@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Handshake, BarChart3, Users, Mic, Globe, Check, ArrowRight } from "lucide-react";
+import GradientDivider from "@/components/GradientDivider";
 
 const benefits = [
   { icon: Shield, title: "Brand Authority", desc: "Position your company as a serious ecosystem contributor via WTIA's industry platforms and initiatives." },
