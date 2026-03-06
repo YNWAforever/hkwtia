@@ -10,7 +10,7 @@ export interface CaseStudy {
 export interface Member {
   id: number;
   name: string;
-  logo: string;
+  logo?: string;
   tier: MemberTier;
   category: MemberCategory;
   description: string;
