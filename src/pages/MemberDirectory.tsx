@@ -340,8 +340,6 @@ const MemberDirectory = () => {
         </div>
       </section>
 
-      {/* Member Detail Modal */}
-      <MemberDetail member={selectedMember} open={!!selectedMember} onClose={() => setSelectedMember(null)} />
     </Layout>
   );
 };
