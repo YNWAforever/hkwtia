@@ -95,8 +95,8 @@ const eras = [
       },
       {
         year: "2026",
-        title: "25th Anniversary",
-        desc: "Today, under the leadership of Chairman Keith Li and the Executive Committee, WTIA stands as a network of hundreds of corporate members, driving Hong Kong's status as a top-class innovation smart hub.",
+        title: "25th Anniversary & Innovate Hong Kong",
+        desc: "Today, under the leadership of Chairman Keith Li, WTIA evolves into Innovate Hong Kong — a cross-border platform bridging GBA innovation to the global stage, serving hundreds of corporate members across Hong Kong, the Greater Bay Area, and Asia.",
       },
     ],
   },
@@ -105,8 +105,8 @@ const eras = [
 const stats = [
   { value: "25", label: "Years of unbroken service to the Hong Kong tech ecosystem", suffix: "Years", icon: Calendar },
   { value: "17+", label: "Asian regions connected through WTIA-led platforms and awards", suffix: "Regions", icon: Globe },
-  { value: "100s", label: "Corporate members, spanning global telecoms to local AI startups", suffix: "Members", icon: Users },
-  { value: "10K+", label: "Professionals trained, connected, and elevated through WTIA programmes", suffix: "Professionals", icon: Award },
+  { value: "100s", label: "Corporate members spanning GBA telecoms to global AI startups", suffix: "Members", icon: Users },
+  { value: "10K+", label: "Professionals trained, connected, and elevated through programmes", suffix: "Professionals", icon: Award },
 ];
 
 const History = () => (
@@ -125,7 +125,7 @@ const History = () => (
           <span className="italic gradient-text">Foundation.</span>
         </h1>
         <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed animate-fade-up animation-delay-200 editorial-sans">
-          From mobile networks to generative AI, WTIA has spent a quarter-century turning emerging technology into enterprise reality.
+          From mobile networks to generative AI, WTIA has spent a quarter-century turning emerging technology into enterprise reality — now evolving into Innovate Hong Kong, bridging the GBA to the world.
         </p>
       </div>
     </section>
@@ -148,7 +148,7 @@ const History = () => (
               Since its incorporation in February 2001, WTIA has operated at the center of Hong Kong's digital transformation. We began as a politically neutral trade association with a single goal: to unite mobile network operators, hardware vendors, and software developers to build out Hong Kong's early wireless ecosystem.
             </p>
             <p className="text-lg text-muted-foreground leading-relaxed mt-6 editorial-sans">
-              Today, 25 years later, WTIA serves as the city's premier innovation aggregator—driving the enterprise adoption of 5G, IoT, Web3, and Artificial Intelligence. We don't just watch tech trends; we build the platforms, security standards, and industry networks that make adoption possible.
+              Today, 25 years later, we serve as the region's premier innovation aggregator — now evolving into Innovate Hong Kong, a cross-border platform driving the enterprise adoption of 5G, IoT, Web3, and Artificial Intelligence across the Greater Bay Area and beyond.
             </p>
           </div>
         </div>
@@ -250,17 +250,17 @@ const History = () => (
           <span className="italic gradient-text">innovation.</span>
         </h2>
         <p className="text-lg text-muted-foreground leading-relaxed editorial-sans mb-10 max-w-2xl mx-auto">
-          For a quarter of a century, the most important technology conversations in Hong Kong have happened within the WTIA network. Whether you are building next-generation AI or seeking to deploy it, your enterprise belongs here.
+          For a quarter of a century, the most important technology conversations in Hong Kong have happened within this network. Now, as Innovate Hong Kong, we're bridging GBA innovation to the world. Whether you are building next-generation AI or seeking to deploy it, your enterprise belongs here.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button asChild size="lg" className="rounded-full px-10">
             <Link to="/membership" className="inline-flex items-center gap-2">
-              Apply for Corporate Membership <ArrowRight className="h-4 w-4" />
+              Apply for Membership <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="rounded-full px-10">
             <Link to="/projects" className="inline-flex items-center gap-2">
-              Explore Our Upcoming Projects
+              Explore Our Projects
             </Link>
           </Button>
         </div>

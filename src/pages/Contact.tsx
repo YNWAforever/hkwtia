@@ -22,7 +22,7 @@ const Contact = () => {
     <Layout>
       {/* Hero with image */}
       <section className="relative h-[70vh] min-h-[500px] flex items-end overflow-hidden">
-        <img src={heroImage} alt="Contact WTIA" className="absolute inset-0 w-full h-full object-cover" />
+        <img src={heroImage} alt="Contact Innovate Hong Kong" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
         <div className="container mx-auto px-6 relative z-10 pb-16">
           <p className="text-xs uppercase tracking-[0.3em] text-primary mb-4 editorial-sans animate-fade-in">Contact</p>
@@ -30,7 +30,7 @@ const Contact = () => {
             Talk to <span className="italic gradient-text">us.</span>
           </h1>
           <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed animate-fade-up animation-delay-200 editorial-sans">
-            Partnership, sponsorship, or membership enquiries—we'd love to hear from you.
+            Cross-border partnerships, global sponsorships, or membership enquiries—we'd love to connect.
           </p>
         </div>
       </section>
