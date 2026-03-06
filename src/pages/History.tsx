@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import GradientDivider from "@/components/GradientDivider";
 import { ArrowRight, Wifi, Shield, Smartphone, Rocket, Brain, Calendar, Globe, Users, Award } from "lucide-react";
+import heroImage from "@/assets/history-hero.jpg";
 
 const eras = [
   {
@@ -110,14 +111,12 @@ const stats = [
 
 const History = () => (
   <Layout>
-    {/* Hero */}
-    <section className="relative py-32 md:py-44 overflow-hidden">
-      {/* Ambient blurs */}
-      <div className="absolute top-20 -left-40 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-accent/5 blur-3xl pointer-events-none" />
-
-      <div className="container mx-auto px-6 max-w-4xl relative z-10">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 mb-8 animate-fade-in">
+    {/* Hero with image */}
+    <section className="relative h-[70vh] min-h-[500px] flex items-end overflow-hidden">
+      <img src={heroImage} alt="WTIA 25th Anniversary" className="absolute inset-0 w-full h-full object-cover" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+      <div className="container mx-auto px-6 relative z-10 pb-16">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 mb-6 animate-fade-in">
           <Wifi className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs font-medium text-primary uppercase tracking-wider editorial-sans">2001 – 2026</span>
         </div>
@@ -125,7 +124,7 @@ const History = () => (
           25 Years of Building<br />Hong Kong's Tech{" "}
           <span className="italic gradient-text">Foundation.</span>
         </h1>
-        <p className="mt-8 text-xl text-muted-foreground max-w-2xl leading-relaxed animate-fade-up animation-delay-200 editorial-sans">
+        <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed animate-fade-up animation-delay-200 editorial-sans">
           From mobile networks to generative AI, WTIA has spent a quarter-century turning emerging technology into enterprise reality.
         </p>
       </div>
