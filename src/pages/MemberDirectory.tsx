@@ -317,7 +317,7 @@ const MemberDirectory = () => {
           {/* Grid */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {displayedMembers.map((m) => (
-              <MemberCard key={m.id} member={m} onClick={() => setSelectedMember(m)} />
+              <MemberCard key={m.id} member={m} />
             ))}
           </div>
 
