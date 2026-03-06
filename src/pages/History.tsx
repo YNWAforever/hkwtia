@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import GradientDivider from "@/components/GradientDivider";
 import { ArrowRight, Wifi, Shield, Smartphone, Rocket, Brain, Calendar, Globe, Users, Award } from "lucide-react";
+import heroImage from "@/assets/history-hero.jpg";
 
 const eras = [
   {
