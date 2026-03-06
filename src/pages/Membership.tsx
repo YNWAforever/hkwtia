@@ -13,36 +13,66 @@ import GradientDivider from "@/components/GradientDivider";
 import ScrollReveal from "@/components/ScrollReveal";
 
 const benefits = [
-  { icon: Globe, title: "Cross-Border Reach", desc: "Access a unified network spanning Hong Kong, the Greater Bay Area, and key Asian markets to scale your technology internationally." },
-  { icon: Handshake, title: "Global Partnerships", desc: "Connect with international investors, regional industry leaders, and cross-border collaboration routes faster." },
-  { icon: BarChart3, title: "Market Intelligence", desc: "Learn what's being adopted across the GBA and Asia—through member exchanges and programme sessions." },
-  { icon: Users, title: "GBA Tech Community", desc: "Join a thriving ecosystem of GBA innovators, enterprise leaders, and global technology partners." },
-  { icon: Mic, title: "Speaking + Visibility", desc: "Priority consideration for international panels, showcases, and featured member spotlights across Asia." },
-  { icon: Shield, title: "Ecosystem Credibility", desc: "Be positioned alongside the builders and decision-makers shaping the GBA's global tech footprint." },
+  { icon: Globe, title: "Networking Events", desc: "Free participation to networking events with industry experts and professionals in wireless, mobile, and emerging technologies." },
+  { icon: Handshake, title: "Business Matching", desc: "Exclusive networking and business-matching events with C-Suite or Director-level professionals in wireless & mobile industries." },
+  { icon: Mic, title: "Speaking Opportunities", desc: "Exclusive speaking opportunities at WTIA-organized events, career fairs, and higher education institutions." },
+  { icon: Users, title: "Member Spotlights", desc: "Opportunity to be featured in 'Meet our Members,' a series of interviews showcasing WTIA members to the wider community." },
+  { icon: BarChart3, title: "Marketing & Exposure", desc: "Marketing of in-house events on WTIA's well-acclaimed social networks including Facebook, LinkedIn, and other platforms." },
+  { icon: Shield, title: "Discounts & Perks", desc: "Discounts on products, services, booth rentals, exhibitions, and free admission to selected events organized or supported by WTIA." },
 ];
 
 const tiers = [
   {
-    name: "Enterprise Member",
+    name: "Platinum Member",
+    price: "$4,800",
+    period: "/year",
     recommended: true,
-    desc: "Best for corporates, listed companies, and large-scale operators seeking cross-border ecosystem leadership and global partnership access.",
-    features: ["Full programme access", "Priority speaking slots", "Global partnership matching", "Executive roundtables"],
+    desc: "Best for corporates and large-scale operators seeking leadership roles, advisory board access, and maximum cross-industry visibility.",
+    features: [
+      "Join Sub-Committee or Advisory Board",
+      "Vote at AGM or EGM",
+      "Executive Committee eligibility",
+      "All networking & business-matching events",
+      "Speaking at events & career fairs",
+      "Member spotlight interviews",
+      "Social media marketing",
+      "Job ad postings on website",
+      "Product & service discounts",
+      "Exhibition booth discounts",
+      "Free admission to selected events",
+    ],
   },
   {
     name: "Corporate Member",
+    price: "$1,800",
+    period: "/year",
     recommended: false,
-    desc: "Best for SMEs and established solution providers seeking GBA-to-global visibility and collaboration.",
-    features: ["Programme access", "Member directory listing", "Cross-border event invitations", "Networking sessions"],
+    desc: "Best for SMEs and established solution providers seeking networking, visibility, and collaboration opportunities.",
+    features: [
+      "All networking & business-matching events",
+      "Speaking at events & career fairs",
+      "Member spotlight interviews",
+      "Social media marketing",
+      "Job ad postings on website",
+      "Product & service discounts",
+      "Exhibition booth discounts",
+      "Free admission to selected events",
+    ],
   },
   {
-    name: "Startup / Innovator",
+    name: "Individual Member",
+    price: "$500",
+    period: "/year",
     recommended: false,
-    desc: "Best for early-stage GBA teams seeking global credibility, international intros, and learning loops.",
-    features: ["Programme access", "Startup showcases", "Mentorship sessions", "Community access"],
+    desc: "Best for professionals seeking to stay connected with the wireless and emerging technology community.",
+    features: [
+      "Networking events with industry experts",
+      "C-Suite business-matching events",
+    ],
   },
 ];
 
-const interestOptions = ["Global partnerships", "Cross-border visibility", "Speaking", "Market insights", "Talent", "Sponsorship"];
+const interestOptions = ["Networking events", "Speaking opportunities", "Business matching", "Marketing exposure", "Job postings", "Exhibition discounts"];
 
 const Membership = () => {
   const { toast } = useToast();
@@ -66,10 +96,10 @@ const Membership = () => {
         <div className="container mx-auto px-6 max-w-4xl">
           <p className="text-xs uppercase tracking-[0.3em] text-primary mb-6 editorial-sans animate-fade-in">Membership</p>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[0.95] tracking-tight animate-fade-up">
-            Membership that scales your technology from GBA to the <span className="italic gradient-text">global stage.</span>
+            Become a <span className="italic gradient-text">WTIA member.</span>
           </h1>
           <p className="mt-8 text-lg text-muted-foreground max-w-xl leading-relaxed animate-fade-up animation-delay-200 editorial-sans">
-            Innovate Hong Kong membership is built for companies that want cross-border outcomes: global market visibility, international partner access, and credible participation in Asia's most connected innovation ecosystem.
+            WTIA membership fee is charged on an annual basis. The annual membership period is measured from when we process your application and payment to the exact date on the next calendar year. Membership will be renewed automatically.
           </p>
         </div>
       </section>
@@ -114,7 +144,8 @@ const Membership = () => {
                     <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground text-xs rounded-full">Recommended</Badge>
                   )}
                   <CardContent className="p-8 pt-8">
-                    <h3 className="text-xl font-bold mb-3 editorial-sans">{t.name}</h3>
+                    <h3 className="text-xl font-bold mb-1 editorial-sans">{t.name}</h3>
+                    <p className="text-3xl font-bold gradient-text mb-1">{t.price}<span className="text-sm text-muted-foreground font-normal">{t.period}</span></p>
                     <p className="text-sm text-muted-foreground leading-relaxed mb-6">{t.desc}</p>
                     <ul className="space-y-3 mb-8">
                       {t.features.map((f) => (
@@ -133,6 +164,11 @@ const Membership = () => {
               </ScrollReveal>
             ))}
           </div>
+          <ScrollReveal delay={500}>
+            <p className="text-xs text-muted-foreground mt-8 text-center italic editorial-sans">
+              *** The Bespoke Partnership Contract allows for a customized partnership & membership agreement between WTIA and a Platinum member to further enhance and fulfill business objectives while exchanging value-added benefits to other members of WTIA.
+            </p>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -146,10 +182,10 @@ const Membership = () => {
           </ScrollReveal>
           <div className="space-y-6">
             {[
-              "GBA tech companies seeking to scale their innovations to international markets via Hong Kong's global launchpad.",
-              "International investors and enterprises looking to tap into the Greater Bay Area's rapidly growing tech ecosystem.",
-              "Solution providers building AI, IoT, Web3, or enterprise platforms across Hong Kong and the GBA.",
-              "Brands and operators who want cross-border visibility through credible industry initiatives and recognition platforms.",
+              "Companies in the wireless and mobile industry seeking networking, partnerships, and industry leadership opportunities.",
+              "Tech startups and emerging technology companies looking for exposure, mentorship, and connections to enterprise buyers.",
+              "Solution providers building in AI, IoT, FinTech, Blockchain, 5G, or enterprise platforms across Hong Kong and the GBA.",
+              "Professionals dedicated to the innovative and emerging technologies industry who want to stay connected and advance their careers.",
             ].map((item, i) => (
               <ScrollReveal key={i} delay={i * 100} direction="left">
                 <div className="flex items-start gap-4 group">

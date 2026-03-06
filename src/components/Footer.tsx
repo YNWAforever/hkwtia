@@ -10,7 +10,7 @@ const Footer = () => (
             The cross-border platform connecting Hong Kong, the Greater Bay Area, and Asia to global tech markets, investors, and opportunities. Powered by WTIA.
           </p>
           <p className="mt-4 text-xs text-muted-foreground/60">
-            Unit 403, IT Street, Cyberport 3 (Core A), 100 Cyberport Road, Hong Kong
+            4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong
           </p>
         </div>
         <div>
@@ -32,7 +32,7 @@ const Footer = () => (
         <div>
           <h4 className="text-xs font-semibold uppercase tracking-[0.15em] mb-4 text-foreground editorial-sans">Connect</h4>
           <p className="text-sm text-muted-foreground">contact@hkwtia.org</p>
-          <p className="text-sm text-muted-foreground mt-1">+852 2370 3130</p>
+          <p className="text-sm text-muted-foreground mt-1">+852-2989 9164</p>
           <p className="text-sm text-muted-foreground mt-3">hkwtia.org</p>
         </div>
       </div>

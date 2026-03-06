@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, Smartphone } from "lucide-react";
 import GradientDivider from "@/components/GradientDivider";
 import heroImage from "@/assets/contact-hero.jpg";
 
@@ -22,7 +22,7 @@ const Contact = () => {
     <Layout>
       {/* Hero with image */}
       <section className="relative h-[70vh] min-h-[500px] flex items-end overflow-hidden">
-        <img src={heroImage} alt="Contact Innovate Hong Kong" className="absolute inset-0 w-full h-full object-cover" />
+        <img src={heroImage} alt="Contact WTIA" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
         <div className="container mx-auto px-6 relative z-10 pb-16">
           <p className="text-xs uppercase tracking-[0.3em] text-primary mb-4 editorial-sans animate-fade-in">Contact</p>
@@ -30,7 +30,7 @@ const Contact = () => {
             Talk to <span className="italic gradient-text">us.</span>
           </h1>
           <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed animate-fade-up animation-delay-200 editorial-sans">
-            Cross-border partnerships, global sponsorships, or membership enquiries—we'd love to connect.
+            Membership enquiries, partnership proposals, or event sponsorships—we'd love to connect.
           </p>
         </div>
       </section>
@@ -74,8 +74,9 @@ const Contact = () => {
             <div className="md:col-span-4 md:col-start-9 space-y-8 pt-4">
               {[
                 { icon: Mail, label: "Email", value: "contact@hkwtia.org" },
-                { icon: Phone, label: "Phone", value: "+852 2370 3130" },
-                { icon: MapPin, label: "Location", value: "Unit 403, IT Street, Cyberport 3, 100 Cyberport Road, Hong Kong" },
+                { icon: Phone, label: "Phone", value: "+852-2989 9164" },
+                { icon: Smartphone, label: "Mobile", value: "+852-2989 9163" },
+                { icon: MapPin, label: "Location", value: "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong" },
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-4 group">
                   <div className="h-10 w-10 rounded-full border border-border/50 flex items-center justify-center shrink-0 group-hover:border-primary/50 transition-colors">
