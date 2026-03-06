@@ -9,6 +9,7 @@ import Projects from "./pages/Projects";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import MemberDirectory from "./pages/MemberDirectory";
+import MemberProfile from "./pages/MemberProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
