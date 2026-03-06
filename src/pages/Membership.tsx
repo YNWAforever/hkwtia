@@ -150,8 +150,6 @@ const Membership = () => {
         </div>
       </section>
 
-      </section>
-
       <GradientDivider variant="cool" />
 
       {/* Application form */}
