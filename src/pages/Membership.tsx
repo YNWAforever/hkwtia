@@ -127,8 +127,6 @@ const Membership = () => {
         </div>
       </section>
 
-      </section>
-
       <GradientDivider variant="warm" />
 
       {/* Who should join */}
