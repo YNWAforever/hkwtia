@@ -11,22 +11,22 @@ const Index = () => {
         {/* Ambient background */}
         <div className="absolute inset-0 overflow-hidden">
           <div
-            className="absolute top-[15%] left-[10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-20"
+            className="absolute top-[15%] left-[10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-10"
             style={{ background: "hsl(var(--primary))", animation: "float 10s ease-in-out infinite" }}
           />
           <div
-            className="absolute bottom-[10%] right-[5%] w-[400px] h-[400px] rounded-full blur-[100px] opacity-15"
+            className="absolute bottom-[10%] right-[5%] w-[400px] h-[400px] rounded-full blur-[100px] opacity-10"
             style={{ background: "hsl(var(--secondary))", animation: "float 14s ease-in-out infinite 3s" }}
           />
           <div
-            className="absolute top-[60%] left-[50%] w-[300px] h-[300px] rounded-full blur-[80px] opacity-10"
+            className="absolute top-[60%] left-[50%] w-[300px] h-[300px] rounded-full blur-[80px] opacity-[0.07]"
             style={{ background: "hsl(var(--accent))", animation: "float 12s ease-in-out infinite 5s" }}
           />
           {/* Grid overlay */}
           <div
-            className="absolute inset-0 opacity-[0.03]"
+            className="absolute inset-0 opacity-[0.04]"
             style={{
-              backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
+              backgroundImage: "linear-gradient(hsl(var(--border)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px)",
               backgroundSize: "60px 60px",
             }}
           />

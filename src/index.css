@@ -6,53 +6,53 @@
 
 @layer base {
   :root {
-    /* WTIA brand-aligned dark theme — steel blue, teal, warm accents */
-    --background: 215 30% 6%;
-    --foreground: 210 20% 95%;
+    /* Light, bright, dynamic WTIA theme */
+    --background: 0 0% 99%;
+    --foreground: 215 25% 15%;
 
-    --card: 215 25% 9%;
-    --card-foreground: 210 20% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
 
-    --popover: 215 25% 9%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
 
-    --primary: 205 45% 42%;
+    --primary: 210 100% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 175 35% 45%;
+    --secondary: 170 65% 40%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 215 20% 13%;
-    --muted-foreground: 210 15% 55%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 15% 45%;
 
-    --accent: 30 70% 55%;
-    --accent-foreground: 215 30% 6%;
+    --accent: 25 95% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 15% 15%;
-    --input: 215 15% 15%;
-    --ring: 205 45% 42%;
+    --border: 210 15% 90%;
+    --input: 210 15% 90%;
+    --ring: 210 100% 45%;
 
     --radius: 0.5rem;
 
     /* Custom tokens */
-    --glass: 215 25% 10%;
-    --glass-border: 215 15% 18%;
-    --glow-primary: 205 45% 42%;
-    --glow-secondary: 175 35% 45%;
-    --glow-accent: 30 70% 55%;
-    --coral: 8 85% 58%;
+    --glass: 210 20% 97%;
+    --glass-border: 210 15% 88%;
+    --glow-primary: 210 100% 45%;
+    --glow-secondary: 170 65% 40%;
+    --glow-accent: 25 95% 55%;
+    --coral: 350 80% 55%;
 
-    --sidebar-background: 215 25% 7%;
-    --sidebar-foreground: 210 20% 95%;
-    --sidebar-primary: 205 45% 42%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 215 25% 15%;
+    --sidebar-primary: 210 100% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 20% 13%;
-    --sidebar-accent-foreground: 210 20% 95%;
-    --sidebar-border: 215 15% 15%;
-    --sidebar-ring: 205 45% 42%;
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 215 25% 15%;
+    --sidebar-border: 210 15% 90%;
+    --sidebar-ring: 210 100% 45%;
   }
 }
 
@@ -73,7 +73,7 @@
 
 @layer utilities {
   .glass-card {
-    @apply bg-card/50 backdrop-blur-xl border border-border/40 rounded-lg;
+    @apply bg-card/80 backdrop-blur-xl border border-border/60 rounded-lg shadow-sm;
   }
 
   .gradient-text {
@@ -87,11 +87,11 @@
   }
 
   .glow-primary {
-    box-shadow: 0 0 60px hsl(var(--glow-primary) / 0.1), 0 0 120px hsl(var(--glow-primary) / 0.03);
+    box-shadow: 0 4px 30px hsl(var(--glow-primary) / 0.08), 0 1px 3px hsl(var(--glow-primary) / 0.04);
   }
 
   .glow-accent {
-    box-shadow: 0 0 60px hsl(var(--glow-accent) / 0.1), 0 0 120px hsl(var(--glow-accent) / 0.03);
+    box-shadow: 0 4px 30px hsl(var(--glow-accent) / 0.08), 0 1px 3px hsl(var(--glow-accent) / 0.04);
   }
 
   .editorial-serif {
