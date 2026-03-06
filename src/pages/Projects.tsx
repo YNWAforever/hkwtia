@@ -10,8 +10,8 @@ const projects = [
     icon: Trophy,
     num: "01",
     title: "Asia Smart App Awards",
-    subtitle: "Recognition that travels across Asia.",
-    desc: "WTIA supports platforms like the Asia Smart App Awards to spotlight innovation and strengthen industry credibility across the region. The ASA Awards recognise outstanding achievements in smart applications, driving cross-border recognition for Hong Kong's tech ecosystem.",
+    subtitle: "Recognition that travels across Asia and beyond.",
+    desc: "Innovate Hong Kong supports platforms like the Asia Smart App Awards to spotlight GBA and Asian innovation, strengthening cross-border industry credibility across 17+ regions. The ASA Awards recognise outstanding achievements in smart applications, driving global recognition for Hong Kong and the GBA's tech ecosystem.",
     link: "https://contest2024.bestasiaapp.hk/",
     cta: "Explore ASA",
   },
@@ -19,8 +19,8 @@ const projects = [
     icon: Users,
     num: "02",
     title: "Tech to Connect",
-    subtitle: "Less talk. More implementation.",
-    desc: "Tech to Connect is an industry-oriented programme series built to connect people, ideas, and practical adoption conversations. It brings together enterprise buyers, solution providers, and thought leaders for focused knowledge exchange.",
+    subtitle: "Less talk. More cross-border implementation.",
+    desc: "Tech to Connect is an industry-oriented programme series built to connect GBA innovators with global enterprise decision-makers. It brings together international buyers, solution providers, and thought leaders for focused knowledge exchange that drives real cross-border adoption.",
     link: "https://techtoconnect.net/",
     cta: "See upcoming sessions",
   },
@@ -28,8 +28,8 @@ const projects = [
     icon: GraduationCap,
     num: "03",
     title: "Certified Practitioner in GenAI (CPAI)",
-    subtitle: "Executive-level AI capability building.",
-    desc: "Co-developed with CUSCS, this certified course offers an introduction to the fundamental technologies and tools of Generative AI. Participants acquire knowledge to harness GenAI techniques effectively, fostering productivity and creativity for business challenges.",
+    subtitle: "Executive-level AI capability building for the GBA.",
+    desc: "Co-developed with CUSCS, this certified course offers an introduction to the fundamental technologies and tools of Generative AI. Participants acquire knowledge to harness GenAI techniques effectively, empowering GBA professionals to compete on the global stage.",
     link: "/contact",
     cta: "Learn more",
   },
@@ -39,22 +39,22 @@ const Projects = () => (
   <Layout>
     {/* Hero with image */}
     <section className="relative h-[70vh] min-h-[500px] flex items-end overflow-hidden">
-      <img src={heroImage} alt="WTIA Projects & Awards" className="absolute inset-0 w-full h-full object-cover" />
+      <img src={heroImage} alt="Innovate Hong Kong Projects & Awards" className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
       <div className="container mx-auto px-6 relative z-10 pb-16">
         <p className="text-xs uppercase tracking-[0.3em] text-primary mb-4 editorial-sans animate-fade-in">Projects & Awards</p>
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[0.95] tracking-tight animate-fade-up">
-          Initiatives designed to <span className="italic gradient-text">move the ecosystem.</span>
+          Initiatives designed to move the <span className="italic gradient-text">global ecosystem.</span>
         </h1>
         <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed animate-fade-up animation-delay-200 editorial-sans">
-          Recognising excellence, surfacing real use cases, and connecting builders with decision makers.
+          Recognising cross-border excellence, surfacing real use cases, and connecting GBA builders with global decision makers.
         </p>
       </div>
     </section>
 
-      <GradientDivider variant="multi" />
+    <GradientDivider variant="multi" />
 
-      <section className="pb-32">
+    <section className="pb-32">
       <div className="container mx-auto px-6">
         <div className="space-y-24">
           {projects.map((p, i) => (

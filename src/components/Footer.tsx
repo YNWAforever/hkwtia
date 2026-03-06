@@ -5,9 +5,9 @@ const Footer = () => (
     <div className="container mx-auto px-6">
       <div className="grid md:grid-cols-4 gap-10">
         <div className="md:col-span-2">
-          <span className="text-2xl font-bold editorial-serif gradient-text">WTIA</span>
+          <span className="text-2xl font-bold editorial-serif gradient-text">Innovate Hong Kong</span>
           <p className="mt-4 text-sm text-muted-foreground leading-relaxed max-w-md">
-            Hong Kong's industry association connecting enterprises, scaleups, and innovators to accelerate wireless, AI, and next‑gen connectivity adoption.
+            The cross-border platform connecting Hong Kong, the Greater Bay Area, and Asia to global tech markets, investors, and opportunities. Powered by WTIA.
           </p>
           <p className="mt-4 text-xs text-muted-foreground/60">
             Unit 403, IT Street, Cyberport 3 (Core A), 100 Cyberport Road, Hong Kong
@@ -38,10 +38,10 @@ const Footer = () => (
       </div>
       <div className="mt-12 pt-8 border-t border-border/30 flex flex-col sm:flex-row justify-between items-center gap-4">
         <p className="text-xs text-muted-foreground/50">
-          © {new Date().getFullYear()} WTIA — Hong Kong Wireless Technology Industry Association. All rights reserved.
+          © {new Date().getFullYear()} Innovate Hong Kong — WTIA. All rights reserved.
         </p>
         <p className="text-xs text-muted-foreground/40">
-          Stretching Possibilities with Wireless
+          Bridging GBA Innovation to the World
         </p>
       </div>
     </div>

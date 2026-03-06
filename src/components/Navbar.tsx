@@ -57,7 +57,7 @@ const Navbar = () => {
             </Link>
           ))}
           <Button asChild size="sm" className="ml-4 rounded-full px-6 text-xs uppercase tracking-wider">
-            <Link to="/membership">Join WTIA</Link>
+            <Link to="/membership">Join Us</Link>
           </Button>
         </nav>
 

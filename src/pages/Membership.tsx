@@ -12,36 +12,36 @@ import { Shield, Handshake, BarChart3, Users, Mic, Globe, Check, ArrowRight } fr
 import GradientDivider from "@/components/GradientDivider";
 
 const benefits = [
-  { icon: Shield, title: "Brand Authority", desc: "Position your company as a serious ecosystem contributor via WTIA's industry platforms and initiatives." },
-  { icon: Handshake, title: "Partnerships Pipeline", desc: "Find solution partners, co-host opportunities, and collaboration routes faster." },
-  { icon: BarChart3, title: "Market Intelligence", desc: "Learn what's actually being adopted and why—through member exchanges and programme sessions." },
-  { icon: Users, title: "Employer Branding", desc: "Signal that your company invests in innovation, talent, and modern capability building." },
-  { icon: Mic, title: "Speaking + Visibility", desc: "Priority consideration for panels, showcases, and featured member spotlights." },
-  { icon: Globe, title: "Ecosystem Credibility", desc: "Be seen in the same room as builders, decision makers, and ecosystem operators." },
+  { icon: Globe, title: "Cross-Border Reach", desc: "Access a unified network spanning Hong Kong, the Greater Bay Area, and key Asian markets to scale your technology internationally." },
+  { icon: Handshake, title: "Global Partnerships", desc: "Connect with international investors, regional industry leaders, and cross-border collaboration routes faster." },
+  { icon: BarChart3, title: "Market Intelligence", desc: "Learn what's being adopted across the GBA and Asia—through member exchanges and programme sessions." },
+  { icon: Users, title: "GBA Tech Community", desc: "Join a thriving ecosystem of GBA innovators, enterprise leaders, and global technology partners." },
+  { icon: Mic, title: "Speaking + Visibility", desc: "Priority consideration for international panels, showcases, and featured member spotlights across Asia." },
+  { icon: Shield, title: "Ecosystem Credibility", desc: "Be positioned alongside the builders and decision-makers shaping the GBA's global tech footprint." },
 ];
 
 const tiers = [
   {
     name: "Enterprise Member",
     recommended: true,
-    desc: "Best for corporates, listed companies, and large-scale operators seeking ecosystem leadership and partnership access.",
-    features: ["Full programme access", "Priority speaking slots", "Partnership matching", "Executive roundtables"],
+    desc: "Best for corporates, listed companies, and large-scale operators seeking cross-border ecosystem leadership and global partnership access.",
+    features: ["Full programme access", "Priority speaking slots", "Global partnership matching", "Executive roundtables"],
   },
   {
     name: "Corporate Member",
     recommended: false,
-    desc: "Best for SMEs and established solution providers seeking visibility and collaboration.",
-    features: ["Programme access", "Member directory listing", "Event invitations", "Networking sessions"],
+    desc: "Best for SMEs and established solution providers seeking GBA-to-global visibility and collaboration.",
+    features: ["Programme access", "Member directory listing", "Cross-border event invitations", "Networking sessions"],
   },
   {
     name: "Startup / Innovator",
     recommended: false,
-    desc: "Best for early-stage teams seeking credibility, intros, and learning loops.",
+    desc: "Best for early-stage GBA teams seeking global credibility, international intros, and learning loops.",
     features: ["Programme access", "Startup showcases", "Mentorship sessions", "Community access"],
   },
 ];
 
-const interestOptions = ["Partnerships", "Visibility", "Speaking", "Market insights", "Talent", "Sponsorship"];
+const interestOptions = ["Global partnerships", "Cross-border visibility", "Speaking", "Market insights", "Talent", "Sponsorship"];
 
 const Membership = () => {
   const { toast } = useToast();
@@ -65,10 +65,10 @@ const Membership = () => {
         <div className="container mx-auto px-6 max-w-4xl">
           <p className="text-xs uppercase tracking-[0.3em] text-primary mb-6 editorial-sans animate-fade-in">Membership</p>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[0.95] tracking-tight animate-fade-up">
-            Corporate Membership that converts technology into <span className="italic gradient-text">business growth.</span>
+            Membership that scales your technology from GBA to the <span className="italic gradient-text">global stage.</span>
           </h1>
           <p className="mt-8 text-lg text-muted-foreground max-w-xl leading-relaxed animate-fade-up animation-delay-200 editorial-sans">
-            WTIA membership is built for companies that want outcomes: market visibility, partner access, and credible participation in Hong Kong's innovation ecosystem.
+            Innovate Hong Kong membership is built for companies that want cross-border outcomes: global market visibility, international partner access, and credible participation in Asia's most connected innovation ecosystem.
           </p>
         </div>
       </section>
@@ -135,9 +135,10 @@ const Membership = () => {
           <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center">Who should <span className="italic gradient-text">join?</span></h2>
           <div className="space-y-6">
             {[
-              "CIO/CTO-led organisations exploring next-gen connectivity and AI adoption.",
-              "Solution providers building wireless, mobile, AI, IoT, or enterprise platforms.",
-              "Brands and operators who want visibility through credible industry initiatives and recognition platforms.",
+              "GBA tech companies seeking to scale their innovations to international markets via Hong Kong's global launchpad.",
+              "International investors and enterprises looking to tap into the Greater Bay Area's rapidly growing tech ecosystem.",
+              "Solution providers building AI, IoT, Web3, or enterprise platforms across Hong Kong and the GBA.",
+              "Brands and operators who want cross-border visibility through credible industry initiatives and recognition platforms.",
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-4 group">
                 <div className="h-8 w-8 rounded-full border border-border/50 flex items-center justify-center shrink-0 mt-0.5 group-hover:border-primary/50 transition-colors">
@@ -177,7 +178,7 @@ const Membership = () => {
                   <Input id="email" type="email" placeholder="Work email" required className="rounded-lg" />
                 </div>
                 <div className="space-y-3">
-                  <Label className="text-xs uppercase tracking-wider">What you want from WTIA</Label>
+                  <Label className="text-xs uppercase tracking-wider">What you're looking for</Label>
                   <div className="flex flex-wrap gap-3">
                     {interestOptions.map((opt) => (
                       <label key={opt} className="flex items-center gap-2 cursor-pointer">

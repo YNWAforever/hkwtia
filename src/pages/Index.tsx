@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
-import { ArrowRight, Wifi, Award, Lightbulb, Network, Eye, Zap, Trophy, Users, GraduationCap } from "lucide-react";
+import { ArrowRight, Wifi, Award, Lightbulb, Network, Eye, Zap, Trophy, Users, GraduationCap, Globe } from "lucide-react";
 import GradientDivider from "@/components/GradientDivider";
 
 const Index = () => {
@@ -36,19 +36,18 @@ const Index = () => {
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl">
             <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-6 editorial-sans animate-fade-in">
-              Hong Kong Wireless Technology Industry Association
+              Innovate Hong Kong
             </p>
             <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold leading-[0.95] tracking-tight animate-fade-up">
-              Where Hong Kong's<br />
-              tech <span className="gradient-text italic">decision‑makers</span><br />
-              connect.
+              Bridging GBA<br />
+              innovation to the <span className="gradient-text italic">global stage.</span>
             </h1>
             <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed animate-fade-up animation-delay-200 editorial-sans">
-              Accelerate real adoption—through projects, recognition platforms, and industry programmes.
+              The cross-border platform connecting Hong Kong, the Greater Bay Area, and Asia to global tech markets, investors, and opportunities.
             </p>
             <div className="mt-10 flex flex-wrap gap-4 animate-fade-up animation-delay-400">
               <Button asChild size="lg" className="rounded-full px-10 text-sm uppercase tracking-wider">
-                <Link to="/membership">Join WTIA</Link>
+                <Link to="/membership">Join Us</Link>
               </Button>
               <Button asChild variant="ghost" size="lg" className="rounded-full px-10 text-sm uppercase tracking-wider text-muted-foreground hover:text-foreground">
                 <Link to="/contact" className="inline-flex items-center gap-2">
@@ -78,42 +77,42 @@ const Index = () => {
         />
         <div className="container mx-auto px-6 relative z-10">
           <p className="text-xs text-muted-foreground/60 uppercase tracking-[0.2em] text-center editorial-sans">
-            Trusted by corporates, startups, solution providers & ecosystem partners across Hong Kong and Asia
+            Trusted by corporates, startups, and ecosystem partners across Hong Kong, the Greater Bay Area, and Asia
           </p>
         </div>
       </section>
 
       <GradientDivider variant="primary" />
 
-      {/* Why WTIA — editorial grid */}
+      {/* Why Innovate Hong Kong — editorial grid */}
       <section className="py-32">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-12 gap-8 items-start">
             <div className="md:col-span-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-primary mb-3 editorial-sans">Why WTIA</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-primary mb-3 editorial-sans">Why Innovate Hong Kong</p>
               <h2 className="text-4xl md:text-5xl font-bold leading-tight">
-                Turn emerging tech into real <span className="italic gradient-text">business outcomes.</span>
+                The ultimate bridge from GBA to <span className="italic gradient-text">the world.</span>
               </h2>
             </div>
             <div className="md:col-span-8">
               <div className="grid sm:grid-cols-3 gap-px bg-border/30 rounded-lg overflow-hidden">
                 {[
                   {
-                    icon: Wifi,
-                    title: "Executive Network",
-                    desc: "Meet business leaders and solution owners who are actively building and deploying next‑gen technology.",
+                    icon: Globe,
+                    title: "Connect HK, GBA & Asia",
+                    desc: "We break down geographical barriers to create a unified, collaborative tech ecosystem spanning from the Pearl River Delta to the broader Asian market.",
                     accent: "primary",
                   },
                   {
-                    icon: Award,
-                    title: "Industry Platforms",
-                    desc: "Participate in WTIA-supported initiatives such as the Asia Smart App Awards to amplify credibility and reach.",
+                    icon: Zap,
+                    title: "Empower GBA Tech",
+                    desc: "We equip GBA startups, established tech companies, and entrepreneurs with global visibility, navigating cross-border commercialization and international scaling.",
                     accent: "secondary",
                   },
                   {
-                    icon: Lightbulb,
-                    title: "Knowledge + Connection",
-                    desc: "Join practical sessions and ecosystem programmes such as Tech to Connect to exchange implementation playbooks.",
+                    icon: Network,
+                    title: "Global Collaboration",
+                    desc: "We serve as the central nexus where international investors, regional industry leaders, and GBA innovators can seamlessly interact and build together.",
                     accent: "accent",
                   },
                 ].map((item, i) => (
@@ -154,28 +153,28 @@ const Index = () => {
           }}
         />
         <div className="container mx-auto px-6 relative z-10">
-          <p className="text-xs uppercase tracking-[0.3em] text-primary mb-12 text-center editorial-sans">Three pillars of membership value</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-primary mb-12 text-center editorial-sans">Three pillars of our platform</p>
           <div className="grid md:grid-cols-3 gap-16 md:gap-8">
             {[
               {
                 icon: Network,
                 num: "01",
-                title: "Influence",
-                desc: "Get closer to the ecosystem shaping standards, adoption, and industry direction in Hong Kong and Asia.",
+                title: "Connect",
+                desc: "Connecting HK, the GBA, and Asia — we create a unified, collaborative tech ecosystem spanning from the Pearl River Delta to the broader Asian market.",
                 color: "--primary",
               },
               {
-                icon: Eye,
+                icon: Zap,
                 num: "02",
-                title: "Visibility",
-                desc: "Raise enterprise credibility through industry platforms and award ecosystems WTIA supports.",
+                title: "Empower",
+                desc: "Empowering GBA tech for the world — we equip startups and enterprises with global visibility, cross-border commercialization, and international scaling.",
                 color: "--secondary",
               },
               {
-                icon: Zap,
+                icon: Globe,
                 num: "03",
-                title: "Access",
-                desc: "Meet builders, buyers, and collaborators via initiatives like Tech to Connect.",
+                title: "Collaborate",
+                desc: "Facilitating global collaboration — the central nexus where international investors, regional leaders, and GBA innovators seamlessly interact.",
                 color: "--accent",
               },
             ].map((item, i) => (
@@ -210,21 +209,21 @@ const Index = () => {
               {
                 icon: Trophy,
                 title: "Asia Smart App Awards",
-                desc: "Recognition that travels across Asia — spotlight innovation and strengthen industry credibility across the region.",
+                desc: "Recognition that travels across Asia — spotlight innovation and strengthen industry credibility across 17+ regions.",
                 link: "/projects",
                 color: "--primary",
               },
               {
                 icon: Users,
                 title: "Tech to Connect",
-                desc: "Less talk. More implementation — connecting people, ideas, and practical adoption conversations.",
+                desc: "Less talk. More implementation — connecting GBA and Asian tech leaders with global enterprise decision-makers.",
                 link: "/projects",
                 color: "--secondary",
               },
               {
                 icon: GraduationCap,
                 title: "GenAI Courses",
-                desc: "Executive-level generative AI programmes for enterprise capability building, co-developed with CUSCS.",
+                desc: "Executive-level generative AI programmes for enterprise capability building, empowering GBA professionals for the global stage.",
                 link: "/projects",
                 color: "--accent",
               },
@@ -289,14 +288,14 @@ const Index = () => {
         </div>
         <div className="container mx-auto px-6 relative z-10 text-center">
           <h2 className="text-4xl md:text-6xl font-bold mb-6">
-            Ready to <span className="italic gradient-text">accelerate?</span>
+            Ready to go <span className="italic gradient-text">global?</span>
           </h2>
           <p className="text-lg text-muted-foreground mb-10 max-w-lg mx-auto editorial-sans">
-            Join a member network built for practical outcomes.
+            Join the platform bridging GBA innovation to global markets and opportunities.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Button asChild size="lg" className="rounded-full px-10 text-sm uppercase tracking-wider">
-              <Link to="/membership">Join WTIA</Link>
+              <Link to="/membership">Join Us</Link>
             </Button>
             <Button asChild variant="ghost" size="lg" className="rounded-full px-10 text-sm uppercase tracking-wider text-muted-foreground hover:text-foreground">
               <Link to="/contact" className="inline-flex items-center gap-2">
