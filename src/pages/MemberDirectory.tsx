@@ -1,12 +1,12 @@
 import { useState, useMemo, useRef } from "react";
+import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { members, featuredMembers, allCategories, generateInitials, colorFromName, type Member, type MemberCategory } from "@/data/members";
-import { Search, ArrowRight, Play, ChevronLeft, ChevronRight, ExternalLink, Award, Building2, Rocket, X } from "lucide-react";
+import { Search, ArrowRight, ChevronLeft, ChevronRight, Award, Building2, Rocket } from "lucide-react";
 import heroImage from "@/assets/member-directory-hero.jpg";
 
 const tierIcon = {
