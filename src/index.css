@@ -163,3 +163,13 @@
   70% { transform: translate(8%, 12%); }
   90% { transform: translate(-10%, 2%); }
 }
+
+@keyframes scanline {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.5); opacity: 0.3; }
+}
