@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout";
 import { User } from "lucide-react";
 import GradientDivider from "@/components/GradientDivider";
+import heroImage from "@/assets/about-hero.jpg";
 
 const committeeMembers = [
   { name: "Mr. Keith LI", title: "Chairman", company: "Co-Founder and CEO, Innopage Limited" },
@@ -13,17 +14,20 @@ const committeeMembers = [
 
 const About = () => (
   <Layout>
-    <section className="py-32 md:py-40">
-      <div className="container mx-auto px-6 max-w-4xl">
-        <p className="text-xs uppercase tracking-[0.3em] text-primary mb-6 editorial-sans animate-fade-in">About WTIA</p>
+    {/* Hero with image */}
+    <section className="relative h-[70vh] min-h-[500px] flex items-end overflow-hidden">
+      <img src={heroImage} alt="About WTIA" className="absolute inset-0 w-full h-full object-cover" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+      <div className="container mx-auto px-6 relative z-10 pb-16">
+        <p className="text-xs uppercase tracking-[0.3em] text-primary mb-4 editorial-sans animate-fade-in">About WTIA</p>
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[0.95] tracking-tight animate-fade-up">
           Stretching possibilities with <span className="italic gradient-text">wireless.</span>
         </h1>
-        <p className="mt-8 text-lg text-muted-foreground max-w-xl leading-relaxed animate-fade-up animation-delay-200 editorial-sans">
+        <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed animate-fade-up animation-delay-200 editorial-sans">
           Established in 2001, WTIA is a not-for-profit trade association and community for professionals, dedicated to the innovative and emerging technologies industry.
         </p>
       </div>
-      </section>
+    </section>
 
       <GradientDivider variant="multi" />
 
