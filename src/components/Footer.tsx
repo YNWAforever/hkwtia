@@ -10,7 +10,7 @@ const Footer = () => (
             The cross-border platform connecting Hong Kong, the Greater Bay Area, and Asia to global tech markets, investors, and opportunities. Powered by WTIA.
           </p>
           <p className="mt-4 text-xs text-muted-foreground/60">
-            Unit 403, IT Street, Cyberport 3 (Core A), 100 Cyberport Road, Hong Kong
+            4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong
           </p>
         </div>
         <div>
