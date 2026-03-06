@@ -2,6 +2,7 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Trophy, Users, GraduationCap, ArrowRight } from "lucide-react";
+import GradientDivider from "@/components/GradientDivider";
 
 const projects = [
   {
