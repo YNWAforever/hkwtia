@@ -7,6 +7,7 @@ import wtiaLogo from "@/assets/wtia-logo.png";
 
 const navLinks = [
   { label: "Home", to: "/" },
+  { label: "Members", to: "/members" },
   { label: "Membership", to: "/membership" },
   { label: "Projects", to: "/projects" },
   { label: "About", to: "/about" },
