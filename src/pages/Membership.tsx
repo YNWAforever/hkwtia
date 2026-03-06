@@ -152,6 +152,10 @@ const Membership = () => {
         </div>
       </section>
 
+      </section>
+
+      <GradientDivider variant="cool" />
+
       {/* Application form */}
       <section id="apply" className="py-24">
         <div className="container mx-auto px-6 max-w-xl">
