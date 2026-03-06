@@ -1,5 +1,6 @@
 import Layout from "@/components/Layout";
 import { User } from "lucide-react";
+import GradientDivider from "@/components/GradientDivider";
 
 const committeeMembers = [
   { name: "Mr. Keith LI", title: "Chairman", company: "Co-Founder and CEO, Innopage Limited" },
