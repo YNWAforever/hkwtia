@@ -177,7 +177,6 @@ const MemberDirectory = () => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<MemberCategory | "All">("All");
   const [selectedTier, setSelectedTier] = useState<string>("All");
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [showAll, setShowAll] = useState(false);
 
   const filteredMembers = useMemo(() => {
