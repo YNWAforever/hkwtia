@@ -1,69 +1,83 @@
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { Trophy, Users, ArrowRight } from "lucide-react";
+import { Trophy, Users, GraduationCap, ArrowRight } from "lucide-react";
+
+const projects = [
+  {
+    icon: Trophy,
+    num: "01",
+    title: "Asia Smart App Awards",
+    subtitle: "Recognition that travels across Asia.",
+    desc: "WTIA supports platforms like the Asia Smart App Awards to spotlight innovation and strengthen industry credibility across the region. The ASA Awards recognise outstanding achievements in smart applications, driving cross-border recognition for Hong Kong's tech ecosystem.",
+    link: "https://contest2024.bestasiaapp.hk/",
+    cta: "Explore ASA",
+  },
+  {
+    icon: Users,
+    num: "02",
+    title: "Tech to Connect",
+    subtitle: "Less talk. More implementation.",
+    desc: "Tech to Connect is an industry-oriented programme series built to connect people, ideas, and practical adoption conversations. It brings together enterprise buyers, solution providers, and thought leaders for focused knowledge exchange.",
+    link: "https://techtoconnect.net/",
+    cta: "See upcoming sessions",
+  },
+  {
+    icon: GraduationCap,
+    num: "03",
+    title: "Certified Practitioner in GenAI (CPAI)",
+    subtitle: "Executive-level AI capability building.",
+    desc: "Co-developed with CUSCS, this certified course offers an introduction to the fundamental technologies and tools of Generative AI. Participants acquire knowledge to harness GenAI techniques effectively, fostering productivity and creativity for business challenges.",
+    link: "/contact",
+    cta: "Learn more",
+  },
+];
 
 const Projects = () => (
   <Layout>
-    <section className="py-24 md:py-32">
-      <div className="container mx-auto px-4 text-center">
-        <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-up">
-          Projects & <span className="gradient-text">Awards</span>
+    <section className="py-32 md:py-40">
+      <div className="container mx-auto px-6 max-w-4xl">
+        <p className="text-xs uppercase tracking-[0.3em] text-primary mb-6 editorial-sans animate-fade-in">Projects & Awards</p>
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[0.95] tracking-tight animate-fade-up">
+          Initiatives designed to <span className="italic gradient-text">move the ecosystem.</span>
         </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto animate-fade-up animation-delay-200">
-          WTIA initiatives are designed to move the ecosystem—by recognising excellence, surfacing real use cases, and connecting builders with decision makers.
+        <p className="mt-8 text-lg text-muted-foreground max-w-xl leading-relaxed animate-fade-up animation-delay-200 editorial-sans">
+          Recognising excellence, surfacing real use cases, and connecting builders with decision makers.
         </p>
       </div>
     </section>
 
-    {/* ASA Awards */}
-    <section className="py-20 bg-muted/20">
-      <div className="container mx-auto px-4">
-        <Card className="glass-card glow-primary overflow-hidden">
-          <CardContent className="p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center">
-            <div className="h-24 w-24 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Trophy className="h-12 w-12 text-primary" />
+    <section className="pb-32">
+      <div className="container mx-auto px-6">
+        <div className="space-y-24">
+          {projects.map((p, i) => (
+            <div key={i} className="grid md:grid-cols-12 gap-8 items-start group">
+              <div className="md:col-span-4">
+                <span className="text-xs text-muted-foreground/40 editorial-sans">{p.num}</span>
+                <div className="mt-3 mb-4 h-14 w-14 rounded-full border border-border/50 flex items-center justify-center group-hover:border-primary/50 group-hover:bg-primary/5 transition-all duration-500">
+                  <p.icon className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold">{p.title}</h2>
+                <p className="text-lg text-primary mt-2 italic">{p.subtitle}</p>
+              </div>
+              <div className="md:col-span-7 md:col-start-6">
+                <div className="w-16 h-px bg-border mb-8 group-hover:w-24 group-hover:bg-primary transition-all duration-500" />
+                <p className="text-muted-foreground leading-relaxed mb-8 text-lg editorial-sans">{p.desc}</p>
+                <Button asChild variant="ghost" className="rounded-full px-0 text-primary hover:text-primary/80 hover:bg-transparent">
+                  {p.link.startsWith("http") ? (
+                    <a href={p.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm uppercase tracking-wider">
+                      {p.cta} <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </a>
+                  ) : (
+                    <Link to={p.link} className="inline-flex items-center gap-2 text-sm uppercase tracking-wider">
+                      {p.cta} <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                  )}
+                </Button>
+              </div>
             </div>
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold mb-3">Asia Smart App Awards</h2>
-              <p className="text-xl text-muted-foreground mb-2">Recognition that travels across Asia.</p>
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                WTIA supports platforms like the Asia Smart App Awards to spotlight innovation and strengthen industry credibility across the region.
-              </p>
-              <Button asChild>
-                <Link to="/contact" className="inline-flex items-center gap-2">
-                  Learn more <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </section>
-
-    {/* Tech to Connect */}
-    <section className="py-20">
-      <div className="container mx-auto px-4">
-        <Card className="glass-card glow-accent overflow-hidden">
-          <CardContent className="p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center">
-            <div className="h-24 w-24 rounded-2xl bg-accent/10 flex items-center justify-center shrink-0">
-              <Users className="h-12 w-12 text-accent" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold mb-3">Tech to Connect</h2>
-              <p className="text-xl text-muted-foreground mb-2">Less talk. More implementation.</p>
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                Tech to Connect is an industry-oriented programme series built to connect people, ideas, and practical adoption conversations.
-              </p>
-              <Button asChild variant="outline" className="border-accent/30 hover:bg-accent/10 text-foreground">
-                <Link to="/contact" className="inline-flex items-center gap-2">
-                  See upcoming sessions <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          ))}
+        </div>
       </div>
     </section>
   </Layout>

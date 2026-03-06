@@ -1,120 +1,149 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout";
-import { Users, Award, Lightbulb, Eye, Zap, ArrowRight, Network } from "lucide-react";
+import { ArrowRight, Wifi, Award, Lightbulb, Network, Eye, Zap, Trophy, Users, GraduationCap } from "lucide-react";
 
 const Index = () => {
   return (
     <Layout>
-      {/* Hero */}
-      <section className="relative overflow-hidden min-h-[90vh] flex items-center">
-        {/* Animated background */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" style={{ animation: "float 8s ease-in-out infinite" }} />
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-secondary/10 rounded-full blur-3xl" style={{ animation: "float 10s ease-in-out infinite 2s" }} />
-          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-accent/5 rounded-full blur-3xl" style={{ animation: "float 12s ease-in-out infinite 4s" }} />
+      {/* Hero — editorial, cinematic */}
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        {/* Ambient background */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div
+            className="absolute top-[15%] left-[10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-20"
+            style={{ background: "hsl(var(--primary))", animation: "float 10s ease-in-out infinite" }}
+          />
+          <div
+            className="absolute bottom-[10%] right-[5%] w-[400px] h-[400px] rounded-full blur-[100px] opacity-15"
+            style={{ background: "hsl(var(--secondary))", animation: "float 14s ease-in-out infinite 3s" }}
+          />
+          <div
+            className="absolute top-[60%] left-[50%] w-[300px] h-[300px] rounded-full blur-[80px] opacity-10"
+            style={{ background: "hsl(var(--accent))", animation: "float 12s ease-in-out infinite 5s" }}
+          />
+          {/* Grid overlay */}
+          <div
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
+              backgroundSize: "60px 60px",
+            }}
+          />
         </div>
 
-        <div className="container mx-auto px-4 relative z-10 text-center">
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-tight animate-fade-up">
-            Where Hong Kong's tech<br />
-            <span className="gradient-text">decision‑makers connect.</span>
-          </h1>
-          <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-up animation-delay-200">
-            WTIA connects enterprises, tech leaders, and innovators to accelerate real adoption—through projects, recognition platforms, and industry programmes.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-4 justify-center animate-fade-up animation-delay-400">
-            <Button asChild size="lg" className="text-base px-8">
-              <Link to="/membership">Join WTIA</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="text-base px-8 border-primary/30 hover:bg-primary/10 text-foreground">
-              <Link to="/contact">Talk to Us</Link>
-            </Button>
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-4xl">
+            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-6 editorial-sans animate-fade-in">
+              Hong Kong Wireless Technology Industry Association
+            </p>
+            <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold leading-[0.95] tracking-tight animate-fade-up">
+              Where Hong Kong's<br />
+              tech <span className="gradient-text italic">decision‑makers</span><br />
+              connect.
+            </h1>
+            <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed animate-fade-up animation-delay-200 editorial-sans">
+              Accelerate real adoption—through projects, recognition platforms, and industry programmes.
+            </p>
+            <div className="mt-10 flex flex-wrap gap-4 animate-fade-up animation-delay-400">
+              <Button asChild size="lg" className="rounded-full px-10 text-sm uppercase tracking-wider">
+                <Link to="/membership">Join WTIA</Link>
+              </Button>
+              <Button asChild variant="ghost" size="lg" className="rounded-full px-10 text-sm uppercase tracking-wider text-muted-foreground hover:text-foreground">
+                <Link to="/contact" className="inline-flex items-center gap-2">
+                  Talk to Us <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
           </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-fade-in animation-delay-800">
+          <div className="w-px h-16 bg-gradient-to-b from-transparent via-muted-foreground/30 to-transparent" />
         </div>
       </section>
 
       {/* Social proof */}
-      <section className="py-8 border-y border-border bg-muted/30">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            Trusted by a cross‑section of corporates, startups, solution providers, and ecosystem partners across Hong Kong and Asia.
+      <section className="py-6 border-y border-border/30">
+        <div className="container mx-auto px-6">
+          <p className="text-xs text-muted-foreground/60 uppercase tracking-[0.2em] text-center editorial-sans">
+            Trusted by corporates, startups, solution providers & ecosystem partners across Hong Kong and Asia
           </p>
         </div>
       </section>
 
-      {/* Why WTIA */}
-      <section className="py-24">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 animate-fade-up">
-            Why <span className="gradient-text">WTIA</span>
-          </h2>
-          <p className="text-center text-muted-foreground mb-16 max-w-xl mx-auto animate-fade-up animation-delay-200">
-            Turn emerging tech into real business outcomes.
-          </p>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                icon: Users,
-                title: "Executive Network",
-                desc: "Meet business leaders and solution owners who are actively building and deploying next‑gen technology.",
-              },
-              {
-                icon: Award,
-                title: "Industry Platforms",
-                desc: "Participate in WTIA-supported industry initiatives such as the Asia Smart App Awards to amplify credibility and reach.",
-              },
-              {
-                icon: Lightbulb,
-                title: "Knowledge + Connection",
-                desc: "Join practical sessions and ecosystem programmes such as Tech to Connect to exchange real implementation playbooks.",
-              },
-            ].map((item, i) => (
-              <Card key={i} className={`glass-card glow-primary hover:scale-[1.02] transition-all duration-300 animate-fade-up animation-delay-${(i + 1) * 200}`}>
-                <CardContent className="p-8">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-5">
-                    <item.icon className="h-6 w-6 text-primary" />
+      {/* Why WTIA — editorial grid */}
+      <section className="py-32">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-12 gap-8 items-start">
+            <div className="md:col-span-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-primary mb-3 editorial-sans">Why WTIA</p>
+              <h2 className="text-4xl md:text-5xl font-bold leading-tight">
+                Turn emerging tech into real <span className="italic gradient-text">business outcomes.</span>
+              </h2>
+            </div>
+            <div className="md:col-span-8">
+              <div className="grid sm:grid-cols-3 gap-px bg-border/30 rounded-lg overflow-hidden">
+                {[
+                  {
+                    icon: Wifi,
+                    title: "Executive Network",
+                    desc: "Meet business leaders and solution owners who are actively building and deploying next‑gen technology.",
+                  },
+                  {
+                    icon: Award,
+                    title: "Industry Platforms",
+                    desc: "Participate in WTIA-supported initiatives such as the Asia Smart App Awards to amplify credibility and reach.",
+                  },
+                  {
+                    icon: Lightbulb,
+                    title: "Knowledge + Connection",
+                    desc: "Join practical sessions and ecosystem programmes such as Tech to Connect to exchange implementation playbooks.",
+                  },
+                ].map((item, i) => (
+                  <div key={i} className="bg-card/40 p-8 hover:bg-card/70 transition-colors duration-500">
+                    <item.icon className="h-5 w-5 text-primary mb-6" />
+                    <h3 className="text-lg font-semibold mb-3 editorial-sans">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
                   </div>
-                  <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{item.desc}</p>
-                </CardContent>
-              </Card>
-            ))}
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Messaging Pillars */}
-      <section className="py-24 bg-muted/20">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
-            Three pillars of <span className="gradient-text">membership value</span>
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
+      {/* Messaging Pillars — bold editorial */}
+      <section className="py-32 border-y border-border/30">
+        <div className="container mx-auto px-6">
+          <p className="text-xs uppercase tracking-[0.3em] text-primary mb-12 text-center editorial-sans">Three pillars of membership value</p>
+          <div className="grid md:grid-cols-3 gap-16 md:gap-8">
             {[
               {
                 icon: Network,
+                num: "01",
                 title: "Influence",
                 desc: "Get closer to the ecosystem shaping standards, adoption, and industry direction in Hong Kong and Asia.",
               },
               {
                 icon: Eye,
+                num: "02",
                 title: "Visibility",
                 desc: "Raise enterprise credibility through industry platforms and award ecosystems WTIA supports.",
               },
               {
                 icon: Zap,
+                num: "03",
                 title: "Access",
                 desc: "Meet builders, buyers, and collaborators via initiatives like Tech to Connect.",
               },
             ].map((item, i) => (
-              <div key={i} className="text-center p-8">
-                <div className="h-16 w-16 rounded-2xl bg-secondary/10 flex items-center justify-center mx-auto mb-6">
-                  <item.icon className="h-8 w-8 text-secondary" />
-                </div>
-                <h3 className="text-2xl font-bold mb-3">{item.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{item.desc}</p>
+              <div key={i} className="group">
+                <span className="text-xs text-muted-foreground/40 editorial-sans">{item.num}</span>
+                <div className="mt-4 mb-6 w-12 h-px bg-border group-hover:w-20 group-hover:bg-primary transition-all duration-500" />
+                <h3 className="text-3xl md:text-4xl font-bold mb-4 italic">{item.title}</h3>
+                <p className="text-muted-foreground leading-relaxed editorial-sans">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -122,57 +151,77 @@ const Index = () => {
       </section>
 
       {/* Featured Initiatives */}
-      <section className="py-24">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
-            Featured <span className="gradient-text">Initiatives</span>
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
+      <section className="py-32">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-20">
+            <p className="text-xs uppercase tracking-[0.3em] text-primary mb-3 editorial-sans">Initiatives</p>
+            <h2 className="text-4xl md:text-5xl font-bold">
+              Featured <span className="italic gradient-text">Programmes</span>
+            </h2>
+          </div>
+
+          <div className="space-y-px">
             {[
               {
+                icon: Trophy,
                 title: "Asia Smart App Awards",
                 desc: "Recognition that travels across Asia — spotlight innovation and strengthen industry credibility across the region.",
                 link: "/projects",
               },
               {
+                icon: Users,
                 title: "Tech to Connect",
                 desc: "Less talk. More implementation — connecting people, ideas, and practical adoption conversations.",
                 link: "/projects",
               },
               {
+                icon: GraduationCap,
                 title: "GenAI Courses",
-                desc: "Executive-level generative AI programmes for enterprise capability building.",
+                desc: "Executive-level generative AI programmes for enterprise capability building, co-developed with CUSCS.",
                 link: "/projects",
               },
             ].map((item, i) => (
-              <Card key={i} className="glass-card hover:border-primary/30 transition-all duration-300 group">
-                <CardContent className="p-8">
-                  <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">{item.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed mb-6">{item.desc}</p>
-                  <Link to={item.link} className="inline-flex items-center gap-1 text-primary text-sm font-medium hover:gap-2 transition-all">
-                    Learn more <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </CardContent>
-              </Card>
+              <Link
+                key={i}
+                to={item.link}
+                className="group flex items-center justify-between py-8 border-b border-border/30 hover:border-primary/30 transition-colors duration-300"
+              >
+                <div className="flex items-center gap-6">
+                  <div className="h-12 w-12 rounded-full border border-border/50 flex items-center justify-center group-hover:border-primary/50 group-hover:bg-primary/5 transition-all duration-300">
+                    <item.icon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl md:text-2xl font-semibold group-hover:text-primary transition-colors editorial-sans">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground mt-1 max-w-lg hidden sm:block">{item.desc}</p>
+                  </div>
+                </div>
+                <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Banner */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5" />
-        <div className="container mx-auto px-4 relative z-10 text-center">
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">Ready to accelerate?</h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-lg mx-auto">
-            Join a member network built for practical outcomes: partnerships, visibility, knowledge exchange, and ecosystem access.
+      {/* CTA Banner — minimalist */}
+      <section className="py-32 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
+        </div>
+        <div className="container mx-auto px-6 relative z-10 text-center">
+          <h2 className="text-4xl md:text-6xl font-bold mb-6">
+            Ready to <span className="italic gradient-text">accelerate?</span>
+          </h2>
+          <p className="text-lg text-muted-foreground mb-10 max-w-lg mx-auto editorial-sans">
+            Join a member network built for practical outcomes.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Button asChild size="lg" className="text-base px-8">
+            <Button asChild size="lg" className="rounded-full px-10 text-sm uppercase tracking-wider">
               <Link to="/membership">Join WTIA</Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="text-base px-8 border-primary/30 hover:bg-primary/10 text-foreground">
-              <Link to="/contact">Talk to Us</Link>
+            <Button asChild variant="ghost" size="lg" className="rounded-full px-10 text-sm uppercase tracking-wider text-muted-foreground hover:text-foreground">
+              <Link to="/contact" className="inline-flex items-center gap-2">
+                Talk to Us <ArrowRight className="h-4 w-4" />
+              </Link>
             </Button>
           </div>
         </div>
