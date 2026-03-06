@@ -10,6 +10,7 @@ const navLinks = [
   { label: "Members", to: "/members" },
   { label: "Membership", to: "/membership" },
   { label: "Projects", to: "/projects" },
+  { label: "25th Anniversary", to: "/history" },
   { label: "About", to: "/about" },
   { label: "Contact", to: "/contact" },
 ];
