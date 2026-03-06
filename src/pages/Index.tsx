@@ -210,9 +210,9 @@ const Index = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-border/30 rounded-xl overflow-hidden">
             {[
               { value: "25", suffix: "", label: "Years of unbroken service", extra: "Years", icon: Calendar },
-              { value: "17+", suffix: "", label: "Asian regions connected", extra: "Regions", icon: Globe },
+              { value: "17", suffix: "+", label: "Asian regions connected", extra: "Regions", icon: Globe },
               { value: "100", suffix: "s", label: "Corporate members across the GBA", extra: "Members", icon: Users },
-              { value: "10000", suffix: "+", label: "Professionals trained & connected", extra: "Professionals", icon: Award },
+              { value: "10", suffix: "K+", label: "Professionals trained & connected", extra: "Professionals", icon: Award },
             ].map((s, i) => (
               <ScrollReveal key={i} delay={i * 150}>
                 <div className="bg-card/40 p-8 text-center hover:bg-card/70 transition-colors duration-500 group">
