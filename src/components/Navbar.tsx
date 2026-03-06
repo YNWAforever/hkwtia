@@ -29,7 +29,7 @@ const Navbar = () => {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         scrolled
-          ? "bg-background/80 backdrop-blur-xl border-b border-border/50"
+          ? "bg-background/90 backdrop-blur-xl border-b border-border/60 shadow-sm"
           : "bg-transparent"
       )}
     >
