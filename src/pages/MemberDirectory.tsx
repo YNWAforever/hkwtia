@@ -84,10 +84,10 @@ const SolutionsCarousel = () => {
 };
 
 // Member Card
-const MemberCard = ({ member, onClick }: { member: Member; onClick: () => void }) => {
+const MemberCard = ({ member }: { member: Member }) => {
   const TierIcon = tierIcon[member.tier];
   return (
-    <button onClick={onClick} className="text-left w-full group">
+    <Link to={`/members/${member.id}`} className="block w-full group">
       <Card className="glass-card h-full hover:border-primary/30 transition-all duration-300 overflow-hidden">
         <CardContent className="p-5">
           <div className="flex items-start justify-between mb-3">
@@ -107,69 +107,7 @@ const MemberCard = ({ member, onClick }: { member: Member; onClick: () => void }
           </div>
         </CardContent>
       </Card>
-    </button>
-  );
-};
-
-// Member Detail Modal
-const MemberDetail = ({ member, open, onClose }: { member: Member | null; open: boolean; onClose: () => void }) => {
-  if (!member) return null;
-  const TierIcon = tierIcon[member.tier];
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center gap-4 mb-2">
-            <div className={`h-14 w-14 rounded-xl flex items-center justify-center text-sm font-bold ${colorFromName(member.name)}`}>
-              {generateInitials(member.name)}
-            </div>
-            <div>
-              <DialogTitle className="text-2xl editorial-serif">{member.name}</DialogTitle>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant="outline" className={`${tierColor[member.tier]}`}>
-                  <TierIcon className="h-3 w-3 mr-1" />{member.tier} Member
-                </Badge>
-                <Badge variant="outline">{member.category}</Badge>
-              </div>
-            </div>
-          </div>
-        </DialogHeader>
-
-        <div className="space-y-6 mt-4">
-          <div>
-            <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-2 editorial-sans">About</h4>
-            <p className="text-muted-foreground leading-relaxed">{member.description}</p>
-          </div>
-
-          <div>
-            <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-2 editorial-sans">Solution</h4>
-            <p className="text-lg font-semibold">{member.solution}</p>
-          </div>
-
-          <div className="bg-muted/50 rounded-xl p-6 border border-border/30">
-            <h4 className="text-xs uppercase tracking-wider text-primary mb-3 font-medium editorial-sans">Featured Case Study</h4>
-            <h5 className="text-lg font-semibold mb-2">{member.caseStudy.title}</h5>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <div>
-                <p className="text-xs text-muted-foreground">Client</p>
-                <p className="text-sm font-medium">{member.caseStudy.client}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Result</p>
-                <p className="text-sm font-medium text-primary">{member.caseStudy.result}</p>
-              </div>
-            </div>
-          </div>
-
-          <Button asChild className="w-full rounded-full">
-            <a href={member.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2">
-              Visit Website <ExternalLink className="h-4 w-4" />
-            </a>
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+    </Link>
   );
 };
 
