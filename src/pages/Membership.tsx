@@ -127,8 +127,12 @@ const Membership = () => {
         </div>
       </section>
 
+      </section>
+
+      <GradientDivider variant="warm" />
+
       {/* Who should join */}
-      <section className="py-24 border-y border-border/30">
+      <section className="py-24 border-b border-border/30">
         <div className="container mx-auto px-6 max-w-3xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center">Who should <span className="italic gradient-text">join?</span></h2>
           <div className="space-y-6">
