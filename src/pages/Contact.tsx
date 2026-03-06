@@ -31,6 +31,8 @@ const Contact = () => {
         </div>
       </section>
 
+      <GradientDivider variant="cool" />
+
       <section className="pb-32">
         <div className="container mx-auto px-6 max-w-4xl">
           <div className="grid md:grid-cols-12 gap-12">

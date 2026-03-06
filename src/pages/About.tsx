@@ -48,9 +48,11 @@ const About = () => (
           </div>
         </div>
       </div>
-    </section>
+      </section>
 
-    {/* Executive Committee */}
+      <GradientDivider variant="warm" />
+
+      {/* Executive Committee */}
     <section className="py-24">
       <div className="container mx-auto px-6">
         <p className="text-xs uppercase tracking-[0.3em] text-primary mb-3 editorial-sans">Leadership</p>
