@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Handshake, BarChart3, Users, Mic, Globe, Check, ArrowRight } from "lucide-react";
+import GradientDivider from "@/components/GradientDivider";
 
 const benefits = [
   { icon: Shield, title: "Brand Authority", desc: "Position your company as a serious ecosystem contributor via WTIA's industry platforms and initiatives." },
@@ -72,8 +73,10 @@ const Membership = () => {
         </div>
       </section>
 
+      <GradientDivider variant="multi" />
+
       {/* Benefits */}
-      <section className="py-24 border-y border-border/30">
+      <section className="py-24 border-b border-border/30">
         <div className="container mx-auto px-6">
           <p className="text-xs uppercase tracking-[0.3em] text-primary mb-3 editorial-sans">Why join</p>
           <h2 className="text-3xl md:text-4xl font-bold mb-16">Member <span className="italic gradient-text">Benefits</span></h2>
@@ -88,6 +91,8 @@ const Membership = () => {
           </div>
         </div>
       </section>
+
+      <GradientDivider variant="primary" />
 
       {/* Tiers */}
       <section className="py-24">
@@ -122,8 +127,10 @@ const Membership = () => {
         </div>
       </section>
 
+      <GradientDivider variant="warm" />
+
       {/* Who should join */}
-      <section className="py-24 border-y border-border/30">
+      <section className="py-24 border-b border-border/30">
         <div className="container mx-auto px-6 max-w-3xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center">Who should <span className="italic gradient-text">join?</span></h2>
           <div className="space-y-6">
@@ -142,6 +149,8 @@ const Membership = () => {
           </div>
         </div>
       </section>
+
+      <GradientDivider variant="cool" />
 
       {/* Application form */}
       <section id="apply" className="py-24">

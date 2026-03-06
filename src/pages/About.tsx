@@ -1,5 +1,6 @@
 import Layout from "@/components/Layout";
 import { User } from "lucide-react";
+import GradientDivider from "@/components/GradientDivider";
 
 const committeeMembers = [
   { name: "Mr. Keith LI", title: "Chairman", company: "Co-Founder and CEO, Innopage Limited" },
@@ -22,10 +23,12 @@ const About = () => (
           Established in 2001, WTIA is a not-for-profit trade association and community for professionals, dedicated to the innovative and emerging technologies industry.
         </p>
       </div>
-    </section>
+      </section>
 
-    {/* Mission */}
-    <section className="py-24 border-y border-border/30">
+      <GradientDivider variant="multi" />
+
+      {/* Mission */}
+      <section className="py-24 border-b border-border/30">
       <div className="container mx-auto px-6">
         <div className="grid md:grid-cols-12 gap-8">
           <div className="md:col-span-4">
@@ -45,9 +48,11 @@ const About = () => (
           </div>
         </div>
       </div>
-    </section>
+      </section>
 
-    {/* Executive Committee */}
+      <GradientDivider variant="warm" />
+
+      {/* Executive Committee */}
     <section className="py-24">
       <div className="container mx-auto px-6">
         <p className="text-xs uppercase tracking-[0.3em] text-primary mb-3 editorial-sans">Leadership</p>

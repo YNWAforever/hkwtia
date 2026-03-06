@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, MapPin, Phone } from "lucide-react";
+import GradientDivider from "@/components/GradientDivider";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -29,6 +30,8 @@ const Contact = () => {
           </p>
         </div>
       </section>
+
+      <GradientDivider variant="cool" />
 
       <section className="pb-32">
         <div className="container mx-auto px-6 max-w-4xl">

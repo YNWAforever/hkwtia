@@ -2,6 +2,7 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Trophy, Users, GraduationCap, ArrowRight } from "lucide-react";
+import GradientDivider from "@/components/GradientDivider";
 
 const projects = [
   {
@@ -45,9 +46,11 @@ const Projects = () => (
           Recognising excellence, surfacing real use cases, and connecting builders with decision makers.
         </p>
       </div>
-    </section>
+      </section>
 
-    <section className="pb-32">
+      <GradientDivider variant="multi" />
+
+      <section className="pb-32">
       <div className="container mx-auto px-6">
         <div className="space-y-24">
           {projects.map((p, i) => (
