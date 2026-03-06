@@ -73,8 +73,10 @@ const Membership = () => {
         </div>
       </section>
 
+      <GradientDivider variant="multi" />
+
       {/* Benefits */}
-      <section className="py-24 border-y border-border/30">
+      <section className="py-24 border-b border-border/30">
         <div className="container mx-auto px-6">
           <p className="text-xs uppercase tracking-[0.3em] text-primary mb-3 editorial-sans">Why join</p>
           <h2 className="text-3xl md:text-4xl font-bold mb-16">Member <span className="italic gradient-text">Benefits</span></h2>
