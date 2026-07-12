@@ -79,7 +79,7 @@ Any later human-supplied redirect map can extend this list without changing the 
 - `i18n/routing.ts`: locales, default locale, and prefix mapping.
 - `i18n/request.ts`: request-scoped message loading.
 - `i18n/navigation.ts`: locale-aware `Link`, redirect, pathname, and router wrappers.
-- `middleware.ts`: locale negotiation and prefix handling.
+- `proxy.ts`: locale negotiation and prefix handling using the Next.js 16 proxy convention.
 
 ### Content and page composition
 
@@ -107,7 +107,7 @@ The current Three.js globe is excluded from the initial server payload. If retai
 
 ## Content and Request Flow
 
-1. Middleware resolves the incoming path to `en` or `zh-HK` and applies the as-needed prefix rule.
+1. The Next.js proxy resolves the incoming path to `en` or `zh-HK` and applies the as-needed prefix rule.
 2. The locale layout rejects unsupported locale values, loads the matching message bundle, and provides it to server and client components.
 3. A page loads typed records from `content/`, resolves message keys on the server, and renders semantic HTML.
 4. Page-specific `generateMetadata` produces canonical URLs, locale alternates, title, description, and Open Graph/Twitter data.
