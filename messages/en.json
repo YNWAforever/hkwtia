@@ -1,46 +1,221 @@
 {
-    "Common":  {
-                   "skipToContent":  "Skip to content"
-               },
-    "Metadata":  {
-                     "title":  "WTIA | Innovate Hong Kong",
-                     "description":  "Connecting Hong Kong and Greater Bay Area innovation to global markets."
-                 },
-    "Home":  {
-                 "eyebrow":  "Innovate Hong Kong",
-                 "title":  "Bridging GBA innovation to the global stage.",
-                 "summary":  "The cross-border platform connecting Hong Kong, the Greater Bay Area, and Asia to global tech markets."
-             },
-    "Navigation":  {
-                       "about":  "About",
-                       "membership":  "Membership",
-                       "showcase":  "Showcase",
-                       "launchpad":  "Launchpad",
-                       "events":  "Events",
-                       "news":  "News",
-                       "openMenu":  "Open navigation",
-                       "closeMenu":  "Close navigation",
-                       "menuTitle":  "Navigation",
-                       "menuDescription":  "Explore WTIA pages and change language.",
-                       "join":  "Join WTIA",
-                       "english":  "EN",
-                       "chinese":  "中文",
-                       "switchToEnglish":  "Switch to English",
-                       "switchToChinese":  "切換至中文",
-                       "homeLabel":  "WTIA home",
-                       "logoAlt":  "WTIA",
-                       "primaryLabel":  "Primary navigation"
-                   },
-    "Footer":  {
-                   "brand":  "Innovate Hong Kong",
-                   "summary":  "The cross-border platform connecting Hong Kong, the Greater Bay Area and Asia to global technology markets, investors and opportunities. Powered by WTIA.",
-                   "address":  "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
-                   "navigate":  "Navigate",
-                   "home":  "Home",
-                   "membership":  "Membership",
-                   "about":  "About",
-                   "contact":  "Contact",
-                   "connect":  "Connect",
-                   "copyright":  "© {year} Innovate Hong Kong — WTIA. All rights reserved."
-               }
+  "Common": {
+    "skipToContent": "Skip to content"
+  },
+  "Metadata": {
+    "title": "WTIA | Innovate Hong Kong",
+    "description": "Connecting Hong Kong and Greater Bay Area innovation to global markets."
+  },
+  "Navigation": {
+    "about": "About",
+    "membership": "Membership",
+    "showcase": "Showcase",
+    "launchpad": "Launchpad",
+    "events": "Events",
+    "news": "News",
+    "openMenu": "Open navigation",
+    "closeMenu": "Close navigation",
+    "menuTitle": "Navigation",
+    "menuDescription": "Explore WTIA pages and change language.",
+    "join": "Join WTIA",
+    "english": "EN",
+    "chinese": "中文",
+    "switchToEnglish": "Switch to English",
+    "switchToChinese": "Switch to Chinese",
+    "homeLabel": "WTIA home",
+    "logoAlt": "WTIA",
+    "primaryLabel": "Primary navigation"
+  },
+  "Footer": {
+    "brand": "Innovate Hong Kong",
+    "summary": "The cross-border platform connecting Hong Kong, the Greater Bay Area and Asia to global technology markets, investors and opportunities. Powered by WTIA.",
+    "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
+    "navigate": "Navigate",
+    "home": "Home",
+    "membership": "Membership",
+    "about": "About",
+    "contact": "Contact",
+    "connect": "Connect",
+    "copyright": "© {year} Innovate Hong Kong — WTIA. All rights reserved."
+  },
+  "Home": {
+    "metaTitle": "WTIA | Innovate Hong Kong",
+    "metaDescription": "Connecting Hong Kong and Greater Bay Area innovation to global markets.",
+    "eyebrow": "Innovate Hong Kong",
+    "title": "Bridging GBA innovation to the global stage.",
+    "summary": "The cross-border platform connecting Hong Kong, the Greater Bay Area and Asia to global technology markets.",
+    "imageAlt": "Hong Kong technology community",
+    "featuresTitle": "Built for connection and growth",
+    "featuresIntro": "WTIA brings the technology community together around practical opportunities.",
+    "features": {
+      "connect": {
+        "title": "Connect",
+        "description": "Build relationships across industry, investors and regional partners."
+      },
+      "accelerate": {
+        "title": "Accelerate",
+        "description": "Turn ideas into market opportunities through focused programmes."
+      },
+      "represent": {
+        "title": "Represent",
+        "description": "Give the wireless technology sector a clear, collective voice."
+      }
+    },
+    "statsTitle": "A platform for the whole ecosystem",
+    "stats": {
+      "0": {
+        "value": "4",
+        "label": "Flagship programmes"
+      },
+      "1": {
+        "value": "2",
+        "label": "Working languages"
+      },
+      "2": {
+        "value": "1",
+        "label": "Connected technology community"
+      }
+    },
+    "programsTitle": "Programmes and awards",
+    "programsIntro": "Explore WTIA initiatives supporting talent, innovation and industry recognition.",
+    "programs": {
+      "cpai": {
+        "title": "CPAI",
+        "description": "A focused programme supporting applied innovation."
+      },
+      "hkict": {
+        "title": "HKICT Awards",
+        "description": "Recognising excellence across Hong Kong's technology sector."
+      },
+      "tct": {
+        "title": "TCT",
+        "description": "Connecting technology, capability and talent."
+      },
+      "asa": {
+        "title": "Asia Smart App Awards",
+        "description": "Celebrating outstanding smart applications across Asia."
+      }
+    },
+    "viewProgram": "View programme"
+  },
+  "About": {
+    "metaTitle": "About WTIA",
+    "metaDescription": "Learn about WTIA's role in Hong Kong's wireless technology community.",
+    "eyebrow": "About WTIA",
+    "title": "A connected voice for wireless technology.",
+    "summary": "WTIA convenes members, partners and public stakeholders to advance Hong Kong's technology ecosystem.",
+    "imageAlt": "Hong Kong technology community",
+    "historyTitle": "Our role",
+    "historyIntro": "We connect the industry with opportunities that strengthen innovation, talent and regional reach.",
+    "connect": {
+      "title": "Connect the ecosystem",
+      "description": "Create practical links among members, partners, investors and markets."
+    },
+    "advance": {
+      "title": "Advance innovation",
+      "description": "Support programmes that help technology teams learn, demonstrate and grow."
+    },
+    "represent": {
+      "title": "Represent the industry",
+      "description": "Bring sector experience into constructive public and industry dialogue."
+    }
+  },
+  "Chairman": {
+    "metaTitle": "Chairman's Message | WTIA",
+    "metaDescription": "A message from the WTIA chairman.",
+    "eyebrow": "Leadership",
+    "title": "Chairman's message",
+    "summary": "Working together to keep Hong Kong connected to emerging technology opportunities.",
+    "messageTitle": "A shared commitment",
+    "message": "Our association is strongest when members contribute experience, curiosity and a willingness to collaborate. WTIA will continue creating practical bridges between innovation and opportunity.",
+    "signature": "Chairman, WTIA"
+  },
+  "Committees": {
+    "metaTitle": "Committees | WTIA",
+    "metaDescription": "How WTIA committees support governance, programmes and members.",
+    "eyebrow": "Governance",
+    "title": "Committees that turn participation into action.",
+    "summary": "Member-led committees provide oversight and focused expertise across WTIA priorities.",
+    "structureTitle": "Committee structure",
+    "executive": {
+      "title": "Executive Committee",
+      "description": "Guides strategy, governance and association priorities."
+    },
+    "innovation": {
+      "title": "Innovation Committee",
+      "description": "Shapes programmes around technology adoption and industry development."
+    },
+    "membership": {
+      "title": "Membership Committee",
+      "description": "Strengthens member value, participation and community connections."
+    }
+  },
+  "Membership": {
+    "metaTitle": "Membership | WTIA",
+    "metaDescription": "Compare WTIA membership tiers and benefits.",
+    "eyebrow": "Membership",
+    "title": "Find your place in Hong Kong's technology community.",
+    "summary": "Choose the membership tier that fits how you participate, grow and contribute.",
+    "tiersTitle": "Membership tiers",
+    "tiersIntro": "Annual membership is shown first. Monthly options are available only for Individual and Startup.",
+    "comingSoon": "Self-service joining arrives in M1. Contact WTIA for current applications.",
+    "benefits": {
+      "network": "Community and networking access",
+      "programs": "Programme participation",
+      "visibility": "WTIA visibility opportunities"
+    },
+    "tiers": {
+      "community": {
+        "name": "Community",
+        "price": "Free",
+        "cadence": "No annual fee",
+        "description": "Stay connected to public WTIA news and opportunities."
+      },
+      "individual": {
+        "name": "Individual",
+        "price": "HKD 500",
+        "cadence": "per year · HKD 50 monthly available",
+        "description": "For professionals building their technology network."
+      },
+      "startup": {
+        "name": "Startup",
+        "price": "HKD 1,200",
+        "cadence": "per year · HKD 120 monthly available",
+        "description": "For early-stage technology companies and teams."
+      },
+      "corporate": {
+        "name": "Corporate",
+        "price": "HKD 1,800",
+        "cadence": "per year",
+        "description": "For established organisations engaging the ecosystem."
+      },
+      "platinum": {
+        "name": "Platinum",
+        "price": "HKD 4,800",
+        "cadence": "per year",
+        "description": "For organisations seeking deeper industry participation."
+      },
+      "patron": {
+        "name": "Patron",
+        "price": "Contact us",
+        "cadence": "Reviewed individually",
+        "description": "For strategic supporters of WTIA's mission."
+      }
+    },
+    "faqTitle": "Membership FAQ",
+    "faq": {
+      "0": {
+        "question": "When will online joining be available?",
+        "answer": "Self-service sign-up and payment are planned for M1. WTIA can assist with applications in the meantime."
+      },
+      "1": {
+        "question": "Which tiers offer monthly payment?",
+        "answer": "Monthly presentation is available only for Individual and Startup tiers."
+      },
+      "2": {
+        "question": "How is Patron membership arranged?",
+        "answer": "Patron membership begins with a contact request and is reviewed manually by WTIA staff."
+      }
+    }
+  }
 }

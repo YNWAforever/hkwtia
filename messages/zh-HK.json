@@ -1,47 +1,222 @@
 {
-    "_review":  true,
-    "Common":  {
-                   "skipToContent":  "跳至主要內容"
-               },
-    "Metadata":  {
-                     "title":  "WTIA｜創科香港",
-                     "description":  "連繫香港及大灣區創新力量，走向全球市場。"
-                 },
-    "Home":  {
-                 "eyebrow":  "創科香港",
-                 "title":  "連繫大灣區創新力量，走向世界舞台。",
-                 "summary":  "跨境平台連繫香港、大灣區、亞洲與全球科技市場。"
-             },
-    "Navigation":  {
-                       "about":  "關於我們",
-                       "membership":  "會員計劃",
-                       "showcase":  "會員展示",
-                       "launchpad":  "創科起動",
-                       "events":  "活動",
-                       "news":  "最新消息",
-                       "openMenu":  "開啟導覽選單",
-                       "closeMenu":  "關閉導覽選單",
-                       "menuTitle":  "網站導覽",
-                       "menuDescription":  "瀏覽 WTIA 網站及切換語言。",
-                       "join":  "加入 WTIA",
-                       "english":  "EN",
-                       "chinese":  "中文",
-                       "switchToEnglish":  "Switch to English",
-                       "switchToChinese":  "切換至中文",
-                       "homeLabel":  "WTIA 首頁",
-                       "logoAlt":  "WTIA",
-                       "primaryLabel":  "主要導覽"
-                   },
-    "Footer":  {
-                   "brand":  "創新香港",
-                   "summary":  "連繫香港、大灣區及亞洲創科社群，接通全球科技市場、投資者及發展機遇。由 WTIA 推動。",
-                   "address":  "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
-                   "navigate":  "網站導覽",
-                   "home":  "首頁",
-                   "membership":  "會員計劃",
-                   "about":  "關於我們",
-                   "contact":  "聯絡我們",
-                   "connect":  "聯絡",
-                   "copyright":  "© {year} 創新香港 — WTIA。版權所有。"
-               }
+  "_review": true,
+  "Common": {
+    "skipToContent": "跳至主要內容"
+  },
+  "Metadata": {
+    "title": "WTIA｜創新香港",
+    "description": "連繫香港及大灣區創新力量，接通全球市場。"
+  },
+  "Navigation": {
+    "about": "關於我們",
+    "membership": "會員計劃",
+    "showcase": "會員展示",
+    "launchpad": "創科起動",
+    "events": "活動",
+    "news": "最新消息",
+    "openMenu": "開啟導覽選單",
+    "closeMenu": "關閉導覽選單",
+    "menuTitle": "網站導覽",
+    "menuDescription": "瀏覽 WTIA 網站及切換語言。",
+    "join": "加入 WTIA",
+    "english": "EN",
+    "chinese": "中文",
+    "switchToEnglish": "Switch to English",
+    "switchToChinese": "切換至中文",
+    "homeLabel": "WTIA 首頁",
+    "logoAlt": "WTIA",
+    "primaryLabel": "主要導覽"
+  },
+  "Footer": {
+    "brand": "創新香港",
+    "summary": "連繫香港、大灣區及亞洲創科社群，接通全球科技市場、投資者及發展機遇。由 WTIA 推動。",
+    "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
+    "navigate": "網站導覽",
+    "home": "首頁",
+    "membership": "會員計劃",
+    "about": "關於我們",
+    "contact": "聯絡我們",
+    "connect": "聯絡",
+    "copyright": "© {year} 創新香港 — WTIA。版權所有。"
+  },
+  "Home": {
+    "metaTitle": "WTIA｜創新香港",
+    "metaDescription": "連繫香港及大灣區創新力量，接通全球市場。",
+    "eyebrow": "創新香港",
+    "title": "連繫大灣區創新力量，走向國際舞台。",
+    "summary": "連接香港、大灣區及亞洲創科社群與全球科技市場的跨境平台。",
+    "imageAlt": "香港創科社群",
+    "featuresTitle": "連繫社群，推動成長",
+    "featuresIntro": "WTIA 透過實際機遇凝聚創科社群。",
+    "features": {
+      "connect": {
+        "title": "連繫",
+        "description": "連接業界、投資者及區域夥伴。"
+      },
+      "accelerate": {
+        "title": "加速",
+        "description": "透過專項計劃把創意轉化為市場機遇。"
+      },
+      "represent": {
+        "title": "代表",
+        "description": "為無線科技業界建立清晰而共同的聲音。"
+      }
+    },
+    "statsTitle": "服務整個創科生態",
+    "stats": {
+      "0": {
+        "value": "4",
+        "label": "重點計劃"
+      },
+      "1": {
+        "value": "2",
+        "label": "工作語言"
+      },
+      "2": {
+        "value": "1",
+        "label": "互聯創科社群"
+      }
+    },
+    "programsTitle": "計劃與獎項",
+    "programsIntro": "探索 WTIA 推動人才、創新及業界認可的項目。",
+    "programs": {
+      "cpai": {
+        "title": "CPAI",
+        "description": "支援應用創新的專項計劃。"
+      },
+      "hkict": {
+        "title": "香港資訊及通訊科技獎",
+        "description": "表揚香港科技界的卓越成果。"
+      },
+      "tct": {
+        "title": "TCT",
+        "description": "連接科技、能力與人才。"
+      },
+      "asa": {
+        "title": "亞洲智能應用程式大獎",
+        "description": "嘉許亞洲優秀智能應用程式。"
+      }
+    },
+    "viewProgram": "查看計劃"
+  },
+  "About": {
+    "metaTitle": "關於 WTIA",
+    "metaDescription": "了解 WTIA 在香港無線科技社群的角色。",
+    "eyebrow": "關於 WTIA",
+    "title": "凝聚無線科技業界的共同力量。",
+    "summary": "WTIA 匯聚會員、夥伴及公共持份者，推動香港創科生態發展。",
+    "imageAlt": "香港創科社群",
+    "historyTitle": "我們的角色",
+    "historyIntro": "我們以實際機遇連接業界，促進創新、人才及區域發展。",
+    "connect": {
+      "title": "連接生態",
+      "description": "連繫會員、夥伴、投資者及市場。"
+    },
+    "advance": {
+      "title": "推動創新",
+      "description": "以計劃支援科技團隊學習、展示及成長。"
+    },
+    "represent": {
+      "title": "代表業界",
+      "description": "把業界經驗帶進具建設性的公共及產業對話。"
+    }
+  },
+  "Chairman": {
+    "metaTitle": "主席的話｜WTIA",
+    "metaDescription": "WTIA 主席的話。",
+    "eyebrow": "領導",
+    "title": "主席的話",
+    "summary": "攜手讓香港持續連接新興科技機遇。",
+    "messageTitle": "共同承諾",
+    "message": "會員分享經驗、保持好奇並積極合作，是本會最重要的力量。WTIA 將繼續在創新與機遇之間建立實際橋樑。",
+    "signature": "WTIA 主席"
+  },
+  "Committees": {
+    "metaTitle": "委員會｜WTIA",
+    "metaDescription": "了解 WTIA 委員會如何支援管治、計劃及會員。",
+    "eyebrow": "管治",
+    "title": "把參與轉化為行動的委員會。",
+    "summary": "由會員帶領的委員會為 WTIA 重點工作提供監督及專業意見。",
+    "structureTitle": "委員會架構",
+    "executive": {
+      "title": "執行委員會",
+      "description": "領導策略、管治及協會優先工作。"
+    },
+    "innovation": {
+      "title": "創新委員會",
+      "description": "就科技應用及業界發展策劃計劃。"
+    },
+    "membership": {
+      "title": "會員委員會",
+      "description": "提升會員價值、參與及社群連繫。"
+    }
+  },
+  "Membership": {
+    "metaTitle": "會員計劃｜WTIA",
+    "metaDescription": "比較 WTIA 會員級別及權益。",
+    "eyebrow": "會員計劃",
+    "title": "在香港創科社群找到你的定位。",
+    "summary": "選擇配合你參與、成長及貢獻方式的會員級別。",
+    "tiersTitle": "會員級別",
+    "tiersIntro": "以年費為主要顯示；只有個人及初創級別提供月費選項。",
+    "comingSoon": "M1 將推出自助入會；現階段請聯絡 WTIA 申請。",
+    "benefits": {
+      "network": "社群及交流機會",
+      "programs": "參與計劃",
+      "visibility": "WTIA 展示機會"
+    },
+    "tiers": {
+      "community": {
+        "name": "社群",
+        "price": "免費",
+        "cadence": "毋須年費",
+        "description": "接收 WTIA 公開消息及機遇。"
+      },
+      "individual": {
+        "name": "個人",
+        "price": "港幣 500 元",
+        "cadence": "每年 · 可選港幣 50 元月費",
+        "description": "適合拓展科技網絡的專業人士。"
+      },
+      "startup": {
+        "name": "初創",
+        "price": "港幣 1,200 元",
+        "cadence": "每年 · 可選港幣 120 元月費",
+        "description": "適合早期科技公司及團隊。"
+      },
+      "corporate": {
+        "name": "企業",
+        "price": "港幣 1,800 元",
+        "cadence": "每年",
+        "description": "適合積極參與創科生態的成熟機構。"
+      },
+      "platinum": {
+        "name": "白金",
+        "price": "港幣 4,800 元",
+        "cadence": "每年",
+        "description": "適合尋求深度業界參與的機構。"
+      },
+      "patron": {
+        "name": "贊助人",
+        "price": "聯絡我們",
+        "cadence": "個別審批",
+        "description": "適合支持 WTIA 使命的策略夥伴。"
+      }
+    },
+    "faqTitle": "會員常見問題",
+    "faq": {
+      "0": {
+        "question": "何時可以網上入會？",
+        "answer": "自助登記及付款計劃於 M1 推出；現階段 WTIA 可協助處理申請。"
+      },
+      "1": {
+        "question": "哪些級別提供月費？",
+        "answer": "只有個人及初創級別提供月費選項。"
+      },
+      "2": {
+        "question": "如何申請贊助人會籍？",
+        "answer": "先提交聯絡要求，再由 WTIA 職員人手審批。"
+      }
+    }
+  }
 }
