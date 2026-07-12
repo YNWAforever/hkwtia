@@ -11,7 +11,7 @@ type Props = {params: Promise<{locale: string}>};
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
   const t = await getTranslations({locale, namespace: 'Showcase'});
-  return buildPageMetadata({locale: locale as AppLocale, pathname: '/showcase', title: t('title'), description: t('description')});
+  return buildPageMetadata({locale: locale as AppLocale, pathname: '/showcase', title: t('metaTitle'), description: t('metaDescription')});
 }
 
 export default async function ShowcasePage({params}: Props) {
