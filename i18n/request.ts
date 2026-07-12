@@ -9,7 +9,8 @@ export default getRequestConfig(async ({requestLocale}) => {
     ? requested
     : routing.defaultLocale;
   const bundle = (await import(`../messages/${locale}.json`)).default;
-  const {_review: _reviewFlag, ...messages} = bundle;
+  const messages = {...bundle};
+  delete (messages as {_review?: boolean})._review;
 
   return {locale, messages};
 });

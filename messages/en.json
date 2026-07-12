@@ -1,14 +1,46 @@
 {
-  "Common": {
-    "skipToContent": "Skip to content"
-  },
-  "Metadata": {
-    "title": "WTIA | Innovate Hong Kong",
-    "description": "Connecting Hong Kong and Greater Bay Area innovation to global markets."
-  },
-  "Home": {
-    "eyebrow": "Innovate Hong Kong",
-    "title": "Bridging GBA innovation to the global stage.",
-    "summary": "The cross-border platform connecting Hong Kong, the Greater Bay Area, and Asia to global tech markets."
-  }
+    "Common":  {
+                   "skipToContent":  "Skip to content"
+               },
+    "Metadata":  {
+                     "title":  "WTIA | Innovate Hong Kong",
+                     "description":  "Connecting Hong Kong and Greater Bay Area innovation to global markets."
+                 },
+    "Home":  {
+                 "eyebrow":  "Innovate Hong Kong",
+                 "title":  "Bridging GBA innovation to the global stage.",
+                 "summary":  "The cross-border platform connecting Hong Kong, the Greater Bay Area, and Asia to global tech markets."
+             },
+    "Navigation":  {
+                       "about":  "About",
+                       "membership":  "Membership",
+                       "showcase":  "Showcase",
+                       "launchpad":  "Launchpad",
+                       "events":  "Events",
+                       "news":  "News",
+                       "openMenu":  "Open navigation",
+                       "closeMenu":  "Close navigation",
+                       "menuTitle":  "Navigation",
+                       "menuDescription":  "Explore WTIA pages and change language.",
+                       "join":  "Join WTIA",
+                       "english":  "EN",
+                       "chinese":  "中文",
+                       "switchToEnglish":  "Switch to English",
+                       "switchToChinese":  "切換至中文",
+                       "homeLabel":  "WTIA home",
+                       "logoAlt":  "WTIA",
+                       "primaryLabel":  "Primary navigation"
+                   },
+    "Footer":  {
+                   "brand":  "Innovate Hong Kong",
+                   "summary":  "The cross-border platform connecting Hong Kong, the Greater Bay Area and Asia to global technology markets, investors and opportunities. Powered by WTIA.",
+                   "address":  "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
+                   "navigate":  "Navigate",
+                   "home":  "Home",
+                   "membership":  "Membership",
+                   "about":  "About",
+                   "contact":  "Contact",
+                   "connect":  "Connect",
+                   "copyright":  "© {year} Innovate Hong Kong — WTIA. All rights reserved."
+               }
 }
