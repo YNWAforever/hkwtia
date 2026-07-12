@@ -264,5 +264,58 @@
                   "title":  "AI operations preview",
                   "description":  "The AI operations dashboard will launch in M4 after validated agent telemetry is available.",
                   "milestone":  "M4 — no operational metrics are published in M0."
-              }
+              }  ,"Events": {
+    "metaTitle": "Events | WTIA",
+    "metaDescription": "Discover WTIA events and community gatherings.",
+    "eyebrow": "Events",
+    "title": "Events",
+    "description": "Stay connected to upcoming WTIA gatherings and opportunities.",
+    "emptyTitle": "No events are published yet",
+    "emptyDescription": "WTIA events will appear here when dates and details are confirmed."
+  },
+  "News": {
+    "metaTitle": "News | WTIA",
+    "metaDescription": "Read the latest news from WTIA.",
+    "eyebrow": "News",
+    "title": "WTIA news",
+    "description": "Browse WTIA announcements and community news.",
+    "emptyTitle": "No news is published yet",
+    "emptyDescription": "News will appear here when content is confirmed."
+  },
+  "Contact": {
+    "metaTitle": "Contact WTIA",
+    "metaDescription": "Contact the Hong Kong Wireless Technology Industry Association.",
+    "eyebrow": "Contact",
+    "title": "Let's connect",
+    "description": "Reach WTIA at the office or by email.",
+    "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong"
+  },
+  "Privacy": {
+    "metaTitle": "Privacy | WTIA",
+    "metaDescription": "How WTIA handles information in the M0 public site.",
+    "eyebrow": "Privacy",
+    "title": "Privacy in M0",
+    "description": "A clear summary of what this public preview does and does not collect.",
+    "summary": "M0 has no accounts, forms, or payments."
+  },
+  "AiTransparency": {
+    "metaTitle": "AI Transparency | WTIA",
+    "metaDescription": "Understand the AI roadmap for the WTIA public site.",
+    "eyebrow": "AI transparency",
+    "title": "How AI fits into WTIA's roadmap",
+    "description": "Agents are planned, not live, in M0.",
+    "summary": "WTIA agents are planned for a later milestone; no AI agent is live on this public site.",
+    "aiOpsLink": "Read the AI-Ops preview"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "description": "The page may have moved or is not part of the public preview.",
+    "home": "Return home",
+    "contact": "Contact WTIA"
+  },
+  "Error": {
+    "title": "Something went wrong",
+    "description": "We could not load this page. Try again.",
+    "retry": "Try again"
+  }
 }

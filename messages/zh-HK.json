@@ -265,5 +265,58 @@
                   "title":  "AI 營運儀表板預覽",
                   "description":  "經核實的代理遙測資料準備就緒後，AI 營運儀表板將於 M4 推出。",
                   "milestone":  "M4 — M0 不會發布營運指標。"
-              }
+              }  ,"Events": {
+    "metaTitle": "活動 | WTIA",
+    "metaDescription": "探索 WTIA 活動及社群聚會。",
+    "eyebrow": "活動",
+    "title": "活動",
+    "description": "掌握即將舉行的 WTIA 聚會及交流機會。",
+    "emptyTitle": "暫未有已發布活動",
+    "emptyDescription": "確認日期及詳情後，WTIA 活動會在此顯示。"
+  },
+  "News": {
+    "metaTitle": "消息 | WTIA",
+    "metaDescription": "閱讀 WTIA 最新消息。",
+    "eyebrow": "消息",
+    "title": "WTIA 最新消息",
+    "description": "瀏覽 WTIA 的公告及社群消息。",
+    "emptyTitle": "暫未有已發布消息",
+    "emptyDescription": "消息內容確認後，會在此顯示。"
+  },
+  "Contact": {
+    "metaTitle": "聯絡 WTIA",
+    "metaDescription": "聯絡香港無線科技商會。",
+    "eyebrow": "聯絡",
+    "title": "與我們聯繫",
+    "description": "歡迎透過辦公室或電郵聯絡 WTIA。",
+    "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓"
+  },
+  "Privacy": {
+    "metaTitle": "私隱 | WTIA",
+    "metaDescription": "了解 M0 公開網站如何處理資料。",
+    "eyebrow": "私隱",
+    "title": "M0 的私隱說明",
+    "description": "清楚了解這個公開預覽版本會及不會收集甚麼資料。",
+    "summary": "M0 沒有帳戶、表格或付款功能。"
+  },
+  "AiTransparency": {
+    "metaTitle": "AI 透明度 | WTIA",
+    "metaDescription": "了解 WTIA 公開網站的 AI 發展路線。",
+    "eyebrow": "AI 透明度",
+    "title": "AI 如何融入 WTIA 路線圖",
+    "description": "M0 只規劃 AI 代理，尚未啟用。",
+    "summary": "WTIA AI 代理計劃於後續里程碑推出；此公開網站目前沒有啟用 AI 代理。",
+    "aiOpsLink": "查看 AI-Ops 預覽"
+  },
+  "NotFound": {
+    "title": "找不到頁面",
+    "description": "頁面可能已移動，或不屬於公開預覽版本。",
+    "home": "返回首頁",
+    "contact": "聯絡 WTIA"
+  },
+  "Error": {
+    "title": "發生錯誤",
+    "description": "頁面未能載入，請再試一次。",
+    "retry": "再試一次"
+  }
 }

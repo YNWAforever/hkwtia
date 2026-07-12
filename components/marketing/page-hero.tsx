@@ -7,7 +7,7 @@ export function PageHero({eyebrow, title, description, image, imageAlt = ''}: Pa
     <section className="relative overflow-hidden bg-muted/60 py-20 sm:py-28">
       {image ? <Image src={image} alt={imageAlt} fill priority className="object-cover opacity-15" /> : null}
       <div className="container relative mx-auto px-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{eyebrow}</p>
+        {eyebrow ? <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{eyebrow}</p> : null}
         <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight sm:text-6xl">{title}</h1>
         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">{description}</p>
       </div>

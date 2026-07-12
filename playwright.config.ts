@@ -1,15 +1,15 @@
-import {defineConfig, devices} from '@playwright/test';
+﻿import {defineConfig, devices} from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000',
     trace: 'on-first-retry'
   },
   projects: [{name: 'chromium', use: {...devices['Desktop Chrome']}}],
   webServer: {
-    command: '.\\node_modules\\.bin\\next.cmd dev --hostname localhost',
-    url: 'http://localhost:3000',
+    command: `.\\node_modules\\.bin\\next.cmd dev --hostname localhost -p ${process.env.PLAYWRIGHT_PORT ?? '3000'}`,
+    url: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000
   }
