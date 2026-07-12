@@ -73,8 +73,7 @@ Any later human-supplied redirect map can extend this list without changing the 
 
 ### Framework and locale shell
 
-- `app/layout.tsx`: global document shell, fonts, global metadata defaults, and styles.
-- `app/[locale]/layout.tsx`: locale validation, message loading, `NextIntlClientProvider`, and locale metadata.
+- `app/[locale]/layout.tsx`: locale-aware root document shell, locale validation, fonts, global metadata defaults, message loading, `NextIntlClientProvider`, and styles. It owns `<html lang>` so every locale remains statically renderable.
 - `app/[locale]/(public)/layout.tsx`: public header, main landmark, and footer.
 - `i18n/routing.ts`: locales, default locale, and prefix mapping.
 - `i18n/request.ts`: request-scoped message loading.
