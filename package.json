@@ -14,11 +14,13 @@
     "test:e2e": "playwright test",
     "test:lighthouse": "lhci autorun",
     "audit:strings": "node scripts/audit-visible-strings.mjs",
-    "db:migrate": "node scripts/not-available.mjs db:migrate M1",
-    "db:seed": "node scripts/not-available.mjs db:seed M1"
+    "db:migrate": "drizzle-kit migrate --config=drizzle.config.ts",
+    "db:seed": "node --experimental-strip-types scripts/db-seed.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
+    "@neondatabase/auth": "^0.4.2-beta",
+    "@neondatabase/serverless": "^1.1.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-aspect-ratio": "^1.1.7",
@@ -51,6 +53,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
+    "drizzle-orm": "^0.45.2",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.462.0",
@@ -63,6 +66,7 @@
     "recharts": "^2.15.4",
     "schema-dts": "^2.0.0",
     "sonner": "^1.7.4",
+    "stripe": "^22.3.1",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.25.76"
@@ -79,6 +83,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.21",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9.32.0",
     "eslint-config-next": "^16.2.10",
     "eslint-plugin-react-hooks": "^5.2.0",
