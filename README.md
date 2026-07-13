@@ -1,73 +1,58 @@
-# Welcome to your Lovable project
+# WTIA Platform
 
-## Project info
+The WTIA public platform is a bilingual Next.js App Router site for the Hong Kong Wireless Technology Industry Association. M0 ships the server-rendered public route surface in English and Traditional Chinese (`/` and `/zh`), with static programme, event, news, membership, privacy, contact, and AI transparency pages.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Requirements
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+- Node.js 20+ and npm
+- A copy of `.env.example` saved as `.env.local` for local overrides (M0 only needs `NEXT_PUBLIC_SITE_URL` when a non-default origin is required)
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Open `http://localhost:3000/` or `http://localhost:3000/zh`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Scripts
 
-**Use GitHub Codespaces**
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the Next.js development server |
+| `npm test` | Run the Vitest unit suite |
+| `npm run test:e2e` | Run Playwright browser tests |
+| `npm run audit:strings` | Reject unapproved visible JSX literals |
+| `npm run lint` | Run ESLint |
+| `npm run typecheck` | Run strict TypeScript checking |
+| `npm run build` | Create the production build |
+| `npm run test:lighthouse` | Run Lighthouse CI on `/` and `/membership` |
+| `npm run db:migrate` / `npm run db:seed` | M1 placeholders; Neon data layer is not part of M0 |
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+For a production-style local check:
 
-## What technologies are used for this project?
+```sh
+npm run build
+npm run start
+```
 
-This project is built with:
+Set `PLAYWRIGHT_BASE_URL` or `LHCI_BASE_URL` when browser or Lighthouse checks should target an already running Preview/production deployment. Never commit populated environment values.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Deployment
 
-## How can I deploy this project?
+The repository is configured for Vercel. Import the GitHub repository, set the variables listed in `.env.example` through the Vercel project settings, and deploy the branch. Preview deployments should use a safe public URL; M0 has no database migrations or authenticated routes to run during build.
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Before promotion, run the repository gates:
 
-## Can I connect a custom domain to my Lovable project?
+```sh
+npm run audit:strings
+npm test
+npm run lint
+npm run typecheck
+npm run build
+npm run test:e2e
+npm audit --omit=dev --audit-level=high
+```
 
-Yes, you can!
+## Repository guidance
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+See [`AGENTS.md`](./AGENTS.md) for i18n, accessibility, server-component, test, commit, and secret-handling conventions.
