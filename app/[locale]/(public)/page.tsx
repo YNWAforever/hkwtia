@@ -6,8 +6,10 @@ import {PageHero} from '@/components/marketing/page-hero';
 import {ProgramGrid} from '@/components/marketing/program-grid';
 import {Section} from '@/components/marketing/section';
 import {Stats} from '@/components/marketing/stats';
+import {StructuredData} from '@/components/seo/structured-data';
 import type {AppLocale} from '@/i18n/routing';
 import {buildPageMetadata} from '@/lib/metadata';
+import {buildOrganizationData} from '@/lib/structured-data';
 
 type Props = {params: Promise<{locale: string}>};
 
@@ -27,6 +29,7 @@ export default async function HomePage({params}: Props) {
 
   return (
     <>
+      <StructuredData data={buildOrganizationData()} />
       <PageHero eyebrow={t('eyebrow')} title={t('title')} description={t('summary')} image="/images/projects-hero.jpg" imageAlt={t('imageAlt')} />
       <Section heading={t('featuresTitle')} intro={t('featuresIntro')}><FeatureGrid features={features} /></Section>
       <Section heading={t('statsTitle')}><Stats items={stats} /></Section>
