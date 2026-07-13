@@ -78,3 +78,32 @@ For this bounded check, project SSO was temporarily disabled, then restored in t
 For each page route, the remote check asserted the canonical URL matched the locale route, hreflang contained the `en` and `zh-HK` alternates, and the two JSON-LD blocks were present (Organization and FAQPage). `robots.txt` points to `https://hkwtia.vercel.app/sitemap.xml`. Browser/runtime verification found no console errors. Deployment-specific runtime logs returned `No logs found`; no runtime errors were reported. Lighthouse was not run against the protected Preview; the local acceptance section above records the Lighthouse artifact caveat.
 
 Promotion decision: **do not promote this M0 Preview to production in this task**. Production promotion remains a separate, explicitly authorized step after the Preview evidence is accepted.
+
+## Vercel production deployment verification
+
+Production verification run: 2026-07-14 00:23:28 +08:00 (Asia/Hong_Kong).
+
+- Project: `hkwtia` (`prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n`), team `ynwaforevers-projects`.
+- Stable production domain: `https://hkwtia.vercel.app` (SSO protection remained enabled after verification).
+- Corrective production deployment: `dpl_C89JMwCU3u3juCrryiWDASfCKju3` (READY; current stable alias).
+- Rollback chain: prior promoted deployment `dpl_8sywc5CZWXy51GsZgMBucwair64f`; original production deployment `dpl_328UsZGhrEkGmiV8rCka8rGpnuJc`.
+- The production `NEXT_PUBLIC_SITE_URL` configuration was corrected to `https://hkwtia.vercel.app` before the corrective redeploy so absolute metadata and crawler URLs resolve to the stable domain.
+
+| Route | HTTP | `<h1>` | `lang` | JSON-LD | canonical | hreflang |
+| --- | ---: | ---: | --- | ---: | ---: | ---: |
+| `/` | 200 | 1 | `en` | 2 | 1 | 2 |
+| `/zh` | 200 | 1 | `zh-HK` | 2 | 1 | 2 |
+| `/membership` | 200 | 1 | `en` | 2 | 1 | 2 |
+| `/zh/membership` | 200 | 1 | `zh-HK` | 2 | 1 | 2 |
+| `/sitemap.xml` | 200 | n/a | n/a | n/a | n/a | n/a |
+| `/robots.txt` | 200 | n/a | n/a | n/a | n/a | n/a |
+
+The four page routes returned absolute canonical URLs on `https://hkwtia.vercel.app`, both `en` and `zh-HK` alternates, and Organization plus FAQPage JSON-LD. `robots.txt` points to `https://hkwtia.vercel.app/sitemap.xml`. Deployment-specific logs returned `No logs found`; no runtime errors were reported.
+
+Browser evidence: the direct production Playwright invocation exited successfully, and the established production suites recorded **43/43 passed** (9 accessibility, 10 core-page, 24 public-route-matrix checks). The Windows approval/runtime wrapper did not produce a stable aggregate report, so no additional browser-console assertion is claimed beyond the passing suite coverage; no console errors were observed in the bounded route checks. Lighthouse was not run against production because the repository configuration uploads reports to `temporary-public-storage`; no score artifact is claimed.
+
+Demo: open `https://hkwtia.vercel.app/` for English, `https://hkwtia.vercel.app/zh` for Traditional Chinese, and use the locale switcher on `/membership` to confirm `/zh/membership` preserves the route while changing language. Verify `/sitemap.xml` and `/robots.txt` directly.
+
+Warnings and human-owned follow-ups: review all Cantonese/Traditional Chinese translations, programme/event/news wording, contact details, and SEO copy with WTIA content owners before public marketing use; event and news datasets remain intentionally empty in M0. The existing Browserslist stale-data warning remains. No database, authentication, billing, portal, CRM, automation, or AI-agent code was added.
+
+M1 has not started.
