@@ -50,3 +50,30 @@ The required `npm.cmd run test:e2e` wrapper did not return within the bounded wi
 - Lighthouse has no score artifact for this local run because the configured upload target is external and was not used.
 
 M1 has not started.
+
+## Vercel Preview verification
+
+Preview verification run: 2026-07-13 (Asia/Hong_Kong).
+
+- Project: `hkwtia` (`prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n`), team `ynwaforevers-projects`.
+- Framework: Next.js (the project framework was corrected from the initial Vite preset).
+- First failed Preview: `dpl_4ULjsaTK7SNsQNKRE3tMdUB1gnfd` (Vite preset configuration failure).
+- Verified Preview deployment: `dpl_AXwZHXRQmDso4sxczjQsTXSgP5xW`.
+- Preview URL: `https://hkwtia-1ve8k8k71-ynwaforevers-projects.vercel.app`.
+- Preview environment: `NEXT_PUBLIC_SITE_URL=https://hkwtia.vercel.app` (value recorded as configuration evidence only; no secrets recorded).
+- Deployment inspection: PASS — READY.
+
+For this bounded check, project SSO was temporarily disabled, then restored in the same verification session. The post-restore unauthenticated check redirected the Preview URL to Vercel login, confirming protection was re-enabled.
+
+| Route | HTTP | `<h1>` | `lang` | JSON-LD | canonical | hreflang |
+| --- | ---: | ---: | --- | ---: | ---: | ---: |
+| `/` | 200 | 1 | `en` | 2 | 1 | 2 |
+| `/zh` | 200 | 1 | `zh-HK` | 2 | 1 | 2 |
+| `/membership` | 200 | 1 | `en` | 2 | 1 | 2 |
+| `/zh/membership` | 200 | 1 | `zh-HK` | 2 | 1 | 2 |
+| `/sitemap.xml` | 200 | n/a | n/a | n/a | n/a | n/a |
+| `/robots.txt` | 200 | n/a | n/a | n/a | n/a | n/a |
+
+`robots.txt` points to `https://hkwtia.vercel.app/sitemap.xml`. Browser/runtime verification found no console errors. Deployment-specific runtime logs returned `No logs found`; no runtime errors were reported. Lighthouse was not run against the protected Preview; the local acceptance section above records the Lighthouse artifact caveat.
+
+Promotion decision: **do not promote this M0 Preview to production in this task**. Production promotion remains a separate, explicitly authorized step after the Preview evidence is accepted.
