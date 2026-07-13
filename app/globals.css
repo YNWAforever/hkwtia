@@ -9,7 +9,7 @@
   --card-foreground: 215 25% 15%;
   --popover: 0 0% 100%;
   --popover-foreground: 215 25% 15%;
-  --primary: 210 100% 45%;
+  --primary: 210 100% 38%;
   --primary-foreground: 0 0% 100%;
   --secondary: 170 65% 40%;
   --secondary-foreground: 0 0% 100%;
@@ -21,11 +21,11 @@
   --destructive-foreground: 0 0% 100%;
   --border: 210 15% 90%;
   --input: 210 15% 90%;
-  --ring: 210 100% 45%;
+  --ring: 210 100% 38%;
   --radius: 0.5rem;
   --glass: 210 20% 97%;
   --glass-border: 210 15% 88%;
-  --glow-primary: 210 100% 45%;
+  --glow-primary: 210 100% 38%;
   --glow-accent: 25 95% 55%;
   --coral: 350 80% 55%;
 }
