@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import ts from 'typescript';
 
 const roots = ['app', 'components'];
 const sourceFiles = roots.flatMap((root) => collectTsxFiles(root));
@@ -12,12 +13,13 @@ const allowedTechnicalIds = new Set([
 
 for (const file of sourceFiles) {
   const source = fs.readFileSync(file, 'utf8');
+  const sourceFile = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 
-  for (const node of extractJsxTextNodes(source)) {
-    const text = stripJsxExpressions(node.rawText).replace(/\s+/g, ' ').trim();
-    if (!text || isAllowedLiteral(text, node.openingTag)) continue;
+  for (const node of collectJsxTextNodes(sourceFile)) {
+    const text = node.rawText.replace(/\s+/g, ' ').trim();
+    if (!text || isAllowedLiteral(text, node.ariaHidden)) continue;
 
-    const line = source.slice(0, node.textStart).split('\n').length;
+    const line = sourceFile.getLineAndCharacterOfPosition(node.textStart).line + 1;
     findings.push(`${file}:${line}: unapproved visible literal: ${JSON.stringify(text)}`);
   }
 }
@@ -38,102 +40,48 @@ function collectTsxFiles(root) {
   });
 }
 
-function extractJsxTextNodes(source) {
+function collectJsxTextNodes(sourceFile) {
   const nodes = [];
 
-  for (let index = 0; index < source.length; index += 1) {
-    if (source[index] !== '<' || !isLikelyOpeningTag(source, index)) continue;
-
-    const tagEnd = findTagEnd(source, index);
-    if (tagEnd < 0 || source[tagEnd - 1] === '/') {
-      index = Math.max(index, tagEnd);
-      continue;
+  function visit(node, inheritedAriaHidden) {
+    if (ts.isJsxText(node)) {
+      nodes.push({
+        ariaHidden: inheritedAriaHidden,
+        rawText: node.getText(sourceFile),
+        textStart: node.getStart(sourceFile),
+      });
+      return;
     }
 
-    const textStart = tagEnd + 1;
-    const nextTag = findNextTagStart(source, textStart);
-    if (nextTag < 0) continue;
+    let ariaHidden = inheritedAriaHidden;
+    if (ts.isJsxElement(node)) {
+      ariaHidden = ariaHidden || hasAriaHidden(node.openingElement.attributes);
+    }
+    if (ts.isJsxSelfClosingElement(node)) return;
 
-    nodes.push({
-      openingTag: source.slice(index, tagEnd + 1),
-      rawText: source.slice(textStart, nextTag),
-      textStart,
-    });
-    index = nextTag - 1;
+    ts.forEachChild(node, (child) => visit(child, ariaHidden));
   }
 
+  visit(sourceFile, false);
   return nodes;
 }
 
-function isLikelyOpeningTag(source, index) {
-  const next = source[index + 1];
-  if (next === '>' || /[A-Za-z]/.test(next ?? '')) {
-    const previous = source[index - 1] ?? '';
-    return !/[A-Za-z0-9_$.)\]]/.test(previous);
+function hasAriaHidden(attributes) {
+  for (const property of attributes.properties) {
+    if (!ts.isJsxAttribute(property) || property.name.text !== 'aria-hidden') continue;
+    if (!property.initializer) return true;
+    if (ts.isStringLiteral(property.initializer)) return property.initializer.text.toLowerCase() === 'true';
+    if (ts.isJsxExpression(property.initializer)) {
+      return property.initializer.expression?.kind === ts.SyntaxKind.TrueKeyword;
+    }
   }
   return false;
 }
 
-function findTagEnd(source, start) {
-  let quote = '';
-  let expressionDepth = 0;
-
-  for (let index = start + 1; index < source.length; index += 1) {
-    const character = source[index];
-    if (quote) {
-      if (character === quote && source[index - 1] !== '\\') quote = '';
-      continue;
-    }
-    if (character === '"' || character === "'") {
-      quote = character;
-      continue;
-    }
-    if (character === '{') {
-      expressionDepth += 1;
-      continue;
-    }
-    if (character === '}' && expressionDepth > 0) {
-      expressionDepth -= 1;
-      continue;
-    }
-    if (character === '>' && expressionDepth === 0) return index;
-  }
-
-  return -1;
-}
-
-function findNextTagStart(source, start) {
-  for (let index = start; index < source.length; index += 1) {
-    if (source[index] !== '<') continue;
-    const next = source[index + 1];
-    if (next === '>' || next === '/' || /[A-Za-z]/.test(next ?? '')) return index;
-  }
-  return -1;
-}
-
-function stripJsxExpressions(value) {
-  let depth = 0;
-  let output = '';
-
-  for (const character of value) {
-    if (character === '{') {
-      depth += 1;
-      continue;
-    }
-    if (character === '}' && depth > 0) {
-      depth -= 1;
-      continue;
-    }
-    if (depth === 0) output += character;
-  }
-
-  return output;
-}
-
-function isAllowedLiteral(text, openingTag) {
+function isAllowedLiteral(text, ariaHidden) {
   if (/^[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}$/.test(text)) return true;
   if (/^\+?[0-9][0-9 ()-]+$/.test(text)) return true;
   if (allowedTechnicalIds.has(text)) return true;
   if (/^[\p{P}\p{S}\s]+$/u.test(text)) return true;
-  return /aria-hidden\s*=\s*["']true["']/i.test(openingTag);
+  return ariaHidden;
 }
