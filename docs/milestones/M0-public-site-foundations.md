@@ -77,7 +77,7 @@ For this bounded check, project SSO was temporarily disabled, then restored in t
 
 For each page route, the remote check asserted the canonical URL matched the locale route, hreflang contained the `en` and `zh-HK` alternates, and the two JSON-LD blocks were present (Organization and FAQPage). `robots.txt` points to `https://hkwtia.vercel.app/sitemap.xml`. Browser/runtime verification found no console errors. Deployment-specific runtime logs returned `No logs found`; no runtime errors were reported. Lighthouse was not run against the protected Preview; the local acceptance section above records the Lighthouse artifact caveat.
 
-Promotion decision: **do not promote this M0 Preview to production in this task**. Production promotion remains a separate, explicitly authorized step after the Preview evidence is accepted.
+Preview-stage decision (Task 6): **do not promote the Preview during Preview verification**. Task 7 subsequently performed the explicitly authorized production promotion and corrective URL configuration documented below.
 
 ## Vercel production deployment verification
 
@@ -87,6 +87,7 @@ Production verification run: 2026-07-14 00:23:28 +08:00 (Asia/Hong_Kong).
 - Stable production domain: `https://hkwtia.vercel.app` (SSO protection remained enabled after verification).
 - Corrective production deployment: `dpl_C89JMwCU3u3juCrryiWDASfCKju3` (READY; current stable alias).
 - Rollback chain: prior promoted deployment `dpl_8sywc5CZWXy51GsZgMBucwair64f`; original production deployment `dpl_328UsZGhrEkGmiV8rCka8rGpnuJc`.
+- Artifact provenance: `dpl_8sywc5CZWXy51GsZgMBucwair64f` was promoted from the verified Preview `dpl_AXwZHXRQmDso4sxczjQsTXSgP5xW` (source commit `1221d26`). The exact Preview artifact emitted localhost metadata when promoted because Production had no `NEXT_PUBLIC_SITE_URL`; to correct that release-blocking configuration, Vercel created corrective deployment `dpl_C89JMwCU3u3juCrryiWDASfCKju3` from the same source commit after setting the production-only URL. Its build digest therefore differs by design, but no application source files changed; the final production checks below apply to this corrective artifact.
 - The production `NEXT_PUBLIC_SITE_URL` configuration was corrected to `https://hkwtia.vercel.app` before the corrective redeploy so absolute metadata and crawler URLs resolve to the stable domain.
 
 | Route | HTTP | `<h1>` | `lang` | JSON-LD | canonical | hreflang |
@@ -98,9 +99,9 @@ Production verification run: 2026-07-14 00:23:28 +08:00 (Asia/Hong_Kong).
 | `/sitemap.xml` | 200 | n/a | n/a | n/a | n/a | n/a |
 | `/robots.txt` | 200 | n/a | n/a | n/a | n/a | n/a |
 
-The four page routes returned absolute canonical URLs on `https://hkwtia.vercel.app`, both `en` and `zh-HK` alternates, and Organization plus FAQPage JSON-LD. `robots.txt` points to `https://hkwtia.vercel.app/sitemap.xml`. Deployment-specific logs returned `No logs found`; no runtime errors were reported.
+The four primary page routes returned absolute canonical URLs on `https://hkwtia.vercel.app`, both `en` and `zh-HK` alternates, and Organization plus FAQPage JSON-LD. The required heading-route check also covered `/launchpad` and `/about`; both returned HTTP 200 with exactly one `<h1>` and `lang="en"`. `robots.txt` points to `https://hkwtia.vercel.app/sitemap.xml`. Deployment-specific logs returned `No logs found`; no runtime errors were reported.
 
-Browser evidence: the direct production Playwright invocation exited successfully, and the established production suites recorded **43/43 passed** (9 accessibility, 10 core-page, 24 public-route-matrix checks). The Windows approval/runtime wrapper did not produce a stable aggregate report, so no additional browser-console assertion is claimed beyond the passing suite coverage; no console errors were observed in the bounded route checks. Lighthouse was not run against production because the repository configuration uploads reports to `temporary-public-storage`; no score artifact is claimed.
+Browser evidence: the direct production Playwright invocation exited successfully, and the established production suites recorded **43/43 passed** (9 accessibility, 10 core-page, 24 public-route-matrix checks). The Windows approval/runtime wrapper did not produce a stable aggregate report, so no additional browser-console assertion is claimed beyond the passing suite coverage; no console errors were observed in the bounded route checks. Lighthouse evidence: a local no-upload run (`npx.cmd lhci collect --no-lighthouserc --url https://hkwtia.vercel.app/ --url https://hkwtia.vercel.app/membership --numberOfRuns=1 --settings={"preset":"desktop"}`) scored Performance 0.92 / Accessibility 1.00 / SEO 1.00 for the root redirect landing on `/zh`, and Performance 0.96 / Accessibility 1.00 / SEO 1.00 for the membership redirect landing on `/zh/membership`; both exceeded the M0 floors (0.90 / 0.95 / 0.95). The reports were kept locally and not uploaded.
 
 Demo: open `https://hkwtia.vercel.app/` for English, `https://hkwtia.vercel.app/zh` for Traditional Chinese, and use the locale switcher on `/membership` to confirm `/zh/membership` preserves the route while changing language. Verify `/sitemap.xml` and `/robots.txt` directly.
 
