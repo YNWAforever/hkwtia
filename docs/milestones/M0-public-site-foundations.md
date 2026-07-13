@@ -19,7 +19,7 @@ Evidence target commit: `7da0588a2612fc8203cd44d859ef8bf396ae8b71` (`2026-07-13T
 | `npm.cmd run typecheck` | PASS |
 | `npm.cmd test` | PASS — 9 files, 13 tests |
 | `npm.cmd run audit:strings` | PASS — 42 TSX files scanned |
-| `NEXT_PUBLIC_SITE_URL=http://localhost:3000 npm.cmd run build` | PASS — Next.js 16.2.10, 38/38 static pages |
+| `$env:NEXT_PUBLIC_SITE_URL='http://localhost:3000'; npm.cmd run build` | PASS — Next.js 16.2.10, 38/38 static pages |
 | Required server-rendered heading fetch | PASS — 4/4 routes returned HTTP 200 and exactly one `<h1>` |
 
 The heading fetch used a hidden production server on port 3105 (recorded PID 4856, stopped after the checks):
@@ -40,8 +40,8 @@ The required `npm.cmd run test:e2e` wrapper did not return within the bounded wi
 ## Locale demo
 
 1. Start the app with `npm.cmd run dev`.
-2. Open `http://localhost:3000/en` and `http://localhost:3000/zh-HK` (the `/zh` alias is also supported).
-3. Use the header locale switcher on a nested page such as `/en/membership` and confirm it preserves the route while changing the visible language.
+2. Open `http://localhost:3000/` for English and `http://localhost:3000/zh` for Traditional Chinese.
+3. Use the header locale switcher on a nested page such as `/membership` and confirm it preserves the route as `/zh/membership` while changing the visible language.
 
 ## Warnings and caveats
 
