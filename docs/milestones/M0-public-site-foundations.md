@@ -2,7 +2,7 @@
 
 Acceptance run: 2026-07-13 19:40 (Asia/Hong_Kong)
 
-Evidence target commit: `7da0588a2612fc8203cd44d859ef8bf396ae8b71` (`2026-07-13T19:03:58+08:00`).
+Local evidence target commit: `7da0588a2612fc8203cd44d859ef8bf396ae8b71` (`2026-07-13T19:03:58+08:00`). Preview evidence below separately identifies deployed source commit `1221d26`.
 
 ## Scope and route totals
 
@@ -53,14 +53,15 @@ M1 has not started.
 
 ## Vercel Preview verification
 
-Preview verification run: 2026-07-13 (Asia/Hong_Kong).
+Preview verification run: 2026-07-13 20:51:20 +08:00 (Asia/Hong_Kong; deployment-created timestamp used as the verification anchor).
 
 - Project: `hkwtia` (`prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n`), team `ynwaforevers-projects`.
 - Framework: Next.js (the project framework was corrected from the initial Vite preset).
 - First failed Preview: `dpl_4ULjsaTK7SNsQNKRE3tMdUB1gnfd` (Vite preset configuration failure).
 - Verified Preview deployment: `dpl_AXwZHXRQmDso4sxczjQsTXSgP5xW`.
 - Preview URL: `https://hkwtia-1ve8k8k71-ynwaforevers-projects.vercel.app`.
-- Preview environment: `NEXT_PUBLIC_SITE_URL=https://hkwtia.vercel.app` (value recorded as configuration evidence only; no secrets recorded).
+- Preview environment: `NEXT_PUBLIC_SITE_URL` configured (value intentionally omitted; no environment values or secrets recorded).
+- Deployment source: commit `1221d26` (`docs: correct local acceptance instructions`); Vercel inspection reported `gitDirty=1` because a pre-existing `.gitignore` change was present at deploy time. The uncommitted change only affects local ignore rules and is not application source; this evidence commit was created afterward and is not part of the deployed artifact.
 - Deployment inspection: PASS — READY.
 
 For this bounded check, project SSO was temporarily disabled, then restored in the same verification session. The post-restore unauthenticated check redirected the Preview URL to Vercel login, confirming protection was re-enabled.
@@ -74,6 +75,6 @@ For this bounded check, project SSO was temporarily disabled, then restored in t
 | `/sitemap.xml` | 200 | n/a | n/a | n/a | n/a | n/a |
 | `/robots.txt` | 200 | n/a | n/a | n/a | n/a | n/a |
 
-`robots.txt` points to `https://hkwtia.vercel.app/sitemap.xml`. Browser/runtime verification found no console errors. Deployment-specific runtime logs returned `No logs found`; no runtime errors were reported. Lighthouse was not run against the protected Preview; the local acceptance section above records the Lighthouse artifact caveat.
+For each page route, the remote check asserted the canonical URL matched the locale route, hreflang contained the `en` and `zh-HK` alternates, and the two JSON-LD blocks were present (Organization and FAQPage). `robots.txt` points to `https://hkwtia.vercel.app/sitemap.xml`. Browser/runtime verification found no console errors. Deployment-specific runtime logs returned `No logs found`; no runtime errors were reported. Lighthouse was not run against the protected Preview; the local acceptance section above records the Lighthouse artifact caveat.
 
 Promotion decision: **do not promote this M0 Preview to production in this task**. Production promotion remains a separate, explicitly authorized step after the Preview evidence is accepted.
