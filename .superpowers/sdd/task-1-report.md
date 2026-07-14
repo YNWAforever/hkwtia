@@ -81,3 +81,38 @@ npm.cmd run typecheck
 > hkwtia-platform@0.0.0 typecheck
 > tsc --noEmit
 ```
+
+## Review regression fix
+
+- `scripts/db-migrate.ts` now uses a fixed `cmd.exe /d /s /c` invocation on Windows. The command and arguments are static; no environment or user-controlled value is interpolated into the command string.
+- `tests/unit/db-script-contract.test.ts` now asserts the exact Windows executable and argument array through `migrationProcessInvocation("win32")`.
+
+TDD red evidence:
+
+```text
+npm.cmd test -- tests/unit/db-script-contract.test.ts
+Exit code: 1
+TypeError: migrationProcessInvocation is not a function
+```
+
+Verification after the Windows wrapper review fix (2026-07-14):
+
+```text
+npm.cmd test -- tests/unit/env-contract.test.ts tests/unit/db-script-contract.test.ts
+Exit code: 0
+Test Files  2 passed (2)
+Tests       7 passed (7)
+
+npm.cmd test
+Exit code: 0
+Test Files  11 passed (11)
+Tests       20 passed (20)
+
+npm.cmd run lint
+Exit code: 0
+> hkwtia-platform@0.0.0 lint
+> eslint .
+
+npm.cmd run typecheck
+> tsc --noEmit
+```

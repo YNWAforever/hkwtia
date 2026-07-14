@@ -3,6 +3,23 @@ import {spawn} from "node:child_process";
 const migrationCommand = "drizzle-kit migrate --config=drizzle.config.ts";
 const migrationArgs = ["migrate", "--config=drizzle.config.ts"];
 
+const windowsMigrationArgs = [
+  "/d",
+  "/s",
+  "/c",
+  "drizzle-kit.cmd migrate --config=drizzle.config.ts",
+];
+
+export function migrationProcessInvocation(platform: NodeJS.Platform = process.platform): {
+  executable: string;
+  args: string[];
+} {
+  if (platform === "win32") {
+    return {executable: "cmd.exe", args: [...windowsMigrationArgs]};
+  }
+
+  return {executable: "drizzle-kit", args: [...migrationArgs]};
+}
 export function migrationCommandText(): string {
   return migrationCommand;
 }
@@ -12,10 +29,10 @@ export function runMigration(environment: NodeJS.ProcessEnv = process.env): Prom
     return Promise.reject(new Error("DATABASE_URL is required to run database migrations."));
   }
 
-  const executable = process.platform === "win32" ? "drizzle-kit.cmd" : "drizzle-kit";
+  const {executable, args} = migrationProcessInvocation();
 
   return new Promise((resolve, reject) => {
-    const child = spawn(executable, migrationArgs, {
+    const child = spawn(executable, args, {
       env: environment,
       stdio: "inherit",
     });
