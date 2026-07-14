@@ -95,3 +95,8 @@ npm.cmd run build  # exit 0
 ```
 
 Next build sets `NEXT_PHASE=phase-production-build`, so auth imports use generated non-production configuration during static analysis; production runtime imports still call strict `serverEnv()`.
+## Follow-up hygiene (2026-07-15)
+
+- Removed the extra blank line at EOF in `lib/db/repos/common.ts`.
+- `npm.cmd test -- --reporter=dot tests/unit/actor-authorization.test.ts tests/unit/repository-scope.test.ts tests/unit/repository-mutation-scope.test.ts`: exit 0, 3 files and 13 tests passed.
+- `git diff --check`: exit 0.

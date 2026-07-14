@@ -28,4 +28,3 @@ export function requireSystem(actor: Actor): asserts actor is Extract<Actor, {ki
 export function requireMember(actor: Actor): asserts actor is Extract<Actor, {kind: "member"}> {
   if (actor.kind !== "member") forbidden();
 }
-
