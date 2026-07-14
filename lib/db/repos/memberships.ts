@@ -1,9 +1,9 @@
 import "server-only";
 
-import {and, eq, exists, or, sql} from "drizzle-orm";
+import {and, eq, exists, isNull, or, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";
-import {companyMembers, memberships as membershipsTable, type Membership} from "@/lib/db/server-schema";
+import {companyMembers, membershipApplications, memberships as membershipsTable, type Membership} from "@/lib/db/server-schema";
 import {forbidden, getDb} from "@/lib/db/repos/common";
 
 export type MembershipInput = Pick<Membership, "planCode" | "seatLimit"> & Partial<Pick<Membership, "ownerUserId" | "companyId" | "applicationId" | "status" | "stripeCustomerId" | "stripeSubscriptionId" | "billingPeriodStart" | "billingPeriodEnd" | "cancelAtPeriodEnd">>;
@@ -15,10 +15,56 @@ function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
   );
 }
 
-function companyAccessScope(actor: Extract<Actor, {kind: "member"}>, companyId: string) {
-  return exists(
-    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companyId} AND ${companyMembers.userId} = ${actor.userId} AND ${companyMembers.revokedAt} IS NULL`,
+function applicationAccessScope(actor: Extract<Actor, {kind: "member"}>, applicationId: string) {
+  return and(
+    eq(membershipApplications.id, applicationId),
+    or(
+      eq(membershipApplications.applicantUserId, actor.userId),
+      exists(
+        sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipApplications.companyId} AND ${companyMembers.userId} = ${actor.userId} AND ${companyMembers.revokedAt} IS NULL`,
+      ),
+    ),
   );
+}
+
+async function authorizeMemberCreate(
+  db: Awaited<ReturnType<typeof getDb>>,
+  actor: Extract<Actor, {kind: "member"}>,
+  input: MembershipInput,
+) {
+  const hasOwner = input.ownerUserId !== null && input.ownerUserId !== undefined;
+  const hasCompany = input.companyId !== null && input.companyId !== undefined;
+  if (hasOwner === hasCompany) forbidden();
+  if (hasOwner && input.ownerUserId !== actor.userId) forbidden();
+
+  if (hasCompany) {
+    const companyAccess = await db
+      .select({companyId: companyMembers.companyId})
+      .from(companyMembers)
+      .where(and(
+        eq(companyMembers.companyId, input.companyId!),
+        eq(companyMembers.userId, actor.userId),
+        isNull(companyMembers.revokedAt),
+      ))
+      .limit(1);
+    if (!companyAccess[0]) forbidden();
+  }
+
+  if (input.applicationId) {
+    const applications = await db
+      .select({
+        applicantUserId: membershipApplications.applicantUserId,
+        companyId: membershipApplications.companyId,
+        planCode: membershipApplications.planCode,
+      })
+      .from(membershipApplications)
+      .where(applicationAccessScope(actor, input.applicationId))
+      .limit(1);
+    const application = applications[0];
+    if (!application || application.planCode !== input.planCode) forbidden();
+    if (hasCompany && application.companyId !== input.companyId) forbidden();
+    if (hasOwner && (application.companyId !== null || application.applicantUserId !== input.ownerUserId)) forbidden();
+  }
 }
 function membershipScope(actor: Actor, membershipId: string) {
   if (actor.kind === "system") return and(eq(membershipsTable.id, membershipId), sql`true`);
@@ -62,12 +108,8 @@ export const membershipsRepository = {
 
   async create(actor: Actor, input: MembershipInput): Promise<Membership> {
     if (actor.kind === "anonymous") forbidden();
-    if (actor.kind === "member") {
-      if (input.ownerUserId !== null && input.ownerUserId !== undefined && input.ownerUserId !== actor.userId) forbidden();
-      if (input.companyId && !companyAccessScope(actor, input.companyId)) forbidden();
-      if (!input.ownerUserId && !input.companyId) forbidden();
-    }
     const db = await getDb();
+    if (actor.kind === "member") await authorizeMemberCreate(db, actor, input);
     const rows = await db.insert(membershipsTable).values(input).returning();
     return rows[0];
   },

@@ -137,3 +137,48 @@ Exit code: 0
 npm.cmd run typecheck
 Exit code: 0
 ```
+
+## Production repository security follow-up
+
+### RED
+
+The inherited production-path regression test was preserved and run before
+production changes:
+
+```text
+npm.cmd test -- tests/unit/repository-production-security.test.ts
+Exit code: 1
+1 test file failed; 2 tests failed.
+```
+
+The failures were exact reproductions: an out-of-scope company/application
+membership insert resolved instead of rejecting, and `profiles.ensure`
+returned default fields after overwriting an existing authored profile.
+
+The security matrix was then expanded before implementation:
+
+```text
+npm.cmd test -- tests/unit/repository-production-security.test.ts
+Exit code: 1
+1 test file failed; 5 tests failed and 1 passed.
+```
+
+The additional RED cases covered application plan/company mismatch and the
+missing actor-scoped application query for a member-owned membership. The
+authorized insert control passed.
+
+### GREEN
+
+```text
+npm.cmd test -- tests/unit/repository-production-security.test.ts
+Exit code: 0
+1 test file passed; 7 tests passed.
+
+npm.cmd test
+Exit code: 0
+20 test files passed; 60 tests passed.
+
+npm.cmd run lint
+Exit code: 0
+
+npm.cmd run typecheck

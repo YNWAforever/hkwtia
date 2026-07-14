@@ -23,9 +23,12 @@ export const profilesRepository = {
     const rows = await db
       .insert(profilesTable)
       .values(input)
-      .onConflictDoUpdate({target: profilesTable.id, set: {...input, updatedAt: new Date()}})
+      .onConflictDoNothing({target: profilesTable.id})
       .returning();
-    return rows[0];
+    if (rows[0]) return rows[0];
+    const existing = await db.select().from(profilesTable).where(eq(profilesTable.id, input.id)).limit(1);
+    if (!existing[0]) forbidden();
+    return existing[0];
   },
   async getById(actor: Actor, userId: string): Promise<Profile | null> {
     if (actor.kind === "member" && actor.userId !== userId) forbidden();
