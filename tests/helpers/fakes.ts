@@ -1,5 +1,5 @@
 import type {Actor} from "@/lib/membership/lifecycle";
-import {createFakeRepositories as makeRepositories} from "@/lib/db/repos/fakes";
+import {createFakeRepositories as makeRepositories} from "@/tests/helpers/repository-fakes";
 
 export const actorFor = (userId: string, companyRoles?: Readonly<Record<string, "owner" | "admin" | "member">>): Actor => ({
   kind: "member",

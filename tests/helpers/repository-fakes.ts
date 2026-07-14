@@ -10,6 +10,7 @@ type FakeProfile = {
   onboardingState: string;
   directoryVisible: boolean;
 };
+type FakeCompany = {id: string; legalName: string; displayName: string; directoryVisible: boolean};
 type FakeMembership = {
   id: string;
   ownerUserId: string | null;
@@ -18,17 +19,24 @@ type FakeMembership = {
   status: "pending_payment" | "pending_review" | "active" | "past_due" | "cancel_at_period_end" | "cancelled" | "expired";
   seatLimit: number;
 };
+type FakeApplication = {id: string; applicantUserId: string; companyId: string | null; planCode: FakeMembership["planCode"]; status: "draft" | "pending_payment" | "pending_review" | "completed" | "abandoned"};
 type FakeCompanyMember = {id: string; companyId: string; userId: string; role: "owner" | "admin" | "member"; revokedAt: string | null};
 type FakeJob = {id: string; runKey: string; kind: string; state: "processing" | "completed" | "failed"; attemptCount: number; lastError: string | null};
 
 export type FakeRepositorySeed = {
   profiles?: Partial<FakeProfile>[];
+  companies?: Partial<FakeCompany>[];
   memberships?: Partial<FakeMembership>[];
+  applications?: Partial<FakeApplication>[];
   companyMembers?: FakeCompanyMember[];
 };
 
 function deny(): never {
   throw new AuthorizationError();
+}
+
+function hasTenantTarget(input: object): boolean {
+  return Object.prototype.hasOwnProperty.call(input, "ownerUserId") || Object.prototype.hasOwnProperty.call(input, "companyId");
 }
 
 export function createFakeRepositories(seed: FakeRepositorySeed = {}) {
@@ -44,6 +52,15 @@ export function createFakeRepositories(seed: FakeRepositorySeed = {}) {
     onboardingState: profile.onboardingState ?? "profile",
     directoryVisible: profile.directoryVisible ?? false,
   }));
+  const companies: FakeCompany[] = (seed.companies ?? [
+    {id: "company-a", legalName: "Company A", displayName: "Company A", directoryVisible: false},
+    {id: "company-b", legalName: "Company B", displayName: "Company B", directoryVisible: false},
+  ]).map((company, index) => ({
+    id: company.id ?? `company-${index + 1}`,
+    legalName: company.legalName ?? "Company",
+    displayName: company.displayName ?? "Company",
+    directoryVisible: company.directoryVisible ?? false,
+  }));
   const memberships: FakeMembership[] = (seed.memberships ?? []).map((membership, index) => ({
     id: membership.id ?? `membership-${index + 1}`,
     ownerUserId: membership.ownerUserId ?? null,
@@ -52,14 +69,26 @@ export function createFakeRepositories(seed: FakeRepositorySeed = {}) {
     status: membership.status ?? "pending_payment",
     seatLimit: membership.seatLimit ?? 0,
   }));
+  const applications: FakeApplication[] = (seed.applications ?? [
+    {id: "application-a", applicantUserId: "user-a", companyId: "company-a", planCode: "corporate", status: "draft"},
+  ]).map((application, index) => ({
+    id: application.id ?? `application-${index + 1}`,
+    applicantUserId: application.applicantUserId ?? "user-a",
+    companyId: application.companyId ?? null,
+    planCode: application.planCode ?? "corporate",
+    status: application.status ?? "draft",
+  }));
   const companyMembers = [...(seed.companyMembers ?? [])];
   const jobs: FakeJob[] = [];
 
+  const isCompanyMember = (actor: Actor, companyId: string | null) =>
+    actor.kind === "system" ||
+    (actor.kind === "member" && companyId !== null && companyMembers.some((member) => member.companyId === companyId && member.userId === actor.userId && member.revokedAt === null));
   const canReadMembership = (actor: Actor, membership: FakeMembership) =>
     actor.kind === "system" ||
-    (actor.kind === "member" &&
-      (membership.ownerUserId === actor.userId ||
-        (membership.companyId !== null && companyMembers.some((member) => member.companyId === membership.companyId && member.userId === actor.userId && member.revokedAt === null))));
+    (actor.kind === "member" && (membership.ownerUserId === actor.userId || isCompanyMember(actor, membership.companyId)));
+  const canReadApplication = (actor: Actor, application: FakeApplication) =>
+    actor.kind === "system" || (actor.kind === "member" && (application.applicantUserId === actor.userId || isCompanyMember(actor, application.companyId)));
 
   return {
     profiles: {
@@ -76,6 +105,20 @@ export function createFakeRepositories(seed: FakeRepositorySeed = {}) {
         return profile;
       },
     },
+    companies: {
+      async getById(actor: Actor, companyId: string) {
+        const company = companies.find((candidate) => candidate.id === companyId);
+        if (!company) return null;
+        if (actor.kind === "anonymous" && !company.directoryVisible) deny();
+        if (actor.kind === "member" && !isCompanyMember(actor, companyId)) deny();
+        return company;
+      },
+      async remove(actor: Actor, companyId: string) {
+        if (actor.kind !== "system" && (actor.kind !== "member" || !isCompanyMember(actor, companyId))) deny();
+        const index = companies.findIndex((company) => company.id === companyId);
+        if (index >= 0) companies.splice(index, 1);
+      },
+    },
     memberships: {
       async getById(actor: Actor, membershipId: string) {
         const membership = memberships.find((candidate) => candidate.id === membershipId);
@@ -84,6 +127,27 @@ export function createFakeRepositories(seed: FakeRepositorySeed = {}) {
       },
       async list(actor: Actor) {
         return memberships.filter((membership) => canReadMembership(actor, membership));
+      },
+      async update(actor: Actor, membershipId: string, input: Partial<FakeMembership>) {
+        if (hasTenantTarget(input)) deny();
+        const membership = memberships.find((candidate) => candidate.id === membershipId);
+        if (!membership || !canReadMembership(actor, membership)) deny();
+        Object.assign(membership, input);
+        return membership;
+      },
+    },
+    applications: {
+      async getById(actor: Actor, applicationId: string) {
+        const application = applications.find((candidate) => candidate.id === applicationId);
+        if (!application || !canReadApplication(actor, application)) deny();
+        return application;
+      },
+      async update(actor: Actor, applicationId: string, input: Partial<FakeApplication>) {
+        if (Object.prototype.hasOwnProperty.call(input, "companyId")) deny();
+        const application = applications.find((candidate) => candidate.id === applicationId);
+        if (!application || !canReadApplication(actor, application)) deny();
+        Object.assign(application, input);
+        return application;
       },
     },
     jobs: {

@@ -1,3 +1,5 @@
+import "server-only";
+
 import type {Actor} from "@/lib/membership/lifecycle";
 
 export type Database = typeof import("@/lib/db/client").db;

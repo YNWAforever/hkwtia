@@ -1,3 +1,5 @@
+import "server-only";
+
 import {and, eq, exists, or, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";
@@ -5,7 +7,7 @@ import {companyMembers, memberships as membershipsTable, type Membership} from "
 import {forbidden, getDb} from "@/lib/db/repos/common";
 
 export type MembershipInput = Pick<Membership, "planCode" | "seatLimit"> & Partial<Pick<Membership, "ownerUserId" | "companyId" | "status" | "stripeCustomerId" | "stripeSubscriptionId" | "billingPeriodStart" | "billingPeriodEnd" | "cancelAtPeriodEnd">>;
-export type MembershipUpdate = Partial<MembershipInput>;
+export type MembershipUpdate = Partial<Pick<Membership, "planCode" | "status" | "seatLimit" | "stripeCustomerId" | "stripeSubscriptionId" | "billingPeriodStart" | "billingPeriodEnd" | "cancelAtPeriodEnd">>;
 
 function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
   return exists(
@@ -51,6 +53,7 @@ export const membershipsRepository = {
 
   async update(actor: Actor, membershipId: string, input: MembershipUpdate): Promise<Membership | null> {
     if (actor.kind === "anonymous") forbidden();
+    if (Object.prototype.hasOwnProperty.call(input, "ownerUserId") || Object.prototype.hasOwnProperty.call(input, "companyId")) forbidden();
     const db = await getDb();
     const rows = await db.update(membershipsTable).set({...input, updatedAt: new Date()}).where(membershipScope(actor, membershipId)).returning();
     if (!rows[0] && actor.kind === "member") forbidden();

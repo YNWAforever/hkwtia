@@ -1,3 +1,5 @@
+import "server-only";
+
 import {and, eq, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";

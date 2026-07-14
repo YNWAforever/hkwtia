@@ -1,3 +1,5 @@
+import "server-only";
+
 export {profiles, profilesRepo, profilesRepository} from "./profiles";
 export {companies, companiesRepo, companiesRepository} from "./companies";
 export {memberships, membershipsRepo, membershipsRepository} from "./memberships";

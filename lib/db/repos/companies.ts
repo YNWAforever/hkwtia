@@ -1,3 +1,5 @@
+import "server-only";
+
 import {and, eq, exists, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";
@@ -14,7 +16,7 @@ function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
 }
 
 function companyScope(actor: Actor, companyId: string) {
-  if (actor.kind === "system") return sql`true`;
+  if (actor.kind === "system") return eq(companiesTable.id, companyId);
   if (actor.kind === "anonymous") return and(eq(companiesTable.id, companyId), eq(companiesTable.directoryVisible, true));
   return and(eq(companiesTable.id, companyId), companyMembershipScope(actor));
 }

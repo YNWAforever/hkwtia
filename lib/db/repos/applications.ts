@@ -1,3 +1,5 @@
+import "server-only";
+
 import {and, eq, exists, or, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";
@@ -5,7 +7,7 @@ import {companyMembers, membershipApplications as membershipApplicationsTable, t
 import {forbidden, getDb, requireMember} from "@/lib/db/repos/common";
 
 export type ApplicationInput = Pick<MembershipApplication, "planCode"> & Partial<Pick<MembershipApplication, "companyId" | "currentStep" | "status">>;
-export type ApplicationUpdate = Partial<ApplicationInput>;
+export type ApplicationUpdate = Partial<Pick<MembershipApplication, "planCode" | "currentStep" | "status">>;
 
 function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
   return exists(
@@ -44,6 +46,7 @@ export const applicationsRepository = {
 
   async update(actor: Actor, applicationId: string, input: ApplicationUpdate): Promise<MembershipApplication | null> {
     requireMember(actor);
+    if (Object.prototype.hasOwnProperty.call(input, "companyId")) forbidden();
     const db = await getDb();
     const rows = await db.update(membershipApplicationsTable).set({...input, updatedAt: new Date()}).where(applicationScope(actor, applicationId)).returning();
     if (!rows[0]) forbidden();
