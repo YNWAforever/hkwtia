@@ -74,3 +74,54 @@ Generated SQL inspection confirmed:
 
 - The company/member uniqueness is intentionally partial so revoked historical memberships can be retained while only one active row exists for a company/user pair.
 - No production database or credentials were accessed or changed.
+## Review fix: explicit server-only boundaries
+
+Added `import "server-only"` to `lib/db/schema.ts` and `lib/membership/lifecycle.ts` so database schema and authorization/lifecycle logic cannot be imported into client bundles. Vitest continues to use the existing test-only server-only shim.
+
+Post-fix verification (2026-07-14):
+
+```text
+npm.cmd test -- tests/unit/membership-lifecycle.test.ts tests/unit/schema-contract.test.ts
+Exit code: 0
+2 test files passed, 7 tests passed.
+
+npm.cmd test
+Exit code: 0
+13 test files passed, 27 tests passed.
+
+npm.cmd run lint
+Exit code: 0
+
+npm.cmd run typecheck
+Exit code: 0
+
+npx.cmd drizzle-kit check --config drizzle.config.ts
+Exit code: 0
+Everything's fine.
+```
+
+## Review fix: discriminated Actor contract
+
+Tightened `Actor` into a discriminated union: member actors require a non-null `userId`; anonymous actors require `userId: null`; system actors require `userId: null` and `source: "stripe-webhook"`. Added a focused `expectTypeOf` contract test consumed by Task 3 authorization code.
+
+Post-fix verification (2026-07-14):
+
+```text
+npm.cmd test -- tests/unit/membership-lifecycle.test.ts tests/unit/schema-contract.test.ts
+Exit code: 0
+2 test files passed, 8 tests passed.
+
+npm.cmd test
+Exit code: 0
+13 test files passed, 28 tests passed.
+
+npm.cmd run lint
+Exit code: 0
+
+npm.cmd run typecheck
+Exit code: 0
+
+npx.cmd drizzle-kit check --config drizzle.config.ts
+Exit code: 0
+Everything's fine.
+```

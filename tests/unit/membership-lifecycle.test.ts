@@ -1,6 +1,6 @@
-import {describe, expect, it} from "vitest";
+import {describe, expect, expectTypeOf, it} from "vitest";
 
-import {canTransitionMembership} from "@/lib/membership/lifecycle";
+import {canTransitionMembership, type Actor} from "@/lib/membership/lifecycle";
 
 describe("membership lifecycle", () => {
   it("allows paid membership to recover from past_due after invoice.paid", () => {
@@ -18,5 +18,12 @@ describe("membership lifecycle", () => {
   it("does not allow terminal memberships to be revived", () => {
     expect(canTransitionMembership("cancelled", "active")).toBe(false);
     expect(canTransitionMembership("expired", "active")).toBe(false);
+  });
+
+  it("requires identity invariants for member and webhook actors", () => {
+    expectTypeOf<Extract<Actor, {kind: "member"}>["userId"]>().toEqualTypeOf<string>();
+    expectTypeOf<Extract<Actor, {kind: "anonymous"}>["userId"]>().toEqualTypeOf<null>();
+    expectTypeOf<Extract<Actor, {kind: "system"}>["userId"]>().toEqualTypeOf<null>();
+    expectTypeOf<Extract<Actor, {kind: "system"}>["source"]>().toEqualTypeOf<"stripe-webhook">();
   });
 });

@@ -1,10 +1,15 @@
+import "server-only";
+
 /** The identity and authorization context supplied to actor-first services. */
-export interface Actor {
-  readonly userId: string | null;
-  readonly kind: "anonymous" | "member" | "system";
-  readonly source?: "stripe-webhook";
-  readonly companyRoles?: Readonly<Record<string, "owner" | "admin" | "member">>;
-}
+type CompanyRole = "owner" | "admin" | "member";
+type CompanyScopedActor = {
+  readonly companyRoles?: Readonly<Record<string, CompanyRole>>;
+};
+
+export type Actor =
+  | ({readonly kind: "anonymous"; readonly userId: null} & CompanyScopedActor)
+  | ({readonly kind: "member"; readonly userId: string} & CompanyScopedActor)
+  | {readonly kind: "system"; readonly userId: null; readonly source: "stripe-webhook"};
 
 export const MEMBERSHIP_STATUSES = [
   "pending_payment",
