@@ -1,5 +1,15 @@
 import "server-only";
 
+import {
+  MEMBERSHIP_PLAN_CODES,
+  MEMBERSHIP_STATUSES,
+  type MembershipPlanCode,
+  type MembershipStatus,
+} from "@/lib/membership/constants";
+
+export {MEMBERSHIP_PLAN_CODES, MEMBERSHIP_STATUSES};
+export type {MembershipPlanCode, MembershipStatus};
+
 /** The identity and authorization context supplied to actor-first services. */
 type CompanyRole = "owner" | "admin" | "member";
 type CompanyScopedActor = {
@@ -10,22 +20,6 @@ export type Actor =
   | ({readonly kind: "anonymous"; readonly userId: null} & CompanyScopedActor)
   | ({readonly kind: "member"; readonly userId: string} & CompanyScopedActor)
   | {readonly kind: "system"; readonly userId: null; readonly source: "stripe-webhook"};
-
-export const MEMBERSHIP_STATUSES = [
-  "pending_payment",
-  "pending_review",
-  "active",
-  "past_due",
-  "cancel_at_period_end",
-  "cancelled",
-  "expired",
-] as const;
-
-export type MembershipStatus = (typeof MEMBERSHIP_STATUSES)[number];
-
-export const MEMBERSHIP_PLAN_CODES = ["community", "startup", "corporate", "patron"] as const;
-
-export type MembershipPlanCode = (typeof MEMBERSHIP_PLAN_CODES)[number];
 
 export interface MembershipRecord {
   readonly id: string;

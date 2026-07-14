@@ -125,3 +125,33 @@ npx.cmd drizzle-kit check --config drizzle.config.ts
 Exit code: 0
 Everything's fine.
 ```
+
+## Review fix: Drizzle build-time schema boundary
+
+Moved table definitions to neutral `lib/db/schema-core.ts`; Drizzle Kit now loads that file directly. `lib/db/schema.ts` and `lib/db/server-schema.ts` are server-only runtime entrypoints that re-export the core, while schema consumers use the wrapper. Shared membership literals/types now live in `lib/membership/constants.ts` and are re-exported by the server-only lifecycle module. AGENTS.md documents the boundary.
+
+Post-fix verification (2026-07-14):
+
+```text
+npx.cmd drizzle-kit generate --config drizzle.config.ts
+Exit code: 0
+No schema changes, nothing to migrate.
+
+npx.cmd drizzle-kit check --config drizzle.config.ts
+Exit code: 0
+Everything's fine.
+
+npm.cmd test -- tests/unit/membership-lifecycle.test.ts tests/unit/schema-contract.test.ts
+Exit code: 0
+2 test files passed, 9 tests passed.
+
+npm.cmd test
+Exit code: 0
+13 test files passed, 29 tests passed.
+
+npm.cmd run lint
+Exit code: 0
+
+npm.cmd run typecheck
+Exit code: 0
+```

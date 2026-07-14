@@ -1,5 +1,7 @@
 import {describe, expect, it} from "vitest";
 
+import * as serverSchema from "@/lib/db/server-schema";
+
 import {
   auditEvents,
   companies,
@@ -10,7 +12,7 @@ import {
   memberships,
   profiles,
   seatInvitations,
-} from "@/lib/db/schema";
+} from "@/lib/db/server-schema";
 
 describe("membership schema contract", () => {
   it("defines all M1 application tables", () => {
@@ -35,5 +37,9 @@ describe("membership schema contract", () => {
     expect(memberships.companyId).toBeDefined();
     expect(memberships.ownerUserId).toBeDefined();
     expect(membershipPlans.code).toBeDefined();
+  });
+
+  it("exposes the Drizzle tables through the server-only runtime wrapper", () => {
+    expect(serverSchema.jobs).toBe(jobs);
   });
 });

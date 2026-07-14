@@ -7,6 +7,7 @@
 - Every user-visible string belongs in `messages/en.json` and `messages/zh-HK.json`; keep the bundles in parity.
 - Do not add secrets to source control. Use `.env.example` for names only and `process.env` at runtime.
 - Keep database and integration work server-side; M1 runtime configuration owns the Neon, Auth, and Stripe server credentials. Keep those modules server-only.
+- `lib/db/schema-core.ts` is Drizzle's build-time schema; runtime server code imports `lib/db/server-schema.ts`, and client modules never import the core directly.
 
 ## Commands
 
