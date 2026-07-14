@@ -15,6 +15,11 @@ function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
   );
 }
 
+function companyAccessScope(actor: Extract<Actor, {kind: "member"}>, companyId: string) {
+  return exists(
+    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companyId} AND ${companyMembers.userId} = ${actor.userId} AND ${companyMembers.revokedAt} IS NULL`,
+  );
+}
 function applicationScope(actor: Actor, applicationId: string) {
   if (actor.kind === "system") return and(eq(membershipApplicationsTable.id, applicationId), sql`true`);
   if (actor.kind === "anonymous") return sql`false`;
@@ -22,6 +27,17 @@ function applicationScope(actor: Actor, applicationId: string) {
 }
 
 export const applicationsRepository = {
+  async setCompany(actor: Actor, applicationId: string, companyId: string): Promise<MembershipApplication | null> {
+    requireMember(actor);
+    const db = await getDb();
+    const rows = await db
+      .update(membershipApplicationsTable)
+      .set({companyId, updatedAt: new Date()})
+      .where(and(eq(membershipApplicationsTable.id, applicationId), eq(membershipApplicationsTable.applicantUserId, actor.userId), companyAccessScope(actor, companyId)))
+      .returning();
+    if (!rows[0]) forbidden();
+    return rows[0] ?? null;
+  },
   async getById(actor: Actor, applicationId: string): Promise<MembershipApplication | null> {
     if (actor.kind === "anonymous") forbidden();
     const db = await getDb();

@@ -25,6 +25,7 @@ export interface MembershipRecord {
   readonly id: string;
   readonly ownerUserId: string | null;
   readonly companyId: string | null;
+  readonly applicationId?: string | null;
   readonly planCode: MembershipPlanCode;
   readonly status: MembershipStatus;
   readonly seatLimit: number;

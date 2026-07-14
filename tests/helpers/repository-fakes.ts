@@ -15,11 +15,12 @@ type FakeMembership = {
   id: string;
   ownerUserId: string | null;
   companyId: string | null;
+  applicationId: string | null;
   planCode: "community" | "startup" | "corporate" | "patron";
   status: "pending_payment" | "pending_review" | "active" | "past_due" | "cancel_at_period_end" | "cancelled" | "expired";
   seatLimit: number;
 };
-type FakeApplication = {id: string; applicantUserId: string; companyId: string | null; planCode: FakeMembership["planCode"]; status: "draft" | "pending_payment" | "pending_review" | "completed" | "abandoned"};
+type FakeApplication = {id: string; applicantUserId: string; companyId: string | null; currentStep: "profile" | "company" | "checkout" | "complete" | "review"; planCode: FakeMembership["planCode"]; status: "draft" | "pending_payment" | "pending_review" | "completed" | "abandoned"};
 type FakeCompanyMember = {id: string; companyId: string; userId: string; role: "owner" | "admin" | "member"; revokedAt: string | null};
 type FakeJob = {id: string; runKey: string; kind: string; state: "processing" | "completed" | "failed"; attemptCount: number; lastError: string | null};
 
@@ -36,7 +37,7 @@ function deny(): never {
 }
 
 function hasTenantTarget(input: object): boolean {
-  return Object.prototype.hasOwnProperty.call(input, "ownerUserId") || Object.prototype.hasOwnProperty.call(input, "companyId");
+  return Object.prototype.hasOwnProperty.call(input, "ownerUserId") || Object.prototype.hasOwnProperty.call(input, "companyId") || Object.prototype.hasOwnProperty.call(input, "applicationId");
 }
 
 export function createFakeRepositories(seed: FakeRepositorySeed = {}) {
@@ -65,16 +66,18 @@ export function createFakeRepositories(seed: FakeRepositorySeed = {}) {
     id: membership.id ?? `membership-${index + 1}`,
     ownerUserId: membership.ownerUserId ?? null,
     companyId: membership.companyId ?? null,
+    applicationId: membership.applicationId ?? null,
     planCode: membership.planCode ?? "corporate",
     status: membership.status ?? "pending_payment",
     seatLimit: membership.seatLimit ?? 0,
   }));
   const applications: FakeApplication[] = (seed.applications ?? [
-    {id: "application-a", applicantUserId: "user-a", companyId: "company-a", planCode: "corporate", status: "draft"},
+    {id: "application-a", applicantUserId: "user-a", companyId: "company-a", planCode: "corporate", currentStep: "profile", status: "draft"},
   ]).map((application, index) => ({
     id: application.id ?? `application-${index + 1}`,
     applicantUserId: application.applicantUserId ?? "user-a",
     companyId: application.companyId ?? null,
+    currentStep: application.currentStep ?? "profile",
     planCode: application.planCode ?? "corporate",
     status: application.status ?? "draft",
   }));
@@ -92,7 +95,17 @@ export function createFakeRepositories(seed: FakeRepositorySeed = {}) {
 
   return {
     profiles: {
-      async getById(actor: Actor, userId: string) {
+      async ensure(actor: Actor, input: Pick<FakeProfile, "id" | "displayName"> & Partial<Pick<FakeProfile, "locale" | "onboardingState">>) {
+        if (actor.kind !== "member" || actor.userId !== input.id) deny();
+        const current = profiles.find((profile) => profile.id === input.id);
+        if (current) {
+          Object.assign(current, input);
+          return current;
+        }
+        const created: FakeProfile = {id: input.id, displayName: input.displayName, phone: null, jobTitle: null, locale: input.locale ?? "en", onboardingState: input.onboardingState ?? "profile", directoryVisible: false};
+        profiles.push(created);
+        return created;
+      },      async getById(actor: Actor, userId: string) {
         if (actor.kind === "member" && actor.userId !== userId) deny();
         if (actor.kind === "anonymous") return profiles.find((profile) => profile.id === userId && profile.directoryVisible) ?? null;
         return profiles.find((profile) => profile.id === userId) ?? null;
@@ -120,7 +133,19 @@ export function createFakeRepositories(seed: FakeRepositorySeed = {}) {
       },
     },
     memberships: {
-      async getById(actor: Actor, membershipId: string) {
+      async create(actor: Actor, input: Partial<FakeMembership> & Pick<FakeMembership, "planCode" | "seatLimit">) {
+        if (actor.kind !== "member") deny();
+        if (input.ownerUserId !== actor.userId && input.companyId !== null && !isCompanyMember(actor, input.companyId ?? null)) deny();
+        const membership: FakeMembership = {id: `membership-${memberships.length + 1}`, ownerUserId: input.ownerUserId ?? null, companyId: input.companyId ?? null, applicationId: input.applicationId ?? null, planCode: input.planCode, status: input.status ?? "pending_payment", seatLimit: input.seatLimit};
+        if (membership.applicationId && memberships.some((candidate) => candidate.applicationId === membership.applicationId)) throw new Error("UNIQUE_APPLICATION_MEMBERSHIP");
+        memberships.push(membership);
+        return membership;
+      },      async getByApplicationId(actor: Actor, applicationId: string) {
+        const membership = memberships.find((candidate) => candidate.applicationId === applicationId);
+        if (!membership) return null;
+        if (!canReadMembership(actor, membership)) deny();
+        return membership;
+      },      async getById(actor: Actor, membershipId: string) {
         const membership = memberships.find((candidate) => candidate.id === membershipId);
         if (!membership || !canReadMembership(actor, membership)) deny();
         return membership;
@@ -137,7 +162,19 @@ export function createFakeRepositories(seed: FakeRepositorySeed = {}) {
       },
     },
     applications: {
-      async getById(actor: Actor, applicationId: string) {
+      async create(actor: Actor, input: Partial<FakeApplication> & Pick<FakeApplication, "planCode">) {
+        if (actor.kind !== "member") deny();
+        const application: FakeApplication = {id: `application-${applications.length + 1}`, applicantUserId: actor.userId, companyId: input.companyId ?? null, currentStep: input.currentStep ?? "profile", planCode: input.planCode, status: input.status ?? "draft"};
+        applications.push(application);
+        return application;
+      },
+      async setCompany(actor: Actor, applicationId: string, companyId: string) {
+        if (actor.kind !== "member" || !isCompanyMember(actor, companyId)) deny();
+        const application = applications.find((candidate) => candidate.id === applicationId);
+        if (!application || application.applicantUserId !== actor.userId) deny();
+        application.companyId = companyId;
+        return application;
+      },      async getById(actor: Actor, applicationId: string) {
         const application = applications.find((candidate) => candidate.id === applicationId);
         if (!application || !canReadApplication(actor, application)) deny();
         return application;

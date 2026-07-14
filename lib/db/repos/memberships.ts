@@ -6,7 +6,7 @@ import type {Actor} from "@/lib/membership/lifecycle";
 import {companyMembers, memberships as membershipsTable, type Membership} from "@/lib/db/server-schema";
 import {forbidden, getDb} from "@/lib/db/repos/common";
 
-export type MembershipInput = Pick<Membership, "planCode" | "seatLimit"> & Partial<Pick<Membership, "ownerUserId" | "companyId" | "status" | "stripeCustomerId" | "stripeSubscriptionId" | "billingPeriodStart" | "billingPeriodEnd" | "cancelAtPeriodEnd">>;
+export type MembershipInput = Pick<Membership, "planCode" | "seatLimit"> & Partial<Pick<Membership, "ownerUserId" | "companyId" | "applicationId" | "status" | "stripeCustomerId" | "stripeSubscriptionId" | "billingPeriodStart" | "billingPeriodEnd" | "cancelAtPeriodEnd">>;
 export type MembershipUpdate = Partial<Pick<Membership, "planCode" | "status" | "seatLimit" | "stripeCustomerId" | "stripeSubscriptionId" | "billingPeriodStart" | "billingPeriodEnd" | "cancelAtPeriodEnd">>;
 
 function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
@@ -15,6 +15,11 @@ function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
   );
 }
 
+function companyAccessScope(actor: Extract<Actor, {kind: "member"}>, companyId: string) {
+  return exists(
+    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companyId} AND ${companyMembers.userId} = ${actor.userId} AND ${companyMembers.revokedAt} IS NULL`,
+  );
+}
 function membershipScope(actor: Actor, membershipId: string) {
   if (actor.kind === "system") return and(eq(membershipsTable.id, membershipId), sql`true`);
   if (actor.kind === "anonymous") return sql`false`;
@@ -25,6 +30,18 @@ function membershipScope(actor: Actor, membershipId: string) {
 }
 
 export const membershipsRepository = {
+  async getByApplicationId(actor: Actor, applicationId: string): Promise<Membership | null> {
+    if (actor.kind === "anonymous") forbidden();
+    const db = await getDb();
+    const where = actor.kind === "system"
+      ? and(eq(membershipsTable.applicationId, applicationId), sql`true`)
+      : and(
+          eq(membershipsTable.applicationId, applicationId),
+          or(eq(membershipsTable.ownerUserId, actor.userId), and(sql`${membershipsTable.companyId} IS NOT NULL`, companyMembershipScope(actor))),
+        );
+    const rows = await db.select().from(membershipsTable).where(where).limit(1);
+    return rows[0] ?? null;
+  },
   async getById(actor: Actor, membershipId: string): Promise<Membership | null> {
     if (actor.kind === "anonymous") forbidden();
     const db = await getDb();
@@ -45,7 +62,11 @@ export const membershipsRepository = {
 
   async create(actor: Actor, input: MembershipInput): Promise<Membership> {
     if (actor.kind === "anonymous") forbidden();
-    if (actor.kind === "member" && input.ownerUserId !== actor.userId) forbidden();
+    if (actor.kind === "member") {
+      if (input.ownerUserId !== null && input.ownerUserId !== undefined && input.ownerUserId !== actor.userId) forbidden();
+      if (input.companyId && !companyAccessScope(actor, input.companyId)) forbidden();
+      if (!input.ownerUserId && !input.companyId) forbidden();
+    }
     const db = await getDb();
     const rows = await db.insert(membershipsTable).values(input).returning();
     return rows[0];

@@ -1,0 +1,3 @@
+ALTER TABLE "memberships" ADD COLUMN "application_id" uuid;--> statement-breakpoint
+ALTER TABLE "memberships" ADD CONSTRAINT "memberships_application_id_membership_applications_id_fk" FOREIGN KEY ("application_id") REFERENCES "public"."membership_applications"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE UNIQUE INDEX "memberships_application_unique" ON "memberships" USING btree ("application_id") WHERE "memberships"."application_id" IS NOT NULL;

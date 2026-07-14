@@ -81,3 +81,59 @@ git diff --check       # exit 0
   6 should resolve configured test-mode prices without adding secrets here.
 - The completion service accepts optional repository adapters for deterministic
   tests; production callers should use the default actor-scoped repositories.
+
+## Review fixes
+
+RED command:
+
+```text
+npm.cmd test -- tests/unit/join-service-review.test.ts
+```
+
+Result before fixes: exit 1, four failures covering missing profile bootstrap,
+unvalidated company targeting, missing company persistence, and a resumed
+pending-payment application that lost its checkout command.
+
+The fix adds actor-scoped profile bootstrap, validates company-plan audience
+and company membership, persists the application company, and links each
+membership to a unique `application_id`. Resume paths now load that durable
+membership and return the same membership/checkout command instead of creating
+a duplicate. The new additive migration is `drizzle/0002_rich_lester.sql`.
+
+Post-fix verification performed by the implementer:
+
+```text
+npm.cmd test -- tests/unit/join-service.test.ts tests/unit/join-schema.test.ts tests/unit/join-service-review.test.ts
+Exit code: 0
+3 test files passed, 11 tests passed.
+
+npm.cmd run lint
+Exit code: 0
+
+npm.cmd run typecheck
+Exit code: 0
+
+npx.cmd drizzle-kit check --config drizzle.config.ts
+Exit code: 0
+
+npx.cmd drizzle-kit generate --config drizzle.config.ts
+Exit code: 0
+No schema changes, nothing to migrate.
+```
+
+## Parent verification
+
+After resuming the linked worktree, the parent controller reran the complete
+unit suite and static gates on the final review-fix tree:
+
+```text
+npm.cmd test
+Exit code: 0
+19 test files passed, 53 tests passed.
+
+npm.cmd run lint
+Exit code: 0
+
+npm.cmd run typecheck
+Exit code: 0
+```

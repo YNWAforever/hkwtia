@@ -151,6 +151,7 @@ export const memberships = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     ownerUserId: text("owner_user_id").references(() => profiles.id, {onDelete: "cascade"}),
     companyId: uuid("company_id").references(() => companies.id, {onDelete: "cascade"}),
+    applicationId: uuid("application_id").references(() => membershipApplications.id, {onDelete: "cascade"}),
     planCode: membershipPlanCodeEnum("plan_code")
       .notNull()
       .references(() => membershipPlans.code, {onDelete: "restrict"}),
@@ -173,6 +174,9 @@ export const memberships = pgTable(
     uniqueIndex("memberships_stripe_subscription_unique")
       .on(table.stripeSubscriptionId)
       .where(sql`${table.stripeSubscriptionId} IS NOT NULL`),
+    uniqueIndex("memberships_application_unique")
+      .on(table.applicationId)
+      .where(sql`${table.applicationId} IS NOT NULL`),
     index("memberships_owner_idx").on(table.ownerUserId),
     index("memberships_company_idx").on(table.companyId),
   ],

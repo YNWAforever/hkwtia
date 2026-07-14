@@ -16,6 +16,17 @@ function profileScope(actor: Actor, userId: string) {
 }
 
 export const profilesRepository = {
+  async ensure(actor: Actor, input: ProfileInput): Promise<Profile> {
+    requireMember(actor);
+    if (actor.userId !== input.id) forbidden();
+    const db = await getDb();
+    const rows = await db
+      .insert(profilesTable)
+      .values(input)
+      .onConflictDoUpdate({target: profilesTable.id, set: {...input, updatedAt: new Date()}})
+      .returning();
+    return rows[0];
+  },
   async getById(actor: Actor, userId: string): Promise<Profile | null> {
     if (actor.kind === "member" && actor.userId !== userId) forbidden();
     if (actor.kind === "anonymous") {

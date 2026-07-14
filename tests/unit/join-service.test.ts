@@ -109,7 +109,7 @@ describe("membership join orchestration", () => {
       {
         plan: "corporate",
         profile: {displayName: "Corporate Member"},
-        company: {legalName: "Corporate Ltd", displayName: "Corporate"},
+        company: {id: "company-a", legalName: "Corporate Ltd", displayName: "Corporate"},
       },
       deps,
     );
