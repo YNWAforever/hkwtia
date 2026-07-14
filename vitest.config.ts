@@ -10,6 +10,6 @@ export default defineConfig({
     include: ["tests/unit/**/*.{test,spec}.{ts,tsx}"],
   },
   resolve: {
-    alias: {"@": path.resolve(__dirname, "."), "server-only": path.resolve(__dirname, "tests/server-only.ts")},
+    alias: {"@": path.resolve(__dirname, "."), "server-only": path.resolve(__dirname, "tests/server-only.ts"), "next/headers": path.resolve(__dirname, "node_modules/next/headers.js"), "@neondatabase/auth/next/server": path.resolve(__dirname, "tests/neon-auth-server.ts")},
   },
 });
