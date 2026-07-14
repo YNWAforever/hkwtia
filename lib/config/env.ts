@@ -1,3 +1,5 @@
+import "server-only";
+
 export interface ServerEnv {
   databaseUrl: string;
   neonAuthBaseUrl: string;

@@ -10,6 +10,6 @@ export default defineConfig({
     include: ["tests/unit/**/*.{test,spec}.{ts,tsx}"],
   },
   resolve: {
-    alias: {"@": path.resolve(__dirname, ".")},
+    alias: {"@": path.resolve(__dirname, "."), "server-only": path.resolve(__dirname, "tests/server-only.ts")},
   },
 });

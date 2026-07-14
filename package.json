@@ -14,7 +14,7 @@
     "test:e2e": "playwright test",
     "test:lighthouse": "lhci autorun",
     "audit:strings": "node scripts/audit-visible-strings.mjs",
-    "db:migrate": "drizzle-kit migrate --config=drizzle.config.ts",
+    "db:migrate": "node --experimental-strip-types scripts/db-migrate.ts",
     "db:seed": "node --experimental-strip-types scripts/db-seed.ts"
   },
   "dependencies": {
@@ -65,6 +65,7 @@
     "react-resizable-panels": "^2.1.9",
     "recharts": "^2.15.4",
     "schema-dts": "^2.0.0",
+    "server-only": "^0.0.1",
     "sonner": "^1.7.4",
     "stripe": "^22.3.1",
     "tailwind-merge": "^2.6.0",

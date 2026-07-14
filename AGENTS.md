@@ -6,7 +6,7 @@
 - Server Components are the default. Add `'use client'` only for interactive browser behavior.
 - Every user-visible string belongs in `messages/en.json` and `messages/zh-HK.json`; keep the bundles in parity.
 - Do not add secrets to source control. Use `.env.example` for names only and `process.env` at runtime.
-- Keep database and integration work server-side; M0 is intentionally static and has no Neon, Auth, Stripe, or AI runtime.
+- Keep database and integration work server-side; M1 runtime configuration owns the Neon, Auth, and Stripe server credentials. Keep those modules server-only.
 
 ## Commands
 
@@ -23,7 +23,7 @@ npm run db:migrate
 npm run db:seed
 ```
 
-`db:migrate` and `db:seed` remain M1 placeholders until the Neon repository layer is implemented.
+`db:migrate` runs Drizzle migrations through `scripts/db-migrate.ts`; `db:seed` runs `scripts/db-seed.ts` and remains intentionally empty until Task 11 adds schema-backed seed rows. Keep `DATABASE_URL` in the environment and never print it.
 
 ## Conventions
 
@@ -36,6 +36,7 @@ npm run db:seed
 ## Changelog
 
 - M0: public bilingual route surface, metadata, structured data, crawler endpoints, translation parity, and accessibility gates.
+- M1 Task 1: server-only runtime configuration, Neon/Drizzle client foundation, and non-placeholder database commands.
 
 <!-- codebase-memory-mcp:start -->
 # Codebase Knowledge Graph (codebase-memory-mcp)

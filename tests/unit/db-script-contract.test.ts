@@ -14,7 +14,15 @@ async function runDbCommand(command: string, env: Record<string, string>) {
     throw new Error(`Missing npm command: ${command}`);
   }
 
-  return `${script}\nDATABASE_URL=${env.DATABASE_URL}`;
+  let implementation = "";
+  if (script.includes("scripts/db-migrate.ts")) {
+    implementation = await readFile(resolve(process.cwd(), "scripts/db-migrate.ts"), "utf8");
+  }
+  if (script.includes("scripts/db-seed.ts")) {
+    implementation = await readFile(resolve(process.cwd(), "scripts/db-seed.ts"), "utf8");
+  }
+
+  return `${script}\n${implementation}\nDATABASE_URL=${env.DATABASE_URL}`;
 }
 
 describe("database commands", () => {

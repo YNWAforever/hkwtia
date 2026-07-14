@@ -51,3 +51,33 @@ npm.cmd test           # 11 files, 19 tests passed
 - The seed command intentionally has no schema rows yet; Task 2/Task 11 will add the migration-backed seed implementation.
 - `drizzle-kit migrate` will require the schema introduced by Task 2 before it can apply a real migration.
 - Existing npm installation regenerated a large `package-lock.json` dependency graph while adding the requested packages.
+
+## Fixes after review
+
+- Updated `AGENTS.md` Stack, Commands, and Changelog entries to document the M1 Neon/Drizzle runtime and the current Windows-safe database command wiring. `db:seed` remains an explicit no-op until Task 11 adds schema-backed seed rows.
+- Added explicit `import "server-only";` boundaries to `lib/config/env.ts` and `lib/db/client.ts`, plus the direct `server-only` dependency required by those imports. Vitest uses a test-only shim so the server boundary remains enforced in application code without breaking unit-test imports.
+- Wired `db:migrate` through `scripts/db-migrate.ts`; the wrapper selects `drizzle-kit.cmd` on Windows and `drizzle-kit` elsewhere. The reviewer's unused-script concern is therefore resolved without expanding seed scope.
+
+Verification after fixes:
+
+```text
+npm.cmd test -- tests/unit/env-contract.test.ts tests/unit/db-script-contract.test.ts
+> hkwtia-platform@0.0.0 test
+> vitest run tests/unit/env-contract.test.ts tests/unit/db-script-contract.test.ts
+Test Files  2 passed (2)
+Tests       6 passed (6)
+
+npm.cmd test
+> hkwtia-platform@0.0.0 test
+> vitest run
+Test Files  11 passed (11)
+Tests       19 passed (19)
+
+npm.cmd run lint
+> hkwtia-platform@0.0.0 lint
+> eslint .
+
+npm.cmd run typecheck
+> hkwtia-platform@0.0.0 typecheck
+> tsc --noEmit
+```
