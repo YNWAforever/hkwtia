@@ -16,10 +16,22 @@ function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
   );
 }
 
+function companyManagementScope(actor: Extract<Actor, {kind: "member"}>) {
+  return exists(
+    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companiesTable.id} AND ${companyMembers.userId} = ${actor.userId} AND (${companyMembers.role} = ${"owner"} OR ${companyMembers.role} = ${"admin"}) AND ${companyMembers.revokedAt} IS NULL`,
+  );
+}
+
 function companyScope(actor: Actor, companyId: string) {
   if (actor.kind === "system") return eq(companiesTable.id, companyId);
   if (actor.kind === "anonymous") return and(eq(companiesTable.id, companyId), eq(companiesTable.directoryVisible, true));
   return and(eq(companiesTable.id, companyId), companyMembershipScope(actor));
+}
+
+function companyMutationScope(actor: Actor, companyId: string) {
+  if (actor.kind === "system") return eq(companiesTable.id, companyId);
+  if (actor.kind === "anonymous") return sql`false`;
+  return and(eq(companiesTable.id, companyId), companyManagementScope(actor));
 }
 
 export const companiesRepository = {
@@ -99,9 +111,9 @@ export const companiesRepository = {
   },
 
   async update(actor: Actor, companyId: string, input: CompanyUpdate): Promise<Company | null> {
-    requireMember(actor);
+    if (actor.kind === "anonymous") forbidden();
     const db = await getDb();
-    const rows = await db.update(companiesTable).set({...input, updatedAt: new Date()}).where(companyScope(actor, companyId)).returning();
+    const rows = await db.update(companiesTable).set({...input, updatedAt: new Date()}).where(companyMutationScope(actor, companyId)).returning();
     if (!rows[0]) forbidden();
     return rows[0] ?? null;
   },

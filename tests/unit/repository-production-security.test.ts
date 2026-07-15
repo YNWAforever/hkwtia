@@ -43,6 +43,20 @@ const existingProfileRow = [
   new Date("2026-01-01T00:00:00.000Z"),
 ];
 
+const companyRow = [
+  "company-b",
+  "Acme Limited",
+  "Acme",
+  null,
+  null,
+  null,
+  null,
+  null,
+  false,
+  new Date("2026-01-01T00:00:00.000Z"),
+  new Date("2026-01-01T00:00:00.000Z"),
+];
+
 const applicationRow = (overrides: {
   applicantUserId?: string;
   companyId?: string | null;
@@ -298,5 +312,55 @@ describe("production repository security boundaries", () => {
     expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
     expect(results.filter((result) => result.status === "rejected")).toHaveLength(1);
     await expect(Promise.reject((results.find((result) => result.status === "rejected") as PromiseRejectedResult).reason)).rejects.toThrow("APPLICATION_COMPANY_CONFLICT");
+  });
+
+  it("denies an ordinary active company member from updating company data", async () => {
+    const statements: string[] = [];
+    const parameters: unknown[][] = [];
+    database.current = drizzle(async (query, params) => {
+      statements.push(query);
+      parameters.push(params);
+      return {rows: []};
+    });
+
+    await expect(companiesRepository.update(actor, "company-b", {displayName: "Attacker Rename"})).rejects.toThrow("FORBIDDEN");
+
+    const sql = statements.join("\n").toLowerCase();
+    expect(sql).toContain('from "company_members"');
+    expect(sql).toContain('"role"');
+    expect(sql).toContain('"revoked_at"');
+    expect(parameters.flat()).toEqual(expect.arrayContaining(["owner", "admin"]));
+  });
+
+  it.each(["owner", "admin"] as const)("allows an active %s to update company data", async () => {
+    const statements: string[] = [];
+    const parameters: unknown[][] = [];
+    database.current = drizzle(async (query, params) => {
+      statements.push(query);
+      parameters.push(params);
+      return {rows: [companyRow]};
+    });
+
+    await expect(companiesRepository.update(actor, "company-b", {displayName: "Acme Updated"})).resolves.toMatchObject({
+      id: "company-b",
+      displayName: "Acme",
+    });
+    const sql = statements.join("\n").toLowerCase();
+    expect(sql).toContain('from "company_members"');
+    expect(sql).toContain('"role"');
+    expect(parameters.flat()).toEqual(expect.arrayContaining(["owner", "admin"]));
+  });
+
+  it("preserves system company updates without member-role scoping", async () => {
+    const statements: string[] = [];
+    database.current = drizzle(async (query) => {
+      statements.push(query);
+      return {rows: [companyRow]};
+    });
+
+    await expect(companiesRepository.update({kind: "system", userId: null, source: "stripe-webhook"}, "company-b", {
+      displayName: "Acme Updated",
+    })).resolves.toMatchObject({id: "company-b"});
+    expect(statements.join("\n").toLowerCase()).not.toContain('from "company_members"');
   });
 });

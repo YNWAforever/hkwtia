@@ -108,7 +108,7 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
     const actor = await requireActor();
     if (actor.kind !== "member") return {message: t("errors.auth")};
     const application = await applicationsRepository.getById(actor, applicationId);
-    if (!application || application.planCode !== plan) return {message: t("errors.save")};
+    if (!application || application.planCode !== plan || application.applicantUserId !== actor.userId) return {message: t("errors.save")};
     const company = application.companyId
       ? await companiesRepository.update(actor, application.companyId, parsed.data)
       : await companiesRepository.createForApplication(actor, applicationId, parsed.data);
