@@ -34,7 +34,7 @@ export type InvoiceRecord = Readonly<{
 }>;
 
 export interface StripeBillingAdapter {
-  createCheckoutSession(input: CheckoutSessionInput): Promise<{url: string}>;
+  createCheckoutSession(input: CheckoutSessionInput): Promise<{id: string; url: string}>;
   createBillingPortalSession(input: PortalSessionInput): Promise<{url: string}>;
   listInvoices(customerId: string): Promise<InvoiceRecord[]>;
 }
@@ -43,7 +43,7 @@ type StripeClient = {
   checkout: {sessions: {create(
     params: Stripe.Checkout.SessionCreateParams,
     options?: Stripe.RequestOptions,
-  ): Promise<Pick<Stripe.Checkout.Session, "url">>}};
+  ): Promise<Pick<Stripe.Checkout.Session, "id" | "url">>}};
   billingPortal: {sessions: {create(
     params: Stripe.BillingPortal.SessionCreateParams,
   ): Promise<Pick<Stripe.BillingPortal.Session, "url">>}};
@@ -65,7 +65,7 @@ export function createStripeBillingAdapter(client: StripeClient): StripeBillingA
         cancel_url: input.cancelUrl,
       }, {idempotencyKey: input.idempotencyKey});
       if (!session.url) throw new Error("STRIPE_CHECKOUT_URL_MISSING");
-      return {url: session.url};
+      return {id: session.id, url: session.url};
     },
 
     async createBillingPortalSession(input) {

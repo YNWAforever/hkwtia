@@ -2,6 +2,7 @@ import "server-only";
 
 import type {AppLocale} from "@/i18n/routing";
 import type {Actor, MembershipPlanCode, MembershipRecord} from "@/lib/membership/lifecycle";
+import {billingAttemptsRepository} from "@/lib/db/repos/billing-attempts";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {serverEnv} from "@/lib/config/env";
 import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
@@ -9,11 +10,13 @@ import {localizedPath} from "@/lib/urls";
 
 type MembershipReader = {
   getById(actor: Actor, membershipId: string): Promise<MembershipRecord | null>;
+  getBillingAccess(actor: Actor, membershipId: string): Promise<MembershipRecord | null>;
 };
 
 export type CheckoutDependencies = Readonly<{
   stripe: StripeBillingAdapter;
   memberships: MembershipReader;
+  attempts: Pick<typeof billingAttemptsRepository, "claimActive" | "getActive" | "attachSession" | "startNewAttempt">;
   appUrl: string;
   priceForPlan: (planCode: MembershipPlanCode) => string;
 }>;
@@ -23,6 +26,7 @@ function defaultDependencies(): CheckoutDependencies {
   return {
     stripe: stripeBillingAdapter(),
     memberships: membershipsRepository,
+    attempts: billingAttemptsRepository,
     appUrl: environment.appUrl,
     priceForPlan: (planCode) => {
       const price = planCode === "startup"
@@ -51,30 +55,13 @@ function requireMember(actor: Actor): asserts actor is Extract<Actor, {kind: "me
   if (actor.kind !== "member") throw new Error("FORBIDDEN");
 }
 
-function mayManageCompanyBilling(actor: Extract<Actor, {kind: "member"}>, companyId: string): boolean {
-  const role = actor.companyRoles?.[companyId];
-  return role === "owner" || role === "admin";
-}
-
-function authorizeBillingManager(actor: Actor, membership: MembershipRecord): void {
-  requireMember(actor);
-  if (membership.ownerUserId !== null) {
-    if (membership.ownerUserId !== actor.userId) throw new Error("FORBIDDEN");
-    return;
-  }
-  if (!membership.companyId || !mayManageCompanyBilling(actor, membership.companyId)) {
-    throw new Error("FORBIDDEN");
-  }
-}
-
 export async function getAuthorizedBillingMembership(
   actor: Actor,
   membershipId: string,
   dependencies: Pick<CheckoutDependencies, "memberships">,
 ): Promise<MembershipRecord> {
-  const membership = await dependencies.memberships.getById(actor, membershipId);
+  const membership = await dependencies.memberships.getBillingAccess(actor, membershipId);
   if (!membership) throw new Error("FORBIDDEN");
-  authorizeBillingManager(actor, membership);
   if (!membership.stripeCustomerId) throw new Error("STRIPE_CUSTOMER_NOT_CONFIGURED");
   return membership;
 }
@@ -95,11 +82,16 @@ export async function createCheckoutSession(
   if (!membership.applicationId) throw new Error("MEMBERSHIP_APPLICATION_REQUIRED");
 
   const origin = appOrigin(dependencies.appUrl);
+  const priceReference = dependencies.priceForPlan(membership.planCode);
+  const {attempt} = await dependencies.attempts.claimActive(actor, membership.id, priceReference);
+  if (attempt.checkoutUrl && attempt.stripeCheckoutSessionId) {
+    return {url: attempt.checkoutUrl};
+  }
   const opaqueMembershipId = encodeURIComponent(membership.id);
   const checkoutPath = localizedPath(locale, "/join/checkout");
   const completePath = localizedPath(locale, "/join/complete");
-  return dependencies.stripe.createCheckoutSession({
-    priceReference: dependencies.priceForPlan(membership.planCode),
+  const session = await dependencies.stripe.createCheckoutSession({
+    priceReference,
     clientReferenceId: membership.id,
     metadata: {
       membershipId: membership.id,
@@ -108,8 +100,32 @@ export async function createCheckoutSession(
     },
     successUrl: `${origin}${completePath}?membership_id=${opaqueMembershipId}&session_id={CHECKOUT_SESSION_ID}`,
     cancelUrl: `${origin}${checkoutPath}?membership_id=${opaqueMembershipId}`,
-    idempotencyKey: `membership-checkout:${membership.id}:initial`,
+    idempotencyKey: attempt.idempotencyKey,
   });
+  try {
+    await dependencies.attempts.attachSession(actor, attempt.id, {
+      stripeCheckoutSessionId: session.id,
+      checkoutUrl: session.url,
+    });
+  } catch {
+    const winner = await dependencies.attempts.getActive(actor, membership.id);
+    if (!winner?.checkoutUrl || !winner.stripeCheckoutSessionId) throw new Error("CHECKOUT_SESSION_PERSIST_FAILED");
+    return {url: winner.checkoutUrl};
+  }
+  return {url: session.url};
+}
+
+export async function startNewCheckoutAttempt(
+  actor: Actor,
+  membershipId: string,
+  locale: AppLocale,
+  reason: "abandoned" | "expired",
+  dependencies: CheckoutDependencies = defaultDependencies(),
+): Promise<{url: string}> {
+  const membership = await dependencies.memberships.getById(actor, membershipId);
+  if (!membership) throw new Error("FORBIDDEN");
+  await dependencies.attempts.startNewAttempt(actor, membershipId, dependencies.priceForPlan(membership.planCode), reason);
+  return createCheckoutSession(actor, membershipId, locale, dependencies);
 }
 
 export async function createBillingPortalSession(

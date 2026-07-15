@@ -42,12 +42,13 @@ export class FakeStripeBillingAdapter implements StripeBillingAdapter {
   readonly checkoutRequests: CheckoutSessionInput[] = [];
   readonly portalRequests: PortalSessionInput[] = [];
   invoices: InvoiceRecord[] = [];
+  checkoutSessionId = "cs_test_session";
   checkoutUrl = "https://checkout.stripe.test/session";
   portalUrl = "https://billing.stripe.test/session";
 
-  async createCheckoutSession(input: CheckoutSessionInput): Promise<{url: string}> {
+  async createCheckoutSession(input: CheckoutSessionInput): Promise<{id: string; url: string}> {
     this.checkoutRequests.push(structuredClone(input));
-    return {url: this.checkoutUrl};
+    return {id: this.checkoutSessionId, url: this.checkoutUrl};
   }
 
   async createBillingPortalSession(input: PortalSessionInput): Promise<{url: string}> {

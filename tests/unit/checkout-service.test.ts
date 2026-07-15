@@ -1,5 +1,8 @@
 import {describe, expect, it, vi} from "vitest";
 
+import type {Actor} from "@/lib/membership/lifecycle";
+import type {BillingAttempt} from "@/lib/db/server-schema";
+import type {CheckoutSessionReference} from "@/lib/db/repos/billing-attempts";
 import {createBillingPortalSession, createCheckoutSession} from "@/lib/billing/checkout-service";
 import {listReceipts} from "@/lib/billing/receipt-service";
 import {actorFor, FakeStripeBillingAdapter} from "@/tests/helpers/fakes";
@@ -24,12 +27,38 @@ function membership(overrides: Record<string, unknown> = {}) {
 function dependencies(record = membership()) {
   const stripe = new FakeStripeBillingAdapter();
   const update = vi.fn();
+  let attempt: BillingAttempt = {id: "attempt-1", membershipId, attemptNumber: 1,
+    idempotencyKey: `membership-checkout:${membershipId}:1`, priceReference: "price_startup_test",
+    state: "active", stripeCheckoutSessionId: null, checkoutUrl: null,
+    createdAt: new Date(), updatedAt: new Date(), endedAt: null};
+  const attempts = {
+    claimActive: vi.fn(async () => ({attempt, disposition: "existing" as const})),
+    getActive: vi.fn(async () => attempt),
+    attachSession: vi.fn(async (_actor: Actor, _id: string, reference: CheckoutSessionReference) => {
+      attempt = {...attempt, stripeCheckoutSessionId: reference.stripeCheckoutSessionId, checkoutUrl: reference.checkoutUrl};
+      return attempt;
+    }),
+    startNewAttempt: vi.fn(async (_actor: unknown, _id: string, priceReference: string) => {
+      attempt = {...attempt, id: "attempt-2", attemptNumber: 2,
+        idempotencyKey: `membership-checkout:${membershipId}:2`, priceReference,
+        stripeCheckoutSessionId: null, checkoutUrl: null};
+      return attempt;
+    }),
+  };
   return {
     stripe,
     update,
+    attempts,
     dependencies: {
       stripe,
-      memberships: {getById: vi.fn().mockResolvedValue(record), update},
+      memberships: {getById: vi.fn().mockResolvedValue(record), getBillingAccess: vi.fn(async (actor: Actor) => {
+        if (actor.kind !== "member") throw new Error("FORBIDDEN");
+        if (record.ownerUserId === actor.userId) return record;
+        const role = record.companyId ? actor.companyRoles?.[record.companyId] : undefined;
+        if (role === "owner" || role === "admin") return record;
+        throw new Error("FORBIDDEN");
+      }), update},
+      attempts,
       appUrl: "https://members.example.test",
       priceForPlan: () => "price_startup_test",
     },
@@ -42,10 +71,8 @@ describe("membership checkout", () => {
     const actor = actorFor("user@example.test");
     await createCheckoutSession(actor, membershipId, "en", setup.dependencies);
     await createCheckoutSession(actor, membershipId, "en", setup.dependencies);
-    expect(setup.stripe.checkoutRequests.map((request) => request.idempotencyKey)).toEqual([
-      `membership-checkout:${membershipId}:initial`,
-      `membership-checkout:${membershipId}:initial`,
-    ]);
+    expect(setup.stripe.checkoutRequests.map((request) => request.idempotencyKey)).toEqual([`membership-checkout:${membershipId}:1`]);
+    expect(setup.attempts.attachSession).toHaveBeenCalledTimes(1);
   });
 
   it("uses opaque identifiers and configured return URLs without leaking PII", async () => {
