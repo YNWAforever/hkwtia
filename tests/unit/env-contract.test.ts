@@ -24,6 +24,8 @@ describe("runtime environment contract", () => {
       NEON_AUTH_COOKIE_SECRET: "cookie-secret",
       STRIPE_SECRET_KEY: "sk_test_example",
       STRIPE_WEBHOOK_SECRET: "whsec_example",
+      STRIPE_STARTUP_PRICE_ID: "price_startup",
+      STRIPE_CORPORATE_PRICE_ID: "price_corporate",
       APP_URL: "https://www.example.test",
     });
 
@@ -33,6 +35,8 @@ describe("runtime environment contract", () => {
       neonAuthCookieSecret: "cookie-secret",
       stripeSecretKey: "sk_test_example",
       stripeWebhookSecret: "whsec_example",
+      stripeStartupPriceId: "price_startup",
+      stripeCorporatePriceId: "price_corporate",
       appUrl: "https://www.example.test",
     });
     expect(values).not.toHaveProperty("NEXT_PUBLIC_SITE_URL");
@@ -56,7 +60,28 @@ describe("runtime environment contract", () => {
       neonAuthCookieSecret: "",
       stripeSecretKey: "",
       stripeWebhookSecret: "",
+      stripeStartupPriceId: "",
+      stripeCorporatePriceId: "",
       appUrl: "",
     });
   });
+
+  it.each(["STRIPE_STARTUP_PRICE_ID", "STRIPE_CORPORATE_PRICE_ID"])(
+    "fails closed in production when %s is missing",
+    (missingKey) => {
+      const environment: NodeJS.ProcessEnv = {
+        NODE_ENV: "production",
+        DATABASE_URL: "postgres://db.example.test/hkwtia",
+        NEON_AUTH_BASE_URL: "https://auth.example.test",
+        NEON_AUTH_COOKIE_SECRET: "cookie-secret",
+        STRIPE_SECRET_KEY: "sk_test_example",
+        STRIPE_WEBHOOK_SECRET: "whsec_example",
+        STRIPE_STARTUP_PRICE_ID: "price_startup",
+        STRIPE_CORPORATE_PRICE_ID: "price_corporate",
+        APP_URL: "https://www.example.test",
+        [missingKey]: "",
+      };
+      expect(() => parseServerEnv(environment)).toThrow(missingKey);
+    },
+  );
 });

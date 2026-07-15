@@ -1,9 +1,11 @@
 import "server-only";
 
+import type {AppLocale} from "@/i18n/routing";
 import type {Actor, MembershipPlanCode, MembershipRecord} from "@/lib/membership/lifecycle";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {serverEnv} from "@/lib/config/env";
 import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
+import {localizedPath} from "@/lib/urls";
 
 type MembershipReader = {
   getById(actor: Actor, membershipId: string): Promise<MembershipRecord | null>;
@@ -16,23 +18,19 @@ export type CheckoutDependencies = Readonly<{
   priceForPlan: (planCode: MembershipPlanCode) => string;
 }>;
 
-function defaultPriceForPlan(planCode: MembershipPlanCode): string {
-  const variable = planCode === "startup"
-    ? "STRIPE_STARTUP_PRICE_ID"
-    : planCode === "corporate"
-      ? "STRIPE_CORPORATE_PRICE_ID"
-      : "";
-  const price = variable ? process.env[variable]?.trim() : "";
-  if (!price) throw new Error("STRIPE_PRICE_NOT_CONFIGURED");
-  return price;
-}
-
 function defaultDependencies(): CheckoutDependencies {
+  const environment = serverEnv();
   return {
     stripe: stripeBillingAdapter(),
     memberships: membershipsRepository,
-    appUrl: serverEnv().appUrl,
-    priceForPlan: defaultPriceForPlan,
+    appUrl: environment.appUrl,
+    priceForPlan: (planCode) => {
+      const price = planCode === "startup"
+        ? environment.stripeStartupPriceId
+        : planCode === "corporate" ? environment.stripeCorporatePriceId : "";
+      if (!price.trim()) throw new Error("STRIPE_PRICE_NOT_CONFIGURED");
+      return price;
+    },
   };
 }
 
@@ -84,6 +82,7 @@ export async function getAuthorizedBillingMembership(
 export async function createCheckoutSession(
   actor: Actor,
   membershipId: string,
+  locale: AppLocale,
   dependencies: CheckoutDependencies = defaultDependencies(),
 ): Promise<{url: string}> {
   requireMember(actor);
@@ -97,6 +96,8 @@ export async function createCheckoutSession(
 
   const origin = appOrigin(dependencies.appUrl);
   const opaqueMembershipId = encodeURIComponent(membership.id);
+  const checkoutPath = localizedPath(locale, "/join/checkout");
+  const completePath = localizedPath(locale, "/join/complete");
   return dependencies.stripe.createCheckoutSession({
     priceReference: dependencies.priceForPlan(membership.planCode),
     clientReferenceId: membership.id,
@@ -105,8 +106,8 @@ export async function createCheckoutSession(
       applicationId: membership.applicationId,
       planCode: membership.planCode,
     },
-    successUrl: `${origin}/join/complete?membership_id=${opaqueMembershipId}&session_id={CHECKOUT_SESSION_ID}`,
-    cancelUrl: `${origin}/join/checkout?membership_id=${opaqueMembershipId}`,
+    successUrl: `${origin}${completePath}?membership_id=${opaqueMembershipId}&session_id={CHECKOUT_SESSION_ID}`,
+    cancelUrl: `${origin}${checkoutPath}?membership_id=${opaqueMembershipId}`,
     idempotencyKey: `membership-checkout:${membership.id}:initial`,
   });
 }

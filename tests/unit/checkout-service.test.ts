@@ -40,8 +40,8 @@ describe("membership checkout", () => {
   it("uses the same idempotency key for retries of one membership", async () => {
     const setup = dependencies();
     const actor = actorFor("user@example.test");
-    await createCheckoutSession(actor, membershipId, setup.dependencies);
-    await createCheckoutSession(actor, membershipId, setup.dependencies);
+    await createCheckoutSession(actor, membershipId, "en", setup.dependencies);
+    await createCheckoutSession(actor, membershipId, "en", setup.dependencies);
     expect(setup.stripe.checkoutRequests.map((request) => request.idempotencyKey)).toEqual([
       `membership-checkout:${membershipId}:initial`,
       `membership-checkout:${membershipId}:initial`,
@@ -50,7 +50,7 @@ describe("membership checkout", () => {
 
   it("uses opaque identifiers and configured return URLs without leaking PII", async () => {
     const setup = dependencies();
-    await createCheckoutSession(actorFor("user@example.test"), membershipId, setup.dependencies);
+    await createCheckoutSession(actorFor("user@example.test"), membershipId, "en", setup.dependencies);
     expect(setup.stripe.checkoutRequests[0]).toMatchObject({
       clientReferenceId: membershipId,
       metadata: {membershipId, applicationId, planCode: "startup"},
@@ -62,8 +62,17 @@ describe("membership checkout", () => {
 
   it("does not activate or update membership state from checkout creation", async () => {
     const setup = dependencies();
-    await createCheckoutSession(actorFor("user@example.test"), membershipId, setup.dependencies);
+    await createCheckoutSession(actorFor("user@example.test"), membershipId, "en", setup.dependencies);
     expect(setup.update).not.toHaveBeenCalled();
+  });
+
+  it("prefixes both Stripe return URLs for the Chinese locale", async () => {
+    const setup = dependencies();
+    await createCheckoutSession(actorFor("user@example.test"), membershipId, "zh-HK", setup.dependencies);
+    expect(setup.stripe.checkoutRequests[0]).toMatchObject({
+      successUrl: `https://members.example.test/zh/join/complete?membership_id=${membershipId}&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `https://members.example.test/zh/join/checkout?membership_id=${membershipId}`,
+    });
   });
 });
 

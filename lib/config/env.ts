@@ -6,6 +6,8 @@ export interface ServerEnv {
   neonAuthCookieSecret: string;
   stripeSecretKey: string;
   stripeWebhookSecret: string;
+  stripeStartupPriceId: string;
+  stripeCorporatePriceId: string;
   appUrl: string;
 }
 
@@ -21,6 +23,8 @@ const serverKeys = [
   ["NEON_AUTH_COOKIE_SECRET", "neonAuthCookieSecret"],
   ["STRIPE_SECRET_KEY", "stripeSecretKey"],
   ["STRIPE_WEBHOOK_SECRET", "stripeWebhookSecret"],
+  ["STRIPE_STARTUP_PRICE_ID", "stripeStartupPriceId"],
+  ["STRIPE_CORPORATE_PRICE_ID", "stripeCorporatePriceId"],
   ["APP_URL", "appUrl"],
 ] as const;
 
@@ -49,6 +53,8 @@ export function parseServerEnv(environment: Environment = process.env): ServerEn
     neonAuthCookieSecret: valueFor(environment, "NEON_AUTH_COOKIE_SECRET"),
     stripeSecretKey: valueFor(environment, "STRIPE_SECRET_KEY"),
     stripeWebhookSecret: valueFor(environment, "STRIPE_WEBHOOK_SECRET"),
+    stripeStartupPriceId: valueFor(environment, "STRIPE_STARTUP_PRICE_ID"),
+    stripeCorporatePriceId: valueFor(environment, "STRIPE_CORPORATE_PRICE_ID"),
     appUrl: valueFor(environment, "APP_URL"),
   };
 }
