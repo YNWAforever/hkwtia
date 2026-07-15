@@ -32,7 +32,7 @@ function dependencies(record = membership()) {
     state: "active", stripeCheckoutSessionId: null, checkoutUrl: null,
     recoveryRequestId: null, createdAt: new Date(), updatedAt: new Date(), endedAt: null};
   const attempts = {
-    claimActive: vi.fn(async () => ({attempt, disposition: "existing" as const})),
+    claimActive: vi.fn(async () => ({attempt, disposition: "existing" as const, membership: record})),
     getActive: vi.fn(async () => attempt),
     getById: vi.fn(async () => attempt),
     attachSession: vi.fn(async (_actor: Actor, _id: string, reference: CheckoutSessionReference) => {
@@ -43,7 +43,7 @@ function dependencies(record = membership()) {
       attempt = {...attempt, id: "attempt-2", attemptNumber: 2,
         idempotencyKey: `membership-checkout:${membershipId}:2`, priceReference,
         stripeCheckoutSessionId: null, checkoutUrl: null};
-      return attempt;
+      return {attempt, membership: record};
     }),
   };
   return {
@@ -101,6 +101,14 @@ describe("membership checkout", () => {
       successUrl: `https://members.example.test/zh/join/complete?membership_id=${membershipId}&session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `https://members.example.test/zh/join/checkout?membership_id=${membershipId}`,
     });
+  });
+
+  it("uses trusted billing access before claiming an initial attempt", async () => {
+    const setup = dependencies();
+    const actor = actorFor("user@example.test");
+    await createCheckoutSession(actor, membershipId, "en", setup.dependencies);
+    expect(setup.dependencies.memberships.getBillingAccess).toHaveBeenCalledWith(actor, membershipId);
+    expect(setup.dependencies.memberships.getById).not.toHaveBeenCalled();
   });
 });
 

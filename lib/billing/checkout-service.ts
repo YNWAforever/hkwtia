@@ -119,11 +119,13 @@ export async function createCheckoutSession(
   dependencies: CheckoutDependencies = defaultDependencies(),
 ): Promise<{url: string}> {
   requireMember(actor);
-  const membership = await dependencies.memberships.getById(actor, membershipId);
-  if (!membership) throw new Error("FORBIDDEN");
-  validateCheckoutMembership(membership);
-  const priceReference = dependencies.priceForPlan(membership.planCode);
-  const {attempt} = await dependencies.attempts.claimActive(actor, membership.id, priceReference);
+  const preflightMembership = await dependencies.memberships.getBillingAccess(actor, membershipId);
+  if (!preflightMembership) throw new Error("FORBIDDEN");
+  validateCheckoutMembership(preflightMembership);
+  const priceReference = dependencies.priceForPlan(preflightMembership.planCode);
+  const {attempt, membership} = await dependencies.attempts.claimActive(
+    actor, preflightMembership.id, priceReference, preflightMembership.planCode,
+  );
   return createSessionForAttempt(actor, membership, attempt, locale, dependencies);
 }
 
@@ -140,10 +142,10 @@ export async function startNewCheckoutAttempt(
   if (!membership) throw new Error("FORBIDDEN");
   validateCheckoutMembership(membership);
   const priceReference = dependencies.priceForPlan(membership.planCode);
-  const attempt = await dependencies.attempts.startNewAttempt(
-    actor, membershipId, priceReference, reason, request,
+  const result = await dependencies.attempts.startNewAttempt(
+    actor, membershipId, priceReference, reason, {...request, expectedPlanCode: membership.planCode},
   );
-  return createSessionForAttempt(actor, membership, attempt, locale, dependencies);
+  return createSessionForAttempt(actor, result.membership, result.attempt, locale, dependencies);
 }
 
 export async function createBillingPortalSession(

@@ -8,43 +8,30 @@ import {actorFor, FakeStripeBillingAdapter} from "@/tests/helpers/fakes";
 
 const actor = actorFor("user-a");
 const membershipId = "20000000-0000-4000-8000-000000000002";
-const membership: MembershipRecord = {
-  id: membershipId, ownerUserId: "user-a", companyId: null,
-  applicationId: "10000000-0000-4000-8000-000000000001",
-  planCode: "startup" as const, status: "pending_payment" as const,
-  seatLimit: 5, stripeCustomerId: null,
-};
+const membership: MembershipRecord = {id: membershipId, ownerUserId: "user-a", companyId: null,
+  applicationId: "10000000-0000-4000-8000-000000000001", planCode: "startup",
+  status: "pending_payment", seatLimit: 5, stripeCustomerId: null};
 const request = {expectedCurrentAttemptId: "attempt-1", recoveryRequestId: "recovery-double-click-1"};
 
 function setup(record: MembershipRecord = membership) {
   const stripe = new FakeStripeBillingAdapter();
-  const replacement: BillingAttempt = {
-    id: "attempt-2", membershipId, attemptNumber: 2,
-    idempotencyKey: `membership-checkout:${membershipId}:2`,
-    priceReference: "price_startup_test", state: "active" as const,
-    stripeCheckoutSessionId: null, checkoutUrl: null,
-    recoveryRequestId: request.recoveryRequestId,
-    createdAt: new Date(), updatedAt: new Date(), endedAt: null,
-  };
+  const replacement: BillingAttempt = {id: "attempt-2", membershipId, attemptNumber: 2,
+    idempotencyKey: `membership-checkout:${membershipId}:2`, priceReference: "price_startup_test",
+    state: "active", stripeCheckoutSessionId: null, checkoutUrl: null,
+    recoveryRequestId: request.recoveryRequestId, createdAt: new Date(), updatedAt: new Date(), endedAt: null};
   const attempts = {
     claimActive: vi.fn(async () => { throw new Error("MUST_NOT_RECLAIM"); }),
-    getActive: vi.fn(async () => replacement),
-    getById: vi.fn(async () => replacement),
-    attachSession: vi.fn(async (_actor: unknown, attemptId: string, reference: {stripeCheckoutSessionId: string; checkoutUrl: string}) => {
+    getActive: vi.fn(async () => replacement), getById: vi.fn(async () => replacement),
+    attachSession: vi.fn(async (_actor: unknown, attemptId: string,
+      reference: {stripeCheckoutSessionId: string; checkoutUrl: string}) => {
       expect(attemptId).toBe(replacement.id);
       return {...replacement, ...reference};
     }),
-    startNewAttempt: vi.fn(async () => replacement),
+    startNewAttempt: vi.fn(async () => ({attempt: replacement, membership: record})),
   };
-  const dependencies = {
-    stripe,
-    memberships: {
-      getById: vi.fn(async () => record),
-      getBillingAccess: vi.fn(async () => record),
-    },
-    attempts,
-    appUrl: "https://members.example.test",
-    priceForPlan: () => "price_startup_test",
+  const dependencies = {stripe,
+    memberships: {getById: vi.fn(async () => record), getBillingAccess: vi.fn(async () => record)},
+    attempts, appUrl: "https://members.example.test", priceForPlan: () => "price_startup_test",
   } as unknown as CheckoutDependencies;
   return {stripe, attempts, dependencies, replacement};
 }
@@ -65,20 +52,17 @@ describe("checkout recovery service", () => {
     const value = setup();
     await expect(startNewCheckoutAttempt(actor, membershipId, "en", "abandoned", request, value.dependencies))
       .resolves.toEqual({url: value.stripe.checkoutUrl});
-    expect(value.attempts.startNewAttempt).toHaveBeenCalledWith(
-      actor, membershipId, "price_startup_test", "abandoned", request,
-    );
+    expect(value.attempts.startNewAttempt).toHaveBeenCalledWith(actor, membershipId, "price_startup_test",
+      "abandoned", {...request, expectedPlanCode: "startup"});
     expect(value.attempts.claimActive).not.toHaveBeenCalled();
     expect(value.stripe.checkoutRequests[0].idempotencyKey).toBe(value.replacement.idempotencyKey);
   });
 
   it("recovers a persisted exact replacement for a duplicate recovery token", async () => {
     const value = setup();
-    value.attempts.startNewAttempt.mockResolvedValue({
-      ...value.replacement,
-      stripeCheckoutSessionId: "cs_existing",
-      checkoutUrl: "https://checkout.stripe.test/existing",
-    });
+    value.attempts.startNewAttempt.mockResolvedValue({membership,
+      attempt: {...value.replacement, stripeCheckoutSessionId: "cs_existing",
+        checkoutUrl: "https://checkout.stripe.test/existing"}});
     await expect(startNewCheckoutAttempt(actor, membershipId, "en", "expired", request, value.dependencies))
       .resolves.toEqual({url: "https://checkout.stripe.test/existing"});
     expect(value.stripe.checkoutRequests).toHaveLength(0);

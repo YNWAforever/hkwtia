@@ -110,3 +110,38 @@ The following supersedes the initial idempotency/build notes above.
 - Stripe creation and attach use the exact returned attempt and its persisted idempotency key; a failed attach reloads that exact attempt rather than whichever attempt is active.
 - Membership/payment preconditions run before attempt mutation, company access requires an active owner/admin membership, and checkout-attempt APIs reject anonymous and system actors.
 - The schema, migration, repository, service, and tests remain within Task 6; webhook processing, job claims, and membership activation remain Task 7 scope.
+
+## Checkout authorization and TOCTOU review fix
+
+### Root cause and fix
+
+- Checkout eligibility was previously checked before the attempt mutation transaction, leaving an authorization and membership-lifecycle time-of-check/time-of-use gap.
+- Initial claim and recovery now re-read the actor-scoped membership and lock that eligibility row with `FOR UPDATE` inside the same transaction as active-attempt lookup, compare-and-swap recovery, and insertion.
+- The locked membership must still be `pending_payment`, use a paid checkout plan, retain an application, and match the plan used to resolve the Stripe price. Active company billing access still requires an unrevoked owner/admin row in `company_members`.
+- Checkout services use DB-backed billing access for preflight and consume the membership returned by the locked repository operation when creating the Stripe session.
+- Obsolete pg-proxy claim tests were replaced by transaction-scripted production-shape tests because the pg-proxy test driver does not implement Drizzle transactions.
+
+### Fresh verification (2026-07-16)
+
+- Focused locking, CAS, recovery, service, and repository security:
+  - Command: `npm.cmd exec vitest run -- tests/unit/billing-checkout-locking.test.ts tests/unit/billing-recovery-cas.test.ts tests/unit/checkout-recovery-service.test.ts tests/unit/checkout-service.test.ts tests/unit/billing-repository-security.test.ts tests/unit/repository-production-security.test.ts`
+  - PASS: 6 files, 49 tests.
+- Full regression:
+  - Command: `npm.cmd exec vitest run`
+  - PASS: 31 files, 127 tests.
+- Typecheck: `npm.cmd run typecheck` passed.
+- Lint: `npm.cmd run lint` passed.
+- Visible-string audit: `npm.cmd run audit:strings` passed; 51 TSX files scanned.
+- Production build:
+  - Command: `npm.cmd run build` with non-secret localhost/example placeholder environment values.
+  - PASS: compiled and typechecked; 48 pages generated; localized join checkout and complete routes present.
+- Join authentication browser flow:
+  - Command: `npm.cmd run test:e2e -- tests/e2e/join-auth.spec.ts --project=chromium`
+  - PASS: 3 tests in Chromium.
+- Migration consistency:
+  - Command: `npx.cmd drizzle-kit generate`
+  - PASS: 10 tables inspected; no schema changes and nothing to migrate.
+- Diff integrity:
+  - `git diff --check` passed.
+  - No `.rej` artifacts were found, generated `next-env.d.ts` noise was restored, and Drizzle produced no migration changes.
+  - All build/database environment values were non-secret placeholders; no live Neon or production database was contacted.

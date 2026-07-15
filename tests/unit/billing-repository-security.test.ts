@@ -33,66 +33,6 @@ const companyMembershipRow = [
 describe("checkout billing attempt persistence", () => {
   beforeEach(() => { database.current = null; });
 
-  it("reuses the persisted key and session identity for the current attempt", async () => {
-    const statements: string[] = [];
-    database.current = drizzle(async (query) => {
-      statements.push(query);
-      if (query.toLowerCase().startsWith("select")) {
-        return {rows: [[...attemptRow().slice(0, 6), "cs_1", "https://checkout.stripe.test/cs_1", ...attemptRow().slice(8)]]};
-      }
-      return {rows: []};
-    });
-
-    const result = await billingAttemptsRepository.claimActive(actor, membershipId, "price_startup_v1");
-
-    expect(result.disposition).toBe("existing");
-    expect(result.attempt).toMatchObject({
-      idempotencyKey: `membership-checkout:${membershipId}:1`,
-      stripeCheckoutSessionId: "cs_1",
-      checkoutUrl: "https://checkout.stripe.test/cs_1",
-    });
-    expect(statements.some((query) => query.toLowerCase().includes("insert into"))).toBe(false);
-  });
-
-  it("rejects changed Stripe price parameters within an active attempt", async () => {
-    const statements: string[] = [];
-    database.current = drizzle(async (query) => {
-      statements.push(query);
-      return {rows: [attemptRow()]};
-    });
-
-    await expect(billingAttemptsRepository.claimActive(actor, membershipId, "price_startup_v2"))
-      .rejects.toThrow("BILLING_ATTEMPT_PRICE_CHANGED");
-    expect(statements.some((query) => query.toLowerCase().includes("insert into"))).toBe(false);
-  });
-
-  it("recovers the single database winner when concurrent claims collide", async () => {
-    vi.spyOn(membershipsRepository, "getById").mockResolvedValue(personalMembershipRow as never);
-    let insertCalls = 0;
-    let selectCalls = 0;
-    database.current = drizzle(async (query) => {
-      const normalized = query.toLowerCase();
-      if (normalized.startsWith("select")) {
-        selectCalls += 1;
-        return selectCalls <= 2 ? {rows: []} : {rows: [attemptRow()]};
-      }
-      if (normalized.includes("insert into")) {
-        insertCalls += 1;
-        if (insertCalls === 1) return {rows: [attemptRow()]};
-        throw Object.assign(new Error("duplicate active attempt"), {code: "23505"});
-      }
-      return {rows: []};
-    });
-
-    const results = await Promise.all([
-      billingAttemptsRepository.claimActive(actor, membershipId, "price_startup_v1"),
-      billingAttemptsRepository.claimActive(actor, membershipId, "price_startup_v1"),
-    ]);
-
-    expect(results.map((result) => result.attempt.id)).toEqual([attemptId, attemptId]);
-    expect(results.map((result) => result.disposition).sort()).toEqual(["created", "existing"]);
-  });
-
   it("persists and returns the Checkout Session reference for recovery", async () => {
     const statements: string[] = [];
     database.current = drizzle(async (query) => {
