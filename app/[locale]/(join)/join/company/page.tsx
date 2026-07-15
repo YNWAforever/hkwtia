@@ -34,8 +34,7 @@ export default async function CompanyPage({params, searchParams}: Props) {
       <h1 className="font-serif text-4xl font-semibold">{t("companyTitle")}</h1>
       <p className="mt-4 text-muted-foreground">{t("companyDescription")}</p>
       <div className="mt-8">
-        <JoinForm action={action} fieldNames={["companyId", "legalName", "companyDisplayName", "website", "industry", "sizeBand", "description"]} pendingLabel={t("saving")} submitLabel={t("submitApplication")}>
-          <Field label={t("fields.companyId")} name="companyId" required/>
+        <JoinForm action={action} fieldNames={["legalName", "companyDisplayName", "website", "industry", "sizeBand", "description"]} pendingLabel={t("saving")} submitLabel={t("submitApplication")}>
           <Field autoComplete="organization" label={t("fields.legalName")} name="legalName" required/>
           <Field autoComplete="organization" label={t("fields.companyDisplayName")} name="companyDisplayName" required/>
           <Field autoComplete="url" label={t("fields.website")} name="website" type="url"/>

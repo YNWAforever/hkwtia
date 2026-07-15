@@ -234,7 +234,7 @@
                  "profileTitle":  "Tell us about yourself",
                  "profileDescription":  "Your profile helps WTIA support your membership and keep your application moving.",
                  "companyTitle":  "Confirm your company",
-                 "companyDescription":  "Company memberships must use a company that you already own or administer in WTIA.",
+                 "companyDescription":  "Tell us about your company. We will create its WTIA profile and make you the initial owner.",
                  "steps":  {
                                "plan":  "Choose plan",
                                "auth":  "Sign in",

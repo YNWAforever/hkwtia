@@ -31,3 +31,10 @@ for (const locale of locales) {
     expect(consoleErrors).toEqual([]);
   });
 }
+
+test("a forged completion status still renders anonymous authentication", async ({page}) => {
+  await page.goto("/join?plan=community&status=complete&application=foreign-application");
+
+  await expect(page.getByRole("heading", {level: 1, name: "Join WTIA"})).toBeVisible();
+  await expect(page.getByRole("heading", {level: 1, name: "Welcome to WTIA"})).toHaveCount(0);
+});

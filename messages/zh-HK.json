@@ -235,7 +235,7 @@
                  "profileTitle":  "介紹你的資料",
                  "profileDescription":  "你的個人資料可協助 WTIA 支援會籍及繼續處理申請。",
                  "companyTitle":  "確認公司資料",
-                 "companyDescription":  "公司會籍必須使用你已在 WTIA 擁有或管理的公司。",
+                 "companyDescription":  "請提供公司資料。我們會建立 WTIA 公司檔案，並將你設為首位擁有人。",
                  "steps":  {
                                "plan":  "選擇計劃",
                                "auth":  "登入",

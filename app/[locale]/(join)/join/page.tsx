@@ -1,11 +1,12 @@
 import Link from "next/link";
 import {getTranslations, setRequestLocale} from "next-intl/server";
-import {redirect} from "next/navigation";
+import {notFound, redirect} from "next/navigation";
 
 import {JoinForm} from "@/components/join/join-form";
 import {JoinProgress} from "@/components/join/progress";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
+import {destinationForJoin} from "@/lib/membership/join-navigation";
 import {startJoin} from "@/lib/membership/join-service";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {localizedPath} from "@/lib/urls";
@@ -16,9 +17,6 @@ type Props = {params: Promise<{locale: string}>; searchParams: Promise<Record<st
 
 function queryValue(value: string | string[] | undefined) { return typeof value === "string" ? value : undefined; }
 function selectedPlan(value: string | undefined): PlanCode | null { try { return getPlan(value).code; } catch { return null; } }
-function selectedStatus(value: string | undefined): "complete" | "checkout" | "review" | null {
-  return value === "complete" || value === "checkout" || value === "review" ? value : null;
-}
 
 export default async function JoinPage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;
@@ -38,19 +36,19 @@ export default async function JoinPage({params, searchParams}: Props) {
   );
 
   const companyPlan = plan === "startup" || plan === "corporate";
-  const status = selectedStatus(queryValue(query.status));
-  if (status) return (
-    <section className="glass-card p-6 sm:p-10">
-      <JoinProgress active={companyPlan ? "company" : "profile"} labels={labels} showCompany={companyPlan}/>
-      <h1 className="font-serif text-4xl font-semibold">{t(`status.${status}.title`)}</h1>
-      <p className="mt-4 text-muted-foreground">{t(`status.${status}.description`)}</p>
-    </section>
-  );
-
   const actor = await getActor().catch(() => null);
   if (actor) {
-    const application = await startJoin(actor, {plan, applicationId: queryValue(query.application) ?? null});
-    redirect(`${localizedPath(locale, "/join/profile")}?${new URLSearchParams({plan, application: application.applicationId})}`);
+    const application = await startJoin(actor, {plan, applicationId: queryValue(query.application) ?? null}).catch(() => notFound());
+    const destination = destinationForJoin(locale, plan, application.applicationId, application.next);
+    if (destination.kind === "page") redirect(destination.href!);
+    const status = destination.next === "complete" || destination.next === "review" ? destination.next : "checkout";
+    return (
+      <section className="glass-card p-6 sm:p-10">
+        <JoinProgress active={companyPlan ? "company" : "profile"} labels={labels} showCompany={companyPlan}/>
+        <h1 className="font-serif text-4xl font-semibold">{t(`status.${status}.title`)}</h1>
+        <p className="mt-4 text-muted-foreground">{t(`status.${status}.description`)}</p>
+      </section>
+    );
   }
 
   const action = requestMagicLink.bind(null, locale, plan);

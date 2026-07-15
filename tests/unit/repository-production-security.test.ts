@@ -8,6 +8,7 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
   return {...original, getDb: async () => database.current};
 });
 
+import {companiesRepository} from "@/lib/db/repos/companies";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 
@@ -233,5 +234,69 @@ describe("production repository security boundaries", () => {
     });
     expect(statements.join("\n").toLowerCase()).toContain("on conflict");
     expect(statements.join("\n").toLowerCase()).not.toContain("do update");
+  });
+
+  it("creates a company and initial active owner only by claiming the actor's application", async () => {
+    const statements: string[] = [];
+    database.current = drizzle(async (query) => {
+      statements.push(query);
+      return {rows: [{id: "company-a", legalName: "Acme Limited", displayName: "Acme"}]};
+    });
+
+    await expect(companiesRepository.createForApplication(actor, "application-a", {
+      legalName: "Acme Limited", displayName: "Acme",
+    }, {companyId: () => "company-a", memberId: () => "member-a"})).resolves.toMatchObject({id: "company-a"});
+
+    expect(statements).toHaveLength(1);
+    const sql = statements[0].toLowerCase();
+    expect(sql.indexOf('update "membership_applications"')).toBeLessThan(sql.indexOf('insert into "companies"'));
+    expect(sql).toContain('applicant_user_id');
+    expect(sql).toContain('insert into "company_members"');
+    expect(sql).toContain("owner");
+  });
+
+  it("rejects anonymous company creation before issuing SQL", async () => {
+    const statements: string[] = [];
+    database.current = drizzle(async (query) => {
+      statements.push(query);
+      return {rows: []};
+    });
+
+    await expect(companiesRepository.createForApplication({kind: "anonymous", userId: null}, "application-a", {
+      legalName: "Acme Limited", displayName: "Acme",
+    })).rejects.toThrow("FORBIDDEN");
+    expect(statements).toEqual([]);
+  });
+
+  it("keeps company and owner creation in one rollback-safe statement", async () => {
+    const statements: string[] = [];
+    database.current = drizzle(async (query) => {
+      statements.push(query);
+      throw new Error("owner insert failed");
+    });
+
+    await expect(companiesRepository.createForApplication(actor, "application-a", {
+      legalName: "Acme Limited", displayName: "Acme",
+    })).rejects.toThrow("Failed query");
+    expect(statements).toHaveLength(1);
+  });
+
+  it("allows only one concurrent claim of the same application", async () => {
+    let calls = 0;
+    database.current = drizzle(async () => {
+      calls += 1;
+      return calls === 1
+        ? {rows: [{id: "company-a", legalName: "Acme Limited", displayName: "Acme"}]}
+        : {rows: []};
+    });
+
+    const results = await Promise.allSettled([
+      companiesRepository.createForApplication(actor, "application-a", {legalName: "Acme Limited", displayName: "Acme"}),
+      companiesRepository.createForApplication(actor, "application-a", {legalName: "Other Limited", displayName: "Other"}),
+    ]);
+
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    expect(results.filter((result) => result.status === "rejected")).toHaveLength(1);
+    await expect(Promise.reject((results.find((result) => result.status === "rejected") as PromiseRejectedResult).reason)).rejects.toThrow("APPLICATION_COMPANY_CONFLICT");
   });
 });
