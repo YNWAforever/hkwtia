@@ -1,4 +1,10 @@
 import type {Actor} from "@/lib/membership/lifecycle";
+import type {
+  CheckoutSessionInput,
+  InvoiceRecord,
+  PortalSessionInput,
+  StripeBillingAdapter,
+} from "@/lib/billing/stripe";
 import {createFakeRepositories as makeRepositories} from "@/tests/helpers/repository-fakes";
 
 export const actorFor = (userId: string, companyRoles?: Readonly<Record<string, "owner" | "admin" | "member">>): Actor => ({
@@ -30,4 +36,26 @@ export function createFakeRepositories() {
       {id: "member-a", companyId: "company-a", userId: "user-a", role: "member", revokedAt: null},
     ],
   });
+}
+
+export class FakeStripeBillingAdapter implements StripeBillingAdapter {
+  readonly checkoutRequests: CheckoutSessionInput[] = [];
+  readonly portalRequests: PortalSessionInput[] = [];
+  invoices: InvoiceRecord[] = [];
+  checkoutUrl = "https://checkout.stripe.test/session";
+  portalUrl = "https://billing.stripe.test/session";
+
+  async createCheckoutSession(input: CheckoutSessionInput): Promise<{url: string}> {
+    this.checkoutRequests.push(structuredClone(input));
+    return {url: this.checkoutUrl};
+  }
+
+  async createBillingPortalSession(input: PortalSessionInput): Promise<{url: string}> {
+    this.portalRequests.push(structuredClone(input));
+    return {url: this.portalUrl};
+  }
+
+  async listInvoices(): Promise<InvoiceRecord[]> {
+    return structuredClone(this.invoices);
+  }
 }
