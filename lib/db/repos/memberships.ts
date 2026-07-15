@@ -37,6 +37,7 @@ async function authorizeMemberCreate(
   if (hasOwner === hasCompany) forbidden();
   if (hasOwner && input.ownerUserId !== actor.userId) forbidden();
 
+  if (!input.applicationId) forbidden();
   if (hasCompany) {
     const companyAccess = await db
       .select({companyId: companyMembers.companyId})

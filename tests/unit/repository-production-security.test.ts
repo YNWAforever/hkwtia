@@ -69,6 +69,37 @@ describe("production repository security boundaries", () => {
     database.current = null;
   });
 
+  it.each([
+    {
+      name: "personal",
+      input: {
+        ownerUserId: "user-a",
+        companyId: null,
+        applicationId: null,
+        planCode: "community",
+        status: "active",
+        seatLimit: 1,
+      } satisfies Parameters<typeof membershipsRepository.create>[1],
+    },
+    {
+      name: "company",
+      input: companyMembershipInput({applicationId: null}),
+    },
+  ])("denies a member-created $name membership without an application", async ({input}) => {
+    const statements: string[] = [];
+    database.current = drizzle(async (query) => {
+      statements.push(query);
+      const normalized = query.toLowerCase();
+      if (normalized.includes('from "company_members"')) return {rows: [["company-b"]]};
+      if (normalized.includes('insert into "memberships"')) return {rows: [membershipRow]};
+      return {rows: []};
+    });
+
+    await expect(membershipsRepository.create(actor, input)).rejects.toThrow("FORBIDDEN");
+
+    expect(statements.join("\n").toLowerCase()).not.toContain('insert into "memberships"');
+  });
+
   it("denies a company membership when the application is outside the actor scope", async () => {
     const statements: string[] = [];
     database.current = drizzle(async (query) => {

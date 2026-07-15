@@ -182,3 +182,43 @@ npm.cmd run lint
 Exit code: 0
 
 npm.cmd run typecheck
+Exit code: 0
+
+git diff --check
+Exit code: 0
+```
+
+## Final review: require member application linkage
+
+### RED
+
+```text
+npm.cmd test -- tests/unit/repository-production-security.test.ts
+Exit code: 1
+1 test file failed; 2 tests failed and 7 passed.
+```
+
+Both new production-repository cases failed for the expected reason: personal
+and company membership creation without `applicationId` resolved and reached
+the insert instead of rejecting with `FORBIDDEN`.
+
+### GREEN
+
+```text
+npm.cmd test -- tests/unit/repository-production-security.test.ts
+Exit code: 0
+1 test file passed; 9 tests passed.
+
+npm.cmd test
+Exit code: 0
+20 test files passed; 62 tests passed.
+
+npm.cmd run lint
+Exit code: 0
+
+npm.cmd run typecheck
+Exit code: 0
+
+git diff --check
+Exit code: 0
+```
