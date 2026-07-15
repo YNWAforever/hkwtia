@@ -30,10 +30,11 @@ function dependencies(record = membership()) {
   let attempt: BillingAttempt = {id: "attempt-1", membershipId, attemptNumber: 1,
     idempotencyKey: `membership-checkout:${membershipId}:1`, priceReference: "price_startup_test",
     state: "active", stripeCheckoutSessionId: null, checkoutUrl: null,
-    createdAt: new Date(), updatedAt: new Date(), endedAt: null};
+    recoveryRequestId: null, createdAt: new Date(), updatedAt: new Date(), endedAt: null};
   const attempts = {
     claimActive: vi.fn(async () => ({attempt, disposition: "existing" as const})),
     getActive: vi.fn(async () => attempt),
+    getById: vi.fn(async () => attempt),
     attachSession: vi.fn(async (_actor: Actor, _id: string, reference: CheckoutSessionReference) => {
       attempt = {...attempt, stripeCheckoutSessionId: reference.stripeCheckoutSessionId, checkoutUrl: reference.checkoutUrl};
       return attempt;

@@ -194,6 +194,7 @@ export const billingAttempts = pgTable(
     state: billingAttemptStateEnum("state").default("active").notNull(),
     stripeCheckoutSessionId: text("stripe_checkout_session_id"),
     checkoutUrl: text("checkout_url"),
+    recoveryRequestId: text("recovery_request_id"),
     createdAt: createdAt("created_at"),
     updatedAt: updatedAt("updated_at"),
     endedAt: timestamp("ended_at", {withTimezone: true}),
@@ -208,6 +209,9 @@ export const billingAttempts = pgTable(
     uniqueIndex("billing_attempts_stripe_session_unique")
       .on(table.stripeCheckoutSessionId)
       .where(sql`${table.stripeCheckoutSessionId} IS NOT NULL`),
+    uniqueIndex("billing_attempts_recovery_request_unique")
+      .on(table.membershipId, table.recoveryRequestId)
+      .where(sql`${table.recoveryRequestId} IS NOT NULL`),
     index("billing_attempts_membership_idx").on(table.membershipId),
   ],
 );

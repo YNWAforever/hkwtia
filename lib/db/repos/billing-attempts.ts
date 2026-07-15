@@ -23,6 +23,10 @@ export type CheckoutSessionReference = Readonly<{
 }>;
 
 type AttemptEndReason = "abandoned" | "expired";
+export type RecoveryRequest = Readonly<{
+  expectedCurrentAttemptId: string;
+  recoveryRequestId: string;
+}>;
 
 function uniqueViolation(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
@@ -59,9 +63,9 @@ function rawAttempt(row: unknown): BillingAttempt | null {
   if (!row) return null;
   if (Array.isArray(row)) {
     const [id, membershipId, attemptNumber, idempotencyKey, priceReference, state,
-      stripeCheckoutSessionId, checkoutUrl, createdAt, updatedAt, endedAt] = row;
+      stripeCheckoutSessionId, checkoutUrl, recoveryRequestId, createdAt, updatedAt, endedAt] = row;
     return {id, membershipId, attemptNumber, idempotencyKey, priceReference, state,
-      stripeCheckoutSessionId, checkoutUrl, createdAt, updatedAt, endedAt} as BillingAttempt;
+      stripeCheckoutSessionId, checkoutUrl, recoveryRequestId, createdAt, updatedAt, endedAt} as BillingAttempt;
   }
   const value = row as Record<string, unknown>;
   return {
@@ -73,6 +77,7 @@ function rawAttempt(row: unknown): BillingAttempt | null {
     state: value.state,
     stripeCheckoutSessionId: value.stripe_checkout_session_id ?? value.stripeCheckoutSessionId,
     checkoutUrl: value.checkout_url ?? value.checkoutUrl,
+    recoveryRequestId: value.recovery_request_id ?? value.recoveryRequestId,
     createdAt: value.created_at ?? value.createdAt,
     updatedAt: value.updated_at ?? value.updatedAt,
     endedAt: value.ended_at ?? value.endedAt,
@@ -90,6 +95,7 @@ function memberAttemptScope(actor: Extract<Actor, {kind: "member"}>) {
           WHERE ${companyMembers.companyId} = ${memberships.companyId}
             AND ${companyMembers.userId} = ${actor.userId}
             AND ${companyMembers.revokedAt} IS NULL
+            AND (${companyMembers.role} = ${"owner"} OR ${companyMembers.role} = ${"admin"})
         )
       )
   `);
@@ -97,14 +103,28 @@ function memberAttemptScope(actor: Extract<Actor, {kind: "member"}>) {
 
 export const billingAttemptsRepository = {
   async getActive(actor: Actor, membershipId: string): Promise<BillingAttempt | null> {
-    if (actor.kind === "anonymous") forbidden();
+    if (actor.kind !== "member") forbidden();
     await membershipsRepository.getById(actor, membershipId);
     const db = await getDb();
     return activeAttempt(db, membershipId);
   },
 
+  async getById(actor: Actor, attemptId: string): Promise<BillingAttempt | null> {
+    if (actor.kind !== "member") forbidden();
+    const db = await getDb();
+    const rows = await db
+      .select()
+      .from(billingAttempts)
+      .where(and(
+        eq(billingAttempts.id, attemptId),
+        memberAttemptScope(actor),
+      ))
+      .limit(1);
+    return rows[0] ?? null;
+  },
+
   async claimActive(actor: Actor, membershipId: string, priceReference: string): Promise<BillingAttemptClaim> {
-    if (actor.kind === "anonymous") forbidden();
+    if (actor.kind !== "member") forbidden();
     await membershipsRepository.getById(actor, membershipId);
     const db = await getDb();
     const existing = await activeAttempt(db, membershipId);
@@ -143,9 +163,9 @@ export const billingAttemptsRepository = {
     attemptId: string,
     reference: CheckoutSessionReference,
   ): Promise<BillingAttempt> {
-    if (actor.kind === "anonymous") forbidden();
+    if (actor.kind !== "member") forbidden();
     const db = await getDb();
-    const scope = actor.kind === "system" ? sql`true` : memberAttemptScope(actor);
+    const scope = memberAttemptScope(actor);
     const rows = await db.update(billingAttempts).set({
       stripeCheckoutSessionId: reference.stripeCheckoutSessionId,
       checkoutUrl: reference.checkoutUrl,
@@ -165,11 +185,12 @@ export const billingAttemptsRepository = {
     membershipId: string,
     priceReference: string,
     reason: AttemptEndReason,
+    request: RecoveryRequest,
   ): Promise<BillingAttempt> {
     if (actor.kind !== "member") forbidden();
     const db = await getDb();
-    const result = await db.execute(sql`
-      WITH accessible_membership AS (
+    return db.transaction(async (tx) => {
+      const access = rawRows(await tx.execute(sql`
         SELECT ${memberships.id} AS membership_id
         FROM ${memberships}
         WHERE ${memberships.id} = ${membershipId}
@@ -180,35 +201,53 @@ export const billingAttemptsRepository = {
               WHERE ${companyMembers.companyId} = ${memberships.companyId}
                 AND ${companyMembers.userId} = ${actor.userId}
                 AND ${companyMembers.revokedAt} IS NULL
+                AND (${companyMembers.role} = ${"owner"} OR ${companyMembers.role} = ${"admin"})
             )
           )
-      ), ended AS (
+        FOR UPDATE
+      `));
+      if (!access[0]) forbidden();
+
+      const replay = rawAttempt(rawRows(await tx.execute(sql`
+        SELECT * FROM ${billingAttempts}
+        WHERE ${billingAttempts.membershipId} = ${membershipId}
+          AND ${billingAttempts.recoveryRequestId} = ${request.recoveryRequestId}
+        LIMIT 1
+      `))[0]);
+      if (replay) return replay;
+
+      const current = rawAttempt(rawRows(await tx.execute(sql`
+        SELECT * FROM ${billingAttempts}
+        WHERE ${billingAttempts.membershipId} = ${membershipId}
+          AND ${billingAttempts.state} = 'active'
+        LIMIT 1
+      `))[0]);
+      if (!current || current.id !== request.expectedCurrentAttemptId) {
+        throw new Error("BILLING_ATTEMPT_STALE");
+      }
+
+      const ended = rawRows(await tx.execute(sql`
         UPDATE ${billingAttempts}
         SET state = ${reason}, ended_at = now(), updated_at = now()
-        WHERE membership_id IN (SELECT membership_id FROM accessible_membership)
-          AND state = 'active'
-        RETURNING membership_id
-      ), next_attempt AS (
-        SELECT accessible_membership.membership_id,
-          COALESCE(MAX(previous.attempt_number), 0)::integer + 1 AS attempt_number
-        FROM accessible_membership
-        LEFT JOIN ${billingAttempts} previous
-          ON previous.membership_id = accessible_membership.membership_id
-        GROUP BY accessible_membership.membership_id
-      ), inserted AS (
-        INSERT INTO ${billingAttempts} (membership_id, attempt_number, idempotency_key, price_reference)
-        SELECT membership_id, attempt_number,
-          ${`membership-checkout:${membershipId}:`} || attempt_number::text,
-          ${priceReference}
-        FROM next_attempt
-        RETURNING id, membership_id, attempt_number, idempotency_key, price_reference, state,
-          stripe_checkout_session_id, checkout_url, created_at, updated_at, ended_at
-      )
-      SELECT * FROM inserted
-    `);
-    const attempt = rawAttempt(rawRows(result)[0]);
-    if (!attempt) forbidden();
-    return attempt;
+        WHERE ${billingAttempts.id} = ${request.expectedCurrentAttemptId}
+          AND ${billingAttempts.state} = 'active'
+        RETURNING id
+      `));
+      if (!ended[0]) throw new Error("BILLING_ATTEMPT_STALE");
+
+      const attemptNumber = current.attemptNumber + 1;
+      const inserted = rawAttempt(rawRows(await tx.execute(sql`
+        INSERT INTO ${billingAttempts} (
+          membership_id, attempt_number, idempotency_key, price_reference, recovery_request_id
+        ) VALUES (
+          ${membershipId}, ${attemptNumber}, ${`membership-checkout:${membershipId}:${attemptNumber}`},
+          ${priceReference}, ${request.recoveryRequestId}
+        )
+        RETURNING *
+      `))[0]);
+      if (!inserted) throw new Error("BILLING_ATTEMPT_CREATE_FAILED");
+      return inserted;
+    });
   },
 };
 

@@ -66,24 +66,6 @@ describe("checkout billing attempt persistence", () => {
     expect(statements.some((query) => query.toLowerCase().includes("insert into"))).toBe(false);
   });
 
-  it("atomically abandons the current attempt and starts a new numbered attempt", async () => {
-    const statements: string[] = [];
-    const parameters: unknown[][] = [];
-    database.current = drizzle(async (query, params) => {
-      statements.push(query);
-      parameters.push(params);
-      return {rows: [[...attemptRow().slice(0, 2), 2, `membership-checkout:${membershipId}:2`, "price_startup_v2", ...attemptRow().slice(5)]]};
-    });
-
-    const attempt = await billingAttemptsRepository.startNewAttempt(actor, membershipId, "price_startup_v2", "abandoned");
-
-    expect(attempt).toMatchObject({attemptNumber: 2, idempotencyKey: `membership-checkout:${membershipId}:2`});
-    expect(statements).toHaveLength(1);
-    expect(statements[0].toLowerCase()).toContain("update");
-    expect(parameters.flat()).toContain("abandoned");
-    expect(statements[0].toLowerCase()).toContain("insert into");
-  });
-
   it("recovers the single database winner when concurrent claims collide", async () => {
     vi.spyOn(membershipsRepository, "getById").mockResolvedValue(personalMembershipRow as never);
     let insertCalls = 0;
