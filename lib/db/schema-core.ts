@@ -38,6 +38,7 @@ export const membershipApplicationStepEnum = pgEnum("membership_application_step
 ]);
 export const companyMemberRoleEnum = pgEnum("company_member_role", ["owner", "admin", "member"]);
 export const jobStateEnum = pgEnum("job_state", ["processing", "completed", "failed"]);
+export const billingAttemptStateEnum = pgEnum("billing_attempt_state", ["active", "completed", "abandoned", "expired"]);
 
 export const profiles = pgTable("profiles", {
   id: text("id").primaryKey(),
@@ -182,6 +183,35 @@ export const memberships = pgTable(
   ],
 );
 
+export const billingAttempts = pgTable(
+  "billing_attempts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    membershipId: uuid("membership_id").notNull().references(() => memberships.id, {onDelete: "cascade"}),
+    attemptNumber: integer("attempt_number").notNull(),
+    idempotencyKey: text("idempotency_key").notNull(),
+    priceReference: text("price_reference").notNull(),
+    state: billingAttemptStateEnum("state").default("active").notNull(),
+    stripeCheckoutSessionId: text("stripe_checkout_session_id"),
+    checkoutUrl: text("checkout_url"),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+    endedAt: timestamp("ended_at", {withTimezone: true}),
+  },
+  (table) => [
+    check("billing_attempts_number_check", sql`${table.attemptNumber} > 0`),
+    unique("billing_attempts_membership_number_unique").on(table.membershipId, table.attemptNumber),
+    unique("billing_attempts_idempotency_key_unique").on(table.idempotencyKey),
+    uniqueIndex("billing_attempts_active_membership_unique")
+      .on(table.membershipId)
+      .where(sql`${table.state} = 'active'`),
+    uniqueIndex("billing_attempts_stripe_session_unique")
+      .on(table.stripeCheckoutSessionId)
+      .where(sql`${table.stripeCheckoutSessionId} IS NOT NULL`),
+    index("billing_attempts_membership_idx").on(table.membershipId),
+  ],
+);
+
 export const jobs = pgTable(
   "jobs",
   {
@@ -221,5 +251,6 @@ export type SeatInvitation = typeof seatInvitations.$inferSelect;
 export type MembershipPlan = typeof membershipPlans.$inferSelect;
 export type MembershipApplication = typeof membershipApplications.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
+export type BillingAttempt = typeof billingAttempts.$inferSelect;
 export type Job = typeof jobs.$inferSelect;
 export type AuditEvent = typeof auditEvents.$inferSelect;

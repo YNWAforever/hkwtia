@@ -15,6 +15,12 @@ function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
   );
 }
 
+function companyBillingManagerScope(actor: Extract<Actor, {kind: "member"}>) {
+  return exists(
+    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipsTable.companyId} AND ${companyMembers.userId} = ${actor.userId} AND (${companyMembers.role} = ${"owner"} OR ${companyMembers.role} = ${"admin"}) AND ${companyMembers.revokedAt} IS NULL`,
+  );
+}
+
 function applicationAccessScope(actor: Extract<Actor, {kind: "member"}>, applicationId: string) {
   return and(
     eq(membershipApplications.id, applicationId),
@@ -95,6 +101,24 @@ export const membershipsRepository = {
     const rows = await db.select().from(membershipsTable).where(membershipScope(actor, membershipId)).limit(1);
     if (!rows[0] && actor.kind === "member") forbidden();
     return rows[0] ?? null;
+  },
+
+  async getBillingAccess(actor: Actor, membershipId: string): Promise<Membership> {
+    if (actor.kind !== "member") forbidden();
+    const db = await getDb();
+    const rows = await db
+      .select()
+      .from(membershipsTable)
+      .where(and(
+        eq(membershipsTable.id, membershipId),
+        or(
+          eq(membershipsTable.ownerUserId, actor.userId),
+          and(sql`${membershipsTable.companyId} IS NOT NULL`, companyBillingManagerScope(actor)),
+        ),
+      ))
+      .limit(1);
+    if (!rows[0]) forbidden();
+    return rows[0];
   },
 
   async list(actor: Actor): Promise<Membership[]> {
