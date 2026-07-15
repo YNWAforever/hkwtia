@@ -160,6 +160,7 @@
                        "tiersTitle":  "會員級別",
                        "tiersIntro":  "以年費為主要顯示；只有個人及初創級別提供月費選項。",
                        "comingSoon":  "M1 將推出自助入會；現階段請聯絡 WTIA 申請。",
+                       "joinAction":  "選擇此計劃",
                        "benefits":  {
                                         "network":  "社群及交流機會",
                                         "programs":  "參與計劃",
@@ -219,6 +220,71 @@
                                          }
                                }
                    },
+    "Join":  {
+                 "backToMembership":  "返回會員計劃",
+                 "title":  "加入 WTIA",
+                 "authDescription":  "輸入電郵地址，我們會傳送安全登入連結，讓你返回此申請。",
+                 "magicLinkSent":  "請查閱電郵中的安全登入連結；連結會帶你返回此申請。",
+                 "sendMagicLink":  "傳送安全登入連結",
+                 "sending":  "傳送中…",
+                 "saving":  "儲存中…",
+                 "continue":  "繼續",
+                 "submitApplication":  "提交申請",
+                 "invalidPlanTitle":  "選擇會員計劃",
+                 "invalidPlanDescription":  "此會員計劃並不可用。請返回會員頁面選擇現有計劃。",
+                 "profileTitle":  "介紹你的資料",
+                 "profileDescription":  "你的個人資料可協助 WTIA 支援會籍及繼續處理申請。",
+                 "companyTitle":  "確認公司資料",
+                 "companyDescription":  "公司會籍必須使用你已在 WTIA 擁有或管理的公司。",
+                 "steps":  {
+                               "plan":  "選擇計劃",
+                               "auth":  "登入",
+                               "profile":  "個人資料",
+                               "company":  "公司資料"
+                           },
+                 "plans":  {
+                               "community":  "社群",
+                               "startup":  "初創",
+                               "corporate":  "企業",
+                               "patron":  "贊助人"
+                           },
+                 "fields":  {
+                                "email":  "電郵地址",
+                                "displayName":  "顯示名稱",
+                                "phone":  "電話（選填）",
+                                "jobTitle":  "職銜（選填）",
+                                "companyId":  "WTIA 公司識別碼",
+                                "legalName":  "公司法定名稱",
+                                "companyDisplayName":  "公司公開名稱",
+                                "website":  "網站（選填）",
+                                "industry":  "行業（選填）",
+                                "sizeBand":  "公司規模（選填）",
+                                "description":  "公司簡介（選填）"
+                            },
+                 "errors":  {
+                                "required":  "請填寫此必填欄位。",
+                                "email":  "請輸入有效電郵地址。",
+                                "auth":  "未能傳送登入連結，請再試一次。",
+                                "save":  "未能儲存申請，請再試一次。",
+                                "company":  "請使用你有權管理的公司。",
+                                "profile":  "提交公司資料前，請先完成個人資料。",
+                                "companyNotAllowed":  "此計劃不接受公司資料。"
+                            },
+                 "status":  {
+                                "complete":  {
+                                                 "title":  "歡迎加入 WTIA",
+                                                 "description":  "你的社群會籍已啟用。會員平台將於 M1 下一步開放。"
+                                             },
+                                "checkout":  {
+                                                 "title":  "申請已儲存",
+                                                 "description":  "你的付費會籍已可進入安全付款程序；付款設定將於下一個 M1 任務完成。"
+                                             },
+                                "review":  {
+                                               "title":  "申請審批中",
+                                               "description":  "WTIA 將審批你的贊助人申請，現時不會收取任何款項。"
+                                           }
+                            }
+             },
     "programs":  {
                      "cpai":  {
                                   "title":  "CPAI",

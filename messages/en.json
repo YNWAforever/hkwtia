@@ -159,6 +159,7 @@
                        "tiersTitle":  "Membership tiers",
                        "tiersIntro":  "Annual membership is shown first. Monthly options are available only for Individual and Startup.",
                        "comingSoon":  "Self-service joining arrives in M1. Contact WTIA for current applications.",
+                       "joinAction":  "Choose this plan",
                        "benefits":  {
                                         "network":  "Community and networking access",
                                         "programs":  "Programme participation",
@@ -218,6 +219,71 @@
                                          }
                                }
                    },
+    "Join":  {
+                 "backToMembership":  "Back to membership",
+                 "title":  "Join WTIA",
+                 "authDescription":  "Enter your email and we will send a secure sign-in link that returns you to this application.",
+                 "magicLinkSent":  "Check your inbox for your secure sign-in link. It will return you to this application.",
+                 "sendMagicLink":  "Send secure sign-in link",
+                 "sending":  "Sending...",
+                 "saving":  "Saving...",
+                 "continue":  "Continue",
+                 "submitApplication":  "Submit application",
+                 "invalidPlanTitle":  "Choose a membership plan",
+                 "invalidPlanDescription":  "This membership plan is unavailable. Return to the membership page to choose one of the current plans.",
+                 "profileTitle":  "Tell us about yourself",
+                 "profileDescription":  "Your profile helps WTIA support your membership and keep your application moving.",
+                 "companyTitle":  "Confirm your company",
+                 "companyDescription":  "Company memberships must use a company that you already own or administer in WTIA.",
+                 "steps":  {
+                               "plan":  "Choose plan",
+                               "auth":  "Sign in",
+                               "profile":  "Your profile",
+                               "company":  "Company details"
+                           },
+                 "plans":  {
+                               "community":  "Community",
+                               "startup":  "Startup",
+                               "corporate":  "Corporate",
+                               "patron":  "Patron"
+                           },
+                 "fields":  {
+                                "email":  "Email address",
+                                "displayName":  "Display name",
+                                "phone":  "Phone (optional)",
+                                "jobTitle":  "Job title (optional)",
+                                "companyId":  "WTIA company ID",
+                                "legalName":  "Legal company name",
+                                "companyDisplayName":  "Public company name",
+                                "website":  "Website (optional)",
+                                "industry":  "Industry (optional)",
+                                "sizeBand":  "Company size (optional)",
+                                "description":  "Company description (optional)"
+                            },
+                 "errors":  {
+                                "required":  "Complete this required field.",
+                                "email":  "Enter a valid email address.",
+                                "auth":  "We could not send the sign-in link. Please try again.",
+                                "save":  "We could not save your application. Please try again.",
+                                "company":  "Use a company that you are allowed to manage.",
+                                "profile":  "Complete your profile before submitting company details.",
+                                "companyNotAllowed":  "This plan does not accept company details."
+                            },
+                 "status":  {
+                                "complete":  {
+                                                 "title":  "Welcome to WTIA",
+                                                 "description":  "Your Community membership is active. Your member portal will be available in the next step of M1."
+                                             },
+                                "checkout":  {
+                                                 "title":  "Application saved",
+                                                 "description":  "Your paid membership is ready for secure checkout. Payment setup arrives in the next M1 task."
+                                             },
+                                "review":  {
+                                               "title":  "Application under review",
+                                               "description":  "WTIA will review your Patron application. No payment has been requested."
+                                           }
+                            }
+             },
     "programs":  {
                      "cpai":  {
                                   "title":  "CPAI",
