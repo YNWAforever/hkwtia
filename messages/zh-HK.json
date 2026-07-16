@@ -384,5 +384,22 @@
     "title": "發生錯誤",
     "description": "頁面未能載入，請再試一次。",
     "retry": "再試一次"
+  },
+  "Portal": {
+    "navigation": "會員平台導覽", "dashboard": "控制台", "profile": "我的個人資料", "company": "公司資料", "signOut": "登出",
+    "dashboardTitle": "你的 WTIA 控制台", "welcome": "歡迎回來，{name}。", "membershipStatus": "會員狀態", "membershipPlan": "{plan} 會員",
+    "onboarding": "啟用進度", "onboardingProgress": "已完成 {completed} / {total} 個步驟", "nextAction": "下一步",
+    "actions": {"complete-profile": "完成個人資料", "complete-company": "完成公司資料", "none": "已全部完成"},
+    "status": {
+      "active": {"title": "會員已啟用", "description": "你可以使用 WTIA 會員福利及服務。"},
+      "past_due": {"title": "付款需要處理", "description": "請更新付款資料以保持會員有效。"},
+      "cancel_at_period_end": {"title": "會員即將結束", "description": "在本期結束前，你仍可使用會員服務。"},
+      "pending_payment": {"title": "付款待處理", "description": "完成付款即可啟用 WTIA 會員。"},
+      "pending_review": {"title": "申請審核中", "description": "WTIA 完成審核後會與你聯絡。"}
+    },
+    "profileTitle": "我的個人資料", "profileDescription": "更新你的個人資料及目錄顯示選項。",
+    "companyTitle": "公司資料", "companyDescription": "公司擁有人及管理員可以更新公司資料。", "companyEmpty": "你目前的會員資格沒有公司資料。",
+    "save": "儲存變更", "fields": {"displayName": "顯示名稱", "phone": "電話", "jobTitle": "職位", "website": "網站", "legalName": "法定名稱", "industry": "行業", "sizeBand": "公司規模", "description": "簡介", "directoryVisible": "在 WTIA 會員目錄顯示此資料"},
+    "readOnly": "只有公司擁有人及管理員可以編輯這些資料。"
   }
 }
