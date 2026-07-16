@@ -6,7 +6,7 @@ const enabled = process.env.RUN_POSTGRES_INTEGRATION === "1";
 const container = `hkwtia-webhook-${process.pid}`;
 
 function docker(args: string[], input?: string): string {
-  return execFileSync("docker", args, {encoding: "utf8", input, stdio: [input ? "pipe" : "ignore", "pipe", "pipe"]});
+  return execFileSync("docker", args, {encoding: "utf8", input, timeout: 20_000, stdio: [input ? "pipe" : "ignore", "pipe", "pipe"]});
 }
 
 function psql(sql: string): string {
@@ -48,6 +48,7 @@ describe.skipIf(!enabled)("webhook ordering on isolated Postgres", () => {
     const winnerSql = `
       BEGIN ISOLATION LEVEL READ COMMITTED;
       SELECT id FROM memberships WHERE id = 'membership-1' FOR UPDATE;
+      \\echo LOCK_ACQUIRED
       SELECT pg_sleep(1.5);
       INSERT INTO audit_events (target_id, action, request_id, metadata)
       VALUES ('membership-1', 'stripe.webhook.processed', 'evt_z', '{"stripeCreated":100}');
@@ -56,9 +57,51 @@ describe.skipIf(!enabled)("webhook ordering on isolated Postgres", () => {
     const winner = spawn("docker", ["exec", "-i", container, "psql", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-At"], {
       stdio: ["pipe", "pipe", "pipe"],
     });
-    winner.stdin.end(winnerSql);
+    winner.stdout.setEncoding("utf8");
+    winner.stderr.setEncoding("utf8");
+    let winnerStdout = "";
+    let winnerStderr = "";
+    winner.stderr.on("data", (chunk: string) => { winnerStderr += chunk; });
 
-    await delay(250);
+    const winnerExitPromise = new Promise<{code: number | null; error?: Error}>((resolve) => {
+      const timeout = setTimeout(() => {
+        winner.kill();
+        resolve({code: null, error: new Error("winner process timed out")});
+      }, 10_000);
+      winner.once("error", (error) => { clearTimeout(timeout); resolve({code: null, error}); });
+      winner.once("exit", (code) => { clearTimeout(timeout); resolve({code}); });
+    });
+    const lockReadyPromise = new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        cleanup();
+        winner.kill();
+        reject(new Error(`winner lock marker timed out: ${winnerStderr}`));
+      }, 5_000);
+      const onData = (chunk: string) => {
+        winnerStdout += chunk;
+        if (winnerStdout.split(/\r?\n/).includes("LOCK_ACQUIRED")) {
+          cleanup();
+          resolve();
+        }
+      };
+      const onError = (error: Error) => { cleanup(); reject(error); };
+      const onExit = (code: number | null) => {
+        cleanup();
+        reject(new Error(`winner exited before lock marker (${code}): ${winnerStderr}`));
+      };
+      function cleanup() {
+        clearTimeout(timeout);
+        winner.stdout.off("data", onData);
+        winner.off("error", onError);
+        winner.off("exit", onExit);
+      }
+      winner.stdout.on("data", onData);
+      winner.once("error", onError);
+      winner.once("exit", onExit);
+    });
+
+    winner.stdin.end(winnerSql);
+    await lockReadyPromise;
     const started = Date.now();
     const waiterOutput = psql(`
       BEGIN ISOLATION LEVEL READ COMMITTED;
@@ -72,12 +115,11 @@ describe.skipIf(!enabled)("webhook ordering on isolated Postgres", () => {
       ROLLBACK;
     `);
     const waitedMs = Date.now() - started;
-    const winnerExit = await new Promise<number | null>((resolve, reject) => {
-      winner.once("error", reject);
-      winner.once("exit", resolve);
-    });
+    const winnerExit = await winnerExitPromise;
 
-    expect(winnerExit).toBe(0);
+    expect(winnerExit.error).toBeUndefined();
+    expect(winnerExit.code, winnerStderr).toBe(0);
+    expect(winnerStdout).toContain("LOCK_ACQUIRED");
     expect(waitedMs).toBeGreaterThanOrEqual(900);
     expect(waiterOutput).toContain("100:evt_z");
   }, 20_000);

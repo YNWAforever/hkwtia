@@ -59,3 +59,20 @@
 ### Post-fix verification
 
 - The build reports the existing stale `caniuse-lite` data warning (13 months old); it does not fail the build and is unrelated to Task 7.
+
+## Post-17592ac concurrency-test stabilization
+
+- Registered winner `error` and `exit` handling immediately after `spawn`, before sending SQL, with bounded process and lock-marker timeouts.
+- Replaced the fixed startup delay with a `LOCK_ACQUIRED` marker emitted only after `SELECT ... FOR UPDATE` returns; the waiter starts only after robust stdout line detection resolves.
+- Retained assertions that the waiter remains blocked until lock release and then observes the winner audit `100:evt_z` in its fresh statement snapshot.
+- Added bounded synchronous Docker commands and deterministic container removal.
+
+### Explicit post-17592ac gate evidence
+
+- Isolated PostgreSQL concurrency test: 3 sequential runs passed, 1 test each; local ephemeral `postgres:16-alpine`, two connections, no live Neon.
+- Focused webhook suites: 3 files, 22 tests passed.
+- Full Vitest: 34 files and 149 tests passed; 1 Docker-gated file/test skipped by default.
+- ESLint: passed with exit code 0.
+- TypeScript `tsc --noEmit`: passed with exit code 0.
+- Visible-string audit: passed; 51 TSX files scanned.
+- Next.js 16.2.10 production build: passed with exit code 0; only the unrelated baseline `caniuse-lite` age warning remained.
