@@ -23,12 +23,24 @@ function resultRows(result: unknown): unknown[] {
   return [];
 }
 
-function resultFlags(result: unknown): {claimed: boolean; matched: boolean} {
+function resultRow(result: unknown): Record<string, unknown> | undefined {
   const row = resultRows(result)[0];
-  if (!row) return {claimed: false, matched: false};
-  if (Array.isArray(row)) return {claimed: Boolean(row[0]), matched: Boolean(row[1])};
-  const value = row as Record<string, unknown>;
-  return {claimed: Boolean(value.claimed), matched: Boolean(value.matched)};
+  return row && !Array.isArray(row) && typeof row === "object" ? row as Record<string, unknown> : undefined;
+}
+
+function requiredString(row: Record<string, unknown> | undefined, key: string): string {
+  const value = row?.[key];
+  if (typeof value !== "string" || value.length === 0) throw new Error("WEBHOOK_MUTATION_FAILED");
+  return value;
+}
+
+function isStale(command: WebhookLifecycleCommand, latest: Record<string, unknown> | undefined): boolean {
+  if (!latest) return false;
+  const latestCreated = Number(latest.stripe_created);
+  const latestEventId = latest.event_id;
+  if (!Number.isSafeInteger(latestCreated) || typeof latestEventId !== "string") throw new Error("WEBHOOK_AUDIT_INVALID");
+  return command.eventCreated < latestCreated
+    || (command.eventCreated === latestCreated && command.eventId <= latestEventId);
 }
 
 function lifecycleSources(command: WebhookLifecycleCommand): readonly string[] {
@@ -94,109 +106,99 @@ export const jobsRepository = {
     try {
       return await db.transaction(async (tx) => {
         const allowedSources = lifecycleSources(command);
-        const result = await tx.execute(sql`
-          WITH claimed AS (
-            INSERT INTO ${jobsTable} (${jobsTable.runKey}, ${jobsTable.kind}, ${jobsTable.state}, ${jobsTable.attemptCount})
-            VALUES (${command.eventId}, ${command.eventType}, 'processing', 1)
-            ON CONFLICT (${jobsTable.runKey}) DO UPDATE
-              SET ${jobsTable.state} = 'processing', ${jobsTable.attemptCount} = ${jobsTable.attemptCount} + 1,
-                  ${jobsTable.lastError} = NULL, ${jobsTable.updatedAt} = now()
-              WHERE ${jobsTable.state} = 'failed'
-            RETURNING ${jobsTable.id}
-          ),
-          locked_membership AS (
-            SELECT ${memberships.id}, ${memberships.status}
-            FROM ${memberships} CROSS JOIN claimed
-            WHERE ${memberships.id} = ${command.membershipId}
-              AND ${memberships.applicationId} = ${command.applicationId}
-              AND ${memberships.planCode} = ${command.planCode}
-              AND ((
-                ${command.eventType} = 'checkout.session.completed'
-                AND (${memberships.stripeCustomerId} IS NULL OR ${memberships.stripeCustomerId} = ${command.stripeCustomerId})
-                AND (${memberships.stripeSubscriptionId} IS NULL OR ${memberships.stripeSubscriptionId} = ${command.stripeSubscriptionId})
-              ) OR (
-                ${command.eventType} <> 'checkout.session.completed'
-                AND ${memberships.stripeCustomerId} = ${command.stripeCustomerId}
-                AND ${memberships.stripeSubscriptionId} = ${command.stripeSubscriptionId}
-              ))
-            FOR UPDATE OF ${memberships}
-          ),
-          latest_event AS (
-            SELECT COALESCE(MAX((${auditEvents.metadata}->>'stripeCreated')::bigint), -1) AS stripe_created
-            FROM locked_membership LEFT JOIN ${auditEvents}
-              ON ${auditEvents.targetType} = 'membership' AND ${auditEvents.targetId} = locked_membership.id
-              AND ${auditEvents.action} IN ('stripe.webhook.processed', 'stripe.webhook.ignored_stale')
-          ),
-          candidate AS (
-            SELECT locked_membership.id, locked_membership.status, latest_event.stripe_created,
-              (${command.eventCreated} < latest_event.stripe_created) AS stale
-            FROM locked_membership CROSS JOIN latest_event
-          ),
-          locked_attempt AS (
-            SELECT ${billingAttempts.id}
-            FROM ${billingAttempts} CROSS JOIN candidate
-            WHERE ${command.eventType} = 'checkout.session.completed'
-              AND ${billingAttempts.membershipId} = candidate.id
+        const claim = resultRow(await tx.execute(sql`INSERT INTO ${jobsTable}
+          (${jobsTable.runKey}, ${jobsTable.kind}, ${jobsTable.state}, ${jobsTable.attemptCount})
+          VALUES (${command.eventId}, ${command.eventType}, 'processing', 1)
+          ON CONFLICT (${jobsTable.runKey}) DO UPDATE
+          SET ${jobsTable.state} = 'processing', ${jobsTable.attemptCount} = ${jobsTable.attemptCount} + 1,
+              ${jobsTable.lastError} = NULL, ${jobsTable.completedAt} = NULL, ${jobsTable.updatedAt} = now()
+          WHERE ${jobsTable.state} = 'failed'
+          RETURNING ${jobsTable.id} AS job_id`));
+        if (!claim) return "duplicate";
+        const jobId = requiredString(claim, "job_id");
+
+        const membership = resultRow(await tx.execute(sql`SELECT ${memberships.id} AS membership_id, ${memberships.status} AS status
+          FROM ${memberships}
+          WHERE ${memberships.id} = ${command.membershipId}
+            AND ${memberships.applicationId} = ${command.applicationId}
+            AND ${memberships.planCode} = ${command.planCode}
+            AND ((${command.eventType} = 'checkout.session.completed'
+              AND (${memberships.stripeCustomerId} IS NULL OR ${memberships.stripeCustomerId} = ${command.stripeCustomerId})
+              AND (${memberships.stripeSubscriptionId} IS NULL OR ${memberships.stripeSubscriptionId} = ${command.stripeSubscriptionId}))
+            OR (${command.eventType} <> 'checkout.session.completed'
+              AND ${memberships.stripeCustomerId} = ${command.stripeCustomerId}
+              AND ${memberships.stripeSubscriptionId} = ${command.stripeSubscriptionId}))
+          FOR UPDATE`));
+        if (!membership) throw new WebhookCorrelationError();
+
+        const latest = resultRow(await tx.execute(sql`SELECT (${auditEvents.metadata}->>'stripeCreated')::bigint AS stripe_created,
+            ${auditEvents.requestId} AS event_id
+          FROM ${auditEvents}
+          WHERE ${auditEvents.targetType} = 'membership' AND ${auditEvents.targetId} = ${command.membershipId}
+            AND ${auditEvents.action} IN ('stripe.webhook.processed', 'stripe.webhook.ignored_stale')
+          ORDER BY stripe_created DESC, event_id DESC LIMIT 1`));
+        const stale = isStale(command, latest);
+
+        let attemptId: string | null = null;
+        if (command.eventType === 'checkout.session.completed') {
+          const attempt = resultRow(await tx.execute(sql`SELECT ${billingAttempts.id} AS attempt_id
+            FROM ${billingAttempts}
+            WHERE ${billingAttempts.membershipId} = ${command.membershipId}
               AND ${billingAttempts.state} = 'active'
               AND ${billingAttempts.stripeCheckoutSessionId} = ${command.stripeCheckoutSessionId}
-            FOR UPDATE OF ${billingAttempts}
-          ),
-          matched AS (
-            SELECT candidate.id, candidate.stale
-            FROM candidate
-            WHERE (candidate.stale OR candidate.status::text IN (${sql.join(allowedSources.map((status) => sql`${status}`), sql`, `)}))
-              AND (${command.eventType} <> 'checkout.session.completed' OR EXISTS (SELECT 1 FROM locked_attempt))
-          ),
-          updated AS (
-            UPDATE ${memberships}
+            FOR UPDATE`));
+          if (!attempt) throw new WebhookCorrelationError();
+          attemptId = requiredString(attempt, "attempt_id");
+        }
+
+        const currentStatus = requiredString(membership, "status");
+        if (!stale && !allowedSources.includes(currentStatus)) throw new WebhookCorrelationError();
+        if (!stale) {
+          const updated = resultRow(await tx.execute(sql`UPDATE ${memberships}
             SET ${memberships.status} = ${command.nextStatus}::membership_status,
                 ${memberships.stripeCustomerId} = ${command.stripeCustomerId},
                 ${memberships.stripeSubscriptionId} = ${command.stripeSubscriptionId},
                 ${memberships.billingPeriodStart} = COALESCE(${command.billingPeriodStart}, ${memberships.billingPeriodStart}),
                 ${memberships.billingPeriodEnd} = COALESCE(${command.billingPeriodEnd}, ${memberships.billingPeriodEnd}),
-                ${memberships.cancelAtPeriodEnd} = ${command.cancelAtPeriodEnd},
-                ${memberships.updatedAt} = now()
-            FROM matched
-            WHERE ${memberships.id} = matched.id AND NOT matched.stale
-            RETURNING ${memberships.id}
-          ),
-          completed_attempt AS (
-            UPDATE ${billingAttempts}
-            SET ${billingAttempts.state} = 'completed', ${billingAttempts.endedAt} = now(), ${billingAttempts.updatedAt} = now()
-            FROM updated, locked_attempt
-            WHERE ${command.eventType} = 'checkout.session.completed'
-              AND ${billingAttempts.id} = locked_attempt.id
-              AND ${billingAttempts.membershipId} = updated.id
-            RETURNING ${billingAttempts.id}
-          ),
-          outcome AS (
-            SELECT matched.id, matched.stale FROM matched
-          ),
-          audited AS (
-            INSERT INTO ${auditEvents} (${auditEvents.actorType}, ${auditEvents.action}, ${auditEvents.targetType}, ${auditEvents.targetId}, ${auditEvents.requestId}, ${auditEvents.metadata})
-            SELECT 'system', CASE WHEN outcome.stale THEN 'stripe.webhook.ignored_stale' ELSE 'stripe.webhook.processed' END,
-              'membership', outcome.id, ${command.eventId},
-              jsonb_build_object('eventType', ${command.eventType}, 'stripeCreated', ${command.eventCreated}, 'status', ${command.nextStatus})
-            FROM outcome RETURNING ${auditEvents.id}
-          ),
-          completed AS (
-            UPDATE ${jobsTable}
-            SET ${jobsTable.state} = 'completed', ${jobsTable.completedAt} = now(), ${jobsTable.updatedAt} = now()
-            FROM claimed WHERE ${jobsTable.id} = claimed.id AND EXISTS (SELECT 1 FROM audited)
-            RETURNING ${jobsTable.id}
-          )
-          SELECT EXISTS(SELECT 1 FROM claimed) AS claimed, EXISTS(SELECT 1 FROM outcome) AS matched
-        `);
-        const flags = resultFlags(result);
-        if (!flags.claimed) return "duplicate";
-        if (!flags.matched) throw new WebhookCorrelationError();
+                ${memberships.cancelAtPeriodEnd} = ${command.cancelAtPeriodEnd}, ${memberships.updatedAt} = now()
+            WHERE ${memberships.id} = ${command.membershipId}
+            RETURNING ${memberships.id} AS membership_id`));
+          if (!updated) throw new Error("WEBHOOK_MUTATION_FAILED");
+          if (attemptId) {
+            const completedAttempt = resultRow(await tx.execute(sql`UPDATE ${billingAttempts}
+              SET ${billingAttempts.state} = 'completed', ${billingAttempts.endedAt} = now(), ${billingAttempts.updatedAt} = now()
+              WHERE ${billingAttempts.id} = ${attemptId} AND ${billingAttempts.state} = 'active'
+              RETURNING ${billingAttempts.id} AS attempt_id`));
+            if (!completedAttempt) throw new Error("WEBHOOK_MUTATION_FAILED");
+          }
+        }
+
+        const action = stale ? 'stripe.webhook.ignored_stale' : 'stripe.webhook.processed';
+        const audit = resultRow(await tx.execute(sql`INSERT INTO ${auditEvents}
+          (${auditEvents.actorType}, ${auditEvents.action}, ${auditEvents.targetType}, ${auditEvents.targetId}, ${auditEvents.requestId}, ${auditEvents.metadata})
+          VALUES ('system', ${action}, 'membership', ${command.membershipId}, ${command.eventId},
+            jsonb_build_object('eventType', ${command.eventType}, 'stripeCreated', ${command.eventCreated}, 'eventId', ${command.eventId}, 'status', ${command.nextStatus}))
+          RETURNING ${auditEvents.id} AS audit_id`));
+        if (!audit) throw new Error("WEBHOOK_MUTATION_FAILED");
+        const completed = resultRow(await tx.execute(sql`UPDATE ${jobsTable}
+          SET ${jobsTable.state} = 'completed', ${jobsTable.completedAt} = now(), ${jobsTable.updatedAt} = now()
+          WHERE ${jobsTable.id} = ${jobId} AND ${jobsTable.state} = 'processing'
+          RETURNING ${jobsTable.id} AS job_id`));
+        if (!completed) throw new Error("WEBHOOK_MUTATION_FAILED");
         return "processed";
-      });
+      }, {isolationLevel: "read committed"});
     } catch (error) {
       if (error instanceof WebhookCorrelationError) throw error;
       try {
-        await db.insert(jobsTable).values({runKey: command.eventId, kind: command.eventType, state: "failed", attemptCount: 1, lastError: redactedError(error)})
-          .onConflictDoUpdate({target: jobsTable.runKey, set: {state: "failed", lastError: redactedError(error), updatedAt: new Date()}});
+        const summary = redactedError(error);
+        await db.execute(sql`INSERT INTO ${jobsTable}
+          (${jobsTable.runKey}, ${jobsTable.kind}, ${jobsTable.state}, ${jobsTable.attemptCount}, ${jobsTable.lastError})
+          VALUES (${command.eventId}, ${command.eventType}, 'failed', 1, ${summary})
+          ON CONFLICT (${jobsTable.runKey}) DO UPDATE
+          SET ${jobsTable.attemptCount} = ${jobsTable.attemptCount} + 1,
+              ${jobsTable.lastError} = ${summary}, ${jobsTable.updatedAt} = now()
+          WHERE ${jobsTable.state} = 'failed'
+          RETURNING ${jobsTable.id}`);
       } catch { /* Preserve the original transient error when failure recording is unavailable. */ }
       throw error;
     }
