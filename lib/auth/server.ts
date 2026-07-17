@@ -32,6 +32,12 @@ export type NeonSession = NonNullable<Awaited<ReturnType<typeof auth.getSession>
 
 /** Read the current Neon Auth session from the request cookies. */
 export async function getSession(): Promise<NeonSession | null> {
-  const result = await auth.getSession();
-  return result.data ?? null;
+  try {
+    const result = await auth.getSession({query: {disableCookieCache: "true", disableRefresh: "true"}});
+    return result.data ?? null;
+  } catch (error) {
+    // Server Components cannot mint Neon Auth cookies; treat that refresh path as signed out.
+    if (error instanceof Error && error.message.includes("Cookies can only be modified")) return null;
+    throw error;
+  }
 }

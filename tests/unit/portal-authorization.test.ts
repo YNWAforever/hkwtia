@@ -15,7 +15,7 @@ import {
 const member: Extract<Actor, {kind: "member"}> = {kind: "member", userId: "user-a"};
 const anonymous: Extract<Actor, {kind: "anonymous"}> = {kind: "anonymous", userId: null};
 
-function dependencies(overrides: Partial<PortalQueryDependencies & PortalCommandDependencies> = {}) {
+function dependencies(overrides: Record<string, unknown> = {}) {
   const profile = {
     id: "user-a",
     displayName: "Ada Member",
@@ -57,7 +57,7 @@ function dependencies(overrides: Partial<PortalQueryDependencies & PortalCommand
       },
     },
     ...overrides,
-  } as PortalQueryDependencies & PortalCommandDependencies;
+  } as unknown as PortalQueryDependencies & PortalCommandDependencies;
 }
 
 describe("protected member portal", () => {
@@ -81,7 +81,7 @@ describe("protected member portal", () => {
   it("does not load private data for cancelled or expired memberships", async () => {
     const deps = dependencies({
       memberships: {
-        async list() { return [{...dependencies().memberships, status: "cancelled" as const}]; },
+        async list() { return [{id: "membership-cancelled", ownerUserId: "user-a", companyId: null, applicationId: "application-cancelled", planCode: "community" as const, status: "cancelled" as const, seatLimit: 1, cancelAtPeriodEnd: false, billingPeriodStart: null, billingPeriodEnd: null}]; },
       },
       companies: {
         async getById() { throw new Error("PRIVATE_READ"); },
@@ -101,7 +101,7 @@ describe("protected member portal", () => {
   it("allows company updates only for an owner or admin", async () => {
     const deps = dependencies({
       memberships: {
-        async list() { return [{...dependencies().memberships, companyId: "company-a", ownerUserId: null}]; },
+        async list() { return [{id: "membership-company-a", ownerUserId: null, companyId: "company-a", applicationId: "application-company-a", planCode: "corporate" as const, status: "active" as const, seatLimit: 5, cancelAtPeriodEnd: false, billingPeriodStart: null, billingPeriodEnd: null}]; },
       },
       companies: {
         async getById() { return {id: "company-a", legalName: "Company A", displayName: "Company A"}; },

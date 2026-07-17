@@ -101,7 +101,7 @@ export async function updateCompany(
   return deps.companies.update(actor, companyId, changes);
 }
 
-export async function updateProfileAction(formData: FormData): Promise<PortalActionState> {
+export async function updateProfileAction(formData: FormData): Promise<void> {
   const {requireActor} = await import("@/lib/auth/actor");
   const actor = await requireActor();
   await updateProfile(actor, {
@@ -112,10 +112,10 @@ export async function updateProfileAction(formData: FormData): Promise<PortalAct
     directoryVisible: formData.get("directoryVisible") === "on",
   });
   revalidatePath("/portal");
-  return {ok: true};
+
 }
 
-export async function updateCompanyAction(formData: FormData): Promise<PortalActionState> {
+export async function updateCompanyAction(formData: FormData): Promise<void> {
   const {requireActor} = await import("@/lib/auth/actor");
   const actor = await requireActor();
   await updateCompany(actor, {
@@ -130,7 +130,7 @@ export async function updateCompanyAction(formData: FormData): Promise<PortalAct
   });
   revalidatePath("/portal");
   revalidatePath("/portal/company");
-  return {ok: true};
+
 }
 
 void (null as unknown as PortalQueryDependencies);

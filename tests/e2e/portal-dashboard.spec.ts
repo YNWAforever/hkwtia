@@ -20,5 +20,5 @@ test("portal navigation does not expose a private dashboard to an anonymous user
 
   expect(response?.status()).toBeLessThan(400);
   await expect(page.getByText("Membership status", {exact: true})).toHaveCount(0);
-  await expect(page.getByRole("link", {name: "Join WTIA", exact: true})).toBeVisible();
+  await expect(page).toHaveURL(new RegExp("/join\\?next=%2Fportal"));
 });
