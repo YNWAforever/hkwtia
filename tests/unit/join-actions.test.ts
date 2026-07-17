@@ -57,7 +57,7 @@ describe("join Server Actions", () => {
     const form = new FormData();
     form.set("email", "not-an-email");
 
-    await expect(requestMagicLink("zh-HK", "startup", {}, form)).resolves.toEqual({
+    await expect(requestMagicLink("zh-HK", "startup", null, {}, form)).resolves.toEqual({
       fieldErrors: {email: "localized:errors.email"},
     });
     expect(authState.input).toBeNull();
@@ -67,12 +67,21 @@ describe("join Server Actions", () => {
     const form = new FormData();
     form.set("email", "member@example.test");
 
-    await expect(requestMagicLink("zh-HK", "startup", {}, form)).rejects.toThrow("NEXT_REDIRECT");
+    await expect(requestMagicLink("zh-HK", "startup", "/portal", {}, form)).rejects.toThrow("NEXT_REDIRECT");
     expect(authState.input).toEqual({
       email: "member@example.test",
-      callbackURL: "https://m1-preview.example.test/zh/join?plan=startup",
+      callbackURL: "https://m1-preview.example.test/zh/join?plan=startup&next=%2Fportal",
     });
-    expect(redirectState.url).toBe("/zh/join?plan=startup&sent=1");
+    expect(redirectState.url).toBe("/zh/join?plan=startup&sent=1&next=%2Fportal");
+  });
+
+  it("carries a portal continuation through the auth request and sent state", async () => {
+    const form = new FormData();
+    form.set("email", "member@example.test");
+
+    await expect(requestMagicLink("en", "community", "/portal/company", {}, form)).rejects.toThrow("NEXT_REDIRECT");
+    expect(authState.input?.callbackURL).toBe("https://m1-preview.example.test/join?plan=community&next=%2Fportal%2Fcompany");
+    expect(redirectState.url).toBe("/join?plan=community&sent=1&next=%2Fportal%2Fcompany");
   });
 
   it("creates a new actor-owned company and completes the scoped application", async () => {

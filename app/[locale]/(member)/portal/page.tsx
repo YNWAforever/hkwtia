@@ -28,9 +28,9 @@ export default async function PortalPage({params}: Props) {
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
-        <StatusCard status={status} title={t(`status.${status}.title`)} description={t(`status.${status}.description`)} />
+        <StatusCard status={status} label={t(`status.${status}.label`)} title={t(`status.${status}.title`)} description={t(`status.${status}.description`)} />
         <section className="glass-card p-5">
-          <p className="text-sm font-medium text-muted-foreground">{t("membershipPlan", {plan: dashboard.memberships[0].planCode})}</p>
+          <p className="text-sm font-medium text-muted-foreground">{t("membershipPlan", {plan: t(`plans.${dashboard.memberships[0].planCode}`)})}</p>
           <h2 className="mt-2 font-serif text-2xl font-semibold">{t("onboarding")}</h2>
           <p className="mt-2 text-sm text-muted-foreground">{t("onboardingProgress", {completed: dashboard.onboarding.completedSteps, total: dashboard.onboarding.totalSteps})}</p>
           <p className="mt-4 text-sm font-medium">{t("nextAction")}: {t(`actions.${action}`)}</p>

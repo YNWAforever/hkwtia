@@ -6,7 +6,7 @@ import {JoinForm} from "@/components/join/join-form";
 import {JoinProgress} from "@/components/join/progress";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
-import {destinationForJoin} from "@/lib/membership/join-navigation";
+import {destinationForJoin, parseJoinContinuation} from "@/lib/membership/join-navigation";
 import {startJoin} from "@/lib/membership/join-service";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {localizedPath} from "@/lib/urls";
@@ -36,8 +36,10 @@ export default async function JoinPage({params, searchParams}: Props) {
   );
 
   const companyPlan = plan === "startup" || plan === "corporate";
+  const continuation = parseJoinContinuation(queryValue(query.next), locale);
   const actor = await getActor().catch(() => null);
   if (actor) {
+    if (continuation) redirect(localizedPath(locale, continuation));
     const application = await startJoin(actor, {plan, applicationId: queryValue(query.application) ?? null}).catch(() => notFound());
     const destination = destinationForJoin(locale, plan, application.applicationId, application.next);
     if (destination.kind === "page") redirect(destination.href!);
@@ -51,7 +53,7 @@ export default async function JoinPage({params, searchParams}: Props) {
     );
   }
 
-  const action = requestMagicLink.bind(null, locale, plan);
+  const action = requestMagicLink.bind(null, locale, plan, continuation);
   return (
     <section className="glass-card p-6 sm:p-10">
       <JoinProgress active="auth" labels={labels} showCompany={companyPlan}/>

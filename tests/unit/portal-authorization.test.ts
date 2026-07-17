@@ -78,6 +78,29 @@ describe("protected member portal", () => {
     expect(dashboard.privateDataAvailable).toBe(true);
   });
 
+  it.each(["active", "past_due", "pending_review"] as const)("returns the recoverable %s dashboard status", async (status) => {
+    const deps = dependencies({
+      memberships: {
+        async list() { return [{id: `membership-${status}`, ownerUserId: "user-a", companyId: null, applicationId: `application-${status}`, planCode: "community" as const, status, seatLimit: 1, cancelAtPeriodEnd: false, billingPeriodStart: null, billingPeriodEnd: null}]; },
+      },
+    });
+
+    await expect(getDashboard(member, deps)).resolves.toMatchObject({primaryStatus: status, memberships: [{status}]});
+  });
+
+  it("excludes revoked company membership roles from dashboard management", async () => {
+    const deps = dependencies({
+      memberships: {
+        async list() { return [{id: "membership-company-a", ownerUserId: null, companyId: "company-a", applicationId: "application-company-a", planCode: "corporate" as const, status: "active" as const, seatLimit: 5, cancelAtPeriodEnd: false, billingPeriodStart: null, billingPeriodEnd: null}]; },
+      },
+      companies: {getById: async () => ({id: "company-a", legalName: "Company A", displayName: "Company A"})},
+      getCompanyRole: async () => null,
+    });
+
+    const dashboard = await getDashboard(member, deps);
+    expect(dashboard.companies).toMatchObject([{id: "company-a", role: null, canManage: false}]);
+  });
+
   it("does not load private data for cancelled or expired memberships", async () => {
     const deps = dependencies({
       memberships: {

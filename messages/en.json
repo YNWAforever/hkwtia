@@ -386,15 +386,15 @@
   },
   "Portal": {
     "navigation": "Member portal navigation", "dashboard": "Dashboard", "profile": "My profile", "company": "Company", "signOut": "Sign out",
-    "dashboardTitle": "Your WTIA dashboard", "welcome": "Welcome back, {name}.", "membershipStatus": "Membership status", "membershipPlan": "{plan} membership",
+    "dashboardTitle": "Your WTIA dashboard", "welcome": "Welcome back, {name}.", "membershipStatus": "Membership status", "membershipPlan": "{plan} membership", "plans": {"community": "Community", "startup": "Startup", "corporate": "Corporate", "patron": "Patron"},
     "onboarding": "Onboarding progress", "onboardingProgress": "{completed} of {total} steps complete", "nextAction": "Next action",
     "actions": {"complete-profile": "Complete your profile", "complete-company": "Complete company details", "none": "You are all set"},
     "status": {
-      "active": {"title": "Your membership is active", "description": "You have access to WTIA member benefits and services."},
-      "past_due": {"title": "Payment needs attention", "description": "Update your billing details to keep your membership active."},
-      "cancel_at_period_end": {"title": "Membership ending soon", "description": "Your membership remains available until the current period ends."},
-      "pending_payment": {"title": "Payment is pending", "description": "Complete payment to activate your WTIA membership."},
-      "pending_review": {"title": "Application under review", "description": "WTIA will contact you when your application has been reviewed."}
+      "active": {"label": "Active", "title": "Your membership is active", "description": "You have access to WTIA member benefits and services."},
+      "past_due": {"label": "Past due", "title": "Payment needs attention", "description": "Update your billing details to keep your membership active."},
+      "cancel_at_period_end": {"label": "Ending soon", "title": "Membership ending soon", "description": "Your membership remains available until the current period ends."},
+      "pending_payment": {"label": "Payment pending", "title": "Payment is pending", "description": "Complete payment to activate your WTIA membership."},
+      "pending_review": {"label": "Under review", "title": "Application under review", "description": "WTIA will contact you when your application has been reviewed."}
     },
     "profileTitle": "My profile", "profileDescription": "Keep your personal details and directory preference up to date.",
     "companyTitle": "Company details", "companyDescription": "Owners and admins can update details for their company.", "companyEmpty": "Your current membership does not include a company profile.",

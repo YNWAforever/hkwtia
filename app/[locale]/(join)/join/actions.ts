@@ -12,7 +12,7 @@ import {serverEnv} from "@/lib/config/env";
 import {applicationsRepository} from "@/lib/db/repos/applications";
 import {companiesRepository} from "@/lib/db/repos/companies";
 import {profilesRepository} from "@/lib/db/repos/profiles";
-import {buildJoinCallback, destinationForJoin} from "@/lib/membership/join-navigation";
+import {buildJoinCallback, destinationForJoin, parseJoinContinuation, type JoinContinuation} from "@/lib/membership/join-navigation";
 import {companySchema, profileSchema} from "@/lib/membership/join-schema";
 import {completeApplication, startJoin} from "@/lib/membership/join-service";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
@@ -32,12 +32,14 @@ async function formError(locale: AppLocale, field: string, key = "errors.require
   return {fieldErrors: {[field]: t(key)}};
 }
 
-export async function requestMagicLink(locale: AppLocale, plan: PlanCode, _state: JoinFormState, formData: FormData): Promise<JoinFormState> {
+export async function requestMagicLink(locale: AppLocale, plan: PlanCode, continuation: JoinContinuation | null, _state: JoinFormState, formData: FormData): Promise<JoinFormState> {
   getPlan(plan);
   const email = emailSchema.safeParse(formData.get("email"));
   if (!email.success) return formError(locale, "email", "errors.email");
   const t = await getTranslations({locale, namespace: "Join"});
-  const callbackURL = buildJoinCallback(serverEnv().appUrl, locale, plan);
+  const next = continuation == null ? null : parseJoinContinuation(continuation, locale);
+  if (continuation != null && !next) return {message: t("errors.auth")};
+  const callbackURL = buildJoinCallback(serverEnv().appUrl, locale, plan, next);
 
   try {
     const result = await auth.signIn.magicLink({email: email.data, callbackURL});
@@ -46,7 +48,7 @@ export async function requestMagicLink(locale: AppLocale, plan: PlanCode, _state
     return {message: t("errors.auth")};
   }
 
-  redirect(nextUrl(locale, "/join", {plan, sent: "1"}));
+  redirect(nextUrl(locale, "/join", {plan, sent: "1", next}));
 }
 
 export async function saveProfile(locale: AppLocale, plan: PlanCode, applicationId: string | null, _state: JoinFormState, formData: FormData): Promise<JoinFormState> {

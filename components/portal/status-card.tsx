@@ -8,10 +8,10 @@ const statusStyles: Record<PortalMembershipStatus, string> = {
   pending_review: "border-violet-500/40 bg-violet-500/10",
 };
 
-export function StatusCard({status, title, description}: {status: PortalMembershipStatus; title: string; description: string}) {
+export function StatusCard({status, label, title, description}: {status: PortalMembershipStatus; label: string; title: string; description: string}) {
   return (
     <section aria-live="polite" className={`rounded-xl border p-5 ${statusStyles[status]}`}>
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{status.replaceAll("_", " ")}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
       <h2 className="mt-2 font-serif text-2xl font-semibold">{title}</h2>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
     </section>

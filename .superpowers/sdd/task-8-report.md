@@ -13,16 +13,24 @@
 - GREEN: focused portal authorization suite passed (1 file, 6 tests).
 - Coverage includes anonymous denial before private reads, active membership onboarding state, cancelled membership short-circuit, self-profile writes, owner/admin company authorization, and locale-safe continuation validation.
 
-## Fresh final verification
-
-- `npm.cmd run lint` - passed.
-- `npm.cmd run audit:strings` - passed; 57 TSX files scanned.
-- `npm.cmd test` - 35 files passed, 1 skipped; 155 tests passed, 1 skipped.
-- `npm.cmd run typecheck` - passed.
-- `npm.cmd run build` - passed on Next.js 16.2.10; `/[locale]/portal`, `/[locale]/portal/profile`, and `/[locale]/portal/company` emitted as dynamic routes.
-- `npm.cmd run test:e2e -- tests/e2e/portal-dashboard.spec.ts --reporter=line --timeout=15000` - 3 tests passed in 5.6 seconds on the normal localhost:3000 dev server.
-- `next-env.d.ts` generated noise was restored before commit.
-
 ## Runtime note
 
 - Without configured local Neon Auth credentials, the auth adapter targets the local site and receives a 404 for `/get-session`; the narrow Server Component cookie-mutation fallback safely treats that path as anonymous. Production still uses the configured `NEON_AUTH_BASE_URL` and cookie secret.
+
+## Review-fix implementation
+
+- `StatusCard` now receives a translated label; English and Traditional Chinese status labels and all four plan labels are message-backed.
+- `getSession` keeps cookie cache/refresh disabled, treats only the exact Next cookie-mutation error as signed out, and normalizes/rethrows SDK `result.error` values.
+- The validated `/portal`, `/portal/profile`, and `/portal/company` continuation survives JoinPage, the magic-link callback URL, and sent-state redirect; localized forms are normalized and external/query/hash/backslash paths are rejected.
+
+## Post-fix verification
+
+- RED: added focused coverage for translated portal status/plan labels, exact Neon Auth session options and error handling, allowlisted magic-link continuations, and deterministic active/past_due/pending_review/cancelled/revoked portal data paths.
+- Focused regression suite: `npm.cmd test -- --run tests/unit/portal-presentational.test.tsx tests/unit/auth-server-runtime.test.ts tests/unit/join-navigation.test.ts tests/unit/join-actions.test.ts tests/unit/portal-authorization.test.ts` - 5 files passed, 46 tests passed.
+- Full Vitest: `npm.cmd test` - 37 files passed, 182 tests passed, 1 skipped.
+- `npm.cmd run lint` - passed.
+- `npm.cmd run audit:strings` - passed; 57 TSX files scanned.
+- `npm.cmd run typecheck` - passed.
+- `npm.cmd run build` - passed on Next.js 16.2.10; `/[locale]/portal`, `/[locale]/portal/profile`, and `/[locale]/portal/company` emitted as dynamic routes.
+- Fresh isolated browser verification: with `PLAYWRIGHT_BASE_URL=http://localhost:3102` and `NEON_AUTH_BASE_URL=http://localhost:3102`, `npm.cmd run test:e2e -- tests/e2e/portal-dashboard.spec.ts --reporter=line --timeout=30000` passed all 3 tests in 17.6 seconds against a clean Next dev server.
+- `next-env.d.ts` generated noise was restored before commit.
