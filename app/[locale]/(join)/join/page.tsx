@@ -25,9 +25,13 @@ export default async function JoinPage({params, searchParams}: Props) {
   setRequestLocale(locale);
   const t = await getTranslations("Join");
   const plan = selectedPlan(queryValue(query.plan));
+  const continuation = parseJoinContinuation(queryValue(query.next), locale);
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
 
-  if (!plan) return (
+  const actor = await getActor().catch(() => null);
+  if (actor && continuation) redirect(localizedPath(locale, continuation));
+
+  if (!plan && !continuation) return (
     <section className="glass-card p-6 sm:p-10">
       <h1 className="font-serif text-4xl font-semibold">{t("invalidPlanTitle")}</h1>
       <p className="mt-4 text-muted-foreground">{t("invalidPlanDescription")}</p>
@@ -35,11 +39,27 @@ export default async function JoinPage({params, searchParams}: Props) {
     </section>
   );
 
+  if (!plan) {
+    const action = requestMagicLink.bind(null, locale, null, continuation);
+    return (
+      <section className="glass-card p-6 sm:p-10">
+        <JoinProgress active="auth" labels={labels} showCompany={false}/>
+        <h1 className="mt-3 font-serif text-4xl font-semibold">{t("title")}</h1>
+        <p className="mt-4 text-muted-foreground">{queryValue(query.sent) ? t("magicLinkSent") : t("authDescription")}</p>
+        <div className="mt-8">
+          <JoinForm action={action} fieldNames={["email"]} pendingLabel={t("sending")} submitLabel={t("sendMagicLink")}>
+            <div>
+              <label className="mb-2 block text-sm font-medium" htmlFor="email">{t("fields.email")}</label>
+              <input aria-describedby="email-error" autoComplete="email" className="min-h-11 w-full rounded-md border border-input bg-background px-3" id="email" name="email" required type="email"/>
+            </div>
+          </JoinForm>
+        </div>
+      </section>
+    );
+  }
+
   const companyPlan = plan === "startup" || plan === "corporate";
-  const continuation = parseJoinContinuation(queryValue(query.next), locale);
-  const actor = await getActor().catch(() => null);
   if (actor) {
-    if (continuation) redirect(localizedPath(locale, continuation));
     const application = await startJoin(actor, {plan, applicationId: queryValue(query.application) ?? null}).catch(() => notFound());
     const destination = destinationForJoin(locale, plan, application.applicationId, application.next);
     if (destination.kind === "page") redirect(destination.href!);

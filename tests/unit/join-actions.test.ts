@@ -84,6 +84,26 @@ describe("join Server Actions", () => {
     expect(redirectState.url).toBe("/join?plan=community&sent=1&next=%2Fportal%2Fcompany");
   });
 
+  it("sends auth-only magic links for a portal continuation without creating a plan", async () => {
+    const form = new FormData();
+    form.set("email", "member@example.test");
+
+    await expect(requestMagicLink("en", null, "/portal", {}, form)).rejects.toThrow("NEXT_REDIRECT");
+    expect(authState.input).toEqual({
+      email: "member@example.test",
+      callbackURL: "https://m1-preview.example.test/join?next=%2Fportal",
+    });
+    expect(redirectState.url).toBe("/join?sent=1&next=%2Fportal");
+  });
+
+  it("rejects an unscoped auth-only magic-link request", async () => {
+    const form = new FormData();
+    form.set("email", "member@example.test");
+
+    await expect(requestMagicLink("en", null, null, {}, form)).resolves.toEqual({message: "localized:errors.auth"});
+    expect(authState.input).toBeNull();
+  });
+
   it("creates a new actor-owned company and completes the scoped application", async () => {
     const form = new FormData();
     form.set("legalName", "Acme Limited");

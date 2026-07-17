@@ -37,7 +37,7 @@ export function destinationForJoin(locale: AppLocale, plan: PlanCode, applicatio
   return {kind: "status", next, href: null};
 }
 
-export function buildJoinCallback(appUrl: string, locale: AppLocale, plan: PlanCode, continuation?: string | null): string {
+export function buildJoinCallback(appUrl: string, locale: AppLocale, plan: PlanCode | null, continuation?: string | null): string {
   let base: URL;
   try {
     base = new URL(appUrl);
@@ -48,7 +48,7 @@ export function buildJoinCallback(appUrl: string, locale: AppLocale, plan: PlanC
     throw new Error("INVALID_APP_URL");
   }
   const callback = new URL(localizedPath(locale, "/join"), base.origin);
-  callback.searchParams.set("plan", plan);
+  if (plan != null) callback.searchParams.set("plan", plan);
   if (continuation != null) {
     const next = parseJoinContinuation(continuation, locale);
     if (!next) throw new Error("INVALID_CONTINUATION");

@@ -32,13 +32,14 @@ async function formError(locale: AppLocale, field: string, key = "errors.require
   return {fieldErrors: {[field]: t(key)}};
 }
 
-export async function requestMagicLink(locale: AppLocale, plan: PlanCode, continuation: JoinContinuation | null, _state: JoinFormState, formData: FormData): Promise<JoinFormState> {
-  getPlan(plan);
+export async function requestMagicLink(locale: AppLocale, plan: PlanCode | null, continuation: JoinContinuation | null, _state: JoinFormState, formData: FormData): Promise<JoinFormState> {
+  if (plan != null) getPlan(plan);
   const email = emailSchema.safeParse(formData.get("email"));
   if (!email.success) return formError(locale, "email", "errors.email");
   const t = await getTranslations({locale, namespace: "Join"});
   const next = continuation == null ? null : parseJoinContinuation(continuation, locale);
   if (continuation != null && !next) return {message: t("errors.auth")};
+  if (plan == null && next == null) return {message: t("errors.auth")};
   const callbackURL = buildJoinCallback(serverEnv().appUrl, locale, plan, next);
 
   try {

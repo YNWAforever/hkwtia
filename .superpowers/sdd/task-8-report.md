@@ -34,3 +34,13 @@
 - `npm.cmd run build` - passed on Next.js 16.2.10; `/[locale]/portal`, `/[locale]/portal/profile`, and `/[locale]/portal/company` emitted as dynamic routes.
 - Fresh isolated browser verification: with `PLAYWRIGHT_BASE_URL=http://localhost:3102` and `NEON_AUTH_BASE_URL=http://localhost:3102`, `npm.cmd run test:e2e -- tests/e2e/portal-dashboard.spec.ts --reporter=line --timeout=30000` passed all 3 tests in 17.6 seconds against a clean Next dev server.
 - `next-env.d.ts` generated noise was restored before commit.
+
+## Final continuation-fix verification
+
+- The no-plan portal redirect (`/join?next=/portal`) now renders the localized magic-link form; an authenticated actor is redirected directly to the validated continuation without creating an application or inventing a membership plan.
+- `buildJoinCallback` omits `plan` for auth-only links while retaining plan-bearing join flows; continuation normalization remains locale-aware and rejects external/query/hash/backslash/admin paths.
+- Final continuation RED/GREEN suite: `npm.cmd test -- --run tests/unit/join-navigation.test.ts tests/unit/join-actions.test.ts tests/unit/join-page.test.tsx` - RED captured 4 expected failures; GREEN passed 3 files, 28 tests after the action-boundary guard.
+- Full Vitest after the final fix: `npm.cmd test` - 38 files passed, 191 tests passed, 1 skipped.
+- Final isolated dev-server browser smoke: `PLAYWRIGHT_BASE_URL=http://localhost:3104` with matching auth/site URLs; `tests/e2e/portal-dashboard.spec.ts` passed 3/3 in 14.1 seconds. This remains anonymous protection/redirect coverage, not an authenticated portal session.
+- Final action-boundary hardening: `(plan=null, continuation=null)` now returns localized auth error without calling Neon Auth; focused continuation suite is 28 tests and full Vitest is 191 passed, 1 skipped.
+- Final production build rerun: `npm.cmd run build` passed on Next.js 16.2.10.

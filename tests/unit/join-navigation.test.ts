@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 
-import {buildJoinCallback, destinationForJoin} from "@/lib/membership/join-navigation";
+import {buildJoinCallback, destinationForJoin, parseJoinContinuation} from "@/lib/membership/join-navigation";
 
 describe("join navigation", () => {
   it.each([
@@ -19,7 +19,19 @@ describe("join navigation", () => {
     expect(callback).not.toContain("evil.example");
   });
 
-  it.each(["https://evil.example/steal", "/portal?evil=1", "/portal#evil", "/portal\\company", "/admin"]) (
+  it("builds an auth-only callback without inventing a membership plan", () => {
+    const callback = buildJoinCallback("https://preview.example.test", "en", null, "/portal");
+    expect(callback).toBe("https://preview.example.test/join?next=%2Fportal");
+  });
+
+  it.each([
+    ["/portal", "en", "/portal"],
+    ["/zh/portal/profile", "zh-HK", "/portal/profile"],
+  ] as const)("normalizes an allowlisted localized continuation %s", (value, locale, canonical) => {
+    expect(parseJoinContinuation(value, locale)).toBe(canonical);
+  });
+
+  it.each(["https://evil.example/steal", "/portal?evil=1", "/portal#evil", "/portal\\company", "/admin", "/portal/admin", "/zh/admin"]) (
     "rejects an unsafe magic-link continuation %s",
     (continuation) => {
       expect(() => buildJoinCallback("https://preview.example.test", "en", "community", continuation)).toThrow("INVALID_CONTINUATION");
