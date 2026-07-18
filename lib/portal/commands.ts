@@ -73,7 +73,7 @@ export async function updateProfile(
   const input = profileUpdateSchema.parse(rawInput);
   const deps = dependencies(inputDependencies);
   await requireRecoverableMembership(actor, deps);
-  const result = await deps.profiles.update(actor, actor.userId, {
+  const result = await deps.profiles.update(actor, actor.profileId, {
     ...input,
     // Profile completion is derived by the portal from this explicit state;
     // callers cannot set an arbitrary onboarding percentage.

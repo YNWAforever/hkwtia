@@ -11,19 +11,19 @@ export type ApplicationUpdate = Partial<Pick<MembershipApplication, "planCode" |
 
 function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
   return exists(
-    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipApplicationsTable.companyId} AND ${companyMembers.userId} = ${actor.userId} AND ${companyMembers.revokedAt} IS NULL`,
+    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipApplicationsTable.companyId} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL`,
   );
 }
 
 function companyAccessScope(actor: Extract<Actor, {kind: "member"}>, companyId: string) {
   return exists(
-    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companyId} AND ${companyMembers.userId} = ${actor.userId} AND ${companyMembers.revokedAt} IS NULL`,
+    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companyId} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL`,
   );
 }
 function applicationScope(actor: Actor, applicationId: string) {
   if (actor.kind === "system") return and(eq(membershipApplicationsTable.id, applicationId), sql`true`);
   if (actor.kind !== "member") return sql`false`;
-  return and(eq(membershipApplicationsTable.id, applicationId), or(eq(membershipApplicationsTable.applicantUserId, actor.userId), companyMembershipScope(actor)));
+  return and(eq(membershipApplicationsTable.id, applicationId), or(eq(membershipApplicationsTable.applicantUserId, actor.profileId), companyMembershipScope(actor)));
 }
 
 export const applicationsRepository = {
@@ -33,7 +33,7 @@ export const applicationsRepository = {
     const rows = await db
       .update(membershipApplicationsTable)
       .set({companyId, updatedAt: new Date()})
-      .where(and(eq(membershipApplicationsTable.id, applicationId), eq(membershipApplicationsTable.applicantUserId, actor.userId), companyAccessScope(actor, companyId)))
+      .where(and(eq(membershipApplicationsTable.id, applicationId), eq(membershipApplicationsTable.applicantUserId, actor.profileId), companyAccessScope(actor, companyId)))
       .returning();
     if (!rows[0]) forbidden();
     return rows[0] ?? null;
@@ -51,13 +51,13 @@ export const applicationsRepository = {
     const db = await getDb();
     if (actor.kind === "system") return db.select().from(membershipApplicationsTable);
     if (actor.kind !== "member") return [];
-    return db.select().from(membershipApplicationsTable).where(or(eq(membershipApplicationsTable.applicantUserId, actor.userId), companyMembershipScope(actor)));
+    return db.select().from(membershipApplicationsTable).where(or(eq(membershipApplicationsTable.applicantUserId, actor.profileId), companyMembershipScope(actor)));
   },
 
   async create(actor: Actor, input: ApplicationInput): Promise<MembershipApplication> {
     requireMember(actor);
     const db = await getDb();
-    const rows = await db.insert(membershipApplicationsTable).values({...input, applicantUserId: actor.userId}).returning();
+    const rows = await db.insert(membershipApplicationsTable).values({...input, applicantUserId: actor.profileId}).returning();
     return rows[0];
   },
 

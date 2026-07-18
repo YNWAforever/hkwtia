@@ -135,10 +135,10 @@ async function lockCheckoutMembership(
       ${memberships.billingPeriodEnd} AS billing_period_end
     FROM ${memberships}
     WHERE ${memberships.id} = ${membershipId}
-      AND (${memberships.ownerUserId} = ${actor.userId} OR EXISTS (
+      AND (${memberships.ownerUserId} = ${actor.profileId} OR EXISTS (
         SELECT 1 FROM ${companyMembers}
         WHERE ${companyMembers.companyId} = ${memberships.companyId}
-          AND ${companyMembers.userId} = ${actor.userId}
+          AND ${companyMembers.userId} = ${actor.profileId}
           AND ${companyMembers.revokedAt} IS NULL
           AND (${companyMembers.role} = ${"owner"} OR ${companyMembers.role} = ${"admin"})
       ))
@@ -157,10 +157,10 @@ async function lockCheckoutMembership(
 function memberAttemptScope(actor: Extract<Actor, {kind: "member"}>) {
   return exists(sql`SELECT 1 FROM ${memberships}
     WHERE ${memberships.id} = ${billingAttempts.membershipId}
-      AND (${memberships.ownerUserId} = ${actor.userId} OR EXISTS (
+      AND (${memberships.ownerUserId} = ${actor.profileId} OR EXISTS (
         SELECT 1 FROM ${companyMembers}
         WHERE ${companyMembers.companyId} = ${memberships.companyId}
-          AND ${companyMembers.userId} = ${actor.userId}
+          AND ${companyMembers.userId} = ${actor.profileId}
           AND ${companyMembers.revokedAt} IS NULL
           AND (${companyMembers.role} = ${"owner"} OR ${companyMembers.role} = ${"admin"})
       ))`);

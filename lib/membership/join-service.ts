@@ -61,7 +61,7 @@ export async function startJoin(
   }
 
   if (actor.kind !== "member") throw new Error("UNAUTHORIZED");
-  if (profiles) await profiles.ensure(actor, {id: actor.userId, displayName: actor.userId, onboardingState: "profile"});
+  if (profiles) await profiles.ensure(actor, {id: actor.profileId, displayName: actor.profileId, onboardingState: "profile"});
   const application = await applications.create(actor, {
     planCode: plan.code,
     currentStep: "profile",

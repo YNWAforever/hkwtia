@@ -12,13 +12,13 @@ export type CompanyUpdate = Partial<CompanyInput>;
 
 function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
   return exists(
-    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companiesTable.id} AND ${companyMembers.userId} = ${actor.userId} AND ${companyMembers.revokedAt} IS NULL`,
+    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companiesTable.id} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL`,
   );
 }
 
 function companyManagementScope(actor: Extract<Actor, {kind: "member"}>) {
   return exists(
-    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companiesTable.id} AND ${companyMembers.userId} = ${actor.userId} AND (${companyMembers.role} = ${"owner"} OR ${companyMembers.role} = ${"admin"}) AND ${companyMembers.revokedAt} IS NULL`,
+    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companiesTable.id} AND ${companyMembers.userId} = ${actor.profileId} AND (${companyMembers.role} = ${"owner"} OR ${companyMembers.role} = ${"admin"}) AND ${companyMembers.revokedAt} IS NULL`,
   );
 }
 
@@ -52,7 +52,7 @@ export const companiesRepository = {
         UPDATE ${membershipApplications}
         SET company_id = ${companyId}, current_step = 'company', updated_at = NOW()
         WHERE id = ${applicationId}
-          AND applicant_user_id = ${actor.userId}
+          AND applicant_user_id = ${actor.profileId}
           AND company_id IS NULL
         RETURNING id
       ), created_company AS (
@@ -67,7 +67,7 @@ export const companiesRepository = {
         RETURNING *
       ), created_owner AS (
         INSERT INTO ${companyMembers} (id, company_id, user_id, role)
-        SELECT ${memberId}, id, ${actor.userId}, 'owner'
+        SELECT ${memberId}, id, ${actor.profileId}, 'owner'
         FROM created_company
         RETURNING company_id
       )

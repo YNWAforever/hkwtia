@@ -126,7 +126,7 @@ export async function getDashboard(
     .map((membership) => ({...membership, applicationId: membership.applicationId ?? null, cancelAtPeriodEnd: membership.cancelAtPeriodEnd ?? false, billingPeriodStart: membership.billingPeriodStart ?? null, billingPeriodEnd: membership.billingPeriodEnd ?? null} satisfies DashboardMembership));
   if (memberships.length === 0) throw new Error("MEMBERSHIP_INACTIVE");
 
-  const profile = await deps.profiles.getById(actor, actor.userId);
+  const profile = await deps.profiles.getById(actor, actor.profileId);
   if (!profile) throw new Error("PROFILE_NOT_FOUND");
 
   const companyIds = [...new Set(memberships.flatMap((membership) => membership.companyId ? [membership.companyId] : []))];

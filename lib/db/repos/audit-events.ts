@@ -10,7 +10,7 @@ export type AuditEventInput = Pick<AuditEvent, "action" | "targetType" | "target
 
 function auditScope(actor: Actor, targetType: string, targetId: string) {
   if (actor.kind === "system") return and(eq(auditEventsTable.targetType, targetType), eq(auditEventsTable.targetId, targetId), sql`true`);
-  if (actor.kind === "member") return and(eq(auditEventsTable.actorUserId, actor.userId), eq(auditEventsTable.targetType, targetType), eq(auditEventsTable.targetId, targetId));
+  if (actor.kind === "member") return and(eq(auditEventsTable.actorUserId, actor.profileId), eq(auditEventsTable.targetType, targetType), eq(auditEventsTable.targetId, targetId));
   return sql`false`;
 }
 
@@ -22,7 +22,7 @@ export const auditEventsRepository = {
       .insert(auditEventsTable)
       .values({
         ...input,
-        actorUserId: actor.userId,
+        actorUserId: actor.kind === "system" ? null : actor.profileId,
         actorType: actor.kind,
       })
       .returning();

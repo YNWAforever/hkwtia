@@ -112,7 +112,7 @@ async function ensureProfile(
 ) {
   if (!deps.profiles) return;
   await deps.profiles.ensure(actor, {
-    id: actor.userId,
+    id: actor.profileId,
     displayName: profile.displayName,
     ...(profile.locale ? {locale: profile.locale} : {}),
     onboardingState: "profile",
@@ -242,7 +242,7 @@ export async function completeApplication(
   if (application.status === "pending_review") return {applicationId: application.id, next: "review"};
   if (application.status === "pending_payment") return {applicationId: application.id, next: "checkout"};
 
-  const target = companyId ? {ownerUserId: null, companyId} : {ownerUserId: actor.userId, companyId: null};
+  const target = companyId ? {ownerUserId: null, companyId} : {ownerUserId: actor.profileId, companyId: null};
   const membershipStatus = plan.billingBehavior === "free" ? "active" : plan.billingBehavior === "review" ? "pending_review" : "pending_payment";
   const membership = await createMembershipOnce(actor, application.id, {
     ...target,

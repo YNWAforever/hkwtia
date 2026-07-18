@@ -118,7 +118,7 @@ describe("protected member portal", () => {
     const deps = dependencies();
 
     await expect(updateProfile(member, {displayName: "Updated Ada"}, deps)).resolves.toMatchObject({displayName: "Updated Ada"});
-    await expect(updateProfile({...member, userId: "user-b"}, {displayName: "Nope"}, deps)).rejects.toThrow("FORBIDDEN");
+    await expect(updateProfile({...member, profileId: "user-b"}, {displayName: "Nope"}, deps)).rejects.toThrow("FORBIDDEN");
   });
 
   it("allows company updates only for an owner or admin", async () => {

@@ -65,7 +65,7 @@ function activeMembers(members: CompanyMember[]): CompanyMember[] {
 
 function managerFor(actor: Actor, members: CompanyMember[], companyId: string): CompanyMember {
   requireMember(actor);
-  const current = members.find((member) => member.companyId === companyId && member.userId === actor.userId && member.revokedAt === null);
+  const current = members.find((member) => member.companyId === companyId && member.userId === actor.profileId && member.revokedAt === null);
   if (!current || (current.role !== "owner" && current.role !== "admin")) forbidden();
   return current;
 }
@@ -96,7 +96,7 @@ export function createSeatService(deps: SeatServiceDependencies) {
         if (activeMembers(members).length + pending.length >= company.seatLimit) throw new SeatServiceError("SEAT_LIMIT_REACHED");
         const row = await deps.insertInvitation({
           companyId,
-          inviterUserId: actor.userId,
+          inviterUserId: actor.profileId,
           invitedEmail: email,
           role,
           tokenDigest,
@@ -121,20 +121,20 @@ export function createSeatService(deps: SeatServiceDependencies) {
         if (invitation.revokedAt !== null) throw new SeatServiceError("INVITATION_REVOKED");
         if (invitation.acceptedAt !== null) throw new SeatServiceError("INVITATION_ALREADY_ACCEPTED");
         if (invitation.expiresAt.getTime() <= Date.now()) throw new SeatServiceError("INVITATION_EXPIRED");
-        const profile = await deps.getProfileByUserId(actor, actor.userId);
+        const profile = await deps.getProfileByUserId(actor, actor.profileId);
         const actorEmail = normalizeEmail(profile?.email ?? (await deps.getUserEmail?.(actor) ?? ""));
         if (actorEmail !== invitation.invitedEmail) throw new SeatServiceError("INVITATION_EMAIL_MISMATCH");
-        await deps.ensureProfile?.(actor, actor.userId, actorEmail.split("@")[0] || "WTIA member", transaction);
+        await deps.ensureProfile?.(actor, actor.profileId, actorEmail.split("@")[0] || "WTIA member", transaction);
         const company = deps.getCompanyById
           ? await deps.getCompanyById(invitation.companyId, transaction)
           : await deps.getCompany(actor, invitation.companyId, transaction);
         if (!company) forbidden();
         const members = await deps.listMembers(invitation.companyId, transaction);
-        if (activeMembers(members).some((member) => member.userId === actor.userId)) throw new SeatServiceError("MEMBERSHIP_EXISTS");
+        if (activeMembers(members).some((member) => member.userId === actor.profileId)) throw new SeatServiceError("MEMBERSHIP_EXISTS");
         if (activeMembers(members).length >= company.seatLimit) throw new SeatServiceError("SEAT_LIMIT_REACHED");
         try {
-          const member = await deps.insertMember({companyId: invitation.companyId, userId: actor.userId, role: invitation.role}, transaction);
-          await deps.markInvitationAccepted(invitation.id, actor.userId, transaction);
+          const member = await deps.insertMember({companyId: invitation.companyId, userId: actor.profileId, role: invitation.role}, transaction);
+          await deps.markInvitationAccepted(invitation.id, actor.profileId, transaction);
           return member;
         } catch (error) {
           if (error instanceof Error && /unique|duplicate|company.?user/i.test(error.message)) throw new SeatServiceError("MEMBERSHIP_EXISTS");
@@ -200,7 +200,7 @@ async function productionDependencies(): Promise<SeatServiceDependencies> {
       .from(companies)
       .innerJoin(memberships, eq(memberships.companyId, companies.id))
       .innerJoin(companyMembers, eq(companyMembers.companyId, companies.id))
-      .where(and(eq(companies.id, companyId), eq(companyMembers.userId, actor.userId), isNull(companyMembers.revokedAt), inArray(memberships.status, ["active", "past_due", "cancel_at_period_end"])))
+      .where(and(eq(companies.id, companyId), eq(companyMembers.userId, actor.profileId), isNull(companyMembers.revokedAt), inArray(memberships.status, ["active", "past_due", "cancel_at_period_end"])))
       .limit(1);
     return rows[0] ?? null;
   };
@@ -220,13 +220,13 @@ async function productionDependencies(): Promise<SeatServiceDependencies> {
     listMembers: async (companyId, transaction) => ((transaction ?? db) as typeof db).select().from(companyMembers).where(and(eq(companyMembers.companyId, companyId), isNull(companyMembers.revokedAt))),
     listPendingInvitations: async (companyId, transaction) => ((transaction ?? db) as typeof db).select().from(seatInvitations).where(and(eq(seatInvitations.companyId, companyId), isNull(seatInvitations.acceptedAt), isNull(seatInvitations.revokedAt), gt(seatInvitations.expiresAt, new Date()))),
     getProfileByUserId: async (actor, userId) => {
-      if (actor.kind !== "member" || actor.userId !== userId) forbidden();
+      if (actor.kind !== "member" || actor.profileId !== userId) forbidden();
       const rows = await db.select({id: profiles.id, displayName: profiles.displayName}).from(profiles).where(eq(profiles.id, userId)).limit(1);
       return rows[0] ?? null;
     },
     ensureProfile: async (actor, userId, displayName, transaction) => {
-      if (actor.kind !== "member" || actor.userId !== userId) forbidden();
-      await ((transaction ?? db) as typeof db).insert(profiles).values({id: userId, authUserId: userId, displayName: displayName.slice(0, 120) || "WTIA member"}).onConflictDoNothing();
+      if (actor.kind !== "member" || actor.profileId !== userId) forbidden();
+      await ((transaction ?? db) as typeof db).insert(profiles).values({id: userId, authUserId: actor.userId, displayName: displayName.slice(0, 120) || "WTIA member"}).onConflictDoNothing();
     },
     getUserEmail: async () => {
       try {

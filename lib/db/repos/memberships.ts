@@ -11,13 +11,13 @@ export type MembershipUpdate = Partial<Pick<Membership, "planCode" | "status" | 
 
 function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
   return exists(
-    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipsTable.companyId} AND ${companyMembers.userId} = ${actor.userId} AND ${companyMembers.revokedAt} IS NULL`,
+    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipsTable.companyId} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL`,
   );
 }
 
 function companyBillingManagerScope(actor: Extract<Actor, {kind: "member"}>) {
   return exists(
-    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipsTable.companyId} AND ${companyMembers.userId} = ${actor.userId} AND (${companyMembers.role} = ${"owner"} OR ${companyMembers.role} = ${"admin"}) AND ${companyMembers.revokedAt} IS NULL`,
+    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipsTable.companyId} AND ${companyMembers.userId} = ${actor.profileId} AND (${companyMembers.role} = ${"owner"} OR ${companyMembers.role} = ${"admin"}) AND ${companyMembers.revokedAt} IS NULL`,
   );
 }
 
@@ -25,9 +25,9 @@ function applicationAccessScope(actor: Extract<Actor, {kind: "member"}>, applica
   return and(
     eq(membershipApplications.id, applicationId),
     or(
-      eq(membershipApplications.applicantUserId, actor.userId),
+      eq(membershipApplications.applicantUserId, actor.profileId),
       exists(
-        sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipApplications.companyId} AND ${companyMembers.userId} = ${actor.userId} AND ${companyMembers.revokedAt} IS NULL`,
+        sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipApplications.companyId} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL`,
       ),
     ),
   );
@@ -41,7 +41,7 @@ async function authorizeMemberCreate(
   const hasOwner = input.ownerUserId !== null && input.ownerUserId !== undefined;
   const hasCompany = input.companyId !== null && input.companyId !== undefined;
   if (hasOwner === hasCompany) forbidden();
-  if (hasOwner && input.ownerUserId !== actor.userId) forbidden();
+  if (hasOwner && input.ownerUserId !== actor.profileId) forbidden();
 
   if (!input.applicationId) forbidden();
   if (hasCompany) {
@@ -50,7 +50,7 @@ async function authorizeMemberCreate(
       .from(companyMembers)
       .where(and(
         eq(companyMembers.companyId, input.companyId!),
-        eq(companyMembers.userId, actor.userId),
+        eq(companyMembers.userId, actor.profileId),
         isNull(companyMembers.revokedAt),
       ))
       .limit(1);
@@ -78,7 +78,7 @@ function membershipScope(actor: Actor, membershipId: string) {
   if (actor.kind !== "member") return sql`false`;
   return and(
     eq(membershipsTable.id, membershipId),
-    or(eq(membershipsTable.ownerUserId, actor.userId), and(sql`${membershipsTable.companyId} IS NOT NULL`, companyMembershipScope(actor))),
+    or(eq(membershipsTable.ownerUserId, actor.profileId), and(sql`${membershipsTable.companyId} IS NOT NULL`, companyMembershipScope(actor))),
   );
 }
 
@@ -90,7 +90,7 @@ export const membershipsRepository = {
       ? and(eq(membershipsTable.applicationId, applicationId), sql`true`)
       : and(
           eq(membershipsTable.applicationId, applicationId),
-          or(eq(membershipsTable.ownerUserId, actor.userId), and(sql`${membershipsTable.companyId} IS NOT NULL`, companyMembershipScope(actor))),
+          or(eq(membershipsTable.ownerUserId, actor.profileId), and(sql`${membershipsTable.companyId} IS NOT NULL`, companyMembershipScope(actor))),
         );
     const rows = await db.select().from(membershipsTable).where(where).limit(1);
     return rows[0] ?? null;
@@ -112,7 +112,7 @@ export const membershipsRepository = {
       .where(and(
         eq(membershipsTable.id, membershipId),
         or(
-          eq(membershipsTable.ownerUserId, actor.userId),
+          eq(membershipsTable.ownerUserId, actor.profileId),
           and(sql`${membershipsTable.companyId} IS NOT NULL`, companyBillingManagerScope(actor)),
         ),
       ))
@@ -129,7 +129,7 @@ export const membershipsRepository = {
     return db
       .select()
       .from(membershipsTable)
-      .where(or(eq(membershipsTable.ownerUserId, actor.userId), companyMembershipScope(actor)));
+      .where(or(eq(membershipsTable.ownerUserId, actor.profileId), companyMembershipScope(actor)));
   },
 
   async create(actor: Actor, input: MembershipInput): Promise<Membership> {

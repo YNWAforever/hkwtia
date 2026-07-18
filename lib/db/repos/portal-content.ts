@@ -4,7 +4,7 @@ import {and, eq, gt, inArray, isNull, or, sql} from "drizzle-orm";
 
 import {getDb} from "@/lib/db/repos/common";
 import {companies, companyMembers, memberships, profiles, seatInvitations, type CompanyMember, type SeatInvitation} from "@/lib/db/server-schema";
-import {forbidden, type Actor, type CompanyRole} from "@/lib/membership/lifecycle";
+import {forbidden, requireMember, type Actor, type CompanyRole} from "@/lib/membership/lifecycle";
 
 export type DirectoryCandidate = Readonly<{
   userId: string;
@@ -20,16 +20,16 @@ export type DirectoryCandidate = Readonly<{
 }>;
 export type SeatOverview = Readonly<{companyId: string; seatLimit: number; members: CompanyMember[]; invitations: SeatInvitation[]; canManage: boolean; canGrantOwner: boolean}>;
 
-type MemberActor = Extract<Actor, {kind: "member"}>;
-
 export const portalContentRepository = {
-  async getCompanyRole(actor: MemberActor, companyId: string): Promise<CompanyRole | null> {
+  async getCompanyRole(actor: Actor, companyId: string): Promise<CompanyRole | null> {
+    requireMember(actor);
     if (actor.companyRoles?.[companyId]) return actor.companyRoles[companyId];
     const db = await getDb();
     const rows = await db.select({role: companyMembers.role}).from(companyMembers).where(and(eq(companyMembers.companyId, companyId), eq(companyMembers.userId, actor.profileId), isNull(companyMembers.revokedAt))).limit(1);
     return rows[0]?.role ?? null;
   },
-  async listDirectory(actor: MemberActor): Promise<DirectoryCandidate[]> {
+  async listDirectory(actor: Actor): Promise<DirectoryCandidate[]> {
+    requireMember(actor);
     const db = await getDb();
     const activeMembership = sql`EXISTS (
       SELECT 1 FROM ${memberships} AS directory_membership
@@ -42,7 +42,6 @@ export const portalContentRepository = {
         ))
     )`;
     const rows = await db.select({userId: profiles.id, displayName: profiles.displayName, jobTitle: profiles.jobTitle, companyId: companyMembers.companyId, companyDisplayName: companies.displayName, industry: companies.industry, sizeBand: companies.sizeBand, profileDirectoryVisible: profiles.directoryVisible, companyDirectoryVisible: companies.directoryVisible}).from(profiles).leftJoin(companyMembers, and(eq(companyMembers.userId, profiles.id), isNull(companyMembers.revokedAt))).leftJoin(companies, eq(companies.id, companyMembers.companyId)).where(and(activeMembership, eq(profiles.directoryVisible, true), or(isNull(companyMembers.id), eq(companies.directoryVisible, true))));
-    void actor;
     return rows.map((row) => ({...row, companyId: row.companyId ?? null, companyDisplayName: row.companyDisplayName ?? null, industry: row.industry ?? null, sizeBand: row.sizeBand ?? null, companyDirectoryVisible: row.companyId === null || row.companyDirectoryVisible === true, active: true}));
   },
   async getSeatOverview(actor: Actor, companyId: string): Promise<SeatOverview | null> {
