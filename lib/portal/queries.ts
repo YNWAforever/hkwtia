@@ -199,3 +199,6 @@ export async function getDashboard(
 export function requirePortalMember(actor: Actor): asserts actor is Extract<Actor, {kind: "member"}> {
   if (actor.kind !== "member") forbidden();
 }
+
+export {getDocuments, getMemberEvents, searchDirectory} from './content';
+export type {DirectoryPage, DirectoryQuery, DirectoryRecord, DocumentItem, PortalContentDependencies} from './content';
