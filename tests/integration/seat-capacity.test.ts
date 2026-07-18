@@ -3,7 +3,7 @@ import {createHash} from "node:crypto";
 import type {Actor} from "@/lib/membership/lifecycle";
 import {createSeatService, type SeatServiceDependencies} from "@/lib/db/repos/seats";
 
-const actor = (userId: string): Actor => ({kind: "member", userId});
+const actor = (userId: string): Actor => ({kind: "member", userId, profileId: userId});
 type TestRow = {id: string; [key: string]: unknown};
 const digest = (token: string) => createHash("sha256").update(token).digest("hex");
 

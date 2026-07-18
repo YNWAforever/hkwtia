@@ -10,16 +10,42 @@ import {
 export {MEMBERSHIP_PLAN_CODES, MEMBERSHIP_STATUSES};
 export type {MembershipPlanCode, MembershipStatus};
 
-/** The identity and authorization context supplied to actor-first services. */
-type CompanyRole = "owner" | "admin" | "member";
-type CompanyScopedActor = {
-  readonly companyRoles?: Readonly<Record<string, CompanyRole>>;
-};
-
+export type CompanyRole = "owner" | "admin" | "member";
+export type AuthenticatedActorKind = "member" | "staff" | "exco" | "superadmin";
+export type AuthenticatedActor = {
+  [Kind in AuthenticatedActorKind]: Readonly<{
+    kind: Kind;
+    userId: string;
+    profileId: string;
+    companyRoles?: Readonly<Record<string, CompanyRole>>;
+  }>;
+}[AuthenticatedActorKind];
+export type AdminActor = Extract<AuthenticatedActor, {kind: "staff" | "exco" | "superadmin"}>;
 export type Actor =
-  | ({readonly kind: "anonymous"; readonly userId: null} & CompanyScopedActor)
-  | ({readonly kind: "member"; readonly userId: string} & CompanyScopedActor)
-  | {readonly kind: "system"; readonly userId: null; readonly source: "stripe-webhook"};
+  | Readonly<{kind: "anonymous"; userId: null}>
+  | AuthenticatedActor
+  | Readonly<{kind: "system"; userId: null; source: "stripe-webhook"}>;
+
+export class AuthorizationError extends Error {
+  readonly code = "FORBIDDEN";
+
+  constructor(message = "FORBIDDEN") {
+    super(message);
+    this.name = "AuthorizationError";
+  }
+}
+
+export function forbidden(): never {
+  throw new AuthorizationError();
+}
+
+export function requireSystem(actor: Actor): asserts actor is Extract<Actor, {kind: "system"}> {
+  if (actor.kind !== "system" || actor.source !== "stripe-webhook") forbidden();
+}
+
+export function requireMember(actor: Actor): asserts actor is Extract<Actor, {kind: "member"}> {
+  if (actor.kind !== "member") forbidden();
+}
 
 export interface MembershipRecord {
   readonly id: string;
@@ -35,10 +61,6 @@ export interface MembershipRecord {
   readonly billingPeriodEnd?: Date | null;
 }
 
-/**
- * Lifecycle transitions are intentionally explicit. Stripe webhook handlers and
- * future services can call this guard without duplicating status policy.
- */
 const allowedTransitions: Readonly<Record<MembershipStatus, readonly MembershipStatus[]>> = {
   pending_payment: ["active", "expired"],
   pending_review: ["active", "cancelled", "expired"],

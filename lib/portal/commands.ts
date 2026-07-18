@@ -7,7 +7,7 @@ import type {Actor} from "@/lib/membership/lifecycle";
 import {companiesRepository} from "@/lib/db/repos/companies";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
-import {forbidden, requireMember} from "@/lib/db/repos/common";
+import {forbidden, requireMember} from "@/lib/membership/lifecycle";
 import {isPortalMembershipStatus, type PortalQueryDependencies} from "@/lib/portal/queries";
 
 const profileUpdateSchema = z.object({

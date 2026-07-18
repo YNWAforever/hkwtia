@@ -1,14 +1,11 @@
 import "server-only";
 
-import {and, eq, isNull, or, sql} from "drizzle-orm";
-
 import {events as publicEvents} from "@/content/events";
 import type {EventRecord} from "@/content/schemas";
 import {listReceipts, type Receipt} from "@/lib/billing/receipt-service";
-import {companyMembers, companies, memberships, profiles} from "@/lib/db/server-schema";
-import {getDb, requireMember} from "@/lib/db/repos/common";
+import {portalContentRepository, type DirectoryCandidate} from "@/lib/db/repos/portal-content";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
-import type {Actor, MembershipRecord} from "@/lib/membership/lifecycle";
+import {requireMember, type Actor, type MembershipRecord} from "@/lib/membership/lifecycle";
 
 type MemberActor = Extract<Actor, {kind: "member"}>;
 
@@ -31,12 +28,6 @@ export type DirectoryRecord = Readonly<{
   companyDisplayName: string | null;
   industry: string | null;
   sizeBand: string | null;
-}>;
-
-type DirectoryCandidate = DirectoryRecord & Readonly<{
-  active: boolean;
-  profileDirectoryVisible: boolean;
-  companyDirectoryVisible: boolean;
 }>;
 
 export type DirectoryPage = Readonly<{
@@ -178,56 +169,9 @@ async function requirePortalEntitlement(actor: Actor, dependencies: PortalConten
   return actor;
 }
 
-async function listDirectoryRows(actor: MemberActor): Promise<DirectoryCandidate[]> {
-  const db = await getDb();
-  const activeMembership = sql`EXISTS (
-    SELECT 1 FROM ${memberships} AS directory_membership
-    WHERE directory_membership.status IN ('active', 'past_due', 'cancel_at_period_end')
-      AND (
-        directory_membership.owner_user_id = ${profiles.id}
-        OR EXISTS (
-          SELECT 1 FROM ${companyMembers} AS directory_membership_member
-          WHERE directory_membership_member.company_id = directory_membership.company_id
-            AND directory_membership_member.user_id = ${profiles.id}
-            AND directory_membership_member.revoked_at IS NULL
-        )
-      )
-  )`;
-  const rows = await db
-    .select({
-      userId: profiles.id,
-      displayName: profiles.displayName,
-      jobTitle: profiles.jobTitle,
-      companyId: companyMembers.companyId,
-      companyDisplayName: companies.displayName,
-      industry: companies.industry,
-      sizeBand: companies.sizeBand,
-      profileDirectoryVisible: profiles.directoryVisible,
-      companyDirectoryVisible: companies.directoryVisible,
-    })
-    .from(profiles)
-    .leftJoin(companyMembers, and(eq(companyMembers.userId, profiles.id), isNull(companyMembers.revokedAt)))
-    .leftJoin(companies, eq(companies.id, companyMembers.companyId))
-    .where(and(
-      activeMembership,
-      eq(profiles.directoryVisible, true),
-      or(isNull(companyMembers.id), eq(companies.directoryVisible, true)),
-    ));
-  void actor;
-  return rows.map((row) => ({
-    ...row,
-    companyId: row.companyId ?? null,
-    companyDisplayName: row.companyDisplayName ?? null,
-    industry: row.industry ?? null,
-    sizeBand: row.sizeBand ?? null,
-    companyDirectoryVisible: row.companyId === null || row.companyDirectoryVisible === true,
-    active: true,
-  }));
-}
-
 const defaultPortalContentDependencies: PortalContentDependencies = {
   memberships: membershipsRepository,
-  directory: {list: listDirectoryRows},
+  directory: {list: portalContentRepository.listDirectory},
   events: {list: async () => publicEvents.map((event) => ({...event}))},
   documents: {
     listApproved: async () => [],

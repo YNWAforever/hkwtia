@@ -1,7 +1,7 @@
 import "server-only";
 import type Stripe from "stripe";
 import {z} from "zod";
-import {requireSystem} from "@/lib/db/repos/common";
+import {requireSystem} from "@/lib/membership/lifecycle";
 import {jobsRepository} from "@/lib/db/repos/jobs";
 import type {Actor, MembershipPlanCode, MembershipStatus} from "@/lib/membership/lifecycle";
 

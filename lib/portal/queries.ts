@@ -1,11 +1,9 @@
 import "server-only";
 
-import {and, eq, isNull} from "drizzle-orm";
-
-import type {Actor} from "@/lib/membership/lifecycle";
-import {forbidden, getDb, requireMember} from "@/lib/db/repos/common";
+import {forbidden, requireMember, type Actor} from "@/lib/membership/lifecycle";
+import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {companiesRepository} from "@/lib/db/repos/companies";
-import {companyMembers, type Company, type Membership, type Profile} from "@/lib/db/server-schema";
+import {type Company, type Membership, type Profile} from "@/lib/db/server-schema";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 import type {AppLocale} from "@/i18n/routing";
@@ -74,29 +72,11 @@ export type PortalQueryDependencies = Readonly<{
   getCompanyRole: (actor: Extract<Actor, {kind: "member"}>, companyId: string) => Promise<PortalCompanyRole | null>;
 }>;
 
-async function defaultCompanyRole(
-  actor: Extract<Actor, {kind: "member"}>,
-  companyId: string,
-): Promise<PortalCompanyRole | null> {
-  if (actor.companyRoles?.[companyId]) return actor.companyRoles[companyId];
-  const db = await getDb();
-  const rows = await db
-    .select({role: companyMembers.role})
-    .from(companyMembers)
-    .where(and(
-      eq(companyMembers.companyId, companyId),
-      eq(companyMembers.userId, actor.userId),
-      isNull(companyMembers.revokedAt),
-    ))
-    .limit(1);
-  return rows[0]?.role ?? null;
-}
-
 export const defaultPortalQueryDependencies: PortalQueryDependencies = {
   profiles: profilesRepository,
   memberships: membershipsRepository,
   companies: companiesRepository,
-  getCompanyRole: defaultCompanyRole,
+  getCompanyRole: portalContentRepository.getCompanyRole,
 };
 
 function dependencies(input?: Partial<PortalQueryDependencies>): PortalQueryDependencies {

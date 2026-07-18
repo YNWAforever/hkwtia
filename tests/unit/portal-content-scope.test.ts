@@ -10,7 +10,7 @@ import {
   type PortalContentDependencies,
 } from "@/lib/portal/content";
 
-const member: Extract<Actor, {kind: "member"}> = {kind: "member", userId: "member-a"};
+const member: Extract<Actor, {kind: "member"}> = {kind: "member", userId: "member-a", profileId: "member-a"};
 const anonymous: Extract<Actor, {kind: "anonymous"}> = {kind: "anonymous", userId: null};
 
 const activeMembership: MembershipRecord = {

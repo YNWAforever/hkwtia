@@ -12,7 +12,7 @@ import {companiesRepository} from "@/lib/db/repos/companies";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 
-const actor = {kind: "member", userId: "user-a"} as const;
+const actor = {kind: "member", userId: "user-a", profileId: "user-a"} as const;
 
 const membershipRow = [
   "membership-a",

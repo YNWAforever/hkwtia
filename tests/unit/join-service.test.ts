@@ -4,7 +4,7 @@ import {startJoin} from "@/lib/membership/join-service";
 import {completeApplication} from "@/lib/membership/onboarding";
 import type {Actor} from "@/lib/membership/lifecycle";
 
-const actor: Extract<Actor, {kind: "member"}> = {kind: "member", userId: "user-a"};
+const actor: Extract<Actor, {kind: "member"}> = {kind: "member", userId: "user-a", profileId: "user-a"};
 
 type TestPlan = "community" | "startup" | "corporate" | "patron";
 type TestApplication = {

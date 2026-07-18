@@ -23,7 +23,7 @@ vi.mock("@/lib/auth/server", () => ({
     return {data: {status: true}, error: null};
   }}},
 }));
-vi.mock("@/lib/auth/actor", () => ({requireActor: async () => ({kind: "member", userId: "user-a"}), getActor: vi.fn()}));
+vi.mock("@/lib/auth/actor", () => ({requireActor: async () => ({kind: "member", userId: "user-a", profileId: "user-a"}), getActor: vi.fn()}));
 vi.mock("@/lib/db/repos/applications", () => ({applicationsRepository: {getById: async () => repoState.application, update: async () => repoState.application}}));
 vi.mock("@/lib/db/repos/companies", () => ({companiesRepository: {
   createForApplication: async (_actor: unknown, _applicationId: string, input: Record<string, unknown>) => {repoState.createdCompanyInput = input; return repoState.company;},

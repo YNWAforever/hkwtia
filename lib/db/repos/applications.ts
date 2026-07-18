@@ -22,7 +22,7 @@ function companyAccessScope(actor: Extract<Actor, {kind: "member"}>, companyId: 
 }
 function applicationScope(actor: Actor, applicationId: string) {
   if (actor.kind === "system") return and(eq(membershipApplicationsTable.id, applicationId), sql`true`);
-  if (actor.kind === "anonymous") return sql`false`;
+  if (actor.kind !== "member") return sql`false`;
   return and(eq(membershipApplicationsTable.id, applicationId), or(eq(membershipApplicationsTable.applicantUserId, actor.userId), companyMembershipScope(actor)));
 }
 
@@ -50,6 +50,7 @@ export const applicationsRepository = {
     if (actor.kind === "anonymous") return [];
     const db = await getDb();
     if (actor.kind === "system") return db.select().from(membershipApplicationsTable);
+    if (actor.kind !== "member") return [];
     return db.select().from(membershipApplicationsTable).where(or(eq(membershipApplicationsTable.applicantUserId, actor.userId), companyMembershipScope(actor)));
   },
 

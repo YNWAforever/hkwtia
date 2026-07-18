@@ -5,7 +5,7 @@ import {createSeatService, type SeatServiceDependencies} from "@/lib/db/repos/se
 
 type Role = "owner" | "admin" | "member";
 type TestRow = {id: string; [key: string]: unknown};
-const actor = (userId: string): Actor => ({kind: "member", userId});
+const actor = (userId: string): Actor => ({kind: "member", userId, profileId: userId});
 
 function makeDependencies(overrides: Record<string, unknown> = {}) {
   const members: TestRow[] = [{id: "m-owner", companyId: "company-a", userId: "owner", role: "owner" as Role, revokedAt: null}];

@@ -9,7 +9,7 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
 import {billingAttemptsRepository} from "@/lib/db/repos/billing-attempts";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 
-const actor = {kind: "member", userId: "user-a"} as const;
+const actor = {kind: "member", userId: "user-a", profileId: "user-a"} as const;
 const system = {kind: "system", userId: null, source: "stripe-webhook"} as const;
 const membershipId = "20000000-0000-4000-8000-000000000002";
 const expectedId = "30000000-0000-4000-8000-000000000003";

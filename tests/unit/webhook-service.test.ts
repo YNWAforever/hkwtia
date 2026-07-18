@@ -93,7 +93,7 @@ describe("Stripe webhook lifecycle mapping", () => {
 
   it("rejects every actor except stripe-webhook systemActor before mutation", async () => {
     const {commands, processor} = captureProcessor();
-    await expect(processStripeEvent(checkoutCompleted(), {kind: "member", userId: "user-a"}, processor)).rejects.toThrow("FORBIDDEN");
+    await expect(processStripeEvent(checkoutCompleted(), {kind: "member", userId: "user-a", profileId: "user-a"}, processor)).rejects.toThrow("FORBIDDEN");
     expect(commands).toEqual([]);
   });
 });

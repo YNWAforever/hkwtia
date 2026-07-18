@@ -12,7 +12,7 @@ import {
   type PortalCommandDependencies,
 } from "@/lib/portal/commands";
 
-const member: Extract<Actor, {kind: "member"}> = {kind: "member", userId: "user-a"};
+const member: Extract<Actor, {kind: "member"}> = {kind: "member", userId: "user-a", profileId: "user-a"};
 const anonymous: Extract<Actor, {kind: "anonymous"}> = {kind: "anonymous", userId: null};
 
 function dependencies(overrides: Record<string, unknown> = {}) {

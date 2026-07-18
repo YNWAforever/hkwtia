@@ -10,6 +10,8 @@ import {createFakeRepositories as makeRepositories} from "@/tests/helpers/reposi
 export const actorFor = (userId: string, companyRoles?: Readonly<Record<string, "owner" | "admin" | "member">>): Actor => ({
   kind: "member",
   userId,
+
+  profileId: userId,
   companyRoles,
 });
 

@@ -75,7 +75,7 @@ async function authorizeMemberCreate(
 }
 function membershipScope(actor: Actor, membershipId: string) {
   if (actor.kind === "system") return and(eq(membershipsTable.id, membershipId), sql`true`);
-  if (actor.kind === "anonymous") return sql`false`;
+  if (actor.kind !== "member") return sql`false`;
   return and(
     eq(membershipsTable.id, membershipId),
     or(eq(membershipsTable.ownerUserId, actor.userId), and(sql`${membershipsTable.companyId} IS NOT NULL`, companyMembershipScope(actor))),
@@ -84,7 +84,7 @@ function membershipScope(actor: Actor, membershipId: string) {
 
 export const membershipsRepository = {
   async getByApplicationId(actor: Actor, applicationId: string): Promise<Membership | null> {
-    if (actor.kind === "anonymous") forbidden();
+    if (actor.kind !== "member" && actor.kind !== "system") forbidden();
     const db = await getDb();
     const where = actor.kind === "system"
       ? and(eq(membershipsTable.applicationId, applicationId), sql`true`)
@@ -96,7 +96,7 @@ export const membershipsRepository = {
     return rows[0] ?? null;
   },
   async getById(actor: Actor, membershipId: string): Promise<Membership | null> {
-    if (actor.kind === "anonymous") forbidden();
+    if (actor.kind !== "member" && actor.kind !== "system") forbidden();
     const db = await getDb();
     const rows = await db.select().from(membershipsTable).where(membershipScope(actor, membershipId)).limit(1);
     if (!rows[0] && actor.kind === "member") forbidden();
@@ -125,6 +125,7 @@ export const membershipsRepository = {
     if (actor.kind === "anonymous") return [];
     const db = await getDb();
     if (actor.kind === "system") return db.select().from(membershipsTable);
+    if (actor.kind !== "member") return [];
     return db
       .select()
       .from(membershipsTable)
@@ -132,7 +133,7 @@ export const membershipsRepository = {
   },
 
   async create(actor: Actor, input: MembershipInput): Promise<Membership> {
-    if (actor.kind === "anonymous") forbidden();
+    if (actor.kind !== "member" && actor.kind !== "system") forbidden();
     const db = await getDb();
     if (actor.kind === "member") await authorizeMemberCreate(db, actor, input);
     const rows = await db.insert(membershipsTable).values(input).returning();
@@ -140,7 +141,7 @@ export const membershipsRepository = {
   },
 
   async update(actor: Actor, membershipId: string, input: MembershipUpdate): Promise<Membership | null> {
-    if (actor.kind === "anonymous") forbidden();
+    if (actor.kind !== "member" && actor.kind !== "system") forbidden();
     if (Object.prototype.hasOwnProperty.call(input, "ownerUserId") || Object.prototype.hasOwnProperty.call(input, "companyId")) forbidden();
     const db = await getDb();
     const rows = await db.update(membershipsTable).set({...input, updatedAt: new Date()}).where(membershipScope(actor, membershipId)).returning();
@@ -149,7 +150,7 @@ export const membershipsRepository = {
   },
 
   async remove(actor: Actor, membershipId: string): Promise<void> {
-    if (actor.kind === "anonymous") forbidden();
+    if (actor.kind !== "member" && actor.kind !== "system") forbidden();
     const db = await getDb();
     await db.delete(membershipsTable).where(membershipScope(actor, membershipId));
   },

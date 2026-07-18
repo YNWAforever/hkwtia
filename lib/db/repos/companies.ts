@@ -25,12 +25,14 @@ function companyManagementScope(actor: Extract<Actor, {kind: "member"}>) {
 function companyScope(actor: Actor, companyId: string) {
   if (actor.kind === "system") return eq(companiesTable.id, companyId);
   if (actor.kind === "anonymous") return and(eq(companiesTable.id, companyId), eq(companiesTable.directoryVisible, true));
+  if (actor.kind !== "member") return sql`false`;
   return and(eq(companiesTable.id, companyId), companyMembershipScope(actor));
 }
 
 function companyMutationScope(actor: Actor, companyId: string) {
   if (actor.kind === "system") return eq(companiesTable.id, companyId);
   if (actor.kind === "anonymous") return sql`false`;
+  if (actor.kind !== "member") return sql`false`;
   return and(eq(companiesTable.id, companyId), companyManagementScope(actor));
 }
 
@@ -100,6 +102,7 @@ export const companiesRepository = {
     const db = await getDb();
     if (actor.kind === "system") return db.select().from(companiesTable);
     if (actor.kind === "anonymous") return db.select().from(companiesTable).where(eq(companiesTable.directoryVisible, true));
+    if (actor.kind !== "member") return [];
     return db.select().from(companiesTable).where(companyMembershipScope(actor));
   },
 
