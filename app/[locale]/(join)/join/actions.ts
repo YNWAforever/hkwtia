@@ -67,11 +67,11 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
   try {
     const actor = await requireActor();
     if (actor.kind !== "member") return {message: t("errors.auth")};
-    const existing = await profilesRepository.getById(actor, actor.userId);
+    const existing = await profilesRepository.getById(actor, actor.profileId);
     if (existing) {
-      await profilesRepository.update(actor, actor.userId, {...parsed.data, onboardingState: "profile"});
+      await profilesRepository.update(actor, actor.profileId, {...parsed.data, onboardingState: "profile"});
     } else {
-      await profilesRepository.ensure(actor, {id: actor.userId, ...parsed.data, onboardingState: "profile"});
+      await profilesRepository.ensure(actor, {id: actor.profileId, ...parsed.data, onboardingState: "profile"});
     }
     const application = await startJoin(actor, {plan, applicationId});
     const id = application.applicationId;
@@ -111,12 +111,12 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
     const actor = await requireActor();
     if (actor.kind !== "member") return {message: t("errors.auth")};
     const application = await applicationsRepository.getById(actor, applicationId);
-    if (!application || application.planCode !== plan || application.applicantUserId !== actor.userId) return {message: t("errors.save")};
+    if (!application || application.planCode !== plan || application.applicantUserId !== actor.profileId) return {message: t("errors.save")};
     const company = application.companyId
       ? await companiesRepository.update(actor, application.companyId, parsed.data)
       : await companiesRepository.createForApplication(actor, applicationId, parsed.data);
     if (!company) return {message: t("errors.save")};
-    const profile = await profilesRepository.getById(actor, actor.userId);
+    const profile = await profilesRepository.getById(actor, actor.profileId);
     if (!profile) return {message: t("errors.profile")};
     const result = await completeApplication(actor, {plan, applicationId, profile: {
       displayName: profile.displayName,
