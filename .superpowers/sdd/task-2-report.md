@@ -62,3 +62,16 @@ Result before production fixes: expected failure - 5 files failed, 11 tests fail
 - Fix commit: `bb94b80` (`fix: use profile identity for member ownership`).
 - A broader aliased-actor audit confirmed the only remaining production `actor.userId` uses write `profiles.auth_user_id`; all member/profile database ownership paths use `actor.profileId`.
 - Every staged semantic diff was inspected. `git diff --check` passed, all changed/new files were BOM-free, and no unrelated or hash-identical encoding noise was staged.
+
+## Final review fix: join actions and audit identity coverage
+
+- Replaced five remaining profile-owned `actor.userId` uses in `app/[locale]/(join)/join/actions.ts` with `actor.profileId`: profile get/update/ensure, applicant ownership comparison, and company-flow profile read.
+- Added distinct-ID route-action coverage for `saveProfile()` and `saveCompany()`, plus direct audit append/list repository coverage.
+- RED: focused 2-file suite produced 1 failed file, 2 failed route-action tests, and 1 passing audit regression. `saveProfile()` passed `auth-1` twice and `saveCompany()` rejected the valid `member-1` applicant.
+- GREEN: focused suite PASS - 2 files / 3 tests.
+- `npm.cmd run typecheck`: PASS.
+- `npm.cmd run lint`: PASS.
+- `npm.cmd test`: PASS - 53 files / 236 tests; 2 skipped integration tests.
+- `npm.cmd run build`: PASS; compiled in 14.0 seconds, TypeScript completed in 41 seconds, and 67 static pages were generated. Only the existing Browserslist data-staleness notice appeared.
+- Exhaustive `app/**` and `lib/**` actor-user audit found zero remaining app uses and exactly three intentional library uses, all writing `profiles.auth_user_id`.
+- Fix commit: `44716c7` (`fix: use profile identity in join actions`).
