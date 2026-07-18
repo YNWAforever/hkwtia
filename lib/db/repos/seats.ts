@@ -226,7 +226,7 @@ async function productionDependencies(): Promise<SeatServiceDependencies> {
     },
     ensureProfile: async (actor, userId, displayName, transaction) => {
       if (actor.kind !== "member" || actor.userId !== userId) forbidden();
-      await ((transaction ?? db) as typeof db).insert(profiles).values({id: userId, displayName: displayName.slice(0, 120) || "WTIA member"}).onConflictDoNothing();
+      await ((transaction ?? db) as typeof db).insert(profiles).values({id: userId, authUserId: userId, displayName: displayName.slice(0, 120) || "WTIA member"}).onConflictDoNothing();
     },
     getUserEmail: async () => {
       try {

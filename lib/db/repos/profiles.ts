@@ -22,7 +22,7 @@ export const profilesRepository = {
     const db = await getDb();
     const rows = await db
       .insert(profilesTable)
-      .values(input)
+      .values({...input, authUserId: input.id})
       .onConflictDoNothing({target: profilesTable.id})
       .returning();
     if (rows[0]) return rows[0];
@@ -46,7 +46,7 @@ export const profilesRepository = {
     if (actor.kind === "member" && actor.userId !== input.id) forbidden();
     if (actor.kind === "anonymous") forbidden();
     const db = await getDb();
-    const rows = await db.insert(profilesTable).values(input).returning();
+    const rows = await db.insert(profilesTable).values({...input, authUserId: input.id}).returning();
     return rows[0];
   },
 

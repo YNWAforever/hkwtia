@@ -20,25 +20,59 @@ async function runDatabaseCommand(command: "db:migrate" | "db:seed") {
   return `${stdout}\n${stderr}`;
 }
 
-describe.skipIf(!testDatabaseUrl)("M1 database migration and seed", () => {
-  it("migrates and seeds all stable plan codes idempotently", async () => {
-    await runDatabaseCommand("db:migrate");
+describe.skipIf(!testDatabaseUrl)("M1 and M2 database migration and seed", () => {
+  it("migrates twice, creates M2 tables, and seeds all stable plan codes idempotently", async () => {
+    const firstMigrationOutput = await runDatabaseCommand("db:migrate");
+    const secondMigrationOutput = await runDatabaseCommand("db:migrate");
     const firstSeedOutput = await runDatabaseCommand("db:seed");
     const secondSeedOutput = await runDatabaseCommand("db:seed");
 
-    expect(firstSeedOutput).not.toContain(testDatabaseUrl);
-    expect(secondSeedOutput).not.toContain(testDatabaseUrl);
+    for (const output of [firstMigrationOutput, secondMigrationOutput, firstSeedOutput, secondSeedOutput]) {
+      expect(output).not.toContain(testDatabaseUrl);
+    }
 
     const pool = new Pool({connectionString: testDatabaseUrl});
     try {
-      const result = await pool.query<{code: string; count: number}>(
+      const plans = await pool.query<{code: string; count: number}>(
         "SELECT code, count(*)::int AS count FROM membership_plans GROUP BY code ORDER BY code",
       );
-      expect(result.rows).toEqual([
+      expect(plans.rows).toEqual([
         {code: "community", count: 1},
         {code: "corporate", count: 1},
         {code: "patron", count: 1},
         {code: "startup", count: 1},
+      ]);
+
+      const m2Tables = await pool.query<{table_name: string}>(
+        `SELECT table_name
+         FROM information_schema.tables
+         WHERE table_schema = 'public'
+           AND table_name = ANY($1)
+         ORDER BY table_name`,
+        [[
+          "approvals",
+          "campaign_recipients",
+          "campaigns",
+          "email_log",
+          "engagement_events",
+          "engagement_scores",
+          "event_registrations",
+          "events",
+          "member_notes",
+          "saved_segments",
+        ]],
+      );
+      expect(m2Tables.rows.map((table) => table.table_name)).toEqual([
+        "approvals",
+        "campaign_recipients",
+        "campaigns",
+        "email_log",
+        "engagement_events",
+        "engagement_scores",
+        "event_registrations",
+        "events",
+        "member_notes",
+        "saved_segments",
       ]);
     } finally {
       await pool.end();

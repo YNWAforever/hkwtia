@@ -33,6 +33,12 @@ const membershipRow = [
 
 const existingProfileRow = [
   "user-a",
+  "user-a",
+  null,
+  "member",
+  null,
+  false,
+  [],
   "Authored Display Name",
   "+852 5555 5555",
   "Founder",
