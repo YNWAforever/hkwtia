@@ -1,157 +1,39 @@
-# Task 2 report: membership schema, constraints, and lifecycle rules
+# M2 Task 2 report
 
-Status: complete
+## Summary
+Implemented strict profile-backed authenticated actors, staff/admin authorization, profile identity resolution with best-effort last-login updates, and repository-only portal database reads. Added the production import boundary test and ESLint restriction.
 
 ## Files changed
+- Actor/auth: `lib/membership/lifecycle.ts`, `lib/auth/actor.ts`
+- Repositories: `lib/db/repos/common.ts`, `lib/db/repos/profile-identities.ts`, `lib/db/repos/portal-content.ts`, `lib/db/repos/index.ts`
+- Portal/boundary: `lib/portal/queries.ts`, `lib/portal/content.ts`, `lib/portal/seats.ts`, `eslint.config.js`
+- Compatibility: member-only repository guards and required `profileId` test fixtures/assertions
+- Boundary compatibility: authorization-only imports moved in `lib/portal/commands.ts` and `lib/billing/webhook-service.ts`
 
-- `lib/db/schema.ts`: Drizzle PostgreSQL enums and tables for profiles, companies, company members, seat invitations, plans, applications, memberships, jobs, and audit events. All timestamp columns use `withTimezone: true`; foreign keys, checks, indexes, and unique constraints are defined in the schema.
-- `lib/membership/lifecycle.ts`: actor and membership domain types, plan/status literals, membership record shape, and explicit transition policy.
-- `drizzle/0001_m1_membership.sql`: generated PostgreSQL migration.
-- `drizzle/meta/0001_snapshot.json`, `drizzle/meta/_journal.json`: generated migration metadata aligned to `0001_m1_membership`.
-- `tests/unit/membership-lifecycle.test.ts`, `tests/unit/schema-contract.test.ts`: lifecycle and schema contract tests.
+## RED
+Command: `npx.cmd vitest run tests/unit/actor-authorization.test.ts tests/unit/admin-repository-authorization.test.ts tests/unit/repository-boundary.test.ts --reporter=dot`
 
-## TDD evidence
+Result: expected failure - 3 files failed, 6 tests failed, 3 passed. Failures proved missing profileId/staff resolution, absent `requireAdmin`, and direct database/common imports outside repositories.
 
-The required focused RED state was captured with the production modules temporarily moved to a reversible `C:\\tmp` backup:
+## GREEN and regression verification
+- Focused suite: PASS - 5 files, 24 tests.
+- `npm.cmd run typecheck`: PASS.
+- `npm.cmd run lint`: PASS.
+- `npm.cmd test`: PASS - 47 files / 222 tests; 2 skipped integration tests.
+- `npm.cmd run build`: PASS in 54.5 seconds; 67 static pages generated. Only the existing Browserslist data-staleness notice appeared.
 
-```text
-npm.cmd test -- tests/unit/membership-lifecycle.test.ts tests/unit/schema-contract.test.ts
-Exit code: 1
-2 failed suites; Vitest could not resolve `@/lib/membership/lifecycle` and `@/lib/db/schema` because the modules were absent.
-```
+## Commit
+Feature commit: `9891246`.
 
-The modules were restored immediately after the RED run.
+## Self-review
+- `sessionToActor()` is async and resolves role/profileId from the application profile resolver.
+- `getActor()` uses the real repository by default and treats last-login write failures as non-authentication failures.
+- `requireAdmin()` and `requireAdminActor()` are present.
+- Portal directory, company-role, and seat-overview reads reside in `lib/db/repos/portal-content.ts`.
+- Production direct imports of the DB client/common module are prohibited outside repositories by ESLint and the boundary test.
+- Staff actors are explicitly denied member-only repository scopes.
+- Every semantic production/test diff was inspected; garbled fixture text and unrelated encoding artifacts were removed before staging.
 
-## Verification
-
-Focused Task 2 tests:
-
-```text
-npm.cmd test -- tests/unit/membership-lifecycle.test.ts tests/unit/schema-contract.test.ts
-Exit code: 0
-2 test files passed, 7 tests passed.
-```
-
-Full unit suite:
-
-```text
-npm.cmd test
-Exit code: 0
-13 test files passed, 27 tests passed.
-```
-
-Lint and typecheck:
-
-```text
-npm.cmd run lint
-Exit code: 0
-
-npm.cmd run typecheck
-Exit code: 0
-```
-
-Drizzle verification:
-
-```text
-npx.cmd drizzle-kit check --config drizzle.config.ts
-Exit code: 0
-Everything's fine.
-
-npx.cmd drizzle-kit generate --config drizzle.config.ts
-Exit code: 0
-No schema changes, nothing to migrate.
-```
-
-Generated SQL inspection confirmed:
-
-- 22 `timestamp with time zone` columns and zero bare `timestamp` columns.
-- Unique `jobs.run_key` constraint (`jobs_run_key_unique`).
-- Exactly-one target check for `memberships.owner_user_id` versus `memberships.company_id` (`memberships_target_check`).
-- Partial unique active company/member index (`company_members_active_company_user_unique`) on `(company_id, user_id)` where `revoked_at IS NULL`.
-- 12 foreign-key constraints and the seat-limit check are present.
-
-## Concerns
-
-- The company/member uniqueness is intentionally partial so revoked historical memberships can be retained while only one active row exists for a company/user pair.
-- No production database or credentials were accessed or changed.
-## Review fix: explicit server-only boundaries
-
-Added `import "server-only"` to `lib/db/schema.ts` and `lib/membership/lifecycle.ts` so database schema and authorization/lifecycle logic cannot be imported into client bundles. Vitest continues to use the existing test-only server-only shim.
-
-Post-fix verification (2026-07-14):
-
-```text
-npm.cmd test -- tests/unit/membership-lifecycle.test.ts tests/unit/schema-contract.test.ts
-Exit code: 0
-2 test files passed, 7 tests passed.
-
-npm.cmd test
-Exit code: 0
-13 test files passed, 27 tests passed.
-
-npm.cmd run lint
-Exit code: 0
-
-npm.cmd run typecheck
-Exit code: 0
-
-npx.cmd drizzle-kit check --config drizzle.config.ts
-Exit code: 0
-Everything's fine.
-```
-
-## Review fix: discriminated Actor contract
-
-Tightened `Actor` into a discriminated union: member actors require a non-null `userId`; anonymous actors require `userId: null`; system actors require `userId: null` and `source: "stripe-webhook"`. Added a focused `expectTypeOf` contract test consumed by Task 3 authorization code.
-
-Post-fix verification (2026-07-14):
-
-```text
-npm.cmd test -- tests/unit/membership-lifecycle.test.ts tests/unit/schema-contract.test.ts
-Exit code: 0
-2 test files passed, 8 tests passed.
-
-npm.cmd test
-Exit code: 0
-13 test files passed, 28 tests passed.
-
-npm.cmd run lint
-Exit code: 0
-
-npm.cmd run typecheck
-Exit code: 0
-
-npx.cmd drizzle-kit check --config drizzle.config.ts
-Exit code: 0
-Everything's fine.
-```
-
-## Review fix: Drizzle build-time schema boundary
-
-Moved table definitions to neutral `lib/db/schema-core.ts`; Drizzle Kit now loads that file directly. `lib/db/schema.ts` and `lib/db/server-schema.ts` are server-only runtime entrypoints that re-export the core, while schema consumers use the wrapper. Shared membership literals/types now live in `lib/membership/constants.ts` and are re-exported by the server-only lifecycle module. AGENTS.md documents the boundary.
-
-Post-fix verification (2026-07-14):
-
-```text
-npx.cmd drizzle-kit generate --config drizzle.config.ts
-Exit code: 0
-No schema changes, nothing to migrate.
-
-npx.cmd drizzle-kit check --config drizzle.config.ts
-Exit code: 0
-Everything's fine.
-
-npm.cmd test -- tests/unit/membership-lifecycle.test.ts tests/unit/schema-contract.test.ts
-Exit code: 0
-2 test files passed, 9 tests passed.
-
-npm.cmd test
-Exit code: 0
-13 test files passed, 29 tests passed.
-
-npm.cmd run lint
-Exit code: 0
-
-npm.cmd run typecheck
-Exit code: 0
-```
+## Risks/issues
+- The linked-worktree sandbox repeatedly returned `apply deny-read ACLs`, including for `apply_patch`. Per the brief, a narrow elevated PowerShell fallback was used for Task 2 files.
+- The fallback briefly introduced false-dirty UTF-8 BOM/EOL noise throughout `tests/`. It was detected and removed before staging; no hash-identical noise is included in the commit.
