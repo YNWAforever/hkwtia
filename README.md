@@ -21,11 +21,12 @@ Open `http://localhost:3000/` or `http://localhost:3000/zh`.
 | `npm run dev` | Start the Next.js development server |
 | `npm test` | Run the Vitest unit suite |
 | `npm run test:e2e` | Run Playwright browser tests |
+| `npm run test:e2e -- tests/e2e/m1-acceptance.spec.ts` | Run deterministic M1 acceptance contracts (live mode is credential-gated) |
 | `npm run audit:strings` | Reject unapproved visible JSX literals |
 | `npm run lint` | Run ESLint |
 | `npm run typecheck` | Run strict TypeScript checking |
 | `npm run build` | Create the production build |
-| `npm run test:lighthouse` | Run Lighthouse CI on `/` and `/membership` |
+| `npm run test:lighthouse` | Run Lighthouse CI on `/membership` and `/zh/membership` |
 | `npm run db:migrate` | Apply Drizzle migrations from `drizzle/` using `DATABASE_URL` |
 | `npm run db:seed` / `npm run db:seed:m1` | Idempotently seed the four code-owned M1 membership plans |
 
@@ -37,6 +38,8 @@ npm run start
 ```
 
 Set `PLAYWRIGHT_BASE_URL` or `LHCI_BASE_URL` when browser or Lighthouse checks should target an already running Preview/production deployment. Never commit populated environment values.
+
+The M1 acceptance evidence template is [`docs/m1-acceptance.md`](./docs/m1-acceptance.md). The deterministic acceptance contracts run without credentials; the real Neon/Stripe preview flow is enabled only when isolated `DATABASE_URL_TEST` and Stripe test variables are present.
 
 ## Deployment
 

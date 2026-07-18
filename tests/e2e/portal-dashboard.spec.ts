@@ -22,3 +22,10 @@ test("portal navigation does not expose a private dashboard to an anonymous user
   await expect(page.getByText("Membership status", {exact: true})).toHaveCount(0);
   await expect(page).toHaveURL(new RegExp("/join\\?next=%2Fportal"));
 });
+
+test("an anonymous portal never exposes company controls", async ({page}) => {
+  await page.goto("/portal");
+
+  await expect(page).toHaveURL(new RegExp("/join\\?next=%2Fportal"));
+  await expect(page.getByText("Company members", {exact: true})).toHaveCount(0);
+});

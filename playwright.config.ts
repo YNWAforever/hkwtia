@@ -5,6 +5,10 @@ const port = process.env.PLAYWRIGHT_PORT ?? '3000';
 
 export default defineConfig({
   testDir: './tests/e2e',
+  metadata: {
+    releaseGate: 'M1',
+    liveAcceptanceRequires: 'DATABASE_URL_TEST and STRIPE_TEST_SECRET_KEY'
+  },
   forbidOnly: Boolean(process.env.CI),
   fullyParallel: false,
   workers: 1,

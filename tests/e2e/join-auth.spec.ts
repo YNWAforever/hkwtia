@@ -38,3 +38,11 @@ test("a forged completion status still renders anonymous authentication", async 
   await expect(page.getByRole("heading", {level: 1, name: "Join WTIA"})).toBeVisible();
   await expect(page.getByRole("heading", {level: 1, name: "Welcome to WTIA"})).toHaveCount(0);
 });
+
+test("a Startup join link never exposes a payment or portal state before authentication", async ({page}) => {
+  await page.goto("/join?plan=startup");
+
+  await expect(page.getByText("Sign in", {exact: true})).toBeVisible();
+  await expect(page.getByText("Membership status", {exact: true})).toHaveCount(0);
+  await expect(page.getByRole("link", {name: /billing portal/i})).toHaveCount(0);
+});
