@@ -24,7 +24,7 @@ npm run db:migrate
 npm run db:seed
 ```
 
-`db:migrate` runs Drizzle migrations through `scripts/db-migrate.ts`; `db:seed` runs `scripts/db-seed.ts` and remains intentionally empty until Task 11 adds schema-backed seed rows. Keep `DATABASE_URL` in the environment and never print it.
+`db:migrate` runs Drizzle migrations through `scripts/db-migrate.ts`; `db:seed` runs the idempotent M1 plan seed through `scripts/db-seed.ts` (with `db:seed:m1` available for the direct runner). Keep `DATABASE_URL` in the environment and never print it.
 
 ## Conventions
 
@@ -34,10 +34,19 @@ npm run db:seed
 - Run the focused test, full unit suite, lint, typecheck, and build before handing off a change.
 - Keep accessibility landmarks, skip navigation, keyboard focus, and localized recovery states intact.
 
+## Task 11 database setup
+
+Create an isolated Neon branch/database for migration and seed verification. Put its pooled connection string in `DATABASE_URL_TEST` only in the local test environment; never commit or print the value. Run `npm run db:migrate` before `npm run db:seed`.
+
+The seed writes only the four stable plan rows (`community`, `startup`, `corporate`, and `patron`) and uses `ON CONFLICT` updates, so running it twice is safe and creates no personal data.
+
+For Stripe test-mode acceptance work, use test-mode values for `STRIPE_TEST_SECRET_KEY`, `STRIPE_TEST_WEBHOOK_SECRET`, `STRIPE_TEST_STARTUP_PRICE_ID`, and `STRIPE_TEST_CORPORATE_PRICE_ID`. Keep production Stripe variables separate and do not use live keys against the test database.
+
 ## Changelog
 
 - M0: public bilingual route surface, metadata, structured data, crawler endpoints, translation parity, and accessibility gates.
 - M1 Task 1: server-only runtime configuration, Neon/Drizzle client foundation, and non-placeholder database commands.
+- M1 Task 11: idempotent plan seed, isolated migration-test contract, and Neon/Stripe test-environment documentation.
 
 <!-- codebase-memory-mcp:start -->
 # Codebase Knowledge Graph (codebase-memory-mcp)

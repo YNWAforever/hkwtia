@@ -15,7 +15,8 @@
     "test:lighthouse": "lhci autorun",
     "audit:strings": "node scripts/audit-visible-strings.mjs",
     "db:migrate": "node --experimental-strip-types scripts/db-migrate.ts",
-    "db:seed": "node --experimental-strip-types scripts/db-seed.ts"
+    "db:seed": "node --experimental-strip-types scripts/db-seed.ts",
+    "db:seed:m1": "node --experimental-strip-types scripts/seed-m1.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

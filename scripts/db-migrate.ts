@@ -24,10 +24,14 @@ export function migrationCommandText(): string {
   return migrationCommand;
 }
 
+export function requireDatabaseUrl(environment: NodeJS.ProcessEnv = process.env): string {
+  const databaseUrl = (environment.DATABASE_URL ?? "").trim();
+  if (!databaseUrl) throw new Error("DATABASE_URL is required to run database migrations.");
+  return databaseUrl;
+}
+
 export function runMigration(environment: NodeJS.ProcessEnv = process.env): Promise<void> {
-  if (!(environment.DATABASE_URL ?? "").trim()) {
-    return Promise.reject(new Error("DATABASE_URL is required to run database migrations."));
-  }
+  requireDatabaseUrl(environment);
 
   const {executable, args} = migrationProcessInvocation();
 

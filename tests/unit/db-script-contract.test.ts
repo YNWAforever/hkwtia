@@ -3,7 +3,7 @@ import {resolve} from "node:path";
 
 import {describe, expect, it} from "vitest";
 
-import {migrationProcessInvocation} from "@/scripts/db-migrate";
+import {migrationProcessInvocation, requireDatabaseUrl} from "@/scripts/db-migrate";
 
 type PackageManifest = {scripts?: Record<string, string>};
 
@@ -38,6 +38,11 @@ describe("database commands", () => {
       executable: "cmd.exe",
       args: ["/d", "/s", "/c", "drizzle-kit.cmd migrate --config=drizzle.config.ts"],
     });
+  });
+
+  it("requires a database URL without exposing its value", () => {
+    expect(() => requireDatabaseUrl({DATABASE_URL: "", NODE_ENV: "test"} as NodeJS.ProcessEnv)).toThrow("DATABASE_URL is required");
+    expect(requireDatabaseUrl({DATABASE_URL: " postgres://test ", NODE_ENV: "test"} as NodeJS.ProcessEnv)).toBe("postgres://test");
   });
 
   it("routes seeding through the TypeScript seed script", async () => {
