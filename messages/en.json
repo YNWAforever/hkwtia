@@ -399,6 +399,7 @@
     "profileTitle": "My profile", "profileDescription": "Keep your personal details and directory preference up to date.",
     "companyTitle": "Company details", "companyDescription": "Owners and admins can update details for their company.", "companyEmpty": "Your current membership does not include a company profile.",
     "save": "Save changes", "fields": {"displayName": "Display name", "phone": "Phone", "jobTitle": "Job title", "website": "Website", "legalName": "Legal name", "industry": "Industry", "sizeBand": "Company size", "description": "Description", "directoryVisible": "Show this profile in the WTIA directory"},
-    "readOnly": "Only company owners and admins can edit these details."
+    "readOnly": "Only company owners and admins can edit these details.",
+    "seats": {"title": "Company seats", "description": "Invite and manage the people who represent your company at WTIA.", "empty": "No company seats are available yet.", "members": "Members", "pending": "Pending invitations", "capacity": "{used} of {limit} seats reserved", "email": "Email address", "role": "Role", "invite": "Invite member", "inviting": "Sending invitation...", "revoke": "Revoke access", "inviteRevoke": "Cancel invitation", "changeRole": "Change role", "owner": "Owner", "admin": "Admin", "member": "Member", "noPending": "No pending invitations.", "errors": {"generic": "We could not update company seats. Please try again."}}
   }
 }
