@@ -57,6 +57,12 @@ The first full suite run exposed one proxy-row test fixture whose ordered `profi
 
 `011e49f` — `feat: add M2 admin CRM schema`
 
+## Independent review follow-up
+
+- Added the missing `"annual"` `billingInterval` value immediately after `"pending_payment"` in the ordered `membershipRow` proxy fixture.
+- Verified with `npx.cmd vitest run tests/unit/repository-production-security.test.ts --reporter=dot`: PASS, 1 file and 17 tests.
+- Review-fix commit: `54d8a3d` — `fix: align membership fixture with M2 schema`.
+
 ## Self-review findings
 
 - The contract test is exactly scoped to the requested profile identity fields and ten CRM tables.
