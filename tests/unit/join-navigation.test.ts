@@ -27,6 +27,7 @@ describe("join navigation", () => {
   it.each([
     ["/portal", "en", "/portal"],
     ["/zh/portal/profile", "zh-HK", "/portal/profile"],
+    ["/portal/company/seats", "en", "/portal/company/seats"],
   ] as const)("normalizes an allowlisted localized continuation %s", (value, locale, canonical) => {
     expect(parseJoinContinuation(value, locale)).toBe(canonical);
   });

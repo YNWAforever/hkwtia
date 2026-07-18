@@ -95,4 +95,17 @@ describe("transactional company seat service", () => {
     const invitation = await service.inviteSeat(actor("owner"), "company-a", {email: "cancel@example.com"});
     await expect(service.revokeInvitation(actor("owner"), invitation.id)).resolves.toBeUndefined();
   });
+  it("ensures a profile row before accepting a first-time invitee", async () => {
+    let ensured = 0;
+    const deps = makeDependencies({
+      getCompanyById: async () => ({id: "company-a", seatLimit: 3}),
+      getProfileByUserId: async () => null,
+      getUserEmail: async (currentActor: Actor) => currentActor.userId === "member" ? "member@example.com" : "owner@example.com",
+      ensureProfile: async () => { ensured += 1; },
+    });
+    const service = createSeatService(deps);
+    const invitation = await service.inviteSeat(actor("owner"), "company-a", {email: "member@example.com"});
+    await service.acceptSeatInvitation(actor("member"), invitation.token);
+    expect(ensured).toBe(1);
+  });
 });

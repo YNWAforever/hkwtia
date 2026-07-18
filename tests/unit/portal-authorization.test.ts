@@ -142,6 +142,7 @@ describe("protected member portal", () => {
   it("builds a locale-aware sign-in continuation and rejects open redirects", () => {
     expect(buildPortalSignInPath("en", "/portal")).toBe("/join?next=%2Fportal");
     expect(buildPortalSignInPath("zh-HK", "/portal/profile")).toBe("/zh/join?next=%2Fportal%2Fprofile");
+    expect(buildPortalSignInPath("en", "/portal/company/seats")).toBe("/join?next=%2Fportal%2Fcompany%2Fseats");
     expect(() => buildPortalSignInPath("en", "https://evil.example/steal")).toThrow("INVALID_CONTINUATION");
   });
 });

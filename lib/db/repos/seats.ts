@@ -33,6 +33,7 @@ export type SeatServiceDependencies = {
   listPendingInvitations(companyId: string, transaction?: unknown): Promise<DatabaseSeatInvitation[]>;
   getProfileByUserId(actor: Actor, userId: string): Promise<SeatProfile | null>;
   getUserEmail?(actor: Actor): Promise<string | null>;
+  ensureProfile?(actor: Actor, userId: string, displayName: string, transaction?: unknown): Promise<void>;
   getInvitationByDigest(tokenDigest: string, transaction?: unknown): Promise<DatabaseSeatInvitation | null>;
   getInvitation?(invitationId: string, transaction?: unknown): Promise<DatabaseSeatInvitation | null>;
   insertInvitation(input: Omit<DatabaseSeatInvitation, "id" | "createdAt">, transaction?: unknown): Promise<DatabaseSeatInvitation>;
@@ -123,6 +124,7 @@ export function createSeatService(deps: SeatServiceDependencies) {
         const profile = await deps.getProfileByUserId(actor, actor.userId);
         const actorEmail = normalizeEmail(profile?.email ?? (await deps.getUserEmail?.(actor) ?? ""));
         if (actorEmail !== invitation.invitedEmail) throw new SeatServiceError("INVITATION_EMAIL_MISMATCH");
+        await deps.ensureProfile?.(actor, actor.userId, actorEmail.split("@")[0] || "WTIA member", transaction);
         const company = deps.getCompanyById
           ? await deps.getCompanyById(invitation.companyId, transaction)
           : await deps.getCompany(actor, invitation.companyId, transaction);
@@ -221,6 +223,10 @@ async function productionDependencies(): Promise<SeatServiceDependencies> {
       if (actor.kind !== "member" || actor.userId !== userId) forbidden();
       const rows = await db.select({id: profiles.id, displayName: profiles.displayName}).from(profiles).where(eq(profiles.id, userId)).limit(1);
       return rows[0] ?? null;
+    },
+    ensureProfile: async (actor, userId, displayName, transaction) => {
+      if (actor.kind !== "member" || actor.userId !== userId) forbidden();
+      await ((transaction ?? db) as typeof db).insert(profiles).values({id: userId, displayName: displayName.slice(0, 120) || "WTIA member"}).onConflictDoNothing();
     },
     getUserEmail: async () => {
       try {

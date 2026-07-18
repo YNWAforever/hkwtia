@@ -29,8 +29,10 @@ async function inviteSeatAction(formData: FormData) {
   "use server";
   const actor = await requireActor();
   const locale = String(formData.get("locale") ?? "en") as AppLocale;
+  let createdInvitation: Awaited<ReturnType<typeof inviteSeat>> | null = null;
   try {
     const invitation = await inviteSeat(actor, String(formData.get("companyId") ?? ""), {email: String(formData.get("email") ?? ""), role: String(formData.get("role") ?? "member") as SeatRole});
+    createdInvitation = invitation;
     if (invitation.token) {
       const result = await auth.signIn.magicLink({email: invitation.invitedEmail, callbackURL: invitationCallbackUrl(locale, invitation.token)});
       if (result.error) throw new Error("INVITATION_DELIVERY_FAILED");
@@ -38,6 +40,7 @@ async function inviteSeatAction(formData: FormData) {
     redirect(localizedPath(locale, "/portal/company/seats"));
   } catch (error) {
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
+    if (createdInvitation?.token) await revokeInvitation(actor, createdInvitation.id).catch(() => undefined);
     redirect(seatErrorPath(locale));
   }
 }

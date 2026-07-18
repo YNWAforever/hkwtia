@@ -3,7 +3,7 @@ import type {JoinStep} from "@/lib/membership/onboarding";
 import type {PlanCode} from "@/lib/membership/plans";
 import {localizedPath} from "@/lib/urls";
 
-const joinContinuations = ["/portal", "/portal/profile", "/portal/company"] as const;
+const joinContinuations = ["/portal", "/portal/profile", "/portal/company", "/portal/company/seats"] as const;
 export type JoinContinuation = (typeof joinContinuations)[number];
 
 /** Return a canonical, locale-neutral portal path or null for untrusted input. */
