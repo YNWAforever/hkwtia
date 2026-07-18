@@ -21,6 +21,7 @@ const membershipRow = [
   "application-b",
   "corporate",
   "pending_payment",
+  "annual",
   10,
   null,
   null,
