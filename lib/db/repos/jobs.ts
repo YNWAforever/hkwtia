@@ -3,7 +3,7 @@ import "server-only";
 import {and, eq, sql} from "drizzle-orm";
 
 import type {WebhookLifecycleCommand} from "@/lib/billing/webhook-service";
-import {auditEvents, billingAttempts, jobs as jobsTable, memberships, type Job} from "@/lib/db/server-schema";
+import {auditEvents, billingAttempts, engagementEvents, jobs as jobsTable, membershipApplications, memberships, type Job} from "@/lib/db/server-schema";
 import {getDb, requireSystem} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";
 
@@ -31,6 +31,12 @@ function resultRow(result: unknown): Record<string, unknown> | undefined {
 function requiredString(row: Record<string, unknown> | undefined, key: string): string {
   const value = row?.[key];
   if (typeof value !== "string" || value.length === 0) throw new Error("WEBHOOK_MUTATION_FAILED");
+  return value;
+}
+
+function requiredOrdinal(row: Record<string, unknown> | undefined, key: string): number {
+  const value = Number(row?.[key]);
+  if (!Number.isSafeInteger(value) || value < 1) throw new Error("WEBHOOK_MUTATION_FAILED");
   return value;
 }
 
@@ -117,8 +123,11 @@ export const jobsRepository = {
         if (!claim) return "duplicate";
         const jobId = requiredString(claim, "job_id");
 
-        const membership = resultRow(await tx.execute(sql`SELECT ${memberships.id} AS membership_id, ${memberships.status} AS status
+        const membership = resultRow(await tx.execute(sql`SELECT ${memberships.id} AS membership_id, ${memberships.status} AS status,
+            COALESCE(${memberships.ownerUserId}, ${membershipApplications.applicantUserId}) AS profile_id,
+            ${memberships.companyId} AS company_id
           FROM ${memberships}
+          LEFT JOIN ${membershipApplications} ON ${membershipApplications.id} = ${memberships.applicationId}
           WHERE ${memberships.id} = ${command.membershipId}
             AND ${memberships.applicationId} = ${command.applicationId}
             AND ${memberships.planCode} = ${command.planCode}
@@ -128,7 +137,7 @@ export const jobsRepository = {
             OR (${command.eventType} <> 'checkout.session.completed'
               AND ${memberships.stripeCustomerId} = ${command.stripeCustomerId}
               AND ${memberships.stripeSubscriptionId} = ${command.stripeSubscriptionId}))
-          FOR UPDATE`));
+          FOR UPDATE OF ${memberships}`));
         if (!membership) throw new WebhookCorrelationError();
 
         const latest = resultRow(await tx.execute(sql`SELECT (${auditEvents.metadata}->>'stripeCreated')::bigint AS stripe_created,
@@ -173,6 +182,30 @@ export const jobsRepository = {
           }
         }
 
+        if (command.isRenewal && (command.eventType === 'invoice.paid' || command.eventType === 'invoice.payment_failed')) {
+          const profileId = requiredString(membership, "profile_id");
+          const periodStart = command.billingPeriodStart?.toISOString();
+          const periodEnd = command.billingPeriodEnd?.toISOString();
+          if (!periodStart || !periodEnd) throw new WebhookCorrelationError();
+          const ordinal = resultRow(await tx.execute(sql`SELECT COALESCE(
+              MAX((${engagementEvents.metadata}->>'renewalOrdinal')::int)
+                FILTER (WHERE ${engagementEvents.metadata}->>'periodStart' = ${periodStart}),
+              COALESCE(MAX((${engagementEvents.metadata}->>'renewalOrdinal')::int), 0) + 1
+            ) AS renewal_ordinal
+            FROM ${engagementEvents}
+            WHERE ${engagementEvents.metadata}->>'membershipId' = ${command.membershipId}
+              AND ${engagementEvents.type} IN ('renewal_paid', 'renewal_failed')`));
+          const renewalOrdinal = requiredOrdinal(ordinal, "renewal_ordinal");          const engagementType = command.eventType === 'invoice.paid' ? 'renewal_paid' : 'renewal_failed';
+          const engagementPoints = command.eventType === 'invoice.paid' ? 10 : -10;
+          const engagement = resultRow(await tx.execute(sql`INSERT INTO ${engagementEvents}
+            (${engagementEvents.profileId}, ${engagementEvents.companyId}, ${engagementEvents.type}, ${engagementEvents.points}, ${engagementEvents.metadata}, ${engagementEvents.occurredAt})
+            VALUES (${profileId}, ${membership.company_id ?? null}, ${engagementType}, ${engagementPoints},
+              jsonb_build_object('membershipId', ${command.membershipId}, 'periodStart', ${periodStart},
+                'periodEnd', ${periodEnd}, 'renewalOrdinal', ${renewalOrdinal}),
+              to_timestamp(${command.eventCreated}))
+            RETURNING ${engagementEvents.id} AS engagement_id`));
+          if (!engagement) throw new Error("WEBHOOK_MUTATION_FAILED");
+        }
         const action = stale ? 'stripe.webhook.ignored_stale' : 'stripe.webhook.processed';
         const audit = resultRow(await tx.execute(sql`INSERT INTO ${auditEvents}
           (${auditEvents.actorType}, ${auditEvents.action}, ${auditEvents.targetType}, ${auditEvents.targetId}, ${auditEvents.requestId}, ${auditEvents.metadata})

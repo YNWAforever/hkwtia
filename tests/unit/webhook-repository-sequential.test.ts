@@ -15,11 +15,11 @@ const command: WebhookLifecycleCommand = {
   eventId: "evt_m", eventType: "checkout.session.completed", eventCreated: 100,
   membershipId, applicationId, planCode: "startup", stripeCustomerId: customerId,
   stripeSubscriptionId: subscriptionId, stripeCheckoutSessionId: checkoutSessionId,
-  nextStatus: "active", billingPeriodStart: null, billingPeriodEnd: null, cancelAtPeriodEnd: false,
+  nextStatus: "active", billingPeriodStart: null, billingPeriodEnd: null, cancelAtPeriodEnd: false, isRenewal: false,
 };
 
 function sqlText(value: unknown): string {
-  if (typeof value === "string") return value;
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value);
   if (!value || typeof value !== "object") return "";
   if ("value" in value && Array.isArray((value as {value?: unknown}).value)) return ((value as {value: unknown[]}).value).join("");
   if ("queryChunks" in value && Array.isArray((value as {queryChunks?: unknown}).queryChunks)) {
@@ -74,7 +74,7 @@ describe("sequential production webhook transaction", () => {
     expect(script.options).toEqual([{isolationLevel: "read committed"}]);
     expect(script.statements).toHaveLength(8);
     expect(script.statements[0]).toMatch(/insert into[\s\S]*on conflict[\s\S]*failed[\s\S]*returning/);
-    expect(script.statements[1]).toContain("for update");
+    expect(script.statements[1]).toMatch(/coalesce[\s\S]*left join[\s\S]*for update of/);
     expect(script.statements[2]).toMatch(/stripe\.webhook\.processed[\s\S]*order by/);
     expect(script.statements[3]).toMatch(/active[\s\S]*cs_test_m1_checkout[\s\S]*for update/);
     expect(script.statements[4]).toMatch(/update[\s\S]*active/);
@@ -92,6 +92,29 @@ describe("sequential production webhook transaction", () => {
     expect(script.db.execute).not.toHaveBeenCalled();
   });
 
+  it("shares renewalOrdinal within one billing period and increments for the next period", async () => {
+    async function processRenewal(eventId: string, eventType: "invoice.paid" | "invoice.payment_failed", periodStart: Date, renewalOrdinal: number) {
+      const renewal = {...command, eventId, eventType, stripeCheckoutSessionId: null, isRenewal: true,
+        nextStatus: eventType === "invoice.paid" ? "active" as const : "past_due" as const,
+        billingPeriodStart: periodStart, billingPeriodEnd: new Date(periodStart.getTime() + 365 * 86_400_000)};
+      const script = scriptedDatabase([
+        claimed,
+        {rows: [{membership_id: membershipId, status: eventType === "invoice.paid" ? "past_due" : "active", profile_id: "profile-1", company_id: null}]},
+        noLatest, membershipUpdated, {rows: [{renewal_ordinal: renewalOrdinal}]}, {rows: [{engagement_id: `engagement-${eventId}`}]}, audited, completed,
+      ]);
+      database.current = script.db;
+      await expect(jobsRepository.processWebhookLifecycle(systemActor("stripe-webhook"), renewal)).resolves.toBe("processed");
+      expect(script.statements[4]).toMatch(/max[\s\S]*periodstart[\s\S]*renewalordinal/);
+      expect(script.statements[5]).toMatch(new RegExp(`'renewalordinal',\\s*${renewalOrdinal}\\b`));
+      expect(script.statements[5]).toContain("profile-1");
+      return script.statements;
+    }
+
+    const firstPeriod = new Date("2026-07-01T00:00:00.000Z");
+    await processRenewal("evt_failed_first", "invoice.payment_failed", firstPeriod, 1);
+    await processRenewal("evt_paid_first", "invoice.paid", firstPeriod, 1);
+    await processRenewal("evt_paid_second", "invoice.paid", new Date("2027-07-01T00:00:00.000Z"), 2);
+  });
   it("audits a valid stale checkout once without membership or attempt mutation", async () => {
     const script = scriptedDatabase([
       claimed,

@@ -44,7 +44,16 @@ describe("Stripe webhook lifecycle mapping", () => {
   it("restores a past-due membership after invoice.paid", async () => {
     const {commands, processor} = captureProcessor();
     await processStripeEvent(invoicePaid(), systemActor("stripe-webhook"), processor);
-    expect(commands[0]).toMatchObject({eventType: "invoice.paid", nextStatus: "active"});
+    expect(commands[0]).toMatchObject({eventType: "invoice.paid", nextStatus: "active", isRenewal: false});
+  });
+
+  it.each([
+    [invoicePaid("evt_cycle_paid", {billing_reason: "subscription_cycle"}), "invoice.paid"],
+    [invoicePaymentFailed("evt_cycle_failed", {billing_reason: "subscription_cycle", period_start: 1_784_156_400, period_end: 1_786_834_800}), "invoice.payment_failed"],
+  ] as const)("marks subscription-cycle renewal facts", async (stripeEvent, eventType) => {
+    const {commands, processor} = captureProcessor();
+    await processStripeEvent(stripeEvent, systemActor("stripe-webhook"), processor);
+    expect(commands[0]).toMatchObject({eventType, isRenewal: true});
   });
 
   it("reads subscription correlation from the current Stripe invoice parent shape", async () => {
@@ -85,6 +94,7 @@ describe("Stripe webhook lifecycle mapping", () => {
     invoicePaid("evt_bad_customer", {customer: null}),
     checkoutCompleted("evt_unpaid", {payment_status: "unpaid"}),
     checkoutCompleted("evt_free_plan", {metadata: {membershipId, applicationId, planCode: "community"}}),
+    invoicePaid("evt_cycle_missing_period", {billing_reason: "subscription_cycle", period_start: null}),
   ])("rejects malformed or inconsistent ownership metadata before repository mutation", async (stripeEvent) => {
     const {commands, processor} = captureProcessor();
     await expect(processStripeEvent(stripeEvent, systemActor("stripe-webhook"), processor)).rejects.toMatchObject({code: "INVALID_WEBHOOK_EVENT"});
