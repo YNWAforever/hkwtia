@@ -1,78 +1,71 @@
-# Task 7 report: signed, idempotent Stripe webhook lifecycle
+# Task 7 Report: Engagement timelines and at-risk queue
 
-## Scope
+## Outcome
 
-- Added raw-body Stripe signature verification at `POST /api/stripe/webhook`.
-- Normalized the five M1 Stripe lifecycle event types with strict membership, application, plan, customer, subscription, checkout-session, and client-reference correlation.
-- Added one atomic repository transaction for job claiming, membership/attempt locking, lifecycle transition, audit append, and job completion.
-- Added transient failure recording with redacted error summaries and deterministic invalid-event rejection.
+DONE_WITH_CONCERNS
 
-## Review hardening
+Implementation commit: `8faac6c` (`feat: add engagement and at-risk operations`)
 
-- Checkout activation locks the exact active `billing_attempts` row with `FOR UPDATE` before completing it.
-- Membership locking precedes the latest Stripe lifecycle audit lookup, serializing concurrent webhook ordering.
-- An event older than the latest committed Stripe audit bypasses only the current-status transition gate.
-- A correlated stale event writes one `stripe.webhook.ignored_stale` audit and completes its job without mutating membership or billing-attempt rows.
-- A stale event with mismatched ownership/correlation is rejected and the transaction rolls back.
-- An exact event replay is returned as `duplicate` and cannot append a second audit.
+Task 7 adds bounded, audited engagement-event writes; staff-only newest-first timelines; Stripe renewal facts with outer event idempotency and transactionally serialized renewal ordinals; the shared at-risk rule and SQL equivalent; and a bilingual Server Component admin queue.
+
+## Files
+
+- Added `lib/db/repos/engagement.ts`
+- Added `lib/admin/at-risk.ts`
+- Updated `lib/billing/webhook-service.ts`
+- Updated `lib/db/repos/jobs.ts`
+- Added `components/admin/at-risk-table.tsx`
+- Added `app/[locale]/(admin)/admin/at-risk/page.tsx`
+- Updated `messages/en.json` and `messages/zh-HK.json`
+- Added `tests/unit/engagement-repository.test.ts` and `tests/unit/at-risk.test.ts`
+- Updated focused webhook and admin presentation tests
 
 ## TDD evidence
 
-- RED: repository transaction test failed because `locked_attempt AS` and the second `FOR UPDATE` were absent.
-- RED: stale-event tests exposed that the prior branch still updated membership `updated_at` and applied the lifecycle status gate before stale detection.
-- RED: the final serialization assertion failed until `latest_event` depended on `locked_membership`.
-- GREEN: `npm.cmd test -- tests/unit/webhook-repository-transaction.test.ts tests/unit/webhook-service.test.ts tests/unit/webhook-route.test.ts` — 3 files, 22 tests passed.
+Initial RED command:
 
-## Fresh final verification
+```powershell
+npx.cmd vitest run tests/unit/engagement-repository.test.ts tests/unit/at-risk.test.ts --reporter=dot
+```
 
-- `npm.cmd test` — 34 files, 149 tests passed.
-- `npm.cmd run lint` — passed.
-- `npm.cmd run typecheck` — passed.
-- `npm.cmd run audit:strings` — passed; 51 TSX files scanned.
-- `npm.cmd run build` — Next.js 16.2.10 production build passed; TypeScript and 49 static pages completed; `/api/stripe/webhook` emitted as a dynamic route.
-- `git diff --check` and `git diff --cached --check` — passed before commit.
+It failed because `@/lib/db/repos/engagement` and `@/lib/admin/at-risk` did not exist. Subsequent narrow RED tests demonstrated each behavior before its implementation: missing renewal facts/ordinals, missing at-risk presentation, forged system-actor rejection, atomic writer audit/rollback, period-stable ordinals, localized tier/status/date output, and malformed renewal-period rejection.
 
-## Non-blocking baseline warning
+Final focused GREEN command:
 
-## Transaction-isolation review fix
+```powershell
+npx.cmd vitest run tests/unit/engagement-repository.test.ts tests/unit/at-risk.test.ts tests/unit/webhook-service.test.ts tests/unit/webhook-repository-sequential.test.ts tests/unit/admin-presentational.test.tsx tests/unit/messages.test.ts --reporter=dot
+```
 
-- Replaced the data-modifying CTE with explicit statements inside one `READ COMMITTED` database transaction.
-- Statement order is claim/reclaim job, lock and correlate membership, read the latest lifecycle audit using a fresh statement snapshot, lock the exact checkout attempt, validate status, update each target at most once, append audit, then complete the job separately.
-- Exact concurrent replay blocks at the unique job claim and returns `duplicate` without membership, attempt, or audit mutation after the winner commits.
-- Transaction rollback removes a new processing claim when validation or mutation fails.
-- The outside failure recorder inserts `failed` only when absent and updates only an existing `failed` row; it increments `attempt_count`, redacts the error, and cannot downgrade `processing` or `completed` after an ambiguous commit/network result.
-- Lifecycle ordering is total and deterministic on `(stripeCreated, eventId)`; a lower or equal tuple is stale, including reverse arrival of contradictory same-second events.
+Result: 6 files passed, 41 tests passed.
 
-### Follow-up TDD evidence
+## Verification
 
-- RED: the sequential suite initially had 5 expected failures out of 6 because the implementation consumed one statement and lacked fresh snapshots, equal-second ordering, rollback scripting, and the safe failure recorder.
-- GREEN: `npm.cmd test -- tests/unit/webhook-repository-sequential.test.ts tests/unit/webhook-service.test.ts tests/unit/webhook-route.test.ts` - 3 files, 22 tests passed.
-- The obsolete one-statement regex suite was replaced by scripted results that model statement boundaries, rollback, stale no-op, replay, exact attempt locking, and separate job completion.
+- `npm.cmd run typecheck`: PASS
+- `npm.cmd run lint`: PASS
+- `npm.cmd test -- --reporter=dot`: PASS on the independent authoritative rerun, 74 files and 328 tests passed, 2 skipped
+- An earlier full run had one unrelated `auth-server-runtime.test.ts` 5-second load timeout; its isolated rerun passed 7/7 before the clean full rerun
+- `npm.cmd run build`: PASS; Next.js generated 75 static pages and recognized `/[locale]/admin/at-risk` as dynamic
+- `git diff --check` and staged `git diff --cached --check`: PASS
+- Task 7 production string audit: PASS; no debug statements, conflict markers, TODO/FIXME/HACK markers, or likely embedded credential strings
+- UTF-8 BOM scan across all changed files: PASS
+- Node UTF-8 parse of both locale JSON files: PASS
+- No dependency manifests or lockfiles changed
 
-### Isolated PostgreSQL evidence
+## Self-review
 
-- Docker daemon and cached `postgres:16-alpine` were available, so a gated two-connection test was added at `tests/unit/webhook-postgres-concurrency.test.ts`.
-- `RUN_POSTGRES_INTEGRATION=1 npm.cmd test -- tests/unit/webhook-postgres-concurrency.test.ts` - 1 test passed.
-- The waiter blocked on the membership row lock, then its next `READ COMMITTED` statement saw the winner audit `100:evt_z`.
-- The test used an ephemeral local container and two independent `psql` connections; no live Neon or production database was used.
+- Authorization is Actor-first at runtime. Engagement appends accept only a validated admin or exact system actor; timeline and at-risk reads require admin before input parsing or adapter work.
+- Engagement input is strict Zod with a bounded event enum and safe integer points. Event and audit writes share one injected/default transaction, and audit metadata excludes PII and secrets.
+- Stripe `subscription_cycle` invoices alone create renewal facts. Renewal periods must have valid increasing bounds before repository mutation. The existing job claim is the outer replay guard.
+- Membership row locking serializes renewal ordinal calculation. Failed and paid events for the same billing period reuse the same ordinal; the next distinct period increments it. Facts use the canonical member profile ID and Stripe event creation time.
+- At-risk eligibility uses the shared constants and exact inclusive instant window: active or past due, score below 20, and renewal from 0 through 60 days. SQL applies the equivalent predicate and deterministic renewal/profile ordering.
+- The admin route is a Server Component with a safe localized error. Tier, status, date, evidence, empty state, and actions are localized; links target Member 360, its note fragment, and campaign segments.
 
-### Post-fix verification
+## Concerns and evidence gaps
 
-- The build reports the existing stale `caniuse-lite` data warning (13 months old); it does not fail the build and is unrelated to Task 7.
+- This task used deterministic repository adapters and SQL-shape/transaction tests, but did not run against live Neon/Postgres or live Stripe. Production lock contention and database constraint behavior therefore remain integration-test evidence gaps.
+- `npm.cmd audit --omit=dev` currently reports 18 transitive dependency advisories (1 critical, 6 high, 11 moderate), including Better Auth through `@neondatabase/auth` plus existing build-tool packages. Task 7 changed no dependencies; remediating these may require coordinated breaking upgrades and is outside this task.
+- The build emits the existing stale `caniuse-lite` data warning.
 
-## Post-17592ac concurrency-test stabilization
+## Tooling note
 
-- Registered winner `error` and `exit` handling immediately after `spawn`, before sending SQL, with bounded process and lock-marker timeouts.
-- Replaced the fixed startup delay with a `LOCK_ACQUIRED` marker emitted only after `SELECT ... FOR UPDATE` returns; the waiter starts only after robust stdout line detection resolves.
-- Retained assertions that the waiter remains blocked until lock release and then observes the winner audit `100:evt_z` in its fresh statement snapshot.
-- Added bounded synchronous Docker commands and deterministic container removal.
-
-### Explicit post-17592ac gate evidence
-
-- Isolated PostgreSQL concurrency test: 3 sequential runs passed, 1 test each; local ephemeral `postgres:16-alpine`, two connections, no live Neon.
-- Focused webhook suites: 3 files, 22 tests passed.
-- Full Vitest: 34 files and 149 tests passed; 1 Docker-gated file/test skipped by default.
-- ESLint: passed with exit code 0.
-- TypeScript `tsc --noEmit`: passed with exit code 0.
-- Visible-string audit: passed; 51 TSX files scanned.
-- Next.js 16.2.10 production build: passed with exit code 0; only the unrelated baseline `caniuse-lite` age warning remained.
+The linked Windows worktree intermittently rejected `apply_patch` with `helper_unknown_error: apply deny-read ACLs`. After each such failure, edits were limited to the exact Task 7 file and written as BOM-free UTF-8; the final BOM and diff checks passed.
