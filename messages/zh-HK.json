@@ -477,5 +477,5 @@
     "score": "??",
     "unavailable": "????",
     "saved": "??????",
-    "export": "?? CSV", "queue": "排入活動佇列", "template": "範本", "templateRenewal": "續期提示", "templateUpdate": "會員更新", "queued": "已排入活動佇列", "existing": "現有活動", "recipients": "位收件人"
+    "export": "?? CSV", "queue": "排入活動佇列", "template": "範本", "templateRenewal": "續期提示", "templateUpdate": "會員更新", "queued": "已排入活動佇列", "existing": "現有活動", "recipients": "位收件人", "newDraft": "建立新活動", "error": "未能排入活動佇列，請再試一次。"
   }, "member360": {"description": "查看完整會員記錄及僅供職員使用的營運歷史。", "profile": "個人資料", "companies": "公司", "membership": "會籍", "engagement": "參與度", "emails": "電郵記錄", "events": "活動登記", "notes": "職員備註", "empty": "暫無記錄。", "name": "姓名", "email": "電郵", "phone": "電話", "role": "角色", "plan": "計劃", "status": "狀態", "renewal": "續期", "score": "分數", "trend": "趨勢", "company": "公司", "companyRole": "公司角色", "event": "活動", "occurredAt": "發生時間", "subject": "主旨", "emailStatus": "電郵狀態", "noteAuthor": "作者", "noteCreatedAt": "建立時間", "stripeCustomer": "Stripe 客戶", "stripeSubscription": "Stripe 訂閱", "addNote": "新增職員備註", "noteBody": "備註", "saving": "儲存中……", "noteSuccess": "已儲存職員備註。", "noteValidation": "請輸入最多 4,000 個字元的備註。", "noteError": "未能儲存職員備註，請再試一次。"}}}

@@ -8,7 +8,8 @@ import {segmentFilterSchema, type SegmentFilterSet} from "@/lib/admin/segment-sc
 import {requireAdmin} from "@/lib/auth/actor";
 import {auditEvents, campaignRecipients, campaigns, companies, companyMembers, emailLog, engagementScores, memberships, profiles, savedSegments} from "@/lib/db/server-schema";
 import {getDb} from "@/lib/db/repos/common";
-import type {AdminActor} from "@/lib/membership/lifecycle";
+import {segmentPredicates} from "@/lib/db/repos/segments";
+import type {Actor} from "@/lib/membership/lifecycle";
 
 const savedSegmentRowSchema = z.object({id: z.string().uuid(), ownerProfileId: z.string(), filters: z.record(z.unknown())});
 const audienceRowSchema = z.object({profileId: z.string(), displayName: z.string(), email: z.string().nullable(), locale: z.string(), consentMarketing: z.boolean(), suppressed: z.boolean(), renewalAt: z.coerce.date().nullable()});
@@ -25,25 +26,6 @@ function resultRows(result: unknown): unknown[] {
   if (Array.isArray(result)) return result;
   if (result && typeof result === "object" && "rows" in result && Array.isArray(result.rows)) return result.rows;
   return [];
-}
-
-function segmentPredicates(filter: SegmentFilterSet) {
-  const terms = [];
-  if (filter.tier.length) terms.push(sql`${memberships.planCode} IN (${sql.join(filter.tier.map((tier) => sql`${tier}`), sql`, `)})`);
-  if (filter.status.length) terms.push(sql`${memberships.status} IN (${sql.join(filter.status.map((status) => sql`${status}`), sql`, `)})`);
-  if (filter.scoreMin !== null) terms.push(sql`${engagementScores.score} >= ${filter.scoreMin}`);
-  if (filter.scoreMax !== null) terms.push(sql`${engagementScores.score} <= ${filter.scoreMax}`);
-  if (filter.renewalWithinDays !== null) {
-    const now = new Date();
-    const renewalCutoff = new Date(now.getTime() + filter.renewalWithinDays * 86_400_000);
-    terms.push(sql`${memberships.billingPeriodEnd} >= ${now} AND ${memberships.billingPeriodEnd} <= ${renewalCutoff}`);
-  }
-  if (filter.sector) terms.push(sql`${companies.industry} ILIKE ${`%${filter.sector}%`}`);
-  if (filter.lastLoginBeforeDays !== null) {
-    const cutoff = new Date(Date.now() - filter.lastLoginBeforeDays * 86_400_000);
-    terms.push(sql`${profiles.lastLoginAt} <= ${cutoff}`);
-  }
-  return terms.length ? and(...terms) : sql`TRUE`;
 }
 
 function toQueueMember(row: z.infer<typeof audienceRowSchema>): CampaignQueueMember {
@@ -73,20 +55,22 @@ async function campaignAudience(store: unknown, filter: SegmentFilterSet): Promi
 }
 
 export const campaignsRepository: CampaignQueueDependencies = {
-  async transaction<T>(callback: (store: unknown) => Promise<T>): Promise<T> {
+  async transaction<T>(actor: Actor, callback: (store: unknown) => Promise<T>): Promise<T> {
+    requireAdmin(actor);
     const db = await getDb();
     return db.transaction(async (tx) => callback(tx));
   },
 
-  async findCampaignByIdempotencyKey(store, idempotencyKey) {
+  async findCampaignByIdempotencyKey(actor, store, idempotencyKey, segmentId) {
+    requireAdmin(actor);
     const db = asDb(store);
-    const campaign = (await db.select({id: campaigns.id}).from(campaigns).where(eq(campaigns.idempotencyKey, idempotencyKey)).limit(1))[0];
+    const campaign = (await db.select({id: campaigns.id}).from(campaigns).where(and(eq(campaigns.idempotencyKey, idempotencyKey), eq(campaigns.createdByProfileId, actor.profileId), eq(campaigns.segmentId, segmentId))).limit(1))[0];
     if (!campaign) return null;
     const count = countRowSchema.parse((await db.select({count: sql<number>`count(*)`}).from(campaignRecipients).where(eq(campaignRecipients.campaignId, campaign.id)))[0]).count;
     return {campaignId: campaign.id, recipientCount: count};
   },
 
-  async getSavedSegment(store, actor, segmentId) {
+  async getSavedSegment(actor, store, segmentId) {
     requireAdmin(actor);
     const db = asDb(store);
     const row = (await db.select({id: savedSegments.id, ownerProfileId: savedSegments.ownerProfileId, filters: savedSegments.filters}).from(savedSegments).where(and(eq(savedSegments.id, segmentId), eq(savedSegments.ownerProfileId, actor.profileId))).limit(1))[0];
@@ -95,27 +79,29 @@ export const campaignsRepository: CampaignQueueDependencies = {
     return {...parsed, filters: segmentFilterSchema.parse(parsed.filters)};
   },
 
-  async membersForSegment(store, filter) {
+  async membersForSegment(actor, store, filter) {
+    requireAdmin(actor);
     return campaignAudience(store, filter);
   },
 
-  async createCampaign(store, actor: AdminActor, input: QueueCampaignInput): Promise<CampaignQueueResult> {
+  async createCampaign(actor: Actor, store, input: QueueCampaignInput): Promise<CampaignQueueResult> {
     requireAdmin(actor);
     const db = asDb(store);
     const inserted = await db.insert(campaigns).values({segmentId: input.segmentId, createdByProfileId: actor.profileId, template: input.template, localeStrategy: input.localeStrategy, idempotencyKey: input.idempotencyKey}).onConflictDoNothing({target: campaigns.idempotencyKey}).returning({id: campaigns.id});
     if (inserted[0]) return {campaignId: campaignRowSchema.parse(inserted[0]).id, recipientCount: 0, disposition: "created"};
-    const existing = await this.findCampaignByIdempotencyKey(store, input.idempotencyKey);
+    const existing = await this.findCampaignByIdempotencyKey(actor, store, input.idempotencyKey, input.segmentId);
     if (!existing) throw new Error("Campaign idempotency claim was not visible");
     return {...existing, disposition: "existing"};
   },
 
-  async insertRecipients(store, campaignId, recipients) {
+  async insertRecipients(actor, store, campaignId, recipients) {
+    requireAdmin(actor);
     if (!recipients.length) return;
     const db = asDb(store);
     await db.insert(campaignRecipients).values(recipients.map((recipient) => ({campaignId, ...recipient, variables: recipient.variables as Record<string, string>})));
   },
 
-  async appendAudit(store, actor, campaignId, recipientCount) {
+  async appendAudit(actor, store, campaignId, recipientCount) {
     requireAdmin(actor);
     const db = asDb(store);
     await db.insert(auditEvents).values({actorUserId: actor.profileId, actorType: actor.kind, action: "campaign.queued", targetType: "campaign", targetId: campaignId, metadata: {recipientCount}});
