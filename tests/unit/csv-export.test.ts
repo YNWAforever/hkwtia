@@ -21,4 +21,13 @@ describe("member CSV export", () => {
 
     expect(csv).toBe("\uFEFFprofileId,displayName,email,companyName,planCode,membershipStatus,renewalAt,score\r\nprofile-1,\"Ada, \"\"Ace\"\"\",'=formula@example.test,\"Acme\nLimited\",corporate,active,2026-09-01T00:00:00.000Z,19\r\n");
   });
+
+  it.each([
+    [" =SUM(1,1)", "\"' =SUM(1,1)\""],
+    ["\t@cmd", "'\t@cmd"],
+    ["  -1+2", "'  -1+2"],
+    [" \t=SUM(\"a,b\")\r\n", "\"' \t=SUM(\"\"a,b\"\")\r\n\""],
+  ])("neutralizes a whitespace-prefixed formula %j", (value, expected) => {
+    expect(csvCell(value)).toBe(expected);
+  });
 });

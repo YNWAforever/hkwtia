@@ -3,7 +3,7 @@ import type {SegmentMember} from "@/lib/admin/segments";
 const header = ["profileId", "displayName", "email", "companyName", "planCode", "membershipStatus", "renewalAt", "score"] as const;
 
 function neutralizeFormula(value: string): string {
-  return /^[=+\-@]/.test(value) ? `'${value}` : value;
+  return /^\s*[=+\-@]/u.test(value) ? `'${value}` : value;
 }
 
 export function csvCell(value: string | number | null): string {

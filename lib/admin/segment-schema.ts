@@ -2,14 +2,18 @@ import {z} from "zod";
 
 const stringList = z.array(z.string().min(1)).max(20).default([]);
 
+function nullableNumber(schema: z.ZodNumber) {
+  return z.preprocess((value) => typeof value === "string" && value.trim() === "" ? null : value, schema.nullable().default(null));
+}
+
 export const segmentFilterSchema = z.object({
   tier: stringList,
   status: stringList,
-  scoreMin: z.coerce.number().min(0).max(100).nullable().default(null),
-  scoreMax: z.coerce.number().min(0).max(100).nullable().default(null),
-  renewalWithinDays: z.coerce.number().int().min(0).max(730).nullable().default(null),
+  scoreMin: nullableNumber(z.coerce.number().min(0).max(100)),
+  scoreMax: nullableNumber(z.coerce.number().min(0).max(100)),
+  renewalWithinDays: nullableNumber(z.coerce.number().int().min(0).max(730)),
   sector: z.string().trim().max(100).default(""),
-  lastLoginBeforeDays: z.coerce.number().int().min(0).max(3650).nullable().default(null),
+  lastLoginBeforeDays: nullableNumber(z.coerce.number().int().min(0).max(3650)),
 }).strict().superRefine((filter, context) => {
   if (filter.scoreMin !== null && filter.scoreMax !== null && filter.scoreMin > filter.scoreMax) {
     context.addIssue({code: z.ZodIssueCode.custom, path: ["scoreMax"], message: "scoreMax must be at least scoreMin"});

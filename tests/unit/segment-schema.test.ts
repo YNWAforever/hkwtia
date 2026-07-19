@@ -27,4 +27,17 @@ describe("segment filter schema", () => {
       cursor: null,
     });
   });
+
+  it.each(["", "   ", "\t"])("normalizes blank numeric filter input %j to null", (blank) => {
+    expect(segmentFilterSchema.parse({scoreMin: blank, scoreMax: blank, renewalWithinDays: blank, lastLoginBeforeDays: blank})).toMatchObject({scoreMin: null, scoreMax: null, renewalWithinDays: null, lastLoginBeforeDays: null});
+  });
+
+  it("keeps valid numeric strings bounded and rejects nonnumeric numeric filter input", () => {
+    expect(segmentFilterSchema.parse({scoreMin: "1.5", scoreMax: "20", renewalWithinDays: "60", lastLoginBeforeDays: "90"})).toMatchObject({scoreMin: 1.5, scoreMax: 20, renewalWithinDays: 60, lastLoginBeforeDays: 90});
+    expect(() => segmentFilterSchema.parse({scoreMin: "not-a-number"})).toThrow();
+  });
+
+  it("keeps all blank URL numeric controls absent from the preview filter", () => {
+    expect(parseSegmentRouteQuery({scoreMin: " ", scoreMax: "", renewalWithinDays: "\t", lastLoginBeforeDays: "   "}).filter).toMatchObject({scoreMin: null, scoreMax: null, renewalWithinDays: null, lastLoginBeforeDays: null});
+  });
 });
