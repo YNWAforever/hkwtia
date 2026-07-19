@@ -326,3 +326,43 @@ The new bound action is produced by `createAppendMemberNoteAction` and used by t
 ### Review-fix commit
 
 - `22ecd28 fix: harden staff note action`
+---
+
+## Critical Server Action boundary fix
+
+### RED
+
+```text
+npx.cmd vitest run tests/unit/member-note-action.test.ts tests/unit/member-note-server-action-boundary.test.ts --reporter=dot
+2 failed test files
+- Failed to resolve @/lib/admin/member-note-action-core
+- member-note-actions.ts was missing
+- the page still imported createAppendMemberNoteAction instead of binding a Server Action export
+```
+
+### Design
+
+The injectable execution path remains in `lib/admin/member-note-action-core.ts` (`server-only`) so behavioral tests can supply actor, repository, and revalidation dependencies. `lib/admin/member-note-actions.ts` begins with the module directive `"use server"` and exports only the async `appendMemberNoteAction` wrapper. The page imports that export and binds the validated route profile ID, route path, and localized labels before passing the resulting bound action to the client `MemberNoteForm`.
+
+### GREEN and boundary evidence
+
+```text
+npx.cmd vitest run tests/unit/member-notes.test.ts tests/unit/member-note-action.test.ts tests/unit/member-note-server-action-boundary.test.ts tests/unit/member-360.test.ts tests/unit/admin-presentational.test.tsx tests/unit/messages.test.ts --reporter=dot
+6 passed / 20 tests passed
+```
+
+The added boundary contract reads the Server Action module and page source. It requires the module-level directive, an exported async action, no non-async value/type/function exports from the action module, and the page's direct import and `.bind(null, profileId.data, routePath, ...)` usage. This repository does not expose a stable server-reference manifest contract for a direct unit assertion, so the source contract is paired with a successful production Next build, which compiled the action/page through the real RSC boundary.
+
+### Verification
+
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run lint` passed.
+- `npm.cmd run audit:strings` passed (76 TSX files scanned).
+- `npm.cmd test` passed: 61 files / 262 tests; 2 skipped.
+- `npm.cmd run build` passed. It emitted only the existing Browserslist/caniuse-lite freshness warning.
+- `git diff --check` passed before staging.
+- Boundary-fix files were verified UTF-8 without BOM.
+
+### Boundary-fix commit
+
+- `0dea151 fix: use a real member note Server Action`
