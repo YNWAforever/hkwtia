@@ -94,3 +94,27 @@
 - Repository entry points require an admin actor and runtime-validate IDs, filters, queue input, recipients, and audit counts before database access.
 - Saved-segment access and campaign creation use the existing owner model (`ownerProfileId`). Idempotency recovery is scoped by actor plus segment, and campaign count, recipient insertion, and audit insertion first verify `createdByProfileId` ownership. Direct cross-admin tests prove create, recovery, counting, recipient, and audit boundaries.
 - Default `queueCampaign` plus `createCampaignsRepository` failure injection at campaign creation, recipient insertion, and audit insertion leaves zero committed campaigns, recipients, or audits and records exactly one rollback for each case. The concurrency race remains covered. No production rollback change was required.
+
+## Server Action authorization denial follow-up - 2026-07-19
+
+### RED
+
+- `npx.cmd vitest run tests/unit/campaign-action.test.ts tests/unit/campaign-server-action-auth.test.ts tests/unit/campaign-server-action-boundary.test.ts --reporter=verbose`
+- Expected RED: 3 files failed, with 5 failed and 7 passed tests. The core returned generic state for both `UNAUTHORIZED` and `FORBIDDEN`; the genuine Server Action therefore resolved generic state instead of calling `notFound()`, and its source had no denial mapper.
+- Existing Zod, missing-segment, idempotency-recovery, database, and unrelated actor-failure tests stayed green, confirming that only authorization-denial behavior needed to change.
+
+### GREEN
+
+- Focused authorization boundary: 3 files and 12 tests passed.
+- Focused Task 6 campaign suite: 8 files and 30 tests passed.
+- Direct TypeScript and lint with zero warnings passed.
+- Full Vitest: 72 files passed and 2 skipped; 311 tests passed and 2 skipped.
+- Production Next.js build passed and generated all 73 static pages; `/[locale]/admin/segments` remains dynamic. The existing stale `caniuse-lite` notice remains informational.
+- `git diff --check` and BOM checks for all six touched files passed.
+
+### Authorization boundary
+
+- `isAuthorizationDenial` recognizes only exact `UNAUTHORIZED` and `FORBIDDEN` errors.
+- The action core rethrows those denials instead of swallowing them, while unrelated actor failures and all queue/service failures continue returning the localized generic form state without revalidation.
+- The genuine module-level `"use server"` action catches propagated denials and calls Next.js `notFound()`. It rethrows any non-authorization error that reaches that boundary and exports only the async action required by Next.js.
+- Direct real-action tests prove both anonymous/revoked (`UNAUTHORIZED`) and non-admin/forged (`FORBIDDEN`) invocation paths map to `notFound()`; success-only revalidation and safe queue failures remain covered.
