@@ -100,3 +100,49 @@ Next build sets `NEXT_PHASE=phase-production-build`, so auth imports use generat
 - Removed the extra blank line at EOF in `lib/db/repos/common.ts`.
 - `npm.cmd test -- --reporter=dot tests/unit/actor-authorization.test.ts tests/unit/repository-scope.test.ts tests/unit/repository-mutation-scope.test.ts`: exit 0, 3 files and 13 tests passed.
 - `git diff --check`: exit 0.
+## Admin shell and member list update (2026-07-19)
+
+### Summary
+
+Implemented the staff-only `/admin` shell and searchable member list. The service validates query input with Zod, requires an admin actor before repository access, and the repository performs case-insensitive server-side profile, email, and company search with a base64url cursor ordered by normalized display name then profile ID.
+
+### Files
+
+- `lib/admin/member-types.ts`
+- `lib/admin/members.ts`
+- `lib/db/repos/admin-members.ts`
+- `components/admin/admin-nav.tsx`
+- `components/admin/member-table.tsx`
+- `app/[locale]/(admin)/admin/layout.tsx`
+- `app/[locale]/(admin)/admin/page.tsx`
+- `app/[locale]/(admin)/admin/members/page.tsx`
+- `messages/en.json`
+- `messages/zh-HK.json`
+- `tests/unit/admin-member-list.test.ts`
+- `tests/unit/admin-presentational.test.tsx`
+
+### RED/GREEN evidence
+
+- RED: `npx.cmd vitest run tests/unit/admin-member-list.test.ts tests/unit/admin-presentational.test.tsx --reporter=dot` failed as expected with Vite import-resolution errors for the absent `@/lib/admin/members` and `@/components/admin/admin-nav` modules.
+- GREEN: `npx.cmd vitest run tests/unit/admin-member-list.test.ts tests/unit/admin-presentational.test.tsx tests/unit/messages.test.ts --reporter=dot` passed: 3 files, 5 tests.
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run lint` passed.
+- `npm.cmd test` passed: 55 files / 240 tests, with 2 environment-gated tests skipped.
+- `npm.cmd run build` passed; the only output was the pre-existing Browserslist database freshness advisory.
+- `npm.cmd run audit:strings` passed: 73 TSX files scanned.
+
+### Commit
+
+`087833a feat: add protected admin member list`
+
+### Self-review
+
+- The admin layout calls `requireAdminActor()` and turns both `UNAUTHORIZED` and `FORBIDDEN` into `notFound()`.
+- All new page and component labels are supplied from the parity-checked `Admin` namespace; the shell remains server-rendered and does not fetch client-side.
+- Repository access is behind the service and requires an admin actor both at the service boundary and repository boundary.
+- Diff, staged-diff whitespace, status, and BOM checks were completed before the feature commit. All Task 3 files are UTF-8 without a BOM.
+
+### Risks and tool fallback
+
+- The member query joins profile, active company membership, membership, and engagement score tables. Profiles with multiple simultaneous company memberships can yield multiple rows; a future staff CRM task should define whether those should be collapsed into a single preferred company row.
+- The linked-worktree sandbox repeatedly returned `helper_unknown_error: apply deny-read ACLs`. After normal reads and an `apply_patch` update attempt failed, only a narrow BOM-free PowerShell fallback was used for identified Task 3 files: reading guidance/target files and editing the two message bundles plus two just-created test files. No tree-wide transformation was performed.
