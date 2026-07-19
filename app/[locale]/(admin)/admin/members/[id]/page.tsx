@@ -1,4 +1,3 @@
-import {revalidatePath} from "next/cache";
 import {notFound} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {z} from "zod";
@@ -7,9 +6,8 @@ import {Member360View} from "@/components/admin/member-360";
 import {MemberNoteForm} from "@/components/admin/member-note-form";
 import type {AppLocale} from "@/i18n/routing";
 import {getMember360, Member360NotFoundError} from "@/lib/admin/member-360";
-import {createAppendMemberNoteAction} from "@/lib/admin/member-note-action";
+import {appendMemberNoteAction} from "@/lib/admin/member-note-actions";
 import {requireAdminActor} from "@/lib/auth/actor";
-import {appendMemberNote} from "@/lib/db/repos/member-notes";
 
 const profileIdSchema = z.string().min(1);
 type Props = Readonly<{params: Promise<{locale: string; id: string}>}>;
@@ -26,12 +24,7 @@ export default async function AdminMember360Page({params}: Props) {
     if (error instanceof Member360NotFoundError) notFound();
     throw error;
   }
-  const appendAction = createAppendMemberNoteAction({
-    profileId: profileId.data,
-    path: `/${locale}/admin/members/${profileId.data}`,
-    labels: {success: t("member360.noteSuccess"), validation: t("member360.noteValidation"), error: t("member360.noteError")},
-    dependencies: {actor: requireAdminActor, append: appendMemberNote, revalidate: revalidatePath},
-  });
+  const appendAction = appendMemberNoteAction.bind(null, profileId.data, `/${locale}/admin/members/${profileId.data}`, {success: t("member360.noteSuccess"), validation: t("member360.noteValidation"), error: t("member360.noteError")});
   const membership = view.membership;
   const customerHref = membership?.stripeCustomerId ? `https://dashboard.stripe.com/customers/${encodeURIComponent(membership.stripeCustomerId)}` : null;
   const subscriptionHref = membership?.stripeSubscriptionId ? `https://dashboard.stripe.com/subscriptions/${encodeURIComponent(membership.stripeSubscriptionId)}` : null;

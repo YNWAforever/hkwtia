@@ -1,7 +1,7 @@
 import {describe, expect, it} from "vitest";
 import {z} from "zod";
 
-import {createAppendMemberNoteAction} from "@/lib/admin/member-note-action";
+import {createAppendMemberNoteAction} from "@/lib/admin/member-note-action-core";
 import type {MemberNoteFormState} from "@/components/admin/member-note-form";
 import type {AdminActor} from "@/lib/membership/lifecycle";
 
