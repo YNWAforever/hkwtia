@@ -144,5 +144,32 @@ Implemented the staff-only `/admin` shell and searchable member list. The servic
 
 ### Risks and tool fallback
 
-- The member query joins profile, active company membership, membership, and engagement score tables. Profiles with multiple simultaneous company memberships can yield multiple rows; a future staff CRM task should define whether those should be collapsed into a single preferred company row.
+- The deterministic `ROW_NUMBER()` projection resolves multi-company duplicates, and its representative-company tie-break is documented and tested.
 - The linked-worktree sandbox repeatedly returned `helper_unknown_error: apply deny-read ACLs`. After normal reads and an `apply_patch` update attempt failed, only a narrow BOM-free PowerShell fallback was used for identified Task 3 files: reading guidance/target files and editing the two message bundles plus two just-created test files. No tree-wide transformation was performed.
+
+## Review fixes (2026-07-19)
+
+### RED
+
+`npx.cmd vitest run tests/unit/admin-members-repository.test.ts tests/unit/admin-member-page-boundary.test.ts tests/unit/admin-presentational.test.tsx --reporter=dot` exited 1: 3 files failed / 4 tests failed / 5 passed. Expected failures were the missing route-boundary parser, the unprojected repository cursor failure against multi-company rows, and missing localized brand labels.
+
+### GREEN and verification
+
+- Focused review suite: 5 files / 12 tests passed.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run lint`: passed.
+- `npm.cmd run audit:strings`: passed, 73 TSX files scanned.
+- `npm.cmd test`: 57 files / 247 tests passed; 2 environment-gated tests skipped.
+- `npm.cmd run build`: passed. `/[locale]/admin` and `/[locale]/admin/members` are dynamic routes. The only advisory was the stale Browserslist database.
+
+### Review implementation
+
+- `matching_profiles` preserves truthfulness for searches matching any active company before `candidate_rows` chooses a representative. `ROW_NUMBER() OVER (PARTITION BY profile)` selects one row before outer cursor pagination.
+- Representative tie-break is membership-status priority (`active`, `past_due`, ending, pending, terminal), then membership ID and company ID. The SQL proxy test simulates multiple company/membership candidates and proves alpha/beta followed by charlie without duplicate or skip.
+- The route calls `parseAdminMemberRouteQuery` before authentication/service/repository work. It rejects array-shaped search terms, out-of-range limits, and invalid base64url cursor payloads; service validation remains in place.
+- Removed the inaccurate Previous link. Next links retain `q` and carry the opaque cursor.
+- Moved the admin brand copy to the parity-checked `Admin.brand` translation key and supplied it to both admin navigation and landing page.
+
+### Tool fallback
+
+The linked-worktree deny-read ACL helper continued to reject normal update reads. After `apply_patch` failed, only identified Task 3 files were changed through narrow BOM-free PowerShell writes; no tree-wide transformation was performed.
