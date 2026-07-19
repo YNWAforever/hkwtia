@@ -2,6 +2,7 @@ import "server-only";
 
 import type {QueueActionState} from "@/components/admin/segment-results";
 import {campaignDraftSchema, queueCampaign} from "@/lib/admin/campaigns";
+import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
 import type {AdminActor} from "@/lib/membership/lifecycle";
 
 type Dependencies = Readonly<{
@@ -21,7 +22,8 @@ export function createQueueCampaignAction({draftId, path, dependencies}: Readonl
       });
       dependencies.revalidate(path);
       return {disposition: result.disposition, recipientCount: result.recipientCount, error: null};
-    } catch {
+    } catch (error) {
+      if (isAuthorizationDenial(error)) throw error;
       return {disposition: null, recipientCount: 0, error: "generic"};
     }
   };

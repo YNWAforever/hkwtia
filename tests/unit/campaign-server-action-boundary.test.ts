@@ -13,6 +13,9 @@ describe("campaign queue Server Action boundary", () => {
     expect(source.trimStart()).toMatch(/^"use server";/);
     expect(source).toMatch(/export async function queueCampaignAction\(/);
     expect(source).not.toMatch(/export (?:const|let|type|interface|function) /);
+    expect(source).toContain('import {notFound} from "next/navigation";');
+    expect(source).toContain("if (isAuthorizationDenial(error)) notFound();");
+    expect(source).toContain("throw error;");
   });
 
   it("binds the validated URL draft on the server and never trusts a form idempotency key", () => {
