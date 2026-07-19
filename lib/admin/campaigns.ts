@@ -5,7 +5,7 @@ import {z} from "zod";
 import type {SegmentFilterSet} from "@/lib/admin/segment-schema";
 import {requireAdmin} from "@/lib/auth/actor";
 import {campaignsRepository} from "@/lib/db/repos/campaigns";
-import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
+import type {Actor} from "@/lib/membership/lifecycle";
 
 export const queueCampaignSchema = z.object({
   segmentId: z.string().uuid(),

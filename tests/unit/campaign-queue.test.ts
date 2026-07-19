@@ -1,6 +1,7 @@
 import {describe, expect, it} from "vitest";
 
 import {isEligibleCampaignEmail, queueCampaign, resolveCampaignDraft, type CampaignQueueMember} from "@/lib/admin/campaigns";
+import {campaignsRepository, createCampaignsRepository} from "@/lib/db/repos/campaigns";
 import type {AdminActor} from "@/lib/membership/lifecycle";
 
 const actor = (): AdminActor => ({kind: "staff", userId: "staff-1", profileId: "staff-1"});
@@ -37,6 +38,32 @@ function fakeDependencies() {
 }
 
 describe("campaign queue", () => {
+  it("rolls back a real campaign repository transaction when recipient or audit work fails", async () => {
+    const writes: string[] = [];
+    const database = {
+      transaction: async <T>(callback: (tx: unknown) => Promise<T>) => {
+        const checkpoint = writes.length;
+        try { return await callback(database); } catch (error) { writes.splice(checkpoint); throw error; }
+      },
+    };
+    const repository = createCampaignsRepository(async () => database as never);
+
+    await expect(repository.transaction(actor(), async () => {
+      writes.push("campaign", "recipient");
+      throw new Error("audit failed");
+    })).rejects.toThrow("audit failed");
+    expect(writes).toEqual([]);
+  });
+  it("rejects anonymous actors at every direct repository entry before database access", async () => {
+    const anonymous = {kind: "anonymous" as const, userId: null};
+    await expect(campaignsRepository.transaction(anonymous, async () => undefined)).rejects.toThrow();
+    await expect(campaignsRepository.findCampaignByIdempotencyKey(anonymous, {}, "22222222-2222-4222-8222-222222222222", input.segmentId)).rejects.toThrow();
+    await expect(campaignsRepository.getSavedSegment(anonymous, {}, input.segmentId)).rejects.toThrow();
+    await expect(campaignsRepository.membersForSegment(anonymous, {}, {tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null})).rejects.toThrow();
+    await expect(campaignsRepository.createCampaign(anonymous, {}, input)).rejects.toThrow();
+    await expect(campaignsRepository.insertRecipients(anonymous, {}, "campaign-1", [])).rejects.toThrow();
+    await expect(campaignsRepository.appendAudit(anonymous, {}, "campaign-1", 0)).rejects.toThrow();
+  });
   it("keeps the URL-bound draft stable until an explicit new draft is requested", () => {
     expect(resolveCampaignDraft("11111111-1111-4111-8111-111111111111", () => "new-draft")).toEqual({draftId: "11111111-1111-4111-8111-111111111111", created: false});
     expect(resolveCampaignDraft(null, () => "new-draft")).toEqual({draftId: "new-draft", created: true});

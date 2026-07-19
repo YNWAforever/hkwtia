@@ -54,10 +54,13 @@ async function campaignAudience(store: unknown, filter: SegmentFilterSet): Promi
   return z.array(audienceRowSchema).parse(resultRows(rows)).map(toQueueMember);
 }
 
-export const campaignsRepository: CampaignQueueDependencies = {
+export type CampaignDbProvider = () => Promise<Awaited<ReturnType<typeof getDb>>>;
+
+export function createCampaignsRepository(getDatabase: CampaignDbProvider): CampaignQueueDependencies {
+  return {
   async transaction<T>(actor: Actor, callback: (store: unknown) => Promise<T>): Promise<T> {
     requireAdmin(actor);
-    const db = await getDb();
+    const db = await getDatabase();
     return db.transaction(async (tx) => callback(tx));
   },
 
@@ -106,4 +109,7 @@ export const campaignsRepository: CampaignQueueDependencies = {
     const db = asDb(store);
     await db.insert(auditEvents).values({actorUserId: actor.profileId, actorType: actor.kind, action: "campaign.queued", targetType: "campaign", targetId: campaignId, metadata: {recipientCount}});
   },
-};
+  };
+}
+
+export const campaignsRepository = createCampaignsRepository(() => getDb());
