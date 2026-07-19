@@ -290,3 +290,39 @@ npx.cmd vitest run tests/unit/member-360.test.ts tests/unit/member-notes.test.ts
 - Reviewed actor-first authorization, runtime repository authorization, profile ownership, page/action Zod boundaries, transactional note/audit behavior, no note-body logging or audit metadata, locale parity, server component defaults, and 404 behavior.
 - Build emitted the pre-existing Browserslist/caniuse-lite freshness warning only; it does not affect the Task 4 build result.
 - The linked-worktree sandbox repeatedly failed to apply deny-read ACLs. `apply_patch` was attempted first; the fallback was limited to the listed Task 4 files, used BOM-free PowerShell writes, and was verified afterward.
+---
+
+## Review-fix evidence: transactional rollback and bound note action
+
+### RED
+
+```text
+npx.cmd vitest run tests/unit/member-notes.test.ts tests/unit/member-note-action.test.ts --reporter=dot
+1 failed / 1 passed; 7 tests passed
+Failed to resolve @/lib/admin/member-note-action
+```
+
+The rollback test runs `appendMemberNote` with no injected dependency override. It mocks the runtime database boundary with a transactional fake that stages the production repository's note and audit writes, rejects the audit insert, and commits staged rows only when the callback resolves. It asserts both committed note and audit collections remain empty.
+
+### GREEN
+
+```text
+npx.cmd vitest run tests/unit/member-notes.test.ts tests/unit/member-note-action.test.ts tests/unit/member-360.test.ts tests/unit/admin-presentational.test.tsx tests/unit/messages.test.ts --reporter=dot
+5 passed / 18 tests passed
+```
+
+The new bound action is produced by `createAppendMemberNoteAction` and used by the member-detail page. It takes the validated route profile ID and target path as closed-over inputs, ignores tampered `FormData.profileId`, has no hidden profile input, revalidates only after a successful append, returns localized validation feedback for Zod errors, and returns the generic localized `Admin.member360.noteError` state for authorization, database, foreign-key, and other write failures without exposing internals.
+
+### Review-fix verification
+
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run lint` passed.
+- `npm.cmd run audit:strings` passed.
+- `npm.cmd test` passed.
+- `npm.cmd run build` passed.
+- `git diff --check` passed before staging.
+- All review-fix files were verified UTF-8 without BOM.
+
+### Review-fix commit
+
+- `22ecd28 fix: harden staff note action`
