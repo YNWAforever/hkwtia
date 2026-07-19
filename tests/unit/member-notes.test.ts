@@ -1,5 +1,12 @@
-import {describe, expect, it} from "vitest";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 
+const database = vi.hoisted(() => ({current: null as unknown}));
+vi.mock("@/lib/db/repos/common", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/lib/db/repos/common")>();
+  return {...original, getDb: async () => database.current};
+});
+
+import {auditEvents, memberNotes} from "@/lib/db/server-schema";
 import {appendMemberNote, type MemberNoteDependencies} from "@/lib/db/repos/member-notes";
 import type {AdminActor, Actor} from "@/lib/membership/lifecycle";
 
@@ -23,6 +30,8 @@ function fakeTransaction() {
 }
 
 describe("staff member notes", () => {
+  beforeEach(() => { database.current = null; });
+
   it("writes the note and audit record atomically", async () => {
     const transaction = fakeTransaction();
 
@@ -57,5 +66,32 @@ describe("staff member notes", () => {
     const dependencies: MemberNoteDependencies = {transaction: async () => { throw new Error("PRIVATE_WRITE"); }};
 
     await expect(appendMemberNote(staffActor(), input, dependencies)).rejects.toThrow();
+  });
+
+  it("rolls back the staged note when the audit write fails in the production transaction path", async () => {
+    const committed = {notes: [] as unknown[], audits: [] as unknown[]};
+    database.current = {
+      transaction: async (work: (tx: {insert(table: unknown): {values(value: unknown): {returning(fields: unknown): Promise<unknown[]>} | Promise<void>}}) => Promise<unknown>) => {
+        const staged = {notes: [] as unknown[], audits: [] as unknown[]};
+        const tx = {insert: (table: unknown) => ({values: (value: unknown) => {
+          if (table === memberNotes) {
+            staged.notes.push(value);
+            return {returning: async () => [{id: "note-1"}]};
+          }
+          if (table === auditEvents) {
+            staged.audits.push(value);
+            return Promise.reject(new Error("AUDIT_WRITE_FAILED"));
+          }
+          throw new Error("UNEXPECTED_TABLE");
+        }})};
+        const result = await work(tx);
+        committed.notes.push(...staged.notes);
+        committed.audits.push(...staged.audits);
+        return result;
+      },
+    };
+
+    await expect(appendMemberNote(staffActor(), {profileId: "member-1", body: "Called about renewal"})).rejects.toThrow("AUDIT_WRITE_FAILED");
+    expect(committed).toEqual({notes: [], audits: []});
   });
 });
