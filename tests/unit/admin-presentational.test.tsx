@@ -8,7 +8,7 @@ import zh from "@/messages/zh-HK.json";
 
 describe("admin presentation", () => {
   it.each([en.Admin, zh.Admin])("renders one page heading, an accessible nav, a table caption, and translated empty state", (labels) => {
-    const nav = renderToStaticMarkup(<AdminNav locale="en" labels={labels.navigation}/>);
+    const nav = renderToStaticMarkup(<AdminNav locale="en" labels={{...labels.navigation, brand: labels.brand}}/>);
     const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: null}} query="" locale="en"/>);
     const page = renderToStaticMarkup(<main><h1>{labels.members.title}</h1>{table}</main>);
 
@@ -16,5 +16,13 @@ describe("admin presentation", () => {
     expect(nav).toContain(`aria-label="${labels.navigation.label}"`);
     expect(table).toMatch(new RegExp(`<caption[^>]*>${labels.members.caption}</caption>`));
     expect(table).toContain(labels.members.empty);
+  });
+  it.each([en.Admin, zh.Admin])("uses localized brand copy and preserves the query in next-page links without a false previous link", (labels) => {
+    const nav = renderToStaticMarkup(<AdminNav locale="en" labels={{...labels.navigation, brand: labels.brand}}/>);
+    const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: "opaque-cursor"}} query="acme" locale="en"/>);
+
+    expect(nav).toContain(labels.brand);
+    expect(table).toContain("?q=acme&amp;cursor=opaque-cursor");
+    expect(table).not.toContain(labels.members.previous);
   });
 });

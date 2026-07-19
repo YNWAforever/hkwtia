@@ -13,12 +13,10 @@ export default async function AdminLayout({children, params}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  try {
-    await requireAdminActor();
-  } catch (error) {
+  try { await requireAdminActor(); } catch (error) {
     if (error instanceof Error && (error.message === "UNAUTHORIZED" || error.message === "FORBIDDEN")) notFound();
     throw error;
   }
   const t = await getTranslations({locale, namespace: "Admin"});
-  return <div className="min-h-screen bg-background"><AdminNav locale={locale} labels={{label: t("navigation.label"), members: t("navigation.members"), segments: t("navigation.segments"), atRisk: t("navigation.atRisk"), events: t("navigation.events"), approvals: t("navigation.approvals"), reports: t("navigation.reports")}} /><main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">{children}</main></div>;
+  return <div className="min-h-screen bg-background"><AdminNav locale={locale} labels={{brand: t("brand"), label: t("navigation.label"), members: t("navigation.members"), segments: t("navigation.segments"), atRisk: t("navigation.atRisk"), events: t("navigation.events"), approvals: t("navigation.approvals"), reports: t("navigation.reports")}} /><main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">{children}</main></div>;
 }
