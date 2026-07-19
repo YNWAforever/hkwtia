@@ -3,18 +3,27 @@ import "server-only";
 import {and, eq, sql} from "drizzle-orm";
 import {z} from "zod";
 
-import type {CampaignQueueDependencies, CampaignQueueMember, CampaignQueueResult, QueueCampaignInput} from "@/lib/admin/campaigns";
-import {segmentFilterSchema, type SegmentFilterSet} from "@/lib/admin/segment-schema";
+import {queueCampaignSchema, type CampaignQueueDependencies, type CampaignQueueMember, type CampaignQueueResult, type QueueCampaignInput} from "@/lib/admin/campaigns";
+import {segmentFilterSchema, segmentIdSchema, type SegmentFilterSet} from "@/lib/admin/segment-schema";
 import {requireAdmin} from "@/lib/auth/actor";
 import {auditEvents, campaignRecipients, campaigns, companies, companyMembers, emailLog, engagementScores, memberships, profiles, savedSegments} from "@/lib/db/server-schema";
 import {getDb} from "@/lib/db/repos/common";
 import {segmentPredicates} from "@/lib/db/repos/segments";
-import type {Actor} from "@/lib/membership/lifecycle";
+import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 
 const savedSegmentRowSchema = z.object({id: z.string().uuid(), ownerProfileId: z.string(), filters: z.record(z.unknown())});
 const audienceRowSchema = z.object({profileId: z.string(), displayName: z.string(), email: z.string().nullable(), locale: z.string(), consentMarketing: z.boolean(), suppressed: z.boolean(), renewalAt: z.coerce.date().nullable()});
 const campaignRowSchema = z.object({id: z.string().uuid()});
 const countRowSchema = z.object({count: z.coerce.number()});
+const idempotencyKeySchema = z.string().uuid();
+const campaignIdSchema = z.string().uuid();
+const recipientCountSchema = z.number().int().nonnegative();
+const campaignRecipientSchema = z.object({
+  profileId: z.string().min(1),
+  email: z.string().trim().email(),
+  locale: z.string().min(1).max(10),
+  variables: z.record(z.string().nullable()),
+}).strict();
 
 type DbExecutor = Pick<Awaited<ReturnType<typeof getDb>>, "select" | "insert" | "execute">;
 
@@ -30,6 +39,29 @@ function resultRows(result: unknown): unknown[] {
 
 function toQueueMember(row: z.infer<typeof audienceRowSchema>): CampaignQueueMember {
   return {...row, renewalAt: row.renewalAt?.toISOString().slice(0, 10) ?? null};
+}
+
+async function savedSegmentForActor(actor: AdminActor, store: unknown, segmentId: string) {
+  const parsedSegmentId = segmentIdSchema.parse(segmentId);
+  const db = asDb(store);
+  const row = (await db.select({id: savedSegments.id, ownerProfileId: savedSegments.ownerProfileId, filters: savedSegments.filters})
+    .from(savedSegments)
+    .where(and(eq(savedSegments.id, parsedSegmentId), eq(savedSegments.ownerProfileId, actor.profileId)))
+    .limit(1))[0];
+  if (!row) return null;
+  const parsed = savedSegmentRowSchema.parse(row);
+  return {...parsed, filters: segmentFilterSchema.parse(parsed.filters)};
+}
+
+async function ownedCampaign(actor: AdminActor, store: unknown, campaignId: string): Promise<string> {
+  const parsedCampaignId = campaignIdSchema.parse(campaignId);
+  const db = asDb(store);
+  const row = (await db.select({id: campaigns.id})
+    .from(campaigns)
+    .where(and(eq(campaigns.id, parsedCampaignId), eq(campaigns.createdByProfileId, actor.profileId)))
+    .limit(1))[0];
+  if (!row) throw new Error("Campaign is not accessible");
+  return campaignRowSchema.parse(row).id;
 }
 
 async function campaignAudience(store: unknown, filter: SegmentFilterSet): Promise<readonly CampaignQueueMember[]> {
@@ -58,57 +90,93 @@ export type CampaignDbProvider = () => Promise<Awaited<ReturnType<typeof getDb>>
 
 export function createCampaignsRepository(getDatabase: CampaignDbProvider): CampaignQueueDependencies {
   return {
-  async transaction<T>(actor: Actor, callback: (store: unknown) => Promise<T>): Promise<T> {
-    requireAdmin(actor);
-    const db = await getDatabase();
-    return db.transaction(async (tx) => callback(tx));
-  },
+    async transaction<T>(actor: Actor, callback: (store: unknown) => Promise<T>): Promise<T> {
+      requireAdmin(actor);
+      const db = await getDatabase();
+      return db.transaction(async (tx) => callback(tx));
+    },
 
-  async findCampaignByIdempotencyKey(actor, store, idempotencyKey, segmentId) {
-    requireAdmin(actor);
-    const db = asDb(store);
-    const campaign = (await db.select({id: campaigns.id}).from(campaigns).where(and(eq(campaigns.idempotencyKey, idempotencyKey), eq(campaigns.createdByProfileId, actor.profileId), eq(campaigns.segmentId, segmentId))).limit(1))[0];
-    if (!campaign) return null;
-    const count = countRowSchema.parse((await db.select({count: sql<number>`count(*)`}).from(campaignRecipients).where(eq(campaignRecipients.campaignId, campaign.id)))[0]).count;
-    return {campaignId: campaign.id, recipientCount: count};
-  },
+    async findCampaignByIdempotencyKey(actor, store, idempotencyKey, segmentId) {
+      requireAdmin(actor);
+      const parsedIdempotencyKey = idempotencyKeySchema.parse(idempotencyKey);
+      const parsedSegmentId = segmentIdSchema.parse(segmentId);
+      const db = asDb(store);
+      const campaign = (await db.select({id: campaigns.id})
+        .from(campaigns)
+        .where(and(
+          eq(campaigns.idempotencyKey, parsedIdempotencyKey),
+          eq(campaigns.createdByProfileId, actor.profileId),
+          eq(campaigns.segmentId, parsedSegmentId),
+        ))
+        .limit(1))[0];
+      if (!campaign) return null;
+      const parsedCampaign = campaignRowSchema.parse(campaign);
+      const count = countRowSchema.parse((await db.select({count: sql<number>`count(*)`})
+        .from(campaignRecipients)
+        .where(eq(campaignRecipients.campaignId, parsedCampaign.id)))[0]).count;
+      return {campaignId: parsedCampaign.id, recipientCount: count};
+    },
 
-  async getSavedSegment(actor, store, segmentId) {
-    requireAdmin(actor);
-    const db = asDb(store);
-    const row = (await db.select({id: savedSegments.id, ownerProfileId: savedSegments.ownerProfileId, filters: savedSegments.filters}).from(savedSegments).where(and(eq(savedSegments.id, segmentId), eq(savedSegments.ownerProfileId, actor.profileId))).limit(1))[0];
-    if (!row) return null;
-    const parsed = savedSegmentRowSchema.parse(row);
-    return {...parsed, filters: segmentFilterSchema.parse(parsed.filters)};
-  },
+    async getSavedSegment(actor, store, segmentId) {
+      requireAdmin(actor);
+      return savedSegmentForActor(actor, store, segmentId);
+    },
 
-  async membersForSegment(actor, store, filter) {
-    requireAdmin(actor);
-    return campaignAudience(store, filter);
-  },
+    async membersForSegment(actor, store, filter) {
+      requireAdmin(actor);
+      const parsedFilter = segmentFilterSchema.parse(filter);
+      return campaignAudience(store, parsedFilter);
+    },
 
-  async createCampaign(actor: Actor, store, input: QueueCampaignInput): Promise<CampaignQueueResult> {
-    requireAdmin(actor);
-    const db = asDb(store);
-    const inserted = await db.insert(campaigns).values({segmentId: input.segmentId, createdByProfileId: actor.profileId, template: input.template, localeStrategy: input.localeStrategy, idempotencyKey: input.idempotencyKey}).onConflictDoNothing({target: campaigns.idempotencyKey}).returning({id: campaigns.id});
-    if (inserted[0]) return {campaignId: campaignRowSchema.parse(inserted[0]).id, recipientCount: 0, disposition: "created"};
-    const existing = await this.findCampaignByIdempotencyKey(actor, store, input.idempotencyKey, input.segmentId);
-    if (!existing) throw new Error("Campaign idempotency claim was not visible");
-    return {...existing, disposition: "existing"};
-  },
+    async createCampaign(actor: Actor, store, input: QueueCampaignInput): Promise<CampaignQueueResult> {
+      requireAdmin(actor);
+      const parsedInput = queueCampaignSchema.parse(input);
+      const segment = await savedSegmentForActor(actor, store, parsedInput.segmentId);
+      if (!segment) throw new Error("Saved segment was not found");
+      const db = asDb(store);
+      const inserted = await db.insert(campaigns)
+        .values({
+          segmentId: parsedInput.segmentId,
+          createdByProfileId: actor.profileId,
+          template: parsedInput.template,
+          localeStrategy: parsedInput.localeStrategy,
+          idempotencyKey: parsedInput.idempotencyKey,
+        })
+        .onConflictDoNothing({target: campaigns.idempotencyKey})
+        .returning({id: campaigns.id});
+      if (inserted[0]) return {campaignId: campaignRowSchema.parse(inserted[0]).id, recipientCount: 0, disposition: "created"};
+      const existing = await this.findCampaignByIdempotencyKey(actor, store, parsedInput.idempotencyKey, parsedInput.segmentId);
+      if (!existing) throw new Error("Campaign idempotency claim was not visible");
+      return {...existing, disposition: "existing"};
+    },
 
-  async insertRecipients(actor, store, campaignId, recipients) {
-    requireAdmin(actor);
-    if (!recipients.length) return;
-    const db = asDb(store);
-    await db.insert(campaignRecipients).values(recipients.map((recipient) => ({campaignId, ...recipient, variables: recipient.variables as Record<string, string>})));
-  },
+    async insertRecipients(actor, store, campaignId, recipients) {
+      requireAdmin(actor);
+      const parsedRecipients = z.array(campaignRecipientSchema).parse(recipients);
+      const parsedCampaignId = await ownedCampaign(actor, store, campaignId);
+      if (!parsedRecipients.length) return;
+      const db = asDb(store);
+      await db.insert(campaignRecipients).values(parsedRecipients.map((recipient) => ({
+        campaignId: parsedCampaignId,
+        ...recipient,
+        variables: recipient.variables as Record<string, string>,
+      })));
+    },
 
-  async appendAudit(actor, store, campaignId, recipientCount) {
-    requireAdmin(actor);
-    const db = asDb(store);
-    await db.insert(auditEvents).values({actorUserId: actor.profileId, actorType: actor.kind, action: "campaign.queued", targetType: "campaign", targetId: campaignId, metadata: {recipientCount}});
-  },
+    async appendAudit(actor, store, campaignId, recipientCount) {
+      requireAdmin(actor);
+      const parsedRecipientCount = recipientCountSchema.parse(recipientCount);
+      const parsedCampaignId = await ownedCampaign(actor, store, campaignId);
+      const db = asDb(store);
+      await db.insert(auditEvents).values({
+        actorUserId: actor.profileId,
+        actorType: actor.kind,
+        action: "campaign.queued",
+        targetType: "campaign",
+        targetId: parsedCampaignId,
+        metadata: {recipientCount: parsedRecipientCount},
+      });
+    },
   };
 }
 

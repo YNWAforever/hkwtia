@@ -34,6 +34,16 @@ export function resolveCampaignDraft(value: unknown, create: () => string): Read
   return parsed.success ? {draftId: parsed.data, created: false} : {draftId: create(), created: true};
 }
 
+export function campaignDraftHref(path: string, searchParams: Readonly<Record<string, string | string[] | undefined>>, draftId: string): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(searchParams)) {
+    if (key === "campaignDraft" || value === undefined) continue;
+    for (const item of Array.isArray(value) ? value : [value]) params.append(key, item);
+  }
+  params.set("campaignDraft", campaignDraftSchema.parse(draftId));
+  return path + "?" + params.toString();
+}
+
 export function isEligibleCampaignEmail(value: string | null): string | null {
   const normalized = value?.trim() ?? "";
   return z.string().email().safeParse(normalized).success ? normalized : null;

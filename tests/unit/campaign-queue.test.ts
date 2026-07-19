@@ -60,8 +60,10 @@ class FakeSelectQuery implements PromiseLike<unknown[]> {
   }
 }
 
-function createConcurrentCampaignDatabase() {
-  const lookupBarrier = new Barrier(2);
+type CampaignFailurePoint = "create" | "recipients" | "audit";
+
+function createConcurrentCampaignDatabase({parties = 2, failAt}: Readonly<{parties?: number; failAt?: CampaignFailurePoint}> = {}) {
+  const lookupBarrier = new Barrier(parties);
   const store = {
     campaigns: [] as StoredCampaign[],
     recipients: [] as StoredRecipient[],
@@ -69,6 +71,7 @@ function createConcurrentCampaignDatabase() {
     initialLookupMisses: 0,
     uniqueConstraintConflicts: 0,
     commits: [] as Array<Readonly<{disposition: "created" | "existing"; campaigns: number; recipients: number; audits: number}>>,
+    rollbacks: [] as Array<Readonly<{campaigns: number; recipients: number; audits: number}>>,
   };
   const claims = new Map<string, TransactionState>();
   let nextTransactionId = 0;
@@ -118,6 +121,7 @@ function createConcurrentCampaignDatabase() {
               return {
                 onConflictDoNothing: () => ({
                   returning: async () => {
+                    if (failAt === "create") throw new Error("campaign insert failed");
                     const owner = claims.get(row.idempotencyKey);
                     if (!owner) {
                       const campaign = {...row, id: "44444444-4444-4444-8444-444444444444"};
@@ -140,10 +144,12 @@ function createConcurrentCampaignDatabase() {
               };
             }
             if (table === campaignRecipients) {
+              if (failAt === "recipients") throw new Error("recipient insert failed");
               transactionState.recipients.push(...value as StoredRecipient[]);
               return Promise.resolve();
             }
             if (table === auditEvents) {
+              if (failAt === "audit") throw new Error("audit insert failed");
               transactionState.audits.push(value as StoredAudit);
               return Promise.resolve();
             }
@@ -162,6 +168,7 @@ function createConcurrentCampaignDatabase() {
         transactionState.completion.resolve("committed");
         return result;
       } catch (error) {
+        store.rollbacks.push({campaigns: transactionState.campaigns.length, recipients: transactionState.recipients.length, audits: transactionState.audits.length});
         transactionState.completion.resolve("rolled-back");
         throw error;
       }
@@ -233,21 +240,17 @@ describe("campaign queue", () => {
       audits: 0,
     });
   });
-  it("rolls back a real campaign repository transaction when recipient or audit work fails", async () => {
-    const writes: string[] = [];
-    const database = {
-      transaction: async <T>(callback: (tx: unknown) => Promise<T>) => {
-        const checkpoint = writes.length;
-        try { return await callback(database); } catch (error) { writes.splice(checkpoint); throw error; }
-      },
-    };
-    const repository = createCampaignsRepository(async () => database as never);
+  it.each(["create", "recipients", "audit"] as const)("rolls back all production queue writes when %s insertion fails", async (failAt) => {
+    const fake = createConcurrentCampaignDatabase({parties: 1, failAt});
+    const repository = createCampaignsRepository(async () => fake.database as never);
+    const message = failAt === "create" ? "campaign insert failed" : failAt === "recipients" ? "recipient insert failed" : "audit insert failed";
 
-    await expect(repository.transaction(actor(), async () => {
-      writes.push("campaign", "recipient");
-      throw new Error("audit failed");
-    })).rejects.toThrow("audit failed");
-    expect(writes).toEqual([]);
+    await expect(queueCampaign(actor(), input, repository)).rejects.toThrow(message);
+    expect(fake.store.campaigns).toEqual([]);
+    expect(fake.store.recipients).toEqual([]);
+    expect(fake.store.audits).toEqual([]);
+    expect(fake.store.commits).toEqual([]);
+    expect(fake.store.rollbacks).toHaveLength(1);
   });
   it("rejects anonymous actors at every direct repository entry before database access", async () => {
     const anonymous = {kind: "anonymous" as const, userId: null};
