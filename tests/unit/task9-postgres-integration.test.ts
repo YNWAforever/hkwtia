@@ -11,6 +11,7 @@ const enabled = process.env.RUN_POSTGRES_INTEGRATION === "1";
 const container = `hkwtia-task9-${process.pid}`;
 const approvalId = "11111111-1111-4111-8111-111111111111";
 const rollbackApprovalId = "22222222-2222-4222-8222-222222222222";
+const invalidApprovalId = "33333333-3333-4333-8333-333333333333";
 const staff: AdminActor = {kind: "staff", userId: "auth-staff", profileId: "staff-profile"};
 
 function docker(args: string[], input?: string): string {
@@ -114,8 +115,9 @@ describe.skipIf(!enabled)("Task 9 approval decisions on isolated Postgres 16", (
       CREATE TABLE approvals (id uuid PRIMARY KEY, action_type text NOT NULL, payload jsonb NOT NULL, status approval_status NOT NULL DEFAULT 'pending', requested_by_profile_id text, requested_at timestamptz NOT NULL DEFAULT now(), decided_by_profile_id text, decided_at timestamptz);
       CREATE TABLE audit_events (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), actor_user_id text, actor_type text NOT NULL, action text NOT NULL, target_type text NOT NULL, target_id text NOT NULL, request_id text, metadata jsonb, created_at timestamptz NOT NULL DEFAULT now());
       INSERT INTO approvals (id, action_type, payload) VALUES
-        ('${approvalId}','campaign.send','{"campaignId":"campaign-1","email":"private@example.test"}'),
-        ('${rollbackApprovalId}','event.publish','{"eventId":"event-1"}');
+        ('${approvalId}','campaign.send','{"campaignId":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","template":"renewal-reminder"}'),
+        ('${rollbackApprovalId}','event.publish','{"eventId":"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb","slug":"task-nine-event"}'),
+        ('${invalidApprovalId}','unknown.private@example.test','null');
     `);
   }, 90_000);
   afterAll(() => { try { docker(["rm", "-f", container]); } catch { /* Container may already be gone. */ } });
@@ -137,4 +139,13 @@ describe.skipIf(!enabled)("Task 9 approval decisions on isolated Postgres 16", (
     await expect(repository.decide(staff, {approvalId: rollbackApprovalId, decision: "approved"})).rejects.toThrow();
     expect(psql(`SELECT status || '|' || coalesce(decided_by_profile_id,'') || '|' || (SELECT count(*) FROM audit_events WHERE target_id='${rollbackApprovalId}') FROM approvals WHERE id='${rollbackApprovalId}';`).trim()).toBe("pending||0");
   }, 30_000);
+
+  it("returns a safe DTO and refuses a direct decision for an unsupported opaque row", async () => {
+    const repository = createApprovalsRepository(async () => createRepositoryDatabase() as never);
+    const opaque = (await repository.listPending(staff)).find(({id}) => id === invalidApprovalId);
+    expect(opaque).toMatchObject({id: invalidApprovalId, actionType: null, payloadSummary: [], actionable: false});
+    expect(JSON.stringify(opaque)).not.toContain("private@example.test");
+    await expect(repository.decide(staff, {approvalId: invalidApprovalId, decision: "approved"})).rejects.toThrow("APPROVAL_UNSUPPORTED");
+    expect(psql(`SELECT status || '|' || coalesce(decided_by_profile_id,'') || '|' || (SELECT count(*) FROM audit_events WHERE target_id='${invalidApprovalId}') FROM approvals WHERE id='${invalidApprovalId}';`).trim()).toBe("pending||0");
+  }, 20_000);
 });

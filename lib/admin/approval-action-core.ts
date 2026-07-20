@@ -22,7 +22,7 @@ export async function runApprovalDecisionAction(_state: ApprovalActionState, for
     return {status: "success", message: options.messages.success};
   } catch (error) {
     if (error instanceof Error && error.message === "APPROVAL_ALREADY_DECIDED") return {status: "error", message: options.messages.alreadyDecided};
-    if (error instanceof Error && error.message === "APPROVAL_NOT_FOUND") return {status: "error", message: options.messages.notFound};
+    if (error instanceof Error && (error.message === "APPROVAL_NOT_FOUND" || error.message === "APPROVAL_UNSUPPORTED")) return {status: "error", message: options.messages.notFound};
     return {status: "error", message: options.messages.error};
   }
 }

@@ -23,6 +23,7 @@ describe("safe approval action state", () => {
   it.each([
     ["APPROVAL_ALREADY_DECIDED", "Already decided."],
     ["APPROVAL_NOT_FOUND", "Approval unavailable."],
+    ["APPROVAL_UNSUPPORTED", "Approval unavailable."],
     ["database payload private@example.test", "Unable to save."],
   ])("maps %s to a safe localized error", async (failure, expected) => {
     const mutate = async () => { throw new Error(failure); };

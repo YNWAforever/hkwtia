@@ -4,6 +4,7 @@ import {
   decideApproval,
   listPendingApprovals,
   approvalDecisionSchema,
+  reviewApprovalPayload,
   summarizeApprovalPayload,
   type ApprovalRepository,
 } from "@/lib/admin/approvals";
@@ -21,6 +22,7 @@ function repository(): ApprovalRepository & {audits: string[]} {
       id: APPROVAL_ID,
       actionType: "campaign.send",
       payloadSummary: [{key: "campaignId", value: "campaign-1"}],
+      actionable: true,
       requestedAt: new Date("2026-07-20T01:00:00.000Z"),
     }],
     decide: async (_actor, input) => {
@@ -61,15 +63,30 @@ describe("approval service", () => {
 
   it("summarizes only allowlisted non-PII payload fields for known action types", () => {
     expect(summarizeApprovalPayload("campaign.send", {
-      campaignId: "campaign-1",
+      campaignId: "11111111-1111-4111-8111-111111111111",
       template: "renewal-reminder",
-      email: "private@example.test",
-      body: "private message",
-      recipientVariables: {name: "Private"},
     })).toEqual([
-      {key: "campaignId", value: "campaign-1"},
+      {key: "campaignId", value: "11111111-1111-4111-8111-111111111111"},
       {key: "template", value: "renewal-reminder"},
     ]);
     expect(summarizeApprovalPayload("unknown.action", {email: "private@example.test"})).toEqual([]);
+  });
+
+  it.each([null, "opaque", 42, ["campaign-1"]])("treats non-object payload %j as unavailable and non-actionable", (payload) => {
+    expect(reviewApprovalPayload("campaign.send", payload)).toEqual({actionType: "campaign.send", payloadSummary: [], actionable: false});
+  });
+
+  it("rejects PII-like or semantically invalid values even under allowlisted field names", () => {
+    expect(reviewApprovalPayload("campaign.send", {campaignId: "private@example.test", template: "renewal-reminder"}))
+      .toEqual({actionType: "campaign.send", payloadSummary: [], actionable: false});
+    expect(reviewApprovalPayload("event.publish", {eventId: "private@example.test", slug: "valid-slug"}))
+      .toEqual({actionType: "event.publish", payloadSummary: [], actionable: false});
+    expect(reviewApprovalPayload("campaign.send", {campaignId: "11111111-1111-4111-8111-111111111111", template: "private@example.test"}))
+      .toEqual({actionType: "campaign.send", payloadSummary: [], actionable: false});
+  });
+
+  it.each(["private@example.test", "toString", "__proto__"])("never exposes or crashes on unknown raw action type %s", (actionType) => {
+    expect(reviewApprovalPayload(actionType, {campaignId: "private@example.test"}))
+      .toEqual({actionType: null, payloadSummary: [], actionable: false});
   });
 });

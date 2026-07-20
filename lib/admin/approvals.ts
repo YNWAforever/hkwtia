@@ -4,17 +4,20 @@ import {requireAdmin} from "@/lib/auth/actor";
 import {
   approvalDecisionSchema,
   approvalsRepository,
+  reviewApprovalPayload,
   summarizeApprovalPayload,
   type ApprovalDecision,
   type ApprovalDecisionInput,
+  type ApprovalPayloadReview,
   type ApprovalsRepository,
   type PendingApproval,
+  type SupportedApprovalActionType,
 } from "@/lib/db/repos/approvals";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 export type ApprovalRepository = ApprovalsRepository;
-export type {ApprovalDecisionInput};
-export {approvalDecisionSchema, summarizeApprovalPayload};
+export type {ApprovalDecisionInput, ApprovalPayloadReview, PendingApproval, SupportedApprovalActionType};
+export {approvalDecisionSchema, reviewApprovalPayload, summarizeApprovalPayload};
 
 export async function listPendingApprovals(actor: Actor, repository: ApprovalRepository = approvalsRepository): Promise<readonly PendingApproval[]> {
   requireAdmin(actor);
