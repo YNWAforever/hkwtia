@@ -2,7 +2,7 @@
 
 ## Outcome
 
-DONE_WITH_CONCERNS
+DONE
 
 Implementation commit: `8faac6c` (`feat: add engagement and at-risk operations`)
 
@@ -62,10 +62,89 @@ Result: 6 files passed, 41 tests passed.
 
 ## Concerns and evidence gaps
 
-- This task used deterministic repository adapters and SQL-shape/transaction tests, but did not run against live Neon/Postgres or live Stripe. Production lock contention and database constraint behavior therefore remain integration-test evidence gaps.
+- Original evidence gap, closed by the review follow-up below: this task initially used deterministic repository adapters and SQL-shape/transaction tests without a real Postgres run.
 - `npm.cmd audit --omit=dev` currently reports 18 transitive dependency advisories (1 critical, 6 high, 11 moderate), including Better Auth through `@neondatabase/auth` plus existing build-tool packages. Task 7 changed no dependencies; remediating these may require coordinated breaking upgrades and is outside this task.
 - The build emits the existing stale `caniuse-lite` data warning.
 
 ## Tooling note
 
 The linked Windows worktree intermittently rejected `apply_patch` with `helper_unknown_error: apply deny-read ACLs`. After each such failure, edits were limited to the exact Task 7 file and written as BOM-free UTF-8; the final BOM and diff checks passed.
+
+## Review follow-up (2026-07-20)
+
+Review outcome: **DONE**
+
+Implementation commit: `6035e8e` (`fix: harden task 7 review boundaries`)
+
+The blocking review findings are resolved. Renewal metadata now has event-discriminated runtime validation; legacy renewal ordinals are guarded before integer conversion; the raw webhook transaction uses PostgreSQL-valid unqualified write targets; and the at-risk campaign action preserves an exact non-PII profile identity through the strict shared segment compiler used by preview, export, and campaign audience selection.
+
+### Codebase graph evidence
+
+The codebase-memory graph was refreshed before editing. Traces confirmed that `segmentPredicates()` is the sole compiler seam shared by segment preview/export and campaign audience selection, while `appendEngagementEvent()` and `jobsRepository.processWebhookLifecycle()` are the renewal write paths. The fixes were therefore made at those shared boundaries rather than duplicated in routes or UI handlers.
+
+### Exact TDD evidence
+
+Renewal validation RED:
+
+```powershell
+npx.cmd vitest run tests/unit/engagement-repository.test.ts --reporter=dot
+```
+
+Result before implementation: 1 file failed; 10 tests failed and 5 passed. Missing/invalid membership IDs and periods, reversed/equal periods, zero/fractional ordinals, renewal-key masquerading, oversized metadata, and non-JSON metadata all reached the write adapter.
+
+Segment/campaign/SQL RED:
+
+```powershell
+npx.cmd vitest run tests/unit/segment-schema.test.ts tests/unit/segment-query.test.ts tests/unit/admin-presentational.test.tsx tests/unit/campaign-draft-url.test.ts tests/unit/webhook-repository-sequential.test.ts --reporter=dot
+```
+
+Result before implementation: 4 files failed and 1 passed; 6 tests failed and 19 passed. The strict schema rejected `profileId`, preview could not carry exact identity, both locales dropped at-risk campaign context, and renewal ordinal SQL lacked legacy-data guards. The campaign draft URL test already passed, proving repeated query preservation independently.
+
+Actual PostgreSQL RED:
+
+```powershell
+$env:RUN_POSTGRES_INTEGRATION='1'; npx.cmd vitest run tests/unit/task7-postgres-integration.test.ts --reporter=dot
+```
+
+Result before implementation: 1 file failed; 2/2 tests failed. The at-risk/default repository path reached the strict route parser and failed on unsupported `profileId`. The production jobs path exposed PostgreSQL-invalid qualified conflict/write targets before it could reach the poisoned legacy ordinal. Subsequent real-database runs exposed and drove correction of every qualified raw `INSERT` column list and `UPDATE SET` target in the same transaction.
+
+Consolidated focused GREEN:
+
+```powershell
+npx.cmd vitest run tests/unit/engagement-repository.test.ts tests/unit/segment-schema.test.ts tests/unit/segment-query.test.ts tests/unit/admin-presentational.test.tsx tests/unit/campaign-draft-url.test.ts tests/unit/campaign-queue-form.test.tsx tests/unit/campaign-queue.test.ts tests/unit/webhook-repository-sequential.test.ts --reporter=dot --maxWorkers=1 --minWorkers=1
+```
+
+Result: 8 files passed; 54/54 tests passed.
+
+Actual PostgreSQL GREEN:
+
+```powershell
+$env:RUN_POSTGRES_INTEGRATION='1'; npx.cmd vitest run tests/unit/task7-postgres-integration.test.ts --reporter=verbose --maxWorkers=1 --minWorkers=1
+```
+
+Result: 1 file passed; 2/2 tests passed against an ephemeral local `postgres:16-alpine` container. Evidence covers score 19/20 and renewal -1ms/0/60d/+1ms boundaries, deterministic at-risk ordering, exact profile preview/campaign audience, concurrent exact replay (`processed` plus `duplicate`), poisoned legacy JSON, failed-to-paid facts sharing ordinal 1, and the next period using ordinal 2. Independent `docker ps -a --filter name=hkwtia-task7-` checks confirmed cleanup after RED and GREEN runs.
+
+### Final verification
+
+- `npm.cmd run typecheck`: PASS
+- `npm.cmd run lint`: PASS
+- `npm.cmd test -- --reporter=dot --maxWorkers=4 --minWorkers=2`: PASS; 74 files passed, 3 skipped; 339 tests passed, 4 skipped
+- The first one-worker full-suite attempt produced no test verdict and timed out after cross-repository scheduler contention delayed its worker; its worktree-owned orphan was removed before the authoritative four-worker GREEN rerun
+- `npm.cmd run build`: PASS; Next.js compiled, TypeScript passed, generated 75 static pages, and retained the dynamic admin routes
+- `git diff --check` and staged `git diff --cached --check`: PASS (only expected Windows LF/CRLF notices)
+- UTF-8 BOM scan across all 14 code/test files: PASS
+- Conflict/debug/TODO marker audit across all 14 code/test files: PASS
+- Dependency manifest/lockfile diff: PASS; no dependency files changed
+- Ephemeral Task 7 Docker cleanup: PASS
+- The build retains the existing stale `caniuse-lite` warning; it is unrelated to this change
+
+### Final self-review
+
+- Access control remains actor-first: staff/system validation still precedes engagement parsing or adapter work, and segment/campaign repositories retain admin enforcement.
+- Idempotency and rollback remain atomic. The real PostgreSQL test proves one job row and one mutation/audit sequence under concurrent exact replay, while existing injected-transaction tests retain audit rollback coverage.
+- Renewal facts require a UUID membership ID, increasing ISO periods, and a positive bounded integer ordinal. Other event metadata is bounded JSON and cannot use renewal-reserved keys.
+- The defensive ordinal query ignores malformed legacy JSON before `::int`, reuses an ordinal within one billing period, and increments only for a later period.
+- At-risk semantics remain exact and inclusive at 0 and 60 days, exclusive below 0 and above 60 days, with score strictly below 20 and deterministic renewal/profile ordering.
+- Campaign links contain only profile ID, membership status, score bound, and renewal-day context; no email, secret, or new PII-bearing selector was added. The strict route schema rejects unknown keys.
+- The exact profile ID condition is compiled once by `segmentPredicates()` and therefore applies consistently to preview, export, and queued campaign audiences.
+- Both English and Traditional Chinese at-risk renders preserve the contextual campaign link. No visible localized copy changed.
