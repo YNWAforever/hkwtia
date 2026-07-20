@@ -1,11 +1,12 @@
 import "server-only";
 
-import {and, asc, count, eq, inArray} from "drizzle-orm";
+import {and, asc, count, eq, inArray, isNull, or} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/actor";
 import {getDb} from "@/lib/db/repos/common";
-import {auditEvents, eventRegistrations, events, profiles, type Event} from "@/lib/db/server-schema";
+import {membershipsRepository} from "@/lib/db/repos/memberships";
+import {auditEvents, companyMembers, eventRegistrations, events, memberships, profiles, type Event} from "@/lib/db/server-schema";
 import {requireMember, type Actor, type AdminActor} from "@/lib/membership/lifecycle";
 
 const eventIdSchema = z.string().uuid();
@@ -26,7 +27,13 @@ const eventInputObjectSchema = z.object({
 const eventInputSchema = eventInputObjectSchema.superRefine((input, context) => {
   if (input.endsAt && input.endsAt <= input.startsAt) context.addIssue({code: z.ZodIssueCode.custom, path: ["endsAt"], message: "endsAt must be after startsAt"});
 });
-const eventUpdateSchema = eventInputObjectSchema.partial().refine((input) => Object.keys(input).length > 0, "event update is empty");
+const eventUpdateSchema = eventInputObjectSchema.partial().superRefine((input, context) => {
+  if (Object.keys(input).length === 0) context.addIssue({code: z.ZodIssueCode.custom, message: "event update is empty"});
+  if (input.startsAt && input.endsAt && input.endsAt <= input.startsAt) context.addIssue({code: z.ZodIssueCode.custom, path: ["endsAt"], message: "endsAt must be after startsAt"});
+});
+const eventPeriodSchema = z.object({startsAt: z.coerce.date(), endsAt: z.coerce.date().nullable()}).superRefine((input, context) => {
+  if (input.endsAt && input.endsAt <= input.startsAt) context.addIssue({code: z.ZodIssueCode.custom, path: ["endsAt"], message: "endsAt must be after startsAt"});
+});
 const registrationInputSchema = z.object({eventId: eventIdSchema}).strict();
 
 type StoredEventInput = z.output<typeof eventInputSchema>;
@@ -41,14 +48,17 @@ type EventAudit = Readonly<{
 }>;
 
 export type EventRows = readonly Event[] | Readonly<{list: () => Promise<readonly Event[]>}>;
+export type MemberEventEligibility = Readonly<{hasEligibleMembership: (actor: Extract<Actor, {kind: "member"}>) => Promise<boolean>}>;
 export type EventMutationDependencies = Readonly<{transaction: <T>(work: (transaction: Readonly<{
   insertEvent: (input: StoredEventInput) => Promise<Event>;
+  lockEvent: (id: string) => Promise<Event | null>;
   updateEvent: (id: string, input: StoredEventUpdate) => Promise<Event | null>;
   insertAudit: (input: EventAudit) => Promise<void>;
 }>) => Promise<T>) => Promise<T>}>;
 export type RegistrationStatus = "registered" | "waitlist" | "cancelled" | "attended" | "no_show";
 export type EventRegistrationDependencies = Readonly<{transaction: <T>(work: (transaction: Readonly<{
   lockEvent: (eventId: string) => Promise<Readonly<{id: string; capacity: number | null; published: boolean}> | null>;
+  hasEligibleMembership: (profileId: string) => Promise<boolean>;
   getRegistration: (eventId: string, profileId: string) => Promise<Readonly<{status: RegistrationStatus}> | null>;
   countRegistered: (eventId: string) => Promise<number>;
   upsertRegistration: (eventId: string, profileId: string, status: "registered" | "waitlist") => Promise<void>;
@@ -75,8 +85,12 @@ export async function listPublicEvents(_actor: Actor, source?: EventRows): Promi
   return sorted((await rowsFrom(source)).filter((event) => event.published && !event.memberOnly));
 }
 
-export async function listMemberEvents(actor: Actor, source?: EventRows): Promise<Event[]> {
+const eligibleStatuses = ["active", "past_due", "cancel_at_period_end"] as const;
+const defaultMemberEligibility: MemberEventEligibility = {hasEligibleMembership: async (actor) => (await membershipsRepository.list(actor)).some((membership) => (eligibleStatuses as readonly string[]).includes(membership.status))};
+
+export async function listMemberEvents(actor: Actor, source?: EventRows, eligibility: MemberEventEligibility = defaultMemberEligibility): Promise<Event[]> {
   requireMember(actor);
+  if (!await eligibility.hasEligibleMembership(actor)) throw new Error("MEMBERSHIP_INACTIVE");
   return sorted((await rowsFrom(source)).filter((event) => event.published));
 }
 
@@ -104,6 +118,7 @@ async function defaultMutationDependencies(): Promise<EventMutationDependencies>
       if (!row) throw new Error("EVENT_INSERT_FAILED");
       return row;
     },
+    lockEvent: async (id) => (await tx.select().from(events).where(eq(events.id, id)).for("update"))[0] ?? null,
     updateEvent: async (id, input) => (await tx.update(events).set({...input, updatedAt: new Date()}).where(eq(events.id, id)).returning())[0] ?? null,
     insertAudit: async (input) => { await tx.insert(auditEvents).values(input); },
   }))};
@@ -124,6 +139,9 @@ export async function updateEvent(actor: Actor, id: unknown, input: unknown, dep
   const eventId = eventIdSchema.parse(id);
   const parsed = eventUpdateSchema.parse(input);
   return (dependencies ?? await defaultMutationDependencies()).transaction(async (transaction) => {
+    const current = await transaction.lockEvent(eventId);
+    if (!current) return null;
+    eventPeriodSchema.parse({startsAt: parsed.startsAt ?? current.startsAt, endsAt: parsed.endsAt === undefined ? current.endsAt : parsed.endsAt});
     const event = await transaction.updateEvent(eventId, parsed);
     if (!event) return null;
     await transaction.insertAudit({actorUserId: actor.profileId, actorType: actor.kind, action: "event.updated", targetType: "event", targetId: event.id, metadata: {fields: Object.keys(parsed).sort()}});
@@ -135,6 +153,9 @@ async function defaultRegistrationDependencies(): Promise<EventRegistrationDepen
   const db = await getDb();
   return {transaction: (work) => db.transaction(async (tx) => work({
     lockEvent: async (eventId) => (await tx.select({id: events.id, capacity: events.capacity, published: events.published}).from(events).where(eq(events.id, eventId)).for("update"))[0] ?? null,
+    hasEligibleMembership: async (profileId) => Boolean((await tx.select({id: memberships.id}).from(memberships)
+      .leftJoin(companyMembers, and(eq(companyMembers.companyId, memberships.companyId), eq(companyMembers.userId, profileId), isNull(companyMembers.revokedAt)))
+      .where(and(or(eq(memberships.ownerUserId, profileId), eq(companyMembers.userId, profileId)), inArray(memberships.status, eligibleStatuses))).limit(1))[0]),
     getRegistration: async (eventId, profileId) => (await tx.select({status: eventRegistrations.status}).from(eventRegistrations).where(and(eq(eventRegistrations.eventId, eventId), eq(eventRegistrations.profileId, profileId))))[0] ?? null,
     countRegistered: async (eventId) => Number((await tx.select({value: count()}).from(eventRegistrations).where(and(eq(eventRegistrations.eventId, eventId), inArray(eventRegistrations.status, ["registered", "attended"]))))[0]?.value ?? 0),
     upsertRegistration: async (eventId, profileId, status) => { await tx.insert(eventRegistrations).values({eventId, profileId, status, checkedInAt: null}).onConflictDoUpdate({target: [eventRegistrations.eventId, eventRegistrations.profileId], set: {status, checkedInAt: null}}); },
@@ -148,6 +169,7 @@ export async function registerForEvent(actor: Actor, input: unknown, dependencie
   return (dependencies ?? await defaultRegistrationDependencies()).transaction(async (transaction) => {
     const event = await transaction.lockEvent(eventId);
     if (!event || !event.published) throw new Error("EVENT_NOT_FOUND");
+    if (!await transaction.hasEligibleMembership(actor.profileId)) throw new Error("MEMBERSHIP_INACTIVE");
     const existing = await transaction.getRegistration(eventId, actor.profileId);
     if (existing?.status === "registered" || existing?.status === "attended") return {disposition: "already_registered"};
     if (existing?.status === "waitlist") return {disposition: "already_waitlisted"};
@@ -159,8 +181,9 @@ export async function registerForEvent(actor: Actor, input: unknown, dependencie
 }
 
 export async function getEventBySlug(actor: Actor, slug: unknown, source?: EventRows): Promise<Event | null> {
-  const parsedSlug = slugSchema.parse(slug);
-  const row = (await rowsFrom(source)).find((event) => event.slug === parsedSlug) ?? null;
+  const parsedSlug = slugSchema.safeParse(slug);
+  if (!parsedSlug.success) return null;
+  const row = (await rowsFrom(source)).find((event) => event.slug === parsedSlug.data) ?? null;
   if (!row) return null;
   if (actor.kind === "anonymous") return row.published && !row.memberOnly ? row : null;
   if (actor.kind === "member") return row.published ? row : null;
