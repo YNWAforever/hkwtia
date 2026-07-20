@@ -1,23 +1,37 @@
-# Task 9 - Transactional company seat management
+# Task 9 implementation report
 
-## RED
+## Outcome
 
-- Focused seat tests initially failed because lib/db/repos/seats.ts did not exist.
-- Focused scenarios cover pending capacity, normalized email mismatch, duplicate acceptance, last-owner protection, owner/admin policy, concurrent acceptance, duplicate invite idempotency, stale-target role authorization, and pending-invite revocation.
+Implemented the M2 staff-only approval decision console with an Actor-first repository, Zod-validated service and Server Action boundaries, conditional one-time decisions, atomic decision audits, allowlisted payload summaries, bilingual accessible UI, and no payload execution or delivery integration.
 
-## GREEN
+## TDD evidence
 
-- Focused unit: tests/unit/seat-service.test.ts - 10/10 passed.
-- Focused integration double: tests/integration/seat-capacity.test.ts - 1/1 passed via vitest.integration.config.ts; it proves serialized one-success/one-capacity-error behavior with an in-memory transaction double. A real Neon/Postgres concurrency run remains environment-dependent.
-- Full Vitest: npm.cmd run test - 202 passed, 1 skipped.
-- Lint: npm.cmd run lint - passed.
-- Typecheck: npm.cmd run typecheck - passed.
-- Visible-string audit: npm.cmd run audit:strings - passed (61 TSX files scanned).
-- Production build: npm.cmd run build - passed; includes /[locale]/portal/company/seats and /[locale]/portal/company/seats/accept.
-- Playwright: tests/e2e/seat-management.spec.ts - 2/2 anonymous localized protection checks passed against the configured dev server. The local proxy omitted nested request headers, so the smoke accepts the documented /portal continuation fallback; nested seat continuation is covered by unit navigation/auth tests.
+- Initial RED: `approval-service.test.ts` and `approval-authorization.test.ts` failed to resolve the missing `@/lib/admin/approvals` module (2 failed suites, 0 tests).
+- Repository/service GREEN: 2 files, 8 tests passed.
+- Action/UI RED: three suites failed to resolve the missing action core, genuine Server Action, and approval list modules.
+- Focused GREEN: 6 files, 17 tests passed.
+- Focused approval plus authorization/boundary regression: 8 files, 21 tests passed.
 
-## Implementation evidence
+## Database evidence
 
-- lib/db/repos/seats.ts uses SHA-256 invitation digests, normalized emails, actor-first authorization, company row locking with FOR UPDATE, active plus pending capacity checks, duplicate pending-invite reuse, fresh locked target checks, pending-invite revocation, unique-membership conflict handling, and last-owner/role policy guards.
-- The invite action uses Neon Auth magic-link delivery with a tokenized /portal/company/seats/accept callback; acceptance verifies the authenticated actor email, ensures a first-time profile row inside the transaction, and then inserts the company member row.
-- portal/company/seats renders bilingual protected seat management with localized invite, role-change including owner-only owner controls, revoke, cancel-invite, capacity, pending, and generic error UI.
+`RUN_POSTGRES_INTEGRATION=1 npx.cmd vitest run tests/unit/task9-postgres-integration.test.ts --reporter=dot`
+
+- 1 file, 1 test passed against disposable PostgreSQL 16.
+- Concurrent approve/reject calls through the production Drizzle repository produced exactly one decision and one audit; the loser returned `APPROVAL_ALREADY_DECIDED`.
+- A forced audit constraint failure rolled the approval update back to pending with no decision actor or audit.
+- The Docker container was removed by the test cleanup. No production or shared database was used.
+
+## Final verification
+
+- Full Vitest: 86 files passed, 5 skipped; 379 tests passed, 6 skipped.
+- TypeScript: passed with `npx.cmd tsc --noEmit --pretty false`.
+- ESLint: passed.
+- Visible-string audit: passed, 88 TSX files scanned.
+- Next.js production build: passed; `/[locale]/admin/approvals` is dynamic.
+- JSON parsing and EN/ZH message parity: passed.
+- Diff whitespace and BOM checks: passed.
+- Privacy/no-delivery scan: no logging, Resend import, raw approval payload rendering, or payload executor added.
+
+## Remaining concerns
+
+- Approval creation and deterministic seeded approval fixtures remain intentionally deferred to Task 12/M4 trusted services. Task 9 only lists and decides existing rows.
