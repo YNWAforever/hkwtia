@@ -1,12 +1,14 @@
 import {z} from "zod";
 
 const stringList = z.array(z.string().min(1)).max(20).default([]);
+const profileIdList = z.array(z.string().trim().min(1).max(200)).max(20).default([]);
 
 function nullableNumber(schema: z.ZodNumber) {
   return z.preprocess((value) => typeof value === "string" && value.trim() === "" ? null : value, schema.nullable().default(null));
 }
 
 export const segmentFilterSchema = z.object({
+  profileIds: profileIdList,
   tier: stringList,
   status: stringList,
   scoreMin: nullableNumber(z.coerce.number().min(0).max(100)),
@@ -50,6 +52,7 @@ export const segmentIdSchema = z.string().uuid();
 const queryListSchema = z.union([z.string(), z.array(z.string())]).optional().transform((value) => value === undefined ? [] : (Array.isArray(value) ? value : [value]));
 
 export const segmentRouteQuerySchema = z.object({
+  profileId: queryListSchema,
   tier: queryListSchema,
   status: queryListSchema,
   scoreMin: z.union([z.string(), z.number()]).optional().transform((value) => value ?? null),
@@ -59,8 +62,8 @@ export const segmentRouteQuerySchema = z.object({
   lastLoginBeforeDays: z.union([z.string(), z.number()]).optional().transform((value) => value ?? null),
   limit: z.union([z.string(), z.number()]).optional().default(50),
   cursor: z.string().nullable().optional().default(null),
-}).strict().transform(({tier, status, scoreMin, scoreMax, renewalWithinDays, sector, lastLoginBeforeDays, limit, cursor}): SegmentPreviewInput => ({
-  filter: segmentFilterSchema.parse({tier, status, scoreMin, scoreMax, renewalWithinDays, sector, lastLoginBeforeDays}),
+}).strict().transform(({profileId, tier, status, scoreMin, scoreMax, renewalWithinDays, sector, lastLoginBeforeDays, limit, cursor}): SegmentPreviewInput => ({
+  filter: segmentFilterSchema.parse({profileIds: profileId, tier, status, scoreMin, scoreMax, renewalWithinDays, sector, lastLoginBeforeDays}),
   limit: segmentPaginationSchema.shape.limit.parse(limit),
   cursor: segmentPaginationSchema.shape.cursor.parse(cursor),
 }));

@@ -24,6 +24,10 @@ describe("admin presentation", () => {
     expect(html).not.toContain("2026-08-01T00:00:00.000Z");
     expect(html).toContain("/admin/members/risk-1#member-note-body");
     expect(html).toContain("Queue campaign");
+    expect(html).toContain("/admin/segments?profileId=risk-1");
+    expect(html).toContain("status=past_due");
+    expect(html).toContain("scoreMax=19");
+    expect(html).toContain("renewalWithinDays=60");
   });
 
   it.each([en.Admin, zh.Admin])("renders one page heading, an accessible nav, a table caption, and translated empty state", (labels) => {

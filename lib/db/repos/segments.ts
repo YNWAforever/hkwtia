@@ -51,6 +51,7 @@ function encodeCursor(member: SegmentMember): string {
 /** Builds the sole parameterized predicate set used by both preview and export. */
 export function segmentPredicates(filter: SegmentFilterSet): SQL {
   const terms: SQL[] = [];
+  if (filter.profileIds.length) terms.push(sql`${profiles.id} IN (${sql.join(filter.profileIds.map((profileId) => sql`${profileId}`), sql`, `)})`);
   if (filter.tier.length) terms.push(sql`${memberships.planCode} IN (${sql.join(filter.tier.map((tier) => sql`${tier}`), sql`, `)})`);
   if (filter.status.length) terms.push(sql`${memberships.status} IN (${sql.join(filter.status.map((status) => sql`${status}`), sql`, `)})`);
   if (filter.scoreMin !== null) terms.push(sql`${engagementScores.score} >= ${filter.scoreMin}`);

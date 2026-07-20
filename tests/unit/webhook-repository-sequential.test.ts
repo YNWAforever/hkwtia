@@ -104,7 +104,9 @@ describe("sequential production webhook transaction", () => {
       ]);
       database.current = script.db;
       await expect(jobsRepository.processWebhookLifecycle(systemActor("stripe-webhook"), renewal)).resolves.toBe("processed");
-      expect(script.statements[4]).toMatch(/max[\s\S]*periodstart[\s\S]*renewalordinal/);
+      expect(script.statements[4]).toMatch(/periodstart[\s\S]*renewalordinal[\s\S]*max/);
+      expect(script.statements[4]).toContain("'^[1-9][0-9]{0,9}$'");
+      expect(script.statements[4]).toMatch(/jsonb_typeof[\s\S]*renewalordinal[\s\S]*length[\s\S]*2147483647[\s\S]*::int/);
       expect(script.statements[5]).toMatch(new RegExp(`'renewalordinal',\\s*${renewalOrdinal}\\b`));
       expect(script.statements[5]).toContain("profile-1");
       return script.statements;

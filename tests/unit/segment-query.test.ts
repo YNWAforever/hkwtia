@@ -15,11 +15,11 @@ describe("segment preview", () => {
       },
     };
 
-    const preview = await previewSegment(actor, {filter: {tier: ["corporate"], scoreMax: 19.99, renewalWithinDays: 60}, limit: "25", cursor: null}, reader);
+    const preview = await previewSegment(actor, {filter: {profileIds: ["corporate-low-score"], tier: ["corporate"], scoreMax: 19.99, renewalWithinDays: 60}, limit: "25", cursor: null}, reader);
 
     expect(preview.items.map((item) => item.profileId)).toEqual(["corporate-low-score"]);
     expect(calls).toEqual([{
-      filter: {tier: ["corporate"], status: [], scoreMin: null, scoreMax: 19.99, renewalWithinDays: 60, sector: "", lastLoginBeforeDays: null},
+      filter: {profileIds: ["corporate-low-score"], tier: ["corporate"], status: [], scoreMin: null, scoreMax: 19.99, renewalWithinDays: 60, sector: "", lastLoginBeforeDays: null},
       pagination: {limit: 25, cursor: null},
     }]);
   });

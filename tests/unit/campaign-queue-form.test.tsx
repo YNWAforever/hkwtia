@@ -14,7 +14,7 @@ describe("campaign queue form", () => {
       newDraftHref="/en/admin/segments?campaignDraft=22222222-2222-4222-8222-222222222222"
       preview={{total: 0, items: [], nextCursor: null}}
       queueAction={async () => ({disposition: null, recipientCount: 0, error: "generic"})}
-      saved={[{id: "11111111-1111-4111-8111-111111111111", ownerProfileId: "staff-1", nameEn: "At risk", nameZh: null, filterVersion: 1, filters: {tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null}, createdAt: "2026-07-19T00:00:00.000Z", updatedAt: "2026-07-19T00:00:00.000Z"}]}
+      saved={[{id: "11111111-1111-4111-8111-111111111111", ownerProfileId: "staff-1", nameEn: "At risk", nameZh: null, filterVersion: 1, filters: {profileIds: [], tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null}, createdAt: "2026-07-19T00:00:00.000Z", updatedAt: "2026-07-19T00:00:00.000Z"}]}
     />);
 
     expect(container.querySelector('input[name="idempotencyKey"]')).toBeNull();

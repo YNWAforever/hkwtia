@@ -11,14 +11,56 @@ import {requireSystem, type Actor, type AdminActor} from "@/lib/membership/lifec
 
 export const ENGAGEMENT_EVENT_TYPES = ["renewal_paid", "renewal_failed", "event_attended"] as const;
 
-const engagementInputSchema = z.object({
+const RENEWAL_EVENT_TYPES = ["renewal_paid", "renewal_failed"] as const;
+const RENEWAL_METADATA_KEYS = new Set(["membershipId", "periodStart", "periodEnd", "renewalOrdinal"]);
+const MAX_METADATA_BYTES = 8_192;
+
+function isBoundedJson(value: unknown, depth = 0, seen = new WeakSet<object>()): boolean {
+  if (value === null || typeof value === "boolean") return true;
+  if (typeof value === "string") return value.length <= MAX_METADATA_BYTES;
+  if (typeof value === "number") return Number.isFinite(value);
+  if (typeof value !== "object" || depth >= 6 || seen.has(value)) return false;
+  seen.add(value);
+  if (Array.isArray(value)) return value.length <= 50 && value.every((item) => isBoundedJson(item, depth + 1, seen));
+  if (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null) return false;
+  const entries = Object.entries(value);
+  return entries.length <= 50 && entries.every(([key, item]) => key.length > 0 && key.length <= 100 && isBoundedJson(item, depth + 1, seen));
+}
+
+const generalMetadataSchema = z.record(z.string().min(1).max(100), z.unknown()).superRefine((metadata, context) => {
+  if (Object.keys(metadata).some((key) => RENEWAL_METADATA_KEYS.has(key))) {
+    context.addIssue({code: z.ZodIssueCode.custom, message: "renewal metadata keys are reserved"});
+  }
+  if (!isBoundedJson(metadata)) {
+    context.addIssue({code: z.ZodIssueCode.custom, message: "metadata must be bounded JSON"});
+    return;
+  }
+  if (Buffer.byteLength(JSON.stringify(metadata), "utf8") > MAX_METADATA_BYTES) {
+    context.addIssue({code: z.ZodIssueCode.custom, message: "metadata exceeds the size limit"});
+  }
+});
+
+const renewalMetadataSchema = z.object({
+  membershipId: z.string().uuid(),
+  periodStart: z.string().datetime({offset: true}),
+  periodEnd: z.string().datetime({offset: true}),
+  renewalOrdinal: z.number().int().positive().max(2_147_483_647),
+}).strict();
+const engagementBaseSchema = z.object({
   profileId: z.string().min(1),
   companyId: z.string().uuid().nullable().optional().default(null),
-  type: z.enum(ENGAGEMENT_EVENT_TYPES),
   points: z.number().int().safe(),
-  metadata: z.record(z.string(), z.unknown()).default({}),
   occurredAt: z.coerce.date().optional(),
 }).strict();
+const engagementInputSchema = z.discriminatedUnion("type", [
+  engagementBaseSchema.extend({type: z.literal(RENEWAL_EVENT_TYPES[0]), metadata: renewalMetadataSchema}),
+  engagementBaseSchema.extend({type: z.literal(RENEWAL_EVENT_TYPES[1]), metadata: renewalMetadataSchema}),
+  engagementBaseSchema.extend({type: z.literal("event_attended"), metadata: generalMetadataSchema.default({})}),
+]).superRefine((input, context) => {
+  if (input.type !== "event_attended" && Date.parse(input.metadata.periodStart) >= Date.parse(input.metadata.periodEnd)) {
+    context.addIssue({code: z.ZodIssueCode.custom, path: ["metadata", "periodEnd"], message: "periodEnd must be after periodStart"});
+  }
+});
 const profileIdSchema = z.string().min(1);
 const atRiskRowSchema = z.object({
   profileId: z.string(), displayName: z.string(), companyName: z.string().nullable(), planCode: z.string(),

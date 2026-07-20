@@ -113,11 +113,11 @@ export const jobsRepository = {
       return await db.transaction(async (tx) => {
         const allowedSources = lifecycleSources(command);
         const claim = resultRow(await tx.execute(sql`INSERT INTO ${jobsTable}
-          (${jobsTable.runKey}, ${jobsTable.kind}, ${jobsTable.state}, ${jobsTable.attemptCount})
+          ("run_key", "kind", "state", "attempt_count")
           VALUES (${command.eventId}, ${command.eventType}, 'processing', 1)
-          ON CONFLICT (${jobsTable.runKey}) DO UPDATE
-          SET ${jobsTable.state} = 'processing', ${jobsTable.attemptCount} = ${jobsTable.attemptCount} + 1,
-              ${jobsTable.lastError} = NULL, ${jobsTable.completedAt} = NULL, ${jobsTable.updatedAt} = now()
+          ON CONFLICT ("run_key") DO UPDATE
+          SET "state" = 'processing', "attempt_count" = ${jobsTable.attemptCount} + 1,
+              "last_error" = NULL, "completed_at" = NULL, "updated_at" = now()
           WHERE ${jobsTable.state} = 'failed'
           RETURNING ${jobsTable.id} AS job_id`));
         if (!claim) return "duplicate";
@@ -164,18 +164,18 @@ export const jobsRepository = {
         if (!stale && !allowedSources.includes(currentStatus)) throw new WebhookCorrelationError();
         if (!stale) {
           const updated = resultRow(await tx.execute(sql`UPDATE ${memberships}
-            SET ${memberships.status} = ${command.nextStatus}::membership_status,
-                ${memberships.stripeCustomerId} = ${command.stripeCustomerId},
-                ${memberships.stripeSubscriptionId} = ${command.stripeSubscriptionId},
-                ${memberships.billingPeriodStart} = COALESCE(${command.billingPeriodStart}, ${memberships.billingPeriodStart}),
-                ${memberships.billingPeriodEnd} = COALESCE(${command.billingPeriodEnd}, ${memberships.billingPeriodEnd}),
-                ${memberships.cancelAtPeriodEnd} = ${command.cancelAtPeriodEnd}, ${memberships.updatedAt} = now()
+            SET "status" = ${command.nextStatus}::membership_status,
+                "stripe_customer_id" = ${command.stripeCustomerId},
+                "stripe_subscription_id" = ${command.stripeSubscriptionId},
+                "billing_period_start" = COALESCE(${command.billingPeriodStart}, ${memberships.billingPeriodStart}),
+                "billing_period_end" = COALESCE(${command.billingPeriodEnd}, ${memberships.billingPeriodEnd}),
+                "cancel_at_period_end" = ${command.cancelAtPeriodEnd}, "updated_at" = now()
             WHERE ${memberships.id} = ${command.membershipId}
             RETURNING ${memberships.id} AS membership_id`));
           if (!updated) throw new Error("WEBHOOK_MUTATION_FAILED");
           if (attemptId) {
             const completedAttempt = resultRow(await tx.execute(sql`UPDATE ${billingAttempts}
-              SET ${billingAttempts.state} = 'completed', ${billingAttempts.endedAt} = now(), ${billingAttempts.updatedAt} = now()
+              SET "state" = 'completed', "ended_at" = now(), "updated_at" = now()
               WHERE ${billingAttempts.id} = ${attemptId} AND ${billingAttempts.state} = 'active'
               RETURNING ${billingAttempts.id} AS attempt_id`));
             if (!completedAttempt) throw new Error("WEBHOOK_MUTATION_FAILED");
@@ -187,18 +187,29 @@ export const jobsRepository = {
           const periodStart = command.billingPeriodStart?.toISOString();
           const periodEnd = command.billingPeriodEnd?.toISOString();
           if (!periodStart || !periodEnd) throw new WebhookCorrelationError();
-          const ordinal = resultRow(await tx.execute(sql`SELECT COALESCE(
-              MAX((${engagementEvents.metadata}->>'renewalOrdinal')::int)
-                FILTER (WHERE ${engagementEvents.metadata}->>'periodStart' = ${periodStart}),
-              COALESCE(MAX((${engagementEvents.metadata}->>'renewalOrdinal')::int), 0) + 1
+          const ordinal = resultRow(await tx.execute(sql`WITH valid_renewals AS (
+              SELECT ${engagementEvents.metadata}->>'periodStart' AS period_start,
+                CASE WHEN jsonb_typeof(${engagementEvents.metadata}->'renewalOrdinal') = 'number'
+                    AND ${engagementEvents.metadata}->>'renewalOrdinal' ~ '^[1-9][0-9]{0,9}$'
+                    AND length(${engagementEvents.metadata}->>'renewalOrdinal') <= 10
+                    AND (length(${engagementEvents.metadata}->>'renewalOrdinal') < 10
+                      OR ${engagementEvents.metadata}->>'renewalOrdinal' <= '2147483647')
+                  THEN (${engagementEvents.metadata}->>'renewalOrdinal')::int
+                  ELSE NULL
+                END AS renewal_ordinal
+              FROM ${engagementEvents}
+              WHERE ${engagementEvents.metadata}->>'membershipId' = ${command.membershipId}
+                AND ${engagementEvents.type} IN ('renewal_paid', 'renewal_failed')
+            )
+            SELECT COALESCE(
+              MAX(renewal_ordinal) FILTER (WHERE period_start = ${periodStart}),
+              COALESCE(MAX(renewal_ordinal), 0) + 1
             ) AS renewal_ordinal
-            FROM ${engagementEvents}
-            WHERE ${engagementEvents.metadata}->>'membershipId' = ${command.membershipId}
-              AND ${engagementEvents.type} IN ('renewal_paid', 'renewal_failed')`));
+            FROM valid_renewals`));
           const renewalOrdinal = requiredOrdinal(ordinal, "renewal_ordinal");          const engagementType = command.eventType === 'invoice.paid' ? 'renewal_paid' : 'renewal_failed';
           const engagementPoints = command.eventType === 'invoice.paid' ? 10 : -10;
           const engagement = resultRow(await tx.execute(sql`INSERT INTO ${engagementEvents}
-            (${engagementEvents.profileId}, ${engagementEvents.companyId}, ${engagementEvents.type}, ${engagementEvents.points}, ${engagementEvents.metadata}, ${engagementEvents.occurredAt})
+            ("profile_id", "company_id", "type", "points", "metadata", "occurred_at")
             VALUES (${profileId}, ${membership.company_id ?? null}, ${engagementType}, ${engagementPoints},
               jsonb_build_object('membershipId', ${command.membershipId}, 'periodStart', ${periodStart},
                 'periodEnd', ${periodEnd}, 'renewalOrdinal', ${renewalOrdinal}),
@@ -208,13 +219,13 @@ export const jobsRepository = {
         }
         const action = stale ? 'stripe.webhook.ignored_stale' : 'stripe.webhook.processed';
         const audit = resultRow(await tx.execute(sql`INSERT INTO ${auditEvents}
-          (${auditEvents.actorType}, ${auditEvents.action}, ${auditEvents.targetType}, ${auditEvents.targetId}, ${auditEvents.requestId}, ${auditEvents.metadata})
+          ("actor_type", "action", "target_type", "target_id", "request_id", "metadata")
           VALUES ('system', ${action}, 'membership', ${command.membershipId}, ${command.eventId},
             jsonb_build_object('eventType', ${command.eventType}, 'stripeCreated', ${command.eventCreated}, 'eventId', ${command.eventId}, 'status', ${command.nextStatus}))
           RETURNING ${auditEvents.id} AS audit_id`));
         if (!audit) throw new Error("WEBHOOK_MUTATION_FAILED");
         const completed = resultRow(await tx.execute(sql`UPDATE ${jobsTable}
-          SET ${jobsTable.state} = 'completed', ${jobsTable.completedAt} = now(), ${jobsTable.updatedAt} = now()
+          SET "state" = 'completed', "completed_at" = now(), "updated_at" = now()
           WHERE ${jobsTable.id} = ${jobId} AND ${jobsTable.state} = 'processing'
           RETURNING ${jobsTable.id} AS job_id`));
         if (!completed) throw new Error("WEBHOOK_MUTATION_FAILED");
@@ -225,11 +236,11 @@ export const jobsRepository = {
       try {
         const summary = redactedError(error);
         await db.execute(sql`INSERT INTO ${jobsTable}
-          (${jobsTable.runKey}, ${jobsTable.kind}, ${jobsTable.state}, ${jobsTable.attemptCount}, ${jobsTable.lastError})
+          ("run_key", "kind", "state", "attempt_count", "last_error")
           VALUES (${command.eventId}, ${command.eventType}, 'failed', 1, ${summary})
-          ON CONFLICT (${jobsTable.runKey}) DO UPDATE
-          SET ${jobsTable.attemptCount} = ${jobsTable.attemptCount} + 1,
-              ${jobsTable.lastError} = ${summary}, ${jobsTable.updatedAt} = now()
+          ON CONFLICT ("run_key") DO UPDATE
+          SET "attempt_count" = ${jobsTable.attemptCount} + 1,
+              "last_error" = ${summary}, "updated_at" = now()
           WHERE ${jobsTable.state} = 'failed'
           RETURNING ${jobsTable.id}`);
       } catch { /* Preserve the original transient error when failure recording is unavailable. */ }

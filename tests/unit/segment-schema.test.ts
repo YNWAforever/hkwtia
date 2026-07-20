@@ -5,6 +5,7 @@ import {parseSegmentRouteQuery, segmentFilterSchema} from "@/lib/admin/segment-s
 describe("segment filter schema", () => {
   it("parses bounded filter values and defaults omitted fields", () => {
     expect(segmentFilterSchema.parse({tier: ["corporate"], scoreMin: "10"})).toEqual({
+      profileIds: [],
       tier: ["corporate"],
       status: [],
       scoreMin: 10,
@@ -15,6 +16,15 @@ describe("segment filter schema", () => {
     });
   });
 
+  it("parses repeated exact profile identity without accepting PII selectors", () => {
+    expect(parseSegmentRouteQuery({profileId: ["profile-a", "profile-b"], status: "past_due", scoreMax: "19", renewalWithinDays: "60"}).filter).toMatchObject({
+      profileIds: ["profile-a", "profile-b"],
+      status: ["past_due"],
+      scoreMax: 19,
+      renewalWithinDays: 60,
+    });
+    expect(() => segmentFilterSchema.parse({profileIds: ["profile-a"], email: "member@example.test"})).toThrow();
+  });
   it("rejects unknown filter keys and an inverted score range", () => {
     expect(() => segmentFilterSchema.parse({tier: ["corporate"], unexpected: "value"})).toThrow();
     expect(() => segmentFilterSchema.parse({scoreMin: 50, scoreMax: 20})).toThrow();
@@ -22,7 +32,7 @@ describe("segment filter schema", () => {
 
   it("parses URL filters without treating pagination keys as filter keys", () => {
     expect(parseSegmentRouteQuery({tier: "corporate", scoreMax: "19.99", renewalWithinDays: "60", limit: "25", cursor: null})).toEqual({
-      filter: {tier: ["corporate"], status: [], scoreMin: null, scoreMax: 19.99, renewalWithinDays: 60, sector: "", lastLoginBeforeDays: null},
+      filter: {profileIds: [], tier: ["corporate"], status: [], scoreMin: null, scoreMax: 19.99, renewalWithinDays: 60, sector: "", lastLoginBeforeDays: null},
       limit: 25,
       cursor: null,
     });
