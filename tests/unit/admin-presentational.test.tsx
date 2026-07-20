@@ -4,6 +4,7 @@ import {describe, expect, it} from "vitest";
 import {AdminNav} from "@/components/admin/admin-nav";
 import {AtRiskTable} from "@/components/admin/at-risk-table";
 import {MemberTable} from "@/components/admin/member-table";
+import {ReportCards} from "@/components/admin/report-cards";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
 
@@ -47,5 +48,32 @@ describe("admin presentation", () => {
     expect(nav).toContain(labels.brand);
     expect(table).toContain("?q=acme&amp;cursor=opaque-cursor");
     expect(table).not.toContain(labels.members.previous);
+  });
+
+
+  it.each([
+    {locale: "en" as const, labels: en.Admin.reports, expectedPeriod: "1 Jul 2026", expectedUnavailable: "Not available"},
+    {locale: "zh-HK" as const, labels: zh.Admin.reports, expectedPeriod: "2026年7月1日", expectedUnavailable: "未有資料"},
+  ])("renders accessible reconciled report cards in $locale", ({locale, labels, expectedPeriod, expectedUnavailable}) => {
+    const html = renderToStaticMarkup(<ReportCards locale={locale} labels={labels} report={{
+      window: {from: "2026-07-01", to: "2026-07-31", timezone: "Asia/Hong_Kong"},
+      revenue: {arrHkd: 3240, mrrHkd: 270},
+      renewal: {numerator: 7, denominator: 8, percentage: 87.5},
+      firstYearRenewal: {numerator: 0, denominator: 0, percentage: null},
+      funnel: {started: 10, profileCompleted: 8, checkoutOrReview: 6, activated: 5},
+      attendance: {numerator: 3, denominator: 4, percentage: 75},
+      atRiskCount: 2,
+    }}/>);
+
+    expect(html).toContain(expectedPeriod);
+    expect(html).toContain("Asia/Hong_Kong");
+    expect(html).toContain("87.5%");
+    expect(html).toContain(expectedUnavailable);
+    expect(html).toContain(labels.numerator);
+    expect(html).toContain(">7<");
+    expect(html).toContain(labels.denominator);
+    expect(html).toContain(">8<");
+    expect(html).toContain("<section");
+    expect(html.match(/aria-labelledby=/g)?.length).toBeGreaterThanOrEqual(6);
   });
 });
