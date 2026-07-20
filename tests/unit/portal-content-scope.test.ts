@@ -112,6 +112,6 @@ describe("member portal content scope", () => {
     const records = await getMemberEvents(member, dependencies({events: {list: async () => [event]}}));
 
     expect(records).toEqual([event]);
-    expect(records[0].namespace).toBe("events.memberMixer");
+    expect("namespace" in records[0]! ? records[0].namespace : null).toBe("events.memberMixer");
   });
 });

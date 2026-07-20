@@ -1,34 +1,29 @@
-import type {Metadata} from 'next';
-import {getTranslations, setRequestLocale} from 'next-intl/server';
-import {notFound} from 'next/navigation';
+import type {Metadata} from "next";
+import {notFound} from "next/navigation";
+import {setRequestLocale} from "next-intl/server";
 
-import {EventDetail} from '@/components/marketing/event-detail';
-import {StructuredData} from '@/components/seo/structured-data';
-import {events} from '@/content/events';
-import type {AppLocale} from '@/i18n/routing';
-import {buildPageMetadata} from '@/lib/metadata';
-import {buildEventData} from '@/lib/structured-data';
+import {PageHero} from "@/components/marketing/page-hero";
+import {eventsRepository, localizeEvent} from "@/lib/db/repos/events";
 
-type Props = {params: Promise<{locale: string; slug: string}>};
+export const dynamic = "force-dynamic";
 
-export function generateStaticParams() {
-  return events.map(({slug}) => ({slug}));
-}
+type Props = Readonly<{params: Promise<{locale: string; slug: string}>}>;
+const anonymous = {kind: "anonymous", userId: null} as const;
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
-  const record = events.find((item) => item.slug === slug);
-  if (!record) notFound();
-  const t = await getTranslations({locale, namespace: record.namespace});
-  return buildPageMetadata({locale: locale as AppLocale, pathname: `/events/${record.slug}`, title: t('title'), description: t('description'), image: record.image});
+  const row = await eventsRepository.getBySlug(anonymous, slug);
+  if (!row) return {};
+  const event = localizeEvent(row, locale);
+  return {title: event.title, description: event.description};
 }
 
 export default async function EventPage({params}: Props) {
   const {locale, slug} = await params;
-  const record = events.find((item) => item.slug === slug);
-  if (!record) notFound();
+  const row = await eventsRepository.getBySlug(anonymous, slug);
+  if (!row) notFound();
   setRequestLocale(locale);
-  const t = await getTranslations({locale, namespace: record.namespace});
-  const title = t('title');
-  return <><StructuredData data={buildEventData(record, title)} /><EventDetail record={record} title={title} /></>;
+  const event = localizeEvent(row, locale);
+  const formatter = new Intl.DateTimeFormat(locale, {dateStyle: "full", timeStyle: "short", timeZone: "Asia/Hong_Kong"});
+  return <><PageHero eyebrow={formatter.format(new Date(event.startsAt))} title={event.title} description={event.description}/><section className="container mx-auto space-y-3 px-6 py-12"><p>{event.venue}</p>{event.endsAt ? <p>{formatter.format(new Date(event.endsAt))}</p> : null}</section></>;
 }

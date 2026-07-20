@@ -1,46 +1,74 @@
-# Task 8 report: protected member portal
+# Task 8 Report: Repository-backed events and idempotent check-in
 
-## Scope
+## Outcome
 
-- Added the protected localized member portal dashboard, profile editor, and company editor.
-- Added actor-scoped portal queries and commands with membership status gating, self-profile writes, and owner/admin company authorization.
-- Added locale-safe sign-in continuation handling and responsive portal navigation/status cards.
-- Added Neon Auth Server Component session-read hardening so cookie refresh failures are treated as signed out instead of rendering a 500.
+DONE_WITH_CONCERNS
 
-## TDD evidence
+Task 8 replaces the static production event source with Actor-first database repositories, serialized member registration, audited event management, idempotent attendance check-in, localized public/member/admin Server Components, and real admin not-found boundaries.
 
-- RED: `npm.cmd test -- tests/unit/portal-authorization.test.ts` initially failed at module collection because `@/lib/portal/queries` did not exist (1 failed suite, 0 tests).
-- GREEN: focused portal authorization suite passed (1 file, 6 tests).
-- Coverage includes anonymous denial before private reads, active membership onboarding state, cancelled membership short-circuit, self-profile writes, owner/admin company authorization, and locale-safe continuation validation.
+## Exact TDD evidence
 
-## Runtime note
+Initial RED, before production edits:
 
-- Without configured local Neon Auth credentials, the auth adapter targets the local site and receives a 404 for `/get-session`; the narrow Server Component cookie-mutation fallback safely treats that path as anonymous. Production still uses the configured `NEON_AUTH_BASE_URL` and cookie secret.
+```powershell
+npx.cmd vitest run tests/unit/admin-events.test.ts tests/unit/event-check-in.test.ts tests/unit/public-event-repository.test.ts --reporter=dot
+```
 
-## Review-fix implementation
+Result: 3 failed suites and no collected tests. Vite reported the expected missing modules `@/lib/db/repos/events` and `@/lib/admin/events`.
 
-- `StatusCard` now receives a translated label; English and Traditional Chinese status labels and all four plan labels are message-backed.
-- `getSession` keeps cookie cache/refresh disabled, treats only the exact Next cookie-mutation error as signed out, and normalizes/rethrows SDK `result.error` values.
-- The validated `/portal`, `/portal/profile`, and `/portal/company` continuation survives JoinPage, the magic-link callback URL, and sent-state redirect; localized forms are normalized and external/query/hash/backslash paths are rejected.
+Focused GREEN after implementation and the repository-layer refactor:
 
-## Post-fix verification
+```powershell
+npx.cmd vitest run tests/unit/admin-events.test.ts tests/unit/event-check-in.test.ts tests/unit/public-event-repository.test.ts --reporter=dot --maxWorkers=2 --minWorkers=1
+```
 
-- RED: added focused coverage for translated portal status/plan labels, exact Neon Auth session options and error handling, allowlisted magic-link continuations, and deterministic active/past_due/pending_review/cancelled/revoked portal data paths.
-- Focused regression suite: `npm.cmd test -- --run tests/unit/portal-presentational.test.tsx tests/unit/auth-server-runtime.test.ts tests/unit/join-navigation.test.ts tests/unit/join-actions.test.ts tests/unit/portal-authorization.test.ts` - 5 files passed, 46 tests passed.
-- Full Vitest: `npm.cmd test` - 37 files passed, 182 tests passed, 1 skipped.
-- `npm.cmd run lint` - passed.
-- `npm.cmd run audit:strings` - passed; 57 TSX files scanned.
-- `npm.cmd run typecheck` - passed.
-- `npm.cmd run build` - passed on Next.js 16.2.10; `/[locale]/portal`, `/[locale]/portal/profile`, and `/[locale]/portal/company` emitted as dynamic routes.
-- Fresh isolated browser verification: with `PLAYWRIGHT_BASE_URL=http://localhost:3102` and `NEON_AUTH_BASE_URL=http://localhost:3102`, `npm.cmd run test:e2e -- tests/e2e/portal-dashboard.spec.ts --reporter=line --timeout=30000` passed all 3 tests in 17.6 seconds against a clean Next dev server.
-- `next-env.d.ts` generated noise was restored before commit.
+Result: 3 files passed; 8/8 tests passed in 24.70 seconds.
 
-## Final continuation-fix verification
+Brief regression GREEN:
 
-- The no-plan portal redirect (`/join?next=/portal`) now renders the localized magic-link form; an authenticated actor is redirected directly to the validated continuation without creating an application or inventing a membership plan.
-- `buildJoinCallback` omits `plan` for auth-only links while retaining plan-bearing join flows; continuation normalization remains locale-aware and rejects external/query/hash/backslash/admin paths.
-- Final continuation RED/GREEN suite: `npm.cmd test -- --run tests/unit/join-navigation.test.ts tests/unit/join-actions.test.ts tests/unit/join-page.test.tsx` - RED captured 4 expected failures; GREEN passed 3 files, 28 tests after the action-boundary guard.
-- Full Vitest after the final fix: `npm.cmd test` - 38 files passed, 191 tests passed, 1 skipped.
-- Final isolated dev-server browser smoke: `PLAYWRIGHT_BASE_URL=http://localhost:3104` with matching auth/site URLs; `tests/e2e/portal-dashboard.spec.ts` passed 3/3 in 14.1 seconds. This remains anonymous protection/redirect coverage, not an authenticated portal session.
-- Final action-boundary hardening: `(plan=null, continuation=null)` now returns localized auth error without calling Neon Auth; focused continuation suite is 28 tests and full Vitest is 191 passed, 1 skipped.
-- Final production build rerun: `npm.cmd run build` passed on Next.js 16.2.10.
+```powershell
+npx.cmd vitest run tests/unit/admin-events.test.ts tests/unit/event-check-in.test.ts tests/unit/public-event-repository.test.ts tests/unit/content-contract.test.ts tests/unit/detail-pages.test.ts tests/unit/portal-content-scope.test.ts --reporter=dot --maxWorkers=2 --minWorkers=1
+```
+
+Result: exit 0 for all six files.
+
+## Files
+
+- Added `lib/db/repos/events.ts` and `lib/db/repos/event-check-in.ts`
+- Added `lib/admin/events.ts`
+- Added `components/admin/event-form.tsx` and `components/admin/attendee-table.tsx`
+- Added admin event list/create and detail/update/check-in routes under `app/[locale]/(admin)/admin/events-mgmt`
+- Replaced public event list/detail and member portal event reads with repository-backed runtime reads
+- Updated `lib/portal/content.ts`, `components/admin/admin-nav.tsx`, and both locale bundles
+- Added the three Task 8 unit files and updated the explicit portal-reader injection contract test
+
+## Verification
+
+- `npm.cmd run typecheck`: PASS
+- `npm.cmd run lint`: PASS
+- `npm.cmd run audit:strings`: PASS; 85 TSX files scanned
+- `npm.cmd test -- --reporter=dot --maxWorkers=4 --minWorkers=2`: PASS; 77 files passed, 3 skipped; 347 tests passed, 4 skipped
+- `npm.cmd run build`: PASS; repository-backed public/member/admin event routes are dynamic
+- First build was a useful RED: static `/en/events` attempted production environment initialization. Marking both repository-backed public event routes `force-dynamic` resolved it.
+- `git diff --check`: PASS, with expected Windows LF/CRLF notices only
+- UTF-8 BOM scan across 18 changed files: PASS
+- Node UTF-8 parse of both locale JSON files: PASS
+
+## Self-review
+
+- Authorization is Actor-first. Admin mutations and check-in require admin before Zod parsing or database work; registration requires a member and always uses `actor.profileId`.
+- Public reads return only published, non-member events. Member reads return published events. Admin reads and mutations require admin.
+- Create, update, registration, and check-in audit records share the same transaction as their mutations. Check-in also inserts the engagement fact in that transaction.
+- Registration locks the event row before counting confirmed registrations, so concurrent capacity decisions serialize. Existing registered/waitlisted rows return stable idempotent dispositions.
+- Check-in locks the composite registration row. An existing `checkedInAt` returns `already_checked_in`; the first mutation marks attendance and inserts exactly one engagement fact with stable `registrationKey` metadata.
+- Public and portal production readers have no fallback to `content/events.ts`; test readers remain explicit injected dependencies.
+- Dynamic IDs and slugs are Zod-validated. Missing or malformed admin event IDs produce a real Next.js 404. Server Components remain the default and no PII is logged.
+
+## Concern and evidence gap
+
+- Capacity and check-in concurrency are implemented with PostgreSQL `FOR UPDATE` locks and have deterministic injected transaction coverage, but Task 8 did not add a fresh real-Postgres concurrency run. The reviewed Task 7 local Postgres harness was not reused because this task's schema already had focused contract coverage and all non-production gates were green. A follow-up integration test should race two registrations for the last seat and two check-ins for one registration against an isolated local PostgreSQL database.
+- The build retains the existing stale `caniuse-lite` warning; Task 8 changed no dependency manifests.
+
+## Tool fallback
+
+The linked Windows worktree repeatedly caused `apply_patch` to fail with `helper_unknown_error: apply deny-read ACLs`. After attempting `apply_patch` first, edits were restricted to the exact Task 8 files and written as BOM-free UTF-8. Final BOM, diff, lint, typecheck, test, string-audit, JSON, and build gates passed.

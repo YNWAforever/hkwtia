@@ -1,9 +1,10 @@
 import "server-only";
 
-import {events as publicEvents} from "@/content/events";
 import type {EventRecord} from "@/content/schemas";
 import {listReceipts, type Receipt} from "@/lib/billing/receipt-service";
 import {portalContentRepository, type DirectoryCandidate} from "@/lib/db/repos/portal-content";
+import {eventsRepository, localizeEvent, type LocalizedEvent} from "@/lib/db/repos/events";
+import type {Event} from "@/lib/db/server-schema";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {requireMember, type Actor, type MembershipRecord} from "@/lib/membership/lifecycle";
 
@@ -55,7 +56,7 @@ type DirectoryReader = Readonly<{
 }>;
 
 type EventReader = Readonly<{
-  list: (actor: MemberActor) => Promise<EventRecord[]>;
+  list: (actor: MemberActor) => Promise<readonly (EventRecord | Event)[]>;
 }>;
 
 type ReceiptLike = Pick<Receipt, "id" | "date" | "amount" | "currency" | "status" | "hostedInvoiceUrl">;
@@ -172,7 +173,7 @@ async function requirePortalEntitlement(actor: Actor, dependencies: PortalConten
 const defaultPortalContentDependencies: PortalContentDependencies = {
   memberships: membershipsRepository,
   directory: {list: portalContentRepository.listDirectory},
-  events: {list: async () => publicEvents.map((event) => ({...event}))},
+  events: {list: eventsRepository.listForMember},
   documents: {
     listApproved: async () => [],
     listReceipts: async (actor, membership) => {
@@ -216,14 +217,15 @@ export async function searchDirectory(
 export async function getMemberEvents(
   actor: Actor,
   inputDependencies?: Partial<PortalContentDependencies>,
-): Promise<EventRecord[]> {
+  locale = "en",
+): Promise<Array<EventRecord | LocalizedEvent>> {
   const deps = dependencies(inputDependencies);
   const member = await requirePortalEntitlement(actor, deps);
   const records = await deps.events.list(member);
   return records
     .filter((event) => new Date(event.startsAt).getTime() >= Date.now())
-    .map(({slug, startsAt, endsAt, venue, image, namespace}) => ({slug, startsAt, endsAt, venue, image, namespace}))
-    .sort((left, right) => left.startsAt.localeCompare(right.startsAt));
+    .map((event) => "titleEn" in event ? localizeEvent(event, locale) : event)
+    .sort((left, right) => new Date(left.startsAt).getTime() - new Date(right.startsAt).getTime() || left.slug.localeCompare(right.slug));
 }
 
 function documentFromReceipt(receipt: ReceiptLike): DocumentItem {

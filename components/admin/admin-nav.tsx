@@ -8,7 +8,7 @@ export type AdminNavLabels = Readonly<{brand: string; label: string; members: st
 export function AdminNav({locale, labels}: {locale: AppLocale; labels: AdminNavLabels}) {
   const items = [
     {href: "/admin/members", label: labels.members}, {href: "/admin/segments", label: labels.segments},
-    {href: "/admin/at-risk", label: labels.atRisk}, {href: "/admin/events", label: labels.events},
+    {href: "/admin/at-risk", label: labels.atRisk}, {href: "/admin/events-mgmt", label: labels.events},
     {href: "/admin/approvals", label: labels.approvals}, {href: "/admin/reports", label: labels.reports},
   ];
   return <nav aria-label={labels.label} className="border-b border-border/70 bg-background/85 px-4 py-4 backdrop-blur sm:px-6">
