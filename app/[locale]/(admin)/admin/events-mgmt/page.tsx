@@ -5,16 +5,11 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {EventForm} from "@/components/admin/event-form";
 import type {AppLocale} from "@/i18n/routing";
 import {runEventFormAction, type EventActionState} from "@/lib/admin/event-action-core";
+import {eventFormInput} from "@/lib/admin/event-form-input";
 import {requireAdminActor} from "@/lib/auth/actor";
 import {createEvent, eventsRepository} from "@/lib/db/repos/events";
 
 type Props = Readonly<{params: Promise<{locale: string}>}>;
-
-function formInput(formData: FormData) {
-  const capacity = String(formData.get("capacity") ?? "").trim();
-  const optional = (name: string) => String(formData.get(name) ?? "").trim() || null;
-  return {slug: formData.get("slug"), titleEn: formData.get("titleEn"), titleZh: optional("titleZh"), descriptionEn: formData.get("descriptionEn"), descriptionZh: optional("descriptionZh"), startsAt: formData.get("startsAt"), endsAt: optional("endsAt"), venue: optional("venue"), capacity: capacity ? Number(capacity) : null, memberOnly: formData.get("memberOnly") === "on", published: formData.get("published") === "on"};
-}
 
 export default async function AdminEventsPage({params}: Props) {
   const {locale: localeValue} = await params;
@@ -23,10 +18,11 @@ export default async function AdminEventsPage({params}: Props) {
   const actor = await requireAdminActor();
   const events = await eventsRepository.listForAdmin(actor);
   const t = await getTranslations({locale, namespace: "Admin.eventsMgmt"});
+  const createActionMessages = {successMessage: t("createSuccess"), validationMessage: t("validation"), errorMessage: t("error")};
   async function createAction(state: EventActionState, formData: FormData): Promise<EventActionState> {
     "use server";
-    return runEventFormAction(state, formData, {successMessage: t("createSuccess"), validationMessage: t("validation"), errorMessage: t("error"), mutate: async (data) => {
-      await createEvent(await requireAdminActor(), formInput(data));
+    return runEventFormAction(state, formData, {...createActionMessages, mutate: async (data) => {
+      await createEvent(await requireAdminActor(), eventFormInput(data));
       revalidatePath(`/${locale}/admin/events-mgmt`);
     }});
   }

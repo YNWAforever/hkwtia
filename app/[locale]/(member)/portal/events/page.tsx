@@ -24,11 +24,11 @@ export default async function MemberEventsPage({params}: Props) {
     const eventT = await getTranslations({locale, namespace: event.namespace});
     return {...event, id: event.slug, title: eventT("title"), description: ""};
   }));
+  const registrationActionMessages = {successMessage: t("events.registerSuccess"), errorMessage: t("events.registerError")};
   async function registerAction(state: RegistrationActionState, formData: FormData): Promise<RegistrationActionState> {
     "use server";
     return runEventRegistrationAction(state, formData, {
-      successMessage: t("events.registerSuccess"),
-      errorMessage: t("events.registerError"),
+      ...registrationActionMessages,
       mutate: async (data) => {
         const actionActor = await requireActor();
         await registerForEvent(actionActor, {eventId: data.get("eventId")});

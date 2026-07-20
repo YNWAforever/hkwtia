@@ -7,18 +7,13 @@ import {AttendeeTable} from "@/components/admin/attendee-table";
 import {EventForm} from "@/components/admin/event-form";
 import type {AppLocale} from "@/i18n/routing";
 import {runCheckInAction, runEventFormAction, type EventActionState} from "@/lib/admin/event-action-core";
+import {eventFormInput} from "@/lib/admin/event-form-input";
 import {checkInAttendee} from "@/lib/admin/events";
 import {requireAdminActor} from "@/lib/auth/actor";
 import {eventsRepository, localizeEvent, updateEvent} from "@/lib/db/repos/events";
 
 type Props = Readonly<{params: Promise<{locale: string; id: string}>}>;
 const idSchema = z.string().uuid();
-
-function formInput(formData: FormData) {
-  const capacity = String(formData.get("capacity") ?? "").trim();
-  const optional = (name: string) => String(formData.get(name) ?? "").trim() || null;
-  return {slug: formData.get("slug"), titleEn: formData.get("titleEn"), titleZh: optional("titleZh"), descriptionEn: formData.get("descriptionEn"), descriptionZh: optional("descriptionZh"), startsAt: formData.get("startsAt"), endsAt: optional("endsAt"), venue: optional("venue"), capacity: capacity ? Number(capacity) : null, memberOnly: formData.get("memberOnly") === "on", published: formData.get("published") === "on"};
-}
 
 export default async function AdminEventDetailPage({params}: Props) {
   const {locale: localeValue, id: rawId} = await params;
@@ -32,17 +27,19 @@ export default async function AdminEventDetailPage({params}: Props) {
   if (!event) notFound();
   const localized = localizeEvent(event, locale);
   const t = await getTranslations({locale, namespace: "Admin.eventsMgmt"});
+  const updateActionMessages = {successMessage: t("updateSuccess"), validationMessage: t("validation"), errorMessage: t("error")};
+  const checkInActionMessages = {successMessage: t("checkInSuccess"), errorMessage: t("checkInError")};
   async function updateAction(state: EventActionState, formData: FormData): Promise<EventActionState> {
     "use server";
-    return runEventFormAction(state, formData, {successMessage: t("updateSuccess"), validationMessage: t("validation"), errorMessage: t("error"), mutate: async (data) => {
-      const updated = await updateEvent(await requireAdminActor(), parsedId.data, formInput(data));
+    return runEventFormAction(state, formData, {...updateActionMessages, mutate: async (data) => {
+      const updated = await updateEvent(await requireAdminActor(), parsedId.data, eventFormInput(data));
       if (!updated) throw new Error("EVENT_NOT_FOUND");
       revalidatePath(`/${locale}/admin/events-mgmt/${parsedId.data}`);
     }});
   }
   async function checkInAction(state: EventActionState, formData: FormData): Promise<EventActionState> {
     "use server";
-    return runCheckInAction(state, formData, {successMessage: t("checkInSuccess"), errorMessage: t("checkInError"), mutate: async (data) => {
+    return runCheckInAction(state, formData, {...checkInActionMessages, mutate: async (data) => {
       await checkInAttendee(await requireAdminActor(), {eventId: parsedId.data, profileId: data.get("profileId")});
       revalidatePath(`/${locale}/admin/events-mgmt/${parsedId.data}`);
     }});

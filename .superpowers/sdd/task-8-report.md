@@ -48,14 +48,40 @@ Result: 1 file passed; 1/1 test passed. Two concurrent registrations for a capac
 - Create, update, check-in, and RSVP actions return localized generic success/error states through `aria-live`; validation errors are field-linked and preserve only the event form's allowlisted non-sensitive values.
 - Event updates validate the resulting persisted period after merging partial input with the locked current row. Malformed public slugs return a safe not-found result.
 - Attendee statuses, dates, pending labels, and admin event titles are localized.
+## Second re-review: Server Action serialization and Hong Kong event time
+
+Serialization RED, before production edits:
+
+```powershell
+npx.cmd vitest run tests/unit/event-server-action-serialization.test.ts --reporter=verbose --maxWorkers=1 --minWorkers=1
+```
+
+Result: 1 file failed; 4/4 tests failed. The admin create, update, and check-in actions plus member RSVP action each called the captured next-intl translator from inside a client-bound inline Server Action.
+
+Datetime RED, before the helper existed:
+
+```powershell
+npx.cmd vitest run tests/unit/event-hong-kong-datetime.test.ts --reporter=verbose --maxWorkers=1 --minWorkers=1
+```
+
+Result: the suite failed to resolve the intended `@/lib/admin/event-form-input` conversion seam. Its behavioral cases specify winter, summer, and year-boundary round trips plus `18:00` Hong Kong form input persisting as `10:00Z`.
+
+Focused GREEN after the minimal fixes:
+
+```powershell
+npx.cmd vitest run tests/unit/event-server-action-serialization.test.ts tests/unit/event-hong-kong-datetime.test.ts tests/unit/admin-events.test.ts tests/unit/event-check-in.test.ts tests/unit/public-event-repository.test.ts tests/unit/event-detail-seo.test.ts tests/unit/event-action-state.test.ts tests/unit/content-contract.test.ts tests/unit/detail-pages.test.ts tests/unit/portal-content-scope.test.ts --reporter=verbose --maxWorkers=2 --minWorkers=1
+```
+
+Result: 10 files passed; 33/33 tests passed. Action messages are resolved to plain serializable objects before action definitions. Admin form values now parse and format explicitly in `Asia/Hong_Kong`, independent of the process timezone.
 
 ## Verification
 
 - `npm.cmd run typecheck`: PASS
 - `npm.cmd run lint`: PASS
 - `npm.cmd run audit:strings`: PASS; 86 TSX files scanned
-- `npm.cmd test -- --reporter=dot --maxWorkers=4 --minWorkers=2`: PASS; 79 files passed, 4 skipped; 355 tests passed, 5 skipped
+- `npm.cmd test -- --reporter=dot --maxWorkers=4 --minWorkers=2`: PASS; 81 files passed, 4 skipped; 363 tests passed, 5 skipped
 - `npm.cmd run build`: PASS; repository-backed public/member/admin event routes are dynamic
+- `$env:TZ='America/New_York'; npx.cmd vitest run tests/unit/event-hong-kong-datetime.test.ts ...`: PASS; 4/4 tests, proving process-timezone independence
 - Node UTF-8 parse of both locale JSON files: PASS
 - `git diff --check`: PASS, with expected Windows LF/CRLF notices only
 - UTF-8 BOM scan across all changed and untracked files: PASS
