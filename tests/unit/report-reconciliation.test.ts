@@ -1,3 +1,6 @@
+import {readFileSync} from "node:fs";
+import {join} from "node:path";
+
 import {drizzle} from "drizzle-orm/pg-proxy";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
@@ -84,12 +87,21 @@ describe("report reconciliation", () => {
       };
     }};
 
-    await getAdminReport(staff, {from: "2026-07-01", to: "2026-07-31"}, reader);
+    await getAdminReport(staff, {from: "2026-07-01", to: "2026-07-31"}, reader, new Date("2026-07-15T00:00:00.000Z"));
 
     expect(seenActor).toBe(staff);
-    expect(seenWindow).toEqual({from: new Date("2026-06-30T16:00:00.000Z"), toExclusive: new Date("2026-07-31T16:00:00.000Z")});
+    expect(seenWindow).toEqual({from: new Date("2026-06-30T16:00:00.000Z"), toExclusive: new Date("2026-07-31T16:00:00.000Z"), asOf: new Date("2026-07-15T00:00:00.000Z")});
   });
 
+  it("uses the historical window end as attendance as-of when it precedes now", async () => {
+    let seenWindow: unknown;
+    const reader: ReportFactsReader = {readFacts: async (_actor, window) => {
+      seenWindow = window;
+      return {revenueMemberships: [], renewal: {paid: 0, due: 0, firstYearPaid: 0, firstYearDue: 0}, funnel: {started: 0, profileCompleted: 0, checkoutOrReview: 0, activated: 0}, attendance: {attended: 0, eligible: 0}, atRiskCount: 0};
+    }};
+    await getAdminReport(staff, {from: "2026-06-01", to: "2026-06-30"}, reader, new Date("2026-07-15T00:00:00.000Z"));
+    expect(seenWindow).toMatchObject({asOf: new Date("2026-06-30T16:00:00.000Z")});
+  });
   it("rejects non-staff actors before reading report facts", async () => {
     let called = false;
     const reader: ReportFactsReader = {readFacts: async () => { called = true; throw new Error("must not read"); }};
@@ -97,6 +109,22 @@ describe("report reconciliation", () => {
     expect(called).toBe(false);
   });
 
+  it.each([
+    {from: "2026-07-01", to: "2026-07-31", unexpected: "value"},
+    {from: ["2026-07-01"], to: "2026-07-31"},
+  ])("rejects the entire malformed route query before reading facts", async (query) => {
+    let called = false;
+    const reader: ReportFactsReader = {readFacts: async () => { called = true; throw new Error("must not read"); }};
+    await expect(getAdminReport(staff, query, reader)).rejects.toThrow();
+    expect(called).toBe(false);
+  });
+
+  it("passes the whole Next searchParams object from the route to strict validation", () => {
+    const source = readFileSync(join(process.cwd(), "app/[locale]/(admin)/admin/reports/page.tsx"), "utf8");
+    expect(source).toContain("const reportQuery = Object.keys(query).length === 0 ? defaults : query;");
+    expect(source).toContain("getAdminReport(await requireAdminActor(), reportQuery)");
+    expect(source).not.toContain("{from: query.from, to: query.to}");
+  });
   it("reads one bounded aggregate row using half-open windows and shared at-risk thresholds", async () => {
     const queries: string[] = [];
     const paramsSeen: unknown[][] = [];
@@ -113,7 +141,7 @@ describe("report reconciliation", () => {
 
     const from = new Date("2026-06-30T16:00:00.000Z");
     const toExclusive = new Date("2026-07-31T16:00:00.000Z");
-    const facts = await reportsRepository.readFacts(staff, {from, toExclusive});
+    const facts = await reportsRepository.readFacts(staff, {from, toExclusive, asOf: new Date("2026-07-15T00:00:00.000Z")});
 
     expect(facts.renewal).toEqual({paid: 2, due: 3, firstYearPaid: 1, firstYearDue: 2});
     expect(facts.revenueMemberships[0]).toMatchObject({count: 2});
@@ -132,7 +160,7 @@ describe("report reconciliation", () => {
     let queries = 0;
     database.current = drizzle(async () => { queries += 1; return {rows: []}; });
     await expect(reportsRepository.readFacts({kind: "member", userId: "auth-member", profileId: "member-1"}, {
-      from: new Date("2026-06-30T16:00:00.000Z"), toExclusive: new Date("2026-07-31T16:00:00.000Z"),
+      from: new Date("2026-06-30T16:00:00.000Z"), toExclusive: new Date("2026-07-31T16:00:00.000Z"), asOf: new Date("2026-07-15T00:00:00.000Z"),
     })).rejects.toThrow("FORBIDDEN");
     expect(queries).toBe(0);
   });

@@ -61,13 +61,14 @@ describe("admin presentation", () => {
       renewal: {numerator: 7, denominator: 8, percentage: 87.5},
       firstYearRenewal: {numerator: 0, denominator: 0, percentage: null},
       funnel: {started: 10, profileCompleted: 8, checkoutOrReview: 6, activated: 5},
-      attendance: {numerator: 3, denominator: 4, percentage: 75},
+      attendance: {numerator: 2, denominator: 4, percentage: 50},
       atRiskCount: 2,
     }}/>);
 
     expect(html).toContain(expectedPeriod);
     expect(html).toContain("Asia/Hong_Kong");
     expect(html).toContain("87.5%");
+    expect(html).toContain("50.0%");
     expect(html).toContain(expectedUnavailable);
     expect(html).toContain(labels.numerator);
     expect(html).toContain(">7<");

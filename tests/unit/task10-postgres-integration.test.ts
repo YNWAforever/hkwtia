@@ -116,13 +116,15 @@ describe.skipIf(!enabled)("Task 10 reconciled reports on isolated Postgres 16", 
         ('member-two','renewal_failed',-1,'{"membershipId":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2","renewalOrdinal":1}','2026-07-10 00:00:00+00'),
         ('member-three','renewal_paid',1,'{"membershipId":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3","renewalOrdinal":2}','2026-07-20 00:00:00+00'),
         ('member-three','renewal_failed',-1,'{"membershipId":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3","renewalOrdinal":"poison"}','2026-07-20 00:00:01+00'),
+        ('member-three','renewal_paid',1,'{"membershipId":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3","renewalOrdinal":"1"}','2026-07-20 00:00:02+00'),
         ('member-four','renewal_paid',1,'{"membershipId":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4","renewalOrdinal":1}','2026-07-31 16:00:00+00'),
         ('member-four','renewal_paid',1,'{"membershipId":"not-a-membership","renewalOrdinal":1}','2026-07-15 00:00:00+00');
       INSERT INTO events VALUES
         ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1','2026-06-30 15:59:59.999+00'),
         ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2','2026-06-30 16:00:00+00'),
         ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee3','2026-07-20 00:00:00+00'),
-        ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee4','2026-07-31 16:00:00+00');
+        ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee4','2026-07-31 16:00:00+00'),
+        ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee5','2026-07-25 00:00:00+00');
       INSERT INTO event_registrations VALUES
         ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1','member-one','attended'),
         ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2','member-one','attended'),
@@ -131,7 +133,8 @@ describe.skipIf(!enabled)("Task 10 reconciled reports on isolated Postgres 16", 
         ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2','member-four','registered'),
         ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee3','member-one','attended'),
         ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee3','member-two','waitlist'),
-        ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee4','member-one','attended');
+        ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee4','member-one','attended'),
+        ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee5','member-one','attended');
     `);
     database.current = drizzle(async (query, params) => ({rows: oneShotRows(query, params)}));
   }, 90_000);
@@ -139,7 +142,7 @@ describe.skipIf(!enabled)("Task 10 reconciled reports on isolated Postgres 16", 
   afterAll(() => { try { docker(["rm", "-f", container]); } catch { /* Container may already be gone. */ } });
 
   it("executes production JSONB aggregates with exact HK boundaries and hand-reconciled facts", async () => {
-    const report = await getAdminReport(staff, {from: "2026-07-01", to: "2026-07-31"});
+    const report = await getAdminReport(staff, {from: "2026-07-01", to: "2026-07-31"}, undefined, new Date("2026-07-21T00:00:00.000Z"));
     expect(report).toEqual({
       window: {from: "2026-07-01", to: "2026-07-31", timezone: "Asia/Hong_Kong"},
       revenue: {arrHkd: 3240, mrrHkd: 270},

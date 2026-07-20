@@ -16,8 +16,9 @@ const calendarDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).superRefine((
 
 export const reportWindowSchema = z.object({from: calendarDateSchema, to: calendarDateSchema}).strict();
 
-export type ReportUtcWindow = Readonly<{from: Date; toExclusive: Date}>;
-export type ParsedReportWindow = Readonly<{display: ReportDisplayWindow; utc: ReportUtcWindow}>;
+export type ReportUtcRange = Readonly<{from: Date; toExclusive: Date}>;
+export type ReportUtcWindow = ReportUtcRange & Readonly<{asOf: Date}>;
+export type ParsedReportWindow = Readonly<{display: ReportDisplayWindow; utc: ReportUtcRange}>;
 export type ReportFactsReader = Readonly<{
   readFacts: (actor: AdminActor, window: ReportUtcWindow) => Promise<RawReportFacts>;
 }>;
@@ -38,9 +39,10 @@ const defaultReader: ReportFactsReader = {
   readFacts: async (actor, window) => (await import("@/lib/db/repos/reports")).reportsRepository.readFacts(actor, window),
 };
 
-export async function getAdminReport(actor: Actor, input: unknown, reader: ReportFactsReader = defaultReader): Promise<AdminReport> {
+export async function getAdminReport(actor: Actor, input: unknown, reader: ReportFactsReader = defaultReader, now = new Date()): Promise<AdminReport> {
   requireAdmin(actor);
   const window = parseReportWindow(input);
-  const facts = await reader.readFacts(actor, window.utc);
+  const currentInstant = z.date().parse(now);
+  const facts = await reader.readFacts(actor, {...window.utc, asOf: new Date(Math.min(window.utc.toExclusive.getTime(), currentInstant.getTime()))});
   return reconcileReportFacts(facts, window.display);
 }

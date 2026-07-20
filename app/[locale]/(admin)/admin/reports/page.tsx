@@ -25,16 +25,16 @@ export default async function AdminReportsPage({params, searchParams}: Props) {
   const t = await getTranslations({locale, namespace: "Admin.reports"});
   const query = await searchParams;
   const defaults = hongKongToday();
-  const values = query.from === undefined && query.to === undefined ? defaults : {from: query.from, to: query.to};
+  const reportQuery = Object.keys(query).length === 0 ? defaults : query;
   let report = null;
   let invalid = false;
-  try { report = await getAdminReport(await requireAdminActor(), values); }
+  try { report = await getAdminReport(await requireAdminActor(), reportQuery); }
   catch (error) {
     if (isAuthorizationDenial(error)) notFound();
     if (error instanceof z.ZodError) invalid = true; else throw error;
   }
-  const from = typeof values.from === "string" ? values.from : "";
-  const to = typeof values.to === "string" ? values.to : "";
+  const from = typeof reportQuery.from === "string" ? reportQuery.from : "";
+  const to = typeof reportQuery.to === "string" ? reportQuery.to : "";
   const labels: ReportCardLabels = {
     cardsLabel: t("cardsLabel"), period: t("period"), arr: t("arr"), arrDescription: t("arrDescription"), mrr: t("mrr"), mrrDescription: t("mrrDescription"),
     renewal: t("renewal"), renewalDescription: t("renewalDescription"), firstYearRenewal: t("firstYearRenewal"), firstYearRenewalDescription: t("firstYearRenewalDescription"),

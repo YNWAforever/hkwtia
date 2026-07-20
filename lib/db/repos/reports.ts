@@ -10,8 +10,8 @@ import {requireAdmin} from "@/lib/auth/actor";
 import {getDb} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";
 
-const utcWindowSchema = z.object({from: z.date(), toExclusive: z.date()}).strict().superRefine((window, context) => {
-  if (!Number.isFinite(window.from.getTime()) || !Number.isFinite(window.toExclusive.getTime()) || window.from >= window.toExclusive) {
+const utcWindowSchema = z.object({from: z.date(), toExclusive: z.date(), asOf: z.date()}).strict().superRefine((window, context) => {
+  if (!Number.isFinite(window.from.getTime()) || !Number.isFinite(window.toExclusive.getTime()) || !Number.isFinite(window.asOf.getTime()) || window.from >= window.toExclusive || window.asOf > window.toExclusive) {
     context.addIssue({code: z.ZodIssueCode.custom, path: ["toExclusive"], message: "invalid UTC report window"});
   }
 });
@@ -69,8 +69,8 @@ async function readFacts(actor: Actor, input: ReportUtcWindow): Promise<RawRepor
     ), renewal_per_membership AS (
       SELECT m.id AS membership_id,
         BOOL_OR(ee.type = 'renewal_paid') AS paid,
-        BOOL_OR(ee.type = 'renewal_paid' AND ee.metadata ->> 'renewalOrdinal' = '1') AS first_year_paid,
-        BOOL_OR(ee.metadata ->> 'renewalOrdinal' = '1') AS first_year_due
+        BOOL_OR(ee.type = 'renewal_paid' AND JSONB_TYPEOF(ee.metadata -> 'renewalOrdinal') = 'number' AND ee.metadata -> 'renewalOrdinal' = '1'::jsonb) AS first_year_paid,
+        BOOL_OR(JSONB_TYPEOF(ee.metadata -> 'renewalOrdinal') = 'number' AND ee.metadata -> 'renewalOrdinal' = '1'::jsonb) AS first_year_due
       FROM engagement_events ee
       INNER JOIN memberships m ON m.id::text = ee.metadata ->> 'membershipId'
       WHERE ee.type IN ('renewal_paid', 'renewal_failed')
@@ -89,7 +89,7 @@ async function readFacts(actor: Actor, input: ReportUtcWindow): Promise<RawRepor
         COUNT(*) FILTER (WHERE r.status <> 'cancelled')::integer AS eligible
       FROM events e
       INNER JOIN event_registrations r ON r.event_id = e.id
-      WHERE e.ends_at IS NOT NULL AND e.ends_at >= ${window.from} AND e.ends_at < ${window.toExclusive}
+      WHERE e.ends_at IS NOT NULL AND e.ends_at >= ${window.from} AND e.ends_at < ${window.toExclusive} AND e.ends_at <= ${window.asOf}
     ), at_risk_profiles AS (
       SELECT DISTINCT p.id
       FROM profiles p

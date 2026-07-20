@@ -34,7 +34,7 @@ export function ReportCards({locale, labels, report}: {locale: AppLocale; labels
   const currencyFormatter = new Intl.NumberFormat(language, {style: "currency", currency: "HKD", maximumFractionDigits: 0});
   const period = labels.period.replace("{from}", dateFormatter.format(new Date(`${report.window.from}T00:00:00+08:00`)))
     .replace("{to}", dateFormatter.format(new Date(`${report.window.to}T00:00:00+08:00`))).replace("{timezone}", report.window.timezone);
-  const percentage = (metric: ReconciledMetric) => metric.percentage === null ? labels.unavailable : `${metric.percentage.toFixed(1).replace(".0", "")}%`;
+  const percentage = (metric: ReconciledMetric) => metric.percentage === null ? labels.unavailable : `${metric.percentage.toFixed(1)}%`;
   const reconciled = (id: string, title: string, description: string, metric: ReconciledMetric) => <ReportCard description={description} id={id} period={period} title={title} value={percentage(metric)}><Reconciliation labels={labels} metric={metric}/></ReportCard>;
 
   return <div aria-label={labels.cardsLabel} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" role="region">
