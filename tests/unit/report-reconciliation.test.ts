@@ -11,6 +11,7 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
   return {...original, getDb: async () => database.current};
 });
 
+import {AT_RISK_RENEWAL_DAYS} from "@/lib/admin/at-risk";
 import {reconcileRenewalEvents, reconcileReportFacts} from "@/lib/admin/report-formulas";
 import {getAdminReport, parseReportWindow, type ReportFactsReader} from "@/lib/admin/reports";
 import {reportsRepository} from "@/lib/db/repos/reports";
@@ -151,9 +152,9 @@ describe("report reconciliation", () => {
     expect(queries[0]).toMatch(/occurred_at[^]*>=/i);
     expect(queries[0]).toMatch(/occurred_at[^]*</i);
     expect(queries[0]).toMatch(/score[^]*<[^]*20/i);
-    expect(queries[0]).toMatch(/interval[^]*60 day/i);
     expect(paramsSeen.flat()).toContainEqual(from);
     expect(paramsSeen.flat()).toContainEqual(toExclusive);
+    expect(paramsSeen.flat()).toContainEqual(new Date(toExclusive.getTime() + AT_RISK_RENEWAL_DAYS * 86_400_000));
   });
 
   it("authorizes before loading the reports database", async () => {

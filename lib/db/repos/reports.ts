@@ -56,7 +56,7 @@ async function readFacts(actor: Actor, input: ReportUtcWindow): Promise<RawRepor
   const window = utcWindowSchema.parse(input);
   const db = await getDb();
   const scoreMaximum = sql.raw(String(AT_RISK_SCORE_MAX));
-  const renewalInterval = sql.raw(`INTERVAL '${AT_RISK_RENEWAL_DAYS} days'`);
+  const renewalBefore = new Date(window.toExclusive.getTime() + AT_RISK_RENEWAL_DAYS * 86_400_000);
   const rows = resultRows(await db.execute(sql`
     WITH revenue_groups AS (
       SELECT m.status::text AS status, m.billing_interval::text AS interval,
@@ -98,7 +98,7 @@ async function readFacts(actor: Actor, input: ReportUtcWindow): Promise<RawRepor
       INNER JOIN engagement_scores es ON es.profile_id = p.id
       WHERE m.status IN ('active', 'past_due') AND es.score < ${scoreMaximum}
         AND m.billing_period_end >= ${window.toExclusive}
-        AND m.billing_period_end <= ${window.toExclusive} + ${renewalInterval}
+        AND m.billing_period_end <= ${renewalBefore}
     )
     SELECT COALESCE((SELECT JSONB_AGG(JSONB_BUILD_OBJECT(
         'status', status, 'interval', interval, 'annualPriceHkd', "annualPriceHkd",

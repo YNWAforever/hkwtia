@@ -26,6 +26,8 @@ npm run db:seed
 
 `db:migrate` runs Drizzle migrations through `scripts/db-migrate.ts`; `db:seed` runs the idempotent M1 plan seed through `scripts/db-seed.ts` (with `db:seed:m1` available for the direct runner). Keep `DATABASE_URL` in the environment and never print it.
 
+`db:seed` runs the M1 plan seed and then the deterministic M2 demo seed. `db:seed:m2` runs only the M2 fixture layer with `node --experimental-strip-types`; migrate and seed M1 first when using it directly.
+
 ## Conventions
 
 - Use strict TypeScript and avoid `any` unless the code includes a reasoned comment.
@@ -38,7 +40,9 @@ npm run db:seed
 
 Create an isolated Neon branch/database for migration and seed verification. Put its pooled connection string in `DATABASE_URL_TEST` only in the local test environment; never commit or print the value. Run `npm run db:migrate` before `npm run db:seed`.
 
-The seed writes only the four stable plan rows (`community`, `startup`, `corporate`, and `patron`) and uses `ON CONFLICT` updates, so running it twice is safe and creates no personal data.
+The combined seed writes the four stable plan rows (`community`, `startup`, `corporate`, and `patron`) followed by the M2 demo contract: exactly 30 non-personal `.example.test` profiles, 12 companies, one staff, one ExCo, one superadmin, varied member histories, four events, saved segments, one queued campaign, and pending approvals. The fixed M2 reference instant is committed in `scripts/seed-m2.ts`; the engineered corporate segment and production at-risk query return exactly `m2-risk-01`, `m2-risk-02`, and `m2-risk-03` in renewal order when evaluated at that instant. Mutable fixture rows use idempotent upserts and immutable history rows use stable IDs with conflict-ignore semantics, so a second run creates no duplicates.
+
+Use only an isolated `DATABASE_URL_TEST` for M2 migration/seed acceptance. With no test URL, the acceptance suite skips; `RUN_POSTGRES_INTEGRATION=1` opts into a disposable local PostgreSQL 16 container. Never point fixture commands at production.
 
 For Stripe test-mode acceptance work, use test-mode values for `STRIPE_TEST_SECRET_KEY`, `STRIPE_TEST_WEBHOOK_SECRET`, `STRIPE_TEST_STARTUP_PRICE_ID`, and `STRIPE_TEST_CORPORATE_PRICE_ID`. Keep production Stripe variables separate and do not use live keys against the test database.
 
@@ -47,6 +51,7 @@ For Stripe test-mode acceptance work, use test-mode values for `STRIPE_TEST_SECR
 - M0: public bilingual route surface, metadata, structured data, crawler endpoints, translation parity, and accessibility gates.
 - M1 Task 1: server-only runtime configuration, Neon/Drizzle client foundation, and non-placeholder database commands.
 - M1 Task 11: idempotent plan seed, isolated migration-test contract, and Neon/Stripe test-environment documentation.
+- M2 Task 11: deterministic non-PII CRM demo fixtures, combined seed command, and isolated PostgreSQL acceptance assertions.
 
 <!-- codebase-memory-mcp:start -->
 # Codebase Knowledge Graph (codebase-memory-mcp)

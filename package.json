@@ -16,7 +16,8 @@
     "audit:strings": "node scripts/audit-visible-strings.mjs",
     "db:migrate": "node --experimental-strip-types scripts/db-migrate.ts",
     "db:seed": "node --experimental-strip-types scripts/db-seed.ts",
-    "db:seed:m1": "node --experimental-strip-types scripts/seed-m1.ts"
+    "db:seed:m1": "node --experimental-strip-types scripts/seed-m1.ts",
+    "db:seed:m2": "node --experimental-strip-types scripts/seed-m2.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -60,6 +61,7 @@
     "lucide-react": "^0.462.0",
     "next": "^16.2.10",
     "next-intl": "^4.13.2",
+    "pg": "^8.22.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-hook-form": "^7.61.1",
@@ -82,6 +84,7 @@
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.0.0",
     "@types/node": "^22.16.5",
+    "@types/pg": "^8.15.6",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.21",

@@ -1,4 +1,4 @@
-import {Pool} from "@neondatabase/serverless";
+import {Pool} from "pg";
 
 export const M1_PLAN_ROWS = [
   {code: "community", audience: "individual", billingBehavior: "free", stripePriceReference: null, seatAllowance: 1, active: true},
