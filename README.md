@@ -1,6 +1,6 @@
 # WTIA Platform
 
-The WTIA public platform is a bilingual Next.js App Router site for the Hong Kong Wireless Technology Industry Association. M0 ships the server-rendered public route surface in English and Traditional Chinese (`/` and `/zh`); M1 adds self-service membership, Stripe billing, company seats, and an authenticated member portal.
+The WTIA public platform is a bilingual Next.js App Router site for the Hong Kong Wireless Technology Industry Association. M0 ships the server-rendered public route surface in English and Traditional Chinese (`/` and `/zh`); M1 adds self-service membership, Stripe billing, company seats, and an authenticated member portal; M2 adds the staff-only Admin CRM.
 
 ## Requirements
 
@@ -22,13 +22,15 @@ Open `http://localhost:3000/` or `http://localhost:3000/zh`.
 | `npm test` | Run the Vitest unit suite |
 | `npm run test:e2e` | Run Playwright browser tests |
 | `npm run test:e2e -- tests/e2e/m1-acceptance.spec.ts` | Run deterministic M1 acceptance contracts (live mode is credential-gated) |
+| `npm run test:e2e -- tests/e2e/m2-admin-crm.spec.ts` | Run M2 browser acceptance; authenticated tests require isolated Neon/Auth credentials |
 | `npm run audit:strings` | Reject unapproved visible JSX literals |
 | `npm run lint` | Run ESLint |
 | `npm run typecheck` | Run strict TypeScript checking |
 | `npm run build` | Create the production build |
 | `npm run test:lighthouse` | Run Lighthouse CI on `/membership` and `/zh/membership` |
 | `npm run db:migrate` | Apply Drizzle migrations from `drizzle/` using `DATABASE_URL` |
-| `npm run db:seed` / `npm run db:seed:m1` | Idempotently seed the four code-owned M1 membership plans |
+| `npm run db:seed` | Idempotently seed the M1 plans and deterministic M2 CRM demo data |
+| `npm run db:seed:m1` / `npm run db:seed:m2` | Run one seed layer directly |
 
 For a production-style local check:
 
@@ -40,6 +42,8 @@ npm run start
 Set `PLAYWRIGHT_BASE_URL` or `LHCI_BASE_URL` when browser or Lighthouse checks should target an already running Preview/production deployment. Never commit populated environment values.
 
 The M1 acceptance evidence template is [`docs/m1-acceptance.md`](./docs/m1-acceptance.md). The deterministic acceptance contracts run without credentials; the real Neon/Stripe preview flow is enabled only when isolated `DATABASE_URL_TEST` and Stripe test variables are present.
+
+The M2 evidence is [`docs/m2-acceptance.md`](./docs/m2-acceptance.md). For an authenticated demo, migrate and seed an isolated Neon branch, create test-only Neon Auth staff/member accounts mapped to the seeded profiles, set the seven names documented there, and run the focused M2 Playwright file. Storage state is written only below ignored `test-results`; never copy production database or Auth credentials into the test environment.
 
 ## Deployment
 

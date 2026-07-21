@@ -307,7 +307,7 @@ async function writeFixtures(connection: SeedConnection): Promise<void> {
 
   const approvals = [
     {id: M2_UUIDS.approvals[0]!, actionType: "membership.patron_review", payload: {applicationId: M2_UUIDS.applications[9]!, fixture: true}, requestedByProfileId: "m2-staff-01", requestedAt: "2026-07-19T04:00:00.000Z"},
-    {id: M2_UUIDS.approvals[1]!, actionType: "campaign.send", payload: {campaignId: M2_UUIDS.campaigns[0]!, fixture: true}, requestedByProfileId: "m2-exco-01", requestedAt: "2026-07-20T04:00:00.000Z"},
+    {id: M2_UUIDS.approvals[1]!, actionType: "campaign.send", payload: {campaignId: M2_UUIDS.campaigns[0]!, template: "renewal-reminder"}, requestedByProfileId: "m2-exco-01", requestedAt: "2026-07-20T04:00:00.000Z"},
   ];
   for (const row of approvals) await connection.query(`
     INSERT INTO approvals (id,action_type,payload,status,requested_by_profile_id,requested_at,decided_by_profile_id,decided_at)

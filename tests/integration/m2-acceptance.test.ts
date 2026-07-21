@@ -14,11 +14,12 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
 
 import {getMember360} from "@/lib/admin/member-360";
 import {getAdminReport} from "@/lib/admin/reports";
+import {listPendingApprovals} from "@/lib/admin/approvals";
 import {parseSegmentRouteQuery} from "@/lib/admin/segment-schema";
 import {previewSegment} from "@/lib/admin/segments";
 import {listAtRiskMembers} from "@/lib/admin/at-risk";
 import type {AdminActor} from "@/lib/membership/lifecycle";
-import {M2_AT_RISK_PROFILE_IDS, M2_REFERENCE_INSTANT} from "@/scripts/seed-m2";
+import {M2_AT_RISK_PROFILE_IDS, M2_REFERENCE_INSTANT, M2_UUIDS} from "@/scripts/seed-m2";
 
 const execFile = promisify(execFileCallback);
 const externalDatabaseUrl = process.env.DATABASE_URL_TEST?.trim() ?? "";
@@ -39,6 +40,7 @@ const M2_TABLES = [
   "saved_segments",
 ] as const;
 const COUNTED_TABLES = [
+  "membership_plans",
   "profiles",
   "companies",
   "company_members",
@@ -46,6 +48,24 @@ const COUNTED_TABLES = [
   "memberships",
   ...M2_TABLES,
 ] as const;
+const EXPECTED_SEED_COUNTS: Readonly<Record<(typeof COUNTED_TABLES)[number], number>> = {
+  membership_plans: 4,
+  profiles: 30,
+  companies: 12,
+  company_members: 18,
+  membership_applications: 18,
+  memberships: 18,
+  approvals: 2,
+  campaign_recipients: 3,
+  campaigns: 1,
+  email_log: 6,
+  engagement_events: 8,
+  engagement_scores: 30,
+  event_registrations: 9,
+  events: 4,
+  member_notes: 4,
+  saved_segments: 2,
+};
 
 let databaseUrl = externalDatabaseUrl;
 let pool: Pool | undefined;
@@ -127,8 +147,13 @@ describe.skipIf(!enabled)("M2 seed acceptance on isolated PostgreSQL", () => {
       [[...M2_TABLES]],
     );
     expect(tables.rows.map(({table_name}) => table_name)).toEqual([...M2_TABLES]);
-    expect(firstSeedCounts.profiles).toBe(30);
-    expect(firstSeedCounts.companies).toBe(12);
+    expect(firstSeedCounts).toEqual(EXPECTED_SEED_COUNTS);
+    const mutableContracts = await pool.query<{queued_campaigns: number; pending_approvals: number}>(`
+      SELECT
+        (SELECT count(*)::int FROM campaigns WHERE status = 'queued') AS queued_campaigns,
+        (SELECT count(*)::int FROM approvals WHERE status = 'pending') AS pending_approvals
+    `);
+    expect(mutableContracts.rows[0]).toEqual({queued_campaigns: 1, pending_approvals: 2});
     expect(await tableCounts()).toEqual(firstSeedCounts);
   });
 
@@ -151,6 +176,12 @@ describe.skipIf(!enabled)("M2 seed acceptance on isolated PostgreSQL", () => {
     expect(member.emails.length).toBeGreaterThan(0);
     expect(member.events.length).toBeGreaterThan(0);
     expect(member.notes.length).toBeGreaterThan(0);
+  });
+
+  it("seeds one supported pending approval for the browser decision flow", async () => {
+    const pending = await listPendingApprovals(staff);
+    expect(pending).toHaveLength(2);
+    expect(pending.filter(({actionable}) => actionable).map(({id}) => id)).toEqual([M2_UUIDS.approvals[1]]);
   });
 
   it("matches committed hand-calculated Task 10 report values", async () => {

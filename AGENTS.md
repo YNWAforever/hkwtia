@@ -52,6 +52,7 @@ For Stripe test-mode acceptance work, use test-mode values for `STRIPE_TEST_SECR
 - M1 Task 1: server-only runtime configuration, Neon/Drizzle client foundation, and non-placeholder database commands.
 - M1 Task 11: idempotent plan seed, isolated migration-test contract, and Neon/Stripe test-environment documentation.
 - M2 Task 11: deterministic non-PII CRM demo fixtures, combined seed command, and isolated PostgreSQL acceptance assertions.
+- M2 Task 12: real Neon Auth browser boundary, credential-gated Admin CRM Playwright flows, exact fixture-count acceptance, and preview release evidence.
 
 <!-- codebase-memory-mcp:start -->
 # Codebase Knowledge Graph (codebase-memory-mcp)
