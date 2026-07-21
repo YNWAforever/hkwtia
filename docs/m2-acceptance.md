@@ -10,7 +10,7 @@ The authenticated browser suite signs in through `POST /api/auth/sign-in/email`,
 
 | Field | Evidence |
 | --- | --- |
-| Implementation commit | Pending the scoped Task 12 commit; replaced in the post-deploy evidence update |
+| Implementation commit | `efdf1cc` (`test: add M2 Admin CRM acceptance evidence`) |
 | Database acceptance type | Disposable local PostgreSQL 16, migrated twice and combined-seeded twice |
 | Authenticated Neon database | Not configured; `DATABASE_URL_TEST` is absent |
 | Neon Auth test accounts | Not configured; all six auth/server and account credential names are absent locally |
@@ -67,8 +67,26 @@ Current results: focused Vitest 15 files and 89 tests passed; full Vitest exited
 
 ## Preview evidence
 
-Preview deployment ID, URL, source commit, framework, build duration, log scan, and live HTTP checks are pending the post-commit preview deployment. Because Preview currently lacks database and Neon Auth variables, this gate is expected to prove the M0 presentational routes and anonymous admin 404 while recording database-backed event/portal limitations; it must not be promoted or supplied production credentials.
+The Preview-only deployment was created from clean source commit `efdf1cc`; it was not promoted and no production credential was copied into Preview.
+
+| Field | Evidence |
+| --- | --- |
+| Deployment | `dpl_3C3K6Tf3keuUaoDWygUbnbWVQt9P` |
+| URL | `https://hkwtia-mrjl6yjcr-ynwaforevers-projects.vercel.app` |
+| Target and status | Preview; READY |
+| Source commit | `efdf1cc` |
+| Framework | Next.js 16.2.10 |
+| Build | Vercel reported 42 seconds; 81 static-generation items completed |
+| Preview variable names | `NEXT_PUBLIC_SITE_URL` only; values were not read |
+
+Direct unauthenticated HTTP requests were redirected by Vercel Deployment Protection and therefore were not counted as application evidence. `vercel curl` supplied only the platform protection bypass and reached the application without a WTIA session:
+
+- PASS: `/about`, `/membership`, `/zh/about`, and `/zh/membership` each returned HTTP 200 with zero application redirects.
+- FAIL: anonymous `/admin` returned HTTP 500 instead of the required real 404.
+- FAIL: `/portal` returned HTTP 500 instead of redirecting to `/join?next=%2Fportal`.
+
+The bounded deployment-specific error scan found exactly the two requests above. Both errors named missing runtime variables and contained no values or user payloads: `DATABASE_URL`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_STARTUP_PRICE_ID`, `STRIPE_CORPORATE_PRICE_ID`, and `APP_URL`. Verification stopped at this first broken database/auth boundary; database-backed event routes and the eight authenticated M2 flows were not exercised on Preview.
 
 ## Human-owned release gap
 
-M2 is not closed. Create an isolated Neon branch, configure the seven required names with test-only values, create staff/member Neon Auth test accounts mapped to the seeded `m2-staff-01` and a seeded member profile, rerun the isolated migration and seed, then run the eight authenticated Playwright flows. Record only non-secret resource and deployment identifiers here.
+M2 is not closed. Create an isolated Neon branch, configure the seven acceptance names with test-only values, and create staff/member Neon Auth test accounts mapped to the seeded `m2-staff-01` and a seeded member profile. For Preview runtime verification, map only that isolated database to `DATABASE_URL` and add test-only Neon Auth, Stripe, and `APP_URL` values; never copy production credentials. Rerun migration and seed against `DATABASE_URL_TEST`, run the eight authenticated Playwright flows, deploy a fresh Preview, and repeat the anonymous admin 404 and portal redirect checks. Record only non-secret resource and deployment identifiers here.
