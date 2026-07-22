@@ -3,6 +3,7 @@ import "server-only";
 import {z} from "zod";
 
 import type {MemberNoteFormState} from "@/components/admin/member-note-form";
+import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
 import {appendMemberNote} from "@/lib/db/repos/member-notes";
 import type {AdminActor} from "@/lib/membership/lifecycle";
 
@@ -20,6 +21,7 @@ export function createAppendMemberNoteAction({profileId, path, labels, dependenc
       dependencies.revalidate(path);
       return {status: "success", message: labels.success};
     } catch (error) {
+      if (isAuthorizationDenial(error)) throw error;
       if (error instanceof z.ZodError) return {status: "error", message: labels.validation};
       return {status: "error", message: labels.error};
     }

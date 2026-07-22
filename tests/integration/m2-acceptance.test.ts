@@ -13,8 +13,10 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
 });
 
 import {getMember360} from "@/lib/admin/member-360";
+import {searchAdminMembers} from "@/lib/admin/members";
 import {getAdminReport} from "@/lib/admin/reports";
 import {listPendingApprovals} from "@/lib/admin/approvals";
+import {queueCampaign} from "@/lib/admin/campaigns";
 import {parseSegmentRouteQuery} from "@/lib/admin/segment-schema";
 import {previewSegment} from "@/lib/admin/segments";
 import {listAtRiskMembers} from "@/lib/admin/at-risk";
@@ -157,6 +159,46 @@ describe.skipIf(!enabled)("M2 seed acceptance on isolated PostgreSQL", () => {
     expect(await tableCounts()).toEqual(firstSeedCounts);
   });
 
+  it("enforces note replacement SET NULL and indexes renewal windows in PostgreSQL", async () => {
+    if (!pool) throw new Error("acceptance pool is unavailable");
+    const replacementForeignKey = await pool.query<{delete_action: string}>(`
+      SELECT confdeltype AS delete_action
+      FROM pg_constraint
+      WHERE conname = 'member_notes_replaces_note_id_member_notes_id_fk'
+    `);
+    const renewalIndex = await pool.query<{indexname: string}>(`
+      SELECT indexname
+      FROM pg_indexes
+      WHERE schemaname = 'public'
+        AND tablename = 'memberships'
+        AND indexname = 'memberships_billing_period_end_idx'
+    `);
+
+    expect(replacementForeignKey.rows).toEqual([{delete_action: "n"}]);
+    expect(renewalIndex.rows).toEqual([{indexname: "memberships_billing_period_end_idx"}]);
+
+    const replacedNoteId = "50000000-0000-4000-8000-000000000001";
+    const replacementNoteId = "50000000-0000-4000-8000-000000000002";
+    await pool.query(
+      "INSERT INTO member_notes (id,profile_id,author_profile_id,body) VALUES ($1,'m2-risk-01','m2-staff-01','Replacement FK proof')",
+      [replacedNoteId],
+    );
+    try {
+      await pool.query(
+        "INSERT INTO member_notes (id,profile_id,author_profile_id,body,replaces_note_id) VALUES ($1,'m2-risk-01','m2-staff-01','Replacement child proof',$2)",
+        [replacementNoteId, replacedNoteId],
+      );
+      await pool.query("DELETE FROM member_notes WHERE id=$1", [replacedNoteId]);
+      const replacement = await pool.query<{replaces_note_id: string | null}>(
+        "SELECT replaces_note_id::text FROM member_notes WHERE id=$1",
+        [replacementNoteId],
+      );
+      expect(replacement.rows).toEqual([{replaces_note_id: null}]);
+    } finally {
+      await pool.query("DELETE FROM member_notes WHERE id = ANY($1::uuid[])", [[replacementNoteId, replacedNoteId]]);
+    }
+  });
+
   it("returns exactly the engineered canonical segment and production at-risk order", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(M2_REFERENCE_INSTANT);
@@ -167,6 +209,45 @@ describe.skipIf(!enabled)("M2 seed acceptance on isolated PostgreSQL", () => {
 
     const atRisk = await listAtRiskMembers(staff, {asOf: M2_REFERENCE_INSTANT});
     expect(atRisk.map(({profileId}) => profileId)).toEqual(M2_AT_RISK_PROFILE_IDS);
+  });
+
+  it("proves production member search matching, nonmatching, and stable cursor semantics", async () => {
+    const match = await searchAdminMembers(staff, {search: "M2 Risk 02", limit: 10, cursor: null});
+    const miss = await searchAdminMembers(staff, {search: "no-such-m2-member", limit: 10, cursor: null});
+    const first = await searchAdminMembers(staff, {search: "M2", limit: 2, cursor: null});
+    const second = await searchAdminMembers(staff, {search: "M2", limit: 2, cursor: first.nextCursor});
+    const combined = [...first.items, ...second.items].map(({profileId}) => profileId);
+
+    expect(match.items.map(({profileId}) => profileId)).toEqual(["m2-risk-02"]);
+    expect(miss.items).toEqual([]);
+    expect(first.nextCursor).not.toBeNull();
+    expect(combined).toEqual([...new Set(combined)]);
+    expect(combined).toEqual(["m2-exco-01", "m2-member-04", "m2-member-05", "m2-member-06"]);
+  });
+
+  it("correlates suppression to each outer campaign candidate", async () => {
+    if (!pool) throw new Error("acceptance pool is unavailable");
+    const segmentId = "40000000-0000-4000-8000-000000000001";
+    const suppressionId = "40000000-0000-4000-8000-000000000002";
+    const idempotencyKey = "40000000-0000-4000-8000-000000000003";
+    await pool.query("INSERT INTO saved_segments (id,owner_profile_id,name_en,filter_version,filters) VALUES ($1,$2,$3,1,$4::jsonb)", [
+      segmentId, staff.profileId, "Suppression correlation proof", JSON.stringify({profileIds: ["m2-risk-02", "m2-risk-03"], tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null}),
+    ]);
+    await pool.query("INSERT INTO email_log (id,profile_id,template,subject,status) VALUES ($1,'m2-risk-02','suppression-proof','fixture','suppressed')", [suppressionId]);
+    try {
+      const result = await queueCampaign(staff, {segmentId, template: "renewal-reminder", localeStrategy: "profile", idempotencyKey});
+      const recipients = await pool.query<{profile_id: string}>("SELECT profile_id FROM campaign_recipients WHERE campaign_id=$1 ORDER BY profile_id", [result.campaignId]);
+      const audits = await pool.query<{recipient_count: number}>("SELECT (metadata->>'recipientCount')::int AS recipient_count FROM audit_events WHERE action='campaign.queued' AND target_id=$1", [result.campaignId]);
+      expect(result).toMatchObject({recipientCount: 1, disposition: "created"});
+      expect(recipients.rows.map(({profile_id}) => profile_id)).toEqual(["m2-risk-03"]);
+      expect(audits.rows).toEqual([{recipient_count: 1}]);
+    } finally {
+      const campaign = await pool.query<{id: string}>("SELECT id::text FROM campaigns WHERE idempotency_key=$1", [idempotencyKey]);
+      for (const {id} of campaign.rows) await pool.query("DELETE FROM audit_events WHERE action='campaign.queued' AND target_id=$1", [id]);
+      await pool.query("DELETE FROM campaigns WHERE idempotency_key=$1", [idempotencyKey]);
+      await pool.query("DELETE FROM email_log WHERE id=$1", [suppressionId]);
+      await pool.query("DELETE FROM saved_segments WHERE id=$1", [segmentId]);
+    }
   });
 
   it("composes a non-empty production Member 360 fixture", async () => {

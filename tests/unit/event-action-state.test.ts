@@ -30,4 +30,10 @@ describe("safe localized event action states", () => {
     const mutate = vi.fn(async () => ({disposition: "registered" as const}));
     await expect(runEventRegistrationAction({}, form({eventId: "11111111-1111-4111-8111-111111111111"}), {successMessage: "Registered.", errorMessage: "Unable.", mutate})).resolves.toEqual({status: "success", message: "Registered."});
   });
+
+  it.each(["UNAUTHORIZED", "FORBIDDEN"])("rethrows %s from admin event mutations for 404 mapping", async (failure) => {
+    const denied = async () => { throw new Error(failure); };
+    await expect(runEventFormAction({}, form({slug: "event"}), {successMessage: "Saved.", validationMessage: "Invalid.", errorMessage: "Unable.", mutate: denied})).rejects.toThrow(failure);
+    await expect(runCheckInAction({}, form({profileId: "member"}), {successMessage: "Saved.", errorMessage: "Unable.", mutate: denied})).rejects.toThrow(failure);
+  });
 });

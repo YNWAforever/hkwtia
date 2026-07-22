@@ -52,4 +52,14 @@ describe("bound member note action", () => {
     await expect(action(initial, new FormData())).resolves.toEqual({status: "error", message: labels.validation});
     expect(paths).toEqual([]);
   });
+
+  it.each(["UNAUTHORIZED", "FORBIDDEN"])("rethrows %s so the genuine Server Action can map it to 404", async (failure) => {
+    const action = createAppendMemberNoteAction({profileId: "member-1", path: "/en/admin/members/member-1", labels, dependencies: {
+      actor: async () => { throw new Error(failure); },
+      append: async () => "note-1",
+      revalidate: () => undefined,
+    }});
+
+    await expect(action(initial, new FormData())).rejects.toThrow(failure);
+  });
 });

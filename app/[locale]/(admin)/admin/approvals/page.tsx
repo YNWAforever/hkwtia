@@ -1,13 +1,14 @@
 import {getTranslations, setRequestLocale} from "next-intl/server";
-import {notFound} from "next/navigation";
+
 
 import {ApprovalList} from "@/components/admin/approval-list";
 import type {AppLocale} from "@/i18n/routing";
 import {decideApprovalAction} from "@/lib/admin/approval-actions";
 import type {ApprovalActionMessages} from "@/lib/admin/approval-action-core";
 import {listPendingApprovals} from "@/lib/admin/approvals";
-import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
-import {requireAdminActor} from "@/lib/auth/actor";
+import {requireAdminPageActor} from "@/lib/admin/page-auth";
+
+
 
 type Props = Readonly<{params: Promise<{locale: string}>}>;
 
@@ -15,9 +16,7 @@ export default async function ApprovalsPage({params}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  let approvals;
-  try { approvals = await listPendingApprovals(await requireAdminActor()); }
-  catch (error) { if (isAuthorizationDenial(error)) notFound(); throw error; }
+    const approvals = await listPendingApprovals(await requireAdminPageActor());
   const t = await getTranslations({locale, namespace: "Admin.approvals"});
   const messages: ApprovalActionMessages = {success: t("success"), validation: t("validation"), alreadyDecided: t("alreadyDecided"), notFound: t("notFound"), error: t("error")};
   const action = decideApprovalAction.bind(null, `/${locale}/admin/approvals`, messages);

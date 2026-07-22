@@ -4,7 +4,7 @@ import {describe, expect, it} from "vitest";
 
 function actionSource(path: string, actionName: string, nextMarker: string): string {
   const source = readFileSync(path, "utf8");
-  const start = source.indexOf(`async function ${actionName}`);
+  const start = source.indexOf("async function " + actionName);
   const end = source.indexOf(nextMarker, start);
   expect(start).toBeGreaterThanOrEqual(0);
   expect(end).toBeGreaterThan(start);
@@ -12,12 +12,23 @@ function actionSource(path: string, actionName: string, nextMarker: string): str
 }
 
 describe("client-bound event Server Actions", () => {
+  it.each(["createEventAction", "updateEventAction", "checkInEventAttendeeAction"])("keeps %s in the top-level module without capturing a translator", (actionName) => {
+    const source = readFileSync("lib/admin/event-actions.ts", "utf8");
+    expect(source).toContain("export async function " + actionName);
+    expect(source).not.toContain("getTranslations");
+    expect(source).not.toMatch(/\bt\(/);
+  });
+
   it.each([
-    ["admin create", "app/[locale]/(admin)/admin/events-mgmt/page.tsx", "createAction", "\n  const labels"],
-    ["admin update", "app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx", "updateAction", "\n  async function checkInAction"],
-    ["admin check-in", "app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx", "checkInAction", "\n  const labels"],
-    ["member RSVP", "app/[locale]/(member)/portal/events/page.tsx", "registerAction", "\n  return <div"],
-  ])("does not capture the next-intl translator in %s", (_label, path, actionName, nextMarker) => {
-    expect(actionSource(path, actionName, nextMarker)).not.toMatch(/\bt\(/);
+    "app/[locale]/(admin)/admin/events-mgmt/page.tsx",
+    "app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx",
+  ])("binds serializable messages in %s", (path) => {
+    const source = readFileSync(path, "utf8");
+    expect(source).toContain(".bind(null,");
+    expect(source).not.toContain('"use server"');
+  });
+
+  it("does not capture the next-intl translator in member RSVP", () => {
+    expect(actionSource("app/[locale]/(member)/portal/events/page.tsx", "registerAction", "\n  return <div")).not.toMatch(/\bt\(/);
   });
 });

@@ -13,18 +13,21 @@ export async function GET(_request: Request, {params}: Props): Promise<Response>
   if (!segment) return new Response(null, {status: 404});
 
   const first = await segmentsRepository.preview(actor, segment.filters, {limit: 500, cursor: null});
-  await segmentsRepository.auditExport(actor, segment.id, segment.filterVersion, first.total);
+
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       try {
         let page: typeof first | null = first;
         let header = true;
+        let rowCount = 0;
         while (page) {
           controller.enqueue(encoder.encode(encodeMemberCsv(page.items, header)));
+          rowCount += page.items.length;
           header = false;
           page = page.nextCursor ? await segmentsRepository.preview(actor, segment.filters, {limit: 500, cursor: page.nextCursor}) : null;
         }
+        await segmentsRepository.auditExport(actor, segment.id, segment.filterVersion, rowCount);
         controller.close();
       } catch (error) {
         controller.error(error);

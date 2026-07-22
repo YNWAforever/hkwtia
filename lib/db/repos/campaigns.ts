@@ -22,7 +22,7 @@ const campaignRecipientSchema = z.object({
   profileId: z.string().min(1),
   email: z.string().trim().email(),
   locale: z.string().min(1).max(10),
-  variables: z.record(z.string().nullable()),
+  variables: z.record(z.string()),
 }).strict();
 
 type DbExecutor = Pick<Awaited<ReturnType<typeof getDb>>, "select" | "insert" | "execute">;
@@ -79,9 +79,10 @@ async function campaignAudience(store: unknown, filter: SegmentFilterSet): Promi
       LEFT JOIN ${engagementScores} ON ${engagementScores.profileId} = ${profiles.id}
       WHERE ${predicates}
     )
-    SELECT profile_id AS "profileId", display_name AS "displayName", email, locale, consent_marketing AS "consentMarketing", renewal_at AS "renewalAt",
-      EXISTS(SELECT 1 FROM ${emailLog} WHERE ${emailLog.profileId} = profile_id AND ${emailLog.status} = 'suppressed') AS suppressed
-    FROM candidate_rows WHERE row_rank = 1 ORDER BY "profileId"
+    SELECT candidate.profile_id AS "profileId", candidate.display_name AS "displayName", candidate.email, candidate.locale,
+      candidate.consent_marketing AS "consentMarketing", candidate.renewal_at AS "renewalAt",
+      EXISTS(SELECT 1 FROM ${emailLog} WHERE ${emailLog.profileId} = candidate.profile_id AND ${emailLog.status} = 'suppressed') AS suppressed
+    FROM candidate_rows AS candidate WHERE candidate.row_rank = 1 ORDER BY "profileId"
   `);
   return z.array(audienceRowSchema).parse(resultRows(rows)).map(toQueueMember);
 }
@@ -159,7 +160,7 @@ export function createCampaignsRepository(getDatabase: CampaignDbProvider): Camp
       await db.insert(campaignRecipients).values(parsedRecipients.map((recipient) => ({
         campaignId: parsedCampaignId,
         ...recipient,
-        variables: recipient.variables as Record<string, string>,
+        variables: recipient.variables,
       })));
     },
 

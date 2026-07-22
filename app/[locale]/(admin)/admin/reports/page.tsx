@@ -1,12 +1,13 @@
 import {getTranslations, setRequestLocale} from "next-intl/server";
-import {notFound} from "next/navigation";
+
 import {z} from "zod";
 
 import {ReportCards, type ReportCardLabels} from "@/components/admin/report-cards";
 import type {AppLocale} from "@/i18n/routing";
+import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {getAdminReport} from "@/lib/admin/reports";
-import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
-import {requireAdminActor} from "@/lib/auth/actor";
+
+
 
 type Props = Readonly<{params: Promise<{locale: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>}>;
 
@@ -28,9 +29,9 @@ export default async function AdminReportsPage({params, searchParams}: Props) {
   const reportQuery = Object.keys(query).length === 0 ? defaults : query;
   let report = null;
   let invalid = false;
-  try { report = await getAdminReport(await requireAdminActor(), reportQuery); }
+  try { report = await getAdminReport(await requireAdminPageActor(), reportQuery); }
   catch (error) {
-    if (isAuthorizationDenial(error)) notFound();
+
     if (error instanceof z.ZodError) invalid = true; else throw error;
   }
   const from = typeof reportQuery.from === "string" ? reportQuery.from : "";

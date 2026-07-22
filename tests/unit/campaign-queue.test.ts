@@ -303,7 +303,7 @@ describe("campaign queue", () => {
       profileId: "eligible",
       email: "eligible@example.test",
       locale: "en",
-      variables: {displayName: "Eligible", renewalDate: null},
+      variables: {displayName: "Eligible"},
     }]);
   });
 });

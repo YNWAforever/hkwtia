@@ -1,0 +1,2 @@
+ALTER TABLE "member_notes" ADD CONSTRAINT "member_notes_replaces_note_id_member_notes_id_fk" FOREIGN KEY ("replaces_note_id") REFERENCES "public"."member_notes"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "memberships_billing_period_end_idx" ON "memberships" USING btree ("billing_period_end");

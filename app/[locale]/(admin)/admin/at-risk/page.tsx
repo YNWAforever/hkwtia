@@ -3,7 +3,8 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {AtRiskTable} from "@/components/admin/at-risk-table";
 import type {AppLocale} from "@/i18n/routing";
 import {listAtRiskMembers} from "@/lib/admin/at-risk";
-import {requireAdminActor} from "@/lib/auth/actor";
+import {requireAdminPageActor} from "@/lib/admin/page-auth";
+
 
 type Props = Readonly<{params: Promise<{locale: string}>}>;
 
@@ -11,7 +12,7 @@ export default async function AdminAtRiskPage({params}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const actor = await requireAdminActor();
+  const actor = await requireAdminPageActor();
   const t = await getTranslations({locale, namespace: "Admin.atRisk"});
   let members;
   try {

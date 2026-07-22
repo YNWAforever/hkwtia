@@ -1,5 +1,7 @@
 import {z} from "zod";
 
+import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
+
 export type EventActionState = Readonly<{
   status?: "success" | "error";
   message?: string;
@@ -22,6 +24,7 @@ export async function runEventFormAction(_state: EventActionState, formData: For
     await options.mutate(formData);
     return {status: "success", message: options.successMessage};
   } catch (error) {
+    if (isAuthorizationDenial(error)) throw error;
     if (error instanceof z.ZodError) {
       const fieldErrors = Object.fromEntries(error.issues.flatMap((issue) => typeof issue.path[0] === "string" ? [[issue.path[0], options.validationMessage]] : []));
       return {status: "error", message: options.validationMessage, fieldErrors, values};
@@ -34,7 +37,8 @@ export async function runCheckInAction(_state: EventActionState, formData: FormD
   try {
     await options.mutate(formData);
     return {status: "success", message: options.successMessage};
-  } catch {
+  } catch (error) {
+    if (isAuthorizationDenial(error)) throw error;
     return {status: "error", message: options.errorMessage};
   }
 }

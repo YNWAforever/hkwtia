@@ -1,9 +1,12 @@
 import {readFileSync} from "node:fs";
 
+import AxeBuilder from "@axe-core/playwright";
 import {expect, test} from "@playwright/test";
 
 import {M2_UUIDS} from "../../scripts/seed-m2";
 import {missingM2LiveEnvironment, signInForM2} from "../fixtures/m2-auth";
+import {buildM2RuntimeEnvironment} from "../fixtures/m2-runtime-env";
+import {readM2ApprovalFact, resetM2AuthenticatedFixtures} from "../fixtures/m2-reset";
 
 type AcceptanceMessages = Readonly<{
   About: {title: string};
@@ -12,7 +15,7 @@ type AcceptanceMessages = Readonly<{
   Admin: {
     members: {title: string; search: string};
     member360: {engagement: string; noteBody: string; addNote: string; noteSuccess: string};
-    segments: {total: string; queue: string; queued: string; existing: string; recipients: string};
+    segments: {total: string; queue: string; queued: string; existing: string; recipients: string; save: string; saveValidation: string};
     atRisk: {title: string};
     reports: {title: string; numerator: string; denominator: string};
     eventsMgmt: {checkIn: string; checkInSuccess: string};
@@ -26,6 +29,17 @@ const zh = messages("zh-HK");
 const CSV_HEADER = "profileId,displayName,email,companyName,planCode,membershipStatus,renewalAt,score";
 const CAMPAIGN_DRAFT_ID = "30000000-0000-4000-8000-000000000001";
 const ARR = "Annual recurring revenue";
+const ADMIN_ROUTES = [
+  "/admin",
+  "/admin/members",
+  "/admin/members/m2-risk-01",
+  "/admin/segments",
+  "/admin/at-risk",
+  "/admin/events-mgmt",
+  "/admin/events-mgmt/2a000000-0000-4000-8000-000000000001",
+  "/admin/approvals",
+  "/admin/reports",
+] as const;
 const missingLiveEnvironment = missingM2LiveEnvironment();
 const authenticatedSkipReason = `M2 authenticated acceptance requires an isolated database and Neon Auth test accounts; missing: ${missingLiveEnvironment.join(", ")}`;
 
@@ -54,6 +68,11 @@ test.describe("M2 credential-free browser evidence", () => {
 test.describe("M2 authenticated Admin CRM acceptance", () => {
   test.describe.configure({mode: "serial"});
   test.skip(missingLiveEnvironment.length > 0, authenticatedSkipReason);
+  test.beforeAll(async () => {
+    if (missingLiveEnvironment.length === 0) {
+      await resetM2AuthenticatedFixtures(buildM2RuntimeEnvironment(process.env));
+    }
+  });
 
   test("staff searches Member 360 and appends a note through the real auth and database seams", async ({page}) => {
     await signInForM2(page, "staff");
@@ -138,28 +157,52 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
     await expect(page.getByText("event_attended", {exact: false})).toHaveCount(1);
   });
 
-  test("staff records one supported approval decision", async ({page}) => {
+  test("staff records one supported approval decision and persists its audit fact", async ({page}) => {
     await signInForM2(page, "staff");
     await page.goto("/admin/approvals");
     const campaignApproval = page.getByRole("row", {name: /Campaign delivery/});
     await expect(campaignApproval).toBeVisible();
     await campaignApproval.getByRole("button", {name: en.Admin.approvals.approve}).click();
-    await expect(campaignApproval.getByText(en.Admin.approvals.success)).toBeVisible();
+    await expect(campaignApproval).toHaveCount(0);
+    await expect.poll(() => readM2ApprovalFact(buildM2RuntimeEnvironment(process.env), M2_UUIDS.approvals[1]))
+      .toEqual({status: "approved", decidedByProfileId: "m2-staff-01", auditCount: 1});
   });
 
-  test("Traditional Chinese admin routes render localized headings", async ({page}) => {
+  test("representative authenticated admin routes have no serious or critical axe violations", async ({page}) => {
+    await signInForM2(page, "staff");
+    for (const route of ["/admin/members", "/admin/segments", "/admin/reports?from=2026-07-01&to=2026-07-31"]) {
+      await page.goto(route);
+      const results = await new AxeBuilder({page}).analyze();
+      expect(results.violations.filter(({impact}) => impact === "serious" || impact === "critical"), route).toEqual([]);
+    }
+  });
+
+  test("Traditional Chinese admin routes render localized headings and segment recovery state", async ({page}) => {
     await signInForM2(page, "staff");
     await page.goto("/zh/admin/members");
     await expect(page.locator("html")).toHaveAttribute("lang", "zh-HK");
     await expect(page.getByRole("heading", {level: 1, name: zh.Admin.members.title})).toBeVisible();
     await page.goto("/zh/admin/reports?from=2026-07-01&to=2026-07-31");
     await expect(page.getByRole("heading", {level: 1, name: zh.Admin.reports.title})).toBeVisible();
+
+    await page.goto("/zh/admin/segments");
+    await expect(page.getByRole("button", {name: zh.Admin.segments.save})).toBeVisible();
+    await page.locator("#segment-name-en").evaluate((element) => element.removeAttribute("required"));
+    await page.getByRole("button", {name: zh.Admin.segments.save}).click();
+    await expect(page.getByText(zh.Admin.segments.saveValidation)).toBeVisible();
   });
 
-  test("members receive 404 for admin routes", async ({page}) => {
-    await signInForM2(page, "member");
-    const response = await page.goto("/admin/reports");
-    expect(response?.status()).toBe(404);
-    await expect(page.getByRole("heading", {level: 1, name: en.NotFound.title})).toBeVisible();
+  test("anonymous, member, and company-admin identities receive 404 for every admin route", async ({browser}) => {
+    for (const role of [null, "member", "company-admin"] as const) {
+      const context = await browser.newContext();
+      const rolePage = await context.newPage();
+      if (role) await signInForM2(rolePage, role);
+      for (const route of ADMIN_ROUTES) {
+        const response = await rolePage.goto(route);
+        expect(response?.status(), (role ?? "anonymous") + " " + route).toBe(404);
+        await expect(rolePage.getByRole("heading", {level: 1, name: en.NotFound.title})).toBeVisible();
+      }
+      await context.close();
+    }
   });
 });

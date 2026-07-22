@@ -16,7 +16,7 @@ export const queueCampaignSchema = z.object({
 export const campaignDraftSchema = z.string().uuid();
 
 export type QueueCampaignInput = z.infer<typeof queueCampaignSchema>;
-export type CampaignQueueRecipient = Readonly<{profileId: string; email: string; locale: string; variables: Readonly<Record<string, string | null>>}>;
+export type CampaignQueueRecipient = Readonly<{profileId: string; email: string; locale: string; variables: Readonly<Record<string, string>>}>;
 export type CampaignQueueMember = Readonly<{profileId: string; displayName: string; email: string | null; locale: string; consentMarketing: boolean; suppressed: boolean; renewalAt: string | null}>;
 export type CampaignQueueResult = Readonly<{campaignId: string; recipientCount: number; disposition: "created" | "existing"}>;
 export type CampaignQueueDependencies = Readonly<{
@@ -52,7 +52,12 @@ export function isEligibleCampaignEmail(value: string | null): string | null {
 function snapshotRecipient(member: CampaignQueueMember): CampaignQueueRecipient | null {
   const email = isEligibleCampaignEmail(member.email);
   if (!email || !member.consentMarketing || member.suppressed) return null;
-  return {profileId: member.profileId, email, locale: member.locale, variables: {displayName: member.displayName, renewalDate: member.renewalAt}};
+  return {
+    profileId: member.profileId,
+    email,
+    locale: member.locale,
+    variables: {displayName: member.displayName, ...(member.renewalAt ? {renewalDate: member.renewalAt} : {})},
+  };
 }
 
 export async function queueCampaign(actor: Actor, input: unknown, dependencies: CampaignQueueDependencies = campaignsRepository): Promise<CampaignQueueResult> {

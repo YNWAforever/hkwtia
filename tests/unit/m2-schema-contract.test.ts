@@ -11,6 +11,7 @@ import {
   eventRegistrations,
   events,
   memberNotes,
+  memberships,
   profiles,
   savedSegments,
 } from "@/lib/db/schema-core";
@@ -36,5 +37,17 @@ describe("M2 schema contract", () => {
       "saved_segments", "campaigns", "campaign_recipients", "events",
       "event_registrations", "approvals",
     ]);
+  });
+
+  it("models note replacement integrity and the renewal-window index", () => {
+    const noteConfig = getTableConfig(memberNotes);
+    const membershipConfig = getTableConfig(memberships);
+    const replacement = noteConfig.foreignKeys.find((foreignKey) => foreignKey.getName() === "member_notes_replaces_note_id_member_notes_id_fk");
+
+    expect(replacement).toBeDefined();
+    expect(replacement?.reference().columns.map((column) => column.name)).toEqual(["replaces_note_id"]);
+    expect(replacement?.reference().foreignColumns.map((column) => column.name)).toEqual(["id"]);
+    expect(replacement?.onDelete).toBe("set null");
+    expect(membershipConfig.indexes.map((index) => index.config.name)).toContain("memberships_billing_period_end_idx");
   });
 });

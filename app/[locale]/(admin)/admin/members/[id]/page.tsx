@@ -7,7 +7,8 @@ import {MemberNoteForm} from "@/components/admin/member-note-form";
 import type {AppLocale} from "@/i18n/routing";
 import {getMember360, Member360NotFoundError} from "@/lib/admin/member-360";
 import {appendMemberNoteAction} from "@/lib/admin/member-note-actions";
-import {requireAdminActor} from "@/lib/auth/actor";
+import {requireAdminPageActor} from "@/lib/admin/page-auth";
+
 
 const profileIdSchema = z.string().min(1);
 type Props = Readonly<{params: Promise<{locale: string; id: string}>}>;
@@ -20,7 +21,7 @@ export default async function AdminMember360Page({params}: Props) {
   if (!profileId.success) notFound();
   const t = await getTranslations({locale, namespace: "Admin"});
   let view;
-  try { view = await getMember360(await requireAdminActor(), profileId.data); } catch (error) {
+  try { view = await getMember360(await requireAdminPageActor(), profileId.data); } catch (error) {
     if (error instanceof Member360NotFoundError) notFound();
     throw error;
   }

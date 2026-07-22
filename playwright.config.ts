@@ -1,16 +1,10 @@
 import {defineConfig, devices} from '@playwright/test';
 
+import {M2_LIVE_ENV_NAMES, buildM2RuntimeEnvironment} from './tests/fixtures/m2-runtime-env';
+
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
 const port = process.env.PLAYWRIGHT_PORT ?? '3000';
-const liveAcceptanceRequires = [
-  'DATABASE_URL_TEST',
-  'NEON_AUTH_BASE_URL',
-  'NEON_AUTH_COOKIE_SECRET',
-  'M2_TEST_STAFF_EMAIL',
-  'M2_TEST_STAFF_PASSWORD',
-  'M2_TEST_MEMBER_EMAIL',
-  'M2_TEST_MEMBER_PASSWORD'
-];
+const liveAcceptanceRequires = [...M2_LIVE_ENV_NAMES];
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -34,7 +28,7 @@ export default defineConfig({
           url: baseURL,
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,
-          env: {...process.env, DATABASE_URL: process.env.DATABASE_URL_TEST ?? ''}
+          env: buildM2RuntimeEnvironment(process.env)
         }
       })
 });

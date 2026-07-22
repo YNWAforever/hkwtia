@@ -1,4 +1,5 @@
 import {
+  type AnyPgColumn,
   boolean,
   check,
   index,
@@ -197,6 +198,7 @@ export const memberships = pgTable(
       .where(sql`${table.applicationId} IS NOT NULL`),
     index("memberships_owner_idx").on(table.ownerUserId),
     index("memberships_company_idx").on(table.companyId),
+    index("memberships_billing_period_end_idx").on(table.billingPeriodEnd),
   ],
 );
 
@@ -286,7 +288,7 @@ export const memberNotes = pgTable("member_notes", {
   profileId: text("profile_id").notNull().references(() => profiles.id, {onDelete: "cascade"}),
   authorProfileId: text("author_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
   body: text("body").notNull(),
-  replacesNoteId: uuid("replaces_note_id"),
+  replacesNoteId: uuid("replaces_note_id").references((): AnyPgColumn => memberNotes.id, {onDelete: "set null"}),
   createdAt: createdAt("created_at"),
 }, (table) => [index("member_notes_profile_created_idx").on(table.profileId, table.createdAt)]);
 

@@ -1,4 +1,6 @@
+import {SegmentSaveForm} from "@/components/admin/segment-save-form";
 import type {AppLocale} from "@/i18n/routing";
+import type {SegmentSaveActionState} from "@/lib/admin/segment-action-core";
 import type {SegmentFilterSet} from "@/lib/admin/segment-schema";
 import {localizedPath} from "@/lib/urls";
 
@@ -13,6 +15,7 @@ export type SegmentBuilderLabels = Readonly<{
   sector: string;
   lastLoginBeforeDays: string;
   save: string;
+  saving: string;
   nameEn: string;
   nameZh: string;
   corporate: string;
@@ -28,7 +31,7 @@ type Props = Readonly<{
   locale: AppLocale;
   labels: SegmentBuilderLabels;
   filter: SegmentFilterSet;
-  saveAction: (formData: FormData) => Promise<void>;
+  saveAction: (state: SegmentSaveActionState, formData: FormData) => Promise<SegmentSaveActionState>;
 }>;
 
 function value(value: number | null): string {
@@ -49,6 +52,6 @@ export function SegmentBuilder({locale, labels, filter, saveAction}: Props) {
       <label className="space-y-2 text-sm" htmlFor="segment-last-login"><span>{labels.lastLoginBeforeDays}</span><input className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={value(filter.lastLoginBeforeDays)} id="segment-last-login" max="3650" min="0" name="lastLoginBeforeDays" type="number" /></label>
       <div className="flex items-end"><button className="min-h-11 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" type="submit">{labels.preview}</button></div>
     </form>
-    <form action={saveAction} className="grid gap-4 border-t border-border pt-6 sm:grid-cols-2"><input name="filters" type="hidden" value={JSON.stringify(filter)} /><label className="space-y-2 text-sm" htmlFor="segment-name-en"><span>{labels.nameEn}</span><input className="min-h-11 w-full rounded-md border border-input bg-background px-3" id="segment-name-en" name="nameEn" required type="text" /></label><label className="space-y-2 text-sm" htmlFor="segment-name-zh"><span>{labels.nameZh}</span><input className="min-h-11 w-full rounded-md border border-input bg-background px-3" id="segment-name-zh" name="nameZh" type="text" /></label><div className="sm:col-span-2"><button className="min-h-11 rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted" type="submit">{labels.save}</button></div></form>
+    <SegmentSaveForm action={saveAction} filter={filter} labels={{save: labels.save, saving: labels.saving, nameEn: labels.nameEn, nameZh: labels.nameZh}}/>
   </div>;
 }

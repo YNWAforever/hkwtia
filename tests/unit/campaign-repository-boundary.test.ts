@@ -24,7 +24,7 @@ describe("campaign repository resource boundaries", () => {
     await expect(repository.getSavedSegment(adminA, privateStore, "bad-segment")).rejects.toBeInstanceOf(z.ZodError);
     await expect(repository.membersForSegment(adminA, privateStore, {unknown: true} as never)).rejects.toBeInstanceOf(z.ZodError);
     await expect(repository.createCampaign(adminA, privateStore, {...queueInput(segmentA), template: ""})).rejects.toBeInstanceOf(z.ZodError);
-    await expect(repository.insertRecipients(adminA, privateStore, campaignA, [{profileId: "member-1", email: "bad", locale: "en", variables: {displayName: "Member", renewalDate: null}}])).rejects.toBeInstanceOf(z.ZodError);
+    await expect(repository.insertRecipients(adminA, privateStore, campaignA, [{profileId: "member-1", email: "bad", locale: "en", variables: {displayName: "Member"}}])).rejects.toBeInstanceOf(z.ZodError);
     await expect(repository.appendAudit(adminA, privateStore, campaignA, -1)).rejects.toBeInstanceOf(z.ZodError);
   });
 
@@ -63,7 +63,7 @@ describe("campaign repository resource boundaries", () => {
     expect(statements.some(({sql}) => sql.toLowerCase().includes('insert into "campaign_recipients"'))).toBe(false);
 
     statements.length = 0;
-    await expect(repository.insertRecipients(adminB, database, campaignA, [{profileId: "member-1", email: "member@example.test", locale: "en", variables: {displayName: "Member", renewalDate: null}}])).rejects.toThrow();
+    await expect(repository.insertRecipients(adminB, database, campaignA, [{profileId: "member-1", email: "member@example.test", locale: "en", variables: {displayName: "Member"}}])).rejects.toThrow();
     expect(statements.some(({sql}) => sql.toLowerCase().startsWith('insert into "campaign_recipients"'))).toBe(false);
 
     statements.length = 0;

@@ -36,6 +36,13 @@
       "when": 1784397815065,
       "tag": "0005_worried_kang",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784735440899,
+      "tag": "0006_m2_integrity_indexes",
+      "breakpoints": true
     }
   ]
 }
