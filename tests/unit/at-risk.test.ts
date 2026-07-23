@@ -1,35 +1,51 @@
 import {describe, expect, it} from "vitest";
-import {AT_RISK_RENEWAL_DAYS, AT_RISK_SCORE_MAX, classifyAtRisk, listAtRiskMembers, type AtRiskCandidate, type AtRiskReader} from "@/lib/admin/at-risk";
+
+import {AT_RISK_NO_LOGIN_DAYS, AT_RISK_RENEWAL_DAYS, AT_RISK_SCORE_MAX, classifyAtRisk, listAtRiskMembers, type AtRiskCandidate, type AtRiskReader} from "@/lib/admin/at-risk";
 
 const staff = {kind: "staff", userId: "auth-staff", profileId: "staff-1"} as const;
-const asOf = new Date("2026-07-19T00:00:00+08:00");
+const asOf = new Date("2026-07-19T00:00:00.000Z");
+const day = 86_400_000;
+
 function fixture(overrides: Partial<AtRiskCandidate> = {}): AtRiskCandidate {
-  return {profileId: "risk-1", displayName: "Risk One", companyName: "Acme", planCode: "corporate", status: "active", score: 19, trend: -3, renewalAt: new Date(asOf.getTime() + 30 * 86_400_000), ...overrides};
+  return {profileId: "risk-1", displayName: "Risk One", companyName: "Acme", planCode: "corporate", status: "active", score: 19, trend: -3, lastLoginAt: new Date(asOf.getTime() - day), renewalAt: new Date(asOf.getTime() + 30 * day), ...overrides};
 }
 
 describe("at-risk operations", () => {
-  it("selects active or past-due low-score members renewing within 60 days", async () => {
+  it("matches Branch A for a low score and declining trend without renewal or no-login evidence", () => {
+    expect(classifyAtRisk(fixture({renewalAt: null}), asOf)).toMatchObject({atRisk: true, branchA: true, branchB: false});
+  });
+
+  it("matches Branch B at the exact 90-day login and 120-day renewal boundaries", () => {
+    expect(classifyAtRisk(fixture({score: AT_RISK_SCORE_MAX, trend: 0, lastLoginAt: new Date(asOf.getTime() - AT_RISK_NO_LOGIN_DAYS * day), renewalAt: new Date(asOf.getTime() + AT_RISK_RENEWAL_DAYS * day)}), asOf)).toMatchObject({atRisk: true, branchA: false, branchB: true});
+  });
+
+  it("counts missing login history as Branch B no-login evidence", () => {
+    expect(classifyAtRisk(fixture({score: AT_RISK_SCORE_MAX, trend: 0, lastLoginAt: null}), asOf)).toMatchObject({atRisk: true, branchA: false, branchB: true});
+  });
+
+  it("exposes both truthful branch reasons when both conditions match", () => {
+    expect(classifyAtRisk(fixture({lastLoginAt: null}), asOf)).toMatchObject({atRisk: true, branchA: true, branchB: true});
+  });
+
+  it("excludes neither-branch and past-renewal members", () => {
+    expect(classifyAtRisk(fixture({score: AT_RISK_SCORE_MAX, trend: 0}), asOf)).toMatchObject({atRisk: false, branchA: false, branchB: false});
+    expect(classifyAtRisk(fixture({score: AT_RISK_SCORE_MAX, trend: 0, lastLoginAt: null, renewalAt: new Date(asOf.getTime() - 1)}), asOf)).toMatchObject({atRisk: false, branchA: false, branchB: false});
+  });
+
+  it.each(["cancelled", "expired", "pending_review"] as const)("excludes %s memberships regardless of matching evidence", (status) => {
+    expect(classifyAtRisk(fixture({status, lastLoginAt: null}), asOf)).toMatchObject({atRisk: false});
+  });
+
+  it("keeps deterministic renewal-first order and puts Branch A rows without renewal last", async () => {
     const candidates = [
-      fixture({profileId: "risk-3", renewalAt: new Date(asOf.getTime() + 60 * 86_400_000)}),
-      fixture({profileId: "risk-2", status: "past_due", renewalAt: new Date(asOf.getTime() + 30 * 86_400_000)}),
-      fixture({profileId: "risk-1", renewalAt: new Date(asOf.getTime() + 30 * 86_400_000)}),
-      fixture({profileId: "score-boundary", score: AT_RISK_SCORE_MAX}),
-      fixture({profileId: "too-late", renewalAt: new Date(asOf.getTime() + (AT_RISK_RENEWAL_DAYS * 86_400_000) + 1)}),
-      fixture({profileId: "already-renewed", renewalAt: new Date(asOf.getTime() - 1)}),
+      fixture({profileId: "null-z", renewalAt: null}), fixture({profileId: "future", score: AT_RISK_SCORE_MAX, trend: 0, lastLoginAt: null, renewalAt: new Date(asOf.getTime() + day)}),
+      fixture({profileId: "today", score: AT_RISK_SCORE_MAX, trend: 0, lastLoginAt: null, renewalAt: new Date(asOf)}), fixture({profileId: "null-a", renewalAt: null}),
     ];
     const reader: AtRiskReader = {listCandidates: async () => candidates};
     const result = await listAtRiskMembers(staff, {asOf}, reader);
-    expect(result.map((member) => member.profileId)).toEqual(["risk-1", "risk-2", "risk-3"]);
-    expect(result[0]?.evidence).toEqual({scoreBelow: 20, renewalWithinDays: 60, status: "active"});
-  });
-
-  it.each(["cancelled", "expired", "pending_review"] as const)("excludes %s memberships", (status) => {
-    expect(classifyAtRisk(fixture({status}), asOf)).toBe(false);
-  });
-
-  it("uses inclusive instant boundaries for today and exactly 60 days", () => {
-    expect(classifyAtRisk(fixture({renewalAt: new Date(asOf)}), asOf)).toBe(true);
-    expect(classifyAtRisk(fixture({renewalAt: new Date(asOf.getTime() + 60 * 86_400_000)}), asOf)).toBe(true);
+    expect(result.map((member) => member.profileId)).toEqual(["today", "future", "null-a", "null-z"]);
+    expect(result[2]?.renewalAt).toBeNull();
+    expect(result[2]?.evidence).toMatchObject({branchA: true, branchB: false, renewalWithinDays: 120, noLoginWithinDays: 90});
   });
 
   it("rejects non-staff actors before calling the reader", async () => {

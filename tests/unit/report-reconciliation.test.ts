@@ -154,7 +154,7 @@ describe("report reconciliation", () => {
     expect(queries[0]).toMatch(/score[^]*<[^]*20/i);
     expect(paramsSeen.flat()).toContainEqual(from);
     expect(paramsSeen.flat()).toContainEqual(toExclusive);
-    expect(paramsSeen.flat()).toContainEqual(new Date(toExclusive.getTime() + AT_RISK_RENEWAL_DAYS * 86_400_000));
+    expect(paramsSeen.flat()).toContainEqual(new Date(new Date("2026-07-15T00:00:00.000Z").getTime() + AT_RISK_RENEWAL_DAYS * 86_400_000));
   });
 
   it("authorizes before loading the reports database", async () => {

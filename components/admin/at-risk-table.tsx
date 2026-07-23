@@ -42,7 +42,7 @@ export function AtRiskTable({locale, labels, members}: Props) {
         return <tr className="border-b border-border align-top last:border-0" key={member.profileId}>
           <th className="px-4 py-3 font-medium text-foreground" scope="row">{member.displayName}</th>
           <td className="px-4 py-3">{member.companyName ?? labels.unavailable}</td><td className="px-4 py-3">{planLabel(labels, member.planCode)}</td><td className="px-4 py-3">{labels.statuses[member.status]}</td>
-          <td className="px-4 py-3">{member.score}</td><td className="px-4 py-3">{member.trend ?? labels.unavailable}</td><td className="px-4 py-3">{dateFormatter.format(member.renewalAt)}</td>
+          <td className="px-4 py-3">{member.score}</td><td className="px-4 py-3">{member.trend ?? labels.unavailable}</td><td className="px-4 py-3">{member.renewalAt ? dateFormatter.format(member.renewalAt) : labels.unavailable}</td>
           <td className="px-4 py-3"><ul><li>{interpolate(labels.scoreEvidence, "score", member.evidence.scoreBelow)}</li><li>{interpolate(labels.renewalEvidence, "days", member.evidence.renewalWithinDays)}</li></ul></td>
           <td className="px-4 py-3"><div className="flex min-w-32 flex-col items-start gap-2"><Link className="text-primary hover:underline" href={memberHref}>{labels.member360}</Link><Link className="text-primary hover:underline" href={`${memberHref}#member-note-body`}>{labels.addNote}</Link><Link className="text-primary hover:underline" href={campaignHref}>{labels.campaign}</Link></div></td>
         </tr>;

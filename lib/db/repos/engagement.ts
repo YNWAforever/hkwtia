@@ -3,7 +3,7 @@ import "server-only";
 import {desc, eq, sql} from "drizzle-orm";
 import {z} from "zod";
 
-import {AT_RISK_RENEWAL_DAYS, AT_RISK_SCORE_MAX, type AtRiskCandidate} from "@/lib/admin/at-risk";
+import {type AtRiskCandidate} from "@/lib/admin/at-risk";
 import {requireAdmin} from "@/lib/auth/actor";
 import {auditEvents, companies, companyMembers, engagementEvents, engagementScores, memberships, profiles, type EngagementEvent} from "@/lib/db/server-schema";
 import {getDb} from "@/lib/db/repos/common";
@@ -64,8 +64,8 @@ const engagementInputSchema = z.discriminatedUnion("type", [
 const profileIdSchema = z.string().min(1);
 const atRiskRowSchema = z.object({
   profileId: z.string(), displayName: z.string(), companyName: z.string().nullable(), planCode: z.string(),
-  status: z.enum(["active", "past_due"]), score: z.union([z.string(), z.number()]),
-  trend: z.union([z.string(), z.number()]).nullable(), renewalAt: z.coerce.date(),
+  status: z.enum(["active", "past_due"]), score: z.union([z.string(), z.number()]).nullable(),
+  trend: z.union([z.string(), z.number()]).nullable(), lastLoginAt: z.coerce.date().nullable(), renewalAt: z.coerce.date().nullable(),
 });
 
 export type EngagementEventInput = z.input<typeof engagementInputSchema>;
@@ -114,32 +114,29 @@ function resultRows(result: unknown): unknown[] {
 
 async function listAtRiskCandidates(actor: Actor, asOf: Date): Promise<readonly AtRiskCandidate[]> {
   requireAdmin(actor);
-  const renewalBefore = new Date(asOf.getTime() + AT_RISK_RENEWAL_DAYS * 86_400_000);
+  void asOf;
   const db = await getDb();
   const rows = z.array(atRiskRowSchema).parse(resultRows(await db.execute(sql`
     WITH candidate_rows AS (
       SELECT ${profiles.id} AS "profileId", ${profiles.displayName} AS "displayName",
         ${companies.displayName} AS "companyName", ${memberships.planCode} AS "planCode",
         ${memberships.status} AS status, ${engagementScores.score} AS score,
-        ${engagementScores.trend} AS trend, ${memberships.billingPeriodEnd} AS "renewalAt",
-        ROW_NUMBER() OVER (PARTITION BY ${profiles.id} ORDER BY ${memberships.billingPeriodEnd}, ${memberships.id}, ${companies.id} NULLS LAST) AS row_rank
+        ${engagementScores.trend} AS trend, ${profiles.lastLoginAt} AS "lastLoginAt",
+        ${memberships.billingPeriodEnd} AS "renewalAt",
+        ROW_NUMBER() OVER (PARTITION BY ${profiles.id} ORDER BY ${memberships.billingPeriodEnd} NULLS LAST, ${memberships.id}, ${companies.id} NULLS LAST) AS row_rank
       FROM ${profiles}
       LEFT JOIN ${companyMembers} ON ${companyMembers.userId} = ${profiles.id} AND ${companyMembers.revokedAt} IS NULL
       LEFT JOIN ${companies} ON ${companies.id} = ${companyMembers.companyId}
       INNER JOIN ${memberships} ON ${memberships.ownerUserId} = ${profiles.id} OR ${memberships.companyId} = ${companyMembers.companyId}
-      INNER JOIN ${engagementScores} ON ${engagementScores.profileId} = ${profiles.id}
+      LEFT JOIN ${engagementScores} ON ${engagementScores.profileId} = ${profiles.id}
       WHERE ${memberships.status} IN ('active', 'past_due')
-        AND ${engagementScores.score} < ${AT_RISK_SCORE_MAX}
-        AND ${memberships.billingPeriodEnd} >= ${asOf}
-        AND ${memberships.billingPeriodEnd} <= ${renewalBefore}
     )
-    SELECT "profileId", "displayName", "companyName", "planCode", status, score, trend, "renewalAt"
+    SELECT "profileId", "displayName", "companyName", "planCode", status, score, trend, "lastLoginAt", "renewalAt"
     FROM candidate_rows WHERE row_rank = 1
-    ORDER BY "renewalAt", "profileId"
+    ORDER BY "renewalAt" NULLS LAST, "profileId"
   `)));
-  return rows.map((row) => ({...row, score: Number(row.score), trend: row.trend === null ? null : Number(row.trend)}));
+  return rows.map((row) => ({...row, score: row.score === null ? null : Number(row.score), trend: row.trend === null ? null : Number(row.trend)}));
 }
-
 export async function appendEngagementEvent(actor: Actor, input: unknown, executor?: EngagementEventExecutor): Promise<EngagementEvent> {
   requireEngagementActor(actor);
   const parsed = engagementInputSchema.parse(input);

@@ -3,7 +3,7 @@ import "server-only";
 import {sql} from "drizzle-orm";
 import {z} from "zod";
 
-import {AT_RISK_RENEWAL_DAYS, AT_RISK_SCORE_MAX} from "@/lib/admin/at-risk";
+import {AT_RISK_DAY_MS, AT_RISK_NO_LOGIN_DAYS, AT_RISK_RENEWAL_DAYS, AT_RISK_SCORE_MAX, AT_RISK_TREND_MAX} from "@/lib/admin/at-risk";
 import type {RawReportFacts} from "@/lib/admin/report-formulas";
 import type {ReportUtcWindow} from "@/lib/admin/reports";
 import {requireAdmin} from "@/lib/auth/actor";
@@ -56,7 +56,8 @@ async function readFacts(actor: Actor, input: ReportUtcWindow): Promise<RawRepor
   const window = utcWindowSchema.parse(input);
   const db = await getDb();
   const scoreMaximum = sql.raw(String(AT_RISK_SCORE_MAX));
-  const renewalBefore = new Date(window.toExclusive.getTime() + AT_RISK_RENEWAL_DAYS * 86_400_000);
+  const renewalBefore = new Date(window.asOf.getTime() + AT_RISK_RENEWAL_DAYS * AT_RISK_DAY_MS);
+  const noLoginBefore = new Date(window.asOf.getTime() - AT_RISK_NO_LOGIN_DAYS * AT_RISK_DAY_MS);
   const rows = resultRows(await db.execute(sql`
     WITH revenue_groups AS (
       SELECT m.status::text AS status, m.billing_interval::text AS interval,
@@ -95,10 +96,12 @@ async function readFacts(actor: Actor, input: ReportUtcWindow): Promise<RawRepor
       FROM profiles p
       LEFT JOIN company_members cm ON cm.user_id = p.id AND cm.revoked_at IS NULL
       INNER JOIN memberships m ON m.owner_user_id = p.id OR m.company_id = cm.company_id
-      INNER JOIN engagement_scores es ON es.profile_id = p.id
-      WHERE m.status IN ('active', 'past_due') AND es.score < ${scoreMaximum}
-        AND m.billing_period_end >= ${window.toExclusive}
-        AND m.billing_period_end <= ${renewalBefore}
+      LEFT JOIN engagement_scores es ON es.profile_id = p.id
+      WHERE m.status IN ('active', 'past_due') AND (
+        (es.score < ${scoreMaximum} AND es.trend < ${AT_RISK_TREND_MAX})
+        OR ((p.last_login_at IS NULL OR p.last_login_at <= ${noLoginBefore})
+          AND m.billing_period_end >= ${window.asOf} AND m.billing_period_end <= ${renewalBefore})
+      )
     )
     SELECT COALESCE((SELECT JSONB_AGG(JSONB_BUILD_OBJECT(
         'status', status, 'interval', interval, 'annualPriceHkd', "annualPriceHkd",

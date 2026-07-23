@@ -36,7 +36,7 @@ export const M2_PROFILE_ROWS: readonly Readonly<{
     authUserId: `m2-auth-member-${String(index + 1).padStart(2, "0")}`,
     email: `${id}@m2.example.test`,
     role: "member" as const,
-    lastLoginAt: index % 5 === 0 ? null : atOffset(-(index + 1)),
+    lastLoginAt: id === "m2-risk-01" ? atOffset(-1) : id === "m2-risk-02" || id === "m2-risk-03" ? null : index % 5 === 0 ? null : atOffset(-(index + 1)),
     consentMarketing: index % 4 !== 0,
     interests: index % 3 === 0 ? ["ai", "events"] : index % 3 === 1 ? ["launch-pad"] : ["membership"],
     displayName: id.startsWith("m2-risk-") ? `M2 Risk ${id.slice(-2)}` : `M2 Member ${id.slice(-2)}`,
@@ -132,7 +132,7 @@ const membershipRows = applicationProfileIds.map((profileId, index) => ({
 
 const engagementScoreRows = M2_PROFILE_ROWS.map((profile, index) => ({
   profileId: profile.id,
-  score: profile.id === "m2-risk-01" ? 8 : profile.id === "m2-risk-02" ? 14 : profile.id === "m2-risk-03" ? 19 : profile.id === "m2-member-06" ? 10 : 25 + (index % 61),
+  score: profile.id === "m2-risk-01" ? 8 : profile.id === "m2-risk-02" ? 24 : profile.id === "m2-risk-03" ? 19 : profile.id === "m2-member-06" ? 10 : 25 + (index % 61),
   trend: (index % 9) - 4,
 }));
 
