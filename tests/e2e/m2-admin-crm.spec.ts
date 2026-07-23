@@ -32,6 +32,7 @@ const ARR = "Annual recurring revenue";
 const ADMIN_ROUTES = [
   "/admin",
   "/admin/members",
+  "/admin/members?limit=not-a-number",
   "/admin/members/m2-risk-01",
   "/admin/segments",
   "/admin/at-risk",
