@@ -36,7 +36,7 @@ export const M2_PROFILE_ROWS: readonly Readonly<{
     authUserId: `m2-auth-member-${String(index + 1).padStart(2, "0")}`,
     email: `${id}@m2.example.test`,
     role: "member" as const,
-    lastLoginAt: id === "m2-risk-01" ? atOffset(-1) : id === "m2-risk-02" || id === "m2-risk-03" ? null : index % 5 === 0 ? null : atOffset(-(index + 1)),
+    lastLoginAt: id === "m2-risk-01" ? atOffset(-1) : id === "m2-risk-02" || id === "m2-risk-03" ? null : id === "m2-member-06" || id === "m2-member-21" ? atOffset(-(index + 1)) : index % 5 === 0 ? null : atOffset(-(index + 1)),
     consentMarketing: index % 4 !== 0,
     interests: index % 3 === 0 ? ["ai", "events"] : index % 3 === 1 ? ["launch-pad"] : ["membership"],
     displayName: id.startsWith("m2-risk-") ? `M2 Risk ${id.slice(-2)}` : `M2 Member ${id.slice(-2)}`,
@@ -74,7 +74,7 @@ export const M2_COMPANY_ROWS = M2_UUIDS.companies.map((id, index) => ({
 
 const companyOwnerProfileIds = [...M2_AT_RISK_PROFILE_IDS, ...memberProfileIds.slice(3, 12)];
 const extraCompanyProfileIds = memberProfileIds.slice(18, 24);
-const companyMemberRows = [
+export const M2_COMPANY_MEMBER_ROWS = [
   ...companyOwnerProfileIds.map((userId, index) => ({id: M2_UUIDS.companyMembers[index]!, companyId: M2_UUIDS.companies[index]!, userId, role: "owner" as const})),
   ...extraCompanyProfileIds.map((userId, index) => ({id: M2_UUIDS.companyMembers[index + 12]!, companyId: M2_UUIDS.companies[index + 3]!, userId, role: index % 2 === 0 ? "admin" as const : "member" as const})),
 ];
@@ -116,7 +116,7 @@ const applicationRows = applicationProfileIds.map((applicantUserId, index) => {
 });
 
 const renewalOffsets = [15, 30, 45, 120, 140, 90, 180, -30, 75, 120, 210, 150, 365, 200, 20, 120, 365, 240];
-const membershipRows = applicationProfileIds.map((profileId, index) => ({
+export const M2_MEMBERSHIP_ROWS = applicationProfileIds.map((profileId, index) => ({
   id: M2_UUIDS.memberships[index]!,
   applicationId: M2_UUIDS.applications[index]!,
   ownerUserId: index < 12 ? null : profileId,
@@ -230,7 +230,7 @@ async function writeFixtures(connection: SeedConnection): Promise<void> {
       directory_visible=EXCLUDED.directory_visible,updated_at=EXCLUDED.updated_at
   `, [row.id,row.legalName,row.displayName,row.website,row.industry,row.sizeBand,"Deterministic M2 fixture company.",row.directoryVisible,"2026-01-01T00:00:00.000Z"]);
 
-  for (const row of companyMemberRows) await connection.query(`
+  for (const row of M2_COMPANY_MEMBER_ROWS) await connection.query(`
     INSERT INTO company_members (id,company_id,user_id,role,joined_at,revoked_at) VALUES ($1,$2,$3,$4,$5,NULL)
     ON CONFLICT (id) DO UPDATE SET company_id=EXCLUDED.company_id,user_id=EXCLUDED.user_id,role=EXCLUDED.role,joined_at=EXCLUDED.joined_at,revoked_at=NULL
   `, [row.id,row.companyId,row.userId,row.role,"2026-01-02T00:00:00.000Z"]);
@@ -242,7 +242,7 @@ async function writeFixtures(connection: SeedConnection): Promise<void> {
       company_id=EXCLUDED.company_id,current_step=EXCLUDED.current_step,status=EXCLUDED.status,updated_at=EXCLUDED.updated_at
   `, [row.id,row.applicantUserId,row.planCode,row.companyId,row.currentStep,row.status,row.createdAt]);
 
-  for (const row of membershipRows) await connection.query(`
+  for (const row of M2_MEMBERSHIP_ROWS) await connection.query(`
     INSERT INTO memberships (id,owner_user_id,company_id,application_id,plan_code,status,billing_interval,seat_limit,
       stripe_customer_id,stripe_subscription_id,billing_period_start,billing_period_end,cancel_at_period_end,created_at,updated_at)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NULL,NULL,$9,$10,$11,$12,$12)

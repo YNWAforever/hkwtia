@@ -11,7 +11,7 @@ The authenticated browser suite signs in through `POST /api/auth/sign-in/email`,
 | Field | Evidence |
 | --- | --- |
 | Current reconciliation | v1.1 at-risk rule source verification; no new cloud deployment |
-| Database acceptance type | Historical disposable local PostgreSQL 16 proof exists; revised-rule rerun pending |
+| Database acceptance type | Revised isolated disposable PostgreSQL 16 acceptance passed 9/9 tests |
 | Authenticated Neon database | Not configured; `DATABASE_URL_TEST` is absent |
 | Neon Auth test accounts | Not configured; all six auth/server and account credential names are absent locally |
 | Preview environment | Only `NEXT_PUBLIC_SITE_URL` is configured for Preview; database and Neon Auth names are absent |
@@ -27,7 +27,7 @@ Historical pre-reconciliation disposable-PostgreSQL acceptance passed 6/6 tests.
 
 The local deterministic seed and focused source contracts prove that `m2-risk-01` is Branch A only, `m2-risk-02` is Branch B only, and `m2-risk-03` matches both branches. The canonical low-score segment remains exactly those three profiles. The queue service evaluates all eligible memberships, selects the earliest qualifying renewal per profile, and resolves equal renewal dates by persisted membership ID.
 
-The revised production-repository PostgreSQL rerun remains pending an isolated local container or isolated test URL. No current PostgreSQL proof is claimed for the revised rule.
+Revised v1.1 isolated PostgreSQL acceptance passed 9/9 tests after migrating and combined-seeding an isolated Docker PostgreSQL 16 container twice. The production at-risk repository returns exactly `m2-risk-01`, `m2-risk-02`, and `m2-risk-03` in deterministic order; the revised report at-risk count is 3. This current proof covers Branch A only, Branch B only, both branches, and exclusion of all other seeded eligible memberships.
 
 ## Browser evidence
 

@@ -1,9 +1,12 @@
 import {describe, expect, it, vi} from "vitest";
+import {classifyAtRisk, type AtRiskCandidate} from "@/lib/admin/at-risk";
 
 import {
   M2_AT_RISK_PROFILE_IDS,
   M2_COMPANY_ROWS,
   M2_ENGAGEMENT_SCORE_ROWS,
+  M2_MEMBERSHIP_ROWS,
+  M2_COMPANY_MEMBER_ROWS,
   M2_PROFILE_ROWS,
   M2_REFERENCE_INSTANT,
   M2_UUIDS,
@@ -23,6 +26,21 @@ describe("M2 deterministic seed", () => {
     expect(M2_PROFILE_ROWS.find((row) => row.id === "m2-risk-02")?.lastLoginAt).toBeNull();
     expect(M2_PROFILE_ROWS.find((row) => row.id === "m2-risk-03")?.lastLoginAt).toBeNull();
     expect(M2_ENGAGEMENT_SCORE_ROWS.filter((row) => row.profileId.startsWith("m2-risk-")).map(({score, trend}) => ({score, trend}))).toEqual([{score: 8, trend: -4}, {score: 14, trend: 0}, {score: 19, trend: -2}]);
+  });
+  it("classifies every seeded eligible membership at the reference instant as exactly the three engineered at-risk profiles", () => {
+    const profiles = new Map(M2_PROFILE_ROWS.map((profile) => [profile.id, profile]));
+    const scores = new Map(M2_ENGAGEMENT_SCORE_ROWS.map((score) => [score.profileId, score]));
+    const candidates: AtRiskCandidate[] = M2_MEMBERSHIP_ROWS.filter(({status}) => status === "active" || status === "past_due").flatMap((membership) => {
+      const profileIds = membership.ownerUserId ? [membership.ownerUserId] : M2_COMPANY_MEMBER_ROWS.filter(({companyId}) => companyId === membership.companyId).map(({userId}) => userId);
+      return profileIds.map((profileId) => {
+        const profile = profiles.get(profileId)!;
+        const score = scores.get(profileId)!;
+        return {profileId, membershipId: membership.id, displayName: profile.displayName, companyName: null, planCode: membership.planCode, status: membership.status, score: score.score, trend: score.trend, lastLoginAt: profile.lastLoginAt ? new Date(profile.lastLoginAt) : null, renewalAt: membership.billingPeriodEnd ? new Date(membership.billingPeriodEnd) : null};
+      });
+    });
+    const matching = candidates.filter((candidate) => classifyAtRisk(candidate, M2_REFERENCE_INSTANT).atRisk);
+    expect([...new Set(matching.map(({profileId}) => profileId))]).toEqual(M2_AT_RISK_PROFILE_IDS);
+    expect(M2_AT_RISK_PROFILE_IDS.map((profileId) => classifyAtRisk(matching.find((candidate) => candidate.profileId === profileId)!, M2_REFERENCE_INSTANT))).toEqual([{atRisk: true, branchA: true, branchB: false}, {atRisk: true, branchA: false, branchB: true}, {atRisk: true, branchA: true, branchB: true}]);
   });
   it("contains one staff, one exco, and one superadmin", () => {
     expect(M2_PROFILE_ROWS.filter((row) => row.role !== "member").map((row) => row.role).sort())
