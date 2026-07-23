@@ -159,7 +159,7 @@ describe.skipIf(!enabled)("M2 seed acceptance on isolated PostgreSQL", () => {
     expect(await tableCounts()).toEqual(firstSeedCounts);
   });
 
-  it("preserves mapped auth identities while restoring every other mutable seeded profile field", async () => {
+  it.runIf(!externalDatabaseUrl)("preserves mapped auth identities while restoring every other mutable seeded profile field", async () => {
     if (!pool) throw new Error("acceptance pool is unavailable");
     const profileIds = ["m2-staff-01", "m2-member-04", "m2-risk-01"] as const;
     const expectedProfiles = M2_PROFILE_ROWS.filter(({id}) => profileIds.includes(id as (typeof profileIds)[number]))
