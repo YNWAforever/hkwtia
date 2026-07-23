@@ -69,6 +69,20 @@ describe("M2 deterministic seed", () => {
     expect(release).toHaveBeenCalledOnce();
   });
 
+  it("preserves externally mapped auth user ids when deterministic profiles already exist", async () => {
+    const statements: string[] = [];
+    const query = vi.fn(async (text: string) => {
+      statements.push(text);
+      return {rows: []};
+    });
+
+    await seedM2({connect: vi.fn(async () => ({query, release: vi.fn()}))});
+
+    const profileUpsert = statements.find((text) => text.includes("INSERT INTO profiles"));
+    expect(profileUpsert).toBeDefined();
+    expect(profileUpsert).not.toContain("auth_user_id=EXCLUDED.auth_user_id");
+  });
+
   it("rolls back and releases the checked-out connection", async () => {
     const statements: string[] = [];
     const release = vi.fn();

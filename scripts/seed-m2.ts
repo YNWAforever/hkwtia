@@ -216,7 +216,7 @@ async function writeFixtures(connection: SeedConnection): Promise<void> {
   for (const row of M2_PROFILE_ROWS) await connection.query(`
     INSERT INTO profiles (id,auth_user_id,email,role,last_login_at,consent_marketing,interests,display_name,phone,job_title,locale,onboarding_state,directory_visible,created_at,updated_at)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NULL,$9,$10,'complete',$11,$12,$12)
-    ON CONFLICT (id) DO UPDATE SET auth_user_id=EXCLUDED.auth_user_id,email=EXCLUDED.email,role=EXCLUDED.role,
+    ON CONFLICT (id) DO UPDATE SET email=EXCLUDED.email,role=EXCLUDED.role,
       last_login_at=EXCLUDED.last_login_at,consent_marketing=EXCLUDED.consent_marketing,interests=EXCLUDED.interests,
       display_name=EXCLUDED.display_name,job_title=EXCLUDED.job_title,locale=EXCLUDED.locale,
       onboarding_state=EXCLUDED.onboarding_state,directory_visible=EXCLUDED.directory_visible,updated_at=EXCLUDED.updated_at
