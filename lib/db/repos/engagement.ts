@@ -117,22 +117,18 @@ async function listAtRiskCandidates(actor: Actor, asOf: Date): Promise<readonly 
   void asOf;
   const db = await getDb();
   const rows = z.array(atRiskRowSchema).parse(resultRows(await db.execute(sql`
-    WITH candidate_rows AS (
+
       SELECT ${profiles.id} AS "profileId", ${profiles.displayName} AS "displayName",
         ${companies.displayName} AS "companyName", ${memberships.planCode} AS "planCode",
         ${memberships.status} AS status, ${engagementScores.score} AS score,
         ${engagementScores.trend} AS trend, ${profiles.lastLoginAt} AS "lastLoginAt",
-        ${memberships.billingPeriodEnd} AS "renewalAt",
-        ROW_NUMBER() OVER (PARTITION BY ${profiles.id} ORDER BY ${memberships.billingPeriodEnd} NULLS LAST, ${memberships.id}, ${companies.id} NULLS LAST) AS row_rank
+        ${memberships.billingPeriodEnd} AS "renewalAt"
       FROM ${profiles}
       LEFT JOIN ${companyMembers} ON ${companyMembers.userId} = ${profiles.id} AND ${companyMembers.revokedAt} IS NULL
       LEFT JOIN ${companies} ON ${companies.id} = ${companyMembers.companyId}
       INNER JOIN ${memberships} ON ${memberships.ownerUserId} = ${profiles.id} OR ${memberships.companyId} = ${companyMembers.companyId}
       LEFT JOIN ${engagementScores} ON ${engagementScores.profileId} = ${profiles.id}
       WHERE ${memberships.status} IN ('active', 'past_due')
-    )
-    SELECT "profileId", "displayName", "companyName", "planCode", status, score, trend, "lastLoginAt", "renewalAt"
-    FROM candidate_rows WHERE row_rank = 1
     ORDER BY "renewalAt" NULLS LAST, "profileId"
   `)));
   return rows.map((row) => ({...row, score: row.score === null ? null : Number(row.score), trend: row.trend === null ? null : Number(row.trend)}));

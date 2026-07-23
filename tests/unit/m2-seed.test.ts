@@ -3,6 +3,7 @@ import {describe, expect, it, vi} from "vitest";
 import {
   M2_AT_RISK_PROFILE_IDS,
   M2_COMPANY_ROWS,
+  M2_ENGAGEMENT_SCORE_ROWS,
   M2_PROFILE_ROWS,
   M2_REFERENCE_INSTANT,
   M2_UUIDS,
@@ -17,6 +18,12 @@ describe("M2 deterministic seed", () => {
     expect(M2_COMPANY_ROWS).toHaveLength(12);
   });
 
+  it("engineers Branch A only, Branch B only, and both branches without breaking the canonical low-score segment", () => {
+    expect(M2_PROFILE_ROWS.find((row) => row.id === "m2-risk-01")?.lastLoginAt).not.toBeNull();
+    expect(M2_PROFILE_ROWS.find((row) => row.id === "m2-risk-02")?.lastLoginAt).toBeNull();
+    expect(M2_PROFILE_ROWS.find((row) => row.id === "m2-risk-03")?.lastLoginAt).toBeNull();
+    expect(M2_ENGAGEMENT_SCORE_ROWS.filter((row) => row.profileId.startsWith("m2-risk-")).map(({score, trend}) => ({score, trend}))).toEqual([{score: 8, trend: -4}, {score: 14, trend: 0}, {score: 19, trend: -2}]);
+  });
   it("contains one staff, one exco, and one superadmin", () => {
     expect(M2_PROFILE_ROWS.filter((row) => row.role !== "member").map((row) => row.role).sort())
       .toEqual(["exco", "staff", "superadmin"]);

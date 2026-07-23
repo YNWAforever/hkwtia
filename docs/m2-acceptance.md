@@ -10,8 +10,8 @@ The authenticated browser suite signs in through `POST /api/auth/sign-in/email`,
 
 | Field | Evidence |
 | --- | --- |
-| Implementation commit | `efdf1cc` (`test: add M2 Admin CRM acceptance evidence`) |
-| Database acceptance type | Disposable local PostgreSQL 16, migrated twice and combined-seeded twice |
+| Current reconciliation | v1.1 at-risk rule source verification; no new cloud deployment |
+| Database acceptance type | Historical disposable local PostgreSQL 16 proof exists; revised-rule rerun pending |
 | Authenticated Neon database | Not configured; `DATABASE_URL_TEST` is absent |
 | Neon Auth test accounts | Not configured; all six auth/server and account credential names are absent locally |
 | Preview environment | Only `NEXT_PUBLIC_SITE_URL` is configured for Preview; database and Neon Auth names are absent |
@@ -21,7 +21,7 @@ The authenticated suite requires all of `DATABASE_URL_TEST`, `NEON_AUTH_BASE_URL
 
 ## Deterministic database evidence
 
-The gated disposable-PostgreSQL acceptance passed 6/6 tests. It proves:
+Historical pre-reconciliation disposable-PostgreSQL acceptance passed 6/6 tests. The revised-rule source-level proof is local; a revised disposable PostgreSQL rerun remains pending. Historical evidence proves:
 
 - Exact idempotent counts after two seeds: 4 plans, 30 profiles, 12 companies, 18 company members, 18 applications, 18 memberships, 30 engagement scores, 8 engagement events, 4 member notes, 6 email rows, 2 saved segments, 4 events, 9 event registrations, 1 queued campaign, 3 frozen recipients, and 2 pending approvals.
 - One pending approval has the supported, privacy-safe campaign payload required by the real decision UI.
@@ -67,7 +67,7 @@ Current results: focused Vitest 15 files and 89 tests passed; full Vitest exited
 
 ## Preview evidence
 
-The Preview-only deployment was created from clean source commit `efdf1cc`; it was not promoted and no production credential was copied into Preview.
+The historical Preview-only deployment predates this reconciliation; it was not promoted and no production credential was copied into Preview.
 
 | Field | Evidence |
 | --- | --- |

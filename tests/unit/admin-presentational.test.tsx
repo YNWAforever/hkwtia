@@ -13,10 +13,10 @@ describe("admin presentation", () => {
     {locale: "en" as const, corporate: "Corporate", pastDue: "Past due", expectedDate: "Aug 1, 2026"},
     {locale: "zh-HK" as const, corporate: "\u4f01\u696d", pastDue: "\u903e\u671f", expectedDate: "2026\u5e748\u67081\u65e5"},
   ])("localizes at-risk evidence, tier, status, date, and actions for $locale", ({locale, corporate, pastDue, expectedDate}) => {
-    const labels = {caption: "At-risk members", empty: "No at-risk members.", name: "Name", company: "Company", tier: "Tier", status: "Status", score: "Score", trend: "Trend", renewal: "Renewal", evidence: "Evidence", actions: "Actions", unavailable: "Unavailable", scoreEvidence: "Score below {score}", renewalEvidence: "Renewal within {days} days", member360: "Member 360", addNote: "Add note", campaign: "Queue campaign", plans: {community: "Community", startup: "Startup", corporate, patron: "Patron"}, statuses: {active: "Active", past_due: pastDue}};
+    const labels = {caption: "At-risk members", empty: "No at-risk members.", name: "Name", company: "Company", tier: "Tier", status: "Status", score: "Score", trend: "Trend", renewal: "Renewal", evidence: "Evidence", actions: "Actions", unavailable: "Unavailable", branchAEvidence: "Score below 20 and trend below 0", branchBEvidence: "No login for 90 days and renewal within 120 days", member360: "Member 360", addNote: "Add note", campaign: "Queue campaign", plans: {community: "Community", startup: "Startup", corporate, patron: "Patron"}, statuses: {active: "Active", past_due: pastDue}};
     const html = renderToStaticMarkup(<AtRiskTable locale={locale} labels={labels} members={[{profileId: "risk-1", displayName: "Risk One", companyName: "Acme", planCode: "corporate", status: "past_due", score: 19, trend: -3, lastLoginAt: null, renewalAt: new Date("2026-08-01T00:00:00.000Z"), evidence: {atRisk: true, branchA: true, branchB: false, scoreBelow: 20, trendBelow: 0, noLoginWithinDays: 90, renewalWithinDays: 120, status: "past_due"}}]}/>);
-    expect(html).toContain("Score below 20");
-    expect(html).toContain("Renewal within 120 days");
+    expect(html).toContain("Score below 20 and trend below 0");
+    expect(html).not.toContain("No login for 90 days and renewal within 120 days");
     expect(html).toContain(corporate);
     expect(html).toContain(pastDue);
     expect(html).toContain(expectedDate);
@@ -26,9 +26,9 @@ describe("admin presentation", () => {
     expect(html).toContain("/admin/members/risk-1#member-note-body");
     expect(html).toContain("Queue campaign");
     expect(html).toContain("/admin/segments?profileId=risk-1");
-    expect(html).toContain("status=past_due");
-    expect(html).toContain("scoreMax=19");
-    expect(html).toContain("renewalWithinDays=120");
+    expect(html).not.toContain("status=past_due");
+    expect(html).not.toContain("scoreMax=");
+    expect(html).not.toContain("renewalWithinDays=");
   });
 
   it.each([en.Admin, zh.Admin])("renders one page heading, an accessible nav, a table caption, and translated empty state", (labels) => {

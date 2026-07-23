@@ -130,10 +130,10 @@ const membershipRows = applicationProfileIds.map((profileId, index) => ({
   cancelAtPeriodEnd: membershipStatuses[index] === "cancel_at_period_end",
 }));
 
-const engagementScoreRows = M2_PROFILE_ROWS.map((profile, index) => ({
+export const M2_ENGAGEMENT_SCORE_ROWS = M2_PROFILE_ROWS.map((profile, index) => ({
   profileId: profile.id,
-  score: profile.id === "m2-risk-01" ? 8 : profile.id === "m2-risk-02" ? 24 : profile.id === "m2-risk-03" ? 19 : profile.id === "m2-member-06" ? 10 : 25 + (index % 61),
-  trend: (index % 9) - 4,
+  score: profile.id === "m2-risk-01" ? 8 : profile.id === "m2-risk-02" ? 14 : profile.id === "m2-risk-03" ? 19 : profile.id === "m2-member-06" ? 10 : 25 + (index % 61),
+  trend: profile.id === "m2-risk-02" ? 0 : (index % 9) - 4,
 }));
 
 const engagementEventRows = [
@@ -252,7 +252,7 @@ async function writeFixtures(connection: SeedConnection): Promise<void> {
       billing_period_end=EXCLUDED.billing_period_end,cancel_at_period_end=EXCLUDED.cancel_at_period_end,updated_at=EXCLUDED.updated_at
   `, [row.id,row.ownerUserId,row.companyId,row.applicationId,row.planCode,row.status,row.billingInterval,row.seatLimit,row.billingPeriodStart,row.billingPeriodEnd,row.cancelAtPeriodEnd,"2026-01-03T00:00:00.000Z"]);
 
-  for (const row of engagementScoreRows) await connection.query(`
+  for (const row of M2_ENGAGEMENT_SCORE_ROWS) await connection.query(`
     INSERT INTO engagement_scores (profile_id,score,trend,computed_at) VALUES ($1,$2,$3,$4)
     ON CONFLICT (profile_id) DO UPDATE SET score=EXCLUDED.score,trend=EXCLUDED.trend,computed_at=EXCLUDED.computed_at
   `, [row.profileId,row.score,row.trend,M2_REFERENCE_INSTANT.toISOString()]);

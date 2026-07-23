@@ -48,6 +48,12 @@ describe("at-risk operations", () => {
     expect(result[2]?.evidence).toMatchObject({branchA: true, branchB: false, renewalWithinDays: 120, noLoginWithinDays: 90});
   });
 
+  it("deduplicates multiple memberships after classification and retains the qualifying membership", async () => {
+    const candidates = [fixture({profileId: "multi", score: AT_RISK_SCORE_MAX, trend: 0, lastLoginAt: new Date(asOf.getTime() - day), renewalAt: new Date(asOf.getTime() + day)}), fixture({profileId: "multi", score: AT_RISK_SCORE_MAX, trend: 0, lastLoginAt: null, renewalAt: new Date(asOf.getTime() + 2 * day)})];
+    const result = await listAtRiskMembers(staff, {asOf}, {listCandidates: async () => candidates});
+    expect(result.map((member) => member.profileId)).toEqual(["multi"]);
+    expect(result[0]?.renewalAt).toEqual(new Date(asOf.getTime() + 2 * day));
+  });
   it("rejects non-staff actors before calling the reader", async () => {
     let called = false;
     const reader: AtRiskReader = {listCandidates: async () => { called = true; return []; }};

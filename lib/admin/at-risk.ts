@@ -56,8 +56,9 @@ export async function listAtRiskMembers(actor: Actor, input: unknown, reader: At
   requireAdmin(actor);
   const {asOf} = optionsSchema.parse(input);
   const candidates = await reader.listCandidates(actor, {asOf});
-  return candidates.map((member) => ({member, classification: classifyAtRisk(member, asOf)}))
+  const matching = candidates.map((member) => ({member, classification: classifyAtRisk(member, asOf)}))
     .filter((entry): entry is Readonly<{member: AtRiskCandidate & {status: "active" | "past_due"}; classification: AtRiskClassification}> => entry.classification.atRisk)
-    .map(({member, classification}) => ({...member, evidence: {...classification, scoreBelow: AT_RISK_SCORE_MAX, trendBelow: AT_RISK_TREND_MAX, noLoginWithinDays: AT_RISK_NO_LOGIN_DAYS, renewalWithinDays: AT_RISK_RENEWAL_DAYS, status: member.status} as AtRiskEvidence}))
-    .sort((left, right) => (left.renewalAt?.getTime() ?? Number.POSITIVE_INFINITY) - (right.renewalAt?.getTime() ?? Number.POSITIVE_INFINITY) || left.profileId.localeCompare(right.profileId));
+    .sort((left, right) => (left.member.renewalAt?.getTime() ?? Number.POSITIVE_INFINITY) - (right.member.renewalAt?.getTime() ?? Number.POSITIVE_INFINITY) || left.member.profileId.localeCompare(right.member.profileId));
+  return matching.filter(({member}, index) => matching.findIndex((entry) => entry.member.profileId === member.profileId) === index)
+    .map(({member, classification}) => ({...member, evidence: {...classification, scoreBelow: AT_RISK_SCORE_MAX, trendBelow: AT_RISK_TREND_MAX, noLoginWithinDays: AT_RISK_NO_LOGIN_DAYS, renewalWithinDays: AT_RISK_RENEWAL_DAYS, status: member.status} as AtRiskEvidence}));
 }
