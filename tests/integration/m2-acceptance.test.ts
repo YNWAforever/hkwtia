@@ -21,7 +21,7 @@ import {parseSegmentRouteQuery} from "@/lib/admin/segment-schema";
 import {previewSegment} from "@/lib/admin/segments";
 import {listAtRiskMembers} from "@/lib/admin/at-risk";
 import type {AdminActor} from "@/lib/membership/lifecycle";
-import {M2_AT_RISK_PROFILE_IDS, M2_REFERENCE_INSTANT, M2_UUIDS} from "@/scripts/seed-m2";
+import {M2_AT_RISK_PROFILE_IDS, M2_PROFILE_ROWS, M2_REFERENCE_INSTANT, M2_UUIDS} from "@/scripts/seed-m2";
 
 const execFile = promisify(execFileCallback);
 const externalDatabaseUrl = process.env.DATABASE_URL_TEST?.trim() ?? "";
@@ -157,6 +157,67 @@ describe.skipIf(!enabled)("M2 seed acceptance on isolated PostgreSQL", () => {
     `);
     expect(mutableContracts.rows[0]).toEqual({queued_campaigns: 1, pending_approvals: 2});
     expect(await tableCounts()).toEqual(firstSeedCounts);
+  });
+
+  it("preserves mapped auth identities while restoring every other mutable seeded profile field", async () => {
+    if (!pool) throw new Error("acceptance pool is unavailable");
+    const profileIds = ["m2-staff-01", "m2-member-04", "m2-risk-01"] as const;
+    const expectedProfiles = M2_PROFILE_ROWS.filter(({id}) => profileIds.includes(id as (typeof profileIds)[number]))
+      .sort((left, right) => left.id.localeCompare(right.id));
+    const fresh = await pool.query<{id: string; auth_user_id: string}>(
+      "SELECT id, auth_user_id FROM profiles WHERE id = ANY($1::text[]) ORDER BY id",
+      [[...profileIds]],
+    );
+    expect(fresh.rows).toEqual(expectedProfiles.map(({id, authUserId}) => ({id, auth_user_id: authUserId})));
+
+    const mappedAuthIds = new Map<string, string>(profileIds.map((id, index) => [id, `preview-auth-user-${index + 1}`]));
+    for (const id of profileIds) {
+      await pool.query(
+        `UPDATE profiles SET auth_user_id=$2,email=$3,role='superadmin',last_login_at='2030-01-01T00:00:00.000Z',
+          consent_marketing=true,interests=ARRAY['dirty'],display_name='Dirty profile',phone='+852 0000 0000',
+          job_title='Dirty role',locale='zh-HK',onboarding_state='profile',directory_visible=false,
+          updated_at='2030-01-01T00:00:00.000Z' WHERE id=$1`,
+        [id, mappedAuthIds.get(id), `${id}@dirty.invalid`],
+      );
+    }
+
+    const reseedOutput = await runDatabaseCommand("db:seed");
+    expect(reseedOutput).not.toContain(databaseUrl);
+    const reseeded = await pool.query<{
+      id: string;
+      auth_user_id: string;
+      email: string;
+      role: string;
+      last_login_at: Date | null;
+      consent_marketing: boolean;
+      interests: string[];
+      display_name: string;
+      phone: string | null;
+      job_title: string | null;
+      locale: string;
+      onboarding_state: string;
+      directory_visible: boolean;
+      updated_at: Date;
+    }>(`SELECT id,auth_user_id,email,role,last_login_at,consent_marketing,interests,display_name,phone,
+      job_title,locale,onboarding_state,directory_visible,updated_at
+      FROM profiles WHERE id = ANY($1::text[]) ORDER BY id`, [[...profileIds]]);
+
+    expect(reseeded.rows).toEqual(expectedProfiles.map((profile) => ({
+      id: profile.id,
+      auth_user_id: mappedAuthIds.get(profile.id),
+      email: profile.email,
+      role: profile.role,
+      last_login_at: profile.lastLoginAt ? new Date(profile.lastLoginAt) : null,
+      consent_marketing: profile.consentMarketing,
+      interests: [...profile.interests],
+      display_name: profile.displayName,
+      phone: null,
+      job_title: "M2 Fixture Role",
+      locale: profile.locale,
+      onboarding_state: "complete",
+      directory_visible: profile.role === "member",
+      updated_at: new Date("2026-01-01T00:00:00.000Z"),
+    })));
   });
 
   it("enforces note replacement SET NULL and indexes renewal windows in PostgreSQL", async () => {
