@@ -13,5 +13,7 @@ describe("at-risk repository boundary", () => {
     expect(source).not.toContain("memberships.billingPeriodEnd} >= ${asOf}");
     expect(source).not.toContain("memberships.billingPeriodEnd} <= ${renewalBefore}");
     expect(source).not.toContain("ROW_NUMBER() OVER");
+    expect(source).toContain('${memberships.id} AS "membershipId"');
+    expect(source).toContain('ORDER BY "renewalAt" NULLS LAST, "profileId", "membershipId"');
   });
 });

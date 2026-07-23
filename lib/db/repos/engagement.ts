@@ -63,7 +63,7 @@ const engagementInputSchema = z.discriminatedUnion("type", [
 });
 const profileIdSchema = z.string().min(1);
 const atRiskRowSchema = z.object({
-  profileId: z.string(), displayName: z.string(), companyName: z.string().nullable(), planCode: z.string(),
+  profileId: z.string(), membershipId: z.string(), displayName: z.string(), companyName: z.string().nullable(), planCode: z.string(),
   status: z.enum(["active", "past_due"]), score: z.union([z.string(), z.number()]).nullable(),
   trend: z.union([z.string(), z.number()]).nullable(), lastLoginAt: z.coerce.date().nullable(), renewalAt: z.coerce.date().nullable(),
 });
@@ -118,7 +118,7 @@ async function listAtRiskCandidates(actor: Actor, asOf: Date): Promise<readonly 
   const db = await getDb();
   const rows = z.array(atRiskRowSchema).parse(resultRows(await db.execute(sql`
 
-      SELECT ${profiles.id} AS "profileId", ${profiles.displayName} AS "displayName",
+      SELECT ${profiles.id} AS "profileId", ${memberships.id} AS "membershipId", ${profiles.displayName} AS "displayName",
         ${companies.displayName} AS "companyName", ${memberships.planCode} AS "planCode",
         ${memberships.status} AS status, ${engagementScores.score} AS score,
         ${engagementScores.trend} AS trend, ${profiles.lastLoginAt} AS "lastLoginAt",
@@ -129,7 +129,7 @@ async function listAtRiskCandidates(actor: Actor, asOf: Date): Promise<readonly 
       INNER JOIN ${memberships} ON ${memberships.ownerUserId} = ${profiles.id} OR ${memberships.companyId} = ${companyMembers.companyId}
       LEFT JOIN ${engagementScores} ON ${engagementScores.profileId} = ${profiles.id}
       WHERE ${memberships.status} IN ('active', 'past_due')
-    ORDER BY "renewalAt" NULLS LAST, "profileId"
+    ORDER BY "renewalAt" NULLS LAST, "profileId", "membershipId"
   `)));
   return rows.map((row) => ({...row, score: row.score === null ? null : Number(row.score), trend: row.trend === null ? null : Number(row.trend)}));
 }

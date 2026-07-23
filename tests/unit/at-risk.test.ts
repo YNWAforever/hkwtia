@@ -7,7 +7,7 @@ const asOf = new Date("2026-07-19T00:00:00.000Z");
 const day = 86_400_000;
 
 function fixture(overrides: Partial<AtRiskCandidate> = {}): AtRiskCandidate {
-  return {profileId: "risk-1", displayName: "Risk One", companyName: "Acme", planCode: "corporate", status: "active", score: 19, trend: -3, lastLoginAt: new Date(asOf.getTime() - day), renewalAt: new Date(asOf.getTime() + 30 * day), ...overrides};
+  return {profileId: "risk-1", displayName: "Risk One", companyName: "Acme", planCode: "corporate", membershipId: "membership-risk-1", status: "active", score: 19, trend: -3, lastLoginAt: new Date(asOf.getTime() - day), renewalAt: new Date(asOf.getTime() + 30 * day), ...overrides};
 }
 
 describe("at-risk operations", () => {
@@ -53,6 +53,16 @@ describe("at-risk operations", () => {
     const result = await listAtRiskMembers(staff, {asOf}, {listCandidates: async () => candidates});
     expect(result.map((member) => member.profileId)).toEqual(["multi"]);
     expect(result[0]?.renewalAt).toEqual(new Date(asOf.getTime() + 2 * day));
+  });
+  it("selects the same equal-renewal membership representation regardless of input order", async () => {
+    const shared = {profileId: "same-day", renewalAt: new Date(asOf.getTime() + day), lastLoginAt: null, score: AT_RISK_SCORE_MAX, trend: 0};
+    const first = fixture({...shared, membershipId: "membership-b", planCode: "startup", companyName: "Beta"});
+    const second = fixture({...shared, membershipId: "membership-a", planCode: "corporate", companyName: "Alpha"});
+    const reader = (candidates: readonly AtRiskCandidate[]): AtRiskReader => ({listCandidates: async () => candidates});
+    const forward = await listAtRiskMembers(staff, {asOf}, reader([first, second]));
+    const reversed = await listAtRiskMembers(staff, {asOf}, reader([second, first]));
+    expect(forward.map(({membershipId, planCode, companyName}) => ({membershipId, planCode, companyName}))).toEqual([{membershipId: "membership-a", planCode: "corporate", companyName: "Alpha"}]);
+    expect(reversed).toEqual(forward);
   });
   it("rejects non-staff actors before calling the reader", async () => {
     let called = false;

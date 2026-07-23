@@ -21,14 +21,13 @@ The authenticated suite requires all of `DATABASE_URL_TEST`, `NEON_AUTH_BASE_URL
 
 ## Deterministic database evidence
 
-Historical pre-reconciliation disposable-PostgreSQL acceptance passed 6/6 tests. The revised-rule source-level proof is local; a revised disposable PostgreSQL rerun remains pending. Historical evidence proves:
+Historical pre-reconciliation disposable-PostgreSQL acceptance passed 6/6 tests. It proves historical idempotent fixture counts, Member 360 composition, report aggregates, and fixture-domain safety only; it does not prove the revised v1.1 at-risk rule.
 
-- Exact idempotent counts after two seeds: 4 plans, 30 profiles, 12 companies, 18 company members, 18 applications, 18 memberships, 30 engagement scores, 8 engagement events, 4 member notes, 6 email rows, 2 saved segments, 4 events, 9 event registrations, 1 queued campaign, 3 frozen recipients, and 2 pending approvals.
-- One pending approval has the supported, privacy-safe campaign payload required by the real decision UI.
-- The production at-risk repository returns exactly `m2-risk-01`, `m2-risk-02`, and `m2-risk-03`: Branch A only, Branch B only, and both branches respectively, using score < 20 and trend < 0 OR no login for 90 days and renewal within 120 days.
-- Production Member 360 composition returns membership, engagement, email, event, and note history.
-- July 2026 report reconciliation is exactly ARR HKD 87,600; MRR HKD 7,300; renewal 2/4 (50%); first-year renewal 1/2 (50%); funnel 5/4/4/1; attendance 3/6 (50%); at-risk 3.
-- Profile and campaign-recipient addresses use only the non-personal `.example.test` fixture domain.
+### Revised v1.1 local deterministic proof
+
+The local deterministic seed and focused source contracts prove that `m2-risk-01` is Branch A only, `m2-risk-02` is Branch B only, and `m2-risk-03` matches both branches. The canonical low-score segment remains exactly those three profiles. The queue service evaluates all eligible memberships, selects the earliest qualifying renewal per profile, and resolves equal renewal dates by persisted membership ID.
+
+The revised production-repository PostgreSQL rerun remains pending an isolated local container or isolated test URL. No current PostgreSQL proof is claimed for the revised rule.
 
 ## Browser evidence
 
