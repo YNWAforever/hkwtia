@@ -86,7 +86,7 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
     await page.goto("/admin/members/m2-risk-01");
     await expect(page.getByRole("heading", {level: 1, name: "M2 Risk 01"})).toBeVisible();
     await expect(page.getByRole("heading", {level: 2, name: en.Admin.member360.engagement})).toBeVisible();
-    await page.getByLabel(en.Admin.member360.noteBody).fill("M2 acceptance follow-up");
+    await page.getByRole("textbox", {name: en.Admin.member360.noteBody, exact: true}).fill("M2 acceptance follow-up");
     await page.getByRole("button", {name: en.Admin.member360.addNote}).click();
     await expect(page.getByText(en.Admin.member360.noteSuccess)).toBeVisible();
     await expect(page.getByText("M2 acceptance follow-up", {exact: true})).toBeVisible();
@@ -116,9 +116,9 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
 
     const segment = page.getByRole("listitem").filter({hasText: "M2 engineered at-risk"});
     await segment.getByRole("button", {name: en.Admin.segments.queue}).click();
-    await expect(segment.getByText(`${en.Admin.segments.queued}: 3 ${en.Admin.segments.recipients}`, {exact: true})).toBeVisible();
+    await expect(segment.getByText(`${en.Admin.segments.queued}: 2 ${en.Admin.segments.recipients}`, {exact: true})).toBeVisible();
     await segment.getByRole("button", {name: en.Admin.segments.queue}).click();
-    await expect(segment.getByText(`${en.Admin.segments.existing}: 3 ${en.Admin.segments.recipients}`, {exact: true})).toBeVisible();
+    await expect(segment.getByText(`${en.Admin.segments.existing}: 2 ${en.Admin.segments.recipients}`, {exact: true})).toBeVisible();
   });
 
   test("the operational at-risk queue contains exactly the three engineered members in order", async ({page}) => {
@@ -190,7 +190,7 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
     await expect(page.getByRole("button", {name: zh.Admin.segments.save})).toBeVisible();
     await page.locator("#segment-name-en").evaluate((element) => element.removeAttribute("required"));
     await page.getByRole("button", {name: zh.Admin.segments.save}).click();
-    await expect(page.getByText(zh.Admin.segments.saveValidation)).toBeVisible();
+    await expect(page.locator('p[role="alert"]')).toHaveText(zh.Admin.segments.saveValidation);
   });
 
   test("anonymous, member, and company-admin identities receive 404 for every admin route", async ({browser}) => {

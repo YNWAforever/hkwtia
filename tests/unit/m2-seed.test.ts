@@ -20,6 +20,10 @@ describe("M2 deterministic seed", () => {
     expect(M2_PROFILE_ROWS).toHaveLength(30);
     expect(M2_COMPANY_ROWS).toHaveLength(12);
   });
+  it("keeps exactly two consented recipients in the canonical at-risk campaign audience", () => {
+    expect(M2_PROFILE_ROWS.filter((row) => M2_AT_RISK_PROFILE_IDS.includes(row.id as typeof M2_AT_RISK_PROFILE_IDS[number]) && row.consentMarketing).map(({id}) => id))
+      .toEqual(["m2-risk-02", "m2-risk-03"]);
+  });
 
   it("engineers Branch A only, Branch B only, and both branches without breaking the canonical low-score segment", () => {
     expect(M2_PROFILE_ROWS.find((row) => row.id === "m2-risk-01")?.lastLoginAt).not.toBeNull();

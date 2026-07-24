@@ -16,8 +16,10 @@ export async function signInForM2(page: Page, role: TestRole): Promise<void> {
   if (!email || !password) throw new Error(prefix + "_EMAIL and " + prefix + "_PASSWORD are required");
 
   const callbackURL = role === "staff" ? "/admin" : "/portal";
+  await page.goto("/");
   const response = await page.request.post("/api/auth/sign-in/email", {
     data: {email, password, callbackURL},
+    headers: {Origin: new URL(page.url()).origin},
   });
   expect(response.ok()).toBe(true);
 

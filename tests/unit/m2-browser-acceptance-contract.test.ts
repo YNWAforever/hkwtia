@@ -18,6 +18,8 @@ describe("M2 authenticated browser release contract", () => {
     const source = read("tests/fixtures/m2-auth.ts");
     const runtime = read("tests/fixtures/m2-runtime-env.ts");
     expect(source).toContain('page.request.post("/api/auth/sign-in/email"');
+    expect(source).toContain('await page.goto("/")');
+    expect(source).toContain("headers: {Origin: new URL(page.url()).origin}");
     expect(source).toContain("M2_TEST_STAFF");
     expect(source).toContain("M2_TEST_MEMBER");
     expect(runtime).toContain("M2_TEST_STAFF_EMAIL");
@@ -51,6 +53,14 @@ describe("M2 authenticated browser release contract", () => {
     const spec = read("tests/e2e/m2-admin-crm.spec.ts");
     for (const evidence of ["M2 Risk 01", "Content-Type", "event_attended", "ARR", "/zh/admin", "404", "AxeBuilder", "company-admin"])
       expect(spec).toContain(evidence);
+    expect(spec).toContain('getByRole("textbox", {name: en.Admin.member360.noteBody, exact: true})');
+    expect(spec).toContain("locator('p[role=\"alert\"]')");
+  });
+
+  it("casts approval audit target ids across the text and UUID boundary", () => {
+    const reset = read("tests/fixtures/m2-reset.ts");
+    expect(reset).toContain("target_id=$1::text");
+    expect(reset).toContain("FROM approvals WHERE id=$2::uuid");
   });
 
   it("documents credential names without populating values", () => {

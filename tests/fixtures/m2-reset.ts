@@ -82,9 +82,9 @@ export async function readM2ApprovalFact(environment: ResetEnvironment, approval
   try {
     const result = await pool.query<{status: string; decided_by_profile_id: string | null; audit_count: string}>(
       "SELECT status, decided_by_profile_id, " +
-      "(SELECT count(*)::text FROM audit_events WHERE action='approval.approved' AND target_type='approval' AND target_id=$1) AS audit_count " +
-      "FROM approvals WHERE id=$1",
-      [approvalId],
+      "(SELECT count(*)::text FROM audit_events WHERE action='approval.approved' AND target_type='approval' AND target_id=$1::text) AS audit_count " +
+      "FROM approvals WHERE id=$2::uuid",
+      [approvalId, approvalId],
     );
     const row = result.rows[0];
     if (!row) throw new Error("M2_APPROVAL_FACT_NOT_FOUND");
