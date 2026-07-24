@@ -1,0 +1,1 @@
+// Vitest shim for the Next.js server-only boundary.

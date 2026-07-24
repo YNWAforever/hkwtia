@@ -1,0 +1,2 @@
+ALTER TABLE "billing_attempts" ADD COLUMN "recovery_request_id" text;--> statement-breakpoint
+CREATE UNIQUE INDEX "billing_attempts_recovery_request_unique" ON "billing_attempts" USING btree ("membership_id","recovery_request_id") WHERE "billing_attempts"."recovery_request_id" IS NOT NULL;

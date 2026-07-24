@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784025581243,
+      "tag": "0001_m1_membership",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784050216154,
+      "tag": "0002_rich_lester",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784129955098,
+      "tag": "0003_confused_lifeguard",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784137820774,
+      "tag": "0004_outgoing_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1784397815065,
+      "tag": "0005_worried_kang",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784735440899,
+      "tag": "0006_m2_integrity_indexes",
+      "breakpoints": true
+    }
+  ]
+}

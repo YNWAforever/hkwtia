@@ -159,6 +159,7 @@
                        "tiersTitle":  "Membership tiers",
                        "tiersIntro":  "Annual membership is shown first. Monthly options are available only for Individual and Startup.",
                        "comingSoon":  "Self-service joining arrives in M1. Contact WTIA for current applications.",
+                       "joinAction":  "Choose this plan",
                        "benefits":  {
                                         "network":  "Community and networking access",
                                         "programs":  "Programme participation",
@@ -218,6 +219,71 @@
                                          }
                                }
                    },
+    "Join":  {
+                 "backToMembership":  "Back to membership",
+                 "title":  "Join WTIA",
+                 "authDescription":  "Enter your email and we will send a secure sign-in link that returns you to this application.",
+                 "magicLinkSent":  "Check your inbox for your secure sign-in link. It will return you to this application.",
+                 "sendMagicLink":  "Send secure sign-in link",
+                 "sending":  "Sending...",
+                 "saving":  "Saving...",
+                 "continue":  "Continue",
+                 "submitApplication":  "Submit application",
+                 "invalidPlanTitle":  "Choose a membership plan",
+                 "invalidPlanDescription":  "This membership plan is unavailable. Return to the membership page to choose one of the current plans.",
+                 "profileTitle":  "Tell us about yourself",
+                 "profileDescription":  "Your profile helps WTIA support your membership and keep your application moving.",
+                 "companyTitle":  "Confirm your company",
+                 "companyDescription":  "Tell us about your company. We will create its WTIA profile and make you the initial owner.",
+                 "steps":  {
+                               "plan":  "Choose plan",
+                               "auth":  "Sign in",
+                               "profile":  "Your profile",
+                               "company":  "Company details"
+                           },
+                 "plans":  {
+                               "community":  "Community",
+                               "startup":  "Startup",
+                               "corporate":  "Corporate",
+                               "patron":  "Patron"
+                           },
+                 "fields":  {
+                                "email":  "Email address",
+                                "displayName":  "Display name",
+                                "phone":  "Phone (optional)",
+                                "jobTitle":  "Job title (optional)",
+                                "companyId":  "WTIA company ID",
+                                "legalName":  "Legal company name",
+                                "companyDisplayName":  "Public company name",
+                                "website":  "Website (optional)",
+                                "industry":  "Industry (optional)",
+                                "sizeBand":  "Company size (optional)",
+                                "description":  "Company description (optional)"
+                            },
+                 "errors":  {
+                                "required":  "Complete this required field.",
+                                "email":  "Enter a valid email address.",
+                                "auth":  "We could not send the sign-in link. Please try again.",
+                                "save":  "We could not save your application. Please try again.",
+                                "company":  "Use a company that you are allowed to manage.",
+                                "profile":  "Complete your profile before submitting company details.",
+                                "companyNotAllowed":  "This plan does not accept company details."
+                            },
+                 "status":  {
+                                "complete":  {
+                                                 "title":  "Welcome to WTIA",
+                                                 "description":  "Your Community membership is active. Your member portal will be available in the next step of M1."
+                                             },
+                                "checkout":  {
+                                                 "title":  "Application saved",
+                                                 "description":  "Your paid membership is ready for secure checkout. Payment setup arrives in the next M1 task."
+                                             },
+                                "review":  {
+                                               "title":  "Application under review",
+                                               "description":  "WTIA will review your Patron application. No payment has been requested."
+                                           }
+                            }
+             },
     "programs":  {
                      "cpai":  {
                                   "title":  "CPAI",
@@ -317,5 +383,106 @@
     "title": "Something went wrong",
     "description": "We could not load this page. Try again.",
     "retry": "Try again"
-  }
-}
+  },
+  "Portal": {
+    "navigation": "Member portal navigation", "dashboard": "Dashboard", "profile": "My profile", "company": "Company", "signOut": "Sign out",
+    "dashboardTitle": "Your WTIA dashboard", "welcome": "Welcome back, {name}.", "membershipStatus": "Membership status", "membershipPlan": "{plan} membership", "plans": {"community": "Community", "startup": "Startup", "corporate": "Corporate", "patron": "Patron"},
+    "onboarding": "Onboarding progress", "onboardingProgress": "{completed} of {total} steps complete", "nextAction": "Next action",
+    "actions": {"complete-profile": "Complete your profile", "complete-company": "Complete company details", "none": "You are all set"},
+    "status": {
+      "active": {"label": "Active", "title": "Your membership is active", "description": "You have access to WTIA member benefits and services."},
+      "past_due": {"label": "Past due", "title": "Payment needs attention", "description": "Update your billing details to keep your membership active."},
+      "cancel_at_period_end": {"label": "Ending soon", "title": "Membership ending soon", "description": "Your membership remains available until the current period ends."},
+      "pending_payment": {"label": "Payment pending", "title": "Payment is pending", "description": "Complete payment to activate your WTIA membership."},
+      "pending_review": {"label": "Under review", "title": "Application under review", "description": "WTIA will contact you when your application has been reviewed."}
+    },
+    "profileTitle": "My profile", "profileDescription": "Keep your personal details and directory preference up to date.",
+    "companyTitle": "Company details", "companyDescription": "Owners and admins can update details for their company.", "companyEmpty": "Your current membership does not include a company profile.",
+    "save": "Save changes", "fields": {"displayName": "Display name", "phone": "Phone", "jobTitle": "Job title", "website": "Website", "legalName": "Legal name", "industry": "Industry", "sizeBand": "Company size", "description": "Description", "directoryVisible": "Show this profile in the WTIA directory"},
+    "readOnly": "Only company owners and admins can edit these details.",
+    "directory": {"title":"Member directory","description":"Find WTIA members who opted into the directory.","search":"Search members","empty":"No opted-in members found.","next":"Next page","previous":"Previous page","company":"Company","industry":"Industry","sizeBand":"Company size","markets":"Markets"},
+    "events": {"title":"Member events","description":"Upcoming WTIA events for members.","empty":"No upcoming events are available.","date":"Date","venue":"Venue","register":"Register","registering":"Registering...","registerSuccess":"Registration confirmed.","registerError":"We could not register you for this event. Please try again."},
+    "documents": {"title":"Documents and receipts","description":"Access approved WTIA resources and your billing receipts.","empty":"No documents are available yet.","receipt":"Receipt","open":"Open receipt","resource":"Resource"},
+    "billing": {"title":"Billing","description":"Manage your membership billing and payment recovery.","manage":"Manage billing","recover":"Continue payment","empty":"No billing actions are available.","error":"We could not open billing right now."},
+    "seats": {"title": "Company seats", "description": "Invite and manage the people who represent your company at WTIA.", "empty": "No company seats are available yet.", "members": "Members", "pending": "Pending invitations", "capacity": "{used} of {limit} seats reserved", "email": "Email address", "role": "Role", "invite": "Invite member", "inviting": "Sending invitation...", "revoke": "Revoke access", "inviteRevoke": "Cancel invitation", "changeRole": "Change role", "owner": "Owner", "admin": "Admin", "member": "Member", "noPending": "No pending invitations.", "errors": {"generic": "We could not update company seats. Please try again."}}
+  },
+  "Admin": {"brand": "WTIA", "title": "Staff workspace", "description": "Manage WTIA member operations from a protected staff-only workspace.", "navigation": {"label": "Staff administration navigation", "segments": {
+    "eyebrow": "Member segments",
+    "title": "Member segments",
+    "description": "Preview a precise member audience, save it for later, and export the exact same result.",
+    "filters": "Filters",
+    "preview": "Preview",
+    "tier": "Membership tier",
+    "status": "Membership status",
+    "scoreMin": "Minimum score",
+    "scoreMax": "Maximum score",
+    "renewalWithinDays": "Renewal within days",
+    "sector": "Sector",
+    "lastLoginBeforeDays": "Last login before days",
+    "save": "Save segment",
+    "saving": "Saving...",
+    "saveSuccess": "Segment saved.",
+    "saveValidation": "Check the highlighted segment fields.",
+    "saveError": "We could not save this segment. Please try again.",
+    "nameEn": "Name (English)",
+    "nameZh": "Name (Traditional Chinese)",
+    "corporate": "Corporate",
+    "startup": "Startup",
+    "community": "Community",
+    "patron": "Patron",
+    "active": "Active",
+    "pastDue": "Past due",
+    "pendingReview": "Pending review",
+    "caption": "Matching members",
+    "total": "Members",
+    "empty": "No matching members.",
+    "name": "Name",
+    "email": "Email",
+    "company": "Company",
+    "plan": "Plan",
+    "renewal": "Renewal",
+    "score": "Score",
+    "unavailable": "Not available",
+    "saved": "Saved segments",
+    "export": "Export CSV"
+  },
+  "members": "Members", "segments": "Segments", "atRisk": "At risk", "events": "Events", "approvals": "Approvals", "reports": "Reports"}, "members": {"title": "Members", "description": "Search member profiles, companies, memberships, and engagement scores.", "search": "Search members", "caption": "WTIA member list", "empty": "No members match this search.", "name": "Name", "email": "Email", "company": "Company", "plan": "Plan", "status": "Status", "renewal": "Renewal", "score": "Score", "next": "Next page", "previous": "Previous page", "unavailable": "Not available"}, "segments": {
+    "eyebrow": "Member segments",
+    "title": "Member segments",
+    "description": "Preview a precise member audience, save it for later, and export the exact same result.",
+    "filters": "Filters",
+    "preview": "Preview",
+    "tier": "Membership tier",
+    "status": "Membership status",
+    "scoreMin": "Minimum score",
+    "scoreMax": "Maximum score",
+    "renewalWithinDays": "Renewal within days",
+    "sector": "Sector",
+    "lastLoginBeforeDays": "Last login before days",
+    "save": "Save segment",
+    "saving": "Saving...",
+    "saveSuccess": "Segment saved.",
+    "saveValidation": "Check the highlighted segment fields.",
+    "saveError": "We could not save this segment. Please try again.",
+    "nameEn": "Name (English)",
+    "nameZh": "Name (Traditional Chinese)",
+    "corporate": "Corporate",
+    "startup": "Startup",
+    "community": "Community",
+    "patron": "Patron",
+    "active": "Active",
+    "pastDue": "Past due",
+    "pendingReview": "Pending review",
+    "caption": "Matching members",
+    "total": "Members",
+    "empty": "No matching members.",
+    "name": "Name",
+    "email": "Email",
+    "company": "Company",
+    "plan": "Plan",
+    "renewal": "Renewal",
+    "score": "Score",
+    "unavailable": "Not available",
+    "saved": "Saved segments",
+    "export": "Export CSV", "queue": "Queue campaign", "template": "Template", "templateRenewal": "Renewal reminder", "templateUpdate": "Member update", "queued": "Campaign queued", "existing": "Existing campaign", "recipients": "recipients", "newDraft": "Start new campaign", "error": "We could not queue this campaign. Please try again."
+  }, "atRisk": {"eyebrow": "At-risk operations", "title": "At-risk renewal queue", "description": "Prioritize members with a score below 20 and declining trend, or no login for 90 days with renewal within 120 days.", "caption": "At-risk members", "empty": "No members currently meet the at-risk rule.", "error": "We could not load the at-risk queue. Please try again.", "name": "Name", "company": "Company", "tier": "Tier", "status": "Status", "score": "Score", "trend": "Trend", "renewal": "Renewal", "evidence": "Evidence", "actions": "Actions", "unavailable": "Not available", "scoreEvidence": "Score below {score}", "renewalEvidence": "Renewal within {days} days", "branchAEvidence": "Score below 20 and trend below 0", "branchBEvidence": "No login for 90 days and renewal within 120 days", "member360": "Member 360", "addNote": "Add note", "campaign": "Queue campaign", "plans": {"community": "Community", "startup": "Startup", "corporate": "Corporate", "patron": "Patron"}, "statuses": {"active": "Active", "pastDue": "Past due"}}, "eventsMgmt": {"eyebrow":"Event operations","title":"Event management","description":"Create, publish, and manage event attendance.","existing":"Events","empty":"No events are available.","slug":"Slug","titleEn":"English title","titleZh":"Chinese title","descriptionEn":"English description","descriptionZh":"Chinese description","startsAt":"Starts at","endsAt":"Ends at","venue":"Venue","capacity":"Capacity","memberOnly":"Members only","published":"Published","create":"Create event","save":"Save event","attendees":"Event attendees","name":"Name","email":"Email","status":"Status","checkedIn":"Checked in","checkIn":"Check in","unavailable":"Not available","saving":"Saving...","createSuccess":"Event created.","updateSuccess":"Event saved.","validation":"Check the highlighted event fields.","error":"We could not save this event. Please try again.","checkingIn":"Checking in...","checkInSuccess":"Attendee checked in.","checkInError":"We could not check in this attendee. Please try again.","statuses":{"registered":"Registered","waitlist":"Waitlisted","cancelled":"Cancelled","attended":"Attended","noShow":"No show"}}, "approvals": {"eyebrow":"Approval queue","title":"Pending approvals","description":"Review trusted application requests and record one decision without executing the payload.","caption":"Pending approval requests","empty":"No approvals are waiting for a decision.","actionType":"Action type","requestedAt":"Requested","summary":"Safe summary","actions":"Decision","approve":"Approve","reject":"Reject","deciding":"Saving...","unavailable":"Not available","success":"Decision saved.","validation":"This approval decision is invalid.","alreadyDecided":"This request has already been decided.","notFound":"This approval is no longer available.","error":"We could not save this decision. Please try again.","actionTypes":{"campaignSend":"Campaign delivery","eventPublish":"Event publication","membershipUpdate":"Membership update"},"summaryFields":{"campaignId":"Campaign","template":"Template","eventId":"Event","slug":"Slug","membershipId":"Membership","field":"Field"}}, "reports": {"eyebrow":"Management reporting","title":"Membership operations report","description":"Review reconciled membership, revenue, funnel, attendance, and at-risk facts for a Hong Kong reporting period.","formLabel":"Report period","from":"From","to":"To","apply":"Apply","validation":"Choose a valid reporting period with the end date on or after the start date.","cardsLabel":"Reconciled membership metrics","period":"{from} – {to} ({timezone})","arr":"Annual recurring revenue","arrDescription":"Annualized value of active recurring memberships.","mrr":"Monthly recurring revenue","mrrDescription":"Annual recurring revenue divided across twelve months.","renewal":"Renewal rate","renewalDescription":"Distinct memberships paid among memberships with a renewal outcome in the period.","firstYearRenewal":"First-year renewal","firstYearRenewalDescription":"Distinct first-renewal memberships paid among first-renewal outcomes in the period.","funnel":"Join funnel","funnelDescription":"Applications started in the period and their furthest completed milestones.","started":"Started","profileCompleted":"Profile completed","checkoutOrReview":"Checkout or review","activated":"Activated","attendance":"Attendance","attendanceDescription":"Attended registrations among non-cancelled registrations for events completed in the period.","atRisk":"At-risk members","atRiskDescription":"Members matching the operational low-engagement and renewal-window rule at period end.","numerator":"Numerator","denominator":"Denominator","unavailable":"Not available"}, "member360": {"description": "Review the complete member record and staff-only operational history.", "profile": "Profile", "companies": "Companies", "membership": "Membership", "engagement": "Engagement", "emails": "Email history", "events": "Event registrations", "notes": "Staff notes", "empty": "No records are available.", "name": "Name", "email": "Email", "phone": "Phone", "role": "Role", "plan": "Plan", "status": "Status", "renewal": "Renewal", "score": "Score", "trend": "Trend", "company": "Company", "companyRole": "Company role", "event": "Event", "occurredAt": "Occurred", "subject": "Subject", "emailStatus": "Email status", "noteAuthor": "Author", "noteCreatedAt": "Created", "stripeCustomer": "Stripe customer", "stripeSubscription": "Stripe subscription", "addNote": "Add staff note", "noteBody": "Note", "saving": "Saving...", "noteSuccess": "Staff note saved.", "noteValidation": "Enter a note of up to 4,000 characters.", "noteError": "We could not save the staff note. Please try again."}}}
