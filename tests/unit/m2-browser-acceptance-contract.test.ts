@@ -33,8 +33,11 @@ describe("M2 authenticated browser release contract", () => {
     const runtime = read("tests/fixtures/m2-runtime-env.ts");
     expect(config).toContain("releaseGate: 'M2'");
     expect(config).toContain("M2_LIVE_ENV_NAMES");
+    expect(config).toContain("expect: {timeout: 20_000}");
+    expect(config).toContain("timeout: 180_000");
     for (const name of [
       "DATABASE_URL_TEST",
+      "M2_TEST_NEON_HOST",
       "NEON_AUTH_BASE_URL",
       "NEON_AUTH_COOKIE_SECRET",
       "STRIPE_TEST_SECRET_KEY",
@@ -55,6 +58,13 @@ describe("M2 authenticated browser release contract", () => {
       expect(spec).toContain(evidence);
     expect(spec).toContain('getByRole("textbox", {name: en.Admin.member360.noteBody, exact: true})');
     expect(spec).toContain("locator('p[role=\"alert\"]')");
+    expect(spec.match(/`\/api\/admin\/segments\/\$\{M2_UUIDS\.segments\[0\]\}\/export`/g)).toHaveLength(2);
+    expect(spec).toContain('(role ?? "anonymous") + " segment export API"');
+    expect(spec).toContain("VERCEL_SHARE_TOKEN");
+    expect(runtime).not.toContain("VERCEL_SHARE_TOKEN");
+    expect(spec.match(/toBeVisible\(\{timeout: 20_000\}\)/g)).toHaveLength(2);
+    expect(spec).toContain('hostname.endsWith(".vercel.app")');
+    expect(config).toContain("process.env.VERCEL_SHARE_TOKEN ? 'off' : 'on-first-retry'");
   });
 
   it("casts approval audit target ids across the text and UUID boundary", () => {

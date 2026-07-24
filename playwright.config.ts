@@ -14,10 +14,12 @@ export default defineConfig({
   },
   forbidOnly: Boolean(process.env.CI),
   fullyParallel: false,
+  expect: {timeout: 20_000},
+  timeout: 180_000,
   workers: 1,
   use: {
     baseURL,
-    trace: 'on-first-retry'
+    trace: process.env.VERCEL_SHARE_TOKEN ? 'off' : 'on-first-retry'
   },
   projects: [{name: 'chromium', use: {...devices['Desktop Chrome']}}],
   ...(process.env.PLAYWRIGHT_BASE_URL

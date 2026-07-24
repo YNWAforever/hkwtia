@@ -20,8 +20,8 @@ const requiredRuntimeMappings = [
 
 describe('M2 preview environment documentation contract', () => {
   it('lists every M2 live environment name and its runtime mappings', () => {
-    expect(M2_LIVE_ENV_NAMES).toHaveLength(14);
-    expect(acceptanceDocument).toContain('all fourteen M2 preview environment names');
+    expect(M2_LIVE_ENV_NAMES).toHaveLength(16);
+    expect(acceptanceDocument).toContain('all sixteen M2 preview environment names');
 
     for (const environmentName of M2_LIVE_ENV_NAMES) {
       expect(acceptanceDocument).toContain(`\`${environmentName}\``);
@@ -32,9 +32,9 @@ describe('M2 preview environment documentation contract', () => {
     }
   });
 
-  it('instructs operators to configure all fourteen test-only preview names', () => {
+  it('instructs operators to configure all sixteen test-only preview names', () => {
     expect(acceptanceDocument).toContain(
-      'configure all fourteen acceptance names with test-only values'
+      'configure all sixteen acceptance names with test-only values'
     );
   });
 });

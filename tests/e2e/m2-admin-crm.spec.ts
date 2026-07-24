@@ -1,7 +1,7 @@
 import {readFileSync} from "node:fs";
 
 import AxeBuilder from "@axe-core/playwright";
-import {expect, test} from "@playwright/test";
+import {expect, test, type Page} from "@playwright/test";
 
 import {M2_UUIDS} from "../../scripts/seed-m2";
 import {missingM2LiveEnvironment, signInForM2} from "../fixtures/m2-auth";
@@ -43,6 +43,21 @@ const ADMIN_ROUTES = [
 ] as const;
 const missingLiveEnvironment = missingM2LiveEnvironment();
 const authenticatedSkipReason = `M2 authenticated acceptance requires an isolated database and Neon Auth test accounts; missing: ${missingLiveEnvironment.join(", ")}`;
+
+async function enterProtectedPreview(page: Page): Promise<void> {
+  const shareToken = process.env.VERCEL_SHARE_TOKEN?.trim();
+  const baseURL = process.env.PLAYWRIGHT_BASE_URL?.trim();
+  if (!shareToken || !baseURL) return;
+
+  const shareUrl = new URL(baseURL);
+  if (shareUrl.protocol !== "https:" || !shareUrl.hostname.endsWith(".vercel.app")) {
+    throw new Error("VERCEL_SHARE_TOKEN_REQUIRES_HTTPS_VERCEL_PREVIEW");
+  }
+  shareUrl.searchParams.set("_vercel_share", shareToken);
+  await page.goto(shareUrl.href);
+}
+
+test.beforeEach(async ({page}) => enterProtectedPreview(page));
 
 test.describe("M2 credential-free browser evidence", () => {
   test("anonymous admin requests receive a real 404", async ({page}) => {
@@ -116,9 +131,9 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
 
     const segment = page.getByRole("listitem").filter({hasText: "M2 engineered at-risk"});
     await segment.getByRole("button", {name: en.Admin.segments.queue}).click();
-    await expect(segment.getByText(`${en.Admin.segments.queued}: 2 ${en.Admin.segments.recipients}`, {exact: true})).toBeVisible();
+    await expect(segment.getByText(`${en.Admin.segments.queued}: 2 ${en.Admin.segments.recipients}`, {exact: true})).toBeVisible({timeout: 20_000});
     await segment.getByRole("button", {name: en.Admin.segments.queue}).click();
-    await expect(segment.getByText(`${en.Admin.segments.existing}: 2 ${en.Admin.segments.recipients}`, {exact: true})).toBeVisible();
+    await expect(segment.getByText(`${en.Admin.segments.existing}: 2 ${en.Admin.segments.recipients}`, {exact: true})).toBeVisible({timeout: 20_000});
   });
 
   test("the operational at-risk queue contains exactly the three engineered members in order", async ({page}) => {
@@ -197,12 +212,16 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
     for (const role of [null, "member", "company-admin"] as const) {
       const context = await browser.newContext();
       const rolePage = await context.newPage();
+      await enterProtectedPreview(rolePage);
       if (role) await signInForM2(rolePage, role);
       for (const route of ADMIN_ROUTES) {
         const response = await rolePage.goto(route);
         expect(response?.status(), (role ?? "anonymous") + " " + route).toBe(404);
         await expect(rolePage.getByRole("heading", {level: 1, name: en.NotFound.title})).toBeVisible();
       }
+      const exportResponse = await rolePage.request.get(`/api/admin/segments/${M2_UUIDS.segments[0]}/export`);
+      expect(exportResponse.status(), (role ?? "anonymous") + " segment export API").toBe(404);
+
       await context.close();
     }
   });

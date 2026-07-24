@@ -5,7 +5,7 @@ import {M2_LIVE_ENV_NAMES, buildM2RuntimeEnvironment, missingM2LiveEnvironment} 
 describe("M2 live runtime environment", () => {
   it("gates every test credential needed by database, auth, Stripe, company-admin, and app URL seams", () => {
     expect(M2_LIVE_ENV_NAMES).toEqual([
-      "DATABASE_URL_TEST", "NEON_AUTH_BASE_URL", "NEON_AUTH_COOKIE_SECRET",
+      "DATABASE_URL_TEST", "M2_TEST_NEON_PROJECT_ID", "M2_TEST_NEON_HOST", "NEON_AUTH_BASE_URL", "NEON_AUTH_COOKIE_SECRET",
       "STRIPE_TEST_SECRET_KEY", "STRIPE_TEST_WEBHOOK_SECRET", "STRIPE_TEST_STARTUP_PRICE_ID", "STRIPE_TEST_CORPORATE_PRICE_ID",
       "APP_URL", "M2_TEST_STAFF_EMAIL", "M2_TEST_STAFF_PASSWORD", "M2_TEST_MEMBER_EMAIL", "M2_TEST_MEMBER_PASSWORD",
       "M2_TEST_COMPANY_ADMIN_EMAIL", "M2_TEST_COMPANY_ADMIN_PASSWORD",

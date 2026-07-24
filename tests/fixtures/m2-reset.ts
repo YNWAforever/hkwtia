@@ -14,10 +14,32 @@ type ResetDependencies = Readonly<{
 
 type ResetEnvironment = NodeJS.ProcessEnv | Readonly<Record<string, string | undefined>>;
 
+function requireAllowlistedNeonProject(environment: ResetEnvironment, databaseUrl: string): void {
+  let hostname: string;
+  try {
+    hostname = new URL(databaseUrl).hostname.toLowerCase();
+    if (!hostname.endsWith(".neon.tech")) return;
+  } catch {
+    return;
+  }
+
+  const configuredProjectId = environment.NEON_PROJECT_ID?.trim();
+  const allowlistedProjectId = environment.M2_TEST_NEON_PROJECT_ID?.trim();
+  if (!configuredProjectId || !allowlistedProjectId || configuredProjectId !== allowlistedProjectId) {
+    throw new Error("M2_RESET_REQUIRES_ISOLATED_NEON_PROJECT");
+  }
+
+  const allowlistedHost = environment.M2_TEST_NEON_HOST?.trim().toLowerCase();
+  if (!allowlistedHost?.endsWith(".neon.tech") || hostname !== allowlistedHost) {
+    throw new Error("M2_RESET_REQUIRES_ISOLATED_NEON_ENDPOINT");
+  }
+}
+
 function isolatedDatabaseUrl(environment: ResetEnvironment): string | null {
   const testUrl = environment.DATABASE_URL_TEST;
   if (!testUrl?.trim()) return null;
   if (environment.DATABASE_URL !== testUrl) throw new Error("M2_RESET_REQUIRES_ISOLATED_DATABASE");
+  requireAllowlistedNeonProject(environment, testUrl);
   return testUrl;
 }
 
