@@ -1,6 +1,6 @@
 # M3 Automations Design
 
-**Status:** Approved in conversation on 2026-07-26; written-spec review pending
+**Status:** Written specification approved on 2026-07-26
 **Source of truth:** `WTIA_Codex_Build_Spec_v1.1.md`
 **Baseline:** `origin/main` at `ea0f84b`
 
@@ -183,7 +183,7 @@ Runs daily and reconciles membership periods into renewal journey instances.
 
 ### Engagement-score runner
 
-Runs daily at 18:00 UTC. The score is the sum of configured engagement-event points over the rolling 90 days, clamped to `0..100`. Trend is the last 30-day point total minus the preceding 30-day point total. Recalculation is deterministic for the same event data.
+Runs daily at 18:00 UTC. The score follows build spec v1.1: `min(100, sum(points * 0.97^weeks_ago))` over the rolling 180 days. Trend is the current score minus the score calculated as of 28 days earlier. Recalculation is deterministic for the same events and evaluation instant.
 
 ### Approval expirer
 
