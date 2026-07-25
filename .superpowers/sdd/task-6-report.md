@@ -51,3 +51,24 @@ The adapter uses WOZTELL's documented Bot API: `POST https://bot.api.woztell.com
 ## Self-review and concerns
 
 Reviewed the final source and tests for provider-boundary containment, credential trimming, eligibility-before-provider behavior, secret/PII-safe errors, and lack of inbound state mutation. The sole WOZTELL endpoint is confined to `lib/channels/woztell.ts`; mock mode calls no network. Existing dirty `task-1` through `task-3` report files were left untouched. The remaining external dependency is operational: channel credentials and the two explicitly named template approvals must be provisioned before live mode can send.
+
+## Review-gap follow-up
+
+### Test-first result
+
+Added `tests/unit/woztell-review-gaps.test.ts` before any production edit. Its 8 new assertions passed immediately against the committed adapter, so the uncovered review behaviors required no production fix. The original Task 6 RED remains the missing-module run recorded above: 2 failing suites and 0 collected tests. For this review follow-up the new test-first run was GREEN immediately: 1 file, 8 passed tests, 0 failed, 0 skipped.
+
+### Follow-up GREEN and verification
+
+- `npm.cmd test -- tests/unit/woztell-adapter.test.ts tests/unit/whatsapp-delivery.test.ts tests/unit/woztell-review-gaps.test.ts` — 3 files, 16 passed tests, 0 failed, 0 skipped.
+- `npm.cmd run typecheck` — PASS.
+- Targeted ESLint including the new review test — PASS, no warnings.
+- `npm.cmd test -- --reporter=json --outputFile=C:\tmp\hkwtia-task6-vitest.json` — 252/252 test files passed; 613 total tests; 593 passed; 0 failed; 20 skipped; 0 todo.
+
+### Added review coverage
+
+- Dunning D3 live POST endpoint, headers, body, configured template name, and exact variable order.
+- Successful live session-message endpoint, headers, and serialized body.
+- Four partial/blank credential combinations selecting deterministic mock mode with no fetch.
+- Null and unsupported inbound payload normalization without state mutation.
+- Malformed 2xx response handling as `provider_unclassified_failure` without response-body leakage.
