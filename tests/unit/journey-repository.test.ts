@@ -35,21 +35,24 @@ const journeyRow = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-function commandText(query: Parameters<PgDialect["sqlToQuery"]>[0]): string {
-  return dialect.sqlToQuery(query).sql.replace(/\s+/g, " ").trim();
+function commandFor(query: Parameters<PgDialect["sqlToQuery"]>[0]) {
+  return dialect.sqlToQuery(query);
 }
 
 function sequenceDatabase(responses: unknown[][]) {
   const commands: string[] = [];
+  const compiledCommands: ReturnType<PgDialect["sqlToQuery"]>[] = [];
   const execute = async (query: Parameters<AutomationSqlExecutor["execute"]>[0]) => {
-    commands.push(commandText(query));
+    const command = commandFor(query);
+    compiledCommands.push(command);
+    commands.push(command.sql.replace(/\s+/g, " ").trim());
     return {rows: responses.shift() ?? []};
   };
   const database: AutomationDatabase = {
     execute,
     transaction: async (work) => work({execute}),
   };
-  return {commands, database};
+  return {commands, compiledCommands, database};
 }
 
 describe("journeys repository SQL and transitions", () => {
@@ -83,10 +86,10 @@ describe("journeys repository SQL and transitions", () => {
   });
 
   it.each([
-    ["markSent", (repo: ReturnType<typeof createJourneysRepository>) => repo.markSent(system, journeyRow().id, now), /status = 'sent'.*status = 'processing'/i],
-    ["markSkipped", (repo: ReturnType<typeof createJourneysRepository>) => repo.markSkipped(system, journeyRow().id, "skip_condition", now), /status = 'skipped'.*error_code = .*status = 'processing'/i],
-    ["reschedule", (repo: ReturnType<typeof createJourneysRepository>) => repo.reschedule(system, journeyRow().id, new Date(now.getTime() + 300_000), "retryable_network"), /status = 'scheduled'.*error_code = .*status = 'processing'/i],
-    ["markFailed", (repo: ReturnType<typeof createJourneysRepository>) => repo.markFailed(system, journeyRow().id, "attempts_exhausted", now), /status = 'failed'.*error_code = .*status = 'processing'/i],
+    ["markSent", (repo: ReturnType<typeof createJourneysRepository>) => repo.markSent(system, journeyRow().id, now, now), /status = 'sent'.*status = 'processing'.*claimed_at =/i],
+    ["markSkipped", (repo: ReturnType<typeof createJourneysRepository>) => repo.markSkipped(system, journeyRow().id, now, "skip_condition", now), /status = 'skipped'.*error_code = .*status = 'processing'.*claimed_at =/i],
+    ["reschedule", (repo: ReturnType<typeof createJourneysRepository>) => repo.reschedule(system, journeyRow().id, now, new Date(now.getTime() + 300_000), "retryable_network"), /status = 'scheduled'.*error_code = .*status = 'processing'.*claimed_at =/i],
+    ["markFailed", (repo: ReturnType<typeof createJourneysRepository>) => repo.markFailed(system, journeyRow().id, now, "attempts_exhausted", now), /status = 'failed'.*error_code = .*status = 'processing'.*claimed_at =/i],
   ] as const)("allows processing -> terminal/retry transition through %s only", async (_name, invoke, expectedSql) => {
     const fake = sequenceDatabase([[journeyRow()]]);
     await expect(invoke(createJourneysRepository(async () => fake.database))).resolves.toMatchObject({id: journeyRow().id});
@@ -97,6 +100,32 @@ describe("journeys repository SQL and transitions", () => {
       .rejects.toMatchObject({code: "INVALID_TRANSITION"});
   });
 
+  it("rejects a stale claim token after lease reclaim and accepts the current token", async () => {
+    const oldClaimedAt = new Date(now.getTime() - 600_000);
+    const currentClaimedAt = now;
+    const completedAt = new Date(now.getTime() + 1_000);
+    const commands: string[] = [];
+    const database: AutomationDatabase = {
+      execute: async (query) => {
+        const command = commandFor(query);
+        commands.push(command.sql.replace(/\s+/g, " ").trim());
+        const ownsClaim = command.params.some((parameter) =>
+          parameter instanceof Date && parameter.getTime() === currentClaimedAt.getTime());
+        return {rows: ownsClaim ? [journeyRow({claimed_at: currentClaimedAt})] : []};
+      },
+      transaction: async (work) => work(database),
+    };
+    const repo = createJourneysRepository(async () => database);
+
+    await expect(repo.markSent(system, journeyRow().id, oldClaimedAt, completedAt))
+      .rejects.toMatchObject({code: "INVALID_TRANSITION"});
+    await expect(repo.markSent(system, journeyRow().id, currentClaimedAt, completedAt))
+      .resolves.toMatchObject({id: journeyRow().id});
+    expect(commands).toHaveLength(2);
+    expect(commands[0]).toMatch(/status = 'processing'.*claimed_at =/i);
+    expect(commands[1]).toMatch(/status = 'processing'.*claimed_at =/i);
+  });
+
   it("allows failed -> scheduled only as an atomic audited admin retry", async () => {
     const fake = sequenceDatabase([[journeyRow({status: "scheduled", error_code: null})], []]);
     const result = await createJourneysRepository(async () => fake.database).retryFailed(admin, journeyRow().id, now);
@@ -105,6 +134,8 @@ describe("journeys repository SQL and transitions", () => {
     expect(fake.commands).toHaveLength(2);
     expect(fake.commands[0]).toMatch(/status = 'scheduled'.*error_code = NULL.*status = 'failed'/i);
     expect(fake.commands[1]).toMatch(/INSERT INTO "audit_events".*journey\.failed_retry_requested/i);
+    expect(fake.compiledCommands[1].params).toContain(admin.profileId);
+    expect(fake.compiledCommands[1].params).not.toContain(admin.userId);
   });
 
   it("does not audit or reopen sent/skipped/non-failed rows", async () => {

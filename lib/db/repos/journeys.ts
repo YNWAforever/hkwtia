@@ -157,50 +157,50 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
       });
     },
 
-    async markSent(actor: Actor, id: string, completedAt: Date): Promise<JourneyState> {
+    async markSent(actor: Actor, id: string, claimedAt: Date, completedAt: Date): Promise<JourneyState> {
       requireSystem(actor);
       const database = await loadDatabase();
       return transitionResult(await database.execute(sql`
         UPDATE ${journeyState}
         SET status = 'sent', completed_at = ${completedAt}, claim_expires_at = NULL,
             error_code = NULL, updated_at = now()
-        WHERE id = ${id} AND status = 'processing'
+        WHERE id = ${id} AND status = 'processing' AND claimed_at = ${claimedAt}
         RETURNING *
       `));
     },
 
-    async markSkipped(actor: Actor, id: string, reasonCode: string, completedAt: Date): Promise<JourneyState> {
+    async markSkipped(actor: Actor, id: string, claimedAt: Date, reasonCode: string, completedAt: Date): Promise<JourneyState> {
       requireSystem(actor);
       const database = await loadDatabase();
       return transitionResult(await database.execute(sql`
         UPDATE ${journeyState}
         SET status = 'skipped', error_code = ${reasonCode}, completed_at = ${completedAt},
             claim_expires_at = NULL, updated_at = now()
-        WHERE id = ${id} AND status = 'processing'
+        WHERE id = ${id} AND status = 'processing' AND claimed_at = ${claimedAt}
         RETURNING *
       `));
     },
 
-    async reschedule(actor: Actor, id: string, scheduledAt: Date, errorCode: string): Promise<JourneyState> {
+    async reschedule(actor: Actor, id: string, claimedAt: Date, scheduledAt: Date, errorCode: string): Promise<JourneyState> {
       requireSystem(actor);
       const database = await loadDatabase();
       return transitionResult(await database.execute(sql`
         UPDATE ${journeyState}
         SET status = 'scheduled', scheduled_at = ${scheduledAt}, error_code = ${errorCode},
             claimed_at = NULL, claim_expires_at = NULL, completed_at = NULL, updated_at = now()
-        WHERE id = ${id} AND status = 'processing'
+        WHERE id = ${id} AND status = 'processing' AND claimed_at = ${claimedAt}
         RETURNING *
       `));
     },
 
-    async markFailed(actor: Actor, id: string, errorCode: string, completedAt: Date): Promise<JourneyState> {
+    async markFailed(actor: Actor, id: string, claimedAt: Date, errorCode: string, completedAt: Date): Promise<JourneyState> {
       requireSystem(actor);
       const database = await loadDatabase();
       return transitionResult(await database.execute(sql`
         UPDATE ${journeyState}
         SET status = 'failed', error_code = ${errorCode}, completed_at = ${completedAt},
             claim_expires_at = NULL, updated_at = now()
-        WHERE id = ${id} AND status = 'processing'
+        WHERE id = ${id} AND status = 'processing' AND claimed_at = ${claimedAt}
         RETURNING *
       `));
     },
