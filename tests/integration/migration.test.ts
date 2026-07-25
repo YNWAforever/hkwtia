@@ -20,8 +20,8 @@ async function runDatabaseCommand(command: "db:migrate" | "db:seed") {
   return `${stdout}\n${stderr}`;
 }
 
-describe.skipIf(!testDatabaseUrl)("M1 and M2 database migration and seed", () => {
-  it("migrates twice, creates M2 tables, and seeds all stable plan codes idempotently", async () => {
+describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", () => {
+  it("migrates twice, creates M3 tables and unique keys, and seeds all stable plan codes idempotently", async () => {
     const firstMigrationOutput = await runDatabaseCommand("db:migrate");
     const secondMigrationOutput = await runDatabaseCommand("db:migrate");
     const firstSeedOutput = await runDatabaseCommand("db:seed");
@@ -58,8 +58,12 @@ describe.skipIf(!testDatabaseUrl)("M1 and M2 database migration and seed", () =>
           "engagement_scores",
           "event_registrations",
           "events",
+          "journey_state",
           "member_notes",
+          "message_suppressions",
           "saved_segments",
+          "staff_tasks",
+          "whatsapp_log",
         ]],
       );
       expect(m2Tables.rows.map((table) => table.table_name)).toEqual([
@@ -71,8 +75,37 @@ describe.skipIf(!testDatabaseUrl)("M1 and M2 database migration and seed", () =>
         "engagement_scores",
         "event_registrations",
         "events",
+        "journey_state",
         "member_notes",
+        "message_suppressions",
         "saved_segments",
+        "staff_tasks",
+        "whatsapp_log",
+      ]);
+
+      const m3UniqueConstraints = await pool.query<{table_name: string; constraint_name: string}>(
+        `SELECT table_name, constraint_name
+         FROM information_schema.table_constraints
+         WHERE table_schema = 'public'
+           AND constraint_type = 'UNIQUE'
+           AND constraint_name = ANY($1)
+         ORDER BY table_name, constraint_name`,
+        [[
+          "email_log_idempotency_key_unique",
+          "journey_state_delivery_key_unique",
+          "journey_state_profile_instance_step_unique",
+          "message_suppressions_profile_channel_classification_unique",
+          "staff_tasks_dedupe_key_unique",
+          "whatsapp_log_idempotency_key_unique",
+        ]],
+      );
+      expect(m3UniqueConstraints.rows).toEqual([
+        {table_name: "email_log", constraint_name: "email_log_idempotency_key_unique"},
+        {table_name: "journey_state", constraint_name: "journey_state_delivery_key_unique"},
+        {table_name: "journey_state", constraint_name: "journey_state_profile_instance_step_unique"},
+        {table_name: "message_suppressions", constraint_name: "message_suppressions_profile_channel_classification_unique"},
+        {table_name: "staff_tasks", constraint_name: "staff_tasks_dedupe_key_unique"},
+        {table_name: "whatsapp_log", constraint_name: "whatsapp_log_idempotency_key_unique"},
       ]);
     } finally {
       await pool.end();

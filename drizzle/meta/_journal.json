@@ -43,6 +43,13 @@
       "when": 1784735440899,
       "tag": "0006_m2_integrity_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1785008363985,
+      "tag": "0007_m3_automations",
+      "breakpoints": true
     }
   ]
 }
