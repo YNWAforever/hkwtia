@@ -158,6 +158,50 @@ describe("sequential production webhook transaction", () => {
     expect(lower.statements).toHaveLength(6);
   });
 
+  it("rolls back membership state and stops before audit or job completion when journey insertion fails", async () => {
+    const statements: string[] = [];
+    const committedMembership = {status: "pending_payment"};
+    const failureWrites: string[] = [];
+    database.current = {
+      async transaction(work: (tx: {execute(query: unknown): Promise<Result>}) => Promise<unknown>) {
+        const stagedMembership = {...committedMembership};
+        const results = [claimed, locked, noLatest, attempt, membershipUpdated, attemptUpdated];
+        let statementIndex = 0;
+        try {
+          const value = await work({execute: async (query) => {
+            const statement = sqlText(query).toLowerCase();
+            statements.push(statement);
+            if (statementIndex === 4) stagedMembership.status = "active";
+            statementIndex += 1;
+            if (statement.includes("jsonb_to_recordset")) throw new Error("JOURNEY_INSERT_FAILED");
+            const result = results.shift();
+            if (!result) throw new Error("unexpected statement");
+            return result;
+          }});
+          committedMembership.status = stagedMembership.status;
+          return value;
+        } catch (error) {
+          throw error;
+        }
+      },
+      execute: vi.fn(async (query: unknown) => {
+        failureWrites.push(sqlText(query).toLowerCase());
+        return {rows: []};
+      }),
+    };
+
+    await expect(jobsRepository.processWebhookLifecycle(systemActor("stripe-webhook"), command))
+      .rejects.toThrow("JOURNEY_INSERT_FAILED");
+
+    expect(statements).toHaveLength(7);
+    const journeyInsertIndex = statements.findIndex((statement) => statement.includes("jsonb_to_recordset"));
+    expect(journeyInsertIndex).toBe(6);
+    expect(statements.slice(journeyInsertIndex + 1)).toEqual([]);
+    expect(committedMembership.status).toBe("pending_payment");
+    expect(failureWrites).toHaveLength(1);
+    expect(failureWrites[0]).toContain("webhook_transient");
+  });
+
   it("rolls back a claimed mismatched event before audit or mutation", async () => {
     const statements: string[] = [];
     let committed = false;

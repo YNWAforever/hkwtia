@@ -169,11 +169,26 @@ export function scheduleWebhookLifecycleEnrollment(
   });
 }
 
+const terminalAuditStatuses = new Set(["cancelled", "canceled", "expired", "lapsed"]);
+
+function auditMatchesStatus(status: MembershipStatus, auditStatus: unknown): boolean {
+  if (typeof auditStatus !== "string") return false;
+  if (status === "cancelled" || status === "expired") {
+    return terminalAuditStatuses.has(auditStatus);
+  }
+  return auditStatus === status;
+}
+
 function auditCreated(audit: LifecycleAudit): number | null {
-  const stripeCreated = Number(audit.metadata?.stripeCreated);
-  if (Number.isSafeInteger(stripeCreated) && stripeCreated >= 0) return stripeCreated;
-  const createdAt = audit.createdAt instanceof Date ? audit.createdAt : new Date(audit.createdAt);
-  return validDate(createdAt) ? Math.floor(createdAt.getTime() / 1000) : null;
+  const stripeCreated = audit.metadata?.stripeCreated;
+  if (
+    typeof stripeCreated !== "number"
+    || !Number.isSafeInteger(stripeCreated)
+    || stripeCreated <= 0
+  ) {
+    return null;
+  }
+  return validDate(new Date(stripeCreated * 1000)) ? stripeCreated : null;
 }
 
 function latestLifecycleAudit(
@@ -181,14 +196,19 @@ function latestLifecycleAudit(
   status: MembershipStatus,
 ): {eventId: string; eventCreated: number} | null {
   return audits
-    .filter((audit) =>
-      audit.action === "stripe.webhook.processed"
-      && audit.metadata?.status === status
-      && typeof audit.requestId === "string"
-      && audit.requestId.length > 0
-      && auditCreated(audit) !== null,
-    )
-    .map((audit) => ({eventId: audit.requestId!, eventCreated: auditCreated(audit)!}))
+    .flatMap((audit) => {
+      const eventCreated = auditCreated(audit);
+      if (
+        audit.action !== "stripe.webhook.processed"
+        || !auditMatchesStatus(status, audit.metadata?.status)
+        || typeof audit.requestId !== "string"
+        || audit.requestId.length === 0
+        || eventCreated === null
+      ) {
+        return [];
+      }
+      return [{eventId: audit.requestId, eventCreated}];
+    })
     .sort((left, right) =>
       right.eventCreated - left.eventCreated || right.eventId.localeCompare(left.eventId),
     )[0] ?? null;

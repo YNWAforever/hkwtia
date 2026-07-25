@@ -16,6 +16,26 @@ const periodEnd = new Date("2027-07-26T04:00:00.000Z");
 const paymentFailedAt = 1_774_502_400;
 const cancellationAt = 1_777_094_400;
 
+type AuditFixture = Readonly<{
+  action: string;
+  requestId: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: Date;
+}>;
+
+function processedAudit(
+  eventId: string,
+  status: string,
+  stripeCreated: unknown,
+): AuditFixture {
+  return {
+    action: "stripe.webhook.processed",
+    requestId: eventId,
+    metadata: {status, stripeCreated},
+    createdAt: new Date("2026-07-26T04:00:00.000Z"),
+  };
+}
+
 function membership(
   id: string,
   status: MembershipStatus,
@@ -35,7 +55,10 @@ function membership(
   };
 }
 
-function harness(seed: readonly LifecycleMembership[]) {
+function harness(
+  seed: readonly LifecycleMembership[],
+  auditsByTarget: Readonly<Record<string, readonly AuditFixture[]>> = {},
+) {
   const rows = new Map<string, JourneyEnrollment>();
   const actors: Actor[] = [];
   const dependencies: LifecycleEnrollmentDependencies = {
@@ -56,18 +79,15 @@ function harness(seed: readonly LifecycleMembership[]) {
     },
     auditEvents: {
       async listForTarget(_actor, _targetType, targetId) {
-        if (targetId === "past-due") return [{
-          action: "stripe.webhook.processed",
-          requestId: "evt_payment_failed",
-          metadata: {status: "past_due", stripeCreated: paymentFailedAt},
-          createdAt: new Date(paymentFailedAt * 1000),
-        }];
-        if (targetId === "cancelled") return [{
-          action: "stripe.webhook.processed",
-          requestId: "evt_cancelled",
-          metadata: {status: "cancelled", stripeCreated: cancellationAt},
-          createdAt: new Date(cancellationAt * 1000),
-        }];
+        if (Object.prototype.hasOwnProperty.call(auditsByTarget, targetId)) {
+          return auditsByTarget[targetId] ?? [];
+        }
+        if (targetId === "past-due") {
+          return [processedAudit("evt_payment_failed", "past_due", paymentFailedAt)];
+        }
+        if (targetId === "cancelled") {
+          return [processedAudit("evt_cancelled", "cancelled", cancellationAt)];
+        }
         return [];
       },
     },
@@ -91,7 +111,12 @@ describe("membership lifecycle journey enrollment", () => {
     const cancelled = membership("cancelled", "cancelled");
     const lapsed = membership("lapsed", "expired");
     const pending = membership("pending", "pending_payment", {ownerUserId: null, applicationId: null});
-    const test = harness([active, pastDue, cancelled, lapsed, pending]);
+    const test = harness([active, pastDue, cancelled, lapsed, pending], {
+      lapsed: [
+        processedAudit("evt_lapsed_cancelled_old", "cancelled", cancellationAt - 60),
+        processedAudit("evt_lapsed_cancelled_latest", "canceled", cancellationAt + 60),
+      ],
+    });
     const actor = systemActor("stripe-webhook");
 
     const first = await reconcileLifecycleEnrollments(actor, now, test.dependencies);
@@ -112,19 +137,25 @@ describe("membership lifecycle journey enrollment", () => {
       instanceKey: "termination:evt_cancelled",
       step: "winback_7",
     }));
+    expect(test.enrollments()).toContainEqual(expect.objectContaining({
+      journey: "winback",
+      instanceKey: "termination:evt_lapsed_cancelled_latest",
+      step: "winback_7",
+      scheduledAt: new Date((cancellationAt + 60) * 1000 + 7 * 86_400_000),
+    }));
     expect(first).toMatchObject({
       scanned: 4,
-      createdSteps: 16,
+      createdSteps: 19,
       existingSteps: 0,
-      skipped: 1,
-      errors: {MISSING_LIFECYCLE_AUDIT: 1},
+      skipped: 0,
+      errors: {},
     });
     expect(second).toMatchObject({
       scanned: 4,
       createdSteps: 0,
-      existingSteps: 16,
-      skipped: 1,
-      errors: {MISSING_LIFECYCLE_AUDIT: 1},
+      existingSteps: 19,
+      skipped: 0,
+      errors: {},
     });
     expect(test.actors).not.toHaveLength(0);
     expect(test.actors.every((value) => value.kind === "system")).toBe(true);
@@ -144,8 +175,40 @@ describe("membership lifecycle journey enrollment", () => {
   });
 
   it("skips lifecycle rows without an authoritative processed audit using a sanitized code", async () => {
+    const missing = membership("missing", "past_due");
+    const test = harness([missing]);
+
+    const summary = await reconcileLifecycleEnrollments(systemActor("stripe-webhook"), now, test.dependencies);
+
+    expect(test.enrollments()).toEqual([]);
+    expect(summary).toMatchObject({
+      scanned: 1,
+      createdSteps: 0,
+      existingSteps: 0,
+      skipped: 1,
+      errors: {MISSING_LIFECYCLE_AUDIT: 1},
+    });
+    expect(JSON.stringify(summary)).not.toContain(missing.id);
+  });
+
+  it.each([
+    null,
+    "",
+    "   ",
+    false,
+    true,
+    [],
+    {},
+    0,
+    -1,
+    1.5,
+    Number.MAX_SAFE_INTEGER,
+    Number.MAX_SAFE_INTEGER + 1,
+  ])("rejects malformed raw stripeCreated metadata without producing a 1970 enrollment: %j", async (stripeCreated) => {
     const malformed = membership("malformed", "past_due");
-    const test = harness([malformed]);
+    const test = harness([malformed], {
+      malformed: [processedAudit("evt_malformed", "past_due", stripeCreated)],
+    });
 
     const summary = await reconcileLifecycleEnrollments(systemActor("stripe-webhook"), now, test.dependencies);
 
@@ -158,6 +221,7 @@ describe("membership lifecycle journey enrollment", () => {
       errors: {MISSING_LIFECYCLE_AUDIT: 1},
     });
     expect(JSON.stringify(summary)).not.toContain(malformed.id);
+    expect(JSON.stringify(test.enrollments())).not.toContain("1970-01-01");
   });
 
   it("uses webhook event identity and event time even when period dates are null", () => {

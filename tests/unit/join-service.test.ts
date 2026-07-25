@@ -33,6 +33,7 @@ function harness() {
   const memberships: TestMembership[] = [];
   const enrollmentRows = new Map<string, JourneyEnrollment>();
   const enrollmentActors: Actor[] = [];
+  const membershipActors: Actor[] = [];
   let nextId = 1;
 
   return {
@@ -66,7 +67,8 @@ function harness() {
       async getByApplicationId(_actor: Actor, applicationId: string) {
         return memberships.find((membership) => membership.applicationId === applicationId) ?? null;
       },
-      async create(_actor: Actor, input: Record<string, unknown>) {
+      async create(membershipActor: Actor, input: Record<string, unknown>) {
+        membershipActors.push(membershipActor);
         const membership: TestMembership = {
           id: `membership-${memberships.length + 1}`,
           applicationId: input.applicationId as string,
@@ -92,7 +94,7 @@ function harness() {
       },
     },
     now: () => new Date("2026-07-26T04:00:00.000Z"),
-    inspect: () => ({applications, memberships, enrollmentRows, enrollmentActors}),
+    inspect: () => ({applications, memberships, enrollmentRows, enrollmentActors, membershipActors}),
   };
 }
 
@@ -128,6 +130,7 @@ describe("membership join orchestration", () => {
       instanceKey: `activation:${result.membershipId}`,
       step: "welcome",
     }));
+    expect(deps.inspect().membershipActors).toEqual([actor]);
     expect(deps.inspect().enrollmentActors.every((value) => value.kind === "system")).toBe(true);
 
     await completeApplication(
