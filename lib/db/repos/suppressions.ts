@@ -19,6 +19,11 @@ async function defaultDatabaseLoader(): Promise<AutomationDatabase> {
   return await getDb() as unknown as AutomationDatabase;
 }
 
+function requireSuppressionActor(actor: Actor): void {
+  if (actor.kind === "system" && actor.source === "unsubscribe") return;
+  requireSystem(actor);
+}
+
 export function createSuppressionsRepository(loadDatabase: AutomationDatabaseLoader = defaultDatabaseLoader) {
   return {
     async unsubscribeEmailMarketing(
@@ -26,7 +31,7 @@ export function createSuppressionsRepository(loadDatabase: AutomationDatabaseLoa
       profileId: string,
       reasonCode: string,
     ): Promise<"created" | "existing"> {
-      requireSystem(actor);
+      requireSuppressionActor(actor);
       const database = await loadDatabase();
       return database.transaction(async (transaction) => {
         const profile = rowsFrom(await transaction.execute(sql`

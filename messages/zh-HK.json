@@ -39,6 +39,40 @@
                    "connect":  "聯絡",
                    "copyright":  "© {year} 創新香港 — WTIA。版權所有。"
                },
+    "Email": {
+      "brand": "WTIA",
+      "footer": {
+        "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
+        "reason": "你收到這封推廣電郵，是因為你已選擇接收 WTIA 最新消息。",
+        "unsubscribe": "取消訂閱推廣電郵"
+      },
+      "templates": {
+        "welcome": {"subject": "{recipientName}，歡迎加入 WTIA", "preview": "你的 WTIA 會員旅程由這裡開始。", "heading": "歡迎加入 WTIA 社群", "body": "{recipientName}，你好！你的會籍已準備好。立即瀏覽會員專區，開始連繫香港創科社群。", "cta": "前往會員專區"},
+        "day1_video": {"subject": "了解 WTIA 會籍為你帶來的機遇", "preview": "快速認識你的 WTIA 會員體驗。", "heading": "盡享你的會員權益", "body": "{recipientName}，你好！觀看會員簡介短片，了解 WTIA 為你連繫的人脈、活動及發展機遇。", "cta": "觀看簡介"},
+        "day7_nudge": {"subject": "你的 WTIA 會員專區已準備好", "preview": "登入並啟動你的會員體驗。", "heading": "踏出參與 WTIA 的第一步", "body": "{recipientName}，你好！你的會員專區正等候你登入。請查閱個人資料及使用 WTIA 會員權益。", "cta": "立即登入"},
+        "day7_mixer": {"subject": "認識 WTIA 創科社群", "preview": "發掘下一個交流機會。", "heading": "參加下一場會員聚會", "body": "{recipientName}，你好！參加 WTIA 會員活動，與香港科技社群建立更多新連繫。", "cta": "瀏覽會員活動"},
+        "day14_profile": {"subject": "完善你的 WTIA 會員檔案", "preview": "讓會員及夥伴更容易認識你的專長。", "heading": "讓會員檔案更完整", "body": "{recipientName}，你好！完善會員檔案，讓 WTIA 社群了解你的專長、興趣及合作方向。", "cta": "完善會員檔案"},
+        "day30_recap": {"subject": "加入 WTIA 首月回顧", "preview": "重溫參與社群的不同方式。", "heading": "延續你的參與動力", "body": "{recipientName}，你好！重溫加入 WTIA 首月可參與的活動、會員資源及社群機遇。", "cta": "探索會員資源"},
+        "day45_content": {"subject": "WTIA 社群最新洞見", "preview": "探索創科社群的實用觀點。", "heading": "緊貼創科市場變化", "body": "{recipientName}，你好！細閱 WTIA 最新洞見、會員故事及影響社群的科技發展。", "cta": "閱讀最新消息"},
+        "day60_committee": {"subject": "一同推動 WTIA 社群發展", "preview": "探索貢獻你的經驗與專長的方式。", "heading": "在 WTIA 分享你的聲音", "body": "{recipientName}，你好！了解不同委員會及社群項目，以你的經驗為其他會員創造價值。", "cta": "探索參與方式"},
+        "day90_review": {"subject": "回顧你的 WTIA 會員體驗", "preview": "告訴我們首 90 日的體驗。", "heading": "你的會員體驗如何？", "body": "{recipientName}，你好！回顧加入 WTIA 首 90 日的體驗，並告訴我們如何令會籍更具價值。", "cta": "分享會員體驗"},
+        "renewal_90": {"subject": "你的 WTIA 會籍將於 90 日後續期", "preview": "提早準備，確保會員服務不中斷。", "heading": "會籍續期日即將來臨", "body": "{recipientName}，你好！你的 WTIA 會籍將於 90 日後續期。請查閱會籍資料，如需更新可聯絡我們。", "cta": "查閱會籍"},
+        "renewal_60": {"subject": "你的 WTIA 會籍將於 60 日後續期", "preview": "續期前請先核對你的資料。", "heading": "為 WTIA 會籍續期做好準備", "body": "{recipientName}，你好！距離會籍續期尚有 60 日，請確認個人及付款資料均為最新。", "cta": "核對續期資料"},
+        "renewal_30": {"subject": "WTIA 會籍將於 30 日後續期", "preview": "讓你的會員權益保持生效。", "heading": "你的會籍快將續期", "body": "{recipientName}，你好！你的 WTIA 會籍將於 30 日後續期，請立即查閱詳情，避免服務中斷。", "cta": "查閱續期詳情"},
+        "renewal_14": {"subject": "WTIA 會籍將於 14 日後續期", "preview": "續期日前的最後提示。", "heading": "你的會籍將於兩星期後續期", "body": "{recipientName}，你好！你的 WTIA 會籍預定於 14 日後續期，請核對資料或聯絡我們尋求協助。", "cta": "管理會籍"},
+        "dunning_0": {"subject": "你的 WTIA 會籍付款需要處理", "preview": "我們未能完成你的會籍付款。", "heading": "請檢查你的付款資料", "body": "{recipientName}，你好！我們未能完成 WTIA 會籍付款。請更新付款資料，以保持會員服務生效。", "cta": "更新付款資料"},
+        "dunning_3": {"subject": "WTIA 會籍付款仍需處理", "preview": "請更新資料，避免會員服務中斷。", "heading": "你的會籍付款尚未完成", "body": "{recipientName}，你好！你的 WTIA 會籍付款仍未完成，請盡快更新付款資料。", "cta": "處理付款"},
+        "dunning_7": {"subject": "WTIA 會籍付款最後提示", "preview": "你的會員服務可能會中斷。", "heading": "保持你的 WTIA 會籍生效", "body": "{recipientName}，你好！我們仍未能完成會籍付款。請立即處理，以免失去會員服務。", "cta": "修正付款資料"},
+        "lapsed_survey": {"subject": "告訴我們你的 WTIA 體驗", "preview": "你的意見有助我們改善會員旅程。", "heading": "我們重視你的意見", "body": "{recipientName}，你好！你的 WTIA 會籍現已失效。請告訴我們哪些體驗良好，以及有甚麼可以改善。", "cta": "分享意見"},
+        "winback_21": {"subject": "與 WTIA 社群保持連繫", "preview": "看看會員網絡的最新動向。", "heading": "WTIA 還有更多機遇等你發掘", "body": "{recipientName}，你好！探索 WTIA 社群的最新活動、人脈及業界發展機遇。", "cta": "查看最新動向"},
+        "winback_60": {"subject": "再次連繫 WTIA", "preview": "重新加入香港科技社群。", "heading": "期待再次歡迎你加入", "body": "{recipientName}，你好！再次連繫 WTIA，重拾支援你下一階段的社群、活動及發展機遇。", "cta": "探索會員計劃"},
+        "lead_ack": {"subject": "WTIA 已收到你的查詢", "preview": "我們的團隊將盡快與你聯絡。", "heading": "感謝你聯絡 WTIA", "body": "{recipientName}，你好！我們已收到你的查詢，WTIA 團隊將會查閱資料並盡快跟進。", "cta": "瀏覽 WTIA"},
+        "lead_staff_notify": {"subject": "新的 WTIA 會籍查詢", "preview": "有準會員需要團隊跟進。", "heading": "新的潛在會員等候處理", "body": "{recipientName} 已提交 WTIA 會籍查詢。請查閱資料並安排下一步跟進。", "cta": "查閱查詢"},
+        "approval_request": {"subject": "WTIA 審批要求等候處理", "preview": "可信應用程式操作需要你的決定。", "heading": "有一項審批等候處理", "body": "{recipientName}，你好！一項可信應用程式要求正等候你審批。請開啟審批佇列，查閱安全摘要並記錄決定。", "cta": "查閱審批"},
+        "campaign_generic": {"subject": "WTIA 最新消息", "preview": "WTIA 社群的消息及機遇。", "heading": "WTIA 社群最新動向", "body": "{recipientName}，你好！探索為 WTIA 會員精選的最新消息、活動及發展機遇。", "cta": "閱讀最新消息"}
+      }
+    },
+    "Unsubscribe": {"metaTitle": "電郵偏好設定｜WTIA", "metaDescription": "更新你的 WTIA 推廣電郵偏好。", "eyebrow": "電郵偏好設定", "confirmTitle": "停止接收 WTIA 推廣電郵？", "confirmDescription": "確認後，我們將停止發送推廣電郵；與會籍及服務相關的交易電郵仍會繼續發送。", "confirmAction": "取消訂閱", "successTitle": "已停止推廣電郵", "successDescription": "你的偏好已更新，日後不會再收到 WTIA 推廣電郵。", "invalidTitle": "此取消訂閱連結無效", "invalidDescription": "連結可能已過期或已被取代。如仍需協助，請聯絡 WTIA。"},
     "Home":  {
                  "metaTitle":  "WTIA｜創新香港",
                  "metaDescription":  "連繫香港及大灣區創新力量，接通全球市場。",

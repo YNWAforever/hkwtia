@@ -8,6 +8,9 @@ export interface ServerEnv {
   stripeWebhookSecret: string;
   stripeStartupPriceId: string;
   stripeCorporatePriceId: string;
+  resendApiKey: string;
+  emailFrom: string;
+  cronSecret: string;
   appUrl: string;
 }
 
@@ -25,6 +28,9 @@ const serverKeys = [
   ["STRIPE_WEBHOOK_SECRET", "stripeWebhookSecret"],
   ["STRIPE_STARTUP_PRICE_ID", "stripeStartupPriceId"],
   ["STRIPE_CORPORATE_PRICE_ID", "stripeCorporatePriceId"],
+  ["RESEND_API_KEY", "resendApiKey"],
+  ["EMAIL_FROM", "emailFrom"],
+  ["CRON_SECRET", "cronSecret"],
   ["APP_URL", "appUrl"],
 ] as const;
 
@@ -55,6 +61,9 @@ export function parseServerEnv(environment: Environment = process.env): ServerEn
     stripeWebhookSecret: valueFor(environment, "STRIPE_WEBHOOK_SECRET"),
     stripeStartupPriceId: valueFor(environment, "STRIPE_STARTUP_PRICE_ID"),
     stripeCorporatePriceId: valueFor(environment, "STRIPE_CORPORATE_PRICE_ID"),
+    resendApiKey: valueFor(environment, "RESEND_API_KEY"),
+    emailFrom: valueFor(environment, "EMAIL_FROM"),
+    cronSecret: valueFor(environment, "CRON_SECRET"),
     appUrl: valueFor(environment, "APP_URL"),
   };
 }
