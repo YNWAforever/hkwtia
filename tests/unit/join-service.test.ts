@@ -2,6 +2,7 @@ import {describe, expect, it} from "vitest";
 
 import {startJoin} from "@/lib/membership/join-service";
 import {completeApplication} from "@/lib/membership/onboarding";
+import type {JourneyEnrollment} from "@/lib/db/repos/journeys";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 const actor: Extract<Actor, {kind: "member"}> = {kind: "member", userId: "user-a", profileId: "user-a"};
@@ -17,16 +18,21 @@ type TestApplication = {
 };
 type TestMembership = {
   id: string;
+  applicationId: string | null;
   planCode: TestPlan;
   status: "pending_payment" | "pending_review" | "active";
   ownerUserId: string | null;
   companyId: string | null;
   seatLimit: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 function harness() {
   const applications = new Map<string, TestApplication>();
   const memberships: TestMembership[] = [];
+  const enrollmentRows = new Map<string, JourneyEnrollment>();
+  const enrollmentActors: Actor[] = [];
   let nextId = 1;
 
   return {
@@ -57,20 +63,36 @@ function harness() {
       },
     },
     memberships: {
+      async getByApplicationId(_actor: Actor, applicationId: string) {
+        return memberships.find((membership) => membership.applicationId === applicationId) ?? null;
+      },
       async create(_actor: Actor, input: Record<string, unknown>) {
         const membership: TestMembership = {
           id: `membership-${memberships.length + 1}`,
+          applicationId: input.applicationId as string,
           planCode: input.planCode as TestPlan,
           status: input.status as TestMembership["status"],
           ownerUserId: (input.ownerUserId as string | null) ?? null,
           companyId: (input.companyId as string | null) ?? null,
           seatLimit: input.seatLimit as number,
+          createdAt: new Date("2026-07-26T04:00:00.000Z"),
+          updatedAt: new Date("2026-07-26T04:00:00.000Z"),
         };
         memberships.push(membership);
         return membership;
       },
     },
-    inspect: () => ({applications, memberships}),
+    journeys: {
+      async enroll(enrollmentActor: Actor, enrollment: JourneyEnrollment) {
+        enrollmentActors.push(enrollmentActor);
+        const key = [enrollment.profileId, enrollment.journey, enrollment.instanceKey, enrollment.step].join("|");
+        if (enrollmentRows.has(key)) return "existing" as const;
+        enrollmentRows.set(key, enrollment);
+        return "created" as const;
+      },
+    },
+    now: () => new Date("2026-07-26T04:00:00.000Z"),
+    inspect: () => ({applications, memberships, enrollmentRows, enrollmentActors}),
   };
 }
 
@@ -100,6 +122,25 @@ describe("membership join orchestration", () => {
     expect(result.next).toBe("complete");
     expect(result.checkout).toBeUndefined();
     expect(deps.inspect().memberships).toMatchObject([{planCode: "community", status: "active"}]);
+    expect([...deps.inspect().enrollmentRows.values()]).toContainEqual(expect.objectContaining({
+      profileId: actor.profileId,
+      journey: "onboarding_90d",
+      instanceKey: `activation:${result.membershipId}`,
+      step: "welcome",
+    }));
+    expect(deps.inspect().enrollmentActors.every((value) => value.kind === "system")).toBe(true);
+
+    await completeApplication(
+      actor,
+      {
+        applicationId: result.applicationId,
+        plan: "community",
+        profile: {displayName: "Community Member"},
+        company: null,
+      },
+      deps,
+    );
+    expect(deps.inspect().enrollmentRows).toHaveLength(9);
   });
 
   it("returns a typed checkout command for paid plans without activating them", async () => {

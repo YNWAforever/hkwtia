@@ -1,9 +1,11 @@
 import "server-only";
 
-import {and, eq, sql} from "drizzle-orm";
+import {and, eq, sql, type SQL} from "drizzle-orm";
+
+import {scheduleWebhookLifecycleEnrollment} from "@/lib/automation/enrollment";
 
 import type {WebhookLifecycleCommand} from "@/lib/billing/webhook-service";
-import {auditEvents, billingAttempts, engagementEvents, jobs as jobsTable, membershipApplications, memberships, type Job} from "@/lib/db/server-schema";
+import {auditEvents, billingAttempts, engagementEvents, jobs as jobsTable, journeyState, membershipApplications, memberships, type Job} from "@/lib/db/server-schema";
 import {getDb, requireSystem} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";
 
@@ -64,6 +66,57 @@ function redactedError(error: unknown): string {
     return `WEBHOOK_TRANSIENT:${error.code.slice(0, 32)}`;
   }
   return "WEBHOOK_TRANSIENT";
+}
+
+type LifecycleExecutor = Readonly<{execute: (query: SQL) => PromiseLike<unknown>}>;
+
+async function insertWebhookLifecycleEnrollment(
+  actor: Actor,
+  executor: LifecycleExecutor,
+  command: WebhookLifecycleCommand,
+  membership: Record<string, unknown>,
+): Promise<void> {
+  requireSystem(actor);
+  const profileId = requiredString(membership, "profile_id");
+  const scheduled = scheduleWebhookLifecycleEnrollment({
+    membershipId: command.membershipId,
+    profileId,
+    nextStatus: command.nextStatus,
+    eventId: command.eventId,
+    eventCreated: command.eventCreated,
+  });
+  if (scheduled.length === 0) return;
+  const rows = scheduled.map((step) => ({
+    profile_id: step.profileId,
+    membership_id: step.membershipId,
+    journey: step.journey,
+    instance_key: step.instanceKey,
+    step: step.step,
+    scheduled_at: step.scheduledAt.toISOString(),
+    delivery_key: step.deliveryKey,
+  }));
+  await executor.execute(sql`
+    INSERT INTO ${journeyState}
+      (profile_id, membership_id, journey, instance_key, step, scheduled_at, delivery_key)
+    SELECT
+      value.profile_id,
+      value.membership_id::uuid,
+      value.journey,
+      value.instance_key,
+      value.step,
+      value.scheduled_at::timestamptz,
+      value.delivery_key
+    FROM jsonb_to_recordset(${JSON.stringify(rows)}::jsonb) AS value(
+      profile_id text,
+      membership_id text,
+      journey text,
+      instance_key text,
+      step text,
+      scheduled_at text,
+      delivery_key text
+    )
+    ON CONFLICT DO NOTHING
+  `);
 }
 
 export const jobsRepository = {
@@ -180,6 +233,7 @@ export const jobsRepository = {
               RETURNING ${billingAttempts.id} AS attempt_id`));
             if (!completedAttempt) throw new Error("WEBHOOK_MUTATION_FAILED");
           }
+          await insertWebhookLifecycleEnrollment(actor, tx, command, membership);
         }
 
         if (command.isRenewal && (command.eventType === 'invoice.paid' || command.eventType === 'invoice.payment_failed')) {

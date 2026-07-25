@@ -1,6 +1,8 @@
 import "server-only";
 
 import type {Actor} from "@/lib/membership/lifecycle";
+import {enrollActivatedMembership} from "@/lib/automation/enrollment";
+import {journeysRepository, type JourneysRepository} from "@/lib/db/repos/journeys";
 import {applicationsRepository} from "@/lib/db/repos/applications";
 import {companiesRepository} from "@/lib/db/repos/companies";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
@@ -33,6 +35,8 @@ export type JoinMembership = {
   ownerUserId: string | null;
   companyId: string | null;
   seatLimit: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 type ApplicationRepository = {
@@ -60,21 +64,26 @@ export type JoinDependencies = {
   profiles?: ProfileRepository;
   companies?: CompanyRepository;
   memberships?: MembershipRepository;
+  journeys?: Pick<JourneysRepository, "enroll">;
+  now?: () => Date;
   repositories?: {
     applications?: ApplicationRepository;
     profiles?: ProfileRepository;
     companies?: CompanyRepository;
     memberships?: MembershipRepository;
+    journeys?: Pick<JourneysRepository, "enroll">;
   };
   idFactory?: () => string;
   readonly [key: string]: unknown;
 };
 
-const defaultDependencies: Required<Pick<JoinDependencies, "applications" | "profiles" | "companies" | "memberships">> = {
+const defaultDependencies: Required<Pick<JoinDependencies, "applications" | "profiles" | "companies" | "memberships" | "journeys" | "now">> = {
   applications: applicationsRepository as unknown as ApplicationRepository,
   profiles: profilesRepository as unknown as ProfileRepository,
   companies: companiesRepository as unknown as CompanyRepository,
   memberships: membershipsRepository as unknown as MembershipRepository,
+  journeys: journeysRepository,
+  now: () => new Date(),
 };
 
 export type CheckoutCommand = Readonly<{
@@ -102,6 +111,8 @@ function dependencies(input?: JoinDependencies) {
     profiles: custom ? input?.profiles ?? input?.repositories?.profiles : defaultDependencies.profiles,
     companies: custom ? input?.companies ?? input?.repositories?.companies : defaultDependencies.companies,
     memberships: input?.memberships ?? input?.repositories?.memberships ?? defaultDependencies.memberships,
+    journeys: custom ? input?.journeys ?? input?.repositories?.journeys : defaultDependencies.journeys,
+    now: input?.now ?? defaultDependencies.now,
   };
 }
 
@@ -232,6 +243,14 @@ export async function completeApplication(
   const existingMembership = await findMembership(actor, application.id, deps);
   if (existingMembership) {
     const result = resultForMembership(application, existingMembership);
+    if (existingMembership.status === "active" && deps.journeys) {
+      await enrollActivatedMembership(
+        actor.profileId,
+        existingMembership.id,
+        existingMembership.updatedAt ?? existingMembership.createdAt ?? deps.now(),
+        deps.journeys,
+      );
+    }
     const status = existingMembership.status === "active" ? "completed" : existingMembership.status;
     const currentStep = result.next;
     await updateApplication(actor, application, {currentStep, status}, deps);
@@ -251,6 +270,14 @@ export async function completeApplication(
     seatLimit: plan.seatAllowance,
   }, deps);
   const result = resultForMembership(application, membership);
+  if (membership.status === "active" && deps.journeys) {
+    await enrollActivatedMembership(
+      actor.profileId,
+      membership.id,
+      membership.updatedAt ?? membership.createdAt ?? deps.now(),
+      deps.journeys,
+    );
+  }
   await updateApplication(actor, application, {
     currentStep: result.next,
     status: membership.status === "active" ? "completed" : membership.status,

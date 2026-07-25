@@ -65,7 +65,11 @@ describe("Stripe webhook lifecycle mapping", () => {
   it("moves a membership to past_due after invoice.payment_failed", async () => {
     const {commands, processor} = captureProcessor();
     await processStripeEvent(invoicePaymentFailed(), systemActor("stripe-webhook"), processor);
-    expect(commands[0]).toMatchObject({eventType: "invoice.payment_failed", nextStatus: "past_due"});
+    expect(commands[0]).toMatchObject({
+      eventType: "invoice.payment_failed",
+      nextStatus: "past_due",
+      billingPeriodEnd: null,
+    });
   });
 
   it("maps a scheduled cancellation subscription update", async () => {
@@ -77,7 +81,11 @@ describe("Stripe webhook lifecycle mapping", () => {
   it("cancels a membership after customer.subscription.deleted", async () => {
     const {commands, processor} = captureProcessor();
     await processStripeEvent(subscriptionDeleted(), systemActor("stripe-webhook"), processor);
-    expect(commands[0]).toMatchObject({eventType: "customer.subscription.deleted", nextStatus: "cancelled"});
+    expect(commands[0]).toMatchObject({
+      eventType: "customer.subscription.deleted",
+      nextStatus: "cancelled",
+      billingPeriodEnd: null,
+    });
   });
 
   it("returns duplicate and emits no second transition command for an exact replay", async () => {
