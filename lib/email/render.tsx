@@ -35,7 +35,11 @@ export async function renderEmail(input: RenderEmailInput): Promise<RenderedEmai
     input.classification,
   );
   const {brand, footer} = getEmailChrome(input.locale);
-  const ctaUrl = String(input.variables.ctaUrl ?? "#");
+  const ctaUrlValue = input.variables.ctaUrl;
+  if (typeof ctaUrlValue !== "string" || ctaUrlValue.trim().length === 0) {
+    throw new Error("EMAIL_CTA_URL_REQUIRED");
+  }
+  const ctaUrl = ctaUrlValue.trim();
   const isMarketing = template.classification === "marketing";
 
   if (isMarketing && !input.unsubscribeUrl) {

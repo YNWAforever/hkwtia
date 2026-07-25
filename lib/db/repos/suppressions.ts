@@ -7,6 +7,18 @@ import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/
 import {getDb, requireSystem} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";
 
+const unsubscribeCapability: unique symbol = Symbol("unsubscribe-capability");
+
+export type UnsubscribeActor = Readonly<{
+  kind: "unsubscribe";
+  userId: null;
+  [unsubscribeCapability]: true;
+}>;
+
+export function unsubscribeActor(): UnsubscribeActor {
+  return Object.freeze({kind: "unsubscribe", userId: null, [unsubscribeCapability]: true as const});
+}
+
 function rowsFrom(result: unknown): Record<string, unknown>[] {
   if (Array.isArray(result)) return result as Record<string, unknown>[];
   if (result && typeof result === "object" && "rows" in result && Array.isArray(result.rows)) {
@@ -19,15 +31,19 @@ async function defaultDatabaseLoader(): Promise<AutomationDatabase> {
   return await getDb() as unknown as AutomationDatabase;
 }
 
-function requireSuppressionActor(actor: Actor): void {
-  if (actor.kind === "system" && actor.source === "unsubscribe") return;
+function isUnsubscribeActor(actor: Actor | UnsubscribeActor): actor is UnsubscribeActor {
+  return actor.kind === "unsubscribe" && actor[unsubscribeCapability] === true;
+}
+
+function requireSuppressionActor(actor: Actor | UnsubscribeActor): void {
+  if (isUnsubscribeActor(actor)) return;
   requireSystem(actor);
 }
 
 export function createSuppressionsRepository(loadDatabase: AutomationDatabaseLoader = defaultDatabaseLoader) {
   return {
     async unsubscribeEmailMarketing(
-      actor: Actor,
+      actor: Actor | UnsubscribeActor,
       profileId: string,
       reasonCode: string,
     ): Promise<"created" | "existing"> {

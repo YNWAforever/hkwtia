@@ -12,8 +12,10 @@ import {
   signUnsubscribeToken,
   verifyUnsubscribeToken,
 } from "@/lib/email/unsubscribe-token";
-import {createSuppressionsRepository} from "@/lib/db/repos/suppressions";
-import type {Actor} from "@/lib/membership/lifecycle";
+import {
+  createSuppressionsRepository,
+  unsubscribeActor,
+} from "@/lib/db/repos/suppressions";
 
 const secret = "fixture-cron-secret-with-enough-entropy";
 const future = 2_000_000_000;
@@ -55,6 +57,7 @@ describe("unsubscribe token", () => {
       .mockResolvedValueOnce("existing");
     const post = createUnsubscribePost({
       secret,
+      appUrl: "https://www.hkwtia.org",
       now: () => past,
       unsubscribeEmailMarketing,
     });
@@ -75,6 +78,7 @@ describe("unsubscribe token", () => {
     const unsubscribeEmailMarketing = vi.fn();
     const post = createUnsubscribePost({
       secret,
+      appUrl: "https://www.hkwtia.org",
       now: () => past,
       unsubscribeEmailMarketing,
     });
@@ -92,6 +96,7 @@ describe("unsubscribe token", () => {
   it("redirects the confirmation form only to the token's localized success page", async () => {
     const post = createUnsubscribePost({
       secret,
+      appUrl: "https://www.hkwtia.org",
       now: () => past,
       unsubscribeEmailMarketing: async () => "created",
     });
@@ -100,13 +105,78 @@ describe("unsubscribe token", () => {
       redirect: "1",
     });
 
-    const response = await post(new Request("https://www.hkwtia.org/api/unsubscribe", {
+    const response = await post(new Request("https://attacker.example/api/unsubscribe", {
       method: "POST",
       body,
+      headers: {"content-type": "application/x-www-form-urlencoded"},
     }));
 
     expect(response.status).toBe(303);
     expect(response.headers.get("location")).toBe("https://www.hkwtia.org/zh/unsubscribe?status=success");
+  });
+
+  it("accepts an application/json confirmation body", async () => {
+    const unsubscribeEmailMarketing = vi.fn().mockResolvedValue("created");
+    const post = createUnsubscribePost({
+      secret,
+      appUrl: "https://www.hkwtia.org",
+      now: () => past,
+      unsubscribeEmailMarketing,
+    });
+
+    const response = await post(new Request("https://attacker.example/api/unsubscribe", {
+      method: "POST",
+      headers: {"content-type": "application/json"},
+      body: JSON.stringify({token: token(), redirect: true}),
+    }));
+
+    expect(response.status).toBe(303);
+    expect(response.headers.get("location")).toBe("https://www.hkwtia.org/unsubscribe?status=success");
+    expect(unsubscribeEmailMarketing).toHaveBeenCalledWith("profile-1");
+  });
+
+  it("rejects unsupported request media before repository access", async () => {
+    const unsubscribeEmailMarketing = vi.fn();
+    const post = createUnsubscribePost({
+      secret,
+      appUrl: "https://www.hkwtia.org",
+      now: () => past,
+      unsubscribeEmailMarketing,
+    });
+
+    const response = await post(new Request("https://www.hkwtia.org/api/unsubscribe", {
+      method: "POST",
+      headers: {"content-type": "text/plain"},
+      body: `token=${encodeURIComponent(token())}`,
+    }));
+
+    expect(response.status).toBe(415);
+    await expect(response.json()).resolves.toEqual({error: "UNSUPPORTED_MEDIA_TYPE"});
+    expect(unsubscribeEmailMarketing).not.toHaveBeenCalled();
+  });
+
+  it("rejects an oversized request body before parsing or repository access", async () => {
+    const unsubscribeEmailMarketing = vi.fn();
+    const post = createUnsubscribePost({
+      secret,
+      appUrl: "https://www.hkwtia.org",
+      now: () => past,
+      unsubscribeEmailMarketing,
+    });
+    const body = new URLSearchParams({
+      token: token(),
+      padding: "x".repeat(8_192),
+    });
+
+    const response = await post(new Request("https://www.hkwtia.org/api/unsubscribe", {
+      method: "POST",
+      body,
+      headers: {"content-type": "application/x-www-form-urlencoded"},
+    }));
+
+    expect(response.status).toBe(413);
+    await expect(response.json()).resolves.toEqual({error: "UNSUBSCRIBE_BODY_TOO_LARGE"});
+    expect(unsubscribeEmailMarketing).not.toHaveBeenCalled();
   });
 
   it("renders localized confirm, success, and invalid public states", async () => {
@@ -143,11 +213,7 @@ describe("unsubscribe token", () => {
     const repository = createSuppressionsRepository(
       async () => database as never,
     );
-    const actor: Actor = {
-      kind: "system",
-      userId: null,
-      source: "unsubscribe",
-    };
+    const actor = unsubscribeActor();
 
     await expect(repository.unsubscribeEmailMarketing(actor, "profile-1", "member_unsubscribe"))
       .resolves.toBe("created");

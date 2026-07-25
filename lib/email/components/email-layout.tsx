@@ -64,6 +64,7 @@ export function EmailLayout({
           @media (prefers-color-scheme: dark) {
             .email-page { background-color: #0f172a !important; color: #f8fafc !important; }
             .email-card { background-color: #111827 !important; border-color: #334155 !important; color: #f8fafc !important; }
+            .email-brand { color: #93c5fd !important; }
             .email-heading { color: #f8fafc !important; }
             .email-copy { color: #e2e8f0 !important; }
             .email-muted { color: #cbd5e1 !important; }
@@ -74,7 +75,7 @@ export function EmailLayout({
       <Preview className="email-preheader">{preview}</Preview>
       <Body className="email-page" style={pageStyle}>
         <Container className="email-card" style={containerStyle}>
-          <Text style={{color: "#2563eb", fontSize: "13px", fontWeight: "700", letterSpacing: "0.08em", margin: "0 0 24px", textTransform: "uppercase"}}>
+          <Text className="email-brand" style={{color: "#2563eb", fontSize: "13px", fontWeight: "700", letterSpacing: "0.08em", margin: "0 0 24px", textTransform: "uppercase"}}>
             {brand}
           </Text>
           {children}

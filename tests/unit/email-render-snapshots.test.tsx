@@ -44,6 +44,8 @@ describe("renderEmail", () => {
     expect(rendered.html).toMatch(/<html[^>]*lang="zh-HK"/);
     expect(rendered.html).toContain("<title>");
     expect(rendered.html).toContain("email-preheader");
+    expect(rendered.html).toContain(".email-brand { color: #93c5fd !important; }");
+    expect(rendered.html).toContain('class="email-brand"');
     expect(rendered.html).toContain("@media (prefers-color-scheme: dark)");
     expect(rendered.html).toContain(".email-heading { color: #f8fafc !important; }");
     expect(rendered.html).toContain(".email-copy { color: #e2e8f0 !important; }");
@@ -84,5 +86,17 @@ describe("renderEmail", () => {
       recipientName: "Fixture Member",
       variables: fixtureVars,
     })).rejects.toThrow("MARKETING_UNSUBSCRIBE_URL_REQUIRED");
+  });
+
+  it.each([
+    ["missing", {recipientName: "Fixture Member"}],
+    ["blank", {...fixtureVars, ctaUrl: "  "}],
+  ])("fails closed when the CTA URL is %s", async (_kind, variables) => {
+    await expect(renderEmail({
+      template: "welcome",
+      locale: "en",
+      recipientName: "Fixture Member",
+      variables,
+    })).rejects.toThrow("EMAIL_CTA_URL_REQUIRED");
   });
 });

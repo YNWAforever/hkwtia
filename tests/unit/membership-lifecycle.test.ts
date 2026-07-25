@@ -24,6 +24,6 @@ describe("membership lifecycle", () => {
     expectTypeOf<Extract<Actor, {kind: "member"}>["userId"]>().toEqualTypeOf<string>();
     expectTypeOf<Extract<Actor, {kind: "anonymous"}>["userId"]>().toEqualTypeOf<null>();
     expectTypeOf<Extract<Actor, {kind: "system"}>["userId"]>().toEqualTypeOf<null>();
-    expectTypeOf<Extract<Actor, {kind: "system"}>["source"]>().toEqualTypeOf<"stripe-webhook" | "unsubscribe">();
+    expectTypeOf<Extract<Actor, {kind: "system"}>["source"]>().toEqualTypeOf<"stripe-webhook">();
   });
 });

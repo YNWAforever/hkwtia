@@ -67,4 +67,16 @@ describe("email catalogue", () => {
     expect(getEmailTemplate("en", "lapsed_survey", {recipientName: "Fixture Member"}, "marketing").classification)
       .toBe("marketing");
   });
+
+  it.each(["campaign_generic", "day1_video"] as const)(
+    "rejects a classification downgrade for %s",
+    (templateId) => {
+      expect(() => getEmailTemplate(
+        "en",
+        templateId,
+        {recipientName: "Fixture Member"},
+        "transactional",
+      )).toThrow("EMAIL_CLASSIFICATION_OVERRIDE_FORBIDDEN");
+    },
+  );
 });

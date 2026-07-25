@@ -4,7 +4,7 @@ import {and, eq, exists, isNull, or, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";
 import {companyMembers, membershipApplications, memberships as membershipsTable, type Membership} from "@/lib/db/server-schema";
-import {forbidden, getDb} from "@/lib/db/repos/common";
+import {forbidden, getDb, requireSystem} from "@/lib/db/repos/common";
 
 export type MembershipInput = Pick<Membership, "planCode" | "seatLimit"> & Partial<Pick<Membership, "ownerUserId" | "companyId" | "applicationId" | "status" | "stripeCustomerId" | "stripeSubscriptionId" | "billingPeriodStart" | "billingPeriodEnd" | "cancelAtPeriodEnd">>;
 export type MembershipUpdate = Partial<Pick<Membership, "planCode" | "status" | "seatLimit" | "stripeCustomerId" | "stripeSubscriptionId" | "billingPeriodStart" | "billingPeriodEnd" | "cancelAtPeriodEnd">>;
@@ -85,6 +85,7 @@ function membershipScope(actor: Actor, membershipId: string) {
 export const membershipsRepository = {
   async getByApplicationId(actor: Actor, applicationId: string): Promise<Membership | null> {
     if (actor.kind !== "member" && actor.kind !== "system") forbidden();
+    if (actor.kind === "system") requireSystem(actor);
     const db = await getDb();
     const where = actor.kind === "system"
       ? and(eq(membershipsTable.applicationId, applicationId), sql`true`)
@@ -97,6 +98,7 @@ export const membershipsRepository = {
   },
   async getById(actor: Actor, membershipId: string): Promise<Membership | null> {
     if (actor.kind !== "member" && actor.kind !== "system") forbidden();
+    if (actor.kind === "system") requireSystem(actor);
     const db = await getDb();
     const rows = await db.select().from(membershipsTable).where(membershipScope(actor, membershipId)).limit(1);
     if (!rows[0] && actor.kind === "member") forbidden();
@@ -123,6 +125,7 @@ export const membershipsRepository = {
 
   async list(actor: Actor): Promise<Membership[]> {
     if (actor.kind === "anonymous") return [];
+    if (actor.kind === "system") requireSystem(actor);
     const db = await getDb();
     if (actor.kind === "system") return db.select().from(membershipsTable);
     if (actor.kind !== "member") return [];
@@ -134,6 +137,7 @@ export const membershipsRepository = {
 
   async create(actor: Actor, input: MembershipInput): Promise<Membership> {
     if (actor.kind !== "member" && actor.kind !== "system") forbidden();
+    if (actor.kind === "system") requireSystem(actor);
     const db = await getDb();
     if (actor.kind === "member") await authorizeMemberCreate(db, actor, input);
     const rows = await db.insert(membershipsTable).values(input).returning();
@@ -142,6 +146,7 @@ export const membershipsRepository = {
 
   async update(actor: Actor, membershipId: string, input: MembershipUpdate): Promise<Membership | null> {
     if (actor.kind !== "member" && actor.kind !== "system") forbidden();
+    if (actor.kind === "system") requireSystem(actor);
     if (Object.prototype.hasOwnProperty.call(input, "ownerUserId") || Object.prototype.hasOwnProperty.call(input, "companyId")) forbidden();
     const db = await getDb();
     const rows = await db.update(membershipsTable).set({...input, updatedAt: new Date()}).where(membershipScope(actor, membershipId)).returning();
@@ -151,6 +156,7 @@ export const membershipsRepository = {
 
   async remove(actor: Actor, membershipId: string): Promise<void> {
     if (actor.kind !== "member" && actor.kind !== "system") forbidden();
+    if (actor.kind === "system") requireSystem(actor);
     const db = await getDb();
     await db.delete(membershipsTable).where(membershipScope(actor, membershipId));
   },

@@ -24,7 +24,7 @@ export type AdminActor = Extract<AuthenticatedActor, {kind: "staff" | "exco" | "
 export type Actor =
   | Readonly<{kind: "anonymous"; userId: null}>
   | AuthenticatedActor
-  | Readonly<{kind: "system"; userId: null; source: "stripe-webhook" | "unsubscribe"}>;
+  | Readonly<{kind: "system"; userId: null; source: "stripe-webhook"}>;
 
 export class AuthorizationError extends Error {
   readonly code = "FORBIDDEN";

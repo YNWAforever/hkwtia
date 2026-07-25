@@ -95,6 +95,10 @@ export function getEmailTemplate(
   variables: EmailVariables,
   classification: MessageClassification = DEFAULT_CLASSIFICATION[templateId],
 ): Readonly<{classification: MessageClassification; copy: EmailCopy}> {
+  if (classification !== DEFAULT_CLASSIFICATION[templateId] && templateId !== "lapsed_survey") {
+    throw new Error("EMAIL_CLASSIFICATION_OVERRIDE_FORBIDDEN");
+  }
+
   const message = bundles[locale].Email.templates[templateId];
   const copy = Object.fromEntries(
     (["subject", "preview", "heading", "body", "cta"] as const)
