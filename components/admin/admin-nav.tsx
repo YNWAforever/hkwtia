@@ -3,13 +3,14 @@ import Link from "next/link";
 import type {AppLocale} from "@/i18n/routing";
 import {localizedPath} from "@/lib/urls";
 
-export type AdminNavLabels = Readonly<{brand: string; label: string; members: string; segments: string; atRisk: string; events: string; approvals: string; reports: string}>;
+export type AdminNavLabels = Readonly<{brand: string; label: string; members: string; segments: string; atRisk: string; events: string; approvals: string; reports: string; automations: string}>;
 
 export function AdminNav({locale, labels}: {locale: AppLocale; labels: AdminNavLabels}) {
   const items = [
     {href: "/admin/members", label: labels.members}, {href: "/admin/segments", label: labels.segments},
     {href: "/admin/at-risk", label: labels.atRisk}, {href: "/admin/events-mgmt", label: labels.events},
     {href: "/admin/approvals", label: labels.approvals}, {href: "/admin/reports", label: labels.reports},
+    {href: "/admin/automations", label: labels.automations},
   ];
   return <nav aria-label={labels.label} className="border-b border-border/70 bg-background/85 px-4 py-4 backdrop-blur sm:px-6">
     <div className="mx-auto flex max-w-6xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
