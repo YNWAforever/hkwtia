@@ -49,6 +49,14 @@ npm.cmd test -- tests/unit/task7-per-channel-retry-crash.test.ts
 
 Result before the per-channel production change: exit 1; 6/10 tests failed for the intended gaps. Repository retry did not persist channel wrappers, claims did not expose channel errors, provider-failure crash cases could not consume authorization safely, pre-context reschedule lost authorization, and dual-channel authorization could not be consumed independently. The three ineligible-channel preservation cases and ordinary stale no-resend case already passed.
 
+Final attempt-gap composition review RED command:
+
+```powershell
+npm.cmd test -- tests/unit/task7-per-channel-retry-crash.test.ts
+```
+
+Result before the composition fix: exit 1; 11/13 tests passed and only the email/WhatsApp composition cases failed. After an unused wrapper survived a pre-context parent retry, the next scheduled claim consumed it and committed a retryable provider failure, but a crash before parent settlement followed by stale reclaim called the provider twice because the parent/delivery attempt counts no longer differed by exactly one. The scheduled ordinary retry control passed.
+
 ## Implemented behavior
 
 - Journey claims use the existing atomic `FOR UPDATE SKIP LOCKED` repository and every transition carries the exact `claimedAt` fencing token.
@@ -85,7 +93,7 @@ The additive migration adds only campaign recipient `processing`, `attempt_count
 
 - A shared fixed codec recognizes only `retryable_network`, `retryable_rate_limit`, `retryable_server`, `provider_client_error`, and `provider_unclassified_failure`, plus their `admin_retry_` wrappers. Unrecognized values, sent rows, and non-failed rows are untouched.
 - Email and WhatsApp retry mutations fence on exact row id, `failed` status, and the expected persisted error value. They atomically set `processing`, clear the wrapper, increment the attempt, and return both the row and decoded original failure code.
-- A consumed retry that fails at the provider is completed with an ordinary provider code. If the process crashes before parent settlement, stale reclaim observes the ordinary row and cannot resend it.
+- A consumed retry that fails at the provider is completed with an ordinary provider code. If the process crashes before parent settlement, every stale ordinary failed row replays its persisted disposition without another provider call, regardless of the parent/delivery attempt delta. A normal scheduled due claim may still explicitly reopen an ordinary retryable row.
 - Authorization is channel-local: a pre-context/transient parent reschedule does not erase it, dual D14 channels consume independently, and suppression, removed email, or WhatsApp opt-out leave the affected authorization unused.
 
 ## Final verification
@@ -111,11 +119,12 @@ Additional verification:
 - Second re-review focused file - RED 0/8, then GREEN 8/8.
 - Final lazy-retry focused file - RED 1/8 preservation tests passed with 7 intended failures, then GREEN 8/8.
 - Final per-channel crash-safety file - RED 4/10 preservation tests passed with 6 intended failures, then GREEN 10/10.
-- Final focused compatibility suite - exit 0; 11 files passed and 78/78 tests passed.
-- `tests/integration/automation-runners-postgres.test.ts` - collected successfully; its 5 real Postgres tests were skipped locally because `DATABASE_URL_TEST` is unset. The updated real-repository case asserts the failed email wrapper, provider-time atomic consumption (`processing`, attempt 2, null error), a post-provider ordinary `retryable_network` code, an injected crash before parent settlement, stale reclaim without a second provider call, and one audit.
+- Final attempt-gap composition file - RED 11/13 with only the email/WhatsApp duplicate-provider cases failing and the scheduled ordinary retry control passing, then GREEN 13/13.
+- Final focused compatibility suite - exit 0; 11 files passed and 81/81 tests passed.
+- `tests/integration/automation-runners-postgres.test.ts` - collected successfully; its 5 real Postgres tests were skipped locally because `DATABASE_URL_TEST` is unset. The updated real-repository case asserts the failed email wrapper, a real pre-context reschedule that advances only the parent, provider-time atomic consumption (`processing`, delivery attempt 2, null error), a post-provider ordinary `retryable_network` code, an injected crash before parent settlement, and stale reclaim at parent attempt 4 versus delivery attempt 2 without a second provider call, with one audit.
 - `npm.cmd run lint` - exit 0, no warnings or errors.
 - `npm.cmd run typecheck` - exit 0.
-- `npm.cmd test` - exit 0; 127 files passed and 9 environment-gated files skipped; 656 tests passed and 25 skipped.
+- `npm.cmd test` - exit 0; 127 files passed and 9 environment-gated files skipped; 659 tests passed and 25 skipped.
 - `git diff --check` - exit 0; only line-ending notices were emitted.
 
 ## Self-review and remaining concerns

@@ -162,6 +162,7 @@ type HarnessOptions = Readonly<{
   emailProvider?: "sent" | "retryable_network";
   whatsappProvider?: "sent" | "retryable_network";
   crashReschedules?: number;
+  crashMarkFailed?: number;
 }>;
 
 function runnerHarness(
@@ -175,6 +176,7 @@ function runnerHarness(
     : [context()];
   let currentClaim = inputClaims[0]!;
   let remainingCrashReschedules = options.crashReschedules ?? 0;
+  let remainingCrashMarkFailed = options.crashMarkFailed ?? 0;
 
   const claimDue = vi.fn(async () => {
     const next = claimQueue.shift();
@@ -288,10 +290,16 @@ function runnerHarness(
     }
     return currentClaim;
   });
-  const markFailed = vi.fn(async () => ({
-    record: currentClaim,
-    taskDisposition: "created" as const,
-  }));
+  const markFailed = vi.fn(async () => {
+    if (remainingCrashMarkFailed > 0) {
+      remainingCrashMarkFailed -= 1;
+      throw new Error("PROCESS_CRASH_BEFORE_PARENT_SETTLE");
+    }
+    return {
+      record: currentClaim,
+      taskDisposition: "created" as const,
+    };
+  });
   const markSent = vi.fn(async () => currentClaim);
   const markSkipped = vi.fn(async () => currentClaim);
 
@@ -580,6 +588,169 @@ describe("Task 7 final review: durable per-channel retry authorization", () => {
       expect.anything(),
       "email-log-1",
       clientErrorAuthorization,
+    );
+    expect(test.emailProvider).toHaveBeenCalledTimes(1);
+    expect(deliveries.get(deliveryKey)).toMatchObject({
+      status: "sent",
+      attemptCount: 2,
+    });
+  });
+
+  it.each(["email", "whatsapp"] as const)(
+    "replays ordinary %s failure after a pre-context attempt gap without another provider call",
+    async (channel) => {
+      const key = channel === "email"
+        ? deliveryKey
+        : `${deliveryKey}:whatsapp`;
+      const deliveries = new Map<string, DeliveryState>();
+      if (channel === "email") {
+        deliveries.set(
+          deliveryKey,
+          delivery("email", retryableNetworkAuthorization),
+        );
+      } else {
+        deliveries.set(deliveryKey, delivery("email", null, "sent"));
+        deliveries.set(
+          `${deliveryKey}:whatsapp`,
+          delivery("whatsapp", retryableNetworkAuthorization),
+        );
+      }
+      const journeyFields = {
+        journey: channel === "email" ? "onboarding_90d" : "renewal",
+        instanceKey: channel === "email"
+          ? "activation:member-1"
+          : "renewal-cycle-2",
+        step: channel === "email" ? "welcome" : "renewal_14",
+      } as const;
+      const channelAuthorization = {
+        emailErrorCode: channel === "email"
+          ? retryableNetworkAuthorization
+          : null,
+        whatsappErrorCode: channel === "whatsapp"
+          ? retryableNetworkAuthorization
+          : null,
+      };
+      const preContext = runnerHarness(
+        [claim({
+          ...journeyFields,
+          ...channelAuthorization,
+          claimSource: "scheduled",
+          attemptCount: 2,
+        } as unknown as Partial<JourneyClaim>)],
+        deliveries,
+        {contexts: [new Error("CONTEXT_TEMPORARILY_UNAVAILABLE")]},
+      );
+
+      const transient = await runJourneyBatch(
+        preContext.dependencies,
+        {now, limit: 1},
+      );
+
+      expect(transient).toMatchObject({retried: 1, sent: 0});
+      expect(preContext.emailProvider).not.toHaveBeenCalled();
+      expect(preContext.whatsappProvider).not.toHaveBeenCalled();
+      expect(deliveries.get(key)).toMatchObject({
+        status: "failed",
+        errorCode: retryableNetworkAuthorization,
+        attemptCount: 1,
+      });
+
+      const authorized = claim({
+        ...journeyFields,
+        ...channelAuthorization,
+        claimSource: "scheduled",
+        attemptCount: 3,
+        claimedAt: later,
+        errorCode: "retryable_network",
+      } as unknown as Partial<JourneyClaim>);
+      const staleAt = new Date(later.getTime() + 30 * 60_000);
+      const stale = claim({
+        ...authorized,
+        claimSource: "stale",
+        attemptCount: 4,
+        claimedAt: staleAt,
+        claimExpiresAt: new Date(staleAt.getTime() + 300_000),
+        emailErrorCode: channel === "email" ? "retryable_network" : null,
+        whatsappErrorCode: channel === "whatsapp"
+          ? "retryable_network"
+          : null,
+      });
+      const crash = runnerHarness(
+        [authorized, stale],
+        deliveries,
+        {
+          contexts: [context(), context()],
+          emailProvider: channel === "email"
+            ? "retryable_network"
+            : "sent",
+          whatsappProvider: channel === "whatsapp"
+            ? "retryable_network"
+            : "sent",
+          crashMarkFailed: 1,
+        },
+      );
+
+      await expect(runJourneyBatch(
+        crash.dependencies,
+        {now: later, limit: 1},
+      )).rejects.toThrow("PROCESS_CRASH_BEFORE_PARENT_SETTLE");
+
+      const provider = channel === "email"
+        ? crash.emailProvider
+        : crash.whatsappProvider;
+      const retry = channel === "email"
+        ? crash.retryEmailFailure
+        : crash.retryWhatsappFailure;
+      expect(provider).toHaveBeenCalledTimes(1);
+      expect(retry).toHaveBeenCalledTimes(1);
+      expect(deliveries.get(key)).toMatchObject({
+        status: "failed",
+        errorCode: "retryable_network",
+        attemptCount: 2,
+      });
+
+      const replay = await runJourneyBatch(
+        crash.dependencies,
+        {now: staleAt, limit: 1},
+      );
+
+      expect(replay).toMatchObject({claimed: 1, sent: 0, failed: 1});
+      expect(provider).toHaveBeenCalledTimes(1);
+      expect(retry).toHaveBeenCalledTimes(1);
+      expect(crash.markFailed).toHaveBeenCalledWith(
+        expect.anything(),
+        journeyId,
+        staleAt,
+        "attempts_exhausted",
+        staleAt,
+        expect.anything(),
+      );
+    },
+  );
+
+  it("allows an ordinary retryable email to reopen on a scheduled due claim", async () => {
+    const deliveries = new Map([
+      [deliveryKey, delivery("email", "retryable_network")],
+    ]);
+    const test = runnerHarness(
+      [claim({
+        claimSource: "scheduled",
+        attemptCount: 4,
+        emailErrorCode: "retryable_network",
+      } as unknown as Partial<JourneyClaim>)],
+      deliveries,
+    );
+
+    const summary = await runJourneyBatch(
+      test.dependencies,
+      {now, limit: 1},
+    );
+
+    expect(summary).toMatchObject({sent: 1, failed: 0});
+    expect(test.retryEmailFailure).toHaveBeenCalledWith(
+      expect.anything(),
+      "email-log-1",
+      "retryable_network",
     );
     expect(test.emailProvider).toHaveBeenCalledTimes(1);
     expect(deliveries.get(deliveryKey)).toMatchObject({

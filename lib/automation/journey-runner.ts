@@ -252,17 +252,13 @@ function persistedFailureDisposition(
 
 function shouldReplayPersistedFailure(
   claim: JourneyClaim,
-  delivery: RunnerDeliveryRecord,
   disposition: PersistedFailureDisposition,
 ): boolean {
   if (disposition.authorized) return false;
   const code = disposition.failureCode;
-  return code === "provider_client_error"
+  return claim.claimSource === "stale"
+    || code === "provider_client_error"
     || code === "provider_unclassified_failure"
-    || (
-      claim.claimSource === "stale"
-      && claim.attemptCount === delivery.attemptCount + 1
-    );
 }
 
 function claimToken(claim: JourneyState): Date {
@@ -390,7 +386,7 @@ async function sendEmail(
   if (delivery.status === "failed") {
     const disposition = persistedFailureDisposition(delivery);
     if (
-      shouldReplayPersistedFailure(claim, delivery, disposition)
+      shouldReplayPersistedFailure(claim, disposition)
     ) {
       throw new RunnerFailure(disposition.failureCode);
     }
@@ -502,7 +498,7 @@ async function sendWhatsapp(
   if (delivery.status === "failed") {
     const disposition = persistedFailureDisposition(delivery);
     if (
-      shouldReplayPersistedFailure(claim, delivery, disposition)
+      shouldReplayPersistedFailure(claim, disposition)
     ) {
       throw new RunnerFailure(disposition.failureCode);
     }

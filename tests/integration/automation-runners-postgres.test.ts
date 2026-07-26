@@ -275,7 +275,7 @@ describe.skipIf(!testDatabaseUrl)(
     );
 
     it(
-      "consumes per-channel admin retry once and blocks stale resend after a parent-settle crash",
+      "preserves one per-channel retry through a pre-context attempt gap and stale reclaim",
       async () => {
         const activeDatabase = requireDatabase();
         const activePool = requirePool();
@@ -304,16 +304,17 @@ describe.skipIf(!testDatabaseUrl)(
             code: "retryable_network" as const,
           });
         });
+        let failContextOnce = true;
         let crashBeforeParentSettle = true;
         const crashJourneys: JourneyRunnerDependencies["journeys"] = {
           ...journeys,
-          async reschedule(actor, id, claimedAt, scheduledAt, errorCode) {
+          async markFailed(actor, id, claimedAt, errorCode, completedAt, task) {
             if (crashBeforeParentSettle) {
               crashBeforeParentSettle = false;
               throw new Error("PROCESS_CRASH_BEFORE_PARENT_SETTLE");
             }
-            return journeys.reschedule(
-              actor, id, claimedAt, scheduledAt, errorCode,
+            return journeys.markFailed(
+              actor, id, claimedAt, errorCode, completedAt, task,
             );
           },
         };
@@ -331,6 +332,10 @@ describe.skipIf(!testDatabaseUrl)(
             },
           },
           async loadContext() {
+            if (failContextOnce) {
+              failContextOnce = false;
+              throw new Error("CONTEXT_TEMPORARILY_UNAVAILABLE");
+            }
             return {
               hasLoggedIn: false,
               profileCompleteness: 100,
@@ -468,8 +473,54 @@ describe.skipIf(!testDatabaseUrl)(
           delivery_key: adminRetryDeliveryKey,
         }]);
 
-        await expect(runJourneyBatch(dependencies, {
+        const transient = await runJourneyBatch(dependencies, {
           now: adminRetryNow,
+          limit: 1,
+        });
+        expect(transient).toMatchObject({
+          claimed: 1,
+          retried: 1,
+          sent: 0,
+        });
+        expect(providerSend).not.toHaveBeenCalled();
+
+        const afterTransientDelivery = await activePool.query<{
+          status: string;
+          attempt_count: number;
+          error_code: string | null;
+        }>(
+          `SELECT status, attempt_count, error_code
+           FROM email_log
+           WHERE idempotency_key = $1`,
+          [adminRetryDeliveryKey],
+        );
+        expect(afterTransientDelivery.rows).toEqual([{
+          status: "failed",
+          attempt_count: 1,
+          error_code: "admin_retry_provider_client_error",
+        }]);
+
+        const afterTransientJourney = await activePool.query<{
+          status: string;
+          attempt_count: number;
+          error_code: string | null;
+        }>(
+          `SELECT status, attempt_count, error_code
+           FROM journey_state
+           WHERE id = $1`,
+          [adminRetryJourneyId],
+        );
+        expect(afterTransientJourney.rows).toEqual([{
+          status: "scheduled",
+          attempt_count: 2,
+          error_code: "retryable_network",
+        }]);
+
+        const providerAttemptNow = new Date(
+          adminRetryNow.getTime() + 30 * 60_000,
+        );
+        await expect(runJourneyBatch(dependencies, {
+          now: providerAttemptNow,
           limit: 1,
         })).rejects.toThrow("PROCESS_CRASH_BEFORE_PARENT_SETTLE");
         expect(providerSend).toHaveBeenCalledTimes(1);
@@ -506,11 +557,11 @@ describe.skipIf(!testDatabaseUrl)(
         );
         expect(postCrashJourney.rows).toEqual([{
           status: "processing",
-          attempt_count: 2,
+          attempt_count: 3,
         }]);
 
         const replay = await runJourneyBatch(dependencies, {
-          now: new Date(adminRetryNow.getTime() + 10 * 60_000),
+          now: new Date(providerAttemptNow.getTime() + 10 * 60_000),
           limit: 1,
         });
         expect(replay).toMatchObject({
@@ -554,7 +605,7 @@ describe.skipIf(!testDatabaseUrl)(
         );
         expect(finalJourney.rows).toEqual([{
           status: "failed",
-          attempt_count: 3,
+          attempt_count: 4,
         }]);
         const finalAudit = await activePool.query<{count: number}>(
           `SELECT count(*)::int AS count
