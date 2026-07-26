@@ -98,4 +98,3 @@ describe("WOZTELL channel adapter", () => {
     expect(adapter.verifyWebhook(body, null)).toBe(false);
   });
 });
-

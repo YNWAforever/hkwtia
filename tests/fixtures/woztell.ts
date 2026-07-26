@@ -8,4 +8,3 @@ export const eligibleWhatsAppRecipient = {
   whatsappOptIn: true,
   whatsappNumber: " 85290000000 ",
 } as const;
-
