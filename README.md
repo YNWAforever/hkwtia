@@ -1,6 +1,6 @@
 # WTIA Platform
 
-The WTIA public platform is a bilingual Next.js App Router site for the Hong Kong Wireless Technology Industry Association. M0 ships the server-rendered public route surface in English and Traditional Chinese (`/` and `/zh`); M1 adds self-service membership, Stripe billing, company seats, and an authenticated member portal; M2 adds the staff-only Admin CRM.
+The WTIA public platform is a bilingual Next.js App Router site for the Hong Kong Wireless Technology Industry Association. M0 ships the server-rendered public route surface in English and Traditional Chinese (`/` and `/zh`); M1 adds self-service membership, Stripe billing, company seats, and an authenticated member portal; M2 adds the staff-only Admin CRM; M3 adds deterministic member journeys, campaigns, provider boundaries, scheduled jobs, and staff automation operations.
 
 ## Requirements
 
@@ -24,6 +24,7 @@ Open `http://localhost:3000/` or `http://localhost:3000/zh`.
 | `npm run test:e2e` | Run Playwright browser tests |
 | `npm run test:e2e -- tests/e2e/m1-acceptance.spec.ts` | Run deterministic M1 acceptance contracts (live mode is credential-gated) |
 | `npm run test:e2e -- tests/e2e/m2-admin-crm.spec.ts` | Run M2 browser acceptance; authenticated tests require isolated Neon/Auth credentials |
+| `npm run test:e2e -- tests/e2e/m3-automations.spec.ts` | Run M3 Preview acceptance; tests skip safely when the isolated URL, credentials, or confirmation tokens are absent |
 | `npm run audit:strings` | Reject unapproved visible JSX literals |
 | `npm run lint` | Run ESLint |
 | `npm run typecheck` | Run strict TypeScript checking |
@@ -32,6 +33,7 @@ Open `http://localhost:3000/` or `http://localhost:3000/zh`.
 | `npm run db:migrate` | Apply Drizzle migrations from `drizzle/` using `DATABASE_URL` |
 | `npm run db:seed` | Idempotently seed the M1 plans and deterministic M2 CRM demo data |
 | `npm run db:seed:m1` / `npm run db:seed:m2` | Run one seed layer directly |
+| `npm run db:seed:m3` | Reconcile the deterministic M3 acceptance fixture using explicit `DATABASE_URL` and `M3_SEED_NOW` |
 | `npm test --prefix workers` | Run the isolated Cloudflare automation Worker tests |
 | `npm run typecheck --prefix workers` | Type-check the isolated Cloudflare automation Worker |
 | `npm run deploy:preview --prefix workers` | Deploy the Preview-only automation Worker |
@@ -48,6 +50,36 @@ Set `PLAYWRIGHT_BASE_URL` or `LHCI_BASE_URL` when browser or Lighthouse checks s
 The M1 acceptance evidence template is [`docs/m1-acceptance.md`](./docs/m1-acceptance.md). The deterministic acceptance contracts run without credentials; the real Neon/Stripe preview flow is enabled only when isolated `DATABASE_URL_TEST` and Stripe test variables are present.
 
 The M2 evidence is [`docs/m2-acceptance.md`](./docs/m2-acceptance.md). For an authenticated demo, migrate and seed an isolated Neon branch, create test-only Neon Auth staff/member accounts mapped to the seeded profiles, set the seven names documented there, and run the focused M2 Playwright file. Storage state is written only below ignored `test-results`; never copy production database or Auth credentials into the test environment.
+
+## M3 acceptance
+
+The M3 seed is intentionally opt-in. Set `DATABASE_URL` to an isolated,
+currently migrated test or Preview database and set `M3_SEED_NOW` to one
+explicit ISO-8601 instant that includes `Z` or a numeric timezone offset. Then
+run:
+
+```sh
+npm run db:seed:m3
+```
+
+The seed uses fixed, visibly synthetic identities under `m3.example.test`,
+derives its Day-7 and renewal D-14 rows from the controlled Hong Kong calendar
+day, and reconciles only its fixed fixture scope in one advisory-locked
+transaction. Do not point it at a shared or production database.
+
+The Postgres acceptance suite uses only `DATABASE_URL_TEST`; without that
+isolated database its five destructive cases are collected and reported as
+skipped. Migrate the isolated database before running the focused integration
+file. Provider calls remain local: email uses the test transport, and WhatsApp
+uses credential-free mock mode.
+
+For browser acceptance, deploy the same seeded database to an isolated Preview,
+map test-only staff and member Auth accounts to the seeded profile IDs, and set
+`PLAYWRIGHT_BASE_URL`, the four `M3_TEST_*` credential names, and both
+`M3_TEST_UNSUBSCRIBE_TOKEN_*` names outside the repository. Set
+`VERCEL_SHARE_TOKEN` only when the HTTPS Vercel Preview is protected. Generate
+unsubscribe confirmation tokens from that Preview's signing configuration;
+never commit populated values.
 
 ## M3 Preview automation Worker
 
