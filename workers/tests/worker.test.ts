@@ -245,6 +245,33 @@ describe("Cloudflare automation scheduler", () => {
     }
   });
 
+  it("adds the Vercel automation bypass header when Preview protection is configured", async () => {
+    const calls: RecordedRequest[] = [];
+    const worker = createAutomationWorker({
+      fetch: createFetch(calls, () => new Response(null, {status: 204})),
+      sleep: async () => {},
+      logger: {error: vi.fn()},
+    });
+
+    await runScheduled(worker, {
+      env: {
+        APP_URL: "https://preview.example.test",
+        CRON_SECRET: "cron-secret",
+        VERCEL_AUTOMATION_BYPASS_SECRET: "bypass-secret",
+      } as WorkerEnv & {
+        VERCEL_AUTOMATION_BYPASS_SECRET: string;
+      },
+    });
+
+    expect(calls).toHaveLength(2);
+    for (const call of calls) {
+      expect(
+        new Headers(call.init?.headers).get(
+          "x-vercel-protection-bypass",
+        ),
+      ).toBe("bypass-secret");
+    }
+  });
   it("never follows a cross-origin job redirect or sends its bearer to the redirect target", async () => {
     const calls: RecordedRequest[] = [];
     const leakedAuthorizations: Array<string | null> = [];

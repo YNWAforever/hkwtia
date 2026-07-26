@@ -9,6 +9,7 @@ export type WorkerJob =
 export type WorkerEnv = Readonly<{
   APP_URL: string;
   CRON_SECRET: string;
+  VERCEL_AUTOMATION_BYPASS_SECRET?: string;
 }>;
 
 type JobFailureCode =
@@ -75,6 +76,7 @@ class WorkerConfigError extends Error {
 type ValidConfig = Readonly<{
   appUrl: URL;
   secret: string;
+  protectionBypass: string | null;
 }>;
 
 function isLocalHostname(hostname: string): boolean {
@@ -124,7 +126,12 @@ function validateConfig(env: WorkerEnv): ValidConfig {
   }
 
   appUrl.pathname = appUrl.pathname.replace(/\/+$/u, "") || "/";
-  return {appUrl, secret: env.CRON_SECRET};
+  return {
+    appUrl,
+    secret: env.CRON_SECRET,
+    protectionBypass:
+      env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim() || null,
+  };
 }
 
 function dueJobs(cron: string): readonly WorkerJob[] {
@@ -223,6 +230,12 @@ async function notifyFinalFailure(
         headers: {
           authorization: `Bearer ${config.secret}`,
           "content-type": "application/json",
+          ...(config.protectionBypass
+            ? {
+                "x-vercel-protection-bypass":
+                  config.protectionBypass,
+              }
+            : {}),
         },
         body: JSON.stringify(payload),
       },
@@ -258,6 +271,12 @@ async function invokeJob(
           method: "POST",
           headers: {
             authorization: `Bearer ${config.secret}`,
+            ...(config.protectionBypass
+              ? {
+                  "x-vercel-protection-bypass":
+                    config.protectionBypass,
+                }
+              : {}),
           },
         },
       );
