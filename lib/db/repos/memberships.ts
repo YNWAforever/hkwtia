@@ -5,6 +5,13 @@ import {and, eq, exists, isNull, or, sql} from "drizzle-orm";
 import type {Actor} from "@/lib/membership/lifecycle";
 import {companyMembers, membershipApplications, memberships as membershipsTable, type Membership} from "@/lib/db/server-schema";
 import {forbidden, getDb, requireSystem} from "@/lib/db/repos/common";
+import {dunningLapseRepository} from "@/lib/db/repos/dunning-lapse";
+
+export {
+  createDunningLapseRepository,
+  type DunningLapseDisposition,
+  type DunningLapseInput,
+} from "@/lib/db/repos/dunning-lapse";
 
 export type MembershipInput = Pick<Membership, "planCode" | "seatLimit"> & Partial<Pick<Membership, "ownerUserId" | "companyId" | "applicationId" | "status" | "stripeCustomerId" | "stripeSubscriptionId" | "billingPeriodStart" | "billingPeriodEnd" | "cancelAtPeriodEnd">>;
 export type MembershipUpdate = Partial<Pick<Membership, "planCode" | "status" | "seatLimit" | "stripeCustomerId" | "stripeSubscriptionId" | "billingPeriodStart" | "billingPeriodEnd" | "cancelAtPeriodEnd">>;
@@ -83,6 +90,8 @@ function membershipScope(actor: Actor, membershipId: string) {
 }
 
 export const membershipsRepository = {
+  lapseDunningEpisode: dunningLapseRepository.lapseDunningEpisode,
+
   async getByApplicationId(actor: Actor, applicationId: string): Promise<Membership | null> {
     if (actor.kind !== "member" && actor.kind !== "system") forbidden();
     if (actor.kind === "system") requireSystem(actor);

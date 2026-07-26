@@ -72,12 +72,16 @@ async function defaultDatabaseLoader(): Promise<AutomationDatabase> {
   return await getDb() as unknown as AutomationDatabase;
 }
 
+function deliveryTable(channel: JourneyChannel) {
+  return channel === "email" ? emailLog : whatsappLog;
+}
+
 async function existingReservation(
   transaction: AutomationSqlExecutor,
   channel: JourneyChannel,
   idempotencyKey: string,
 ): Promise<DeliveryRecord> {
-  const table = channel === "email" ? emailLog : whatsappLog;
+  const table = deliveryTable(channel);
   const row = rowsFrom(await transaction.execute(sql`
     SELECT * FROM ${table} WHERE idempotency_key = ${idempotencyKey} LIMIT 1
   `))[0];
@@ -85,10 +89,68 @@ async function existingReservation(
   return recordFrom(channel, row);
 }
 
-function completedRecord(channel: JourneyChannel, result: unknown): DeliveryRecord {
-  const row = rowsFrom(result)[0];
-  if (!row) throw new Error("INVALID_DELIVERY_TRANSITION");
-  return recordFrom(channel, row);
+async function reopenFailedReservation(
+  transaction: AutomationSqlExecutor,
+  channel: JourneyChannel,
+  idempotencyKey: string,
+): Promise<DeliveryRecord | null> {
+  const table = deliveryTable(channel);
+  const row = rowsFrom(await transaction.execute(sql`
+    UPDATE ${table}
+    SET status = 'processing',
+        provider_id = NULL,
+        error_code = NULL,
+        attempt_count = attempt_count + 1
+    WHERE idempotency_key = ${idempotencyKey} AND status = 'failed'
+    RETURNING *
+  `))[0];
+  return row ? recordFrom(channel, row) : null;
+}
+
+async function reserveExisting(
+  transaction: AutomationSqlExecutor,
+  channel: JourneyChannel,
+  idempotencyKey: string,
+): Promise<DeliveryReservation> {
+  const reopened = await reopenFailedReservation(transaction, channel, idempotencyKey);
+  return {
+    record: reopened ?? await existingReservation(transaction, channel, idempotencyKey),
+    disposition: "existing",
+  };
+}
+
+function completionMatches(record: DeliveryRecord, completion: DeliveryCompletion): boolean {
+  if (record.status !== completion.status) return false;
+  if (completion.status === "sent") return record.providerId === completion.providerId;
+  return record.errorCode === completion.errorCode
+    && record.providerId === (completion.providerId ?? null);
+}
+
+async function completeReservedDelivery(
+  database: AutomationSqlExecutor,
+  channel: JourneyChannel,
+  id: string,
+  completion: DeliveryCompletion,
+): Promise<DeliveryRecord> {
+  const table = deliveryTable(channel);
+  const updated = rowsFrom(await database.execute(sql`
+    UPDATE ${table}
+    SET status = ${completion.status},
+        provider_id = ${completion.providerId ?? null},
+        error_code = ${completion.status === "failed" ? completion.errorCode : null}
+    WHERE id = ${id} AND status = 'processing'
+    RETURNING *
+  `))[0];
+  if (updated) return recordFrom(channel, updated);
+
+  const existing = rowsFrom(await database.execute(sql`
+    SELECT * FROM ${table} WHERE id = ${id} LIMIT 1
+  `))[0];
+  if (existing) {
+    const record = recordFrom(channel, existing);
+    if (completionMatches(record, completion)) return record;
+  }
+  throw new Error("INVALID_DELIVERY_TRANSITION");
 }
 
 export function createDeliveriesRepository(loadDatabase: AutomationDatabaseLoader = defaultDatabaseLoader) {
@@ -108,20 +170,13 @@ export function createDeliveriesRepository(loadDatabase: AutomationDatabaseLoade
       `);
       const created = rowsFrom(result)[0];
       if (created) return {record: recordFrom("email", created), disposition: "created"};
-      return {record: await existingReservation(database, "email", input.idempotencyKey), disposition: "existing"};
+      return reserveExisting(database, "email", input.idempotencyKey);
     },
 
     async completeEmail(actor: Actor, id: string, completion: DeliveryCompletion): Promise<DeliveryRecord> {
       requireSystem(actor);
       const database = await loadDatabase();
-      return completedRecord("email", await database.execute(sql`
-        UPDATE ${emailLog}
-        SET status = ${completion.status},
-            provider_id = ${completion.providerId ?? null},
-            error_code = ${completion.status === "failed" ? completion.errorCode : null}
-        WHERE id = ${id} AND status = 'processing'
-        RETURNING *
-      `));
+      return completeReservedDelivery(database, "email", id, completion);
     },
 
     async reserveWhatsapp(actor: Actor, input: WhatsappReservationInput): Promise<DeliveryReservation> {
@@ -139,20 +194,13 @@ export function createDeliveriesRepository(loadDatabase: AutomationDatabaseLoade
       `);
       const created = rowsFrom(result)[0];
       if (created) return {record: recordFrom("whatsapp", created), disposition: "created"};
-      return {record: await existingReservation(database, "whatsapp", input.idempotencyKey), disposition: "existing"};
+      return reserveExisting(database, "whatsapp", input.idempotencyKey);
     },
 
     async completeWhatsapp(actor: Actor, id: string, completion: DeliveryCompletion): Promise<DeliveryRecord> {
       requireSystem(actor);
       const database = await loadDatabase();
-      return completedRecord("whatsapp", await database.execute(sql`
-        UPDATE ${whatsappLog}
-        SET status = ${completion.status},
-            provider_id = ${completion.providerId ?? null},
-            error_code = ${completion.status === "failed" ? completion.errorCode : null}
-        WHERE id = ${id} AND status = 'processing'
-        RETURNING *
-      `));
+      return completeReservedDelivery(database, "whatsapp", id, completion);
     },
   };
 }

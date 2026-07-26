@@ -46,7 +46,7 @@ export const userRoleEnum = pgEnum("user_role", ["member", "staff", "exco", "sup
 export const billingIntervalEnum = pgEnum("billing_interval", ["annual", "monthly", "none"]);
 export const registrationStatusEnum = pgEnum("registration_status", ["registered", "waitlist", "cancelled", "attended", "no_show"]);
 export const campaignStatusEnum = pgEnum("campaign_status", ["queued", "processing", "completed", "cancelled"]);
-export const recipientStatusEnum = pgEnum("campaign_recipient_status", ["queued", "sent", "failed", "suppressed"]);
+export const recipientStatusEnum = pgEnum("campaign_recipient_status", ["queued", "processing", "sent", "failed", "suppressed"]);
 export const approvalStatusEnum = pgEnum("approval_status", ["pending", "approved", "rejected", "expired"]);
 export const journeyStatusEnum = pgEnum("journey_status", ["scheduled", "processing", "sent", "skipped", "failed"]);
 export const staffTaskStatusEnum = pgEnum("staff_task_status", ["open", "resolved"]);
@@ -419,7 +419,14 @@ export const campaignRecipients = pgTable("campaign_recipients", {
   locale: varchar("locale", {length: 10}).notNull(),
   variables: jsonb("variables").$type<Record<string, string>>().notNull(),
   status: recipientStatusEnum("status").default("queued").notNull(),
-}, (table) => [unique("campaign_recipients_campaign_profile_unique").on(table.campaignId, table.profileId)]);
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  claimedAt: timestamp("claimed_at", {withTimezone: true}),
+  claimExpiresAt: timestamp("claim_expires_at", {withTimezone: true}),
+  errorCode: text("error_code"),
+}, (table) => [
+  unique("campaign_recipients_campaign_profile_unique").on(table.campaignId, table.profileId),
+  index("campaign_recipients_due_idx").on(table.status, table.claimExpiresAt),
+]);
 
 export const events = pgTable("events", {
   id: uuid("id").defaultRandom().primaryKey(),

@@ -18,7 +18,8 @@ const conditionMatches = (condition: JourneyStep["condition"], context: JourneyC
 const hasDeliverableChannel = (step: JourneyStep, context: JourneyContext): boolean => {
   if (step.classification === "marketing" && !context.marketingConsent) return false;
 
-  const emailAllowed = step.channels.includes("email") && !context.emailSuppressed;
+  const emailAllowed = step.channels.includes("email")
+    && (step.classification === "transactional" || !context.emailSuppressed);
   const whatsappAllowed = step.channels.includes("whatsapp") && context.whatsappOptIn && Boolean(context.whatsappNumber?.trim());
   return emailAllowed || whatsappAllowed;
 };

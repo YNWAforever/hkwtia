@@ -43,28 +43,29 @@ describe("evaluateStep", () => {
     expect(evaluateStep(day14, context({profileCompleteness: 70}))).toBe("skip_condition");
   });
 
-  it("suppresses marketing messages when current marketing consent is absent", () => {
+  it("suppresses marketing messages without current consent or with an active email suppression", () => {
     const marketingStep = step("onboarding_90d", "day30_recap");
     const transactionalStep = step("onboarding_90d", "welcome");
 
     expect(evaluateStep(marketingStep, context({marketingConsent: false}))).toBe("skip_suppressed");
+    expect(evaluateStep(marketingStep, context({emailSuppressed: true}))).toBe("skip_suppressed");
     expect(evaluateStep(transactionalStep, context({marketingConsent: false}))).toBe("send");
   });
 
-  it("suppresses email-only messages when email is suppressed", () => {
+  it("keeps transactional email eligible when marketing email is suppressed", () => {
     expect(evaluateStep(step("onboarding_90d", "welcome"), context({emailSuppressed: true})))
-      .toBe("skip_suppressed");
+      .toBe("send");
   });
 
-  it("uses WhatsApp as an eligible alternative only with opt-in and a number", () => {
+  it("does not require WhatsApp when transactional email remains eligible", () => {
     const renewal = step("renewal", "renewal_14");
 
     expect(evaluateStep(renewal, context({emailSuppressed: true, whatsappOptIn: true, whatsappNumber: "+85290000000"})))
       .toBe("send");
     expect(evaluateStep(renewal, context({emailSuppressed: true, whatsappOptIn: false, whatsappNumber: "+85290000000"})))
-      .toBe("skip_suppressed");
+      .toBe("send");
     expect(evaluateStep(renewal, context({emailSuppressed: true, whatsappOptIn: true, whatsappNumber: null})))
-      .toBe("skip_suppressed");
+      .toBe("send");
   });
 
   it("flags a low D90 score for the later staff task without suppressing the email", () => {

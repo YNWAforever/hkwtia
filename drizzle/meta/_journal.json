@@ -50,6 +50,13 @@
       "when": 1785008363985,
       "tag": "0007_m3_automations",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1785025874067,
+      "tag": "0008_m3_campaign_recipient_leases",
+      "breakpoints": true
     }
   ]
 }
