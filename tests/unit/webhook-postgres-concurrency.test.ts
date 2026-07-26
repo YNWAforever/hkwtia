@@ -36,6 +36,13 @@ describe.skipIf(!enabled)("webhook ordering on isolated Postgres", () => {
         request_id text NOT NULL,
         metadata jsonb NOT NULL
       );
+      CREATE TABLE journey_state (
+        profile_id text NOT NULL,
+        journey text NOT NULL,
+        instance_key text NOT NULL,
+        step text NOT NULL,
+        UNIQUE (profile_id, journey, instance_key, step)
+      );
       INSERT INTO memberships VALUES ('membership-1', 'active');
     `);
   }, 30_000);
@@ -52,6 +59,9 @@ describe.skipIf(!enabled)("webhook ordering on isolated Postgres", () => {
       SELECT pg_sleep(1.5);
       INSERT INTO audit_events (target_id, action, request_id, metadata)
       VALUES ('membership-1', 'stripe.webhook.processed', 'evt_z', '{"stripeCreated":100}');
+      INSERT INTO journey_state (profile_id, journey, instance_key, step)
+      VALUES ('profile-1', 'dunning', 'payment:evt_z', 'dunning_0')
+      ON CONFLICT DO NOTHING;
       COMMIT;
     `;
     const winner = spawn("docker", ["exec", "-i", container, "psql", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-At"], {
@@ -112,6 +122,9 @@ describe.skipIf(!enabled)("webhook ordering on isolated Postgres", () => {
         AND action IN ('stripe.webhook.processed', 'stripe.webhook.ignored_stale')
       ORDER BY (metadata->>'stripeCreated')::bigint DESC, request_id DESC
       LIMIT 1;
+      SELECT journey || ':' || instance_key || ':' || step
+      FROM journey_state
+      WHERE profile_id = 'profile-1';
       ROLLBACK;
     `);
     const waitedMs = Date.now() - started;
@@ -122,5 +135,6 @@ describe.skipIf(!enabled)("webhook ordering on isolated Postgres", () => {
     expect(winnerStdout).toContain("LOCK_ACQUIRED");
     expect(waitedMs).toBeGreaterThanOrEqual(900);
     expect(waiterOutput).toContain("100:evt_z");
+    expect(waiterOutput).toContain("dunning:payment:evt_z:dunning_0");
   }, 20_000);
 });

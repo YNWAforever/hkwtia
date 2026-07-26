@@ -4,7 +4,7 @@ import {and, eq, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";
 import {profiles as profilesTable, type Profile} from "@/lib/db/server-schema";
-import {forbidden, getDb, requireMember} from "@/lib/db/repos/common";
+import {forbidden, getDb, requireMember, requireSystem} from "@/lib/db/repos/common";
 
 export type ProfileInput = Pick<Profile, "id" | "displayName"> & Partial<Pick<Profile, "phone" | "jobTitle" | "locale" | "onboardingState" | "directoryVisible">>;
 export type ProfileUpdate = Partial<Pick<Profile, "displayName" | "phone" | "jobTitle" | "locale" | "onboardingState" | "directoryVisible">>;
@@ -32,6 +32,7 @@ export const profilesRepository = {
   },
   async getById(actor: Actor, userId: string): Promise<Profile | null> {
     if (actor.kind === "member" && actor.profileId !== userId) forbidden();
+    if (actor.kind === "system") requireSystem(actor);
     if (actor.kind === "anonymous") {
       const db = await getDb();
       const rows = await db.select().from(profilesTable).where(profileScope(actor, userId)).limit(1);
@@ -44,6 +45,7 @@ export const profilesRepository = {
 
   async create(actor: Actor, input: ProfileInput): Promise<Profile> {
     if (actor.kind === "member" && actor.profileId !== input.id) forbidden();
+    if (actor.kind === "system") requireSystem(actor);
     if (actor.kind === "anonymous") forbidden();
     const db = await getDb();
     const rows = await db.insert(profilesTable).values({...input, authUserId: actor.kind === "system" ? input.id : actor.userId}).returning();
@@ -64,6 +66,7 @@ export const profilesRepository = {
 
   async remove(actor: Actor, userId: string): Promise<void> {
     if (actor.kind !== "system" && (actor.kind !== "member" || actor.profileId !== userId)) forbidden();
+    if (actor.kind === "system") requireSystem(actor);
     const db = await getDb();
     await db.delete(profilesTable).where(and(eq(profilesTable.id, userId), profileScope(actor, userId)));
   },

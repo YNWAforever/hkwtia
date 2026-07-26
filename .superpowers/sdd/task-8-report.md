@@ -1,106 +1,142 @@
-# Task 8 Report: Repository-backed events and idempotent check-in
+# Task 8 Report: Engagement scoring and approval expiration
 
 ## Outcome
 
 DONE
 
-Task 8 replaces the static production event source with Actor-first database repositories, serialized member registration, audited event management, idempotent attendance check-in, localized public/member/admin Server Components, and real not-found boundaries. Review hardening now also enforces eligible membership at the repository and transaction boundaries, restores full event-detail SEO, returns safe localized action states, validates resulting event periods, and proves concurrency against disposable PostgreSQL 16.
+Task 8 adds pure 180-day decayed engagement scoring with a 28-day trend, a system-only batched score runner and conflict upsert, plus a system-only approval expiry runner whose pending-row transition, audit event, and deduplicated staff task are committed atomically behind a `FOR UPDATE SKIP LOCKED` claim.
+
+No schema migration was needed. Existing `engagement_scores`, `approvals`, `audit_events`, and `staff_tasks` contracts support the implementation.
+
+## Baseline
+
+Before Task 8 production edits:
+
+```powershell
+npm.cmd test
+```
+
+Result: PASS; 127 files passed, 9 environment-gated files skipped; 659 tests passed, 25 skipped.
 
 ## Exact TDD evidence
 
-Initial RED, before the first production implementation:
+Initial RED, after adding only the three required tests:
 
 ```powershell
-npx.cmd vitest run tests/unit/admin-events.test.ts tests/unit/event-check-in.test.ts tests/unit/public-event-repository.test.ts --reporter=dot
+npm.cmd test -- tests/unit/engagement-scoring.test.ts tests/unit/engagement-score-runner.test.ts tests/unit/approvals-expirer.test.ts
 ```
 
-Result: three failed suites; the expected event repository and admin event modules did not exist.
+Result: FAIL; all 3 suites failed at import resolution because `@/lib/engagement/scoring`, `@/lib/automation/engagement-score-runner`, and `@/lib/automation/approvals-expirer` did not exist. No tests were collected.
 
-Review RED, before review fixes:
+Required-suite GREEN after the first implementation:
 
 ```powershell
-npx.cmd vitest run tests/unit/admin-events.test.ts tests/unit/public-event-repository.test.ts tests/unit/event-detail-seo.test.ts tests/unit/event-action-state.test.ts --reporter=dot --maxWorkers=2 --minWorkers=1
+npm.cmd test -- tests/unit/engagement-scoring.test.ts tests/unit/engagement-score-runner.test.ts tests/unit/approvals-expirer.test.ts
 ```
 
-Result: four files failed, with 6 failed and 4 passed tests. The failures demonstrated inactive-member access, malformed-slug exceptions, missing resulting-period validation, missing shared SEO/JSON-LD wiring, and missing safe action-state helpers.
+Result: PASS; 3 files passed; 21/21 tests passed.
 
-Focused and required regression GREEN:
+Precision RED exposed premature trend rounding:
 
 ```powershell
-npx.cmd vitest run tests/unit/admin-events.test.ts tests/unit/event-check-in.test.ts tests/unit/public-event-repository.test.ts tests/unit/event-detail-seo.test.ts tests/unit/event-action-state.test.ts tests/unit/content-contract.test.ts tests/unit/detail-pages.test.ts tests/unit/portal-content-scope.test.ts --reporter=verbose --maxWorkers=2 --minWorkers=1
+npm.cmd test -- tests/unit/engagement-trend-precision.test.ts
 ```
 
-Result: 8 files passed; 25/25 tests passed.
+Result: FAIL; 1/1 test failed because subtracting already-rounded scores returned `0.88` instead of the exact-score difference rounded once to `0.89`.
 
-Gated real-PostgreSQL race GREEN:
+Precision GREEN:
 
 ```powershell
-$env:RUN_POSTGRES_INTEGRATION='1'
-npx.cmd vitest run tests/unit/task8-postgres-integration.test.ts --reporter=verbose --maxWorkers=1 --minWorkers=1
+npm.cmd test -- tests/unit/engagement-trend-precision.test.ts tests/unit/engagement-scoring.test.ts
 ```
 
-Result: 1 file passed; 1/1 test passed. Two concurrent registrations for a capacity-one event produced exactly one `registered` and one `waitlist`. Two concurrent check-ins produced one `checked_in`, one `already_checked_in`, exactly one attendance engagement fact, and exactly one audit event. The test starts and removes a disposable `postgres:16-alpine` container and never reads a production database URL.
+Result: PASS; 2 files passed; 11/11 tests passed.
 
-## Review fixes
-
-- Member event lists reject inactive memberships before reading rows. RSVP rechecks an eligible direct or company membership inside the same locked transaction as the capacity decision.
-- Public repository-backed event detail pages use localized database data with `buildPageMetadata`, canonical/hreflang, Open Graph, Twitter, and `buildEventData` JSON-LD.
-- Create, update, check-in, and RSVP actions return localized generic success/error states through `aria-live`; validation errors are field-linked and preserve only the event form's allowlisted non-sensitive values.
-- Event updates validate the resulting persisted period after merging partial input with the locked current row. Malformed public slugs return a safe not-found result.
-- Attendee statuses, dates, pending labels, and admin event titles are localized.
-## Second re-review: Server Action serialization and Hong Kong event time
-
-Serialization RED, before production edits:
+Requesterless-approval RED demonstrated that an approval could otherwise be expired without its required staff task:
 
 ```powershell
-npx.cmd vitest run tests/unit/event-server-action-serialization.test.ts --reporter=verbose --maxWorkers=1 --minWorkers=1
+npm.cmd test -- tests/unit/approval-expiry-orphan.test.ts
 ```
 
-Result: 1 file failed; 4/4 tests failed. The admin create, update, and check-in actions plus member RSVP action each called the captured next-intl translator from inside a client-bound inline Server Action.
+Result: FAIL; 1/1 test failed because the expiry update did not yet exclude a claimed row whose requester profile had been deleted.
 
-Datetime RED, before the helper existed:
+Requesterless-approval GREEN:
 
 ```powershell
-npx.cmd vitest run tests/unit/event-hong-kong-datetime.test.ts --reporter=verbose --maxWorkers=1 --minWorkers=1
+npm.cmd test -- tests/unit/approval-expiry-orphan.test.ts
 ```
 
-Result: the suite failed to resolve the intended `@/lib/admin/event-form-input` conversion seam. Its behavioral cases specify winter, summer, and year-boundary round trips plus `18:00` Hong Kong form input persisting as `10:00Z`.
+Result: PASS; 1/1 test passed. Such rows remain pending and are reported with the sanitized `MISSING_REQUESTER_PROFILE` code.
 
-Focused GREEN after the minimal fixes:
+Claim-order RED demonstrated that requesterless rows could occupy a limited claim batch and starve later taskable approvals:
 
 ```powershell
-npx.cmd vitest run tests/unit/event-server-action-serialization.test.ts tests/unit/event-hong-kong-datetime.test.ts tests/unit/admin-events.test.ts tests/unit/event-check-in.test.ts tests/unit/public-event-repository.test.ts tests/unit/event-detail-seo.test.ts tests/unit/event-action-state.test.ts tests/unit/content-contract.test.ts tests/unit/detail-pages.test.ts tests/unit/portal-content-scope.test.ts --reporter=verbose --maxWorkers=2 --minWorkers=1
+npm.cmd test -- tests/unit/approval-expiry-orphan-ordering.test.ts
 ```
 
-Result: 10 files passed; 33/33 tests passed. Action messages are resolved to plain serializable objects before action definitions. Admin form values now parse and format explicitly in `Asia/Hong_Kong`, independent of the process timezone.
+Result: FAIL; 1/1 test failed because the claim ordered only by request time and ID.
 
-## Verification
+Claim-order GREEN with adjacent expiry invariants:
 
-- `npm.cmd run typecheck`: PASS
-- `npm.cmd run lint`: PASS
-- `npm.cmd run audit:strings`: PASS; 86 TSX files scanned
-- `npm.cmd test -- --reporter=dot --maxWorkers=4 --minWorkers=2`: PASS; 81 files passed, 4 skipped; 363 tests passed, 5 skipped
-- `npm.cmd run build`: PASS; repository-backed public/member/admin event routes are dynamic
-- `$env:TZ='America/New_York'; npx.cmd vitest run tests/unit/event-hong-kong-datetime.test.ts ...`: PASS; 4/4 tests, proving process-timezone independence
-- Node UTF-8 parse of both locale JSON files: PASS
-- `git diff --check`: PASS, with expected Windows LF/CRLF notices only
-- UTF-8 BOM scan across all changed and untracked files: PASS
-- Task-scoped error/PII scan: PASS; no raw caught error, action payload, or profile/event identifier is surfaced to action-state messages
-- Disposable Task 8 container cleanup check: PASS
+```powershell
+npm.cmd test -- tests/unit/approval-expiry-orphan-ordering.test.ts tests/unit/approval-expiry-orphan.test.ts tests/unit/approvals-expirer.test.ts
+```
+
+Result: PASS; 3 files passed; 7/7 tests passed. Taskable approvals now sort before requesterless rows prior to `LIMIT`.
+
+## Implementation
+
+- `scoreEngagement(events, asOf)` applies `min(100, max(0, sum(points * 0.97^weeksAgo)))` using fractional weeks, includes the exact 180-day boundary, excludes events after each evaluation instant, and stores score and trend at two decimals.
+- Trend subtracts the exact current and prior values before rounding. The prior value is independently evaluated at `asOf - 28 days` with its own 180-day window.
+- `recomputeEngagementScores(actor, asOf)` accepts only the `automation-cron` system actor, pages deterministic profile-ID batches, loads only profile IDs plus event points/timestamps across the required 208-day union window, and upserts each profile without loading personal fields.
+- Score-runner failures are bounded and summarized only with stable non-sensitive codes. Invalid profile facts and individual upsert failures do not stop the remaining profiles.
+- `expireStaleApprovals(actor, asOf)` accepts only the `automation-cron` system actor and expires pending approvals at the inclusive `requested_at <= asOf - 72h` boundary.
+- Each approval batch uses one transaction and one data-modifying CTE statement. It claims with `FOR UPDATE SKIP LOCKED`, updates only still-pending taskable rows, inserts the system audit, and inserts a stable deduplicated staff task from the exact updated-row set.
+- Audit request IDs and staff-task dedupe keys are `approval-expiry:<approvalId>`. Audit metadata is limited to `{reason: "pending_timeout"}`.
+- Requesterless approvals remain pending rather than committing a taskless expiry. Null-last claim ordering prevents those rows from starving valid approvals.
+
+## Contract interpretation
+
+The plan's illustrative 26-week fixture lists `{score: 0, trend: 0}`, but the governing trend rule says to calculate the prior score independently at `asOf - 28 days`. A 182-day-old event is outside the current window but only 154 days old at the prior instant, so the implemented and tested result for 10 points is `{score: 0, trend: -5.12}`. This follows the explicit rolling-window and future-event-exclusion requirements.
+
+## Final verification
+
+Expanded Task 8 and compatibility suite:
+
+```powershell
+npm.cmd test -- tests/unit/engagement-scoring.test.ts tests/unit/engagement-trend-precision.test.ts tests/unit/engagement-score-runner.test.ts tests/unit/approvals-expirer.test.ts tests/unit/approval-expiry-orphan.test.ts tests/unit/approval-expiry-orphan-ordering.test.ts tests/unit/engagement-repository.test.ts tests/unit/approval-service.test.ts tests/unit/approval-authorization.test.ts tests/unit/automation-repository-authorization.test.ts tests/unit/dunning-lapse-repository.test.ts tests/unit/at-risk-repository-boundary.test.ts
+```
+
+Result: PASS; 12 files passed; 65/65 tests passed.
+
+Environment-gated Postgres collection:
+
+```powershell
+npm.cmd test -- tests/integration/task8-automations-postgres.test.ts
+```
+
+Result: collected successfully; 1 file and 1 test skipped because `DATABASE_URL_TEST` is absent. The test is ready to exercise the exact 72-hour boundary and two concurrent `SKIP LOCKED` runners against the current migrated Postgres schema, but no live-database pass is claimed.
+
+Static and full regression verification:
+
+- `npm.cmd run typecheck`: PASS.
+- `npm.cmd run lint`: PASS.
+- `git diff --check`: PASS, with expected Windows LF/CRLF notices only.
+- `npm.cmd test`: PASS; 133 files passed, 10 environment-gated files skipped; 683 tests passed, 26 skipped.
 
 ## Self-review
 
-- Authorization is Actor-first. Admin mutations and check-in require admin before Zod parsing or database work; member listing and registration require a member before data access.
-- Active membership is a data boundary, not only a route guard. Registration checks it inside the serialized transaction to close time-of-check/time-of-use drift.
-- Create, update, registration, and check-in audit records share the same transaction as their mutations. Check-in also inserts the engagement fact in that transaction.
-- Registration locks the event row before counting confirmed registrations. Check-in locks the composite registration row; repeat check-in returns an idempotent disposition without another engagement or audit.
-- Public and portal production readers have no fallback to static event content. Test readers remain explicit injected dependencies.
-- Dynamic IDs and slugs are Zod-validated. Missing or malformed routes produce real Next.js not-found behavior, and no PII is logged.
+- Code-graph review found `scoreEngagement` is consumed only by the new score runner; both job runners are new entry points. Separate repository factories preserve the existing engagement and admin-approval interfaces.
+- Repository boundaries require a system actor; runner boundaries narrow this to the cron source before any database access.
+- Scoring queries select no email, phone, display name, auth user ID, metadata, company, or membership fields.
+- Caught database errors are not returned or logged. Summaries contain counts and allowlisted codes only.
+- The expiry mutation, audit, and task share one statement and transaction, so a side-effect failure rolls back the claim and status transition.
+- Existing Task 1-3 report edits were present before this task, were preserved, and are excluded from the Task 8 commit. The progress ledger was intentionally not modified.
 
-## Remaining baseline note
+## Remaining verification note
 
-The build retains the existing stale `caniuse-lite` warning. Task 8 changed no dependency manifests.
+The Postgres concurrency and exact-boundary integration case remains unexecuted until an isolated `DATABASE_URL_TEST` is supplied. Unit SQL-shape tests, compatibility tests, typecheck, lint, and the full non-DB suite are green.
 
 ## Tool fallback
 
-The linked Windows worktree repeatedly caused `apply_patch` to fail with `helper_unknown_error: apply deny-read ACLs`. After attempting `apply_patch` first, edits were restricted to the exact Task 8 files and written as BOM-free UTF-8. Final BOM, diff, lint, typecheck, test, string-audit, JSON, PostgreSQL, and build gates passed.
+The linked Windows worktree caused `apply_patch` updates of existing files to fail with `helper_unknown_error: apply deny-read ACLs`. New files were created with `apply_patch`; existing-file changes were applied only after resolving and verifying exact absolute paths inside the Task 8 worktree, using complete-file replacement or exact mechanical substitution. Final diff and verification gates passed.

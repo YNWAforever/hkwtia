@@ -11,8 +11,14 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
 import {companiesRepository} from "@/lib/db/repos/companies";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
+import type {Actor} from "@/lib/membership/lifecycle";
 
 const actor = {kind: "member", userId: "user-a", profileId: "user-a"} as const;
+const forgedUnsubscribeActor = {
+  kind: "system",
+  userId: null,
+  source: "unsubscribe",
+} as unknown as Actor;
 
 const membershipRow = [
   "membership-a",
@@ -369,5 +375,20 @@ describe("production repository security boundaries", () => {
       displayName: "Acme Updated",
     })).resolves.toMatchObject({id: "company-b"});
     expect(statements.join("\n").toLowerCase()).not.toContain('from "company_members"');
+  });
+
+  it.each([
+    ["memberships", () => membershipsRepository.getById(forgedUnsubscribeActor, "membership-a")],
+    ["profiles", () => profilesRepository.getById(forgedUnsubscribeActor, "profile-a")],
+    ["companies", () => companiesRepository.getById(forgedUnsubscribeActor, "company-a")],
+  ])("rejects a forged unsubscribe actor at the %s repository before database access", async (_name, invoke) => {
+    const statements: string[] = [];
+    database.current = drizzle(async (query) => {
+      statements.push(query);
+      return {rows: []};
+    });
+
+    await expect(invoke()).rejects.toThrow("FORBIDDEN");
+    expect(statements).toEqual([]);
   });
 });

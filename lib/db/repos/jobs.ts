@@ -1,13 +1,28 @@
 import "server-only";
 
-import {and, eq, sql} from "drizzle-orm";
+import {and, eq, sql, type SQL} from "drizzle-orm";
+
+import {scheduleWebhookLifecycleEnrollment} from "@/lib/automation/enrollment";
+
+import {
+  requireAutomationCron,
+  type AutomationRepositoryActor,
+} from "@/lib/auth/automation-actor";
 
 import type {WebhookLifecycleCommand} from "@/lib/billing/webhook-service";
-import {auditEvents, billingAttempts, engagementEvents, jobs as jobsTable, membershipApplications, memberships, type Job} from "@/lib/db/server-schema";
+import {auditEvents, billingAttempts, engagementEvents, jobs as jobsTable, journeyState, membershipApplications, memberships, type Job} from "@/lib/db/server-schema";
 import {getDb, requireSystem} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";
 
-export type JobClaimResult = "claimed" | "duplicate";
+export type JobClaimResult =
+  | Readonly<{status: "claimed"; attemptCount: number}>
+  | Readonly<{status: "duplicate"}>;
+
+export type ScheduledJobsExecutor = Readonly<{
+  execute: (query: SQL) => PromiseLike<unknown>;
+}>;
+
+export type ScheduledJobsDatabaseLoader = () => Promise<ScheduledJobsExecutor>;
 
 export class WebhookCorrelationError extends Error {
   readonly code = "INVALID_WEBHOOK_EVENT";
@@ -26,6 +41,12 @@ function resultRows(result: unknown): unknown[] {
 function resultRow(result: unknown): Record<string, unknown> | undefined {
   const row = resultRows(result)[0];
   return row && !Array.isArray(row) && typeof row === "object" ? row as Record<string, unknown> : undefined;
+}
+
+function claimToken(row: Record<string, unknown>): number {
+  const value = Number(row.claim_token);
+  if (!Number.isSafeInteger(value) || value < 1) throw new Error("INVALID_JOB_CLAIM");
+  return value;
 }
 
 function requiredString(row: Record<string, unknown> | undefined, key: string): string {
@@ -66,43 +87,140 @@ function redactedError(error: unknown): string {
   return "WEBHOOK_TRANSIENT";
 }
 
+type LifecycleExecutor = Readonly<{execute: (query: SQL) => PromiseLike<unknown>}>;
+
+async function insertWebhookLifecycleEnrollment(
+  actor: Actor,
+  executor: LifecycleExecutor,
+  command: WebhookLifecycleCommand,
+  membership: Record<string, unknown>,
+): Promise<void> {
+  requireSystem(actor);
+  const profileId = requiredString(membership, "profile_id");
+  const scheduled = scheduleWebhookLifecycleEnrollment({
+    membershipId: command.membershipId,
+    profileId,
+    nextStatus: command.nextStatus,
+    eventId: command.eventId,
+    eventCreated: command.eventCreated,
+  });
+  if (scheduled.length === 0) return;
+  const rows = scheduled.map((step) => ({
+    profile_id: step.profileId,
+    membership_id: step.membershipId,
+    journey: step.journey,
+    instance_key: step.instanceKey,
+    step: step.step,
+    scheduled_at: step.scheduledAt.toISOString(),
+    delivery_key: step.deliveryKey,
+  }));
+  await executor.execute(sql`
+    INSERT INTO ${journeyState}
+      (profile_id, membership_id, journey, instance_key, step, scheduled_at, delivery_key)
+    SELECT
+      value.profile_id,
+      value.membership_id::uuid,
+      value.journey,
+      value.instance_key,
+      value.step,
+      value.scheduled_at::timestamptz,
+      value.delivery_key
+    FROM jsonb_to_recordset(${JSON.stringify(rows)}::jsonb) AS value(
+      profile_id text,
+      membership_id text,
+      journey text,
+      instance_key text,
+      step text,
+      scheduled_at text,
+      delivery_key text
+    )
+    ON CONFLICT DO NOTHING
+  `);
+}
+
+async function defaultScheduledJobsDatabaseLoader(): Promise<ScheduledJobsExecutor> {
+  return await getDb() as unknown as ScheduledJobsExecutor;
+}
+
+function validAttemptCount(attemptCount: number): boolean {
+  return Number.isSafeInteger(attemptCount) && attemptCount > 0;
+}
+
+export function createScheduledJobsRepository(
+  loadDatabase: ScheduledJobsDatabaseLoader = defaultScheduledJobsDatabaseLoader,
+) {
+  return {
+    async claim(
+      actor: AutomationRepositoryActor,
+      runKey: string,
+      kind: string,
+    ): Promise<JobClaimResult> {
+      requireAutomationCron(actor);
+      const database = await loadDatabase();
+      const claim = resultRow(await database.execute(sql`
+        INSERT INTO ${jobsTable} ("run_key", "kind", "state", "attempt_count")
+        VALUES (${runKey}, ${kind}, 'processing', 1)
+        ON CONFLICT ("run_key") DO UPDATE
+        SET "kind" = EXCLUDED."kind", "state" = 'processing',
+            "attempt_count" = ${jobsTable.attemptCount} + 1,
+            "last_error" = NULL, "completed_at" = NULL, "updated_at" = now()
+        WHERE ${jobsTable.state} = 'failed'
+        RETURNING ${jobsTable.attemptCount} AS claim_token
+      `));
+      return claim
+        ? {status: "claimed", attemptCount: claimToken(claim)}
+        : {status: "duplicate"};
+    },
+
+    async complete(
+      actor: AutomationRepositoryActor,
+      runKey: string,
+      attemptCount: number,
+    ): Promise<boolean> {
+      requireAutomationCron(actor);
+      if (!validAttemptCount(attemptCount)) throw new Error("INVALID_JOB_CLAIM");
+      const database = await loadDatabase();
+      const settled = resultRow(await database.execute(sql`
+        UPDATE ${jobsTable}
+        SET "state" = 'completed', "completed_at" = now(), "updated_at" = now()
+        WHERE ${jobsTable.runKey} = ${runKey}
+          AND ${jobsTable.state} = 'processing'
+          AND ${jobsTable.attemptCount} = ${attemptCount}
+        RETURNING ${jobsTable.id} AS job_id
+      `));
+      return settled !== undefined;
+    },
+
+    async fail(
+      actor: AutomationRepositoryActor,
+      runKey: string,
+      attemptCount: number,
+      errorMessage: string,
+    ): Promise<boolean> {
+      requireAutomationCron(actor);
+      if (!validAttemptCount(attemptCount)) throw new Error("INVALID_JOB_CLAIM");
+      const database = await loadDatabase();
+      const settled = resultRow(await database.execute(sql`
+        UPDATE ${jobsTable}
+        SET "state" = 'failed', "last_error" = ${errorMessage}, "updated_at" = now()
+        WHERE ${jobsTable.runKey} = ${runKey}
+          AND ${jobsTable.state} = 'processing'
+          AND ${jobsTable.attemptCount} = ${attemptCount}
+        RETURNING ${jobsTable.id} AS job_id
+      `));
+      return settled !== undefined;
+    },
+  };
+}
+
+const scheduledJobsRepository = createScheduledJobsRepository();
+
 export const jobsRepository = {
+  ...scheduledJobsRepository,
   async getByRunKey(actor: Actor, runKey: string): Promise<Job | null> {
     requireSystem(actor);
     const db = await getDb();
     const rows = await db.select().from(jobsTable).where(and(eq(jobsTable.runKey, runKey), sql`true`)).limit(1);
-    return rows[0] ?? null;
-  },
-
-  async claim(actor: Actor, runKey: string, kind: string): Promise<JobClaimResult> {
-    requireSystem(actor);
-    const db = await getDb();
-    const existing = await db.select({id: jobsTable.id}).from(jobsTable).where(and(eq(jobsTable.runKey, runKey), sql`true`)).limit(1);
-    if (existing.length > 0) return "duplicate";
-    try {
-      await db.insert(jobsTable).values({runKey, kind, state: "processing", attemptCount: 0}).returning({id: jobsTable.id});
-      return "claimed";
-    } catch (error) {
-      if (error && typeof error === "object" && "code" in error && (error as {code?: string}).code === "23505") return "duplicate";
-      throw error;
-    }
-  },
-
-  async complete(actor: Actor, runKey: string): Promise<Job | null> {
-    requireSystem(actor);
-    const db = await getDb();
-    const rows = await db.update(jobsTable)
-      .set({state: "completed", completedAt: new Date(), updatedAt: new Date()})
-      .where(and(eq(jobsTable.runKey, runKey), sql`true`)).returning();
-    return rows[0] ?? null;
-  },
-
-  async fail(actor: Actor, runKey: string, errorMessage: string): Promise<Job | null> {
-    requireSystem(actor);
-    const db = await getDb();
-    const rows = await db.update(jobsTable)
-      .set({state: "failed", lastError: errorMessage, updatedAt: new Date()})
-      .where(and(eq(jobsTable.runKey, runKey), sql`true`)).returning();
     return rows[0] ?? null;
   },
 
@@ -180,6 +298,7 @@ export const jobsRepository = {
               RETURNING ${billingAttempts.id} AS attempt_id`));
             if (!completedAttempt) throw new Error("WEBHOOK_MUTATION_FAILED");
           }
+          await insertWebhookLifecycleEnrollment(actor, tx, command, membership);
         }
 
         if (command.isRenewal && (command.eventType === 'invoice.paid' || command.eventType === 'invoice.payment_failed')) {

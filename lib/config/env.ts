@@ -8,6 +8,10 @@ export interface ServerEnv {
   stripeWebhookSecret: string;
   stripeStartupPriceId: string;
   stripeCorporatePriceId: string;
+  resendApiKey: string;
+  emailFrom: string;
+  emailDeliveryMode: "resend" | "test";
+  cronSecret: string;
   appUrl: string;
 }
 
@@ -25,6 +29,9 @@ const serverKeys = [
   ["STRIPE_WEBHOOK_SECRET", "stripeWebhookSecret"],
   ["STRIPE_STARTUP_PRICE_ID", "stripeStartupPriceId"],
   ["STRIPE_CORPORATE_PRICE_ID", "stripeCorporatePriceId"],
+  ["RESEND_API_KEY", "resendApiKey"],
+  ["EMAIL_FROM", "emailFrom"],
+  ["CRON_SECRET", "cronSecret"],
   ["APP_URL", "appUrl"],
 ] as const;
 
@@ -35,7 +42,14 @@ function valueFor(environment: Environment, key: string): string {
 function validateServerEnvironment(environment: Environment): void {
   if (environment.NODE_ENV !== "production") return;
 
+  const previewTestEmail =
+    environment.VERCEL_ENV === "preview"
+    && environment.EMAIL_DELIVERY_MODE === "test";
   const missing = serverKeys
+    .filter(([key]) =>
+      !previewTestEmail
+      || (key !== "RESEND_API_KEY" && key !== "EMAIL_FROM"),
+    )
     .filter(([key]) => valueFor(environment, key).trim().length === 0)
     .map(([key]) => key);
 
@@ -55,6 +69,13 @@ export function parseServerEnv(environment: Environment = process.env): ServerEn
     stripeWebhookSecret: valueFor(environment, "STRIPE_WEBHOOK_SECRET"),
     stripeStartupPriceId: valueFor(environment, "STRIPE_STARTUP_PRICE_ID"),
     stripeCorporatePriceId: valueFor(environment, "STRIPE_CORPORATE_PRICE_ID"),
+    resendApiKey: valueFor(environment, "RESEND_API_KEY"),
+    emailFrom: valueFor(environment, "EMAIL_FROM"),
+    emailDeliveryMode:
+      valueFor(environment, "EMAIL_DELIVERY_MODE") === "test"
+        ? "test"
+        : "resend",
+    cronSecret: valueFor(environment, "CRON_SECRET"),
     appUrl: valueFor(environment, "APP_URL"),
   };
 }

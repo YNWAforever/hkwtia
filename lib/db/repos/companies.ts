@@ -5,7 +5,7 @@ import {and, eq, exists, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";
 import {companies as companiesTable, companyMembers, membershipApplications, type Company} from "@/lib/db/server-schema";
-import {forbidden, getDb, requireMember} from "@/lib/db/repos/common";
+import {forbidden, getDb, requireMember, requireSystem} from "@/lib/db/repos/common";
 
 export type CompanyInput = Pick<Company, "legalName" | "displayName"> & Partial<Pick<Company, "website" | "industry" | "sizeBand" | "description" | "logoReference" | "directoryVisible">>;
 export type CompanyUpdate = Partial<CompanyInput>;
@@ -92,6 +92,7 @@ export const companiesRepository = {
   },
 
   async getById(actor: Actor, companyId: string): Promise<Company | null> {
+    if (actor.kind === "system") requireSystem(actor);
     const db = await getDb();
     const rows = await db.select().from(companiesTable).where(companyScope(actor, companyId)).limit(1);
     if (!rows[0] && actor.kind === "member") forbidden();
@@ -99,6 +100,7 @@ export const companiesRepository = {
   },
 
   async list(actor: Actor): Promise<Company[]> {
+    if (actor.kind === "system") requireSystem(actor);
     const db = await getDb();
     if (actor.kind === "system") return db.select().from(companiesTable);
     if (actor.kind === "anonymous") return db.select().from(companiesTable).where(eq(companiesTable.directoryVisible, true));
@@ -115,6 +117,7 @@ export const companiesRepository = {
 
   async update(actor: Actor, companyId: string, input: CompanyUpdate): Promise<Company | null> {
     if (actor.kind === "anonymous") forbidden();
+    if (actor.kind === "system") requireSystem(actor);
     const db = await getDb();
     const rows = await db.update(companiesTable).set({...input, updatedAt: new Date()}).where(companyMutationScope(actor, companyId)).returning();
     if (!rows[0]) forbidden();
@@ -123,6 +126,7 @@ export const companiesRepository = {
 
   async remove(actor: Actor, companyId: string): Promise<void> {
     if (actor.kind !== "system" && actor.kind !== "member") forbidden();
+    if (actor.kind === "system") requireSystem(actor);
     const db = await getDb();
     await db.delete(companiesTable).where(companyScope(actor, companyId));
   },

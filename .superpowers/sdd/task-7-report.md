@@ -1,150 +1,136 @@
-# Task 7 Report: Engagement timelines and at-risk queue
+# M3 Task 7 report - idempotent journey and campaign runners
 
-## Outcome
+## Status and scope
 
-DONE
+Implemented `runJourneyBatch` and `runCampaignBatch` with durable delivery reservations, retry handling, claim-token fencing, current eligibility checks, and stable provider idempotency keys. Added the minimum campaign-recipient processing lease schema and generated migration required for atomic claims. Added an atomic D14 dunning lapse primitive that transitions canonical `past_due -> expired`, writes a sanitized stable audit identity, creates one staff task, and enrolls the deterministic win-back instance in the same transaction.
 
-Implementation commit: `8faac6c` (`feat: add engagement and at-risk operations`)
+Review hardening makes permanent-failure task creation and terminal transition one claim-token-fenced transaction, gives each failed delivery channel its own durable audited retry authorization, keeps eligibility checks ahead of authorization consumption, and supports the existing M2 `membership_renewal` campaign source without widening arbitrary-template access.
 
-Task 7 adds bounded, audited engagement-event writes; staff-only newest-first timelines; Stripe renewal facts with outer event idempotency and transactionally serialized renewal ordinals; the shared at-risk rule and SQL equivalent; and a bilingual Server Component admin queue.
+This task did not add HTTP job routes, renewal/scoring/approval runners, admin UI, Worker code, or any `progress.md` change.
 
-## Files
+## RED evidence
 
-- Added `lib/db/repos/engagement.ts`
-- Added `lib/admin/at-risk.ts`
-- Updated `lib/billing/webhook-service.ts`
-- Updated `lib/db/repos/jobs.ts`
-- Added `components/admin/at-risk-table.tsx`
-- Added `app/[locale]/(admin)/admin/at-risk/page.tsx`
-- Updated `messages/en.json` and `messages/zh-HK.json`
-- Added `tests/unit/engagement-repository.test.ts` and `tests/unit/at-risk.test.ts`
-- Updated focused webhook and admin presentation tests
-
-## TDD evidence
-
-Initial RED command:
+The required runner command was run before the runner modules existed:
 
 ```powershell
-npx.cmd vitest run tests/unit/engagement-repository.test.ts tests/unit/at-risk.test.ts --reporter=dot
+npm.cmd test -- tests/unit/journey-runner.test.ts tests/unit/campaign-delivery.test.ts tests/integration/journey-delivery-idempotency.test.ts
 ```
 
-It failed because `@/lib/db/repos/engagement` and `@/lib/admin/at-risk` did not exist. Subsequent narrow RED tests demonstrated each behavior before its implementation: missing renewal facts/ordinals, missing at-risk presentation, forged system-actor rejection, atomic writer audit/rollback, period-stable ordinals, localized tier/status/date output, and malformed renewal-period rejection.
+Result: exit 1; all 3 suites failed during collection because `journey-runner` and `campaign-runner` were missing, with 0 tests collected.
 
-Final focused GREEN command:
+Additional test-first gaps were recorded before their production changes:
+
+- `npm.cmd test -- tests/unit/campaign-recipient-lease-schema.test.ts` - 2/2 failed because the enum lacked `processing` and no migration/journal entry 8 existed.
+- `npm.cmd test -- tests/unit/delivery-retry-idempotency.test.ts` - 2/2 failed because a failed delivery was only selected, not reopened, and a repeated terminal completion threw `INVALID_DELIVERY_TRANSITION`.
+- `npm.cmd test -- tests/unit/dunning-lapse-repository.test.ts` - 3/3 failed because `createDunningLapseRepository` did not exist.
+- `npm.cmd test -- tests/unit/campaign-delivery.test.ts` after adding the idle-campaign case - 1/6 failed because the claim sweep did not yet complete campaigns with no queued/processing recipients.
+
+Second re-review RED command:
 
 ```powershell
-npx.cmd vitest run tests/unit/engagement-repository.test.ts tests/unit/at-risk.test.ts tests/unit/webhook-service.test.ts tests/unit/webhook-repository-sequential.test.ts tests/unit/admin-presentational.test.tsx tests/unit/messages.test.ts --reporter=dot
+npm.cmd test -- tests/unit/task7-second-rereview.test.ts
 ```
 
-Result: 6 files passed, 41 tests passed.
+Result before production changes: exit 1; 8/8 tests failed for the intended gaps: two stale-worker false-task races, four missing transactional repository contracts, audited admin retry unable to reopen the permanent delivery, and the seeded `membership_renewal` source rejected.
 
-## Verification
-
-- `npm.cmd run typecheck`: PASS
-- `npm.cmd run lint`: PASS
-- `npm.cmd test -- --reporter=dot`: PASS on the independent authoritative rerun, 74 files and 328 tests passed, 2 skipped
-- An earlier full run had one unrelated `auth-server-runtime.test.ts` 5-second load timeout; its isolated rerun passed 7/7 before the clean full rerun
-- `npm.cmd run build`: PASS; Next.js generated 75 static pages and recognized `/[locale]/admin/at-risk` as dynamic
-- `git diff --check` and staged `git diff --cached --check`: PASS
-- Task 7 production string audit: PASS; no debug statements, conflict markers, TODO/FIXME/HACK markers, or likely embedded credential strings
-- UTF-8 BOM scan across all changed files: PASS
-- Node UTF-8 parse of both locale JSON files: PASS
-- No dependency manifests or lockfiles changed
-
-## Self-review
-
-- Authorization is Actor-first at runtime. Engagement appends accept only a validated admin or exact system actor; timeline and at-risk reads require admin before input parsing or adapter work.
-- Engagement input is strict Zod with a bounded event enum and safe integer points. Event and audit writes share one injected/default transaction, and audit metadata excludes PII and secrets.
-- Stripe `subscription_cycle` invoices alone create renewal facts. Renewal periods must have valid increasing bounds before repository mutation. The existing job claim is the outer replay guard.
-- Membership row locking serializes renewal ordinal calculation. Failed and paid events for the same billing period reuse the same ordinal; the next distinct period increments it. Facts use the canonical member profile ID and Stripe event creation time.
-- At-risk eligibility uses the shared constants and exact inclusive instant window: active or past due, score below 20, and renewal from 0 through 60 days. SQL applies the equivalent predicate and deterministic renewal/profile ordering.
-- The admin route is a Server Component with a safe localized error. Tier, status, date, evidence, empty state, and actions are localized; links target Member 360, its note fragment, and campaign segments.
-
-## Concerns and evidence gaps
-
-- Original evidence gap, closed by the review follow-up below: this task initially used deterministic repository adapters and SQL-shape/transaction tests without a real Postgres run.
-- `npm.cmd audit --omit=dev` currently reports 18 transitive dependency advisories (1 critical, 6 high, 11 moderate), including Better Auth through `@neondatabase/auth` plus existing build-tool packages. Task 7 changed no dependencies; remediating these may require coordinated breaking upgrades and is outside this task.
-- The build emits the existing stale `caniuse-lite` data warning.
-
-## Tooling note
-
-The linked Windows worktree intermittently rejected `apply_patch` with `helper_unknown_error: apply deny-read ACLs`. After each such failure, edits were limited to the exact Task 7 file and written as BOM-free UTF-8; the final BOM and diff checks passed.
-
-## Review follow-up (2026-07-20)
-
-Review outcome: **DONE**
-
-Implementation commit: `6035e8e` (`fix: harden task 7 review boundaries`)
-
-The blocking review findings are resolved. Renewal metadata now has event-discriminated runtime validation; legacy renewal ordinals are guarded before integer conversion; the raw webhook transaction uses PostgreSQL-valid unqualified write targets; and the at-risk campaign action preserves an exact non-PII profile identity through the strict shared segment compiler used by preview, export, and campaign audience selection.
-
-### Codebase graph evidence
-
-The codebase-memory graph was refreshed before editing. Traces confirmed that `segmentPredicates()` is the sole compiler seam shared by segment preview/export and campaign audience selection, while `appendEngagementEvent()` and `jobsRepository.processWebhookLifecycle()` are the renewal write paths. The fixes were therefore made at those shared boundaries rather than duplicated in routes or UI handlers.
-
-### Exact TDD evidence
-
-Renewal validation RED:
+Final lazy-retry review RED command:
 
 ```powershell
-npx.cmd vitest run tests/unit/engagement-repository.test.ts --reporter=dot
+npm.cmd test -- tests/unit/task7-lazy-admin-retry.test.ts
 ```
 
-Result before implementation: 1 file failed; 10 tests failed and 5 passed. Missing/invalid membership IDs and periods, reversed/equal periods, zero/fractional ordinals, renewal-key masquerading, oversized metadata, and non-JSON metadata all reached the write adapter.
+Result before the lazy-retry production change: exit 1; 7/8 tests failed for the intended eager-reopen, retry-claim-source, eligibility-preservation, and eligible lazy-fence gaps. The ordinary stale permanent-failure no-resend preservation test already passed.
 
-Segment/campaign/SQL RED:
+Final per-channel crash-safety review RED command:
 
 ```powershell
-npx.cmd vitest run tests/unit/segment-schema.test.ts tests/unit/segment-query.test.ts tests/unit/admin-presentational.test.tsx tests/unit/campaign-draft-url.test.ts tests/unit/webhook-repository-sequential.test.ts --reporter=dot
+npm.cmd test -- tests/unit/task7-per-channel-retry-crash.test.ts
 ```
 
-Result before implementation: 4 files failed and 1 passed; 6 tests failed and 19 passed. The strict schema rejected `profileId`, preview could not carry exact identity, both locales dropped at-risk campaign context, and renewal ordinal SQL lacked legacy-data guards. The campaign draft URL test already passed, proving repeated query preservation independently.
+Result before the per-channel production change: exit 1; 6/10 tests failed for the intended gaps. Repository retry did not persist channel wrappers, claims did not expose channel errors, provider-failure crash cases could not consume authorization safely, pre-context reschedule lost authorization, and dual-channel authorization could not be consumed independently. The three ineligible-channel preservation cases and ordinary stale no-resend case already passed.
 
-Actual PostgreSQL RED:
+Final attempt-gap composition review RED command:
 
 ```powershell
-$env:RUN_POSTGRES_INTEGRATION='1'; npx.cmd vitest run tests/unit/task7-postgres-integration.test.ts --reporter=dot
+npm.cmd test -- tests/unit/task7-per-channel-retry-crash.test.ts
 ```
 
-Result before implementation: 1 file failed; 2/2 tests failed. The at-risk/default repository path reached the strict route parser and failed on unsupported `profileId`. The production jobs path exposed PostgreSQL-invalid qualified conflict/write targets before it could reach the poisoned legacy ordinal. Subsequent real-database runs exposed and drove correction of every qualified raw `INSERT` column list and `UPDATE SET` target in the same transaction.
+Result before the composition fix: exit 1; 11/13 tests passed and only the email/WhatsApp composition cases failed. After an unused wrapper survived a pre-context parent retry, the next scheduled claim consumed it and committed a retryable provider failure, but a crash before parent settlement followed by stale reclaim called the provider twice because the parent/delivery attempt counts no longer differed by exactly one. The scheduled ordinary retry control passed.
 
-Consolidated focused GREEN:
+## Implemented behavior
+
+- Journey claims use the existing atomic `FOR UPDATE SKIP LOCKED` repository and every transition carries the exact `claimedAt` fencing token.
+- Day-7 alternatives are evaluated from current context; marketing requires current consent and no active marketing email suppression, while transactional delivery remains eligible.
+- A delivery row is durably reserved before provider send. Provider retries reuse the exact stable journey or campaign delivery key.
+- Reserving an existing failed delivery leaves it terminal. Audited staff retry reschedules the parent with a null parent error and rewrites only recognized failed email/WhatsApp provider codes to fixed sanitized `admin_retry_<original>` wrappers, without changing channel status or attempts. After current eligibility is rechecked, an exact-fenced channel retry consumes one matching wrapper, increments its attempt, and returns the original sanitized disposition. Ineligible channels keep their unconsumed wrappers, while ordinary failed rows and stale recovery remain provider-silent.
+- A provider-success/log-completion crash reschedules the journey; reclaim reuses the same delivery row and provider idempotency key, then completes without creating a second log.
+- Retryable failures use the shared 5/25-minute policy. Attempt three and permanent provider failures transition the claimed journey/campaign recipient and insert one deduplicated staff task in the same transaction; a stale claim creates no task and a task-write error rolls back the terminal transition.
+- D90 always delivers and creates a stable low-engagement task only below the approved threshold.
+- D14 unresolved dunning locks the membership and atomically transitions `past_due -> expired`, inserts `membership.lapsed_by_dunning` with request identity `dunning-lapse:<journeyStateId>`, creates one task, and inserts win-back D7/D21/D60 rows under `termination:lapse:<journeyStateId>`. Retrying an already committed matching episode repairs only missing idempotent side effects.
+- Renewal D-14 creates no WhatsApp reservation or provider request without current opt-in and a nonblank number.
+- Campaign claims include queued and expired-processing recipients, increment attempts, set a bounded lease, and fence all transitions by `claimedAt`.
+- Campaign delivery rechecks current consent/suppression, accepts only the frozen source identities `renewal-reminder`, `member-update`, and the existing M2 value `membership_renewal`, maps them to the approved `campaign_generic` renderer/log identity, and preserves locale and variables. Unknown source identities fail safely before rendering, reservation, or provider delivery.
+- Campaigns complete only when no queued/processing recipients remain, including empty or already-terminal campaigns found by the claim sweep.
+
+## Schema and migration
+
+Generated:
+
+- `drizzle/0008_m3_campaign_recipient_leases.sql`
+- `drizzle/meta/0008_snapshot.json`
+- journal entry `idx: 8`
+
+The additive migration adds only campaign recipient `processing`, `attempt_count`, `claimed_at`, `claim_expires_at`, `error_code`, and the `(status, claim_expires_at)` due index. It stores no message body or provider response.
+
+## Second re-review implementation
+
+- `journeys.markFailed` and `campaignRecipients.markRecipientFailed` now fence the terminal update by the exact claim token before inserting the stable task with `ON CONFLICT DO NOTHING`, all inside one database transaction.
+- Runners receive the task disposition from that transaction; they no longer perform a separate permanent-failure task write.
+- The earlier parent-level retry marker was superseded. `journeys.retryFailed` now reschedules the failed parent, rewrites only matching failed channel rows to allowlisted wrappers, and writes the audit event in one transaction. `claimDue` reports ordinary `scheduled`/`stale` source plus the independent persisted email and WhatsApp error states.
+- The strict source map adds only `membership_renewal -> campaign_generic`. No schema or migration change was needed for any retry review follow-up; durable authorization uses the existing sanitized channel `error_code` columns.
+
+## Final crash-safety implementation
+
+- A shared fixed codec recognizes only `retryable_network`, `retryable_rate_limit`, `retryable_server`, `provider_client_error`, and `provider_unclassified_failure`, plus their `admin_retry_` wrappers. Unrecognized values, sent rows, and non-failed rows are untouched.
+- Email and WhatsApp retry mutations fence on exact row id, `failed` status, and the expected persisted error value. They atomically set `processing`, clear the wrapper, increment the attempt, and return both the row and decoded original failure code.
+- A consumed retry that fails at the provider is completed with an ordinary provider code. If the process crashes before parent settlement, every stale ordinary failed row replays its persisted disposition without another provider call, regardless of the parent/delivery attempt delta. A normal scheduled due claim may still explicitly reopen an ordinary retryable row.
+- Authorization is channel-local: a pre-context/transient parent reschedule does not erase it, dual D14 channels consume independently, and suppression, removed email, or WhatsApp opt-out leave the affected authorization unused.
+
+## Final verification
+
+Exact Task 7 plan command:
 
 ```powershell
-npx.cmd vitest run tests/unit/engagement-repository.test.ts tests/unit/segment-schema.test.ts tests/unit/segment-query.test.ts tests/unit/admin-presentational.test.tsx tests/unit/campaign-draft-url.test.ts tests/unit/campaign-queue-form.test.tsx tests/unit/campaign-queue.test.ts tests/unit/webhook-repository-sequential.test.ts --reporter=dot --maxWorkers=1 --minWorkers=1
+npm.cmd test -- tests/unit/journey-runner.test.ts tests/unit/campaign-delivery.test.ts tests/integration/journey-delivery-idempotency.test.ts
 ```
 
-Result: 8 files passed; 54/54 tests passed.
+Result: exit 0; 3 files passed, 15/15 tests passed.
 
-Actual PostgreSQL GREEN:
+Supporting repository, migration, condition, and stale-lease regression command:
 
 ```powershell
-$env:RUN_POSTGRES_INTEGRATION='1'; npx.cmd vitest run tests/unit/task7-postgres-integration.test.ts --reporter=verbose --maxWorkers=1 --minWorkers=1
+npm.cmd test -- tests/unit/journey-conditions.test.ts tests/unit/delivery-retry-idempotency.test.ts tests/unit/dunning-lapse-repository.test.ts tests/unit/campaign-recipient-lease-schema.test.ts tests/unit/journey-repository.test.ts
 ```
 
-Result: 1 file passed; 2/2 tests passed against an ephemeral local `postgres:16-alpine` container. Evidence covers score 19/20 and renewal -1ms/0/60d/+1ms boundaries, deterministic at-risk ordering, exact profile preview/campaign audience, concurrent exact replay (`processed` plus `duplicate`), poisoned legacy JSON, failed-to-paid facts sharing ordinal 1, and the next period using ordinal 2. Independent `docker ps -a --filter name=hkwtia-task7-` checks confirmed cleanup after RED and GREEN runs.
+Result: exit 0; 5 files passed, 28/28 tests passed.
 
-### Final verification
+Additional verification:
 
-- `npm.cmd run typecheck`: PASS
-- `npm.cmd run lint`: PASS
-- `npm.cmd test -- --reporter=dot --maxWorkers=4 --minWorkers=2`: PASS; 74 files passed, 3 skipped; 339 tests passed, 4 skipped
-- The first one-worker full-suite attempt produced no test verdict and timed out after cross-repository scheduler contention delayed its worker; its worktree-owned orphan was removed before the authoritative four-worker GREEN rerun
-- `npm.cmd run build`: PASS; Next.js compiled, TypeScript passed, generated 75 static pages, and retained the dynamic admin routes
-- `git diff --check` and staged `git diff --cached --check`: PASS (only expected Windows LF/CRLF notices)
-- UTF-8 BOM scan across all 14 code/test files: PASS
-- Conflict/debug/TODO marker audit across all 14 code/test files: PASS
-- Dependency manifest/lockfile diff: PASS; no dependency files changed
-- Ephemeral Task 7 Docker cleanup: PASS
-- The build retains the existing stale `caniuse-lite` warning; it is unrelated to this change
+- Second re-review focused file - RED 0/8, then GREEN 8/8.
+- Final lazy-retry focused file - RED 1/8 preservation tests passed with 7 intended failures, then GREEN 8/8.
+- Final per-channel crash-safety file - RED 4/10 preservation tests passed with 6 intended failures, then GREEN 10/10.
+- Final attempt-gap composition file - RED 11/13 with only the email/WhatsApp duplicate-provider cases failing and the scheduled ordinary retry control passing, then GREEN 13/13.
+- Final focused compatibility suite - exit 0; 11 files passed and 81/81 tests passed.
+- `tests/integration/automation-runners-postgres.test.ts` - collected successfully; its 5 real Postgres tests were skipped locally because `DATABASE_URL_TEST` is unset. The updated real-repository case asserts the failed email wrapper, a real pre-context reschedule that advances only the parent, provider-time atomic consumption (`processing`, delivery attempt 2, null error), a post-provider ordinary `retryable_network` code, an injected crash before parent settlement, and stale reclaim at parent attempt 4 versus delivery attempt 2 without a second provider call, with one audit.
+- `npm.cmd run lint` - exit 0, no warnings or errors.
+- `npm.cmd run typecheck` - exit 0.
+- `npm.cmd test` - exit 0; 127 files passed and 9 environment-gated files skipped; 659 tests passed and 25 skipped.
+- `git diff --check` - exit 0; only line-ending notices were emitted.
 
-### Final self-review
+## Self-review and remaining concerns
 
-- Access control remains actor-first: staff/system validation still precedes engagement parsing or adapter work, and segment/campaign repositories retain admin enforcement.
-- Idempotency and rollback remain atomic. The real PostgreSQL test proves one job row and one mutation/audit sequence under concurrent exact replay, while existing injected-transaction tests retain audit rollback coverage.
-- Renewal facts require a UUID membership ID, increasing ISO periods, and a positive bounded integer ordinal. Other event metadata is bounded JSON and cannot use renewal-reserved keys.
-- The defensive ordinal query ignores malformed legacy JSON before `::int`, reuses an ordinal within one billing period, and increments only for a later period.
-- At-risk semantics remain exact and inclusive at 0 and 60 days, exclusive below 0 and above 60 days, with score strictly below 20 and deterministic renewal/profile ordering.
-- Campaign links contain only profile ID, membership status, score bound, and renewal-day context; no email, secret, or new PII-bearing selector was added. The strict route schema rejects unknown keys.
-- The exact profile ID condition is compiled once by `segmentPredicates()` and therefore applies consistently to preview, export, and queued campaign audiences.
-- Both English and Traditional Chinese at-risk renders preserve the contextual campaign link. No visible localized copy changed.
+The final diff was reviewed against Task 7 for plan alignment, authorization, claim fencing, durable idempotency, retry/crash windows, PII-safe errors/audit metadata, migration compatibility, frozen campaign data, and empty/partial campaign completion. No Critical or Important issue remains from that self-review.
+
+The 25 skipped tests are database-gated integration tests because this worktree has no live `DATABASE_URL_TEST`; the expanded real-runner Postgres suite was collected but could not execute live. The generated migration, SQL shape, runner behavior, and adapter idempotency contracts are covered locally, but this review fix did not apply migration 0008 to a live database or issue live Resend/WOZTELL sends. Provider-side duplicate suppression therefore still depends on the already-tested adapters honoring the stable idempotency key.
+
+The pre-existing dirty `.superpowers/sdd/task-1-report.md`, `task-2-report.md`, and `task-3-report.md` files were preserved and excluded from this task.

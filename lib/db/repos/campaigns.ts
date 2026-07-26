@@ -7,7 +7,12 @@ import {queueCampaignSchema, type CampaignQueueDependencies, type CampaignQueueM
 import {segmentFilterSchema, segmentIdSchema, type SegmentFilterSet} from "@/lib/admin/segment-schema";
 import {requireAdmin} from "@/lib/auth/actor";
 import {auditEvents, campaignRecipients, campaigns, companies, companyMembers, emailLog, engagementScores, memberships, profiles, savedSegments} from "@/lib/db/server-schema";
+import {
+  createCampaignRecipientDeliveryRepository,
+  type CampaignRecipientDeliveryRepository,
+} from "@/lib/db/repos/campaign-recipient-delivery";
 import {getDb} from "@/lib/db/repos/common";
+import type {AutomationDatabase} from "@/lib/db/repos/journeys";
 import {segmentPredicates} from "@/lib/db/repos/segments";
 import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 
@@ -88,9 +93,18 @@ async function campaignAudience(store: unknown, filter: SegmentFilterSet): Promi
 }
 
 export type CampaignDbProvider = () => Promise<Awaited<ReturnType<typeof getDb>>>;
+export type CampaignsRepository =
+  & CampaignQueueDependencies
+  & CampaignRecipientDeliveryRepository;
 
-export function createCampaignsRepository(getDatabase: CampaignDbProvider): CampaignQueueDependencies {
+export function createCampaignsRepository(
+  getDatabase: CampaignDbProvider,
+): CampaignsRepository {
+  const recipientDelivery = createCampaignRecipientDeliveryRepository(
+    async () => await getDatabase() as unknown as AutomationDatabase,
+  );
   return {
+    ...recipientDelivery,
     async transaction<T>(actor: Actor, callback: (store: unknown) => Promise<T>): Promise<T> {
       requireAdmin(actor);
       const db = await getDatabase();

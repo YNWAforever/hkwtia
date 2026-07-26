@@ -18,6 +18,7 @@ import {
 } from "drizzle-orm/pg-core";
 import {sql} from "drizzle-orm";
 
+import {M3_AUTOMATION_JOB_KIND_SQL_LIST} from "@/lib/jobs/kinds";
 import {MEMBERSHIP_PLAN_CODES, MEMBERSHIP_STATUSES} from "@/lib/membership/constants";
 
 const createdAt = (name: string) => timestamp(name, {withTimezone: true}).defaultNow().notNull();
@@ -46,8 +47,10 @@ export const userRoleEnum = pgEnum("user_role", ["member", "staff", "exco", "sup
 export const billingIntervalEnum = pgEnum("billing_interval", ["annual", "monthly", "none"]);
 export const registrationStatusEnum = pgEnum("registration_status", ["registered", "waitlist", "cancelled", "attended", "no_show"]);
 export const campaignStatusEnum = pgEnum("campaign_status", ["queued", "processing", "completed", "cancelled"]);
-export const recipientStatusEnum = pgEnum("campaign_recipient_status", ["queued", "sent", "failed", "suppressed"]);
+export const recipientStatusEnum = pgEnum("campaign_recipient_status", ["queued", "processing", "sent", "failed", "suppressed"]);
 export const approvalStatusEnum = pgEnum("approval_status", ["pending", "approved", "rejected", "expired"]);
+export const journeyStatusEnum = pgEnum("journey_status", ["scheduled", "processing", "sent", "skipped", "failed"]);
+export const staffTaskStatusEnum = pgEnum("staff_task_status", ["open", "resolved"]);
 
 export const profiles = pgTable("profiles", {
   id: text("id").primaryKey(),
@@ -65,6 +68,8 @@ export const profiles = pgTable("profiles", {
   directoryVisible: boolean("directory_visible").default(false).notNull(),
   createdAt: createdAt("created_at"),
   updatedAt: updatedAt("updated_at"),
+  whatsappOptIn: boolean("whatsapp_opt_in").default(false).notNull(),
+  whatsappNumber: text("whatsapp_number"),
 });
 
 export const companies = pgTable("companies", {
@@ -248,7 +253,12 @@ export const jobs = pgTable(
     updatedAt: updatedAt("updated_at"),
     completedAt: timestamp("completed_at", {withTimezone: true}),
   },
-  (table) => [index("jobs_state_idx").on(table.state)],
+  (table) => [
+    index("jobs_state_idx").on(table.state),
+    index("jobs_automation_recent_idx")
+      .on(table.updatedAt.desc(), table.id.desc())
+      .where(sql`${table.kind} IN (${sql.raw(M3_AUTOMATION_JOB_KIND_SQL_LIST)})`),
+  ],
 );
 
 export const auditEvents = pgTable(
@@ -292,15 +302,100 @@ export const memberNotes = pgTable("member_notes", {
   createdAt: createdAt("created_at"),
 }, (table) => [index("member_notes_profile_created_idx").on(table.profileId, table.createdAt)]);
 
+export const journeyState = pgTable("journey_state", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  profileId: text("profile_id").notNull().references(() => profiles.id, {onDelete: "cascade"}),
+  membershipId: uuid("membership_id").references(() => memberships.id, {onDelete: "cascade"}),
+  journey: text("journey").notNull(),
+  instanceKey: text("instance_key").notNull(),
+  step: text("step").notNull(),
+  scheduledAt: timestamp("scheduled_at", {withTimezone: true}).notNull(),
+  status: journeyStatusEnum("status").default("scheduled").notNull(),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  claimedAt: timestamp("claimed_at", {withTimezone: true}),
+  claimExpiresAt: timestamp("claim_expires_at", {withTimezone: true}),
+  deliveryKey: text("delivery_key").notNull(),
+  errorCode: text("error_code"),
+  completedAt: timestamp("completed_at", {withTimezone: true}),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  unique("journey_state_profile_instance_step_unique").on(table.profileId, table.journey, table.instanceKey, table.step),
+  unique("journey_state_delivery_key_unique").on(table.deliveryKey),
+  index("journey_state_due_idx").on(table.status, table.scheduledAt),
+  index("journey_state_profile_idx").on(table.profileId, table.createdAt),
+  index("journey_state_admin_recent_idx")
+    .on(table.scheduledAt.desc(), table.id.desc()),
+]);
+
 export const emailLog = pgTable("email_log", {
   id: uuid("id").defaultRandom().primaryKey(),
   profileId: text("profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  journeyStateId: uuid("journey_state_id").references(() => journeyState.id, {onDelete: "set null"}),
   template: text("template").notNull(),
   subject: text("subject").notNull(),
   status: text("status").notNull(),
   providerId: text("provider_id"),
+  idempotencyKey: text("idempotency_key").default(sql`gen_random_uuid()::text`).notNull(),
+  locale: varchar("locale", {length: 10}).default("en").notNull(),
+  classification: text("classification").default("transactional").notNull(),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  errorCode: text("error_code"),
   createdAt: createdAt("created_at"),
-}, (table) => [index("email_log_profile_created_idx").on(table.profileId, table.createdAt)]);
+}, (table) => [
+  unique("email_log_idempotency_key_unique").on(table.idempotencyKey),
+  index("email_log_profile_created_idx").on(table.profileId, table.createdAt),
+  index("email_log_journey_state_idx").on(table.journeyStateId),
+]);
+
+export const whatsappLog = pgTable("whatsapp_log", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  profileId: text("profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  journeyStateId: uuid("journey_state_id").references(() => journeyState.id, {onDelete: "set null"}),
+  template: text("template").notNull(),
+  status: text("status").notNull(),
+  providerId: text("provider_id"),
+  idempotencyKey: text("idempotency_key").notNull(),
+  locale: varchar("locale", {length: 10}).default("en").notNull(),
+  classification: text("classification").default("transactional").notNull(),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  errorCode: text("error_code"),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  unique("whatsapp_log_idempotency_key_unique").on(table.idempotencyKey),
+  index("whatsapp_log_profile_created_idx").on(table.profileId, table.createdAt),
+  index("whatsapp_log_journey_state_idx").on(table.journeyStateId),
+]);
+
+export const messageSuppressions = pgTable("message_suppressions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  profileId: text("profile_id").notNull().references(() => profiles.id, {onDelete: "cascade"}),
+  channel: text("channel").notNull(),
+  classification: text("classification").notNull(),
+  reasonCode: text("reason_code"),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  unique("message_suppressions_profile_channel_classification_unique").on(table.profileId, table.channel, table.classification),
+  index("message_suppressions_profile_idx").on(table.profileId),
+]);
+
+export const staffTasks = pgTable("staff_tasks", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  profileId: text("profile_id").notNull().references(() => profiles.id, {onDelete: "cascade"}),
+  journeyStateId: uuid("journey_state_id").references(() => journeyState.id, {onDelete: "set null"}),
+  kind: text("kind").notNull(),
+  dedupeKey: text("dedupe_key").notNull(),
+  summaryCode: text("summary_code").notNull(),
+  status: staffTaskStatusEnum("status").default("open").notNull(),
+  resolvedAt: timestamp("resolved_at", {withTimezone: true}),
+  resolvedByProfileId: text("resolved_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  unique("staff_tasks_dedupe_key_unique").on(table.dedupeKey),
+  index("staff_tasks_profile_status_idx").on(table.profileId, table.status),
+  index("staff_tasks_journey_state_idx").on(table.journeyStateId),
+]);
 
 export const savedSegments = pgTable("saved_segments", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -332,7 +427,14 @@ export const campaignRecipients = pgTable("campaign_recipients", {
   locale: varchar("locale", {length: 10}).notNull(),
   variables: jsonb("variables").$type<Record<string, string>>().notNull(),
   status: recipientStatusEnum("status").default("queued").notNull(),
-}, (table) => [unique("campaign_recipients_campaign_profile_unique").on(table.campaignId, table.profileId)]);
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  claimedAt: timestamp("claimed_at", {withTimezone: true}),
+  claimExpiresAt: timestamp("claim_expires_at", {withTimezone: true}),
+  errorCode: text("error_code"),
+}, (table) => [
+  unique("campaign_recipients_campaign_profile_unique").on(table.campaignId, table.profileId),
+  index("campaign_recipients_due_idx").on(table.status, table.claimExpiresAt),
+]);
 
 export const events = pgTable("events", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -385,7 +487,11 @@ export type AuditEvent = typeof auditEvents.$inferSelect;
 export type EngagementEvent = typeof engagementEvents.$inferSelect;
 export type EngagementScore = typeof engagementScores.$inferSelect;
 export type MemberNote = typeof memberNotes.$inferSelect;
+export type JourneyState = typeof journeyState.$inferSelect;
 export type EmailLog = typeof emailLog.$inferSelect;
+export type WhatsappLog = typeof whatsappLog.$inferSelect;
+export type MessageSuppression = typeof messageSuppressions.$inferSelect;
+export type StaffTask = typeof staffTasks.$inferSelect;
 export type SavedSegment = typeof savedSegments.$inferSelect;
 export type Campaign = typeof campaigns.$inferSelect;
 export type CampaignRecipient = typeof campaignRecipients.$inferSelect;

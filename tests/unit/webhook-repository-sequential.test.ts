@@ -54,11 +54,12 @@ function scriptedDatabase(results: Result[]) {
 }
 
 const claimed = {rows: [{job_id: "job-1"}]};
-const locked = {rows: [{membership_id: membershipId, status: "pending_payment"}]};
+const locked = {rows: [{membership_id: membershipId, status: "pending_payment", profile_id: "profile-1", company_id: null}]};
 const noLatest = {rows: []};
 const attempt = {rows: [{attempt_id: "attempt-1"}]};
 const membershipUpdated = {rows: [{membership_id: membershipId}]};
 const attemptUpdated = {rows: [{attempt_id: "attempt-1"}]};
+const journeyInserted = {rows: []};
 const audited = {rows: [{audit_id: "audit-1"}]};
 const completed = {rows: [{job_id: "job-1"}]};
 
@@ -66,21 +67,22 @@ describe("sequential production webhook transaction", () => {
   beforeEach(() => { database.current = null; });
 
   it("uses fresh READ COMMITTED statements after membership and exact-attempt row locks", async () => {
-    const script = scriptedDatabase([claimed, locked, noLatest, attempt, membershipUpdated, attemptUpdated, audited, completed]);
+    const script = scriptedDatabase([claimed, locked, noLatest, attempt, membershipUpdated, attemptUpdated, journeyInserted, audited, completed]);
     database.current = script.db;
 
     await expect(jobsRepository.processWebhookLifecycle(systemActor("stripe-webhook"), command)).resolves.toBe("processed");
 
     expect(script.options).toEqual([{isolationLevel: "read committed"}]);
-    expect(script.statements).toHaveLength(8);
+    expect(script.statements).toHaveLength(9);
     expect(script.statements[0]).toMatch(/insert into[\s\S]*on conflict[\s\S]*failed[\s\S]*returning/);
     expect(script.statements[1]).toMatch(/coalesce[\s\S]*left join[\s\S]*for update of/);
     expect(script.statements[2]).toMatch(/stripe\.webhook\.processed[\s\S]*order by/);
     expect(script.statements[3]).toMatch(/active[\s\S]*cs_test_m1_checkout[\s\S]*for update/);
     expect(script.statements[4]).toMatch(/update[\s\S]*active/);
     expect(script.statements[5]).toMatch(/update[\s\S]*attempt-1/);
-    expect(script.statements[6]).toContain("stripe.webhook.processed");
-    expect(script.statements[7]).toMatch(/update[\s\S]*completed/);
+    expect(script.statements[6]).toMatch(/insert into[\s\S]*jsonb_to_recordset[\s\S]*activation:/);
+    expect(script.statements[7]).toContain("stripe.webhook.processed");
+    expect(script.statements[8]).toMatch(/update[\s\S]*completed/);
     expect(script.committed()).toBe(true);
   });
 
@@ -100,15 +102,17 @@ describe("sequential production webhook transaction", () => {
       const script = scriptedDatabase([
         claimed,
         {rows: [{membership_id: membershipId, status: eventType === "invoice.paid" ? "past_due" : "active", profile_id: "profile-1", company_id: null}]},
-        noLatest, membershipUpdated, {rows: [{renewal_ordinal: renewalOrdinal}]}, {rows: [{engagement_id: `engagement-${eventId}`}]}, audited, completed,
+        noLatest, membershipUpdated, journeyInserted, {rows: [{renewal_ordinal: renewalOrdinal}]}, {rows: [{engagement_id: `engagement-${eventId}`}]}, audited, completed,
       ]);
       database.current = script.db;
       await expect(jobsRepository.processWebhookLifecycle(systemActor("stripe-webhook"), renewal)).resolves.toBe("processed");
-      expect(script.statements[4]).toMatch(/periodstart[\s\S]*renewalordinal[\s\S]*max/);
-      expect(script.statements[4]).toContain("'^[1-9][0-9]{0,9}$'");
-      expect(script.statements[4]).toMatch(/jsonb_typeof[\s\S]*renewalordinal[\s\S]*length[\s\S]*2147483647[\s\S]*::int/);
-      expect(script.statements[5]).toMatch(new RegExp(`'renewalordinal',\\s*${renewalOrdinal}\\b`));
-      expect(script.statements[5]).toContain("profile-1");
+      expect(script.statements[4]).toContain("jsonb_to_recordset");
+      expect(script.statements[4]).toContain(eventType === "invoice.payment_failed" ? `payment:${eventId}` : `activation:${membershipId}`);
+      expect(script.statements[5]).toMatch(/periodstart[\s\S]*renewalordinal[\s\S]*max/);
+      expect(script.statements[5]).toContain("'^[1-9][0-9]{0,9}$'");
+      expect(script.statements[5]).toMatch(/jsonb_typeof[\s\S]*renewalordinal[\s\S]*length[\s\S]*2147483647[\s\S]*::int/);
+      expect(script.statements[6]).toMatch(new RegExp(`'renewalordinal',\\s*${renewalOrdinal}\\b`));
+      expect(script.statements[6]).toContain("profile-1");
       return script.statements;
     }
 
@@ -138,11 +142,12 @@ describe("sequential production webhook transaction", () => {
   it("uses event ID as a deterministic tiebreaker for contradictory same-second events", async () => {
     const higher = scriptedDatabase([
       claimed, locked, {rows: [{stripe_created: 100, event_id: "evt_a"}]}, attempt,
-      membershipUpdated, attemptUpdated, audited, completed,
+      membershipUpdated, attemptUpdated, journeyInserted, audited, completed,
     ]);
     database.current = higher.db;
     await expect(jobsRepository.processWebhookLifecycle(systemActor("stripe-webhook"), {...command, eventId: "evt_z"})).resolves.toBe("processed");
-    expect(higher.statements[6]).toContain("stripe.webhook.processed");
+    expect(higher.statements[6]).toContain("jsonb_to_recordset");
+    expect(higher.statements[7]).toContain("stripe.webhook.processed");
 
     const lower = scriptedDatabase([
       claimed, locked, {rows: [{stripe_created: 100, event_id: "evt_z"}]}, attempt, audited, completed,
@@ -151,6 +156,50 @@ describe("sequential production webhook transaction", () => {
     await expect(jobsRepository.processWebhookLifecycle(systemActor("stripe-webhook"), {...command, eventId: "evt_a"})).resolves.toBe("processed");
     expect(lower.statements[4]).toContain("stripe.webhook.ignored_stale");
     expect(lower.statements).toHaveLength(6);
+  });
+
+  it("rolls back membership state and stops before audit or job completion when journey insertion fails", async () => {
+    const statements: string[] = [];
+    const committedMembership = {status: "pending_payment"};
+    const failureWrites: string[] = [];
+    database.current = {
+      async transaction(work: (tx: {execute(query: unknown): Promise<Result>}) => Promise<unknown>) {
+        const stagedMembership = {...committedMembership};
+        const results = [claimed, locked, noLatest, attempt, membershipUpdated, attemptUpdated];
+        let statementIndex = 0;
+        try {
+          const value = await work({execute: async (query) => {
+            const statement = sqlText(query).toLowerCase();
+            statements.push(statement);
+            if (statementIndex === 4) stagedMembership.status = "active";
+            statementIndex += 1;
+            if (statement.includes("jsonb_to_recordset")) throw new Error("JOURNEY_INSERT_FAILED");
+            const result = results.shift();
+            if (!result) throw new Error("unexpected statement");
+            return result;
+          }});
+          committedMembership.status = stagedMembership.status;
+          return value;
+        } catch (error) {
+          throw error;
+        }
+      },
+      execute: vi.fn(async (query: unknown) => {
+        failureWrites.push(sqlText(query).toLowerCase());
+        return {rows: []};
+      }),
+    };
+
+    await expect(jobsRepository.processWebhookLifecycle(systemActor("stripe-webhook"), command))
+      .rejects.toThrow("JOURNEY_INSERT_FAILED");
+
+    expect(statements).toHaveLength(7);
+    const journeyInsertIndex = statements.findIndex((statement) => statement.includes("jsonb_to_recordset"));
+    expect(journeyInsertIndex).toBe(6);
+    expect(statements.slice(journeyInsertIndex + 1)).toEqual([]);
+    expect(committedMembership.status).toBe("pending_payment");
+    expect(failureWrites).toHaveLength(1);
+    expect(failureWrites[0]).toContain("webhook_transient");
   });
 
   it("rolls back a claimed mismatched event before audit or mutation", async () => {

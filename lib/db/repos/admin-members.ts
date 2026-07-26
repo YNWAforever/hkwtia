@@ -7,7 +7,7 @@ import type {Member360} from "@/lib/admin/member-360";
 
 import {decodeAdminMemberCursor, encodeAdminMemberCursor, type AdminMemberListItem, type AdminMemberPage, type AdminMemberQuery} from "@/lib/admin/member-types";
 import {requireAdmin} from "@/lib/auth/actor";
-import {companies, companyMembers, emailLog, engagementEvents, engagementScores, eventRegistrations, events, memberNotes, memberships, profiles} from "@/lib/db/server-schema";
+import {companies, companyMembers, emailLog, engagementEvents, engagementScores, eventRegistrations, events, journeyState, memberNotes, memberships, messageSuppressions, profiles, whatsappLog} from "@/lib/db/server-schema";
 import {getDb} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";
 
@@ -27,6 +27,11 @@ const member360EngagementEventSchema = z.object({id: z.string(), type: z.string(
 const member360EmailSchema = z.object({id: z.string(), template: z.string(), subject: z.string(), status: z.string(), createdAt: z.coerce.date()});
 const member360RegistrationSchema = z.object({eventId: z.string(), title: z.string(), startsAt: z.coerce.date(), status: z.string(), checkedInAt: z.coerce.date().nullable()});
 const member360NoteSchema = z.object({id: z.string(), authorProfileId: z.string(), body: z.string(), replacesNoteId: z.string().nullable(), createdAt: z.coerce.date()});
+const member360JourneySchema = z.object({id: z.string(), journey: z.string(), step: z.string(), status: z.string(), scheduledAt: z.coerce.date(), attemptCount: z.coerce.number().int().nonnegative(), errorCode: z.string().nullable()});
+const member360WhatsappSchema = z.object({id: z.string(), template: z.string(), status: z.string(), locale: z.string(), classification: z.string(), attemptCount: z.coerce.number().int().nonnegative(), errorCode: z.string().nullable(), createdAt: z.coerce.date()});
+const member360SuppressionSchema = z.object({id: z.string(), channel: z.string(), classification: z.string(), reasonCode: z.string().nullable(), createdAt: z.coerce.date()});
+
+export const MEMBER_360_AUTOMATION_HISTORY_LIMIT = 25;
 
 function resultRows(result: unknown): unknown[] {
   if (Array.isArray(result)) return result;
@@ -108,6 +113,9 @@ export const adminMembersRepository = {
     const emails = z.array(member360EmailSchema).parse(resultRows(await db.execute(sql`SELECT ${emailLog.id} AS id, ${emailLog.template} AS template, ${emailLog.subject} AS subject, ${emailLog.status} AS status, ${emailLog.createdAt} AS "createdAt" FROM ${emailLog} WHERE ${emailLog.profileId} = ${profileId} ORDER BY ${emailLog.createdAt} DESC, ${emailLog.id} DESC`)));
     const registrations = z.array(member360RegistrationSchema).parse(resultRows(await db.execute(sql`SELECT ${eventRegistrations.eventId} AS "eventId", ${events.titleEn} AS title, ${events.startsAt} AS "startsAt", ${eventRegistrations.status} AS status, ${eventRegistrations.checkedInAt} AS "checkedInAt" FROM ${eventRegistrations} INNER JOIN ${events} ON ${events.id} = ${eventRegistrations.eventId} WHERE ${eventRegistrations.profileId} = ${profileId} ORDER BY ${events.startsAt} DESC, ${eventRegistrations.eventId} DESC`)));
     const notes = z.array(member360NoteSchema).parse(resultRows(await db.execute(sql`SELECT ${memberNotes.id} AS id, ${memberNotes.authorProfileId} AS "authorProfileId", ${memberNotes.body} AS body, ${memberNotes.replacesNoteId} AS "replacesNoteId", ${memberNotes.createdAt} AS "createdAt" FROM ${memberNotes} WHERE ${memberNotes.profileId} = ${profileId} ORDER BY ${memberNotes.createdAt} DESC, ${memberNotes.id} DESC`)));
+    const journeys = z.array(member360JourneySchema).parse(resultRows(await db.execute(sql`SELECT ${journeyState.id} AS id, ${journeyState.journey} AS journey, ${journeyState.step} AS step, ${journeyState.status} AS status, ${journeyState.scheduledAt} AS "scheduledAt", ${journeyState.attemptCount} AS "attemptCount", ${journeyState.errorCode} AS "errorCode" FROM ${journeyState} WHERE ${journeyState.profileId} = ${profileId} ORDER BY ${journeyState.scheduledAt} DESC, ${journeyState.id} DESC LIMIT ${MEMBER_360_AUTOMATION_HISTORY_LIMIT}`)));
+    const whatsapp = z.array(member360WhatsappSchema).parse(resultRows(await db.execute(sql`SELECT ${whatsappLog.id} AS id, ${whatsappLog.template} AS template, ${whatsappLog.status} AS status, ${whatsappLog.locale} AS locale, ${whatsappLog.classification} AS classification, ${whatsappLog.attemptCount} AS "attemptCount", ${whatsappLog.errorCode} AS "errorCode", ${whatsappLog.createdAt} AS "createdAt" FROM ${whatsappLog} WHERE ${whatsappLog.profileId} = ${profileId} ORDER BY ${whatsappLog.createdAt} DESC, ${whatsappLog.id} DESC LIMIT ${MEMBER_360_AUTOMATION_HISTORY_LIMIT}`)));
+    const suppressions = z.array(member360SuppressionSchema).parse(resultRows(await db.execute(sql`SELECT ${messageSuppressions.id} AS id, ${messageSuppressions.channel} AS channel, ${messageSuppressions.classification} AS classification, ${messageSuppressions.reasonCode} AS "reasonCode", ${messageSuppressions.createdAt} AS "createdAt" FROM ${messageSuppressions} WHERE ${messageSuppressions.profileId} = ${profileId} ORDER BY ${messageSuppressions.createdAt} DESC, ${messageSuppressions.id} DESC LIMIT ${MEMBER_360_AUTOMATION_HISTORY_LIMIT}`)));
     return {
       profile,
       companies: companiesForProfile,
@@ -116,6 +124,9 @@ export const adminMembersRepository = {
       emails: emails.map((email) => ({...email, createdAt: email.createdAt.toISOString()})),
       events: registrations.map((registration) => ({...registration, startsAt: registration.startsAt.toISOString(), checkedInAt: registration.checkedInAt?.toISOString() ?? null})),
       notes: notes.map((note) => ({...note, createdAt: note.createdAt.toISOString()})),
+      journeys: journeys.map((journey) => ({...journey, scheduledAt: journey.scheduledAt.toISOString()})),
+      whatsapp: whatsapp.map((delivery) => ({...delivery, createdAt: delivery.createdAt.toISOString()})),
+      suppressions: suppressions.map((suppression) => ({...suppression, createdAt: suppression.createdAt.toISOString()})),
     };
   },
 

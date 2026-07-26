@@ -17,7 +17,8 @@
     "db:migrate": "node --experimental-strip-types scripts/db-migrate.ts",
     "db:seed": "node --experimental-strip-types scripts/db-seed.ts",
     "db:seed:m1": "node --experimental-strip-types scripts/seed-m1.ts",
-    "db:seed:m2": "node --experimental-strip-types scripts/seed-m2.ts"
+    "db:seed:m2": "node --experimental-strip-types scripts/seed-m2.ts",
+    "db:seed:m3": "node --experimental-strip-types scripts/seed-m3.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -50,6 +51,8 @@
     "@radix-ui/react-toggle": "^1.1.9",
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
+    "@react-email/components": "^1.0.12",
+    "@react-email/render": "^2.1.0",
     "@tanstack/react-query": "^5.83.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -67,6 +70,7 @@
     "react-hook-form": "^7.61.1",
     "react-resizable-panels": "^2.1.9",
     "recharts": "^2.15.4",
+    "resend": "^6.18.0",
     "schema-dts": "^2.0.0",
     "server-only": "^0.0.1",
     "sonner": "^1.7.4",

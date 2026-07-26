@@ -10,6 +10,9 @@ export type EngagementTimelineItem = Readonly<{id: string; type: string; points:
 export type EmailHistoryItem = Readonly<{id: string; template: string; subject: string; status: string; createdAt: string}>;
 export type RegistrationHistoryItem = Readonly<{eventId: string; title: string; startsAt: string; status: string; checkedInAt: string | null}>;
 export type MemberNoteItem = Readonly<{id: string; authorProfileId: string; body: string; replacesNoteId: string | null; createdAt: string}>;
+export type JourneyHistoryItem = Readonly<{id: string; journey: string; step: string; status: string; scheduledAt: string; attemptCount: number; errorCode: string | null}>;
+export type WhatsappHistoryItem = Readonly<{id: string; template: string; status: string; locale: string; classification: string; attemptCount: number; errorCode: string | null; createdAt: string}>;
+export type SuppressionHistoryItem = Readonly<{id: string; channel: string; classification: string; reasonCode: string | null; createdAt: string}>;
 
 export type Member360 = Readonly<{
   profile: {id: string; displayName: string; email: string | null; phone: string | null; role: string};
@@ -19,6 +22,9 @@ export type Member360 = Readonly<{
   emails: readonly EmailHistoryItem[];
   events: readonly RegistrationHistoryItem[];
   notes: readonly MemberNoteItem[];
+  journeys: readonly JourneyHistoryItem[];
+  whatsapp: readonly WhatsappHistoryItem[];
+  suppressions: readonly SuppressionHistoryItem[];
 }>;
 
 export type Member360Reader = Readonly<{get360: (actor: AdminActor, profileId: string) => Promise<Member360 | null>}>;
