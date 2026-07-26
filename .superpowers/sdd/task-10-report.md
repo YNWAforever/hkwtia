@@ -144,3 +144,22 @@ Result: PASS; 16 files passed; 85/85 tests passed.
 The first review-fix full-suite run exposed one stale test assumption: the campaign-recipient migration test required migration `0008` to remain the journal tail. It now locates and verifies the generated `0008_m3_campaign_recipient_leases` entry by tag, while the new automation-index test owns the `0009` tail contract. Both migration contracts pass.
 
 No live PostgreSQL result is claimed; the same 26 database/environment-gated tests remain skipped. Existing Task 1-3 report edits were preserved and excluded, and the progress ledger was not changed.
+
+## Journal lookup maintainability follow-up
+
+The automation-index metadata test no longer requires migration `0009` to remain the journal tail. It finds `0009_m3_automation_admin_indexes` by tag, projects and asserts the exact `idx: 9` / tag pair, and verifies both index names are present in the migration SQL and matching Drizzle snapshot tables.
+
+A synthetic later `{idx: 10, tag: "0010_future_migration"}` entry guards the behavior:
+
+- RED: the previous `.at(-1)` assertion selected the synthetic `0010` entry and failed with received index 10 instead of 9.
+- GREEN: tag lookup selected `0009` while the later fixture remained present; the index contract passed 3/3.
+
+Fresh verification:
+
+- Targeted `0008` and `0009` migration/index contracts: PASS; 2 files, 5/5 tests.
+- Task 10 review-focused regression: PASS; 16 files, 85/85 tests.
+- Exact Task 10 acceptance: PASS; 4 files, 33/33 tests.
+- `npm.cmd run typecheck`: PASS, no diagnostics.
+- `npm.cmd run lint`: PASS, no diagnostics.
+
+This follow-up changes only the index contract test and this report. Production code, schema, generated SQL, snapshot, and journal are unchanged. The full suite was not rerun for this test-only maintainability change; the prior source-state full run remains documented above.

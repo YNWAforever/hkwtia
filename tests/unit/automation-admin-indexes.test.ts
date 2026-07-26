@@ -2,9 +2,14 @@ import {existsSync, readFileSync} from "node:fs";
 
 import {describe, expect, it} from "vitest";
 
-const migrationPath = "drizzle/0009_m3_automation_admin_indexes.sql";
-const snapshotPath = "drizzle/meta/0009_snapshot.json";
+const migrationTag = "0009_m3_automation_admin_indexes";
+const migrationPath = `drizzle/${migrationTag}.sql`;
+const snapshotPath = `drizzle/meta/${migrationTag.slice(0, 4)}_snapshot.json`;
 const schema = readFileSync("lib/db/schema-core.ts", "utf8");
+const indexTargets = [
+  ["public.journey_state", "journey_state_admin_recent_idx"],
+  ["public.jobs", "jobs_automation_recent_idx"],
+] as const;
 
 describe("automation admin index contracts", () => {
   it("defines planner-compatible global journey and partial job indexes", () => {
@@ -38,16 +43,30 @@ describe("automation admin index contracts", () => {
     expect(migration).not.toContain("stripe");
   });
 
-  it("records migration 0009 and both indexes in Drizzle metadata", () => {
+  it("finds migration 0009 by tag and records SQL/snapshot index parity", () => {
     expect(existsSync(snapshotPath)).toBe(true);
     const journal = JSON.parse(
       readFileSync("drizzle/meta/_journal.json", "utf8"),
     ) as {entries: {idx: number; tag: string}[]};
-    expect(journal.entries.at(-1)).toMatchObject({
-      idx: 9,
-      tag: "0009_m3_automation_admin_indexes",
-    });
+    const laterEntry = {idx: 10, tag: "0010_future_migration"};
+    const entriesWithLaterMigration = [
+      ...journal.entries,
+      laterEntry,
+    ];
+    const migrationEntry = entriesWithLaterMigration.find(
+      (entry) => entry.tag === migrationTag,
+    );
 
+    expect({
+      idx: migrationEntry?.idx,
+      tag: migrationEntry?.tag,
+    }).toEqual({
+      idx: 9,
+      tag: migrationTag,
+    });
+    expect(entriesWithLaterMigration).toContainEqual(laterEntry);
+
+    const migration = readFileSync(migrationPath, "utf8");
     const snapshot = JSON.parse(
       readFileSync(snapshotPath, "utf8"),
     ) as {
@@ -55,11 +74,9 @@ describe("automation admin index contracts", () => {
         indexes: Record<string, unknown>;
       }>;
     };
-    expect(
-      snapshot.tables["public.journey_state"]?.indexes,
-    ).toHaveProperty("journey_state_admin_recent_idx");
-    expect(
-      snapshot.tables["public.jobs"]?.indexes,
-    ).toHaveProperty("jobs_automation_recent_idx");
+    for (const [table, index] of indexTargets) {
+      expect(migration).toContain(`"${index}"`);
+      expect(snapshot.tables[table]?.indexes).toHaveProperty(index);
+    }
   });
 });
