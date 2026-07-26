@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "packageManager": "npm@11.16.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "deploy:preview": "wrangler deploy --env preview",
     "test": "vitest run",

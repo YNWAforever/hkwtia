@@ -4,7 +4,8 @@ The WTIA public platform is a bilingual Next.js App Router site for the Hong Kon
 
 ## Requirements
 
-- Node.js 20+ and npm
+- Node.js 20+ and npm for the Next.js application
+- Node.js 22+ for tooling in `workers/` (required by Wrangler 4.114.0)
 - A copy of `.env.example` saved as `.env.local` for local overrides (public M0 pages can run with only `NEXT_PUBLIC_SITE_URL`; M1 database/auth/billing flows require the corresponding server variables)
 
 ```sh
@@ -53,8 +54,10 @@ The M2 evidence is [`docs/m2-acceptance.md`](./docs/m2-acceptance.md). For an au
 The isolated [`workers`](./workers) package contains the Preview-only Cloudflare Cron Worker. It invokes the authenticated Next.js job routes and does not own journey or delivery state. Its UTC triggers are:
 
 - Hourly: journey runner and approval expirer
-- 02:00: hourly jobs plus renewal runner
-- 18:00: hourly jobs plus engagement-score runner
+- 02:00: renewal runner
+- 18:00: engagement-score runner
+
+Cloudflare fires matching overlapping cron expressions as separate events. Each HTTP attempt uses manual redirect handling and a fixed 10-second deadline; redirect responses fail without following their `Location` target.
 
 Configure these Worker bindings in Cloudflare Preview:
 

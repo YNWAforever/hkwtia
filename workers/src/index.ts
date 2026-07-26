@@ -47,6 +47,7 @@ export type AutomationWorker = Readonly<{
   ) => void;
 }>;
 
+export const REQUEST_TIMEOUT_MS = 10_000;
 const RETRY_DELAYS = [250, 1_000] as const;
 const ATTEMPT_COUNT = 3;
 const BASE_JOBS = [
@@ -55,8 +56,8 @@ const BASE_JOBS = [
 ] as const satisfies readonly WorkerJob[];
 const JOBS_BY_CRON = {
   "0 * * * *": BASE_JOBS,
-  "0 2 * * *": [...BASE_JOBS, "renewal-runner"],
-  "0 18 * * *": [...BASE_JOBS, "engagement-score"],
+  "0 2 * * *": ["renewal-runner"],
+  "0 18 * * *": ["engagement-score"],
 } as const satisfies Readonly<
   Record<string, readonly WorkerJob[]>
 >;
@@ -168,6 +169,26 @@ function alertLogCode(error: unknown): AlertLogCode {
     : "WORKER_ALERT_NETWORK_ERROR";
 }
 
+async function fetchWithDeadline(
+  dependencies: WorkerDependencies,
+  input: RequestInfo | URL,
+  init: RequestInit,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, REQUEST_TIMEOUT_MS);
+  try {
+    return await dependencies.fetch(input, {
+      ...init,
+      redirect: "manual",
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 function logSanitized(
   logger: WorkerDependencies["logger"],
   record: WorkerLog,
@@ -194,7 +215,8 @@ async function notifyFinalFailure(
   } as const;
 
   try {
-    const response = await dependencies.fetch(
+    const response = await fetchWithDeadline(
+      dependencies,
       endpointUrl(config.appUrl, "worker-alert"),
       {
         method: "POST",
@@ -229,7 +251,8 @@ async function invokeJob(
 
   for (let attempt = 1; attempt <= ATTEMPT_COUNT; attempt += 1) {
     try {
-      const response = await dependencies.fetch(
+      const response = await fetchWithDeadline(
+        dependencies,
         endpointUrl(config.appUrl, job),
         {
           method: "POST",

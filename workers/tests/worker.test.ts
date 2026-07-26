@@ -12,6 +12,7 @@ const DEFAULT_ENV: WorkerEnv = {
   CRON_SECRET: "cron-test-secret",
 };
 const SCHEDULED_TIME = Date.parse("2026-07-26T02:00:00.123Z");
+const EXPECTED_REQUEST_TIMEOUT_MS = 10_000;
 
 type RecordedRequest = Readonly<{
   url: string;
@@ -40,7 +41,32 @@ function createFetch(
   }) as WorkerDependencies["fetch"];
 }
 
-async function runScheduled(
+function createRedirectFollowingFetch(
+  calls: RecordedRequest[],
+  respond: (
+    url: string,
+    init: RequestInit | undefined,
+  ) => Response | Promise<Response>,
+): WorkerDependencies["fetch"] {
+  const request: WorkerDependencies["fetch"] = (async (input, init) => {
+    const url = requestUrl(input);
+    calls.push({url, init});
+    const response = await respond(url, init);
+    const location = response.headers.get("location");
+    if (
+      response.status >= 300
+      && response.status < 400
+      && location
+      && init?.redirect !== "manual"
+    ) {
+      return request(new URL(location, url), init);
+    }
+    return response;
+  }) as WorkerDependencies["fetch"];
+  return request;
+}
+
+function dispatchScheduled(
   worker: AutomationWorker,
   options: Readonly<{
     cron?: string;
@@ -64,7 +90,18 @@ async function runScheduled(
     worker.scheduled(controller, options.env ?? DEFAULT_ENV, ctx),
   ).toBeUndefined();
   expect(waits).toHaveLength(1);
-  await Promise.all(waits);
+  return Promise.all(waits).then(() => undefined);
+}
+
+async function runScheduled(
+  worker: AutomationWorker,
+  options: Readonly<{
+    cron?: string;
+    env?: WorkerEnv;
+    scheduledTime?: number;
+  }> = {},
+): Promise<void> {
+  await dispatchScheduled(worker, options);
 }
 
 function guardedFailureResponse(): Response {
@@ -86,16 +123,10 @@ function guardedFailureResponse(): Response {
 describe("Cloudflare automation scheduler", () => {
   it.each([
     ["0 * * * *", ["approvals-expirer", "journey-runner"]],
-    [
-      "0 2 * * *",
-      ["approvals-expirer", "journey-runner", "renewal-runner"],
-    ],
-    [
-      "0 18 * * *",
-      ["approvals-expirer", "engagement-score", "journey-runner"],
-    ],
+    ["0 2 * * *", ["renewal-runner"]],
+    ["0 18 * * *", ["engagement-score"]],
   ] as const)(
-    "maps %s to every due job once, including overlapping hourly work",
+    "maps %s to only the jobs owned by that cron event",
     async (cron, expectedJobs) => {
       const calls: RecordedRequest[] = [];
       const worker = createAutomationWorker({
@@ -111,6 +142,52 @@ describe("Cloudflare automation scheduler", () => {
       expect(new Set(actualJobs).size).toBe(actualJobs.length);
     },
   );
+
+  it.each([
+    ["0 2 * * *", "renewal-runner"],
+    ["0 18 * * *", "engagement-score"],
+  ] as const)(
+    "lets overlapping hourly and %s events run each owned job once",
+    async (dailyCron, dailyJob) => {
+      const calls: RecordedRequest[] = [];
+      const worker = createAutomationWorker({
+        fetch: createFetch(calls, () => new Response(null, {status: 204})),
+        sleep: async () => {},
+        logger: {error: vi.fn()},
+      });
+
+      await runScheduled(worker, {
+        cron: "0 * * * *",
+        scheduledTime: SCHEDULED_TIME,
+      });
+      await runScheduled(worker, {
+        cron: dailyCron,
+        scheduledTime: SCHEDULED_TIME,
+      });
+
+      const actualJobs = calls.map((call) => jobName(call.url)).sort();
+      expect(actualJobs).toEqual(
+        ["approvals-expirer", dailyJob, "journey-runner"].sort(),
+      );
+      expect(new Set(actualJobs).size).toBe(actualJobs.length);
+    },
+  );
+
+  it("safely logs and performs no fetch for an unknown cron", async () => {
+    const calls: RecordedRequest[] = [];
+    const logError = vi.fn();
+    const worker = createAutomationWorker({
+      fetch: createFetch(calls, () => new Response(null, {status: 204})),
+      sleep: async () => {},
+      logger: {error: logError},
+    });
+
+    await runScheduled(worker, {cron: "*/5 * * * *"});
+
+    expect(calls).toHaveLength(0);
+    expect(logError).toHaveBeenCalledTimes(1);
+    expect(logError).toHaveBeenCalledWith({errorCode: "INVALID_CRON"});
+  });
 
   it("registers one waitUntil promise and settles every due job independently", async () => {
     const calls: RecordedRequest[] = [];
@@ -160,9 +237,229 @@ describe("Cloudflare automation scheduler", () => {
     for (const call of calls) {
       expect(call.init).toEqual({
         method: "POST",
+        redirect: "manual",
+        signal: expect.any(AbortSignal),
         headers: {authorization: "Bearer exact bearer secret"},
       });
       expect(call.init?.body).toBeUndefined();
+    }
+  });
+
+  it("never follows a cross-origin job redirect or sends its bearer to the redirect target", async () => {
+    const calls: RecordedRequest[] = [];
+    const leakedAuthorizations: Array<string | null> = [];
+    const redirectTarget = "https://attacker.example/collect";
+    const fetch = createRedirectFollowingFetch(calls, (url, init) => {
+      if (url === redirectTarget) {
+        leakedAuthorizations.push(
+          new Headers(init?.headers).get("authorization"),
+        );
+        return new Response(null, {status: 204});
+      }
+      if (url.endsWith("/worker-alert")) {
+        return new Response(null, {status: 204});
+      }
+      return new Response(null, {
+        status: 302,
+        headers: {location: redirectTarget},
+      });
+    });
+    const worker = createAutomationWorker({
+      fetch,
+      sleep: async () => {},
+      logger: {error: vi.fn()},
+    });
+
+    await runScheduled(worker, {cron: "0 2 * * *"});
+
+    const jobCalls = calls.filter((call) =>
+      call.url.endsWith("/renewal-runner"),
+    );
+    expect(jobCalls).toHaveLength(3);
+    for (const call of jobCalls) {
+      expect(call.init?.redirect).toBe("manual");
+      expect(call.init?.signal).toBeInstanceOf(AbortSignal);
+    }
+    expect(calls.filter((call) => call.url === redirectTarget)).toHaveLength(0);
+    expect(leakedAuthorizations).toHaveLength(0);
+    const alert = calls.find((call) => call.url.endsWith("/worker-alert"));
+    expect(alert).toBeDefined();
+    expect(JSON.parse(String(alert?.init?.body))).toMatchObject({
+      job: "renewal-runner",
+      attemptCount: 3,
+      errorCode: "JOB_HTTP_ERROR",
+    });
+  });
+
+  it("treats an alert redirect as failure without following or leaking the bearer", async () => {
+    const calls: RecordedRequest[] = [];
+    const leakedAuthorizations: Array<string | null> = [];
+    const redirectTarget = "https://attacker.example/alert";
+    const logError = vi.fn();
+    const fetch = createRedirectFollowingFetch(calls, (url, init) => {
+      if (url === redirectTarget) {
+        leakedAuthorizations.push(
+          new Headers(init?.headers).get("authorization"),
+        );
+        return new Response(null, {status: 204});
+      }
+      if (url.endsWith("/worker-alert")) {
+        return new Response(null, {
+          status: 302,
+          headers: {location: redirectTarget},
+        });
+      }
+      return new Response(null, {status: 503});
+    });
+    const worker = createAutomationWorker({
+      fetch,
+      sleep: async () => {},
+      logger: {error: logError},
+    });
+
+    await runScheduled(worker, {cron: "0 2 * * *"});
+
+    const alerts = calls.filter((call) => call.url.endsWith("/worker-alert"));
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0]?.init?.redirect).toBe("manual");
+    expect(alerts[0]?.init?.signal).toBeInstanceOf(AbortSignal);
+    expect(calls.filter((call) => call.url === redirectTarget)).toHaveLength(0);
+    expect(leakedAuthorizations).toHaveLength(0);
+    expect(logError).toHaveBeenCalledTimes(1);
+    expect(logError).toHaveBeenCalledWith({
+      job: "renewal-runner",
+      errorCode: "WORKER_ALERT_HTTP_ERROR",
+    });
+  });
+
+  it("aborts each hanging job request at the fixed deadline and reports JOB_TIMEOUT", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(SCHEDULED_TIME);
+    try {
+      const calls: RecordedRequest[] = [];
+      const delays: number[] = [];
+      const abortDurations: number[] = [];
+      const attemptSignals: AbortSignal[] = [];
+      const worker = createAutomationWorker({
+        fetch: createFetch(calls, (url, init) => {
+          if (url.endsWith("/worker-alert")) {
+            return new Response(null, {status: 204});
+          }
+          if (!url.endsWith("/renewal-runner")) {
+            return new Response(null, {status: 204});
+          }
+          const signal = init?.signal;
+          if (!(signal instanceof AbortSignal)) {
+            throw new Error("job request has no AbortSignal");
+          }
+          attemptSignals.push(signal);
+          const startedAt = Date.now();
+          return new Promise<Response>((_resolve, reject) => {
+            const abort = () => {
+              abortDurations.push(Date.now() - startedAt);
+              reject(new DOMException("deadline reached", "AbortError"));
+            };
+            if (signal.aborted) {
+              abort();
+              return;
+            }
+            signal.addEventListener("abort", abort, {once: true});
+          });
+        }),
+        sleep: async (milliseconds) => {
+          delays.push(milliseconds);
+          await new Promise<void>((resolve) => {
+            setTimeout(resolve, milliseconds);
+          });
+        },
+        logger: {error: vi.fn()},
+      });
+
+      const completion = dispatchScheduled(worker, {cron: "0 2 * * *"});
+      await vi.runAllTimersAsync();
+      await completion;
+
+      expect(abortDurations).toEqual([
+        EXPECTED_REQUEST_TIMEOUT_MS,
+        EXPECTED_REQUEST_TIMEOUT_MS,
+        EXPECTED_REQUEST_TIMEOUT_MS,
+      ]);
+      expect(attemptSignals).toHaveLength(3);
+      expect(new Set(attemptSignals).size).toBe(3);
+      expect(
+        calls.filter((call) => call.url.endsWith("/renewal-runner")),
+      ).toHaveLength(3);
+      expect(delays).toEqual([250, 1_000]);
+      const alert = calls.find((call) => call.url.endsWith("/worker-alert"));
+      expect(JSON.parse(String(alert?.init?.body))).toMatchObject({
+        job: "renewal-runner",
+        attemptCount: 3,
+        errorCode: "JOB_TIMEOUT",
+      });
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
+  });
+
+  it("aborts a hanging alert and emits one bounded timeout log with no timers left", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(SCHEDULED_TIME);
+    try {
+      const calls: RecordedRequest[] = [];
+      const abortDurations: number[] = [];
+      const logError = vi.fn();
+      const worker = createAutomationWorker({
+        fetch: createFetch(calls, (url, init) => {
+          if (!url.endsWith("/worker-alert")) {
+            return new Response(null, {status: 503});
+          }
+          const signal = init?.signal;
+          if (!(signal instanceof AbortSignal)) {
+            throw new Error("alert request has no AbortSignal");
+          }
+          const startedAt = Date.now();
+          return new Promise<Response>((_resolve, reject) => {
+            const abort = () => {
+              abortDurations.push(Date.now() - startedAt);
+              reject(new DOMException("deadline reached", "AbortError"));
+            };
+            if (signal.aborted) {
+              abort();
+              return;
+            }
+            signal.addEventListener("abort", abort, {once: true});
+          });
+        }),
+        sleep: async (milliseconds) => {
+          await new Promise<void>((resolve) => {
+            setTimeout(resolve, milliseconds);
+          });
+        },
+        logger: {error: logError},
+      });
+
+      const completion = dispatchScheduled(worker, {cron: "0 2 * * *"});
+      await vi.runAllTimersAsync();
+      await completion;
+
+      expect(abortDurations).toEqual([EXPECTED_REQUEST_TIMEOUT_MS]);
+      expect(
+        calls.filter((call) => call.url.endsWith("/renewal-runner")),
+      ).toHaveLength(3);
+      expect(
+        calls.filter((call) => call.url.endsWith("/worker-alert")),
+      ).toHaveLength(1);
+      expect(logError).toHaveBeenCalledTimes(1);
+      expect(logError).toHaveBeenCalledWith({
+        job: "renewal-runner",
+        errorCode: "WORKER_ALERT_TIMEOUT",
+      });
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
     }
   });
 
@@ -185,23 +482,16 @@ describe("Cloudflare automation scheduler", () => {
       cron: "0 2 * * *",
     });
 
-    for (const job of [
-      "journey-runner",
-      "approvals-expirer",
-      "renewal-runner",
-    ]) {
-      expect(
-        calls.filter((call) => call.url.endsWith(`/${job}`)),
-      ).toHaveLength(3);
-    }
-    expect(delays.sort((left, right) => left - right)).toEqual([
-      250,
-      250,
-      250,
-      1_000,
-      1_000,
-      1_000,
-    ]);
+    expect(
+      calls.filter((call) => call.url.endsWith("/renewal-runner")),
+    ).toHaveLength(3);
+    expect(
+      calls.filter((call) => call.url.endsWith("/journey-runner")),
+    ).toHaveLength(0);
+    expect(
+      calls.filter((call) => call.url.endsWith("/approvals-expirer")),
+    ).toHaveLength(0);
+    expect(delays).toEqual([250, 1_000]);
   });
 
   it("counts fetch exceptions in the same three-attempt budget", async () => {
