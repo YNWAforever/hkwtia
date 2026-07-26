@@ -2,7 +2,10 @@ import {readFileSync} from "node:fs";
 
 import {expect, test, type Page} from "@playwright/test";
 
-import {requireM3E2ETarget} from "@/tests/fixtures/m3-acceptance-safety";
+import {
+  enterProtectedM3Preview,
+  requireM3E2ETarget,
+} from "@/tests/fixtures/m3-acceptance-safety";
 
 type M3Messages = Readonly<{
   NotFound: {title: string};
@@ -45,12 +48,7 @@ function missing(names: readonly string[]): readonly string[] {
 }
 
 async function enterProtectedPreview(page: Page): Promise<void> {
-  const shareToken = process.env.VERCEL_SHARE_TOKEN?.trim();
-  if (!shareToken || !previewTarget) return;
-
-  const shareUrl = new URL(previewTarget.baseUrl);
-  shareUrl.searchParams.set("_vercel_share", shareToken);
-  await page.goto(shareUrl.href);
+  await enterProtectedM3Preview(page, process.env);
 }
 
 async function signIn(

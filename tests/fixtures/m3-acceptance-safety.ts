@@ -52,6 +52,30 @@ function databaseName(parsed: URL): string {
   return decoded;
 }
 
+function hasExactCanonicalQueryParameter(
+  parsed: URL,
+  name: string,
+  value: string,
+): boolean {
+  const expected = `${name}=${value}`;
+  let matchingNames = 0;
+  for (const segment of parsed.search.slice(1).split("&")) {
+    const rawName = segment.split("=", 1)[0] ?? "";
+    let decodedName: string;
+    try {
+      decodedName = decodeURIComponent(
+        rawName.replace(/\+/g, " "),
+      );
+    } catch {
+      continue;
+    }
+    if (decodedName.toLowerCase() !== name) continue;
+    matchingNames += 1;
+    if (segment !== expected) return false;
+  }
+  return matchingNames === 1;
+}
+
 function connectionIdentity(parsed: URL): string {
   return [
     normalizedHostname(parsed.hostname),
@@ -88,8 +112,14 @@ export function requireM3AcceptanceDatabase(
   }
 
   const parsed = parseDatabaseUrl(databaseUrl);
-  const sslMode = parsed.searchParams.get("sslmode")?.toLowerCase();
-  if (!sslMode || !TLS_SSL_MODES.has(sslMode)) {
+  const sslModes = parsed.searchParams.getAll("sslmode");
+  const sslMode = sslModes[0];
+  if (
+    sslModes.length !== 1
+    || !sslMode
+    || !TLS_SSL_MODES.has(sslMode)
+    || !hasExactCanonicalQueryParameter(parsed, "sslmode", sslMode)
+  ) {
     throw new Error("M3_ACCEPTANCE_DATABASE_TLS_REQUIRED");
   }
 
@@ -212,6 +242,28 @@ export function requireM3E2ETarget(
     origin: target.origin,
     isLoopback: false,
   };
+}
+
+type M3PreviewNavigator = Readonly<{
+  goto: (url: string) => Promise<unknown>;
+}>;
+
+export async function enterProtectedM3Preview(
+  navigator: M3PreviewNavigator,
+  environment: AcceptanceEnvironment,
+): Promise<void> {
+  const shareToken = environment.VERCEL_SHARE_TOKEN?.trim();
+  if (!shareToken) return;
+
+  const target = requireM3E2ETarget(environment);
+  if (target.isLoopback) return;
+
+  const shareUrl = new URL(target.baseUrl);
+  shareUrl.searchParams.set(
+    "_vercel_share",
+    shareToken,
+  );
+  await navigator.goto(shareUrl.href);
 }
 
 type M3AcceptanceCaseDependencies = Readonly<{

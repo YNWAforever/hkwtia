@@ -1,9 +1,12 @@
 import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 
-import {describe, expect, it} from "vitest";
+import {describe, expect, it, vi} from "vitest";
 
-import {requireM3E2ETarget} from "@/tests/fixtures/m3-acceptance-safety";
+import {
+  enterProtectedM3Preview,
+  requireM3E2ETarget,
+} from "@/tests/fixtures/m3-acceptance-safety";
 
 describe("M3 E2E target safety", () => {
   it("allows loopback targets without a remote allowlist", () => {
@@ -84,13 +87,59 @@ describe("M3 E2E target safety", () => {
     })).toThrow();
   });
 
+  it("never attaches a share token or navigates for loopback", async () => {
+    const goto = vi.fn(async (url: string) => url);
+    const setExtraHTTPHeaders = vi.fn(async () => undefined);
+    const page = {goto, setExtraHTTPHeaders};
+    const environment = {
+      PLAYWRIGHT_BASE_URL: "http://localhost:3000",
+      VERCEL_SHARE_TOKEN: "test-only-share-token",
+    };
+
+    await enterProtectedM3Preview(page, environment);
+
+    expect(goto).not.toHaveBeenCalled();
+    expect(setExtraHTTPHeaders).not.toHaveBeenCalled();
+    expect(environment.PLAYWRIGHT_BASE_URL).not.toContain(
+      "_vercel_share",
+    );
+  });
+
+  it("attaches a share token only to the exact allowed remote Preview", async () => {
+    const origin =
+      "https://hkwtia-git-m3-acceptance-wtia.vercel.app";
+    const goto = vi.fn(async (url: string) => url);
+    const setExtraHTTPHeaders = vi.fn(async () => undefined);
+    const page = {goto, setExtraHTTPHeaders};
+
+    await enterProtectedM3Preview(page, {
+      PLAYWRIGHT_BASE_URL: origin,
+      M3_E2E_ALLOWED_ORIGIN: origin,
+      VERCEL_SHARE_TOKEN: "test-only-share-token",
+    });
+
+    expect(goto).toHaveBeenCalledOnce();
+    expect(setExtraHTTPHeaders).not.toHaveBeenCalled();
+    const navigated = new URL(goto.mock.calls[0]![0]);
+    expect(navigated.origin).toBe(origin);
+    expect(navigated.pathname).toBe("/");
+    expect([...navigated.searchParams.keys()]).toEqual([
+      "_vercel_share",
+    ]);
+    expect(navigated.searchParams.get("_vercel_share")).toBe(
+      "test-only-share-token",
+    );
+  });
+
   it("guards the E2E module before share auth, credentials, or mutations", () => {
     const source = readFileSync(
       resolve(process.cwd(), "tests/e2e/m3-automations.spec.ts"),
       "utf8",
     );
     const guardCall = source.indexOf("requireM3E2ETarget(process.env)");
-    const shareAuth = source.indexOf("VERCEL_SHARE_TOKEN");
+    const shareAuth = source.indexOf(
+      "enterProtectedM3Preview(page, process.env)",
+    );
     const credentials = source.indexOf("M3_TEST_STAFF_EMAIL");
     const unsubscribeToken = source.indexOf(
       "M3_TEST_UNSUBSCRIBE_TOKEN_EN",

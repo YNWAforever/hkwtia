@@ -106,6 +106,43 @@ describe("M3 destructive acceptance database guard", () => {
     }
   });
 
+  it.each([
+    [
+      "safe value before conflicting disable",
+      "sslmode=require&sslmode=disable",
+    ],
+    [
+      "disable before safe value",
+      "sslmode=disable&sslmode=require",
+    ],
+    [
+      "duplicate safe values",
+      "sslmode=require&sslmode=require",
+    ],
+    [
+      "upper-case value",
+      "sslmode=REQUIRE",
+    ],
+    [
+      "percent-encoded value",
+      "sslmode=%72equire",
+    ],
+    [
+      "upper-case key",
+      "SSLMODE=require",
+    ],
+    [
+      "percent-encoded key",
+      "%73slmode=require",
+    ],
+  ])("rejects non-canonical or repeated sslmode: %s", (_case, query) => {
+    expect(() => requireM3AcceptanceDatabase(allowedEnvironment({
+      DATABASE_URL_TEST:
+        `postgresql://m3_fixture:test-only@${PREVIEW_HOST}`
+        + `/m3_acceptance?${query}`,
+    }))).toThrow("M3_ACCEPTANCE_DATABASE_TLS_REQUIRED");
+  });
+
   it("rejects expected-host mismatch after normalizing case and trailing dots", () => {
     expect(() => requireM3AcceptanceDatabase(allowedEnvironment({
       M3_ACCEPTANCE_EXPECTED_DB_HOST:
