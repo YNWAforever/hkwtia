@@ -31,6 +31,9 @@ Open `http://localhost:3000/` or `http://localhost:3000/zh`.
 | `npm run db:migrate` | Apply Drizzle migrations from `drizzle/` using `DATABASE_URL` |
 | `npm run db:seed` | Idempotently seed the M1 plans and deterministic M2 CRM demo data |
 | `npm run db:seed:m1` / `npm run db:seed:m2` | Run one seed layer directly |
+| `npm test --prefix workers` | Run the isolated Cloudflare automation Worker tests |
+| `npm run typecheck --prefix workers` | Type-check the isolated Cloudflare automation Worker |
+| `npm run deploy:preview --prefix workers` | Deploy the Preview-only automation Worker |
 
 For a production-style local check:
 
@@ -44,6 +47,42 @@ Set `PLAYWRIGHT_BASE_URL` or `LHCI_BASE_URL` when browser or Lighthouse checks s
 The M1 acceptance evidence template is [`docs/m1-acceptance.md`](./docs/m1-acceptance.md). The deterministic acceptance contracts run without credentials; the real Neon/Stripe preview flow is enabled only when isolated `DATABASE_URL_TEST` and Stripe test variables are present.
 
 The M2 evidence is [`docs/m2-acceptance.md`](./docs/m2-acceptance.md). For an authenticated demo, migrate and seed an isolated Neon branch, create test-only Neon Auth staff/member accounts mapped to the seeded profiles, set the seven names documented there, and run the focused M2 Playwright file. Storage state is written only below ignored `test-results`; never copy production database or Auth credentials into the test environment.
+
+## M3 Preview automation Worker
+
+The isolated [`workers`](./workers) package contains the Preview-only Cloudflare Cron Worker. It invokes the authenticated Next.js job routes and does not own journey or delivery state. Its UTC triggers are:
+
+- Hourly: journey runner and approval expirer
+- 02:00: hourly jobs plus renewal runner
+- 18:00: hourly jobs plus engagement-score runner
+
+Configure these Worker bindings in Cloudflare Preview:
+
+- `APP_URL`: the canonical HTTPS origin of the matching Vercel Preview deployment. Plain HTTP is accepted only for `localhost` development.
+- `CRON_SECRET`: the same non-empty bearer secret configured on the matching Next.js Preview deployment.
+
+Keep both values out of `wrangler.toml` and committed environment files. Add them interactively without placing real values in shell history:
+
+```sh
+cd workers
+npx wrangler secret put APP_URL --env preview
+npx wrangler secret put CRON_SECRET --env preview
+cd ..
+```
+
+Install and verify the Worker independently from the root application:
+
+```sh
+npm ci --prefix workers
+npm test --prefix workers
+npm run typecheck --prefix workers
+```
+
+After Preview bindings and the matching Next.js Preview are ready, deploy only the isolated Preview Worker:
+
+```sh
+npm run deploy:preview --prefix workers
+```
 
 ## Deployment
 
