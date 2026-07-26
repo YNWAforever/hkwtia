@@ -12,13 +12,14 @@ import {
   type AutomationSqlExecutor,
   type JourneyClaim,
 } from "@/lib/db/repos/journeys";
+import {authorizedProviderFailureCode} from "@/lib/automation/delivery-retry-authorization";
 
 const dialect = new PgDialect();
 const now = new Date("2027-01-15T10:00:00.000Z");
 const journeyId = "11111111-1111-4111-8111-111111111111";
 const deliveryKey =
   "journey:member-1:renewal:renewal-cycle-1:renewal_14";
-const auditedRetryMarker = "admin_retry_authorized";
+const auditedRetryMarker = "admin_retry_provider_client_error";
 const admin = {
   kind: "staff",
   userId: "auth-staff",
@@ -62,11 +63,7 @@ function journeyRow(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function claim(
-  overrides: Partial<JourneyClaim> & {
-    claimSource?: JourneyClaim["claimSource"] | "retry";
-  } = {},
-): JourneyClaim {
+function claim(overrides: Partial<JourneyClaim> = {}): JourneyClaim {
   return {
     id: journeyId,
     profileId: "member-1",
@@ -80,13 +77,15 @@ function claim(
     claimedAt: now,
     claimExpiresAt: new Date(now.getTime() + 300_000),
     deliveryKey,
-    errorCode: auditedRetryMarker,
+    errorCode: null,
     completedAt: null,
     createdAt: now,
     updatedAt: now,
-    claimSource: "retry",
+    claimSource: "scheduled",
+    emailErrorCode: auditedRetryMarker,
+    whatsappErrorCode: auditedRetryMarker,
     ...overrides,
-  } as unknown as JourneyClaim;
+  };
 }
 
 function context(
@@ -153,37 +152,28 @@ function retryDatabase(deliveries: Map<string, DeliveryState>) {
     const command = normalizedSql(query);
     commands.push(command);
     if (/UPDATE "journey_state".*status = 'scheduled'/i.test(command.sql)) {
-      const hasMarker = command.params.includes(auditedRetryMarker);
       return {
         rows: [journeyRow({
           status: "scheduled",
           scheduled_at: now,
           claimed_at: null,
           claim_expires_at: null,
-          error_code: hasMarker ? auditedRetryMarker : null,
+          error_code: null,
           completed_at: null,
         })],
       };
     }
     if (/UPDATE "email_log"/i.test(command.sql)) {
       const record = deliveries.get(deliveryKey);
-      if (record?.status === "failed") {
-        record.status = "processing";
-        record.providerId = null;
-        record.errorCode = null;
-        record.attemptCount += 1;
-        return {rows: [{id: record.id}]};
+      if (record?.status === "failed" && record.errorCode === "provider_client_error") {
+        record.errorCode = auditedRetryMarker;
       }
       return {rows: []};
     }
     if (/UPDATE "whatsapp_log"/i.test(command.sql)) {
       const record = deliveries.get(`${deliveryKey}:whatsapp`);
-      if (record?.status === "failed") {
-        record.status = "processing";
-        record.providerId = null;
-        record.errorCode = null;
-        record.attemptCount += 1;
-        return {rows: [{id: record.id}]};
+      if (record?.status === "failed" && record.errorCode === "provider_client_error") {
+        record.errorCode = auditedRetryMarker;
       }
       return {rows: []};
     }
@@ -232,10 +222,12 @@ function runnerHarness(
     expectedErrorCode: string,
   ) => {
     const record = deliveries.get(deliveryKey)!;
+    const failureCode = authorizedProviderFailureCode(expectedErrorCode);
     if (
       record.id !== id
       || record.status !== "failed"
       || record.errorCode !== expectedErrorCode
+      || !failureCode
     ) {
       throw new Error("INVALID_DELIVERY_RETRY");
     }
@@ -243,7 +235,7 @@ function runnerHarness(
     record.errorCode = null;
     record.providerId = null;
     record.attemptCount += 1;
-    return {...record};
+    return {record: {...record}, failureCode};
   });
   const retryWhatsappFailure = vi.fn(async (
     _actor,
@@ -251,10 +243,12 @@ function runnerHarness(
     expectedErrorCode: string,
   ) => {
     const record = deliveries.get(`${deliveryKey}:whatsapp`)!;
+    const failureCode = authorizedProviderFailureCode(expectedErrorCode);
     if (
       record.id !== id
       || record.status !== "failed"
       || record.errorCode !== expectedErrorCode
+      || !failureCode
     ) {
       throw new Error("INVALID_DELIVERY_RETRY");
     }
@@ -262,7 +256,7 @@ function runnerHarness(
     record.errorCode = null;
     record.providerId = null;
     record.attemptCount += 1;
-    return {...record};
+    return {record: {...record}, failureCode};
   });
   const dependencies = {
     journeys: {
@@ -357,7 +351,7 @@ async function authorizeAndRun(
 }
 
 describe("Task 7 final re-review: lazy audited channel retry", () => {
-  it("schedules and audits the parent without eagerly reopening any failed channel", async () => {
+  it("schedules and audits the parent while authorizing failed channels without reopening them", async () => {
     const deliveries = new Map([
       [deliveryKey, delivery("email", "failed")],
       [`${deliveryKey}:whatsapp`, delivery("whatsapp", "failed")],
@@ -369,29 +363,33 @@ describe("Task 7 final re-review: lazy audited channel retry", () => {
 
     expect(result).toMatchObject({
       status: "scheduled",
-      errorCode: auditedRetryMarker,
+      errorCode: null,
     });
-    expect(fake.commands).toHaveLength(2);
+    expect(fake.commands).toHaveLength(4);
     expect(fake.commands[0]?.sql).toMatch(
-      /UPDATE "journey_state".*status = 'scheduled'.*error_code =/i,
+      /UPDATE "journey_state".*status = 'scheduled'.*error_code = NULL/i,
     );
-    expect(fake.commands[0]?.params).toContain(auditedRetryMarker);
-    expect(fake.commands[1]?.sql).toMatch(
+    expect(fake.commands[0]?.params).not.toContain(auditedRetryMarker);
+    expect(fake.commands[1]?.sql).toMatch(/UPDATE "email_log".*SET error_code = CASE/i);
+    expect(fake.commands[2]?.sql).toMatch(/UPDATE "whatsapp_log".*SET error_code = CASE/i);
+    expect(fake.commands[1]?.params).toContain(auditedRetryMarker);
+    expect(fake.commands[2]?.params).toContain(auditedRetryMarker);
+    expect(fake.commands[3]?.sql).toMatch(
       /INSERT INTO "audit_events".*journey\.failed_retry_requested/i,
     );
     expect(fake.auditWrites()).toBe(1);
     expect([...deliveries.values()]).toEqual([
-      expect.objectContaining({channel: "email", status: "failed", attemptCount: 1}),
-      expect.objectContaining({channel: "whatsapp", status: "failed", attemptCount: 1}),
+      expect.objectContaining({channel: "email", status: "failed", errorCode: auditedRetryMarker, attemptCount: 1}),
+      expect.objectContaining({channel: "whatsapp", status: "failed", errorCode: auditedRetryMarker, attemptCount: 1}),
     ]);
   });
 
   it.each([
-    ["scheduled", "scheduled"],
-    ["expired processing", "processing"],
+    ["scheduled", "scheduled", "scheduled"],
+    ["expired processing", "processing", "stale"],
   ] as const)(
-    "derives retry claim source from the durable marker on %s parent",
-    async (_label, priorStatus) => {
+    "exposes channel authorization with ordinary claim source on %s parent",
+    async (_label, priorStatus, expectedSource) => {
       const commands: ReturnType<typeof normalizedSql>[] = [];
       const execute: AutomationSqlExecutor["execute"] = async (query) => {
         commands.push(normalizedSql(query));
@@ -400,10 +398,11 @@ describe("Task 7 final re-review: lazy audited channel retry", () => {
             status: "processing",
             claimed_at: now,
             claim_expires_at: new Date(now.getTime() + 300_000),
-            error_code: auditedRetryMarker,
+            error_code: null,
             completed_at: null,
             prior_status: priorStatus,
-            prior_error_code: auditedRetryMarker,
+            email_error_code: auditedRetryMarker,
+            whatsapp_error_code: auditedRetryMarker,
           })],
         };
       };
@@ -415,10 +414,11 @@ describe("Task 7 final re-review: lazy audited channel retry", () => {
       const [claimed] = await createJourneysRepository(async () => database)
         .claimDue(cronActor, now, 1, 300_000);
 
-      expect(claimed?.claimSource).toBe("retry");
-      expect(commands[0]?.sql).toMatch(
-        /error_code AS prior_error_code.*RETURNING target\.\*, due\.prior_status, due\.prior_error_code/i,
-      );
+      expect(claimed?.claimSource).toBe(expectedSource);
+      expect(claimed?.emailErrorCode).toBe(auditedRetryMarker);
+      expect(claimed?.whatsappErrorCode).toBe(auditedRetryMarker);
+      expect(commands[0]?.sql).toMatch(/LEFT JOIN "email_log".*LEFT JOIN "whatsapp_log"/i);
+      expect(commands[0]?.sql).toMatch(/RETURNING target\.\*, due\.prior_status, due\.email_error_code, due\.whatsapp_error_code/i);
     },
   );
 
@@ -439,7 +439,7 @@ describe("Task 7 final re-review: lazy audited channel retry", () => {
     expect(deliveries.get(`${deliveryKey}:whatsapp`)).toMatchObject({
       status: "failed",
       attemptCount: 1,
-      errorCode: "provider_client_error",
+      errorCode: auditedRetryMarker,
     });
     expect(test.runner.reserveWhatsapp).not.toHaveBeenCalled();
     expect(test.runner.retryWhatsappFailure).not.toHaveBeenCalled();
@@ -519,7 +519,7 @@ describe("Task 7 final re-review: lazy audited channel retry", () => {
     expect(test.runner.retryEmailFailure).toHaveBeenCalledWith(
       expect.anything(),
       "email-log-1",
-      "provider_client_error",
+      auditedRetryMarker,
     );
     expect(test.runner.emailProvider).toHaveBeenCalledTimes(1);
     expect(deliveries.get(deliveryKey)).toMatchObject({
@@ -541,6 +541,7 @@ describe("Task 7 final re-review: lazy audited channel retry", () => {
         step: "welcome",
         claimSource: "stale",
         errorCode: null,
+        emailErrorCode: "provider_client_error",
       }),
       context(),
       deliveries,

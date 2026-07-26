@@ -2,6 +2,9 @@ import "server-only";
 
 import {sql, type SQL} from "drizzle-orm";
 
+import {
+  ADMIN_RETRY_AUTHORIZATION_BY_FAILURE,
+} from "@/lib/automation/delivery-retry-authorization";
 import type {ScheduledJourneyStep} from "@/lib/automation/types";
 import {
   requireAutomationSystem,
@@ -9,8 +12,10 @@ import {
 } from "@/lib/auth/automation-actor";
 import {
   auditEvents,
+  emailLog,
   journeyState,
   staffTasks,
+  whatsappLog,
   type JourneyState,
 } from "@/lib/db/server-schema";
 import {forbidden, getDb, requireSystem} from "@/lib/db/repos/common";
@@ -35,10 +40,12 @@ export type JourneyEnrollment = Pick<
 export type JourneyEnrollmentDisposition = "created" | "existing";
 export type JourneyTransitionErrorCode = "INVALID_TRANSITION";
 
-const ADMIN_RETRY_AUTHORIZED = "admin_retry_authorized";
-
-export type JourneyClaimSource = "scheduled" | "stale" | "retry";
-export type JourneyClaim = JourneyState & Readonly<{claimSource: JourneyClaimSource}>;
+export type JourneyClaimSource = "scheduled" | "stale";
+export type JourneyClaim = JourneyState & Readonly<{
+  claimSource: JourneyClaimSource;
+  emailErrorCode: string | null;
+  whatsappErrorCode: string | null;
+}>;
 
 export class JourneyTransitionError extends Error {
   constructor(readonly code: JourneyTransitionErrorCode = "INVALID_TRANSITION") {
@@ -58,6 +65,10 @@ function rowsFrom(result: unknown): Record<string, unknown>[] {
 function optionalDate(value: unknown): Date | null {
   if (value === null || value === undefined) return null;
   return value instanceof Date ? value : new Date(String(value));
+}
+
+function optionalString(value: unknown): string | null {
+  return value === null || value === undefined ? null : String(value);
 }
 
 function requiredDate(value: unknown): Date {
@@ -89,16 +100,16 @@ function journeyFrom(row: Record<string, unknown>): JourneyState {
 
 function journeyClaimFrom(row: Record<string, unknown>): JourneyClaim {
   const priorStatus = String(row.prior_status ?? "");
-  const priorErrorCode = row.prior_error_code === null || row.prior_error_code === undefined
-    ? null
-    : String(row.prior_error_code);
-  const claimSource = priorErrorCode === ADMIN_RETRY_AUTHORIZED
-    ? "retry"
-    : priorStatus === "scheduled"
+  const claimSource = priorStatus === "scheduled"
     ? "scheduled"
     : priorStatus === "processing" ? "stale" : null;
   if (!claimSource) throw new Error("INVALID_JOURNEY_CLAIM_SOURCE");
-  return {...journeyFrom(row), claimSource};
+  return {
+    ...journeyFrom(row),
+    claimSource,
+    emailErrorCode: optionalString(row.email_error_code),
+    whatsappErrorCode: optionalString(row.whatsapp_error_code),
+  };
 }
 
 function firstJourney(result: unknown): JourneyState | null {
@@ -170,15 +181,23 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
       return database.transaction(async (transaction) => {
         const result = await transaction.execute(sql`
           WITH due AS (
-            SELECT id, status AS prior_status, error_code AS prior_error_code
-            FROM ${journeyState}
+            SELECT source.id, source.status AS prior_status,
+                   email_delivery.error_code AS email_error_code,
+                   whatsapp_delivery.error_code AS whatsapp_error_code
+            FROM ${journeyState} AS source
+            LEFT JOIN ${emailLog} AS email_delivery
+              ON email_delivery.journey_state_id = source.id
+             AND email_delivery.idempotency_key = source.delivery_key
+            LEFT JOIN ${whatsappLog} AS whatsapp_delivery
+              ON whatsapp_delivery.journey_state_id = source.id
+             AND whatsapp_delivery.idempotency_key = source.delivery_key || ':whatsapp'
             WHERE (
-              status = 'scheduled' AND scheduled_at <= ${now}
+              source.status = 'scheduled' AND source.scheduled_at <= ${now}
             ) OR (
-              status = 'processing' AND claim_expires_at <= ${now}
+              source.status = 'processing' AND source.claim_expires_at <= ${now}
             )
-            ORDER BY scheduled_at, id
-            FOR UPDATE SKIP LOCKED
+            ORDER BY source.scheduled_at, source.id
+            FOR UPDATE OF source SKIP LOCKED
             LIMIT ${limit}
           )
           UPDATE ${journeyState} AS target
@@ -189,7 +208,8 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
               updated_at = now()
           FROM due
           WHERE target.id = due.id
-          RETURNING target.*, due.prior_status, due.prior_error_code
+          RETURNING target.*, due.prior_status,
+                    due.email_error_code, due.whatsapp_error_code
         `);
         return rowsFrom(result).map(journeyClaimFrom);
       });
@@ -278,11 +298,53 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
         const journey = transitionResult(await transaction.execute(sql`
           UPDATE ${journeyState}
           SET status = 'scheduled', scheduled_at = ${scheduledAt},
-              error_code = ${ADMIN_RETRY_AUTHORIZED},
+              error_code = NULL,
               claimed_at = NULL, claim_expires_at = NULL, completed_at = NULL, updated_at = now()
           WHERE id = ${id} AND status = 'failed'
           RETURNING *
         `));
+        await transaction.execute(sql`
+          UPDATE ${emailLog}
+          SET error_code = CASE error_code
+            WHEN 'retryable_network' THEN ${ADMIN_RETRY_AUTHORIZATION_BY_FAILURE.retryable_network}
+            WHEN 'retryable_rate_limit' THEN ${ADMIN_RETRY_AUTHORIZATION_BY_FAILURE.retryable_rate_limit}
+            WHEN 'retryable_server' THEN ${ADMIN_RETRY_AUTHORIZATION_BY_FAILURE.retryable_server}
+            WHEN 'provider_client_error' THEN ${ADMIN_RETRY_AUTHORIZATION_BY_FAILURE.provider_client_error}
+            WHEN 'provider_unclassified_failure' THEN ${ADMIN_RETRY_AUTHORIZATION_BY_FAILURE.provider_unclassified_failure}
+            ELSE error_code
+          END
+          WHERE journey_state_id = ${id}
+            AND idempotency_key = ${journey.deliveryKey}
+            AND status = 'failed'
+            AND error_code IN (
+              'retryable_network',
+              'retryable_rate_limit',
+              'retryable_server',
+              'provider_client_error',
+              'provider_unclassified_failure'
+            )
+        `);
+        await transaction.execute(sql`
+          UPDATE ${whatsappLog}
+          SET error_code = CASE error_code
+            WHEN 'retryable_network' THEN ${ADMIN_RETRY_AUTHORIZATION_BY_FAILURE.retryable_network}
+            WHEN 'retryable_rate_limit' THEN ${ADMIN_RETRY_AUTHORIZATION_BY_FAILURE.retryable_rate_limit}
+            WHEN 'retryable_server' THEN ${ADMIN_RETRY_AUTHORIZATION_BY_FAILURE.retryable_server}
+            WHEN 'provider_client_error' THEN ${ADMIN_RETRY_AUTHORIZATION_BY_FAILURE.provider_client_error}
+            WHEN 'provider_unclassified_failure' THEN ${ADMIN_RETRY_AUTHORIZATION_BY_FAILURE.provider_unclassified_failure}
+            ELSE error_code
+          END
+          WHERE journey_state_id = ${id}
+            AND idempotency_key = ${`${journey.deliveryKey}:whatsapp`}
+            AND status = 'failed'
+            AND error_code IN (
+              'retryable_network',
+              'retryable_rate_limit',
+              'retryable_server',
+              'provider_client_error',
+              'provider_unclassified_failure'
+            )
+        `);
         await transaction.execute(sql`
           INSERT INTO ${auditEvents}
             (actor_user_id, actor_type, action, target_type, target_id, metadata)

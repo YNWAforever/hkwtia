@@ -3,6 +3,10 @@ import "server-only";
 import {JOURNEYS} from "@/config/journeys";
 import {WHATSAPP_TEMPLATES, type WhatsAppTemplateKey} from "@/config/whatsapp-templates";
 import {evaluateStep, shouldCreateStaffTask} from "@/lib/automation/conditions";
+import {
+  authorizedProviderFailureCode,
+  providerFailureCode,
+} from "@/lib/automation/delivery-retry-authorization";
 import {classifyDeliveryFailure} from "@/lib/automation/retry";
 import {scheduleJourney} from "@/lib/automation/schedule";
 import type {
@@ -46,13 +50,6 @@ import type {MembershipStatus} from "@/lib/membership/lifecycle";
 const LEASE_MS = 5 * 60_000;
 const emailTemplates = new Set<string>(EMAIL_TEMPLATE_IDS);
 const runnerActor = automationCronActor();
-const providerFailureCodes = new Set<DeliveryFailureCode>([
-  "retryable_network",
-  "retryable_rate_limit",
-  "retryable_server",
-  "provider_client_error",
-  "provider_unclassified_failure",
-]);
 
 export type RunnerSummary = Readonly<{
   claimed: number;
@@ -107,6 +104,11 @@ type RunnerDeliveryReservation = Readonly<{
   disposition: "created" | "existing";
 }>;
 
+type RunnerDeliveryRetryResult = Readonly<{
+  record: RunnerDeliveryRecord;
+  failureCode: DeliveryFailureCode;
+}>;
+
 type DeliveryMutations = Readonly<{
   reserveEmail: (
     actor: AutomationCronActor,
@@ -116,7 +118,7 @@ type DeliveryMutations = Readonly<{
     actor: AutomationCronActor,
     id: string,
     expectedErrorCode: string,
-  ) => Promise<RunnerDeliveryRecord>;
+  ) => Promise<RunnerDeliveryRetryResult>;
   completeEmail: (
     actor: AutomationCronActor,
     id: string,
@@ -130,7 +132,7 @@ type DeliveryMutations = Readonly<{
     actor: AutomationCronActor,
     id: string,
     expectedErrorCode: string,
-  ) => Promise<RunnerDeliveryRecord>;
+  ) => Promise<RunnerDeliveryRetryResult>;
   completeWhatsapp: (
     actor: AutomationCronActor,
     id: string,
@@ -197,16 +199,13 @@ function emailTemplate(template: string): EmailTemplateId {
 }
 
 function failureCode(error: unknown): DeliveryFailureCode {
-  if (
-    error
+  const code = error
     && typeof error === "object"
     && "code" in error
     && typeof error.code === "string"
-    && providerFailureCodes.has(error.code as DeliveryFailureCode)
-  ) {
-    return error.code as DeliveryFailureCode;
-  }
-  return "provider_unclassified_failure";
+    ? providerFailureCode(error.code)
+    : null;
+  return code ?? "provider_unclassified_failure";
 }
 
 function retryStatus(code: DeliveryFailureCode): number | null {
@@ -224,23 +223,40 @@ function retryStatus(code: DeliveryFailureCode): number | null {
   }
 }
 
-function persistedFailureCode(
+type PersistedFailureDisposition = Readonly<{
+  failureCode: DeliveryFailureCode;
+  expectedErrorCode: string;
+  authorized: boolean;
+}>;
+
+function persistedFailureDisposition(
   delivery: RunnerDeliveryRecord,
-): DeliveryFailureCode {
-  const code = delivery.errorCode;
-  return code !== null
-    && code !== undefined
-    && providerFailureCodes.has(code as DeliveryFailureCode)
-    ? code as DeliveryFailureCode
-    : "provider_unclassified_failure";
+): PersistedFailureDisposition {
+  const expectedErrorCode = delivery.errorCode;
+  const authorized = authorizedProviderFailureCode(expectedErrorCode);
+  if (authorized && expectedErrorCode) {
+    return {
+      failureCode: authorized,
+      expectedErrorCode,
+      authorized: true,
+    };
+  }
+  const ordinary = providerFailureCode(expectedErrorCode);
+  return {
+    failureCode: ordinary ?? "provider_unclassified_failure",
+    expectedErrorCode:
+      ordinary ?? expectedErrorCode ?? "provider_unclassified_failure",
+    authorized: false,
+  };
 }
 
 function shouldReplayPersistedFailure(
   claim: JourneyClaim,
   delivery: RunnerDeliveryRecord,
-  code: DeliveryFailureCode,
+  disposition: PersistedFailureDisposition,
 ): boolean {
-  if (claim.claimSource === "retry") return false;
+  if (disposition.authorized) return false;
+  const code = disposition.failureCode;
   return code === "provider_client_error"
     || code === "provider_unclassified_failure"
     || (
@@ -372,21 +388,26 @@ async function sendEmail(
   let delivery = reservation.record;
   if (delivery.status === "sent") return true;
   if (delivery.status === "failed") {
-    const code = persistedFailureCode(delivery);
+    const disposition = persistedFailureDisposition(delivery);
     if (
-      shouldReplayPersistedFailure(claim, delivery, code)
+      shouldReplayPersistedFailure(claim, delivery, disposition)
     ) {
-      throw new RunnerFailure(code);
+      throw new RunnerFailure(disposition.failureCode);
     }
+    let retryResult: RunnerDeliveryRetryResult;
     try {
-      delivery = await dependencies.deliveries.retryEmailFailure(
+      retryResult = await dependencies.deliveries.retryEmailFailure(
         runnerActor,
         delivery.id,
-        code,
+        disposition.expectedErrorCode,
       );
     } catch {
       throw new RunnerFailure("retryable_network");
     }
+    if (retryResult.failureCode !== disposition.failureCode) {
+      throw new RunnerFailure("provider_unclassified_failure");
+    }
+    delivery = retryResult.record;
   }
 
   let provider;
@@ -479,21 +500,26 @@ async function sendWhatsapp(
   let delivery = reservation.record;
   if (delivery.status === "sent") return true;
   if (delivery.status === "failed") {
-    const code = persistedFailureCode(delivery);
+    const disposition = persistedFailureDisposition(delivery);
     if (
-      shouldReplayPersistedFailure(claim, delivery, code)
+      shouldReplayPersistedFailure(claim, delivery, disposition)
     ) {
-      throw new RunnerFailure(code);
+      throw new RunnerFailure(disposition.failureCode);
     }
+    let retryResult: RunnerDeliveryRetryResult;
     try {
-      delivery = await dependencies.deliveries.retryWhatsappFailure(
+      retryResult = await dependencies.deliveries.retryWhatsappFailure(
         runnerActor,
         delivery.id,
-        code,
+        disposition.expectedErrorCode,
       );
     } catch {
       throw new RunnerFailure("retryable_network");
     }
+    if (retryResult.failureCode !== disposition.failureCode) {
+      throw new RunnerFailure("provider_unclassified_failure");
+    }
+    delivery = retryResult.record;
   }
 
   let provider;

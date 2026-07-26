@@ -74,6 +74,11 @@ type DeliveryRecordLike = Readonly<{
   attemptCount: number;
 }>;
 
+type DeliveryRetryResultLike = Readonly<{
+  record: DeliveryRecordLike;
+  failureCode: DeliveryFailureCode;
+}>;
+
 type EmailDeliveries = Readonly<{
   reserveEmail: (
     actor: AutomationCronActor,
@@ -86,7 +91,7 @@ type EmailDeliveries = Readonly<{
     actor: AutomationCronActor,
     id: string,
     expectedErrorCode: string,
-  ) => Promise<DeliveryRecordLike>;
+  ) => Promise<DeliveryRetryResultLike>;
   completeEmail: (
     actor: AutomationCronActor,
     id: string,
@@ -327,8 +332,9 @@ async function sendRecipient(
     ) {
       throw new CampaignRunnerFailure(code);
     }
+    let retryResult: DeliveryRetryResultLike;
     try {
-      delivery = await dependencies.deliveries.retryEmailFailure(
+      retryResult = await dependencies.deliveries.retryEmailFailure(
         runnerActor,
         delivery.id,
         code,
@@ -336,6 +342,10 @@ async function sendRecipient(
     } catch {
       throw new CampaignRunnerFailure("retryable_network");
     }
+    if (retryResult.failureCode !== code) {
+      throw new CampaignRunnerFailure("provider_unclassified_failure");
+    }
+    delivery = retryResult.record;
   }
 
   let provider: Awaited<ReturnType<EmailTransport["send"]>>;

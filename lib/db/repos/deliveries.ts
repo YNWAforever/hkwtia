@@ -2,7 +2,12 @@ import "server-only";
 
 import {sql} from "drizzle-orm";
 
+import {
+  authorizedProviderFailureCode,
+  providerFailureCode,
+} from "@/lib/automation/delivery-retry-authorization";
 import type {JourneyChannel, MessageClassification} from "@/lib/automation/types";
+import type {DeliveryFailureCode} from "@/lib/email/transport";
 import {
   requireAutomationSystem,
   type AutomationRepositoryActor,
@@ -26,6 +31,10 @@ export type DeliveryRecord = Readonly<{
   attemptCount: number;
   errorCode: string | null;
   createdAt: Date | null;
+}>;
+export type DeliveryRetryResult = Readonly<{
+  record: DeliveryRecord;
+  failureCode: DeliveryFailureCode;
 }>;
 export type DeliveryReservation = Readonly<{record: DeliveryRecord; disposition: "created" | "existing"}>;
 
@@ -97,7 +106,11 @@ async function retryFailedDelivery(
   channel: JourneyChannel,
   id: string,
   expectedErrorCode: string,
-): Promise<DeliveryRecord> {
+): Promise<DeliveryRetryResult> {
+  const failureCode =
+    authorizedProviderFailureCode(expectedErrorCode)
+    ?? providerFailureCode(expectedErrorCode);
+  if (!failureCode) throw new Error("INVALID_DELIVERY_RETRY");
   const table = deliveryTable(channel);
   const row = rowsFrom(await transaction.execute(sql`
     UPDATE ${table}
@@ -111,7 +124,7 @@ async function retryFailedDelivery(
     RETURNING *
   `))[0];
   if (!row) throw new Error("INVALID_DELIVERY_RETRY");
-  return recordFrom(channel, row);
+  return {record: recordFrom(channel, row), failureCode};
 }
 
 async function reserveExisting(
@@ -183,7 +196,7 @@ export function createDeliveriesRepository(loadDatabase: AutomationDatabaseLoade
       actor: AutomationRepositoryActor,
       id: string,
       expectedErrorCode: string,
-    ): Promise<DeliveryRecord> {
+    ): Promise<DeliveryRetryResult> {
       requireAutomationSystem(actor);
       const database = await loadDatabase();
       return retryFailedDelivery(database, "email", id, expectedErrorCode);
@@ -217,7 +230,7 @@ export function createDeliveriesRepository(loadDatabase: AutomationDatabaseLoade
       actor: AutomationRepositoryActor,
       id: string,
       expectedErrorCode: string,
-    ): Promise<DeliveryRecord> {
+    ): Promise<DeliveryRetryResult> {
       requireAutomationSystem(actor);
       const database = await loadDatabase();
       return retryFailedDelivery(database, "whatsapp", id, expectedErrorCode);

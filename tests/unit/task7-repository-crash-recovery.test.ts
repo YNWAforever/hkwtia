@@ -131,9 +131,10 @@ describe("Task 7 repository crash-recovery contracts", () => {
       String(processing.id),
       "retryable_network",
     )).resolves.toMatchObject({
-      status: "processing",
-      attemptCount: 2,
-      errorCode: null,
+      failureCode: "retryable_network",
+      record: {
+        status: "processing", attemptCount: 2, errorCode: null,
+      },
     });
 
     const command = fake.commands[0]?.sql.replace(/\s+/g, " ");
@@ -153,7 +154,8 @@ describe("Task 7 repository crash-recovery contracts", () => {
       .resolves.toMatchObject([{claimSource: expectedSource}]);
 
     const command = fake.commands[0]?.sql.replace(/\s+/g, " ");
-    expect(command).toMatch(/SELECT id, status AS prior_status/i);
+    expect(command).toMatch(/SELECT source\.id, source\.status AS prior_status/i);
+    expect(command).toMatch(/email_delivery\.error_code AS email_error_code.*whatsapp_delivery\.error_code AS whatsapp_error_code/i);
     expect(command).toMatch(/RETURNING target\.\*, due\.prior_status/i);
   });
 

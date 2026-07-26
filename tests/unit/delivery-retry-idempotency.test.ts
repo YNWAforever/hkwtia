@@ -63,7 +63,10 @@ describe("delivery retry and completion idempotency", () => {
       system,
       String(reopened.id),
       "retryable_network",
-    )).resolves.toMatchObject({status: "processing", attemptCount: 2, errorCode: null});
+    )).resolves.toMatchObject({
+      failureCode: "retryable_network",
+      record: {status: "processing", attemptCount: 2, errorCode: null},
+    });
 
     expect(fake.commands[1]?.sql.replace(/\s+/g, " "))
       .toMatch(/SELECT .*FROM "email_log".*idempotency_key/i);

@@ -7,7 +7,7 @@ import {
   type CampaignRunnerDependencies,
 } from "@/lib/automation/campaign-runner";
 import {createCampaignsRepository} from "@/lib/db/repos/campaigns";
-import {DeliveryFailure} from "@/lib/email/transport";
+import {DeliveryFailure, type DeliveryFailureCode} from "@/lib/email/transport";
 
 const now = new Date("2027-01-15T10:00:00.000Z");
 const campaignId = "11111111-1111-4111-8111-111111111111";
@@ -198,7 +198,10 @@ function memoryHarness(
         record.status = "processing";
         record.errorCode = null;
         record.attemptCount += 1;
-        return record;
+        return {
+          record,
+          failureCode: expectedErrorCode as DeliveryFailureCode,
+        };
       },
       async completeEmail(_actor, id, completion) {
         const record = [...logs.values()].find((candidate) => candidate.id === id)!;

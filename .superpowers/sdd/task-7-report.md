@@ -4,7 +4,7 @@
 
 Implemented `runJourneyBatch` and `runCampaignBatch` with durable delivery reservations, retry handling, claim-token fencing, current eligibility checks, and stable provider idempotency keys. Added the minimum campaign-recipient processing lease schema and generated migration required for atomic claims. Added an atomic D14 dunning lapse primitive that transitions canonical `past_due -> expired`, writes a sanitized stable audit identity, creates one staff task, and enrolls the deterministic win-back instance in the same transaction.
 
-Review hardening makes permanent-failure task creation and terminal transition one claim-token-fenced transaction, makes audited staff retry write a durable parent marker so the runner lazily reopens only an error-fenced channel that remains eligible at execution time, and supports the existing M2 `membership_renewal` campaign source without widening arbitrary-template access.
+Review hardening makes permanent-failure task creation and terminal transition one claim-token-fenced transaction, gives each failed delivery channel its own durable audited retry authorization, keeps eligibility checks ahead of authorization consumption, and supports the existing M2 `membership_renewal` campaign source without widening arbitrary-template access.
 
 This task did not add HTTP job routes, renewal/scoring/approval runners, admin UI, Worker code, or any `progress.md` change.
 
@@ -41,12 +41,20 @@ npm.cmd test -- tests/unit/task7-lazy-admin-retry.test.ts
 
 Result before the lazy-retry production change: exit 1; 7/8 tests failed for the intended eager-reopen, retry-claim-source, eligibility-preservation, and eligible lazy-fence gaps. The ordinary stale permanent-failure no-resend preservation test already passed.
 
+Final per-channel crash-safety review RED command:
+
+```powershell
+npm.cmd test -- tests/unit/task7-per-channel-retry-crash.test.ts
+```
+
+Result before the per-channel production change: exit 1; 6/10 tests failed for the intended gaps. Repository retry did not persist channel wrappers, claims did not expose channel errors, provider-failure crash cases could not consume authorization safely, pre-context reschedule lost authorization, and dual-channel authorization could not be consumed independently. The three ineligible-channel preservation cases and ordinary stale no-resend case already passed.
+
 ## Implemented behavior
 
 - Journey claims use the existing atomic `FOR UPDATE SKIP LOCKED` repository and every transition carries the exact `claimedAt` fencing token.
 - Day-7 alternatives are evaluated from current context; marketing requires current consent and no active marketing email suppression, while transactional delivery remains eligible.
 - A delivery row is durably reserved before provider send. Provider retries reuse the exact stable journey or campaign delivery key.
-- Reserving an existing failed delivery leaves it terminal. Audited staff retry schedules and audits only the parent with `admin_retry_authorized`; the claim source remains `retry` even after stale reclaim. After current channel eligibility is rechecked, only an eligible failed channel uses the existing error-fenced retry transition and increments its durable attempt. Ineligible channels stay failed, while ordinary stale recovery remains provider-silent.
+- Reserving an existing failed delivery leaves it terminal. Audited staff retry reschedules the parent with a null parent error and rewrites only recognized failed email/WhatsApp provider codes to fixed sanitized `admin_retry_<original>` wrappers, without changing channel status or attempts. After current eligibility is rechecked, an exact-fenced channel retry consumes one matching wrapper, increments its attempt, and returns the original sanitized disposition. Ineligible channels keep their unconsumed wrappers, while ordinary failed rows and stale recovery remain provider-silent.
 - A provider-success/log-completion crash reschedules the journey; reclaim reuses the same delivery row and provider idempotency key, then completes without creating a second log.
 - Retryable failures use the shared 5/25-minute policy. Attempt three and permanent provider failures transition the claimed journey/campaign recipient and insert one deduplicated staff task in the same transaction; a stale claim creates no task and a task-write error rolls back the terminal transition.
 - D90 always delivers and creates a stable low-engagement task only below the approved threshold.
@@ -70,8 +78,15 @@ The additive migration adds only campaign recipient `processing`, `attempt_count
 
 - `journeys.markFailed` and `campaignRecipients.markRecipientFailed` now fence the terminal update by the exact claim token before inserting the stable task with `ON CONFLICT DO NOTHING`, all inside one database transaction.
 - Runners receive the task disposition from that transaction; they no longer perform a separate permanent-failure task write.
-- Authorized `journeys.retryFailed` now reschedules only the failed parent with `admin_retry_authorized` and writes the existing audit event in one transaction. `claimDue` carries that marker into `claimSource: retry` for scheduled and expired-processing claims; each runner lazily calls the existing error-fenced delivery retry only after current channel eligibility passes.
-- The strict source map adds only `membership_renewal -> campaign_generic`. No schema or migration change was needed for either review follow-up; the durable retry authorization uses the existing sanitized `journey_state.error_code`.
+- The earlier parent-level retry marker was superseded. `journeys.retryFailed` now reschedules the failed parent, rewrites only matching failed channel rows to allowlisted wrappers, and writes the audit event in one transaction. `claimDue` reports ordinary `scheduled`/`stale` source plus the independent persisted email and WhatsApp error states.
+- The strict source map adds only `membership_renewal -> campaign_generic`. No schema or migration change was needed for any retry review follow-up; durable authorization uses the existing sanitized channel `error_code` columns.
+
+## Final crash-safety implementation
+
+- A shared fixed codec recognizes only `retryable_network`, `retryable_rate_limit`, `retryable_server`, `provider_client_error`, and `provider_unclassified_failure`, plus their `admin_retry_` wrappers. Unrecognized values, sent rows, and non-failed rows are untouched.
+- Email and WhatsApp retry mutations fence on exact row id, `failed` status, and the expected persisted error value. They atomically set `processing`, clear the wrapper, increment the attempt, and return both the row and decoded original failure code.
+- A consumed retry that fails at the provider is completed with an ordinary provider code. If the process crashes before parent settlement, stale reclaim observes the ordinary row and cannot resend it.
+- Authorization is channel-local: a pre-context/transient parent reschedule does not erase it, dual D14 channels consume independently, and suppression, removed email, or WhatsApp opt-out leave the affected authorization unused.
 
 ## Final verification
 
@@ -95,11 +110,12 @@ Additional verification:
 
 - Second re-review focused file - RED 0/8, then GREEN 8/8.
 - Final lazy-retry focused file - RED 1/8 preservation tests passed with 7 intended failures, then GREEN 8/8.
-- Final focused compatibility suite - exit 0; 4 files passed and 36/36 tests passed.
-- `tests/integration/automation-runners-postgres.test.ts` - collected successfully; its 5 real Postgres tests were skipped locally because `DATABASE_URL_TEST` is unset. The updated case proves ordinary failed rows remain unclaimable/provider-silent, audited admin retry sets the durable parent marker and one audit without mutating the delivery, and the real retry-source runner then performs exactly one fenced delivery attempt and provider call.
+- Final per-channel crash-safety file - RED 4/10 preservation tests passed with 6 intended failures, then GREEN 10/10.
+- Final focused compatibility suite - exit 0; 11 files passed and 78/78 tests passed.
+- `tests/integration/automation-runners-postgres.test.ts` - collected successfully; its 5 real Postgres tests were skipped locally because `DATABASE_URL_TEST` is unset. The updated real-repository case asserts the failed email wrapper, provider-time atomic consumption (`processing`, attempt 2, null error), a post-provider ordinary `retryable_network` code, an injected crash before parent settlement, stale reclaim without a second provider call, and one audit.
 - `npm.cmd run lint` - exit 0, no warnings or errors.
 - `npm.cmd run typecheck` - exit 0.
-- `npm.cmd test` - exit 0; 126 files passed and 9 environment-gated files skipped; 646 tests passed and 25 skipped.
+- `npm.cmd test` - exit 0; 127 files passed and 9 environment-gated files skipped; 656 tests passed and 25 skipped.
 - `git diff --check` - exit 0; only line-ending notices were emitted.
 
 ## Self-review and remaining concerns

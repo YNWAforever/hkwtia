@@ -1,7 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
 import {runJourneyBatch, type JourneyRunnerContext, type JourneyRunnerDependencies} from "@/lib/automation/journey-runner";
-import {DeliveryFailure} from "@/lib/email/transport";
+import {DeliveryFailure, type DeliveryFailureCode} from "@/lib/email/transport";
 import type {JourneyClaim} from "@/lib/db/repos/journeys";
 
 const now = new Date("2027-01-15T10:00:00.000Z");
@@ -29,6 +29,8 @@ function due(
     createdAt: new Date(now.getTime() - 86_400_000),
     updatedAt: now,
     claimSource: "scheduled",
+    emailErrorCode: null,
+    whatsappErrorCode: null,
     ...overrides,
   };
 }
@@ -146,7 +148,10 @@ function harness(
           record.errorCode = null;
           record.attemptCount += 1;
         }
-        return record;
+        return {
+          record,
+          failureCode: expectedErrorCode as DeliveryFailureCode,
+        };
       },
       async completeEmail(_actor, id, completion) {
         const record = [...logs.values()].find((candidate) => candidate.id === id)!;
@@ -177,7 +182,10 @@ function harness(
           record.errorCode = null;
           record.attemptCount += 1;
         }
-        return record;
+        return {
+          record,
+          failureCode: expectedErrorCode as DeliveryFailureCode,
+        };
       },
       async completeWhatsapp(_actor, id, completion) {
         const record = [...logs.values()].find((candidate) => candidate.id === id)!;

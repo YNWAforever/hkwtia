@@ -22,6 +22,8 @@ const due: JourneyClaim = {
   createdAt: new Date(now.getTime() - 86_400_000),
   updatedAt: now,
   claimSource: "scheduled",
+  emailErrorCode: null,
+  whatsappErrorCode: null,
 };
 
 describe("journey runner delivery idempotency", () => {

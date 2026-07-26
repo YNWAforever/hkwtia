@@ -82,6 +82,8 @@ function journeyClaim(
     createdAt: now,
     updatedAt: now,
     claimSource: "scheduled",
+    emailErrorCode: null,
+    whatsappErrorCode: null,
     ...overrides,
   };
 }
@@ -445,10 +447,22 @@ describe("Task 7 second re-review: audited delivery retry authorization", () => 
             status: "scheduled",
             claimed_at: null,
             claim_expires_at: null,
-            error_code: "admin_retry_authorized",
+            error_code: null,
             completed_at: null,
           })],
         };
+      }
+      if (/UPDATE "email_log"/i.test(text)) {
+        if (
+          delivery.status === "failed"
+          && delivery.errorCode === "provider_client_error"
+        ) {
+          delivery.errorCode = "admin_retry_provider_client_error";
+        }
+        return {rows: []};
+      }
+      if (/UPDATE "whatsapp_log"/i.test(text)) {
+        return {rows: []};
       }
       if (/INSERT INTO "audit_events"/i.test(text)) {
         auditWrites += 1;
@@ -494,7 +508,10 @@ describe("Task 7 second re-review: audited delivery retry authorization", () => 
           delivery.providerId = null;
           delivery.errorCode = null;
           delivery.attemptCount += 1;
-          return {...delivery};
+          return {
+            record: {...delivery},
+            failureCode: "provider_client_error" as const,
+          };
         }),
         completeEmail: vi.fn(async (_actor, _id, completion) => {
           delivery.status = completion.status;
@@ -554,12 +571,13 @@ describe("Task 7 second re-review: audited delivery retry authorization", () => 
     expect(delivery).toMatchObject({
       status: "failed",
       attemptCount: 1,
-      errorCode: "provider_client_error",
+      errorCode: "admin_retry_provider_client_error",
     });
     currentClaim = journeyClaim({
       attemptCount: 3,
       claimedAt: new Date(later.getTime() + 1_000),
-      claimSource: "retry",
+      claimSource: "scheduled",
+      emailErrorCode: "admin_retry_provider_client_error",
     });
     await runJourneyBatch(dependencies, {
       now: currentClaim.claimedAt!,
@@ -574,11 +592,15 @@ describe("Task 7 second re-review: audited delivery retry authorization", () => 
       providerId: "provider-after-admin-retry",
     });
     expect(auditWrites).toBe(1);
-    expect(commands).toHaveLength(2);
+    expect(commands).toHaveLength(4);
     expect(normalizedSql(commands[0]!)).toMatch(/UPDATE "journey_state".*status = 'scheduled'/i);
-    expect(commands[0]!.params).toContain("admin_retry_authorized");
-    expect(normalizedSql(commands[1]!)).toMatch(/INSERT INTO "audit_events".*journey\.failed_retry_requested/i);
-    expect(commands.map(normalizedSql).join(" ")).not.toMatch(/UPDATE "(email_log|whatsapp_log)"/i);
+    expect(commands[0]!.params).not.toContain("admin_retry_authorized");
+    expect(normalizedSql(commands[1]!)).toMatch(/UPDATE "email_log".*SET error_code = CASE/i);
+    expect(commands[1]!.params).toContain("admin_retry_provider_client_error");
+    expect(normalizedSql(commands[2]!)).toMatch(/UPDATE "whatsapp_log".*SET error_code = CASE/i);
+    expect(normalizedSql(commands[3]!)).toMatch(
+      /INSERT INTO "audit_events".*journey\.failed_retry_requested/i,
+    );
   });
 });
 
