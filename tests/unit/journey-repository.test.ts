@@ -90,7 +90,12 @@ describe("journeys repository SQL and transitions", () => {
     ["markSent", (repo: ReturnType<typeof createJourneysRepository>) => repo.markSent(system, journeyRow().id, now, now), /status = 'sent'.*status = 'processing'.*claimed_at =/i],
     ["markSkipped", (repo: ReturnType<typeof createJourneysRepository>) => repo.markSkipped(system, journeyRow().id, now, "skip_condition", now), /status = 'skipped'.*error_code = .*status = 'processing'.*claimed_at =/i],
     ["reschedule", (repo: ReturnType<typeof createJourneysRepository>) => repo.reschedule(system, journeyRow().id, now, new Date(now.getTime() + 300_000), "retryable_network"), /status = 'scheduled'.*error_code = .*status = 'processing'.*claimed_at =/i],
-    ["markFailed", (repo: ReturnType<typeof createJourneysRepository>) => repo.markFailed(system, journeyRow().id, now, "attempts_exhausted", now), /status = 'failed'.*error_code = .*status = 'processing'.*claimed_at =/i],
+    ["markFailed", async (repo: ReturnType<typeof createJourneysRepository>) => (await repo.markFailed(
+      system, journeyRow().id, now, "attempts_exhausted", now, {
+        profileId: "member-1", journeyStateId: journeyRow().id, kind: "permanent_delivery_failure",
+        dedupeKey: "journey-1:permanent_delivery_failure", summaryCode: "attempts_exhausted",
+      },
+    )).record, /status = 'failed'.*error_code = .*status = 'processing'.*claimed_at =/i],
   ] as const)("allows processing -> terminal/retry transition through %s only", async (_name, invoke, expectedSql) => {
     const fake = sequenceDatabase([[journeyRow()]]);
     await expect(invoke(createJourneysRepository(async () => fake.database))).resolves.toMatchObject({id: journeyRow().id});
@@ -128,15 +133,19 @@ describe("journeys repository SQL and transitions", () => {
   });
 
   it("allows failed -> scheduled only as an atomic audited admin retry", async () => {
-    const fake = sequenceDatabase([[journeyRow({status: "scheduled", error_code: null})], []]);
+    const fake = sequenceDatabase([[journeyRow({status: "scheduled", error_code: null})], [], [], []]);
     const result = await createJourneysRepository(async () => fake.database).retryFailed(admin, journeyRow().id, now);
 
     expect(result).toMatchObject({status: "scheduled", errorCode: null});
-    expect(fake.commands).toHaveLength(2);
+    expect(fake.commands).toHaveLength(4);
     expect(fake.commands[0]).toMatch(/status = 'scheduled'.*error_code = NULL.*status = 'failed'/i);
-    expect(fake.commands[1]).toMatch(/INSERT INTO "audit_events".*journey\.failed_retry_requested/i);
-    expect(fake.compiledCommands[1].params).toContain(admin.profileId);
-    expect(fake.compiledCommands[1].params).not.toContain(admin.userId);
+    expect(fake.commands[1]).toMatch(/UPDATE "email_log".*attempt_count = attempt_count \+ 1.*journey_state_id = .*idempotency_key = .*status = 'failed'.*error_code IN/i);
+    expect(fake.commands[2]).toMatch(/UPDATE "whatsapp_log".*attempt_count = attempt_count \+ 1.*journey_state_id = .*idempotency_key = .*status = 'failed'.*error_code IN/i);
+    expect(fake.commands[3]).toMatch(/INSERT INTO "audit_events".*journey\.failed_retry_requested/i);
+    expect(fake.compiledCommands[1].params).toContain(journeyRow().delivery_key);
+    expect(fake.compiledCommands[2].params).toContain(`${journeyRow().delivery_key}:whatsapp`);
+    expect(fake.compiledCommands[3].params).toContain(admin.profileId);
+    expect(fake.compiledCommands[3].params).not.toContain(admin.userId);
   });
 
   it("does not audit or reopen sent/skipped/non-failed rows", async () => {

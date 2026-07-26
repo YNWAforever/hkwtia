@@ -7,11 +7,12 @@ import {
   requireAutomationSystem,
   type AutomationRepositoryActor,
 } from "@/lib/auth/automation-actor";
-import {campaignRecipients, campaigns} from "@/lib/db/server-schema";
+import {campaignRecipients, campaigns, staffTasks} from "@/lib/db/server-schema";
 import type {
   AutomationDatabaseLoader,
   AutomationSqlExecutor,
 } from "@/lib/db/repos/journeys";
+import type {StaffTaskInput} from "@/lib/db/repos/staff-tasks";
 import type {AppLocale} from "@/i18n/routing";
 
 export type CampaignRecipientStatus =
@@ -239,14 +240,36 @@ export function createCampaignRecipientDeliveryRepository(
       id: string,
       claimedAt: Date,
       errorCode: string,
-    ): Promise<unknown> {
+      task: StaffTaskInput,
+    ): Promise<Readonly<{
+      record: unknown;
+      taskDisposition: "created" | "existing";
+    }>> {
       requireAutomationSystem(actor);
       const database = await loadDatabase();
-      return transitionRecipient(database, id, claimedAt, sql`
-        status = 'failed',
-        claim_expires_at = NULL,
-        error_code = ${errorCode}
-      `);
+      return database.transaction(async (transaction) => {
+        const record = await transitionRecipient(transaction, id, claimedAt, sql`
+          status = 'failed',
+          claim_expires_at = NULL,
+          error_code = ${errorCode}
+        `);
+        const taskResult = await transaction.execute(sql`
+          INSERT INTO ${staffTasks}
+            (profile_id, journey_state_id, kind, dedupe_key, summary_code)
+          VALUES (
+            ${task.profileId}, ${task.journeyStateId}, ${task.kind},
+            ${task.dedupeKey}, ${task.summaryCode}
+          )
+          ON CONFLICT DO NOTHING
+          RETURNING id
+        `);
+        return {
+          record,
+          taskDisposition: rowsFrom(taskResult).length > 0
+            ? "created" as const
+            : "existing" as const,
+        };
+      });
     },
 
     async completeCampaignIfIdle(

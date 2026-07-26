@@ -292,20 +292,21 @@ async function settleFailure(
     return;
   }
 
-  await createTask(dependencies, {
-    profileId: claim.profileId,
-    journeyStateId: claim.id,
-    kind: "permanent_delivery_failure",
-    dedupeKey: `${claim.deliveryKey}:permanent_delivery_failure`,
-    summaryCode: decision.code,
-  }, summary);
-  await dependencies.journeys.markFailed(
+  const settlement = await dependencies.journeys.markFailed(
     runnerActor,
     claim.id,
     token,
     decision.code,
     now,
+    {
+      profileId: claim.profileId,
+      journeyStateId: claim.id,
+      kind: "permanent_delivery_failure",
+      dedupeKey: `${claim.deliveryKey}:permanent_delivery_failure`,
+      summaryCode: decision.code,
+    },
   );
+  if (settlement.taskDisposition === "created") summary.tasksCreated += 1;
   summary.failed += 1;
 }
 

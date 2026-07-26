@@ -7,8 +7,16 @@ import {
   requireAutomationSystem,
   type AutomationRepositoryActor,
 } from "@/lib/auth/automation-actor";
-import {auditEvents, journeyState, type JourneyState} from "@/lib/db/server-schema";
+import {
+  auditEvents,
+  emailLog,
+  journeyState,
+  staffTasks,
+  whatsappLog,
+  type JourneyState,
+} from "@/lib/db/server-schema";
 import {forbidden, getDb, requireSystem} from "@/lib/db/repos/common";
+import type {StaffTaskInput} from "@/lib/db/repos/staff-tasks";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 export type AutomationSqlExecutor = Readonly<{
@@ -217,16 +225,44 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
       `));
     },
 
-    async markFailed(actor: AutomationRepositoryActor, id: string, claimedAt: Date, errorCode: string, completedAt: Date): Promise<JourneyState> {
+    async markFailed(
+      actor: AutomationRepositoryActor,
+      id: string,
+      claimedAt: Date,
+      errorCode: string,
+      completedAt: Date,
+      task: StaffTaskInput,
+    ): Promise<Readonly<{
+      record: JourneyState;
+      taskDisposition: "created" | "existing";
+    }>> {
       requireAutomationSystem(actor);
       const database = await loadDatabase();
-      return transitionResult(await database.execute(sql`
-        UPDATE ${journeyState}
-        SET status = 'failed', error_code = ${errorCode}, completed_at = ${completedAt},
-            claim_expires_at = NULL, updated_at = now()
-        WHERE id = ${id} AND status = 'processing' AND claimed_at = ${claimedAt}
-        RETURNING *
-      `));
+      return database.transaction(async (transaction) => {
+        const record = transitionResult(await transaction.execute(sql`
+          UPDATE ${journeyState}
+          SET status = 'failed', error_code = ${errorCode}, completed_at = ${completedAt},
+              claim_expires_at = NULL, updated_at = now()
+          WHERE id = ${id} AND status = 'processing' AND claimed_at = ${claimedAt}
+          RETURNING *
+        `));
+        const taskResult = await transaction.execute(sql`
+          INSERT INTO ${staffTasks}
+            (profile_id, journey_state_id, kind, dedupe_key, summary_code)
+          VALUES (
+            ${task.profileId}, ${task.journeyStateId}, ${task.kind},
+            ${task.dedupeKey}, ${task.summaryCode}
+          )
+          ON CONFLICT DO NOTHING
+          RETURNING id
+        `);
+        return {
+          record,
+          taskDisposition: rowsFrom(taskResult).length > 0
+            ? "created" as const
+            : "existing" as const,
+        };
+      });
     },
 
     async retryFailed(actor: Actor, id: string, scheduledAt: Date): Promise<JourneyState> {
@@ -241,11 +277,50 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
           RETURNING *
         `));
         await transaction.execute(sql`
+          UPDATE ${emailLog}
+          SET status = 'processing',
+              provider_id = NULL,
+              error_code = NULL,
+              attempt_count = attempt_count + 1
+          WHERE journey_state_id = ${id}
+            AND idempotency_key = ${journey.deliveryKey}
+            AND status = 'failed'
+            AND error_code IN (
+              'retryable_network',
+              'retryable_rate_limit',
+              'retryable_server',
+              'provider_client_error',
+              'provider_unclassified_failure'
+            )
+          RETURNING id
+        `);
+        await transaction.execute(sql`
+          UPDATE ${whatsappLog}
+          SET status = 'processing',
+              provider_id = NULL,
+              error_code = NULL,
+              attempt_count = attempt_count + 1
+          WHERE journey_state_id = ${id}
+            AND idempotency_key = ${`${journey.deliveryKey}:whatsapp`}
+            AND status = 'failed'
+            AND error_code IN (
+              'retryable_network',
+              'retryable_rate_limit',
+              'retryable_server',
+              'provider_client_error',
+              'provider_unclassified_failure'
+            )
+          RETURNING id
+        `);
+        await transaction.execute(sql`
           INSERT INTO ${auditEvents}
             (actor_user_id, actor_type, action, target_type, target_id, metadata)
           VALUES (
             ${actor.profileId}, ${actor.kind}, 'journey.failed_retry_requested', 'journey_state', ${id},
-            ${JSON.stringify({scheduledAt: scheduledAt.toISOString()})}::jsonb
+            ${JSON.stringify({
+              scheduledAt: scheduledAt.toISOString(),
+              deliveryKey: journey.deliveryKey,
+            })}::jsonb
           )
         `);
         return journey;

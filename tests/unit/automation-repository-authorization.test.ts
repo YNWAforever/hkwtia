@@ -44,7 +44,17 @@ describe("automation repository authorization", () => {
     await expect(repo.markSent(actor, "journey-1", enrollment.scheduledAt, enrollment.scheduledAt)).rejects.toMatchObject({code: "FORBIDDEN"});
     await expect(repo.markSkipped(actor, "journey-1", enrollment.scheduledAt, "skip_condition", enrollment.scheduledAt)).rejects.toMatchObject({code: "FORBIDDEN"});
     await expect(repo.reschedule(actor, "journey-1", enrollment.scheduledAt, enrollment.scheduledAt, "retryable_network")).rejects.toMatchObject({code: "FORBIDDEN"});
-    await expect(repo.markFailed(actor, "journey-1", enrollment.scheduledAt, "attempts_exhausted", enrollment.scheduledAt)).rejects.toMatchObject({code: "FORBIDDEN"});
+    await expect(repo.markFailed(
+      actor,
+      "journey-1",
+      enrollment.scheduledAt,
+      "attempts_exhausted",
+      enrollment.scheduledAt,
+      {
+        profileId: "member-1", journeyStateId: "journey-1", kind: "permanent_delivery_failure",
+        dedupeKey: "journey-1:permanent_delivery_failure", summaryCode: "attempts_exhausted",
+      },
+    )).rejects.toMatchObject({code: "FORBIDDEN"});
 
     expect(loadDatabase).not.toHaveBeenCalled();
   });

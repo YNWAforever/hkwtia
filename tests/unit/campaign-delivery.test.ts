@@ -84,6 +84,13 @@ function memoryHarness(
     variables: Readonly<Record<string, string>>;
     unsubscribeUrl: string;
   }> = [];
+  const tasks = new Map<string, {
+    profileId: string;
+    journeyStateId: string | null;
+    kind: string;
+    dedupeKey: string;
+    summaryCode: string;
+  }>();
   let campaignStatus: "queued" | "processing" | "completed" = "queued";
 
   const deps: CampaignRunnerDependencies = {
@@ -144,7 +151,7 @@ function memoryHarness(
         item.errorCode = errorCode;
         return {...item};
       },
-      async markRecipientFailed(_actor, id, claimedAt, errorCode) {
+      async markRecipientFailed(_actor, id, claimedAt, errorCode, task) {
         const item = recipients.find((candidate) => candidate.id === id)!;
         if (item.status !== "processing" || item.claimedAt?.getTime() !== claimedAt.getTime()) {
           throw new Error("INVALID_CAMPAIGN_RECIPIENT_TRANSITION");
@@ -152,7 +159,14 @@ function memoryHarness(
         item.status = "failed";
         item.errorCode = errorCode;
         item.claimExpiresAt = null;
-        return {...item};
+        const taskDisposition = tasks.has(task.dedupeKey)
+          ? "existing" as const
+          : "created" as const;
+        if (taskDisposition === "created") tasks.set(task.dedupeKey, task);
+        return {
+          record: {...item},
+          taskDisposition,
+        };
       },
       async completeCampaignIfIdle(_actor, id) {
         const hasWork = recipients.some((item) =>

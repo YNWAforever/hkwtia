@@ -31,11 +31,20 @@ const campaignId = crypto.randomUUID();
 const campaignRecipientId = crypto.randomUUID();
 const fencedCampaignId = crypto.randomUUID();
 const fencedRecipientId = crypto.randomUUID();
+const adminRetryJourneyId = crypto.randomUUID();
 const cronActor = automationCronActor();
+const adminActor = {
+  kind: "staff",
+  userId: `auth-${fixture}`,
+  profileId,
+} as const;
 const journeyNow = new Date("2000-01-01T00:00:00.000Z");
 const campaignNow = new Date("2000-01-02T00:00:00.000Z");
+const adminRetryNow = new Date("2000-01-04T00:00:00.000Z");
 const journeyDeliveryKey =
   `journey:${profileId}:onboarding_90d:activation:${fixture}:welcome`;
+const adminRetryDeliveryKey =
+  `journey:${profileId}:onboarding_90d:admin-retry:${fixture}:welcome`;
 const campaignKey = campaignDeliveryKey({
   campaignId,
   id: campaignRecipientId,
@@ -117,6 +126,10 @@ describe.skipIf(!testDatabaseUrl)(
         await pool.query("DELETE FROM saved_segments WHERE id = $1", [
           segmentId,
         ]);
+        await pool.query(
+          "DELETE FROM audit_events WHERE target_type = 'journey_state' AND target_id = $1",
+          [adminRetryJourneyId],
+        );
         await pool.query("DELETE FROM profiles WHERE id = $1", [profileId]);
       } finally {
         await pool.end();
@@ -258,6 +271,225 @@ describe.skipIf(!testDatabaseUrl)(
           status: "sent",
           attempt_count: 1,
         }]);
+      },
+    );
+
+    it(
+      "keeps failed delivery replay blocked until audited admin retry authorizes one real provider call",
+      async () => {
+        const activeDatabase = requireDatabase();
+        const activePool = requirePool();
+        const loadDatabase = async () => activeDatabase;
+        const journeys = createJourneysRepository(loadDatabase);
+        const deliveries = createDeliveriesRepository(loadDatabase);
+        const staffTaskRepo = createStaffTasksRepository(loadDatabase);
+        const providerSend = vi.fn(async () => ({
+          status: "sent" as const,
+          providerId: `provider-${fixture}-admin-retry`,
+        }));
+        const dependencies = {
+          journeys,
+          deliveries,
+          staffTasks: staffTaskRepo,
+          memberships: {
+            async lapseDunningEpisode() {
+              return {
+                disposition: "resolved" as const,
+                createdTasks: 0,
+                createdSteps: 0,
+              };
+            },
+          },
+          async loadContext() {
+            return {
+              hasLoggedIn: false,
+              profileCompleteness: 100,
+              marketingConsent: true,
+              emailSuppressed: false,
+              whatsappOptIn: false,
+              whatsappNumber: null,
+              engagementScore: 50,
+              email: `${fixture}@example.test`,
+              recipientName: "M3 runner fixture",
+              locale: "en" as const,
+              variables: {
+                ctaUrl: "https://example.test/member",
+                memberName: "M3 runner fixture",
+                renewalDate: "2000-02-01",
+                renewalUrl: "https://example.test/renew",
+                amountDue: "HKD 100",
+                paymentUrl: "https://example.test/pay",
+              },
+              unsubscribeUrl: "https://example.test/unsubscribe",
+              membershipStatus: null,
+            };
+          },
+          async renderEmail(input) {
+            return {
+              subject: `${input.template}-subject`,
+              html: `<p>${input.template}</p>`,
+              text: input.template,
+              headers: {},
+            };
+          },
+          emailTransport: {send: providerSend},
+          whatsappTransport: {
+            async sendTemplateMessage() {
+              return {
+                status: "skipped" as const,
+                reason: "recipient_ineligible" as const,
+              };
+            },
+          },
+          emailFrom: "WTIA <members@example.test>",
+        } satisfies JourneyRunnerDependencies;
+
+        await activePool.query(
+          `INSERT INTO journey_state
+             (id, profile_id, membership_id, journey, instance_key, step,
+              scheduled_at, status, attempt_count, claimed_at,
+              claim_expires_at, delivery_key, error_code, completed_at)
+           VALUES (
+             $1, $2, NULL, 'onboarding_90d', $3, 'welcome',
+             $4, 'failed', 1, $5, NULL, $6, 'provider_client_error', $5
+           )`,
+          [
+            adminRetryJourneyId,
+            profileId,
+            `admin-retry:${fixture}`,
+            new Date(adminRetryNow.getTime() - 60_000),
+            new Date(adminRetryNow.getTime() - 30_000),
+            adminRetryDeliveryKey,
+          ],
+        );
+        await activePool.query(
+          `INSERT INTO email_log
+             (profile_id, journey_state_id, template, subject, status,
+              provider_id, idempotency_key, locale, classification,
+              attempt_count, error_code)
+           VALUES (
+             $1, $2, 'welcome', 'welcome-subject', 'failed', NULL,
+             $3, 'en', 'transactional', 1, 'provider_client_error'
+           )`,
+          [profileId, adminRetryJourneyId, adminRetryDeliveryKey],
+        );
+
+        const blocked = await runJourneyBatch(dependencies, {
+          now: adminRetryNow,
+          limit: 1,
+        });
+        expect(blocked).toMatchObject({claimed: 0, sent: 0});
+        expect(providerSend).not.toHaveBeenCalled();
+        const blockedDelivery = await activePool.query<{
+          status: string;
+          attempt_count: number;
+          error_code: string | null;
+        }>(
+          `SELECT status, attempt_count, error_code
+           FROM email_log
+           WHERE idempotency_key = $1`,
+          [adminRetryDeliveryKey],
+        );
+        expect(blockedDelivery.rows).toEqual([{
+          status: "failed",
+          attempt_count: 1,
+          error_code: "provider_client_error",
+        }]);
+
+        await expect(journeys.retryFailed(
+          adminActor,
+          adminRetryJourneyId,
+          adminRetryNow,
+        )).resolves.toMatchObject({
+          id: adminRetryJourneyId,
+          status: "scheduled",
+        });
+
+        const authorizedDelivery = await activePool.query<{
+          status: string;
+          attempt_count: number;
+          error_code: string | null;
+        }>(
+          `SELECT status, attempt_count, error_code
+           FROM email_log
+           WHERE idempotency_key = $1`,
+          [adminRetryDeliveryKey],
+        );
+        expect(authorizedDelivery.rows).toEqual([{
+          status: "processing",
+          attempt_count: 2,
+          error_code: null,
+        }]);
+        const auditAfterAuthorization = await activePool.query<{
+          count: number;
+          delivery_key: string | null;
+        }>(
+          `SELECT count(*)::int AS count,
+                  min(metadata->>'deliveryKey') AS delivery_key
+           FROM audit_events
+           WHERE action = 'journey.failed_retry_requested'
+             AND target_type = 'journey_state'
+             AND target_id = $1`,
+          [adminRetryJourneyId],
+        );
+        expect(auditAfterAuthorization.rows).toEqual([{
+          count: 1,
+          delivery_key: adminRetryDeliveryKey,
+        }]);
+
+        const summary = await runJourneyBatch(dependencies, {
+          now: adminRetryNow,
+          limit: 1,
+        });
+        expect(summary).toMatchObject({
+          claimed: 1,
+          sent: 1,
+          failed: 0,
+        });
+        expect(providerSend).toHaveBeenCalledTimes(1);
+
+        const finalDelivery = await activePool.query<{
+          status: string;
+          attempt_count: number;
+          provider_id: string | null;
+          count: number;
+        }>(
+          `SELECT min(status) AS status,
+                  min(attempt_count)::int AS attempt_count,
+                  min(provider_id) AS provider_id,
+                  count(*)::int AS count
+           FROM email_log
+           WHERE idempotency_key = $1`,
+          [adminRetryDeliveryKey],
+        );
+        expect(finalDelivery.rows).toEqual([{
+          status: "sent",
+          attempt_count: 2,
+          provider_id: `provider-${fixture}-admin-retry`,
+          count: 1,
+        }]);
+        const finalJourney = await activePool.query<{
+          status: string;
+          attempt_count: number;
+        }>(
+          `SELECT status, attempt_count
+           FROM journey_state
+           WHERE id = $1`,
+          [adminRetryJourneyId],
+        );
+        expect(finalJourney.rows).toEqual([{
+          status: "sent",
+          attempt_count: 2,
+        }]);
+        const finalAudit = await activePool.query<{count: number}>(
+          `SELECT count(*)::int AS count
+           FROM audit_events
+           WHERE action = 'journey.failed_retry_requested'
+             AND target_type = 'journey_state'
+             AND target_id = $1`,
+          [adminRetryJourneyId],
+        );
+        expect(finalAudit.rows).toEqual([{count: 1}]);
       },
     );
 

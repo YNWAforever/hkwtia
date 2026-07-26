@@ -31,6 +31,7 @@ const providerFailureCodes = new Set<DeliveryFailureCode>([
 const campaignTemplateMap = {
   "renewal-reminder": "campaign_generic",
   "member-update": "campaign_generic",
+  "membership_renewal": "campaign_generic",
 } as const;
 type CampaignSourceTemplate = keyof typeof campaignTemplateMap;
 
@@ -57,7 +58,7 @@ export type CampaignRecipientContext = Readonly<{
 }>;
 
 export type CampaignRenderInput = Readonly<{
-  sourceTemplate: "renewal-reminder" | "member-update";
+  sourceTemplate: CampaignSourceTemplate;
   template: "campaign_generic";
   locale: AppLocale;
   variables: Readonly<Record<string, string>>;
@@ -125,7 +126,11 @@ type CampaignRecipientMutations = Readonly<{
     id: string,
     claimedAt: Date,
     errorCode: string,
-  ) => Promise<unknown>;
+    task: StaffTaskInput,
+  ) => Promise<Readonly<{
+    record: unknown;
+    taskDisposition: "created" | "existing";
+  }>>;
   completeCampaignIfIdle: (
     actor: AutomationCronActor,
     campaignId: string,
@@ -245,15 +250,6 @@ function isTransitionError(error: unknown): boolean {
 
 export function campaignDeliveryKey(claim: Pick<CampaignRecipientClaim, "campaignId" | "id">): string {
   return `campaign:${claim.campaignId}:${claim.id}:email`;
-}
-
-async function createTask(
-  dependencies: CampaignRunnerDependencies,
-  input: StaffTaskInput,
-  summary: MutableSummary,
-): Promise<void> {
-  const result = await dependencies.staffTasks.createOnce(runnerActor, input);
-  if (result.disposition === "created") summary.tasksCreated += 1;
 }
 
 export function createCampaignEmailRenderer(
@@ -391,19 +387,20 @@ async function settleFailure(
     summary.retried += 1;
     return;
   }
-  await createTask(dependencies, {
-    profileId: claim.profileId,
-    journeyStateId: null,
-    kind: "permanent_campaign_delivery_failure",
-    dedupeKey: `${campaignDeliveryKey(claim)}:permanent_delivery_failure`,
-    summaryCode: decision.code,
-  }, summary);
-  await dependencies.campaigns.markRecipientFailed(
+  const settlement = await dependencies.campaigns.markRecipientFailed(
     runnerActor,
     claim.id,
     claim.claimedAt,
     decision.code,
+    {
+      profileId: claim.profileId,
+      journeyStateId: null,
+      kind: "permanent_campaign_delivery_failure",
+      dedupeKey: `${campaignDeliveryKey(claim)}:permanent_delivery_failure`,
+      summaryCode: decision.code,
+    },
   );
+  if (settlement.taskDisposition === "created") summary.tasksCreated += 1;
   summary.failed += 1;
 }
 

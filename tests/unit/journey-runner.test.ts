@@ -109,9 +109,16 @@ function harness(
         rescheduled.push({id, claimedAt, scheduledAt, code});
         return claims.find((claim) => claim.id === id)!;
       },
-      async markFailed(_actor, id, claimedAt, code) {
+      async markFailed(_actor, id, claimedAt, code, _completedAt, task) {
         failed.push({id, claimedAt, code});
-        return claims.find((claim) => claim.id === id)!;
+        const taskDisposition = tasks.has(task.dedupeKey)
+          ? "existing" as const
+          : "created" as const;
+        if (taskDisposition === "created") tasks.set(task.dedupeKey, task);
+        return {
+          record: claims.find((claim) => claim.id === id)!,
+          taskDisposition,
+        };
       },
     },
     deliveries: {

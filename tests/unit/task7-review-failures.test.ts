@@ -11,6 +11,7 @@ import {
   type JourneyRunnerDependencies,
 } from "@/lib/automation/journey-runner";
 import {DeliveryFailure, type DeliveryFailureCode} from "@/lib/email/transport";
+import type {StaffTaskInput} from "@/lib/db/repos/staff-tasks";
 import type {JourneyState} from "@/lib/db/server-schema";
 
 const now = new Date("2027-01-15T10:00:00.000Z");
@@ -89,9 +90,18 @@ function failedJourneyHarness(
     events.push("reschedule");
     return claim;
   });
-  const markFailed = vi.fn(async () => {
-    events.push("mark-failed");
-    return claim;
+  const terminalTasks = new Set<string>();
+  const markFailed = vi.fn(async (...args: unknown[]) => {
+    const task = args[5] as StaffTaskInput;
+    const taskDisposition = terminalTasks.has(task.dedupeKey)
+      ? "existing" as const
+      : "created" as const;
+    if (taskDisposition === "created") terminalTasks.add(task.dedupeKey);
+    events.push("mark-failed-with-task");
+    return {
+      record: claim,
+      taskDisposition,
+    };
   });
   const createOnce = vi.fn(async (_actor, input) => {
     events.push("task");
@@ -200,7 +210,17 @@ function campaignBaseDependencies(
 ) {
   let claimIndex = 0;
   const tasks = new Map<string, unknown>();
-  const markRecipientFailed = vi.fn(async () => ({}));
+  const markRecipientFailed = vi.fn(async (...args: unknown[]) => {
+    const input = args[4] as StaffTaskInput;
+    const taskDisposition = tasks.has(input.dedupeKey)
+      ? "existing" as const
+      : "created" as const;
+    if (taskDisposition === "created") tasks.set(input.dedupeKey, input);
+    return {
+      record: {},
+      taskDisposition,
+    };
+  });
   const rescheduleRecipient = vi.fn(async () => ({}));
   const provider = vi.fn(async (input) => ({
     status: "sent" as const,
@@ -280,7 +300,7 @@ function campaignBaseDependencies(
 }
 
 describe("Task 7 review: provider-failure crash recovery", () => {
-  it("replays a permanent journey failure without another provider call and tasks before terminal state", async () => {
+  it("replays a permanent journey failure without another provider call and settles task plus terminal state atomically", async () => {
     const claim = journeyClaim({
       attemptCount: 2,
       claimedAt: later,
@@ -293,7 +313,8 @@ describe("Task 7 review: provider-failure crash recovery", () => {
     expect(summary).toMatchObject({failed: 1, retried: 0, tasksCreated: 1});
     expect(test.provider).not.toHaveBeenCalled();
     expect(test.retryEmailFailure).not.toHaveBeenCalled();
-    expect(test.events).toEqual(["task", "mark-failed"]);
+    expect(test.events).toEqual(["mark-failed-with-task"]);
+    expect(test.createOnce).not.toHaveBeenCalled();
   });
 
   it("replays a retryable journey failure at second-attempt 25 minute backoff without provider I/O", async () => {
@@ -318,7 +339,7 @@ describe("Task 7 review: provider-failure crash recovery", () => {
     );
   });
 
-  it("keeps a journey recoverable when task creation fails, then deduplicates task-before-terminal retry", async () => {
+  it("keeps a journey recoverable when atomic task creation fails, then retries without duplication", async () => {
     const first = journeyClaim({attemptCount: 3});
     const second = journeyClaim({
       attemptCount: 3,
@@ -326,15 +347,23 @@ describe("Task 7 review: provider-failure crash recovery", () => {
       claimSource: "stale",
     });
     let batch = 0;
-    const taskInputs: Array<{dedupeKey: string}> = [];
-    const markFailed = vi.fn(async () => second);
-    const createOnce = vi.fn(async (_actor, input) => {
+    const taskInputs: StaffTaskInput[] = [];
+    const terminalTasks = new Set<string>();
+    const markFailed = vi.fn(async (...args: unknown[]) => {
+      const input = args[5] as StaffTaskInput;
       taskInputs.push(input);
       if (taskInputs.length === 1) throw new Error("task store unavailable");
+      const taskDisposition = terminalTasks.has(input.dedupeKey)
+        ? "existing" as const
+        : "created" as const;
+      if (taskDisposition === "created") terminalTasks.add(input.dedupeKey);
       return {
-        record: {...input, id: "task-recovered", status: "open" as const},
-        disposition: "created" as const,
+        record: second,
+        taskDisposition,
       };
+    });
+    const createOnce = vi.fn(async () => {
+      throw new Error("unexpected standalone permanent task write");
     });
     const dependencies = {
       journeys: {
@@ -365,15 +394,18 @@ describe("Task 7 review: provider-failure crash recovery", () => {
 
     await expect(runJourneyBatch(dependencies, {now, limit: 1}))
       .rejects.toThrow("task store unavailable");
-    expect(markFailed).not.toHaveBeenCalled();
+    expect(markFailed).toHaveBeenCalledTimes(1);
+    expect(terminalTasks.size).toBe(0);
 
     await expect(runJourneyBatch(dependencies, {now: later, limit: 1}))
       .resolves.toMatchObject({failed: 1, tasksCreated: 1});
-    expect(markFailed).toHaveBeenCalledTimes(1);
+    expect(markFailed).toHaveBeenCalledTimes(2);
+    expect(createOnce).not.toHaveBeenCalled();
     expect(taskInputs.map((input) => input.dedupeKey)).toEqual([
       `${first.deliveryKey}:permanent_delivery_failure`,
       `${first.deliveryKey}:permanent_delivery_failure`,
     ]);
+    expect(terminalTasks.size).toBe(1);
   });
 
   it("replays retryable campaign failure with 25 minute backoff and no second provider call", async () => {
@@ -462,13 +494,17 @@ describe("Task 7 review: campaign task durability and template identity", () => 
       throw new DeliveryFailure("provider_client_error");
     });
     let taskAttempts = 0;
-    test.dependencies.staffTasks.createOnce = vi.fn(async (_actor, input) => {
+    test.markRecipientFailed.mockImplementation(async (...args: unknown[]) => {
+      const input = args[4] as StaffTaskInput;
       taskAttempts += 1;
       if (taskAttempts === 1) throw new Error("task store unavailable");
-      test.tasks.set(input.dedupeKey, input);
+      const taskDisposition = test.tasks.has(input.dedupeKey)
+        ? "existing" as const
+        : "created" as const;
+      if (taskDisposition === "created") test.tasks.set(input.dedupeKey, input);
       return {
-        record: {...input, id: "campaign-task-recovered", status: "open" as const},
-        disposition: "created" as const,
+        record: {},
+        taskDisposition,
       };
     });
     let deliveryStatus: "processing" | "failed" = "processing";
@@ -497,14 +533,16 @@ describe("Task 7 review: campaign task durability and template identity", () => 
 
     await expect(runCampaignBatch(test.dependencies, {now, limit: 1}))
       .rejects.toThrow("task store unavailable");
-    expect(test.markRecipientFailed).not.toHaveBeenCalled();
+    expect(test.markRecipientFailed).toHaveBeenCalledTimes(1);
+    expect(test.tasks.size).toBe(0);
 
     await expect(runCampaignBatch(test.dependencies, {now: later, limit: 1}))
       .resolves.toMatchObject({failed: 1, tasksCreated: 1});
     expect(providerCalls).toEqual([
       `campaign:${campaignId}:${first.id}:email`,
     ]);
-    expect(test.markRecipientFailed).toHaveBeenCalledTimes(1);
-    expect(test.tasks).toHaveLength(1);
+    expect(test.markRecipientFailed).toHaveBeenCalledTimes(2);
+    expect(test.createOnce).not.toHaveBeenCalled();
+    expect(test.tasks.size).toBe(1);
   });
 });
