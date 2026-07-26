@@ -403,6 +403,7 @@ describe.skipIf(!testDatabaseUrl)(
         )).resolves.toMatchObject({
           id: adminRetryJourneyId,
           status: "scheduled",
+          errorCode: "admin_retry_authorized",
         });
 
         const authorizedDelivery = await activePool.query<{
@@ -416,9 +417,9 @@ describe.skipIf(!testDatabaseUrl)(
           [adminRetryDeliveryKey],
         );
         expect(authorizedDelivery.rows).toEqual([{
-          status: "processing",
-          attempt_count: 2,
-          error_code: null,
+          status: "failed",
+          attempt_count: 1,
+          error_code: "provider_client_error",
         }]);
         const auditAfterAuthorization = await activePool.query<{
           count: number;

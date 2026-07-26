@@ -9,10 +9,8 @@ import {
 } from "@/lib/auth/automation-actor";
 import {
   auditEvents,
-  emailLog,
   journeyState,
   staffTasks,
-  whatsappLog,
   type JourneyState,
 } from "@/lib/db/server-schema";
 import {forbidden, getDb, requireSystem} from "@/lib/db/repos/common";
@@ -37,7 +35,9 @@ export type JourneyEnrollment = Pick<
 export type JourneyEnrollmentDisposition = "created" | "existing";
 export type JourneyTransitionErrorCode = "INVALID_TRANSITION";
 
-export type JourneyClaimSource = "scheduled" | "stale";
+const ADMIN_RETRY_AUTHORIZED = "admin_retry_authorized";
+
+export type JourneyClaimSource = "scheduled" | "stale" | "retry";
 export type JourneyClaim = JourneyState & Readonly<{claimSource: JourneyClaimSource}>;
 
 export class JourneyTransitionError extends Error {
@@ -89,7 +89,12 @@ function journeyFrom(row: Record<string, unknown>): JourneyState {
 
 function journeyClaimFrom(row: Record<string, unknown>): JourneyClaim {
   const priorStatus = String(row.prior_status ?? "");
-  const claimSource = priorStatus === "scheduled"
+  const priorErrorCode = row.prior_error_code === null || row.prior_error_code === undefined
+    ? null
+    : String(row.prior_error_code);
+  const claimSource = priorErrorCode === ADMIN_RETRY_AUTHORIZED
+    ? "retry"
+    : priorStatus === "scheduled"
     ? "scheduled"
     : priorStatus === "processing" ? "stale" : null;
   if (!claimSource) throw new Error("INVALID_JOURNEY_CLAIM_SOURCE");
@@ -165,7 +170,8 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
       return database.transaction(async (transaction) => {
         const result = await transaction.execute(sql`
           WITH due AS (
-            SELECT id, status AS prior_status FROM ${journeyState}
+            SELECT id, status AS prior_status, error_code AS prior_error_code
+            FROM ${journeyState}
             WHERE (
               status = 'scheduled' AND scheduled_at <= ${now}
             ) OR (
@@ -183,7 +189,7 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
               updated_at = now()
           FROM due
           WHERE target.id = due.id
-          RETURNING target.*, due.prior_status
+          RETURNING target.*, due.prior_status, due.prior_error_code
         `);
         return rowsFrom(result).map(journeyClaimFrom);
       });
@@ -271,47 +277,12 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
       return database.transaction(async (transaction) => {
         const journey = transitionResult(await transaction.execute(sql`
           UPDATE ${journeyState}
-          SET status = 'scheduled', scheduled_at = ${scheduledAt}, error_code = NULL,
+          SET status = 'scheduled', scheduled_at = ${scheduledAt},
+              error_code = ${ADMIN_RETRY_AUTHORIZED},
               claimed_at = NULL, claim_expires_at = NULL, completed_at = NULL, updated_at = now()
           WHERE id = ${id} AND status = 'failed'
           RETURNING *
         `));
-        await transaction.execute(sql`
-          UPDATE ${emailLog}
-          SET status = 'processing',
-              provider_id = NULL,
-              error_code = NULL,
-              attempt_count = attempt_count + 1
-          WHERE journey_state_id = ${id}
-            AND idempotency_key = ${journey.deliveryKey}
-            AND status = 'failed'
-            AND error_code IN (
-              'retryable_network',
-              'retryable_rate_limit',
-              'retryable_server',
-              'provider_client_error',
-              'provider_unclassified_failure'
-            )
-          RETURNING id
-        `);
-        await transaction.execute(sql`
-          UPDATE ${whatsappLog}
-          SET status = 'processing',
-              provider_id = NULL,
-              error_code = NULL,
-              attempt_count = attempt_count + 1
-          WHERE journey_state_id = ${id}
-            AND idempotency_key = ${`${journey.deliveryKey}:whatsapp`}
-            AND status = 'failed'
-            AND error_code IN (
-              'retryable_network',
-              'retryable_rate_limit',
-              'retryable_server',
-              'provider_client_error',
-              'provider_unclassified_failure'
-            )
-          RETURNING id
-        `);
         await transaction.execute(sql`
           INSERT INTO ${auditEvents}
             (actor_user_id, actor_type, action, target_type, target_id, metadata)

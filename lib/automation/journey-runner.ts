@@ -240,6 +240,7 @@ function shouldReplayPersistedFailure(
   delivery: RunnerDeliveryRecord,
   code: DeliveryFailureCode,
 ): boolean {
+  if (claim.claimSource === "retry") return false;
   return code === "provider_client_error"
     || code === "provider_unclassified_failure"
     || (
