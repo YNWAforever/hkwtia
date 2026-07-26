@@ -7,9 +7,11 @@ const journal = JSON.parse(readFileSync("drizzle/meta/_journal.json", "utf8")) a
   entries: Array<{idx: number; tag: string}>;
 };
 
-function latestGeneratedMigration(): Readonly<{name: string; sql: string}> {
-  const entry = journal.entries.at(-1);
-  if (!entry) throw new Error("MIGRATION_JOURNAL_EMPTY");
+function generatedMigration(tag: string): Readonly<{name: string; sql: string}> {
+  const entry = journal.entries.find((candidate) => candidate.tag === tag);
+  if (!entry) {
+    throw new Error(`MIGRATION_JOURNAL_TAG_MISSING:${tag}`);
+  }
   return {
     name: entry.tag,
     sql: readFileSync(`drizzle/${entry.tag}.sql`, "utf8"),
@@ -35,16 +37,20 @@ describe("campaign recipient processing leases", () => {
   });
 
   it("journals a generated additive migration and matching snapshot", () => {
-    const latest = latestGeneratedMigration();
+    const migration = generatedMigration("0008_m3_campaign_recipient_leases");
     const snapshotNames = readdirSync("drizzle/meta").filter((name) => /^\d{4}_snapshot\.json$/.test(name));
 
-    expect(journal.entries.at(-1)?.idx).toBe(8);
-    expect(latest.sql).toMatch(/ALTER TYPE "public"\."campaign_recipient_status" ADD VALUE 'processing'/);
-    expect(latest.sql).toContain('ALTER TABLE "campaign_recipients" ADD COLUMN "attempt_count" integer DEFAULT 0 NOT NULL');
-    expect(latest.sql).toContain('ALTER TABLE "campaign_recipients" ADD COLUMN "claimed_at" timestamp with time zone');
-    expect(latest.sql).toContain('ALTER TABLE "campaign_recipients" ADD COLUMN "claim_expires_at" timestamp with time zone');
-    expect(latest.sql).toContain('ALTER TABLE "campaign_recipients" ADD COLUMN "error_code" text');
-    expect(latest.sql).toContain('CREATE INDEX "campaign_recipients_due_idx"');
+    expect(
+      journal.entries.find(
+        (entry) => entry.tag === "0008_m3_campaign_recipient_leases",
+      ),
+    ).toMatchObject({idx: 8, tag: "0008_m3_campaign_recipient_leases"});
+    expect(migration.sql).toMatch(/ALTER TYPE "public"\."campaign_recipient_status" ADD VALUE 'processing'/);
+    expect(migration.sql).toContain('ALTER TABLE "campaign_recipients" ADD COLUMN "attempt_count" integer DEFAULT 0 NOT NULL');
+    expect(migration.sql).toContain('ALTER TABLE "campaign_recipients" ADD COLUMN "claimed_at" timestamp with time zone');
+    expect(migration.sql).toContain('ALTER TABLE "campaign_recipients" ADD COLUMN "claim_expires_at" timestamp with time zone');
+    expect(migration.sql).toContain('ALTER TABLE "campaign_recipients" ADD COLUMN "error_code" text');
+    expect(migration.sql).toContain('CREATE INDEX "campaign_recipients_due_idx"');
     expect(snapshotNames).toContain("0008_snapshot.json");
   });
 });

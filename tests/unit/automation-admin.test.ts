@@ -32,11 +32,14 @@ const member: Extract<Actor, {kind: "member"}> = {
   profileId: "member-1",
 };
 const journeyId = "11111111-1111-4111-8111-111111111111";
+const automationJobId = "44444444-4444-4444-8444-444444444444";
+const unknownJobId = "55555555-5555-4555-8555-555555555555";
 
 const dashboardFixture = (): AutomationDashboard => ({
   asOf: asOf.toISOString(),
   counts: {due: 2, upcoming: 1, failed: 1, processing: 1},
   jobs: [{
+    id: automationJobId,
     kind: "journey-runner",
     state: "failed",
     updatedAt: "2027-01-15T09:59:00.000Z",
@@ -147,6 +150,7 @@ describe("automation admin repository projection", () => {
       [{due: "2", upcoming: "1", failed: "1", processing: "1"}],
       [
         {
+          id: automationJobId,
           kind: "journey-runner",
           state: "failed",
           updated_at: new Date("2027-01-15T09:59:00.000Z"),
@@ -158,6 +162,7 @@ describe("automation admin repository projection", () => {
           token: "secret-token",
         },
         {
+          id: unknownJobId,
           kind: "worker@example.test",
           state: "unknown-state",
           updated_at: new Date("2027-01-15T09:58:00.000Z"),
@@ -212,12 +217,14 @@ describe("automation admin repository projection", () => {
       counts: {due: 2, upcoming: 1, failed: 1, processing: 1},
       jobs: [
         {
+          id: automationJobId,
           kind: "journey-runner",
           state: "failed",
           updatedAt: "2027-01-15T09:59:00.000Z",
           errorCode: "JOB_RUN_FAILED",
         },
         {
+          id: unknownJobId,
           kind: "unknown",
           state: "unknown",
           updatedAt: "2027-01-15T09:58:00.000Z",
@@ -256,6 +263,7 @@ describe("automation admin repository projection", () => {
       "nextCursor",
     ]);
     expect(Object.keys(dashboard.jobs[0]!)).toEqual([
+      "id",
       "kind",
       "state",
       "updatedAt",

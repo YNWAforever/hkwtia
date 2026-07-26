@@ -70,6 +70,7 @@ export default async function AdminMember360Page({params}: Props) {
         </p>
       </header>
       <Member360View
+        locale={locale}
         labels={{
           profile: t("member360.profile"),
           companies: t("member360.companies"),

@@ -57,6 +57,13 @@
       "when": 1785025874067,
       "tag": "0008_m3_campaign_recipient_leases",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1785066539044,
+      "tag": "0009_m3_automation_admin_indexes",
+      "breakpoints": true
     }
   ]
 }

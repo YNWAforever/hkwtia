@@ -1,0 +1,2 @@
+CREATE INDEX "jobs_automation_recent_idx" ON "jobs" USING btree ("updated_at" DESC NULLS LAST,"id" DESC NULLS LAST) WHERE "jobs"."kind" IN ('journey-runner', 'renewal-runner', 'engagement-score', 'approvals-expirer', 'worker-alert');--> statement-breakpoint
+CREATE INDEX "journey_state_admin_recent_idx" ON "journey_state" USING btree ("scheduled_at" DESC NULLS LAST,"id" DESC NULLS LAST);

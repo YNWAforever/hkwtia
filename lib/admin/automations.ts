@@ -16,6 +16,10 @@ export const AUTOMATION_DEFAULT_PAGE_LIMIT = 25;
 export const AUTOMATION_MAX_PAGE_LIMIT = 50;
 
 export type AutomationDashboard = Readonly<{
+  /**
+   * Evaluation boundary for due/upcoming counts. Jobs and rows are current
+   * operational reads and are not reconstructed historical state.
+   */
   asOf: string;
   counts: Readonly<{
     due: number;
@@ -24,6 +28,7 @@ export type AutomationDashboard = Readonly<{
     processing: number;
   }>;
   jobs: readonly Readonly<{
+    id: string;
     kind: string;
     state: string;
     updatedAt: string;

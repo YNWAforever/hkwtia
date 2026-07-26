@@ -106,3 +106,41 @@ The full suite skipped 26 database/environment-gated tests because isolated serv
 ## Tool fallback
 
 The linked Windows worktree allowed new files through `apply_patch` but denied updates to existing files with `helper_unknown_error: apply deny-read ACLs`. Existing-file changes used exact Git-applied unified diffs after path verification. Final scope and whitespace checks passed.
+
+## Review-fix follow-up
+
+The Task 10 review findings were addressed in a scoped follow-up:
+
+- Recent-job health now filters to exactly the five persisted M3 job kinds before ordering and limiting: `journey-runner`, `renewal-runner`, `engagement-score`, `approvals-expirer`, and `worker-alert`. Route writers and the admin reader share the constants in `lib/jobs/kinds.ts`.
+- The admin copy now says `Evaluated at` / `評估時間`. `asOf` is documented and tested only as the due/upcoming evaluation boundary; job and journey rows are current operational reads, not a historical snapshot.
+- Counts, recent jobs, and journey rows are started concurrently and joined with `Promise.all`.
+- Generated Drizzle migration `0009_m3_automation_admin_indexes` adds a partial recent-job index on `updated_at DESC, id DESC` for the exact five-kind predicate and a journey-admin index on `scheduled_at DESC, id DESC`. The generated snapshot and journal entry are included.
+- The bounded job DTO now includes only the safe database UUID needed for stable React keys. `runKey` remains excluded.
+- New Member 360 journey, WhatsApp, and suppression timestamps render with the active locale in the explicit `Asia/Hong_Kong` time zone while retaining ISO values in semantic `dateTime` attributes.
+
+Review TDD evidence:
+
+- Job allowlist RED: twelve newer unrelated job rows displaced all automation rows. GREEN: 3 files, 32/32 tests passed across the review regression, kind contract, and route writers.
+- Honest timestamp-label RED: English and Traditional Chinese review checks could not find `Evaluated at` / `評估時間`. GREEN: 3 files, 9/9 tests passed.
+- Query-plan/index RED: sequential maximum overlap was 1 and generated migration/index contracts were absent. GREEN: 3 files, 5/5 tests passed.
+- Stable job UUID RED: the repository DTO omitted `id`. GREEN: 4 files, 22/22 tests passed across repository, privacy, and presentation coverage.
+- Member 360 time RED: both locales rendered raw ISO text. GREEN: 6/6 presentation tests passed with locale-aware Hong Kong display times.
+
+Review-fix verification:
+
+```powershell
+npm.cmd test -- tests/unit/automation-admin.test.ts tests/unit/automation-admin-review.test.ts tests/unit/automation-admin-planner.test.ts tests/unit/automation-admin-parallel.test.ts tests/unit/automation-admin-indexes.test.ts tests/unit/automation-job-id.test.ts tests/unit/job-kind-contract.test.ts tests/unit/automation-dashboard.test.tsx tests/unit/automation-dashboard-review.test.tsx tests/unit/member-360.test.ts tests/unit/admin-presentational.test.tsx tests/unit/messages.test.ts tests/unit/job-routes.test.ts tests/unit/m3-schema-contract.test.ts tests/unit/schema-contract.test.ts tests/unit/db-script-contract.test.ts
+```
+
+Result: PASS; 16 files passed; 85/85 tests passed.
+
+- Exact Task 10 acceptance: PASS; 4 files passed; 33/33 tests passed.
+- Broader admin/member/auth/i18n/automation regression: PASS; 21 files passed; 118/118 tests passed.
+- `npm.cmd run typecheck`: PASS, no diagnostics.
+- `npm.cmd run lint`: PASS, no diagnostics.
+- `npm.cmd run build`: PASS; Next.js 16 production build emitted `/[locale]/admin/automations`.
+- `npm.cmd test`: PASS; 147 files passed and 10 environment-gated files skipped; 786 tests passed and 26 skipped.
+
+The first review-fix full-suite run exposed one stale test assumption: the campaign-recipient migration test required migration `0008` to remain the journal tail. It now locates and verifies the generated `0008_m3_campaign_recipient_leases` entry by tag, while the new automation-index test owns the `0009` tail contract. Both migration contracts pass.
+
+No live PostgreSQL result is claimed; the same 26 database/environment-gated tests remain skipped. Existing Task 1-3 report edits were preserved and excluded, and the progress ledger was not changed.

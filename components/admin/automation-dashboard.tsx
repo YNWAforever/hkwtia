@@ -14,7 +14,7 @@ export type AutomationDashboardLabels = Readonly<{
   eyebrow: string;
   title: string;
   description: string;
-  snapshot: string;
+  evaluatedAt: string;
   countsLabel: string;
   due: string;
   upcoming: string;
@@ -99,7 +99,7 @@ export function AutomationDashboardView({
         </h1>
         <p className="text-lg text-muted-foreground">{labels.description}</p>
         <p className="text-sm text-muted-foreground">
-          {labels.snapshot}{" "}
+          {labels.evaluatedAt}{" "}
           <time dateTime={dashboard.asOf}>{displayDate(dashboard.asOf)}</time>
         </p>
       </header>
@@ -148,7 +148,7 @@ export function AutomationDashboardView({
               ) : dashboard.jobs.map((job) => (
                 <tr
                   className="border-b border-border last:border-0"
-                  key={`${job.kind}:${job.state}:${job.updatedAt}:${job.errorCode ?? ""}`}
+                  key={job.id}
                 >
                   <th className="px-4 py-3 font-medium" scope="row">
                     {job.kind}

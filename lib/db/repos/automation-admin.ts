@@ -8,6 +8,9 @@ import {requireAdmin} from "@/lib/auth/actor";
 import {jobs as jobsTable, journeyState} from "@/lib/db/server-schema";
 import {getDb} from "@/lib/db/repos/common";
 import {journeysRepository} from "@/lib/db/repos/journeys";
+import {
+  M3_AUTOMATION_JOB_KIND_SQL_LIST,
+} from "@/lib/jobs/kinds";
 import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 
 export const AUTOMATION_JOB_LIMIT = 10;
@@ -24,6 +27,10 @@ type RetryFailedJourney = (
 ) => Promise<unknown>;
 
 export type AutomationDashboardRepositoryQuery = Readonly<{
+  /**
+   * Evaluation boundary for due/upcoming counts; the jobs and paged rows
+   * remain current operational reads.
+   */
   asOf: Date;
   cursor: string | null;
   limit: number;
@@ -37,6 +44,7 @@ const countsRowSchema = z.object({
 });
 
 const jobRowSchema = z.object({
+  id: z.string().uuid(),
   kind: z.string(),
   state: z.string(),
   updated_at: z.coerce.date(),
@@ -161,8 +169,7 @@ export function createAutomationAdminRepository(
       requireAdmin(actor);
       const query = validateQuery(input);
       const executor = await loadExecutor();
-      const countRows = z.array(countsRowSchema).parse(resultRows(
-        await executor.execute(sql`
+      const countRead = executor.execute(sql`
           SELECT
             COUNT(*) FILTER (
               WHERE ${journeyState.status} = 'scheduled'
@@ -179,27 +186,22 @@ export function createAutomationAdminRepository(
               WHERE ${journeyState.status} = 'processing'
             )::int AS processing
           FROM ${journeyState}
-        `),
-      ));
-      const counts = countRows[0] ?? {
-        due: 0,
-        upcoming: 0,
-        failed: 0,
-        processing: 0,
-      };
+        `);
 
-      const jobRows = z.array(jobRowSchema).parse(resultRows(
-        await executor.execute(sql`
+      const jobRead = executor.execute(sql`
           SELECT
+            ${jobsTable.id} AS id,
             ${jobsTable.kind} AS kind,
             ${jobsTable.state} AS state,
             ${jobsTable.updatedAt} AS updated_at,
             ${jobsTable.lastError} AS error_code
           FROM ${jobsTable}
+          WHERE ${jobsTable.kind} IN (
+            ${sql.raw(M3_AUTOMATION_JOB_KIND_SQL_LIST)}
+          )
           ORDER BY ${jobsTable.updatedAt} DESC, ${jobsTable.id} DESC
           LIMIT ${AUTOMATION_JOB_LIMIT}
-        `),
-      ));
+        `);
 
       const afterCursor = query.cursor
         ? sql`WHERE (
@@ -210,8 +212,7 @@ export function createAutomationAdminRepository(
             )
           )`
         : sql``;
-      const journeyRows = z.array(journeyRowSchema).parse(resultRows(
-        await executor.execute(sql`
+      const journeyRead = executor.execute(sql`
           SELECT
             ${journeyState.id} AS id,
             ${journeyState.journey} AS journey,
@@ -224,8 +225,26 @@ export function createAutomationAdminRepository(
           ${afterCursor}
           ORDER BY ${journeyState.scheduledAt} DESC, ${journeyState.id} DESC
           LIMIT ${query.limit + 1}
-        `),
-      ));
+        `);
+
+      const [countResult, jobResult, journeyResult] = await Promise.all([
+        countRead,
+        jobRead,
+        journeyRead,
+      ]);
+      const countRows = z.array(countsRowSchema).parse(
+        resultRows(countResult),
+      );
+      const counts = countRows[0] ?? {
+        due: 0,
+        upcoming: 0,
+        failed: 0,
+        processing: 0,
+      };
+      const jobRows = z.array(jobRowSchema).parse(resultRows(jobResult));
+      const journeyRows = z.array(journeyRowSchema).parse(
+        resultRows(journeyResult),
+      );
       const hasNextPage = journeyRows.length > query.limit;
       const rows = journeyRows.slice(0, query.limit).map((row) => {
         const status = JOURNEY_STATES.has(row.status)
@@ -248,6 +267,7 @@ export function createAutomationAdminRepository(
         asOf: query.asOf.toISOString(),
         counts,
         jobs: jobRows.map((row) => ({
+          id: row.id,
           kind: safeRequiredCode(row.kind),
           state: JOB_STATES.has(row.state) ? row.state : "unknown",
           updatedAt: row.updated_at.toISOString(),

@@ -32,7 +32,7 @@ export default async function AdminAutomationsPage({
     eyebrow: t("eyebrow"),
     title: t("title"),
     description: t("description"),
-    snapshot: t("snapshot"),
+    evaluatedAt: t("evaluatedAt"),
     countsLabel: t("countsLabel"),
     due: t("due"),
     upcoming: t("upcoming"),

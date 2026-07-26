@@ -18,6 +18,7 @@ const dashboard: AutomationDashboard = {
   asOf: "2027-01-15T10:00:00.000Z",
   counts: {due: 2, upcoming: 3, failed: 1, processing: 4},
   jobs: [{
+    id: "44444444-4444-4444-8444-444444444444",
     kind: "journey-runner",
     state: "failed",
     updatedAt: "2027-01-15T09:59:00.000Z",
@@ -197,12 +198,13 @@ describe("automation dashboard presentation", () => {
   });
 
   it.each([
-    {labels: en.Admin.member360, locale: "en"},
-    {labels: zh.Admin.member360, locale: "zh-HK"},
-  ])("renders sanitized Member360 automation history in $locale", ({labels}) => {
+    {labels: en.Admin.member360, locale: "en" as const},
+    {labels: zh.Admin.member360, locale: "zh-HK" as const},
+  ])("renders sanitized Member360 automation history in $locale", ({labels, locale}) => {
     const html = renderToStaticMarkup(
       <Member360View
         labels={labels}
+        locale={locale}
         stripeCustomerHref={null}
         stripeSubscriptionHref={null}
         view={member360}
@@ -216,5 +218,19 @@ describe("automation dashboard presentation", () => {
     expect(html).toContain("renewal-reminder");
     expect(html).toContain("opt_out");
     expect(html).not.toContain("provider-secret");
+
+    const formatter = new Intl.DateTimeFormat(locale, {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Hong_Kong",
+    });
+    for (const timestamp of [
+      member360.journeys[0]!.scheduledAt,
+      member360.whatsapp[0]!.createdAt,
+      member360.suppressions[0]!.createdAt,
+    ]) {
+      expect(html).toContain(formatter.format(new Date(timestamp)));
+      expect(html).not.toContain(`>${timestamp}</time>`);
+    }
   });
 });

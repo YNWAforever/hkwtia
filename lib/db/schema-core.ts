@@ -18,6 +18,7 @@ import {
 } from "drizzle-orm/pg-core";
 import {sql} from "drizzle-orm";
 
+import {M3_AUTOMATION_JOB_KIND_SQL_LIST} from "@/lib/jobs/kinds";
 import {MEMBERSHIP_PLAN_CODES, MEMBERSHIP_STATUSES} from "@/lib/membership/constants";
 
 const createdAt = (name: string) => timestamp(name, {withTimezone: true}).defaultNow().notNull();
@@ -252,7 +253,12 @@ export const jobs = pgTable(
     updatedAt: updatedAt("updated_at"),
     completedAt: timestamp("completed_at", {withTimezone: true}),
   },
-  (table) => [index("jobs_state_idx").on(table.state)],
+  (table) => [
+    index("jobs_state_idx").on(table.state),
+    index("jobs_automation_recent_idx")
+      .on(table.updatedAt.desc(), table.id.desc())
+      .where(sql`${table.kind} IN (${sql.raw(M3_AUTOMATION_JOB_KIND_SQL_LIST)})`),
+  ],
 );
 
 export const auditEvents = pgTable(
@@ -318,6 +324,8 @@ export const journeyState = pgTable("journey_state", {
   unique("journey_state_delivery_key_unique").on(table.deliveryKey),
   index("journey_state_due_idx").on(table.status, table.scheduledAt),
   index("journey_state_profile_idx").on(table.profileId, table.createdAt),
+  index("journey_state_admin_recent_idx")
+    .on(table.scheduledAt.desc(), table.id.desc()),
 ]);
 
 export const emailLog = pgTable("email_log", {

@@ -1,5 +1,6 @@
 import type {ReactNode} from "react";
 
+import type {AppLocale} from "@/i18n/routing";
 import type {Member360} from "@/lib/admin/member-360";
 
 export type Member360Labels = Readonly<{
@@ -47,6 +48,7 @@ export type Member360Labels = Readonly<{
 
 type Member360ViewProps = Readonly<{
   view: Member360;
+  locale: AppLocale;
   labels: Member360Labels;
   stripeCustomerHref: string | null;
   stripeSubscriptionHref: string | null;
@@ -75,10 +77,17 @@ function valueOrEmpty(
 
 export function Member360View({
   view,
+  locale,
   labels,
   stripeCustomerHref,
   stripeSubscriptionHref,
 }: Member360ViewProps) {
+  const dateTimeFormatter = new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Hong_Kong",
+  });
+
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <section
@@ -297,7 +306,7 @@ export function Member360View({
                   </MemberField>
                   <MemberField label={labels.scheduledAt}>
                     <time dateTime={journey.scheduledAt}>
-                      {journey.scheduledAt}
+                      {dateTimeFormatter.format(new Date(journey.scheduledAt))}
                     </time>
                   </MemberField>
                   <MemberField label={labels.attemptCount}>
@@ -342,7 +351,9 @@ export function Member360View({
                     {valueOrEmpty(message.errorCode, labels.empty)}
                   </MemberField>
                   <MemberField label={labels.createdAt}>
-                    <time dateTime={message.createdAt}>{message.createdAt}</time>
+                    <time dateTime={message.createdAt}>
+                      {dateTimeFormatter.format(new Date(message.createdAt))}
+                    </time>
                   </MemberField>
                   <MemberField label={labels.locale}>
                     {message.locale}
@@ -382,7 +393,7 @@ export function Member360View({
                   </MemberField>
                   <MemberField label={labels.createdAt}>
                     <time dateTime={suppression.createdAt}>
-                      {suppression.createdAt}
+                      {dateTimeFormatter.format(new Date(suppression.createdAt))}
                     </time>
                   </MemberField>
                 </dl>
