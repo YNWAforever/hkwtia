@@ -639,15 +639,7 @@ async function writeFixture(
        annual_price_hkd, monthly_price_hkd, seat_allowance, active,
        created_at, updated_at)
     VALUES ('community', 'individual', 'free', NULL, 0, 0, 1, true, $1, $1)
-    ON CONFLICT (code) DO UPDATE SET
-      audience = EXCLUDED.audience,
-      billing_behavior = EXCLUDED.billing_behavior,
-      stripe_price_reference = EXCLUDED.stripe_price_reference,
-      annual_price_hkd = EXCLUDED.annual_price_hkd,
-      monthly_price_hkd = EXCLUDED.monthly_price_hkd,
-      seat_allowance = EXCLUDED.seat_allowance,
-      active = EXCLUDED.active,
-      updated_at = EXCLUDED.updated_at
+    ON CONFLICT (code) DO NOTHING
   `, [fixture.now]);
 
   for (const row of fixture.profiles) {

@@ -1,6 +1,15 @@
 import {Pool, type PoolClient} from "pg";
 import {drizzle} from "drizzle-orm/node-postgres";
-import {afterAll, beforeAll, describe, expect, it, vi} from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 const activeDatabase = vi.hoisted(() => ({current: null as unknown}));
 vi.mock("@/lib/db/repos/common", async (importOriginal) => {
@@ -38,8 +47,15 @@ import {
   buildM3SeedFixture,
   seedM3,
 } from "@/scripts/seed-m3";
+import {
+  createM3AcceptanceCaseLifecycle,
+  requireM3AcceptanceDatabase,
+} from "@/tests/fixtures/m3-acceptance-safety";
 
-const testDatabaseUrl = process.env.DATABASE_URL_TEST?.trim() ?? "";
+const acceptanceDatabase = process.env.DATABASE_URL_TEST?.trim()
+  ? requireM3AcceptanceDatabase(process.env)
+  : null;
+const testDatabaseUrl = acceptanceDatabase?.databaseUrl ?? "";
 const now = new Date("2026-07-26T04:00:00.000Z");
 const fixture = buildM3SeedFixture(now);
 const profileIds = Object.values(M3_PROFILE_IDS);
@@ -163,6 +179,13 @@ async function cleanM3Fixture(activePool: Pool): Promise<void> {
   );
 }
 
+const caseLifecycle = createM3AcceptanceCaseLifecycle({
+  clean: async () => cleanM3Fixture(requirePool()),
+  seed: async () => {
+    await seedM3(requirePool(), {now});
+  },
+});
+
 function journeyDependencies(
   activePool: Pool,
   activeDb: AutomationDatabase,
@@ -262,6 +285,30 @@ function campaignDependencies(
   };
 }
 
+function createHourlyAcceptancePost(
+  activePool: Pool,
+  activeDb: AutomationDatabase,
+  emailTransport: ReturnType<typeof createTestTransport>,
+) {
+  const journeys = journeyDependencies(activePool, activeDb, emailTransport);
+  const campaigns = campaignDependencies(activeDb, emailTransport);
+  const jobs = createScheduledJobsRepository(async () => activeDb);
+  return createJobPost({
+    kind: "journey-runner",
+    bucket: "hourly",
+    jobs,
+    now: () => new Date(now),
+    secret: () => testCronSecret,
+    async run({now: runNow}) {
+      const [journey, campaign] = await Promise.all([
+        runJourneyBatch(journeys, {now: runNow, limit: 50}),
+        runCampaignBatch(campaigns, {now: runNow, limit: 50}),
+      ]);
+      return {journey, campaign};
+    },
+  });
+}
+
 describe.skipIf(!testDatabaseUrl)(
   "M3 acceptance on an isolated current migrated Postgres",
   () => {
@@ -269,17 +316,18 @@ describe.skipIf(!testDatabaseUrl)(
       pool = new Pool({connectionString: testDatabaseUrl});
       database = drizzle(pool) as unknown as AutomationDatabase;
       activeDatabase.current = database;
-      await cleanM3Fixture(pool);
-      await seedM3(pool, {now});
     }, 120_000);
+
+    beforeEach(async () => caseLifecycle.prepare(), 120_000);
+
+    afterEach(async () => caseLifecycle.cleanup(), 120_000);
 
     afterAll(async () => {
       if (!pool) return;
-      try {
-        await cleanM3Fixture(pool);
-      } finally {
-        await pool.end();
-      }
+      await pool.end();
+      pool = undefined;
+      database = undefined;
+      activeDatabase.current = null;
     }, 120_000);
 
     it("seeds and reconciles the exact fixed fixture idempotently", async () => {
@@ -342,27 +390,11 @@ describe.skipIf(!testDatabaseUrl)(
         const activePool = requirePool();
         const activeDb = requireDatabase();
         const emailTransport = createTestTransport();
-        const journeys = journeyDependencies(
+        const post = createHourlyAcceptancePost(
           activePool,
           activeDb,
           emailTransport,
         );
-        const campaigns = campaignDependencies(activeDb, emailTransport);
-        const jobs = createScheduledJobsRepository(async () => activeDb);
-        const post = createJobPost({
-          kind: "journey-runner",
-          bucket: "hourly",
-          jobs,
-          now: () => new Date(now),
-          secret: () => testCronSecret,
-          async run({now: runNow}) {
-            const [journey, campaign] = await Promise.all([
-              runJourneyBatch(journeys, {now: runNow, limit: 50}),
-              runCampaignBatch(campaigns, {now: runNow, limit: 50}),
-            ]);
-            return {journey, campaign};
-          },
-        });
 
         const first = await post(requestFor("/api/jobs/journey-runner"));
         const sendsAfterFirst = emailTransport.sends.length;
@@ -635,7 +667,18 @@ describe.skipIf(!testDatabaseUrl)(
     );
 
     it("shows seeded automation data through production admin and Member 360 readers", async () => {
+      const activePool = requirePool();
       const activeDb = requireDatabase();
+      const emailTransport = createTestTransport();
+      const post = createHourlyAcceptancePost(
+        activePool,
+        activeDb,
+        emailTransport,
+      );
+      const runnerResponse = await post(requestFor("/api/jobs/journey-runner"));
+      expect(runnerResponse.status).toBe(200);
+      expect(await runnerResponse.json()).toMatchObject({duplicate: false});
+
       const dashboard = await getAutomationDashboard(
         adminActor,
         {limit: "50"},
@@ -699,6 +742,18 @@ describe.skipIf(!testDatabaseUrl)(
       const activePool = requirePool();
       const activeDb = requireDatabase();
       const claimNow = new Date(now.getTime() + 86_400_000);
+      await activePool.query(`
+        UPDATE journey_state
+        SET status = 'skipped',
+            completed_at = $2,
+            updated_at = $2,
+            error_code = 'm3_acceptance_case_isolation'
+        WHERE profile_id = ANY($1::text[])
+          AND status = 'scheduled'
+      `, [profileIds, now]);
+      const uniqueEarliestScheduledAt = new Date(
+        "2000-01-01T00:00:00.000Z",
+      );
       const deliveryKey =
         `journey:${M3_PROFILE_IDS.memberAccess}:onboarding_90d:`
         + "m3-seed:concurrent:welcome";
@@ -716,7 +771,7 @@ describe.skipIf(!testDatabaseUrl)(
       `, [
         M3_SEED_UUIDS.concurrentJourney,
         M3_PROFILE_IDS.memberAccess,
-        new Date(claimNow.getTime() - 1_000),
+        uniqueEarliestScheduledAt,
         deliveryKey,
         now,
       ]);

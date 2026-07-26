@@ -67,19 +67,30 @@ derives its Day-7 and renewal D-14 rows from the controlled Hong Kong calendar
 day, and reconciles only its fixed fixture scope in one advisory-locked
 transaction. Do not point it at a shared or production database.
 
-The Postgres acceptance suite uses only `DATABASE_URL_TEST`; without that
-isolated database its five destructive cases are collected and reported as
-skipped. Migrate the isolated database before running the focused integration
-file. Provider calls remain local: email uses the test transport, and WhatsApp
-uses credential-free mock mode.
+The Postgres acceptance suite runs its five destructive cases only when
+`DATABASE_URL_TEST` is a valid TLS Neon URL,
+`M3_ACCEPTANCE_ALLOW_DESTRUCTIVE` is exactly `isolated-preview`, and
+`M3_ACCEPTANCE_EXPECTED_DB_HOST` exactly matches the normalized hostname parsed
+from that URL. The guard rejects production-looking hosts and reuse of the
+runtime database before opening a connection or cleaning any rows. Without
+`DATABASE_URL_TEST`, the cases are collected and reported as skipped; with a
+configured URL but an incomplete or mismatched guard, collection fails closed.
+Migrate the isolated database before running the focused integration file.
+Provider calls remain local: email uses the test transport, and WhatsApp uses
+credential-free mock mode.
 
 For browser acceptance, deploy the same seeded database to an isolated Preview,
 map test-only staff and member Auth accounts to the seeded profile IDs, and set
-`PLAYWRIGHT_BASE_URL`, the four `M3_TEST_*` credential names, and both
-`M3_TEST_UNSUBSCRIBE_TOKEN_*` names outside the repository. Set
-`VERCEL_SHARE_TOKEN` only when the HTTPS Vercel Preview is protected. Generate
-unsubscribe confirmation tokens from that Preview's signing configuration;
-never commit populated values.
+`PLAYWRIGHT_BASE_URL`, `M3_E2E_ALLOWED_ORIGIN`, the four `M3_TEST_*` credential
+names, and both `M3_TEST_UNSUBSCRIBE_TOKEN_*` names outside the repository.
+For a remote run, the allowlisted origin must exactly match a preview-safe
+HTTPS `*.vercel.app` target; `https://hkwtia.vercel.app`, remote HTTP, and
+arbitrary hosts are rejected before credentials or unsubscribe tokens are
+used. Loopback targets are exempt from the remote allowlist. Set
+`VERCEL_SHARE_TOKEN` only when the validated Preview is protected; it provides
+Preview authentication and never authorizes the target. Generate unsubscribe
+confirmation tokens from that Preview's signing configuration and never commit
+populated values.
 
 ## M3 Preview automation Worker
 

@@ -206,6 +206,88 @@ describe("M3 deterministic acceptance seed", () => {
     expect(release).toHaveBeenCalledOnce();
   });
 
+  it("does not overwrite an existing shared community plan", async () => {
+    const original = {
+      audience: "existing-audience",
+      billingBehavior: "existing-billing",
+      annualPriceHkd: 777,
+      monthlyPriceHkd: 88,
+      seatAllowance: 9,
+      active: false,
+      updatedAt: "2024-01-01T00:00:00.000Z",
+    };
+    let stored = {...original};
+    let planSql = "";
+    const pool: M3SeedPool = {
+      async connect() {
+        return {
+          async query(text) {
+            if (text.includes("INSERT INTO membership_plans")) {
+              planSql = text;
+              if (text.includes("DO UPDATE SET")) {
+                stored = {
+                  audience: "individual",
+                  billingBehavior: "free",
+                  annualPriceHkd: 0,
+                  monthlyPriceHkd: 0,
+                  seatAllowance: 1,
+                  active: true,
+                  updatedAt: NOW.toISOString(),
+                };
+              }
+            }
+            return {rows: []};
+          },
+          release() {},
+        };
+      },
+    };
+
+    await seedM3(pool, {now: NOW});
+
+    expect(stored).toEqual(original);
+    expect(planSql).toMatch(
+      /ON CONFLICT \(code\)\s+DO NOTHING/,
+    );
+    expect(planSql).not.toContain("DO UPDATE SET");
+  });
+
+  it("still inserts the community plan on a blank migrated database", async () => {
+    let inserted: Readonly<{
+      code: string;
+      audience: string;
+      billingBehavior: string;
+    }> | null = null;
+    const pool: M3SeedPool = {
+      async connect() {
+        return {
+          async query(text) {
+            if (text.includes("INSERT INTO membership_plans")) {
+              inserted = {
+                code: "community",
+                audience: "individual",
+                billingBehavior: "free",
+              };
+              expect(text).toMatch(
+                /ON CONFLICT \(code\)\s+DO NOTHING/,
+              );
+            }
+            return {rows: []};
+          },
+          release() {},
+        };
+      },
+    };
+
+    await seedM3(pool, {now: NOW});
+
+    expect(inserted).toEqual({
+      code: "community",
+      audience: "individual",
+      billingBehavior: "free",
+    });
+  });
+
   it("validates environment inputs before opening a database pool", async () => {
     await expect(runM3Seed({})).rejects.toThrow(
       "DATABASE_URL is required to seed M3 fixtures.",

@@ -2,6 +2,8 @@ import {readFileSync} from "node:fs";
 
 import {expect, test, type Page} from "@playwright/test";
 
+import {requireM3E2ETarget} from "@/tests/fixtures/m3-acceptance-safety";
+
 type M3Messages = Readonly<{
   NotFound: {title: string};
   Unsubscribe: {
@@ -30,7 +32,11 @@ function messages(locale: "en" | "zh-HK"): M3Messages {
 
 const en = messages("en");
 const zh = messages("zh-HK");
-const previewUrl = process.env.PLAYWRIGHT_BASE_URL?.trim();
+const configuredPreviewUrl = process.env.PLAYWRIGHT_BASE_URL?.trim();
+const previewTarget = configuredPreviewUrl
+  ? requireM3E2ETarget(process.env)
+  : null;
+const previewUrl = previewTarget?.baseUrl;
 const previewSkipReason =
   "M3 browser acceptance requires PLAYWRIGHT_BASE_URL for an isolated Preview.";
 
@@ -40,15 +46,9 @@ function missing(names: readonly string[]): readonly string[] {
 
 async function enterProtectedPreview(page: Page): Promise<void> {
   const shareToken = process.env.VERCEL_SHARE_TOKEN?.trim();
-  if (!shareToken || !previewUrl) return;
+  if (!shareToken || !previewTarget) return;
 
-  const shareUrl = new URL(previewUrl);
-  if (
-    shareUrl.protocol !== "https:"
-    || !shareUrl.hostname.endsWith(".vercel.app")
-  ) {
-    throw new Error("VERCEL_SHARE_TOKEN_REQUIRES_HTTPS_VERCEL_PREVIEW");
-  }
+  const shareUrl = new URL(previewTarget.baseUrl);
   shareUrl.searchParams.set("_vercel_share", shareToken);
   await page.goto(shareUrl.href);
 }
