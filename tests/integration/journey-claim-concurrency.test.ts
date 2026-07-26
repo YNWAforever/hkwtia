@@ -30,7 +30,7 @@ describe.skipIf(!testDatabaseUrl)("journey due-claim concurrency on isolated Pos
     if (!pool) throw new Error("DATABASE_URL_TEST pool was not initialized");
     const db = drizzle(pool) as unknown as AutomationDatabase;
     const repo = createJourneysRepository(async () => db);
-    const now = new Date("2027-01-15T10:00:00.000Z");
+    const now = new Date("2000-01-15T10:00:00.000Z");
     const deliveryKey = `journey:${profileId}:onboarding_90d:activation:test:welcome`;
 
     await expect(repo.enroll(system, {
@@ -48,15 +48,18 @@ describe.skipIf(!testDatabaseUrl)("journey due-claim concurrency on isolated Pos
       repo.claimDue(system, now, 1, 300_000),
     ]);
 
-    expect([...left, ...right]).toHaveLength(1);
-    expect([...left, ...right][0]).toMatchObject({profileId, deliveryKey, status: "processing", attemptCount: 1});
+    const ownClaims = [...left, ...right].filter(
+      (claim) => claim.profileId === profileId && claim.deliveryKey === deliveryKey,
+    );
+    expect(ownClaims).toHaveLength(1);
+    expect(ownClaims[0]).toMatchObject({profileId, deliveryKey, status: "processing", attemptCount: 1});
   });
 
   it("reclaims an expired processing lease and fences the stale worker token", async () => {
     if (!pool) throw new Error("DATABASE_URL_TEST pool was not initialized");
     const db = drizzle(pool) as unknown as AutomationDatabase;
     const repo = createJourneysRepository(async () => db);
-    const now = new Date("2027-01-15T12:00:00.000Z");
+    const now = new Date("2000-01-15T12:00:00.000Z");
     const oldClaimedAt = new Date(now.getTime() - 600_000);
     const deliveryKey = `journey:${profileId}:onboarding_90d:activation:stale:welcome`;
     const inserted = await pool.query<{id: string}>(
