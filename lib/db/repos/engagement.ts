@@ -5,8 +5,26 @@ import {z} from "zod";
 
 import {type AtRiskCandidate} from "@/lib/admin/at-risk";
 import {requireAdmin} from "@/lib/auth/actor";
-import {auditEvents, companies, companyMembers, engagementEvents, engagementScores, memberships, profiles, type EngagementEvent} from "@/lib/db/server-schema";
+import {
+  requireAutomationSystem,
+  type AutomationRepositoryActor,
+} from "@/lib/auth/automation-actor";
 import {getDb} from "@/lib/db/repos/common";
+import type {
+  AutomationDatabase,
+  AutomationDatabaseLoader,
+} from "@/lib/db/repos/journeys";
+import {
+  auditEvents,
+  companies,
+  companyMembers,
+  engagementEvents,
+  engagementScores,
+  memberships,
+  profiles,
+  type EngagementEvent,
+} from "@/lib/db/server-schema";
+import type {EngagementPoint} from "@/lib/engagement/scoring";
 import {requireSystem, type Actor, type AdminActor} from "@/lib/membership/lifecycle";
 
 export const ENGAGEMENT_EVENT_TYPES = ["renewal_paid", "renewal_failed", "event_attended"] as const;
@@ -62,6 +80,27 @@ const engagementInputSchema = z.discriminatedUnion("type", [
   }
 });
 const profileIdSchema = z.string().min(1);
+const scoreBatchInputSchema = z.object({
+  afterProfileId: z.string().min(1).nullable(),
+  asOf: z.date().refine((value) => Number.isFinite(value.getTime())),
+  limit: z.number().int().positive().max(1_000),
+  windowStart: z.date().refine((value) => Number.isFinite(value.getTime())),
+}).strict().refine(
+  (input) => input.windowStart.getTime() <= input.asOf.getTime(),
+  {message: "INVALID_ENGAGEMENT_SCORE_BATCH"},
+);
+const scoreUpsertInputSchema = z.object({
+  profileId: z.string().min(1),
+  score: z.number().finite().min(0).max(100),
+  trend: z.number().finite().min(-100).max(100),
+  computedAt: z.date().refine((value) => Number.isFinite(value.getTime())),
+}).strict();
+const scoreProfileRowSchema = z.object({profile_id: z.string().min(1)});
+const scoreEventRowSchema = z.object({
+  profile_id: z.string().min(1),
+  points: z.number().int().safe(),
+  occurred_at: z.coerce.date().refine((value) => Number.isFinite(value.getTime())),
+});
 const atRiskRowSchema = z.object({
   profileId: z.string(), membershipId: z.string(), displayName: z.string(), companyName: z.string().nullable(), planCode: z.string(),
   status: z.enum(["active", "past_due"]), score: z.union([z.string(), z.number()]).nullable(),
@@ -82,6 +121,23 @@ export type EngagementEventTransaction = Readonly<{
 }>;
 export type EngagementEventExecutor = Readonly<{transaction: <T>(work: (transaction: EngagementEventTransaction) => Promise<T>) => Promise<T>}>;
 export type EngagementTimelineReader = Readonly<{listForProfile: (profileId: string) => Promise<readonly EngagementEvent[]>}>;
+export type EngagementScoreEvent = EngagementPoint & Readonly<{profileId: string}>;
+export type EngagementScoreBatchInput = z.infer<typeof scoreBatchInputSchema>;
+export type EngagementScoreBatch = Readonly<{
+  profileIds: readonly string[];
+  events: readonly EngagementScoreEvent[];
+}>;
+export type EngagementScoreUpsertInput = z.infer<typeof scoreUpsertInputSchema>;
+export type EngagementScoreRepository = Readonly<{
+  listScoreBatch: (
+    actor: AutomationRepositoryActor,
+    input: EngagementScoreBatchInput,
+  ) => Promise<EngagementScoreBatch>;
+  upsertScore: (
+    actor: AutomationRepositoryActor,
+    input: EngagementScoreUpsertInput,
+  ) => Promise<void>;
+}>;
 
 function requireEngagementActor(actor: Actor): asserts actor is EngagementActor {
   if (actor.kind === "system") requireSystem(actor); else requireAdmin(actor);
@@ -110,6 +166,85 @@ function resultRows(result: unknown): unknown[] {
   if (Array.isArray(result)) return result;
   if (result && typeof result === "object" && "rows" in result && Array.isArray(result.rows)) return result.rows;
   return [];
+}
+
+async function defaultAutomationDatabaseLoader(): Promise<AutomationDatabase> {
+  return await getDb() as unknown as AutomationDatabase;
+}
+
+export function createEngagementScoreRepository(
+  loadDatabase: AutomationDatabaseLoader = defaultAutomationDatabaseLoader,
+): EngagementScoreRepository {
+  return {
+    async listScoreBatch(actor, input) {
+      requireAutomationSystem(actor);
+      const parsed = scoreBatchInputSchema.parse(input);
+      const database = await loadDatabase();
+      const cursor = parsed.afterProfileId === null
+        ? sql`true`
+        : sql`${profiles.id} > ${parsed.afterProfileId}`;
+      const profileRows = z.array(scoreProfileRowSchema).parse(resultRows(
+        await database.execute(sql`
+          SELECT ${profiles.id} AS profile_id
+          FROM ${profiles}
+          WHERE ${cursor}
+          ORDER BY ${profiles.id}
+          LIMIT ${parsed.limit}
+        `),
+      ));
+      const profileIds = profileRows.map((row) => row.profile_id);
+      if (profileIds.length === 0) return {profileIds, events: []};
+
+      const profileList = sql.join(
+        profileIds.map((profileId) => sql`${profileId}`),
+        sql`, `,
+      );
+      const eventRows = z.array(scoreEventRowSchema).parse(resultRows(
+        await database.execute(sql`
+          SELECT
+            ${engagementEvents.profileId} AS profile_id,
+            ${engagementEvents.points} AS points,
+            ${engagementEvents.occurredAt} AS occurred_at
+          FROM ${engagementEvents}
+          WHERE ${engagementEvents.profileId} IN (${profileList})
+            AND ${engagementEvents.occurredAt} >= ${parsed.windowStart}
+            AND ${engagementEvents.occurredAt} <= ${parsed.asOf}
+          ORDER BY
+            ${engagementEvents.profileId},
+            ${engagementEvents.occurredAt},
+            ${engagementEvents.id}
+        `),
+      ));
+      return {
+        profileIds,
+        events: eventRows.map((row) => ({
+          profileId: row.profile_id,
+          points: row.points,
+          occurredAt: row.occurred_at,
+        })),
+      };
+    },
+
+    async upsertScore(actor, input) {
+      requireAutomationSystem(actor);
+      const parsed = scoreUpsertInputSchema.parse(input);
+      const database = await loadDatabase();
+      await database.execute(sql`
+        INSERT INTO ${engagementScores}
+          (profile_id, score, trend, computed_at)
+        VALUES (
+          ${parsed.profileId},
+          ${parsed.score.toFixed(2)},
+          ${parsed.trend.toFixed(2)},
+          ${parsed.computedAt}
+        )
+        ON CONFLICT (profile_id) DO UPDATE SET
+          score = EXCLUDED.score,
+          trend = EXCLUDED.trend,
+          computed_at = EXCLUDED.computed_at
+      `);
+    },
+  };
 }
 
 async function listAtRiskCandidates(actor: Actor, asOf: Date): Promise<readonly AtRiskCandidate[]> {
@@ -157,3 +292,4 @@ export async function getEngagementTimeline(actor: Actor, profileId: unknown, re
 }
 
 export const engagementRepository = {listAtRiskCandidates};
+export const engagementScoreRepository = createEngagementScoreRepository();

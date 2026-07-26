@@ -1,11 +1,19 @@
 import "server-only";
 
-import {and, asc, eq} from "drizzle-orm";
+import {and, asc, eq, sql} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/actor";
+import {
+  requireAutomationSystem,
+  type AutomationRepositoryActor,
+} from "@/lib/auth/automation-actor";
 import {getDb, type Database} from "@/lib/db/repos/common";
-import {approvals, auditEvents} from "@/lib/db/server-schema";
+import type {
+  AutomationDatabase,
+  AutomationDatabaseLoader,
+} from "@/lib/db/repos/journeys";
+import {approvals, auditEvents, staffTasks} from "@/lib/db/server-schema";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 export const approvalDecisionSchema = z.object({
@@ -24,6 +32,33 @@ export type SupportedApprovalActionType = keyof typeof supportedPayloadSchemas;
 export type ApprovalPayloadReview = Readonly<{actionType: SupportedApprovalActionType | null; payloadSummary: readonly ApprovalPayloadSummary[]; actionable: boolean}>;
 export type PendingApproval = Readonly<{id: string; actionType: SupportedApprovalActionType | null; payloadSummary: readonly ApprovalPayloadSummary[]; actionable: boolean; requestedAt: Date}>;
 export type ApprovalDecision = Readonly<{id: string; status: "approved" | "rejected"; decidedAt: Date}>;
+export type ApprovalExpiryBatchInput = Readonly<{
+  asOf: Date;
+  limit: number;
+}>;
+export type ApprovalExpiryBatchResult = Readonly<{
+  expired: number;
+  auditsCreated: number;
+  tasksCreated: number;
+  missingRequesterProfiles: number;
+}>;
+export type ApprovalExpiryRepository = Readonly<{
+  expirePendingBatch: (
+    actor: AutomationRepositoryActor,
+    input: ApprovalExpiryBatchInput,
+  ) => Promise<ApprovalExpiryBatchResult>;
+}>;
+
+const approvalExpiryInputSchema = z.object({
+  asOf: z.date().refine((value) => Number.isFinite(value.getTime())),
+  limit: z.number().int().positive().max(1_000),
+}).strict();
+const approvalExpiryResultSchema = z.object({
+  expired_count: z.coerce.number().int().nonnegative(),
+  audit_count: z.coerce.number().int().nonnegative(),
+  task_count: z.coerce.number().int().nonnegative(),
+  missing_requester_count: z.coerce.number().int().nonnegative(),
+});
 
 export function reviewApprovalPayload(actionType: unknown, payload: unknown): ApprovalPayloadReview {
   if (typeof actionType !== "string" || !Object.prototype.hasOwnProperty.call(supportedPayloadSchemas, actionType)) return {actionType: null, payloadSummary: [], actionable: false};
@@ -43,6 +78,23 @@ export type ApprovalsRepository = Readonly<{
   decide: (actor: Actor, input: unknown) => Promise<ApprovalDecision>;
 }>;
 type DatabaseLoader = () => Promise<Database>;
+
+function resultRows(result: unknown): unknown[] {
+  if (Array.isArray(result)) return result;
+  if (
+    result
+    && typeof result === "object"
+    && "rows" in result
+    && Array.isArray(result.rows)
+  ) {
+    return result.rows;
+  }
+  return [];
+}
+
+async function defaultAutomationDatabaseLoader(): Promise<AutomationDatabase> {
+  return await getDb() as unknown as AutomationDatabase;
+}
 
 export function createApprovalsRepository(loadDatabase: DatabaseLoader = getDb): ApprovalsRepository {
   return {
@@ -81,4 +133,109 @@ export function createApprovalsRepository(loadDatabase: DatabaseLoader = getDb):
   };
 }
 
+export function createApprovalExpiryRepository(
+  loadDatabase: AutomationDatabaseLoader = defaultAutomationDatabaseLoader,
+): ApprovalExpiryRepository {
+  return {
+    async expirePendingBatch(actor, input) {
+      requireAutomationSystem(actor);
+      const parsed = approvalExpiryInputSchema.parse(input);
+      const cutoff = new Date(parsed.asOf.getTime() - 72 * 3_600_000);
+      if (!Number.isFinite(cutoff.getTime())) {
+        throw new Error("INVALID_APPROVAL_EXPIRY_AS_OF");
+      }
+      const database = await loadDatabase();
+      return database.transaction(async (transaction) => {
+        const rows = resultRows(await transaction.execute(sql`
+          WITH candidate_approvals AS MATERIALIZED (
+            SELECT ${approvals.id}, ${approvals.requestedByProfileId}
+            FROM ${approvals}
+            WHERE ${approvals.status} = 'pending'
+              AND ${approvals.requestedAt} <= ${cutoff}
+            ORDER BY
+              ${approvals.requestedByProfileId} IS NULL,
+              ${approvals.requestedAt},
+              ${approvals.id}
+            LIMIT ${parsed.limit}
+            FOR UPDATE SKIP LOCKED
+          ),
+          expired_approvals AS (
+            UPDATE ${approvals} AS approval
+            SET
+              status = 'expired',
+              decided_by_profile_id = NULL,
+              decided_at = ${parsed.asOf}
+            FROM candidate_approvals
+            WHERE approval.id = candidate_approvals.id
+              AND approval.status = 'pending'
+              AND candidate_approvals.requested_by_profile_id IS NOT NULL
+            RETURNING approval.id, approval.requested_by_profile_id
+          ),
+          audit_rows AS (
+            INSERT INTO ${auditEvents}
+              (
+                actor_user_id,
+                actor_type,
+                action,
+                target_type,
+                target_id,
+                request_id,
+                metadata
+              )
+            SELECT
+              NULL,
+              'system',
+              'approval.expired',
+              'approval',
+              expired_approvals.id::text,
+              'approval-expiry:' || expired_approvals.id::text,
+              jsonb_build_object('reason', 'pending_timeout')
+            FROM expired_approvals
+            RETURNING id
+          ),
+          task_rows AS (
+            INSERT INTO ${staffTasks}
+              (
+                profile_id,
+                journey_state_id,
+                kind,
+                dedupe_key,
+                summary_code,
+                status
+              )
+            SELECT
+              expired_approvals.requested_by_profile_id,
+              NULL,
+              'approval_expired',
+              'approval-expiry:' || expired_approvals.id::text,
+              'approval_expired',
+              'open'
+            FROM expired_approvals
+            WHERE expired_approvals.requested_by_profile_id IS NOT NULL
+            ON CONFLICT DO NOTHING
+            RETURNING id
+          )
+          SELECT
+            (SELECT count(*)::int FROM expired_approvals) AS expired_count,
+            (SELECT count(*)::int FROM audit_rows) AS audit_count,
+            (SELECT count(*)::int FROM task_rows) AS task_count,
+            (
+              SELECT count(*)::int
+              FROM candidate_approvals
+              WHERE requested_by_profile_id IS NULL
+            ) AS missing_requester_count
+        `));
+        const row = approvalExpiryResultSchema.parse(rows[0]);
+        return {
+          expired: row.expired_count,
+          auditsCreated: row.audit_count,
+          tasksCreated: row.task_count,
+          missingRequesterProfiles: row.missing_requester_count,
+        };
+      });
+    },
+  };
+}
+
 export const approvalsRepository = createApprovalsRepository();
+export const approvalExpiryRepository = createApprovalExpiryRepository();
