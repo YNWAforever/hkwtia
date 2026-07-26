@@ -1,49 +1,106 @@
-# Task 9 implementation report
+# Task 9 Report: Secure idempotent automation job routes
 
 ## Outcome
 
-Implemented the M2 staff-only approval decision console with an Actor-first repository, Zod-validated service and Server Action boundaries, conditional one-time decisions, atomic decision audits, allowlisted payload summaries, bilingual accessible UI, and no payload execution or delivery integration.
+DONE
 
-## TDD evidence
+Task 9 adds five POST-only automation endpoints protected by constant-time Bearer verification, UTC bucketed job claims, duplicate suppression, failed-run reclaim, bounded sanitized responses, and production service wiring for journeys, campaigns, renewal reconciliation, engagement scoring, approval expiry, and worker failure alerts.
 
-- Initial RED: `approval-service.test.ts` and `approval-authorization.test.ts` failed to resolve the missing `@/lib/admin/approvals` module (2 failed suites, 0 tests).
-- Repository/service GREEN: 2 files, 8 tests passed.
-- Action/UI RED: three suites failed to resolve the missing action core, genuine Server Action, and approval list modules.
-- Focused GREEN: 6 files, 17 tests passed.
-- Focused approval plus authorization/boundary regression: 8 files, 21 tests passed.
+## Exact TDD evidence
 
-## Database evidence
+Initial RED after adding the three required test files:
 
-`RUN_POSTGRES_INTEGRATION=1 npx.cmd vitest run tests/unit/task9-postgres-integration.test.ts --reporter=dot`
+```powershell
+npm.cmd test -- tests/unit/job-auth.test.ts tests/unit/job-handler.test.ts tests/unit/job-routes.test.ts
+```
 
-- 1 file, 1 test passed against disposable PostgreSQL 16.
-- Concurrent approve/reject calls through the production Drizzle repository produced exactly one decision and one audit; the loser returned `APPROVAL_ALREADY_DECIDED`.
-- A forced audit constraint failure rolled the approval update back to pending with no decision actor or audit.
-- The Docker container was removed by the test cleanup. No production or shared database was used.
+Result: FAIL; 3 suites failed during import resolution because `@/lib/jobs/auth`, `@/lib/jobs/handler`, and the job route modules did not exist. No tests were collected.
+
+Bearer and generic handler GREEN:
+
+```powershell
+npm.cmd test -- tests/unit/job-auth.test.ts tests/unit/job-handler.test.ts
+```
+
+Result: PASS; 2 files passed; 31/31 tests passed.
+
+First complete route GREEN:
+
+```powershell
+npm.cmd test -- tests/unit/job-auth.test.ts tests/unit/job-handler.test.ts tests/unit/job-routes.test.ts
+```
+
+Result: PASS; 3 files passed; 58/58 tests passed.
+
+Self-review added two focused production-correctness tests. Recorded RED:
+
+```powershell
+npm.cmd test -- tests/unit/job-routes.test.ts
+```
+
+Result: FAIL; 2/29 tests failed. The journey wrapper returned before the companion campaign engine settled, and campaign context discarded the current `zh-HK` locale.
+
+Focused GREEN after using settled batch composition and preserving current locale:
+
+```powershell
+npm.cmd test -- tests/unit/job-routes.test.ts
+```
+
+Result: PASS; 1 file passed; 29/29 tests passed.
+
+## Implementation
+
+- `verifyCronBearer` rejects missing, malformed, wrong-length, wrong-value, or blank-configured secrets and compares SHA-256 digests with `timingSafeEqual`.
+- `createJobPost` is POST-only, captures one explicit clock instant, derives UTC hourly or daily run keys, claims through `jobsRepository`, skips duplicates, and completes or fails with the `automation-cron` actor.
+- Success summaries retain only bounded numeric and boolean counters. Failures and request errors return stable codes without provider errors, secrets, response bodies, recipient addresses, or other personal data.
+- Scheduled job claiming is one atomic `INSERT ... ON CONFLICT ... WHERE state = 'failed' RETURNING` statement. Processing and completed rows remain duplicates; failed rows are safely reclaimed with incremented attempts.
+- The hourly journey route starts both due journey and frozen campaign engines, waits for both to settle, and fails generically if either engine fails. Repository delivery claims and stable provider idempotency keys make the retry resumable.
+- Renewal, engagement-score, and approval-expirer routes invoke their existing system services with the same captured `now`. Actor contracts were widened only to the existing `AutomationRepositoryActor` union so Stripe and cron system sources stay type-safe.
+- Current journey and campaign context is loaded through a cron-only repository. Queries select only required profile, membership, consent, suppression, locale, and scoring facts.
+- Worker alerts accept only strict bounded JSON shaped as `{job, scheduledTime, attemptCount, errorCode}`. Job and error values are allowlisted, timestamps are canonicalized to UTC, and the run key is a SHA-256 digest with no raw fields.
+- Worker-alert recipients are queried on every invocation from current `staff`, `exco`, and `superadmin` profiles. Only normalized email addresses are selected; Stripe, member, and staff actors are rejected before database access.
+- Alert email is branded and transactional. Per-recipient provider idempotency keys contain only the alert digest and a recipient-address digest, while responses expose counts only.
+- All five route modules export `POST` and no `GET`.
 
 ## Final verification
 
-- Full Vitest: 86 files passed, 5 skipped; 379 tests passed, 6 skipped.
-- TypeScript: passed with `npx.cmd tsc --noEmit --pretty false`.
-- ESLint: passed.
-- Visible-string audit: passed, 88 TSX files scanned.
-- Next.js production build: passed; `/[locale]/admin/approvals` is dynamic.
-- JSON parsing and EN/ZH message parity: passed.
-- Diff whitespace and BOM checks: passed.
-- Privacy/no-delivery scan: no logging, Resend import, raw approval payload rendering, or payload executor added.
+Focused Task 9 plus renewal compatibility:
 
-## Remaining concerns
+```powershell
+npm.cmd test -- tests/unit/job-auth.test.ts tests/unit/job-handler.test.ts tests/unit/job-routes.test.ts tests/unit/journey-enrollment.test.ts
+```
 
-- Approval creation and deterministic seeded approval fixtures remain intentionally deferred to Task 12/M4 trusted services. Task 9 only lists and decides existing rows.
+Result: PASS; 4 files passed; 78/78 tests passed.
 
-## Privacy hardening follow-up
+Static verification:
 
-An independent review found that legacy or malformed approval rows could still expose an unknown raw action type in the UI and remain directly actionable. The fix replaces permissive summary extraction with strict action-discriminated payload schemas, treats malformed or unsupported rows as non-actionable DTOs, renders only the localized unavailable fallback, disables both decision controls, and revalidates the payload inside the decision transaction before any update. `APPROVAL_UNSUPPORTED` is mapped to the existing safe localized unavailable action state.
+- `npm.cmd run typecheck`: PASS, no diagnostics.
+- `npm.cmd run lint`: PASS, no errors or warnings.
+- `git diff --check`: PASS; expected Windows LF/CRLF notices only.
 
-- Recorded RED: focused parser/UI suites reported 7 failures and 5 passes before the missing service export and UI gating were wired.
-- Focused GREEN: `approval-service.test.ts` plus `approval-list.test.tsx` passed 12 tests; related action/auth/messages suites passed 13 tests.
-- Disposable PostgreSQL GREEN: 2 tests proved the original concurrent single-decision/audit and rollback invariants with semantically valid strict fixtures, plus an opaque unsupported row remaining `pending` with no decision actor and zero audit records.
-- Prototype-key RED/GREEN: `toString` and `__proto__` reproduced 2 parser crashes before the discriminator was changed to an own-property check; the refreshed focused privacy group passed 20 tests.
-- Full Vitest: 86 files passed, 5 skipped; 389 tests passed, 7 skipped.
-- TypeScript, ESLint, visible-string audit (88 TSX files), and production build all passed; `/[locale]/admin/approvals` remained dynamic.
-- Diff whitespace, UTF-8 BOM, privacy/scope, and disposable-container cleanup checks passed.
+Full regression verification:
+
+```powershell
+npm.cmd test
+```
+
+Result: PASS; 136 files passed and 10 environment-gated files skipped; 743 tests passed and 26 skipped.
+
+## Self-review
+
+- Authentication is evaluated before clock, body parsing, claims, environment-dependent runner work, or database access.
+- Worker request bodies are stream-read with a 4 KiB ceiling even when `Content-Length` is absent or misleading.
+- Custom alert run keys are canonical digests, so retry identity is stable across equivalent timezone representations and does not reveal job names, timestamps, or error codes.
+- Both journey-side engines are launched and awaited before the wrapper settles. A companion engine cannot continue after the wrapper has already marked the shared hourly job failed.
+- Marketing unsubscribe links use signed expiring tokens and retain the current profile locale.
+- Staff lookup, context lookup, scheduled job mutations, and existing automation services enforce the cron system actor before data access.
+- No console logging was added. Caught exceptions are not serialized into HTTP bodies or persisted as raw job errors.
+- Pre-existing Task 1-3 report edits were preserved and excluded from this task. The progress ledger was intentionally not modified.
+
+## Remaining verification note
+
+The full suite collected but skipped 26 database/environment-gated tests because their isolated test services were not configured. No live PostgreSQL result is claimed. Focused repository SQL-shape tests, all non-gated tests, typecheck, and lint are green.
+
+## Tool fallback
+
+The linked Windows worktree allowed new files through `apply_patch` but denied updates to existing files with `helper_unknown_error: apply deny-read ACLs`. Existing-file changes used exact unified diffs applied by Git after verifying paths inside the Task 9 worktree. Final scope and whitespace checks passed.

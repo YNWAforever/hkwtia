@@ -5,12 +5,12 @@ import {
   type JobSummary,
   type LifecycleEnrollmentDependencies,
 } from "@/lib/automation/enrollment";
-import type {Actor} from "@/lib/membership/lifecycle";
+import type {AutomationRepositoryActor} from "@/lib/auth/automation-actor";
 
 export type {JobSummary} from "@/lib/automation/enrollment";
 
 export async function runRenewalReconciliation(
-  actor: Actor,
+  actor: AutomationRepositoryActor,
   now: Date,
   dependencies?: LifecycleEnrollmentDependencies,
 ): Promise<JobSummary> {

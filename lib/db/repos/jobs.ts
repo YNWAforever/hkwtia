@@ -4,6 +4,11 @@ import {and, eq, sql, type SQL} from "drizzle-orm";
 
 import {scheduleWebhookLifecycleEnrollment} from "@/lib/automation/enrollment";
 
+import {
+  requireAutomationSystem,
+  type AutomationRepositoryActor,
+} from "@/lib/auth/automation-actor";
+
 import type {WebhookLifecycleCommand} from "@/lib/billing/webhook-service";
 import {auditEvents, billingAttempts, engagementEvents, jobs as jobsTable, journeyState, membershipApplications, memberships, type Job} from "@/lib/db/server-schema";
 import {getDb, requireSystem} from "@/lib/db/repos/common";
@@ -127,22 +132,24 @@ export const jobsRepository = {
     return rows[0] ?? null;
   },
 
-  async claim(actor: Actor, runKey: string, kind: string): Promise<JobClaimResult> {
-    requireSystem(actor);
+  async claim(actor: AutomationRepositoryActor, runKey: string, kind: string): Promise<JobClaimResult> {
+    requireAutomationSystem(actor);
     const db = await getDb();
-    const existing = await db.select({id: jobsTable.id}).from(jobsTable).where(and(eq(jobsTable.runKey, runKey), sql`true`)).limit(1);
-    if (existing.length > 0) return "duplicate";
-    try {
-      await db.insert(jobsTable).values({runKey, kind, state: "processing", attemptCount: 0}).returning({id: jobsTable.id});
-      return "claimed";
-    } catch (error) {
-      if (error && typeof error === "object" && "code" in error && (error as {code?: string}).code === "23505") return "duplicate";
-      throw error;
-    }
+    const claim = resultRow(await db.execute(sql`
+      INSERT INTO ${jobsTable} ("run_key", "kind", "state", "attempt_count")
+      VALUES (${runKey}, ${kind}, 'processing', 1)
+      ON CONFLICT ("run_key") DO UPDATE
+      SET "kind" = EXCLUDED."kind", "state" = 'processing',
+          "attempt_count" = ${jobsTable.attemptCount} + 1,
+          "last_error" = NULL, "completed_at" = NULL, "updated_at" = now()
+      WHERE ${jobsTable.state} = 'failed'
+      RETURNING ${jobsTable.id} AS job_id
+    `));
+    return claim ? "claimed" : "duplicate";
   },
 
-  async complete(actor: Actor, runKey: string): Promise<Job | null> {
-    requireSystem(actor);
+  async complete(actor: AutomationRepositoryActor, runKey: string): Promise<Job | null> {
+    requireAutomationSystem(actor);
     const db = await getDb();
     const rows = await db.update(jobsTable)
       .set({state: "completed", completedAt: new Date(), updatedAt: new Date()})
@@ -150,8 +157,8 @@ export const jobsRepository = {
     return rows[0] ?? null;
   },
 
-  async fail(actor: Actor, runKey: string, errorMessage: string): Promise<Job | null> {
-    requireSystem(actor);
+  async fail(actor: AutomationRepositoryActor, runKey: string, errorMessage: string): Promise<Job | null> {
+    requireAutomationSystem(actor);
     const db = await getDb();
     const rows = await db.update(jobsTable)
       .set({state: "failed", lastError: errorMessage, updatedAt: new Date()})

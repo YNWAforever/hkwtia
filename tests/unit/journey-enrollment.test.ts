@@ -1,6 +1,7 @@
 import {describe, expect, it} from "vitest";
 
 import {systemActor} from "@/lib/auth/actor";
+import type {AutomationRepositoryActor} from "@/lib/auth/automation-actor";
 import {
   reconcileLifecycleEnrollments,
   scheduleWebhookLifecycleEnrollment,
@@ -60,7 +61,7 @@ function harness(
   auditsByTarget: Readonly<Record<string, readonly AuditFixture[]>> = {},
 ) {
   const rows = new Map<string, JourneyEnrollment>();
-  const actors: Actor[] = [];
+  const actors: AutomationRepositoryActor[] = [];
   const dependencies: LifecycleEnrollmentDependencies = {
     memberships: {
       async list() {

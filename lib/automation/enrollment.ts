@@ -11,7 +11,8 @@ import {
   type JourneyEnrollmentDisposition,
 } from "@/lib/db/repos/journeys";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
-import type {Actor, MembershipStatus} from "@/lib/membership/lifecycle";
+import type {AutomationRepositoryActor} from "@/lib/auth/automation-actor";
+import type {MembershipStatus} from "@/lib/membership/lifecycle";
 
 export type LifecycleMembership = Readonly<{
   id: string;
@@ -38,19 +39,19 @@ type LifecycleAudit = Readonly<{
 }>;
 
 type MembershipsReader = Readonly<{
-  list: (actor: Actor) => Promise<readonly LifecycleMembership[]>;
+  list: (actor: AutomationRepositoryActor) => Promise<readonly LifecycleMembership[]>;
 }>;
 
 type ApplicationsReader = Readonly<{
-  list: (actor: Actor) => Promise<readonly LifecycleApplication[]>;
+  list: (actor: AutomationRepositoryActor) => Promise<readonly LifecycleApplication[]>;
 }>;
 
 type AuditEventsReader = Readonly<{
-  listForTarget: (actor: Actor, targetType: string, targetId: string) => Promise<readonly LifecycleAudit[]>;
+  listForTarget: (actor: AutomationRepositoryActor, targetType: string, targetId: string) => Promise<readonly LifecycleAudit[]>;
 }>;
 
 type JourneyEnroller = Readonly<{
-  enroll: (actor: Actor, enrollment: JourneyEnrollment) => Promise<JourneyEnrollmentDisposition>;
+  enroll: (actor: AutomationRepositoryActor, enrollment: JourneyEnrollment) => Promise<JourneyEnrollmentDisposition>;
 }>;
 
 export type LifecycleEnrollmentDependencies = Readonly<{
@@ -118,7 +119,7 @@ function profileFor(
 }
 
 async function enrollSteps(
-  actor: Actor,
+  actor: AutomationRepositoryActor,
   scheduled: readonly ScheduledJourneyStep[],
   journeys: JourneyEnroller,
   summary: MutableSummary,
@@ -234,7 +235,7 @@ export async function enrollActivatedMembership(
 }
 
 export async function reconcileLifecycleEnrollments(
-  actor: Actor,
+  actor: AutomationRepositoryActor,
   now: Date,
   dependencies: LifecycleEnrollmentDependencies = defaultDependencies,
 ): Promise<JobSummary> {
@@ -297,7 +298,7 @@ export async function reconcileLifecycleEnrollments(
 }
 
 export async function reconcileRenewalEnrollments(
-  actor: Actor,
+  actor: AutomationRepositoryActor,
   now: Date,
   dependencies: LifecycleEnrollmentDependencies = defaultDependencies,
 ): Promise<JobSummary> {
