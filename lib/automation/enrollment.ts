@@ -11,8 +11,12 @@ import {
   type JourneyEnrollmentDisposition,
 } from "@/lib/db/repos/journeys";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
+import {
+  renewalEnrollmentsRepository,
+  type RenewalEnrollmentCandidate,
+} from "@/lib/db/repos/renewal-enrollments";
 import type {AutomationRepositoryActor} from "@/lib/auth/automation-actor";
-import type {MembershipStatus} from "@/lib/membership/lifecycle";
+import type {Actor, MembershipStatus} from "@/lib/membership/lifecycle";
 
 export type LifecycleMembership = Readonly<{
   id: string;
@@ -39,15 +43,15 @@ type LifecycleAudit = Readonly<{
 }>;
 
 type MembershipsReader = Readonly<{
-  list: (actor: AutomationRepositoryActor) => Promise<readonly LifecycleMembership[]>;
+  list: (actor: Actor) => Promise<readonly LifecycleMembership[]>;
 }>;
 
 type ApplicationsReader = Readonly<{
-  list: (actor: AutomationRepositoryActor) => Promise<readonly LifecycleApplication[]>;
+  list: (actor: Actor) => Promise<readonly LifecycleApplication[]>;
 }>;
 
 type AuditEventsReader = Readonly<{
-  listForTarget: (actor: AutomationRepositoryActor, targetType: string, targetId: string) => Promise<readonly LifecycleAudit[]>;
+  listForTarget: (actor: Actor, targetType: string, targetId: string) => Promise<readonly LifecycleAudit[]>;
 }>;
 
 type JourneyEnroller = Readonly<{
@@ -58,6 +62,15 @@ export type LifecycleEnrollmentDependencies = Readonly<{
   memberships: MembershipsReader;
   applications: ApplicationsReader;
   auditEvents: AuditEventsReader;
+  journeys: JourneyEnroller;
+}>;
+
+type RenewalEnrollmentsReader = Readonly<{
+  listDue: (actor: AutomationRepositoryActor) => Promise<readonly RenewalEnrollmentCandidate[]>;
+}>;
+
+export type RenewalEnrollmentDependencies = Readonly<{
+  renewals: RenewalEnrollmentsReader;
   journeys: JourneyEnroller;
 }>;
 
@@ -82,10 +95,15 @@ export type WebhookLifecycleEnrollmentInput = Readonly<{
   eventCreated: number;
 }>;
 
-const defaultDependencies: LifecycleEnrollmentDependencies = {
-  memberships: membershipsRepository as unknown as MembershipsReader,
-  applications: applicationsRepository as unknown as ApplicationsReader,
-  auditEvents: auditEventsRepository as unknown as AuditEventsReader,
+const defaultLifecycleDependencies: LifecycleEnrollmentDependencies = {
+  memberships: membershipsRepository,
+  applications: applicationsRepository,
+  auditEvents: auditEventsRepository,
+  journeys: journeysRepository,
+};
+
+const defaultRenewalDependencies: RenewalEnrollmentDependencies = {
+  renewals: renewalEnrollmentsRepository,
   journeys: journeysRepository,
 };
 
@@ -235,9 +253,9 @@ export async function enrollActivatedMembership(
 }
 
 export async function reconcileLifecycleEnrollments(
-  actor: AutomationRepositoryActor,
+  actor: Actor,
   now: Date,
-  dependencies: LifecycleEnrollmentDependencies = defaultDependencies,
+  dependencies: LifecycleEnrollmentDependencies = defaultLifecycleDependencies,
 ): Promise<JobSummary> {
   if (actor.kind !== "system") throw new Error("FORBIDDEN");
   if (!validDate(now)) throw new Error("INVALID_RECONCILIATION_TIME");
@@ -300,14 +318,11 @@ export async function reconcileLifecycleEnrollments(
 export async function reconcileRenewalEnrollments(
   actor: AutomationRepositoryActor,
   now: Date,
-  dependencies: LifecycleEnrollmentDependencies = defaultDependencies,
+  dependencies: RenewalEnrollmentDependencies = defaultRenewalDependencies,
 ): Promise<JobSummary> {
   if (actor.kind !== "system") throw new Error("FORBIDDEN");
   if (!validDate(now)) throw new Error("INVALID_RECONCILIATION_TIME");
-  const allMemberships = await dependencies.memberships.list(actor);
-  const memberships = allMemberships.filter((membership) => membership.billingPeriodEnd !== null);
-  const applications = await dependencies.applications.list(actor);
-  const applicants = profileMap(applications);
+  const memberships = await dependencies.renewals.listDue(actor);
   const summary: MutableSummary = {
     scanned: memberships.length,
     createdSteps: 0,
@@ -316,19 +331,18 @@ export async function reconcileRenewalEnrollments(
     errors: {},
   };
   for (const membership of memberships) {
-    if (!membership.billingPeriodEnd || !validDate(membership.billingPeriodEnd)) {
+    if (!validDate(membership.billingPeriodEnd)) {
       recordError(summary, "MISSING_BILLING_PERIOD_END");
       continue;
     }
-    const profileId = profileFor(membership, applicants);
-    if (!profileId) {
+    if (!membership.profileId) {
       recordError(summary, "MISSING_PROFILE");
       continue;
     }
     await enrollSteps(actor, scheduleJourney({
       journey: "renewal",
-      profileId,
-      membershipId: membership.id,
+      profileId: membership.profileId,
+      membershipId: membership.membershipId,
       instanceKey: `period:${membership.billingPeriodEnd.toISOString()}`,
       anchor: membership.billingPeriodEnd,
     }), dependencies.journeys, summary);

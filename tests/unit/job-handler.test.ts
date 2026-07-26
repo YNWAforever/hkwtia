@@ -10,21 +10,29 @@ import {
 const fixedNow = new Date("2027-01-01T00:00:00.000Z");
 
 function repository() {
-  const records = new Map<string, "processing" | "completed" | "failed">();
+  const records = new Map<string, {
+    state: "processing" | "completed" | "failed";
+    attemptCount: number;
+  }>();
   const repo: JobHandlerRepository = {
     async claim(_actor, runKey) {
-      const state = records.get(runKey);
-      if (state && state !== "failed") return "duplicate";
-      records.set(runKey, "processing");
-      return "claimed";
+      const record = records.get(runKey);
+      if (record && record.state !== "failed") return {status: "duplicate"};
+      const attemptCount = (record?.attemptCount ?? 0) + 1;
+      records.set(runKey, {state: "processing", attemptCount});
+      return {status: "claimed", attemptCount};
     },
-    async complete(_actor, runKey) {
-      records.set(runKey, "completed");
-      return null;
+    async complete(_actor, runKey, attemptCount) {
+      const record = records.get(runKey);
+      if (!record || record.state !== "processing" || record.attemptCount !== attemptCount) return false;
+      records.set(runKey, {...record, state: "completed"});
+      return true;
     },
-    async fail(_actor, runKey) {
-      records.set(runKey, "failed");
-      return null;
+    async fail(_actor, runKey, attemptCount) {
+      const record = records.get(runKey);
+      if (!record || record.state !== "processing" || record.attemptCount !== attemptCount) return false;
+      records.set(runKey, {...record, state: "failed"});
+      return true;
     },
   };
   return {records, repo};
@@ -114,8 +122,8 @@ describe("secured idempotent job handler", () => {
   );
 
   it("captures one explicit valid now and passes the automation-cron system actor", async () => {
-    const claim = vi.fn<JobHandlerRepository["claim"]>(async () => "claimed");
-    const complete = vi.fn<JobHandlerRepository["complete"]>(async () => null);
+    const claim = vi.fn<JobHandlerRepository["claim"]>(async () => ({status: "claimed", attemptCount: 7}));
+    const complete = vi.fn<JobHandlerRepository["complete"]>(async () => true);
     const now = vi.fn(() => fixedNow);
     const run = vi.fn(async ({now: runNow}) => ({processed: runNow === fixedNow ? 1 : 0}));
     const post = createJobPost({
@@ -140,6 +148,7 @@ describe("secured idempotent job handler", () => {
     expect(complete).toHaveBeenCalledWith(
       {kind: "system", userId: null, source: "automation-cron"},
       "test-job:2027-01-01T00",
+      7,
     );
   });
 
@@ -190,7 +199,7 @@ describe("secured idempotent job handler", () => {
     const post = createJobPost({
       kind: "test-job",
       bucket: "hourly",
-      jobs: {claim: async () => "duplicate", complete, fail: vi.fn()},
+      jobs: {claim: async () => ({status: "duplicate"}), complete, fail: vi.fn()},
       now: () => fixedNow,
       secret: () => "cron-secret",
       run,
@@ -256,12 +265,12 @@ describe("secured idempotent job handler", () => {
   });
 
   it("fails the claimed job with one bounded safe code and never leaks thrown data", async () => {
-    const fail = vi.fn<JobHandlerRepository["fail"]>(async () => null);
+    const fail = vi.fn<JobHandlerRepository["fail"]>(async () => true);
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const post = createJobPost({
       kind: "test-job",
       bucket: "hourly",
-      jobs: {claim: async () => "claimed", complete: vi.fn(), fail},
+      jobs: {claim: async () => ({status: "claimed", attemptCount: 4}), complete: vi.fn(), fail},
       now: () => fixedNow,
       secret: () => "cron-secret",
       run: async () => {
@@ -277,10 +286,100 @@ describe("secured idempotent job handler", () => {
     expect(fail).toHaveBeenCalledWith(
       {kind: "system", userId: null, source: "automation-cron"},
       "test-job:2027-01-01T00",
+      4,
       "JOB_RUN_FAILED",
     );
     expect(text).not.toMatch(/cron-secret|private|provider|message/i);
     expect(consoleError).not.toHaveBeenCalled();
+  });
+
+  it("returns a bounded stale response when completion no longer owns the processing attempt", async () => {
+    const fail = vi.fn<JobHandlerRepository["fail"]>();
+    const complete = vi.fn<JobHandlerRepository["complete"]>(async () => false);
+    const post = createJobPost({
+      kind: "test-job",
+      bucket: "hourly",
+      jobs: {
+        claim: async () => ({status: "claimed", attemptCount: 2}),
+        complete,
+        fail,
+      },
+      now: () => fixedNow,
+      secret: () => "cron-secret",
+      run: async () => ({processed: 1}),
+    });
+
+    const response = await invoke(post, {authorization: "Bearer cron-secret"});
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({stale: true});
+    expect(complete).toHaveBeenCalledWith(
+      {kind: "system", userId: null, source: "automation-cron"},
+      "test-job:2027-01-01T00",
+      2,
+    );
+    expect(fail).not.toHaveBeenCalled();
+  });
+
+  it("does not overwrite a committed completion when its database response is lost", async () => {
+    const complete = vi.fn<JobHandlerRepository["complete"]>(async () => {
+      throw new Error("private completion transport failure");
+    });
+    const fail = vi.fn<JobHandlerRepository["fail"]>(async () => false);
+    const post = createJobPost({
+      kind: "test-job",
+      bucket: "hourly",
+      jobs: {
+        claim: async () => ({status: "claimed", attemptCount: 5}),
+        complete,
+        fail,
+      },
+      now: () => fixedNow,
+      secret: () => "cron-secret",
+      run: async () => ({processed: 1, recipient: "private@example.test"}),
+    });
+
+    const response = await invoke(post, {authorization: "Bearer cron-secret"});
+    const text = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(JSON.parse(text)).toEqual({stale: true});
+    expect(fail).toHaveBeenCalledWith(
+      {kind: "system", userId: null, source: "automation-cron"},
+      "test-job:2027-01-01T00",
+      5,
+      "JOB_RUN_FAILED",
+    );
+    expect(text).not.toMatch(/private|recipient|transport/i);
+  });
+
+  it("returns a bounded stale response when an old failed runner loses its attempt fence", async () => {
+    const fail = vi.fn<JobHandlerRepository["fail"]>(async () => false);
+    const post = createJobPost({
+      kind: "test-job",
+      bucket: "hourly",
+      jobs: {
+        claim: async () => ({status: "claimed", attemptCount: 1}),
+        complete: vi.fn(),
+        fail,
+      },
+      now: () => fixedNow,
+      secret: () => "cron-secret",
+      run: async () => {
+        throw new Error("private stale worker error");
+      },
+    });
+
+    const response = await invoke(post, {authorization: "Bearer cron-secret"});
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({stale: true});
+    expect(fail).toHaveBeenCalledWith(
+      {kind: "system", userId: null, source: "automation-cron"},
+      "test-job:2027-01-01T00",
+      1,
+      "JOB_RUN_FAILED",
+    );
   });
 
   it("returns safe request validation errors before claiming", async () => {

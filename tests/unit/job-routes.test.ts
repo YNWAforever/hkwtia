@@ -162,7 +162,7 @@ describe("production runner composition", () => {
       kind: "journey-runner",
       bucket: "hourly",
       jobs: {
-        claim: async () => "duplicate",
+        claim: async () => ({status: "duplicate"}),
         complete: vi.fn(),
         fail: vi.fn(),
       },
@@ -285,10 +285,80 @@ describe("worker alert boundary", () => {
     expect(JSON.stringify(summary)).not.toMatch(/@|provider|journey|message/i);
   });
 
+  it("attempts every staff recipient before surfacing a generic delivery failure", async () => {
+    const addresses = [
+      "first@example.test",
+      "second@example.test",
+      "third@example.test",
+    ];
+    const listCurrent = vi.fn<StaffAlertRecipientsRepository["listCurrent"]>(
+      async () => addresses,
+    );
+    const render = vi.fn(async () => ({
+      subject: "WTIA automation alert",
+      html: "<main>WTIA automation alert</main>",
+      text: "WTIA automation alert",
+      headers: {},
+    }));
+    const send = vi.fn(async (input: EmailSendInput) => {
+      if (input.to === addresses[0]) {
+        throw new Error("provider permanent failure for first@example.test");
+      }
+      return {status: "sent" as const, providerId: "private-provider-id"};
+    });
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const invoke = () => sendWorkerAlert(goodPayload, {
+      recipients: {listCurrent},
+      render,
+      transport: {send},
+      emailFrom: "WTIA <operations@example.test>",
+    });
+
+    const first = await invoke().then(
+      () => null,
+      (error: unknown) => error,
+    );
+    const firstKeys = send.mock.calls.map(([input]) => input.idempotencyKey);
+    send.mockClear();
+    const second = await invoke().then(
+      () => null,
+      (error: unknown) => error,
+    );
+    const secondKeys = send.mock.calls.map(([input]) => input.idempotencyKey);
+
+    expect(first).toBeInstanceOf(Error);
+    expect(second).toBeInstanceOf(Error);
+    expect((first as Error).message).toBe("WORKER_ALERT_DELIVERY_FAILED");
+    expect((second as Error).message).toBe("WORKER_ALERT_DELIVERY_FAILED");
+    expect(send).toHaveBeenCalledTimes(3);
+    expect(send.mock.calls.map(([input]) => input.to)).toEqual(addresses);
+    expect(secondKeys).toEqual(firstKeys);
+    expect(`${String(first)} ${String(second)}`).not.toMatch(/@|provider|permanent|first/i);
+    expect(consoleError).not.toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+
   it("fails the alert job through the wrapper so a failed claim can be retried safely", async () => {
     let state: "missing" | "processing" | "failed" | "completed" = "missing";
-    const fail = vi.fn(async () => { state = "failed"; return null; });
-    const complete = vi.fn(async () => { state = "completed"; return null; });
+    let attemptCount = 0;
+    const fail = vi.fn(async (
+      _actor,
+      _runKey,
+      claimedAttempt: number,
+    ) => {
+      if (state !== "processing" || claimedAttempt !== attemptCount) return false;
+      state = "failed";
+      return true;
+    });
+    const complete = vi.fn(async (
+      _actor,
+      _runKey,
+      claimedAttempt: number,
+    ) => {
+      if (state !== "processing" || claimedAttempt !== attemptCount) return false;
+      state = "completed";
+      return true;
+    });
     const run = vi.fn()
       .mockRejectedValueOnce(new Error("provider private@example.test"))
       .mockResolvedValueOnce({recipients: 1, sent: 1, failed: 0});
@@ -297,9 +367,10 @@ describe("worker alert boundary", () => {
       bucket: "hourly",
       jobs: {
         async claim() {
-          if (state === "processing" || state === "completed") return "duplicate";
+          if (state === "processing" || state === "completed") return {status: "duplicate"} as const;
+          attemptCount += 1;
           state = "processing";
-          return "claimed";
+          return {status: "claimed", attemptCount} as const;
         },
         complete,
         fail,
@@ -323,9 +394,14 @@ describe("worker alert boundary", () => {
     expect(fail).toHaveBeenCalledWith(
       automationCronActor(),
       expect.stringMatching(/^worker-alert:[a-f0-9]{64}$/),
+      1,
       "JOB_RUN_FAILED",
     );
-    expect(complete).toHaveBeenCalledOnce();
+    expect(complete).toHaveBeenCalledWith(
+      automationCronActor(),
+      expect.stringMatching(/^worker-alert:[a-f0-9]{64}$/),
+      2,
+    );
   });
 });
 

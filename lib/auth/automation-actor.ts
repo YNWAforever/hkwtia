@@ -28,3 +28,12 @@ export function requireAutomationSystem(
     forbidden();
   }
 }
+
+export function requireAutomationCron(
+  actor: AutomationRepositoryActor,
+): asserts actor is AutomationCronActor {
+  requireAutomationSystem(actor);
+  if (actor.source !== "automation-cron") {
+    forbidden();
+  }
+}

@@ -5,11 +5,14 @@ import {
   type AutomationCronActor,
 } from "@/lib/auth/automation-actor";
 import {serverEnv} from "@/lib/config/env";
-import {jobsRepository} from "@/lib/db/repos/jobs";
+import {
+  jobsRepository,
+  type JobClaimResult as RepositoryJobClaimResult,
+} from "@/lib/db/repos/jobs";
 import {verifyCronBearer} from "@/lib/jobs/auth";
 
 export type JobBucket = "hourly" | "daily";
-export type JobClaimResult = "claimed" | "duplicate";
+export type JobClaimResult = RepositoryJobClaimResult;
 
 export type JobHandlerRepository = Readonly<{
   claim(
@@ -17,12 +20,17 @@ export type JobHandlerRepository = Readonly<{
     runKey: string,
     kind: string,
   ): Promise<JobClaimResult>;
-  complete(actor: AutomationCronActor, runKey: string): Promise<unknown>;
+  complete(
+    actor: AutomationCronActor,
+    runKey: string,
+    attemptCount: number,
+  ): Promise<boolean>;
   fail(
     actor: AutomationCronActor,
     runKey: string,
+    attemptCount: number,
     errorCode: string,
-  ): Promise<unknown>;
+  ): Promise<boolean>;
 }>;
 
 export type PreparedJob<T> = Readonly<{
@@ -198,20 +206,43 @@ export function createJobPost<T = undefined>(
     } catch {
       return failed();
     }
-    if (claim === "duplicate") return json({duplicate: true});
+    if (claim.status === "duplicate") return json({duplicate: true});
+    const attemptCount = claim.attemptCount;
 
+    let result: unknown;
     try {
-      const result = await options.run({request, now, runKey, prepared});
-      const summary = sanitizedRecord(result);
-      await jobs.complete(actor, runKey);
-      return json({duplicate: false, summary});
+      result = await options.run({request, now, runKey, prepared});
     } catch {
       try {
-        await jobs.fail(actor, runKey, "JOB_RUN_FAILED");
+        const settled = await jobs.fail(
+          actor,
+          runKey,
+          attemptCount,
+          "JOB_RUN_FAILED",
+        );
+        return settled ? failed() : json({stale: true});
       } catch {
-        // Preserve the generic failure response when recording is unavailable.
+        return failed();
       }
-      return failed();
     }
+
+    const summary = sanitizedRecord(result);
+    try {
+      const settled = await jobs.complete(actor, runKey, attemptCount);
+      if (!settled) return json({stale: true});
+    } catch {
+      try {
+        const failedSettlement = await jobs.fail(
+          actor,
+          runKey,
+          attemptCount,
+          "JOB_RUN_FAILED",
+        );
+        return failedSettlement ? failed() : json({stale: true});
+      } catch {
+        return failed();
+      }
+    }
+    return json({duplicate: false, summary});
   };
 }

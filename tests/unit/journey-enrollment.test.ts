@@ -7,6 +7,7 @@ import {
   scheduleWebhookLifecycleEnrollment,
   type LifecycleEnrollmentDependencies,
   type LifecycleMembership,
+  type RenewalEnrollmentDependencies,
 } from "@/lib/automation/enrollment";
 import {runRenewalReconciliation} from "@/lib/automation/renewal-runner";
 import type {JourneyEnrollment} from "@/lib/db/repos/journeys";
@@ -102,7 +103,27 @@ function harness(
       },
     },
   };
-  return {dependencies, enrollments: () => [...rows.values()], actors};
+  const renewalDependencies: RenewalEnrollmentDependencies = {
+    renewals: {
+      async listDue() {
+        return seed
+          .filter((value) => value.billingPeriodEnd !== null)
+          .map((value) => ({
+            membershipId: value.id,
+            profileId: value.ownerUserId
+              ?? (value.applicationId ? `applicant-${value.id}` : null),
+            billingPeriodEnd: value.billingPeriodEnd!,
+          }));
+      },
+    },
+    journeys: dependencies.journeys,
+  };
+  return {
+    dependencies,
+    renewalDependencies,
+    enrollments: () => [...rows.values()],
+    actors,
+  };
 }
 
 describe("membership lifecycle journey enrollment", () => {
@@ -261,8 +282,8 @@ describe("membership lifecycle journey enrollment", () => {
     const test = harness([active, free]);
     const actor = systemActor("stripe-webhook");
 
-    const first = await runRenewalReconciliation(actor, now, test.dependencies);
-    const second = await runRenewalReconciliation(actor, now, test.dependencies);
+    const first = await runRenewalReconciliation(actor, now, test.renewalDependencies);
+    const second = await runRenewalReconciliation(actor, now, test.renewalDependencies);
 
     const renewal = test.enrollments().filter((value) => value.journey === "renewal");
     expect(renewal).toHaveLength(4);

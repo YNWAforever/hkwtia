@@ -240,21 +240,27 @@ export async function sendWorkerAlert(
   const message = await render(payload);
   const alertDigest = workerAlertDigest(payload);
 
-  let sent = 0;
-  for (const address of addresses) {
-    await transport.send({
-      to: address,
-      from: emailFrom,
-      subject: message.subject,
-      html: message.html,
-      text: message.text,
-      headers: message.headers,
-      idempotencyKey:
-        `worker-alert:${alertDigest}:${digest(address.trim().toLowerCase())}`,
-    });
-    sent += 1;
+  const deliveries = await Promise.allSettled(
+    addresses.map((address) =>
+      transport.send({
+        to: address,
+        from: emailFrom,
+        subject: message.subject,
+        html: message.html,
+        text: message.text,
+        headers: message.headers,
+        idempotencyKey:
+          `worker-alert:${alertDigest}:${digest(address.trim().toLowerCase())}`,
+      }),
+    ),
+  );
+  const sent = deliveries
+    .filter((delivery) => delivery.status === "fulfilled").length;
+  const failed = deliveries.length - sent;
+  if (failed > 0) {
+    throw new Error("WORKER_ALERT_DELIVERY_FAILED");
   }
-  return {recipients: addresses.length, sent, failed: 0};
+  return {recipients: addresses.length, sent, failed};
 }
 
 function unsubscribeUrl(
@@ -353,7 +359,7 @@ async function runProductionCampaigns(now: Date): Promise<unknown> {
   }, {now, limit: RUNNER_BATCH_LIMIT});
 }
 
-async function runProductionRenewal(now: Date): Promise<unknown> {
+export async function runProductionRenewal(now: Date): Promise<unknown> {
   return runRenewalReconciliation(automationCronActor(), now);
 }
 

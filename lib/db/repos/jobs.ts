@@ -5,7 +5,7 @@ import {and, eq, sql, type SQL} from "drizzle-orm";
 import {scheduleWebhookLifecycleEnrollment} from "@/lib/automation/enrollment";
 
 import {
-  requireAutomationSystem,
+  requireAutomationCron,
   type AutomationRepositoryActor,
 } from "@/lib/auth/automation-actor";
 
@@ -14,7 +14,15 @@ import {auditEvents, billingAttempts, engagementEvents, jobs as jobsTable, journ
 import {getDb, requireSystem} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";
 
-export type JobClaimResult = "claimed" | "duplicate";
+export type JobClaimResult =
+  | Readonly<{status: "claimed"; attemptCount: number}>
+  | Readonly<{status: "duplicate"}>;
+
+export type ScheduledJobsExecutor = Readonly<{
+  execute: (query: SQL) => PromiseLike<unknown>;
+}>;
+
+export type ScheduledJobsDatabaseLoader = () => Promise<ScheduledJobsExecutor>;
 
 export class WebhookCorrelationError extends Error {
   readonly code = "INVALID_WEBHOOK_EVENT";
@@ -33,6 +41,12 @@ function resultRows(result: unknown): unknown[] {
 function resultRow(result: unknown): Record<string, unknown> | undefined {
   const row = resultRows(result)[0];
   return row && !Array.isArray(row) && typeof row === "object" ? row as Record<string, unknown> : undefined;
+}
+
+function claimToken(row: Record<string, unknown>): number {
+  const value = Number(row.claim_token);
+  if (!Number.isSafeInteger(value) || value < 1) throw new Error("INVALID_JOB_CLAIM");
+  return value;
 }
 
 function requiredString(row: Record<string, unknown> | undefined, key: string): string {
@@ -124,45 +138,89 @@ async function insertWebhookLifecycleEnrollment(
   `);
 }
 
+async function defaultScheduledJobsDatabaseLoader(): Promise<ScheduledJobsExecutor> {
+  return await getDb() as unknown as ScheduledJobsExecutor;
+}
+
+function validAttemptCount(attemptCount: number): boolean {
+  return Number.isSafeInteger(attemptCount) && attemptCount > 0;
+}
+
+export function createScheduledJobsRepository(
+  loadDatabase: ScheduledJobsDatabaseLoader = defaultScheduledJobsDatabaseLoader,
+) {
+  return {
+    async claim(
+      actor: AutomationRepositoryActor,
+      runKey: string,
+      kind: string,
+    ): Promise<JobClaimResult> {
+      requireAutomationCron(actor);
+      const database = await loadDatabase();
+      const claim = resultRow(await database.execute(sql`
+        INSERT INTO ${jobsTable} ("run_key", "kind", "state", "attempt_count")
+        VALUES (${runKey}, ${kind}, 'processing', 1)
+        ON CONFLICT ("run_key") DO UPDATE
+        SET "kind" = EXCLUDED."kind", "state" = 'processing',
+            "attempt_count" = ${jobsTable.attemptCount} + 1,
+            "last_error" = NULL, "completed_at" = NULL, "updated_at" = now()
+        WHERE ${jobsTable.state} = 'failed'
+        RETURNING ${jobsTable.attemptCount} AS claim_token
+      `));
+      return claim
+        ? {status: "claimed", attemptCount: claimToken(claim)}
+        : {status: "duplicate"};
+    },
+
+    async complete(
+      actor: AutomationRepositoryActor,
+      runKey: string,
+      attemptCount: number,
+    ): Promise<boolean> {
+      requireAutomationCron(actor);
+      if (!validAttemptCount(attemptCount)) throw new Error("INVALID_JOB_CLAIM");
+      const database = await loadDatabase();
+      const settled = resultRow(await database.execute(sql`
+        UPDATE ${jobsTable}
+        SET "state" = 'completed', "completed_at" = now(), "updated_at" = now()
+        WHERE ${jobsTable.runKey} = ${runKey}
+          AND ${jobsTable.state} = 'processing'
+          AND ${jobsTable.attemptCount} = ${attemptCount}
+        RETURNING ${jobsTable.id} AS job_id
+      `));
+      return settled !== undefined;
+    },
+
+    async fail(
+      actor: AutomationRepositoryActor,
+      runKey: string,
+      attemptCount: number,
+      errorMessage: string,
+    ): Promise<boolean> {
+      requireAutomationCron(actor);
+      if (!validAttemptCount(attemptCount)) throw new Error("INVALID_JOB_CLAIM");
+      const database = await loadDatabase();
+      const settled = resultRow(await database.execute(sql`
+        UPDATE ${jobsTable}
+        SET "state" = 'failed', "last_error" = ${errorMessage}, "updated_at" = now()
+        WHERE ${jobsTable.runKey} = ${runKey}
+          AND ${jobsTable.state} = 'processing'
+          AND ${jobsTable.attemptCount} = ${attemptCount}
+        RETURNING ${jobsTable.id} AS job_id
+      `));
+      return settled !== undefined;
+    },
+  };
+}
+
+const scheduledJobsRepository = createScheduledJobsRepository();
+
 export const jobsRepository = {
+  ...scheduledJobsRepository,
   async getByRunKey(actor: Actor, runKey: string): Promise<Job | null> {
     requireSystem(actor);
     const db = await getDb();
     const rows = await db.select().from(jobsTable).where(and(eq(jobsTable.runKey, runKey), sql`true`)).limit(1);
-    return rows[0] ?? null;
-  },
-
-  async claim(actor: AutomationRepositoryActor, runKey: string, kind: string): Promise<JobClaimResult> {
-    requireAutomationSystem(actor);
-    const db = await getDb();
-    const claim = resultRow(await db.execute(sql`
-      INSERT INTO ${jobsTable} ("run_key", "kind", "state", "attempt_count")
-      VALUES (${runKey}, ${kind}, 'processing', 1)
-      ON CONFLICT ("run_key") DO UPDATE
-      SET "kind" = EXCLUDED."kind", "state" = 'processing',
-          "attempt_count" = ${jobsTable.attemptCount} + 1,
-          "last_error" = NULL, "completed_at" = NULL, "updated_at" = now()
-      WHERE ${jobsTable.state} = 'failed'
-      RETURNING ${jobsTable.id} AS job_id
-    `));
-    return claim ? "claimed" : "duplicate";
-  },
-
-  async complete(actor: AutomationRepositoryActor, runKey: string): Promise<Job | null> {
-    requireAutomationSystem(actor);
-    const db = await getDb();
-    const rows = await db.update(jobsTable)
-      .set({state: "completed", completedAt: new Date(), updatedAt: new Date()})
-      .where(and(eq(jobsTable.runKey, runKey), sql`true`)).returning();
-    return rows[0] ?? null;
-  },
-
-  async fail(actor: AutomationRepositoryActor, runKey: string, errorMessage: string): Promise<Job | null> {
-    requireAutomationSystem(actor);
-    const db = await getDb();
-    const rows = await db.update(jobsTable)
-      .set({state: "failed", lastError: errorMessage, updatedAt: new Date()})
-      .where(and(eq(jobsTable.runKey, runKey), sql`true`)).returning();
     return rows[0] ?? null;
   },
 
