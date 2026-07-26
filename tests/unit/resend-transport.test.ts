@@ -2,6 +2,8 @@ import {describe, expect, it, vi} from "vitest";
 
 import {
   createResendTransport,
+  createConfiguredEmailTransport,
+  createPreviewTestTransport,
   createTestTransport,
   DeliveryFailure,
   type EmailSendInput,
@@ -94,5 +96,26 @@ describe("email transports", () => {
     });
     expect(first.sends).toEqual([input]);
     expect(second.sends).toEqual([]);
+  });
+
+  it("returns a deterministic provider id in explicit Preview test mode", async () => {
+    const transport = createPreviewTestTransport();
+
+    await expect(transport.send(input)).resolves.toEqual({
+      status: "sent",
+      providerId: `test:${input.idempotencyKey}`,
+    });
+  });
+
+  it("selects deterministic test transport only when explicitly configured", async () => {
+    const transport = createConfiguredEmailTransport({
+      emailDeliveryMode: "test",
+      resendApiKey: "",
+    });
+
+    await expect(transport.send(input)).resolves.toEqual({
+      status: "sent",
+      providerId: `test:${input.idempotencyKey}`,
+    });
   });
 });

@@ -27,7 +27,7 @@ import {
 import {staffTasksRepository} from "@/lib/db/repos/staff-tasks";
 import {renderEmail, type RenderedEmail} from "@/lib/email/render";
 import {
-  createConfiguredResendTransport,
+  createConfiguredEmailTransport,
   type EmailTransport,
 } from "@/lib/email/transport";
 import {signUnsubscribeToken} from "@/lib/email/unsubscribe-token";
@@ -233,7 +233,7 @@ export async function sendWorkerAlert(
     dependencies.recipients ?? staffAlertRecipientsRepository;
   const render = dependencies.render ?? renderWorkerAlert;
   const transport =
-    dependencies.transport ?? createConfiguredResendTransport();
+    dependencies.transport ?? createConfiguredEmailTransport();
   const emailFrom = dependencies.emailFrom ?? serverEnv().emailFrom;
   const actor = automationCronActor();
   const addresses = await recipients.listCurrent(actor);
@@ -325,7 +325,7 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
       };
     },
     renderEmail,
-    emailTransport: createConfiguredResendTransport(),
+    emailTransport: createConfiguredEmailTransport(),
     whatsappTransport: createWoztellAdapter({
       WOZTELL_API_TOKEN: process.env.WOZTELL_API_TOKEN,
       WOZTELL_CHANNEL_ID: process.env.WOZTELL_CHANNEL_ID,
@@ -354,7 +354,7 @@ async function runProductionCampaigns(now: Date): Promise<unknown> {
     renderCampaign: createCampaignEmailRenderer(
       new URL("/", environment.appUrl).toString(),
     ),
-    emailTransport: createConfiguredResendTransport(),
+    emailTransport: createConfiguredEmailTransport(),
     emailFrom: environment.emailFrom,
   }, {now, limit: RUNNER_BATCH_LIMIT});
 }

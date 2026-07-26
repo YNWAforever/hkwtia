@@ -42,6 +42,7 @@ describe("runtime environment contract", () => {
       stripeCorporatePriceId: "price_corporate",
       resendApiKey: "re_test_example",
       emailFrom: "WTIA <notifications@example.test>",
+      emailDeliveryMode: "resend",
       cronSecret: "cron-secret",
       appUrl: "https://www.example.test",
     });
@@ -70,6 +71,7 @@ describe("runtime environment contract", () => {
       stripeCorporatePriceId: "",
       resendApiKey: "",
       emailFrom: "",
+      emailDeliveryMode: "resend",
       cronSecret: "",
       appUrl: "",
     });
@@ -118,4 +120,46 @@ describe("runtime environment contract", () => {
       expect(() => parseServerEnv(environment)).toThrow(missingKey);
     },
   );
+
+  it("allows explicit test email delivery only in a Vercel Preview", () => {
+    const values = parseServerEnv({
+      NODE_ENV: "production",
+      VERCEL_ENV: "preview",
+      EMAIL_DELIVERY_MODE: "test",
+      DATABASE_URL: "postgres://db.example.test/hkwtia",
+      NEON_AUTH_BASE_URL: "https://auth.example.test",
+      NEON_AUTH_COOKIE_SECRET: "cookie-secret",
+      STRIPE_SECRET_KEY: "sk_test_example",
+      STRIPE_WEBHOOK_SECRET: "whsec_example",
+      STRIPE_STARTUP_PRICE_ID: "price_startup",
+      STRIPE_CORPORATE_PRICE_ID: "price_corporate",
+      RESEND_API_KEY: "",
+      EMAIL_FROM: "",
+      CRON_SECRET: "cron-secret",
+      APP_URL: "https://preview.example.test",
+    });
+
+    expect(values.emailDeliveryMode).toBe("test");
+  });
+
+  it("does not allow test email delivery to weaken production", () => {
+    expect(() =>
+      parseServerEnv({
+        NODE_ENV: "production",
+        VERCEL_ENV: "production",
+        EMAIL_DELIVERY_MODE: "test",
+        DATABASE_URL: "postgres://db.example.test/hkwtia",
+        NEON_AUTH_BASE_URL: "https://auth.example.test",
+        NEON_AUTH_COOKIE_SECRET: "cookie-secret",
+        STRIPE_SECRET_KEY: "sk_test_example",
+        STRIPE_WEBHOOK_SECRET: "whsec_example",
+        STRIPE_STARTUP_PRICE_ID: "price_startup",
+        STRIPE_CORPORATE_PRICE_ID: "price_corporate",
+        RESEND_API_KEY: "",
+        EMAIL_FROM: "",
+        CRON_SECRET: "cron-secret",
+        APP_URL: "https://www.example.test",
+      }),
+    ).toThrow("RESEND_API_KEY");
+  });
 });

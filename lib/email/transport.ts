@@ -2,7 +2,7 @@ import "server-only";
 
 import {Resend} from "resend";
 
-import {serverEnv} from "@/lib/config/env";
+import {serverEnv, type ServerEnv} from "@/lib/config/env";
 
 export type EmailSendInput = Readonly<{
   to: string;
@@ -105,8 +105,8 @@ export function createResendTransport(resend: ResendLike): EmailTransport {
   };
 }
 
-export function createConfiguredResendTransport(): EmailTransport {
-  const resend = new Resend(serverEnv().resendApiKey);
+function createResendSdkTransport(apiKey: string): EmailTransport {
+  const resend = new Resend(apiKey);
   return createResendTransport({
     emails: {
       async send(payload, options) {
@@ -123,6 +123,31 @@ export function createConfiguredResendTransport(): EmailTransport {
   });
 }
 
+export function createConfiguredResendTransport(): EmailTransport {
+  return createResendSdkTransport(serverEnv().resendApiKey);
+}
+
+export function createPreviewTestTransport(): EmailTransport {
+  return {
+    async send(input) {
+      return {
+        status: "sent",
+        providerId: `test:${input.idempotencyKey}`,
+      };
+    },
+  };
+}
+
+type ConfiguredEmailTransportEnvironment =
+  Pick<ServerEnv, "emailDeliveryMode" | "resendApiKey">;
+
+export function createConfiguredEmailTransport(
+  environment: ConfiguredEmailTransportEnvironment = serverEnv(),
+): EmailTransport {
+  return environment.emailDeliveryMode === "test"
+    ? createPreviewTestTransport()
+    : createResendSdkTransport(environment.resendApiKey);
+}
 export type TestEmailTransport = EmailTransport & Readonly<{
   sends: EmailSendInput[];
 }>;
