@@ -43,7 +43,7 @@ function recipient(
       displayName: `Frozen ${profileId}`,
       renewalDate: "2027-02-01",
     },
-    template: "membership_renewal",
+    template: "renewal-reminder",
     status: "queued",
     attemptCount: 0,
     claimedAt: null,
@@ -75,6 +75,7 @@ function memoryHarness(
     idempotencyKey: string;
     providerId: string | null;
     errorCode: string | null;
+    attemptCount: number;
   }>();
   const providerCalls: Array<{to: string; idempotencyKey: string}> = [];
   const rendered: Array<{
@@ -95,6 +96,12 @@ function memoryHarness(
               && item.claimExpiresAt !== null
               && item.claimExpiresAt.getTime() <= claimNow.getTime()))
           .slice(0, limit);
+        const claimSources = new Map(due.map((item) => [
+          item.id,
+          item.status === "queued"
+            ? "queued" as const
+            : item.errorCode ? "retry" as const : "stale" as const,
+        ] as const));
         for (const item of due) {
           item.status = "processing";
           item.claimedAt = claimNow;
@@ -103,7 +110,11 @@ function memoryHarness(
           item.errorCode = null;
         }
         if (due.length > 0) campaignStatus = "processing";
-        return due.map((item) => ({...item, claimedAt: item.claimedAt as Date}));
+        return due.map((item) => ({
+          ...item,
+          claimedAt: item.claimedAt as Date,
+          claimSource: claimSources.get(item.id)!,
+        }));
       },
       async markRecipientSent(_actor, id, claimedAt) {
         const item = recipients.find((candidate) => candidate.id === id)!;
@@ -153,22 +164,27 @@ function memoryHarness(
     deliveries: {
       async reserveEmail(_actor, input) {
         const existing = logs.get(input.idempotencyKey);
-        if (existing) {
-          if (existing.status === "failed") {
-            existing.status = "processing";
-            existing.errorCode = null;
-          }
-          return {record: existing, disposition: "existing" as const};
-        }
+        if (existing) return {record: existing, disposition: "existing" as const};
         const record = {
           id: `email-${logs.size + 1}`,
           status: "processing" as const,
           idempotencyKey: input.idempotencyKey,
           providerId: null,
           errorCode: null,
+          attemptCount: 1,
         };
         logs.set(input.idempotencyKey, record);
         return {record, disposition: "created" as const};
+      },
+      async retryEmailFailure(_actor, id, expectedErrorCode) {
+        const record = [...logs.values()].find((candidate) => candidate.id === id)!;
+        if (record.status !== "failed" || record.errorCode !== expectedErrorCode) {
+          throw new Error("INVALID_DELIVERY_RETRY");
+        }
+        record.status = "processing";
+        record.errorCode = null;
+        record.attemptCount += 1;
+        return record;
       },
       async completeEmail(_actor, id, completion) {
         const record = [...logs.values()].find((candidate) => candidate.id === id)!;
@@ -176,6 +192,14 @@ function memoryHarness(
         record.providerId = completion.providerId ?? null;
         record.errorCode = completion.status === "failed" ? completion.errorCode : null;
         return record;
+      },
+    },
+    staffTasks: {
+      async createOnce(_actor, input) {
+        return {
+          record: {...input, id: `task-${input.dedupeKey}`, status: "open" as const},
+          disposition: "created" as const,
+        };
       },
     },
     loadContext: async (_actor, profileId) => contextFor(profileId),
@@ -216,7 +240,8 @@ describe("runCampaignBatch", () => {
 
     expect(summary).toMatchObject({claimed: 1, sent: 1, skipped: 0});
     expect(test.rendered).toEqual([{
-      template: frozen.template,
+      sourceTemplate: frozen.template,
+      template: "campaign_generic",
       locale: frozen.locale,
       variables: frozen.variables,
       unsubscribeUrl: "https://example.test/unsubscribe?token=current",
@@ -326,6 +351,8 @@ describe("campaign recipient repository fencing", () => {
         claimed_at: row.claimedAt,
         claim_expires_at: row.claimExpiresAt,
         error_code: null,
+        prior_status: "processing",
+        prior_error_code: null,
       },
     ]]);
     const repo = createCampaignsRepository(async () => fake.db as never);

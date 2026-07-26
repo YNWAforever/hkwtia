@@ -2,10 +2,13 @@ import "server-only";
 
 import {sql} from "drizzle-orm";
 
+import {
+  requireAutomationSystem,
+  type AutomationRepositoryActor,
+} from "@/lib/auth/automation-actor";
 import {staffTasks} from "@/lib/db/server-schema";
 import type {AutomationDatabase, AutomationDatabaseLoader, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
-import {getDb, requireSystem} from "@/lib/db/repos/common";
-import type {Actor} from "@/lib/membership/lifecycle";
+import {getDb} from "@/lib/db/repos/common";
 
 export type StaffTaskInput = Readonly<{
   profileId: string;
@@ -60,10 +63,10 @@ async function existingTask(transaction: AutomationSqlExecutor, dedupeKey: strin
 export function createStaffTasksRepository(loadDatabase: AutomationDatabaseLoader = defaultDatabaseLoader) {
   return {
     async createOnce(
-      actor: Actor,
+      actor: AutomationRepositoryActor,
       input: StaffTaskInput,
     ): Promise<Readonly<{record: StaffTaskRecord; disposition: "created" | "existing"}>> {
-      requireSystem(actor);
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       const result = await database.execute(sql`
         INSERT INTO ${staffTasks}

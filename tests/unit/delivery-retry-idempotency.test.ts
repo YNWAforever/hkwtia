@@ -43,7 +43,7 @@ function row(overrides: Record<string, unknown> = {}) {
 describe("delivery retry and completion idempotency", () => {
   it("reopens a failed reservation and increments its durable attempt", async () => {
     const reopened = row({status: "processing", attempt_count: 2, error_code: null});
-    const fake = sequenceDatabase([[], [reopened]]);
+    const fake = sequenceDatabase([[], [row()], [reopened]]);
     const repo = createDeliveriesRepository(async () => fake.database);
 
     await expect(repo.reserveEmail(system, {
@@ -56,10 +56,18 @@ describe("delivery retry and completion idempotency", () => {
       classification: "transactional",
     })).resolves.toMatchObject({
       disposition: "existing",
-      record: {status: "processing", attemptCount: 2, errorCode: null},
+      record: {status: "failed", attemptCount: 1, errorCode: "retryable_network"},
     });
 
-    expect(fake.commands[1]?.sql.replace(/\s+/g, " ")).toMatch(
+    await expect(repo.retryEmailFailure(
+      system,
+      String(reopened.id),
+      "retryable_network",
+    )).resolves.toMatchObject({status: "processing", attemptCount: 2, errorCode: null});
+
+    expect(fake.commands[1]?.sql.replace(/\s+/g, " "))
+      .toMatch(/SELECT .*FROM "email_log".*idempotency_key/i);
+    expect(fake.commands[2]?.sql.replace(/\s+/g, " ")).toMatch(
       /UPDATE "email_log".*status = 'processing'.*attempt_count = .*attempt_count \+ 1.*status = 'failed'/i,
     );
   });

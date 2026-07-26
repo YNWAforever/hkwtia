@@ -3,6 +3,10 @@ import "server-only";
 import {sql, type SQL} from "drizzle-orm";
 
 import type {ScheduledJourneyStep} from "@/lib/automation/types";
+import {
+  requireAutomationSystem,
+  type AutomationRepositoryActor,
+} from "@/lib/auth/automation-actor";
 import {auditEvents, journeyState, type JourneyState} from "@/lib/db/server-schema";
 import {forbidden, getDb, requireSystem} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";
@@ -24,6 +28,9 @@ export type JourneyEnrollment = Pick<
 
 export type JourneyEnrollmentDisposition = "created" | "existing";
 export type JourneyTransitionErrorCode = "INVALID_TRANSITION";
+
+export type JourneyClaimSource = "scheduled" | "stale";
+export type JourneyClaim = JourneyState & Readonly<{claimSource: JourneyClaimSource}>;
 
 export class JourneyTransitionError extends Error {
   constructor(readonly code: JourneyTransitionErrorCode = "INVALID_TRANSITION") {
@@ -72,6 +79,15 @@ function journeyFrom(row: Record<string, unknown>): JourneyState {
   };
 }
 
+function journeyClaimFrom(row: Record<string, unknown>): JourneyClaim {
+  const priorStatus = String(row.prior_status ?? "");
+  const claimSource = priorStatus === "scheduled"
+    ? "scheduled"
+    : priorStatus === "processing" ? "stale" : null;
+  if (!claimSource) throw new Error("INVALID_JOURNEY_CLAIM_SOURCE");
+  return {...journeyFrom(row), claimSource};
+}
+
 function firstJourney(result: unknown): JourneyState | null {
   const row = rowsFrom(result)[0];
   return row ? journeyFrom(row) : null;
@@ -106,8 +122,11 @@ function transitionResult(result: unknown): JourneyState {
 
 export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader = defaultDatabaseLoader) {
   return {
-    async enroll(actor: Actor, enrollment: JourneyEnrollment): Promise<JourneyEnrollmentDisposition> {
-      requireSystem(actor);
+    async enroll(
+      actor: AutomationRepositoryActor,
+      enrollment: JourneyEnrollment,
+    ): Promise<JourneyEnrollmentDisposition> {
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       const result = await database.execute(sql`
         INSERT INTO ${journeyState}
@@ -122,8 +141,13 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
       return rowsFrom(result).length > 0 ? "created" : "existing";
     },
 
-    async claimDue(actor: Actor, now: Date, limit: number, leaseMs: number): Promise<JourneyState[]> {
-      requireSystem(actor);
+    async claimDue(
+      actor: AutomationRepositoryActor,
+      now: Date,
+      limit: number,
+      leaseMs: number,
+    ): Promise<JourneyClaim[]> {
+      requireAutomationSystem(actor);
       if (!Number.isInteger(limit) || limit <= 0 || !Number.isSafeInteger(leaseMs) || leaseMs <= 0) {
         throw new Error("INVALID_CLAIM_ARGUMENT");
       }
@@ -133,7 +157,7 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
       return database.transaction(async (transaction) => {
         const result = await transaction.execute(sql`
           WITH due AS (
-            SELECT id FROM ${journeyState}
+            SELECT id, status AS prior_status FROM ${journeyState}
             WHERE (
               status = 'scheduled' AND scheduled_at <= ${now}
             ) OR (
@@ -151,14 +175,14 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
               updated_at = now()
           FROM due
           WHERE target.id = due.id
-          RETURNING target.*
+          RETURNING target.*, due.prior_status
         `);
-        return rowsFrom(result).map(journeyFrom);
+        return rowsFrom(result).map(journeyClaimFrom);
       });
     },
 
-    async markSent(actor: Actor, id: string, claimedAt: Date, completedAt: Date): Promise<JourneyState> {
-      requireSystem(actor);
+    async markSent(actor: AutomationRepositoryActor, id: string, claimedAt: Date, completedAt: Date): Promise<JourneyState> {
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       return transitionResult(await database.execute(sql`
         UPDATE ${journeyState}
@@ -169,8 +193,8 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
       `));
     },
 
-    async markSkipped(actor: Actor, id: string, claimedAt: Date, reasonCode: string, completedAt: Date): Promise<JourneyState> {
-      requireSystem(actor);
+    async markSkipped(actor: AutomationRepositoryActor, id: string, claimedAt: Date, reasonCode: string, completedAt: Date): Promise<JourneyState> {
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       return transitionResult(await database.execute(sql`
         UPDATE ${journeyState}
@@ -181,8 +205,8 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
       `));
     },
 
-    async reschedule(actor: Actor, id: string, claimedAt: Date, scheduledAt: Date, errorCode: string): Promise<JourneyState> {
-      requireSystem(actor);
+    async reschedule(actor: AutomationRepositoryActor, id: string, claimedAt: Date, scheduledAt: Date, errorCode: string): Promise<JourneyState> {
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       return transitionResult(await database.execute(sql`
         UPDATE ${journeyState}
@@ -193,8 +217,8 @@ export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader 
       `));
     },
 
-    async markFailed(actor: Actor, id: string, claimedAt: Date, errorCode: string, completedAt: Date): Promise<JourneyState> {
-      requireSystem(actor);
+    async markFailed(actor: AutomationRepositoryActor, id: string, claimedAt: Date, errorCode: string, completedAt: Date): Promise<JourneyState> {
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       return transitionResult(await database.execute(sql`
         UPDATE ${journeyState}

@@ -3,14 +3,16 @@ import "server-only";
 import {sql} from "drizzle-orm";
 import {z} from "zod";
 
+import {
+  requireAutomationSystem,
+  type AutomationRepositoryActor,
+} from "@/lib/auth/automation-actor";
 import {campaignRecipients, campaigns} from "@/lib/db/server-schema";
-import {requireSystem} from "@/lib/db/repos/common";
 import type {
   AutomationDatabaseLoader,
   AutomationSqlExecutor,
 } from "@/lib/db/repos/journeys";
 import type {AppLocale} from "@/i18n/routing";
-import type {Actor} from "@/lib/membership/lifecycle";
 
 export type CampaignRecipientStatus =
   | "queued"
@@ -32,6 +34,7 @@ export type CampaignRecipientClaim = Readonly<{
   claimedAt: Date;
   claimExpiresAt: Date;
   errorCode: string | null;
+  claimSource: "queued" | "retry" | "stale";
 }>;
 
 const claimSchema = z.object({
@@ -47,6 +50,8 @@ const claimSchema = z.object({
   claimed_at: z.coerce.date(),
   claim_expires_at: z.coerce.date(),
   error_code: z.string().nullable(),
+  prior_status: z.enum(["queued", "processing"]),
+  prior_error_code: z.string().nullable(),
 });
 
 function rowsFrom(result: unknown): unknown[] {
@@ -72,6 +77,9 @@ function claimFrom(row: unknown): CampaignRecipientClaim {
     claimedAt: parsed.claimed_at,
     claimExpiresAt: parsed.claim_expires_at,
     errorCode: parsed.error_code,
+    claimSource: parsed.prior_status === "queued"
+      ? "queued"
+      : parsed.prior_error_code === null ? "stale" : "retry",
   };
 }
 
@@ -116,12 +124,12 @@ export function createCampaignRecipientDeliveryRepository(
 ) {
   return {
     async claimRecipients(
-      actor: Actor,
+      actor: AutomationRepositoryActor,
       now: Date,
       limit: number,
       leaseMs: number,
     ): Promise<CampaignRecipientClaim[]> {
-      requireSystem(actor);
+      requireAutomationSystem(actor);
       validClaimInput(now, limit, leaseMs);
       const database = await loadDatabase();
       const claimExpiresAt = new Date(now.getTime() + leaseMs);
@@ -141,7 +149,7 @@ export function createCampaignRecipientDeliveryRepository(
             RETURNING idle.id
           ),
           due AS (
-            SELECT target.id
+            SELECT target.id, target.status AS prior_status, target.error_code AS prior_error_code
             FROM ${campaignRecipients} AS target
             INNER JOIN ${campaigns} AS campaign ON campaign.id = target.campaign_id
             WHERE campaign.status IN ('queued', 'processing')
@@ -165,7 +173,7 @@ export function createCampaignRecipientDeliveryRepository(
                 error_code = NULL
             FROM due
             WHERE target.id = due.id
-            RETURNING target.*
+            RETURNING target.*, due.prior_status, due.prior_error_code
           ),
           activated AS (
             UPDATE ${campaigns} AS campaign
@@ -183,11 +191,11 @@ export function createCampaignRecipientDeliveryRepository(
     },
 
     async markRecipientSent(
-      actor: Actor,
+      actor: AutomationRepositoryActor,
       id: string,
       claimedAt: Date,
     ): Promise<unknown> {
-      requireSystem(actor);
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       return transitionRecipient(database, id, claimedAt, sql`
         status = 'sent',
@@ -197,12 +205,12 @@ export function createCampaignRecipientDeliveryRepository(
     },
 
     async markRecipientSuppressed(
-      actor: Actor,
+      actor: AutomationRepositoryActor,
       id: string,
       claimedAt: Date,
       errorCode: string,
     ): Promise<unknown> {
-      requireSystem(actor);
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       return transitionRecipient(database, id, claimedAt, sql`
         status = 'suppressed',
@@ -212,13 +220,13 @@ export function createCampaignRecipientDeliveryRepository(
     },
 
     async rescheduleRecipient(
-      actor: Actor,
+      actor: AutomationRepositoryActor,
       id: string,
       claimedAt: Date,
       retryAt: Date,
       errorCode: string,
     ): Promise<unknown> {
-      requireSystem(actor);
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       return transitionRecipient(database, id, claimedAt, sql`
         claim_expires_at = ${retryAt},
@@ -227,12 +235,12 @@ export function createCampaignRecipientDeliveryRepository(
     },
 
     async markRecipientFailed(
-      actor: Actor,
+      actor: AutomationRepositoryActor,
       id: string,
       claimedAt: Date,
       errorCode: string,
     ): Promise<unknown> {
-      requireSystem(actor);
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       return transitionRecipient(database, id, claimedAt, sql`
         status = 'failed',
@@ -242,10 +250,10 @@ export function createCampaignRecipientDeliveryRepository(
     },
 
     async completeCampaignIfIdle(
-      actor: Actor,
+      actor: AutomationRepositoryActor,
       campaignId: string,
     ): Promise<boolean> {
-      requireSystem(actor);
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       const completed = rowsFrom(await database.execute(sql`
         UPDATE ${campaigns} AS campaign

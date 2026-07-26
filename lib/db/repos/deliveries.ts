@@ -3,10 +3,13 @@ import "server-only";
 import {sql} from "drizzle-orm";
 
 import type {JourneyChannel, MessageClassification} from "@/lib/automation/types";
+import {
+  requireAutomationSystem,
+  type AutomationRepositoryActor,
+} from "@/lib/auth/automation-actor";
 import {emailLog, whatsappLog} from "@/lib/db/server-schema";
 import type {AutomationDatabase, AutomationDatabaseLoader, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
-import {getDb, requireSystem} from "@/lib/db/repos/common";
-import type {Actor} from "@/lib/membership/lifecycle";
+import {getDb} from "@/lib/db/repos/common";
 
 export type DeliveryStatus = "processing" | "sent" | "failed";
 export type DeliveryRecord = Readonly<{
@@ -89,11 +92,12 @@ async function existingReservation(
   return recordFrom(channel, row);
 }
 
-async function reopenFailedReservation(
+async function retryFailedDelivery(
   transaction: AutomationSqlExecutor,
   channel: JourneyChannel,
-  idempotencyKey: string,
-): Promise<DeliveryRecord | null> {
+  id: string,
+  expectedErrorCode: string,
+): Promise<DeliveryRecord> {
   const table = deliveryTable(channel);
   const row = rowsFrom(await transaction.execute(sql`
     UPDATE ${table}
@@ -101,10 +105,13 @@ async function reopenFailedReservation(
         provider_id = NULL,
         error_code = NULL,
         attempt_count = attempt_count + 1
-    WHERE idempotency_key = ${idempotencyKey} AND status = 'failed'
+    WHERE id = ${id}
+      AND status = 'failed'
+      AND error_code = ${expectedErrorCode}
     RETURNING *
   `))[0];
-  return row ? recordFrom(channel, row) : null;
+  if (!row) throw new Error("INVALID_DELIVERY_RETRY");
+  return recordFrom(channel, row);
 }
 
 async function reserveExisting(
@@ -112,9 +119,8 @@ async function reserveExisting(
   channel: JourneyChannel,
   idempotencyKey: string,
 ): Promise<DeliveryReservation> {
-  const reopened = await reopenFailedReservation(transaction, channel, idempotencyKey);
   return {
-    record: reopened ?? await existingReservation(transaction, channel, idempotencyKey),
+    record: await existingReservation(transaction, channel, idempotencyKey),
     disposition: "existing",
   };
 }
@@ -155,8 +161,8 @@ async function completeReservedDelivery(
 
 export function createDeliveriesRepository(loadDatabase: AutomationDatabaseLoader = defaultDatabaseLoader) {
   return {
-    async reserveEmail(actor: Actor, input: EmailReservationInput): Promise<DeliveryReservation> {
-      requireSystem(actor);
+    async reserveEmail(actor: AutomationRepositoryActor, input: EmailReservationInput): Promise<DeliveryReservation> {
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       const result = await database.execute(sql`
         INSERT INTO ${emailLog}
@@ -173,14 +179,24 @@ export function createDeliveriesRepository(loadDatabase: AutomationDatabaseLoade
       return reserveExisting(database, "email", input.idempotencyKey);
     },
 
-    async completeEmail(actor: Actor, id: string, completion: DeliveryCompletion): Promise<DeliveryRecord> {
-      requireSystem(actor);
+    async retryEmailFailure(
+      actor: AutomationRepositoryActor,
+      id: string,
+      expectedErrorCode: string,
+    ): Promise<DeliveryRecord> {
+      requireAutomationSystem(actor);
+      const database = await loadDatabase();
+      return retryFailedDelivery(database, "email", id, expectedErrorCode);
+    },
+
+    async completeEmail(actor: AutomationRepositoryActor, id: string, completion: DeliveryCompletion): Promise<DeliveryRecord> {
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       return completeReservedDelivery(database, "email", id, completion);
     },
 
-    async reserveWhatsapp(actor: Actor, input: WhatsappReservationInput): Promise<DeliveryReservation> {
-      requireSystem(actor);
+    async reserveWhatsapp(actor: AutomationRepositoryActor, input: WhatsappReservationInput): Promise<DeliveryReservation> {
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       const result = await database.execute(sql`
         INSERT INTO ${whatsappLog}
@@ -197,8 +213,18 @@ export function createDeliveriesRepository(loadDatabase: AutomationDatabaseLoade
       return reserveExisting(database, "whatsapp", input.idempotencyKey);
     },
 
-    async completeWhatsapp(actor: Actor, id: string, completion: DeliveryCompletion): Promise<DeliveryRecord> {
-      requireSystem(actor);
+    async retryWhatsappFailure(
+      actor: AutomationRepositoryActor,
+      id: string,
+      expectedErrorCode: string,
+    ): Promise<DeliveryRecord> {
+      requireAutomationSystem(actor);
+      const database = await loadDatabase();
+      return retryFailedDelivery(database, "whatsapp", id, expectedErrorCode);
+    },
+
+    async completeWhatsapp(actor: AutomationRepositoryActor, id: string, completion: DeliveryCompletion): Promise<DeliveryRecord> {
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       return completeReservedDelivery(database, "whatsapp", id, completion);
     },

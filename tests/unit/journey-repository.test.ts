@@ -32,6 +32,7 @@ const journeyRow = (overrides: Record<string, unknown> = {}) => ({
   completed_at: null,
   created_at: now,
   updated_at: now,
+  prior_status: "scheduled",
   ...overrides,
 });
 

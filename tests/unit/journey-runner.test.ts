@@ -2,15 +2,15 @@ import {describe, expect, it, vi} from "vitest";
 
 import {runJourneyBatch, type JourneyRunnerContext, type JourneyRunnerDependencies} from "@/lib/automation/journey-runner";
 import {DeliveryFailure} from "@/lib/email/transport";
-import type {JourneyState} from "@/lib/db/server-schema";
+import type {JourneyClaim} from "@/lib/db/repos/journeys";
 
 const now = new Date("2027-01-15T10:00:00.000Z");
 const membershipId = "22222222-2222-4222-8222-222222222222";
 
 function due(
   step: string,
-  overrides: Partial<JourneyState> = {},
-): JourneyState {
+  overrides: Partial<JourneyClaim> = {},
+): JourneyClaim {
   return {
     id: crypto.randomUUID(),
     profileId: `member-${step}`,
@@ -28,6 +28,7 @@ function due(
     completedAt: null,
     createdAt: new Date(now.getTime() - 86_400_000),
     updatedAt: now,
+    claimSource: "scheduled",
     ...overrides,
   };
 }
@@ -65,12 +66,13 @@ type DeliveryRecord = {
   idempotencyKey: string;
   providerId: string | null;
   errorCode: string | null;
+  attemptCount: number;
 };
 
 function harness(
-  claims: JourneyState[],
-  contextFor: (claim: JourneyState) => JourneyRunnerContext = () => context(),
-  claimBatches: readonly (readonly JourneyState[])[] = [claims],
+  claims: JourneyClaim[],
+  contextFor: (claim: JourneyClaim) => JourneyRunnerContext = () => context(),
+  claimBatches: readonly (readonly JourneyClaim[])[] = [claims],
 ) {
   const logs = new Map<string, DeliveryRecord>();
   const tasks = new Map<string, {
@@ -116,10 +118,6 @@ function harness(
       async reserveEmail(_actor, input) {
         const existing = logs.get(input.idempotencyKey);
         if (existing) {
-          if (existing.status === "failed") {
-            existing.status = "processing";
-            existing.errorCode = null;
-          }
           return {record: existing, disposition: "existing" as const};
         }
         const record: DeliveryRecord = {
@@ -129,9 +127,19 @@ function harness(
           idempotencyKey: input.idempotencyKey,
           providerId: null,
           errorCode: null,
+          attemptCount: 1,
         };
         logs.set(input.idempotencyKey, record);
         return {record, disposition: "created" as const};
+      },
+      async retryEmailFailure(_actor, id, expectedErrorCode) {
+        const record = [...logs.values()].find((candidate) => candidate.id === id)!;
+        if (record.status === "failed" && record.errorCode === expectedErrorCode) {
+          record.status = "processing";
+          record.errorCode = null;
+          record.attemptCount += 1;
+        }
+        return record;
       },
       async completeEmail(_actor, id, completion) {
         const record = [...logs.values()].find((candidate) => candidate.id === id)!;
@@ -150,9 +158,19 @@ function harness(
           idempotencyKey: input.idempotencyKey,
           providerId: null,
           errorCode: null,
+          attemptCount: 1,
         };
         logs.set(input.idempotencyKey, record);
         return {record, disposition: "created" as const};
+      },
+      async retryWhatsappFailure(_actor, id, expectedErrorCode) {
+        const record = [...logs.values()].find((candidate) => candidate.id === id)!;
+        if (record.status === "failed" && record.errorCode === expectedErrorCode) {
+          record.status = "processing";
+          record.errorCode = null;
+          record.attemptCount += 1;
+        }
+        return record;
       },
       async completeWhatsapp(_actor, id, completion) {
         const record = [...logs.values()].find((candidate) => candidate.id === id)!;

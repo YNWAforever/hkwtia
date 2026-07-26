@@ -5,15 +5,21 @@ import type {
   RunnerInput,
   RunnerSummary,
 } from "@/lib/automation/journey-runner";
-import {systemActor} from "@/lib/auth/actor";
+import {
+  automationCronActor,
+  type AutomationCronActor,
+} from "@/lib/auth/automation-actor";
 import type {EmailReservationInput} from "@/lib/db/repos/deliveries";
+import type {
+  StaffTaskInput,
+  StaffTasksRepository,
+} from "@/lib/db/repos/staff-tasks";
 import type {EmailSendInput, EmailTransport, DeliveryFailureCode} from "@/lib/email/transport";
 import {renderEmail, type RenderedEmail} from "@/lib/email/render";
 import type {AppLocale} from "@/i18n/routing";
-import type {Actor} from "@/lib/membership/lifecycle";
 
 const LEASE_MS = 5 * 60_000;
-const runnerActor = systemActor("stripe-webhook");
+const runnerActor = automationCronActor();
 const providerFailureCodes = new Set<DeliveryFailureCode>([
   "retryable_network",
   "retryable_rate_limit",
@@ -21,6 +27,12 @@ const providerFailureCodes = new Set<DeliveryFailureCode>([
   "provider_client_error",
   "provider_unclassified_failure",
 ]);
+
+const campaignTemplateMap = {
+  "renewal-reminder": "campaign_generic",
+  "member-update": "campaign_generic",
+} as const;
+type CampaignSourceTemplate = keyof typeof campaignTemplateMap;
 
 export type CampaignRecipientClaim = Readonly<{
   id: string;
@@ -35,6 +47,7 @@ export type CampaignRecipientClaim = Readonly<{
   claimedAt: Date;
   claimExpiresAt: Date | null;
   errorCode: string | null;
+  claimSource: "queued" | "retry" | "stale";
 }>;
 
 export type CampaignRecipientContext = Readonly<{
@@ -44,7 +57,8 @@ export type CampaignRecipientContext = Readonly<{
 }>;
 
 export type CampaignRenderInput = Readonly<{
-  template: string;
+  sourceTemplate: "renewal-reminder" | "member-update";
+  template: "campaign_generic";
   locale: AppLocale;
   variables: Readonly<Record<string, string>>;
   unsubscribeUrl: string;
@@ -56,18 +70,24 @@ type DeliveryRecordLike = Readonly<{
   idempotencyKey: string;
   providerId?: string | null;
   errorCode?: string | null;
+  attemptCount: number;
 }>;
 
 type EmailDeliveries = Readonly<{
   reserveEmail: (
-    actor: Actor,
+    actor: AutomationCronActor,
     input: EmailReservationInput,
   ) => Promise<Readonly<{
     record: DeliveryRecordLike;
     disposition: "created" | "existing";
   }>>;
+  retryEmailFailure: (
+    actor: AutomationCronActor,
+    id: string,
+    expectedErrorCode: string,
+  ) => Promise<DeliveryRecordLike>;
   completeEmail: (
-    actor: Actor,
+    actor: AutomationCronActor,
     id: string,
     completion:
       | Readonly<{status: "sent"; providerId: string}>
@@ -77,46 +97,49 @@ type EmailDeliveries = Readonly<{
 
 type CampaignRecipientMutations = Readonly<{
   claimRecipients: (
-    actor: Actor,
+    actor: AutomationCronActor,
     now: Date,
     limit: number,
     leaseMs: number,
   ) => Promise<CampaignRecipientClaim[]>;
   markRecipientSent: (
-    actor: Actor,
+    actor: AutomationCronActor,
     id: string,
     claimedAt: Date,
   ) => Promise<unknown>;
   markRecipientSuppressed: (
-    actor: Actor,
+    actor: AutomationCronActor,
     id: string,
     claimedAt: Date,
     errorCode: string,
   ) => Promise<unknown>;
   rescheduleRecipient: (
-    actor: Actor,
+    actor: AutomationCronActor,
     id: string,
     claimedAt: Date,
     retryAt: Date,
     errorCode: string,
   ) => Promise<unknown>;
   markRecipientFailed: (
-    actor: Actor,
+    actor: AutomationCronActor,
     id: string,
     claimedAt: Date,
     errorCode: string,
   ) => Promise<unknown>;
   completeCampaignIfIdle: (
-    actor: Actor,
+    actor: AutomationCronActor,
     campaignId: string,
   ) => Promise<boolean>;
 }>;
 
+type TaskCreator = Pick<StaffTasksRepository, "createOnce">;
+
 export type CampaignRunnerDependencies = Readonly<{
   campaigns: CampaignRecipientMutations;
   deliveries: EmailDeliveries;
+  staffTasks: TaskCreator;
   loadContext: (
-    actor: Actor,
+    actor: AutomationCronActor,
     profileId: string,
   ) => Promise<CampaignRecipientContext>;
   renderCampaign: (input: CampaignRenderInput) => Promise<RenderedEmail>;
@@ -158,6 +181,48 @@ function failureCode(error: unknown): DeliveryFailureCode {
   return "provider_unclassified_failure";
 }
 
+function campaignTemplateSelection(
+  source: string,
+): Readonly<{
+  sourceTemplate: CampaignSourceTemplate;
+  template: (typeof campaignTemplateMap)[CampaignSourceTemplate];
+}> {
+  if (
+    !Object.prototype.hasOwnProperty.call(campaignTemplateMap, source)
+  ) {
+    throw new CampaignRunnerFailure("provider_unclassified_failure");
+  }
+  const sourceTemplate = source as CampaignSourceTemplate;
+  return {
+    sourceTemplate,
+    template: campaignTemplateMap[sourceTemplate],
+  };
+}
+
+function persistedFailureCode(
+  delivery: DeliveryRecordLike,
+): DeliveryFailureCode {
+  const code = delivery.errorCode;
+  return code !== null
+    && code !== undefined
+    && providerFailureCodes.has(code as DeliveryFailureCode)
+    ? code as DeliveryFailureCode
+    : "provider_unclassified_failure";
+}
+
+function shouldReplayPersistedFailure(
+  claim: CampaignRecipientClaim,
+  delivery: DeliveryRecordLike,
+  code: DeliveryFailureCode,
+): boolean {
+  return code === "provider_client_error"
+    || code === "provider_unclassified_failure"
+    || (
+      claim.claimSource === "stale"
+      && claim.attemptCount === delivery.attemptCount + 1
+    );
+}
+
 function retryStatus(code: DeliveryFailureCode): number | null {
   switch (code) {
     case "retryable_network":
@@ -182,11 +247,20 @@ export function campaignDeliveryKey(claim: Pick<CampaignRecipientClaim, "campaig
   return `campaign:${claim.campaignId}:${claim.id}:email`;
 }
 
+async function createTask(
+  dependencies: CampaignRunnerDependencies,
+  input: StaffTaskInput,
+  summary: MutableSummary,
+): Promise<void> {
+  const result = await dependencies.staffTasks.createOnce(runnerActor, input);
+  if (result.disposition === "created") summary.tasksCreated += 1;
+}
+
 export function createCampaignEmailRenderer(
   ctaUrl: string,
 ): (input: CampaignRenderInput) => Promise<RenderedEmail> {
   return async (input) => renderEmail({
-    template: "campaign_generic",
+    template: input.template,
     locale: input.locale,
     recipientName: input.variables.displayName ?? "",
     variables: {
@@ -219,10 +293,12 @@ async function sendRecipient(
   claim: CampaignRecipientClaim,
   context: CampaignRecipientContext,
 ): Promise<void> {
+  const template = campaignTemplateSelection(claim.template);
   let rendered: RenderedEmail;
   try {
     rendered = await dependencies.renderCampaign({
-      template: claim.template,
+      sourceTemplate: template.sourceTemplate,
+      template: template.template,
       locale: claim.locale,
       variables: claim.variables,
       unsubscribeUrl: context.unsubscribeUrl,
@@ -237,7 +313,7 @@ async function sendRecipient(
     reservation = await dependencies.deliveries.reserveEmail(runnerActor, {
       profileId: claim.profileId,
       journeyStateId: null,
-      template: claim.template,
+      template: template.template,
       subject: rendered.subject,
       idempotencyKey,
       locale: claim.locale,
@@ -246,7 +322,25 @@ async function sendRecipient(
   } catch {
     throw new CampaignRunnerFailure("retryable_network");
   }
-  if (reservation.record.status === "sent") return;
+  let delivery = reservation.record;
+  if (delivery.status === "sent") return;
+  if (delivery.status === "failed") {
+    const code = persistedFailureCode(delivery);
+    if (
+      shouldReplayPersistedFailure(claim, delivery, code)
+    ) {
+      throw new CampaignRunnerFailure(code);
+    }
+    try {
+      delivery = await dependencies.deliveries.retryEmailFailure(
+        runnerActor,
+        delivery.id,
+        code,
+      );
+    } catch {
+      throw new CampaignRunnerFailure("retryable_network");
+    }
+  }
 
   let provider: Awaited<ReturnType<EmailTransport["send"]>>;
   const sendInput: EmailSendInput = {
@@ -263,13 +357,13 @@ async function sendRecipient(
   } catch (error) {
     return completeFailedDelivery(
       dependencies,
-      reservation.record,
+      delivery,
       failureCode(error),
     );
   }
 
   try {
-    await dependencies.deliveries.completeEmail(runnerActor, reservation.record.id, {
+    await dependencies.deliveries.completeEmail(runnerActor, delivery.id, {
       status: "sent",
       providerId: provider.providerId,
     });
@@ -297,6 +391,13 @@ async function settleFailure(
     summary.retried += 1;
     return;
   }
+  await createTask(dependencies, {
+    profileId: claim.profileId,
+    journeyStateId: null,
+    kind: "permanent_campaign_delivery_failure",
+    dedupeKey: `${campaignDeliveryKey(claim)}:permanent_delivery_failure`,
+    summaryCode: decision.code,
+  }, summary);
   await dependencies.campaigns.markRecipientFailed(
     runnerActor,
     claim.id,

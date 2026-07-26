@@ -28,14 +28,14 @@ Additional test-first gaps were recorded before their production changes:
 - Journey claims use the existing atomic `FOR UPDATE SKIP LOCKED` repository and every transition carries the exact `claimedAt` fencing token.
 - Day-7 alternatives are evaluated from current context; marketing requires current consent and no active marketing email suppression, while transactional delivery remains eligible.
 - A delivery row is durably reserved before provider send. Provider retries reuse the exact stable journey or campaign delivery key.
-- Failed delivery rows reopen atomically and increment their durable attempt count. Repeated matching terminal completion is idempotent.
+- Reserving an existing failed delivery leaves it terminal. Only an explicit, error-fenced retry transition reopens retryable failures and increments the durable delivery attempt; stale crash recovery replays the sanitized committed disposition without another provider call.
 - A provider-success/log-completion crash reschedules the journey; reclaim reuses the same delivery row and provider idempotency key, then completes without creating a second log.
-- Retryable failures use the shared 5/25-minute policy. Attempt three and permanent provider failures mark the journey/recipient terminal; journey failure creates one deduplicated staff task.
+- Retryable failures use the shared 5/25-minute policy. Attempt three and permanent provider failures create one deduplicated staff task before marking either the journey or campaign recipient terminal.
 - D90 always delivers and creates a stable low-engagement task only below the approved threshold.
 - D14 unresolved dunning locks the membership and atomically transitions `past_due -> expired`, inserts `membership.lapsed_by_dunning` with request identity `dunning-lapse:<journeyStateId>`, creates one task, and inserts win-back D7/D21/D60 rows under `termination:lapse:<journeyStateId>`. Retrying an already committed matching episode repairs only missing idempotent side effects.
 - Renewal D-14 creates no WhatsApp reservation or provider request without current opt-in and a nonblank number.
 - Campaign claims include queued and expired-processing recipients, increment attempts, set a bounded lease, and fence all transitions by `claimedAt`.
-- Campaign delivery rechecks current consent/suppression while preserving the frozen email, locale, variables, and campaign template identity. Partial failures resume without resending terminal recipients.
+- Campaign delivery rechecks current consent/suppression, accepts only the frozen source identities `renewal-reminder` and `member-update`, maps both to the approved `campaign_generic` renderer/log identity, and preserves locale and variables. Unknown source identities fail safely before rendering, reservation, or provider delivery.
 - Campaigns complete only when no queued/processing recipients remain, including empty or already-terminal campaigns found by the claim sweep.
 
 ## Schema and migration
@@ -68,15 +68,17 @@ Result: exit 0; 5 files passed, 28/28 tests passed.
 
 Additional verification:
 
+- Focused review suite - exit 0; 6 files passed and the `DATABASE_URL_TEST`-gated file skipped; 32 tests passed and 4 skipped.
+- `tests/integration/automation-runners-postgres.test.ts` - collected successfully; its 4 real Postgres tests were skipped locally because `DATABASE_URL_TEST` is unset. The gated cases use the production runners and real journey, campaign-recipient, delivery, and staff-task repositories to prove concurrent single claim/provider/log behavior, campaign template mapping, uniqueness, lease fencing, and transaction rollback.
 - `npm.cmd run lint` - exit 0, no warnings or errors.
 - `npm.cmd run typecheck` - exit 0.
-- `npm.cmd test` - exit 0; 122 files passed and 8 environment-gated files skipped; 615 tests passed and 20 skipped.
-- `git diff --check` - exit 0; only line-ending notices for pre-existing dirty Task 1-3 reports and the generated journal were emitted.
+- `npm.cmd test` - exit 0; 124 files passed and 9 environment-gated files skipped; 630 tests passed and 24 skipped.
+- `git diff --check` - exit 0; only line-ending notices were emitted.
 
 ## Self-review and remaining concerns
 
 The final diff was reviewed against Task 7 for plan alignment, authorization, claim fencing, durable idempotency, retry/crash windows, PII-safe errors/audit metadata, migration compatibility, frozen campaign data, and empty/partial campaign completion. No Critical or Important issue remains from that self-review.
 
-The 20 skipped tests are existing database-gated integration tests because this worktree has no live test `DATABASE_URL`; the generated migration and SQL shape are covered, but this task did not apply migration 0008 to a live database or issue live Resend/WOZTELL sends. Provider-side duplicate suppression therefore still depends on the already-tested adapters honoring the stable idempotency key. Task 9 must inject the production current-context loaders, renderers, transports, and repositories when it wires the authenticated job routes.
+The 24 skipped tests are database-gated integration tests because this worktree has no live `DATABASE_URL_TEST`; the new real-runner Postgres suite was collected but could not execute live. The generated migration, SQL shape, runner behavior, and adapter idempotency contracts are covered locally, but this review fix did not apply migration 0008 to a live database or issue live Resend/WOZTELL sends. Provider-side duplicate suppression therefore still depends on the already-tested adapters honoring the stable idempotency key.
 
 The pre-existing dirty `.superpowers/sdd/task-1-report.md`, `task-2-report.md`, and `task-3-report.md` files were preserved and excluded from this task.

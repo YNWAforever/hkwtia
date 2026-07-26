@@ -11,14 +11,17 @@ import type {
   JourneyStep,
   ScheduledJourneyStep,
 } from "@/lib/automation/types";
-import {systemActor} from "@/lib/auth/actor";
+import {
+  automationCronActor,
+  type AutomationCronActor,
+} from "@/lib/auth/automation-actor";
 import type {ChannelAdapter} from "@/lib/channels/types";
 import type {
   DeliveryCompletion,
   EmailReservationInput,
   WhatsappReservationInput,
 } from "@/lib/db/repos/deliveries";
-import type {JourneysRepository} from "@/lib/db/repos/journeys";
+import type {JourneyClaim, JourneysRepository} from "@/lib/db/repos/journeys";
 import type {
   StaffTaskInput,
   StaffTasksRepository,
@@ -38,14 +41,11 @@ import type {
   RenderedEmail,
 } from "@/lib/email/render";
 import type {AppLocale} from "@/i18n/routing";
-import type {
-  Actor,
-  MembershipStatus,
-} from "@/lib/membership/lifecycle";
+import type {MembershipStatus} from "@/lib/membership/lifecycle";
 
 const LEASE_MS = 5 * 60_000;
 const emailTemplates = new Set<string>(EMAIL_TEMPLATE_IDS);
-const runnerActor = systemActor("stripe-webhook");
+const runnerActor = automationCronActor();
 const providerFailureCodes = new Set<DeliveryFailureCode>([
   "retryable_network",
   "retryable_rate_limit",
@@ -99,6 +99,7 @@ type RunnerDeliveryRecord = Readonly<{
   idempotencyKey: string;
   providerId?: string | null;
   errorCode?: string | null;
+  attemptCount: number;
 }>;
 
 type RunnerDeliveryReservation = Readonly<{
@@ -108,20 +109,30 @@ type RunnerDeliveryReservation = Readonly<{
 
 type DeliveryMutations = Readonly<{
   reserveEmail: (
-    actor: Actor,
+    actor: AutomationCronActor,
     input: EmailReservationInput,
   ) => Promise<RunnerDeliveryReservation>;
+  retryEmailFailure: (
+    actor: AutomationCronActor,
+    id: string,
+    expectedErrorCode: string,
+  ) => Promise<RunnerDeliveryRecord>;
   completeEmail: (
-    actor: Actor,
+    actor: AutomationCronActor,
     id: string,
     completion: DeliveryCompletion,
   ) => Promise<RunnerDeliveryRecord>;
   reserveWhatsapp: (
-    actor: Actor,
+    actor: AutomationCronActor,
     input: WhatsappReservationInput,
   ) => Promise<RunnerDeliveryReservation>;
+  retryWhatsappFailure: (
+    actor: AutomationCronActor,
+    id: string,
+    expectedErrorCode: string,
+  ) => Promise<RunnerDeliveryRecord>;
   completeWhatsapp: (
-    actor: Actor,
+    actor: AutomationCronActor,
     id: string,
     completion: DeliveryCompletion,
   ) => Promise<RunnerDeliveryRecord>;
@@ -135,13 +146,13 @@ export type JourneyRunnerDependencies = Readonly<{
   staffTasks: TaskCreator;
   memberships: Readonly<{
     lapseDunningEpisode: (
-      actor: Actor,
+      actor: AutomationCronActor,
       input: DunningLapseInput,
     ) => Promise<DunningLapseDisposition>;
   }>;
   loadContext: (
-    actor: Actor,
-    claim: JourneyState,
+    actor: AutomationCronActor,
+    claim: JourneyClaim,
   ) => Promise<JourneyRunnerContext>;
   renderEmail: (input: RenderEmailInput) => Promise<RenderedEmail>;
   emailTransport: EmailTransport;
@@ -213,6 +224,30 @@ function retryStatus(code: DeliveryFailureCode): number | null {
   }
 }
 
+function persistedFailureCode(
+  delivery: RunnerDeliveryRecord,
+): DeliveryFailureCode {
+  const code = delivery.errorCode;
+  return code !== null
+    && code !== undefined
+    && providerFailureCodes.has(code as DeliveryFailureCode)
+    ? code as DeliveryFailureCode
+    : "provider_unclassified_failure";
+}
+
+function shouldReplayPersistedFailure(
+  claim: JourneyClaim,
+  delivery: RunnerDeliveryRecord,
+  code: DeliveryFailureCode,
+): boolean {
+  return code === "provider_client_error"
+    || code === "provider_unclassified_failure"
+    || (
+      claim.claimSource === "stale"
+      && claim.attemptCount === delivery.attemptCount + 1
+    );
+}
+
 function claimToken(claim: JourneyState): Date {
   if (!claim.claimedAt || !isValidDate(claim.claimedAt)) throw new Error("MISSING_CLAIM_TOKEN");
   return claim.claimedAt;
@@ -237,7 +272,7 @@ async function createTask(
 
 async function settleFailure(
   dependencies: JourneyRunnerDependencies,
-  claim: JourneyState,
+  claim: JourneyClaim,
   code: DeliveryFailureCode,
   now: Date,
   summary: MutableSummary,
@@ -257,6 +292,13 @@ async function settleFailure(
     return;
   }
 
+  await createTask(dependencies, {
+    profileId: claim.profileId,
+    journeyStateId: claim.id,
+    kind: "permanent_delivery_failure",
+    dedupeKey: `${claim.deliveryKey}:permanent_delivery_failure`,
+    summaryCode: decision.code,
+  }, summary);
   await dependencies.journeys.markFailed(
     runnerActor,
     claim.id,
@@ -265,13 +307,6 @@ async function settleFailure(
     now,
   );
   summary.failed += 1;
-  await createTask(dependencies, {
-    profileId: claim.profileId,
-    journeyStateId: claim.id,
-    kind: "permanent_delivery_failure",
-    dedupeKey: `${claim.deliveryKey}:permanent_delivery_failure`,
-    summaryCode: decision.code,
-  }, summary);
 }
 
 async function completeFailedEmail(
@@ -292,7 +327,7 @@ async function completeFailedEmail(
 
 async function sendEmail(
   dependencies: JourneyRunnerDependencies,
-  claim: JourneyState,
+  claim: JourneyClaim,
   step: JourneyStep,
   context: JourneyRunnerContext,
 ): Promise<boolean> {
@@ -332,7 +367,25 @@ async function sendEmail(
   } catch {
     throw new RunnerFailure("retryable_network");
   }
-  if (reservation.record.status === "sent") return true;
+  let delivery = reservation.record;
+  if (delivery.status === "sent") return true;
+  if (delivery.status === "failed") {
+    const code = persistedFailureCode(delivery);
+    if (
+      shouldReplayPersistedFailure(claim, delivery, code)
+    ) {
+      throw new RunnerFailure(code);
+    }
+    try {
+      delivery = await dependencies.deliveries.retryEmailFailure(
+        runnerActor,
+        delivery.id,
+        code,
+      );
+    } catch {
+      throw new RunnerFailure("retryable_network");
+    }
+  }
 
   let provider;
   try {
@@ -346,11 +399,11 @@ async function sendEmail(
       idempotencyKey: claim.deliveryKey,
     });
   } catch (error) {
-    return completeFailedEmail(dependencies, reservation.record, failureCode(error));
+    return completeFailedEmail(dependencies, delivery, failureCode(error));
   }
 
   try {
-    await dependencies.deliveries.completeEmail(runnerActor, reservation.record.id, {
+    await dependencies.deliveries.completeEmail(runnerActor, delivery.id, {
       status: "sent",
       providerId: provider.providerId,
     });
@@ -392,7 +445,7 @@ async function completeFailedWhatsapp(
 
 async function sendWhatsapp(
   dependencies: JourneyRunnerDependencies,
-  claim: JourneyState,
+  claim: JourneyClaim,
   step: JourneyStep,
   context: JourneyRunnerContext,
 ): Promise<boolean> {
@@ -421,7 +474,25 @@ async function sendWhatsapp(
   } catch {
     throw new RunnerFailure("retryable_network");
   }
-  if (reservation.record.status === "sent") return true;
+  let delivery = reservation.record;
+  if (delivery.status === "sent") return true;
+  if (delivery.status === "failed") {
+    const code = persistedFailureCode(delivery);
+    if (
+      shouldReplayPersistedFailure(claim, delivery, code)
+    ) {
+      throw new RunnerFailure(code);
+    }
+    try {
+      delivery = await dependencies.deliveries.retryWhatsappFailure(
+        runnerActor,
+        delivery.id,
+        code,
+      );
+    } catch {
+      throw new RunnerFailure("retryable_network");
+    }
+  }
 
   let provider;
   try {
@@ -435,20 +506,20 @@ async function sendWhatsapp(
   } catch (error) {
     return completeFailedWhatsapp(
       dependencies,
-      reservation.record,
+      delivery,
       failureCode(error),
     );
   }
   if (provider.status === "skipped") {
     return completeFailedWhatsapp(
       dependencies,
-      reservation.record,
+      delivery,
       "provider_unclassified_failure",
     );
   }
 
   try {
-    await dependencies.deliveries.completeWhatsapp(runnerActor, reservation.record.id, {
+    await dependencies.deliveries.completeWhatsapp(runnerActor, delivery.id, {
       status: "sent",
       providerId: provider.providerId,
     });
@@ -460,7 +531,7 @@ async function sendWhatsapp(
 
 async function lapseDunning(
   dependencies: JourneyRunnerDependencies,
-  claim: JourneyState,
+  claim: JourneyClaim,
   summary: MutableSummary,
 ): Promise<"deliver" | "resolved"> {
   if (claim.journey !== "dunning" || claim.step !== "lapsed") return "deliver";
@@ -492,7 +563,7 @@ async function lapseDunning(
 
 async function processClaim(
   dependencies: JourneyRunnerDependencies,
-  claim: JourneyState,
+  claim: JourneyClaim,
   input: RunnerInput,
   summary: MutableSummary,
 ): Promise<void> {

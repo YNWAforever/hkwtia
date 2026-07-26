@@ -3,14 +3,17 @@ import "server-only";
 import {sql} from "drizzle-orm";
 
 import type {ScheduledJourneyStep} from "@/lib/automation/types";
+import {
+  requireAutomationSystem,
+  type AutomationRepositoryActor,
+} from "@/lib/auth/automation-actor";
 import {auditEvents, journeyState, memberships, staffTasks} from "@/lib/db/server-schema";
-import {getDb, requireSystem} from "@/lib/db/repos/common";
+import {getDb} from "@/lib/db/repos/common";
 import type {
   AutomationDatabase,
   AutomationDatabaseLoader,
   AutomationSqlExecutor,
 } from "@/lib/db/repos/journeys";
-import type {Actor} from "@/lib/membership/lifecycle";
 
 export type DunningLapseInput = Readonly<{
   membershipId: string;
@@ -109,10 +112,10 @@ export function createDunningLapseRepository(
 ) {
   return {
     async lapseDunningEpisode(
-      actor: Actor,
+      actor: AutomationRepositoryActor,
       input: DunningLapseInput,
     ): Promise<DunningLapseDisposition> {
-      requireSystem(actor);
+      requireAutomationSystem(actor);
       const database = await loadDatabase();
       const requestId = `dunning-lapse:${input.journeyStateId}`;
 

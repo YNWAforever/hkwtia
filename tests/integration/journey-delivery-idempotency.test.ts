@@ -1,10 +1,10 @@
 import {describe, expect, it} from "vitest";
 
 import {runJourneyBatch, type JourneyRunnerDependencies} from "@/lib/automation/journey-runner";
-import type {JourneyState} from "@/lib/db/server-schema";
+import type {JourneyClaim} from "@/lib/db/repos/journeys";
 
 const now = new Date("2027-01-15T10:00:00.000Z");
-const due: JourneyState = {
+const due: JourneyClaim = {
   id: "11111111-1111-4111-8111-111111111111",
   profileId: "member-concurrent",
   membershipId: "22222222-2222-4222-8222-222222222222",
@@ -21,6 +21,7 @@ const due: JourneyState = {
   completedAt: null,
   createdAt: new Date(now.getTime() - 86_400_000),
   updatedAt: now,
+  claimSource: "scheduled",
 };
 
 describe("journey runner delivery idempotency", () => {
@@ -31,6 +32,7 @@ describe("journey runner delivery idempotency", () => {
       status: "processing" | "sent";
       idempotencyKey: string;
       providerId: string | null;
+      attemptCount: number;
     }>();
     const providerRequests: string[] = [];
     const transitions: Array<{id: string; claimedAt: Date}> = [];
@@ -64,9 +66,13 @@ describe("journey runner delivery idempotency", () => {
             status: "processing" as const,
             idempotencyKey: input.idempotencyKey,
             providerId: null,
+            attemptCount: 1,
           };
           emailLogs.set(input.idempotencyKey, record);
           return {record, disposition: "created" as const};
+        },
+        async retryEmailFailure() {
+          throw new Error("unexpected email retry");
         },
         async completeEmail(_actor, id, completion) {
           const record = [...emailLogs.values()].find((candidate) => candidate.id === id)!;
@@ -76,6 +82,9 @@ describe("journey runner delivery idempotency", () => {
         },
         async reserveWhatsapp() {
           throw new Error("unexpected WhatsApp reservation");
+        },
+        async retryWhatsappFailure() {
+          throw new Error("unexpected WhatsApp retry");
         },
         async completeWhatsapp() {
           throw new Error("unexpected WhatsApp completion");
