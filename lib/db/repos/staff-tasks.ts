@@ -1,4 +1,4 @@
-import "server-only";
+﻿import "server-only";
 
 import {sql} from "drizzle-orm";
 import {z} from "zod";
@@ -200,7 +200,15 @@ export function createStaffTasksRepository(
     }
 
     if (actor.kind === "agent") {
-      if (parsed.dedupeKey !== `agent-run:${actor.runId}`) throw new Error("INVALID_AGENT_STAFF_TASK");
+      const legacyDedupeKey = `agent-run:${actor.runId}`;
+      const scopedDedupeKey =
+        `${legacyDedupeKey}:${parsed.kind}:${parsed.summaryCode}`;
+      if (
+        parsed.dedupeKey !== legacyDedupeKey
+        && parsed.dedupeKey !== scopedDedupeKey
+      ) {
+        throw new Error("INVALID_AGENT_STAFF_TASK");
+      }
       if (
         parsed.profileId !== actor.profileId
         || context.conversationId !== actor.conversationId
