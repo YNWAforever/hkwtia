@@ -91,8 +91,9 @@ export class AgentToolExecutionError extends Error {
   }
 }
 
-function safeHttpUrl(value: string | undefined): string | undefined {
+function safeHttpUrl(value: unknown): string | undefined {
   if (value === undefined) return undefined;
+  if (typeof value !== "string") return undefined;
   try {
     const url = new URL(value);
     return url.protocol === "http:" || url.protocol === "https:"
@@ -103,28 +104,51 @@ function safeHttpUrl(value: string | undefined): string | undefined {
   }
 }
 
-export function normalizeAgentCitations(
-  inputs: readonly AgentCitationInput[],
-): AgentCitation[] {
+export function normalizeAgentCitations(inputs: unknown): AgentCitation[] {
+  let inputCount: number;
+  try {
+    if (!Array.isArray(inputs)) return [];
+    inputCount = Math.min(inputs.length, MAX_AGENT_CITATIONS);
+  } catch {
+    return [];
+  }
+
   const citations: AgentCitation[] = [];
   const seen = new Set<string>();
 
-  for (const input of inputs) {
-    if (citations.length >= MAX_AGENT_CITATIONS) break;
+  for (let index = 0; index < inputCount; index += 1) {
+    let input: unknown;
+    try {
+      input = inputs[index];
+    } catch {
+      continue;
+    }
+    if (!input || typeof input !== "object") continue;
+
+    let sourceIdValue: unknown;
+    let titleValue: unknown;
+    let urlValue: unknown;
+    try {
+      const record = input as Record<string, unknown>;
+      sourceIdValue = record.sourceId;
+      titleValue = record.title;
+      urlValue = record.url;
+    } catch {
+      continue;
+    }
     if (
-      !input
-      || typeof input.sourceId !== "string"
-      || typeof input.title !== "string"
+      typeof sourceIdValue !== "string"
+      || typeof titleValue !== "string"
     ) {
       continue;
     }
 
-    const sourceId = input.sourceId.trim().slice(0, 128);
-    const title = input.title.trim().slice(0, 200);
+    const sourceId = sourceIdValue.trim().slice(0, 128);
+    const title = titleValue.trim().slice(0, 200);
     if (!sourceId || !title || seen.has(sourceId)) continue;
 
-    const url = safeHttpUrl(input.url);
-    if (input.url !== undefined && url === undefined) continue;
+    const url = safeHttpUrl(urlValue);
+    if (urlValue !== undefined && url === undefined) continue;
 
     seen.add(sourceId);
     citations.push({

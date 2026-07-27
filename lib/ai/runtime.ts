@@ -3,7 +3,6 @@ import {randomUUID} from "node:crypto";
 import type {ConciergeAgentActor} from "@/lib/auth/agent-actor";
 import {
   AgentModelConfigurationError,
-  parseAgentModel,
   resolveAgentModel,
   type AgentProviderName,
 } from "@/lib/ai/model";
@@ -135,6 +134,13 @@ const defaultProviderFactories: Readonly<
 const ZERO_USAGE: AgentUsage = {inputTokens: 0, outputTokens: 0};
 const ZERO_COST = "0.000000";
 
+/**
+ * Maximum number of UTF-16 characters retained for a consumer that is not
+ * draining the returned text stream. The provider stream is pumped eagerly so
+ * terminal persistence does not depend on the caller consuming text.
+ */
+export const MAX_BUFFERED_STREAM_CHARACTERS = 65_536;
+
 function safeNow(now: () => Date): Date {
   const value = now();
   if (!Number.isFinite(value.getTime())) throw new Error("INVALID_RUNTIME_DATE");
@@ -196,6 +202,15 @@ function failureCodeFor(
   return "provider_error";
 }
 
+function publicRuntimeError(
+  error: unknown,
+  abortSignal?: AbortSignal,
+): AgentRuntimeError {
+  return error instanceof AgentRuntimeError
+    ? error
+    : new AgentRuntimeError(failureCodeFor(error, abortSignal));
+}
+
 function normalizeUsage(value: unknown): AgentUsage {
   if (!value || typeof value !== "object") {
     throw new AgentInvalidProviderResponseError();
@@ -248,6 +263,119 @@ function emptyTextStream(): AsyncIterable<string> {
   };
 }
 
+type StreamWaiter = Readonly<{
+  resolve: (result: IteratorResult<string>) => void;
+  reject: (error: AgentRuntimeError) => void;
+}>;
+
+function createEagerTextPump(
+  source: AsyncIterable<string>,
+  abortSignal?: AbortSignal,
+): Readonly<{
+  textStream: AsyncIterable<string>;
+  completion: Promise<void>;
+}> {
+  const queuedDeltas: string[] = [];
+  let queuedCharacters = 0;
+  let queueIndex = 0;
+  let waiter: StreamWaiter | undefined;
+  let completed = false;
+  let failure: unknown;
+  let iteratorCreated = false;
+
+  function compactQueue(): void {
+    if (queueIndex > 128 && queueIndex * 2 >= queuedDeltas.length) {
+      queuedDeltas.splice(0, queueIndex);
+      queueIndex = 0;
+    }
+  }
+
+  function wakeConsumer(): void {
+    if (!waiter) return;
+    const pending = waiter;
+    waiter = undefined;
+    if (queueIndex < queuedDeltas.length) {
+      const value = queuedDeltas[queueIndex]!;
+      queueIndex += 1;
+      queuedCharacters -= value.length;
+      compactQueue();
+      pending.resolve({value, done: false});
+      return;
+    }
+    if (failure !== undefined) {
+      pending.reject(publicRuntimeError(failure, abortSignal));
+      return;
+    }
+    if (completed) pending.resolve({value: undefined, done: true});
+  }
+
+  const completion = (async () => {
+    try {
+      for await (const delta of source) {
+        if (typeof delta !== "string") {
+          throw new AgentInvalidProviderResponseError();
+        }
+        if (delta.length === 0) continue;
+        if (waiter) {
+          queuedDeltas.push(delta);
+          queuedCharacters += delta.length;
+          wakeConsumer();
+          continue;
+        }
+        if (
+          queuedCharacters + delta.length
+          > MAX_BUFFERED_STREAM_CHARACTERS
+        ) {
+          throw new AgentInvalidProviderResponseError();
+        }
+        queuedDeltas.push(delta);
+        queuedCharacters += delta.length;
+      }
+    } catch (error) {
+      failure = error;
+      throw error;
+    } finally {
+      completed = true;
+      wakeConsumer();
+    }
+  })();
+
+  const textStream: AsyncIterable<string> = {
+    [Symbol.asyncIterator](): AsyncIterator<string> {
+      if (iteratorCreated) {
+        return {
+          next: async () => {
+            throw new AgentRuntimeError("invalid_provider_response");
+          },
+        };
+      }
+      iteratorCreated = true;
+      return {
+        next(): Promise<IteratorResult<string>> {
+          if (queueIndex < queuedDeltas.length) {
+            const value = queuedDeltas[queueIndex]!;
+            queueIndex += 1;
+            queuedCharacters -= value.length;
+            compactQueue();
+            return Promise.resolve({value, done: false});
+          }
+          if (failure !== undefined) {
+            return Promise.reject(publicRuntimeError(failure, abortSignal));
+          }
+          if (completed) {
+            return Promise.resolve({value: undefined, done: true});
+          }
+          return new Promise<IteratorResult<string>>((resolve, reject) => {
+            waiter = {resolve, reject};
+          });
+        },
+      };
+    },
+  };
+
+  return {textStream, completion};
+}
+
 export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
   const {
     agentRuns,
@@ -258,7 +386,6 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
 
   return {
     async stream(request: AgentRuntimeRequest): Promise<AgentRuntimeStream> {
-      const parsedModel = parseAgentModel(request.model);
       const runId = createRunId();
       const actor: ConciergeAgentActor = {
         kind: "agent",
@@ -270,8 +397,8 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
       };
       const startedAt = safeNow(now);
       await agentRuns.start(actor, {
-        provider: parsedModel.provider,
-        model: parsedModel.modelId,
+        provider: null,
+        model: null,
         startedAt,
       });
 
@@ -298,19 +425,22 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
         return terminal.promise;
       }
 
-      async function fail(error: unknown): Promise<AgentRuntimeError> {
-        const code = failureCodeFor(error, request.abortSignal);
-        const runtimeError = error instanceof AgentRuntimeError
-          ? error
-          : new AgentRuntimeError(code);
+      async function fail(
+        error: unknown,
+        billing: Readonly<{usage: AgentUsage; costUsd: string}> = {
+          usage: ZERO_USAGE,
+          costUsd: ZERO_COST,
+        },
+      ): Promise<AgentRuntimeError> {
+        const runtimeError = publicRuntimeError(error, request.abortSignal);
         try {
           await settle("fail", {
             completedAt: safeNow(now),
-            errorCode: code,
-            inputTokens: 0,
-            outputTokens: 0,
-            costUsd: ZERO_COST,
-          }, code);
+            errorCode: runtimeError.code,
+            inputTokens: billing.usage.inputTokens,
+            outputTokens: billing.usage.outputTokens,
+            costUsd: billing.costUsd,
+          }, runtimeError.code);
         } catch {
           // A failed terminal persistence attempt must not expose database details
           // or trigger a second, illegal transition.
@@ -362,93 +492,88 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
             : {abortSignal: request.abortSignal}),
         });
       } catch (error) {
-        const configurationError =
-          error instanceof AgentModelConfigurationError
-          || error instanceof AgentRuntimeError
-          ? error
-          : new AgentRuntimeError("provider_error");
-        throw await fail(configurationError);
+        throw await fail(error);
       }
 
-      const finish = Promise.resolve(providerResult.finish)
-        .then(async (
-          rawFinish,
-        ): Promise<CompletedAgentRuntimeFinish | EscalatedAgentRuntimeFinish> => {
-          if (terminal?.kind === "fail") {
-            throw new AgentRuntimeError(
-              terminal.failureCode ?? "provider_error",
-            );
-          }
-          const providerFinish = normalizeProviderFinish(rawFinish);
-          if (providerFinish.finishReason === "error") {
+      const pump = createEagerTextPump(
+        providerResult.textStream,
+        request.abortSignal,
+      );
+      const providerFinish = Promise.resolve(providerResult.finish)
+        .then(normalizeProviderFinish);
+
+      const finish = (async (): Promise<
+        CompletedAgentRuntimeFinish | EscalatedAgentRuntimeFinish
+      > => {
+        let billing:
+          | Readonly<{usage: AgentUsage; costUsd: string}>
+          | undefined;
+        try {
+          const [finishResult, pumpResult] = await Promise.allSettled([
+            providerFinish,
+            pump.completion,
+          ]);
+          if (finishResult.status === "rejected") throw finishResult.reason;
+
+          const normalizedFinish = finishResult.value;
+          billing = {
+            usage: normalizedFinish.usage,
+            costUsd: calculateAgentCostUsd(
+              normalizedFinish.usage,
+              resolvedModel.pricing,
+            ),
+          };
+          if (pumpResult.status === "rejected") throw pumpResult.reason;
+          if (normalizedFinish.finishReason === "error") {
             throw new AgentRuntimeError("provider_error");
           }
-          const costUsd = calculateAgentCostUsd(
-            providerFinish.usage,
-            resolvedModel.pricing,
-          );
           if (
-            providerFinish.steps === MAX_AGENT_STEPS
-            && providerFinish.finishReason === "tool-calls"
+            normalizedFinish.steps === MAX_AGENT_STEPS
+            && normalizedFinish.finishReason === "tool-calls"
           ) {
             const code: AgentEscalationCode = "tool_unavailable";
             await settle("escalate", {
               completedAt: safeNow(now),
               summaryCode: code,
-              inputTokens: providerFinish.usage.inputTokens,
-              outputTokens: providerFinish.usage.outputTokens,
-              costUsd,
+              inputTokens: billing.usage.inputTokens,
+              outputTokens: billing.usage.outputTokens,
+              costUsd: billing.costUsd,
             });
             return {
               status: "escalated",
               code,
               runId,
-              usage: providerFinish.usage,
-              costUsd,
-              finishReason: providerFinish.finishReason,
-              steps: providerFinish.steps,
-              citations: [...providerFinish.citations],
+              usage: billing.usage,
+              costUsd: billing.costUsd,
+              finishReason: normalizedFinish.finishReason,
+              steps: normalizedFinish.steps,
+              citations: [...normalizedFinish.citations],
             };
           }
           await settle("finish", {
             completedAt: safeNow(now),
-            summaryCode: providerFinish.toolExecutions > 0
+            summaryCode: normalizedFinish.toolExecutions > 0
               ? "completed_with_tools"
               : "answered",
-            inputTokens: providerFinish.usage.inputTokens,
-            outputTokens: providerFinish.usage.outputTokens,
-            costUsd,
+            inputTokens: billing.usage.inputTokens,
+            outputTokens: billing.usage.outputTokens,
+            costUsd: billing.costUsd,
           });
           return {
             status: "completed",
             runId,
-            usage: providerFinish.usage,
-            costUsd,
-            finishReason: providerFinish.finishReason,
-            steps: providerFinish.steps,
-            citations: [...providerFinish.citations],
+            usage: billing.usage,
+            costUsd: billing.costUsd,
+            finishReason: normalizedFinish.finishReason,
+            steps: normalizedFinish.steps,
+            citations: [...normalizedFinish.citations],
           };
-        })
-        .catch(async (error): Promise<never> => {
-          throw await fail(error);
-        });
+        } catch (error) {
+          throw await fail(error, billing);
+        }
+      })();
 
-      const textStream: AsyncIterable<string> = {
-        async *[Symbol.asyncIterator]() {
-          try {
-            for await (const delta of providerResult.textStream) {
-              if (typeof delta !== "string") {
-                throw new AgentInvalidProviderResponseError();
-              }
-              yield delta;
-            }
-          } catch (error) {
-            throw await fail(error);
-          }
-        },
-      };
-
-      return {runId, textStream, finish};
+      return {runId, textStream: pump.textStream, finish};
     },
   };
 }

@@ -1,3 +1,4 @@
+import type {LanguageModel} from "ai";
 import {z} from "zod";
 import {describe, expect, it, vi} from "vitest";
 
@@ -120,8 +121,8 @@ describe("provider-neutral AI runtime", () => {
       profileId: "profile-1",
       trigger: "web",
     }, {
-      provider: "openai",
-      model: "gpt-4.1-mini",
+      provider: null,
+      model: null,
       startedAt: STARTED_AT,
     });
     expect(agentRuns.finish).toHaveBeenCalledOnce();
@@ -137,7 +138,7 @@ describe("provider-neutral AI runtime", () => {
     );
   });
 
-  it("normalizes, deduplicates, and bounds citations from typed runtime output", async () => {
+  it("normalizes citations while inspecting at most the configured input cap", async () => {
     const citations = Array.from({length: 12}, (_, index) => ({
       sourceId: `source-${index}`,
       title: `Source ${index}`,
@@ -174,7 +175,7 @@ describe("provider-neutral AI runtime", () => {
     const result = await runtime.stream(runtimeRequest());
     const finish = await result.finish;
 
-    expect(finish.citations).toHaveLength(8);
+    expect(finish.citations).toHaveLength(6);
     expect(finish.citations[0]).toEqual({
       sourceId: "source-0",
       title: "Source 0",
@@ -182,6 +183,9 @@ describe("provider-neutral AI runtime", () => {
     });
     expect(finish.citations).not.toContainEqual(
       expect.objectContaining({sourceId: "unsafe"}),
+    );
+    expect(finish.citations).not.toContainEqual(
+      expect.objectContaining({sourceId: "source-6"}),
     );
   });
 
@@ -496,7 +500,10 @@ describe("OpenAI AI SDK v7 adapter", () => {
       sdkOptions = options;
       return sdkResult;
     });
-    const model = {provider: "openai", modelId: "gpt-4.1-mini"};
+    const model = {
+      provider: "openai",
+      modelId: "gpt-4.1-mini",
+    } as LanguageModel;
     const modelFactory = vi.fn((modelId: string) => {
       expect(modelId).toBe("gpt-4.1-mini");
       return model;

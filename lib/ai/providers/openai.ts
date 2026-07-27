@@ -2,6 +2,7 @@ import {
   createOpenAI,
   type OpenAIProviderSettings,
 } from "@ai-sdk/openai";
+import type {LanguageModel} from "ai";
 
 import {
   createAiSdkAgentProvider,
@@ -11,7 +12,16 @@ import type {AgentProvider} from "@/lib/ai/provider";
 
 type OpenAIProviderFactory = (
   settings: OpenAIProviderSettings,
-) => (modelId: string) => unknown;
+) => (modelId: string) => LanguageModel;
+
+const createProductionOpenAIProvider = (
+  (settings: OpenAIProviderSettings) => {
+    const provider = createOpenAI(settings);
+    return (modelId: string) => provider(
+      modelId as Parameters<typeof provider>[0],
+    );
+  }
+) satisfies OpenAIProviderFactory;
 
 export type OpenAIAgentProviderDependencies = AiSdkAdapterOverrides & Readonly<{
   createProvider?: OpenAIProviderFactory;
@@ -22,7 +32,7 @@ export function createOpenAIAgentProvider(
   dependencies: OpenAIAgentProviderDependencies = {},
 ): AgentProvider {
   const providerFactory = dependencies.createProvider
-    ?? (createOpenAI as unknown as OpenAIProviderFactory);
+    ?? createProductionOpenAIProvider;
   const provider = providerFactory({apiKey});
 
   return createAiSdkAgentProvider(

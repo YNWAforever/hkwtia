@@ -2,17 +2,18 @@ import {
   stepCountIs,
   streamText,
   tool,
+  type LanguageModel,
 } from "ai";
 import type {ZodTypeAny} from "zod";
 
 import {
   AgentInvalidProviderResponseError,
   AgentToolExecutionError,
+  MAX_AGENT_CITATIONS,
   MAX_AGENT_STEPS,
   normalizeAgentCitations,
   type AgentProvider,
   type AgentStreamRequest,
-  type AgentToolResult,
   type AgentUsage,
 } from "@/lib/ai/provider";
 
@@ -26,6 +27,18 @@ type AiSdkToolDefinition = Readonly<{
   ) => Promise<unknown>;
 }>;
 
+const createAiSdkTool = (definition: AiSdkToolDefinition) => tool({
+  description: definition.description,
+  inputSchema: definition.inputSchema,
+  strict: definition.strict,
+  execute: async (input, options) => definition.execute(input, {
+    ...(options.abortSignal === undefined
+      ? {}
+      : {abortSignal: options.abortSignal}),
+  }),
+});
+
+type AiSdkStreamOptions = Parameters<typeof streamText>[0];
 type AiSdkStreamResult = Readonly<{
   textStream: AsyncIterable<string>;
   usage: PromiseLike<unknown>;
@@ -33,26 +46,27 @@ type AiSdkStreamResult = Readonly<{
   steps: PromiseLike<unknown>;
 }>;
 
-type AiSdkStreamText = (
-  options: Record<string, unknown>,
-) => AiSdkStreamResult;
-
 type AiSdkDependencies = Readonly<{
-  streamText: AiSdkStreamText;
-  createTool: (definition: AiSdkToolDefinition) => unknown;
+  streamText: (options: AiSdkStreamOptions) => AiSdkStreamResult;
+  createTool: (
+    definition: AiSdkToolDefinition,
+  ) => ReturnType<typeof createAiSdkTool>;
   createStopCondition: (
     count: number,
-  ) => (input: {steps: unknown[]}) => boolean | PromiseLike<boolean>;
+  ) => ReturnType<typeof stepCountIs>;
 }>;
 
 export type AiSdkAdapterOverrides = Partial<AiSdkDependencies>;
 
-const defaultDependencies: AiSdkDependencies = {
-  streamText: streamText as unknown as AiSdkStreamText,
-  createTool: tool as unknown as AiSdkDependencies["createTool"],
-  createStopCondition:
-    stepCountIs as unknown as AiSdkDependencies["createStopCondition"],
-};
+const productionStreamText = (
+  (options: AiSdkStreamOptions): AiSdkStreamResult => streamText(options)
+) satisfies AiSdkDependencies["streamText"];
+
+const defaultDependencies = {
+  streamText: productionStreamText,
+  createTool: createAiSdkTool,
+  createStopCondition: stepCountIs,
+} satisfies AiSdkDependencies;
 
 function normalizeUsage(value: unknown): AgentUsage {
   if (!value || typeof value !== "object") {
@@ -93,24 +107,54 @@ function normalizeSteps(value: unknown): number {
   return value.length;
 }
 
-function normalizeToolResult(value: unknown): AgentToolResult {
+function normalizeToolResult(
+  value: unknown,
+): Readonly<{value: unknown; citations: unknown}> {
   if (!value || typeof value !== "object" || !("value" in value)) {
     throw new AgentInvalidProviderResponseError();
   }
-  return value as AgentToolResult;
+  const record = value as Record<string, unknown>;
+  return {
+    value: record.value,
+    citations: record.citations,
+  };
+}
+
+function appendCitationInputs(target: unknown[], inputs: unknown): void {
+  let inputCount: number;
+  try {
+    if (!Array.isArray(inputs)) return;
+    inputCount = Math.min(
+      inputs.length,
+      MAX_AGENT_CITATIONS - target.length,
+    );
+  } catch {
+    return;
+  }
+
+  for (let index = 0; index < inputCount; index += 1) {
+    try {
+      target.push(inputs[index]);
+    } catch {
+      return;
+    }
+  }
 }
 
 export function createAiSdkAgentProvider(
-  createModel: (modelId: string) => unknown,
+  createModel: (modelId: string) => LanguageModel,
   overrides: AiSdkAdapterOverrides = {},
 ): AgentProvider {
-  const dependencies = {...defaultDependencies, ...overrides};
+  const dependencies: AiSdkDependencies = {
+    ...defaultDependencies,
+    ...overrides,
+  };
 
   return {
     stream(request: AgentStreamRequest) {
       let toolExecutions = 0;
       let toolFailure: AgentToolExecutionError | undefined;
-      const citationInputs: NonNullable<AgentToolResult["citations"]>[number][] = [];
+      const citationInputs: unknown[] = [];
       const tools = Object.fromEntries(
         Object.entries(request.tools).map(([name, agentTool]) => [
           name,
@@ -121,12 +165,14 @@ export function createAiSdkAgentProvider(
             execute: async (input, options) => {
               toolExecutions += 1;
               try {
-                const result = normalizeToolResult(await agentTool.execute(input, {
-                  ...(options.abortSignal === undefined
-                    ? {}
-                    : {abortSignal: options.abortSignal}),
-                }));
-                citationInputs.push(...(result.citations ?? []));
+                const result = normalizeToolResult(
+                  await agentTool.execute(input, {
+                    ...(options.abortSignal === undefined
+                      ? {}
+                      : {abortSignal: options.abortSignal}),
+                  }),
+                );
+                appendCitationInputs(citationInputs, result.citations);
                 return result.value;
               } catch (error) {
                 toolFailure = error instanceof AgentToolExecutionError
@@ -138,7 +184,7 @@ export function createAiSdkAgentProvider(
           }),
         ]),
       );
-      const sdkResult = dependencies.streamText({
+      const options = {
         model: createModel(request.model),
         system: request.system,
         messages: request.messages,
@@ -149,7 +195,8 @@ export function createAiSdkAgentProvider(
           ? {}
           : {abortSignal: request.abortSignal}),
         onError: () => undefined,
-      });
+      } satisfies AiSdkStreamOptions;
+      const sdkResult = dependencies.streamText(options);
 
       return {
         textStream: sdkResult.textStream,

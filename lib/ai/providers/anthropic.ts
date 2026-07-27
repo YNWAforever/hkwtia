@@ -2,6 +2,7 @@ import {
   createAnthropic,
   type AnthropicProviderSettings,
 } from "@ai-sdk/anthropic";
+import type {LanguageModel} from "ai";
 
 import {
   createAiSdkAgentProvider,
@@ -11,7 +12,16 @@ import type {AgentProvider} from "@/lib/ai/provider";
 
 type AnthropicProviderFactory = (
   settings: AnthropicProviderSettings,
-) => (modelId: string) => unknown;
+) => (modelId: string) => LanguageModel;
+
+const createProductionAnthropicProvider = (
+  (settings: AnthropicProviderSettings) => {
+    const provider = createAnthropic(settings);
+    return (modelId: string) => provider(
+      modelId as Parameters<typeof provider>[0],
+    );
+  }
+) satisfies AnthropicProviderFactory;
 
 export type AnthropicAgentProviderDependencies =
   AiSdkAdapterOverrides & Readonly<{
@@ -23,7 +33,7 @@ export function createAnthropicAgentProvider(
   dependencies: AnthropicAgentProviderDependencies = {},
 ): AgentProvider {
   const providerFactory = dependencies.createProvider
-    ?? (createAnthropic as unknown as AnthropicProviderFactory);
+    ?? createProductionAnthropicProvider;
   const provider = providerFactory({apiKey});
 
   return createAiSdkAgentProvider(
