@@ -293,6 +293,7 @@ function createEagerTextPump(
   let consumerDetached = false;
   let stopped = false;
   let sourceIterator: AsyncIterator<string> | undefined;
+  let sourceClosed = false;
 
   function compactQueue(): void {
     if (queueIndex > 128 && queueIndex * 2 >= queuedDeltas.length) {
@@ -336,15 +337,26 @@ function createEagerTextPump(
     wakeConsumer();
   }
 
+  function closeSource(): void {
+    if (sourceClosed) return;
+    sourceClosed = true;
+    const sourceReturn = sourceIterator?.return;
+    if (!sourceReturn || !sourceIterator) return;
+    try {
+      void Promise.resolve(sourceReturn.call(sourceIterator))
+        .catch(() => undefined);
+    } catch {
+      // Source cleanup is best-effort and must never delay terminal failure.
+    }
+  }
+
   function stop(error: unknown): void {
     if (stopped) return;
     stopped = true;
     failure = error;
     clearQueue();
     wakeConsumer();
-    if (sourceIterator?.return) {
-      void Promise.resolve(sourceIterator.return()).catch(() => undefined);
-    }
+    closeSource();
   }
 
   const completion = (async () => {
@@ -376,6 +388,7 @@ function createEagerTextPump(
       }
     } catch (error) {
       if (!stopped) {
+        closeSource();
         failure = error;
         throw error;
       }
