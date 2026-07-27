@@ -226,6 +226,15 @@ and indexes additively.
 - No email address, phone number, raw webhook body, provider key, cookie,
   Turnstile token, or conversation transcript.
 
+### Existing `staff_tasks` extension
+
+M4A makes `staff_tasks.profile_id` nullable for anonymous conversations and
+adds `context jsonb NOT NULL DEFAULT '{}'`. Authenticated tasks retain their
+profile foreign key. Context accepts only the route-validated contact email,
+conversation ID, agent run ID, escalation reason code, and locale; repository
+validation rejects other keys and caps serialized size. Existing M3 callers
+continue to write an empty context and a required profile.
+
 The existing `approvals`, `staff_tasks`, `profiles`, `events`, and audit tables
 remain authoritative. M4A extends their repositories but does not duplicate
 them.
