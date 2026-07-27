@@ -12,20 +12,76 @@ const repositoryOnlyRuntimeImports = new Set([
   "@/lib/db/server-schema",
 ]);
 
-function staticModuleText(expression: ts.Expression): string | null {
-  if (ts.isStringLiteralLike(expression)) return expression.text;
-  if (
-    ts.isBinaryExpression(expression)
-    && expression.operatorToken.kind === ts.SyntaxKind.PlusToken
+type ConstAliases = ReadonlyMap<string, ts.Expression>;
+
+function unwrapTransparentExpression(expression: ts.Expression): ts.Expression {
+  let current = expression;
+  while (
+    ts.isParenthesizedExpression(current)
+    || ts.isAsExpression(current)
+    || ts.isSatisfiesExpression(current)
+    || ts.isNonNullExpression(current)
+    || ts.isTypeAssertionExpression(current)
   ) {
-    const left = staticModuleText(expression.left);
-    const right = staticModuleText(expression.right);
+    current = current.expression;
+  }
+  return current;
+}
+
+function collectConstAliases(sourceFile: ts.SourceFile): ConstAliases {
+  const candidates = new Map<string, ts.Expression>();
+  const ambiguous = new Set<string>();
+  function visit(node: ts.Node): void {
+    if (
+      ts.isVariableDeclaration(node)
+      && ts.isIdentifier(node.name)
+      && node.initializer
+      && ts.isVariableDeclarationList(node.parent)
+      && Boolean(node.parent.flags & ts.NodeFlags.Const)
+    ) {
+      const name = node.name.text;
+      if (candidates.has(name)) {
+        candidates.delete(name);
+        ambiguous.add(name);
+      } else if (!ambiguous.has(name)) {
+        candidates.set(name, node.initializer);
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  return candidates;
+}
+
+function staticModuleText(
+  expression: ts.Expression,
+  aliases: ConstAliases,
+  resolving: ReadonlySet<string> = new Set(),
+): string | null {
+  const current = unwrapTransparentExpression(expression);
+  if (ts.isIdentifier(current)) {
+    if (resolving.has(current.text)) return null;
+    const initializer = aliases.get(current.text);
+    if (!initializer) return null;
+    return staticModuleText(
+      initializer,
+      aliases,
+      new Set([...resolving, current.text]),
+    );
+  }
+  if (ts.isStringLiteralLike(current)) return current.text;
+  if (
+    ts.isBinaryExpression(current)
+    && current.operatorToken.kind === ts.SyntaxKind.PlusToken
+  ) {
+    const left = staticModuleText(current.left, aliases, resolving);
+    const right = staticModuleText(current.right, aliases, resolving);
     return left === null || right === null ? null : left + right;
   }
-  if (ts.isTemplateExpression(expression)) {
-    let value = expression.head.text;
-    for (const span of expression.templateSpans) {
-      const interpolated = staticModuleText(span.expression);
+  if (ts.isTemplateExpression(current)) {
+    let value = current.head.text;
+    for (const span of current.templateSpans) {
+      const interpolated = staticModuleText(span.expression, aliases, resolving);
       if (interpolated === null) return null;
       value += interpolated + span.literal.text;
     }
@@ -34,40 +90,62 @@ function staticModuleText(expression: ts.Expression): string | null {
   return null;
 }
 
-function leadingStaticModuleText(expression: ts.Expression): string {
-  if (ts.isStringLiteralLike(expression)) return expression.text;
-  if (ts.isTemplateExpression(expression)) return expression.head.text;
+function leadingStaticModuleText(
+  expression: ts.Expression,
+  aliases: ConstAliases,
+  resolving: ReadonlySet<string> = new Set(),
+): string {
+  const current = unwrapTransparentExpression(expression);
+  if (ts.isIdentifier(current)) {
+    if (resolving.has(current.text)) return "";
+    const initializer = aliases.get(current.text);
+    if (!initializer) return "";
+    return leadingStaticModuleText(
+      initializer,
+      aliases,
+      new Set([...resolving, current.text]),
+    );
+  }
+  if (ts.isStringLiteralLike(current)) return current.text;
+  if (ts.isTemplateExpression(current)) return current.head.text;
   if (
-    ts.isBinaryExpression(expression)
-    && expression.operatorToken.kind === ts.SyntaxKind.PlusToken
+    ts.isBinaryExpression(current)
+    && current.operatorToken.kind === ts.SyntaxKind.PlusToken
   ) {
-    const left = staticModuleText(expression.left);
-    return left ?? leadingStaticModuleText(expression.left);
+    const left = staticModuleText(current.left, aliases, resolving);
+    return left ?? leadingStaticModuleText(current.left, aliases, resolving);
   }
   return "";
 }
 
-function classifiedDatabaseSpecifier(expression: ts.Expression): string | null {
-  const exact = staticModuleText(expression);
+function classifiedDatabaseSpecifier(
+  expression: ts.Expression,
+  aliases: ConstAliases,
+): string | null {
+  const exact = staticModuleText(expression, aliases);
   if (exact !== null) return repositoryOnlyRuntimeImports.has(exact) ? exact : null;
-  const prefix = leadingStaticModuleText(expression);
+  const prefix = leadingStaticModuleText(expression, aliases);
   return prefix && [...repositoryOnlyRuntimeImports].some((specifier) => specifier.startsWith(prefix))
     ? "@/lib/db/*"
     : null;
 }
 
-function runtimeDatabaseImportSpecifiers(source: string): string[] {
+function runtimeDatabaseImportSpecifiers(
+  source: string,
+  scriptKind: ts.ScriptKind = ts.ScriptKind.TS,
+): string[] {
   const sourceFile = ts.createSourceFile(
     "candidate.ts",
     source,
     ts.ScriptTarget.Latest,
     true,
-    ts.ScriptKind.TSX,
+    scriptKind,
   );
   const specifiers = new Set<string>();
+  const aliases = collectConstAliases(sourceFile);
 
   function addExpression(expression: ts.Expression): void {
-    const specifier = classifiedDatabaseSpecifier(expression);
+    const specifier = classifiedDatabaseSpecifier(expression, aliases);
     if (specifier) specifiers.add(specifier);
   }
 
@@ -113,10 +191,11 @@ function runtimeDatabaseImportSpecifiers(source: string): string[] {
       return;
     }
 
-    if (ts.isCallExpression(node) && node.arguments.length === 1) {
+    if (ts.isCallExpression(node) && node.arguments.length > 0) {
       const isDynamicImport = node.expression.kind === ts.SyntaxKind.ImportKeyword;
       const isRequire = ts.isIdentifier(node.expression) && node.expression.text === "require";
-      if (isDynamicImport || isRequire) addExpression(node.arguments[0]);
+      const firstArgument = node.arguments[0];
+      if ((isDynamicImport || isRequire) && firstArgument) addExpression(firstArgument);
     }
 
     ts.forEachChild(node, visit);
@@ -153,7 +232,10 @@ describe("repository database boundary", () => {
       const relativePath = relative(root, file).replaceAll("\\", "/");
       if (relativePath.startsWith("db/repos/")) continue;
       const source = await readFile(file, "utf8");
-      for (const specifier of runtimeDatabaseImportSpecifiers(source)) {
+      const scriptKind = file.endsWith(".tsx")
+        ? ts.ScriptKind.TSX
+        : ts.ScriptKind.TS;
+      for (const specifier of runtimeDatabaseImportSpecifiers(source, scriptKind)) {
         violations.push(`${relativePath}: ${specifier}`);
       }
     }
@@ -208,6 +290,68 @@ describe("repository database boundary", () => {
     'export {type Profile, type Company} from "@/lib/db/server-schema";',
     'export type * from "@/lib/db/server-schema";',
   ])("allows type-only database module syntax: %s", (source) => {
+    expect(runtimeDatabaseImportSpecifiers(source)).toEqual([]);
+  });
+
+  it.each([
+    [
+      "parenthesized expression",
+      'void import(("@/lib/db/server-schema"));',
+      "@/lib/db/server-schema",
+    ],
+    [
+      "as expression",
+      'void import("@/lib/db/server-schema" as string);',
+      "@/lib/db/server-schema",
+    ],
+    [
+      "satisfies expression",
+      'void import("@/lib/db/server-schema" satisfies string);',
+      "@/lib/db/server-schema",
+    ],
+    [
+      "non-null expression",
+      'void import("@/lib/db/server-schema"!);',
+      "@/lib/db/server-schema",
+    ],
+    [
+      "type assertion expression",
+      'void import(<string>"@/lib/db/server-schema");',
+      "@/lib/db/server-schema",
+    ],
+    [
+      "wrapped require",
+      'const schema = require((("@/lib/db/server-schema" as string)!));',
+      "@/lib/db/server-schema",
+    ],
+    [
+      "direct const alias",
+      'const schemaPath = "@/lib/db/server-schema" as const; void import(schemaPath);',
+      "@/lib/db/server-schema",
+    ],
+    [
+      "const alias chain",
+      'const first = "@/lib/db/server-schema"; const second = first; void import(second);',
+      "@/lib/db/server-schema",
+    ],
+    [
+      "const alias with unresolved DB prefix",
+      'declare const name: string; const path = "@/lib/db/" + name; void import(path);',
+      "@/lib/db/*",
+    ],
+    [
+      "two-argument dynamic import",
+      'void import("@/lib/db/server-schema", {with: {type: "json"}});',
+      "@/lib/db/server-schema",
+    ],
+  ])("normalizes and resolves %s", (_name, source, expectedSpecifier) => {
+    expect(runtimeDatabaseImportSpecifiers(source)).toContain(expectedSpecifier);
+  });
+
+  it.each([
+    "const first = second; const second = first; void import(first);",
+    "declare const unknownPath: string; void import(unknownPath);",
+  ])("handles cyclic or unknown aliases without classifying: %s", (source) => {
     expect(runtimeDatabaseImportSpecifiers(source)).toEqual([]);
   });
 
