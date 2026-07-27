@@ -10,6 +10,7 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
 
 import {companiesRepository} from "@/lib/db/repos/companies";
 import {createApprovalsRepository} from "@/lib/db/repos/approvals";
+import {createAgentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {createConversationsRepository} from "@/lib/db/repos/conversations";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
@@ -434,4 +435,24 @@ describe("production repository security boundaries", () => {
     )).rejects.toMatchObject({code: "FORBIDDEN"});
     expect(loadDatabase).not.toHaveBeenCalled();
   });
+
+  it.each(["finish", "fail", "escalate", "disable"] as const)(
+    "authorizes %s before validating attacker-controlled input or opening the database",
+    async (method) => {
+      const loadDatabase = vi.fn();
+      const repository = createAgentRunsRepository(loadDatabase);
+      const inputByMethod = {
+        finish: {completedAt: "invalid", summary: "Alice Chan"},
+        fail: {completedAt: "invalid", errorCode: '{"token":"secret"}'},
+        escalate: {completedAt: "invalid", summary: "1 Queen's Road Central"},
+        disable: {completedAt: "invalid", summary: "A123456(7)"},
+      } as const;
+
+      await expect(repository[method](
+        actor as never,
+        inputByMethod[method] as never,
+      )).rejects.toMatchObject({code: "FORBIDDEN"});
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
 });

@@ -205,8 +205,7 @@ export function createConversationsRepository(
       const database = await loadDatabase();
       await getOwnedFrom(database, owner, parsedId);
       const providerMessageId = parsed.providerMessageId ?? null;
-      const row = rowsFrom(await database.execute(sql`
-        WITH inserted AS (
+      let row = rowsFrom(await database.execute(sql`
           INSERT INTO ${messages}
             (
               conversation_id,
@@ -229,39 +228,36 @@ export function createConversationsRepository(
           ON CONFLICT (provider_message_id)
             WHERE provider_message_id IS NOT NULL
           DO NOTHING
-          RETURNING *
-        ),
-        selected AS (
-          SELECT inserted.*, 'created'::text AS disposition
-          FROM inserted
-          UNION ALL
+          RETURNING *, 'created'::text AS disposition
+      `))[0];
+
+      // A conflicting INSERT can wait for another transaction, but every CTE in
+      // that statement still shares the original PostgreSQL snapshot. Read the
+      // winner in a new statement so the post-wait snapshot can see it.
+      if (!row && providerMessageId !== null) {
+        row = rowsFrom(await database.execute(sql`
           SELECT existing.*, 'existing'::text AS disposition
           FROM ${messages} AS existing
-          WHERE ${providerMessageId} IS NOT NULL
-            AND existing.conversation_id = ${parsedId}
+          WHERE existing.conversation_id = ${parsedId}
             AND existing.provider_message_id = ${providerMessageId}
-            AND NOT EXISTS (SELECT 1 FROM inserted)
           LIMIT 1
-        ),
-        touched AS (
-          UPDATE ${conversations}
-          SET
-            last_message_at = GREATEST(
-              COALESCE(last_message_at, (SELECT created_at FROM selected)),
-              (SELECT created_at FROM selected)
-            ),
-            updated_at = GREATEST(updated_at, (SELECT created_at FROM selected))
-          WHERE id = ${parsedId}
-            AND EXISTS (SELECT 1 FROM selected)
-          RETURNING id
-        )
-        SELECT selected.*
-        FROM selected, touched
-        LIMIT 1
-      `))[0];
+        `))[0];
+      }
+
       if (!row) throw new Error("MESSAGE_CREATE_CONFLICT");
+      const message = messageFrom(row);
+      await database.execute(sql`
+        UPDATE ${conversations}
+        SET
+          last_message_at = GREATEST(
+            COALESCE(last_message_at, ${message.createdAt}),
+            ${message.createdAt}
+          ),
+          updated_at = GREATEST(updated_at, ${message.createdAt})
+        WHERE id = ${parsedId}
+      `);
       return {
-        ...messageFrom(row),
+        ...message,
         disposition: String(row.disposition) as AppendedMessage["disposition"],
       };
     },

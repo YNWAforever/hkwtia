@@ -2,10 +2,41 @@ import {mkdtemp, readdir, readFile, rm, writeFile} from "node:fs/promises";
 import {tmpdir} from "node:os";
 import {join, relative, resolve} from "node:path";
 
+import ts from "typescript";
 import {describe, expect, it} from "vitest";
 
 const root = resolve(process.cwd(), "lib");
-const forbiddenImports = ["@/lib/db/client", "@/lib/db/repos/common"];
+const repositoryOnlyRuntimeImports = new Set([
+  "@/lib/db/client",
+  "@/lib/db/repos/common",
+  "@/lib/db/server-schema",
+]);
+
+function runtimeDatabaseImportSpecifiers(source: string): string[] {
+  const sourceFile = ts.createSourceFile(
+    "candidate.ts",
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
+  const specifiers: string[] = [];
+  for (const statement of sourceFile.statements) {
+    if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue;
+    const specifier = statement.moduleSpecifier.text;
+    if (!repositoryOnlyRuntimeImports.has(specifier)) continue;
+    const clause = statement.importClause;
+    if (clause?.isTypeOnly) continue;
+    const bindings = clause?.namedBindings;
+    const isRuntime = !clause
+      || Boolean(clause.name)
+      || (bindings && ts.isNamespaceImport(bindings))
+      || (bindings && ts.isNamedImports(bindings)
+        && (bindings.elements.length === 0 || bindings.elements.some((element) => !element.isTypeOnly)));
+    if (isRuntime) specifiers.push(specifier);
+  }
+  return specifiers;
+}
 
 async function productionTypeScriptFiles(directory: string): Promise<string[]> {
   const entries = await readdir(directory, {withFileTypes: true});
@@ -28,16 +59,30 @@ describe("repository database boundary", () => {
     }
   });
 
-  it("allows database client and common repository imports only within repositories", async () => {
+  it("allows runtime database imports only within repositories", async () => {
     const violations: string[] = [];
     for (const file of await productionTypeScriptFiles(root)) {
       const relativePath = relative(root, file).replaceAll("\\", "/");
       if (relativePath.startsWith("db/repos/")) continue;
       const source = await readFile(file, "utf8");
-      if (forbiddenImports.some((specifier) => source.includes(specifier))) violations.push(relativePath);
+      for (const specifier of runtimeDatabaseImportSpecifiers(source)) {
+        violations.push(`${relativePath}: ${specifier}`);
+      }
     }
 
     expect(violations).toEqual([]);
+  });
+
+  it("distinguishes runtime server-schema imports from type-only imports", () => {
+    expect(runtimeDatabaseImportSpecifiers(
+      'import {profiles} from "@/lib/db/server-schema";',
+    )).toEqual(["@/lib/db/server-schema"]);
+    expect(runtimeDatabaseImportSpecifiers(
+      'import type {Profile} from "@/lib/db/server-schema";',
+    )).toEqual([]);
+    expect(runtimeDatabaseImportSpecifiers(
+      'import {type Profile} from "@/lib/db/server-schema";',
+    )).toEqual([]);
   });
 
   it("keeps the Concierge actor outside the general membership Actor union", async () => {

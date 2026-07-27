@@ -139,14 +139,15 @@ describe("AI conversation repository", () => {
   });
 
   it.each([
-    [profileOwner, otherOwner],
-    [anonymousOwner, otherAnonymousOwner],
-  ] as const)("denies cross-owner reads for %o", async (owner, deniedOwner) => {
+    [profileOwner, otherOwner, /profile_id.*anonymous_owner_hash.*IS NULL/i],
+    [anonymousOwner, otherAnonymousOwner, /profile_id.*IS NULL.*anonymous_owner_hash/i],
+  ] as const)("denies cross-owner reads for %o", async (owner, deniedOwner, expectedPredicate) => {
     const allowed = sequenceDatabase([[conversationRow()]]);
     await expect(
       createConversationsRepository(async () => allowed.database)
         .getOwned(owner, conversationId),
     ).resolves.toMatchObject({id: conversationId});
+    expect(allowed.commands[0]?.sql).toMatch(expectedPredicate);
 
     const denied = sequenceDatabase([[]]);
     await expect(
@@ -161,6 +162,7 @@ describe("AI conversation repository", () => {
     const created = sequenceDatabase([
       [conversationRow()],
       [messageRow({provider_message_id: providerMessageId})],
+      [],
     ]);
     const repository = createConversationsRepository(async () => created.database);
     await expect(repository.appendMessage(profileOwner, conversationId, {
@@ -170,10 +172,16 @@ describe("AI conversation repository", () => {
       providerMessageId,
     })).resolves.toMatchObject({disposition: "created"});
     expect(created.commands[1]?.sql).toMatch(/ON CONFLICT.*provider_message_id.*DO NOTHING/i);
+    expect(created.commands[0]?.sql).toMatch(/profile_id.*anonymous_owner_hash.*IS NULL/i);
+    expect(created.commands[0]?.params).toEqual(expect.arrayContaining([conversationId, "profile-1"]));
+    expect(created.commands[1]?.params).toContain(conversationId);
+    expect(created.commands[2]?.params).toContain(conversationId);
 
     const existing = sequenceDatabase([
       [conversationRow()],
+      [],
       [messageRow({provider_message_id: providerMessageId, disposition: "existing"})],
+      [],
     ]);
     await expect(
       createConversationsRepository(async () => existing.database)
@@ -184,7 +192,30 @@ describe("AI conversation repository", () => {
           providerMessageId,
         }),
     ).resolves.toMatchObject({disposition: "existing"});
-    expect(existing.commands[1]?.sql).toMatch(/conversation_id.*provider_message_id/i);
+    expect(existing.commands[2]?.sql).toMatch(/conversation_id.*provider_message_id/i);
+    expect(existing.commands[2]?.params).toEqual(
+      expect.arrayContaining([conversationId, providerMessageId]),
+    );
+    expect(existing.commands[2]?.sql).toMatch(/^SELECT/i);
+
+    const crossConversation = sequenceDatabase([
+      [conversationRow()],
+      [],
+      [],
+    ]);
+    await expect(
+      createConversationsRepository(async () => crossConversation.database)
+        .appendMessage(profileOwner, conversationId, {
+          role: "user",
+          channel: "web",
+          content: "Do not leak another conversation",
+          providerMessageId,
+        }),
+    ).rejects.toThrow("MESSAGE_CREATE_CONFLICT");
+    expect(crossConversation.commands[2]?.sql).toMatch(/conversation_id.*provider_message_id/i);
+    expect(crossConversation.commands[2]?.params).toEqual(
+      expect.arrayContaining([conversationId, providerMessageId]),
+    );
   });
 
   it("lists messages only after an ownership check", async () => {
@@ -196,6 +227,10 @@ describe("AI conversation repository", () => {
       createConversationsRepository(async () => allowed.database)
         .listMessages(profileOwner, conversationId),
     ).resolves.toMatchObject([{content: "Hello"}]);
+    expect(allowed.commands[0]?.sql).toMatch(/profile_id.*anonymous_owner_hash.*IS NULL/i);
+    expect(allowed.commands[0]?.params).toEqual(expect.arrayContaining([conversationId, "profile-1"]));
+    expect(allowed.commands[1]?.sql).toMatch(/WHERE .*conversation_id/i);
+    expect(allowed.commands[1]?.params).toContain(conversationId);
 
     const denied = sequenceDatabase([[]]);
     await expect(
@@ -242,7 +277,7 @@ describe("agent-run repository lifecycle", () => {
         input_tokens: 12,
         output_tokens: 6,
         cost_usd: "0.001200",
-        summary: "Contact [redacted-email] at [redacted-phone]",
+        summary: "answered",
       })],
     ]);
     const repository = createAgentRunsRepository(async () => fake.database);
@@ -257,26 +292,25 @@ describe("agent-run repository lifecycle", () => {
       inputTokens: 12,
       outputTokens: 6,
       costUsd: "0.001200",
-      summary: "Contact person@example.com at +852 9123 4567",
+      summaryCode: "answered",
     })).resolves.toMatchObject({
       status: "completed",
       latencyMs: 1_250,
-      summary: "Contact [redacted-email] at [redacted-phone]",
+      summary: "answered",
     });
     expect(fake.commands[1]?.sql).toMatch(/status = 'completed'.*status = 'running'/i);
     expect(fake.commands[1]?.sql).toMatch(/started_at/i);
-    expect(fake.commands[1]?.params).not.toContain("person@example.com");
-    expect(fake.commands[1]?.params).not.toContain("+852 9123 4567");
+    expect(fake.commands[1]?.params).toContain("answered");
   });
 
   it.each([
     ["failed", "fail", {errorCode: "provider_error"}],
-    ["escalated", "escalate", {summary: "Needs staff follow-up"}],
-    ["disabled", "disable", {summary: "Feature disabled"}],
+    ["escalated", "escalate", {summaryCode: "human_requested"}],
+    ["disabled", "disable", {summaryCode: "agent_disabled"}],
   ] as const)("supports running -> %s and rejects an already-terminal run", async (status, method, extra) => {
     const transitioned = sequenceDatabase([[
       runRow({status, completed_at: completedAt, latency_ms: 1_250, ...(
-        "errorCode" in extra ? {error_code: extra.errorCode} : {summary: extra.summary}
+        "errorCode" in extra ? {error_code: extra.errorCode} : {summary: extra.summaryCode}
       )}),
     ]]);
     const repository = createAgentRunsRepository(async () => transitioned.database);
@@ -311,30 +345,72 @@ describe("agent-run repository lifecycle", () => {
     ).rejects.toMatchObject({code: "FORBIDDEN"});
   });
 
-  it("redacts auth tokens, cookies, and webhook signatures from summaries", async () => {
-    const fake = sequenceDatabase([[
-      runRow({
-        status: "completed",
-        completed_at: completedAt,
-        latency_ms: 1_250,
-        summary: "Authorization=[redacted-secret] Cookie=[redacted-secret] webhook_signature=[redacted-secret]",
-      }),
-    ]]);
-    const sensitive = [
-      "Bearer sk-secret-token-123456",
-      "session=private-cookie-123456",
-      "whsec_private-webhook-123456",
-    ];
-    await createAgentRunsRepository(async () => fake.database).finish(agent, {
+  it.each([
+    ["finish", {completedAt, summaryCode: "Alice Chan"}],
+    ["finish", {completedAt, summaryCode: "1 Queen's Road Central"}],
+    ["finish", {completedAt, summaryCode: "A123456(7)"}],
+    ["finish", {completedAt, summaryCode: '{"token":"secret"}'}],
+    ["fail", {completedAt, errorCode: '{"token":"secret"}'}],
+    ["escalate", {completedAt, summaryCode: "Authorization: Bearer private"}],
+    ["disable", {completedAt, summaryCode: "session=private-cookie"}],
+  ] as const)(
+    "rejects non-allowlisted operational data for %s before database access",
+    async (method, input) => {
+      let databaseLoads = 0;
+      const repository = createAgentRunsRepository(async () => {
+        databaseLoads += 1;
+        return sequenceDatabase([]).database;
+      });
+
+      await expect(repository[method](agent, input as never)).rejects.toThrow();
+      expect(databaseLoads).toBe(0);
+    },
+  );
+
+  it("rejects a terminal timestamp earlier than started_at without clamping latency", async () => {
+    const earlier = new Date("2027-04-10T09:59:59.000Z");
+    const fake = sequenceDatabase([[]]);
+    const repository = createAgentRunsRepository(async () => fake.database);
+
+    await expect(repository.finish(agent, {
+      completedAt: earlier,
+      summaryCode: "answered",
+    })).rejects.toThrow("INVALID_AGENT_RUN_TRANSITION");
+
+    expect(fake.commands[0]?.sql).toMatch(/started_at/i);
+    expect(fake.commands[0]?.sql).toMatch(/>=/);
+    expect(fake.commands[0]?.sql).not.toMatch(/GREATEST/i);
+    expect(fake.commands[0]?.params).toEqual(expect.arrayContaining([
+      runId,
+      conversationId,
+      "profile-1",
+      "web",
+      earlier,
+    ]));
+  });
+
+  it("uses concrete actor predicates in the run lifecycle update", async () => {
+    const fake = sequenceDatabase([[runRow({
+      status: "escalated",
+      completed_at: completedAt,
+      latency_ms: 1_250,
+      summary: "human_requested",
+    })]]);
+
+    await createAgentRunsRepository(async () => fake.database).escalate(agent, {
       completedAt,
-      summary: "Authorization: " + sensitive[0]
-        + " Cookie: " + sensitive[1]
-        + " webhook_signature=" + sensitive[2],
+      summaryCode: "human_requested",
     });
 
-    const persisted = JSON.stringify(fake.commands[0]?.params);
-    for (const secret of sensitive) expect(persisted).not.toContain(secret);
-    expect(persisted).toContain("[redacted-secret]");
+    for (const predicate of ["id", "conversation_id", "profile_id", "trigger", "status", "started_at"]) {
+      expect(fake.commands[0]?.sql.toLowerCase()).toContain(predicate);
+    }
+    expect(fake.commands[0]?.params).toEqual(expect.arrayContaining([
+      runId,
+      conversationId,
+      "profile-1",
+      "web",
+    ]));
   });
 
   it("records CSAT for the matching anonymous hash and denies another hash", async () => {
@@ -377,7 +453,7 @@ describe("agent staff-task escalation repository", () => {
       journey_state_id: null,
       kind: "concierge_escalation",
       dedupe_key: "agent-run:" + runId,
-      summary_code: "Contact [redacted-email] at [redacted-phone]",
+      summary_code: "human_requested",
       context,
       status: "open",
     };
@@ -389,15 +465,17 @@ describe("agent staff-task escalation repository", () => {
       journeyStateId: null,
       kind: "concierge_escalation",
       dedupeKey: "agent-run:" + runId,
-      summaryCode: "Contact guest@example.com at +852 9123 4567",
+      summaryCode: "human_requested",
       context,
     })).resolves.toMatchObject({
       disposition: "created",
       record: {profileId: null, context},
     });
 
-    expect(fake.commands[0]?.params).not.toContain("guest@example.com at +852 9123 4567");
-    expect(fake.commands[0]?.params).toContain("Contact [redacted-email] at [redacted-phone]");
+    expect(fake.commands[0]?.params).toContain("human_requested");
+    expect(JSON.stringify(fake.commands[0]?.params)).toContain(conversationId);
+    expect(JSON.stringify(fake.commands[0]?.params)).toContain(runId);
+    expect(fake.commands[0]?.sql).toMatch(/profile_id.*context/i);
   });
 
   it("rejects wrong actor context, unknown context keys, and oversized context before database access", async () => {
@@ -411,7 +489,7 @@ describe("agent staff-task escalation repository", () => {
       journeyStateId: null,
       kind: "concierge_escalation",
       dedupeKey: "agent-run:" + runId,
-      summaryCode: "human_requested",
+      summaryCode: "human_requested" as const,
     };
 
     await expect(repository.createOnce(anonymousAgent, {
@@ -429,6 +507,30 @@ describe("agent staff-task escalation repository", () => {
     expect(databaseLoads).toBe(0);
   });
 
+  it.each([
+    "Alice Chan",
+    "1 Queen's Road Central",
+    "A123456(7)",
+    '{"token":"secret"}',
+    "Contact guest@example.com",
+  ])("rejects agent staff-task operational data %s before database access", async (summaryCode) => {
+    let databaseLoads = 0;
+    const repository = createStaffTasksRepository(async () => {
+      databaseLoads += 1;
+      return sequenceDatabase([]).database;
+    });
+
+    await expect(repository.createOnce(anonymousAgent, {
+      profileId: null,
+      journeyStateId: null,
+      kind: "concierge_escalation",
+      dedupeKey: "agent-run:" + runId,
+      summaryCode,
+      context,
+    } as never)).rejects.toThrow();
+    expect(databaseLoads).toBe(0);
+  });
+
   it("preserves M3 automation input defaults and requires its existing profile", async () => {
     const system = {kind: "system", userId: null, source: "stripe-webhook"} as const;
     const fake = sequenceDatabase([]);
@@ -441,6 +543,35 @@ describe("agent staff-task escalation repository", () => {
       summaryCode: "automation",
     } as never)).rejects.toThrow("AUTOMATION_STAFF_TASK_PROFILE_REQUIRED");
     expect(fake.commands).toEqual([]);
+  });
+
+  it("preserves the legacy M3 automation summary-code contract", async () => {
+    const system = {kind: "system", userId: null, source: "stripe-webhook"} as const;
+    const legacySummary = "Legacy M3 summary with spaces and authored detail";
+    const row = {
+      id: "55555555-5555-4555-8555-555555555555",
+      profile_id: "profile-1",
+      journey_state_id: "journey-1",
+      kind: "automation",
+      dedupe_key: "automation:legacy-summary",
+      summary_code: legacySummary,
+      context: {},
+      status: "open",
+    };
+    const fake = sequenceDatabase([[row]]);
+
+    await expect(createStaffTasksRepository(async () => fake.database).createOnce(system, {
+      profileId: "profile-1",
+      journeyStateId: "journey-1",
+      kind: "automation",
+      dedupeKey: "automation:legacy-summary",
+      summaryCode: legacySummary,
+    })).resolves.toMatchObject({
+      disposition: "created",
+      record: {summaryCode: legacySummary},
+    });
+
+    expect(fake.commands[0]?.params).toContain(legacySummary);
   });
 
   it("does not return another task when an agent dedupe key collides", async () => {
@@ -474,8 +605,13 @@ describe("agent staff-task escalation repository", () => {
           context,
         }),
     ).rejects.toThrow("STAFF_TASK_DEDUPE_CONFLICT");
+    expect(fake.commands[1]?.sql).toMatch(/profile_id.*IS NOT DISTINCT FROM/i);
     expect(fake.commands[1]?.sql).toMatch(/conversationId|conversation_id/i);
     expect(fake.commands[1]?.sql).toMatch(/agentRunId|agent_run_id/i);
+    expect(fake.commands[1]?.params).toEqual(expect.arrayContaining([
+      runId,
+      conversationId,
+    ]));
   });
 });
 

@@ -13,7 +13,6 @@ import {
 } from "@/lib/auth/automation-actor";
 import {staffTasks} from "@/lib/db/server-schema";
 import type {AutomationDatabase, AutomationDatabaseLoader, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
-import {redactRepositorySummary} from "@/lib/db/repos/redaction";
 import {getDb} from "@/lib/db/repos/common";
 
 export type StaffTaskContext = Readonly<{
@@ -36,8 +35,20 @@ export type StaffTaskInput = StaffTaskFields & Readonly<{
   profileId: string;
 }>;
 
-export type AgentStaffTaskInput = StaffTaskFields & Readonly<{
+const agentStaffTaskSummaryCodeSchema = z.enum([
+  "human_requested",
+  "policy_boundary",
+  "low_confidence",
+  "tool_unavailable",
+  "provider_handoff",
+]);
+
+export type AgentStaffTaskSummaryCode =
+  z.infer<typeof agentStaffTaskSummaryCodeSchema>;
+
+export type AgentStaffTaskInput = Omit<StaffTaskFields, "summaryCode"> & Readonly<{
   profileId: string | null;
+  summaryCode: AgentStaffTaskSummaryCode;
 }>;
 
 type AnyStaffTaskInput = StaffTaskFields & Readonly<{
@@ -200,12 +211,16 @@ export function createStaffTasksRepository(
         throw new Error("INVALID_AGENT_STAFF_TASK");
       }
     } else {
+      // M3 automation callers intentionally retain their authored summary-code contract.
+      // Only Concierge-generated operational data is constrained to the enum above.
       if (parsed.profileId === null) {
         throw new Error("AUTOMATION_STAFF_TASK_PROFILE_REQUIRED");
       }
     }
 
-    const summaryCode = redactRepositorySummary(parsed.summaryCode);
+    const summaryCode = actor.kind === "agent"
+      ? agentStaffTaskSummaryCodeSchema.parse(parsed.summaryCode)
+      : parsed.summaryCode;
     const database = await loadDatabase();
     const result = await database.execute(sql`
       INSERT INTO ${staffTasks}

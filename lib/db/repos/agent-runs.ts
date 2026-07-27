@@ -13,7 +13,6 @@ import type {
   AutomationDatabaseLoader,
 } from "@/lib/db/repos/journeys";
 import type {ConversationOwner} from "@/lib/db/repos/conversations";
-import {redactRepositorySummary} from "@/lib/db/repos/redaction";
 import {agentRuns, conversations} from "@/lib/db/server-schema";
 import {forbidden} from "@/lib/membership/lifecycle";
 
@@ -48,20 +47,46 @@ const usageSchema = {
   outputTokens: z.number().int().nonnegative().optional(),
   costUsd: z.string().regex(/^\d+(?:\.\d{1,6})?$/).optional(),
 };
+const completedSummaryCodeSchema = z.enum([
+  "answered",
+  "completed_with_tools",
+]);
+const failureCodeSchema = z.enum([
+  "provider_error",
+  "invalid_provider_response",
+  "tool_error",
+  "timeout",
+  "rate_limited",
+  "configuration_error",
+]);
+const escalationSummaryCodeSchema = z.enum([
+  "human_requested",
+  "policy_boundary",
+  "low_confidence",
+  "tool_unavailable",
+]);
+const disabledSummaryCodeSchema = z.enum([
+  "agent_disabled",
+  "channel_disabled",
+]);
 const finishInputSchema = z.object({
   completedAt: z.date().refine((value) => Number.isFinite(value.getTime())),
-  summary: z.string().min(1).max(10_000),
+  summaryCode: completedSummaryCodeSchema,
   ...usageSchema,
 }).strict();
 const failInputSchema = z.object({
   completedAt: z.date().refine((value) => Number.isFinite(value.getTime())),
-  errorCode: z.string().regex(/^[a-z0-9][a-z0-9_.-]{0,99}$/),
-  summary: z.string().min(1).max(10_000).optional(),
+  errorCode: failureCodeSchema,
   ...usageSchema,
 }).strict();
-const summaryTransitionInputSchema = z.object({
+const escalationInputSchema = z.object({
   completedAt: z.date().refine((value) => Number.isFinite(value.getTime())),
-  summary: z.string().min(1).max(10_000),
+  summaryCode: escalationSummaryCodeSchema,
+  ...usageSchema,
+}).strict();
+const disabledInputSchema = z.object({
+  completedAt: z.date().refine((value) => Number.isFinite(value.getTime())),
+  summaryCode: disabledSummaryCodeSchema,
   ...usageSchema,
 }).strict();
 const scoreSchema = z.number().int().min(1).max(5);
@@ -173,10 +198,7 @@ async function transition(
       input_tokens = ${values.inputTokens},
       output_tokens = ${values.outputTokens},
       cost_usd = ${values.costUsd},
-      latency_ms = GREATEST(
-        0,
-        FLOOR(EXTRACT(EPOCH FROM (${values.completedAt} - started_at)) * 1000)::int
-      ),
+      latency_ms = FLOOR(EXTRACT(EPOCH FROM (${values.completedAt} - started_at)) * 1000)::int,
       summary = ${values.summary},
       error_code = ${values.errorCode},
       completed_at = ${values.completedAt},
@@ -186,6 +208,7 @@ async function transition(
       AND profile_id IS NOT DISTINCT FROM ${actor.profileId}
       AND trigger = ${actor.trigger}
       AND status = 'running'
+      AND ${values.completedAt} >= started_at
     RETURNING *
   `));
   if (!rows[0]) throw new Error("INVALID_AGENT_RUN_TRANSITION");
@@ -251,42 +274,44 @@ export function createAgentRunsRepository(
     },
 
     async finish(actor: ConciergeAgentActor, input: unknown): Promise<AgentRunRecord> {
+      requireConciergeAgent(actor);
       const parsed = finishInputSchema.parse(input);
       return transition(await loadDatabase(), actor, "completed", {
         completedAt: parsed.completedAt,
-        summary: redactRepositorySummary(parsed.summary),
+        summary: parsed.summaryCode,
         errorCode: null,
         ...usageFrom(parsed),
       });
     },
 
     async fail(actor: ConciergeAgentActor, input: unknown): Promise<AgentRunRecord> {
+      requireConciergeAgent(actor);
       const parsed = failInputSchema.parse(input);
       return transition(await loadDatabase(), actor, "failed", {
         completedAt: parsed.completedAt,
-        summary: parsed.summary
-          ? redactRepositorySummary(parsed.summary)
-          : null,
+        summary: null,
         errorCode: parsed.errorCode,
         ...usageFrom(parsed),
       });
     },
 
     async escalate(actor: ConciergeAgentActor, input: unknown): Promise<AgentRunRecord> {
-      const parsed = summaryTransitionInputSchema.parse(input);
+      requireConciergeAgent(actor);
+      const parsed = escalationInputSchema.parse(input);
       return transition(await loadDatabase(), actor, "escalated", {
         completedAt: parsed.completedAt,
-        summary: redactRepositorySummary(parsed.summary),
+        summary: parsed.summaryCode,
         errorCode: null,
         ...usageFrom(parsed),
       });
     },
 
     async disable(actor: ConciergeAgentActor, input: unknown): Promise<AgentRunRecord> {
-      const parsed = summaryTransitionInputSchema.parse(input);
+      requireConciergeAgent(actor);
+      const parsed = disabledInputSchema.parse(input);
       return transition(await loadDatabase(), actor, "disabled", {
         completedAt: parsed.completedAt,
-        summary: redactRepositorySummary(parsed.summary),
+        summary: parsed.summaryCode,
         errorCode: null,
         ...usageFrom(parsed),
       });
