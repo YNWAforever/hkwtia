@@ -39,6 +39,7 @@ export type AgentEscalationCode =
 
 type AgentRunsLifecycle = Readonly<{
   start: (actor: ConciergeAgentActor, input: unknown) => Promise<unknown>;
+  configureModel: (actor: ConciergeAgentActor, input: unknown) => Promise<unknown>;
   finish: (actor: ConciergeAgentActor, input: unknown) => Promise<unknown>;
   fail: (actor: ConciergeAgentActor, input: unknown) => Promise<unknown>;
   escalate: (actor: ConciergeAgentActor, input: unknown) => Promise<unknown>;
@@ -103,6 +104,12 @@ export type AgentRuntimeFinish =
 
 export type AgentRuntimeStream = Readonly<{
   runId: string;
+  /**
+   * Single-consumer eager stream. Concurrent pending `next()` calls are
+   * rejected. Consumer `return()`/`throw()` detaches delivery and discards
+   * subsequent deltas without cancelling the provider; provider cancellation
+   * remains controlled by the request AbortSignal.
+   */
   textStream: AsyncIterable<string>;
   finish: Promise<AgentRuntimeFinish>;
 }>;
@@ -274,6 +281,7 @@ function createEagerTextPump(
 ): Readonly<{
   textStream: AsyncIterable<string>;
   completion: Promise<void>;
+  stop: (error: unknown) => void;
 }> {
   const queuedDeltas: string[] = [];
   let queuedCharacters = 0;
@@ -282,6 +290,9 @@ function createEagerTextPump(
   let completed = false;
   let failure: unknown;
   let iteratorCreated = false;
+  let consumerDetached = false;
+  let stopped = false;
+  let sourceIterator: AsyncIterator<string> | undefined;
 
   function compactQueue(): void {
     if (queueIndex > 128 && queueIndex * 2 >= queuedDeltas.length) {
@@ -290,10 +301,20 @@ function createEagerTextPump(
     }
   }
 
+  function clearQueue(): void {
+    queuedDeltas.length = 0;
+    queuedCharacters = 0;
+    queueIndex = 0;
+  }
+
   function wakeConsumer(): void {
     if (!waiter) return;
     const pending = waiter;
     waiter = undefined;
+    if (consumerDetached) {
+      pending.resolve({value: undefined, done: true});
+      return;
+    }
     if (queueIndex < queuedDeltas.length) {
       const value = queuedDeltas[queueIndex]!;
       queueIndex += 1;
@@ -309,13 +330,35 @@ function createEagerTextPump(
     if (completed) pending.resolve({value: undefined, done: true});
   }
 
+  function detachConsumer(): void {
+    consumerDetached = true;
+    clearQueue();
+    wakeConsumer();
+  }
+
+  function stop(error: unknown): void {
+    if (stopped) return;
+    stopped = true;
+    failure = error;
+    clearQueue();
+    wakeConsumer();
+    if (sourceIterator?.return) {
+      void Promise.resolve(sourceIterator.return()).catch(() => undefined);
+    }
+  }
+
   const completion = (async () => {
     try {
-      for await (const delta of source) {
+      sourceIterator = source[Symbol.asyncIterator]();
+      while (!stopped) {
+        const result = await sourceIterator.next();
+        if (stopped || result.done) break;
+        const delta = result.value;
         if (typeof delta !== "string") {
           throw new AgentInvalidProviderResponseError();
         }
         if (delta.length === 0) continue;
+        if (consumerDetached) continue;
         if (waiter) {
           queuedDeltas.push(delta);
           queuedCharacters += delta.length;
@@ -332,8 +375,10 @@ function createEagerTextPump(
         queuedCharacters += delta.length;
       }
     } catch (error) {
-      failure = error;
-      throw error;
+      if (!stopped) {
+        failure = error;
+        throw error;
+      }
     } finally {
       completed = true;
       wakeConsumer();
@@ -352,6 +397,9 @@ function createEagerTextPump(
       iteratorCreated = true;
       return {
         next(): Promise<IteratorResult<string>> {
+          if (consumerDetached) {
+            return Promise.resolve({value: undefined, done: true});
+          }
           if (queueIndex < queuedDeltas.length) {
             const value = queuedDeltas[queueIndex]!;
             queueIndex += 1;
@@ -365,15 +413,30 @@ function createEagerTextPump(
           if (completed) {
             return Promise.resolve({value: undefined, done: true});
           }
+          if (waiter) {
+            return Promise.reject(
+              new AgentRuntimeError("invalid_provider_response"),
+            );
+          }
           return new Promise<IteratorResult<string>>((resolve, reject) => {
             waiter = {resolve, reject};
           });
+        },
+        return(value?: string): Promise<IteratorResult<string>> {
+          detachConsumer();
+          return Promise.resolve({value, done: true});
+        },
+        throw(error?: unknown): Promise<IteratorResult<string>> {
+          detachConsumer();
+          return Promise.reject(
+            error ?? new AgentRuntimeError("invalid_provider_response"),
+          );
         },
       };
     },
   };
 
-  return {textStream, completion};
+  return {textStream, completion, stop};
 }
 
 export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
@@ -476,6 +539,10 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
       let providerResult;
       try {
         resolvedModel = resolveAgentModel(request.model);
+        await agentRuns.configureModel(actor, {
+          provider: resolvedModel.provider,
+          model: resolvedModel.modelId,
+        });
         const apiKey = apiKeyFor(resolvedModel.provider, request.credentials);
         if (!apiKey?.trim()) {
           throw new AgentRuntimeError("configuration_error");
@@ -495,38 +562,128 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
         throw await fail(error);
       }
 
+      type Billing = Readonly<{usage: AgentUsage; costUsd: string}>;
+      type ProviderFinishOutcome =
+        | Readonly<{
+          branch: "finish";
+          status: "fulfilled";
+          value: AgentStreamFinish;
+          billing: Billing;
+        }>
+        | Readonly<{
+          branch: "finish";
+          status: "rejected";
+          error: unknown;
+        }>;
+      type PumpOutcome =
+        | Readonly<{branch: "pump"; status: "fulfilled"}>
+        | Readonly<{branch: "pump"; status: "rejected"; error: unknown}>;
+
+      let finishState:
+        | Readonly<{status: "pending"}>
+        | Readonly<{status: "fulfilled"; billing: Billing}>
+        | Readonly<{status: "rejected"}>
+        = {status: "pending"};
+      const providerFinishOutcome: Promise<ProviderFinishOutcome> =
+        Promise.resolve(providerResult.finish)
+          .then(normalizeProviderFinish)
+          .then(
+            (value) => {
+              const billing = {
+                usage: value.usage,
+                costUsd: calculateAgentCostUsd(
+                  value.usage,
+                  resolvedModel.pricing,
+                ),
+              };
+              finishState = {status: "fulfilled", billing};
+              return {
+                branch: "finish",
+                status: "fulfilled",
+                value,
+                billing,
+              };
+            },
+            (error: unknown) => {
+              finishState = {status: "rejected"};
+              return {branch: "finish", status: "rejected", error};
+            },
+          );
       const pump = createEagerTextPump(
         providerResult.textStream,
         request.abortSignal,
       );
-      const providerFinish = Promise.resolve(providerResult.finish)
-        .then(normalizeProviderFinish);
+      const pumpOutcome: Promise<PumpOutcome> = pump.completion.then(
+        () => ({branch: "pump", status: "fulfilled"}),
+        (error: unknown) => ({branch: "pump", status: "rejected", error}),
+      );
+
+      function knownBilling(): Billing | undefined {
+        return finishState.status === "fulfilled"
+          ? finishState.billing
+          : undefined;
+      }
+
+      async function rejectRuntimeFinish(
+        error: unknown,
+        billing: Billing | undefined,
+        stopPump: boolean,
+      ): Promise<never> {
+        if (stopPump) pump.stop(error);
+        throw await fail(error, billing);
+      }
 
       const finish = (async (): Promise<
         CompletedAgentRuntimeFinish | EscalatedAgentRuntimeFinish
       > => {
-        let billing:
-          | Readonly<{usage: AgentUsage; costUsd: string}>
-          | undefined;
-        try {
-          const [finishResult, pumpResult] = await Promise.allSettled([
-            providerFinish,
-            pump.completion,
-          ]);
-          if (finishResult.status === "rejected") throw finishResult.reason;
+        const first = await Promise.race([
+          providerFinishOutcome,
+          pumpOutcome,
+        ]);
+        let normalizedFinish: AgentStreamFinish;
+        let billing: Billing;
 
-          const normalizedFinish = finishResult.value;
-          billing = {
-            usage: normalizedFinish.usage,
-            costUsd: calculateAgentCostUsd(
-              normalizedFinish.usage,
-              resolvedModel.pricing,
-            ),
-          };
-          if (pumpResult.status === "rejected") throw pumpResult.reason;
-          if (normalizedFinish.finishReason === "error") {
-            throw new AgentRuntimeError("provider_error");
+        if (first.branch === "finish") {
+          if (first.status === "rejected") {
+            return rejectRuntimeFinish(first.error, undefined, true);
           }
+          normalizedFinish = first.value;
+          billing = first.billing;
+          if (normalizedFinish.finishReason === "error") {
+            return rejectRuntimeFinish(
+              new AgentRuntimeError("provider_error"),
+              billing,
+              true,
+            );
+          }
+          const pumpResult = await pumpOutcome;
+          if (pumpResult.status === "rejected") {
+            return rejectRuntimeFinish(pumpResult.error, billing, false);
+          }
+        } else {
+          if (first.status === "rejected") {
+            return rejectRuntimeFinish(
+              first.error,
+              knownBilling(),
+              false,
+            );
+          }
+          const finishResult = await providerFinishOutcome;
+          if (finishResult.status === "rejected") {
+            return rejectRuntimeFinish(finishResult.error, undefined, true);
+          }
+          normalizedFinish = finishResult.value;
+          billing = finishResult.billing;
+          if (normalizedFinish.finishReason === "error") {
+            return rejectRuntimeFinish(
+              new AgentRuntimeError("provider_error"),
+              billing,
+              false,
+            );
+          }
+        }
+
+        try {
           if (
             normalizedFinish.steps === MAX_AGENT_STEPS
             && normalizedFinish.finishReason === "tool-calls"
@@ -569,7 +726,7 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
             citations: [...normalizedFinish.citations],
           };
         } catch (error) {
-          throw await fail(error, billing);
+          return rejectRuntimeFinish(error, billing, false);
         }
       })();
 

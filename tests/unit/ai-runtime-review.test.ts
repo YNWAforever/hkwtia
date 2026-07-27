@@ -58,6 +58,7 @@ function successfulFinish(
 function createAgentRunsFake() {
   return {
     start: vi.fn(async () => ({id: RUN_ID})),
+    configureModel: vi.fn(async () => ({id: RUN_ID})),
     finish: vi.fn(async () => ({id: RUN_ID})),
     fail: vi.fn(async () => ({id: RUN_ID})),
     escalate: vi.fn(async () => ({id: RUN_ID})),

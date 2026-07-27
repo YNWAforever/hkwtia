@@ -42,6 +42,10 @@ const startInputSchema = z.object({
   model: z.string().min(1).max(200).nullish(),
   startedAt: z.date().refine((value) => Number.isFinite(value.getTime())).optional(),
 }).strict();
+const configureModelInputSchema = z.object({
+  provider: z.enum(["openai", "anthropic"]),
+  model: z.string().min(1).max(200).regex(/^[A-Za-z0-9._:-]+$/),
+}).strict();
 const usageSchema = {
   inputTokens: z.number().int().nonnegative().optional(),
   outputTokens: z.number().int().nonnegative().optional(),
@@ -270,6 +274,34 @@ export function createAgentRunsRepository(
         RETURNING *
       `))[0];
       if (!row) forbidden();
+      return runFrom(row);
+    },
+
+    async configureModel(
+      actor: ConciergeAgentActor,
+      input: unknown,
+    ): Promise<AgentRunRecord> {
+      requireConciergeAgent(actor);
+      const parsed = configureModelInputSchema.parse(input);
+      const database = await loadDatabase();
+      const row = rowsFrom(await database.execute(sql`
+        UPDATE ${agentRuns}
+        SET
+          provider = ${parsed.provider},
+          model = ${parsed.model},
+          updated_at = NOW()
+        WHERE id = ${actor.runId}
+          AND conversation_id = ${actor.conversationId}
+          AND profile_id IS NOT DISTINCT FROM ${actor.profileId}
+          AND trigger = ${actor.trigger}
+          AND status = 'running'
+          AND provider IS NULL
+          AND model IS NULL
+        RETURNING *
+      `))[0];
+      if (!row) {
+        throw new Error("INVALID_AGENT_RUN_MODEL_CONFIGURATION");
+      }
       return runFrom(row);
     },
 
