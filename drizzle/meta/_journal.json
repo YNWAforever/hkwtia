@@ -64,6 +64,13 @@
       "when": 1785066539044,
       "tag": "0009_m3_automation_admin_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1785120916830,
+      "tag": "0010_m4a_ai_concierge",
+      "breakpoints": true
     }
   ]
 }

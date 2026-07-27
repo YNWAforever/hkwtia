@@ -1,79 +1,91 @@
-# Task 1 report: M2 schema and sequential migration
+# M4A Task 1 Report: AI schema and configuration
 
-## Summary
+## Implementation summary
 
-Implemented the M2 Admin CRM Drizzle schema, inferred row types, and sequential `0005_worried_kang.sql` migration. The migration is additive and safely backfills `profiles.auth_user_id` from the existing M1 `profiles.id` key before enforcing `NOT NULL` and uniqueness. Existing M1 profile creation paths map that same identity to the new field.
+- Added the approved Vercel AI SDK dependencies: `ai`, `@ai-sdk/openai`, and `@ai-sdk/anthropic`.
+- Added credential-free AI environment parsing. `AGENTS_ENABLED` is true only for the exact string `"true"`; Concierge defaults to `openai:gpt-4.1-mini`; provider-qualified model names are parsed as `<provider>:<model-id>`.
+- Added durable Drizzle tables for `kb_documents`, `conversations`, `messages`, and `agent_runs`, including pgvector `vector(1536)`, JSON metadata/citations, lifecycle timestamps, CSAT 1–5 constraint, ownership/query indexes, provider-message idempotency, and retention indexes.
+- Made `staff_tasks.profile_id` nullable and added the typed, defaulted JSON `context` containing only the five approved optional keys.
+- Generated migration `0010_m4a_ai_concierge`, journal entry, and snapshot. Inspected SQL and manually added `CREATE EXTENSION IF NOT EXISTS vector` before the vector column. Existing staff tasks receive `context jsonb DEFAULT '{}'::jsonb NOT NULL`.
 
 ## Files changed
 
+- `package.json`, `package-lock.json`
+- `.env.example`
+- `lib/config/env.ts`
 - `lib/db/schema-core.ts`
-- `lib/db/repos/profiles.ts`
-- `lib/db/repos/seats.ts`
-- `drizzle/0005_worried_kang.sql`
-- `drizzle/meta/0005_snapshot.json`
-- `drizzle/meta/_journal.json`
-- `tests/unit/m2-schema-contract.test.ts`
-- `tests/integration/migration.test.ts`
-- `tests/unit/repository-production-security.test.ts`
+- `drizzle/0010_m4a_ai_concierge.sql`
+- `drizzle/meta/_journal.json`, `drizzle/meta/0010_snapshot.json`
+- `tests/unit/ai-model.test.ts`
+- `tests/unit/schema-contract.test.ts`, `tests/unit/env-contract.test.ts`
 
-## RED
+`lib/db/schema.ts` and `lib/db/server-schema.ts` already re-export `schema-core.ts` wholesale, so the new tables are exposed through both boundaries without redundant edits.
+
+## RED evidence
 
 Command:
 
 ```powershell
-npx.cmd vitest run tests/unit/m2-schema-contract.test.ts --reporter=dot
+npm.cmd test -- tests/unit/ai-model.test.ts tests/unit/schema-contract.test.ts
 ```
 
-Result: failed as expected: 2 tests failed. The `profiles` table lacked `auth_user_id`, `email`, `role`, `last_login_at`, `consent_marketing`, and `interests`; the ten M2 table exports were `undefined`, producing `getTableConfig`'s expected missing-table error.
+Result: failed as intended before production implementation: 2 files failed; 11 failed, 4 passed.
 
-## GREEN and refactor verification
+Expected missing-feature evidence included:
+
+```text
+expected undefined to be true
+parseAgentModel is not a function
+expected undefined to be defined
+Cannot read properties of undefined (reading 'channel')
+```
+
+These failures corresponded to absent AI configuration/model parsing, absent M4A tables, and absent `staff_tasks.context`.
+
+## GREEN evidence
+
+Command:
 
 ```powershell
-npx.cmd vitest run tests/unit/m2-schema-contract.test.ts --reporter=dot
-# PASS: 1 file, 2 tests
-
-npx.cmd drizzle-kit generate --config=drizzle.config.ts
-# PASS: generated drizzle/0005_worried_kang.sql
-
-npx.cmd vitest run tests/unit/m2-schema-contract.test.ts tests/integration/migration.test.ts --reporter=dot
-# PASS: 1 file/2 tests; migration integration test skipped because DATABASE_URL_TEST is absent
-
-npm.cmd run typecheck
-# PASS
-
-npm.cmd run lint
-# PASS
-
-npm.cmd test
-# PASS: 45 files/218 tests; 2 skipped because database environment variables are absent
-
-npm.cmd run build
-# PASS: Next.js production build
+npm.cmd test -- tests/unit/ai-model.test.ts tests/unit/schema-contract.test.ts
 ```
 
-The first full suite run exposed one proxy-row test fixture whose ordered `profiles` columns no longer matched the expanded schema (`value.map is not a function` on `interests`). Updated that fixture with the new selected profile columns, reran the focused failing test (17 passed), then reran the complete suite successfully.
+Result:
 
-## Commit SHA
+```text
+Test Files  2 passed (2)
+Tests       15 passed (15)
+```
 
-`011e49f` — `feat: add M2 admin CRM schema`
+## Verification
 
-## Independent review follow-up
+```powershell
+npm.cmd run typecheck
+```
 
-- Added the missing `"annual"` `billingInterval` value immediately after `"pending_payment"` in the ordered `membershipRow` proxy fixture.
-- Verified with `npx.cmd vitest run tests/unit/repository-production-security.test.ts --reporter=dot`: PASS, 1 file and 17 tests.
-- Review-fix commit: `54d8a3d` — `fix: align membership fixture with M2 schema`.
+Result: passed (`tsc --noEmit`, exit 0).
 
-## Self-review findings
+```powershell
+npm.cmd test
+```
 
-- The contract test is exactly scoped to the requested profile identity fields and ten CRM tables.
-- All requested enums, columns, tables, indexes, foreign keys, composite key, and select types are present in `schema-core.ts`.
-- `0005_worried_kang.sql` follows `0004_outgoing_vermin.sql`; migrations `0001` through `0004` were untouched.
-- The `auth_user_id` migration sequence is nullable add, M1-key backfill, `NOT NULL`, then unique constraint; all other changes are additive.
-- The guarded migration test runs `db:migrate` twice and verifies all ten M2 tables without printing `DATABASE_URL_TEST`.
-- The new `authUserId` requirement is preserved for M1 repository inserts by setting it from their existing stable profile ID.
+Result: completed successfully (exit 0) in the credential-free default configuration. A concise rerun with `npm.cmd test -- --reporter=dot` also completed successfully.
 
-## Risks and remaining issues
+Migration inspection confirmed:
 
-- `DATABASE_URL_TEST` was not available locally, so the migration integration test was correctly skipped; its query and idempotence assertions are covered but require the isolated Neon test database for live execution.
-- The build emitted an existing non-blocking Browserslist `caniuse-lite` staleness notice.
-- `apply_patch` repeatedly failed to read both this linked worktree and temporary copies due the Windows sandbox helper's deny-read ACL error. With workspace-owner authorization, the exact Task 1 files were edited using a narrow elevated PowerShell transform/copy fallback; every resulting diff was inspected with `git diff --check` and focused diffs before verification.
+- `CREATE EXTENSION IF NOT EXISTS vector` appears before `CREATE TABLE "kb_documents"` and its `vector(1536)` column.
+- `messages_provider_message_id_unique` is partial (`IS NOT NULL`).
+- `messages.channel` is the `web | whatsapp` enum.
+- `agent_runs_csat_score_check` permits only null or scores 1 through 5.
+- `conversations_expires_at_idx`, `messages_conversation_created_idx`, and `agent_runs_conversation_created_idx` support retention and chronological scans.
+
+## Self-review
+
+- Restored five pre-M4A profile columns after an initial broad mechanical edit attempt; the final generated migration only alters `staff_tasks.profile_id` and adds its context column.
+- Kept production database access out of application code; this task adds only schema/configuration.
+- No live provider, database, or other credentials are required by default tests.
+- `git diff --check` passed before commit.
+
+## Concerns
+
+`npm.cmd install` reported 27 dependency audit advisories (2 low, 11 moderate, 13 high, 1 critical). No audit upgrade or remediation was performed because it is outside this narrowly scoped task; these advisories were not introduced as application-code changes by this implementation.

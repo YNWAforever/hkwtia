@@ -2,6 +2,7 @@ import {
   type AnyPgColumn,
   boolean,
   check,
+  customType,
   index,
   integer,
   jsonb,
@@ -51,6 +52,17 @@ export const recipientStatusEnum = pgEnum("campaign_recipient_status", ["queued"
 export const approvalStatusEnum = pgEnum("approval_status", ["pending", "approved", "rejected", "expired"]);
 export const journeyStatusEnum = pgEnum("journey_status", ["scheduled", "processing", "sent", "skipped", "failed"]);
 export const staffTaskStatusEnum = pgEnum("staff_task_status", ["open", "resolved"]);
+export const conversationStatusEnum = pgEnum("conversation_status", ["active", "closed", "deleted"]);
+export const messageRoleEnum = pgEnum("message_role", ["user", "assistant", "tool"]);
+export const messageChannelEnum = pgEnum("message_channel", ["web", "whatsapp"]);
+export const agentRunStatusEnum = pgEnum("agent_run_status", ["running", "disabled", "completed", "failed", "escalated"]);
+export const agentTriggerEnum = pgEnum("agent_trigger", ["web", "whatsapp"]);
+
+const vector = customType<{data: number[]; driverData: string}>({
+  dataType() {
+    return "vector(1536)";
+  },
+});
 
 export const profiles = pgTable("profiles", {
   id: text("id").primaryKey(),
@@ -379,13 +391,123 @@ export const messageSuppressions = pgTable("message_suppressions", {
   index("message_suppressions_profile_idx").on(table.profileId),
 ]);
 
+export const kbDocuments = pgTable(
+  "kb_documents",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    namespace: text("namespace").notNull(),
+    locale: varchar("locale", {length: 10}).notNull(),
+    title: text("title").notNull(),
+    url: text("url").notNull(),
+    content: text("content").notNull(),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}).notNull(),
+    embedding: vector("embedding").notNull(),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    index("kb_documents_namespace_locale_idx").on(table.namespace, table.locale),
+    index("kb_documents_created_idx").on(table.createdAt),
+  ],
+);
+
+export const conversations = pgTable(
+  "conversations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    profileId: text("profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    anonymousOwnerHash: text("anonymous_owner_hash"),
+    locale: varchar("locale", {length: 10}).default("en").notNull(),
+    status: conversationStatusEnum("status").default("active").notNull(),
+    lastMessageAt: timestamp("last_message_at", {withTimezone: true}),
+    expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    check(
+      "conversations_owner_check",
+      sql`(${table.profileId} IS NOT NULL AND ${table.anonymousOwnerHash} IS NULL) OR (${table.profileId} IS NULL AND ${table.anonymousOwnerHash} IS NOT NULL)`,
+    ),
+    index("conversations_profile_idx").on(table.profileId),
+    index("conversations_anonymous_owner_idx").on(table.anonymousOwnerHash),
+    index("conversations_recent_idx").on(table.updatedAt.desc(), table.id.desc()),
+    index("conversations_expires_at_idx").on(table.expiresAt),
+  ],
+);
+
+export const messages = pgTable(
+  "messages",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    conversationId: uuid("conversation_id")
+      .notNull()
+      .references(() => conversations.id, {onDelete: "cascade"}),
+    role: messageRoleEnum("role").notNull(),
+    channel: messageChannelEnum("channel").notNull(),
+    content: text("content").notNull(),
+    providerMessageId: text("provider_message_id"),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}).notNull(),
+    citations: jsonb("citations").$type<Array<Record<string, unknown>>>().default([]).notNull(),
+    createdAt: createdAt("created_at"),
+  },
+  (table) => [
+    uniqueIndex("messages_provider_message_id_unique")
+      .on(table.providerMessageId)
+      .where(sql`${table.providerMessageId} IS NOT NULL`),
+    index("messages_conversation_created_idx").on(table.conversationId, table.createdAt),
+    index("messages_created_at_idx").on(table.createdAt),
+  ],
+);
+
+export const agentRuns = pgTable(
+  "agent_runs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    conversationId: uuid("conversation_id")
+      .notNull()
+      .references(() => conversations.id, {onDelete: "cascade"}),
+    profileId: text("profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    trigger: agentTriggerEnum("trigger").notNull(),
+    status: agentRunStatusEnum("status").default("running").notNull(),
+    provider: text("provider"),
+    model: text("model"),
+    inputTokens: integer("input_tokens").default(0).notNull(),
+    outputTokens: integer("output_tokens").default(0).notNull(),
+    costUsd: numeric("cost_usd", {precision: 12, scale: 6}).default("0").notNull(),
+    latencyMs: integer("latency_ms"),
+    summary: text("summary"),
+    errorCode: text("error_code"),
+    csatScore: integer("csat_score"),
+    startedAt: createdAt("started_at"),
+    completedAt: timestamp("completed_at", {withTimezone: true}),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    check("agent_runs_csat_score_check", sql`${table.csatScore} IS NULL OR (${table.csatScore} >= 1 AND ${table.csatScore} <= 5)`),
+    index("agent_runs_conversation_created_idx").on(table.conversationId, table.createdAt),
+    index("agent_runs_profile_idx").on(table.profileId),
+    index("agent_runs_created_at_idx").on(table.createdAt),
+  ],
+);
 export const staffTasks = pgTable("staff_tasks", {
   id: uuid("id").defaultRandom().primaryKey(),
-  profileId: text("profile_id").notNull().references(() => profiles.id, {onDelete: "cascade"}),
+  profileId: text("profile_id").references(() => profiles.id, {onDelete: "cascade"}),
   journeyStateId: uuid("journey_state_id").references(() => journeyState.id, {onDelete: "set null"}),
   kind: text("kind").notNull(),
   dedupeKey: text("dedupe_key").notNull(),
   summaryCode: text("summary_code").notNull(),
+  context: jsonb("context")
+    .$type<{
+      contactEmail?: string;
+      conversationId?: string;
+      agentRunId?: string;
+      reasonCode?: string;
+      locale?: "en" | "zh-HK";
+    }>()
+    .notNull()
+    .default({}),
   status: staffTaskStatusEnum("status").default("open").notNull(),
   resolvedAt: timestamp("resolved_at", {withTimezone: true}),
   resolvedByProfileId: text("resolved_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
@@ -491,6 +613,10 @@ export type JourneyState = typeof journeyState.$inferSelect;
 export type EmailLog = typeof emailLog.$inferSelect;
 export type WhatsappLog = typeof whatsappLog.$inferSelect;
 export type MessageSuppression = typeof messageSuppressions.$inferSelect;
+export type KnowledgeDocument = typeof kbDocuments.$inferSelect;
+export type Conversation = typeof conversations.$inferSelect;
+export type Message = typeof messages.$inferSelect;
+export type AgentRun = typeof agentRuns.$inferSelect;
 export type StaffTask = typeof staffTasks.$inferSelect;
 export type SavedSegment = typeof savedSegments.$inferSelect;
 export type Campaign = typeof campaigns.$inferSelect;

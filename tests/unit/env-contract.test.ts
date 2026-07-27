@@ -45,6 +45,8 @@ describe("runtime environment contract", () => {
       emailDeliveryMode: "resend",
       cronSecret: "cron-secret",
       appUrl: "https://www.example.test",
+      agentsEnabled: false,
+      agentModelConcierge: "openai:gpt-4.1-mini",
     });
     expect(values).not.toHaveProperty("NEXT_PUBLIC_SITE_URL");
   });
@@ -74,6 +76,8 @@ describe("runtime environment contract", () => {
       emailDeliveryMode: "resend",
       cronSecret: "",
       appUrl: "",
+      agentsEnabled: false,
+      agentModelConcierge: "openai:gpt-4.1-mini",
     });
   });
 
