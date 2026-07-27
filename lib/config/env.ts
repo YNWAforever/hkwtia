@@ -2,6 +2,10 @@ import "server-only";
 
 import {z} from "zod";
 
+import {parseAgentModel} from "@/lib/ai/model";
+
+export {parseAgentModel};
+export type {AgentModel} from "@/lib/ai/model";
 export interface ServerEnv {
   databaseUrl: string;
   neonAuthBaseUrl: string;
@@ -60,20 +64,6 @@ const aiEnvironmentSchema = z.object({
   WOZTELL_WEBHOOK_SECRET: z.string().optional(),
   TURNSTILE_SECRET: z.string().optional(),
 });
-
-export type AgentModel = Readonly<{provider: string; modelId: string}>;
-
-export function parseAgentModel(model: string): AgentModel {
-  const separator = model.indexOf(":");
-  if (separator <= 0 || separator !== model.lastIndexOf(":") || separator === model.length - 1) {
-    throw new Error("AGENT_MODEL_INVALID");
-  }
-
-  return {
-    provider: model.slice(0, separator),
-    modelId: model.slice(separator + 1),
-  };
-}
 
 function validateServerEnvironment(environment: Environment): void {
   if (environment.NODE_ENV !== "production") return;
