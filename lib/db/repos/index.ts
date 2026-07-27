@@ -12,6 +12,8 @@ export {journeys, journeysRepo, journeysRepository} from "./journeys";
 export {deliveries, deliveriesRepo, deliveriesRepository} from "./deliveries";
 export {suppressions, suppressionsRepo, suppressionsRepository} from "./suppressions";
 export {staffTasksRepo, staffTasksRepository} from "./staff-tasks";
+export {conversationsRepo, conversationsRepository} from "./conversations";
+export {agentRunsRepo, agentRunsRepository} from "./agent-runs";
 
 import {profiles} from "./profiles";
 import {companies} from "./companies";
@@ -25,6 +27,8 @@ import {journeys} from "./journeys";
 import {deliveries} from "./deliveries";
 import {suppressions} from "./suppressions";
 import {staffTasksRepository} from "./staff-tasks";
+import {conversationsRepository} from "./conversations";
+import {agentRunsRepository} from "./agent-runs";
 
 export const repositories = {
   profiles,
@@ -39,4 +43,6 @@ export const repositories = {
   deliveries,
   suppressions,
   staffTasks: staffTasksRepository,
+  conversations: conversationsRepository,
+  agentRuns: agentRunsRepository,
 };

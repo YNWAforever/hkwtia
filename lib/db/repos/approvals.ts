@@ -3,6 +3,10 @@ import "server-only";
 import {and, asc, eq, sql} from "drizzle-orm";
 import {z} from "zod";
 
+import {
+  requireConciergeAgent,
+  type ConciergeAgentActor,
+} from "@/lib/auth/agent-actor";
 import {requireAdmin} from "@/lib/auth/actor";
 import {
   requireAutomationSystem,
@@ -22,15 +26,30 @@ export const approvalDecisionSchema = z.object({
 }).strict();
 
 export type ApprovalDecisionInput = z.infer<typeof approvalDecisionSchema>;
-export type ApprovalPayloadSummary = Readonly<{key: "campaignId" | "template" | "eventId" | "slug" | "membershipId" | "field"; value: string}>;
+export type ApprovalPayloadSummary = Readonly<{key: "campaignId" | "template" | "eventId" | "slug" | "membershipId" | "field" | "to" | "subject" | "text" | "locale" | "conversationId" | "agentRunId"; value: string}>;
+export const draftEmailApprovalSchema = z.object({
+  to: z.string().email().max(320),
+  subject: z.string().min(1).max(998),
+  text: z.string().min(1).max(50_000),
+  locale: z.enum(["en", "zh-HK"]),
+  conversationId: z.string().uuid(),
+  agentRunId: z.string().uuid(),
+}).strict();
 const supportedPayloadSchemas = {
   "campaign.send": z.object({campaignId: z.string().uuid(), template: z.enum(["renewal-reminder", "member-update"])}).strict(),
   "event.publish": z.object({eventId: z.string().uuid(), slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(200)}).strict(),
   "membership.update": z.object({membershipId: z.string().uuid(), field: z.enum(["status", "billingInterval", "cancelAtPeriodEnd"])}).strict(),
+  "agent.draft_email": draftEmailApprovalSchema,
 } as const;
+export type DraftEmailApprovalInput = z.infer<typeof draftEmailApprovalSchema>;
 export type SupportedApprovalActionType = keyof typeof supportedPayloadSchemas;
 export type ApprovalPayloadReview = Readonly<{actionType: SupportedApprovalActionType | null; payloadSummary: readonly ApprovalPayloadSummary[]; actionable: boolean}>;
 export type PendingApproval = Readonly<{id: string; actionType: SupportedApprovalActionType | null; payloadSummary: readonly ApprovalPayloadSummary[]; actionable: boolean; requestedAt: Date}>;
+export type DraftEmailApproval = Readonly<{
+  id: string;
+  status: "pending";
+  requestedAt: Date;
+}>;
 export type ApprovalDecision = Readonly<{id: string; status: "approved" | "rejected"; decidedAt: Date}>;
 export type ApprovalExpiryBatchInput = Readonly<{
   asOf: Date;
@@ -73,6 +92,12 @@ export function summarizeApprovalPayload(actionType: unknown, payload: unknown):
   return reviewApprovalPayload(actionType, payload).payloadSummary;
 }
 
+export type AgentApprovalsRepository = Readonly<{
+  createDraftEmail: (
+    actor: ConciergeAgentActor,
+    input: unknown,
+  ) => Promise<DraftEmailApproval>;
+}>;
 export type ApprovalsRepository = Readonly<{
   listPending: (actor: Actor) => Promise<readonly PendingApproval[]>;
   decide: (actor: Actor, input: unknown) => Promise<ApprovalDecision>;
@@ -96,8 +121,36 @@ async function defaultAutomationDatabaseLoader(): Promise<AutomationDatabase> {
   return await getDb() as unknown as AutomationDatabase;
 }
 
-export function createApprovalsRepository(loadDatabase: DatabaseLoader = getDb): ApprovalsRepository {
+export function createApprovalsRepository(
+  loadDatabase: DatabaseLoader = getDb,
+): ApprovalsRepository & AgentApprovalsRepository {
   return {
+    async createDraftEmail(actor, input) {
+      requireConciergeAgent(actor);
+      const parsed = draftEmailApprovalSchema.parse(input);
+      if (
+        parsed.conversationId !== actor.conversationId
+        || parsed.agentRunId !== actor.runId
+      ) {
+        throw new Error("INVALID_AGENT_APPROVAL_CONTEXT");
+      }
+      const db = await loadDatabase();
+      const [created] = await db.insert(approvals).values({
+        actionType: "agent.draft_email",
+        payload: parsed,
+        status: "pending",
+        requestedByProfileId: actor.profileId,
+      }).returning({
+        id: approvals.id,
+        status: approvals.status,
+        requestedAt: approvals.requestedAt,
+      });
+      if (!created || created.status !== "pending") {
+        throw new Error("DRAFT_EMAIL_APPROVAL_CREATE_FAILED");
+      }
+      return {...created, status: "pending" as const};
+    },
+
     async listPending(actor) {
       requireAdmin(actor);
       const db = await loadDatabase();

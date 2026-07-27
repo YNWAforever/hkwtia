@@ -9,9 +9,12 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
 });
 
 import {companiesRepository} from "@/lib/db/repos/companies";
+import {createApprovalsRepository} from "@/lib/db/repos/approvals";
+import {createConversationsRepository} from "@/lib/db/repos/conversations";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 import type {Actor} from "@/lib/membership/lifecycle";
+import type {ConciergeAgentActor} from "@/lib/auth/agent-actor";
 
 const actor = {kind: "member", userId: "user-a", profileId: "user-a"} as const;
 const forgedUnsubscribeActor = {
@@ -19,6 +22,14 @@ const forgedUnsubscribeActor = {
   userId: null,
   source: "unsubscribe",
 } as unknown as Actor;
+const agent: ConciergeAgentActor = {
+  kind: "agent",
+  agent: "concierge",
+  runId: "22222222-2222-4222-8222-222222222222",
+  conversationId: "11111111-1111-4111-8111-111111111111",
+  profileId: "user-a",
+  trigger: "web",
+};
 
 const membershipRow = [
   "membership-a",
@@ -390,5 +401,37 @@ describe("production repository security boundaries", () => {
 
     await expect(invoke()).rejects.toThrow("FORBIDDEN");
     expect(statements).toEqual([]);
+  });
+
+  it("scopes conversation ownership in production SQL rather than trusting returned rows", async () => {
+    const statements: string[] = [];
+    database.current = drizzle(async (query) => {
+      statements.push(query);
+      return {rows: []};
+    });
+
+    await expect(
+      createConversationsRepository()
+        .getOwned({kind: "profile", profileId: "profile-attacker"}, agent.conversationId),
+    ).rejects.toMatchObject({code: "FORBIDDEN"});
+
+    const sql = statements.join("\n").toLowerCase();
+    expect(sql).toContain('"conversations"');
+    expect(sql).toContain('"profile_id"');
+    expect(sql).toContain('"id"');
+  });
+
+  it("rejects an agent approval decision before database access", async () => {
+    const loadDatabase = vi.fn();
+    const repository = createApprovalsRepository(loadDatabase);
+
+    await expect(repository.decide(
+      agent as never,
+      {
+        approvalId: "44444444-4444-4444-8444-444444444444",
+        decision: "approved",
+      },
+    )).rejects.toMatchObject({code: "FORBIDDEN"});
+    expect(loadDatabase).not.toHaveBeenCalled();
   });
 });

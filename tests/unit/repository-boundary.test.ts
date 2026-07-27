@@ -39,4 +39,14 @@ describe("repository database boundary", () => {
 
     expect(violations).toEqual([]);
   });
+
+  it("keeps the Concierge actor outside the general membership Actor union", async () => {
+    const lifecycle = await readFile(join(root, "membership", "lifecycle.ts"), "utf8");
+    const concierge = await readFile(join(root, "auth", "agent-actor.ts"), "utf8");
+
+    expect(lifecycle).not.toMatch(/kind:\s*["']agent["']/);
+    expect(concierge).toContain('kind: "agent"');
+    expect(concierge).toContain('agent: "concierge"');
+    expect(concierge).not.toMatch(/type\s+Actor\s*=/);
+  });
 });
