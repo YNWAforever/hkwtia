@@ -1,3 +1,4 @@
+import {createHash} from "node:crypto";
 import {readFile} from "node:fs/promises";
 import {resolve} from "node:path";
 
@@ -21,6 +22,7 @@ import {
   type KbDocumentInput,
 } from "@/lib/db/repos/kb-documents";
 import {
+  M4A_FUNDING_SOURCES,
   M4A_KB_NAMESPACE,
   buildM4ASeedDocuments,
   parseKnowledgeMarkdown,
@@ -76,6 +78,10 @@ describe("M4A embeddings", () => {
     const adapter = createDeterministicTestEmbeddingAdapter();
     const first = await adapter.embed("香港 technology membership");
     const second = await adapter.embed("香港 technology membership");
+    const different = await adapter.embed(
+      "香港 technology memberships",
+    );
+    const fingerprint = createHash("sha256");
 
     expect(adapter.dimensions).toBe(EMBEDDING_DIMENSIONS);
     expect(first).toEqual(second);
@@ -83,6 +89,12 @@ describe("M4A embeddings", () => {
     expect(first.every(Number.isFinite)).toBe(true);
     expect(first.some((value) => value !== 0)).toBe(true);
     expect(Math.hypot(...first)).toBeCloseTo(1, 12);
+    expect(different).not.toEqual(first);
+    expect(fingerprint.update(
+      first.map((value) => value.toPrecision(17)).join(","),
+    ).digest("hex")).toBe(
+      "c2c45fb2455cd8ef2d54bdaba96fa4b2ee0a7c919b91b7e95645de2229805a67",
+    );
   });
 
   it("deliberately rejects empty and oversized embedding input", async () => {
@@ -114,6 +126,9 @@ describe("M4A knowledge repository", () => {
     ])).rejects.toThrow("KB_EMBEDDING_INVALID");
     await expect(repository.replaceNamespace("m4a-core-v1", [
       document({embedding: [...VECTOR.slice(0, -1), Number.NaN]}),
+    ])).rejects.toThrow("KB_EMBEDDING_INVALID");
+    await expect(repository.replaceNamespace("m4a-core-v1", [
+      document({embedding: Array(1536).fill(0)}),
     ])).rejects.toThrow("KB_EMBEDDING_INVALID");
     await expect(repository.replaceNamespace("m4a-core-v1", [
       document({namespace: "another-namespace"}),
@@ -255,6 +270,19 @@ describe("deterministic funding catalogue", () => {
     }
     expect(FUNDING_VERIFY_CURRENT_TERMS.en).toMatch(/not approval/i);
     expect(FUNDING_VERIFY_CURRENT_TERMS["zh-HK"]).toMatch(/不代表.*批/i);
+    const bud = FUNDING_SCHEMES.find(({id}) => id === "bud");
+    expect(bud?.summary.en).toContain(
+      "From 15 June 2026, BUD covers 48 economies and the Easy BUD per-application ceiling is HK$150,000.",
+    );
+    expect(bud?.summary["zh-HK"]).toContain(
+      "由2026年6月15日起，BUD專項基金涵蓋48個經濟體，而申請易每宗申請上限為15萬港元。",
+    );
+    expect(bud?.summary.en).toContain(
+      "From 1 July 2026, EMF was consolidated into BUD.",
+    );
+    expect(bud?.summary["zh-HK"]).toContain(
+      "由2026年7月1日起，中小企業市場推廣基金已併入BUD專項基金。",
+    );
   });
 
   it("returns deterministic bilingual eligibility without implying approval", () => {
@@ -289,6 +317,24 @@ describe("deterministic funding catalogue", () => {
       .toBe(true);
     expect(second.every(({disclaimer}) => /不代表.*批/i.test(disclaimer)))
       .toBe(true);
+    expect(first.find(({id}) => id === "bud")).toMatchObject({
+      potentiallyEligible: true,
+    });
+    expect(evaluateFundingEligibility({
+      ...input,
+      hongKongBusinessRegistered: false,
+    }, "en").find(({id}) => id === "bud")).toMatchObject({
+      potentiallyEligible: false,
+    });
+  });
+
+  it("localizes every Traditional Chinese funding seed footer", () => {
+    const chinese = M4A_FUNDING_SOURCES.filter(({locale}) => locale === "zh-HK");
+    expect(chinese).not.toHaveLength(0);
+    expect(chinese.every(({markdown}) =>
+      markdown.includes(`資料截至${FUNDING_AS_OF}。`) &&
+      !markdown.includes("Information current as of")
+    )).toBe(true);
   });
 });
 

@@ -158,7 +158,7 @@ function validDocument(
     url: validUrl(input.url),
     content,
     metadata,
-    embedding: validVector(input.embedding),
+    embedding: validVector(input.embedding, false),
   };
 }
 

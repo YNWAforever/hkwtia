@@ -60,8 +60,8 @@ export const FUNDING_SCHEMES: readonly FundingScheme[] = Object.freeze([
       "zh-HK": "發展品牌、升級轉型及拓展內銷市場的專項基金（BUD專項基金）",
     },
     summary: {
-      en: "Active for projects developing brands, upgrading operations, or expanding sales in 48 covered economies from 15 June 2026. Easy BUD has a HK$150,000 per-application ceiling; the cumulative BUD ceiling is HK$7 million and the E-commerce Easy sublimit is HK$1 million. EMF was consolidated into BUD on 1 July 2026.",
-      "zh-HK": "支援企業在48個涵蓋經濟體發展品牌、升級轉型或拓展銷售。申請易每宗申請上限為15萬港元；BUD專項基金累計資助上限為700萬港元，而電商易分項上限為100萬港元。中小企業市場推廣基金已於2026年7月1日併入BUD專項基金。",
+      en: "From 15 June 2026, BUD covers 48 economies and the Easy BUD per-application ceiling is HK$150,000. The cumulative BUD ceiling is HK$7 million and the E-commerce Easy sublimit is HK$1 million. From 1 July 2026, EMF was consolidated into BUD.",
+      "zh-HK": "由2026年6月15日起，BUD專項基金涵蓋48個經濟體，而申請易每宗申請上限為15萬港元。BUD專項基金累計資助上限為700萬港元，而電商易分項上限為100萬港元。由2026年7月1日起，中小企業市場推廣基金已併入BUD專項基金。",
     },
     sourceUrls: {
       en: "https://www.smefund.tid.gov.hk/english/bud/bud_home.html",
@@ -148,7 +148,8 @@ function eligibility(
 ): boolean {
   switch (id) {
     case "bud":
-      return input.operatesInHongKong &&
+      return input.hongKongBusinessRegistered &&
+        input.operatesInHongKong &&
         input.expansionProjectInCoveredEconomy;
     case "nittp":
       return input.hongKongBusinessRegistered &&

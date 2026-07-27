@@ -182,7 +182,9 @@ export const M4A_FUNDING_SOURCES: readonly KnowledgeMarkdownSource[] =
         "",
         FUNDING_VERIFY_CURRENT_TERMS[locale],
         "",
-        `Information current as of ${scheme.asOf}.`,
+        locale === "en"
+          ? `Information current as of ${scheme.asOf}.`
+          : `資料截至${scheme.asOf}。`,
       ].join("\n"),
     }))
   ));

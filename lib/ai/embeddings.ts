@@ -1,3 +1,5 @@
+import {createHash} from "node:crypto";
+
 import {createOpenAI} from "@ai-sdk/openai";
 import {embed as embedValue} from "ai";
 
@@ -29,15 +31,6 @@ function validatedVector(vector: readonly number[]): readonly number[] {
   return Object.freeze([...vector]);
 }
 
-function fnv1a(bytes: Uint8Array): number {
-  let hash = 0x811c9dc5;
-  for (const byte of bytes) {
-    hash ^= byte;
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return hash >>> 0;
-}
-
 /**
  * Test-only by construction: attempting to instantiate this adapter outside a
  * test process fails instead of silently replacing the production provider.
@@ -49,19 +42,27 @@ export function createDeterministicTestEmbeddingAdapter(): EmbeddingAdapter {
   return Object.freeze({
     dimensions: EMBEDDING_DIMENSIONS,
     async embed(text: string) {
-      const bytes = new TextEncoder().encode(validatedText(text));
-      let state = fnv1a(bytes) || 0x6d2b79f5;
-      const vector = new Array<number>(EMBEDDING_DIMENSIONS);
-      let squaredMagnitude = 0;
-      for (let index = 0; index < EMBEDDING_DIMENSIONS; index += 1) {
-        state ^= state << 13;
-        state ^= state >>> 17;
-        state ^= state << 5;
-        const value = ((state >>> 0) / 0x1_0000_0000) * 2 - 1;
-        vector[index] = value;
-        squaredMagnitude += value * value;
+      const input = validatedText(text);
+      const vector: number[] = [];
+      for (
+        let counter = 0;
+        vector.length < EMBEDDING_DIMENSIONS;
+        counter += 1
+      ) {
+        const counterBytes = Buffer.allocUnsafe(4);
+        counterBytes.writeUInt32BE(counter);
+        const digest = createHash("sha256")
+          .update("hkwtia:m4a:test-embedding:v1\0", "utf8")
+          .update(input, "utf8")
+          .update(counterBytes)
+          .digest();
+        for (let offset = 0; offset < digest.length; offset += 4) {
+          vector.push(
+            digest.readInt32BE(offset) / 0x8000_0000,
+          );
+        }
       }
-      const magnitude = Math.sqrt(squaredMagnitude);
+      const magnitude = Math.hypot(...vector);
       return validatedVector(vector.map((value) => value / magnitude));
     },
   });
