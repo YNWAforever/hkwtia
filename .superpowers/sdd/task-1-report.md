@@ -89,3 +89,57 @@ Migration inspection confirmed:
 ## Concerns
 
 `npm.cmd install` reported 27 dependency audit advisories (2 low, 11 moderate, 13 high, 1 critical). No audit upgrade or remediation was performed because it is outside this narrowly scoped task; these advisories were not introduced as application-code changes by this implementation.
+
+## Review-fix follow-up: foreign-key contract coverage
+
+### Files changed
+
+- `tests/unit/schema-contract.test.ts`
+- `.superpowers/sdd/task-1-report.md`
+
+### Mutation RED evidence
+
+After adding runtime Drizzle `getTableConfig(...).foreignKeys` assertions for all four required relations, I temporarily removed only the `agent_runs.profile_id -> profiles.id` reference from `lib/db/schema-core.ts`. The mutation was not committed and was restored immediately after the command.
+
+Command:
+
+```powershell
+npm.cmd test -- tests/unit/schema-contract.test.ts
+```
+
+Result:
+
+```text
+M4A AI concierge schema contract > retains all required AI concierge foreign-key relations
+AssertionError: expected false to be true
+Test Files  1 failed (1)
+Tests       1 failed | 8 passed (9)
+MUTATION_TEST_EXIT_CODE=1
+```
+
+This demonstrates the assertion fails when that required relation is removed. The test also independently checks the remaining three required relationships: `conversations.profile_id -> profiles.id`, `messages.conversation_id -> conversations.id`, and `agent_runs.conversation_id -> conversations.id`.
+
+### Final GREEN evidence
+
+```powershell
+npm.cmd test -- tests/unit/schema-contract.test.ts
+npm.cmd run typecheck
+```
+
+Result:
+
+```text
+Test Files  1 passed (1)
+Tests       9 passed (9)
+tsc --noEmit passed
+```
+
+### Self-review
+
+- Assertions inspect Drizzle’s runtime foreign-key metadata, not merely source text or column presence.
+- Each assertion matches its source column, referenced table, and target primary-key column, so removal or retargeting of any required relation fails the contract.
+- The approved relationship design and generated migration were not changed.
+
+### Follow-up concerns
+
+No new concerns. The existing dependency-audit advisory note above remains unchanged.
