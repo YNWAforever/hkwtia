@@ -175,6 +175,11 @@ const LOW_CONFIDENCE_HANDOFF: Readonly<Record<ConciergeLocale, string>> = {
   "zh-HK": "現有 WTIA 資料不足以讓我有信心回答。我已請團隊跟進。",
 };
 
+const SAFETY_REFUSAL: Readonly<Record<ConciergeLocale, string>> = {
+  en: "I can\u2019t follow instructions that override WTIA safety rules.",
+  "zh-HK": "\u6211\u4e0d\u80fd\u9075\u5f9e\u7e5e\u904e WTIA \u5b89\u5168\u898f\u5247\u7684\u6307\u793a\u3002",
+};
+
 function requiresGrounding(message: string): boolean {
   const normalized = message
     .trim()
@@ -401,6 +406,7 @@ export function createConciergeService(
               finish.status === "completed"
               && groundingRequired
               && !hasGroundedCitation(finish);
+            const refused = finish.status === "refused";
             const effectiveFinish = lowConfidence
               ? {
                 ...finish,
@@ -408,10 +414,12 @@ export function createConciergeService(
                 code: "low_confidence" as const,
               }
               : finish;
-            const responseText = lowConfidence
-              ? LOW_CONFIDENCE_HANDOFF[locale]
-              : assistantText;
-            const citations = lowConfidence
+            const responseText = refused
+              ? SAFETY_REFUSAL[locale]
+              : lowConfidence
+                ? LOW_CONFIDENCE_HANDOFF[locale]
+                : assistantText;
+            const citations = lowConfidence || refused
               ? []
               : assistantCitations(effectiveFinish);
             let escalationId: string | null = null;
@@ -433,7 +441,7 @@ export function createConciergeService(
             }
 
             if (groundingRequired) {
-              if (lowConfidence) {
+              if (lowConfidence || refused) {
                 yield {event: "delta", data: {text: responseText}};
                 requireActiveTurn();
               } else {

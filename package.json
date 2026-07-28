@@ -20,8 +20,8 @@
     "db:seed:m2": "node --experimental-strip-types scripts/seed-m2.ts",
     "db:seed:m3": "node --experimental-strip-types scripts/seed-m3.ts",
     "db:seed:m4a": "node --experimental-strip-types scripts/seed-m4a.ts",
-    "eval:concierge": "node --experimental-strip-types evals/grader.ts",
-    "eval:concierge:live": "node --experimental-strip-types evals/grader.ts --live"
+    "eval:concierge": "vite-node --config vitest.config.ts evals/grader.ts --eval-concierge-cli",
+    "eval:concierge:live": "vite-node --config vitest.config.ts evals/grader.ts --eval-concierge-cli --live"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.21",

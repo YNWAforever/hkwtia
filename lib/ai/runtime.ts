@@ -99,6 +99,16 @@ export type EscalatedAgentRuntimeFinish = Readonly<{
   citations: AgentCitation[];
 }>;
 
+export type RefusedAgentRuntimeFinish = Readonly<{
+  status: "refused";
+  code: "content_filter";
+  runId: string;
+  usage: AgentUsage;
+  costUsd: string;
+  finishReason: "content-filter";
+  steps: number;
+  citations: [];
+}>;
 export type DisabledAgentRuntimeFinish = Readonly<{
   status: "disabled";
   code: AgentDisabledCode;
@@ -113,6 +123,7 @@ export type DisabledAgentRuntimeFinish = Readonly<{
 export type AgentRuntimeFinish =
   | CompletedAgentRuntimeFinish
   | EscalatedAgentRuntimeFinish
+  | RefusedAgentRuntimeFinish
   | DisabledAgentRuntimeFinish;
 
 export type AgentRuntimeStream = Readonly<{
@@ -817,7 +828,9 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
       }
 
       const rawFinish = (async (): Promise<
-        CompletedAgentRuntimeFinish | EscalatedAgentRuntimeFinish
+        | CompletedAgentRuntimeFinish
+        | EscalatedAgentRuntimeFinish
+        | RefusedAgentRuntimeFinish
       > => {
         const first = await Promise.race([
           providerFinishOutcome,
@@ -878,6 +891,18 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
             citations: [...normalizedFinish.citations],
           };
         }
+        if (normalizedFinish.finishReason === "content-filter") {
+          return {
+            status: "refused",
+            code: "content_filter",
+            runId,
+            usage: billing.usage,
+            costUsd: billing.costUsd,
+            finishReason: "content-filter",
+            steps: normalizedFinish.steps,
+            citations: [],
+          };
+        }
         return {
           status: "completed",
           runId,
@@ -892,7 +917,9 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
       const finish = deferred
         ? rawFinish
         : rawFinish.then((outcome) => finalizeOutcome(outcome)) as Promise<
-          CompletedAgentRuntimeFinish | EscalatedAgentRuntimeFinish
+          | CompletedAgentRuntimeFinish
+          | EscalatedAgentRuntimeFinish
+          | RefusedAgentRuntimeFinish
         >;
 
       return {
