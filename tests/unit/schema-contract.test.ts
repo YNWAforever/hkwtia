@@ -55,6 +55,9 @@ describe("M4A AI concierge schema contract", () => {
     expect(serverSchema.conversations).toBeDefined();
     expect(serverSchema.messages).toBeDefined();
     expect(serverSchema.agentRuns).toBeDefined();
+    expect(
+      (serverSchema as unknown as Record<string, unknown>).posts,
+    ).toBeDefined();
   });
 
   it("retains all required AI concierge foreign-key relations", () => {

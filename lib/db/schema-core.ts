@@ -56,7 +56,13 @@ export const conversationStatusEnum = pgEnum("conversation_status", ["active", "
 export const messageRoleEnum = pgEnum("message_role", ["user", "assistant", "tool"]);
 export const messageChannelEnum = pgEnum("message_channel", ["web", "whatsapp"]);
 export const agentRunStatusEnum = pgEnum("agent_run_status", ["running", "disabled", "completed", "failed", "escalated"]);
-export const agentTriggerEnum = pgEnum("agent_trigger", ["web", "whatsapp"]);
+export const agentNameEnum = pgEnum("agent_name", [
+  "concierge",
+  "retention_analyst",
+  "board_reporter",
+]);
+export const postKindEnum = pgEnum("post_kind", ["news", "buildlog", "page"]);
+export const agentTriggerEnum = pgEnum("agent_trigger", ["web", "whatsapp", "scheduled"]);
 
 const vector = customType<{data: number[]; driverData: string}>({
   dataType() {
@@ -478,6 +484,7 @@ export const agentRuns = pgTable(
     conversationId: uuid("conversation_id")
       .references(() => conversations.id, {onDelete: "set null"}),
     profileId: text("profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    agent: agentNameEnum("agent").default("concierge").notNull(),
     trigger: agentTriggerEnum("trigger").notNull(),
     status: agentRunStatusEnum("status").default("running").notNull(),
     provider: text("provider"),
@@ -599,12 +606,43 @@ export const approvals = pgTable("approvals", {
   id: uuid("id").defaultRandom().primaryKey(),
   actionType: text("action_type").notNull(),
   payload: jsonb("payload").$type<Record<string, unknown>>().notNull(),
+  requestKey: text("request_key"),
   status: approvalStatusEnum("status").default("pending").notNull(),
   requestedByProfileId: text("requested_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
   requestedAt: createdAt("requested_at"),
   decidedByProfileId: text("decided_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
   decidedAt: timestamp("decided_at", {withTimezone: true}),
-}, (table) => [index("approvals_status_requested_idx").on(table.status, table.requestedAt)]);
+}, (table) => [
+  uniqueIndex("approvals_request_key_unique")
+    .on(table.requestKey)
+    .where(sql`${table.requestKey} IS NOT NULL`),
+  index("approvals_status_requested_idx").on(table.status, table.requestedAt),
+]);
+
+export const posts = pgTable(
+  "posts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    slug: text("slug").notNull(),
+    kind: postKindEnum("kind").notNull(),
+    titleEn: text("title_en").notNull(),
+    titleZh: text("title_zh").notNull(),
+    bodyMdx: text("body_mdx").notNull(),
+    publishedAt: timestamp("published_at", {withTimezone: true}),
+    author: text("author").notNull(),
+    sourceKey: text("source_key"),
+    agentRunId: uuid("agent_run_id")
+      .references(() => agentRuns.id, {onDelete: "set null"}),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    uniqueIndex("posts_slug_unique").on(table.slug),
+    uniqueIndex("posts_source_key_unique")
+      .on(table.sourceKey)
+      .where(sql`${table.sourceKey} IS NOT NULL`),
+  ],
+);
 
 export type Profile = typeof profiles.$inferSelect;
 export type Company = typeof companies.$inferSelect;
@@ -634,3 +672,4 @@ export type CampaignRecipient = typeof campaignRecipients.$inferSelect;
 export type Event = typeof events.$inferSelect;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
 export type Approval = typeof approvals.$inferSelect;
+export type Post = typeof posts.$inferSelect;

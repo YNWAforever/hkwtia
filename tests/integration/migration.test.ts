@@ -107,6 +107,110 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         {table_name: "staff_tasks", constraint_name: "staff_tasks_dedupe_key_unique"},
         {table_name: "whatsapp_log", constraint_name: "whatsapp_log_idempotency_key_unique"},
       ]);
+
+      const m4bEnums = await pool.query<{enum_name: string; enum_value: string}>(
+        `SELECT t.typname AS enum_name, e.enumlabel AS enum_value
+         FROM pg_type t
+         JOIN pg_enum e ON e.enumtypid = t.oid
+         WHERE t.typname = ANY($1)
+         ORDER BY t.typname, e.enumsortorder`,
+        [["agent_name", "agent_trigger", "post_kind"]],
+      );
+      expect(m4bEnums.rows).toEqual([
+        {enum_name: "agent_name", enum_value: "concierge"},
+        {enum_name: "agent_name", enum_value: "retention_analyst"},
+        {enum_name: "agent_name", enum_value: "board_reporter"},
+        {enum_name: "agent_trigger", enum_value: "web"},
+        {enum_name: "agent_trigger", enum_value: "whatsapp"},
+        {enum_name: "agent_trigger", enum_value: "scheduled"},
+        {enum_name: "post_kind", enum_value: "news"},
+        {enum_name: "post_kind", enum_value: "buildlog"},
+        {enum_name: "post_kind", enum_value: "page"},
+      ]);
+
+      const m4bColumns = await pool.query<{
+        table_name: string;
+        column_name: string;
+        is_nullable: "YES" | "NO";
+      }>(
+        `SELECT table_name, column_name, is_nullable
+         FROM information_schema.columns
+         WHERE table_schema = 'public'
+           AND (
+             (table_name = 'agent_runs' AND column_name = 'agent')
+             OR (table_name = 'approvals' AND column_name = 'request_key')
+             OR table_name = 'posts'
+           )
+         ORDER BY table_name, ordinal_position`,
+      );
+      expect(m4bColumns.rows).toEqual([
+        {table_name: "agent_runs", column_name: "agent", is_nullable: "NO"},
+        {table_name: "approvals", column_name: "request_key", is_nullable: "YES"},
+        {table_name: "posts", column_name: "id", is_nullable: "NO"},
+        {table_name: "posts", column_name: "slug", is_nullable: "NO"},
+        {table_name: "posts", column_name: "kind", is_nullable: "NO"},
+        {table_name: "posts", column_name: "title_en", is_nullable: "NO"},
+        {table_name: "posts", column_name: "title_zh", is_nullable: "NO"},
+        {table_name: "posts", column_name: "body_mdx", is_nullable: "NO"},
+        {table_name: "posts", column_name: "published_at", is_nullable: "YES"},
+        {table_name: "posts", column_name: "author", is_nullable: "NO"},
+        {table_name: "posts", column_name: "source_key", is_nullable: "YES"},
+        {table_name: "posts", column_name: "agent_run_id", is_nullable: "YES"},
+        {table_name: "posts", column_name: "created_at", is_nullable: "NO"},
+        {table_name: "posts", column_name: "updated_at", is_nullable: "NO"},
+      ]);
+
+      const m4bIndexes = await pool.query<{indexname: string; indexdef: string}>(
+        `SELECT indexname, indexdef
+         FROM pg_indexes
+         WHERE schemaname = 'public'
+           AND indexname = ANY($1)
+         ORDER BY indexname`,
+        [[
+          "approvals_request_key_unique",
+          "posts_slug_unique",
+          "posts_source_key_unique",
+        ]],
+      );
+      expect(m4bIndexes.rows.map(({indexname}) => indexname)).toEqual([
+        "approvals_request_key_unique",
+        "posts_slug_unique",
+        "posts_source_key_unique",
+      ]);
+      expect(m4bIndexes.rows.find(({indexname}) =>
+        indexname === "approvals_request_key_unique")?.indexdef)
+        .toContain("WHERE (request_key IS NOT NULL)");
+      expect(m4bIndexes.rows.find(({indexname}) =>
+        indexname === "posts_source_key_unique")?.indexdef)
+        .toContain("WHERE (source_key IS NOT NULL)");
+
+      const postForeignKey = await pool.query<{
+        source_column: string;
+        foreign_table: string;
+        foreign_column: string;
+      }>(
+        `SELECT
+           source_column.attname AS source_column,
+           foreign_table.relname AS foreign_table,
+           foreign_column.attname AS foreign_column
+         FROM pg_constraint constraint_record
+         JOIN pg_class source_table ON source_table.oid = constraint_record.conrelid
+         JOIN pg_class foreign_table ON foreign_table.oid = constraint_record.confrelid
+         JOIN pg_attribute source_column
+           ON source_column.attrelid = source_table.oid
+          AND source_column.attnum = constraint_record.conkey[1]
+         JOIN pg_attribute foreign_column
+           ON foreign_column.attrelid = foreign_table.oid
+          AND foreign_column.attnum = constraint_record.confkey[1]
+         WHERE constraint_record.contype = 'f'
+           AND source_table.relname = 'posts'
+           AND source_column.attname = 'agent_run_id'`,
+      );
+      expect(postForeignKey.rows).toEqual([{
+        source_column: "agent_run_id",
+        foreign_table: "agent_runs",
+        foreign_column: "id",
+      }]);
     } finally {
       await pool.end();
     }
