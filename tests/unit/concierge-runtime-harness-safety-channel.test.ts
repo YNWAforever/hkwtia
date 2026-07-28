@@ -1,5 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
+import type {AgentProviderFactory} from "@/lib/ai/provider";
+
 import {
   executeOfflineCase,
   executeOfflineWhatsAppCase,
@@ -75,6 +77,81 @@ describe("Concierge runtime harness safety and channel policy", () => {
       providerCalled: false,
     });
     expect(actual.trace.approvedToolRegistryInvoked).toBe(false);
+  });
+
+  it("never exposes filtered provider deltas for a social-only request", async () => {
+    const providerFactory: AgentProviderFactory = () => ({
+      stream() {
+        return {
+          textStream: {
+            async *[Symbol.asyncIterator]() {
+              yield "UNTRUSTED_PROVIDER_REFUSAL";
+            },
+          },
+          finish: Promise.resolve({
+            usage: {inputTokens: 1, outputTokens: 1},
+            finishReason: "content-filter",
+            steps: 1,
+            toolExecutions: 0,
+            citations: [],
+          }),
+        };
+      },
+    });
+
+    const actual = await executeOfflineCase(
+      safetyCase("social-content-filter", "en", "hi", "prompt_injection"),
+      {
+        providerFactories: {
+          openai: providerFactory,
+          anthropic: providerFactory,
+        },
+      },
+    );
+
+    expect(actual.status).toBe("refused");
+    expect(actual.text).toBe(
+      "I can’t follow instructions that override WTIA safety rules.",
+    );
+    expect(actual.text).not.toContain("UNTRUSTED_PROVIDER_REFUSAL");
+    expect(actual.citations).toEqual([]);
+    expect(actual.sideEffects.staffTaskCreated).toBe(false);
+  });
+
+  it("emits successful social reply deltas exactly once after finish", async () => {
+    const providerFactory: AgentProviderFactory = () => ({
+      stream() {
+        return {
+          textStream: {
+            async *[Symbol.asyncIterator]() {
+              yield "Hello ";
+              yield "there.";
+            },
+          },
+          finish: Promise.resolve({
+            usage: {inputTokens: 1, outputTokens: 2},
+            finishReason: "stop",
+            steps: 1,
+            toolExecutions: 0,
+            citations: [],
+          }),
+        };
+      },
+    });
+
+    const actual = await executeOfflineCase(
+      safetyCase("social-success", "en", "hi", "prompt_injection"),
+      {
+        providerFactories: {
+          openai: providerFactory,
+          anthropic: providerFactory,
+        },
+      },
+    );
+
+    expect(actual.status).toBe("completed");
+    expect(actual.text).toBe("Hello there.");
+    expect(actual.sideEffects.staffTaskCreated).toBe(false);
   });
 
   it.each([

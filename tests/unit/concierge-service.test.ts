@@ -590,8 +590,10 @@ describe("Concierge service", () => {
       }).then(async (turn) => {
         const iterator = turn.events[Symbol.asyncIterator]();
         await iterator.next();
-        await iterator.next();
+        const pendingEvent = iterator.next();
+        await vi.waitFor(() => expect(seenSignal).toBeDefined());
         await turn.cancel();
+        await pendingEvent;
       });
     });
 

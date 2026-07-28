@@ -394,10 +394,6 @@ export function createConciergeService(
               requireActiveTurn();
               assistantText += delta;
               assistantDeltas.push(delta);
-              if (!groundingRequired) {
-                yield {event: "delta", data: {text: delta}};
-                requireActiveTurn();
-              }
             }
             requireActiveTurn();
             const finish = await runtimeTurn.finish;
@@ -440,15 +436,13 @@ export function createConciergeService(
               escalationId = `WTIA-${task.id}`;
             }
 
-            if (groundingRequired) {
-              if (lowConfidence || refused) {
-                yield {event: "delta", data: {text: responseText}};
+            if (lowConfidence || refused) {
+              yield {event: "delta", data: {text: responseText}};
+              requireActiveTurn();
+            } else {
+              for (const delta of assistantDeltas) {
+                yield {event: "delta", data: {text: delta}};
                 requireActiveTurn();
-              } else {
-                for (const delta of assistantDeltas) {
-                  yield {event: "delta", data: {text: delta}};
-                  requireActiveTurn();
-                }
               }
             }
 
