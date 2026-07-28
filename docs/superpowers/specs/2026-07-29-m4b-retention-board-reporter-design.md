@@ -139,6 +139,14 @@ methods to an agent service.
 
 ## Data Model
 
+### Agent Runs
+
+Add a required `agent` identity to `agent_runs`, backfilling every existing row
+as `concierge`, and extend the trigger enum with `scheduled`. Allowed agent
+identities are `concierge`, `retention_analyst`, and `board_reporter`.
+Scheduled rows have null conversation and profile IDs; Concierge ownership and
+feedback predicates remain unchanged.
+
 ### Approvals
 
 Add nullable `request_key text` to `approvals` with a partial unique index
