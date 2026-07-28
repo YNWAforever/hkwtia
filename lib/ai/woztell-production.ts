@@ -16,6 +16,12 @@ import {
   createPostgresWoztellStore,
   providerRunId,
 } from "@/lib/db/repos/woztell";
+import {
+  createWoztellDeliveryOutboxRepository,
+} from "@/lib/db/repos/woztell-delivery-outbox";
+import {
+  createWoztellRunRecoveryRepository,
+} from "@/lib/db/repos/woztell-run-recovery";
 
 type RuntimeEnvironment = ReturnType<typeof serverEnv>;
 
@@ -28,11 +34,47 @@ function duplicateKey(error: unknown): boolean {
   );
 }
 
-function conversationsWithoutInboundAppend() {
+function metadataFrom(input: unknown): Record<string, unknown> {
+  if (
+    !input
+    || typeof input !== "object"
+    || Array.isArray(input)
+    || !("metadata" in input)
+    || !input.metadata
+    || typeof input.metadata !== "object"
+    || Array.isArray(input.metadata)
+  ) {
+    return {};
+  }
+  return input.metadata as Record<string, unknown>;
+}
+
+function correlateAssistantMessage(input: unknown, runId: string): unknown {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return input;
+  return {
+    ...input,
+    metadata: {
+      ...metadataFrom(input),
+      woztellRunId: runId,
+    },
+  };
+}
+
+function conversationsWithoutInboundAppend(runId: string) {
   return {
     create: conversationsRepository.create,
     getOwned: conversationsRepository.getOwned,
-    appendMessage: conversationsRepository.appendMessage,
+    async appendMessage(
+      owner: Parameters<typeof conversationsRepository.appendMessage>[0],
+      conversationId: string,
+      input: unknown,
+    ) {
+      return conversationsRepository.appendMessage(
+        owner,
+        conversationId,
+        correlateAssistantMessage(input, runId),
+      );
+    },
     listMessages: conversationsRepository.listMessages,
     async startAgentTurn(
       _owner: unknown,
@@ -75,10 +117,14 @@ export function createProductionWoztellProcessorDependencies(
 ): WoztellWebhookProcessorDependencies {
   const now = () => new Date();
   const store = createPostgresWoztellStore(now);
+  const recovery = createWoztellRunRecoveryRepository();
+  const deliveryOutbox = createWoztellDeliveryOutboxRepository();
   const appOrigin = env.appUrl;
   return {
     channel,
     ...store,
+    ...recovery,
+    ...deliveryOutbox,
     anonymousOwnerHash(normalizedSender) {
       const secret = env.conciergeCookieSecret ?? env.woztellWebhookSecret ?? "";
       return createHmac("sha256", secret)
@@ -103,7 +149,7 @@ export function createProductionWoztellProcessorDependencies(
               : {anthropicApiKey: env.anthropicApiKey}),
           },
           appOrigin,
-          conversations: conversationsWithoutInboundAppend(),
+          conversations: conversationsWithoutInboundAppend(runId),
           agentTools: agentToolsRepository,
           getRuntime: () => createAgentRuntime({
             agentRuns: agentRunsRepository,
@@ -140,7 +186,7 @@ export function createProductionWoztellProcessorDependencies(
     },
     async escalate(input) {
       const runId = providerRunId(
-        `${input.conversationId}:${input.reason}`,
+        `${input.providerMessageId}:${input.reason}`,
       );
       await agentToolsRepository.createStaffTask({
         kind: "agent",

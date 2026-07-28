@@ -1,12 +1,25 @@
 import "server-only";
 
 import type {WhatsAppTemplateKey} from "@/config/whatsapp-templates";
+import {
+  deliverWoztellReply,
+  type WoztellDeliveryDependencies,
+} from "@/lib/ai/woztell-delivery";
+import type {WoztellRunRecovery} from "@/lib/ai/woztell-run-recovery";
 import type {
   ChannelAdapter,
   NormalizedInbound,
 } from "@/lib/channels/types";
 import {normalizeWhatsAppNumber} from "@/lib/channels/woztell";
 import type {ConversationOwner} from "@/lib/db/repos/conversations";
+
+export {
+  decideWoztellRunRecovery,
+} from "@/lib/ai/woztell-run-recovery";
+export type {
+  WoztellAgentRunSnapshot,
+  WoztellRunRecovery,
+} from "@/lib/ai/woztell-run-recovery";
 
 export type WoztellProfile = Readonly<{
   id: string;
@@ -84,37 +97,49 @@ export type WoztellConciergeTurn = Readonly<{
   cancel: () => Promise<void>;
 }>;
 
-export type WoztellWebhookProcessorDependencies = Readonly<{
-  channel: ChannelAdapter;
-  resolveProfile: (normalizedSender: string) => Promise<WoztellProfile | null>;
-  claimInbound: (
-    input: WoztellInboundClaimInput,
-  ) => Promise<WoztellInboundClaim>;
-  markRunOwned?: (
-    providerMessageId: string,
-    leaseUntil: Date,
-  ) => Promise<void>;
-  markReplyReady?: (
-    providerMessageId: string,
-    reply: string,
-    leaseUntil: Date,
-  ) => Promise<void>;
-  markCompleted?: (providerMessageId: string) => Promise<void>;
-  setWhatsappOptIn: (profileId: string, optedIn: boolean) => Promise<void>;
-  concierge: Readonly<{
-    startTurn(input: WoztellConciergeTurnInput): Promise<WoztellConciergeTurn>;
+export type WoztellEscalationReason =
+  | "approved_template_unavailable"
+  | "channel_delivery_failed"
+  | "channel_delivery_uncertain"
+  | "concierge_turn_failed"
+  | "concierge_run_ambiguous";
+
+export type WoztellWebhookProcessorDependencies =
+  WoztellDeliveryDependencies & Readonly<{
+    resolveProfile: (normalizedSender: string) => Promise<WoztellProfile | null>;
+    claimInbound: (
+      input: WoztellInboundClaimInput,
+    ) => Promise<WoztellInboundClaim>;
+    recoverRun?: (
+      providerMessageId: string,
+      conversationId: string,
+    ) => Promise<WoztellRunRecovery>;
+    markRunOwned?: (
+      providerMessageId: string,
+      leaseUntil: Date,
+    ) => Promise<void>;
+    markReplyReady?: (
+      providerMessageId: string,
+      reply: string,
+      leaseUntil: Date,
+    ) => Promise<void>;
+    markCompleted?: (providerMessageId: string) => Promise<void>;
+    setWhatsappOptIn: (profileId: string, optedIn: boolean) => Promise<void>;
+    concierge: Readonly<{
+      startTurn(input: WoztellConciergeTurnInput): Promise<WoztellConciergeTurn>;
+    }>;
+    escalate: (input: Readonly<{
+      conversationId: string;
+      profileId: string | null;
+      providerMessageId: string;
+      locale: "en" | "zh-HK";
+      reason: WoztellEscalationReason;
+    }>) => Promise<void>;
+    anonymousOwnerHash: (normalizedSender: string) => string;
+    approvedTemplateKeys: ReadonlySet<WhatsAppTemplateKey>;
+    supportUrl: string;
+    now?: () => Date;
   }>;
-  escalate: (input: Readonly<{
-    conversationId: string;
-    profileId: string | null;
-    locale: "en" | "zh-HK";
-    reason: "approved_template_unavailable" | "channel_delivery_failed";
-  }>) => Promise<void>;
-  anonymousOwnerHash: (normalizedSender: string) => string;
-  approvedTemplateKeys: ReadonlySet<WhatsAppTemplateKey>;
-  supportUrl: string;
-  now?: () => Date;
-}>;
 
 export type WoztellProcessResult =
   | Readonly<{status: "accepted"}>
@@ -122,6 +147,11 @@ export type WoztellProcessResult =
   | Readonly<{status: "ignored"}>
   | Readonly<{status: "opted_out"}>
   | Readonly<{status: "escalated"}>;
+
+type WoztellTurnOutcome =
+  | Readonly<{status: "done"; text: string}>
+  | Readonly<{status: "error"}>
+  | Readonly<{status: "disabled"}>;
 
 const EFFECT_LEASE_MS = 5 * 60 * 1_000;
 
@@ -133,20 +163,22 @@ function localeFor(
   return /[\u3400-\u9fff]/u.test(text) ? "zh-HK" : "en";
 }
 
-function templateFor(locale: "en" | "zh-HK"): WhatsAppTemplateKey {
-  return locale === "zh-HK"
-    ? "concierge_follow_up_zh_hk"
-    : "concierge_follow_up_en";
-}
-
-async function responseText(turn: WoztellConciergeTurn): Promise<string> {
+async function turnOutcome(
+  turn: WoztellConciergeTurn,
+): Promise<WoztellTurnOutcome> {
   let text = "";
   for await (const event of turn.events) {
     if (event.event === "delta" && typeof event.data.text === "string") {
       text += event.data.text;
+    } else if (event.event === "error") {
+      return {status: "error"};
+    } else if (event.event === "disabled") {
+      return {status: "disabled"};
+    } else if (event.event === "done") {
+      return {status: "done", text: text.trim()};
     }
   }
-  return text.trim();
+  return {status: "error"};
 }
 
 function ownerFor(
@@ -202,87 +234,89 @@ export function createWoztellWebhookProcessor(
 
       let text = claim.pendingReply;
       if (text === undefined) {
-        await dependencies.markRunOwned?.(
+        const recovery = await dependencies.recoverRun?.(
           normalized.providerMessageId,
-          leaseUntil(),
-        );
-        const turn = await dependencies.concierge.startTurn({
-          owner: claim.owner,
-          profileId: claim.profileId,
-          conversationId: claim.conversationId,
-          providerMessageId: normalized.providerMessageId,
-          message: normalized.text,
-          locale: claim.locale,
-          trigger: "whatsapp",
-          inboundMessagePersisted: true,
-        });
-        text = await responseText(turn);
-        if (!text) {
-          await dependencies.markCompleted?.(normalized.providerMessageId);
-          return {status: "accepted"};
-        }
-        await dependencies.markReplyReady?.(
-          normalized.providerMessageId,
-          text,
-          leaseUntil(),
-        );
-      }
-
-      const session = await dependencies.channel.sendSessionMessage({
-        whatsappOptIn: claim.whatsappOptIn,
-        whatsappNumber: sender,
-        text,
-        idempotencyKey: `concierge:${normalized.providerMessageId}:session`,
-        lastCustomerMessageAt: normalized.receivedAt,
-      });
-      if (session.status !== "blocked") {
-        if (session.status === "skipped") {
+          claim.conversationId,
+        ) ?? {status: "start_new" as const};
+        if (recovery.status === "escalate_ambiguous") {
           await dependencies.escalate({
             conversationId: claim.conversationId,
             profileId: claim.profileId,
+            providerMessageId: normalized.providerMessageId,
             locale: claim.locale,
-            reason: "channel_delivery_failed",
+            reason: "concierge_run_ambiguous",
           });
           await dependencies.markCompleted?.(normalized.providerMessageId);
           return {status: "escalated"};
         }
-        await dependencies.markCompleted?.(normalized.providerMessageId);
-        return {status: "accepted"};
+        if (recovery.status === "reply_ready") {
+          text = recovery.reply;
+          await dependencies.markReplyReady?.(
+            normalized.providerMessageId,
+            text,
+            leaseUntil(),
+          );
+        } else {
+          await dependencies.markRunOwned?.(
+            normalized.providerMessageId,
+            leaseUntil(),
+          );
+          const turn = await dependencies.concierge.startTurn({
+            owner: claim.owner,
+            profileId: claim.profileId,
+            conversationId: claim.conversationId,
+            providerMessageId: normalized.providerMessageId,
+            message: normalized.text,
+            locale: claim.locale,
+            trigger: "whatsapp",
+            inboundMessagePersisted: true,
+          });
+          const outcome = await turnOutcome(turn);
+          if (outcome.status !== "done") {
+            await dependencies.escalate({
+              conversationId: claim.conversationId,
+              profileId: claim.profileId,
+              providerMessageId: normalized.providerMessageId,
+              locale: claim.locale,
+              reason: "concierge_turn_failed",
+            });
+            await dependencies.markCompleted?.(normalized.providerMessageId);
+            return {status: "escalated"};
+          }
+          text = outcome.text;
+          if (!text) {
+            await dependencies.markCompleted?.(normalized.providerMessageId);
+            return {status: "accepted"};
+          }
+          await dependencies.markReplyReady?.(
+            normalized.providerMessageId,
+            text,
+            leaseUntil(),
+          );
+        }
       }
 
-      const template = templateFor(claim.locale);
-      if (!dependencies.approvedTemplateKeys.has(template)) {
-        await dependencies.escalate({
-          conversationId: claim.conversationId,
-          profileId: claim.profileId,
-          locale: claim.locale,
-          reason: "approved_template_unavailable",
-        });
-        await dependencies.markCompleted?.(normalized.providerMessageId);
-        return {status: "escalated"};
-      }
-      const templateResult = await dependencies.channel.sendTemplateMessage({
+      return deliverWoztellReply({
+        providerMessageId: normalized.providerMessageId,
+        sender,
+        receivedAt: normalized.receivedAt,
+        text,
+        locale: claim.locale,
+        memberName: claim.memberName,
         whatsappOptIn: claim.whatsappOptIn,
-        whatsappNumber: sender,
-        template,
-        variables: {
-          memberName: claim.memberName,
-          supportUrl: dependencies.supportUrl,
+        complete: async () => {
+          await dependencies.markCompleted?.(normalized.providerMessageId);
         },
-        idempotencyKey: `concierge:${normalized.providerMessageId}:template`,
-      });
-      if (templateResult.status !== "sent") {
-        await dependencies.escalate({
-          conversationId: claim.conversationId,
-          profileId: claim.profileId,
-          locale: claim.locale,
-          reason: "channel_delivery_failed",
-        });
-        await dependencies.markCompleted?.(normalized.providerMessageId);
-        return {status: "escalated"};
-      }
-      await dependencies.markCompleted?.(normalized.providerMessageId);
-      return {status: "accepted"};
+        escalate: async (reason) => {
+          await dependencies.escalate({
+            conversationId: claim.conversationId,
+            profileId: claim.profileId,
+            providerMessageId: normalized.providerMessageId,
+            locale: claim.locale,
+            reason,
+          });
+        },
+      }, dependencies);
     },
   });
 }
