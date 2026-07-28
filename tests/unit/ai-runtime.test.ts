@@ -113,6 +113,61 @@ describe("provider-neutral AI runtime", () => {
     expect(agentRuns.finish).toHaveBeenCalledOnce();
   });
 
+  it("preserves a scheduled agent identity through the full run lifecycle", async () => {
+    const agentRuns = createAgentRunsFake();
+    const runtime = createAgentRuntime({
+      agentRuns,
+      providerFactories: {
+        openai: () => ({
+          stream: () => ({
+            textStream: asyncText('{"summary":"ok"}'),
+            finish: Promise.resolve(successfulFinish()),
+          }),
+        }),
+        anthropic: vi.fn(),
+      },
+      createRunId: () => RUN_ID,
+      now: vi.fn()
+        .mockReturnValueOnce(STARTED_AT)
+        .mockReturnValue(COMPLETED_AT),
+    });
+    const scheduledActor = {
+      agent: "retention_analyst" as const,
+      conversationId: null,
+      profileId: null,
+      trigger: "scheduled" as const,
+    };
+
+    const prepared = await runtime.prepare(scheduledActor);
+    const result = await runtime.stream({
+      ...runtimeRequest(),
+      actor: scheduledActor,
+      preparedRun: prepared,
+      finalization: "deferred",
+    });
+    await collectText(result.textStream);
+    await result.finalize();
+
+    for (const lifecycle of [
+      agentRuns.start,
+      agentRuns.configureModel,
+      agentRuns.finish,
+    ]) {
+      expect(lifecycle).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kind: "agent",
+          agent: "retention_analyst",
+          runId: RUN_ID,
+          conversationId: null,
+          profileId: null,
+          trigger: "scheduled",
+        }),
+        expect.anything(),
+      );
+    }
+    expect(agentRuns.fail).not.toHaveBeenCalled();
+  });
+
   it("starts the run before provider construction, streams deltas, and records usage cost", async () => {
     const order: string[] = [];
     const agentRuns = createAgentRunsFake();

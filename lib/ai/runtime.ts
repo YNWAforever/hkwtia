@@ -1,6 +1,10 @@
 import {randomUUID} from "node:crypto";
 
-import type {ConciergeAgentActor} from "@/lib/auth/agent-actor";
+import {
+  requireAgentRunActor,
+  type AgentRunActor,
+  type ConciergeAgentActor,
+} from "@/lib/auth/agent-actor";
 import {
   AgentModelConfigurationError,
   resolveAgentModel,
@@ -47,6 +51,20 @@ type AgentRunsLifecycle = Readonly<{
   disable: (actor: ConciergeAgentActor, input: unknown) => Promise<unknown>;
 }>;
 
+export type AgentRuntimeActorInput =
+  | Readonly<{
+    agent?: "concierge";
+    conversationId: string;
+    profileId: string | null;
+    trigger: "web" | "whatsapp";
+  }>
+  | Readonly<{
+    agent: "retention_analyst" | "board_reporter";
+    conversationId: null;
+    profileId: null;
+    trigger: "scheduled";
+  }>;
+
 export type AgentRuntimeRequest = Readonly<{
   enabled: boolean;
   disabledCode?: AgentDisabledCode;
@@ -55,11 +73,7 @@ export type AgentRuntimeRequest = Readonly<{
     openaiApiKey?: string;
     anthropicApiKey?: string;
   }>;
-  actor: Readonly<{
-    conversationId: string;
-    profileId: string | null;
-    trigger: "web" | "whatsapp";
-  }>;
+  actor: AgentRuntimeActorInput;
   system: string;
   messages: AgentMessage[];
   tools: AgentToolSet;
@@ -504,7 +518,7 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
     promise: Promise<unknown>;
   }>;
   type RunState = {
-    actor: ConciergeAgentActor;
+    actor: AgentRunActor;
     streamStarted: boolean;
     terminal?: Terminal;
   };
@@ -524,7 +538,12 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
       }
       return state.terminal.promise;
     }
-    const method = agentRuns[kind];
+    // Repositories accept the generalized run actor. The Concierge-shaped
+    // dependency surface remains source-compatible with M4A's in-memory
+    // acceptance adapter.
+    const method = agentRuns[kind] as unknown as (
+      actor: AgentRunActor, input: unknown
+    ) => Promise<unknown>;
     state.terminal = {
       kind,
       ...(failureCode === undefined ? {} : {failureCode}),
@@ -567,14 +586,24 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
     actorInput: AgentRuntimeRequest["actor"],
     runId: string,
   ): AgentRuntimePreparedRun {
-    const actor: ConciergeAgentActor = {
-      kind: "agent",
-      agent: "concierge",
-      runId,
-      conversationId: actorInput.conversationId,
-      profileId: actorInput.profileId,
-      trigger: actorInput.trigger,
-    };
+    const actor: AgentRunActor = actorInput.trigger === "scheduled"
+      ? {
+        kind: "agent" as const,
+        agent: actorInput.agent,
+        runId,
+        conversationId: null,
+        profileId: null,
+        trigger: "scheduled" as const,
+      }
+      : {
+        kind: "agent" as const,
+        agent: "concierge" as const,
+        runId,
+        conversationId: actorInput.conversationId,
+        profileId: actorInput.profileId,
+        trigger: actorInput.trigger,
+      };
+    requireAgentRunActor(actor);
     const state: RunState = {actor, streamStarted: false};
     const prepared = Object.freeze({
       runId,
@@ -591,7 +620,10 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
     const runId = createRunId();
     const prepared = preparedRunFor(actorInput, runId);
     const state = preparedStates.get(prepared)!;
-    await agentRuns.start(state.actor, {
+    const start = agentRuns.start as unknown as (
+      actor: AgentRunActor, input: unknown
+    ) => Promise<unknown>;
+    await start(state.actor, {
       provider: null,
       model: null,
       startedAt: safeNow(now),
@@ -621,7 +653,8 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
       const {actor} = activeState;
       const {runId} = actor;
       if (
-        actor.conversationId !== request.actor.conversationId
+        actor.agent !== (request.actor.agent ?? "concierge")
+        || actor.conversationId !== request.actor.conversationId
         || actor.profileId !== request.actor.profileId
         || actor.trigger !== request.actor.trigger
       ) {
@@ -728,7 +761,10 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
       let providerResult;
       try {
         resolvedModel = resolveAgentModel(request.model);
-        await agentRuns.configureModel(actor, {
+        const configureModel = agentRuns.configureModel as unknown as (
+          actor: AgentRunActor, input: unknown
+        ) => Promise<unknown>;
+        await configureModel(actor, {
           provider: resolvedModel.provider,
           model: resolvedModel.modelId,
         });

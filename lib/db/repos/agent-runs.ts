@@ -4,7 +4,8 @@ import {sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
 import {
-  requireConciergeAgent,
+  requireAgentRunActor,
+  type AgentRunActor,
   type ConciergeAgentActor,
 } from "@/lib/auth/agent-actor";
 import {getDb} from "@/lib/db/repos/common";
@@ -18,9 +19,10 @@ import {forbidden} from "@/lib/membership/lifecycle";
 
 export type AgentRunRecord = Readonly<{
   id: string;
-  conversationId: string;
+  agent: AgentRunActor["agent"];
+  conversationId: string | null;
   profileId: string | null;
-  trigger: "web" | "whatsapp";
+  trigger: AgentRunActor["trigger"];
   status: "running" | "disabled" | "completed" | "failed" | "escalated";
   provider: string | null;
   model: string | null;
@@ -128,7 +130,8 @@ function optionalString(value: unknown): string | null {
 function runFrom(row: Record<string, unknown>): AgentRunRecord {
   return {
     id: String(row.id),
-    conversationId: String(row.conversation_id),
+    agent: String(row.agent) as AgentRunRecord["agent"],
+    conversationId: optionalString(row.conversation_id),
     profileId: optionalString(row.profile_id),
     trigger: String(row.trigger) as AgentRunRecord["trigger"],
     status: String(row.status) as AgentRunRecord["status"],
@@ -156,6 +159,20 @@ function actorOwnerPredicate(actor: ConciergeAgentActor): SQL {
   return actor.profileId === null
     ? sql`${conversations.profileId} IS NULL`
     : sql`${conversations.profileId} = ${actor.profileId}`;
+}
+
+function actorRunPredicate(actor: AgentRunActor): SQL {
+  const conversationPredicate = actor.conversationId === null
+    ? sql`conversation_id IS NULL`
+    : sql`conversation_id = ${actor.conversationId}`;
+  const profilePredicate = actor.agent === "concierge"
+    ? sql`profile_id IS NOT DISTINCT FROM ${actor.profileId}`
+    : sql`profile_id IS NULL`;
+  return sql`id = ${actor.runId}
+    AND agent = ${actor.agent}
+    AND ${conversationPredicate}
+    AND ${profilePredicate}
+    AND trigger = ${actor.trigger}`;
 }
 
 function feedbackOwnerPredicate(owner: ConversationOwner): SQL {
@@ -190,11 +207,11 @@ function targetSql(target: TransitionTarget): SQL {
 
 async function transition(
   database: AutomationDatabase,
-  actor: ConciergeAgentActor,
+  actor: AgentRunActor,
   target: TransitionTarget,
   values: TransitionValues,
 ): Promise<AgentRunRecord> {
-  requireConciergeAgent(actor);
+  requireAgentRunActor(actor);
   const rows = rowsFrom(await database.execute(sql`
     UPDATE ${agentRuns}
     SET
@@ -207,10 +224,7 @@ async function transition(
       error_code = ${values.errorCode},
       completed_at = ${values.completedAt},
       updated_at = ${values.completedAt}
-    WHERE id = ${actor.runId}
-      AND conversation_id = ${actor.conversationId}
-      AND profile_id IS NOT DISTINCT FROM ${actor.profileId}
-      AND trigger = ${actor.trigger}
+    WHERE ${actorRunPredicate(actor)}
       AND status = 'running'
       AND ${values.completedAt} >= started_at
     RETURNING *
@@ -236,17 +250,19 @@ export function createAgentRunsRepository(
 ) {
   return {
     async start(
-      actor: ConciergeAgentActor,
+      actor: AgentRunActor,
       input: unknown,
     ): Promise<AgentRunRecord> {
-      requireConciergeAgent(actor);
+      requireAgentRunActor(actor);
       const parsed = startInputSchema.parse(input);
       const startedAt = parsed.startedAt ?? new Date();
       const database = await loadDatabase();
-      const row = rowsFrom(await database.execute(sql`
+      const statement = actor.agent === "concierge"
+        ? sql`
         INSERT INTO ${agentRuns}
           (
             id,
+            agent,
             conversation_id,
             profile_id,
             trigger,
@@ -259,6 +275,7 @@ export function createAgentRunsRepository(
           )
         SELECT
           ${actor.runId},
+          ${actor.agent},
           ${actor.conversationId},
           ${actor.profileId},
           ${actor.trigger},
@@ -272,16 +289,47 @@ export function createAgentRunsRepository(
         WHERE ${conversations.id} = ${actor.conversationId}
           AND ${actorOwnerPredicate(actor)}
         RETURNING *
-      `))[0];
+      `
+        : sql`
+        INSERT INTO ${agentRuns}
+          (
+            id,
+            agent,
+            conversation_id,
+            profile_id,
+            trigger,
+            status,
+            provider,
+            model,
+            started_at,
+            created_at,
+            updated_at
+          )
+        VALUES (
+          ${actor.runId},
+          ${actor.agent},
+          NULL,
+          NULL,
+          ${actor.trigger},
+          'running',
+          ${parsed.provider ?? null},
+          ${parsed.model ?? null},
+          ${startedAt},
+          ${startedAt},
+          ${startedAt}
+        )
+        RETURNING *
+      `;
+      const row = rowsFrom(await database.execute(statement))[0];
       if (!row) forbidden();
       return runFrom(row);
     },
 
     async configureModel(
-      actor: ConciergeAgentActor,
+      actor: AgentRunActor,
       input: unknown,
     ): Promise<AgentRunRecord> {
-      requireConciergeAgent(actor);
+      requireAgentRunActor(actor);
       const parsed = configureModelInputSchema.parse(input);
       const database = await loadDatabase();
       const row = rowsFrom(await database.execute(sql`
@@ -290,10 +338,7 @@ export function createAgentRunsRepository(
           provider = ${parsed.provider},
           model = ${parsed.model},
           updated_at = NOW()
-        WHERE id = ${actor.runId}
-          AND conversation_id = ${actor.conversationId}
-          AND profile_id IS NOT DISTINCT FROM ${actor.profileId}
-          AND trigger = ${actor.trigger}
+        WHERE ${actorRunPredicate(actor)}
           AND status = 'running'
           AND provider IS NULL
           AND model IS NULL
@@ -305,8 +350,8 @@ export function createAgentRunsRepository(
       return runFrom(row);
     },
 
-    async finish(actor: ConciergeAgentActor, input: unknown): Promise<AgentRunRecord> {
-      requireConciergeAgent(actor);
+    async finish(actor: AgentRunActor, input: unknown): Promise<AgentRunRecord> {
+      requireAgentRunActor(actor);
       const parsed = finishInputSchema.parse(input);
       return transition(await loadDatabase(), actor, "completed", {
         completedAt: parsed.completedAt,
@@ -316,8 +361,8 @@ export function createAgentRunsRepository(
       });
     },
 
-    async fail(actor: ConciergeAgentActor, input: unknown): Promise<AgentRunRecord> {
-      requireConciergeAgent(actor);
+    async fail(actor: AgentRunActor, input: unknown): Promise<AgentRunRecord> {
+      requireAgentRunActor(actor);
       const parsed = failInputSchema.parse(input);
       return transition(await loadDatabase(), actor, "failed", {
         completedAt: parsed.completedAt,
@@ -327,8 +372,8 @@ export function createAgentRunsRepository(
       });
     },
 
-    async escalate(actor: ConciergeAgentActor, input: unknown): Promise<AgentRunRecord> {
-      requireConciergeAgent(actor);
+    async escalate(actor: AgentRunActor, input: unknown): Promise<AgentRunRecord> {
+      requireAgentRunActor(actor);
       const parsed = escalationInputSchema.parse(input);
       return transition(await loadDatabase(), actor, "escalated", {
         completedAt: parsed.completedAt,
@@ -338,8 +383,8 @@ export function createAgentRunsRepository(
       });
     },
 
-    async disable(actor: ConciergeAgentActor, input: unknown): Promise<AgentRunRecord> {
-      requireConciergeAgent(actor);
+    async disable(actor: AgentRunActor, input: unknown): Promise<AgentRunRecord> {
+      requireAgentRunActor(actor);
       const parsed = disabledInputSchema.parse(input);
       return transition(await loadDatabase(), actor, "disabled", {
         completedAt: parsed.completedAt,
