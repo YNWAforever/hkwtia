@@ -16,7 +16,7 @@ const labels: ConciergeLabels = {
   description: "Ask about membership, events, programmes and support.",
   close: "Close Concierge",
   messageLabel: "Your message",
-  placeholder: "How can we help?",
+  placeholder: "e.g. How do I join WTIA?…",
   send: "Send",
   sending: "Sending…",
   cancel: "Cancel response",
@@ -42,11 +42,13 @@ function widget(): ReactElement {
   return <ConciergeWidget locale="en" labels={labels} />;
 }
 
-function sseResponse(chunks: readonly string[]): Response {
+function sseResponse(chunks: readonly (string | Uint8Array)[]): Response {
   const encoder = new TextEncoder();
   return new Response(new ReadableStream<Uint8Array>({
     start(controller) {
-      for (const chunk of chunks) controller.enqueue(encoder.encode(chunk));
+      for (const chunk of chunks) {
+        controller.enqueue(typeof chunk === "string" ? encoder.encode(chunk) : chunk);
+      }
       controller.close();
     },
   }), {
@@ -90,7 +92,19 @@ describe("ConciergeWidget", () => {
     expect(launcher).toHaveAttribute("aria-expanded", "false");
     await openWidget();
     expect(launcher).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("textbox", {name: labels.messageLabel})).toHaveFocus();
+    const textbox = screen.getByRole("textbox", {name: labels.messageLabel});
+    expect(textbox).toHaveFocus();
+    expect(textbox).toHaveAttribute("name", "message");
+    expect(textbox).toHaveAttribute("autocomplete", "off");
+
+    const close = screen.getByRole("button", {name: labels.close});
+    close.focus();
+    fireEvent.keyDown(close, {key: "Tab", shiftKey: true});
+    await waitFor(() => expect(textbox).toHaveFocus());
+    expect(screen.getByRole("dialog", {name: labels.title}).querySelector("ol"))
+      .toHaveClass("overscroll-contain");
+    expect(close).toHaveClass("touch-manipulation");
+    expect(launcher).toHaveClass("touch-manipulation");
 
     fireEvent.keyDown(document, {key: "Escape"});
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
@@ -140,6 +154,7 @@ describe("ConciergeWidget", () => {
     });
     expect(citation).toHaveAttribute("href", "https://www.hkwtia.org/membership");
     expect(citation).toHaveAttribute("rel", "noopener noreferrer");
+    expect(citation).toHaveClass("hover:text-primary/80", "touch-manipulation");
     expect(screen.queryByRole("link", {name: /Bad source/})).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
@@ -151,6 +166,53 @@ describe("ConciergeWidget", () => {
       locale: "en",
       message: "And member events?",
     });
+  });
+
+  it("parses CRLF frames, multiline data, and split multibyte UTF-8", async () => {
+    const encoder = new TextEncoder();
+    const beforeMultibyte = [
+      `event: meta\r\ndata: {"conversationId":"${CONVERSATION_ID}","runId":"${RUN_ID}"}\r\n\r\n`,
+      'event: delta\r\ndata: {"text":\r\ndata: "',
+    ].join("");
+    const stream = encoder.encode(
+      `${beforeMultibyte}香港"}\r\n\r\nevent: done\r\ndata: {"citations":[],"escalationId":null}\r\n\r\n`,
+    );
+    const splitInsideCharacter = encoder.encode(beforeMultibyte).length + 1;
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(sseResponse([
+      stream.slice(0, splitInsideCharacter),
+      stream.slice(splitInsideCharacter),
+    ])));
+    render(widget());
+    await openWidget();
+
+    submit("Protocol edge cases");
+    expect(await screen.findByText("香港")).toBeVisible();
+  });
+
+  it("cancels a held-open SSE reader when event dispatch fails", async () => {
+    const encoder = new TextEncoder();
+    let streamController!: ReadableStreamDefaultController<Uint8Array>;
+    const cancel = vi.fn();
+    const response = new Response(new ReadableStream<Uint8Array>({
+      start(controller) {
+        streamController = controller;
+        controller.enqueue(encoder.encode(
+          'event: error\ndata: {"code":"AI_TEMPORARILY_UNAVAILABLE"}\n\n',
+        ));
+      },
+      cancel,
+    }), {
+      status: 200,
+      headers: {"content-type": "text/event-stream; charset=utf-8"},
+    });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
+    render(widget());
+    await openWidget();
+
+    submit("Hold the stream");
+    expect(await screen.findByRole("alert")).toHaveTextContent(labels.error);
+    await waitFor(() => expect(cancel).toHaveBeenCalledTimes(1));
+    expect(() => streamController.enqueue(encoder.encode("late"))).toThrow();
   });
 
   it("shows recoverable stream errors and retries the same turn only once", async () => {

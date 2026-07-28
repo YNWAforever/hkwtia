@@ -57,6 +57,9 @@ test("anonymous English and Traditional Chinese turns keep conversation continui
   for (const locale of ["en", "zh-HK"] as const) {
     const labels = copy(locale).Concierge;
     await page.goto(locale === "en" ? "/about" : "/zh/about");
+    await expect.poll(() => page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    )).toBe(true);
     await page.getByRole("button", {name: labels.launcher}).click();
     const dialog = page.getByRole("dialog", {name: labels.title});
     await expect(dialog).toBeVisible();
@@ -65,6 +68,9 @@ test("anonymous English and Traditional Chinese turns keep conversation continui
     expect(box).not.toBeNull();
     expect(box!.x).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(375);
+    expect(await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    )).toBe(true);
 
     await ask(page, labels, `Question in ${locale}`);
     await expect(dialog.getByText(`Answer ${turn}`, {exact: true})).toBeVisible();

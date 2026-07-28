@@ -5,35 +5,10 @@ import {ExternalLink, MessageCircle, Send, Star, X} from "lucide-react";
 import {type FormEvent, useEffect, useId, useRef, useState} from "react";
 
 import {Button} from "@/components/ui/button";
+import type {ConciergeLabels} from "@/lib/ai/concierge-labels";
 import {cn} from "@/lib/utils";
 
-export type ConciergeLabels = Readonly<{
-  launcher: string;
-  title: string;
-  description: string;
-  close: string;
-  messageLabel: string;
-  placeholder: string;
-  send: string;
-  sending: string;
-  cancel: string;
-  empty: string;
-  you: string;
-  assistant: string;
-  sources: string;
-  retry: string;
-  error: string;
-  offline: string;
-  disabled: string;
-  leaveMessage: string;
-  escalated: string;
-  reference: string;
-  feedbackPrompt: string;
-  feedbackLabel: string;
-  feedbackThanks: string;
-  feedbackError: string;
-  characterCount: string;
-}>;
+export type {ConciergeLabels} from "@/lib/ai/concierge-labels";
 
 type Citation = Readonly<{
   sourceId: string;
@@ -137,6 +112,13 @@ async function readSse(
       const parsed = parseFrame(buffer);
       if (parsed) onEvent(parsed);
     }
+  } catch (error) {
+    try {
+      await reader.cancel(error);
+    } catch {
+      // Preserve the original stream/dispatch failure.
+    }
+    throw error;
   } finally {
     reader.releaseLock();
   }
@@ -374,7 +356,7 @@ export function ConciergeWidget({locale, labels}: Props) {
           aria-label={labels.launcher}
           aria-controls={dialogId}
           aria-expanded={open}
-          className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-[calc(1rem+env(safe-area-inset-right))] z-40 inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg motion-safe:transition-[opacity,transform] motion-safe:duration-200 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 active:opacity-90"
+          className="fixed touch-manipulation bottom-[calc(1rem+env(safe-area-inset-bottom))] right-[calc(1rem+env(safe-area-inset-right))] z-40 inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg motion-safe:transition-[opacity,transform] motion-safe:duration-200 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 active:opacity-90"
         >
           <MessageCircle aria-hidden="true" className="size-5" />
           <span>{labels.launcher}</span>
@@ -399,7 +381,7 @@ export function ConciergeWidget({locale, labels}: Props) {
             </Dialog.Description>
             <Dialog.Close
               aria-label={labels.close}
-              className="absolute right-3 top-3 inline-flex size-11 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+              className="absolute right-3 top-3 inline-flex touch-manipulation size-11 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
             >
               <X aria-hidden="true" className="size-5" />
             </Dialog.Close>
@@ -409,7 +391,7 @@ export function ConciergeWidget({locale, labels}: Props) {
             <ol
               aria-label={labels.title}
               aria-live="polite"
-              className="min-h-40 flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-4 py-4"
+              className="min-h-40 flex-1 space-y-4 overflow-y-auto overscroll-contain overflow-x-hidden px-4 py-4"
             >
               {messages.length === 0 && !disabledState ? (
                 <li className="text-sm leading-6 text-muted-foreground">
@@ -451,7 +433,7 @@ export function ConciergeWidget({locale, labels}: Props) {
                           return url ? (
                             <li key={citation.sourceId}>
                               <a
-                                className="inline-flex min-h-11 max-w-full items-center gap-2 rounded-md text-primary underline decoration-primary/40 underline-offset-4 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+                                className="inline-flex min-h-11 max-w-full touch-manipulation items-center gap-2 rounded-md text-primary underline hover:text-primary/80 decoration-primary/40 underline-offset-4 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
                                 href={url.href}
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -497,7 +479,7 @@ export function ConciergeWidget({locale, labels}: Props) {
                                   }
                                   onClick={() =>
                                     void recordFeedback(message.runId!, score)}
-                                  className="inline-flex size-11 cursor-pointer items-center justify-center rounded-md border border-border bg-background text-primary hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                  className="inline-flex size-11 touch-manipulation cursor-pointer items-center justify-center rounded-md border border-border bg-background text-primary hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                   <Star aria-hidden="true" className="size-5" />
                                 </button>
@@ -537,7 +519,7 @@ export function ConciergeWidget({locale, labels}: Props) {
                     <Button
                       type="button"
                       variant="outline"
-                      className="mt-3 min-h-11"
+                      className="mt-3 min-h-11 touch-manipulation"
                       disabled={sending || !online}
                       onClick={() =>
                         void sendTurn(error.retryMessage!, {retry: true})}
@@ -559,6 +541,8 @@ export function ConciergeWidget({locale, labels}: Props) {
               <textarea
                 ref={textareaRef}
                 id={`${dialogId}-message`}
+                name="message"
+                autoComplete="off"
                 value={draft}
                 maxLength={2000}
                 rows={3}
@@ -576,7 +560,7 @@ export function ConciergeWidget({locale, labels}: Props) {
                     <Button
                       type="button"
                       variant="outline"
-                      className="min-h-11"
+                      className="min-h-11 touch-manipulation"
                       onClick={cancelRequest}
                     >
                       {labels.cancel}
@@ -584,7 +568,7 @@ export function ConciergeWidget({locale, labels}: Props) {
                   ) : null}
                   <Button
                     type="submit"
-                    className="min-h-11"
+                    className="min-h-11 touch-manipulation"
                     disabled={
                       sending
                       || Boolean(disabledState)

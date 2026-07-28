@@ -448,7 +448,7 @@
     "description": "查詢 WTIA 會籍、活動、計劃及支援。",
     "close": "關閉 WTIA 智能助理",
     "messageLabel": "你的訊息",
-    "placeholder": "我們可以怎樣幫你？",
+    "placeholder": "例如：如何加入 WTIA？…",
     "send": "發送",
     "sending": "發送中……",
     "cancel": "取消回覆",

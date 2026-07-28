@@ -24,4 +24,9 @@ describe('message bundles', () => {
     expect(chineseKeys).toEqual(englishKeys);
     expect(zh._review).toBe(true);
   });
+
+  it('uses localized example placeholders with an ellipsis', () => {
+    expect(en.Concierge.placeholder).toMatch(/^e\.g\. .+…$/);
+    expect(zh.Concierge.placeholder).toMatch(/^例如：.+…$/);
+  });
 });

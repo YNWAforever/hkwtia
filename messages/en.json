@@ -446,7 +446,7 @@
     "description": "Ask about WTIA membership, events, programmes and support.",
     "close": "Close Concierge",
     "messageLabel": "Your message",
-    "placeholder": "How can we help?",
+    "placeholder": "e.g. How do I join WTIA?…",
     "send": "Send",
     "sending": "Sending…",
     "cancel": "Cancel response",

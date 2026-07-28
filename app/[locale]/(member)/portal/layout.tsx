@@ -1,12 +1,13 @@
-import {getMessages, getTranslations, setRequestLocale} from "next-intl/server";
+import {getTranslations, setRequestLocale} from "next-intl/server";
 import {headers} from "next/headers";
 import {redirect} from "next/navigation";
 import type {ReactNode} from "react";
 
-import {ConciergeWidget, type ConciergeLabels} from "@/components/ai/concierge-widget";
+import {ConciergeWidget} from "@/components/ai/concierge-widget";
 import {PortalNav} from "@/components/portal/portal-nav";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
+import {localizeConcierge} from "@/lib/ai/concierge-labels";
 import {buildPortalSignInPath} from "@/lib/portal/queries";
 
 export const dynamic = "force-dynamic";
@@ -39,9 +40,11 @@ export default async function PortalLayout({children, params}: Props) {
     throw error;
   }
 
-  const t = await getTranslations({locale, namespace: "Portal"});
-  const messages = await getMessages({locale});
-  const conciergeLabels = messages.Concierge as ConciergeLabels;
+  const [t, concierge] = await Promise.all([
+    getTranslations({locale, namespace: "Portal"}),
+    getTranslations({locale, namespace: "Concierge"}),
+  ]);
+  const conciergeLabels = localizeConcierge((key) => concierge.raw(key));
 
   return (
     <div className="min-h-screen bg-background">
