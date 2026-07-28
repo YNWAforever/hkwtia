@@ -241,8 +241,12 @@ export function createConciergeService(
         {startedAt: now()},
       );
 
+      let cancellationRequested = false;
       const controller = new AbortController();
-      const forwardAbort = () => controller.abort(input.abortSignal?.reason);
+      const forwardAbort = () => {
+        cancellationRequested = true;
+        controller.abort(input.abortSignal?.reason);
+      };
       input.abortSignal?.addEventListener("abort", forwardAbort, {once: true});
       if (input.abortSignal?.aborted) forwardAbort();
 
@@ -339,12 +343,18 @@ export function createConciergeService(
       let cancellation: Promise<void> | undefined;
       function cancelPendingRun(): Promise<void> {
         if (completed) return Promise.resolve();
+        cancellationRequested = true;
         if (cancellation) return cancellation;
         if (!controller.signal.aborted) controller.abort();
         cancellation = runtimeTurn
           .fail(new AgentRuntimeError("timeout"))
           .then(() => undefined);
         return cancellation;
+      }
+      function requireActiveTurn(): void {
+        if (cancellationRequested) {
+          throw new AgentRuntimeError("timeout");
+        }
       }
       const events: AsyncIterable<ConciergeSseEvent> = {
         async *[Symbol.asyncIterator]() {
@@ -359,11 +369,14 @@ export function createConciergeService(
                 runId: runtimeTurn.runId,
               },
             };
+            requireActiveTurn();
 
             if (!dependencies.agentsEnabled) {
               await runtimeTurn.finish;
+              requireActiveTurn();
               await runtimeTurn.finalize();
               completed = true;
+              requireActiveTurn();
               yield {
                 event: "disabled",
                 data: {taskId: disabledTaskId!},
@@ -372,13 +385,17 @@ export function createConciergeService(
             }
 
             for await (const delta of runtimeTurn.textStream) {
+              requireActiveTurn();
               assistantText += delta;
               assistantDeltas.push(delta);
               if (!groundingRequired) {
                 yield {event: "delta", data: {text: delta}};
+                requireActiveTurn();
               }
             }
+            requireActiveTurn();
             const finish = await runtimeTurn.finish;
+            requireActiveTurn();
             const lowConfidence =
               finish.status === "completed"
               && groundingRequired
@@ -399,6 +416,7 @@ export function createConciergeService(
             let escalationId: string | null = null;
 
             if (effectiveFinish.status === "escalated") {
+              requireActiveTurn();
               const task = await dependencies.agentTools.createStaffTask(
                 actor,
                 {
@@ -409,20 +427,24 @@ export function createConciergeService(
                   locale,
                 },
               );
+              requireActiveTurn();
               escalationId = `WTIA-${task.id}`;
             }
 
             if (groundingRequired) {
               if (lowConfidence) {
                 yield {event: "delta", data: {text: responseText}};
+                requireActiveTurn();
               } else {
                 for (const delta of assistantDeltas) {
                   yield {event: "delta", data: {text: delta}};
+                  requireActiveTurn();
                 }
               }
             }
 
             if (responseText.trim()) {
+              requireActiveTurn();
               await dependencies.conversations.appendMessage(
                 input.owner,
                 conversation.id,
@@ -434,14 +456,17 @@ export function createConciergeService(
                   citations: [...citations],
                 },
               );
+              requireActiveTurn();
             }
 
+            requireActiveTurn();
             await runtimeTurn.finalize(
               lowConfidence
                 ? {status: "escalated", code: "low_confidence"}
                 : undefined,
             );
             completed = true;
+            requireActiveTurn();
             yield {
               event: "done",
               data: {citations, escalationId},
@@ -451,6 +476,7 @@ export function createConciergeService(
             let escalationId: string | undefined;
             if (
               error instanceof AgentRuntimeError
+              && !cancellationRequested
               && error.toolExecutions > 0
             ) {
               try {

@@ -494,6 +494,7 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
   }>;
   type RunState = {
     actor: ConciergeAgentActor;
+    streamStarted: boolean;
     terminal?: Terminal;
   };
   const preparedStates = new WeakMap<AgentRuntimePreparedRun, RunState>();
@@ -504,12 +505,19 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
     input: unknown,
     failureCode?: AgentFailureCode,
   ): Promise<unknown> {
-    if (state.terminal) return state.terminal.promise;
+    if (state.terminal) {
+      if (state.terminal.kind !== kind) {
+        throw new AgentRuntimeError(
+          state.terminal.failureCode ?? "provider_error",
+        );
+      }
+      return state.terminal.promise;
+    }
     const method = agentRuns[kind];
     state.terminal = {
       kind,
       ...(failureCode === undefined ? {} : {failureCode}),
-      promise: Promise.resolve(method(state.actor, input)),
+      promise: Promise.resolve().then(() => method(state.actor, input)),
     };
     return state.terminal.promise;
   }
@@ -556,7 +564,7 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
       profileId: actorInput.profileId,
       trigger: actorInput.trigger,
     };
-    const state: RunState = {actor};
+    const state: RunState = {actor, streamStarted: false};
     const prepared = Object.freeze({
       runId,
       fail: (error: unknown = new AgentRuntimeError("provider_error")) =>
@@ -595,6 +603,10 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
       const state = preparedStates.get(preparedRun);
       if (!state) throw new AgentRuntimeError("configuration_error");
       const activeState = state;
+      if (activeState.streamStarted) {
+        throw new AgentRuntimeError("configuration_error");
+      }
+      activeState.streamStarted = true;
       const {actor} = activeState;
       const {runId} = actor;
       if (

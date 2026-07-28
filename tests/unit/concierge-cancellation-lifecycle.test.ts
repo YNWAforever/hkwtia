@@ -86,7 +86,7 @@ function lifecycleHarness() {
     createRunId: () => RUN_ID,
     now: () => NOW,
   });
-  return {agentRuns, service};
+  return {agentRuns, conversations, service};
 }
 
 async function consume(events: AsyncIterable<unknown>): Promise<void> {
@@ -143,6 +143,32 @@ describe("Concierge cancellation lifecycle", () => {
     await iterator.next();
     await iterator.return?.();
 
+    expect(agentRuns.fail).toHaveBeenCalledOnce();
+    expect(agentRuns.fail).toHaveBeenCalledWith(
+      expect.objectContaining({runId: RUN_ID}),
+      expect.objectContaining({errorCode: "timeout"}),
+    );
+    expectNoNonFailureTerminal(agentRuns);
+  });
+
+  it("cannot append or emit done when consumption continues after cancel", async () => {
+    const {agentRuns, conversations, service} = lifecycleHarness();
+    const turn = await service.startTurn({
+      owner: OWNER,
+      profileId: OWNER.profileId,
+      conversationId: CONVERSATION_ID,
+      message: "Hello",
+      locale: "en",
+      trigger: "web",
+    });
+
+    await turn.cancel();
+    const events: Array<{event: string}> = [];
+    for await (const event of turn.events) events.push(event);
+
+    expect(events).toContainEqual(expect.objectContaining({event: "error"}));
+    expect(events).not.toContainEqual(expect.objectContaining({event: "done"}));
+    expect(conversations.appendMessage).not.toHaveBeenCalled();
     expect(agentRuns.fail).toHaveBeenCalledOnce();
     expect(agentRuns.fail).toHaveBeenCalledWith(
       expect.objectContaining({runId: RUN_ID}),
