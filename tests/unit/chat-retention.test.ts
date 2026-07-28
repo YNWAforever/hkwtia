@@ -220,12 +220,65 @@ describe("production retention SQL boundary", () => {
       emptyConversations: 1,
     });
     const query = fixture.queries[0];
-    expect(query?.sql.match(/agent_kind = /g)).toHaveLength(4);
-    expect(query?.sql.match(/agent_kind = 'concierge'/g)).toHaveLength(4);
+    expect(query?.sql).toMatch(
+      /post_delete_empty_conversations[\s\S]*agent_kind = 'concierge'/i,
+    );
+    expect(query?.sql).toMatch(
+      /FROM "?messages"? AS transcript[\s\S]*INNER JOIN "?conversations"? AS conversation[\s\S]*agent_kind = 'concierge'/i,
+    );
+    expect(query?.sql).toMatch(
+      /FROM "?agent_runs"? AS run[\s\S]*INNER JOIN "?conversations"? AS conversation[\s\S]*agent_kind = 'concierge'/i,
+    );
     expect(query?.sql).toMatch(/transcript\.created_at < /);
     expect(query?.sql).not.toMatch(/transcript\.created_at <= /);
     expect(query?.sql).not.toMatch(/transcript\.content|run\.summary\s+AS/i);
   });
+  it("previews conversations emptied by old-message deletion and counts every linked summarized run once", async () => {
+    const cutoff = new Date("2025-07-28T03:00:00.000Z");
+    const fixture = database([[
+      {
+        messages: 1,
+        runs_to_redact: 1,
+        runs_to_unlink: 1,
+        empty_conversations: 1,
+      },
+    ]]);
+    const repo = createChatRetentionRepository(async () => fixture.database);
+
+    await expect(repo.inspect(cutoff, now)).resolves.toEqual({
+      messages: 1,
+      runsToRedact: 1,
+      runsToUnlink: 1,
+      emptyConversations: 1,
+    });
+
+    const query = fixture.queries[0];
+    expect(query?.sql).toMatch(/WITH post_delete_empty_conversations AS/i);
+    expect(query?.sql).toMatch(
+      /post_delete_empty_conversations[\s\S]*agent_kind = 'concierge'[\s\S]*expires_at <= [\s\S]*NOT EXISTS[\s\S]*remaining\.created_at >= /i,
+    );
+    expect(query?.sql).toMatch(
+      /LEFT JOIN post_delete_empty_conversations AS candidate[\s\S]*run\.summary IS NOT NULL[\s\S]*run\.created_at < [\s\S]*OR candidate\.id IS NOT NULL/i,
+    );
+    expect(query?.sql).toMatch(
+      /INNER JOIN post_delete_empty_conversations AS candidate[\s\S]*candidate\.id = run\.conversation_id/i,
+    );
+    expect(query?.sql).toMatch(
+      /SELECT count\(\*\)::integer[\s\S]*FROM post_delete_empty_conversations/i,
+    );
+    expect(query?.sql).not.toMatch(/\bUPDATE\b|\bDELETE\b|\.content/i);
+
+    const serializedParams = query?.params.map((value) =>
+      value instanceof Date ? value.toISOString() : value
+    );
+    expect(serializedParams?.filter(
+      (value) => value === cutoff.toISOString(),
+    )).toHaveLength(3);
+    expect(serializedParams?.filter(
+      (value) => value === now.toISOString(),
+    )).toHaveLength(1);
+  });
+
   it("bounds mutations, redacts only summaries, unlinks runs, and never targets non-Concierge rows", async () => {
     const conversationId = "11111111-1111-4111-8111-111111111111";
     const fixture = database([

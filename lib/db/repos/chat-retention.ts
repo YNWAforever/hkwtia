@@ -101,6 +101,18 @@ export function createChatRetentionRepository(
         throw new Error("INVALID_RETENTION_CLOCK");
       }
       const row = rowsFrom(await (await database()).execute(sql`
+        WITH post_delete_empty_conversations AS (
+          SELECT conversation.id
+          FROM ${conversations} AS conversation
+          WHERE conversation.agent_kind = 'concierge'
+            AND conversation.expires_at <= ${now}
+            AND NOT EXISTS (
+              SELECT 1
+              FROM ${messages} AS remaining
+              WHERE remaining.conversation_id = conversation.id
+                AND remaining.created_at >= ${cutoff}
+            )
+        )
         SELECT
           (
             SELECT count(*)::integer
@@ -115,33 +127,24 @@ export function createChatRetentionRepository(
             FROM ${agentRuns} AS run
             INNER JOIN ${conversations} AS conversation
               ON conversation.id = run.conversation_id
+            LEFT JOIN post_delete_empty_conversations AS candidate
+              ON candidate.id = run.conversation_id
             WHERE conversation.agent_kind = 'concierge'
-              AND run.created_at < ${cutoff}
               AND run.summary IS NOT NULL
+              AND (
+                run.created_at < ${cutoff}
+                OR candidate.id IS NOT NULL
+              )
           ) AS runs_to_redact,
           (
             SELECT count(*)::integer
             FROM ${agentRuns} AS run
-            INNER JOIN ${conversations} AS conversation
-              ON conversation.id = run.conversation_id
-            WHERE conversation.agent_kind = 'concierge'
-              AND conversation.expires_at <= ${now}
-              AND NOT EXISTS (
-                SELECT 1
-                FROM ${messages} AS transcript
-                WHERE transcript.conversation_id = conversation.id
-              )
+            INNER JOIN post_delete_empty_conversations AS candidate
+              ON candidate.id = run.conversation_id
           ) AS runs_to_unlink,
           (
             SELECT count(*)::integer
-            FROM ${conversations} AS conversation
-            WHERE conversation.agent_kind = 'concierge'
-              AND conversation.expires_at <= ${now}
-              AND NOT EXISTS (
-                SELECT 1
-                FROM ${messages} AS transcript
-                WHERE transcript.conversation_id = conversation.id
-              )
+            FROM post_delete_empty_conversations
           ) AS empty_conversations
       `))[0];
       return {
