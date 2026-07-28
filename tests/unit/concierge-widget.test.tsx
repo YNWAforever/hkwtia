@@ -1,0 +1,290 @@
+import {fireEvent, render, screen, waitFor} from "@testing-library/react";
+import type {ReactElement} from "react";
+import {afterEach, describe, expect, it, vi} from "vitest";
+
+import {
+  ConciergeWidget,
+  type ConciergeLabels,
+} from "@/components/ai/concierge-widget";
+
+const CONVERSATION_ID = "11111111-1111-4111-8111-111111111111";
+const RUN_ID = "22222222-2222-4222-8222-222222222222";
+
+const labels: ConciergeLabels = {
+  launcher: "Ask WTIA",
+  title: "WTIA Concierge",
+  description: "Ask about membership, events, programmes and support.",
+  close: "Close Concierge",
+  messageLabel: "Your message",
+  placeholder: "How can we help?",
+  send: "Send",
+  sending: "Sending…",
+  cancel: "Cancel response",
+  empty: "Start a conversation with WTIA.",
+  you: "You",
+  assistant: "WTIA Concierge",
+  sources: "Sources",
+  retry: "Try again",
+  error: "We couldn’t reach WTIA Concierge. Check your connection and try again.",
+  offline: "You’re offline. Reconnect to send a message.",
+  disabled: "AI support is currently paused.",
+  leaveMessage: "Your message has been passed to the WTIA team.",
+  escalated: "A WTIA team member will follow up.",
+  reference: "Reference: {id}",
+  feedbackPrompt: "How helpful was this answer?",
+  feedbackLabel: "{score} out of 5",
+  feedbackThanks: "Thank you for your feedback.",
+  feedbackError: "We couldn’t save your feedback. Please try again.",
+  characterCount: "{count} / 2000",
+};
+
+function widget(): ReactElement {
+  return <ConciergeWidget locale="en" labels={labels} />;
+}
+
+function sseResponse(chunks: readonly string[]): Response {
+  const encoder = new TextEncoder();
+  return new Response(new ReadableStream<Uint8Array>({
+    start(controller) {
+      for (const chunk of chunks) controller.enqueue(encoder.encode(chunk));
+      controller.close();
+    },
+  }), {
+    status: 200,
+    headers: {"content-type": "text/event-stream; charset=utf-8"},
+  });
+}
+
+function deferredResponse() {
+  let resolve!: (response: Response) => void;
+  const promise = new Promise<Response>((done) => {
+    resolve = done;
+  });
+  return {promise, resolve};
+}
+
+async function openWidget() {
+  const launcher = screen.getByRole("button", {name: labels.launcher});
+  fireEvent.click(launcher);
+  await screen.findByRole("dialog", {name: labels.title});
+  return launcher;
+}
+
+function submit(message = "What events are coming up?") {
+  fireEvent.change(screen.getByRole("textbox", {name: labels.messageLabel}), {
+    target: {value: message},
+  });
+  fireEvent.click(screen.getByRole("button", {name: labels.send}));
+}
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
+describe("ConciergeWidget", () => {
+  it("labels its launcher and dialog, moves focus inside, closes with Escape, and returns focus", async () => {
+    render(widget());
+    const launcher = screen.getByRole("button", {name: labels.launcher});
+
+    expect(launcher).toHaveAttribute("aria-expanded", "false");
+    await openWidget();
+    expect(launcher).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("textbox", {name: labels.messageLabel})).toHaveFocus();
+
+    fireEvent.keyDown(document, {key: "Escape"});
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(launcher).toHaveFocus();
+  });
+
+  it("shows a 2000-character counter and prevents empty or over-limit submission", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    render(widget());
+    await openWidget();
+
+    const input = screen.getByRole("textbox", {name: labels.messageLabel});
+    const send = screen.getByRole("button", {name: labels.send});
+    expect(send).toBeDisabled();
+    expect(screen.getByText("0 / 2000")).toBeVisible();
+
+    fireEvent.change(input, {target: {value: "x".repeat(2001)}});
+    expect(input).toHaveValue("x".repeat(2000));
+    expect(screen.getByText("2000 / 2000")).toBeVisible();
+  });
+
+  it("submits once, parses split SSE chunks, preserves continuity, and renders only safe text and citation URLs", async () => {
+    const first = [
+      'event: meta\ndata: {"conversationId":"11111111-1111-4111-8111-111111111111","runId":"22222222-',
+      '2222-4222-8222-222222222222"}\n\nevent: delta\ndata: {"text":"<img src=x onerror=alert(1)>Hello "}\n\nevent: del',
+      'ta\ndata: {"text":"WTIA"}\n\nevent: done\ndata: {"citations":[{"sourceId":"safe","title":"WTIA Membership","url":"https://www.hkwtia.org/membership"},{"sourceId":"hostile","title":"Bad source","url":"javascript:alert(1)"}],"escalationId":null}\n\n',
+    ];
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(sseResponse(first))
+      .mockResolvedValueOnce(sseResponse([
+        `event: meta\ndata: {"conversationId":"${CONVERSATION_ID}","runId":"${RUN_ID}"}\n\n`,
+        'event: delta\ndata: {"text":"Second answer"}\n\n',
+        'event: done\ndata: {"citations":[],"escalationId":null}\n\n',
+      ]));
+    vi.stubGlobal("fetch", fetchMock);
+    render(widget());
+    await openWidget();
+
+    submit();
+    fireEvent.click(screen.getByRole("button", {name: labels.sending}));
+
+    expect(await screen.findByText("<img src=x onerror=alert(1)>Hello WTIA")).toBeVisible();
+    expect(document.querySelector("img")).toBeNull();
+    const citation = screen.getByRole("link", {
+      name: /WTIA Membership.*hkwtia\.org/,
+    });
+    expect(citation).toHaveAttribute("href", "https://www.hkwtia.org/membership");
+    expect(citation).toHaveAttribute("rel", "noopener noreferrer");
+    expect(screen.queryByRole("link", {name: /Bad source/})).not.toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    submit("And member events?");
+    await screen.findByText("Second answer");
+    const secondBody = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body));
+    expect(secondBody).toMatchObject({
+      conversationId: CONVERSATION_ID,
+      locale: "en",
+      message: "And member events?",
+    });
+  });
+
+  it("shows recoverable stream errors and retries the same turn only once", async () => {
+    const retry = deferredResponse();
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(sseResponse([
+        'event: error\ndata: {"code":"AI_TEMPORARILY_UNAVAILABLE","escalationId":"WTIA-task-error"}\n\n',
+      ]))
+      .mockImplementationOnce(() => retry.promise);
+    vi.stubGlobal("fetch", fetchMock);
+    render(widget());
+    await openWidget();
+
+    submit("Please help");
+    expect(await screen.findByRole("alert")).toHaveTextContent(labels.error);
+
+    expect(screen.getByText(labels.escalated)).toBeVisible();
+    expect(screen.getByText("Reference: WTIA-task-error")).toBeVisible();
+    const retryButton = screen.getByRole("button", {name: labels.retry});
+    fireEvent.click(retryButton);
+    fireEvent.click(retryButton);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    retry.resolve(sseResponse([
+      `event: meta\ndata: {"conversationId":"${CONVERSATION_ID}","runId":"${RUN_ID}"}\n\n`,
+      'event: delta\ndata: {"text":"Recovered"}\n\n',
+      'event: done\ndata: {"citations":[],"escalationId":null}\n\n',
+    ]));
+    expect(await screen.findByText("Recovered")).toBeVisible();
+  });
+
+  it("reports offline status and recovers when the browser reconnects", async () => {
+    vi.stubGlobal("fetch", vi.fn());
+    vi.spyOn(window.navigator, "onLine", "get").mockReturnValue(false);
+    render(widget());
+    await openWidget();
+
+    submit("Hello");
+    expect(await screen.findByRole("alert")).toHaveTextContent(labels.offline);
+    expect(fetch).not.toHaveBeenCalled();
+
+    vi.spyOn(window.navigator, "onLine", "get").mockReturnValue(true);
+    fireEvent(window, new Event("online"));
+    await waitFor(() =>
+      expect(screen.getByRole("button", {name: labels.retry})).toBeEnabled(),
+    );
+  });
+
+  it("aborts an active request on cancel and unmount without late UI updates", async () => {
+    let requestSignal: AbortSignal | undefined;
+    const fetchMock = vi.fn((_input: RequestInfo | URL, init?: RequestInit) => {
+      requestSignal = init?.signal as AbortSignal;
+      return new Promise<Response>((_resolve, reject) => {
+        requestSignal?.addEventListener("abort", () =>
+          reject(new DOMException("Aborted", "AbortError")),
+        );
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const view = render(widget());
+    await openWidget();
+
+    submit("Cancel this");
+    fireEvent.click(await screen.findByRole("button", {name: labels.cancel}));
+    expect(requestSignal?.aborted).toBe(true);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    await screen.findByRole("button", {name: labels.send});
+    submit("Unmount this");
+    view.unmount();
+    expect(requestSignal?.aborted).toBe(true);
+  });
+
+  it("shows disabled leave-message and escalation reference states and prevents another turn", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(sseResponse([
+        `event: meta\ndata: {"conversationId":"${CONVERSATION_ID}","runId":"${RUN_ID}"}\n\n`,
+        'event: disabled\ndata: {"taskId":"task-disabled"}\n\n',
+      ]))
+      .mockResolvedValueOnce(sseResponse([
+        `event: meta\ndata: {"conversationId":"${CONVERSATION_ID}","runId":"${RUN_ID}"}\n\n`,
+        'event: delta\ndata: {"text":"I have asked the team."}\n\n',
+        'event: done\ndata: {"citations":[],"escalationId":"WTIA-task-escalated"}\n\n',
+      ]));
+    vi.stubGlobal("fetch", fetchMock);
+    const first = render(widget());
+    await openWidget();
+
+    submit("Leave this with the team");
+    expect(await screen.findByText(labels.disabled)).toBeVisible();
+    expect(screen.getByText(labels.leaveMessage)).toBeVisible();
+    expect(screen.getByText("Reference: task-disabled")).toBeVisible();
+    expect(screen.getByRole("textbox", {name: labels.messageLabel})).toBeDisabled();
+    first.unmount();
+
+    render(widget());
+    await openWidget();
+    submit("Escalate this");
+    expect(await screen.findByText(labels.escalated)).toBeVisible();
+    expect(screen.getByText("Reference: WTIA-task-escalated")).toBeVisible();
+  });
+
+  it("records one 1..5 feedback score per run, locks while pending, and recovers from an error", async () => {
+    const feedback = deferredResponse();
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(sseResponse([
+        `event: meta\ndata: {"conversationId":"${CONVERSATION_ID}","runId":"${RUN_ID}"}\n\n`,
+        'event: delta\ndata: {"text":"Answer"}\n\n',
+        'event: done\ndata: {"citations":[],"escalationId":null}\n\n',
+      ]))
+      .mockImplementationOnce(() => feedback.promise)
+      .mockResolvedValueOnce(Response.json({status: "recorded"}));
+    vi.stubGlobal("fetch", fetchMock);
+    render(widget());
+    await openWidget();
+    submit("Question");
+    await screen.findByText("Answer");
+
+    const score = screen.getByRole("button", {name: "5 out of 5"});
+    fireEvent.click(score);
+    fireEvent.click(score);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    feedback.resolve(Response.json({error: "temporary"}, {status: 503}));
+    expect(await screen.findByRole("alert")).toHaveTextContent(labels.feedbackError);
+
+    fireEvent.click(screen.getByRole("button", {name: "5 out of 5"}));
+    expect(await screen.findByText(labels.feedbackThanks)).toBeVisible();
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls[2]?.[0]).toBe(
+      `/api/ai/conversations/${RUN_ID}/feedback`,
+    );
+    expect(JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body))).toEqual({
+      score: 5,
+    });
+    expect(screen.queryByRole("button", {name: "5 out of 5"}))
+      .not.toBeInTheDocument();
+  });
+});
