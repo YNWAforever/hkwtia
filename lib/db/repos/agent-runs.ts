@@ -364,6 +364,7 @@ export function createAgentRunsRepository(
         WHERE target.id = ${parsedRunId}
           AND target.conversation_id = owned.id
           AND target.status IN ('completed', 'escalated')
+          AND target.csat_score IS NULL
           AND ${feedbackOwnerPredicate(owner)}
         RETURNING target.*
       `))[0];

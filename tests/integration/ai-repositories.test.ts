@@ -337,6 +337,7 @@ describe("agent-run repository lifecycle", () => {
     ).resolves.toMatchObject({csatScore: 5});
     expect(updated.commands[0]?.sql).toMatch(/UPDATE "agent_runs".*"conversations"/i);
     expect(updated.commands[0]?.sql).toMatch(/profile_id/i);
+    expect(updated.commands[0]?.sql).toMatch(/csat_score IS NULL/i);
 
     const denied = sequenceDatabase([[]]);
     await expect(
