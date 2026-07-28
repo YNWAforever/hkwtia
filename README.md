@@ -174,17 +174,19 @@ npm run eval:concierge
 npm run build
 # In another terminal, serve the production build with the normal required
 # production variables pointed at isolated/non-live values, plus both exact gates:
-M4A_DETERMINISTIC_ACCEPTANCE=true M4A_DETERMINISTIC_ACCEPTANCE_AUTHORIZED=true npm run start
+APP_URL=http://localhost:3000 M4A_DETERMINISTIC_ACCEPTANCE=true M4A_DETERMINISTIC_ACCEPTANCE_AUTHORIZED=true npm run start
 # Then target that local production server (the gate rejects non-loopback hosts):
 PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:e2e -- tests/e2e/concierge.spec.ts
 ```
 
 The acceptance suite uses an in-memory persistence boundary and deterministic
 provider behind the real Concierge service/runtime/tool composition. The
-production-build browser gate requires both exact flags above and accepts only
-`localhost`, `127.0.0.1`, or `::1`; a deployed host cannot activate it. The
-boundary performs no provider, database, email, WOZTELL, or deployment network
-calls. Set `RUN_DATABASE_TESTS=true` and `DATABASE_URL_TEST` only for an
+production-build browser gate requires both exact flags above, rejects any
+non-empty `VERCEL` or `VERCEL_ENV`, and requires `APP_URL` to be a loopback
+origin that exactly matches the request origin. Only `localhost`, `127.0.0.1`,
+or `::1` are accepted, so a hosted runtime or forged localhost request URL
+cannot activate it. The boundary performs no provider, database, email,
+WOZTELL, or deployment network calls. Set `RUN_DATABASE_TESTS=true` and `DATABASE_URL_TEST` only for an
 explicitly isolated, migrated test database; this separately enables the fixed
 fixture reconciliation case.
 

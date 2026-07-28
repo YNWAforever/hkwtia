@@ -18,8 +18,8 @@ import type {WoztellWebhookProcessorDependencies} from "@/lib/ai/woztell-webhook
 import type {ChannelAdapter} from "@/lib/channels/types";
 import type {ConciergeAgentActor} from "@/lib/auth/agent-actor";
 import type {ConciergeToolRepositories} from "@/lib/db/repos/agent-tools";
+import type {ConversationOwner} from "@/lib/db/repos/conversations";
 
-const CONVERSATION_ID = "41111111-1111-4111-8111-111111111111";
 const PROFILE_ID = "m4a-acceptance-member";
 const MEMBERSHIP_URL = "https://www.hkwtia.org/membership";
 const ACCEPTANCE_COOKIE_SECRET =
@@ -38,6 +38,23 @@ type RunRecord = {
   costUsd: string;
   summaryCode: string | null;
 };
+type AcceptanceMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+type AcceptanceConversation = {
+  id: string;
+  ownerKey: string;
+  locale: "en" | "zh-HK";
+  messages: AcceptanceMessage[];
+};
+
+function conversationOwnerKey(owner: ConversationOwner): string {
+  return owner.kind === "profile"
+    ? `profile:${owner.profileId}`
+    : `anonymous:${owner.anonymousOwnerHash}`;
+}
 
 type BoundaryOptions = Readonly<{
   now?: () => Date;
@@ -76,21 +93,60 @@ function loopbackHostname(hostname: string): boolean {
     || hostname === "::1";
 }
 
+function configuredLoopbackOrigin(value: string | undefined): string | null {
+  if (!value?.trim()) return null;
+  try {
+    const url = new URL(value);
+    if (
+      (url.protocol !== "http:" && url.protocol !== "https:")
+      || url.username
+      || url.password
+      || url.pathname !== "/"
+      || url.search
+      || url.hash
+      || !loopbackHostname(url.hostname)
+    ) {
+      return null;
+    }
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
+export function m4aAcceptanceOrigin(
+  environment: AcceptanceEnvironment,
+  requestUrl: string,
+): string | null {
+  if (
+    environment.M4A_DETERMINISTIC_ACCEPTANCE !== "true"
+    || environment.M4A_DETERMINISTIC_ACCEPTANCE_AUTHORIZED !== "true"
+    || Boolean(environment.VERCEL?.trim())
+    || Boolean(environment.VERCEL_ENV?.trim())
+  ) {
+    return null;
+  }
+  const configuredOrigin = configuredLoopbackOrigin(environment.APP_URL);
+  if (!configuredOrigin) return null;
+  try {
+    const request = new URL(requestUrl);
+    if (
+      !loopbackHostname(request.hostname)
+      || request.origin !== configuredOrigin
+    ) {
+      return null;
+    }
+    return configuredOrigin;
+  } catch {
+    return null;
+  }
+}
+
 export function isM4AAcceptanceRequest(
   environment: AcceptanceEnvironment,
   requestUrl: string,
 ): boolean {
-  if (
-    environment.M4A_DETERMINISTIC_ACCEPTANCE !== "true"
-    || environment.M4A_DETERMINISTIC_ACCEPTANCE_AUTHORIZED !== "true"
-  ) {
-    return false;
-  }
-  try {
-    return loopbackHostname(new URL(requestUrl).hostname);
-  } catch {
-    return false;
-  }
+  return m4aAcceptanceOrigin(environment, requestUrl) !== null;
 }
 
 export function m4aAcceptanceCookieSecret(): string {
@@ -124,24 +180,62 @@ export function createM4AAcceptanceBoundary(
   const runs: RunRecord[] = [];
   const approvals: Array<Record<string, unknown>> = [];
   const tasks: Array<Record<string, unknown>> = [];
-  const messages: Array<{
-    role: "user" | "assistant";
-    content: string;
-  }> = [];
+  const conversationsById = new Map<string, AcceptanceConversation>();
   const claimedMessages = new Set<string>();
   let providerCalls = 0;
+  let conversationCounter = 0;
   let runCounter = 0;
   let approvalCounter = 0;
   let taskCounter = 0;
+
+  const nextConversationId = () => {
+    conversationCounter += 1;
+    return `41111111-1111-4111-8111-${String(conversationCounter).padStart(12, "0")}`;
+  };
 
   const nextRunId = () => {
     runCounter += 1;
     return `42222222-2222-4222-8222-${String(runCounter).padStart(12, "0")}`;
   };
 
+  function createConversation(
+    owner: ConversationOwner,
+    locale: "en" | "zh-HK",
+  ): AcceptanceConversation {
+    const conversation: AcceptanceConversation = {
+      id: nextConversationId(),
+      ownerKey: conversationOwnerKey(owner),
+      locale,
+      messages: [],
+    };
+    conversationsById.set(conversation.id, conversation);
+    return conversation;
+  }
+
+  function ownedConversation(
+    owner: ConversationOwner,
+    conversationId: string,
+  ): AcceptanceConversation {
+    const conversation = conversationsById.get(conversationId);
+    if (
+      !conversation
+      || conversation.ownerKey !== conversationOwnerKey(owner)
+    ) {
+      throw new Error("FORBIDDEN");
+    }
+    return conversation;
+  }
+
   function runFor(actor: ConciergeAgentActor): RunRecord {
     const run = runs.find(({id}) => id === actor.runId);
-    if (!run) throw new Error("M4A_ACCEPTANCE_RUN_NOT_FOUND");
+    if (
+      !run
+      || run.conversationId !== actor.conversationId
+      || run.profileId !== actor.profileId
+      || run.trigger !== actor.trigger
+    ) {
+      throw new Error("M4A_ACCEPTANCE_RUN_NOT_FOUND");
+    }
     return run;
   }
 
@@ -335,29 +429,30 @@ export function createM4AAcceptanceBoundary(
 
   const conversations: ConciergeServiceDependencies["conversations"] =
     Object.freeze({
-      async create(_owner, input) {
+      async create(owner, input) {
         const values = record(input);
         const locale = values.locale === "zh-HK" ? "zh-HK" : "en";
-        return {id: CONVERSATION_ID, locale};
+        const conversation = createConversation(owner, locale);
+        return {id: conversation.id, locale: conversation.locale};
       },
-      async getOwned() {
-        const locale = messages.some(({content}) =>
-          /[\u3400-\u9fff]/u.test(content)
-        ) ? "zh-HK" : "en";
-        return {id: CONVERSATION_ID, locale};
+      async getOwned(owner, conversationId) {
+        const conversation = ownedConversation(owner, conversationId);
+        return {id: conversation.id, locale: conversation.locale};
       },
-      async appendMessage(_owner, _conversationId, input) {
+      async appendMessage(owner, conversationId, input) {
+        const conversation = ownedConversation(owner, conversationId);
         const values = record(input);
         const role = values.role === "assistant" ? "assistant" : "user";
-        messages.push({
+        conversation.messages.push({
           role,
           content: stringValue(values.content, ""),
         });
-        return {id: `message-${messages.length}`};
+        return {id: `message-${conversation.messages.length}`};
       },
-      async startAgentTurn(_owner, actor, messageInput, input) {
+      async startAgentTurn(owner, actor, messageInput, input) {
+        const conversation = ownedConversation(owner, actor.conversationId);
         const message = record(messageInput);
-        messages.push({
+        conversation.messages.push({
           role: "user",
           content: stringValue(message.content, ""),
         });
@@ -369,11 +464,11 @@ export function createM4AAcceptanceBoundary(
         });
         return {id: actor.runId};
       },
-      async listMessages() {
-        return Object.freeze([...messages]);
+      async listMessages(owner, conversationId) {
+        const conversation = ownedConversation(owner, conversationId);
+        return Object.freeze([...conversation.messages]);
       },
     });
-
   const service = createConciergeService({
     agentsEnabled: true,
     model: "openai:gpt-4.1-mini",
@@ -427,9 +522,10 @@ export function createM4AAcceptanceBoundary(
             return {status: "duplicate"};
           }
           claimedMessages.add(input.providerMessageId);
+          const conversation = createConversation(input.owner, input.locale);
           return {
             status: "accepted",
-            conversationId: CONVERSATION_ID,
+            conversationId: conversation.id,
             owner: input.owner,
             profileId: input.profileId,
             locale: input.locale,

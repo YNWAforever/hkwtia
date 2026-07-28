@@ -30,6 +30,18 @@ async function drain(
   return events;
 }
 
+async function drainText(
+  turn: Awaited<ReturnType<
+    ReturnType<typeof createConciergeService>["startTurn"]
+  >>,
+): Promise<string> {
+  let text = "";
+  for await (const event of turn.events) {
+    if (event.event === "delta") text += event.data.text;
+  }
+  return text;
+}
+
 describe("M4A deterministic acceptance", () => {
   it("keeps the kill switch provider-free and records a leave-message task", async () => {
     const provider = vi.fn();
@@ -118,7 +130,7 @@ describe("M4A deterministic acceptance", () => {
     ]);
   });
 
-  it("enables deterministic composition only with both flags on loopback", async () => {
+  it("fails closed unless flags, runtime, trusted origin, and request origin are all local", async () => {
     const route = await import("@/app/api/ai/concierge/route") as unknown as {
       isM4AAcceptanceRequest?: (
         environment: Readonly<Record<string, string | undefined>>,
@@ -130,29 +142,53 @@ describe("M4A deterministic acceptance", () => {
     const authorized = {
       M4A_DETERMINISTIC_ACCEPTANCE: "true",
       M4A_DETERMINISTIC_ACCEPTANCE_AUTHORIZED: "true",
+      APP_URL: "http://localhost:3100",
     };
-    expect(route.isM4AAcceptanceRequest(
-      authorized,
-      "http://127.0.0.1:3100/api/ai/concierge",
-    )).toBe(true);
     expect(route.isM4AAcceptanceRequest(
       authorized,
       "http://localhost:3100/api/ai/concierge",
     )).toBe(true);
+    expect(route.isM4AAcceptanceRequest(
+      {...authorized, APP_URL: "http://127.0.0.1:3100"},
+      "http://127.0.0.1:3100/api/ai/concierge",
+    )).toBe(true);
+    expect(route.isM4AAcceptanceRequest(
+      {...authorized, VERCEL: "1"},
+      "http://localhost:3100/api/ai/concierge",
+    )).toBe(false);
+    expect(route.isM4AAcceptanceRequest(
+      {...authorized, VERCEL_ENV: "preview"},
+      "http://localhost:3100/api/ai/concierge",
+    )).toBe(false);
+    expect(route.isM4AAcceptanceRequest(
+      {...authorized, VERCEL_ENV: "development"},
+      "http://localhost:3100/api/ai/concierge",
+    )).toBe(false);
+    expect(route.isM4AAcceptanceRequest(
+      {...authorized, APP_URL: "https://www.hkwtia.org"},
+      "http://localhost:3100/api/ai/concierge",
+    )).toBe(false);
+    expect(route.isM4AAcceptanceRequest(
+      authorized,
+      "http://localhost:3101/api/ai/concierge",
+    )).toBe(false);
     expect(route.isM4AAcceptanceRequest(
       authorized,
       "https://hkwtia.vercel.app/api/ai/concierge",
     )).toBe(false);
     expect(route.isM4AAcceptanceRequest({
       M4A_DETERMINISTIC_ACCEPTANCE: "true",
-    }, "http://127.0.0.1:3100/api/ai/concierge")).toBe(false);
+      APP_URL: "http://localhost:3100",
+    }, "http://localhost:3100/api/ai/concierge")).toBe(false);
     expect(route.isM4AAcceptanceRequest({
       M4A_DETERMINISTIC_ACCEPTANCE_AUTHORIZED: "true",
-    }, "http://127.0.0.1:3100/api/ai/concierge")).toBe(false);
+      APP_URL: "http://localhost:3100",
+    }, "http://localhost:3100/api/ai/concierge")).toBe(false);
   });
   it("accepts a real browser-style loopback POST without proxy IP headers only when authorized", async () => {
     vi.stubEnv("M4A_DETERMINISTIC_ACCEPTANCE", "true");
     vi.stubEnv("M4A_DETERMINISTIC_ACCEPTANCE_AUTHORIZED", "true");
+    vi.stubEnv("APP_URL", "http://localhost:3100");
     try {
       const route = await import("@/app/api/ai/concierge/route");
       const response = await route.POST(new Request(
@@ -177,6 +213,101 @@ describe("M4A deterministic acceptance", () => {
     } finally {
       vi.unstubAllEnvs();
     }
+  });
+  it("partitions a zh first owner from an en second owner and their runs", async () => {
+    const {createM4AAcceptanceBoundary} = await import(
+      "@/app/api/ai/concierge/route"
+    );
+    const boundary = createM4AAcceptanceBoundary({now: () => NOW});
+    const zhOwner = {
+      kind: "anonymous" as const,
+      anonymousOwnerHash: "a".repeat(64),
+    };
+    const enOwner = {
+      kind: "anonymous" as const,
+      anonymousOwnerHash: "b".repeat(64),
+    };
+    const zhTurn = await boundary.service.startTurn({
+      owner: zhOwner,
+      profileId: null,
+      message: "請介紹已批准的 WTIA 會員福利。",
+      locale: "zh-HK",
+      trigger: "web",
+    });
+    expect(await drainText(zhTurn)).toBe(
+      "已批准的 WTIA 會員福利包括社群活動。",
+    );
+    const enTurn = await boundary.service.startTurn({
+      owner: enOwner,
+      profileId: null,
+      message: "Tell me about approved WTIA membership benefits.",
+      locale: "en",
+      trigger: "web",
+    });
+    expect(await drainText(enTurn)).toBe(
+      "Approved WTIA membership benefits include community events.",
+    );
+
+    expect(enTurn.conversationId).not.toBe(zhTurn.conversationId);
+    expect(enTurn.runId).not.toBe(zhTurn.runId);
+    expect(boundary.snapshot().runs).toEqual([
+      expect.objectContaining({
+        id: zhTurn.runId,
+        conversationId: zhTurn.conversationId,
+        status: "completed",
+      }),
+      expect.objectContaining({
+        id: enTurn.runId,
+        conversationId: enTurn.conversationId,
+        status: "completed",
+      }),
+    ]);
+  });
+
+  it("preserves repeated-turn continuity for one owner but rejects cross-owner reuse", async () => {
+    const {createM4AAcceptanceBoundary} = await import(
+      "@/app/api/ai/concierge/route"
+    );
+    const boundary = createM4AAcceptanceBoundary({now: () => NOW});
+    const firstOwner = {
+      kind: "anonymous" as const,
+      anonymousOwnerHash: "c".repeat(64),
+    };
+    const otherOwner = {
+      kind: "anonymous" as const,
+      anonymousOwnerHash: "d".repeat(64),
+    };
+    const first = await boundary.service.startTurn({
+      owner: firstOwner,
+      profileId: null,
+      message: "Tell me about approved WTIA membership benefits.",
+      locale: "en",
+      trigger: "web",
+    });
+    await drain(first);
+    const repeated = await boundary.service.startTurn({
+      owner: firstOwner,
+      profileId: null,
+      conversationId: first.conversationId,
+      message: "Tell me again about approved WTIA membership benefits.",
+      locale: "en",
+      trigger: "web",
+    });
+    await drain(repeated);
+    expect(repeated.conversationId).toBe(first.conversationId);
+
+    await expect(boundary.service.startTurn({
+      owner: otherOwner,
+      profileId: null,
+      conversationId: first.conversationId,
+      message: "Show me the other client's context.",
+      locale: "en",
+      trigger: "web",
+    })).rejects.toThrow("FORBIDDEN");
+    expect(boundary.snapshot().runs).toHaveLength(2);
+    expect(boundary.snapshot().runs.every(
+      (run) => run.conversationId === first.conversationId,
+    )).toBe(true);
   });
   it("drives the real web route through service/runtime and persists priced telemetry", async () => {
     const route = await import("@/app/api/ai/concierge/route") as unknown as {

@@ -16,6 +16,7 @@ import {
   createM4AAcceptanceBoundary,
   isM4AAcceptanceRequest,
   m4aAcceptanceCookieSecret,
+  m4aAcceptanceOrigin,
 } from "@/lib/ai/m4a-acceptance-boundary";
 import {createConciergeTools} from "@/lib/ai/tools/registry";
 import {getActor} from "@/lib/auth/actor";
@@ -270,7 +271,8 @@ export function createConciergePostHandler(
 }
 
 async function productionHandler(request: Request): Promise<Response> {
-  if (isM4AAcceptanceRequest(process.env, request.url)) {
+  const acceptanceOrigin = m4aAcceptanceOrigin(process.env, request.url);
+  if (acceptanceOrigin) {
     m4aAcceptanceBoundary ??= createM4AAcceptanceBoundary();
     const headers = new Headers(request.headers);
     if (
@@ -285,7 +287,7 @@ async function productionHandler(request: Request): Promise<Response> {
       body: await request.text(),
     });
     return createConciergePostHandler({
-      expectedOrigin: new URL(request.url).origin,
+      expectedOrigin: acceptanceOrigin,
       cookieSecret: m4aAcceptanceCookieSecret(),
       rateLimiter: publicRateLimiter,
       verifyTurnstile: async () => true,
