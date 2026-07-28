@@ -121,8 +121,8 @@ export function m4aAcceptanceOrigin(
   if (
     environment.M4A_DETERMINISTIC_ACCEPTANCE !== "true"
     || environment.M4A_DETERMINISTIC_ACCEPTANCE_AUTHORIZED !== "true"
-    || Boolean(environment.VERCEL?.trim())
-    || Boolean(environment.VERCEL_ENV?.trim())
+    || Boolean(environment.VERCEL)
+    || Boolean(environment.VERCEL_ENV)
   ) {
     return null;
   }

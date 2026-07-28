@@ -157,6 +157,18 @@ describe("M4A deterministic acceptance", () => {
       "http://localhost:3100/api/ai/concierge",
     )).toBe(false);
     expect(route.isM4AAcceptanceRequest(
+      {...authorized, VERCEL: " "},
+      "http://localhost:3100/api/ai/concierge",
+    )).toBe(false);
+    expect(route.isM4AAcceptanceRequest(
+      {...authorized, VERCEL_ENV: "\t"},
+      "http://localhost:3100/api/ai/concierge",
+    )).toBe(false);
+    expect(route.isM4AAcceptanceRequest(
+      {...authorized, VERCEL: "", VERCEL_ENV: ""},
+      "http://localhost:3100/api/ai/concierge",
+    )).toBe(true);
+    expect(route.isM4AAcceptanceRequest(
       {...authorized, VERCEL_ENV: "preview"},
       "http://localhost:3100/api/ai/concierge",
     )).toBe(false);
