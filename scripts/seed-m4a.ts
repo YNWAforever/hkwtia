@@ -1,6 +1,8 @@
 import {resolve} from "node:path";
 import {fileURLToPath} from "node:url";
 
+import {Pool} from "pg";
+
 import {
   FUNDING_SCHEMES,
   FUNDING_VERIFY_CURRENT_TERMS,
@@ -18,6 +20,186 @@ import {
 } from "../lib/db/repos/kb-documents.ts";
 
 export const M4A_KB_NAMESPACE = "m4a-core-v1" as const;
+
+const ACCEPTANCE_MEMBER_ID = "m4a-acceptance-member";
+const ACCEPTANCE_CLOCK = "2026-07-28T04:00:00.000Z";
+
+export const M4A_ACCEPTANCE_FIXTURE = Object.freeze({
+  namespace: M4A_KB_NAMESPACE,
+  member: Object.freeze({
+    id: ACCEPTANCE_MEMBER_ID,
+    authUserId: "m4a-acceptance-auth-member",
+    email: "member@m4a.example.test",
+    displayName: "M4A Acceptance Member",
+    locale: "en" as const,
+  }),
+  events: Object.freeze([
+    Object.freeze({
+      id: "44000001-0000-4000-8000-000000000001",
+      slug: "m4a-innovation-exchange",
+      titleEn: "WTIA Innovation Exchange",
+      titleZh: "WTIA 創科交流會",
+      descriptionEn: "A published bilingual M4A acceptance event.",
+      descriptionZh: "已發布的雙語 M4A 驗收活動。",
+      startsAt: "2026-09-08T10:00:00.000Z",
+      endsAt: "2026-09-08T12:00:00.000Z",
+      venue: "Hong Kong",
+      memberOnly: false,
+      published: true,
+    }),
+    Object.freeze({
+      id: "44000001-0000-4000-8000-000000000002",
+      slug: "m4a-member-ai-clinic",
+      titleEn: "WTIA Member AI Clinic",
+      titleZh: "WTIA 會員 AI 諮詢站",
+      descriptionEn: "A published member event for the Concierge fixture.",
+      descriptionZh: "供 Concierge 固定測試使用的已發布會員活動。",
+      startsAt: "2026-10-15T06:00:00.000Z",
+      endsAt: "2026-10-15T08:00:00.000Z",
+      venue: "Hong Kong",
+      memberOnly: true,
+      published: true,
+    }),
+  ]),
+  cleanup: Object.freeze({
+    approvalActionType: "agent.draft_email",
+    taskKinds: Object.freeze([
+      "concierge_general_follow_up",
+      "concierge_escalation",
+    ]),
+  }),
+  updatedAt: ACCEPTANCE_CLOCK,
+});
+
+export type M4AAcceptanceFixture = typeof M4A_ACCEPTANCE_FIXTURE;
+
+export type M4AAcceptanceFixtureRepository = Readonly<{
+  reconcile: (fixture: M4AAcceptanceFixture) => Promise<void>;
+}>;
+
+type SeedConnection = Readonly<{
+  query: (
+    text: string,
+    values?: readonly unknown[],
+  ) => Promise<unknown>;
+  release: () => void;
+}>;
+
+export type M4ASeedPool = Readonly<{
+  connect: () => Promise<SeedConnection>;
+}>;
+
+export async function reconcileM4AAcceptanceFixture(
+  repository: M4AAcceptanceFixtureRepository,
+): Promise<void> {
+  await repository.reconcile(M4A_ACCEPTANCE_FIXTURE);
+}
+
+export function createM4AAcceptanceFixtureRepository(
+  pool: M4ASeedPool,
+): M4AAcceptanceFixtureRepository {
+  return Object.freeze({
+    async reconcile(fixture) {
+      const connection = await pool.connect();
+      try {
+        await connection.query("BEGIN");
+        await connection.query(
+          "SELECT pg_advisory_xact_lock(hashtext($1))",
+          ["hkwtia:m4a-acceptance-seed"],
+        );
+        await connection.query(
+          `DELETE FROM approvals
+           WHERE requested_by_profile_id = $1
+             AND action_type = $2`,
+          [fixture.member.id, fixture.cleanup.approvalActionType],
+        );
+        await connection.query(
+          `DELETE FROM staff_tasks
+           WHERE profile_id = $1
+             AND kind = ANY($2::text[])`,
+          [fixture.member.id, fixture.cleanup.taskKinds],
+        );
+        await connection.query(
+          `INSERT INTO profiles
+             (id, auth_user_id, email, role, consent_marketing, interests,
+              display_name, phone, job_title, locale, onboarding_state,
+              directory_visible, whatsapp_opt_in, whatsapp_number,
+              created_at, updated_at)
+           VALUES
+             ($1, $2, $3, 'member', false, ARRAY['m4a-fixture']::text[],
+              $4, NULL, 'M4A Acceptance Member', $5, 'complete',
+              false, true, '+85290000000', $6, $6)
+           ON CONFLICT (id) DO UPDATE SET
+             auth_user_id = EXCLUDED.auth_user_id,
+             email = EXCLUDED.email,
+             role = EXCLUDED.role,
+             consent_marketing = EXCLUDED.consent_marketing,
+             interests = EXCLUDED.interests,
+             display_name = EXCLUDED.display_name,
+             phone = EXCLUDED.phone,
+             job_title = EXCLUDED.job_title,
+             locale = EXCLUDED.locale,
+             onboarding_state = EXCLUDED.onboarding_state,
+             directory_visible = EXCLUDED.directory_visible,
+             whatsapp_opt_in = EXCLUDED.whatsapp_opt_in,
+             whatsapp_number = EXCLUDED.whatsapp_number,
+             updated_at = EXCLUDED.updated_at`,
+          [
+            fixture.member.id,
+            fixture.member.authUserId,
+            fixture.member.email,
+            fixture.member.displayName,
+            fixture.member.locale,
+            fixture.updatedAt,
+          ],
+        );
+        for (const event of fixture.events) {
+          await connection.query(
+            `INSERT INTO events
+               (id, slug, title_en, title_zh, description_en, description_zh,
+                starts_at, ends_at, venue, capacity, member_only, published,
+                created_at, updated_at)
+             VALUES
+               ($1, $2, $3, $4, $5, $6, $7, $8, $9, NULL, $10, $11, $12, $12)
+             ON CONFLICT (id) DO UPDATE SET
+               slug = EXCLUDED.slug,
+               title_en = EXCLUDED.title_en,
+               title_zh = EXCLUDED.title_zh,
+               description_en = EXCLUDED.description_en,
+               description_zh = EXCLUDED.description_zh,
+               starts_at = EXCLUDED.starts_at,
+               ends_at = EXCLUDED.ends_at,
+               venue = EXCLUDED.venue,
+               capacity = EXCLUDED.capacity,
+               member_only = EXCLUDED.member_only,
+               published = EXCLUDED.published,
+               updated_at = EXCLUDED.updated_at`,
+            [
+              event.id,
+              event.slug,
+              event.titleEn,
+              event.titleZh,
+              event.descriptionEn,
+              event.descriptionZh,
+              event.startsAt,
+              event.endsAt,
+              event.venue,
+              event.memberOnly,
+              event.published,
+              fixture.updatedAt,
+            ],
+          );
+        }
+        await connection.query("COMMIT");
+      } catch (error) {
+        await connection.query("ROLLBACK");
+        throw error;
+      } finally {
+        connection.release();
+      }
+    },
+  });
+}
 
 export type KnowledgeMarkdownSource = Readonly<{
   locale: FundingLocale;
@@ -189,13 +371,62 @@ export const M4A_FUNDING_SOURCES: readonly KnowledgeMarkdownSource[] =
     }))
   ));
 
+export const M4A_ACCEPTANCE_SOURCES: readonly KnowledgeMarkdownSource[] =
+  Object.freeze([
+    {
+      locale: "en",
+      url: "https://www.hkwtia.org/membership",
+      markdown: [
+        "# WTIA Membership",
+        "",
+        "Approved membership information and member benefits.",
+      ].join("\n"),
+    },
+    {
+      locale: "zh-HK",
+      url: "https://www.hkwtia.org/zh-HK/membership",
+      markdown: [
+        "# WTIA 會員",
+        "",
+        "已批准的會員資料及會員福利。",
+      ].join("\n"),
+    },
+    ...M4A_ACCEPTANCE_FIXTURE.events.flatMap((event) => [
+      {
+        locale: "en" as const,
+        url: `https://www.hkwtia.org/en/events/${event.slug}`,
+        markdown: [
+          `# ${event.titleEn}`,
+          "",
+          event.descriptionEn,
+          "",
+          `${event.startsAt} — ${event.venue}`,
+        ].join("\n"),
+      },
+      {
+        locale: "zh-HK" as const,
+        url: `https://www.hkwtia.org/zh-HK/events/${event.slug}`,
+        markdown: [
+          `# ${event.titleZh}`,
+          "",
+          event.descriptionZh,
+          "",
+          `${event.startsAt} — ${event.venue}`,
+        ].join("\n"),
+      },
+    ]),
+  ]);
+
+export const M4A_DEFAULT_SOURCES: readonly KnowledgeMarkdownSource[] =
+  Object.freeze([...M4A_FUNDING_SOURCES, ...M4A_ACCEPTANCE_SOURCES]);
+
 export async function seedM4A(input: Readonly<{
   sources?: readonly KnowledgeMarkdownSource[];
   embedding: EmbeddingAdapter;
   repository: Pick<KbDocumentsRepository, "replaceNamespace">;
 }>): Promise<void> {
   const documents = await buildM4ASeedDocuments(
-    input.sources ?? M4A_FUNDING_SOURCES,
+    input.sources ?? M4A_DEFAULT_SOURCES,
     input.embedding,
   );
   await input.repository.replaceNamespace(M4A_KB_NAMESPACE, documents);
@@ -208,14 +439,18 @@ export async function runM4ASeed(
   if (!apiKey) throw new Error("OPENAI_API_KEY_REQUIRED");
   const databaseUrl = environment.DATABASE_URL?.trim();
   if (!databaseUrl) throw new Error("DATABASE_URL_REQUIRED");
-  const connection = createKbDocumentsRepositoryForDatabaseUrl(databaseUrl);
+  const knowledge = createKbDocumentsRepositoryForDatabaseUrl(databaseUrl);
+  const pool = new Pool({connectionString: databaseUrl, max: 1});
   try {
     await seedM4A({
       embedding: createOpenAIEmbeddingAdapter(apiKey),
-      repository: connection.repository,
+      repository: knowledge.repository,
     });
+    await reconcileM4AAcceptanceFixture(
+      createM4AAcceptanceFixtureRepository(pool),
+    );
   } finally {
-    await connection.close();
+    await Promise.allSettled([knowledge.close(), pool.end()]);
   }
 }
 

@@ -1,6 +1,6 @@
 # WTIA Platform
 
-The WTIA public platform is a bilingual Next.js App Router site for the Hong Kong Wireless Technology Industry Association. M0 ships the server-rendered public route surface in English and Traditional Chinese (`/` and `/zh`); M1 adds self-service membership, Stripe billing, company seats, and an authenticated member portal; M2 adds the staff-only Admin CRM; M3 adds deterministic member journeys, campaigns, provider boundaries, scheduled jobs, and staff automation operations.
+The WTIA public platform is a bilingual Next.js App Router site for the Hong Kong Wireless Technology Industry Association. M0 ships the server-rendered public route surface in English and Traditional Chinese (`/` and `/zh`); M1 adds self-service membership, Stripe billing, company seats, and an authenticated member portal; M2 adds the staff-only Admin CRM; M3 adds deterministic member journeys, campaigns, provider boundaries, scheduled jobs, and staff automation operations. M4A adds the bilingual, provider-neutral AI Concierge with durable web and WhatsApp conversations, citations, approvals, telemetry, and retention.
 
 ## Requirements
 
@@ -34,6 +34,10 @@ Open `http://localhost:3000/` or `http://localhost:3000/zh`.
 | `npm run db:seed` | Idempotently seed the M1 plans and deterministic M2 CRM demo data |
 | `npm run db:seed:m1` / `npm run db:seed:m2` | Run one seed layer directly |
 | `npm run db:seed:m3` | Reconcile the deterministic M3 acceptance fixture using explicit `DATABASE_URL` and `M3_SEED_NOW` |
+| `npm run db:seed:m4a` | Replace the scoped M4A KB namespace and reconcile the fixed isolated acceptance fixture |
+| `npm test -- tests/integration/m4a-acceptance.test.ts` | Run deterministic M4A acceptance; the database case needs the explicit opt-in gate |
+| `npm run eval:concierge` | Run 25 deterministic bilingual Concierge golden cases offline |
+| `npm run eval:concierge:live` | Run separately authorized live-provider evals only when every live guard is present |
 | `npm test --prefix workers` | Run the isolated Cloudflare automation Worker tests |
 | `npm run typecheck --prefix workers` | Type-check the isolated Cloudflare automation Worker |
 | `npm run deploy:preview --prefix workers` | Deploy the Preview-only automation Worker |
@@ -129,6 +133,87 @@ After Preview bindings and the matching Next.js Preview are ready, deploy only t
 ```sh
 npm run deploy:preview --prefix workers
 ```
+
+## M4A AI Concierge operations
+
+M4A adds the provider-neutral bilingual Concierge for web and WOZTELL
+WhatsApp. Keep `AGENTS_ENABLED=false` for initial setup and rollback. The
+agent runs only when the value is exactly `true`; disabled turns still create
+a zero-cost `agent_runs` record and a scoped leave-message staff task without
+constructing a provider or embedding client.
+
+Configure server-only values from `.env.example`. Never place populated
+provider, database, cookie, webhook, Turnstile, or approval values in source
+control. `CONCIERGE_COOKIE_SECRET` must be an independent high-entropy secret,
+not the Neon Auth cookie secret.
+
+Apply and seed an isolated environment in this order:
+
+```sh
+npm run db:migrate
+npm run db:seed:m1
+npm run db:seed:m2
+# M3 is optional for an M4A-only fixture and retains its own M3_SEED_NOW guard
+npm run db:seed:m3
+npm run db:seed:m4a
+```
+
+`db:seed:m4a` requires `DATABASE_URL` and `OPENAI_API_KEY` because production
+knowledge vectors use the live embedding adapter. It replaces only the
+`m4a-core-v1` KB namespace, reconciles the fixed
+`m4a-acceptance-member` and two `m4a-*` events, and clears only that synthetic
+member's Concierge approval/task residue. It never truncates or cleans M1-M3
+fixtures.
+
+The deterministic acceptance and evaluation gates require no external
+credentials:
+
+```sh
+npm test -- tests/integration/m4a-acceptance.test.ts
+npm run eval:concierge
+npm run build
+# In another terminal, serve the production build:
+npm run start
+# Then target that local production server:
+PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:e2e -- tests/e2e/concierge.spec.ts
+```
+
+The acceptance suite uses repository doubles by default. Set
+`RUN_DATABASE_TESTS=true` and `DATABASE_URL_TEST` only for an explicitly
+isolated, migrated test database; this enables the fixed-fixture reconciliation
+case. It does not make provider, email, WOZTELL, or deployment calls.
+
+Live model evaluation is a distinct manual action and requires all of
+`RUN_LIVE_AI_EVALS=true`, `RUN_LIVE_EVALS=1`,
+`LIVE_AI_EVALS_AUTHORIZED=true`, and the selected provider key before running
+`npm run eval:concierge:live`. Ordinary CI and commits use only the
+deterministic evaluator.
+
+Production enablement remains blocked until named business and technical
+approvers have recorded prompt/policy approval in the release ticket, both
+WOZTELL templates (`concierge_follow_up_en` and
+`concierge_follow_up_zh_hk`) are approved with the exact two body parameters,
+and live acceptance is separately authorized. Live WhatsApp also requires
+`RUN_LIVE_WOZTELL=1`; set `WOZTELL_APPROVED_TEMPLATE_KEYS` only to template
+keys confirmed approved by WOZTELL. The live acceptance fixture has its own
+`RUN_LIVE_WOZTELL_ACCEPTANCE=1` gate and
+`WOZTELL_ACCEPTANCE_APPROVED_TEMPLATE_KEYS` allowlist.
+
+Chat retention is invoked by the authenticated daily retention job and removes
+Concierge transcript data at the twelve-month cutoff in bounded, idempotent
+batches. `CRON_SECRET` must match the caller; verify dry-run counts before the
+first production mutation.
+
+Rollback does not require a schema downgrade:
+
+1. Set `AGENTS_ENABLED=false` and redeploy, which preserves leave-message
+   handling and zero-cost run evidence.
+2. Set `RUN_LIVE_WOZTELL` to a non-`1` value and remove live template
+   allowlisting.
+3. Stop the retention scheduler while investigating; do not reverse or
+   truncate additive migrations.
+4. Restore the prior application deployment if needed. Preserve conversations,
+   `agent_runs`, pending approvals, staff tasks, and audit evidence for review.
 
 ## Deployment
 
