@@ -202,5 +202,3 @@ describe("Concierge runtime harness safety and channel policy", () => {
     });
   });
 });
-
-
