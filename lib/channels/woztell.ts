@@ -14,6 +14,9 @@ import type {
 
 const WOZTELL_SEND_RESPONSES_URL = "https://bot.api.woztell.com/sendResponses";
 const CUSTOMER_SERVICE_WINDOW_MS = 24 * 60 * 60 * 1_000;
+const MIN_NUMERIC_TIMESTAMP_MS = Date.UTC(2000, 0, 1);
+const MAX_NUMERIC_TIMESTAMP_MS = Date.UTC(2100, 0, 1);
+const EPOCH_MILLISECONDS_THRESHOLD = 100_000_000_000;
 
 export type WoztellEnvironment = Readonly<{
   WOZTELL_API_TOKEN?: string;
@@ -72,9 +75,22 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function providerId(body: unknown): string | null {
-  if (!isRecord(body) || body.ok !== 1 || !isRecord(body.sendResult) || body.sendResult.ok !== 1) return null;
+  if (
+    !isRecord(body)
+    || body.ok !== 1
+    || !isRecord(body.sendResult)
+    || body.sendResult.ok !== 1
+  ) {
+    return null;
+  }
   const results = body.sendResult.result;
-  if (!Array.isArray(results) || !isRecord(results[0]) || !isRecord(results[0].messageEvent)) return null;
+  if (
+    !Array.isArray(results)
+    || !isRecord(results[0])
+    || !isRecord(results[0].messageEvent)
+  ) {
+    return null;
+  }
   const id = results[0].messageEvent.messageId;
   return typeof id === "string" && id ? id : null;
 }
@@ -93,13 +109,19 @@ async function sendLive(
         authorization: `Bearer ${credentials.token}`,
         "content-type": "application/json",
       },
-      body: JSON.stringify({channelId: credentials.channelId, recipientId, response}),
+      body: JSON.stringify({
+        channelId: credentials.channelId,
+        recipientId,
+        response,
+      }),
     });
   } catch {
     throw new WoztellDeliveryFailure("retryable_network");
   }
 
-  if (!httpResponse.ok) throw new WoztellDeliveryFailure(failureCode(httpResponse.status));
+  if (!httpResponse.ok) {
+    throw new WoztellDeliveryFailure(failureCode(httpResponse.status));
+  }
 
   let body: unknown;
   try {
@@ -108,26 +130,49 @@ async function sendLive(
     throw new WoztellDeliveryFailure("provider_unclassified_failure");
   }
   const id = providerId(body);
-  if (!id) throw new WoztellDeliveryFailure("provider_unclassified_failure");
+  if (!id) {
+    throw new WoztellDeliveryFailure("provider_unclassified_failure");
+  }
   return {status: "sent", providerId: id};
 }
 
+function receivedAtFrom(value: unknown): Date | null {
+  if (typeof value === "string") {
+    const parsed = new Date(value);
+    return Number.isFinite(parsed.getTime()) ? parsed : null;
+  }
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  const epochMilliseconds = value < EPOCH_MILLISECONDS_THRESHOLD
+    ? value * 1_000
+    : value;
+  if (
+    epochMilliseconds < MIN_NUMERIC_TIMESTAMP_MS
+    || epochMilliseconds > MAX_NUMERIC_TIMESTAMP_MS
+  ) {
+    return null;
+  }
+  const parsed = new Date(epochMilliseconds);
+  return Number.isFinite(parsed.getTime()) ? parsed : null;
+}
+
 function normalizedInbound(payload: unknown): NormalizedInbound {
-  if (!isRecord(payload)) return {kind: "unsupported", sender: null, text: null, intent: null};
+  if (!isRecord(payload)) {
+    return {kind: "unsupported", sender: null, text: null, intent: null};
+  }
   const sender = typeof payload.from === "string" ? payload.from : null;
-  const text = isRecord(payload.data) && typeof payload.data.text === "string" ? payload.data.text.trim() : null;
+  const text = isRecord(payload.data) && typeof payload.data.text === "string"
+    ? payload.data.text.trim()
+    : null;
   const providerMessageId = typeof payload.messageId === "string"
     ? payload.messageId.trim()
     : "";
-  const receivedAt = typeof payload.timestamp === "string"
-    ? new Date(payload.timestamp)
-    : new Date(Number.NaN);
+  const receivedAt = receivedAtFrom(payload.timestamp);
   if (
     payload.type !== "TEXT"
     || !sender
     || !text
     || !providerMessageId
-    || !Number.isFinite(receivedAt.getTime())
+    || receivedAt === null
   ) {
     return {kind: "unsupported", sender, text: null, intent: null};
   }
@@ -135,19 +180,32 @@ function normalizedInbound(payload: unknown): NormalizedInbound {
     kind: "message",
     sender,
     text,
-    intent: text.toUpperCase() === "STOP" || text === "\u53d6\u6d88" ? "opt_out" : null,
+    intent: text.toUpperCase() === "STOP" || text === "\u53d6\u6d88"
+      ? "opt_out"
+      : null,
     providerMessageId,
     receivedAt,
   };
 }
 
-function validWebhookSignature(rawBody: string, signature: string | null, secret: string | null): boolean {
+function validWebhookSignature(
+  rawBody: string,
+  signature: string | null,
+  secret: string | null,
+): boolean {
   if (!secret) return false;
-  const expected = createHmac("sha256", secret).update(rawBody).digest("base64");
+  const expected = createHmac("sha256", secret)
+    .update(rawBody)
+    .digest("base64");
   const expectedBytes = Buffer.from(expected, "utf8");
   const receivedBytes = Buffer.from(signature ?? "", "utf8");
   const fixedLengthCandidate = Buffer.alloc(expectedBytes.length);
-  receivedBytes.copy(fixedLengthCandidate, 0, 0, fixedLengthCandidate.length);
+  receivedBytes.copy(
+    fixedLengthCandidate,
+    0,
+    0,
+    fixedLengthCandidate.length,
+  );
   const matched = timingSafeEqual(expectedBytes, fixedLengthCandidate);
   return receivedBytes.length === expectedBytes.length && matched;
 }
@@ -172,8 +230,12 @@ export function createWoztellAdapter(
     response: readonly Record<string, unknown>[],
   ): Promise<ChannelResult> {
     const recipientId = recipientNumber(recipient);
-    if (!recipientId) return {status: "skipped", reason: "recipient_ineligible"};
-    if (!credentials) return {status: "sent", providerId: `mock:${idempotencyKey}`};
+    if (!recipientId) {
+      return {status: "skipped", reason: "recipient_ineligible"};
+    }
+    if (!credentials) {
+      return {status: "sent", providerId: `mock:${idempotencyKey}`};
+    }
     return sendLive(credentials, fetchImpl, recipientId, response);
   }
 
@@ -183,14 +245,18 @@ export function createWoztellAdapter(
       if (
         !(lastCustomerMessageAt instanceof Date)
         || !Number.isFinite(lastCustomerMessageAt.getTime())
-        || now().getTime() - lastCustomerMessageAt.getTime() > CUSTOMER_SERVICE_WINDOW_MS
+        || now().getTime() - lastCustomerMessageAt.getTime()
+          > CUSTOMER_SERVICE_WINDOW_MS
       ) {
         return Promise.resolve({
           status: "blocked",
           reason: "outside_customer_service_window",
         });
       }
-      return send(input, input.idempotencyKey, [{type: "TEXT", text: input.text}]);
+      return send(input, input.idempotencyKey, [{
+        type: "TEXT",
+        text: input.text,
+      }]);
     },
     sendTemplateMessage(input: TemplateMessageInput) {
       const template = WHATSAPP_TEMPLATES[input.template];
@@ -200,7 +266,10 @@ export function createWoztellAdapter(
         languageCode: template.languageCode,
         components: [{
           type: "body",
-          parameters: template.variables.map((key) => ({type: "text", text: input.variables[key] ?? ""})),
+          parameters: template.variables.map((key) => ({
+            type: "text",
+            text: input.variables[key] ?? "",
+          })),
         }],
       }]);
     },

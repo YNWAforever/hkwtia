@@ -6,10 +6,7 @@ import {
   type WoztellDeliveryDependencies,
 } from "@/lib/ai/woztell-delivery";
 import type {WoztellRunRecovery} from "@/lib/ai/woztell-run-recovery";
-import type {
-  ChannelAdapter,
-  NormalizedInbound,
-} from "@/lib/channels/types";
+import type {NormalizedInbound} from "@/lib/channels/types";
 import {normalizeWhatsAppNumber} from "@/lib/channels/woztell";
 import type {ConversationOwner} from "@/lib/db/repos/conversations";
 
@@ -223,6 +220,11 @@ export function createWoztellWebhookProcessor(
         channel: "whatsapp",
       });
       if (claim.status === "duplicate") return {status: "duplicate"};
+
+      if (!claim.whatsappOptIn) {
+        await dependencies.markCompleted?.(normalized.providerMessageId);
+        return {status: "opted_out"};
+      }
 
       if (normalized.intent === "opt_out") {
         if (claim.profileId) {

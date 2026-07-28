@@ -67,11 +67,7 @@ function failureCode(error: unknown): string | null {
 }
 
 function retryableBeforeAcceptance(error: unknown): boolean {
-  const code = failureCode(error);
-  return code === "retryable_network"
-    || code === "retryable_rate_limit"
-    || code === "retryable_server"
-    || code === "provider_client_error";
+  return failureCode(error) === "retryable_server";
 }
 
 async function reservation(

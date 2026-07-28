@@ -20,6 +20,9 @@ import {
   createWoztellDeliveryOutboxRepository,
 } from "@/lib/db/repos/woztell-delivery-outbox";
 import {
+  createWoztellProfileResolverRepository,
+} from "@/lib/db/repos/woztell-profile-resolver";
+import {
   createWoztellRunRecoveryRepository,
 } from "@/lib/db/repos/woztell-run-recovery";
 
@@ -117,12 +120,14 @@ export function createProductionWoztellProcessorDependencies(
 ): WoztellWebhookProcessorDependencies {
   const now = () => new Date();
   const store = createPostgresWoztellStore(now);
+  const profileResolver = createWoztellProfileResolverRepository();
   const recovery = createWoztellRunRecoveryRepository();
   const deliveryOutbox = createWoztellDeliveryOutboxRepository();
   const appOrigin = env.appUrl;
   return {
     channel,
     ...store,
+    ...profileResolver,
     ...recovery,
     ...deliveryOutbox,
     anonymousOwnerHash(normalizedSender) {

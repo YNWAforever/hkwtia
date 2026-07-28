@@ -86,8 +86,10 @@ describe("WOZTELL live acceptance authorization guard", () => {
       authorizedEnvironment(),
     );
     const fetchImpl = vi.fn(
-      async (_input: string, _init: RequestInit) =>
-        new Response(JSON.stringify({
+      async (input: string, init: RequestInit) => {
+        void input;
+        void init;
+        return new Response(JSON.stringify({
           ok: 1,
           sendResult: {
             ok: 1,
@@ -95,7 +97,8 @@ describe("WOZTELL live acceptance authorization guard", () => {
               messageEvent: {messageId: "wamid.recorded.delivery"},
             }],
           },
-        }), {status: 200}),
+        }), {status: 200});
+      },
     );
     const adapter = createWoztellAdapter({
       RUN_LIVE_WOZTELL: "1",
