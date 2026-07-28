@@ -16,7 +16,10 @@ import {createAgentRuntime} from "@/lib/ai/runtime";
 import {createConciergeTools} from "@/lib/ai/tools/registry";
 import type {WoztellWebhookProcessorDependencies} from "@/lib/ai/woztell-webhook";
 import type {ChannelAdapter} from "@/lib/channels/types";
-import type {ConciergeAgentActor} from "@/lib/auth/agent-actor";
+import {
+  requireConciergeAgent,
+  type ConciergeAgentActor,
+} from "@/lib/auth/agent-actor";
 import type {ConciergeToolRepositories} from "@/lib/db/repos/agent-tools";
 import type {ConversationOwner} from "@/lib/db/repos/conversations";
 
@@ -242,14 +245,15 @@ export function createM4AAcceptanceBoundary(
   type RuntimeDependencies = Parameters<typeof createAgentRuntime>[0];
   const lifecycle: RuntimeDependencies["agentRuns"] = Object.freeze({
     async start(actor, input) {
+      const conciergeActor = requireConciergeAgent(actor);
       const values = record(input);
-      const existing = runs.find(({id}) => id === actor.runId);
+      const existing = runs.find(({id}) => id === conciergeActor.runId);
       if (existing) return existing;
       const created: RunRecord = {
-        id: actor.runId,
-        conversationId: actor.conversationId,
-        profileId: actor.profileId,
-        trigger: actor.trigger,
+        id: conciergeActor.runId,
+        conversationId: conciergeActor.conversationId,
+        profileId: conciergeActor.profileId,
+        trigger: conciergeActor.trigger,
         status: "running",
         provider: typeof values.provider === "string" ? values.provider : null,
         model: typeof values.model === "string" ? values.model : null,
@@ -263,14 +267,14 @@ export function createM4AAcceptanceBoundary(
     },
     async configureModel(actor, input) {
       const values = record(input);
-      const run = runFor(actor);
+      const run = runFor(requireConciergeAgent(actor));
       run.provider = stringValue(values.provider, "openai");
       run.model = stringValue(values.model, "gpt-4.1-mini");
       return run;
     },
     async finish(actor, input) {
       const values = record(input);
-      const run = runFor(actor);
+      const run = runFor(requireConciergeAgent(actor));
       run.status = "completed";
       run.inputTokens = numberValue(values.inputTokens);
       run.outputTokens = numberValue(values.outputTokens);
@@ -280,7 +284,7 @@ export function createM4AAcceptanceBoundary(
     },
     async fail(actor, input) {
       const values = record(input);
-      const run = runFor(actor);
+      const run = runFor(requireConciergeAgent(actor));
       run.status = "failed";
       run.inputTokens = numberValue(values.inputTokens);
       run.outputTokens = numberValue(values.outputTokens);
@@ -290,7 +294,7 @@ export function createM4AAcceptanceBoundary(
     },
     async escalate(actor, input) {
       const values = record(input);
-      const run = runFor(actor);
+      const run = runFor(requireConciergeAgent(actor));
       run.status = "escalated";
       run.inputTokens = numberValue(values.inputTokens);
       run.outputTokens = numberValue(values.outputTokens);
@@ -300,7 +304,7 @@ export function createM4AAcceptanceBoundary(
     },
     async disable(actor, input) {
       const values = record(input);
-      const run = runFor(actor);
+      const run = runFor(requireConciergeAgent(actor));
       run.status = "disabled";
       run.inputTokens = numberValue(values.inputTokens);
       run.outputTokens = numberValue(values.outputTokens);

@@ -3,7 +3,6 @@ import {randomUUID} from "node:crypto";
 import {
   requireAgentRunActor,
   type AgentRunActor,
-  type ConciergeAgentActor,
 } from "@/lib/auth/agent-actor";
 import {
   AgentModelConfigurationError,
@@ -43,12 +42,12 @@ export type AgentEscalationCode =
   | "tool_unavailable";
 
 type AgentRunsLifecycle = Readonly<{
-  start: (actor: ConciergeAgentActor, input: unknown) => Promise<unknown>;
-  configureModel: (actor: ConciergeAgentActor, input: unknown) => Promise<unknown>;
-  finish: (actor: ConciergeAgentActor, input: unknown) => Promise<unknown>;
-  fail: (actor: ConciergeAgentActor, input: unknown) => Promise<unknown>;
-  escalate: (actor: ConciergeAgentActor, input: unknown) => Promise<unknown>;
-  disable: (actor: ConciergeAgentActor, input: unknown) => Promise<unknown>;
+  start: (actor: AgentRunActor, input: unknown) => Promise<unknown>;
+  configureModel: (actor: AgentRunActor, input: unknown) => Promise<unknown>;
+  finish: (actor: AgentRunActor, input: unknown) => Promise<unknown>;
+  fail: (actor: AgentRunActor, input: unknown) => Promise<unknown>;
+  escalate: (actor: AgentRunActor, input: unknown) => Promise<unknown>;
+  disable: (actor: AgentRunActor, input: unknown) => Promise<unknown>;
 }>;
 
 export type AgentRuntimeActorInput =
@@ -538,12 +537,7 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
       }
       return state.terminal.promise;
     }
-    // Repositories accept the generalized run actor. The Concierge-shaped
-    // dependency surface remains source-compatible with M4A's in-memory
-    // acceptance adapter.
-    const method = agentRuns[kind] as unknown as (
-      actor: AgentRunActor, input: unknown
-    ) => Promise<unknown>;
+    const method = agentRuns[kind];
     state.terminal = {
       kind,
       ...(failureCode === undefined ? {} : {failureCode}),
@@ -620,10 +614,7 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
     const runId = createRunId();
     const prepared = preparedRunFor(actorInput, runId);
     const state = preparedStates.get(prepared)!;
-    const start = agentRuns.start as unknown as (
-      actor: AgentRunActor, input: unknown
-    ) => Promise<unknown>;
-    await start(state.actor, {
+    await agentRuns.start(state.actor, {
       provider: null,
       model: null,
       startedAt: safeNow(now),
@@ -761,10 +752,7 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
       let providerResult;
       try {
         resolvedModel = resolveAgentModel(request.model);
-        const configureModel = agentRuns.configureModel as unknown as (
-          actor: AgentRunActor, input: unknown
-        ) => Promise<unknown>;
-        await configureModel(actor, {
+        await agentRuns.configureModel(actor, {
           provider: resolvedModel.provider,
           model: resolvedModel.modelId,
         });

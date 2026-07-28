@@ -2,6 +2,7 @@ import type {LanguageModel} from "ai";
 import {z} from "zod";
 import {describe, expect, it, vi} from "vitest";
 
+import type {ScheduledAgentActor} from "@/lib/auth/agent-actor";
 import {
   AgentRuntimeError,
   createAgentRuntime,
@@ -17,6 +18,19 @@ import {createOpenAIAgentProvider} from "@/lib/ai/providers/openai";
 const RUN_ID = "019f6bb0-f721-7eb8-9a6b-112233445566";
 const STARTED_AT = new Date("2026-07-27T01:00:00.000Z");
 const COMPLETED_AT = new Date("2026-07-27T01:00:01.000Z");
+
+type RuntimeAgentRunsLifecycle =
+  Parameters<typeof createAgentRuntime>[0]["agentRuns"];
+
+function configureScheduledLifecycleContract(
+  lifecycle: RuntimeAgentRunsLifecycle,
+  scheduledActor: ScheduledAgentActor,
+): Promise<unknown> {
+  return lifecycle.configureModel(scheduledActor, {
+    provider: "openai",
+    model: "gpt-4.1-mini",
+  });
+}
 
 function asyncText(...deltas: string[]): AsyncIterable<string> {
   return {
@@ -148,6 +162,10 @@ describe("provider-neutral AI runtime", () => {
     await collectText(result.textStream);
     await result.finalize();
 
+    await expect(configureScheduledLifecycleContract(
+      agentRuns,
+      {kind: "agent", runId: RUN_ID, ...scheduledActor},
+    )).resolves.toEqual({id: RUN_ID});
     for (const lifecycle of [
       agentRuns.start,
       agentRuns.configureModel,
