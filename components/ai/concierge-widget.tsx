@@ -40,6 +40,14 @@ function interpolate(template: string, values: Record<string, string | number>) 
   );
 }
 
+const CONTACT_EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validContactEmail(value: string): boolean {
+  const normalized = value.trim();
+  return normalized === ""
+    || (normalized.length <= 320 && CONTACT_EMAIL_PATTERN.test(normalized));
+}
+
 function safeCitationUrl(value: string | undefined): URL | null {
   if (!value) return null;
   try {
@@ -127,6 +135,8 @@ async function readSse(
 export function ConciergeWidget({locale, labels}: Props) {
   const dialogId = useId();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const contactEmailRef = useRef<HTMLInputElement>(null);
+  const terminalEscalationRef = useRef(false);
   const mountedRef = useRef(true);
   const conversationIdRef = useRef<string | undefined>(undefined);
   const activeControllerRef = useRef<AbortController | undefined>(undefined);
@@ -135,6 +145,9 @@ export function ConciergeWidget({locale, labels}: Props) {
   const sequenceRef = useRef(0);
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactEmailInvalid, setContactEmailInvalid] = useState(false);
+  const [terminalEscalated, setTerminalEscalated] = useState(false);
   const [messages, setMessages] = useState<readonly TranscriptMessage[]>([]);
   const [sending, setSending] = useState(false);
   const [online, setOnline] = useState(
@@ -179,7 +192,13 @@ export function ConciergeWidget({locale, labels}: Props) {
       || normalized.length > 2000
       || requestActiveRef.current
       || disabledState
+      || terminalEscalationRef.current
     ) {
+      return;
+    }
+    if (!validContactEmail(contactEmail)) {
+      setContactEmailInvalid(true);
+      contactEmailRef.current?.focus();
       return;
     }
     if (!navigator.onLine) {
@@ -220,6 +239,9 @@ export function ConciergeWidget({locale, labels}: Props) {
         body: JSON.stringify({
           ...(conversationIdRef.current
             ? {conversationId: conversationIdRef.current}
+            : {}),
+          ...(!conversationIdRef.current && contactEmail.trim()
+            ? {contactEmail: contactEmail.trim()}
             : {}),
           message: normalized,
           locale,
@@ -264,6 +286,8 @@ export function ConciergeWidget({locale, labels}: Props) {
           terminal = true;
           if (typeof input.escalationId === "string") {
             errorEscalationId = input.escalationId;
+            terminalEscalationRef.current = true;
+            setTerminalEscalated(true);
             updateAssistant(assistantId, (assistant) => ({
               ...assistant,
               escalationId: input.escalationId as string,
@@ -341,6 +365,8 @@ export function ConciergeWidget({locale, labels}: Props) {
     event.preventDefault();
     void sendTurn(draft);
   }
+
+  const composerLocked = Boolean(disabledState) || terminalEscalated;
 
   function cancelRequest() {
     const controller = activeControllerRef.current;
@@ -534,10 +560,58 @@ export function ConciergeWidget({locale, labels}: Props) {
               ) : null}
             </div>
 
-            <form onSubmit={submit} className="border-t border-border p-4">
+            <form
+              noValidate
+              onSubmit={submit}
+              className="border-t border-border p-4"
+            >
+              <div>
+                <label
+                  htmlFor={`${dialogId}-contact-email`}
+                  className="text-sm font-semibold"
+                >
+                  {labels.contactEmailLabel}
+                </label>
+                <input
+                  ref={contactEmailRef}
+                  id={`${dialogId}-contact-email`}
+                  name="contactEmail"
+                  type="email"
+                  autoComplete="email"
+                  spellCheck={false}
+                  maxLength={320}
+                  value={contactEmail}
+                  disabled={composerLocked}
+                  aria-invalid={contactEmailInvalid}
+                  aria-describedby={`${dialogId}-contact-email-help`}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setContactEmail(value);
+                    if (contactEmailInvalid) {
+                      setContactEmailInvalid(!validContactEmail(value));
+                    }
+                  }}
+                  onBlur={(event) =>
+                    setContactEmailInvalid(
+                      !validContactEmail(event.currentTarget.value),
+                    )}
+                  className="mt-2 block min-h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-60"
+                />
+                <p
+                  id={`${dialogId}-contact-email-help`}
+                  className="mt-1 text-xs leading-5 text-muted-foreground"
+                >
+                  {labels.contactEmailHelper}
+                </p>
+                {contactEmailInvalid ? (
+                  <p role="alert" className="mt-1 text-sm text-destructive">
+                    {labels.contactEmailError}
+                  </p>
+                ) : null}
+              </div>
               <label
                 htmlFor={`${dialogId}-message`}
-                className="text-sm font-semibold"
+                className="mt-4 block text-sm font-semibold"
               >
                 {labels.messageLabel}
               </label>
@@ -549,7 +623,7 @@ export function ConciergeWidget({locale, labels}: Props) {
                 value={draft}
                 maxLength={2000}
                 rows={3}
-                disabled={Boolean(disabledState)}
+                disabled={composerLocked}
                 placeholder={labels.placeholder}
                 onChange={(event) => setDraft(event.target.value.slice(0, 2000))}
                 className="mt-2 block min-h-24 w-full resize-y rounded-md border border-input bg-background px-3 py-3 text-base leading-6 placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-60"
@@ -574,7 +648,7 @@ export function ConciergeWidget({locale, labels}: Props) {
                     className="min-h-11 touch-manipulation"
                     disabled={
                       sending
-                      || Boolean(disabledState)
+                      || composerLocked
                       || draft.trim().length === 0
                     }
                   >

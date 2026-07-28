@@ -212,6 +212,38 @@ describe("Concierge service", () => {
     );
   });
 
+  it("never promotes fallback contact email into enabled tools, provider input, or audit", async () => {
+    const runtime = runtimeDouble(finish({
+      citations: [{
+        sourceId: "kb:source",
+        title: "WTIA",
+        confidence: 0.9,
+      }],
+    }));
+    const deps = dependencies({getRuntime: vi.fn(() => runtime.runtime)});
+    const email = "fallback@example.com";
+
+    const turn = await createConciergeService(deps).startTurn({
+      owner: OWNER,
+      profileId: OWNER.profileId,
+      message: "Help",
+      locale: "en",
+      trigger: "web",
+      fallbackContactEmail: email,
+    });
+    await eventsOf(turn);
+
+    const createTools = vi.mocked(deps.createTools);
+    const audit = vi.mocked(deps.audit);
+    const toolsContext = createTools.mock.calls[0]?.[0];
+    expect(toolsContext).not.toHaveProperty("confirmedContactEmail");
+    expect(toolsContext).not.toHaveProperty("fallbackContactEmail");
+    expect(JSON.stringify(createTools.mock.calls)).not.toContain(email);
+    expect(JSON.stringify(runtime.runtime.stream.mock.calls)).not.toContain(email);
+    expect(deps.agentTools.createStaffTask).not.toHaveBeenCalled();
+    expect(audit).not.toHaveBeenCalled();
+  });
+
   it("persists a zero-cost disabled run and one deduplicated leave-message task without constructing AI clients", async () => {
     const disabledFinish = finish({
       status: "disabled",
@@ -234,6 +266,7 @@ describe("Concierge service", () => {
       message: "Help",
       locale: "en",
       trigger: "web",
+      fallbackContactEmail: "fallback@example.com",
     });
     const events = await eventsOf(turn);
 
@@ -249,6 +282,7 @@ describe("Concierge service", () => {
       expect.objectContaining({
         kind: "concierge_general_follow_up",
         summaryCode: "human_requested",
+        contactEmail: "fallback@example.com",
       }),
     );
     expect(events).toEqual([

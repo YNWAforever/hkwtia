@@ -31,9 +31,21 @@ import {
 } from "@/lib/security/rate-limit";
 import {verifyTurnstile} from "@/lib/security/turnstile";
 
+const optionalContactEmailSchema = z.preprocess(
+  (value) =>
+    typeof value === "string" && value.trim() === "" ? undefined : value,
+  z.string()
+    .trim()
+    .max(320)
+    .email()
+    .transform((value) => value.toLowerCase())
+    .optional(),
+);
+
 export const conciergeRequestSchema = z.object({
   conversationId: z.string().uuid().optional(),
   message: z.string().trim().min(1).max(2000),
+  contactEmail: optionalContactEmailSchema,
   locale: z.enum(["en", "zh-HK"]),
   website: z.string().max(0).optional(),
   turnstileToken: z.string().max(4096).optional(),
@@ -227,6 +239,9 @@ export function createConciergePostHandler(
           ? {}
           : {conversationId: parsed.conversationId}),
         message: parsed.message,
+        ...(parsed.contactEmail === undefined
+          ? {}
+          : {fallbackContactEmail: parsed.contactEmail}),
         locale: parsed.locale,
         trigger: "web",
         abortSignal: request.signal,

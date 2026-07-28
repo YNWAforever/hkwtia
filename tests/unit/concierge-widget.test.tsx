@@ -16,6 +16,9 @@ const labels: ConciergeLabels = {
   description: "Ask about membership, events, programmes and support.",
   close: "Close Concierge",
   messageLabel: "Your message",
+  contactEmailLabel: "Contact email (optional)",
+  contactEmailHelper: "Used only if WTIA Concierge is unavailable so our team can follow up.",
+  contactEmailError: "Enter a valid email address.",
   placeholder: "e.g. How do I join WTIA?…",
   send: "Send",
   sending: "Sending…",
@@ -96,6 +99,12 @@ describe("ConciergeWidget", () => {
     expect(textbox).toHaveFocus();
     expect(textbox).toHaveAttribute("name", "message");
     expect(textbox).toHaveAttribute("autocomplete", "off");
+    const email = screen.getByRole("textbox", {name: labels.contactEmailLabel});
+    expect(email).toHaveAttribute("name", "contactEmail");
+    expect(email).toHaveAttribute("type", "email");
+    expect(email).toHaveAttribute("autocomplete", "email");
+    expect(email).toHaveAttribute("spellcheck", "false");
+    expect(screen.getByText(labels.contactEmailHelper)).toBeVisible();
 
     const close = screen.getByRole("button", {name: labels.close});
     close.focus();
@@ -127,6 +136,25 @@ describe("ConciergeWidget", () => {
     expect(screen.getByText("2000 / 2000")).toBeVisible();
   });
 
+  it("validates the optional fallback email inline and focuses it on submit", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    render(widget());
+    await openWidget();
+
+    const email = screen.getByRole("textbox", {name: labels.contactEmailLabel});
+    fireEvent.change(email, {target: {value: "not-an-email"}});
+    fireEvent.blur(email);
+    expect(screen.getByText(labels.contactEmailError)).toBeVisible();
+
+    fireEvent.change(screen.getByRole("textbox", {name: labels.messageLabel}), {
+      target: {value: "Please contact me"},
+    });
+    fireEvent.submit(email.closest("form")!);
+    expect(email).toHaveFocus();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("submits once, parses split SSE chunks, preserves continuity, and renders only safe text and citation URLs", async () => {
     const first = [
       'event: meta\ndata: {"conversationId":"11111111-1111-4111-8111-111111111111","runId":"22222222-',
@@ -144,8 +172,16 @@ describe("ConciergeWidget", () => {
     render(widget());
     await openWidget();
 
+    fireEvent.change(
+      screen.getByRole("textbox", {name: labels.contactEmailLabel}),
+      {target: {value: "person@example.com"}},
+    );
     submit();
     fireEvent.click(screen.getByRole("button", {name: labels.sending}));
+
+    const firstBody = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
+    expect(firstBody).toMatchObject({contactEmail: "person@example.com"});
+    expect(screen.queryByText("person@example.com")).not.toBeInTheDocument();
 
     expect(await screen.findByText("<img src=x onerror=alert(1)>Hello WTIA")).toBeVisible();
     expect(document.querySelector("img")).toBeNull();
@@ -166,6 +202,7 @@ describe("ConciergeWidget", () => {
       locale: "en",
       message: "And member events?",
     });
+    expect(secondBody).not.toHaveProperty("contactEmail");
   });
 
   it("parses CRLF frames, multiline data, and split multibyte UTF-8", async () => {
@@ -229,6 +266,11 @@ describe("ConciergeWidget", () => {
     expect(screen.getByText("Reference: WTIA-task-error")).toBeVisible();
     expect(screen.queryByRole("button", {name: labels.retry}))
       .not.toBeInTheDocument();
+    const composer = screen.getByRole("textbox", {name: labels.messageLabel});
+    expect(composer).toBeDisabled();
+    expect(screen.getByRole("button", {name: labels.send})).toBeDisabled();
+    fireEvent.change(composer, {target: {value: "Submit again"}});
+    fireEvent.submit(composer.closest("form")!);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 

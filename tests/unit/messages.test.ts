@@ -28,5 +28,9 @@ describe('message bundles', () => {
   it('uses localized example placeholders with an ellipsis', () => {
     expect(en.Concierge.placeholder).toMatch(/^e\.g\. .+…$/);
     expect(zh.Concierge.placeholder).toMatch(/^例如：.+…$/);
+    expect(en.Concierge.contactEmailHelper).toMatch(/only if/i);
+    expect(zh.Concierge.contactEmailHelper).toContain("只會");
+    expect(en.Concierge.contactEmailError).toMatch(/valid email/i);
+    expect(zh.Concierge.contactEmailError).toContain("有效");
   });
 });

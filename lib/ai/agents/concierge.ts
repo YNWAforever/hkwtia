@@ -93,6 +93,7 @@ export type ConciergeTurnInput = Readonly<{
   locale: ConciergeLocale;
   trigger: "web" | "whatsapp";
   confirmedContactEmail?: string;
+  fallbackContactEmail?: string;
   abortSignal?: AbortSignal;
 }>;
 
@@ -321,6 +322,8 @@ export function createConciergeService(
 
       let disabledTaskId: string | undefined;
       if (!dependencies.agentsEnabled) {
+        const contactEmail =
+          input.fallbackContactEmail ?? input.confirmedContactEmail;
         try {
           const task = await dependencies.agentTools.createStaffTask(actor, {
             profileId: input.profileId,
@@ -328,9 +331,7 @@ export function createConciergeService(
             summaryCode: "human_requested",
             reasonCode: "human_requested",
             locale,
-            ...(input.confirmedContactEmail === undefined
-              ? {}
-              : {contactEmail: input.confirmedContactEmail}),
+            ...(contactEmail === undefined ? {} : {contactEmail}),
           });
           disabledTaskId = task.id;
         } catch (error) {

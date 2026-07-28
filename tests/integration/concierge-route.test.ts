@@ -88,6 +88,42 @@ describe("Concierge SSE route", () => {
     ].join(""));
   });
 
+  it("validates and maps fallback contact email without promoting it to confirmed identity", async () => {
+    const deps = routeDependencies();
+    const response = await createConciergePostHandler(deps)(request({
+      message: "Please follow up",
+      locale: "en",
+      contactEmail: " Person@Example.com ",
+    }));
+
+    expect(response.status).toBe(200);
+    expect(deps.service.startTurn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fallbackContactEmail: "person@example.com",
+      }),
+    );
+    expect(deps.service.startTurn).toHaveBeenCalledWith(
+      expect.not.objectContaining({confirmedContactEmail: expect.anything()}),
+    );
+  });
+
+  it.each([
+    "not-an-email",
+    `${"a".repeat(310)}@example.com`,
+  ])("rejects invalid fallback contact email %s", async (contactEmail) => {
+    const response = await createConciergePostHandler(routeDependencies())(
+      request({message: "Hello", locale: "en", contactEmail}),
+    );
+    expect(response.status).toBe(400);
+  });
+
+  it("keeps the request schema strict for unknown fields", async () => {
+    const response = await createConciergePostHandler(routeDependencies())(
+      request({message: "Hello", locale: "en", unexpected: "value"}),
+    );
+    expect(response.status).toBe(400);
+  });
+
   it("rejects origin spoofing, honeypot submissions, Turnstile failure, and the 21st request", async () => {
     const origin = await createConciergePostHandler(routeDependencies())(
       request({message: "Hello", locale: "en"}, {
