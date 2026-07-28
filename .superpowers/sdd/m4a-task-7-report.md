@@ -43,7 +43,7 @@ Unable to find "A WTIA team member will follow up."
 
 The second failure proved the Task 6 `error` event's optional `escalationId`
 was being discarded. The implementation now preserves and displays that
-reference while retaining retry recovery.
+reference while retaining retry recovery for pre-tool failures only.
 
 Formal review added RED/GREEN coverage for form metadata, focus containment,
 SSE reader cancellation, CRLF and multiline frames, split multibyte UTF-8,
@@ -51,14 +51,19 @@ scoped raw translation templates, interaction styles, and whole-document
 375px overflow. A held-open stream now proves its underlying source is
 cancelled before the reader lock is released after dispatch failure.
 
+Final re-review added a retry-safety RED/GREEN split: an SSE error carrying the
+server-owned `escalationId` is terminal after tool/provider handoff, preserves
+the safe error copy and visible reference, and exposes no retry control. An
+error without `escalationId` remains retryable and has its own regression.
+
 ## Verification
 
-- `npm.cmd test -- tests/unit/concierge-widget.test.tsx` — PASS, 10/10.
-- Task 6/7 focused contracts — PASS, 7 files and 38/38 tests.
+- `npm.cmd test -- tests/unit/concierge-widget.test.tsx` — PASS, 11/11.
+- Task 6/7 focused contracts — PASS, 7 files and 39/39 tests.
 - `npm.cmd run typecheck` — PASS.
 - `npm.cmd run lint` — PASS.
 - `npm.cmd run build` — PASS, 92 static pages generated.
-- `npm.cmd test` — PASS, 174 files and 1076 tests; 11 files / 31 tests skipped
+- `npm.cmd test` — PASS, 174 files and 1077 tests; 11 files / 31 tests skipped
   by their existing environment gates.
 - `npm.cmd run audit:strings` — PASS, 96 TSX files scanned.
 - `npm.cmd run test:e2e -- tests/e2e/concierge.spec.ts` — PASS, anonymous

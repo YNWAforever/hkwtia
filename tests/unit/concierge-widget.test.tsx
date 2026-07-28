@@ -215,11 +215,28 @@ describe("ConciergeWidget", () => {
     expect(() => streamController.enqueue(encoder.encode("late"))).toThrow();
   });
 
-  it("shows recoverable stream errors and retries the same turn only once", async () => {
+  it("does not retry a terminal error carrying an escalation reference", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(sseResponse([
+      'event: error\ndata: {"code":"AI_TEMPORARILY_UNAVAILABLE","escalationId":"WTIA-task-error"}\n\n',
+    ]));
+    vi.stubGlobal("fetch", fetchMock);
+    render(widget());
+    await openWidget();
+
+    submit("Please help");
+    expect(await screen.findByRole("alert")).toHaveTextContent(labels.error);
+    expect(screen.getByText(labels.escalated)).toBeVisible();
+    expect(screen.getByText("Reference: WTIA-task-error")).toBeVisible();
+    expect(screen.queryByRole("button", {name: labels.retry}))
+      .not.toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries a pre-tool stream error with the same turn only once", async () => {
     const retry = deferredResponse();
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(sseResponse([
-        'event: error\ndata: {"code":"AI_TEMPORARILY_UNAVAILABLE","escalationId":"WTIA-task-error"}\n\n',
+        'event: error\ndata: {"code":"AI_TEMPORARILY_UNAVAILABLE"}\n\n',
       ]))
       .mockImplementationOnce(() => retry.promise);
     vi.stubGlobal("fetch", fetchMock);
@@ -229,8 +246,6 @@ describe("ConciergeWidget", () => {
     submit("Please help");
     expect(await screen.findByRole("alert")).toHaveTextContent(labels.error);
 
-    expect(screen.getByText(labels.escalated)).toBeVisible();
-    expect(screen.getByText("Reference: WTIA-task-error")).toBeVisible();
     const retryButton = screen.getByRole("button", {name: labels.retry});
     fireEvent.click(retryButton);
     fireEvent.click(retryButton);

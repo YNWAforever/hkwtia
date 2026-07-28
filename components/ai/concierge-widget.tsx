@@ -289,7 +289,10 @@ export function ConciergeWidget({locale, labels}: Props) {
             current.filter((item) => item.id !== assistantId),
           );
         }
-        setError({message: labels.error, retryMessage: normalized});
+        setError({
+          message: labels.error,
+          ...(errorEscalationId ? {} : {retryMessage: normalized}),
+        });
       }
     } finally {
       if (activeControllerRef.current === controller) {
