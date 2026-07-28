@@ -81,10 +81,16 @@ describe("WOZTELL channel adapter", () => {
 
   it("normalizes STOP and 取消 as opt-out intent without mutating state", () => {
     const adapter = createWoztellAdapter({}, vi.fn());
+    const envelope = {
+      from: "85290000000",
+      type: "TEXT",
+      messageId: "wamid.opt-out",
+      timestamp: "2026-07-28T01:00:00.000Z",
+    };
 
-    expect(adapter.normalizeInbound({from: "85290000000", type: "TEXT", data: {text: " STOP "}}))
+    expect(adapter.normalizeInbound({...envelope, data: {text: " STOP "}}))
       .toMatchObject({kind: "message", intent: "opt_out"});
-    expect(adapter.normalizeInbound({from: "85290000000", type: "TEXT", data: {text: "\u53d6\u6d88"}}))
+    expect(adapter.normalizeInbound({...envelope, data: {text: "\u53d6\u6d88"}}))
       .toMatchObject({kind: "message", intent: "opt_out"});
   });
 

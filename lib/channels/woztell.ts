@@ -13,11 +13,13 @@ import type {
 } from "@/lib/channels/types";
 
 const WOZTELL_SEND_RESPONSES_URL = "https://bot.api.woztell.com/sendResponses";
+const CUSTOMER_SERVICE_WINDOW_MS = 24 * 60 * 60 * 1_000;
 
 export type WoztellEnvironment = Readonly<{
   WOZTELL_API_TOKEN?: string;
   WOZTELL_CHANNEL_ID?: string;
   WOZTELL_WEBHOOK_SECRET?: string;
+  RUN_LIVE_WOZTELL?: string;
 }>;
 
 type FetchLike = (input: string, init: RequestInit) => Promise<Response>;
@@ -47,6 +49,7 @@ function nonblank(value: string | undefined): string | null {
 }
 
 function liveCredentials(env: WoztellEnvironment): LiveCredentials | null {
+  if (env.RUN_LIVE_WOZTELL !== "1") return null;
   const token = nonblank(env.WOZTELL_API_TOKEN);
   const channelId = nonblank(env.WOZTELL_CHANNEL_ID);
   return token && channelId ? {token, channelId} : null;
@@ -113,12 +116,28 @@ function normalizedInbound(payload: unknown): NormalizedInbound {
   if (!isRecord(payload)) return {kind: "unsupported", sender: null, text: null, intent: null};
   const sender = typeof payload.from === "string" ? payload.from : null;
   const text = isRecord(payload.data) && typeof payload.data.text === "string" ? payload.data.text.trim() : null;
-  if (payload.type !== "TEXT" || text === null) return {kind: "unsupported", sender, text: null, intent: null};
+  const providerMessageId = typeof payload.messageId === "string"
+    ? payload.messageId.trim()
+    : "";
+  const receivedAt = typeof payload.timestamp === "string"
+    ? new Date(payload.timestamp)
+    : new Date(Number.NaN);
+  if (
+    payload.type !== "TEXT"
+    || !sender
+    || !text
+    || !providerMessageId
+    || !Number.isFinite(receivedAt.getTime())
+  ) {
+    return {kind: "unsupported", sender, text: null, intent: null};
+  }
   return {
     kind: "message",
     sender,
     text,
     intent: text.toUpperCase() === "STOP" || text === "\u53d6\u6d88" ? "opt_out" : null,
+    providerMessageId,
+    receivedAt,
   };
 }
 
@@ -133,7 +152,17 @@ function validWebhookSignature(rawBody: string, signature: string | null, secret
   return receivedBytes.length === expectedBytes.length && matched;
 }
 
-export function createWoztellAdapter(env: WoztellEnvironment, fetchImpl: FetchLike = fetch): ChannelAdapter {
+export function normalizeWhatsAppNumber(value: string): string | null {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length < 8 || digits.length > 15) return null;
+  return `+${digits}`;
+}
+
+export function createWoztellAdapter(
+  env: WoztellEnvironment,
+  fetchImpl: FetchLike = fetch,
+  now: () => Date = () => new Date(),
+): ChannelAdapter {
   const credentials = liveCredentials(env);
   const webhookSecret = nonblank(env.WOZTELL_WEBHOOK_SECRET);
 
@@ -150,6 +179,17 @@ export function createWoztellAdapter(env: WoztellEnvironment, fetchImpl: FetchLi
 
   return {
     sendSessionMessage(input: SessionMessageInput) {
+      const lastCustomerMessageAt = input.lastCustomerMessageAt;
+      if (
+        !(lastCustomerMessageAt instanceof Date)
+        || !Number.isFinite(lastCustomerMessageAt.getTime())
+        || now().getTime() - lastCustomerMessageAt.getTime() > CUSTOMER_SERVICE_WINDOW_MS
+      ) {
+        return Promise.resolve({
+          status: "blocked",
+          reason: "outside_customer_service_window",
+        });
+      }
       return send(input, input.idempotencyKey, [{type: "TEXT", text: input.text}]);
     },
     sendTemplateMessage(input: TemplateMessageInput) {
