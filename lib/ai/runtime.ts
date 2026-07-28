@@ -544,10 +544,10 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
     return runtimeError;
   }
 
-  async function prepareRun(
+  function preparedRunFor(
     actorInput: AgentRuntimeRequest["actor"],
-  ): Promise<AgentRuntimePreparedRun> {
-    const runId = createRunId();
+    runId: string,
+  ): AgentRuntimePreparedRun {
     const actor: ConciergeAgentActor = {
       kind: "agent",
       agent: "concierge",
@@ -557,11 +557,6 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
       trigger: actorInput.trigger,
     };
     const state: RunState = {actor};
-    await agentRuns.start(actor, {
-      provider: null,
-      model: null,
-      startedAt: safeNow(now),
-    });
     const prepared = Object.freeze({
       runId,
       fail: (error: unknown = new AgentRuntimeError("provider_error")) =>
@@ -571,8 +566,29 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
     return prepared;
   }
 
+  async function prepareRun(
+    actorInput: AgentRuntimeRequest["actor"],
+  ): Promise<AgentRuntimePreparedRun> {
+    const runId = createRunId();
+    const prepared = preparedRunFor(actorInput, runId);
+    const state = preparedStates.get(prepared)!;
+    await agentRuns.start(state.actor, {
+      provider: null,
+      model: null,
+      startedAt: safeNow(now),
+    });
+    return prepared;
+  }
+
   return {
     prepare: prepareRun,
+    adoptPrestarted(
+      actorInput: AgentRuntimeRequest["actor"],
+      runId: string,
+    ): AgentRuntimePreparedRun {
+      if (!runId.trim()) throw new AgentRuntimeError("configuration_error");
+      return preparedRunFor(actorInput, runId);
+    },
 
     async stream(request: AgentRuntimeRequest): Promise<AgentRuntimeStream> {
       const preparedRun = request.preparedRun ?? await prepareRun(request.actor);

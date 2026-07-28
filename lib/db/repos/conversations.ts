@@ -4,6 +4,10 @@ import {sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
 import {
+  requireConciergeAgent,
+  type ConciergeAgentActor,
+} from "@/lib/auth/agent-actor";
+import {
   requireAutomationSystem,
   type AutomationRepositoryActor,
 } from "@/lib/auth/automation-actor";
@@ -13,7 +17,7 @@ import type {
   AutomationDatabaseLoader,
   AutomationSqlExecutor,
 } from "@/lib/db/repos/journeys";
-import {conversations, messages} from "@/lib/db/server-schema";
+import {agentRuns, conversations, messages} from "@/lib/db/server-schema";
 import {forbidden} from "@/lib/membership/lifecycle";
 
 export type ConversationOwner =
@@ -48,6 +52,18 @@ export type AppendedMessage = ConversationMessageRecord & Readonly<{
   disposition: "created" | "existing";
 }>;
 
+export type StartedAgentTurn = Readonly<{
+  message: AppendedMessage;
+  run: Readonly<{
+    id: string;
+    conversationId: string;
+    profileId: string | null;
+    trigger: "web" | "whatsapp";
+    status: "running";
+    startedAt: Date;
+  }>;
+}>;
+
 const ownerSchema = z.discriminatedUnion("kind", [
   z.object({kind: z.literal("profile"), profileId: z.string().min(1).max(255)}).strict(),
   z.object({
@@ -67,6 +83,11 @@ const appendMessageInputSchema = z.object({
   providerMessageId: z.string().min(1).max(255).nullish(),
   metadata: z.record(z.unknown()).optional(),
   citations: z.array(z.record(z.unknown())).max(50).optional(),
+}).strict();
+const startAgentTurnInputSchema = z.object({
+  startedAt: z.date()
+    .refine((value) => Number.isFinite(value.getTime()))
+    .optional(),
 }).strict();
 const deleteExpiredInputSchema = z.object({
   asOf: z.date().refine((value) => Number.isFinite(value.getTime())),
@@ -165,6 +186,92 @@ async function getOwnedFrom(
   return conversationFrom(row);
 }
 
+async function appendMessageFrom(
+  database: AutomationSqlExecutor,
+  owner: ConversationOwner,
+  conversationId: string,
+  input: unknown,
+): Promise<AppendedMessage> {
+  const parsedId = conversationIdSchema.parse(conversationId);
+  const parsed = appendMessageInputSchema.parse(input);
+  await getOwnedFrom(database, owner, parsedId);
+  const providerMessageId = parsed.providerMessageId ?? null;
+  let row = rowsFrom(await database.execute(sql`
+      INSERT INTO ${messages}
+        (
+          conversation_id,
+          role,
+          channel,
+          content,
+          provider_message_id,
+          metadata,
+          citations
+        )
+      VALUES (
+        ${parsedId},
+        ${parsed.role},
+        ${parsed.channel},
+        ${parsed.content},
+        ${providerMessageId},
+        ${parsed.metadata ?? {}},
+        ${parsed.citations ?? []}
+      )
+      ON CONFLICT (provider_message_id)
+        WHERE provider_message_id IS NOT NULL
+      DO NOTHING
+      RETURNING *, 'created'::text AS disposition
+  `))[0];
+
+  // A conflicting INSERT can wait for another transaction, but every CTE in
+  // that statement still shares the original PostgreSQL snapshot. Read the
+  // winner in a new statement so the post-wait snapshot can see it.
+  if (!row && providerMessageId !== null) {
+    row = rowsFrom(await database.execute(sql`
+      SELECT existing.*, 'existing'::text AS disposition
+      FROM ${messages} AS existing
+      WHERE existing.conversation_id = ${parsedId}
+        AND existing.provider_message_id = ${providerMessageId}
+      LIMIT 1
+    `))[0];
+  }
+
+  if (!row) throw new Error("MESSAGE_CREATE_CONFLICT");
+  const message = messageFrom(row);
+  await database.execute(sql`
+    UPDATE ${conversations}
+    SET
+      last_message_at = GREATEST(
+        COALESCE(last_message_at, ${message.createdAt}),
+        ${message.createdAt}
+      ),
+      updated_at = GREATEST(updated_at, ${message.createdAt})
+    WHERE id = ${parsedId}
+  `);
+  return {
+    ...message,
+    disposition: String(row.disposition) as AppendedMessage["disposition"],
+  };
+}
+
+function requireMatchingOwner(
+  owner: ConversationOwner,
+  actor: ConciergeAgentActor,
+): void {
+  const parsedOwner = ownerSchema.parse(owner);
+  if (
+    (
+      parsedOwner.kind === "profile"
+      && actor.profileId !== parsedOwner.profileId
+    )
+    || (
+      parsedOwner.kind === "anonymous"
+      && actor.profileId !== null
+    )
+  ) {
+    forbidden();
+  }
+}
+
 export function createConversationsRepository(
   loadDatabase: AutomationDatabaseLoader = defaultDatabaseLoader,
 ) {
@@ -200,66 +307,81 @@ export function createConversationsRepository(
       conversationId: string,
       input: unknown,
     ): Promise<AppendedMessage> {
-      const parsedId = conversationIdSchema.parse(conversationId);
-      const parsed = appendMessageInputSchema.parse(input);
+      return appendMessageFrom(
+        await loadDatabase(),
+        owner,
+        conversationId,
+        input,
+      );
+    },
+
+    async startAgentTurn(
+      owner: ConversationOwner,
+      actor: ConciergeAgentActor,
+      messageInput: unknown,
+      input: unknown,
+    ): Promise<StartedAgentTurn> {
+      requireConciergeAgent(actor);
+      requireMatchingOwner(owner, actor);
+      const parsedConversationId = conversationIdSchema.parse(
+        actor.conversationId,
+      );
+      const parsedRunId = z.string().uuid().parse(actor.runId);
+      const parsed = startAgentTurnInputSchema.parse(input);
+      const startedAt = parsed.startedAt ?? new Date();
       const database = await loadDatabase();
-      await getOwnedFrom(database, owner, parsedId);
-      const providerMessageId = parsed.providerMessageId ?? null;
-      let row = rowsFrom(await database.execute(sql`
-          INSERT INTO ${messages}
+      return database.transaction(async (transaction) => {
+        const message = await appendMessageFrom(
+          transaction,
+          owner,
+          parsedConversationId,
+          messageInput,
+        );
+        const row = rowsFrom(await transaction.execute(sql`
+          INSERT INTO ${agentRuns}
             (
+              id,
               conversation_id,
-              role,
-              channel,
-              content,
-              provider_message_id,
-              metadata,
-              citations
+              profile_id,
+              trigger,
+              status,
+              provider,
+              model,
+              started_at,
+              created_at,
+              updated_at
             )
-          VALUES (
-            ${parsedId},
-            ${parsed.role},
-            ${parsed.channel},
-            ${parsed.content},
-            ${providerMessageId},
-            ${parsed.metadata ?? {}},
-            ${parsed.citations ?? []}
-          )
-          ON CONFLICT (provider_message_id)
-            WHERE provider_message_id IS NOT NULL
-          DO NOTHING
-          RETURNING *, 'created'::text AS disposition
-      `))[0];
-
-      // A conflicting INSERT can wait for another transaction, but every CTE in
-      // that statement still shares the original PostgreSQL snapshot. Read the
-      // winner in a new statement so the post-wait snapshot can see it.
-      if (!row && providerMessageId !== null) {
-        row = rowsFrom(await database.execute(sql`
-          SELECT existing.*, 'existing'::text AS disposition
-          FROM ${messages} AS existing
-          WHERE existing.conversation_id = ${parsedId}
-            AND existing.provider_message_id = ${providerMessageId}
-          LIMIT 1
+          SELECT
+            ${parsedRunId},
+            ${parsedConversationId},
+            ${actor.profileId},
+            ${actor.trigger},
+            'running',
+            NULL,
+            NULL,
+            ${startedAt},
+            ${startedAt},
+            ${startedAt}
+          FROM ${conversations}
+          WHERE ${conversations.id} = ${parsedConversationId}
+            AND ${ownerPredicate(owner)}
+          RETURNING *
         `))[0];
-      }
-
-      if (!row) throw new Error("MESSAGE_CREATE_CONFLICT");
-      const message = messageFrom(row);
-      await database.execute(sql`
-        UPDATE ${conversations}
-        SET
-          last_message_at = GREATEST(
-            COALESCE(last_message_at, ${message.createdAt}),
-            ${message.createdAt}
-          ),
-          updated_at = GREATEST(updated_at, ${message.createdAt})
-        WHERE id = ${parsedId}
-      `);
-      return {
-        ...message,
-        disposition: String(row.disposition) as AppendedMessage["disposition"],
-      };
+        if (!row) throw new Error("AGENT_RUN_START_FAILED");
+        return {
+          message,
+          run: {
+            id: String(row.id),
+            conversationId: String(row.conversation_id),
+            profileId: row.profile_id === null || row.profile_id === undefined
+              ? null
+              : String(row.profile_id),
+            trigger: String(row.trigger) as "web" | "whatsapp",
+            status: "running",
+            startedAt: requiredDate(row.started_at),
+          },
+        };
+      });
     },
 
     async listMessages(

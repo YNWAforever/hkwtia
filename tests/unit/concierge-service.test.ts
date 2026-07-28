@@ -69,6 +69,7 @@ function runtimeDouble(
     fail,
     runtime: {
       prepare: vi.fn(async () => prepared),
+      adoptPrestarted: vi.fn(() => prepared),
       stream: vi.fn(async () => ({
         runId: RUN_ID,
         textStream: asyncText(...deltas),
@@ -97,6 +98,7 @@ function dependencies(
         locale: "en" as const,
       })),
       appendMessage: vi.fn(async () => ({id: crypto.randomUUID()})),
+      startAgentTurn: vi.fn(async () => ({id: RUN_ID})),
       listMessages: vi.fn(async () => [{
         role: "user" as const,
         content: "What is WTIA?",
@@ -168,14 +170,17 @@ describe("Concierge service", () => {
         },
       },
     ]);
-    expect(deps.conversations.appendMessage).toHaveBeenNthCalledWith(
-      1,
+    expect(deps.conversations.startAgentTurn).toHaveBeenCalledWith(
       OWNER,
-      CONVERSATION_ID,
+      expect.objectContaining({
+        runId: RUN_ID,
+        conversationId: CONVERSATION_ID,
+      }),
       expect.objectContaining({role: "user", content: "What is WTIA?"}),
+      expect.objectContaining({startedAt: expect.any(Date)}),
     );
-    expect(deps.conversations.appendMessage).toHaveBeenNthCalledWith(
-      2,
+    expect(deps.conversations.appendMessage).toHaveBeenCalledOnce();
+    expect(deps.conversations.appendMessage).toHaveBeenCalledWith(
       OWNER,
       CONVERSATION_ID,
       expect.objectContaining({
@@ -333,6 +338,10 @@ describe("Concierge service", () => {
     const deps = dependencies({
       conversations: {
         ...base.conversations,
+        startAgentTurn: vi.fn(async (_owner, _actor, value) => {
+          order.push((value as {role: string}).role);
+          return {id: RUN_ID};
+        }),
         appendMessage: vi.fn(async (_owner, _conversationId, value) => {
           order.push((value as {role: string}).role);
           return {id: crypto.randomUUID()};
@@ -355,7 +364,6 @@ describe("Concierge service", () => {
 
   it("fails instead of finalizing when the assistant reply is not durable", async () => {
     const appendError = new Error("assistant append failed");
-    let appendCount = 0;
     const outcome = finish({
       citations: [{
         sourceId: "kb:grounded",
@@ -369,11 +377,7 @@ describe("Concierge service", () => {
     const deps = dependencies({
       conversations: {
         ...base.conversations,
-        appendMessage: vi.fn(async () => {
-          appendCount += 1;
-          if (appendCount === 2) throw appendError;
-          return {id: crypto.randomUUID()};
-        }),
+        appendMessage: vi.fn(async () => Promise.reject(appendError)),
       },
       getRuntime: vi.fn(() => runtime.runtime),
     });
@@ -479,7 +483,7 @@ describe("Concierge service", () => {
     });
     expect(JSON.stringify(events)).not.toContain("provider");
   });
-  it("precreates and fails the run when turn preparation fails", async () => {
+  it("adopts and fails the atomically prestarted run when turn preparation fails", async () => {
     const prepError = new Error("history unavailable");
     const runtime = runtimeDouble();
     const base = dependencies();
@@ -501,7 +505,7 @@ describe("Concierge service", () => {
       trigger: "web",
     })).rejects.toBe(prepError);
 
-    expect(runtime.runtime.prepare).toHaveBeenCalledOnce();
+    expect(runtime.runtime.adoptPrestarted).toHaveBeenCalledOnce();
     expect(runtime.prepared.fail).toHaveBeenCalledWith(prepError);
     expect(runtime.runtime.stream).not.toHaveBeenCalled();
   });
@@ -511,10 +515,11 @@ describe("Concierge service", () => {
       setTimeout(resolve, 0);
       const deps = dependencies({
         getRuntime: vi.fn(() => ({
-          prepare: vi.fn(async () => ({
+          adoptPrestarted: vi.fn(() => ({
             runId: RUN_ID,
             fail: vi.fn(async () => new AgentRuntimeError("provider_error")),
           })),
+          prepare: vi.fn(),
           stream: vi.fn(async (request) => {
             seenSignal = request.abortSignal;
             const outcome = finish();

@@ -50,6 +50,12 @@ type Conversations = Readonly<{
     conversationId: string,
     input: unknown,
   ) => Promise<unknown>;
+  startAgentTurn: (
+    owner: ConversationOwner,
+    actor: ConciergeAgentActor,
+    messageInput: unknown,
+    input: unknown,
+  ) => Promise<unknown>;
   listMessages: (
     owner: ConversationOwner,
     conversationId: string,
@@ -57,9 +63,10 @@ type Conversations = Readonly<{
 }>;
 
 type Runtime = Readonly<{
-  prepare: (
+  adoptPrestarted: (
     actor: AgentRuntimeRequest["actor"],
-  ) => Promise<AgentRuntimePreparedRun>;
+    runId: string,
+  ) => AgentRuntimePreparedRun;
   stream: (request: AgentRuntimeRequest) => Promise<AgentRuntimeStream>;
 }>;
 
@@ -219,9 +226,11 @@ export function createConciergeService(
         });
       const locale = conversation.locale;
 
-      await dependencies.conversations.appendMessage(
+      const plannedRunId = createRunId();
+      const actor = agentActor(plannedRunId, conversation.id, input);
+      await dependencies.conversations.startAgentTurn(
         input.owner,
-        conversation.id,
+        actor,
         {
           role: "user",
           channel: input.trigger,
@@ -229,21 +238,23 @@ export function createConciergeService(
           metadata: {locale},
           citations: [],
         },
+        {startedAt: now()},
       );
 
-      const plannedRunId = createRunId();
-      const actor = agentActor(plannedRunId, conversation.id, input);
       const controller = new AbortController();
       const forwardAbort = () => controller.abort(input.abortSignal?.reason);
       input.abortSignal?.addEventListener("abort", forwardAbort, {once: true});
       if (input.abortSignal?.aborted) forwardAbort();
 
       const runtime = dependencies.getRuntime(plannedRunId);
-      const preparedRun = await runtime.prepare({
-        conversationId: conversation.id,
-        profileId: input.profileId,
-        trigger: input.trigger,
-      });
+      const preparedRun = runtime.adoptPrestarted(
+        {
+          conversationId: conversation.id,
+          profileId: input.profileId,
+          trigger: input.trigger,
+        },
+        plannedRunId,
+      );
       if (preparedRun.runId !== plannedRunId) {
         const error = new Error("CONCIERGE_RUN_ID_MISMATCH");
         controller.abort();
@@ -325,6 +336,16 @@ export function createConciergeService(
       }
 
       let completed = false;
+      let cancellation: Promise<void> | undefined;
+      function cancelPendingRun(): Promise<void> {
+        if (completed) return Promise.resolve();
+        if (cancellation) return cancellation;
+        if (!controller.signal.aborted) controller.abort();
+        cancellation = runtimeTurn
+          .fail(new AgentRuntimeError("timeout"))
+          .then(() => undefined);
+        return cancellation;
+      }
       const events: AsyncIterable<ConciergeSseEvent> = {
         async *[Symbol.asyncIterator]() {
           let assistantText = "";
@@ -458,7 +479,7 @@ export function createConciergeService(
             };
           } finally {
             input.abortSignal?.removeEventListener("abort", forwardAbort);
-            if (!completed && !controller.signal.aborted) controller.abort();
+            if (!completed) await cancelPendingRun();
           }
         },
       };
@@ -468,7 +489,7 @@ export function createConciergeService(
         runId: runtimeTurn.runId,
         events,
         async cancel() {
-          if (!controller.signal.aborted) controller.abort();
+          await cancelPendingRun();
         },
       };
     },
