@@ -30,7 +30,7 @@ type FetchLike = (input: string, init: RequestInit) => Promise<Response>;
 export type WoztellDeliveryFailureCode =
   | "retryable_network"
   | "retryable_rate_limit"
-  | "retryable_server"
+  | "provider_acceptance_uncertain"
   | "provider_client_error"
   | "provider_unclassified_failure";
 
@@ -65,7 +65,7 @@ function recipientNumber(recipient: WhatsAppRecipient): string | null {
 
 function failureCode(status: number): WoztellDeliveryFailureCode {
   if (status === 429) return "retryable_rate_limit";
-  if (status >= 500) return "retryable_server";
+  if (status >= 500) return "provider_acceptance_uncertain";
   if (status >= 400 && status < 500) return "provider_client_error";
   return "provider_unclassified_failure";
 }

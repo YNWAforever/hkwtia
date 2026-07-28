@@ -73,8 +73,8 @@ describe("WOZTELL channel adapter", () => {
       text: "private-template-variable",
       idempotencyKey: "delivery:session",
     })).rejects.toMatchObject({
-      code: "retryable_server",
-      message: "WHATSAPP_DELIVERY_FAILED:retryable_server",
+      code: "provider_acceptance_uncertain",
+      message: "WHATSAPP_DELIVERY_FAILED:provider_acceptance_uncertain",
     });
     expect(consoleError).not.toHaveBeenCalled();
   });

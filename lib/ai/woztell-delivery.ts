@@ -57,19 +57,6 @@ function templateFor(locale: "en" | "zh-HK"): WhatsAppTemplateKey {
     : "concierge_follow_up_en";
 }
 
-function failureCode(error: unknown): string | null {
-  return error
-    && typeof error === "object"
-    && "code" in error
-    && typeof error.code === "string"
-    ? error.code
-    : null;
-}
-
-function retryableBeforeAcceptance(error: unknown): boolean {
-  return failureCode(error) === "retryable_server";
-}
-
 async function reservation(
   dependencies: WoztellDeliveryDependencies,
   providerMessageId: string,
@@ -105,10 +92,6 @@ async function handleDeliveryError(
   dependencies: WoztellDeliveryDependencies,
 ): Promise<WoztellDeliveryResult> {
   if (!dependencies.reserveDelivery) throw error;
-  if (retryableBeforeAcceptance(error)) {
-    await dependencies.markDeliveryRetryable?.(deliveryId);
-    throw error;
-  }
   await dependencies.markDeliveryUncertain?.(deliveryId);
   return escalateTerminal(input, "channel_delivery_uncertain");
 }
