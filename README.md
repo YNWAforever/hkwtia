@@ -172,16 +172,21 @@ credentials:
 npm test -- tests/integration/m4a-acceptance.test.ts
 npm run eval:concierge
 npm run build
-# In another terminal, serve the production build:
-npm run start
-# Then target that local production server:
+# In another terminal, serve the production build with the normal required
+# production variables pointed at isolated/non-live values, plus both exact gates:
+M4A_DETERMINISTIC_ACCEPTANCE=true M4A_DETERMINISTIC_ACCEPTANCE_AUTHORIZED=true npm run start
+# Then target that local production server (the gate rejects non-loopback hosts):
 PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:e2e -- tests/e2e/concierge.spec.ts
 ```
 
-The acceptance suite uses repository doubles by default. Set
-`RUN_DATABASE_TESTS=true` and `DATABASE_URL_TEST` only for an explicitly
-isolated, migrated test database; this enables the fixed-fixture reconciliation
-case. It does not make provider, email, WOZTELL, or deployment calls.
+The acceptance suite uses an in-memory persistence boundary and deterministic
+provider behind the real Concierge service/runtime/tool composition. The
+production-build browser gate requires both exact flags above and accepts only
+`localhost`, `127.0.0.1`, or `::1`; a deployed host cannot activate it. The
+boundary performs no provider, database, email, WOZTELL, or deployment network
+calls. Set `RUN_DATABASE_TESTS=true` and `DATABASE_URL_TEST` only for an
+explicitly isolated, migrated test database; this separately enables the fixed
+fixture reconciliation case.
 
 Live model evaluation is a distinct manual action and requires all of
 `RUN_LIVE_AI_EVALS=true`, `RUN_LIVE_EVALS=1`,

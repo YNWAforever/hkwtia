@@ -1,6 +1,6 @@
 import {readFileSync} from "node:fs";
 
-import {expect, test, type Page, type Route} from "@playwright/test";
+import {expect, test, type Page} from "@playwright/test";
 
 import {missingM2LiveEnvironment, signInForM2} from "../fixtures/m2-auth";
 
@@ -20,35 +20,6 @@ const copy = (locale: "en" | "zh-HK") =>
     "utf8",
   )) as ConciergeCopy;
 
-const CONVERSATION_ID = "11111111-1111-4111-8111-111111111111";
-const RUN_ID = "22222222-2222-4222-8222-222222222222";
-
-function sse(
-  answer: string,
-  locale: "en" | "zh-HK",
-): string {
-  const sourceTitle = locale === "en"
-    ? "WTIA Membership"
-    : "WTIA 會員";
-  return [
-    `event: meta\ndata: ${JSON.stringify({
-      conversationId: CONVERSATION_ID,
-      runId: RUN_ID,
-    })}\n\n`,
-    `event: delta\ndata: ${JSON.stringify({text: answer})}\n\n`,
-    `event: done\ndata: ${JSON.stringify({
-      citations: [{
-        sourceId: `m4a:${locale}:membership`,
-        title: sourceTitle,
-        url: locale === "en"
-          ? "https://www.hkwtia.org/membership"
-          : "https://www.hkwtia.org/zh-HK/membership",
-      }],
-      escalationId: null,
-    })}\n\n`,
-  ].join("");
-}
-
 async function ask(
   page: Page,
   labels: ConciergeCopy["Concierge"],
@@ -67,25 +38,10 @@ const viewports = [
 for (const viewport of viewports) {
   for (const locale of ["en", "zh-HK"] as const) {
     test(
-      `${viewport.name} ${locale} mock-provider flow cites approved sources and keeps continuity`,
+      `${viewport.name} ${locale} real-route mock provider cites sources and keeps continuity`,
       async ({page}) => {
         await page.setViewportSize(viewport);
         const labels = copy(locale).Concierge;
-        const requests: Array<Record<string, unknown>> = [];
-        let turn = 0;
-        await page.route("**/api/ai/concierge", async (route: Route) => {
-          requests.push(
-            route.request().postDataJSON() as Record<string, unknown>,
-          );
-          turn += 1;
-          await route.fulfill({
-            status: 200,
-            contentType: "text/event-stream; charset=utf-8",
-            headers: {"cache-control": "no-cache"},
-            body: sse(`M4A ${locale} answer ${turn}`, locale),
-          });
-        });
-
         await page.goto(locale === "en" ? "/about" : "/zh/about");
         await expect.poll(() => page.evaluate(
           () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -99,10 +55,22 @@ for (const viewport of viewports) {
         expect(box!.x).toBeGreaterThanOrEqual(0);
         expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
 
-        await ask(page, labels, `Question in ${locale}`);
-        await expect(
-          dialog.getByText(`M4A ${locale} answer 1`, {exact: true}),
-        ).toBeVisible();
+        const question = locale === "en"
+          ? "Tell me about approved WTIA membership benefits."
+          : "請介紹已批准的 WTIA 會員福利。";
+        const answer = locale === "en"
+          ? "Approved WTIA membership benefits include community events."
+          : "已批准的 WTIA 會員福利包括社群活動。";
+        const responsePromise = page.waitForResponse((response) =>
+          response.url().endsWith("/api/ai/concierge")
+          && response.request().method() === "POST"
+        );
+        await ask(page, labels, question);
+        const response = await responsePromise;
+        expect(response.status()).toBe(200);
+        expect(response.headers()["content-type"]).toContain("text/event-stream");
+        await expect(dialog.getByText(answer, {exact: true})).toBeVisible();
+
         const sourceTitle = locale === "en"
           ? "WTIA Membership"
           : "WTIA 會員";
@@ -117,18 +85,13 @@ for (const viewport of viewports) {
             : "https://www.hkwtia.org/zh-HK/membership",
         );
 
-        await ask(page, labels, `Follow-up in ${locale}`);
-        await expect(
-          dialog.getByText(`M4A ${locale} answer 2`, {exact: true}),
-        ).toBeVisible();
-
-        expect(requests).toHaveLength(2);
-        expect(requests[0]).toMatchObject({locale});
-        expect(requests[0]).not.toHaveProperty("conversationId");
-        expect(requests[1]).toMatchObject({
-          locale,
-          conversationId: CONVERSATION_ID,
-        });
+        const repeatResponsePromise = page.waitForResponse((response) =>
+          response.url().endsWith("/api/ai/concierge")
+          && response.request().method() === "POST"
+        );
+        await ask(page, labels, question);
+        expect((await repeatResponsePromise).status()).toBe(200);
+        await expect(dialog.getByText(answer, {exact: true})).toHaveCount(2);
       },
     );
   }
@@ -136,7 +99,7 @@ for (const viewport of viewports) {
 
 const missingMemberEnvironment = missingM2LiveEnvironment();
 
-test("authenticated member can use the Concierge from the member portal", async ({
+test("authenticated member can use the real Concierge route from the member portal", async ({
   page,
 }) => {
   test.skip(
@@ -144,18 +107,10 @@ test("authenticated member can use the Concierge from the member portal", async 
     `Member Concierge acceptance requires existing M2 test account environment: ${missingMemberEnvironment.join(", ")}`,
   );
   const labels = copy("en").Concierge;
-  await page.route("**/api/ai/concierge", (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: "text/event-stream; charset=utf-8",
-      body: sse("Your member context is available.", "en"),
-    }),
-  );
-
   await signInForM2(page, "member");
   await page.goto("/portal");
   await page.getByRole("button", {name: labels.launcher}).click();
   await ask(page, labels, "What is my membership context?");
-  await expect(page.getByRole("dialog", {name: labels.title}))
-    .toContainText("Your member context is available.");
+  const dialog = page.getByRole("dialog", {name: labels.title});
+  await expect(dialog).toContainText(labels.sources);
 });

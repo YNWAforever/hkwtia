@@ -12,6 +12,11 @@ import {
 } from "@/lib/ai/conversation-cookie";
 import {createOpenAIEmbeddingAdapter} from "@/lib/ai/embeddings";
 import {createAgentRuntime} from "@/lib/ai/runtime";
+import {
+  createM4AAcceptanceBoundary,
+  isM4AAcceptanceRequest,
+  m4aAcceptanceCookieSecret,
+} from "@/lib/ai/m4a-acceptance-boundary";
 import {createConciergeTools} from "@/lib/ai/tools/registry";
 import {getActor} from "@/lib/auth/actor";
 import {serverEnv} from "@/lib/config/env";
@@ -77,6 +82,14 @@ const publicRateLimiter = createInMemoryRateLimiter({
   limit: 20,
   windowMs: 60_000,
 });
+let m4aAcceptanceBoundary:
+  | ReturnType<typeof createM4AAcceptanceBoundary>
+  | undefined;
+
+export {
+  createM4AAcceptanceBoundary,
+  isM4AAcceptanceRequest,
+};
 
 function jsonError(error: string, status: number, headers?: HeadersInit) {
   return Response.json({error}, {status, headers});
@@ -257,6 +270,29 @@ export function createConciergePostHandler(
 }
 
 async function productionHandler(request: Request): Promise<Response> {
+  if (isM4AAcceptanceRequest(process.env, request.url)) {
+    m4aAcceptanceBoundary ??= createM4AAcceptanceBoundary();
+    const headers = new Headers(request.headers);
+    if (
+      !headers.has("x-vercel-forwarded-for")
+      && !headers.has("x-real-ip")
+    ) {
+      headers.set("x-real-ip", "127.0.0.1");
+    }
+    const acceptanceRequest = new Request(request.url, {
+      method: request.method,
+      headers,
+      body: await request.text(),
+    });
+    return createConciergePostHandler({
+      expectedOrigin: new URL(request.url).origin,
+      cookieSecret: m4aAcceptanceCookieSecret(),
+      rateLimiter: publicRateLimiter,
+      verifyTurnstile: async () => true,
+      getActor: async () => null,
+      service: m4aAcceptanceBoundary.service,
+    })(acceptanceRequest);
+  }
   const env = serverEnv();
   const expectedOrigin = env.appUrl || new URL(request.url).origin;
   const service = createConciergeService({

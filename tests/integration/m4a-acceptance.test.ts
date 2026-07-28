@@ -3,9 +3,14 @@ import {createHmac} from "node:crypto";
 import {describe, expect, it, vi} from "vitest";
 import {Pool} from "pg";
 
-import {createWoztellWebhookPostHandler} from "@/app/api/webhooks/woztell/route";
+import {
+  createProductionWoztellWebhookPostHandler,
+  createWoztellWebhookPostHandler,
+} from "@/app/api/webhooks/woztell/route";
 import {createConciergeService} from "@/lib/ai/agents/concierge";
 import {createAgentRuntime} from "@/lib/ai/runtime";
+import type {WoztellWebhookProcessorDependencies} from "@/lib/ai/woztell-webhook";
+import type {ChannelAdapter} from "@/lib/channels/types";
 import {runChatRetention} from "@/lib/ai/retention";
 import {createWoztellAdapter} from "@/lib/channels/woztell";
 import {executeOfflineCase} from "@/evals/runtime-harness";
@@ -14,89 +19,6 @@ const NOW = new Date("2026-07-28T04:00:00.000Z");
 const CONVERSATION_ID = "41111111-1111-4111-8111-111111111111";
 const RUN_ID = "42222222-2222-4222-8222-222222222222";
 const PROFILE_ID = "m4a-acceptance-member";
-
-function textStream(...chunks: string[]): AsyncIterable<string> {
-  return {
-    async *[Symbol.asyncIterator]() {
-      for (const chunk of chunks) yield chunk;
-    },
-  };
-}
-
-async function persistedRunFor(trigger: "web" | "whatsapp") {
-  const record: Record<string, unknown> = {
-    trigger,
-    status: "missing",
-    costUsd: null,
-  };
-  const providerCalls = vi.fn();
-  const runtime = createAgentRuntime({
-    agentRuns: {
-      async start(actor, input) {
-        Object.assign(record, {
-          id: actor.runId,
-          trigger: actor.trigger,
-          status: "running",
-          costUsd: "0.000000",
-          ...(typeof input === "object" && input !== null ? input : {}),
-        });
-      },
-      async configureModel(_actor, input) {
-        Object.assign(record, input);
-      },
-      async finish(_actor, input) {
-        Object.assign(record, input, {status: "completed"});
-      },
-      async fail(_actor, input) {
-        Object.assign(record, input, {status: "failed"});
-      },
-      async escalate(_actor, input) {
-        Object.assign(record, input, {status: "escalated"});
-      },
-      async disable(_actor, input) {
-        Object.assign(record, input, {status: "disabled"});
-      },
-    },
-    providerFactories: {
-      openai: () => ({
-        async stream() {
-          providerCalls();
-          return {
-            textStream: textStream("Accepted"),
-            finish: Promise.resolve({
-              usage: {inputTokens: 100, outputTokens: 20},
-              finishReason: "stop",
-              steps: 1,
-              toolExecutions: 0,
-              citations: [],
-            }),
-          };
-        },
-      }),
-      anthropic: () => {
-        throw new Error("UNEXPECTED_PROVIDER");
-      },
-    },
-    createRunId: () => `${RUN_ID.slice(0, -1)}${trigger === "web" ? "1" : "2"}`,
-    now: () => NOW,
-  });
-  const turn = await runtime.stream({
-    enabled: true,
-    model: "openai:gpt-4.1-mini",
-    credentials: {openaiApiKey: "deterministic-test-only"},
-    actor: {
-      conversationId: CONVERSATION_ID,
-      profileId: PROFILE_ID,
-      trigger,
-    },
-    system: "Deterministic acceptance",
-    messages: [{role: "user", content: "Hello"}],
-    tools: {},
-  });
-  for await (const _chunk of turn.textStream) void _chunk;
-  await turn.finish;
-  return {record, providerCalls};
-}
 
 async function drain(
   turn: Awaited<ReturnType<
@@ -109,23 +31,6 @@ async function drain(
 }
 
 describe("M4A deterministic acceptance", () => {
-  it.each(["web", "whatsapp"] as const)(
-    "persists a terminal agent run with priced usage for every %s turn",
-    async (trigger) => {
-      const {record, providerCalls} = await persistedRunFor(trigger);
-      expect(providerCalls).toHaveBeenCalledOnce();
-      expect(record).toMatchObject({
-        trigger,
-        status: "completed",
-        provider: "openai",
-        model: "gpt-4.1-mini",
-        inputTokens: 100,
-        outputTokens: 20,
-        costUsd: "0.000072",
-      });
-    },
-  );
-
   it("keeps the kill switch provider-free and records a leave-message task", async () => {
     const provider = vi.fn();
     const embedding = vi.fn();
@@ -213,42 +118,209 @@ describe("M4A deterministic acceptance", () => {
     ]);
   });
 
-  it("keeps a Platinum email request pending and writes no email log", async () => {
-    const actual = await executeOfflineCase({
-      id: "m4a-acceptance-platinum-email",
-      locale: "en",
-      request: {
-        message: "Draft an email about my Platinum membership.",
-        channel: "web",
-        authenticatedProfileId: PROFILE_ID,
-        agentsEnabled: true,
-        confirmedContactEmail: "member@m4a.example.test",
-      },
-      scenario: {
-        provider: {
-          keywords: ["draft", "email", "platinum"],
-          action: "draft_email",
-          toolInput: {
-            recipient: "member@m4a.example.test",
-            recipientConfirmed: true,
-            subject: "Platinum membership follow-up",
-            body: "Here is the requested Platinum membership information.",
+  it("enables deterministic composition only with both flags on loopback", async () => {
+    const route = await import("@/app/api/ai/concierge/route") as unknown as {
+      isM4AAcceptanceRequest?: (
+        environment: Readonly<Record<string, string | undefined>>,
+        requestUrl: string,
+      ) => boolean;
+    };
+    expect(route.isM4AAcceptanceRequest).toBeTypeOf("function");
+    if (!route.isM4AAcceptanceRequest) return;
+    const authorized = {
+      M4A_DETERMINISTIC_ACCEPTANCE: "true",
+      M4A_DETERMINISTIC_ACCEPTANCE_AUTHORIZED: "true",
+    };
+    expect(route.isM4AAcceptanceRequest(
+      authorized,
+      "http://127.0.0.1:3100/api/ai/concierge",
+    )).toBe(true);
+    expect(route.isM4AAcceptanceRequest(
+      authorized,
+      "http://localhost:3100/api/ai/concierge",
+    )).toBe(true);
+    expect(route.isM4AAcceptanceRequest(
+      authorized,
+      "https://hkwtia.vercel.app/api/ai/concierge",
+    )).toBe(false);
+    expect(route.isM4AAcceptanceRequest({
+      M4A_DETERMINISTIC_ACCEPTANCE: "true",
+    }, "http://127.0.0.1:3100/api/ai/concierge")).toBe(false);
+    expect(route.isM4AAcceptanceRequest({
+      M4A_DETERMINISTIC_ACCEPTANCE_AUTHORIZED: "true",
+    }, "http://127.0.0.1:3100/api/ai/concierge")).toBe(false);
+  });
+  it("accepts a real browser-style loopback POST without proxy IP headers only when authorized", async () => {
+    vi.stubEnv("M4A_DETERMINISTIC_ACCEPTANCE", "true");
+    vi.stubEnv("M4A_DETERMINISTIC_ACCEPTANCE_AUTHORIZED", "true");
+    try {
+      const route = await import("@/app/api/ai/concierge/route");
+      const response = await route.POST(new Request(
+        "http://localhost:3100/api/ai/concierge",
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            origin: "http://localhost:3100",
           },
+          body: JSON.stringify({
+            message: "Tell me about approved WTIA membership benefits.",
+            locale: "en",
+          }),
         },
-        repositories: {
-          knowledge: [],
-          events: [],
-          memberContext: {tier: "platinum"},
+      ));
+      expect(response.status).toBe(200);
+      expect(response.headers.get("content-type")).toContain("text/event-stream");
+      expect(await response.text()).toContain(
+        "Approved WTIA membership benefits include community events.",
+      );
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+  it("drives the real web route through service/runtime and persists priced telemetry", async () => {
+    const route = await import("@/app/api/ai/concierge/route") as unknown as {
+      createM4AAcceptanceBoundary?: (options?: unknown) => {
+        service: ReturnType<typeof createConciergeService>;
+        snapshot(): {
+          runs: readonly Record<string, unknown>[];
+          providerCalls: number;
+          approvals: readonly Record<string, unknown>[];
+        };
+        createWoztellDependencies(
+          channel: ChannelAdapter,
+        ): WoztellWebhookProcessorDependencies;
+      };
+      createConciergePostHandler: typeof import("@/app/api/ai/concierge/route")["createConciergePostHandler"];
+    };
+    expect(route.createM4AAcceptanceBoundary).toBeTypeOf("function");
+    if (!route.createM4AAcceptanceBoundary) return;
+    const boundary = route.createM4AAcceptanceBoundary({now: () => NOW});
+    const post = route.createConciergePostHandler({
+      expectedOrigin: "https://www.hkwtia.org",
+      cookieSecret: "m4a-acceptance-cookie-secret-at-least-32-bytes",
+      rateLimiter: {check: () => ({
+        allowed: true,
+        remaining: 19,
+        retryAfterSeconds: 0,
+      })},
+      verifyTurnstile: async () => true,
+      getActor: async () => ({profileId: PROFILE_ID}),
+      service: boundary.service,
+    });
+    const response = await post(new Request(
+      "https://www.hkwtia.org/api/ai/concierge",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          origin: "https://www.hkwtia.org",
+          "x-vercel-forwarded-for": "203.0.113.44",
         },
+        body: JSON.stringify({
+          message: "Tell me about approved WTIA membership benefits.",
+          locale: "en",
+        }),
       },
+    ));
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain("event: done");
+    expect(boundary.snapshot()).toMatchObject({
+      providerCalls: 1,
+      runs: [expect.objectContaining({
+        trigger: "web",
+        status: "completed",
+        inputTokens: 100,
+        outputTokens: 20,
+        costUsd: "0.000072",
+      })],
     });
+  });
 
-    expect(actual.status).toBe("pending_approval");
-    expect(actual.sideEffects).toMatchObject({
-      approvalStatus: "pending",
-      emailSent: false,
-      providerCalled: true,
+  it("drives the verified WOZTELL webhook through the same service/runtime telemetry", async () => {
+    const route = await import("@/app/api/ai/concierge/route") as unknown as {
+      createM4AAcceptanceBoundary?: () => {
+        snapshot(): {runs: readonly Record<string, unknown>[]; providerCalls: number};
+        createWoztellDependencies(
+          channel: ChannelAdapter,
+        ): WoztellWebhookProcessorDependencies;
+      };
+    };
+    expect(route.createM4AAcceptanceBoundary).toBeTypeOf("function");
+    if (!route.createM4AAcceptanceBoundary) return;
+    const boundary = route.createM4AAcceptanceBoundary();
+    const secret = "m4a-review-woztell-secret";
+    const channel = createWoztellAdapter(
+      {WOZTELL_WEBHOOK_SECRET: secret},
+      vi.fn(),
+    );
+    const post = createProductionWoztellWebhookPostHandler({
+      channel,
+      processorDependencies: boundary.createWoztellDependencies(channel),
     });
+    const body = JSON.stringify({
+      from: "+85290000000",
+      type: "TEXT",
+      messageId: "wamid.m4a.review.telemetry",
+      timestamp: "2026-07-28T03:30:00.000Z",
+      data: {text: "Tell me about approved WTIA membership benefits."},
+    });
+    const response = await post(new Request(
+      "https://www.hkwtia.org/api/webhooks/woztell",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-woztell-signature": createHmac("sha256", secret)
+            .update(body)
+            .digest("base64"),
+        },
+        body,
+      },
+    ));
+    expect(response.status).toBe(202);
+    await expect(response.json()).resolves.toEqual({status: "accepted"});
+    expect(boundary.snapshot()).toMatchObject({
+      providerCalls: 1,
+      runs: [expect.objectContaining({
+        trigger: "whatsapp",
+        status: "completed",
+        inputTokens: 100,
+        outputTokens: 20,
+        costUsd: "0.000072",
+      })],
+    });
+  });
+
+  it("keeps Platinum email pending while real send/log capabilities remain callable but unused", async () => {
+    const sendEmail = vi.fn(async () => ({providerId: "must-not-send"}));
+    const writeEmailLog = vi.fn(async () => ({id: "must-not-log"}));
+    const route = await import("@/app/api/ai/concierge/route") as unknown as {
+      createM4AAcceptanceBoundary?: (options: unknown) => {
+        service: ReturnType<typeof createConciergeService>;
+        snapshot(): {approvals: readonly Record<string, unknown>[]};
+      };
+    };
+    expect(route.createM4AAcceptanceBoundary).toBeTypeOf("function");
+    if (!route.createM4AAcceptanceBoundary) return;
+    const boundary = route.createM4AAcceptanceBoundary({
+      now: () => NOW,
+      emailCapabilities: {sendEmail, writeEmailLog},
+    });
+    const turn = await boundary.service.startTurn({
+      owner: {kind: "profile", profileId: PROFILE_ID},
+      profileId: PROFILE_ID,
+      message: "Draft an email about my Platinum membership.",
+      confirmedContactEmail: "member@m4a.example.test",
+      locale: "en",
+      trigger: "web",
+    });
+    await drain(turn);
+    expect(boundary.snapshot().approvals).toEqual([
+      expect.objectContaining({status: "pending"}),
+    ]);
+    expect(sendEmail).not.toHaveBeenCalled();
+    expect(writeEmailLog).not.toHaveBeenCalled();
   });
 
   it.each([
