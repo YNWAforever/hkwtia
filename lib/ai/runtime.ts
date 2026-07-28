@@ -15,6 +15,7 @@ import {
   type AgentMessage,
   type AgentProviderFactory,
   type AgentStreamFinish,
+  type AgentToolExecutionOptions,
   type AgentToolSet,
   type AgentUsage,
 } from "@/lib/ai/provider";
@@ -63,6 +64,18 @@ export type AgentRuntimeRequest = Readonly<{
   messages: AgentMessage[];
   tools: AgentToolSet;
   abortSignal?: AbortSignal;
+  preparedRun?: AgentRuntimePreparedRun;
+  finalization?: "automatic" | "deferred";
+}>;
+
+export type AgentRuntimePreparedRun = Readonly<{
+  runId: string;
+  fail: (error?: unknown) => Promise<AgentRuntimeError>;
+}>;
+
+export type AgentRuntimeFinalizationOverride = Readonly<{
+  status: "escalated";
+  code: AgentEscalationCode;
 }>;
 
 export type CompletedAgentRuntimeFinish = Readonly<{
@@ -112,15 +125,21 @@ export type AgentRuntimeStream = Readonly<{
    */
   textStream: AsyncIterable<string>;
   finish: Promise<AgentRuntimeFinish>;
+  finalize: (
+    override?: AgentRuntimeFinalizationOverride,
+  ) => Promise<AgentRuntimeFinish>;
+  fail: (error?: unknown) => Promise<AgentRuntimeError>;
 }>;
 
 export class AgentRuntimeError extends Error {
   readonly code: AgentFailureCode;
+  readonly toolExecutions: number;
 
-  constructor(code: AgentFailureCode) {
+  constructor(code: AgentFailureCode, toolExecutions = 0) {
     super(`AI_RUNTIME_FAILED:${code}`);
     this.name = "AgentRuntimeError";
     this.code = code;
+    this.toolExecutions = toolExecutions;
   }
 }
 
@@ -212,10 +231,18 @@ function failureCodeFor(
 function publicRuntimeError(
   error: unknown,
   abortSignal?: AbortSignal,
+  toolExecutions = 0,
 ): AgentRuntimeError {
-  return error instanceof AgentRuntimeError
-    ? error
-    : new AgentRuntimeError(failureCodeFor(error, abortSignal));
+  if (
+    error instanceof AgentRuntimeError
+    && error.toolExecutions >= toolExecutions
+  ) {
+    return error;
+  }
+  return new AgentRuntimeError(
+    failureCodeFor(error, abortSignal),
+    toolExecutions,
+  );
 }
 
 function normalizeUsage(value: unknown): AgentUsage {
@@ -460,93 +487,203 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
     now = () => new Date(),
   } = dependencies;
 
+  type Terminal = Readonly<{
+    kind: "finish" | "fail" | "escalate" | "disable";
+    failureCode?: AgentFailureCode;
+    promise: Promise<unknown>;
+  }>;
+  type RunState = {
+    actor: ConciergeAgentActor;
+    terminal?: Terminal;
+  };
+  const preparedStates = new WeakMap<AgentRuntimePreparedRun, RunState>();
+
+  function settle(
+    state: RunState,
+    kind: Terminal["kind"],
+    input: unknown,
+    failureCode?: AgentFailureCode,
+  ): Promise<unknown> {
+    if (state.terminal) return state.terminal.promise;
+    const method = agentRuns[kind];
+    state.terminal = {
+      kind,
+      ...(failureCode === undefined ? {} : {failureCode}),
+      promise: Promise.resolve(method(state.actor, input)),
+    };
+    return state.terminal.promise;
+  }
+
+  async function failState(
+    state: RunState,
+    error: unknown,
+    billing: Readonly<{usage: AgentUsage; costUsd: string}> = {
+      usage: ZERO_USAGE,
+      costUsd: ZERO_COST,
+    },
+    abortSignal?: AbortSignal,
+    toolExecutions = 0,
+  ): Promise<AgentRuntimeError> {
+    const runtimeError = publicRuntimeError(
+      error,
+      abortSignal,
+      toolExecutions,
+    );
+    try {
+      await settle(state, "fail", {
+        completedAt: safeNow(now),
+        errorCode: runtimeError.code,
+        inputTokens: billing.usage.inputTokens,
+        outputTokens: billing.usage.outputTokens,
+        costUsd: billing.costUsd,
+      }, runtimeError.code);
+    } catch {
+      // Terminal persistence errors remain private and never trigger a second
+      // illegal transition.
+    }
+    return runtimeError;
+  }
+
+  async function prepareRun(
+    actorInput: AgentRuntimeRequest["actor"],
+  ): Promise<AgentRuntimePreparedRun> {
+    const runId = createRunId();
+    const actor: ConciergeAgentActor = {
+      kind: "agent",
+      agent: "concierge",
+      runId,
+      conversationId: actorInput.conversationId,
+      profileId: actorInput.profileId,
+      trigger: actorInput.trigger,
+    };
+    const state: RunState = {actor};
+    await agentRuns.start(actor, {
+      provider: null,
+      model: null,
+      startedAt: safeNow(now),
+    });
+    const prepared = Object.freeze({
+      runId,
+      fail: (error: unknown = new AgentRuntimeError("provider_error")) =>
+        failState(state, error),
+    });
+    preparedStates.set(prepared, state);
+    return prepared;
+  }
+
   return {
+    prepare: prepareRun,
+
     async stream(request: AgentRuntimeRequest): Promise<AgentRuntimeStream> {
-      const runId = createRunId();
-      const actor: ConciergeAgentActor = {
-        kind: "agent",
-        agent: "concierge",
-        runId,
-        conversationId: request.actor.conversationId,
-        profileId: request.actor.profileId,
-        trigger: request.actor.trigger,
-      };
-      const startedAt = safeNow(now);
-      await agentRuns.start(actor, {
-        provider: null,
-        model: null,
-        startedAt,
-      });
-
-      let terminal:
-        | Readonly<{
-          kind: "finish" | "fail" | "escalate" | "disable";
-          failureCode?: AgentFailureCode;
-          promise: Promise<unknown>;
-        }>
-        | undefined;
-
-      function settle(
-        kind: "finish" | "fail" | "escalate" | "disable",
-        input: unknown,
-        failureCode?: AgentFailureCode,
-      ): Promise<unknown> {
-        if (terminal) return terminal.promise;
-        const method = agentRuns[kind];
-        terminal = {
-          kind,
-          ...(failureCode === undefined ? {} : {failureCode}),
-          promise: Promise.resolve(method(actor, input)),
-        };
-        return terminal.promise;
+      const preparedRun = request.preparedRun ?? await prepareRun(request.actor);
+      const state = preparedStates.get(preparedRun);
+      if (!state) throw new AgentRuntimeError("configuration_error");
+      const activeState = state;
+      const {actor} = activeState;
+      const {runId} = actor;
+      if (
+        actor.conversationId !== request.actor.conversationId
+        || actor.profileId !== request.actor.profileId
+        || actor.trigger !== request.actor.trigger
+      ) {
+        throw await failState(
+          state,
+          new AgentRuntimeError("configuration_error"),
+        );
       }
 
-      async function fail(
-        error: unknown,
-        billing: Readonly<{usage: AgentUsage; costUsd: string}> = {
-          usage: ZERO_USAGE,
-          costUsd: ZERO_COST,
-        },
-      ): Promise<AgentRuntimeError> {
-        const runtimeError = publicRuntimeError(error, request.abortSignal);
+      const deferred = request.finalization === "deferred";
+      let observedToolExecutions = 0;
+      let latestBilling:
+        | Readonly<{usage: AgentUsage; costUsd: string}>
+        | undefined;
+      const fail = (
+        error: unknown = new AgentRuntimeError("provider_error"),
+        billing = latestBilling,
+      ) => failState(
+        state,
+        error,
+        billing,
+        request.abortSignal,
+        observedToolExecutions,
+      );
+
+      async function finalizeOutcome(
+        outcome: AgentRuntimeFinish,
+        override?: AgentRuntimeFinalizationOverride,
+      ): Promise<AgentRuntimeFinish> {
+        const finalized = override === undefined
+          ? outcome
+          : outcome.status === "disabled"
+            ? outcome
+            : {...outcome, status: "escalated" as const, code: override.code};
+        const terminalInput = {
+          completedAt: safeNow(now),
+          summaryCode: finalized.status === "completed"
+            ? (observedToolExecutions > 0 ? "completed_with_tools" : "answered")
+            : finalized.code,
+          inputTokens: finalized.usage.inputTokens,
+          outputTokens: finalized.usage.outputTokens,
+          costUsd: finalized.costUsd,
+        };
         try {
-          await settle("fail", {
-            completedAt: safeNow(now),
-            errorCode: runtimeError.code,
-            inputTokens: billing.usage.inputTokens,
-            outputTokens: billing.usage.outputTokens,
-            costUsd: billing.costUsd,
-          }, runtimeError.code);
-        } catch {
-          // A failed terminal persistence attempt must not expose database details
-          // or trigger a second, illegal transition.
+          if (finalized.status === "disabled") {
+            await settle(activeState, "disable", terminalInput);
+          } else if (finalized.status === "escalated") {
+            await settle(activeState, "escalate", terminalInput);
+          } else {
+            await settle(activeState, "finish", terminalInput);
+          }
+        } catch (error) {
+          throw await fail(error);
         }
-        return runtimeError;
+        return finalized;
       }
 
       if (!request.enabled) {
         const code = request.disabledCode ?? "agent_disabled";
-        const finish = (async (): Promise<DisabledAgentRuntimeFinish> => {
-          await settle("disable", {
-            completedAt: safeNow(now),
-            summaryCode: code,
-            inputTokens: 0,
-            outputTokens: 0,
-            costUsd: ZERO_COST,
-          });
-          return {
-            status: "disabled",
-            code,
-            runId,
-            usage: ZERO_USAGE,
-            costUsd: ZERO_COST,
-            finishReason: "disabled",
-            steps: 0,
-            citations: [],
-          };
-        })();
-        return {runId, textStream: emptyTextStream(), finish};
+        const rawFinish = Promise.resolve<DisabledAgentRuntimeFinish>({
+          status: "disabled",
+          code,
+          runId,
+          usage: ZERO_USAGE,
+          costUsd: ZERO_COST,
+          finishReason: "disabled",
+          steps: 0,
+          citations: [],
+        });
+        const finish = deferred
+          ? rawFinish
+          : rawFinish.then((outcome) => finalizeOutcome(outcome)) as Promise<
+            DisabledAgentRuntimeFinish
+          >;
+        return {
+          runId,
+          textStream: emptyTextStream(),
+          finish,
+          finalize: async (override) => finalizeOutcome(
+            await rawFinish,
+            override,
+          ),
+          fail,
+        };
       }
+
+      const wrappedTools: AgentToolSet = Object.freeze(Object.fromEntries(
+        Object.entries(request.tools).map(([name, tool]) => [
+          name,
+          Object.freeze({
+            ...tool,
+            execute: async (
+              input: unknown,
+              options: AgentToolExecutionOptions,
+            ) => {
+              observedToolExecutions += 1;
+              return tool.execute(input, options);
+            },
+          }),
+        ]),
+      ));
 
       let resolvedModel;
       let providerResult;
@@ -566,7 +703,7 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
           model: resolvedModel.modelId,
           system: request.system,
           messages: request.messages,
-          tools: request.tools,
+          tools: wrappedTools,
           ...(request.abortSignal === undefined
             ? {}
             : {abortSignal: request.abortSignal}),
@@ -602,6 +739,10 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
           .then(normalizeProviderFinish)
           .then(
             (value) => {
+              observedToolExecutions = Math.max(
+                observedToolExecutions,
+                value.toolExecutions,
+              );
               const billing = {
                 usage: value.usage,
                 costUsd: calculateAgentCostUsd(
@@ -609,6 +750,7 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
                   resolvedModel.pricing,
                 ),
               };
+              latestBilling = billing;
               finishState = {status: "fulfilled", billing};
               return {
                 branch: "finish",
@@ -646,7 +788,7 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
         throw await fail(error, billing);
       }
 
-      const finish = (async (): Promise<
+      const rawFinish = (async (): Promise<
         CompletedAgentRuntimeFinish | EscalatedAgentRuntimeFinish
       > => {
         const first = await Promise.race([
@@ -664,7 +806,7 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
           billing = first.billing;
           if (normalizedFinish.finishReason === "error") {
             return rejectRuntimeFinish(
-              new AgentRuntimeError("provider_error"),
+              new AgentRuntimeError("provider_error", observedToolExecutions),
               billing,
               true,
             );
@@ -675,11 +817,7 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
           }
         } else {
           if (first.status === "rejected") {
-            return rejectRuntimeFinish(
-              first.error,
-              knownBilling(),
-              false,
-            );
+            return rejectRuntimeFinish(first.error, knownBilling(), false);
           }
           const finishResult = await providerFinishOutcome;
           if (finishResult.status === "rejected") {
@@ -689,48 +827,21 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
           billing = finishResult.billing;
           if (normalizedFinish.finishReason === "error") {
             return rejectRuntimeFinish(
-              new AgentRuntimeError("provider_error"),
+              new AgentRuntimeError("provider_error", observedToolExecutions),
               billing,
               false,
             );
           }
         }
 
-        try {
-          if (
-            normalizedFinish.steps === MAX_AGENT_STEPS
-            && normalizedFinish.finishReason === "tool-calls"
-          ) {
-            const code: AgentEscalationCode = "tool_unavailable";
-            await settle("escalate", {
-              completedAt: safeNow(now),
-              summaryCode: code,
-              inputTokens: billing.usage.inputTokens,
-              outputTokens: billing.usage.outputTokens,
-              costUsd: billing.costUsd,
-            });
-            return {
-              status: "escalated",
-              code,
-              runId,
-              usage: billing.usage,
-              costUsd: billing.costUsd,
-              finishReason: normalizedFinish.finishReason,
-              steps: normalizedFinish.steps,
-              citations: [...normalizedFinish.citations],
-            };
-          }
-          await settle("finish", {
-            completedAt: safeNow(now),
-            summaryCode: normalizedFinish.toolExecutions > 0
-              ? "completed_with_tools"
-              : "answered",
-            inputTokens: billing.usage.inputTokens,
-            outputTokens: billing.usage.outputTokens,
-            costUsd: billing.costUsd,
-          });
+        if (
+          normalizedFinish.steps === MAX_AGENT_STEPS
+          && normalizedFinish.finishReason === "tool-calls"
+        ) {
+          const code: AgentEscalationCode = "tool_unavailable";
           return {
-            status: "completed",
+            status: "escalated",
+            code,
             runId,
             usage: billing.usage,
             costUsd: billing.costUsd,
@@ -738,12 +849,34 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
             steps: normalizedFinish.steps,
             citations: [...normalizedFinish.citations],
           };
-        } catch (error) {
-          return rejectRuntimeFinish(error, billing, false);
         }
+        return {
+          status: "completed",
+          runId,
+          usage: billing.usage,
+          costUsd: billing.costUsd,
+          finishReason: normalizedFinish.finishReason,
+          steps: normalizedFinish.steps,
+          citations: [...normalizedFinish.citations],
+        };
       })();
 
-      return {runId, textStream: pump.textStream, finish};
+      const finish = deferred
+        ? rawFinish
+        : rawFinish.then((outcome) => finalizeOutcome(outcome)) as Promise<
+          CompletedAgentRuntimeFinish | EscalatedAgentRuntimeFinish
+        >;
+
+      return {
+        runId,
+        textStream: pump.textStream,
+        finish,
+        finalize: async (override) => finalizeOutcome(
+          await rawFinish,
+          override,
+        ),
+        fail,
+      };
     },
   };
 }

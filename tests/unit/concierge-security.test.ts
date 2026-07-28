@@ -114,6 +114,14 @@ describe("Concierge public request security", () => {
     ));
 
     await expect(verifyTurnstile({
+      secret: "   ",
+      token: "proof",
+      remoteIp: "203.0.113.10",
+      fetchImpl,
+    })).resolves.toBe(false);
+    expect(fetchImpl).not.toHaveBeenCalled();
+
+    await expect(verifyTurnstile({
       secret: "turnstile-secret",
       token: undefined,
       remoteIp: "203.0.113.10",

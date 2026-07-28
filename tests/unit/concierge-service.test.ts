@@ -1,6 +1,10 @@
 import {describe, expect, it, vi} from "vitest";
 
-import type {AgentRuntimeFinish} from "@/lib/ai/runtime";
+import {
+  AgentRuntimeError,
+  type AgentRuntimeFinish,
+  type AgentRuntimeFinalizationOverride,
+} from "@/lib/ai/runtime";
 import {
   createConciergeService,
   type ConciergeServiceDependencies,
@@ -42,6 +46,39 @@ function finish(
   } as AgentRuntimeFinish;
 }
 
+
+function runtimeDouble(
+  outcome: AgentRuntimeFinish = finish(),
+  deltas: string[] = ["WTIA ", "answer"],
+) {
+  const prepared = {
+    runId: RUN_ID,
+    fail: vi.fn(async () => new AgentRuntimeError("provider_error")),
+  };
+  const finalize = vi.fn(async (override?: AgentRuntimeFinalizationOverride) => override && outcome.status !== "disabled"
+    ? {
+      ...outcome,
+      status: "escalated" as const,
+      code: override.code,
+    }
+    : outcome);
+  const fail = vi.fn(async () => new AgentRuntimeError("provider_error"));
+  return {
+    prepared,
+    finalize,
+    fail,
+    runtime: {
+      prepare: vi.fn(async () => prepared),
+      stream: vi.fn(async () => ({
+        runId: RUN_ID,
+        textStream: asyncText(...deltas),
+        finish: Promise.resolve(outcome),
+        finalize,
+        fail,
+      })),
+    },
+  };
+}
 function dependencies(
   overrides: Partial<ConciergeServiceDependencies> = {},
 ): ConciergeServiceDependencies {
@@ -68,19 +105,14 @@ function dependencies(
     agentTools: {
       createStaffTask: vi.fn(async () => ({id: "task-1", status: "open" as const})),
     },
-    getRuntime: vi.fn(() => ({
-      stream: vi.fn(async () => ({
-        runId: RUN_ID,
-        textStream: asyncText("WTIA ", "answer"),
-        finish: Promise.resolve(finish({
-          citations: [{
-            sourceId: "kb:source",
-            title: "WTIA membership",
-            url: "https://www.hkwtia.org/membership",
-          }],
-        })),
-      })),
-    })),
+    getRuntime: vi.fn(() => runtimeDouble(finish({
+      citations: [{
+        sourceId: "kb:source",
+        title: "WTIA membership",
+        url: "https://www.hkwtia.org/membership",
+        confidence: 0.9,
+      }],
+    })).runtime),
     getEmbedding: vi.fn(() => ({
       dimensions: 1536 as const,
       embed: vi.fn(async () => Array.from({length: 1536}, () => 0)),
@@ -185,14 +217,10 @@ describe("Concierge service", () => {
       steps: 0,
       citations: [],
     });
-    const runtimeStream = vi.fn(async () => ({
-      runId: RUN_ID,
-      textStream: asyncText(),
-      finish: Promise.resolve(disabledFinish),
-    }));
+    const runtime = runtimeDouble(disabledFinish, []);
     const deps = dependencies({
       agentsEnabled: false,
-      getRuntime: vi.fn(() => ({stream: runtimeStream})),
+      getRuntime: vi.fn(() => runtime.runtime),
     });
 
     const turn = await createConciergeService(deps).startTurn({
@@ -204,7 +232,7 @@ describe("Concierge service", () => {
     });
     const events = await eventsOf(turn);
 
-    expect(runtimeStream).toHaveBeenCalledWith(expect.objectContaining({
+    expect(runtime.runtime.stream).toHaveBeenCalledWith(expect.objectContaining({
       enabled: false,
       tools: {},
     }));
@@ -224,18 +252,47 @@ describe("Concierge service", () => {
     ]);
   });
 
-  it("returns an escalation reference for an escalated runtime", async () => {
+
+  it("fails the pending disabled run when leave-message task creation fails", async () => {
+    const taskError = new Error("task persistence failed");
+    const disabledFinish = finish({
+      status: "disabled",
+      code: "agent_disabled",
+      usage: {inputTokens: 0, outputTokens: 0},
+      costUsd: "0.000000",
+      finishReason: "disabled",
+      steps: 0,
+      citations: [],
+    });
+    const runtime = runtimeDouble(disabledFinish, []);
     const deps = dependencies({
-      getRuntime: vi.fn(() => ({
-        stream: vi.fn(async () => ({
-          runId: RUN_ID,
-          textStream: asyncText("I will ask staff."),
-          finish: Promise.resolve(finish({
-            status: "escalated",
-            code: "low_confidence",
-          })),
-        })),
-      })),
+      agentsEnabled: false,
+      agentTools: {
+        createStaffTask: vi.fn(async () => {
+          throw taskError;
+        }),
+      },
+      getRuntime: vi.fn(() => runtime.runtime),
+    });
+
+    await expect(createConciergeService(deps).startTurn({
+      owner: OWNER,
+      profileId: OWNER.profileId,
+      message: "Help",
+      locale: "en",
+      trigger: "web",
+    })).rejects.toBe(taskError);
+
+    expect(runtime.fail).toHaveBeenCalledWith(taskError);
+    expect(runtime.finalize).not.toHaveBeenCalled();
+  });
+  it("returns an escalation reference for an escalated runtime", async () => {
+    const runtime = runtimeDouble(finish({
+      status: "escalated",
+      code: "low_confidence",
+    }), ["I will ask staff."]);
+    const deps = dependencies({
+      getRuntime: vi.fn(() => runtime.runtime),
     });
 
     const turn = await createConciergeService(deps).startTurn({
@@ -254,14 +311,213 @@ describe("Concierge service", () => {
     });
   });
 
+
+
+
+  it("persists the assistant reply before finalizing the run", async () => {
+    const order: string[] = [];
+    const outcome = finish({
+      citations: [{
+        sourceId: "kb:grounded",
+        title: "Grounded source",
+        url: "https://www.hkwtia.org/grounded",
+        confidence: 0.9,
+      }],
+    });
+    const runtime = runtimeDouble(outcome, ["Grounded answer"]);
+    runtime.finalize.mockImplementation(async () => {
+      order.push("finalize");
+      return outcome;
+    });
+    const base = dependencies();
+    const deps = dependencies({
+      conversations: {
+        ...base.conversations,
+        appendMessage: vi.fn(async (_owner, _conversationId, value) => {
+          order.push((value as {role: string}).role);
+          return {id: crypto.randomUUID()};
+        }),
+      },
+      getRuntime: vi.fn(() => runtime.runtime),
+    });
+
+    const turn = await createConciergeService(deps).startTurn({
+      owner: OWNER,
+      profileId: OWNER.profileId,
+      message: "Tell me about WTIA",
+      locale: "en",
+      trigger: "web",
+    });
+    await eventsOf(turn);
+
+    expect(order).toEqual(["user", "assistant", "finalize"]);
+  });
+
+  it("fails instead of finalizing when the assistant reply is not durable", async () => {
+    const appendError = new Error("assistant append failed");
+    let appendCount = 0;
+    const outcome = finish({
+      citations: [{
+        sourceId: "kb:grounded",
+        title: "Grounded source",
+        url: "https://www.hkwtia.org/grounded",
+        confidence: 0.9,
+      }],
+    });
+    const runtime = runtimeDouble(outcome, ["Grounded answer"]);
+    const base = dependencies();
+    const deps = dependencies({
+      conversations: {
+        ...base.conversations,
+        appendMessage: vi.fn(async () => {
+          appendCount += 1;
+          if (appendCount === 2) throw appendError;
+          return {id: crypto.randomUUID()};
+        }),
+      },
+      getRuntime: vi.fn(() => runtime.runtime),
+    });
+
+    const turn = await createConciergeService(deps).startTurn({
+      owner: OWNER,
+      profileId: OWNER.profileId,
+      message: "Tell me about WTIA",
+      locale: "en",
+      trigger: "web",
+    });
+    const events = await eventsOf(turn);
+
+    expect(runtime.fail).toHaveBeenCalledWith(appendError);
+    expect(runtime.finalize).not.toHaveBeenCalled();
+    expect(events.at(-1)).toEqual({
+      event: "error",
+      data: {code: "AI_TEMPORARILY_UNAVAILABLE"},
+    });
+  });
+  it("withholds and escalates a substantive answer below the grounding threshold", async () => {
+    const runtime = runtimeDouble(finish({
+      citations: [{
+        sourceId: "kb:weak",
+        title: "Weak WTIA match",
+        url: "https://www.hkwtia.org/weak",
+        confidence: 0.71,
+      } as AgentRuntimeFinish["citations"][number]],
+    }), ["Unsupported WTIA claim"]);
+    const deps = dependencies({
+      getRuntime: vi.fn(() => runtime.runtime),
+    });
+
+    const turn = await createConciergeService(deps).startTurn({
+      owner: OWNER,
+      profileId: OWNER.profileId,
+      message: "What benefits does WTIA membership include?",
+      locale: "en",
+      trigger: "web",
+    });
+    const events = await eventsOf(turn);
+
+    expect(events).not.toContainEqual({
+      event: "delta",
+      data: {text: "Unsupported WTIA claim"},
+    });
+    expect(events.at(-1)).toEqual({
+      event: "done",
+      data: {citations: [], escalationId: "WTIA-task-1"},
+    });
+    expect(runtime.finalize).toHaveBeenCalledWith({
+      status: "escalated",
+      code: "low_confidence",
+    });
+    expect(deps.conversations.appendMessage).toHaveBeenLastCalledWith(
+      OWNER,
+      CONVERSATION_ID,
+      expect.objectContaining({
+        role: "assistant",
+        content: expect.not.stringContaining("Unsupported WTIA claim"),
+      }),
+    );
+  });
+
+  it("creates one safe escalation reference after a post-tool provider failure", async () => {
+    const runtime = runtimeDouble();
+    const failure = new AgentRuntimeError("provider_error", 1);
+    runtime.runtime.stream.mockImplementation(async () => ({
+      runId: RUN_ID,
+      textStream: asyncText(),
+      finish: Promise.reject(failure),
+      finalize: runtime.finalize,
+      fail: runtime.fail,
+    }));
+    const deps = dependencies({
+      getRuntime: vi.fn(() => runtime.runtime),
+    });
+
+    const turn = await createConciergeService(deps).startTurn({
+      owner: OWNER,
+      profileId: OWNER.profileId,
+      message: "Check current WTIA funding support",
+      locale: "en",
+      trigger: "web",
+    });
+    const events = await eventsOf(turn);
+
+    expect(deps.agentTools.createStaffTask).toHaveBeenCalledOnce();
+    expect(deps.agentTools.createStaffTask).toHaveBeenCalledWith(
+      expect.objectContaining({runId: RUN_ID}),
+      expect.objectContaining({
+        kind: "concierge_escalation",
+        summaryCode: "tool_unavailable",
+        reasonCode: "tool_unavailable",
+      }),
+    );
+    expect(events.at(-1)).toEqual({
+      event: "error",
+      data: {
+        code: "AI_TEMPORARILY_UNAVAILABLE",
+        escalationId: "WTIA-task-1",
+      },
+    });
+    expect(JSON.stringify(events)).not.toContain("provider");
+  });
+  it("precreates and fails the run when turn preparation fails", async () => {
+    const prepError = new Error("history unavailable");
+    const runtime = runtimeDouble();
+    const base = dependencies();
+    const deps = dependencies({
+      conversations: {
+        ...base.conversations,
+        listMessages: vi.fn(async () => {
+          throw prepError;
+        }),
+      },
+      getRuntime: vi.fn(() => runtime.runtime),
+    });
+
+    await expect(createConciergeService(deps).startTurn({
+      owner: OWNER,
+      profileId: OWNER.profileId,
+      message: "What is WTIA?",
+      locale: "en",
+      trigger: "web",
+    })).rejects.toBe(prepError);
+
+    expect(runtime.runtime.prepare).toHaveBeenCalledOnce();
+    expect(runtime.prepared.fail).toHaveBeenCalledWith(prepError);
+    expect(runtime.runtime.stream).not.toHaveBeenCalled();
+  });
   it("aborts provider work when the downstream stream disconnects", async () => {
     let seenSignal: AbortSignal | undefined;
     const providerCancelled = new Promise<void>((resolve) => {
       setTimeout(resolve, 0);
       const deps = dependencies({
         getRuntime: vi.fn(() => ({
+          prepare: vi.fn(async () => ({
+            runId: RUN_ID,
+            fail: vi.fn(async () => new AgentRuntimeError("provider_error")),
+          })),
           stream: vi.fn(async (request) => {
             seenSignal = request.abortSignal;
+            const outcome = finish();
             return {
               runId: RUN_ID,
               textStream: {
@@ -279,7 +535,9 @@ describe("Concierge service", () => {
                   }
                 },
               },
-              finish: Promise.resolve(finish()),
+              finish: Promise.resolve(outcome),
+              finalize: vi.fn(async () => outcome),
+              fail: vi.fn(async () => new AgentRuntimeError("provider_error")),
             };
           }),
         })),
@@ -287,7 +545,7 @@ describe("Concierge service", () => {
       void createConciergeService(deps).startTurn({
         owner: OWNER,
         profileId: OWNER.profileId,
-        message: "Cancel",
+        message: "Hello",
         locale: "en",
         trigger: "web",
       }).then(async (turn) => {

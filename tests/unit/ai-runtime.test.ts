@@ -74,6 +74,45 @@ function runtimeRequest(overrides: Record<string, unknown> = {}) {
 }
 
 describe("provider-neutral AI runtime", () => {
+  it("supports a precreated run with explicit deferred finalization", async () => {
+    const agentRuns = createAgentRunsFake();
+    const runtime = createAgentRuntime({
+      agentRuns,
+      providerFactories: {
+        openai: () => ({
+          stream: () => ({
+            textStream: asyncText("durable answer"),
+            finish: Promise.resolve(successfulFinish()),
+          }),
+        }),
+        anthropic: vi.fn(),
+      },
+      createRunId: () => RUN_ID,
+      now: vi.fn()
+        .mockReturnValueOnce(STARTED_AT)
+        .mockReturnValue(COMPLETED_AT),
+    });
+
+    const prepared = await runtime.prepare(runtimeRequest().actor);
+    const result = await runtime.stream(runtimeRequest({
+      preparedRun: prepared,
+      finalization: "deferred",
+    }));
+
+    await expect(result.finish).resolves.toMatchObject({
+      status: "completed",
+      runId: RUN_ID,
+    });
+    expect(agentRuns.start).toHaveBeenCalledOnce();
+    expect(agentRuns.finish).not.toHaveBeenCalled();
+
+    await expect(result.finalize()).resolves.toMatchObject({
+      status: "completed",
+      runId: RUN_ID,
+    });
+    expect(agentRuns.finish).toHaveBeenCalledOnce();
+  });
+
   it("starts the run before provider construction, streams deltas, and records usage cost", async () => {
     const order: string[] = [];
     const agentRuns = createAgentRunsFake();
@@ -475,7 +514,10 @@ describe("provider-neutral AI runtime", () => {
           execute: toolExecute,
         },
       },
-    }))).rejects.toMatchObject({code: "provider_error"});
+    }))).rejects.toMatchObject({
+      code: "provider_error",
+      toolExecutions: 1,
+    });
     expect(toolExecute).toHaveBeenCalledOnce();
     expect(openaiFactory).toHaveBeenCalledOnce();
     expect(openaiStream).toHaveBeenCalledOnce();

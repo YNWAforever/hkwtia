@@ -40,6 +40,7 @@ const serverKeys = [
   ["DATABASE_URL", "databaseUrl"],
   ["NEON_AUTH_BASE_URL", "neonAuthBaseUrl"],
   ["NEON_AUTH_COOKIE_SECRET", "neonAuthCookieSecret"],
+  ["CONCIERGE_COOKIE_SECRET", "conciergeCookieSecret"],
   ["STRIPE_SECRET_KEY", "stripeSecretKey"],
   ["STRIPE_WEBHOOK_SECRET", "stripeWebhookSecret"],
   ["STRIPE_STARTUP_PRICE_ID", "stripeStartupPriceId"],
@@ -58,11 +59,17 @@ const aiEnvironmentSchema = z.object({
   AGENT_MODEL_CONCIERGE: z.string().default("openai:gpt-4.1-mini"),
   OPENAI_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
-  CONCIERGE_COOKIE_SECRET: z.string().min(32).optional(),
+  CONCIERGE_COOKIE_SECRET: z.string().refine(
+    (value) => Buffer.byteLength(value, "utf8") >= 32,
+    {message: "CONCIERGE_COOKIE_SECRET must be at least 32 bytes"},
+  ).optional(),
   WOZTELL_API_TOKEN: z.string().optional(),
   WOZTELL_CHANNEL_ID: z.string().optional(),
   WOZTELL_WEBHOOK_SECRET: z.string().optional(),
-  TURNSTILE_SECRET: z.string().optional(),
+  TURNSTILE_SECRET: z.string().refine(
+    (value) => value.trim().length > 0,
+    {message: "TURNSTILE_SECRET must not be blank"},
+  ).optional(),
 });
 
 function validateServerEnvironment(environment: Environment): void {
@@ -81,6 +88,14 @@ function validateServerEnvironment(environment: Environment): void {
 
   if (missing.length > 0) {
     throw new Error(`Missing required production environment variables: ${missing.join(", ")}`);
+  }
+
+  const conciergeSecret = valueFor(environment, "CONCIERGE_COOKIE_SECRET");
+  if (Buffer.byteLength(conciergeSecret, "utf8") < 32) {
+    throw new Error("CONCIERGE_COOKIE_SECRET must be at least 32 bytes");
+  }
+  if (conciergeSecret === valueFor(environment, "NEON_AUTH_COOKIE_SECRET")) {
+    throw new Error("CONCIERGE_COOKIE_SECRET must not reuse NEON_AUTH_COOKIE_SECRET");
   }
 }
 

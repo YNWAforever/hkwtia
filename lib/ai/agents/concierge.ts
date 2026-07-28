@@ -1,6 +1,7 @@
 import {randomUUID} from "node:crypto";
 
 import {
+  CONCIERGE_AGENT_CONFIG,
   conciergeSystemPrompt,
   type ConciergeLocale,
 } from "@/config/agents/concierge";
@@ -11,10 +12,12 @@ import type {
   AgentMessage,
   AgentToolSet,
 } from "@/lib/ai/provider";
-import type {
-  AgentRuntimeFinish,
-  AgentRuntimeRequest,
-  AgentRuntimeStream,
+import {
+  AgentRuntimeError,
+  type AgentRuntimeFinish,
+  type AgentRuntimePreparedRun,
+  type AgentRuntimeRequest,
+  type AgentRuntimeStream,
 } from "@/lib/ai/runtime";
 import type {
   ConciergeToolAuditEvent,
@@ -54,6 +57,9 @@ type Conversations = Readonly<{
 }>;
 
 type Runtime = Readonly<{
+  prepare: (
+    actor: AgentRuntimeRequest["actor"],
+  ) => Promise<AgentRuntimePreparedRun>;
   stream: (request: AgentRuntimeRequest) => Promise<AgentRuntimeStream>;
 }>;
 
@@ -99,7 +105,10 @@ export type ConciergeSseEvent =
   | Readonly<{event: "disabled"; data: Readonly<{taskId: string}>}>
   | Readonly<{
     event: "error";
-    data: Readonly<{code: "AI_TEMPORARILY_UNAVAILABLE"}>;
+    data: Readonly<{
+      code: "AI_TEMPORARILY_UNAVAILABLE";
+      escalationId?: string;
+    }>;
   }>;
 
 export type ConciergeTurn = Readonly<{
@@ -138,10 +147,53 @@ function agentActor(
   };
 }
 
+const SOCIAL_ONLY_MESSAGES = new Set([
+  "hi",
+  "hello",
+  "hey",
+  "thanks",
+  "thank you",
+  "bye",
+  "goodbye",
+  "你好",
+  "您好",
+  "多謝",
+  "唔該",
+  "再見",
+]);
+
+const LOW_CONFIDENCE_HANDOFF: Readonly<Record<ConciergeLocale, string>> = {
+  en: "I’m not confident enough to answer from the available WTIA sources. I’ve asked our team to follow up.",
+  "zh-HK": "現有 WTIA 資料不足以讓我有信心回答。我已請團隊跟進。",
+};
+
+function requiresGrounding(message: string): boolean {
+  const normalized = message
+    .trim()
+    .toLocaleLowerCase("en")
+    .replace(/[.!?。！？,，、'"]/g, "")
+    .replace(/\s+/g, " ");
+  return !SOCIAL_ONLY_MESSAGES.has(normalized);
+}
+
+function hasGroundedCitation(finish: AgentRuntimeFinish): boolean {
+  return finish.status !== "disabled"
+    && finish.citations.some(
+      (citation) =>
+        citation.confidence !== undefined
+        && citation.confidence >= CONCIERGE_AGENT_CONFIG.confidenceThreshold,
+    );
+}
+
 function assistantCitations(
   finish: AgentRuntimeFinish,
 ): readonly AgentCitation[] {
-  return finish.status === "disabled" ? [] : finish.citations;
+  if (finish.status === "disabled") return [];
+  return finish.citations.map((citation) => ({
+    sourceId: citation.sourceId,
+    title: citation.title,
+    ...(citation.url === undefined ? {} : {url: citation.url}),
+  }));
 }
 
 export function createConciergeService(
@@ -187,29 +239,45 @@ export function createConciergeService(
       if (input.abortSignal?.aborted) forwardAbort();
 
       const runtime = dependencies.getRuntime(plannedRunId);
+      const preparedRun = await runtime.prepare({
+        conversationId: conversation.id,
+        profileId: input.profileId,
+        trigger: input.trigger,
+      });
+      if (preparedRun.runId !== plannedRunId) {
+        const error = new Error("CONCIERGE_RUN_ID_MISMATCH");
+        controller.abort();
+        await preparedRun.fail(error);
+        throw error;
+      }
       let tools: AgentToolSet = {};
       let messages: AgentMessage[] = [{
         role: "user",
         content: input.message,
       }];
-      if (dependencies.agentsEnabled) {
-        messages = historyMessages(
-          await dependencies.conversations.listMessages(
-            input.owner,
-            conversation.id,
-          ),
-        );
-        tools = dependencies.createTools({
-          actor,
-          locale,
-          repositories: dependencies.agentTools as ConciergeToolRepositories,
-          embedding: dependencies.getEmbedding(),
-          ...(input.confirmedContactEmail === undefined
-            ? {}
-            : {confirmedContactEmail: input.confirmedContactEmail}),
-          appOrigin: dependencies.appOrigin,
-          audit: dependencies.audit,
-        });
+      try {
+        if (dependencies.agentsEnabled) {
+          messages = historyMessages(
+            await dependencies.conversations.listMessages(
+              input.owner,
+              conversation.id,
+            ),
+          );
+          tools = dependencies.createTools({
+            actor,
+            locale,
+            repositories: dependencies.agentTools as ConciergeToolRepositories,
+            embedding: dependencies.getEmbedding(),
+            ...(input.confirmedContactEmail === undefined
+              ? {}
+              : {confirmedContactEmail: input.confirmedContactEmail}),
+            appOrigin: dependencies.appOrigin,
+            audit: dependencies.audit,
+          });
+        }
+      } catch (error) {
+        await preparedRun.fail(error);
+        throw error;
       }
 
       const runtimeTurn = await runtime.stream({
@@ -226,31 +294,42 @@ export function createConciergeService(
         messages,
         tools,
         abortSignal: controller.signal,
+        preparedRun,
+        finalization: "deferred",
       });
       if (runtimeTurn.runId !== plannedRunId) {
+        const error = new Error("CONCIERGE_RUN_ID_MISMATCH");
         controller.abort();
-        throw new Error("CONCIERGE_RUN_ID_MISMATCH");
+        await runtimeTurn.fail(error);
+        throw error;
       }
 
       let disabledTaskId: string | undefined;
       if (!dependencies.agentsEnabled) {
-        const task = await dependencies.agentTools.createStaffTask(actor, {
-          profileId: input.profileId,
-          kind: "concierge_general_follow_up",
-          summaryCode: "human_requested",
-          reasonCode: "human_requested",
-          locale,
-          ...(input.confirmedContactEmail === undefined
-            ? {}
-            : {contactEmail: input.confirmedContactEmail}),
-        });
-        disabledTaskId = task.id;
+        try {
+          const task = await dependencies.agentTools.createStaffTask(actor, {
+            profileId: input.profileId,
+            kind: "concierge_general_follow_up",
+            summaryCode: "human_requested",
+            reasonCode: "human_requested",
+            locale,
+            ...(input.confirmedContactEmail === undefined
+              ? {}
+              : {contactEmail: input.confirmedContactEmail}),
+          });
+          disabledTaskId = task.id;
+        } catch (error) {
+          await runtimeTurn.fail(error);
+          throw error;
+        }
       }
 
       let completed = false;
       const events: AsyncIterable<ConciergeSseEvent> = {
         async *[Symbol.asyncIterator]() {
           let assistantText = "";
+          const assistantDeltas: string[] = [];
+          const groundingRequired = requiresGrounding(input.message);
           try {
             yield {
               event: "meta",
@@ -262,6 +341,7 @@ export function createConciergeService(
 
             if (!dependencies.agentsEnabled) {
               await runtimeTurn.finish;
+              await runtimeTurn.finalize();
               completed = true;
               yield {
                 event: "disabled",
@@ -272,51 +352,109 @@ export function createConciergeService(
 
             for await (const delta of runtimeTurn.textStream) {
               assistantText += delta;
-              yield {event: "delta", data: {text: delta}};
+              assistantDeltas.push(delta);
+              if (!groundingRequired) {
+                yield {event: "delta", data: {text: delta}};
+              }
             }
             const finish = await runtimeTurn.finish;
-            const citations = assistantCitations(finish);
+            const lowConfidence =
+              finish.status === "completed"
+              && groundingRequired
+              && !hasGroundedCitation(finish);
+            const effectiveFinish = lowConfidence
+              ? {
+                ...finish,
+                status: "escalated" as const,
+                code: "low_confidence" as const,
+              }
+              : finish;
+            const responseText = lowConfidence
+              ? LOW_CONFIDENCE_HANDOFF[locale]
+              : assistantText;
+            const citations = lowConfidence
+              ? []
+              : assistantCitations(effectiveFinish);
             let escalationId: string | null = null;
 
-            if (finish.status === "escalated") {
+            if (effectiveFinish.status === "escalated") {
               const task = await dependencies.agentTools.createStaffTask(
                 actor,
                 {
                   profileId: input.profileId,
                   kind: "concierge_escalation",
-                  summaryCode: finish.code,
-                  reasonCode: finish.code,
+                  summaryCode: effectiveFinish.code,
+                  reasonCode: effectiveFinish.code,
                   locale,
                 },
               );
               escalationId = `WTIA-${task.id}`;
             }
 
-            if (assistantText.trim()) {
-              // Task 3 owns the terminal run transition. Persist the durable
-              // assistant message immediately after that terminal result.
+            if (groundingRequired) {
+              if (lowConfidence) {
+                yield {event: "delta", data: {text: responseText}};
+              } else {
+                for (const delta of assistantDeltas) {
+                  yield {event: "delta", data: {text: delta}};
+                }
+              }
+            }
+
+            if (responseText.trim()) {
               await dependencies.conversations.appendMessage(
                 input.owner,
                 conversation.id,
                 {
                   role: "assistant",
                   channel: input.trigger,
-                  content: assistantText,
-                  metadata: {locale, status: finish.status},
+                  content: responseText,
+                  metadata: {locale, status: effectiveFinish.status},
                   citations: [...citations],
                 },
               );
             }
 
+            await runtimeTurn.finalize(
+              lowConfidence
+                ? {status: "escalated", code: "low_confidence"}
+                : undefined,
+            );
             completed = true;
             yield {
               event: "done",
               data: {citations, escalationId},
             };
-          } catch {
+          } catch (error) {
+            await runtimeTurn.fail(error);
+            let escalationId: string | undefined;
+            if (
+              error instanceof AgentRuntimeError
+              && error.toolExecutions > 0
+            ) {
+              try {
+                const task = await dependencies.agentTools.createStaffTask(
+                  actor,
+                  {
+                    profileId: input.profileId,
+                    kind: "concierge_escalation",
+                    summaryCode: "tool_unavailable",
+                    reasonCode: "tool_unavailable",
+                    locale,
+                  },
+                );
+                escalationId = `WTIA-${task.id}`;
+              } catch {
+                // Preserve the stable public error if escalation persistence
+                // is temporarily unavailable.
+              }
+            }
             yield {
               event: "error",
-              data: {code: "AI_TEMPORARILY_UNAVAILABLE"},
+              data: {
+                code: "AI_TEMPORARILY_UNAVAILABLE",
+                ...(escalationId === undefined ? {} : {escalationId}),
+              },
             };
           } finally {
             input.abortSignal?.removeEventListener("abort", forwardAbort);

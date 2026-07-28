@@ -8,8 +8,9 @@ type TurnstileOptions = Readonly<{
 export async function verifyTurnstile(
   options: TurnstileOptions,
 ): Promise<boolean> {
-  const secret = options.secret?.trim();
-  if (!secret) return true;
+  if (options.secret === undefined) return true;
+  const secret = options.secret.trim();
+  if (!secret) return false;
   const token = options.token?.trim();
   if (!token || token.length > 4_096) return false;
 

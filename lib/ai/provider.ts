@@ -17,12 +17,14 @@ export type AgentCitationInput = Readonly<{
   sourceId: string;
   title: string;
   url?: string;
+  confidence?: number;
 }>;
 
 export type AgentCitation = Readonly<{
   sourceId: string;
   title: string;
   url?: string;
+  confidence?: number;
 }>;
 
 export type AgentToolResult = Readonly<{
@@ -128,11 +130,13 @@ export function normalizeAgentCitations(inputs: unknown): AgentCitation[] {
     let sourceIdValue: unknown;
     let titleValue: unknown;
     let urlValue: unknown;
+    let confidenceValue: unknown;
     try {
       const record = input as Record<string, unknown>;
       sourceIdValue = record.sourceId;
       titleValue = record.title;
       urlValue = record.url;
+      confidenceValue = record.confidence;
     } catch {
       continue;
     }
@@ -149,12 +153,22 @@ export function normalizeAgentCitations(inputs: unknown): AgentCitation[] {
 
     const url = safeHttpUrl(urlValue);
     if (urlValue !== undefined && url === undefined) continue;
+    const confidence = confidenceValue === undefined
+      ? undefined
+      : typeof confidenceValue === "number"
+        && Number.isFinite(confidenceValue)
+        && confidenceValue >= 0
+        && confidenceValue <= 1
+        ? confidenceValue
+        : undefined;
+    if (confidenceValue !== undefined && confidence === undefined) continue;
 
     seen.add(sourceId);
     citations.push({
       sourceId,
       title,
       ...(url === undefined ? {} : {url}),
+      ...(confidence === undefined ? {} : {confidence}),
     });
   }
 

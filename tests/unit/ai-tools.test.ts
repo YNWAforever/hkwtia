@@ -126,6 +126,7 @@ describe("policy-safe Concierge tool registry", () => {
       sourceId: expect.stringMatching(/^kb:/),
       title: "Membership guide",
       url: "https://www.hkwtia.org/en/membership",
+      confidence: 0.9,
     }]);
     expect(result.value).toEqual([expect.objectContaining({
       code: "ok",
@@ -225,6 +226,7 @@ describe("policy-safe Concierge tool registry", () => {
       sourceId: "event:member-networking",
       title: "Member networking",
       url: "https://www.hkwtia.org/en/events/member-networking",
+      confidence: 1,
     }]);
     expect(JSON.stringify(result)).not.toMatch(/published|draft|capacity|admin/i);
   });

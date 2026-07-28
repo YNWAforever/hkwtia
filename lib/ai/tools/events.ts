@@ -41,12 +41,18 @@ export function createEventsTool(context: ConciergeToolContext): AgentTool {
           limit: parsed.limit,
         });
         const values: unknown[] = [];
-        const citations: Array<{sourceId: string; title: string; url: string}> = [];
+        const citations: Array<{
+          sourceId: string;
+          title: string;
+          url: string;
+          confidence: number;
+        }> = [];
         for (const event of rows.slice(0, parsed.limit)) {
           const citation = {
             sourceId: `event:${event.slug}`,
             title: event.title,
             url: `${context.appOrigin}/${context.locale}/events/${encodeURIComponent(event.slug)}`,
+            confidence: 1,
           };
           citations.push(citation);
           values.push(Object.freeze({

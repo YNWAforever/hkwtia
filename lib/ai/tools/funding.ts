@@ -49,7 +49,12 @@ export function createFundingTool(context: ConciergeToolContext): AgentTool {
       try {
         const rows = evaluateFundingEligibility(parsed, context.locale);
         const values: unknown[] = [];
-        const citations: Array<{sourceId: string; title: string; url: string}> = [];
+        const citations: Array<{
+          sourceId: string;
+          title: string;
+          url: string;
+          confidence: number;
+        }> = [];
         for (const row of rows.slice(0, 5)) {
           const url = canonicalHttpsUrl(row.sourceUrl);
           if (!url) continue;
@@ -57,6 +62,7 @@ export function createFundingTool(context: ConciergeToolContext): AgentTool {
             sourceId: sourceId("funding", row.id),
             title: row.name,
             url,
+            confidence: 1,
           };
           citations.push(citation);
           values.push(Object.freeze({
