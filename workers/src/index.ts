@@ -4,7 +4,8 @@ export type WorkerJob =
   | "journey-runner"
   | "approvals-expirer"
   | "renewal-runner"
-  | "engagement-score";
+  | "engagement-score"
+  | "chat-retention";
 
 export type WorkerEnv = Readonly<{
   APP_URL: string;
@@ -59,6 +60,7 @@ const JOBS_BY_CRON = {
   "0 * * * *": BASE_JOBS,
   "0 2 * * *": ["renewal-runner"],
   "0 18 * * *": ["engagement-score"],
+  "0 3 * * *": ["chat-retention"],
 } as const satisfies Readonly<
   Record<string, readonly WorkerJob[]>
 >;

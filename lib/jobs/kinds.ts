@@ -21,3 +21,13 @@ export const M3_AUTOMATION_JOB_KIND_SQL_LIST =
 
 export type M3AutomationJobKind =
   typeof M3_AUTOMATION_JOB_KINDS[number];
+
+export const M4_AI_JOB_KIND = {
+  CHAT_RETENTION: "chat-retention",
+} as const;
+
+export const M4_AI_JOB_KINDS = [
+  M4_AI_JOB_KIND.CHAT_RETENTION,
+] as const;
+
+export type M4AiJobKind = typeof M4_AI_JOB_KINDS[number];

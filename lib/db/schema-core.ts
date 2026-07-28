@@ -415,6 +415,9 @@ export const conversations = pgTable(
   "conversations",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    agentKind: varchar("agent_kind", {length: 32})
+      .default("concierge")
+      .notNull(),
     profileId: text("profile_id").references(() => profiles.id, {onDelete: "set null"}),
     anonymousOwnerHash: text("anonymous_owner_hash"),
     locale: varchar("locale", {length: 10}).default("en").notNull(),
@@ -426,6 +429,10 @@ export const conversations = pgTable(
   },
   (table) => [
     check(
+      "conversations_agent_kind_check",
+      sql`${table.agentKind} IN ('concierge', 'retention-analyst', 'board-reporter')`,
+    ),
+    check(
       "conversations_owner_check",
       sql`(${table.profileId} IS NOT NULL AND ${table.anonymousOwnerHash} IS NULL) OR (${table.profileId} IS NULL AND ${table.anonymousOwnerHash} IS NOT NULL)`,
     ),
@@ -433,6 +440,10 @@ export const conversations = pgTable(
     index("conversations_anonymous_owner_idx").on(table.anonymousOwnerHash),
     index("conversations_recent_idx").on(table.updatedAt.desc(), table.id.desc()),
     index("conversations_expires_at_idx").on(table.expiresAt),
+    index("conversations_agent_kind_expires_idx").on(
+      table.agentKind,
+      table.expiresAt,
+    ),
   ],
 );
 
@@ -465,8 +476,7 @@ export const agentRuns = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     conversationId: uuid("conversation_id")
-      .notNull()
-      .references(() => conversations.id, {onDelete: "cascade"}),
+      .references(() => conversations.id, {onDelete: "set null"}),
     profileId: text("profile_id").references(() => profiles.id, {onDelete: "set null"}),
     trigger: agentTriggerEnum("trigger").notNull(),
     status: agentRunStatusEnum("status").default("running").notNull(),
