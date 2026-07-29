@@ -1,3 +1,4 @@
+import {hongKongDateKey} from "@/lib/automation/hong-kong-time";
 import {
   retentionAnalystRepository,
   type RetentionAnalystRepository,
@@ -43,18 +44,6 @@ function requestMode(request: Request): RequestMode {
   throw new JobRequestError(400, "INVALID_RETENTION_ANALYST_REQUEST");
 }
 
-function hongKongDate(value: Date): string {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Hong_Kong",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(value);
-  const part = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((item) => item.type === type)?.value ?? "";
-  return `${part("year")}-${part("month")}-${part("day")}`;
-}
-
 function json(body: Readonly<Record<string, unknown>>, status = 200): Response {
   return Response.json(body, {
     status,
@@ -94,7 +83,7 @@ export function createRetentionAnalystPost(
     secret: configuredSecret,
     prepare: async (_request, now) => ({
       value: undefined,
-      runKey: `retention-analyst:${hongKongDate(now)}`,
+      runKey: `retention-analyst:${hongKongDateKey(now)}`,
     }),
     run: ({now}) => runner(now),
   });

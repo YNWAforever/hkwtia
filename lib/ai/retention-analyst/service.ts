@@ -17,6 +17,7 @@ import {
   runScheduledJson,
   type AgentConfig,
 } from "@/lib/ai/scheduled-runtime";
+import {hongKongDateKey} from "@/lib/automation/hong-kong-time";
 import type {ScheduledAgentActor} from "@/lib/auth/agent-actor";
 import {
   requireAutomationCron,
@@ -87,18 +88,6 @@ const defaultDependencies: RetentionAnalystServiceDependencies = {
   createRunId: randomUUID,
 };
 
-function hongKongDate(value: Date): string {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Hong_Kong",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(value);
-  const part = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((item) => item.type === type)?.value ?? "";
-  return `${part("year")}-${part("month")}-${part("day")}`;
-}
-
 function scheduledActor(runId: string): ScheduledAgentActor {
   return {
     kind: "agent",
@@ -113,7 +102,7 @@ function scheduledActor(runId: string): ScheduledAgentActor {
 function requestKeyFor(candidate: RetentionCandidate, asOf: Date): string {
   return [
     "retention",
-    hongKongDate(asOf),
+    hongKongDateKey(asOf),
     candidate.profileId,
     RETENTION_ANALYST_AGENT_CONFIG.version,
   ].join(":");
