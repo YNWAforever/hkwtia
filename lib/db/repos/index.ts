@@ -14,6 +14,7 @@ export {suppressions, suppressionsRepo, suppressionsRepository} from "./suppress
 export {staffTasksRepo, staffTasksRepository} from "./staff-tasks";
 export {conversationsRepo, conversationsRepository} from "./conversations";
 export {agentRunsRepo, agentRunsRepository} from "./agent-runs";
+export {postsRepository} from "./posts";
 
 import {profiles} from "./profiles";
 import {companies} from "./companies";
@@ -29,6 +30,7 @@ import {suppressions} from "./suppressions";
 import {staffTasksRepository} from "./staff-tasks";
 import {conversationsRepository} from "./conversations";
 import {agentRunsRepository} from "./agent-runs";
+import {postsRepository} from "./posts";
 
 export const repositories = {
   profiles,
@@ -45,4 +47,5 @@ export const repositories = {
   staffTasks: staffTasksRepository,
   conversations: conversationsRepository,
   agentRuns: agentRunsRepository,
+  posts: postsRepository,
 };
