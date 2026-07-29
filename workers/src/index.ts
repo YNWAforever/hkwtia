@@ -5,7 +5,8 @@ export type WorkerJob =
   | "approvals-expirer"
   | "renewal-runner"
   | "engagement-score"
-  | "chat-retention";
+  | "chat-retention"
+  | "retention-analyst";
 
 export type WorkerEnv = Readonly<{
   APP_URL: string;
@@ -50,6 +51,7 @@ export type AutomationWorker = Readonly<{
 }>;
 
 export const REQUEST_TIMEOUT_MS = 10_000;
+export const AI_REQUEST_TIMEOUT_MS = 240_000;
 const RETRY_DELAYS = [250, 1_000] as const;
 const ATTEMPT_COUNT = 3;
 const BASE_JOBS = [
@@ -61,9 +63,19 @@ const JOBS_BY_CRON = {
   "0 2 * * *": ["renewal-runner"],
   "0 18 * * *": ["engagement-score"],
   "0 3 * * *": ["chat-retention"],
+  "15 18 * * *": ["retention-analyst"],
 } as const satisfies Readonly<
   Record<string, readonly WorkerJob[]>
 >;
+
+const REQUEST_TIMEOUT_BY_JOB = {
+  "journey-runner": REQUEST_TIMEOUT_MS,
+  "approvals-expirer": REQUEST_TIMEOUT_MS,
+  "renewal-runner": REQUEST_TIMEOUT_MS,
+  "engagement-score": REQUEST_TIMEOUT_MS,
+  "chat-retention": REQUEST_TIMEOUT_MS,
+  "retention-analyst": AI_REQUEST_TIMEOUT_MS,
+} as const satisfies Readonly<Record<WorkerJob, number>>;
 
 class WorkerConfigError extends Error {
   readonly code: ConfigErrorCode;
@@ -182,11 +194,12 @@ async function fetchWithDeadline(
   dependencies: WorkerDependencies,
   input: RequestInfo | URL,
   init: RequestInit,
+  timeoutMs = REQUEST_TIMEOUT_MS,
 ): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {
     controller.abort();
-  }, REQUEST_TIMEOUT_MS);
+  }, timeoutMs);
   try {
     return await dependencies.fetch(input, {
       ...init,
@@ -281,6 +294,7 @@ async function invokeJob(
               : {}),
           },
         },
+        REQUEST_TIMEOUT_BY_JOB[job],
       );
       if (response.ok) {
         return;

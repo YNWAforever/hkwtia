@@ -10,11 +10,20 @@ import {
 } from "@/lib/automation/campaign-runner";
 import {expireStaleApprovals} from "@/lib/automation/approvals-expirer";
 import {recomputeEngagementScores} from "@/lib/automation/engagement-score-runner";
+import {
+  RETENTION_ANALYST_AGENT_CONFIG,
+  RETENTION_ANALYST_SYSTEM_PROMPT,
+} from "@/config/agents/retention-analyst";
+import {
+  runRetentionAnalyst as runRetentionAnalystService,
+} from "@/lib/ai/retention-analyst/service";
+import {createAgentRuntime} from "@/lib/ai/runtime";
 import {runJourneyBatch} from "@/lib/automation/journey-runner";
 import {runRenewalReconciliation} from "@/lib/automation/renewal-runner";
 import {automationCronActor} from "@/lib/auth/automation-actor";
 import {createWoztellAdapter} from "@/lib/channels/woztell";
 import {serverEnv} from "@/lib/config/env";
+import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {campaignsRepository} from "@/lib/db/repos/campaigns";
 import {deliveriesRepository} from "@/lib/db/repos/deliveries";
 import {dunningLapseRepository} from "@/lib/db/repos/dunning-lapse";
@@ -43,6 +52,7 @@ const workerAlertSchema = z.object({
     "renewal-runner",
     "engagement-score",
     "approvals-expirer",
+    "retention-analyst",
   ]),
   scheduledTime: z.string().min(1).max(64),
   attemptCount: z.number().int().min(1).max(3),
@@ -58,7 +68,8 @@ export type WorkerAlertPayload = Readonly<{
     | "journey-runner"
     | "renewal-runner"
     | "engagement-score"
-    | "approvals-expirer";
+    | "approvals-expirer"
+    | "retention-analyst";
   scheduledTime: string;
   attemptCount: number;
   errorCode: "JOB_HTTP_ERROR" | "JOB_NETWORK_ERROR" | "JOB_TIMEOUT";
@@ -77,6 +88,7 @@ type ProductionRunnerOverrides = Partial<Readonly<{
   runRenewal(now: Date): Promise<unknown>;
   runEngagement(now: Date): Promise<unknown>;
   runApprovals(now: Date): Promise<unknown>;
+  runRetentionAnalyst(now: Date): Promise<unknown>;
   runWorkerAlert(payload: WorkerAlertPayload): Promise<unknown>;
 }>>;
 
@@ -371,6 +383,32 @@ async function runProductionApprovals(now: Date): Promise<unknown> {
   return expireStaleApprovals(automationCronActor(), now);
 }
 
+export async function runProductionRetentionAnalyst(
+  now: Date,
+): Promise<unknown> {
+  const environment = serverEnv();
+  return runRetentionAnalystService(automationCronActor(), {
+    asOf: now,
+    agentConfig: {
+      enabled: environment.agentsEnabled,
+      model: process.env.RETENTION_ANALYST_MODEL
+        ?? RETENTION_ANALYST_AGENT_CONFIG.model,
+      credentials: {
+        ...(environment.openaiApiKey === undefined
+          ? {}
+          : {openaiApiKey: environment.openaiApiKey}),
+        ...(environment.anthropicApiKey === undefined
+          ? {}
+          : {anthropicApiKey: environment.anthropicApiKey}),
+      },
+      system: RETENTION_ANALYST_SYSTEM_PROMPT,
+      runtime: createAgentRuntime({
+        agentRuns: agentRunsRepository,
+      }),
+    },
+  });
+}
+
 export function createJobRunners(
   overrides: ProductionRunnerOverrides = {},
 ) {
@@ -380,6 +418,8 @@ export function createJobRunners(
   const runEngagement =
     overrides.runEngagement ?? runProductionEngagement;
   const runApprovals = overrides.runApprovals ?? runProductionApprovals;
+  const runRetentionAnalyst =
+    overrides.runRetentionAnalyst ?? runProductionRetentionAnalyst;
   const runWorkerAlert = overrides.runWorkerAlert ?? sendWorkerAlert;
 
   return {
@@ -401,6 +441,9 @@ export function createJobRunners(
     },
     approvals(now: Date) {
       return runApprovals(now);
+    },
+    retentionAnalyst(now: Date) {
+      return runRetentionAnalyst(now);
     },
     workerAlert(payload: WorkerAlertPayload) {
       return runWorkerAlert(payload);

@@ -24,10 +24,12 @@ export type M3AutomationJobKind =
 
 export const M4_AI_JOB_KIND = {
   CHAT_RETENTION: "chat-retention",
+  RETENTION_ANALYST: "retention-analyst",
 } as const;
 
 export const M4_AI_JOB_KINDS = [
   M4_AI_JOB_KIND.CHAT_RETENTION,
+  M4_AI_JOB_KIND.RETENTION_ANALYST,
 ] as const;
 
 export type M4AiJobKind = typeof M4_AI_JOB_KINDS[number];

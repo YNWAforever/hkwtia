@@ -125,6 +125,7 @@ describe("Cloudflare automation scheduler", () => {
     ["0 * * * *", ["approvals-expirer", "journey-runner"]],
     ["0 2 * * *", ["renewal-runner"]],
     ["0 18 * * *", ["engagement-score"]],
+    ["15 18 * * *", ["retention-analyst"]],
   ] as const)(
     "maps %s to only the jobs owned by that cron event",
     async (cron, expectedJobs) => {

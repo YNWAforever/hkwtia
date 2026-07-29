@@ -3,7 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2026-07-26"
 
 [triggers]
-crons = ["0 * * * *", "0 2 * * *", "0 18 * * *", "0 3 * * *"]
+crons = ["0 * * * *", "0 2 * * *", "0 18 * * *", "0 3 * * *", "15 18 * * *"]
 
 [env.preview]
 name = "hkwtia-m3-preview"

@@ -77,7 +77,7 @@ describe("chat retention Worker schedule", () => {
   it("configures all three M3 schedules plus the M4 retention schedule", () => {
     const wrangler = readFileSync("wrangler.toml", "utf8");
     expect(wrangler).toContain(
-      'crons = ["0 * * * *", "0 2 * * *", "0 18 * * *", "0 3 * * *"]',
+      'crons = ["0 * * * *", "0 2 * * *", "0 18 * * *", "0 3 * * *", "15 18 * * *"]',
     );
   });
 });

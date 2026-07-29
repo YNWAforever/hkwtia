@@ -5,6 +5,8 @@ import {describe, expect, it} from "vitest";
 import {
   M3_AUTOMATION_JOB_KIND,
   M3_AUTOMATION_JOB_KINDS,
+  M4_AI_JOB_KIND,
+  M4_AI_JOB_KINDS,
 } from "@/lib/jobs/kinds";
 
 const routes = [
@@ -29,5 +31,15 @@ describe("M3 persisted job kinds", () => {
       );
       expect(source).toContain('from "@/lib/jobs/kinds"');
     }
+  });
+});
+
+describe("M4 AI job kinds", () => {
+  it("includes the scheduled Retention Analyst route kind", () => {
+    expect(M4_AI_JOB_KIND).toMatchObject({
+      CHAT_RETENTION: "chat-retention",
+      RETENTION_ANALYST: "retention-analyst",
+    });
+    expect(M4_AI_JOB_KINDS).toContain("retention-analyst");
   });
 });

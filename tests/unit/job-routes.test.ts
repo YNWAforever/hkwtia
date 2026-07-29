@@ -112,6 +112,24 @@ describe("production runner composition", () => {
     expect(runCampaigns).toHaveBeenCalledWith(fixedNow);
   });
 
+  it("exposes the Retention Analyst production runner without coupling it to existing jobs", async () => {
+    const runRetentionAnalyst = vi.fn(async () => ({
+      considered: 2,
+      drafted: 1,
+      skippedPending: 0,
+      deduplicated: 1,
+      failed: 0,
+    }));
+    const runners = createJobRunners({
+      runRetentionAnalyst,
+    });
+
+    await expect(
+      runners.retentionAnalyst(fixedNow),
+    ).resolves.toMatchObject({considered: 2, drafted: 1});
+    expect(runRetentionAnalyst).toHaveBeenCalledWith(fixedNow);
+  });
+
   it("waits for both hourly engines before surfacing either failure", async () => {
     let finishCampaign: () => void = () => {
       throw new Error("CAMPAIGN_NOT_STARTED");
