@@ -214,6 +214,38 @@ Remove-Item Env:NODE_ENV -ErrorAction SilentlyContinue
 Remove-Item Env:VERCEL_ENV -ErrorAction SilentlyContinue
 ```
 
+## Verification evidence — 2026-07-29
+
+Local verification on branch `codex/m4b-retention-board-reporter`:
+
+- the full app suite passed 221 files with 13 skipped and 1,347 tests with 37
+  skipped;
+- the Worker suite passed all 5 files and 40 tests;
+- the final localized-preview focused suite passed all 19 tests;
+- `audit:strings` passed all 99 TSX files;
+- lint passed with zero warnings, typecheck passed, and the production build
+  compiled all 96 static pages, including the staff-only Board Reporter draft
+  route.
+
+An isolated Neon branch was provisioned for the external gate:
+
+- project: `fragrant-mountain-25240574`;
+- branch: `br-fragrant-mouse-aosksolr`
+  (`m4b-acceptance-2026-07-29`);
+- expiry: `2026-08-05T16:00:00Z`.
+
+A read-only schema check found only `event_registrations`, `events`, and
+`profiles` among the tables required by the M4B fixture. In particular,
+`agent_runs`, `approval_requests`, and `posts` were absent. The isolated
+PostgreSQL seed and acceptance suite were therefore **not run**: the branch
+must first receive the current repository migrations.
+
+The live-model/cron, Vercel Preview, and browser gates were also **not run**.
+No M4B Preview deployment exists for this unpushed branch, and isolated staff
+and member test accounts were not provisioned. These are honest pending gates,
+not passes. No Production database, provider, email, WhatsApp, approval,
+publication, or deployment side effect occurred.
+
 ## Production prohibition
 
 No command in this runbook authorizes a Production seed, deployment, provider
