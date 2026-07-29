@@ -239,12 +239,16 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
     }
   });
   it("materializes twelve scalar-only Hong Kong months with deterministic public metrics", async () => {
-    await runDatabaseCommand("db:migrate");
-    await runDatabaseCommand("db:seed");
-
     const pool = new Pool({connectionString: testDatabaseUrl, max: 1});
-    await pool.query("SELECT pg_advisory_lock($1)", [fixtureLock]);
+    let lockAcquired = false;
+    let transactionStarted = false;
     try {
+      await pool.query("SELECT pg_advisory_lock($1)", [fixtureLock]);
+      lockAcquired = true;
+      await runDatabaseCommand("db:migrate");
+      await runDatabaseCommand("db:seed");
+      await pool.query("BEGIN");
+      transactionStarted = true;
       // DATABASE_URL_TEST is an isolated test database; remove source rows so every
       // zero-activity month below is an actual zero rather than a seed-data accident.
       await pool.query(`TRUNCATE TABLE
@@ -622,8 +626,14 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         });
       }
     } finally {
-      try { await pool.query("ROLLBACK"); } finally {
-        try { await pool.query("SELECT pg_advisory_unlock($1)", [fixtureLock]); } finally { await pool.end(); }
+      try {
+        if (transactionStarted) await pool.query("ROLLBACK");
+      } finally {
+        try {
+          if (lockAcquired) await pool.query("SELECT pg_advisory_unlock($1)", [fixtureLock]);
+        } finally {
+          await pool.end();
+        }
       }
     }
   }, 30_000);
