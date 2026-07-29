@@ -6,6 +6,7 @@ import {describe, expect, it} from "vitest";
 
 import {BoardDraftList} from "@/components/admin/board-draft-list";
 import {SafeGeneratedContent} from "@/components/admin/safe-generated-content";
+import {SafeStructuredContent} from "@/components/content/safe-structured-content";
 
 const tableHeaders = {
   kpi: "Localized KPI heading",
@@ -86,9 +87,63 @@ describe("safe generated content", () => {
     expect(html).not.toMatch(/href="https:|href="javascript:|href="\/\//);
   });
 
+  it("renders the bounded bilingual build-log grammar without creating another h1", () => {
+    const content = [
+      "## Build notes 建置紀錄",
+      "",
+      "Published **evidence** with [an internal route](/zh/ai-ops).",
+      "",
+      "- First result",
+      "- 第二項結果",
+    ].join("\n");
+
+    const html = renderToStaticMarkup(<SafeStructuredContent
+      content={content}
+      mode="build-log"
+      tableHeaders={tableHeaders}
+    />);
+
+    expect(html).not.toContain("<h1");
+    expect(html).toContain("<h2");
+    expect(html).toContain("Build notes 建置紀錄</h2>");
+    expect(html).toContain("<p");
+    expect(html).toContain("<strong>evidence</strong>");
+    expect(html).toContain("<ul");
+    expect(html).toContain("<li");
+    expect(html).toContain('href="/zh/ai-ops"');
+  });
+
+  it("keeps hostile build-log input inert and rejects unsafe or unbounded headings", () => {
+    const hostile = [
+      "<script>alert(1)</script>",
+      "import Widget from './widget'",
+      "{dangerousExpression()}",
+      "[external](https://attacker.example)",
+      "[unsafe](javascript:alert(1))",
+      "# Page-owned title",
+      "## {unsafe heading}",
+      `## ${"a".repeat(121)}`,
+    ].join("\n");
+
+    const html = renderToStaticMarkup(<SafeStructuredContent
+      content={hostile}
+      mode="build-log"
+      tableHeaders={tableHeaders}
+    />);
+
+    expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
+    expect(html).toContain("import Widget from");
+    expect(html).toContain("{dangerousExpression()}");
+    expect(html).toContain("[external](https://attacker.example)");
+    expect(html).toContain("[unsafe](javascript:alert(1))");
+    expect(html).not.toContain("<h1");
+    expect(html).not.toContain("<h2");
+    expect(html).not.toMatch(/<script>|href="https:|href="javascript:/);
+  });
+
   it("does not include executable HTML or MDX rendering mechanisms", () => {
     const source = readFileSync(
-      resolve(process.cwd(), "components/admin/safe-generated-content.tsx"),
+      resolve(process.cwd(), "components/content/safe-structured-content.tsx"),
       "utf8",
     );
 
@@ -98,6 +153,16 @@ describe("safe generated content", () => {
     expect(source).not.toMatch(/\beval\s*\(/);
     expect(source).not.toContain('scope="col">KPI<');
     expect(source).not.toContain('scope="col">Value<');
+  });
+
+  it("keeps SafeGeneratedContent as the board-report compatibility wrapper", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "components/admin/safe-generated-content.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain("SafeStructuredContent");
+    expect(source).toContain('mode="board-report"');
   });
 
   it("renders Board Reporter drafts as read-only summaries with a staff preview link and no inline body", () => {
