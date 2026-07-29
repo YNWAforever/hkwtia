@@ -7,6 +7,7 @@ import {describe, expect, it} from "vitest";
 const execFile = promisify(execFileCallback);
 
 const testDatabaseUrl = process.env.DATABASE_URL_TEST?.trim() ?? "";
+const fixtureLock = 1_944_202_607;
 
 async function runDatabaseCommand(command: "db:migrate" | "db:seed") {
   const npm = process.platform === "win32" ? "npm.cmd" : "npm";
@@ -31,7 +32,8 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
       expect(output).not.toContain(testDatabaseUrl);
     }
 
-    const pool = new Pool({connectionString: testDatabaseUrl});
+    const pool = new Pool({connectionString: testDatabaseUrl, max: 1});
+    await pool.query("SELECT pg_advisory_lock($1)", [fixtureLock]);
     try {
       const plans = await pool.query<{code: string; count: number}>(
         "SELECT code, count(*)::int AS count FROM membership_plans GROUP BY code ORDER BY code",
@@ -240,7 +242,8 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
     await runDatabaseCommand("db:migrate");
     await runDatabaseCommand("db:seed");
 
-    const pool = new Pool({connectionString: testDatabaseUrl});
+    const pool = new Pool({connectionString: testDatabaseUrl, max: 1});
+    await pool.query("SELECT pg_advisory_lock($1)", [fixtureLock]);
     try {
       // DATABASE_URL_TEST is an isolated test database; remove source rows so every
       // zero-activity month below is an actual zero rather than a seed-data accident.
