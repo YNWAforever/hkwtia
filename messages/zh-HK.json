@@ -1,371 +1,565 @@
 {
-    "_review":  true,
-    "Common":  {
-                   "skipToContent":  "跳至主要內容"
-               },
-    "Metadata":  {
-                     "title":  "WTIA｜創新香港",
-                     "description":  "連繫香港及大灣區創新力量，接通全球市場。"
-                 },
-    "Navigation":  {
-                       "about":  "關於我們",
-                       "membership":  "會員計劃",
-                       "showcase":  "會員展示",
-                       "launchpad":  "創科起動",
-                       "events":  "活動",
-                       "news":  "最新消息",
-                       "openMenu":  "開啟導覽選單",
-                       "closeMenu":  "關閉導覽選單",
-                       "menuTitle":  "網站導覽",
-                       "menuDescription":  "瀏覽 WTIA 網站及切換語言。",
-                       "join":  "加入 WTIA",
-                       "english":  "EN",
-                       "chinese":  "中文",
-                       "switchToEnglish":  "Switch to English",
-                       "switchToChinese":  "切換至中文",
-                       "homeLabel":  "WTIA 首頁",
-                       "logoAlt":  "WTIA",
-                       "primaryLabel":  "主要導覽"
-                   },
-    "Footer":  {
-                   "brand":  "創新香港",
-                   "summary":  "連繫香港、大灣區及亞洲創科社群，接通全球科技市場、投資者及發展機遇。由 WTIA 推動。",
-                   "address":  "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
-                   "navigate":  "網站導覽",
-                   "home":  "首頁",
-                   "membership":  "會員計劃",
-                   "about":  "關於我們",
-                   "contact":  "聯絡我們",
-                   "connect":  "聯絡",
-                   "copyright":  "© {year} 創新香港 — WTIA。版權所有。"
-               },
-    "Email": {
-      "brand": "WTIA",
-      "footer": {
-        "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
-        "reason": "你收到這封推廣電郵，是因為你已選擇接收 WTIA 最新消息。",
-        "unsubscribe": "取消訂閱推廣電郵"
+  "_review": true,
+  "Common": {
+    "skipToContent": "跳至主要內容"
+  },
+  "Metadata": {
+    "title": "WTIA｜創新香港",
+    "description": "連繫香港及大灣區創新力量，接通全球市場。"
+  },
+  "Navigation": {
+    "about": "關於我們",
+    "membership": "會員計劃",
+    "showcase": "會員展示",
+    "launchpad": "創科起動",
+    "events": "活動",
+    "news": "最新消息",
+    "openMenu": "開啟導覽選單",
+    "closeMenu": "關閉導覽選單",
+    "menuTitle": "網站導覽",
+    "menuDescription": "瀏覽 WTIA 網站及切換語言。",
+    "join": "加入 WTIA",
+    "english": "EN",
+    "chinese": "中文",
+    "switchToEnglish": "Switch to English",
+    "switchToChinese": "切換至中文",
+    "homeLabel": "WTIA 首頁",
+    "logoAlt": "WTIA",
+    "primaryLabel": "主要導覽"
+  },
+  "Footer": {
+    "brand": "創新香港",
+    "summary": "連繫香港、大灣區及亞洲創科社群，接通全球科技市場、投資者及發展機遇。由 WTIA 推動。",
+    "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
+    "navigate": "網站導覽",
+    "home": "首頁",
+    "membership": "會員計劃",
+    "about": "關於我們",
+    "contact": "聯絡我們",
+    "connect": "聯絡",
+    "copyright": "© {year} 創新香港 — WTIA。版權所有。"
+  },
+  "Email": {
+    "brand": "WTIA",
+    "footer": {
+      "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
+      "reason": "你收到這封推廣電郵，是因為你已選擇接收 WTIA 最新消息。",
+      "unsubscribe": "取消訂閱推廣電郵"
+    },
+    "templates": {
+      "welcome": {
+        "subject": "{recipientName}，歡迎加入 WTIA",
+        "preview": "你的 WTIA 會員旅程由這裡開始。",
+        "heading": "歡迎加入 WTIA 社群",
+        "body": "{recipientName}，你好！你的會籍已準備好。立即瀏覽會員專區，開始連繫香港創科社群。",
+        "cta": "前往會員專區"
       },
-      "templates": {
-        "welcome": {"subject": "{recipientName}，歡迎加入 WTIA", "preview": "你的 WTIA 會員旅程由這裡開始。", "heading": "歡迎加入 WTIA 社群", "body": "{recipientName}，你好！你的會籍已準備好。立即瀏覽會員專區，開始連繫香港創科社群。", "cta": "前往會員專區"},
-        "day1_video": {"subject": "了解 WTIA 會籍為你帶來的機遇", "preview": "快速認識你的 WTIA 會員體驗。", "heading": "盡享你的會員權益", "body": "{recipientName}，你好！觀看會員簡介短片，了解 WTIA 為你連繫的人脈、活動及發展機遇。", "cta": "觀看簡介"},
-        "day7_nudge": {"subject": "你的 WTIA 會員專區已準備好", "preview": "登入並啟動你的會員體驗。", "heading": "踏出參與 WTIA 的第一步", "body": "{recipientName}，你好！你的會員專區正等候你登入。請查閱個人資料及使用 WTIA 會員權益。", "cta": "立即登入"},
-        "day7_mixer": {"subject": "認識 WTIA 創科社群", "preview": "發掘下一個交流機會。", "heading": "參加下一場會員聚會", "body": "{recipientName}，你好！參加 WTIA 會員活動，與香港科技社群建立更多新連繫。", "cta": "瀏覽會員活動"},
-        "day14_profile": {"subject": "完善你的 WTIA 會員檔案", "preview": "讓會員及夥伴更容易認識你的專長。", "heading": "讓會員檔案更完整", "body": "{recipientName}，你好！完善會員檔案，讓 WTIA 社群了解你的專長、興趣及合作方向。", "cta": "完善會員檔案"},
-        "day30_recap": {"subject": "加入 WTIA 首月回顧", "preview": "重溫參與社群的不同方式。", "heading": "延續你的參與動力", "body": "{recipientName}，你好！重溫加入 WTIA 首月可參與的活動、會員資源及社群機遇。", "cta": "探索會員資源"},
-        "day45_content": {"subject": "WTIA 社群最新洞見", "preview": "探索創科社群的實用觀點。", "heading": "緊貼創科市場變化", "body": "{recipientName}，你好！細閱 WTIA 最新洞見、會員故事及影響社群的科技發展。", "cta": "閱讀最新消息"},
-        "day60_committee": {"subject": "一同推動 WTIA 社群發展", "preview": "探索貢獻你的經驗與專長的方式。", "heading": "在 WTIA 分享你的聲音", "body": "{recipientName}，你好！了解不同委員會及社群項目，以你的經驗為其他會員創造價值。", "cta": "探索參與方式"},
-        "day90_review": {"subject": "回顧你的 WTIA 會員體驗", "preview": "告訴我們首 90 日的體驗。", "heading": "你的會員體驗如何？", "body": "{recipientName}，你好！回顧加入 WTIA 首 90 日的體驗，並告訴我們如何令會籍更具價值。", "cta": "分享會員體驗"},
-        "renewal_90": {"subject": "你的 WTIA 會籍將於 90 日後續期", "preview": "提早準備，確保會員服務不中斷。", "heading": "會籍續期日即將來臨", "body": "{recipientName}，你好！你的 WTIA 會籍將於 90 日後續期。請查閱會籍資料，如需更新可聯絡我們。", "cta": "查閱會籍"},
-        "renewal_60": {"subject": "你的 WTIA 會籍將於 60 日後續期", "preview": "續期前請先核對你的資料。", "heading": "為 WTIA 會籍續期做好準備", "body": "{recipientName}，你好！距離會籍續期尚有 60 日，請確認個人及付款資料均為最新。", "cta": "核對續期資料"},
-        "renewal_30": {"subject": "WTIA 會籍將於 30 日後續期", "preview": "讓你的會員權益保持生效。", "heading": "你的會籍快將續期", "body": "{recipientName}，你好！你的 WTIA 會籍將於 30 日後續期，請立即查閱詳情，避免服務中斷。", "cta": "查閱續期詳情"},
-        "renewal_14": {"subject": "WTIA 會籍將於 14 日後續期", "preview": "續期日前的最後提示。", "heading": "你的會籍將於兩星期後續期", "body": "{recipientName}，你好！你的 WTIA 會籍預定於 14 日後續期，請核對資料或聯絡我們尋求協助。", "cta": "管理會籍"},
-        "dunning_0": {"subject": "你的 WTIA 會籍付款需要處理", "preview": "我們未能完成你的會籍付款。", "heading": "請檢查你的付款資料", "body": "{recipientName}，你好！我們未能完成 WTIA 會籍付款。請更新付款資料，以保持會員服務生效。", "cta": "更新付款資料"},
-        "dunning_3": {"subject": "WTIA 會籍付款仍需處理", "preview": "請更新資料，避免會員服務中斷。", "heading": "你的會籍付款尚未完成", "body": "{recipientName}，你好！你的 WTIA 會籍付款仍未完成，請盡快更新付款資料。", "cta": "處理付款"},
-        "dunning_7": {"subject": "WTIA 會籍付款最後提示", "preview": "你的會員服務可能會中斷。", "heading": "保持你的 WTIA 會籍生效", "body": "{recipientName}，你好！我們仍未能完成會籍付款。請立即處理，以免失去會員服務。", "cta": "修正付款資料"},
-        "lapsed_survey": {"subject": "告訴我們你的 WTIA 體驗", "preview": "你的意見有助我們改善會員旅程。", "heading": "我們重視你的意見", "body": "{recipientName}，你好！你的 WTIA 會籍現已失效。請告訴我們哪些體驗良好，以及有甚麼可以改善。", "cta": "分享意見"},
-        "winback_21": {"subject": "與 WTIA 社群保持連繫", "preview": "看看會員網絡的最新動向。", "heading": "WTIA 還有更多機遇等你發掘", "body": "{recipientName}，你好！探索 WTIA 社群的最新活動、人脈及業界發展機遇。", "cta": "查看最新動向"},
-        "winback_60": {"subject": "再次連繫 WTIA", "preview": "重新加入香港科技社群。", "heading": "期待再次歡迎你加入", "body": "{recipientName}，你好！再次連繫 WTIA，重拾支援你下一階段的社群、活動及發展機遇。", "cta": "探索會員計劃"},
-        "lead_ack": {"subject": "WTIA 已收到你的查詢", "preview": "我們的團隊將盡快與你聯絡。", "heading": "感謝你聯絡 WTIA", "body": "{recipientName}，你好！我們已收到你的查詢，WTIA 團隊將會查閱資料並盡快跟進。", "cta": "瀏覽 WTIA"},
-        "lead_staff_notify": {"subject": "新的 WTIA 會籍查詢", "preview": "有準會員需要團隊跟進。", "heading": "新的潛在會員等候處理", "body": "{recipientName} 已提交 WTIA 會籍查詢。請查閱資料並安排下一步跟進。", "cta": "查閱查詢"},
-        "approval_request": {"subject": "WTIA 審批要求等候處理", "preview": "可信應用程式操作需要你的決定。", "heading": "有一項審批等候處理", "body": "{recipientName}，你好！一項可信應用程式要求正等候你審批。請開啟審批佇列，查閱安全摘要並記錄決定。", "cta": "查閱審批"},
-        "campaign_generic": {"subject": "WTIA 最新消息", "preview": "WTIA 社群的消息及機遇。", "heading": "WTIA 社群最新動向", "body": "{recipientName}，你好！探索為 WTIA 會員精選的最新消息、活動及發展機遇。", "cta": "閱讀最新消息"}
+      "day1_video": {
+        "subject": "了解 WTIA 會籍為你帶來的機遇",
+        "preview": "快速認識你的 WTIA 會員體驗。",
+        "heading": "盡享你的會員權益",
+        "body": "{recipientName}，你好！觀看會員簡介短片，了解 WTIA 為你連繫的人脈、活動及發展機遇。",
+        "cta": "觀看簡介"
+      },
+      "day7_nudge": {
+        "subject": "你的 WTIA 會員專區已準備好",
+        "preview": "登入並啟動你的會員體驗。",
+        "heading": "踏出參與 WTIA 的第一步",
+        "body": "{recipientName}，你好！你的會員專區正等候你登入。請查閱個人資料及使用 WTIA 會員權益。",
+        "cta": "立即登入"
+      },
+      "day7_mixer": {
+        "subject": "認識 WTIA 創科社群",
+        "preview": "發掘下一個交流機會。",
+        "heading": "參加下一場會員聚會",
+        "body": "{recipientName}，你好！參加 WTIA 會員活動，與香港科技社群建立更多新連繫。",
+        "cta": "瀏覽會員活動"
+      },
+      "day14_profile": {
+        "subject": "完善你的 WTIA 會員檔案",
+        "preview": "讓會員及夥伴更容易認識你的專長。",
+        "heading": "讓會員檔案更完整",
+        "body": "{recipientName}，你好！完善會員檔案，讓 WTIA 社群了解你的專長、興趣及合作方向。",
+        "cta": "完善會員檔案"
+      },
+      "day30_recap": {
+        "subject": "加入 WTIA 首月回顧",
+        "preview": "重溫參與社群的不同方式。",
+        "heading": "延續你的參與動力",
+        "body": "{recipientName}，你好！重溫加入 WTIA 首月可參與的活動、會員資源及社群機遇。",
+        "cta": "探索會員資源"
+      },
+      "day45_content": {
+        "subject": "WTIA 社群最新洞見",
+        "preview": "探索創科社群的實用觀點。",
+        "heading": "緊貼創科市場變化",
+        "body": "{recipientName}，你好！細閱 WTIA 最新洞見、會員故事及影響社群的科技發展。",
+        "cta": "閱讀最新消息"
+      },
+      "day60_committee": {
+        "subject": "一同推動 WTIA 社群發展",
+        "preview": "探索貢獻你的經驗與專長的方式。",
+        "heading": "在 WTIA 分享你的聲音",
+        "body": "{recipientName}，你好！了解不同委員會及社群項目，以你的經驗為其他會員創造價值。",
+        "cta": "探索參與方式"
+      },
+      "day90_review": {
+        "subject": "回顧你的 WTIA 會員體驗",
+        "preview": "告訴我們首 90 日的體驗。",
+        "heading": "你的會員體驗如何？",
+        "body": "{recipientName}，你好！回顧加入 WTIA 首 90 日的體驗，並告訴我們如何令會籍更具價值。",
+        "cta": "分享會員體驗"
+      },
+      "renewal_90": {
+        "subject": "你的 WTIA 會籍將於 90 日後續期",
+        "preview": "提早準備，確保會員服務不中斷。",
+        "heading": "會籍續期日即將來臨",
+        "body": "{recipientName}，你好！你的 WTIA 會籍將於 90 日後續期。請查閱會籍資料，如需更新可聯絡我們。",
+        "cta": "查閱會籍"
+      },
+      "renewal_60": {
+        "subject": "你的 WTIA 會籍將於 60 日後續期",
+        "preview": "續期前請先核對你的資料。",
+        "heading": "為 WTIA 會籍續期做好準備",
+        "body": "{recipientName}，你好！距離會籍續期尚有 60 日，請確認個人及付款資料均為最新。",
+        "cta": "核對續期資料"
+      },
+      "renewal_30": {
+        "subject": "WTIA 會籍將於 30 日後續期",
+        "preview": "讓你的會員權益保持生效。",
+        "heading": "你的會籍快將續期",
+        "body": "{recipientName}，你好！你的 WTIA 會籍將於 30 日後續期，請立即查閱詳情，避免服務中斷。",
+        "cta": "查閱續期詳情"
+      },
+      "renewal_14": {
+        "subject": "WTIA 會籍將於 14 日後續期",
+        "preview": "續期日前的最後提示。",
+        "heading": "你的會籍將於兩星期後續期",
+        "body": "{recipientName}，你好！你的 WTIA 會籍預定於 14 日後續期，請核對資料或聯絡我們尋求協助。",
+        "cta": "管理會籍"
+      },
+      "dunning_0": {
+        "subject": "你的 WTIA 會籍付款需要處理",
+        "preview": "我們未能完成你的會籍付款。",
+        "heading": "請檢查你的付款資料",
+        "body": "{recipientName}，你好！我們未能完成 WTIA 會籍付款。請更新付款資料，以保持會員服務生效。",
+        "cta": "更新付款資料"
+      },
+      "dunning_3": {
+        "subject": "WTIA 會籍付款仍需處理",
+        "preview": "請更新資料，避免會員服務中斷。",
+        "heading": "你的會籍付款尚未完成",
+        "body": "{recipientName}，你好！你的 WTIA 會籍付款仍未完成，請盡快更新付款資料。",
+        "cta": "處理付款"
+      },
+      "dunning_7": {
+        "subject": "WTIA 會籍付款最後提示",
+        "preview": "你的會員服務可能會中斷。",
+        "heading": "保持你的 WTIA 會籍生效",
+        "body": "{recipientName}，你好！我們仍未能完成會籍付款。請立即處理，以免失去會員服務。",
+        "cta": "修正付款資料"
+      },
+      "lapsed_survey": {
+        "subject": "告訴我們你的 WTIA 體驗",
+        "preview": "你的意見有助我們改善會員旅程。",
+        "heading": "我們重視你的意見",
+        "body": "{recipientName}，你好！你的 WTIA 會籍現已失效。請告訴我們哪些體驗良好，以及有甚麼可以改善。",
+        "cta": "分享意見"
+      },
+      "winback_21": {
+        "subject": "與 WTIA 社群保持連繫",
+        "preview": "看看會員網絡的最新動向。",
+        "heading": "WTIA 還有更多機遇等你發掘",
+        "body": "{recipientName}，你好！探索 WTIA 社群的最新活動、人脈及業界發展機遇。",
+        "cta": "查看最新動向"
+      },
+      "winback_60": {
+        "subject": "再次連繫 WTIA",
+        "preview": "重新加入香港科技社群。",
+        "heading": "期待再次歡迎你加入",
+        "body": "{recipientName}，你好！再次連繫 WTIA，重拾支援你下一階段的社群、活動及發展機遇。",
+        "cta": "探索會員計劃"
+      },
+      "lead_ack": {
+        "subject": "WTIA 已收到你的查詢",
+        "preview": "我們的團隊將盡快與你聯絡。",
+        "heading": "感謝你聯絡 WTIA",
+        "body": "{recipientName}，你好！我們已收到你的查詢，WTIA 團隊將會查閱資料並盡快跟進。",
+        "cta": "瀏覽 WTIA"
+      },
+      "lead_staff_notify": {
+        "subject": "新的 WTIA 會籍查詢",
+        "preview": "有準會員需要團隊跟進。",
+        "heading": "新的潛在會員等候處理",
+        "body": "{recipientName} 已提交 WTIA 會籍查詢。請查閱資料並安排下一步跟進。",
+        "cta": "查閱查詢"
+      },
+      "approval_request": {
+        "subject": "WTIA 審批要求等候處理",
+        "preview": "可信應用程式操作需要你的決定。",
+        "heading": "有一項審批等候處理",
+        "body": "{recipientName}，你好！一項可信應用程式要求正等候你審批。請開啟審批佇列，查閱安全摘要並記錄決定。",
+        "cta": "查閱審批"
+      },
+      "campaign_generic": {
+        "subject": "WTIA 最新消息",
+        "preview": "WTIA 社群的消息及機遇。",
+        "heading": "WTIA 社群最新動向",
+        "body": "{recipientName}，你好！探索為 WTIA 會員精選的最新消息、活動及發展機遇。",
+        "cta": "閱讀最新消息"
+      }
+    }
+  },
+  "Unsubscribe": {
+    "metaTitle": "電郵偏好設定｜WTIA",
+    "metaDescription": "更新你的 WTIA 推廣電郵偏好。",
+    "eyebrow": "電郵偏好設定",
+    "confirmTitle": "停止接收 WTIA 推廣電郵？",
+    "confirmDescription": "確認後，我們將停止發送推廣電郵；與會籍及服務相關的交易電郵仍會繼續發送。",
+    "confirmAction": "取消訂閱",
+    "successTitle": "已停止推廣電郵",
+    "successDescription": "你的偏好已更新，日後不會再收到 WTIA 推廣電郵。",
+    "invalidTitle": "此取消訂閱連結無效",
+    "invalidDescription": "連結可能已過期或已被取代。如仍需協助，請聯絡 WTIA。"
+  },
+  "Home": {
+    "metaTitle": "WTIA｜創新香港",
+    "metaDescription": "連繫香港及大灣區創新力量，接通全球市場。",
+    "eyebrow": "創新香港",
+    "title": "連繫大灣區創新力量，走向國際舞台。",
+    "summary": "連接香港、大灣區及亞洲創科社群與全球科技市場的跨境平台。",
+    "imageAlt": "香港創科社群",
+    "featuresTitle": "連繫社群，推動成長",
+    "featuresIntro": "WTIA 透過實際機遇凝聚創科社群。",
+    "features": {
+      "connect": {
+        "title": "連繫",
+        "description": "連接業界、投資者及區域夥伴。"
+      },
+      "accelerate": {
+        "title": "加速",
+        "description": "透過專項計劃把創意轉化為市場機遇。"
+      },
+      "represent": {
+        "title": "代表",
+        "description": "為無線科技業界建立清晰而共同的聲音。"
       }
     },
-    "Unsubscribe": {"metaTitle": "電郵偏好設定｜WTIA", "metaDescription": "更新你的 WTIA 推廣電郵偏好。", "eyebrow": "電郵偏好設定", "confirmTitle": "停止接收 WTIA 推廣電郵？", "confirmDescription": "確認後，我們將停止發送推廣電郵；與會籍及服務相關的交易電郵仍會繼續發送。", "confirmAction": "取消訂閱", "successTitle": "已停止推廣電郵", "successDescription": "你的偏好已更新，日後不會再收到 WTIA 推廣電郵。", "invalidTitle": "此取消訂閱連結無效", "invalidDescription": "連結可能已過期或已被取代。如仍需協助，請聯絡 WTIA。"},
-    "Home":  {
-                 "metaTitle":  "WTIA｜創新香港",
-                 "metaDescription":  "連繫香港及大灣區創新力量，接通全球市場。",
-                 "eyebrow":  "創新香港",
-                 "title":  "連繫大灣區創新力量，走向國際舞台。",
-                 "summary":  "連接香港、大灣區及亞洲創科社群與全球科技市場的跨境平台。",
-                 "imageAlt":  "香港創科社群",
-                 "featuresTitle":  "連繫社群，推動成長",
-                 "featuresIntro":  "WTIA 透過實際機遇凝聚創科社群。",
-                 "features":  {
-                                  "connect":  {
-                                                  "title":  "連繫",
-                                                  "description":  "連接業界、投資者及區域夥伴。"
-                                              },
-                                  "accelerate":  {
-                                                     "title":  "加速",
-                                                     "description":  "透過專項計劃把創意轉化為市場機遇。"
-                                                 },
-                                  "represent":  {
-                                                    "title":  "代表",
-                                                    "description":  "為無線科技業界建立清晰而共同的聲音。"
-                                                }
-                              },
-                 "statsTitle":  "服務整個創科生態",
-                 "stats":  {
-                               "0":  {
-                                         "value":  "4",
-                                         "label":  "重點計劃"
-                                     },
-                               "1":  {
-                                         "value":  "2",
-                                         "label":  "工作語言"
-                                     },
-                               "2":  {
-                                         "value":  "1",
-                                         "label":  "互聯創科社群"
-                                     }
-                           },
-                 "programsTitle":  "計劃與獎項",
-                 "programsIntro":  "探索 WTIA 推動人才、創新及業界認可的項目。",
-                 "programs":  {
-                                  "cpai":  {
-                                               "title":  "CPAI",
-                                               "description":  "支援應用創新的專項計劃。"
-                                           },
-                                  "hkict":  {
-                                                "title":  "香港資訊及通訊科技獎",
-                                                "description":  "表揚香港科技界的卓越成果。"
-                                            },
-                                  "tct":  {
-                                              "title":  "TCT",
-                                              "description":  "連接科技、能力與人才。"
-                                          },
-                                  "asa":  {
-                                              "title":  "亞洲智能應用程式大獎",
-                                              "description":  "嘉許亞洲優秀智能應用程式。"
-                                          }
-                              },
-                 "viewProgram":  "查看計劃"
-             },
-    "About":  {
-                  "metaTitle":  "關於 WTIA",
-                  "metaDescription":  "了解 WTIA 在香港無線科技社群的角色。",
-                  "eyebrow":  "關於 WTIA",
-                  "title":  "凝聚無線科技業界的共同力量。",
-                  "summary":  "WTIA 匯聚會員、夥伴及公共持份者，推動香港創科生態發展。",
-                  "imageAlt":  "香港創科社群",
-                  "historyTitle":  "我們的角色",
-                  "historyIntro":  "我們以實際機遇連接業界，促進創新、人才及區域發展。",
-                  "connect":  {
-                                  "title":  "連接生態",
-                                  "description":  "連繫會員、夥伴、投資者及市場。"
-                              },
-                  "advance":  {
-                                  "title":  "推動創新",
-                                  "description":  "以計劃支援科技團隊學習、展示及成長。"
-                              },
-                  "represent":  {
-                                    "title":  "代表業界",
-                                    "description":  "把業界經驗帶進具建設性的公共及產業對話。"
-                                }
-              },
-    "Chairman":  {
-                     "metaTitle":  "主席的話｜WTIA",
-                     "metaDescription":  "WTIA 主席的話。",
-                     "eyebrow":  "領導",
-                     "title":  "主席的話",
-                     "summary":  "攜手讓香港持續連接新興科技機遇。",
-                     "messageTitle":  "共同承諾",
-                     "message":  "會員分享經驗、保持好奇並積極合作，是本會最重要的力量。WTIA 將繼續在創新與機遇之間建立實際橋樑。",
-                     "signature":  "WTIA 主席"
-                 },
-    "Committees":  {
-                       "metaTitle":  "委員會｜WTIA",
-                       "metaDescription":  "了解 WTIA 委員會如何支援管治、計劃及會員。",
-                       "eyebrow":  "管治",
-                       "title":  "把參與轉化為行動的委員會。",
-                       "summary":  "由會員帶領的委員會為 WTIA 重點工作提供監督及專業意見。",
-                       "structureTitle":  "委員會架構",
-                       "executive":  {
-                                         "title":  "執行委員會",
-                                         "description":  "領導策略、管治及協會優先工作。"
-                                     },
-                       "innovation":  {
-                                          "title":  "創新委員會",
-                                          "description":  "就科技應用及業界發展策劃計劃。"
-                                      },
-                       "membership":  {
-                                          "title":  "會員委員會",
-                                          "description":  "提升會員價值、參與及社群連繫。"
-                                      }
-                   },
-    "Membership":  {
-                       "metaTitle":  "會員計劃｜WTIA",
-                       "metaDescription":  "比較 WTIA 會員級別及權益。",
-                       "eyebrow":  "會員計劃",
-                       "title":  "在香港創科社群找到你的定位。",
-                       "summary":  "選擇配合你參與、成長及貢獻方式的會員級別。",
-                       "tiersTitle":  "會員級別",
-                       "tiersIntro":  "以年費為主要顯示；只有個人及初創級別提供月費選項。",
-                       "comingSoon":  "M1 將推出自助入會；現階段請聯絡 WTIA 申請。",
-                       "joinAction":  "選擇此計劃",
-                       "benefits":  {
-                                        "network":  "社群及交流機會",
-                                        "programs":  "參與計劃",
-                                        "visibility":  "WTIA 展示機會"
-                                    },
-                       "tiers":  {
-                                     "community":  {
-                                                       "name":  "社群",
-                                                       "price":  "免費",
-                                                       "cadence":  "毋須年費",
-                                                       "description":  "接收 WTIA 公開消息及機遇。"
-                                                   },
-                                     "individual":  {
-                                                        "name":  "個人",
-                                                        "price":  "港幣 500 元",
-                                                        "cadence":  "每年 · 可選港幣 50 元月費",
-                                                        "description":  "適合拓展科技網絡的專業人士。"
-                                                    },
-                                     "startup":  {
-                                                     "name":  "初創",
-                                                     "price":  "港幣 1,200 元",
-                                                     "cadence":  "每年 · 可選港幣 120 元月費",
-                                                     "description":  "適合早期科技公司及團隊。"
-                                                 },
-                                     "corporate":  {
-                                                       "name":  "企業",
-                                                       "price":  "港幣 1,800 元",
-                                                       "cadence":  "每年",
-                                                       "description":  "適合積極參與創科生態的成熟機構。"
-                                                   },
-                                     "platinum":  {
-                                                      "name":  "白金",
-                                                      "price":  "港幣 4,800 元",
-                                                      "cadence":  "每年",
-                                                      "description":  "適合尋求深度業界參與的機構。"
-                                                  },
-                                     "patron":  {
-                                                    "name":  "贊助人",
-                                                    "price":  "聯絡我們",
-                                                    "cadence":  "個別審批",
-                                                    "description":  "適合支持 WTIA 使命的策略夥伴。"
-                                                }
-                                 },
-                       "faqTitle":  "會員常見問題",
-                       "faq":  {
-                                   "0":  {
-                                             "question":  "何時可以網上入會？",
-                                             "answer":  "自助登記及付款計劃於 M1 推出；現階段 WTIA 可協助處理申請。"
-                                         },
-                                   "1":  {
-                                             "question":  "哪些級別提供月費？",
-                                             "answer":  "只有個人及初創級別提供月費選項。"
-                                         },
-                                   "2":  {
-                                             "question":  "如何申請贊助人會籍？",
-                                             "answer":  "先提交聯絡要求，再由 WTIA 職員人手審批。"
-                                         }
-                               }
-                   },
-    "Join":  {
-                 "backToMembership":  "返回會員計劃",
-                 "title":  "加入 WTIA",
-                 "authDescription":  "輸入電郵地址，我們會傳送安全登入連結，讓你返回此申請。",
-                 "magicLinkSent":  "請查閱電郵中的安全登入連結；連結會帶你返回此申請。",
-                 "sendMagicLink":  "傳送安全登入連結",
-                 "sending":  "傳送中…",
-                 "saving":  "儲存中…",
-                 "continue":  "繼續",
-                 "submitApplication":  "提交申請",
-                 "invalidPlanTitle":  "選擇會員計劃",
-                 "invalidPlanDescription":  "此會員計劃並不可用。請返回會員頁面選擇現有計劃。",
-                 "profileTitle":  "介紹你的資料",
-                 "profileDescription":  "你的個人資料可協助 WTIA 支援會籍及繼續處理申請。",
-                 "companyTitle":  "確認公司資料",
-                 "companyDescription":  "請提供公司資料。我們會建立 WTIA 公司檔案，並將你設為首位擁有人。",
-                 "steps":  {
-                               "plan":  "選擇計劃",
-                               "auth":  "登入",
-                               "profile":  "個人資料",
-                               "company":  "公司資料"
-                           },
-                 "plans":  {
-                               "community":  "社群",
-                               "startup":  "初創",
-                               "corporate":  "企業",
-                               "patron":  "贊助人"
-                           },
-                 "fields":  {
-                                "email":  "電郵地址",
-                                "displayName":  "顯示名稱",
-                                "phone":  "電話（選填）",
-                                "jobTitle":  "職銜（選填）",
-                                "companyId":  "WTIA 公司識別碼",
-                                "legalName":  "公司法定名稱",
-                                "companyDisplayName":  "公司公開名稱",
-                                "website":  "網站（選填）",
-                                "industry":  "行業（選填）",
-                                "sizeBand":  "公司規模（選填）",
-                                "description":  "公司簡介（選填）"
-                            },
-                 "errors":  {
-                                "required":  "請填寫此必填欄位。",
-                                "email":  "請輸入有效電郵地址。",
-                                "auth":  "未能傳送登入連結，請再試一次。",
-                                "save":  "未能儲存申請，請再試一次。",
-                                "company":  "請使用你有權管理的公司。",
-                                "profile":  "提交公司資料前，請先完成個人資料。",
-                                "companyNotAllowed":  "此計劃不接受公司資料。"
-                            },
-                 "status":  {
-                                "complete":  {
-                                                 "title":  "歡迎加入 WTIA",
-                                                 "description":  "你的社群會籍已啟用。會員平台將於 M1 下一步開放。"
-                                             },
-                                "checkout":  {
-                                                 "title":  "申請已儲存",
-                                                 "description":  "你的付費會籍已可進入安全付款程序；付款設定將於下一個 M1 任務完成。"
-                                             },
-                                "review":  {
-                                               "title":  "申請審批中",
-                                               "description":  "WTIA 將審批你的贊助人申請，現時不會收取任何款項。"
-                                           }
-                            }
-             },
-    "programs":  {
-                     "cpai":  {
-                                  "title":  "CPAI",
-                                  "description":  "支援應用創新的 WTIA 計劃。",
-                                  "status":  "計劃詳情正在整理。"
-                              },
-                     "hkict":  {
-                                   "title":  "香港資訊及通訊科技獎",
-                                   "description":  "表揚香港科技界的卓越成果。",
-                                   "status":  "計劃詳情正在整理。"
-                               },
-                     "tct":  {
-                                 "title":  "TCT",
-                                 "description":  "連接科技、能力與人才。",
-                                 "status":  "計劃詳情正在整理。"
-                             },
-                     "asa":  {
-                                 "title":  "亞洲智能應用程式大獎",
-                                 "description":  "嘉許亞洲優秀智能應用程式。",
-                                 "status":  "計劃詳情正在整理。"
-                             }
-                 },
-    "LaunchPad":  {
-                      "metaTitle":  "創科起動｜WTIA",
-                      "metaDescription":  "預覽 WTIA 未來的全球化團隊培訓模式。",
-                      "eyebrow":  "創科起動",
-                      "title":  "以全球市場為目標的科技團隊。",
-                      "description":  "創科起動將以小組形式協助科技團隊拓展國際市場，提供實用的市場連接及同儕學習。",
-                      "cohort":  "小組模式將於後續里程碑推出；M0 不提供即時申請或資金配對。",
-                      "milestone":  "申請及資金配對將於後續里程碑推出。"
-                  },
-    "Showcase":  {
-                     "metaTitle":  "會員展示｜WTIA",
-                     "metaDescription":  "預覽 WTIA 未來的會員展示體驗。",
-                     "eyebrow":  "會員展示",
-                     "title":  "會員展示",
-                     "description":  "會員目錄及市集功能計劃於 M5 推出。",
-                     "milestone":  "M5 — 會員資料功能將於目錄準備就緒後推出。"
-                 },
-    "AiOps":  {
-                  "metaTitle":  "AI-Ops｜WTIA",
-                  "metaDescription":  "預覽 WTIA 計劃中的 AI 營運儀表板。",
-                  "eyebrow":  "AI-Ops",
-                  "title":  "AI 營運儀表板預覽",
-                  "description":  "經核實的代理遙測資料準備就緒後，AI 營運儀表板將於 M4 推出。",
-                  "milestone":  "M4 — M0 不會發布營運指標。"
-              }  ,"Events": {
+    "statsTitle": "服務整個創科生態",
+    "stats": {
+      "0": {
+        "value": "4",
+        "label": "重點計劃"
+      },
+      "1": {
+        "value": "2",
+        "label": "工作語言"
+      },
+      "2": {
+        "value": "1",
+        "label": "互聯創科社群"
+      }
+    },
+    "programsTitle": "計劃與獎項",
+    "programsIntro": "探索 WTIA 推動人才、創新及業界認可的項目。",
+    "programs": {
+      "cpai": {
+        "title": "CPAI",
+        "description": "支援應用創新的專項計劃。"
+      },
+      "hkict": {
+        "title": "香港資訊及通訊科技獎",
+        "description": "表揚香港科技界的卓越成果。"
+      },
+      "tct": {
+        "title": "TCT",
+        "description": "連接科技、能力與人才。"
+      },
+      "asa": {
+        "title": "亞洲智能應用程式大獎",
+        "description": "嘉許亞洲優秀智能應用程式。"
+      }
+    },
+    "viewProgram": "查看計劃"
+  },
+  "About": {
+    "metaTitle": "關於 WTIA",
+    "metaDescription": "了解 WTIA 在香港無線科技社群的角色。",
+    "eyebrow": "關於 WTIA",
+    "title": "凝聚無線科技業界的共同力量。",
+    "summary": "WTIA 匯聚會員、夥伴及公共持份者，推動香港創科生態發展。",
+    "imageAlt": "香港創科社群",
+    "historyTitle": "我們的角色",
+    "historyIntro": "我們以實際機遇連接業界，促進創新、人才及區域發展。",
+    "connect": {
+      "title": "連接生態",
+      "description": "連繫會員、夥伴、投資者及市場。"
+    },
+    "advance": {
+      "title": "推動創新",
+      "description": "以計劃支援科技團隊學習、展示及成長。"
+    },
+    "represent": {
+      "title": "代表業界",
+      "description": "把業界經驗帶進具建設性的公共及產業對話。"
+    }
+  },
+  "Chairman": {
+    "metaTitle": "主席的話｜WTIA",
+    "metaDescription": "WTIA 主席的話。",
+    "eyebrow": "領導",
+    "title": "主席的話",
+    "summary": "攜手讓香港持續連接新興科技機遇。",
+    "messageTitle": "共同承諾",
+    "message": "會員分享經驗、保持好奇並積極合作，是本會最重要的力量。WTIA 將繼續在創新與機遇之間建立實際橋樑。",
+    "signature": "WTIA 主席"
+  },
+  "Committees": {
+    "metaTitle": "委員會｜WTIA",
+    "metaDescription": "了解 WTIA 委員會如何支援管治、計劃及會員。",
+    "eyebrow": "管治",
+    "title": "把參與轉化為行動的委員會。",
+    "summary": "由會員帶領的委員會為 WTIA 重點工作提供監督及專業意見。",
+    "structureTitle": "委員會架構",
+    "executive": {
+      "title": "執行委員會",
+      "description": "領導策略、管治及協會優先工作。"
+    },
+    "innovation": {
+      "title": "創新委員會",
+      "description": "就科技應用及業界發展策劃計劃。"
+    },
+    "membership": {
+      "title": "會員委員會",
+      "description": "提升會員價值、參與及社群連繫。"
+    }
+  },
+  "Membership": {
+    "metaTitle": "會員計劃｜WTIA",
+    "metaDescription": "比較 WTIA 會員級別及權益。",
+    "eyebrow": "會員計劃",
+    "title": "在香港創科社群找到你的定位。",
+    "summary": "選擇配合你參與、成長及貢獻方式的會員級別。",
+    "tiersTitle": "會員級別",
+    "tiersIntro": "以年費為主要顯示；只有個人及初創級別提供月費選項。",
+    "comingSoon": "M1 將推出自助入會；現階段請聯絡 WTIA 申請。",
+    "joinAction": "選擇此計劃",
+    "benefits": {
+      "network": "社群及交流機會",
+      "programs": "參與計劃",
+      "visibility": "WTIA 展示機會"
+    },
+    "tiers": {
+      "community": {
+        "name": "社群",
+        "price": "免費",
+        "cadence": "毋須年費",
+        "description": "接收 WTIA 公開消息及機遇。"
+      },
+      "individual": {
+        "name": "個人",
+        "price": "港幣 500 元",
+        "cadence": "每年 · 可選港幣 50 元月費",
+        "description": "適合拓展科技網絡的專業人士。"
+      },
+      "startup": {
+        "name": "初創",
+        "price": "港幣 1,200 元",
+        "cadence": "每年 · 可選港幣 120 元月費",
+        "description": "適合早期科技公司及團隊。"
+      },
+      "corporate": {
+        "name": "企業",
+        "price": "港幣 1,800 元",
+        "cadence": "每年",
+        "description": "適合積極參與創科生態的成熟機構。"
+      },
+      "platinum": {
+        "name": "白金",
+        "price": "港幣 4,800 元",
+        "cadence": "每年",
+        "description": "適合尋求深度業界參與的機構。"
+      },
+      "patron": {
+        "name": "贊助人",
+        "price": "聯絡我們",
+        "cadence": "個別審批",
+        "description": "適合支持 WTIA 使命的策略夥伴。"
+      }
+    },
+    "faqTitle": "會員常見問題",
+    "faq": {
+      "0": {
+        "question": "何時可以網上入會？",
+        "answer": "自助登記及付款計劃於 M1 推出；現階段 WTIA 可協助處理申請。"
+      },
+      "1": {
+        "question": "哪些級別提供月費？",
+        "answer": "只有個人及初創級別提供月費選項。"
+      },
+      "2": {
+        "question": "如何申請贊助人會籍？",
+        "answer": "先提交聯絡要求，再由 WTIA 職員人手審批。"
+      }
+    }
+  },
+  "Join": {
+    "backToMembership": "返回會員計劃",
+    "title": "加入 WTIA",
+    "authDescription": "輸入電郵地址，我們會傳送安全登入連結，讓你返回此申請。",
+    "magicLinkSent": "請查閱電郵中的安全登入連結；連結會帶你返回此申請。",
+    "sendMagicLink": "傳送安全登入連結",
+    "sending": "傳送中…",
+    "saving": "儲存中…",
+    "continue": "繼續",
+    "submitApplication": "提交申請",
+    "invalidPlanTitle": "選擇會員計劃",
+    "invalidPlanDescription": "此會員計劃並不可用。請返回會員頁面選擇現有計劃。",
+    "profileTitle": "介紹你的資料",
+    "profileDescription": "你的個人資料可協助 WTIA 支援會籍及繼續處理申請。",
+    "companyTitle": "確認公司資料",
+    "companyDescription": "請提供公司資料。我們會建立 WTIA 公司檔案，並將你設為首位擁有人。",
+    "steps": {
+      "plan": "選擇計劃",
+      "auth": "登入",
+      "profile": "個人資料",
+      "company": "公司資料"
+    },
+    "plans": {
+      "community": "社群",
+      "startup": "初創",
+      "corporate": "企業",
+      "patron": "贊助人"
+    },
+    "fields": {
+      "email": "電郵地址",
+      "displayName": "顯示名稱",
+      "phone": "電話（選填）",
+      "jobTitle": "職銜（選填）",
+      "companyId": "WTIA 公司識別碼",
+      "legalName": "公司法定名稱",
+      "companyDisplayName": "公司公開名稱",
+      "website": "網站（選填）",
+      "industry": "行業（選填）",
+      "sizeBand": "公司規模（選填）",
+      "description": "公司簡介（選填）"
+    },
+    "errors": {
+      "required": "請填寫此必填欄位。",
+      "email": "請輸入有效電郵地址。",
+      "auth": "未能傳送登入連結，請再試一次。",
+      "save": "未能儲存申請，請再試一次。",
+      "company": "請使用你有權管理的公司。",
+      "profile": "提交公司資料前，請先完成個人資料。",
+      "companyNotAllowed": "此計劃不接受公司資料。"
+    },
+    "status": {
+      "complete": {
+        "title": "歡迎加入 WTIA",
+        "description": "你的社群會籍已啟用。會員平台將於 M1 下一步開放。"
+      },
+      "checkout": {
+        "title": "申請已儲存",
+        "description": "你的付費會籍已可進入安全付款程序；付款設定將於下一個 M1 任務完成。"
+      },
+      "review": {
+        "title": "申請審批中",
+        "description": "WTIA 將審批你的贊助人申請，現時不會收取任何款項。"
+      }
+    }
+  },
+  "programs": {
+    "cpai": {
+      "title": "CPAI",
+      "description": "支援應用創新的 WTIA 計劃。",
+      "status": "計劃詳情正在整理。"
+    },
+    "hkict": {
+      "title": "香港資訊及通訊科技獎",
+      "description": "表揚香港科技界的卓越成果。",
+      "status": "計劃詳情正在整理。"
+    },
+    "tct": {
+      "title": "TCT",
+      "description": "連接科技、能力與人才。",
+      "status": "計劃詳情正在整理。"
+    },
+    "asa": {
+      "title": "亞洲智能應用程式大獎",
+      "description": "嘉許亞洲優秀智能應用程式。",
+      "status": "計劃詳情正在整理。"
+    }
+  },
+  "LaunchPad": {
+    "metaTitle": "創科起動｜WTIA",
+    "metaDescription": "預覽 WTIA 未來的全球化團隊培訓模式。",
+    "eyebrow": "創科起動",
+    "title": "以全球市場為目標的科技團隊。",
+    "description": "創科起動將以小組形式協助科技團隊拓展國際市場，提供實用的市場連接及同儕學習。",
+    "cohort": "小組模式將於後續里程碑推出；M0 不提供即時申請或資金配對。",
+    "milestone": "申請及資金配對將於後續里程碑推出。"
+  },
+  "Showcase": {
+    "metaTitle": "會員展示｜WTIA",
+    "metaDescription": "預覽 WTIA 未來的會員展示體驗。",
+    "eyebrow": "會員展示",
+    "title": "會員展示",
+    "description": "會員目錄及市集功能計劃於 M5 推出。",
+    "milestone": "M5 — 會員資料功能將於目錄準備就緒後推出。"
+  },
+  "AiOps": {
+    "metaTitle": "公開 AI-Ops｜WTIA",
+    "metaDescription": "Live, privacy-safe metrics showing how WTIA's AI agents perform, escalate and cost.",
+    "eyebrow": "AI-Ops in public",
+    "title": "公開量度 AI 營運",
+    "description": "Hourly, privacy-safe evidence from WTIA's Concierge and scheduled agents.",
+    "currentMonth": "Current Hong Kong month",
+    "partialMonth": "Month to date",
+    "lastUpdated": "Last updated",
+    "fresh": "Metrics refreshed on schedule",
+    "stale": "Metrics may be delayed",
+    "empty": "No metrics are available for this month yet",
+    "unavailable": "指標暫時無法提供",
+    "notEnoughData": "Not enough data",
+    "conversations": "Conversations",
+    "resolved": "Agent resolved",
+    "firstResponse": "Median first response",
+    "csat": "CSAT",
+    "escalation": "Escalation rate",
+    "failure": "Failure rate",
+    "hoursSaved": "Estimated staff hours saved",
+    "llmCost": "Monthly LLM cost",
+    "responses": "responses",
+    "samples": "samples",
+    "hours": "hours",
+    "resolutionTarget": "Target: 70% or higher",
+    "csatTarget": "Target: 4.5 / 5 or higher",
+    "renewalHeading": "Twelve-month renewal trend",
+    "overallRenewal": "Overall renewal",
+    "firstYearRenewal": "First-year renewal",
+    "overallTarget": "Overall target: 88%",
+    "firstYearTarget": "First-year target: 82%",
+    "renewalChartTitle": "Monthly renewal rates",
+    "renewalChartDescription": "Overall and first-year renewal rates for the latest twelve Hong Kong months.",
+    "month": "Month",
+    "paid": "Paid",
+    "due": "Due",
+    "rate": "Rate",
+    "methodologyHeading": "How these metrics are calculated",
+    "methodologyDescription": "Aggregates refresh hourly. Estimated time saved equals agent-resolved conversations multiplied by six minutes. No member-level data is published.",
+    "architectureHeading": "How WTIA AI-Ops works",
+    "architectureDescription": "Web and WhatsApp requests pass through the Concierge runtime and guarded tools. Scheduled jobs use authenticated routes. Generated actions remain behind approval or publication gates.",
+    "approvalGate": "Human approval gate",
+    "publicationGate": "Publication gate",
+    "evidenceHeading": "Build evidence",
+    "buildLogs": "Published build logs",
+    "source": "Source repository",
+    "commits": "Commit and build history",
+    "deployment": "Live deployment",
+    "acceptance": "M4 acceptance evidence",
+    "noBuildLogs": "No published build logs are available."
+  },
+  "Events": {
     "metaTitle": "活動 | WTIA",
     "metaDescription": "探索 WTIA 活動及社群聚會。",
     "eyebrow": "活動",
@@ -420,26 +614,135 @@
     "retry": "再試一次"
   },
   "Portal": {
-    "navigation": "會員平台導覽", "dashboard": "控制台", "profile": "我的個人資料", "company": "公司資料", "signOut": "登出",
-    "dashboardTitle": "你的 WTIA 控制台", "welcome": "歡迎回來，{name}。", "membershipStatus": "會員狀態", "membershipPlan": "{plan} 會員", "plans": {"community": "社群", "startup": "初創", "corporate": "企業", "patron": "贊助"},
-    "onboarding": "啟用進度", "onboardingProgress": "已完成 {completed} / {total} 個步驟", "nextAction": "下一步",
-    "actions": {"complete-profile": "完成個人資料", "complete-company": "完成公司資料", "none": "已全部完成"},
-    "status": {
-      "active": {"label": "已啟用", "title": "會員已啟用", "description": "你可以使用 WTIA 會員福利及服務。"},
-      "past_due": {"label": "付款逾期", "title": "付款需要處理", "description": "請更新付款資料以保持會員有效。"},
-      "cancel_at_period_end": {"label": "即將結束", "title": "會員即將結束", "description": "在本期結束前，你仍可使用會員服務。"},
-      "pending_payment": {"label": "付款待處理", "title": "付款待處理", "description": "完成付款即可啟用 WTIA 會員。"},
-      "pending_review": {"label": "審核中", "title": "申請審核中", "description": "WTIA 完成審核後會與你聯絡。"}
+    "navigation": "會員平台導覽",
+    "dashboard": "控制台",
+    "profile": "我的個人資料",
+    "company": "公司資料",
+    "signOut": "登出",
+    "dashboardTitle": "你的 WTIA 控制台",
+    "welcome": "歡迎回來，{name}。",
+    "membershipStatus": "會員狀態",
+    "membershipPlan": "{plan} 會員",
+    "plans": {
+      "community": "社群",
+      "startup": "初創",
+      "corporate": "企業",
+      "patron": "贊助"
     },
-    "profileTitle": "我的個人資料", "profileDescription": "更新你的個人資料及目錄顯示選項。",
-    "companyTitle": "公司資料", "companyDescription": "公司擁有人及管理員可以更新公司資料。", "companyEmpty": "你目前的會員資格沒有公司資料。",
-    "save": "儲存變更", "fields": {"displayName": "顯示名稱", "phone": "電話", "jobTitle": "職位", "website": "網站", "legalName": "法定名稱", "industry": "行業", "sizeBand": "公司規模", "description": "簡介", "directoryVisible": "在 WTIA 會員目錄顯示此資料"},
+    "onboarding": "啟用進度",
+    "onboardingProgress": "已完成 {completed} / {total} 個步驟",
+    "nextAction": "下一步",
+    "actions": {
+      "complete-profile": "完成個人資料",
+      "complete-company": "完成公司資料",
+      "none": "已全部完成"
+    },
+    "status": {
+      "active": {
+        "label": "已啟用",
+        "title": "會員已啟用",
+        "description": "你可以使用 WTIA 會員福利及服務。"
+      },
+      "past_due": {
+        "label": "付款逾期",
+        "title": "付款需要處理",
+        "description": "請更新付款資料以保持會員有效。"
+      },
+      "cancel_at_period_end": {
+        "label": "即將結束",
+        "title": "會員即將結束",
+        "description": "在本期結束前，你仍可使用會員服務。"
+      },
+      "pending_payment": {
+        "label": "付款待處理",
+        "title": "付款待處理",
+        "description": "完成付款即可啟用 WTIA 會員。"
+      },
+      "pending_review": {
+        "label": "審核中",
+        "title": "申請審核中",
+        "description": "WTIA 完成審核後會與你聯絡。"
+      }
+    },
+    "profileTitle": "我的個人資料",
+    "profileDescription": "更新你的個人資料及目錄顯示選項。",
+    "companyTitle": "公司資料",
+    "companyDescription": "公司擁有人及管理員可以更新公司資料。",
+    "companyEmpty": "你目前的會員資格沒有公司資料。",
+    "save": "儲存變更",
+    "fields": {
+      "displayName": "顯示名稱",
+      "phone": "電話",
+      "jobTitle": "職位",
+      "website": "網站",
+      "legalName": "法定名稱",
+      "industry": "行業",
+      "sizeBand": "公司規模",
+      "description": "簡介",
+      "directoryVisible": "在 WTIA 會員目錄顯示此資料"
+    },
     "readOnly": "只有公司擁有人及管理員可以編輯這些資料。",
-    "directory": {"title":"會員名錄","description":"尋找選擇公開資料的 WTIA 會員。","search":"搜尋會員","empty":"找不到已選擇公開資料的會員。","next":"下一頁","previous":"上一頁","company":"公司","industry":"行業","sizeBand":"公司規模","markets":"市場"},
-    "events": {"title":"會員活動","description":"供會員參加的 WTIA 活動。","empty":"目前沒有即將舉行的活動。","date":"日期","venue":"地點","register":"登記","registering":"登記中……","registerSuccess":"已確認活動登記。","registerError":"未能為你登記此活動，請再試一次。"},
-    "documents": {"title":"文件及收據","description":"查閱 WTIA 已批准資源及你的付款收據。","empty":"目前沒有可用文件。","receipt":"收據","open":"開啟收據","resource":"資源"},
-    "billing": {"title":"帳單","description":"管理會員帳單及付款恢復。","manage":"管理帳單","recover":"繼續付款","empty":"目前沒有可用帳單操作。","error":"目前無法開啟帳單，請稍後再試。"},
-    "seats": {"title": "公司席位", "description": "邀請及管理代表公司參與 WTIA 的成員。", "empty": "目前沒有可用的公司席位。", "members": "成員", "pending": "待接受邀請", "capacity": "已預留 {used} / {limit} 個席位", "email": "電郵地址", "role": "角色", "invite": "邀請成員", "inviting": "正在發送邀請……", "revoke": "撤銷權限", "inviteRevoke": "取消邀請", "changeRole": "更改角色", "owner": "擁有人", "admin": "管理員", "member": "成員", "noPending": "沒有待接受邀請。", "errors": {"generic": "未能更新公司席位，請再試一次。"}}
+    "directory": {
+      "title": "會員名錄",
+      "description": "尋找選擇公開資料的 WTIA 會員。",
+      "search": "搜尋會員",
+      "empty": "找不到已選擇公開資料的會員。",
+      "next": "下一頁",
+      "previous": "上一頁",
+      "company": "公司",
+      "industry": "行業",
+      "sizeBand": "公司規模",
+      "markets": "市場"
+    },
+    "events": {
+      "title": "會員活動",
+      "description": "供會員參加的 WTIA 活動。",
+      "empty": "目前沒有即將舉行的活動。",
+      "date": "日期",
+      "venue": "地點",
+      "register": "登記",
+      "registering": "登記中……",
+      "registerSuccess": "已確認活動登記。",
+      "registerError": "未能為你登記此活動，請再試一次。"
+    },
+    "documents": {
+      "title": "文件及收據",
+      "description": "查閱 WTIA 已批准資源及你的付款收據。",
+      "empty": "目前沒有可用文件。",
+      "receipt": "收據",
+      "open": "開啟收據",
+      "resource": "資源"
+    },
+    "billing": {
+      "title": "帳單",
+      "description": "管理會員帳單及付款恢復。",
+      "manage": "管理帳單",
+      "recover": "繼續付款",
+      "empty": "目前沒有可用帳單操作。",
+      "error": "目前無法開啟帳單，請稍後再試。"
+    },
+    "seats": {
+      "title": "公司席位",
+      "description": "邀請及管理代表公司參與 WTIA 的成員。",
+      "empty": "目前沒有可用的公司席位。",
+      "members": "成員",
+      "pending": "待接受邀請",
+      "capacity": "已預留 {used} / {limit} 個席位",
+      "email": "電郵地址",
+      "role": "角色",
+      "invite": "邀請成員",
+      "inviting": "正在發送邀請……",
+      "revoke": "撤銷權限",
+      "inviteRevoke": "取消邀請",
+      "changeRole": "更改角色",
+      "owner": "擁有人",
+      "admin": "管理員",
+      "member": "成員",
+      "noPending": "沒有待接受邀請。",
+      "errors": {
+        "generic": "未能更新公司席位，請再試一次。"
+      }
+    }
   },
   "Concierge": {
     "_review": true,
@@ -472,83 +775,345 @@
     "feedbackError": "未能儲存你的意見，請再試一次。",
     "characterCount": "{count} / 2000"
   },
-  "Admin": {"brand": "WTIA", "title": "職員工作區", "description": "在受保護的職員專用工作區管理 WTIA 會員營運。", "navigation": {"label": "職員管理導覽", "segments": {
-    "eyebrow": "????",
-    "title": "????",
-    "description": "?????????????????????????????",
-    "filters": "????",
-    "preview": "??",
-    "tier": "????",
-    "status": "????",
-    "scoreMin": "????",
-    "scoreMax": "????",
-    "renewalWithinDays": "???????",
-    "sector": "??",
-    "lastLoginBeforeDays": "????????",
-    "save": "儲存分群",
-    "saving": "儲存中……",
-    "saveSuccess": "已儲存分群。",
-    "saveValidation": "請檢查已標示的分群欄位。",
-    "saveError": "未能儲存此分群，請再試一次。",
-    "nameEn": "??????",
-    "nameZh": "????????",
-    "corporate": "??",
-    "startup": "??",
-    "community": "??",
-    "patron": "??",
-    "active": "??",
-    "pastDue": "??",
-    "pendingReview": "???",
-    "caption": "???????",
-    "total": "????",
-    "empty": "??????????",
-    "name": "??",
-    "email": "??",
-    "company": "??",
-    "plan": "????",
-    "renewal": "????",
-    "score": "??",
-    "unavailable": "????",
-    "saved": "??????",
-    "export": "?? CSV"
-  },
-  "members": "會員", "segments": "分群", "atRisk": "高風險", "events": "活動", "approvals": "審批", "reports": "報告", "automations": "自動化"}, "members": {"title": "會員", "description": "搜尋會員檔案、公司、會籍及參與分數。", "search": "搜尋會員", "caption": "WTIA 會員列表", "empty": "沒有符合搜尋條件的會員。", "name": "姓名", "email": "電郵", "company": "公司", "plan": "計劃", "status": "狀態", "renewal": "續期", "score": "分數", "next": "下一頁", "previous": "上一頁", "unavailable": "未提供"}, "segments": {
-    "eyebrow": "????",
-    "title": "????",
-    "description": "?????????????????????????????",
-    "filters": "????",
-    "preview": "??",
-    "tier": "????",
-    "status": "????",
-    "scoreMin": "????",
-    "scoreMax": "????",
-    "renewalWithinDays": "???????",
-    "sector": "??",
-    "lastLoginBeforeDays": "????????",
-    "save": "儲存分群",
-    "saving": "儲存中……",
-    "saveSuccess": "已儲存分群。",
-    "saveValidation": "請檢查已標示的分群欄位。",
-    "saveError": "未能儲存此分群，請再試一次。",
-    "nameEn": "??????",
-    "nameZh": "????????",
-    "corporate": "??",
-    "startup": "??",
-    "community": "??",
-    "patron": "??",
-    "active": "??",
-    "pastDue": "??",
-    "pendingReview": "???",
-    "caption": "???????",
-    "total": "????",
-    "empty": "??????????",
-    "name": "??",
-    "email": "??",
-    "company": "??",
-    "plan": "????",
-    "renewal": "????",
-    "score": "??",
-    "unavailable": "????",
-    "saved": "??????",
-    "export": "?? CSV", "queue": "排入活動佇列", "template": "範本", "templateRenewal": "續期提示", "templateUpdate": "會員更新", "queued": "已排入活動佇列", "existing": "現有活動", "recipients": "位收件人", "newDraft": "建立新活動", "error": "未能排入活動佇列，請再試一次。"
-  }, "atRisk": {"eyebrow": "\u9ad8\u98a8\u96aa\u6703\u54e1", "title": "\u9ad8\u98a8\u96aa\u7e8c\u671f\u540d\u55ae", "description": "\u95dc\u6ce8\u5206\u6578\u4f4e\u65bc 20 \u4e14\u8da8\u52e2\u4e0b\u964d\uff0c\u6216 90 \u65e5\u672a\u767b\u5165\u4e14 120 \u65e5\u5167\u7e8c\u671f\u7684\u6703\u54e1\u3002", "caption": "\u9ad8\u98a8\u96aa\u6703\u54e1\u540d\u55ae", "empty": "\u76ee\u524d\u6c92\u6709\u7b26\u5408\u689d\u4ef6\u7684\u9ad8\u98a8\u96aa\u6703\u54e1\u3002", "error": "\u66ab\u6642\u7121\u6cd5\u8f09\u5165\u9ad8\u98a8\u96aa\u540d\u55ae\uff0c\u8acb\u7a0d\u5f8c\u518d\u8a66\u3002", "name": "\u59d3\u540d", "company": "\u516c\u53f8", "tier": "\u8a08\u5283", "status": "\u72c0\u614b", "score": "\u5206\u6578", "trend": "\u8da8\u52e2", "renewal": "\u7e8c\u671f\u65e5", "evidence": "\u5206\u985e\u4f9d\u64da", "actions": "\u64cd\u4f5c", "unavailable": "\u672a\u63d0\u4f9b", "scoreEvidence": "\u5206\u6578\u4f4e\u65bc {score}", "renewalEvidence": "{days} \u65e5\u5167\u7e8c\u671f", "branchAEvidence": "\u5206\u6578\u4f4e\u65bc 20 \u4e14\u8da8\u52e2\u4e0b\u964d", "branchBEvidence": "90 \u65e5\u672a\u767b\u5165\u4e14 120 \u65e5\u5167\u7e8c\u671f", "member360": "\u6703\u54e1 360", "addNote": "\u65b0\u589e\u5099\u8a3b", "campaign": "\u5efa\u7acb\u63a8\u5ee3\u6d3b\u52d5", "plans": {"community": "\u793e\u7fa4", "startup": "\u521d\u5275", "corporate": "\u4f01\u696d", "patron": "\u8d0a\u52a9"}, "statuses": {"active": "\u751f\u6548", "pastDue": "\u903e\u671f"}}, "eventsMgmt": {"eyebrow":"\u6d3b\u52d5\u71df\u904b","title":"\u6d3b\u52d5\u7ba1\u7406","description":"\u5efa\u7acb\u3001\u767c\u4f48\u53ca\u7ba1\u7406\u6d3b\u52d5\u51fa\u5e2d\u3002","existing":"\u6d3b\u52d5","empty":"\u76ee\u524d\u6c92\u6709\u6d3b\u52d5\u3002","slug":"Slug","titleEn":"\u82f1\u6587\u6a19\u984c","titleZh":"\u4e2d\u6587\u6a19\u984c","descriptionEn":"\u82f1\u6587\u63cf\u8ff0","descriptionZh":"\u4e2d\u6587\u63cf\u8ff0","startsAt":"\u958b\u59cb\u6642\u9593","endsAt":"\u7d50\u675f\u6642\u9593","venue":"\u5730\u9ede","capacity":"\u540d\u984d","memberOnly":"\u50c5\u9650\u6703\u54e1","published":"\u5df2\u767c\u4f48","create":"\u5efa\u7acb\u6d3b\u52d5","save":"\u5132\u5b58\u6d3b\u52d5","attendees":"\u6d3b\u52d5\u53c3\u52a0\u8005","name":"\u59d3\u540d","email":"\u96fb\u90f5","status":"\u72c0\u614b","checkedIn":"\u5df2\u7c3d\u5230","checkIn":"\u7c3d\u5230","unavailable":"\u672a\u63d0\u4f9b","saving":"\u5132\u5b58\u4e2d\u2026\u2026","createSuccess":"\u5df2\u5efa\u7acb\u6d3b\u52d5\u3002","updateSuccess":"\u5df2\u5132\u5b58\u6d3b\u52d5\u3002","validation":"\u8acb\u6aa2\u67e5\u5df2\u6a19\u793a\u7684\u6d3b\u52d5\u6b04\u4f4d\u3002","error":"\u672a\u80fd\u5132\u5b58\u6d3b\u52d5\uff0c\u8acb\u518d\u8a66\u4e00\u6b21\u3002","checkingIn":"\u7c3d\u5230\u4e2d\u2026\u2026","checkInSuccess":"\u5df2\u70ba\u53c3\u52a0\u8005\u7c3d\u5230\u3002","checkInError":"\u672a\u80fd\u70ba\u53c3\u52a0\u8005\u7c3d\u5230\uff0c\u8acb\u518d\u8a66\u4e00\u6b21\u3002","statuses":{"registered":"\u5df2\u767b\u8a18","waitlist":"\u5019\u88dc\u540d\u55ae","cancelled":"\u5df2\u53d6\u6d88","attended":"\u5df2\u51fa\u5e2d","noShow":"\u672a\u51fa\u5e2d"}}, "approvals": {"eyebrow":"審批佇列","title":"待審批項目","description":"檢視可信應用程式提出的要求並記錄一次決定，而不會執行內容。","caption":"待審批要求","empty":"目前沒有等待決定的審批。","actionType":"操作類型","requestedAt":"提出時間","summary":"安全摘要","actions":"決定","approve":"批准","reject":"拒絕","deciding":"儲存中……","unavailable":"未提供","success":"已儲存決定。","validation":"此審批決定無效。","alreadyDecided":"此要求已有決定。","notFound":"此審批已無法使用。","error":"未能儲存此決定，請再試一次。","actionTypes":{"campaignSend":"推廣活動發送","eventPublish":"活動發佈","membershipUpdate":"會籍更新","retentionOutreach":"續期關懷"},"summaryFields":{"campaignId":"推廣活動","template":"範本","eventId":"活動","slug":"網址代號","membershipId":"會籍","field":"欄位"},"subject":"主旨","body":"訊息內容","memberReference":"會員參考編號","locale":"語言","agentRunReference":"代理程式執行記錄","reasons":"續期原因","reasonCodes":{"lowScoreDeclining":"參與分數偏低並持續下降","inactiveBeforeRenewal":"續期前未有互動"}}, "reports": {"eyebrow":"管理報告","title":"會員營運報告","description":"檢視香港報告期間內已核對的會籍、收入、加入流程、出席及續期風險數據。","formLabel":"報告期間","from":"開始日期","to":"結束日期","apply":"套用","validation":"請選擇有效的報告期間，結束日期不得早於開始日期。","cardsLabel":"已核對的會籍指標","period":"{from} 至 {to}（{timezone}）","arr":"年度經常性收入","arrDescription":"有效經常性會籍的年度化價值。","mrr":"每月經常性收入","mrrDescription":"年度經常性收入平均分配至十二個月。","renewal":"續期率","renewalDescription":"期內有續期結果的不同會籍中已付款的比例。","firstYearRenewal":"首年續期率","firstYearRenewalDescription":"期內首次續期結果中已付款的不同會籍比例。","funnel":"加入流程","funnelDescription":"期內開始申請及其已完成的最遠階段。","started":"已開始","profileCompleted":"已完成個人資料","checkoutOrReview":"付款或審核","activated":"已啟用","attendance":"出席率","attendanceDescription":"期內已完成活動的非取消登記中實際出席的比例。","atRisk":"有續期風險的會員","atRiskDescription":"在期末符合低參與度及續期時限營運規則的會員。","numerator":"分子","denominator":"分母","unavailable":"未有資料","boardDraftsHeading":"Board Reporter 草稿","boardDraftsDescription":"以不執行內容的唯讀預覽檢視未發佈的 Board Reporter 頁面草稿。","boardDraftsEmpty":"目前沒有未發佈的 Board Reporter 草稿。","boardDraftPreview":"草稿預覽","boardDraftSlug":"網址代號","boardDraftCreatedAt":"建立時間","boardDraftSourceKey":"來源索引鍵","boardDraftAgentRunId":"代理程式執行記錄","boardDraftReportMonth":"報告月份","boardDraftAgentRunStatus":"代理程式執行狀態","boardDraftStatuses":{"running":"執行中","disabled":"已停用","completed":"已完成","failed":"失敗","escalated":"已轉交"},"boardDraftPreviewEyebrow":"Board Reporter 草稿","boardDraftPreviewDescription":"透過不執行內容的產生式內容預覽，檢視此僅供職員查看的草稿。","boardDraftKpi":"關鍵績效指標","boardDraftValue":"數值","boardDraftBack":"返回報告"}, "automations": {"eyebrow":"自動化營運","title":"自動化營運","description":"監察會員旅程排程及工作狀態，並重試符合資格的失敗項目。","evaluatedAt":"評估時間","countsLabel":"自動化佇列摘要","due":"已到期","upcoming":"即將執行","failed":"失敗","processing":"處理中","jobsHeading":"工作狀態","jobsCaption":"最近的自動化工作","jobsEmpty":"暫無自動化工作。","queueHeading":"會員旅程佇列","queueCaption":"已排程及已完成的旅程步驟","queueEmpty":"暫無旅程步驟。","kind":"工作","state":"狀態","updatedAt":"更新時間","errorCode":"錯誤代碼","journey":"旅程","step":"步驟","status":"狀態","scheduledAt":"排程時間","attemptCount":"嘗試次數","actions":"操作","retry":"重試","retrying":"排程中……","retryScheduled":"已排程重試。","retryValidation":"此重試要求無效。","retryUnavailable":"此失敗項目已不符合重試資格。","retryError":"未能排程重試，請再試一次。","notAvailable":"未提供","next":"下一頁"}, "member360": {"description": "查看完整會員記錄及僅供職員使用的營運歷史。", "profile": "個人資料", "companies": "公司", "membership": "會籍", "engagement": "參與度", "emails": "電郵記錄", "events": "活動登記", "notes": "職員備註", "journeys": "旅程記錄", "whatsapp": "WhatsApp 傳送記錄", "suppressions": "生效中的傳送封鎖", "empty": "暫無記錄。", "name": "姓名", "email": "電郵", "phone": "電話", "role": "角色", "plan": "計劃", "status": "狀態", "renewal": "續期", "score": "分數", "trend": "趨勢", "company": "公司", "companyRole": "公司角色", "event": "活動", "occurredAt": "發生時間", "subject": "主旨", "emailStatus": "電郵狀態", "template": "範本", "locale": "語言", "channel": "渠道", "classification": "分類", "attemptCount": "嘗試次數", "errorCode": "錯誤代碼", "scheduledAt": "排程時間", "createdAt": "建立時間", "step": "步驟", "reasonCode": "原因代碼", "noteAuthor": "作者", "noteCreatedAt": "建立時間", "stripeCustomer": "Stripe 客戶", "stripeSubscription": "Stripe 訂閱", "addNote": "新增職員備註", "noteBody": "備註", "saving": "儲存中……", "noteSuccess": "已儲存職員備註。", "noteValidation": "請輸入最多 4,000 個字元的備註。", "noteError": "未能儲存職員備註，請再試一次。"}}}
+  "Admin": {
+    "brand": "WTIA",
+    "title": "職員工作區",
+    "description": "在受保護的職員專用工作區管理 WTIA 會員營運。",
+    "navigation": {
+      "label": "職員管理導覽",
+      "segments": "分群",
+      "members": "會員",
+      "atRisk": "高風險",
+      "events": "活動",
+      "approvals": "審批",
+      "reports": "報告",
+      "automations": "自動化"
+    },
+    "members": {
+      "title": "會員",
+      "description": "搜尋會員檔案、公司、會籍及參與分數。",
+      "search": "搜尋會員",
+      "caption": "WTIA 會員列表",
+      "empty": "沒有符合搜尋條件的會員。",
+      "name": "姓名",
+      "email": "電郵",
+      "company": "公司",
+      "plan": "計劃",
+      "status": "狀態",
+      "renewal": "續期",
+      "score": "分數",
+      "next": "下一頁",
+      "previous": "上一頁",
+      "unavailable": "未提供"
+    },
+    "segments": {
+      "eyebrow": "????",
+      "title": "????",
+      "description": "?????????????????????????????",
+      "filters": "????",
+      "preview": "??",
+      "tier": "????",
+      "status": "????",
+      "scoreMin": "????",
+      "scoreMax": "????",
+      "renewalWithinDays": "???????",
+      "sector": "??",
+      "lastLoginBeforeDays": "????????",
+      "save": "儲存分群",
+      "saving": "儲存中……",
+      "saveSuccess": "已儲存分群。",
+      "saveValidation": "請檢查已標示的分群欄位。",
+      "saveError": "未能儲存此分群，請再試一次。",
+      "nameEn": "??????",
+      "nameZh": "????????",
+      "corporate": "??",
+      "startup": "??",
+      "community": "??",
+      "patron": "??",
+      "active": "??",
+      "pastDue": "??",
+      "pendingReview": "???",
+      "caption": "???????",
+      "total": "????",
+      "empty": "??????????",
+      "name": "??",
+      "email": "??",
+      "company": "??",
+      "plan": "????",
+      "renewal": "????",
+      "score": "??",
+      "unavailable": "????",
+      "saved": "??????",
+      "export": "?? CSV",
+      "queue": "排入活動佇列",
+      "template": "範本",
+      "templateRenewal": "續期提示",
+      "templateUpdate": "會員更新",
+      "queued": "已排入活動佇列",
+      "existing": "現有活動",
+      "recipients": "位收件人",
+      "newDraft": "建立新活動",
+      "error": "未能排入活動佇列，請再試一次。"
+    },
+    "atRisk": {
+      "eyebrow": "高風險會員",
+      "title": "高風險續期名單",
+      "description": "關注分數低於 20 且趨勢下降，或 90 日未登入且 120 日內續期的會員。",
+      "caption": "高風險會員名單",
+      "empty": "目前沒有符合條件的高風險會員。",
+      "error": "暫時無法載入高風險名單，請稍後再試。",
+      "name": "姓名",
+      "company": "公司",
+      "tier": "計劃",
+      "status": "狀態",
+      "score": "分數",
+      "trend": "趨勢",
+      "renewal": "續期日",
+      "evidence": "分類依據",
+      "actions": "操作",
+      "unavailable": "未提供",
+      "scoreEvidence": "分數低於 {score}",
+      "renewalEvidence": "{days} 日內續期",
+      "branchAEvidence": "分數低於 20 且趨勢下降",
+      "branchBEvidence": "90 日未登入且 120 日內續期",
+      "member360": "會員 360",
+      "addNote": "新增備註",
+      "campaign": "建立推廣活動",
+      "plans": {
+        "community": "社群",
+        "startup": "初創",
+        "corporate": "企業",
+        "patron": "贊助"
+      },
+      "statuses": {
+        "active": "生效",
+        "pastDue": "逾期"
+      }
+    },
+    "eventsMgmt": {
+      "eyebrow": "活動營運",
+      "title": "活動管理",
+      "description": "建立、發佈及管理活動出席。",
+      "existing": "活動",
+      "empty": "目前沒有活動。",
+      "slug": "Slug",
+      "titleEn": "英文標題",
+      "titleZh": "中文標題",
+      "descriptionEn": "英文描述",
+      "descriptionZh": "中文描述",
+      "startsAt": "開始時間",
+      "endsAt": "結束時間",
+      "venue": "地點",
+      "capacity": "名額",
+      "memberOnly": "僅限會員",
+      "published": "已發佈",
+      "create": "建立活動",
+      "save": "儲存活動",
+      "attendees": "活動參加者",
+      "name": "姓名",
+      "email": "電郵",
+      "status": "狀態",
+      "checkedIn": "已簽到",
+      "checkIn": "簽到",
+      "unavailable": "未提供",
+      "saving": "儲存中……",
+      "createSuccess": "已建立活動。",
+      "updateSuccess": "已儲存活動。",
+      "validation": "請檢查已標示的活動欄位。",
+      "error": "未能儲存活動，請再試一次。",
+      "checkingIn": "簽到中……",
+      "checkInSuccess": "已為參加者簽到。",
+      "checkInError": "未能為參加者簽到，請再試一次。",
+      "statuses": {
+        "registered": "已登記",
+        "waitlist": "候補名單",
+        "cancelled": "已取消",
+        "attended": "已出席",
+        "noShow": "未出席"
+      }
+    },
+    "approvals": {
+      "eyebrow": "審批佇列",
+      "title": "待審批項目",
+      "description": "檢視可信應用程式提出的要求並記錄一次決定，而不會執行內容。",
+      "caption": "待審批要求",
+      "empty": "目前沒有等待決定的審批。",
+      "actionType": "操作類型",
+      "requestedAt": "提出時間",
+      "summary": "安全摘要",
+      "actions": "決定",
+      "approve": "批准",
+      "reject": "拒絕",
+      "deciding": "儲存中……",
+      "unavailable": "未提供",
+      "success": "已儲存決定。",
+      "validation": "此審批決定無效。",
+      "alreadyDecided": "此要求已有決定。",
+      "notFound": "此審批已無法使用。",
+      "error": "未能儲存此決定，請再試一次。",
+      "actionTypes": {
+        "campaignSend": "推廣活動發送",
+        "eventPublish": "活動發佈",
+        "membershipUpdate": "會籍更新",
+        "retentionOutreach": "續期關懷"
+      },
+      "summaryFields": {
+        "campaignId": "推廣活動",
+        "template": "範本",
+        "eventId": "活動",
+        "slug": "網址代號",
+        "membershipId": "會籍",
+        "field": "欄位"
+      },
+      "subject": "主旨",
+      "body": "訊息內容",
+      "memberReference": "會員參考編號",
+      "locale": "語言",
+      "agentRunReference": "代理程式執行記錄",
+      "reasons": "續期原因",
+      "reasonCodes": {
+        "lowScoreDeclining": "參與分數偏低並持續下降",
+        "inactiveBeforeRenewal": "續期前未有互動"
+      }
+    },
+    "reports": {
+      "eyebrow": "管理報告",
+      "title": "會員營運報告",
+      "description": "檢視香港報告期間內已核對的會籍、收入、加入流程、出席及續期風險數據。",
+      "formLabel": "報告期間",
+      "from": "開始日期",
+      "to": "結束日期",
+      "apply": "套用",
+      "validation": "請選擇有效的報告期間，結束日期不得早於開始日期。",
+      "cardsLabel": "已核對的會籍指標",
+      "period": "{from} 至 {to}（{timezone}）",
+      "arr": "年度經常性收入",
+      "arrDescription": "有效經常性會籍的年度化價值。",
+      "mrr": "每月經常性收入",
+      "mrrDescription": "年度經常性收入平均分配至十二個月。",
+      "renewal": "續期率",
+      "renewalDescription": "期內有續期結果的不同會籍中已付款的比例。",
+      "firstYearRenewal": "首年續期率",
+      "firstYearRenewalDescription": "期內首次續期結果中已付款的不同會籍比例。",
+      "funnel": "加入流程",
+      "funnelDescription": "期內開始申請及其已完成的最遠階段。",
+      "started": "已開始",
+      "profileCompleted": "已完成個人資料",
+      "checkoutOrReview": "付款或審核",
+      "activated": "已啟用",
+      "attendance": "出席率",
+      "attendanceDescription": "期內已完成活動的非取消登記中實際出席的比例。",
+      "atRisk": "有續期風險的會員",
+      "atRiskDescription": "在期末符合低參與度及續期時限營運規則的會員。",
+      "numerator": "分子",
+      "denominator": "分母",
+      "unavailable": "未有資料",
+      "boardDraftsHeading": "Board Reporter 草稿",
+      "boardDraftsDescription": "以不執行內容的唯讀預覽檢視未發佈的 Board Reporter 頁面草稿。",
+      "boardDraftsEmpty": "目前沒有未發佈的 Board Reporter 草稿。",
+      "boardDraftPreview": "草稿預覽",
+      "boardDraftSlug": "網址代號",
+      "boardDraftCreatedAt": "建立時間",
+      "boardDraftSourceKey": "來源索引鍵",
+      "boardDraftAgentRunId": "代理程式執行記錄",
+      "boardDraftReportMonth": "報告月份",
+      "boardDraftAgentRunStatus": "代理程式執行狀態",
+      "boardDraftStatuses": {
+        "running": "執行中",
+        "disabled": "已停用",
+        "completed": "已完成",
+        "failed": "失敗",
+        "escalated": "已轉交"
+      },
+      "boardDraftPreviewEyebrow": "Board Reporter 草稿",
+      "boardDraftPreviewDescription": "透過不執行內容的產生式內容預覽，檢視此僅供職員查看的草稿。",
+      "boardDraftKpi": "關鍵績效指標",
+      "boardDraftValue": "數值",
+      "boardDraftBack": "返回報告"
+    },
+    "automations": {
+      "eyebrow": "自動化營運",
+      "title": "自動化營運",
+      "description": "監察會員旅程排程及工作狀態，並重試符合資格的失敗項目。",
+      "evaluatedAt": "評估時間",
+      "countsLabel": "自動化佇列摘要",
+      "due": "已到期",
+      "upcoming": "即將執行",
+      "failed": "失敗",
+      "processing": "處理中",
+      "jobsHeading": "工作狀態",
+      "jobsCaption": "最近的自動化工作",
+      "jobsEmpty": "暫無自動化工作。",
+      "queueHeading": "會員旅程佇列",
+      "queueCaption": "已排程及已完成的旅程步驟",
+      "queueEmpty": "暫無旅程步驟。",
+      "kind": "工作",
+      "state": "狀態",
+      "updatedAt": "更新時間",
+      "errorCode": "錯誤代碼",
+      "journey": "旅程",
+      "step": "步驟",
+      "status": "狀態",
+      "scheduledAt": "排程時間",
+      "attemptCount": "嘗試次數",
+      "actions": "操作",
+      "retry": "重試",
+      "retrying": "排程中……",
+      "retryScheduled": "已排程重試。",
+      "retryValidation": "此重試要求無效。",
+      "retryUnavailable": "此失敗項目已不符合重試資格。",
+      "retryError": "未能排程重試，請再試一次。",
+      "notAvailable": "未提供",
+      "next": "下一頁"
+    },
+    "member360": {
+      "description": "查看完整會員記錄及僅供職員使用的營運歷史。",
+      "profile": "個人資料",
+      "companies": "公司",
+      "membership": "會籍",
+      "engagement": "參與度",
+      "emails": "電郵記錄",
+      "events": "活動登記",
+      "notes": "職員備註",
+      "journeys": "旅程記錄",
+      "whatsapp": "WhatsApp 傳送記錄",
+      "suppressions": "生效中的傳送封鎖",
+      "empty": "暫無記錄。",
+      "name": "姓名",
+      "email": "電郵",
+      "phone": "電話",
+      "role": "角色",
+      "plan": "計劃",
+      "status": "狀態",
+      "renewal": "續期",
+      "score": "分數",
+      "trend": "趨勢",
+      "company": "公司",
+      "companyRole": "公司角色",
+      "event": "活動",
+      "occurredAt": "發生時間",
+      "subject": "主旨",
+      "emailStatus": "電郵狀態",
+      "template": "範本",
+      "locale": "語言",
+      "channel": "渠道",
+      "classification": "分類",
+      "attemptCount": "嘗試次數",
+      "errorCode": "錯誤代碼",
+      "scheduledAt": "排程時間",
+      "createdAt": "建立時間",
+      "step": "步驟",
+      "reasonCode": "原因代碼",
+      "noteAuthor": "作者",
+      "noteCreatedAt": "建立時間",
+      "stripeCustomer": "Stripe 客戶",
+      "stripeSubscription": "Stripe 訂閱",
+      "addNote": "新增職員備註",
+      "noteBody": "備註",
+      "saving": "儲存中……",
+      "noteSuccess": "已儲存職員備註。",
+      "noteValidation": "請輸入最多 4,000 個字元的備註。",
+      "noteError": "未能儲存職員備註，請再試一次。"
+    }
+  }
+}
