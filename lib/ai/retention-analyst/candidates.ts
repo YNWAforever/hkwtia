@@ -45,11 +45,34 @@ function renewalDateFrom(value: Date | null): string | null {
   return value === null ? null : value.toISOString().slice(0, 10);
 }
 
+function compareRenewalDates(left: string | null, right: string | null): number {
+  if (left === null) return right === null ? 0 : 1;
+  if (right === null) return -1;
+  return left.localeCompare(right);
+}
+
+export function deduplicateRetentionCandidates(
+  candidates: readonly RetentionCandidate[],
+): readonly RetentionCandidate[] {
+  const seenProfiles = new Set<string>();
+  return [...candidates]
+    .sort((left, right) =>
+      left.profileId.localeCompare(right.profileId)
+      || compareRenewalDates(left.renewalDate, right.renewalDate)
+      || left.membershipId.localeCompare(right.membershipId)
+    )
+    .filter((candidate) => {
+      if (seenProfiles.has(candidate.profileId)) return false;
+      seenProfiles.add(candidate.profileId);
+      return true;
+    });
+}
+
 export function projectRetentionCandidates(
   sources: readonly RetentionCandidateSource[],
   asOf: Date,
 ): readonly RetentionCandidate[] {
-  return sources.flatMap((source) => {
+  return deduplicateRetentionCandidates(sources.flatMap((source) => {
     const classification = classifyAtRisk({
       profileId: source.profileId,
       membershipId: source.membershipId,
@@ -78,8 +101,5 @@ export function projectRetentionCandidates(
       trend: trendFrom(source.trend),
       riskCodes,
     }];
-  }).sort((left, right) =>
-    left.profileId.localeCompare(right.profileId)
-    || left.membershipId.localeCompare(right.membershipId)
-  );
+  }));
 }

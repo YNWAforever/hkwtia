@@ -42,6 +42,7 @@ export async function runScheduledJson<T>(input: {
   prompt: string;
   outputSchema: z.ZodType<T>;
   signal?: AbortSignal;
+  commit?: (output: T) => Promise<void>;
 }): Promise<T> {
   const runtimeActor = runtimeActorFor(input.actor);
   const preparedRun = input.agentConfig.runtime.adoptPrestarted(
@@ -86,6 +87,12 @@ export async function runScheduledJson<T>(input: {
       output = input.outputSchema.parse(json);
     } catch {
       throw invalidProviderResponse();
+    }
+
+    try {
+      await input.commit?.(output);
+    } catch {
+      throw new AgentRuntimeError("tool_error");
     }
 
     await result.finalize();

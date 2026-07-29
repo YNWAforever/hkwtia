@@ -86,12 +86,16 @@ describe("M4B deterministic service acceptance", () => {
       status: "pending";
     }>();
     const deliveries: unknown[] = [];
-    const model = vi.fn(async () => ({
+    const model = vi.fn(async (input) => {
+      const output = {
       subject: "Membership check-in",
       body: "Hello {{first_name}}, your renewal date is {{renewal_date}}.",
       reasonCodes:
         ["inactive_before_renewal"] as ("inactive_before_renewal")[],
-    }));
+      };
+      await input.commit?.(output);
+      return output;
+    });
     let runIndex = 0;
     const dependencies = {
       candidates: {
@@ -196,12 +200,16 @@ describe("M4B deterministic service acceptance", () => {
       publishedAt: null;
       bodyMdx: string;
     }>();
-    const model = vi.fn(async () => ({
+    const model = vi.fn(async (input) => {
+      const output = {
       executiveSummary: "Deterministic M4B acceptance month.",
       highlights: ["Three qualifying retention profiles."],
       risks: ["Approval review remains required."],
       recommendedActions: ["Review the staff-only queues."],
-    }));
+      };
+      await input.commit?.(output);
+      return output;
+    });
     let runIndex = 0;
     const dependencies = {
       buildFactPack: vi.fn(async () => factPack),

@@ -4,10 +4,11 @@ import type {
   BoardFactPack,
   BoardNarrative,
 } from "@/lib/ai/board-reporter/contracts";
-import type {AgentConfig} from "@/lib/ai/scheduled-runtime";
+import {runScheduledJson, type AgentConfig} from "@/lib/ai/scheduled-runtime";
 import type {ScheduledAgentActor} from "@/lib/auth/agent-actor";
 import {automationCronActor} from "@/lib/auth/automation-actor";
 import type {BoardDraftInput} from "@/lib/db/repos/posts";
+import {scheduledRuntimeHarness} from "@/tests/fixtures/scheduled-runtime-harness";
 
 const factPack: BoardFactPack = {
   reportMonth: "2026-06",
@@ -70,6 +71,7 @@ describe("Board Reporter service", () => {
     const runJson = vi.fn(async (input) => {
       order.push("model");
       expect(input.outputSchema.parse(narrative)).toEqual(narrative);
+      await input.commit?.(narrative);
       return narrative;
     });
     const createBoardDraftOnce = vi.fn(async (
@@ -192,5 +194,47 @@ describe("Board Reporter service", () => {
     )).rejects.toThrow("invalid_provider_response");
 
     expect(createBoardDraftOnce).not.toHaveBeenCalled();
+  });
+
+  it("fails the same agent run when the durable post commit fails", async () => {
+    const serviceModule = await loadService();
+    if (!serviceModule) return;
+    const agentActor: ScheduledAgentActor = {
+      kind: "agent",
+      agent: "board_reporter",
+      runId: "11111111-1111-4111-8111-111111111111",
+      conversationId: null,
+      profileId: null,
+      trigger: "scheduled",
+    };
+    const runtime = scheduledRuntimeHarness(
+      JSON.stringify(narrative),
+      agentActor,
+    );
+
+    await expect(serviceModule.runBoardReporter(
+      automationCronActor(),
+      {asOf: new Date("2026-07-29T02:00:00.000Z"), agentConfig: runtime.agentConfig},
+      {
+        buildFactPack: vi.fn(async () => factPack),
+        agentRuns: {start: vi.fn(async () => ({}))},
+        runJson: runScheduledJson,
+        posts: {createBoardDraftOnce: vi.fn(async () => {
+          throw new Error("private post database detail");
+        })},
+        createRunId: () => agentActor.runId,
+      },
+    )).rejects.toMatchObject({
+      code: "tool_error",
+      message: "AI_RUNTIME_FAILED:tool_error",
+    });
+
+    expect(runtime.fail).toHaveBeenCalledWith(expect.objectContaining({
+      code: "tool_error",
+    }));
+    expect(JSON.stringify(runtime.fail.mock.calls)).not.toContain(
+      "private post database detail",
+    );
+    expect(runtime.finalize).not.toHaveBeenCalled();
   });
 });

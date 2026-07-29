@@ -63,12 +63,16 @@ describe("Board Reporter idempotency", () => {
       "11111111-1111-4111-8111-111111111111",
       "11111111-1111-4111-8111-111111111112",
     ];
-    const runJson = vi.fn(async ({actor}): Promise<BoardNarrative> => ({
+    const runJson = vi.fn(async ({actor, commit}): Promise<BoardNarrative> => {
+      const output: BoardNarrative = {
       executiveSummary: `Narrative from ${actor.runId}`,
       highlights: [],
       risks: [],
       recommendedActions: [],
-    }));
+      };
+      await commit?.(output);
+      return output;
+    });
 
     const results = await Promise.all(runIds.map((runId) =>
       runBoardReporter(

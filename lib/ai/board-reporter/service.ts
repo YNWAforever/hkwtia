@@ -33,6 +33,7 @@ type BoardNarrativeRunInput = Readonly<{
   agentConfig: AgentConfig;
   prompt: string;
   outputSchema: typeof boardNarrativeSchema;
+  commit?: (output: BoardNarrative) => Promise<void>;
 }>;
 
 export type BoardReporterResult = Readonly<{
@@ -117,25 +118,29 @@ export async function runBoardReporter(
       ? {acceptanceOwnershipKey: input.acceptanceOwnershipKey}
       : {}),
   });
-  const narrative = await dependencies.runJson({
+  const reportMonth = factPack.reportMonth;
+  let post: {postId: string; created: boolean} | undefined;
+  await dependencies.runJson({
     actor: agentActor,
     agentConfig: input.agentConfig,
     prompt: buildBoardNarrativePrompt(factPack),
     outputSchema: boardNarrativeSchema,
+    commit: async (narrative) => {
+      const bodyMdx = renderBoardReportMdx({
+        factPack,
+        narrative,
+        agentRunId: agentActor.runId,
+      });
+      post = await dependencies.posts.createBoardDraftOnce(agentActor, {
+        sourceKey: sourceKey(reportMonth),
+        slug: `board-report-${reportMonth}`,
+        titleEn: `Board report: ${reportMonth}`,
+        titleZh: `Board report: ${reportMonth}`,
+        bodyMdx,
+      });
+    },
   });
-  const bodyMdx = renderBoardReportMdx({
-    factPack,
-    narrative,
-    agentRunId: agentActor.runId,
-  });
-  const reportMonth = factPack.reportMonth;
-  const post = await dependencies.posts.createBoardDraftOnce(agentActor, {
-    sourceKey: sourceKey(reportMonth),
-    slug: `board-report-${reportMonth}`,
-    titleEn: `Board report: ${reportMonth}`,
-    titleZh: `Board report: ${reportMonth}`,
-    bodyMdx,
-  });
+  if (!post) throw new Error("BOARD_REPORTER_COMMIT_NOT_RUN");
 
   return {
     reportMonth,

@@ -10,8 +10,9 @@ import {
   retentionDraftSchema,
   type RetentionDraft,
 } from "@/lib/ai/retention-analyst/contracts";
-import type {
-  RetentionCandidate,
+import {
+  deduplicateRetentionCandidates,
+  type RetentionCandidate,
 } from "@/lib/ai/retention-analyst/candidates";
 import {
   runScheduledJson,
@@ -47,6 +48,7 @@ type RetentionDraftRunInput = Readonly<{
   agentConfig: AgentConfig;
   prompt: string;
   outputSchema: typeof retentionDraftSchema;
+  commit?: (output: RetentionDraft) => Promise<void>;
 }>;
 
 export type RetentionAnalystServiceDependencies = Readonly<{
@@ -128,11 +130,8 @@ export async function runRetentionAnalyst(
   });
   if (!input.agentConfig.enabled) return emptySummary();
 
-  const candidates = [...await dependencies.candidates.listCandidates(actor, {
-    asOf: input.asOf,
-  })].sort((left, right) =>
-    left.profileId.localeCompare(right.profileId)
-    || left.membershipId.localeCompare(right.membershipId)
+  const candidates = deduplicateRetentionCandidates(
+    await dependencies.candidates.listCandidates(actor, {asOf: input.asOf}),
   );
   const summary: RetentionRunSummary = {
     ...emptySummary(),
@@ -157,25 +156,32 @@ export async function runRetentionAnalyst(
           ? {acceptanceOwnershipKey: input.acceptanceOwnershipKey}
           : {}),
       });
-      const draft = await dependencies.runJson({
+      let approvalCreated: boolean | undefined;
+      await dependencies.runJson({
         actor: agentActor,
         agentConfig: input.agentConfig,
         prompt: buildRetentionDraftPrompt(candidate),
         outputSchema: retentionDraftSchema,
-      });
-      const approval = await dependencies.approvals.createRetentionOutreachOnce(
-        agentActor,
-        {
-          requestKey: requestKeyFor(candidate, input.asOf),
-          profileId: candidate.profileId,
-          membershipId: candidate.membershipId,
-          locale: candidate.locale,
-          reasonCodes: candidate.riskCodes,
-          subject: draft.subject,
-          body: draft.body,
+        commit: async (draft) => {
+          const approval = await dependencies.approvals.createRetentionOutreachOnce(
+            agentActor,
+            {
+              requestKey: requestKeyFor(candidate, input.asOf),
+              profileId: candidate.profileId,
+              membershipId: candidate.membershipId,
+              locale: candidate.locale,
+              reasonCodes: candidate.riskCodes,
+              subject: draft.subject,
+              body: draft.body,
+            },
+          );
+          approvalCreated = approval.created;
         },
-      );
-      if (approval.created) summary.drafted += 1;
+      });
+      if (approvalCreated === undefined) {
+        throw new Error("RETENTION_ANALYST_COMMIT_NOT_RUN");
+      }
+      if (approvalCreated) summary.drafted += 1;
       else summary.deduplicated += 1;
     } catch {
       summary.failed += 1;
@@ -193,5 +199,8 @@ export async function runRetentionAnalyst(
   }
   const workerCount = Math.min(3, candidates.length);
   await Promise.all(Array.from({length: workerCount}, () => worker()));
+  if (summary.failed > 0) {
+    throw new Error("RETENTION_ANALYST_CANDIDATE_FAILED");
+  }
   return summary;
 }

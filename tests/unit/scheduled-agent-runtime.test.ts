@@ -176,6 +176,59 @@ describe("scheduled agent JSON runtime", () => {
     expect(cancelled.finalize).not.toHaveBeenCalled();
   });
 
+  it("commits the strict parsed output before finalizing the same run", async () => {
+    const order: string[] = [];
+    const {agentConfig, finalize, fail} = harness({
+      deltas: ['{"summary":"retained"}'],
+    });
+    finalize.mockImplementationOnce(async () => {
+      order.push("finalize");
+      return completedFinish();
+    });
+    const commit = vi.fn(async (output: {summary: string}) => {
+      order.push("commit");
+      expect(output).toEqual({summary: "retained"});
+    });
+
+    await expect(runScheduledJson({
+      actor,
+      agentConfig,
+      prompt: "Analyze.",
+      outputSchema,
+      commit,
+    })).resolves.toEqual({summary: "retained"});
+
+    expect(commit).toHaveBeenCalledOnce();
+    expect(order).toEqual(["commit", "finalize"]);
+    expect(fail).not.toHaveBeenCalled();
+  });
+
+  it("fails the same run with a sanitized tool error when commit rejects", async () => {
+    const {agentConfig, finalize, fail} = harness({
+      deltas: ['{"summary":"retained"}'],
+    });
+    const commit = vi.fn(async () => {
+      throw new Error("private database detail");
+    });
+
+    await expect(runScheduledJson({
+      actor,
+      agentConfig,
+      prompt: "Analyze.",
+      outputSchema,
+      commit,
+    })).rejects.toMatchObject({
+      code: "tool_error",
+      message: "AI_RUNTIME_FAILED:tool_error",
+    });
+
+    expect(fail).toHaveBeenCalledWith(expect.objectContaining({
+      code: "tool_error",
+    }));
+    expect(JSON.stringify(fail.mock.calls)).not.toContain("private database detail");
+    expect(finalize).not.toHaveBeenCalled();
+  });
+
   it("rejects tool/non-text completion and performs no automatic side effect", async () => {
     const {agentConfig, finalize, fail} = harness({
       finish: Promise.resolve(completedFinish({finishReason: "tool-calls"})),

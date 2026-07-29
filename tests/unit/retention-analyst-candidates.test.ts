@@ -90,6 +90,39 @@ describe("retention analyst candidates", () => {
     ]);
   });
 
+  it("selects one deterministic membership per profile by renewal date then membership id", () => {
+    const candidates = projectRetentionCandidates([
+      source({
+        profileId: "profile-duplicate",
+        membershipId: "membership-later",
+        renewalAt: new Date("2027-05-01T00:00:00.000Z"),
+        score: 10,
+        trend: -1,
+      }),
+      source({
+        profileId: "profile-duplicate",
+        membershipId: "membership-b",
+        renewalAt: new Date("2027-04-20T00:00:00.000Z"),
+        score: 10,
+        trend: -1,
+      }),
+      source({
+        profileId: "profile-duplicate",
+        membershipId: "membership-a",
+        renewalAt: new Date("2027-04-20T00:00:00.000Z"),
+        score: 10,
+        trend: -1,
+      }),
+    ], asOf);
+
+    expect(candidates).toHaveLength(1);
+    expect(candidates[0]).toMatchObject({
+      profileId: "profile-duplicate",
+      membershipId: "membership-a",
+      renewalDate: "2027-04-20",
+    });
+  });
+
   it("does not leak identity or contact fields from structurally wider source rows", () => {
     const privateSource = {
       ...source({
