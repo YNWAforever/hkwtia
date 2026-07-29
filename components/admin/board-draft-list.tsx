@@ -1,4 +1,5 @@
-import {SafeGeneratedContent} from "@/components/admin/safe-generated-content";
+import Link from "next/link";
+
 import type {BoardDraft} from "@/lib/admin/board-drafts";
 
 type Labels = Readonly<{
@@ -6,11 +7,11 @@ type Labels = Readonly<{
   description: string;
   empty: string;
   preview: string;
-  slug: string;
+  reportMonth: string;
   createdAt: string;
-  sourceKey: string;
-  agentRunId: string;
+  agentRunStatus: string;
   unavailable: string;
+  statuses: Readonly<Record<string, string>>;
 }>;
 
 export function BoardDraftList({
@@ -36,16 +37,14 @@ export function BoardDraftList({
     {drafts.length === 0 ? <p className="text-muted-foreground">{labels.empty}</p> : <div className="space-y-5">
       {drafts.map((draft) => <article className="space-y-4 rounded-2xl border border-border bg-card p-5" key={draft.id}>
         <header className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{labels.preview}</p>
           <h3 className="font-serif text-xl font-semibold">{locale === "zh-HK" ? draft.titleZh : draft.titleEn}</h3>
         </header>
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
-          <div><dt className="font-medium">{labels.slug}</dt><dd className="break-all text-muted-foreground">{draft.slug}</dd></div>
+          <div><dt className="font-medium">{labels.reportMonth}</dt><dd className="text-muted-foreground">{draft.reportMonth}</dd></div>
           <div><dt className="font-medium">{labels.createdAt}</dt><dd className="text-muted-foreground">{formatter.format(draft.createdAt)}</dd></div>
-          <div><dt className="font-medium">{labels.sourceKey}</dt><dd className="break-all text-muted-foreground">{draft.sourceKey ?? labels.unavailable}</dd></div>
-          <div><dt className="font-medium">{labels.agentRunId}</dt><dd className="break-all text-muted-foreground">{draft.agentRunId ?? labels.unavailable}</dd></div>
+          <div><dt className="font-medium">{labels.agentRunStatus}</dt><dd className="text-muted-foreground">{labels.statuses[draft.agentRunStatus] ?? labels.unavailable}</dd></div>
         </dl>
-        <SafeGeneratedContent content={draft.bodyMdx}/>
+        <Link className="inline-flex rounded-md border border-input px-3 py-2 text-sm font-medium hover:bg-muted" href={`/${locale}/admin/reports/board-drafts/${draft.id}`}>{labels.preview}</Link>
       </article>)}
     </div>}
   </section>;

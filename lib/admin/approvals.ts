@@ -1,5 +1,7 @@
 import "server-only";
 
+import {createHash} from "node:crypto";
+
 import {requireAdmin} from "@/lib/auth/actor";
 import {
   approvalDecisionSchema,
@@ -19,6 +21,8 @@ export type RetentionReasonCode = "low_score_declining" | "inactive_before_renew
 export type RetentionApprovalPreview = Readonly<{
   locale: "en" | "zh-HK";
   reasonCodes: readonly RetentionReasonCode[];
+  memberReference: string;
+  agentRunReference: string;
   subject: string;
   body: string;
 }>;
@@ -34,14 +38,23 @@ const RETENTION_REASON_CODES = new Set<RetentionReasonCode>([
   "inactive_before_renewal",
 ]);
 
+function displaySafeMemberReference(profileId: string): string {
+  const digest = createHash("sha256").update(profileId).digest("hex").slice(0, 12);
+  return `member-${digest}`;
+}
+
 function retentionPreview(approval: PendingApproval): RetentionApprovalPreview | null {
   const values = new Map(approval.payloadSummary.map((item) => [item.key, item.value]));
   const locale = values.get("locale");
+  const profileId = values.get("profileId");
+  const agentRunReference = values.get("agentRunId");
   const subject = values.get("subject");
   const body = values.get("body");
   const reasonCodes = values.get("reasonCodes")?.split(",") ?? [];
   if (
     (locale !== "en" && locale !== "zh-HK")
+    || !profileId
+    || !agentRunReference
     || !subject
     || !body
     || reasonCodes.length === 0
@@ -50,7 +63,14 @@ function retentionPreview(approval: PendingApproval): RetentionApprovalPreview |
   ) {
     return null;
   }
-  return {locale, subject, body, reasonCodes};
+  return {
+    locale,
+    memberReference: displaySafeMemberReference(profileId),
+    agentRunReference,
+    subject,
+    body,
+    reasonCodes,
+  };
 }
 
 function toAdminPendingApproval(approval: PendingApproval): AdminPendingApproval {

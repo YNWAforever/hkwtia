@@ -67,7 +67,8 @@ describe("approval service", () => {
         id: APPROVAL_ID,
         actionType: "agent.retention_outreach",
         payloadSummary: [
-          {key: "profileId", value: "profile-private"},
+          {key: "profileId", value: "private@example.test"},
+          {key: "to", value: "+852 9123 4567"},
           {key: "membershipId", value: "22222222-2222-4222-8222-222222222222"},
           {key: "locale", value: "zh-HK"},
           {key: "reasonCodes", value: "low_score_declining,inactive_before_renewal"},
@@ -90,14 +91,17 @@ describe("approval service", () => {
       payloadSummary: [],
       retentionPreview: {
         locale: "zh-HK",
+        memberReference: expect.stringMatching(/^member-[0-9a-f]{12}$/),
+        agentRunReference: "33333333-3333-4333-8333-333333333333",
         reasonCodes: ["low_score_declining", "inactive_before_renewal"],
         subject: "續期支援",
         body: "我們想了解如何協助你續期。",
       },
     });
-    expect(JSON.stringify(approval)).not.toContain("profile-private");
+    expect(JSON.stringify(approval)).not.toContain("private@example.test");
+    expect(JSON.stringify(approval)).not.toContain("+852 9123 4567");
     expect(JSON.stringify(approval)).not.toContain("22222222-2222-4222-8222-222222222222");
-    expect(JSON.stringify(approval)).not.toContain("33333333-3333-4333-8333-333333333333");
+    expect(approval.retentionPreview?.memberReference).not.toContain("private");
   });
 
   it("summarizes only allowlisted non-PII payload fields for known action types", () => {

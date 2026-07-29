@@ -51,8 +51,15 @@ export default async function AdminReportsPage({params, searchParams}: Props) {
   const to = typeof reportQuery.to === "string" ? reportQuery.to : "";
   const boardDraftLabels = {
     heading: t("boardDraftsHeading"), description: t("boardDraftsDescription"), empty: t("boardDraftsEmpty"),
-    preview: t("boardDraftPreview"), slug: t("boardDraftSlug"), createdAt: t("boardDraftCreatedAt"),
-    sourceKey: t("boardDraftSourceKey"), agentRunId: t("boardDraftAgentRunId"), unavailable: t("unavailable"),
+    preview: t("boardDraftPreview"), reportMonth: t("boardDraftReportMonth"), createdAt: t("boardDraftCreatedAt"),
+    agentRunStatus: t("boardDraftAgentRunStatus"), unavailable: t("unavailable"),
+    statuses: {
+      running: t("boardDraftStatuses.running"),
+      disabled: t("boardDraftStatuses.disabled"),
+      completed: t("boardDraftStatuses.completed"),
+      failed: t("boardDraftStatuses.failed"),
+      escalated: t("boardDraftStatuses.escalated"),
+    },
   };
   const labels: ReportCardLabels = {
     cardsLabel: t("cardsLabel"), period: t("period"), arr: t("arr"), arrDescription: t("arrDescription"), mrr: t("mrr"), mrrDescription: t("mrrDescription"),

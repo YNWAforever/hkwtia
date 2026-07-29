@@ -25,7 +25,9 @@ export default async function ApprovalsPage({params}: Props) {
   const action = decideApprovalAction.bind(null, `/${locale}/admin/approvals`, messages);
   const labels = {
     caption: t("caption"), empty: t("empty"), actionType: t("actionType"), requestedAt: t("requestedAt"), summary: t("summary"), actions: t("actions"),
-    approve: t("approve"), reject: t("reject"), deciding: t("deciding"), unavailable: t("unavailable"), subject: t("subject"), body: t("body"), reasons: t("reasons"),
+    approve: t("approve"), reject: t("reject"), deciding: t("deciding"), unavailable: t("unavailable"),
+    memberReference: t("memberReference"), locale: t("locale"), agentRunReference: t("agentRunReference"),
+    subject: t("subject"), body: t("body"), reasons: t("reasons"),
     actionTypes: {"campaign.send": t("actionTypes.campaignSend"), "event.publish": t("actionTypes.eventPublish"), "membership.update": t("actionTypes.membershipUpdate"), "agent.retention_outreach": t("actionTypes.retentionOutreach")},
     summaryFields: {campaignId: t("summaryFields.campaignId"), template: t("summaryFields.template"), eventId: t("summaryFields.eventId"), slug: t("summaryFields.slug"), membershipId: t("summaryFields.membershipId"), field: t("summaryFields.field")},
     reasonCodes: {low_score_declining: t("reasonCodes.lowScoreDeclining"), inactive_before_renewal: t("reasonCodes.inactiveBeforeRenewal")},

@@ -8,7 +8,8 @@ import type {AdminPendingApproval} from "@/lib/admin/approvals";
 type ApprovalAction = (state: ApprovalActionState, formData: FormData) => Promise<ApprovalActionState>;
 type Labels = Readonly<{
   caption: string; empty: string; actionType: string; requestedAt: string; summary: string; actions: string;
-  approve: string; reject: string; deciding: string; unavailable: string; subject: string; body: string; reasons: string;
+  approve: string; reject: string; deciding: string; unavailable: string;
+  memberReference: string; locale: string; agentRunReference: string; subject: string; body: string; reasons: string;
   actionTypes: Readonly<Record<string, string>>;
   summaryFields: Readonly<Record<string, string>>;
   reasonCodes: Readonly<Record<string, string>>;
@@ -26,6 +27,9 @@ function DecisionForm({action, actionable, approvalId, decision, labels}: Readon
 
 function ApprovalSummary({approval, labels}: Readonly<{approval: AdminPendingApproval; labels: Labels}>) {
   if (approval.retentionPreview) return <dl className="space-y-2">
+    <div><dt className="font-medium">{labels.memberReference}</dt><dd>{approval.retentionPreview.memberReference}</dd></div>
+    <div><dt className="font-medium">{labels.locale}</dt><dd>{approval.retentionPreview.locale}</dd></div>
+    <div><dt className="font-medium">{labels.agentRunReference}</dt><dd className="break-all">{approval.retentionPreview.agentRunReference}</dd></div>
     <div><dt className="font-medium">{labels.subject}</dt><dd>{approval.retentionPreview.subject}</dd></div>
     <div><dt className="font-medium">{labels.body}</dt><dd className="whitespace-pre-wrap">{approval.retentionPreview.body}</dd></div>
     <div><dt className="font-medium">{labels.reasons}</dt><dd><ul className="list-disc space-y-1 pl-5">{approval.retentionPreview.reasonCodes.map((code) => <li key={code}>{labels.reasonCodes[code] ?? labels.unavailable}</li>)}</ul></dd></div>

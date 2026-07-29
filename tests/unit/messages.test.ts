@@ -38,6 +38,9 @@ describe('message bundles', () => {
     expect(admin.approvals.actionTypes.retentionOutreach).toBeTruthy();
     expect(admin.approvals.subject).toBeTruthy();
     expect(admin.approvals.body).toBeTruthy();
+    expect(admin.approvals.memberReference).toBeTruthy();
+    expect(admin.approvals.locale).toBeTruthy();
+    expect(admin.approvals.agentRunReference).toBeTruthy();
     expect(admin.approvals.reasons).toBeTruthy();
     expect(admin.approvals.reasonCodes.lowScoreDeclining).toBeTruthy();
     expect(admin.approvals.reasonCodes.inactiveBeforeRenewal).toBeTruthy();
@@ -45,5 +48,16 @@ describe('message bundles', () => {
     expect(admin.reports.boardDraftsDescription).toBeTruthy();
     expect(admin.reports.boardDraftsEmpty).toBeTruthy();
     expect(admin.reports.boardDraftPreview).toBeTruthy();
+    expect(admin.reports.boardDraftReportMonth).toBeTruthy();
+    expect(admin.reports.boardDraftAgentRunStatus).toBeTruthy();
+    expect(admin.reports.boardDraftPreviewEyebrow).toBeTruthy();
+    expect(admin.reports.boardDraftPreviewDescription).toBeTruthy();
+    expect(admin.reports.boardDraftBack).toBeTruthy();
+    expect(Object.keys(admin.reports.boardDraftStatuses).sort()).toEqual([
+      'completed', 'disabled', 'escalated', 'failed', 'running',
+    ]);
+    for (const status of Object.values(admin.reports.boardDraftStatuses)) {
+      expect(status).toBeTruthy();
+    }
   });
 });
