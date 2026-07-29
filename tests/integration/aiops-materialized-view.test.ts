@@ -1,4 +1,4 @@
-import {Pool} from "@neondatabase/serverless";
+import {Pool, type PoolClient} from "@neondatabase/serverless";
 import {describe, expect, it} from "vitest";
 
 const testDatabaseUrl = process.env.DATABASE_URL_TEST?.trim() ?? "";
@@ -32,18 +32,21 @@ type MetricRow = {
 describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () => {
   it("proves every public aggregate formula with an isolated forty-run fixture", async () => {
     const pool = new Pool({connectionString: testDatabaseUrl, max: 1});
+    let connectedClient: PoolClient | undefined;
     let lockAcquired = false;
     let transactionStarted = false;
     try {
-      await pool.query("SELECT pg_advisory_lock($1)", [fixtureLock]);
+      const client = await pool.connect();
+      connectedClient = client;
+      await client.query("SELECT pg_advisory_lock($1)", [fixtureLock]);
       lockAcquired = true;
-      await pool.query("BEGIN");
+      await client.query("BEGIN");
       transactionStarted = true;
-      await pool.query(`TRUNCATE TABLE
+      await client.query(`TRUNCATE TABLE
         messages, agent_runs, conversations, engagement_events, memberships, profiles
         CASCADE`);
 
-      const bounds = await pool.query<{
+      const bounds = await client.query<{
         current_month: string;
         month_from: Date;
         month_to: Date;
@@ -67,7 +70,7 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
       const at = (milliseconds: number) => new Date(monthFrom.getTime() + milliseconds);
       const profileId = "m4c-formula-profile";
 
-      await pool.query(
+      await client.query(
         `INSERT INTO profiles (id, auth_user_id, display_name)
          VALUES ($1, $2, $3)`,
         [profileId, "m4c-formula-auth", "M4C formula fixture"],
@@ -75,7 +78,7 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
 
       const membershipIds: string[] = [];
       for (const label of ["one", "two", "three"]) {
-        const result = await pool.query<{id: string}>(
+        const result = await client.query<{id: string}>(
           `INSERT INTO memberships (
              owner_user_id, plan_code, status, billing_interval, seat_limit, stripe_customer_id
            ) VALUES ($1, 'community', 'active', 'annual', 1, $2)
@@ -89,7 +92,7 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
       }
 
       async function createConversation(index: number): Promise<string> {
-        const result = await pool.query<{id: string}>(
+        const result = await client.query<{id: string}>(
           `INSERT INTO conversations (
              agent_kind, profile_id, locale, status, expires_at, created_at, updated_at
            ) VALUES ('concierge', $1, 'en', 'active', $2, $3, $3)
@@ -119,7 +122,7 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
         startedAt: Date;
         completedAt: Date;
       }) {
-        await pool.query(
+        await client.query(
           `INSERT INTO agent_runs (
              conversation_id, agent, trigger, status, cost_usd, csat_score,
              started_at, completed_at, created_at, updated_at
@@ -132,7 +135,7 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
         const conversationId = await createConversation(index);
         const userAt = at(3_600_000 + index * 10_000);
         const latency = (index + 1) * 100;
-        await pool.query(
+        await client.query(
           `INSERT INTO messages (conversation_id, role, channel, content, created_at)
            VALUES ($1, 'user', 'web', $2, $3), ($1, 'assistant', 'web', $4, $5)`,
           [conversationId, "m4c-formula-user", userAt, "m4c-formula-assistant", at(userAt.getTime() - monthFrom.getTime() + latency)],
@@ -183,7 +186,7 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
         [membershipIds[2], "renewal_paid", 2],
       ] as const;
       for (const [membershipId, type, renewalOrdinal] of renewalEvents) {
-        await pool.query(
+        await client.query(
           `INSERT INTO engagement_events (profile_id, type, points, metadata, occurred_at)
            VALUES ($1, $2, 0, $3::jsonb, $4)`,
           [
@@ -195,9 +198,9 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
         );
       }
 
-      await pool.query("REFRESH MATERIALIZED VIEW aiops_monthly_metrics");
+      await client.query("REFRESH MATERIALIZED VIEW aiops_monthly_metrics");
 
-      const columns = await pool.query<{column_name: string; data_type: string}>(`
+      const columns = await client.query<{column_name: string; data_type: string}>(`
         SELECT column_name, data_type
         FROM information_schema.columns
         WHERE table_schema = 'public'
@@ -210,7 +213,7 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
         || /json|array|text|character/i.test(data_type),
       )).toBe(false);
 
-      const metrics = await pool.query<MetricRow>(`
+      const metrics = await client.query<MetricRow>(`
         SELECT
           to_char(month_start, 'YYYY-MM-DD') AS month_start,
           is_partial_month,
@@ -238,7 +241,7 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
         ORDER BY month_start
       `);
       const rows = metrics.rows;
-      const runDistribution = await pool.query<{agent: string; count: number}>(
+      const runDistribution = await client.query<{agent: string; count: number}>(
         "SELECT agent::text AS agent, count(*)::int AS count FROM agent_runs GROUP BY agent ORDER BY agent",
       );
       expect(runDistribution.rows).toEqual([
@@ -292,12 +295,16 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
       }
     } finally {
       try {
-        if (transactionStarted) await pool.query("ROLLBACK");
+        if (transactionStarted && connectedClient) await connectedClient.query("ROLLBACK");
       } finally {
         try {
-          if (lockAcquired) await pool.query("SELECT pg_advisory_unlock($1)", [fixtureLock]);
+          if (lockAcquired && connectedClient) await connectedClient.query("SELECT pg_advisory_unlock($1)", [fixtureLock]);
         } finally {
-          await pool.end();
+          try {
+            connectedClient?.release();
+          } finally {
+            await pool.end();
+          }
         }
       }
     }

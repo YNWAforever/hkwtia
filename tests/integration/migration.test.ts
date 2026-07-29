@@ -1,7 +1,7 @@
 import {execFile as execFileCallback} from "node:child_process";
 import {promisify} from "node:util";
 
-import {Pool} from "@neondatabase/serverless";
+import {Pool, type PoolClient} from "@neondatabase/serverless";
 import {describe, expect, it} from "vitest";
 
 const execFile = promisify(execFileCallback);
@@ -24,18 +24,23 @@ async function runDatabaseCommand(command: "db:migrate" | "db:seed") {
 describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", () => {
   it("migrates twice, creates M3 tables and unique keys, and seeds all stable plan codes idempotently", async () => {
     const pool = new Pool({connectionString: testDatabaseUrl, max: 1});
-    await pool.query("SELECT pg_advisory_lock($1)", [fixtureLock]);
+    let connectedClient: PoolClient | undefined;
+    let lockAcquired = false;
     try {
-    const firstMigrationOutput = await runDatabaseCommand("db:migrate");
-    const secondMigrationOutput = await runDatabaseCommand("db:migrate");
-    const firstSeedOutput = await runDatabaseCommand("db:seed");
-    const secondSeedOutput = await runDatabaseCommand("db:seed");
+      const client = await pool.connect();
+      connectedClient = client;
+      await client.query("SELECT pg_advisory_lock($1)", [fixtureLock]);
+      lockAcquired = true;
+      const firstMigrationOutput = await runDatabaseCommand("db:migrate");
+      const secondMigrationOutput = await runDatabaseCommand("db:migrate");
+      const firstSeedOutput = await runDatabaseCommand("db:seed");
+      const secondSeedOutput = await runDatabaseCommand("db:seed");
 
-    for (const output of [firstMigrationOutput, secondMigrationOutput, firstSeedOutput, secondSeedOutput]) {
-      expect(output).not.toContain(testDatabaseUrl);
-    }
+      for (const output of [firstMigrationOutput, secondMigrationOutput, firstSeedOutput, secondSeedOutput]) {
+        expect(output).not.toContain(testDatabaseUrl);
+      }
 
-      const plans = await pool.query<{code: string; count: number}>(
+      const plans = await client.query<{code: string; count: number}>(
         "SELECT code, count(*)::int AS count FROM membership_plans GROUP BY code ORDER BY code",
       );
       expect(plans.rows).toEqual([
@@ -45,7 +50,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         {code: "startup", count: 1},
       ]);
 
-      const m2Tables = await pool.query<{table_name: string}>(
+      const m2Tables = await client.query<{table_name: string}>(
         `SELECT table_name
          FROM information_schema.tables
          WHERE table_schema = 'public'
@@ -85,7 +90,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         "whatsapp_log",
       ]);
 
-      const m3UniqueConstraints = await pool.query<{table_name: string; constraint_name: string}>(
+      const m3UniqueConstraints = await client.query<{table_name: string; constraint_name: string}>(
         `SELECT table_name, constraint_name
          FROM information_schema.table_constraints
          WHERE table_schema = 'public'
@@ -110,7 +115,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         {table_name: "whatsapp_log", constraint_name: "whatsapp_log_idempotency_key_unique"},
       ]);
 
-      const m4bEnums = await pool.query<{enum_name: string; enum_value: string}>(
+      const m4bEnums = await client.query<{enum_name: string; enum_value: string}>(
         `SELECT t.typname AS enum_name, e.enumlabel AS enum_value
          FROM pg_type t
          JOIN pg_enum e ON e.enumtypid = t.oid
@@ -130,7 +135,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         {enum_name: "post_kind", enum_value: "page"},
       ]);
 
-      const m4bColumns = await pool.query<{
+      const m4bColumns = await client.query<{
         table_name: string;
         column_name: string;
         is_nullable: "YES" | "NO";
@@ -162,7 +167,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         {table_name: "posts", column_name: "updated_at", is_nullable: "NO"},
       ]);
 
-      const m4bIndexes = await pool.query<{indexname: string; indexdef: string}>(
+      const m4bIndexes = await client.query<{indexname: string; indexdef: string}>(
         `SELECT indexname, indexdef
          FROM pg_indexes
          WHERE schemaname = 'public'
@@ -186,7 +191,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         indexname === "posts_source_key_unique")?.indexdef)
         .toContain("WHERE (source_key IS NOT NULL)");
 
-      const postForeignKey = await pool.query<{
+      const postForeignKey = await client.query<{
         source_column: string;
         foreign_table: string;
         foreign_column: string;
@@ -214,7 +219,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         foreign_column: "id",
       }]);
 
-      const view = await pool.query(
+      const view = await client.query(
         `SELECT matviewname, ispopulated
            FROM pg_matviews
           WHERE schemaname = 'public'
@@ -225,7 +230,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         ispopulated: true,
       }]);
 
-      const index = await pool.query(
+      const index = await client.query(
         `SELECT indexname
            FROM pg_indexes
           WHERE schemaname = 'public'
@@ -235,27 +240,38 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         indexname: "aiops_monthly_metrics_month_start_unique",
       }]);
     } finally {
-      try { await pool.query("SELECT pg_advisory_unlock($1)", [fixtureLock]); } finally { await pool.end(); }
+      try {
+        if (lockAcquired && connectedClient) await connectedClient.query("SELECT pg_advisory_unlock($1)", [fixtureLock]);
+      } finally {
+        try {
+          connectedClient?.release();
+        } finally {
+          await pool.end();
+        }
+      }
     }
   });
   it("materializes twelve scalar-only Hong Kong months with deterministic public metrics", async () => {
     const pool = new Pool({connectionString: testDatabaseUrl, max: 1});
+    let connectedClient: PoolClient | undefined;
     let lockAcquired = false;
     let transactionStarted = false;
     try {
-      await pool.query("SELECT pg_advisory_lock($1)", [fixtureLock]);
+      const client = await pool.connect();
+      connectedClient = client;
+      await client.query("SELECT pg_advisory_lock($1)", [fixtureLock]);
       lockAcquired = true;
       await runDatabaseCommand("db:migrate");
       await runDatabaseCommand("db:seed");
-      await pool.query("BEGIN");
+      await client.query("BEGIN");
       transactionStarted = true;
       // DATABASE_URL_TEST is an isolated test database; remove source rows so every
       // zero-activity month below is an actual zero rather than a seed-data accident.
-      await pool.query(`TRUNCATE TABLE
+      await client.query(`TRUNCATE TABLE
         messages, agent_runs, conversations, engagement_events, memberships, profiles
         CASCADE`);
 
-      const bounds = await pool.query<{
+      const bounds = await client.query<{
         month_start: string;
         current_month: string;
         month_from: Date;
@@ -288,7 +304,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
       const afterReportingWindow = new Date(reportingWindowEnd.getTime() + 60_000);
       const profileId = "m4c-aiops-fixture-profile";
 
-      await pool.query(
+      await client.query(
         `INSERT INTO profiles (id, auth_user_id, display_name)
          VALUES ($1, $2, $3)`,
         [profileId, "m4c-aiops-fixture-auth", "M4C AI-Ops fixture"],
@@ -296,7 +312,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
 
       const membershipIds: string[] = [];
       for (let index = 0; index < 3; index += 1) {
-        const membership = await pool.query<{id: string}>(
+        const membership = await client.query<{id: string}>(
           `INSERT INTO memberships (
              owner_user_id, plan_code, status, billing_interval, seat_limit
            ) VALUES ($1, 'community', 'active', 'annual', 1)
@@ -309,7 +325,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
       }
 
       async function conversation() {
-        const result = await pool.query<{id: string}>(
+        const result = await client.query<{id: string}>(
           `INSERT INTO conversations (
              agent_kind, profile_id, locale, status, expires_at, created_at, updated_at
            ) VALUES ('concierge', $1, 'en', 'active', $2, $3, $3)
@@ -337,7 +353,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         startedAt: Date;
         completedAt?: Date | null;
       }) {
-        await pool.query(
+        await client.query(
           `INSERT INTO agent_runs (
              conversation_id, agent, trigger, status, cost_usd, csat_score,
              started_at, completed_at, created_at, updated_at
@@ -351,7 +367,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         role: "user" | "assistant",
         createdAt: Date,
       ) {
-        await pool.query(
+        await client.query(
           `INSERT INTO messages (conversation_id, role, channel, content, created_at)
            VALUES ($1, $2, 'web', $3, $4)`,
           [conversationId, role, `${role} fixture`, createdAt],
@@ -450,7 +466,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         [membershipIds[2], "renewal_paid", 1],
       ] as const;
       for (const [membershipId, type, renewalOrdinal] of renewalEvents) {
-        await pool.query(
+        await client.query(
           `INSERT INTO engagement_events (profile_id, type, points, metadata, occurred_at)
            VALUES ($1, $2, 0, $3::jsonb, $4)`,
           [
@@ -462,9 +478,9 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         );
       }
 
-      await pool.query('REFRESH MATERIALIZED VIEW aiops_monthly_metrics');
+      await client.query('REFRESH MATERIALIZED VIEW aiops_monthly_metrics');
 
-      const columns = await pool.query<{
+      const columns = await client.query<{
         column_name: string;
         data_type: string;
         udt_name: string;
@@ -514,7 +530,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         || /json|array|text|character/i.test(data_type)))
         .toBe(false);
 
-      const metrics = await pool.query<{
+      const metrics = await client.query<{
         month_start: string;
         is_partial_month: boolean;
         conversation_count: number;
@@ -627,12 +643,16 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
       }
     } finally {
       try {
-        if (transactionStarted) await pool.query("ROLLBACK");
+        if (transactionStarted && connectedClient) await connectedClient.query("ROLLBACK");
       } finally {
         try {
-          if (lockAcquired) await pool.query("SELECT pg_advisory_unlock($1)", [fixtureLock]);
+          if (lockAcquired && connectedClient) await connectedClient.query("SELECT pg_advisory_unlock($1)", [fixtureLock]);
         } finally {
-          await pool.end();
+          try {
+            connectedClient?.release();
+          } finally {
+            await pool.end();
+          }
         }
       }
     }
