@@ -4,13 +4,16 @@ import {resolve} from "node:path";
 import {describe, expect, it} from "vitest";
 
 import {
+  M4B_ACCEPTANCE_OWNERSHIP_KEY,
+} from "@/lib/acceptance/m4b-ownership";
+import {
   resolveM4BAcceptanceOwnershipKey,
 } from "@/lib/acceptance/m4b-runtime-guard";
 
 describe("M4B runtime ownership guard", () => {
   const databaseUrl = "postgres://isolated";
   const valid = {
-    M4B_ACCEPTANCE_OWNERSHIP_KEY: "m4b-acceptance-v1",
+    M4B_ACCEPTANCE_OWNERSHIP_KEY,
     M4B_ACCEPTANCE_SEED: "true",
     DATABASE_URL: databaseUrl,
     DATABASE_URL_TEST: databaseUrl,
@@ -31,12 +34,14 @@ describe("M4B runtime ownership guard", () => {
       ...valid,
       DATABASE_URL: ` ${databaseUrl} `,
       DATABASE_URL_TEST: databaseUrl,
-    })).toBe("m4b-acceptance-v1");
+    })).toBe(M4B_ACCEPTANCE_OWNERSHIP_KEY);
   });
 
   it.each([
     [{...valid, M4B_ACCEPTANCE_OWNERSHIP_KEY: ""}, "M4B_ACCEPTANCE_OWNERSHIP_KEY_INVALID"],
     [{...valid, M4B_ACCEPTANCE_OWNERSHIP_KEY: "other"}, "M4B_ACCEPTANCE_OWNERSHIP_KEY_INVALID"],
+    [{...valid, M4B_ACCEPTANCE_OWNERSHIP_KEY: "m4b-acceptance-v2"}, "M4B_ACCEPTANCE_OWNERSHIP_KEY_INVALID"],
+    [{...valid, M4B_ACCEPTANCE_OWNERSHIP_KEY: "m4b-acceptance-v01"}, "M4B_ACCEPTANCE_OWNERSHIP_KEY_INVALID"],
     [{...valid, M4B_ACCEPTANCE_SEED: "false"}, "M4B_ACCEPTANCE_RUNTIME_NOT_AUTHORIZED"],
     [{...valid, NODE_ENV: ""}, "M4B_ACCEPTANCE_RUNTIME_ENVIRONMENT_REQUIRED"],
     [{...valid, VERCEL_ENV: ""}, "M4B_ACCEPTANCE_RUNTIME_ENVIRONMENT_REQUIRED"],

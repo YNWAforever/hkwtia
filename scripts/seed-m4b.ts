@@ -3,6 +3,7 @@ import {fileURLToPath} from "node:url";
 import {Pool} from "pg";
 
 import {previousHongKongMonthWindow} from "@/lib/ai/board-reporter/reporting-window";
+import {M4B_ACCEPTANCE_OWNERSHIP_KEY} from "@/lib/acceptance/m4b-ownership";
 import {hongKongDateKey} from "@/lib/automation/hong-kong-time";
 
 export const M4B_ACCEPTANCE_SEED_ENV = "M4B_ACCEPTANCE_SEED";
@@ -74,7 +75,7 @@ const profiles = [
 export const M4B_ACCEPTANCE_FIXTURE = {
   asOf: AS_OF,
   reportMonth: "2030-06",
-  sourceLabel: "m4b-acceptance-v1",
+  sourceLabel: M4B_ACCEPTANCE_OWNERSHIP_KEY,
   profiles,
   expectedAtRiskProfileIds: [
     PROFILE_IDS.lowScore,
@@ -115,7 +116,7 @@ export const M4B_ACCEPTANCE_FIXTURE = {
 
 const DAY_MS = 86_400_000;
 const AGENT_RUN_OWNERSHIP_MARKER =
-  `m4b-acceptance-owner:${M4B_ACCEPTANCE_FIXTURE.sourceLabel}`;
+  `m4b-acceptance-owner:${M4B_ACCEPTANCE_OWNERSHIP_KEY}`;
 
 function offsetDate(base: Date, days: number): Date {
   return new Date(base.getTime() + days * DAY_MS);
@@ -491,7 +492,7 @@ export async function seedM4B(
     await connection.query("BEGIN");
     await connection.query(
       "SELECT pg_advisory_xact_lock(hashtext($1))",
-      ["hkwtia:m4b-acceptance-v1"],
+      [`hkwtia:${M4B_ACCEPTANCE_OWNERSHIP_KEY}`],
     );
     await clearGeneratedEffects(connection, fixture);
     await writeBaseFixture(connection, fixture);

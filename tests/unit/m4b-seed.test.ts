@@ -4,6 +4,10 @@ import {pathToFileURL} from "node:url";
 
 import {describe, expect, it} from "vitest";
 
+import {
+  M4B_ACCEPTANCE_OWNERSHIP_KEY,
+} from "@/lib/acceptance/m4b-ownership";
+
 const seedUrl = pathToFileURL(resolve("scripts/seed-m4b.ts"));
 const seedExists = existsSync(seedUrl);
 
@@ -66,6 +70,16 @@ describe("M4B acceptance seed", () => {
   });
 
   describe.runIf(seedExists)("fixture contract", () => {
+    it("derives seed ownership labels from the shared key", () => {
+      const source = readFileSync(resolve("scripts/seed-m4b.ts"), "utf8");
+      expect(source).toContain(
+        "sourceLabel: M4B_ACCEPTANCE_OWNERSHIP_KEY",
+      );
+      expect(source).toContain(
+        "`m4b-acceptance-owner:${M4B_ACCEPTANCE_OWNERSHIP_KEY}`",
+      );
+    });
+
     it("is stable with exactly three qualifying profiles and one nonqualifier", async () => {
       const {buildM4BAcceptanceFixture} = await loadSeed();
       const fixture = buildM4BAcceptanceFixture(
@@ -78,7 +92,7 @@ describe("M4B acceptance seed", () => {
 
       expect(fixture.asOf.toISOString()).toBe("2030-07-15T02:00:00.000Z");
       expect(fixture.reportMonth).toBe("2030-06");
-      expect(fixture.sourceLabel).toBe("m4b-acceptance-v1");
+      expect(fixture.sourceLabel).toBe(M4B_ACCEPTANCE_OWNERSHIP_KEY);
       expect(fixture.profiles).toHaveLength(4);
       expect(qualifying).toEqual(
         [...fixture.expectedAtRiskProfileIds].sort(),
@@ -104,7 +118,7 @@ describe("M4B acceptance seed", () => {
         "board-report:2030-06:board-reporter-v1",
       );
       expect(fixture.agentRunOwnershipMarker).toBe(
-        "m4b-acceptance-owner:m4b-acceptance-v1",
+        `m4b-acceptance-owner:${M4B_ACCEPTANCE_OWNERSHIP_KEY}`,
       );
     });
 
@@ -277,8 +291,8 @@ describe("M4B acceptance seed", () => {
       );
       for (const index of [linkedApprovalDelete, linkedPostDelete]) {
         expect(statements[index]?.values).toEqual([
-          "m4b-acceptance-owner:m4b-acceptance-v1",
-          "m4b-acceptance-owner:m4b-acceptance-v1:%",
+          `m4b-acceptance-owner:${M4B_ACCEPTANCE_OWNERSHIP_KEY}`,
+          `m4b-acceptance-owner:${M4B_ACCEPTANCE_OWNERSHIP_KEY}:%`,
         ]);
       }
 
@@ -294,8 +308,8 @@ describe("M4B acceptance seed", () => {
         expect(sql).toContain("summary = $1");
         expect(sql).toContain("summary like $2");
         expect(statement.values).toEqual([
-          "m4b-acceptance-owner:m4b-acceptance-v1",
-          "m4b-acceptance-owner:m4b-acceptance-v1:%",
+          `m4b-acceptance-owner:${M4B_ACCEPTANCE_OWNERSHIP_KEY}`,
+          `m4b-acceptance-owner:${M4B_ACCEPTANCE_OWNERSHIP_KEY}:%`,
         ]);
         expect(sql).not.toContain("select");
       }

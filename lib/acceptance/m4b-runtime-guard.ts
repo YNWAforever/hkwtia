@@ -1,7 +1,7 @@
+import {M4B_ACCEPTANCE_OWNERSHIP_KEY} from "@/lib/acceptance/m4b-ownership";
+
 type RuntimeEnvironment =
   Readonly<Record<string, string | undefined>>;
-
-const OWNERSHIP_KEY_PATTERN = /^m4b-acceptance-v\d+$/;
 
 export function resolveM4BAcceptanceOwnershipKey(
   environment: RuntimeEnvironment,
@@ -10,7 +10,7 @@ export function resolveM4BAcceptanceOwnershipKey(
   if (configuredKey === undefined) return undefined;
 
   const ownershipKey = configuredKey.trim();
-  if (!OWNERSHIP_KEY_PATTERN.test(ownershipKey)) {
+  if (ownershipKey !== M4B_ACCEPTANCE_OWNERSHIP_KEY) {
     throw new Error("M4B_ACCEPTANCE_OWNERSHIP_KEY_INVALID");
   }
   if (environment.M4B_ACCEPTANCE_SEED?.trim().toLowerCase() !== "true") {
