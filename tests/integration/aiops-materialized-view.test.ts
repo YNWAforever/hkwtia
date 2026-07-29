@@ -31,7 +31,10 @@ type MetricRow = {
 
 describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () => {
   it("proves every public aggregate formula with an isolated forty-run fixture", async () => {
-    const pool = new Pool({connectionString: testDatabaseUrl, max: 1});`n    let lockAcquired = false;`n    let transactionStarted = false;`n    try {`n      await pool.query("SELECT pg_advisory_lock($1)", [fixtureLock]);`n      lockAcquired = true;`n      await pool.query("BEGIN");`n      transactionStarted = true;
+    const pool = new Pool({connectionString: testDatabaseUrl, max: 1});
+    await pool.query("SELECT pg_advisory_lock($1)", [fixtureLock]);
+    await pool.query("BEGIN");
+    try {
       await pool.query(`TRUNCATE TABLE
         messages, agent_runs, conversations, engagement_events, memberships, profiles
         CASCADE`);
