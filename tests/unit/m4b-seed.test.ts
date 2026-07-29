@@ -226,6 +226,62 @@ describe("M4B acceptance seed", () => {
       expect(normalized).not.toContain("delete from memberships");
       expect(normalized).not.toContain("delete from engagement_scores");
 
+      const firstCommit = normalized.indexOf("commit");
+      const firstTransaction = normalized.slice(0, firstCommit);
+      const linkedApprovalDelete = firstTransaction.findIndex((text) =>
+        text.startsWith("delete from approvals as effects using agent_runs as owned")
+      );
+      const linkedPostDelete = firstTransaction.findIndex((text) =>
+        text.startsWith("delete from posts as effects using agent_runs as owned")
+      );
+      const markedRunDelete = firstTransaction.findIndex((text) =>
+        text.startsWith("delete from agent_runs")
+      );
+      const currentApprovalDelete = firstTransaction.findIndex((text) =>
+        text === "delete from approvals where request_key = any($1::text[])"
+      );
+      const currentPostDelete = firstTransaction.findIndex((text) =>
+        text === "delete from posts where source_key = $1"
+      );
+      expect([
+        linkedApprovalDelete,
+        linkedPostDelete,
+        markedRunDelete,
+        currentApprovalDelete,
+        currentPostDelete,
+      ]).toEqual([...[
+        linkedApprovalDelete,
+        linkedPostDelete,
+        markedRunDelete,
+        currentApprovalDelete,
+        currentPostDelete,
+      ]].sort((left, right) => left - right));
+      expect(linkedApprovalDelete).toBeGreaterThan(0);
+      const approvalDeleteSql = firstTransaction[linkedApprovalDelete] ?? "";
+      const postDeleteSql = firstTransaction[linkedPostDelete] ?? "";
+      expect(approvalDeleteSql).toContain(
+        "effects.payload ->> 'agentrunid' = owned.id::text",
+      );
+      expect(approvalDeleteSql).toContain(
+        "owned.agent = 'retention_analyst'",
+      );
+      expect(approvalDeleteSql).toContain(
+        "owned.summary = $1 or owned.summary like $2",
+      );
+      expect(postDeleteSql).toContain(
+        "effects.agent_run_id = owned.id",
+      );
+      expect(postDeleteSql).toContain("owned.agent = 'board_reporter'");
+      expect(postDeleteSql).toContain(
+        "owned.summary = $1 or owned.summary like $2",
+      );
+      for (const index of [linkedApprovalDelete, linkedPostDelete]) {
+        expect(statements[index]?.values).toEqual([
+          "m4b-acceptance-owner:m4b-acceptance-v1",
+          "m4b-acceptance-owner:m4b-acceptance-v1:%",
+        ]);
+      }
+
       const runDeletes = statements.filter(({text}) =>
         /^\s*DELETE\s+FROM\s+agent_runs/i.test(text)
       );

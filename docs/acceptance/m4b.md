@@ -127,9 +127,22 @@ and only against the isolated target from the preceding section.
 
 1. Seed once immediately before the run so the M4B effects begin at zero.
 2. Configure `AGENTS_ENABLED=true`, an isolated runtime `DATABASE_URL`,
-   `CRON_SECRET`, and the approved provider credential. Also set
-   `M4B_ACCEPTANCE_OWNERSHIP_KEY=m4b-acceptance-v1` so every acceptance-owned
-   run, including a deduplicated orphan run, can be reconciled safely. The
+   `CRON_SECRET`, and the approved provider credential. Every acceptance-owned
+   run, including a deduplicated orphan run, must use the stable ownership
+   marker. The marker is accepted only with explicit seed authorization,
+   matching isolated database URLs, and explicit non-Production runtime
+   labels:
+
+   ```powershell
+   $env:M4B_ACCEPTANCE_OWNERSHIP_KEY = "m4b-acceptance-v1"
+   $env:M4B_ACCEPTANCE_SEED = "true"
+   $env:DATABASE_URL_TEST = $env:DATABASE_URL
+   $env:NODE_ENV = "test"
+   $env:VERCEL_ENV = "preview"
+   ```
+
+   Any missing, empty, mismatched, or Production value fails before candidate,
+   fact, model, or agent-run work begins. The
    default model is `openai:gpt-4.1-mini`; optional overrides are
    `RETENTION_ANALYST_MODEL` and `BOARD_REPORTER_MODEL`.
 3. Start the isolated app, then call each route once with
@@ -189,6 +202,17 @@ both `/admin/approvals` and `/admin/reports`.
 
 A skipped browser run is an honest non-result. Record it as “not run: target or
 credentials unavailable,” not as a pass.
+
+After the live model, cron, and browser gates are complete and the isolated
+app has stopped, clear the acceptance runtime authorization:
+
+```powershell
+Remove-Item Env:M4B_ACCEPTANCE_OWNERSHIP_KEY -ErrorAction SilentlyContinue
+Remove-Item Env:M4B_ACCEPTANCE_SEED -ErrorAction SilentlyContinue
+Remove-Item Env:DATABASE_URL_TEST -ErrorAction SilentlyContinue
+Remove-Item Env:NODE_ENV -ErrorAction SilentlyContinue
+Remove-Item Env:VERCEL_ENV -ErrorAction SilentlyContinue
+```
 
 ## Production prohibition
 

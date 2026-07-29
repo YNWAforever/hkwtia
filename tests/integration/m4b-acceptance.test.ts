@@ -124,7 +124,13 @@ describe("M4B deterministic service acceptance", () => {
           },
         ),
       },
-      agentRuns: {start: vi.fn(async () => ({}))},
+      agentRuns: {
+        start: vi.fn(async (actor: unknown, input: unknown) => {
+          void actor;
+          void input;
+          return {};
+        }),
+      },
       runJson: model,
       createRunId: () => {
         runIndex += 1;
@@ -199,7 +205,13 @@ describe("M4B deterministic service acceptance", () => {
     let runIndex = 0;
     const dependencies = {
       buildFactPack: vi.fn(async () => factPack),
-      agentRuns: {start: vi.fn(async () => ({}))},
+      agentRuns: {
+        start: vi.fn(async (actor: unknown, input: unknown) => {
+          void actor;
+          void input;
+          return {};
+        }),
+      },
       runJson: model,
       posts: {
         createBoardDraftOnce: vi.fn(

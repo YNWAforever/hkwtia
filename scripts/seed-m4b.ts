@@ -193,14 +193,31 @@ async function clearGeneratedEffects(
   fixture: M4BAcceptanceFixture,
 ): Promise<void> {
   const profileIds = fixture.profiles.map(({id}) => id);
+  const markerValues = [
+    fixture.agentRunOwnershipMarker,
+    `${fixture.agentRunOwnershipMarker}:%`,
+  ] as const;
+  await connection.query(
+    `DELETE FROM approvals AS effects
+     USING agent_runs AS owned
+     WHERE effects.payload ->> 'agentRunId' = owned.id::text
+       AND owned.agent = 'retention_analyst'
+       AND (owned.summary = $1 OR owned.summary LIKE $2)`,
+    markerValues,
+  );
+  await connection.query(
+    `DELETE FROM posts AS effects
+     USING agent_runs AS owned
+     WHERE effects.agent_run_id = owned.id
+       AND owned.agent = 'board_reporter'
+       AND (owned.summary = $1 OR owned.summary LIKE $2)`,
+    markerValues,
+  );
   await connection.query(
     `DELETE FROM agent_runs
      WHERE agent IN ('retention_analyst', 'board_reporter')
        AND (summary = $1 OR summary LIKE $2)`,
-    [
-      fixture.agentRunOwnershipMarker,
-      `${fixture.agentRunOwnershipMarker}:%`,
-    ],
+    markerValues,
   );
   await connection.query(
     "DELETE FROM approvals WHERE request_key = ANY($1::text[])",

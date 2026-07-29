@@ -27,6 +27,9 @@ import {
 import {createAgentRuntime} from "@/lib/ai/runtime";
 import {runJourneyBatch} from "@/lib/automation/journey-runner";
 import {runRenewalReconciliation} from "@/lib/automation/renewal-runner";
+import {
+  resolveM4BAcceptanceOwnershipKey,
+} from "@/lib/acceptance/m4b-runtime-guard";
 import {automationCronActor} from "@/lib/auth/automation-actor";
 import {createWoztellAdapter} from "@/lib/channels/woztell";
 import {serverEnv} from "@/lib/config/env";
@@ -396,10 +399,12 @@ async function runProductionApprovals(now: Date): Promise<unknown> {
 export async function runProductionRetentionAnalyst(
   now: Date,
 ): Promise<unknown> {
+  const acceptanceOwnershipKey =
+    resolveM4BAcceptanceOwnershipKey(process.env);
   const environment = serverEnv();
   return runRetentionAnalystService(automationCronActor(), {
     asOf: now,
-    acceptanceOwnershipKey: process.env.M4B_ACCEPTANCE_OWNERSHIP_KEY,
+    acceptanceOwnershipKey,
     agentConfig: {
       enabled: environment.agentsEnabled,
       model: process.env.RETENTION_ANALYST_MODEL
@@ -423,10 +428,12 @@ export async function runProductionRetentionAnalyst(
 export async function runProductionBoardReporter(
   now: Date,
 ): Promise<unknown> {
+  const acceptanceOwnershipKey =
+    resolveM4BAcceptanceOwnershipKey(process.env);
   const environment = serverEnv();
   return runBoardReporterService(automationCronActor(), {
     asOf: now,
-    acceptanceOwnershipKey: process.env.M4B_ACCEPTANCE_OWNERSHIP_KEY,
+    acceptanceOwnershipKey,
     agentConfig: {
       enabled: environment.agentsEnabled,
       model: process.env.BOARD_REPORTER_MODEL
