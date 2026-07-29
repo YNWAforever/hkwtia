@@ -97,3 +97,32 @@ Result: passed with no TypeScript diagnostics.
 git diff --check
 ```
 Result: passed.
+
+## Second re-review fix wave: every-month fixture, catalog fidelity, and first response
+
+### Changes
+- Corrected the fixture boundaries so the selected oldest reporting month, its own end, and the dashboard's full twelve-month reporting-window end are distinct. The score-1 out-of-window completion now occurs after the full window, not in the current partial month.
+- Removed the calendar-year-count assertion so the test works in December as well as every other execution month; it now proves twelve sequential monthly dates directly.
+- Extended the catalog assertion for every public view column with exact `numeric_precision`, `numeric_scale`, and `is_nullable` values, alongside the existing exact names and scalar type restrictions. PostgreSQL materialized-view catalog columns are intentionally asserted as nullable (`YES`); logical required fields remain declared non-null in the Drizzle/snapshot contract.
+- Added deterministic fixture messages covering first-user selection, assistant ordering, a discrete median (1,000/3,000/10,000ms -> 3,000ms), and a user-only conversation that does not contribute to the response sample.
+
+### Verification
+```powershell
+npm.cmd test -- tests/unit/m4c-schema-contract.test.ts tests/unit/m4b-schema-contract.test.ts tests/unit/schema-contract.test.ts
+```
+Result: 3 test files passed, 15 tests passed.
+
+```powershell
+npm.cmd test -- tests/integration/migration.test.ts
+```
+Result: 1 test file skipped; both integration tests are correctly gated because `DATABASE_URL_TEST` is absent. The fixture remains confined to the isolated test-database path; Production was not touched.
+
+```powershell
+npm.cmd run typecheck
+```
+Result: passed with no TypeScript diagnostics.
+
+```powershell
+git diff --check
+```
+Result: passed.

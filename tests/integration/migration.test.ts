@@ -251,7 +251,8 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
       const bounds = await pool.query<{
         month_start: string;
         month_from: Date;
-        month_to: Date;
+        fixture_month_to: Date;
+        reporting_window_end: Date;
       }>(`
         SELECT
           (date_trunc('month', timezone('Asia/Hong_Kong', now()))
@@ -259,18 +260,23 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
           (date_trunc('month', timezone('Asia/Hong_Kong', now()))
             - interval '11 months')::timestamp AT TIME ZONE 'Asia/Hong_Kong'
             AS month_from,
-          date_trunc('month', timezone('Asia/Hong_Kong', now()))::timestamp
-            AT TIME ZONE 'Asia/Hong_Kong' AS month_to
+          (date_trunc('month', timezone('Asia/Hong_Kong', now()))
+            - interval '10 months')::timestamp AT TIME ZONE 'Asia/Hong_Kong'
+            AS fixture_month_to,
+          (date_trunc('month', timezone('Asia/Hong_Kong', now()) + interval '1 month'))
+            ::timestamp AT TIME ZONE 'Asia/Hong_Kong' AS reporting_window_end
       `);
       const [month] = bounds.rows;
       expect(month).toBeDefined();
       if (!month) return;
 
       const monthFrom = new Date(month.month_from);
-      const monthTo = new Date(month.month_to);
+      const fixtureMonthTo = new Date(month.fixture_month_to);
+      const reportingWindowEnd = new Date(month.reporting_window_end);
       const at = (minutes: number) => new Date(monthFrom.getTime() + minutes * 60_000);
+      const atMilliseconds = (milliseconds: number) => new Date(monthFrom.getTime() + milliseconds);
       const beforeMonth = new Date(monthFrom.getTime() - 60_000);
-      const afterMonth = new Date(monthTo.getTime() + 60_000);
+      const afterReportingWindow = new Date(reportingWindowEnd.getTime() + 60_000);
       const profileId = "m4c-aiops-fixture-profile";
 
       await pool.query(
@@ -299,7 +305,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
              agent_kind, profile_id, locale, status, expires_at, created_at, updated_at
            ) VALUES ('concierge', $1, 'en', 'active', $2, $3, $3)
            RETURNING id::text AS id`,
-          [profileId, monthTo, at(1)],
+          [profileId, fixtureMonthTo, at(1)],
         );
         const [row] = result.rows;
         expect(row).toBeDefined();
@@ -331,6 +337,17 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         );
       }
 
+      async function message(
+        conversationId: string,
+        role: "user" | "assistant",
+        createdAt: Date,
+      ) {
+        await pool.query(
+          `INSERT INTO messages (conversation_id, role, channel, content, created_at)
+           VALUES ($1, $2, 'web', $3, $4)`,
+          [conversationId, role, `${role} fixture`, createdAt],
+        );
+      }
       const resolvedConversation = await conversation();
       await agentRun({
         conversationId: resolvedConversation,
@@ -346,6 +363,11 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         startedAt: at(4),
         completedAt: at(5),
       });
+
+      await message(resolvedConversation, "user", atMilliseconds(30_000));
+      await message(resolvedConversation, "user", atMilliseconds(32_000));
+      await message(resolvedConversation, "assistant", atMilliseconds(33_000));
+      await message(resolvedConversation, "assistant", atMilliseconds(40_000));
 
       const escalatedConversation = await conversation();
       await agentRun({
@@ -363,6 +385,10 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         completedAt: at(9),
       });
 
+      await message(escalatedConversation, "assistant", atMilliseconds(49_000));
+      await message(escalatedConversation, "user", atMilliseconds(50_000));
+      await message(escalatedConversation, "assistant", atMilliseconds(51_000));
+
       const failedConversation = await conversation();
       await agentRun({
         conversationId: failedConversation,
@@ -379,12 +405,17 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         completedAt: at(13),
       });
 
+      await message(failedConversation, "user", atMilliseconds(60_000));
+      await message(failedConversation, "assistant", atMilliseconds(70_000));
+
       const nonTerminalConversation = await conversation();
       await agentRun({
         conversationId: nonTerminalConversation,
         status: "running",
         startedAt: at(14),
       });
+
+      await message(nonTerminalConversation, "user", atMilliseconds(80_000));
 
       // Cost follows started_at while CSAT follows completed_at, independent of
       // the conversation terminal-outcome calculation above.
@@ -400,7 +431,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         costUsd: "1.250000",
         csatScore: 1,
         startedAt: at(16),
-        completedAt: afterMonth,
+        completedAt: afterReportingWindow,
       });
 
       const renewalEvents = [
@@ -428,37 +459,46 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         column_name: string;
         data_type: string;
         udt_name: string;
+        numeric_precision: number | null;
+        numeric_scale: number | null;
+        is_nullable: "YES" | "NO";
       }>(
-        `SELECT column_name, data_type, udt_name
-           FROM information_schema.columns
-          WHERE table_schema = 'public'
-            AND table_name = 'aiops_monthly_metrics'
-          ORDER BY ordinal_position`,
+        `SELECT
+           column_name,
+           data_type,
+           udt_name,
+           numeric_precision,
+           numeric_scale,
+           is_nullable
+         FROM information_schema.columns
+         WHERE table_schema = 'public'
+           AND table_name = 'aiops_monthly_metrics'
+         ORDER BY ordinal_position`,
       );
       expect(columns.rows).toEqual([
-        {column_name: "month_start", data_type: "date", udt_name: "date"},
-        {column_name: "is_partial_month", data_type: "boolean", udt_name: "bool"},
-        {column_name: "conversation_count", data_type: "integer", udt_name: "int4"},
-        {column_name: "terminal_conversation_count", data_type: "integer", udt_name: "int4"},
-        {column_name: "resolved_conversation_count", data_type: "integer", udt_name: "int4"},
-        {column_name: "escalated_conversation_count", data_type: "integer", udt_name: "int4"},
-        {column_name: "failed_conversation_count", data_type: "integer", udt_name: "int4"},
-        {column_name: "agent_resolved_rate", data_type: "numeric", udt_name: "numeric"},
-        {column_name: "escalation_rate", data_type: "numeric", udt_name: "numeric"},
-        {column_name: "failure_rate", data_type: "numeric", udt_name: "numeric"},
-        {column_name: "median_first_response_ms", data_type: "integer", udt_name: "int4"},
-        {column_name: "first_response_sample_count", data_type: "integer", udt_name: "int4"},
-        {column_name: "csat_average", data_type: "numeric", udt_name: "numeric"},
-        {column_name: "csat_response_count", data_type: "integer", udt_name: "int4"},
-        {column_name: "staff_hours_saved", data_type: "numeric", udt_name: "numeric"},
-        {column_name: "llm_cost_usd", data_type: "numeric", udt_name: "numeric"},
-        {column_name: "renewal_due_count", data_type: "integer", udt_name: "int4"},
-        {column_name: "renewal_paid_count", data_type: "integer", udt_name: "int4"},
-        {column_name: "renewal_rate", data_type: "numeric", udt_name: "numeric"},
-        {column_name: "first_year_renewal_due_count", data_type: "integer", udt_name: "int4"},
-        {column_name: "first_year_renewal_paid_count", data_type: "integer", udt_name: "int4"},
-        {column_name: "first_year_renewal_rate", data_type: "numeric", udt_name: "numeric"},
-        {column_name: "refreshed_at", data_type: "timestamp with time zone", udt_name: "timestamptz"},
+        {column_name: "month_start", data_type: "date", udt_name: "date", numeric_precision: null, numeric_scale: null, is_nullable: "YES"},
+        {column_name: "is_partial_month", data_type: "boolean", udt_name: "bool", numeric_precision: null, numeric_scale: null, is_nullable: "YES"},
+        {column_name: "conversation_count", data_type: "integer", udt_name: "int4", numeric_precision: 32, numeric_scale: 0, is_nullable: "YES"},
+        {column_name: "terminal_conversation_count", data_type: "integer", udt_name: "int4", numeric_precision: 32, numeric_scale: 0, is_nullable: "YES"},
+        {column_name: "resolved_conversation_count", data_type: "integer", udt_name: "int4", numeric_precision: 32, numeric_scale: 0, is_nullable: "YES"},
+        {column_name: "escalated_conversation_count", data_type: "integer", udt_name: "int4", numeric_precision: 32, numeric_scale: 0, is_nullable: "YES"},
+        {column_name: "failed_conversation_count", data_type: "integer", udt_name: "int4", numeric_precision: 32, numeric_scale: 0, is_nullable: "YES"},
+        {column_name: "agent_resolved_rate", data_type: "numeric", udt_name: "numeric", numeric_precision: 7, numeric_scale: 6, is_nullable: "YES"},
+        {column_name: "escalation_rate", data_type: "numeric", udt_name: "numeric", numeric_precision: 7, numeric_scale: 6, is_nullable: "YES"},
+        {column_name: "failure_rate", data_type: "numeric", udt_name: "numeric", numeric_precision: 7, numeric_scale: 6, is_nullable: "YES"},
+        {column_name: "median_first_response_ms", data_type: "integer", udt_name: "int4", numeric_precision: 32, numeric_scale: 0, is_nullable: "YES"},
+        {column_name: "first_response_sample_count", data_type: "integer", udt_name: "int4", numeric_precision: 32, numeric_scale: 0, is_nullable: "YES"},
+        {column_name: "csat_average", data_type: "numeric", udt_name: "numeric", numeric_precision: 4, numeric_scale: 2, is_nullable: "YES"},
+        {column_name: "csat_response_count", data_type: "integer", udt_name: "int4", numeric_precision: 32, numeric_scale: 0, is_nullable: "YES"},
+        {column_name: "staff_hours_saved", data_type: "numeric", udt_name: "numeric", numeric_precision: 12, numeric_scale: 2, is_nullable: "YES"},
+        {column_name: "llm_cost_usd", data_type: "numeric", udt_name: "numeric", numeric_precision: 12, numeric_scale: 6, is_nullable: "YES"},
+        {column_name: "renewal_due_count", data_type: "integer", udt_name: "int4", numeric_precision: 32, numeric_scale: 0, is_nullable: "YES"},
+        {column_name: "renewal_paid_count", data_type: "integer", udt_name: "int4", numeric_precision: 32, numeric_scale: 0, is_nullable: "YES"},
+        {column_name: "renewal_rate", data_type: "numeric", udt_name: "numeric", numeric_precision: 7, numeric_scale: 6, is_nullable: "YES"},
+        {column_name: "first_year_renewal_due_count", data_type: "integer", udt_name: "int4", numeric_precision: 32, numeric_scale: 0, is_nullable: "YES"},
+        {column_name: "first_year_renewal_paid_count", data_type: "integer", udt_name: "int4", numeric_precision: 32, numeric_scale: 0, is_nullable: "YES"},
+        {column_name: "first_year_renewal_rate", data_type: "numeric", udt_name: "numeric", numeric_precision: 7, numeric_scale: 6, is_nullable: "YES"},
+        {column_name: "refreshed_at", data_type: "timestamp with time zone", udt_name: "timestamptz", numeric_precision: null, numeric_scale: null, is_nullable: "YES"},
       ]);
       expect(columns.rows.some(({column_name, data_type}) =>
         /(^|_)(profile|conversation|message|content|metadata|summary|error)(_|$)/i.test(column_name)
@@ -476,6 +516,8 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         agent_resolved_rate: string | null;
         escalation_rate: string | null;
         failure_rate: string | null;
+        median_first_response_ms: number | null;
+        first_response_sample_count: number;
         csat_average: string | null;
         csat_response_count: number;
         staff_hours_saved: string;
@@ -498,6 +540,8 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
            agent_resolved_rate::text AS agent_resolved_rate,
            escalation_rate::text AS escalation_rate,
            failure_rate::text AS failure_rate,
+           median_first_response_ms,
+           first_response_sample_count,
            csat_average::text AS csat_average,
            csat_response_count,
            staff_hours_saved::text AS staff_hours_saved,
@@ -513,7 +557,6 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
       );
       expect(metrics.rows).toHaveLength(12);
       expect(metrics.rows[0]?.month_start).toBe(month.month_start);
-      expect(new Set(metrics.rows.map((row) => row.month_start.slice(0, 4))).size).toBeGreaterThan(1);
       for (let index = 1; index < metrics.rows.length; index += 1) {
         const previous = new Date(`${metrics.rows[index - 1]?.month_start}T00:00:00Z`);
         previous.setUTCMonth(previous.getUTCMonth() + 1);
@@ -530,6 +573,8 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         agent_resolved_rate: "0.333333",
         escalation_rate: "0.333333",
         failure_rate: "0.333333",
+        median_first_response_ms: 3000,
+        first_response_sample_count: 3,
         csat_average: "3.50",
         csat_response_count: 4,
         staff_hours_saved: "0.10",
@@ -551,6 +596,8 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
           agent_resolved_rate: null,
           escalation_rate: null,
           failure_rate: null,
+          median_first_response_ms: null,
+          first_response_sample_count: 0,
           csat_average: null,
           csat_response_count: 0,
           staff_hours_saved: "0.00",
