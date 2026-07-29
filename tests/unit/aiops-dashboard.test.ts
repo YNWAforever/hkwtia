@@ -46,6 +46,17 @@ function windowRows(refreshedAt?: Date) {
   return Array.from({length: 12}, (_, index) => metric(monthStartAt(index), refreshedAt));
 }
 
+function expectInvalid(rows: AiOpsMonthlyMetric[], now: Date) {
+  try {
+    buildAiOpsDashboardState(rows, now);
+    throw new Error("expected dashboard state validation to throw");
+  } catch (error) {
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).message).toBe(AI_OPS_DASHBOARD_INVALID);
+    expect(Object.keys(error as object)).toEqual([]);
+  }
+}
+
 describe("AI-Ops dashboard state", () => {
   it("treats a refresh exactly 120 minutes old as fresh", () => {
     const rows = windowRows(new Date("2026-07-30T10:00:00.000Z"));
@@ -69,11 +80,61 @@ describe("AI-Ops dashboard state", () => {
   it("returns empty when the valid twelve-month window lacks the current Hong Kong month", () => {
     const rows = Array.from({length: 12}, (_, index) => metric(monthStartAt(index - 1)));
 
-    expect(buildAiOpsDashboardState(rows, NOW)).toEqual({
+    const state = buildAiOpsDashboardState(rows, NOW);
+
+    expect(state).toEqual({
       status: "empty",
       current: null,
       months: rows,
     });
+    expect(Object.isFrozen(state)).toBe(true);
+    expect(Object.isFrozen(state.months)).toBe(true);
+    expect(Object.isFrozen(state.months[0])).toBe(true);
+  });
+
+  it("uses the newest refresh timestamp to calculate the dashboard age and status", () => {
+    const rows = windowRows(new Date("2026-07-30T07:00:00.000Z"));
+    rows[11].refreshedAt = new Date("2026-07-30T11:00:00.000Z");
+
+    expect(buildAiOpsDashboardState(rows, NOW)).toMatchObject({status: "fresh", ageMs: 60 * 60 * 1000});
+  });
+
+  it("selects the current month at a Hong Kong month boundary", () => {
+    const now = new Date("2026-06-30T16:30:00.000Z");
+    const rows = windowRows(new Date("2026-06-30T16:29:00.000Z"));
+
+    expect(buildAiOpsDashboardState(rows, now)).toMatchObject({
+      status: "fresh",
+      current: {monthStart: "2026-07-01"},
+    });
+  });
+
+  it("returns a frozen defensive snapshot independent of caller mutations", () => {
+    const refreshedAt = new Date("2026-07-30T10:00:00.000Z");
+    const rows = windowRows(refreshedAt);
+    const state = buildAiOpsDashboardState(rows, NOW);
+
+    if (state.status !== "fresh") throw new Error("expected fresh dashboard state");
+    const current = state.current;
+    const months = state.months;
+    rows.reverse();
+    rows.push(metric("2026-08-01", refreshedAt));
+    rows.find((row) => row.monthStart === "2026-07-01")!.conversationCount = 0;
+    refreshedAt.setTime(new Date("2020-01-01T00:00:00.000Z").getTime());
+
+    expect(state).toMatchObject({
+      status: "fresh",
+      ageMs: 120 * 60 * 1000,
+      current: {monthStart: "2026-07-01", conversationCount: 15},
+    });
+    expect(state.months).toHaveLength(12);
+    expect(state.current).toBe(current);
+    expect(state.months).toBe(months);
+    expect(state.current.refreshedAt.getTime()).toBe(new Date("2026-07-30T10:00:00.000Z").getTime());
+    expect(state.current.refreshedAt).not.toBe(refreshedAt);
+    expect(Object.isFrozen(state)).toBe(true);
+    expect(Object.isFrozen(state.months)).toBe(true);
+    expect(Object.isFrozen(state.current)).toBe(true);
   });
 
   it.each([
@@ -84,8 +145,8 @@ describe("AI-Ops dashboard state", () => {
     ["fewer than twelve rows", windowRows().slice(0, 11), NOW],
     ["more than twelve rows", [...windowRows(), metric("2026-08-01")], NOW],
     ["a malformed row", [{monthStart: "2026-07-01"}, ...windowRows().slice(1)] as unknown as AiOpsMonthlyMetric[], NOW],
-  ])("rejects %s with the fixed safe code", (_name, rows, now) => {
-    expect(() => buildAiOpsDashboardState(rows, now)).toThrow(AI_OPS_DASHBOARD_INVALID);
+  ])("rejects %s with only the fixed safe error", (_name, rows, now) => {
+    expectInvalid(rows, now);
   });
 
   it("returns unavailable without an error argument or message", () => {
@@ -95,5 +156,7 @@ describe("AI-Ops dashboard state", () => {
       months: [],
     });
     expect(unavailableAiOpsDashboardState).toHaveLength(0);
+    expect(Object.isFrozen(unavailableAiOpsDashboardState())).toBe(true);
+    expect(Object.isFrozen(unavailableAiOpsDashboardState().months)).toBe(true);
   });
 });

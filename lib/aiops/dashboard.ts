@@ -39,6 +39,14 @@ function currentHongKongMonth(now: Date): string {
   return `${year}-${month}-01`;
 }
 
+function frozenMetricSnapshot(row: AiOpsMonthlyMetric): AiOpsMonthlyMetric {
+  return Object.freeze({...row, refreshedAt: Object.freeze(new Date(row.refreshedAt.getTime()))});
+}
+
+function frozenMonths(rows: readonly AiOpsMonthlyMetric[]): readonly AiOpsMonthlyMetric[] {
+  return Object.freeze(rows.map(frozenMetricSnapshot));
+}
+
 export function buildAiOpsDashboardState(
   rows: readonly AiOpsMonthlyMetric[],
   now: Date,
@@ -60,17 +68,18 @@ export function buildAiOpsDashboardState(
   const ageMs = now.getTime() - newestRefreshedAt;
   if (!Number.isFinite(newestRefreshedAt) || ageMs < 0) invalidDashboardState();
 
-  const current = rows.find((row) => row.monthStart === currentHongKongMonth(now));
-  if (!current) return {status: "empty", current: null, months: rows};
+  const months = frozenMonths(rows);
+  const current = months.find((row) => row.monthStart === currentHongKongMonth(now));
+  if (!current) return Object.freeze({status: "empty", current: null, months});
 
-  return {
+  return Object.freeze({
     status: ageMs <= FRESHNESS_MS ? "fresh" : "stale",
     current,
-    months: rows,
+    months,
     ageMs,
-  };
+  });
 }
 
 export function unavailableAiOpsDashboardState(): AiOpsDashboardState {
-  return {status: "unavailable", current: null, months: []};
+  return Object.freeze({status: "unavailable", current: null, months: Object.freeze([]) as readonly []});
 }
