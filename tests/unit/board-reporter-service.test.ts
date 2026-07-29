@@ -73,9 +73,11 @@ describe("Board Reporter service", () => {
       return narrative;
     });
     const createBoardDraftOnce = vi.fn(async (
-      _actor: ScheduledAgentActor,
-      _input: BoardDraftInput,
+      actor: ScheduledAgentActor,
+      input: BoardDraftInput,
     ) => {
+      void actor;
+      void input;
       order.push("post");
       return {
         postId: "22222222-2222-4222-8222-222222222222",

@@ -12,6 +12,11 @@ const SECTION_HEADINGS = new Set([
 const KPI_HEADER = "| KPI | Value |";
 const KPI_SEPARATOR = "| --- | ---: |";
 const KPI_ROW = /^\| ([^|\n]+) \| ([^|\n]+) \|$/;
+type TableHeaders = Readonly<{
+  kpi: string;
+  value: string;
+}>;
+
 const INLINE_TOKEN =
   /\*\*([^*\n]+)\*\*|(?<!!)\[([^\]\n]+)\]\((\/(?!\/)[A-Za-z0-9/_?=&.%#~-]*)\)/g;
 
@@ -36,7 +41,7 @@ function inlineNodes(value: string, keyPrefix: string): ReactNode[] {
   return nodes;
 }
 
-function safeBlocks(content: string): ReactNode[] {
+function safeBlocks(content: string, tableHeaders: TableHeaders): ReactNode[] {
   const lines = content.replace(/\r\n?/g, "\n").split("\n");
   const blocks: ReactNode[] = [];
 
@@ -68,7 +73,7 @@ function safeBlocks(content: string): ReactNode[] {
         rows.push({label: row[1], value: row[2]});
       }
       blocks.push(<div className="overflow-x-auto" key={`block-${index}`}><table className="min-w-full border-collapse text-left text-sm">
-        <thead><tr className="border-b border-border"><th className="px-3 py-2" scope="col">KPI</th><th className="px-3 py-2" scope="col">Value</th></tr></thead>
+        <thead><tr className="border-b border-border"><th className="px-3 py-2" scope="col">{tableHeaders.kpi}</th><th className="px-3 py-2" scope="col">{tableHeaders.value}</th></tr></thead>
         <tbody>{rows.map((row, tableIndex) => <tr className="border-b border-border last:border-0" key={`${row.label}-${tableIndex}`}><th className="px-3 py-2 font-medium" scope="row">{inlineNodes(row.label, `table-label-${tableIndex}`)}</th><td className="px-3 py-2">{inlineNodes(row.value, `table-value-${tableIndex}`)}</td></tr>)}</tbody>
       </table></div>);
       index = rowIndex;
@@ -94,9 +99,9 @@ function safeBlocks(content: string): ReactNode[] {
 }
 
 export function SafeGeneratedContent(
-  {content}: Readonly<{content: string}>,
+  {content, tableHeaders}: Readonly<{content: string; tableHeaders: TableHeaders}>,
 ) {
   return <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4 text-foreground">
-    {safeBlocks(content)}
+    {safeBlocks(content, tableHeaders)}
   </div>;
 }

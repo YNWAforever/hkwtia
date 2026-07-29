@@ -48,7 +48,10 @@ export default async function BoardDraftPreviewPage({params}: Props) {
       <div><dt className="font-medium">{t("boardDraftAgentRunStatus")}</dt><dd className="text-muted-foreground">{status}</dd></div>
       <div><dt className="font-medium">{t("boardDraftAgentRunId")}</dt><dd className="break-all text-muted-foreground">{draft.agentRunId}</dd></div>
     </dl>
-    <SafeGeneratedContent content={draft.bodyMdx}/>
+    <SafeGeneratedContent content={draft.bodyMdx} tableHeaders={{
+      kpi: t("boardDraftKpi"),
+      value: t("boardDraftValue"),
+    }}/>
     <Link className="inline-flex rounded-md border border-input px-3 py-2 text-sm font-medium hover:bg-muted" href={`/${locale}/admin/reports`}>{t("boardDraftBack")}</Link>
   </article>;
 }

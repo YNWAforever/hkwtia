@@ -2,7 +2,6 @@ import type {BoardFactPack} from "@/lib/ai/board-reporter/contracts";
 import {buildBoardFactPack} from "@/lib/ai/board-reporter/facts";
 import {previousHongKongMonthWindow} from "@/lib/ai/board-reporter/reporting-window";
 import type {ScheduledAgentActor} from "@/lib/auth/agent-actor";
-import {automationCronActor} from "@/lib/auth/automation-actor";
 import {serverEnv} from "@/lib/config/env";
 import {
   createJobPost,

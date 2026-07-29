@@ -7,6 +7,11 @@ import {describe, expect, it} from "vitest";
 import {BoardDraftList} from "@/components/admin/board-draft-list";
 import {SafeGeneratedContent} from "@/components/admin/safe-generated-content";
 
+const tableHeaders = {
+  kpi: "Localized KPI heading",
+  value: "Localized value heading",
+} as const;
+
 describe("safe generated content", () => {
   it("maps the app-composed report grammar to safe structural React nodes", () => {
     const content = [
@@ -31,7 +36,7 @@ describe("safe generated content", () => {
       "- [At-risk members](/en/admin/at-risk)",
     ].join("\n");
 
-    const html = renderToStaticMarkup(<SafeGeneratedContent content={content}/>);
+    const html = renderToStaticMarkup(<SafeGeneratedContent content={content} tableHeaders={tableHeaders}/>);
 
     expect(html).toContain("<h1");
     expect(html).toContain("Board report: 2026-06</h1>");
@@ -45,6 +50,10 @@ describe("safe generated content", () => {
     expect(html).toContain("<ul");
     expect(html).toContain("<li");
     expect(html).toContain('href="/en/admin/at-risk"');
+    expect(html).toContain("Localized KPI heading");
+    expect(html).toContain("Localized value heading");
+    expect(html).not.toContain(">KPI<");
+    expect(html).not.toContain(">Value<");
   });
 
   it("keeps raw HTML, executable MDX, images, embeds, and unsafe links inert", () => {
@@ -62,7 +71,7 @@ describe("safe generated content", () => {
       "[protocol relative](//example.test/path)",
     ].join("\n");
 
-    const html = renderToStaticMarkup(<SafeGeneratedContent content={payload}/>);
+    const html = renderToStaticMarkup(<SafeGeneratedContent content={payload} tableHeaders={tableHeaders}/>);
 
     expect(html).toContain("&lt;script&gt;globalThis.compromised = true&lt;/script&gt;");
     expect(html).toContain("&lt;img src=x onerror=alert(1)&gt;");
@@ -87,6 +96,8 @@ describe("safe generated content", () => {
     expect(source).not.toMatch(/next-mdx-remote/);
     expect(source).not.toMatch(/\bimport\s*\(/);
     expect(source).not.toMatch(/\beval\s*\(/);
+    expect(source).not.toContain('scope="col">KPI<');
+    expect(source).not.toContain('scope="col">Value<');
   });
 
   it("renders Board Reporter drafts as read-only summaries with a staff preview link and no inline body", () => {

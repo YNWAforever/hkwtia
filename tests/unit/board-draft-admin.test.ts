@@ -129,6 +129,8 @@ describe("board draft admin reader", () => {
     expect(source).toContain("getBoardDraft");
     expect(source).toContain("SafeGeneratedContent");
     expect(source).toContain("notFound()");
+    expect(source).toContain('kpi: t("boardDraftKpi")');
+    expect(source).toContain('value: t("boardDraftValue")');
     expect(source).not.toMatch(/publishAction|sendAction|<form|<button/);
   });
 });

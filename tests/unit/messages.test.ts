@@ -59,5 +59,9 @@ describe('message bundles', () => {
     for (const status of Object.values(admin.reports.boardDraftStatuses)) {
       expect(status).toBeTruthy();
     }
+    expect(en.Admin.reports.boardDraftKpi).toBe("KPI");
+    expect(en.Admin.reports.boardDraftValue).toBe("Value");
+    expect(zh.Admin.reports.boardDraftKpi).toBe("關鍵績效指標");
+    expect(zh.Admin.reports.boardDraftValue).toBe("數值");
   });
 });

@@ -155,7 +155,10 @@ describe("retention analyst service", () => {
     const hasPendingRetentionOutreach = vi.fn(
       async (_actor, profileId: string) => profileId === "profile-b",
     );
-    const start = vi.fn(async (_actor: {runId: string}) => ({}));
+    const start = vi.fn(async (actor: {runId: string}) => {
+      void actor;
+      return {};
+    });
     const runJson = vi.fn(async ({actor}) => {
       if (actor.runId === "11111111-1111-4111-8111-111111111102") {
         throw new Error("invalid_provider_response");
