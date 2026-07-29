@@ -7,6 +7,9 @@ import type {AiOpsMonthlyMetric} from "@/lib/aiops/contracts";
 import type {AiOpsDashboardState} from "@/lib/aiops/dashboard";
 
 const labels: AiOpsDashboardLabels = {
+  eyebrow: "AI-Ops in public",
+  title: "Operational AI, measured in public",
+  description: "Hourly, privacy-safe evidence from WTIA's Concierge and scheduled agents.",
   currentMonth: "Current Hong Kong month",
   partialMonth: "Month to date",
   lastUpdated: "Last updated",
@@ -127,6 +130,13 @@ describe("public AI-Ops dashboard components", () => {
   it("renders the fresh KPI fixture with exact precision and denominator notes", () => {
     render(dashboard());
 
+    expect(screen.getByRole("heading", {name: labels.title})).toBeInTheDocument();
+    expect(screen.getByText(labels.eyebrow)).toBeInTheDocument();
+    expect(screen.getByText(labels.description)).toBeInTheDocument();
+    expect(screen.getByText(labels.partialMonth)).toBeInTheDocument();
+    expect(screen.getByText(labels.lastUpdated, {exact: false})).toBeInTheDocument();
+    expect(screen.getByText(labels.resolutionTarget)).toBeInTheDocument();
+    expect(screen.getByText(labels.csatTarget)).toBeInTheDocument();
     expect(screen.getByText("15")).toBeInTheDocument();
     expect(within(screen.getByRole("heading", {name: "Agent resolved"}).parentElement!).getByText("80.0%")).toBeInTheDocument();
     expect(screen.getByText("12 / 15")).toBeInTheDocument();
@@ -150,7 +160,7 @@ describe("public AI-Ops dashboard components", () => {
     expect(chart.querySelector("title")).toHaveTextContent(labels.renewalChartTitle);
     expect(chart.querySelector("desc")).toHaveTextContent(labels.renewalChartDescription);
     expect(screen.getByText(labels.overallRenewal)).toBeInTheDocument();
-    expect(screen.getAllByText(labels.firstYearRenewal)).toHaveLength(2);
+    expect(screen.getByText(labels.firstYearRenewal)).toBeInTheDocument();
     expect(screen.getByText(labels.overallTarget)).toBeInTheDocument();
     expect(screen.getByText(labels.firstYearTarget)).toBeInTheDocument();
 
@@ -158,6 +168,11 @@ describe("public AI-Ops dashboard components", () => {
     expect(within(table).getAllByRole("row")).toHaveLength(13);
     expect(within(table).getAllByText("90.0%")).toHaveLength(12);
     expect(within(table).getAllByText("80.0%")).toHaveLength(12);
+    expect(within(table).getByRole("columnheader", {name: "Overall renewal Paid"})).toBeInTheDocument();
+    expect(within(table).getByRole("columnheader", {name: "First-year renewal Due"})).toBeInTheDocument();
+    expect(chart.querySelectorAll("circle")).toHaveLength(12);
+    expect(chart.querySelectorAll("rect")).toHaveLength(12);
+    expect(chart.querySelectorAll("line")).toHaveLength(2);
   });
 
   it("renders missing rates as localized unavailable values without fabricating zero", () => {
@@ -187,6 +202,8 @@ describe("public AI-Ops dashboard components", () => {
     expect(screen.getByText("scheduled agents / AI-Ops refresh")).toBeInTheDocument();
     expect(screen.getByText(labels.approvalGate)).toBeInTheDocument();
     expect(screen.getByText(labels.publicationGate)).toBeInTheDocument();
+    const flows = screen.getAllByRole("list").slice(0, 2).map((flow) => within(flow).getAllByRole("listitem").map((item) => item.textContent?.replace("→", "").trim()));
+    expect(flows).toEqual([["Web / WhatsApp", "Concierge runtime", "guarded tools", "Neon Postgres"], ["Cloudflare Worker", "authenticated job routes", "scheduled agents / AI-Ops refresh", "Neon Postgres"]]);
 
     expect(screen.getByRole("link", {name: buildLogs[0].titleEn})).toHaveAttribute(
       "href",
