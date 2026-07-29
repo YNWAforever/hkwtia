@@ -122,7 +122,7 @@ describe("agent-run model provenance", () => {
     expect(loadDatabase).not.toHaveBeenCalled();
   });
 
-  it("starts a scheduled run with exact agent identity and null ownership", async () => {
+  it("starts a scheduled run with exact identity and an optional acceptance marker", async () => {
     const statements: string[] = [];
     const parameters: unknown[][] = [];
     const database = drizzle(async (query, params) => {
@@ -136,19 +136,24 @@ describe("agent-run model provenance", () => {
         trigger: "scheduled",
         provider: null,
         model: null,
+        summary: "m4b-acceptance-owner:m4b-acceptance-v1",
       })]};
     });
     const repository = createAgentRunsRepository(
       async () => database as unknown as AutomationDatabase,
     );
 
-    await expect(repository.start(scheduledActor, {startedAt: now})).resolves.toMatchObject({
+    await expect(repository.start(scheduledActor, {
+      startedAt: now,
+      acceptanceOwnershipKey: "m4b-acceptance-v1",
+    })).resolves.toMatchObject({
       id: scheduledActor.runId,
       agent: "retention_analyst",
       conversationId: null,
       profileId: null,
       trigger: "scheduled",
       status: "running",
+      summary: "m4b-acceptance-owner:m4b-acceptance-v1",
     });
 
     const insertSql = normalizedSql(statements[0]);
@@ -160,6 +165,7 @@ describe("agent-run model provenance", () => {
       scheduledActor.agent,
       null,
       "scheduled",
+      "m4b-acceptance-owner:m4b-acceptance-v1",
     ]));
   });
 

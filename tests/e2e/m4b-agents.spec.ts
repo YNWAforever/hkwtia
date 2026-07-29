@@ -2,6 +2,9 @@ import {readFileSync} from "node:fs";
 
 import {expect, test, type Page} from "@playwright/test";
 
+import {buildM4BAcceptanceFixture} from "@/scripts/seed-m4b";
+import {validateM4BE2ETarget} from "@/tests/fixtures/m4b-e2e-safety";
+
 type Messages = Readonly<{
   NotFound: {title: string};
   Admin: {
@@ -20,37 +23,10 @@ type Messages = Readonly<{
 const messages = JSON.parse(
   readFileSync(new URL("../../messages/en.json", import.meta.url), "utf8"),
 ) as Messages;
-const configuredBaseUrl = process.env.PLAYWRIGHT_BASE_URL?.trim();
-
-function validateTarget(value: string): URL {
-  const target = new URL(value);
-  if (
-    target.username
-    || target.password
-    || target.search
-    || target.hash
-    || !["http:", "https:"].includes(target.protocol)
-  ) {
-    throw new Error("M4B_E2E_TARGET_INVALID");
-  }
-  const loopback = new Set(["localhost", "127.0.0.1", "[::1]"])
-    .has(target.hostname.toLowerCase());
-  if (loopback) return target;
-  if (
-    target.protocol !== "https:"
-    || !target.hostname.endsWith(".vercel.app")
-    || target.hostname === "hkwtia.vercel.app"
-  ) {
-    throw new Error("M4B_E2E_PREVIEW_TARGET_REQUIRED");
-  }
-  const allowedOrigin = process.env.M4B_E2E_ALLOWED_ORIGIN?.trim();
-  if (allowedOrigin !== target.origin) {
-    throw new Error("M4B_E2E_TARGET_ORIGIN_MISMATCH");
-  }
-  return target;
-}
-
-const target = configuredBaseUrl ? validateTarget(configuredBaseUrl) : null;
+const target = process.env.PLAYWRIGHT_BASE_URL?.trim()
+  ? validateM4BE2ETarget(process.env)
+  : null;
+const fixture = buildM4BAcceptanceFixture();
 const requiredCredentials = [
   "M4B_TEST_STAFF_EMAIL",
   "M4B_TEST_STAFF_PASSWORD",
@@ -127,7 +103,8 @@ test.describe("M4B staff-only agent outputs", () => {
     })).toHaveCount(0);
 
     const reports = await page.goto(
-      "/admin/reports?from=2030-06-01&to=2030-06-30",
+      `/admin/reports?from=${fixture.reportWindow.display.from}`
+      + `&to=${fixture.reportWindow.display.to}`,
     );
     expect(reports?.status()).toBe(200);
     await expect(page.getByRole("heading", {
@@ -149,7 +126,7 @@ test.describe("M4B staff-only agent outputs", () => {
     await preview.click();
     await expect(page.getByRole("heading", {
       level: 1,
-      name: "Board report: 2030-06",
+      name: `Board report: ${fixture.reportMonth}`,
     })).toBeVisible();
     await expect(page.getByText("HKD 10,800", {exact: false})).toBeVisible();
     await expect(page.getByText("At-risk members", {exact: false}))

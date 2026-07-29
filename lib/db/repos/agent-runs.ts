@@ -43,6 +43,9 @@ const startInputSchema = z.object({
   provider: z.string().min(1).max(100).nullish(),
   model: z.string().min(1).max(200).nullish(),
   startedAt: z.date().refine((value) => Number.isFinite(value.getTime())).optional(),
+  acceptanceOwnershipKey: z.string()
+    .regex(/^m4b-acceptance-v\d+$/)
+    .optional(),
 }).strict();
 const configureModelInputSchema = z.object({
   provider: z.enum(["openai", "anthropic"]),
@@ -220,7 +223,14 @@ async function transition(
       output_tokens = ${values.outputTokens},
       cost_usd = ${values.costUsd},
       latency_ms = FLOOR(EXTRACT(EPOCH FROM (${values.completedAt} - started_at)) * 1000)::int,
-      summary = ${values.summary},
+      summary = CASE
+        WHEN summary LIKE 'm4b-acceptance-owner:%'
+          THEN summary || CASE
+            WHEN ${values.summary} IS NULL THEN ''
+            ELSE ':' || ${values.summary}
+          END
+        ELSE ${values.summary}
+      END,
       error_code = ${values.errorCode},
       completed_at = ${values.completedAt},
       updated_at = ${values.completedAt}
@@ -256,6 +266,9 @@ export function createAgentRunsRepository(
       requireAgentRunActor(actor);
       const parsed = startInputSchema.parse(input);
       const startedAt = parsed.startedAt ?? new Date();
+      const acceptanceSummary = parsed.acceptanceOwnershipKey
+        ? `m4b-acceptance-owner:${parsed.acceptanceOwnershipKey}`
+        : null;
       const database = await loadDatabase();
       const statement = actor.agent === "concierge"
         ? sql`
@@ -269,6 +282,7 @@ export function createAgentRunsRepository(
             status,
             provider,
             model,
+            summary,
             started_at,
             created_at,
             updated_at
@@ -282,6 +296,7 @@ export function createAgentRunsRepository(
           'running',
           ${parsed.provider ?? null},
           ${parsed.model ?? null},
+          ${acceptanceSummary},
           ${startedAt},
           ${startedAt},
           ${startedAt}
@@ -301,6 +316,7 @@ export function createAgentRunsRepository(
             status,
             provider,
             model,
+            summary,
             started_at,
             created_at,
             updated_at
@@ -314,6 +330,7 @@ export function createAgentRunsRepository(
           'running',
           ${parsed.provider ?? null},
           ${parsed.model ?? null},
+          ${acceptanceSummary},
           ${startedAt},
           ${startedAt},
           ${startedAt}

@@ -399,6 +399,7 @@ export async function runProductionRetentionAnalyst(
   const environment = serverEnv();
   return runRetentionAnalystService(automationCronActor(), {
     asOf: now,
+    acceptanceOwnershipKey: process.env.M4B_ACCEPTANCE_OWNERSHIP_KEY,
     agentConfig: {
       enabled: environment.agentsEnabled,
       model: process.env.RETENTION_ANALYST_MODEL
@@ -425,6 +426,7 @@ export async function runProductionBoardReporter(
   const environment = serverEnv();
   return runBoardReporterService(automationCronActor(), {
     asOf: now,
+    acceptanceOwnershipKey: process.env.M4B_ACCEPTANCE_OWNERSHIP_KEY,
     agentConfig: {
       enabled: environment.agentsEnabled,
       model: process.env.BOARD_REPORTER_MODEL

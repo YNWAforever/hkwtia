@@ -29,6 +29,7 @@ import {retentionAnalystRepository} from "@/lib/db/repos/retention-analyst";
 import type {JobHandlerRepository} from "@/lib/jobs/handler";
 import {
   assertM4BSeedEnvironment,
+  buildM4BAcceptanceFixture,
   M4B_ACCEPTANCE_FIXTURE,
   seedM4B,
 } from "@/scripts/seed-m4b";
@@ -136,12 +137,20 @@ describe("M4B deterministic service acceptance", () => {
 
     const first = await runRetentionAnalyst(
       automationCronActor(),
-      {asOf: M4B_ACCEPTANCE_FIXTURE.asOf, agentConfig: enabledAgent},
+      {
+        asOf: M4B_ACCEPTANCE_FIXTURE.asOf,
+        agentConfig: enabledAgent,
+        acceptanceOwnershipKey: M4B_ACCEPTANCE_FIXTURE.sourceLabel,
+      },
       dependencies,
     );
     const rerun = await runRetentionAnalyst(
       automationCronActor(),
-      {asOf: M4B_ACCEPTANCE_FIXTURE.asOf, agentConfig: enabledAgent},
+      {
+        asOf: M4B_ACCEPTANCE_FIXTURE.asOf,
+        agentConfig: enabledAgent,
+        acceptanceOwnershipKey: M4B_ACCEPTANCE_FIXTURE.sourceLabel,
+      },
       dependencies,
     );
 
@@ -163,6 +172,11 @@ describe("M4B deterministic service acceptance", () => {
     expect([...approvals.values()].map(({profileId}) => profileId).sort())
       .toEqual([...M4B_ACCEPTANCE_FIXTURE.expectedAtRiskProfileIds].sort());
     expect(model).toHaveBeenCalledTimes(3);
+    for (const call of dependencies.agentRuns.start.mock.calls) {
+      expect(call[1]).toMatchObject({
+        acceptanceOwnershipKey: M4B_ACCEPTANCE_FIXTURE.sourceLabel,
+      });
+    }
     expect(deliveries).toHaveLength(0);
     expect(JSON.stringify([...approvals.values()])).not.toMatch(
       /sent|delivered|email_log|whatsapp_log/i,
@@ -217,12 +231,20 @@ describe("M4B deterministic service acceptance", () => {
 
     const first = await runBoardReporter(
       automationCronActor(),
-      {asOf: M4B_ACCEPTANCE_FIXTURE.asOf, agentConfig: enabledAgent},
+      {
+        asOf: M4B_ACCEPTANCE_FIXTURE.asOf,
+        agentConfig: enabledAgent,
+        acceptanceOwnershipKey: M4B_ACCEPTANCE_FIXTURE.sourceLabel,
+      },
       dependencies,
     );
     const rerun = await runBoardReporter(
       automationCronActor(),
-      {asOf: M4B_ACCEPTANCE_FIXTURE.asOf, agentConfig: enabledAgent},
+      {
+        asOf: M4B_ACCEPTANCE_FIXTURE.asOf,
+        agentConfig: enabledAgent,
+        acceptanceOwnershipKey: M4B_ACCEPTANCE_FIXTURE.sourceLabel,
+      },
       dependencies,
     );
 
@@ -240,6 +262,11 @@ describe("M4B deterministic service acceptance", () => {
       M4B_ACCEPTANCE_FIXTURE.expectedBoardMetrics,
     );
     expect([...posts.values()]).toHaveLength(1);
+    for (const call of dependencies.agentRuns.start.mock.calls) {
+      expect(call[1]).toMatchObject({
+        acceptanceOwnershipKey: M4B_ACCEPTANCE_FIXTURE.sourceLabel,
+      });
+    }
     expect([...posts.values()][0]).toMatchObject({
       kind: "page",
       publishedAt: null,
@@ -370,6 +397,9 @@ describe.skipIf(!databaseAcceptanceEnabled)(
   "M4B isolated PostgreSQL acceptance",
   () => {
     let pool: Pool;
+    const databaseFixture = buildM4BAcceptanceFixture(
+      M4B_ACCEPTANCE_FIXTURE.asOf,
+    );
 
     beforeAll(async () => {
       const databaseUrl = process.env.DATABASE_URL_TEST?.trim();
@@ -387,8 +417,8 @@ describe.skipIf(!databaseAcceptanceEnabled)(
         DATABASE_URL: databaseUrl,
       });
       pool = new Pool({connectionString: databaseUrl});
-      await seedM4B(pool);
-      await seedM4B(pool);
+      await seedM4B(pool, {asOf: databaseFixture.asOf});
+      await seedM4B(pool, {asOf: databaseFixture.asOf});
     });
 
     afterAll(async () => {
@@ -428,19 +458,26 @@ describe.skipIf(!databaseAcceptanceEnabled)(
       }>(
         `SELECT
            (SELECT count(*)::int FROM approvals
-             WHERE request_key LIKE 'retention:2030-07-15:m4b-acceptance-%')
+             WHERE request_key = ANY($2::text[]))
              AS approvals,
            (SELECT count(*)::int FROM posts
-             WHERE source_key = 'board-report:2030-06:board-reporter-v1')
+             WHERE source_key = $3)
              AS posts,
            (SELECT count(*)::int FROM agent_runs
-             WHERE agent IN ('retention_analyst', 'board_reporter'))
+             WHERE agent IN ('retention_analyst', 'board_reporter')
+               AND (summary = $4 OR summary LIKE $5))
              AS runs,
            (SELECT count(*)::int FROM email_log
              WHERE profile_id = ANY($1::text[])) AS emails,
            (SELECT count(*)::int FROM whatsapp_log
              WHERE profile_id = ANY($1::text[])) AS whatsapp`,
-        [profileIds],
+        [
+          profileIds,
+          databaseFixture.retentionRequestKeys,
+          databaseFixture.boardSourceKey,
+          databaseFixture.agentRunOwnershipMarker,
+          `${databaseFixture.agentRunOwnershipMarker}:%`,
+        ],
       );
       expect(result.rows[0]).toEqual({
         approvals: 0,
@@ -449,6 +486,42 @@ describe.skipIf(!databaseAcceptanceEnabled)(
         emails: 0,
         whatsapp: 0,
       });
+    });
+
+    it("removes rerun-orphaned fixture runs without touching unrelated runs", async () => {
+      const orphanId = "44000001-0000-4000-8000-000000000001";
+      const unrelatedId = "44000001-0000-4000-8000-000000000002";
+      await pool.query(
+        `INSERT INTO agent_runs
+           (id, agent, conversation_id, profile_id, trigger, status, summary,
+            started_at, created_at, updated_at)
+         VALUES
+           ($1, 'board_reporter', NULL, NULL, 'scheduled', 'completed', $3,
+            $5, $5, $5),
+           ($2, 'board_reporter', NULL, NULL, 'scheduled', 'completed', $4,
+            $5, $5, $5)`,
+        [
+          orphanId,
+          unrelatedId,
+          `${databaseFixture.agentRunOwnershipMarker}:answered`,
+          "unrelated-board-run",
+          databaseFixture.asOf,
+        ],
+      );
+
+      try {
+        await seedM4B(pool, {asOf: databaseFixture.asOf});
+        const remaining = await pool.query<{id: string}>(
+          "SELECT id::text FROM agent_runs WHERE id = ANY($1::uuid[]) ORDER BY id",
+          [[orphanId, unrelatedId]],
+        );
+        expect(remaining.rows).toEqual([{id: unrelatedId}]);
+      } finally {
+        await pool.query(
+          "DELETE FROM agent_runs WHERE id = $1",
+          [unrelatedId],
+        );
+      }
     });
   },
 );

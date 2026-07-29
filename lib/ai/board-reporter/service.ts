@@ -54,6 +54,7 @@ export type BoardReporterServiceDependencies = Readonly<{
         provider: null;
         model: null;
         startedAt: Date;
+        acceptanceOwnershipKey?: string;
       }>,
     ) => Promise<unknown>;
   }>;
@@ -99,6 +100,7 @@ export async function runBoardReporter(
   input: Readonly<{
     asOf: Date;
     agentConfig: AgentConfig;
+    acceptanceOwnershipKey?: string;
   }>,
   dependencies: BoardReporterServiceDependencies = defaultDependencies,
 ): Promise<BoardReporterResult | null> {
@@ -111,6 +113,9 @@ export async function runBoardReporter(
     provider: null,
     model: null,
     startedAt: input.asOf,
+    ...(input.acceptanceOwnershipKey
+      ? {acceptanceOwnershipKey: input.acceptanceOwnershipKey}
+      : {}),
   });
   const narrative = await dependencies.runJson({
     actor: agentActor,

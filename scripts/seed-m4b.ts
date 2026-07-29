@@ -2,10 +2,12 @@ import {fileURLToPath} from "node:url";
 
 import {Pool} from "pg";
 
+import {previousHongKongMonthWindow} from "@/lib/ai/board-reporter/reporting-window";
+import {hongKongDateKey} from "@/lib/automation/hong-kong-time";
+
 export const M4B_ACCEPTANCE_SEED_ENV = "M4B_ACCEPTANCE_SEED";
 
 const AS_OF = new Date("2030-07-15T02:00:00.000Z");
-const CREATED_AT = new Date("2030-01-01T00:00:00.000Z");
 const PROFILE_IDS = {
   lowScore: "m4b-acceptance-low-score",
   inactive: "m4b-acceptance-inactive",
@@ -111,6 +113,69 @@ export const M4B_ACCEPTANCE_FIXTURE = {
   ],
 } as const;
 
+const DAY_MS = 86_400_000;
+const AGENT_RUN_OWNERSHIP_MARKER =
+  `m4b-acceptance-owner:${M4B_ACCEPTANCE_FIXTURE.sourceLabel}`;
+
+function offsetDate(base: Date, days: number): Date {
+  return new Date(base.getTime() + days * DAY_MS);
+}
+
+export function buildM4BAcceptanceFixture(asOf = new Date()) {
+  if (!Number.isFinite(asOf.getTime())) {
+    throw new Error("M4B_ACCEPTANCE_AS_OF_INVALID");
+  }
+  const reportWindow = previousHongKongMonthWindow(asOf);
+  const dynamicProfiles = [
+    {
+      ...profiles[0],
+      lastLoginAt: offsetDate(asOf, -10),
+      renewalAt: offsetDate(asOf, 180),
+    },
+    {
+      ...profiles[1],
+      lastLoginAt: offsetDate(asOf, -100),
+      renewalAt: offsetDate(asOf, 30),
+    },
+    {
+      ...profiles[2],
+      lastLoginAt: offsetDate(asOf, -110),
+      renewalAt: offsetDate(asOf, 45),
+    },
+    {
+      ...profiles[3],
+      lastLoginAt: offsetDate(asOf, -10),
+      renewalAt: offsetDate(asOf, 180),
+    },
+  ] as const;
+  const retentionDate = hongKongDateKey(asOf);
+  return {
+    ...M4B_ACCEPTANCE_FIXTURE,
+    asOf: new Date(asOf),
+    reportMonth: reportWindow.reportMonth,
+    reportWindow,
+    profiles: dynamicProfiles,
+    agentRunOwnershipMarker: AGENT_RUN_OWNERSHIP_MARKER,
+    retentionRequestKeys: M4B_ACCEPTANCE_FIXTURE.expectedAtRiskProfileIds
+      .map((profileId) =>
+        `retention:${retentionDate}:${profileId}:retention-analyst-v1`
+      ),
+    boardSourceKey:
+      `board-report:${reportWindow.reportMonth}:board-reporter-v1`,
+    createdAt: offsetDate(reportWindow.utc.from, -180),
+    applicationDates: APPLICATION_IDS.map((_, index) =>
+      offsetDate(reportWindow.utc.from, index + 1)
+    ),
+    renewalDates: ENGAGEMENT_EVENT_IDS.map((_, index) =>
+      offsetDate(reportWindow.utc.from, index + 9)
+    ),
+    eventStart: offsetDate(reportWindow.utc.from, 19),
+  } as const;
+}
+
+export type M4BAcceptanceFixture =
+  ReturnType<typeof buildM4BAcceptanceFixture>;
+
 type SeedConnection = Readonly<{
   query: (
     text: string,
@@ -123,38 +188,27 @@ export type M4BSeedPool = Readonly<{
   connect: () => Promise<SeedConnection>;
 }>;
 
-const retentionRequestKeys = M4B_ACCEPTANCE_FIXTURE
-  .expectedAtRiskProfileIds
-  .map((profileId) =>
-    `retention:2030-07-15:${profileId}:retention-analyst-v1`
-  );
-const boardSourceKey = "board-report:2030-06:board-reporter-v1";
-
 async function clearGeneratedEffects(
   connection: SeedConnection,
+  fixture: M4BAcceptanceFixture,
 ): Promise<void> {
-  const profileIds = profiles.map(({id}) => id);
+  const profileIds = fixture.profiles.map(({id}) => id);
   await connection.query(
     `DELETE FROM agent_runs
-     WHERE id IN (
-       SELECT NULLIF(payload ->> 'agentRunId', '')::uuid
-       FROM approvals
-       WHERE request_key = ANY($1::text[])
-       UNION
-       SELECT agent_run_id
-       FROM posts
-       WHERE source_key = $2
-         AND agent_run_id IS NOT NULL
-     )`,
-    [retentionRequestKeys, boardSourceKey],
+     WHERE agent IN ('retention_analyst', 'board_reporter')
+       AND (summary = $1 OR summary LIKE $2)`,
+    [
+      fixture.agentRunOwnershipMarker,
+      `${fixture.agentRunOwnershipMarker}:%`,
+    ],
   );
   await connection.query(
     "DELETE FROM approvals WHERE request_key = ANY($1::text[])",
-    [retentionRequestKeys],
+    [fixture.retentionRequestKeys],
   );
   await connection.query(
     "DELETE FROM posts WHERE source_key = $1",
-    [boardSourceKey],
+    [fixture.boardSourceKey],
   );
   await connection.query(
     "DELETE FROM email_log WHERE profile_id = ANY($1::text[])",
@@ -166,7 +220,10 @@ async function clearGeneratedEffects(
   );
 }
 
-async function writeBaseFixture(connection: SeedConnection): Promise<void> {
+async function writeBaseFixture(
+  connection: SeedConnection,
+  fixture: M4BAcceptanceFixture,
+): Promise<void> {
   await connection.query(
     `INSERT INTO membership_plans
        (code, audience, billing_behavior, stripe_price_reference,
@@ -178,10 +235,10 @@ async function writeBaseFixture(connection: SeedConnection): Promise<void> {
        annual_price_hkd = EXCLUDED.annual_price_hkd,
        monthly_price_hkd = EXCLUDED.monthly_price_hkd,
        updated_at = EXCLUDED.updated_at`,
-    [CREATED_AT],
+    [fixture.createdAt],
   );
 
-  for (const row of profiles) {
+  for (const row of fixture.profiles) {
     await connection.query(
       `INSERT INTO profiles
          (id, auth_user_id, email, role, last_login_at, consent_marketing,
@@ -211,9 +268,9 @@ async function writeBaseFixture(connection: SeedConnection): Promise<void> {
         `m4b-acceptance-auth-${row.id}`,
         `${row.id}@example.test`,
         row.lastLoginAt,
-        [M4B_ACCEPTANCE_FIXTURE.sourceLabel],
+        [fixture.sourceLabel],
         row.id.replaceAll("-", " "),
-        CREATED_AT,
+        fixture.createdAt,
       ],
     );
   }
@@ -245,14 +302,14 @@ async function writeBaseFixture(connection: SeedConnection): Promise<void> {
         applicantUserId,
         currentStep,
         status,
-        new Date(`2030-06-${String(applicationRows.indexOf(
-          applicationRows.find((candidate) => candidate[0] === id)!,
-        ) + 2).padStart(2, "0")}T02:00:00.000Z`),
+        fixture.applicationDates[applicationRows.findIndex(
+          (candidate) => candidate[0] === id,
+        )],
       ],
     );
   }
 
-  for (const [index, row] of profiles.entries()) {
+  for (const [index, row] of fixture.profiles.entries()) {
     await connection.query(
       `INSERT INTO memberships
          (id, owner_user_id, company_id, application_id, plan_code, status,
@@ -281,9 +338,9 @@ async function writeBaseFixture(connection: SeedConnection): Promise<void> {
         row.id,
         index < 3 ? APPLICATION_IDS[index] : null,
         index % 2 === 0 ? "annual" : "monthly",
-        new Date("2029-08-01T00:00:00.000Z"),
+        fixture.createdAt,
         row.renewalAt,
-        CREATED_AT,
+        fixture.createdAt,
       ],
     );
     await connection.query(
@@ -294,12 +351,15 @@ async function writeBaseFixture(connection: SeedConnection): Promise<void> {
          score = EXCLUDED.score,
          trend = EXCLUDED.trend,
          computed_at = EXCLUDED.computed_at`,
-      [row.id, row.score, row.trend, AS_OF],
+      [row.id, row.score, row.trend, fixture.asOf],
     );
   }
 }
 
-async function writeReportFacts(connection: SeedConnection): Promise<void> {
+async function writeReportFacts(
+  connection: SeedConnection,
+  fixture: M4BAcceptanceFixture,
+): Promise<void> {
   const renewalRows = [
     {
       id: ENGAGEMENT_EVENT_IDS[0],
@@ -344,11 +404,11 @@ async function writeReportFacts(connection: SeedConnection): Promise<void> {
         row.type,
         row.points,
         JSON.stringify({
-          fixture: M4B_ACCEPTANCE_FIXTURE.sourceLabel,
+          fixture: fixture.sourceLabel,
           membershipId: row.membershipId,
           renewalOrdinal: row.ordinal,
         }),
-        new Date(`2030-06-${String(index + 10).padStart(2, "0")}T02:00:00Z`),
+        fixture.renewalDates[index],
       ],
     );
   }
@@ -378,13 +438,13 @@ async function writeReportFacts(connection: SeedConnection): Promise<void> {
        updated_at = EXCLUDED.updated_at`,
     [
       EVENT_ID,
-      new Date("2030-06-20T01:00:00.000Z"),
-      new Date("2030-06-20T03:00:00.000Z"),
-      CREATED_AT,
+      fixture.eventStart,
+      new Date(fixture.eventStart.getTime() + 2 * 60 * 60 * 1_000),
+      fixture.createdAt,
     ],
   );
 
-  for (const [index, profile] of profiles.entries()) {
+  for (const [index, profile] of fixture.profiles.entries()) {
     await connection.query(
       `INSERT INTO event_registrations
          (event_id, profile_id, status, checked_in_at)
@@ -396,13 +456,19 @@ async function writeReportFacts(connection: SeedConnection): Promise<void> {
         EVENT_ID,
         profile.id,
         index < 3 ? "attended" : "no_show",
-        index < 3 ? new Date("2030-06-20T01:10:00.000Z") : null,
+        index < 3
+          ? new Date(fixture.eventStart.getTime() + 10 * 60 * 1_000)
+          : null,
       ],
     );
   }
 }
 
-export async function seedM4B(pool: M4BSeedPool): Promise<void> {
+export async function seedM4B(
+  pool: M4BSeedPool,
+  options: Readonly<{asOf?: Date}> = {},
+): Promise<void> {
+  const fixture = buildM4BAcceptanceFixture(options.asOf);
   const connection = await pool.connect();
   try {
     await connection.query("BEGIN");
@@ -410,9 +476,9 @@ export async function seedM4B(pool: M4BSeedPool): Promise<void> {
       "SELECT pg_advisory_xact_lock(hashtext($1))",
       ["hkwtia:m4b-acceptance-v1"],
     );
-    await clearGeneratedEffects(connection);
-    await writeBaseFixture(connection);
-    await writeReportFacts(connection);
+    await clearGeneratedEffects(connection, fixture);
+    await writeBaseFixture(connection, fixture);
+    await writeReportFacts(connection, fixture);
     await connection.query("COMMIT");
   } catch (error) {
     try {
@@ -442,14 +508,29 @@ export function assertM4BSeedEnvironment(
   if (!databaseUrl) {
     throw new Error("M4B_ACCEPTANCE_DATABASE_URL_REQUIRED");
   }
+  const testDatabaseUrl = environment.DATABASE_URL_TEST?.trim();
+  if (!testDatabaseUrl) {
+    throw new Error("M4B_ACCEPTANCE_DATABASE_URL_TEST_REQUIRED");
+  }
+  if (databaseUrl !== testDatabaseUrl) {
+    throw new Error("M4B_ACCEPTANCE_DATABASE_URL_MISMATCH");
+  }
   return databaseUrl;
 }
 
+type SeedPoolWithEnd = M4BSeedPool & Readonly<{
+  end: () => Promise<void>;
+}>;
+
 export async function runM4BSeed(
   environment: Readonly<Record<string, string | undefined>> = process.env,
+  createPool: (databaseUrl: string) => SeedPoolWithEnd =
+    (databaseUrl) => new Pool({
+      connectionString: databaseUrl,
+    }) as unknown as SeedPoolWithEnd,
 ): Promise<void> {
   const databaseUrl = assertM4BSeedEnvironment(environment);
-  const pool = new Pool({connectionString: databaseUrl});
+  const pool = createPool(databaseUrl);
   try {
     await seedM4B(pool);
   } finally {
