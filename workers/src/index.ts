@@ -1,6 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 
 export type WorkerJob =
+  | "aiops-metrics"
   | "journey-runner"
   | "approvals-expirer"
   | "renewal-runner"
@@ -56,8 +57,9 @@ export const AI_REQUEST_TIMEOUT_MS = 240_000;
 const RETRY_DELAYS = [250, 1_000] as const;
 const ATTEMPT_COUNT = 3;
 const BASE_JOBS = [
-  "journey-runner",
+  "aiops-metrics",
   "approvals-expirer",
+  "journey-runner",
 ] as const satisfies readonly WorkerJob[];
 const JOBS_BY_CRON = {
   "0 * * * *": BASE_JOBS,
@@ -71,6 +73,7 @@ const JOBS_BY_CRON = {
 >;
 
 const REQUEST_TIMEOUT_BY_JOB = {
+  "aiops-metrics": REQUEST_TIMEOUT_MS,
   "journey-runner": REQUEST_TIMEOUT_MS,
   "approvals-expirer": REQUEST_TIMEOUT_MS,
   "renewal-runner": REQUEST_TIMEOUT_MS,

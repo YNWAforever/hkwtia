@@ -54,7 +54,10 @@ describe("chat retention Worker schedule", () => {
   });
 
   it.each([
-    ["0 * * * *", ["journey-runner", "approvals-expirer"]],
+    [
+      "0 * * * *",
+      ["aiops-metrics", "journey-runner", "approvals-expirer"],
+    ],
     ["0 2 * * *", ["renewal-runner"]],
     ["0 18 * * *", ["engagement-score"]],
   ])("preserves the existing M3 dispatch for %s", async (cron, expected) => {
