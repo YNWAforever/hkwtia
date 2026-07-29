@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "e2e": "playwright test",
     "test:e2e": "playwright test",
     "test:lighthouse": "lhci autorun",
     "audit:strings": "node scripts/audit-visible-strings.mjs",
@@ -20,6 +21,7 @@
     "db:seed:m2": "node --experimental-strip-types scripts/seed-m2.ts",
     "db:seed:m3": "node --experimental-strip-types scripts/seed-m3.ts",
     "db:seed:m4a": "node --experimental-strip-types scripts/seed-m4a.ts",
+    "db:seed:m4b": "tsx scripts/seed-m4b.ts",
     "eval:concierge": "vite-node --config vitest.config.ts evals/grader.ts --eval-concierge-cli",
     "eval:concierge:live": "vite-node --config vitest.config.ts evals/grader.ts --eval-concierge-cli --live"
   },
