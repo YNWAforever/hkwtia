@@ -250,6 +250,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
 
       const bounds = await pool.query<{
         month_start: string;
+        current_month: string;
         month_from: Date;
         fixture_month_to: Date;
         reporting_window_end: Date;
@@ -257,6 +258,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         SELECT
           (date_trunc('month', timezone('Asia/Hong_Kong', now()))
             - interval '11 months')::date::text AS month_start,
+          date_trunc('month', timezone('Asia/Hong_Kong', now()))::date::text AS current_month,
           (date_trunc('month', timezone('Asia/Hong_Kong', now()))
             - interval '11 months')::timestamp AT TIME ZONE 'Asia/Hong_Kong'
             AS month_from,
@@ -557,6 +559,12 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
       );
       expect(metrics.rows).toHaveLength(12);
       expect(metrics.rows[0]?.month_start).toBe(month.month_start);
+      expect(metrics.rows.at(-1)).toMatchObject({
+        month_start: month.current_month,
+        is_partial_month: true,
+      });
+      expect(metrics.rows.filter((row) => row.is_partial_month)).toHaveLength(1);
+      expect(metrics.rows.slice(0, -1).every((row) => !row.is_partial_month)).toBe(true);
       for (let index = 1; index < metrics.rows.length; index += 1) {
         const previous = new Date(`${metrics.rows[index - 1]?.month_start}T00:00:00Z`);
         previous.setUTCMonth(previous.getUTCMonth() + 1);

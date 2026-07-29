@@ -126,3 +126,22 @@ Result: passed with no TypeScript diagnostics.
 git diff --check
 ```
 Result: passed.
+
+## Final re-review fix: partial-month contract
+
+- The isolated fixture now independently queries the current Hong Kong calendar month and asserts that the materialized view has exactly one `is_partial_month = true` row, that it is the final/current HKT month, and that all preceding eleven rows are false.
+
+```powershell
+npm.cmd test -- tests/integration/migration.test.ts
+```
+Result: 1 test file skipped; both integration tests remain correctly gated because `DATABASE_URL_TEST` is absent.
+
+```powershell
+npm.cmd run typecheck
+```
+Result: passed with no TypeScript diagnostics after correcting the test fixture row type for `current_month`.
+
+```powershell
+git diff --check
+```
+Result: passed.
