@@ -288,10 +288,10 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
       }
     } finally {
       try {
-        await pool.query("ROLLBACK");
+        if (transactionStarted) await pool.query("ROLLBACK");
       } finally {
         try {
-          await pool.query("SELECT pg_advisory_unlock($1)", [fixtureLock]);
+          if (lockAcquired) await pool.query("SELECT pg_advisory_unlock($1)", [fixtureLock]);
         } finally {
           await pool.end();
         }
