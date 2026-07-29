@@ -2,6 +2,7 @@ import {PgDialect} from "drizzle-orm/pg-core";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import * as approvalRoute from "@/app/api/jobs/approvals-expirer/route";
+import * as boardReporterRoute from "@/app/api/jobs/board-reporter/route";
 import * as engagementRoute from "@/app/api/jobs/engagement-score/route";
 import * as journeyRoute from "@/app/api/jobs/journey-runner/route";
 import * as renewalRoute from "@/app/api/jobs/renewal-runner/route";
@@ -66,6 +67,7 @@ describe("job route exports and security", () => {
     ["engagement", engagementRoute],
     ["approvals", approvalRoute],
     ["worker-alert", workerAlertRoute],
+    ["board-reporter", boardReporterRoute],
   ])("exports POST and no GET for %s", (_name, route) => {
     expect(typeof route.POST).toBe("function");
     expect("GET" in route).toBe(false);
@@ -77,6 +79,7 @@ describe("job route exports and security", () => {
     engagementRoute.POST,
     approvalRoute.POST,
     workerAlertRoute.POST,
+    boardReporterRoute.POST,
   ])("returns 405 for a non-POST request and 401 for a missing bearer", async (post) => {
     const getResponse = await post(new Request("http://localhost/api/jobs/test", {
       method: "GET",
@@ -128,6 +131,23 @@ describe("production runner composition", () => {
       runners.retentionAnalyst(fixedNow),
     ).resolves.toMatchObject({considered: 2, drafted: 1});
     expect(runRetentionAnalyst).toHaveBeenCalledWith(fixedNow);
+  });
+
+  it("exposes the Board Reporter production runner without coupling it to existing jobs", async () => {
+    const runBoardReporter = vi.fn(async () => ({
+      reportMonth: "2026-12",
+      postId: "11111111-1111-4111-8111-111111111111",
+      created: true,
+      metricCount: 10,
+    }));
+    const runners = createJobRunners({
+      runBoardReporter,
+    });
+
+    await expect(
+      runners.boardReporter(fixedNow),
+    ).resolves.toMatchObject({reportMonth: "2026-12", created: true});
+    expect(runBoardReporter).toHaveBeenCalledWith(fixedNow);
   });
 
   it("waits for both hourly engines before surfacing either failure", async () => {

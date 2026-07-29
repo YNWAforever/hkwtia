@@ -74,10 +74,10 @@ describe("chat retention Worker schedule", () => {
     ).toBe(false);
   });
 
-  it("configures all three M3 schedules plus the M4 retention schedule", () => {
+  it("configures all M3 and M4 production schedules", () => {
     const wrangler = readFileSync("wrangler.toml", "utf8");
     expect(wrangler).toContain(
-      'crons = ["0 * * * *", "0 2 * * *", "0 18 * * *", "0 3 * * *", "15 18 * * *"]',
+      'crons = ["0 * * * *", "0 2 * * *", "0 18 * * *", "0 3 * * *", "15 18 * * *", "30 0 1 * *"]',
     );
   });
 });

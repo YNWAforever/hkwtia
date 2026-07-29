@@ -8,6 +8,10 @@ import {
   createCampaignEmailRenderer,
   runCampaignBatch,
 } from "@/lib/automation/campaign-runner";
+import {
+  BOARD_REPORTER_AGENT_CONFIG,
+  BOARD_REPORTER_SYSTEM_PROMPT,
+} from "@/config/agents/board-reporter";
 import {expireStaleApprovals} from "@/lib/automation/approvals-expirer";
 import {recomputeEngagementScores} from "@/lib/automation/engagement-score-runner";
 import {
@@ -17,6 +21,9 @@ import {
 import {
   runRetentionAnalyst as runRetentionAnalystService,
 } from "@/lib/ai/retention-analyst/service";
+import {
+  runBoardReporter as runBoardReporterService,
+} from "@/lib/ai/board-reporter/service";
 import {createAgentRuntime} from "@/lib/ai/runtime";
 import {runJourneyBatch} from "@/lib/automation/journey-runner";
 import {runRenewalReconciliation} from "@/lib/automation/renewal-runner";
@@ -53,6 +60,7 @@ const workerAlertSchema = z.object({
     "engagement-score",
     "approvals-expirer",
     "retention-analyst",
+    "board-reporter",
   ]),
   scheduledTime: z.string().min(1).max(64),
   attemptCount: z.number().int().min(1).max(3),
@@ -69,7 +77,8 @@ export type WorkerAlertPayload = Readonly<{
     | "renewal-runner"
     | "engagement-score"
     | "approvals-expirer"
-    | "retention-analyst";
+    | "retention-analyst"
+    | "board-reporter";
   scheduledTime: string;
   attemptCount: number;
   errorCode: "JOB_HTTP_ERROR" | "JOB_NETWORK_ERROR" | "JOB_TIMEOUT";
@@ -89,6 +98,7 @@ type ProductionRunnerOverrides = Partial<Readonly<{
   runEngagement(now: Date): Promise<unknown>;
   runApprovals(now: Date): Promise<unknown>;
   runRetentionAnalyst(now: Date): Promise<unknown>;
+  runBoardReporter(now: Date): Promise<unknown>;
   runWorkerAlert(payload: WorkerAlertPayload): Promise<unknown>;
 }>>;
 
@@ -409,6 +419,32 @@ export async function runProductionRetentionAnalyst(
   });
 }
 
+export async function runProductionBoardReporter(
+  now: Date,
+): Promise<unknown> {
+  const environment = serverEnv();
+  return runBoardReporterService(automationCronActor(), {
+    asOf: now,
+    agentConfig: {
+      enabled: environment.agentsEnabled,
+      model: process.env.BOARD_REPORTER_MODEL
+        ?? BOARD_REPORTER_AGENT_CONFIG.model,
+      credentials: {
+        ...(environment.openaiApiKey === undefined
+          ? {}
+          : {openaiApiKey: environment.openaiApiKey}),
+        ...(environment.anthropicApiKey === undefined
+          ? {}
+          : {anthropicApiKey: environment.anthropicApiKey}),
+      },
+      system: BOARD_REPORTER_SYSTEM_PROMPT,
+      runtime: createAgentRuntime({
+        agentRuns: agentRunsRepository,
+      }),
+    },
+  });
+}
+
 export function createJobRunners(
   overrides: ProductionRunnerOverrides = {},
 ) {
@@ -420,6 +456,8 @@ export function createJobRunners(
   const runApprovals = overrides.runApprovals ?? runProductionApprovals;
   const runRetentionAnalyst =
     overrides.runRetentionAnalyst ?? runProductionRetentionAnalyst;
+  const runBoardReporter =
+    overrides.runBoardReporter ?? runProductionBoardReporter;
   const runWorkerAlert = overrides.runWorkerAlert ?? sendWorkerAlert;
 
   return {
@@ -444,6 +482,9 @@ export function createJobRunners(
     },
     retentionAnalyst(now: Date) {
       return runRetentionAnalyst(now);
+    },
+    boardReporter(now: Date) {
+      return runBoardReporter(now);
     },
     workerAlert(payload: WorkerAlertPayload) {
       return runWorkerAlert(payload);

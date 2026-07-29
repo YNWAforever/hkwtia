@@ -39,7 +39,9 @@ describe("M4 AI job kinds", () => {
     expect(M4_AI_JOB_KIND).toMatchObject({
       CHAT_RETENTION: "chat-retention",
       RETENTION_ANALYST: "retention-analyst",
+      BOARD_REPORTER: "board-reporter",
     });
     expect(M4_AI_JOB_KINDS).toContain("retention-analyst");
+    expect(M4_AI_JOB_KINDS).toContain("board-reporter");
   });
 });
