@@ -40,7 +40,16 @@ function currentHongKongMonth(now: Date): string {
 }
 
 function frozenMetricSnapshot(row: AiOpsMonthlyMetric): AiOpsMonthlyMetric {
-  return Object.freeze({...row, refreshedAt: Object.freeze(new Date(row.refreshedAt.getTime()))});
+  const refreshedAtMs = row.refreshedAt.getTime();
+  const snapshot = {...row};
+
+  Object.defineProperty(snapshot, "refreshedAt", {
+    enumerable: true,
+    configurable: false,
+    get: () => new Date(refreshedAtMs),
+  });
+
+  return Object.freeze(snapshot);
 }
 
 function frozenMonths(rows: readonly AiOpsMonthlyMetric[]): readonly AiOpsMonthlyMetric[] {

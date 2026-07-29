@@ -130,8 +130,15 @@ describe("AI-Ops dashboard state", () => {
     expect(state.months).toHaveLength(12);
     expect(state.current).toBe(current);
     expect(state.months).toBe(months);
-    expect(state.current.refreshedAt.getTime()).toBe(new Date("2026-07-30T10:00:00.000Z").getTime());
+    const firstExposedRefresh = state.current.refreshedAt;
+    firstExposedRefresh.setTime(new Date("2020-01-01T00:00:00.000Z").getTime());
+    const secondExposedRefresh = state.current.refreshedAt;
+
+    expect(secondExposedRefresh).not.toBe(firstExposedRefresh);
+    expect(secondExposedRefresh.getTime()).toBe(new Date("2026-07-30T10:00:00.000Z").getTime());
+    expect(state.months[11].refreshedAt.getTime()).toBe(new Date("2026-07-30T10:00:00.000Z").getTime());
     expect(state.current.refreshedAt).not.toBe(refreshedAt);
+    expect(state).toMatchObject({status: "fresh", ageMs: 120 * 60 * 1000});
     expect(Object.isFrozen(state)).toBe(true);
     expect(Object.isFrozen(state.months)).toBe(true);
     expect(Object.isFrozen(state.current)).toBe(true);
