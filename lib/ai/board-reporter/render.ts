@@ -34,16 +34,48 @@ const METRIC_LABELS: Readonly<Record<BoardMetricId, string>> = Object.freeze({
   at_risk_count: "At-risk members",
 });
 
-function escapeMarkdownText(value: string, allowEmphasis = true): string {
-  const normalized = value.replace(/\s+/g, " ").trim();
-  const htmlEscaped = normalized
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-  const unsupported = allowEmphasis
-    ? /([\\`[\]{}()#!|_~>])/g
-    : /([\\`[\]{}()#!|_~>*])/g;
-  return htmlEscaped.replace(unsupported, "\\$1");
+const MARKDOWN_CONTROL_CHARACTERS = "\\`*_[]{}()#!|~>+-=.";
+const BALANCED_EMPHASIS = /(?<!\*)\*\*([^*]+)\*\*(?!\*)/g;
+
+function normalizedText(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function escapeMarkdownLiteral(value: string): string {
+  let escaped = "";
+  for (const character of value) {
+    if (character === "&") {
+      escaped += "&amp;";
+    } else if (character === "<") {
+      escaped += "&lt;";
+    } else if (character === ">") {
+      escaped += "&gt;";
+    } else if (MARKDOWN_CONTROL_CHARACTERS.includes(character)) {
+      escaped += `\\${character}`;
+    } else {
+      escaped += character;
+    }
+  }
+  return escaped;
+}
+
+function serializeNarrativeInline(value: string): string {
+  const normalized = normalizedText(value);
+  let serialized = "";
+  let cursor = 0;
+
+  for (const match of normalized.matchAll(BALANCED_EMPHASIS)) {
+    const index = match.index;
+    serialized += escapeMarkdownLiteral(normalized.slice(cursor, index));
+    serialized += `**${escapeMarkdownLiteral(match[1])}**`;
+    cursor = index + match[0].length;
+  }
+
+  return serialized + escapeMarkdownLiteral(normalized.slice(cursor));
+}
+
+function serializeLiteralInline(value: string): string {
+  return escapeMarkdownLiteral(normalizedText(value));
 }
 
 function formatNumber(value: number): string {
@@ -82,7 +114,7 @@ function bulletSection(title: string, values: readonly string[]): string[] {
     "",
     ...(values.length === 0
       ? ["None provided."]
-      : values.map((value) => `- ${escapeMarkdownText(value)}`)),
+      : values.map((value) => `- ${serializeNarrativeInline(value)}`)),
   ];
 }
 
@@ -107,7 +139,7 @@ export function renderBoardReportMdx(input: Readonly<{
     "",
     "## Executive summary",
     "",
-    escapeMarkdownText(narrative.executiveSummary),
+    `Narrative: ${serializeNarrativeInline(narrative.executiveSummary)}`,
     "",
     ...bulletSection("Highlights", narrative.highlights),
     "",
@@ -122,7 +154,7 @@ export function renderBoardReportMdx(input: Readonly<{
       "## App links",
       "",
       ...parsed.links.map((link) => (
-        `- [${escapeMarkdownText(link.label, false)}](${link.href})`
+        `- [${serializeLiteralInline(link.label)}](${link.href})`
       )),
     );
   }

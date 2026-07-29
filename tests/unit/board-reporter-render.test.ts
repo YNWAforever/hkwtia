@@ -94,6 +94,61 @@ describe("renderBoardReportMdx", () => {
     expect(bodyMdx).not.toContain("`code`");
   });
 
+  it.each([
+    {
+      label: "MDX import",
+      value: "import Widget from './widget.js'",
+      activeBlock: /^import\s/m,
+    },
+    {
+      label: "MDX export",
+      value: "export const report = 1",
+      activeBlock: /^export\s/m,
+    },
+    {
+      label: "thematic break",
+      value: "---",
+      activeBlock: /^---$/m,
+    },
+    {
+      label: "ordered list",
+      value: "1. replace the application document",
+      activeBlock: /^1\.\s/m,
+    },
+  ])("keeps $label free text inside an app-owned paragraph", ({value, activeBlock}) => {
+    const bodyMdx = renderBoardReportMdx({
+      factPack,
+      narrative: {
+        ...narrative,
+        executiveSummary: value,
+      },
+      agentRunId: "11111111-1111-4111-8111-111111111111",
+    });
+    const executiveSection = bodyMdx.slice(
+      bodyMdx.indexOf("## Executive summary"),
+      bodyMdx.indexOf("## Highlights"),
+    );
+
+    expect(executiveSection).toContain("Narrative: ");
+    expect(executiveSection).not.toMatch(activeBlock);
+  });
+
+  it("allows only balanced double-asterisk emphasis and literalizes every other asterisk", () => {
+    const bodyMdx = renderBoardReportMdx({
+      factPack,
+      narrative: {
+        ...narrative,
+        executiveSummary: "*single* **unclosed ***triple*** **balanced emphasis**",
+      },
+      agentRunId: "11111111-1111-4111-8111-111111111111",
+    });
+
+    expect(bodyMdx).toContain("\\*single\\*");
+    expect(bodyMdx).toContain("\\*\\*unclosed");
+    expect(bodyMdx).toContain("\\*\\*\\*triple\\*\\*\\*");
+    expect(bodyMdx).toContain("**balanced emphasis**");
+  });
+
   it("renders only validated app-owned links", () => {
     expect(renderBoardReportMdx({
       factPack,
