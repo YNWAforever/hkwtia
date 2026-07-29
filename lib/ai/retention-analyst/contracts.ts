@@ -19,8 +19,8 @@ export const retentionFactPackSchema = z.object({
   locale: z.enum(["en", "zh-HK"]),
   planCode: z.string().min(1),
   renewalDate: z.string().nullable(),
-  score: z.number().finite(),
-  trend: z.enum(["up", "flat", "down"]),
+  score: z.number().finite().nullable(),
+  trend: z.enum(["up", "flat", "down"]).nullable(),
   riskCodes: z.array(riskCodeSchema).min(1),
 }).strict();
 

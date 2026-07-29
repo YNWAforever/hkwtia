@@ -244,7 +244,7 @@ Each immutable fact pack contains:
 
 - locale;
 - tier code;
-- engagement score and trend bands;
+- engagement score and trend bands, nullable when unavailable;
 - last-login age band;
 - renewal proximity band;
 - membership status;

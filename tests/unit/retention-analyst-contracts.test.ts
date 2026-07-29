@@ -64,6 +64,27 @@ describe("retention analyst contracts", () => {
     expect(RETENTION_ANALYST_SYSTEM_PROMPT).not.toContain(candidate.planCode);
   });
 
+  it("preserves unavailable engagement facts without inference", () => {
+    const unavailableCandidate: RetentionCandidate = {
+      ...candidate,
+      score: null,
+      trend: null,
+      riskCodes: ["inactive_before_renewal"],
+    };
+    const factPack = serializeRetentionFactPack(unavailableCandidate);
+    const completePrompt =
+      `${RETENTION_ANALYST_SYSTEM_PROMPT}\n${buildRetentionDraftPrompt(unavailableCandidate)}`;
+
+    expect(JSON.parse(factPack)).toMatchObject({
+      score: null,
+      trend: null,
+      riskCodes: ["inactive_before_renewal"],
+    });
+    expect(completePrompt).toMatch(
+      /null means unavailable; do not infer or invent engagement values/i,
+    );
+  });
+
   it("constrains drafts to JSON-only localized safe content without side effects", () => {
     const completePrompt = `${RETENTION_ANALYST_SYSTEM_PROMPT}\n${buildRetentionDraftPrompt(candidate)}`;
 

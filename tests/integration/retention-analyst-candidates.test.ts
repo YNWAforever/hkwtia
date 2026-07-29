@@ -81,6 +81,46 @@ describe("retention analyst candidate repository", () => {
     expect(statement).toMatch(/order by .*profiles.*id.*memberships.*id/);
   });
 
+  it("retains inactive-before-renewal candidates without engagement scores", async () => {
+    const statements: string[] = [];
+    const database = drizzle(async (query) => {
+      statements.push(query);
+      return {
+        rows: [{
+          profile_id: "profile-no-score",
+          membership_id: "33333333-3333-4333-8333-333333333333",
+          locale: "en",
+          plan_code: "startup",
+          status: "active",
+          renewal_at: new Date("2027-04-20T00:00:00.000Z"),
+          score: null,
+          trend: null,
+          last_login_at: null,
+        }],
+      };
+    });
+    const repository = createRetentionAnalystRepository(
+      async () => database as unknown as AutomationDatabase,
+    );
+
+    await expect(
+      repository.listCandidates(automationCronActor(), {asOf}),
+    ).resolves.toEqual([{
+      profileId: "profile-no-score",
+      membershipId: "33333333-3333-4333-8333-333333333333",
+      locale: "en",
+      planCode: "startup",
+      renewalDate: "2027-04-20",
+      score: null,
+      trend: null,
+      riskCodes: ["inactive_before_renewal"],
+    }]);
+
+    expect(normalizedSql(statements[0])).toMatch(
+      /left join "engagement_scores"/,
+    );
+  });
+
   it("authorizes the automation cron before database access", async () => {
     const loadDatabase = vi.fn();
     const repository = createRetentionAnalystRepository(loadDatabase);

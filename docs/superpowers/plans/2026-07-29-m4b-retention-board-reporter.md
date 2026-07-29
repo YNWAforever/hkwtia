@@ -244,8 +244,8 @@ type RetentionCandidate = {
   locale: "en" | "zh-HK";
   planCode: string;
   renewalDate: string | null;
-  score: number;
-  trend: "up" | "flat" | "down";
+  score: number | null;
+  trend: "up" | "flat" | "down" | null;
   riskCodes: Array<"low_score_declining" | "inactive_before_renewal">;
 };
 ```

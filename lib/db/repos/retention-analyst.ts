@@ -34,8 +34,8 @@ const candidateRowSchema = z.object({
   plan_code: z.string().min(1),
   status: z.enum(["active", "past_due"]),
   renewal_at: z.coerce.date().nullable(),
-  score: z.union([z.string(), z.number()]),
-  trend: z.union([z.string(), z.number()]),
+  score: z.union([z.string(), z.number()]).nullable(),
+  trend: z.union([z.string(), z.number()]).nullable(),
   last_login_at: z.coerce.date().nullable(),
 }).strict();
 
@@ -90,7 +90,7 @@ export function createRetentionAnalystRepository(
           INNER JOIN ${memberships}
             ON ${memberships.ownerUserId} = ${profiles.id}
             OR ${memberships.companyId} = ${companyMembers.companyId}
-          INNER JOIN ${engagementScores}
+          LEFT JOIN ${engagementScores}
             ON ${engagementScores.profileId} = ${profiles.id}
           WHERE ${memberships.status} IN ('active', 'past_due')
           ORDER BY ${profiles.id}, ${memberships.id}
@@ -103,8 +103,8 @@ export function createRetentionAnalystRepository(
         planCode: row.plan_code,
         status: row.status,
         renewalAt: row.renewal_at,
-        score: Number(row.score),
-        trend: Number(row.trend),
+        score: row.score === null ? null : Number(row.score),
+        trend: row.trend === null ? null : Number(row.trend),
         lastLoginAt: row.last_login_at,
       }));
       return projectRetentionCandidates(sources, asOf);

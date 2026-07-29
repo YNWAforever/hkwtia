@@ -13,8 +13,8 @@ export type RetentionCandidate = Readonly<{
   locale: "en" | "zh-HK";
   planCode: string;
   renewalDate: string | null;
-  score: number;
-  trend: "up" | "flat" | "down";
+  score: number | null;
+  trend: "up" | "flat" | "down" | null;
   riskCodes: RetentionRiskCode[];
 }>;
 
@@ -25,8 +25,8 @@ export type RetentionCandidateSource = Readonly<{
   planCode: string;
   status: AtRiskCandidate["status"];
   renewalAt: Date | null;
-  score: number;
-  trend: number;
+  score: number | null;
+  trend: number | null;
   lastLoginAt: Date | null;
 }>;
 
@@ -34,7 +34,8 @@ function localeFrom(value: string | null): RetentionCandidate["locale"] {
   return value === "en" ? "en" : "zh-HK";
 }
 
-function trendFrom(value: number): RetentionCandidate["trend"] {
+function trendFrom(value: number | null): RetentionCandidate["trend"] {
+  if (value === null) return null;
   if (value < 0) return "down";
   if (value > 0) return "up";
   return "flat";
