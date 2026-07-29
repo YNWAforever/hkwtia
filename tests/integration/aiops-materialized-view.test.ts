@@ -270,10 +270,11 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
       expect(rows).toHaveLength(12);
       expect(new Set(rows.map(({month_start}) => month_start)).size).toBe(12);
       expect(rows[0]?.month_start).toBe(window.first_month);
-      expect(rows.some((row, index) =>
-        /-12-01$/.test(row.month_start)
-        && rows[index + 1]?.month_start === `${Number(row.month_start.slice(0, 4)) + 1}-01-01`,
-      )).toBe(true);
+      for (let index = 1; index < rows.length; index += 1) {
+        const previous = new Date(`${rows[index - 1]?.month_start}T00:00:00.000Z`);
+        previous.setUTCMonth(previous.getUTCMonth() + 1);
+        expect(rows[index]?.month_start).toBe(previous.toISOString().slice(0, 10));
+      }
       for (const row of rows.slice(0, -1)) {
         expect(row).toMatchObject({
           conversation_count: 0,
@@ -286,11 +287,15 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
         });
       }
     } finally {
-      await pool.query(`TRUNCATE TABLE
-        messages, agent_runs, conversations, engagement_events, memberships, profiles
-        CASCADE`);
-      await pool.query("REFRESH MATERIALIZED VIEW aiops_monthly_metrics");
-      await pool.end();
+      try {
+        await pool.query("ROLLBACK");
+      } finally {
+        try {
+          await pool.query("SELECT pg_advisory_unlock($1)", [fixtureLock]);
+        } finally {
+          await pool.end();
+        }
+      }
     }
   }, 30_000);
 });

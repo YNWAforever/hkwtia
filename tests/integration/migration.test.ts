@@ -23,6 +23,9 @@ async function runDatabaseCommand(command: "db:migrate" | "db:seed") {
 
 describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", () => {
   it("migrates twice, creates M3 tables and unique keys, and seeds all stable plan codes idempotently", async () => {
+    const pool = new Pool({connectionString: testDatabaseUrl, max: 1});
+    await pool.query("SELECT pg_advisory_lock($1)", [fixtureLock]);
+    try {
     const firstMigrationOutput = await runDatabaseCommand("db:migrate");
     const secondMigrationOutput = await runDatabaseCommand("db:migrate");
     const firstSeedOutput = await runDatabaseCommand("db:seed");
@@ -32,9 +35,6 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
       expect(output).not.toContain(testDatabaseUrl);
     }
 
-    const pool = new Pool({connectionString: testDatabaseUrl, max: 1});
-    await pool.query("SELECT pg_advisory_lock($1)", [fixtureLock]);
-    try {
       const plans = await pool.query<{code: string; count: number}>(
         "SELECT code, count(*)::int AS count FROM membership_plans GROUP BY code ORDER BY code",
       );
@@ -235,7 +235,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         indexname: "aiops_monthly_metrics_month_start_unique",
       }]);
     } finally {
-      await pool.end();
+      try { await pool.query("SELECT pg_advisory_unlock($1)", [fixtureLock]); } finally { await pool.end(); }
     }
   });
   it("materializes twelve scalar-only Hong Kong months with deterministic public metrics", async () => {
@@ -622,11 +622,9 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         });
       }
     } finally {
-      await pool.query(`TRUNCATE TABLE
-        messages, agent_runs, conversations, engagement_events, memberships, profiles
-        CASCADE`);
-      await pool.query('REFRESH MATERIALIZED VIEW aiops_monthly_metrics');
-      await pool.end();
+      try { await pool.query("ROLLBACK"); } finally {
+        try { await pool.query("SELECT pg_advisory_unlock($1)", [fixtureLock]); } finally { await pool.end(); }
+      }
     }
   }, 30_000);
 });
