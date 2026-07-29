@@ -2,6 +2,7 @@ import {Pool} from "@neondatabase/serverless";
 import {describe, expect, it} from "vitest";
 
 const testDatabaseUrl = process.env.DATABASE_URL_TEST?.trim() ?? "";
+const fixtureLock = 1_944_202_607;
 
 type MetricRow = {
   month_start: string;
@@ -30,7 +31,9 @@ type MetricRow = {
 
 describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () => {
   it("proves every public aggregate formula with an isolated forty-run fixture", async () => {
-    const pool = new Pool({connectionString: testDatabaseUrl});
+    const pool = new Pool({connectionString: testDatabaseUrl, max: 1});
+    await pool.query("SELECT pg_advisory_lock($1)", [fixtureLock]);
+    await pool.query("BEGIN");
     try {
       await pool.query(`TRUNCATE TABLE
         messages, agent_runs, conversations, engagement_events, memberships, profiles
@@ -135,36 +138,36 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
           await createRun({
             conversationId,
             status: "failed",
-            startedAt: at(1_000),
-            completedAt: at(2_000),
+            startedAt: at(4_000_000),
+            completedAt: at(4_001_000),
           });
         }
         await createRun({
           conversationId,
           status: index < 12 ? "completed" : "escalated",
           csatScore: index < 5 ? 5 : index < 10 ? 4 : null,
-          startedAt: at(10_000 + index * 1_000),
-          completedAt: at(20_000 + index * 1_000),
+          startedAt: at(5_000_000 + index * 10_000),
+          completedAt: at(5_001_000 + index * 10_000),
         });
       }
 
       for (let index = 0; index < 22; index += 1) {
         await createRun({
-          startedAt: at(100_000 + index * 1_000),
-          completedAt: at(101_000 + index * 1_000),
+          startedAt: at(6_000_000 + index * 1_000),
+          completedAt: at(6_001_000 + index * 1_000),
         });
       }
       await createRun({
         agent: "retention_analyst",
         costUsd: "0.005000",
-        startedAt: at(200_000),
-        completedAt: at(201_000),
+        startedAt: at(7_000_000),
+        completedAt: at(7_001_000),
       });
       await createRun({
         agent: "board_reporter",
         costUsd: "0.006000",
-        startedAt: at(202_000),
-        completedAt: at(203_000),
+        startedAt: at(7_002_000),
+        completedAt: at(7_003_000),
       });
 
       const renewalEvents = [
@@ -183,7 +186,7 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
             profileId,
             type,
             JSON.stringify({membershipId, renewalOrdinal}),
-            at(300_000),
+            at(8_000_000),
           ],
         );
       }
@@ -231,6 +234,14 @@ describe.skipIf(!testDatabaseUrl)("AI-Ops materialized-view formula proof", () =
         ORDER BY month_start
       `);
       const rows = metrics.rows;
+      const runDistribution = await pool.query<{agent: string; count: number}>(
+        "SELECT agent::text AS agent, count(*)::int AS count FROM agent_runs GROUP BY agent ORDER BY agent",
+      );
+      expect(runDistribution.rows).toEqual([
+        {agent: "board_reporter", count: 1},
+        {agent: "concierge", count: 38},
+        {agent: "retention_analyst", count: 1},
+      ]);
       const current = rows.at(-1);
       expect(current).toMatchObject({
         month_start: window.current_month,

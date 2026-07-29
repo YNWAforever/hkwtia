@@ -105,4 +105,28 @@ describe("AI-Ops public aggregate reader", () => {
     await expect(incomplete.readLatestTwelveMonths()).rejects.toThrow("AI_OPS_METRIC_WINDOW_INVALID");
     await expect(duplicate.readLatestTwelveMonths()).rejects.toThrow("AI_OPS_METRIC_WINDOW_INVALID");
   });
+
+  it.each([
+    ["missing required numeric", {conversation_count: null}],
+    ["empty required decimal", {llm_cost_usd: ""}],
+    ["whitespace required decimal", {staff_hours_saved: "  "}],
+    ["non-finite required numeric", {conversation_count: Number.POSITIVE_INFINITY}],
+    ["non-decimal required numeric", {csat_response_count: "NaN"}],
+    ["undefined required numeric", {renewal_due_count: undefined}],
+    ["empty nullable decimal", {agent_resolved_rate: ""}],
+    ["whitespace nullable decimal", {csat_average: "  "}],
+    ["non-finite nullable numeric", {renewal_rate: Number.NaN}],
+    ["undefined nullable numeric", {failure_rate: undefined}],
+  ])("rejects malformed database %s", async (_name, mutation) => {
+    const rows: Array<Record<string, unknown>> = Array.from(
+      {length: 12},
+      (_, index) => rawRow(`2025-${String(index + 1).padStart(2, "0")}-01`),
+    );
+    rows[0] = {...rows[0], ...mutation};
+    const repository = createAiOpsPublicRepository(async () => ({
+      execute: vi.fn().mockResolvedValue({rows}),
+    }) as never);
+
+    await expect(repository.readLatestTwelveMonths()).rejects.toThrow();
+  });
 });

@@ -22,8 +22,22 @@ function resultRows(result: unknown): Record<string, unknown>[] {
   return [];
 }
 
-function numberOrNull(value: unknown): number | null {
-  return value === null || value === undefined ? null : Number(value);
+function numeric(value: unknown, nullable: boolean): number | null {
+  if (value === null && nullable) return null;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && /^-?\d+(?:\.\d+)?$/.test(value)) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  throw new Error("AI_OPS_METRIC_NUMERIC_INVALID");
+}
+
+function requiredNumber(value: unknown): number {
+  return numeric(value, false) as number;
+}
+
+function nullableNumber(value: unknown): number | null {
+  return numeric(value, true);
 }
 
 function date(value: unknown): Date {
@@ -41,26 +55,26 @@ function metricFrom(row: Record<string, unknown>): AiOpsMonthlyMetric {
   return aiOpsMonthlyMetricSchema.parse({
     monthStart: monthStart(row.month_start),
     isPartialMonth: row.is_partial_month,
-    conversationCount: Number(row.conversation_count),
-    terminalConversationCount: Number(row.terminal_conversation_count),
-    resolvedConversationCount: Number(row.resolved_conversation_count),
-    escalatedConversationCount: Number(row.escalated_conversation_count),
-    failedConversationCount: Number(row.failed_conversation_count),
-    agentResolvedRate: numberOrNull(row.agent_resolved_rate),
-    escalationRate: numberOrNull(row.escalation_rate),
-    failureRate: numberOrNull(row.failure_rate),
-    medianFirstResponseMs: numberOrNull(row.median_first_response_ms),
-    firstResponseSampleCount: Number(row.first_response_sample_count),
-    csatAverage: numberOrNull(row.csat_average),
-    csatResponseCount: Number(row.csat_response_count),
-    staffHoursSaved: Number(row.staff_hours_saved),
-    llmCostUsd: Number(row.llm_cost_usd),
-    renewalDueCount: Number(row.renewal_due_count),
-    renewalPaidCount: Number(row.renewal_paid_count),
-    renewalRate: numberOrNull(row.renewal_rate),
-    firstYearRenewalDueCount: Number(row.first_year_renewal_due_count),
-    firstYearRenewalPaidCount: Number(row.first_year_renewal_paid_count),
-    firstYearRenewalRate: numberOrNull(row.first_year_renewal_rate),
+    conversationCount: requiredNumber(row.conversation_count),
+    terminalConversationCount: requiredNumber(row.terminal_conversation_count),
+    resolvedConversationCount: requiredNumber(row.resolved_conversation_count),
+    escalatedConversationCount: requiredNumber(row.escalated_conversation_count),
+    failedConversationCount: requiredNumber(row.failed_conversation_count),
+    agentResolvedRate: nullableNumber(row.agent_resolved_rate),
+    escalationRate: nullableNumber(row.escalation_rate),
+    failureRate: nullableNumber(row.failure_rate),
+    medianFirstResponseMs: nullableNumber(row.median_first_response_ms),
+    firstResponseSampleCount: requiredNumber(row.first_response_sample_count),
+    csatAverage: nullableNumber(row.csat_average),
+    csatResponseCount: requiredNumber(row.csat_response_count),
+    staffHoursSaved: requiredNumber(row.staff_hours_saved),
+    llmCostUsd: requiredNumber(row.llm_cost_usd),
+    renewalDueCount: requiredNumber(row.renewal_due_count),
+    renewalPaidCount: requiredNumber(row.renewal_paid_count),
+    renewalRate: nullableNumber(row.renewal_rate),
+    firstYearRenewalDueCount: requiredNumber(row.first_year_renewal_due_count),
+    firstYearRenewalPaidCount: requiredNumber(row.first_year_renewal_paid_count),
+    firstYearRenewalRate: nullableNumber(row.first_year_renewal_rate),
     refreshedAt: date(row.refreshed_at),
   });
 }
