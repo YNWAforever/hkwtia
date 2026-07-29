@@ -56,7 +56,7 @@ describe("chat retention Worker schedule", () => {
   it.each([
     [
       "0 * * * *",
-      ["aiops-metrics", "journey-runner", "approvals-expirer"],
+      ["aiops-metrics", "approvals-expirer", "journey-runner"],
     ],
     ["0 2 * * *", ["renewal-runner"]],
     ["0 18 * * *", ["engagement-score"]],
@@ -65,10 +65,8 @@ describe("chat retention Worker schedule", () => {
 
     await invoke(cron, fetch);
 
-    expect(fetch.mock.calls.map(([url]) => url.toString()).sort()).toEqual(
-      expected.map(
-        (job) => `https://preview.example.test/api/jobs/${job}`,
-      ).sort(),
+    expect(fetch.mock.calls.map(([url]) => url.toString())).toEqual(
+      expected.map((job) => `https://preview.example.test/api/jobs/${job}`),
     );
     expect(
       fetch.mock.calls.some(([url]) =>

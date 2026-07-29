@@ -142,7 +142,7 @@ describe("Cloudflare automation scheduler", () => {
 
       await runScheduled(worker, {cron});
 
-      const actualJobs = calls.map((call) => jobName(call.url)).sort();
+      const actualJobs = calls.map((call) => jobName(call.url));
       expect(actualJobs).toEqual([...expectedJobs]);
       expect(new Set(actualJobs).size).toBe(actualJobs.length);
     },
@@ -170,15 +170,13 @@ describe("Cloudflare automation scheduler", () => {
         scheduledTime: SCHEDULED_TIME,
       });
 
-      const actualJobs = calls.map((call) => jobName(call.url)).sort();
-      expect(actualJobs).toEqual(
-        [
-          "aiops-metrics",
-          "approvals-expirer",
-          dailyJob,
-          "journey-runner",
-        ].sort(),
-      );
+      const actualJobs = calls.map((call) => jobName(call.url));
+      expect(actualJobs).toEqual([
+        "aiops-metrics",
+        "approvals-expirer",
+        "journey-runner",
+        dailyJob,
+      ]);
       expect(new Set(actualJobs).size).toBe(actualJobs.length);
     },
   );
@@ -243,7 +241,7 @@ describe("Cloudflare automation scheduler", () => {
       },
     });
 
-    expect(calls.map((call) => call.url).sort()).toEqual([
+    expect(calls.map((call) => call.url)).toEqual([
       "https://app.example.test/base/api/jobs/aiops-metrics",
       "https://app.example.test/base/api/jobs/approvals-expirer",
       "https://app.example.test/base/api/jobs/journey-runner",
@@ -444,6 +442,83 @@ describe("Cloudflare automation scheduler", () => {
     }
   });
 
+  it("aborts each hanging AI-Ops attempt after exactly 10 seconds", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(SCHEDULED_TIME);
+    try {
+      const calls: RecordedRequest[] = [];
+      const delays: number[] = [];
+      const abortDurations: number[] = [];
+      const attemptSignals: AbortSignal[] = [];
+      const worker = createAutomationWorker({
+        fetch: createFetch(calls, (url, init) => {
+          if (url.endsWith("/worker-alert")) {
+            return new Response(null, {status: 204});
+          }
+          if (!url.endsWith("/aiops-metrics")) {
+            return new Response(null, {status: 204});
+          }
+          const signal = init?.signal;
+          if (!(signal instanceof AbortSignal)) {
+            throw new Error("job request has no AbortSignal");
+          }
+          attemptSignals.push(signal);
+          const startedAt = Date.now();
+          return new Promise<Response>((_resolve, reject) => {
+            const abort = () => {
+              abortDurations.push(Date.now() - startedAt);
+              reject(new DOMException("deadline reached", "AbortError"));
+            };
+            if (signal.aborted) {
+              abort();
+              return;
+            }
+            signal.addEventListener("abort", abort, {once: true});
+          });
+        }),
+        sleep: async (milliseconds) => {
+          delays.push(milliseconds);
+          await new Promise<void>((resolve) => {
+            setTimeout(resolve, milliseconds);
+          });
+        },
+        logger: {error: vi.fn()},
+      });
+
+      const completion = dispatchScheduled(worker);
+      await vi.runAllTimersAsync();
+      await completion;
+
+      expect(abortDurations).toEqual([
+        EXPECTED_REQUEST_TIMEOUT_MS,
+        EXPECTED_REQUEST_TIMEOUT_MS,
+        EXPECTED_REQUEST_TIMEOUT_MS,
+      ]);
+      expect(attemptSignals).toHaveLength(3);
+      expect(new Set(attemptSignals).size).toBe(3);
+      expect(
+        calls.filter((call) => call.url.endsWith("/aiops-metrics")),
+      ).toHaveLength(3);
+      expect(
+        calls.filter((call) => call.url.endsWith("/approvals-expirer")),
+      ).toHaveLength(1);
+      expect(
+        calls.filter((call) => call.url.endsWith("/journey-runner")),
+      ).toHaveLength(1);
+      expect(delays).toEqual([250, 1_000]);
+      const alert = calls.find((call) => call.url.endsWith("/worker-alert"));
+      expect(JSON.parse(String(alert?.init?.body))).toMatchObject({
+        job: "aiops-metrics",
+        attemptCount: 3,
+        errorCode: "JOB_TIMEOUT",
+      });
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
+  });
+
   it("aborts a hanging alert and emits one bounded timeout log with no timers left", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(SCHEDULED_TIME);
@@ -556,6 +631,12 @@ describe("Cloudflare automation scheduler", () => {
     expect(
       calls.filter((call) => call.url.endsWith("/aiops-metrics")),
     ).toHaveLength(3);
+    expect(
+      calls.filter((call) => call.url.endsWith("/approvals-expirer")),
+    ).toHaveLength(1);
+    expect(
+      calls.filter((call) => call.url.endsWith("/journey-runner")),
+    ).toHaveLength(1);
     expect(delays).toEqual([250, 1_000]);
     const alerts = calls.filter((call) => call.url.endsWith("/worker-alert"));
     expect(alerts).toHaveLength(1);
@@ -809,7 +890,7 @@ describe("Cloudflare automation scheduler", () => {
       },
     });
 
-    expect(calls.map((call) => call.url).sort()).toEqual([
+    expect(calls.map((call) => call.url)).toEqual([
       "http://localhost:3000/api/jobs/aiops-metrics",
       "http://localhost:3000/api/jobs/approvals-expirer",
       "http://localhost:3000/api/jobs/journey-runner",
