@@ -33,4 +33,17 @@ describe('message bundles', () => {
     expect(en.Concierge.contactEmailError).toMatch(/valid email/i);
     expect(zh.Concierge.contactEmailError).toContain("有效");
   });
+
+  it.each([en.Admin, zh.Admin])('includes equivalent retention approval and Board Reporter draft labels', (admin) => {
+    expect(admin.approvals.actionTypes.retentionOutreach).toBeTruthy();
+    expect(admin.approvals.subject).toBeTruthy();
+    expect(admin.approvals.body).toBeTruthy();
+    expect(admin.approvals.reasons).toBeTruthy();
+    expect(admin.approvals.reasonCodes.lowScoreDeclining).toBeTruthy();
+    expect(admin.approvals.reasonCodes.inactiveBeforeRenewal).toBeTruthy();
+    expect(admin.reports.boardDraftsHeading).toBeTruthy();
+    expect(admin.reports.boardDraftsDescription).toBeTruthy();
+    expect(admin.reports.boardDraftsEmpty).toBeTruthy();
+    expect(admin.reports.boardDraftPreview).toBeTruthy();
+  });
 });

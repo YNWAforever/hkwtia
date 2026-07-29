@@ -2,14 +2,18 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {z} from "zod";
 
+import {BoardDraftList} from "@/components/admin/board-draft-list";
 import {ReportCards, type ReportCardLabels} from "@/components/admin/report-cards";
 import type {AppLocale} from "@/i18n/routing";
+import {listBoardDrafts} from "@/lib/admin/board-drafts";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {getAdminReport} from "@/lib/admin/reports";
+import type {AdminActor} from "@/lib/membership/lifecycle";
 
 
 
 type Props = Readonly<{params: Promise<{locale: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>}>;
+type AdminReport = Awaited<ReturnType<typeof getAdminReport>>;
 
 function hongKongToday(now = new Date()): {from: string; to: string} {
   const parts = new Intl.DateTimeFormat("en", {timeZone: "Asia/Hong_Kong", year: "numeric", month: "2-digit", day: "2-digit"}).formatToParts(now);
@@ -19,23 +23,37 @@ function hongKongToday(now = new Date()): {from: string; to: string} {
   return {from: `${year}-${month}-01`, to: `${year}-${month}-${value("day")}`};
 }
 
+async function loadReport(actor: AdminActor, reportQuery: unknown): Promise<{report: AdminReport | null; invalid: boolean}> {
+  try {
+    return {report: await getAdminReport(actor, reportQuery), invalid: false};
+  } catch (error) {
+    if (error instanceof z.ZodError) return {report: null, invalid: true};
+    throw error;
+  }
+}
+
 export default async function AdminReportsPage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const t = await getTranslations({locale, namespace: "Admin.reports"});
-  const query = await searchParams;
+  const [t, query, actor] = await Promise.all([
+    getTranslations({locale, namespace: "Admin.reports"}),
+    searchParams,
+    requireAdminPageActor(),
+  ]);
   const defaults = hongKongToday();
   const reportQuery = Object.keys(query).length === 0 ? defaults : query;
-  let report = null;
-  let invalid = false;
-  try { report = await getAdminReport(await requireAdminPageActor(), reportQuery); }
-  catch (error) {
-
-    if (error instanceof z.ZodError) invalid = true; else throw error;
-  }
+  const [{report, invalid}, boardDrafts] = await Promise.all([
+    loadReport(actor, reportQuery),
+    listBoardDrafts(actor),
+  ]);
   const from = typeof reportQuery.from === "string" ? reportQuery.from : "";
   const to = typeof reportQuery.to === "string" ? reportQuery.to : "";
+  const boardDraftLabels = {
+    heading: t("boardDraftsHeading"), description: t("boardDraftsDescription"), empty: t("boardDraftsEmpty"),
+    preview: t("boardDraftPreview"), slug: t("boardDraftSlug"), createdAt: t("boardDraftCreatedAt"),
+    sourceKey: t("boardDraftSourceKey"), agentRunId: t("boardDraftAgentRunId"), unavailable: t("unavailable"),
+  };
   const labels: ReportCardLabels = {
     cardsLabel: t("cardsLabel"), period: t("period"), arr: t("arr"), arrDescription: t("arrDescription"), mrr: t("mrr"), mrrDescription: t("mrrDescription"),
     renewal: t("renewal"), renewalDescription: t("renewalDescription"), firstYearRenewal: t("firstYearRenewal"), firstYearRenewalDescription: t("firstYearRenewalDescription"),
@@ -53,5 +71,6 @@ export default async function AdminReportsPage({params, searchParams}: Props) {
       {invalid ? <p aria-live="polite" className="text-sm text-destructive sm:col-span-3" role="alert">{t("validation")}</p> : null}
     </form>
     {report ? <ReportCards labels={labels} locale={locale} report={report}/> : null}
+    <BoardDraftList drafts={boardDrafts} labels={boardDraftLabels} locale={locale}/>
   </div>;
 }

@@ -61,6 +61,45 @@ describe("approval service", () => {
     await expect(listPendingApprovals(staff(), repo)).resolves.toHaveLength(1);
   });
 
+  it("projects retention outreach into a safe staff preview without member or agent identifiers", async () => {
+    const repo: ApprovalRepository = {
+      listPending: async () => [{
+        id: APPROVAL_ID,
+        actionType: "agent.retention_outreach",
+        payloadSummary: [
+          {key: "profileId", value: "profile-private"},
+          {key: "membershipId", value: "22222222-2222-4222-8222-222222222222"},
+          {key: "locale", value: "zh-HK"},
+          {key: "reasonCodes", value: "low_score_declining,inactive_before_renewal"},
+          {key: "subject", value: "續期支援"},
+          {key: "body", value: "我們想了解如何協助你續期。"},
+          {key: "agentRunId", value: "33333333-3333-4333-8333-333333333333"},
+        ],
+        actionable: true,
+        requestedAt: new Date("2026-07-20T01:00:00.000Z"),
+      }],
+      decide: async () => {
+        throw new Error("not used");
+      },
+    };
+
+    const [approval] = await listPendingApprovals(staff(), repo);
+
+    expect(approval).toMatchObject({
+      actionType: "agent.retention_outreach",
+      payloadSummary: [],
+      retentionPreview: {
+        locale: "zh-HK",
+        reasonCodes: ["low_score_declining", "inactive_before_renewal"],
+        subject: "續期支援",
+        body: "我們想了解如何協助你續期。",
+      },
+    });
+    expect(JSON.stringify(approval)).not.toContain("profile-private");
+    expect(JSON.stringify(approval)).not.toContain("22222222-2222-4222-8222-222222222222");
+    expect(JSON.stringify(approval)).not.toContain("33333333-3333-4333-8333-333333333333");
+  });
+
   it("summarizes only allowlisted non-PII payload fields for known action types", () => {
     expect(summarizeApprovalPayload("campaign.send", {
       campaignId: "11111111-1111-4111-8111-111111111111",
