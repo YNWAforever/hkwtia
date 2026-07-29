@@ -345,17 +345,41 @@ It also shows approval and publication gates between generated content and
 external side effects. Decorative connectors are hidden from assistive
 technology; a text description contains the complete flow.
 
-Build-evidence links use a fixed application allowlist and HTTPS URLs. They
-include:
+Build evidence combines two sources:
+
+- internal links to exactly the published `buildlog` posts;
+- fixed, allowlisted HTTPS links to external engineering evidence.
+
+External evidence URLs include:
 
 - the source repository;
 - commit/build history;
 - the deployed application;
 - the checked-in M4 acceptance document.
 
-No database or generated provider value may become a link target. If a
-configured evidence URL is invalid, the link is omitted and the missing
-evidence is shown as unavailable rather than accepting unsafe schemes.
+Only fixed application configuration may define an external URL. Unsafe or
+invalid URLs are omitted and shown as unavailable.
+
+### Published Build Logs
+
+A dedicated public-posts repository exposes two operations:
+
+- `listPublishedBuildLogs()`
+- `getPublishedBuildLogBySlug(slug)`
+
+Both operations select an explicit public-content column list and require
+`kind = 'buildlog'` with `published_at <= now()`. A null or future
+`published_at`, a `page` draft, and any other post kind are never returned.
+
+The existing `/[locale]/news` page combines static news with published build
+logs. `/[locale]/news/[slug]` keeps the static-content lookup and falls back to
+the public-posts repository. Database MDX is rendered through the existing
+narrow generated-content renderer, with raw HTML, imports, and executable
+components disabled.
+
+The AI-Ops evidence section receives only published build-log summaries and
+links to their localized internal news routes. A slug must pass the existing
+safe slug schema before application code uses it to construct the URL.
 
 ## Privacy and Security
 
@@ -363,8 +387,10 @@ evidence is shown as unavailable rather than accepting unsafe schemes.
   scalars only.
 - The public repository projects only named columns and rejects malformed
   numeric ranges.
-- Public services never query `profiles`, `companies`, `memberships`,
-  `conversations`, `messages`, `agent_runs`, approvals, or posts directly.
+- AI-Ops metric services never query `profiles`, `companies`, `memberships`,
+  `conversations`, `messages`, `agent_runs`, or approvals directly.
+- The dedicated public-posts repository is the only public content path into
+  `posts` and returns published `buildlog` rows only.
 - Counts are published without member-level drill-down.
 - The dashboard contains no raw error strings, provider errors, SQL errors,
   prompts, summaries, or job payloads.
@@ -403,20 +429,25 @@ publishing a real person's behavior.
 Extend the isolated M4 seed with deterministic, synthetic telemetry scoped by
 stable fixture keys:
 
-- current-month Concierge conversations covering completed, escalated, failed,
-  unrated, and unanswered outcomes;
+- reconcile the final M4 demo to the build-spec totals of exactly 40
+  `agent_runs` and 15 Concierge conversations;
+- preserve the specified conversation outcomes of 12 resolved and three
+  escalated, producing an 80 percent resolution rate and 20 percent escalation
+  rate;
 - user and assistant timestamps with a known first-response median;
 - terminal run costs and CSAT values with known totals;
 - scheduled-agent costs for Retention Analyst and Board Reporter;
 - twelve Hong Kong months of renewal paid/failed events with overall and
   first-year denominators;
-- explicit below-target and failure data so negative states are visible;
+- exactly two published build-log posts with stable evidence links;
 - no real contact data in any public fixture.
 
 The current-month fixture must produce a reproducible aggregate set whose
-resolution rate is at least 70 percent and whose rated CSAT is at least 4.5,
-while still containing non-zero escalation and failure rates. Expected values
-are asserted in acceptance tests rather than copied manually into the page.
+resolution rate is 80 percent, escalation rate is 20 percent, and rated CSAT
+is at least 4.5. The dashboard must render the failure metric even when its
+seeded value is zero. Focused repository and page tests use a separate
+non-production fixture to prove non-zero failure handling. Expected values are
+asserted in acceptance tests rather than copied manually into the page.
 
 The seed is idempotent, does not delete unrelated records, and refreshes the
 materialized view only after all fixture transactions commit.
@@ -458,6 +489,10 @@ Implementation follows test-driven development.
 ### Repository and Page Tests
 
 - the public repository selects and validates only the aggregate allowlist;
+- the public-posts repository returns only currently published build logs;
+- unpublished, future-dated, `page`, and unknown posts never render publicly;
+- static news and database build-log detail routes coexist without leaking
+  drafts;
 - fresh, stale, empty, unavailable, zero, and null states render correctly;
 - every KPI uses its specified numerator, denominator, unit, and target;
 - escalation and failure remain visible when non-zero and when zero;
@@ -466,7 +501,8 @@ Implementation follows test-driven development.
 - both locales contain complete visible labels, metadata, methodology,
   architecture, and evidence;
 - the route remains server-rendered and performs no client fetch;
-- sitemap and indexing behavior include both localized routes;
+- sitemap and indexing behavior include both localized AI-Ops routes and every
+  published build-log detail route;
 - HTML and RSC payloads contain no seeded PII canaries;
 - keyboard, heading, landmark, contrast, reduced-motion, and mobile overflow
   checks pass.
@@ -481,8 +517,9 @@ M4C owns the combined M4 acceptance run. It must prove:
   provider/tool side effects;
 - a Platinum draft-email request remains pending approval and sends no email
   before approval;
-- the public AI-Ops page renders the real seeded aggregate set, including
-  non-zero escalation and failure rates;
+- the public AI-Ops page renders the real seeded aggregate set, including the
+  expected 80 percent resolution rate, 20 percent escalation rate, and a
+  visible failure metric even when zero;
 - Retention Analyst creates the expected seeded at-risk drafts without direct
   sends;
 - Board Reporter creates one unpublished reconciled bilingual draft;
