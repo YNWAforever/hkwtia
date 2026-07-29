@@ -186,6 +186,15 @@ export function buildM4CSeedFixture(asOf: Date) {
       ],
     };
   });
+  const expectedRenewalMetrics = renewalFacts.map(({monthStart}) => ({
+    monthStart,
+    renewalDueCount: 2,
+    renewalPaidCount: 1,
+    renewalRate: 0.5,
+    firstYearRenewalDueCount: 1,
+    firstYearRenewalPaidCount: 1,
+    firstYearRenewalRate: 1,
+  }));
   const publishedAt = new Date(asOf.getTime() - 86_400_000);
   const buildLogs = [
     {
@@ -223,6 +232,7 @@ export function buildM4CSeedFixture(asOf: Date) {
       agent === "concierge" && completedAt !== null
     ).map(({status}) => ({status})),
     renewalFacts,
+    expectedRenewalMetrics,
     buildLogs,
     expectedCurrentMetrics: {
       conversationCount: 15,
@@ -288,6 +298,22 @@ async function deleteOwnedRows(
   await connection.query(
     "DELETE FROM conversations WHERE id = ANY($1::uuid[])",
     [fixture.conversations.map(({id}) => id)],
+  );
+}
+
+async function writeStartupPlan(
+  connection: SeedConnection,
+  fixture: M4CSeedFixture,
+): Promise<void> {
+  await connection.query(
+    `INSERT INTO membership_plans
+       (code, audience, billing_behavior, stripe_price_reference,
+        annual_price_hkd, monthly_price_hkd, seat_allowance, active,
+        created_at, updated_at)
+     VALUES ('startup', 'startup', 'checkout', NULL, 2400, 250, 5, true,
+       $1, $1)
+     ON CONFLICT (code) DO NOTHING`,
+    [fixture.asOf],
   );
 }
 
@@ -494,6 +520,7 @@ export async function seedM4C(
       [`hkwtia:${M4C_ACCEPTANCE_OWNERSHIP_KEY}`],
     );
     await deleteOwnedRows(connection, fixture);
+    await writeStartupPlan(connection, fixture);
     await writeRenewalOwners(connection, fixture);
     await writeOperationalRows(connection, fixture);
     await writeRenewalFactsAndBuildLogs(connection, fixture);

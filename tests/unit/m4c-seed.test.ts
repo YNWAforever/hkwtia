@@ -26,6 +26,15 @@ type SeedModule = {
     }[];
     latestOutcomes: readonly {status: string}[];
     renewalFacts: readonly {monthStart: string}[];
+    expectedRenewalMetrics?: readonly {
+      monthStart: string;
+      renewalDueCount: number;
+      renewalPaidCount: number;
+      renewalRate: number;
+      firstYearRenewalDueCount: number;
+      firstYearRenewalPaidCount: number;
+      firstYearRenewalRate: number;
+    }[];
     buildLogs: readonly {
       slug: string;
       publishedAt: Date | null;
@@ -114,6 +123,17 @@ describe("M4C acceptance seed", () => {
         fixture.latestOutcomes.filter(({status}) => status === "failed"),
       ).toHaveLength(0);
       expect(fixture.renewalFacts).toHaveLength(12);
+      expect(fixture.expectedRenewalMetrics).toEqual(
+        fixture.renewalFacts.map(({monthStart}) => ({
+          monthStart,
+          renewalDueCount: 2,
+          renewalPaidCount: 1,
+          renewalRate: 0.5,
+          firstYearRenewalDueCount: 1,
+          firstYearRenewalPaidCount: 1,
+          firstYearRenewalRate: 1,
+        })),
+      );
       expect(fixture.buildLogs.map(({slug}) => slug).sort()).toEqual([
         "m4-public-ai-ops",
         "m4-runtime-and-concierge",
@@ -214,6 +234,15 @@ describe("M4C acceptance seed", () => {
       expect(sql.some((text) =>
         text.includes("pg_advisory_xact_lock")
       )).toBe(true);
+      const startupPlanIndex = sql.findIndex((text) =>
+        text.includes("insert into membership_plans")
+      );
+      const membershipIndex = sql.findIndex((text) =>
+        text.includes("insert into memberships")
+      );
+      expect(startupPlanIndex).toBeGreaterThan(0);
+      expect(membershipIndex).toBeGreaterThan(startupPlanIndex);
+      expect(sql[startupPlanIndex]).toContain("on conflict (code) do nothing");
       expect(sql.join("\n")).not.toMatch(/\btruncate\b|\bdrop table\b/);
       expect(sql.join("\n")).not.toContain("m4a-acceptance");
       expect(sql.join("\n")).not.toContain("m4b-acceptance");
