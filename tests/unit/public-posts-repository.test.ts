@@ -5,85 +5,202 @@ import {createPublicPostsRepository} from "@/lib/db/repos/public-posts";
 
 const asOf = new Date("2026-07-30T12:00:00.000Z");
 const publishedAt = new Date("2026-07-29T04:00:00.000Z");
-const published = {
-  slug: "m4-ai-ops-dashboard",
-  titleEn: "How we built the AI-Ops dashboard",
-  titleZh: "我們如何建立 AI 營運儀表板",
-  publishedAt,
-  author: "HKWTIA Engineering",
-} as const;
+
+type FixtureRow = Readonly<{
+  slug: string;
+  kind: "buildlog" | "page" | "news";
+  titleEn: string;
+  titleZh: string;
+  bodyMdx: string;
+  publishedAt: Date | null;
+  author: string | null;
+}>;
+
+function row(
+  slug: string,
+  overrides: Partial<FixtureRow> = {},
+): FixtureRow {
+  return {
+    slug,
+    kind: "buildlog",
+    titleEn: `${slug} English`,
+    titleZh: `${slug} 中文`,
+    bodyMdx: `## ${slug}\n\nPublished evidence.`,
+    publishedAt,
+    author: "HKWTIA Engineering",
+    ...overrides,
+  };
+}
+
+const visibleZulu = row("visible-zulu");
+const visibleAlpha = row("visible-alpha");
+const fullDataset: readonly FixtureRow[] = [
+  visibleZulu,
+  row("future-build-log", {
+    publishedAt: new Date("2026-07-31T00:00:00.000Z"),
+  }),
+  row("draft-build-log", {publishedAt: null}),
+  row("page-post", {kind: "page"}),
+  row("news-post", {kind: "news"}),
+  visibleAlpha,
+];
+
+function summaryOf(fixture: FixtureRow) {
+  return {
+    slug: fixture.slug,
+    titleEn: fixture.titleEn,
+    titleZh: fixture.titleZh,
+    publishedAt: fixture.publishedAt,
+    author: fixture.author,
+  };
+}
+
+function detailOf(fixture: FixtureRow) {
+  return {
+    ...summaryOf(fixture),
+    bodyMdx: fixture.bodyMdx,
+  };
+}
 
 function normalizedSql(query: string, params: unknown[]): string {
   return `${query.replace(/\s+/g, " ").trim()} ${params.map(String).join(" ")}`;
 }
 
+function predicateSensitiveProxy(dataset: readonly FixtureRow[]) {
+  const statements: Array<{sql: string; params: unknown[]}> = [];
+  const database = drizzle(async (query, params) => {
+    statements.push({sql: normalizedSql(query, params), params});
+    let filtered = [...dataset];
+
+    if (
+      /"posts"\."kind"\s*=\s*\$\d+/i.test(query)
+      && params.includes("buildlog")
+    ) {
+      filtered = filtered.filter((fixture) => fixture.kind === "buildlog");
+    }
+    if (/"posts"\."published_at"\s+is\s+not\s+null/i.test(query)) {
+      filtered = filtered.filter((fixture) => fixture.publishedAt !== null);
+    }
+    if (/"posts"\."published_at"\s*<=\s*\$\d+/i.test(query)) {
+      const timestamp = params.find(
+        (value) => typeof value === "string" && /^\d{4}-\d{2}-\d{2}T/.test(value),
+      );
+      const cutoff = new Date(String(timestamp));
+      filtered = filtered.filter(
+        (fixture) =>
+          fixture.publishedAt === null || fixture.publishedAt <= cutoff,
+      );
+    }
+    if (/"posts"\."slug"\s*=\s*\$\d+/i.test(query)) {
+      const selectedSlug = params.find(
+        (value) =>
+          typeof value === "string"
+          && dataset.some((fixture) => fixture.slug === value),
+      );
+      filtered = filtered.filter((fixture) => fixture.slug === selectedSlug);
+    }
+    if (
+      /order by "posts"\."published_at" desc,\s*"posts"\."slug" asc/i.test(query)
+    ) {
+      filtered.sort((left, right) => {
+        const dateOrder =
+          (right.publishedAt?.getTime() ?? Number.NEGATIVE_INFINITY)
+          - (left.publishedAt?.getTime() ?? Number.NEGATIVE_INFINITY);
+        return dateOrder || left.slug.localeCompare(right.slug);
+      });
+    }
+    if (/\slimit\s+\$\d+/i.test(query)) {
+      const limit = params.find((value) => typeof value === "number");
+      filtered = filtered.slice(0, Number(limit));
+    }
+
+    const detailProjection = /body_mdx/i.test(query);
+    return {
+      rows: filtered.map((fixture) => {
+        const projected = [
+          fixture.slug,
+          fixture.titleEn,
+          fixture.titleZh,
+          fixture.publishedAt,
+          fixture.author,
+        ];
+        return detailProjection ? [...projected, fixture.bodyMdx] : projected;
+      }),
+    };
+  });
+
+  return {database, statements};
+}
+
 describe("public posts repository", () => {
-  it("selects only the public summary allowlist for currently published build logs", async () => {
-    const statements: Array<{sql: string; params: unknown[]}> = [];
-    const database = drizzle(async (query, params) => {
-      statements.push({sql: normalizedSql(query, params), params});
-      return {rows: [[
-        published.slug,
-        published.titleEn,
-        published.titleZh,
-        published.publishedAt,
-        published.author,
-      ]]};
-    });
-    const repository = createPublicPostsRepository(async () => database as never);
+  it("uses every publication predicate to exclude future, draft, page, and news rows", async () => {
+    const fixture = predicateSensitiveProxy(fullDataset);
+    const repository = createPublicPostsRepository(
+      async () => fixture.database as never,
+    );
 
-    await expect(repository.listPublishedBuildLogs(asOf)).resolves.toEqual([published]);
+    const summaries = await repository.listPublishedBuildLogs(asOf);
 
-    expect(statements).toHaveLength(1);
-    expect(statements[0].sql).toMatch(/FROM "posts"/i);
-    expect(statements[0].sql).toMatch(/kind.*=.*buildlog/i);
-    expect(statements[0].sql).toMatch(/published_at.*IS NOT NULL/i);
-    expect(statements[0].sql).toMatch(/published_at.*<=/i);
-    expect(statements[0].sql).toMatch(/ORDER BY.*published_at.*DESC.*slug.*ASC/i);
-    expect(statements[0].sql).not.toMatch(
+    expect(summaries).toEqual([
+      summaryOf(visibleAlpha),
+      summaryOf(visibleZulu),
+    ]);
+    expect(summaries.map(({slug}) => slug)).not.toEqual(
+      expect.arrayContaining([
+        "future-build-log",
+        "draft-build-log",
+        "page-post",
+        "news-post",
+      ]),
+    );
+
+    expect(fixture.statements).toHaveLength(1);
+    const [statement] = fixture.statements;
+    expect(statement.sql).toMatch(/FROM "posts"/i);
+    expect(statement.sql).toMatch(/kind.*=.*buildlog/i);
+    expect(statement.sql).toMatch(/published_at.*IS NOT NULL/i);
+    expect(statement.sql).toMatch(/published_at.*<=/i);
+    expect(statement.sql).toMatch(
+      /ORDER BY.*published_at.*DESC.*slug.*ASC/i,
+    );
+    expect(statement.sql).not.toMatch(
       /agent_run_id|source_key|profile|email|phone|summary/i,
     );
-    expect(statements[0].sql).not.toMatch(/body_mdx/i);
-    expect(statements[0].params).toEqual(
+    expect(statement.sql).not.toMatch(/body_mdx/i);
+    expect(statement.params).toEqual(
       expect.arrayContaining(["buildlog", asOf.toISOString()]),
     );
   });
 
-  it("selects the public detail allowlist and limits lookup to one safe slug", async () => {
-    const detail = {
-      ...published,
-      bodyMdx: "## Build notes\n\nPublished evidence.",
-    };
-    const statements: Array<{sql: string; params: unknown[]}> = [];
-    const database = drizzle(async (query, params) => {
-      statements.push({sql: normalizedSql(query, params), params});
-      return {rows: [[
-        detail.slug,
-        detail.titleEn,
-        detail.titleZh,
-        detail.publishedAt,
-        detail.author,
-        detail.bodyMdx,
-      ]]};
-    });
-    const repository = createPublicPostsRepository(async () => database as never);
+  it("requires the safe slug predicate for the public detail projection", async () => {
+    const fixture = predicateSensitiveProxy(fullDataset);
+    const repository = createPublicPostsRepository(
+      async () => fixture.database as never,
+    );
 
     await expect(
-      repository.getPublishedBuildLogBySlug(published.slug, asOf),
-    ).resolves.toEqual(detail);
+      repository.getPublishedBuildLogBySlug(visibleAlpha.slug, asOf),
+    ).resolves.toEqual(detailOf(visibleAlpha));
 
-    expect(statements[0].sql).toMatch(/FROM "posts"/i);
-    expect(statements[0].sql).toMatch(/kind.*=.*buildlog/i);
-    expect(statements[0].sql).toMatch(/published_at.*IS NOT NULL/i);
-    expect(statements[0].sql).toMatch(/published_at.*<=/i);
-    expect(statements[0].sql).toMatch(/slug.*=/i);
-    expect(statements[0].sql).toMatch(/LIMIT/i);
-    expect(statements[0].sql).toMatch(/body_mdx/i);
-    expect(statements[0].sql).not.toMatch(
+    expect(fixture.statements).toHaveLength(1);
+    const [statement] = fixture.statements;
+    expect(statement.sql).toMatch(/FROM "posts"/i);
+    expect(statement.sql).toMatch(/kind.*=.*buildlog/i);
+    expect(statement.sql).toMatch(/published_at.*IS NOT NULL/i);
+    expect(statement.sql).toMatch(/published_at.*<=/i);
+    expect(statement.sql).toMatch(/slug.*=/i);
+    expect(statement.sql).toMatch(/LIMIT/i);
+    expect(statement.sql).toMatch(/body_mdx/i);
+    expect(statement.sql).not.toMatch(
       /agent_run_id|source_key|profile|email|phone|summary/i,
     );
-    expect(statements[0].params).toEqual(
-      expect.arrayContaining(["buildlog", published.slug, asOf.toISOString(), 1]),
+    expect(statement.params).toEqual(
+      expect.arrayContaining([
+        "buildlog",
+        visibleAlpha.slug,
+        asOf.toISOString(),
+        1,
+      ]),
     );
   });
 
@@ -100,34 +217,25 @@ describe("public posts repository", () => {
     expect(loadDatabase).not.toHaveBeenCalled();
   });
 
-  it.each([
-    ["future", {kind: "buildlog", publishedAt: new Date("2026-07-31T00:00:00.000Z")}],
-    ["null-published", {kind: "buildlog", publishedAt: null}],
-    ["page", {kind: "page", publishedAt}],
-    ["news", {kind: "news", publishedAt}],
-  ])("never exposes a %s row", async (_name, hidden) => {
-    const database = drizzle(async (query, params) => {
-      const queryText = normalizedSql(query, params);
-      const visible =
-        /kind.*=.*buildlog/i.test(queryText)
-        && /published_at.*is not null/i.test(queryText)
-        && /published_at.*<=/i.test(queryText)
-        && hidden.kind === "buildlog"
-        && hidden.publishedAt instanceof Date
-        && hidden.publishedAt <= asOf;
-      return {rows: visible ? [{...published, publishedAt: hidden.publishedAt}] : []};
-    });
-    const repository = createPublicPostsRepository(async () => database as never);
-
-    await expect(repository.listPublishedBuildLogs(asOf)).resolves.toEqual([]);
-  });
-
-  it("rejects malformed projected rows instead of widening the public contract", async () => {
+  it("rejects a projected positional row whose author is null", async () => {
+    const malformed = row("malformed-author", {author: null});
     const database = drizzle(async () => ({
-      rows: [{...published, author: null}],
+      rows: [[
+        malformed.slug,
+        malformed.titleEn,
+        malformed.titleZh,
+        malformed.publishedAt,
+        malformed.author,
+      ]],
     }));
-    const repository = createPublicPostsRepository(async () => database as never);
+    const repository = createPublicPostsRepository(
+      async () => database as never,
+    );
 
-    await expect(repository.listPublishedBuildLogs(asOf)).rejects.toThrow();
+    await expect(repository.listPublishedBuildLogs(asOf)).rejects.toMatchObject({
+      issues: expect.arrayContaining([
+        expect.objectContaining({path: [0, "author"]}),
+      ]),
+    });
   });
 });

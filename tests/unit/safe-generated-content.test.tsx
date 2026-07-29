@@ -113,6 +113,35 @@ describe("safe generated content", () => {
     expect(html).toContain('href="/zh/ai-ops"');
   });
 
+  it("enforces the complete safe build-log h2 boundary", () => {
+    const oneCharacter = "字";
+    const oneHundredTwentyCharacters = "a".repeat(120);
+    const content = [
+      `## ${oneCharacter}`,
+      `## ${oneHundredTwentyCharacters}`,
+      "## ",
+      "## unsafe < heading",
+      "## unsafe > heading",
+      "## unsafe { heading",
+      "## unsafe } heading",
+      `## ${"b".repeat(121)}`,
+    ].join("\n");
+
+    const html = renderToStaticMarkup(<SafeStructuredContent
+      content={content}
+      mode="build-log"
+      tableHeaders={tableHeaders}
+    />);
+
+    expect(html.match(/<h2/g)).toHaveLength(2);
+    expect(html).toContain(`${oneCharacter}</h2>`);
+    expect(html).toContain(`${oneHundredTwentyCharacters}</h2>`);
+    expect(html).not.toContain("<h1");
+    expect(html).toContain("## ");
+    expect(html).toContain("&lt; heading");
+    expect(html).toContain("&gt; heading");
+  });
+
   it("keeps hostile build-log input inert and rejects unsafe or unbounded headings", () => {
     const hostile = [
       "<script>alert(1)</script>",

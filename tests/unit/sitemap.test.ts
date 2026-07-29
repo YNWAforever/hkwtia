@@ -5,6 +5,14 @@ const publicPosts = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/db/repos/public-posts", () => publicPosts);
+vi.mock("@/content/news", () => ({
+  newsPosts: [{
+    slug: "static-update",
+    publishedAt: "2026-07-01T00:00:00.000Z",
+    image: "/images/projects-hero.jpg",
+    namespace: "news.staticUpdate",
+  }],
+}));
 
 import sitemap from "@/app/sitemap";
 
@@ -15,6 +23,13 @@ describe("published build logs in the sitemap", () => {
 
   it("adds both localized URLs for each published build-log slug", async () => {
     publicPosts.listPublishedBuildLogs.mockResolvedValue([
+      {
+        slug: "static-update",
+        titleEn: "Unreachable database title",
+        titleZh: "不可到達的資料庫標題",
+        publishedAt: new Date("2026-07-29T05:00:00.000Z"),
+        author: "HKWTIA Engineering",
+      },
       {
         slug: "m4-ai-ops-dashboard",
         titleEn: "AI-Ops dashboard",
@@ -30,6 +45,14 @@ describe("published build logs in the sitemap", () => {
       "http://localhost:3000/news/m4-ai-ops-dashboard",
       "http://localhost:3000/zh/news/m4-ai-ops-dashboard",
     ]));
+    expect(
+      urls.filter((url) => url === "http://localhost:3000/news/static-update"),
+    ).toHaveLength(1);
+    expect(
+      urls.filter(
+        (url) => url === "http://localhost:3000/zh/news/static-update",
+      ),
+    ).toHaveLength(1);
   });
 
   it("keeps static sitemap entries when only the public-post read fails", async () => {

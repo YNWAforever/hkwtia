@@ -7,6 +7,7 @@ import {PageHero} from "@/components/marketing/page-hero";
 import {newsPosts} from "@/content/news";
 import type {AppLocale} from "@/i18n/routing";
 import {listPublishedBuildLogs} from "@/lib/db/repos/public-posts";
+import {withoutStaticNewsSlugCollisions} from "@/lib/news/build-log-visibility";
 import {buildPageMetadata} from "@/lib/metadata";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +29,10 @@ export default async function NewsPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
   const t = await getTranslations({locale, namespace: "News"});
-  const buildLogs = await listPublishedBuildLogs();
+  const buildLogs = withoutStaticNewsSlugCollisions(
+    await listPublishedBuildLogs(),
+    newsPosts,
+  );
   const appLocale = locale as AppLocale;
 
   return (

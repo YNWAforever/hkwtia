@@ -8,6 +8,7 @@ import {
   listPublishedBuildLogs,
   type PublishedBuildLogSummary,
 } from "@/lib/db/repos/public-posts";
+import {withoutStaticNewsSlugCollisions} from "@/lib/news/build-log-visibility";
 import {absoluteUrl, localizedPath} from "@/lib/urls";
 
 const locales: AppLocale[] = ["en", "zh-HK"];
@@ -36,6 +37,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch {
     buildLogs = [];
   }
+  const visibleBuildLogs = withoutStaticNewsSlugCollisions(
+    buildLogs,
+    newsPosts,
+  );
 
   const staticEntries = publicRoutes.flatMap((pathname) =>
     localizedEntries(pathname));
@@ -43,7 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     localizedEntries(`/events/${record.slug}`));
   const newsEntries = newsPosts.flatMap((record) =>
     localizedEntries(`/news/${record.slug}`));
-  const buildLogEntries = buildLogs.flatMap((record) =>
+  const buildLogEntries = visibleBuildLogs.flatMap((record) =>
     localizedEntries(`/news/${record.slug}`));
 
   return [

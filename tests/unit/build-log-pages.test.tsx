@@ -75,6 +75,26 @@ describe("published build logs through news routes", () => {
     expect(publicPosts.listPublishedBuildLogs).toHaveBeenCalledOnce();
   });
 
+  it("omits a database build-log card whose slug belongs to static news", async () => {
+    publicPosts.listPublishedBuildLogs.mockResolvedValueOnce([
+      {
+        ...summary,
+        slug: "static-update",
+        titleEn: "Unreachable database title",
+        titleZh: "不可到達的資料庫標題",
+      },
+      summary,
+    ]);
+
+    render(await NewsPage({params: Promise.resolve({locale: "en"})}));
+
+    expect(screen.getAllByText("static-update")).toHaveLength(1);
+    expect(screen.queryByText("Unreachable database title")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {name: "How we built the AI-Ops dashboard"}),
+    ).toHaveAttribute("href", "/news/m4-ai-ops-dashboard");
+  });
+
   it("renders a published database detail with one page-owned h1", async () => {
     render(await NewsPostPage({
       params: Promise.resolve({locale: "en", slug: summary.slug}),
