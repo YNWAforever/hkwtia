@@ -33,6 +33,7 @@ import {
 import {automationCronActor} from "@/lib/auth/automation-actor";
 import {createWoztellAdapter} from "@/lib/channels/woztell";
 import {serverEnv} from "@/lib/config/env";
+import {aiOpsMetricsRepository} from "@/lib/db/repos/aiops-metrics";
 import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {campaignsRepository} from "@/lib/db/repos/campaigns";
 import {deliveriesRepository} from "@/lib/db/repos/deliveries";
@@ -102,6 +103,7 @@ type ProductionRunnerOverrides = Partial<Readonly<{
   runApprovals(now: Date): Promise<unknown>;
   runRetentionAnalyst(now: Date): Promise<unknown>;
   runBoardReporter(now: Date): Promise<unknown>;
+  runAiOpsMetrics(now: Date): Promise<{refreshed: 1}>;
   runWorkerAlert(payload: WorkerAlertPayload): Promise<unknown>;
 }>>;
 
@@ -454,6 +456,13 @@ export async function runProductionBoardReporter(
   });
 }
 
+export async function runProductionAiOpsMetrics(
+  _now: Date,
+): Promise<{refreshed: 1}> {
+  await aiOpsMetricsRepository.refresh(automationCronActor());
+  return {refreshed: 1};
+}
+
 export function createJobRunners(
   overrides: ProductionRunnerOverrides = {},
 ) {
@@ -467,6 +476,8 @@ export function createJobRunners(
     overrides.runRetentionAnalyst ?? runProductionRetentionAnalyst;
   const runBoardReporter =
     overrides.runBoardReporter ?? runProductionBoardReporter;
+  const runAiOpsMetrics =
+    overrides.runAiOpsMetrics ?? runProductionAiOpsMetrics;
   const runWorkerAlert = overrides.runWorkerAlert ?? sendWorkerAlert;
 
   return {
@@ -494,6 +505,9 @@ export function createJobRunners(
     },
     boardReporter(now: Date) {
       return runBoardReporter(now);
+    },
+    aiOpsMetrics(now: Date) {
+      return runAiOpsMetrics(now);
     },
     workerAlert(payload: WorkerAlertPayload) {
       return runWorkerAlert(payload);

@@ -40,8 +40,10 @@ describe("M4 AI job kinds", () => {
       CHAT_RETENTION: "chat-retention",
       RETENTION_ANALYST: "retention-analyst",
       BOARD_REPORTER: "board-reporter",
+      AI_OPS_METRICS: "aiops-metrics",
     });
     expect(M4_AI_JOB_KINDS).toContain("retention-analyst");
     expect(M4_AI_JOB_KINDS).toContain("board-reporter");
+    expect(M4_AI_JOB_KINDS).toContain("aiops-metrics");
   });
 });
