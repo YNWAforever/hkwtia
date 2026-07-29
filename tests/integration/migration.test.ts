@@ -236,4 +236,339 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
       await pool.end();
     }
   });
+  it("materializes twelve scalar-only Hong Kong months with deterministic public metrics", async () => {
+    await runDatabaseCommand("db:migrate");
+    await runDatabaseCommand("db:seed");
+
+    const pool = new Pool({connectionString: testDatabaseUrl});
+    try {
+      // DATABASE_URL_TEST is an isolated test database; remove source rows so every
+      // zero-activity month below is an actual zero rather than a seed-data accident.
+      await pool.query(`TRUNCATE TABLE
+        messages, agent_runs, conversations, engagement_events, memberships, profiles
+        CASCADE`);
+
+      const bounds = await pool.query<{
+        month_start: string;
+        month_from: Date;
+        month_to: Date;
+      }>(`
+        SELECT
+          (date_trunc('month', timezone('Asia/Hong_Kong', now()))
+            - interval '11 months')::date::text AS month_start,
+          (date_trunc('month', timezone('Asia/Hong_Kong', now()))
+            - interval '11 months')::timestamp AT TIME ZONE 'Asia/Hong_Kong'
+            AS month_from,
+          date_trunc('month', timezone('Asia/Hong_Kong', now()))::timestamp
+            AT TIME ZONE 'Asia/Hong_Kong' AS month_to
+      `);
+      const [month] = bounds.rows;
+      expect(month).toBeDefined();
+      if (!month) return;
+
+      const monthFrom = new Date(month.month_from);
+      const monthTo = new Date(month.month_to);
+      const at = (minutes: number) => new Date(monthFrom.getTime() + minutes * 60_000);
+      const beforeMonth = new Date(monthFrom.getTime() - 60_000);
+      const afterMonth = new Date(monthTo.getTime() + 60_000);
+      const profileId = "m4c-aiops-fixture-profile";
+
+      await pool.query(
+        `INSERT INTO profiles (id, auth_user_id, display_name)
+         VALUES ($1, $2, $3)`,
+        [profileId, "m4c-aiops-fixture-auth", "M4C AI-Ops fixture"],
+      );
+
+      const membershipIds: string[] = [];
+      for (let index = 0; index < 3; index += 1) {
+        const membership = await pool.query<{id: string}>(
+          `INSERT INTO memberships (
+             owner_user_id, plan_code, status, billing_interval, seat_limit
+           ) VALUES ($1, 'community', 'active', 'annual', 1)
+           RETURNING id::text AS id`,
+          [profileId],
+        );
+        const [row] = membership.rows;
+        expect(row).toBeDefined();
+        if (row) membershipIds.push(row.id);
+      }
+
+      async function conversation() {
+        const result = await pool.query<{id: string}>(
+          `INSERT INTO conversations (
+             agent_kind, profile_id, locale, status, expires_at, created_at, updated_at
+           ) VALUES ('concierge', $1, 'en', 'active', $2, $3, $3)
+           RETURNING id::text AS id`,
+          [profileId, monthTo, at(1)],
+        );
+        const [row] = result.rows;
+        expect(row).toBeDefined();
+        if (!row) throw new Error("fixture conversation was not created");
+        return row.id;
+      }
+
+      async function agentRun({
+        conversationId = null,
+        status,
+        costUsd = "0.000000",
+        csatScore = null,
+        startedAt,
+        completedAt = null,
+      }: {
+        conversationId?: string | null;
+        status: "running" | "completed" | "escalated" | "failed";
+        costUsd?: string;
+        csatScore?: number | null;
+        startedAt: Date;
+        completedAt?: Date | null;
+      }) {
+        await pool.query(
+          `INSERT INTO agent_runs (
+             conversation_id, agent, trigger, status, cost_usd, csat_score,
+             started_at, completed_at, created_at, updated_at
+           ) VALUES ($1, 'concierge', 'web', $2, $3, $4, $5, $6, $5, $5)`,
+          [conversationId, status, costUsd, csatScore, startedAt, completedAt],
+        );
+      }
+
+      const resolvedConversation = await conversation();
+      await agentRun({
+        conversationId: resolvedConversation,
+        status: "failed",
+        startedAt: at(2),
+        completedAt: at(3),
+      });
+      await agentRun({
+        conversationId: resolvedConversation,
+        status: "completed",
+        costUsd: "0.100000",
+        csatScore: 4,
+        startedAt: at(4),
+        completedAt: at(5),
+      });
+
+      const escalatedConversation = await conversation();
+      await agentRun({
+        conversationId: escalatedConversation,
+        status: "completed",
+        startedAt: at(6),
+        completedAt: at(7),
+      });
+      await agentRun({
+        conversationId: escalatedConversation,
+        status: "escalated",
+        costUsd: "0.200000",
+        csatScore: 2,
+        startedAt: at(8),
+        completedAt: at(9),
+      });
+
+      const failedConversation = await conversation();
+      await agentRun({
+        conversationId: failedConversation,
+        status: "completed",
+        startedAt: at(10),
+        completedAt: at(11),
+      });
+      await agentRun({
+        conversationId: failedConversation,
+        status: "failed",
+        costUsd: "0.300000",
+        csatScore: 3,
+        startedAt: at(12),
+        completedAt: at(13),
+      });
+
+      const nonTerminalConversation = await conversation();
+      await agentRun({
+        conversationId: nonTerminalConversation,
+        status: "running",
+        startedAt: at(14),
+      });
+
+      // Cost follows started_at while CSAT follows completed_at, independent of
+      // the conversation terminal-outcome calculation above.
+      await agentRun({
+        status: "completed",
+        costUsd: "9.000000",
+        csatScore: 5,
+        startedAt: beforeMonth,
+        completedAt: at(15),
+      });
+      await agentRun({
+        status: "completed",
+        costUsd: "1.250000",
+        csatScore: 1,
+        startedAt: at(16),
+        completedAt: afterMonth,
+      });
+
+      const renewalEvents = [
+        [membershipIds[0], "renewal_failed", 1],
+        [membershipIds[0], "renewal_paid", 1],
+        [membershipIds[1], "renewal_failed", 2],
+        [membershipIds[2], "renewal_paid", 1],
+      ] as const;
+      for (const [membershipId, type, renewalOrdinal] of renewalEvents) {
+        await pool.query(
+          `INSERT INTO engagement_events (profile_id, type, points, metadata, occurred_at)
+           VALUES ($1, $2, 0, $3::jsonb, $4)`,
+          [
+            profileId,
+            type,
+            JSON.stringify({membershipId, renewalOrdinal}),
+            at(20),
+          ],
+        );
+      }
+
+      await pool.query('REFRESH MATERIALIZED VIEW aiops_monthly_metrics');
+
+      const columns = await pool.query<{
+        column_name: string;
+        data_type: string;
+        udt_name: string;
+      }>(
+        `SELECT column_name, data_type, udt_name
+           FROM information_schema.columns
+          WHERE table_schema = 'public'
+            AND table_name = 'aiops_monthly_metrics'
+          ORDER BY ordinal_position`,
+      );
+      expect(columns.rows).toEqual([
+        {column_name: "month_start", data_type: "date", udt_name: "date"},
+        {column_name: "is_partial_month", data_type: "boolean", udt_name: "bool"},
+        {column_name: "conversation_count", data_type: "integer", udt_name: "int4"},
+        {column_name: "terminal_conversation_count", data_type: "integer", udt_name: "int4"},
+        {column_name: "resolved_conversation_count", data_type: "integer", udt_name: "int4"},
+        {column_name: "escalated_conversation_count", data_type: "integer", udt_name: "int4"},
+        {column_name: "failed_conversation_count", data_type: "integer", udt_name: "int4"},
+        {column_name: "agent_resolved_rate", data_type: "numeric", udt_name: "numeric"},
+        {column_name: "escalation_rate", data_type: "numeric", udt_name: "numeric"},
+        {column_name: "failure_rate", data_type: "numeric", udt_name: "numeric"},
+        {column_name: "median_first_response_ms", data_type: "integer", udt_name: "int4"},
+        {column_name: "first_response_sample_count", data_type: "integer", udt_name: "int4"},
+        {column_name: "csat_average", data_type: "numeric", udt_name: "numeric"},
+        {column_name: "csat_response_count", data_type: "integer", udt_name: "int4"},
+        {column_name: "staff_hours_saved", data_type: "numeric", udt_name: "numeric"},
+        {column_name: "llm_cost_usd", data_type: "numeric", udt_name: "numeric"},
+        {column_name: "renewal_due_count", data_type: "integer", udt_name: "int4"},
+        {column_name: "renewal_paid_count", data_type: "integer", udt_name: "int4"},
+        {column_name: "renewal_rate", data_type: "numeric", udt_name: "numeric"},
+        {column_name: "first_year_renewal_due_count", data_type: "integer", udt_name: "int4"},
+        {column_name: "first_year_renewal_paid_count", data_type: "integer", udt_name: "int4"},
+        {column_name: "first_year_renewal_rate", data_type: "numeric", udt_name: "numeric"},
+        {column_name: "refreshed_at", data_type: "timestamp with time zone", udt_name: "timestamptz"},
+      ]);
+      expect(columns.rows.some(({column_name, data_type}) =>
+        /(^|_)(profile|conversation|message|content|metadata|summary|error)(_|$)/i.test(column_name)
+        || /json|array|text|character/i.test(data_type)))
+        .toBe(false);
+
+      const metrics = await pool.query<{
+        month_start: string;
+        is_partial_month: boolean;
+        conversation_count: number;
+        terminal_conversation_count: number;
+        resolved_conversation_count: number;
+        escalated_conversation_count: number;
+        failed_conversation_count: number;
+        agent_resolved_rate: string | null;
+        escalation_rate: string | null;
+        failure_rate: string | null;
+        csat_average: string | null;
+        csat_response_count: number;
+        staff_hours_saved: string;
+        llm_cost_usd: string;
+        renewal_due_count: number;
+        renewal_paid_count: number;
+        renewal_rate: string | null;
+        first_year_renewal_due_count: number;
+        first_year_renewal_paid_count: number;
+        first_year_renewal_rate: string | null;
+      }>(
+        `SELECT
+           to_char(month_start, 'YYYY-MM-DD') AS month_start,
+           is_partial_month,
+           conversation_count,
+           terminal_conversation_count,
+           resolved_conversation_count,
+           escalated_conversation_count,
+           failed_conversation_count,
+           agent_resolved_rate::text AS agent_resolved_rate,
+           escalation_rate::text AS escalation_rate,
+           failure_rate::text AS failure_rate,
+           csat_average::text AS csat_average,
+           csat_response_count,
+           staff_hours_saved::text AS staff_hours_saved,
+           llm_cost_usd::text AS llm_cost_usd,
+           renewal_due_count,
+           renewal_paid_count,
+           renewal_rate::text AS renewal_rate,
+           first_year_renewal_due_count,
+           first_year_renewal_paid_count,
+           first_year_renewal_rate::text AS first_year_renewal_rate
+         FROM aiops_monthly_metrics
+         ORDER BY month_start`,
+      );
+      expect(metrics.rows).toHaveLength(12);
+      expect(metrics.rows[0]?.month_start).toBe(month.month_start);
+      expect(new Set(metrics.rows.map((row) => row.month_start.slice(0, 4))).size).toBeGreaterThan(1);
+      for (let index = 1; index < metrics.rows.length; index += 1) {
+        const previous = new Date(`${metrics.rows[index - 1]?.month_start}T00:00:00Z`);
+        previous.setUTCMonth(previous.getUTCMonth() + 1);
+        expect(metrics.rows[index]?.month_start).toBe(previous.toISOString().slice(0, 10));
+      }
+
+      expect(metrics.rows[0]).toMatchObject({
+        is_partial_month: false,
+        conversation_count: 4,
+        terminal_conversation_count: 3,
+        resolved_conversation_count: 1,
+        escalated_conversation_count: 1,
+        failed_conversation_count: 1,
+        agent_resolved_rate: "0.333333",
+        escalation_rate: "0.333333",
+        failure_rate: "0.333333",
+        csat_average: "3.50",
+        csat_response_count: 4,
+        staff_hours_saved: "0.10",
+        llm_cost_usd: "1.850000",
+        renewal_due_count: 3,
+        renewal_paid_count: 2,
+        renewal_rate: "0.666667",
+        first_year_renewal_due_count: 2,
+        first_year_renewal_paid_count: 2,
+        first_year_renewal_rate: "1.000000",
+      });
+      for (const row of metrics.rows.slice(1)) {
+        expect(row).toMatchObject({
+          conversation_count: 0,
+          terminal_conversation_count: 0,
+          resolved_conversation_count: 0,
+          escalated_conversation_count: 0,
+          failed_conversation_count: 0,
+          agent_resolved_rate: null,
+          escalation_rate: null,
+          failure_rate: null,
+          csat_average: null,
+          csat_response_count: 0,
+          staff_hours_saved: "0.00",
+          llm_cost_usd: "0.000000",
+          renewal_due_count: 0,
+          renewal_paid_count: 0,
+          renewal_rate: null,
+          first_year_renewal_due_count: 0,
+          first_year_renewal_paid_count: 0,
+          first_year_renewal_rate: null,
+        });
+      }
+    } finally {
+      await pool.query(`TRUNCATE TABLE
+        messages, agent_runs, conversations, engagement_events, memberships, profiles
+        CASCADE`);
+      await pool.query('REFRESH MATERIALIZED VIEW aiops_monthly_metrics');
+      await pool.end();
+    }
+  }, 30_000);
 });

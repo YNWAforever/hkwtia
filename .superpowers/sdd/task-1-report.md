@@ -57,3 +57,43 @@ Result: passed.
 - Public data shape: the projection exposes only the required scalar aggregate metric columns. The schema contract rejects sensitive/raw identifier and content aliases.
 - Concurrent refresh: migration creates the required unique `month_start` index.
 - Metadata: the snapshot was generated with Drizzle and includes `public.aiops_monthly_metrics`; the journal ends with `0013_m4c_aiops_metrics`.
+## Review-fix wave: database-backed metrics and privacy contracts
+
+### Changes
+- Strengthened `tests/unit/m4c-schema-contract.test.ts` to assert the exact 23 approved public column names from both the Drizzle materialized-view declaration and the generated snapshot metadata.
+- Added an isolated `DATABASE_URL_TEST`-gated fixture in `tests/integration/migration.test.ts`. It truncates only the test database source rows, seeds deterministic cross-year Hong Kong month fixtures, refreshes the materialized view, then verifies:
+  - exactly 12 ordered HKT months spanning a year boundary and true zero-activity rows;
+  - deterministic latest terminal attempts;
+  - cost attribution by `started_at` and CSAT attribution by `completed_at`;
+  - per-membership renewal deduplication and numeric `renewalOrdinal` first-year behavior;
+  - null rates for zero denominators; and
+  - exact materialized-view columns, scalar PostgreSQL types, and rejection of identifier/content/JSON/array/free-text-like outputs.
+
+### TDD evidence
+The stricter unit contract was added before any production/schema adjustment. It passed immediately because the existing Task 1 Drizzle declaration and generated snapshot already had the exact approved 23-column scalar projection, so no production artifact adjustment was warranted.
+
+```powershell
+npm.cmd test -- tests/unit/m4c-schema-contract.test.ts
+```
+Result: 1 test file passed, 2 tests passed.
+
+### Review-fix verification
+```powershell
+npm.cmd test -- tests/unit/m4c-schema-contract.test.ts tests/unit/m4b-schema-contract.test.ts tests/unit/schema-contract.test.ts
+```
+Result: 3 test files passed, 15 tests passed.
+
+```powershell
+npm.cmd test -- tests/integration/migration.test.ts
+```
+Result: 1 test file skipped; both integration tests (including the new database-backed fixture) are correctly gated because `DATABASE_URL_TEST` is not configured. No production database was provisioned or touched.
+
+```powershell
+npm.cmd run typecheck
+```
+Result: passed with no TypeScript diagnostics.
+
+```powershell
+git diff --check
+```
+Result: passed.
