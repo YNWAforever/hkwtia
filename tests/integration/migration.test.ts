@@ -211,6 +211,27 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         foreign_table: "agent_runs",
         foreign_column: "id",
       }]);
+
+      const view = await pool.query(
+        `SELECT matviewname, ispopulated
+           FROM pg_matviews
+          WHERE schemaname = 'public'
+            AND matviewname = 'aiops_monthly_metrics'`,
+      );
+      expect(view.rows).toEqual([{
+        matviewname: "aiops_monthly_metrics",
+        ispopulated: true,
+      }]);
+
+      const index = await pool.query(
+        `SELECT indexname
+           FROM pg_indexes
+          WHERE schemaname = 'public'
+            AND indexname = 'aiops_monthly_metrics_month_start_unique'`,
+      );
+      expect(index.rows).toEqual([{
+        indexname: "aiops_monthly_metrics_month_start_unique",
+      }]);
     } finally {
       await pool.end();
     }

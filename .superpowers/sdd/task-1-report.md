@@ -1,145 +1,59 @@
-# M4A Task 1 Report: AI schema and configuration
+# M4C Task 1 report: AI-Ops materialized view
 
-## Implementation summary
+## Status
+Implemented the `aiopsMonthlyMetrics` Drizzle materialized view, generated its migration metadata, added the unique month index required for concurrent refresh, and extended schema and migration contracts.
 
-- Added the approved Vercel AI SDK dependencies: `ai`, `@ai-sdk/openai`, and `@ai-sdk/anthropic`.
-- Added credential-free AI environment parsing. `AGENTS_ENABLED` is true only for the exact string `"true"`; Concierge defaults to `openai:gpt-4.1-mini`; provider-qualified model names are parsed as `<provider>:<model-id>`.
-- Added durable Drizzle tables for `kb_documents`, `conversations`, `messages`, and `agent_runs`, including pgvector `vector(1536)`, JSON metadata/citations, lifecycle timestamps, CSAT 1–5 constraint, ownership/query indexes, provider-message idempotency, and retention indexes.
-- Made `staff_tasks.profile_id` nullable and added the typed, defaulted JSON `context` containing only the five approved optional keys.
-- Generated migration `0010_m4a_ai_concierge`, journal entry, and snapshot. Inspected SQL and manually added `CREATE EXTENSION IF NOT EXISTS vector` before the vector column. Existing staff tasks receive `context jsonb DEFAULT '{}'::jsonb NOT NULL`.
+## Changed files
+- `lib/db/schema-core.ts`: declared the `aiopsMonthlyMetrics` materialized view with the public scalar metric columns.
+- `drizzle/0013_m4c_aiops_metrics.sql`: generated materialized-view migration plus `aiops_monthly_metrics_month_start_unique`.
+- `drizzle/meta/0013_snapshot.json`: generated Drizzle snapshot metadata for `public.aiops_monthly_metrics`.
+- `drizzle/meta/_journal.json`: generated `0013_m4c_aiops_metrics` journal entry.
+- `tests/unit/m4c-schema-contract.test.ts`: new M4C export/migration/metadata/public-column contract.
+- `tests/integration/migration.test.ts`: validates populated materialized view and unique index when `DATABASE_URL_TEST` is configured.
+- `tests/unit/m4b-schema-contract.test.ts`: changed the legacy assertion from requiring M4B to remain the journal tail to requiring that its migration entry remains present; M4C correctly becomes the tail.
 
-## Files changed
-
-- `package.json`, `package-lock.json`
-- `.env.example`
-- `lib/config/env.ts`
-- `lib/db/schema-core.ts`
-- `drizzle/0010_m4a_ai_concierge.sql`
-- `drizzle/meta/_journal.json`, `drizzle/meta/0010_snapshot.json`
-- `tests/unit/ai-model.test.ts`
-- `tests/unit/schema-contract.test.ts`, `tests/unit/env-contract.test.ts`
-
-`lib/db/schema.ts` and `lib/db/server-schema.ts` already re-export `schema-core.ts` wholesale, so the new tables are exposed through both boundaries without redundant edits.
-
-## RED evidence
-
-Command:
-
+## TDD evidence
+RED command:
 ```powershell
-npm.cmd test -- tests/unit/ai-model.test.ts tests/unit/schema-contract.test.ts
+npm.cmd test -- tests/unit/m4c-schema-contract.test.ts
 ```
+RED result: 1 failed test. Expected failure at `expect(view).toBeDefined()` because `aiopsMonthlyMetrics` was not yet exported.
 
-Result: failed as intended before production implementation: 2 files failed; 11 failed, 4 passed.
-
-Expected missing-feature evidence included:
-
-```text
-expected undefined to be true
-parseAgentModel is not a function
-expected undefined to be defined
-Cannot read properties of undefined (reading 'channel')
-```
-
-These failures corresponded to absent AI configuration/model parsing, absent M4A tables, and absent `staff_tasks.context`.
-
-## GREEN evidence
-
-Command:
-
+GREEN command:
 ```powershell
-npm.cmd test -- tests/unit/ai-model.test.ts tests/unit/schema-contract.test.ts
+npm.cmd test -- tests/unit/m4c-schema-contract.test.ts tests/unit/m4b-schema-contract.test.ts tests/unit/schema-contract.test.ts
 ```
-
-Result:
-
-```text
-Test Files  2 passed (2)
-Tests       15 passed (15)
-```
+GREEN result: 3 test files passed, 14 tests passed.
 
 ## Verification
-
 ```powershell
 npm.cmd run typecheck
 ```
-
-Result: passed (`tsc --noEmit`, exit 0).
+Result: passed with no TypeScript diagnostics.
 
 ```powershell
-npm.cmd test
+npm.cmd test -- tests/integration/migration.test.ts
 ```
+Result: 1 test skipped because `DATABASE_URL_TEST` is not configured. The test contains the required `pg_matviews` and `pg_indexes` assertions for a configured database.
 
-Result: completed successfully (exit 0) in the credential-free default configuration. A concise rerun with `npm.cmd test -- --reporter=dot` also completed successfully.
+```powershell
+npm.cmd test -- tests/unit/board-reporter-service.test.ts tests/unit/repository-boundary.test.ts
+```
+Result: 2 test files passed, 36 tests passed. This independently confirms the only two tests that timed out during the full concurrent suite.
 
-Migration inspection confirmed:
+```powershell
+npm.cmd test -- --reporter=dot
+```
+Result: the final low-noise full-suite capture was interrupted after exceeding twice the clean baseline duration of approximately 207 seconds, so it is not treated as a passing full-suite verification. The partial capture showed unrelated default 5-second timeouts in `board-reporter-service` and `repository-boundary`; both passed independently above. This is a verification/infrastructure concern, not attributed to the Task 1 schema/migration changes.
 
-- `CREATE EXTENSION IF NOT EXISTS vector` appears before `CREATE TABLE "kb_documents"` and its `vector(1536)` column.
-- `messages_provider_message_id_unique` is partial (`IS NOT NULL`).
-- `messages.channel` is the `web | whatsapp` enum.
-- `agent_runs_csat_score_check` permits only null or scores 1 through 5.
-- `conversations_expires_at_idx`, `messages_conversation_created_idx`, and `agent_runs_conversation_created_idx` support retention and chronological scans.
+```powershell
+git diff --check
+```
+Result: passed.
 
 ## Self-review
-
-- Restored five pre-M4A profile columns after an initial broad mechanical edit attempt; the final generated migration only alters `staff_tasks.profile_id` and adds its context column.
-- Kept production database access out of application code; this task adds only schema/configuration.
-- No live provider, database, or other credentials are required by default tests.
-- `git diff --check` passed before commit.
-
-## Concerns
-
-`npm.cmd install` reported 27 dependency audit advisories (2 low, 11 moderate, 13 high, 1 critical). No audit upgrade or remediation was performed because it is outside this narrowly scoped task; these advisories were not introduced as application-code changes by this implementation.
-
-## Review-fix follow-up: foreign-key contract coverage
-
-### Files changed
-
-- `tests/unit/schema-contract.test.ts`
-- `.superpowers/sdd/task-1-report.md`
-
-### Mutation RED evidence
-
-After adding runtime Drizzle `getTableConfig(...).foreignKeys` assertions for all four required relations, I temporarily removed only the `agent_runs.profile_id -> profiles.id` reference from `lib/db/schema-core.ts`. The mutation was not committed and was restored immediately after the command.
-
-Command:
-
-```powershell
-npm.cmd test -- tests/unit/schema-contract.test.ts
-```
-
-Result:
-
-```text
-M4A AI concierge schema contract > retains all required AI concierge foreign-key relations
-AssertionError: expected false to be true
-Test Files  1 failed (1)
-Tests       1 failed | 8 passed (9)
-MUTATION_TEST_EXIT_CODE=1
-```
-
-This demonstrates the assertion fails when that required relation is removed. The test also independently checks the remaining three required relationships: `conversations.profile_id -> profiles.id`, `messages.conversation_id -> conversations.id`, and `agent_runs.conversation_id -> conversations.id`.
-
-### Final GREEN evidence
-
-```powershell
-npm.cmd test -- tests/unit/schema-contract.test.ts
-npm.cmd run typecheck
-```
-
-Result:
-
-```text
-Test Files  1 passed (1)
-Tests       9 passed (9)
-tsc --noEmit passed
-```
-
-### Self-review
-
-- Assertions inspect Drizzle’s runtime foreign-key metadata, not merely source text or column presence.
-- Each assertion matches its source column, referenced table, and target primary-key column, so removal or retargeting of any required relation fails the contract.
-- The approved relationship design and generated migration were not changed.
-
-### Follow-up concerns
-
-No new concerns. The existing dependency-audit advisory note above remains unchanged.
+- Twelve-month Hong Kong semantics: the view generates the current Hong Kong calendar month plus the preceding eleven months, flags the current month as partial, and derives month boundaries with `Asia/Hong_Kong`.
+- Attribution: terminal outcomes use the latest completed concierge run before the conversation month's end; cost uses `started_at`; CSAT uses terminal `completed_at`; renewals use event occurrence in the month.
+- Public data shape: the projection exposes only the required scalar aggregate metric columns. The schema contract rejects sensitive/raw identifier and content aliases.
+- Concurrent refresh: migration creates the required unique `month_start` index.
+- Metadata: the snapshot was generated with Drizzle and includes `public.aiops_monthly_metrics`; the journal ends with `0013_m4c_aiops_metrics`.

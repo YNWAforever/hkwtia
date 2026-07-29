@@ -85,6 +85,13 @@
       "when": 1785269860328,
       "tag": "0012_m4b_scheduled_agents",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1785344859728,
+      "tag": "0013_m4c_aiops_metrics",
+      "breakpoints": true
     }
   ]
 }

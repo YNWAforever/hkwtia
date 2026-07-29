@@ -149,6 +149,6 @@ describe("M4B scheduled-agent schema contract", () => {
       join(process.cwd(), "drizzle", "meta", "_journal.json"),
       "utf8",
     )) as {entries?: Array<{tag?: string}>};
-    expect(journal.entries?.at(-1)?.tag).toBe("0012_m4b_scheduled_agents");
+    expect(journal.entries?.some((entry) => entry.tag === "0012_m4b_scheduled_agents")).toBe(true);
   });
 });
