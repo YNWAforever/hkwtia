@@ -43,6 +43,7 @@ type RunRecord = {
 };
 type AcceptanceMessage = {
   role: "user" | "assistant";
+  channel: "web" | "whatsapp";
   content: string;
 };
 
@@ -447,8 +448,10 @@ export function createM4AAcceptanceBoundary(
         const conversation = ownedConversation(owner, conversationId);
         const values = record(input);
         const role = values.role === "assistant" ? "assistant" : "user";
+        const channel = values.channel === "whatsapp" ? "whatsapp" : "web";
         conversation.messages.push({
           role,
+          channel,
           content: stringValue(values.content, ""),
         });
         return {id: `message-${conversation.messages.length}`};
@@ -458,6 +461,7 @@ export function createM4AAcceptanceBoundary(
         const message = record(messageInput);
         conversation.messages.push({
           role: "user",
+          channel: message.channel === "whatsapp" ? "whatsapp" : "web",
           content: stringValue(message.content, ""),
         });
         const values = record(input);
@@ -500,6 +504,17 @@ export function createM4AAcceptanceBoundary(
     service,
     snapshot() {
       return Object.freeze({
+        conversations: Object.freeze(
+          [...conversationsById.values()].map(({id}) => Object.freeze({id})),
+        ),
+        messages: Object.freeze(
+          [...conversationsById.values()].flatMap(({id, messages}) =>
+            messages.map((message) => Object.freeze({
+              ...message,
+              conversationId: id,
+            }))
+          ),
+        ),
         runs: Object.freeze(runs.map((run) => Object.freeze({...run}))),
         approvals: Object.freeze(
           approvals.map((approval) => Object.freeze({...approval})),

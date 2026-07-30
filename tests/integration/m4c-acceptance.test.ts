@@ -219,19 +219,48 @@ async function exerciseWoztell(): Promise<void> {
       body,
     },
   );
-  const accepted = await post(signedRequest());
-  expect(accepted.status).toBe(202);
-  await expect(accepted.json()).resolves.toEqual({status: "accepted"});
+  const concurrent = await Promise.all([
+    post(signedRequest()),
+    post(signedRequest()),
+    post(signedRequest()),
+  ]);
+  expect(concurrent.map(({status}) => status)).toEqual([202, 202, 202]);
+  expect(await Promise.all(concurrent.map((response) => response.json()))).toEqual([
+    {status: "accepted"},
+    {status: "duplicate"},
+    {status: "duplicate"},
+  ]);
   expect(claimInbound).toHaveBeenCalledWith(expect.objectContaining({
     channel: "whatsapp",
     providerMessageId: "wamid.m4c.acceptance",
   }));
 
-  const duplicate = await post(signedRequest());
-  expect(duplicate.status).toBe(202);
-  await expect(duplicate.json()).resolves.toEqual({status: "duplicate"});
-  expect(claimInbound).toHaveBeenCalledTimes(2);
-  expect(boundary.snapshot()).toMatchObject({runs: [expect.anything()], providerCalls: 1});
+  const replay = await post(signedRequest());
+  expect(replay.status).toBe(202);
+  await expect(replay.json()).resolves.toEqual({status: "duplicate"});
+  expect(claimInbound).toHaveBeenCalledTimes(4);
+
+  const durable = boundary.snapshot() as unknown as {
+    conversations: readonly {id: string}[];
+    messages: readonly {conversationId: string; role: string; channel: string}[];
+    runs: readonly unknown[];
+    providerCalls: number;
+  };
+  expect(durable.conversations).toHaveLength(1);
+  expect(durable.messages).toEqual([
+    expect.objectContaining({
+      conversationId: durable.conversations[0]!.id,
+      role: "user",
+      channel: "whatsapp",
+    }),
+    expect.objectContaining({
+      conversationId: durable.conversations[0]!.id,
+      role: "assistant",
+      channel: "whatsapp",
+    }),
+  ]);
+  expect(durable.runs).toHaveLength(1);
+  expect(durable.providerCalls).toBe(1);
 
   const process = vi.fn();
   const invalid = createWoztellWebhookPostHandler({channel, process});
