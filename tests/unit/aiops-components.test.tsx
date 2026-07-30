@@ -165,6 +165,10 @@ describe("public AI-Ops dashboard components", () => {
     expect(screen.getByText(labels.firstYearTarget)).toBeInTheDocument();
 
     const table = screen.getByRole("table", {name: labels.renewalHeading});
+    const scrollRegion = table.parentElement;
+    expect(scrollRegion).toHaveAttribute("role", "region");
+    expect(scrollRegion).toHaveAttribute("aria-label", labels.renewalHeading);
+    expect(scrollRegion).toHaveAttribute("tabindex", "0");
     expect(within(table).getAllByRole("row")).toHaveLength(13);
     expect(within(table).getAllByText("90.0%")).toHaveLength(12);
     expect(within(table).getAllByText("80.0%")).toHaveLength(12);

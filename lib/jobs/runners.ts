@@ -459,6 +459,7 @@ export async function runProductionBoardReporter(
 export async function runProductionAiOpsMetrics(
   _now: Date,
 ): Promise<{refreshed: 1}> {
+  void _now;
   await aiOpsMetricsRepository.refresh(automationCronActor());
   return {refreshed: 1};
 }

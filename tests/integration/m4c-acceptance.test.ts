@@ -29,8 +29,9 @@ const AS_OF = new Date("2026-07-30T12:00:00.000Z");
 async function drain(turn: Awaited<ReturnType<
   ReturnType<typeof createM4AAcceptanceBoundary>["service"]["startTurn"]
 >>) {
-  for await (const _event of turn.events) {
+  for await (const event of turn.events) {
     // Exhaust the deterministic runtime without exposing event payloads.
+    void event;
   }
 }
 
@@ -431,7 +432,7 @@ describe("complete M4 deterministic acceptance", () => {
     for (const {id} of fixture.profiles) {
       expect(safeDashboard).not.toContain(id);
     }
-    expect(opaque(safeDashboard)).toBe("8635ad999d7394c60148057f0d6081fbbfc169fac030bca2a3f62830a5939ce9");
+    expect(opaque(safeDashboard)).toBe("70024a54d5e21c1e58da8e66a058654a7c17dfb109b2fb9b399300b343fc0b75");
 
     expect(fixture.buildLogs).toHaveLength(2);
     await exerciseConciergeEvaluation();
