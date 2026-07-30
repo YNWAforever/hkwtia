@@ -24,6 +24,10 @@ type AiOpsMessages = Readonly<{
 
 const target = process.env.PLAYWRIGHT_BASE_URL?.trim() || null;
 const canaryToken = "M4C_PRIVATE_CANARY";
+const localePaths: Record<Locale, string> = {
+  en: "/en",
+  "zh-HK": "/zh",
+};
 const messages = Object.fromEntries(
   (["en", "zh-HK"] as const).map((locale) => [
     locale,
@@ -59,7 +63,7 @@ test.describe("M4C public AI-Ops acceptance", () => {
       page,
     }) => {
       const labels = messages[locale];
-      const response = await page.goto(`/${locale}/ai-ops`);
+      const response = await page.goto(`${localePaths[locale]}/ai-ops`);
       expect(response?.status()).toBe(200);
 
       await expect(page.getByRole("heading", {level: 1})).toHaveCount(1);
