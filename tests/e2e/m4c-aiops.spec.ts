@@ -97,10 +97,9 @@ test.describe("M4C public AI-Ops acceptance", () => {
         level: 2,
         name: labels.architectureHeading,
       })).toBeVisible();
-      const evidence = page.getByRole("heading", {
-        level: 2,
+      const evidence = page.getByRole("region", {
         name: labels.evidenceHeading,
-      }).locator("..");
+      });
       await expect(evidence).toBeVisible();
       const buildLogLinks = evidence.locator('a[href*="/news/"]');
       await expect(buildLogLinks).toHaveCount(2);

@@ -1604,7 +1604,7 @@ expect(boardDraft).toMatchObject({
   publishedAt: null,
 });
 expect(validWoztell).toMatchObject({
-  responseStatus: 200,
+  responseStatus: 202,
   persistedChannel: "whatsapp",
 });
 expect(invalidWoztell.responseStatus).toBe(401);
