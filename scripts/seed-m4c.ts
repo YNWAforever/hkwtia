@@ -1,8 +1,8 @@
-﻿import {fileURLToPath} from "node:url";
+﻿import { fileURLToPath } from "node:url";
 
-import {Pool} from "pg";
+import { Pool } from "pg";
 
-import {M4C_ACCEPTANCE_OWNERSHIP_KEY} from "@/lib/acceptance/m4c-ownership";
+import { M4C_ACCEPTANCE_OWNERSHIP_KEY } from "@/lib/acceptance/m4c-ownership";
 
 export const M4C_ACCEPTANCE_SEED_ENV = "M4C_ACCEPTANCE_SEED";
 
@@ -29,33 +29,33 @@ type AgentRunFixture = Readonly<{
 }>;
 
 function stableUuid(group: number, index: number): string {
-  return `500000${String(group).padStart(2, "0")}-0000-4000-8000-${
-    String(index + 1).padStart(12, "0")
-  }`;
+  return `500000${String(group).padStart(2, "0")}-0000-4000-8000-${String(
+    index + 1,
+  ).padStart(12, "0")}`;
 }
 
-function hongKongMonth(asOf: Date): {year: number; month: number} {
+function hongKongMonth(asOf: Date): { year: number; month: number } {
   const values = Object.fromEntries(
     new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Hong_Kong",
       year: "numeric",
       month: "2-digit",
-    }).formatToParts(asOf).map(({type, value}) => [type, value]),
+    })
+      .formatToParts(asOf)
+      .map(({ type, value }) => [type, value]),
   );
-  return {year: Number(values.year), month: Number(values.month)};
+  return { year: Number(values.year), month: Number(values.month) };
 }
 
 function monthWindow(
   year: number,
   month: number,
   offset = 0,
-): {monthStart: string; from: Date; to: Date} {
+): { monthStart: string; from: Date; to: Date } {
   const localMonth = new Date(Date.UTC(year, month - 1 - offset, 1));
-  const nextLocalMonth = new Date(Date.UTC(
-    localMonth.getUTCFullYear(),
-    localMonth.getUTCMonth() + 1,
-    1,
-  ));
+  const nextLocalMonth = new Date(
+    Date.UTC(localMonth.getUTCFullYear(), localMonth.getUTCMonth() + 1, 1),
+  );
   const from = new Date(localMonth.getTime() - 8 * 60 * 60 * 1_000);
   const to = new Date(nextLocalMonth.getTime() - 8 * 60 * 60 * 1_000);
   return {
@@ -69,16 +69,15 @@ export function buildM4CSeedFixture(asOf: Date) {
   if (!Number.isFinite(asOf.getTime())) {
     throw new Error("M4C_ACCEPTANCE_AS_OF_INVALID");
   }
-  const {year, month} = hongKongMonth(asOf);
+  const { year, month } = hongKongMonth(asOf);
   const current = monthWindow(year, month);
-  const conversations = Array.from({length: 15}, (_, index) => {
+  const conversations = Array.from({ length: 15 }, (_, index) => {
     const createdAt = new Date(
       current.from.getTime() + (index + 1) * 60 * 60 * 1_000,
     );
     return {
       id: stableUuid(10, index),
-      ownerHash:
-        `${M4C_ACCEPTANCE_OWNERSHIP_KEY}:anonymous:${String(index + 1)}`,
+      ownerHash: `${M4C_ACCEPTANCE_OWNERSHIP_KEY}:anonymous:${String(index + 1)}`,
       createdAt,
       expiresAt: new Date(createdAt.getTime() + 30 * 86_400_000),
     };
@@ -91,9 +90,10 @@ export function buildM4CSeedFixture(asOf: Date) {
         conversationId: conversation.id,
         role: "user" as const,
         channel: "web" as const,
-        content: index === 0
-          ? `Synthetic acceptance request ${PRIVATE_CANARY}`
-          : `Synthetic acceptance request ${index + 1}`,
+        content:
+          index === 0
+            ? `Synthetic acceptance request ${PRIVATE_CANARY}`
+            : `Synthetic acceptance request ${index + 1}`,
         createdAt: conversation.createdAt,
       },
       {
@@ -110,11 +110,13 @@ export function buildM4CSeedFixture(asOf: Date) {
   const agentRuns: AgentRunFixture[] = conversations.flatMap(
     (conversation, conversationIndex) => {
       const count = conversationIndex < 8 ? 3 : 2;
-      return Array.from({length: count}, (_, localIndex): AgentRunFixture => {
+      return Array.from({ length: count }, (_, localIndex): AgentRunFixture => {
         const isLatest = localIndex === count - 1;
         const index = runIndex++;
         const status = isLatest
-          ? conversationIndex < 12 ? "completed" : "escalated"
+          ? conversationIndex < 12
+            ? "completed"
+            : "escalated"
           : "running";
         const startedAt = new Date(
           conversation.createdAt.getTime() + localIndex * 10,
@@ -126,13 +128,14 @@ export function buildM4CSeedFixture(asOf: Date) {
           trigger: "web",
           status,
           costUsd: "0.001500",
-          csatScore: isLatest && conversationIndex < 10
-            ? conversationIndex < 5 ? 5 : 4
-            : null,
+          csatScore:
+            isLatest && conversationIndex < 10
+              ? conversationIndex < 5
+                ? 5
+                : 4
+              : null,
           startedAt,
-          completedAt: isLatest
-            ? new Date(startedAt.getTime() + 50)
-            : null,
+          completedAt: isLatest ? new Date(startedAt.getTime() + 50) : null,
         };
       });
     },
@@ -161,7 +164,7 @@ export function buildM4CSeedFixture(asOf: Date) {
       completedAt: new Date(current.from.getTime() + 21 * 60 * 60 * 1_000 + 50),
     },
   );
-  const renewalFacts = Array.from({length: 12}, (_, reverseIndex) => {
+  const renewalFacts = Array.from({ length: 12 }, (_, reverseIndex) => {
     const window = monthWindow(year, month, 11 - reverseIndex);
     const occurredAt = new Date(window.from.getTime() + 12 * 60 * 60 * 1_000);
     return {
@@ -186,7 +189,7 @@ export function buildM4CSeedFixture(asOf: Date) {
       ],
     };
   });
-  const expectedRenewalMetrics = renewalFacts.map(({monthStart}) => ({
+  const expectedRenewalMetrics = renewalFacts.map(({ monthStart }) => ({
     monthStart,
     renewalDueCount: 2,
     renewalPaidCount: 1,
@@ -203,7 +206,8 @@ export function buildM4CSeedFixture(asOf: Date) {
       sourceKey: `${M4C_ACCEPTANCE_OWNERSHIP_KEY}:buildlog:runtime`,
       titleEn: "M4 runtime and Concierge",
       titleZh: "M4 執行系統與 Concierge",
-      bodyEn: "## What we built\n\nA provider-neutral runtime with guarded tools.",
+      bodyEn:
+        "## What we built\n\nA provider-neutral runtime with guarded tools.",
       bodyZhHk: "## 我們建構了甚麼\n\n一套供應商中立並設有工具防護的執行系統。",
       publishedAt,
     },
@@ -213,7 +217,8 @@ export function buildM4CSeedFixture(asOf: Date) {
       sourceKey: `${M4C_ACCEPTANCE_OWNERSHIP_KEY}:buildlog:aiops`,
       titleEn: "M4 public AI-Ops",
       titleZh: "M4 公開 AI-Ops",
-      bodyEn: "## What we built\n\nA privacy-safe aggregate operations dashboard.",
+      bodyEn:
+        "## What we built\n\nA privacy-safe aggregate operations dashboard.",
       bodyZhHk: "## 我們建構了甚麼\n\n一個保障私隱的綜合營運儀表板。",
       publishedAt,
     },
@@ -228,9 +233,12 @@ export function buildM4CSeedFixture(asOf: Date) {
     conversations,
     messages,
     agentRuns,
-    latestOutcomes: agentRuns.filter(({agent, completedAt}) =>
-      agent === "concierge" && completedAt !== null
-    ).map(({status}) => ({status})),
+    latestOutcomes: agentRuns
+      .filter(
+        ({ agent, completedAt }) =>
+          agent === "concierge" && completedAt !== null,
+      )
+      .map(({ status }) => ({ status })),
     renewalFacts,
     expectedRenewalMetrics,
     buildLogs,
@@ -256,10 +264,7 @@ export function buildM4CSeedFixture(asOf: Date) {
 export type M4CSeedFixture = ReturnType<typeof buildM4CSeedFixture>;
 
 type SeedConnection = Readonly<{
-  query: (
-    text: string,
-    values?: readonly unknown[],
-  ) => Promise<unknown>;
+  query: (text: string, values?: readonly unknown[]) => Promise<unknown>;
   release: () => void;
 }>;
 
@@ -269,8 +274,10 @@ export type M4CSeedPool = Readonly<{
 
 function rowsFrom(result: unknown): readonly Record<string, unknown>[] {
   if (
-    typeof result !== "object" || result === null || !("rows" in result)
-    || !Array.isArray(result.rows)
+    typeof result !== "object" ||
+    result === null ||
+    !("rows" in result) ||
+    !Array.isArray(result.rows)
   ) {
     return [];
   }
@@ -283,21 +290,18 @@ async function deleteOwnedRows(
 ): Promise<void> {
   await connection.query(
     "DELETE FROM posts WHERE source_key = ANY($1::text[])",
-    [fixture.buildLogs.map(({sourceKey}) => sourceKey)],
+    [fixture.buildLogs.map(({ sourceKey }) => sourceKey)],
   );
   await connection.query(
     "DELETE FROM engagement_events WHERE id = ANY($1::uuid[])",
-    [fixture.renewalFacts.flatMap(({events}) => events.map(({id}) => id))],
+    [fixture.renewalFacts.flatMap(({ events }) => events.map(({ id }) => id))],
   );
-  await connection.query(
-    "DELETE FROM agent_runs WHERE id = ANY($1::uuid[])",
-    [fixture.agentRuns.filter(({conversationId}) =>
-      conversationId === null
-    ).map(({id}) => id)],
-  );
+  await connection.query("DELETE FROM agent_runs WHERE id = ANY($1::uuid[])", [
+    fixture.agentRuns.map(({ id }) => id),
+  ]);
   await connection.query(
     "DELETE FROM conversations WHERE id = ANY($1::uuid[])",
-    [fixture.conversations.map(({id}) => id)],
+    [fixture.conversations.map(({ id }) => id)],
   );
 }
 
@@ -376,9 +380,9 @@ async function writeOperationalRows(
   fixture: M4CSeedFixture,
 ): Promise<void> {
   for (const conversation of fixture.conversations) {
-    const lastMessage = fixture.messages.filter(({conversationId}) =>
-      conversationId === conversation.id
-    ).at(-1);
+    const lastMessage = fixture.messages
+      .filter(({ conversationId }) => conversationId === conversation.id)
+      .at(-1);
     await connection.query(
       `INSERT INTO conversations
          (id, profile_id, anonymous_owner_hash, locale, status, agent_kind,
@@ -405,7 +409,7 @@ async function writeOperationalRows(
         message.role,
         message.channel,
         message.content,
-        JSON.stringify({fixture: fixture.ownershipKey}),
+        JSON.stringify({ fixture: fixture.ownershipKey }),
         message.createdAt,
       ],
     );
@@ -439,7 +443,7 @@ async function writeRenewalFactsAndBuildLogs(
   connection: SeedConnection,
   fixture: M4CSeedFixture,
 ): Promise<void> {
-  for (const event of fixture.renewalFacts.flatMap(({events}) => events)) {
+  for (const event of fixture.renewalFacts.flatMap(({ events }) => events)) {
     await connection.query(
       `INSERT INTO engagement_events
          (id, profile_id, company_id, type, points, metadata, occurred_at)
@@ -491,16 +495,16 @@ async function verifyOwnedCounts(
        (SELECT count(*)::integer FROM posts
         WHERE source_key = ANY($3::text[])) AS post_count`,
     [
-      fixture.conversations.map(({id}) => id),
-      fixture.agentRuns.map(({id}) => id),
-      fixture.buildLogs.map(({sourceKey}) => sourceKey),
+      fixture.conversations.map(({ id }) => id),
+      fixture.agentRuns.map(({ id }) => id),
+      fixture.buildLogs.map(({ sourceKey }) => sourceKey),
     ],
   );
   const row = rowsFrom(result)[0];
   if (
-    Number(row?.conversation_count) !== 15
-    || Number(row?.run_count) !== 40
-    || Number(row?.post_count) !== 2
+    Number(row?.conversation_count) !== 15 ||
+    Number(row?.run_count) !== 40 ||
+    Number(row?.post_count) !== 2
   ) {
     throw new Error("M4C_ACCEPTANCE_OWNED_COUNT_MISMATCH");
   }
@@ -508,17 +512,16 @@ async function verifyOwnedCounts(
 
 export async function seedM4C(
   pool: M4CSeedPool,
-  options: Readonly<{asOf: Date}>,
+  options: Readonly<{ asOf: Date }>,
 ): Promise<void> {
   const fixture = buildM4CSeedFixture(options.asOf);
   const connection = await pool.connect();
   let committed = false;
   try {
     await connection.query("BEGIN");
-    await connection.query(
-      "SELECT pg_advisory_xact_lock(hashtext($1))",
-      [`hkwtia:${M4C_ACCEPTANCE_OWNERSHIP_KEY}`],
-    );
+    await connection.query("SELECT pg_advisory_xact_lock(hashtext($1))", [
+      `hkwtia:${M4C_ACCEPTANCE_OWNERSHIP_KEY}`,
+    ]);
     await deleteOwnedRows(connection, fixture);
     await writeStartupPlan(connection, fixture);
     await writeRenewalOwners(connection, fixture);
@@ -551,8 +554,8 @@ export function assertM4CSeedEnvironment(
     throw new Error("M4C_ACCEPTANCE_SEED_NOT_AUTHORIZED");
   }
   if (
-    environment.VERCEL_ENV?.trim().toLowerCase() === "production"
-    || environment.NODE_ENV?.trim().toLowerCase() === "production"
+    environment.VERCEL_ENV?.trim().toLowerCase() === "production" ||
+    environment.NODE_ENV?.trim().toLowerCase() === "production"
   ) {
     throw new Error("M4C_ACCEPTANCE_PRODUCTION_FORBIDDEN");
   }
@@ -570,21 +573,22 @@ export function assertM4CSeedEnvironment(
   return databaseUrl;
 }
 
-type SeedPoolWithEnd = M4CSeedPool & Readonly<{
-  end: () => Promise<void>;
-}>;
+type SeedPoolWithEnd = M4CSeedPool &
+  Readonly<{
+    end: () => Promise<void>;
+  }>;
 
 export async function runM4CSeed(
   environment: Readonly<Record<string, string | undefined>> = process.env,
-  createPool: (databaseUrl: string) => SeedPoolWithEnd =
-    (databaseUrl) => new Pool({
+  createPool: (databaseUrl: string) => SeedPoolWithEnd = (databaseUrl) =>
+    new Pool({
       connectionString: databaseUrl,
     }) as unknown as SeedPoolWithEnd,
 ): Promise<void> {
   const databaseUrl = assertM4CSeedEnvironment(environment);
   const pool = createPool(databaseUrl);
   try {
-    await seedM4C(pool, {asOf: new Date()});
+    await seedM4C(pool, { asOf: new Date() });
   } finally {
     await pool.end();
   }
@@ -592,8 +596,8 @@ export async function runM4CSeed(
 
 const entrypoint = process.argv[1];
 if (
-  entrypoint
-  && fileURLToPath(import.meta.url).toLowerCase() === entrypoint.toLowerCase()
+  entrypoint &&
+  fileURLToPath(import.meta.url).toLowerCase() === entrypoint.toLowerCase()
 ) {
   runM4CSeed().catch((error: unknown) => {
     const code = error instanceof Error ? error.message : "UNKNOWN_ERROR";
@@ -601,4 +605,3 @@ if (
     process.exitCode = 1;
   });
 }
-
