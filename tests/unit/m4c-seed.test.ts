@@ -259,5 +259,34 @@ describe("M4C acceptance seed", () => {
       expect(commitIndex).toBeGreaterThan(0);
       expect(refreshIndex).toBeGreaterThan(commitIndex);
     });
+
+    it("types reused nullable agent-run timestamps explicitly", async () => {
+      const {seedM4C} = await loadSeed();
+      const statements: Array<{text: string}> = [];
+      const connection: SeedConnection = {
+        query: async (text) => {
+          statements.push({text});
+          if (/select\s+count/i.test(text)) {
+            return {rows: [{conversation_count: 15, run_count: 40, post_count: 2}]};
+          }
+          return {rows: []};
+        },
+        release: () => undefined,
+      };
+
+      await seedM4C(
+        {connect: async () => connection},
+        {asOf: new Date("2030-07-15T02:00:00.000Z")},
+      );
+
+      const agentRunsInsert = statements.find(({text}) =>
+        /insert\s+into\s+agent_runs/i.test(text)
+      )?.text.replace(/\s+/g, " ").trim().toLowerCase();
+      expect(agentRunsInsert).toContain("$8::timestamptz");
+      expect(agentRunsInsert).toContain("$9::timestamptz");
+      expect(agentRunsInsert).toContain(
+        "coalesce($9::timestamptz, $8::timestamptz)",
+      );
+    });
   });
 });

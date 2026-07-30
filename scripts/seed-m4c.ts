@@ -1,4 +1,4 @@
-import {fileURLToPath} from "node:url";
+﻿import {fileURLToPath} from "node:url";
 
 import {Pool} from "pg";
 
@@ -418,7 +418,7 @@ async function writeOperationalRows(
           error_code, csat_score, started_at, completed_at, created_at,
           updated_at, agent)
        VALUES ($1, $2, NULL, $3, $4, 'fixture', 'deterministic', 0, 0,
-         $5, 0, $6, NULL, $7, $8, $9, $8, COALESCE($9, $8), $10)`,
+         $5, 0, $6, NULL, $7, $8::timestamptz, $9::timestamptz, $8::timestamptz, COALESCE($9::timestamptz, $8::timestamptz), $10)`,
       [
         run.id,
         run.conversationId,
@@ -601,3 +601,4 @@ if (
     process.exitCode = 1;
   });
 }
+
