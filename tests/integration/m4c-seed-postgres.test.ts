@@ -1,4 +1,4 @@
-﻿import { createElement } from "react";
+import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Pool } from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
