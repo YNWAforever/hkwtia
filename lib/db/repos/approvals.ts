@@ -3,8 +3,18 @@ import "server-only";
 import {and, asc, eq, sql} from "drizzle-orm";
 import {z} from "zod";
 
+import type {RetentionRiskCode} from "@/lib/ai/retention-analyst/candidates";
+import {
+  requireConciergeAgent,
+  type ConciergeAgentActor,
+} from "@/lib/auth/agent-actor";
+import {
+  requireScheduledAgent,
+  type ScheduledAgentActor,
+} from "@/lib/auth/agent-actor";
 import {requireAdmin} from "@/lib/auth/actor";
 import {
+  requireAutomationCron,
   requireAutomationSystem,
   type AutomationRepositoryActor,
 } from "@/lib/auth/automation-actor";
@@ -22,15 +32,54 @@ export const approvalDecisionSchema = z.object({
 }).strict();
 
 export type ApprovalDecisionInput = z.infer<typeof approvalDecisionSchema>;
-export type ApprovalPayloadSummary = Readonly<{key: "campaignId" | "template" | "eventId" | "slug" | "membershipId" | "field"; value: string}>;
+export type ApprovalPayloadSummary = Readonly<{key: "campaignId" | "template" | "eventId" | "slug" | "profileId" | "membershipId" | "field" | "to" | "subject" | "text" | "body" | "locale" | "reasonCodes" | "conversationId" | "agentRunId"; value: string}>;
+export const draftEmailApprovalSchema = z.object({
+  to: z.string().email().max(320),
+  subject: z.string().min(1).max(998),
+  text: z.string().min(1).max(50_000),
+  locale: z.enum(["en", "zh-HK"]),
+  conversationId: z.string().uuid(),
+  agentRunId: z.string().uuid(),
+}).strict();
+const retentionRiskCodeSchema = z.enum([
+  "low_score_declining",
+  "inactive_before_renewal",
+]);
+export const retentionOutreachApprovalSchema = z.object({
+  requestKey: z.string().min(1).max(500),
+  profileId: z.string().min(1).max(255),
+  membershipId: z.string().uuid(),
+  locale: z.enum(["en", "zh-HK"]),
+  reasonCodes: z.array(retentionRiskCodeSchema).min(1).max(2),
+  subject: z.string().min(1).max(160),
+  body: z.string().min(1).max(4000),
+}).strict();
+const retentionOutreachPayloadSchema = retentionOutreachApprovalSchema
+  .omit({requestKey: true})
+  .extend({
+    agentRunId: z.string().uuid(),
+  })
+  .strict();
 const supportedPayloadSchemas = {
   "campaign.send": z.object({campaignId: z.string().uuid(), template: z.enum(["renewal-reminder", "member-update"])}).strict(),
   "event.publish": z.object({eventId: z.string().uuid(), slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(200)}).strict(),
   "membership.update": z.object({membershipId: z.string().uuid(), field: z.enum(["status", "billingInterval", "cancelAtPeriodEnd"])}).strict(),
+  "agent.draft_email": draftEmailApprovalSchema,
+  "agent.retention_outreach": retentionOutreachPayloadSchema,
 } as const;
+export type DraftEmailApprovalInput = z.infer<typeof draftEmailApprovalSchema>;
+export type RetentionOutreachApprovalInput = Omit<
+  z.infer<typeof retentionOutreachApprovalSchema>,
+  "reasonCodes"
+> & Readonly<{reasonCodes: RetentionRiskCode[]}>;
 export type SupportedApprovalActionType = keyof typeof supportedPayloadSchemas;
 export type ApprovalPayloadReview = Readonly<{actionType: SupportedApprovalActionType | null; payloadSummary: readonly ApprovalPayloadSummary[]; actionable: boolean}>;
 export type PendingApproval = Readonly<{id: string; actionType: SupportedApprovalActionType | null; payloadSummary: readonly ApprovalPayloadSummary[]; actionable: boolean; requestedAt: Date}>;
+export type DraftEmailApproval = Readonly<{
+  id: string;
+  status: "pending";
+  requestedAt: Date;
+}>;
 export type ApprovalDecision = Readonly<{id: string; status: "approved" | "rejected"; decidedAt: Date}>;
 export type ApprovalExpiryBatchInput = Readonly<{
   asOf: Date;
@@ -59,6 +108,9 @@ const approvalExpiryResultSchema = z.object({
   task_count: z.coerce.number().int().nonnegative(),
   missing_requester_count: z.coerce.number().int().nonnegative(),
 });
+const pendingRetentionRowSchema = z.object({
+  pending: z.boolean(),
+});
 
 export function reviewApprovalPayload(actionType: unknown, payload: unknown): ApprovalPayloadReview {
   if (typeof actionType !== "string" || !Object.prototype.hasOwnProperty.call(supportedPayloadSchemas, actionType)) return {actionType: null, payloadSummary: [], actionable: false};
@@ -73,6 +125,23 @@ export function summarizeApprovalPayload(actionType: unknown, payload: unknown):
   return reviewApprovalPayload(actionType, payload).payloadSummary;
 }
 
+export type AgentApprovalsRepository = Readonly<{
+  createDraftEmail: (
+    actor: ConciergeAgentActor,
+    input: unknown,
+  ) => Promise<DraftEmailApproval>;
+  createRetentionOutreachOnce: (
+    actor: ScheduledAgentActor,
+    input: RetentionOutreachApprovalInput,
+  ) => Promise<{
+    approvalId: string;
+    created: boolean;
+  }>;
+  hasPendingRetentionOutreach: (
+    actor: AutomationRepositoryActor,
+    profileId: string,
+  ) => Promise<boolean>;
+}>;
 export type ApprovalsRepository = Readonly<{
   listPending: (actor: Actor) => Promise<readonly PendingApproval[]>;
   decide: (actor: Actor, input: unknown) => Promise<ApprovalDecision>;
@@ -96,8 +165,106 @@ async function defaultAutomationDatabaseLoader(): Promise<AutomationDatabase> {
   return await getDb() as unknown as AutomationDatabase;
 }
 
-export function createApprovalsRepository(loadDatabase: DatabaseLoader = getDb): ApprovalsRepository {
+export function createApprovalsRepository(
+  loadDatabase: DatabaseLoader = getDb,
+): ApprovalsRepository & AgentApprovalsRepository {
   return {
+    async createDraftEmail(actor, input) {
+      requireConciergeAgent(actor);
+      const parsed = draftEmailApprovalSchema.parse(input);
+      if (
+        parsed.conversationId !== actor.conversationId
+        || parsed.agentRunId !== actor.runId
+      ) {
+        throw new Error("INVALID_AGENT_APPROVAL_CONTEXT");
+      }
+      const db = await loadDatabase();
+      const [created] = await db.insert(approvals).values({
+        actionType: "agent.draft_email",
+        payload: parsed,
+        status: "pending",
+        requestedByProfileId: actor.profileId,
+      }).returning({
+        id: approvals.id,
+        status: approvals.status,
+        requestedAt: approvals.requestedAt,
+      });
+      if (!created || created.status !== "pending") {
+        throw new Error("DRAFT_EMAIL_APPROVAL_CREATE_FAILED");
+      }
+      return {...created, status: "pending" as const};
+    },
+
+    async createRetentionOutreachOnce(actor, input) {
+      requireScheduledAgent(actor, "retention_analyst");
+      const parsed = retentionOutreachApprovalSchema.parse(input);
+      const payload = {
+        profileId: parsed.profileId,
+        membershipId: parsed.membershipId,
+        locale: parsed.locale,
+        reasonCodes: parsed.reasonCodes,
+        subject: parsed.subject,
+        body: parsed.body,
+        agentRunId: actor.runId,
+      };
+      const db = await loadDatabase();
+      const rows = resultRows(await db.execute(sql`
+        INSERT INTO ${approvals}
+          (
+            action_type,
+            payload,
+            request_key,
+            status,
+            requested_by_profile_id
+          )
+        VALUES (
+          ${"agent.retention_outreach"},
+          jsonb_build_object(
+            'profileId', ${payload.profileId},
+            'membershipId', ${payload.membershipId},
+            'locale', ${payload.locale},
+            'reasonCodes', ${JSON.stringify(payload.reasonCodes)}::jsonb,
+            'subject', ${payload.subject},
+            'body', ${payload.body},
+            'agentRunId', ${payload.agentRunId}
+          ),
+          ${parsed.requestKey},
+          ${"pending"},
+          NULL
+        )
+        ON CONFLICT (request_key)
+          WHERE request_key IS NOT NULL
+        DO UPDATE SET request_key = EXCLUDED.request_key
+        RETURNING
+          id AS approval_id,
+          (xmax = 0) AS created
+      `));
+      const result = z.object({
+        approval_id: z.string().uuid(),
+        created: z.boolean(),
+      }).parse(rows[0]);
+      return {
+        approvalId: result.approval_id,
+        created: result.created,
+      };
+    },
+
+    async hasPendingRetentionOutreach(actor, profileId) {
+      requireAutomationCron(actor);
+      const parsedProfileId = z.string().min(1).max(255).parse(profileId);
+      const db = await loadDatabase();
+      const row = pendingRetentionRowSchema.parse(resultRows(await db.execute(sql`
+        SELECT EXISTS (
+          SELECT 1
+          FROM ${approvals}
+          WHERE ${approvals.actionType} = 'agent.retention_outreach'
+            AND ${approvals.status} = 'pending'
+            AND ${approvals.payload} ->> 'profileId' = ${parsedProfileId}
+        ) AS pending
+      `))[0]);
+      return row.pending;
+    },
+
     async listPending(actor) {
       requireAdmin(actor);
       const db = await loadDatabase();

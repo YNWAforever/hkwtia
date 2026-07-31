@@ -64,6 +64,34 @@
       "when": 1785066539044,
       "tag": "0009_m3_automation_admin_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1785120916830,
+      "tag": "0010_m4a_ai_concierge",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1785235889783,
+      "tag": "0011_m4a_chat_retention",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1785269860328,
+      "tag": "0012_m4b_scheduled_agents",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1785344859728,
+      "tag": "0013_m4c_aiops_metrics",
+      "breakpoints": true
     }
   ]
 }

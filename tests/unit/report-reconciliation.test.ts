@@ -123,7 +123,8 @@ describe("report reconciliation", () => {
   it("passes the whole Next searchParams object from the route to strict validation", () => {
     const source = readFileSync(join(process.cwd(), "app/[locale]/(admin)/admin/reports/page.tsx"), "utf8");
     expect(source).toContain("const reportQuery = Object.keys(query).length === 0 ? defaults : query;");
-    expect(source).toContain("getAdminReport(await requireAdminPageActor(), reportQuery)");
+    expect(source.match(/requireAdminPageActor\(\)/g)).toHaveLength(1);
+    expect(source).toContain("loadReport(actor, reportQuery)");
     expect(source).not.toContain("{from: query.from, to: query.to}");
   });
   it("reads one bounded aggregate row using half-open windows and shared at-risk thresholds", async () => {

@@ -1,370 +1,564 @@
 {
-    "Common":  {
-                   "skipToContent":  "Skip to content"
-               },
-    "Metadata":  {
-                     "title":  "WTIA | Innovate Hong Kong",
-                     "description":  "Connecting Hong Kong and Greater Bay Area innovation to global markets."
-                 },
-    "Navigation":  {
-                       "about":  "About",
-                       "membership":  "Membership",
-                       "showcase":  "Showcase",
-                       "launchpad":  "Launchpad",
-                       "events":  "Events",
-                       "news":  "News",
-                       "openMenu":  "Open navigation",
-                       "closeMenu":  "Close navigation",
-                       "menuTitle":  "Navigation",
-                       "menuDescription":  "Explore WTIA pages and change language.",
-                       "join":  "Join WTIA",
-                       "english":  "EN",
-                       "chinese":  "中文",
-                       "switchToEnglish":  "Switch to English",
-                       "switchToChinese":  "Switch to Chinese",
-                       "homeLabel":  "WTIA home",
-                       "logoAlt":  "WTIA",
-                       "primaryLabel":  "Primary navigation"
-                   },
-    "Footer":  {
-                   "brand":  "Innovate Hong Kong",
-                   "summary":  "The cross-border platform connecting Hong Kong, the Greater Bay Area and Asia to global technology markets, investors and opportunities. Powered by WTIA.",
-                   "address":  "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
-                   "navigate":  "Navigate",
-                   "home":  "Home",
-                   "membership":  "Membership",
-                   "about":  "About",
-                   "contact":  "Contact",
-                   "connect":  "Connect",
-                   "copyright":  "© {year} Innovate Hong Kong — WTIA. All rights reserved."
-               },
-    "Email": {
-      "brand": "WTIA",
-      "footer": {
-        "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
-        "reason": "You are receiving this marketing email because you opted in to WTIA updates.",
-        "unsubscribe": "Unsubscribe from marketing email"
+  "Common": {
+    "skipToContent": "Skip to content"
+  },
+  "Metadata": {
+    "title": "WTIA | Innovate Hong Kong",
+    "description": "Connecting Hong Kong and Greater Bay Area innovation to global markets."
+  },
+  "Navigation": {
+    "about": "About",
+    "membership": "Membership",
+    "showcase": "Showcase",
+    "launchpad": "Launchpad",
+    "events": "Events",
+    "news": "News",
+    "openMenu": "Open navigation",
+    "closeMenu": "Close navigation",
+    "menuTitle": "Navigation",
+    "menuDescription": "Explore WTIA pages and change language.",
+    "join": "Join WTIA",
+    "english": "EN",
+    "chinese": "中文",
+    "switchToEnglish": "Switch to English",
+    "switchToChinese": "Switch to Chinese",
+    "homeLabel": "WTIA home",
+    "logoAlt": "WTIA",
+    "primaryLabel": "Primary navigation"
+  },
+  "Footer": {
+    "brand": "Innovate Hong Kong",
+    "summary": "The cross-border platform connecting Hong Kong, the Greater Bay Area and Asia to global technology markets, investors and opportunities. Powered by WTIA.",
+    "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
+    "navigate": "Navigate",
+    "home": "Home",
+    "membership": "Membership",
+    "about": "About",
+    "contact": "Contact",
+    "connect": "Connect",
+    "copyright": "© {year} Innovate Hong Kong — WTIA. All rights reserved."
+  },
+  "Email": {
+    "brand": "WTIA",
+    "footer": {
+      "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
+      "reason": "You are receiving this marketing email because you opted in to WTIA updates.",
+      "unsubscribe": "Unsubscribe from marketing email"
+    },
+    "templates": {
+      "welcome": {
+        "subject": "Welcome to WTIA, {recipientName}",
+        "preview": "Your WTIA membership journey starts here.",
+        "heading": "Welcome to the WTIA community",
+        "body": "Hello {recipientName}, your membership is ready. Explore your member portal and start connecting with Hong Kong's innovation community.",
+        "cta": "Open member portal"
       },
-      "templates": {
-        "welcome": {"subject": "Welcome to WTIA, {recipientName}", "preview": "Your WTIA membership journey starts here.", "heading": "Welcome to the WTIA community", "body": "Hello {recipientName}, your membership is ready. Explore your member portal and start connecting with Hong Kong's innovation community.", "cta": "Open member portal"},
-        "day1_video": {"subject": "See what your WTIA membership unlocks", "preview": "A quick introduction to your WTIA member experience.", "heading": "Make the most of your membership", "body": "Hello {recipientName}, watch our short member introduction and discover the people, programmes and opportunities available through WTIA.", "cta": "Watch the introduction"},
-        "day7_nudge": {"subject": "Your WTIA member portal is ready", "preview": "Sign in to activate your member experience.", "heading": "Take your first step with WTIA", "body": "Hello {recipientName}, your member portal is waiting. Sign in to review your details and access your WTIA benefits.", "cta": "Sign in now"},
-        "day7_mixer": {"subject": "Meet the WTIA community", "preview": "Discover your next opportunity to connect.", "heading": "Join your next member gathering", "body": "Hello {recipientName}, build new connections across Hong Kong's technology community at an upcoming WTIA member event.", "cta": "View member events"},
-        "day14_profile": {"subject": "Complete your WTIA member profile", "preview": "Help members and partners discover your expertise.", "heading": "Strengthen your member profile", "body": "Hello {recipientName}, complete your profile so the WTIA community can understand your expertise, interests and collaboration goals.", "cta": "Complete profile"},
-        "day30_recap": {"subject": "Your first month with WTIA", "preview": "A quick recap of ways to participate.", "heading": "Keep your momentum going", "body": "Hello {recipientName}, revisit the events, member resources and community opportunities available during your first month with WTIA.", "cta": "Explore member resources"},
-        "day45_content": {"subject": "Fresh insight from the WTIA network", "preview": "Explore practical perspectives from our innovation community.", "heading": "Stay close to what is changing", "body": "Hello {recipientName}, catch up on the latest WTIA insight, member stories and technology developments shaping our community.", "cta": "Read the latest updates"},
-        "day60_committee": {"subject": "Help shape the WTIA community", "preview": "Explore ways to contribute your experience.", "heading": "Bring your voice to WTIA", "body": "Hello {recipientName}, discover committees and community initiatives where your experience can create value for fellow members.", "cta": "Explore ways to contribute"},
-        "day90_review": {"subject": "Review your WTIA member experience", "preview": "Tell us how your first 90 days have gone.", "heading": "How is your membership going?", "body": "Hello {recipientName}, review your first 90 days with WTIA and let us know where we can make your member experience more valuable.", "cta": "Review your experience"},
-        "renewal_90": {"subject": "Your WTIA membership renews in 90 days", "preview": "Plan ahead for uninterrupted member access.", "heading": "Your renewal window is approaching", "body": "Hello {recipientName}, your WTIA membership is due to renew in 90 days. Review your membership details and contact us if anything needs updating.", "cta": "Review membership"},
-        "renewal_60": {"subject": "Your WTIA membership renews in 60 days", "preview": "Check your details before renewal.", "heading": "Prepare for your WTIA renewal", "body": "Hello {recipientName}, your membership renewal is 60 days away. Please confirm that your profile and billing details are current.", "cta": "Check renewal details"},
-        "renewal_30": {"subject": "30 days until your WTIA renewal", "preview": "Keep your membership benefits active.", "heading": "Your membership renews soon", "body": "Hello {recipientName}, your WTIA membership renews in 30 days. Review the renewal details now to avoid any interruption.", "cta": "Review renewal"},
-        "renewal_14": {"subject": "WTIA membership renewal in 14 days", "preview": "A final reminder before your renewal date.", "heading": "Your renewal is two weeks away", "body": "Hello {recipientName}, your WTIA membership is scheduled to renew in 14 days. Please check your details or contact our team for support.", "cta": "Manage membership"},
-        "dunning_0": {"subject": "Action needed for your WTIA payment", "preview": "We could not complete your membership payment.", "heading": "Please review your payment details", "body": "Hello {recipientName}, we could not complete your WTIA membership payment. Update your payment details to keep your access active.", "cta": "Update payment details"},
-        "dunning_3": {"subject": "WTIA payment still needs attention", "preview": "Update your details to prevent an interruption.", "heading": "Your membership payment is outstanding", "body": "Hello {recipientName}, your WTIA membership payment remains outstanding. Please update your payment details as soon as possible.", "cta": "Resolve payment"},
-        "dunning_7": {"subject": "Final WTIA payment reminder", "preview": "Your membership access may be interrupted.", "heading": "Keep your WTIA membership active", "body": "Hello {recipientName}, we still cannot complete your membership payment. Please resolve it now to avoid losing member access.", "cta": "Fix payment"},
-        "lapsed_survey": {"subject": "Tell us about your WTIA experience", "preview": "Your feedback will help us improve the member journey.", "heading": "We would value your feedback", "body": "Hello {recipientName}, your WTIA membership is no longer active. Please tell us what worked and what we could improve.", "cta": "Share feedback"},
-        "winback_21": {"subject": "Stay connected with the WTIA community", "preview": "See what is happening across our member network.", "heading": "There is more to explore with WTIA", "body": "Hello {recipientName}, discover new events, connections and industry opportunities across the WTIA community.", "cta": "See what's new"},
-        "winback_60": {"subject": "Reconnect with WTIA", "preview": "Return to Hong Kong's technology community.", "heading": "We would be glad to welcome you back", "body": "Hello {recipientName}, reconnect with WTIA and regain access to the community, programmes and opportunities supporting your next stage.", "cta": "Explore membership"},
-        "lead_ack": {"subject": "WTIA has received your enquiry", "preview": "Our team will follow up with you shortly.", "heading": "Thank you for contacting WTIA", "body": "Hello {recipientName}, we have received your enquiry. A member of the WTIA team will review it and follow up shortly.", "cta": "Visit WTIA"},
-        "lead_staff_notify": {"subject": "New WTIA membership enquiry", "preview": "A new prospective member needs follow-up.", "heading": "New lead ready for review", "body": "{recipientName} has submitted a WTIA membership enquiry. Review the lead details and assign the next action.", "cta": "Review lead"},
-        "approval_request": {"subject": "WTIA approval request awaiting review", "preview": "A trusted application action needs a decision.", "heading": "An approval is waiting", "body": "Hello {recipientName}, a trusted application request is ready for your review. Open the approval queue to inspect the safe summary and record a decision.", "cta": "Review approval"},
-        "campaign_generic": {"subject": "An update from WTIA", "preview": "News and opportunities from the WTIA community.", "heading": "Latest from the WTIA community", "body": "Hello {recipientName}, explore the latest WTIA news, programmes and opportunities selected for our member community.", "cta": "Read the update"}
+      "day1_video": {
+        "subject": "See what your WTIA membership unlocks",
+        "preview": "A quick introduction to your WTIA member experience.",
+        "heading": "Make the most of your membership",
+        "body": "Hello {recipientName}, watch our short member introduction and discover the people, programmes and opportunities available through WTIA.",
+        "cta": "Watch the introduction"
+      },
+      "day7_nudge": {
+        "subject": "Your WTIA member portal is ready",
+        "preview": "Sign in to activate your member experience.",
+        "heading": "Take your first step with WTIA",
+        "body": "Hello {recipientName}, your member portal is waiting. Sign in to review your details and access your WTIA benefits.",
+        "cta": "Sign in now"
+      },
+      "day7_mixer": {
+        "subject": "Meet the WTIA community",
+        "preview": "Discover your next opportunity to connect.",
+        "heading": "Join your next member gathering",
+        "body": "Hello {recipientName}, build new connections across Hong Kong's technology community at an upcoming WTIA member event.",
+        "cta": "View member events"
+      },
+      "day14_profile": {
+        "subject": "Complete your WTIA member profile",
+        "preview": "Help members and partners discover your expertise.",
+        "heading": "Strengthen your member profile",
+        "body": "Hello {recipientName}, complete your profile so the WTIA community can understand your expertise, interests and collaboration goals.",
+        "cta": "Complete profile"
+      },
+      "day30_recap": {
+        "subject": "Your first month with WTIA",
+        "preview": "A quick recap of ways to participate.",
+        "heading": "Keep your momentum going",
+        "body": "Hello {recipientName}, revisit the events, member resources and community opportunities available during your first month with WTIA.",
+        "cta": "Explore member resources"
+      },
+      "day45_content": {
+        "subject": "Fresh insight from the WTIA network",
+        "preview": "Explore practical perspectives from our innovation community.",
+        "heading": "Stay close to what is changing",
+        "body": "Hello {recipientName}, catch up on the latest WTIA insight, member stories and technology developments shaping our community.",
+        "cta": "Read the latest updates"
+      },
+      "day60_committee": {
+        "subject": "Help shape the WTIA community",
+        "preview": "Explore ways to contribute your experience.",
+        "heading": "Bring your voice to WTIA",
+        "body": "Hello {recipientName}, discover committees and community initiatives where your experience can create value for fellow members.",
+        "cta": "Explore ways to contribute"
+      },
+      "day90_review": {
+        "subject": "Review your WTIA member experience",
+        "preview": "Tell us how your first 90 days have gone.",
+        "heading": "How is your membership going?",
+        "body": "Hello {recipientName}, review your first 90 days with WTIA and let us know where we can make your member experience more valuable.",
+        "cta": "Review your experience"
+      },
+      "renewal_90": {
+        "subject": "Your WTIA membership renews in 90 days",
+        "preview": "Plan ahead for uninterrupted member access.",
+        "heading": "Your renewal window is approaching",
+        "body": "Hello {recipientName}, your WTIA membership is due to renew in 90 days. Review your membership details and contact us if anything needs updating.",
+        "cta": "Review membership"
+      },
+      "renewal_60": {
+        "subject": "Your WTIA membership renews in 60 days",
+        "preview": "Check your details before renewal.",
+        "heading": "Prepare for your WTIA renewal",
+        "body": "Hello {recipientName}, your membership renewal is 60 days away. Please confirm that your profile and billing details are current.",
+        "cta": "Check renewal details"
+      },
+      "renewal_30": {
+        "subject": "30 days until your WTIA renewal",
+        "preview": "Keep your membership benefits active.",
+        "heading": "Your membership renews soon",
+        "body": "Hello {recipientName}, your WTIA membership renews in 30 days. Review the renewal details now to avoid any interruption.",
+        "cta": "Review renewal"
+      },
+      "renewal_14": {
+        "subject": "WTIA membership renewal in 14 days",
+        "preview": "A final reminder before your renewal date.",
+        "heading": "Your renewal is two weeks away",
+        "body": "Hello {recipientName}, your WTIA membership is scheduled to renew in 14 days. Please check your details or contact our team for support.",
+        "cta": "Manage membership"
+      },
+      "dunning_0": {
+        "subject": "Action needed for your WTIA payment",
+        "preview": "We could not complete your membership payment.",
+        "heading": "Please review your payment details",
+        "body": "Hello {recipientName}, we could not complete your WTIA membership payment. Update your payment details to keep your access active.",
+        "cta": "Update payment details"
+      },
+      "dunning_3": {
+        "subject": "WTIA payment still needs attention",
+        "preview": "Update your details to prevent an interruption.",
+        "heading": "Your membership payment is outstanding",
+        "body": "Hello {recipientName}, your WTIA membership payment remains outstanding. Please update your payment details as soon as possible.",
+        "cta": "Resolve payment"
+      },
+      "dunning_7": {
+        "subject": "Final WTIA payment reminder",
+        "preview": "Your membership access may be interrupted.",
+        "heading": "Keep your WTIA membership active",
+        "body": "Hello {recipientName}, we still cannot complete your membership payment. Please resolve it now to avoid losing member access.",
+        "cta": "Fix payment"
+      },
+      "lapsed_survey": {
+        "subject": "Tell us about your WTIA experience",
+        "preview": "Your feedback will help us improve the member journey.",
+        "heading": "We would value your feedback",
+        "body": "Hello {recipientName}, your WTIA membership is no longer active. Please tell us what worked and what we could improve.",
+        "cta": "Share feedback"
+      },
+      "winback_21": {
+        "subject": "Stay connected with the WTIA community",
+        "preview": "See what is happening across our member network.",
+        "heading": "There is more to explore with WTIA",
+        "body": "Hello {recipientName}, discover new events, connections and industry opportunities across the WTIA community.",
+        "cta": "See what's new"
+      },
+      "winback_60": {
+        "subject": "Reconnect with WTIA",
+        "preview": "Return to Hong Kong's technology community.",
+        "heading": "We would be glad to welcome you back",
+        "body": "Hello {recipientName}, reconnect with WTIA and regain access to the community, programmes and opportunities supporting your next stage.",
+        "cta": "Explore membership"
+      },
+      "lead_ack": {
+        "subject": "WTIA has received your enquiry",
+        "preview": "Our team will follow up with you shortly.",
+        "heading": "Thank you for contacting WTIA",
+        "body": "Hello {recipientName}, we have received your enquiry. A member of the WTIA team will review it and follow up shortly.",
+        "cta": "Visit WTIA"
+      },
+      "lead_staff_notify": {
+        "subject": "New WTIA membership enquiry",
+        "preview": "A new prospective member needs follow-up.",
+        "heading": "New lead ready for review",
+        "body": "{recipientName} has submitted a WTIA membership enquiry. Review the lead details and assign the next action.",
+        "cta": "Review lead"
+      },
+      "approval_request": {
+        "subject": "WTIA approval request awaiting review",
+        "preview": "A trusted application action needs a decision.",
+        "heading": "An approval is waiting",
+        "body": "Hello {recipientName}, a trusted application request is ready for your review. Open the approval queue to inspect the safe summary and record a decision.",
+        "cta": "Review approval"
+      },
+      "campaign_generic": {
+        "subject": "An update from WTIA",
+        "preview": "News and opportunities from the WTIA community.",
+        "heading": "Latest from the WTIA community",
+        "body": "Hello {recipientName}, explore the latest WTIA news, programmes and opportunities selected for our member community.",
+        "cta": "Read the update"
+      }
+    }
+  },
+  "Unsubscribe": {
+    "metaTitle": "Email preferences | WTIA",
+    "metaDescription": "Update your WTIA marketing email preference.",
+    "eyebrow": "Email preferences",
+    "confirmTitle": "Stop WTIA marketing email?",
+    "confirmDescription": "Confirm below and we will stop sending marketing email. Transactional membership messages will continue.",
+    "confirmAction": "Unsubscribe",
+    "successTitle": "Marketing email stopped",
+    "successDescription": "Your preference has been updated. You will no longer receive WTIA marketing email.",
+    "invalidTitle": "This unsubscribe link is invalid",
+    "invalidDescription": "The link may have expired or already been replaced. Contact WTIA if you still need help."
+  },
+  "Home": {
+    "metaTitle": "WTIA | Innovate Hong Kong",
+    "metaDescription": "Connecting Hong Kong and Greater Bay Area innovation to global markets.",
+    "eyebrow": "Innovate Hong Kong",
+    "title": "Bridging GBA innovation to the global stage.",
+    "summary": "The cross-border platform connecting Hong Kong, the Greater Bay Area and Asia to global technology markets.",
+    "imageAlt": "Hong Kong technology community",
+    "featuresTitle": "Built for connection and growth",
+    "featuresIntro": "WTIA brings the technology community together around practical opportunities.",
+    "features": {
+      "connect": {
+        "title": "Connect",
+        "description": "Build relationships across industry, investors and regional partners."
+      },
+      "accelerate": {
+        "title": "Accelerate",
+        "description": "Turn ideas into market opportunities through focused programmes."
+      },
+      "represent": {
+        "title": "Represent",
+        "description": "Give the wireless technology sector a clear, collective voice."
       }
     },
-    "Unsubscribe": {"metaTitle": "Email preferences | WTIA", "metaDescription": "Update your WTIA marketing email preference.", "eyebrow": "Email preferences", "confirmTitle": "Stop WTIA marketing email?", "confirmDescription": "Confirm below and we will stop sending marketing email. Transactional membership messages will continue.", "confirmAction": "Unsubscribe", "successTitle": "Marketing email stopped", "successDescription": "Your preference has been updated. You will no longer receive WTIA marketing email.", "invalidTitle": "This unsubscribe link is invalid", "invalidDescription": "The link may have expired or already been replaced. Contact WTIA if you still need help."},
-    "Home":  {
-                 "metaTitle":  "WTIA | Innovate Hong Kong",
-                 "metaDescription":  "Connecting Hong Kong and Greater Bay Area innovation to global markets.",
-                 "eyebrow":  "Innovate Hong Kong",
-                 "title":  "Bridging GBA innovation to the global stage.",
-                 "summary":  "The cross-border platform connecting Hong Kong, the Greater Bay Area and Asia to global technology markets.",
-                 "imageAlt":  "Hong Kong technology community",
-                 "featuresTitle":  "Built for connection and growth",
-                 "featuresIntro":  "WTIA brings the technology community together around practical opportunities.",
-                 "features":  {
-                                  "connect":  {
-                                                  "title":  "Connect",
-                                                  "description":  "Build relationships across industry, investors and regional partners."
-                                              },
-                                  "accelerate":  {
-                                                     "title":  "Accelerate",
-                                                     "description":  "Turn ideas into market opportunities through focused programmes."
-                                                 },
-                                  "represent":  {
-                                                    "title":  "Represent",
-                                                    "description":  "Give the wireless technology sector a clear, collective voice."
-                                                }
-                              },
-                 "statsTitle":  "A platform for the whole ecosystem",
-                 "stats":  {
-                               "0":  {
-                                         "value":  "4",
-                                         "label":  "Flagship programmes"
-                                     },
-                               "1":  {
-                                         "value":  "2",
-                                         "label":  "Working languages"
-                                     },
-                               "2":  {
-                                         "value":  "1",
-                                         "label":  "Connected technology community"
-                                     }
-                           },
-                 "programsTitle":  "Programmes and awards",
-                 "programsIntro":  "Explore WTIA initiatives supporting talent, innovation and industry recognition.",
-                 "programs":  {
-                                  "cpai":  {
-                                               "title":  "CPAI",
-                                               "description":  "A focused programme supporting applied innovation."
-                                           },
-                                  "hkict":  {
-                                                "title":  "HKICT Awards",
-                                                "description":  "Recognising excellence across Hong Kong\u0027s technology sector."
-                                            },
-                                  "tct":  {
-                                              "title":  "TCT",
-                                              "description":  "Connecting technology, capability and talent."
-                                          },
-                                  "asa":  {
-                                              "title":  "Asia Smart App Awards",
-                                              "description":  "Celebrating outstanding smart applications across Asia."
-                                          }
-                              },
-                 "viewProgram":  "View programme"
-             },
-    "About":  {
-                  "metaTitle":  "About WTIA",
-                  "metaDescription":  "Learn about WTIA\u0027s role in Hong Kong\u0027s wireless technology community.",
-                  "eyebrow":  "About WTIA",
-                  "title":  "A connected voice for wireless technology.",
-                  "summary":  "WTIA convenes members, partners and public stakeholders to advance Hong Kong\u0027s technology ecosystem.",
-                  "imageAlt":  "Hong Kong technology community",
-                  "historyTitle":  "Our role",
-                  "historyIntro":  "We connect the industry with opportunities that strengthen innovation, talent and regional reach.",
-                  "connect":  {
-                                  "title":  "Connect the ecosystem",
-                                  "description":  "Create practical links among members, partners, investors and markets."
-                              },
-                  "advance":  {
-                                  "title":  "Advance innovation",
-                                  "description":  "Support programmes that help technology teams learn, demonstrate and grow."
-                              },
-                  "represent":  {
-                                    "title":  "Represent the industry",
-                                    "description":  "Bring sector experience into constructive public and industry dialogue."
-                                }
-              },
-    "Chairman":  {
-                     "metaTitle":  "Chairman\u0027s Message | WTIA",
-                     "metaDescription":  "A message from the WTIA chairman.",
-                     "eyebrow":  "Leadership",
-                     "title":  "Chairman\u0027s message",
-                     "summary":  "Working together to keep Hong Kong connected to emerging technology opportunities.",
-                     "messageTitle":  "A shared commitment",
-                     "message":  "Our association is strongest when members contribute experience, curiosity and a willingness to collaborate. WTIA will continue creating practical bridges between innovation and opportunity.",
-                     "signature":  "Chairman, WTIA"
-                 },
-    "Committees":  {
-                       "metaTitle":  "Committees | WTIA",
-                       "metaDescription":  "How WTIA committees support governance, programmes and members.",
-                       "eyebrow":  "Governance",
-                       "title":  "Committees that turn participation into action.",
-                       "summary":  "Member-led committees provide oversight and focused expertise across WTIA priorities.",
-                       "structureTitle":  "Committee structure",
-                       "executive":  {
-                                         "title":  "Executive Committee",
-                                         "description":  "Guides strategy, governance and association priorities."
-                                     },
-                       "innovation":  {
-                                          "title":  "Innovation Committee",
-                                          "description":  "Shapes programmes around technology adoption and industry development."
-                                      },
-                       "membership":  {
-                                          "title":  "Membership Committee",
-                                          "description":  "Strengthens member value, participation and community connections."
-                                      }
-                   },
-    "Membership":  {
-                       "metaTitle":  "Membership | WTIA",
-                       "metaDescription":  "Compare WTIA membership tiers and benefits.",
-                       "eyebrow":  "Membership",
-                       "title":  "Find your place in Hong Kong\u0027s technology community.",
-                       "summary":  "Choose the membership tier that fits how you participate, grow and contribute.",
-                       "tiersTitle":  "Membership tiers",
-                       "tiersIntro":  "Annual membership is shown first. Monthly options are available only for Individual and Startup.",
-                       "comingSoon":  "Self-service joining arrives in M1. Contact WTIA for current applications.",
-                       "joinAction":  "Choose this plan",
-                       "benefits":  {
-                                        "network":  "Community and networking access",
-                                        "programs":  "Programme participation",
-                                        "visibility":  "WTIA visibility opportunities"
-                                    },
-                       "tiers":  {
-                                     "community":  {
-                                                       "name":  "Community",
-                                                       "price":  "Free",
-                                                       "cadence":  "No annual fee",
-                                                       "description":  "Stay connected to public WTIA news and opportunities."
-                                                   },
-                                     "individual":  {
-                                                        "name":  "Individual",
-                                                        "price":  "HKD 500",
-                                                        "cadence":  "per year · HKD 50 monthly available",
-                                                        "description":  "For professionals building their technology network."
-                                                    },
-                                     "startup":  {
-                                                     "name":  "Startup",
-                                                     "price":  "HKD 1,200",
-                                                     "cadence":  "per year · HKD 120 monthly available",
-                                                     "description":  "For early-stage technology companies and teams."
-                                                 },
-                                     "corporate":  {
-                                                       "name":  "Corporate",
-                                                       "price":  "HKD 1,800",
-                                                       "cadence":  "per year",
-                                                       "description":  "For established organisations engaging the ecosystem."
-                                                   },
-                                     "platinum":  {
-                                                      "name":  "Platinum",
-                                                      "price":  "HKD 4,800",
-                                                      "cadence":  "per year",
-                                                      "description":  "For organisations seeking deeper industry participation."
-                                                  },
-                                     "patron":  {
-                                                    "name":  "Patron",
-                                                    "price":  "Contact us",
-                                                    "cadence":  "Reviewed individually",
-                                                    "description":  "For strategic supporters of WTIA\u0027s mission."
-                                                }
-                                 },
-                       "faqTitle":  "Membership FAQ",
-                       "faq":  {
-                                   "0":  {
-                                             "question":  "When will online joining be available?",
-                                             "answer":  "Self-service sign-up and payment are planned for M1. WTIA can assist with applications in the meantime."
-                                         },
-                                   "1":  {
-                                             "question":  "Which tiers offer monthly payment?",
-                                             "answer":  "Monthly presentation is available only for Individual and Startup tiers."
-                                         },
-                                   "2":  {
-                                             "question":  "How is Patron membership arranged?",
-                                             "answer":  "Patron membership begins with a contact request and is reviewed manually by WTIA staff."
-                                         }
-                               }
-                   },
-    "Join":  {
-                 "backToMembership":  "Back to membership",
-                 "title":  "Join WTIA",
-                 "authDescription":  "Enter your email and we will send a secure sign-in link that returns you to this application.",
-                 "magicLinkSent":  "Check your inbox for your secure sign-in link. It will return you to this application.",
-                 "sendMagicLink":  "Send secure sign-in link",
-                 "sending":  "Sending...",
-                 "saving":  "Saving...",
-                 "continue":  "Continue",
-                 "submitApplication":  "Submit application",
-                 "invalidPlanTitle":  "Choose a membership plan",
-                 "invalidPlanDescription":  "This membership plan is unavailable. Return to the membership page to choose one of the current plans.",
-                 "profileTitle":  "Tell us about yourself",
-                 "profileDescription":  "Your profile helps WTIA support your membership and keep your application moving.",
-                 "companyTitle":  "Confirm your company",
-                 "companyDescription":  "Tell us about your company. We will create its WTIA profile and make you the initial owner.",
-                 "steps":  {
-                               "plan":  "Choose plan",
-                               "auth":  "Sign in",
-                               "profile":  "Your profile",
-                               "company":  "Company details"
-                           },
-                 "plans":  {
-                               "community":  "Community",
-                               "startup":  "Startup",
-                               "corporate":  "Corporate",
-                               "patron":  "Patron"
-                           },
-                 "fields":  {
-                                "email":  "Email address",
-                                "displayName":  "Display name",
-                                "phone":  "Phone (optional)",
-                                "jobTitle":  "Job title (optional)",
-                                "companyId":  "WTIA company ID",
-                                "legalName":  "Legal company name",
-                                "companyDisplayName":  "Public company name",
-                                "website":  "Website (optional)",
-                                "industry":  "Industry (optional)",
-                                "sizeBand":  "Company size (optional)",
-                                "description":  "Company description (optional)"
-                            },
-                 "errors":  {
-                                "required":  "Complete this required field.",
-                                "email":  "Enter a valid email address.",
-                                "auth":  "We could not send the sign-in link. Please try again.",
-                                "save":  "We could not save your application. Please try again.",
-                                "company":  "Use a company that you are allowed to manage.",
-                                "profile":  "Complete your profile before submitting company details.",
-                                "companyNotAllowed":  "This plan does not accept company details."
-                            },
-                 "status":  {
-                                "complete":  {
-                                                 "title":  "Welcome to WTIA",
-                                                 "description":  "Your Community membership is active. Your member portal will be available in the next step of M1."
-                                             },
-                                "checkout":  {
-                                                 "title":  "Application saved",
-                                                 "description":  "Your paid membership is ready for secure checkout. Payment setup arrives in the next M1 task."
-                                             },
-                                "review":  {
-                                               "title":  "Application under review",
-                                               "description":  "WTIA will review your Patron application. No payment has been requested."
-                                           }
-                            }
-             },
-    "programs":  {
-                     "cpai":  {
-                                  "title":  "CPAI",
-                                  "description":  "A focused WTIA programme supporting applied innovation.",
-                                  "status":  "Programme details are being prepared for a later milestone."
-                              },
-                     "hkict":  {
-                                   "title":  "HKICT Awards",
-                                   "description":  "Recognising excellence across Hong Kong\u0027s technology sector.",
-                                   "status":  "Programme details are being prepared for a later milestone."
-                               },
-                     "tct":  {
-                                 "title":  "TCT",
-                                 "description":  "Connecting technology, capability and talent.",
-                                 "status":  "Programme details are being prepared for a later milestone."
-                             },
-                     "asa":  {
-                                 "title":  "Asia Smart App Awards",
-                                 "description":  "Celebrating outstanding smart applications across Asia.",
-                                 "status":  "Programme details are being prepared for a later milestone."
-                             }
-                 },
-    "LaunchPad":  {
-                      "metaTitle":  "Launch Pad | WTIA",
-                      "metaDescription":  "A preview of WTIA\u0027s future go-global cohort model.",
-                      "eyebrow":  "Launch Pad",
-                      "title":  "Go-global cohorts for technology teams.",
-                      "description":  "Launch Pad will bring selected technology teams together in focused cohorts with practical market access and peer learning.",
-                      "cohort":  "The cohort model is planned for a later milestone; no live applications or funding matching are available in M0.",
-                      "milestone":  "Applications and funding matching will be introduced in a later milestone."
-                  },
-    "Showcase":  {
-                     "metaTitle":  "Showcase | WTIA",
-                     "metaDescription":  "A preview of WTIA\u0027s member showcase experience.",
-                     "eyebrow":  "Member showcase",
-                     "title":  "Member showcase",
-                     "description":  "Member directory and showcase features are planned for M5.",
-                     "milestone":  "M5 — live member data will be added after the directory is ready."
-                 },
-    "AiOps":  {
-                  "metaTitle":  "AI-Ops | WTIA",
-                  "metaDescription":  "A preview of WTIA\u0027s planned AI operations dashboard.",
-                  "eyebrow":  "AI-Ops",
-                  "title":  "AI operations preview",
-                  "description":  "The AI operations dashboard will launch in M4 after validated agent telemetry is available.",
-                  "milestone":  "M4 — no operational metrics are published in M0."
-              }  ,"Events": {
+    "statsTitle": "A platform for the whole ecosystem",
+    "stats": {
+      "0": {
+        "value": "4",
+        "label": "Flagship programmes"
+      },
+      "1": {
+        "value": "2",
+        "label": "Working languages"
+      },
+      "2": {
+        "value": "1",
+        "label": "Connected technology community"
+      }
+    },
+    "programsTitle": "Programmes and awards",
+    "programsIntro": "Explore WTIA initiatives supporting talent, innovation and industry recognition.",
+    "programs": {
+      "cpai": {
+        "title": "CPAI",
+        "description": "A focused programme supporting applied innovation."
+      },
+      "hkict": {
+        "title": "HKICT Awards",
+        "description": "Recognising excellence across Hong Kong's technology sector."
+      },
+      "tct": {
+        "title": "TCT",
+        "description": "Connecting technology, capability and talent."
+      },
+      "asa": {
+        "title": "Asia Smart App Awards",
+        "description": "Celebrating outstanding smart applications across Asia."
+      }
+    },
+    "viewProgram": "View programme"
+  },
+  "About": {
+    "metaTitle": "About WTIA",
+    "metaDescription": "Learn about WTIA's role in Hong Kong's wireless technology community.",
+    "eyebrow": "About WTIA",
+    "title": "A connected voice for wireless technology.",
+    "summary": "WTIA convenes members, partners and public stakeholders to advance Hong Kong's technology ecosystem.",
+    "imageAlt": "Hong Kong technology community",
+    "historyTitle": "Our role",
+    "historyIntro": "We connect the industry with opportunities that strengthen innovation, talent and regional reach.",
+    "connect": {
+      "title": "Connect the ecosystem",
+      "description": "Create practical links among members, partners, investors and markets."
+    },
+    "advance": {
+      "title": "Advance innovation",
+      "description": "Support programmes that help technology teams learn, demonstrate and grow."
+    },
+    "represent": {
+      "title": "Represent the industry",
+      "description": "Bring sector experience into constructive public and industry dialogue."
+    }
+  },
+  "Chairman": {
+    "metaTitle": "Chairman's Message | WTIA",
+    "metaDescription": "A message from the WTIA chairman.",
+    "eyebrow": "Leadership",
+    "title": "Chairman's message",
+    "summary": "Working together to keep Hong Kong connected to emerging technology opportunities.",
+    "messageTitle": "A shared commitment",
+    "message": "Our association is strongest when members contribute experience, curiosity and a willingness to collaborate. WTIA will continue creating practical bridges between innovation and opportunity.",
+    "signature": "Chairman, WTIA"
+  },
+  "Committees": {
+    "metaTitle": "Committees | WTIA",
+    "metaDescription": "How WTIA committees support governance, programmes and members.",
+    "eyebrow": "Governance",
+    "title": "Committees that turn participation into action.",
+    "summary": "Member-led committees provide oversight and focused expertise across WTIA priorities.",
+    "structureTitle": "Committee structure",
+    "executive": {
+      "title": "Executive Committee",
+      "description": "Guides strategy, governance and association priorities."
+    },
+    "innovation": {
+      "title": "Innovation Committee",
+      "description": "Shapes programmes around technology adoption and industry development."
+    },
+    "membership": {
+      "title": "Membership Committee",
+      "description": "Strengthens member value, participation and community connections."
+    }
+  },
+  "Membership": {
+    "metaTitle": "Membership | WTIA",
+    "metaDescription": "Compare WTIA membership tiers and benefits.",
+    "eyebrow": "Membership",
+    "title": "Find your place in Hong Kong's technology community.",
+    "summary": "Choose the membership tier that fits how you participate, grow and contribute.",
+    "tiersTitle": "Membership tiers",
+    "tiersIntro": "Annual membership is shown first. Monthly options are available only for Individual and Startup.",
+    "comingSoon": "Self-service joining arrives in M1. Contact WTIA for current applications.",
+    "joinAction": "Choose this plan",
+    "benefits": {
+      "network": "Community and networking access",
+      "programs": "Programme participation",
+      "visibility": "WTIA visibility opportunities"
+    },
+    "tiers": {
+      "community": {
+        "name": "Community",
+        "price": "Free",
+        "cadence": "No annual fee",
+        "description": "Stay connected to public WTIA news and opportunities."
+      },
+      "individual": {
+        "name": "Individual",
+        "price": "HKD 500",
+        "cadence": "per year · HKD 50 monthly available",
+        "description": "For professionals building their technology network."
+      },
+      "startup": {
+        "name": "Startup",
+        "price": "HKD 1,200",
+        "cadence": "per year · HKD 120 monthly available",
+        "description": "For early-stage technology companies and teams."
+      },
+      "corporate": {
+        "name": "Corporate",
+        "price": "HKD 1,800",
+        "cadence": "per year",
+        "description": "For established organisations engaging the ecosystem."
+      },
+      "platinum": {
+        "name": "Platinum",
+        "price": "HKD 4,800",
+        "cadence": "per year",
+        "description": "For organisations seeking deeper industry participation."
+      },
+      "patron": {
+        "name": "Patron",
+        "price": "Contact us",
+        "cadence": "Reviewed individually",
+        "description": "For strategic supporters of WTIA's mission."
+      }
+    },
+    "faqTitle": "Membership FAQ",
+    "faq": {
+      "0": {
+        "question": "When will online joining be available?",
+        "answer": "Self-service sign-up and payment are planned for M1. WTIA can assist with applications in the meantime."
+      },
+      "1": {
+        "question": "Which tiers offer monthly payment?",
+        "answer": "Monthly presentation is available only for Individual and Startup tiers."
+      },
+      "2": {
+        "question": "How is Patron membership arranged?",
+        "answer": "Patron membership begins with a contact request and is reviewed manually by WTIA staff."
+      }
+    }
+  },
+  "Join": {
+    "backToMembership": "Back to membership",
+    "title": "Join WTIA",
+    "authDescription": "Enter your email and we will send a secure sign-in link that returns you to this application.",
+    "magicLinkSent": "Check your inbox for your secure sign-in link. It will return you to this application.",
+    "sendMagicLink": "Send secure sign-in link",
+    "sending": "Sending...",
+    "saving": "Saving...",
+    "continue": "Continue",
+    "submitApplication": "Submit application",
+    "invalidPlanTitle": "Choose a membership plan",
+    "invalidPlanDescription": "This membership plan is unavailable. Return to the membership page to choose one of the current plans.",
+    "profileTitle": "Tell us about yourself",
+    "profileDescription": "Your profile helps WTIA support your membership and keep your application moving.",
+    "companyTitle": "Confirm your company",
+    "companyDescription": "Tell us about your company. We will create its WTIA profile and make you the initial owner.",
+    "steps": {
+      "plan": "Choose plan",
+      "auth": "Sign in",
+      "profile": "Your profile",
+      "company": "Company details"
+    },
+    "plans": {
+      "community": "Community",
+      "startup": "Startup",
+      "corporate": "Corporate",
+      "patron": "Patron"
+    },
+    "fields": {
+      "email": "Email address",
+      "displayName": "Display name",
+      "phone": "Phone (optional)",
+      "jobTitle": "Job title (optional)",
+      "companyId": "WTIA company ID",
+      "legalName": "Legal company name",
+      "companyDisplayName": "Public company name",
+      "website": "Website (optional)",
+      "industry": "Industry (optional)",
+      "sizeBand": "Company size (optional)",
+      "description": "Company description (optional)"
+    },
+    "errors": {
+      "required": "Complete this required field.",
+      "email": "Enter a valid email address.",
+      "auth": "We could not send the sign-in link. Please try again.",
+      "save": "We could not save your application. Please try again.",
+      "company": "Use a company that you are allowed to manage.",
+      "profile": "Complete your profile before submitting company details.",
+      "companyNotAllowed": "This plan does not accept company details."
+    },
+    "status": {
+      "complete": {
+        "title": "Welcome to WTIA",
+        "description": "Your Community membership is active. Your member portal will be available in the next step of M1."
+      },
+      "checkout": {
+        "title": "Application saved",
+        "description": "Your paid membership is ready for secure checkout. Payment setup arrives in the next M1 task."
+      },
+      "review": {
+        "title": "Application under review",
+        "description": "WTIA will review your Patron application. No payment has been requested."
+      }
+    }
+  },
+  "programs": {
+    "cpai": {
+      "title": "CPAI",
+      "description": "A focused WTIA programme supporting applied innovation.",
+      "status": "Programme details are being prepared for a later milestone."
+    },
+    "hkict": {
+      "title": "HKICT Awards",
+      "description": "Recognising excellence across Hong Kong's technology sector.",
+      "status": "Programme details are being prepared for a later milestone."
+    },
+    "tct": {
+      "title": "TCT",
+      "description": "Connecting technology, capability and talent.",
+      "status": "Programme details are being prepared for a later milestone."
+    },
+    "asa": {
+      "title": "Asia Smart App Awards",
+      "description": "Celebrating outstanding smart applications across Asia.",
+      "status": "Programme details are being prepared for a later milestone."
+    }
+  },
+  "LaunchPad": {
+    "metaTitle": "Launch Pad | WTIA",
+    "metaDescription": "A preview of WTIA's future go-global cohort model.",
+    "eyebrow": "Launch Pad",
+    "title": "Go-global cohorts for technology teams.",
+    "description": "Launch Pad will bring selected technology teams together in focused cohorts with practical market access and peer learning.",
+    "cohort": "The cohort model is planned for a later milestone; no live applications or funding matching are available in M0.",
+    "milestone": "Applications and funding matching will be introduced in a later milestone."
+  },
+  "Showcase": {
+    "metaTitle": "Showcase | WTIA",
+    "metaDescription": "A preview of WTIA's member showcase experience.",
+    "eyebrow": "Member showcase",
+    "title": "Member showcase",
+    "description": "Member directory and showcase features are planned for M5.",
+    "milestone": "M5 — live member data will be added after the directory is ready."
+  },
+  "AiOps": {
+    "metaTitle": "AI-Ops in public | WTIA",
+    "metaDescription": "Live, privacy-safe metrics showing how WTIA's AI agents perform, escalate and cost.",
+    "eyebrow": "AI-Ops in public",
+    "title": "Operational AI, measured in public",
+    "description": "Hourly, privacy-safe evidence from WTIA's Concierge and scheduled agents.",
+    "currentMonth": "Current Hong Kong month",
+    "partialMonth": "Month to date",
+    "lastUpdated": "Last updated",
+    "fresh": "Metrics refreshed on schedule",
+    "stale": "Metrics may be delayed",
+    "empty": "No metrics are available for this month yet",
+    "unavailable": "Metrics are temporarily unavailable",
+    "notEnoughData": "Not enough data",
+    "conversations": "Conversations",
+    "resolved": "Agent resolved",
+    "firstResponse": "Median first response",
+    "csat": "CSAT",
+    "escalation": "Escalation rate",
+    "failure": "Failure rate",
+    "hoursSaved": "Estimated staff hours saved",
+    "llmCost": "Monthly LLM cost",
+    "responses": "responses",
+    "samples": "samples",
+    "hours": "hours",
+    "resolutionTarget": "Target: 70% or higher",
+    "csatTarget": "Target: 4.5 / 5 or higher",
+    "renewalHeading": "Twelve-month renewal trend",
+    "overallRenewal": "Overall renewal",
+    "firstYearRenewal": "First-year renewal",
+    "overallTarget": "Overall target: 88%",
+    "firstYearTarget": "First-year target: 82%",
+    "renewalChartTitle": "Monthly renewal rates",
+    "renewalChartDescription": "Overall and first-year renewal rates for the latest twelve Hong Kong months.",
+    "month": "Month",
+    "paid": "Paid",
+    "due": "Due",
+    "rate": "Rate",
+    "methodologyHeading": "How these metrics are calculated",
+    "methodologyDescription": "Aggregates refresh hourly. Estimated time saved equals agent-resolved conversations multiplied by six minutes. No member-level data is published.",
+    "architectureHeading": "How WTIA AI-Ops works",
+    "architectureDescription": "Web and WhatsApp requests pass through the Concierge runtime and guarded tools. Scheduled jobs use authenticated routes. Generated actions remain behind approval or publication gates.",
+    "approvalGate": "Human approval gate",
+    "publicationGate": "Publication gate",
+    "evidenceHeading": "Build evidence",
+    "buildLogs": "Published build logs",
+    "source": "Source repository",
+    "commits": "Commit and build history",
+    "deployment": "Live deployment",
+    "acceptance": "M4 acceptance evidence",
+    "noBuildLogs": "No published build logs are available."
+  },
+  "Events": {
     "metaTitle": "Events | WTIA",
     "metaDescription": "Discover WTIA events and community gatherings.",
     "eyebrow": "Events",
@@ -419,104 +613,505 @@
     "retry": "Try again"
   },
   "Portal": {
-    "navigation": "Member portal navigation", "dashboard": "Dashboard", "profile": "My profile", "company": "Company", "signOut": "Sign out",
-    "dashboardTitle": "Your WTIA dashboard", "welcome": "Welcome back, {name}.", "membershipStatus": "Membership status", "membershipPlan": "{plan} membership", "plans": {"community": "Community", "startup": "Startup", "corporate": "Corporate", "patron": "Patron"},
-    "onboarding": "Onboarding progress", "onboardingProgress": "{completed} of {total} steps complete", "nextAction": "Next action",
-    "actions": {"complete-profile": "Complete your profile", "complete-company": "Complete company details", "none": "You are all set"},
-    "status": {
-      "active": {"label": "Active", "title": "Your membership is active", "description": "You have access to WTIA member benefits and services."},
-      "past_due": {"label": "Past due", "title": "Payment needs attention", "description": "Update your billing details to keep your membership active."},
-      "cancel_at_period_end": {"label": "Ending soon", "title": "Membership ending soon", "description": "Your membership remains available until the current period ends."},
-      "pending_payment": {"label": "Payment pending", "title": "Payment is pending", "description": "Complete payment to activate your WTIA membership."},
-      "pending_review": {"label": "Under review", "title": "Application under review", "description": "WTIA will contact you when your application has been reviewed."}
+    "navigation": "Member portal navigation",
+    "dashboard": "Dashboard",
+    "profile": "My profile",
+    "company": "Company",
+    "signOut": "Sign out",
+    "dashboardTitle": "Your WTIA dashboard",
+    "welcome": "Welcome back, {name}.",
+    "membershipStatus": "Membership status",
+    "membershipPlan": "{plan} membership",
+    "plans": {
+      "community": "Community",
+      "startup": "Startup",
+      "corporate": "Corporate",
+      "patron": "Patron"
     },
-    "profileTitle": "My profile", "profileDescription": "Keep your personal details and directory preference up to date.",
-    "companyTitle": "Company details", "companyDescription": "Owners and admins can update details for their company.", "companyEmpty": "Your current membership does not include a company profile.",
-    "save": "Save changes", "fields": {"displayName": "Display name", "phone": "Phone", "jobTitle": "Job title", "website": "Website", "legalName": "Legal name", "industry": "Industry", "sizeBand": "Company size", "description": "Description", "directoryVisible": "Show this profile in the WTIA directory"},
+    "onboarding": "Onboarding progress",
+    "onboardingProgress": "{completed} of {total} steps complete",
+    "nextAction": "Next action",
+    "actions": {
+      "complete-profile": "Complete your profile",
+      "complete-company": "Complete company details",
+      "none": "You are all set"
+    },
+    "status": {
+      "active": {
+        "label": "Active",
+        "title": "Your membership is active",
+        "description": "You have access to WTIA member benefits and services."
+      },
+      "past_due": {
+        "label": "Past due",
+        "title": "Payment needs attention",
+        "description": "Update your billing details to keep your membership active."
+      },
+      "cancel_at_period_end": {
+        "label": "Ending soon",
+        "title": "Membership ending soon",
+        "description": "Your membership remains available until the current period ends."
+      },
+      "pending_payment": {
+        "label": "Payment pending",
+        "title": "Payment is pending",
+        "description": "Complete payment to activate your WTIA membership."
+      },
+      "pending_review": {
+        "label": "Under review",
+        "title": "Application under review",
+        "description": "WTIA will contact you when your application has been reviewed."
+      }
+    },
+    "profileTitle": "My profile",
+    "profileDescription": "Keep your personal details and directory preference up to date.",
+    "companyTitle": "Company details",
+    "companyDescription": "Owners and admins can update details for their company.",
+    "companyEmpty": "Your current membership does not include a company profile.",
+    "save": "Save changes",
+    "fields": {
+      "displayName": "Display name",
+      "phone": "Phone",
+      "jobTitle": "Job title",
+      "website": "Website",
+      "legalName": "Legal name",
+      "industry": "Industry",
+      "sizeBand": "Company size",
+      "description": "Description",
+      "directoryVisible": "Show this profile in the WTIA directory"
+    },
     "readOnly": "Only company owners and admins can edit these details.",
-    "directory": {"title":"Member directory","description":"Find WTIA members who opted into the directory.","search":"Search members","empty":"No opted-in members found.","next":"Next page","previous":"Previous page","company":"Company","industry":"Industry","sizeBand":"Company size","markets":"Markets"},
-    "events": {"title":"Member events","description":"Upcoming WTIA events for members.","empty":"No upcoming events are available.","date":"Date","venue":"Venue","register":"Register","registering":"Registering...","registerSuccess":"Registration confirmed.","registerError":"We could not register you for this event. Please try again."},
-    "documents": {"title":"Documents and receipts","description":"Access approved WTIA resources and your billing receipts.","empty":"No documents are available yet.","receipt":"Receipt","open":"Open receipt","resource":"Resource"},
-    "billing": {"title":"Billing","description":"Manage your membership billing and payment recovery.","manage":"Manage billing","recover":"Continue payment","empty":"No billing actions are available.","error":"We could not open billing right now."},
-    "seats": {"title": "Company seats", "description": "Invite and manage the people who represent your company at WTIA.", "empty": "No company seats are available yet.", "members": "Members", "pending": "Pending invitations", "capacity": "{used} of {limit} seats reserved", "email": "Email address", "role": "Role", "invite": "Invite member", "inviting": "Sending invitation...", "revoke": "Revoke access", "inviteRevoke": "Cancel invitation", "changeRole": "Change role", "owner": "Owner", "admin": "Admin", "member": "Member", "noPending": "No pending invitations.", "errors": {"generic": "We could not update company seats. Please try again."}}
+    "directory": {
+      "title": "Member directory",
+      "description": "Find WTIA members who opted into the directory.",
+      "search": "Search members",
+      "empty": "No opted-in members found.",
+      "next": "Next page",
+      "previous": "Previous page",
+      "company": "Company",
+      "industry": "Industry",
+      "sizeBand": "Company size",
+      "markets": "Markets"
+    },
+    "events": {
+      "title": "Member events",
+      "description": "Upcoming WTIA events for members.",
+      "empty": "No upcoming events are available.",
+      "date": "Date",
+      "venue": "Venue",
+      "register": "Register",
+      "registering": "Registering...",
+      "registerSuccess": "Registration confirmed.",
+      "registerError": "We could not register you for this event. Please try again."
+    },
+    "documents": {
+      "title": "Documents and receipts",
+      "description": "Access approved WTIA resources and your billing receipts.",
+      "empty": "No documents are available yet.",
+      "receipt": "Receipt",
+      "open": "Open receipt",
+      "resource": "Resource"
+    },
+    "billing": {
+      "title": "Billing",
+      "description": "Manage your membership billing and payment recovery.",
+      "manage": "Manage billing",
+      "recover": "Continue payment",
+      "empty": "No billing actions are available.",
+      "error": "We could not open billing right now."
+    },
+    "seats": {
+      "title": "Company seats",
+      "description": "Invite and manage the people who represent your company at WTIA.",
+      "empty": "No company seats are available yet.",
+      "members": "Members",
+      "pending": "Pending invitations",
+      "capacity": "{used} of {limit} seats reserved",
+      "email": "Email address",
+      "role": "Role",
+      "invite": "Invite member",
+      "inviting": "Sending invitation...",
+      "revoke": "Revoke access",
+      "inviteRevoke": "Cancel invitation",
+      "changeRole": "Change role",
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member",
+      "noPending": "No pending invitations.",
+      "errors": {
+        "generic": "We could not update company seats. Please try again."
+      }
+    }
   },
-  "Admin": {"brand": "WTIA", "title": "Staff workspace", "description": "Manage WTIA member operations from a protected staff-only workspace.", "navigation": {"label": "Staff administration navigation", "segments": {
-    "eyebrow": "Member segments",
-    "title": "Member segments",
-    "description": "Preview a precise member audience, save it for later, and export the exact same result.",
-    "filters": "Filters",
-    "preview": "Preview",
-    "tier": "Membership tier",
-    "status": "Membership status",
-    "scoreMin": "Minimum score",
-    "scoreMax": "Maximum score",
-    "renewalWithinDays": "Renewal within days",
-    "sector": "Sector",
-    "lastLoginBeforeDays": "Last login before days",
-    "save": "Save segment",
-    "saving": "Saving...",
-    "saveSuccess": "Segment saved.",
-    "saveValidation": "Check the highlighted segment fields.",
-    "saveError": "We could not save this segment. Please try again.",
-    "nameEn": "Name (English)",
-    "nameZh": "Name (Traditional Chinese)",
-    "corporate": "Corporate",
-    "startup": "Startup",
-    "community": "Community",
-    "patron": "Patron",
-    "active": "Active",
-    "pastDue": "Past due",
-    "pendingReview": "Pending review",
-    "caption": "Matching members",
-    "total": "Members",
-    "empty": "No matching members.",
-    "name": "Name",
-    "email": "Email",
-    "company": "Company",
-    "plan": "Plan",
-    "renewal": "Renewal",
-    "score": "Score",
-    "unavailable": "Not available",
-    "saved": "Saved segments",
-    "export": "Export CSV"
+  "Concierge": {
+    "launcher": "Ask WTIA",
+    "title": "WTIA Concierge",
+    "description": "Ask about WTIA membership, events, programmes and support.",
+    "close": "Close Concierge",
+    "messageLabel": "Your message",
+    "contactEmailLabel": "Contact email (optional)",
+    "contactEmailHelper": "Used only if WTIA Concierge is unavailable so our team can follow up.",
+    "contactEmailError": "Enter a valid email address.",
+    "placeholder": "e.g. How do I join WTIA?…",
+    "send": "Send",
+    "sending": "Sending…",
+    "cancel": "Cancel response",
+    "empty": "Start a conversation with WTIA.",
+    "you": "You",
+    "assistant": "WTIA Concierge",
+    "sources": "Sources",
+    "retry": "Try again",
+    "error": "We couldn’t reach WTIA Concierge. Check your connection and try again.",
+    "offline": "You’re offline. Reconnect to send a message.",
+    "disabled": "AI support is currently paused.",
+    "leaveMessage": "Your message has been passed to the WTIA team.",
+    "escalated": "A WTIA team member will follow up.",
+    "reference": "Reference: {id}",
+    "feedbackPrompt": "How helpful was this answer?",
+    "feedbackLabel": "{score} out of 5",
+    "feedbackThanks": "Thank you for your feedback.",
+    "feedbackError": "We couldn’t save your feedback. Please try again.",
+    "characterCount": "{count} / 2000"
   },
-  "members": "Members", "segments": "Segments", "atRisk": "At risk", "events": "Events", "approvals": "Approvals", "reports": "Reports", "automations": "Automations"}, "members": {"title": "Members", "description": "Search member profiles, companies, memberships, and engagement scores.", "search": "Search members", "caption": "WTIA member list", "empty": "No members match this search.", "name": "Name", "email": "Email", "company": "Company", "plan": "Plan", "status": "Status", "renewal": "Renewal", "score": "Score", "next": "Next page", "previous": "Previous page", "unavailable": "Not available"}, "segments": {
-    "eyebrow": "Member segments",
-    "title": "Member segments",
-    "description": "Preview a precise member audience, save it for later, and export the exact same result.",
-    "filters": "Filters",
-    "preview": "Preview",
-    "tier": "Membership tier",
-    "status": "Membership status",
-    "scoreMin": "Minimum score",
-    "scoreMax": "Maximum score",
-    "renewalWithinDays": "Renewal within days",
-    "sector": "Sector",
-    "lastLoginBeforeDays": "Last login before days",
-    "save": "Save segment",
-    "saving": "Saving...",
-    "saveSuccess": "Segment saved.",
-    "saveValidation": "Check the highlighted segment fields.",
-    "saveError": "We could not save this segment. Please try again.",
-    "nameEn": "Name (English)",
-    "nameZh": "Name (Traditional Chinese)",
-    "corporate": "Corporate",
-    "startup": "Startup",
-    "community": "Community",
-    "patron": "Patron",
-    "active": "Active",
-    "pastDue": "Past due",
-    "pendingReview": "Pending review",
-    "caption": "Matching members",
-    "total": "Members",
-    "empty": "No matching members.",
-    "name": "Name",
-    "email": "Email",
-    "company": "Company",
-    "plan": "Plan",
-    "renewal": "Renewal",
-    "score": "Score",
-    "unavailable": "Not available",
-    "saved": "Saved segments",
-    "export": "Export CSV", "queue": "Queue campaign", "template": "Template", "templateRenewal": "Renewal reminder", "templateUpdate": "Member update", "queued": "Campaign queued", "existing": "Existing campaign", "recipients": "recipients", "newDraft": "Start new campaign", "error": "We could not queue this campaign. Please try again."
-  }, "atRisk": {"eyebrow": "At-risk operations", "title": "At-risk renewal queue", "description": "Prioritize members with a score below 20 and declining trend, or no login for 90 days with renewal within 120 days.", "caption": "At-risk members", "empty": "No members currently meet the at-risk rule.", "error": "We could not load the at-risk queue. Please try again.", "name": "Name", "company": "Company", "tier": "Tier", "status": "Status", "score": "Score", "trend": "Trend", "renewal": "Renewal", "evidence": "Evidence", "actions": "Actions", "unavailable": "Not available", "scoreEvidence": "Score below {score}", "renewalEvidence": "Renewal within {days} days", "branchAEvidence": "Score below 20 and trend below 0", "branchBEvidence": "No login for 90 days and renewal within 120 days", "member360": "Member 360", "addNote": "Add note", "campaign": "Queue campaign", "plans": {"community": "Community", "startup": "Startup", "corporate": "Corporate", "patron": "Patron"}, "statuses": {"active": "Active", "pastDue": "Past due"}}, "eventsMgmt": {"eyebrow":"Event operations","title":"Event management","description":"Create, publish, and manage event attendance.","existing":"Events","empty":"No events are available.","slug":"Slug","titleEn":"English title","titleZh":"Chinese title","descriptionEn":"English description","descriptionZh":"Chinese description","startsAt":"Starts at","endsAt":"Ends at","venue":"Venue","capacity":"Capacity","memberOnly":"Members only","published":"Published","create":"Create event","save":"Save event","attendees":"Event attendees","name":"Name","email":"Email","status":"Status","checkedIn":"Checked in","checkIn":"Check in","unavailable":"Not available","saving":"Saving...","createSuccess":"Event created.","updateSuccess":"Event saved.","validation":"Check the highlighted event fields.","error":"We could not save this event. Please try again.","checkingIn":"Checking in...","checkInSuccess":"Attendee checked in.","checkInError":"We could not check in this attendee. Please try again.","statuses":{"registered":"Registered","waitlist":"Waitlisted","cancelled":"Cancelled","attended":"Attended","noShow":"No show"}}, "approvals": {"eyebrow":"Approval queue","title":"Pending approvals","description":"Review trusted application requests and record one decision without executing the payload.","caption":"Pending approval requests","empty":"No approvals are waiting for a decision.","actionType":"Action type","requestedAt":"Requested","summary":"Safe summary","actions":"Decision","approve":"Approve","reject":"Reject","deciding":"Saving...","unavailable":"Not available","success":"Decision saved.","validation":"This approval decision is invalid.","alreadyDecided":"This request has already been decided.","notFound":"This approval is no longer available.","error":"We could not save this decision. Please try again.","actionTypes":{"campaignSend":"Campaign delivery","eventPublish":"Event publication","membershipUpdate":"Membership update"},"summaryFields":{"campaignId":"Campaign","template":"Template","eventId":"Event","slug":"Slug","membershipId":"Membership","field":"Field"}}, "reports": {"eyebrow":"Management reporting","title":"Membership operations report","description":"Review reconciled membership, revenue, funnel, attendance, and at-risk facts for a Hong Kong reporting period.","formLabel":"Report period","from":"From","to":"To","apply":"Apply","validation":"Choose a valid reporting period with the end date on or after the start date.","cardsLabel":"Reconciled membership metrics","period":"{from} – {to} ({timezone})","arr":"Annual recurring revenue","arrDescription":"Annualized value of active recurring memberships.","mrr":"Monthly recurring revenue","mrrDescription":"Annual recurring revenue divided across twelve months.","renewal":"Renewal rate","renewalDescription":"Distinct memberships paid among memberships with a renewal outcome in the period.","firstYearRenewal":"First-year renewal","firstYearRenewalDescription":"Distinct first-renewal memberships paid among first-renewal outcomes in the period.","funnel":"Join funnel","funnelDescription":"Applications started in the period and their furthest completed milestones.","started":"Started","profileCompleted":"Profile completed","checkoutOrReview":"Checkout or review","activated":"Activated","attendance":"Attendance","attendanceDescription":"Attended registrations among non-cancelled registrations for events completed in the period.","atRisk":"At-risk members","atRiskDescription":"Members matching the operational low-engagement and renewal-window rule at period end.","numerator":"Numerator","denominator":"Denominator","unavailable":"Not available"}, "automations": {"eyebrow":"Automation operations","title":"Automation operations","description":"Monitor scheduled member journeys and job health, and retry eligible failures.","evaluatedAt":"Evaluated at","countsLabel":"Automation queue summary","due":"Due","upcoming":"Upcoming","failed":"Failed","processing":"Processing","jobsHeading":"Job health","jobsCaption":"Recent automation jobs","jobsEmpty":"No automation jobs are available.","queueHeading":"Journey queue","queueCaption":"Scheduled and completed journey steps","queueEmpty":"No journey steps are available.","kind":"Job","state":"State","updatedAt":"Updated","errorCode":"Error code","journey":"Journey","step":"Step","status":"Status","scheduledAt":"Scheduled","attemptCount":"Attempts","actions":"Actions","retry":"Retry","retrying":"Scheduling…","retryScheduled":"Retry scheduled.","retryValidation":"This retry request is invalid.","retryUnavailable":"This failure is no longer eligible for retry.","retryError":"We could not schedule this retry. Please try again.","notAvailable":"Not available","next":"Next page"}, "member360": {"description": "Review the complete member record and staff-only operational history.", "profile": "Profile", "companies": "Companies", "membership": "Membership", "engagement": "Engagement", "emails": "Email history", "events": "Event registrations", "notes": "Staff notes", "journeys": "Journey history", "whatsapp": "WhatsApp delivery history", "suppressions": "Active suppressions", "empty": "No records are available.", "name": "Name", "email": "Email", "phone": "Phone", "role": "Role", "plan": "Plan", "status": "Status", "renewal": "Renewal", "score": "Score", "trend": "Trend", "company": "Company", "companyRole": "Company role", "event": "Event", "occurredAt": "Occurred", "subject": "Subject", "emailStatus": "Email status", "template": "Template", "locale": "Locale", "channel": "Channel", "classification": "Classification", "attemptCount": "Attempts", "errorCode": "Error code", "scheduledAt": "Scheduled", "createdAt": "Created", "step": "Step", "reasonCode": "Reason code", "noteAuthor": "Author", "noteCreatedAt": "Created", "stripeCustomer": "Stripe customer", "stripeSubscription": "Stripe subscription", "addNote": "Add staff note", "noteBody": "Note", "saving": "Saving...", "noteSuccess": "Staff note saved.", "noteValidation": "Enter a note of up to 4,000 characters.", "noteError": "We could not save the staff note. Please try again."}}}
+  "Admin": {
+    "brand": "WTIA",
+    "title": "Staff workspace",
+    "description": "Manage WTIA member operations from a protected staff-only workspace.",
+    "navigation": {
+      "label": "Staff administration navigation",
+      "segments": "Segments",
+      "members": "Members",
+      "atRisk": "At risk",
+      "events": "Events",
+      "approvals": "Approvals",
+      "reports": "Reports",
+      "automations": "Automations"
+    },
+    "members": {
+      "title": "Members",
+      "description": "Search member profiles, companies, memberships, and engagement scores.",
+      "search": "Search members",
+      "caption": "WTIA member list",
+      "empty": "No members match this search.",
+      "name": "Name",
+      "email": "Email",
+      "company": "Company",
+      "plan": "Plan",
+      "status": "Status",
+      "renewal": "Renewal",
+      "score": "Score",
+      "next": "Next page",
+      "previous": "Previous page",
+      "unavailable": "Not available"
+    },
+    "segments": {
+      "eyebrow": "Member segments",
+      "title": "Member segments",
+      "description": "Preview a precise member audience, save it for later, and export the exact same result.",
+      "filters": "Filters",
+      "preview": "Preview",
+      "tier": "Membership tier",
+      "status": "Membership status",
+      "scoreMin": "Minimum score",
+      "scoreMax": "Maximum score",
+      "renewalWithinDays": "Renewal within days",
+      "sector": "Sector",
+      "lastLoginBeforeDays": "Last login before days",
+      "save": "Save segment",
+      "saving": "Saving...",
+      "saveSuccess": "Segment saved.",
+      "saveValidation": "Check the highlighted segment fields.",
+      "saveError": "We could not save this segment. Please try again.",
+      "nameEn": "Name (English)",
+      "nameZh": "Name (Traditional Chinese)",
+      "corporate": "Corporate",
+      "startup": "Startup",
+      "community": "Community",
+      "patron": "Patron",
+      "active": "Active",
+      "pastDue": "Past due",
+      "pendingReview": "Pending review",
+      "caption": "Matching members",
+      "total": "Members",
+      "empty": "No matching members.",
+      "name": "Name",
+      "email": "Email",
+      "company": "Company",
+      "plan": "Plan",
+      "renewal": "Renewal",
+      "score": "Score",
+      "unavailable": "Not available",
+      "saved": "Saved segments",
+      "export": "Export CSV",
+      "queue": "Queue campaign",
+      "template": "Template",
+      "templateRenewal": "Renewal reminder",
+      "templateUpdate": "Member update",
+      "queued": "Campaign queued",
+      "existing": "Existing campaign",
+      "recipients": "recipients",
+      "newDraft": "Start new campaign",
+      "error": "We could not queue this campaign. Please try again."
+    },
+    "atRisk": {
+      "eyebrow": "At-risk operations",
+      "title": "At-risk renewal queue",
+      "description": "Prioritize members with a score below 20 and declining trend, or no login for 90 days with renewal within 120 days.",
+      "caption": "At-risk members",
+      "empty": "No members currently meet the at-risk rule.",
+      "error": "We could not load the at-risk queue. Please try again.",
+      "name": "Name",
+      "company": "Company",
+      "tier": "Tier",
+      "status": "Status",
+      "score": "Score",
+      "trend": "Trend",
+      "renewal": "Renewal",
+      "evidence": "Evidence",
+      "actions": "Actions",
+      "unavailable": "Not available",
+      "scoreEvidence": "Score below {score}",
+      "renewalEvidence": "Renewal within {days} days",
+      "branchAEvidence": "Score below 20 and trend below 0",
+      "branchBEvidence": "No login for 90 days and renewal within 120 days",
+      "member360": "Member 360",
+      "addNote": "Add note",
+      "campaign": "Queue campaign",
+      "plans": {
+        "community": "Community",
+        "startup": "Startup",
+        "corporate": "Corporate",
+        "patron": "Patron"
+      },
+      "statuses": {
+        "active": "Active",
+        "pastDue": "Past due"
+      }
+    },
+    "eventsMgmt": {
+      "eyebrow": "Event operations",
+      "title": "Event management",
+      "description": "Create, publish, and manage event attendance.",
+      "existing": "Events",
+      "empty": "No events are available.",
+      "slug": "Slug",
+      "titleEn": "English title",
+      "titleZh": "Chinese title",
+      "descriptionEn": "English description",
+      "descriptionZh": "Chinese description",
+      "startsAt": "Starts at",
+      "endsAt": "Ends at",
+      "venue": "Venue",
+      "capacity": "Capacity",
+      "memberOnly": "Members only",
+      "published": "Published",
+      "create": "Create event",
+      "save": "Save event",
+      "attendees": "Event attendees",
+      "name": "Name",
+      "email": "Email",
+      "status": "Status",
+      "checkedIn": "Checked in",
+      "checkIn": "Check in",
+      "unavailable": "Not available",
+      "saving": "Saving...",
+      "createSuccess": "Event created.",
+      "updateSuccess": "Event saved.",
+      "validation": "Check the highlighted event fields.",
+      "error": "We could not save this event. Please try again.",
+      "checkingIn": "Checking in...",
+      "checkInSuccess": "Attendee checked in.",
+      "checkInError": "We could not check in this attendee. Please try again.",
+      "statuses": {
+        "registered": "Registered",
+        "waitlist": "Waitlisted",
+        "cancelled": "Cancelled",
+        "attended": "Attended",
+        "noShow": "No show"
+      }
+    },
+    "approvals": {
+      "eyebrow": "Approval queue",
+      "title": "Pending approvals",
+      "description": "Review trusted application requests and record one decision without executing the payload.",
+      "caption": "Pending approval requests",
+      "empty": "No approvals are waiting for a decision.",
+      "actionType": "Action type",
+      "requestedAt": "Requested",
+      "summary": "Safe summary",
+      "actions": "Decision",
+      "approve": "Approve",
+      "reject": "Reject",
+      "deciding": "Saving...",
+      "unavailable": "Not available",
+      "success": "Decision saved.",
+      "validation": "This approval decision is invalid.",
+      "alreadyDecided": "This request has already been decided.",
+      "notFound": "This approval is no longer available.",
+      "error": "We could not save this decision. Please try again.",
+      "actionTypes": {
+        "campaignSend": "Campaign delivery",
+        "eventPublish": "Event publication",
+        "membershipUpdate": "Membership update",
+        "retentionOutreach": "Retention outreach"
+      },
+      "summaryFields": {
+        "campaignId": "Campaign",
+        "template": "Template",
+        "eventId": "Event",
+        "slug": "Slug",
+        "membershipId": "Membership",
+        "field": "Field"
+      },
+      "subject": "Subject",
+      "body": "Message body",
+      "memberReference": "Member reference",
+      "locale": "Locale",
+      "agentRunReference": "Agent run",
+      "reasons": "Retention reasons",
+      "reasonCodes": {
+        "lowScoreDeclining": "Low and declining engagement score",
+        "inactiveBeforeRenewal": "Inactive before renewal"
+      }
+    },
+    "reports": {
+      "eyebrow": "Management reporting",
+      "title": "Membership operations report",
+      "description": "Review reconciled membership, revenue, funnel, attendance, and at-risk facts for a Hong Kong reporting period.",
+      "formLabel": "Report period",
+      "from": "From",
+      "to": "To",
+      "apply": "Apply",
+      "validation": "Choose a valid reporting period with the end date on or after the start date.",
+      "cardsLabel": "Reconciled membership metrics",
+      "period": "{from} – {to} ({timezone})",
+      "arr": "Annual recurring revenue",
+      "arrDescription": "Annualized value of active recurring memberships.",
+      "mrr": "Monthly recurring revenue",
+      "mrrDescription": "Annual recurring revenue divided across twelve months.",
+      "renewal": "Renewal rate",
+      "renewalDescription": "Distinct memberships paid among memberships with a renewal outcome in the period.",
+      "firstYearRenewal": "First-year renewal",
+      "firstYearRenewalDescription": "Distinct first-renewal memberships paid among first-renewal outcomes in the period.",
+      "funnel": "Join funnel",
+      "funnelDescription": "Applications started in the period and their furthest completed milestones.",
+      "started": "Started",
+      "profileCompleted": "Profile completed",
+      "checkoutOrReview": "Checkout or review",
+      "activated": "Activated",
+      "attendance": "Attendance",
+      "attendanceDescription": "Attended registrations among non-cancelled registrations for events completed in the period.",
+      "atRisk": "At-risk members",
+      "atRiskDescription": "Members matching the operational low-engagement and renewal-window rule at period end.",
+      "numerator": "Numerator",
+      "denominator": "Denominator",
+      "unavailable": "Not available",
+      "boardDraftsHeading": "Board Reporter drafts",
+      "boardDraftsDescription": "Review unpublished Board Reporter page drafts as inert, read-only previews.",
+      "boardDraftsEmpty": "No unpublished Board Reporter drafts are available.",
+      "boardDraftPreview": "Draft preview",
+      "boardDraftSlug": "Slug",
+      "boardDraftCreatedAt": "Created",
+      "boardDraftSourceKey": "Source key",
+      "boardDraftAgentRunId": "Agent run",
+      "boardDraftReportMonth": "Report month",
+      "boardDraftAgentRunStatus": "Agent run status",
+      "boardDraftStatuses": {
+        "running": "Running",
+        "disabled": "Disabled",
+        "completed": "Completed",
+        "failed": "Failed",
+        "escalated": "Escalated"
+      },
+      "boardDraftPreviewEyebrow": "Board Reporter draft",
+      "boardDraftPreviewDescription": "Review this staff-only draft through an inert generated-content preview.",
+      "boardDraftKpi": "KPI",
+      "boardDraftValue": "Value",
+      "boardDraftBack": "Back to reports"
+    },
+    "automations": {
+      "eyebrow": "Automation operations",
+      "title": "Automation operations",
+      "description": "Monitor scheduled member journeys and job health, and retry eligible failures.",
+      "evaluatedAt": "Evaluated at",
+      "countsLabel": "Automation queue summary",
+      "due": "Due",
+      "upcoming": "Upcoming",
+      "failed": "Failed",
+      "processing": "Processing",
+      "jobsHeading": "Job health",
+      "jobsCaption": "Recent automation jobs",
+      "jobsEmpty": "No automation jobs are available.",
+      "queueHeading": "Journey queue",
+      "queueCaption": "Scheduled and completed journey steps",
+      "queueEmpty": "No journey steps are available.",
+      "kind": "Job",
+      "state": "State",
+      "updatedAt": "Updated",
+      "errorCode": "Error code",
+      "journey": "Journey",
+      "step": "Step",
+      "status": "Status",
+      "scheduledAt": "Scheduled",
+      "attemptCount": "Attempts",
+      "actions": "Actions",
+      "retry": "Retry",
+      "retrying": "Scheduling…",
+      "retryScheduled": "Retry scheduled.",
+      "retryValidation": "This retry request is invalid.",
+      "retryUnavailable": "This failure is no longer eligible for retry.",
+      "retryError": "We could not schedule this retry. Please try again.",
+      "notAvailable": "Not available",
+      "next": "Next page"
+    },
+    "member360": {
+      "description": "Review the complete member record and staff-only operational history.",
+      "profile": "Profile",
+      "companies": "Companies",
+      "membership": "Membership",
+      "engagement": "Engagement",
+      "emails": "Email history",
+      "events": "Event registrations",
+      "notes": "Staff notes",
+      "journeys": "Journey history",
+      "whatsapp": "WhatsApp delivery history",
+      "suppressions": "Active suppressions",
+      "empty": "No records are available.",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "role": "Role",
+      "plan": "Plan",
+      "status": "Status",
+      "renewal": "Renewal",
+      "score": "Score",
+      "trend": "Trend",
+      "company": "Company",
+      "companyRole": "Company role",
+      "event": "Event",
+      "occurredAt": "Occurred",
+      "subject": "Subject",
+      "emailStatus": "Email status",
+      "template": "Template",
+      "locale": "Locale",
+      "channel": "Channel",
+      "classification": "Classification",
+      "attemptCount": "Attempts",
+      "errorCode": "Error code",
+      "scheduledAt": "Scheduled",
+      "createdAt": "Created",
+      "step": "Step",
+      "reasonCode": "Reason code",
+      "noteAuthor": "Author",
+      "noteCreatedAt": "Created",
+      "stripeCustomer": "Stripe customer",
+      "stripeSubscription": "Stripe subscription",
+      "addNote": "Add staff note",
+      "noteBody": "Note",
+      "saving": "Saving...",
+      "noteSuccess": "Staff note saved.",
+      "noteValidation": "Enter a note of up to 4,000 characters.",
+      "noteError": "We could not save the staff note. Please try again."
+    }
+  }
+}

@@ -9,9 +9,14 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
 });
 
 import {companiesRepository} from "@/lib/db/repos/companies";
+import {createApprovalsRepository} from "@/lib/db/repos/approvals";
+import {createAgentRunsRepository} from "@/lib/db/repos/agent-runs";
+import {createConversationsRepository} from "@/lib/db/repos/conversations";
+import {createStaffTasksRepository} from "@/lib/db/repos/staff-tasks";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 import type {Actor} from "@/lib/membership/lifecycle";
+import type {ConciergeAgentActor} from "@/lib/auth/agent-actor";
 
 const actor = {kind: "member", userId: "user-a", profileId: "user-a"} as const;
 const forgedUnsubscribeActor = {
@@ -19,6 +24,48 @@ const forgedUnsubscribeActor = {
   userId: null,
   source: "unsubscribe",
 } as unknown as Actor;
+const agent: ConciergeAgentActor = {
+  kind: "agent",
+  agent: "concierge",
+  runId: "22222222-2222-4222-8222-222222222222",
+  conversationId: "11111111-1111-4111-8111-111111111111",
+  profileId: "user-a",
+  trigger: "web",
+};
+
+const securityNow = new Date("2027-04-10T10:00:00.000Z");
+const providerMessageId = "provider-message-security";
+const anonymousOwnerHash = "a".repeat(64);
+const conversationProxyRow = (
+  profileId: string | null,
+  anonymousHash: string | null,
+) => ({
+  id: agent.conversationId,
+  profile_id: profileId,
+  anonymous_owner_hash: anonymousHash,
+  locale: "en",
+  status: "active",
+  last_message_at: null,
+  expires_at: new Date("2027-04-11T10:00:00.000Z"),
+  created_at: securityNow,
+  updated_at: securityNow,
+});
+const messageProxyRow = (disposition?: "created" | "existing") => ({
+  id: "33333333-3333-4333-8333-333333333333",
+  conversation_id: agent.conversationId,
+  role: "user",
+  channel: "web",
+  content: "Hello",
+  provider_message_id: providerMessageId,
+  metadata: {},
+  citations: [],
+  created_at: securityNow,
+  disposition,
+});
+
+function normalizedSql(statement: string | undefined): string {
+  return (statement ?? "").replace(/\s+/g, " ").trim().toLowerCase();
+}
 
 const membershipRow = [
   "membership-a",
@@ -391,4 +438,251 @@ describe("production repository security boundaries", () => {
     await expect(invoke()).rejects.toThrow("FORBIDDEN");
     expect(statements).toEqual([]);
   });
+
+  it("scopes conversation ownership in production SQL rather than trusting returned rows", async () => {
+    const statements: string[] = [];
+    database.current = drizzle(async (query) => {
+      statements.push(query);
+      return {rows: []};
+    });
+
+    await expect(
+      createConversationsRepository()
+        .getOwned({kind: "profile", profileId: "profile-attacker"}, agent.conversationId),
+    ).rejects.toMatchObject({code: "FORBIDDEN"});
+
+    const sql = statements.join("\n").toLowerCase();
+    expect(sql).toContain('"conversations"');
+    expect(sql).toContain('"profile_id"');
+    expect(sql).toContain('"id"');
+  });
+
+  it("uses the anonymous owner hash and null profile in the owned-conversation statement", async () => {
+    const statements: string[] = [];
+    const parameters: unknown[][] = [];
+    database.current = drizzle(async (query, params) => {
+      statements.push(query);
+      parameters.push(params);
+      return {rows: [conversationProxyRow(null, anonymousOwnerHash)]};
+    });
+
+    await expect(createConversationsRepository().getOwned({
+      kind: "anonymous",
+      anonymousOwnerHash,
+    }, agent.conversationId)).resolves.toMatchObject({
+      id: agent.conversationId,
+      profileId: null,
+      anonymousOwnerHash,
+    });
+
+    const ownerSql = normalizedSql(statements[0]);
+    expect(ownerSql).toMatch(/where .*"id".*"profile_id" is null.*"anonymous_owner_hash" =/);
+    expect(parameters[0]).toEqual(expect.arrayContaining([
+      agent.conversationId,
+      anonymousOwnerHash,
+    ]));
+  });
+
+  it("binds append and list ownership in their dedicated production statements", async () => {
+    const appendStatements: string[] = [];
+    const appendParameters: unknown[][] = [];
+    const appendResponses = [
+      [conversationProxyRow(agent.profileId, null)],
+      [messageProxyRow("created")],
+      [],
+    ];
+    let appendCall = 0;
+    database.current = drizzle(async (query, params) => {
+      appendStatements.push(query);
+      appendParameters.push(params);
+      return {rows: appendResponses[appendCall++] ?? []};
+    });
+
+    await expect(createConversationsRepository().appendMessage({
+      kind: "profile",
+      profileId: agent.profileId!,
+    }, agent.conversationId, {
+      role: "user",
+      channel: "web",
+      content: "Hello",
+      providerMessageId,
+    })).resolves.toMatchObject({disposition: "created"});
+
+    const appendOwnerSql = normalizedSql(appendStatements[0]);
+    expect(appendOwnerSql).toMatch(/where .*"id".*"profile_id" =.*"anonymous_owner_hash" is null/);
+    expect(appendParameters[0]).toEqual(expect.arrayContaining([
+      agent.conversationId,
+      agent.profileId,
+    ]));
+    expect(normalizedSql(appendStatements[1])).toMatch(/^insert into "messages".*conversation_id/);
+    expect(appendParameters[1]).toContain(agent.conversationId);
+    expect(normalizedSql(appendStatements[2])).toMatch(/^update "conversations".*where id =/);
+    expect(appendParameters[2]).toContain(agent.conversationId);
+
+    const listStatements: string[] = [];
+    const listParameters: unknown[][] = [];
+    const listResponses = [
+      [conversationProxyRow(agent.profileId, null)],
+      [messageProxyRow()],
+    ];
+    let listCall = 0;
+    database.current = drizzle(async (query, params) => {
+      listStatements.push(query);
+      listParameters.push(params);
+      return {rows: listResponses[listCall++] ?? []};
+    });
+
+    await expect(createConversationsRepository().listMessages({
+      kind: "profile",
+      profileId: agent.profileId!,
+    }, agent.conversationId)).resolves.toMatchObject([
+      {conversationId: agent.conversationId, content: "Hello"},
+    ]);
+
+    const listOwnerSql = normalizedSql(listStatements[0]);
+    expect(listOwnerSql).toMatch(/where .*"id".*"profile_id" =.*"anonymous_owner_hash" is null/);
+    expect(listParameters[0]).toEqual(expect.arrayContaining([
+      agent.conversationId,
+      agent.profileId,
+    ]));
+    expect(normalizedSql(listStatements[1])).toMatch(
+      /^select .* from "messages" where "messages"\."conversation_id" =/,
+    );
+    expect(listParameters[1]).toContain(agent.conversationId);
+  });
+
+  it("scopes the fresh provider-conflict lookup to its conversation and provider ID", async () => {
+    const statements: string[] = [];
+    const parameters: unknown[][] = [];
+    const responses = [
+      [conversationProxyRow(agent.profileId, null)],
+      [],
+      [messageProxyRow("existing")],
+      [],
+    ];
+    let call = 0;
+    database.current = drizzle(async (query, params) => {
+      statements.push(query);
+      parameters.push(params);
+      return {rows: responses[call++] ?? []};
+    });
+
+    await expect(createConversationsRepository().appendMessage({
+      kind: "profile",
+      profileId: agent.profileId!,
+    }, agent.conversationId, {
+      role: "user",
+      channel: "web",
+      content: "Retry",
+      providerMessageId,
+    })).resolves.toMatchObject({disposition: "existing"});
+
+    expect(statements).toHaveLength(4);
+    const conflictSql = normalizedSql(statements[2]);
+    expect(conflictSql).toMatch(/^select existing\.\*.*from "messages" as existing where/);
+    expect(conflictSql).toMatch(/existing\.conversation_id =.*existing\.provider_message_id =/);
+    expect(parameters[2]).toEqual(expect.arrayContaining([
+      agent.conversationId,
+      providerMessageId,
+    ]));
+  });
+
+  it("keeps every actor and lifecycle predicate in the terminal run update", async () => {
+    const statements: string[] = [];
+    const parameters: unknown[][] = [];
+    database.current = drizzle(async (query, params) => {
+      statements.push(query);
+      parameters.push(params);
+      return {rows: []};
+    });
+
+    await expect(createAgentRunsRepository().finish(agent, {
+      completedAt: new Date("2027-04-10T10:00:01.000Z"),
+      summaryCode: "answered",
+    })).rejects.toThrow("INVALID_AGENT_RUN_TRANSITION");
+
+    expect(statements).toHaveLength(1);
+    const transitionSql = normalizedSql(statements[0]);
+    expect(transitionSql).toMatch(/^update "agent_runs".*where id =/);
+    expect(transitionSql).toMatch(
+      /conversation_id =.*profile_id is not distinct from.*trigger =.*status = 'running'/,
+    );
+    expect(transitionSql).toMatch(/>= started_at/);
+    expect(parameters[0]).toEqual(expect.arrayContaining([
+      agent.runId,
+      agent.conversationId,
+      agent.profileId,
+      agent.trigger,
+    ]));
+  });
+
+  it("scopes an agent staff-task conflict lookup to dedupe, profile, conversation, and run", async () => {
+    const statements: string[] = [];
+    const parameters: unknown[][] = [];
+    database.current = drizzle(async (query, params) => {
+      statements.push(query);
+      parameters.push(params);
+      return {rows: []};
+    });
+
+    await expect(createStaffTasksRepository().createOnce(agent, {
+      profileId: agent.profileId,
+      journeyStateId: null,
+      kind: "concierge_escalation",
+      dedupeKey: `agent-run:${agent.runId}`,
+      summaryCode: "human_requested",
+      context: {
+        conversationId: agent.conversationId,
+        agentRunId: agent.runId,
+        reasonCode: "human_requested",
+        locale: "en",
+      },
+    })).rejects.toThrow("STAFF_TASK_DEDUPE_CONFLICT");
+
+    expect(statements).toHaveLength(2);
+    const conflictSql = normalizedSql(statements[1]);
+    expect(conflictSql).toMatch(/^select .* from "staff_tasks" where/);
+    expect(conflictSql).toMatch(/dedupe_key =.*profile_id is not distinct from/);
+    expect(conflictSql).toMatch(/context ->> 'conversationid' =.*context ->> 'agentrunid' =/);
+    expect(parameters[1]).toEqual(expect.arrayContaining([
+      `agent-run:${agent.runId}`,
+      agent.profileId,
+      agent.conversationId,
+      agent.runId,
+    ]));
+  });
+
+  it("rejects an agent approval decision before database access", async () => {
+    const loadDatabase = vi.fn();
+    const repository = createApprovalsRepository(loadDatabase);
+
+    await expect(repository.decide(
+      agent as never,
+      {
+        approvalId: "44444444-4444-4444-8444-444444444444",
+        decision: "approved",
+      },
+    )).rejects.toMatchObject({code: "FORBIDDEN"});
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
+  it.each(["finish", "fail", "escalate", "disable"] as const)(
+    "authorizes %s before validating attacker-controlled input or opening the database",
+    async (method) => {
+      const loadDatabase = vi.fn();
+      const repository = createAgentRunsRepository(loadDatabase);
+      const inputByMethod = {
+        finish: {completedAt: "invalid", summary: "Alice Chan"},
+        fail: {completedAt: "invalid", errorCode: '{"token":"secret"}'},
+        escalate: {completedAt: "invalid", summary: "1 Queen's Road Central"},
+        disable: {completedAt: "invalid", summary: "A123456(7)"},
+      } as const;
+
+      await expect(repository[method](
+        actor as never,
+        inputByMethod[method] as never,
+      )).rejects.toMatchObject({code: "FORBIDDEN"});
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
 });

@@ -2,6 +2,8 @@ import {describe, expect, it} from "vitest";
 
 import packageLock from "../package-lock.json";
 import packageJson from "../package.json";
+// @ts-expect-error -- Vitest supports raw text imports for non-code assets.
+import wranglerToml from "../wrangler.toml?raw";
 
 type PackageMetadata = Readonly<{
   engines?: Readonly<{node?: string}>;
@@ -21,5 +23,9 @@ describe("Worker package runtime contract", () => {
     expect(lock.packages["node_modules/wrangler"]?.engines?.node).toBe(
       ">=22.0.0",
     );
+  });
+
+  it("keeps exactly one hourly cron trigger", () => {
+    expect(wranglerToml.match(/"0 \* \* \* \*"/g)).toHaveLength(1);
   });
 });

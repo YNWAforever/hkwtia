@@ -1,7 +1,7 @@
 /**
  * These names and ordered body parameters must be created and approved in the
  * configured WOZTELL WhatsApp channel before live delivery is enabled.
- * M3 deliberately has no fallback template and does not create templates.
+ * Runtime callers may select only these keys; raw template names are rejected.
  */
 export const WHATSAPP_TEMPLATES = {
   renewal_14: {
@@ -15,6 +15,18 @@ export const WHATSAPP_TEMPLATES = {
     languageCode: "en_US",
     variables: ["memberName", "amountDue", "paymentUrl"],
     approvalRequirement: "WOZTELL template wtia_dunning_d3 must be approved with three BODY text parameters in this order.",
+  },
+  concierge_follow_up_en: {
+    name: "wtia_concierge_follow_up_en",
+    languageCode: "en_US",
+    variables: ["memberName", "supportUrl"],
+    approvalRequirement: "WOZTELL template wtia_concierge_follow_up_en must be approved with two BODY text parameters in this order.",
+  },
+  concierge_follow_up_zh_hk: {
+    name: "wtia_concierge_follow_up_zh_hk",
+    languageCode: "zh_HK",
+    variables: ["memberName", "supportUrl"],
+    approvalRequirement: "WOZTELL template wtia_concierge_follow_up_zh_hk must be approved with two BODY text parameters in this order.",
   },
 } as const;
 

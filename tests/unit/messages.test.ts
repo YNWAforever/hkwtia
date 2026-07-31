@@ -24,4 +24,44 @@ describe('message bundles', () => {
     expect(chineseKeys).toEqual(englishKeys);
     expect(zh._review).toBe(true);
   });
+
+  it('uses localized example placeholders with an ellipsis', () => {
+    expect(en.Concierge.placeholder).toMatch(/^e\.g\. .+…$/);
+    expect(zh.Concierge.placeholder).toMatch(/^例如：.+…$/);
+    expect(en.Concierge.contactEmailHelper).toMatch(/only if/i);
+    expect(zh.Concierge.contactEmailHelper).toContain("只會");
+    expect(en.Concierge.contactEmailError).toMatch(/valid email/i);
+    expect(zh.Concierge.contactEmailError).toContain("有效");
+  });
+
+  it.each([en.Admin, zh.Admin])('includes equivalent retention approval and Board Reporter draft labels', (admin) => {
+    expect(admin.approvals.actionTypes.retentionOutreach).toBeTruthy();
+    expect(admin.approvals.subject).toBeTruthy();
+    expect(admin.approvals.body).toBeTruthy();
+    expect(admin.approvals.memberReference).toBeTruthy();
+    expect(admin.approvals.locale).toBeTruthy();
+    expect(admin.approvals.agentRunReference).toBeTruthy();
+    expect(admin.approvals.reasons).toBeTruthy();
+    expect(admin.approvals.reasonCodes.lowScoreDeclining).toBeTruthy();
+    expect(admin.approvals.reasonCodes.inactiveBeforeRenewal).toBeTruthy();
+    expect(admin.reports.boardDraftsHeading).toBeTruthy();
+    expect(admin.reports.boardDraftsDescription).toBeTruthy();
+    expect(admin.reports.boardDraftsEmpty).toBeTruthy();
+    expect(admin.reports.boardDraftPreview).toBeTruthy();
+    expect(admin.reports.boardDraftReportMonth).toBeTruthy();
+    expect(admin.reports.boardDraftAgentRunStatus).toBeTruthy();
+    expect(admin.reports.boardDraftPreviewEyebrow).toBeTruthy();
+    expect(admin.reports.boardDraftPreviewDescription).toBeTruthy();
+    expect(admin.reports.boardDraftBack).toBeTruthy();
+    expect(Object.keys(admin.reports.boardDraftStatuses).sort()).toEqual([
+      'completed', 'disabled', 'escalated', 'failed', 'running',
+    ]);
+    for (const status of Object.values(admin.reports.boardDraftStatuses)) {
+      expect(status).toBeTruthy();
+    }
+    expect(en.Admin.reports.boardDraftKpi).toBe("KPI");
+    expect(en.Admin.reports.boardDraftValue).toBe("Value");
+    expect(zh.Admin.reports.boardDraftKpi).toBe("關鍵績效指標");
+    expect(zh.Admin.reports.boardDraftValue).toBe("數值");
+  });
 });

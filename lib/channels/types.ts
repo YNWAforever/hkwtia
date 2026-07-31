@@ -8,6 +8,7 @@ export type WhatsAppRecipient = Readonly<{
 export type SessionMessageInput = WhatsAppRecipient & Readonly<{
   text: string;
   idempotencyKey: string;
+  lastCustomerMessageAt: Date;
 }>;
 
 export type TemplateMessageInput = WhatsAppRecipient & Readonly<{
@@ -20,15 +21,31 @@ export type ChannelResult =
   | Readonly<{status: "sent"; providerId: string}>
   | Readonly<{status: "skipped"; reason: "recipient_ineligible"}>;
 
-export type NormalizedInbound = Readonly<{
-  kind: "message" | "unsupported";
-  sender: string | null;
-  text: string | null;
-  intent: "opt_out" | null;
-}>;
+export type SessionChannelResult =
+  | ChannelResult
+  | Readonly<{
+    status: "blocked";
+    reason: "outside_customer_service_window";
+  }>;
+
+export type NormalizedInbound =
+  | Readonly<{
+    kind: "message";
+    sender: string;
+    text: string;
+    intent: "opt_out" | null;
+    providerMessageId: string;
+    receivedAt: Date;
+  }>
+  | Readonly<{
+    kind: "unsupported";
+    sender: string | null;
+    text: null;
+    intent: null;
+  }>;
 
 export interface ChannelAdapter {
-  sendSessionMessage(input: SessionMessageInput): Promise<ChannelResult>;
+  sendSessionMessage(input: SessionMessageInput): Promise<SessionChannelResult>;
   sendTemplateMessage(input: TemplateMessageInput): Promise<ChannelResult>;
   normalizeInbound(payload: unknown): NormalizedInbound;
   verifyWebhook(rawBody: string, signature: string | null): boolean;

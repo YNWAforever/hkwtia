@@ -22,6 +22,7 @@ describe("runtime environment contract", () => {
       DATABASE_URL: "postgres://db.example.test/hkwtia",
       NEON_AUTH_BASE_URL: "https://auth.example.test",
       NEON_AUTH_COOKIE_SECRET: "cookie-secret",
+      CONCIERGE_COOKIE_SECRET: "concierge-cookie-secret-separate-0001",
       STRIPE_SECRET_KEY: "sk_test_example",
       STRIPE_WEBHOOK_SECRET: "whsec_example",
       STRIPE_STARTUP_PRICE_ID: "price_startup",
@@ -36,6 +37,7 @@ describe("runtime environment contract", () => {
       databaseUrl: "postgres://db.example.test/hkwtia",
       neonAuthBaseUrl: "https://auth.example.test",
       neonAuthCookieSecret: "cookie-secret",
+      conciergeCookieSecret: "concierge-cookie-secret-separate-0001",
       stripeSecretKey: "sk_test_example",
       stripeWebhookSecret: "whsec_example",
       stripeStartupPriceId: "price_startup",
@@ -45,6 +47,8 @@ describe("runtime environment contract", () => {
       emailDeliveryMode: "resend",
       cronSecret: "cron-secret",
       appUrl: "https://www.example.test",
+      agentsEnabled: false,
+      agentModelConcierge: "openai:gpt-4.1-mini",
     });
     expect(values).not.toHaveProperty("NEXT_PUBLIC_SITE_URL");
   });
@@ -74,6 +78,8 @@ describe("runtime environment contract", () => {
       emailDeliveryMode: "resend",
       cronSecret: "",
       appUrl: "",
+      agentsEnabled: false,
+      agentModelConcierge: "openai:gpt-4.1-mini",
     });
   });
 
@@ -85,6 +91,7 @@ describe("runtime environment contract", () => {
         DATABASE_URL: "postgres://db.example.test/hkwtia",
         NEON_AUTH_BASE_URL: "https://auth.example.test",
         NEON_AUTH_COOKIE_SECRET: "cookie-secret",
+        CONCIERGE_COOKIE_SECRET: "concierge-cookie-secret-separate-0001",
         STRIPE_SECRET_KEY: "sk_test_example",
         STRIPE_WEBHOOK_SECRET: "whsec_example",
         STRIPE_STARTUP_PRICE_ID: "price_startup",
@@ -107,6 +114,7 @@ describe("runtime environment contract", () => {
         DATABASE_URL: "postgres://db.example.test/hkwtia",
         NEON_AUTH_BASE_URL: "https://auth.example.test",
         NEON_AUTH_COOKIE_SECRET: "cookie-secret",
+        CONCIERGE_COOKIE_SECRET: "concierge-cookie-secret-separate-0001",
         STRIPE_SECRET_KEY: "sk_test_example",
         STRIPE_WEBHOOK_SECRET: "whsec_example",
         STRIPE_STARTUP_PRICE_ID: "price_startup",
@@ -129,6 +137,7 @@ describe("runtime environment contract", () => {
       DATABASE_URL: "postgres://db.example.test/hkwtia",
       NEON_AUTH_BASE_URL: "https://auth.example.test",
       NEON_AUTH_COOKIE_SECRET: "cookie-secret",
+      CONCIERGE_COOKIE_SECRET: "concierge-cookie-secret-separate-0001",
       STRIPE_SECRET_KEY: "sk_test_example",
       STRIPE_WEBHOOK_SECRET: "whsec_example",
       STRIPE_STARTUP_PRICE_ID: "price_startup",
@@ -151,6 +160,7 @@ describe("runtime environment contract", () => {
         DATABASE_URL: "postgres://db.example.test/hkwtia",
         NEON_AUTH_BASE_URL: "https://auth.example.test",
         NEON_AUTH_COOKIE_SECRET: "cookie-secret",
+        CONCIERGE_COOKIE_SECRET: "concierge-cookie-secret-separate-0001",
         STRIPE_SECRET_KEY: "sk_test_example",
         STRIPE_WEBHOOK_SECRET: "whsec_example",
         STRIPE_STARTUP_PRICE_ID: "price_startup",
@@ -161,5 +171,42 @@ describe("runtime environment contract", () => {
         APP_URL: "https://www.example.test",
       }),
     ).toThrow("RESEND_API_KEY");
+  });
+
+  it("requires a dedicated strong Concierge cookie secret and rejects blank Turnstile configuration in production", () => {
+    const environment: NodeJS.ProcessEnv = {
+      NODE_ENV: "production",
+      DATABASE_URL: "postgres://db.example.test/hkwtia",
+      NEON_AUTH_BASE_URL: "https://auth.example.test",
+      NEON_AUTH_COOKIE_SECRET: "n".repeat(32),
+      CONCIERGE_COOKIE_SECRET: "c".repeat(32),
+      STRIPE_SECRET_KEY: "sk_test_example",
+      STRIPE_WEBHOOK_SECRET: "whsec_example",
+      STRIPE_STARTUP_PRICE_ID: "price_startup",
+      STRIPE_CORPORATE_PRICE_ID: "price_corporate",
+      RESEND_API_KEY: "re_test_example",
+      EMAIL_FROM: "WTIA <notifications@example.test>",
+      CRON_SECRET: "cron-secret",
+      APP_URL: "https://www.example.test",
+    };
+
+    const missing = {...environment};
+    delete missing.CONCIERGE_COOKIE_SECRET;
+    expect(() => parseServerEnv(missing)).toThrow("CONCIERGE_COOKIE_SECRET");
+
+    expect(() => parseServerEnv({
+      ...environment,
+      CONCIERGE_COOKIE_SECRET: "too-short",
+    })).toThrow("CONCIERGE_COOKIE_SECRET");
+
+    expect(() => parseServerEnv({
+      ...environment,
+      CONCIERGE_COOKIE_SECRET: environment.NEON_AUTH_COOKIE_SECRET,
+    })).toThrow("CONCIERGE_COOKIE_SECRET");
+
+    expect(() => parseServerEnv({
+      ...environment,
+      TURNSTILE_SECRET: "   ",
+    })).toThrow("TURNSTILE_SECRET");
   });
 });

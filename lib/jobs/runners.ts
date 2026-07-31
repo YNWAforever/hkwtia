@@ -8,13 +8,33 @@ import {
   createCampaignEmailRenderer,
   runCampaignBatch,
 } from "@/lib/automation/campaign-runner";
+import {
+  BOARD_REPORTER_AGENT_CONFIG,
+  BOARD_REPORTER_SYSTEM_PROMPT,
+} from "@/config/agents/board-reporter";
 import {expireStaleApprovals} from "@/lib/automation/approvals-expirer";
 import {recomputeEngagementScores} from "@/lib/automation/engagement-score-runner";
+import {
+  RETENTION_ANALYST_AGENT_CONFIG,
+  RETENTION_ANALYST_SYSTEM_PROMPT,
+} from "@/config/agents/retention-analyst";
+import {
+  runRetentionAnalyst as runRetentionAnalystService,
+} from "@/lib/ai/retention-analyst/service";
+import {
+  runBoardReporter as runBoardReporterService,
+} from "@/lib/ai/board-reporter/service";
+import {createAgentRuntime} from "@/lib/ai/runtime";
 import {runJourneyBatch} from "@/lib/automation/journey-runner";
 import {runRenewalReconciliation} from "@/lib/automation/renewal-runner";
+import {
+  resolveM4BAcceptanceOwnershipKey,
+} from "@/lib/acceptance/m4b-runtime-guard";
 import {automationCronActor} from "@/lib/auth/automation-actor";
 import {createWoztellAdapter} from "@/lib/channels/woztell";
 import {serverEnv} from "@/lib/config/env";
+import {aiOpsMetricsRepository} from "@/lib/db/repos/aiops-metrics";
+import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {campaignsRepository} from "@/lib/db/repos/campaigns";
 import {deliveriesRepository} from "@/lib/db/repos/deliveries";
 import {dunningLapseRepository} from "@/lib/db/repos/dunning-lapse";
@@ -43,6 +63,8 @@ const workerAlertSchema = z.object({
     "renewal-runner",
     "engagement-score",
     "approvals-expirer",
+    "retention-analyst",
+    "board-reporter",
   ]),
   scheduledTime: z.string().min(1).max(64),
   attemptCount: z.number().int().min(1).max(3),
@@ -58,7 +80,9 @@ export type WorkerAlertPayload = Readonly<{
     | "journey-runner"
     | "renewal-runner"
     | "engagement-score"
-    | "approvals-expirer";
+    | "approvals-expirer"
+    | "retention-analyst"
+    | "board-reporter";
   scheduledTime: string;
   attemptCount: number;
   errorCode: "JOB_HTTP_ERROR" | "JOB_NETWORK_ERROR" | "JOB_TIMEOUT";
@@ -77,6 +101,9 @@ type ProductionRunnerOverrides = Partial<Readonly<{
   runRenewal(now: Date): Promise<unknown>;
   runEngagement(now: Date): Promise<unknown>;
   runApprovals(now: Date): Promise<unknown>;
+  runRetentionAnalyst(now: Date): Promise<unknown>;
+  runBoardReporter(now: Date): Promise<unknown>;
+  runAiOpsMetrics(now: Date): Promise<{refreshed: 1}>;
   runWorkerAlert(payload: WorkerAlertPayload): Promise<unknown>;
 }>>;
 
@@ -371,6 +398,72 @@ async function runProductionApprovals(now: Date): Promise<unknown> {
   return expireStaleApprovals(automationCronActor(), now);
 }
 
+export async function runProductionRetentionAnalyst(
+  now: Date,
+): Promise<unknown> {
+  const acceptanceOwnershipKey =
+    resolveM4BAcceptanceOwnershipKey(process.env);
+  const environment = serverEnv();
+  return runRetentionAnalystService(automationCronActor(), {
+    asOf: now,
+    acceptanceOwnershipKey,
+    agentConfig: {
+      enabled: environment.agentsEnabled,
+      model: process.env.RETENTION_ANALYST_MODEL
+        ?? RETENTION_ANALYST_AGENT_CONFIG.model,
+      credentials: {
+        ...(environment.openaiApiKey === undefined
+          ? {}
+          : {openaiApiKey: environment.openaiApiKey}),
+        ...(environment.anthropicApiKey === undefined
+          ? {}
+          : {anthropicApiKey: environment.anthropicApiKey}),
+      },
+      system: RETENTION_ANALYST_SYSTEM_PROMPT,
+      runtime: createAgentRuntime({
+        agentRuns: agentRunsRepository,
+      }),
+    },
+  });
+}
+
+export async function runProductionBoardReporter(
+  now: Date,
+): Promise<unknown> {
+  const acceptanceOwnershipKey =
+    resolveM4BAcceptanceOwnershipKey(process.env);
+  const environment = serverEnv();
+  return runBoardReporterService(automationCronActor(), {
+    asOf: now,
+    acceptanceOwnershipKey,
+    agentConfig: {
+      enabled: environment.agentsEnabled,
+      model: process.env.BOARD_REPORTER_MODEL
+        ?? BOARD_REPORTER_AGENT_CONFIG.model,
+      credentials: {
+        ...(environment.openaiApiKey === undefined
+          ? {}
+          : {openaiApiKey: environment.openaiApiKey}),
+        ...(environment.anthropicApiKey === undefined
+          ? {}
+          : {anthropicApiKey: environment.anthropicApiKey}),
+      },
+      system: BOARD_REPORTER_SYSTEM_PROMPT,
+      runtime: createAgentRuntime({
+        agentRuns: agentRunsRepository,
+      }),
+    },
+  });
+}
+
+export async function runProductionAiOpsMetrics(
+  _now: Date,
+): Promise<{refreshed: 1}> {
+  void _now;
+  await aiOpsMetricsRepository.refresh(automationCronActor());
+  return {refreshed: 1};
+}
+
 export function createJobRunners(
   overrides: ProductionRunnerOverrides = {},
 ) {
@@ -380,6 +473,12 @@ export function createJobRunners(
   const runEngagement =
     overrides.runEngagement ?? runProductionEngagement;
   const runApprovals = overrides.runApprovals ?? runProductionApprovals;
+  const runRetentionAnalyst =
+    overrides.runRetentionAnalyst ?? runProductionRetentionAnalyst;
+  const runBoardReporter =
+    overrides.runBoardReporter ?? runProductionBoardReporter;
+  const runAiOpsMetrics =
+    overrides.runAiOpsMetrics ?? runProductionAiOpsMetrics;
   const runWorkerAlert = overrides.runWorkerAlert ?? sendWorkerAlert;
 
   return {
@@ -401,6 +500,15 @@ export function createJobRunners(
     },
     approvals(now: Date) {
       return runApprovals(now);
+    },
+    retentionAnalyst(now: Date) {
+      return runRetentionAnalyst(now);
+    },
+    boardReporter(now: Date) {
+      return runBoardReporter(now);
+    },
+    aiOpsMetrics(now: Date) {
+      return runAiOpsMetrics(now);
     },
     workerAlert(payload: WorkerAlertPayload) {
       return runWorkerAlert(payload);

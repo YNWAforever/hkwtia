@@ -2,11 +2,14 @@ import {
   type AnyPgColumn,
   boolean,
   check,
+  customType,
+  date,
   index,
   integer,
   jsonb,
   numeric,
   pgEnum,
+  pgMaterializedView,
   pgTable,
   primaryKey,
   text,
@@ -51,6 +54,23 @@ export const recipientStatusEnum = pgEnum("campaign_recipient_status", ["queued"
 export const approvalStatusEnum = pgEnum("approval_status", ["pending", "approved", "rejected", "expired"]);
 export const journeyStatusEnum = pgEnum("journey_status", ["scheduled", "processing", "sent", "skipped", "failed"]);
 export const staffTaskStatusEnum = pgEnum("staff_task_status", ["open", "resolved"]);
+export const conversationStatusEnum = pgEnum("conversation_status", ["active", "closed", "deleted"]);
+export const messageRoleEnum = pgEnum("message_role", ["user", "assistant", "tool"]);
+export const messageChannelEnum = pgEnum("message_channel", ["web", "whatsapp"]);
+export const agentRunStatusEnum = pgEnum("agent_run_status", ["running", "disabled", "completed", "failed", "escalated"]);
+export const agentNameEnum = pgEnum("agent_name", [
+  "concierge",
+  "retention_analyst",
+  "board_reporter",
+]);
+export const postKindEnum = pgEnum("post_kind", ["news", "buildlog", "page"]);
+export const agentTriggerEnum = pgEnum("agent_trigger", ["web", "whatsapp", "scheduled"]);
+
+const vector = customType<{data: number[]; driverData: string}>({
+  dataType() {
+    return "vector(1536)";
+  },
+});
 
 export const profiles = pgTable("profiles", {
   id: text("id").primaryKey(),
@@ -379,13 +399,134 @@ export const messageSuppressions = pgTable("message_suppressions", {
   index("message_suppressions_profile_idx").on(table.profileId),
 ]);
 
+export const kbDocuments = pgTable(
+  "kb_documents",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    namespace: text("namespace").notNull(),
+    locale: varchar("locale", {length: 10}).notNull(),
+    title: text("title").notNull(),
+    url: text("url").notNull(),
+    content: text("content").notNull(),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}).notNull(),
+    embedding: vector("embedding").notNull(),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    index("kb_documents_namespace_locale_idx").on(table.namespace, table.locale),
+    index("kb_documents_created_idx").on(table.createdAt),
+  ],
+);
+
+export const conversations = pgTable(
+  "conversations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    agentKind: varchar("agent_kind", {length: 32})
+      .default("concierge")
+      .notNull(),
+    profileId: text("profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    anonymousOwnerHash: text("anonymous_owner_hash"),
+    locale: varchar("locale", {length: 10}).default("en").notNull(),
+    status: conversationStatusEnum("status").default("active").notNull(),
+    lastMessageAt: timestamp("last_message_at", {withTimezone: true}),
+    expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    check(
+      "conversations_agent_kind_check",
+      sql`${table.agentKind} IN ('concierge', 'retention-analyst', 'board-reporter')`,
+    ),
+    check(
+      "conversations_owner_check",
+      sql`(${table.profileId} IS NOT NULL AND ${table.anonymousOwnerHash} IS NULL) OR (${table.profileId} IS NULL AND ${table.anonymousOwnerHash} IS NOT NULL)`,
+    ),
+    index("conversations_profile_idx").on(table.profileId),
+    index("conversations_anonymous_owner_idx").on(table.anonymousOwnerHash),
+    index("conversations_recent_idx").on(table.updatedAt.desc(), table.id.desc()),
+    index("conversations_expires_at_idx").on(table.expiresAt),
+    index("conversations_agent_kind_expires_idx").on(
+      table.agentKind,
+      table.expiresAt,
+    ),
+  ],
+);
+
+export const messages = pgTable(
+  "messages",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    conversationId: uuid("conversation_id")
+      .notNull()
+      .references(() => conversations.id, {onDelete: "cascade"}),
+    role: messageRoleEnum("role").notNull(),
+    channel: messageChannelEnum("channel").notNull(),
+    content: text("content").notNull(),
+    providerMessageId: text("provider_message_id"),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}).notNull(),
+    citations: jsonb("citations").$type<Array<Record<string, unknown>>>().default([]).notNull(),
+    createdAt: createdAt("created_at"),
+  },
+  (table) => [
+    uniqueIndex("messages_provider_message_id_unique")
+      .on(table.providerMessageId)
+      .where(sql`${table.providerMessageId} IS NOT NULL`),
+    index("messages_conversation_created_idx").on(table.conversationId, table.createdAt),
+    index("messages_created_at_idx").on(table.createdAt),
+  ],
+);
+
+export const agentRuns = pgTable(
+  "agent_runs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    conversationId: uuid("conversation_id")
+      .references(() => conversations.id, {onDelete: "set null"}),
+    profileId: text("profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    agent: agentNameEnum("agent").default("concierge").notNull(),
+    trigger: agentTriggerEnum("trigger").notNull(),
+    status: agentRunStatusEnum("status").default("running").notNull(),
+    provider: text("provider"),
+    model: text("model"),
+    inputTokens: integer("input_tokens").default(0).notNull(),
+    outputTokens: integer("output_tokens").default(0).notNull(),
+    costUsd: numeric("cost_usd", {precision: 12, scale: 6}).default("0").notNull(),
+    latencyMs: integer("latency_ms"),
+    summary: text("summary"),
+    errorCode: text("error_code"),
+    csatScore: integer("csat_score"),
+    startedAt: createdAt("started_at"),
+    completedAt: timestamp("completed_at", {withTimezone: true}),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    check("agent_runs_csat_score_check", sql`${table.csatScore} IS NULL OR (${table.csatScore} >= 1 AND ${table.csatScore} <= 5)`),
+    index("agent_runs_conversation_created_idx").on(table.conversationId, table.createdAt),
+    index("agent_runs_profile_idx").on(table.profileId),
+    index("agent_runs_created_at_idx").on(table.createdAt),
+  ],
+);
 export const staffTasks = pgTable("staff_tasks", {
   id: uuid("id").defaultRandom().primaryKey(),
-  profileId: text("profile_id").notNull().references(() => profiles.id, {onDelete: "cascade"}),
+  profileId: text("profile_id").references(() => profiles.id, {onDelete: "cascade"}),
   journeyStateId: uuid("journey_state_id").references(() => journeyState.id, {onDelete: "set null"}),
   kind: text("kind").notNull(),
   dedupeKey: text("dedupe_key").notNull(),
   summaryCode: text("summary_code").notNull(),
+  context: jsonb("context")
+    .$type<{
+      contactEmail?: string;
+      conversationId?: string;
+      agentRunId?: string;
+      reasonCode?: string;
+      locale?: "en" | "zh-HK";
+    }>()
+    .notNull()
+    .default({}),
   status: staffTaskStatusEnum("status").default("open").notNull(),
   resolvedAt: timestamp("resolved_at", {withTimezone: true}),
   resolvedByProfileId: text("resolved_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
@@ -467,12 +608,302 @@ export const approvals = pgTable("approvals", {
   id: uuid("id").defaultRandom().primaryKey(),
   actionType: text("action_type").notNull(),
   payload: jsonb("payload").$type<Record<string, unknown>>().notNull(),
+  requestKey: text("request_key"),
   status: approvalStatusEnum("status").default("pending").notNull(),
   requestedByProfileId: text("requested_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
   requestedAt: createdAt("requested_at"),
   decidedByProfileId: text("decided_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
   decidedAt: timestamp("decided_at", {withTimezone: true}),
-}, (table) => [index("approvals_status_requested_idx").on(table.status, table.requestedAt)]);
+}, (table) => [
+  uniqueIndex("approvals_request_key_unique")
+    .on(table.requestKey)
+    .where(sql`${table.requestKey} IS NOT NULL`),
+  index("approvals_status_requested_idx").on(table.status, table.requestedAt),
+]);
+
+export const posts = pgTable(
+  "posts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    slug: text("slug").notNull(),
+    kind: postKindEnum("kind").notNull(),
+    titleEn: text("title_en").notNull(),
+    titleZh: text("title_zh").notNull(),
+    bodyMdx: text("body_mdx").notNull(),
+    publishedAt: timestamp("published_at", {withTimezone: true}),
+    author: text("author").notNull(),
+    sourceKey: text("source_key"),
+    agentRunId: uuid("agent_run_id")
+      .references(() => agentRuns.id, {onDelete: "set null"}),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    uniqueIndex("posts_slug_unique").on(table.slug),
+    uniqueIndex("posts_source_key_unique")
+      .on(table.sourceKey)
+      .where(sql`${table.sourceKey} IS NOT NULL`),
+  ],
+);
+
+export const aiopsMonthlyMetrics = pgMaterializedView(
+  "aiops_monthly_metrics",
+  {
+    monthStart: date("month_start").notNull(),
+    isPartialMonth: boolean("is_partial_month").notNull(),
+    conversationCount: integer("conversation_count").notNull(),
+    terminalConversationCount: integer("terminal_conversation_count").notNull(),
+    resolvedConversationCount: integer("resolved_conversation_count").notNull(),
+    escalatedConversationCount: integer("escalated_conversation_count").notNull(),
+    failedConversationCount: integer("failed_conversation_count").notNull(),
+    agentResolvedRate: numeric("agent_resolved_rate", {precision: 7, scale: 6}),
+    escalationRate: numeric("escalation_rate", {precision: 7, scale: 6}),
+    failureRate: numeric("failure_rate", {precision: 7, scale: 6}),
+    medianFirstResponseMs: integer("median_first_response_ms"),
+    firstResponseSampleCount: integer("first_response_sample_count").notNull(),
+    csatAverage: numeric("csat_average", {precision: 4, scale: 2}),
+    csatResponseCount: integer("csat_response_count").notNull(),
+    staffHoursSaved: numeric("staff_hours_saved", {precision: 12, scale: 2}).notNull(),
+    llmCostUsd: numeric("llm_cost_usd", {precision: 12, scale: 6}).notNull(),
+    renewalDueCount: integer("renewal_due_count").notNull(),
+    renewalPaidCount: integer("renewal_paid_count").notNull(),
+    renewalRate: numeric("renewal_rate", {precision: 7, scale: 6}),
+    firstYearRenewalDueCount: integer("first_year_renewal_due_count").notNull(),
+    firstYearRenewalPaidCount: integer("first_year_renewal_paid_count").notNull(),
+    firstYearRenewalRate: numeric("first_year_renewal_rate", {precision: 7, scale: 6}),
+    refreshedAt: timestamp("refreshed_at", {withTimezone: true}).notNull(),
+  },
+).as(sql`
+  WITH settings AS (
+    SELECT
+      date_trunc('month', timezone('Asia/Hong_Kong', now()))::date
+        AS current_month,
+      now() AS refreshed_at
+  ),
+  months AS (
+    SELECT
+      generated.month_start::date AS month_start,
+      generated.month_start::date = settings.current_month AS is_partial_month,
+      generated.month_start::timestamp AT TIME ZONE 'Asia/Hong_Kong' AS month_from,
+      (generated.month_start + interval '1 month')::timestamp
+        AT TIME ZONE 'Asia/Hong_Kong' AS month_to,
+      settings.refreshed_at
+    FROM settings
+    CROSS JOIN LATERAL generate_series(
+      settings.current_month - interval '11 months',
+      settings.current_month,
+      interval '1 month'
+    ) AS generated(month_start)
+  ),
+  month_conversations AS (
+    SELECT months.month_start, months.month_to, conversations.id
+    FROM months
+    INNER JOIN conversations
+      ON conversations.agent_kind = 'concierge'
+     AND conversations.created_at >= months.month_from
+     AND conversations.created_at < months.month_to
+  ),
+  latest_terminal AS (
+    SELECT DISTINCT ON (month_conversations.month_start, agent_runs.conversation_id)
+      month_conversations.month_start,
+      agent_runs.conversation_id,
+      agent_runs.status
+    FROM month_conversations
+    INNER JOIN agent_runs
+      ON agent_runs.conversation_id = month_conversations.id
+     AND agent_runs.agent = 'concierge'
+     AND agent_runs.status IN ('completed', 'escalated', 'failed')
+     AND agent_runs.completed_at IS NOT NULL
+     AND agent_runs.completed_at < month_conversations.month_to
+    ORDER BY month_conversations.month_start, agent_runs.conversation_id,
+      agent_runs.completed_at DESC, agent_runs.created_at DESC,
+      agent_runs.id DESC
+  ),
+  first_user AS (
+    SELECT DISTINCT ON (month_conversations.month_start, messages.conversation_id)
+      month_conversations.month_start,
+      messages.conversation_id,
+      messages.created_at,
+      messages.id
+    FROM month_conversations
+    INNER JOIN messages ON messages.conversation_id = month_conversations.id
+    WHERE messages.role = 'user'
+    ORDER BY month_conversations.month_start, messages.conversation_id,
+      messages.created_at, messages.id
+  ),
+  first_response AS (
+    SELECT
+      first_user.month_start,
+      first_user.conversation_id,
+      floor(extract(epoch FROM (
+        min(messages.created_at) - first_user.created_at
+      )) * 1000)::integer AS latency_ms
+    FROM first_user
+    INNER JOIN messages
+      ON messages.conversation_id = first_user.conversation_id
+     AND messages.role = 'assistant'
+     AND messages.created_at >= first_user.created_at
+    GROUP BY first_user.month_start, first_user.conversation_id,
+      first_user.created_at
+    HAVING min(messages.created_at) >= first_user.created_at
+  ),
+  conversation_aggregates AS (
+    SELECT
+      months.month_start,
+      count(DISTINCT month_conversations.id)::integer AS conversation_count,
+      count(DISTINCT latest_terminal.conversation_id)::integer
+        AS terminal_conversation_count,
+      count(DISTINCT latest_terminal.conversation_id)
+        FILTER (WHERE latest_terminal.status = 'completed')::integer
+        AS resolved_conversation_count,
+      count(DISTINCT latest_terminal.conversation_id)
+        FILTER (WHERE latest_terminal.status = 'escalated')::integer
+        AS escalated_conversation_count,
+      count(DISTINCT latest_terminal.conversation_id)
+        FILTER (WHERE latest_terminal.status = 'failed')::integer
+        AS failed_conversation_count
+    FROM months
+    LEFT JOIN month_conversations
+      ON month_conversations.month_start = months.month_start
+    LEFT JOIN latest_terminal
+      ON latest_terminal.month_start = months.month_start
+     AND latest_terminal.conversation_id = month_conversations.id
+    GROUP BY months.month_start
+  ),
+  response_aggregates AS (
+    SELECT
+      months.month_start,
+      percentile_disc(0.5) WITHIN GROUP (ORDER BY first_response.latency_ms)
+        FILTER (WHERE first_response.latency_ms >= 0)::integer
+        AS median_first_response_ms,
+      count(first_response.latency_ms)
+        FILTER (WHERE first_response.latency_ms >= 0)::integer
+        AS first_response_sample_count
+    FROM months
+    LEFT JOIN first_response ON first_response.month_start = months.month_start
+    GROUP BY months.month_start
+  ),
+  cost_aggregates AS (
+    SELECT
+      months.month_start,
+      coalesce(sum(agent_runs.cost_usd), 0)::numeric(12, 6) AS llm_cost_usd
+    FROM months
+    LEFT JOIN agent_runs
+      ON agent_runs.started_at >= months.month_from
+     AND agent_runs.started_at < months.month_to
+    GROUP BY months.month_start
+  ),
+  csat_aggregates AS (
+    SELECT
+      months.month_start,
+      avg(agent_runs.csat_score)::numeric(4, 2) AS csat_average,
+      count(agent_runs.csat_score)::integer AS csat_response_count
+    FROM months
+    LEFT JOIN agent_runs
+      ON agent_runs.agent = 'concierge'
+     AND agent_runs.status IN ('completed', 'escalated', 'failed')
+     AND agent_runs.csat_score IS NOT NULL
+     AND agent_runs.completed_at >= months.month_from
+     AND agent_runs.completed_at < months.month_to
+    GROUP BY months.month_start
+  ),
+  renewal_per_membership AS (
+    SELECT
+      months.month_start,
+      engagement_events.metadata ->> 'membershipId' AS membership_id,
+      bool_or(engagement_events.type = 'renewal_paid') AS paid,
+      bool_or(
+        jsonb_typeof(engagement_events.metadata -> 'renewalOrdinal') = 'number'
+        AND engagement_events.metadata -> 'renewalOrdinal' = '1'::jsonb
+      ) AS first_year_due,
+      bool_or(
+        engagement_events.type = 'renewal_paid'
+        AND jsonb_typeof(engagement_events.metadata -> 'renewalOrdinal') = 'number'
+        AND engagement_events.metadata -> 'renewalOrdinal' = '1'::jsonb
+      ) AS first_year_paid
+    FROM months
+    INNER JOIN engagement_events
+      ON engagement_events.occurred_at >= months.month_from
+     AND engagement_events.occurred_at < months.month_to
+     AND engagement_events.type IN ('renewal_paid', 'renewal_failed')
+    INNER JOIN memberships
+      ON memberships.id::text =
+        engagement_events.metadata ->> 'membershipId'
+    GROUP BY months.month_start,
+      engagement_events.metadata ->> 'membershipId'
+  ),
+  renewal_aggregates AS (
+    SELECT
+      months.month_start,
+      count(renewal_per_membership.membership_id)::integer
+        AS renewal_due_count,
+      count(renewal_per_membership.membership_id)
+        FILTER (WHERE renewal_per_membership.paid)::integer
+        AS renewal_paid_count,
+      count(renewal_per_membership.membership_id)
+        FILTER (WHERE renewal_per_membership.first_year_due)::integer
+        AS first_year_renewal_due_count,
+      count(renewal_per_membership.membership_id)
+        FILTER (WHERE renewal_per_membership.first_year_paid)::integer
+        AS first_year_renewal_paid_count
+    FROM months
+    LEFT JOIN renewal_per_membership
+      ON renewal_per_membership.month_start = months.month_start
+    GROUP BY months.month_start
+  )
+  SELECT
+    months.month_start,
+    months.is_partial_month,
+    conversation_aggregates.conversation_count,
+    conversation_aggregates.terminal_conversation_count,
+    conversation_aggregates.resolved_conversation_count,
+    conversation_aggregates.escalated_conversation_count,
+    conversation_aggregates.failed_conversation_count,
+    CASE WHEN conversation_aggregates.terminal_conversation_count = 0
+      THEN NULL ELSE
+      conversation_aggregates.resolved_conversation_count::numeric
+        / conversation_aggregates.terminal_conversation_count END
+      ::numeric(7, 6) AS agent_resolved_rate,
+    CASE WHEN conversation_aggregates.terminal_conversation_count = 0
+      THEN NULL ELSE
+      conversation_aggregates.escalated_conversation_count::numeric
+        / conversation_aggregates.terminal_conversation_count END
+      ::numeric(7, 6) AS escalation_rate,
+    CASE WHEN conversation_aggregates.terminal_conversation_count = 0
+      THEN NULL ELSE
+      conversation_aggregates.failed_conversation_count::numeric
+        / conversation_aggregates.terminal_conversation_count END
+      ::numeric(7, 6) AS failure_rate,
+    response_aggregates.median_first_response_ms,
+    response_aggregates.first_response_sample_count,
+    csat_aggregates.csat_average,
+    csat_aggregates.csat_response_count,
+    (conversation_aggregates.resolved_conversation_count::numeric / 10)
+      ::numeric(12, 2) AS staff_hours_saved,
+    cost_aggregates.llm_cost_usd,
+    renewal_aggregates.renewal_due_count,
+    renewal_aggregates.renewal_paid_count,
+    CASE WHEN renewal_aggregates.renewal_due_count = 0
+      THEN NULL ELSE
+      renewal_aggregates.renewal_paid_count::numeric
+        / renewal_aggregates.renewal_due_count END
+      ::numeric(7, 6) AS renewal_rate,
+    renewal_aggregates.first_year_renewal_due_count,
+    renewal_aggregates.first_year_renewal_paid_count,
+    CASE WHEN renewal_aggregates.first_year_renewal_due_count = 0
+      THEN NULL ELSE
+      renewal_aggregates.first_year_renewal_paid_count::numeric
+        / renewal_aggregates.first_year_renewal_due_count END
+      ::numeric(7, 6) AS first_year_renewal_rate,
+    months.refreshed_at
+  FROM months
+  INNER JOIN conversation_aggregates USING (month_start)
+  INNER JOIN response_aggregates USING (month_start)
+  INNER JOIN cost_aggregates USING (month_start)
+  INNER JOIN csat_aggregates USING (month_start)
+  INNER JOIN renewal_aggregates USING (month_start)
+  ORDER BY months.month_start
+`);
 
 export type Profile = typeof profiles.$inferSelect;
 export type Company = typeof companies.$inferSelect;
@@ -491,6 +922,10 @@ export type JourneyState = typeof journeyState.$inferSelect;
 export type EmailLog = typeof emailLog.$inferSelect;
 export type WhatsappLog = typeof whatsappLog.$inferSelect;
 export type MessageSuppression = typeof messageSuppressions.$inferSelect;
+export type KnowledgeDocument = typeof kbDocuments.$inferSelect;
+export type Conversation = typeof conversations.$inferSelect;
+export type Message = typeof messages.$inferSelect;
+export type AgentRun = typeof agentRuns.$inferSelect;
 export type StaffTask = typeof staffTasks.$inferSelect;
 export type SavedSegment = typeof savedSegments.$inferSelect;
 export type Campaign = typeof campaigns.$inferSelect;
@@ -498,3 +933,4 @@ export type CampaignRecipient = typeof campaignRecipients.$inferSelect;
 export type Event = typeof events.$inferSelect;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
 export type Approval = typeof approvals.$inferSelect;
+export type Post = typeof posts.$inferSelect;

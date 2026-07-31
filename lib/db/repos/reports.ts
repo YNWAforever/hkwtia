@@ -6,6 +6,7 @@ import {z} from "zod";
 import {AT_RISK_DAY_MS, AT_RISK_NO_LOGIN_DAYS, AT_RISK_RENEWAL_DAYS, AT_RISK_SCORE_MAX, AT_RISK_TREND_MAX} from "@/lib/admin/at-risk";
 import type {RawReportFacts} from "@/lib/admin/report-formulas";
 import type {ReportUtcWindow} from "@/lib/admin/reports";
+import {requireScheduledAgent, type Actor as AgentActor} from "@/lib/auth/agent-actor";
 import {requireAdmin} from "@/lib/auth/actor";
 import {getDb} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";
@@ -49,10 +50,7 @@ function resultRows(result: unknown): unknown[] {
   return [];
 }
 
-export type ReportsRepository = Readonly<{readFacts: (actor: Actor, window: ReportUtcWindow) => Promise<RawReportFacts>}>;
-
-async function readFacts(actor: Actor, input: ReportUtcWindow): Promise<RawReportFacts> {
-  requireAdmin(actor);
+async function loadFacts(input: ReportUtcWindow): Promise<RawReportFacts> {
   const window = utcWindowSchema.parse(input);
   const db = await getDb();
   const scoreMaximum = sql.raw(String(AT_RISK_SCORE_MAX));
@@ -129,4 +127,22 @@ async function readFacts(actor: Actor, input: ReportUtcWindow): Promise<RawRepor
   };
 }
 
-export const reportsRepository: ReportsRepository = {readFacts};
+export type ReportsRepository = Readonly<{
+  readFacts: (actor: Actor, window: ReportUtcWindow) => Promise<RawReportFacts>;
+  readBoardFacts: (actor: AgentActor, window: ReportUtcWindow) => Promise<RawReportFacts>;
+}>;
+
+async function readFacts(actor: Actor, input: ReportUtcWindow): Promise<RawReportFacts> {
+  requireAdmin(actor);
+  return loadFacts(input);
+}
+
+async function readBoardFacts(
+  actor: AgentActor,
+  input: ReportUtcWindow,
+): Promise<RawReportFacts> {
+  requireScheduledAgent(actor, "board_reporter");
+  return loadFacts(input);
+}
+
+export const reportsRepository: ReportsRepository = {readFacts, readBoardFacts};

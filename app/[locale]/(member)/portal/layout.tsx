@@ -3,9 +3,11 @@ import {headers} from "next/headers";
 import {redirect} from "next/navigation";
 import type {ReactNode} from "react";
 
+import {ConciergeWidget} from "@/components/ai/concierge-widget";
 import {PortalNav} from "@/components/portal/portal-nav";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
+import {localizeConcierge} from "@/lib/ai/concierge-labels";
 import {buildPortalSignInPath} from "@/lib/portal/queries";
 
 export const dynamic = "force-dynamic";
@@ -38,11 +40,17 @@ export default async function PortalLayout({children, params}: Props) {
     throw error;
   }
 
-  const t = await getTranslations({locale, namespace: "Portal"});
+  const [t, concierge] = await Promise.all([
+    getTranslations({locale, namespace: "Portal"}),
+    getTranslations({locale, namespace: "Concierge"}),
+  ]);
+  const conciergeLabels = localizeConcierge((key) => concierge.raw(key));
+
   return (
     <div className="min-h-screen bg-background">
       <PortalNav locale={locale} labels={{navigation: t("navigation"), dashboard: t("dashboard"), profile: t("profile"), company: t("company"), directory: t("directory.title"), events: t("events.title"), documents: t("documents.title"), billing: t("billing.title"), signOut: t("signOut")}} />
       <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">{children}</main>
+      <ConciergeWidget locale={locale} labels={conciergeLabels} />
     </div>
   );
 }
