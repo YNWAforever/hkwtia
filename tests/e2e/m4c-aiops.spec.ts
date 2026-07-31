@@ -5,6 +5,8 @@ import {expect, test, type Page} from "@playwright/test";
 
 type Locale = "en" | "zh-HK";
 type AiOpsMessages = Readonly<{
+  metaTitle: string;
+  metaDescription: string;
   title: string;
   currentMonth: string;
   conversations: string;
@@ -65,6 +67,9 @@ test.describe("M4C public AI-Ops acceptance", () => {
       const labels = messages[locale];
       const response = await page.goto(`${localePaths[locale]}/ai-ops`);
       expect(response?.status()).toBe(200);
+      await expect(page).toHaveTitle(labels.metaTitle);
+      await expect(page.locator('meta[name="description"]'))
+        .toHaveAttribute("content", labels.metaDescription);
 
       await expect(page.getByRole("heading", {level: 1})).toHaveCount(1);
       await expect(page.getByRole("heading", {
@@ -132,4 +137,14 @@ test.describe("M4C public AI-Ops acceptance", () => {
       expect(await page.content()).not.toContain(canaryToken);
     });
   }
+
+  test("sitemap publishes the canonical AI-Ops route", async ({page}) => {
+    const response = await page.request.get("/sitemap.xml");
+    expect(response.status()).toBe(200);
+    const sitemap = await response.text();
+    const paths = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)]
+      .map(([, location]) => new URL(location).pathname);
+    expect(paths).toContain("/ai-ops");
+    expect(sitemap).not.toContain(canaryToken);
+  });
 });

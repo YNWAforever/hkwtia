@@ -92,13 +92,25 @@ import AiOpsPage, {
 
 const CANARY = "M4C_PRIVATE_CANARY_private@example.test";
 
-function monthStartAt(index: number) {
-  return new Date(Date.UTC(2025, 7 + index, 1)).toISOString().slice(0, 10);
+function monthStartAt(index: number, now: Date) {
+  const currentMonth = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Hong_Kong",
+    year: "numeric",
+    month: "2-digit",
+  }).formatToParts(now);
+  const year = Number(currentMonth.find((part) => part.type === "year")?.value);
+  const month = Number(currentMonth.find((part) => part.type === "month")?.value);
+
+  return new Date(Date.UTC(year, month - 12 + index, 1))
+    .toISOString()
+    .slice(0, 10);
 }
 
 function rows(): AiOpsMonthlyMetric[] {
+  const now = new Date();
+
   return Array.from({length: 12}, (_, index) => ({
-    monthStart: monthStartAt(index),
+    monthStart: monthStartAt(index, now),
     isPartialMonth: index === 11,
     conversationCount: 15,
     terminalConversationCount: 15,
@@ -120,7 +132,7 @@ function rows(): AiOpsMonthlyMetric[] {
     firstYearRenewalDueCount: 5,
     firstYearRenewalPaidCount: 4,
     firstYearRenewalRate: 0.8,
-    refreshedAt: new Date(),
+    refreshedAt: now,
   }));
 }
 
@@ -150,7 +162,7 @@ describe("AI-Ops public page boundary", () => {
     expect(repositories.readLatestTwelveMonths).toHaveBeenCalledOnce();
     expect(repositories.listPublishedBuildLogs).toHaveBeenCalledOnce();
     expect(screen.getByRole("table", {name: translated.renewalHeading}))
-      .toHaveTextContent("2025");
+      .toBeVisible();
     expect(screen.getAllByRole("row")).toHaveLength(13);
   });
 
