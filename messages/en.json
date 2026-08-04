@@ -491,12 +491,16 @@
   },
   "LaunchPad": {
     "metaTitle": "Launch Pad | WTIA",
-    "metaDescription": "A preview of WTIA's future go-global cohort model.",
+    "metaDescription": "WTIA's go-global cohort programme, landing partners, and funding-scheme picker.",
     "eyebrow": "Launch Pad",
     "title": "Go-global cohorts for technology teams.",
-    "description": "Launch Pad will bring selected technology teams together in focused cohorts with practical market access and peer learning.",
-    "cohort": "The cohort model is planned for a later milestone; no live applications or funding matching are available in M0.",
-    "milestone": "Applications and funding matching will be introduced in a later milestone."
+    "description": "Focused cohorts, practical market access, and clear next steps for Hong Kong technology teams expanding internationally.",
+    "program": {"title": "A practical route to new markets", "intro": "Launch Pad brings selected teams together for structured market preparation, landing-partner connections, and peer learning.", "outcomeTitle": "From readiness to market entry", "outcomeDescription": "Each cohort follows a clear path through readiness, partner matching, landing, and scale."},
+    "calendar": {"title": "Cohort calendar", "intro": "Explore current and upcoming Launch Pad cohorts.", "empty": "No public cohorts are scheduled yet.", "starts": "Starts", "ends": "Ends", "capacity": "Capacity", "fee": "Fee", "statuses": {"planning": "Planning", "open": "Open", "active": "Active", "completed": "Completed", "archived": "Archived"}},
+    "partners": {"title": "Landing partner map", "intro": "Meet the public organisations that help cohorts navigate priority markets.", "empty": "Landing partners will be announced shortly.", "market": "Market", "region": "Region", "statuses": {"prospect": "Prospect", "inDiscussion": "In discussion", "signed": "Signed", "inactive": "Inactive"}},
+    "funding": {"title": "Funding scheme picker", "intro": "Answer five questions for an informational screening against current published scheme rules.", "formLabel": "Funding scheme picker", "instructions": "Choose an answer for every question.", "submit": "See matching schemes", "questions": {"sector": {"label": "What is the project focus?", "options": {"trade": "Branding, upgrading, or market expansion", "advancedTraining": "Advanced technology training", "smartProduction": "Smart production line", "lifeHealth": "Life and health technology", "aiDataScience": "AI and data science", "advancedManufacturing": "Advanced manufacturing and new energy", "researchDevelopment": "Applied research and development"}}, "stage": {"label": "What is the company's Hong Kong status?", "options": {"businessRegistered": "Business-registered and non-subvented", "incorporated": "Incorporated and non-subvented", "subvented": "Incorporated and subvented"}}, "market": {"label": "Where will the project operate?", "options": {"hongKong": "Hong Kong", "coveredEconomy": "A covered BUD economy", "global": "Another market"}}, "employees": {"label": "Which staff readiness statement applies?", "options": {"standard": "No additional training condition applies", "traineeHongKongPermanentResident": "An advanced-technology trainee is a Hong Kong permanent resident"}}, "revenue": {"label": "What applicable investment or expenditure band applies?", "options": {"under100m": "Below HK$100 million enterprise investment", "investment100mProject150m": "At least HK$100 million enterprise investment and HK$150 million project cost", "eligibleRdExpenditure": "Eligible applied R&D or partnership expenditure"}}}, "results": {"heading": "Funding results", "eligible": "Potentially eligible", "ineligible": "Check scheme details", "source": "Official source", "asOf": "As of"}},
+    "clinic": {"title": "Need a funding or market-entry clinic?", "description": "Speak with WTIA about your next practical step."},
+    "clinicCta": "Book a clinic"
   },
   "Showcase": {
     "metaTitle": "Showcase | WTIA",
