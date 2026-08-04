@@ -117,9 +117,7 @@ export function toPublicListing(row: PublicSource, locale: AppLocale): PublicLis
     slug: row.slug,
     premium: row.premium,
     views: row.views,
-    memberSince: row.memberSince instanceof Date
-      ? row.memberSince.toISOString().slice(0, 10)
-      : String(row.memberSince),
+    memberSince: String(row.memberSince),
     name: chinese ? row.nameZhHk : row.nameEn,
     tagline: chinese ? row.taglineZhHk : row.taglineEn,
     description: chinese ? row.descriptionZhHk : row.descriptionEn,

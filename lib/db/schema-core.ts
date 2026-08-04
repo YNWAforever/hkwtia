@@ -72,6 +72,7 @@ export const showcaseListingStatusEnum = pgEnum("showcase_listing_status", [
   "rejected",
 ]);
 export const leadStatusEnum = pgEnum("lead_status", ["new", "contacted", "closed"]);
+export type ShowcaseListingStatus = (typeof showcaseListingStatusEnum.enumValues)[number];
 
 const vector = customType<{data: number[]; driverData: string}>({
   dataType() {

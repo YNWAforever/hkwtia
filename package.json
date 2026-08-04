@@ -24,7 +24,8 @@
     "db:seed:m4b": "tsx scripts/seed-m4b.ts",
     "eval:concierge": "vite-node --config vitest.config.ts evals/grader.ts --eval-concierge-cli",
     "eval:concierge:live": "vite-node --config vitest.config.ts evals/grader.ts --eval-concierge-cli --live",
-    "db:seed:m4c": "tsx scripts/seed-m4c.ts"
+    "db:seed:m4c": "tsx scripts/seed-m4c.ts",
+    "db:seed:m5": "tsx scripts/seed-m5.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.21",

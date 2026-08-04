@@ -61,7 +61,7 @@ describe("M5 Showcase contracts", () => {
       status: "published",
       premium: true,
       views: 7,
-      memberSince: new Date("2020-01-01T00:00:00.000Z"),
+      memberSince: "2020-01-01",
       nameEn: "Harbour Vision AI",
       nameZhHk: "港灣視野 AI",
       taglineEn: "Trade intelligence",
