@@ -44,6 +44,7 @@ vi.mock("@/lib/db/repos/cohorts", () => ({
 }));
 
 import LaunchPadPage from "@/app/[locale]/(public)/launchpad/page";
+import {CohortCalendar} from "@/components/marketing/cohort-calendar";
 import {FundingWizard} from "@/components/marketing/funding-wizard";
 
 const labels = {
@@ -103,6 +104,17 @@ describe("M6 Launch Pad public experience", () => {
       expect(markup).toContain(`for="funding-${key}"`);
     }
     expect(markup).toContain('role="status"');
+  });
+
+  it("uses the localized no-end label when a cohort has no fixed end date", () => {
+    const markup = renderToStaticMarkup(<CohortCalendar
+      cohorts={[{...state.cohorts[0], endsOn: null, status: "open" as const}]}
+      labels={{title: "Cohort calendar", empty: "No cohorts", starts: "Starts", ends: "Ends", noEnd: "No fixed end date", capacity: "Capacity", fee: "Fee", statuses: {planning: "Planning", open: "Open", active: "Active", completed: "Completed", archived: "Archived"}}}
+      locale="en"
+    />);
+
+    expect(markup).toContain("No fixed end date");
+    expect(markup).not.toContain("—");
   });
 
   it("passes only public partner fields into the rendered map", async () => {
