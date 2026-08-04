@@ -30,9 +30,11 @@ npm run db:seed
 
 `db:seed:m6` is the separately guarded Launch Pad acceptance fixture. It requires
 `M6_ACCEPTANCE_SEED=true`, equal `DATABASE_URL`/`DATABASE_URL_TEST` values, and
-an exact `M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST` entry for an isolated,
-non-Production database hostname. It never authorizes a shared or Production
-seed.
+an exact `M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST` entry for an explicitly
+allowlisted, non-Production database hostname. The guard blocks Production-mode
+execution and unallowlisted hosts, but it cannot establish that a host is
+isolated; the operator must confirm the selected database is isolated before
+seeding.
 
 ## Conventions
 

@@ -6,12 +6,14 @@ mutation.
 
 ## Isolated seed prerequisites
 
-Use an already-migrated isolated database only. `M6_ACCEPTANCE_SEED=true` is
-required, `DATABASE_URL` and `DATABASE_URL_TEST` must be the same value, and
-the normalized database hostname must be listed in
-`M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST`. The guard rejects Production-mode
-execution, missing or mismatched test URLs, and an unlisted host before opening
-a connection.
+Before running the seed, the operator must select an already-migrated isolated
+database. `M6_ACCEPTANCE_SEED=true` is required, `DATABASE_URL` and
+`DATABASE_URL_TEST` must be the same value, and the normalized database
+hostname must be listed in `M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST`. The guard
+rejects Production-mode execution, missing or mismatched test URLs, and an
+unlisted host before opening a connection. It cannot determine whether an
+allowlisted non-Production host is isolated, so that remains an operator
+responsibility.
 
 ```powershell
 $env:DATABASE_URL = "<isolated-branch-url>"
@@ -25,8 +27,9 @@ npm.cmd run db:seed:m6
 
 The seed reconciles only the `m6-launch-pad-acceptance-v1` fixture scope under
 an advisory lock. Do not put a populated URL, hostname, account, or credential
-in this document, shell history, logs, or source control. Do not run this
-command against a shared or Production database.
+in this document, shell history, logs, or source control. Do not use a shared
+or Production database; the Production check is enforced, while confirming a
+non-Production host is not shared is the operator's responsibility.
 
 ## Funding picker fixtures
 

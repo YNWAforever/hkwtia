@@ -94,8 +94,10 @@ M6 uses a separate, explicitly authorized acceptance seed. Set `DATABASE_URL`
 and `DATABASE_URL_TEST` to the same migrated isolated database,
 `M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST` to its exact normalized hostname, and
 `M6_ACCEPTANCE_SEED=true` before running `npm run db:seed:m6`. The guard
-rejects Production mode, a missing/mismatched test URL, or an unlisted host.
-The seed only reconciles the synthetic `m6-launch-pad-acceptance-v1` scope.
+rejects Production mode, a missing/mismatched test URL, or an unlisted host;
+it does not prove that an allowlisted non-Production host is isolated. The
+operator must make that confirmation before use. The seed only reconciles the
+synthetic `m6-launch-pad-acceptance-v1` scope.
 
 The credential-free deterministic browser checks use intercepted fixtures:
 
