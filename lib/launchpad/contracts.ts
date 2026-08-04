@@ -4,7 +4,6 @@ const cohortStatuses = ["planning", "open", "active", "completed", "archived"] a
 const cohortStages = [
   "applied", "accepted", "ready", "match", "land", "scale", "graduated", "rejected",
 ] as const;
-const landingPartnerMouStatuses = ["prospect", "in_discussion", "signed", "inactive"] as const;
 
 const readinessValueSchema = z.union([
   z.string().trim().max(500),
@@ -39,13 +38,14 @@ export const publicCohortSchema = z.object({
 }).strict();
 
 export const publicLandingPartnerSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().trim().min(1).max(160),
   organizationEn: z.string().trim().min(1).max(200),
   organizationZhHk: z.string().trim().min(1).max(200),
   market: z.string().trim().min(1).max(120),
   region: z.string().trim().min(1).max(120),
-  mouStatus: z.enum(landingPartnerMouStatuses),
 }).strict();
+
+export const landingPartnerMapSchema = z.array(publicLandingPartnerSchema).min(1);
 
 export function parseCohortStage(input: unknown) {
   return cohortStageSchema.parse(input);

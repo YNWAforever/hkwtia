@@ -6,6 +6,7 @@ import {
   parseCohortApplicationInput,
   parseCohortStage,
 } from "@/lib/launchpad/contracts";
+import {landingPartners} from "@/config/landing-partners";
 
 describe("M6 Launch Pad contracts", () => {
   it("rejects an invalid cohort ID before an application reaches a repository", () => {
@@ -39,5 +40,15 @@ describe("M6 Launch Pad contracts", () => {
     expect(cohortStageSchema.safeParse("graduated").success).toBe(true);
     expect(cohortStageSchema.safeParse("unknown").success).toBe(false);
     expect(parseCohortStage("accepted")).toBe("accepted");
+  });
+
+  it("ships only curated public fields in the static Landing Partner map", () => {
+    expect(landingPartners.length).toBeGreaterThan(0);
+    for (const partner of landingPartners) {
+      expect(Object.keys(partner).sort()).toEqual([
+        "id", "market", "organizationEn", "organizationZhHk", "region",
+      ]);
+      expect(JSON.stringify(partner)).not.toMatch(/prospect|in_discussion|contact|notes/i);
+    }
   });
 });

@@ -12,7 +12,6 @@ import {
   cohorts,
   companyMembers,
   companies,
-  landingPartners,
   showcaseListings,
   type Cohort,
   type CohortApplication,
@@ -21,10 +20,8 @@ import {
   parseCohortApplicationInput,
   parseCohortStage,
   publicCohortSchema,
-  publicLandingPartnerSchema,
   type CohortStage,
   type PublicCohort,
-  type PublicLandingPartner,
 } from "@/lib/launchpad/contracts";
 import {requireMember, type Actor, type AdminActor, type CompanyRole} from "@/lib/membership/lifecycle";
 
@@ -67,7 +64,6 @@ export type AdminCohortApplication = Readonly<{
 
 export type CohortStore = Readonly<{
   listPublicCohorts: () => Promise<readonly PublicCohort[]>;
-  listPublicPartners: () => Promise<readonly PublicLandingPartner[]>;
   findActiveCompanyId: (actor: Extract<Actor, {kind: "member"}>) => Promise<string | null>;
   getApplication: (cohortId: string, companyId: string) => Promise<CohortApplication | null>;
   getCohort: (cohortId: string) => Promise<Cohort | null>;
@@ -83,7 +79,6 @@ export type CohortRepositoryDependencies = Readonly<{
 
 export type CohortRepository = Readonly<{
   listPublicCohorts: () => Promise<readonly PublicCohort[]>;
-  listPublicPartners: () => Promise<readonly PublicLandingPartner[]>;
   getApplicationForCompany: (actor: Actor, cohortId: string, companyId: string) => Promise<CohortApplication | null>;
   createApplication: (actor: Actor, cohortId: string, input: unknown) => Promise<CohortApplication>;
   listForAdmin: (actor: AdminActor) => Promise<readonly AdminCohortApplication[]>;
@@ -113,18 +108,6 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): CohortSto
         status: cohorts.status,
       }).from(cohorts).where(ne(cohorts.status, "archived")).orderBy(asc(cohorts.startsOn), asc(cohorts.slug));
       return rows.map((row) => publicCohortSchema.parse(row));
-    },
-    async listPublicPartners() {
-      const database = await loadDatabase();
-      const rows = await database.select({
-        id: landingPartners.id,
-        organizationEn: landingPartners.organizationEn,
-        organizationZhHk: landingPartners.organizationZhHk,
-        market: landingPartners.market,
-        region: landingPartners.region,
-        mouStatus: landingPartners.mouStatus,
-      }).from(landingPartners).orderBy(asc(landingPartners.region), asc(landingPartners.market), asc(landingPartners.organizationEn));
-      return rows.map((row) => publicLandingPartnerSchema.parse(row));
     },
     async findActiveCompanyId(actor) {
       const database = await loadDatabase();
@@ -244,9 +227,6 @@ export function createCohortRepository(
   return {
     async listPublicCohorts() {
       return store.listPublicCohorts();
-    },
-    async listPublicPartners() {
-      return store.listPublicPartners();
     },
     async getApplicationForCompany(actor, cohortId, companyId) {
       const parsedCohortId = applicationIdSchema.parse(cohortId);

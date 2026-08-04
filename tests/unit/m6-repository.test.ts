@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 
-import type {Cohort, CohortApplication, LandingPartner} from "@/lib/db/server-schema";
+import type {Cohort, CohortApplication} from "@/lib/db/server-schema";
 import {
   createCohortRepository,
   type AdminCohortApplication,
@@ -67,10 +67,8 @@ function memoryStore(initial: CohortApplication[] = [], options: Readonly<{close
   const applications = [...initial];
   const auditEvents: {action: string; applicationId: string}[] = [];
   const goneGlobalCompanyIds: string[] = [];
-  const partners: LandingPartner[] = [];
   return {
     listPublicCohorts: async () => [cohort()],
-    listPublicPartners: async () => partners,
     findActiveCompanyId: async () => companyId,
     getApplication: async (requestedCohortId, requestedCompanyId) => applications.find((row) => row.cohortId === requestedCohortId && row.companyId === requestedCompanyId) ?? null,
     getCohort: async (id) => id === cohortId ? cohort() : null,

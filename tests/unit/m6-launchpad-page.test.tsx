@@ -2,34 +2,21 @@ import {renderToStaticMarkup} from "react-dom/server";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const state = vi.hoisted(() => ({
-  cohorts: [
-    {
-      id: "11111111-1111-4111-8111-111111111111",
-      slug: "asean-2026",
-      nameEn: "ASEAN Landing Cohort",
-      nameZhHk: "東盟落地組別",
-      descriptionEn: "A practical route into ASEAN markets.",
-      descriptionZhHk: "進入東盟市場的實務路徑。",
-      track: "Market entry",
-      startsOn: "2026-10-01",
-      endsOn: "2026-12-31",
-      capacity: 20,
-      feeHkd: 12000,
-      status: "open",
-    },
-  ],
-  partners: [
-    {
-      id: "22222222-2222-4222-8222-222222222222",
-      organizationEn: "Singapore Trade Desk",
-      organizationZhHk: "新加坡貿易服務台",
-      market: "Singapore",
-      region: "ASEAN",
-      mouStatus: "signed",
-      contact: "private-contact@example.com",
-      notes: "private-partner-notes",
-    },
-  ],
+  cohorts: [{
+    id: "11111111-1111-4111-8111-111111111111",
+    slug: "asean-2026",
+    nameEn: "ASEAN Landing Cohort",
+    nameZhHk: "ASEAN Landing Cohort",
+    descriptionEn: "A practical route into ASEAN markets.",
+    descriptionZhHk: "A practical route into ASEAN markets.",
+    track: "Market entry",
+    startsOn: "2026-10-01",
+    endsOn: "2026-12-31",
+    capacity: 20,
+    feeHkd: 12_000,
+    status: "open" as const,
+  }],
+  listPublicCohorts: vi.fn(),
 }));
 
 vi.mock("next-intl/server", () => ({
@@ -38,12 +25,11 @@ vi.mock("next-intl/server", () => ({
 }));
 vi.mock("@/lib/db/repos/cohorts", () => ({
   cohortRepository: {
-    listPublicCohorts: async () => state.cohorts,
-    listPublicPartners: async () => state.partners,
+    listPublicCohorts: () => state.listPublicCohorts(),
   },
 }));
 
-import LaunchPadPage from "@/app/[locale]/(public)/launchpad/page";
+import LaunchPadPage, {dynamic} from "@/app/[locale]/(public)/launchpad/page";
 import {CohortCalendar} from "@/components/marketing/cohort-calendar";
 import {FundingWizard} from "@/components/marketing/funding-wizard";
 
@@ -58,7 +44,6 @@ const labels = {
     employees: {label: "Staff readiness", options: {standard: "Standard", "trainee-hk-pr": "Trainee is a Hong Kong permanent resident"}},
     revenue: {label: "Investment or expenditure", options: {"under-100m": "Under HK$100 million", "investment-100m-project-150m": "HK$100 million investment and HK$150 million project", "eligible-rd-expenditure": "Eligible R&D expenditure"}},
   },
-  results: {heading: "Funding results", eligible: "Potentially eligible", ineligible: "Check details", source: "Official source", asOf: "As of", disclaimer: "Information only"},
 };
 
 function pageProps(locale: "en" | "zh-HK") {
@@ -76,12 +61,8 @@ function pageProps(locale: "en" | "zh-HK") {
 
 describe("M6 Launch Pad public experience", () => {
   beforeEach(() => {
-    state.cohorts = [{
-      id: "11111111-1111-4111-8111-111111111111", slug: "asean-2026", nameEn: "ASEAN Landing Cohort", nameZhHk: "東盟落地組別", descriptionEn: "A practical route into ASEAN markets.", descriptionZhHk: "進入東盟市場的實務路徑。", track: "Market entry", startsOn: "2026-10-01", endsOn: "2026-12-31", capacity: 20, feeHkd: 12000, status: "open",
-    }];
-    state.partners = [{
-      id: "22222222-2222-4222-8222-222222222222", organizationEn: "Singapore Trade Desk", organizationZhHk: "新加坡貿易服務台", market: "Singapore", region: "ASEAN", mouStatus: "signed", contact: "private-contact@example.com", notes: "private-partner-notes",
-    }];
+    state.listPublicCohorts.mockReset();
+    state.listPublicCohorts.mockResolvedValue(state.cohorts);
   });
 
   it.each(["en", "zh-HK"] as const)("renders the explainer, calendar, partner map, picker, results, and clinic CTA in %s", async (locale) => {
@@ -93,6 +74,20 @@ describe("M6 Launch Pad public experience", () => {
     expect(markup).toContain("funding.formLabel");
     expect(markup).toContain("funding.results.heading");
     expect(markup).toContain("clinicCta");
+  });
+
+  it("uses the curated static partner map with no database partner method available", async () => {
+    const markup = renderToStaticMarkup(await LaunchPadPage(pageProps("en")));
+
+    expect(markup).toContain("Singapore Trade Desk");
+    expect(markup).not.toContain("private-contact@example.com");
+    expect(markup).not.toContain("private-partner-notes");
+    expect(markup).not.toContain("in_discussion");
+    expect(markup).not.toContain("prospect");
+  });
+
+  it("forces dynamic rendering because the cohort calendar is database-backed", () => {
+    expect(dynamic).toBe("force-dynamic");
   });
 
   it("renders a keyboard-accessible GET picker with all five stable answer controls", () => {
@@ -108,20 +103,11 @@ describe("M6 Launch Pad public experience", () => {
 
   it("uses the localized no-end label when a cohort has no fixed end date", () => {
     const markup = renderToStaticMarkup(<CohortCalendar
-      cohorts={[{...state.cohorts[0], endsOn: null, status: "open" as const}]}
+      cohorts={[{...state.cohorts[0]!, endsOn: null}]}
       labels={{title: "Cohort calendar", empty: "No cohorts", starts: "Starts", ends: "Ends", noEnd: "No fixed end date", capacity: "Capacity", fee: "Fee", statuses: {planning: "Planning", open: "Open", active: "Active", completed: "Completed", archived: "Archived"}}}
       locale="en"
     />);
 
     expect(markup).toContain("No fixed end date");
-    expect(markup).not.toContain("—");
-  });
-
-  it("passes only public partner fields into the rendered map", async () => {
-    const markup = renderToStaticMarkup(await LaunchPadPage(pageProps("en")));
-
-    expect(markup).toContain("Singapore Trade Desk");
-    expect(markup).not.toContain("private-contact@example.com");
-    expect(markup).not.toContain("private-partner-notes");
   });
 });

@@ -6,7 +6,6 @@ export type LandingPartnerMapLabels = Readonly<{
   empty: string;
   market: string;
   region: string;
-  statuses: Readonly<Record<PublicLandingPartner["mouStatus"], string>>;
 }>;
 
 export function LandingPartnerMap({
@@ -23,7 +22,7 @@ export function LandingPartnerMap({
     {partners.map((partner) => <li className="rounded-lg border p-5" key={partner.id}>
       <p className="text-sm text-muted-foreground">{partner.region}</p>
       <h3 className="mt-1 text-lg font-semibold">{locale === "zh-HK" ? partner.organizationZhHk : partner.organizationEn}</h3>
-      <dl className="mt-4 space-y-2 text-sm"><div><dt className="font-medium">{labels.market}</dt><dd>{partner.market}</dd></div><div><dt className="font-medium">{labels.region}</dt><dd>{partner.region}</dd></div><div><dt className="font-medium">{labels.statuses[partner.mouStatus]}</dt></div></dl>
+      <dl className="mt-4 space-y-2 text-sm"><div><dt className="font-medium">{labels.market}</dt><dd>{partner.market}</dd></div><div><dt className="font-medium">{labels.region}</dt><dd>{partner.region}</dd></div></dl>
     </li>)}
   </ul>;
 }

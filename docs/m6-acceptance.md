@@ -53,6 +53,9 @@ Check both public routes:
 
 Each must render the programme explainer, cohort calendar, Landing Partner map,
 five-question funding picker, and any currently open cohort application form.
+The public map is a curated static configuration containing only approved public
+identity and market fields; it does not read the `landing_partners` database
+table or expose contact, notes, or negotiation-status data.
 
 ## Durable journey demonstration
 
