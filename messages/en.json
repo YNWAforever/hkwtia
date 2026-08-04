@@ -858,6 +858,7 @@
       "atRisk": "At risk",
       "events": "Events",
       "listingsReview": "Showcase review",
+      "cohorts": "Launch Pad cohorts",
       "approvals": "Approvals",
       "reports": "Reports",
       "automations": "Automations"
@@ -875,6 +876,18 @@
       "reject": "Reject",
       "rejectionReason": "Rejection reason",
       "savePremium": "Save"
+    },
+    "cohorts": {
+      "title": "Cohort applications",
+      "description": "Move Launch Pad applications through the staff-reviewed go-global journey.",
+      "application": "Application",
+      "moveTo": "Move to",
+      "notes": "Staff note",
+      "move": "Update stage",
+      "moving": "Updating…",
+      "empty": "No applications in this stage.",
+      "errors": {"invalid": "Check the application move and try again.", "forbidden": "You do not have access to update this application.", "error": "The application could not be updated. Please try again."},
+      "stages": {"applied": "Applied", "accepted": "Accepted", "ready": "Ready", "match": "Match", "land": "Land", "scale": "Scale", "graduated": "Graduated", "rejected": "Rejected"}
     },
     "members": {
       "title": "Members",

@@ -860,6 +860,7 @@
       "atRisk": "高風險",
       "events": "活動",
       "listingsReview": "展示頁審核",
+      "cohorts": "啟航計劃",
       "approvals": "審批",
       "reports": "報告",
       "automations": "自動化"
@@ -877,6 +878,18 @@
       "reject": "退回",
       "rejectionReason": "退回原因",
       "savePremium": "儲存"
+    },
+    "cohorts": {
+      "title": "啟航計劃申請",
+      "description": "由職員審核並推進企業的海外拓展申請。",
+      "application": "申請",
+      "moveTo": "移至",
+      "notes": "職員備註",
+      "move": "更新階段",
+      "moving": "更新中…",
+      "empty": "此階段暫無申請。",
+      "errors": {"invalid": "請檢查申請階段轉移後再試。", "forbidden": "你沒有權限更新此申請。", "error": "未能更新申請，請再試一次。"},
+      "stages": {"applied": "已申請", "accepted": "已接納", "ready": "已就緒", "match": "配對", "land": "落地", "scale": "擴展", "graduated": "已畢業", "rejected": "已拒絕"}
     },
     "members": {
       "title": "會員",
