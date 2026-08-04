@@ -7,7 +7,7 @@ import {buildShowcaseQuery, softwareApplicationJsonLd} from "@/lib/showcase/publ
 import type {PublicListing} from "@/lib/showcase/contracts";
 
 const listing: PublicListing = {
-  slug: "harbour-vision-ai", premium: true, views: 42, memberSince: "2020-01-01", name: "Harbour Vision AI", tagline: "Trade intelligence", description: "Public description", category: "software", useCases: ["logistics"], deploymentOptions: ["cloud"], supportedLanguages: ["en", "zh-HK"], worksWith: ["ERP"], videoUrl: null, caseStudyUrl: null, caseStudySummary: "Case study", logoReference: null,
+  slug: "harbour-vision-ai", premium: true, goneGlobal: false, views: 42, memberSince: "2020-01-01", name: "Harbour Vision AI", tagline: "Trade intelligence", description: "Public description", category: "software", useCases: ["logistics"], deploymentOptions: ["cloud"], supportedLanguages: ["en", "zh-HK"], worksWith: ["ERP"], videoUrl: null, caseStudyUrl: null, caseStudySummary: "Case study", logoReference: null,
 };
 
 describe("public Showcase", () => {
@@ -28,7 +28,7 @@ describe("public Showcase", () => {
   });
 
   it("renders buyer-facing card and URL-driven filters", () => {
-    render(<><ShowcaseFilters filters={{category: "software"}} labels={{search: "Search", category: "Category", useCase: "Use case", deployment: "Deployment", language: "Language", worksWith: "Works with", submit: "Filter", clear: "Clear"}}/><ShowcaseCard listing={listing} locale="en" labels={{premium: "Premium", memberSince: "WTIA member since", view: "View listing"}}/></>);
+    render(<><ShowcaseFilters filters={{category: "software"}} labels={{search: "Search", category: "Category", useCase: "Use case", deployment: "Deployment", language: "Language", worksWith: "Works with", submit: "Filter", clear: "Clear"}}/><ShowcaseCard listing={listing} locale="en" labels={{premium: "Premium", goneGlobal: "Gone Global", memberSince: "WTIA member since", view: "View listing"}}/></>);
     expect(screen.getByRole("link", {name: /View listing/i})).toHaveAttribute("href", "/showcase/harbour-vision-ai");
     expect(screen.getByLabelText("Category")).toHaveValue("software");
     expect(screen.getByText("Premium")).toBeInTheDocument();

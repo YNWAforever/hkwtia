@@ -512,6 +512,7 @@
     "emptyTitle": "No published listings match",
     "emptyDescription": "Try changing a filter or search term.",
     "premium": "Premium",
+    "goneGlobal": "Gone Global",
     "memberSince": "WTIA member since",
     "view": "View listing",
     "filters": {

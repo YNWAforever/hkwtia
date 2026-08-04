@@ -26,6 +26,6 @@ export default async function ShowcasePage({params, searchParams}: Props) {
   const [t, query] = await Promise.all([getTranslations({locale, namespace: "Showcase"}), searchParams]);
   const filters = parseShowcaseFilters(query);
   const listings = (await showcaseRepository.listPublished(filters)).map((row) => toPublicListing(row, locale));
-  const cardLabels = {premium: t("premium"), memberSince: t("memberSince"), view: t("view")};
+  const cardLabels = {premium: t("premium"), goneGlobal: t("goneGlobal"), memberSince: t("memberSince"), view: t("view")};
   return <><PageHero eyebrow={t("eyebrow")} title={t("title")} description={t("description")}/><main className="container mx-auto space-y-8 px-6 py-16"><ShowcaseFilters filters={filters} labels={{search: t("filters.search"), category: t("filters.category"), useCase: t("filters.useCase"), deployment: t("filters.deployment"), language: t("filters.language"), worksWith: t("filters.worksWith"), submit: t("filters.submit"), clear: t("filters.clear")}}/>{listings.length ? <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">{listings.map((listing) => <ShowcaseCard key={listing.slug} listing={listing} locale={locale} labels={cardLabels}/>)}</div> : <EmptyState title={t("emptyTitle")} description={t("emptyDescription")}/>}</main></>;
 }

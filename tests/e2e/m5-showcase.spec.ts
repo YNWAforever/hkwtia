@@ -6,6 +6,7 @@ import type {PublicListing} from "@/lib/showcase/contracts";
 const listing = {
   slug: "harbour-vision-ai",
   premium: true,
+  goneGlobal: false,
   views: 0,
   memberSince: "2026-01-01",
   name: "Harbour Vision AI",

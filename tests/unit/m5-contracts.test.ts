@@ -60,6 +60,7 @@ describe("M5 Showcase contracts", () => {
       slug: "harbour-vision-ai",
       status: "published",
       premium: true,
+      goneGlobal: false,
       views: 7,
       memberSince: "2020-01-01",
       nameEn: "Harbour Vision AI",

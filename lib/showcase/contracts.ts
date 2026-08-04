@@ -85,7 +85,7 @@ export function transitionListingStatus(
 
 type PublicSource = Pick<
   ShowcaseListing,
-  | "slug" | "status" | "premium" | "views" | "memberSince"
+  | "slug" | "status" | "premium" | "goneGlobal" | "views" | "memberSince"
   | "nameEn" | "nameZhHk" | "taglineEn" | "taglineZhHk"
   | "descriptionEn" | "descriptionZhHk" | "category" | "useCases"
   | "deploymentOptions" | "supportedLanguages" | "worksWith" | "videoUrl"
@@ -95,6 +95,7 @@ type PublicSource = Pick<
 export type PublicListing = Readonly<{
   slug: string;
   premium: boolean;
+  goneGlobal: boolean;
   views: number;
   memberSince: string;
   name: string;
@@ -116,6 +117,7 @@ export function toPublicListing(row: PublicSource, locale: AppLocale): PublicLis
   return {
     slug: row.slug,
     premium: row.premium,
+    goneGlobal: row.goneGlobal,
     views: row.views,
     memberSince: String(row.memberSince),
     name: chinese ? row.nameZhHk : row.nameEn,
