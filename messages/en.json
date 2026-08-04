@@ -526,7 +526,18 @@
       "worksWith": "Works with",
       "caseStudy": "Case study",
       "video": "Product video",
-      "requestIntro": "Request an introduction"
+      "requestIntro": "Request an introduction",
+      "form": {
+        "name": "Name",
+        "email": "Email",
+        "organization": "Organisation",
+        "message": "How can WTIA help?",
+        "submit": "Request an introduction",
+        "submitting": "Sending…",
+        "success": "Thank you — WTIA will follow up shortly.",
+        "invalid": "Please check your details and try again.",
+        "rateLimited": "Please try again later."
+      }
     }
   },
   "AiOps": {
