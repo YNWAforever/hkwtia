@@ -11,6 +11,7 @@ import {
   cohortApplications,
   cohorts,
   companyMembers,
+  companies,
   landingPartners,
   showcaseListings,
   type Cohort,
@@ -21,7 +22,6 @@ import {
   parseCohortStage,
   publicCohortSchema,
   publicLandingPartnerSchema,
-  type CohortApplicationInput,
   type CohortStage,
   type PublicCohort,
   type PublicLandingPartner,
@@ -51,6 +51,20 @@ export type CohortMoveInput = Readonly<{
   actor: AdminActor;
 }>;
 
+/** Staff-facing identity projection; deliberately omits readiness and private notes. */
+export type AdminCohortApplication = Readonly<{
+  id: string;
+  cohortId: string;
+  companyId: string;
+  stage: CohortStage;
+  createdAt: Date;
+  updatedAt: Date;
+  companyDisplayName: string;
+  cohortSlug: string;
+  cohortNameEn: string;
+  cohortNameZhHk: string;
+}>;
+
 export type CohortStore = Readonly<{
   listPublicCohorts: () => Promise<readonly PublicCohort[]>;
   listPublicPartners: () => Promise<readonly PublicLandingPartner[]>;
@@ -58,7 +72,7 @@ export type CohortStore = Readonly<{
   getApplication: (cohortId: string, companyId: string) => Promise<CohortApplication | null>;
   getCohort: (cohortId: string) => Promise<Cohort | null>;
   createApplication: (input: Readonly<{cohortId: string; companyId: string; readiness: Record<string, unknown>}>) => Promise<CohortApplication>;
-  listForAdmin: () => Promise<readonly CohortApplication[]>;
+  listForAdmin: () => Promise<readonly AdminCohortApplication[]>;
   moveApplication: (input: CohortMoveInput) => Promise<CohortApplication | null>;
 }>;
 
@@ -72,7 +86,7 @@ export type CohortRepository = Readonly<{
   listPublicPartners: () => Promise<readonly PublicLandingPartner[]>;
   getApplicationForCompany: (actor: Actor, cohortId: string, companyId: string) => Promise<CohortApplication | null>;
   createApplication: (actor: Actor, cohortId: string, input: unknown) => Promise<CohortApplication>;
-  listForAdmin: (actor: AdminActor) => Promise<readonly CohortApplication[]>;
+  listForAdmin: (actor: AdminActor) => Promise<readonly AdminCohortApplication[]>;
   moveApplication: (actor: AdminActor, applicationId: string, nextStage: unknown, notes?: string | null) => Promise<CohortApplication | null>;
 }>;
 
@@ -153,7 +167,20 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): CohortSto
     },
     async listForAdmin() {
       const database = await loadDatabase();
-      return database.select().from(cohortApplications)
+      return database.select({
+        id: cohortApplications.id,
+        cohortId: cohortApplications.cohortId,
+        companyId: cohortApplications.companyId,
+        stage: cohortApplications.stage,
+        createdAt: cohortApplications.createdAt,
+        updatedAt: cohortApplications.updatedAt,
+        companyDisplayName: companies.displayName,
+        cohortSlug: cohorts.slug,
+        cohortNameEn: cohorts.nameEn,
+        cohortNameZhHk: cohorts.nameZhHk,
+      }).from(cohortApplications)
+        .innerJoin(companies, eq(cohortApplications.companyId, companies.id))
+        .innerJoin(cohorts, eq(cohortApplications.cohortId, cohorts.id))
         .orderBy(asc(cohortApplications.cohortId), asc(cohortApplications.stage), asc(cohortApplications.createdAt));
     },
     async moveApplication(input) {

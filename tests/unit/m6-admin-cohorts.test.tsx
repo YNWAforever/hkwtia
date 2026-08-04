@@ -92,18 +92,20 @@ describe("M6 staff cohort kanban", () => {
     expect(state.moveApplication).not.toHaveBeenCalled();
   });
 
-  it("renders every persisted stage with keyboard-accessible legal move controls and no private readiness data", () => {
+  it("renders every persisted stage with safe company and cohort identities plus keyboard-accessible legal move controls", () => {
     render(<CohortKanban
-      applications={[{id: applicationId, cohortId, companyId, stage: "applied", readiness: {contactEmail: "private@example.test"}, notes: "private note", createdAt: new Date(), updatedAt: new Date()}] as never}
+      applications={[{id: applicationId, stage: "applied", companyDisplayName: "Harbour Systems", cohortSlug: "singapore-launch", cohortName: "Singapore Launch Pad"}]}
       labels={labels}
       moveAction={async () => ({status: "success"})}
     />);
 
     for (const stage of Object.values(labels.stages)) expect(screen.getByRole("heading", {name: stage})).toBeInTheDocument();
-    expect(screen.getByLabelText(`${labels.moveTo}: ${applicationId}`)).toHaveAttribute("name", "stage");
-    expect(screen.getByLabelText(`${labels.notes}: ${applicationId}`)).toHaveAttribute("name", "notes");
+    expect(screen.getByText("Harbour Systems")).toBeInTheDocument();
+    expect(screen.getByText("Singapore Launch Pad")).toBeInTheDocument();
+    expect(screen.getByText("singapore-launch")).toBeInTheDocument();
+    expect(screen.queryByText(`${labels.application} ${applicationId}`)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(`${labels.moveTo}: Harbour Systems`)).toHaveAttribute("name", "stage");
+    expect(screen.getByLabelText(`${labels.notes}: Harbour Systems`)).toHaveAttribute("name", "notes");
     expect(screen.getByRole("button", {name: labels.move})).toBeInTheDocument();
-    expect(screen.queryByText("private@example.test")).not.toBeInTheDocument();
-    expect(screen.queryByText("private note")).not.toBeInTheDocument();
   });
 });

@@ -23,6 +23,12 @@ export default async function AdminCohortsPage({params}: Props) {
     errors: {invalid: t("errors.invalid"), forbidden: t("errors.forbidden"), error: t("errors.error")},
     stages: {applied: t("stages.applied"), accepted: t("stages.accepted"), ready: t("stages.ready"), match: t("stages.match"), land: t("stages.land"), scale: t("stages.scale"), graduated: t("stages.graduated"), rejected: t("stages.rejected")},
   };
-  const kanbanApplications = applications.map(({id, stage}) => ({id, stage}));
+  const kanbanApplications = applications.map(({id, stage, companyDisplayName, cohortSlug, cohortNameEn, cohortNameZhHk}) => ({
+    id,
+    stage,
+    companyDisplayName,
+    cohortSlug,
+    cohortName: locale === "zh-HK" ? cohortNameZhHk : cohortNameEn,
+  }));
   return <CohortKanban applications={kanbanApplications} labels={labels} moveAction={moveCohortApplicationAction.bind(null, path)}/>;
 }

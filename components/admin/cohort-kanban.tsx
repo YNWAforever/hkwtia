@@ -31,7 +31,13 @@ export type CohortKanbanLabels = Readonly<{
 }>;
 
 type Action = (formData: FormData) => Promise<CohortMoveActionState>;
-export type CohortKanbanApplication = Readonly<{id: string; stage: CohortStage}>;
+export type CohortKanbanApplication = Readonly<{
+  id: string;
+  stage: CohortStage;
+  companyDisplayName: string;
+  cohortSlug: string;
+  cohortName: string;
+}>;
 const initialState: CohortMoveActionState = {status: "idle"};
 
 function statusMessage(state: CohortMoveActionState, labels: CohortKanbanLabels) {
@@ -55,11 +61,11 @@ function CohortApplicationCard({application, action, labels}: Readonly<{
   const controlId = application.id;
 
   return <article className="space-y-3 rounded-lg border border-border/70 bg-background p-4 shadow-sm">
-    <p className="text-sm font-medium">{labels.application} {application.id}</p>
+    <div><p className="font-medium">{application.companyDisplayName}</p><p className="text-sm text-muted-foreground">{application.cohortName}</p><p className="text-xs text-muted-foreground">{application.cohortSlug}</p></div>
     {nextStages.length > 0 ? <form action={formAction} className="space-y-3">
       <input name="applicationId" type="hidden" value={application.id}/>
-      <label className="block space-y-1 text-sm" htmlFor={`cohort-stage-${controlId}`}><span>{labels.moveTo}</span><select aria-describedby={`cohort-status-${controlId}`} aria-label={`${labels.moveTo}: ${application.id}`} className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={nextStages[0]} id={`cohort-stage-${controlId}`} name="stage">{nextStages.map((stage) => <option key={stage} value={stage}>{labels.stages[stage]}</option>)}</select></label>
-      <label className="block space-y-1 text-sm" htmlFor={`cohort-notes-${controlId}`}><span>{labels.notes}</span><textarea aria-describedby={`cohort-status-${controlId}`} aria-label={`${labels.notes}: ${application.id}`} className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2" id={`cohort-notes-${controlId}`} maxLength={4000} name="notes" rows={3}/></label>
+      <label className="block space-y-1 text-sm" htmlFor={`cohort-stage-${controlId}`}><span>{labels.moveTo}</span><select aria-describedby={`cohort-status-${controlId}`} aria-label={`${labels.moveTo}: ${application.companyDisplayName}`} className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={nextStages[0]} id={`cohort-stage-${controlId}`} name="stage">{nextStages.map((stage) => <option key={stage} value={stage}>{labels.stages[stage]}</option>)}</select></label>
+      <label className="block space-y-1 text-sm" htmlFor={`cohort-notes-${controlId}`}><span>{labels.notes}</span><textarea aria-describedby={`cohort-status-${controlId}`} aria-label={`${labels.notes}: ${application.companyDisplayName}`} className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2" id={`cohort-notes-${controlId}`} maxLength={4000} name="notes" rows={3}/></label>
       <button className="min-h-11 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending} type="submit">{pending ? labels.moving : labels.move}</button>
       <p aria-live="polite" className="text-sm text-destructive" id={`cohort-status-${controlId}`} role={message ? "alert" : "status"}>{message}</p>
     </form> : null}

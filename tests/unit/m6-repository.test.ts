@@ -3,6 +3,7 @@ import {describe, expect, it} from "vitest";
 import type {Cohort, CohortApplication, LandingPartner} from "@/lib/db/server-schema";
 import {
   createCohortRepository,
+  type AdminCohortApplication,
   type CohortStore,
 } from "@/lib/db/repos/cohorts";
 import {actorFor, anonymousActor} from "@/tests/helpers/fakes";
@@ -44,6 +45,21 @@ function application(overrides: Partial<CohortApplication> = {}): CohortApplicat
   };
 }
 
+function adminApplication(row: CohortApplication): AdminCohortApplication {
+  return {
+    id: row.id,
+    cohortId: row.cohortId,
+    companyId: row.companyId,
+    stage: row.stage,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    companyDisplayName: "Harbour Systems",
+    cohortSlug: "launch-pad-2026",
+    cohortNameEn: "Launch Pad 2026",
+    cohortNameZhHk: "啟航計劃 2026",
+  };
+}
+
 function memoryStore(initial: CohortApplication[] = [], options: Readonly<{closeBeforeCreate?: boolean}> = {}): CohortStore & {
   readonly auditEvents: readonly {action: string; applicationId: string}[];
   readonly goneGlobalCompanyIds: readonly string[];
@@ -66,7 +82,7 @@ function memoryStore(initial: CohortApplication[] = [], options: Readonly<{close
       applications.push(created);
       return created;
     },
-    listForAdmin: async () => applications,
+    listForAdmin: async () => applications.map(adminApplication),
     moveApplication: async (input) => {
       const current = applications.find((row) => row.id === input.applicationId);
       if (!current) return null;
@@ -120,6 +136,21 @@ describe("M6 cohort repository", () => {
     await expect(repo.listForAdmin(actorFor("member-1") as never)).rejects.toThrow("FORBIDDEN");
     await expect(repo.moveApplication(actorFor("member-1") as never, application().id, "accepted"))
       .rejects.toThrow("FORBIDDEN");
+  });
+
+  it("returns staff-safe cohort and company display projections without readiness or notes", async () => {
+    const repo = createCohortRepository({store: memoryStore([application()])});
+    const rows = await repo.listForAdmin({kind: "staff", userId: "staff-1", profileId: "staff-1"});
+
+    expect(rows).toEqual([expect.objectContaining({
+      id: application().id,
+      companyDisplayName: "Harbour Systems",
+      cohortSlug: "launch-pad-2026",
+      cohortNameEn: "Launch Pad 2026",
+      cohortNameZhHk: "啟航計劃 2026",
+    })]);
+    expect(rows[0]).not.toHaveProperty("readiness");
+    expect(rows[0]).not.toHaveProperty("notes");
   });
 
   it("rejects an invalid stage transition before an audit write", async () => {
