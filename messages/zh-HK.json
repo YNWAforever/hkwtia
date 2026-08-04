@@ -819,9 +819,24 @@
       "members": "會員",
       "atRisk": "高風險",
       "events": "活動",
+      "listingsReview": "展示頁審核",
       "approvals": "審批",
       "reports": "報告",
       "automations": "自動化"
+    },
+    "listingsReview": {
+      "eyebrow": "展示頁管理",
+      "title": "審核公司展示頁",
+      "description": "檢查每個公開展示頁，然後才在 WTIA Showcase 發布。",
+      "caption": "公司展示頁",
+      "company": "公司",
+      "slug": "Slug",
+      "status": "狀態",
+      "premium": "精選",
+      "publish": "發布",
+      "reject": "退回",
+      "rejectionReason": "退回原因",
+      "savePremium": "儲存"
     },
     "members": {
       "title": "會員",

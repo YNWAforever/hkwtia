@@ -817,9 +817,24 @@
       "members": "Members",
       "atRisk": "At risk",
       "events": "Events",
+      "listingsReview": "Showcase review",
       "approvals": "Approvals",
       "reports": "Reports",
       "automations": "Automations"
+    },
+    "listingsReview": {
+      "eyebrow": "Showcase operations",
+      "title": "Review company listings",
+      "description": "Check every public listing before it appears in the WTIA Showcase.",
+      "caption": "Company listings",
+      "company": "Company",
+      "slug": "Slug",
+      "status": "Status",
+      "premium": "Premium",
+      "publish": "Publish",
+      "reject": "Reject",
+      "rejectionReason": "Rejection reason",
+      "savePremium": "Save"
     },
     "members": {
       "title": "Members",
