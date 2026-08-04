@@ -1,10 +1,28 @@
 import {render, screen} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
+const actionState = vi.hoisted(() => ({
+  actor: {kind: "member", userId: "member-a", profileId: "member-a"},
+  error: null as string | null,
+  createApplication: vi.fn(),
+}));
+
+vi.mock("next/cache", () => ({revalidatePath: vi.fn()}));
+vi.mock("@/lib/auth/actor", () => ({
+  requireActor: async () => {
+    if (actionState.error) throw new Error(actionState.error);
+    return actionState.actor;
+  },
+}));
+vi.mock("@/lib/db/repos/cohorts", () => ({
+  cohortRepository: {createApplication: (...args: unknown[]) => actionState.createApplication(...args)},
+}));
+
 import {CohortApplicationForm} from "@/components/marketing/cohort-application-form";
 import {applyToCohort, applyToCohortAction} from "@/lib/launchpad/member-actions";
 import type {CohortRepository} from "@/lib/db/repos/cohorts";
 import {actorFor, anonymousActor} from "@/tests/helpers/fakes";
+import {revalidatePath} from "next/cache";
 
 const cohortId = "11111111-1111-4111-8111-111111111111";
 const actor = actorFor("member-a");
@@ -18,7 +36,24 @@ function repository(create = vi.fn(async () => application())): Pick<CohortRepos
   return {createApplication: create};
 }
 
+function validForm(locale: "en" | "zh-HK" = "en") {
+  const formData = new FormData();
+  formData.set("cohortId", cohortId);
+  formData.set("market", "Singapore");
+  formData.set("readiness", "Pilot-ready");
+  formData.set("consent", "on");
+  formData.set("locale", locale);
+  return formData;
+}
+
 describe("M6 member cohort application", () => {
+  beforeEach(() => {
+    actionState.actor = {kind: "member", userId: "member-a", profileId: "member-a"};
+    actionState.error = null;
+    actionState.createApplication = vi.fn(async () => application());
+    vi.mocked(revalidatePath).mockClear();
+  });
+
   it("delegates an authenticated member application to the actor-scoped repository", async () => {
     const createApplication = vi.fn(async () => application());
     const result = await applyToCohort(actor, cohortId, input, repository(createApplication));
@@ -76,5 +111,40 @@ describe("M6 member cohort application", () => {
     formData.set("readiness", "Pilot-ready");
 
     await expect(applyToCohortAction(formData)).resolves.toEqual({status: "invalid"});
+  });
+
+  it("returns an unauthorised state without calling the repository", async () => {
+    actionState.error = "UNAUTHORIZED";
+
+    await expect(applyToCohortAction(validForm())).resolves.toEqual({status: "unauthorized"});
+    expect(actionState.createApplication).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("returns an invalid state when the repository rejects a closed cohort", async () => {
+    actionState.createApplication = vi.fn(async () => { throw new Error("COHORT_NOT_OPEN"); });
+
+    await expect(applyToCohortAction(validForm())).resolves.toEqual({status: "invalid"});
+    expect(actionState.createApplication).toHaveBeenCalledTimes(1);
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("allows repeat successful submissions through the idempotent repository boundary", async () => {
+    const existing = application();
+    actionState.createApplication = vi.fn(async () => existing);
+
+    await expect(applyToCohortAction(validForm())).resolves.toEqual({status: "success"});
+    await expect(applyToCohortAction(validForm())).resolves.toEqual({status: "success"});
+    expect(actionState.createApplication).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    ["en", ["/launchpad", "/portal"]],
+    ["zh-HK", ["/zh/launchpad", "/zh/portal"]],
+  ] as const)("revalidates canonical %s launch pad and portal paths", async (locale, paths) => {
+    await expect(applyToCohortAction(validForm(locale))).resolves.toEqual({status: "success"});
+
+    expect(revalidatePath).toHaveBeenNthCalledWith(1, paths[0]);
+    expect(revalidatePath).toHaveBeenNthCalledWith(2, paths[1]);
   });
 });

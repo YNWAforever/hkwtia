@@ -6,6 +6,7 @@ import {z} from "zod";
 import {requireActor} from "@/lib/auth/actor";
 import {cohortRepository, type CohortRepository} from "@/lib/db/repos/cohorts";
 import type {Actor} from "@/lib/membership/lifecycle";
+import {localizedPath} from "@/lib/urls";
 
 const formSchema = z.object({
   cohortId: z.string().uuid(),
@@ -41,8 +42,8 @@ export async function applyToCohortAction(formData: FormData): Promise<CohortApp
       cohortId: parsed.data.cohortId,
       readiness: {market: parsed.data.market, readiness: parsed.data.readiness},
     });
-    revalidatePath(`/${parsed.data.locale}/launchpad`);
-    revalidatePath(`/${parsed.data.locale}/portal`);
+    revalidatePath(localizedPath(parsed.data.locale, "/launchpad"));
+    revalidatePath(localizedPath(parsed.data.locale, "/portal"));
     return {status: "success"};
   } catch (error) {
     if (error instanceof Error && (error.message === "UNAUTHORIZED" || error.message === "FORBIDDEN")) return {status: "unauthorized"};
