@@ -682,6 +682,40 @@
       "directoryVisible": "在 WTIA 會員目錄顯示此資料"
     },
     "readOnly": "只有公司擁有人及管理員可以編輯這些資料。",
+    "showcaseListing": {
+      "nav": "展示頁資料",
+      "eyebrow": "AI 展示",
+      "title": "發布你的公司故事",
+      "description": "向 WTIA 網絡分享清晰、方便買家了解的產品資料。",
+      "formTitle": "展示頁資料",
+      "saveDraft": "儲存草稿",
+      "submit": "提交審核",
+      "status": {
+        "draft": "草稿 — 只有公司團隊可以查看。",
+        "pending_review": "等待審核 — WTIA 職員會審閱這份提交。",
+        "published": "已發布 — 你的展示頁已在 Showcase 公開。",
+        "rejected": "需要修改 — 更新資料後再次提交。"
+      },
+      "fields": {
+        "slug": "公開網址 slug",
+        "nameEn": "英文名稱",
+        "nameZhHk": "繁體中文名稱",
+        "taglineEn": "英文標語",
+        "taglineZhHk": "繁體中文標語",
+        "descriptionEn": "英文描述",
+        "descriptionZhHk": "繁體中文描述",
+        "category": "類別",
+        "useCases": "使用場景（以逗號分隔）",
+        "deploymentOptions": "部署方式（以逗號分隔）",
+        "supportedLanguages": "支援語言（以逗號分隔）",
+        "worksWith": "兼容系統（以逗號分隔）",
+        "videoUrl": "影片網址（HTTPS）",
+        "caseStudyUrl": "案例研究網址（HTTPS）",
+        "caseStudySummaryEn": "英文案例摘要",
+        "caseStudySummaryZhHk": "繁體中文案例摘要",
+        "logoReference": "標誌引用"
+      }
+    },
     "directory": {
       "title": "會員名錄",
       "description": "尋找選擇公開資料的 WTIA 會員。",

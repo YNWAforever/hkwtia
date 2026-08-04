@@ -681,6 +681,40 @@
       "directoryVisible": "Show this profile in the WTIA directory"
     },
     "readOnly": "Only company owners and admins can edit these details.",
+    "showcaseListing": {
+      "nav": "Showcase listing",
+      "eyebrow": "AI Showcase",
+      "title": "Publish your company story",
+      "description": "Share a clear, buyer-friendly view of your product with the WTIA network.",
+      "formTitle": "Listing details",
+      "saveDraft": "Save draft",
+      "submit": "Submit for review",
+      "status": {
+        "draft": "Draft — visible only to your company team.",
+        "pending_review": "Pending review — WTIA staff will review this submission.",
+        "published": "Published — your listing is visible in the Showcase.",
+        "rejected": "Needs changes — update the listing and submit again."
+      },
+      "fields": {
+        "slug": "Public URL slug",
+        "nameEn": "English name",
+        "nameZhHk": "Traditional Chinese name",
+        "taglineEn": "English tagline",
+        "taglineZhHk": "Traditional Chinese tagline",
+        "descriptionEn": "English description",
+        "descriptionZhHk": "Traditional Chinese description",
+        "category": "Category",
+        "useCases": "Use cases (comma separated)",
+        "deploymentOptions": "Deployment options (comma separated)",
+        "supportedLanguages": "Supported languages (comma separated)",
+        "worksWith": "Works with (comma separated)",
+        "videoUrl": "Video URL (HTTPS)",
+        "caseStudyUrl": "Case study URL (HTTPS)",
+        "caseStudySummaryEn": "English case-study summary",
+        "caseStudySummaryZhHk": "Traditional Chinese case-study summary",
+        "logoReference": "Logo reference"
+      }
+    },
     "directory": {
       "title": "Member directory",
       "description": "Find WTIA members who opted into the directory.",
