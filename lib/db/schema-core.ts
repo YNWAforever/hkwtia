@@ -72,6 +72,15 @@ export const showcaseListingStatusEnum = pgEnum("showcase_listing_status", [
   "rejected",
 ]);
 export const leadStatusEnum = pgEnum("lead_status", ["new", "contacted", "closed"]);
+export const cohortStatusEnum = pgEnum("cohort_status", [
+  "planning", "open", "active", "completed", "archived",
+]);
+export const cohortApplicationStageEnum = pgEnum("cohort_application_stage", [
+  "applied", "accepted", "ready", "match", "land", "scale", "graduated", "rejected",
+]);
+export const landingPartnerMouStatusEnum = pgEnum("landing_partner_mou_status", [
+  "prospect", "in_discussion", "signed", "inactive",
+]);
 export type ShowcaseListingStatus = (typeof showcaseListingStatusEnum.enumValues)[number];
 
 const vector = customType<{data: number[]; driverData: string}>({
@@ -664,6 +673,7 @@ export const showcaseListings = pgTable(
     slug: text("slug").notNull(),
     status: showcaseListingStatusEnum("status").default("draft").notNull(),
     premium: boolean("premium").default(false).notNull(),
+    goneGlobal: boolean("gone_global").default(false).notNull(),
     views: integer("views").default(0).notNull(),
     memberSince: date("member_since").notNull(),
     nameEn: text("name_en").notNull(),
@@ -697,6 +707,74 @@ export const showcaseListings = pgTable(
     index("showcase_listings_deployment_options_idx").using("gin", table.deploymentOptions),
     index("showcase_listings_supported_languages_idx").using("gin", table.supportedLanguages),
     index("showcase_listings_works_with_idx").using("gin", table.worksWith),
+  ],
+);
+
+export const cohorts = pgTable(
+  "cohorts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    slug: text("slug").notNull(),
+    nameEn: text("name_en").notNull(),
+    nameZhHk: text("name_zh_hk").notNull(),
+    descriptionEn: text("description_en").notNull(),
+    descriptionZhHk: text("description_zh_hk").notNull(),
+    track: text("track").notNull(),
+    startsOn: date("starts_on").notNull(),
+    endsOn: date("ends_on"),
+    capacity: integer("capacity").notNull(),
+    feeHkd: integer("fee_hkd").notNull(),
+    status: cohortStatusEnum("status").default("planning").notNull(),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    uniqueIndex("cohorts_slug_unique").on(table.slug),
+    check("cohorts_capacity_check", sql`${table.capacity} > 0`),
+    check("cohorts_fee_hkd_check", sql`${table.feeHkd} >= 0`),
+    index("cohorts_public_status_starts_on_idx").on(table.status, table.startsOn),
+  ],
+);
+
+export const cohortApplications = pgTable(
+  "cohort_applications",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    cohortId: uuid("cohort_id")
+      .notNull()
+      .references(() => cohorts.id, {onDelete: "cascade"}),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, {onDelete: "cascade"}),
+    stage: cohortApplicationStageEnum("stage").default("applied").notNull(),
+    readiness: jsonb("readiness").$type<Record<string, unknown>>().default({}).notNull(),
+    notes: text("notes"),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    uniqueIndex("cohort_applications_cohort_company_unique").on(table.cohortId, table.companyId),
+    index("cohort_applications_cohort_stage_idx").on(table.cohortId, table.stage),
+    index("cohort_applications_company_idx").on(table.companyId),
+  ],
+);
+
+export const landingPartners = pgTable(
+  "landing_partners",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    organizationEn: text("organization_en").notNull(),
+    organizationZhHk: text("organization_zh_hk").notNull(),
+    market: text("market").notNull(),
+    region: text("region").notNull(),
+    mouStatus: landingPartnerMouStatusEnum("mou_status").default("prospect").notNull(),
+    contact: jsonb("contact").$type<Record<string, unknown>>().default({}).notNull(),
+    notes: text("notes"),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    index("landing_partners_public_market_status_idx").on(table.market, table.mouStatus),
   ],
 );
 
@@ -1013,5 +1091,11 @@ export type Approval = typeof approvals.$inferSelect;
 export type Post = typeof posts.$inferSelect;
 export type ShowcaseListing = typeof showcaseListings.$inferSelect;
 export type NewShowcaseListing = typeof showcaseListings.$inferInsert;
+export type Cohort = typeof cohorts.$inferSelect;
+export type NewCohort = typeof cohorts.$inferInsert;
+export type CohortApplication = typeof cohortApplications.$inferSelect;
+export type NewCohortApplication = typeof cohortApplications.$inferInsert;
+export type LandingPartner = typeof landingPartners.$inferSelect;
+export type NewLandingPartner = typeof landingPartners.$inferInsert;
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;

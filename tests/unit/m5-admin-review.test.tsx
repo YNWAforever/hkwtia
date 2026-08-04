@@ -12,7 +12,7 @@ import type {AdminActor} from "@/lib/membership/lifecycle";
 
 const staff = {kind: "staff", userId: "staff-1", profileId: "staff-1"} as AdminActor;
 const row = {
-  id: "listing-1", companyId: "company-1", slug: "harbour-vision-ai", status: "pending_review" as const, premium: false, views: 0, memberSince: "2020-01-01",
+  id: "listing-1", companyId: "company-1", slug: "harbour-vision-ai", status: "pending_review" as const, premium: false, goneGlobal: false, views: 0, memberSince: "2020-01-01",
   nameEn: "Harbour Vision AI", nameZhHk: "港灣視野 AI", taglineEn: "Trade intelligence", taglineZhHk: "貿易智能", descriptionEn: "Description", descriptionZhHk: "描述", category: "software", useCases: ["logistics"], deploymentOptions: ["cloud"], supportedLanguages: ["en"], worksWith: ["ERP"], videoUrl: null, caseStudyUrl: null, caseStudySummaryEn: null, caseStudySummaryZhHk: null, logoReference: null, reviewedAt: null, reviewedByProfileId: null, rejectionReason: null, createdAt: new Date(), updatedAt: new Date(),
 };
 
