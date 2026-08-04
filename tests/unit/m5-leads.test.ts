@@ -77,11 +77,10 @@ describe("showcase request-intro lead service", () => {
 
     await expect(fake.service.request(form({email: "not-an-email"}))).resolves.toEqual({ok: false, code: "invalid"});
     await expect(fake.service.request(form({contactName: ""}))).resolves.toEqual({ok: false, code: "invalid"});
-    fake.service = createLeadService({
-      ...dependencies().service,
+    const missing = dependencies({
       repository: {getPublishedBySlug: vi.fn(async () => null), createLead: vi.fn()},
     });
-    await expect(fake.service.request(form({idempotencyKey: "missing"}))).resolves.toEqual({ok: false, code: "invalid"});
+    await expect(missing.service.request(form({idempotencyKey: "missing"}))).resolves.toEqual({ok: false, code: "invalid"});
     expect(fake.leads).toHaveLength(0);
     expect(fake.sends).toHaveLength(0);
   });

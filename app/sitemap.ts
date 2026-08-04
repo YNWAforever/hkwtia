@@ -8,6 +8,7 @@ import {
   listPublishedBuildLogs,
   type PublishedBuildLogSummary,
 } from "@/lib/db/repos/public-posts";
+import {showcaseRepository} from "@/lib/db/repos/showcase";
 import {withoutStaticNewsSlugCollisions} from "@/lib/news/build-log-visibility";
 import {absoluteUrl, localizedPath} from "@/lib/urls";
 
@@ -32,10 +33,16 @@ function localizedEntries(pathname: string): MetadataRoute.Sitemap {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let buildLogs: readonly PublishedBuildLogSummary[] = [];
+  let showcaseSlugs: readonly string[] = [];
   try {
     buildLogs = await listPublishedBuildLogs();
   } catch {
     buildLogs = [];
+  }
+  try {
+    showcaseSlugs = await showcaseRepository.listPublishedSlugs();
+  } catch {
+    showcaseSlugs = [];
   }
   const visibleBuildLogs = withoutStaticNewsSlugCollisions(
     buildLogs,
@@ -50,11 +57,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     localizedEntries(`/news/${record.slug}`));
   const buildLogEntries = visibleBuildLogs.flatMap((record) =>
     localizedEntries(`/news/${record.slug}`));
+  const showcaseEntries = showcaseSlugs.flatMap((slug) =>
+    localizedEntries(`/showcase/${slug}`));
 
   return [
     ...staticEntries,
     ...eventEntries,
     ...newsEntries,
     ...buildLogEntries,
+    ...showcaseEntries,
   ];
 }
