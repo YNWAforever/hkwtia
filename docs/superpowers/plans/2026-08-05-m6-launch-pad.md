@@ -91,7 +91,7 @@ git commit -m "feat: add M6 launch pad schema and contracts"
 - `createCohortRepository(dependencies?)` returns `listPublicCohorts()`, `listPublicPartners()`, `getApplicationForCompany(actor, cohortId, companyId)`, `createApplication(actor, cohortId, input)`, `listForAdmin(actor)`, and `moveApplication(actor, applicationId, nextStage, notes?)`.
 - `createApplication` resolves the actor’s active company membership; it is idempotent on `(cohortId, companyId)` and only accepts cohorts with status `open`.
 - `moveApplication` requires `requireAdmin`, validates a stage transition, writes an `auditEvents` row with action `cohort_application.stage_changed`, and updates `showcaseListings.goneGlobal` in the same transaction when entering `graduated`.
-- Seed creates one open cohort, three landing partners, and five applications covering all non-terminal kanban stages without logging PII.
+- Seed creates one open cohort, three landing partners, and five unique applications across representative non-terminal lanes (`applied`, `accepted`, `ready`, `match`, and `land`) without logging PII; the remaining `scale`/`graduated` lanes are exercised by the staff move and public-badge acceptance flow.
 
 - [ ] **Step 1: Write failing repository tests with a fake store**
 
