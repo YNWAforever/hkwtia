@@ -25,7 +25,7 @@ vi.mock("next-intl/server", () => ({
 }));
 vi.mock("@/lib/db/repos/cohorts", () => ({
   cohortRepository: {
-    listPublicCohorts: () => state.listPublicCohorts(),
+    listPublicCohorts: (...args: unknown[]) => state.listPublicCohorts(...args),
   },
 }));
 
@@ -84,6 +84,12 @@ describe("M6 Launch Pad public experience", () => {
     expect(markup).not.toContain("private-partner-notes");
     expect(markup).not.toContain("in_discussion");
     expect(markup).not.toContain("prospect");
+  });
+
+  it("passes the explicit anonymous actor to the database-backed cohort projection", async () => {
+    await LaunchPadPage(pageProps("en"));
+
+    expect(state.listPublicCohorts).toHaveBeenCalledWith({kind: "anonymous", userId: null});
   });
 
   it("forces dynamic rendering because the cohort calendar is database-backed", () => {

@@ -12,12 +12,14 @@ import type {AppLocale} from '@/i18n/routing';
 import {cohortRepository} from '@/lib/db/repos/cohorts';
 import {getFundingResults, parseFundingAnswers} from '@/lib/launchpad/funding';
 import {applyToCohortAction} from '@/lib/launchpad/member-actions';
+import type {Actor} from '@/lib/membership/lifecycle';
 import {buildPageMetadata} from '@/lib/metadata';
 import {localizedPath} from '@/lib/urls';
 
 type Props = {params: Promise<{locale: string}>; searchParams?: Promise<Record<string, string | string[] | undefined>>};
 
 export const dynamic = "force-dynamic";
+const anonymous: Actor = {kind: "anonymous", userId: null};
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
@@ -31,7 +33,7 @@ export default async function LaunchPadPage({params, searchParams = Promise.reso
   setRequestLocale(appLocale);
   const [t, cohorts] = await Promise.all([
     getTranslations({locale: appLocale, namespace: 'LaunchPad'}),
-    cohortRepository.listPublicCohorts(),
+    cohortRepository.listPublicCohorts(anonymous),
   ]);
   const answers = parseFundingAnswers(query);
   const fundingResults = getFundingResults(query, appLocale);

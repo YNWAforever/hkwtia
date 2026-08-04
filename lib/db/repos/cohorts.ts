@@ -63,7 +63,7 @@ export type AdminCohortApplication = Readonly<{
 }>;
 
 export type CohortStore = Readonly<{
-  listPublicCohorts: () => Promise<readonly PublicCohort[]>;
+  listPublicCohorts: (actor: Actor) => Promise<readonly PublicCohort[]>;
   findActiveCompanyId: (actor: Extract<Actor, {kind: "member"}>) => Promise<string | null>;
   getApplication: (cohortId: string, companyId: string) => Promise<CohortApplication | null>;
   getCohort: (cohortId: string) => Promise<Cohort | null>;
@@ -78,7 +78,7 @@ export type CohortRepositoryDependencies = Readonly<{
 }>;
 
 export type CohortRepository = Readonly<{
-  listPublicCohorts: () => Promise<readonly PublicCohort[]>;
+  listPublicCohorts: (actor: Actor) => Promise<readonly PublicCohort[]>;
   getApplicationForCompany: (actor: Actor, cohortId: string, companyId: string) => Promise<CohortApplication | null>;
   createApplication: (actor: Actor, cohortId: string, input: unknown) => Promise<CohortApplication>;
   listForAdmin: (actor: AdminActor) => Promise<readonly AdminCohortApplication[]>;
@@ -91,7 +91,7 @@ function transitionAllowed(from: CohortStage, to: CohortStage): boolean {
 
 function databaseStore(loadDatabase: () => Promise<Database> = getDb): CohortStore {
   return {
-    async listPublicCohorts() {
+    async listPublicCohorts(_actor) {
       const database = await loadDatabase();
       const rows = await database.select({
         id: cohorts.id,
@@ -225,8 +225,8 @@ export function createCohortRepository(
 ): CohortRepository {
   const store = dependencies.store ?? databaseStore();
   return {
-    async listPublicCohorts() {
-      return store.listPublicCohorts();
+    async listPublicCohorts(actor) {
+      return store.listPublicCohorts(actor);
     },
     async getApplicationForCompany(actor, cohortId, companyId) {
       const parsedCohortId = applicationIdSchema.parse(cohortId);
