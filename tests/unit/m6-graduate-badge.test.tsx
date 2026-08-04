@@ -95,13 +95,16 @@ describe("M6 Gone Global public Showcase projection", () => {
     expect(screen.getByText(`${labels.memberSince} 2020-01-01`)).toBeInTheDocument();
   });
 
-  it("does not render the badge for a published listing without the graduation projection", () => {
-    const {unmount} = render(<ShowcaseCard listing={listing(false)} locale="en" labels={englishLabels}/>);
-    expect(screen.queryByText("Gone Global")).not.toBeInTheDocument();
+  it.each([
+    ["en", englishLabels, "Gone Global"],
+    ["zh-HK", chineseLabels, "走向全球"],
+  ] as const)("does not render the %s badge for a published listing without the graduation projection", (locale, labels, badge) => {
+    const {unmount} = render(<ShowcaseCard listing={listing(false)} locale={locale} labels={labels}/>);
+    expect(screen.queryByText(badge)).not.toBeInTheDocument();
     unmount();
 
-    render(<ShowcaseDetail listing={listing(false)} locale="en" labels={{...englishLabels, ...detailLabels}}/>);
-    expect(screen.queryByText("Gone Global")).not.toBeInTheDocument();
+    render(<ShowcaseDetail listing={listing(false)} locale={locale} labels={{...labels, ...detailLabels}}/>);
+    expect(screen.queryByText(badge)).not.toBeInTheDocument();
   });
 
   it("projects the server-owned boolean to public listings and strips it from member input", () => {
