@@ -1,7 +1,7 @@
 import {describe, expect, it} from "vitest";
 
 describe("M6 Launch Pad seed", () => {
-  it("has stable cohort, partner, and unique application fixture records", async () => {
+  it("has stable cohort, partner, and representative application lane records", async () => {
     const seed = await import("@/scripts/seed-m6");
     const fixture = seed.buildM6SeedFixture(new Date("2030-08-05T00:00:00.000Z"));
     expect(fixture.cohorts).toHaveLength(1);
@@ -22,6 +22,22 @@ describe("M6 Launch Pad seed", () => {
       .toThrow("M6_ACCEPTANCE_DATABASE_URL_MISMATCH");
     expect(() => seed.assertM6SeedEnvironment({M6_ACCEPTANCE_SEED: "true", DATABASE_URL: isolated, DATABASE_URL_TEST: isolated, NODE_ENV: "production"}))
       .toThrow("M6_ACCEPTANCE_PRODUCTION_FORBIDDEN");
+  });
+
+  it("requires an independently configured host allowlist before accepting an isolated URL", async () => {
+    const seed = await import("@/scripts/seed-m6");
+    const isolated = "postgres://worker:secret@ep-isolated.example.neon.tech/neondb";
+    expect(() => seed.assertM6SeedEnvironment({
+      M6_ACCEPTANCE_SEED: "true", DATABASE_URL: isolated, DATABASE_URL_TEST: isolated,
+    })).toThrow("M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST_REQUIRED");
+    expect(() => seed.assertM6SeedEnvironment({
+      M6_ACCEPTANCE_SEED: "true", DATABASE_URL: isolated, DATABASE_URL_TEST: isolated,
+      M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST: "preview.example.neon.tech",
+    })).toThrow("M6_ACCEPTANCE_DATABASE_HOST_NOT_ALLOWED");
+    expect(seed.assertM6SeedEnvironment({
+      M6_ACCEPTANCE_SEED: "true", DATABASE_URL: isolated, DATABASE_URL_TEST: isolated,
+      M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST: "ep-isolated.example.neon.tech",
+    })).toBe(isolated);
   });
 
   it("keeps owned application pairs unique when seeded twice", async () => {

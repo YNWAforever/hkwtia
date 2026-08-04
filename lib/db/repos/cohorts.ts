@@ -133,18 +133,23 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): CohortSto
     },
     async createApplication(input) {
       const database = await loadDatabase();
-      const [row] = await database.insert(cohortApplications).values({
-        cohortId: input.cohortId,
-        companyId: input.companyId,
-        stage: "applied",
-        readiness: input.readiness,
-      }).onConflictDoNothing({target: [cohortApplications.cohortId, cohortApplications.companyId]}).returning();
-      if (row) return row;
-      const existing = (await database.select().from(cohortApplications)
-        .where(and(eq(cohortApplications.cohortId, input.cohortId), eq(cohortApplications.companyId, input.companyId)))
-        .limit(1))[0];
-      if (!existing) throw new Error("COHORT_APPLICATION_WRITE_FAILED");
-      return existing;
+      return database.transaction(async (transaction) => {
+        const selectedCohort = (await transaction.select({status: cohorts.status}).from(cohorts)
+          .where(eq(cohorts.id, input.cohortId)).limit(1).for("update"))[0];
+        if (!selectedCohort || selectedCohort.status !== "open") throw new Error("COHORT_NOT_OPEN");
+        const [row] = await transaction.insert(cohortApplications).values({
+          cohortId: input.cohortId,
+          companyId: input.companyId,
+          stage: "applied",
+          readiness: input.readiness,
+        }).onConflictDoNothing({target: [cohortApplications.cohortId, cohortApplications.companyId]}).returning();
+        if (row) return row;
+        const existing = (await transaction.select().from(cohortApplications)
+          .where(and(eq(cohortApplications.cohortId, input.cohortId), eq(cohortApplications.companyId, input.companyId)))
+          .limit(1))[0];
+        if (!existing) throw new Error("COHORT_APPLICATION_WRITE_FAILED");
+        return existing;
+      });
     },
     async listForAdmin() {
       const database = await loadDatabase();

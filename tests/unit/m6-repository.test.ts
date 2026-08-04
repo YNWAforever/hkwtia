@@ -44,7 +44,7 @@ function application(overrides: Partial<CohortApplication> = {}): CohortApplicat
   };
 }
 
-function memoryStore(initial: CohortApplication[] = []): CohortStore & {
+function memoryStore(initial: CohortApplication[] = [], options: Readonly<{closeBeforeCreate?: boolean}> = {}): CohortStore & {
   readonly auditEvents: readonly {action: string; applicationId: string}[];
   readonly goneGlobalCompanyIds: readonly string[];
 } {
@@ -59,6 +59,7 @@ function memoryStore(initial: CohortApplication[] = []): CohortStore & {
     getApplication: async (requestedCohortId, requestedCompanyId) => applications.find((row) => row.cohortId === requestedCohortId && row.companyId === requestedCompanyId) ?? null,
     getCohort: async (id) => id === cohortId ? cohort() : null,
     createApplication: async (input) => {
+      if (options.closeBeforeCreate) throw new Error("COHORT_NOT_OPEN");
       const existing = applications.find((row) => row.cohortId === input.cohortId && row.companyId === input.companyId);
       if (existing) return existing;
       const created = application({id: "60000062-0000-4000-8000-000000000002", ...input});
@@ -103,6 +104,15 @@ describe("M6 cohort repository", () => {
     const repo = createCohortRepository({store: memoryStore(), getCompanyRole: async () => "member"});
     await expect(repo.createApplication(actorFor("member-1"), cohortId, {cohortId, readiness: {market: "Singapore"}}))
       .rejects.toThrow("FORBIDDEN");
+  });
+
+  it("rejects a cohort that closes after the initial read but before the write", async () => {
+    const repo = createCohortRepository({
+      store: memoryStore([], {closeBeforeCreate: true}),
+      getCompanyRole: async () => "owner",
+    });
+    await expect(repo.createApplication(actorFor("member-1"), cohortId, {cohortId, readiness: {market: "Singapore"}}))
+      .rejects.toThrow("COHORT_NOT_OPEN");
   });
 
   it("requires staff access to list and move applications", async () => {

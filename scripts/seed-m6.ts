@@ -108,6 +108,18 @@ export function assertM6SeedEnvironment(
   const testDatabaseUrl = environment.DATABASE_URL_TEST?.trim();
   if (!testDatabaseUrl) throw new Error("M6_ACCEPTANCE_DATABASE_URL_TEST_REQUIRED");
   if (databaseUrl !== testDatabaseUrl) throw new Error("M6_ACCEPTANCE_DATABASE_URL_MISMATCH");
+  const hostAllowlist = environment.M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST
+    ?.split(/[\s,]+/)
+    .map((host) => host.trim().toLowerCase())
+    .filter(Boolean);
+  if (!hostAllowlist?.length) throw new Error("M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST_REQUIRED");
+  let databaseHost: string;
+  try {
+    databaseHost = new URL(databaseUrl).hostname.toLowerCase();
+  } catch {
+    throw new Error("M6_ACCEPTANCE_DATABASE_URL_INVALID");
+  }
+  if (!hostAllowlist.includes(databaseHost)) throw new Error("M6_ACCEPTANCE_DATABASE_HOST_NOT_ALLOWED");
   return databaseUrl;
 }
 
