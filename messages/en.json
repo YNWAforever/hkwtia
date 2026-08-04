@@ -500,11 +500,34 @@
   },
   "Showcase": {
     "metaTitle": "Showcase | WTIA",
-    "metaDescription": "A preview of WTIA's member showcase experience.",
-    "eyebrow": "Member showcase",
-    "title": "Member showcase",
-    "description": "Member directory and showcase features are planned for M5.",
-    "milestone": "M5 — live member data will be added after the directory is ready."
+    "metaDescription": "Discover WTIA member companies, products, and practical technology solutions.",
+    "eyebrow": "AI Showcase",
+    "title": "Find the right WTIA member partner",
+    "description": "Explore practical products and services from Hong Kong technology companies.",
+    "emptyTitle": "No published listings match",
+    "emptyDescription": "Try changing a filter or search term.",
+    "premium": "Premium",
+    "memberSince": "WTIA member since",
+    "view": "View listing",
+    "filters": {
+      "search": "Search listings",
+      "category": "Category",
+      "useCase": "Use case",
+      "deployment": "Deployment",
+      "language": "Language",
+      "worksWith": "Works with",
+      "submit": "Filter",
+      "clear": "Clear filters"
+    },
+    "details": {
+      "useCases": "Use cases",
+      "deployment": "Deployment",
+      "languages": "Languages",
+      "worksWith": "Works with",
+      "caseStudy": "Case study",
+      "video": "Product video",
+      "requestIntro": "Request an introduction"
+    }
   },
   "AiOps": {
     "metaTitle": "AI-Ops in public | WTIA",

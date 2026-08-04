@@ -500,12 +500,35 @@
     "milestone": "申請及資金配對將於後續里程碑推出。"
   },
   "Showcase": {
-    "metaTitle": "會員展示｜WTIA",
-    "metaDescription": "預覽 WTIA 未來的會員展示體驗。",
-    "eyebrow": "會員展示",
-    "title": "會員展示",
-    "description": "會員目錄及市集功能計劃於 M5 推出。",
-    "milestone": "M5 — 會員資料功能將於目錄準備就緒後推出。"
+    "metaTitle": "展示頁 | WTIA",
+    "metaDescription": "探索 WTIA 會員公司、產品及實用科技方案。",
+    "eyebrow": "AI 展示",
+    "title": "尋找合適的 WTIA 會員夥伴",
+    "description": "探索香港科技公司的實用產品及服務。",
+    "emptyTitle": "沒有符合的已發布展示頁",
+    "emptyDescription": "請嘗試更改篩選條件或搜尋字詞。",
+    "premium": "精選",
+    "memberSince": "WTIA 會員始於",
+    "view": "查看展示頁",
+    "filters": {
+      "search": "搜尋展示頁",
+      "category": "類別",
+      "useCase": "使用場景",
+      "deployment": "部署方式",
+      "language": "語言",
+      "worksWith": "兼容系統",
+      "submit": "篩選",
+      "clear": "清除篩選"
+    },
+    "details": {
+      "useCases": "使用場景",
+      "deployment": "部署方式",
+      "languages": "語言",
+      "worksWith": "兼容系統",
+      "caseStudy": "案例研究",
+      "video": "產品影片",
+      "requestIntro": "要求介紹"
+    }
   },
   "AiOps": {
     "metaTitle": "公開 AI-Ops｜WTIA",
