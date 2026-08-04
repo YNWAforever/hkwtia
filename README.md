@@ -1,6 +1,6 @@
 # WTIA Platform
 
-The WTIA public platform is a bilingual Next.js App Router site for the Hong Kong Wireless Technology Industry Association. M0 ships the server-rendered public route surface in English and Traditional Chinese (`/` and `/zh`); M1 adds self-service membership, Stripe billing, company seats, and an authenticated member portal; M2 adds the staff-only Admin CRM; M3 adds deterministic member journeys, campaigns, provider boundaries, scheduled jobs, and staff automation operations. M4A adds the bilingual, provider-neutral AI Concierge with durable web and WhatsApp conversations, citations, approvals, telemetry, and retention. M5 adds the member Showcase directory, review workflow, public detail pages, request-intro leads, view debounce, and sitemap indexing.
+The WTIA public platform is a bilingual Next.js App Router site for the Hong Kong Wireless Technology Industry Association. M0 ships the server-rendered public route surface in English and Traditional Chinese (`/` and `/zh`); M1 adds self-service membership, Stripe billing, company seats, and an authenticated member portal; M2 adds the staff-only Admin CRM; M3 adds deterministic member journeys, campaigns, provider boundaries, scheduled jobs, and staff automation operations. M4A adds the bilingual, provider-neutral AI Concierge with durable web and WhatsApp conversations, citations, approvals, telemetry, and retention. M5 adds the member Showcase directory, review workflow, public detail pages, request-intro leads, view debounce, and sitemap indexing. M6 adds the Launch Pad cohort programme, deterministic funding-scheme picker, guarded application flow, staff Kanban, audit trail, and public Gone Global graduate badge.
 
 ## Requirements
 
@@ -37,6 +37,7 @@ Open `http://localhost:3000/` or `http://localhost:3000/zh`.
 | `npm run db:seed:m3` | Reconcile the deterministic M3 acceptance fixture using explicit `DATABASE_URL` and `M3_SEED_NOW` |
 | `npm run db:seed:m4a` | Replace the scoped M4A KB namespace and reconcile the fixed isolated acceptance fixture |
 | `npm run db:seed:m5` | Reconcile the opt-in synthetic M5 Showcase fixture in an isolated database |
+| `npm run db:seed:m6` | Reconcile the opt-in synthetic M6 Launch Pad fixture in an isolated database |
 | `npm test -- tests/integration/m4a-acceptance.test.ts` | Run deterministic M4A acceptance; the database case needs the explicit opt-in gate |
 | `npm run eval:concierge` | Run 25 deterministic bilingual Concierge golden cases offline |
 | `npm run eval:concierge:live` | Run separately authorized live-provider evals only when every live guard is present |
@@ -86,6 +87,28 @@ flows skip unless `PLAYWRIGHT_BASE_URL`, `M5_ACCEPTANCE_EMAIL`, and
 `M5_ACCEPTANCE_PASSWORD` are explicitly set for an isolated non-Production
 Preview. See [`docs/m5-acceptance.md`](./docs/m5-acceptance.md) for the evidence
 record and remaining credential-gated scenarios.
+
+## M6 Launch Pad acceptance
+
+M6 uses a separate, explicitly authorized acceptance seed. Set `DATABASE_URL`
+and `DATABASE_URL_TEST` to the same migrated isolated database,
+`M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST` to its exact normalized hostname, and
+`M6_ACCEPTANCE_SEED=true` before running `npm run db:seed:m6`. The guard
+rejects Production mode, a missing/mismatched test URL, or an unlisted host.
+The seed only reconciles the synthetic `m6-launch-pad-acceptance-v1` scope.
+
+The credential-free deterministic browser checks use intercepted fixtures:
+
+```powershell
+$env:PLAYWRIGHT_BASE_URL = "http://127.0.0.1:3333"
+npm.cmd run test:e2e -- tests/e2e/m6-launch-pad.spec.ts
+```
+
+Live Preview smoke remains skipped unless `M6_PREVIEW_URL`,
+`M6_PREVIEW_MEMBER_EMAIL`, and `M6_PREVIEW_ADMIN_EMAIL` are all explicit;
+the test rejects the known Production hostname. See
+[`docs/m6-acceptance.md`](./docs/m6-acceptance.md) for the fixture answers,
+journey demonstration, and verification record.
 
 ## M3 acceptance
 
