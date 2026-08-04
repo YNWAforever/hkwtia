@@ -65,6 +65,13 @@ export const agentNameEnum = pgEnum("agent_name", [
 ]);
 export const postKindEnum = pgEnum("post_kind", ["news", "buildlog", "page"]);
 export const agentTriggerEnum = pgEnum("agent_trigger", ["web", "whatsapp", "scheduled"]);
+export const showcaseListingStatusEnum = pgEnum("showcase_listing_status", [
+  "draft",
+  "pending_review",
+  "published",
+  "rejected",
+]);
+export const leadStatusEnum = pgEnum("lead_status", ["new", "contacted", "closed"]);
 
 const vector = customType<{data: number[]; driverData: string}>({
   dataType() {
@@ -646,6 +653,75 @@ export const posts = pgTable(
   ],
 );
 
+export const showcaseListings = pgTable(
+  "showcase_listings",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, {onDelete: "cascade"}),
+    slug: text("slug").notNull(),
+    status: showcaseListingStatusEnum("status").default("draft").notNull(),
+    premium: boolean("premium").default(false).notNull(),
+    views: integer("views").default(0).notNull(),
+    memberSince: date("member_since").notNull(),
+    nameEn: text("name_en").notNull(),
+    nameZhHk: text("name_zh_hk").notNull(),
+    taglineEn: text("tagline_en").notNull(),
+    taglineZhHk: text("tagline_zh_hk").notNull(),
+    descriptionEn: text("description_en").notNull(),
+    descriptionZhHk: text("description_zh_hk").notNull(),
+    category: text("category").notNull(),
+    useCases: text("use_cases").array().default(sql`'{}'::text[]`).notNull(),
+    deploymentOptions: text("deployment_options").array().default(sql`'{}'::text[]`).notNull(),
+    supportedLanguages: text("supported_languages").array().default(sql`'{}'::text[]`).notNull(),
+    worksWith: text("works_with").array().default(sql`'{}'::text[]`).notNull(),
+    videoUrl: text("video_url"),
+    caseStudyUrl: text("case_study_url"),
+    caseStudySummaryEn: text("case_study_summary_en"),
+    caseStudySummaryZhHk: text("case_study_summary_zh_hk"),
+    logoReference: text("logo_reference"),
+    reviewedAt: timestamp("reviewed_at", {withTimezone: true}),
+    reviewedByProfileId: text("reviewed_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    rejectionReason: text("rejection_reason"),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    uniqueIndex("showcase_listings_company_unique").on(table.companyId),
+    uniqueIndex("showcase_listings_slug_unique").on(table.slug),
+    check("showcase_listings_views_check", sql`${table.views} >= 0`),
+    index("showcase_listings_status_premium_category_idx").on(table.status, table.premium, table.category),
+    index("showcase_listings_use_cases_idx").using("gin", table.useCases),
+    index("showcase_listings_deployment_options_idx").using("gin", table.deploymentOptions),
+    index("showcase_listings_supported_languages_idx").using("gin", table.supportedLanguages),
+    index("showcase_listings_works_with_idx").using("gin", table.worksWith),
+  ],
+);
+
+export const leads = pgTable(
+  "leads",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    listingId: uuid("listing_id")
+      .notNull()
+      .references(() => showcaseListings.id, {onDelete: "cascade"}),
+    contactName: text("contact_name").notNull(),
+    email: text("email").notNull(),
+    organization: text("organization"),
+    message: text("message"),
+    locale: varchar("locale", {length: 10}).default("en").notNull(),
+    status: leadStatusEnum("status").default("new").notNull(),
+    idempotencyKey: text("idempotency_key").notNull(),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    unique("leads_idempotency_key_unique").on(table.idempotencyKey),
+    index("leads_listing_created_idx").on(table.listingId, table.createdAt),
+  ],
+);
+
 export const aiopsMonthlyMetrics = pgMaterializedView(
   "aiops_monthly_metrics",
   {
@@ -934,3 +1010,7 @@ export type Event = typeof events.$inferSelect;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
 export type Approval = typeof approvals.$inferSelect;
 export type Post = typeof posts.$inferSelect;
+export type ShowcaseListing = typeof showcaseListings.$inferSelect;
+export type NewShowcaseListing = typeof showcaseListings.$inferInsert;
+export type Lead = typeof leads.$inferSelect;
+export type NewLead = typeof leads.$inferInsert;
