@@ -25,8 +25,6 @@ import {moveCohortApplicationAction} from "@/lib/admin/cohort-actions";
 import {revalidatePath} from "next/cache";
 
 const applicationId = "11111111-1111-4111-8111-111111111111";
-const cohortId = "22222222-2222-4222-8222-222222222222";
-const companyId = "33333333-3333-4333-8333-333333333333";
 
 const labels = {
   title: "Cohort applications",
