@@ -39,7 +39,7 @@ describe("M5 Showcase schema contract", () => {
     expect([...columns.keys()].sort()).toEqual([
       "case_study_summary_en", "case_study_summary_zh_hk", "case_study_url",
       "category", "company_id", "created_at", "deployment_options",
-      "description_en", "description_zh_hk", "id", "logo_reference",
+      "description_en", "description_zh_hk", "gone_global", "id", "logo_reference",
       "member_since", "name_en", "name_zh_hk", "premium", "rejection_reason",
       "reviewed_at", "reviewed_by_profile_id", "slug", "status", "tagline_en",
       "tagline_zh_hk", "updated_at", "use_cases", "video_url", "views",
@@ -48,6 +48,7 @@ describe("M5 Showcase schema contract", () => {
     expect(columns.get("company_id")?.notNull).toBe(true);
     expect(columns.get("member_since")?.notNull).toBe(true);
     expect(columns.get("premium")?.notNull).toBe(true);
+    expect(columns.get("gone_global")?.notNull).toBe(true);
     expect(columns.get("views")?.notNull).toBe(true);
     expect(columns.get("rejection_reason")?.notNull).toBe(false);
     expect(listing.indexes.map((index) => index.config.name)).toEqual(
@@ -95,6 +96,6 @@ describe("M5 Showcase schema contract", () => {
       join(process.cwd(), "drizzle", "meta", "_journal.json"),
       "utf8",
     )) as {entries?: Array<{tag?: string}>};
-    expect(journal.entries?.at(-1)?.tag).toBe("0014_m5_showcase");
+    expect(journal.entries?.at(-1)?.tag).toBe("0015_m6_launch_pad");
   });
 });

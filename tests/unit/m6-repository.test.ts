@@ -68,7 +68,10 @@ function memoryStore(initial: CohortApplication[] = [], options: Readonly<{close
   const auditEvents: {action: string; applicationId: string}[] = [];
   const goneGlobalCompanyIds: string[] = [];
   return {
-    listPublicCohorts: async (_actor) => [cohort()],
+    listPublicCohorts: async (actor) => {
+      void actor;
+      return [cohort()];
+    },
     findActiveCompanyId: async () => companyId,
     getApplication: async (requestedCohortId, requestedCompanyId) => applications.find((row) => row.cohortId === requestedCohortId && row.companyId === requestedCompanyId) ?? null,
     getCohort: async (id) => id === cohortId ? cohort() : null,

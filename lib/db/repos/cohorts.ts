@@ -91,7 +91,8 @@ function transitionAllowed(from: CohortStage, to: CohortStage): boolean {
 
 function databaseStore(loadDatabase: () => Promise<Database> = getDb): CohortStore {
   return {
-    async listPublicCohorts(_actor) {
+    async listPublicCohorts(actor) {
+      void actor;
       const database = await loadDatabase();
       const rows = await database.select({
         id: cohorts.id,
