@@ -10,7 +10,7 @@ describe("request-intro form", () => {
       locale="en"
       slug="harbour-vision-ai"
       labels={{
-        name: "Name", email: "Email", organization: "Organisation", message: "Message",
+        name: "Name", email: "Email", organization: "Organisation", message: "Message", website: "Website",
         submit: "Request an introduction", submitting: "Sending", success: "Received",
         invalid: "Check your details", rateLimited: "Try again later",
       }}
