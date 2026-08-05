@@ -35,22 +35,39 @@ describe("public policy pages", () => {
     }
   });
 
-  // These pages told visitors the site had no accounts, forms or payments and
-  // no live AI agent, long after all four shipped.
+  // Public copy had drifted badly behind the product: pages claiming no
+  // accounts, forms, payments or live AI agent long after all four shipped, a
+  // FAQ saying online joining was still "planned", and internal milestone
+  // labels leaking onto public pages.
   it("states nothing that the platform has outgrown", () => {
-    const copy = JSON.stringify({
-      privacy: [en.Privacy, zhHK.Privacy],
-      ai: [en.AiTransparency, zhHK.AiTransparency],
-      programs: [en.programs, zhHK.programs],
-      membership: [en.Membership.comingSoon, zhHK.Membership.comingSoon],
-    });
+    // Namespaces rendered to the public. Staff-facing copy is out of scope.
+    const publicNamespaces = [
+      "Home", "About", "Chairman", "Committees", "Contact", "Privacy",
+      "AiTransparency", "News", "Events", "programs", "Membership",
+      "LaunchPad", "Showcase", "AiOps", "NotFound", "Error", "Navigation",
+      "Footer", "Metadata",
+    ] as const;
 
-    for (const stale of [
-      "M0", "M1", "M2", "M3", "M4", "M5", "M6",
-      "later milestone", "public preview", "not live",
-      "後續里程碑", "正在整理",
-    ]) {
-      expect(copy).not.toContain(stale);
+    const stale = [
+      /later milestone/i, /public preview/i,
+      /planned for/i, /arrives in/i, /no AI agent/i,
+      /後續里程碑/, /正在整理/, /公開預覽/,
+    ];
+    // AiOps is excluded from the milestone-token check on purpose: its
+    // "acceptance" label is the link text for docs/acceptance/m4.md, so naming
+    // M4 there is accurate rather than stale.
+    const milestoneToken = /\bM[0-6]\b/;
+
+    for (const [locale, bundle] of bundles) {
+      for (const ns of publicNamespaces) {
+        const copy = JSON.stringify(bundle[ns as keyof typeof bundle] ?? {});
+        for (const pattern of stale) {
+          expect(copy, `${locale}.${ns} matched ${pattern}`).not.toMatch(pattern);
+        }
+        if (ns !== "AiOps") {
+          expect(copy, `${locale}.${ns} names a milestone`).not.toMatch(milestoneToken);
+        }
+      }
     }
   });
 

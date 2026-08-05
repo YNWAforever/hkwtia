@@ -1,5 +1,3 @@
-import Image from 'next/image';
-
 import type {ProgramRecord} from '@/content/schemas';
 import {PageHero} from '@/components/marketing/page-hero';
 
@@ -22,7 +20,6 @@ export function ProgramDetail({program, title, description, status}: ProgramDeta
       />
       <section className="container mx-auto px-6 py-16">
         <div className="glass-card p-6">
-          <Image src={program.image} alt="" width={800} height={450} className="sr-only" />
           <p className="text-muted-foreground">{status}</p>
         </div>
       </section>

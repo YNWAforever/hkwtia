@@ -341,8 +341,7 @@
     "title": "在香港創科社群找到你的定位。",
     "summary": "選擇配合你參與、成長及貢獻方式的會員級別。",
     "tiersTitle": "會員級別",
-    "tiersIntro": "以年費為主要顯示；只有個人及初創級別提供月費選項。",
-    "comingSoon": "想先與我們談談？請聯絡 WTIA，團隊會協助你完成申請。",
+    "tiersIntro": "以年費為主要顯示；初創級別另提供月費選項。",
     "joinAction": "選擇此計劃",
     "benefits": {
       "network": "社群及交流機會",
@@ -356,12 +355,6 @@
         "cadence": "毋須年費",
         "description": "接收 WTIA 公開消息及機遇。"
       },
-      "individual": {
-        "name": "個人",
-        "price": "港幣 500 元",
-        "cadence": "每年 · 可選港幣 50 元月費",
-        "description": "適合拓展科技網絡的專業人士。"
-      },
       "startup": {
         "name": "初創",
         "price": "港幣 1,200 元",
@@ -374,12 +367,6 @@
         "cadence": "每年",
         "description": "適合積極參與創科生態的成熟機構。"
       },
-      "platinum": {
-        "name": "白金",
-        "price": "港幣 4,800 元",
-        "cadence": "每年",
-        "description": "適合尋求深度業界參與的機構。"
-      },
       "patron": {
         "name": "贊助人",
         "price": "聯絡我們",
@@ -390,12 +377,12 @@
     "faqTitle": "會員常見問題",
     "faq": {
       "0": {
-        "question": "何時可以網上入會？",
-        "answer": "自助登記及付款計劃於 M1 推出；現階段 WTIA 可協助處理申請。"
+        "question": "可以網上入會嗎？",
+        "answer": "可以。社群、初創及企業會籍均可於網上申請及付款；贊助人會籍由聯絡查詢開始。"
       },
       "1": {
         "question": "哪些級別提供月費？",
-        "answer": "只有個人及初創級別提供月費選項。"
+        "answer": "初創級別提供月費選項，其他收費級別按年收費。"
       },
       "2": {
         "question": "如何申請贊助人會籍？",
@@ -793,7 +780,7 @@
   },
   "NotFound": {
     "title": "找不到頁面",
-    "description": "頁面可能已移動，或不屬於公開預覽版本。",
+    "description": "頁面可能已移動，或網址有誤。",
     "home": "返回首頁",
     "contact": "聯絡 WTIA"
   },

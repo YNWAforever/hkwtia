@@ -340,8 +340,7 @@
     "title": "Find your place in Hong Kong's technology community.",
     "summary": "Choose the membership tier that fits how you participate, grow and contribute.",
     "tiersTitle": "Membership tiers",
-    "tiersIntro": "Annual membership is shown first. Monthly options are available only for Individual and Startup.",
-    "comingSoon": "Prefer to speak to someone first? Contact WTIA and our team will guide your application.",
+    "tiersIntro": "Annual membership is shown first. A monthly option is available for the Startup tier.",
     "joinAction": "Choose this plan",
     "benefits": {
       "network": "Community and networking access",
@@ -355,12 +354,6 @@
         "cadence": "No annual fee",
         "description": "Stay connected to public WTIA news and opportunities."
       },
-      "individual": {
-        "name": "Individual",
-        "price": "HKD 500",
-        "cadence": "per year · HKD 50 monthly available",
-        "description": "For professionals building their technology network."
-      },
       "startup": {
         "name": "Startup",
         "price": "HKD 1,200",
@@ -373,12 +366,6 @@
         "cadence": "per year",
         "description": "For established organisations engaging the ecosystem."
       },
-      "platinum": {
-        "name": "Platinum",
-        "price": "HKD 4,800",
-        "cadence": "per year",
-        "description": "For organisations seeking deeper industry participation."
-      },
       "patron": {
         "name": "Patron",
         "price": "Contact us",
@@ -389,12 +376,12 @@
     "faqTitle": "Membership FAQ",
     "faq": {
       "0": {
-        "question": "When will online joining be available?",
-        "answer": "Self-service sign-up and payment are planned for M1. WTIA can assist with applications in the meantime."
+        "question": "Can I join online?",
+        "answer": "Yes. Community, Startup and Corporate membership can be applied for and paid online. Patron membership begins with a contact request."
       },
       "1": {
         "question": "Which tiers offer monthly payment?",
-        "answer": "Monthly presentation is available only for Individual and Startup tiers."
+        "answer": "Monthly payment is available for the Startup tier. Other paid tiers are billed annually."
       },
       "2": {
         "question": "How is Patron membership arranged?",
@@ -792,7 +779,7 @@
   },
   "NotFound": {
     "title": "Page not found",
-    "description": "The page may have moved or is not part of the public preview.",
+    "description": "The page may have moved, or the address may be incorrect.",
     "home": "Return home",
     "contact": "Contact WTIA"
   },

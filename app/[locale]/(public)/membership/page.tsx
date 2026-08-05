@@ -7,8 +7,11 @@ import {StructuredData} from '@/components/seo/structured-data';
 import {TierComparison, type MembershipTier} from '@/components/marketing/tier-comparison';
 import type {AppLocale} from '@/i18n/routing';
 import {buildPageMetadata} from '@/lib/metadata';
+import {MEMBERSHIP_PLAN_CODES} from '@/lib/membership/constants';
 import {buildFaqData} from '@/lib/structured-data';
 type Props={params:Promise<{locale:string}>};
-const tierIds=['community','startup','corporate','patron'] as const;
+// Derived from the canonical plan codes so the pricing table cannot advertise
+// a tier that checkout would reject.
+const tierIds=MEMBERSHIP_PLAN_CODES;
 export async function generateMetadata({params}:Props):Promise<Metadata>{const{locale}=await params;const t=await getTranslations({locale,namespace:'Membership'});return buildPageMetadata({locale:locale as AppLocale,pathname:'/membership',title:t('metaTitle'),description:t('metaDescription')});}
 export default async function MembershipPage({params}:Props){const{locale}=await params;setRequestLocale(locale);const t=await getTranslations('Membership');const tiers:MembershipTier[]=tierIds.map((id)=>({id,name:t(`tiers.${id}.name`),price:t(`tiers.${id}.price`),cadence:t(`tiers.${id}.cadence`),description:t(`tiers.${id}.description`),benefits:[t('benefits.network'),t('benefits.programs'),t('benefits.visibility')],action:t('joinAction')}));const faq=[0,1,2].map((i)=>({question:t(`faq.${i}.question`),answer:t(`faq.${i}.answer`)}));return <><StructuredData data={buildFaqData(faq)}/><PageHero eyebrow={t('eyebrow')} title={t('title')} description={t('summary')} /><Section heading={t('tiersTitle')} intro={t('tiersIntro')}><TierComparison locale={locale as AppLocale} tiers={tiers}/></Section><Section heading={t('faqTitle')}><FAQ items={faq}/></Section></>;}
