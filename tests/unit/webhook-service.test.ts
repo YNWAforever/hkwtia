@@ -13,6 +13,7 @@ import {
   membershipId,
   subscriptionDeleted,
   subscriptionId,
+  subscriptionUpdatedLegacyPeriod,
   subscriptionUpdated,
 } from "@/tests/fixtures/stripe-events";
 
@@ -76,6 +77,24 @@ describe("Stripe webhook lifecycle mapping", () => {
     const {commands, processor} = captureProcessor();
     await processStripeEvent(subscriptionUpdated(), systemActor("stripe-webhook"), processor);
     expect(commands[0]).toMatchObject({eventType: "customer.subscription.updated", nextStatus: "cancel_at_period_end", cancelAtPeriodEnd: true});
+  });
+
+  it("reads the subscription billing period from the subscription items", async () => {
+    const {commands, processor} = captureProcessor();
+    await processStripeEvent(subscriptionUpdated(), systemActor("stripe-webhook"), processor);
+    expect(commands[0]).toMatchObject({
+      billingPeriodStart: new Date(1_784_156_400 * 1000),
+      billingPeriodEnd: new Date(1_786_834_800 * 1000),
+    });
+  });
+
+  it("still reads a top-level period from an endpoint on an older API version", async () => {
+    const {commands, processor} = captureProcessor();
+    await processStripeEvent(subscriptionUpdatedLegacyPeriod(), systemActor("stripe-webhook"), processor);
+    expect(commands[0]).toMatchObject({
+      billingPeriodStart: new Date(1_784_156_400 * 1000),
+      billingPeriodEnd: new Date(1_786_834_800 * 1000),
+    });
   });
 
   it("cancels a membership after customer.subscription.deleted", async () => {

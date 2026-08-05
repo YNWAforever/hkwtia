@@ -1,4 +1,4 @@
-﻿import {createHash, createHmac} from "node:crypto";
+import {createHash, createHmac} from "node:crypto";
 import {readFileSync} from "node:fs";
 
 import {renderToStaticMarkup} from "react-dom/server";

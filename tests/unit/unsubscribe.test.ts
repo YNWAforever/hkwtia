@@ -105,9 +105,11 @@ describe("unsubscribe token", () => {
       redirect: "1",
     });
 
+    // Serialize explicitly: jsdom's URLSearchParams is a different realm from
+    // the one undici brand-checks, and the route reads the body as bytes.
     const response = await post(new Request("https://attacker.example/api/unsubscribe", {
       method: "POST",
-      body,
+      body: body.toString(),
       headers: {"content-type": "application/x-www-form-urlencoded"},
     }));
 
@@ -170,7 +172,7 @@ describe("unsubscribe token", () => {
 
     const response = await post(new Request("https://www.hkwtia.org/api/unsubscribe", {
       method: "POST",
-      body,
+      body: body.toString(),
       headers: {"content-type": "application/x-www-form-urlencoded"},
     }));
 

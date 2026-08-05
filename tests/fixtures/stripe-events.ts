@@ -56,7 +56,30 @@ export function invoicePaymentFailed(id = "evt_invoice_failed", overrides: Recor
   });
 }
 
+// API version 2026-06-24.dahlia moved the billing period off the subscription
+// and onto its items.
 export function subscriptionUpdated(id = "evt_subscription_updated", overrides: Record<string, unknown> = {}): Stripe.Event {
+  return event("customer.subscription.updated", id, {
+    id: subscriptionId,
+    customer: customerId,
+    status: "active",
+    cancel_at_period_end: true,
+    items: {
+      object: "list",
+      data: [{
+        id: "si_m1",
+        object: "subscription_item",
+        current_period_start: 1_784_156_400,
+        current_period_end: 1_786_834_800,
+      }],
+    },
+    metadata,
+    ...overrides,
+  });
+}
+
+/** An endpoint still pinned to an API version before the period fields moved. */
+export function subscriptionUpdatedLegacyPeriod(id = "evt_subscription_legacy"): Stripe.Event {
   return event("customer.subscription.updated", id, {
     id: subscriptionId,
     customer: customerId,
@@ -65,7 +88,6 @@ export function subscriptionUpdated(id = "evt_subscription_updated", overrides: 
     current_period_start: 1_784_156_400,
     current_period_end: 1_786_834_800,
     metadata,
-    ...overrides,
   });
 }
 

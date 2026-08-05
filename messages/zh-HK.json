@@ -848,7 +848,10 @@
     "feedbackLabel": "5 分滿分中的 {score} 分",
     "feedbackThanks": "感謝你的意見。",
     "feedbackError": "未能儲存你的意見，請再試一次。",
-    "characterCount": "{count} / 2000"
+    "characterCount": "{count} / 2000",
+    "verificationLabel": "真人驗證",
+    "verificationPending": "請完成驗證檢查以傳送訊息。",
+    "verificationError": "目前無法進行驗證。請重新載入頁面再試。"
   },
   "Admin": {
     "brand": "WTIA",

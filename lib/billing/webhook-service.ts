@@ -17,6 +17,26 @@ function stringId(value: unknown): string { if (typeof value === "string" && val
 function subscriptionDetails(value: unknown): StripeObject | undefined { return value && typeof value === "object" && "subscription_details" in value ? (value.subscription_details as StripeObject) : undefined; }
 function metadataFor(type: SupportedStripeEventType, object: StripeObject) { const value = type === "checkout.session.completed" || type.startsWith("customer.subscription.") ? object.metadata : objectValue(object.subscription_details ?? subscriptionDetails(object.parent)).metadata; const parsed = metadataSchema.safeParse(value); if (!parsed.success) throw new WebhookInputError(); return parsed.data; }
 function unixDate(value: unknown): Date | null { return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? new Date(value * 1000) : null; }
+function firstSubscriptionItem(object: StripeObject): StripeObject | undefined {
+  const items = object.items;
+  const data = items && typeof items === "object" && "data" in items ? (items as {data: unknown}).data : undefined;
+  const first = Array.isArray(data) ? data[0] : undefined;
+  return first && typeof first === "object" ? first as StripeObject : undefined;
+}
+/**
+ * Subscription objects carry the billing period on their items as of API
+ * version 2026-06-24.dahlia; invoices still expose `period_start`/`period_end`.
+ * The top-level subscription fields remain as a fallback for endpoints still
+ * pinned to an older version.
+ */
+function billingPeriod(eventType: SupportedStripeEventType, object: StripeObject): {start: unknown; end: unknown} {
+  if (!eventType.startsWith("customer.subscription.")) return {start: object.period_start, end: object.period_end};
+  const item = firstSubscriptionItem(object);
+  return {
+    start: item?.current_period_start ?? object.current_period_start,
+    end: item?.current_period_end ?? object.current_period_end,
+  };
+}
 function subscriptionStatus(object: StripeObject): {status: MembershipStatus; cancelAtPeriodEnd: boolean} { const status = object.status; const cancelling = object.cancel_at_period_end === true; if (status === "canceled") return {status: "cancelled", cancelAtPeriodEnd: false}; if (status === "past_due" || status === "unpaid") return {status: "past_due", cancelAtPeriodEnd: cancelling}; if (status === "active" || status === "trialing") return {status: cancelling ? "cancel_at_period_end" : "active", cancelAtPeriodEnd: cancelling}; throw new WebhookInputError(); }
 function normalize(event: Stripe.Event): WebhookLifecycleCommand | null {
   if (!(supportedEventTypes as readonly string[]).includes(event.type)) return null;
@@ -27,8 +47,9 @@ function normalize(event: Stripe.Event): WebhookLifecycleCommand | null {
   if (eventType === "invoice.payment_failed") nextStatus = "past_due"; else if (eventType === "customer.subscription.deleted") nextStatus = "cancelled"; else if (eventType === "customer.subscription.updated") { const mapped = subscriptionStatus(object); nextStatus = mapped.status; cancelAtPeriodEnd = mapped.cancelAtPeriodEnd; } else nextStatus = "active";
   const stripeCheckoutSessionId = eventType === "checkout.session.completed" ? stringId(object.id) : null;
   const isRenewal = (eventType === "invoice.paid" || eventType === "invoice.payment_failed") && object.billing_reason === "subscription_cycle";
-  const billingPeriodStart = unixDate(object.current_period_start ?? object.period_start);
-  const billingPeriodEnd = unixDate(object.current_period_end ?? object.period_end);
+  const period = billingPeriod(eventType, object);
+  const billingPeriodStart = unixDate(period.start);
+  const billingPeriodEnd = unixDate(period.end);
   if (isRenewal && (!billingPeriodStart || !billingPeriodEnd || billingPeriodEnd <= billingPeriodStart)) throw new WebhookInputError();
   if (eventType === "checkout.session.completed" && object.payment_status !== "paid") throw new WebhookInputError();
   if (eventType === "checkout.session.completed" && object.client_reference_id !== metadata.membershipId) throw new WebhookInputError();

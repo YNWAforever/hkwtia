@@ -1,4 +1,4 @@
-﻿import type {NewsPostRecord} from '@/content/schemas';
+import type {NewsPostRecord} from '@/content/schemas';
 
 import {PageHero} from '@/components/marketing/page-hero';
 

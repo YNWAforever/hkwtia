@@ -6,6 +6,7 @@ import {SiteFooter} from '@/components/layout/site-footer';
 import {SiteHeader} from '@/components/layout/site-header';
 import type {AppLocale} from '@/i18n/routing';
 import {localizeConcierge} from '@/lib/ai/concierge-labels';
+import {publicEnv} from '@/lib/config/env';
 
 type PublicLayoutProps = {
   children: ReactNode;
@@ -21,6 +22,7 @@ export default async function PublicLayout({children, params}: PublicLayoutProps
   ]);
   const appLocale = locale as AppLocale;
   const conciergeLabels = localizeConcierge((key) => concierge.raw(key));
+  const {turnstileSiteKey} = publicEnv();
 
   return (
     <>
@@ -30,7 +32,11 @@ export default async function PublicLayout({children, params}: PublicLayoutProps
       <SiteHeader locale={appLocale} />
       <main id="main-content">{children}</main>
       <SiteFooter locale={appLocale} />
-      <ConciergeWidget locale={appLocale} labels={conciergeLabels} />
+      <ConciergeWidget
+        locale={appLocale}
+        labels={conciergeLabels}
+        {...(turnstileSiteKey === undefined ? {} : {turnstileSiteKey})}
+      />
     </>
   );
 }

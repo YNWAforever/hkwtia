@@ -28,10 +28,17 @@ export interface ServerEnv {
   woztellChannelId?: string;
   woztellWebhookSecret?: string;
   turnstileSecret?: string;
+  turnstileSiteKey?: string;
 }
 
 export interface PublicEnv {
   siteUrl: string;
+  /**
+   * A Turnstile site key is public by design. It is read here rather than
+   * through serverEnv so statically prerendered public pages can render the
+   * widget without the strict production credential check.
+   */
+  turnstileSiteKey?: string;
 }
 
 type Environment = Partial<NodeJS.ProcessEnv>;
@@ -70,6 +77,10 @@ const aiEnvironmentSchema = z.object({
     (value) => value.trim().length > 0,
     {message: "TURNSTILE_SECRET must not be blank"},
   ).optional(),
+  TURNSTILE_SITE_KEY: z.string().refine(
+    (value) => value.trim().length > 0,
+    {message: "TURNSTILE_SITE_KEY must not be blank"},
+  ).optional(),
 });
 
 function validateServerEnvironment(environment: Environment): void {
@@ -96,6 +107,15 @@ function validateServerEnvironment(environment: Environment): void {
   }
   if (conciergeSecret === valueFor(environment, "NEON_AUTH_COOKIE_SECRET")) {
     throw new Error("CONCIERGE_COOKIE_SECRET must not reuse NEON_AUTH_COOKIE_SECRET");
+  }
+
+  // Turnstile only works when both halves are present: the secret alone makes
+  // the server reject every request because no client can mint a token, and the
+  // site key alone renders a challenge nothing verifies.
+  const turnstileSecret = valueFor(environment, "TURNSTILE_SECRET").trim();
+  const turnstileSiteKey = valueFor(environment, "TURNSTILE_SITE_KEY").trim();
+  if (Boolean(turnstileSecret) !== Boolean(turnstileSiteKey)) {
+    throw new Error("TURNSTILE_SECRET and TURNSTILE_SITE_KEY must be set together");
   }
 }
 
@@ -130,6 +150,7 @@ export function parseServerEnv(environment: Environment = process.env): ServerEn
     ...(ai.WOZTELL_CHANNEL_ID === undefined ? {} : {woztellChannelId: ai.WOZTELL_CHANNEL_ID}),
     ...(ai.WOZTELL_WEBHOOK_SECRET === undefined ? {} : {woztellWebhookSecret: ai.WOZTELL_WEBHOOK_SECRET}),
     ...(ai.TURNSTILE_SECRET === undefined ? {} : {turnstileSecret: ai.TURNSTILE_SECRET}),
+    ...(ai.TURNSTILE_SITE_KEY === undefined ? {} : {turnstileSiteKey: ai.TURNSTILE_SITE_KEY}),
   };
 }
 
@@ -138,7 +159,9 @@ export function serverEnv(): ServerEnv {
 }
 
 export function publicEnv(environment: Environment = process.env): PublicEnv {
+  const turnstileSiteKey = valueFor(environment, "TURNSTILE_SITE_KEY").trim();
   return {
     siteUrl: valueFor(environment, "NEXT_PUBLIC_SITE_URL") || "http://localhost:3000",
+    ...(turnstileSiteKey ? {turnstileSiteKey} : {}),
   };
 }

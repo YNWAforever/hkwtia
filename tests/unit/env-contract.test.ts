@@ -208,5 +208,26 @@ describe("runtime environment contract", () => {
       ...environment,
       TURNSTILE_SECRET: "   ",
     })).toThrow("TURNSTILE_SECRET");
+
+    // A secret with no site key rejects every Concierge request, because no
+    // client can produce a token; a site key with no secret verifies nothing.
+    expect(() => parseServerEnv({
+      ...environment,
+      TURNSTILE_SECRET: "turnstile-secret",
+    })).toThrow("TURNSTILE_SECRET and TURNSTILE_SITE_KEY must be set together");
+
+    expect(() => parseServerEnv({
+      ...environment,
+      TURNSTILE_SITE_KEY: "turnstile-site-key",
+    })).toThrow("TURNSTILE_SECRET and TURNSTILE_SITE_KEY must be set together");
+
+    expect(parseServerEnv({
+      ...environment,
+      TURNSTILE_SECRET: "turnstile-secret",
+      TURNSTILE_SITE_KEY: "turnstile-site-key",
+    })).toMatchObject({
+      turnstileSecret: "turnstile-secret",
+      turnstileSiteKey: "turnstile-site-key",
+    });
   });
 });

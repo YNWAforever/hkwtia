@@ -30,7 +30,55 @@ type DisabledState = Readonly<{taskId: string}>;
 type Props = Readonly<{
   locale: "en" | "zh-HK";
   labels: ConciergeLabels;
+  /** Absent when Turnstile is not configured; the challenge is then skipped. */
+  turnstileSiteKey?: string;
 }>;
+
+const TURNSTILE_SCRIPT_SRC =
+  "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+
+type TurnstileApi = Readonly<{
+  render: (
+    container: HTMLElement,
+    options: Readonly<{
+      sitekey: string;
+      callback: (token: string) => void;
+      "expired-callback": () => void;
+      "error-callback": () => void;
+      theme?: "auto";
+      language?: string;
+    }>,
+  ) => string;
+  remove: (widgetId: string) => void;
+  reset: (widgetId: string) => void;
+}>;
+
+declare global {
+  var turnstile: TurnstileApi | undefined;
+}
+
+// Memoized so reopening the panel reuses the one tag this module created.
+// Attaching a load listener to a pre-existing tag would never fire if that tag
+// had already finished loading, leaving the caller waiting forever.
+let turnstileScript: Promise<void> | undefined;
+
+function loadTurnstileScript(): Promise<void> {
+  if (globalThis.turnstile) return Promise.resolve();
+  turnstileScript ??= new Promise<void>((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = TURNSTILE_SCRIPT_SRC;
+    script.async = true;
+    script.defer = true;
+    script.addEventListener("load", () => resolve(), {once: true});
+    script.addEventListener(
+      "error",
+      () => reject(new Error("TURNSTILE_SCRIPT_FAILED")),
+      {once: true},
+    );
+    document.head.append(script);
+  });
+  return turnstileScript;
+}
 
 function interpolate(template: string, values: Record<string, string | number>) {
   return Object.entries(values).reduce(
@@ -132,9 +180,11 @@ async function readSse(
   }
 }
 
-export function ConciergeWidget({locale, labels}: Props) {
+export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
   const dialogId = useId();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetIdRef = useRef<string | undefined>(undefined);
   const contactEmailRef = useRef<HTMLInputElement>(null);
   const terminalEscalationRef = useRef(false);
   const mountedRef = useRef(true);
@@ -158,6 +208,8 @@ export function ConciergeWidget({locale, labels}: Props) {
   const [feedbackState, setFeedbackState] = useState<
     Record<string, "pending" | "recorded" | "error">
   >({});
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileFailed, setTurnstileFailed] = useState(false);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -171,6 +223,49 @@ export function ConciergeWidget({locale, labels}: Props) {
       window.removeEventListener("offline", updateOnline);
     };
   }, []);
+
+  // Rendered only while the panel is open, so the challenge is not requested
+  // for visitors who never open the concierge.
+  useEffect(() => {
+    if (!turnstileSiteKey || !open) return;
+    let widgetId: string | undefined;
+    let cancelled = false;
+
+    void loadTurnstileScript()
+      .then(() => {
+        const api = globalThis.turnstile;
+        const container = turnstileRef.current;
+        if (cancelled || !container) return;
+        // A blocked or rewritten script can load without defining the global.
+        // Surface that instead of leaving the composer silently unsendable.
+        if (!api) {
+          setTurnstileFailed(true);
+          return;
+        }
+        widgetId = api.render(container, {
+          sitekey: turnstileSiteKey,
+          callback: (token) => setTurnstileToken(token),
+          "expired-callback": () => setTurnstileToken(null),
+          "error-callback": () => {
+            setTurnstileToken(null);
+            setTurnstileFailed(true);
+          },
+          theme: "auto",
+          language: locale === "zh-HK" ? "zh-tw" : "en",
+        });
+        turnstileWidgetIdRef.current = widgetId;
+      })
+      .catch(() => {
+        if (!cancelled) setTurnstileFailed(true);
+      });
+
+    return () => {
+      cancelled = true;
+      setTurnstileToken(null);
+      turnstileWidgetIdRef.current = undefined;
+      if (widgetId) globalThis.turnstile?.remove(widgetId);
+    };
+  }, [turnstileSiteKey, open, locale]);
 
   function updateAssistant(
     id: string,
@@ -204,6 +299,15 @@ export function ConciergeWidget({locale, labels}: Props) {
     if (!navigator.onLine) {
       setOnline(false);
       setError({message: labels.offline, retryMessage: normalized});
+      return;
+    }
+    if (turnstileSiteKey && !turnstileToken) {
+      setError({
+        message: turnstileFailed
+          ? labels.verificationError
+          : labels.verificationPending,
+        retryMessage: normalized,
+      });
       return;
     }
 
@@ -243,6 +347,7 @@ export function ConciergeWidget({locale, labels}: Props) {
           ...(!conversationIdRef.current && contactEmail.trim()
             ? {contactEmail: contactEmail.trim()}
             : {}),
+          ...(turnstileToken ? {turnstileToken} : {}),
           message: normalized,
           locale,
         }),
@@ -324,6 +429,11 @@ export function ConciergeWidget({locale, labels}: Props) {
         requestActiveRef.current = false;
       }
       if (mountedRef.current) setSending(false);
+      // Turnstile tokens are single-use, so the next turn needs a fresh one.
+      if (turnstileWidgetIdRef.current) {
+        setTurnstileToken(null);
+        globalThis.turnstile?.reset(turnstileWidgetIdRef.current);
+      }
     }
   }
 
@@ -628,6 +738,19 @@ export function ConciergeWidget({locale, labels}: Props) {
                 onChange={(event) => setDraft(event.target.value.slice(0, 2000))}
                 className="mt-2 block min-h-24 w-full resize-y rounded-md border border-input bg-background px-3 py-3 text-base leading-6 placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-60"
               />
+              {turnstileSiteKey ? (
+                <div className="mt-4">
+                  <p className="text-sm font-semibold">
+                    {labels.verificationLabel}
+                  </p>
+                  <div className="mt-2" ref={turnstileRef} />
+                  {turnstileFailed ? (
+                    <p role="alert" className="mt-1 text-sm text-destructive">
+                      {labels.verificationError}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
               <div className="mt-2 flex items-center justify-between gap-4">
                 <p className="text-xs tabular-nums text-muted-foreground">
                   {interpolate(labels.characterCount, {count: draft.length})}

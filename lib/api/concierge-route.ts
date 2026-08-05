@@ -27,6 +27,7 @@ import {
   conversationsRepository,
   type ConversationOwner,
 } from "@/lib/db/repos/conversations";
+import {actorContactEmail} from "@/lib/db/repos/profile-identities";
 import {
   clientIpFromHeaders,
   isSameOrigin,
@@ -57,7 +58,13 @@ export const conciergeRequestSchema = z.object({
   turnstileToken: z.string().max(4096).optional(),
 }).strict();
 
-type Actor = Readonly<{profileId: string}> | null;
+/**
+ * `contactEmail` is the address already on file for the signed-in profile, so
+ * it is confirmed by definition. It is deliberately distinct from the
+ * visitor-supplied `contactEmail` in the request body, which is never promoted
+ * to a confirmed identity.
+ */
+type Actor = Readonly<{profileId: string; contactEmail?: string}> | null;
 type Service = Pick<
   ReturnType<typeof createConciergeService>,
   "startTurn"
@@ -256,6 +263,9 @@ export function createConciergePostHandler(
         ...(parsed.contactEmail === undefined
           ? {}
           : {fallbackContactEmail: parsed.contactEmail}),
+        ...(actor?.contactEmail === undefined
+          ? {}
+          : {confirmedContactEmail: actor.contactEmail}),
         locale: parsed.locale,
         trigger: "web",
         abortSignal: request.signal,
@@ -330,7 +340,12 @@ async function productionHandler(request: Request): Promise<Response> {
     verifyTurnstile,
     getActor: async () => {
       const actor = await getActor();
-      return actor ? {profileId: actor.profileId} : null;
+      if (!actor) return null;
+      const contactEmail = await actorContactEmail(actor).catch(() => null);
+      return {
+        profileId: actor.profileId,
+        ...(contactEmail === null ? {} : {contactEmail}),
+      };
     },
     service,
   })(request);

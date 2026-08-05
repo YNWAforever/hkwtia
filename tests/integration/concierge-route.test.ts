@@ -8,6 +8,7 @@ import {
 import {
   createFeedbackPostHandler,
 } from "@/lib/api/feedback-route";
+import {verifyTurnstile} from "@/lib/security/turnstile";
 
 const SECRET = "concierge-cookie-secret-that-is-at-least-32-bytes";
 const CONVERSATION_ID = "11111111-1111-4111-8111-111111111111";
@@ -107,6 +108,44 @@ describe("Concierge SSE route", () => {
     );
   });
 
+  it("confirms the signed-in member's own address on file", async () => {
+    const deps = routeDependencies({
+      getActor: vi.fn(async () => ({
+        profileId: "profile-1",
+        contactEmail: "member@example.com",
+      })),
+    });
+    const response = await createConciergePostHandler(deps)(request({
+      message: "Please email me the details",
+      locale: "en",
+      contactEmail: "typed@example.com",
+    }));
+
+    expect(response.status).toBe(200);
+    // The address on file is confirmed; the typed one stays a fallback only.
+    expect(deps.service.startTurn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        confirmedContactEmail: "member@example.com",
+        fallbackContactEmail: "typed@example.com",
+      }),
+    );
+  });
+
+  it("leaves a member with no address on file unconfirmed", async () => {
+    const deps = routeDependencies({
+      getActor: vi.fn(async () => ({profileId: "profile-1"})),
+    });
+    const response = await createConciergePostHandler(deps)(request({
+      message: "Hello",
+      locale: "en",
+    }));
+
+    expect(response.status).toBe(200);
+    expect(deps.service.startTurn).toHaveBeenCalledWith(
+      expect.not.objectContaining({confirmedContactEmail: expect.anything()}),
+    );
+  });
+
   it.each([
     "not-an-email",
     `${"a".repeat(310)}@example.com`,
@@ -151,6 +190,32 @@ describe("Concierge SSE route", () => {
     }))(request({message: "Hello", locale: "en"}));
     expect(limited.status).toBe(429);
     expect(limited.headers.get("retry-after")).toBe("42");
+  });
+
+  it("forwards the client Turnstile token when a secret is configured", async () => {
+    const verifyTurnstile = vi.fn(async () => true);
+    const response = await createConciergePostHandler(routeDependencies({
+      turnstileSecret: "turnstile-secret",
+      verifyTurnstile,
+    }))(request({message: "Hello", locale: "en", turnstileToken: "client-token"}));
+
+    expect(response.status).toBe(200);
+    expect(verifyTurnstile).toHaveBeenCalledWith(expect.objectContaining({
+      secret: "turnstile-secret",
+      token: "client-token",
+    }));
+  });
+
+  it("rejects a configured-Turnstile request that carries no client token", async () => {
+    // Regression guard: the widget shipped without a token for a long time, so
+    // enabling the secret in production rejected every conversation.
+    const response = await createConciergePostHandler(routeDependencies({
+      turnstileSecret: "turnstile-secret",
+      verifyTurnstile,
+    }))(request({message: "Hello", locale: "en"}));
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toEqual({error: "TURNSTILE_FAILED"});
   });
 
   it("continues only the authenticated member's owned conversation", async () => {

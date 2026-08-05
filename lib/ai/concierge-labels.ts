@@ -27,6 +27,9 @@ export const conciergeLabelKeys = [
   "feedbackThanks",
   "feedbackError",
   "characterCount",
+  "verificationLabel",
+  "verificationPending",
+  "verificationError",
 ] as const;
 
 export type ConciergeLabelKey = typeof conciergeLabelKeys[number];
