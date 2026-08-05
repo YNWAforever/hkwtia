@@ -43,14 +43,18 @@ function validateM6Target(): void {
   }
 }
 
+const configuredTarget = process.env.PLAYWRIGHT_BASE_URL?.trim() ?? "";
+const managedM6Target = configuredTarget.length === 0;
 const missingEnvironment = missingM6Environment();
-if (missingEnvironment.length === 0) {
+if (!managedM6Target) validateM6Target();
+if (managedM6Target && missingEnvironment.length === 0) {
   const databaseUrl = process.env.DATABASE_URL_TEST!.trim();
   assertM6SeedEnvironment({...process.env, DATABASE_URL: databaseUrl, DATABASE_URL_TEST: databaseUrl});
-  validateM6Target();
 }
 
-const skipReason = missingEnvironment.length > 0
+const skipReason = !managedM6Target
+  ? "M6 mutating real-route acceptance is restricted to Playwright's managed loopback server; an external PLAYWRIGHT_BASE_URL target is read-only for this spec."
+  : missingEnvironment.length > 0
   ? `M6 real-route acceptance requires an explicitly seeded isolated runtime; missing: ${missingEnvironment.join(", ")}`
   : "";
 
@@ -77,16 +81,6 @@ async function signIn(page: Page, role: "member" | "staff"): Promise<void> {
   expect(response.ok()).toBe(true);
 }
 
-async function enterProtectedPreview(page: Page): Promise<void> {
-  const shareToken = process.env.VERCEL_SHARE_TOKEN?.trim();
-  const baseUrl = process.env.PLAYWRIGHT_BASE_URL?.trim();
-  if (!shareToken || !baseUrl) return;
-  const shareUrl = new URL(baseUrl);
-  if (!shareUrl.hostname.endsWith(".vercel.app")) throw new Error("M6_SHARE_TOKEN_REQUIRES_VERCEL_PREVIEW");
-  shareUrl.searchParams.set("_vercel_share", shareToken);
-  await page.goto(shareUrl.href);
-}
-
 test.describe("M6 Launch Pad deterministic funding contract", () => {
   test("maps each fixture answer set to exactly one eligible scheme", () => {
     for (const fixture of fundingFixtures) {
@@ -96,10 +90,10 @@ test.describe("M6 Launch Pad deterministic funding contract", () => {
   });
 });
 
-test.describe("M6 Launch Pad isolated real-route acceptance", () => {
-  test.skip(missingEnvironment.length > 0, skipReason);
-  test.beforeEach(async ({page}) => enterProtectedPreview(page));
+test.describe("M6 Launch Pad managed isolated real-route acceptance (mutating)", () => {
+  test.skip(!managedM6Target || missingEnvironment.length > 0, skipReason);
   test.beforeAll(async () => {
+    if (!managedM6Target) return;
     database = new Pool({connectionString: process.env.DATABASE_URL_TEST, max: 1});
   });
   test.afterAll(async () => {

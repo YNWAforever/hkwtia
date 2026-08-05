@@ -107,12 +107,16 @@ credential-gated and uses only an explicitly seeded isolated runtime:
 npm.cmd run e2e -- tests/e2e/m6-launch-pad.spec.ts
 ```
 
-When intentionally using a separately started isolated server, set
-`PLAYWRIGHT_BASE_URL` to its loopback or non-Production `*.vercel.app` origin
-before running the same command. The real-route journey requires the M6 seed
+The mutating real-route journey is intentionally restricted to the managed
+loopback server: its Playwright configuration maps the runtime
+`DATABASE_URL` to the isolated `DATABASE_URL_TEST`. If
+`PLAYWRIGHT_BASE_URL` is set (including a Vercel Preview or separately started
+loopback), this spec runs only the funding contract and skips the two mutating
+tests, so direct database assertions cannot accidentally target an unverified
+hosted/shared/Production runtime. The managed journey requires the M6 seed
 guard, an allowlisted `DATABASE_URL_TEST`, M6 test-only member/staff email and
 password variables (`M6_TEST_MEMBER_*` and `M6_TEST_STAFF_*`), and synthetic
-company display-name variables; it rejects the known Production hostname. See
+company display-name variables. See
 [`docs/m6-acceptance.md`](./docs/m6-acceptance.md) for the fixture answers,
 journey demonstration, and verification record.
 

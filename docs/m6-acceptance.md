@@ -74,8 +74,12 @@ table or expose contact, notes, or negotiation-status data.
 
 The Playwright durable journey uses the real Next routes, server actions,
 Neon Auth session, repositories, audit table, and Showcase projection. It is
-credential-gated and only runs when the M6 seed guard, an allowlisted isolated
-`DATABASE_URL_TEST`, and the M6 test-only member/staff accounts are present.
+credential-gated and only runs against the managed loopback server. That
+server is the only target whose runtime wiring is proven to map
+`DATABASE_URL` to the isolated `DATABASE_URL_TEST`; an externally configured
+`PLAYWRIGHT_BASE_URL` (including a Vercel Preview or separately started local
+server) skips these mutating tests. External targets are therefore read-only
+for this spec and cannot be used for direct database assertions.
 The required account variables are `M6_TEST_MEMBER_EMAIL`,
 `M6_TEST_MEMBER_PASSWORD`, `M6_TEST_STAFF_EMAIL`, and
 `M6_TEST_STAFF_PASSWORD` (the managed local server also needs the isolated
@@ -98,15 +102,22 @@ node -e "JSON.parse(require('node:fs').readFileSync('messages/en.json','utf8'));
 
 That command runs the funding contract without credentials and skips the
 durable real-route journey unless all isolated M6 variables are configured.
-When intentionally targeting a separately started isolated server, set
-`PLAYWRIGHT_BASE_URL` to its loopback or non-Production `*.vercel.app` origin
-and run the same command. Do not use a shared or Production URL.
+If `PLAYWRIGHT_BASE_URL` is set, this spec still runs the credential-free
+funding contract but skips both mutating real-route tests with an explicit
+managed-loopback-only reason. Do not use a shared or Production URL for any
+other acceptance run.
 
-## Fresh Task 7 verification
+## Fresh post-c4e0359 verification
 
 | Gate | Result | Evidence |
 | --- | --- | --- |
-| M6 deterministic Playwright | PASS | 5 passed, 1 live Preview test skipped without the three explicit M6 variables |
+| M6 deterministic funding contract | PASS | 1 credential-free funding contract passed |
+| M6 real-route mutation | SKIPPED | 2 credential-gated tests skipped unless the managed loopback server and all isolated M6 variables are present |
 | Visible-string audit | PASS | 123 TSX files scanned |
 | Message JSON parse | PASS | both locale message bundles parsed successfully |
-| Database, Preview, or Production mutation | NONE | Task 7 performs no seed, deployment, or external-resource action |
+| Database, Preview, or Production mutation | NONE | The recorded local run used no credentials and performed no seed, deployment, hosted Preview, shared, or Production action |
+
+The recorded local run was **1 passed + 2 credential-gated skips**. When the
+real-route tests are intentionally enabled, they mutate only the managed
+isolated runtime and never a hosted/shared/Production environment. Any older
+5-pass synthetic-suite counts are historical and are not current M6 evidence.
