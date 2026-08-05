@@ -314,6 +314,20 @@ describe("policy-safe Concierge tool registry", () => {
     expect(repositories.createDraftEmailApproval).not.toHaveBeenCalled();
   });
 
+  it("denies every draft when the conversation has no confirmed address", async () => {
+    // Anonymous visitors never get a confirmed address, so this is the branch
+    // that runs for them; it previously had no coverage at all.
+    const {tools, repositories} = fixture();
+
+    await expect(execute(tools.draft_email!, {
+      recipient: "member@example.com",
+      recipientConfirmed: true,
+      subject: "Hi",
+      body: "Text",
+    })).resolves.toEqual({value: [{code: "draft_email_recipient_denied"}]});
+    expect(repositories.createDraftEmailApproval).not.toHaveBeenCalled();
+  });
+
   it("fails closed when pre-execution audit is unavailable", async () => {
     const {tools, repositories} = fixture({
       confirmedContactEmail: "member@example.com",

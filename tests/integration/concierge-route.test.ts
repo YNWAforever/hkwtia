@@ -108,6 +108,44 @@ describe("Concierge SSE route", () => {
     );
   });
 
+  it("confirms the signed-in member's own address on file", async () => {
+    const deps = routeDependencies({
+      getActor: vi.fn(async () => ({
+        profileId: "profile-1",
+        contactEmail: "member@example.com",
+      })),
+    });
+    const response = await createConciergePostHandler(deps)(request({
+      message: "Please email me the details",
+      locale: "en",
+      contactEmail: "typed@example.com",
+    }));
+
+    expect(response.status).toBe(200);
+    // The address on file is confirmed; the typed one stays a fallback only.
+    expect(deps.service.startTurn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        confirmedContactEmail: "member@example.com",
+        fallbackContactEmail: "typed@example.com",
+      }),
+    );
+  });
+
+  it("leaves a member with no address on file unconfirmed", async () => {
+    const deps = routeDependencies({
+      getActor: vi.fn(async () => ({profileId: "profile-1"})),
+    });
+    const response = await createConciergePostHandler(deps)(request({
+      message: "Hello",
+      locale: "en",
+    }));
+
+    expect(response.status).toBe(200);
+    expect(deps.service.startTurn).toHaveBeenCalledWith(
+      expect.not.objectContaining({confirmedContactEmail: expect.anything()}),
+    );
+  });
+
   it.each([
     "not-an-email",
     `${"a".repeat(310)}@example.com`,

@@ -27,3 +27,18 @@ export const profileIdentityRepository: ProfileIdentityResolver = {
     await db.update(profiles).set({lastLoginAt: new Date()}).where(eq(profiles.id, profileId));
   },
 };
+
+/**
+ * The address already on file for a signed-in profile. Used only as a
+ * server-side comparison key for agent tooling; it is never sent to a model.
+ */
+export async function profileContactEmail(profileId: string): Promise<string | null> {
+  const db = await getDb();
+  const rows = await db
+    .select({email: profiles.email})
+    .from(profiles)
+    .where(eq(profiles.id, profileId))
+    .limit(1);
+  const email = rows[0]?.email?.trim();
+  return email ? email.toLowerCase() : null;
+}

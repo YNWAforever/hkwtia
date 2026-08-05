@@ -25,6 +25,16 @@ function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
 }
 
+/** True when the recipient is not the address confirmed for this conversation. */
+function recipientMismatch(
+  confirmedContactEmail: string | undefined,
+  recipient: unknown,
+): boolean {
+  if (confirmedContactEmail === undefined) return true;
+  return typeof recipient !== "string"
+    || normalizeEmail(recipient) !== normalizeEmail(confirmedContactEmail);
+}
+
 export function createDraftEmailTool(
   context: ConciergeToolContext,
 ): AgentTool {
@@ -36,42 +46,33 @@ export function createDraftEmailTool(
       try {
         parsed = draftEmailInputSchema.parse(input);
       } catch (error) {
-        if (
-          input
-          && typeof input === "object"
-          && Object.keys(input).every((key) =>
-            ["recipient", "recipientConfirmed", "subject", "body"].includes(key)
-          )
-          && (
-            (input as {recipientConfirmed?: unknown}).recipientConfirmed === false
-            || (
-              typeof (input as {recipient?: unknown}).recipient === "string"
-              && context.confirmedContactEmail !== undefined
-              && normalizeEmail((input as {recipient: string}).recipient)
-                !== normalizeEmail(context.confirmedContactEmail)
-            )
-          )
-        ) {
-          await auditBestEffort(context, {
-            tool: "draft_email",
-            phase: "outcome",
-            outcome: "denied",
-          });
-          return ok([{code: "draft_email_recipient_denied"}]);
-        }
-await auditBestEffort(context, {
+        await auditBestEffort(context, {
           tool: "draft_email",
           phase: "outcome",
           outcome: "denied",
         });
+        // A well-formed call aimed at the wrong recipient is a policy denial
+        // the model can recover from; anything else is a malformed tool call.
+        const values = input && typeof input === "object"
+          ? input as Readonly<Record<string, unknown>>
+          : null;
+        const recipientRefused = values !== null
+          && Object.keys(values).every((key) =>
+            ["recipient", "recipientConfirmed", "subject", "body"].includes(key)
+          )
+          && (
+            values.recipientConfirmed === false
+            || (
+              context.confirmedContactEmail !== undefined
+              && typeof values.recipient === "string"
+              && recipientMismatch(context.confirmedContactEmail, values.recipient)
+            )
+          );
+        if (recipientRefused) return ok([{code: "draft_email_recipient_denied"}]);
         throw error;
       }
       const startedAt = Date.now();
-      if (
-        context.confirmedContactEmail === undefined
-        || normalizeEmail(parsed.recipient)
-          !== normalizeEmail(context.confirmedContactEmail)
-      ) {
+      if (recipientMismatch(context.confirmedContactEmail, parsed.recipient)) {
         await auditBestEffort(context, {
           tool: "draft_email",
           phase: "outcome",
