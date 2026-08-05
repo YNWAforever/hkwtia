@@ -5,6 +5,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {RequestIntroForm} from "@/components/marketing/request-intro-form";
 import {ShowcaseDetail} from "@/components/marketing/showcase-detail";
 import {ShowcaseViewBeacon} from "@/components/marketing/showcase-view-beacon";
+import {StructuredData} from "@/components/seo/structured-data";
 import type {AppLocale} from "@/i18n/routing";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
 import {buildPageMetadata} from "@/lib/metadata";
@@ -35,5 +36,5 @@ export default async function ShowcaseDetailPage({params}: Props) {
   const labels = {premium: t("premium"), goneGlobal: t("goneGlobal"), memberSince: t("memberSince"), useCases: t("details.useCases"), deployment: t("details.deployment"), languages: t("details.languages"), worksWith: t("details.worksWith"), caseStudy: t("details.caseStudy"), video: t("details.video"), requestIntro: t("details.requestIntro")};
   const requestIntro = <RequestIntroForm action={requestIntroAction} locale={locale} slug={listing.slug} labels={{name: t("details.form.name"), email: t("details.form.email"), organization: t("details.form.organization"), message: t("details.form.message"), website: t("details.form.website"), submit: t("details.form.submit"), submitting: t("details.form.submitting"), success: t("details.form.success"), invalid: t("details.form.invalid"), rateLimited: t("details.form.rateLimited")}}/>;
   const jsonLd = softwareApplicationJsonLd(listing, locale);
-  return <main className="container mx-auto px-6 py-16"><ShowcaseViewBeacon slug={listing.slug}/><ShowcaseDetail listing={listing} locale={locale} labels={labels} requestIntro={requestIntro}/><script dangerouslySetInnerHTML={{__html: JSON.stringify(jsonLd)}} type="application/ld+json"/></main>;
+  return <main className="container mx-auto px-6 py-16"><ShowcaseViewBeacon slug={listing.slug}/><ShowcaseDetail listing={listing} locale={locale} labels={labels} requestIntro={requestIntro}/><StructuredData data={jsonLd}/></main>;
 }

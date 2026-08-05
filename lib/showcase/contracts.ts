@@ -8,6 +8,27 @@ const optionalHttpsUrl = z.string().trim().url().refine(
   {message: "HTTPS_URL_REQUIRED"},
 ).nullable().optional().transform((value) => value || null);
 
+/**
+ * Logo references are resolved with `absoluteUrl`, which accepts any absolute
+ * scheme. Allow only a site-relative path or an explicit HTTPS URL so a stored
+ * reference can never resolve to `javascript:` or a protocol-relative host.
+ */
+function isSafeLogoReference(value: string): boolean {
+  if (value.startsWith("/")) return !value.startsWith("//");
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+const optionalLogoReference = z.string().trim().max(500).nullable().optional()
+  .transform((value) => value?.trim() || null)
+  .refine(
+    (value) => value === null || isSafeLogoReference(value),
+    {message: "LOGO_REFERENCE_INVALID"},
+  );
+
 const facet = z.string().trim().min(1).max(64);
 const facetList = z.array(facet).max(20);
 
@@ -64,7 +85,7 @@ export const listingInputSchema = z.object({
   caseStudyUrl: optionalHttpsUrl,
   caseStudySummaryEn: z.string().trim().max(2_000).nullable().optional().transform((value) => value?.trim() || null),
   caseStudySummaryZhHk: z.string().trim().max(2_000).nullable().optional().transform((value) => value?.trim() || null),
-  logoReference: z.string().trim().max(500).nullable().optional().transform((value) => value?.trim() || null),
+  logoReference: optionalLogoReference,
 });
 
 export type ListingInput = z.infer<typeof listingInputSchema>;

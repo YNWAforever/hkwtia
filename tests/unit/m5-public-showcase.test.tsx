@@ -1,10 +1,14 @@
+import {readFileSync} from "node:fs";
+
 import {render, screen} from "@testing-library/react";
+import {renderToStaticMarkup} from "react-dom/server";
 import {describe, expect, it} from "vitest";
 
 import {ShowcaseCard} from "@/components/marketing/showcase-card";
 import {ShowcaseFilters} from "@/components/marketing/showcase-filters";
+import {StructuredData} from "@/components/seo/structured-data";
 import {buildShowcaseQuery, softwareApplicationJsonLd} from "@/lib/showcase/public";
-import type {PublicListing} from "@/lib/showcase/contracts";
+import {listingInputSchema, type PublicListing} from "@/lib/showcase/contracts";
 
 const listing: PublicListing = {
   slug: "harbour-vision-ai", premium: true, goneGlobal: false, views: 42, memberSince: "2020-01-01", name: "Harbour Vision AI", tagline: "Trade intelligence", description: "Public description", category: "software", useCases: ["logistics"], deploymentOptions: ["cloud"], supportedLanguages: ["en", "zh-HK"], worksWith: ["ERP"], videoUrl: null, caseStudyUrl: null, caseStudySummary: "Case study", logoReference: null,
@@ -25,6 +29,48 @@ describe("public Showcase", () => {
     });
     expect(softwareApplicationJsonLd(listing, "en")).not.toHaveProperty("email");
     expect(softwareApplicationJsonLd(listing, "en")).not.toHaveProperty("id");
+  });
+
+  it("escapes markup so a listing cannot break out of the JSON-LD script tag", () => {
+    const hostile: PublicListing = {
+      ...listing,
+      description: '</script><img src=x onerror="alert(1)">',
+    };
+
+    const html = renderToStaticMarkup(
+      <StructuredData data={softwareApplicationJsonLd(hostile, "en")}/>,
+    );
+
+    expect(html).toContain("\\u003c/script>");
+    expect(html).not.toContain("</script><img");
+    expect(html.match(/<\/script>/g)).toHaveLength(1);
+  });
+
+  it("renders the detail page JSON-LD through the escaping component", () => {
+    const source = readFileSync("app/[locale]/(public)/showcase/[slug]/page.tsx", "utf8");
+
+    expect(source).toContain("<StructuredData");
+    expect(source).not.toMatch(/dangerouslySetInnerHTML/);
+  });
+
+  it("rejects logo references that resolve to a non-HTTPS scheme or another host", () => {
+    const input = {
+      slug: "harbour-vision-ai", nameEn: "Harbour Vision AI", nameZhHk: "港灣視野 AI",
+      taglineEn: "Trade intelligence", taglineZhHk: "貿易智能",
+      descriptionEn: "Description", descriptionZhHk: "描述",
+      category: "software", useCases: ["logistics"], deploymentOptions: ["cloud"],
+      supportedLanguages: ["en"], worksWith: ["ERP"],
+    };
+
+    expect(listingInputSchema.parse({...input, logoReference: "/images/showcase/logo.svg"}).logoReference)
+      .toBe("/images/showcase/logo.svg");
+    expect(listingInputSchema.parse({...input, logoReference: "https://cdn.example.com/logo.svg"}).logoReference)
+      .toBe("https://cdn.example.com/logo.svg");
+    expect(listingInputSchema.parse({...input, logoReference: null}).logoReference).toBeNull();
+
+    for (const logoReference of ["javascript:alert(1)", "//evil.example.com/logo.svg", "http://cdn.example.com/logo.svg", "data:image/svg+xml;base64,AAAA"]) {
+      expect(listingInputSchema.safeParse({...input, logoReference}).success).toBe(false);
+    }
   });
 
   it("renders buyer-facing card and URL-driven filters", () => {
