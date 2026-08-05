@@ -4,6 +4,7 @@ import {publicRoutes} from "@/config/public-routes";
 import {events} from "@/content/events";
 import {newsPosts} from "@/content/news";
 import type {AppLocale} from "@/i18n/routing";
+import {eventsRepository} from "@/lib/db/repos/events";
 import {
   listPublishedBuildLogs,
   type PublishedBuildLogSummary,
@@ -31,13 +32,23 @@ function localizedEntries(pathname: string): MetadataRoute.Sitemap {
   }));
 }
 
+const anonymous = {kind: "anonymous", userId: null} as const;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let buildLogs: readonly PublishedBuildLogSummary[] = [];
   let showcaseSlugs: readonly string[] = [];
+  // Event pages are database-backed, so the static content list alone would
+  // leave every published event out of the sitemap.
+  let eventSlugs: readonly string[] = [];
   try {
     buildLogs = await listPublishedBuildLogs();
   } catch {
     buildLogs = [];
+  }
+  try {
+    eventSlugs = (await eventsRepository.listPublic(anonymous)).map(({slug}) => slug);
+  } catch {
+    eventSlugs = [];
   }
   try {
     showcaseSlugs = await showcaseRepository.listPublishedSlugs();
@@ -51,8 +62,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticEntries = publicRoutes.flatMap((pathname) =>
     localizedEntries(pathname));
-  const eventEntries = events.flatMap((record) =>
-    localizedEntries(`/events/${record.slug}`));
+  const eventSlugSet = new Set([...events.map(({slug}) => slug), ...eventSlugs]);
+  const eventEntries = [...eventSlugSet].flatMap((slug) =>
+    localizedEntries(`/events/${slug}`));
   const newsEntries = newsPosts.flatMap((record) =>
     localizedEntries(`/news/${record.slug}`));
   const buildLogEntries = visibleBuildLogs.flatMap((record) =>

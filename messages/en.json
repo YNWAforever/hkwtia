@@ -341,7 +341,7 @@
     "summary": "Choose the membership tier that fits how you participate, grow and contribute.",
     "tiersTitle": "Membership tiers",
     "tiersIntro": "Annual membership is shown first. Monthly options are available only for Individual and Startup.",
-    "comingSoon": "Self-service joining arrives in M1. Contact WTIA for current applications.",
+    "comingSoon": "Prefer to speak to someone first? Contact WTIA and our team will guide your application.",
     "joinAction": "Choose this plan",
     "benefits": {
       "network": "Community and networking access",
@@ -471,22 +471,22 @@
     "cpai": {
       "title": "CPAI",
       "description": "A focused WTIA programme supporting applied innovation.",
-      "status": "Programme details are being prepared for a later milestone."
+      "status": "Contact WTIA for the current programme timetable and how to take part."
     },
     "hkict": {
       "title": "HKICT Awards",
       "description": "Recognising excellence across Hong Kong's technology sector.",
-      "status": "Programme details are being prepared for a later milestone."
+      "status": "Contact WTIA for the current programme timetable and how to take part."
     },
     "tct": {
       "title": "TCT",
       "description": "Connecting technology, capability and talent.",
-      "status": "Programme details are being prepared for a later milestone."
+      "status": "Contact WTIA for the current programme timetable and how to take part."
     },
     "asa": {
       "title": "Asia Smart App Awards",
       "description": "Celebrating outstanding smart applications across Asia.",
-      "status": "Programme details are being prepared for a later milestone."
+      "status": "Contact WTIA for the current programme timetable and how to take part."
     }
   },
   "LaunchPad": {
@@ -627,20 +627,168 @@
   },
   "Privacy": {
     "metaTitle": "Privacy | WTIA",
-    "metaDescription": "How WTIA handles information in the M0 public site.",
+    "metaDescription": "How the WTIA platform collects, uses and retains your information.",
     "eyebrow": "Privacy",
-    "title": "Privacy in M0",
-    "description": "A clear summary of what this public preview does and does not collect.",
-    "summary": "M0 has no accounts, forms, or payments."
+    "title": "How we handle your information",
+    "description": "What the WTIA platform collects, who processes it, and how long it is kept.",
+    "sections": [
+      {
+        "heading": "What this covers",
+        "body": [
+          "This page describes how the WTIA website and member platform handle personal information. It covers the public pages, membership applications, the member portal, company seats, the member Showcase, the Launch Pad programme and the WTIA Concierge assistant.",
+          "For any question about your information, contact WTIA at contact@hkwtia.org."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Information you give us",
+        "body": ["You provide information when you apply, sign in, or use member features."],
+        "items": [
+          "Membership application and profile: your name, email address, phone number, job title, preferred language, and whether you appear in the member directory.",
+          "Company records: legal and display name, website, industry, size band and description.",
+          "Showcase listings and introduction requests: your name, email address, organisation and message.",
+          "Launch Pad applications: your target market and readiness responses.",
+          "Concierge conversations: the messages you send, and an optional contact email if you ask the team to follow up."
+        ]
+      },
+      {
+        "heading": "Information collected automatically",
+        "body": [],
+        "items": [
+          "A session cookie that keeps you signed in, and a signed cookie that links an anonymous Concierge conversation to your browser.",
+          "The network address reported by our hosting provider, used to rate-limit public forms and the Concierge against automated abuse.",
+          "Showcase listing view counts, recorded without identifying the viewer."
+        ]
+      },
+      {
+        "heading": "Payments",
+        "body": [
+          "Membership payments are handled by Stripe. WTIA stores the Stripe customer and subscription identifiers, your plan, status and billing period so we can administer your membership. Card numbers are entered on Stripe's systems and are not stored by WTIA."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Email and WhatsApp",
+        "body": [
+          "Transactional and campaign email is delivered through Resend, and each message is recorded in a delivery log so staff can confirm what was sent. Every marketing email includes an unsubscribe link; unsubscribing records a suppression that stops further marketing email to that address.",
+          "WhatsApp messages are delivered through WOZTELL and are only sent to members who have opted in. You can withdraw that opt-in at any time."
+        ],
+        "items": []
+      },
+      {
+        "heading": "The WTIA Concierge",
+        "body": [
+          "Concierge conversations are stored so a conversation can continue and so staff can follow up when a question is escalated. The assistant cannot change membership, billing, roles, seats or approval decisions, and any email it drafts is held for staff approval before anything is sent.",
+          "Conversation messages older than twelve months are deleted and the associated run records are redacted."
+        ],
+        "items": []
+      },
+      {
+        "heading": "How long we keep information",
+        "body": [
+          "Membership, billing and audit records are kept while you are a member and for as long as WTIA needs them to administer the association and meet its record-keeping obligations. Concierge conversation messages are deleted after twelve months. Suppression records are kept so that an unsubscribe request continues to be honoured."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Your choices",
+        "body": [],
+        "items": [
+          "Update your profile and company details at any time in the member portal.",
+          "Choose whether your profile appears in the member directory.",
+          "Unsubscribe from marketing email using the link in any campaign message.",
+          "Withdraw your WhatsApp opt-in.",
+          "Request access to, correction of, or deletion of your personal data under the Personal Data (Privacy) Ordinance by writing to contact@hkwtia.org."
+        ]
+      },
+      {
+        "heading": "Service providers",
+        "body": ["WTIA uses the following providers to operate the platform."],
+        "items": [
+          "Neon — database hosting and account authentication.",
+          "Stripe — membership payments.",
+          "Resend — transactional and campaign email.",
+          "WOZTELL — WhatsApp message delivery.",
+          "Vercel — website hosting.",
+          "Cloudflare Turnstile — bot protection on public forms, where enabled.",
+          "OpenAI or Anthropic — the language model behind the Concierge, depending on the configured model."
+        ]
+      },
+      {
+        "heading": "Contact",
+        "body": [
+          "Questions, requests and complaints about personal data can be sent to contact@hkwtia.org, or by post to WTIA at 4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong."
+        ],
+        "items": []
+      }
+    ]
   },
   "AiTransparency": {
     "metaTitle": "AI Transparency | WTIA",
-    "metaDescription": "Understand the AI roadmap for the WTIA public site.",
+    "metaDescription": "How the WTIA Concierge works, what it can do, and when a person takes over.",
     "eyebrow": "AI transparency",
-    "title": "How AI fits into WTIA's roadmap",
-    "description": "Agents are planned, not live, in M0.",
-    "summary": "WTIA agents are planned for a later milestone; no AI agent is live on this public site.",
-    "aiOpsLink": "Read the AI-Ops preview"
+    "title": "How the WTIA Concierge works",
+    "description": "What our AI assistant can and cannot do, and how your conversation is handled.",
+    "sections": [
+      {
+        "heading": "The Concierge is live",
+        "body": [
+          "The WTIA Concierge is a bilingual assistant available on this website and over WhatsApp. It answers questions about membership, events, programmes and support in English and Traditional Chinese."
+        ],
+        "items": []
+      },
+      {
+        "heading": "What it can and cannot do",
+        "body": ["The assistant works only through a fixed set of approved tools."],
+        "items": [
+          "It can search approved WTIA sources, list upcoming events, explain funding schemes, and read your own membership context when you are signed in.",
+          "It can create a follow-up task for the WTIA team.",
+          "It cannot change membership, billing, roles, seats or approval decisions.",
+          "It cannot send email. Any email it drafts is held for staff approval first."
+        ]
+      },
+      {
+        "heading": "Grounded answers and citations",
+        "body": [
+          "The assistant cites only sources returned by its own tools and does not invent links. When it cannot answer from a sufficiently grounded source, it hands the question to the WTIA team instead of guessing."
+        ],
+        "items": []
+      },
+      {
+        "heading": "When a person takes over",
+        "body": ["The assistant escalates to WTIA staff rather than answering when a conversation involves:"],
+        "items": [
+          "payments, refunds or billing disputes",
+          "complaints or legal matters",
+          "privacy or safety requests",
+          "changes to protected member details",
+          "an answer it is not confident enough to give",
+          "a tool or service failure"
+        ]
+      },
+      {
+        "heading": "Safety",
+        "body": [
+          "The assistant treats retrieved documents and tool results as untrusted data, never as instructions. Text inside a document cannot redirect it, and it will refuse instructions that try to override WTIA's rules."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Your conversation data",
+        "body": [
+          "Messages are stored so a conversation can continue and so staff can follow up on an escalation. If you provide a contact email, it is used only so the team can reply. Messages older than twelve months are deleted and the associated run records are redacted. See the privacy page for the full detail."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Models and oversight",
+        "body": [
+          "The Concierge runs on a configured OpenAI or Anthropic model. The platform is provider-neutral, so WTIA can change model providers without changing how the assistant behaves. Usage, cost and answer quality are recorded and summarised publicly."
+        ],
+        "items": []
+      }
+    ],
+    "aiOpsLink": "Read the AI-Ops dashboard"
   },
   "NotFound": {
     "title": "Page not found",

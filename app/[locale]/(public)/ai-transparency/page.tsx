@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 
 import {PageHero} from '@/components/marketing/page-hero';
+import {parsePolicySections, PolicySections} from '@/components/marketing/policy-sections';
 import type {AppLocale} from '@/i18n/routing';
 import {Link} from '@/i18n/navigation';
 import {buildPageMetadata} from '@/lib/metadata';
@@ -22,11 +23,9 @@ export default async function AiTransparencyPage({params}: Props) {
   return (
     <>
       <PageHero eyebrow={t('eyebrow')} title={t('title')} description={t('description')} />
-      <section className="container mx-auto px-6 py-16">
-        <div className="glass-card space-y-4 p-6">
-          <p className="text-muted-foreground">{t('summary')}</p>
-          <Link className="font-semibold text-primary" href="/ai-ops">{t('aiOpsLink')}</Link>
-        </div>
+      <PolicySections sections={parsePolicySections(t.raw('sections'))} />
+      <section className="container mx-auto max-w-3xl px-6 pb-16">
+        <Link className="font-semibold text-primary" href="/ai-ops">{t('aiOpsLink')}</Link>
       </section>
     </>
   );

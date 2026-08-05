@@ -62,7 +62,12 @@ describe("published build logs through news routes", () => {
   it("renders static news followed by localized published build-log cards", async () => {
     render(await NewsPage({params: Promise.resolve({locale: "zh-HK"})}));
 
-    expect(screen.getByText("static-update")).toBeInTheDocument();
+    // Static news renders as a titled, linked card like a build log, not as a
+    // bare slug.
+    expect(
+      screen.getByRole("link", {name: "translated:title"}),
+    ).toHaveAttribute("href", "/zh/news/static-update");
+    expect(screen.queryByText("static-update")).not.toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
         level: 2,
@@ -88,7 +93,12 @@ describe("published build logs through news routes", () => {
 
     render(await NewsPage({params: Promise.resolve({locale: "en"})}));
 
-    expect(screen.getAllByText("static-update")).toHaveLength(1);
+    // The colliding slug is rendered once, by static news, and the database
+    // card for the same slug is suppressed.
+    expect(
+      screen.getAllByRole("link").filter((link) =>
+        link.getAttribute("href") === "/news/static-update"),
+    ).toHaveLength(1);
     expect(screen.queryByText("Unreachable database title")).not.toBeInTheDocument();
     expect(
       screen.getByRole("link", {name: "How we built the AI-Ops dashboard"}),

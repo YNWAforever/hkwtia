@@ -3,6 +3,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {BuildLogCard} from "@/components/marketing/build-log-card";
 import {EmptyState} from "@/components/marketing/empty-state";
+import {NewsCard} from "@/components/marketing/news-card";
 import {PageHero} from "@/components/marketing/page-hero";
 import {newsPosts} from "@/content/news";
 import type {AppLocale} from "@/i18n/routing";
@@ -34,6 +35,10 @@ export default async function NewsPage({params}: Props) {
     newsPosts,
   );
   const appLocale = locale as AppLocale;
+  const staticPosts = await Promise.all(newsPosts.map(async (post) => {
+    const post_t = await getTranslations({locale, namespace: post.namespace});
+    return {slug: post.slug, publishedAt: post.publishedAt, title: post_t("title")};
+  }));
 
   return (
     <>
@@ -45,7 +50,15 @@ export default async function NewsPage({params}: Props) {
       <section className="container mx-auto px-6 py-16">
         {newsPosts.length > 0 || buildLogs.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2">
-            {newsPosts.map((post) => <p key={post.slug}>{post.slug}</p>)}
+            {staticPosts.map((post) => (
+              <NewsCard
+                key={post.slug}
+                locale={appLocale}
+                publishedAt={post.publishedAt}
+                slug={post.slug}
+                title={post.title}
+              />
+            ))}
             {buildLogs.map((post) => (
               <BuildLogCard key={post.slug} locale={appLocale} post={post}/>
             ))}
