@@ -39,6 +39,9 @@ const labels: ConciergeLabels = {
   feedbackThanks: "Thank you for your feedback.",
   feedbackError: "We couldn’t save your feedback. Please try again.",
   characterCount: "{count} / 2000",
+  verificationLabel: "Human verification",
+  verificationPending: "Complete the verification check to send your message.",
+  verificationError: "Verification is unavailable. Reload the page and try again.",
 };
 
 function widget(): ReactElement {
