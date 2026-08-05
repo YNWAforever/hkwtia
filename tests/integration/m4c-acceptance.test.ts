@@ -440,5 +440,3 @@ describe("complete M4 deterministic acceptance", () => {
     await exerciseWoztell();
   });
 });
-
-

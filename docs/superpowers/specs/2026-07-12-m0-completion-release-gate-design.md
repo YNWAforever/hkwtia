@@ -1,7 +1,7 @@
 # M0 Completion and Release Gate Design
 
-**Date:** 2026-07-12  
-**Status:** Approved in conversation; awaiting written-spec review  
+**Date:** 2026-07-12
+**Status:** Approved in conversation; awaiting written-spec review
 **Source of truth:** `WTIA_Codex_Build_Spec_v1.1.md` and the approved M0 public-site design and implementation plan
 
 ## Purpose

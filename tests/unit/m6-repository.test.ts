@@ -1,8 +1,12 @@
+import {readFileSync} from "node:fs";
+
 import {describe, expect, it} from "vitest";
 
 import type {Cohort, CohortApplication} from "@/lib/db/server-schema";
 import {
   createCohortRepository,
+  databaseStore,
+  PUBLIC_COHORT_STATUSES,
   type AdminCohortApplication,
   type CohortStore,
 } from "@/lib/db/repos/cohorts";
@@ -101,6 +105,49 @@ function memoryStore(initial: CohortApplication[] = [], options: Readonly<{close
 }
 
 describe("M6 cohort repository", () => {
+  it("publicly projects only open and active cohorts", () => {
+    expect(PUBLIC_COHORT_STATUSES).toEqual(["open", "active"]);
+    expect(["planning", "open", "active", "completed", "archived"].filter((status) =>
+      (PUBLIC_COHORT_STATUSES as readonly string[]).includes(status),
+    )).toEqual(["open", "active"]);
+
+    const source = readFileSync("lib/db/repos/cohorts.ts", "utf8");
+    expect(source).toContain("inArray(cohorts.status, PUBLIC_COHORT_STATUSES)");
+    expect(source).not.toContain('ne(cohorts.status, "archived")');
+  });
+
+  it("applies the explicit public status predicate to database rows", async () => {
+    const rows = ["planning", "open", "active", "completed", "archived"].map((status) => {
+      const row = cohort({status: status as Cohort["status"]});
+      return {
+        id: row.id, slug: row.slug, nameEn: row.nameEn, nameZhHk: row.nameZhHk,
+        descriptionEn: row.descriptionEn, descriptionZhHk: row.descriptionZhHk,
+        track: row.track, startsOn: row.startsOn, endsOn: row.endsOn,
+        capacity: row.capacity, feeHkd: row.feeHkd, status: row.status,
+      };
+    });
+    let whereCondition: {queryChunks?: readonly unknown[]} | undefined;
+    const database = {
+      select: () => ({
+        from: () => ({
+          where: (condition: {queryChunks?: readonly unknown[]}) => {
+            whereCondition = condition;
+            return {orderBy: async () => rows.filter((row) => (PUBLIC_COHORT_STATUSES as readonly string[]).includes(row.status))};
+          },
+        }),
+      }),
+    };
+    const store = databaseStore(async () => database as never);
+
+    await expect(store.listPublicCohorts(anonymousActor())).resolves.toHaveLength(2);
+    const predicateValues = (whereCondition?.queryChunks ?? [])
+      .filter((chunk): chunk is readonly unknown[] => Array.isArray(chunk))
+      .flat();
+    expect(predicateValues).toHaveLength(2);
+    expect((predicateValues[0] as {value?: unknown}).value).toBe("open");
+    expect((predicateValues[1] as {value?: unknown}).value).toBe("active");
+  });
+
   it("requires an authenticated member before creating an application", async () => {
     const repo = createCohortRepository({store: memoryStore()});
     await expect(repo.createApplication(anonymousActor(), cohortId, {cohortId, readiness: {market: "Singapore"}}))

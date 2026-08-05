@@ -1,13 +1,23 @@
+import {Pool} from "pg";
 import {expect, test, type Page} from "@playwright/test";
 
 import {getFundingResults} from "@/lib/launchpad/funding";
+import {assertM6SeedEnvironment} from "@/scripts/seed-m6";
 
-type LocaleCase = Readonly<{locale: "en" | "zh-HK"; path: string; lang: string; title: string}>;
-
-const locales: readonly LocaleCase[] = [
-  {locale: "en", path: "/launchpad", lang: "en", title: "Launch Pad"},
-  {locale: "zh-HK", path: "/zh/launchpad", lang: "zh-HK", title: "Launch Pad"},
-];
+const COHORT_ID = "60000060-0000-4000-8000-000000000001";
+const M6_REQUIRED_ENV = [
+  "M6_ACCEPTANCE_SEED",
+  "DATABASE_URL_TEST",
+  "M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST",
+  "NEON_AUTH_BASE_URL",
+  "NEON_AUTH_COOKIE_SECRET",
+  "M6_TEST_MEMBER_EMAIL",
+  "M6_TEST_MEMBER_PASSWORD",
+  "M6_TEST_MEMBER_COMPANY_DISPLAY_NAME",
+  "M6_TEST_STAFF_EMAIL",
+  "M6_TEST_STAFF_PASSWORD",
+  "M6_TEST_GRADUATE_COMPANY_DISPLAY_NAME",
+] as const;
 
 const fundingFixtures = [
   {id: "bud", query: {sector: "trade", stage: "business-registered-non-subvented", market: "covered-economy", employees: "standard", revenue: "under-100m"}},
@@ -17,100 +27,160 @@ const fundingFixtures = [
   {id: "rd-cash-rebate", query: {sector: "research-development", stage: "incorporated-non-subvented", market: "hong-kong", employees: "standard", revenue: "eligible-rd-expenditure"}},
 ] as const;
 
-function escapeHtml(value: string): string {
-  return value.replace(/[&<>\"]/g, (character) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '\"': "&quot;"})[character] ?? character);
+function missingM6Environment(): readonly string[] {
+  return M6_REQUIRED_ENV.filter((name) => !process.env[name]?.trim());
 }
 
-function launchPadFixture(locale: LocaleCase, query: Record<string, string>): string {
-  const results = getFundingResults(query, locale.locale);
-  const cards = results.map((result) => `<article data-eligible="${result.potentiallyEligible}" data-scheme-id="${result.id}"><h3>${escapeHtml(result.name)}</h3><p>${result.potentiallyEligible ? "Potentially eligible" : "Not currently eligible"}</p><a href="${escapeHtml(result.sourceUrl)}">Official source</a></article>`).join("");
-  return `<!doctype html><html lang="${locale.lang}"><body><main>
-    <h1>${locale.title}</h1>
-    <section aria-label="Programme explainer"><h2>Programme explainer</h2><p>Cross-border cohort programme</p></section>
-    <section aria-label="Cohort calendar"><h2>Cohort calendar</h2><article>Launch Pad 2026</article></section>
-    <section aria-label="Landing partner map"><h2>Landing partner map</h2><p>Synthetic Singapore Partner</p></section>
-    <section aria-label="Funding scheme picker"><h2>Funding scheme picker</h2><form method="get"><label>Sector <select name="sector"><option value="trade">Trade</option></select></label><label>Stage <select name="stage"><option value="business-registered-non-subvented">Registered</option></select></label><label>Market <select name="market"><option value="covered-economy">Covered economy</option></select></label><label>Employees <select name="employees"><option value="standard">Standard</option></select></label><label>Revenue <select name="revenue"><option value="under-100m">Under 100m</option></select></label><button type="submit">Screen funding</button></form><section aria-label="Funding results">${cards}</section></section>
-    <section aria-label="Cohort application"><h2>Apply to a cohort</h2><form id="cohort-application"><label>Cohort <select name="cohortId"><option value="60000060-0000-4000-8000-000000000001">Launch Pad 2026</option></select></label><label>Target market <input name="market" required></label><label>Readiness <textarea name="readiness" required></textarea></label><label>Consent <input name="consent" required type="checkbox"></label><button type="submit">Apply to cohort</button><p id="cohort-application-status" role="status"></p></form></section>
-    <script>document.querySelector('#cohort-application').addEventListener('submit', (event) => { event.preventDefault(); const form = event.currentTarget; form.dataset.persisted = 'true'; form.dataset.applicationId = '60000062-0000-4000-8000-000000000001'; document.querySelector('#cohort-application-status').textContent = 'Application received'; });</script>
-  </main></body></html>`;
+function validateM6Target(): void {
+  const configured = process.env.PLAYWRIGHT_BASE_URL?.trim();
+  if (!configured) return;
+  const target = new URL(configured);
+  const hostname = target.hostname.toLowerCase();
+  const loopback = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+  if (loopback) return;
+  if (target.protocol !== "https:" || hostname === "hkwtia.vercel.app" || !hostname.endsWith(".vercel.app")) {
+    throw new Error("M6_E2E_TARGET_MUST_BE_AN_ISOLATED_VERCEL_PREVIEW");
+  }
 }
 
-function adminFixture(): string {
-  return `<!doctype html><html lang="en"><body><main><h1>Cohort applications</h1><section aria-label="Cohort kanban"><h2>Applied</h2><article data-application-id="60000062-0000-4000-8000-000000000001"><p>Synthetic Launch Pad Company 1</p><form id="cohort-stage-move"><label>Move to <select name="stage"><option value="accepted">Accepted</option></select></label><label>Staff note <textarea name="notes"></textarea></label><button type="submit">Move application</button><p id="move-status" role="status"></p></form></article></section><section aria-label="Audit evidence"><output id="audit-action"></output></section><script>document.querySelector('#cohort-stage-move').addEventListener('submit', (event) => { event.preventDefault(); const card = document.querySelector('[data-application-id]'); card.dataset.stage = event.currentTarget.elements.stage.value; document.querySelector('#audit-action').textContent = 'cohort_application.stage_changed'; document.querySelector('#move-status').textContent = 'Application moved'; });</script></main></body></html>`;
+const missingEnvironment = missingM6Environment();
+if (missingEnvironment.length === 0) {
+  const databaseUrl = process.env.DATABASE_URL_TEST!.trim();
+  assertM6SeedEnvironment({...process.env, DATABASE_URL: databaseUrl, DATABASE_URL_TEST: databaseUrl});
+  validateM6Target();
 }
 
-function showcaseFixture(): string {
-  return `<!doctype html><html lang="en"><body><main><article data-listing="m6-graduate"><h1>Synthetic Launch Pad Company 1</h1><span data-gone-global="true">Gone Global</span></article></main></body></html>`;
+const skipReason = missingEnvironment.length > 0
+  ? `M6 real-route acceptance requires an explicitly seeded isolated runtime; missing: ${missingEnvironment.join(", ")}`
+  : "";
+
+type ApplicationRow = Readonly<{id: string; companyId: string; stage: string}>;
+
+let database: Pool | null = null;
+
+async function query<T extends Record<string, unknown>>(text: string, values: unknown[] = []): Promise<readonly T[]> {
+  if (!database) throw new Error("M6_ACCEPTANCE_DATABASE_NOT_OPEN");
+  const result = await database.query<T>(text, values);
+  return result.rows;
 }
 
-async function installM6Fixtures(page: Page): Promise<void> {
-  await page.route(/\/((zh)\/)?launchpad(?:\?.*)?$/, async (route) => {
-    const url = new URL(route.request().url());
-    const locale = url.pathname.startsWith("/zh/") ? locales[1]! : locales[0]!;
-    await route.fulfill({contentType: "text/html", body: launchPadFixture(locale, Object.fromEntries(url.searchParams))});
+async function signIn(page: Page, role: "member" | "staff"): Promise<void> {
+  const prefix = role === "member" ? "M6_TEST_MEMBER" : "M6_TEST_STAFF";
+  const email = process.env[`${prefix}_EMAIL`]?.trim();
+  const password = process.env[`${prefix}_PASSWORD`]?.trim();
+  if (!email || !password) throw new Error(`${prefix}_EMAIL and ${prefix}_PASSWORD are required`);
+  await page.goto("/");
+  const response = await page.request.post("/api/auth/sign-in/email", {
+    data: {email, password, callbackURL: role === "staff" ? "/admin/cohorts" : "/launchpad"},
+    headers: {Origin: new URL(page.url()).origin},
   });
-  await page.route(/\/((zh)\/)?admin\/cohorts$/, async (route) => {
-    await route.fulfill({contentType: "text/html", body: adminFixture()});
-  });
-  await page.route(/\/((zh)\/)?showcase\/m6-graduate$/, async (route) => {
-    await route.fulfill({contentType: "text/html", body: showcaseFixture()});
-  });
+  expect(response.ok()).toBe(true);
 }
 
-test.describe("M6 Launch Pad deterministic acceptance", () => {
-  test.beforeEach(async ({page}) => installM6Fixtures(page));
+async function enterProtectedPreview(page: Page): Promise<void> {
+  const shareToken = process.env.VERCEL_SHARE_TOKEN?.trim();
+  const baseUrl = process.env.PLAYWRIGHT_BASE_URL?.trim();
+  if (!shareToken || !baseUrl) return;
+  const shareUrl = new URL(baseUrl);
+  if (!shareUrl.hostname.endsWith(".vercel.app")) throw new Error("M6_SHARE_TOKEN_REQUIRES_VERCEL_PREVIEW");
+  shareUrl.searchParams.set("_vercel_share", shareToken);
+  await page.goto(shareUrl.href);
+}
 
-  test("maps the five funding answer sets to exactly one deterministic eligible scheme", async () => {
+test.describe("M6 Launch Pad deterministic funding contract", () => {
+  test("maps each fixture answer set to exactly one eligible scheme", () => {
     for (const fixture of fundingFixtures) {
       const results = getFundingResults(fixture.query, "en");
       expect(results.filter((result) => result.potentiallyEligible).map((result) => result.id), fixture.id).toEqual([fixture.id]);
     }
   });
-
-  for (const locale of locales) {
-    test(`${locale.locale} exposes the public Launch Pad, funding result, and durable application state`, async ({page}) => {
-      const query = new URLSearchParams(fundingFixtures[0].query).toString();
-      await page.goto(`${locale.path}?${query}`);
-      await expect(page.locator("html")).toHaveAttribute("lang", locale.lang);
-      await expect(page.getByRole("heading", {level: 1, name: locale.title})).toBeVisible();
-      for (const section of ["Programme explainer", "Cohort calendar", "Landing partner map", "Funding scheme picker", "Cohort application"]) await expect(page.getByRole("region", {name: section})).toBeVisible();
-      await expect(page.locator('[data-scheme-id="bud"][data-eligible="true"]')).toHaveCount(1);
-      await expect(page.locator('[data-scheme-id]:not([data-scheme-id="bud"])[data-eligible="true"]')).toHaveCount(0);
-
-      const application = page.getByRole("region", {name: "Cohort application"});
-      await application.getByLabel("Target market").fill("Singapore");
-      await application.getByLabel("Readiness").fill("Pilot-ready");
-      await application.getByLabel("Consent").check();
-      await application.getByRole("button", {name: "Apply to cohort"}).click();
-      await expect(application.locator("form")).toHaveAttribute("data-persisted", "true");
-      await expect(application.locator("form")).toHaveAttribute("data-application-id", "60000062-0000-4000-8000-000000000001");
-      await expect(application.getByRole("status")).toHaveText("Application received");
-    });
-  }
-
-  test("staff kanban stage move emits durable audit evidence", async ({page}) => {
-    await page.goto("/admin/cohorts");
-    await expect(page.getByRole("heading", {level: 1, name: "Cohort applications"})).toBeVisible();
-    await page.getByLabel("Staff note").fill("Accepted for launch preparation");
-    await page.getByRole("button", {name: "Move application"}).click();
-    await expect(page.locator('[data-application-id]')).toHaveAttribute("data-stage", "accepted");
-    await expect(page.locator("#audit-action")).toHaveText("cohort_application.stage_changed");
-    await expect(page.locator("#move-status")).toHaveText("Application moved");
-  });
-
-  test("graduated listing carries the public Gone Global badge", async ({page}) => {
-    await page.goto("/showcase/m6-graduate");
-    await expect(page.locator('[data-listing="m6-graduate"] [data-gone-global="true"]')).toHaveText("Gone Global");
-  });
 });
 
-test("live Preview M6 smoke is strictly credential-gated", async ({page}) => {
-  const previewUrl = process.env.M6_PREVIEW_URL?.trim();
-  const memberEmail = process.env.M6_PREVIEW_MEMBER_EMAIL?.trim();
-  const adminEmail = process.env.M6_PREVIEW_ADMIN_EMAIL?.trim();
-  test.skip(!previewUrl || !memberEmail || !adminEmail, "Live M6 Preview requires M6_PREVIEW_URL, M6_PREVIEW_MEMBER_EMAIL, and M6_PREVIEW_ADMIN_EMAIL.");
-  const target = new URL(previewUrl!);
-  if (target.hostname === "hkwtia.vercel.app" || target.hostname.includes("production")) throw new Error("M6_PREVIEW_PRODUCTION_FORBIDDEN");
-  await page.goto(new URL("/launchpad", target).href);
-  await expect(page.getByRole("heading", {level: 1})).toBeVisible();
+test.describe("M6 Launch Pad isolated real-route acceptance", () => {
+  test.skip(missingEnvironment.length > 0, skipReason);
+  test.beforeEach(async ({page}) => enterProtectedPreview(page));
+  test.beforeAll(async () => {
+    database = new Pool({connectionString: process.env.DATABASE_URL_TEST, max: 1});
+  });
+  test.afterAll(async () => {
+    await database?.end();
+    database = null;
+  });
+
+  test("member submits through the real route and the application survives a reload", async ({page}) => {
+    await signIn(page, "member");
+    const response = await page.goto(`/launchpad?${new URLSearchParams(fundingFixtures[0].query)}`);
+    expect(response?.status()).toBe(200);
+    const application = page.locator("form").filter({has: page.locator("#cohort-application-cohort")});
+    await expect(application).toBeVisible();
+    await application.locator("#cohort-application-cohort").selectOption(COHORT_ID);
+    await application.locator("#cohort-application-market").fill("Singapore");
+    await application.locator("#cohort-application-readiness").fill("Pilot-ready isolated acceptance submission");
+    await application.locator("#cohort-application-consent").check();
+    await application.getByRole("button", {name: /apply|申請/i}).click();
+    await expect(page.locator("#cohort-application-status")).not.toBeEmpty();
+
+    const companyName = process.env.M6_TEST_MEMBER_COMPANY_DISPLAY_NAME!.trim();
+    await expect.poll(async () => Number((await query<{count: string}>(
+      `SELECT count(*)::text AS count
+       FROM cohort_applications ca
+       INNER JOIN companies c ON c.id = ca.company_id
+       WHERE ca.cohort_id = $1 AND c.display_name = $2`,
+      [COHORT_ID, companyName],
+    ))[0]?.count ?? 0)).toBe(1);
+    await page.reload();
+    await expect(application).toBeVisible();
+  });
+
+  test("staff performs legal stage moves, proves audit persistence, and sees the real Showcase projection", async ({page}) => {
+    const companyName = process.env.M6_TEST_GRADUATE_COMPANY_DISPLAY_NAME!.trim();
+    const applicationRows = await query<ApplicationRow>(
+      `SELECT ca.id, ca.company_id AS "companyId", ca.stage
+       FROM cohort_applications ca
+       INNER JOIN companies c ON c.id = ca.company_id
+       WHERE ca.cohort_id = $1 AND c.display_name = $2
+       LIMIT 1`,
+      [COHORT_ID, companyName],
+    );
+    test.skip(applicationRows.length === 0, `M6 isolated seed has no application for ${companyName}; reseed the isolated fixture.`);
+    const applicationRow = applicationRows[0]!;
+    test.skip(applicationRow.stage === "graduated", "M6 graduate fixture is already graduated; reseed before repeating this mutating acceptance.");
+    const listingRows = await query<{slug: string}>(
+      `SELECT slug FROM showcase_listings WHERE company_id = $1 AND status = 'published' LIMIT 1`,
+      [applicationRow.companyId],
+    );
+    test.skip(listingRows.length === 0, `M6 isolated seed has no published Showcase listing for ${companyName}; seed the linked M5 fixture first.`);
+    const beforeAudit = Number((await query<{count: string}>(
+      `SELECT count(*)::text AS count FROM audit_events WHERE action = 'cohort_application.stage_changed' AND target_id = $1`,
+      [applicationRow.id],
+    ))[0]?.count ?? 0);
+
+    const nextStage: Readonly<Record<string, string>> = {applied: "accepted", accepted: "ready", ready: "match", match: "land", land: "scale", scale: "graduated"};
+    let stage = applicationRow.stage;
+    let moves = 0;
+    await signIn(page, "staff");
+    while (stage !== "graduated") {
+      const targetStage = nextStage[stage];
+      if (!targetStage) throw new Error(`M6_UNSUPPORTED_GRADUATE_PATH_${stage}`);
+      await page.goto("/admin/cohorts");
+      const card = page.locator("article").filter({hasText: companyName});
+      await expect(card).toBeVisible();
+      await card.getByRole("combobox").selectOption(targetStage);
+      await card.getByRole("textbox").fill(`M6 isolated acceptance move to ${targetStage}`);
+      await card.getByRole("button").click();
+      await expect.poll(async () => (await query<ApplicationRow>("SELECT stage FROM cohort_applications WHERE id = $1", [applicationRow.id]))[0]?.stage).toBe(targetStage);
+      stage = targetStage;
+      moves += 1;
+    }
+
+    const afterAudit = Number((await query<{count: string}>(
+      `SELECT count(*)::text AS count FROM audit_events WHERE action = 'cohort_application.stage_changed' AND target_id = $1`,
+      [applicationRow.id],
+    ))[0]?.count ?? 0);
+    expect(afterAudit).toBeGreaterThanOrEqual(beforeAudit + moves);
+
+    await page.goto(`/showcase/${listingRows[0]!.slug}`);
+    await expect(page.getByRole("heading", {level: 1})).toContainText(companyName);
+    await expect(page.getByText(/gone global/i)).toBeVisible();
+  });
 });

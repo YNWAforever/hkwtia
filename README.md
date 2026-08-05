@@ -99,16 +99,20 @@ it does not prove that an allowlisted non-Production host is isolated. The
 operator must make that confirmation before use. The seed only reconciles the
 synthetic `m6-launch-pad-acceptance-v1` scope.
 
-The credential-free deterministic browser checks use intercepted fixtures:
+The managed browser command starts the actual Next development server with
+Webpack. The funding mapping runs without credentials; the durable journey is
+credential-gated and uses only an explicitly seeded isolated runtime:
 
 ```powershell
-$env:PLAYWRIGHT_BASE_URL = "http://127.0.0.1:3333"
-npm.cmd run test:e2e -- tests/e2e/m6-launch-pad.spec.ts
+npm.cmd run e2e -- tests/e2e/m6-launch-pad.spec.ts
 ```
 
-Live Preview smoke remains skipped unless `M6_PREVIEW_URL`,
-`M6_PREVIEW_MEMBER_EMAIL`, and `M6_PREVIEW_ADMIN_EMAIL` are all explicit;
-the test rejects the known Production hostname. See
+When intentionally using a separately started isolated server, set
+`PLAYWRIGHT_BASE_URL` to its loopback or non-Production `*.vercel.app` origin
+before running the same command. The real-route journey requires the M6 seed
+guard, an allowlisted `DATABASE_URL_TEST`, M6 test-only member/staff email and
+password variables (`M6_TEST_MEMBER_*` and `M6_TEST_STAFF_*`), and synthetic
+company display-name variables; it rejects the known Production hostname. See
 [`docs/m6-acceptance.md`](./docs/m6-acceptance.md) for the fixture answers,
 journey demonstration, and verification record.
 

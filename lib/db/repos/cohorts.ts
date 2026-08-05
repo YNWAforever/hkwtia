@@ -1,6 +1,6 @@
 import "server-only";
 
-import {and, asc, eq, isNull, ne} from "drizzle-orm";
+import {and, asc, eq, inArray, isNull} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/actor";
@@ -74,6 +74,7 @@ export type CohortStore = Readonly<{
 
 export type CohortRepositoryDependencies = Readonly<{
   store?: CohortStore;
+  loadDatabase?: () => Promise<Database>;
   getCompanyRole?: (actor: Extract<Actor, {kind: "member"}>, companyId: string) => Promise<CompanyRole | null>;
 }>;
 
@@ -85,11 +86,13 @@ export type CohortRepository = Readonly<{
   moveApplication: (actor: AdminActor, applicationId: string, nextStage: unknown, notes?: string | null) => Promise<CohortApplication | null>;
 }>;
 
+export const PUBLIC_COHORT_STATUSES = ["open", "active"] as const;
+
 function transitionAllowed(from: CohortStage, to: CohortStage): boolean {
   return stageTransitions[from].includes(to);
 }
 
-function databaseStore(loadDatabase: () => Promise<Database> = getDb): CohortStore {
+export function databaseStore(loadDatabase: () => Promise<Database> = getDb): CohortStore {
   return {
     async listPublicCohorts(actor) {
       void actor;
@@ -107,7 +110,7 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): CohortSto
         capacity: cohorts.capacity,
         feeHkd: cohorts.feeHkd,
         status: cohorts.status,
-      }).from(cohorts).where(ne(cohorts.status, "archived")).orderBy(asc(cohorts.startsOn), asc(cohorts.slug));
+      }).from(cohorts).where(inArray(cohorts.status, PUBLIC_COHORT_STATUSES)).orderBy(asc(cohorts.startsOn), asc(cohorts.slug));
       return rows.map((row) => publicCohortSchema.parse(row));
     },
     async findActiveCompanyId(actor) {
@@ -224,7 +227,7 @@ async function requireCompanyManager(
 export function createCohortRepository(
   dependencies: CohortRepositoryDependencies = {},
 ): CohortRepository {
-  const store = dependencies.store ?? databaseStore();
+  const store = dependencies.store ?? databaseStore(dependencies.loadDatabase);
   return {
     async listPublicCohorts(actor) {
       return store.listPublicCohorts(actor);

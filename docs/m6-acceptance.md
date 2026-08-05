@@ -72,24 +72,35 @@ table or expose contact, notes, or negotiation-status data.
    Showcase listing is marked server-side and displays the localized `Gone
    Global` badge on its public card and detail route.
 
+The Playwright durable journey uses the real Next routes, server actions,
+Neon Auth session, repositories, audit table, and Showcase projection. It is
+credential-gated and only runs when the M6 seed guard, an allowlisted isolated
+`DATABASE_URL_TEST`, and the M6 test-only member/staff accounts are present.
+The required account variables are `M6_TEST_MEMBER_EMAIL`,
+`M6_TEST_MEMBER_PASSWORD`, `M6_TEST_STAFF_EMAIL`, and
+`M6_TEST_STAFF_PASSWORD` (the managed local server also needs the isolated
+Neon Auth runtime values).
+Set `M6_TEST_MEMBER_COMPANY_DISPLAY_NAME` and
+`M6_TEST_GRADUATE_COMPANY_DISPLAY_NAME` to the synthetic companies mapped to
+those accounts. The graduate company must also have a published Showcase
+listing. The test never seeds or cleans data.
+
 ## Verification commands
 
-The deterministic browser suite intercepts its own fixture routes; it does not
-need database access, a hosted Preview, or credentials. Use an explicit
-loopback URL when the worktree `node_modules` link is outside Turbopack's
-filesystem root:
+The managed acceptance command starts the actual Next development server with
+Webpack and is the canonical local command:
 
 ```powershell
-$env:PLAYWRIGHT_BASE_URL = "http://127.0.0.1:3333"
-npm.cmd run test:e2e -- tests/e2e/m6-launch-pad.spec.ts
+npm.cmd run e2e -- tests/e2e/m6-launch-pad.spec.ts
 npm.cmd run audit:strings
 node -e "JSON.parse(require('node:fs').readFileSync('messages/en.json','utf8')); JSON.parse(require('node:fs').readFileSync('messages/zh-HK.json','utf8')); console.log('message JSON parsed')"
 ```
 
-The live smoke test remains skipped unless all of `M6_PREVIEW_URL`,
-`M6_PREVIEW_MEMBER_EMAIL`, and `M6_PREVIEW_ADMIN_EMAIL` are explicitly
-present. It rejects the known Production hostname and never substitutes
-Production/shared credentials.
+That command runs the funding contract without credentials and skips the
+durable real-route journey unless all isolated M6 variables are configured.
+When intentionally targeting a separately started isolated server, set
+`PLAYWRIGHT_BASE_URL` to its loopback or non-Production `*.vercel.app` origin
+and run the same command. Do not use a shared or Production URL.
 
 ## Fresh Task 7 verification
 
