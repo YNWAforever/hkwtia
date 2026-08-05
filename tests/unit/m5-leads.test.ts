@@ -121,6 +121,16 @@ describe("showcase request-intro lead service", () => {
     expect(getPublishedBySlug).toHaveBeenCalledTimes(1);
   });
 
+  it("degrades to a per-email quota when no trusted client address exists", async () => {
+    // A missing proxy header must not put every visitor in one bucket, which
+    // would take the form offline site-wide after three submissions.
+    const fake = dependencies({resolveClientIp: async () => null});
+
+    await expect(fake.service.request(form({idempotencyKey: "first", email: "ada@example.com"}))).resolves.toEqual({ok: true});
+    await expect(fake.service.request(form({idempotencyKey: "second", email: "ada@example.com"}))).resolves.toEqual({ok: false, code: "rate_limited"});
+    await expect(fake.service.request(form({idempotencyKey: "third", email: "grace@example.com"}))).resolves.toEqual({ok: true});
+  });
+
   it("keeps separate quotas per client address", async () => {
     let clientIp = "203.0.113.10";
     const fake = dependencies({resolveClientIp: async () => clientIp});

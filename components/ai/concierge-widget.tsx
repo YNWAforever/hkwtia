@@ -57,21 +57,27 @@ declare global {
   var turnstile: TurnstileApi | undefined;
 }
 
+// Memoized so reopening the panel reuses the one tag this module created.
+// Attaching a load listener to a pre-existing tag would never fire if that tag
+// had already finished loading, leaving the caller waiting forever.
+let turnstileScript: Promise<void> | undefined;
+
 function loadTurnstileScript(): Promise<void> {
   if (globalThis.turnstile) return Promise.resolve();
-  return new Promise((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(
-      `script[src="${TURNSTILE_SCRIPT_SRC}"]`,
-    );
-    const script = existing ?? document.createElement("script");
-    script.addEventListener("load", () => resolve(), {once: true});
-    script.addEventListener("error", () => reject(new Error("TURNSTILE_SCRIPT_FAILED")), {once: true});
-    if (existing) return;
+  turnstileScript ??= new Promise<void>((resolve, reject) => {
+    const script = document.createElement("script");
     script.src = TURNSTILE_SCRIPT_SRC;
     script.async = true;
     script.defer = true;
+    script.addEventListener("load", () => resolve(), {once: true});
+    script.addEventListener(
+      "error",
+      () => reject(new Error("TURNSTILE_SCRIPT_FAILED")),
+      {once: true},
+    );
     document.head.append(script);
   });
+  return turnstileScript;
 }
 
 function interpolate(template: string, values: Record<string, string | number>) {
@@ -229,7 +235,13 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
       .then(() => {
         const api = globalThis.turnstile;
         const container = turnstileRef.current;
-        if (cancelled || !api || !container) return;
+        if (cancelled || !container) return;
+        // A blocked or rewritten script can load without defining the global.
+        // Surface that instead of leaving the composer silently unsendable.
+        if (!api) {
+          setTurnstileFailed(true);
+          return;
+        }
         widgetId = api.render(container, {
           sitekey: turnstileSiteKey,
           callback: (token) => setTurnstileToken(token),

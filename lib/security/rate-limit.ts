@@ -40,8 +40,15 @@ export function createInMemoryRateLimiter(
     throw new Error("RATE_LIMIT_MAX_ENTRIES_INVALID");
   }
   const buckets = new Map<string, {startedAt: number; count: number}>();
+  let sweptAt = Number.NEGATIVE_INFINITY;
 
+  // Amortized: a full scan on every call would let an attacker who has filled
+  // the map to the cap impose that scan on every subsequent request. Sweeping
+  // once per window still reclaims expired buckets, and exceeding the cap
+  // forces an immediate sweep, so the map size stays hard-bounded.
   function cleanup(current: number): void {
+    if (buckets.size <= maxEntries && current - sweptAt < options.windowMs) return;
+    sweptAt = current;
     for (const [key, bucket] of buckets) {
       if (current - bucket.startedAt >= options.windowMs) buckets.delete(key);
     }

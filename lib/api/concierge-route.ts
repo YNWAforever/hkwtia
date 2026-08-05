@@ -27,7 +27,7 @@ import {
   conversationsRepository,
   type ConversationOwner,
 } from "@/lib/db/repos/conversations";
-import {profileContactEmail} from "@/lib/db/repos/profile-identities";
+import {actorContactEmail} from "@/lib/db/repos/profile-identities";
 import {
   clientIpFromHeaders,
   isSameOrigin,
@@ -341,8 +341,7 @@ async function productionHandler(request: Request): Promise<Response> {
     getActor: async () => {
       const actor = await getActor();
       if (!actor) return null;
-      const contactEmail = await profileContactEmail(actor.profileId)
-        .catch(() => null);
+      const contactEmail = await actorContactEmail(actor).catch(() => null);
       return {
         profileId: actor.profileId,
         ...(contactEmail === null ? {} : {contactEmail}),

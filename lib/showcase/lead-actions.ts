@@ -100,9 +100,16 @@ export function createLeadService(dependencies: LeadServiceDependencies) {
 
       // Key on the client rather than the submitted email: the email is
       // attacker-chosen, so an email-keyed quota is bypassed by varying it.
-      // Requests with no trusted proxy header share one bucket by design.
+      // The platform sets the trusted proxy header and a client cannot strip
+      // it, so there is no downgrade path. Where no such header exists at all,
+      // fall back to the email key rather than collapsing every visitor into a
+      // single bucket, which would take the form offline site-wide after three
+      // submissions.
       const clientIp = await dependencies.resolveClientIp();
-      if (!dependencies.limiter.check(`showcase-lead:${clientIp ?? "unknown"}`).allowed) {
+      const limiterKey = clientIp
+        ? `showcase-lead:ip:${clientIp}`
+        : `showcase-lead:email:${parsed.data.slug}:${parsed.data.email}`;
+      if (!dependencies.limiter.check(limiterKey).allowed) {
         return {ok: false, code: "rate_limited"};
       }
 
