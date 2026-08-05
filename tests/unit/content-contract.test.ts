@@ -2,16 +2,14 @@ import {describe, expect, it} from 'vitest';
 
 import {publicRoutes} from '@/config/public-routes';
 import {events} from '@/content/events';
-import {newsPosts} from '@/content/news';
 import {programs} from '@/content/programs';
-import {eventSchema, newsPostSchema, programSchema} from '@/content/schemas';
+import {eventSchema, programSchema} from '@/content/schemas';
 
 describe('public content contract', () => {
   it('has unique static paths and valid dynamic records', () => {
     expect(new Set(publicRoutes).size).toBe(publicRoutes.length);
     expect(publicRoutes).toContain('/membership');
     expect(() => eventSchema.array().parse(events)).not.toThrow();
-    expect(() => newsPostSchema.array().parse(newsPosts)).not.toThrow();
     expect(programs.map(({id}) => id)).toEqual(['cpai', 'hkict', 'tct', 'asa']);
   });
 

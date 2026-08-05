@@ -999,6 +999,7 @@
       "segments": "分群",
       "members": "會員",
       "atRisk": "高風險",
+      "news": "最新消息",
       "events": "活動",
       "listingsReview": "展示頁審核",
       "cohorts": "啟航計劃",
@@ -1174,6 +1175,30 @@
         "attended": "已出席",
         "noShow": "未出席"
       }
+    },
+    "news": {
+      "eyebrow": "最新消息",
+      "title": "最新消息",
+      "description": "撰寫及發布 WTIA 雙語消息。",
+      "existing": "已發布及草稿",
+      "empty": "尚未有消息。",
+      "slug": "網址代碼",
+      "titleEn": "標題（英文）",
+      "titleZh": "標題（中文）",
+      "author": "作者",
+      "bodyMdx": "內文",
+      "bodyHelp": "支援格式：## 標題、- 項目、**粗體**，以及連向 WTIA 頁面的連結，例如 [會員計劃](/membership)。不支援圖片及外部連結。",
+      "published": "已發布",
+      "statusPublished": "已發布",
+      "statusDraft": "草稿",
+      "create": "建立消息",
+      "save": "儲存變更",
+      "saving": "儲存中…",
+      "createSuccess": "已建立消息。",
+      "updateSuccess": "已更新消息。",
+      "slugConflict": "此網址代碼已被使用。",
+      "validation": "請檢查各欄位。",
+      "error": "出現問題，請再試一次。"
     },
     "approvals": {
       "eyebrow": "審批佇列",

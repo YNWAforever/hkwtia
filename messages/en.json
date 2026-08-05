@@ -997,6 +997,7 @@
       "segments": "Segments",
       "members": "Members",
       "atRisk": "At risk",
+      "news": "News",
       "events": "Events",
       "listingsReview": "Showcase review",
       "cohorts": "Launch Pad cohorts",
@@ -1172,6 +1173,30 @@
         "attended": "Attended",
         "noShow": "No show"
       }
+    },
+    "news": {
+      "eyebrow": "News",
+      "title": "News",
+      "description": "Write and publish bilingual WTIA news.",
+      "existing": "Published and draft posts",
+      "empty": "No news posts yet.",
+      "slug": "URL slug",
+      "titleEn": "Title (English)",
+      "titleZh": "Title (Chinese)",
+      "author": "Author",
+      "bodyMdx": "Body",
+      "bodyHelp": "Supported formatting: ## headings, - lists, **bold**, and links to WTIA pages such as [membership](/membership). Images and external links are not supported.",
+      "published": "Published",
+      "statusPublished": "Published",
+      "statusDraft": "Draft",
+      "create": "Create post",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "createSuccess": "News post created.",
+      "updateSuccess": "News post updated.",
+      "slugConflict": "That URL slug is already taken.",
+      "validation": "Check the fields.",
+      "error": "Something went wrong. Try again."
     },
     "approvals": {
       "eyebrow": "Approval queue",

@@ -4,6 +4,8 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 const publicPosts = vi.hoisted(() => ({
   listPublishedBuildLogs: vi.fn(),
   getPublishedBuildLogBySlug: vi.fn(),
+  listPublishedNews: vi.fn(),
+  getPublishedNewsBySlug: vi.fn(),
 }));
 const navigation = vi.hoisted(() => ({
   notFound: vi.fn(() => {
@@ -19,14 +21,6 @@ vi.mock("next/navigation", () => navigation);
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async () => (key: string) => `translated:${key}`),
   setRequestLocale: vi.fn(),
-}));
-vi.mock("@/content/news", () => ({
-  newsPosts: [{
-    slug: "static-update",
-    publishedAt: "2026-07-01T00:00:00.000Z",
-    image: "/images/projects-hero.jpg",
-    namespace: "news.staticUpdate",
-  }],
 }));
 
 import NewsPage from "@/app/[locale]/(public)/news/page";
@@ -51,61 +45,72 @@ const detail = {
     "- [AI-Ops dashboard](/en/ai-ops)",
   ].join("\n"),
 } as const;
+const newsSummary = {
+  slug: "wtia-welcomes-new-members",
+  titleEn: "WTIA welcomes new members",
+  titleZh: "WTIA 歡迎新會員",
+  publishedAt: new Date("2026-08-01T02:00:00.000Z"),
+  author: "WTIA",
+} as const;
+const newsDetail = {
+  ...newsSummary,
+  bodyMdx: ["## Welcome", "", "A **warm** welcome."].join("\n"),
+} as const;
 
-describe("published build logs through news routes", () => {
+describe("published posts through news routes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     publicPosts.listPublishedBuildLogs.mockResolvedValue([summary]);
     publicPosts.getPublishedBuildLogBySlug.mockResolvedValue(detail);
+    publicPosts.listPublishedNews.mockResolvedValue([newsSummary]);
+    publicPosts.getPublishedNewsBySlug.mockResolvedValue(null);
   });
 
-  it("renders static news followed by localized published build-log cards", async () => {
+  it("renders staff news and build-log cards with localized titles", async () => {
     render(await NewsPage({params: Promise.resolve({locale: "zh-HK"})}));
 
-    // Static news renders as a titled, linked card like a build log, not as a
-    // bare slug.
     expect(
-      screen.getByRole("link", {name: "translated:title"}),
-    ).toHaveAttribute("href", "/zh/news/static-update");
-    expect(screen.queryByText("static-update")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", {
-        level: 2,
-        name: "我們如何建立 AI 營運儀表板",
-      }),
-    ).toBeInTheDocument();
+      screen.getByRole("link", {name: "WTIA 歡迎新會員"}),
+    ).toHaveAttribute("href", "/zh/news/wtia-welcomes-new-members");
     expect(
       screen.getByRole("link", {name: "我們如何建立 AI 營運儀表板"}),
     ).toHaveAttribute("href", "/zh/news/m4-ai-ops-dashboard");
+    expect(publicPosts.listPublishedNews).toHaveBeenCalledOnce();
     expect(publicPosts.listPublishedBuildLogs).toHaveBeenCalledOnce();
   });
 
-  it("omits a database build-log card whose slug belongs to static news", async () => {
-    publicPosts.listPublishedBuildLogs.mockResolvedValueOnce([
-      {
-        ...summary,
-        slug: "static-update",
-        titleEn: "Unreachable database title",
-        titleZh: "不可到達的資料庫標題",
-      },
-      summary,
-    ]);
+  it("shows the empty state when nothing is published", async () => {
+    publicPosts.listPublishedNews.mockResolvedValueOnce([]);
+    publicPosts.listPublishedBuildLogs.mockResolvedValueOnce([]);
 
     render(await NewsPage({params: Promise.resolve({locale: "en"})}));
 
-    // The colliding slug is rendered once, by static news, and the database
-    // card for the same slug is suppressed.
-    expect(
-      screen.getAllByRole("link").filter((link) =>
-        link.getAttribute("href") === "/news/static-update"),
-    ).toHaveLength(1);
-    expect(screen.queryByText("Unreachable database title")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("link", {name: "How we built the AI-Ops dashboard"}),
-    ).toHaveAttribute("href", "/news/m4-ai-ops-dashboard");
+    expect(screen.getByText("translated:emptyTitle")).toBeInTheDocument();
   });
 
-  it("renders a published database detail with one page-owned h1", async () => {
+  it("degrades to the empty state when the database is unavailable", async () => {
+    publicPosts.listPublishedNews.mockRejectedValueOnce(new Error("DB_DOWN"));
+    publicPosts.listPublishedBuildLogs.mockRejectedValueOnce(new Error("DB_DOWN"));
+
+    render(await NewsPage({params: Promise.resolve({locale: "en"})}));
+
+    expect(screen.getByText("translated:emptyTitle")).toBeInTheDocument();
+  });
+
+  it("resolves a news slug without falling through to build logs", async () => {
+    publicPosts.getPublishedNewsBySlug.mockResolvedValueOnce(newsDetail);
+
+    render(await NewsPostPage({
+      params: Promise.resolve({locale: "en", slug: newsSummary.slug}),
+    }));
+
+    expect(
+      screen.getAllByRole("heading", {level: 1, name: "WTIA welcomes new members"}),
+    ).toHaveLength(1);
+    expect(publicPosts.getPublishedBuildLogBySlug).not.toHaveBeenCalled();
+  });
+
+  it("renders a published build log with one page-owned h1", async () => {
     render(await NewsPostPage({
       params: Promise.resolve({locale: "en", slug: summary.slug}),
     }));
@@ -126,9 +131,10 @@ describe("published build logs through news routes", () => {
     );
   });
 
-  it.each(["draft-build-log", "future-build-log", "unknown-build-log"])(
+  it.each(["draft-post", "future-post", "unknown-post"])(
     "calls notFound for unpublished or unknown slug %s",
     async (slug) => {
+      publicPosts.getPublishedNewsBySlug.mockResolvedValueOnce(null);
       publicPosts.getPublishedBuildLogBySlug.mockResolvedValueOnce(null);
 
       await expect(
@@ -150,11 +156,12 @@ describe("published build logs through news routes", () => {
       }),
     ).rejects.toThrow("NEXT_NOT_FOUND");
     expect(navigation.notFound).toHaveBeenCalledTimes(2);
+    expect(publicPosts.getPublishedNewsBySlug).not.toHaveBeenCalled();
     expect(publicPosts.getPublishedBuildLogBySlug).not.toHaveBeenCalled();
   });
 
   it("does not hide non-validation repository failures", async () => {
-    publicPosts.getPublishedBuildLogBySlug.mockRejectedValueOnce(
+    publicPosts.getPublishedNewsBySlug.mockRejectedValueOnce(
       new Error("TRANSIENT_DATABASE_READ"),
     );
 
@@ -164,17 +171,6 @@ describe("published build logs through news routes", () => {
       }),
     ).rejects.toThrow("TRANSIENT_DATABASE_READ");
     expect(navigation.notFound).not.toHaveBeenCalled();
-  });
-
-  it("checks static news before querying the database fallback", async () => {
-    render(await NewsPostPage({
-      params: Promise.resolve({locale: "en", slug: "static-update"}),
-    }));
-
-    expect(screen.getByRole("heading", {level: 1})).toHaveTextContent(
-      "translated:title",
-    );
-    expect(publicPosts.getPublishedBuildLogBySlug).not.toHaveBeenCalled();
   });
 
   it.each([

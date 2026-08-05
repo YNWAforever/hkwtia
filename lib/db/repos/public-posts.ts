@@ -28,6 +28,9 @@ export type PublishedBuildLogSummary = Readonly<
 export type PublishedBuildLogDetail = Readonly<
   z.infer<typeof publishedBuildLogDetailRowSchema>
 >;
+export type PublishedNewsSummary = PublishedBuildLogSummary;
+export type PublishedNewsDetail = PublishedBuildLogDetail;
+
 export type PublicPostsRepository = Readonly<{
   listPublishedBuildLogs: (
     asOf?: Date,
@@ -36,6 +39,13 @@ export type PublicPostsRepository = Readonly<{
     slug: string,
     asOf?: Date,
   ) => Promise<PublishedBuildLogDetail | null>;
+  listPublishedNews: (
+    asOf?: Date,
+  ) => Promise<readonly PublishedNewsSummary[]>;
+  getPublishedNewsBySlug: (
+    slug: string,
+    asOf?: Date,
+  ) => Promise<PublishedNewsDetail | null>;
 }>;
 
 type DatabaseLoader = () => Promise<Database>;
@@ -93,6 +103,55 @@ export function createPublicPostsRepository(
       const row = rows[0];
       return row ? publishedBuildLogDetailRowSchema.parse(row) : null;
     },
+
+    // Deliberately separate from the build-log readers rather than a shared
+    // `kind` parameter: those feed the public AI-Ops evidence panel, where a
+    // news article must never appear.
+    async listPublishedNews(asOf = new Date()) {
+      const database = await loadDatabase();
+      const rows = await database
+        .select({
+          slug: posts.slug,
+          titleEn: posts.titleEn,
+          titleZh: posts.titleZh,
+          publishedAt: posts.publishedAt,
+          author: posts.author,
+        })
+        .from(posts)
+        .where(and(
+          eq(posts.kind, "news"),
+          isNotNull(posts.publishedAt),
+          lte(posts.publishedAt, asOf),
+        ))
+        .orderBy(desc(posts.publishedAt), asc(posts.slug));
+
+      return publishedBuildLogSummaryRowSchema.array().parse(rows);
+    },
+
+    async getPublishedNewsBySlug(slug, asOf = new Date()) {
+      const parsedSlug = parsePublishedBuildLogSlug(slug);
+      const database = await loadDatabase();
+      const rows = await database
+        .select({
+          slug: posts.slug,
+          titleEn: posts.titleEn,
+          titleZh: posts.titleZh,
+          publishedAt: posts.publishedAt,
+          author: posts.author,
+          bodyMdx: posts.bodyMdx,
+        })
+        .from(posts)
+        .where(and(
+          eq(posts.kind, "news"),
+          isNotNull(posts.publishedAt),
+          lte(posts.publishedAt, asOf),
+          eq(posts.slug, parsedSlug),
+        ))
+        .limit(1);
+
+      const row = rows[0];
+      return row ? publishedBuildLogDetailRowSchema.parse(row) : null;
+    },
   };
 }
 
@@ -109,4 +168,17 @@ export function getPublishedBuildLogBySlug(
   asOf?: Date,
 ): Promise<PublishedBuildLogDetail | null> {
   return publicPostsRepository.getPublishedBuildLogBySlug(slug, asOf);
+}
+
+export function listPublishedNews(
+  asOf?: Date,
+): Promise<readonly PublishedNewsSummary[]> {
+  return publicPostsRepository.listPublishedNews(asOf);
+}
+
+export function getPublishedNewsBySlug(
+  slug: string,
+  asOf?: Date,
+): Promise<PublishedNewsDetail | null> {
+  return publicPostsRepository.getPublishedNewsBySlug(slug, asOf);
 }
