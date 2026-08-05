@@ -1,4 +1,4 @@
-﻿import type {EventRecord} from '@/content/schemas';
+import type {EventRecord} from '@/content/schemas';
 
 import {PageHero} from '@/components/marketing/page-hero';
 

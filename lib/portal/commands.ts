@@ -8,7 +8,7 @@ import {companiesRepository} from "@/lib/db/repos/companies";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 import {forbidden, requireMember} from "@/lib/membership/lifecycle";
-import {isPortalMembershipStatus, type PortalQueryDependencies} from "@/lib/portal/queries";
+import {isPortalMembershipStatus} from "@/lib/portal/queries";
 
 const profileUpdateSchema = z.object({
   displayName: z.string().trim().min(1).max(200),
@@ -133,4 +133,3 @@ export async function updateCompanyAction(formData: FormData): Promise<void> {
 
 }
 
-void (null as unknown as PortalQueryDependencies);
