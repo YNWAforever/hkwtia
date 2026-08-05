@@ -12,12 +12,16 @@ type RateLimitOptions = Readonly<{
   limit: number;
   windowMs: number;
   now?: () => number;
+  maxEntries?: number;
 }>;
 
 /**
  * Process-local fixed-window limiter. This protects a single Next.js process;
  * production deployments that need a fleet-wide quota must replace this
  * interface with a shared atomic store without changing the route contract.
+ *
+ * Keys are attacker-influenced, so expired buckets are swept and the map is
+ * capped; without that a public endpoint grows the heap without bound.
  */
 export function createInMemoryRateLimiter(
   options: RateLimitOptions,
@@ -31,7 +35,22 @@ export function createInMemoryRateLimiter(
     throw new Error("RATE_LIMIT_CONFIGURATION_INVALID");
   }
   const now = options.now ?? Date.now;
+  const maxEntries = options.maxEntries ?? 10_000;
+  if (!Number.isSafeInteger(maxEntries) || maxEntries < 1) {
+    throw new Error("RATE_LIMIT_MAX_ENTRIES_INVALID");
+  }
   const buckets = new Map<string, {startedAt: number; count: number}>();
+
+  function cleanup(current: number): void {
+    for (const [key, bucket] of buckets) {
+      if (current - bucket.startedAt >= options.windowMs) buckets.delete(key);
+    }
+    while (buckets.size > maxEntries) {
+      const oldest = buckets.keys().next().value;
+      if (typeof oldest !== "string") break;
+      buckets.delete(oldest);
+    }
+  }
 
   return Object.freeze({
     check(key: string): RateLimitResult {
@@ -63,6 +82,7 @@ export function createInMemoryRateLimiter(
 
       bucket.count += 1;
       buckets.set(key, bucket);
+      cleanup(current);
       return {
         allowed: true,
         remaining: options.limit - bucket.count,

@@ -3,12 +3,11 @@ import "server-only";
 import {randomUUID} from "node:crypto";
 import {z} from "zod";
 
-import {renderEmail, type RenderEmailInput, type RenderedEmail} from "@/lib/email/render";
-import {createConfiguredEmailTransport, type EmailTransport} from "@/lib/email/transport";
-import {serverEnv} from "@/lib/config/env";
-import {showcaseRepository, type ShowcaseRepository} from "@/lib/db/repos/showcase";
+import type {RenderEmailInput, RenderedEmail} from "@/lib/email/render";
+import type {EmailTransport} from "@/lib/email/transport";
+import type {ShowcaseRepository} from "@/lib/db/repos/showcase";
 import type {NewLead} from "@/lib/db/server-schema";
-import {createInMemoryRateLimiter, type RateLimiter} from "@/lib/security/rate-limit";
+import type {RateLimiter} from "@/lib/security/rate-limit";
 import type {AppLocale} from "@/i18n/routing";
 import {localizedPath} from "@/lib/urls";
 
@@ -41,10 +40,10 @@ export type LeadServiceDependencies = Readonly<{
   emailTransport: EmailTransport;
   renderEmail: LeadEmailRenderer;
   resolveStaffRecipient: () => Promise<string | null>;
+  /** Injected so the service stays testable outside a request scope. */
+  resolveClientIp: () => Promise<string | null>;
   emailFrom: string;
   appUrl: string;
-  rateLimitBucketMs?: number;
-  now?: () => number;
 }>;
 
 function textValue(formData: FormData, key: string): string {
@@ -93,23 +92,24 @@ async function sendRenderedEmail(
 }
 
 export function createLeadService(dependencies: LeadServiceDependencies) {
-  const now = dependencies.now ?? Date.now;
-  const bucketMs = dependencies.rateLimitBucketMs ?? 15 * 60_000;
-
   return Object.freeze({
     async request(formData: FormData): Promise<LeadRequestResult> {
       if (textValue(formData, "website").trim().length > 0) return {ok: true};
       const parsed = parseFormData(formData);
       if (!parsed.success) return {ok: false, code: "invalid"};
 
-      const listing = await dependencies.repository.getPublishedBySlug(parsed.data.slug);
-      if (!listing) return {ok: false, code: "invalid"};
-
-      const bucket = Math.floor(now() / bucketMs);
-      const limiterKey = `showcase:${listing.slug}:${parsed.data.email}:${bucket}`;
-      if (!dependencies.limiter.check(limiterKey).allowed) {
+      // Key on the client rather than the submitted email: the email is
+      // attacker-chosen, so an email-keyed quota is bypassed by varying it.
+      // Requests with no trusted proxy header share one bucket by design.
+      const clientIp = await dependencies.resolveClientIp();
+      if (!dependencies.limiter.check(`showcase-lead:${clientIp ?? "unknown"}`).allowed) {
         return {ok: false, code: "rate_limited"};
       }
+
+      // Checked after the limiter so unauthenticated traffic cannot spend a
+      // database query per request.
+      const listing = await dependencies.repository.getPublishedBySlug(parsed.data.slug);
+      if (!listing) return {ok: false, code: "invalid"};
 
       const idempotencyKey = parsed.data.idempotencyKey ?? randomUUID();
       const lead = await dependencies.repository.createLead({
@@ -149,18 +149,4 @@ export function createLeadService(dependencies: LeadServiceDependencies) {
   });
 }
 
-const defaultRateLimiter = createInMemoryRateLimiter({limit: 3, windowMs: 15 * 60_000});
-
-export async function requestIntroAction(formData: FormData): Promise<LeadRequestResult> {
-  const environment = serverEnv();
-  const service = createLeadService({
-    repository: showcaseRepository,
-    limiter: defaultRateLimiter,
-    emailTransport: createConfiguredEmailTransport(environment),
-    renderEmail,
-    resolveStaffRecipient: async () => process.env.SHOWCASE_STAFF_EMAIL?.trim() || environment.emailFrom.trim() || null,
-    emailFrom: environment.emailFrom,
-    appUrl: environment.appUrl || "http://localhost:3000",
-  });
-  return service.request(formData);
-}
+export type LeadService = ReturnType<typeof createLeadService>;

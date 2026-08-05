@@ -11,7 +11,7 @@ import {showcaseRepository} from "@/lib/db/repos/showcase";
 import {buildPageMetadata} from "@/lib/metadata";
 import {toPublicListing} from "@/lib/showcase/contracts";
 import {softwareApplicationJsonLd} from "@/lib/showcase/public";
-import {requestIntroAction} from "@/lib/showcase/lead-actions";
+import {requestIntroAction} from "@/lib/showcase/lead-request-action";
 
 export const dynamic = "force-dynamic";
 type Props = Readonly<{params: Promise<{locale: string; slug: string}>}>;

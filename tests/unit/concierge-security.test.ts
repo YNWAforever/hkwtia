@@ -73,6 +73,46 @@ describe("Concierge public request security", () => {
     expect(limiter.check("203.0.113.10").allowed).toBe(true);
   });
 
+  it("evicts expired buckets so attacker-chosen keys cannot grow the heap", () => {
+    let now = 10_000;
+    const limiter = createInMemoryRateLimiter({
+      limit: 1,
+      windowMs: 60_000,
+      now: () => now,
+      maxEntries: 4,
+    });
+
+    for (let index = 0; index < 500; index += 1) {
+      expect(limiter.check(`key-${index}`).allowed).toBe(true);
+      now += 1;
+    }
+
+    // Every earlier key was swept or trimmed, so a replayed key is treated as
+    // new rather than retained for the lifetime of the process.
+    expect(limiter.check("key-0").allowed).toBe(true);
+    // The cap never costs a caller its own in-window quota.
+    expect(limiter.check("key-0").allowed).toBe(false);
+  });
+
+  it("keeps live buckets within the entry cap", () => {
+    const limiter = createInMemoryRateLimiter({
+      limit: 1,
+      windowMs: 60_000,
+      now: () => 10_000,
+      maxEntries: 4,
+    });
+
+    expect(limiter.check("203.0.113.10").allowed).toBe(true);
+    expect(limiter.check("203.0.113.11").allowed).toBe(true);
+    expect(limiter.check("203.0.113.10").allowed).toBe(false);
+    expect(limiter.check("203.0.113.11").allowed).toBe(false);
+  });
+
+  it("rejects an invalid entry cap", () => {
+    expect(() => createInMemoryRateLimiter({limit: 1, windowMs: 60_000, maxEntries: 0}))
+      .toThrow("RATE_LIMIT_MAX_ENTRIES_INVALID");
+  });
+
   it("enforces the strict body contract and rejects the honeypot", () => {
     expect(conciergeRequestSchema.parse({
       message: "  Hello  ",

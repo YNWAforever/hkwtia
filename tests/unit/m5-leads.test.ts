@@ -48,9 +48,9 @@ function dependencies(overrides: Record<string, unknown> = {}) {
         headers: {},
       })),
       resolveStaffRecipient: async () => "staff@example.com",
+      resolveClientIp: async () => "203.0.113.10",
       emailFrom: "WTIA <notifications@example.com>",
       appUrl: "https://hkwtia.example",
-      rateLimitBucketMs: 60_000,
       ...overrides,
     }),
     leads,
@@ -93,12 +93,42 @@ describe("showcase request-intro lead service", () => {
     expect(fake.sends).toHaveLength(0);
   });
 
-  it("rate limits repeated normalized email/listing requests", async () => {
+  it("rate limits repeated requests from the same client", async () => {
     const fake = dependencies();
 
     await expect(fake.service.request(form({idempotencyKey: "first"}))).resolves.toEqual({ok: true});
     await expect(fake.service.request(form({idempotencyKey: "second"}))).resolves.toEqual({ok: false, code: "rate_limited"});
     expect(fake.leads).toHaveLength(1);
+  });
+
+  it("cannot be bypassed by varying the submitted email", async () => {
+    const fake = dependencies();
+
+    await expect(fake.service.request(form({idempotencyKey: "first", email: "ada@example.com"}))).resolves.toEqual({ok: true});
+    await expect(fake.service.request(form({idempotencyKey: "second", email: "grace@example.com"}))).resolves.toEqual({ok: false, code: "rate_limited"});
+    expect(fake.leads).toHaveLength(1);
+  });
+
+  it("does not spend a listing lookup on rate-limited requests", async () => {
+    const getPublishedBySlug = vi.fn(async () => listing);
+    const fake = dependencies({
+      repository: {getPublishedBySlug, createLead: vi.fn(async (input: unknown) => input)},
+    });
+
+    await fake.service.request(form({idempotencyKey: "first"}));
+    await fake.service.request(form({idempotencyKey: "second"}));
+
+    expect(getPublishedBySlug).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps separate quotas per client address", async () => {
+    let clientIp = "203.0.113.10";
+    const fake = dependencies({resolveClientIp: async () => clientIp});
+
+    await expect(fake.service.request(form({idempotencyKey: "first"}))).resolves.toEqual({ok: true});
+    await expect(fake.service.request(form({idempotencyKey: "second"}))).resolves.toEqual({ok: false, code: "rate_limited"});
+    clientIp = "203.0.113.11";
+    await expect(fake.service.request(form({idempotencyKey: "third"}))).resolves.toEqual({ok: true});
   });
 
   it("keeps a durable lead when delivery fails and ignores duplicate idempotency keys", async () => {
