@@ -2,6 +2,7 @@ import "server-only";
 
 import Stripe from "stripe";
 
+import {STRIPE_API_VERSION} from "@/lib/billing/stripe-api-version";
 import {serverEnv} from "@/lib/config/env";
 
 export type CheckoutMetadata = Readonly<{
@@ -93,6 +94,8 @@ export function createStripeBillingAdapter(client: StripeClient): StripeBillingA
 let productionAdapter: StripeBillingAdapter | undefined;
 
 export function stripeBillingAdapter(): StripeBillingAdapter {
-  productionAdapter ??= createStripeBillingAdapter(new Stripe(serverEnv().stripeSecretKey));
+  productionAdapter ??= createStripeBillingAdapter(
+    new Stripe(serverEnv().stripeSecretKey, {apiVersion: STRIPE_API_VERSION}),
+  );
   return productionAdapter;
 }

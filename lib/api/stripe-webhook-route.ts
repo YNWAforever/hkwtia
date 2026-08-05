@@ -3,6 +3,7 @@ import "server-only";
 import Stripe from "stripe";
 
 import {systemActor} from "@/lib/auth/actor";
+import {STRIPE_API_VERSION} from "@/lib/billing/stripe-api-version";
 import {processStripeEvent, WebhookInputError} from "@/lib/billing/webhook-service";
 import {serverEnv} from "@/lib/config/env";
 
@@ -39,7 +40,7 @@ export function createWebhookPost(dependencies: Dependencies) {
 let stripe: Stripe | undefined;
 
 function stripeClient(): Stripe {
-  stripe ??= new Stripe(serverEnv().stripeSecretKey);
+  stripe ??= new Stripe(serverEnv().stripeSecretKey, {apiVersion: STRIPE_API_VERSION});
   return stripe;
 }
 
