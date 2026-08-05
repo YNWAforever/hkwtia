@@ -6,7 +6,7 @@ import {
 } from "@/lib/security/request-origin";
 import {createInMemoryRateLimiter} from "@/lib/security/rate-limit";
 import {verifyTurnstile} from "@/lib/security/turnstile";
-import {conciergeRequestSchema} from "@/app/api/ai/concierge/route";
+import {conciergeRequestSchema} from "@/lib/api/concierge-route";
 
 describe("Concierge public request security", () => {
   it("accepts only the exact request origin and ignores spoofable host headers", () => {

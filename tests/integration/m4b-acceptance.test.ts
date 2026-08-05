@@ -10,10 +10,10 @@ import {
 
 import {
   createBoardReporterPost,
-} from "@/app/api/jobs/board-reporter/route";
+} from "@/lib/api/jobs/board-reporter-route";
 import {
   createRetentionAnalystPost,
-} from "@/app/api/jobs/retention-analyst/route";
+} from "@/lib/api/jobs/retention-analyst-route";
 import {
   boardFactPackSchema,
   type BoardFactPack,

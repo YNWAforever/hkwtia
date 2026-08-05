@@ -6,7 +6,7 @@ import {Pool} from "pg";
 import {
   createProductionWoztellWebhookPostHandler,
   createWoztellWebhookPostHandler,
-} from "@/app/api/webhooks/woztell/route";
+} from "@/lib/api/woztell-webhook-route";
 import {createConciergeService} from "@/lib/ai/agents/concierge";
 import {createAgentRuntime} from "@/lib/ai/runtime";
 import type {WoztellWebhookProcessorDependencies} from "@/lib/ai/woztell-webhook";
@@ -131,7 +131,7 @@ describe("M4A deterministic acceptance", () => {
   });
 
   it("fails closed unless flags, runtime, trusted origin, and request origin are all local", async () => {
-    const route = await import("@/app/api/ai/concierge/route") as unknown as {
+    const route = await import("@/lib/ai/m4a-acceptance-boundary") as unknown as {
       isM4AAcceptanceRequest?: (
         environment: Readonly<Record<string, string | undefined>>,
         requestUrl: string,
@@ -228,7 +228,7 @@ describe("M4A deterministic acceptance", () => {
   });
   it("partitions a zh first owner from an en second owner and their runs", async () => {
     const {createM4AAcceptanceBoundary} = await import(
-      "@/app/api/ai/concierge/route"
+      "@/lib/ai/m4a-acceptance-boundary"
     );
     const boundary = createM4AAcceptanceBoundary({now: () => NOW});
     const zhOwner = {
@@ -278,7 +278,7 @@ describe("M4A deterministic acceptance", () => {
 
   it("preserves repeated-turn continuity for one owner but rejects cross-owner reuse", async () => {
     const {createM4AAcceptanceBoundary} = await import(
-      "@/app/api/ai/concierge/route"
+      "@/lib/ai/m4a-acceptance-boundary"
     );
     const boundary = createM4AAcceptanceBoundary({now: () => NOW});
     const firstOwner = {
@@ -322,7 +322,7 @@ describe("M4A deterministic acceptance", () => {
     )).toBe(true);
   });
   it("drives the real web route through service/runtime and persists priced telemetry", async () => {
-    const route = await import("@/app/api/ai/concierge/route") as unknown as {
+    const route = await import("@/lib/api/concierge-route") as unknown as {
       createM4AAcceptanceBoundary?: (options?: unknown) => {
         service: ReturnType<typeof createConciergeService>;
         snapshot(): {
@@ -334,7 +334,7 @@ describe("M4A deterministic acceptance", () => {
           channel: ChannelAdapter,
         ): WoztellWebhookProcessorDependencies;
       };
-      createConciergePostHandler: typeof import("@/app/api/ai/concierge/route")["createConciergePostHandler"];
+      createConciergePostHandler: typeof import("@/lib/api/concierge-route")["createConciergePostHandler"];
     };
     expect(route.createM4AAcceptanceBoundary).toBeTypeOf("function");
     if (!route.createM4AAcceptanceBoundary) return;
@@ -381,7 +381,7 @@ describe("M4A deterministic acceptance", () => {
   });
 
   it("drives the verified WOZTELL webhook through the same service/runtime telemetry", async () => {
-    const route = await import("@/app/api/ai/concierge/route") as unknown as {
+    const route = await import("@/lib/api/concierge-route") as unknown as {
       createM4AAcceptanceBoundary?: () => {
         snapshot(): {runs: readonly Record<string, unknown>[]; providerCalls: number};
         createWoztellDependencies(
@@ -438,7 +438,7 @@ describe("M4A deterministic acceptance", () => {
   it("keeps Platinum email pending while real send/log capabilities remain callable but unused", async () => {
     const sendEmail = vi.fn(async () => ({providerId: "must-not-send"}));
     const writeEmailLog = vi.fn(async () => ({id: "must-not-log"}));
-    const route = await import("@/app/api/ai/concierge/route") as unknown as {
+    const route = await import("@/lib/api/concierge-route") as unknown as {
       createM4AAcceptanceBoundary?: (options: unknown) => {
         service: ReturnType<typeof createConciergeService>;
         snapshot(): {approvals: readonly Record<string, unknown>[]};

@@ -7,7 +7,7 @@ import {describe, expect, it, vi} from "vitest";
 import {
   createProductionWoztellWebhookPostHandler,
   createWoztellWebhookPostHandler,
-} from "@/app/api/webhooks/woztell/route";
+} from "@/lib/api/woztell-webhook-route";
 import {AiOpsDashboard} from "@/components/marketing/aiops/dashboard";
 import {
   evaluateGoldenCases,
