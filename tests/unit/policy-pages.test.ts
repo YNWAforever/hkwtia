@@ -45,7 +45,7 @@ describe("public policy pages", () => {
       "Home", "About", "Chairman", "Committees", "Contact", "Privacy",
       "AiTransparency", "News", "Events", "programs", "Membership",
       "LaunchPad", "Showcase", "AiOps", "NotFound", "Error", "Navigation",
-      "Footer", "Metadata",
+      "Footer", "Metadata", "Join",
     ] as const;
 
     const stale = [

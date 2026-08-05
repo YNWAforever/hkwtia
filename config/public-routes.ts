@@ -1,5 +1,6 @@
 export const publicRoutes = [
   '/',
+  '/join',
   '/about',
   '/about/chairman',
   '/about/committees',

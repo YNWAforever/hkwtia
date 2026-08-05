@@ -1,3 +1,4 @@
+import type {Metadata} from "next";
 import Link from "next/link";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound, redirect} from "next/navigation";
@@ -7,6 +8,7 @@ import {JoinProgress} from "@/components/join/progress";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
 import {destinationForJoin, parseJoinContinuation} from "@/lib/membership/join-navigation";
+import {buildPageMetadata} from "@/lib/metadata";
 import {startJoin} from "@/lib/membership/join-service";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {localizedPath} from "@/lib/urls";
@@ -17,6 +19,17 @@ type Props = {params: Promise<{locale: string}>; searchParams: Promise<Record<st
 
 function queryValue(value: string | string[] | undefined) { return typeof value === "string" ? value : undefined; }
 function selectedPlan(value: string | undefined): PlanCode | null { try { return getPlan(value).code; } catch { return null; } }
+
+export async function generateMetadata({params}: Props): Promise<Metadata> {
+  const {locale} = await params;
+  const t = await getTranslations({locale, namespace: "Join"});
+  return buildPageMetadata({
+    locale: locale as AppLocale,
+    pathname: "/join",
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  });
+}
 
 export default async function JoinPage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;

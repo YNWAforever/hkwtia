@@ -1,8 +1,10 @@
+import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 
 import {CheckoutStatus} from "@/components/billing/checkout-status";
 import type {AppLocale} from "@/i18n/routing";
+import {buildPageMetadata} from "@/lib/metadata";
 import {getActor} from "@/lib/auth/actor";
 import {loadPendingJoinBillingState} from "@/lib/membership/join-billing-state";
 
@@ -13,6 +15,19 @@ type Props = Readonly<{
 
 function queryValue(value: string | string[] | undefined): string | undefined {
   return typeof value === "string" ? value : undefined;
+}
+
+// Mid-flow, member-specific step: keep it out of search results.
+export async function generateMetadata({params}: Props): Promise<Metadata> {
+  const {locale} = await params;
+  const t = await getTranslations({locale, namespace: "Join"});
+  return buildPageMetadata({
+    locale: locale as AppLocale,
+    pathname: "/join/complete",
+    title: t("title"),
+    description: t("authDescription"),
+    index: false,
+  });
 }
 
 export default async function CompletePage({params, searchParams}: Props) {

@@ -392,6 +392,8 @@
   "Join": {
     "backToMembership": "Back to membership",
     "title": "Join WTIA",
+    "metaTitle": "Join WTIA | Membership application",
+    "metaDescription": "Apply for WTIA membership online. Choose a tier, create your account and join Hong Kong's technology community.",
     "authDescription": "Enter your email and we will send a secure sign-in link that returns you to this application.",
     "magicLinkSent": "Check your inbox for your secure sign-in link. It will return you to this application.",
     "sendMagicLink": "Send secure sign-in link",
@@ -442,11 +444,11 @@
     "status": {
       "complete": {
         "title": "Welcome to WTIA",
-        "description": "Your Community membership is active. Your member portal will be available in the next step of M1."
+        "description": "Your Community membership is active. Open your member portal to complete your profile and explore member benefits."
       },
       "checkout": {
         "title": "Application saved",
-        "description": "Your paid membership is ready for secure checkout. Payment setup arrives in the next M1 task."
+        "description": "Your paid membership is ready for secure checkout."
       },
       "review": {
         "title": "Application under review",

@@ -393,6 +393,8 @@
   "Join": {
     "backToMembership": "返回會員計劃",
     "title": "加入 WTIA",
+    "metaTitle": "加入 WTIA｜會籍申請",
+    "metaDescription": "網上申請 WTIA 會籍：選擇級別、建立帳戶，加入香港創科社群。",
     "authDescription": "輸入電郵地址，我們會傳送安全登入連結，讓你返回此申請。",
     "magicLinkSent": "請查閱電郵中的安全登入連結；連結會帶你返回此申請。",
     "sendMagicLink": "傳送安全登入連結",
@@ -443,11 +445,11 @@
     "status": {
       "complete": {
         "title": "歡迎加入 WTIA",
-        "description": "你的社群會籍已啟用。會員平台將於 M1 下一步開放。"
+        "description": "你的社群會籍已啟用。立即前往會員專區完善個人檔案並探索會員權益。"
       },
       "checkout": {
         "title": "申請已儲存",
-        "description": "你的付費會籍已可進入安全付款程序；付款設定將於下一個 M1 任務完成。"
+        "description": "你的付費會籍已可進入安全付款程序。"
       },
       "review": {
         "title": "申請審批中",
