@@ -26,7 +26,7 @@ export default defineConfig({
     ? {}
     : {
         webServer: {
-          command: `.\\node_modules\\.bin\\next.cmd dev --hostname localhost -p ${port}`,
+          command: `.\\node_modules\\.bin\\next.cmd dev --webpack --hostname localhost -p ${port}`,
           url: baseURL,
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,

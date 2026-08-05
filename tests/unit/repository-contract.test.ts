@@ -5,8 +5,8 @@ import manifest from "../../package.json";
 describe("repository contract", () => {
   it("uses Next.js and exposes every required command", () => {
     expect(manifest.scripts).toMatchObject({
-      dev: "next dev",
-      build: "next build",
+      dev: "next dev --webpack",
+      build: "next build --webpack",
       start: "next start",
       lint: "eslint .",
       typecheck: "tsc --noEmit",
