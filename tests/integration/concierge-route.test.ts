@@ -4,10 +4,10 @@ import {createAnonymousOwnership} from "@/lib/ai/conversation-cookie";
 import {
   createConciergePostHandler,
   encodeSseEvent,
-} from "@/app/api/ai/concierge/route";
+} from "@/lib/api/concierge-route";
 import {
   createFeedbackPostHandler,
-} from "@/app/api/ai/conversations/[id]/feedback/route";
+} from "@/lib/api/feedback-route";
 
 const SECRET = "concierge-cookie-secret-that-is-at-least-32-bytes";
 const CONVERSATION_ID = "11111111-1111-4111-8111-111111111111";

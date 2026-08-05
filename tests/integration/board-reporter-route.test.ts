@@ -1,6 +1,6 @@
 import {describe, expect, it, vi} from "vitest";
 
-import {createBoardReporterPost} from "@/app/api/jobs/board-reporter/route";
+import {createBoardReporterPost} from "@/lib/api/jobs/board-reporter-route";
 import type {BoardFactPack} from "@/lib/ai/board-reporter/contracts";
 import type {JobHandlerRepository} from "@/lib/jobs/handler";
 import {automationCronActor} from "@/lib/auth/automation-actor";

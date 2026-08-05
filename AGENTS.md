@@ -28,6 +28,14 @@ npm run db:seed
 
 `db:seed` runs the M1 plan seed and then the deterministic M2 demo seed. `db:seed:m2` runs only the M2 fixture layer with `node --experimental-strip-types`; migrate and seed M1 first when using it directly.
 
+`db:seed:m6` is the separately guarded Launch Pad acceptance fixture. It requires
+`M6_ACCEPTANCE_SEED=true`, equal `DATABASE_URL`/`DATABASE_URL_TEST` values, and
+an exact `M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST` entry for an explicitly
+allowlisted, non-Production database hostname. The guard blocks Production-mode
+execution and unallowlisted hosts, but it cannot establish that a host is
+isolated; the operator must confirm the selected database is isolated before
+seeding.
+
 ## Conventions
 
 - Use strict TypeScript and avoid `any` unless the code includes a reasoned comment.
@@ -53,6 +61,7 @@ For Stripe test-mode acceptance work, use test-mode values for `STRIPE_TEST_SECR
 - M1 Task 11: idempotent plan seed, isolated migration-test contract, and Neon/Stripe test-environment documentation.
 - M2 Task 11: deterministic non-PII CRM demo fixtures, combined seed command, and isolated PostgreSQL acceptance assertions.
 - M2 Task 12: real Neon Auth browser boundary, credential-gated Admin CRM Playwright flows, exact fixture-count acceptance, and preview release evidence.
+- M6 Task 7: deterministic Launch Pad browser fixtures, isolated-seed evidence, guarded Preview smoke, and public graduate-badge acceptance record.
 
 <!-- codebase-memory-mcp:start -->
 # Codebase Knowledge Graph (codebase-memory-mcp)

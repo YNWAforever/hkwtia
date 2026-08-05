@@ -3,8 +3,12 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 const publicPosts = vi.hoisted(() => ({
   listPublishedBuildLogs: vi.fn(),
 }));
+const showcase = vi.hoisted(() => ({
+  listPublishedSlugs: vi.fn(),
+}));
 
 vi.mock("@/lib/db/repos/public-posts", () => publicPosts);
+vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: showcase}));
 vi.mock("@/content/news", () => ({
   newsPosts: [{
     slug: "static-update",
@@ -19,6 +23,7 @@ import sitemap from "@/app/sitemap";
 describe("published build logs in the sitemap", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    showcase.listPublishedSlugs.mockResolvedValue([]);
   });
 
   it("adds both localized URLs for each published build-log slug", async () => {
@@ -67,6 +72,30 @@ describe("published build logs in the sitemap", () => {
       "http://localhost:3000/zh",
       "http://localhost:3000/news",
       "http://localhost:3000/zh/news",
+    ]));
+  });
+
+  it("adds both localized URLs for each published showcase slug", async () => {
+    publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
+    showcase.listPublishedSlugs.mockResolvedValue(["harbour-vision-ai"]);
+
+    const urls = (await sitemap()).map((entry) => entry.url);
+
+    expect(urls).toEqual(expect.arrayContaining([
+      "http://localhost:3000/showcase/harbour-vision-ai",
+      "http://localhost:3000/zh/showcase/harbour-vision-ai",
+    ]));
+  });
+
+  it("keeps static sitemap entries when showcase reads fail", async () => {
+    publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
+    showcase.listPublishedSlugs.mockRejectedValue(new Error("TRANSIENT_DATABASE_READ"));
+
+    const urls = (await sitemap()).map((entry) => entry.url);
+
+    expect(urls).toEqual(expect.arrayContaining([
+      "http://localhost:3000/",
+      "http://localhost:3000/zh",
     ]));
   });
 });

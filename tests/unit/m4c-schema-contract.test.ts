@@ -76,6 +76,6 @@ describe("M4C AI-Ops materialized-view schema contract", () => {
       resolve("drizzle/meta/_journal.json"),
       "utf8",
     )) as {entries?: Array<{tag?: string}>};
-    expect(journal.entries?.at(-1)?.tag).toBe("0013_m4c_aiops_metrics");
+    expect(journal.entries?.some((entry) => entry.tag === "0013_m4c_aiops_metrics")).toBe(true);
   });
 });

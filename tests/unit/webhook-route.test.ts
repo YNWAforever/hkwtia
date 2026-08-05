@@ -1,6 +1,6 @@
 import {describe, expect, it, vi} from "vitest";
 
-import {createWebhookPost} from "@/app/api/stripe/webhook/route";
+import {createWebhookPost} from "@/lib/api/stripe-webhook-route";
 import {checkoutCompleted} from "@/tests/fixtures/stripe-events";
 
 describe("Stripe webhook route", () => {

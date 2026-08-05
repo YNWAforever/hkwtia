@@ -9,7 +9,7 @@ import {createWoztellAdapter} from "@/lib/channels/woztell";
 import {
   createProductionWoztellWebhookPostHandler,
   createWoztellWebhookPostHandler,
-} from "@/app/api/webhooks/woztell/route";
+} from "@/lib/api/woztell-webhook-route";
 
 const SECRET = "credential-free-fixture-secret";
 const NOW = new Date("2026-07-28T02:00:00.000Z");

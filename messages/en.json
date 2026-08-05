@@ -491,20 +491,61 @@
   },
   "LaunchPad": {
     "metaTitle": "Launch Pad | WTIA",
-    "metaDescription": "A preview of WTIA's future go-global cohort model.",
+    "metaDescription": "WTIA's go-global cohort programme, landing partners, and funding-scheme picker.",
     "eyebrow": "Launch Pad",
     "title": "Go-global cohorts for technology teams.",
-    "description": "Launch Pad will bring selected technology teams together in focused cohorts with practical market access and peer learning.",
-    "cohort": "The cohort model is planned for a later milestone; no live applications or funding matching are available in M0.",
-    "milestone": "Applications and funding matching will be introduced in a later milestone."
+    "description": "Focused cohorts, practical market access, and clear next steps for Hong Kong technology teams expanding internationally.",
+    "program": {"title": "A practical route to new markets", "intro": "Launch Pad brings selected teams together for structured market preparation, landing-partner connections, and peer learning.", "outcomeTitle": "From readiness to market entry", "outcomeDescription": "Each cohort follows a clear path through readiness, partner matching, landing, and scale."},
+    "calendar": {"title": "Cohort calendar", "intro": "Explore current and upcoming Launch Pad cohorts.", "empty": "No public cohorts are scheduled yet.", "starts": "Starts", "ends": "Ends", "noEnd": "No fixed end date", "capacity": "Capacity", "fee": "Fee", "statuses": {"planning": "Planning", "open": "Open", "active": "Active", "completed": "Completed", "archived": "Archived"}},
+    "partners": {"title": "Landing partner map", "intro": "Meet the public organisations that help cohorts navigate priority markets.", "empty": "Landing partners will be announced shortly.", "market": "Market", "region": "Region", "statuses": {"prospect": "Prospect", "inDiscussion": "In discussion", "signed": "Signed", "inactive": "Inactive"}},
+    "funding": {"title": "Funding scheme picker", "intro": "Answer five questions for an informational screening against current published scheme rules.", "formLabel": "Funding scheme picker", "instructions": "Choose an answer for every question.", "submit": "See matching schemes", "questions": {"sector": {"label": "What is the project focus?", "options": {"trade": "Branding, upgrading, or market expansion", "advancedTraining": "Advanced technology training", "smartProduction": "Smart production line", "lifeHealth": "Life and health technology", "aiDataScience": "AI and data science", "advancedManufacturing": "Advanced manufacturing and new energy", "researchDevelopment": "Applied research and development"}}, "stage": {"label": "What is the company's Hong Kong status?", "options": {"businessRegistered": "Business-registered and non-subvented", "incorporated": "Incorporated and non-subvented", "subvented": "Incorporated and subvented"}}, "market": {"label": "Where will the project operate?", "options": {"hongKong": "Hong Kong", "coveredEconomy": "A covered BUD economy", "global": "Another market"}}, "employees": {"label": "Which staff readiness statement applies?", "options": {"standard": "No additional training condition applies", "traineeHongKongPermanentResident": "An advanced-technology trainee is a Hong Kong permanent resident"}}, "revenue": {"label": "What applicable investment or expenditure band applies?", "options": {"under100m": "Below HK$100 million enterprise investment", "investment100mProject150m": "At least HK$100 million enterprise investment and HK$150 million project cost", "eligibleRdExpenditure": "Eligible applied R&D or partnership expenditure"}}}, "results": {"heading": "Funding results", "eligible": "Potentially eligible", "ineligible": "Check scheme details", "source": "Official source", "asOf": "As of"}},
+    "clinic": {"title": "Need a funding or market-entry clinic?", "description": "Speak with WTIA about your next practical step."},
+    "application": {"title": "Apply to an open cohort", "cohort": "Cohort", "market": "Target market", "readiness": "Readiness for this cohort", "consent": "I consent to WTIA using this application for cohort review.", "submit": "Submit application", "submitting": "Submitting application", "success": "Your application has been received.", "invalid": "Check the required fields and try again.", "unauthorized": "Please sign in with an authorised member account to apply.", "signIn": "Sign in", "error": "We could not submit your application. Please try again."},
+    "clinicCta": "Book a clinic"
   },
   "Showcase": {
     "metaTitle": "Showcase | WTIA",
-    "metaDescription": "A preview of WTIA's member showcase experience.",
-    "eyebrow": "Member showcase",
-    "title": "Member showcase",
-    "description": "Member directory and showcase features are planned for M5.",
-    "milestone": "M5 — live member data will be added after the directory is ready."
+    "metaDescription": "Discover WTIA member companies, products, and practical technology solutions.",
+    "eyebrow": "AI Showcase",
+    "title": "Find the right WTIA member partner",
+    "description": "Explore practical products and services from Hong Kong technology companies.",
+    "emptyTitle": "No published listings match",
+    "emptyDescription": "Try changing a filter or search term.",
+    "premium": "Premium",
+    "goneGlobal": "Gone Global",
+    "memberSince": "WTIA member since",
+    "view": "View listing",
+    "filters": {
+      "search": "Search listings",
+      "category": "Category",
+      "useCase": "Use case",
+      "deployment": "Deployment",
+      "language": "Language",
+      "worksWith": "Works with",
+      "submit": "Filter",
+      "clear": "Clear filters"
+    },
+    "details": {
+      "useCases": "Use cases",
+      "deployment": "Deployment",
+      "languages": "Languages",
+      "worksWith": "Works with",
+      "caseStudy": "Case study",
+      "video": "Product video",
+      "requestIntro": "Request an introduction",
+      "form": {
+        "name": "Name",
+        "email": "Email",
+        "organization": "Organisation",
+        "message": "How can WTIA help?",
+        "website": "Website",
+        "submit": "Request an introduction",
+        "submitting": "Sending…",
+        "success": "Thank you — WTIA will follow up shortly.",
+        "invalid": "Please check your details and try again.",
+        "rateLimited": "Please try again later."
+      }
+    }
   },
   "AiOps": {
     "metaTitle": "AI-Ops in public | WTIA",
@@ -681,6 +722,40 @@
       "directoryVisible": "Show this profile in the WTIA directory"
     },
     "readOnly": "Only company owners and admins can edit these details.",
+    "showcaseListing": {
+      "nav": "Showcase listing",
+      "eyebrow": "AI Showcase",
+      "title": "Publish your company story",
+      "description": "Share a clear, buyer-friendly view of your product with the WTIA network.",
+      "formTitle": "Listing details",
+      "saveDraft": "Save draft",
+      "submit": "Submit for review",
+      "status": {
+        "draft": "Draft — visible only to your company team.",
+        "pending_review": "Pending review — WTIA staff will review this submission.",
+        "published": "Published — your listing is visible in the Showcase.",
+        "rejected": "Needs changes — update the listing and submit again."
+      },
+      "fields": {
+        "slug": "Public URL slug",
+        "nameEn": "English name",
+        "nameZhHk": "Traditional Chinese name",
+        "taglineEn": "English tagline",
+        "taglineZhHk": "Traditional Chinese tagline",
+        "descriptionEn": "English description",
+        "descriptionZhHk": "Traditional Chinese description",
+        "category": "Category",
+        "useCases": "Use cases (comma separated)",
+        "deploymentOptions": "Deployment options (comma separated)",
+        "supportedLanguages": "Supported languages (comma separated)",
+        "worksWith": "Works with (comma separated)",
+        "videoUrl": "Video URL (HTTPS)",
+        "caseStudyUrl": "Case study URL (HTTPS)",
+        "caseStudySummaryEn": "English case-study summary",
+        "caseStudySummaryZhHk": "Traditional Chinese case-study summary",
+        "logoReference": "Logo reference"
+      }
+    },
     "directory": {
       "title": "Member directory",
       "description": "Find WTIA members who opted into the directory.",
@@ -783,9 +858,37 @@
       "members": "Members",
       "atRisk": "At risk",
       "events": "Events",
+      "listingsReview": "Showcase review",
+      "cohorts": "Launch Pad cohorts",
       "approvals": "Approvals",
       "reports": "Reports",
       "automations": "Automations"
+    },
+    "listingsReview": {
+      "eyebrow": "Showcase operations",
+      "title": "Review company listings",
+      "description": "Check every public listing before it appears in the WTIA Showcase.",
+      "caption": "Company listings",
+      "company": "Company",
+      "slug": "Slug",
+      "status": "Status",
+      "premium": "Premium",
+      "publish": "Publish",
+      "reject": "Reject",
+      "rejectionReason": "Rejection reason",
+      "savePremium": "Save"
+    },
+    "cohorts": {
+      "title": "Cohort applications",
+      "description": "Move Launch Pad applications through the staff-reviewed go-global journey.",
+      "application": "Application",
+      "moveTo": "Move to",
+      "notes": "Staff note",
+      "move": "Update stage",
+      "moving": "Updating…",
+      "empty": "No applications in this stage.",
+      "errors": {"invalid": "Check the application move and try again.", "forbidden": "You do not have access to update this application.", "error": "The application could not be updated. Please try again."},
+      "stages": {"applied": "Applied", "accepted": "Accepted", "ready": "Ready", "match": "Match", "land": "Land", "scale": "Scale", "graduated": "Graduated", "rejected": "Rejected"}
     },
     "members": {
       "title": "Members",

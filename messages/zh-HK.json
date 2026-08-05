@@ -492,20 +492,61 @@
   },
   "LaunchPad": {
     "metaTitle": "創科起動｜WTIA",
-    "metaDescription": "預覽 WTIA 未來的全球化團隊培訓模式。",
+    "metaDescription": "WTIA 的全球市場小組計劃、落地夥伴及資助計劃配對工具。",
     "eyebrow": "創科起動",
-    "title": "以全球市場為目標的科技團隊。",
-    "description": "創科起動將以小組形式協助科技團隊拓展國際市場，提供實用的市場連接及同儕學習。",
-    "cohort": "小組模式將於後續里程碑推出；M0 不提供即時申請或資金配對。",
-    "milestone": "申請及資金配對將於後續里程碑推出。"
+    "title": "協助科技團隊走向全球市場。",
+    "description": "以專題小組、實用市場連接及清晰下一步，支援香港科技團隊拓展國際市場。",
+    "program": {"title": "通往新市場的實務路徑", "intro": "創科起動聚集獲選團隊，提供有系統的市場準備、落地夥伴連接及同儕學習。", "outcomeTitle": "由準備走向市場落地", "outcomeDescription": "每個小組均循清晰路徑推進：準備、夥伴配對、落地及擴展。"},
+    "calendar": {"title": "小組日曆", "intro": "探索現正開放及即將舉行的創科起動小組。", "empty": "目前未有公開小組安排。", "starts": "開始日期", "ends": "結束日期", "noEnd": "未有固定結束日期", "capacity": "名額", "fee": "費用", "statuses": {"planning": "籌備中", "open": "現正招募", "active": "進行中", "completed": "已完成", "archived": "已封存"}},
+    "partners": {"title": "落地夥伴地圖", "intro": "認識協助小組探索優先市場的公開夥伴機構。", "empty": "落地夥伴將於稍後公布。", "market": "市場", "region": "地區", "statuses": {"prospect": "接洽中", "inDiscussion": "商討中", "signed": "已簽署", "inactive": "暫停"}},
+    "funding": {"title": "資助計劃配對工具", "intro": "回答五條問題，按現行公開計劃條款取得資訊性初步配對。", "formLabel": "資助計劃配對工具", "instructions": "請回答每一條問題。", "submit": "查看配對計劃", "questions": {"sector": {"label": "項目的重點是甚麼？", "options": {"trade": "品牌、升級或市場拓展", "advancedTraining": "先進科技培訓", "smartProduction": "智能生產線", "lifeHealth": "生命健康科技", "aiDataScience": "人工智能及數據科學", "advancedManufacturing": "先進製造及新能源", "researchDevelopment": "應用研究及開發"}}, "stage": {"label": "公司的香港登記狀況是甚麼？", "options": {"businessRegistered": "已商業登記並非受資助機構", "incorporated": "已成立公司並非受資助機構", "subvented": "已成立公司並為受資助機構"}}, "market": {"label": "項目將在哪個市場推行？", "options": {"hongKong": "香港", "coveredEconomy": "BUD 涵蓋經濟體", "global": "其他市場"}}, "employees": {"label": "哪項員工準備情況適用？", "options": {"standard": "沒有額外培訓條件", "traineeHongKongPermanentResident": "先進科技受訓員工為香港永久性居民"}}, "revenue": {"label": "哪個投資或開支級別適用？", "options": {"under100m": "企業投資少於一億港元", "investment100mProject150m": "企業投資至少一億港元及項目成本至少一億五千萬港元", "eligibleRdExpenditure": "合資格應用研發或合作開支"}}}, "results": {"heading": "資助配對結果", "eligible": "可能合資格", "ineligible": "請查閱計劃詳情", "source": "官方資料來源", "asOf": "資料日期"}},
+    "clinic": {"title": "需要資助或市場落地諮詢？", "description": "與 WTIA 討論下一個實務步驟。"},
+    "application": {"title": "申請參與開放小組", "cohort": "小組", "market": "目標市場", "readiness": "參與小組的準備程度", "consent": "我同意 WTIA 使用此申請作小組評審。", "submit": "提交申請", "submitting": "正在提交申請", "success": "已收到你的申請。", "invalid": "請檢查必填欄位後再試。", "unauthorized": "請以獲授權的會員帳戶登入後申請。", "signIn": "登入", "error": "未能提交申請，請再試一次。"},
+    "clinicCta": "預約諮詢"
   },
   "Showcase": {
-    "metaTitle": "會員展示｜WTIA",
-    "metaDescription": "預覽 WTIA 未來的會員展示體驗。",
-    "eyebrow": "會員展示",
-    "title": "會員展示",
-    "description": "會員目錄及市集功能計劃於 M5 推出。",
-    "milestone": "M5 — 會員資料功能將於目錄準備就緒後推出。"
+    "metaTitle": "展示頁 | WTIA",
+    "metaDescription": "探索 WTIA 會員公司、產品及實用科技方案。",
+    "eyebrow": "AI 展示",
+    "title": "尋找合適的 WTIA 會員夥伴",
+    "description": "探索香港科技公司的實用產品及服務。",
+    "emptyTitle": "沒有符合的已發布展示頁",
+    "emptyDescription": "請嘗試更改篩選條件或搜尋字詞。",
+    "premium": "精選",
+    "goneGlobal": "走向全球",
+    "memberSince": "WTIA 會員始於",
+    "view": "查看展示頁",
+    "filters": {
+      "search": "搜尋展示頁",
+      "category": "類別",
+      "useCase": "使用場景",
+      "deployment": "部署方式",
+      "language": "語言",
+      "worksWith": "兼容系統",
+      "submit": "篩選",
+      "clear": "清除篩選"
+    },
+    "details": {
+      "useCases": "使用場景",
+      "deployment": "部署方式",
+      "languages": "語言",
+      "worksWith": "兼容系統",
+      "caseStudy": "案例研究",
+      "video": "產品影片",
+      "requestIntro": "要求介紹",
+      "form": {
+        "name": "姓名",
+        "email": "電郵",
+        "organization": "機構",
+        "message": "WTIA 可以如何協助你？",
+        "website": "網站",
+        "submit": "要求介紹",
+        "submitting": "傳送中…",
+        "success": "多謝你 — WTIA 團隊將會盡快跟進。",
+        "invalid": "請檢查資料後再試。",
+        "rateLimited": "請稍後再試。"
+      }
+    }
   },
   "AiOps": {
     "metaTitle": "公開 AI-Ops｜WTIA",
@@ -682,6 +723,40 @@
       "directoryVisible": "在 WTIA 會員目錄顯示此資料"
     },
     "readOnly": "只有公司擁有人及管理員可以編輯這些資料。",
+    "showcaseListing": {
+      "nav": "展示頁資料",
+      "eyebrow": "AI 展示",
+      "title": "發布你的公司故事",
+      "description": "向 WTIA 網絡分享清晰、方便買家了解的產品資料。",
+      "formTitle": "展示頁資料",
+      "saveDraft": "儲存草稿",
+      "submit": "提交審核",
+      "status": {
+        "draft": "草稿 — 只有公司團隊可以查看。",
+        "pending_review": "等待審核 — WTIA 職員會審閱這份提交。",
+        "published": "已發布 — 你的展示頁已在 Showcase 公開。",
+        "rejected": "需要修改 — 更新資料後再次提交。"
+      },
+      "fields": {
+        "slug": "公開網址 slug",
+        "nameEn": "英文名稱",
+        "nameZhHk": "繁體中文名稱",
+        "taglineEn": "英文標語",
+        "taglineZhHk": "繁體中文標語",
+        "descriptionEn": "英文描述",
+        "descriptionZhHk": "繁體中文描述",
+        "category": "類別",
+        "useCases": "使用場景（以逗號分隔）",
+        "deploymentOptions": "部署方式（以逗號分隔）",
+        "supportedLanguages": "支援語言（以逗號分隔）",
+        "worksWith": "兼容系統（以逗號分隔）",
+        "videoUrl": "影片網址（HTTPS）",
+        "caseStudyUrl": "案例研究網址（HTTPS）",
+        "caseStudySummaryEn": "英文案例摘要",
+        "caseStudySummaryZhHk": "繁體中文案例摘要",
+        "logoReference": "標誌引用"
+      }
+    },
     "directory": {
       "title": "會員名錄",
       "description": "尋找選擇公開資料的 WTIA 會員。",
@@ -785,9 +860,37 @@
       "members": "會員",
       "atRisk": "高風險",
       "events": "活動",
+      "listingsReview": "展示頁審核",
+      "cohorts": "啟航計劃",
       "approvals": "審批",
       "reports": "報告",
       "automations": "自動化"
+    },
+    "listingsReview": {
+      "eyebrow": "展示頁管理",
+      "title": "審核公司展示頁",
+      "description": "檢查每個公開展示頁，然後才在 WTIA Showcase 發布。",
+      "caption": "公司展示頁",
+      "company": "公司",
+      "slug": "Slug",
+      "status": "狀態",
+      "premium": "精選",
+      "publish": "發布",
+      "reject": "退回",
+      "rejectionReason": "退回原因",
+      "savePremium": "儲存"
+    },
+    "cohorts": {
+      "title": "啟航計劃申請",
+      "description": "由職員審核並推進企業的海外拓展申請。",
+      "application": "申請",
+      "moveTo": "移至",
+      "notes": "職員備註",
+      "move": "更新階段",
+      "moving": "更新中…",
+      "empty": "此階段暫無申請。",
+      "errors": {"invalid": "請檢查申請階段轉移後再試。", "forbidden": "你沒有權限更新此申請。", "error": "未能更新申請，請再試一次。"},
+      "stages": {"applied": "已申請", "accepted": "已接納", "ready": "已就緒", "match": "配對", "land": "落地", "scale": "擴展", "graduated": "已畢業", "rejected": "已拒絕"}
     },
     "members": {
       "title": "會員",

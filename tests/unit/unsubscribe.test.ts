@@ -7,7 +7,7 @@ vi.mock("next-intl/server", () => ({
 }));
 
 import UnsubscribePage from "@/app/[locale]/(public)/unsubscribe/page";
-import {createUnsubscribePost} from "@/app/api/unsubscribe/route";
+import {createUnsubscribePost} from "@/lib/api/unsubscribe-route";
 import {
   signUnsubscribeToken,
   verifyUnsubscribeToken,

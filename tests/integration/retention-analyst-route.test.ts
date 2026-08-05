@@ -1,6 +1,6 @@
 import {describe, expect, it, vi} from "vitest";
 
-import {createRetentionAnalystPost} from "@/app/api/jobs/retention-analyst/route";
+import {createRetentionAnalystPost} from "@/lib/api/jobs/retention-analyst-route";
 import {automationCronActor} from "@/lib/auth/automation-actor";
 import type {RetentionCandidate} from "@/lib/ai/retention-analyst/candidates";
 import type {JobHandlerRepository} from "@/lib/jobs/handler";

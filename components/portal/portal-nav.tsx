@@ -8,6 +8,7 @@ export type PortalNavLabels = Readonly<{
   dashboard: string;
   profile: string;
   company: string;
+  showcaseListing: string;
   directory: string;
   events: string;
   documents: string;
@@ -20,6 +21,7 @@ export function PortalNav({locale, labels}: {locale: AppLocale; labels: PortalNa
     {href: localizedPath(locale, "/portal"), label: labels.dashboard},
     {href: localizedPath(locale, "/portal/profile"), label: labels.profile},
     {href: localizedPath(locale, "/portal/company"), label: labels.company},
+    {href: localizedPath(locale, "/portal/company/listing"), label: labels.showcaseListing},
     {href: localizedPath(locale, "/portal/directory"), label: labels.directory},
     {href: localizedPath(locale, "/portal/events"), label: labels.events},
     {href: localizedPath(locale, "/portal/documents"), label: labels.documents},

@@ -3,7 +3,7 @@ import {describe, expect, it, vi} from "vitest";
 import {automationCronActor} from "@/lib/auth/automation-actor";
 import {
   createAiOpsMetricsPost,
-} from "@/app/api/jobs/aiops-metrics/route";
+} from "@/lib/api/jobs/aiops-metrics-route";
 import type {JobHandlerRepository} from "@/lib/jobs/handler";
 
 const fixedNow = new Date("2026-07-30T03:45:00.000Z");

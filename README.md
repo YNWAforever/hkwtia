@@ -1,6 +1,6 @@
 # WTIA Platform
 
-The WTIA public platform is a bilingual Next.js App Router site for the Hong Kong Wireless Technology Industry Association. M0 ships the server-rendered public route surface in English and Traditional Chinese (`/` and `/zh`); M1 adds self-service membership, Stripe billing, company seats, and an authenticated member portal; M2 adds the staff-only Admin CRM; M3 adds deterministic member journeys, campaigns, provider boundaries, scheduled jobs, and staff automation operations. M4A adds the bilingual, provider-neutral AI Concierge with durable web and WhatsApp conversations, citations, approvals, telemetry, and retention.
+The WTIA public platform is a bilingual Next.js App Router site for the Hong Kong Wireless Technology Industry Association. M0 ships the server-rendered public route surface in English and Traditional Chinese (`/` and `/zh`); M1 adds self-service membership, Stripe billing, company seats, and an authenticated member portal; M2 adds the staff-only Admin CRM; M3 adds deterministic member journeys, campaigns, provider boundaries, scheduled jobs, and staff automation operations. M4A adds the bilingual, provider-neutral AI Concierge with durable web and WhatsApp conversations, citations, approvals, telemetry, and retention. M5 adds the member Showcase directory, review workflow, public detail pages, request-intro leads, view debounce, and sitemap indexing. M6 adds the Launch Pad cohort programme, deterministic funding-scheme picker, guarded application flow, staff Kanban, audit trail, and public Gone Global graduate badge.
 
 ## Requirements
 
@@ -25,6 +25,7 @@ Open `http://localhost:3000/` or `http://localhost:3000/zh`.
 | `npm run test:e2e -- tests/e2e/m1-acceptance.spec.ts` | Run deterministic M1 acceptance contracts (live mode is credential-gated) |
 | `npm run test:e2e -- tests/e2e/m2-admin-crm.spec.ts` | Run M2 browser acceptance; authenticated tests require isolated Neon/Auth credentials |
 | `npm run test:e2e -- tests/e2e/m3-automations.spec.ts` | Run M3 Preview acceptance; tests skip safely when the isolated URL, credentials, or confirmation tokens are absent |
+| `npm run test:e2e -- tests/e2e/m5-showcase.spec.ts` | Run deterministic M5 Showcase contracts; live Preview browser checks require explicit isolated credentials |
 | `npm run audit:strings` | Reject unapproved visible JSX literals |
 | `npm run lint` | Run ESLint |
 | `npm run typecheck` | Run strict TypeScript checking |
@@ -35,6 +36,8 @@ Open `http://localhost:3000/` or `http://localhost:3000/zh`.
 | `npm run db:seed:m1` / `npm run db:seed:m2` | Run one seed layer directly |
 | `npm run db:seed:m3` | Reconcile the deterministic M3 acceptance fixture using explicit `DATABASE_URL` and `M3_SEED_NOW` |
 | `npm run db:seed:m4a` | Replace the scoped M4A KB namespace and reconcile the fixed isolated acceptance fixture |
+| `npm run db:seed:m5` | Reconcile the opt-in synthetic M5 Showcase fixture in an isolated database |
+| `npm run db:seed:m6` | Reconcile the opt-in synthetic M6 Launch Pad fixture in an isolated database |
 | `npm test -- tests/integration/m4a-acceptance.test.ts` | Run deterministic M4A acceptance; the database case needs the explicit opt-in gate |
 | `npm run eval:concierge` | Run 25 deterministic bilingual Concierge golden cases offline |
 | `npm run eval:concierge:live` | Run separately authorized live-provider evals only when every live guard is present |
@@ -54,6 +57,68 @@ Set `PLAYWRIGHT_BASE_URL` or `LHCI_BASE_URL` when browser or Lighthouse checks s
 The M1 acceptance evidence template is [`docs/m1-acceptance.md`](./docs/m1-acceptance.md). The deterministic acceptance contracts run without credentials; the real Neon/Stripe preview flow is enabled only when isolated `DATABASE_URL_TEST` and Stripe test variables are present.
 
 The M2 evidence is [`docs/m2-acceptance.md`](./docs/m2-acceptance.md). For an authenticated demo, migrate and seed an isolated Neon branch, create test-only Neon Auth staff/member accounts mapped to the seeded profiles, set the seven names documented there, and run the focused M2 Playwright file. Storage state is written only below ignored `test-results`; never copy production database or Auth credentials into the test environment.
+
+## M5 Showcase acceptance
+
+M5 database seeding is intentionally opt-in and isolated. Set `DATABASE_URL` and
+`DATABASE_URL_TEST` to the same already-migrated, non-production Neon branch,
+set `M5_ACCEPTANCE_SEED=true`, and keep `NODE_ENV` away from production before
+running:
+
+```sh
+npm run db:migrate
+npm run db:seed:m5
+```
+
+The seed reconciles only the owned synthetic Showcase companies/listings under
+the `m5-showcase-acceptance-v1` key, uses an advisory lock, and never truncates
+or mutates M1–M4C data. Do not point it at a shared or Production database, and
+do not print or commit database credentials.
+
+The deterministic M5 contract suite can run without credentials:
+
+```sh
+npm test -- tests/unit/m5-schema-contract.test.ts tests/unit/m5-contracts.test.ts tests/unit/m5-repository.test.ts tests/unit/m5-seed.test.ts tests/unit/m5-member-listing.test.tsx tests/unit/m5-admin-review.test.tsx tests/unit/m5-public-showcase.test.tsx tests/unit/m5-leads.test.ts tests/unit/m5-request-intro-form.test.tsx tests/unit/m5-views.test.ts tests/unit/sitemap.test.ts
+npm run test:e2e -- tests/e2e/m5-showcase.spec.ts
+```
+
+The browser file always runs pure contract checks; live member/staff/public
+flows skip unless `PLAYWRIGHT_BASE_URL`, `M5_ACCEPTANCE_EMAIL`, and
+`M5_ACCEPTANCE_PASSWORD` are explicitly set for an isolated non-Production
+Preview. See [`docs/m5-acceptance.md`](./docs/m5-acceptance.md) for the evidence
+record and remaining credential-gated scenarios.
+
+## M6 Launch Pad acceptance
+
+M6 uses a separate, explicitly authorized acceptance seed. Set `DATABASE_URL`
+and `DATABASE_URL_TEST` to the same migrated isolated database,
+`M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST` to its exact normalized hostname, and
+`M6_ACCEPTANCE_SEED=true` before running `npm run db:seed:m6`. The guard
+rejects Production mode, a missing/mismatched test URL, or an unlisted host;
+it does not prove that an allowlisted non-Production host is isolated. The
+operator must make that confirmation before use. The seed only reconciles the
+synthetic `m6-launch-pad-acceptance-v1` scope.
+
+The managed browser command starts the actual Next development server with
+Webpack. The funding mapping runs without credentials; the durable journey is
+credential-gated and uses only an explicitly seeded isolated runtime:
+
+```powershell
+npm.cmd run e2e -- tests/e2e/m6-launch-pad.spec.ts
+```
+
+The mutating real-route journey is intentionally restricted to the managed
+loopback server: its Playwright configuration maps the runtime
+`DATABASE_URL` to the isolated `DATABASE_URL_TEST`. If
+`PLAYWRIGHT_BASE_URL` is set (including a Vercel Preview or separately started
+loopback), this spec runs only the funding contract and skips the two mutating
+tests, so direct database assertions cannot accidentally target an unverified
+hosted/shared/Production runtime. The managed journey requires the M6 seed
+guard, an allowlisted `DATABASE_URL_TEST`, M6 test-only member/staff email and
+password variables (`M6_TEST_MEMBER_*` and `M6_TEST_STAFF_*`), and synthetic
+company display-name variables. See
+[`docs/m6-acceptance.md`](./docs/m6-acceptance.md) for the fixture answers,
+journey demonstration, and verification record.
 
 ## M3 acceptance
 

@@ -3,7 +3,7 @@ import {describe, expect, it, vi} from "vitest";
 import {
   POST,
   createChatRetentionPost,
-} from "@/app/api/jobs/chat-retention/route";
+} from "@/lib/api/jobs/chat-retention-route";
 import {automationCronActor} from "@/lib/auth/automation-actor";
 import type {ChatRetentionRepository} from "@/lib/ai/retention";
 import {M4_AI_JOB_KIND} from "@/lib/jobs/kinds";
