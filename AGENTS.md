@@ -5,6 +5,9 @@
 - Next.js App Router with TypeScript strict mode, Tailwind CSS, shadcn/ui, and `next-intl`.
 - Server Components are the default. Add `'use client'` only for interactive browser behavior.
 - Every user-visible string belongs in `messages/en.json` and `messages/zh-HK.json`; keep the bundles in parity.
+- Traditional Chinese is Hong Kong register, not Taiwan. Follow `docs/i18n-glossary.md` for agreed terms, the
+  ones that deliberately differ by context, and punctuation; `tests/unit/messages.test.ts` enforces the
+  mechanical rules (a zh value must contain Chinese, no `?` runs, no stray bookkeeping keys).
 - Do not add secrets to source control. Use `.env.example` for names only and `process.env` at runtime.
 - Keep database and integration work server-side; M1 runtime configuration owns the Neon, Auth, and Stripe server credentials. Keep those modules server-only.
 - `lib/db/schema-core.ts` is Drizzle's build-time schema; runtime server code imports `lib/db/server-schema.ts`, and client modules never import the core directly.
@@ -67,6 +70,7 @@ For Stripe test-mode acceptance work, use test-mode values for `STRIPE_TEST_SECR
 - M7.3: curated media registry — staff register own-origin images on `/admin/media` and attach them to showcase listings, which now render a logo; adds an image-scoped CSP and closes an obfuscation bypass in the logo-reference validator.
 - M7.3 follow-up: `"use server"` modules no longer export actor-taking helpers. That directive publishes every export as an HTTP endpoint, so nine of them across admin, portal, showcase and Launch Pad accepted a forged actor and bypassed authorization entirely; a discovery test now enforces the boundary.
 - Security hardening: rate-limited the auth send and credential endpoints at both entrypoints (the `/join` Server Action calls the upstream service directly and never crosses our route); split `UNSUBSCRIBE_TOKEN_SECRET` out of `CRON_SECRET`, with a dual-verify fallback that **must be removed after 2026-09-06** (a test fails once that date passes); added `frame-ancestors`/`X-Frame-Options` and the other static headers; capped the feedback and Woztell bodies; stopped the showcase view beacon being inflatable via the user-agent; and made a missing Turnstile pair fail the production boot instead of silently disabling the captcha.
+- zh-HK repair: the entire `Admin.segments` namespace had shipped as literal ASCII question marks since M2 — `/admin/segments` rendered as a page of `?` in Chinese. Rewrote all 33 strings, converged genuine terminology divergences, stopped a nested `_review` flag leaking into every zh page's HTML, and added the mechanical checks plus `docs/i18n-glossary.md` that would have caught it.
 
 <!-- codebase-memory-mcp:start -->
 # Codebase Knowledge Graph (codebase-memory-mcp)

@@ -100,4 +100,90 @@ describe('message bundles', () => {
       }
     },
   );
+
+  // The whole Admin.segments namespace once shipped as literal ASCII question
+  // marks — "?? CSV", "????", a 29-character run of "?" — from M2 until it was
+  // found by inspection. Every test passed throughout, because leaf-key parity
+  // says nothing about whether a Chinese value contains Chinese.
+  //
+  // Arrays are walked here deliberately: collectLeafEntries above skips them,
+  // so Privacy.sections.0.body.0 and its siblings would otherwise be exempt.
+  function everyLeaf(value: unknown, prefix = ''): Array<[string, string]> {
+    if (typeof value === 'string') return prefix ? [[prefix, value]] : [];
+    if (value === null || typeof value !== 'object') return [];
+    if (Array.isArray(value)) {
+      return value.flatMap((child, index) => everyLeaf(child, `${prefix}.${index}`));
+    }
+    return Object.entries(value as MessageTree).flatMap(([key, child]) => {
+      if (key.startsWith('_')) return [];
+      return everyLeaf(child, prefix ? `${prefix}.${key}` : key);
+    });
+  }
+
+  // Values that are legitimately Latin. The allowlist is the point: adding to it
+  // should be a deliberate, reviewed act rather than a silent exemption.
+  const latinByDesign = new Set([
+    'Navigation.switchToEnglish',  // the language switcher must read as English
+    'Navigation.logoAlt',
+    'Email.brand',
+    'Admin.brand',
+    'Home.programs.cpai.title',
+    'Home.programs.tct.title',
+    'programs.cpai.title',
+    'programs.tct.title',
+    'Privacy.sections.5.heading',  // "WTIA Concierge", a product name
+    'Concierge.characterCount',    // "{count} / 2000"
+    'Navigation.english',          // the "EN" half of the language toggle
+  ]);
+
+  it('walks array leaves too, so no branch of the tree is exempt', () => {
+    const paths = everyLeaf(zh).map(([path]) => path);
+
+    expect(paths).toContain('Privacy.sections.0.body.0');
+    expect(paths.length).toBeGreaterThanOrEqual(1_100);
+  });
+
+  it('every Traditional Chinese value actually contains Chinese', () => {
+    const missing = everyLeaf(zh)
+      .filter(([path]) => !latinByDesign.has(path))
+      // Only Latin *prose* is suspect. A bare numeral like Home.stats.0.value
+      // ("4") needs no translation, and allowlisting each one would rot as the
+      // numbers change.
+      .filter(([, value]) => /[A-Za-z]/.test(value) && !/[\u4e00-\u9fff]/.test(value))
+      .map(([path, value]) => `${path} = ${JSON.stringify(value)}`);
+
+    expect(
+      missing,
+      'These zh-HK values contain no Chinese. Either translate them, or add the '
+      + 'key to latinByDesign with a comment saying why it is Latin on purpose.',
+    ).toEqual([]);
+  });
+
+  it('no value contains a run of ASCII question marks', () => {
+    const corrupted = everyLeaf(zh)
+      .filter(([, value]) => /\?{2,}/.test(value))
+      .map(([path, value]) => `${path} = ${JSON.stringify(value)}`);
+
+    expect(
+      corrupted,
+      'A run of "?" is the signature of a lossy encoding round-trip that '
+      + 'replaced Chinese characters. No legitimate string needs one.',
+    ).toEqual([]);
+  });
+
+  it('ships no internal bookkeeping key to the browser at any depth', () => {
+    // The root flag is stripped by i18n/request.ts, but a nested Concierge._review
+    // was reaching the serialized payload of every zh page.
+    function underscored(value: unknown, prefix = ''): string[] {
+      if (value === null || typeof value !== 'object' || Array.isArray(value)) return [];
+      return Object.entries(value as MessageTree).flatMap(([key, child]) => {
+        const path = prefix ? `${prefix}.${key}` : key;
+        return [...(key.startsWith('_') ? [path] : []), ...underscored(child, path)];
+      });
+    }
+
+    // Exactly one, at the root, where i18n/request.ts and the reviewer expect it.
+    expect(underscored(zh)).toEqual(['_review']);
+    expect(underscored(en)).toEqual([]);
+  });
 });
