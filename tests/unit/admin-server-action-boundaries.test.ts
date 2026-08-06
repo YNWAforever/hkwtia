@@ -8,6 +8,7 @@ describe("admin mutation Server Action boundaries", () => {
     ["event", "lib/admin/event-actions.ts"],
     ["member note", "lib/admin/member-note-actions.ts"],
     ["news", "lib/admin/news-actions.ts"],
+    ["page copy", "lib/admin/page-copy-actions.ts"],
   ])("maps authorization denial to notFound in the top-level %s action module", (_name, path) => {
     const source = readFileSync(resolve(process.cwd(), path), "utf8");
     expect(source.trimStart()).toMatch(/^"use server";/);

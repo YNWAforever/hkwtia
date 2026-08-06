@@ -92,10 +92,13 @@ describe("M5 Showcase schema contract", () => {
       "draft", "pending_review", "published", "rejected",
     ]);
 
+    // Registered at its own index rather than at the head: later milestones
+    // append to this journal, and this milestone's migration is what matters.
     const journal = JSON.parse(readFileSync(
       join(process.cwd(), "drizzle", "meta", "_journal.json"),
       "utf8",
-    )) as {entries?: Array<{tag?: string}>};
-    expect(journal.entries?.at(-1)?.tag).toBe("0015_m6_launch_pad");
+    )) as {entries?: Array<{idx?: number; tag?: string}>};
+    expect(journal.entries?.find((entry) => entry.tag === "0014_m5_showcase"))
+      .toMatchObject({idx: 14});
   });
 });

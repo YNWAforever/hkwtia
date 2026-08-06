@@ -663,6 +663,33 @@ export const posts = pgTable(
   ],
 );
 
+/**
+ * Staff overrides for individual marketing copy strings. The message bundles
+ * stay the structural source of truth and the fallback: a row here only ever
+ * replaces one existing leaf string, so it can never add a key or change a
+ * page's shape. Rows are per locale, so English may be overridden while
+ * Chinese still falls back to its bundle value.
+ */
+export const pageCopy = pgTable(
+  "page_copy",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    locale: varchar("locale", {length: 10}).notNull(),
+    namespace: text("namespace").notNull(),
+    keyPath: text("key_path").notNull(),
+    value: text("value").notNull(),
+    updatedByProfileId: text("updated_by_profile_id")
+      .references(() => profiles.id, {onDelete: "set null"}),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    uniqueIndex("page_copy_locale_namespace_key_path_unique")
+      .on(table.locale, table.namespace, table.keyPath),
+    index("page_copy_locale_idx").on(table.locale),
+  ],
+);
+
 export const showcaseListings = pgTable(
   "showcase_listings",
   {
@@ -1089,6 +1116,7 @@ export type Event = typeof events.$inferSelect;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
 export type Approval = typeof approvals.$inferSelect;
 export type Post = typeof posts.$inferSelect;
+export type PageCopyRow = typeof pageCopy.$inferSelect;
 export type ShowcaseListing = typeof showcaseListings.$inferSelect;
 export type NewShowcaseListing = typeof showcaseListings.$inferInsert;
 export type Cohort = typeof cohorts.$inferSelect;

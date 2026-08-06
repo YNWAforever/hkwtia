@@ -998,6 +998,7 @@
       "members": "Members",
       "atRisk": "At risk",
       "news": "News",
+      "pageCopy": "Page copy",
       "events": "Events",
       "listingsReview": "Showcase review",
       "cohorts": "Launch Pad cohorts",
@@ -1172,6 +1173,36 @@
         "cancelled": "Cancelled",
         "attended": "Attended",
         "noShow": "No show"
+      }
+    },
+    "pageCopy": {
+      "eyebrow": "Page copy",
+      "title": "Page copy",
+      "description": "Edit the wording on the public marketing pages. Layout and structure stay fixed.",
+      "sectionsTitle": "Editable pages",
+      "fieldCount": "{count, plural, one {# field} other {# fields}}",
+      "overrideCount": "{count, plural, =0 {no edits} one {# edit} other {# edits}}",
+      "editDescription": "Each box replaces one sentence on the public page. Leave a box empty to use the wording shipped with the site.",
+      "back": "Back to page copy",
+      "english": "English",
+      "chinese": "Chinese",
+      "revertHint": "The grey text in an empty box is the wording currently shown. Clear a box to go back to it.",
+      "save": "Save copy",
+      "saving": "Saving…",
+      "saveSuccess": "Page copy saved. The public page updates shortly.",
+      "saveUnchanged": "No changes to save.",
+      "validation": "Some wording could not be saved. Check the highlighted fields.",
+      "error": "Something went wrong. Try again.",
+      "namespaces": {
+        "Home": "Home",
+        "About": "About WTIA",
+        "Chairman": "Chairman's message",
+        "Committees": "Committees",
+        "Contact": "Contact",
+        "programs": "Programmes",
+        "Membership": "Membership",
+        "Privacy": "Privacy notice",
+        "AiTransparency": "AI transparency"
       }
     },
     "news": {

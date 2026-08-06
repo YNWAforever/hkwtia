@@ -12,6 +12,8 @@ const routes = [
   "app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx",
   "app/[locale]/(admin)/admin/news/page.tsx",
   "app/[locale]/(admin)/admin/news/[id]/page.tsx",
+  "app/[locale]/(admin)/admin/page-copy/page.tsx",
+  "app/[locale]/(admin)/admin/page-copy/[namespace]/page.tsx",
   "app/[locale]/(admin)/admin/approvals/page.tsx",
   "app/[locale]/(admin)/admin/reports/page.tsx",
 ] as const;

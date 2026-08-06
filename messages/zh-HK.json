@@ -1000,6 +1000,7 @@
       "members": "會員",
       "atRisk": "高風險",
       "news": "最新消息",
+      "pageCopy": "頁面文案",
       "events": "活動",
       "listingsReview": "展示頁審核",
       "cohorts": "啟航計劃",
@@ -1174,6 +1175,36 @@
         "cancelled": "已取消",
         "attended": "已出席",
         "noShow": "未出席"
+      }
+    },
+    "pageCopy": {
+      "eyebrow": "頁面文案",
+      "title": "頁面文案",
+      "description": "編輯公開市場推廣頁面的文字。版面與結構維持不變。",
+      "sectionsTitle": "可編輯頁面",
+      "fieldCount": "{count, plural, other {# 個欄位}}",
+      "overrideCount": "{count, plural, =0 {未有修改} other {# 項修改}}",
+      "editDescription": "每個輸入框對應公開頁面上的一句文字。留空即沿用網站預設文案。",
+      "back": "返回頁面文案",
+      "english": "英文",
+      "chinese": "中文",
+      "revertHint": "空白輸入框內的淺色文字是目前顯示的文案。清空輸入框即可回復預設。",
+      "save": "儲存文案",
+      "saving": "儲存中…",
+      "saveSuccess": "頁面文案已儲存，公開頁面稍後更新。",
+      "saveUnchanged": "沒有需要儲存的改動。",
+      "validation": "部分文案無法儲存，請檢查標示的欄位。",
+      "error": "發生錯誤，請再試一次。",
+      "namespaces": {
+        "Home": "主頁",
+        "About": "關於 WTIA",
+        "Chairman": "主席的話",
+        "Committees": "委員會",
+        "Contact": "聯絡我們",
+        "programs": "計劃",
+        "Membership": "會籍",
+        "Privacy": "私隱聲明",
+        "AiTransparency": "AI 透明度"
       }
     },
     "news": {

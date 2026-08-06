@@ -28,6 +28,10 @@ describe("admin revalidate path guard", () => {
     "/en/admin/news",
     "/zh-HK/admin/news",
     "/en/admin/news/11111111-1111-4111-8111-111111111111",
+    "/en/admin/page-copy",
+    "/zh-HK/admin/page-copy",
+    "/en/admin/page-copy/Privacy",
+    "/zh-HK/admin/page-copy/AiTransparency",
   ])("revalidates the bound admin path %s", (path) => {
     expect(revalidateAdminPath(path)).toBe(true);
     expect(revalidate).toHaveBeenCalledWith(path);

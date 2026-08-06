@@ -1,8 +1,19 @@
+import {createTranslator} from 'next-intl';
 import en from '@/messages/en.json';
 import zh from '@/messages/zh-HK.json';
 import {describe, expect, it} from 'vitest';
 
 type MessageTree = Record<string, unknown>;
+
+function collectLeafEntries(value: unknown, prefix = ''): Array<[string, string]> {
+  if (typeof value === 'string') return prefix ? [[prefix, value]] : [];
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return [];
+
+  return Object.entries(value as MessageTree).flatMap(([key, child]) => {
+    if (key.startsWith('_')) return [];
+    return collectLeafEntries(child, prefix ? `${prefix}.${key}` : key);
+  });
+}
 
 function collectLeafKeys(value: unknown, prefix = ''): string[] {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
@@ -64,4 +75,29 @@ describe('message bundles', () => {
     expect(zh.Admin.reports.boardDraftKpi).toBe("關鍵績效指標");
     expect(zh.Admin.reports.boardDraftValue).toBe("數值");
   });
+
+  // The bundles carry ICU plurals, which next-intl formats through
+  // intl-messageformat rather than a plain substitution. A malformed one throws
+  // only when the page renders, so format every plural here instead.
+  it.each([['en', en] as const, ['zh-HK', zh] as const])(
+    'formats every %s ICU plural for zero, one, and many',
+    (locale, messages) => {
+      const plurals = collectLeafEntries(messages)
+        .filter(([, value]) => value.includes(', plural,'));
+
+      expect(plurals.length).toBeGreaterThan(0);
+      for (const [path] of plurals) {
+        const namespace = path.slice(0, path.lastIndexOf('.'));
+        const key = path.slice(path.lastIndexOf('.') + 1);
+        // Namespaces and keys are discovered from the bundle at runtime, so
+        // next-intl's compile-time key types cannot describe this call.
+        const t = createTranslator({
+          locale, messages, namespace: namespace as never,
+        }) as unknown as (key: string, values: Record<string, number>) => string;
+        for (const count of [0, 1, 2, 11]) {
+          expect(t(key, {count}), `${locale} ${path} @ ${count}`).toBeTruthy();
+        }
+      }
+    },
+  );
 });
