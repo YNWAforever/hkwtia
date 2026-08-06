@@ -18,6 +18,7 @@ export interface ServerEnv {
   emailFrom: string;
   emailDeliveryMode: "resend" | "test";
   cronSecret: string;
+  unsubscribeTokenSecret: string;
   appUrl: string;
   agentsEnabled: boolean;
   agentModelConcierge: string;
@@ -55,6 +56,7 @@ const serverKeys = [
   ["RESEND_API_KEY", "resendApiKey"],
   ["EMAIL_FROM", "emailFrom"],
   ["CRON_SECRET", "cronSecret"],
+  ["UNSUBSCRIBE_TOKEN_SECRET", "unsubscribeTokenSecret"],
   ["APP_URL", "appUrl"],
 ] as const;
 
@@ -109,6 +111,18 @@ function validateServerEnvironment(environment: Environment): void {
     throw new Error("CONCIERGE_COOKIE_SECRET must not reuse NEON_AUTH_COOKIE_SECRET");
   }
 
+  // A bearer credential and a signing key have opposite blast radii and
+  // opposite rotation lifecycles. While these were one value, anyone holding
+  // the cron bearer could mint an unsubscribe token for any profile, and
+  // rotating the bearer would have invalidated every link already delivered.
+  const unsubscribeSecret = valueFor(environment, "UNSUBSCRIBE_TOKEN_SECRET");
+  if (Buffer.byteLength(unsubscribeSecret, "utf8") < 32) {
+    throw new Error("UNSUBSCRIBE_TOKEN_SECRET must be at least 32 bytes");
+  }
+  if (unsubscribeSecret === valueFor(environment, "CRON_SECRET")) {
+    throw new Error("UNSUBSCRIBE_TOKEN_SECRET must not reuse CRON_SECRET");
+  }
+
   // Turnstile only works when both halves are present: the secret alone makes
   // the server reject every request because no client can mint a token, and the
   // site key alone renders a challenge nothing verifies.
@@ -116,6 +130,16 @@ function validateServerEnvironment(environment: Environment): void {
   const turnstileSiteKey = valueFor(environment, "TURNSTILE_SITE_KEY").trim();
   if (Boolean(turnstileSecret) !== Boolean(turnstileSiteKey)) {
     throw new Error("TURNSTILE_SECRET and TURNSTILE_SITE_KEY must be set together");
+  }
+  // Presence, not only pairing. `verifyTurnstile` returns true when the secret
+  // is undefined, so an unset pair silently disables the captcha in front of an
+  // unauthenticated, per-call-costed endpoint and nothing anywhere reports it.
+  // Preview is exempt for the same reason EMAIL_DELIVERY_MODE=test is above:
+  // those environments are configured separately and are not public production.
+  if (!turnstileSecret && environment.VERCEL_ENV !== "preview") {
+    throw new Error(
+      "Missing required production environment variables: TURNSTILE_SECRET, TURNSTILE_SITE_KEY",
+    );
   }
 }
 
@@ -140,6 +164,7 @@ export function parseServerEnv(environment: Environment = process.env): ServerEn
         ? "test"
         : "resend",
     cronSecret: valueFor(environment, "CRON_SECRET"),
+    unsubscribeTokenSecret: valueFor(environment, "UNSUBSCRIBE_TOKEN_SECRET"),
     appUrl: valueFor(environment, "APP_URL"),
     agentsEnabled: ai.AGENTS_ENABLED,
     agentModelConcierge: ai.AGENT_MODEL_CONCIERGE,

@@ -10,6 +10,9 @@ import {withDurableWoztellReplyState} from "@/lib/ai/woztell-reply-state";
 import type {ChannelAdapter} from "@/lib/channels/types";
 import {createWoztellAdapter} from "@/lib/channels/woztell";
 import {serverEnv} from "@/lib/config/env";
+import {readBoundedText} from "@/lib/security/bounded-body";
+
+const MAX_WEBHOOK_BYTES = 64 * 1_024;
 
 type HandlerDependencies = Readonly<{
   channel: Pick<ChannelAdapter, "verifyWebhook">;
@@ -20,7 +23,15 @@ export function createWoztellWebhookPostHandler(
   dependencies: HandlerDependencies,
 ) {
   return async function post(request: Request): Promise<Response> {
-    const rawBody = await request.text();
+    // Signature verification is correct and fail-closed, so this is purely a
+    // resource bound — it stops an unbounded body being buffered before the
+    // signature is even checked.
+    let rawBody: string;
+    try {
+      rawBody = await readBoundedText(request, MAX_WEBHOOK_BYTES);
+    } catch {
+      return Response.json({error: "PAYLOAD_TOO_LARGE"}, {status: 413});
+    }
     const signature = request.headers.get("x-woztell-signature");
     if (!dependencies.channel.verifyWebhook(rawBody, signature)) {
       return Response.json({error: "INVALID_SIGNATURE"}, {status: 401});

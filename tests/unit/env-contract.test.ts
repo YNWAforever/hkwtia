@@ -30,7 +30,10 @@ describe("runtime environment contract", () => {
       RESEND_API_KEY: "re_test_example",
       EMAIL_FROM: "WTIA <notifications@example.test>",
       CRON_SECRET: "cron-secret",
+      UNSUBSCRIBE_TOKEN_SECRET: "unsubscribe-token-secret-least-32-bytes",
       APP_URL: "https://www.example.test",
+      TURNSTILE_SECRET: "turnstile-secret",
+      TURNSTILE_SITE_KEY: "turnstile-site-key",
     });
 
     expect(values).toEqual({
@@ -46,6 +49,9 @@ describe("runtime environment contract", () => {
       emailFrom: "WTIA <notifications@example.test>",
       emailDeliveryMode: "resend",
       cronSecret: "cron-secret",
+      unsubscribeTokenSecret: "unsubscribe-token-secret-least-32-bytes",
+      turnstileSecret: "turnstile-secret",
+      turnstileSiteKey: "turnstile-site-key",
       appUrl: "https://www.example.test",
       agentsEnabled: false,
       agentModelConcierge: "openai:gpt-4.1-mini",
@@ -77,6 +83,7 @@ describe("runtime environment contract", () => {
       emailFrom: "",
       emailDeliveryMode: "resend",
       cronSecret: "",
+      unsubscribeTokenSecret: "",
       appUrl: "",
       agentsEnabled: false,
       agentModelConcierge: "openai:gpt-4.1-mini",
@@ -99,6 +106,7 @@ describe("runtime environment contract", () => {
         RESEND_API_KEY: "re_test_example",
         EMAIL_FROM: "WTIA <notifications@example.test>",
         CRON_SECRET: "cron-secret",
+      UNSUBSCRIBE_TOKEN_SECRET: "unsubscribe-token-secret-least-32-bytes",
         APP_URL: "https://www.example.test",
         [missingKey]: "",
       };
@@ -122,6 +130,7 @@ describe("runtime environment contract", () => {
         RESEND_API_KEY: "re_test_example",
         EMAIL_FROM: "WTIA <notifications@example.test>",
         CRON_SECRET: "cron-secret",
+      UNSUBSCRIBE_TOKEN_SECRET: "unsubscribe-token-secret-least-32-bytes",
         APP_URL: "https://www.example.test",
         [missingKey]: "",
       };
@@ -145,6 +154,7 @@ describe("runtime environment contract", () => {
       RESEND_API_KEY: "",
       EMAIL_FROM: "",
       CRON_SECRET: "cron-secret",
+      UNSUBSCRIBE_TOKEN_SECRET: "unsubscribe-token-secret-least-32-bytes",
       APP_URL: "https://preview.example.test",
     });
 
@@ -168,6 +178,7 @@ describe("runtime environment contract", () => {
         RESEND_API_KEY: "",
         EMAIL_FROM: "",
         CRON_SECRET: "cron-secret",
+      UNSUBSCRIBE_TOKEN_SECRET: "unsubscribe-token-secret-least-32-bytes",
         APP_URL: "https://www.example.test",
       }),
     ).toThrow("RESEND_API_KEY");
@@ -187,6 +198,7 @@ describe("runtime environment contract", () => {
       RESEND_API_KEY: "re_test_example",
       EMAIL_FROM: "WTIA <notifications@example.test>",
       CRON_SECRET: "cron-secret",
+      UNSUBSCRIBE_TOKEN_SECRET: "unsubscribe-token-secret-least-32-bytes",
       APP_URL: "https://www.example.test",
     };
 
@@ -230,4 +242,66 @@ describe("runtime environment contract", () => {
       turnstileSiteKey: "turnstile-site-key",
     });
   });
+
+  // The captcha in front of the unauthenticated, per-call-costed concierge was
+  // previously allowed to be absent: verifyTurnstile returns true for an
+  // undefined secret, so production could run with it off and nothing said so.
+  it.each([
+    ["neither set", {}],
+    ["only the secret", {TURNSTILE_SECRET: "turnstile-secret"}],
+    ["only the site key", {TURNSTILE_SITE_KEY: "turnstile-site-key"}],
+  ])("refuses to boot production with %s", (_case, overrides) => {
+    expect(() => parseServerEnv({...productionEnvironment(), ...overrides})).toThrow(/TURNSTILE/);
+  });
+
+  it("boots production when the pair is present", () => {
+    expect(() => parseServerEnv({
+      ...productionEnvironment(),
+      TURNSTILE_SECRET: "turnstile-secret",
+      TURNSTILE_SITE_KEY: "turnstile-site-key",
+    })).not.toThrow();
+  });
+
+  it("exempts Vercel Preview, which is configured separately", () => {
+    expect(() => parseServerEnv({...productionEnvironment(), VERCEL_ENV: "preview"}))
+      .not.toThrow();
+  });
+
+  it("keeps a bearer credential from doubling as a signing key", () => {
+    expect(() => parseServerEnv({
+      ...productionEnvironment(),
+      TURNSTILE_SECRET: "turnstile-secret",
+      TURNSTILE_SITE_KEY: "turnstile-site-key",
+      CRON_SECRET: "shared-secret-that-is-long-enough-0001",
+      UNSUBSCRIBE_TOKEN_SECRET: "shared-secret-that-is-long-enough-0001",
+    })).toThrow("UNSUBSCRIBE_TOKEN_SECRET must not reuse CRON_SECRET");
+  });
+
+  it("requires the unsubscribe signing key to be long enough to matter", () => {
+    expect(() => parseServerEnv({
+      ...productionEnvironment(),
+      TURNSTILE_SECRET: "turnstile-secret",
+      TURNSTILE_SITE_KEY: "turnstile-site-key",
+      UNSUBSCRIBE_TOKEN_SECRET: "too-short",
+    })).toThrow("UNSUBSCRIBE_TOKEN_SECRET must be at least 32 bytes");
+  });
 });
+
+function productionEnvironment(): Record<string, string> {
+  return {
+    NODE_ENV: "production",
+    DATABASE_URL: "postgres://db.example.test/hkwtia",
+    NEON_AUTH_BASE_URL: "https://auth.example.test",
+    NEON_AUTH_COOKIE_SECRET: "cookie-secret",
+    CONCIERGE_COOKIE_SECRET: "concierge-cookie-secret-separate-0001",
+    STRIPE_SECRET_KEY: "sk_test_example",
+    STRIPE_WEBHOOK_SECRET: "whsec_example",
+    STRIPE_STARTUP_PRICE_ID: "price_startup",
+    STRIPE_CORPORATE_PRICE_ID: "price_corporate",
+    RESEND_API_KEY: "re_test_example",
+    EMAIL_FROM: "WTIA <notifications@example.test>",
+    CRON_SECRET: "cron-secret",
+    UNSUBSCRIBE_TOKEN_SECRET: "unsubscribe-token-secret-least-32-bytes",
+    APP_URL: "https://www.example.test",
+  };
+}

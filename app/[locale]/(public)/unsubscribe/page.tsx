@@ -3,7 +3,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import type {AppLocale} from "@/i18n/routing";
 import {serverEnv} from "@/lib/config/env";
-import {verifyUnsubscribeToken} from "@/lib/email/unsubscribe-token";
+import {verifyUnsubscribeTokenWithAny} from "@/lib/email/unsubscribe-token";
 import {buildPageMetadata} from "@/lib/metadata";
 
 type Props = Readonly<{
@@ -42,7 +42,7 @@ export default async function UnsubscribePage({params, searchParams}: Props) {
   }
 
   const payload = query.token
-    ? verifyUnsubscribeToken(query.token, serverEnv().cronSecret)
+    ? verifyUnsubscribeTokenWithAny(query.token, [serverEnv().unsubscribeTokenSecret, serverEnv().cronSecret])
     : null;
   const valid = payload?.locale === appLocale;
 

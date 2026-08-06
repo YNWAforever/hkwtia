@@ -436,6 +436,7 @@
       "required": "Complete this required field.",
       "email": "Enter a valid email address.",
       "auth": "We could not send the sign-in link. Please try again.",
+      "rateLimited": "Too many sign-in emails have been requested. Wait a few minutes and try again.",
       "save": "We could not save your application. Please try again.",
       "company": "Use a company that you are allowed to manage.",
       "profile": "Complete your profile before submitting company details.",

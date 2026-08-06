@@ -300,7 +300,7 @@ function unsubscribeUrl(
     profileId,
     locale,
     exp: Math.floor(now.getTime() / 1000) + UNSUBSCRIBE_TTL_SECONDS,
-  }, environment.cronSecret);
+  }, environment.unsubscribeTokenSecret);
   const path = locale === "zh-HK" ? "/zh/unsubscribe" : "/unsubscribe";
   const url = new URL(path, environment.appUrl);
   url.searchParams.set("token", token);

@@ -33,6 +33,38 @@ export function signUnsubscribeToken(
   return `${encodedPayload}.${signature(encodedPayload, secret).toString("base64url")}`;
 }
 
+/**
+ * These links were signed with `CRON_SECRET` until the signing key was split
+ * out, and they stay valid for `UNSUBSCRIBE_TTL_SECONDS` (30 days) after they
+ * are minted. The last legacy token is minted by the final job run before the
+ * deploy, so the fallback must outlive that by a margin.
+ *
+ * After this date, delete `cronSecret` from the two `secrets` arrays
+ * (`lib/api/unsubscribe-route.ts` and `app/[locale]/(public)/unsubscribe/page.tsx`)
+ * and remove this constant. A test fails once the date passes, so this is not
+ * left to memory.
+ */
+export const LEGACY_UNSUBSCRIBE_SECRET_SUNSET = "2026-09-06";
+
+/**
+ * Verifies against several keys in order, returning the first that matches.
+ *
+ * Array-shaped rather than `(primary, legacy)` because that is the shape any
+ * future rotation needs too — a key can be added at the front and the old one
+ * dropped from the back without touching a call site.
+ */
+export function verifyUnsubscribeTokenWithAny(
+  token: string,
+  secrets: readonly string[],
+  now = Math.floor(Date.now() / 1000),
+): UnsubscribeTokenPayload | null {
+  for (const secret of [...new Set(secrets.filter(Boolean))]) {
+    const payload = verifyUnsubscribeToken(token, secret, now);
+    if (payload) return payload;
+  }
+  return null;
+}
+
 export function verifyUnsubscribeToken(
   token: string,
   secret: string,

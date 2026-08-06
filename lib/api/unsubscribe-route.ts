@@ -5,11 +5,11 @@ import {
   suppressionsRepository,
   unsubscribeActor,
 } from "@/lib/db/repos/suppressions";
-import {verifyUnsubscribeToken} from "@/lib/email/unsubscribe-token";
+import {verifyUnsubscribeTokenWithAny} from "@/lib/email/unsubscribe-token";
 
 type UnsubscribeResult = "created" | "existing";
 type Dependencies = Readonly<{
-  secret: string | (() => string);
+  secrets: readonly string[] | (() => readonly string[]);
   appUrl: string | (() => string);
   now?: () => number;
   unsubscribeEmailMarketing(profileId: string): Promise<UnsubscribeResult>;
@@ -89,11 +89,11 @@ export function createUnsubscribePost(dependencies: Dependencies) {
       return Response.json({error: "INVALID_UNSUBSCRIBE_TOKEN"}, {status: 400});
     }
 
-    const secret = typeof dependencies.secret === "function"
-      ? dependencies.secret()
-      : dependencies.secret;
+    const secrets = typeof dependencies.secrets === "function"
+      ? dependencies.secrets()
+      : dependencies.secrets;
     const payload = input.token
-      ? verifyUnsubscribeToken(input.token, secret, dependencies.now?.())
+      ? verifyUnsubscribeTokenWithAny(input.token, secrets, dependencies.now?.())
       : null;
     if (!payload) {
       return Response.json({error: "INVALID_UNSUBSCRIBE_TOKEN"}, {status: 400});
@@ -119,7 +119,9 @@ export function createUnsubscribePost(dependencies: Dependencies) {
 }
 
 export const POST = createUnsubscribePost({
-  secret: () => serverEnv().cronSecret,
+  // Legacy fallback: links already in inboxes were signed with CRON_SECRET.
+  // Remove it after LEGACY_UNSUBSCRIBE_SECRET_SUNSET.
+  secrets: () => [serverEnv().unsubscribeTokenSecret, serverEnv().cronSecret],
   appUrl: () => serverEnv().appUrl,
   unsubscribeEmailMarketing(profileId) {
     return suppressionsRepository.unsubscribeEmailMarketing(

@@ -57,10 +57,35 @@ describe("next.config.ts image posture", () => {
     expect(config).not.toContain(forbidden);
   });
 
-  it("restricts images to this origin at the browser", () => {
+  it.each([
+    ["images to this origin", "img-src 'self' data:"],
+    ["framing, which is what makes admin clickjacking possible", "frame-ancestors 'none'"],
+    ["base-tag injection repointing relative script URLs", "base-uri 'self'"],
+    ["plugin content", "object-src 'none'"],
+    ["cross-origin form posts", "form-action 'self'"],
+  ])("restricts %s at the browser", (_case, directive) => {
     expect(config).toContain("Content-Security-Policy");
-    expect(config).toContain("img-src 'self' data:");
-    // No default-src, so this policy cannot break scripts or styles.
-    expect(config).not.toContain("default-src");
+    expect(config).toContain(directive);
+  });
+
+  it.each([
+    ["X-Frame-Options", "DENY"],
+    ["Referrer-Policy", "strict-origin-when-cross-origin"],
+    ["X-Content-Type-Options", "nosniff"],
+    ["Permissions-Policy", "camera=(), microphone=(), geolocation=()"],
+  ])("sends %s", (header, value) => {
+    expect(config).toContain(header);
+    expect(config).toContain(value);
+  });
+
+  // The negative half is what stops a well-meaning contributor adding a
+  // directive that white-screens the site, or an HSTS preload that browsers
+  // cache for two years and a redeploy cannot undo.
+  it.each([
+    ["default-src", "would make every unnamed directive restrictive at once"],
+    ["script-src", "needs a per-request nonce; staged separately, report-only first"],
+    ["Strict-Transport-Security", "Vercel already sends it, and preload outlives a mistake"],
+  ])("still declares no %s — %s", (forbidden) => {
+    expect(config).not.toContain(forbidden);
   });
 });
