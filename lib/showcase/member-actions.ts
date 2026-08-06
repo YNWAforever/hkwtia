@@ -3,32 +3,14 @@
 import {revalidatePath} from "next/cache";
 
 import {requireActor} from "@/lib/auth/actor";
-import {showcaseRepository, type ShowcaseRepository} from "@/lib/db/repos/showcase";
-import type {Actor} from "@/lib/membership/lifecycle";
+import {saveShowcaseDraft, submitShowcaseListing} from "@/lib/showcase/member-core";
 import {listingInputFromFormData} from "@/lib/showcase/member-contract";
 
-export type MemberShowcaseRepository = Pick<ShowcaseRepository, "upsertDraft" | "submitForReview">;
+// Only formData wrappers are exported here; each resolves its own actor.
+export type {MemberShowcaseRepository} from "@/lib/showcase/member-core";
 
 function textField(formData: FormData, name: string): string {
   return String(formData.get(name) ?? "").trim();
-}
-
-export async function saveShowcaseDraft(
-  actor: Actor,
-  companyId: string,
-  rawInput: unknown,
-  repository: MemberShowcaseRepository = showcaseRepository,
-) {
-  return repository.upsertDraft(actor, companyId, rawInput, "draft");
-}
-
-export async function submitShowcaseListing(
-  actor: Actor,
-  companyId: string,
-  rawInput: unknown,
-  repository: MemberShowcaseRepository = showcaseRepository,
-) {
-  return repository.submitForReview(actor, companyId, rawInput);
 }
 
 export async function saveShowcaseDraftAction(formData: FormData): Promise<void> {

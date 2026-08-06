@@ -147,14 +147,20 @@ describe("media registry repository", () => {
     expect(audits).toEqual([]);
   });
 
-  it("tolerates a malformed id without querying", async () => {
+  it("loads a row by id and tolerates a malformed one without querying", async () => {
     const reads: MediaReadDependencies = {
       list: vi.fn(async () => [row()] as never),
       get: vi.fn(async () => row() as never),
     };
 
     await expect(listMediaForAdmin(staff, reads)).resolves.toHaveLength(1);
+    // The positive case matters: this is the only loader behind
+    // /admin/media/[id], which calls notFound() on a null, so a loader that
+    // always returned null would 404 every edit page with a green suite.
+    await expect(getMediaForAdmin(staff, row().id, reads)).resolves.toMatchObject({id: row().id});
+    expect(reads.get).toHaveBeenCalledExactlyOnceWith(row().id);
+
     await expect(getMediaForAdmin(staff, "not-a-uuid", reads)).resolves.toBeNull();
-    expect(reads.get).not.toHaveBeenCalled();
+    expect(reads.get).toHaveBeenCalledOnce();
   });
 });

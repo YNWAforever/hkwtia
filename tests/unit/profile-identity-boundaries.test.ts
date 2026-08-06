@@ -4,7 +4,7 @@ import {createSeatService, type SeatServiceDependencies} from "@/lib/db/repos/se
 import type {Actor} from "@/lib/membership/lifecycle";
 import {completeApplication} from "@/lib/membership/onboarding";
 import {getDashboard, type PortalQueryDependencies} from "@/lib/portal/queries";
-import {updateProfile, type PortalCommandDependencies} from "@/lib/portal/commands";
+import {updateProfile, type PortalCommandDependencies} from "@/lib/portal/command-core";
 
 const member = {kind: "member", userId: "auth-1", profileId: "member-1"} as const;
 

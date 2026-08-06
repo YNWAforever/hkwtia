@@ -6,7 +6,7 @@ import {
   publishShowcaseListing,
   rejectShowcaseListing,
   setShowcasePremium,
-} from "@/lib/admin/showcase-actions";
+} from "@/lib/admin/showcase-core";
 import type {ShowcaseRepository} from "@/lib/db/repos/showcase";
 import type {AdminActor} from "@/lib/membership/lifecycle";
 

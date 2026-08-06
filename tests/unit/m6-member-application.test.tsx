@@ -19,7 +19,8 @@ vi.mock("@/lib/db/repos/cohorts", () => ({
 }));
 
 import {CohortApplicationForm} from "@/components/marketing/cohort-application-form";
-import {applyToCohort, applyToCohortAction} from "@/lib/launchpad/member-actions";
+import {applyToCohortAction} from "@/lib/launchpad/member-actions";
+import {applyToCohort} from "@/lib/launchpad/member-core";
 import type {CohortRepository} from "@/lib/db/repos/cohorts";
 import {actorFor, anonymousActor} from "@/tests/helpers/fakes";
 import {revalidatePath} from "next/cache";
