@@ -1,13 +1,16 @@
 "use server";
 
 import {getTranslations} from "next-intl/server";
+import {headers} from "next/headers";
 import {redirect} from "next/navigation";
 import {z} from "zod";
 
 import type {JoinFormState} from "@/components/join/join-form";
 import type {AppLocale} from "@/i18n/routing";
 import {auth} from "@/lib/auth/server";
+import {checkAuthSend} from "@/lib/auth/rate-limit";
 import {requireActor} from "@/lib/auth/actor";
+import {clientIpFromHeaders} from "@/lib/security/request-origin";
 import {serverEnv} from "@/lib/config/env";
 import {applicationsRepository} from "@/lib/db/repos/applications";
 import {companiesRepository} from "@/lib/db/repos/companies";
@@ -40,6 +43,14 @@ export async function requestMagicLink(locale: AppLocale, plan: PlanCode | null,
   const next = continuation == null ? null : parseJoinContinuation(continuation, locale);
   if (continuation != null && !next) return {message: t("errors.auth")};
   if (plan == null && next == null) return {message: t("errors.auth")};
+  // `auth.signIn.magicLink` fetches the upstream auth service directly, so it
+  // never passes through our /api/auth catch-all. The shared guard has to be
+  // applied here too or this path stays an unauthenticated email amplifier.
+  const send = checkAuthSend({
+    ip: clientIpFromHeaders(await headers()),
+    email: email.data,
+  });
+  if (!send.allowed) return {message: t("errors.rateLimited")};
   const callbackURL = buildJoinCallback(serverEnv().appUrl, locale, plan, next);
 
   try {

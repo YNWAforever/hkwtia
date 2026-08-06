@@ -26,7 +26,13 @@ export default defineConfig({
     ? {}
     : {
         webServer: {
-          command: `.\\node_modules\\.bin\\next.cmd dev --webpack --hostname localhost -p ${port}`,
+          // `--webpack` is load-bearing: a Windows worktree junctions
+          // node_modules, which Turbopack rejects. The command itself must stay
+          // cross-platform, though — spelling it `.\node_modules\.bin\next.cmd`
+          // meant the managed server could not start on Linux or macOS, so
+          // `npm run test:e2e` was Windows-only. `npx --no-install` resolves the
+          // same local binary on every platform without reaching the network.
+          command: `npx --no-install next dev --webpack --hostname localhost -p ${port}`,
           url: baseURL,
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,

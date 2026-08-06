@@ -14,6 +14,11 @@ const repoState = vi.hoisted(() => ({
 vi.mock("next-intl/server", () => ({
   getTranslations: async () => (key: string) => `localized:${key}`,
 }));
+import {resetAuthRateLimits} from "@/lib/auth/rate-limit";
+
+vi.mock("next/headers", () => ({
+  headers: async () => new Headers({"x-vercel-forwarded-for": "203.0.113.9"}),
+}));
 vi.mock("next/navigation", () => ({
   redirect: (url: string) => { redirectState.url = url; throw new Error("NEXT_REDIRECT"); },
 }));
@@ -43,6 +48,7 @@ import {requestMagicLink, saveCompany} from "@/app/[locale]/(join)/join/actions"
 
 describe("join Server Actions", () => {
   beforeEach(() => {
+    resetAuthRateLimits();
     authState.input = null;
     redirectState.url = null;
     repoState.createdCompanyInput = null;
@@ -155,5 +161,24 @@ describe("join Server Actions", () => {
       applicationId: "application-a",
       company: {id: "company-a", legalName: "Acme Updated Limited", displayName: "Acme Updated"},
     });
+  });
+
+  it("refuses to keep mailing one address once the ceiling is reached", async () => {
+    const form = new FormData();
+    form.set("email", "flood@example.test");
+
+    // The default per-address ceiling is 3 per 15 minutes.
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      authState.input = null;
+      await expect(requestMagicLink("en", "startup", null, {}, form)).rejects.toThrow("NEXT_REDIRECT");
+      expect(authState.input).not.toBeNull();
+    }
+
+    authState.input = null;
+    const state = await requestMagicLink("en", "startup", null, {}, form);
+
+    expect(state).toEqual({message: "localized:errors.rateLimited"});
+    // The decisive assertion: the provider was never asked to send.
+    expect(authState.input).toBeNull();
   });
 });

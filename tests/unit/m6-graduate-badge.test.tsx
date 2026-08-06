@@ -47,7 +47,7 @@ function listing(goneGlobal: boolean): PublicListing {
     videoUrl: null,
     caseStudyUrl: null,
     caseStudySummary: "Case study",
-    logoReference: null,
+    logoReference: null, logo: null,
   };
 }
 

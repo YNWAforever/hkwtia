@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 
 import {PageHero} from '@/components/marketing/page-hero';
+import {parsePolicySections, PolicySections} from '@/components/marketing/policy-sections';
 import type {AppLocale} from '@/i18n/routing';
 import {buildPageMetadata} from '@/lib/metadata';
 
@@ -21,11 +22,7 @@ export default async function PrivacyPage({params}: Props) {
   return (
     <>
       <PageHero eyebrow={t('eyebrow')} title={t('title')} description={t('description')} />
-      <section className="container mx-auto px-6 py-16">
-        <div className="glass-card p-6">
-          <p className="text-muted-foreground">{t('summary')}</p>
-        </div>
-      </section>
+      <PolicySections sections={parsePolicySections(t.raw('sections'))} />
     </>
   );
 }

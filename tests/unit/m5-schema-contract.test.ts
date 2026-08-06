@@ -43,7 +43,7 @@ describe("M5 Showcase schema contract", () => {
       "member_since", "name_en", "name_zh_hk", "premium", "rejection_reason",
       "reviewed_at", "reviewed_by_profile_id", "slug", "status", "tagline_en",
       "tagline_zh_hk", "updated_at", "use_cases", "video_url", "views",
-      "works_with", "supported_languages",
+      "works_with", "supported_languages", "logo_media_id",
     ].sort());
     expect(columns.get("company_id")?.notNull).toBe(true);
     expect(columns.get("member_since")?.notNull).toBe(true);
@@ -92,10 +92,13 @@ describe("M5 Showcase schema contract", () => {
       "draft", "pending_review", "published", "rejected",
     ]);
 
+    // Registered at its own index rather than at the head: later milestones
+    // append to this journal, and this milestone's migration is what matters.
     const journal = JSON.parse(readFileSync(
       join(process.cwd(), "drizzle", "meta", "_journal.json"),
       "utf8",
-    )) as {entries?: Array<{tag?: string}>};
-    expect(journal.entries?.at(-1)?.tag).toBe("0015_m6_launch_pad");
+    )) as {entries?: Array<{idx?: number; tag?: string}>};
+    expect(journal.entries?.find((entry) => entry.tag === "0014_m5_showcase"))
+      .toMatchObject({idx: 14});
   });
 });

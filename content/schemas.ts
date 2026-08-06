@@ -11,12 +11,6 @@ export const eventSchema = z.object({
   namespace: z.string().min(1)
 });
 
-export const newsPostSchema = z.object({
-  slug,
-  publishedAt: z.string().datetime(),
-  image: z.string().startsWith('/'),
-  namespace: z.string().min(1)
-});
 
 export const programSchema = z.object({
   id: z.enum(['cpai', 'hkict', 'tct', 'asa']),
@@ -25,5 +19,4 @@ export const programSchema = z.object({
 });
 
 export type EventRecord = z.infer<typeof eventSchema>;
-export type NewsPostRecord = z.infer<typeof newsPostSchema>;
 export type ProgramRecord = z.infer<typeof programSchema>;

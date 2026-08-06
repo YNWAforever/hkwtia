@@ -663,6 +663,57 @@ export const posts = pgTable(
   ],
 );
 
+/**
+ * Images staff have curated for use on the site.
+ *
+ * The registry is a curation boundary, not an upload mechanism: `url` is
+ * validated as own-origin only (`lib/media/url.ts`), because an allowlist of
+ * third-party hosts cannot be made safe for a render target. There are
+ * deliberately no `width`/`height` columns — with no upload they could only be
+ * typed by hand, where a wrong value silently distorts the image.
+ */
+export const media = pgTable(
+  "media",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    url: text("url").notNull(),
+    altEn: text("alt_en").notNull(),
+    altZh: text("alt_zh").notNull(),
+    registeredByProfileId: text("registered_by_profile_id")
+      .references(() => profiles.id, {onDelete: "set null"}),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [uniqueIndex("media_url_unique").on(table.url)],
+);
+
+/**
+ * Staff overrides for individual marketing copy strings. The message bundles
+ * stay the structural source of truth and the fallback: a row here only ever
+ * replaces one existing leaf string, so it can never add a key or change a
+ * page's shape. Rows are per locale, so English may be overridden while
+ * Chinese still falls back to its bundle value.
+ */
+export const pageCopy = pgTable(
+  "page_copy",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    locale: varchar("locale", {length: 10}).notNull(),
+    namespace: text("namespace").notNull(),
+    keyPath: text("key_path").notNull(),
+    value: text("value").notNull(),
+    updatedByProfileId: text("updated_by_profile_id")
+      .references(() => profiles.id, {onDelete: "set null"}),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    uniqueIndex("page_copy_locale_namespace_key_path_unique")
+      .on(table.locale, table.namespace, table.keyPath),
+    index("page_copy_locale_idx").on(table.locale),
+  ],
+);
+
 export const showcaseListings = pgTable(
   "showcase_listings",
   {
@@ -691,7 +742,11 @@ export const showcaseListings = pgTable(
     caseStudyUrl: text("case_study_url"),
     caseStudySummaryEn: text("case_study_summary_en"),
     caseStudySummaryZhHk: text("case_study_summary_zh_hk"),
+    // Free text, member-supplied, and reaching only the schema.org `image`
+    // field. Kept and still validated, but never rendered — a curated registry
+    // entry is what the site actually displays.
     logoReference: text("logo_reference"),
+    logoMediaId: uuid("logo_media_id").references(() => media.id, {onDelete: "set null"}),
     reviewedAt: timestamp("reviewed_at", {withTimezone: true}),
     reviewedByProfileId: text("reviewed_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
     rejectionReason: text("rejection_reason"),
@@ -1089,6 +1144,8 @@ export type Event = typeof events.$inferSelect;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
 export type Approval = typeof approvals.$inferSelect;
 export type Post = typeof posts.$inferSelect;
+export type PageCopyRow = typeof pageCopy.$inferSelect;
+export type MediaRow = typeof media.$inferSelect;
 export type ShowcaseListing = typeof showcaseListings.$inferSelect;
 export type NewShowcaseListing = typeof showcaseListings.$inferInsert;
 export type Cohort = typeof cohorts.$inferSelect;

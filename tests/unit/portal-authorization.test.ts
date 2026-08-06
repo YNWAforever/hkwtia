@@ -10,7 +10,7 @@ import {
   updateCompany,
   updateProfile,
   type PortalCommandDependencies,
-} from "@/lib/portal/commands";
+} from "@/lib/portal/command-core";
 
 const member: Extract<Actor, {kind: "member"}> = {kind: "member", userId: "user-a", profileId: "user-a"};
 const anonymous: Extract<Actor, {kind: "anonymous"}> = {kind: "anonymous", userId: null};

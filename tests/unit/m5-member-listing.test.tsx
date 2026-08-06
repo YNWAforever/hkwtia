@@ -2,7 +2,7 @@ import {render, screen} from "@testing-library/react";
 import {describe, expect, it, vi} from "vitest";
 
 import {ShowcaseListingForm} from "@/components/portal/showcase-listing-form";
-import {saveShowcaseDraft, submitShowcaseListing} from "@/lib/showcase/member-actions";
+import {saveShowcaseDraft, submitShowcaseListing} from "@/lib/showcase/member-core";
 import {listingInputFromFormData} from "@/lib/showcase/member-contract";
 import type {ShowcaseRepository} from "@/lib/db/repos/showcase";
 import {actorFor} from "@/tests/helpers/fakes";

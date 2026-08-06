@@ -56,7 +56,7 @@ describe("unsubscribe token", () => {
       .mockResolvedValueOnce("created")
       .mockResolvedValueOnce("existing");
     const post = createUnsubscribePost({
-      secret,
+      secrets: [secret],
       appUrl: "https://www.hkwtia.org",
       now: () => past,
       unsubscribeEmailMarketing,
@@ -77,7 +77,7 @@ describe("unsubscribe token", () => {
   it("rejects an invalid POST before repository access", async () => {
     const unsubscribeEmailMarketing = vi.fn();
     const post = createUnsubscribePost({
-      secret,
+      secrets: [secret],
       appUrl: "https://www.hkwtia.org",
       now: () => past,
       unsubscribeEmailMarketing,
@@ -95,7 +95,7 @@ describe("unsubscribe token", () => {
 
   it("redirects the confirmation form only to the token's localized success page", async () => {
     const post = createUnsubscribePost({
-      secret,
+      secrets: [secret],
       appUrl: "https://www.hkwtia.org",
       now: () => past,
       unsubscribeEmailMarketing: async () => "created",
@@ -120,7 +120,7 @@ describe("unsubscribe token", () => {
   it("accepts an application/json confirmation body", async () => {
     const unsubscribeEmailMarketing = vi.fn().mockResolvedValue("created");
     const post = createUnsubscribePost({
-      secret,
+      secrets: [secret],
       appUrl: "https://www.hkwtia.org",
       now: () => past,
       unsubscribeEmailMarketing,
@@ -140,7 +140,7 @@ describe("unsubscribe token", () => {
   it("rejects unsupported request media before repository access", async () => {
     const unsubscribeEmailMarketing = vi.fn();
     const post = createUnsubscribePost({
-      secret,
+      secrets: [secret],
       appUrl: "https://www.hkwtia.org",
       now: () => past,
       unsubscribeEmailMarketing,
@@ -160,7 +160,7 @@ describe("unsubscribe token", () => {
   it("rejects an oversized request body before parsing or repository access", async () => {
     const unsubscribeEmailMarketing = vi.fn();
     const post = createUnsubscribePost({
-      secret,
+      secrets: [secret],
       appUrl: "https://www.hkwtia.org",
       now: () => past,
       unsubscribeEmailMarketing,

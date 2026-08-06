@@ -1,9 +1,11 @@
+import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {redirect} from "next/navigation";
 
 import {JoinForm} from "@/components/join/join-form";
 import {JoinProgress} from "@/components/join/progress";
 import type {AppLocale} from "@/i18n/routing";
+import {buildPageMetadata} from "@/lib/metadata";
 import {getActor} from "@/lib/auth/actor";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {localizedPath} from "@/lib/urls";
@@ -13,6 +15,19 @@ import {saveProfile} from "../actions";
 type Props = {params: Promise<{locale: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>};
 function value(input: string | string[] | undefined) { return typeof input === "string" ? input : undefined; }
 function planCode(input: string | undefined): PlanCode | null { try { return getPlan(input).code; } catch { return null; } }
+
+// Mid-flow, member-specific step: keep it out of search results.
+export async function generateMetadata({params}: Props): Promise<Metadata> {
+  const {locale} = await params;
+  const t = await getTranslations({locale, namespace: "Join"});
+  return buildPageMetadata({
+    locale: locale as AppLocale,
+    pathname: "/join/profile",
+    title: t("profileTitle"),
+    description: t("profileDescription"),
+    index: false,
+  });
+}
 
 export default async function ProfilePage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;

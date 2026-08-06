@@ -341,8 +341,7 @@
     "title": "在香港創科社群找到你的定位。",
     "summary": "選擇配合你參與、成長及貢獻方式的會員級別。",
     "tiersTitle": "會員級別",
-    "tiersIntro": "以年費為主要顯示；只有個人及初創級別提供月費選項。",
-    "comingSoon": "M1 將推出自助入會；現階段請聯絡 WTIA 申請。",
+    "tiersIntro": "以年費為主要顯示；初創級別另提供月費選項。",
     "joinAction": "選擇此計劃",
     "benefits": {
       "network": "社群及交流機會",
@@ -356,12 +355,6 @@
         "cadence": "毋須年費",
         "description": "接收 WTIA 公開消息及機遇。"
       },
-      "individual": {
-        "name": "個人",
-        "price": "港幣 500 元",
-        "cadence": "每年 · 可選港幣 50 元月費",
-        "description": "適合拓展科技網絡的專業人士。"
-      },
       "startup": {
         "name": "初創",
         "price": "港幣 1,200 元",
@@ -374,12 +367,6 @@
         "cadence": "每年",
         "description": "適合積極參與創科生態的成熟機構。"
       },
-      "platinum": {
-        "name": "白金",
-        "price": "港幣 4,800 元",
-        "cadence": "每年",
-        "description": "適合尋求深度業界參與的機構。"
-      },
       "patron": {
         "name": "贊助人",
         "price": "聯絡我們",
@@ -390,12 +377,12 @@
     "faqTitle": "會員常見問題",
     "faq": {
       "0": {
-        "question": "何時可以網上入會？",
-        "answer": "自助登記及付款計劃於 M1 推出；現階段 WTIA 可協助處理申請。"
+        "question": "可以網上入會嗎？",
+        "answer": "可以。社群、初創及企業會籍均可於網上申請及付款；贊助人會籍由聯絡查詢開始。"
       },
       "1": {
         "question": "哪些級別提供月費？",
-        "answer": "只有個人及初創級別提供月費選項。"
+        "answer": "初創級別提供月費選項，其他收費級別按年收費。"
       },
       "2": {
         "question": "如何申請贊助人會籍？",
@@ -406,6 +393,8 @@
   "Join": {
     "backToMembership": "返回會員計劃",
     "title": "加入 WTIA",
+    "metaTitle": "加入 WTIA｜會籍申請",
+    "metaDescription": "網上申請 WTIA 會籍：選擇級別、建立帳戶，加入香港創科社群。",
     "authDescription": "輸入電郵地址，我們會傳送安全登入連結，讓你返回此申請。",
     "magicLinkSent": "請查閱電郵中的安全登入連結；連結會帶你返回此申請。",
     "sendMagicLink": "傳送安全登入連結",
@@ -448,6 +437,7 @@
       "required": "請填寫此必填欄位。",
       "email": "請輸入有效電郵地址。",
       "auth": "未能傳送登入連結，請再試一次。",
+      "rateLimited": "登入電郵要求次數過多，請等待數分鐘後再試。",
       "save": "未能儲存申請，請再試一次。",
       "company": "請使用你有權管理的公司。",
       "profile": "提交公司資料前，請先完成個人資料。",
@@ -456,11 +446,11 @@
     "status": {
       "complete": {
         "title": "歡迎加入 WTIA",
-        "description": "你的社群會籍已啟用。會員平台將於 M1 下一步開放。"
+        "description": "你的社群會籍已啟用。立即前往會員專區完善個人檔案並探索會員權益。"
       },
       "checkout": {
         "title": "申請已儲存",
-        "description": "你的付費會籍已可進入安全付款程序；付款設定將於下一個 M1 任務完成。"
+        "description": "你的付費會籍已可進入安全付款程序。"
       },
       "review": {
         "title": "申請審批中",
@@ -472,22 +462,22 @@
     "cpai": {
       "title": "CPAI",
       "description": "支援應用創新的 WTIA 計劃。",
-      "status": "計劃詳情正在整理。"
+      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。"
     },
     "hkict": {
       "title": "香港資訊及通訊科技獎",
       "description": "表揚香港科技界的卓越成果。",
-      "status": "計劃詳情正在整理。"
+      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。"
     },
     "tct": {
       "title": "TCT",
       "description": "連接科技、能力與人才。",
-      "status": "計劃詳情正在整理。"
+      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。"
     },
     "asa": {
       "title": "亞洲智能應用程式大獎",
       "description": "嘉許亞洲優秀智能應用程式。",
-      "status": "計劃詳情正在整理。"
+      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。"
     }
   },
   "LaunchPad": {
@@ -628,24 +618,172 @@
   },
   "Privacy": {
     "metaTitle": "私隱 | WTIA",
-    "metaDescription": "了解 M0 公開網站如何處理資料。",
+    "metaDescription": "WTIA 平台如何收集、使用及保存你的資料。",
     "eyebrow": "私隱",
-    "title": "M0 的私隱說明",
-    "description": "清楚了解這個公開預覽版本會及不會收集甚麼資料。",
-    "summary": "M0 沒有帳戶、表格或付款功能。"
+    "title": "我們如何處理你的資料",
+    "description": "WTIA 平台收集甚麼資料、由誰處理，以及保存多久。",
+    "sections": [
+      {
+        "heading": "適用範圍",
+        "body": [
+          "本頁說明 WTIA 網站及會員平台如何處理個人資料，涵蓋公開頁面、入會申請、會員專區、公司席位、會員展示平台、Launch Pad 計劃，以及 WTIA Concierge 助理。",
+          "如對你的資料有任何疑問，請電郵至 contact@hkwtia.org 與 WTIA 聯絡。"
+        ],
+        "items": []
+      },
+      {
+        "heading": "你提供的資料",
+        "body": ["你在申請、登入或使用會員功能時會提供以下資料。"],
+        "items": [
+          "入會申請及個人檔案：姓名、電郵地址、電話號碼、職銜、慣用語言，以及是否在會員名錄中顯示。",
+          "公司紀錄：法定名稱及顯示名稱、網址、行業、規模及簡介。",
+          "展示平台項目及引薦查詢：姓名、電郵地址、機構名稱及查詢內容。",
+          "Launch Pad 申請：目標市場及準備情況的回覆。",
+          "Concierge 對話：你發送的訊息，以及在需要團隊跟進時自願提供的聯絡電郵。"
+        ]
+      },
+      {
+        "heading": "自動收集的資料",
+        "body": [],
+        "items": [
+          "維持登入狀態的工作階段 Cookie，以及將匿名 Concierge 對話與你的瀏覽器連結的簽署 Cookie。",
+          "由主機供應商提供的網絡位址，用於限制公開表格及 Concierge 的請求頻率，防止自動濫用。",
+          "展示平台項目的瀏覽次數，紀錄時不會識別瀏覽者身分。"
+        ]
+      },
+      {
+        "heading": "付款",
+        "body": [
+          "會籍付款由 Stripe 處理。WTIA 只儲存 Stripe 客戶及訂閱識別碼、你的計劃、狀態及帳單週期，以便管理會籍。信用卡號碼在 Stripe 系統輸入，WTIA 不會儲存。"
+        ],
+        "items": []
+      },
+      {
+        "heading": "電郵及 WhatsApp",
+        "body": [
+          "交易及推廣電郵透過 Resend 發送，每封訊息都會記錄於發送紀錄，方便職員核實。所有推廣電郵均設有取消訂閱連結；取消訂閱後會記錄抑制紀錄，停止再向該地址發送推廣電郵。",
+          "WhatsApp 訊息透過 WOZTELL 發送，只會發給已選擇接收的會員。你可隨時取消。"
+        ],
+        "items": []
+      },
+      {
+        "heading": "WTIA Concierge",
+        "body": [
+          "Concierge 對話會被儲存，以便延續對話及在問題升級時由職員跟進。助理不能更改會籍、帳單、權限、席位或審批決定；它草擬的任何電郵都必須先經職員批准才會發出。",
+          "超過十二個月的對話訊息會被刪除，相關的執行紀錄亦會作遮蔽處理。"
+        ],
+        "items": []
+      },
+      {
+        "heading": "資料保存期",
+        "body": [
+          "會籍、帳單及審計紀錄會在你成為會員期間保存，並在 WTIA 管理會務及履行紀錄保存責任所需的期間內繼續保存。Concierge 對話訊息會在十二個月後刪除。抑制紀錄會予以保留，以確保取消訂閱的要求持續生效。"
+        ],
+        "items": []
+      },
+      {
+        "heading": "你的選擇",
+        "body": [],
+        "items": [
+          "隨時在會員專區更新個人檔案及公司資料。",
+          "選擇是否在會員名錄中顯示你的檔案。",
+          "透過任何推廣電郵中的連結取消訂閱。",
+          "取消 WhatsApp 接收設定。",
+          "根據《個人資料（私隱）條例》，可電郵至 contact@hkwtia.org 要求查閱、改正或刪除你的個人資料。"
+        ]
+      },
+      {
+        "heading": "服務供應商",
+        "body": ["WTIA 使用以下供應商營運本平台。"],
+        "items": [
+          "Neon — 資料庫寄存及帳戶認證。",
+          "Stripe — 會籍付款。",
+          "Resend — 交易及推廣電郵。",
+          "WOZTELL — WhatsApp 訊息發送。",
+          "Vercel — 網站寄存。",
+          "Cloudflare Turnstile — 已啟用時用於公開表格的機械人防護。",
+          "OpenAI 或 Anthropic — 按所設定的模型，提供 Concierge 背後的語言模型。"
+        ]
+      },
+      {
+        "heading": "聯絡我們",
+        "body": [
+          "有關個人資料的查詢、要求及投訴，可電郵至 contact@hkwtia.org，或郵寄至香港觀塘鴻圖道 73-75 號 KOHO 4 樓 WTIA。"
+        ],
+        "items": []
+      }
+    ]
   },
   "AiTransparency": {
     "metaTitle": "AI 透明度 | WTIA",
-    "metaDescription": "了解 WTIA 公開網站的 AI 發展路線。",
+    "metaDescription": "WTIA Concierge 的運作方式、能力範圍，以及何時交由真人接手。",
     "eyebrow": "AI 透明度",
-    "title": "AI 如何融入 WTIA 路線圖",
-    "description": "M0 只規劃 AI 代理，尚未啟用。",
-    "summary": "WTIA AI 代理計劃於後續里程碑推出；此公開網站目前沒有啟用 AI 代理。",
-    "aiOpsLink": "查看 AI-Ops 預覽"
+    "title": "WTIA Concierge 如何運作",
+    "description": "我們的 AI 助理能做甚麼、不能做甚麼，以及你的對話如何被處理。",
+    "sections": [
+      {
+        "heading": "Concierge 已經啟用",
+        "body": [
+          "WTIA Concierge 是雙語助理，於本網站及 WhatsApp 提供服務，以英文及繁體中文解答有關會籍、活動、計劃及支援的問題。"
+        ],
+        "items": []
+      },
+      {
+        "heading": "能力與限制",
+        "body": ["助理只能透過一組固定並已核准的工具運作。"],
+        "items": [
+          "可搜尋已核准的 WTIA 資料、列出即將舉行的活動、講解資助計劃，並在你登入後讀取你自己的會籍資料。",
+          "可為 WTIA 團隊建立跟進工作。",
+          "不能更改會籍、帳單、權限、席位或審批決定。",
+          "不能發送電郵。它草擬的任何電郵都必須先經職員批准。"
+        ]
+      },
+      {
+        "heading": "有根據的回答與引用",
+        "body": [
+          "助理只會引用其工具傳回的來源，不會虛構連結。當缺乏足夠可靠的來源時，它會將問題交給 WTIA 團隊，而不會猜測作答。"
+        ],
+        "items": []
+      },
+      {
+        "heading": "何時交由真人處理",
+        "body": ["遇到以下情況，助理會轉交 WTIA 職員而不自行作答："],
+        "items": [
+          "付款、退款或帳單爭議",
+          "投訴或法律事宜",
+          "私隱或安全要求",
+          "更改受保護的會員資料",
+          "信心不足的回答",
+          "工具或服務故障"
+        ]
+      },
+      {
+        "heading": "安全",
+        "body": [
+          "助理將檢索到的文件及工具結果視為不可信的資料，而非指令。文件內的文字不能改變它的行為，它亦會拒絕試圖凌駕 WTIA 規則的指示。"
+        ],
+        "items": []
+      },
+      {
+        "heading": "你的對話資料",
+        "body": [
+          "訊息會被儲存，以便延續對話及在問題升級時由職員跟進。若你提供聯絡電郵，該電郵只會用於團隊回覆。超過十二個月的訊息會被刪除，相關執行紀錄亦會作遮蔽處理。詳情請參閱私隱頁面。"
+        ],
+        "items": []
+      },
+      {
+        "heading": "模型與監督",
+        "body": [
+          "Concierge 使用所設定的 OpenAI 或 Anthropic 模型運作。平台不綁定單一供應商，WTIA 可更換模型供應商而不改變助理的行為。使用量、成本及回答質素均有紀錄並公開匯報。"
+        ],
+        "items": []
+      }
+    ],
+    "aiOpsLink": "查看 AI-Ops 儀表板"
   },
   "NotFound": {
     "title": "找不到頁面",
-    "description": "頁面可能已移動，或不屬於公開預覽版本。",
+    "description": "頁面可能已移動，或網址有誤。",
     "home": "返回首頁",
     "contact": "聯絡 WTIA"
   },
@@ -862,6 +1000,9 @@
       "segments": "分群",
       "members": "會員",
       "atRisk": "高風險",
+      "news": "最新消息",
+      "pageCopy": "頁面文案",
+      "media": "媒體",
       "events": "活動",
       "listingsReview": "展示頁審核",
       "cohorts": "啟航計劃",
@@ -876,6 +1017,9 @@
       "caption": "公司展示頁",
       "company": "公司",
       "slug": "Slug",
+      "logo": "標誌",
+      "logoNone": "沒有標誌",
+      "saveLogo": "儲存標誌",
       "status": "狀態",
       "premium": "精選",
       "publish": "發布",
@@ -1037,6 +1181,83 @@
         "attended": "已出席",
         "noShow": "未出席"
       }
+    },
+    "media": {
+      "eyebrow": "媒體",
+      "title": "媒體庫",
+      "description": "登記網站可顯示的圖片，並提供中英文替代文字。",
+      "existing": "已登記圖片",
+      "empty": "尚未登記任何圖片。",
+      "url": "圖片路徑",
+      "urlHelp": "本網站檔案的路徑，例如 /images/showcase/example.png。外部網站寄存的圖片無法顯示：每次瀏覽都需由本站抓取，而其內容可在審批後變更。只支援 PNG、JPEG、WebP 及 AVIF —— 不支援 SVG。",
+      "altEn": "替代文字（英文）",
+      "altZh": "替代文字（中文）",
+      "altHelp": "替代文字讓看不到圖片的人了解內容。請描述圖片顯示的內容，而非說明這是一張圖片。",
+      "preview": "預覽",
+      "back": "返回媒體庫",
+      "create": "登記圖片",
+      "save": "儲存變更",
+      "saving": "儲存中…",
+      "createSuccess": "圖片已登記。",
+      "updateSuccess": "圖片已更新。",
+      "urlInvalid": "請使用本網站檔案的路徑，並以 .png、.jpg、.webp 或 .avif 結尾。",
+      "urlConflict": "該圖片已經登記。",
+      "validation": "請檢查各欄位。",
+      "error": "發生錯誤，請再試一次。"
+    },
+    "pageCopy": {
+      "eyebrow": "頁面文案",
+      "title": "頁面文案",
+      "description": "編輯公開市場推廣頁面的文字。版面與結構維持不變。",
+      "sectionsTitle": "可編輯頁面",
+      "fieldCount": "{count, plural, other {# 個欄位}}",
+      "overrideCount": "{count, plural, =0 {未有修改} other {# 項修改}}",
+      "editDescription": "每個輸入框對應公開頁面上的一句文字。留空即沿用網站預設文案。",
+      "back": "返回頁面文案",
+      "english": "英文",
+      "chinese": "中文",
+      "revertHint": "空白輸入框內的淺色文字是目前顯示的文案。清空輸入框即可回復預設。",
+      "save": "儲存文案",
+      "saving": "儲存中…",
+      "saveSuccess": "頁面文案已儲存，公開頁面稍後更新。",
+      "saveUnchanged": "沒有需要儲存的改動。",
+      "validation": "部分文案無法儲存，請檢查標示的欄位。",
+      "error": "發生錯誤，請再試一次。",
+      "namespaces": {
+        "Home": "主頁",
+        "About": "關於 WTIA",
+        "Chairman": "主席的話",
+        "Committees": "委員會",
+        "Contact": "聯絡我們",
+        "programs": "計劃",
+        "Membership": "會籍",
+        "Privacy": "私隱聲明",
+        "AiTransparency": "AI 透明度"
+      }
+    },
+    "news": {
+      "eyebrow": "最新消息",
+      "title": "最新消息",
+      "description": "撰寫及發布 WTIA 雙語消息。",
+      "existing": "已發布及草稿",
+      "empty": "尚未有消息。",
+      "slug": "網址代碼",
+      "titleEn": "標題（英文）",
+      "titleZh": "標題（中文）",
+      "author": "作者",
+      "bodyMdx": "內文",
+      "bodyHelp": "支援格式：## 標題、- 項目、**粗體**，以及連向 WTIA 頁面的連結，例如 [會員計劃](/membership)。不支援圖片及外部連結。",
+      "published": "已發布",
+      "statusPublished": "已發布",
+      "statusDraft": "草稿",
+      "create": "建立消息",
+      "save": "儲存變更",
+      "saving": "儲存中…",
+      "createSuccess": "已建立消息。",
+      "updateSuccess": "已更新消息。",
+      "slugConflict": "此網址代碼已被使用。",
+      "validation": "請檢查各欄位。",
+      "error": "出現問題，請再試一次。"
     },
     "approvals": {
       "eyebrow": "審批佇列",

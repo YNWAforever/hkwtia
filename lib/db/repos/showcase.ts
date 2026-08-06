@@ -1,6 +1,6 @@
 import "server-only";
 
-import {and, asc, desc, eq, ilike, or, sql} from "drizzle-orm";
+import {and, asc, desc, eq, getTableColumns, ilike, or, sql} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/actor";
@@ -8,6 +8,7 @@ import {getDb, type Database} from "@/lib/db/repos/common";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {
   leads,
+  media,
   showcaseListings,
   type Lead,
   type NewLead,
@@ -19,21 +20,38 @@ import {
   type ListingInput,
   parseShowcaseFilters,
   transitionListingStatus,
+  type PublicLogoJoin,
   type ShowcaseFilters,
 } from "@/lib/showcase/contracts";
 
+/**
+ * A published listing with its curated logo resolved. The registry columns are
+ * optional so every existing in-memory test double stays valid.
+ */
+export type PublicShowcaseRow = ShowcaseListing & PublicLogoJoin;
+
+const publicLogoColumns = {
+  logoMediaUrl: media.url,
+  logoMediaAltEn: media.altEn,
+  logoMediaAltZh: media.altZh,
+} as const;
+
 const listingIdSchema = z.string().uuid().or(z.string().min(1));
 const slugSchema = z.string().min(2).max(96).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+// An empty select clears the logo; anything else must be a real registry id.
+const mediaIdSchema = z.union([z.literal(""), z.null()]).transform(() => null)
+  .or(z.string().uuid());
 
 export type ShowcaseStore = Readonly<{
   getByCompany: (companyId: string) => Promise<ShowcaseListing | null>;
   getById: (id: string) => Promise<ShowcaseListing | null>;
   upsert: (companyId: string, input: ListingInput, status: "draft" | "pending_review") => Promise<ShowcaseListing>;
-  listForReview: () => Promise<readonly ShowcaseListing[]>;
+  listForReview: () => Promise<readonly PublicShowcaseRow[]>;
   setStatus: (id: string, status: "published" | "rejected" | "pending_review", reviewerId: string, rejectionReason?: string | null) => Promise<ShowcaseListing | null>;
   setPremium: (id: string, premium: boolean) => Promise<ShowcaseListing | null>;
-  listPublished: (filters: ShowcaseFilters) => Promise<readonly ShowcaseListing[]>;
-  getPublishedBySlug: (slug: string) => Promise<ShowcaseListing | null>;
+  setLogoMedia: (id: string, mediaId: string | null) => Promise<ShowcaseListing | null>;
+  listPublished: (filters: ShowcaseFilters) => Promise<readonly PublicShowcaseRow[]>;
+  getPublishedBySlug: (slug: string) => Promise<PublicShowcaseRow | null>;
   listPublishedSlugs: () => Promise<readonly string[]>;
   incrementViews: (slug: string) => Promise<void>;
   insertLead: (input: NewLead) => Promise<Lead | null>;
@@ -48,18 +66,19 @@ export type ShowcaseRepository = Readonly<{
   getByCompany: (actor: Actor, companyId: string) => Promise<ShowcaseListing | null>;
   upsertDraft: (actor: Actor, companyId: string, input: unknown, status?: "draft" | "pending_review") => Promise<ShowcaseListing>;
   submitForReview: (actor: Actor, companyId: string, input: unknown) => Promise<ShowcaseListing>;
-  listForReview: (actor: AdminActor) => Promise<readonly ShowcaseListing[]>;
+  listForReview: (actor: AdminActor) => Promise<readonly PublicShowcaseRow[]>;
   publish: (actor: AdminActor, id: string) => Promise<ShowcaseListing | null>;
   reject: (actor: AdminActor, id: string, reason: string) => Promise<ShowcaseListing | null>;
   setPremium: (actor: AdminActor, id: string, premium: boolean) => Promise<ShowcaseListing | null>;
-  listPublished: (filters: ShowcaseFilters | Readonly<Record<string, unknown>>) => Promise<readonly ShowcaseListing[]>;
-  getPublishedBySlug: (slug: string) => Promise<ShowcaseListing | null>;
+  setLogoMedia: (actor: AdminActor, id: string, mediaId: unknown) => Promise<ShowcaseListing | null>;
+  listPublished: (filters: ShowcaseFilters | Readonly<Record<string, unknown>>) => Promise<readonly PublicShowcaseRow[]>;
+  getPublishedBySlug: (slug: string) => Promise<PublicShowcaseRow | null>;
   listPublishedSlugs: () => Promise<readonly string[]>;
   recordView: (slug: string) => Promise<void>;
   createLead: (input: NewLead) => Promise<Lead | null>;
 }>;
 
-function publicSort(rows: readonly ShowcaseListing[]): ShowcaseListing[] {
+function publicSort<T extends ShowcaseListing>(rows: readonly T[]): T[] {
   return rows
     .filter((row) => row.status === "published")
     .slice()
@@ -148,7 +167,13 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseS
     },
     async listForReview() {
       const database = await loadDatabase();
-      return database.select().from(showcaseListings).orderBy(desc(showcaseListings.updatedAt), asc(showcaseListings.slug));
+      // Joined so staff can see the picture they are publishing, not just its
+      // slug — the logo goes out under the association's brand.
+      return database
+        .select({...getTableColumns(showcaseListings), ...publicLogoColumns})
+        .from(showcaseListings)
+        .leftJoin(media, eq(showcaseListings.logoMediaId, media.id))
+        .orderBy(desc(showcaseListings.updatedAt), asc(showcaseListings.slug));
     },
     async setStatus(id, status, reviewerId, rejectionReason = null) {
       const database = await loadDatabase();
@@ -163,6 +188,12 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseS
     async setPremium(id, premium) {
       const database = await loadDatabase();
       return (await database.update(showcaseListings).set({premium, updatedAt: new Date()}).where(eq(showcaseListings.id, id)).returning())[0] ?? null;
+    },
+    async setLogoMedia(id, mediaId) {
+      const database = await loadDatabase();
+      return (await database.update(showcaseListings)
+        .set({logoMediaId: mediaId, updatedAt: new Date()})
+        .where(eq(showcaseListings.id, id)).returning())[0] ?? null;
     },
     async listPublished(filters) {
       const database = await loadDatabase();
@@ -182,13 +213,21 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseS
           ilike(showcaseListings.descriptionZhHk, `%${filters.q}%`),
         )!);
       }
-      return database.select().from(showcaseListings)
+      return database
+        .select({...getTableColumns(showcaseListings), ...publicLogoColumns})
+        .from(showcaseListings)
+        .leftJoin(media, eq(showcaseListings.logoMediaId, media.id))
         .where(and(...conditions))
         .orderBy(desc(showcaseListings.premium), asc(showcaseListings.category), asc(showcaseListings.nameEn), asc(showcaseListings.slug));
     },
     async getPublishedBySlug(slug) {
       const database = await loadDatabase();
-      return (await database.select().from(showcaseListings).where(and(eq(showcaseListings.slug, slug), eq(showcaseListings.status, "published"))).limit(1))[0] ?? null;
+      return (await database
+        .select({...getTableColumns(showcaseListings), ...publicLogoColumns})
+        .from(showcaseListings)
+        .leftJoin(media, eq(showcaseListings.logoMediaId, media.id))
+        .where(and(eq(showcaseListings.slug, slug), eq(showcaseListings.status, "published")))
+        .limit(1))[0] ?? null;
     },
     async listPublishedSlugs() {
       const database = await loadDatabase();
@@ -273,6 +312,16 @@ export function createShowcaseRepository(
     async setPremium(actor, id, premium) {
       requireAdmin(actor);
       return store.setPremium(listingIdSchema.parse(id), Boolean(premium));
+    },
+    /**
+     * Only staff may choose what a listing displays. The member-supplied
+     * `logoReference` stays free text feeding the JSON-LD sink; the rendered
+     * picture always comes from a curated registry row.
+     */
+    async setLogoMedia(actor, id, mediaId) {
+      requireAdmin(actor);
+      const parsed = mediaIdSchema.parse(mediaId);
+      return store.setLogoMedia(listingIdSchema.parse(id), parsed);
     },
     async listPublished(filters) {
       const parsed = parseShowcaseFilters(filters);

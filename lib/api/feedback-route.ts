@@ -8,7 +8,17 @@ import {getActor} from "@/lib/auth/actor";
 import {serverEnv} from "@/lib/config/env";
 import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
 import type {ConversationOwner} from "@/lib/db/repos/conversations";
-import {isSameOrigin} from "@/lib/security/request-origin";
+import {BoundedBodyError, readBoundedText} from "@/lib/security/bounded-body";
+import {createInMemoryRateLimiter, type RateLimiter} from "@/lib/security/rate-limit";
+import {clientIpFromHeaders, isSameOrigin} from "@/lib/security/request-origin";
+
+// The payload is {score: 1..5}. A kilobyte is already generous.
+const MAX_BODY_BYTES = 1_024;
+
+// Matches the concierge route's shape. Feedback is a low-value write behind an
+// origin and cookie check, so an unresolvable IP shares one bucket rather than
+// being refused outright.
+const defaultRateLimiter = createInMemoryRateLimiter({limit: 30, windowMs: 60_000});
 
 const feedbackSchema = z.object({
   score: z.number().int().min(1).max(5),
@@ -17,6 +27,7 @@ const feedbackSchema = z.object({
 type HandlerDependencies = Readonly<{
   expectedOrigin: string;
   cookieSecret: string;
+  rateLimiter?: RateLimiter;
   getActor: () => Promise<Readonly<{profileId: string}> | null>;
   recordFeedback: (
     owner: ConversationOwner,
@@ -72,12 +83,24 @@ export function createFeedbackPostHandler(
       );
     }
 
+    const limit = (dependencies.rateLimiter ?? defaultRateLimiter)
+      .check(`feedback:${clientIpFromHeaders(request.headers) ?? "unknown"}`);
+    if (!limit.allowed) {
+      return Response.json({error: "RATE_LIMITED"}, {
+        status: 429,
+        headers: {"retry-after": String(limit.retryAfterSeconds)},
+      });
+    }
+
     let score: number;
     let runId: string;
     try {
-      score = feedbackSchema.parse(await request.json()).score;
+      score = feedbackSchema.parse(JSON.parse(await readBoundedText(request, MAX_BODY_BYTES))).score;
       runId = z.string().uuid().parse((await context.params).id);
-    } catch {
+    } catch (error) {
+      if (error instanceof BoundedBodyError && error.reason === "TOO_LARGE") {
+        return Response.json({error: "PAYLOAD_TOO_LARGE"}, {status: 413});
+      }
       return Response.json({error: "INVALID_REQUEST"}, {status: 400});
     }
 

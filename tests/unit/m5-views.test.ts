@@ -39,4 +39,37 @@ describe("showcase view tracker", () => {
     expect(response.status).toBe(204);
     expect(showcaseRepository.recordView).not.toHaveBeenCalled();
   });
+
+  it("counts one view when a single client varies its user agent", async () => {
+    showcaseRepository.recordView.mockClear();
+    showcaseRepository.recordView.mockResolvedValue(undefined);
+    const params = Promise.resolve({slug: "ua-rotation-listing"});
+    const beacon = (userAgent: string) => GET(
+      new Request("https://hkwtia.test/api/showcase/ua-rotation-listing/view", {
+        headers: {"x-vercel-forwarded-for": "203.0.113.44", "user-agent": userAgent},
+      }),
+      {params},
+    );
+
+    // The user agent is attacker-controlled. When it was part of the viewer
+    // key, each variation minted a fresh key and the debounce never fired.
+    await beacon("Mozilla/5.0 (one)");
+    await beacon("Mozilla/5.0 (two)");
+    await beacon("Mozilla/5.0 (three)");
+
+    expect(showcaseRepository.recordView).toHaveBeenCalledOnce();
+  });
+
+  it("records nothing when no trusted client IP is present", async () => {
+    showcaseRepository.recordView.mockClear();
+    showcaseRepository.recordView.mockResolvedValue(undefined);
+
+    const response = await GET(
+      new Request("https://hkwtia.test/api/showcase/no-ip-listing/view"),
+      {params: Promise.resolve({slug: "no-ip-listing"})},
+    );
+
+    expect(response.status).toBe(204);
+    expect(showcaseRepository.recordView).not.toHaveBeenCalled();
+  });
 });

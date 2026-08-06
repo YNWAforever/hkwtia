@@ -340,8 +340,7 @@
     "title": "Find your place in Hong Kong's technology community.",
     "summary": "Choose the membership tier that fits how you participate, grow and contribute.",
     "tiersTitle": "Membership tiers",
-    "tiersIntro": "Annual membership is shown first. Monthly options are available only for Individual and Startup.",
-    "comingSoon": "Self-service joining arrives in M1. Contact WTIA for current applications.",
+    "tiersIntro": "Annual membership is shown first. A monthly option is available for the Startup tier.",
     "joinAction": "Choose this plan",
     "benefits": {
       "network": "Community and networking access",
@@ -355,12 +354,6 @@
         "cadence": "No annual fee",
         "description": "Stay connected to public WTIA news and opportunities."
       },
-      "individual": {
-        "name": "Individual",
-        "price": "HKD 500",
-        "cadence": "per year · HKD 50 monthly available",
-        "description": "For professionals building their technology network."
-      },
       "startup": {
         "name": "Startup",
         "price": "HKD 1,200",
@@ -373,12 +366,6 @@
         "cadence": "per year",
         "description": "For established organisations engaging the ecosystem."
       },
-      "platinum": {
-        "name": "Platinum",
-        "price": "HKD 4,800",
-        "cadence": "per year",
-        "description": "For organisations seeking deeper industry participation."
-      },
       "patron": {
         "name": "Patron",
         "price": "Contact us",
@@ -389,12 +376,12 @@
     "faqTitle": "Membership FAQ",
     "faq": {
       "0": {
-        "question": "When will online joining be available?",
-        "answer": "Self-service sign-up and payment are planned for M1. WTIA can assist with applications in the meantime."
+        "question": "Can I join online?",
+        "answer": "Yes. Community, Startup and Corporate membership can be applied for and paid online. Patron membership begins with a contact request."
       },
       "1": {
         "question": "Which tiers offer monthly payment?",
-        "answer": "Monthly presentation is available only for Individual and Startup tiers."
+        "answer": "Monthly payment is available for the Startup tier. Other paid tiers are billed annually."
       },
       "2": {
         "question": "How is Patron membership arranged?",
@@ -405,6 +392,8 @@
   "Join": {
     "backToMembership": "Back to membership",
     "title": "Join WTIA",
+    "metaTitle": "Join WTIA | Membership application",
+    "metaDescription": "Apply for WTIA membership online. Choose a tier, create your account and join Hong Kong's technology community.",
     "authDescription": "Enter your email and we will send a secure sign-in link that returns you to this application.",
     "magicLinkSent": "Check your inbox for your secure sign-in link. It will return you to this application.",
     "sendMagicLink": "Send secure sign-in link",
@@ -447,6 +436,7 @@
       "required": "Complete this required field.",
       "email": "Enter a valid email address.",
       "auth": "We could not send the sign-in link. Please try again.",
+      "rateLimited": "Too many sign-in emails have been requested. Wait a few minutes and try again.",
       "save": "We could not save your application. Please try again.",
       "company": "Use a company that you are allowed to manage.",
       "profile": "Complete your profile before submitting company details.",
@@ -455,11 +445,11 @@
     "status": {
       "complete": {
         "title": "Welcome to WTIA",
-        "description": "Your Community membership is active. Your member portal will be available in the next step of M1."
+        "description": "Your Community membership is active. Open your member portal to complete your profile and explore member benefits."
       },
       "checkout": {
         "title": "Application saved",
-        "description": "Your paid membership is ready for secure checkout. Payment setup arrives in the next M1 task."
+        "description": "Your paid membership is ready for secure checkout."
       },
       "review": {
         "title": "Application under review",
@@ -471,22 +461,22 @@
     "cpai": {
       "title": "CPAI",
       "description": "A focused WTIA programme supporting applied innovation.",
-      "status": "Programme details are being prepared for a later milestone."
+      "status": "Contact WTIA for the current programme timetable and how to take part."
     },
     "hkict": {
       "title": "HKICT Awards",
       "description": "Recognising excellence across Hong Kong's technology sector.",
-      "status": "Programme details are being prepared for a later milestone."
+      "status": "Contact WTIA for the current programme timetable and how to take part."
     },
     "tct": {
       "title": "TCT",
       "description": "Connecting technology, capability and talent.",
-      "status": "Programme details are being prepared for a later milestone."
+      "status": "Contact WTIA for the current programme timetable and how to take part."
     },
     "asa": {
       "title": "Asia Smart App Awards",
       "description": "Celebrating outstanding smart applications across Asia.",
-      "status": "Programme details are being prepared for a later milestone."
+      "status": "Contact WTIA for the current programme timetable and how to take part."
     }
   },
   "LaunchPad": {
@@ -627,24 +617,172 @@
   },
   "Privacy": {
     "metaTitle": "Privacy | WTIA",
-    "metaDescription": "How WTIA handles information in the M0 public site.",
+    "metaDescription": "How the WTIA platform collects, uses and retains your information.",
     "eyebrow": "Privacy",
-    "title": "Privacy in M0",
-    "description": "A clear summary of what this public preview does and does not collect.",
-    "summary": "M0 has no accounts, forms, or payments."
+    "title": "How we handle your information",
+    "description": "What the WTIA platform collects, who processes it, and how long it is kept.",
+    "sections": [
+      {
+        "heading": "What this covers",
+        "body": [
+          "This page describes how the WTIA website and member platform handle personal information. It covers the public pages, membership applications, the member portal, company seats, the member Showcase, the Launch Pad programme and the WTIA Concierge assistant.",
+          "For any question about your information, contact WTIA at contact@hkwtia.org."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Information you give us",
+        "body": ["You provide information when you apply, sign in, or use member features."],
+        "items": [
+          "Membership application and profile: your name, email address, phone number, job title, preferred language, and whether you appear in the member directory.",
+          "Company records: legal and display name, website, industry, size band and description.",
+          "Showcase listings and introduction requests: your name, email address, organisation and message.",
+          "Launch Pad applications: your target market and readiness responses.",
+          "Concierge conversations: the messages you send, and an optional contact email if you ask the team to follow up."
+        ]
+      },
+      {
+        "heading": "Information collected automatically",
+        "body": [],
+        "items": [
+          "A session cookie that keeps you signed in, and a signed cookie that links an anonymous Concierge conversation to your browser.",
+          "The network address reported by our hosting provider, used to rate-limit public forms and the Concierge against automated abuse.",
+          "Showcase listing view counts, recorded without identifying the viewer."
+        ]
+      },
+      {
+        "heading": "Payments",
+        "body": [
+          "Membership payments are handled by Stripe. WTIA stores the Stripe customer and subscription identifiers, your plan, status and billing period so we can administer your membership. Card numbers are entered on Stripe's systems and are not stored by WTIA."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Email and WhatsApp",
+        "body": [
+          "Transactional and campaign email is delivered through Resend, and each message is recorded in a delivery log so staff can confirm what was sent. Every marketing email includes an unsubscribe link; unsubscribing records a suppression that stops further marketing email to that address.",
+          "WhatsApp messages are delivered through WOZTELL and are only sent to members who have opted in. You can withdraw that opt-in at any time."
+        ],
+        "items": []
+      },
+      {
+        "heading": "The WTIA Concierge",
+        "body": [
+          "Concierge conversations are stored so a conversation can continue and so staff can follow up when a question is escalated. The assistant cannot change membership, billing, roles, seats or approval decisions, and any email it drafts is held for staff approval before anything is sent.",
+          "Conversation messages older than twelve months are deleted and the associated run records are redacted."
+        ],
+        "items": []
+      },
+      {
+        "heading": "How long we keep information",
+        "body": [
+          "Membership, billing and audit records are kept while you are a member and for as long as WTIA needs them to administer the association and meet its record-keeping obligations. Concierge conversation messages are deleted after twelve months. Suppression records are kept so that an unsubscribe request continues to be honoured."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Your choices",
+        "body": [],
+        "items": [
+          "Update your profile and company details at any time in the member portal.",
+          "Choose whether your profile appears in the member directory.",
+          "Unsubscribe from marketing email using the link in any campaign message.",
+          "Withdraw your WhatsApp opt-in.",
+          "Request access to, correction of, or deletion of your personal data under the Personal Data (Privacy) Ordinance by writing to contact@hkwtia.org."
+        ]
+      },
+      {
+        "heading": "Service providers",
+        "body": ["WTIA uses the following providers to operate the platform."],
+        "items": [
+          "Neon — database hosting and account authentication.",
+          "Stripe — membership payments.",
+          "Resend — transactional and campaign email.",
+          "WOZTELL — WhatsApp message delivery.",
+          "Vercel — website hosting.",
+          "Cloudflare Turnstile — bot protection on public forms, where enabled.",
+          "OpenAI or Anthropic — the language model behind the Concierge, depending on the configured model."
+        ]
+      },
+      {
+        "heading": "Contact",
+        "body": [
+          "Questions, requests and complaints about personal data can be sent to contact@hkwtia.org, or by post to WTIA at 4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong."
+        ],
+        "items": []
+      }
+    ]
   },
   "AiTransparency": {
     "metaTitle": "AI Transparency | WTIA",
-    "metaDescription": "Understand the AI roadmap for the WTIA public site.",
+    "metaDescription": "How the WTIA Concierge works, what it can do, and when a person takes over.",
     "eyebrow": "AI transparency",
-    "title": "How AI fits into WTIA's roadmap",
-    "description": "Agents are planned, not live, in M0.",
-    "summary": "WTIA agents are planned for a later milestone; no AI agent is live on this public site.",
-    "aiOpsLink": "Read the AI-Ops preview"
+    "title": "How the WTIA Concierge works",
+    "description": "What our AI assistant can and cannot do, and how your conversation is handled.",
+    "sections": [
+      {
+        "heading": "The Concierge is live",
+        "body": [
+          "The WTIA Concierge is a bilingual assistant available on this website and over WhatsApp. It answers questions about membership, events, programmes and support in English and Traditional Chinese."
+        ],
+        "items": []
+      },
+      {
+        "heading": "What it can and cannot do",
+        "body": ["The assistant works only through a fixed set of approved tools."],
+        "items": [
+          "It can search approved WTIA sources, list upcoming events, explain funding schemes, and read your own membership context when you are signed in.",
+          "It can create a follow-up task for the WTIA team.",
+          "It cannot change membership, billing, roles, seats or approval decisions.",
+          "It cannot send email. Any email it drafts is held for staff approval first."
+        ]
+      },
+      {
+        "heading": "Grounded answers and citations",
+        "body": [
+          "The assistant cites only sources returned by its own tools and does not invent links. When it cannot answer from a sufficiently grounded source, it hands the question to the WTIA team instead of guessing."
+        ],
+        "items": []
+      },
+      {
+        "heading": "When a person takes over",
+        "body": ["The assistant escalates to WTIA staff rather than answering when a conversation involves:"],
+        "items": [
+          "payments, refunds or billing disputes",
+          "complaints or legal matters",
+          "privacy or safety requests",
+          "changes to protected member details",
+          "an answer it is not confident enough to give",
+          "a tool or service failure"
+        ]
+      },
+      {
+        "heading": "Safety",
+        "body": [
+          "The assistant treats retrieved documents and tool results as untrusted data, never as instructions. Text inside a document cannot redirect it, and it will refuse instructions that try to override WTIA's rules."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Your conversation data",
+        "body": [
+          "Messages are stored so a conversation can continue and so staff can follow up on an escalation. If you provide a contact email, it is used only so the team can reply. Messages older than twelve months are deleted and the associated run records are redacted. See the privacy page for the full detail."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Models and oversight",
+        "body": [
+          "The Concierge runs on a configured OpenAI or Anthropic model. The platform is provider-neutral, so WTIA can change model providers without changing how the assistant behaves. Usage, cost and answer quality are recorded and summarised publicly."
+        ],
+        "items": []
+      }
+    ],
+    "aiOpsLink": "Read the AI-Ops dashboard"
   },
   "NotFound": {
     "title": "Page not found",
-    "description": "The page may have moved or is not part of the public preview.",
+    "description": "The page may have moved, or the address may be incorrect.",
     "home": "Return home",
     "contact": "Contact WTIA"
   },
@@ -860,6 +998,9 @@
       "segments": "Segments",
       "members": "Members",
       "atRisk": "At risk",
+      "news": "News",
+      "pageCopy": "Page copy",
+      "media": "Media",
       "events": "Events",
       "listingsReview": "Showcase review",
       "cohorts": "Launch Pad cohorts",
@@ -874,6 +1015,9 @@
       "caption": "Company listings",
       "company": "Company",
       "slug": "Slug",
+      "logo": "Logo",
+      "logoNone": "No logo",
+      "saveLogo": "Save logo",
       "status": "Status",
       "premium": "Premium",
       "publish": "Publish",
@@ -1035,6 +1179,83 @@
         "attended": "Attended",
         "noShow": "No show"
       }
+    },
+    "media": {
+      "eyebrow": "Media",
+      "title": "Media library",
+      "description": "Register images the site may display, with alt text in both languages.",
+      "existing": "Registered images",
+      "empty": "No images registered yet.",
+      "url": "Image path",
+      "urlHelp": "A path to a file on this site, such as /images/showcase/example.png. Images hosted elsewhere cannot be displayed: the site would have to fetch them on every visit, and their contents can change after approval. PNG, JPEG, WebP and AVIF only — SVG is not displayed.",
+      "altEn": "Alt text (English)",
+      "altZh": "Alt text (Chinese)",
+      "altHelp": "Alt text describes the image to someone who cannot see it. Describe what the image shows, not that it is an image.",
+      "preview": "Preview",
+      "back": "Back to media library",
+      "create": "Register image",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "createSuccess": "Image registered.",
+      "updateSuccess": "Image updated.",
+      "urlInvalid": "Use a path to a file on this site, ending in .png, .jpg, .webp or .avif.",
+      "urlConflict": "That image is already registered.",
+      "validation": "Check the fields.",
+      "error": "Something went wrong. Try again."
+    },
+    "pageCopy": {
+      "eyebrow": "Page copy",
+      "title": "Page copy",
+      "description": "Edit the wording on the public marketing pages. Layout and structure stay fixed.",
+      "sectionsTitle": "Editable pages",
+      "fieldCount": "{count, plural, one {# field} other {# fields}}",
+      "overrideCount": "{count, plural, =0 {no edits} one {# edit} other {# edits}}",
+      "editDescription": "Each box replaces one sentence on the public page. Leave a box empty to use the wording shipped with the site.",
+      "back": "Back to page copy",
+      "english": "English",
+      "chinese": "Chinese",
+      "revertHint": "The grey text in an empty box is the wording currently shown. Clear a box to go back to it.",
+      "save": "Save copy",
+      "saving": "Saving…",
+      "saveSuccess": "Page copy saved. The public page updates shortly.",
+      "saveUnchanged": "No changes to save.",
+      "validation": "Some wording could not be saved. Check the highlighted fields.",
+      "error": "Something went wrong. Try again.",
+      "namespaces": {
+        "Home": "Home",
+        "About": "About WTIA",
+        "Chairman": "Chairman's message",
+        "Committees": "Committees",
+        "Contact": "Contact",
+        "programs": "Programmes",
+        "Membership": "Membership",
+        "Privacy": "Privacy notice",
+        "AiTransparency": "AI transparency"
+      }
+    },
+    "news": {
+      "eyebrow": "News",
+      "title": "News",
+      "description": "Write and publish bilingual WTIA news.",
+      "existing": "Published and draft posts",
+      "empty": "No news posts yet.",
+      "slug": "URL slug",
+      "titleEn": "Title (English)",
+      "titleZh": "Title (Chinese)",
+      "author": "Author",
+      "bodyMdx": "Body",
+      "bodyHelp": "Supported formatting: ## headings, - lists, **bold**, and links to WTIA pages such as [membership](/membership). Images and external links are not supported.",
+      "published": "Published",
+      "statusPublished": "Published",
+      "statusDraft": "Draft",
+      "create": "Create post",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "createSuccess": "News post created.",
+      "updateSuccess": "News post updated.",
+      "slugConflict": "That URL slug is already taken.",
+      "validation": "Check the fields.",
+      "error": "Something went wrong. Try again."
     },
     "approvals": {
       "eyebrow": "Approval queue",

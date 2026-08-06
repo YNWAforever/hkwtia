@@ -10,6 +10,8 @@ interface BuildPageMetadataInput {
   title: string;
   description: string;
   image?: string;
+  /** Set false for token-bearing or mid-flow pages that must stay out of search. */
+  index?: boolean;
 }
 
 export function buildPageMetadata({
@@ -17,7 +19,8 @@ export function buildPageMetadata({
   pathname,
   title,
   description,
-  image = siteConfig.defaultImage
+  image = siteConfig.defaultImage,
+  index = true
 }: BuildPageMetadataInput): Metadata {
   const canonical = absoluteUrl(localizedPath(locale, pathname));
   const englishUrl = absoluteUrl(localizedPath('en', pathname));
@@ -27,6 +30,7 @@ export function buildPageMetadata({
   return {
     title,
     description,
+    ...(index ? {} : {robots: {index: false, follow: false}}),
     alternates: {
       canonical,
       languages: {

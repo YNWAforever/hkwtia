@@ -3,11 +3,10 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {BuildLogCard} from "@/components/marketing/build-log-card";
 import {EmptyState} from "@/components/marketing/empty-state";
+import {NewsCard} from "@/components/marketing/news-card";
 import {PageHero} from "@/components/marketing/page-hero";
-import {newsPosts} from "@/content/news";
 import type {AppLocale} from "@/i18n/routing";
-import {listPublishedBuildLogs} from "@/lib/db/repos/public-posts";
-import {withoutStaticNewsSlugCollisions} from "@/lib/news/build-log-visibility";
+import {listPublishedBuildLogs, listPublishedNews} from "@/lib/db/repos/public-posts";
 import {buildPageMetadata} from "@/lib/metadata";
 
 export const dynamic = "force-dynamic";
@@ -29,11 +28,12 @@ export default async function NewsPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
   const t = await getTranslations({locale, namespace: "News"});
-  const buildLogs = withoutStaticNewsSlugCollisions(
-    await listPublishedBuildLogs(),
-    newsPosts,
-  );
   const appLocale = locale as AppLocale;
+  // A database outage degrades to the empty state rather than a 500.
+  const [news, buildLogs] = await Promise.all([
+    listPublishedNews().catch(() => []),
+    listPublishedBuildLogs().catch(() => []),
+  ]);
 
   return (
     <>
@@ -43,9 +43,18 @@ export default async function NewsPage({params}: Props) {
         description={t("description")}
       />
       <section className="container mx-auto px-6 py-16">
-        {newsPosts.length > 0 || buildLogs.length > 0 ? (
+        {news.length > 0 || buildLogs.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2">
-            {newsPosts.map((post) => <p key={post.slug}>{post.slug}</p>)}
+            {news.map((post) => (
+              <NewsCard
+                author={post.author}
+                key={post.slug}
+                locale={appLocale}
+                publishedAt={post.publishedAt}
+                slug={post.slug}
+                title={appLocale === "zh-HK" ? post.titleZh : post.titleEn}
+              />
+            ))}
             {buildLogs.map((post) => (
               <BuildLogCard key={post.slug} locale={appLocale} post={post}/>
             ))}

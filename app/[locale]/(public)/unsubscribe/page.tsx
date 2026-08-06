@@ -3,7 +3,8 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import type {AppLocale} from "@/i18n/routing";
 import {serverEnv} from "@/lib/config/env";
-import {verifyUnsubscribeToken} from "@/lib/email/unsubscribe-token";
+import {verifyUnsubscribeTokenWithAny} from "@/lib/email/unsubscribe-token";
+import {buildPageMetadata} from "@/lib/metadata";
 
 type Props = Readonly<{
   params: Promise<{locale: string}>;
@@ -13,7 +14,15 @@ type Props = Readonly<{
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
   const t = await getTranslations({locale, namespace: "Unsubscribe"});
-  return {title: t("metaTitle"), description: t("metaDescription")};
+  // The URL carries a signed token identifying a member, so this page must
+  // never reach a search index.
+  return buildPageMetadata({
+    locale: locale as AppLocale,
+    pathname: "/unsubscribe",
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    index: false,
+  });
 }
 
 export default async function UnsubscribePage({params, searchParams}: Props) {
@@ -33,7 +42,7 @@ export default async function UnsubscribePage({params, searchParams}: Props) {
   }
 
   const payload = query.token
-    ? verifyUnsubscribeToken(query.token, serverEnv().cronSecret)
+    ? verifyUnsubscribeTokenWithAny(query.token, [serverEnv().unsubscribeTokenSecret, serverEnv().cronSecret])
     : null;
   const valid = payload?.locale === appLocale;
 

@@ -4,9 +4,11 @@ import {revalidatePath} from "next/cache";
 import {z} from "zod";
 
 import {requireActor} from "@/lib/auth/actor";
-import {cohortRepository, type CohortRepository} from "@/lib/db/repos/cohorts";
-import type {Actor} from "@/lib/membership/lifecycle";
+import {applyToCohort} from "@/lib/launchpad/member-core";
 import {localizedPath} from "@/lib/urls";
+
+// Only the formData wrapper is exported here; it resolves its own actor.
+export type {MemberCohortRepository} from "@/lib/launchpad/member-core";
 
 const formSchema = z.object({
   cohortId: z.string().uuid(),
@@ -16,20 +18,10 @@ const formSchema = z.object({
   locale: z.enum(["en", "zh-HK"]),
 }).strict();
 
-export type MemberCohortRepository = Pick<CohortRepository, "createApplication">;
 export type CohortApplicationActionState = Readonly<{status: "idle" | "success" | "invalid" | "unauthorized" | "error"}>;
 
 function rawFormData(formData: FormData): Record<string, string> {
   return Object.fromEntries(["cohortId", "market", "readiness", "consent", "locale"].map((key) => [key, String(formData.get(key) ?? "")]));
-}
-
-export async function applyToCohort(
-  actor: Actor,
-  cohortId: string,
-  input: unknown,
-  repository: MemberCohortRepository = cohortRepository,
-) {
-  return repository.createApplication(actor, cohortId, input);
 }
 
 export async function applyToCohortAction(formData: FormData): Promise<CohortApplicationActionState> {
