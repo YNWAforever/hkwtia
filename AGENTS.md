@@ -64,6 +64,7 @@ For Stripe test-mode acceptance work, use test-mode values for `STRIPE_TEST_SECR
 - M6 Task 7: deterministic Launch Pad browser fixtures, isolated-seed evidence, guarded Preview smoke, and public graduate-badge acceptance record.
 - M7.1: staff news authoring on `/admin/news` scoped to `kind: "news"`, publication recorded as in-transaction audit rows, and the static news path retired.
 - M7.2: staff-editable marketing copy — 194 allowlisted strings merged over the message bundles in `i18n/request.ts`, fail-soft so a build without `DATABASE_URL` still serves shipped copy.
+- M7.3: curated media registry — staff register own-origin images on `/admin/media` and attach them to showcase listings, which now render a logo; adds an image-scoped CSP and closes an obfuscation bypass in the logo-reference validator.
 
 <!-- codebase-memory-mcp:start -->
 # Codebase Knowledge Graph (codebase-memory-mcp)

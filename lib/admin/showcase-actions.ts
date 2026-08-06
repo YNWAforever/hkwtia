@@ -8,7 +8,7 @@ import {requireAdminActor} from "@/lib/auth/actor";
 import {showcaseRepository, type ShowcaseRepository} from "@/lib/db/repos/showcase";
 import type {AdminActor} from "@/lib/membership/lifecycle";
 
-export type AdminShowcaseRepository = Pick<ShowcaseRepository, "publish" | "reject" | "setPremium">;
+export type AdminShowcaseRepository = Pick<ShowcaseRepository, "publish" | "reject" | "setPremium" | "setLogoMedia">;
 
 export async function publishShowcaseListing(actor: AdminActor, id: string, repository: AdminShowcaseRepository = showcaseRepository) {
   return repository.publish(actor, z.string().min(1).parse(id));
@@ -21,6 +21,14 @@ export async function rejectShowcaseListing(actor: AdminActor, id: string, reaso
 
 export async function setShowcasePremium(actor: AdminActor, id: string, premium: boolean, repository: AdminShowcaseRepository = showcaseRepository) {
   return repository.setPremium(actor, z.string().min(1).parse(id), premium);
+}
+
+/**
+ * Attaching a logo is staff-only and registry-only. The value is a media row
+ * id, never a URL, so nothing a member typed can become a rendered image.
+ */
+export async function setShowcaseLogo(actor: AdminActor, id: string, mediaId: string, repository: AdminShowcaseRepository = showcaseRepository) {
+  return repository.setLogoMedia(actor, z.string().min(1).parse(id), mediaId);
 }
 
 export async function publishShowcaseListingAction(path: string, formData: FormData): Promise<void> {
@@ -40,6 +48,13 @@ export async function rejectShowcaseListingAction(path: string, formData: FormDa
 export async function setShowcasePremiumAction(path: string, formData: FormData): Promise<void> {
   const actor = await requireAdminActor();
   await setShowcasePremium(actor, String(formData.get("listingId") ?? ""), formData.get("premium") === "on");
+  revalidateAdminPath(path);
+  revalidatePath("/showcase");
+}
+
+export async function setShowcaseLogoAction(path: string, formData: FormData): Promise<void> {
+  const actor = await requireAdminActor();
+  await setShowcaseLogo(actor, String(formData.get("listingId") ?? ""), String(formData.get("logoMediaId") ?? ""));
   revalidateAdminPath(path);
   revalidatePath("/showcase");
 }

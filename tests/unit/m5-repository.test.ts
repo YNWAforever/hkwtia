@@ -74,6 +74,12 @@ function memoryStore(initial: ShowcaseListing[]): ShowcaseStore & {viewWrites: n
       row.premium = premium;
       return row;
     },
+    setLogoMedia: async (id, mediaId) => {
+      const row = rows.find((candidate) => candidate.id === id);
+      if (!row) return null;
+      row.logoMediaId = mediaId;
+      return row;
+    },
     listPublished: async () => rows,
     getPublishedBySlug: async (slug) => rows.find((row) => row.slug === slug) ?? null,
     listPublishedSlugs: async () => rows.filter((row) => row.status === "published").map((row) => row.slug),

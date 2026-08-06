@@ -20,7 +20,7 @@ const listing = {
   videoUrl: null,
   caseStudyUrl: null,
   caseStudySummary: null,
-  logoReference: null,
+  logoReference: null, logo: null,
 } satisfies PublicListing;
 
 test.describe("M5 showcase deterministic acceptance contract", () => {

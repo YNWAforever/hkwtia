@@ -56,7 +56,7 @@ export function buildM5SeedFixture(asOf: Date): M5SeedFixture {
         nameEn: "Harbour Vision AI", nameZhHk: "港灣視野 AI", taglineEn: "Trade intelligence for Hong Kong teams", taglineZhHk: "為香港團隊而設的貿易智能",
         descriptionEn: "A synthetic acceptance listing for cross-border trade intelligence.", descriptionZhHk: "用於驗收的跨境貿易智能示例公司。",
         category: "software", useCases: ["logistics", "trade"], deploymentOptions: ["cloud"], supportedLanguages: ["en", "zh-HK"], worksWith: ["ERP", "CRM"],
-        videoUrl: "https://example.com/m5/harbour-vision-ai", caseStudyUrl: "https://example.com/m5/harbour-case-study", caseStudySummaryEn: "Synthetic case study", caseStudySummaryZhHk: "示例案例研究", logoReference: "/images/showcase/harbour-vision-ai.svg",
+        videoUrl: "https://example.com/m5/harbour-vision-ai", caseStudyUrl: "https://example.com/m5/harbour-case-study", caseStudySummaryEn: "Synthetic case study", caseStudySummaryZhHk: "示例案例研究", logoReference: null,
       },
       {
         id: LISTING_IDS[1], companyId: COMPANY_IDS[1], slug: "jade-logistics-platform",
@@ -64,7 +64,7 @@ export function buildM5SeedFixture(asOf: Date): M5SeedFixture {
         nameEn: "Jade Logistics Platform", nameZhHk: "翠玉物流平台", taglineEn: "Shipment visibility across Asia", taglineZhHk: "連接亞洲的貨運可視化",
         descriptionEn: "A synthetic acceptance listing for shipment visibility.", descriptionZhHk: "用於驗收的貨運可視化示例公司。",
         category: "software", useCases: ["logistics"], deploymentOptions: ["cloud", "hybrid"], supportedLanguages: ["en", "zh-HK"], worksWith: ["ERP"],
-        videoUrl: null, caseStudyUrl: null, caseStudySummaryEn: null, caseStudySummaryZhHk: null, logoReference: "/images/showcase/jade-logistics.svg",
+        videoUrl: null, caseStudyUrl: null, caseStudySummaryEn: null, caseStudySummaryZhHk: null, logoReference: null,
       },
       {
         id: LISTING_IDS[2], companyId: COMPANY_IDS[2], slug: "lion-rock-cyber",
@@ -72,7 +72,7 @@ export function buildM5SeedFixture(asOf: Date): M5SeedFixture {
         nameEn: "Lion Rock Cyber", nameZhHk: "獅子山網安", taglineEn: "Practical cyber resilience", taglineZhHk: "實用網絡韌性",
         descriptionEn: "A synthetic listing awaiting staff review.", descriptionZhHk: "等待職員審核的示例公司。",
         category: "security", useCases: ["risk"], deploymentOptions: ["on-prem"], supportedLanguages: ["en"], worksWith: ["SIEM"],
-        videoUrl: null, caseStudyUrl: null, caseStudySummaryEn: null, caseStudySummaryZhHk: null, logoReference: "/images/showcase/lion-rock-cyber.svg",
+        videoUrl: null, caseStudyUrl: null, caseStudySummaryEn: null, caseStudySummaryZhHk: null, logoReference: null,
       },
     ],
   };

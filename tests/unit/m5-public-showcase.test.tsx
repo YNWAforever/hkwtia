@@ -11,7 +11,7 @@ import {buildShowcaseQuery, softwareApplicationJsonLd} from "@/lib/showcase/publ
 import {listingInputSchema, type PublicListing} from "@/lib/showcase/contracts";
 
 const listing: PublicListing = {
-  slug: "harbour-vision-ai", premium: true, goneGlobal: false, views: 42, memberSince: "2020-01-01", name: "Harbour Vision AI", tagline: "Trade intelligence", description: "Public description", category: "software", useCases: ["logistics"], deploymentOptions: ["cloud"], supportedLanguages: ["en", "zh-HK"], worksWith: ["ERP"], videoUrl: null, caseStudyUrl: null, caseStudySummary: "Case study", logoReference: null,
+  slug: "harbour-vision-ai", premium: true, goneGlobal: false, views: 42, memberSince: "2020-01-01", name: "Harbour Vision AI", tagline: "Trade intelligence", description: "Public description", category: "software", useCases: ["logistics"], deploymentOptions: ["cloud"], supportedLanguages: ["en", "zh-HK"], worksWith: ["ERP"], videoUrl: null, caseStudyUrl: null, caseStudySummary: "Case study", logoReference: null, logo: null,
 };
 
 describe("public Showcase", () => {
@@ -68,8 +68,24 @@ describe("public Showcase", () => {
       .toBe("https://cdn.example.com/logo.svg");
     expect(listingInputSchema.parse({...input, logoReference: null}).logoReference).toBeNull();
 
-    for (const logoReference of ["javascript:alert(1)", "//evil.example.com/logo.svg", "http://cdn.example.com/logo.svg", "data:image/svg+xml;base64,AAAA"]) {
-      expect(listingInputSchema.safeParse({...input, logoReference}).success).toBe(false);
+    for (const logoReference of [
+      "javascript:alert(1)",
+      "//evil.example.com/logo.svg",
+      "http://cdn.example.com/logo.svg",
+      "data:image/svg+xml;base64,AAAA",
+      // A naive `/` prefix check reads each of these as site-relative, but the
+      // WHATWG parser maps `\` to `/` and strips tab, LF and CR from anywhere
+      // in the input, so `absoluteUrl` resolves all of them to a foreign host.
+      // zod's `.trim()` does not help: the character is interior, not at an end.
+      "/\\evil.example.com/logo.svg",
+      `/${String.fromCharCode(9)}/evil.example.com/logo.svg`,
+      `/${String.fromCharCode(10)}/evil.example.com/logo.svg`,
+      `/${String.fromCharCode(13)}/evil.example.com/logo.svg`,
+      // Reads as our own domain in an audit log, resolves somewhere else.
+      "https://hkwtia.org@evil.example.com/logo.svg",
+    ]) {
+      expect(listingInputSchema.safeParse({...input, logoReference}).success, logoReference)
+        .toBe(false);
     }
   });
 

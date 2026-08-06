@@ -2,6 +2,7 @@ import {z} from "zod";
 
 import type {AppLocale} from "@/i18n/routing";
 import type {ShowcaseListing, ShowcaseListingStatus} from "@/lib/db/server-schema";
+import {hasUrlObfuscation} from "@/lib/media/url";
 
 const optionalHttpsUrl = z.string().trim().url().refine(
   (value) => new URL(value).protocol === "https:",
@@ -12,11 +13,25 @@ const optionalHttpsUrl = z.string().trim().url().refine(
  * Logo references are resolved with `absoluteUrl`, which accepts any absolute
  * scheme. Allow only a site-relative path or an explicit HTTPS URL so a stored
  * reference can never resolve to `javascript:` or a protocol-relative host.
+ *
+ * This value reaches only the schema.org `image` field, which a crawler
+ * fetches and we never do, so a remote HTTPS host stays legitimate here — a
+ * registry entry meant for rendering is held to the stricter own-origin rule
+ * in `lib/media/url.ts` instead.
+ *
+ * The obfuscation check is load-bearing rather than defensive: without it
+ * `"/\\evil.example.com/x.png"` and a tab-separated `"/<TAB>/evil.example.com/x.png"`
+ * both pass the `/` prefix test and then resolve to a foreign host.
  */
 function isSafeLogoReference(value: string): boolean {
+  if (hasUrlObfuscation(value)) return false;
   if (value.startsWith("/")) return !value.startsWith("//");
   try {
-    return new URL(value).protocol === "https:";
+    const url = new URL(value);
+    // Userinfo is rejected so a stored value cannot read as our own domain
+    // (`https://hkwtia.org@evil.example.com/logo.png`) while resolving elsewhere.
+    if (url.username || url.password) return false;
+    return url.protocol === "https:";
   } catch {
     return false;
   }
@@ -111,7 +126,17 @@ type PublicSource = Pick<
   | "descriptionEn" | "descriptionZhHk" | "category" | "useCases"
   | "deploymentOptions" | "supportedLanguages" | "worksWith" | "videoUrl"
   | "caseStudyUrl" | "caseStudySummaryEn" | "caseStudySummaryZhHk" | "logoReference"
-> & Record<string, unknown>;
+> & PublicLogoJoin & Record<string, unknown>;
+
+/**
+ * Columns a public read joins in from the media registry. Optional so a test
+ * double or a listing with no registered logo needs no extra shape.
+ */
+export type PublicLogoJoin = Readonly<{
+  logoMediaUrl?: string | null;
+  logoMediaAltEn?: string | null;
+  logoMediaAltZh?: string | null;
+}>;
 
 export type PublicListing = Readonly<{
   slug: string;
@@ -130,7 +155,13 @@ export type PublicListing = Readonly<{
   videoUrl: string | null;
   caseStudyUrl: string | null;
   caseStudySummary: string | null;
+  /**
+   * The free-text member-supplied reference. It reaches the schema.org `image`
+   * field and nothing else — `logo` is what the site renders.
+   */
   logoReference: string | null;
+  /** Resolved from the curated registry, so this is always an own-origin path. */
+  logo: Readonly<{url: string; alt: string}> | null;
 }>;
 
 export function toPublicListing(row: PublicSource, locale: AppLocale): PublicListing {
@@ -153,5 +184,14 @@ export function toPublicListing(row: PublicSource, locale: AppLocale): PublicLis
     caseStudyUrl: row.caseStudyUrl,
     caseStudySummary: chinese ? row.caseStudySummaryZhHk : row.caseStudySummaryEn,
     logoReference: row.logoReference,
+    logo: row.logoMediaUrl
+      ? {
+        url: row.logoMediaUrl,
+        // Both alt columns are NOT NULL, so the company name only covers a
+        // partial test double rather than any real row.
+        alt: (chinese ? row.logoMediaAltZh : row.logoMediaAltEn)
+          ?? (chinese ? row.nameZhHk : row.nameEn),
+      }
+      : null,
   };
 }

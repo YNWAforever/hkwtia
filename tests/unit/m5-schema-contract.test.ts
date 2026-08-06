@@ -43,7 +43,7 @@ describe("M5 Showcase schema contract", () => {
       "member_since", "name_en", "name_zh_hk", "premium", "rejection_reason",
       "reviewed_at", "reviewed_by_profile_id", "slug", "status", "tagline_en",
       "tagline_zh_hk", "updated_at", "use_cases", "video_url", "views",
-      "works_with", "supported_languages",
+      "works_with", "supported_languages", "logo_media_id",
     ].sort());
     expect(columns.get("company_id")?.notNull).toBe(true);
     expect(columns.get("member_since")?.notNull).toBe(true);
