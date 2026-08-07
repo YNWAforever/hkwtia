@@ -134,6 +134,11 @@ describe('message bundles', () => {
     'Privacy.sections.5.heading',  // "WTIA Concierge", a product name
     'Concierge.characterCount',    // "{count} / 2000"
     'Navigation.english',          // the "EN" half of the language toggle
+    // Architecture-diagram nodes that are product names. The approved
+    // AiOps.architectureDescription keeps "Concierge runtime" in English too.
+    'AiOps.architectureConciergeRuntime',
+    'AiOps.architectureWorker',
+    'AiOps.architectureDatabase',
   ]);
 
   it('walks array leaves too, so no branch of the tree is exempt', () => {

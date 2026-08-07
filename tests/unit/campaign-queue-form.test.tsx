@@ -11,6 +11,7 @@ describe("campaign queue form", () => {
   it("submits without an idempotency field and renders the translated safe error", async () => {
     const {container} = render(<SegmentResults
       labels={labels}
+      locale="en"
       newDraftHref="/en/admin/segments?campaignDraft=22222222-2222-4222-8222-222222222222"
       preview={{total: 0, items: [], nextCursor: null}}
       queueAction={async () => ({disposition: null, recipientCount: 0, error: "generic"})}

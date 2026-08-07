@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type {AppLocale} from "@/i18n/routing";
+import {labelSeparator} from "@/lib/i18n/punctuation";
 import type {DirectoryPage} from "@/lib/portal/content";
 import {localizedPath} from "@/lib/urls";
 
@@ -50,9 +51,9 @@ export function DirectoryResults({locale, page, query, labels}: Props) {
                 <h2 className="font-serif text-2xl font-semibold">{record.displayName}</h2>
                 {record.jobTitle ? <p className="text-sm text-muted-foreground">{record.jobTitle}</p> : null}
               </div>
-              {record.companyDisplayName ? <p className="text-sm"><span className="font-medium">{labels.company}:</span> {record.companyDisplayName}</p> : null}
-              {record.industry ? <p className="text-sm"><span className="font-medium">{labels.industry}:</span> {record.industry}</p> : null}
-              {record.sizeBand ? <p className="text-sm"><span className="font-medium">{labels.sizeBand}:</span> {record.sizeBand}</p> : null}
+              {record.companyDisplayName ? <p className="text-sm"><span className="font-medium">{labels.company}{labelSeparator(locale)}</span>{record.companyDisplayName}</p> : null}
+              {record.industry ? <p className="text-sm"><span className="font-medium">{labels.industry}{labelSeparator(locale)}</span>{record.industry}</p> : null}
+              {record.sizeBand ? <p className="text-sm"><span className="font-medium">{labels.sizeBand}{labelSeparator(locale)}</span>{record.sizeBand}</p> : null}
             </article>
           ))}
         </div>

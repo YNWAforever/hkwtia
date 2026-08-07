@@ -432,7 +432,10 @@ describe("complete M4 deterministic acceptance", () => {
     for (const {id} of fixture.profiles) {
       expect(safeDashboard).not.toContain(id);
     }
-    expect(opaque(safeDashboard)).toBe("70024a54d5e21c1e58da8e66a058654a7c17dfb109b2fb9b399300b343fc0b75");
+    // Re-pinned when the architecture diagram moved into the message bundle.
+    // The rendered diff was reviewed and is exactly six English nodes becoming
+    // Chinese plus two "flow-1"/"flow-2" aria-labels becoming real names.
+    expect(opaque(safeDashboard)).toBe("688917c5e8f4df54173f9201ac0790eeed0504fcfca85b02eab13af7666699a2");
 
     expect(fixture.buildLogs).toHaveLength(2);
     await exerciseConciergeEvaluation();

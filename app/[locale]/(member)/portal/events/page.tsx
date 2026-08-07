@@ -5,6 +5,7 @@ import {EventRegistrationForm} from "@/components/portal/event-registration-form
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
 import {registerForEvent} from "@/lib/db/repos/events";
+import {labelSeparator} from "@/lib/i18n/punctuation";
 import {runEventRegistrationAction, type RegistrationActionState} from "@/lib/portal/event-action-core";
 import {getMemberEvents} from "@/lib/portal/content";
 
@@ -36,5 +37,5 @@ export default async function MemberEventsPage({params}: Props) {
       },
     });
   }
-  return <div className="space-y-8"><header className="space-y-3"><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("events.title")}</p><h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{t("events.title")}</h1><p className="text-lg text-muted-foreground">{t("events.description")}</p></header>{rows.length === 0 ? <section className="glass-card p-6"><p className="text-muted-foreground">{t("events.empty")}</p></section> : <div className="grid gap-4 md:grid-cols-2">{rows.map((event) => <article className="glass-card space-y-3 p-5" key={event.slug}><h2 className="font-serif text-2xl font-semibold">{event.title}</h2><p className="text-sm"><span className="font-medium">{t("events.date")}:</span> {formatter.format(new Date(event.startsAt))}</p><p className="text-sm"><span className="font-medium">{t("events.venue")}:</span> {event.venue}</p><EventRegistrationForm action={registerAction} eventId={event.id} pendingLabel={t("events.registering")} registerLabel={t("events.register")}/></article>)}</div>}</div>;
+  return <div className="space-y-8"><header className="space-y-3"><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("events.title")}</p><h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{t("events.title")}</h1><p className="text-lg text-muted-foreground">{t("events.description")}</p></header>{rows.length === 0 ? <section className="glass-card p-6"><p className="text-muted-foreground">{t("events.empty")}</p></section> : <div className="grid gap-4 md:grid-cols-2">{rows.map((event) => <article className="glass-card space-y-3 p-5" key={event.slug}><h2 className="font-serif text-2xl font-semibold">{event.title}</h2><p className="text-sm"><span className="font-medium">{t("events.date")}{labelSeparator(locale)}</span>{formatter.format(new Date(event.startsAt))}</p><p className="text-sm"><span className="font-medium">{t("events.venue")}{labelSeparator(locale)}</span>{event.venue}</p><EventRegistrationForm action={registerAction} eventId={event.id} pendingLabel={t("events.registering")} registerLabel={t("events.register")}/></article>)}</div>}</div>;
 }

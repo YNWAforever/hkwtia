@@ -52,6 +52,15 @@ const translated = vi.hoisted(() => ({
   methodologyDescription: "Aggregates refresh hourly. Estimated time saved equals agent-resolved conversations multiplied by six minutes. No member-level data is published.",
   architectureHeading: "How WTIA AI-Ops works",
   architectureDescription: "Web and WhatsApp requests pass through the Concierge runtime and guarded tools. Scheduled jobs use authenticated routes. Generated actions remain behind approval or publication gates.",
+  architectureMemberFlow: "Member request flow",
+  architectureJobFlow: "Scheduled job flow",
+  architectureWeb: "Web / WhatsApp",
+  architectureConciergeRuntime: "Concierge runtime",
+  architectureGuardedTools: "guarded tools",
+  architectureWorker: "Cloudflare Worker",
+  architectureJobRoutes: "authenticated job routes",
+  architectureScheduledAgents: "scheduled agents / AI-Ops refresh",
+  architectureDatabase: "Neon Postgres",
   approvalGate: "Human approval gate",
   publicationGate: "Publication gate",
   evidenceHeading: "Build evidence",
@@ -89,6 +98,7 @@ import AiOpsPage, {
   generateMetadata,
   revalidate,
 } from "@/app/[locale]/(public)/ai-ops/page";
+import {ArchitectureDiagram} from "@/components/marketing/aiops/architecture-diagram";
 
 const CANARY = "M4C_PRIVATE_CANARY_private@example.test";
 
@@ -237,8 +247,26 @@ describe("AI-Ops public page boundary", () => {
     expect(html).not.toContain(CANARY);
     expect(JSON.stringify(page)).not.toContain(CANARY);
   });
+  it("renders the architecture diagram in Chinese, not English", () => {
+    // These four nodes lived in a module-scope const and rendered as English on
+    // /zh/ai-ops, directly under a paragraph already saying 受限制工具.
+    const chinese = JSON.parse(readFileSync("messages/zh-HK.json", "utf8")).AiOps;
+    const html = renderToStaticMarkup(<ArchitectureDiagram labels={chinese}/>);
+
+    for (const node of ["網站／WhatsApp", "受限制工具", "已驗證路由", "排程代理／AI-Ops 更新"]) {
+      expect(html).toContain(node);
+    }
+    for (const english of ["Web / WhatsApp", "guarded tools", "authenticated job routes", "scheduled agents"]) {
+      expect(html).not.toContain(english);
+    }
+    // Both lists are reachable by name, not as "flow-1" and "flow-2".
+    expect(html).toContain('aria-label="會員查詢流程"');
+    expect(html).toContain('aria-label="排程工作流程"');
+    expect(html).not.toMatch(/flow-\d/);
+  });
+
   it("matches the complete approved Traditional Chinese AI-Ops copy", () => {
     const chinese = JSON.parse(readFileSync("messages/zh-HK.json", "utf8")).AiOps;
-    expect(Object.values(chinese)).toEqual(["公開 AI-Ops｜WTIA","公開 WTIA AI 代理的即時、保障私隱表現、升級處理及成本指標。","公開 AI-Ops","公開量度 AI 營運","每小時更新、保障私隱的 WTIA Concierge 及排程代理實證。","香港本月","本月至今","最後更新","指標已按時更新","指標可能延遲","本月暫未有指標","指標暫時無法提供","資料不足","對話數目","代理已解決","首次回應時間中位數","客戶滿意度","升級處理率","失敗率","估算節省職員工時","本月 LLM 成本","份回應","個樣本","小時","目標：70% 或以上","目標：4.5 / 5 或以上","十二個月續會趨勢","整體續會率","首年續會率","整體目標：88%","首年目標：82%","每月續會率","最近十二個香港月份的整體及首年續會率。","月份","已付款","應續會","比率","指標計算方法","聚合指標每小時更新。估算節省時間等於代理已解決對話乘以六分鐘。頁面不會公開任何會員層級資料。","WTIA AI-Ops 運作方式","網站及 WhatsApp 查詢經 Concierge runtime 及受限制工具處理。排程工作使用已驗證路由。所有生成操作仍受人工批准或發布關卡限制。","人工批准關卡","發布關卡","開發實證","已發布開發紀錄","原始碼倉庫","Commit 及 build 紀錄","正式網站","M4 驗收實證","暫未有已發布開發紀錄。"]);
+    expect(Object.values(chinese)).toEqual(["公開 AI-Ops｜WTIA","公開 WTIA AI 代理的即時、保障私隱表現、升級處理及成本指標。","公開 AI-Ops","公開量度 AI 營運","每小時更新、保障私隱的 WTIA Concierge 及排程代理實證。","香港本月","本月至今","最後更新","指標已按時更新","指標可能延遲","本月暫未有指標","指標暫時無法提供","資料不足","對話數目","代理已解決","首次回應時間中位數","客戶滿意度","升級處理率","失敗率","估算節省職員工時","本月 LLM 成本","份回應","個樣本","小時","目標：70% 或以上","目標：4.5 / 5 或以上","十二個月續會趨勢","整體續會率","首年續會率","整體目標：88%","首年目標：82%","每月續會率","最近十二個香港月份的整體及首年續會率。","月份","已付款","應續會","比率","指標計算方法","聚合指標每小時更新。估算節省時間等於代理已解決對話乘以六分鐘。頁面不會公開任何會員層級資料。","WTIA AI-Ops 運作方式","網站及 WhatsApp 查詢經 Concierge runtime 及受限制工具處理。排程工作使用已驗證路由。所有生成操作仍受人工批准或發布關卡限制。","會員查詢流程","排程工作流程","網站／WhatsApp","Concierge runtime","受限制工具","Cloudflare Worker","已驗證路由","排程代理／AI-Ops 更新","Neon Postgres","人工批准關卡","發布關卡","開發實證","已發布開發紀錄","原始碼倉庫","Commit 及 build 紀錄","正式網站","M4 驗收實證","暫未有已發布開發紀錄。"]);
   });
 });

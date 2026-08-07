@@ -19,6 +19,16 @@ mechanical half of what is written here; the rest is judgement, which is what th
 - no `_`-prefixed bookkeeping key may exist anywhere except the root `_review`;
 - `en` and `zh-HK` must have identical leaf keys, and every ICU plural must format.
 
+`npm run audit:strings` (`scripts/audit-visible-strings.mjs`) fails the build on visible copy that never
+reaches the bundle at all:
+
+- hard-coded text in JSX, unless it is an email address, a phone number, an approved technical id, or
+  purely locale-neutral glyphs (`· • → ← ✓ ✗ — – / | ( ) [ ] #`). Notably **`:` is not neutral** — see
+  Punctuation below;
+- English prose in a `const` that is rendered through a JSX expression. References from a JSX *attribute*
+  are exempt, so `className` strings, `cva()` maps and render helpers stay quiet;
+- English prose in a `placeholder`, `aria-label`, `alt` or `title` string literal.
+
 ## Hong Kong, not Taiwan
 
 Both write Traditional, but the vocabulary differs. Use the left column.
@@ -77,6 +87,10 @@ Do **not** "fix" these into one word. A naive consistency sweep will want to; ea
 ## Punctuation and spacing
 
 - Full-width punctuation in Chinese text: `，。：；？！` and `「」` for quotes.
+- **Never write a literal `:` in JSX.** A `label: value` pair goes through `labelSeparator(locale)` or
+  `labelledValue(locale, label, value)` from `lib/i18n/punctuation.ts`. The full-width `：` carries its own
+  trailing whitespace, so English needs the space after the colon and Chinese must not have it — eight call
+  sites got this wrong and rendered `會員: 1` until the audit stopped exempting punctuation.
 - The Chinese ellipsis is **two characters**, `……` — used for every progress indicator
   (`儲存中……`, `傳送中……`). A single `…` is correct only where it trails an example sentence.
 - Titles separate with the full-width pipe: `會員計劃｜WTIA`.
@@ -94,6 +108,15 @@ A bundle-only review misses these. All are visitor-reachable:
 - `scripts/seed-m*.ts` — event, showcase, cohort and build-log fixtures.
 - `messages/*.json` → `Email.*` — 119 leaves read directly by `lib/email/catalog.ts`, never through
   next-intl, so they never appear on a page and are pinned by snapshot tests instead.
+
+Copy must not live in a component-level `const`. The `/zh/ai-ops` architecture diagram held its nodes that
+way and rendered `guarded tools` under a paragraph that already said 受限制工具; `audit:strings` now
+rejects the pattern.
+
+Two `aria-label`s are knowingly left with an ASCII separator — `components/admin/cohort-kanban.tsx` and
+`components/admin/showcase-review-table.tsx`. Neither component takes a `locale`, and threading one through
+for a screen-reader separator on a staff-only page is not worth the prop. Revisit if either gains a
+`locale` for another reason.
 
 ## Review status
 

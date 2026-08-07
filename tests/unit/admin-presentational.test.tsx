@@ -112,6 +112,7 @@ describe("admin presentation", () => {
     // render; a saved segment is what forces the export and queue controls.
     const results = renderToStaticMarkup(<SegmentResults
       labels={resultsLabels}
+      locale={locale}
       newDraftHref="/admin/campaigns/new"
       preview={{total: 1, nextCursor: null, items: [{profileId: "p-1", displayName: "Member One", email: null, companyName: null, planCode: null, membershipStatus: null, renewalAt: null, score: null}]}}
       queueAction={async (state) => state}
@@ -119,6 +120,7 @@ describe("admin presentation", () => {
     // The zero-result pass, because `empty` is only reachable with no matches.
     const emptyResults = renderToStaticMarkup(<SegmentResults
       labels={resultsLabels}
+      locale={locale}
       newDraftHref="/admin/campaigns/new"
       preview={{total: 0, nextCursor: null, items: []}}
       queueAction={async (state) => state}
@@ -137,6 +139,10 @@ describe("admin presentation", () => {
       expect(html, `${key} is missing from the rendered page`).toContain(label);
     }
     expect(html).not.toMatch(/\?{2,}/);
+    // Chinese takes the full-width colon, which carries its own trailing space.
+    // `總數: 1` is what shipped before lib/i18n/punctuation existed.
+    expect(html).toContain(`${labels.total}${locale === "zh-HK" ? "\uff1a" : ": "}1`);
+    expect(html).not.toMatch(/\p{Script=Han}\s*:/u);
   });
 
   it("renders the repaired Chinese where the question marks used to be", () => {

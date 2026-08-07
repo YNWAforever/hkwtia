@@ -3,6 +3,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {StatusCard} from "@/components/portal/status-card";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
+import {labelSeparator} from "@/lib/i18n/punctuation";
 import {getDashboard} from "@/lib/portal/queries";
 
 export const dynamic = "force-dynamic";
@@ -33,7 +34,7 @@ export default async function PortalPage({params}: Props) {
           <p className="text-sm font-medium text-muted-foreground">{t("membershipPlan", {plan: t(`plans.${dashboard.memberships[0].planCode}`)})}</p>
           <h2 className="mt-2 font-serif text-2xl font-semibold">{t("onboarding")}</h2>
           <p className="mt-2 text-sm text-muted-foreground">{t("onboardingProgress", {completed: dashboard.onboarding.completedSteps, total: dashboard.onboarding.totalSteps})}</p>
-          <p className="mt-4 text-sm font-medium">{t("nextAction")}: {t(`actions.${action}`)}</p>
+          <p className="mt-4 text-sm font-medium">{t("nextAction")}{labelSeparator(locale)}{t(`actions.${action}`)}</p>
         </section>
       </div>
 
