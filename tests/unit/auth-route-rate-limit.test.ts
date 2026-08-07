@@ -4,7 +4,7 @@ import {resolve} from "node:path";
 import {describe, expect, it} from "vitest";
 
 import {authPathOf, checkAuthSend, rateLimitAuthRequest} from "@/lib/auth/rate-limit";
-import {createInMemoryRateLimiter} from "@/lib/security/rate-limit";
+import {asAsyncRateLimiter, createInMemoryRateLimiter} from "@/lib/security/rate-limit";
 
 function post(path: string, body?: unknown, ip = "203.0.113.10"): Request {
   return new Request(`https://hkwtia.test/api/auth/${path}`, {
@@ -19,9 +19,9 @@ function post(path: string, body?: unknown, ip = "203.0.113.10"): Request {
 
 function limiters(overrides: Parameters<typeof rateLimitAuthRequest>[1] = {}) {
   return {
-    emailLimiter: createInMemoryRateLimiter({limit: 2, windowMs: 60_000}),
-    sendIpLimiter: createInMemoryRateLimiter({limit: 3, windowMs: 60_000}),
-    credentialLimiter: createInMemoryRateLimiter({limit: 2, windowMs: 60_000}),
+    emailLimiter: asAsyncRateLimiter(createInMemoryRateLimiter({limit: 2, windowMs: 60_000})),
+    sendIpLimiter: asAsyncRateLimiter(createInMemoryRateLimiter({limit: 3, windowMs: 60_000})),
+    credentialLimiter: asAsyncRateLimiter(createInMemoryRateLimiter({limit: 2, windowMs: 60_000})),
     ...overrides,
   };
 }
@@ -201,31 +201,31 @@ describe("the route module", () => {
 describe("the shared decision used by the /join Server Action", () => {
   // auth.signIn.magicLink fetches the upstream service directly, so /join never
   // passes through the route wrapper. Both entrypoints must share this.
-  it("applies the same IP and email ceilings the route uses", () => {
+  it("applies the same IP and email ceilings the route uses", async () => {
     const dependencies = limiters();
     const send = (email: string, ip: string | null = "203.0.113.10") =>
       checkAuthSend({ip, email}, dependencies);
 
-    expect(send("a@example.test").allowed).toBe(true);
-    expect(send("a@example.test").allowed).toBe(true);
-    const blocked = send("a@example.test");
+    expect((await send("a@example.test")).allowed).toBe(true);
+    expect((await send("a@example.test")).allowed).toBe(true);
+    const blocked = await send("a@example.test");
     expect(blocked.allowed).toBe(false);
     expect(blocked.retryAfterSeconds).toBeGreaterThan(0);
   });
 
-  it("charges the IP bucket before the email bucket", () => {
+  it("charges the IP bucket before the email bucket", async () => {
     const dependencies = limiters();
 
     // Three distinct addresses from one source exhausts the IP ceiling of 3,
     // so a fourth is refused even though no address has been used twice.
     for (let attempt = 0; attempt < 3; attempt += 1) {
-      expect(checkAuthSend({ip: "198.51.100.7", email: `x${attempt}@example.test`}, dependencies).allowed).toBe(true);
+      expect((await checkAuthSend({ip: "198.51.100.7", email: `x${attempt}@example.test`}, dependencies)).allowed).toBe(true);
     }
-    expect(checkAuthSend({ip: "198.51.100.7", email: "fresh@example.test"}, dependencies).allowed).toBe(false);
+    expect((await checkAuthSend({ip: "198.51.100.7", email: "fresh@example.test"}, dependencies)).allowed).toBe(false);
   });
 
-  it("allows a send with no address once the IP bucket has room", () => {
-    expect(checkAuthSend({ip: "198.51.100.8", email: null}, limiters()).allowed).toBe(true);
+  it("allows a send with no address once the IP bucket has room", async () => {
+    expect((await checkAuthSend({ip: "198.51.100.8", email: null}, limiters())).allowed).toBe(true);
   });
 });
 

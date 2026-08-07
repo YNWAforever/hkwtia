@@ -120,6 +120,13 @@
       "when": 1785984491158,
       "tag": "0017_m7_media",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1786123469597,
+      "tag": "0018_m7_rate_limits",
+      "breakpoints": true
     }
   ]
 }

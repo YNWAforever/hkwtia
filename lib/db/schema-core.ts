@@ -856,6 +856,35 @@ export const leads = pgTable(
   ],
 );
 
+/**
+ * Fixed-window rate-limit buckets, shared by every instance.
+ *
+ * `createInMemoryRateLimiter` holds its buckets in one process, so on a
+ * serverless deployment the real ceiling was `limit x concurrent instances`.
+ * That is enough to stop a naive script and an accidental retry storm, but it
+ * does not bound how many messages one victim's inbox receives — the thing the
+ * per-address bucket exists to bound. One row per bucket key.
+ *
+ * Keys are hashes and coarse identifiers, never an address: see
+ * `emailBucket()` in `lib/auth/rate-limit.ts`.
+ */
+export const rateLimits = pgTable(
+  "rate_limits",
+  {
+    bucketKey: text("bucket_key").primaryKey(),
+    // An absolute expiry, not a window start. Limiters with different window
+    // lengths share this table, so a prune computed from any single window
+    // would delete another limiter's live buckets and silently reset its
+    // quota. Storing when the row dies makes expiry and pruning the same
+    // comparison for every caller.
+    expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+    hitCount: integer("hit_count").notNull(),
+  },
+  // Keys are attacker-influenced, so the table needs a cheap way to find and
+  // drop the expired rows rather than growing without bound.
+  (table) => [index("rate_limits_expires_idx").on(table.expiresAt)],
+);
+
 export const aiopsMonthlyMetrics = pgMaterializedView(
   "aiops_monthly_metrics",
   {
@@ -1156,3 +1185,4 @@ export type LandingPartner = typeof landingPartners.$inferSelect;
 export type NewLandingPartner = typeof landingPartners.$inferInsert;
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
+export type RateLimitBucket = typeof rateLimits.$inferSelect;
