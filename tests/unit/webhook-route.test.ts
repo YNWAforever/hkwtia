@@ -60,15 +60,16 @@ describe("Stripe webhook route", () => {
     }));
 
     vi.doMock("stripe", () => ({default: Stripe}));
-    vi.doMock("@/lib/billing/webhook-service", async () => {
-      const actual = await vi.importActual<typeof import("@/lib/billing/webhook-service")>(
-        "@/lib/billing/webhook-service",
-      );
-      return {
-        ...actual,
-        processStripeEvent,
-      };
-    });
+    vi.doMock("@/lib/billing/webhook-service", () => ({
+      WebhookInputError: class WebhookInputError extends Error {
+        readonly code = "INVALID_WEBHOOK_EVENT";
+        constructor() {
+          super("INVALID_WEBHOOK_EVENT");
+          this.name = "WebhookInputError";
+        }
+      },
+      processStripeEvent,
+    }));
 
     const route = await import("@/app/api/stripe/webhook/route");
     const response = await route.POST(new Request("http://localhost/api/stripe/webhook", {
