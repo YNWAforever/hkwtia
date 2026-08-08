@@ -32,7 +32,7 @@ import {
 } from "@/lib/acceptance/m4b-runtime-guard";
 import {automationCronActor} from "@/lib/auth/automation-actor";
 import {createWoztellAdapter} from "@/lib/channels/woztell";
-import {serverEnv} from "@/lib/config/env";
+import {aiEnv, appEnv, emailEnv, unsubscribeEnv} from "@/lib/config/env";
 import {aiOpsMetricsRepository} from "@/lib/db/repos/aiops-metrics";
 import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {campaignsRepository} from "@/lib/db/repos/campaigns";
@@ -261,7 +261,7 @@ export async function sendWorkerAlert(
   const render = dependencies.render ?? renderWorkerAlert;
   const transport =
     dependencies.transport ?? createConfiguredEmailTransport();
-  const emailFrom = dependencies.emailFrom ?? serverEnv().emailFrom;
+  const emailFrom = dependencies.emailFrom ?? emailEnv().emailFrom;
   const actor = automationCronActor();
   const addresses = await recipients.listCurrent(actor);
   const message = await render(payload);
@@ -295,21 +295,24 @@ function unsubscribeUrl(
   locale: "en" | "zh-HK",
   now: Date,
 ): string {
-  const environment = serverEnv();
+  const {unsubscribeTokenSecret} = unsubscribeEnv();
+  const {appUrl} = appEnv();
   const token = signUnsubscribeToken({
     profileId,
     locale,
     exp: Math.floor(now.getTime() / 1000) + UNSUBSCRIBE_TTL_SECONDS,
-  }, environment.unsubscribeTokenSecret);
+  }, unsubscribeTokenSecret);
   const path = locale === "zh-HK" ? "/zh/unsubscribe" : "/unsubscribe";
-  const url = new URL(path, environment.appUrl);
+  const url = new URL(path, appUrl);
   url.searchParams.set("token", token);
   return url.toString();
 }
 
 async function runProductionJourneys(now: Date): Promise<unknown> {
-  const environment = serverEnv();
-  const portalUrl = new URL("/portal", environment.appUrl).toString();
+  const {emailFrom} = emailEnv();
+  const {appUrl} = appEnv();
+  const ai = aiEnv();
+  const portalUrl = new URL("/portal", appUrl).toString();
   return runJourneyBatch({
     journeys: journeysRepository,
     deliveries: deliveriesRepository,
@@ -354,16 +357,23 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
     renderEmail,
     emailTransport: createConfiguredEmailTransport(),
     whatsappTransport: createWoztellAdapter({
-      WOZTELL_API_TOKEN: process.env.WOZTELL_API_TOKEN,
-      WOZTELL_CHANNEL_ID: process.env.WOZTELL_CHANNEL_ID,
-      WOZTELL_WEBHOOK_SECRET: process.env.WOZTELL_WEBHOOK_SECRET,
+      ...(ai.woztellApiToken === undefined
+        ? {}
+        : {WOZTELL_API_TOKEN: ai.woztellApiToken}),
+      ...(ai.woztellChannelId === undefined
+        ? {}
+        : {WOZTELL_CHANNEL_ID: ai.woztellChannelId}),
+      ...(ai.woztellWebhookSecret === undefined
+        ? {}
+        : {WOZTELL_WEBHOOK_SECRET: ai.woztellWebhookSecret}),
     }),
-    emailFrom: environment.emailFrom,
+    emailFrom,
   }, {now, limit: RUNNER_BATCH_LIMIT});
 }
 
 async function runProductionCampaigns(now: Date): Promise<unknown> {
-  const environment = serverEnv();
+  const {emailFrom} = emailEnv();
+  const {appUrl} = appEnv();
   return runCampaignBatch({
     campaigns: campaignsRepository,
     deliveries: deliveriesRepository,
@@ -379,10 +389,10 @@ async function runProductionCampaigns(now: Date): Promise<unknown> {
       };
     },
     renderCampaign: createCampaignEmailRenderer(
-      new URL("/", environment.appUrl).toString(),
+      new URL("/", appUrl).toString(),
     ),
     emailTransport: createConfiguredEmailTransport(),
-    emailFrom: environment.emailFrom,
+    emailFrom,
   }, {now, limit: RUNNER_BATCH_LIMIT});
 }
 
@@ -403,21 +413,21 @@ export async function runProductionRetentionAnalyst(
 ): Promise<unknown> {
   const acceptanceOwnershipKey =
     resolveM4BAcceptanceOwnershipKey(process.env);
-  const environment = serverEnv();
+  const ai = aiEnv();
   return runRetentionAnalystService(automationCronActor(), {
     asOf: now,
     acceptanceOwnershipKey,
     agentConfig: {
-      enabled: environment.agentsEnabled,
+      enabled: ai.agentsEnabled,
       model: process.env.RETENTION_ANALYST_MODEL
         ?? RETENTION_ANALYST_AGENT_CONFIG.model,
       credentials: {
-        ...(environment.openaiApiKey === undefined
+        ...(ai.openaiApiKey === undefined
           ? {}
-          : {openaiApiKey: environment.openaiApiKey}),
-        ...(environment.anthropicApiKey === undefined
+          : {openaiApiKey: ai.openaiApiKey}),
+        ...(ai.anthropicApiKey === undefined
           ? {}
-          : {anthropicApiKey: environment.anthropicApiKey}),
+          : {anthropicApiKey: ai.anthropicApiKey}),
       },
       system: RETENTION_ANALYST_SYSTEM_PROMPT,
       runtime: createAgentRuntime({
@@ -432,21 +442,21 @@ export async function runProductionBoardReporter(
 ): Promise<unknown> {
   const acceptanceOwnershipKey =
     resolveM4BAcceptanceOwnershipKey(process.env);
-  const environment = serverEnv();
+  const ai = aiEnv();
   return runBoardReporterService(automationCronActor(), {
     asOf: now,
     acceptanceOwnershipKey,
     agentConfig: {
-      enabled: environment.agentsEnabled,
+      enabled: ai.agentsEnabled,
       model: process.env.BOARD_REPORTER_MODEL
         ?? BOARD_REPORTER_AGENT_CONFIG.model,
       credentials: {
-        ...(environment.openaiApiKey === undefined
+        ...(ai.openaiApiKey === undefined
           ? {}
-          : {openaiApiKey: environment.openaiApiKey}),
-        ...(environment.anthropicApiKey === undefined
+          : {openaiApiKey: ai.openaiApiKey}),
+        ...(ai.anthropicApiKey === undefined
           ? {}
-          : {anthropicApiKey: environment.anthropicApiKey}),
+          : {anthropicApiKey: ai.anthropicApiKey}),
       },
       system: BOARD_REPORTER_SYSTEM_PROMPT,
       runtime: createAgentRuntime({

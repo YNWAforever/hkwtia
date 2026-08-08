@@ -2,7 +2,7 @@ import type {BoardFactPack} from "@/lib/ai/board-reporter/contracts";
 import {buildBoardFactPack} from "@/lib/ai/board-reporter/facts";
 import {previousHongKongMonthWindow} from "@/lib/ai/board-reporter/reporting-window";
 import type {ScheduledAgentActor} from "@/lib/auth/agent-actor";
-import {serverEnv} from "@/lib/config/env";
+import {automationEnv} from "@/lib/config/env";
 import {
   createJobPost,
   JobRequestError,
@@ -83,7 +83,7 @@ export function createBoardReporterPost(
   options: BoardReporterRouteOptions = {},
 ): (request: Request) => Promise<Response> {
   const clock = options.now ?? (() => new Date());
-  const configuredSecret = options.secret ?? (() => serverEnv().cronSecret);
+  const configuredSecret = options.secret ?? (() => automationEnv().cronSecret);
   const buildFacts = options.buildFactPack ?? productionFactPack;
   const runner = options.runner ?? jobRunners.boardReporter;
   const livePost = createJobPost({

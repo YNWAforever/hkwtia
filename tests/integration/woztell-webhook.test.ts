@@ -248,4 +248,44 @@ describe("WOZTELL webhook route", () => {
     expect(BODY).not.toContain("WOZTELL_API_TOKEN");
     expect(BODY).not.toContain("WOZTELL_CHANNEL_ID");
   });
+
+  it("loads only app and AI contracts for the production WOZTELL route", async () => {
+    vi.resetModules();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv(
+      "CONCIERGE_COOKIE_SECRET",
+      "concierge-cookie-secret-that-is-at-least-32-bytes",
+    );
+    vi.stubEnv("APP_URL", "https://www.hkwtia.org");
+
+    const createProductionWoztellProcessorDependencies = vi.fn(() =>
+      processorDependencies(),
+    );
+    const withDurableWoztellReplyState = vi.fn((input) => input);
+    const createWoztellAdapterMock = vi.fn(() => verifiedChannel());
+
+    vi.doMock("@/lib/ai/woztell-production", () => ({
+      createProductionWoztellProcessorDependencies,
+    }));
+    vi.doMock("@/lib/ai/woztell-reply-state", () => ({
+      withDurableWoztellReplyState,
+    }));
+    vi.doMock("@/lib/channels/woztell", async () => {
+      const actual = await vi.importActual<typeof import("@/lib/channels/woztell")>(
+        "@/lib/channels/woztell",
+      );
+      return {
+        ...actual,
+        createWoztellAdapter: createWoztellAdapterMock,
+      };
+    });
+
+    const route = await import("@/app/api/webhooks/woztell/route");
+    const response = await route.POST(request(BODY, signature(BODY)));
+
+    expect(response.status).toBe(202);
+    expect(createWoztellAdapterMock).toHaveBeenCalledOnce();
+    expect(createProductionWoztellProcessorDependencies).toHaveBeenCalledOnce();
+    expect(withDurableWoztellReplyState).toHaveBeenCalledOnce();
+  });
 });

@@ -44,4 +44,42 @@ describe("Stripe webhook route", () => {
     }));
     expect(response.status).toBe(500);
   });
+
+  it("loads only the billing contract for the production webhook handler", async () => {
+    vi.resetModules();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_example");
+    vi.stubEnv("STRIPE_WEBHOOK_SECRET", "whsec_example");
+    vi.stubEnv("STRIPE_STARTUP_PRICE_ID", "price_startup");
+    vi.stubEnv("STRIPE_CORPORATE_PRICE_ID", "price_corporate");
+
+    const constructEvent = vi.fn(() => checkoutCompleted());
+    const processStripeEvent = vi.fn(async () => "processed" as const);
+    const Stripe = vi.fn(() => ({
+      webhooks: {constructEvent},
+    }));
+
+    vi.doMock("stripe", () => ({default: Stripe}));
+    vi.doMock("@/lib/billing/webhook-service", async () => {
+      const actual = await vi.importActual<typeof import("@/lib/billing/webhook-service")>(
+        "@/lib/billing/webhook-service",
+      );
+      return {
+        ...actual,
+        processStripeEvent,
+      };
+    });
+
+    const route = await import("@/app/api/stripe/webhook/route");
+    const response = await route.POST(new Request("http://localhost/api/stripe/webhook", {
+      method: "POST",
+      body: "raw",
+      headers: {"stripe-signature": "valid"},
+    }));
+
+    expect(response.status).toBe(200);
+    expect(Stripe).toHaveBeenCalledWith("sk_test_example");
+    expect(constructEvent).toHaveBeenCalledWith("raw", "valid", "whsec_example");
+    expect(processStripeEvent).toHaveBeenCalledOnce();
+  });
 });

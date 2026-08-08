@@ -37,6 +37,11 @@ export interface AutomationEnv {
   cronSecret: string;
 }
 
+export interface UnsubscribeEnv {
+  unsubscribeTokenSecret: string;
+  cronSecret: string;
+}
+
 export interface AiEnv {
   agentsEnabled: boolean;
   agentModelConcierge: string;
@@ -309,6 +314,19 @@ export function parseAutomationEnv(environment: Environment = process.env): Auto
 
 export function automationEnv(): AutomationEnv {
   return parseAutomationEnv(process.env);
+}
+
+export function parseUnsubscribeEnv(environment: Environment = process.env): UnsubscribeEnv {
+  requireProductionKeys(environment, ["UNSUBSCRIBE_TOKEN_SECRET", "CRON_SECRET"]);
+
+  return {
+    unsubscribeTokenSecret: valueFor(environment, "UNSUBSCRIBE_TOKEN_SECRET"),
+    cronSecret: valueFor(environment, "CRON_SECRET"),
+  };
+}
+
+export function unsubscribeEnv(): UnsubscribeEnv {
+  return parseUnsubscribeEnv(process.env);
 }
 
 export function parseAiEnv(environment: Environment = process.env): AiEnv {

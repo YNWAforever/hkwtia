@@ -5,7 +5,7 @@ import type {Actor, MembershipPlanCode, MembershipRecord} from "@/lib/membership
 import type {BillingAttempt} from "@/lib/db/server-schema";
 import {billingAttemptsRepository} from "@/lib/db/repos/billing-attempts";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
-import {serverEnv} from "@/lib/config/env";
+import {appEnv, billingEnv} from "@/lib/config/env";
 import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
 import {localizedPath} from "@/lib/urls";
 
@@ -23,16 +23,17 @@ export type CheckoutDependencies = Readonly<{
 }>;
 
 function defaultDependencies(): CheckoutDependencies {
-  const environment = serverEnv();
+  const app = appEnv();
+  const billing = billingEnv();
   return {
     stripe: stripeBillingAdapter(),
     memberships: membershipsRepository,
     attempts: billingAttemptsRepository,
-    appUrl: environment.appUrl,
+    appUrl: app.appUrl,
     priceForPlan: (planCode) => {
       const price = planCode === "startup"
-        ? environment.stripeStartupPriceId
-        : planCode === "corporate" ? environment.stripeCorporatePriceId : "";
+        ? billing.stripeStartupPriceId
+        : planCode === "corporate" ? billing.stripeCorporatePriceId : "";
       if (!price.trim()) throw new Error("STRIPE_PRICE_NOT_CONFIGURED");
       return price;
     },

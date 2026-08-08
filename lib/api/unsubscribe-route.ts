@@ -1,6 +1,6 @@
 import "server-only";
 
-import {serverEnv} from "@/lib/config/env";
+import {appEnv, unsubscribeEnv} from "@/lib/config/env";
 import {
   suppressionsRepository,
   unsubscribeActor,
@@ -121,8 +121,11 @@ export function createUnsubscribePost(dependencies: Dependencies) {
 export const POST = createUnsubscribePost({
   // Legacy fallback: links already in inboxes were signed with CRON_SECRET.
   // Remove it after LEGACY_UNSUBSCRIBE_SECRET_SUNSET.
-  secrets: () => [serverEnv().unsubscribeTokenSecret, serverEnv().cronSecret],
-  appUrl: () => serverEnv().appUrl,
+  secrets: () => {
+    const env = unsubscribeEnv();
+    return [env.unsubscribeTokenSecret, env.cronSecret];
+  },
+  appUrl: () => appEnv().appUrl,
   unsubscribeEmailMarketing(profileId) {
     return suppressionsRepository.unsubscribeEmailMarketing(
       unsubscribeActor(),

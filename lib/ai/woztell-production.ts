@@ -8,7 +8,7 @@ import type {WoztellWebhookProcessorDependencies} from "@/lib/ai/woztell-webhook
 import {createAgentRuntime} from "@/lib/ai/runtime";
 import {createConciergeTools} from "@/lib/ai/tools/registry";
 import type {ChannelAdapter} from "@/lib/channels/types";
-import type {serverEnv} from "@/lib/config/env";
+import type {AiEnv, AppEnv} from "@/lib/config/env";
 import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {agentToolsRepository} from "@/lib/db/repos/agent-tools";
 import {conversationsRepository} from "@/lib/db/repos/conversations";
@@ -26,7 +26,7 @@ import {
   createWoztellRunRecoveryRepository,
 } from "@/lib/db/repos/woztell-run-recovery";
 
-type RuntimeEnvironment = ReturnType<typeof serverEnv>;
+type RuntimeEnvironment = AppEnv & AiEnv;
 
 function duplicateKey(error: unknown): boolean {
   return Boolean(

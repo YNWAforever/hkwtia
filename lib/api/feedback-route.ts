@@ -5,7 +5,7 @@ import {
   resolveAnonymousOwnership,
 } from "@/lib/ai/conversation-cookie";
 import {getActor} from "@/lib/auth/actor";
-import {serverEnv} from "@/lib/config/env";
+import {aiEnv, appEnv} from "@/lib/config/env";
 import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
 import type {ConversationOwner} from "@/lib/db/repos/conversations";
 import {BoundedBodyError, readBoundedText} from "@/lib/security/bounded-body";
@@ -146,9 +146,9 @@ export async function POST(
   request: Request,
   context: RouteContext,
 ): Promise<Response> {
-  const env = serverEnv();
+  const env = aiEnv();
   return createFeedbackPostHandler({
-    expectedOrigin: env.appUrl || new URL(request.url).origin,
+    expectedOrigin: appEnv().appUrl || new URL(request.url).origin,
     cookieSecret: env.conciergeCookieSecret ?? "",
     getActor: async () => {
       const actor = await getActor();

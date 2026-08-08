@@ -1,9 +1,12 @@
-import {describe, expect, it, vi} from "vitest";
+import {afterEach, describe, expect, it, vi} from "vitest";
 
-import type {Actor} from "@/lib/membership/lifecycle";
+import type {Actor, MembershipRecord} from "@/lib/membership/lifecycle";
 import type {BillingAttempt} from "@/lib/db/server-schema";
 import type {CheckoutSessionReference} from "@/lib/db/repos/billing-attempts";
+import {billingAttemptsRepository} from "@/lib/db/repos/billing-attempts";
+import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {createBillingPortalSession, createCheckoutSession} from "@/lib/billing/checkout-service";
+import * as stripeModule from "@/lib/billing/stripe";
 import {listReceipts} from "@/lib/billing/receipt-service";
 import {actorFor, FakeStripeBillingAdapter} from "@/tests/helpers/fakes";
 
@@ -66,6 +69,11 @@ function dependencies(record = membership()) {
   };
 }
 
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllEnvs();
+});
+
 describe("membership checkout", () => {
   it("uses the same idempotency key for retries of one membership", async () => {
     const setup = dependencies();
@@ -109,6 +117,56 @@ describe("membership checkout", () => {
     await createCheckoutSession(actor, membershipId, "en", setup.dependencies);
     expect(setup.dependencies.memberships.getBillingAccess).toHaveBeenCalledWith(actor, membershipId);
     expect(setup.dependencies.memberships.getById).not.toHaveBeenCalled();
+  });
+
+  it("loads only billing and app contracts in the default checkout dependency loader", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("APP_URL", "https://members.example.test");
+    vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_example");
+    vi.stubEnv("STRIPE_WEBHOOK_SECRET", "whsec_example");
+    vi.stubEnv("STRIPE_STARTUP_PRICE_ID", "price_startup");
+    vi.stubEnv("STRIPE_CORPORATE_PRICE_ID", "price_corporate");
+
+    const actor = actorFor("user@example.test");
+    const record = membership() as MembershipRecord;
+    const attempt: BillingAttempt = {
+      id: "attempt-default-1",
+      membershipId,
+      attemptNumber: 1,
+      idempotencyKey: `membership-checkout:${membershipId}:1`,
+      priceReference: "price_startup",
+      state: "active",
+      stripeCheckoutSessionId: null,
+      checkoutUrl: null,
+      recoveryRequestId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      endedAt: null,
+    };
+    const stripe = new FakeStripeBillingAdapter();
+
+    vi.spyOn(stripeModule, "stripeBillingAdapter").mockReturnValue(stripe);
+    vi.spyOn(membershipsRepository, "getBillingAccess").mockResolvedValue(
+      record as Awaited<ReturnType<typeof membershipsRepository.getBillingAccess>>,
+    );
+    vi.spyOn(billingAttemptsRepository, "claimActive").mockResolvedValue(
+      {
+        attempt,
+        disposition: "existing",
+        membership: record,
+      } as Awaited<ReturnType<typeof billingAttemptsRepository.claimActive>>,
+    );
+    vi.spyOn(billingAttemptsRepository, "attachSession").mockImplementation(
+      async (_actor: Actor, _id: string, reference: CheckoutSessionReference) => ({
+        ...attempt,
+        stripeCheckoutSessionId: reference.stripeCheckoutSessionId,
+        checkoutUrl: reference.checkoutUrl,
+      }),
+    );
+
+    await expect(
+      createCheckoutSession(actor, membershipId, "en"),
+    ).resolves.toEqual({url: stripe.checkoutUrl});
   });
 });
 

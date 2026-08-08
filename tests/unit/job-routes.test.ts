@@ -93,6 +93,33 @@ describe("job route exports and security", () => {
     expect(unauthorized.status).toBe(401);
     await expect(unauthorized.json()).resolves.toEqual({error: "UNAUTHORIZED"});
   });
+
+  it("loads the default job secret from the automation contract only", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("CRON_SECRET", "cron-secret");
+
+    const post = createJobPost({
+      kind: "journey-runner",
+      bucket: "hourly",
+      jobs: {
+        claim: vi.fn(async () => ({status: "claimed" as const, attemptCount: 1})),
+        complete: vi.fn(async () => true),
+        fail: vi.fn(async () => true),
+      },
+      run: async () => ({ok: true}),
+    });
+
+    const response = await post(new Request("http://localhost/api/jobs/test", {
+      method: "POST",
+      headers: {authorization: "Bearer cron-secret"},
+    }));
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      duplicate: false,
+      summary: {ok: true},
+    });
+  });
 });
 
 describe("production runner composition", () => {

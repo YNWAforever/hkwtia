@@ -9,7 +9,7 @@ import {
 import {withDurableWoztellReplyState} from "@/lib/ai/woztell-reply-state";
 import type {ChannelAdapter} from "@/lib/channels/types";
 import {createWoztellAdapter} from "@/lib/channels/woztell";
-import {serverEnv} from "@/lib/config/env";
+import {aiEnv} from "@/lib/config/env";
 import {readBoundedText} from "@/lib/security/bounded-body";
 
 const MAX_WEBHOOK_BYTES = 64 * 1_024;
@@ -64,7 +64,7 @@ export function createProductionWoztellWebhookPostHandler(
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const env = serverEnv();
+  const env = aiEnv();
   const channel = createWoztellAdapter({
     ...(env.woztellApiToken === undefined
       ? {}

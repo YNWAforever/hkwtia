@@ -4,7 +4,7 @@ import {
   automationCronActor,
   type AutomationCronActor,
 } from "@/lib/auth/automation-actor";
-import {serverEnv} from "@/lib/config/env";
+import {automationEnv} from "@/lib/config/env";
 import {
   jobsRepository,
   type JobClaimResult as RepositoryJobClaimResult,
@@ -159,7 +159,7 @@ export function createJobPost<T = undefined>(
   }
   const jobs = options.jobs ?? jobsRepository;
   const clock = options.now ?? (() => new Date());
-  const secret = options.secret ?? (() => serverEnv().cronSecret);
+  const secret = options.secret ?? (() => automationEnv().cronSecret);
   const actor = automationCronActor();
 
   return async function post(request: Request): Promise<Response> {

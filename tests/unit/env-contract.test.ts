@@ -84,6 +84,21 @@ describe("runtime environment contract", () => {
     })).toEqual({cronSecret: "cron-secret"});
   });
 
+  it("accepts production-like billing and automation profiles without unrelated keys", () => {
+    expect(() => parseBillingEnv({
+      NODE_ENV: "production",
+      STRIPE_SECRET_KEY: "sk_test_example",
+      STRIPE_WEBHOOK_SECRET: "whsec_example",
+      STRIPE_STARTUP_PRICE_ID: "price_startup",
+      STRIPE_CORPORATE_PRICE_ID: "price_corporate",
+    })).not.toThrow();
+
+    expect(() => parseAutomationEnv({
+      NODE_ENV: "production",
+      CRON_SECRET: "cron-secret",
+    })).not.toThrow();
+  });
+
   it("reads feature accessors from process.env without cross-feature validation", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("DATABASE_URL", "postgres://db.example.test/hkwtia");
