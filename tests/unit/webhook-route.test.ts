@@ -1,6 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
 import {createWebhookPost} from "@/lib/api/stripe-webhook-route";
+import {STRIPE_API_VERSION} from "@/lib/billing/stripe-api-version";
 import {checkoutCompleted} from "@/tests/fixtures/stripe-events";
 
 describe("Stripe webhook route", () => {
@@ -79,7 +80,7 @@ describe("Stripe webhook route", () => {
     }));
 
     expect(response.status).toBe(200);
-    expect(Stripe).toHaveBeenCalledWith("sk_test_example");
+    expect(Stripe).toHaveBeenCalledWith("sk_test_example", {apiVersion: STRIPE_API_VERSION});
     expect(constructEvent).toHaveBeenCalledWith("raw", "valid", "whsec_example");
     expect(processStripeEvent).toHaveBeenCalledOnce();
   });
