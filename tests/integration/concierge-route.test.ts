@@ -296,15 +296,9 @@ describe("Concierge SSE route", () => {
         createConciergeService: vi.fn(() => ({startTurn})),
       };
     });
-    vi.doMock("@/lib/auth/actor", async () => {
-      const actual = await vi.importActual<typeof import("@/lib/auth/actor")>(
-        "@/lib/auth/actor",
-      );
-      return {
-        ...actual,
-        getActor: vi.fn(async () => null),
-      };
-    });
+    vi.doMock("@/lib/auth/actor", () => ({
+      getActor: vi.fn(async () => null),
+    }));
 
     const route = await import("@/app/api/ai/concierge/route");
     const response = await route.POST(request({message: "Hello", locale: "en"}));
@@ -415,15 +409,9 @@ describe("owned Concierge feedback route", () => {
 
     const recordFeedback = vi.fn(async () => ({id: RUN_ID, csatScore: 5}));
 
-    vi.doMock("@/lib/auth/actor", async () => {
-      const actual = await vi.importActual<typeof import("@/lib/auth/actor")>(
-        "@/lib/auth/actor",
-      );
-      return {
-        ...actual,
-        getActor: vi.fn(async () => ({profileId: "profile-1"})),
-      };
-    });
+    vi.doMock("@/lib/auth/actor", () => ({
+      getActor: vi.fn(async () => ({profileId: "profile-1"})),
+    }));
     vi.doMock("@/lib/db/repos/agent-runs", async () => {
       const actual = await vi.importActual<typeof import("@/lib/db/repos/agent-runs")>(
         "@/lib/db/repos/agent-runs",
