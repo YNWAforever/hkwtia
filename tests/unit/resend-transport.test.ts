@@ -1,6 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
 import {
+  createConfiguredResendTransport,
   createResendTransport,
   createConfiguredEmailTransport,
   createPreviewTestTransport,
@@ -117,5 +118,14 @@ describe("email transports", () => {
       status: "sent",
       providerId: `test:${input.idempotencyKey}`,
     });
+  });
+
+  it("loads configured transports from the email contract without unrelated production secrets", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("RESEND_API_KEY", "re_test_example");
+    vi.stubEnv("EMAIL_FROM", "WTIA <notifications@example.test>");
+
+    expect(() => createConfiguredResendTransport()).not.toThrow();
+    expect(() => createConfiguredEmailTransport()).not.toThrow();
   });
 });

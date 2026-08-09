@@ -9,7 +9,7 @@ import {requireActor} from "@/lib/auth/actor";
 import {changeSeatRole, inviteSeat, revokeInvitation, revokeSeat, type SeatRole} from "@/lib/db/repos/seats";
 import {getSeatOverview} from "@/lib/portal/seats";
 import {localizedPath} from "@/lib/urls";
-import {serverEnv} from "@/lib/config/env";
+import {appEnv} from "@/lib/config/env";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +20,7 @@ function seatErrorPath(locale: AppLocale): string {
 }
 
 function invitationCallbackUrl(locale: AppLocale, token: string): string {
-  const url = new URL(localizedPath(locale, "/portal/company/seats/accept"), serverEnv().appUrl);
+  const url = new URL(localizedPath(locale, "/portal/company/seats/accept"), appEnv().appUrl);
   url.searchParams.set("token", token);
   return url.toString();
 }

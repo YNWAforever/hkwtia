@@ -10,8 +10,8 @@ import type {AppLocale} from "@/i18n/routing";
 import {auth} from "@/lib/auth/server";
 import {checkAuthSend} from "@/lib/auth/rate-limit";
 import {requireActor} from "@/lib/auth/actor";
+import {appEnv} from "@/lib/config/env";
 import {clientIpFromHeaders} from "@/lib/security/request-origin";
-import {serverEnv} from "@/lib/config/env";
 import {applicationsRepository} from "@/lib/db/repos/applications";
 import {companiesRepository} from "@/lib/db/repos/companies";
 import {profilesRepository} from "@/lib/db/repos/profiles";
@@ -51,7 +51,7 @@ export async function requestMagicLink(locale: AppLocale, plan: PlanCode | null,
     email: email.data,
   });
   if (!send.allowed) return {message: t("errors.rateLimited")};
-  const callbackURL = buildJoinCallback(serverEnv().appUrl, locale, plan, next);
+  const callbackURL = buildJoinCallback(appEnv().appUrl, locale, plan, next);
 
   try {
     const result = await auth.signIn.magicLink({email: email.data, callbackURL});

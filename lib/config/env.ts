@@ -6,6 +6,55 @@ import {parseAgentModel} from "@/lib/ai/model";
 
 export {parseAgentModel};
 export type {AgentModel} from "@/lib/ai/model";
+
+export interface DatabaseEnv {
+  databaseUrl: string;
+}
+
+export interface AuthEnv {
+  neonAuthBaseUrl: string;
+  neonAuthCookieSecret: string;
+}
+
+export interface AppEnv {
+  appUrl: string;
+}
+
+export interface EmailEnv {
+  resendApiKey: string;
+  emailFrom: string;
+  emailDeliveryMode: "resend" | "test";
+}
+
+export interface BillingEnv {
+  stripeSecretKey: string;
+  stripeWebhookSecret: string;
+  stripeStartupPriceId: string;
+  stripeCorporatePriceId: string;
+}
+
+export interface AutomationEnv {
+  cronSecret: string;
+}
+
+export interface UnsubscribeEnv {
+  unsubscribeTokenSecret: string;
+  cronSecret: string;
+}
+
+export interface AiEnv {
+  agentsEnabled: boolean;
+  agentModelConcierge: string;
+  openaiApiKey?: string;
+  anthropicApiKey?: string;
+  conciergeCookieSecret?: string;
+  woztellApiToken?: string;
+  woztellChannelId?: string;
+  woztellWebhookSecret?: string;
+  turnstileSecret?: string;
+  turnstileSiteKey?: string;
+}
+
 export interface ServerEnv {
   databaseUrl: string;
   neonAuthBaseUrl: string;
@@ -63,6 +112,20 @@ const serverKeys = [
 function valueFor(environment: Environment, key: string): string {
   return environment[key] ?? "";
 }
+
+function requireProductionKeys(
+  environment: Environment,
+  keys: readonly string[],
+): void {
+  if (environment.NODE_ENV !== "production") return;
+
+  const missing = keys.filter((key) => valueFor(environment, key).trim().length === 0);
+
+  if (missing.length > 0) {
+    throw new Error(`Missing required production environment variables: ${missing.join(", ")}`);
+  }
+}
+
 const aiEnvironmentSchema = z.object({
   AGENTS_ENABLED: z.string().optional().transform((value) => value === "true"),
   AGENT_MODEL_CONCIERGE: z.string().default("openai:gpt-4.1-mini"),
@@ -84,6 +147,35 @@ const aiEnvironmentSchema = z.object({
     {message: "TURNSTILE_SITE_KEY must not be blank"},
   ).optional(),
 });
+
+function parseAiEnvironment(environment: Environment): AiEnv {
+  const ai = aiEnvironmentSchema.parse(environment);
+  parseAgentModel(ai.AGENT_MODEL_CONCIERGE);
+
+  if (environment.NODE_ENV === "production") {
+    const conciergeSecret = valueFor(environment, "CONCIERGE_COOKIE_SECRET");
+    requireProductionKeys(environment, ["CONCIERGE_COOKIE_SECRET"]);
+    if (Buffer.byteLength(conciergeSecret, "utf8") < 32) {
+      throw new Error("CONCIERGE_COOKIE_SECRET must be at least 32 bytes");
+    }
+    if (conciergeSecret === valueFor(environment, "NEON_AUTH_COOKIE_SECRET")) {
+      throw new Error("CONCIERGE_COOKIE_SECRET must not reuse NEON_AUTH_COOKIE_SECRET");
+    }
+  }
+
+  return {
+    agentsEnabled: ai.AGENTS_ENABLED,
+    agentModelConcierge: ai.AGENT_MODEL_CONCIERGE,
+    ...(ai.OPENAI_API_KEY === undefined ? {} : {openaiApiKey: ai.OPENAI_API_KEY}),
+    ...(ai.ANTHROPIC_API_KEY === undefined ? {} : {anthropicApiKey: ai.ANTHROPIC_API_KEY}),
+    ...(ai.CONCIERGE_COOKIE_SECRET === undefined ? {} : {conciergeCookieSecret: ai.CONCIERGE_COOKIE_SECRET}),
+    ...(ai.WOZTELL_API_TOKEN === undefined ? {} : {woztellApiToken: ai.WOZTELL_API_TOKEN}),
+    ...(ai.WOZTELL_CHANNEL_ID === undefined ? {} : {woztellChannelId: ai.WOZTELL_CHANNEL_ID}),
+    ...(ai.WOZTELL_WEBHOOK_SECRET === undefined ? {} : {woztellWebhookSecret: ai.WOZTELL_WEBHOOK_SECRET}),
+    ...(ai.TURNSTILE_SECRET === undefined ? {} : {turnstileSecret: ai.TURNSTILE_SECRET}),
+    ...(ai.TURNSTILE_SITE_KEY === undefined ? {} : {turnstileSiteKey: ai.TURNSTILE_SITE_KEY}),
+  };
+}
 
 function validateServerEnvironment(environment: Environment): void {
   if (environment.NODE_ENV !== "production") return;
@@ -111,10 +203,6 @@ function validateServerEnvironment(environment: Environment): void {
     throw new Error("CONCIERGE_COOKIE_SECRET must not reuse NEON_AUTH_COOKIE_SECRET");
   }
 
-  // A bearer credential and a signing key have opposite blast radii and
-  // opposite rotation lifecycles. While these were one value, anyone holding
-  // the cron bearer could mint an unsubscribe token for any profile, and
-  // rotating the bearer would have invalidated every link already delivered.
   const unsubscribeSecret = valueFor(environment, "UNSUBSCRIBE_TOKEN_SECRET");
   if (Buffer.byteLength(unsubscribeSecret, "utf8") < 32) {
     throw new Error("UNSUBSCRIBE_TOKEN_SECRET must be at least 32 bytes");
@@ -123,19 +211,11 @@ function validateServerEnvironment(environment: Environment): void {
     throw new Error("UNSUBSCRIBE_TOKEN_SECRET must not reuse CRON_SECRET");
   }
 
-  // Turnstile only works when both halves are present: the secret alone makes
-  // the server reject every request because no client can mint a token, and the
-  // site key alone renders a challenge nothing verifies.
   const turnstileSecret = valueFor(environment, "TURNSTILE_SECRET").trim();
   const turnstileSiteKey = valueFor(environment, "TURNSTILE_SITE_KEY").trim();
   if (Boolean(turnstileSecret) !== Boolean(turnstileSiteKey)) {
     throw new Error("TURNSTILE_SECRET and TURNSTILE_SITE_KEY must be set together");
   }
-  // Presence, not only pairing. `verifyTurnstile` returns true when the secret
-  // is undefined, so an unset pair silently disables the captcha in front of an
-  // unauthenticated, per-call-costed endpoint and nothing anywhere reports it.
-  // Preview is exempt for the same reason EMAIL_DELIVERY_MODE=test is above:
-  // those environments are configured separately and are not public production.
   if (!turnstileSecret && environment.VERCEL_ENV !== "preview") {
     throw new Error(
       "Missing required production environment variables: TURNSTILE_SECRET, TURNSTILE_SITE_KEY",
@@ -143,11 +223,124 @@ function validateServerEnvironment(environment: Environment): void {
   }
 }
 
+export function parseDatabaseEnv(environment: Environment = process.env): DatabaseEnv {
+  requireProductionKeys(environment, ["DATABASE_URL"]);
+
+  return {
+    databaseUrl: valueFor(environment, "DATABASE_URL"),
+  };
+}
+
+export function databaseEnv(): DatabaseEnv {
+  return parseDatabaseEnv(process.env);
+}
+
+export function parseAuthEnv(environment: Environment = process.env): AuthEnv {
+  requireProductionKeys(environment, ["NEON_AUTH_BASE_URL", "NEON_AUTH_COOKIE_SECRET"]);
+
+  return {
+    neonAuthBaseUrl: valueFor(environment, "NEON_AUTH_BASE_URL"),
+    neonAuthCookieSecret: valueFor(environment, "NEON_AUTH_COOKIE_SECRET"),
+  };
+}
+
+export function authEnv(): AuthEnv {
+  return parseAuthEnv(process.env);
+}
+
+export function parseAppEnv(environment: Environment = process.env): AppEnv {
+  requireProductionKeys(environment, ["APP_URL"]);
+
+  return {
+    appUrl: valueFor(environment, "APP_URL"),
+  };
+}
+
+export function appEnv(): AppEnv {
+  return parseAppEnv(process.env);
+}
+
+export function parseEmailEnv(environment: Environment = process.env): EmailEnv {
+  const previewTestEmail =
+    environment.NODE_ENV === "production"
+    && environment.VERCEL_ENV === "preview"
+    && environment.EMAIL_DELIVERY_MODE === "test";
+
+  if (!previewTestEmail) {
+    requireProductionKeys(environment, ["RESEND_API_KEY", "EMAIL_FROM"]);
+  }
+
+  return {
+    resendApiKey: valueFor(environment, "RESEND_API_KEY"),
+    emailFrom: valueFor(environment, "EMAIL_FROM"),
+    emailDeliveryMode:
+      valueFor(environment, "EMAIL_DELIVERY_MODE") === "test"
+        ? "test"
+        : "resend",
+  };
+}
+
+export function emailEnv(): EmailEnv {
+  return parseEmailEnv(process.env);
+}
+
+export function parseBillingEnv(environment: Environment = process.env): BillingEnv {
+  requireProductionKeys(environment, [
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+    "STRIPE_STARTUP_PRICE_ID",
+    "STRIPE_CORPORATE_PRICE_ID",
+  ]);
+
+  return {
+    stripeSecretKey: valueFor(environment, "STRIPE_SECRET_KEY"),
+    stripeWebhookSecret: valueFor(environment, "STRIPE_WEBHOOK_SECRET"),
+    stripeStartupPriceId: valueFor(environment, "STRIPE_STARTUP_PRICE_ID"),
+    stripeCorporatePriceId: valueFor(environment, "STRIPE_CORPORATE_PRICE_ID"),
+  };
+}
+
+export function billingEnv(): BillingEnv {
+  return parseBillingEnv(process.env);
+}
+
+export function parseAutomationEnv(environment: Environment = process.env): AutomationEnv {
+  requireProductionKeys(environment, ["CRON_SECRET"]);
+
+  return {
+    cronSecret: valueFor(environment, "CRON_SECRET"),
+  };
+}
+
+export function automationEnv(): AutomationEnv {
+  return parseAutomationEnv(process.env);
+}
+
+export function parseUnsubscribeEnv(environment: Environment = process.env): UnsubscribeEnv {
+  requireProductionKeys(environment, ["UNSUBSCRIBE_TOKEN_SECRET", "CRON_SECRET"]);
+
+  return {
+    unsubscribeTokenSecret: valueFor(environment, "UNSUBSCRIBE_TOKEN_SECRET"),
+    cronSecret: valueFor(environment, "CRON_SECRET"),
+  };
+}
+
+export function unsubscribeEnv(): UnsubscribeEnv {
+  return parseUnsubscribeEnv(process.env);
+}
+
+export function parseAiEnv(environment: Environment = process.env): AiEnv {
+  return parseAiEnvironment(environment);
+}
+
+export function aiEnv(): AiEnv {
+  return parseAiEnv(process.env);
+}
+
 export function parseServerEnv(environment: Environment = process.env): ServerEnv {
   validateServerEnvironment(environment);
 
-  const ai = aiEnvironmentSchema.parse(environment);
-  parseAgentModel(ai.AGENT_MODEL_CONCIERGE);
+  const ai = parseAiEnvironment(environment);
 
   return {
     databaseUrl: valueFor(environment, "DATABASE_URL"),
@@ -166,16 +359,16 @@ export function parseServerEnv(environment: Environment = process.env): ServerEn
     cronSecret: valueFor(environment, "CRON_SECRET"),
     unsubscribeTokenSecret: valueFor(environment, "UNSUBSCRIBE_TOKEN_SECRET"),
     appUrl: valueFor(environment, "APP_URL"),
-    agentsEnabled: ai.AGENTS_ENABLED,
-    agentModelConcierge: ai.AGENT_MODEL_CONCIERGE,
-    ...(ai.OPENAI_API_KEY === undefined ? {} : {openaiApiKey: ai.OPENAI_API_KEY}),
-    ...(ai.ANTHROPIC_API_KEY === undefined ? {} : {anthropicApiKey: ai.ANTHROPIC_API_KEY}),
-    ...(ai.CONCIERGE_COOKIE_SECRET === undefined ? {} : {conciergeCookieSecret: ai.CONCIERGE_COOKIE_SECRET}),
-    ...(ai.WOZTELL_API_TOKEN === undefined ? {} : {woztellApiToken: ai.WOZTELL_API_TOKEN}),
-    ...(ai.WOZTELL_CHANNEL_ID === undefined ? {} : {woztellChannelId: ai.WOZTELL_CHANNEL_ID}),
-    ...(ai.WOZTELL_WEBHOOK_SECRET === undefined ? {} : {woztellWebhookSecret: ai.WOZTELL_WEBHOOK_SECRET}),
-    ...(ai.TURNSTILE_SECRET === undefined ? {} : {turnstileSecret: ai.TURNSTILE_SECRET}),
-    ...(ai.TURNSTILE_SITE_KEY === undefined ? {} : {turnstileSiteKey: ai.TURNSTILE_SITE_KEY}),
+    agentsEnabled: ai.agentsEnabled,
+    agentModelConcierge: ai.agentModelConcierge,
+    ...(ai.openaiApiKey === undefined ? {} : {openaiApiKey: ai.openaiApiKey}),
+    ...(ai.anthropicApiKey === undefined ? {} : {anthropicApiKey: ai.anthropicApiKey}),
+    ...(ai.conciergeCookieSecret === undefined ? {} : {conciergeCookieSecret: ai.conciergeCookieSecret}),
+    ...(ai.woztellApiToken === undefined ? {} : {woztellApiToken: ai.woztellApiToken}),
+    ...(ai.woztellChannelId === undefined ? {} : {woztellChannelId: ai.woztellChannelId}),
+    ...(ai.woztellWebhookSecret === undefined ? {} : {woztellWebhookSecret: ai.woztellWebhookSecret}),
+    ...(ai.turnstileSecret === undefined ? {} : {turnstileSecret: ai.turnstileSecret}),
+    ...(ai.turnstileSiteKey === undefined ? {} : {turnstileSiteKey: ai.turnstileSiteKey}),
   };
 }
 

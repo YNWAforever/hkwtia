@@ -1,6 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
 import {createWebhookPost} from "@/lib/api/stripe-webhook-route";
+import {STRIPE_API_VERSION} from "@/lib/billing/stripe-api-version";
 import {checkoutCompleted} from "@/tests/fixtures/stripe-events";
 
 describe("Stripe webhook route", () => {
@@ -43,5 +44,44 @@ describe("Stripe webhook route", () => {
       method: "POST", body: "raw", headers: {"stripe-signature": "valid"},
     }));
     expect(response.status).toBe(500);
+  });
+
+  it("loads only the billing contract for the production webhook handler", async () => {
+    vi.resetModules();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_example");
+    vi.stubEnv("STRIPE_WEBHOOK_SECRET", "whsec_example");
+    vi.stubEnv("STRIPE_STARTUP_PRICE_ID", "price_startup");
+    vi.stubEnv("STRIPE_CORPORATE_PRICE_ID", "price_corporate");
+
+    const constructEvent = vi.fn(() => checkoutCompleted());
+    const processStripeEvent = vi.fn(async () => "processed" as const);
+    const Stripe = vi.fn(() => ({
+      webhooks: {constructEvent},
+    }));
+
+    vi.doMock("stripe", () => ({default: Stripe}));
+    vi.doMock("@/lib/billing/webhook-service", () => ({
+      WebhookInputError: class WebhookInputError extends Error {
+        readonly code = "INVALID_WEBHOOK_EVENT";
+        constructor() {
+          super("INVALID_WEBHOOK_EVENT");
+          this.name = "WebhookInputError";
+        }
+      },
+      processStripeEvent,
+    }));
+
+    const route = await import("@/app/api/stripe/webhook/route");
+    const response = await route.POST(new Request("http://localhost/api/stripe/webhook", {
+      method: "POST",
+      body: "raw",
+      headers: {"stripe-signature": "valid"},
+    }));
+
+    expect(response.status).toBe(200);
+    expect(Stripe).toHaveBeenCalledWith("sk_test_example", {apiVersion: STRIPE_API_VERSION});
+    expect(constructEvent).toHaveBeenCalledWith("raw", "valid", "whsec_example");
+    expect(processStripeEvent).toHaveBeenCalledOnce();
   });
 });

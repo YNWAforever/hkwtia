@@ -12,7 +12,7 @@ import {
 import {verifyCronBearer} from "@/lib/jobs/auth";
 import {M4_AI_JOB_KIND} from "@/lib/jobs/kinds";
 import {jobRunners} from "@/lib/jobs/runners";
-import {serverEnv} from "@/lib/config/env";
+import {automationEnv} from "@/lib/config/env";
 
 type RetentionAnalystRouteOptions = Readonly<{
   candidates?: RetentionAnalystRepository;
@@ -72,7 +72,7 @@ export function createRetentionAnalystPost(
   options: RetentionAnalystRouteOptions = {},
 ): (request: Request) => Promise<Response> {
   const clock = options.now ?? (() => new Date());
-  const configuredSecret = options.secret ?? (() => serverEnv().cronSecret);
+  const configuredSecret = options.secret ?? (() => automationEnv().cronSecret);
   const candidates = options.candidates ?? retentionAnalystRepository;
   const runner = options.runner ?? jobRunners.retentionAnalyst;
   const livePost = createJobPost({

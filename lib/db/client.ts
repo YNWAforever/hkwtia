@@ -3,9 +3,9 @@ import "server-only";
 import {Pool} from "@neondatabase/serverless";
 import {drizzle} from "drizzle-orm/neon-serverless";
 
-import {serverEnv} from "@/lib/config/env";
+import {databaseEnv} from "@/lib/config/env";
 
-const {databaseUrl} = serverEnv();
+const {databaseUrl} = databaseEnv();
 
 if (!databaseUrl) {
   throw new Error("DATABASE_URL is required to initialize the database client.");

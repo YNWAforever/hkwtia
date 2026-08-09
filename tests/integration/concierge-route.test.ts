@@ -261,6 +261,52 @@ describe("Concierge SSE route", () => {
       error: "CONVERSATION_NOT_FOUND",
     });
   });
+
+  it("loads only app and AI contracts for the production Concierge route", async () => {
+    vi.resetModules();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("APP_URL", "https://www.hkwtia.org");
+    vi.stubEnv("CONCIERGE_COOKIE_SECRET", SECRET);
+
+    const startTurn = vi.fn(async ({owner}: {owner: unknown}) => ({
+      conversationId: CONVERSATION_ID,
+      runId: RUN_ID,
+      owner,
+      events: {
+        async *[Symbol.asyncIterator]() {
+          yield {
+            event: "meta",
+            data: {conversationId: CONVERSATION_ID, runId: RUN_ID},
+          } as const;
+          yield {
+            event: "done",
+            data: {citations: [], escalationId: null},
+          } as const;
+        },
+      },
+      cancel: vi.fn(async () => undefined),
+    }));
+
+    vi.doMock("@/lib/ai/agents/concierge", async () => {
+      const actual = await vi.importActual<typeof import("@/lib/ai/agents/concierge")>(
+        "@/lib/ai/agents/concierge",
+      );
+      return {
+        ...actual,
+        createConciergeService: vi.fn(() => ({startTurn})),
+      };
+    });
+    vi.doMock("@/lib/auth/actor", () => ({
+      getActor: vi.fn(async () => null),
+    }));
+
+    const route = await import("@/app/api/ai/concierge/route");
+    const response = await route.POST(request({message: "Hello", locale: "en"}));
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain("event: meta");
+    expect(startTurn).toHaveBeenCalledOnce();
+  });
 });
 
 describe("owned Concierge feedback route", () => {
@@ -352,6 +398,51 @@ describe("owned Concierge feedback route", () => {
       }),
       RUN_ID,
       4,
+    );
+  });
+
+  it("loads only app and AI contracts for the production feedback route", async () => {
+    vi.resetModules();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("APP_URL", "https://www.hkwtia.org");
+    vi.stubEnv("CONCIERGE_COOKIE_SECRET", SECRET);
+
+    const recordFeedback = vi.fn(async () => ({id: RUN_ID, csatScore: 5}));
+
+    vi.doMock("@/lib/auth/actor", () => ({
+      getActor: vi.fn(async () => ({profileId: "profile-1"})),
+    }));
+    vi.doMock("@/lib/db/repos/agent-runs", async () => {
+      const actual = await vi.importActual<typeof import("@/lib/db/repos/agent-runs")>(
+        "@/lib/db/repos/agent-runs",
+      );
+      return {
+        ...actual,
+        agentRunsRepository: {
+          ...actual.agentRunsRepository,
+          recordFeedback,
+        },
+      };
+    });
+
+    const route = await import("@/app/api/ai/conversations/[id]/feedback/route");
+    const response = await route.POST(new Request(
+      `https://www.hkwtia.org/api/ai/conversations/${RUN_ID}/feedback`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          origin: "https://www.hkwtia.org",
+        },
+        body: JSON.stringify({score: 5}),
+      },
+    ), {params: Promise.resolve({id: RUN_ID})});
+
+    expect(response.status).toBe(200);
+    expect(recordFeedback).toHaveBeenCalledWith(
+      {kind: "profile", profileId: "profile-1"},
+      RUN_ID,
+      5,
     );
   });
 });

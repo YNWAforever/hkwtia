@@ -11,6 +11,7 @@ vi.mock("@neondatabase/auth/next/server", () => ({
 describe("Neon Auth server session runtime", () => {
   beforeEach(() => {
     vi.resetModules();
+    vi.unstubAllEnvs();
     authState.getSession.mockReset();
   });
 
@@ -59,5 +60,17 @@ describe("Neon Auth server session runtime", () => {
     const {getSession} = await import("@/lib/auth/server");
 
     await expect(getSession()).resolves.toBeNull();
+  });
+
+  it.each([
+    "NEON_AUTH_BASE_URL",
+    "NEON_AUTH_COOKIE_SECRET",
+  ])("fails closed in production when %s is missing", async (missingKey) => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEON_AUTH_BASE_URL", "https://auth.example.test");
+    vi.stubEnv("NEON_AUTH_COOKIE_SECRET", "neon-cookie-secret");
+    vi.stubEnv(missingKey, "");
+
+    await expect(import("@/lib/auth/server")).rejects.toThrow(missingKey);
   });
 });

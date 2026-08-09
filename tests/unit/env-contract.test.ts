@@ -1,10 +1,127 @@
 import {afterEach, describe, expect, it, vi} from "vitest";
 
-import {parseServerEnv, publicEnv, serverEnv} from "@/lib/config/env";
+import {
+  appEnv,
+  databaseEnv,
+  parseAiEnv,
+  parseAppEnv,
+  parseAuthEnv,
+  parseBillingEnv,
+  parseDatabaseEnv,
+  parseEmailEnv,
+  parseAutomationEnv,
+  parseServerEnv,
+  publicEnv,
+  serverEnv,
+} from "@/lib/config/env";
 
 describe("runtime environment contract", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
+  });
+
+  const productionDatabase = {
+    NODE_ENV: "production",
+    DATABASE_URL: "postgres://db.example.test/hkwtia",
+  } as const;
+
+  it("parses a database contract without unrelated production secrets", () => {
+    expect(parseDatabaseEnv(productionDatabase)).toEqual({
+      databaseUrl: productionDatabase.DATABASE_URL,
+    });
+  });
+
+  it("rejects a production database contract without DATABASE_URL", () => {
+    expect(() => parseDatabaseEnv({NODE_ENV: "production"})).toThrow(
+      "DATABASE_URL",
+    );
+  });
+
+  it("parses auth and app contracts independently", () => {
+    expect(parseAuthEnv({
+      NODE_ENV: "production",
+      NEON_AUTH_BASE_URL: "https://auth.example.test",
+      NEON_AUTH_COOKIE_SECRET: "neon-cookie-secret",
+    })).toEqual({
+      neonAuthBaseUrl: "https://auth.example.test",
+      neonAuthCookieSecret: "neon-cookie-secret",
+    });
+    expect(parseAppEnv({
+      NODE_ENV: "production",
+      APP_URL: "https://www.example.test",
+    })).toEqual({appUrl: "https://www.example.test"});
+  });
+
+  it("keeps the preview-only email exception inside the email contract", () => {
+    expect(parseEmailEnv({
+      NODE_ENV: "production",
+      VERCEL_ENV: "preview",
+      EMAIL_DELIVERY_MODE: "test",
+    })).toEqual({resendApiKey: "", emailFrom: "", emailDeliveryMode: "test"});
+    expect(() => parseEmailEnv({
+      NODE_ENV: "production",
+      VERCEL_ENV: "production",
+      EMAIL_DELIVERY_MODE: "test",
+    })).toThrow("RESEND_API_KEY");
+  });
+
+  it("parses billing and automation contracts independently", () => {
+    expect(parseBillingEnv({
+      NODE_ENV: "production",
+      STRIPE_SECRET_KEY: "sk_test_example",
+      STRIPE_WEBHOOK_SECRET: "whsec_example",
+      STRIPE_STARTUP_PRICE_ID: "price_startup",
+      STRIPE_CORPORATE_PRICE_ID: "price_corporate",
+    })).toEqual({
+      stripeSecretKey: "sk_test_example",
+      stripeWebhookSecret: "whsec_example",
+      stripeStartupPriceId: "price_startup",
+      stripeCorporatePriceId: "price_corporate",
+    });
+    expect(parseAutomationEnv({
+      NODE_ENV: "production",
+      CRON_SECRET: "cron-secret",
+    })).toEqual({cronSecret: "cron-secret"});
+  });
+
+  it("accepts production-like billing and automation profiles without unrelated keys", () => {
+    expect(() => parseBillingEnv({
+      NODE_ENV: "production",
+      STRIPE_SECRET_KEY: "sk_test_example",
+      STRIPE_WEBHOOK_SECRET: "whsec_example",
+      STRIPE_STARTUP_PRICE_ID: "price_startup",
+      STRIPE_CORPORATE_PRICE_ID: "price_corporate",
+    })).not.toThrow();
+
+    expect(() => parseAutomationEnv({
+      NODE_ENV: "production",
+      CRON_SECRET: "cron-secret",
+    })).not.toThrow();
+  });
+
+  it("reads feature accessors from process.env without cross-feature validation", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("DATABASE_URL", "postgres://db.example.test/hkwtia");
+    vi.stubEnv("APP_URL", "https://www.example.test");
+    expect(databaseEnv()).toEqual({
+      databaseUrl: "postgres://db.example.test/hkwtia",
+    });
+    expect(appEnv()).toEqual({appUrl: "https://www.example.test"});
+  });
+
+  it("keeps the AI contract typed and validates the dedicated Concierge secret", () => {
+    expect(parseAiEnv({
+      NODE_ENV: "production",
+      CONCIERGE_COOKIE_SECRET: "c".repeat(32),
+      AGENT_MODEL_CONCIERGE: "openai:gpt-4.1-mini",
+    })).toMatchObject({
+      agentsEnabled: false,
+      agentModelConcierge: "openai:gpt-4.1-mini",
+      conciergeCookieSecret: "c".repeat(32),
+    });
+    expect(() => parseAiEnv({NODE_ENV: "production"})).toThrow(
+      "CONCIERGE_COOKIE_SECRET",
+    );
   });
 
   it("rejects a deployed runtime without server credentials", () => {

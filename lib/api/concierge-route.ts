@@ -20,7 +20,7 @@ import {
 } from "@/lib/ai/m4a-acceptance-boundary";
 import {createConciergeTools} from "@/lib/ai/tools/registry";
 import {getActor} from "@/lib/auth/actor";
-import {serverEnv} from "@/lib/config/env";
+import {aiEnv, appEnv} from "@/lib/config/env";
 import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {agentToolsRepository} from "@/lib/db/repos/agent-tools";
 import {
@@ -305,8 +305,8 @@ async function productionHandler(request: Request): Promise<Response> {
       service: m4aAcceptanceBoundary.service,
     })(acceptanceRequest);
   }
-  const env = serverEnv();
-  const expectedOrigin = env.appUrl || new URL(request.url).origin;
+  const env = aiEnv();
+  const expectedOrigin = appEnv().appUrl || new URL(request.url).origin;
   const service = createConciergeService({
     agentsEnabled: env.agentsEnabled,
     model: env.agentModelConcierge,

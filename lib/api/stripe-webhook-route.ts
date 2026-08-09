@@ -2,10 +2,10 @@ import "server-only";
 
 import Stripe from "stripe";
 
-import {systemActor} from "@/lib/auth/actor";
 import {STRIPE_API_VERSION} from "@/lib/billing/stripe-api-version";
 import {processStripeEvent, WebhookInputError} from "@/lib/billing/webhook-service";
-import {serverEnv} from "@/lib/config/env";
+import {billingEnv} from "@/lib/config/env";
+import type {Actor} from "@/lib/membership/lifecycle";
 
 type Dependencies = Readonly<{
   constructEvent(rawBody: string, signature: string): Stripe.Event;
@@ -38,17 +38,22 @@ export function createWebhookPost(dependencies: Dependencies) {
 }
 
 let stripe: Stripe | undefined;
+const stripeWebhookActor: Actor = {
+  kind: "system",
+  userId: null,
+  source: "stripe-webhook",
+};
 
 function stripeClient(): Stripe {
-  stripe ??= new Stripe(serverEnv().stripeSecretKey, {apiVersion: STRIPE_API_VERSION});
+  stripe ??= new Stripe(billingEnv().stripeSecretKey, {apiVersion: STRIPE_API_VERSION});
   return stripe;
 }
 
 export const POST = createWebhookPost({
   constructEvent(rawBody, signature) {
-    return stripeClient().webhooks.constructEvent(rawBody, signature, serverEnv().stripeWebhookSecret);
+    return stripeClient().webhooks.constructEvent(rawBody, signature, billingEnv().stripeWebhookSecret);
   },
   processEvent(event) {
-    return processStripeEvent(event, systemActor("stripe-webhook"));
+    return processStripeEvent(event, stripeWebhookActor);
   },
 });

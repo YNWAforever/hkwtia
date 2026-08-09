@@ -11,6 +11,9 @@ for (const path of paths) {
     test(`${prefix}${path} renders one public heading`, async ({page}) => {
       const response = await page.goto(`${prefix}${path}`);
       expect(response?.status()).toBeLessThan(400);
+      await expect(page.locator('body')).not.toContainText(
+        'Missing required production environment variables',
+      );
       await expect(page.locator('h1')).toHaveCount(1);
       await expect(page.locator('h1')).toBeVisible();
     });

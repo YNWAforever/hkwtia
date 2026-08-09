@@ -2,7 +2,7 @@ import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import type {AppLocale} from "@/i18n/routing";
-import {serverEnv} from "@/lib/config/env";
+import {unsubscribeEnv} from "@/lib/config/env";
 import {verifyUnsubscribeTokenWithAny} from "@/lib/email/unsubscribe-token";
 import {buildPageMetadata} from "@/lib/metadata";
 
@@ -42,7 +42,10 @@ export default async function UnsubscribePage({params, searchParams}: Props) {
   }
 
   const payload = query.token
-    ? verifyUnsubscribeTokenWithAny(query.token, [serverEnv().unsubscribeTokenSecret, serverEnv().cronSecret])
+    ? (() => {
+      const env = unsubscribeEnv();
+      return verifyUnsubscribeTokenWithAny(query.token!, [env.unsubscribeTokenSecret, env.cronSecret]);
+    })()
     : null;
   const valid = payload?.locale === appLocale;
 
