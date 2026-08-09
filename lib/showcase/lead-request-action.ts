@@ -2,7 +2,7 @@
 
 import {headers} from "next/headers";
 
-import {serverEnv} from "@/lib/config/env";
+import {appEnv, emailEnv} from "@/lib/config/env";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
 import {renderEmail} from "@/lib/email/render";
 import {createConfiguredEmailTransport} from "@/lib/email/transport";
@@ -23,17 +23,18 @@ const leadRateLimiter = createInMemoryRateLimiter({limit: 3, windowMs: 15 * 60_0
 export async function requestIntroAction(
   formData: FormData,
 ): Promise<LeadRequestResult> {
-  const environment = serverEnv();
+  const emailEnvironment = emailEnv();
+  const {appUrl} = appEnv();
   const service = createLeadService({
     repository: showcaseRepository,
     limiter: leadRateLimiter,
-    emailTransport: createConfiguredEmailTransport(environment),
+    emailTransport: createConfiguredEmailTransport(emailEnvironment),
     renderEmail,
     resolveStaffRecipient: async () =>
-      process.env.SHOWCASE_STAFF_EMAIL?.trim() || environment.emailFrom.trim() || null,
+      process.env.SHOWCASE_STAFF_EMAIL?.trim() || emailEnvironment.emailFrom.trim() || null,
     resolveClientIp: async () => clientIpFromHeaders(await headers()),
-    emailFrom: environment.emailFrom,
-    appUrl: environment.appUrl || "http://localhost:3000",
+    emailFrom: emailEnvironment.emailFrom,
+    appUrl,
   });
   return service.request(formData);
 }
