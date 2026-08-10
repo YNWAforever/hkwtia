@@ -67,14 +67,34 @@ function adminApplication(row: CohortApplication): AdminCohortApplication {
 function memoryStore(initial: CohortApplication[] = [], options: Readonly<{closeBeforeCreate?: boolean}> = {}): CohortStore & {
   readonly auditEvents: readonly {action: string; applicationId: string}[];
   readonly goneGlobalCompanyIds: readonly string[];
+  readonly cohortRecords: readonly Cohort[];
+  readonly cohortAudits: readonly {action: string; actorProfileId: string; slug: string}[];
 } {
   const applications = [...initial];
   const auditEvents: {action: string; applicationId: string}[] = [];
   const goneGlobalCompanyIds: string[] = [];
+  const cohortRecords: Cohort[] = [cohort()];
+  const cohortAudits: {action: string; actorProfileId: string; slug: string}[] = [];
   return {
     listPublicCohorts: async (actor) => {
       void actor;
       return [cohort()];
+    },
+    listCohorts: async () => cohortRecords,
+    findCohortBySlug: async (slug) => cohortRecords.find((row) => row.slug === slug) ?? null,
+    insertCohort: async (input, actor) => {
+      const created = cohort({...input, id: "60000062-0000-4000-8000-0000000000c1"});
+      cohortRecords.push(created);
+      cohortAudits.push({action: "cohort.created", actorProfileId: actor.profileId, slug: created.slug});
+      return created;
+    },
+    updateCohort: async (id, input, actor) => {
+      const current = cohortRecords.find((row) => row.id === id);
+      if (!current) return null;
+      const updated = cohort({...current, ...input});
+      cohortRecords[cohortRecords.indexOf(current)] = updated;
+      cohortAudits.push({action: "cohort.updated", actorProfileId: actor.profileId, slug: updated.slug});
+      return updated;
     },
     findActiveCompanyId: async () => companyId,
     getApplication: async (requestedCohortId, requestedCompanyId) => applications.find((row) => row.cohortId === requestedCohortId && row.companyId === requestedCompanyId) ?? null,
@@ -101,6 +121,8 @@ function memoryStore(initial: CohortApplication[] = [], options: Readonly<{close
     },
     get auditEvents() { return auditEvents; },
     get goneGlobalCompanyIds() { return goneGlobalCompanyIds; },
+    get cohortRecords() { return cohortRecords; },
+    get cohortAudits() { return cohortAudits; },
   };
 }
 

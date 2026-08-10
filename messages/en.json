@@ -993,6 +993,7 @@
     "brand": "WTIA",
     "title": "Staff workspace",
     "description": "Manage WTIA member operations from a protected staff-only workspace.",
+    "dashboard": {"heading": "Queues", "description": "What is waiting for staff attention right now.", "view": "Open", "unavailable": "Unavailable", "pendingApprovals": "Pending approvals", "atRisk": "At-risk members", "listingsAwaitingReview": "Listings awaiting review", "draftNews": "Draft news posts"},
     "navigation": {
       "label": "Staff administration navigation",
       "segments": "Segments",
@@ -1026,6 +1027,7 @@
       "savePremium": "Save"
     },
     "cohorts": {
+      "manage": {"createHeading": "Create a cohort", "createDescription": "A cohort becomes visible on Launch Pad once its status is Open or Active.", "existing": "All cohorts", "noCohorts": "No cohorts exist yet.", "editEyebrow": "Edit cohort", "back": "Back to cohorts", "create": "Create cohort", "save": "Save cohort", "saving": "Saving", "slug": "Slug", "nameEn": "Name (English)", "nameZhHk": "Name (Traditional Chinese)", "descriptionEn": "Description (English)", "descriptionZhHk": "Description (Traditional Chinese)", "track": "Track", "startsOn": "Starts on", "endsOn": "Ends on", "endsOnHelp": "Leave empty if there is no fixed end date.", "capacity": "Capacity", "feeHkd": "Fee (HKD)", "feeHelp": "Enter 0 for a cohort with no fee.", "status": "Status", "statusHelp": "Open and Active cohorts appear on the public Launch Pad page.", "statuses": {"planning": "Planning", "open": "Open", "active": "Active", "completed": "Completed", "archived": "Archived"}, "success": "Cohort saved.", "validation": "Check the required fields and try again.", "slugConflict": "That slug is already in use.", "endBeforeStart": "The end date cannot be before the start date.", "error": "We could not save this cohort. Please try again."},
       "title": "Cohort applications",
       "description": "Move Launch Pad applications through the staff-reviewed go-global journey.",
       "application": "Application",
