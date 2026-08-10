@@ -7,7 +7,7 @@ import {newsFormInput} from "@/lib/admin/news-form-input";
 import {revalidateAdminPath} from "@/lib/admin/revalidate-path";
 import {requireAdminActor} from "@/lib/auth/actor";
 import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
-import {createNewsPost, getNewsForAdmin, updateNewsPost} from "@/lib/db/repos/admin-posts";
+import {createNewsPost, getNewsForAdmin, setNewsArchived, updateNewsPost} from "@/lib/db/repos/admin-posts";
 import {revalidatePublicNews} from "@/lib/news/revalidate";
 
 export type NewsFormActionMessages = Readonly<{
@@ -60,5 +60,34 @@ export async function updateNewsAction(
   } catch (error) {
     if (isAuthorizationDenial(error)) notFound();
     throw error;
+  }
+}
+
+export type ArchiveActionState = Readonly<{status: "idle" | "success" | "invalid" | "error"}>;
+
+/**
+ * Archiving is its own action rather than a field on the edit form: it retires
+ * a post from the authoring list, so it should not ride along with a content
+ * save that a staff member might submit by reflex.
+ */
+export async function setNewsArchivedAction(
+  postId: string,
+  path: string,
+  archived: boolean,
+  state: ArchiveActionState,
+  formData: FormData,
+): Promise<ArchiveActionState> {
+  void state;
+  void formData;
+  try {
+    const actor = await requireAdminActor();
+    const post = await setNewsArchived(actor, postId, archived);
+    if (!post) return {status: "invalid"};
+    revalidateAdminPath(path);
+    revalidatePublicNews(post.slug);
+    return {status: "success"};
+  } catch (error) {
+    if (isAuthorizationDenial(error)) notFound();
+    return {status: "error"};
   }
 }

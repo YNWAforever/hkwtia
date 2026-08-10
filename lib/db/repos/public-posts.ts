@@ -1,6 +1,6 @@
 import "server-only";
 
-import {and, asc, desc, eq, isNotNull, lte} from "drizzle-orm";
+import {and, asc, desc, eq, isNotNull, isNull, lte} from "drizzle-orm";
 import {z} from "zod";
 
 import {getDb, type Database} from "@/lib/db/repos/common";
@@ -122,6 +122,9 @@ export function createPublicPostsRepository(
           eq(posts.kind, "news"),
           isNotNull(posts.publishedAt),
           lte(posts.publishedAt, asOf),
+          // An archived post is retired, not merely unpublished: it leaves the
+          // feed, its slug route and the sitemap together.
+          isNull(posts.archivedAt),
         ))
         .orderBy(desc(posts.publishedAt), asc(posts.slug));
 
@@ -145,6 +148,7 @@ export function createPublicPostsRepository(
           eq(posts.kind, "news"),
           isNotNull(posts.publishedAt),
           lte(posts.publishedAt, asOf),
+          isNull(posts.archivedAt),
           eq(posts.slug, parsedSlug),
         ))
         .limit(1);

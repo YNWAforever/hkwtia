@@ -73,6 +73,7 @@ describe("M4B scheduled-agent schema contract", () => {
     );
     expect([...columns.keys()].sort()).toEqual([
       "agent_run_id",
+      "archived_at",
       "author",
       "body_mdx",
       "created_at",
@@ -102,6 +103,9 @@ describe("M4B scheduled-agent schema contract", () => {
     expect(columns.get("published_at")?.notNull).toBe(false);
     expect(columns.get("source_key")?.notNull).toBe(false);
     expect(columns.get("agent_run_id")?.notNull).toBe(false);
+    // Nullable, and null for every row written before archiving existed, so
+    // "not archived" needs no backfill.
+    expect(columns.get("archived_at")?.notNull).toBe(false);
 
     const indexes = new Map(
       config.indexes.map((candidate) => [candidate.config.name, candidate]),

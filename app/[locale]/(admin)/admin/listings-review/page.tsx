@@ -15,7 +15,7 @@ export default async function AdminListingsReviewPage({params}: Props) {
   setRequestLocale(locale);
   const actor = await requireAdminPageActor();
   const listings = await showcaseRepository.listForReview(actor);
-  const mediaOptions = (await mediaRepository.listForAdmin(actor)).map((entry) => ({
+  const mediaOptions = (await mediaRepository.listActiveForAdmin(actor)).map((entry) => ({
     id: entry.id,
     label: locale === "zh-HK" ? entry.altZh : entry.altEn,
   }));

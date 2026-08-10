@@ -1,7 +1,7 @@
 import {describe, expect, it} from "vitest";
 
 import {cohortFormInput} from "@/lib/admin/cohort-form-input";
-import {createCohortRepository, type CohortStore} from "@/lib/db/repos/cohorts";
+import {createCohortRepository, type CohortInput, type CohortStore} from "@/lib/db/repos/cohorts";
 import type {Cohort} from "@/lib/db/server-schema";
 import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 
@@ -65,16 +65,16 @@ function store(initial: Cohort[] = []) {
     listCohorts: async () => rows,
     getCohort: async (id: string) => rows.find((row) => row.id === id) ?? null,
     findCohortBySlug: async (slug: string) => rows.find((row) => row.slug === slug) ?? null,
-    insertCohort: async (input: never, actor: AdminActor) => {
-      const created = cohort({...(input as object), id: "60000062-0000-4000-8000-0000000000b2"});
+    insertCohort: async (input: CohortInput, actor: AdminActor) => {
+      const created = cohort({...input, id: "60000062-0000-4000-8000-0000000000b2"});
       rows.push(created);
       audits.push({action: "cohort.created", actorProfileId: actor.profileId});
       return created;
     },
-    updateCohort: async (id: string, input: never, actor: AdminActor) => {
+    updateCohort: async (id: string, input: CohortInput, actor: AdminActor) => {
       const current = rows.find((row) => row.id === id);
       if (!current) return null;
-      const updated = cohort({...current, ...(input as object)});
+      const updated = cohort({...current, ...input});
       rows[rows.indexOf(current)] = updated;
       audits.push({action: "cohort.updated", actorProfileId: actor.profileId});
       return updated;

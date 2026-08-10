@@ -7,7 +7,9 @@ import {mediaFormInput} from "@/lib/admin/media-form-input";
 import {revalidateAdminPath} from "@/lib/admin/revalidate-path";
 import {requireAdminActor} from "@/lib/auth/actor";
 import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
-import {createMedia, updateMedia} from "@/lib/db/repos/media";
+import {ZodError} from "zod";
+
+import {createMedia, setMediaArchived, updateMedia} from "@/lib/db/repos/media";
 
 // Only the admin path is revalidated. The public surfaces that resolve a
 // registry entry — /showcase and /showcase/[slug] — are force-dynamic, so they
@@ -56,5 +58,44 @@ export async function updateMediaAction(
   } catch (error) {
     if (isAuthorizationDenial(error)) notFound();
     throw error;
+  }
+}
+
+export type MediaArchiveActionState = Readonly<{
+  status: "idle" | "success" | "invalid" | "inUse" | "error";
+  listings?: number;
+}>;
+
+/**
+ * Archiving is refused while a showcase listing still points at the image, so
+ * retiring one is never a silent change to something already published. The
+ * count comes back so staff can be told how many listings to detach.
+ */
+export async function setMediaArchivedAction(
+  mediaId: string,
+  path: string,
+  archived: boolean,
+  state: MediaArchiveActionState,
+  formData: FormData,
+): Promise<MediaArchiveActionState> {
+  void state;
+  void formData;
+  try {
+    const actor = await requireAdminActor();
+    const entry = await setMediaArchived(actor, mediaId, archived);
+    if (!entry) return {status: "invalid"};
+    revalidateAdminPath(path);
+    return {status: "success"};
+  } catch (error) {
+    if (isAuthorizationDenial(error)) notFound();
+    if (error instanceof ZodError) {
+      const issue = error.issues.find((candidate) => candidate.message === "MEDIA_IN_USE");
+      if (issue) {
+        const listings = (issue as {params?: {listings?: number}}).params?.listings ?? 0;
+        return {status: "inUse", listings};
+      }
+      return {status: "invalid"};
+    }
+    return {status: "error"};
   }
 }

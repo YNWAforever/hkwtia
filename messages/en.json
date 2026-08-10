@@ -1183,6 +1183,7 @@
       }
     },
     "media": {
+      "statusArchived": "Archived", "archive": "Archive", "unarchive": "Restore", "archiving": "Saving", "archivedNotice": "This item is archived and hidden from the public site.", "archiveInUse": "Still used by {count} showcase listing(s). Remove the logo from those listings first.",
       "eyebrow": "Media",
       "title": "Media library",
       "description": "Register images the site may display, with alt text in both languages.",
@@ -1236,6 +1237,7 @@
       }
     },
     "news": {
+      "statusArchived": "Archived", "archive": "Archive", "unarchive": "Restore", "archiving": "Saving", "archivedNotice": "This item is archived and hidden from the public site.", "archiveInUse": "Still used by {count} showcase listing(s). Remove the logo from those listings first.",
       "eyebrow": "News",
       "title": "News",
       "description": "Write and publish bilingual WTIA news.",

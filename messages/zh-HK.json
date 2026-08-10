@@ -1185,6 +1185,7 @@
       }
     },
     "media": {
+      "statusArchived": "已封存", "archive": "封存", "unarchive": "復原", "archiving": "儲存中", "archivedNotice": "此項目已封存，不會在公開網站顯示。", "archiveInUse": "仍有 {count} 個展示企業使用此圖片，請先移除相關標誌。",
       "eyebrow": "媒體",
       "title": "媒體庫",
       "description": "登記網站可顯示的圖片，並提供中英文替代文字。",
@@ -1238,6 +1239,7 @@
       }
     },
     "news": {
+      "statusArchived": "已封存", "archive": "封存", "unarchive": "復原", "archiving": "儲存中", "archivedNotice": "此項目已封存，不會在公開網站顯示。", "archiveInUse": "仍有 {count} 個展示企業使用此圖片，請先移除相關標誌。",
       "eyebrow": "最新消息",
       "title": "最新消息",
       "description": "撰寫及發布 WTIA 雙語消息。",

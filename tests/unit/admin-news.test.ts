@@ -65,7 +65,7 @@ describe("staff news repository", () => {
       .rejects.toThrow("FORBIDDEN");
     await expect(updateNewsPost(actor as never, post().id, validInput, dependencies))
       .rejects.toThrow("FORBIDDEN");
-    await expect(listNewsForAdmin(actor as never, {list: async () => [], get: async () => null}))
+    await expect(listNewsForAdmin(actor as never, {list: async () => [], listActive: async () => [], get: async () => null}))
       .rejects.toThrow("FORBIDDEN");
 
     expect(spy).not.toHaveBeenCalled();
@@ -139,6 +139,7 @@ describe("staff news repository", () => {
   it("reads only news rows and tolerates a malformed id", async () => {
     const reads: NewsReadDependencies = {
       list: vi.fn(async () => [post()] as never),
+      listActive: vi.fn(async () => [] as never),
       get: vi.fn(async () => post() as never),
     };
 

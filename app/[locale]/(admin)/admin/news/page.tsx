@@ -47,7 +47,9 @@ export default async function AdminNewsPage({params}: Props) {
                 {locale === "zh-HK" ? post.titleZh : post.titleEn}
               </Link>
               <span className="text-sm text-muted-foreground">
-                {post.publishedAt ? t("statusPublished") : t("statusDraft")}
+                {post.archivedAt
+                  ? t("statusArchived")
+                  : post.publishedAt ? t("statusPublished") : t("statusDraft")}
               </span>
             </li>
           ))}</ul>
