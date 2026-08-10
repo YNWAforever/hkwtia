@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 
-import {systemActor} from "@/lib/auth/actor";
+import {systemActor} from "@/lib/auth/authorize";
 import type {AutomationRepositoryActor} from "@/lib/auth/automation-actor";
 import {
   reconcileLifecycleEnrollments,

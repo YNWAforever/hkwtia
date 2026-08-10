@@ -13,7 +13,7 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
 import {parseSegmentRouteQuery} from "@/lib/admin/segment-schema";
 import {previewSegment} from "@/lib/admin/segments";
 import {listAtRiskMembers} from "@/lib/admin/at-risk";
-import {systemActor} from "@/lib/auth/actor";
+import {systemActor} from "@/lib/auth/authorize";
 import type {WebhookLifecycleCommand} from "@/lib/billing/webhook-service";
 import {campaignsRepository} from "@/lib/db/repos/campaigns";
 import {jobsRepository} from "@/lib/db/repos/jobs";

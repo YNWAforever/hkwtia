@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {actorFor, anonymousActor} from "@/tests/helpers/fakes";
 
 describe("staff repository authorization", () => {

@@ -4,7 +4,7 @@ import {sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
 import type {AutomationDashboard} from "@/lib/admin/automations";
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {jobs as jobsTable, journeyState} from "@/lib/db/server-schema";
 import {getDb} from "@/lib/db/repos/common";
 import {journeysRepository} from "@/lib/db/repos/journeys";

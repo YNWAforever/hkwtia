@@ -3,7 +3,7 @@ import "server-only";
 import {and, asc, count, eq, inArray, isNull, or} from "drizzle-orm";
 import {z} from "zod";
 
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb} from "@/lib/db/repos/common";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {auditEvents, companyMembers, eventRegistrations, events, memberships, profiles, type Event} from "@/lib/db/server-schema";

@@ -1,6 +1,6 @@
 import "server-only";
 
-import {systemActor} from "@/lib/auth/actor";
+import {systemActor} from "@/lib/auth/authorize";
 import {scheduleJourney} from "@/lib/automation/schedule";
 import type {JourneyName, ScheduledJourneyStep} from "@/lib/automation/types";
 import {applicationsRepository} from "@/lib/db/repos/applications";

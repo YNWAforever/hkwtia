@@ -7,7 +7,7 @@ import {AT_RISK_DAY_MS, AT_RISK_NO_LOGIN_DAYS, AT_RISK_RENEWAL_DAYS, AT_RISK_SCO
 import type {RawReportFacts} from "@/lib/admin/report-formulas";
 import type {ReportUtcWindow} from "@/lib/admin/reports";
 import {requireScheduledAgent, type Actor as AgentActor} from "@/lib/auth/agent-actor";
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";
 

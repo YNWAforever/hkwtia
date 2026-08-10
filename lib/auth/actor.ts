@@ -1,9 +1,15 @@
 import "server-only";
 
+import {requireAdmin, systemActor} from "@/lib/auth/authorize";
 import * as authServer from "@/lib/auth/server";
 import type {NeonSession} from "@/lib/auth/server";
-import {forbidden, type Actor, type AdminActor, type AuthenticatedActor} from "@/lib/membership/lifecycle";
+import {type AdminActor, type AuthenticatedActor} from "@/lib/membership/lifecycle";
 import {profileIdentityRepository, type ProfileIdentityResolver} from "@/lib/db/repos/profile-identities";
+
+// Re-exported so a caller that already reaches for the session keeps one import.
+// Anything that needs only these should import "@/lib/auth/authorize" directly:
+// this module pulls in the Neon Auth client, and that dependency is transitive.
+export {requireAdmin, systemActor};
 
 type SessionLike = Pick<NeonSession, "user"> | {user?: {id?: string | null}};
 
@@ -31,16 +37,8 @@ export async function requireActor(): Promise<AuthenticatedActor> {
   return actor;
 }
 
-export function requireAdmin(actor: Actor): asserts actor is AdminActor {
-  if (actor.kind !== "staff" && actor.kind !== "exco" && actor.kind !== "superadmin") forbidden();
-}
-
 export async function requireAdminActor(): Promise<AdminActor> {
   const actor = await requireActor();
   requireAdmin(actor);
   return actor;
-}
-
-export function systemActor(source: "stripe-webhook"): Actor {
-  return {kind: "system", userId: null, source};
 }

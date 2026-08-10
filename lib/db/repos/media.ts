@@ -3,7 +3,7 @@ import "server-only";
 import {asc, eq} from "drizzle-orm";
 import {z} from "zod";
 
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb} from "@/lib/db/repos/common";
 import {auditEvents, media, type MediaRow} from "@/lib/db/server-schema";
 import {isRegistrableMediaUrl} from "@/lib/media/url";

@@ -4,7 +4,7 @@ import {desc, eq, sql} from "drizzle-orm";
 import {z} from "zod";
 
 import {type AtRiskCandidate} from "@/lib/admin/at-risk";
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {
   requireAutomationSystem,
   type AutomationRepositoryActor,

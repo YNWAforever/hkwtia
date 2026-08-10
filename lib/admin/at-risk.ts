@@ -2,7 +2,7 @@ import "server-only";
 
 import {z} from "zod";
 
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import type {Actor, AdminActor, MembershipStatus} from "@/lib/membership/lifecycle";
 
 export const AT_RISK_SCORE_MAX = 20;

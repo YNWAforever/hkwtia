@@ -3,7 +3,7 @@ import "server-only";
 import {z} from "zod";
 
 import {reconcileReportFacts, REPORT_TIMEZONE, type AdminReport, type RawReportFacts, type ReportDisplayWindow} from "@/lib/admin/report-formulas";
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 
 const calendarDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).superRefine((value, context) => {

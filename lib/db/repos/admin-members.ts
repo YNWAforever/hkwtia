@@ -6,7 +6,7 @@ import {z} from "zod";
 import type {Member360} from "@/lib/admin/member-360";
 
 import {decodeAdminMemberCursor, encodeAdminMemberCursor, type AdminMemberListItem, type AdminMemberPage, type AdminMemberQuery} from "@/lib/admin/member-types";
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {companies, companyMembers, emailLog, engagementEvents, engagementScores, eventRegistrations, events, journeyState, memberNotes, memberships, messageSuppressions, profiles, whatsappLog} from "@/lib/db/server-schema";
 import {getDb} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";

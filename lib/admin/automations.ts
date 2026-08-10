@@ -3,7 +3,7 @@ import "server-only";
 import {z} from "zod";
 
 import type {AppLocale} from "@/i18n/routing";
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
 import {
   automationAdminRepository,
