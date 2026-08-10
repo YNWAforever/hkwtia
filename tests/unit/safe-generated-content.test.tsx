@@ -220,11 +220,38 @@ describe("safe generated content", () => {
     expect(html).toContain("2026-06");
     expect(html).toContain("Agent run status");
     expect(html).toContain("Completed");
-    expect(html).toContain('href="/en/admin/reports/board-drafts/11111111-1111-4111-8111-111111111111"');
+    expect(html).toContain('href="/admin/reports/board-drafts/11111111-1111-4111-8111-111111111111"');
     expect(html).not.toContain("alert(1)");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");
     expect(html).not.toMatch(/>Send</);
     expect(html).not.toMatch(/>Publish</);
+  });
+
+  // `zh-HK` is served under the `/zh` prefix. A preview link built as
+  // `/${locale}/...` renders `/zh-HK/...`, which the middleware does not
+  // recognise as a prefixed route, so the Chinese admin 404s on every draft.
+  it("prefixes the Chinese preview link with /zh, not the raw locale", () => {
+    const html = renderToStaticMarkup(<BoardDraftList
+      drafts={[{
+        id: "11111111-1111-4111-8111-111111111111",
+        slug: "board-report-2026-06",
+        titleEn: "Board report: 2026-06",
+        titleZh: "董事會報告：2026-06",
+        reportMonth: "2026-06",
+        agentRunId: "22222222-2222-4222-8222-222222222222",
+        agentRunStatus: "completed",
+        createdAt: new Date("2026-07-20T01:00:00.000Z"),
+      }]}
+      labels={{
+        heading: "Board Reporter drafts", description: "Read-only previews", empty: "No drafts", preview: "Open preview",
+        reportMonth: "Report month", createdAt: "Created", agentRunStatus: "Agent run status", unavailable: "Not available",
+        statuses: {running: "Running", disabled: "Disabled", completed: "Completed", failed: "Failed", escalated: "Escalated"},
+      }}
+      locale="zh-HK"
+    />);
+
+    expect(html).toContain('href="/zh/admin/reports/board-drafts/11111111-1111-4111-8111-111111111111"');
+    expect(html).not.toContain("/zh-HK/admin");
   });
 });

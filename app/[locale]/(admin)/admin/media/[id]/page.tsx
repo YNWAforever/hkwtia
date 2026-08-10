@@ -8,6 +8,7 @@ import type {AppLocale} from "@/i18n/routing";
 import {updateMediaAction} from "@/lib/admin/media-actions";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {mediaRepository} from "@/lib/db/repos/media";
+import {localizedPath} from "@/lib/urls";
 
 const idSchema = z.string().uuid();
 
@@ -44,7 +45,7 @@ export default async function AdminMediaDetailPage({params}: Props) {
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("eyebrow")}</p>
         <h1 className="font-serif text-4xl font-semibold">{alt}</h1>
         <p className="font-mono text-sm text-muted-foreground">{entry.url}</p>
-        <Link className="text-sm underline" href={`/${locale}/admin/media`}>{t("back")}</Link>
+        <Link className="text-sm underline" href={localizedPath(locale, "/admin/media")}>{t("back")}</Link>
       </header>
       <MediaForm
         action={updateAction}

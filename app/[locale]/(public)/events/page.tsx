@@ -7,6 +7,7 @@ import {PageHero} from "@/components/marketing/page-hero";
 import type {AppLocale} from "@/i18n/routing";
 import {eventsRepository, localizeEvent} from "@/lib/db/repos/events";
 import {buildPageMetadata} from "@/lib/metadata";
+import {localizedPath} from "@/lib/urls";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,8 @@ export default async function EventsPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
   const t = await getTranslations({locale, namespace: "Events"});
+  const appLocale = locale as AppLocale;
   const records = (await eventsRepository.listPublic(anonymous)).map((event) => localizeEvent(event, locale));
   const formatter = new Intl.DateTimeFormat(locale, {dateStyle: "long", timeZone: "Asia/Hong_Kong"});
-  return <><PageHero eyebrow={t("eyebrow")} title={t("title")} description={t("description")}/><section className="container mx-auto px-6 py-16">{records.length > 0 ? <div className="grid gap-6 md:grid-cols-2">{records.map((event) => <article className="glass-card space-y-3 p-6" key={event.id}><h2 className="font-serif text-2xl font-semibold"><Link href={`/${locale}/events/${event.slug}`}>{event.title}</Link></h2><p>{event.description}</p><p className="text-sm text-muted-foreground">{formatter.format(new Date(event.startsAt))}</p></article>)}</div> : <EmptyState title={t("emptyTitle")} description={t("emptyDescription")}/>}</section></>;
+  return <><PageHero eyebrow={t("eyebrow")} title={t("title")} description={t("description")}/><section className="container mx-auto px-6 py-16">{records.length > 0 ? <div className="grid gap-6 md:grid-cols-2">{records.map((event) => <article className="glass-card space-y-3 p-6" key={event.id}><h2 className="font-serif text-2xl font-semibold"><Link href={localizedPath(appLocale, `/events/${event.slug}`)}>{event.title}</Link></h2><p>{event.description}</p><p className="text-sm text-muted-foreground">{formatter.format(new Date(event.startsAt))}</p></article>)}</div> : <EmptyState title={t("emptyTitle")} description={t("emptyDescription")}/>}</section></>;
 }

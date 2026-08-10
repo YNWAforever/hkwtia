@@ -7,6 +7,7 @@ import {SafeGeneratedContent} from "@/components/admin/safe-generated-content";
 import type {AppLocale} from "@/i18n/routing";
 import {getBoardDraft} from "@/lib/admin/board-drafts";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
+import {localizedPath} from "@/lib/urls";
 
 type Props = Readonly<{
   params: Promise<{locale: string; id: string}>;
@@ -52,6 +53,6 @@ export default async function BoardDraftPreviewPage({params}: Props) {
       kpi: t("boardDraftKpi"),
       value: t("boardDraftValue"),
     }}/>
-    <Link className="inline-flex rounded-md border border-input px-3 py-2 text-sm font-medium hover:bg-muted" href={`/${locale}/admin/reports`}>{t("boardDraftBack")}</Link>
+    <Link className="inline-flex rounded-md border border-input px-3 py-2 text-sm font-medium hover:bg-muted" href={localizedPath(locale, "/admin/reports")}>{t("boardDraftBack")}</Link>
   </article>;
 }

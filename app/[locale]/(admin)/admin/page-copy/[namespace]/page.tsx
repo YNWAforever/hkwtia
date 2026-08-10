@@ -10,6 +10,7 @@ import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {pageCopyRepository} from "@/lib/db/repos/page-copy";
 import {pageCopyBundleValues, pageCopyCatalog} from "@/lib/i18n/page-copy-catalog";
 import {isPageCopyNamespace} from "@/lib/i18n/page-copy-scope";
+import {localizedPath} from "@/lib/urls";
 
 type Props = Readonly<{params: Promise<{locale: string; namespace: string}>}>;
 
@@ -57,7 +58,7 @@ export default async function AdminPageCopyNamespacePage({params}: Props) {
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("eyebrow")}</p>
         <h1 className="font-serif text-4xl font-semibold">{t(`namespaces.${namespace}`)}</h1>
         <p className="text-muted-foreground">{t("editDescription")}</p>
-        <Link className="text-sm underline" href={`/${locale}/admin/page-copy`}>{t("back")}</Link>
+        <Link className="text-sm underline" href={localizedPath(locale, "/admin/page-copy")}>{t("back")}</Link>
       </header>
       <PageCopyForm
         action={action}

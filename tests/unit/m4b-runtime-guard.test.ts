@@ -58,19 +58,29 @@ describe("M4B runtime ownership guard", () => {
       .toThrow(error);
   });
 
-  it("guards both production runners before server configuration or work", () => {
+  it.each([
+    ["runProductionRetentionAnalyst", "runRetentionAnalystService"],
+    ["runProductionBoardReporter", "runBoardReporterService"],
+  ])("%s guards before server configuration or work", (runner, service) => {
     const source = readFileSync(resolve("lib/jobs/runners.ts"), "utf8");
-    for (const runner of [
-      "runProductionRetentionAnalyst",
-      "runProductionBoardReporter",
-    ]) {
-      const start = source.indexOf(`function ${runner}`);
-      const end = source.indexOf("\n}\n", start);
-      const body = source.slice(start, end);
-      expect(body.indexOf("resolveM4BAcceptanceOwnershipKey(process.env)"))
-        .toBeGreaterThan(0);
-      expect(body.indexOf("resolveM4BAcceptanceOwnershipKey(process.env)"))
-        .toBeLessThan(body.indexOf("serverEnv()"));
-    }
+    const start = source.indexOf(`function ${runner}`);
+    const end = source.indexOf("\n}\n", start);
+    const body = source.slice(start, end);
+
+    const guard = body.indexOf("resolveM4BAcceptanceOwnershipKey(process.env)");
+    expect(guard).toBeGreaterThan(0);
+
+    // Any environment accessor, not one named contract: the guard has to run
+    // before configuration is read, whichever helper reads it. Pinning a single
+    // name let a rename to a feature-scoped accessor turn this into
+    // `indexOf(...) === -1` and quietly invert the assertion.
+    const configuration = body.search(/\b[a-z][A-Za-z]*Env\(\)/);
+    expect(configuration).toBeGreaterThan(0);
+    expect(guard).toBeLessThan(configuration);
+
+    // ...and before the runner does any work.
+    const work = body.indexOf(`${service}(`);
+    expect(work).toBeGreaterThan(0);
+    expect(guard).toBeLessThan(work);
   });
 });
