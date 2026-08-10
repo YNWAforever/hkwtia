@@ -5,7 +5,7 @@ import {z} from "zod";
 
 import {queueCampaignSchema, type CampaignQueueDependencies, type CampaignQueueMember, type CampaignQueueResult, type QueueCampaignInput} from "@/lib/admin/campaigns";
 import {segmentFilterSchema, segmentIdSchema, type SegmentFilterSet} from "@/lib/admin/segment-schema";
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {auditEvents, campaignRecipients, campaigns, companies, companyMembers, emailLog, engagementScores, memberships, profiles, savedSegments} from "@/lib/db/server-schema";
 import {
   createCampaignRecipientDeliveryRepository,

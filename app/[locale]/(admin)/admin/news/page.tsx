@@ -6,6 +6,7 @@ import type {AppLocale} from "@/i18n/routing";
 import {createNewsAction} from "@/lib/admin/news-actions";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {adminPostsRepository} from "@/lib/db/repos/admin-posts";
+import {localizedPath} from "@/lib/urls";
 
 type Props = Readonly<{params: Promise<{locale: string}>}>;
 
@@ -42,7 +43,7 @@ export default async function AdminNewsPage({params}: Props) {
         {posts.length
           ? <ul className="divide-y">{posts.map((post) => (
             <li className="flex flex-wrap items-center justify-between gap-2 py-3" key={post.id}>
-              <Link className="underline" href={`/${locale}/admin/news/${post.id}`}>
+              <Link className="underline" href={localizedPath(locale, `/admin/news/${post.id}`)}>
                 {locale === "zh-HK" ? post.titleZh : post.titleEn}
               </Link>
               <span className="text-sm text-muted-foreground">

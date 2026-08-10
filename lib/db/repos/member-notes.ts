@@ -2,7 +2,7 @@ import "server-only";
 
 import {z} from "zod";
 
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {auditEvents, memberNotes} from "@/lib/db/server-schema";
 import {getDb} from "@/lib/db/repos/common";
 import type {Actor, AdminActor} from "@/lib/membership/lifecycle";

@@ -64,7 +64,10 @@ describe("the split is real, not aliased", () => {
   it("signs with the dedicated secret and never with the cron bearer", () => {
     const source = readFileSync(resolve(process.cwd(), "lib/jobs/runners.ts"), "utf8");
 
-    expect(source).toContain("environment.unsubscribeTokenSecret");
+    // Matched on the property name rather than a particular accessor
+    // expression, so narrowing `serverEnv()` to a feature-scoped contract
+    // stays a refactor instead of silently retiring this guard.
+    expect(source).toMatch(/\bunsubscribeTokenSecret\b/);
     // If signing were merely aliased, a leaked bearer would still mint tokens.
     expect(source).not.toContain("cronSecret");
   });

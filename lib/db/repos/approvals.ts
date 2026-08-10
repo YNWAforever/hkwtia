@@ -12,7 +12,7 @@ import {
   requireScheduledAgent,
   type ScheduledAgentActor,
 } from "@/lib/auth/agent-actor";
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {
   requireAutomationCron,
   requireAutomationSystem,

@@ -3,7 +3,7 @@ import "server-only";
 import {z} from "zod";
 
 import type {SegmentFilterSet} from "@/lib/admin/segment-schema";
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {campaignsRepository} from "@/lib/db/repos/campaigns";
 import type {Actor} from "@/lib/membership/lifecycle";
 

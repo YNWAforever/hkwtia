@@ -1,7 +1,7 @@
 import "server-only";
 
 import {segmentPreviewSchema, segmentSaveSchema, type SegmentFilterSet, type SegmentPagination, type SegmentPreviewInput, type SegmentSaveInput} from "@/lib/admin/segment-schema";
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {segmentsRepository, type SavedSegmentRecord} from "@/lib/db/repos/segments";
 import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 

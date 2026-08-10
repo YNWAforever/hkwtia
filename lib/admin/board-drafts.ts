@@ -1,6 +1,6 @@
 import "server-only";
 
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {
   boardDraftRepository,
   createBoardDraftRepository,

@@ -6,6 +6,7 @@ import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {pageCopyRepository} from "@/lib/db/repos/page-copy";
 import {pageCopyCatalogSizes} from "@/lib/i18n/page-copy-catalog";
 import {pageCopyNamespaces} from "@/lib/i18n/page-copy-scope";
+import {localizedPath} from "@/lib/urls";
 
 type Props = Readonly<{params: Promise<{locale: string}>}>;
 
@@ -32,7 +33,7 @@ export default async function AdminPageCopyPage({params}: Props) {
         <ul className="mt-2 divide-y">
           {pageCopyNamespaces.map((namespace) => (
             <li className="flex flex-wrap items-center justify-between gap-2 py-3" key={namespace}>
-              <Link className="underline" href={`/${locale}/admin/page-copy/${namespace}`}>
+              <Link className="underline" href={localizedPath(locale, `/admin/page-copy/${namespace}`)}>
                 {t(`namespaces.${namespace}`)}
               </Link>
               <span className="text-sm text-muted-foreground">

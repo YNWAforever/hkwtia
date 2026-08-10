@@ -1,6 +1,8 @@
 import Link from "next/link";
 
+import type {AppLocale} from "@/i18n/routing";
 import type {BoardDraft} from "@/lib/admin/board-drafts";
+import {localizedPath} from "@/lib/urls";
 
 type Labels = Readonly<{
   heading: string;
@@ -21,7 +23,7 @@ export function BoardDraftList({
 }: Readonly<{
   drafts: readonly BoardDraft[];
   labels: Labels;
-  locale: string;
+  locale: AppLocale;
 }>) {
   const formatter = new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
@@ -44,7 +46,7 @@ export function BoardDraftList({
           <div><dt className="font-medium">{labels.createdAt}</dt><dd className="text-muted-foreground">{formatter.format(draft.createdAt)}</dd></div>
           <div><dt className="font-medium">{labels.agentRunStatus}</dt><dd className="text-muted-foreground">{labels.statuses[draft.agentRunStatus] ?? labels.unavailable}</dd></div>
         </dl>
-        <Link className="inline-flex rounded-md border border-input px-3 py-2 text-sm font-medium hover:bg-muted" href={`/${locale}/admin/reports/board-drafts/${draft.id}`}>{labels.preview}</Link>
+        <Link className="inline-flex rounded-md border border-input px-3 py-2 text-sm font-medium hover:bg-muted" href={localizedPath(locale, `/admin/reports/board-drafts/${draft.id}`)}>{labels.preview}</Link>
       </article>)}
     </div>}
   </section>;

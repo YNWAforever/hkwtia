@@ -3,7 +3,7 @@ import "server-only";
 import {and, asc, eq, inArray, isNull} from "drizzle-orm";
 import {z} from "zod";
 
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb, type Database} from "@/lib/db/repos/common";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {

@@ -2,7 +2,7 @@ import "server-only";
 
 import {createHash} from "node:crypto";
 
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {
   approvalDecisionSchema,
   approvalsRepository,

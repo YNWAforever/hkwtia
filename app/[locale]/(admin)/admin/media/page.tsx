@@ -7,6 +7,7 @@ import type {AppLocale} from "@/i18n/routing";
 import {createMediaAction} from "@/lib/admin/media-actions";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {mediaRepository} from "@/lib/db/repos/media";
+import {localizedPath} from "@/lib/urls";
 
 type Props = Readonly<{params: Promise<{locale: string}>}>;
 
@@ -51,7 +52,7 @@ export default async function AdminMediaPage({params}: Props) {
                   width={96}
                 />
               </span>
-              <Link className="underline" href={`/${locale}/admin/media/${entry.id}`}>
+              <Link className="underline" href={localizedPath(locale, `/admin/media/${entry.id}`)}>
                 {locale === "zh-HK" ? entry.altZh : entry.altEn}
               </Link>
               <span className="font-mono text-xs text-muted-foreground">{entry.url}</span>

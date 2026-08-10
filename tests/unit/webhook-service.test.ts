@@ -1,7 +1,7 @@
 import {describe, expect, it} from "vitest";
 
 import {processStripeEvent, type WebhookLifecycleCommand, type WebhookProcessor} from "@/lib/billing/webhook-service";
-import {systemActor} from "@/lib/auth/actor";
+import {systemActor} from "@/lib/auth/authorize";
 import {
   applicationId,
   checkoutCompleted,

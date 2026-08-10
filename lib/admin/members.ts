@@ -1,7 +1,7 @@
 import "server-only";
 
 import {adminMemberQuerySchema, type AdminMemberPage, type AdminMemberQuery} from "@/lib/admin/member-types";
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {adminMembersRepository} from "@/lib/db/repos/admin-members";
 import type {AdminActor, Actor} from "@/lib/membership/lifecycle";
 

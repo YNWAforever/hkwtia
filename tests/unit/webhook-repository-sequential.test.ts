@@ -6,7 +6,7 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
   return {...original, getDb: async () => database.current};
 });
 
-import {systemActor} from "@/lib/auth/actor";
+import {systemActor} from "@/lib/auth/authorize";
 import type {WebhookLifecycleCommand} from "@/lib/billing/webhook-service";
 import {jobsRepository, WebhookCorrelationError} from "@/lib/db/repos/jobs";
 import {applicationId, checkoutSessionId, customerId, membershipId, subscriptionId} from "@/tests/fixtures/stripe-events";

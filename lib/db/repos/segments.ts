@@ -5,7 +5,7 @@ import {z} from "zod";
 
 import type {SegmentMember, SegmentPreview} from "@/lib/admin/segments";
 import {segmentFilterSchema, segmentIdSchema, type SegmentFilterSet, type SegmentPagination, type SegmentSaveInput} from "@/lib/admin/segment-schema";
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {auditEvents, companies, companyMembers, engagementScores, memberships, profiles, savedSegments} from "@/lib/db/server-schema";
 import {getDb} from "@/lib/db/repos/common";
 import type {Actor, AdminActor} from "@/lib/membership/lifecycle";

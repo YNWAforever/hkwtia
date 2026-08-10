@@ -3,7 +3,7 @@ import "server-only";
 import {sql} from "drizzle-orm";
 import {z} from "zod";
 
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb, type Database} from "@/lib/db/repos/common";
 import {agentRuns, posts} from "@/lib/db/server-schema";
 import type {Actor} from "@/lib/membership/lifecycle";

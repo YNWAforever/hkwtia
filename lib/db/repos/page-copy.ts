@@ -4,7 +4,7 @@ import {and, asc, eq} from "drizzle-orm";
 import {z} from "zod";
 
 import {routing} from "@/i18n/routing";
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb} from "@/lib/db/repos/common";
 import {auditEvents, pageCopy} from "@/lib/db/server-schema";
 import type {PageCopyOverride} from "@/lib/i18n/apply-page-copy";

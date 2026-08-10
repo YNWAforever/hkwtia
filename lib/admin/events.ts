@@ -2,7 +2,7 @@ import "server-only";
 
 import {z} from "zod";
 
-import {requireAdmin} from "@/lib/auth/actor";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {createCheckInDependencies, type CheckInDependencies} from "@/lib/db/repos/event-check-in";
 import type {Actor} from "@/lib/membership/lifecycle";
 
