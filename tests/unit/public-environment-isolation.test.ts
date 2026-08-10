@@ -31,6 +31,12 @@ describe("public environment boundaries", () => {
     ["@/lib/db/repos/showcase"],
     ["@/lib/db/repos/public-posts"],
     ["@/lib/auth/authorize"],
+    // A public page must import the Server Action it binds to a form, and an
+    // action module resolves its own actor — so these reach lib/auth/actor.
+    // Importing one must not require credentials the page never uses.
+    ["@/lib/auth/actor"],
+    ["@/lib/launchpad/member-actions"],
+    ["@/lib/showcase/member-actions"],
   ])("imports %s without the Neon Auth pair configured", async (specifier) => {
     vi.stubEnv("DATABASE_URL", "postgres://db.example.test/hkwtia");
     await expect(import(specifier)).resolves.toBeDefined();
