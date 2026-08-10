@@ -1396,6 +1396,7 @@
       "next": "Next page"
     },
     "member360": {
+      "profileHeading": "Contact details", "profileDescription": "Correct a member's contact details. Membership, billing, role and consent settings are not editable here.", "profileDisplayName": "Display name", "profilePhone": "Phone", "profileJobTitle": "Job title", "profileLocale": "Preferred language", "profileLocaleEn": "English", "profileLocaleZh": "Traditional Chinese", "profileOptional": "Optional", "profileSave": "Save contact details", "profileSuccess": "Contact details saved.", "profileValidation": "Check the required fields and try again.", "profileError": "We could not save these details. Please try again.",
       "description": "Review the complete member record and staff-only operational history.",
       "profile": "Profile",
       "companies": "Companies",

@@ -1398,6 +1398,7 @@
       "next": "下一頁"
     },
     "member360": {
+      "profileHeading": "聯絡資料", "profileDescription": "更正會員的聯絡資料。會籍、付款、權限及同意設定不可在此修改。", "profileDisplayName": "顯示名稱", "profilePhone": "電話", "profileJobTitle": "職銜", "profileLocale": "偏好語言", "profileLocaleEn": "英文", "profileLocaleZh": "繁體中文", "profileOptional": "選填", "profileSave": "儲存聯絡資料", "profileSuccess": "聯絡資料已儲存。", "profileValidation": "請檢查必填欄位後再試一次。", "profileError": "無法儲存資料，請再試一次。",
       "description": "查看完整會員記錄及僅供職員使用的營運歷史。",
       "profile": "個人資料",
       "companies": "公司",

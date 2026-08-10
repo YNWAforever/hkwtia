@@ -4,13 +4,16 @@ import {z} from "zod";
 
 import {Member360View} from "@/components/admin/member-360";
 import {MemberNoteForm} from "@/components/admin/member-note-form";
+import {MemberProfileForm} from "@/components/admin/member-profile-form";
 import type {AppLocale} from "@/i18n/routing";
 import {
   getMember360,
   Member360NotFoundError,
 } from "@/lib/admin/member-360";
 import {appendMemberNoteAction} from "@/lib/admin/member-note-actions";
+import {updateMemberProfileAction} from "@/lib/admin/member-profile-actions";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
+import {getEditableMemberProfile} from "@/lib/db/repos/admin-member-profile";
 
 const profileIdSchema = z.string().min(1);
 
@@ -29,12 +32,10 @@ export default async function AdminMember360Page({params}: Props) {
   }
 
   const t = await getTranslations({locale, namespace: "Admin"});
+  const actor = await requireAdminPageActor();
   let view;
   try {
-    view = await getMember360(
-      await requireAdminPageActor(),
-      profileId.data,
-    );
+    view = await getMember360(actor, profileId.data);
   } catch (error) {
     if (error instanceof Member360NotFoundError) {
       notFound();
@@ -48,6 +49,7 @@ export default async function AdminMember360Page({params}: Props) {
       error: t("member360.noteError"),
     },
   );
+  const editable = await getEditableMemberProfile(actor, profileId.data);
   const membership = view.membership;
   const customerHref = membership?.stripeCustomerId
     ? `https://dashboard.stripe.com/customers/${encodeURIComponent(membership.stripeCustomerId)}`
@@ -117,6 +119,33 @@ export default async function AdminMember360Page({params}: Props) {
         stripeSubscriptionHref={subscriptionHref}
         view={view}
       />
+      {editable
+        ? <MemberProfileForm
+          action={updateMemberProfileAction.bind(
+            null,
+            profileId.data,
+            `/${locale}/admin/members/${profileId.data}`,
+            {
+              successMessage: t("member360.profileSuccess"),
+              validationMessage: t("member360.profileValidation"),
+              errorMessage: t("member360.profileError"),
+            },
+          )}
+          labels={{
+            heading: t("member360.profileHeading"),
+            description: t("member360.profileDescription"),
+            displayName: t("member360.profileDisplayName"),
+            phone: t("member360.profilePhone"),
+            jobTitle: t("member360.profileJobTitle"),
+            locale: t("member360.profileLocale"),
+            locales: {"en": t("member360.profileLocaleEn"), "zh-HK": t("member360.profileLocaleZh")},
+            optional: t("member360.profileOptional"),
+            save: t("member360.profileSave"),
+            saving: t("member360.saving"),
+          }}
+          values={editable}
+        />
+        : null}
       <MemberNoteForm
         action={appendAction}
         labels={{
