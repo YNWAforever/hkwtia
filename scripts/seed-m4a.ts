@@ -440,6 +440,10 @@ export async function runM4ASeed(
   // a synthetic acceptance member and events (see reconcileM4AAcceptanceFixture
   // below) into whatever DATABASE_URL points at, so the guard has to live here
   // rather than in a wrapper nothing forces callers through.
+  //
+  // The real funding sources this also writes are available without the guard
+  // through `scripts/seed-m4a-knowledge.ts`, which seeds them and nothing else.
+  // Keep that entry point free of anything below.
   const databaseUrl = assertIsolatedSeedEnvironment(environment, {
     prefix: "M4A_ACCEPTANCE",
     flag: "M4A_ACCEPTANCE_SEED",
@@ -450,6 +454,9 @@ export async function runM4ASeed(
   const pool = new Pool({connectionString: databaseUrl, max: 1});
   try {
     await seedM4A({
+      // Named rather than left to the default, so the difference between this
+      // and the production seed is visible at both call sites instead of one.
+      sources: M4A_DEFAULT_SOURCES,
       embedding: createOpenAIEmbeddingAdapter(apiKey),
       repository: knowledge.repository,
     });

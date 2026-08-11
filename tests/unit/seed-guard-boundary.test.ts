@@ -14,10 +14,33 @@ import {describe, expect, it} from "vitest";
  * escaping it by name alone. `db-seed.ts` and `db-migrate.ts` don't start
  * with `seed-`, so they're unaffected.
  *
- * M1 is the sole exemption — its four membership plan rows are real product
- * configuration that production needs, and it writes no synthetic identity.
+ * Two seeds are exempt, on the same grounds: everything they write is real
+ * product configuration that production needs, and neither writes a synthetic
+ * identity. `seed-m1.ts` writes the four membership plan rows.
+ * `seed-m4a-knowledge.ts` writes the funding-scheme sources into the Concierge
+ * knowledge base — the half of `runM4ASeed` that had to stay reachable in
+ * production once the other half, which reconciles a fake member and two fake
+ * events, went behind the guard.
+ *
+ * An exemption is a hole by construction, so it is not granted on a comment
+ * alone: the case below proves each exempted file cannot reach fixture content.
+ * Adding a third entry here should be as uncomfortable as it looks.
  */
-const UNGUARDED_BY_DESIGN = new Set(["seed-m1.ts"]);
+const UNGUARDED_BY_DESIGN = new Set(["seed-m1.ts", "seed-m4a-knowledge.ts"]);
+
+/**
+ * What an exempted seed must never touch. These are the symbols that write, or
+ * name, synthetic data — a reference to any of them means the file is no longer
+ * only-real-configuration and has to be guarded like everything else.
+ */
+const FIXTURE_SYMBOLS = [
+  "M4A_ACCEPTANCE_SOURCES",
+  "M4A_DEFAULT_SOURCES",
+  "M4A_ACCEPTANCE_FIXTURE",
+  "reconcileM4AAcceptanceFixture",
+  "createM4AAcceptanceFixtureRepository",
+  "example.test",
+] as const;
 
 describe("every fixture seed is isolation-guarded", () => {
   const seeds = readdirSync(resolve("scripts"))
@@ -32,6 +55,19 @@ describe("every fixture seed is isolation-guarded", () => {
     (name) => {
       const source = readFileSync(resolve("scripts", name), "utf8");
       expect(source).toContain("assertIsolatedSeedEnvironment");
+    },
+  );
+
+  // The exemption is only defensible while the file writes real configuration
+  // and nothing else. Guarding is a runtime check; this is the static one, and
+  // it is what actually keeps an unguarded seed honest as the code moves.
+  it.each([...UNGUARDED_BY_DESIGN])(
+    "%s, which runs unguarded, cannot reach fixture content",
+    (name) => {
+      const source = readFileSync(resolve("scripts", name), "utf8");
+      for (const symbol of FIXTURE_SYMBOLS) {
+        expect(source, `${name} references ${symbol}`).not.toContain(symbol);
+      }
     },
   );
 
