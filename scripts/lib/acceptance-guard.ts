@@ -8,6 +8,9 @@
  *
  * Error codes stay prefixed per seed so existing runbooks and tests that match
  * on `M5_ACCEPTANCE_*` keep working after the refactor.
+ *
+ * The allowlist's whitespace-or-comma split and the try/catch around the URL
+ * parse are carried over from M6 deliberately — do not simplify them away.
  */
 export type IsolatedSeedOptions = Readonly<{
   prefix: string;
@@ -43,13 +46,19 @@ export function assertIsolatedSeedEnvironment(
 
   if (hostAllowlistVar) {
     const allowlist = environment[hostAllowlistVar]
-      ?.split(",").map((entry) => entry.trim().toLowerCase()).filter(Boolean) ?? [];
+      ?.split(/[\s,]+/).map((entry) => entry.trim().toLowerCase()).filter(Boolean) ?? [];
     if (allowlist.length === 0) fail("DATABASE_HOST_ALLOWLIST_REQUIRED");
     // An allowlisted host is not proof of isolation — the operator still has to
     // confirm that. This only stops an unlisted host, which is the mistake a
     // tired person actually makes.
-    const host = new URL(databaseUrl as string).hostname.toLowerCase();
-    if (!allowlist.includes(host)) fail("DATABASE_HOST_NOT_ALLOWED");
+    const parseHost = (): string => {
+      try {
+        return new URL(databaseUrl as string).hostname.toLowerCase();
+      } catch {
+        return fail("DATABASE_URL_INVALID");
+      }
+    };
+    if (!allowlist.includes(parseHost())) fail("DATABASE_HOST_NOT_ALLOWED");
   }
 
   return databaseUrl as string;
