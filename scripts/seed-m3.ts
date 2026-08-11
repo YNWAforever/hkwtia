@@ -1,5 +1,7 @@
 import {Pool} from "pg";
 
+import {assertIsolatedSeedEnvironment} from "./lib/acceptance-guard.ts";
+
 export const M3_SEED_NOW_ENV = "M3_SEED_NOW";
 
 export const M3_PROFILE_IDS = {
@@ -1005,6 +1007,12 @@ export async function seedM3(
 export async function runM3Seed(
   environment: Readonly<Record<string, string | undefined>> = process.env,
 ): Promise<void> {
+  // `npm run db:seed:m3` is callable directly, so the guard has to live here
+  // rather than in a wrapper script nothing forces callers through.
+  assertIsolatedSeedEnvironment(environment, {
+    prefix: "M3_ACCEPTANCE",
+    flag: "M3_ACCEPTANCE_SEED",
+  });
   const databaseUrl = environment.DATABASE_URL?.trim();
   if (!databaseUrl) {
     throw new Error("DATABASE_URL is required to seed M3 fixtures.");
