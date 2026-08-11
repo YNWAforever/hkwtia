@@ -104,6 +104,14 @@ describe("M2 deterministic seed", () => {
   });
 
   it("rejects a missing database URL without opening a pool", async () => {
-    await expect(runM2Seed({DATABASE_URL: "", NODE_ENV: "test"} as NodeJS.ProcessEnv)).rejects.toThrow("DATABASE_URL is required");
+    // runM2Seed is now guarded (Task 4): the isolation check runs before the
+    // pool is ever created, so a missing DATABASE_URL surfaces as the guard's
+    // own error rather than the function's former standalone check.
+    await expect(runM2Seed({
+      DEMO_ACCEPTANCE_SEED: "true",
+      DATABASE_URL: "",
+      DATABASE_URL_TEST: "",
+      NODE_ENV: "test",
+    } as NodeJS.ProcessEnv)).rejects.toThrow("DEMO_ACCEPTANCE_DATABASE_URL_REQUIRED");
   });
 });

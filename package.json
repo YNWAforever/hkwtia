@@ -18,6 +18,7 @@
     "db:migrate": "node --experimental-strip-types scripts/db-migrate.ts",
     "db:seed": "node --experimental-strip-types scripts/db-seed.ts",
     "db:seed:m1": "node --experimental-strip-types scripts/seed-m1.ts",
+    "db:seed:demo": "node --experimental-strip-types scripts/seed-demo.ts",
     "db:seed:m2": "node --experimental-strip-types scripts/seed-m2.ts",
     "db:seed:m3": "node --experimental-strip-types scripts/seed-m3.ts",
     "db:seed:m4a": "node --experimental-strip-types scripts/seed-m4a.ts",
