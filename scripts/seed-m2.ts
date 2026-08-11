@@ -352,8 +352,10 @@ export async function runM2Seed(environment: NodeJS.ProcessEnv = process.env): P
 }
 
 if (process.argv[1]?.endsWith("seed-m2.ts")) {
-  runM2Seed().catch(() => {
-    console.error("M2 database seed failed.");
+  runM2Seed().catch((error: unknown) => {
+    // A guard rejection and a real database error are different problems, and
+    // a fixed string makes them indistinguishable to whoever is debugging.
+    console.error(error instanceof Error ? error.message : "M2 database seed failed.");
     process.exitCode = 1;
   });
 }

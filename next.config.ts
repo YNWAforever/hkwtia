@@ -93,9 +93,32 @@ function coveredByPattern(from: string): boolean {
   );
 }
 
+/**
+ * WordPress served every one of these with a trailing slash, and the fixture
+ * records them that way because it is a faithful capture of the old site. They
+ * have to be stripped here: Next normalises `/about-us/` to `/about-us` with a
+ * 308 *before* it consults this list, so a slashed source never matches and the
+ * request lands on a 404 instead of the redirect. That silently affected every
+ * `equivalent` mapping — the ones government filings and press coverage cite.
+ *
+ * `skipTrailingSlashRedirect: true` also fixes it and saves a hop, but it turns
+ * that normalisation off for real pages too, leaving `/about` and `/about/`
+ * both answering 200. Paying one extra hop on retired URLs is cheaper than
+ * duplicate content on live ones.
+ */
+function redirectSource(from: string): string {
+  return from.length > 1 && from.endsWith("/") ? from.slice(0, -1) : from;
+}
+
 const legacyLiteralRedirects: LegacyRedirect[] = legacyUrls.entries
   .filter((entry) => !coveredByPattern(entry.from))
-  .map(({from, to}) => ({source: from, destination: to, permanent: true}));
+  .map(({from, to}) => ({source: redirectSource(from), destination: to, permanent: true}))
+  // `/news/` and `/events/` survive the migration under the same name, so
+  // stripping the slash makes source and destination identical — a rule that
+  // redirects a page to itself, forever. Next's own normalisation already
+  // takes `/news/` to `/news`, which is the real page, so the correct number
+  // of rules for these is zero.
+  .filter(({source, destination}) => source !== destination);
 
 const securityHeaders = [
   {key: "Content-Security-Policy", value: contentSecurityPolicy},

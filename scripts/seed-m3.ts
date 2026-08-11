@@ -1027,8 +1027,10 @@ export async function runM3Seed(
 }
 
 if (process.argv[1]?.endsWith("seed-m3.ts")) {
-  runM3Seed().catch(() => {
-    console.error("M3 database seed failed.");
+  runM3Seed().catch((error: unknown) => {
+    // A guard rejection and a real database error are different problems, and
+    // a fixed string makes them indistinguishable to whoever is debugging.
+    console.error(error instanceof Error ? error.message : "M3 database seed failed.");
     process.exitCode = 1;
   });
 }

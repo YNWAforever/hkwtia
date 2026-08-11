@@ -2,6 +2,7 @@ import {describe, expect, it} from "vitest";
 
 import nextConfig from "@/next.config";
 import legacyUrls from "@/content/legacy-urls.json";
+import {publicRoutes} from "@/config/public-routes";
 // Next bundles its own path-to-regexp fork and uses it internally to compile
 // `redirects()` `source` patterns into matchers (see next/dist/shared/lib/router
 // /utils/prepare-destination.js). Importing it here means "covered by some rule"
@@ -24,13 +25,26 @@ async function getRedirects() {
 }
 
 describe("legacy redirects", () => {
-  it("serves every classified legacy url, matched the way Next.js actually matches sources", async () => {
+  it("resolves every classified legacy url the way Next.js actually processes a request", async () => {
     const redirects = await getRedirects();
     const matchers = redirects.map((redirect) => pathToRegexp(redirect.source));
+    const realRoutes = new Set<string>(publicRoutes);
 
     for (const entry of legacyUrls.entries) {
-      const covered = matchers.some((matcher) => matcher.test(entry.from));
-      expect(covered, `${entry.from} is not covered by any redirect rule`).toBe(true);
+      // Next 308s the trailing slash away before it consults redirects(), so
+      // the stripped path is what the rules actually see. Testing the raw
+      // captured path instead would pass against rules that never fire — which
+      // is exactly how every `equivalent` mapping came to 404 in production
+      // while this suite stayed green.
+      const normalized = entry.from.length > 1 && entry.from.endsWith("/")
+        ? entry.from.slice(0, -1)
+        : entry.from;
+      // Two ways to be reachable: a rule matches, or the normalised path is
+      // already a live page (`/news/` and `/events/` kept their names, so they
+      // need no rule and must not have one).
+      const reachable = matchers.some((matcher) => matcher.test(normalized))
+        || realRoutes.has(normalized);
+      expect(reachable, `${entry.from} (normalised to ${normalized}) reaches nothing`).toBe(true);
     }
   });
 
