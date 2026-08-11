@@ -1,0 +1,2884 @@
+{
+  "entries": [
+    {
+      "from": "/2001/01/2001-establishment-of-wtia/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2002/01/2002-the-1st-wtia-panel-discussion-inter-operator-sms/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2003/01/2003-opening-of-hong-kong-wireless-development-centre-at-cyberport/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2003/01/2003-the-1st-wtia-awards-j2me-open-2003/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2003/01/2003-wtia-partner-with-pisa-to-conduct-wlan-war-driving-in-hong-kong/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2005/01/2005-1st-hong-kong-wireless-technology-excellence-awards/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2005/01/2005-hong-kong-international-wireless-conference-2005/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2005/01/2005-launching-of-3g-cyberport-project/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2005/01/2005-launching-of-wireless-services-value-chain-cooperation-wsvcc-platform/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2005/01/2005-the-1st-wtia-sms-donation-campaign/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2006/01/2006-hong-kong-ict-awards-best-ubiquitous-award/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2007/01/2007-hong-kong-mobile-film-festival/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2013/01/2013-asia-smartphone-contest/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2013/01/2013-opening-of-mobility-experience-centre-at-cyberport/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2014/01/2014-made-in-hong-kong-smartphone-apps-project/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2014/01/2014-wi-fi-hk/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2015/01/2015-asia-smartphone-apps-contest-summit-2015/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2015/01/2015-hong-kong-ict-awards-2015-best-mobile-apps-award/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2015/01/2015-safewifi-campaign/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2015/01/2015-the-5th-hong-kong-international-mobile-film-festival-and-awards/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2016/01/2016-asia-smartphone-apps-summit-cum-award-presentation-ceremony-2016/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2016/01/2016-building-up-wi-fi-hk-through-collaboration-pledging-ceremony/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2016/01/2016-legco-information-technology-constituency-election-forum/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2016/01/2016-safewifi-campaign/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2016/08/wtia-meet-our-member-%e9%a6%ac%e7%94%b0%e9%9b%bb%e8%85%a6-cypher-martin/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2016/09/wtia-meet-our-member-%e5%a8%81%e6%9c%8b%e5%a4%a7%e6%95%b8%e6%93%9a%e9%9b%86%e5%9c%98-vpon-big-data-group/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2016/12/wtia-meet-our-member-%e7%be%85%e5%be%b7%e8%88%87%e6%96%bd%e7%93%a6%e8%8c%a8%e9%a6%99%e6%b8%af%e6%9c%89%e9%99%90%e5%85%ac%e5%8f%b8-rohde-schwarz-hong-kong-ltd/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2017/01/2017-asia-smart-app-summit-cum-award-presentation-ceremony/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2017/01/2017-connected-city-conference/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2017/01/2017-develop-market-network-of-internet-of-vehicles-iov-in-mainland-china/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2017/01/2017-hong-kong-ict-awards-best-mobile-app-award/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2017/04/wtia-meet-our-member-%e9%9b%85%e8%99%8e%e9%a6%99%e6%b8%af-yahoo-hong-kong/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2017/06/wtia-meet-our-member-playnote/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2017/08/wtia-meet-our-member-finfabrik/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2017/09/wtia-meet-our-member-pixel-networks-limited/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2017/10/wtia-meet-our-member-mtel-limited/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2018/01/2018-develop-market-network-of-internet-of-vehicles-iov-in-mainland-china/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2018/01/2018-meeting-with-yc-partner-eric-migicovsky-how-to-apply-successfully-for-y-combinator/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2018/01/2018-taipei-iot-business-delegation-tour/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2019/01/2019-a-5g-revolution-what-does-it-mean-for-me/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2019/01/2019-asia-smart-app-awards-2018-2019/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2019/01/2019-joint-ict-spring-dinner-2019/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2019/01/2019-techconnect-conference-festival/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2020/01/2020-asia-smart-app-awards-2020/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2020/01/2020-hong-kong-ict-awards-ict-startup-award/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2020/03/postpone-asia-smart-app-awards-2020/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2020/03/postpone-hong-kong-ict-awards-2020-ict-startup-award/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2020/03/postpone-joint-ict-spring-dinner-2020-%e9%a6%99%e6%b8%af%e8%b3%87%e8%a8%8a%e5%8f%8a%e9%80%9a%e8%a8%8a%e7%a7%91%e6%8a%80%e6%a5%ad%e7%95%8c-%e5%ba%9a%e5%ad%90%e9%bc%a0%e5%b9%b4%e8%81%af%e5%90%88/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2020/03/postpone-tokyo-industry-4-0-training-programme/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2020/03/smartones-press-release-smartone-%e9%81%b8%e7%94%a8%e6%84%9b%e7%ab%8b%e4%bf%a15g-%e5%85%b1%e5%90%8c%e6%8e%a8%e5%8b%95%e9%a6%99%e6%b8%af5g%e6%95%b8%e7%a2%bc%e5%8c%96/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2020/04/%e6%96%b0%e8%81%9e%e7%a8%bf-%e7%96%ab%e6%83%85%e9%87%8d%e5%89%b5it%e4%b8%ad%e5%b0%8f%e4%bc%81-%e5%88%9d%e5%89%b5%e8%b3%87%e9%87%91%e9%8f%88%e6%96%b7%e8%a3%82%e6%80%a5%e9%a0%88%e6%95%91%e4%ba%a1/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2020/05/smartone-press-release-smartone-5g-%e6%9c%8d%e5%8b%99%e5%95%9f%e5%8b%95-%e7%b6%b2%e7%b5%a1%e8%a6%86%e8%93%8b%e5%85%a8%e6%b8%af%e8%87%b3%e5%bb%a3-%e5%b8%b6%e5%8b%95%e9%a6%99%e6%b8%af%e6%99%ba/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2020/10/asia-smart-app-workshop-ux-ui-more-than-you-think/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2020/10/the-strategies-for-expanding-global-internet-of-things-iot-markets/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2021/03/simcardregistration/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2022/09/new-term-of-executive-committee-2022-2024/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2022/09/wtia-21st-anniversary-celebration-and-inauguration-gala-dinner/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2022/10/wtia-201st-anniversary-commemorative-book-%e9%a6%99%e6%b8%af%e7%84%a1%e7%b7%9a%e7%a7%91%e6%8a%80%e5%95%86%e6%9c%8320%ef%bc%8b1%e9%80%b1%e5%b9%b4%e7%b4%80%e5%bf%b5%e7%89%b9%e5%88%8a/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2025/05/%e3%80%8ctech-connect-%e6%99%ba%e5%89%b5%e4%ba%92%e8%81%af%e3%80%8dai-%e9%a0%98%e8%a2%96%e7%b3%bb%e5%88%97%e7%a0%94%e8%a8%8e%e6%9c%83-tech-connect-ai-leaders-seminar-series/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2025/10/2025-%e9%a6%99%e6%b8%af%e8%b3%87%e8%a8%8a%e5%8f%8a%e9%80%9a%e8%a8%8a%e7%a7%91%e6%8a%80%e7%8d%8e%ef%bc%9a%e8%b3%87%e8%a8%8a%e7%a7%91%e6%8a%80%e5%88%9d%e5%89%b5%e4%bc%81%e6%a5%ad%e7%8d%8e/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/2025/11/2025-%e4%ba%9e%e6%b4%b2%e6%99%ba%e6%85%a7%e5%89%b5%e6%96%b0%e5%a4%a7%e7%8d%8e-asia-smart-innovation-awards-2025/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/about-us/",
+      "to": "/about",
+      "kind": "equivalent"
+    },
+    {
+      "from": "/author/bella-lau/",
+      "to": "/news",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/author/hkwtia/",
+      "to": "/news",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/author/iris/",
+      "to": "/news",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/author/kane-chu/",
+      "to": "/news",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/author/keith/",
+      "to": "/news",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/author/kylie-li/",
+      "to": "/news",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/become-a-member/",
+      "to": "/membership",
+      "kind": "equivalent"
+    },
+    {
+      "from": "/category/archive/",
+      "to": "/news",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/category/meet-our-members/",
+      "to": "/news",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/category/members-update/",
+      "to": "/news",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/category/news/",
+      "to": "/news",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/category/resources/",
+      "to": "/news",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/certified-courses/",
+      "to": "/programs/cpai",
+      "kind": "equivalent"
+    },
+    {
+      "from": "/chairmans-message/",
+      "to": "/about/chairman",
+      "kind": "equivalent"
+    },
+    {
+      "from": "/constitution/",
+      "to": "/about",
+      "kind": "gone"
+    },
+    {
+      "from": "/contact-us/",
+      "to": "/contact",
+      "kind": "equivalent"
+    },
+    {
+      "from": "/core-focus-groups/",
+      "to": "/about/committees",
+      "kind": "equivalent"
+    },
+    {
+      "from": "/element_category/columns/",
+      "to": "/",
+      "kind": "gone"
+    },
+    {
+      "from": "/element_category/elements/",
+      "to": "/",
+      "kind": "gone"
+    },
+    {
+      "from": "/element_category/sections/",
+      "to": "/",
+      "kind": "gone"
+    },
+    {
+      "from": "/event/%e3%80%8a%e7%9c%8b%e6%88%91%e4%bb%8a%e5%a4%a9%e6%80%8e%e9%ba%bc%e8%aa%aa%e3%80%8b-%e9%9b%bb%e5%bd%b1-%e6%85%88%e5%96%84%e5%85%b1%e8%9e%8d%e8%ac%9d%e7%a5%a8%e5%a0%b4/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e3%80%8c2024-%e8%b3%87%e8%a8%8a%e7%a7%91%e6%8a%80%e5%88%9d%e5%89%b5%e4%bc%81%e6%a5%ad%e7%8d%8e%e3%80%8d%e6%8b%9b%e5%8b%9f%e6%97%a5/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e3%80%90-opening-ceremony%e3%80%91%e2%9c%a8the-innovation-technology-festival-for-the-secondary-school-student%e2%9c%a8/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e3%80%90award-presentation-ceremony%e3%80%91hong-kong-ict-awards-2020-ict-startup-award-2020/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e3%80%90awards-presentation-ceremony%e3%80%91hong-kong-ict-awards-2020/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e3%80%90gt-limited-x-blutech-io-x-saltagen-ventures-x-gobi-partners%e3%80%91-ict-startup-award-launch-party-x-sharing-section/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e3%80%90night%e5%99%8f%e3%80%91-sim-card%e5%af%a6%e5%90%8d%e5%88%b6%e5%b0%8d%e7%9b%a4%e7%94%9f%e6%84%8f%e6%9c%89%e5%92%a9%e5%bd%b1%e9%9f%bf/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e3%80%90open-for-application%e3%80%91-retail-innovation-award-2021/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e3%80%90tech-connect%e7%b3%bb%e5%88%97%e5%b7%a5%e4%bd%9c%e5%9d%8a3%e3%80%91ai%e4%ba%92%e5%8b%95%e5%89%b5%e6%96%b0%e8%80%85-%e4%bb%a5%e6%99%ba%e8%83%bd%e6%ba%9d%e9%80%9a%e6%90%ad%e5%bb%ba%e6%a9%8b/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e3%80%90tech-connect%e7%b3%bb%e5%88%97%e5%b7%a5%e4%bd%9c%e5%9d%8a9%e3%80%91ai-%e9%9b%bb%e5%95%86%e7%ad%96%e5%b1%95%ef%bc%9a%e5%80%8b%e6%80%a7%e5%8c%96%e6%8e%a8%e8%96%a6%e7%9a%84%e8%97%9d%e8%a1%93/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e3%80%90tech-to-connect-series%e3%80%91kick-off-seminar-unleashing-the-unprecedented-opportunities-in-a-new-tech-era/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e3%80%90wtia%e5%b0%8e%e8%b3%9e%e5%9c%98%e3%80%91wtia-x-%e5%9c%b0%e7%90%86%e7%a9%ba%e9%96%93%e5%af%a6%e9%a9%97%e5%ae%a4/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e3%80%90wtia%e5%b0%8e%e8%b3%9e%e5%9c%98%e3%80%91wtia-x-aws-genai-pop-up%e9%ab%94%e9%a9%97%e7%a9%ba%e9%96%93/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e3%80%90wtia%e5%b0%8e%e8%b3%9e%e5%9c%98%e3%80%91wtia-x-microsoft%e5%b0%8e%e8%b3%9e%e5%9c%98/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e4%b8%ad%e5%a4%a7-cuscs-wtiai-%e5%90%88%e8%be%a6-genai-%e5%95%86%e6%a5%ad%e6%87%89%e7%94%a8%e8%aa%b2%e7%a8%8b%ef%bc%9acpai-%e5%b0%88%e6%a5%ad%e8%aa%8d%e8%ad%89/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e6%8f%90%e5%8d%87%e9%a6%99%e6%b8%af%e4%b8%ad%e5%ad%b8%e7%94%9f%e6%96%bc%e5%b7%a5%e6%a5%ad4-0%e6%8a%80%e8%a1%93%e5%8f%8a%e5%89%b5%e6%96%b0%e6%87%89%e7%94%a8-cps%e6%a8%a1%e5%9e%8b%e8%bb%8a%e8%a8%ad/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e6%99%ba%e5%89%b5%e4%ba%92%e8%81%af-2026%ef%bc%9a%e6%a9%9f%e5%99%a8%e4%ba%ba%e8%88%87%e8%87%aa%e5%8b%95%e5%8c%96%e8%b3%a6%e8%83%bd%e5%95%9f%e5%8b%95%e7%a0%94%e8%a8%8e%e6%9c%83-wtia-tech-to-connect/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e7%94%9f%e6%88%90%e5%bc%8fai%e9%a0%98%e8%a2%96%e5%b3%b0%e6%9c%83%ef%bc%9a%e7%a7%91%e6%8a%80%e9%be%8d%e9%a0%ad%e5%85%b1%e5%a1%91%e5%95%86%e6%a5%ad%e6%96%b0%e5%8b%95%e6%85%8b/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e8%a6%aa%e5%ad%90%e7%b7%9a%e4%b8%8a%e5%b7%a5%e4%bd%9c%e5%9d%8a-%e3%80%8c%e5%8b%95%e6%89%8b%e7%a0%8c%e7%ae%a1%e7%8b%80%e7%a9%8d%e6%9c%a8%e3%80%8dmicrobit-%e5%89%b5%e6%84%8f%e7%b7%a8%e7%a8%8b/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e9%81%99%e8%b7%9d%e7%87%9f%e5%95%86%e8%a8%88%e5%8a%83%e5%8f%8a%e7%a7%91%e6%8a%80%e6%87%89%e7%94%a8%e6%a1%88%e4%be%8b%e5%88%86%e4%ba%ab/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e9%9b%b6%e5%94%ae%e6%a5%ad%e8%bd%89%e5%9e%8b-%e8%b8%8f%e4%b8%8a%e7%ac%ac%e4%b8%80%e6%ad%a5/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e9%a6%99%e6%b8%af%e9%9b%b6%e5%94%ae%e7%a7%91%e6%8a%80%e5%89%b5%e6%96%b0%e5%a4%a7%e7%8d%8e2020/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/%e9%a6%99%e6%b8%afict-awards-2025%ef%bc%9a%e8%b3%87%e8%a8%8a%e7%a7%91%e6%8a%80%e5%88%9d%e5%89%b5%e4%bc%81%e6%a5%ad%e7%8d%8e%e5%8f%8a%e6%95%b8%e7%a2%bc%e5%a8%9b%e6%a8%82%e7%8d%8e%e9%a0%92%e7%8d%8e/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/12th-banktech-executive-virtual-summit-2021/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/2-5-day-rpa-workshop-start-to-deploy-a-robotic-workforce-in-your-enterprise/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/2020-%e3%80%8c%e9%a6%99%e6%b8%af%e7%92%b0%e5%a2%83%e5%8d%93%e8%b6%8a%e5%a4%a7%e7%8d%8e%e3%80%8d%e5%8f%8a%e3%80%8c%e9%a6%99%e6%b8%af%e7%b6%a0%e8%89%b2%e5%89%b5%e6%96%b0%e5%a4%a7%e7%8d%8e%e3%80%8d/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/2020%e5%b9%b4%e7%a4%be%e6%9c%83%e9%97%9c%e6%84%9b%e4%bc%81%e6%a5%ad%e7%8d%8e%e9%a0%85%e5%8f%8a%e5%b0%88%e6%a5%ad%e8%b3%87%e6%a0%bc%e9%a0%92%e6%8e%88%e5%85%b8%e7%a6%ae/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/2021-eureka-nova-hackathon-the-future-of-real-estate-retail/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/2021-smart-retailing-awards-open-for-enrollment/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/2021-vietnam-business-matching/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/2021-voter-registration-campaign/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/3rd-annual-chatbots-asia/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/4984/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/5291/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/5g-iot-techconnect-conference/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/5g-iot-towards-a-new-era-of-wireless-communication-workshop/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/5g-iot-workshop-festival-ai-transformation-on-image-analytics/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/5g-iot-workshop-festival-case-studies-in-the-application-of-internet-of-things-in-ai-and-big-data/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/5g-iot-workshop-festival-clarity-for-operational-technology-networks/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/5g-iot-workshop-festival-enabling-the-iot-connected-world-through-cyber-security/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/5g-iot-workshop-festival-internet-of-construction/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/5g-iot-workshop-festival-p2p%e8%88%87%e6%9c%aa%e4%be%86%e4%ba%92%e8%81%af%e7%b6%b2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/5g-iot-workshop-festival-smart-building-diy-iot-hands-on-workshop/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/7729/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/advanced-microservices-certification-programme-2-days/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/advanced-microservices-certification-programme/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/agile-and-intelligent-automation-trend-in-2021/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/agile-scrum-way-with-iterative-elaboration-of-user-stories-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/agile-scrum-way-with-iterative-elaboration-of-user-stories/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ai-%e5%a4%a7%e5%b0%8d%e6%b1%ba%ef%bc%9achatgpt-vs-bard-ai-vs-bing-chat/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ai-%e9%98%b2%e8%ad%b7%e7%9b%be%ef%bc%9a%e5%b0%8b%e6%89%be%e5%ae%89%e5%85%a8%e4%b9%8b%e9%81%93/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ai-and-cloud-innovations-opening-new-horizons-for-effective-collaboration-and-strategic-decisions-ai%e8%88%87%e9%9b%b2%e7%ab%af%e5%89%b5%e6%96%b0%ef%bc%9a%e9%96%8b%e5%95%9f%e5%8d%94%e4%bd%9c/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ai-driven-cybersecurity-essential-strategies-for-the-modern-business-landscape/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ai-horizons-igniting-an-innovation-wave/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ai-infused-storytelling-merging-data-with-narrative-for-maximum-impact-ai-%e5%8f%99%e4%ba%8b%e8%9e%8d%e5%85%a5%e6%95%b8%e6%93%9a%e5%8a%a9%e5%af%a6%e7%8f%be%e6%9c%80%e5%a4%a7%e5%bd%b1%e9%9f%bf/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ai-transaction-watchtower-smart-defenses-against-cyber-threats-ai%e5%ae%88%e6%9c%9b%e8%80%85-%e6%99%ba%e6%85%a7%e9%98%b2%e8%a1%9b%e7%b6%b2%e7%b5%a1%e5%a8%81%e8%84%85/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ai-transaction-watchtower-smart-defenses-against-cyber-threats/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ai-transportation-innovation-the-driving-force-of-future-mobility-ai%e9%81%8b%e8%bc%b8%e9%9d%a9%e6%96%b0%e6%9c%aa%e4%be%86%e4%ba%a4%e9%80%9a%e7%9a%84%e9%a9%85%e5%8b%95%e5%8a%9b/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/aim-x-hkitf-x-wtia-joint-asso-xmas-party/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/aiot-innovations-building-a-future-of-smart-connections-aiot-%e5%89%b5%e6%96%b0-%e5%bb%ba%e7%ab%8b%e6%99%ba%e8%83%bd%e9%80%a3%e6%8e%a5%e7%9a%84%e6%9c%aa%e4%be%86/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/aiu-explore-and-expereince-exhibition-2020/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/announcement-of-hong-kong-mobile-apps-industry-survey-2020-results/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/artificial-intelligence-essentials-application-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/artificial-intelligence-essentials-application/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/artificial-intelligence-infrastructure-architect-2-days/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asa-2020-kick-off-ceremony-cum-smart-app-seminar/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-award-presentation-ceremony-2021/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-awards-2020-presentation-ceremony/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-awards-2022-2023-kick-off-ceremony-cum-smart-app-seminar/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-awards-2024-award-presentation-ceremony-cum-luncheon/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-awards-22-23-industry-survey-on-hong-kong-mobile-apps-industry-press-conference/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-awards-kick-off-ceremony-cum-smart-app-seminar/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-awards-kick-off-ceremony-x-winners-seminar-appaichemy-chapter-10-of-asa-saga/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-summit-2020-how-to-tackle-covid-19-with-apps-and-technology/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-summit-2021-how-app-development-evolved-during-covid-19-pandemic/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-summit-2022-23/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-summit-2024/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-workshop-ai-powered-smart-apps-build-smart-apps-that-learn-and-adapt/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-workshop-ai-x-design-thinking/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-workshop-application-in-metaverse/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-workshop-cybersecurity-in-web-3-0/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-workshop-emerging-trends-in-smart-app-ux-ui-design/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-workshop-from-desktop-to-mobile/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-workshop-from-idea-to-app-the-ultimate-guide-to-smart-app-development-for-startups/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-workshop-innovate-with-design-thinking-the-secret-to-creating-smart-apps-that-solve-real-problems/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-workshop-memorable-users-experience%ef%bc%9a-ar-vr-in-the-apps/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-workshop-ui-ux-vs-consumer-behaviors/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-app-workshop-uiux-more-than-you-think/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-smart-innovation-awards-summit-2025/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asia-telecoms-summit/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asian-e-tailing-summit/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asifma-compliance-week-2021/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/asifma-tech-ops-week/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/associations-padel-sports-day/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/award-presentation-cum-closing-ceremony-it-festival-for-secondary-school-students/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/aws-discovery-day/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/azure-fundamental-learning-day/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/back-to-basic-accounting-payroll-with-cloud-automation/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/big-data-analytics-essentials-for-smart-city-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/big-data-analytics-essentials-for-smart-city-3/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/big-data-analytics-essentials-for-smart-city/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/big-data-and-open-source-fundamentals-workshop-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/big-data-and-open-source-fundamentals-workshop/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/build-a-secure-cyberspace-2020-2021-campaign/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/build-a-secure-cyberspace-2021-2022-campaign/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/build-a-trusted-smart-living-environment-with-product-certification-cyber-security-and-electromagnetic-compatibility-emc/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/building-a-cyber-security-and-cloud-protection-framework/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/building-microsoft-teams-integrations-and-workflows/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/business-govirtual-expo-conference-%e2%ad%90%ef%b8%8f-wtia-innovation-forum/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/business-of-ip-asia-forum-2020/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/capture-the-flag-challenge-2020-webinar/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/certificate-on-rpa-for-executives-start-to-deploy-a-robotic-workforce-in-your-enterprise-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/certificate-on-rpa-for-executives-start-to-deploy-a-robotic-workforce-in-your-enterprise-3/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/certificate-on-rpa-for-executives-start-to-deploy-a-robotic-workforce-in-your-enterprise-4/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/certificate-on-rpa-for-executives-start-to-deploy-a-robotic-workforce-in-your-enterprise/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/certified-associate-in-python-programming-pcap/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/certified-hadoop-administrator/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/certified-information-systems-security-professional-cissp-official-training-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/certified-information-systems-security-professional-cissp-official-training-3/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/certified-information-systems-security-professional-cissp-official-training/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/cloud-security-certification-ccsp-certified-cloud-security-professional/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/connected-retail-experiences-2020/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/connected-vehicles-and-autonomous-driving-webinar/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/containers-kubernetes-and-red-hat-openshift-administration-ii-do285/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/covid-19-and-new-cybersecurity-risk-covid-19%e8%88%87%e6%96%b0%e5%9e%8b%e7%b6%b2%e7%b5%a1%e9%a2%a8%e9%9a%aa/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/cpce-and-wtia-memorandum-of-understanding-signing-ceremony/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/cxo-forum/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/cyber-threat-intelligence-workshop-series-advanced/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/cyber-threat-intelligence-workshop-series-foundation-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/cyber-threat-intelligence-workshop-series-foundation/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/cyberport-venture-capital-forum-2020/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/cyberport-x-wtia-smart-business-with-iot/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/cybersecurity-and-regulations-concern-for-smart-home-devices-workshop-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/cybersecurity-and-regulations-concern-for-smart-home-devices-workshop/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/data-privacy-forum/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/designing-the-perfect-ar-vr-experience-how-to-put-users-first/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/devops-foundation-certification-dof/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/devops-foundation-dofd-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/devops-foundation-dofd/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/devops-training-series-continuous-testing-foundation-ctf%e2%84%a0/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/devops-training-series-devops-leader-dol-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/devops-training-series-devops-leader-dol-3/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/devops-training-series-devops-leader-dol/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/devops-training-series-site-reliability-engineering-sre-foundation%e2%84%a0/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/digital-entertainment-leadership-forum-delf-2020/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/digital-marketing-strategy-in-asia-pacific-region/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/digital-transformation-of-supply-chain-management-seminar-smartbiz-expo/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/diploma-in-internet-of-things-iot-module-1-technologies-and-applications/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/diploma-in-internet-of-things-iot/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/dont-waste-the-crisis-build-a-better-hong-kong/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/e4-0-robotic-process-automation-rpa-hands-on-workshop-1-day/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/e4-0-robotic-process-automation-rpa-hands-on-workshop/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/e4-0-web-and-mobile-application-development-with-emerging-low-code-approach-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/e4-0-web-and-mobile-application-development-with-emerging-low-code-approach/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/emotional-sustainability-for-transformation-via-covid-19/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/empathy-in-action-applying-design-thinking-to-understand-users-and-drive-innovation/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/enterprise-4-0-robotic-process-automation-hands-on-workshop-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/enterprise-4-0-robotic-process-automation-hands-on-workshop/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/enterprise-4-0-the-road-to-digital-smart-and-agile-sme/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/enterprise-4-0-web-and-mobile-application-development-with-emerging-low-code-approach-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/enterprise-4-0-web-and-mobile-application-development-with-emerging-low-code-approach/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/essential-workshop-for-an-accelerated-path-to-successful-cloud-adoption/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/filmarty-2021/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/fintech-2-0-conference/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/foresight-2021/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/free-webinarlong-way-to-aglie-challenges-success-series-scrum-in-banking-and-insurance-industry/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/gerontech-and-innovation-expo-cum-summit-gies/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/gerontechnology-conference-insight-of-gerontechnology-in-hong-kong/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/global-microsoft-365-developer-bootcamp/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/go-for-it-business-tour-wtia-x-towngas-telecom/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/govirtual-business-expo-conference/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/graduation-ceremony-for-the-certified-practitioner-in-generative-ai-for-business-innovation-and-applications-cpai-program/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/hkban-x-hku-idendron-investment-matching-gathering/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/hkcs-enterprise-architecture-specialist-group-annual-forum-2020-the-architecture-evolution-in-the-digital-age/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/hkitf-x-rtia-x-wtia-2024%e9%a6%99%e6%b8%af%e8%b3%87%e8%a8%8a%e5%8f%8a%e9%80%9a%e8%a8%8a%e7%a7%91%e6%8a%80%e8%81%af%e5%90%88%e6%98%a5%e8%8c%97%e6%99%9a%e5%ae%b4/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/hkt-x-kingdee-x-hkpc-%e7%b6%b2%e4%b8%8a%e7%a0%94%e8%a8%8e%e6%9c%83-%e5%96%84%e7%94%a8%e5%89%b5%e6%96%b0%e6%95%b8%e7%a2%bc%e6%96%b9%e6%a1%88%ef%bc%8c%e6%8b%93%e5%b1%95%e5%a4%a7%e7%81%a3%e5%8d%80/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/hong-kong-and-vietnam-ict-landscape-and-opportunities/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/hong-kong-electronic-forum-healthtech-innovation/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/hong-kong-electronics-symposium-2020-embracing-smart-city-with-iot/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/hong-kong-electronics-symposium-hkes-2021/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/hong-kong-ict-awards-2025-ict-startup-award-recruitment-day-%e3%80%8c%e5%89%b5%e7%a7%91%e7%84%a1%e6%a5%b5%e9%99%90-ai%e5%bc%95%e9%a0%98%e5%88%9d%e5%89%b5%e6%96%b0%e6%99%82%e4%bb%a3%e3%80%8d/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/hong-kong-innovation-and-technology-exchange-programme-and-hong-kong-innovation-and-technology-new-force-award/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/hong-kong-retail-summit-2021-the-rise-of-new-retail-normal-recover-and-revitalize-under-adversity/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/hong-kong-science-park-career-expo-2020-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/how-cloud-accelerates-results-and-drive-for-a-successful-digital-transformation-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/how-cloud-accelerates-results-and-drive-for-a-successful-digital-transformation/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/how-cloud-accelerates-results-and-drives-a-successful-digital-transformation/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/how-standards-and-testing-foster-local-iot-and-5g-developments-in-2021/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/how-to-make-cloud-successfully-adopted-in-your-organisation-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/how-to-make-cloud-successfully-adopted-in-your-organisation/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ict-startup-award-2020-briefing-session-cyberport/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ict-startup-award-2020-briefing-session-hkstp/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ict-startup-award-introductory-session-hkeba-9th-seminar-how-vr-and-ar-works-with-commerce/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ict-startup-award-launch-party-x-entrepreneurs-at-20-30-40/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/icta-2023-startup-seminar-from-zero-to-one-launching-your-entrepreneurial-journey/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/icta23-awards-presentation-ceremony-cum-dinner/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/implementing-your-infrastructure-securely-in-public-cloud/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/improve-the-high-quality-code-awareness-of-development-workshop-2-days/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/inaugural-city-it-grand-challenge-the-grand-challenge/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/industrialist-forum-2020-propelling-to-the-next-normal/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/information-security-summit-2021/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/innopreneur-forum%e2%80%affb%e2%80%aftechnology%e2%80%afunder-the-new-normal%e2%80%af/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/innopreneur-network-2021-foodtech-transforming-a-local-brand/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/insidw-2023-9-issue-launch-party/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/insidw-2025-3%e6%9c%88%e8%99%9f-launch-party/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/intro-to-cryptos-and-e-commerce-payments/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/introducing-power-virtual-agents-a-no-code-bot-building-experience/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/introduction-to-internet-of-things-iot-technologies-and-application/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/introduction-to-internet-of-things-iot-technologies-and-applications/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/iot-certification-5-days-from-beginner-to-advanced-tue-section/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/iot-certification-programme-start-from-beginner-to-advanced-level-in-5-days-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/iot-certification-programme-start-from-beginner-to-advanced-level-in-5-days/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/iot-seminar-the-development-trend-of-global-iot-technologies/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/iot-sensor-do-it-yourself-diy-experience-workshop/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/iot-solutions-world-congress-digital-summit/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/iot-webinar%e3%80%90start-a-new-journey-in-the-iot-world-workshop%e3%80%91/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/it-professional-lohas-in-the-greater-bay-area/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/itdef-ms-004-%e5%89%b5%e7%a7%91%e7%99%bc%e5%b1%95%e8%ab%96%e5%a3%87%e5%a4%a7%e5%b8%ab%e7%b3%bb%e5%88%97%ef%bc%9a-women-in-tech/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/joint-ict-christmas-party-2019/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/kubernetes-administration-official-linux-foundation-course-lfs458-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/kubernetes-administration-official-linux-foundation-course-lfs458/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/kubernetes-k8s-%e5%ae%b9%e5%99%a8%e6%8a%80%e8%a1%93-%e9%ab%98%e6%b5%81%e9%87%8f%e6%95%b8%e6%93%9a%e8%99%95%e7%90%86-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/kubernetes-k8s-%e5%ae%b9%e5%99%a8%e6%8a%80%e8%a1%93-%e9%ab%98%e6%b5%81%e9%87%8f%e6%95%b8%e6%93%9a%e8%99%95%e7%90%86/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/leading-safe-agilist-certification-programme-2-days-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/leading-safe-agilist-certification-programme-2-days/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/leading-safe-agilist-certification-programme-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/leading-safe-agilist-certification-programme/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/leading-scaled-agile-framework-safe/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/learning-teaching-expo-2020/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/long-way-to-agile-challenges-success-series-scrum-with-azure-devops/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/long-way-to-digital-success-story-series-robotic-process-automation-rpa/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/machine-learning-programming-workshop-in-tensorflow-keras-and-pytorch-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/machine-learning-programming-workshop-in-tensorflow-keras-and-pytorch-3/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/machine-learning-programming-workshop-in-tensorflow-keras-and-pytorch/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/marketing-pulse-online-2021-marketing-for-good/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/marketingpulse-social-commerce-marketing-strategies-and-case-studies/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/marketingpulse-x-asian-e-tailing-summit-webinar/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/microsoft-azure-virtual-training-day-fundamentals-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/microsoft-azure-virtual-training-day-fundamentals/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/microsoft-azure-virtual-training-day-intelligent-decision-making-through-modern-data-warehousing-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/microsoft-azure-virtual-training-day-intelligent-decision-making-through-modern-data-warehousing/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/microsoft-azure-virtual-training-day-modernising-web-applications-and-data/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/microsoft-cybersecurity-summit-rethink-cybersecurity-compliance-for-a-post-pandemic-world/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/microsoft-dynamics-365-virtual-training-day-fundamentals/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/microsoft-hong-kong-envision-forum/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/microsoft-power-platform-virtual-training-day-fundamentals-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/microsoft-power-platform-virtual-training-day-fundamentals/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/modernising-web-applications-and-data/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/new-opportunities-and-challenges-during-covid-19-pandemic/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/nft-fintech-metaverse-series-decentralised-finances-you-are-your-own-bank/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/nft-fintech-metaverse-series-from-web-2-0-to-web-3-0-digital-opportunities-and-challenges/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/nft-fintech-metaverse-series-webinar%ef%bc%9awhat-the-rise-of-nft-means-to-the-world/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/o2o-technologies-how-to-successfully-apply-for-hong-kong-funding-schemes/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/online-mega-outreach-day-on-government-funding-schemes/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/open-source-hong-kong-pycon-hk-2021/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/opening-ceremony-it-festival-for-primary-school-students/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/padel-tennis%e9%ab%94%e9%a9%97%e6%97%a5/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/pentest-kungfu-advanced-cyber-security-exploit-workshop/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/practical-training-on-professional-scrum-for-agile-transformation/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-3/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-4/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-5/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-6/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-7/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-8/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-course-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-course-3/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-course-4/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-course-5/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-course-6/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-course-7/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-course-8/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-course-9/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-course/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-ii-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-ii-3/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master-ii/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-master/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-product-owner-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-product-owner-3/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-product-owner-4/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-product-owner-course/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-product-owner/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-with-user-experience-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-with-user-experience-3/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-with-user-experience-course/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/professional-scrum-with-user-experience/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/python-for-big-data-analytics-certificate-program/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/python-for-big-data-analytics-certificate-programme-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/python-for-big-data-analytics-certificate-programme/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/python-kungfu-for-cyber-security-testing-threat-intelligence-and-automation/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/react-native-rapidly-develop-native-ios-and-android-apps-with-javascript-2-days/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/red-hat-linux-official-certificated-administration-rhcsa/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/regional-innotech-summit/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/retail-asia-conference-expo/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/retail-asia-expo-conference-2020/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rpa-2-0-advanced-trouble-shooting-certification-training/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rpa-2-0-advanced-troubleshooting-certification-training-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rpa-2-0-advanced-troubleshooting-certification-training-3/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rpa-2-0-advanced-troubleshooting-certification-training-4/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rpa-2-0-advanced-troubleshooting-certification-training/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rpa-bootcamp-developer-certification-training-5-days-blue-prism-v6-8/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rpa-developer-certification-training/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rpa-hands-on-workshop-1-day/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttp-course-2-5-day-rpa-workshop-start-to-deploy-a-robotic-workforce-in-your-enterprise/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttp-course-certificate-in-apache-hadoop-user-cu-hd-module-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttp-course-deep-learning-and-application/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttp-course-diploma-in-internet-of-things-iot-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttp-course-diploma-in-internet-of-things-iot-3/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttp-course-diploma-in-internet-of-things-iot-module-5-machine-learning-for-iot-data/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttp-course-diploma-in-internet-of-things-iot/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttp-course-journey-to-hr-analytics-how-to-apply-data-to-manage-human-resources-in-a-qualitative-way/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttp-course-journey-to-hr-analytics/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttp-course-professional-scrum-foundations/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttp-course-professional-scrum-master-course-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttp-course-professional-scrum-master-course/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttp-course-professional-scrum-master-ii/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttp-courseprofessional-scrum-master-course/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttp-courseprofessional-scrum-master/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/rttpprofessional-scrum-master/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sb-001-how-a-fun-board-game-can-foster-cybersecurity-awareness/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sb-002-introduction-to-ai-and-technological-trend-sharing/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/scrum-developer-with-devops-training-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/scrum-developer-with-devops-training/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/secrets-to-impressive-ux-ui-how-to-stand-out-in-an-ai-powered-world/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/secure-use-of-mobile-devices-sticker-design-contest/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/secure-use-of-mobile-devices-webinar-sticker-design-contest-award-ceremony/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/securing-microservices-in-kubernetes-container-environment-for-serverless-paas-cloud-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/securing-microservices-in-kubernetes-container-environment-for-serverless-paas-cloud/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/securing-your-e-commerce-web-application-against-cyber-threats-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/securing-your-e-commerce-web-application-against-cyber-threats/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/security-big-data-a-i-analytic-sbda-training/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/shaperz-hk-sme-tech-exhibition-programme-step-initiative/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/singapore-fintech-festival-sff-2020/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/singapore-fintech-festival/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sipit-coffee-time/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/smart-e-logistics-technology-for-executives-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/smart-e-logistics-technology-for-executives/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/smart-innovation-meets-genai-trends-shaping-the-next-decade-of-startups/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/start2up-cocoon-law-things-to-get-you-starting-up/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/startup-impact-summit-2020/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/success-story-series-how-machine-learning-ai-work-in-rpa/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/support-first-line-worker-webinar/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-001-robotics-theory-application/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-002-blocky-programming-on-robot/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-003-vr-experience/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-004-musical-interface-diy-workshop/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-005-robotics-theory-application/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-006-ai-reinforcement-learning-in-aws-deepracer/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-007-train-cybersecurity-awareness-with-a-board-game/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-008-vr-experience/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-009-ai-reinforcement-learning-in-aws-deepracer/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-010-aviation-stem-experience-session/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-011-aviation-stem-experience-session/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-012-aviation-stem-experience-session/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-013-fighting-against-covid/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-014-blocky-programming-on-robot/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-015-musical-interface-diy-workshop/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-016-fighting-against-covid/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-017-create-your-ar-vr-game/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/sw-018-create-your-ar-vr-game/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-2024-ai-leaders-summit-harnessing-ai-to-drive-global-transformation/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-4-0-leaders-summit-transforming-smart-lead-through-industry-4-0/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-4-0-series-empowering-with-industrial-iot-iiot-seminar/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-4-0-series-technical-enhancement-workshops-cloud-accelerating-smart-manufacturing-i/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-4-0-series-technical-enhancement-workshops-cloud-accelerating-smart-manufacturing-ii/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-4-0-series-technical-enhancement-workshops-esg-industry-4-0-produce-our-future/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-4-0-series-technical-enhancement-workshops-iiot-unlock-productivity-with-connectivity/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-4-0-series-technical-enhancement-workshops-industry-4-0-enhancing-safety-and-security/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-4-0-series-technical-enhancement-workshops-robotic-applications-next-level-of-automation/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-4-0-series-technical-enhancement-workshops-smart-logistics-and-supply-chain-management/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-4-0-series-technical-enhancement-workshops-tech-between-industry-4-0-x-construction-2-0/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-4-0-series-technical-enhancement-workshops-visualisation-prediction-the-use-of-big-data/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-4-0-series-technical-enhancement-workshops-what-a-i-can-help-in-smart-manufacturing/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-4-0-series-the-journey-of-industry-4-0-and-future-trends/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-5g-adopting-robotics-technology-smart-logistic-supply-chain-automation-in-5g-era/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-5g-beyond-safety-5g-iot-usecase-in-construction-industry/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-5g-empowering-autonomous-driving-and-smart-transportation-system/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-5g-iot-and-its-cloud-applications/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-5g-iot-application-opportunities-and-challenges-of-smart-logistic/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-5g-iot-redefining-the-new-age-of-retails/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-5g-iot-unleashing-the-ultimate-power-of-connectivity/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-5g-lpwan-application-nb-iot-versus-sigfox/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-automation-evolution-5g-iot-enables-industry-4-0/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-conference-be-one-step-ahead-gear-up-for-5g-iot-tech/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-iomt-the-gateway-to-a-happy-and-healthy-life/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-prop-tech-with-5g-iot-enabling-smart-management/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-safety-matters-in-both-real-and-virtual-world/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-series-closing-seminar-build-a-connected-city-with-5g-and-iot/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-workshop-ai-driven-marketing-from-data-to-insights/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-to-connect-workshop-ai-empowers-smart-property-management/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tech-trends-symposium-2020-the-future-of-intelligent-connectivity/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/techfrontiers-tokyo-uniting-innovators-wtia-business-delegation-tour-to-tokyo/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/techfrontiers-vietnam/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/technical-training-on-ui-ux/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/technical-workshop-on-machine-learning-for-iot-data-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/technical-workshop-on-machine-learning-for-iot-data-3/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/technical-workshop-on-machine-learning-for-iot-data/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/the-13th-infosecurity-virtual-summit-2021/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/the-20th-gs1-hong-kong-summit/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/the-6th-cloud-forum/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/the-astris-impact-conference/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/the-global-sources-fall-2021-show-series/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/the-new-era-of-creative-industry-nft-nonfungible-token/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/transforming-into-a-secured-digital-distributed-workforce-for-smes/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ts-001-%e9%96%8b%e6%94%be%e6%95%b8%e6%93%9a%e5%8f%8a%e6%ba%90%e7%a2%bc%e8%88%87%e6%87%89%e7%94%a8%e9%96%8b%e7%99%bc/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ts-002-%e6%96%b0%e8%88%88%e9%87%91%e8%9e%8d%e7%a7%91%e6%8a%80%e7%9a%84%e5%8d%80%e5%a1%8a%e9%8d%8a%e5%92%8c%e6%95%b8%e6%93%9a/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/ts-003-%e7%b6%b2%e7%b5%a1%e4%bf%9d%e5%ae%89%e9%9d%92%e5%b9%b4%e5%9f%b9%e8%a8%93%e8%a8%88%e5%8a%83-%e7%b6%b2%e4%b8%8a%e8%ac%9b%e5%ba%a7/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-001-ai-artificial-intelligence-application-coding/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-002-ai-for-teaching/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-003-experience-python-via-minecraft/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-004-ar-augmented-reality-application-coding/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-005-cloud-computing-automation-for-schools/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-006-train-cybersecurity-awareness-with-a-board-game/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-007-uav-beginner-training/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-008-uav-beginner-training/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-009-create-your-app-using-power-apps-ai-builder/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-010-mobile-application-coding-open-data-application/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-011-ai-for-teaching/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-012-aviation-stem-experience-session/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-013-aviation-stem-experience-session/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-015-uav-beginner-training/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-016-aviation-stem-experience-session/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-017-musical-interface-diy-trial-workshop/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/tw-018-%e7%94%a8power-apps-%e5%8f%8a-ai-builder%e5%89%b5%e5%bb%ba%e4%bd%a0%e7%9a%84ai-app/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/understanding-blockchain-technologies-applications-an-experiential-programme/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/unsdg-true-data-for-innovations-transformations-via-post-covid-19-sdg-4-8-917/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/use-security-scoring-to-quantify-your-cyber-risks/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/venture-summit-virtual-connect-global/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/venture-summit-west-2020/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/veuture-summit-virtual-connect-global/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/visit-tour-hktv-mall/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/what-the-health-ai-technology-revolution/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/whats-up-startup-wtia-movie-night/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-%e7%b5%84%e5%9c%98%e5%8e%bb%e7%9d%87%e3%80%8c%e7%ac%ac71%e5%b1%86%e6%be%b3%e9%96%80%e6%a0%bc%e8%98%ad%e6%8a%ab%e6%b2%bb%e5%a4%a7%e8%b3%bd%e8%bb%8a%e3%80%8d%f0%9f%8f%8e%ef%b8%8f/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-18th-annual-general-meeting/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-21st-anniversary-gala-dinner/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-3-on-3-basketball-tournament/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-annual-general-meeting-agm/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-booth-smart-biz-expo/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-chill-talk-2/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-chill-talk/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-fintech-webinar-series1-how-covid-changes-mobile-payment-behavior/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-go-for-it-business-tour-%e6%8e%a2%e7%b4%a2towngas-telecom%e9%a6%99%e6%b8%af2%e8%99%9f%e6%95%b8%e6%93%9a%e4%b8%ad%e5%bf%83/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-go-for-it-business-tour-google-cloud-genai-popup-experience-tour/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-reunion-spring-gathering/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-tech-to-connect-seminar-govirtual-business-expo/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-x-3-business-digibox%e5%95%86%e6%a5%ad%e6%87%89%e7%94%a8%e6%96%b9%e6%a1%88%e5%b1%95%e8%a6%bd%e9%a4%a8%e6%9c%83%e5%93%a1%e5%b0%8e%e8%b3%9e%e5%9c%98/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-x-business-govirtual-ai-and-next-gen-network-technologies-conference-driving-smart-business-transformation/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia-x-citic-telecom-cpc-tour/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtia%e6%9c%83%e5%93%a1%e5%b0%8e%e8%b3%9e-%e5%8f%83%e8%a7%80%e4%b8%89%e6%98%9f%e4%bc%81%e6%a5%ad%e5%ae%a2%e6%88%b6%e9%ab%94%e9%a9%97%e4%b8%ad%e5%bf%83/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/event/wtias-pavilions-govirtual-business-expo/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/events/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/events/category/supporting-events/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/events/category/wtia-events/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/events/category/wtia-past-events/",
+      "to": "/events",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/executive-committee/",
+      "to": "/about/committees",
+      "kind": "equivalent"
+    },
+    {
+      "from": "/faq_category/configuration/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq_category/design-process/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq_category/installation/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq_category/management/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq_category/pricing/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq_category/technical/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/aenean-pretium-felis-vel-purus-bibendum-luctus/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/cras-erat-elit-maximus-vestibulum-eros-non/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/donec-ac-iaculis-lorem-sit-venenatis-tellus/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/duis-non-dui-vitae-risus-consequat-vestibulum/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/etiam-porttitor-lacus-eu-mi-rhoncu-tincidunt-dui/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/fusce-efficitur-gravida-odois-interdum-arcu-vulputate/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/interdum-et-malesuada-fames-ac-ante-in-faucibus/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/maecenas-nec-ante-metus-accumsan-eleifend/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/morbi-at-enim-vitae-velit-dictum-tincidunt-vitae/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/morbi-in-congue-felis-a-vulputate-magna/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/nunc-pellentesque-augue-sapien-dignissim/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/pellentesque-finibus-viverra-lectus-vitae-cursus/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/quisque-condimentum-interdum-purus-tempus/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/sed-eu-erat-ac-ligula-tristique-ullamcorper-quam/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/faq-items/vestibulum-et-neque-interdum-euismod-velit-commodo/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/home-2/",
+      "to": "/",
+      "kind": "equivalent"
+    },
+    {
+      "from": "/honorary-chairman/",
+      "to": "/about/committees",
+      "kind": "equivalent"
+    },
+    {
+      "from": "/job-board/",
+      "to": "/",
+      "kind": "gone"
+    },
+    {
+      "from": "/media-and-press-coverage/",
+      "to": "/news",
+      "kind": "equivalent"
+    },
+    {
+      "from": "/media-coverage-press-release/",
+      "to": "/news",
+      "kind": "equivalent"
+    },
+    {
+      "from": "/meet-our-members/",
+      "to": "/showcase",
+      "kind": "equivalent"
+    },
+    {
+      "from": "/members-update-2/",
+      "to": "/news",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/news/",
+      "to": "/news",
+      "kind": "equivalent"
+    },
+    {
+      "from": "/photo-gallery/",
+      "to": "/about",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/resources-steminternshipscheme/",
+      "to": "/",
+      "kind": "gone"
+    },
+    {
+      "from": "/slide-page/home/",
+      "to": "/",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/special-task-force/",
+      "to": "/about/committees",
+      "kind": "section-fallback"
+    },
+    {
+      "from": "/upcoming-events/",
+      "to": "/events",
+      "kind": "equivalent"
+    },
+    {
+      "from": "/wtia-career/",
+      "to": "/",
+      "kind": "gone"
+    }
+  ]
+}
