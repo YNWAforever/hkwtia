@@ -7,12 +7,14 @@ import {assertIsolatedSeedEnvironment} from "./lib/acceptance-guard.ts";
 export const M5_ACCEPTANCE_SEED_ENV = "M5_ACCEPTANCE_SEED";
 export const M5_ACCEPTANCE_OWNERSHIP_KEY = "m5-showcase-acceptance-v1";
 
-const COMPANY_IDS = [
+// Exported so scripts/audit-synthetic-content.ts can identify these exact
+// rows by id instead of maintaining a second, driftable copy of the list.
+export const COMPANY_IDS = [
   "50000070-0000-4000-8000-000000000001",
   "50000070-0000-4000-8000-000000000002",
   "50000070-0000-4000-8000-000000000003",
 ] as const;
-const LISTING_IDS = [
+export const LISTING_IDS = [
   "50000071-0000-4000-8000-000000000001",
   "50000071-0000-4000-8000-000000000002",
   "50000071-0000-4000-8000-000000000003",
