@@ -26,6 +26,7 @@ import {
   M4A_KB_NAMESPACE,
   buildM4ASeedDocuments,
   parseKnowledgeMarkdown,
+  runM4ASeed,
   seedM4A,
 } from "@/scripts/seed-m4a";
 
@@ -417,5 +418,25 @@ describe("M4A seed", () => {
         }),
       ]),
     );
+  });
+
+  it("refuses to run without explicit isolation authorization before opening a pool or reading the API key", async () => {
+    // runM4ASeed is now guarded (Task 6): the isolation check runs before the
+    // function's own OPENAI_API_KEY check, so an unauthorized call surfaces
+    // the guard's error rather than reaching that check or ever creating a
+    // database pool.
+    await expect(runM4ASeed({} as NodeJS.ProcessEnv)).rejects.toThrow(
+      "M4A_ACCEPTANCE_SEED_NOT_AUTHORIZED",
+    );
+    await expect(runM4ASeed({
+      DATABASE_URL: "postgres://live.example/wtia",
+      NODE_ENV: "test",
+    } as NodeJS.ProcessEnv)).rejects.toThrow("M4A_ACCEPTANCE_SEED_NOT_AUTHORIZED");
+    await expect(runM4ASeed({
+      M4A_ACCEPTANCE_SEED: "true",
+      DATABASE_URL: "postgresql://example.invalid/test",
+      DATABASE_URL_TEST: "postgresql://example.invalid/test",
+      NODE_ENV: "test",
+    } as NodeJS.ProcessEnv)).rejects.toThrow("OPENAI_API_KEY_REQUIRED");
   });
 });

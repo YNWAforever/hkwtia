@@ -223,12 +223,24 @@ npm run db:seed:m3
 npm run db:seed:m4a
 ```
 
-`db:seed:m4a` requires `DATABASE_URL` and `OPENAI_API_KEY` because production
-knowledge vectors use the live embedding adapter. It replaces only the
-`m4a-core-v1` KB namespace, reconciles the fixed
-`m4a-acceptance-member` and two `m4a-*` events, and clears only that synthetic
-member's Concierge approval/task residue. It never truncates or cleans M1-M3
-fixtures.
+`db:seed:m4a` requires `OPENAI_API_KEY` because knowledge vectors use the live
+embedding adapter, plus the same isolation guard as M3/M5/M6: set `DATABASE_URL`
+and `DATABASE_URL_TEST` to the same already-migrated, non-production database
+and set `M4A_ACCEPTANCE_SEED=true`. It replaces the entire `m4a-core-v1` KB
+namespace with the funding-scheme sources plus fixed acceptance sources,
+reconciles the fixed `m4a-acceptance-member` and two `m4a-*` events, and clears
+only that synthetic member's Concierge approval/task residue. It never
+truncates or cleans M1-M3 fixtures.
+
+The guard means `db:seed:m4a` can no longer run against production — it
+previously could, and was the only documented way to load the real
+funding-scheme sources (`M4A_FUNDING_SOURCES`) into a production knowledge
+base. There is currently no separate, ungated path for that, because the CLI
+entry point always also reconciles the synthetic acceptance member/events;
+guarding it was judged the safer default given the domain cutover, but loading
+real funding content into a live knowledge base now needs a deliberate,
+reviewed one-off call to `seedM4A({sources: M4A_FUNDING_SOURCES, ...})`
+(exported from `scripts/seed-m4a.ts`) until that split is built.
 
 The deterministic acceptance and evaluation gates require no external
 credentials:

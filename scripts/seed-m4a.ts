@@ -3,6 +3,7 @@ import {fileURLToPath} from "node:url";
 
 import {Pool} from "pg";
 
+import {assertIsolatedSeedEnvironment} from "./lib/acceptance-guard.ts";
 import {
   FUNDING_SCHEMES,
   FUNDING_VERIFY_CURRENT_TERMS,
@@ -435,10 +436,16 @@ export async function seedM4A(input: Readonly<{
 export async function runM4ASeed(
   environment: NodeJS.ProcessEnv = process.env,
 ): Promise<void> {
+  // `npm run db:seed:m4a` is directly callable, and unconditionally reconciles
+  // a synthetic acceptance member and events (see reconcileM4AAcceptanceFixture
+  // below) into whatever DATABASE_URL points at, so the guard has to live here
+  // rather than in a wrapper nothing forces callers through.
+  const databaseUrl = assertIsolatedSeedEnvironment(environment, {
+    prefix: "M4A_ACCEPTANCE",
+    flag: "M4A_ACCEPTANCE_SEED",
+  });
   const apiKey = environment.OPENAI_API_KEY?.trim();
   if (!apiKey) throw new Error("OPENAI_API_KEY_REQUIRED");
-  const databaseUrl = environment.DATABASE_URL?.trim();
-  if (!databaseUrl) throw new Error("DATABASE_URL_REQUIRED");
   const knowledge = createKbDocumentsRepositoryForDatabaseUrl(databaseUrl);
   const pool = new Pool({connectionString: databaseUrl, max: 1});
   try {
