@@ -2,6 +2,8 @@ import {fileURLToPath} from "node:url";
 
 import {Pool} from "pg";
 
+import {assertIsolatedSeedEnvironment} from "./lib/acceptance-guard.ts";
+
 export const M5_ACCEPTANCE_SEED_ENV = "M5_ACCEPTANCE_SEED";
 export const M5_ACCEPTANCE_OWNERSHIP_KEY = "m5-showcase-acceptance-v1";
 
@@ -81,18 +83,10 @@ export function buildM5SeedFixture(asOf: Date): M5SeedFixture {
 export function assertM5SeedEnvironment(
   environment: Readonly<Record<string, string | undefined>>,
 ): string {
-  if (environment[M5_ACCEPTANCE_SEED_ENV]?.trim().toLowerCase() !== "true") {
-    throw new Error("M5_ACCEPTANCE_SEED_NOT_AUTHORIZED");
-  }
-  if (environment.VERCEL_ENV?.trim().toLowerCase() === "production" || environment.NODE_ENV?.trim().toLowerCase() === "production") {
-    throw new Error("M5_ACCEPTANCE_PRODUCTION_FORBIDDEN");
-  }
-  const databaseUrl = environment.DATABASE_URL?.trim();
-  if (!databaseUrl) throw new Error("M5_ACCEPTANCE_DATABASE_URL_REQUIRED");
-  const testDatabaseUrl = environment.DATABASE_URL_TEST?.trim();
-  if (!testDatabaseUrl) throw new Error("M5_ACCEPTANCE_DATABASE_URL_TEST_REQUIRED");
-  if (databaseUrl !== testDatabaseUrl) throw new Error("M5_ACCEPTANCE_DATABASE_URL_MISMATCH");
-  return databaseUrl;
+  return assertIsolatedSeedEnvironment(environment, {
+    prefix: "M5_ACCEPTANCE",
+    flag: M5_ACCEPTANCE_SEED_ENV,
+  });
 }
 
 export type M5SeedConnection = Readonly<{

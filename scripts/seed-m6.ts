@@ -2,6 +2,8 @@ import {fileURLToPath} from "node:url";
 
 import {Pool} from "pg";
 
+import {assertIsolatedSeedEnvironment} from "./lib/acceptance-guard.ts";
+
 export const M6_ACCEPTANCE_SEED_ENV = "M6_ACCEPTANCE_SEED";
 export const M6_ACCEPTANCE_OWNERSHIP_KEY = "m6-launch-pad-acceptance-v1";
 
@@ -97,30 +99,11 @@ export function buildM6SeedFixture(asOf: Date): M6SeedFixture {
 export function assertM6SeedEnvironment(
   environment: Readonly<Record<string, string | undefined>>,
 ): string {
-  if (environment[M6_ACCEPTANCE_SEED_ENV]?.trim().toLowerCase() !== "true") {
-    throw new Error("M6_ACCEPTANCE_SEED_NOT_AUTHORIZED");
-  }
-  if (environment.VERCEL_ENV?.trim().toLowerCase() === "production" || environment.NODE_ENV?.trim().toLowerCase() === "production") {
-    throw new Error("M6_ACCEPTANCE_PRODUCTION_FORBIDDEN");
-  }
-  const databaseUrl = environment.DATABASE_URL?.trim();
-  if (!databaseUrl) throw new Error("M6_ACCEPTANCE_DATABASE_URL_REQUIRED");
-  const testDatabaseUrl = environment.DATABASE_URL_TEST?.trim();
-  if (!testDatabaseUrl) throw new Error("M6_ACCEPTANCE_DATABASE_URL_TEST_REQUIRED");
-  if (databaseUrl !== testDatabaseUrl) throw new Error("M6_ACCEPTANCE_DATABASE_URL_MISMATCH");
-  const hostAllowlist = environment.M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST
-    ?.split(/[\s,]+/)
-    .map((host) => host.trim().toLowerCase())
-    .filter(Boolean);
-  if (!hostAllowlist?.length) throw new Error("M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST_REQUIRED");
-  let databaseHost: string;
-  try {
-    databaseHost = new URL(databaseUrl).hostname.toLowerCase();
-  } catch {
-    throw new Error("M6_ACCEPTANCE_DATABASE_URL_INVALID");
-  }
-  if (!hostAllowlist.includes(databaseHost)) throw new Error("M6_ACCEPTANCE_DATABASE_HOST_NOT_ALLOWED");
-  return databaseUrl;
+  return assertIsolatedSeedEnvironment(environment, {
+    prefix: "M6_ACCEPTANCE",
+    flag: M6_ACCEPTANCE_SEED_ENV,
+    hostAllowlistVar: "M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST",
+  });
 }
 
 export type M6SeedConnection = Readonly<{
