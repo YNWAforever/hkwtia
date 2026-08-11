@@ -43,6 +43,22 @@ seeding.
 - Use conventional commits: `feat:`, `fix:`, `test:`, `chore:`, or `docs:`.
 - Run the focused test, full unit suite, lint, typecheck, and build before handing off a change.
 - Keep accessibility landmarks, skip navigation, keyboard focus, and localized recovery states intact.
+- Work test-first. Write the test, **run it, and read the failure** before writing the code that
+  satisfies it. Watching it fail is the part that carries the value: a test that has never failed is
+  a claim, not evidence. Two assertions in this repo had silently stopped testing anything —
+  `m4b-runtime-guard` compared a position against `indexOf("serverEnv()")` after that call was
+  renamed, so it asserted `112 < -1` and became unsatisfiable, and a slightly different refactor
+  would have made it vacuously *pass* instead. Confirm the failure names the behaviour you meant,
+  not a typo, a missing import, or a `-1`.
+- A test that guards an invariant should prove it can still catch a violation. The established
+  shape for this is `server-action-actor-boundary.test.ts`: it discovers its own targets, asserts a
+  minimum count so a broken walk cannot pass vacuously, and carries a `detects the shapes it is
+  meant to catch` case with hostile and safe samples. Reuse that shape for boundary and discovery
+  tests, and when adding one for a bug that reached `main`, reintroduce the bug once to watch the
+  new test fail.
+- Prefer assertions on behaviour over assertions on source text. Where a source-level check really
+  is the only option, anchor it on the property that matters — any `*Env()` accessor, a property
+  name — rather than one spelling that a rename will quietly retire.
 
 ## Task 11 database setup
 
