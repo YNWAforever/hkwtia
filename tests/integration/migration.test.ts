@@ -33,6 +33,10 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
       lockAcquired = true;
       const firstMigrationOutput = await runDatabaseCommand("db:migrate");
       const secondMigrationOutput = await runDatabaseCommand("db:migrate");
+      // db:seed now only writes the M1 plan rows (Task 4). This test only
+      // checks membership_plans counts and table/constraint *existence* below
+      // (all from migration, not seed) — it never asserts M2 row data, so it
+      // doesn't need the guarded db:seed:demo layer.
       const firstSeedOutput = await runDatabaseCommand("db:seed");
       const secondSeedOutput = await runDatabaseCommand("db:seed");
 
@@ -262,6 +266,9 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
       await client.query("SELECT pg_advisory_lock($1)", [fixtureLock]);
       lockAcquired = true;
       await runDatabaseCommand("db:migrate");
+      // db:seed only needs to supply the 'community' plan row the memberships
+      // insert below references (M1); the M2 demo layer isn't needed here and
+      // the TRUNCATE immediately below would discard it anyway.
       await runDatabaseCommand("db:seed");
       await client.query("BEGIN");
       transactionStarted = true;
