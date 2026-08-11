@@ -31,3 +31,5 @@ playwright-report/
 
 # Isolated worktrees for subagent-driven execution
 .worktrees/
+
+.legacy-capture/
