@@ -33,3 +33,5 @@ playwright-report/
 .worktrees/
 
 .legacy-capture/
+
+content/milestones.draft.json
