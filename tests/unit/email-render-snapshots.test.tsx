@@ -21,7 +21,8 @@ describe("renderEmail", () => {
           locale,
           recipientName: "Fixture Member",
           variables: fixtureVars,
-          unsubscribeUrl: "https://www.hkwtia.org/api/unsubscribe?token=signed-fixture",
+          unsubscribeUrl: "https://www.hkwtia.org/unsubscribe?token=signed-fixture",
+          unsubscribeOneClickUrl: "https://www.hkwtia.org/api/unsubscribe?token=signed-fixture",
         });
 
         expect(rendered.subject).not.toMatch(/MISSING|undefined/i);
@@ -38,7 +39,8 @@ describe("renderEmail", () => {
       locale: "zh-HK",
       recipientName: "Fixture Member",
       variables: fixtureVars,
-      unsubscribeUrl: "https://www.hkwtia.org/api/unsubscribe?token=signed-fixture",
+      unsubscribeUrl: "https://www.hkwtia.org/unsubscribe?token=signed-fixture",
+      unsubscribeOneClickUrl: "https://www.hkwtia.org/api/unsubscribe?token=signed-fixture",
     });
 
     expect(rendered.html).toMatch(/<html[^>]*lang="zh-HK"/);
@@ -52,13 +54,15 @@ describe("renderEmail", () => {
   });
 
   it("adds visible address, unsubscribe copy, and one-click headers only to marketing email", async () => {
-    const unsubscribeUrl = "https://www.hkwtia.org/api/unsubscribe?token=signed-fixture";
+    const unsubscribeUrl = "https://www.hkwtia.org/unsubscribe?token=signed-fixture";
+    const unsubscribeOneClickUrl = "https://www.hkwtia.org/api/unsubscribe?token=signed-fixture";
     const marketing = await renderEmail({
       template: "day1_video",
       locale: "en",
       recipientName: "Fixture Member",
       variables: fixtureVars,
       unsubscribeUrl,
+      unsubscribeOneClickUrl,
     });
     const transactional = await renderEmail({
       template: "welcome",
@@ -70,7 +74,9 @@ describe("renderEmail", () => {
     expect(marketing.html).toContain("4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong");
     expect(marketing.html).toContain("Unsubscribe from marketing email");
     expect(marketing.headers).toEqual({
-      "List-Unsubscribe": `<${unsubscribeUrl}>`,
+      // RFC 8058: the header names the POST-capable route handler, not the
+      // confirmation page the visible footer link points at.
+      "List-Unsubscribe": `<${unsubscribeOneClickUrl}>`,
       "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
     });
 

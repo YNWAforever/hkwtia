@@ -124,6 +124,7 @@ function context(
       paymentUrl: "https://example.test/pay",
     },
     unsubscribeUrl: "https://example.test/unsubscribe",
+    unsubscribeOneClickUrl: "https://example.test/api/unsubscribe",
     membershipStatus: "active",
     ...overrides,
   };

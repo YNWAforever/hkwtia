@@ -56,6 +56,7 @@ function context(overrides: Partial<JourneyRunnerContext> = {}): JourneyRunnerCo
       paymentUrl: "https://example.test/pay",
     },
     unsubscribeUrl: "https://example.test/unsubscribe?token=fixture",
+    unsubscribeOneClickUrl: "https://example.test/api/unsubscribe?token=fixture",
     membershipStatus: "active",
     ...overrides,
   };

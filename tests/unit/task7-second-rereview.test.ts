@@ -183,6 +183,7 @@ function permanentJourneyDependencies(
         paymentUrl: "https://example.test/pay",
       },
       unsubscribeUrl: "https://example.test/unsubscribe",
+      unsubscribeOneClickUrl: "https://example.test/api/unsubscribe",
       membershipStatus: null,
     })),
     renderEmail: vi.fn(async () => {
@@ -227,6 +228,7 @@ function permanentCampaignDependencies(
       marketingConsent: true,
       emailSuppressed: false,
       unsubscribeUrl: "https://example.test/unsubscribe",
+      unsubscribeOneClickUrl: "https://example.test/api/unsubscribe",
     })),
     renderCampaign: vi.fn(),
     emailTransport: {send: vi.fn()},
@@ -551,6 +553,7 @@ describe("Task 7 second re-review: audited delivery retry authorization", () => 
           paymentUrl: "https://example.test/pay",
         },
         unsubscribeUrl: "https://example.test/unsubscribe",
+        unsubscribeOneClickUrl: "https://example.test/api/unsubscribe",
         membershipStatus: null,
       })),
       renderEmail: vi.fn(async () => ({
@@ -662,6 +665,7 @@ describe("Task 7 second re-review: seeded campaign source identity", () => {
         marketingConsent: true,
         emailSuppressed: false,
         unsubscribeUrl: "https://example.test/unsubscribe",
+        unsubscribeOneClickUrl: "https://example.test/api/unsubscribe",
       })),
       renderCampaign,
       emailTransport: {send: provider},

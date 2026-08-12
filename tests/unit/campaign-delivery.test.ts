@@ -60,6 +60,7 @@ function currentContext(
     marketingConsent: true,
     emailSuppressed: false,
     unsubscribeUrl: "https://example.test/unsubscribe?token=current",
+    unsubscribeOneClickUrl: "https://example.test/api/unsubscribe?token=current",
     ...overrides,
   };
 }
@@ -83,6 +84,7 @@ function memoryHarness(
     locale: string;
     variables: Readonly<Record<string, string>>;
     unsubscribeUrl: string;
+    unsubscribeOneClickUrl: string;
   }> = [];
   const tasks = new Map<string, {
     profileId: string;
@@ -226,7 +228,7 @@ function memoryHarness(
         subject: "Frozen campaign",
         html: "<p>Frozen campaign</p>",
         text: "Frozen campaign",
-        headers: {"List-Unsubscribe": `<${input.unsubscribeUrl}>`},
+        headers: {"List-Unsubscribe": `<${input.unsubscribeOneClickUrl}>`},
       };
     },
     emailTransport: {
@@ -262,6 +264,7 @@ describe("runCampaignBatch", () => {
       locale: frozen.locale,
       variables: frozen.variables,
       unsubscribeUrl: "https://example.test/unsubscribe?token=current",
+      unsubscribeOneClickUrl: "https://example.test/api/unsubscribe?token=current",
     }]);
     expect(test.providerCalls).toEqual([{
       to: frozen.email,

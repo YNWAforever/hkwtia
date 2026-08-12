@@ -290,11 +290,23 @@ export async function sendWorkerAlert(
   return {recipients: addresses.length, sent, failed};
 }
 
-function unsubscribeUrl(
+/**
+ * The two unsubscribe URLs a marketing send needs, sharing one signed token so
+ * both routes accept the same link for the same window.
+ *
+ * `pageUrl` is the localized confirmation page a recipient clicks in the
+ * footer. `oneClickUrl` is the route handler named by `List-Unsubscribe`, which
+ * must answer POST because the accompanying `List-Unsubscribe-Post` header
+ * makes the recipient's mail provider post to it directly. Pointing the header
+ * at the page silently dropped every provider-issued unsubscribe: the page
+ * exports no POST handler, so those requests took a 405 and no suppression row
+ * was ever written.
+ */
+export function unsubscribeUrls(
   profileId: string,
   locale: "en" | "zh-HK",
   now: Date,
-): string {
+): Readonly<{pageUrl: string; oneClickUrl: string}> {
   const {unsubscribeTokenSecret} = unsubscribeEnv();
   const {appUrl} = appEnv();
   const token = signUnsubscribeToken({
@@ -303,9 +315,13 @@ function unsubscribeUrl(
     exp: Math.floor(now.getTime() / 1000) + UNSUBSCRIBE_TTL_SECONDS,
   }, unsubscribeTokenSecret);
   const path = locale === "zh-HK" ? "/zh/unsubscribe" : "/unsubscribe";
-  const url = new URL(path, appUrl);
-  url.searchParams.set("token", token);
-  return url.toString();
+  const pageUrl = new URL(path, appUrl);
+  pageUrl.searchParams.set("token", token);
+  // Not locale-prefixed: /api is excluded from the proxy matcher, and the
+  // token already carries the locale the confirmation redirect uses.
+  const oneClickUrl = new URL("/api/unsubscribe", appUrl);
+  oneClickUrl.searchParams.set("token", token);
+  return {pageUrl: pageUrl.toString(), oneClickUrl: oneClickUrl.toString()};
 }
 
 async function runProductionJourneys(now: Date): Promise<unknown> {
@@ -326,6 +342,11 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
       );
       const renewalDate =
         context.billingPeriodEnd?.toISOString().slice(0, 10) ?? "";
+      const unsubscribe = unsubscribeUrls(
+        context.profileId,
+        context.locale,
+        now,
+      );
       return {
         hasLoggedIn: context.lastLoginAt !== null,
         profileCompleteness: context.profileComplete ? 100 : 0,
@@ -346,11 +367,8 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
           renewalDate,
           membershipStatus: context.membershipStatus ?? "",
         },
-        unsubscribeUrl: unsubscribeUrl(
-          context.profileId,
-          context.locale,
-          now,
-        ),
+        unsubscribeUrl: unsubscribe.pageUrl,
+        unsubscribeOneClickUrl: unsubscribe.oneClickUrl,
         membershipStatus: context.membershipStatus,
       };
     },
@@ -366,6 +384,13 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
       ...(ai.woztellWebhookSecret === undefined
         ? {}
         : {WOZTELL_WEBHOOK_SECRET: ai.woztellWebhookSecret}),
+      // Without this the adapter finds no live credentials and every send
+      // returns {status: "sent", providerId: "mock:…"} — so journey and dunning
+      // WhatsApp messages were recorded as delivered while nothing left the
+      // building, and a member in dunning never got the reminder the log says
+      // they did. The inbound reply path in lib/api/woztell-webhook-route.ts
+      // has always passed it; this outbound path is the one that omitted it.
+      RUN_LIVE_WOZTELL: process.env.RUN_LIVE_WOZTELL,
     }),
     emailFrom,
   }, {now, limit: RUNNER_BATCH_LIMIT});
@@ -383,9 +408,11 @@ async function runProductionCampaigns(now: Date): Promise<unknown> {
         actor,
         profileId,
       );
+      const unsubscribe = unsubscribeUrls(profileId, context.locale, now);
       return {
         ...context,
-        unsubscribeUrl: unsubscribeUrl(profileId, context.locale, now),
+        unsubscribeUrl: unsubscribe.pageUrl,
+        unsubscribeOneClickUrl: unsubscribe.oneClickUrl,
       };
     },
     renderCampaign: createCampaignEmailRenderer(

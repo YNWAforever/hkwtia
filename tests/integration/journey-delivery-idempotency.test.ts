@@ -116,6 +116,7 @@ describe("journey runner delivery idempotency", () => {
           locale: "en",
           variables: {ctaUrl: "https://example.test/member"},
           unsubscribeUrl: null,
+          unsubscribeOneClickUrl: null,
           membershipStatus: "active",
         };
       },

@@ -67,6 +67,7 @@ export type JourneyRunnerContext = JourneyContext & Readonly<{
   locale: AppLocale;
   variables: EmailVariables;
   unsubscribeUrl: string | null;
+  unsubscribeOneClickUrl: string | null;
   membershipStatus: MembershipStatus | null;
 }>;
 
@@ -362,6 +363,7 @@ async function sendEmail(
       variables: context.variables,
       classification: step.classification,
       unsubscribeUrl: context.unsubscribeUrl ?? undefined,
+      unsubscribeOneClickUrl: context.unsubscribeOneClickUrl ?? undefined,
     });
   } catch (error) {
     throw new RunnerFailure(failureCode(error));
