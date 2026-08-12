@@ -47,6 +47,32 @@ Measured from the 577-page capture, not assumed:
   WTIA`) and ordinary news posts that happen to be old (`New Term of Executive
   Committee (2022 - 2024)`).
 
+## Classification: not every post is a milestone
+
+Extraction showed the archive holds three different kinds of thing, and the
+word-count threshold picks the wrong ones: five of the seven entries long enough
+to earn their own page are member interviews, because interviews are long and
+milestones are short. Left as-is, `/about/history` would open with Yahoo Hong
+Kong rather than the founding of the association.
+
+Each entry therefore carries a `kind`:
+
+- **`milestone`** — WTIA's own institutional record. Renders on `/about/history`.
+- **`member-story`** — the "Meet Our Member" interviews (Playnote, FinFabrik,
+  Pixel Networks, Vpon, Yahoo HK, Cypher Martin, Rohde & Schwarz). The audit
+  already assigns these to `/showcase` in sub-project 4, so their redirects point
+  there and sub-project 4 builds the real pages.
+- **`press-release`** — third-party announcements WTIA republished, such as the
+  two SmarTone 5G releases. Redirect to `/news`.
+
+Every entry is still migrated and every word still preserved; `kind` decides
+where each lands. Doing this now rather than in sub-project 4 matters because
+these URLs become permanent 301s, and moving them afterwards means breaking
+links that were just fixed.
+
+`featured` applies only to `milestone` entries — a member story's length should
+not buy it a page on the history timeline.
+
 ## Options considered
 
 **A page for every post.** Rejected. With a 58-word median, that produces ~46
