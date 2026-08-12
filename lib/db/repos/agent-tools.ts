@@ -300,7 +300,10 @@ export function createAgentToolsRepository(
           AND (
             ${events.memberOnly} = false
             OR (
-              ${actor.profileId} IS NOT NULL
+              -- Cast required: this is a bind parameter, not a column, and
+              -- $n IS NOT NULL gives Postgres nothing to infer from — the
+              -- whole statement fails with 42P18 without it.
+              ${actor.profileId}::text IS NOT NULL
               AND EXISTS (
                 SELECT 1
                 FROM ${memberships}

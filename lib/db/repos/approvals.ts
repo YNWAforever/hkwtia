@@ -219,14 +219,18 @@ export function createApprovalsRepository(
           )
         VALUES (
           ${"agent.retention_outreach"},
+          -- Cast every argument: jsonb_build_object is variadic "any" and gives
+          -- a bind parameter nothing to infer a type from, so an uncast one
+          -- fails the statement with 42P18. reasonCodes already showed the
+          -- shape; the rest were relying on an inference that never happens.
           jsonb_build_object(
-            'profileId', ${payload.profileId},
-            'membershipId', ${payload.membershipId},
-            'locale', ${payload.locale},
+            'profileId', ${payload.profileId}::text,
+            'membershipId', ${payload.membershipId}::text,
+            'locale', ${payload.locale}::text,
             'reasonCodes', ${JSON.stringify(payload.reasonCodes)}::jsonb,
-            'subject', ${payload.subject},
-            'body', ${payload.body},
-            'agentRunId', ${payload.agentRunId}
+            'subject', ${payload.subject}::text,
+            'body', ${payload.body}::text,
+            'agentRunId', ${payload.agentRunId}::text
           ),
           ${parsed.requestKey},
           ${"pending"},
