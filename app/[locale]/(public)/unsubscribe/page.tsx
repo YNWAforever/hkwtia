@@ -29,7 +29,6 @@ export default async function UnsubscribePage({params, searchParams}: Props) {
   const [{locale}, query] = await Promise.all([params, searchParams]);
   setRequestLocale(locale);
   const t = await getTranslations({locale, namespace: "Unsubscribe"});
-  const appLocale: AppLocale = locale === "zh-HK" ? "zh-HK" : "en";
 
   if (query.status === "success") {
     return (
@@ -47,7 +46,18 @@ export default async function UnsubscribePage({params, searchParams}: Props) {
       return verifyUnsubscribeTokenWithAny(query.token!, [env.unsubscribeTokenSecret, env.cronSecret]);
     })()
     : null;
-  const valid = payload?.locale === appLocale;
+  /**
+   * The signature and expiry decide this, not the locale the visitor landed in.
+   *
+   * Requiring `payload.locale` to equal the page locale rejected valid links.
+   * The locale cookie lives for a year and `localePrefix` is `as-needed`, so a
+   * recipient who has ever browsed the Chinese site is redirected from
+   * `/unsubscribe` to `/zh/unsubscribe` before this renders — and an English
+   * link then showed "this link is invalid" to someone holding a perfectly
+   * good token. The token's locale still selects the success page, so nothing
+   * about the confirmation is lost by honouring the link here.
+   */
+  const valid = payload !== null;
 
   if (!valid) {
     return (
