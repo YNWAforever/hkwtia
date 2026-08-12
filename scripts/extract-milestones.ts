@@ -58,6 +58,51 @@ function decode(value: string): string {
     .trim();
 }
 
+/**
+ * Selects the region of a captured page that is this post's own content: the
+ * <article> (or <main>, or the whole document, as successive fallbacks),
+ * with the "Related Posts" carousel truncated off. The theme renders that
+ * carousel *inside* the <article> tag, picking the site's other posts by
+ * recency rather than relevance to this one — verified on the real archive:
+ * a 2020 postponement notice's related posts were three unconnected 2025
+ * announcements. It always comes last (after the byline and share box, right
+ * before </article>, on all 45 of the 61 real captures that have one), so
+ * truncating there is safe and keeps its unrelated thumbnails out of this
+ * milestone's body and images.
+ *
+ * Shared with scripts/download-milestone-images.ts, which needs the same
+ * region to recover the original remote image urls — a mismatch between the
+ * two would make that script download unrelated posts' images, or miss real
+ * ones.
+ */
+export function extractArticleRegion(html: string): string {
+  const article = /<article[\s\S]*?<\/article>/.exec(html)?.[0]
+    ?? /<main[\s\S]*?<\/main>/.exec(html)?.[0]
+    ?? html;
+  return article.split(/<section[^>]*\brelated-posts\b[^>]*>/)[0]!;
+}
+
+/**
+ * Resolves a single <img> tag's real source url. WordPress lazy-loading
+ * (class="lazyload", seen on 2 of the 61 real captured pages) replaces src
+ * with an inline blank-SVG placeholder and puts the real url in
+ * data-orig-src (or data-src/data-lazy-src, depending on plugin); without
+ * this fallback the placeholder's data: URI is skipped below and the real
+ * content image is silently dropped. Returns null for a decorative site logo
+ * or a tag with nothing resolvable.
+ */
+export function resolveImageSrc(tag: string): string | null {
+  const rawSrc = /src="([^"]+)"/.exec(tag)?.[1] ?? "";
+  const src = rawSrc.startsWith("data:")
+    ? (/data-orig-src="([^"]+)"/.exec(tag)?.[1]
+      ?? /data-src="([^"]+)"/.exec(tag)?.[1]
+      ?? /data-lazy-src="([^"]+)"/.exec(tag)?.[1]
+      ?? "")
+    : rawSrc;
+  if (!src || src.startsWith("data:") || /logo/i.test(src)) return null;
+  return src;
+}
+
 export function parseMilestoneHtml(
   html: string,
   legacyPath: string,
@@ -66,18 +111,7 @@ export function parseMilestoneHtml(
   const rawTitle = /<title>([\s\S]*?)<\/title>/.exec(html)?.[1] ?? "";
   const titleEn = decode(rawTitle).replace(/\s*\|\s*WTIA\b.*$/, "").trim();
 
-  const article = /<article[\s\S]*?<\/article>/.exec(html)?.[0]
-    ?? /<main[\s\S]*?<\/main>/.exec(html)?.[0]
-    ?? html;
-
-  // The theme renders a "Related Posts" carousel *inside* the <article> tag,
-  // picking the site's other posts by recency rather than relevance to this
-  // one — verified on the real archive: a 2020 postponement notice's related
-  // posts were three unconnected 2025 announcements. It always comes last
-  // (after the byline and share box, right before </article>, on all 45 of
-  // the 61 real captures that have one), so truncating there is safe and
-  // keeps its unrelated thumbnails out of this milestone's images.
-  const region = article.split(/<section[^>]*\brelated-posts\b[^>]*>/)[0]!;
+  const region = extractArticleRegion(html);
 
   const bodyEn = [...region.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/g)]
     .map(([, inner]) => decode(inner))
@@ -85,24 +119,12 @@ export function parseMilestoneHtml(
     .join("\n\n");
 
   const images = [...region.matchAll(/<img[^>]*>/g)].flatMap((match) => {
-    const tag = match[0];
-    const rawSrc = /src="([^"]+)"/.exec(tag)?.[1] ?? "";
-    // WordPress lazy-loading (class="lazyload", seen on 2 of the 61 real
-    // captured pages) replaces src with an inline blank-SVG placeholder and
-    // puts the real URL in data-orig-src (or data-src/data-lazy-src,
-    // depending on plugin). Without this fallback the placeholder's data:
-    // URI is skipped below and the real content image is silently dropped.
-    const src = rawSrc.startsWith("data:")
-      ? (/data-orig-src="([^"]+)"/.exec(tag)?.[1]
-        ?? /data-src="([^"]+)"/.exec(tag)?.[1]
-        ?? /data-lazy-src="([^"]+)"/.exec(tag)?.[1]
-        ?? "")
-      : rawSrc;
-    if (!src || src.startsWith("data:") || /logo/i.test(src)) return [];
+    const src = resolveImageSrc(match[0]);
+    if (!src) return [];
     const file = src.split("/").pop() ?? "";
     return [{
       src: `/images/history/${file}`,
-      altEn: decode(/alt="([^"]*)"/.exec(tag)?.[1] ?? ""),
+      altEn: decode(/alt="([^"]*)"/.exec(match[0])?.[1] ?? ""),
       altZh: "",
     }];
   });
