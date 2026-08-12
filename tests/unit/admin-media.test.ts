@@ -60,9 +60,9 @@ describe("media registry repository", () => {
       .rejects.toThrow("FORBIDDEN");
     await expect(updateMedia(actor as never, row().id, validInput, dependencies))
       .rejects.toThrow("FORBIDDEN");
-    await expect(listMediaForAdmin(actor as never, {list: async () => [], get: async () => null}))
+    await expect(listMediaForAdmin(actor as never, {list: async () => [], listActive: async () => [], get: async () => null}))
       .rejects.toThrow("FORBIDDEN");
-    await expect(getMediaForAdmin(actor as never, row().id, {list: async () => [], get: async () => null}))
+    await expect(getMediaForAdmin(actor as never, row().id, {list: async () => [], listActive: async () => [], get: async () => null}))
       .rejects.toThrow("FORBIDDEN");
 
     expect(spy).not.toHaveBeenCalled();
@@ -150,6 +150,7 @@ describe("media registry repository", () => {
   it("loads a row by id and tolerates a malformed one without querying", async () => {
     const reads: MediaReadDependencies = {
       list: vi.fn(async () => [row()] as never),
+      listActive: vi.fn(async () => [row()] as never),
       get: vi.fn(async () => row() as never),
     };
 

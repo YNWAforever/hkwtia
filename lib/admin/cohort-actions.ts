@@ -3,8 +3,18 @@
 import {revalidatePath} from "next/cache";
 import {z} from "zod";
 
+import {notFound} from "next/navigation";
+
+import {runCohortFormAction, type CohortActionState} from "@/lib/admin/cohort-action-core";
+import {cohortFormInput} from "@/lib/admin/cohort-form-input";
+import {revalidateAdminPath} from "@/lib/admin/revalidate-path";
 import {requireAdminActor} from "@/lib/auth/actor";
+import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
 import {cohortRepository} from "@/lib/db/repos/cohorts";
+
+// Only the admin path is revalidated. The public surface that lists cohorts —
+// /launchpad — is force-dynamic, so it re-reads on every request and has no
+// cache entry to invalidate.
 
 const canonicalPathSchema = z.union([z.literal("/admin/cohorts"), z.literal("/zh/admin/cohorts")]);
 const moveSchema = z.object({
@@ -21,6 +31,52 @@ function actionInput(formData: FormData) {
     stage: formData.get("stage"),
     notes: formData.get("notes"),
   });
+}
+
+export type CohortFormActionMessages = Readonly<{
+  successMessage: string;
+  validationMessage: string;
+  slugConflictMessage: string;
+  endBeforeStartMessage: string;
+  errorMessage: string;
+}>;
+
+export async function createCohortAction(
+  path: string,
+  messages: CohortFormActionMessages,
+  state: CohortActionState,
+  formData: FormData,
+): Promise<CohortActionState> {
+  try {
+    return await runCohortFormAction(state, formData, {...messages, mutate: async (data) => {
+      const actor = await requireAdminActor();
+      await cohortRepository.createCohort(actor, cohortFormInput(data));
+      revalidateAdminPath(path);
+    }});
+  } catch (error) {
+    if (isAuthorizationDenial(error)) notFound();
+    throw error;
+  }
+}
+
+export async function updateCohortAction(
+  cohortId: string,
+  path: string,
+  messages: CohortFormActionMessages,
+  state: CohortActionState,
+  formData: FormData,
+): Promise<CohortActionState> {
+  try {
+    return await runCohortFormAction(state, formData, {...messages, mutate: async (data) => {
+      const actor = await requireAdminActor();
+      const updated = await cohortRepository.updateCohort(actor, cohortId, cohortFormInput(data));
+      if (!updated) throw new Error("COHORT_NOT_FOUND");
+      revalidateAdminPath(path);
+    }});
+  } catch (error) {
+    if (isAuthorizationDenial(error)) notFound();
+    throw error;
+  }
 }
 
 /** Staff mutation boundary; the repository owns transition validation, audit, and graduate projection. */

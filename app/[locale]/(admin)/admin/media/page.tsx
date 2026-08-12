@@ -56,6 +56,9 @@ export default async function AdminMediaPage({params}: Props) {
                 {locale === "zh-HK" ? entry.altZh : entry.altEn}
               </Link>
               <span className="font-mono text-xs text-muted-foreground">{entry.url}</span>
+              {entry.archivedAt
+                ? <span className="text-xs text-muted-foreground">{t("statusArchived")}</span>
+                : null}
             </li>
           ))}</ul>
           : <p>{t("empty")}</p>}

@@ -62,8 +62,41 @@ export type AdminCohortApplication = Readonly<{
   cohortNameZhHk: string;
 }>;
 
+/**
+ * Cohort record fields staff may set. `status` drives public visibility through
+ * `PUBLIC_COHORT_STATUSES`, so it is the publish control; `slug` is uniquely
+ * indexed, so a clash is a field error rather than a 500.
+ */
+const cohortStatusSchema = z.enum(["planning", "open", "active", "completed", "archived"]);
+const isoDateSchema = z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "COHORT_DATE_INVALID");
+const cohortInputObjectSchema = z.object({
+  slug: z.string().trim().min(1).max(200).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  nameEn: z.string().trim().min(1).max(300),
+  nameZhHk: z.string().trim().min(1).max(300),
+  descriptionEn: z.string().trim().min(1).max(4_000),
+  descriptionZhHk: z.string().trim().min(1).max(4_000),
+  track: z.string().trim().min(1).max(120),
+  startsOn: isoDateSchema,
+  endsOn: isoDateSchema.nullable(),
+  // Mirrors the cohorts_capacity_check and cohorts_fee_hkd_check constraints, so
+  // a bad number is a field error instead of a database exception.
+  capacity: z.coerce.number().int().positive().max(10_000),
+  feeHkd: z.coerce.number().int().min(0).max(100_000_000),
+  status: cohortStatusSchema,
+}).strict().refine(
+  (value) => value.endsOn === null || value.endsOn >= value.startsOn,
+  {message: "COHORT_END_BEFORE_START", path: ["endsOn"]},
+);
+
+export const cohortInputSchema = cohortInputObjectSchema;
+export type CohortInput = z.output<typeof cohortInputObjectSchema>;
+
 export type CohortStore = Readonly<{
   listPublicCohorts: (actor: Actor) => Promise<readonly PublicCohort[]>;
+  listCohorts: () => Promise<readonly Cohort[]>;
+  findCohortBySlug: (slug: string) => Promise<Readonly<{id: string}> | null>;
+  insertCohort: (input: CohortInput, actor: AdminActor) => Promise<Cohort>;
+  updateCohort: (id: string, input: CohortInput, actor: AdminActor) => Promise<Cohort | null>;
   findActiveCompanyId: (actor: Extract<Actor, {kind: "member"}>) => Promise<string | null>;
   getApplication: (cohortId: string, companyId: string) => Promise<CohortApplication | null>;
   getCohort: (cohortId: string) => Promise<Cohort | null>;
@@ -80,6 +113,10 @@ export type CohortRepositoryDependencies = Readonly<{
 
 export type CohortRepository = Readonly<{
   listPublicCohorts: (actor: Actor) => Promise<readonly PublicCohort[]>;
+  listCohortsForAdmin: (actor: AdminActor) => Promise<readonly Cohort[]>;
+  getCohortForAdmin: (actor: AdminActor, cohortId: unknown) => Promise<Cohort | null>;
+  createCohort: (actor: AdminActor, input: unknown) => Promise<Cohort>;
+  updateCohort: (actor: AdminActor, cohortId: unknown, input: unknown) => Promise<Cohort | null>;
   getApplicationForCompany: (actor: Actor, cohortId: string, companyId: string) => Promise<CohortApplication | null>;
   createApplication: (actor: Actor, cohortId: string, input: unknown) => Promise<CohortApplication>;
   listForAdmin: (actor: AdminActor) => Promise<readonly AdminCohortApplication[]>;
@@ -90,6 +127,15 @@ export const PUBLIC_COHORT_STATUSES = ["open", "active"] as const;
 
 function transitionAllowed(from: CohortStage, to: CohortStage): boolean {
   return stageTransitions[from].includes(to);
+}
+
+/** `slug` is uniquely indexed, so a clash is a field error, not a 500. */
+function cohortSlugConflictError(): z.ZodError {
+  return new z.ZodError([{
+    code: z.ZodIssueCode.custom,
+    path: ["slug"],
+    message: "COHORT_SLUG_TAKEN",
+  }]);
 }
 
 export function databaseStore(loadDatabase: () => Promise<Database> = getDb): CohortStore {
@@ -112,6 +158,55 @@ export function databaseStore(loadDatabase: () => Promise<Database> = getDb): Co
         status: cohorts.status,
       }).from(cohorts).where(inArray(cohorts.status, PUBLIC_COHORT_STATUSES)).orderBy(asc(cohorts.startsOn), asc(cohorts.slug));
       return rows.map((row) => publicCohortSchema.parse(row));
+    },
+    async listCohorts() {
+      const database = await loadDatabase();
+      return database.select().from(cohorts).orderBy(asc(cohorts.startsOn), asc(cohorts.slug));
+    },
+    async findCohortBySlug(slug) {
+      const database = await loadDatabase();
+      return (await database.select({id: cohorts.id}).from(cohorts)
+        .where(eq(cohorts.slug, slug)).limit(1))[0] ?? null;
+    },
+    async insertCohort(input, actor) {
+      const database = await loadDatabase();
+      // The audit row is written in the same transaction as the insert, so a
+      // cohort can never exist without the record of who created it — `cohorts`
+      // has no column naming its author.
+      return database.transaction(async (transaction) => {
+        const [row] = await transaction.insert(cohorts).values(input).returning();
+        if (!row) throw new Error("COHORT_INSERT_FAILED");
+        await transaction.insert(auditEvents).values({
+          actorUserId: actor.profileId,
+          actorType: actor.kind,
+          action: "cohort.created",
+          targetType: "cohort",
+          targetId: row.id,
+          metadata: {slug: row.slug, status: row.status},
+        });
+        return row;
+      });
+    },
+    async updateCohort(id, input, actor) {
+      const database = await loadDatabase();
+      return database.transaction(async (transaction) => {
+        const current = (await transaction.select().from(cohorts)
+          .where(eq(cohorts.id, id)).for("update"))[0];
+        if (!current) return null;
+        const [row] = await transaction.update(cohorts)
+          .set({...input, updatedAt: new Date()})
+          .where(eq(cohorts.id, id)).returning();
+        if (!row) return null;
+        await transaction.insert(auditEvents).values({
+          actorUserId: actor.profileId,
+          actorType: actor.kind,
+          action: "cohort.updated",
+          targetType: "cohort",
+          targetId: row.id,
+          metadata: {slug: row.slug, fromStatus: current.status, toStatus: row.status},
+        });
+        return row;
+      });
     },
     async findActiveCompanyId(actor) {
       const database = await loadDatabase();
@@ -255,6 +350,32 @@ export function createCohortRepository(
     async listForAdmin(actor) {
       requireAdmin(actor);
       return store.listForAdmin();
+    },
+    async listCohortsForAdmin(actor) {
+      requireAdmin(actor);
+      return store.listCohorts();
+    },
+    async getCohortForAdmin(actor, cohortId) {
+      requireAdmin(actor);
+      const parsed = applicationIdSchema.safeParse(cohortId);
+      // A malformed id is a 404, not a 500: the [id] route passes whatever the
+      // URL contained.
+      if (!parsed.success) return null;
+      return store.getCohort(parsed.data);
+    },
+    async createCohort(actor, input) {
+      requireAdmin(actor);
+      const parsed = cohortInputSchema.parse(input);
+      if (await store.findCohortBySlug(parsed.slug)) throw cohortSlugConflictError();
+      return store.insertCohort(parsed, actor);
+    },
+    async updateCohort(actor, cohortId, input) {
+      requireAdmin(actor);
+      const parsedId = applicationIdSchema.parse(cohortId);
+      const parsed = cohortInputSchema.parse(input);
+      const clash = await store.findCohortBySlug(parsed.slug);
+      if (clash && clash.id !== parsedId) throw cohortSlugConflictError();
+      return store.updateCohort(parsedId, parsed, actor);
     },
     async moveApplication(actor, applicationId, nextStage, notes) {
       requireAdmin(actor);

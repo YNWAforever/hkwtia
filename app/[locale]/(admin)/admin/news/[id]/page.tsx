@@ -2,9 +2,10 @@ import {notFound} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {z} from "zod";
 
+import {ArchiveToggle} from "@/components/admin/archive-toggle";
 import {NewsForm} from "@/components/admin/news-form";
 import type {AppLocale} from "@/i18n/routing";
-import {updateNewsAction} from "@/lib/admin/news-actions";
+import {setNewsArchivedAction, updateNewsAction} from "@/lib/admin/news-actions";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {adminPostsRepository} from "@/lib/db/repos/admin-posts";
 
@@ -49,10 +50,25 @@ export default async function AdminNewsDetailPage({params}: Props) {
           {locale === "zh-HK" ? post.titleZh : post.titleEn}
         </h1>
         <p className="text-muted-foreground">
-          {post.publishedAt ? t("statusPublished") : t("statusDraft")}
+          {post.archivedAt
+            ? t("statusArchived")
+            : post.publishedAt ? t("statusPublished") : t("statusDraft")}
         </p>
       </header>
       <NewsForm action={updateAction} labels={labels} values={post}/>
+      <ArchiveToggle
+        action={setNewsArchivedAction.bind(
+          null,
+          parsedId.data,
+          "/" + locale + "/admin/news/" + parsedId.data,
+          post.archivedAt === null,
+        ) as never}
+        archived={post.archivedAt !== null}
+        labels={{
+          archive: t("archive"), unarchive: t("unarchive"), archiving: t("archiving"),
+          archivedNotice: t("archivedNotice"), inUse: t("archiveInUse"), error: t("error"),
+        }}
+      />
     </div>
   );
 }

@@ -13,6 +13,7 @@ type FixtureRow = Readonly<{
   titleZh: string;
   bodyMdx: string;
   publishedAt: Date | null;
+  archivedAt: Date | null;
   author: string | null;
 }>;
 
@@ -27,6 +28,7 @@ function row(
     titleZh: `${slug} 中文`,
     bodyMdx: `## ${slug}\n\nPublished evidence.`,
     publishedAt,
+    archivedAt: null,
     author: "HKWTIA Engineering",
     ...overrides,
   };
@@ -42,6 +44,8 @@ const fullDataset: readonly FixtureRow[] = [
   row("draft-build-log", {publishedAt: null}),
   row("page-post", {kind: "page"}),
   row("news-post", {kind: "news"}),
+  // Published, but retired: must leave the feed and its slug route together.
+  row("archived-news-post", {kind: "news", archivedAt: new Date("2026-07-30T00:00:00.000Z")}),
   visibleAlpha,
 ];
 
@@ -90,6 +94,9 @@ function predicateSensitiveProxy(dataset: readonly FixtureRow[]) {
         (fixture) =>
           fixture.publishedAt === null || fixture.publishedAt <= cutoff,
       );
+    }
+    if (/"posts"\."archived_at"\s+is\s+null/i.test(query)) {
+      filtered = filtered.filter((fixture) => fixture.archivedAt === null);
     }
     if (/"posts"\."slug"\s*=\s*\$\d+/i.test(query)) {
       const selectedSlug = params.find(
@@ -237,5 +244,27 @@ describe("public posts repository", () => {
         expect.objectContaining({path: [0, "author"]}),
       ]),
     });
+  });
+
+  // Archiving retires a published post: it must leave the feed, its slug route
+  // and (through listPublishedNews) the sitemap together. Unpublishing is the
+  // reversible working state; archiving is not the same thing.
+  it("excludes an archived news post from the feed", async () => {
+    const fixture = predicateSensitiveProxy(fullDataset);
+    const repository = createPublicPostsRepository(async () => fixture.database as never);
+
+    const summaries = await repository.listPublishedNews(asOf);
+
+    expect(summaries.map(({slug}) => slug)).toContain("news-post");
+    expect(summaries.map(({slug}) => slug)).not.toContain("archived-news-post");
+    expect(fixture.statements[0]?.sql).toMatch(/archived_at.*IS NULL/i);
+  });
+
+  it("returns null for an archived news slug", async () => {
+    const fixture = predicateSensitiveProxy(fullDataset);
+    const repository = createPublicPostsRepository(async () => fixture.database as never);
+
+    await expect(repository.getPublishedNewsBySlug("archived-news-post", asOf)).resolves.toBeNull();
+    await expect(repository.getPublishedNewsBySlug("news-post", asOf)).resolves.toMatchObject({slug: "news-post"});
   });
 });

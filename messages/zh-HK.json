@@ -995,6 +995,7 @@
     "brand": "WTIA",
     "title": "職員工作區",
     "description": "在受保護的職員專用工作區管理 WTIA 會員營運。",
+    "dashboard": {"heading": "待辦佇列", "description": "目前需要職員處理的項目。", "view": "開啟", "unavailable": "無法讀取", "pendingApprovals": "待審批項目", "atRisk": "高流失風險會員", "listingsAwaitingReview": "待審核展示企業", "draftNews": "新聞草稿"},
     "navigation": {
       "label": "職員管理導覽",
       "segments": "分群",
@@ -1028,6 +1029,7 @@
       "savePremium": "儲存"
     },
     "cohorts": {
+      "manage": {"createHeading": "建立計劃期數", "createDescription": "當狀態為「開放」或「進行中」時，該期數會在啟航計劃頁面公開顯示。", "existing": "所有期數", "noCohorts": "尚未建立任何期數。", "editEyebrow": "編輯期數", "back": "返回期數列表", "create": "建立期數", "save": "儲存期數", "saving": "儲存中", "slug": "網址代號", "nameEn": "名稱（英文）", "nameZhHk": "名稱（繁體中文）", "descriptionEn": "簡介（英文）", "descriptionZhHk": "簡介（繁體中文）", "track": "路線", "startsOn": "開始日期", "endsOn": "結束日期", "endsOnHelp": "如未定結束日期，請留空。", "capacity": "名額", "feeHkd": "費用（港元）", "feeHelp": "免費期數請輸入 0。", "status": "狀態", "statusHelp": "「開放」及「進行中」的期數會在公開的啟航計劃頁面顯示。", "statuses": {"planning": "籌備中", "open": "開放", "active": "進行中", "completed": "已完成", "archived": "已封存"}, "success": "期數已儲存。", "validation": "請檢查必填欄位後再試一次。", "slugConflict": "此網址代號已被使用。", "endBeforeStart": "結束日期不可早於開始日期。", "error": "無法儲存此期數，請再試一次。"},
       "title": "啟航計劃申請",
       "description": "由職員審核並推進企業的海外拓展申請。",
       "application": "申請",
@@ -1183,6 +1185,7 @@
       }
     },
     "media": {
+      "statusArchived": "已封存", "archive": "封存", "unarchive": "復原", "archiving": "儲存中", "archivedNotice": "此項目已封存，不會在公開網站顯示。", "archiveInUse": "仍有 {count} 個展示企業使用此圖片，請先移除相關標誌。",
       "eyebrow": "媒體",
       "title": "媒體庫",
       "description": "登記網站可顯示的圖片，並提供中英文替代文字。",
@@ -1236,6 +1239,7 @@
       }
     },
     "news": {
+      "statusArchived": "已封存", "archive": "封存", "unarchive": "復原", "archiving": "儲存中", "archivedNotice": "此項目已封存，不會在公開網站顯示。", "archiveInUse": "仍有 {count} 個展示企業使用此圖片，請先移除相關標誌。",
       "eyebrow": "最新消息",
       "title": "最新消息",
       "description": "撰寫及發布 WTIA 雙語消息。",
@@ -1394,6 +1398,7 @@
       "next": "下一頁"
     },
     "member360": {
+      "profileHeading": "聯絡資料", "profileDescription": "更正會員的聯絡資料。會籍、付款、權限及同意設定不可在此修改。", "profileDisplayName": "顯示名稱", "profilePhone": "電話", "profileJobTitle": "職銜", "profileLocale": "偏好語言", "profileLocaleEn": "英文", "profileLocaleZh": "繁體中文", "profileOptional": "選填", "profileSave": "儲存聯絡資料", "profileSuccess": "聯絡資料已儲存。", "profileValidation": "請檢查必填欄位後再試一次。", "profileError": "無法儲存資料，請再試一次。",
       "description": "查看完整會員記錄及僅供職員使用的營運歷史。",
       "profile": "個人資料",
       "companies": "公司",

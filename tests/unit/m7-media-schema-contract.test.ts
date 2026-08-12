@@ -27,12 +27,24 @@ describe("M7.3 media schema contract", () => {
     expect(table.columns.map((column) => column.name).sort()).toEqual([
       "alt_en",
       "alt_zh",
+      "archived_at",
       "created_at",
       "id",
       "registered_by_profile_id",
       "updated_at",
       "url",
     ]);
+  });
+
+  // Archive rather than delete: an entry may already be referenced by a
+  // published listing, and the row is the record of what was shown. Nullable,
+  // so every row written before archiving existed needs no backfill.
+  it("archives rather than deletes, with no backfill needed", () => {
+    const table = tableConfig("media");
+    if (!table) return;
+
+    const columns = new Map(table.columns.map((column) => [column.name, column]));
+    expect(columns.get("archived_at")?.notNull).toBe(false);
   });
 
   it("requires a url and alt text in both locales", () => {

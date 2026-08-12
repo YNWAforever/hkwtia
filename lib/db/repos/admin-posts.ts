@@ -1,6 +1,6 @@
 import "server-only";
 
-import {and, asc, desc, eq} from "drizzle-orm";
+import {and, asc, desc, eq, isNull} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
@@ -41,7 +41,8 @@ type StoredNewsUpdate = z.output<typeof newsUpdateSchema>;
 type NewsAudit = Readonly<{
   actorUserId: string;
   actorType: AdminActor["kind"];
-  action: "post.created" | "post.updated" | "post.published" | "post.unpublished";
+  action: "post.created" | "post.updated" | "post.published" | "post.unpublished"
+    | "post.archived" | "post.unarchived";
   targetType: "post";
   targetId: string;
   metadata: Record<string, unknown>;
@@ -52,11 +53,13 @@ export type NewsMutationDependencies = Readonly<{transaction: <T>(work: (transac
   insertPost: (input: StoredNewsInput) => Promise<Post>;
   lockPost: (id: string) => Promise<Post | null>;
   updatePost: (id: string, input: StoredNewsUpdate) => Promise<Post | null>;
+  setArchivedAt: (id: string, archivedAt: Date | null) => Promise<Post | null>;
   insertAudit: (input: NewsAudit) => Promise<void>;
 }>) => Promise<T>) => Promise<T>}>;
 
 export type NewsReadDependencies = Readonly<{
   list: () => Promise<readonly Post[]>;
+  listActive: () => Promise<readonly Post[]>;
   get: (id: string) => Promise<Post | null>;
 }>;
 
@@ -87,6 +90,9 @@ async function defaultMutationDependencies(): Promise<NewsMutationDependencies> 
       (await tx.update(posts).set({...input, updatedAt: new Date()})
         .where(and(eq(posts.id, id), eq(posts.kind, NEWS_KIND)))
         .returning())[0] ?? null,
+    setArchivedAt: async (id, archivedAt) =>
+      (await tx.update(posts).set({archivedAt, updatedAt: new Date()})
+        .where(and(eq(posts.id, id), eq(posts.kind, NEWS_KIND))).returning())[0] ?? null,
     insertAudit: async (input) => { await tx.insert(auditEvents).values(input); },
   }))};
 }
@@ -95,6 +101,9 @@ async function defaultReadDependencies(): Promise<NewsReadDependencies> {
   const db = await getDb();
   return {
     list: async () => db.select().from(posts).where(eq(posts.kind, NEWS_KIND))
+      .orderBy(desc(posts.createdAt), asc(posts.slug)),
+    listActive: async () => db.select().from(posts)
+      .where(and(eq(posts.kind, NEWS_KIND), isNull(posts.archivedAt)))
       .orderBy(desc(posts.createdAt), asc(posts.slug)),
     get: async (id) => (await db.select().from(posts)
       .where(and(eq(posts.id, id), eq(posts.kind, NEWS_KIND))).limit(1))[0] ?? null,
@@ -173,6 +182,48 @@ export async function updateNewsPost(
   });
 }
 
+/**
+ * Archives or restores a post. Distinct from unpublishing: unpublishing returns
+ * a post to draft and keeps it in the authoring list, archiving retires it from
+ * that list. Both hide it from the public site; only one is a working state.
+ *
+ * Scoped to `kind: "news"` like every other method here, so a board draft or a
+ * build log id cannot be archived through the news UI.
+ */
+export async function setNewsArchived(
+  actor: Actor,
+  id: unknown,
+  archived: boolean,
+  dependencies?: NewsMutationDependencies,
+  now: () => Date = () => new Date(),
+): Promise<Post | null> {
+  requireAdmin(actor);
+  const postId = postIdSchema.parse(id);
+  return (dependencies ?? await defaultMutationDependencies()).transaction(async (transaction) => {
+    const current = await transaction.lockPost(postId);
+    if (!current) return null;
+    // Already in the requested state: not an event worth recording.
+    if (archived === (current.archivedAt !== null)) return current;
+    const post = await transaction.setArchivedAt(postId, archived ? now() : null);
+    if (!post) return null;
+    await transaction.insertAudit({
+      actorUserId: actor.profileId, actorType: actor.kind,
+      action: archived ? "post.archived" : "post.unarchived",
+      targetType: "post", targetId: post.id,
+      metadata: {slug: post.slug},
+    });
+    return post;
+  });
+}
+
+export async function listActiveNewsForAdmin(
+  actor: Actor,
+  dependencies?: NewsReadDependencies,
+): Promise<readonly Post[]> {
+  requireAdmin(actor);
+  return (dependencies ?? await defaultReadDependencies()).listActive();
+}
+
 export async function listNewsForAdmin(
   actor: Actor,
   dependencies?: NewsReadDependencies,
@@ -195,6 +246,8 @@ export async function getNewsForAdmin(
 export const adminPostsRepository = {
   create: createNewsPost,
   update: updateNewsPost,
+  setArchived: setNewsArchived,
   listForAdmin: listNewsForAdmin,
+  listActiveForAdmin: listActiveNewsForAdmin,
   getForAdmin: getNewsForAdmin,
 };

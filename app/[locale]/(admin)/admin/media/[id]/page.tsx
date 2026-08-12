@@ -3,9 +3,10 @@ import {notFound} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {z} from "zod";
 
+import {ArchiveToggle} from "@/components/admin/archive-toggle";
 import {MediaForm} from "@/components/admin/media-form";
 import type {AppLocale} from "@/i18n/routing";
-import {updateMediaAction} from "@/lib/admin/media-actions";
+import {setMediaArchivedAction, updateMediaAction} from "@/lib/admin/media-actions";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {mediaRepository} from "@/lib/db/repos/media";
 import {localizedPath} from "@/lib/urls";
@@ -55,6 +56,19 @@ export default async function AdminMediaDetailPage({params}: Props) {
         }}
         preview={{url: entry.url, alt}}
         values={entry}
+      />
+      <ArchiveToggle
+        action={setMediaArchivedAction.bind(
+          null,
+          entry.id,
+          localizedPath(locale, `/admin/media/${entry.id}`),
+          entry.archivedAt === null,
+        ) as never}
+        archived={entry.archivedAt !== null}
+        labels={{
+          archive: t("archive"), unarchive: t("unarchive"), archiving: t("archiving"),
+          archivedNotice: t("archivedNotice"), inUse: t("archiveInUse"), error: t("error"),
+        }}
       />
     </div>
   );

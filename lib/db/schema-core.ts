@@ -648,6 +648,10 @@ export const posts = pgTable(
     titleZh: text("title_zh").notNull(),
     bodyMdx: text("body_mdx").notNull(),
     publishedAt: timestamp("published_at", {withTimezone: true}),
+    // Distinct from publishedAt: unpublishing returns a post to draft and keeps
+    // it in the authoring list, archiving retires it from that list entirely.
+    // Both hide it from the public site; only one is a working state.
+    archivedAt: timestamp("archived_at", {withTimezone: true}),
     author: text("author").notNull(),
     sourceKey: text("source_key"),
     agentRunId: uuid("agent_run_id")
@@ -681,6 +685,9 @@ export const media = pgTable(
     altZh: text("alt_zh").notNull(),
     registeredByProfileId: text("registered_by_profile_id")
       .references(() => profiles.id, {onDelete: "set null"}),
+    // Archive rather than delete: a registry entry may already be referenced by
+    // a published listing, and the row is the record of what was shown.
+    archivedAt: timestamp("archived_at", {withTimezone: true}),
     createdAt: createdAt("created_at"),
     updatedAt: updatedAt("updated_at"),
   },
