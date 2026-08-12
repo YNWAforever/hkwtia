@@ -2,6 +2,11 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const publicPosts = vi.hoisted(() => ({
   listPublishedBuildLogs: vi.fn(),
+  // The sitemap reads news as well as build logs. This mock omitted it, and the
+  // omission stayed invisible while each read sat in its own try/catch: calling
+  // an undefined export threw a TypeError that the catch swallowed as if it
+  // were a failed database read.
+  listPublishedNews: vi.fn(),
 }));
 const showcase = vi.hoisted(() => ({
   listPublishedSlugs: vi.fn(),
@@ -23,6 +28,7 @@ import sitemap from "@/app/sitemap";
 describe("published build logs in the sitemap", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    publicPosts.listPublishedNews.mockResolvedValue([]);
     showcase.listPublishedSlugs.mockResolvedValue([]);
   });
 
