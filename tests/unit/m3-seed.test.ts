@@ -289,10 +289,26 @@ describe("M3 deterministic acceptance seed", () => {
   });
 
   it("validates environment inputs before opening a database pool", async () => {
+    // runM3Seed is now guarded (Task 5): the isolation check runs before any
+    // of the function's own input validation, so an unauthorized call
+    // surfaces the guard's error rather than reaching the DATABASE_URL or
+    // M3_SEED_NOW checks below it.
     await expect(runM3Seed({})).rejects.toThrow(
-      "DATABASE_URL is required to seed M3 fixtures.",
+      "M3_ACCEPTANCE_SEED_NOT_AUTHORIZED",
     );
-    await expect(runM3Seed({DATABASE_URL: "postgresql://example.invalid/test"}))
-      .rejects.toThrow("M3_SEED_NOW_REQUIRED");
+    await expect(runM3Seed({
+      M3_ACCEPTANCE_SEED: "true",
+      DATABASE_URL: "postgresql://example.invalid/test",
+      DATABASE_URL_TEST: "postgresql://example.invalid/test",
+      NODE_ENV: "test",
+    })).rejects.toThrow("M3_SEED_NOW_REQUIRED");
+  });
+
+  it("refuses to run without explicit isolation authorization", async () => {
+    await expect(runM3Seed({
+      DATABASE_URL: "postgres://live.example/wtia",
+      M3_SEED_NOW: "2026-07-21T00:00:00Z",
+      NODE_ENV: "test",
+    })).rejects.toThrow("M3_ACCEPTANCE_SEED_NOT_AUTHORIZED");
   });
 });

@@ -36,6 +36,7 @@ Open `http://localhost:3000/` or `http://localhost:3000/zh`.
 | `npm run db:seed:m1` / `npm run db:seed:m2` | Run one seed layer directly |
 | `npm run db:seed:m3` | Reconcile the deterministic M3 acceptance fixture using explicit `DATABASE_URL` and `M3_SEED_NOW` |
 | `npm run db:seed:m4a` | Replace the scoped M4A KB namespace and reconcile the fixed isolated acceptance fixture |
+| `npm run db:seed:m4a-knowledge` | Load only the real funding-scheme sources into the M4A KB namespace; safe in production |
 | `npm run db:seed:m5` | Reconcile the opt-in synthetic M5 Showcase fixture in an isolated database |
 | `npm run db:seed:m6` | Reconcile the opt-in synthetic M6 Launch Pad fixture in an isolated database |
 | `npm test -- tests/integration/m4a-acceptance.test.ts` | Run deterministic M4A acceptance; the database case needs the explicit opt-in gate |
@@ -223,12 +224,35 @@ npm run db:seed:m3
 npm run db:seed:m4a
 ```
 
-`db:seed:m4a` requires `DATABASE_URL` and `OPENAI_API_KEY` because production
-knowledge vectors use the live embedding adapter. It replaces only the
-`m4a-core-v1` KB namespace, reconciles the fixed
-`m4a-acceptance-member` and two `m4a-*` events, and clears only that synthetic
-member's Concierge approval/task residue. It never truncates or cleans M1-M3
-fixtures.
+`db:seed:m4a` requires `OPENAI_API_KEY` because knowledge vectors use the live
+embedding adapter, plus the same isolation guard as M3/M5/M6: set `DATABASE_URL`
+and `DATABASE_URL_TEST` to the same already-migrated, non-production database
+and set `M4A_ACCEPTANCE_SEED=true`. It replaces the entire `m4a-core-v1` KB
+namespace with the funding-scheme sources plus fixed acceptance sources,
+reconciles the fixed `m4a-acceptance-member` and two `m4a-*` events, and clears
+only that synthetic member's Concierge approval/task residue. It never
+truncates or cleans M1-M3 fixtures.
+
+`db:seed:m4a` cannot run against production, by design — it reconciles a
+synthetic member and two fictional events. Loading the real funding-scheme
+sources into a production knowledge base is a separate command:
+
+```sh
+npm run db:seed:m4a-knowledge
+```
+
+It needs only `DATABASE_URL` and `OPENAI_API_KEY`, takes no isolation flag, and
+is safe to run in production for the same reason `db:seed:m1` is: everything it
+writes is real configuration. It seeds `M4A_FUNDING_SOURCES` and nothing else —
+it never touches `profiles` or `events`, and
+`tests/unit/seed-guard-boundary.test.ts` fails if `scripts/seed-m4a-knowledge.ts`
+ever gains a reference to the acceptance fixture.
+
+Both commands call `replaceNamespace`, which replaces `m4a-core-v1` rather than
+merging into it. That is what makes the production command safe — the namespace
+ends up holding exactly the real sources — but it also means running
+`db:seed:m4a-knowledge` against an acceptance database drops the acceptance
+sources. Re-run `db:seed:m4a` there to restore them.
 
 The deterministic acceptance and evaluation gates require no external
 credentials:

@@ -2,23 +2,27 @@ import {fileURLToPath} from "node:url";
 
 import {Pool} from "pg";
 
+import {assertIsolatedSeedEnvironment} from "./lib/acceptance-guard.ts";
+
 export const M6_ACCEPTANCE_SEED_ENV = "M6_ACCEPTANCE_SEED";
 export const M6_ACCEPTANCE_OWNERSHIP_KEY = "m6-launch-pad-acceptance-v1";
 
-const COHORT_ID = "60000060-0000-4000-8000-000000000001";
-const PARTNER_IDS = [
+// Exported so scripts/audit-synthetic-content.ts can identify these exact
+// rows by id instead of maintaining a second, driftable copy of the list.
+export const COHORT_ID = "60000060-0000-4000-8000-000000000001";
+export const PARTNER_IDS = [
   "60000063-0000-4000-8000-000000000001",
   "60000063-0000-4000-8000-000000000002",
   "60000063-0000-4000-8000-000000000003",
 ] as const;
-const COMPANY_IDS = [
+export const COMPANY_IDS = [
   "60000061-0000-4000-8000-000000000001",
   "60000061-0000-4000-8000-000000000002",
   "60000061-0000-4000-8000-000000000003",
   "60000061-0000-4000-8000-000000000004",
   "60000061-0000-4000-8000-000000000005",
 ] as const;
-const APPLICATION_IDS = [
+export const APPLICATION_IDS = [
   "60000062-0000-4000-8000-000000000001",
   "60000062-0000-4000-8000-000000000002",
   "60000062-0000-4000-8000-000000000003",
@@ -97,30 +101,11 @@ export function buildM6SeedFixture(asOf: Date): M6SeedFixture {
 export function assertM6SeedEnvironment(
   environment: Readonly<Record<string, string | undefined>>,
 ): string {
-  if (environment[M6_ACCEPTANCE_SEED_ENV]?.trim().toLowerCase() !== "true") {
-    throw new Error("M6_ACCEPTANCE_SEED_NOT_AUTHORIZED");
-  }
-  if (environment.VERCEL_ENV?.trim().toLowerCase() === "production" || environment.NODE_ENV?.trim().toLowerCase() === "production") {
-    throw new Error("M6_ACCEPTANCE_PRODUCTION_FORBIDDEN");
-  }
-  const databaseUrl = environment.DATABASE_URL?.trim();
-  if (!databaseUrl) throw new Error("M6_ACCEPTANCE_DATABASE_URL_REQUIRED");
-  const testDatabaseUrl = environment.DATABASE_URL_TEST?.trim();
-  if (!testDatabaseUrl) throw new Error("M6_ACCEPTANCE_DATABASE_URL_TEST_REQUIRED");
-  if (databaseUrl !== testDatabaseUrl) throw new Error("M6_ACCEPTANCE_DATABASE_URL_MISMATCH");
-  const hostAllowlist = environment.M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST
-    ?.split(/[\s,]+/)
-    .map((host) => host.trim().toLowerCase())
-    .filter(Boolean);
-  if (!hostAllowlist?.length) throw new Error("M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST_REQUIRED");
-  let databaseHost: string;
-  try {
-    databaseHost = new URL(databaseUrl).hostname.toLowerCase();
-  } catch {
-    throw new Error("M6_ACCEPTANCE_DATABASE_URL_INVALID");
-  }
-  if (!hostAllowlist.includes(databaseHost)) throw new Error("M6_ACCEPTANCE_DATABASE_HOST_NOT_ALLOWED");
-  return databaseUrl;
+  return assertIsolatedSeedEnvironment(environment, {
+    prefix: "M6_ACCEPTANCE",
+    flag: M6_ACCEPTANCE_SEED_ENV,
+    hostAllowlistVar: "M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST",
+  });
 }
 
 export type M6SeedConnection = Readonly<{

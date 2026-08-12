@@ -5,6 +5,7 @@ import {Pool} from "pg";
 import {previousHongKongMonthWindow} from "@/lib/ai/board-reporter/reporting-window";
 import {M4B_ACCEPTANCE_OWNERSHIP_KEY} from "@/lib/acceptance/m4b-ownership";
 import {hongKongDateKey} from "@/lib/automation/hong-kong-time";
+import {assertIsolatedSeedEnvironment} from "@/scripts/lib/acceptance-guard";
 
 export const M4B_ACCEPTANCE_SEED_ENV = "M4B_ACCEPTANCE_SEED";
 
@@ -513,27 +514,15 @@ export async function seedM4B(
 export function assertM4BSeedEnvironment(
   environment: Readonly<Record<string, string | undefined>>,
 ): string {
-  if (environment[M4B_ACCEPTANCE_SEED_ENV]?.trim().toLowerCase() !== "true") {
-    throw new Error("M4B_ACCEPTANCE_SEED_NOT_AUTHORIZED");
-  }
-  if (
-    environment.VERCEL_ENV?.trim().toLowerCase() === "production"
-    || environment.NODE_ENV?.trim().toLowerCase() === "production"
-  ) {
-    throw new Error("M4B_ACCEPTANCE_PRODUCTION_FORBIDDEN");
-  }
-  const databaseUrl = environment.DATABASE_URL?.trim();
-  if (!databaseUrl) {
-    throw new Error("M4B_ACCEPTANCE_DATABASE_URL_REQUIRED");
-  }
-  const testDatabaseUrl = environment.DATABASE_URL_TEST?.trim();
-  if (!testDatabaseUrl) {
-    throw new Error("M4B_ACCEPTANCE_DATABASE_URL_TEST_REQUIRED");
-  }
-  if (databaseUrl !== testDatabaseUrl) {
-    throw new Error("M4B_ACCEPTANCE_DATABASE_URL_MISMATCH");
-  }
-  return databaseUrl;
+  // Was a hand-rolled copy of the same five checks scripts/lib/acceptance-guard.ts
+  // now centralizes (M5 and M6 were the original two copies); delegating keeps
+  // the exact error codes below (existing tests match on them) while routing
+  // through the one guard the discovery test in seed-guard-boundary.test.ts
+  // requires every fixture seed to call.
+  return assertIsolatedSeedEnvironment(environment, {
+    prefix: "M4B_ACCEPTANCE",
+    flag: M4B_ACCEPTANCE_SEED_ENV,
+  });
 }
 
 type SeedPoolWithEnd = M4BSeedPool & Readonly<{

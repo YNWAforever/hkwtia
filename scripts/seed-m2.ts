@@ -1,5 +1,7 @@
 import {Pool} from "pg";
 
+import {assertIsolatedSeedEnvironment} from "./lib/acceptance-guard.ts";
+
 export const M2_REFERENCE_INSTANT = new Date("2026-07-21T00:00:00.000Z");
 export const M2_AT_RISK_PROFILE_IDS = ["m2-risk-01", "m2-risk-02", "m2-risk-03"] as const;
 
@@ -333,6 +335,12 @@ export async function seedM2(pool: M2SeedPool): Promise<void> {
 }
 
 export async function runM2Seed(environment: NodeJS.ProcessEnv = process.env): Promise<void> {
+  // `npm run db:seed:m2` is callable directly, bypassing scripts/seed-demo.ts,
+  // so the guard has to live here too rather than only in that wrapper.
+  assertIsolatedSeedEnvironment(environment, {
+    prefix: "DEMO_ACCEPTANCE",
+    flag: "DEMO_ACCEPTANCE_SEED",
+  });
   const databaseUrl = environment.DATABASE_URL?.trim();
   if (!databaseUrl) throw new Error("DATABASE_URL is required to seed M2 fixtures.");
   const pool = new Pool({connectionString: databaseUrl});
@@ -344,8 +352,10 @@ export async function runM2Seed(environment: NodeJS.ProcessEnv = process.env): P
 }
 
 if (process.argv[1]?.endsWith("seed-m2.ts")) {
-  runM2Seed().catch(() => {
-    console.error("M2 database seed failed.");
+  runM2Seed().catch((error: unknown) => {
+    // A guard rejection and a real database error are different problems, and
+    // a fixed string makes them indistinguishable to whoever is debugging.
+    console.error(error instanceof Error ? error.message : "M2 database seed failed.");
     process.exitCode = 1;
   });
 }

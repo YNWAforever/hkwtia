@@ -89,11 +89,17 @@ async function waitForPostgres(): Promise<void> {
   throw new Error("isolated PostgreSQL 16 did not become ready");
 }
 
-async function runDatabaseCommand(command: "db:migrate" | "db:seed"): Promise<string> {
+async function runDatabaseCommand(command: "db:migrate" | "db:seed" | "db:seed:demo"): Promise<string> {
   const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+  // db:seed:demo is guarded (Task 4): this suite's whole `databaseUrl` is the
+  // isolated database the guard exists to require, so state that explicitly
+  // rather than hoping the ambient shell already has these four set.
+  const demoSeedGuardEnv = command === "db:seed:demo"
+    ? {DEMO_ACCEPTANCE_SEED: "true", DATABASE_URL_TEST: databaseUrl, NODE_ENV: "test" as const, VERCEL_ENV: ""}
+    : {};
   const {stdout, stderr} = await execFile(npm, ["run", command], {
     cwd: process.cwd(),
-    env: {...process.env, DATABASE_URL: databaseUrl},
+    env: {...process.env, DATABASE_URL: databaseUrl, ...demoSeedGuardEnv},
     maxBuffer: 4 * 1024 * 1024,
     shell: process.platform === "win32",
   });
@@ -121,15 +127,25 @@ describe.skipIf(!enabled)("M2 seed acceptance on isolated PostgreSQL", () => {
       databaseUrl = `postgresql://postgres:test@127.0.0.1:${port}/postgres?sslmode=disable`;
     }
 
-    const outputs = [await runDatabaseCommand("db:migrate"), await runDatabaseCommand("db:migrate"), await runDatabaseCommand("db:seed")];
+    // db:seed now only writes the M1 plan rows (Task 4); this suite's fixture
+    // counts and business-logic assertions need the M2 demo layer too, which
+    // only runs through the guarded db:seed:demo entry point.
+    const outputs = [
+      await runDatabaseCommand("db:migrate"),
+      await runDatabaseCommand("db:migrate"),
+      await runDatabaseCommand("db:seed"),
+      await runDatabaseCommand("db:seed:demo"),
+    ];
     for (const output of outputs) expect(output).not.toContain(databaseUrl);
 
     pool = new Pool({connectionString: databaseUrl});
     database.current = drizzle(pool);
     firstSeedCounts = await tableCounts();
 
-    const secondSeedOutput = await runDatabaseCommand("db:seed");
-    expect(secondSeedOutput).not.toContain(databaseUrl);
+    // Re-run both layers so the "idempotently" half of this suite's title
+    // covers the M2 fixture layer too, not just the M1 plan rows.
+    const secondSeedOutputs = [await runDatabaseCommand("db:seed"), await runDatabaseCommand("db:seed:demo")];
+    for (const output of secondSeedOutputs) expect(output).not.toContain(databaseUrl);
   }, 600_000);
 
   afterAll(async () => {
@@ -181,7 +197,9 @@ describe.skipIf(!enabled)("M2 seed acceptance on isolated PostgreSQL", () => {
       );
     }
 
-    const reseedOutput = await runDatabaseCommand("db:seed");
+    // Only profiles (an M2 table) were dirtied above; db:seed no longer
+    // touches them, so the guarded M2 layer is the one that has to restore them.
+    const reseedOutput = await runDatabaseCommand("db:seed:demo");
     expect(reseedOutput).not.toContain(databaseUrl);
     const reseeded = await pool.query<{
       id: string;
