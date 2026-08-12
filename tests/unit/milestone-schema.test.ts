@@ -4,6 +4,7 @@ import {milestoneSchema} from "@/content/schemas";
 
 const valid = {
   slug: "2001-establishment-of-wtia",
+  kind: "milestone",
   year: 2001,
   month: "01",
   titleEn: "Establishment of WTIA",
@@ -42,9 +43,39 @@ describe("milestone schema", () => {
     }
   });
 
+  // WordPress falls back to a percent-encoded slug when a post's title is
+  // Chinese and no manual slug was set -- true for 12 of the 61 real posts,
+  // confirmed against content/legacy-urls.json which stores the identical
+  // encoded form as the redirect source Task 10 matches against verbatim.
+  // Rejecting it here would make those 12 entries impossible to ever satisfy
+  // the schema, since legacyPath must stay the true original path.
+  it("accepts a legacy path with a percent-encoded slug", () => {
+    const legacyPath = "/2016/08/wtia-meet-our-member-%e9%a6%ac%e7%94%b0%e9%9b%bb%e8%85%a6-cypher-martin/";
+    expect(milestoneSchema.parse({...valid, legacyPath}).legacyPath).toBe(legacyPath);
+  });
+
   it("rejects a month outside 01-12", () => {
     for (const month of ["00", "13", "1", "aa"]) {
       expect(() => milestoneSchema.parse({...valid, month}), month).toThrow();
     }
+  });
+
+  // The archive holds member interviews and republished vendor press releases
+  // alongside WTIA's own record; an unrecognised or absent kind must not
+  // silently fall into one of the three surfaces Task 10 routes them to.
+  it("accepts each valid kind", () => {
+    for (const kind of ["milestone", "member-story", "press-release"]) {
+      expect(milestoneSchema.parse({...valid, kind}).kind).toBe(kind);
+    }
+  });
+
+  it("rejects an unknown kind", () => {
+    expect(() => milestoneSchema.parse({...valid, kind: "news"})).toThrow();
+  });
+
+  it("rejects a missing kind", () => {
+    const withoutKind: Record<string, unknown> = {...valid};
+    delete withoutKind.kind;
+    expect(() => milestoneSchema.parse(withoutKind)).toThrow();
   });
 });
