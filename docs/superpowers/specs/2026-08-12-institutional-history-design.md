@@ -36,8 +36,13 @@ Measured from the 577-page capture, not assumed:
 - **The median body is 58 words**; the longest is 991. Total 7,258 words.
 - **47 of 61 are English-only**, 3 are Chinese-only, 11 are mixed. WTIA's own
   Chinese site has never carried a Chinese version of most of its history.
-- **205 image references resolving to 87 unique files**, ~93 KB each, roughly
-  8 MB in total. Every one is hosted on `hkwtia.org` and will die with it.
+- **81 image references resolving to 73 unique files**, ~93 KB each, roughly
+  7 MB in total. Every one is hosted on `hkwtia.org` and will die with it.
+
+  An earlier draft of this spec said 205/87. That count was wrong: the theme
+  renders a "Related Posts" carousel *inside* `<article>` on 45 of the 61 pages,
+  and the measurement counted those thumbnails as post content. Corrected after
+  the extractor was run against the archive.
 - Titles come in two shapes: year-prefixed milestones (`2001 - Establishment of
   WTIA`) and ordinary news posts that happen to be old (`New Term of Executive
   Committee (2022 - 2024)`).
@@ -56,7 +61,8 @@ anniversary record, the chairman's remarks — get no address of their own and t
 inbound links to them stay pointed at a section.
 
 **Threshold split.** Chosen. Entries above ~150 words get a page; the rest render
-in full on the timeline. Every word survives either way; the only thing that
+in full on the timeline. Measured against the real archive this yields **7**
+featured entries, not the ~15 first estimated. Every word survives either way; the only thing that
 varies is whether an entry has its own URL, and that tracks whether there is
 enough content to justify one.
 
