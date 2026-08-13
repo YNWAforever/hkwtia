@@ -48,7 +48,7 @@ describe("page copy scope", () => {
 
     expect(sizes).toEqual({
       Home: 32,
-      About: 14,
+      About: 19,
       Chairman: 8,
       Committees: 12,
       Contact: 6,
@@ -57,7 +57,7 @@ describe("page copy scope", () => {
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(194);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(199);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

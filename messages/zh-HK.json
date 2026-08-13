@@ -302,7 +302,12 @@
     "represent": {
       "title": "代表業界",
       "description": "把業界經驗帶進具建設性的公共及產業對話。"
-    }
+    },
+    "foundedTitle": "成立於2001年",
+    "foundedBody": "香港無線科技商會（WTIA）成立於2001年，是一個非牟利貿易協會，服務香港無線、流動及新興科技社群。",
+    "missionTitle": "我們的使命",
+    "missionBody": "推動無線、流動及新興科技發展，加速其實際應用，協助香港發展成為頂尖創科樞紐。",
+    "historyLink": "閱讀我們的歷史"
   },
   "Chairman": {
     "metaTitle": "主席的話｜WTIA",
