@@ -4,9 +4,10 @@ import {getTranslations, setRequestLocale} from 'next-intl/server';
 import {FeatureGrid} from '@/components/marketing/feature-grid';
 import {PageHero} from '@/components/marketing/page-hero';
 import {Section} from '@/components/marketing/section';
+import {Link} from '@/i18n/navigation';
 import type {AppLocale} from '@/i18n/routing';
 import {buildPageMetadata} from '@/lib/metadata';
 
 type Props = {params: Promise<{locale: string}>};
 export async function generateMetadata({params}: Props): Promise<Metadata> {const {locale}=await params; const t=await getTranslations({locale,namespace:'About'}); return buildPageMetadata({locale:locale as AppLocale,pathname:'/about',title:t('metaTitle'),description:t('metaDescription'),image:'/images/about-hero.jpg'});}
-export default async function AboutPage({params}: Props) {const {locale}=await params; setRequestLocale(locale); const t=await getTranslations('About'); return <><PageHero eyebrow={t('eyebrow')} title={t('title')} description={t('summary')} image="/images/about-hero.jpg" imageAlt={t('imageAlt')} /><Section heading={t('historyTitle')} intro={t('historyIntro')}><FeatureGrid features={['connect','advance','represent'].map((key)=>({title:t(`${key}.title`),description:t(`${key}.description`)}))} /></Section></>;}
+export default async function AboutPage({params}: Props) {const {locale}=await params; setRequestLocale(locale); const t=await getTranslations('About'); return <><PageHero eyebrow={t('eyebrow')} title={t('title')} description={t('summary')} image="/images/about-hero.jpg" imageAlt={t('imageAlt')} /><Section heading={t('historyTitle')} intro={t('historyIntro')}><FeatureGrid features={['connect','advance','represent'].map((key)=>({title:t(`${key}.title`),description:t(`${key}.description`)}))} /></Section><Section heading={t('foundedTitle')} intro={t('foundedBody')}><h3 className="text-xl font-semibold">{t('missionTitle')}</h3><p className="mt-3 max-w-3xl leading-relaxed text-muted-foreground">{t('missionBody')}</p><Link className="mt-6 inline-block font-semibold text-primary" href="/about/history">{t('historyLink')}</Link></Section></>;}

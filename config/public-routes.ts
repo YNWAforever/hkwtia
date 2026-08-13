@@ -4,6 +4,7 @@ export const publicRoutes = [
   '/about',
   '/about/chairman',
   '/about/committees',
+  '/about/history',
   '/membership',
   '/showcase',
   '/launchpad',

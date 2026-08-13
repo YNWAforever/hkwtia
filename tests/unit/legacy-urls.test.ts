@@ -1,9 +1,22 @@
 import {describe, expect, it} from "vitest";
 
 import legacyUrls from "@/content/legacy-urls.json";
+import {milestones} from "@/content/milestones";
 import {publicRoutes} from "@/config/public-routes";
+import {featuredOnly, milestonesOnly} from "@/lib/history/milestones";
 
 const allowed = new Set<string>(publicRoutes);
+
+// Featured milestone detail pages (/about/history/<slug>) are typed content,
+// not a static route, so they can never appear in `publicRoutes` -- but their
+// slugs are still known at build time, from the same milestone record Task 10
+// redirects against. The guarantee this test exists to provide -- no redirect
+// pointing at a page that does not exist -- is preserved, not weakened: the
+// milestone record becomes the second source it checks a destination against,
+// alongside the static route allowlist.
+const milestoneDetailPaths = new Set(
+  featuredOnly(milestonesOnly(milestones)).map(({slug}) => `/about/history/${slug}`),
+);
 
 // Task 1's capture recorded 577 urls, 0 missed. `.legacy-capture/inventory.json`
 // is git-ignored bulk input (see .gitignore) and will not exist in every clone
@@ -23,7 +36,10 @@ describe("legacy url map", () => {
   // A redirect to a route that does not exist trades a 404 for a slower 404.
   it("never points at a route outside the public allowlist", () => {
     for (const entry of legacyUrls.entries) {
-      expect(allowed.has(entry.to), `${entry.from} -> ${entry.to}`).toBe(true);
+      expect(
+        allowed.has(entry.to) || milestoneDetailPaths.has(entry.to),
+        `${entry.from} -> ${entry.to}`,
+      ).toBe(true);
     }
   });
 

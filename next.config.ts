@@ -69,9 +69,13 @@ type LegacyRedirect = {source: string; destination: string; permanent: boolean};
 const legacyPatternRedirects: LegacyRedirect[] = [
   // WordPress's tribe-events plugin: 453 individual event pages, /event/<slug>/.
   {source: "/event/:path*", destination: "/events", permanent: true},
-  // Milestone posts, /YYYY/MM/<slug>/, 2001-2025 (61 urls). No per-item
-  // destination exists yet, so all of them fall back to the about page.
-  {source: "/:year(\\d{4})/:month(\\d{2})/:slug*", destination: "/about", permanent: true},
+  // Milestone posts, /YYYY/MM/<slug>/, 2001-2025 (61 urls), used to live here
+  // as a single wildcard rule to /about: no per-item destination existed yet.
+  // Task 10 gave each one a real destination keyed by the source post's kind
+  // (its own page, the history timeline, /showcase, or /news) -- destinations
+  // that differ per url can no longer collapse into one pattern rule, so these
+  // are now ordinary entries in legacyLiteralRedirects below, like everything
+  // else content/legacy-urls.json classifies individually.
   {source: "/faq-items/:path*", destination: "/about", permanent: true},
   {source: "/faq_category/:path*", destination: "/about", permanent: true},
   {source: "/author/:path*", destination: "/news", permanent: true},
@@ -81,10 +85,13 @@ const legacyPatternRedirects: LegacyRedirect[] = [
 
 // Must stay in sync with the prefixes matched by legacyPatternRedirects above —
 // this is what keeps legacyLiteralRedirects from double-covering the same url.
+// The milestone posts' /YYYY/MM/ shape is deliberately NOT listed here (see the
+// comment in legacyPatternRedirects): now that their destinations differ per
+// url, they need to reach legacyLiteralRedirects instead of being swallowed by
+// a wildcard, so this function must not treat that shape as pattern-covered.
 function coveredByPattern(from: string): boolean {
   return (
     from.startsWith("/event/") ||
-    /^\/\d{4}\/\d{2}\//.test(from) ||
     from.startsWith("/faq-items/") ||
     from.startsWith("/faq_category/") ||
     from.startsWith("/author/") ||

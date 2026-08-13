@@ -30,3 +30,5 @@ playwright-report/
 .vercel
 
 .legacy-capture/
+
+content/milestones.draft.json

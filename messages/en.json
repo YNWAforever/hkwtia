@@ -301,7 +301,12 @@
     "represent": {
       "title": "Represent the industry",
       "description": "Bring sector experience into constructive public and industry dialogue."
-    }
+    },
+    "foundedTitle": "Established 2001",
+    "foundedBody": "WTIA is a not-for-profit trade association founded in 2001 for Hong Kong's wireless, mobile and emerging technology community.",
+    "missionTitle": "Our mission",
+    "missionBody": "To advance wireless, mobile and emerging technologies, accelerate their real-world adoption, and help shape Hong Kong into a top-class innovation and technology hub.",
+    "historyLink": "Read our history"
   },
   "Chairman": {
     "metaTitle": "Chairman's Message | WTIA",
@@ -332,6 +337,14 @@
       "title": "Membership Committee",
       "description": "Strengthens member value, participation and community connections."
     }
+  },
+  "History": {
+    "metaTitle": "History | WTIA",
+    "metaDescription": "Twenty-five years of the Hong Kong Wireless Technology Industry Association, 2001 to 2025.",
+    "eyebrow": "Since 2001",
+    "title": "Our history",
+    "intro": "Milestones from twenty-five years of building Hong Kong's wireless and technology industry.",
+    "readMore": "Read more"
   },
   "Membership": {
     "metaTitle": "Membership | WTIA",
