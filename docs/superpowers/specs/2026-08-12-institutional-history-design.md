@@ -140,15 +140,15 @@ is mechanical and checkable, rather than a second thing to keep in sync.
 - `/about/history` — all 61 grouped by year, newest first, with non-featured
   bodies rendered in full inline. Years with no entries are omitted; eight empty
   rows would advertise the gap rather than the record.
-- `/about/history/[slug]` — the ~15 featured entries.
+- `/about/history/[slug]` — the 3 featured entries.
 
 Both are Server Components reading typed content, so neither needs a database and
 neither can fail the way a database-backed public page can.
 
 ### 4. Images
 
-Download the 87 unique files to `public/images/history/`, rewrite the references
-in the extracted content, and commit them. At ~8 MB that is comfortable in the
+Download the 73 unique files to `public/images/history/`, rewrite the references
+in the extracted content, and commit them. At ~19 MB that is comfortable in the
 repository, and own-origin satisfies the existing `img-src 'self' data:` CSP with
 no configuration change — the media registry and `next.config.ts` both
 deliberately refuse remote hosts, so hotlinking would not render even while the
