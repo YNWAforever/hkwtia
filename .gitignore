@@ -29,7 +29,4 @@ test-results/
 playwright-report/
 .vercel
 
-# Isolated worktrees for subagent-driven execution
-.worktrees/
-
 .legacy-capture/

@@ -5,7 +5,15 @@ import nextTypeScript from "eslint-config-next/typescript";
 export default defineConfig([
   ...nextVitals,
   ...nextTypeScript,
-  globalIgnores([".next/**", "coverage/**", "playwright-report/**", "test-results/**"]),
+  globalIgnores([
+    ".next/**",
+    "coverage/**",
+    "playwright-report/**",
+    "test-results/**",
+    // Git ignores this, but flat config keeps its own list — without the entry
+    // `npm run lint` walks into a worktree and lints a second copy of the repo.
+    ".worktrees/**",
+  ]),
   {
     files: ["lib/**/*.{ts,tsx}"],
     ignores: ["lib/db/repos/**"],
