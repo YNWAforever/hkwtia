@@ -71,6 +71,16 @@ The old site's post archive is effectively WTIA's 25-year timeline. Key entries 
 | 2025 | Asia Smart Innovation Awards 2025 (largest edition, 17 regions); HKICT Startup Award 2025; Tech Connect AI Leaders Seminar Series |
 
 ### 3. Programme Track Records (→ /zh/programs/*)
+
+> **⚠ Thirteen claims in this section are contradicted by WTIA's own archive.**
+> See `docs/wtia-programme-claims-review.md`. Do not build programme pages from
+> the four bullets below without reading it first. In particular: ASA was funded
+> by **Create Hong Kong / CreateSmart**, not CCIDA, for editions 2017–2022/23;
+> CPAI is issued by **WTIA alone**, not jointly with CUSCS; HKICT was organised
+> for **OGCIO** until 2025, not the Digital Policy Office; and TCT's "10
+> workshops + 2 seminars" describes only the 2023 edition. The "150+ I&T
+> companies" and "15+ experts from Huawei, Microsoft, HKPC" figures have no
+> source anywhere in the archive.
 Each programme stub should carry its history and outcomes:
 
 - **ASA** — 10th edition in 2024, CCIDA-funded, 16 regional co-organisers ([hkwtia.org](https://hkwtia.org/)). Rebranded **Asia Smart Innovation Awards 2025**: 17 regions (largest ever), grand winner RIFFAI (Thailand), HK's 417 Technology Limited won Silver in Life & Culture; ceremony 16 Oct at Cordis Hong Kong ([news](https://hkwtia.org/news/)).
