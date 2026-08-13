@@ -62,6 +62,7 @@ function journeyContext(): JourneyRunnerContext {
     locale: "en",
     variables: {ctaUrl: "https://example.test/member"},
     unsubscribeUrl: null,
+    unsubscribeOneClickUrl: null,
     membershipStatus: "active",
   };
 }
@@ -278,6 +279,7 @@ function campaignBaseDependencies(
       marketingConsent: true,
       emailSuppressed: false,
       unsubscribeUrl: "https://example.test/unsubscribe?token=current",
+      unsubscribeOneClickUrl: "https://example.test/api/unsubscribe?token=current",
     })),
     renderCampaign: vi.fn(async () => ({
       subject: "Campaign",
@@ -460,6 +462,7 @@ describe("Task 7 review: campaign task durability and template identity", () => 
       locale: claim.locale,
       variables: claim.variables,
       unsubscribeUrl: "https://example.test/unsubscribe?token=current",
+      unsubscribeOneClickUrl: "https://example.test/api/unsubscribe?token=current",
     });
     expect(test.reserveEmail).toHaveBeenCalledWith(
       expect.anything(),

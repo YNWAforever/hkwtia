@@ -203,6 +203,22 @@ describe("unsubscribe token", () => {
     expect(invalid).toContain('data-unsubscribe-state="invalid"');
   });
 
+  it("honours a valid token on the other locale's page", async () => {
+    vi.stubEnv("CRON_SECRET", secret);
+
+    // The locale cookie lasts a year and localePrefix is "as-needed", so a
+    // recipient who has ever browsed in Chinese is redirected from
+    // /unsubscribe to /zh/unsubscribe. The token is still theirs and still
+    // signed; rejecting it told them a working link was invalid.
+    const crossLocale = renderToStaticMarkup(await UnsubscribePage({
+      params: Promise.resolve({locale: "zh-HK"}),
+      searchParams: Promise.resolve({token: token(), status: ""}),
+    }));
+
+    expect(crossLocale).toContain('data-unsubscribe-state="confirm"');
+    expect(crossLocale).toContain('method="post"');
+  });
+
   it("authorizes the dedicated unsubscribe source only at the atomic suppression repository", async () => {
     const execute = vi.fn()
       .mockResolvedValueOnce([{id: "profile-1"}])

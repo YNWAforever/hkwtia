@@ -330,8 +330,11 @@ export const jobsRepository = {
           const engagement = resultRow(await tx.execute(sql`INSERT INTO ${engagementEvents}
             ("profile_id", "company_id", "type", "points", "metadata", "occurred_at")
             VALUES (${profileId}, ${membership.company_id ?? null}, ${engagementType}, ${engagementPoints},
-              jsonb_build_object('membershipId', ${command.membershipId}, 'periodStart', ${periodStart},
-                'periodEnd', ${periodEnd}, 'renewalOrdinal', ${renewalOrdinal}),
+              -- Every argument is cast. jsonb_build_object is variadic "any", so
+              -- it lends a bind parameter no type to infer from and Postgres
+              -- rejects the whole statement with 42P18 before executing it.
+              jsonb_build_object('membershipId', ${command.membershipId}::text, 'periodStart', ${periodStart}::text,
+                'periodEnd', ${periodEnd}::text, 'renewalOrdinal', ${renewalOrdinal}::int),
               to_timestamp(${command.eventCreated}))
             RETURNING ${engagementEvents.id} AS engagement_id`));
           if (!engagement) throw new Error("WEBHOOK_MUTATION_FAILED");
@@ -340,7 +343,7 @@ export const jobsRepository = {
         const audit = resultRow(await tx.execute(sql`INSERT INTO ${auditEvents}
           ("actor_type", "action", "target_type", "target_id", "request_id", "metadata")
           VALUES ('system', ${action}, 'membership', ${command.membershipId}, ${command.eventId},
-            jsonb_build_object('eventType', ${command.eventType}, 'stripeCreated', ${command.eventCreated}, 'eventId', ${command.eventId}, 'status', ${command.nextStatus}))
+            jsonb_build_object('eventType', ${command.eventType}::text, 'stripeCreated', ${command.eventCreated}::bigint, 'eventId', ${command.eventId}::text, 'status', ${command.nextStatus}::text))
           RETURNING ${auditEvents.id} AS audit_id`));
         if (!audit) throw new Error("WEBHOOK_MUTATION_FAILED");
         const completed = resultRow(await tx.execute(sql`UPDATE ${jobsTable}

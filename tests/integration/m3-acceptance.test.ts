@@ -230,6 +230,7 @@ function journeyDependencies(
           membershipStatus: context.membershipStatus ?? "",
         },
         unsubscribeUrl: "https://m3.example.test/unsubscribe/test-only",
+        unsubscribeOneClickUrl: "https://m3.example.test/api/unsubscribe/test-only",
         membershipStatus: context.membershipStatus,
       };
     },
@@ -270,6 +271,7 @@ function campaignDependencies(
         marketingConsent: context.marketingConsent,
         emailSuppressed: context.emailSuppressed,
         unsubscribeUrl: "https://m3.example.test/unsubscribe/test-only",
+        unsubscribeOneClickUrl: "https://m3.example.test/api/unsubscribe/test-only",
       };
     },
     async renderCampaign(input) {

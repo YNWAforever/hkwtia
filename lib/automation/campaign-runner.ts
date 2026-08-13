@@ -55,6 +55,7 @@ export type CampaignRecipientContext = Readonly<{
   marketingConsent: boolean;
   emailSuppressed: boolean;
   unsubscribeUrl: string;
+  unsubscribeOneClickUrl: string;
 }>;
 
 export type CampaignRenderInput = Readonly<{
@@ -63,6 +64,7 @@ export type CampaignRenderInput = Readonly<{
   locale: AppLocale;
   variables: Readonly<Record<string, string>>;
   unsubscribeUrl: string;
+  unsubscribeOneClickUrl: string;
 }>;
 
 type DeliveryRecordLike = Readonly<{
@@ -270,6 +272,7 @@ export function createCampaignEmailRenderer(
     },
     classification: "marketing",
     unsubscribeUrl: input.unsubscribeUrl,
+    unsubscribeOneClickUrl: input.unsubscribeOneClickUrl,
   });
 }
 
@@ -303,6 +306,7 @@ async function sendRecipient(
       locale: claim.locale,
       variables: claim.variables,
       unsubscribeUrl: context.unsubscribeUrl,
+      unsubscribeOneClickUrl: context.unsubscribeOneClickUrl,
     });
   } catch (error) {
     throw new CampaignRunnerFailure(failureCode(error));

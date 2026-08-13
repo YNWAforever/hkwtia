@@ -43,7 +43,13 @@ describe("public environment boundaries", () => {
   });
 
   it("builds the sitemap without the Neon Auth pair configured", async () => {
-    vi.stubEnv("DATABASE_URL", "postgres://db.example.test/hkwtia");
+    // A closed loopback port rather than a `.test` hostname: this is the only
+    // case here that actually opens a connection, and resolving a name that
+    // does not exist costs whatever the developer's resolver charges for
+    // NXDOMAIN — 30s on some networks, which blew the timeout and made the
+    // suite fail for reasons that had nothing to do with the code. Refused
+    // beats unresolvable, and it exercises the same degrade path.
+    vi.stubEnv("DATABASE_URL", "postgres://user:pw@127.0.0.1:1/hkwtia");
     const {default: sitemap} = await import("@/app/sitemap");
     // Every database read is individually caught, so an unreachable database
     // degrades to the static public routes rather than failing the document.

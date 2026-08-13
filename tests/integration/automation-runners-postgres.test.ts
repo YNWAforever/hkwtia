@@ -194,6 +194,7 @@ describe.skipIf(!testDatabaseUrl)(
                 paymentUrl: "https://example.test/pay",
               },
               unsubscribeUrl: "https://example.test/unsubscribe",
+              unsubscribeOneClickUrl: "https://example.test/api/unsubscribe",
               membershipStatus: null,
             };
           },
@@ -356,6 +357,7 @@ describe.skipIf(!testDatabaseUrl)(
                 paymentUrl: "https://example.test/pay",
               },
               unsubscribeUrl: "https://example.test/unsubscribe",
+              unsubscribeOneClickUrl: "https://example.test/api/unsubscribe",
               membershipStatus: null,
             };
           },
@@ -653,6 +655,7 @@ describe.skipIf(!testDatabaseUrl)(
               marketingConsent: row.consent_marketing,
               emailSuppressed: false,
               unsubscribeUrl: "https://example.test/unsubscribe",
+              unsubscribeOneClickUrl: "https://example.test/api/unsubscribe",
             };
           },
           async renderCampaign(input) {
@@ -718,6 +721,7 @@ describe.skipIf(!testDatabaseUrl)(
           locale: "en",
           variables,
           unsubscribeUrl: "https://example.test/unsubscribe",
+          unsubscribeOneClickUrl: "https://example.test/api/unsubscribe",
         }]);
         const log = await activePool.query<{
           status: string;

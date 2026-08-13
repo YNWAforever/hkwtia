@@ -226,7 +226,11 @@ async function transition(
       summary = CASE
         WHEN summary LIKE 'm4b-acceptance-owner:%'
           THEN summary || CASE
-            WHEN ${values.summary} IS NULL THEN ''
+            -- Cast required: $n IS NULL is the one place this parameter
+            -- appears, so Postgres has nothing to infer its type from and
+            -- rejects the statement with 42P18. The two below sit next to a
+            -- text operator and a text column, so they infer on their own.
+            WHEN ${values.summary}::text IS NULL THEN ''
             ELSE ':' || ${values.summary}
           END
         ELSE ${values.summary}
