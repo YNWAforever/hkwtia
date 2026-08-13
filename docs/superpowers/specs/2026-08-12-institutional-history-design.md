@@ -36,11 +36,42 @@ Measured from the 577-page capture, not assumed:
 - **The median body is 58 words**; the longest is 991. Total 7,258 words.
 - **47 of 61 are English-only**, 3 are Chinese-only, 11 are mixed. WTIA's own
   Chinese site has never carried a Chinese version of most of its history.
-- **205 image references resolving to 87 unique files**, ~93 KB each, roughly
-  8 MB in total. Every one is hosted on `hkwtia.org` and will die with it.
+- **81 image references resolving to 73 unique files**, ~93 KB each, roughly
+  7 MB in total. Every one is hosted on `hkwtia.org` and will die with it.
+
+  An earlier draft of this spec said 205/87. That count was wrong: the theme
+  renders a "Related Posts" carousel *inside* `<article>` on 45 of the 61 pages,
+  and the measurement counted those thumbnails as post content. Corrected after
+  the extractor was run against the archive.
 - Titles come in two shapes: year-prefixed milestones (`2001 - Establishment of
   WTIA`) and ordinary news posts that happen to be old (`New Term of Executive
   Committee (2022 - 2024)`).
+
+## Classification: not every post is a milestone
+
+Extraction showed the archive holds three different kinds of thing, and the
+word-count threshold picks the wrong ones: five of the seven entries long enough
+to earn their own page are member interviews, because interviews are long and
+milestones are short. Left as-is, `/about/history` would open with Yahoo Hong
+Kong rather than the founding of the association.
+
+Each entry therefore carries a `kind`:
+
+- **`milestone`** — WTIA's own institutional record. Renders on `/about/history`.
+- **`member-story`** — the "Meet Our Member" interviews (Playnote, FinFabrik,
+  Pixel Networks, Vpon, Yahoo HK, Cypher Martin, Rohde & Schwarz). The audit
+  already assigns these to `/showcase` in sub-project 4, so their redirects point
+  there and sub-project 4 builds the real pages.
+- **`press-release`** — third-party announcements WTIA republished, such as the
+  two SmarTone 5G releases. Redirect to `/news`.
+
+Every entry is still migrated and every word still preserved; `kind` decides
+where each lands. Doing this now rather than in sub-project 4 matters because
+these URLs become permanent 301s, and moving them afterwards means breaking
+links that were just fixed.
+
+`featured` applies only to `milestone` entries — a member story's length should
+not buy it a page on the history timeline.
 
 ## Options considered
 
@@ -56,7 +87,8 @@ anniversary record, the chairman's remarks — get no address of their own and t
 inbound links to them stay pointed at a section.
 
 **Threshold split.** Chosen. Entries above ~150 words get a page; the rest render
-in full on the timeline. Every word survives either way; the only thing that
+in full on the timeline. Measured against the real archive this yields **7**
+featured entries, not the ~15 first estimated. Every word survives either way; the only thing that
 varies is whether an entry has its own URL, and that tracks whether there is
 enough content to justify one.
 
