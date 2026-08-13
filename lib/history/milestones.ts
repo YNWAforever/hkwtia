@@ -24,6 +24,20 @@ export function byYearDescending(
     .map(([year, entries]) => ({year, milestones: entries}));
 }
 
+/**
+ * The captured archive holds three post kinds under one shape (see
+ * milestoneSchema's `kind` comment): WTIA's own record, "Meet Our Member"
+ * interviews, and republished vendor press releases. The interviews belong
+ * on /showcase and the press releases on /news (Task 10 redirects each kind
+ * to its real home) -- neither is WTIA's own institutional history, so this
+ * page's timeline must not render them alongside actual milestones.
+ */
+export function milestonesOnly(
+  milestones: readonly MilestoneRecord[],
+): readonly MilestoneRecord[] {
+  return milestones.filter(({kind}) => kind === "milestone");
+}
+
 export function featuredOnly(
   milestones: readonly MilestoneRecord[],
 ): readonly MilestoneRecord[] {

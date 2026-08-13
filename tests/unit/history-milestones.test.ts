@@ -1,11 +1,11 @@
 import {describe, expect, it} from "vitest";
 
 import type {MilestoneRecord} from "@/content/schemas";
-import {byYearDescending, featuredOnly, findBySlug} from "@/lib/history/milestones";
+import {byYearDescending, featuredOnly, findBySlug, milestonesOnly} from "@/lib/history/milestones";
 
 function milestone(overrides: Partial<MilestoneRecord>): MilestoneRecord {
   return {
-    slug: "x", year: 2010, month: "01",
+    slug: "x", year: 2010, month: "01", kind: "milestone",
     titleEn: "t", titleZh: "t", bodyEn: "b", bodyZh: "b",
     images: [], legacyPath: "/2010/01/x/", featured: false,
     ...overrides,
@@ -34,5 +34,15 @@ describe("milestone derivations", () => {
     const list = [milestone({slug: "a"})];
     expect(findBySlug(list, "a")?.slug).toBe("a");
     expect(findBySlug(list, "nope")).toBeNull();
+  });
+
+  it("keeps only kind: milestone, excluding member stories and press releases", () => {
+    const list = [
+      milestone({slug: "a", kind: "milestone"}),
+      milestone({slug: "b", kind: "member-story"}),
+      milestone({slug: "c", kind: "press-release"}),
+      milestone({slug: "d", kind: "milestone"}),
+    ];
+    expect(milestonesOnly(list).map(({slug}) => slug)).toEqual(["a", "d"]);
   });
 });

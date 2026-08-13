@@ -30,7 +30,10 @@ describe("public revalidate path guard", () => {
   it.each([
     ["the admin surface", "/en/admin/page-copy"],
     ["a member surface", "/portal"],
-    ["an undeclared page", "/about/history"],
+    // /about/history itself is now a declared public route (Task 8); a
+    // per-milestone detail path under it is not, and exercises the same
+    // "declared prefix, undeclared exact path" boundary the old fixture did.
+    ["an undeclared page", "/about/history/2001-establishment-of-wtia"],
     ["a traversal attempt", "/privacy/../admin"],
     ["a protocol-relative host", "//evil.example.com"],
     ["an absolute url", "https://evil.example.com/privacy"],
