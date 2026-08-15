@@ -490,6 +490,24 @@
       "title": "Asia Smart App Awards",
       "description": "Celebrating outstanding smart applications across Asia.",
       "status": "Contact WTIA for the current programme timetable and how to take part."
+    },
+    "record": {
+      "editionsHeading": "Editions",
+      "winnersHeading": "Winners",
+      "categoryHeading": "Category",
+      "fundedBy": "Funded by {agency} under the {initiative}",
+      "fundedByAgency": "Funded by {agency}",
+      "fundedByScheme": "Funded with {scheme} funding",
+      "organisedFor": "Organised for {agency}",
+      "regionsAttended": "{count} regions attended",
+      "regionsCoOrganised": "Co-organised with {count} Asia regions",
+      "winnersOffSite": "The full winner list is published on the edition's own site.",
+      "winnersOffSiteLink": "View the winners",
+      "winnersUnrecorded": "WTIA's archive does not record the winners for this edition.",
+      "credentialIssuer": "Issued by",
+      "credentialCoursePartner": "Course delivered with",
+      "credentialPartnerCertificate": "Graduates also receive",
+      "credentialSyllabus": "Syllabus"
     }
   },
   "LaunchPad": {
@@ -498,12 +516,119 @@
     "eyebrow": "Launch Pad",
     "title": "Go-global cohorts for technology teams.",
     "description": "Focused cohorts, practical market access, and clear next steps for Hong Kong technology teams expanding internationally.",
-    "program": {"title": "A practical route to new markets", "intro": "Launch Pad brings selected teams together for structured market preparation, landing-partner connections, and peer learning.", "outcomeTitle": "From readiness to market entry", "outcomeDescription": "Each cohort follows a clear path through readiness, partner matching, landing, and scale."},
-    "calendar": {"title": "Cohort calendar", "intro": "Explore current and upcoming Launch Pad cohorts.", "empty": "No public cohorts are scheduled yet.", "starts": "Starts", "ends": "Ends", "noEnd": "No fixed end date", "capacity": "Capacity", "fee": "Fee", "statuses": {"planning": "Planning", "open": "Open", "active": "Active", "completed": "Completed", "archived": "Archived"}},
-    "partners": {"title": "Landing partner map", "intro": "Meet the public organisations that help cohorts navigate priority markets.", "empty": "Landing partners will be announced shortly.", "market": "Market", "region": "Region", "statuses": {"prospect": "Prospect", "inDiscussion": "In discussion", "signed": "Signed", "inactive": "Inactive"}},
-    "funding": {"title": "Funding scheme picker", "intro": "Answer five questions for an informational screening against current published scheme rules.", "formLabel": "Funding scheme picker", "instructions": "Choose an answer for every question.", "submit": "See matching schemes", "questions": {"sector": {"label": "What is the project focus?", "options": {"trade": "Branding, upgrading, or market expansion", "advancedTraining": "Advanced technology training", "smartProduction": "Smart production line", "lifeHealth": "Life and health technology", "aiDataScience": "AI and data science", "advancedManufacturing": "Advanced manufacturing and new energy", "researchDevelopment": "Applied research and development"}}, "stage": {"label": "What is the company's Hong Kong status?", "options": {"businessRegistered": "Business-registered and non-subvented", "incorporated": "Incorporated and non-subvented", "subvented": "Incorporated and subvented"}}, "market": {"label": "Where will the project operate?", "options": {"hongKong": "Hong Kong", "coveredEconomy": "A covered BUD economy", "global": "Another market"}}, "employees": {"label": "Which staff readiness statement applies?", "options": {"standard": "No additional training condition applies", "traineeHongKongPermanentResident": "An advanced-technology trainee is a Hong Kong permanent resident"}}, "revenue": {"label": "What applicable investment or expenditure band applies?", "options": {"under100m": "Below HK$100 million enterprise investment", "investment100mProject150m": "At least HK$100 million enterprise investment and HK$150 million project cost", "eligibleRdExpenditure": "Eligible applied R&D or partnership expenditure"}}}, "results": {"heading": "Funding results", "eligible": "Potentially eligible", "ineligible": "Check scheme details", "source": "Official source", "asOf": "As of"}},
-    "clinic": {"title": "Need a funding or market-entry clinic?", "description": "Speak with WTIA about your next practical step."},
-    "application": {"title": "Apply to an open cohort", "cohort": "Cohort", "market": "Target market", "readiness": "Readiness for this cohort", "consent": "I consent to WTIA using this application for cohort review.", "submit": "Submit application", "submitting": "Submitting application", "success": "Your application has been received.", "invalid": "Check the required fields and try again.", "unauthorized": "Please sign in with an authorised member account to apply.", "signIn": "Sign in", "error": "We could not submit your application. Please try again."},
+    "program": {
+      "title": "A practical route to new markets",
+      "intro": "Launch Pad brings selected teams together for structured market preparation, landing-partner connections, and peer learning.",
+      "outcomeTitle": "From readiness to market entry",
+      "outcomeDescription": "Each cohort follows a clear path through readiness, partner matching, landing, and scale."
+    },
+    "calendar": {
+      "title": "Cohort calendar",
+      "intro": "Explore current and upcoming Launch Pad cohorts.",
+      "empty": "No public cohorts are scheduled yet.",
+      "starts": "Starts",
+      "ends": "Ends",
+      "noEnd": "No fixed end date",
+      "capacity": "Capacity",
+      "fee": "Fee",
+      "statuses": {
+        "planning": "Planning",
+        "open": "Open",
+        "active": "Active",
+        "completed": "Completed",
+        "archived": "Archived"
+      }
+    },
+    "partners": {
+      "title": "Landing partner map",
+      "intro": "Meet the public organisations that help cohorts navigate priority markets.",
+      "empty": "Landing partners will be announced shortly.",
+      "market": "Market",
+      "region": "Region",
+      "statuses": {
+        "prospect": "Prospect",
+        "inDiscussion": "In discussion",
+        "signed": "Signed",
+        "inactive": "Inactive"
+      }
+    },
+    "funding": {
+      "title": "Funding scheme picker",
+      "intro": "Answer five questions for an informational screening against current published scheme rules.",
+      "formLabel": "Funding scheme picker",
+      "instructions": "Choose an answer for every question.",
+      "submit": "See matching schemes",
+      "questions": {
+        "sector": {
+          "label": "What is the project focus?",
+          "options": {
+            "trade": "Branding, upgrading, or market expansion",
+            "advancedTraining": "Advanced technology training",
+            "smartProduction": "Smart production line",
+            "lifeHealth": "Life and health technology",
+            "aiDataScience": "AI and data science",
+            "advancedManufacturing": "Advanced manufacturing and new energy",
+            "researchDevelopment": "Applied research and development"
+          }
+        },
+        "stage": {
+          "label": "What is the company's Hong Kong status?",
+          "options": {
+            "businessRegistered": "Business-registered and non-subvented",
+            "incorporated": "Incorporated and non-subvented",
+            "subvented": "Incorporated and subvented"
+          }
+        },
+        "market": {
+          "label": "Where will the project operate?",
+          "options": {
+            "hongKong": "Hong Kong",
+            "coveredEconomy": "A covered BUD economy",
+            "global": "Another market"
+          }
+        },
+        "employees": {
+          "label": "Which staff readiness statement applies?",
+          "options": {
+            "standard": "No additional training condition applies",
+            "traineeHongKongPermanentResident": "An advanced-technology trainee is a Hong Kong permanent resident"
+          }
+        },
+        "revenue": {
+          "label": "What applicable investment or expenditure band applies?",
+          "options": {
+            "under100m": "Below HK$100 million enterprise investment",
+            "investment100mProject150m": "At least HK$100 million enterprise investment and HK$150 million project cost",
+            "eligibleRdExpenditure": "Eligible applied R&D or partnership expenditure"
+          }
+        }
+      },
+      "results": {
+        "heading": "Funding results",
+        "eligible": "Potentially eligible",
+        "ineligible": "Check scheme details",
+        "source": "Official source",
+        "asOf": "As of"
+      }
+    },
+    "clinic": {
+      "title": "Need a funding or market-entry clinic?",
+      "description": "Speak with WTIA about your next practical step."
+    },
+    "application": {
+      "title": "Apply to an open cohort",
+      "cohort": "Cohort",
+      "market": "Target market",
+      "readiness": "Readiness for this cohort",
+      "consent": "I consent to WTIA using this application for cohort review.",
+      "submit": "Submit application",
+      "submitting": "Submitting application",
+      "success": "Your application has been received.",
+      "invalid": "Check the required fields and try again.",
+      "unauthorized": "Please sign in with an authorised member account to apply.",
+      "signIn": "Sign in",
+      "error": "We could not submit your application. Please try again."
+    },
     "clinicCta": "Book a clinic"
   },
   "Showcase": {
@@ -645,7 +770,9 @@
       },
       {
         "heading": "Information you give us",
-        "body": ["You provide information when you apply, sign in, or use member features."],
+        "body": [
+          "You provide information when you apply, sign in, or use member features."
+        ],
         "items": [
           "Membership application and profile: your name, email address, phone number, job title, preferred language, and whether you appear in the member directory.",
           "Company records: legal and display name, website, industry, size band and description.",
@@ -706,7 +833,9 @@
       },
       {
         "heading": "Service providers",
-        "body": ["WTIA uses the following providers to operate the platform."],
+        "body": [
+          "WTIA uses the following providers to operate the platform."
+        ],
         "items": [
           "Neon — database hosting and account authentication.",
           "Stripe — membership payments.",
@@ -742,7 +871,9 @@
       },
       {
         "heading": "What it can and cannot do",
-        "body": ["The assistant works only through a fixed set of approved tools."],
+        "body": [
+          "The assistant works only through a fixed set of approved tools."
+        ],
         "items": [
           "It can search approved WTIA sources, list upcoming events, explain funding schemes, and read your own membership context when you are signed in.",
           "It can create a follow-up task for the WTIA team.",
@@ -759,7 +890,9 @@
       },
       {
         "heading": "When a person takes over",
-        "body": ["The assistant escalates to WTIA staff rather than answering when a conversation involves:"],
+        "body": [
+          "The assistant escalates to WTIA staff rather than answering when a conversation involves:"
+        ],
         "items": [
           "payments, refunds or billing disputes",
           "complaints or legal matters",
@@ -1006,7 +1139,16 @@
     "brand": "WTIA",
     "title": "Staff workspace",
     "description": "Manage WTIA member operations from a protected staff-only workspace.",
-    "dashboard": {"heading": "Queues", "description": "What is waiting for staff attention right now.", "view": "Open", "unavailable": "Unavailable", "pendingApprovals": "Pending approvals", "atRisk": "At-risk members", "listingsAwaitingReview": "Listings awaiting review", "draftNews": "Draft news posts"},
+    "dashboard": {
+      "heading": "Queues",
+      "description": "What is waiting for staff attention right now.",
+      "view": "Open",
+      "unavailable": "Unavailable",
+      "pendingApprovals": "Pending approvals",
+      "atRisk": "At-risk members",
+      "listingsAwaitingReview": "Listings awaiting review",
+      "draftNews": "Draft news posts"
+    },
     "navigation": {
       "label": "Staff administration navigation",
       "segments": "Segments",
@@ -1040,7 +1182,43 @@
       "savePremium": "Save"
     },
     "cohorts": {
-      "manage": {"createHeading": "Create a cohort", "createDescription": "A cohort becomes visible on Launch Pad once its status is Open or Active.", "existing": "All cohorts", "noCohorts": "No cohorts exist yet.", "editEyebrow": "Edit cohort", "back": "Back to cohorts", "create": "Create cohort", "save": "Save cohort", "saving": "Saving", "slug": "Slug", "nameEn": "Name (English)", "nameZhHk": "Name (Traditional Chinese)", "descriptionEn": "Description (English)", "descriptionZhHk": "Description (Traditional Chinese)", "track": "Track", "startsOn": "Starts on", "endsOn": "Ends on", "endsOnHelp": "Leave empty if there is no fixed end date.", "capacity": "Capacity", "feeHkd": "Fee (HKD)", "feeHelp": "Enter 0 for a cohort with no fee.", "status": "Status", "statusHelp": "Open and Active cohorts appear on the public Launch Pad page.", "statuses": {"planning": "Planning", "open": "Open", "active": "Active", "completed": "Completed", "archived": "Archived"}, "success": "Cohort saved.", "validation": "Check the required fields and try again.", "slugConflict": "That slug is already in use.", "endBeforeStart": "The end date cannot be before the start date.", "error": "We could not save this cohort. Please try again."},
+      "manage": {
+        "createHeading": "Create a cohort",
+        "createDescription": "A cohort becomes visible on Launch Pad once its status is Open or Active.",
+        "existing": "All cohorts",
+        "noCohorts": "No cohorts exist yet.",
+        "editEyebrow": "Edit cohort",
+        "back": "Back to cohorts",
+        "create": "Create cohort",
+        "save": "Save cohort",
+        "saving": "Saving",
+        "slug": "Slug",
+        "nameEn": "Name (English)",
+        "nameZhHk": "Name (Traditional Chinese)",
+        "descriptionEn": "Description (English)",
+        "descriptionZhHk": "Description (Traditional Chinese)",
+        "track": "Track",
+        "startsOn": "Starts on",
+        "endsOn": "Ends on",
+        "endsOnHelp": "Leave empty if there is no fixed end date.",
+        "capacity": "Capacity",
+        "feeHkd": "Fee (HKD)",
+        "feeHelp": "Enter 0 for a cohort with no fee.",
+        "status": "Status",
+        "statusHelp": "Open and Active cohorts appear on the public Launch Pad page.",
+        "statuses": {
+          "planning": "Planning",
+          "open": "Open",
+          "active": "Active",
+          "completed": "Completed",
+          "archived": "Archived"
+        },
+        "success": "Cohort saved.",
+        "validation": "Check the required fields and try again.",
+        "slugConflict": "That slug is already in use.",
+        "endBeforeStart": "The end date cannot be before the start date.",
+        "error": "We could not save this cohort. Please try again."
+      },
       "title": "Cohort applications",
       "description": "Move Launch Pad applications through the staff-reviewed go-global journey.",
       "application": "Application",
@@ -1049,8 +1227,21 @@
       "move": "Update stage",
       "moving": "Updating…",
       "empty": "No applications in this stage.",
-      "errors": {"invalid": "Check the application move and try again.", "forbidden": "You do not have access to update this application.", "error": "The application could not be updated. Please try again."},
-      "stages": {"applied": "Applied", "accepted": "Accepted", "ready": "Ready", "match": "Match", "land": "Land", "scale": "Scale", "graduated": "Graduated", "rejected": "Rejected"}
+      "errors": {
+        "invalid": "Check the application move and try again.",
+        "forbidden": "You do not have access to update this application.",
+        "error": "The application could not be updated. Please try again."
+      },
+      "stages": {
+        "applied": "Applied",
+        "accepted": "Accepted",
+        "ready": "Ready",
+        "match": "Match",
+        "land": "Land",
+        "scale": "Scale",
+        "graduated": "Graduated",
+        "rejected": "Rejected"
+      }
     },
     "members": {
       "title": "Members",
@@ -1196,7 +1387,12 @@
       }
     },
     "media": {
-      "statusArchived": "Archived", "archive": "Archive", "unarchive": "Restore", "archiving": "Saving", "archivedNotice": "This item is archived and hidden from the public site.", "archiveInUse": "Still used by {count} showcase listing(s). Remove the logo from those listings first.",
+      "statusArchived": "Archived",
+      "archive": "Archive",
+      "unarchive": "Restore",
+      "archiving": "Saving",
+      "archivedNotice": "This item is archived and hidden from the public site.",
+      "archiveInUse": "Still used by {count} showcase listing(s). Remove the logo from those listings first.",
       "eyebrow": "Media",
       "title": "Media library",
       "description": "Register images the site may display, with alt text in both languages.",
@@ -1250,7 +1446,12 @@
       }
     },
     "news": {
-      "statusArchived": "Archived", "archive": "Archive", "unarchive": "Restore", "archiving": "Saving", "archivedNotice": "This item is archived and hidden from the public site.", "archiveInUse": "Still used by {count} showcase listing(s). Remove the logo from those listings first.",
+      "statusArchived": "Archived",
+      "archive": "Archive",
+      "unarchive": "Restore",
+      "archiving": "Saving",
+      "archivedNotice": "This item is archived and hidden from the public site.",
+      "archiveInUse": "Still used by {count} showcase listing(s). Remove the logo from those listings first.",
       "eyebrow": "News",
       "title": "News",
       "description": "Write and publish bilingual WTIA news.",
@@ -1409,7 +1610,19 @@
       "next": "Next page"
     },
     "member360": {
-      "profileHeading": "Contact details", "profileDescription": "Correct a member's contact details. Membership, billing, role and consent settings are not editable here.", "profileDisplayName": "Display name", "profilePhone": "Phone", "profileJobTitle": "Job title", "profileLocale": "Preferred language", "profileLocaleEn": "English", "profileLocaleZh": "Traditional Chinese", "profileOptional": "Optional", "profileSave": "Save contact details", "profileSuccess": "Contact details saved.", "profileValidation": "Check the required fields and try again.", "profileError": "We could not save these details. Please try again.",
+      "profileHeading": "Contact details",
+      "profileDescription": "Correct a member's contact details. Membership, billing, role and consent settings are not editable here.",
+      "profileDisplayName": "Display name",
+      "profilePhone": "Phone",
+      "profileJobTitle": "Job title",
+      "profileLocale": "Preferred language",
+      "profileLocaleEn": "English",
+      "profileLocaleZh": "Traditional Chinese",
+      "profileOptional": "Optional",
+      "profileSave": "Save contact details",
+      "profileSuccess": "Contact details saved.",
+      "profileValidation": "Check the required fields and try again.",
+      "profileError": "We could not save these details. Please try again.",
       "description": "Review the complete member record and staff-only operational history.",
       "profile": "Profile",
       "companies": "Companies",
