@@ -886,7 +886,9 @@ Three constraints:
 2. **The subject is generative AI**, and the course is CUSCS's *Generative AI for Business Innovation and Applications*. Enrolment happens on CUSCS systems, not on hkwtia.org.
 3. **The "150+ I&T companies" figure is on WTIA's own CPAI page but nothing substantiates it.** It does not go on the new page — no list, no logos, no named employers, and WTIA has been asked to supply a source. Neither do fee, assessment requirements, validity period or prerequisites — none are in the archive.
 
-4. **The syllabus exists, but only in Chinese.** The course page gives 「12 小時實戰課程，涵蓋四大模組」 and names all four modules (策略框架 / 內容創作實操 / 網絡安全與合規 / 垂直行業案例). `titleEn` is required, so draft the English yourself and add the four module names to the Task 12 translation review — that is the same draft-then-review flow the spec sets out for every missing locale. Do not leave a module out because its English is uncertain, and do not invent a fifth.
+4. **Mark what you drafted.** `content/programs/cpai.ts` must open with a header comment naming every field whose English was written rather than transcribed — the four `titleEn` module names and `partnerCertificateEn`. `content/milestones.ts:1-20` carries exactly this comment for the same reason. Without it a later reader cannot tell drafted English from archive-sourced English, and that distinction is this sub-project's entire premise.
+
+5. **The syllabus exists, but only in Chinese.** The course page gives 「12 小時實戰課程，涵蓋四大模組」 and names all four modules (策略框架 / 內容創作實操 / 網絡安全與合規 / 垂直行業案例). `titleEn` is required, so draft the English yourself and add the four module names to the Task 12 translation review — that is the same draft-then-review flow the spec sets out for every missing locale. Do not leave a module out because its English is uncertain, and do not invent a fifth.
 
 - [ ] **Step 2: Write the CPAI record**
 
@@ -1408,7 +1410,7 @@ import Image from 'next/image';
 import {useTranslations} from 'next-intl';
 
 import {AGENCIES, type AgencyId} from '@/content/programs/agencies';
-import type {ProgramImage, ProgramWinners} from '@/content/schemas';
+import type {AsaRegions, ProgramImage, ProgramWinners} from '@/content/schemas';
 
 type Edition = {
   heading: string;
@@ -1416,8 +1418,9 @@ type Edition = {
   organisedFor: AgencyId | null;
   // Passed through rather than pre-rendered: `attended` and `co-organisers`
   // are different measurements of different eras and get different sentences,
-  // and the sentences live in this component's own namespace.
-  regions: {kind: 'attended' | 'co-organisers'; count: number} | {kind: 'unrecorded'};
+  // and the sentences live in this component's own namespace. Imported rather
+  // than restated so a new variant in the schema fails here at build time.
+  regions: AsaRegions;
   // Already-localised free text -- TCT's per-edition shape.
   meta: readonly string[];
   winners: ProgramWinners;
@@ -1554,7 +1557,7 @@ Inside the component, after the existing `<ProgramDetail … />`:
         agencyName={(id) => (zh ? AGENCIES[id].nameZh : AGENCIES[id].nameEn)}
         alt={(image) => (zh ? image.altZh : image.altEn)}
         editions={asa.editions.map((edition) => ({
-          heading: edition.label,
+          heading: zh ? edition.labelZh : edition.labelEn,
           attribution: edition.funder.kind === 'named'
             ? {agency: edition.funder.agency, initiative: zh ? edition.funder.initiativeZh : edition.funder.initiativeEn}
             : null,
@@ -1590,9 +1593,9 @@ Adjust the `ProgramWinners` type used by the component to the localised shape (`
 
 HKICT maps `organisedFor: edition.organisedFor`, `attribution: null`, `heading: String(edition.year)`, `regions: {kind: 'unrecorded'}`, `meta: []`.
 
-TCT maps `heading: edition.label`, `attribution` from its funder, `organisedFor: null`, `regions: {kind: 'unrecorded'}`, `meta: [zh ? edition.shapeZh : edition.shapeEn]`.
+TCT maps `heading: zh ? edition.labelZh : edition.labelEn`, `attribution` from its funder, `organisedFor: null`, `regions: {kind: 'unrecorded'}`, `meta: [zh ? edition.shapeZh : edition.shapeEn]`.
 
-TCT uses `label`, not the year, because its editions are named — "Tech to Connect 4.0", and the series renamed to "Tech Connect" mid-run. Rendering a bare year would assert none of that.
+TCT uses the label, not the year, because its editions are named — "Tech to Connect 4.0", and the series renamed to "Tech Connect" (智創互聯) mid-run. Rendering a bare year would assert none of that. The label is a locale pair for the same reason every other user-visible string is: the archive's own event titles are bilingual, e.g. `智創互聯 2026：機器人與自動化賦能啟動研討會 | WTIA Tech To Connect 2026: Robotics & Automation Kick-Off Seminar`.
 
 - [ ] **Step 4: Write the CPAI component and wire its page**
 
@@ -1667,9 +1670,14 @@ describe("contradicted claims stay off the programme pages", () => {
   // it -- no list, no logos, no named employers, and no indication whether it
   // counts a survey, a pledge list or WTIA's own membership. Republishing an
   // unevidenced number onto a new site is what this guard prevents.
+  // The pattern is deliberately just the number. "150+" is only the audit's
+  // shorthand; the archive says "over 150 pioneering companies" and 「超過150家
+  // 創新與科技行業先驅公司」, so the likeliest way this reaches the record is a
+  // transcriber copying the source verbatim -- which /150\+/ would not catch.
+  // No legitimate use of that number exists on these pages.
   it("does not republish the unsubstantiated '150+ companies' figure", () => {
-    for (const {id, text} of SOURCES) expect(text, id).not.toMatch(/150\+/);
-    for (const {locale, text} of messages) expect(text, locale).not.toMatch(/150\+/);
+    for (const {id, text} of SOURCES) expect(text, id).not.toMatch(/150/);
+    for (const {locale, text} of messages) expect(text, locale).not.toMatch(/150/);
   });
 
   // WTIA issues CPAI alone; CUSCS separately issues its own completion
@@ -1718,8 +1726,10 @@ describe("contradicted claims stay off the programme pages", () => {
   it("detects the shapes it is meant to catch", () => {
     expect(SOURCES).toHaveLength(4);
     for (const {id, text} of SOURCES) expect(text.length, id).toBeGreaterThan(200);
-    const hostile = "recognised by 150+ I&T companies, a joint certification";
-    expect(hostile).toMatch(/150\+/);
+    // The archive's own wording, not the audit's shorthand -- a guard tested
+    // only against "150+" would miss the sentence a transcriber would paste.
+    const hostile = "recognized by over 150 pioneering companies, a joint certification";
+    expect(hostile).toMatch(/150/);
     expect(hostile).toMatch(/joint/i);
   });
 });
@@ -1732,7 +1742,7 @@ Expected: PASS, 7 tests. **A failure is a real finding** — the content repeats
 
 - [ ] **Step 3: Prove the guard fails when it should**
 
-Temporarily add `// recognised by 150+ I&T companies` to `content/programs/cpai.ts` and re-run.
+Temporarily add `// recognized by over 150 pioneering companies` to `content/programs/cpai.ts` and re-run — the archive's own wording, which is what a transcriber would actually paste.
 Expected: FAIL on the first test. Remove the line and confirm PASS again.
 
 - [ ] **Step 4: Extend the content contract**
