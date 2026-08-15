@@ -88,3 +88,79 @@ wrong rendering is the single most likely embarrassment in this whole file.
 | 羅賢 | Law Yin | Co-founder & CEO, Godzpeed Autosport | |
 | 林鳳儀 | Lam Fung-yi | Operations Manager, Kowloon Esports Arena | |
 | 楊偉雄 | Nicholas W. Yang | Secretary for Innovation and Technology (2020) | |
+
+---
+
+# Translation review: proper nouns in the programme records
+
+Added by the programme records migration (sub-project 3). Same request as the
+tables above: please correct anything wrong, and leave the "Correct?" column blank
+where it is right.
+
+The four programme pages now state which editions ran, who funded each, and the
+winners the archive names. Where the archive gave only one language, we drafted the
+other rather than inventing a name — everything below marked **drafted** is our
+wording, not yours, and has no source in the captured site.
+
+## Table E — Award and programme names
+
+| English rendering | Chinese rendering | Source | Correct? |
+|---|---|---|---|
+| Asia Smartphone Contest (2013) | *drafted — English only in the archive* | 2013 edition post | |
+| Asia Smartphone Apps Contest & Summit 2015 | *drafted — English only* | 2015 edition post | |
+| Asia Smartphone Apps Summit cum Award Presentation Ceremony 2016 | *drafted — English only* | 2016 edition post | |
+| Asia Smart App Awards 2022/2023 | 2022/23亞洲智能應用程式大獎 | both on the 22/23 press page | |
+| Asia Smart Innovation Awards 2025 | 2025 亞洲智慧創新大獎 | 2025 post title | |
+| Tech to Connect Series (2021–22) | *drafted — English only* | kick-off seminar page | |
+| Tech to Connect 4.0 (2023) | *drafted — English only* | 4.0 Leaders Summit page | |
+| Tech Connect 智創互聯 (2024–) | 智創互聯 | 2025 seminar post, 2026 kick-off | |
+
+**One we cannot resolve for you.** The 2025 ASA post uses **兩個不同的中文名稱** in the
+same article: 亞洲智慧創新大獎 in its title, and 亞洲智能創新大獎 for the grand award
+itself. We have used the title's form for the edition name and transcribed the grand
+award as the post writes it, so both appear on the page. **Which is correct?**
+
+## Table F — Government bodies and funding schemes
+
+| English | Chinese rendering | Source | Correct? |
+|---|---|---|---|
+| Cultural and Creative Industries Development Agency (CCIDA) | 文創產業發展處 | standard official name | |
+| Digital Policy Office (DPO) | 數字政策辦公室 | 2025 edition post | |
+| Innovation and Technology Commission (ITC) | 創新科技署 | Tech to Connect 4.0 speaker line-up graphic | |
+| CreateSmart Initiative | 創意智優計劃 | **drafted** — the scheme's Chinese name appears nowhere in 577 pages | |
+| GSP | *not expanded* | named once, never expanded — see below | |
+
+**GSP.** The July 2023 seminar page says Tech to Connect 4.0 was launched "with GSP
+funding" and never expands the acronym. The edition's own speaker line-up graphic
+names 創新科技署 as Funding Organisation, and GSP is that body's General Support
+Programme — but since your prose never says so, the page names the scheme without
+expanding it. **Please confirm the full scheme name** if you would like it published.
+
+## Table G — CPAI course modules
+
+The CPAI course page lists four modules in Chinese only. The English below is
+**entirely drafted by us** and is the largest block of unreviewed translation in
+this migration.
+
+| Chinese (yours) | English (drafted) | Correct? |
+|---|---|---|
+| 企業 AI 應用的策略框架 | Strategic frameworks for enterprise AI adoption | |
+| 生成式 AI 內容創作實操 | Hands-on generative AI content creation | |
+| AI 時代的網絡安全與合規要點 | Cybersecurity and compliance essentials for the AI era | |
+| 垂直行業 AI 應用案例 | AI case studies across vertical industries | |
+
+Also drafted: **CUSCS Certificate of Completion** for 「CUSCS 結業證書」, and
+**生成式AI商業創新與應用** as the course name (your page writes it only as part of the
+credential's full name).
+
+## Table H — Winner names with no Chinese form
+
+Thirteen 2023 ICT Startup Award winners and two 2025 ASA winners are named in the
+archive. Five of the thirteen, and both ASA winners, appear in Latin script only, so
+the page repeats the English name in the Chinese column rather than inventing a
+Chinese one: **CHOMP Limited, Vidi Labs Limited, Llewellyn and Partners Company
+Limited, V SING HONG KONG LIMITED, Liquid Tech, RIFFAI, 417 Technology Limited.**
+
+**Please supply Chinese names** for any that have one. The 2023 category names are
+likewise Chinese-only, so the English column repeats the Chinese — if these awards
+have official English names, they would be better than what we can infer.
