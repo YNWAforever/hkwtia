@@ -62,7 +62,7 @@ Run `npm test`, `npm run lint`, `npm run typecheck`, `npm run audit:strings` and
 |---|---|
 | `content/programs/index.ts` | The existing four-record route identity list, moved verbatim from `content/programs.ts` |
 | `content/programs/agencies.ts` | The four government body names in both locales, written exactly once |
-| `content/programs/asa.ts` | ASA editions: label, funder per edition, regions, venue, winners |
+| `content/programs/asa.ts` | ASA editions: label, funder per edition, regions, winners |
 | `content/programs/hkict.ts` | HKICT editions: year, `organisedFor`, winners |
 | `content/programs/cpai.ts` | CPAI as a credential: issuer, course partner, syllabus. No editions |
 | `content/programs/tct.ts` | TCT editions: year, free-text shape, funder |
@@ -316,9 +316,7 @@ const asa = {
       initiativeEn: "CreateSmart Initiative",
       initiativeZh: "創意智優計劃",
     },
-    regionsAttended: 16,
-    venueEn: "Hong Kong",
-    venueZh: "香港",
+    regions: {kind: "attended" as const, count: 16},
     winners: listedWinners,
     images: [],
   }],
@@ -514,11 +512,17 @@ export const asaProgramSchema = z.object({
     yearStart: z.number().int().min(2013).max(2100),
     funder: fundingSchema(['createhk', 'ccida']),
     // The audit read "16 regional co-organisers" off a page that says 16
-    // regions attended. Explicit co-organiser counts exist only for 2013 (7)
-    // and 2016 (9), so the field records attendance and is named for it.
-    regionsAttended: z.number().int().positive().nullable(),
-    venueEn: z.string().min(1),
-    venueZh: z.string().min(1),
+    // regions attended. Those are different measurements from different eras:
+    // 2013 and 2016 name co-organiser counts (7 and 9), 2017 onward name
+    // participating regions. A single field would force one to be recorded as
+    // the other, so the kind travels with the count.
+    regions: z.discriminatedUnion('kind', [
+      z.object({kind: z.literal('attended'), count: z.number().int().positive()}).strict(),
+      z.object({kind: z.literal('co-organisers'), count: z.number().int().positive()}).strict(),
+      z.object({kind: z.literal('unrecorded')}).strict()
+    ]),
+    // No venue field: five ASA edition pages in the capture name no venue at
+    // all, and the 2024 page gets only as far as "right here in Hong Kong".
     winners: winnersSchema,
     images: z.array(programImageSchema)
   }).strict()).min(1)
@@ -653,7 +657,7 @@ git commit -m "feat: record the four government agency names in both locales"
 
 ## Task 4: ASA's record
 
-**This task transcribes from the archive. It does not summarise, infer, or fill gaps from the content audit.** Every edition, funder, venue and winner name comes from a captured page you have open in front of you.
+**This task transcribes from the archive. It does not summarise, infer, or fill gaps from the content audit.** Every edition, funder and winner name comes from a captured page you have open in front of you.
 
 **Files:**
 - Create: `content/programs/asa.ts`
