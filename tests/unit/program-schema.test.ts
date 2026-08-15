@@ -28,9 +28,7 @@ const asa = {
       initiativeEn: "CreateSmart Initiative",
       initiativeZh: "創意智優計劃",
     },
-    regionsAttended: 16,
-    venueEn: "Hong Kong",
-    venueZh: "香港",
+    regions: {kind: "attended" as const, count: 16},
     winners: listedWinners,
     images: [],
   }],
@@ -44,6 +42,7 @@ const hkict = {
 const tct = {
   id: "tct" as const,
   editions: [{
+    label: "Tech to Connect 4.0",
     year: 2023,
     shapeEn: "10 industry workshops, 2 seminars and a grand conference",
     shapeZh: "十場業界工作坊、兩場研討會及一場大型會議",
@@ -60,6 +59,8 @@ const cpai = {
   coursePartnerZh: "香港中文大學專業進修學院",
   courseNameEn: "Generative AI for Business Innovation and Applications",
   courseNameZh: "生成式人工智能商業應用課程",
+  partnerCertificateEn: "CUSCS certificate of completion",
+  partnerCertificateZh: "CUSCS 結業證書",
   syllabus: [{titleEn: "Foundations", titleZh: "基礎"}],
   images: [],
 };
@@ -140,10 +141,90 @@ describe("programme schemas", () => {
     }
   });
 
-  it("requires an off-site winner list to say where", () => {
+  // The two tests above probe the programme level. This one probes the
+  // edition, which is where contradicted claim #2 would actually be written:
+  // `coOrganisers: 16` alongside a regions count is precisely the conflation
+  // the schema exists to stop, and without .strict() on the edition object it
+  // would be dropped in silence and the editor would believe it shipped.
+  it("rejects an unknown key on an edition, not just on the programme", () => {
+    expect(() => asaProgramSchema.parse({
+      ...asa, editions: [{...asa.editions[0], coOrganisers: 16}],
+    })).toThrow();
+    expect(() => tctProgramSchema.parse({
+      ...tct, editions: [{...tct.editions[0], workshops: 10}],
+    })).toThrow();
+  });
+
+  // Same rule one level deeper. The archive never says what a winner built, so
+  // `descriptionEn` must be refused loudly; silently dropping it would let an
+  // editor believe they had published something that never renders.
+  it("rejects an unknown key on a winner and on an image", () => {
+    expect(() => asaProgramSchema.parse({
+      ...asa,
+      editions: [{...asa.editions[0], winners: {
+        kind: "listed", entries: [{...listedWinners.entries[0], descriptionEn: "an AI music app"}],
+      }}],
+    })).toThrow();
+    expect(() => cpaiProgramSchema.parse({
+      ...cpai, images: [{src: "/images/programs/a.jpg", altEn: "a", altZh: "a", caption: "x"}],
+    })).toThrow();
+  });
+
+  // Both eras of the regions claim are representable, and so is the 2025 case
+  // where the home page says 17 and its own carousel renders 15.
+  it("keeps attended and co-organiser region counts distinct", () => {
+    for (const regions of [
+      {kind: "attended", count: 11},
+      {kind: "co-organisers", count: 7},
+      {kind: "unrecorded"},
+    ]) {
+      expect(() => asaProgramSchema.parse({
+        ...asa, editions: [{...asa.editions[0], regions}],
+      }), JSON.stringify(regions)).not.toThrow();
+    }
+    // A bare number is the flattened field the audit's error came from.
+    expect(() => asaProgramSchema.parse({
+      ...asa, editions: [{...asa.editions[0], regions: 16}],
+    })).toThrow();
+  });
+
+  // Most TCT editions will use this branch -- GSP is named once in 577 pages --
+  // so a typo in the literal must fail here rather than at import time in a
+  // later task.
+  it("accepts an edition whose funder the archive does not name", () => {
+    expect(tctProgramSchema.parse({
+      ...tct, editions: [{...tct.editions[0], funder: {kind: "none-recorded"}}],
+    }).editions[0].funder.kind).toBe("none-recorded");
+    expect(asaProgramSchema.parse({
+      ...asa, editions: [{...asa.editions[0], funder: {kind: "none-recorded"}}],
+    }).editions[0].funder.kind).toBe("none-recorded");
+  });
+
+  // Each floor encodes a claims-review correction: ASA starts 2013, the ICT
+  // Startup Award stream starts 2020 (the 2006 Best Ubiquitous Award is a
+  // different stream), and TCT starts 2021 (2019 is a same-named predecessor).
+  it("rejects a year below each programme's documented first edition", () => {
+    expect(() => asaProgramSchema.parse({
+      ...asa, editions: [{...asa.editions[0], yearStart: 2012}],
+    })).toThrow();
+    expect(() => hkictProgramSchema.parse({
+      ...hkict, editions: [{...hkict.editions[0], year: 2019}],
+    })).toThrow();
+    expect(() => tctProgramSchema.parse({
+      ...tct, editions: [{...tct.editions[0], year: 2020}],
+    })).toThrow();
+  });
+
+  it("requires an off-site winner list to say where, over https", () => {
     expect(() => hkictProgramSchema.parse({
       ...hkict, editions: [{...hkict.editions[0], winners: {kind: "off-site"}}],
     })).toThrow();
+    // `z.string().url()` accepts these; the value is rendered as a link.
+    for (const url of ["mailto:info@hkwtia.org", "javascript:alert(1)", "http://contest2020.bestasiaapp.hk/"]) {
+      expect(() => hkictProgramSchema.parse({
+        ...hkict, editions: [{...hkict.editions[0], winners: {kind: "off-site", url}}],
+      }), url).toThrow();
+    }
   });
 
   // CPAI is a credential, not an event series. Giving it editions would invite
@@ -165,6 +246,7 @@ describe("programme schemas", () => {
   it("requires both locales everywhere one is required", () => {
     expect(() => cpaiProgramSchema.parse({...cpai, issuerZh: ""})).toThrow();
     expect(() => cpaiProgramSchema.parse({...cpai, courseNameZh: ""})).toThrow();
+    expect(() => cpaiProgramSchema.parse({...cpai, partnerCertificateZh: ""})).toThrow();
     expect(() => tctProgramSchema.parse({
       ...tct, editions: [{...tct.editions[0], shapeZh: ""}],
     })).toThrow();
