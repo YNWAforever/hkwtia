@@ -1,6 +1,7 @@
 import {describe, expect, it} from "vitest";
 
 import {asa} from "@/content/programs/asa";
+import {hkict} from "@/content/programs/hkict";
 
 describe("ASA record", () => {
   // The parse in content/programs/asa.ts already throws on a malformed record;
@@ -68,5 +69,52 @@ describe("ASA record", () => {
         expect(edition.yearStart, edition.labelEn).toBeGreaterThanOrEqual(2017);
       }
     }
+  });
+});
+
+describe("HKICT record", () => {
+  it("has editions", () => {
+    expect(hkict.editions.length).toBeGreaterThan(0);
+  });
+
+  // DPO applies only from 2025. Naming it for an earlier edition attributes the
+  // award to a body that did not exist under that name at the time.
+  it("names the counterparty each edition's own era used", () => {
+    for (const edition of hkict.editions) {
+      if (edition.organisedFor === "dpo") expect(edition.year).toBeGreaterThanOrEqual(2025);
+      if (edition.organisedFor === "ogcio") expect(edition.year).toBeLessThan(2025);
+    }
+  });
+
+  // The Startup Award stream begins in 2020; anything earlier is the Best
+  // Mobile Apps lineage, which is a different award.
+  it("starts at the 2020 edition", () => {
+    expect(Math.min(...hkict.editions.map(({year}) => year))).toBeGreaterThanOrEqual(2020);
+  });
+
+  // 2023 is the only edition whose winners the archive publishes as a list, and
+  // the list has one feature nothing else in this repo protects: its 社會貢獻
+  // category awards Gold, Silver, Silver and a certificate of merit, where the
+  // other two categories run Gold/Silver/Bronze. It reads like a typo for 銅獎
+  // and it is not one this record may fix — the ICTA23 ceremony page says 銀獎
+  // twice, and correcting it here would publish an award tier WTIA never
+  // announced. The count is pinned alongside it because the page's list ends
+  // mid-thought at "優異證書 – Liquid Tech", so a fourteenth entry would mean
+  // someone completed the page rather than transcribed it.
+  it("keeps the 2023 list's duplicated Silver award rather than tidying it", () => {
+    const winners = hkict.editions.find(({year}) => year === 2023)?.winners;
+    if (winners?.kind !== "listed") throw new Error("EXPECTED_LISTED_2023_WINNERS");
+
+    expect(winners.entries).toHaveLength(13);
+    expect(
+      winners.entries
+        .filter(({categoryZh}) => categoryZh.startsWith("資訊科技初創企業（社會貢獻）獎"))
+        .map(({categoryZh}) => categoryZh),
+    ).toEqual([
+      "資訊科技初創企業（社會貢獻）獎 — 金獎",
+      "資訊科技初創企業（社會貢獻）獎 — 銀獎",
+      "資訊科技初創企業（社會貢獻）獎 — 銀獎",
+      "資訊科技初創企業（社會貢獻）獎 — 優異證書",
+    ]);
   });
 });
