@@ -15,6 +15,8 @@
     "test:e2e": "playwright test",
     "test:lighthouse": "lhci autorun",
     "audit:strings": "node scripts/audit-visible-strings.mjs",
+    "content:program-images": "tsx scripts/download-program-images.ts",
+    "content:index-programs": "node --experimental-strip-types scripts/index-program-pages.ts",
     "db:migrate": "node --experimental-strip-types scripts/db-migrate.ts",
     "db:seed": "node --experimental-strip-types scripts/db-seed.ts",
     "db:seed:m1": "node --experimental-strip-types scripts/seed-m1.ts",

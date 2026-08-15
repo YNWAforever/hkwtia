@@ -52,12 +52,17 @@ describe("page copy scope", () => {
       Chairman: 8,
       Committees: 12,
       Contact: 6,
-      programs: 12,
+      // 12 for the four programmes' title/description/status, plus the 16
+      // `programs.record` keys the programme records migration added. Those are
+      // page furniture -- headings, and sentences with {agency}/{count}
+      // placeholders -- so staff can reword them. The facts they frame come
+      // from content/programs/*.ts, which /admin/page-copy cannot reach.
+      programs: 28,
       Membership: 34,
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(199);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(215);
   });
 
   it("offers a Chinese placeholder for every English field", () => {
