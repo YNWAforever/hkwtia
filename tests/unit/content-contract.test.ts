@@ -23,4 +23,16 @@ describe('public content contract', () => {
     ).not.toThrow();
     expect(() => programSchema.parse({id: 'unknown'})).toThrow();
   });
+
+  it('parses every programme record module', async () => {
+    const records = await Promise.all([
+      import('@/content/programs/asa'),
+      import('@/content/programs/hkict'),
+      import('@/content/programs/cpai'),
+      import('@/content/programs/tct')
+    ]);
+    // Each module parses at import time, so reaching here means all four are
+    // valid; this pins that all four are actually wired up and reachable.
+    expect(records).toHaveLength(4);
+  });
 });
