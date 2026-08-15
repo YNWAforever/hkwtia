@@ -5,12 +5,10 @@ import {
   asaProgramSchema,
   cpaiProgramSchema,
   hkictProgramSchema,
-  type TctEdition,
   tctProgramSchema,
 } from "@/content/schemas";
 
 type AsaAgency = Extract<AsaEdition["funder"], {kind: "named"}>["agency"];
-type TctAgency = Extract<TctEdition["funder"], {kind: "named"}>["agency"];
 
 const listedWinners = {
   kind: "listed" as const,
@@ -48,7 +46,7 @@ const tct = {
     year: 2023,
     shapeEn: "10 industry workshops, 2 seminars and a grand conference",
     shapeZh: "十場業界工作坊、兩場研討會及一場大型會議",
-    funder: {kind: "named" as const, agency: "gsp" as const, initiativeEn: "GSP", initiativeZh: "GSP"},
+    funder: {kind: "named" as const, schemeEn: "GSP", schemeZh: "GSP"},
     images: [],
   }],
 };
@@ -98,34 +96,37 @@ describe("programme schemas", () => {
     expect(() => asaProgramSchema.parse({...asa, editions: [withoutFunder]})).toThrow();
   });
 
-  it("rejects a funding agency outside each programme's documented set", () => {
-    // CCIDA never funded TCT; GSP never funded ASA. Sharing one agency enum
-    // across programmes would let either through.
-    expect(() => tctProgramSchema.parse({
-      ...tct,
-      editions: [{...tct.editions[0], funder: {...tct.editions[0].funder, agency: "ccida"}}],
-    })).toThrow();
+  it("rejects a funding agency outside ASA's documented set", () => {
     expect(() => asaProgramSchema.parse({
       ...asa,
       editions: [{...asa.editions[0], funder: {...asa.editions[0].funder, agency: "gsp"}}],
     })).toThrow();
   });
 
-  // The same rule at the type level. `fundingSchema` is generic, and a generic
-  // that widens its argument to `readonly string[]` leaves every `.parse` test
-  // above still passing while `agency` silently becomes plain `string` -- so the
-  // compiler stops rejecting the mistake and only the runtime does. Both
-  // directives below must stay necessary; `npm run typecheck` fails if either
-  // stops reporting an error.
-  it("keeps each programme's agency set a distinct type, not just a distinct parse", () => {
+  // TCT's archive names a funding *scheme* with no body attached -- "launched
+  // the 'Tech to Connect 4.0' campaign with GSP funding", the only mention in
+  // 577 pages, never expanding the acronym and never naming the administering
+  // agency. So TCT has no `agency` field to put CCIDA in, which is a stronger
+  // guarantee than rejecting it: `.strict()` refuses the key outright.
+  it("gives TCT a funding scheme and no agency at all", () => {
+    expect(() => tctProgramSchema.parse({
+      ...tct,
+      editions: [{...tct.editions[0], funder: {...tct.editions[0].funder, agency: "ccida"}}],
+    })).toThrow();
+    const [edition] = tctProgramSchema.parse(tct).editions;
+    expect(edition.funder.kind === "named" && edition.funder.schemeEn).toBe("GSP");
+  });
+
+  // The same rule at the type level. A `.parse` test cannot see `agency` widen
+  // to plain `string` -- every runtime assertion above keeps passing while the
+  // compiler quietly stops rejecting the mistake. The directive below must stay
+  // necessary; `npm run typecheck` fails if it stops reporting an error.
+  it("keeps ASA's agency set a distinct type, not just a distinct parse", () => {
     const asaAgencies: AsaAgency[] = ["createhk", "ccida"];
-    const tctAgencies: TctAgency[] = ["gsp"];
-    // @ts-expect-error GSP never funded ASA.
+    // @ts-expect-error GSP is a funding scheme, and never funded ASA.
     const gspOnAsa: AsaAgency = "gsp";
-    // @ts-expect-error CCIDA never funded TCT.
-    const ccidaOnTct: TctAgency = "ccida";
-    expect([...asaAgencies, ...tctAgencies]).toHaveLength(3);
-    expect([gspOnAsa, ccidaOnTct]).toHaveLength(2);
+    expect(asaAgencies).toHaveLength(2);
+    expect(gspOnAsa).toBe("gsp");
   });
 
   // An empty winners array is indistinguishable from an editor who has not

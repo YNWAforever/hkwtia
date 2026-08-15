@@ -111,33 +111,31 @@ const winnersSchema = z.discriminatedUnion('kind', [
 ]);
 
 /**
- * Funding is per edition and the agency set is per programme.
+ * ASA's funding: per edition, and named as a government body plus its scheme.
  *
  * The content audit called ASA "CCIDA-funded" as though that held throughout.
  * It does not: CCIDA appears only from 2024, and every documented edition from
  * 2017 through 2022/23 names Create Hong Kong under the CreateSmart Initiative.
- * A shared agency enum would let CCIDA be written against a 2017 edition; a
- * per-programme one will not.
+ * Per-edition is what makes "the funder of ASA" impossible to write down.
  *
- * `const T` is load-bearing, not decoration. Without it the argument widens to
- * `readonly string[]` and every `agency` becomes plain `string`: the runtime
- * parse still rejects `agency: 'gsp'` on an ASA edition, but the compiler stops
- * doing so, which is most of the protection. `tests/unit/program-schema.test.ts`
- * pins both halves -- the runtime one with `.parse`, the type one with
- * `@ts-expect-error`, since a test that only parses cannot see this regress.
+ * This is ASA's shape alone, not a shared one. TCT's archive names a funding
+ * *scheme* with no body attached, and HKICT's names no funder at all, so a
+ * single shared funding type would have to make `agency` optional -- which is
+ * the shape that lets a missing funder pass unnoticed. Three programmes, three
+ * honest shapes; `enum` here means CCIDA against a 2017 edition is rejected by
+ * both the compiler and the parse.
  */
-const fundingSchema = <const T extends readonly [string, ...string[]]>(agencies: T) =>
-  z.discriminatedUnion('kind', [
-    z.object({
-      kind: z.literal('named'),
-      agency: z.enum(agencies),
-      initiativeEn: z.string().min(1),
-      initiativeZh: z.string().min(1)
-    }).strict(),
-    // The archive names no funder for this edition. Distinct from "not yet
-    // filled in", and the page says nothing about funding rather than guessing.
-    z.object({kind: z.literal('none-recorded')}).strict()
-  ]);
+const asaFundingSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('named'),
+    agency: z.enum(['createhk', 'ccida']),
+    initiativeEn: z.string().min(1),
+    initiativeZh: z.string().min(1)
+  }).strict(),
+  // The archive names no funder for this edition. Distinct from "not yet
+  // filled in", and the page says nothing about funding rather than guessing.
+  z.object({kind: z.literal('none-recorded')}).strict()
+]);
 
 /**
  * There is deliberately no venue field.
@@ -169,7 +167,7 @@ export const asaProgramSchema = z.object({
     // 2013 is the first edition -- "WTIA started to organize Asia Smartphone
     // Contest in 2013" -- so an earlier year is a transcription error.
     yearStart: z.number().int().min(2013).max(2100),
-    funder: fundingSchema(['createhk', 'ccida']),
+    funder: asaFundingSchema,
     /**
      * Two different measurements, never flattened into one number.
      *
@@ -276,9 +274,23 @@ export const tctProgramSchema = z.object({
     // to all of them, which is how the audit got this wrong.
     shapeEn: z.string().min(1),
     shapeZh: z.string().min(1),
-    // GSP is named exactly once in 577 pages, on the July 2023 seminar page.
-    // The 2024-26 editions never mention it.
-    funder: fundingSchema(['gsp']),
+    // A funding *scheme*, not a body -- which is why this is not the same shape
+    // as ASA's `funder`. GSP is named exactly once in 577 pages, on the July
+    // 2023 seminar page, in a single sentence: WTIA "has launched the 'Tech to
+    // Connect 4.0' campaign with GSP funding". The archive never expands the
+    // acronym and never names the administering agency, so the page states
+    // neither. Writing it as an `agency` would have rendered "Funded by GSP
+    // under the GSP", and inviting someone to expand it means publishing a
+    // government programme name the archive does not evidence. The 2024-26
+    // editions never mention funding at all.
+    funder: z.discriminatedUnion('kind', [
+      z.object({
+        kind: z.literal('named'),
+        schemeEn: z.string().min(1),
+        schemeZh: z.string().min(1)
+      }).strict(),
+      z.object({kind: z.literal('none-recorded')}).strict()
+    ]),
     images: z.array(programImageSchema)
   }).strict()).min(1)
 }).strict();

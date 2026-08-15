@@ -606,6 +606,8 @@ git commit -m "feat: add four tight programme record schemas"
 
 Four government bodies, each of which must be rendered exactly, written once. `docs/wtia-programme-claims-review.md` supplies all four.
 
+**No `gsp` entry.** TCT's archive names GSP as a funding scheme, once, without expanding the acronym or naming the body that administers it — so it is not an agency, `tctProgramSchema` does not model it as one, and adding it here would invite rendering "Funded by GSP" or expanding it to a government programme name the archive never states.
+
 **Files:**
 - Create: `content/programs/agencies.ts`
 
@@ -935,7 +937,7 @@ export const cpai: CpaiProgram = cpaiProgramSchema.parse({
 Everything known about TCT is inferred from roughly 50 individual event listings — the site's own navigation linked off to `techtoconnect.net`, which was never captured. Four constraints:
 
 1. **2021–22 is the first edition and was 12 workshops** (the archive holds exactly 12 matching workshop pages). Tech to Connect 4.0 (2023) is the "2nd edition" by the 2023 summit's own wording, and is the 10-workshops-plus-2-seminars-plus-conference edition the audit wrongly describes as the programme's shape.
-2. **GSP funding appears once, on the July 2023 seminar page.** Every other edition is `{kind: 'none-recorded'}`.
+2. **GSP funding appears once, on the July 2023 seminar page**, in a single sentence: WTIA "has launched the 'Tech to Connect 4.0' campaign with GSP funding". The archive never expands the acronym and never names the body administering it, so TCT's `funder` records a *scheme* (`schemeEn`/`schemeZh`), not an agency — a different shape from ASA's, deliberately. Write `'GSP'` in both locales and expand it nowhere. Every other edition is `{kind: 'none-recorded'}`.
 3. **The AI Leaders' Summit speaker count is unresolved** — its own page says fifteen in one sentence and eighteen in the next, and names none of them. Publish no speaker count. The "15+ experts from Huawei, Microsoft, HKPC" claim has no support; HKPC is the venue.
 4. The 2019 TechConnect Conference & Festival is not an edition and is already excluded by Task 1.
 
@@ -1342,6 +1344,7 @@ In `messages/en.json`, add a `record` key inside the existing `programs` object 
       "winnersHeading": "Winners",
       "categoryHeading": "Category",
       "fundedBy": "Funded by {agency} under the {initiative}",
+      "fundedByScheme": "Funded with {scheme} funding",
       "organisedFor": "Organised for {agency}",
       "regionsAttended": "{count} regions attended",
       "regionsCoOrganised": "Co-organised with {count} Asia regions",
@@ -1365,6 +1368,7 @@ Add the same keys to `messages/zh-HK.json` under `programs.record`:
       "winnersHeading": "得獎者",
       "categoryHeading": "組別",
       "fundedBy": "由{agency}透過{initiative}資助",
+      "fundedByScheme": "獲 {scheme} 資助",
       "organisedFor": "為{agency}籌辦",
       "regionsAttended": "{count} 個地區參與",
       "regionsCoOrganised": "由 {count} 個亞洲地區合辦",
@@ -1414,7 +1418,14 @@ import type {AsaRegions, ProgramImage, ProgramWinners} from '@/content/schemas';
 
 type Edition = {
   heading: string;
-  attribution: {agency: AgencyId; initiative: string} | null;
+  // Two shapes because the archive gives two. ASA names a government body and
+  // its scheme; TCT names a scheme with no body attached. Collapsing them would
+  // mean an optional `agency`, which is the shape that lets a missing funder
+  // pass unnoticed.
+  attribution:
+    | {kind: 'agency'; agency: AgencyId; initiative: string}
+    | {kind: 'scheme'; scheme: string}
+    | null;
   organisedFor: AgencyId | null;
   // Passed through rather than pre-rendered: `attended` and `co-organisers`
   // are different measurements of different eras and get different sentences,
@@ -1444,14 +1455,16 @@ export function ProgramEditions({editions, agencyName, alt}: ProgramEditionsProp
           <li key={edition.heading} className="glass-card p-6">
             <h3 className="text-xl font-semibold">{edition.heading}</h3>
 
-            {edition.attribution ? (
+            {edition.attribution === null ? null : (
               <p className="text-muted-foreground mt-2">
-                {t('fundedBy', {
-                  agency: agencyName(edition.attribution.agency),
-                  initiative: edition.attribution.initiative
-                })}
+                {edition.attribution.kind === 'agency'
+                  ? t('fundedBy', {
+                      agency: agencyName(edition.attribution.agency),
+                      initiative: edition.attribution.initiative
+                    })
+                  : t('fundedByScheme', {scheme: edition.attribution.scheme})}
               </p>
-            ) : null}
+            )}
 
             {edition.organisedFor ? (
               <p className="text-muted-foreground mt-2">
@@ -1559,7 +1572,11 @@ Inside the component, after the existing `<ProgramDetail … />`:
         editions={asa.editions.map((edition) => ({
           heading: zh ? edition.labelZh : edition.labelEn,
           attribution: edition.funder.kind === 'named'
-            ? {agency: edition.funder.agency, initiative: zh ? edition.funder.initiativeZh : edition.funder.initiativeEn}
+            ? {
+                kind: 'agency' as const,
+                agency: edition.funder.agency,
+                initiative: zh ? edition.funder.initiativeZh : edition.funder.initiativeEn
+              }
             : null,
           organisedFor: null,
           regions: edition.regions,
@@ -1593,7 +1610,7 @@ Adjust the `ProgramWinners` type used by the component to the localised shape (`
 
 HKICT maps `organisedFor: edition.organisedFor`, `attribution: null`, `heading: String(edition.year)`, `regions: {kind: 'unrecorded'}`, `meta: []`.
 
-TCT maps `heading: zh ? edition.labelZh : edition.labelEn`, `attribution` from its funder, `organisedFor: null`, `regions: {kind: 'unrecorded'}`, `meta: [zh ? edition.shapeZh : edition.shapeEn]`.
+TCT maps `heading: zh ? edition.labelZh : edition.labelEn`, `organisedFor: null`, `regions: {kind: 'unrecorded'}`, `meta: [zh ? edition.shapeZh : edition.shapeEn]`, and `attribution: edition.funder.kind === 'named' ? {kind: 'scheme' as const, scheme: zh ? edition.funder.schemeZh : edition.funder.schemeEn} : null` — a scheme, not an agency, because that is all the archive names.
 
 TCT uses the label, not the year, because its editions are named — "Tech to Connect 4.0", and the series renamed to "Tech Connect" (智創互聯) mid-run. Rendering a bare year would assert none of that. The label is a locale pair for the same reason every other user-visible string is: the archive's own event titles are bilingual, e.g. `智創互聯 2026：機器人與自動化賦能啟動研討會 | WTIA Tech To Connect 2026: Robotics & Automation Kick-Off Seminar`.
 
