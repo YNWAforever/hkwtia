@@ -129,8 +129,18 @@ const asaFundingSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('named'),
     agency: z.enum(['createhk', 'ccida']),
-    initiativeEn: z.string().min(1),
-    initiativeZh: z.string().min(1)
+    // Nullable, and a pair so it cannot be half-filled. Most edition pages name
+    // the funding body and stop there: "CreateSmart Initiative" appears on
+    // exactly two pages in 577, both workshop disclaimers (2020-07-23 and
+    // 2024-08-15), and 創意智優計劃 appears on none. Requiring it would attach a
+    // named government scheme to six editions on the evidence of two, which is
+    // the same shape of error as the CCIDA claim this schema exists to prevent.
+    // Null renders "Funded by Create Hong Kong" and stops there, which is what
+    // those pages say.
+    initiative: z.object({
+      en: z.string().min(1),
+      zh: z.string().min(1)
+    }).strict().nullable()
   }).strict(),
   // The archive names no funder for this edition. Distinct from "not yet
   // filled in", and the page says nothing about funding rather than guessing.

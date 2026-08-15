@@ -1344,6 +1344,7 @@ In `messages/en.json`, add a `record` key inside the existing `programs` object 
       "winnersHeading": "Winners",
       "categoryHeading": "Category",
       "fundedBy": "Funded by {agency} under the {initiative}",
+      "fundedByAgency": "Funded by {agency}",
       "fundedByScheme": "Funded with {scheme} funding",
       "organisedFor": "Organised for {agency}",
       "regionsAttended": "{count} regions attended",
@@ -1368,6 +1369,7 @@ Add the same keys to `messages/zh-HK.json` under `programs.record`:
       "winnersHeading": "得獎者",
       "categoryHeading": "組別",
       "fundedBy": "由{agency}透過{initiative}資助",
+      "fundedByAgency": "由{agency}資助",
       "fundedByScheme": "獲 {scheme} 資助",
       "organisedFor": "為{agency}籌辦",
       "regionsAttended": "{count} 個地區參與",
@@ -1422,8 +1424,11 @@ type Edition = {
   // its scheme; TCT names a scheme with no body attached. Collapsing them would
   // mean an optional `agency`, which is the shape that lets a missing funder
   // pass unnoticed.
+  // `initiative` is null on the four ASA editions whose pages name Create Hong
+  // Kong and never name the scheme -- those render "Funded by Create Hong Kong"
+  // and stop, which is what the page says.
   attribution:
-    | {kind: 'agency'; agency: AgencyId; initiative: string}
+    | {kind: 'agency'; agency: AgencyId; initiative: string | null}
     | {kind: 'scheme'; scheme: string}
     | null;
   organisedFor: AgencyId | null;
@@ -1457,12 +1462,14 @@ export function ProgramEditions({editions, agencyName, alt}: ProgramEditionsProp
 
             {edition.attribution === null ? null : (
               <p className="text-muted-foreground mt-2">
-                {edition.attribution.kind === 'agency'
-                  ? t('fundedBy', {
-                      agency: agencyName(edition.attribution.agency),
-                      initiative: edition.attribution.initiative
-                    })
-                  : t('fundedByScheme', {scheme: edition.attribution.scheme})}
+                {edition.attribution.kind === 'scheme'
+                  ? t('fundedByScheme', {scheme: edition.attribution.scheme})
+                  : edition.attribution.initiative === null
+                    ? t('fundedByAgency', {agency: agencyName(edition.attribution.agency)})
+                    : t('fundedBy', {
+                        agency: agencyName(edition.attribution.agency),
+                        initiative: edition.attribution.initiative
+                      })}
               </p>
             )}
 
@@ -1575,7 +1582,7 @@ Inside the component, after the existing `<ProgramDetail … />`:
             ? {
                 kind: 'agency' as const,
                 agency: edition.funder.agency,
-                initiative: zh ? edition.funder.initiativeZh : edition.funder.initiativeEn
+                initiative: edition.funder.initiative && (zh ? edition.funder.initiative.zh : edition.funder.initiative.en)
               }
             : null,
           organisedFor: null,

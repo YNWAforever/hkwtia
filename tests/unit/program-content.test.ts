@@ -22,26 +22,45 @@ describe("ASA record", () => {
   });
 
   // Neither microsite was captured, so a listed winner set for either year
-  // means someone transcribed names from photo captions.
-  it("defers the 2020 and 2021 winners off-site", () => {
-    for (const yearStart of [2020, 2021]) {
-      const edition = asa.editions.find((item) => item.yearStart === yearStart);
-      if (!edition) continue;
-      expect(edition.winners.kind, `${yearStart}`).toBe("off-site");
-    }
+  // means someone transcribed names from photo captions, or from the two
+  // kick-off pages that name a handful of returning winners as panellists.
+  //
+  // The two years are asserted differently because the archive treats them
+  // differently. 2020's ceremony page states outright "Full list of Award
+  // Winners will be uploaded: https://contest2020.bestasiaapp.hk/", quoting a
+  // bare url. 2021's carries only a `Website:` field pointing at that
+  // ceremony's own sub-page, and never says the winners were published there --
+  // so `off-site` for 2021 would have to link to a url no page writes.
+  it("publishes no winner list for 2020 or 2021", () => {
+    const yearStart = (year: number) => asa.editions.find((item) => item.yearStart === year);
+
+    expect(yearStart(2020)?.winners).toEqual({
+      kind: "off-site",
+      url: "https://contest2020.bestasiaapp.hk/",
+    });
+    expect(yearStart(2021)?.winners.kind).toBe("unrecorded");
   });
 
-  // The era boundary, which nothing else pins. The archive counts co-organising
-  // regions while the contest is the Asia Smartphone (Apps) Contest -- "7 Asia
-  // Regions ... was the co-organizer" in 2013 and 2015, 9 in 2016 -- and
-  // switches to counting participation once it becomes the Asia Smart App
-  // Awards in 2017: "11 participating countries/ regions", 13, 15, then 16
-  // "industry experts from ... Asian regions" in 2024. The audit flattened the
-  // two, reading a participation figure as a co-organiser count; a record that
-  // put `co-organisers` on a 2017-or-later edition would be making the same
-  // mistake in the file itself. `unrecorded` is allowed in either era.
+  // The era boundary, which nothing else pins. Through 2016 the archive counts
+  // co-organising regions -- "7 Asia Regions ... was the co-organizer", 9 in
+  // 2016 -- and from the 2017 rename to Asia Smart App Awards it counts
+  // participation instead: "11 participating countries/ regions", 13, 15, then
+  // 16 "industry experts from ... Asian regions" in 2024. The audit flattened
+  // the two, reading a participation figure as a co-organiser count; a record
+  // that put `co-organisers` on a 2017-2024 edition would be making the same
+  // mistake in the file itself.
+  //
+  // Bounded at 2024 on purpose. The 2025 home page reverts to the earlier
+  // wording -- "Uniting 17 regional co-organisers" -- so the era is not open
+  // ended. That edition is `unrecorded` today only because the same page's
+  // carousel renders 15 logos; should WTIA settle it at 17, the accurate
+  // transcription is a `co-organisers` figure, and this test must not block it.
+  // `unrecorded` is allowed anywhere.
+  const ATTENDANCE_ERA_END = 2024;
+
   it("counts co-organising regions only before the 2017 rename, and attendance only after", () => {
     for (const edition of asa.editions) {
+      if (edition.yearStart > ATTENDANCE_ERA_END) continue;
       if (edition.regions.kind === "co-organisers") {
         expect(edition.yearStart, edition.labelEn).toBeLessThan(2017);
       }

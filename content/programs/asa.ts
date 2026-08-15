@@ -10,12 +10,16 @@ import {asaProgramSchema, type AsaProgram} from '@/content/schemas';
  * page; the page is named in the comment beside it. Four values are drafted
  * rather than transcribed, and each is marked `DRAFTED` where it appears:
  *
- * 1. `initiativeZh` — the archive never writes the CreateSmart Initiative's
- *    Chinese name (`grep 創意智優` over all 577 pages returns nothing). The
- *    rendering used matches the fixture already in
- *    tests/unit/program-schema.test.ts. It belongs in
- *    docs/wtia-translation-review.md Table A alongside "SME Development Fund",
- *    the other official scheme name that archive does not corroborate.
+ * 1. `funder.initiative.zh` on the two editions that have an initiative at all
+ *    — the archive never writes the CreateSmart Initiative's Chinese name
+ *    (`grep 創意智優` over all 577 pages returns nothing). The rendering used
+ *    matches the fixture already in tests/unit/program-schema.test.ts. It
+ *    belongs in docs/wtia-translation-review.md Table A alongside "SME
+ *    Development Fund", the other official scheme name the archive does not
+ *    corroborate. `initiative` is null on the other four funded editions:
+ *    "CreateSmart" appears in exactly two of 577 pages, both ASA workshop
+ *    disclaimers (2020-07-23, CreateHK; 2024-08-15, CCIDA), so only the 2020
+ *    and 2024 editions can name it.
  * 2. `labelZh` on the eight editions whose pages are English-only — repeated
  *    from `labelEn` per asaProgramSchema's instruction, rather than inventing a
  *    Chinese award name. Only ASA 2022/23 and ASA 2025 have a real Chinese
@@ -28,6 +32,11 @@ import {asaProgramSchema, type AsaProgram} from '@/content/schemas';
  *    category names (公共事務及社會創新獎, 商業應用獎, 生活及娛樂獎), but that
  *    is a different edition's page and this record does not carry a fact from
  *    one edition to another. See the task report.
+ *
+ * Two winner sets are deliberately incomplete rather than absent. Kick-off
+ * pages name four ASA 2020 winners and five ASA 2021 winners in prose, as
+ * returning panellists, with no apps and no categories. A full list exists for
+ * neither year, and `listed` cannot say "some of".
  *
  * Nothing here describes what a winner built: the archive never does, for any
  * edition, and winnerSchema is `.strict()` so that the omission is loud.
@@ -56,11 +65,14 @@ export const asa: AsaProgram = asaProgramSchema.parse({
       labelZh: 'Asia Smartphone Apps Contest & Summit 2015', // DRAFTED: English-only.
       yearStart: 2015,
       funder: {kind: 'none-recorded'},
-      // The same co-organiser sentence as 2013, with 7. The claims review says
-      // explicit co-organiser counts exist "only for 2013 (7) and 2016 (9)" —
-      // it missed this page, which repeats the sentence verbatim. Recorded as
-      // the page writes it; flagged for WTIA in the task report.
-      regions: {kind: 'co-organisers', count: 7},
+      // The page carries 2013's co-organiser sentence forward unchanged — same
+      // 7, same region list, differing only in British spelling and one comma.
+      // That comma is the point: 2013's page ends the clause with a full stop,
+      // while here it binds to "started to organise ... in 2013", making the
+      // sentence an origin-story recap rather than a statement about 2015.
+      // 2016 earns its figure because someone edited the number to 9; this page
+      // never did, so it records nothing about its own edition.
+      regions: {kind: 'unrecorded'},
       winners: {kind: 'unrecorded'},
       images: []
     },
@@ -85,17 +97,11 @@ export const asa: AsaProgram = asaProgramSchema.parse({
       labelZh: 'Asia Smart App Summit cum Award Presentation Ceremony', // DRAFTED: English-only.
       yearStart: 2017,
       // "With funding support from Create Hong Kong of the Government of the
-      // Hong Kong Special Administrative Region". The post itself does not name
-      // the scheme; the CreateSmart Initiative attribution for 2017–2022/23 is
-      // the claims review's (§1), corroborated in the archive by the ASA
-      // workshop disclaimers — 2020-07-23 names Create Hong Kong and the
-      // CreateSmart Initiative, 2024-08-15 names CCIDA and the same Initiative.
-      funder: {
-        kind: 'named',
-        agency: 'createhk',
-        initiativeEn: 'CreateSmart Initiative',
-        initiativeZh: '創意智優計劃' // DRAFTED: no Chinese form in the archive.
-      },
+      // Hong Kong Special Administrative Region", and it stops there. The
+      // CreateSmart Initiative attribution for 2017–2022/23 is the claims
+      // review's, not this page's — "CreateSmart" appears in exactly two of 577
+      // pages, both workshop disclaimers — so the scheme is left null.
+      funder: {kind: 'named', agency: 'createhk', initiative: null},
       // "successfully gather 11 participating countries/ regions in Asia".
       // Participation, not co-organisation — the two are never interchanged.
       regions: {kind: 'attended', count: 11},
@@ -109,13 +115,9 @@ export const asa: AsaProgram = asaProgramSchema.parse({
       labelEn: 'Asia Smart App Awards 2018/2019',
       labelZh: 'Asia Smart App Awards 2018/2019', // DRAFTED: English-only.
       yearStart: 2018,
-      // Same "With funding support from Create Hong Kong" sentence.
-      funder: {
-        kind: 'named',
-        agency: 'createhk',
-        initiativeEn: 'CreateSmart Initiative',
-        initiativeZh: '創意智優計劃' // DRAFTED: no Chinese form in the archive.
-      },
+      // Same "With funding support from Create Hong Kong" sentence, and again
+      // no scheme named on the page.
+      funder: {kind: 'named', agency: 'createhk', initiative: null},
       // "successfully gather 13 participating countries/ regions in Asia".
       regions: {kind: 'attended', count: 13},
       winners: {kind: 'unrecorded'},
@@ -133,15 +135,21 @@ export const asa: AsaProgram = asaProgramSchema.parse({
       funder: {
         kind: 'named',
         agency: 'createhk',
-        initiativeEn: 'CreateSmart Initiative',
-        initiativeZh: '創意智優計劃' // DRAFTED: no Chinese form in the archive.
+        initiative: {
+          en: 'CreateSmart Initiative',
+          zh: '創意智優計劃' // DRAFTED: no Chinese form in 577 pages.
+        }
       },
       // "successfully gather 15 participating countries/ regions in Asia".
       regions: {kind: 'attended', count: 15},
-      // The presentation ceremony page says "Full list of Award Winners will be
-      // uploaded: https://contest2020.bestasiaapp.hk/". That microsite was not
-      // captured, and the ceremony page's photo caption names no one — a
-      // partial list read off photographs is exactly what this variant prevents.
+      // The presentation ceremony page says, verbatim, "Full list of Award
+      // Winners will be uploaded: https://contest2020.bestasiaapp.hk/" — a bare
+      // url the archive itself writes, and an explicit statement that the
+      // results live there. The microsite was not captured. The 2021-11-23
+      // kick-off page does name four ASA 2020 winners in prose (Visionaries
+      // 777, Pokeguide, SOCIF, InnoSpire Technology) as returning panellists,
+      // with no apps and no categories; `listed` would assert a completeness
+      // that partial set does not have, and the schema cannot qualify it.
       winners: {kind: 'off-site', url: 'https://contest2020.bestasiaapp.hk/'},
       images: []
     },
@@ -155,22 +163,27 @@ export const asa: AsaProgram = asaProgramSchema.parse({
       // Kick-off page: "organised by ... (WTIA) and sponsored by Create Hong
       // Kong (CreateHK) of the Government of the Hong Kong Special
       // Administrative Region". The Asia Smart App Summit 2021 page repeats it.
-      funder: {
-        kind: 'named',
-        agency: 'createhk',
-        initiativeEn: 'CreateSmart Initiative',
-        initiativeZh: '創意智優計劃' // DRAFTED: no Chinese form in the archive.
-      },
-      // No 2021 page states either kind of figure. The summit page says "the
-      // representative of the 13 regional partners from ..." — a third phrase
-      // the archive uses for neither measurement consistently: for 2020 it
-      // matches that edition's participation count (15), while the claims
-      // review reads the 2025 home page's "Regional Partners" carousel as a
-      // co-organiser signal. Rather than pick a side, this stays silent.
-      regions: {kind: 'unrecorded'},
-      // The ceremony page links only to the ASA 2021 microsite, which was not
-      // captured; no page names a 2021 winner.
-      winners: {kind: 'off-site', url: 'https://contest2021.bestasiaapp.hk/'},
+      // Neither names a scheme.
+      funder: {kind: 'named', agency: 'createhk', initiative: null},
+      // Summit page: "the representative of the 13 regional partners from
+      // Bangladesh, Cambodia, Israel, India, Indonesia, Japan, Malaysia,
+      // Myanmar, the Mainland, Sri Lanka, Taiwan, Thailand and Vietnam" —
+      // thirteen names for thirteen. "Regional partners" is the same
+      // measurement as "participating countries/ regions", not a third one:
+      // 2020 states both, with the same count and the same fifteen regions in
+      // the same order (edition page "15 participating countries/ regions in
+      // Asia, namely the Cambodia, Israel, India, ..."; summit page "15
+      // regional partners from Cambodia, Israel, India, ...").
+      regions: {kind: 'attended', count: 13},
+      // Unlike 2020, nothing says the 2021 winners were published anywhere. The
+      // ceremony page carries only a `Website:` field pointing at that
+      // ceremony's own sub-page of the microsite; the bare microsite url
+      // appears nowhere in the capture, so `off-site` here would mean linking
+      // to a url this record invented. The 2023-01-05 kick-off page names five
+      // ASA 2021 winners in prose (HKT, CheckPlus, ANIWARE, Dayta AI, and
+      // Dr.Go/HKT) as returning panellists — a partial set, no apps, no
+      // categories, so not a `listed` winner set either.
+      winners: {kind: 'unrecorded'},
       images: []
     },
     {
@@ -184,15 +197,14 @@ export const asa: AsaProgram = asaProgramSchema.parse({
       // Kick-off page: "with the funding support from Create Hong Kong
       // (CreateHK)". The press conference page says the same in Chinese:
       // 「香港特別行政區政府『創意香港』贊助」. This is the last CreateHK edition.
-      funder: {
-        kind: 'named',
-        agency: 'createhk',
-        initiativeEn: 'CreateSmart Initiative',
-        initiativeZh: '創意智優計劃' // DRAFTED: no Chinese form in the archive.
-      },
-      // Same "regional partners" phrasing as 2021, and here the page
-      // contradicts itself: the Asia Smart App Summit 2022/23 page says "the 15
-      // regional partners from" and then lists 14.
+      // Neither page names a scheme.
+      funder: {kind: 'named', agency: 'createhk', initiative: null},
+      // The only figure is on the Asia Smart App Summit 2022/23 page, and the
+      // sentence contradicts itself: "the 15 regional partners from
+      // Bangladesh, Cambodia, Israel, India, Japan, Korea, Malaysia, Myanmar,
+      // Philippines, Singapore, Sri Lanka, Taiwan, Thailand and Vietnam" lists
+      // fourteen. 2021's identical phrasing is recorded because its thirteen
+      // names match its thirteen; this one has no figure to trust.
       regions: {kind: 'unrecorded'},
       // The press conference page publishes a 「九強名單」 — a nine-strong
       // shortlist "排名不分先後", explicitly not a result. No captured page
@@ -216,8 +228,10 @@ export const asa: AsaProgram = asaProgramSchema.parse({
       funder: {
         kind: 'named',
         agency: 'ccida',
-        initiativeEn: 'CreateSmart Initiative',
-        initiativeZh: '創意智優計劃' // DRAFTED: no Chinese form in the archive.
+        initiative: {
+          en: 'CreateSmart Initiative',
+          zh: '創意智優計劃' // DRAFTED: no Chinese form in 577 pages.
+        }
       },
       // "bringing together representatives from 16 Asian regions right here in
       // Hong Kong", and the summit page: "industry experts from 16 Asian
@@ -320,11 +334,19 @@ export const asa: AsaProgram = asaProgramSchema.parse({
       yearStart: 2025,
       // No captured 2025 page names a funder — neither the post nor the summit
       // page. CCIDA funded 2024, and that fact stops at 2024.
-      funder: {kind: 'none-recorded'},
-      // The post and the summit page both say 17 Asian regions, but the home
-      // page's own Regional Partners carousel renders 15 logos. The archive
-      // contradicts itself and WTIA has been asked to settle it, so the record
-      // states neither figure.
+      // The home page's ASA card, duplicated in hkwtia-org-slide-page-home.html:
+      // WTIA "organises the Asia Smart Innovation Awards (ASA) 2025, with
+      // funding support from he [sic] Cultural and Creative Industries
+      // Development Agency (CCIDA) of the Government of the Hong Kong Special
+      // Administrative Region." Neither the November post nor the summit page
+      // names a funder; the home page does, and it names CCIDA. No scheme.
+      funder: {kind: 'named', agency: 'ccida', initiative: null},
+      // That same sentence continues "Uniting 17 regional co-organisers" — so
+      // 2025 does have an explicit co-organiser figure, and it is the only one
+      // after 2016. It is not recorded because the page contradicts itself
+      // internally: the Regional Partners carousel further down that same page
+      // renders exactly 15 logos (RP_R1 … RP_R15). The claims review asks WTIA
+      // to settle 17 against 15; until they do, the record states neither.
       regions: {kind: 'unrecorded'},
       // The only two winners the post names, and the only category it names.
       // Neither company has a Chinese name in the archive; neither product is
@@ -333,14 +355,19 @@ export const asa: AsaProgram = asaProgramSchema.parse({
         kind: 'listed',
         entries: [
           {
-            nameEn: 'RIFFAI',
-            nameZh: 'RIFFAI',
+            // "the Thai team RIFFAI" / 「泰國團隊 RIFFAI」. The region is carried
+            // in the name for the same reason as the 2024 entries.
+            nameEn: 'RIFFAI (Thailand)',
+            nameZh: 'RIFFAI (Thailand)',
             categoryEn: 'Asia Smart Innovation Grand Award',
             categoryZh: '亞洲智能創新大獎'
           },
           {
-            nameEn: '417 Technology Limited',
-            nameZh: '417 Technology Limited',
+            // "Hong Kong representatives also delivered outstanding
+            // performances, with 417 Technology Limited securing the Silver
+            // Award".
+            nameEn: '417 Technology Limited (Hong Kong)',
+            nameZh: '417 Technology Limited (Hong Kong)',
             categoryEn: 'Living & Culture — Silver Award',
             categoryZh: '「生活與文化組別」銀獎'
           }

@@ -24,8 +24,7 @@ const asa = {
     funder: {
       kind: "named" as const,
       agency: "createhk" as const,
-      initiativeEn: "CreateSmart Initiative",
-      initiativeZh: "創意智優計劃",
+      initiative: {en: "CreateSmart Initiative", zh: "創意智優計劃"},
     },
     regions: {kind: "attended" as const, count: 16},
     winners: listedWinners,
@@ -80,7 +79,7 @@ describe("programme schemas", () => {
   it("gives ASA no programme-level funder to write", () => {
     expect(() => asaProgramSchema.parse({
       ...asa,
-      funder: {kind: "named", agency: "ccida", initiativeEn: "x", initiativeZh: "x"},
+      funder: {kind: "named", agency: "ccida", initiative: {en: "x", zh: "x"}},
     })).toThrow();
   });
 
@@ -94,6 +93,22 @@ describe("programme schemas", () => {
     const withoutFunder: Record<string, unknown> = {...edition};
     delete withoutFunder.funder;
     expect(() => asaProgramSchema.parse({...asa, editions: [withoutFunder]})).toThrow();
+  });
+
+  // Most ASA edition pages name the funding body and stop there. "CreateSmart
+  // Initiative" is on two pages in 577 and 創意智優計劃 on none, so requiring the
+  // scheme would attach a named government programme to six editions on the
+  // evidence of two. Null is the honest value, and the pair cannot be half-filled.
+  it("lets an edition name a funder without naming a scheme", () => {
+    const named = {kind: "named" as const, agency: "createhk" as const};
+    expect(() => asaProgramSchema.parse({
+      ...asa, editions: [{...asa.editions[0], funder: {...named, initiative: null}}],
+    })).not.toThrow();
+    for (const initiative of [{en: "CreateSmart Initiative"}, {zh: "創意智優計劃"}]) {
+      expect(() => asaProgramSchema.parse({
+        ...asa, editions: [{...asa.editions[0], funder: {...named, initiative}}],
+      }), JSON.stringify(initiative)).toThrow();
+    }
   });
 
   it("rejects a funding agency outside ASA's documented set", () => {
