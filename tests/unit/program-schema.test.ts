@@ -1,16 +1,16 @@
 import {describe, expect, it} from "vitest";
 
 import {
-  type AsaProgram,
+  type AsaEdition,
   asaProgramSchema,
   cpaiProgramSchema,
   hkictProgramSchema,
-  type TctProgram,
+  type TctEdition,
   tctProgramSchema,
 } from "@/content/schemas";
 
-type AsaAgency = Extract<AsaProgram["editions"][number]["funder"], {kind: "named"}>["agency"];
-type TctAgency = Extract<TctProgram["editions"][number]["funder"], {kind: "named"}>["agency"];
+type AsaAgency = Extract<AsaEdition["funder"], {kind: "named"}>["agency"];
+type TctAgency = Extract<TctEdition["funder"], {kind: "named"}>["agency"];
 
 const listedWinners = {
   kind: "listed" as const,
@@ -20,7 +20,8 @@ const listedWinners = {
 const asa = {
   id: "asa" as const,
   editions: [{
-    label: "2022/23",
+    labelEn: "Asia Smart App Awards 2022/23",
+    labelZh: "亞洲智能應用程式大獎 2022/23",
     yearStart: 2022,
     funder: {
       kind: "named" as const,
@@ -42,7 +43,8 @@ const hkict = {
 const tct = {
   id: "tct" as const,
   editions: [{
-    label: "Tech to Connect 4.0",
+    labelEn: "Tech to Connect 4.0",
+    labelZh: "智創互聯 4.0",
     year: 2023,
     shapeEn: "10 industry workshops, 2 seminars and a grand conference",
     shapeZh: "十場業界工作坊、兩場研討會及一場大型會議",
@@ -219,8 +221,15 @@ describe("programme schemas", () => {
     expect(() => hkictProgramSchema.parse({
       ...hkict, editions: [{...hkict.editions[0], winners: {kind: "off-site"}}],
     })).toThrow();
-    // `z.string().url()` accepts these; the value is rendered as a link.
-    for (const url of ["mailto:info@hkwtia.org", "javascript:alert(1)", "http://contest2020.bestasiaapp.hk/"]) {
+    // The first three `z.string().url()` accepts; the last two the scheme
+    // regex accepts. Neither check alone is enough, so both are chained.
+    for (const url of [
+      "mailto:info@hkwtia.org",
+      "javascript:alert(1)",
+      "http://contest2020.bestasiaapp.hk/",
+      "https://",
+      "https://a b c",
+    ]) {
       expect(() => hkictProgramSchema.parse({
         ...hkict, editions: [{...hkict.editions[0], winners: {kind: "off-site", url}}],
       }), url).toThrow();
@@ -249,6 +258,14 @@ describe("programme schemas", () => {
     expect(() => cpaiProgramSchema.parse({...cpai, partnerCertificateZh: ""})).toThrow();
     expect(() => tctProgramSchema.parse({
       ...tct, editions: [{...tct.editions[0], shapeZh: ""}],
+    })).toThrow();
+    // An edition's name is a heading. A single `label` would put "Tech to
+    // Connect 4.0" at the top of an otherwise-Chinese page.
+    expect(() => asaProgramSchema.parse({
+      ...asa, editions: [{...asa.editions[0], labelZh: ""}],
+    })).toThrow();
+    expect(() => tctProgramSchema.parse({
+      ...tct, editions: [{...tct.editions[0], labelZh: ""}],
     })).toThrow();
   });
 });

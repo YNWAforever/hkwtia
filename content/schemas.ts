@@ -99,10 +99,14 @@ const winnerSchema = z.object({
  */
 const winnersSchema = z.discriminatedUnion('kind', [
   z.object({kind: z.literal('listed'), entries: z.array(winnerSchema).min(1)}).strict(),
-  // `.url()` alone would accept `mailto:` and `javascript:`. Both known
-  // microsites are https (contest2020/contest2021.bestasiaapp.hk), and this
-  // value is rendered as a link, so the scheme is pinned.
-  z.object({kind: z.literal('off-site'), url: z.string().regex(/^https:\/\//)}).strict(),
+  // Both checks, because each misses what the other catches: `.url()` alone
+  // accepts `mailto:` and `javascript:`, while the scheme regex alone accepts
+  // `https://` bare and `https://a b c`. Both known microsites are https
+  // (contest2020/contest2021.bestasiaapp.hk) and this renders as a link.
+  z.object({
+    kind: z.literal('off-site'),
+    url: z.string().url().regex(/^https:\/\//)
+  }).strict(),
   z.object({kind: z.literal('unrecorded')}).strict()
 ]);
 
@@ -152,7 +156,16 @@ export const asaProgramSchema = z.object({
     // Both vary: "2022/23" is a single edition, and the lineage runs Asia
     // Smartphone Apps Contest -> Asia Smart App Awards -> Asia Smart Innovation
     // Awards, so the per-edition name has nowhere else to live.
-    label: z.string().min(1),
+    //
+    // Bilingual because it is user-visible and becomes a heading: a single
+    // `label` would put "Asia Smart App Awards 2018/2019" at the top of
+    // /zh/programs/asa. It is also the only field that can hold 2025's two
+    // competing Chinese names -- 亞洲智慧創新大獎 in the post title,
+    // 亞洲智能創新大獎 for the grand award -- which the claims review asks WTIA
+    // to settle. Where the archive gives one form only, repeat it in both, as
+    // with a winner's `nameZh` above.
+    labelEn: z.string().min(1),
+    labelZh: z.string().min(1),
     // 2013 is the first edition -- "WTIA started to organize Asia Smartphone
     // Contest in 2013" -- so an earlier year is a transcription error.
     yearStart: z.number().int().min(2013).max(2100),
@@ -201,6 +214,14 @@ export const hkictProgramSchema = z.object({
 /**
  * CPAI is a credential, not an event series: no editions, no winners, no years.
  *
+ * Not for want of material -- the archive does name cohort dates (2026-03-02,
+ * 逢週一晚), a 12-hour duration, a venue, and 「已成功舉辦兩屆，第三屆現正接受最後
+ * 報名」. All of it is deliberately omitted: a credential page framed as a course
+ * schedule is exactly the "when did CPAI run" framing the claims review warns
+ * against, and enrolment happens on CUSCS systems rather than here. `.strict()`
+ * makes the omission loud, so anyone who disagrees has to change this schema
+ * rather than quietly adding a field.
+ *
  * WTIA issues CPAI alone. CUSCS separately issues its own completion
  * certificate to the same graduates -- 「一個課程，兩張認證」. The audit called it
  * a "joint WTIA x CUSCS certification", which understates what WTIA owns, so
@@ -235,12 +256,16 @@ export const cpaiProgramSchema = z.object({
 export const tctProgramSchema = z.object({
   id: z.literal('tct'),
   editions: z.array(z.object({
-    // Same reason ASA has one: an edition is not reliably a calendar year and
-    // is not reliably called by one. The first edition runs 2021-22, the 2023
-    // edition's own name is "Tech to Connect 4.0", and the series was renamed
-    // to Tech Connect (智創互聯) mid-run -- a rename the page classifier already
-    // has to match on. Write the name the page uses.
-    label: z.string().min(1),
+    // Same reason ASA has one, including the locale pair: an edition is not
+    // reliably a calendar year and is not reliably called by one. The first
+    // edition runs 2021-22, the 2023 edition's own name is "Tech to Connect
+    // 4.0", and the series was renamed to Tech Connect (智創互聯) mid-run -- a
+    // rename the page classifier already has to match on. The archive writes
+    // both forms itself: 「智創互聯 2026：機器人與自動化賦能啟動研討會 | WTIA Tech
+    // To Connect 2026: Robotics & Automation Kick-Off Seminar」. Write the name
+    // the page uses, in each locale.
+    labelEn: z.string().min(1),
+    labelZh: z.string().min(1),
     // The 2019 TechConnect Conference & Festival is a same-named predecessor,
     // not edition zero: no "Tech to Connect" branding, no edition number, and
     // the 2023 summit calls 2021-22 the first edition. The floor keeps it out.
@@ -270,8 +295,3 @@ export type AsaEdition = AsaProgram['editions'][number];
 export type HkictEdition = HkictProgram['editions'][number];
 export type TctEdition = TctProgram['editions'][number];
 export type AsaRegions = AsaEdition['regions'];
-
-// For render helpers that take a funder from either funded programme. The two
-// member types stay distinct -- this union does not let an ASA edition hold a
-// TCT agency, it only lets one function accept both.
-export type ProgramFunder = AsaEdition['funder'] | TctEdition['funder'];
