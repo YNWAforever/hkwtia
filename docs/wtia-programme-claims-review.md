@@ -138,10 +138,22 @@ Connect" branding, no edition number, and no link to the series site. The 2023 s
 Tech to Connect 4.0 the "2nd edition", which makes 2021–22 the first. 2019 is a same-named
 predecessor, not edition zero.
 
-**The AI Leaders' Summit speaker count is unresolved.** Its own event page says fifteen speakers
-in one sentence and eighteen in the next, and **names none of them**. No Huawei, Microsoft or
-HKPC person appears anywhere — HKPC is the venue. The audit's "15+ experts from Huawei,
-Microsoft, HKPC" has no support in the archive.
+**The AI Leaders' Summit speaker count is unresolved, and the archive gives three different
+answers.** Its own event page says fifteen speakers in one sentence and eighteen in the next. A
+third page — the May 2025 「Tech Connect 智創互聯」AI 領袖系列研討會 post — states the audit's
+version outright, in both locales: 「邀請超過 15 位來自華為、Microsoft、HKPC 等知名企業的技術專家」 /
+"featured over 15 tech experts from renowned organizations such as Huawei, Microsoft, and HKPC".
+
+So the audit did not invent this one. What no page does is **name a single speaker** — not one
+person from Huawei, Microsoft or HKPC appears anywhere in 577 pages, and HKPC is the venue. A
+count that three of your own pages disagree about, attached to companies none of them evidence,
+is not something we will publish for you.
+
+**Please supply:** the speaker list, or confirm the figure should not be published.
+
+*(An earlier draft of this section said the Huawei/Microsoft/HKPC claim had no support in the
+archive. It has support — on the page above, which the surveys missed. The substance of the
+finding is unchanged: three conflicting counts and no named speaker.)*
 
 **GSP funding appears once, in 577 pages** — on the July 2023 Tech to Connect 4.0 seminar page.
 The 2024–26 AI and robotics editions never mention it.

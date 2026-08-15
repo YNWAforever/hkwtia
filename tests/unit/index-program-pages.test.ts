@@ -218,7 +218,10 @@ describe("content/program-pages.json stays in sync with the classifier", () => {
   const EXPECTED_ASA_COUNT = 34;
   const EXPECTED_HKICT_COUNT = 15;
   const EXPECTED_CPAI_COUNT = 3;
-  const EXPECTED_TCT_COUNT = 36;
+  // 36 by pattern, plus the seven allowlisted Tech Connect workshop pages whose
+  // English titles hide the Chinese series marker in the body (one of them
+  // captured twice under different slugs).
+  const EXPECTED_TCT_COUNT = 43;
 
   it("has the reviewed per-programme counts", () => {
     expect(programPages.asa).toHaveLength(EXPECTED_ASA_COUNT);

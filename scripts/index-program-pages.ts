@@ -114,6 +114,24 @@ export const ALLOWLIST: ReadonlyMap<string, ProgramId> = new Map([
   // "certified ... course" page. This is one specific page, confirmed by its
   // <title>, not a rule.
   ["hkwtia-org-certified-courses.html", "cpai"],
+  // Tech Connect workshops #4-#8 and the July 2025 「智創互聯：AI 防護盾」, all
+  // titled in English with the Chinese series marker 「Tech Connect 系列工作坊#N」
+  // only in the body. #3 and #9 kept the marker in their titles and so reach
+  // `tct` by pattern; these six do not, and were found only by reading page
+  // bodies while transcribing the record. Their images belong to TCT's set, so
+  // leaving them out would have silently dropped a sixth of the edition's
+  // pictures from the download.
+  //
+  // #6 was captured twice, under a bare slug and a bilingual one. Both are
+  // listed: the download deduplicates by image url, so a page appearing twice
+  // costs nothing, while guessing which copy is canonical could cost an image.
+  ["hkwtia-org-event-ai-and-cloud-innovations-opening-new-horizons-for-effective-collaboration-and-strategic-decisions-ai-e8-88-87-e9-9b-b2-e7-ab-af-e5-89-b5-e6-96-b0-ef-bc-9a-e9-96-8b-e5-95-9f-e5-8d-94-e4-bd-9c.html", "tct"],
+  ["hkwtia-org-event-ai-transportation-innovation-the-driving-force-of-future-mobility-ai-e9-81-8b-e8-bc-b8-e9-9d-a9-e6-96-b0-e6-9c-aa-e4-be-86-e4-ba-a4-e9-80-9a-e7-9a-84-e9-a9-85-e5-8b-95-e5-8a-9b.html", "tct"],
+  ["hkwtia-org-event-ai-transaction-watchtower-smart-defenses-against-cyber-threats-ai-e5-ae-88-e6-9c-9b-e8-80-85-e6-99-ba-e6-85-a7-e9-98-b2-e8-a1-9b-e7-b6-b2-e7-b5-a1-e5-a8-81-e8-84-85.html", "tct"],
+  ["hkwtia-org-event-ai-transaction-watchtower-smart-defenses-against-cyber-threats.html", "tct"],
+  ["hkwtia-org-event-ai-infused-storytelling-merging-data-with-narrative-for-maximum-impact-ai-e5-8f-99-e4-ba-8b-e8-9e-8d-e5-85-a5-e6-95-b8-e6-93-9a-e5-8a-a9-e5-af-a6-e7-8f-be-e6-9c-80-e5-a4-a7-e5-bd-b1-e9-9f-bf.html", "tct"],
+  ["hkwtia-org-event-aiot-innovations-building-a-future-of-smart-connections-aiot-e5-89-b5-e6-96-b0-e5-bb-ba-e7-ab-8b-e6-99-ba-e8-83-bd-e9-80-a3-e6-8e-a5-e7-9a-84-e6-9c-aa-e4-be-86.html", "tct"],
+  ["hkwtia-org-event-ai-e9-98-b2-e8-ad-b7-e7-9b-be-ef-bc-9a-e5-b0-8b-e6-89-be-e5-ae-89-e5-85-a8-e4-b9-8b-e9-81-93.html", "tct"],
 ] as const satisfies (readonly [string, ProgramId])[]);
 
 export function classifyPage(filename: string): ProgramId | null {
