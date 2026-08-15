@@ -263,7 +263,14 @@ export const hkict: HkictProgram = hkictProgramSchema.parse({
           }
         ]
       },
-      images: []
+      images: [
+        {
+          // ICT23_5.jpg, from the ICTA23 ceremony page.
+          src: '/images/programs/ICT23_5.jpg',
+          altEn: 'A speaker at the lectern of the Hong Kong ICT Awards 2023 presentation ceremony.',
+          altZh: '講者在二零二三年香港資訊及通訊科技獎頒獎典禮的講台上發言。'
+        }
+      ]
     },
     {
       // hkwtia-org-event-…「2024 資訊科技初創企業獎」招募日.html, the 13 June

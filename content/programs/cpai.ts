@@ -134,5 +134,15 @@ export const cpai: CpaiProgram = cpaiProgramSchema.parse({
       titleZh: '垂直行業 AI 應用案例'
     }
   ],
-  images: []
+  images: [
+    {
+      // CPAI-Certificate-F.jpg, from the landing page: the certificate
+      // template itself. It names WTIA alone as issuer, signed by WTIA's
+      // Chairman and Honorary Chairman, with no CUSCS mark anywhere -- which
+      // is the correction this record exists to make, in WTIA's own artwork.
+      src: '/images/programs/CPAI-Certificate-F.jpg',
+      altEn: 'The CPAI certificate template, headed WTIA and signed by WTIA\'s Chairman and Honorary Chairman.',
+      altZh: 'CPAI 證書範本，以商會為抬頭，由商會主席及榮譽主席簽署。'
+    }
+  ]
 });

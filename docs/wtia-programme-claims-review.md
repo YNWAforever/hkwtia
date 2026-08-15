@@ -155,8 +155,24 @@ is not something we will publish for you.
 archive. It has support — on the page above, which the surveys missed. The substance of the
 finding is unchanged: three conflicting counts and no named speaker.)*
 
-**GSP funding appears once, in 577 pages** — on the July 2023 Tech to Connect 4.0 seminar page.
-The 2024–26 AI and robotics editions never mention it.
+**GSP funding appears once in 577 pages of text** — on the July 2023 Tech to Connect 4.0 seminar
+page. The 2024–26 AI and robotics editions never mention it.
+
+**But the funding body is named, in a graphic.** Tech to Connect 4.0's own speaker line-up image
+prints, beside "Organiser WTIA":
+
+> Funding Organisation　創新科技署　Innovation and Technology Commission
+
+GSP is the ITC's General Support Programme, so the two agree; a hashtag on the July 2025 workshop
+wrap-up (「#創新科技署」) says it a third time. We have not put ITC on the page, because the
+migration's rule is to publish what the archive states and every other funder on these pages was
+read from prose — but this one is evidenced, and you should decide whether it belongs.
+
+**A caution that applies to this whole review.** Every finding in this document was reached by
+reading page *text*. The line above was found only because someone opened an image. WTIA puts
+funder attributions, sponsor logos and speaker rosters into graphics — the 2024 Asia Smart App
+Awards stage backdrop, for instance, carries "Sponsor CCIDAHK" and a government-funded-programme
+badge. Where this document says a fact is absent, it means absent from the text.
 
 **Please confirm:** the edition numbering, the funder for the 2024–26 editions, and the speaker
 list for the AI Leaders' Summit.

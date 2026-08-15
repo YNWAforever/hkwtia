@@ -61,6 +61,26 @@ import {tctProgramSchema, type TctProgram} from '@/content/schemas';
  * predecessor with no "Tech to Connect" branding and no edition number, which
  * tctProgramSchema's 2021 floor keeps out. The 2023 summit page calling 4.0 the
  * "2nd edition" is what makes 2021–22 the first.
+ *
+ * ONE FINDING THIS RECORD CANNOT HOLD, AND IT IS THE IMPORTANT ONE.
+ *
+ * `funder` records a scheme with no body attached, because the archive's *text*
+ * names GSP once and never says who administers it. That is true of the text
+ * and false of the archive. This edition's own speaker line-up graphic
+ * (TTC_9.jpg, attached below) prints, beside "Organiser WTIA":
+ *
+ *     Funding Organisation  創新科技署  Innovation and Technology Commission
+ *
+ * GSP is the ITC's General Support Programme, so the two agree. A hashtag on
+ * the July 2025 workshop wrap-up (「#創新科技署」) says the same thing a third
+ * time. `tctProgramSchema` has no agency field to put it in -- deliberately, on
+ * the evidence available when it was written -- so the fact lives here and on
+ * the claims review rather than on the page.
+ *
+ * The general lesson is worth more than this instance: every value in all four
+ * programme records was transcribed from page text, and WTIA puts funder
+ * attributions, sponsor logos and speaker rosters in images. A text-only sweep
+ * of this archive is not a complete sweep of it.
  */
 export const tct: TctProgram = tctProgramSchema.parse({
   id: 'tct',
@@ -139,7 +159,17 @@ export const tct: TctProgram = tctProgramSchema.parse({
       // this record's own authority — the same shape of error as the audit's
       // CCIDA claim about ASA.
       funder: {kind: 'named', schemeEn: 'GSP', schemeZh: 'GSP'},
-      images: []
+      images: [
+        {
+          // TTC_9.jpg, the edition's own speaker line-up graphic. It also
+          // carries the one funder attribution the archive's *text* never
+          // gives: "Funding Organisation 創新科技署 Innovation and Technology
+          // Commission", beside "Organiser WTIA". See this file's docblock.
+          src: '/images/programs/TTC_9.jpg',
+          altEn: 'Speaker line-up for the Tech to Connect 4.0 Leaders Summit, 20 April 2023 at HKPC Building, showing thirteen speakers with their companies.',
+          altZh: '「智連 4.0」領袖峰會講者陣容，二零二三年四月二十日於生產力大樓舉行，列出十三位講者及其所屬機構。'
+        }
+      ]
     },
     {
       // The rename lands here. hkwtia-org-event-tech-to-connect-2024-ai-

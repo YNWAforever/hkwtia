@@ -320,7 +320,18 @@ export const asa: AsaProgram = asaProgramSchema.parse({
           }
         ]
       },
-      images: []
+      images: [
+        {
+          // ASA24_9.jpg, from the 2024 ceremony page. Eight people on stage
+          // holding ASA and WTIA boards and a "10th Anniversary" board. The
+          // backdrop behind them independently corroborates this edition's
+          // funder: "Organiser WTIA / Sponsor CCIDAHK", beside the HKSAR
+          // government mark and a "Government-funded programme" badge.
+          src: '/images/programs/ASA24_9.jpg',
+          altEn: 'Eight guests on stage at the 2024 Asia Smart App Awards ceremony, holding award boards and a tenth-anniversary sign.',
+          altZh: '二零二四年亞洲智能應用程式大獎頒獎典禮上，八位嘉賓在台上手持獎項牌及十週年紀念牌。'
+        }
+      ]
     },
     {
       // 2025-11 post, the only bilingual edition page in the archive. Its title
