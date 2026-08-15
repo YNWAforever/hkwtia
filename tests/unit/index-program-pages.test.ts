@@ -1,6 +1,7 @@
 import {describe, expect, it} from "vitest";
 
-import {classifyPage} from "@/scripts/index-program-pages";
+import programPages from "@/content/program-pages.json";
+import {ALLOWLIST, classifyPage, type ProgramId} from "@/scripts/index-program-pages";
 
 describe("program page classification", () => {
   it("assigns the obvious pages to their programme", () => {
@@ -15,7 +16,11 @@ describe("program page classification", () => {
   // The 2019 TechConnect Conference & Festival carries no "Tech to Connect"
   // branding, no edition number and no link to the series site. The 2023 summit
   // calls Tech to Connect 4.0 the "2nd edition", which makes 2021-22 the first.
-  // 2019 is a same-named predecessor, not edition zero.
+  // 2019 is a same-named predecessor, not edition zero. This must keep holding
+  // now that hyphenated "tech-connect" (no "to") is also a valid TCT
+  // inclusion: the fused word "techconnect" these two filenames use never
+  // contains the contiguous substring "tech-connect", so the exclusion and
+  // the newer inclusion pattern cannot collide.
   it("excludes the 2019 TechConnect predecessor from TCT", () => {
     expect(classifyPage("hkwtia-org-2019-01-2019-techconnect-conference-festival.html")).toBeNull();
     expect(classifyPage("hkwtia-org-event-5g-iot-techconnect-conference.html")).toBeNull();
@@ -80,20 +85,12 @@ describe("program page classification", () => {
     )).toBe("tct");
   });
 
-  // The 2019 predecessor uses the fused word "techconnect" (no hyphen between
-  // "tech" and "connect"), which must stay excluded even now that hyphenated
-  // "tech-connect" is a valid TCT inclusion -- the two patterns must not
-  // collide on either the fused or the three-word "tech-to-connect" form.
-  it("still excludes the fused 'techconnect' predecessor after the rename fix", () => {
-    expect(classifyPage("hkwtia-org-2019-01-2019-techconnect-conference-festival.html")).toBeNull();
-    expect(classifyPage("hkwtia-org-event-5g-iot-techconnect-conference.html")).toBeNull();
-  });
-
   // Found by a title sweep (not filename search): CPAI's canonical landing
   // page carries the issuer/course/credential prose a later task needs to
-  // transcribe, but its slug ("certified-courses") matches neither existing
-  // CPAI pattern.
-  it("catches the CPAI landing page", () => {
+  // transcribe, but its slug ("certified-courses") is too generic to trust
+  // as a pattern (no programme-specific word in it), so it lives in the
+  // ALLOWLIST rather than as a fifth CPAI regex alternative.
+  it("catches the CPAI landing page via the allowlist", () => {
     expect(classifyPage("hkwtia-org-certified-courses.html")).toBe("cpai");
   });
 
@@ -139,5 +136,82 @@ describe("program page classification", () => {
   it("does not classify other bare-post-ID pages that are not programme pages", () => {
     expect(classifyPage("hkwtia-org-event-4984.html")).toBeNull();
     expect(classifyPage("hkwtia-org-event-5291.html")).toBeNull();
+  });
+
+  // The plan's invariant is that exclusions are the last word: nothing,
+  // including a future allowlist entry, may silently override a
+  // claims-review correction. Neither of today's two ALLOWLIST entries
+  // collides with an EXCLUSIONS pattern, so this test simulates a future one
+  // by temporarily registering a real excluded filename (the 2019
+  // TechConnect predecessor) under a bogus programme, then reverting it --
+  // the only way to exercise this precedence without permanently adding a
+  // fake entry to the real archive index.
+  it("keeps exclusions authoritative even over an allowlist entry", () => {
+    const mutableAllowlist = ALLOWLIST as Record<string, ProgramId>;
+    const conflictingFilename = "hkwtia-org-2019-01-2019-techconnect-conference-festival.html";
+    expect(mutableAllowlist).not.toHaveProperty(conflictingFilename);
+    mutableAllowlist[conflictingFilename] = "tct";
+    try {
+      expect(classifyPage(conflictingFilename)).toBeNull();
+    } finally {
+      delete mutableAllowlist[conflictingFilename];
+    }
+  });
+
+  // `filename in ALLOWLIST` and bracket access both walk the prototype
+  // chain, so classifyPage("toString") would previously have returned
+  // Object.prototype.toString itself instead of null -- violating the
+  // declared `ProgramId | null` return type in a way TypeScript cannot catch
+  // (tsconfig.json does not set noUncheckedIndexedAccess). Object.hasOwn
+  // fixes it.
+  it("does not walk the prototype chain when looking up the allowlist", () => {
+    for (const key of ["toString", "constructor", "valueOf", "hasOwnProperty"]) {
+      expect(classifyPage(key), key).toBeNull();
+    }
+  });
+
+  // No real archive filename matches two inclusion patterns today (verified
+  // against all 577 captured pages), so this filename is synthetic rather
+  // than lifted from the archive like the rest of the suite -- there is no
+  // real one to borrow. It exists to pin the throw itself: first-match-wins
+  // would otherwise let a later widening of one pattern silently move a page
+  // from one programme to another.
+  it("throws if a filename matches more than one programme's inclusion pattern", () => {
+    expect(() => classifyPage("hkwtia-org-event-asia-smart-app-x-hong-kong-ict-awards-crossover.html")).toThrow(
+      /matches more than one programme/,
+    );
+  });
+});
+
+describe("content/program-pages.json stays in sync with the classifier", () => {
+  // Without this, widening a pattern (e.g. hkict to the singular
+  // "/ict-award/") would change what gets written by the generator script
+  // but fail no test, because every other test in this file asserts against
+  // specific filenames that would not themselves change verdict. This
+  // catches both a forgotten regeneration after a pattern change and a
+  // hand-edit of the JSON (which docs/superpowers/plans/2026-08-12-programme-
+  // records.md forbids).
+  it("classifies every indexed filename the same way the classifier does today", () => {
+    for (const [programme, filenames] of Object.entries(programPages)) {
+      for (const filename of filenames) {
+        expect(classifyPage(filename), `${programme}/${filename}`).toBe(programme);
+      }
+    }
+  });
+
+  // Named constants, not a `.length` read off the live JSON, so a count
+  // that moves because a pattern widened has to be a conscious edit to this
+  // file -- mirrors EXPECTED_UNIQUE_IMAGES in
+  // scripts/download-milestone-images.ts. Reviewed in Step 7 of the plan.
+  const EXPECTED_ASA_COUNT = 34;
+  const EXPECTED_HKICT_COUNT = 15;
+  const EXPECTED_CPAI_COUNT = 3;
+  const EXPECTED_TCT_COUNT = 36;
+
+  it("has the reviewed per-programme counts", () => {
+    expect(programPages.asa).toHaveLength(EXPECTED_ASA_COUNT);
+    expect(programPages.hkict).toHaveLength(EXPECTED_HKICT_COUNT);
+    expect(programPages.cpai).toHaveLength(EXPECTED_CPAI_COUNT);
+    expect(programPages.tct).toHaveLength(EXPECTED_TCT_COUNT);
   });
 });
