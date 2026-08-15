@@ -88,4 +88,56 @@ describe("program page classification", () => {
     expect(classifyPage("hkwtia-org-2019-01-2019-techconnect-conference-festival.html")).toBeNull();
     expect(classifyPage("hkwtia-org-event-5g-iot-techconnect-conference.html")).toBeNull();
   });
+
+  // Found by a title sweep (not filename search): CPAI's canonical landing
+  // page carries the issuer/course/credential prose a later task needs to
+  // transcribe, but its slug ("certified-courses") matches neither existing
+  // CPAI pattern.
+  it("catches the CPAI landing page", () => {
+    expect(classifyPage("hkwtia-org-certified-courses.html")).toBe("cpai");
+  });
+
+  // Found by the same title sweep: the 2023 ICT Startup Award ceremony (with
+  // the full 2023 winner list) and the 2023 startup seminar both abbreviate
+  // to "ICTA" in their own titles, which neither "ict-startup-award" nor
+  // "ict-awards" matches.
+  it("catches the 2023 ICTA-abbreviated HKICT pages", () => {
+    expect(classifyPage("hkwtia-org-event-icta23-awards-presentation-ceremony-cum-dinner.html")).toBe("hkict");
+    expect(classifyPage(
+      "hkwtia-org-event-icta-2023-startup-seminar-from-zero-to-one-launching-your-entrepreneurial-journey.html",
+    )).toBe("hkict");
+  });
+
+  // Found by the same title sweep: WTIA's programme lineage is Asia
+  // Smartphone Apps Contest (2013) -> Asia Smart App Awards -> Asia Smart
+  // Innovation Awards, all the same programme under different names.
+  // docs/wtia-programme-claims-review.md sources ASA's co-organiser counts
+  // from exactly the 2013 and 2016 pages here, and the ASA schema's
+  // yearStart minimum is 2013 -- both only make sense if this is ASA.
+  it("catches the 'Asia Smartphone' era of ASA's name", () => {
+    for (const file of [
+      "hkwtia-org-2013-01-2013-asia-smartphone-contest.html",
+      "hkwtia-org-2015-01-2015-asia-smartphone-apps-contest-summit-2015.html",
+      "hkwtia-org-2016-01-2016-asia-smartphone-apps-summit-cum-award-presentation-ceremony-2016.html",
+    ]) {
+      expect(classifyPage(file), file).toBe("asa");
+    }
+  });
+
+  // hkwtia-org-event-7729.html's original title used a fullwidth colon
+  // ("Asia Smart App Workshop - UIUX： Mobile first"), which the capture
+  // tool's slugifier dropped along with everything after it, collapsing the
+  // slug to the bare WordPress post ID. No filename pattern can reach this;
+  // it requires the ALLOWLIST escape hatch.
+  it("catches the bare-post-ID page via the allowlist", () => {
+    expect(classifyPage("hkwtia-org-event-7729.html")).toBe("asa");
+  });
+
+  // Other bare-post-ID pages in the archive are not programme pages, so the
+  // allowlist must stay a targeted exception, not a rule that swallows every
+  // digits-only slug.
+  it("does not classify other bare-post-ID pages that are not programme pages", () => {
+    expect(classifyPage("hkwtia-org-event-4984.html")).toBeNull();
+    expect(classifyPage("hkwtia-org-event-5291.html")).toBeNull();
+  });
 });

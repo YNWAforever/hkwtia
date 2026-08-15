@@ -28,14 +28,24 @@ const EXCLUSIONS: readonly RegExp[] = [
 const INCLUSIONS: readonly (readonly [ProgramId, RegExp])[] = [
   // "asa" as a bare word would match "asama", "wasabi" and any percent-encoded
   // Chinese run containing those bytes, so match the spelled-out names and the
-  // hyphen-delimited acronym only.
-  ["asa", /asia-smart-app|asia-smart-innovation|-asa-/],
+  // hyphen-delimited acronym only. asia-smartphone covers the programme's
+  // earliest name -- Asia Smartphone Apps Contest (2013) -> Asia Smart App
+  // Awards -> Asia Smart Innovation Awards -- the same lineage under an
+  // earlier name, not a typo to "clean up": docs/wtia-programme-claims-review.md
+  // sources ASA's co-organiser counts from exactly the 2013 and 2016 pages
+  // this pattern reaches, and the ASA schema's yearStart minimum is 2013.
+  ["asa", /asia-smart-app|asia-smart-innovation|asia-smartphone|-asa-/],
   // e8-b3-87...e7-8d-8e is the percent-hex encoding of 資訊科技初創企業獎
   // (Chinese for "ICT Startup Award"). Two 2024/2025 pages -- a recruitment
   // day and the 2025 award page -- carry that name only in Chinese in their
   // slug even though the page's own <title> is bilingual; "ict-startup-award"
-  // alone missed both on the first pass.
-  ["hkict", /ict-startup-award|ict-awards|e8-b3-87-e8-a8-8a-e7-a7-91-e6-8a-80-e5-88-9d-e5-89-b5-e4-bc-81-e6-a5-ad-e7-8d-8e/],
+  // alone missed both on the first pass. -icta reaches the 2023 ceremony
+  // (icta23-awards-presentation-ceremony-cum-dinner.html, with the full 2023
+  // winner list) and the 2023 startup seminar, both abbreviated "ICTA" in
+  // their own titles -- claims-review lists HKICT winners as unavailable for
+  // 2021, 2022 and 2024, pointedly not 2023, because 2023 lives on this page.
+  // Checked against all 577 captured filenames: only those two match.
+  ["hkict", /ict-startup-award|ict-awards|-icta|e8-b3-87-e8-a8-8a-e7-a7-91-e6-8a-80-e5-88-9d-e5-89-b5-e4-bc-81-e6-a5-ad-e7-8d-8e/],
   // WTIA renamed the series from "Tech to Connect" to "Tech Connect" (智創互聯)
   // partway through 2024-25 -- confirmed by hkwtia-org-2025-05-...tech-connect-
   // ai-leaders-seminar-series.html and the two "Tech Connect系列工作坊" (Tech
@@ -44,10 +54,31 @@ const INCLUSIONS: readonly (readonly [ProgramId, RegExp])[] = [
   // the EXCLUSIONS block screens out above, so the two patterns cannot collide
   // -- "tech-to-connect" never contains the contiguous substring "tech-connect".
   ["tct", /tech-to-connect|tech-connect/],
-  ["cpai", /cpai|certified-practitioner-in-generative-ai/],
+  // certified-courses is CPAI's canonical landing page
+  // (hkwtia-org-certified-courses.html, <title> "CPAI - Certified Practitioner
+  // in Generative AI ... (CPAI)") -- the issuer/course/credential prose a
+  // later task needs to transcribe. No edition number or event slug to match
+  // on, so it needed its own pattern; confirmed the only match in the archive.
+  ["cpai", /cpai|certified-practitioner-in-generative-ai|certified-courses/],
 ];
 
+/**
+ * Filenames the slug-pattern rules above can never reach, mapped directly to
+ * their programme. Today this is exactly one entry: WTIA's original title
+ * for this event used a fullwidth colon ("："), which the capture tool's
+ * slugifier dropped along with everything that followed, collapsing the slug
+ * to the bare WordPress post ID. No filename pattern can recover "Asia Smart
+ * App Workshop" from "7729" -- confirmed by reading the page's own <title>.
+ * This is a deliberate escape hatch for that one archive quirk, not a
+ * pattern to extend; new entries need the same title-read confirmation.
+ */
+const ALLOWLIST: Readonly<Record<string, ProgramId>> = {
+  // "Asia Smart App Workshop - UIUX： Mobile first" (Apr 2023)
+  "hkwtia-org-event-7729.html": "asa",
+};
+
 export function classifyPage(filename: string): ProgramId | null {
+  if (filename in ALLOWLIST) return ALLOWLIST[filename];
   if (EXCLUSIONS.some((pattern) => pattern.test(filename))) return null;
   return INCLUSIONS.find(([, pattern]) => pattern.test(filename))?.[0] ?? null;
 }
