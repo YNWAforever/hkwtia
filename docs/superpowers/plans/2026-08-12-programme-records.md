@@ -884,7 +884,9 @@ Three constraints:
 
 1. **WTIA issues CPAI alone.** 「CPAI（Certified Practitioner in GenAI）由 WTIA 頒發」…「完成課程後同時獲頒 … CUSCS 結業證書」…「一個課程，兩張認證。」 One course, two distinct certificates. Not a joint credential.
 2. **The subject is generative AI**, and the course is CUSCS's *Generative AI for Business Innovation and Applications*. Enrolment happens on CUSCS systems, not on hkwtia.org.
-3. **The "150+ I&T companies" figure has no source anywhere in 577 pages.** It does not go on the page. Neither do fee, assessment requirements, validity period or prerequisites — none are in the archive.
+3. **The "150+ I&T companies" figure is on WTIA's own CPAI page but nothing substantiates it.** It does not go on the new page — no list, no logos, no named employers, and WTIA has been asked to supply a source. Neither do fee, assessment requirements, validity period or prerequisites — none are in the archive.
+
+4. **The syllabus exists, but only in Chinese.** The course page gives 「12 小時實戰課程，涵蓋四大模組」 and names all four modules (策略框架 / 內容創作實操 / 網絡安全與合規 / 垂直行業案例). `titleEn` is required, so draft the English yourself and add the four module names to the Task 12 translation review — that is the same draft-then-review flow the spec sets out for every missing locale. Do not leave a module out because its English is uncertain, and do not invent a fifth.
 
 - [ ] **Step 2: Write the CPAI record**
 
@@ -1661,9 +1663,11 @@ const messages = ["en", "zh-HK"].map((locale) => ({
 }));
 
 describe("contradicted claims stay off the programme pages", () => {
-  // No list, no logos, no named employers, no indication whether it is a
-  // survey, a pledge list or a membership count. Not in 577 pages.
-  it("does not publish the unsourced '150+ companies' figure", () => {
+  // The figure is on WTIA's own CPAI page, but nothing anywhere substantiates
+  // it -- no list, no logos, no named employers, and no indication whether it
+  // counts a survey, a pledge list or WTIA's own membership. Republishing an
+  // unevidenced number onto a new site is what this guard prevents.
+  it("does not republish the unsubstantiated '150+ companies' figure", () => {
     for (const {id, text} of SOURCES) expect(text, id).not.toMatch(/150\+/);
     for (const {locale, text} of messages) expect(text, locale).not.toMatch(/150\+/);
   });

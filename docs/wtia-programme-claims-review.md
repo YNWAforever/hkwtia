@@ -67,13 +67,26 @@ subject is generative AI.
 **Please confirm:** the exact wording for how CPAI and the CUSCS certificate relate, since
 describing WTIA's own credential as jointly issued understates it.
 
-### The "150+ companies" figure has no source
+### The "150+ companies" figure is stated but never substantiated
 
-The audit says CPAI is "recognised by 150+ I&T companies". That number appears nowhere in the
-archive — no list, no logos, no named employers, and no indication whether it is a survey, a
-pledge list, or a membership count.
+The audit says CPAI is "recognised by 150+ I&T companies". The figure does appear on WTIA's own
+CPAI page, in both locales:
+
+> "CPAI Certification holders are recognized by over 150 pioneering companies in the Innovation
+> and Technology Industry."
+> 「CPAI 認證持有者的專業資格獲得超過150家創新與科技行業先驅公司的認可。」
+
+What is missing is any basis for it — no list, no logos, no named employers, and no indication
+whether it counts a survey, a pledge list, or WTIA's own membership. A figure a reader can check
+is worth publishing; one that rests only on its own assertion is the kind a trade association
+gets asked to evidence.
 
 **Please supply:** the source of the figure, or confirm it should not be published.
+
+*(An earlier draft of this section said the number appeared nowhere in the archive. It does — on
+`/certified-courses/`, the CPAI landing page. That page was missed by the surveys and by the
+first pass of the migration's own page classifier for the same reason: its URL says
+`certified-courses` and never says CPAI.)*
 
 ---
 
