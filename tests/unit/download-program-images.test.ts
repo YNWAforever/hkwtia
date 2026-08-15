@@ -35,6 +35,20 @@ describe("programme image extraction", () => {
     expect(localFilename("https://hkwtia.org/x/plain.png", map)).toBe("plain.png");
   });
 
+  // Two different images in this archive share the basename 3-scaled.jpg,
+  // uploaded in different months. A basename-keyed entry cannot separate them,
+  // so the map is consulted by full url first.
+  it("lets a full-url entry disambiguate a shared basename", () => {
+    const map = {
+      "https://hkwtia.org/wp-content/uploads/2022/04/3-scaled.jpg": "2022-04-3-scaled.jpg",
+      "https://hkwtia.org/wp-content/uploads/2022/07/3-scaled.jpg": "2022-07-3-scaled.jpg",
+    };
+    expect(localFilename("https://hkwtia.org/wp-content/uploads/2022/04/3-scaled.jpg", map))
+      .toBe("2022-04-3-scaled.jpg");
+    expect(localFilename("https://hkwtia.org/wp-content/uploads/2022/07/3-scaled.jpg", map))
+      .toBe("2022-07-3-scaled.jpg");
+  });
+
   // Filenames arrive percent-encoded in the url and must be decoded before the
   // rename map is consulted, or an entry keyed on the real filename never
   // matches and the file lands under a name programImageSchema rejects.

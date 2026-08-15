@@ -68,8 +68,15 @@ export function localFilename(
   remoteUrl: string,
   renameMap: Readonly<Record<string, string>>,
 ): string {
+  // Full url first, basename second. WordPress names uploads by whatever the
+  // uploader called the file, so two different images can share a basename
+  // across upload months -- 2022/04/3-scaled.jpg and 2022/07/3-scaled.jpg both
+  // exist in this archive. A basename-keyed entry cannot separate those, and
+  // the collision check below would refuse to run at all without a url-keyed
+  // one. (The milestone pass's equivalent comment said this never happens; in
+  // that archive it did not.)
   const original = decodeURIComponent(remoteUrl.split("/").pop() ?? "");
-  return renameMap[original] ?? original;
+  return renameMap[remoteUrl] ?? renameMap[original] ?? original;
 }
 
 async function main(): Promise<void> {
