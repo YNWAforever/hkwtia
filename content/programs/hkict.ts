@@ -34,10 +34,16 @@ import {hkictProgramSchema, type HkictProgram} from '@/content/schemas';
  *   with an em dash ("資訊科技初創企業（硬件與設備）獎 — 金獎"), the same join
  *   content/programs/asa.ts uses for ASA 2024. Everything either side of the
  *   dash is the page's own text.
- * - 「#GrandAward」 is kept in the 2023 grand award's category. It is a hashtag
- *   the author appended to the section heading, and the heading is transcribed
- *   as written rather than tidied — the same rule that kept ASA 2024's "Sliver
- *   Award" typo visible.
+ * - 「#GrandAward」 is dropped from the 2023 grand award's category. The page
+ *   heading reads 「資訊科技初創企業大獎 #GrandAward：」, but three things mark the
+ *   tag as the author's rather than part of the award's name: no other section
+ *   heading on the page carries one, it is CamelCase Latin inside an otherwise
+ *   all-Chinese heading, and the 2025 page writes the same award as
+ *   「資訊科技初創企業大獎」 / "ICT Startup Grand Award" with nothing appended.
+ *   This is the one place the transcribe-as-written rule gives way — it governs
+ *   what the page *says*, and a hashtag is markup around the saying. ASA 2024's
+ *   "Sliver Award" typo stays visible because that is genuinely how the page
+ *   names the tier.
  * - The 2023 社會貢獻 category awards 金獎, 銀獎, 銀獎 and 優異證書: two Silver
  *   awards and no Bronze, where the other two categories run Gold/Silver/Bronze.
  *   It reads like a typo for 銅獎 on the second one, but the page says 銀獎, so
@@ -126,23 +132,26 @@ export const hkict: HkictProgram = hkictProgramSchema.parse({
       images: []
     },
     {
-      // The thinnest edition in this record, and the comment says so rather
-      // than hiding it. No 2022 page exists in the capture — not an edition
-      // post, not an event listing. Two things attest it:
+      // No edition post exists for 2022, but three pages attest the edition
+      // and one names the stream outright:
+      // hkwtia-org-event-wtia-chill-talk-2.html (6 July 2023) introduces its
+      // guests as 「ICT Startup Award 2022 …優勝初創之一嘅 Custonomy」 — WTIA's
+      // own words, naming the Startup Award stream and not the umbrella;
       // hkwtia-org-photo-gallery.html carries "Hong Kong ICT Awards 2022 /
-      // Introductory Party" and "Hong Kong ICT Awards 2022 / Award Presentation
-      // Ceremony" albums, and the ICTA23 「過去 4 年」 sentence below counts 2022
-      // among WTIA's four years with OGCIO. Both album titles say "Hong Kong
-      // ICT Awards", the umbrella award, not "ICT Startup Award" — WTIA
-      // organises the Startup Award stream within it, which is why they are
-      // WTIA's own photos, but the page does not say so in as many words.
+      // Introductory Party" and "… / Award Presentation Ceremony" albums; and
+      // the ICTA23 「過去 4 年」 sentence below counts 2022 among WTIA's four
+      // years with OGCIO.
       year: 2022,
       // Same 「過去 4 年」 sentence on the ICTA23 ceremony page. See 2021.
       organisedFor: 'ogcio',
-      // The 2023 recruitment seminar page runs a "Meet the Winners" slot with
-      // Raymond Mak (Farmacy HK) and Kelvin Chu (Vista Innotech Limited). It
-      // never says which edition they won, or in which category, so neither
-      // name is recorded against this or any year.
+      // Two winners of this edition are named in the archive and neither is
+      // recorded, for the same reason: `listed` asserts a complete list.
+      // Custonomy is 「優勝初創之一」 on the Chill Talk page — one of the winning
+      // startups, with no category and no tier, in a sentence that conjoins
+      // this award with 「創業快綫」 and so does not even settle which one it
+      // won. The 2023 recruitment seminar's "Meet the Winners" slot adds
+      // Raymond Mak (Farmacy HK) and Kelvin Chu (Vista Innotech Limited)
+      // without saying which edition or category. Both go to WTIA to confirm.
       winners: {kind: 'unrecorded'},
       images: []
     },
@@ -153,7 +162,12 @@ export const hkict: HkictProgram = hkictProgramSchema.parse({
       // it; its body is nonetheless the only complete winner list in the
       // capture for any edition of this award.
       year: 2023,
-      // Same page: 「感謝政府資訊科技總監辦公室過去 4 年對 WTIA 的信任」.
+      // Same page: 「感謝政府資訊科技總監辦公室過去 4 年對 WTIA 的信任」, and
+      // corroborated outright in English on this edition's own startup seminar
+      // page (hkwtia-org-event-icta-2023-startup-seminar-from-zero-to-one-…),
+      // which bills "Mr Kingsley Wong, Deputy Government Chief Information
+      // Officer (Acting), OGCIO". 2023 does not rest on the 「過去 4 年」
+      // inference alone.
       organisedFor: 'ogcio',
       // Transcribed from that page's own prose block, not from the six photos
       // above it, which carry no captions. The list below is the page's, in the
@@ -166,8 +180,8 @@ export const hkict: HkictProgram = hkictProgramSchema.parse({
             nameEn: 'LaSense Technology Limited',
             nameZh: '朗思科技有限公司',
             // DRAFTED: winner list is Chinese-only; Chinese repeated.
-            categoryEn: '資訊科技初創企業大獎 #GrandAward',
-            categoryZh: '資訊科技初創企業大獎 #GrandAward'
+            categoryEn: '資訊科技初創企業大獎',
+            categoryZh: '資訊科技初創企業大獎'
           },
           {
             // The grand award winner again, taking Gold in its own category.

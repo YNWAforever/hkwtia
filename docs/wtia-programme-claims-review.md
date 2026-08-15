@@ -83,6 +83,25 @@ gets asked to evidence.
 
 **Please supply:** the source of the figure, or confirm it should not be published.
 
+### Two ICT Startup Award winners are named in passing, and nowhere else
+
+Neither is published as a result, so neither goes on the new page — but both are in your
+archive, and if you can confirm them the editions stop reading as blank:
+
+- **2020 — Blutech IoT Ltd.** A June 2021 launch-party page introduces a panellist as "Mr. Davon
+  Hui, Founder and CEO, blutech.io (Award of the Year of HKICT Awards 2020 and ICT Startup Award
+  Grand Award Winner)", and your media-coverage page indexes a 19/11/2020 clipping naming the
+  same company. The capture spells it three ways — "blutech.io", "Blutech IoT Ltd.",
+  "Blutech.io".
+- **2022 — Custonomy.** The 6 July 2023 Chill Talk listing introduces its guests as 「ICT Startup
+  Award 2022 以及「創業快綫」…優勝初創之一嘅 Custonomy」. The sentence conjoins two programmes, so it
+  does not settle which one Custonomy won.
+
+**Please supply:** the full winner list for 2020, 2021, 2022 and 2024, or confirm these two names
+and the editions they belong to. Also: whether WTIA ran the Startup Award in **2022** — no
+edition page exists, and the edition is attested only by the Chill Talk listing above, two photo
+album titles, and the 2023 ceremony's 「過去 4 年」 count.
+
 *(An earlier draft of this section said the number appeared nowhere in the archive. It does — on
 `/certified-courses/`, the CPAI landing page. That page was missed by the surveys and by the
 first pass of the migration's own page classifier for the same reason: its URL says
