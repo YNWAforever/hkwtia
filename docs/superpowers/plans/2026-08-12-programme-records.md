@@ -67,6 +67,7 @@ Run `npm test`, `npm run lint`, `npm run typecheck`, `npm run audit:strings` and
 | `content/programs/cpai.ts` | CPAI as a credential: issuer, course partner, syllabus. No editions |
 | `content/programs/tct.ts` | TCT editions: year, free-text shape, funder |
 | `content/program-pages.json` | Programme id → captured page filenames, the input to image extraction |
+| `content/program-image-pages.json` | Captured page → the local image paths it referenced, so Task 8 can attach an image to the right edition |
 | `scripts/index-program-pages.ts` | Classifies captured pages by programme, encoding the claims review's exclusions |
 | `scripts/download-program-images.ts` | Recovers and downloads the archive images, modelled on `download-milestone-images.ts` |
 | `components/marketing/program-editions.tsx` | Renders an edition list for ASA, HKICT and TCT |
@@ -670,12 +671,14 @@ Read every ASA page listed under `"asa"` in `content/program-pages.json`. Start 
 /Users/willylai/wtia-legacy-capture-20260812/pages/hkwtia-org-2025-11-2025-e4-ba-9e-e6-b4-b2-e6-99-ba-e6-85-a7-e5-89-b5-e6-96-b0-e5-a4-a7-e7-8d-8e-asia-smart-innovation-awards-2025.html
 ```
 
-For each edition record: the label as the page writes it, the funding sentence verbatim, the venue, how many regions attended, and the winners with their categories.
+For each edition record: the label as the page writes it, the funding sentence verbatim, the regions figure **together with which kind of figure it is**, and the winners with their categories.
+
+There is deliberately no venue field. Five ASA edition pages in the capture — 2013, 2016, 2017, 2019 and 2020 — name no venue at all, and the 2024 page gets only as far as "right here in Hong Kong", which is a city. A required venue field would have left a transcriber choosing between inventing one and editing the schema.
 
 **The four constraints from the claims review that decide this file:**
 
 1. **Funder per edition.** 2017 through 2022/23 name Create Hong Kong under the CreateSmart Initiative — the 2017 post says "With funding support from Create Hong Kong of the Government of the Hong Kong Special Administrative Region". CCIDA only from 2024. If a page names neither, use `{kind: 'none-recorded'}`; do not carry a neighbouring edition's funder across.
-2. **Regions attended, not co-organisers.** Record what the page says attended. Where the 2025 home page asserts 17 but its own Regional Partners carousel renders 15 logos, the archive contradicts itself — use `regionsAttended: null` and leave it for WTIA.
+2. **Regions: record which kind of figure the page gives.** The archive says two genuinely different things in two eras, and conflating them is contradicted claim #2. 2013 says "7 Asia Regions … was the co-organizer" and 2016 says 9 co-organisers; 2017 says "11 participating countries/regions", 2019 says 13, 2020 says 15, 2024 says "16 Asian regions". Use `{kind: 'co-organisers', count}` for the first pair and `{kind: 'attended', count}` for the second group — never translate one into the other. Where the 2025 home page asserts 17 but its own Regional Partners carousel renders 15 logos, the archive contradicts itself: use `{kind: 'unrecorded'}` and let the claims review's outstanding question to WTIA settle it.
 3. **2020 and 2021 winners are `{kind: 'off-site'}`**, pointing at `https://contest2020.bestasiaapp.hk/` and `https://contest2021.bestasiaapp.hk/`. Neither microsite was captured. Do not transcribe partial winner lists from photo captions.
 4. **Only "Living & Culture" is named** for the 2025 category structure. Record the winners the page names — RIFFAI and 417 Technology among them — and no category you cannot source. What either company built is not described anywhere; do not describe it.
 
@@ -704,9 +707,7 @@ export const asa: AsaProgram = asaProgramSchema.parse({
         initiativeEn: 'CreateSmart Initiative',
         initiativeZh: '創意智優計劃'
       },
-      regionsAttended: null,
-      venueEn: '…',
-      venueZh: '…',
+      regions: {kind: 'unrecorded'},
       winners: {kind: 'unrecorded'},
       images: []
     }
@@ -904,6 +905,12 @@ export const cpai: CpaiProgram = cpaiProgramSchema.parse({
   coursePartnerZh: '…',
   courseNameEn: 'Generative AI for Business Innovation and Applications',
   courseNameZh: '…',
+  // 「一個課程，兩張認證」 -- CUSCS's own completion certificate, issued
+  // separately to the same graduates. This is the substance of the correction:
+  // without it the page states who issues CPAI and who delivers the course,
+  // and says nothing about the second certificate at all.
+  partnerCertificateEn: '…',
+  partnerCertificateZh: '…',
   syllabus: [/* one entry per module the archive lists, both locales */],
   images: []
 });
@@ -942,6 +949,11 @@ export const tct: TctProgram = tctProgramSchema.parse({
   editions: [
     {
       year: 2021,
+      // The edition's name as the archive writes it, not a year span. The
+      // series was renamed mid-run -- "Tech to Connect" through 4.0, then
+      // "Tech Connect" (智創互聯) from 2024-25, which Task 1's classifier
+      // already had to handle. Rendering a bare year would assert none of it.
+      label: '…',
       shapeEn: '12 industry workshops',
       shapeZh: '十二場業界工作坊',
       funder: {kind: 'none-recorded'},
@@ -1054,7 +1066,7 @@ Expected: FAIL — cannot resolve `@/scripts/download-program-images`.
 Create `scripts/download-program-images.ts`:
 
 ```ts
-import {existsSync, readFileSync, readdirSync} from "node:fs";
+import {existsSync, readFileSync, readdirSync, writeFileSync} from "node:fs";
 import {mkdir, writeFile} from "node:fs/promises";
 import {join} from "node:path";
 
@@ -1100,6 +1112,12 @@ async function main(): Promise<void> {
   const available = new Set(readdirSync(pagesDir));
 
   const perProgramme = new Map<ProgramId, Set<string>>();
+  // Which page each image came from. Without this the download collapses to a
+  // flat per-programme set and Task 8 faces ~170 loose ASA files to sort
+  // against 8 editions by eye. The page filename carries the edition (ASA and
+  // HKICT slugs are dated), so recording the association here is what makes
+  // attaching an image to the right edition a lookup rather than a guess.
+  const pageImages: Record<string, string[]> = {};
   const missingPages: string[] = [];
   for (const [id, files] of Object.entries(index) as [ProgramId, string[]][]) {
     const urls = new Set<string>();
@@ -1108,7 +1126,9 @@ async function main(): Promise<void> {
         missingPages.push(file);
         continue;
       }
-      for (const url of extractImageUrls(readFileSync(join(pagesDir, file), "utf8"))) urls.add(url);
+      const found = extractImageUrls(readFileSync(join(pagesDir, file), "utf8"));
+      pageImages[file] = found;
+      for (const url of found) urls.add(url);
     }
     perProgramme.set(id, urls);
   }
@@ -1162,6 +1182,19 @@ async function main(): Promise<void> {
       totalBytes += bytes.length;
     },
   );
+
+  // Rewritten to local filenames so Task 8 can look up "which images belong to
+  // the 2020 edition" by its page rather than by opening 170 files.
+  writeFileSync("content/program-image-pages.json", `${JSON.stringify(
+    Object.fromEntries(
+      Object.entries(pageImages).map(([page, urls]) => [
+        page,
+        urls.map((url) => `/images/programs/${filenameForUrl.get(url)!}`)
+      ])
+    ),
+    null,
+    2
+  )}\n`);
 
   console.log(`saved ${saved.length}, missed ${missed.length}, ${(totalBytes / (1024 * 1024)).toFixed(2)} MB`);
   if (missed.length > 0) {
@@ -1236,6 +1269,8 @@ Then re-run. If it reports misses, re-run once — hkwtia.org returns intermitte
 
 - [ ] **Step 2: Attach images to the records**
 
+`content/program-image-pages.json`, written by Task 7, maps each captured page to the local paths of the images it referenced. Use it: ASA and HKICT page slugs carry their year, so "which images belong to the 2020 edition" is a lookup rather than a visual sort through ~170 files. Open the images you are about to attach — the map tells you where a file came from, not what is in it, and alt text has to describe the photograph.
+
 For each programme, add the relevant entries to the `images` arrays in `content/programs/*.ts`, with alt text in both locales:
 
 ```ts
@@ -1301,12 +1336,13 @@ In `messages/en.json`, add a `record` key inside the existing `programs` object 
       "fundedBy": "Funded by {agency} under the {initiative}",
       "organisedFor": "Organised for {agency}",
       "regionsAttended": "{count} regions attended",
-      "venue": "Venue",
+      "regionsCoOrganised": "Co-organised with {count} Asia regions",
       "winnersOffSite": "The full winner list is published on the edition's own site.",
       "winnersOffSiteLink": "View the winners",
       "winnersUnrecorded": "WTIA's archive does not record the winners for this edition.",
       "credentialIssuer": "Issued by",
       "credentialCoursePartner": "Course delivered with",
+      "credentialPartnerCertificate": "Graduates also receive",
       "credentialSyllabus": "Syllabus"
     }
 ```
@@ -1323,12 +1359,13 @@ Add the same keys to `messages/zh-HK.json` under `programs.record`:
       "fundedBy": "由{agency}透過{initiative}資助",
       "organisedFor": "為{agency}籌辦",
       "regionsAttended": "{count} 個地區參與",
-      "venue": "地點",
+      "regionsCoOrganised": "由 {count} 個亞洲地區合辦",
       "winnersOffSite": "完整得獎名單刊於該屆的專題網站。",
       "winnersOffSiteLink": "查看得獎名單",
       "winnersUnrecorded": "商會的存檔沒有記錄該屆得獎者。",
       "credentialIssuer": "頒發機構",
       "credentialCoursePartner": "課程合辦機構",
+      "credentialPartnerCertificate": "畢業學員另可獲頒",
       "credentialSyllabus": "課程內容"
     }
 ```
@@ -1371,6 +1408,11 @@ type Edition = {
   heading: string;
   attribution: {agency: AgencyId; initiative: string} | null;
   organisedFor: AgencyId | null;
+  // Passed through rather than pre-rendered: `attended` and `co-organisers`
+  // are different measurements of different eras and get different sentences,
+  // and the sentences live in this component's own namespace.
+  regions: {kind: 'attended' | 'co-organisers'; count: number} | {kind: 'unrecorded'};
+  // Already-localised free text -- TCT's per-edition shape.
   meta: readonly string[];
   winners: ProgramWinners;
   images: readonly ProgramImage[];
@@ -1407,6 +1449,15 @@ export function ProgramEditions({editions, agencyName, alt}: ProgramEditionsProp
                 {t('organisedFor', {agency: agencyName(edition.organisedFor)})}
               </p>
             ) : null}
+
+            {edition.regions.kind === 'unrecorded' ? null : (
+              <p className="text-muted-foreground mt-2">
+                {t(
+                  edition.regions.kind === 'attended' ? 'regionsAttended' : 'regionsCoOrganised',
+                  {count: edition.regions.count}
+                )}
+              </p>
+            )}
 
             {edition.meta.map((line) => (
               <p key={line} className="text-muted-foreground mt-2">{line}</p>
@@ -1502,7 +1553,8 @@ Inside the component, after the existing `<ProgramDetail … />`:
             ? {agency: edition.funder.agency, initiative: zh ? edition.funder.initiativeZh : edition.funder.initiativeEn}
             : null,
           organisedFor: null,
-          meta: [zh ? edition.venueZh : edition.venueEn],
+          regions: edition.regions,
+          meta: [],
           winners: localiseWinners(edition.winners, zh),
           images: edition.images
         }))}
@@ -1530,13 +1582,17 @@ Adjust the `ProgramWinners` type used by the component to the localised shape (`
 
 - [ ] **Step 3: Wire up HKICT and TCT the same way**
 
-HKICT maps `organisedFor: edition.organisedFor`, `attribution: null`, `heading: String(edition.year)`, `meta: []`.
+HKICT maps `organisedFor: edition.organisedFor`, `attribution: null`, `heading: String(edition.year)`, `regions: {kind: 'unrecorded'}`, `meta: []`.
 
-TCT maps `heading: String(edition.year)`, `attribution` from its funder, `organisedFor: null`, `meta: [zh ? edition.shapeZh : edition.shapeEn]`.
+TCT maps `heading: edition.label`, `attribution` from its funder, `organisedFor: null`, `regions: {kind: 'unrecorded'}`, `meta: [zh ? edition.shapeZh : edition.shapeEn]`.
+
+TCT uses `label`, not the year, because its editions are named — "Tech to Connect 4.0", and the series renamed to "Tech Connect" mid-run. Rendering a bare year would assert none of that.
 
 - [ ] **Step 4: Write the CPAI component and wire its page**
 
-Create `components/marketing/program-credential.tsx` rendering issuer, course partner, course name and syllabus from `programs.record` keys. It takes localised strings and has no editions, no winners and no funder — the shape difference is the point.
+Create `components/marketing/program-credential.tsx` rendering issuer, course partner, course name, the partner certificate and syllabus from `programs.record` keys. It takes localised strings and has no editions, no winners and no funder — the shape difference is the point.
+
+Render the partner certificate line: 「一個課程，兩張認證」 is the correction this page exists to get right, and a page that names only the issuer and the course partner states half of it.
 
 - [ ] **Step 5: Verify the pages render in both locales**
 
