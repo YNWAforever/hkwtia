@@ -1,7 +1,7 @@
 import {describe, expect, it} from "vitest";
 
 import programPages from "@/content/program-pages.json";
-import {ALLOWLIST, classifyPage, type ProgramId} from "@/scripts/index-program-pages";
+import {ALLOWLIST, classifyPage, conflictingAllowlistEntries, EXCLUSIONS, type ProgramId} from "@/scripts/index-program-pages";
 
 describe("program page classification", () => {
   it("assigns the obvious pages to their programme", () => {
@@ -138,32 +138,13 @@ describe("program page classification", () => {
     expect(classifyPage("hkwtia-org-event-5291.html")).toBeNull();
   });
 
-  // The plan's invariant is that exclusions are the last word: nothing,
-  // including a future allowlist entry, may silently override a
-  // claims-review correction. Neither of today's two ALLOWLIST entries
-  // collides with an EXCLUSIONS pattern, so this test simulates a future one
-  // by temporarily registering a real excluded filename (the 2019
-  // TechConnect predecessor) under a bogus programme, then reverting it --
-  // the only way to exercise this precedence without permanently adding a
-  // fake entry to the real archive index.
-  it("keeps exclusions authoritative even over an allowlist entry", () => {
-    const mutableAllowlist = ALLOWLIST as Record<string, ProgramId>;
-    const conflictingFilename = "hkwtia-org-2019-01-2019-techconnect-conference-festival.html";
-    expect(mutableAllowlist).not.toHaveProperty(conflictingFilename);
-    mutableAllowlist[conflictingFilename] = "tct";
-    try {
-      expect(classifyPage(conflictingFilename)).toBeNull();
-    } finally {
-      delete mutableAllowlist[conflictingFilename];
-    }
-  });
-
-  // `filename in ALLOWLIST` and bracket access both walk the prototype
-  // chain, so classifyPage("toString") would previously have returned
-  // Object.prototype.toString itself instead of null -- violating the
-  // declared `ProgramId | null` return type in a way TypeScript cannot catch
-  // (tsconfig.json does not set noUncheckedIndexedAccess). Object.hasOwn
-  // fixes it.
+  // ALLOWLIST is a Map, which has no prototype-chain surface: Map.get("toString")
+  // is undefined for any key not explicitly set, unlike a plain object's `in`/
+  // bracket access, which would have returned Object.prototype.toString itself
+  // -- violating the declared `ProgramId | null` return type in a way
+  // TypeScript cannot catch (tsconfig.json does not set
+  // noUncheckedIndexedAccess). Kept as a regression guard even though the Map
+  // choice makes this structurally impossible now, not just fixed.
   it("does not walk the prototype chain when looking up the allowlist", () => {
     for (const key of ["toString", "constructor", "valueOf", "hasOwnProperty"]) {
       expect(classifyPage(key), key).toBeNull();
@@ -180,6 +161,37 @@ describe("program page classification", () => {
     expect(() => classifyPage("hkwtia-org-event-asia-smart-app-x-hong-kong-ict-awards-crossover.html")).toThrow(
       /matches more than one programme/,
     );
+  });
+});
+
+describe("conflictingAllowlistEntries", () => {
+  // Synthetic, not archive-lifted: no real ALLOWLIST entry conflicts with a
+  // real EXCLUSIONS pattern today (the next test asserts that), so there is
+  // no real example to borrow. This pins the detection itself -- a
+  // deliberately allowlisted page whose filename an exclusion pattern also
+  // matches is a genuine contradiction between two rule sets, and main()
+  // must refuse to resolve it silently rather than pick a winner.
+  it("flags a filename present in both the allowlist and an exclusion pattern", () => {
+    const allowlist = new Map<string, ProgramId>([
+      ["hkwtia-org-event-some-techconnect-page.html", "tct"],
+      ["hkwtia-org-certified-courses.html", "cpai"],
+    ]);
+    const exclusions = [/techconnect/];
+    expect(conflictingAllowlistEntries(allowlist, exclusions)).toEqual([
+      "hkwtia-org-event-some-techconnect-page.html",
+    ]);
+  });
+
+  it("returns an empty array when nothing conflicts", () => {
+    expect(conflictingAllowlistEntries(new Map([["a.html", "asa"]]), [/never-matches/])).toEqual([]);
+  });
+
+  // The real pair this repository ships: today's two ALLOWLIST entries
+  // (hkwtia-org-event-7729.html, hkwtia-org-certified-courses.html) against
+  // today's three EXCLUSIONS patterns (techconnect, best-mobile-app family,
+  // GenAI events). main() calls this exact pairing before writing the index.
+  it("finds no conflicts in the real ALLOWLIST/EXCLUSIONS pair", () => {
+    expect(conflictingAllowlistEntries(ALLOWLIST, EXCLUSIONS)).toEqual([]);
   });
 });
 

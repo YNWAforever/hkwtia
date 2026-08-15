@@ -28,7 +28,10 @@ export type ProgramId = ProgramRecord["id"];
 // Checked before ALLOWLIST and INCLUSIONS. This is the plan's invariant:
 // exclusions are the last word, so a future allowlist entry or a widened
 // inclusion pattern can never silently override a claims-review correction.
-const EXCLUSIONS: readonly RegExp[] = [
+// Exported so tests/unit/index-program-pages.test.ts can assert the real
+// ALLOWLIST/EXCLUSIONS pair via conflictingAllowlistEntries (below) instead
+// of only synthetic ones.
+export const EXCLUSIONS: readonly RegExp[] = [
   // 2019 TechConnect Conference & Festival is the claims-review correction
   // (§4): same name, different event, no series branding. The 5G/IoT
   // TechConnect conference is this script's own defensive addition, caught
@@ -91,17 +94,18 @@ const INCLUSIONS: readonly (readonly [ProgramId, RegExp])[] = [
  * need the same title-read confirmation as these two -- this is an escape
  * hatch for real archive quirks, not a shortcut around writing a pattern.
  *
- * Exported only so tests/unit/index-program-pages.test.ts can simulate a
- * future entry that collides with EXCLUSIONS; nothing else should import it.
+ * A Map, not a plain object: Map.get() only ever returns a value actually
+ * set on it or undefined, with no prototype-chain surface to worry about --
+ * `ALLOWLIST.get("toString")` is undefined, not Object.prototype.toString.
  */
-export const ALLOWLIST: Readonly<Record<string, ProgramId>> = {
+export const ALLOWLIST: ReadonlyMap<string, ProgramId> = new Map([
   // "Asia Smart App Workshop - UIUX： Mobile first" (Apr 2023). WTIA's
   // original title used a fullwidth colon ("："), which the capture tool's
   // slugifier dropped along with everything after it, collapsing the slug
   // to the bare WordPress post ID. No filename pattern can recover "Asia
   // Smart App Workshop" from "7729" -- confirmed by reading the page's own
   // <title>.
-  "hkwtia-org-event-7729.html": "asa",
+  ["hkwtia-org-event-7729.html", "asa"],
   // CPAI's canonical landing page (<title> "CPAI - Certified Practitioner in
   // Generative AI for Business Innovation and Applications (CPAI)") -- the
   // issuer/course/credential prose a later task needs to transcribe. Its
@@ -109,19 +113,19 @@ export const ALLOWLIST: Readonly<Record<string, ProgramId>> = {
   // pattern loose enough to match it risks matching some future unrelated
   // "certified ... course" page. This is one specific page, confirmed by its
   // <title>, not a rule.
-  "hkwtia-org-certified-courses.html": "cpai",
-};
+  ["hkwtia-org-certified-courses.html", "cpai"],
+] as const satisfies (readonly [string, ProgramId])[]);
 
 export function classifyPage(filename: string): ProgramId | null {
+  // Exclusions are checked first: this is the plan's invariant that
+  // exclusions are the last word, kept as defence in depth even though
+  // conflictingAllowlistEntries (below) is what actually guarantees no
+  // ALLOWLIST entry can reach this function while also matching an
+  // exclusion pattern.
   if (EXCLUSIONS.some((pattern) => pattern.test(filename))) return null;
 
-  // Object.hasOwn, not `filename in ALLOWLIST` or bracket access: a plain
-  // object's `in`/index lookup walks the prototype chain, so
-  // classifyPage("toString") would return the Object.prototype method
-  // instead of null. TypeScript's declared `ProgramId | null` return type
-  // does not catch this -- tsconfig.json does not set
-  // noUncheckedIndexedAccess.
-  if (Object.hasOwn(ALLOWLIST, filename)) return ALLOWLIST[filename] as ProgramId;
+  const allowlisted = ALLOWLIST.get(filename);
+  if (allowlisted) return allowlisted;
 
   const matches = INCLUSIONS.filter(([, pattern]) => pattern.test(filename));
   // Zero collisions today (pinned by a test), but first-match-wins is silent
@@ -138,6 +142,24 @@ export function classifyPage(filename: string): ProgramId | null {
   return matches[0]?.[0] ?? null;
 }
 
+/**
+ * Filenames that are both allowlisted and would independently match an
+ * EXCLUSIONS pattern. Should always return [] -- if it doesn't, a human
+ * deliberately allowlisted a page that a claims-review correction also
+ * excludes, and classifyPage's exclusions-first ordering would silently
+ * pick "excluded" as the winner. That is exactly the ambiguous-
+ * classification failure the multi-inclusion-pattern throw above exists to
+ * prevent, so main() throws here too rather than resolving it quietly.
+ * A pure function, not a check baked into classifyPage, so it can be tested
+ * with synthetic inputs instead of mutating the real ALLOWLIST.
+ */
+export function conflictingAllowlistEntries(
+  allowlist: ReadonlyMap<string, ProgramId>,
+  exclusions: readonly RegExp[],
+): string[] {
+  return [...allowlist.keys()].filter((filename) => exclusions.some((pattern) => pattern.test(filename)));
+}
+
 // Pinned against the 577-page capture at
 // /Users/willylai/wtia-legacy-capture-20260812 (2026-08-12). Task 7 downloads
 // irreplaceable images from a site that is about to be switched off, using
@@ -151,12 +173,25 @@ function main(): void {
   const captureDir = process.argv[2];
   if (!captureDir) throw new Error("USAGE: index-program-pages <capture-dir>");
 
+  const conflicts = conflictingAllowlistEntries(ALLOWLIST, EXCLUSIONS);
+  if (conflicts.length > 0) {
+    throw new Error(
+      `ALLOWLIST ${conflicts.length === 1 ? "entry" : "entries"} also matched by an EXCLUSIONS pattern: `
+        + `${conflicts.join(", ")} -- resolve the contradiction before generating the index.`,
+    );
+  }
+
   const pagesDir = join(captureDir, "pages");
-  const files = readdirSync(pagesDir).sort();
+  // Filter to .html before counting: readdirSync also returns dotfiles
+  // (a single Finder visit to the capture directory creates .DS_Store), and
+  // without this filter one incidental file inflates the count past
+  // EXPECTED_TOTAL_PAGES and hard-fails a perfectly good capture.
+  const files = readdirSync(pagesDir).filter((file) => file.endsWith(".html")).sort();
   if (files.length !== EXPECTED_TOTAL_PAGES) {
     throw new Error(
       `expected ${EXPECTED_TOTAL_PAGES} captured pages, found ${files.length} in ${pagesDir} -- `
-        + "refusing to overwrite the reviewed index with a possibly-partial one.",
+        + "refusing to overwrite the reviewed index with a possibly-partial one. If this is a "
+        + "legitimate new capture, update EXPECTED_TOTAL_PAGES and re-run the plan's Step 7 hand review.",
     );
   }
 
