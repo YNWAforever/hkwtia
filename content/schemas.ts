@@ -60,3 +60,140 @@ export const milestoneSchema = z.object({
 });
 
 export type MilestoneRecord = z.infer<typeof milestoneSchema>;
+
+// Own-origin under a dedicated prefix, for the same reason milestoneImageSchema
+// pins /images/history/: the CSP is `img-src 'self' data:` and next.config.ts
+// declares no remotePatterns, so a remote src renders nothing.
+const programImageSchema = z.object({
+  src: z.string().regex(/^\/images\/programs\/[A-Za-z0-9._-]+$/),
+  altEn: z.string().min(1),
+  altZh: z.string().min(1)
+});
+
+const winnerSchema = z.object({
+  nameEn: z.string().min(1),
+  nameZh: z.string().min(1),
+  categoryEn: z.string().min(1),
+  categoryZh: z.string().min(1)
+});
+
+/**
+ * Absence is stated, never inferred from an empty array.
+ *
+ * The archive does not name the ASA 2020 or 2021 winners -- both editions defer
+ * to microsites that were never captured -- nor the HKICT winners for 2021,
+ * 2022 and 2024. `winners: []` would be indistinguishable from an unfinished
+ * entry, so each edition has to declare which case it is, and the page renders
+ * a link or an explicit line rather than an empty table.
+ */
+const winnersSchema = z.discriminatedUnion('kind', [
+  z.object({kind: z.literal('listed'), entries: z.array(winnerSchema).min(1)}).strict(),
+  z.object({kind: z.literal('off-site'), url: z.string().url()}).strict(),
+  z.object({kind: z.literal('unrecorded')}).strict()
+]);
+
+/**
+ * Funding is per edition and the agency set is per programme.
+ *
+ * The content audit called ASA "CCIDA-funded" as though that held throughout.
+ * It does not: CCIDA appears only from 2024, and every documented edition from
+ * 2017 through 2022/23 names Create Hong Kong under the CreateSmart Initiative.
+ * A shared agency enum would let CCIDA be written against a 2017 edition; a
+ * per-programme one will not.
+ *
+ * `const T` is load-bearing, not decoration. Without it the argument widens to
+ * `readonly string[]` and every `agency` becomes plain `string`: the runtime
+ * parse still rejects `agency: 'gsp'` on an ASA edition, but the compiler stops
+ * doing so, which is most of the protection. `tests/unit/program-schema.test.ts`
+ * pins both halves -- the runtime one with `.parse`, the type one with
+ * `@ts-expect-error`, since a test that only parses cannot see this regress.
+ */
+const fundingSchema = <const T extends readonly [string, ...string[]]>(agencies: T) =>
+  z.discriminatedUnion('kind', [
+    z.object({
+      kind: z.literal('named'),
+      agency: z.enum(agencies),
+      initiativeEn: z.string().min(1),
+      initiativeZh: z.string().min(1)
+    }).strict(),
+    // The archive names no funder for this edition. Distinct from "not yet
+    // filled in", and the page says nothing about funding rather than guessing.
+    z.object({kind: z.literal('none-recorded')}).strict()
+  ]);
+
+export const asaProgramSchema = z.object({
+  id: z.literal('asa'),
+  editions: z.array(z.object({
+    // Not every edition is a single calendar year -- "2022/23" is one edition.
+    label: z.string().min(1),
+    yearStart: z.number().int().min(2013).max(2100),
+    funder: fundingSchema(['createhk', 'ccida']),
+    // The audit read "16 regional co-organisers" off a page that says 16
+    // regions attended. Explicit co-organiser counts exist only for 2013 (7)
+    // and 2016 (9), so the field records attendance and is named for it.
+    regionsAttended: z.number().int().positive().nullable(),
+    venueEn: z.string().min(1),
+    venueZh: z.string().min(1),
+    winners: winnersSchema,
+    images: z.array(programImageSchema)
+  }).strict()).min(1)
+}).strict();
+
+export const hkictProgramSchema = z.object({
+  id: z.literal('hkict'),
+  editions: z.array(z.object({
+    year: z.number().int().min(2020).max(2100),
+    // OGCIO for 2020-2024, DPO from 2025. Programme-level would collapse them.
+    organisedFor: z.enum(['ogcio', 'dpo']),
+    winners: winnersSchema,
+    images: z.array(programImageSchema)
+  }).strict()).min(1)
+}).strict();
+
+/**
+ * CPAI is a credential, not an event series: no editions, no winners, no years.
+ *
+ * WTIA issues CPAI alone. CUSCS separately issues its own completion
+ * certificate to the same graduates -- 「一個課程，兩張認證」. The audit called it
+ * a "joint WTIA x CUSCS certification", which understates what WTIA owns, so
+ * the issuer and the course partner are separate required fields and there is
+ * no field in which a joint issuer can be written.
+ */
+export const cpaiProgramSchema = z.object({
+  id: z.literal('cpai'),
+  issuerEn: z.string().min(1),
+  issuerZh: z.string().min(1),
+  coursePartnerEn: z.string().min(1),
+  coursePartnerZh: z.string().min(1),
+  courseNameEn: z.string().min(1),
+  courseNameZh: z.string().min(1),
+  syllabus: z.array(z.object({
+    titleEn: z.string().min(1),
+    titleZh: z.string().min(1)
+  }).strict()),
+  images: z.array(programImageSchema)
+}).strict();
+
+export const tctProgramSchema = z.object({
+  id: z.literal('tct'),
+  editions: z.array(z.object({
+    year: z.number().int().min(2021).max(2100),
+    // Free text, not workshop and seminar counts: the first edition (2021-22)
+    // was 12 workshops and 4.0 (2023) was 10 workshops plus 2 seminars and a
+    // conference. A count-shaped field invites applying one edition's structure
+    // to all of them, which is how the audit got this wrong.
+    shapeEn: z.string().min(1),
+    shapeZh: z.string().min(1),
+    // GSP is named exactly once in 577 pages, on the July 2023 seminar page.
+    // The 2024-26 editions never mention it.
+    funder: fundingSchema(['gsp']),
+    images: z.array(programImageSchema)
+  }).strict()).min(1)
+}).strict();
+
+export type AsaProgram = z.infer<typeof asaProgramSchema>;
+export type HkictProgram = z.infer<typeof hkictProgramSchema>;
+export type CpaiProgram = z.infer<typeof cpaiProgramSchema>;
+export type TctProgram = z.infer<typeof tctProgramSchema>;
+export type ProgramWinners = z.infer<typeof winnersSchema>;
+export type ProgramImage = z.infer<typeof programImageSchema>;
