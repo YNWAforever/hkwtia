@@ -1,7 +1,9 @@
 import {describe, expect, it} from "vitest";
 
 import {asa} from "@/content/programs/asa";
+import {cpai} from "@/content/programs/cpai";
 import {hkict} from "@/content/programs/hkict";
+import {tct} from "@/content/programs/tct";
 
 describe("ASA record", () => {
   // The parse in content/programs/asa.ts already throws on a malformed record;
@@ -116,5 +118,75 @@ describe("HKICT record", () => {
       "資訊科技初創企業（社會貢獻）獎 — 銀獎",
       "資訊科技初創企業（社會貢獻）獎 — 優異證書",
     ]);
+  });
+});
+
+describe("CPAI record", () => {
+  // The correction docs/wtia-programme-claims-review.md §2 asks for. The audit
+  // calls CPAI a "joint WTIA × CUSCS certification"; the course page is
+  // explicit that WTIA issues it alone — 「CPAI … 由 WTIA 頒發」 — and that CUSCS
+  // separately issues its own 結業證書 to the same graduates. cpaiProgramSchema
+  // has no field a joint issuer could be written into; this pins that the two
+  // fields it does have are not quietly filled with the same body.
+  it("names WTIA as the issuer and CUSCS only as the course partner", () => {
+    expect(cpai.issuerEn).toBe("WTIA");
+    expect(cpai.coursePartnerEn).not.toBe(cpai.issuerEn);
+  });
+
+  // The other half of 「一個課程，兩張認證。」 Refusing to represent a joint issuer
+  // states only half the arrangement: without CUSCS's own completion
+  // certificate named separately from the credential, a reader learns only that
+  // CUSCS teaches the course.
+  it("names CUSCS's completion certificate as distinct from CPAI itself", () => {
+    expect(cpai.partnerCertificateZh).toBe("CUSCS 結業證書");
+    expect(cpai.partnerCertificateEn).not.toBe(cpai.courseNameEn);
+  });
+
+  // The syllabus is the one part of this record with drafted English in every
+  // entry, so the Chinese is what anchors it. The course page says 「12 小時實戰
+  // 課程，涵蓋四大模組：」 and then names exactly these four, in this order. A
+  // fifth module, a dropped one, or a reworded one means someone wrote a
+  // syllabus rather than transcribed one — which is the failure this file's
+  // English titles are already closest to.
+  it("carries the course page's four modules verbatim, in its order", () => {
+    expect(cpai.syllabus.map(({titleZh}) => titleZh)).toEqual([
+      "企業 AI 應用的策略框架",
+      "生成式 AI 內容創作實操",
+      "AI 時代的網絡安全與合規要點",
+      "垂直行業 AI 應用案例",
+    ]);
+  });
+});
+
+describe("TCT record", () => {
+  it("has editions and starts no earlier than 2021", () => {
+    expect(tct.editions.length).toBeGreaterThan(0);
+    expect(Math.min(...tct.editions.map(({year}) => year))).toBeGreaterThanOrEqual(2021);
+  });
+
+  // GSP is named exactly once in 577 pages, on the July 2023 seminar page.
+  it("names GSP for the 2023 edition only", () => {
+    for (const edition of tct.editions) {
+      if (edition.funder.kind === "named") expect(edition.year).toBe(2023);
+    }
+  });
+
+  // The audit's actual error, in the form it took: one edition's structure
+  // written as the programme's. The 26 August 2021 kick-off page states its own
+  // edition as "two Public Awareness Seminars, a TechConnect Conference and a
+  // total of 12 Technical workshops"; the 25 July 2023 seminar page says the
+  // 4.0 campaign "has already held 10 workshops". Both counts are real and they
+  // belong to different editions, so a shared shape string — or a twelve
+  // against 2023, or a ten against 2021 — is the mistake reappearing inside the
+  // record. `shapeEn`/`shapeZh` are free text for exactly this reason.
+  it("gives every edition its own shape, and does not swap 2021's twelve for 2023's ten", () => {
+    const shapes = tct.editions.map(({shapeEn}) => shapeEn);
+    expect(new Set(shapes).size, "two editions share a shape string").toBe(shapes.length);
+
+    const shapeFor = (year: number) => tct.editions.find((edition) => edition.year === year)?.shapeEn;
+    expect(shapeFor(2021)).toMatch(/\btwelve\b/i);
+    expect(shapeFor(2021)).not.toMatch(/\bten\b/i);
+    expect(shapeFor(2023)).toMatch(/\bten\b/i);
+    expect(shapeFor(2023)).not.toMatch(/\btwelve\b/i);
   });
 });
