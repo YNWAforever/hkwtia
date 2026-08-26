@@ -121,6 +121,6 @@
     "vitest": "^3.2.4"
   },
   "overrides": {
-    "picomatch": "^2.3.2"
+    "picomatch@2": "^2.3.2"
   }
 }
