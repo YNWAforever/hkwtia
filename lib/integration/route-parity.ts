@@ -120,6 +120,17 @@ function validateDestinationChain(
   errors: RouteParityError[],
   entryId: string,
 ): void {
+  if (entry.disposition === "retire") {
+    if (entry.destinationChain !== undefined) {
+      addError(
+        errors,
+        entryId,
+        "invalid-destination-chain",
+        "A retired entry must not supply a destinationChain.",
+      );
+    }
+    return;
+  }
   if (entry.destinationChain === undefined) return;
   if (entry.destinationChain.length === 0) {
     addError(

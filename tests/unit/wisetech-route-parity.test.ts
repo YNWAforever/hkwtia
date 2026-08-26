@@ -176,6 +176,20 @@ describe("WiseTech route parity manifest", () => {
     }
   });
 
+  it("rejects every destination chain on a retired entry", async () => {
+    const retired = wisetechIntegrationManifest.find(({disposition}) => disposition === "retire")!;
+    const hostile = withIdentity(
+      retired,
+      "hostile-retired-with-chain",
+      "/hostile-retired-with-chain",
+      {destinationChain: ["/about"]},
+    );
+
+    expect(validateRouteParity([hostile], await validationDestinations())).toEqual([
+      expect.objectContaining({entryId: hostile.id, code: "invalid-destination-chain"}),
+    ]);
+  });
+
   it("treats only repository patterns as directional wildcards", () => {
     const hostile = withIdentity(
       wisetechIntegrationManifest[0]!,
