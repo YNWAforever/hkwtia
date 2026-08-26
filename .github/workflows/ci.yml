@@ -23,6 +23,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm ls --package-lock-only @neondatabase/auth @neondatabase/auth-ui better-auth better-call
       - run: npm run audit:strings
       - run: npm test
       - run: npm run lint
