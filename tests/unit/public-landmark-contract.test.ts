@@ -1,10 +1,15 @@
-import {readFileSync, readdirSync} from "node:fs";
+import {existsSync, readFileSync, readdirSync, statSync} from "node:fs";
 import {dirname, join, relative, resolve, sep} from "node:path";
 
 import ts from "typescript";
 import {describe, expect, it} from "vitest";
 
 type SourceFile = Readonly<{path: string; source: string}>;
+type SourceReader = Readonly<{
+  publicPageEntrypoints(): readonly string[];
+  exists(path: string): boolean;
+  read(path: string): string;
+}>;
 
 const publicRoot = "app/[locale]/(public)";
 const publicLayout = `${publicRoot}/layout.tsx`;
@@ -14,21 +19,24 @@ function normalizePath(path: string): string {
   return path.split(sep).join("/").replace(/^\.\//, "");
 }
 
-function collectSourceFiles(directory: string): string[] {
+function collectPublicPageEntrypoints(root: string, directory = join(root, publicRoot)): string[] {
   return readdirSync(directory, {withFileTypes: true}).flatMap((entry) => {
-    if ([".git", ".next", "node_modules", ".worktrees"].includes(entry.name)) return [];
     const path = join(directory, entry.name);
-    if (entry.isDirectory()) return collectSourceFiles(path);
-    return entry.isFile() && sourceExtensions.some((extension) => entry.name.endsWith(extension)) ? [path] : [];
+    if (entry.isDirectory()) return collectPublicPageEntrypoints(root, path);
+    return entry.isFile() && entry.name === "page.tsx" ? [normalizePath(relative(root, path))] : [];
   });
 }
 
-function projectSources(): SourceFile[] {
+function nodeSourceReader(): SourceReader {
   const root = resolve(process.cwd());
-  return collectSourceFiles(root).map((file) => ({
-    path: normalizePath(relative(root, file)),
-    source: readFileSync(file, "utf8"),
-  }));
+  return {
+    publicPageEntrypoints: () => collectPublicPageEntrypoints(root),
+    exists: (path) => {
+      const candidate = join(root, path);
+      return existsSync(candidate) && statSync(candidate).isFile();
+    },
+    read: (path) => readFileSync(join(root, path), "utf8"),
+  };
 }
 
 function staticSpecifiers(source: string, path: string): string[] {
@@ -40,7 +48,7 @@ function staticSpecifiers(source: string, path: string): string[] {
   });
 }
 
-function resolveLocalImport(from: string, specifier: string, available: ReadonlySet<string>): string | null {
+function resolveLocalImport(from: string, specifier: string, exists: (path: string) => boolean): string | null {
   const base = specifier.startsWith("@/")
     ? specifier.slice(2)
     : specifier.startsWith(".")
@@ -50,26 +58,58 @@ function resolveLocalImport(from: string, specifier: string, available: Readonly
   const candidates = sourceExtensions.some((extension) => base.endsWith(extension))
     ? [base]
     : [base, ...sourceExtensions.map((extension) => `${base}${extension}`), ...sourceExtensions.map((extension) => `${base}/index${extension}`)];
-  return candidates.find((candidate) => available.has(candidate)) ?? null;
+  return candidates.find(exists) ?? null;
 }
 
-function publicReachableSources(sources: readonly SourceFile[]): SourceFile[] {
-  const byPath = new Map(sources.map((source) => [source.path, source]));
-  const available = new Set(byPath.keys());
-  const pending = sources.filter(({path}) => path.startsWith(`${publicRoot}/`) && path.endsWith("/page.tsx")).map(({path}) => path);
+function projectSources(reader: SourceReader = nodeSourceReader()): SourceFile[] {
+  const pending = [...reader.publicPageEntrypoints(), publicLayout];
   const visited = new Set<string>();
+  const sources = new Map<string, SourceFile>();
+  const specifiers = new Map<string, string[]>();
+
   while (pending.length) {
-    const path = pending.pop();
-    if (!path || visited.has(path)) continue;
+    const path = pending.shift();
+    if (!path || visited.has(path) || !reader.exists(path)) continue;
     visited.add(path);
-    const source = byPath.get(path);
-    if (!source) continue;
-    for (const specifier of staticSpecifiers(source.source, path)) {
-      const dependency = resolveLocalImport(path, specifier, available);
+
+    let source = sources.get(path);
+    if (!source) {
+      source = {path, source: reader.read(path)};
+      sources.set(path, source);
+    }
+
+    let imports = specifiers.get(path);
+    if (!imports) {
+      imports = staticSpecifiers(source.source, path);
+      specifiers.set(path, imports);
+    }
+    for (const specifier of imports) {
+      const dependency = resolveLocalImport(path, specifier, reader.exists);
       if (dependency && !visited.has(dependency)) pending.push(dependency);
     }
   }
-  return [...visited].map((path) => byPath.get(path)!).filter(Boolean);
+
+  return [...visited].map((path) => sources.get(path)!).filter(Boolean);
+}
+
+function inMemorySourceReader(sources: readonly SourceFile[], onRead?: (path: string) => void): SourceReader {
+  const byPath = new Map(sources.map((source) => [source.path, source.source]));
+  return {
+    publicPageEntrypoints: () => sources
+      .filter(({path}) => path.startsWith(`${publicRoot}/`) && path.endsWith("/page.tsx"))
+      .map(({path}) => path),
+    exists: (path) => byPath.has(path),
+    read: (path) => {
+      onRead?.(path);
+      const source = byPath.get(path);
+      if (source === undefined) throw new Error(`missing fixture source: ${path}`);
+      return source;
+    },
+  };
+}
+
+function publicReachableSources(sources: readonly SourceFile[]): SourceFile[] {
+  return projectSources(inMemorySourceReader(sources));
 }
 
 function nestedMainOffenders(sources: readonly SourceFile[]): string[] {
@@ -123,6 +163,27 @@ describe("public landmark contract", () => {
       .toEqual(["owner <main> must have id=\"main-content\""]);
     expect(ownerMainIssues('<main data-id="main-content"/>'))
       .toEqual(["owner <main> must have id=\"main-content\""]);
+  });
+
+  it("reads only public entrypoints, the owner, and each reachable source once", () => {
+    const reads: string[] = [];
+    const sources: SourceFile[] = [
+      {path: publicLayout, source: '<main id="main-content"/>'},
+      {path: `${publicRoot}/sample/page.tsx`, source: 'import "@/components/site/shared";'},
+      {path: "components/site/shared.tsx", source: "export const shared = true;"},
+      {path: "components/marketing/unreachable-main.tsx", source: "<main/>"},
+    ];
+
+    expect(projectSources(inMemorySourceReader(sources, (path) => reads.push(path))).map(({path}) => path)).toEqual([
+      `${publicRoot}/sample/page.tsx`,
+      publicLayout,
+      "components/site/shared.tsx",
+    ]);
+    expect(reads).toEqual([
+      `${publicRoot}/sample/page.tsx`,
+      publicLayout,
+      "components/site/shared.tsx",
+    ]);
   });
 
   it("discovers nested mains through public import and re-export reachability", () => {
