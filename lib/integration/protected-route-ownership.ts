@@ -36,6 +36,13 @@ type DerivedProtectedRoute = Readonly<{
   filePath: string;
 }>;
 
+type InterceptionOperation = "retain" | "pop" | "reset";
+
+type InterceptedRouteSegment = Readonly<{
+  operations: readonly InterceptionOperation[];
+  target: string;
+}>;
+
 function normalizedFilePath(filePath: string): string {
   return filePath.replaceAll("\\", "/").replace(/^\.\//, "");
 }
@@ -48,8 +55,30 @@ function isParallelRouteSlot(segment: string): boolean {
   return segment.startsWith("@");
 }
 
-function interceptedSegment(segment: string): string {
-  return segment.replace(/^(?:(?:\(\.\.\.\))|(?:\(\.\.\))|(?:\(\.\)))+/, "");
+function parseInterceptedRouteSegment(segment: string): InterceptedRouteSegment | null {
+  const operations: InterceptionOperation[] = [];
+  let target = segment;
+
+  while (true) {
+    if (target.startsWith("(...)")) {
+      operations.push("reset");
+      target = target.slice("(...)".length);
+      continue;
+    }
+    if (target.startsWith("(..)")) {
+      operations.push("pop");
+      target = target.slice("(..)".length);
+      continue;
+    }
+    if (target.startsWith("(.)")) {
+      operations.push("retain");
+      target = target.slice("(.)".length);
+      continue;
+    }
+    break;
+  }
+
+  return operations.length === 0 ? null : {operations, target};
 }
 
 function isPrivateSegment(segment: string): boolean {
@@ -71,25 +100,33 @@ export function appRouteFromFilePath(filePath: string): string | null {
     throw new Error(`Protected route file ${filePath} must be an app/**/page.tsx or app/**/route.ts file.`);
   }
 
-  const routeSegments: string[] = [];
-  for (const segment of segments.slice(1, -1)) {
-    if (isPrivateSegment(segment)) return null;
-    if (isParallelRouteSlot(segment)) continue;
+  const sourceSegments = segments.slice(1, -1);
+  if (sourceSegments[0] === "[locale]") sourceSegments.shift();
 
-    const intercepted = interceptedSegment(segment);
-    if (intercepted !== segment) {
-      if (intercepted === "") {
+  const routeSegments: string[] = [];
+  for (const segment of sourceSegments) {
+    if (isPrivateSegment(segment)) return null;
+    if (isParallelRouteSlot(segment) || isRouteGroup(segment)) continue;
+
+    const interception = parseInterceptedRouteSegment(segment);
+    if (interception !== null) {
+      if (interception.target === "") {
         throw new Error(`Protected route file ${filePath} has an interception marker without a target segment.`);
       }
-      if (isPrivateSegment(intercepted)) return null;
-      routeSegments.push(intercepted);
+      for (const operation of interception.operations) {
+        if (operation === "reset") {
+          routeSegments.length = 0;
+        } else if (operation === "pop" && routeSegments.length > 0) {
+          routeSegments.pop();
+        }
+      }
+      if (isPrivateSegment(interception.target)) return null;
+      routeSegments.push(interception.target);
       continue;
     }
-    if (isRouteGroup(segment)) continue;
     routeSegments.push(segment);
   }
 
-  if (routeSegments[0] === "[locale]") routeSegments.shift();
   const invalid = routeSegments.find((segment) => !isValidRouteSegment(segment));
   if (invalid !== undefined) {
     throw new Error(`Protected route file ${filePath} contains invalid route segment ${invalid}.`);
