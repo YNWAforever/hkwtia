@@ -49,3 +49,7 @@ Phase 0 parity is not closed. Closure requires all of the following:
 6. Re-run the parity validator and human evidence review after reconciliation.
 
 Until those steps are complete, the known Site commit/hash establishes a donor identity only. It does not prove that all Site routes/files/assets have been classified, and it does not authorize Sites source transfer, provider action, schema mutation, seeding, deployment or production changes.
+
+## Delivery-gate cross-link
+
+For the reusable seven-PR delivery checklist, independent Preview/rollback expectations, and fail-closed external statuses, see [WiseTech delivery gates](wisetech-delivery-gates.md). This provenance record remains the authority for source-archive availability and reconciliation evidence.
