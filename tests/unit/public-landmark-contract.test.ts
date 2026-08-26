@@ -79,10 +79,32 @@ function nestedMainOffenders(sources: readonly SourceFile[]): string[] {
     .sort();
 }
 
+function jsxMainElements(source: string): ts.JsxOpeningLikeElement[] {
+  const parsed = ts.createSourceFile("owner.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const elements: ts.JsxOpeningLikeElement[] = [];
+  const visit = (node: ts.Node): void => {
+    if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && ts.isIdentifier(node.tagName) && node.tagName.text === "main") {
+      elements.push(node);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(parsed);
+  return elements;
+}
+
+function hasMainContentId(main: ts.JsxOpeningLikeElement): boolean {
+  return main.attributes.properties.some((attribute) => ts.isJsxAttribute(attribute)
+    && ts.isIdentifier(attribute.name)
+    && attribute.name.text === "id"
+    && !!attribute.initializer
+    && ts.isStringLiteral(attribute.initializer)
+    && attribute.initializer.text === "main-content");
+}
+
 function ownerMainIssues(source: string | undefined): string[] {
-  const mains = source?.match(/<main\b[^>]*>/g) ?? [];
+  const mains = source ? jsxMainElements(source) : [];
   if (mains.length !== 1) return [`expected exactly one <main>, found ${mains.length}`];
-  return /\bid\s*=\s*["']main-content["']/.test(mains[0]!) ? [] : ["owner <main> must have id=\"main-content\""];
+  return hasMainContentId(mains[0]!) ? [] : ["owner <main> must have id=\"main-content\""];
 }
 
 describe("public landmark contract", () => {
@@ -98,6 +120,8 @@ describe("public landmark contract", () => {
     expect(ownerMainIssues("<main id=\"other\"/>"))
       .toEqual(["owner <main> must have id=\"main-content\""]);
     expect(ownerMainIssues("<main/>"))
+      .toEqual(["owner <main> must have id=\"main-content\""]);
+    expect(ownerMainIssues('<main data-id="main-content"/>'))
       .toEqual(["owner <main> must have id=\"main-content\""]);
   });
 
