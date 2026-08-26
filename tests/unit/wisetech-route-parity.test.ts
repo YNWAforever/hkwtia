@@ -12,13 +12,18 @@ import {
   wisetechIntegrationProvenance,
 } from "@/config/wisetech-integration-manifest";
 import type {IntegrationManifestEntry} from "@/config/wisetech-integration-manifest";
-import {validateRouteParity} from "@/lib/integration/route-parity";
+import {protectedRouteOwnershipInventory} from "@/config/wisetech-protected-route-inventory";
+import {
+  appRouteFromFilePath,
+  isProtectedAdminRoute,
+  validateRouteParity,
+} from "@/lib/integration/route-parity";
 
-function pageFiles(directory: string): string[] {
+function filesNamed(directory: string, fileName: string): string[] {
   return readdirSync(directory, {withFileTypes: true}).flatMap((item) => {
     const path = join(directory, item.name);
-    if (item.isDirectory()) return pageFiles(path);
-    return item.isFile() && item.name === "page.tsx" ? [path] : [];
+    if (item.isDirectory()) return filesNamed(path, fileName);
+    return item.isFile() && item.name === fileName ? [path] : [];
   });
 }
 
@@ -33,8 +38,23 @@ function appRouteForPage(file: string): string {
 }
 
 const appRoutes = new Set(
-  pageFiles(resolve(process.cwd(), "app", "[locale]")).map(appRouteForPage),
+  filesNamed(resolve(process.cwd(), "app", "[locale]"), "page.tsx").map(appRouteForPage),
 );
+
+function repositoryProtectedFiles(): string[] {
+  const root = process.cwd();
+  const app = resolve(root, "app");
+  const adminPages = filesNamed(resolve(app, "[locale]"), "page.tsx")
+    .map((file) => relative(root, file).replaceAll("\\", "/"))
+    .filter((file) => {
+      const route = appRouteFromFilePath(file);
+      return route !== null && isProtectedAdminRoute(route);
+    });
+  const apiHandlers = filesNamed(resolve(app, "api"), "route.ts")
+    .map((file) => relative(root, file).replaceAll("\\", "/"))
+    .filter((file) => appRouteFromFilePath(file) !== null);
+  return [...adminPages, ...apiHandlers].sort();
+}
 
 async function validationDestinations() {
   const configured = ((await nextConfig.redirects?.()) ?? []) as readonly {
@@ -45,6 +65,10 @@ async function validationDestinations() {
     appRoutes,
     redirects: new Map(configured.map(({source, destination}) => [source, destination])),
     conciergeActions: new Set(["/api/ai/concierge"]),
+    protectedRoutes: {
+      inventory: protectedRouteOwnershipInventory,
+      codeFiles: repositoryProtectedFiles(),
+    },
   };
 }
 
@@ -190,7 +214,7 @@ describe("WiseTech route parity manifest", () => {
     ]);
   });
 
-  it("treats only repository patterns as directional wildcards", () => {
+  it("treats only repository patterns as directional wildcards", async () => {
     const hostile = withIdentity(
       wisetechIntegrationManifest[0]!,
       "hostile-submitted-dynamic-pattern",
@@ -198,6 +222,7 @@ describe("WiseTech route parity manifest", () => {
       {canonicalPath: "/[slug]", disposition: "merge"},
     );
     const destinations = {
+      ...(await validationDestinations()),
       appRoutes: new Set(["/about"]),
       redirects: new Map<string, string>(),
       conciergeActions: new Set<string>(),

@@ -5,7 +5,11 @@ import {describe, expect, it} from "vitest";
 
 import {protectedRouteOwnershipInventory} from "@/config/wisetech-protected-route-inventory";
 import type {ProtectedRouteOwner} from "@/config/wisetech-protected-route-inventory";
-import {appRouteFromFilePath, validateRouteParity} from "@/lib/integration/route-parity";
+import {
+  appRouteFromFilePath,
+  isProtectedAdminRoute,
+  validateRouteParity,
+} from "@/lib/integration/route-parity";
 
 function filesNamed(directory: string, fileName: string): string[] {
   return readdirSync(directory, {withFileTypes: true}).flatMap((item) => {
@@ -20,9 +24,13 @@ function repositoryProtectedFiles(): string[] {
   const app = resolve(root, "app");
   const adminPages = filesNamed(resolve(app, "[locale]"), "page.tsx")
     .map((file) => relative(root, file).replaceAll("\\", "/"))
-    .filter((file) => appRouteFromFilePath(file).startsWith("/admin"));
+    .filter((file) => {
+      const route = appRouteFromFilePath(file);
+      return route !== null && isProtectedAdminRoute(route);
+    });
   const apiHandlers = filesNamed(resolve(app, "api"), "route.ts")
-    .map((file) => relative(root, file).replaceAll("\\", "/"));
+    .map((file) => relative(root, file).replaceAll("\\", "/"))
+    .filter((file) => appRouteFromFilePath(file) !== null);
   return [...adminPages, ...apiHandlers].sort();
 }
 

@@ -41,7 +41,19 @@ function normalizedFilePath(filePath: string): string {
 }
 
 function isRouteGroup(segment: string): boolean {
-  return /^\([^/]+\)$/.test(segment);
+  return /^\([^()]+\)$/.test(segment);
+}
+
+function isParallelRouteSlot(segment: string): boolean {
+  return segment.startsWith("@");
+}
+
+function interceptedSegment(segment: string): string {
+  return segment.replace(/^(?:(?:\(\.\.\.\))|(?:\(\.\.\))|(?:\(\.\)))+/, "");
+}
+
+function isPrivateSegment(segment: string): boolean {
+  return segment.startsWith("_");
 }
 
 function isValidRouteSegment(segment: string): boolean {
@@ -51,7 +63,7 @@ function isValidRouteSegment(segment: string): boolean {
     || /^\[\[\.\.\.[^[\]/]+\]\]$/.test(segment);
 }
 
-export function appRouteFromFilePath(filePath: string): string {
+export function appRouteFromFilePath(filePath: string): string | null {
   const normalized = normalizedFilePath(filePath);
   const segments = normalized.split("/");
   const convention = segments.at(-1);
@@ -59,13 +71,34 @@ export function appRouteFromFilePath(filePath: string): string {
     throw new Error(`Protected route file ${filePath} must be an app/**/page.tsx or app/**/route.ts file.`);
   }
 
-  const routeSegments = segments.slice(1, -1).filter((segment) => !isRouteGroup(segment));
+  const routeSegments: string[] = [];
+  for (const segment of segments.slice(1, -1)) {
+    if (isPrivateSegment(segment)) return null;
+    if (isParallelRouteSlot(segment)) continue;
+
+    const intercepted = interceptedSegment(segment);
+    if (intercepted !== segment) {
+      if (intercepted === "") {
+        throw new Error(`Protected route file ${filePath} has an interception marker without a target segment.`);
+      }
+      if (isPrivateSegment(intercepted)) return null;
+      routeSegments.push(intercepted);
+      continue;
+    }
+    if (isRouteGroup(segment)) continue;
+    routeSegments.push(segment);
+  }
+
   if (routeSegments[0] === "[locale]") routeSegments.shift();
   const invalid = routeSegments.find((segment) => !isValidRouteSegment(segment));
   if (invalid !== undefined) {
     throw new Error(`Protected route file ${filePath} contains invalid route segment ${invalid}.`);
   }
   return routeSegments.length === 0 ? "/" : `/${routeSegments.join("/")}`;
+}
+
+export function isProtectedAdminRoute(routePath: string): boolean {
+  return routePath === "/admin" || routePath.startsWith("/admin/");
 }
 
 function classificationForApiPath(routePath: string): ProtectedRouteClassification {
@@ -77,11 +110,11 @@ function classificationForApiPath(routePath: string): ProtectedRouteClassificati
   return "api-handler";
 }
 
-function deriveProtectedRoute(filePath: string): DerivedProtectedRoute {
+function deriveProtectedRoute(filePath: string): DerivedProtectedRoute | null {
   const normalized = normalizedFilePath(filePath);
   const routePath = appRouteFromFilePath(normalized);
-  if (normalized.endsWith("/page.tsx")
-    && (routePath === "/admin" || routePath.startsWith("/admin/"))) {
+  if (routePath === null) return null;
+  if (normalized.endsWith("/page.tsx") && isProtectedAdminRoute(routePath)) {
     return {family: "admin", classification: "admin-page", routePath, filePath: normalized};
   }
   if (normalized.endsWith("/route.ts")
@@ -125,6 +158,7 @@ export function validateProtectedRouteOwnership(
     const normalized = normalizedFilePath(filePath);
     try {
       const route = deriveProtectedRoute(normalized);
+      if (route === null) continue;
       if (codeByFile.has(normalized)) {
         error(errors, normalized, "invalid-protected-route-file", `Protected code file ${normalized} is listed more than once.`);
       } else {
@@ -152,9 +186,8 @@ export function validateProtectedRouteOwnership(
     if (duplicateRoutes.has(owner.routePath)) {
       error(errors, owner.id, "duplicate-protected-owner-route", `Protected owner route ${owner.routePath} is not unique.`);
     }
-    if (!ownerByFile.has(filePath)) ownerByFile.set(filePath, owner);
 
-    let derived: DerivedProtectedRoute | undefined;
+    let derived: DerivedProtectedRoute | null | undefined;
     try {
       derived = deriveProtectedRoute(filePath);
     } catch (cause) {
@@ -166,6 +199,16 @@ export function validateProtectedRouteOwnership(
       );
     }
     if (derived === undefined) continue;
+    if (derived === null) {
+      error(
+        errors,
+        owner.id,
+        "invalid-protected-route-file",
+        `Protected owner file ${filePath} is inside a private non-route subtree.`,
+      );
+      continue;
+    }
+    if (!ownerByFile.has(filePath)) ownerByFile.set(filePath, owner);
 
     const expectedPattern = derived.family === "admin" ? "/admin/*" : "/api/*";
     if (!protectedRouteFamilies.includes(owner.family)

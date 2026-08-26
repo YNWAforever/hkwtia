@@ -15,13 +15,16 @@ import type {
   ProtectedRouteOwnershipInput,
 } from "@/lib/integration/protected-route-ownership";
 
-export {appRouteFromFilePath} from "@/lib/integration/protected-route-ownership";
+export {
+  appRouteFromFilePath,
+  isProtectedAdminRoute,
+} from "@/lib/integration/protected-route-ownership";
 
 export type RouteParityDestinations = Readonly<{
   appRoutes: ReadonlySet<string>;
   redirects: ReadonlyMap<string, string>;
   conciergeActions: ReadonlySet<string>;
-  protectedRoutes?: ProtectedRouteOwnershipInput;
+  protectedRoutes: ProtectedRouteOwnershipInput;
 }>;
 
 export type RouteParityErrorCode =
@@ -38,6 +41,7 @@ export type RouteParityErrorCode =
   | "invalid-durable-owner"
   | "invalid-durable-outcome"
   | "invalid-locale-mechanism"
+  | "missing-protected-route-inventory"
   | ProtectedRouteOwnershipErrorCode;
 
 export type RouteParityError = Readonly<{
@@ -124,6 +128,12 @@ function duplicates(values: readonly string[]): ReadonlySet<string> {
 function sameOrderedValues(actual: readonly string[], expected: readonly string[]): boolean {
   return actual.length === expected.length
     && expected.every((value, index) => actual[index] === value);
+}
+
+function isProtectedRouteOwnershipInput(value: unknown): value is ProtectedRouteOwnershipInput {
+  if (typeof value !== "object" || value === null) return false;
+  const candidate = value as Partial<ProtectedRouteOwnershipInput>;
+  return Array.isArray(candidate.inventory) && Array.isArray(candidate.codeFiles);
 }
 
 function validateDestinationChain(
@@ -289,8 +299,18 @@ export function validateRouteParity(
     }
   }
 
-  if (destinations.protectedRoutes !== undefined) {
-    errors.push(...validateProtectedRouteOwnership(destinations.protectedRoutes));
+  const protectedRouteInput = (
+    destinations as RouteParityDestinations | Partial<RouteParityDestinations>
+  ).protectedRoutes;
+  if (!isProtectedRouteOwnershipInput(protectedRouteInput)) {
+    addError(
+      errors,
+      "<protected-route-inventory>",
+      "missing-protected-route-inventory",
+      "Protected admin/API ownership inventory and discovered code files are required.",
+    );
+  } else {
+    errors.push(...validateProtectedRouteOwnership(protectedRouteInput));
   }
 
   return errors;
