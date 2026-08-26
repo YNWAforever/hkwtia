@@ -1,6 +1,6 @@
 # WiseTech route parity evidence
 
-This is the human-readable route/CTA view of `config/wisetech-integration-manifest.ts`. The validator independently checks every non-retired canonical path and every member of a supplied chain against App Router pages, exact `next.config.ts` source-to-destination redirect mappings, or the existing Concierge action. Destination chains are allowed only on non-retired entries, must be nonempty, and must begin with `canonicalPath`; retired entries have neither a canonical target nor a destination chain. Repository patterns are directional wildcards, and redirect entries must match their configured target. This is classification evidence, not a claim that design-only pages have been built.
+This is the human-readable route/CTA view of `config/wisetech-integration-manifest.ts` plus the protected code-owner view of `config/wisetech-protected-route-inventory.ts`. The validator independently checks every non-retired canonical path and every member of a supplied chain against App Router pages, exact `next.config.ts` source-to-destination redirect mappings, or the existing Concierge action. It separately requires bidirectional equality between the explicit protected inventory and every discovered localized `/admin` `page.tsx` plus every `app/api/**/route.ts` handler. Destination chains are allowed only on non-retired entries, must be nonempty, and must begin with `canonicalPath`; retired entries have neither a canonical target nor a destination chain. Repository patterns are directional wildcards, and redirect entries must match their configured target. This is classification evidence, not a claim that design-only pages have been built.
 
 ## Evidence basis and open gate
 
@@ -13,11 +13,11 @@ This is the human-readable route/CTA view of `config/wisetech-integration-manife
 |---|---|
 | `hkwtia-repository` | Verified in the App Router, redirect configuration, action/component, typed content or repository assets. |
 | `site-v13-design-doc` | Stated by an attached design instruction; not verified against Site source files. |
-| `master-plan` | Required by the integration plan, including the CTA contract. |
+| `master-plan` | Required by the integration plan, including the CTA contract and the `/admin/*` and `/api/*` families. |
 | `site-v13-source` | Reserved for evidence from the transferred archive. There are currently zero such entries. |
 | Unavailable archive | A known Site identity/hash without locally inspectable archive bytes; never parity-closure evidence. |
 
-The manifest has 127 entries: route 110, CTA 5, form 3, locale 1 and asset 8. Dispositions are retain 47, redirect 4, merge 61 and retire 15. Evidence labels are repository 52, design document 70, master plan 5 and Site source 0.
+The integration manifest has 127 entries: route 110, CTA 5, form 3, locale 1 and asset 8. Dispositions are retain 47, redirect 4, merge 61 and retire 15. Evidence labels are repository 52, design document 70, master plan 5 and Site source 0. The separate protected inventory has 37 repository-owned code routes: 20 admin pages and 17 API handlers, classified as 6 general API handlers, 2 webhook handlers and 9 job handlers.
 
 ## Repository-backed canonical routes
 
@@ -47,10 +47,23 @@ Each row below is a `retain` route with `hkwtia-repository` evidence. Dynamic pa
 | `/portal`, `/portal/profile`, `/portal/company` | Authenticated member/company data |
 | `/portal/company/seats`, `/portal/company/seats/accept` | Company seat and invitation state |
 | `/portal/directory`, `/portal/company/listing`, `/portal/events`, `/portal/documents`, `/portal/billing` | Existing member read/mutation models for each surface |
-| `/admin` | Staff-authorised CMS/CRM entry point and nested routes |
-| `/api/ai/concierge` | Existing guarded Concierge action |
+| `/admin` | Staff-authorised CMS/CRM entry point; nested owners are enumerated below |
+| `/api/ai/concierge` | Existing guarded Concierge action; all API owners are enumerated below |
 
-These rows cover every current destination represented by the master plan's route-and-journey matrix, including `/unsubscribe` and all four required public `[slug]` patterns. The `/portal/*`, `/admin/*` and `/api/*` matrix families are represented by their current entry points and explicit existing destinations; this document does not imply that every proposed design subroute exists.
+These rows cover every current destination represented by the master plan's route-and-journey matrix, including `/unsubscribe` and all four required public `[slug]` patterns. The `/portal/*` matrix family remains represented by its explicit current destinations. The master-plan `/admin/*` and `/api/*` family evidence is retained, but family completeness is established only by the protected inventory below; no representative route stands in for its siblings.
+
+## Protected route family ownership
+
+The master plan is the requirements evidence for the `/admin/*` and `/api/*` families. Each file/path owner below is independently marked `hkwtia-repository`. Route groups such as `(admin)` do not contribute a URL segment; the locale wrapper is removed from the canonical ownership path; `[id]`, `[...path]` and `[[...path]]` remain deterministic Next.js patterns. `page.tsx` is accepted only for the admin family and `route.ts` only for the API family.
+
+| Classification | Exact current canonical routes |
+|---|---|
+| Admin pages (20) | `/admin`; `/admin/approvals`; `/admin/at-risk`; `/admin/automations`; `/admin/cohorts`; `/admin/cohorts/[id]`; `/admin/events-mgmt`; `/admin/events-mgmt/[id]`; `/admin/listings-review`; `/admin/media`; `/admin/media/[id]`; `/admin/members`; `/admin/members/[id]`; `/admin/news`; `/admin/news/[id]`; `/admin/page-copy`; `/admin/page-copy/[namespace]`; `/admin/reports`; `/admin/reports/board-drafts/[id]`; `/admin/segments` |
+| General API handlers (6) | `/api/admin/segments/[id]/export`; `/api/ai/concierge`; `/api/ai/conversations/[id]/feedback`; `/api/auth/[...path]`; `/api/showcase/[slug]/view`; `/api/unsubscribe` |
+| Webhook handlers (2) | `/api/stripe/webhook`; `/api/webhooks/woztell` |
+| Job handlers (9) | `/api/jobs/aiops-metrics`; `/api/jobs/approvals-expirer`; `/api/jobs/board-reporter`; `/api/jobs/chat-retention`; `/api/jobs/engagement-score`; `/api/jobs/journey-runner`; `/api/jobs/renewal-runner`; `/api/jobs/retention-analyst`; `/api/jobs/worker-alert` |
+
+The contract compares exact normalized file paths and canonical paths in both directions. A new code route without an owner, a deleted code route with a stale owner, a fabricated owner, a duplicate owner, a wrong family, or a webhook/job classified as a general handler all fail. This inventory proves current `hkwtia` code ownership only; it does not classify any unavailable Site archive route.
 
 ## Explicit current redirects
 
@@ -125,4 +138,4 @@ The design map's already-canonical routes (`/events`, `/events/[slug]`, `/member
 
 ## Exit condition
 
-The machine-readable boundary passes against the current repository and catches injected invalid canonicals with otherwise valid chains, empty/inconsistent chains, chains on retired entries, submitted dynamic patterns, fabricated/wrong-target redirects, unsupported durable owners/actions, unmapped routes and nonexistent CTA destinations. It also pins zero `site-v13-source` entries while the archive is unavailable and deep-freezes nested contract arrays. That does not close Site parity. Closure requires a credential-safe archive transfer, verification of the reported archive hash, and reconciliation of every source route, CTA, form, locale, component, content item and asset without introducing fabricated data or destinations.
+The machine-readable boundary passes against the current repository and catches injected invalid canonicals with otherwise valid chains, empty/inconsistent chains, chains on retired entries, submitted dynamic patterns, fabricated/wrong-target redirects, unsupported durable owners/actions, unmapped routes and nonexistent CTA destinations. The protected family contract additionally catches new code routes, deleted code routes, fabricated owners, wrong file conventions, family drift and webhook/job misclassification while pinning the exact current 20/17 ownership sets. It also pins zero `site-v13-source` entries while the archive is unavailable and deep-freezes all inventory objects and nested contract arrays. That does not close Site parity. Closure requires a credential-safe archive transfer, verification of the reported archive hash, and reconciliation of every source route, CTA, form, locale, component, content item and asset without introducing fabricated data or destinations.

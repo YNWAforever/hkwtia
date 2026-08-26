@@ -7,11 +7,21 @@ import type {
   DurableOwner,
   IntegrationManifestEntry,
 } from "@/config/wisetech-integration-manifest";
+import {
+  validateProtectedRouteOwnership,
+} from "@/lib/integration/protected-route-ownership";
+import type {
+  ProtectedRouteOwnershipErrorCode,
+  ProtectedRouteOwnershipInput,
+} from "@/lib/integration/protected-route-ownership";
+
+export {appRouteFromFilePath} from "@/lib/integration/protected-route-ownership";
 
 export type RouteParityDestinations = Readonly<{
   appRoutes: ReadonlySet<string>;
   redirects: ReadonlyMap<string, string>;
   conciergeActions: ReadonlySet<string>;
+  protectedRoutes?: ProtectedRouteOwnershipInput;
 }>;
 
 export type RouteParityErrorCode =
@@ -27,7 +37,8 @@ export type RouteParityErrorCode =
   | "invalid-redirect"
   | "invalid-durable-owner"
   | "invalid-durable-outcome"
-  | "invalid-locale-mechanism";
+  | "invalid-locale-mechanism"
+  | ProtectedRouteOwnershipErrorCode;
 
 export type RouteParityError = Readonly<{
   entryId: string;
@@ -276,6 +287,10 @@ export function validateRouteParity(
         "Locale switching must use next-intl router replacement and never build a /zh-HK browser path.",
       );
     }
+  }
+
+  if (destinations.protectedRoutes !== undefined) {
+    errors.push(...validateProtectedRouteOwnership(destinations.protectedRoutes));
   }
 
   return errors;

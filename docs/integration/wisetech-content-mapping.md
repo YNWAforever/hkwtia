@@ -28,9 +28,12 @@ Evidence legend: `hkwtia-repository` is current code/data ownership; `site-v13-d
 | AI Concierge | Existing widget, API, conversations, approvals and knowledge/runtime controls | Replace presentation only; retain rate limits, Turnstile, ownership and approval rules | Repository-verified |
 | AI-Ops metrics | Existing evidence formulas/materialised metrics | Never fill sparse metrics with invented outcomes | Repository/master plan |
 | Portal content | Member/company-owned records behind current authorization | Share tokens, not marketing navigation or public data assumptions | Repository-verified |
-| Admin CMS/CRM | Staff-authorised audited routes and repositories | Extend only for a proven content gap through additive review | Repository-verified |
+| Admin CMS/CRM | The 20 explicit localized admin `page.tsx` owners in `config/wisetech-protected-route-inventory.ts` plus their authorised audited repositories/actions | Extend only for a proven content gap; any new/deleted page must update the bidirectional inventory | Master-plan `/admin/*` family plus repository-verified file owners |
+| Server API, webhooks and jobs | The 17 explicit `app/api/**/route.ts` owners: 6 general handlers, 2 webhooks and 9 jobs | Preserve authentication, idempotency and secrets; any new/deleted handler or classification change must update the bidirectional inventory | Master-plan `/api/*` family plus repository-verified file owners |
 | Locale routing | `next-intl`, current switcher and `/zh` public prefix | Preserve path/query via router locale replacement; do not store `/zh-HK` browser links | Repository-verified |
 | Assets and alt text | Tracked own-origin assets plus curated media metadata | Reconcile every Site file, rights status and localized alt text after archive transfer | Repository/design document; gate open |
+
+The protected route inventory is code-ownership evidence only. Route groups do not add URL segments, the locale wrapper is removed, and dynamic/catch-all patterns retain Next.js notation. It does not imply that the unavailable Site archive has been reconciled or that any proposed design-only route exists.
 
 ## CTA content rules
 
