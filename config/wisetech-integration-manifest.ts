@@ -10,7 +10,7 @@ export const evidenceKinds = [
 export type IntegrationKind = (typeof integrationKinds)[number];
 export type IntegrationDisposition = (typeof integrationDispositions)[number];
 export type IntegrationEvidence = (typeof evidenceKinds)[number];
-export type DurableOwner = "published-event" | "published-cohort" | "crm-inquiry";
+export type DurableOwner = "events" | "cohorts";
 
 export type IntegrationManifestEntry = Readonly<{
   id: string;
@@ -39,7 +39,15 @@ export const wisetechIntegrationProvenance = Object.freeze({
 });
 
 function entry(value: IntegrationManifestEntry): IntegrationManifestEntry {
-  return Object.freeze(value);
+  return Object.freeze({
+    ...value,
+    ...(value.destinationChain === undefined
+      ? {}
+      : {destinationChain: Object.freeze([...value.destinationChain])}),
+    ...(value.durableOwners === undefined
+      ? {}
+      : {durableOwners: Object.freeze([...value.durableOwners])}),
+  });
 }
 
 const repositoryRoutes: readonly IntegrationManifestEntry[] = [
@@ -205,7 +213,7 @@ const contractEntries: readonly IntegrationManifestEntry[] = [
   entry({id: "cta-join-wisetech", kind: "cta", source: "cta:join-wisetech", canonicalPath: "/membership", disposition: "merge", dataOwner: "canonical plan codes, membership application state and server-owned checkout.", rationale: "Visitors compare canonical plans before entering the focused join flow.", evidence: "master-plan", destinationChain: ["/membership", "/join?plan=<canonical-plan>"]}),
   entry({id: "cta-explore-members-solutions", kind: "cta", source: "cta:explore-members-solutions", canonicalPath: "/showcase", disposition: "merge", dataOwner: "reviewed showcase listings and curated media.", rationale: "Public discovery must use reviewed listings, not prototype logos.", evidence: "master-plan", destinationChain: ["/showcase"]}),
   entry({id: "cta-ask-wisetech", kind: "cta", source: "cta:ask-wisetech", canonicalPath: "/api/ai/concierge", disposition: "merge", dataOwner: "ConciergeWidget, guarded Concierge API, conversations and approvals.", rationale: "The Site presentation may change but the existing AI runtime remains authoritative.", evidence: "master-plan", destinationChain: ["/api/ai/concierge"]}),
-  entry({id: "cta-register-interest", kind: "cta", source: "cta:register-interest", canonicalPath: "/events/[slug]", disposition: "merge", dataOwner: "published events/event_registrations, published cohorts/cohort_applications, or an approved CRM inquiry record.", rationale: "Registration must never terminate in a mock form or an unpublished opportunity.", evidence: "master-plan", destinationChain: ["/events/[slug]", "/launchpad", "/contact"], durableOwners: ["published-event", "published-cohort", "crm-inquiry"]}),
+  entry({id: "cta-register-interest", kind: "cta", source: "cta:register-interest", canonicalPath: "/events", disposition: "merge", dataOwner: "published events/event_registrations or published cohorts/cohort_applications.", rationale: "Interest may target only a real published event or cohort; general inquiry capture is not currently persisted.", evidence: "master-plan", destinationChain: ["/events", "/launchpad"], durableOwners: ["events", "cohorts"]}),
   entry({id: "form-event-registration", kind: "form", source: "form:event-registration", canonicalPath: "/events/[slug]", disposition: "retain", dataOwner: "events and event_registrations repositories.", rationale: "Registration is tied to a published event record.", evidence: "hkwtia-repository"}),
   entry({id: "form-cohort-application", kind: "form", source: "form:cohort-application", canonicalPath: "/launchpad", disposition: "retain", dataOwner: "cohorts and cohort_applications repositories.", rationale: "The form renders only when an open cohort exists.", evidence: "hkwtia-repository"}),
   entry({id: "form-showcase-introduction", kind: "form", source: "form:showcase-introduction", canonicalPath: "/showcase/[slug]", disposition: "retain", dataOwner: "reviewed showcase listing and leads repository.", rationale: "Introduction requests remain consent-based and listing-scoped.", evidence: "hkwtia-repository"}),

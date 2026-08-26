@@ -1,6 +1,6 @@
 # WiseTech route parity evidence
 
-This is the human-readable route/CTA view of `config/wisetech-integration-manifest.ts`. The validator checks the manifest against App Router pages, explicit `next.config.ts` redirect sources, and the existing Concierge action. It is classification evidence, not a claim that design-only pages have been built.
+This is the human-readable route/CTA view of `config/wisetech-integration-manifest.ts`. The validator independently checks every canonical path and every supplied nonempty destination-chain member against App Router pages, exact `next.config.ts` source-to-destination redirect mappings, or the existing Concierge action. Repository patterns are directional wildcards, redirect entries must match their configured target, and chains must start at the canonical path. This is classification evidence, not a claim that design-only pages have been built.
 
 ## Evidence basis and open gate
 
@@ -61,7 +61,7 @@ These rows cover every current destination represented by the master plan's rout
 | `route-design-members` | `/members` | `/showcase` | `next.config.ts` redirect |
 | `route-legacy-member-detail` | `/members/:id` | `/showcase` | `next.config.ts` redirect |
 
-The broader legacy redirect fixture is outside the Site-specific parity scope. It remains covered by `tests/unit/redirects.test.ts`.
+The validator receives the full source-to-destination mapping and rejects a fabricated source or a wrong target even when the claimed target is otherwise a real page. The broader legacy redirect fixture is outside the Site-specific parity scope and remains covered by `tests/unit/redirects.test.ts`.
 
 ## Design-document routes merged into real destinations
 
@@ -117,7 +117,7 @@ The design map's already-canonical routes (`/events`, `/events/[slug]`, `/member
 | `cta-join-wisetech` | `/membership` then `/join?plan=<canonical-plan>` | Canonical plans, application state, server checkout |
 | `cta-explore-members-solutions` | `/showcase` | Reviewed published listings |
 | `cta-ask-wisetech` | Existing `ConciergeWidget` action at `/api/ai/concierge` | Conversations, approvals and guarded API |
-| `cta-register-interest` | Only a published `/events/[slug]`, open `/launchpad` cohort, or approved `/contact` CRM inquiry | `published-event`, `published-cohort`, `crm-inquiry`; no mock form |
+| `cta-register-interest` | `/events` or `/launchpad` only | `events` or `cohorts`; general contact inquiry capture is unavailable until an approved persisted schema/action exists |
 | `form-event-registration` | `/events/[slug]` | `events`, `event_registrations` |
 | `form-cohort-application` | `/launchpad` | `cohorts`, `cohort_applications`; form is absent without an open cohort |
 | `form-showcase-introduction` | `/showcase/[slug]` | Reviewed listing and `leads` |
@@ -125,4 +125,4 @@ The design map's already-canonical routes (`/events`, `/events/[slug]`, `/member
 
 ## Exit condition
 
-The machine-readable boundary passes against the current repository and catches injected unmapped routes/nonexistent CTA destinations. That does not close Site parity. Closure requires a credential-safe archive transfer, verification of the reported archive hash, and reconciliation of every source route, CTA, form, locale, component, content item and asset without introducing fabricated data or destinations.
+The machine-readable boundary passes against the current repository and catches injected invalid canonicals with otherwise valid chains, empty/inconsistent chains, submitted dynamic patterns, fabricated/wrong-target redirects, unsupported durable owners/actions, unmapped routes and nonexistent CTA destinations. It also pins zero `site-v13-source` entries while the archive is unavailable and deep-freezes nested contract arrays. That does not close Site parity. Closure requires a credential-safe archive transfer, verification of the reported archive hash, and reconciliation of every source route, CTA, form, locale, component, content item and asset without introducing fabricated data or destinations.

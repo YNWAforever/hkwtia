@@ -10,7 +10,7 @@ import type {
 
 export type RouteParityDestinations = Readonly<{
   appRoutes: ReadonlySet<string>;
-  redirectSources: ReadonlySet<string>;
+  redirects: ReadonlyMap<string, string>;
   conciergeActions: ReadonlySet<string>;
 }>;
 
@@ -22,8 +22,11 @@ export type RouteParityErrorCode =
   | "invalid-disposition"
   | "invalid-evidence"
   | "invalid-destination"
+  | "invalid-destination-chain"
   | "unresolved-destination"
+  | "invalid-redirect"
   | "invalid-durable-owner"
+  | "invalid-durable-outcome"
   | "invalid-locale-mechanism";
 
 export type RouteParityError = Readonly<{
@@ -43,10 +46,12 @@ const requiredFields = [
   "evidence",
 ] as const;
 
-const registerInterestOwners: readonly DurableOwner[] = [
-  "published-event",
-  "published-cohort",
-  "crm-inquiry",
+const registerInterestOutcomes: readonly Readonly<{
+  destination: string;
+  owner: DurableOwner;
+}>[] = [
+  {destination: "/events", owner: "events"},
+  {destination: "/launchpad", owner: "cohorts"},
 ];
 
 function routePath(value: string): string {
@@ -64,14 +69,12 @@ function isDynamicSegment(segment: string): boolean {
   return /^\[[^/]+\]$/.test(segment) || /^:[^/]+$/.test(segment);
 }
 
-function routeMatches(candidate: string, pattern: string): boolean {
+function routeMatchesRepositoryPattern(candidate: string, repositoryPattern: string): boolean {
   const candidateSegments = routeSegments(candidate);
-  const patternSegments = routeSegments(pattern);
+  const patternSegments = routeSegments(repositoryPattern);
   return candidateSegments.length === patternSegments.length
     && patternSegments.every((segment, index) => (
-      isDynamicSegment(segment)
-      || isDynamicSegment(candidateSegments[index] ?? "")
-      || segment === candidateSegments[index]
+      isDynamicSegment(segment) || segment === candidateSegments[index]
     ));
 }
 
@@ -80,12 +83,12 @@ function isDestinationBacked(
   destinations: RouteParityDestinations,
 ): boolean {
   const path = routePath(destination);
-  const candidates = [
+  const repositoryPatterns = [
     ...destinations.appRoutes,
-    ...destinations.redirectSources,
+    ...destinations.redirects.keys(),
     ...destinations.conciergeActions,
   ];
-  return candidates.some((candidate) => routeMatches(path, candidate));
+  return repositoryPatterns.some((pattern) => routeMatchesRepositoryPattern(path, pattern));
 }
 
 function addError(
@@ -105,6 +108,86 @@ function duplicates(values: readonly string[]): ReadonlySet<string> {
     seen.add(value);
   }
   return repeated;
+}
+
+function sameOrderedValues(actual: readonly string[], expected: readonly string[]): boolean {
+  return actual.length === expected.length
+    && expected.every((value, index) => actual[index] === value);
+}
+
+function validateDestinationChain(
+  entry: IntegrationManifestEntry,
+  errors: RouteParityError[],
+  entryId: string,
+): void {
+  if (entry.destinationChain === undefined) return;
+  if (entry.destinationChain.length === 0) {
+    addError(
+      errors,
+      entryId,
+      "invalid-destination-chain",
+      "A supplied destinationChain must contain at least one destination.",
+    );
+    return;
+  }
+  if (typeof entry.canonicalPath === "string"
+    && entry.destinationChain[0] !== entry.canonicalPath) {
+    addError(
+      errors,
+      entryId,
+      "invalid-destination-chain",
+      "destinationChain must start with canonicalPath.",
+    );
+  }
+}
+
+function validateRedirect(
+  entry: IntegrationManifestEntry,
+  destinations: RouteParityDestinations,
+  errors: RouteParityError[],
+  entryId: string,
+): void {
+  if (entry.disposition !== "redirect") return;
+  const configuredDestination = destinations.redirects.get(entry.source);
+  if (configuredDestination === undefined || configuredDestination !== entry.canonicalPath) {
+    addError(
+      errors,
+      entryId,
+      "invalid-redirect",
+      configuredDestination === undefined
+        ? `Redirect source ${entry.source} is not configured in next.config.ts.`
+        : `Redirect source ${entry.source} targets ${configuredDestination}, not ${entry.canonicalPath}.`,
+    );
+  }
+}
+
+function validateRegisterInterest(
+  entry: IntegrationManifestEntry,
+  errors: RouteParityError[],
+  entryId: string,
+): void {
+  if (entry.source !== "cta:register-interest") return;
+  const expectedOwners = registerInterestOutcomes.map(({owner}) => owner);
+  const expectedDestinations = registerInterestOutcomes.map(({destination}) => destination);
+  const owners = entry.durableOwners ?? [];
+  const chain = entry.destinationChain ?? [];
+
+  if (!sameOrderedValues(owners, expectedOwners)) {
+    addError(
+      errors,
+      entryId,
+      "invalid-durable-owner",
+      "Register interest owners must be exactly events and cohorts in outcome order.",
+    );
+  }
+  if (!sameOrderedValues(chain, expectedDestinations)) {
+    addError(
+      errors,
+      entryId,
+      "invalid-durable-outcome",
+      "Register interest outcomes must be exactly the published events and cohorts surfaces.",
+    );
+  }
 }
 
 export function validateRouteParity(
@@ -148,11 +231,17 @@ export function validateRouteParity(
       addError(errors, entryId, "invalid-destination", "A non-retired entry requires a destination.");
     }
 
+    validateDestinationChain(entry, errors, entryId);
+    validateRedirect(entry, destinations, errors, entryId);
+
     if (entry.disposition !== "retire"
       && entry.kind !== "asset"
       && typeof entry.canonicalPath === "string") {
-      const destinationChain = entry.destinationChain ?? [entry.canonicalPath];
-      for (const destination of new Set(destinationChain)) {
+      const submittedDestinations = new Set([
+        entry.canonicalPath,
+        ...(entry.destinationChain ?? []),
+      ]);
+      for (const destination of submittedDestinations) {
         if (!isDestinationBacked(destination, destinations)) {
           addError(
             errors,
@@ -164,18 +253,7 @@ export function validateRouteParity(
       }
     }
 
-    if (entry.source === "cta:register-interest") {
-      const owners = entry.durableOwners ?? [];
-      if (owners.length !== registerInterestOwners.length
-        || registerInterestOwners.some((owner) => !owners.includes(owner))) {
-        addError(
-          errors,
-          entryId,
-          "invalid-durable-owner",
-          "Register interest must be limited to published events, published cohorts, or CRM inquiries.",
-        );
-      }
-    }
+    validateRegisterInterest(entry, errors, entryId);
 
     if (entry.kind === "locale"
       && (entry.localeMechanism !== "next-intl-router-replace"

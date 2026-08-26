@@ -24,7 +24,7 @@ Evidence legend: `hkwtia-repository` is current code/data ownership; `site-v13-d
 | Public member/solution discovery | Reviewed `showcase_listings`, curated `media`, `leads` | Site logo/name content is not importable membership evidence | Repository/master plan |
 | Partners/sponsors | No single approved published partner authority | Future distinct partner model and audited CMS only after approval | Master plan; absent now |
 | Launch Pad | `cohorts`, `cohort_applications`, verified funding rules | Resolve config/table partner duplication separately; never publish fictional cohorts | Repository/master plan |
-| Contact/inquiries | Current page contains verified contact channels; no durable general inquiry record is claimed | A CRM inquiry model requires separate approval before a “submit” form can exist | Repository/master plan |
+| Contact/inquiries | Current page contains verified contact channels; no durable general inquiry record is claimed | A persisted inquiry model and action require separate approval before a “submit” form can exist | Repository/master plan |
 | AI Concierge | Existing widget, API, conversations, approvals and knowledge/runtime controls | Replace presentation only; retain rate limits, Turnstile, ownership and approval rules | Repository-verified |
 | AI-Ops metrics | Existing evidence formulas/materialised metrics | Never fill sparse metrics with invented outcomes | Repository/master plan |
 | Portal content | Member/company-owned records behind current authorization | Share tokens, not marketing navigation or public data assumptions | Repository-verified |
@@ -38,7 +38,7 @@ Evidence legend: `hkwtia-repository` is current code/data ownership; `site-v13-d
 - “Join WiseTech” begins at `/membership`, then uses `/join?plan=<canonical-plan>`; labels/prices must agree with the canonical plan adapter before any redesign ships.
 - “Explore Members & Solutions” links to `/showcase`; logos and claims require reviewed listing/media records.
 - “Ask WiseTech” invokes the existing Concierge action; a new shell cannot create a second assistant runtime.
-- “Register interest” is allowed only for a published event, open/published cohort, or separately approved persisted CRM inquiry. The current contact page is not represented as a working inquiry form.
+- “Register interest” maps only to `/events` backed by published event records or `/launchpad` backed by published/open cohort records. General contact inquiry capture is unavailable and remains future work until an approved persisted schema and action exist.
 
 ## Migration and archive gates
 
