@@ -22,7 +22,7 @@ Legend: **repository-verified** means inspected current code; **design-document-
 | Editorial inner-page shell | Port layout patterns later | Existing public layout, metadata helpers, bilingual messages and safe body renderer | Design document; source component anatomy unavailable |
 | Programme edition/gallery treatment | Rebuild around typed records | Four separate programme contracts and tracked verified archive images | Repository plus design document; no generic loose schema |
 | Floating Ask WiseTech shell | Port presentation only | Existing `ConciergeWidget`, guarded API, conversations and approvals | Master plan/repository; do not copy a Site-side AI runtime |
-| Language control | Reuse | Current `LocaleSwitcher` calling `router.replace(pathname, {locale})` | Repository-verified; never construct `/zh-HK` hrefs |
+| Language control | Reuse | Current `LocaleSwitcher` serializes `useSearchParams()` and calls the locale-aware router | Repository-verified; never construct `/zh-HK` hrefs |
 | Join/checkout layouts | Visual alignment only | Current focused join route group, Neon Auth and server-owned Stripe services | Master plan/repository; no marketing mega menu inside transaction flow |
 | Member portal/admin chrome | Token alignment only | Current authenticated layouts and authorization boundaries | Master plan/repository; no public marketing navigation injection |
 | Loading/empty/error states | Reuse and extend per real data source | Current App Router and localized recovery patterns | Design acceptance requirement; scope belongs with each future slice |
