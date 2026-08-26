@@ -25,5 +25,4 @@
 - [ ] Preview/UAT has an isolated preview URL, test evidence, and rollback owner.
 - [ ] production approval is explicitly recorded by the authorized approver.
 - [ ] 6 September 2026 unsubscribe fallback deadline has a verified fallback outcome.
-
-Do not mark an external gate as passed without recorded evidence.
+- [ ] Do not mark an external gate as passed without recorded evidence.
