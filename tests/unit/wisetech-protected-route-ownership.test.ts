@@ -5,8 +5,9 @@ import {join, resolve} from "node:path";
 import {describe, expect, it} from "vitest";
 
 import nextConfig from "@/next.config";
+import * as protectedRouteInventory from "@/config/wisetech-protected-route-inventory";
 import {
-  protectedRouteFamilyEvidence,
+  protectedRouteConventions,
   protectedRouteOwnershipInventory,
 } from "@/config/wisetech-protected-route-inventory";
 import type {ProtectedRouteOwner} from "@/config/wisetech-protected-route-inventory";
@@ -314,8 +315,9 @@ describe("WiseTech protected route ownership", () => {
     expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(17);
   });
 
-  it("publishes deeply immutable protected conventions for every installed default extension", () => {
-    expect(protectedRouteFamilyEvidence).toEqual([
+  it("publishes only the canonical deeply immutable protected conventions export", () => {
+    expect("protectedRouteFamilyEvidence" in protectedRouteInventory).toBe(false);
+    expect(protectedRouteConventions).toEqual([
       {
         family: "admin",
         sourcePattern: "/admin/*",
@@ -329,9 +331,9 @@ describe("WiseTech protected route ownership", () => {
         evidence: "master-plan",
       },
     ]);
-    expect(Object.isFrozen(protectedRouteFamilyEvidence)).toBe(true);
-    for (const item of protectedRouteFamilyEvidence) expect(Object.isFrozen(item)).toBe(true);
-    expect(JSON.parse(JSON.stringify(protectedRouteFamilyEvidence))).toEqual(protectedRouteFamilyEvidence);
+    expect(Object.isFrozen(protectedRouteConventions)).toBe(true);
+    for (const item of protectedRouteConventions) expect(Object.isFrozen(item)).toBe(true);
+    expect(JSON.parse(JSON.stringify(protectedRouteConventions))).toEqual(protectedRouteConventions);
   });
 
   it("deep-freezes the ownership inventory", () => {

@@ -38,8 +38,6 @@ export const protectedRouteConventions = Object.freeze([
   }),
 ]);
 
-export const protectedRouteFamilyEvidence = protectedRouteConventions;
-
 function owner(
   value: Omit<ProtectedRouteOwner, "masterFamilyPattern" | "familyEvidence" | "routeEvidence">,
 ): ProtectedRouteOwner {
