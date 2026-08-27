@@ -24,15 +24,28 @@ describe("announcement resolver", () => {
     expect(resolveAnnouncement(record, new Date(record.endsAt))).toBeNull();
   });
 
-  it.each([
-    [null, "null"],
-    [{...record, href: "/activities"}, "non-canonical href"],
-    [{...record, startsAt: "not-a-date"}, "malformed start"],
-    [{...record, startsAt: "2026-02-31T00:00:00.000Z"}, "impossible calendar date"],
-    [{...record, endsAt: record.startsAt}, "empty window"],
-    [{...record, text: {...record.text, en: ""}}, "missing English text"],
-  ])("rejects %s (%s)", (value) => {
-    expect(resolveAnnouncement(value, new Date("2026-08-28T12:00:00.000Z"))).toBeNull();
+  it("rejects null", () => {
+    expect(resolveAnnouncement(null, new Date("2026-08-28T12:00:00.000Z"))).toBeNull();
+  });
+
+  it("rejects a non-canonical href", () => {
+    expect(resolveAnnouncement({...record, href: "/activities"}, new Date("2026-08-28T12:00:00.000Z"))).toBeNull();
+  });
+
+  it("rejects a malformed start", () => {
+    expect(resolveAnnouncement({...record, startsAt: "not-a-date"}, new Date("2026-08-28T12:00:00.000Z"))).toBeNull();
+  });
+
+  it("rejects an impossible calendar date", () => {
+    expect(resolveAnnouncement({...record, startsAt: "2026-02-31T00:00:00.000Z"}, new Date("2026-08-28T12:00:00.000Z"))).toBeNull();
+  });
+
+  it("rejects an empty window", () => {
+    expect(resolveAnnouncement({...record, endsAt: record.startsAt}, new Date("2026-08-28T12:00:00.000Z"))).toBeNull();
+  });
+
+  it("rejects missing English text", () => {
+    expect(resolveAnnouncement({...record, text: {...record.text, en: ""}}, new Date("2026-08-28T12:00:00.000Z"))).toBeNull();
   });
 
   it("rejects future and expired records", () => {
