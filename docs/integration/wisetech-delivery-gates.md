@@ -46,6 +46,13 @@ Record the exact command, exit code, timestamp, and focused-test totals in the P
 - [ ] Database/provider gates — no provider action is implied by local checks; record isolated evidence if applicable.
 - [ ] Rollback notes — identify the revert commit/PR, owner, and any application-only migration rollback.
 
+The browser commands are final release evidence gates, not local completion claims. Both remain `NOT PASSED` on this branch because no isolated browser, Preview, Neon, test-identity, or provider acceptance was run.
+
+| Exact command | Current status | Browser | Credentials | Isolated infrastructure | Evidence required |
+|---|---|---|---|---|---|
+| `npm.cmd run test:e2e` | NOT PASSED | Required | Required for protected, authenticated, or provider-backed release scenarios: test-only identities and provider configuration. | Isolated Preview and isolated Neon; never Production. | Record the Preview URL, isolated resource identifiers, scenario totals, and sanitized failures or skips. |
+| `npm.cmd run test:lighthouse` | NOT PASSED | Required | Not required by the command when its target is public. | An isolated Preview target is required for final release acceptance. | Record the audited Preview URL, Lighthouse scores, thresholds, and report location. |
+
 ## External delivery gates
 
 Fail closed: every status below is `NOT PASSED` until the listed evidence is recorded by the responsible external system or authorized reviewer. Local source checks do not upgrade these statuses.

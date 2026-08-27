@@ -17,6 +17,15 @@
 - [ ] Database/provider gates are recorded as not applicable, not run, or independently evidenced.
 - [ ] Rollback notes identify the independently deployable commit/PR and any application-only rollback constraints.
 
+## Browser release evidence — unresolved
+
+Do not convert these unresolved commands into completion checkboxes before their infrastructure exists. Both remain `NOT PASSED` on this branch because no isolated browser, Preview, Neon, test-identity, or provider acceptance was run. Replace the evidence request only with recorded, sanitized results from an authorized release-acceptance run.
+
+| Exact command | Current status | Browser | Credentials | Isolated infrastructure | Evidence required |
+|---|---|---|---|---|---|
+| `npm.cmd run test:e2e` | NOT PASSED | Required | Required for protected, authenticated, or provider-backed release scenarios: test-only identities and provider configuration. | Isolated Preview and isolated Neon; never Production. | Record the Preview URL, isolated resource identifiers, scenario totals, and sanitized failures or skips. |
+| `npm.cmd run test:lighthouse` | NOT PASSED | Required | Not required by the command when its target is public. | An isolated Preview target is required for final release acceptance. | Record the audited Preview URL, Lighthouse scores, thresholds, and report location. |
+
 ## Delivery gates — fail closed
 
 - [ ] Site source archive transfer has hash-verified reconciliation evidence.

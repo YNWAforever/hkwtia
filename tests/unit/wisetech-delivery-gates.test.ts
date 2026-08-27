@@ -37,6 +37,24 @@ const statuses = [
   "production approval: NOT PASSED",
   "6 September 2026 unsubscribe fallback deadline: NOT PASSED",
 ] as const;
+const browserReleaseGates = [
+  [
+    "npm.cmd run test:e2e",
+    "NOT PASSED",
+    "Required",
+    "Required for protected, authenticated, or provider-backed release scenarios: test-only identities and provider configuration.",
+    "Isolated Preview and isolated Neon; never Production.",
+    "Record the Preview URL, isolated resource identifiers, scenario totals, and sanitized failures or skips.",
+  ],
+  [
+    "npm.cmd run test:lighthouse",
+    "NOT PASSED",
+    "Required",
+    "Not required by the command when its target is public.",
+    "An isolated Preview target is required for final release acceptance.",
+    "Record the audited Preview URL, Lighthouse scores, thresholds, and report location.",
+  ],
+] as const;
 
 function readRequired(path: string, label: string) {
   expect(existsSync(path), `missing required ${label}`).toBe(true);
@@ -54,8 +72,8 @@ function section(markdown: string, heading: string) {
 function tableRows(markdown: string) {
   return markdown.split(/\r?\n/)
     .filter((line) => /^\|.*\|\s*$/.test(line))
-    .map((line) => line.split("|").slice(1, -1).map((cell) => cell.trim()))
-    .filter((cells) => cells[0] !== "Gate" && !cells.every((cell) => /^-+$/.test(cell)));
+    .map((line) => line.split("|").slice(1, -1).map((cell) => cell.trim().replace(/^`|`$/g, "")))
+    .filter((cells) => cells[0] !== "Gate" && cells[0] !== "Exact command" && !cells.every((cell) => /^-+$/.test(cell)));
 }
 
 function escapeRegex(value: string) {
@@ -88,6 +106,39 @@ function validate(delivery: string, template: string, provenance: string) {
   return errors;
 }
 
+function validateBrowserReleaseGates(delivery: string, template: string) {
+  const errors: string[] = [];
+  const sections = [
+    ["delivery checklist", section(delivery, "## Local command and evidence checklist")],
+    ["PR evidence request", section(template, "## Browser release evidence — unresolved")],
+  ] as const;
+
+  for (const [label, releaseSection] of sections) {
+    const rows = tableRows(releaseSection);
+    if (rows.length !== browserReleaseGates.length) {
+      errors.push(`${label} must contain exactly ${browserReleaseGates.length} browser release command rows`);
+      continue;
+    }
+    for (const [index, expected] of browserReleaseGates.entries()) {
+      if (JSON.stringify(rows[index]) !== JSON.stringify(expected)) {
+        errors.push(`${label} browser release row ${index + 1} must classify ${expected[0]} exactly`);
+      }
+    }
+    if (/: PASSED\b|\|\s*PASSED\s*\|/.test(releaseSection)) {
+      errors.push(`${label} must not report a browser release command as passed`);
+    }
+  }
+
+  const templateReleaseSection = sections[1][1];
+  for (const [command] of browserReleaseGates) {
+    const checklist = "- [ ] " + `\`${command}\``;
+    if (new RegExp(`^${escapeRegex(checklist)}`, "m").test(templateReleaseSection)) {
+      errors.push(`${command} must be an evidence request, not a misleading unchecked PR checkbox`);
+    }
+  }
+  return errors;
+}
+
 describe("WiseTech delivery gates", () => {
   it("records the exact branch, source, scope, rollback, Preview, and fail-closed evidence", () => {
     expect(validate(
@@ -111,5 +162,12 @@ describe("WiseTech delivery gates", () => {
     for (const [label, hostileDelivery, hostileTemplate, hostileProvenance] of cases) {
       expect(validate(hostileDelivery, hostileTemplate, hostileProvenance), `${label} must fail delivery evidence validation`).not.toEqual([]);
     }
+  });
+
+  it("records unresolved browser release commands with their exact environment dependencies", () => {
+    expect(validateBrowserReleaseGates(
+      readRequired(paths.delivery, "WiseTech delivery-gates document"),
+      readRequired(paths.template, "pull-request template"),
+    )).toEqual([]);
   });
 });
