@@ -8,36 +8,89 @@
     "description": "連繫香港及大灣區創新力量，接通全球市場。"
   },
   "Navigation": {
-    "about": "關於我們",
-    "membership": "會員計劃",
-    "showcase": "會員展示",
-    "launchpad": "創科起動",
-    "events": "活動",
-    "news": "最新消息",
+    "brand": {
+      "publicName": "WiseTech Hong Kong",
+      "operator": "由 WTIA 營運"
+    },
+    "groups": {
+      "eventsProgrammes": {
+        "label": "活動及計劃",
+        "description": "探索由 WTIA 記錄支持的最新活動、獎項及計劃。"
+      },
+      "membershipEcosystem": {
+        "label": "會員與創科生態",
+        "description": "加入協會，並探索經審核的會員方案。"
+      },
+      "impactInsights": {
+        "label": "影響與洞察",
+        "description": "閱讀已發布消息，並查閱 WTIA 的人工智能實證。"
+      },
+      "aboutWtia": {
+        "label": "關於 WTIA",
+        "description": "了解協會、歷史、管治及聯絡渠道。"
+      }
+    },
+    "columns": {
+      "participate": "參與",
+      "programmes": "計劃",
+      "membership": "會員",
+      "insights": "實證與洞察",
+      "organisation": "協會",
+      "connect": "聯絡"
+    },
+    "links": {
+      "events": "活動",
+      "launchpad": "創科起動",
+      "hkict": "香港資訊及通訊科技獎",
+      "asa": "亞洲智能應用程式大獎",
+      "tct": "Tech to Connect",
+      "cpai": "CPAI",
+      "membership": "會員計劃",
+      "showcase": "會員與方案展示",
+      "news": "最新消息",
+      "aiOps": "人工智能營運",
+      "aiTransparency": "人工智能透明度",
+      "about": "關於 WTIA",
+      "history": "歷史",
+      "chairman": "主席的話",
+      "committees": "委員會",
+      "contact": "聯絡我們"
+    },
+    "actions": {
+      "findEvent": "尋找活動",
+      "join": "加入 WiseTech",
+      "memberSignIn": "會員登入"
+    },
     "openMenu": "開啟導覽選單",
     "closeMenu": "關閉導覽選單",
     "menuTitle": "網站導覽",
-    "menuDescription": "瀏覽 WTIA 網站及切換語言。",
-    "join": "加入 WTIA",
+    "menuDescription": "瀏覽 WiseTech Hong Kong 服務及切換語言。",
     "english": "EN",
     "chinese": "中文",
     "switchToEnglish": "Switch to English",
     "switchToChinese": "切換至中文",
-    "homeLabel": "WTIA 首頁",
+    "homeLabel": "WiseTech Hong Kong 首頁",
     "logoAlt": "WTIA",
     "primaryLabel": "主要導覽"
   },
+  "Announcement": {
+    "label": "公告",
+    "dismiss": "關閉公告"
+  },
   "Footer": {
-    "brand": "創新香港",
-    "summary": "連繫香港、大灣區及亞洲創科社群，接通全球科技市場、投資者及發展機遇。由 WTIA 推動。",
+    "brand": {
+      "publicName": "WiseTech Hong Kong",
+      "operator": "由 WTIA 營運",
+      "homeLabel": "WiseTech Hong Kong 首頁",
+      "logoAlt": "WTIA"
+    },
+    "summary": "WiseTech Hong Kong 透過 WTIA 經核實的公開服務，連繫科技企業、專業人士及計劃。",
     "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
-    "navigate": "網站導覽",
-    "home": "首頁",
-    "membership": "會員計劃",
-    "about": "關於我們",
-    "contact": "聯絡我們",
+    "journeys": "探索",
     "connect": "聯絡",
-    "copyright": "© {year} 創新香港 — WTIA。版權所有。"
+    "legal": "法律資訊",
+    "privacy": "私隱聲明",
+    "copyright": "© {year} WiseTech Hong Kong。由 WTIA 營運。版權所有。"
   },
   "Email": {
     "brand": "WTIA",
