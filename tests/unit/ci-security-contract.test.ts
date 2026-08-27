@@ -54,6 +54,21 @@ function workflowRunSteps(workflow: string) {
   return [...workflow.matchAll(/^\s*- run: (.+)$/gm)].map(([, command]) => command);
 }
 
+function workflowRunStepTimeoutMinutes(workflow: string, command: string) {
+  const lines = workflow.split(/\r?\n/);
+  const runLine = `      - run: ${command}`;
+  const stepStart = lines.indexOf(runLine);
+  if (stepStart === -1) return undefined;
+
+  const stepLines = [lines[stepStart]];
+  for (let index = stepStart + 1; index < lines.length && !/^ {6}- /.test(lines[index]); index += 1) {
+    stepLines.push(lines[index]);
+  }
+
+  const timeout = stepLines.join("\n").match(/^ {8}timeout-minutes: ([1-9]\d*)$/m);
+  return timeout ? Number(timeout[1]) : undefined;
+}
+
 function runAuthTreeCheck(cwd: string, options: AuthTreeProcessOptions = {}) {
   const executable = options.executable ?? (process.platform === "win32" ? (process.env.ComSpec ?? "cmd.exe") : "npm");
   const args = options.args ?? (process.platform === "win32"
@@ -220,10 +235,21 @@ describe("CI and production dependency security contract", () => {
     expect(workflowRunSteps(workflow), "CI run steps must be exactly the required commands in order").toEqual(requiredCiCommands);
   });
 
+  it("bounds the exact Auth dependency-tree CI step to one minute", () => {
+    const workflow = readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8");
+
+    expect(
+      workflowRunStepTimeoutMinutes(workflow, authTreeCommand),
+      "the exact lockfile-only Auth dependency-tree step must declare numeric timeout-minutes: 1",
+    ).toBe(1);
+  });
+
   it("rejects reordered, missing, or extra CI run commands", () => {
     const workflow = readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8");
-    const reordered = workflow.replace(`- run: ${authTreeCommand}\n      - run: npm run audit:strings`, `- run: npm run audit:strings\n      - run: ${authTreeCommand}`);
-    const missingAuthTree = workflow.replace(`      - run: ${authTreeCommand}\n`, "");
+    const authTreeStep = `      - run: ${authTreeCommand}\n        timeout-minutes: 1`;
+    const auditStep = "      - run: npm run audit:strings";
+    const reordered = workflow.replace(`${authTreeStep}\n${auditStep}`, `${auditStep}\n${authTreeStep}`);
+    const missingAuthTree = workflow.replace(`${authTreeStep}\n`, "");
     const withExtraCommand = `${workflow}\n      - run: npm run e2e\n`;
 
     expect(workflowRunSteps(reordered), "reordered workflow commands must fail the exact command contract").not.toEqual(requiredCiCommands);
