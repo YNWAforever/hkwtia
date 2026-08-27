@@ -50,6 +50,15 @@ describe("LocaleSwitcher", () => {
     expect(routerReplace).toHaveBeenCalledWith("/events", {locale: "zh-HK"});
   });
 
+  it("preserves an empty-valued query parameter when switching from English to Chinese", () => {
+    searchState.current = new URLSearchParams("flag=");
+    render(<LocaleSwitcher locale="en" {...labels} />);
+
+    fireEvent.click(screen.getByRole("button", {name: labels.switchToChineseLabel}));
+
+    expect(routerReplace).toHaveBeenCalledWith("/events?flag=", {locale: "zh-HK"});
+  });
+
   it("preserves serialized query values when switching from Chinese to English", () => {
     searchState.current = new URLSearchParams("tag=cloud&tag=security&q=%E7%B6%B2%E7%B5%A1");
     render(<LocaleSwitcher locale="zh-HK" {...labels} />);
@@ -69,5 +78,14 @@ describe("LocaleSwitcher", () => {
     fireEvent.click(screen.getByRole("button", {name: labels.switchToEnglishLabel}));
 
     expect(routerReplace).toHaveBeenCalledWith("/events", {locale: "en"});
+  });
+
+  it("preserves an empty-valued query parameter when switching from Chinese to English", () => {
+    searchState.current = new URLSearchParams("flag=");
+    render(<LocaleSwitcher locale="zh-HK" {...labels} />);
+
+    fireEvent.click(screen.getByRole("button", {name: labels.switchToEnglishLabel}));
+
+    expect(routerReplace).toHaveBeenCalledWith("/events?flag=", {locale: "en"});
   });
 });

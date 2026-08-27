@@ -114,9 +114,6 @@ export function appRouteFromFilePath(filePath: string): string | null {
 
     const interception = parseInterceptedRouteSegment(segment);
     if (interception !== null) {
-      if (interception.target === "") {
-        throw new Error(`Protected route file ${filePath} has an interception marker without a target segment.`);
-      }
       for (const operation of interception.operations) {
         if (operation === "reset") {
           routeSegments.length = 0;

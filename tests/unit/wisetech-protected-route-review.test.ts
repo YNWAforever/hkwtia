@@ -55,6 +55,18 @@ describe("WiseTech protected-route re-review", () => {
     }
   });
 
+  it("treats bare interception-shaped parenthetical segments as URL-less groups", () => {
+    const cases = [
+      ["app/[locale]/(.)/admin/page.tsx", "/admin"],
+      ["app/[locale]/(..)/admin/page.tsx", "/admin"],
+      ["app/[locale]/(...)/api/health/route.ts", "/api/health"],
+    ] as const;
+
+    for (const [filePath, routePath] of cases) {
+      expect(protectedRoutes.appRouteFromFilePath(filePath), filePath).toBe(routePath);
+    }
+  });
+
   it("removes locale when URL-less groups and slots precede it", () => {
     const cases = [
       ["app/(group)/[locale]/admin/hidden/page.tsx", "/admin/hidden"],
