@@ -35,6 +35,19 @@ export const wisetechIntegrationProvenance = Object.freeze({
     reportedArchiveSha256: "411837ea096a11d3a7f49f77f028879b1f4c3599ab643d1ee3ce92de56a02e54",
     archiveAvailable: false,
     archiveStatus: "Identity recorded by the master plan; archive bytes are unavailable for reconciliation.",
+    currentDonor: Object.freeze({
+      repository: "https://github.com/YNWAforever/wisetech",
+      importedCommit: "f91ecc5fa29c2b9d416ed8315f23e9492baf993d",
+      gitTree: "d13a99e6c47f2b3ea279c5d02da5cf15008807b7",
+      continuityWithReportedArchive: false,
+      logo: Object.freeze({
+        sourcePath: "public/brand/wtia-legacy-logo.png",
+        canonicalPath: "public/images/wtia-logo.png",
+        sha256: "4ABAB36F7D09F36F6D54165E9A8F4C719CAD5CAA7B6CBBCD5F2819F6180DEC51",
+        width: 2001,
+        height: 721,
+      }),
+    }),
   }),
 });
 
@@ -221,7 +234,16 @@ const contractEntries: readonly IntegrationManifestEntry[] = [
 ];
 
 const assetEntries: readonly IntegrationManifestEntry[] = [
-  entry({id: "asset-wtia-logo", kind: "asset", source: "asset:wtia-logo", canonicalPath: "public/images/wtia-logo.png", disposition: "retain", dataOwner: "Tracked repository asset and legal WTIA identity.", rationale: "The tracked logo is repository evidence, not proof of any member or partner relationship.", evidence: "hkwtia-repository"}),
+  entry({
+    id: "asset-wtia-logo",
+    kind: "asset",
+    source: "https://github.com/YNWAforever/wisetech/blob/f91ecc5fa29c2b9d416ed8315f23e9492baf993d/public/brand/wtia-legacy-logo.png",
+    canonicalPath: "public/images/wtia-logo.png",
+    disposition: "retain",
+    dataOwner: "User-authoritative WiseTech donor commit plus the tracked own-origin copy.",
+    rationale: "The pinned WTIA logo supports legal-operator identity without importing the donor runtime or implying a member or partner relationship.",
+    evidence: "site-v13-source",
+  }),
   entry({id: "asset-page-heroes", kind: "asset", source: "asset:page-heroes", canonicalPath: "public/images/", disposition: "retain", dataOwner: "Tracked repository assets used by current pages.", rationale: "Only tracked own-origin hero assets may be reused after rights and alt-text review.", evidence: "hkwtia-repository"}),
   entry({id: "asset-history-archive", kind: "asset", source: "asset:history-archive", canonicalPath: "public/images/history/", disposition: "retain", dataOwner: "Typed history records and tracked repository archive.", rationale: "Use only against the matching verified institutional record and reviewed alt text.", evidence: "hkwtia-repository"}),
   entry({id: "asset-programme-archive", kind: "asset", source: "asset:programme-archive", canonicalPath: "public/images/programs/", disposition: "retain", dataOwner: "Typed programme records and tracked repository archive.", rationale: "Use only against the matching verified programme evidence and reviewed alt text.", evidence: "hkwtia-repository"}),

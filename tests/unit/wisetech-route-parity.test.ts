@@ -126,12 +126,39 @@ describe("WiseTech route parity manifest", () => {
     expect(byId.get("cta-register-interest")?.durableOwners).toEqual(["events", "cohorts"]);
   });
 
-  it("uses next-intl without claiming unavailable Site source evidence", () => {
+  it("uses next-intl and records the donor without rewriting the missing original archive", () => {
     const locale = wisetechIntegrationManifest.find(({id}) => id === "locale-language-toggle");
     expect(locale?.localeMechanism).toBe("next-intl-router-replace");
     expect(JSON.stringify(locale)).not.toContain("/zh-HK");
-    expect(wisetechIntegrationProvenance.site.archiveAvailable).toBe(false);
-    expect(wisetechIntegrationManifest.filter(({evidence}) => evidence === "site-v13-source")).toEqual([]);
+
+    expect(wisetechIntegrationProvenance.site).toEqual(expect.objectContaining({
+      sourceCommit: "d2d82c01099490a8c2768c942186735667bbc881",
+      reportedArchiveSha256: "411837ea096a11d3a7f49f77f028879b1f4c3599ab643d1ee3ce92de56a02e54",
+      archiveAvailable: false,
+    }));
+    expect(wisetechIntegrationProvenance.site.currentDonor).toEqual({
+      repository: "https://github.com/YNWAforever/wisetech",
+      importedCommit: "f91ecc5fa29c2b9d416ed8315f23e9492baf993d",
+      gitTree: "d13a99e6c47f2b3ea279c5d02da5cf15008807b7",
+      continuityWithReportedArchive: false,
+      logo: {
+        sourcePath: "public/brand/wtia-legacy-logo.png",
+        canonicalPath: "public/images/wtia-logo.png",
+        sha256: "4ABAB36F7D09F36F6D54165E9A8F4C719CAD5CAA7B6CBBCD5F2819F6180DEC51",
+        width: 2001,
+        height: 721,
+      },
+    });
+
+    expect(
+      wisetechIntegrationManifest.filter(({evidence}) => evidence === "site-v13-source"),
+    ).toEqual([
+      expect.objectContaining({
+        id: "asset-wtia-logo",
+        canonicalPath: "public/images/wtia-logo.png",
+        disposition: "retain",
+      }),
+    ]);
   });
 
   it("deep-freezes the manifest and nested contract arrays", () => {
