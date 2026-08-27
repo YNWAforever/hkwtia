@@ -28,6 +28,7 @@ describe("announcement resolver", () => {
     [null, "null"],
     [{...record, href: "/activities"}, "non-canonical href"],
     [{...record, startsAt: "not-a-date"}, "malformed start"],
+    [{...record, startsAt: "2026-02-31T00:00:00.000Z"}, "impossible calendar date"],
     [{...record, endsAt: record.startsAt}, "empty window"],
     [{...record, text: {...record.text, en: ""}}, "missing English text"],
   ])("rejects %s (%s)", (value) => {
@@ -53,7 +54,10 @@ describe("AnnouncementBar", () => {
     );
 
     expect(screen.getByRole("complementary", {name: "公告"})).toBeInTheDocument();
+    expect(screen.getByRole("complementary", {name: "公告"})).toHaveAttribute("aria-live", "polite");
+    expect(screen.getByRole("complementary", {name: "公告"})).toHaveAttribute("aria-atomic", "true");
     expect(screen.getByRole("link", {name: record.text["zh-HK"]})).toHaveAttribute("href", "/events");
+    expect(screen.getByRole("link", {name: record.text["zh-HK"]})).toHaveClass("min-h-11", "min-w-11");
     fireEvent.click(screen.getByRole("button", {name: "關閉公告"}));
     expect(screen.queryByRole("complementary", {name: "公告"})).not.toBeInTheDocument();
     expect(document.cookie).toBe("");
@@ -64,5 +68,17 @@ describe("AnnouncementBar", () => {
       <AnnouncementBar announcement={null} locale="en" label="Announcement" dismissLabel="Dismiss announcement" />,
     );
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it("keeps an arbitrary allowed token shrinkable and breakable at narrow widths", () => {
+    const announcement = resolveAnnouncement(
+      {...record, text: {en: "a".repeat(180), "zh-HK": "公告"}},
+      new Date("2026-08-28T12:00:00.000Z"),
+    );
+    render(
+      <AnnouncementBar announcement={announcement} locale="en" label="Announcement" dismissLabel="Dismiss announcement" />,
+    );
+
+    expect(screen.getByRole("link", {name: "a".repeat(180)})).toHaveClass("flex-1", "break-all");
   });
 });
