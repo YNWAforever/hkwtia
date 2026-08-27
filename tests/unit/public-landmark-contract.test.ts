@@ -96,18 +96,18 @@ function resolveLocalImport(
 ): string | null {
   if (!specifier.startsWith("@/") && !specifier.startsWith(".")) return null;
   const extension = extname(specifier);
-  if (
-    extension &&
-    !sourceExtensions.includes(extension as (typeof sourceExtensions)[number])
-  )
-    return null;
+  const isExplicitSource = sourceExtensions.includes(
+    extension as (typeof sourceExtensions)[number],
+  );
   const base = specifier.startsWith("@/")
     ? resolve(reader.root, specifier.slice(2))
     : resolve(dirname(from), specifier);
-  const candidates = extension
+  const substitutionBase =
+    extension === ".js" ? base.slice(0, -extension.length) : base;
+  const candidates = isExplicitSource
     ? [base]
     : [
-        ...sourceExtensions.map((suffix) => `${base}${suffix}`),
+        ...sourceExtensions.map((suffix) => `${substitutionBase}${suffix}`),
         ...sourceExtensions.map((suffix) => join(base, `index${suffix}`)),
       ];
   for (const candidate of candidates) {
@@ -296,6 +296,38 @@ describe("public landmark contract", () => {
         ),
       ),
     ).toEqual(["components/typed.tsx"]));
+  it("resolves extensionless dotted TypeScript module basenames", () =>
+    expect(
+      offenders(
+        fixture(
+          { path: publicLayout, source: '<main id="main-content"/>' },
+          {
+            path: `${publicRoot}/dotted/page.tsx`,
+            source: 'import "./component.client";',
+          },
+          {
+            path: `${publicRoot}/dotted/component.client.tsx`,
+            source: "<main/>",
+          },
+        ),
+      ),
+    ).toEqual([`${publicRoot}/dotted/component.client.tsx`]));
+  it("substitutes TypeScript sources for explicit JavaScript specifiers", () =>
+    expect(
+      offenders(
+        fixture(
+          { path: publicLayout, source: '<main id="main-content"/>' },
+          {
+            path: `${publicRoot}/substitution/page.tsx`,
+            source: 'import "./component.js";',
+          },
+          {
+            path: `${publicRoot}/substitution/component.tsx`,
+            source: "<main/>",
+          },
+        ),
+      ),
+    ).toEqual([`${publicRoot}/substitution/component.tsx`]));
   it("never reads explicit JSON or CSS imports", () => {
     const reads: string[] = [];
     const f = fixture(
