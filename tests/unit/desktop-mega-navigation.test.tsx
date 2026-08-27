@@ -1,4 +1,4 @@
-import {fireEvent, render, screen, waitFor} from "@testing-library/react";
+import {act, fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import {DesktopMegaNavigation} from "@/components/layout/desktop-mega-navigation";
@@ -26,6 +26,14 @@ class ResizeObserverStub {
 vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 
 const groups = localizeNavigation((key) => key).groups;
+
+function activateButtonWithEnter(button: HTMLButtonElement) {
+  act(() => {
+    const keyDownWasNotPrevented = fireEvent.keyDown(button, {key: "Enter", code: "Enter"});
+    if (keyDownWasNotPrevented) button.click();
+    fireEvent.keyUp(button, {key: "Enter", code: "Enter"});
+  });
+}
 
 describe("DesktopMegaNavigation", () => {
   beforeEach(() => { route.pathname = "/events"; });
@@ -57,13 +65,30 @@ describe("DesktopMegaNavigation", () => {
     await waitFor(() => expect(triggers[0]).toHaveFocus());
   });
 
-  it("opens from the keyboard, exposes canonical anchors, closes on navigation, and returns focus", async () => {
+  it("uses valid 320px width guards on both the viewport and panel", async () => {
+    Object.defineProperty(window, "innerWidth", {configurable: true, value: 320});
     render(<DesktopMegaNavigation groups={groups} primaryLabel="Primary navigation" />);
-    const trigger = screen.getAllByRole("button")[0]!;
+    const trigger = screen.getAllByRole("button")[0]! as HTMLButtonElement;
     trigger.focus();
-    fireEvent.keyDown(trigger, {key: "Enter"});
-    // fireEvent does not emulate the browser's native Enter-to-click default.
-    fireEvent.click(trigger);
+    activateButtonWithEnter(trigger);
+
+    const events = await screen.findByRole("link", {name: "links.events"});
+    const panel = events.closest('[id$="content-events-programmes"]')?.firstElementChild;
+    const viewport = document.querySelector(".overflow-hidden");
+
+    expect(panel).toHaveClass("w-[min(36rem,calc(100vw_-_2rem))]");
+    expect(panel).toHaveClass("max-w-[calc(100vw_-_2rem)]");
+    expect(viewport).toHaveClass("w-[min(36rem,calc(100vw_-_2rem))]");
+    expect(viewport).toHaveClass("max-w-[calc(100vw_-_2rem)]");
+    expect(panel).not.toHaveAttribute("class", expect.stringContaining("calc(100vw-2rem)"));
+    expect(viewport).not.toHaveAttribute("class", expect.stringContaining("calc(100vw-2rem)"));
+  });
+
+  it("opens from Enter, exposes canonical anchors, closes on navigation, and returns focus", async () => {
+    render(<DesktopMegaNavigation groups={groups} primaryLabel="Primary navigation" />);
+    const trigger = screen.getAllByRole("button")[0]! as HTMLButtonElement;
+    trigger.focus();
+    activateButtonWithEnter(trigger);
 
     const events = await screen.findByRole("link", {name: "links.events"});
     expect(events).toHaveAttribute("href", "/events");
@@ -73,14 +98,16 @@ describe("DesktopMegaNavigation", () => {
     expect(trigger).toHaveFocus();
   });
 
-  it("closes on Escape and restores the initiating trigger", async () => {
+  it("moves focus from an Enter-opened trigger into a leaf and returns it on Escape", async () => {
     render(<DesktopMegaNavigation groups={groups} primaryLabel="Primary navigation" />);
-    const trigger = screen.getAllByRole("button")[0]!;
+    const trigger = screen.getAllByRole("button")[0]! as HTMLButtonElement;
     trigger.focus();
-    // Radix opens a horizontal menu via native trigger activation; ArrowDown enters an already open panel.
-    fireEvent.click(trigger);
-    expect(await screen.findByRole("link", {name: "links.events"})).toBeInTheDocument();
-    fireEvent.keyDown(document.activeElement ?? trigger, {key: "Escape"});
+    activateButtonWithEnter(trigger);
+
+    const events = await screen.findByRole("link", {name: "links.events"});
+    fireEvent.keyDown(trigger, {key: "ArrowDown"});
+    await waitFor(() => expect(events).toHaveFocus());
+    fireEvent.keyDown(events, {key: "Escape"});
     await waitFor(() => expect(trigger).toHaveAttribute("aria-expanded", "false"));
     await waitFor(() => expect(trigger).toHaveFocus());
   });

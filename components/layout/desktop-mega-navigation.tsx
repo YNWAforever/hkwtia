@@ -53,7 +53,7 @@ export function DesktopMegaNavigation({groups, primaryLabel}: DesktopMegaNavigat
                   {group.label}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <div className="grid w-[min(36rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] grid-cols-1 gap-6 p-4 sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-8 sm:p-6">
+                  <div className="grid w-[min(36rem,calc(100vw_-_2rem))] max-w-[calc(100vw_-_2rem)] grid-cols-1 gap-6 p-4 sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-8 sm:p-6">
                     <div className="rounded-shell-lg bg-shell-warm p-5">
                       <p className="text-lg font-bold text-shell-ink">{group.label}</p>
                       <p className="mt-2 text-sm leading-6 text-shell-muted">{group.description}</p>
