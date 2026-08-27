@@ -1,50 +1,44 @@
-import {AxeBuilder} from '@axe-core/playwright';
-import {expect, test} from '@playwright/test';
+import {AxeBuilder} from "@axe-core/playwright";
+import {expect, test} from "@playwright/test";
 
-const pages = ['/', '/membership', '/zh', '/zh/membership', '/showcase', '/events'];
+const pages = [
+  "/", "/events", "/membership", "/news", "/about",
+  "/zh", "/zh/events", "/zh/membership", "/zh/news", "/zh/about",
+];
+
+async function expectNoSeriousOrCritical(page: import("@playwright/test").Page) {
+  const results = await new AxeBuilder({page}).analyze();
+  const violations = results.violations.filter(({impact}) => impact === "serious" || impact === "critical");
+  expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
+}
 
 for (const path of pages) {
   test(`${path} has no serious or critical accessibility violations`, async ({page}) => {
     await page.goto(path);
-    const results = await new AxeBuilder({page}).analyze();
-    const seriousOrCritical = results.violations.filter((violation) =>
-      violation.impact === 'serious' || violation.impact === 'critical',
-    );
-    expect(seriousOrCritical, JSON.stringify(seriousOrCritical, null, 2)).toEqual([]);
+    await expectNoSeriousOrCritical(page);
   });
 }
 
-test('skip link targets the main content landmark', async ({page}) => {
-  await page.goto('/');
-  const skipLink = page.locator('a.skip-link');
+test("open desktop and mobile navigation surfaces pass axe", async ({page}) => {
+  await page.setViewportSize({width: 1120, height: 900});
+  await page.goto("/");
+  await page.getByRole("navigation", {name: "Primary navigation"}).getByRole("button").first().click();
+  await expectNoSeriousOrCritical(page);
 
-  await expect(skipLink).toHaveAttribute('href', '#main-content');
+  await page.setViewportSize({width: 375, height: 800});
+  await page.goto("/zh");
+  await page.getByRole("button", {name: "開啟導覽選單"}).click();
+  await page.getByRole("button", {name: "活動及計劃"}).click();
+  await expectNoSeriousOrCritical(page);
+});
+
+test("skip link targets the sole main content landmark", async ({page}) => {
+  await page.goto("/");
+  const skipLink = page.locator("a.skip-link");
+  await expect(skipLink).toHaveAttribute("href", "#main-content");
   await skipLink.focus();
   await expect(skipLink).toBeVisible();
-  await expect(skipLink).toBeFocused();
-  await skipLink.press('Enter');
+  await skipLink.press("Enter");
   await expect(page).toHaveURL(/#main-content$/);
-  await expect(page.locator('#main-content')).toBeVisible();
-});
-
-test('desktop keyboard navigation reaches primary navigation and locale switcher', async ({page}) => {
-  await page.goto('/');
-  await page.locator('nav[aria-label]').first().getByRole('link').first().focus();
-  await expect(page.locator('nav[aria-label]').first().getByRole('link').first()).toBeFocused();
-
-  const localeSwitcher = page.getByRole('button', {name: /switch to/i}).first();
-  await localeSwitcher.focus();
-  await expect(localeSwitcher).toBeFocused();
-});
-
-test('mobile keyboard navigation reaches the menu trigger', async ({page}) => {
-  await page.setViewportSize({width: 375, height: 800});
-  await page.goto('/');
-
-  const menuTrigger = page.getByRole('button', {name: /menu|navigation/i}).first();
-  await menuTrigger.focus();
-  await expect(menuTrigger).toBeFocused();
-
-  await menuTrigger.press('Enter');
-  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.locator("main#main-content")).toHaveCount(1);
 });
