@@ -76,6 +76,26 @@ describe("WiseTech protected route ownership", () => {
     }
   });
 
+  it("discovers protected routes when locale is an interception target", () => {
+    const root = mkdtempSync(join(tmpdir(), "wisetech-protected-intercepted-locales-"));
+    const fixtureFiles = [
+      "app/@slot/(.)[locale]/admin/hidden/page.tsx",
+      "app/@slot/(...)[locale]/api/hidden/route.ts",
+    ];
+
+    try {
+      for (const file of fixtureFiles) {
+        const absolute = resolve(root, file);
+        mkdirSync(resolve(absolute, ".."), {recursive: true});
+        writeFileSync(absolute, "export {};\n");
+      }
+
+      expect(repositoryProtectedFiles(root)).toEqual(fixtureFiles);
+    } finally {
+      rmSync(root, {recursive: true, force: true});
+    }
+  });
+
   it("rejects missing admin/API owners, a fabricated owner, and misclassified webhook/job handlers", () => {
     const inventory: readonly ProtectedRouteOwner[] = [
       {

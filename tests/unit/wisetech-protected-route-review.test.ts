@@ -67,6 +67,17 @@ describe("WiseTech protected-route re-review", () => {
     }
   });
 
+  it("removes locale after interception targets are parsed", () => {
+    const cases = [
+      ["app/@slot/(.)[locale]/admin/hidden/page.tsx", "/admin/hidden"],
+      ["app/@slot/(...)[locale]/api/hidden/route.ts", "/api/hidden"],
+    ] as const;
+
+    for (const [filePath, routePath] of cases) {
+      expect(protectedRoutes.appRouteFromFilePath(filePath), filePath).toBe(routePath);
+    }
+  });
+
   it("treats every private-folder subtree as a non-route", () => {
     expect(protectedRoutes.appRouteFromFilePath(
       "app/[locale]/_private/admin/page.tsx",

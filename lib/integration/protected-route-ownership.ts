@@ -101,11 +101,6 @@ export function appRouteFromFilePath(filePath: string): string | null {
   }
 
   const sourceSegments = segments.slice(1, -1);
-  const firstRouteSegment = sourceSegments.findIndex(
-    (segment) => !isParallelRouteSlot(segment) && !isRouteGroup(segment),
-  );
-  if (sourceSegments[firstRouteSegment] === "[locale]") sourceSegments.splice(firstRouteSegment, 1);
-
   const routeSegments: string[] = [];
   for (const segment of sourceSegments) {
     if (isPrivateSegment(segment)) return null;
@@ -129,6 +124,8 @@ export function appRouteFromFilePath(filePath: string): string | null {
     }
     routeSegments.push(segment);
   }
+
+  if (routeSegments[0] === "[locale]") routeSegments.shift();
 
   const invalid = routeSegments.find((segment) => !isValidRouteSegment(segment));
   if (invalid !== undefined) {
