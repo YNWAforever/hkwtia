@@ -1,5 +1,6 @@
-import {readdirSync} from "node:fs";
-import {join, relative, resolve} from "node:path";
+import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from "node:fs";
+import {tmpdir} from "node:os";
+import {join, resolve} from "node:path";
 
 import {describe, expect, it} from "vitest";
 
@@ -7,32 +8,9 @@ import {protectedRouteOwnershipInventory} from "@/config/wisetech-protected-rout
 import type {ProtectedRouteOwner} from "@/config/wisetech-protected-route-inventory";
 import {
   appRouteFromFilePath,
-  isProtectedAdminRoute,
   validateRouteParity,
 } from "@/lib/integration/route-parity";
-
-function filesNamed(directory: string, fileName: string): string[] {
-  return readdirSync(directory, {withFileTypes: true}).flatMap((item) => {
-    const path = join(directory, item.name);
-    if (item.isDirectory()) return filesNamed(path, fileName);
-    return item.isFile() && item.name === fileName ? [path] : [];
-  });
-}
-
-function repositoryProtectedFiles(): string[] {
-  const root = process.cwd();
-  const app = resolve(root, "app");
-  const adminPages = filesNamed(resolve(app, "[locale]"), "page.tsx")
-    .map((file) => relative(root, file).replaceAll("\\", "/"))
-    .filter((file) => {
-      const route = appRouteFromFilePath(file);
-      return route !== null && isProtectedAdminRoute(route);
-    });
-  const apiHandlers = filesNamed(resolve(app, "api"), "route.ts")
-    .map((file) => relative(root, file).replaceAll("\\", "/"))
-    .filter((file) => appRouteFromFilePath(file) !== null);
-  return [...adminPages, ...apiHandlers].sort();
-}
+import {repositoryProtectedFiles} from "@/tests/helpers/wisetech-protected-route-discovery";
 
 function routeEntry(path: string) {
   return {
@@ -48,6 +26,35 @@ function routeEntry(path: string) {
 }
 
 describe("WiseTech protected route ownership", () => {
+  it("discovers protected routes outside conventional roots without admitting public decoys", () => {
+    const root = mkdtempSync(join(tmpdir(), "wisetech-protected-routes-"));
+    const fixtureFiles = [
+      "app/[locale]/admin/conventional/page.tsx",
+      "app/api/conventional/route.ts",
+      "app/(group)/admin/grouped/page.tsx",
+      "app/(server)/api/grouped/route.ts",
+      "app/(group)/administrator/decoy/page.tsx",
+      "app/(server)/public-api/decoy/route.ts",
+    ];
+
+    try {
+      for (const file of fixtureFiles) {
+        const absolute = resolve(root, file);
+        mkdirSync(resolve(absolute, ".."), {recursive: true});
+        writeFileSync(absolute, "export {};\n");
+      }
+
+      expect(repositoryProtectedFiles(root)).toEqual([
+        "app/(group)/admin/grouped/page.tsx",
+        "app/(server)/api/grouped/route.ts",
+        "app/[locale]/admin/conventional/page.tsx",
+        "app/api/conventional/route.ts",
+      ]);
+    } finally {
+      rmSync(root, {recursive: true, force: true});
+    }
+  });
+
   it("rejects missing admin/API owners, a fabricated owner, and misclassified webhook/job handlers", () => {
     const inventory: readonly ProtectedRouteOwner[] = [
       {
@@ -128,6 +135,8 @@ describe("WiseTech protected route ownership", () => {
     const codeFiles = repositoryProtectedFiles();
     const inventoryFiles = protectedRouteOwnershipInventory.map(({filePath}) => filePath).sort();
 
+    expect(codeFiles).toHaveLength(37);
+    expect(inventoryFiles).toHaveLength(37);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),

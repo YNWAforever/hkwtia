@@ -14,10 +14,9 @@ import {
 import type {IntegrationManifestEntry} from "@/config/wisetech-integration-manifest";
 import {protectedRouteOwnershipInventory} from "@/config/wisetech-protected-route-inventory";
 import {
-  appRouteFromFilePath,
-  isProtectedAdminRoute,
   validateRouteParity,
 } from "@/lib/integration/route-parity";
+import {repositoryProtectedFiles} from "@/tests/helpers/wisetech-protected-route-discovery";
 
 function filesNamed(directory: string, fileName: string): string[] {
   return readdirSync(directory, {withFileTypes: true}).flatMap((item) => {
@@ -40,21 +39,6 @@ function appRouteForPage(file: string): string {
 const appRoutes = new Set(
   filesNamed(resolve(process.cwd(), "app", "[locale]"), "page.tsx").map(appRouteForPage),
 );
-
-function repositoryProtectedFiles(): string[] {
-  const root = process.cwd();
-  const app = resolve(root, "app");
-  const adminPages = filesNamed(resolve(app, "[locale]"), "page.tsx")
-    .map((file) => relative(root, file).replaceAll("\\", "/"))
-    .filter((file) => {
-      const route = appRouteFromFilePath(file);
-      return route !== null && isProtectedAdminRoute(route);
-    });
-  const apiHandlers = filesNamed(resolve(app, "api"), "route.ts")
-    .map((file) => relative(root, file).replaceAll("\\", "/"))
-    .filter((file) => appRouteFromFilePath(file) !== null);
-  return [...adminPages, ...apiHandlers].sort();
-}
 
 async function validationDestinations() {
   const configured = ((await nextConfig.redirects?.()) ?? []) as readonly {
