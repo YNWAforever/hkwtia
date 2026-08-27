@@ -54,6 +54,19 @@ function workflowRunSteps(workflow: string) {
   return [...workflow.matchAll(/^\s*- run: (.+)$/gm)].map(([, command]) => command);
 }
 
+function normalizeNewlines(value: string) {
+  return value.replace(/\r\n/g, "\n");
+}
+
+function mutateFixture(label: string, fixture: string, needle: string, replacement: string) {
+  const normalizedFixture = normalizeNewlines(fixture);
+  const normalizedNeedle = normalizeNewlines(needle);
+  expect(normalizedFixture.includes(normalizedNeedle), label + " mutation needle was not found").toBe(true);
+  const mutatedFixture = normalizedFixture.replace(normalizedNeedle, normalizeNewlines(replacement));
+  expect(mutatedFixture, label + " fixture mutation unexpectedly no-op").not.toBe(normalizedFixture);
+  return mutatedFixture;
+}
+
 function workflowRunStepTimeoutMinutes(workflow: string, command: string) {
   const lines = workflow.split(/\r?\n/);
   const runLine = `      - run: ${command}`;
@@ -236,7 +249,7 @@ describe("CI and production dependency security contract", () => {
   });
 
   it("bounds the exact Auth dependency-tree CI step to one minute", () => {
-    const workflow = readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8");
+    const workflow = normalizeNewlines(readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8"));
 
     expect(
       workflowRunStepTimeoutMinutes(workflow, authTreeCommand),
@@ -245,12 +258,13 @@ describe("CI and production dependency security contract", () => {
   });
 
   it("rejects reordered, missing, or extra CI run commands", () => {
-    const workflow = readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8");
+    const workflow = normalizeNewlines(readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8"));
     const authTreeStep = `      - run: ${authTreeCommand}\n        timeout-minutes: 1`;
     const auditStep = "      - run: npm run audit:strings";
-    const reordered = workflow.replace(`${authTreeStep}\n${auditStep}`, `${auditStep}\n${authTreeStep}`);
-    const missingAuthTree = workflow.replace(`${authTreeStep}\n`, "");
+    const reordered = mutateFixture("reordered workflow commands", workflow, `${authTreeStep}\n${auditStep}`, `${auditStep}\n${authTreeStep}`);
+    const missingAuthTree = mutateFixture("missing Auth-tree validation", workflow, `${authTreeStep}\n`, "");
     const withExtraCommand = `${workflow}\n      - run: npm run e2e\n`;
+    expect(withExtraCommand, "extra workflow command fixture mutation unexpectedly no-op").not.toBe(workflow);
 
     expect(workflowRunSteps(reordered), "reordered workflow commands must fail the exact command contract").not.toEqual(requiredCiCommands);
     expect(workflowRunSteps(missingAuthTree), "missing Auth-tree validation must fail the exact command contract").not.toEqual(requiredCiCommands);
