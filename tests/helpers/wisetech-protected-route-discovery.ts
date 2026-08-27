@@ -1,6 +1,7 @@
 import {readdirSync} from "node:fs";
 import {join, relative, resolve} from "node:path";
 
+import {nextAppRouteFileKind} from "@/lib/integration/next-route-file-conventions";
 import {
   appRouteFromFilePath,
   isProtectedAdminRoute,
@@ -10,7 +11,7 @@ function appRouteConventionFiles(directory: string): string[] {
   return readdirSync(directory, {withFileTypes: true}).flatMap((item) => {
     const path = join(directory, item.name);
     if (item.isDirectory()) return appRouteConventionFiles(path);
-    return item.isFile() && (item.name === "page.tsx" || item.name === "route.ts") ? [path] : [];
+    return item.isFile() && nextAppRouteFileKind(item.name) !== null ? [path] : [];
   });
 }
 
@@ -20,8 +21,9 @@ export function repositoryProtectedFiles(root = process.cwd()): string[] {
     .filter((file) => {
       const route = appRouteFromFilePath(file);
       if (route === null) return false;
-      if (file.endsWith("/page.tsx")) return isProtectedAdminRoute(route);
-      return route === "/api" || route.startsWith("/api/");
+      const kind = nextAppRouteFileKind(file);
+      if (kind === "page") return isProtectedAdminRoute(route);
+      return kind === "route" && (route === "/api" || route.startsWith("/api/"));
     })
     .sort();
 }

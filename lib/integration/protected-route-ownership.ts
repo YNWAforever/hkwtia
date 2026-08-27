@@ -7,6 +7,10 @@ import type {
   ProtectedRouteFamily,
   ProtectedRouteOwner,
 } from "@/config/wisetech-protected-route-inventory";
+import {
+  defaultNextRouteFileConventions,
+  nextAppRouteFileKind,
+} from "@/lib/integration/next-route-file-conventions";
 
 export type ProtectedRouteOwnershipInput = Readonly<{
   inventory: readonly ProtectedRouteOwner[];
@@ -95,9 +99,11 @@ function isValidRouteSegment(segment: string): boolean {
 export function appRouteFromFilePath(filePath: string): string | null {
   const normalized = normalizedFilePath(filePath);
   const segments = normalized.split("/");
-  const convention = segments.at(-1);
-  if (segments[0] !== "app" || (convention !== "page.tsx" && convention !== "route.ts")) {
-    throw new Error(`Protected route file ${filePath} must be an app/**/page.tsx or app/**/route.ts file.`);
+  const convention = nextAppRouteFileKind(normalized);
+  if (segments[0] !== "app" || convention === null) {
+    throw new Error(
+      `Protected route file ${filePath} must be a ${defaultNextRouteFileConventions()} file.`,
+    );
   }
 
   const sourceSegments = segments.slice(1, -1);
@@ -149,17 +155,17 @@ function classificationForApiPath(routePath: string): ProtectedRouteClassificati
 
 function deriveProtectedRoute(filePath: string): DerivedProtectedRoute | null {
   const normalized = normalizedFilePath(filePath);
+  const kind = nextAppRouteFileKind(normalized);
   const routePath = appRouteFromFilePath(normalized);
   if (routePath === null) return null;
-  if (normalized.endsWith("/page.tsx") && isProtectedAdminRoute(routePath)) {
+  if (kind === "page" && isProtectedAdminRoute(routePath)) {
     return {family: "admin", classification: "admin-page", routePath, filePath: normalized};
   }
-  if (normalized.endsWith("/route.ts")
-    && (routePath === "/api" || routePath.startsWith("/api/"))) {
+  if (kind === "route" && (routePath === "/api" || routePath.startsWith("/api/"))) {
     return {family: "api", classification: classificationForApiPath(routePath), routePath, filePath: normalized};
   }
   throw new Error(
-    `Protected route file ${filePath} must own an /admin page.tsx or /api route.ts path.`,
+    `Protected route file ${filePath} must own an /admin page or /api route path.`,
   );
 }
 

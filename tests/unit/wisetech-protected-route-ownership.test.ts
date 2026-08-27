@@ -4,8 +4,10 @@ import {join, resolve} from "node:path";
 
 import {describe, expect, it} from "vitest";
 
+import nextConfig from "@/next.config";
 import {protectedRouteOwnershipInventory} from "@/config/wisetech-protected-route-inventory";
 import type {ProtectedRouteOwner} from "@/config/wisetech-protected-route-inventory";
+import {validateProtectedRouteOwnership} from "@/lib/integration/protected-route-ownership";
 import {
   appRouteFromFilePath,
   validateRouteParity,
@@ -25,6 +27,33 @@ function routeEntry(path: string) {
   };
 }
 
+function extensionOwner(
+  id: string,
+  filePath: string,
+  routePath: string,
+  family: ProtectedRouteOwner["family"],
+): ProtectedRouteOwner {
+  return {
+    id,
+    family,
+    classification: family === "admin" ? "admin-page" : "api-handler",
+    routePath,
+    filePath,
+    dataOwner: "Default Next route extension hostile fixture.",
+    masterFamilyPattern: family === "admin" ? "/admin/*" : "/api/*",
+    familyEvidence: "master-plan",
+    routeEvidence: "hkwtia-repository",
+  };
+}
+
+function writeFixtureFiles(root: string, fixtureFiles: readonly string[]): void {
+  for (const file of fixtureFiles) {
+    const absolute = resolve(root, file);
+    mkdirSync(resolve(absolute, ".."), {recursive: true});
+    writeFileSync(absolute, "export {};\n");
+  }
+}
+
 describe("WiseTech protected route ownership", () => {
   it("discovers protected routes outside conventional roots without admitting public decoys", () => {
     const root = mkdtempSync(join(tmpdir(), "wisetech-protected-routes-"));
@@ -38,11 +67,7 @@ describe("WiseTech protected route ownership", () => {
     ];
 
     try {
-      for (const file of fixtureFiles) {
-        const absolute = resolve(root, file);
-        mkdirSync(resolve(absolute, ".."), {recursive: true});
-        writeFileSync(absolute, "export {};\n");
-      }
+      writeFixtureFiles(root, fixtureFiles);
 
       expect(repositoryProtectedFiles(root)).toEqual([
         "app/(group)/admin/grouped/page.tsx",
@@ -55,6 +80,59 @@ describe("WiseTech protected route ownership", () => {
     }
   });
 
+  it("discovers every default Next route-file extension and rejects exact protected-looking decoys", () => {
+    const root = mkdtempSync(join(tmpdir(), "wisetech-protected-route-extensions-"));
+    const protectedFiles = [
+      "app/(group)/[locale]/admin/extensions/tsx/page.tsx",
+      "app/@slot/[locale]/admin/extensions/ts/page.ts",
+      "app/[locale]/@modal/(.)admin/extensions/jsx/page.jsx",
+      "app/(group)/[locale]/admin/extensions/js/page.js",
+      "app/(server)/api/extensions/tsx/route.tsx",
+      "app/@slot/(...)[locale]/api/extensions/ts/route.ts",
+      "app/(server)/[locale]/api/extensions/jsx/route.jsx",
+      "app/api/extensions/js/route.js",
+    ];
+    const decoys = [
+      "app/[locale]/admin/extensions/css/page.css",
+      "app/api/extensions/json/route.json",
+      "app/[locale]/admin/extensions/near/pages.ts",
+      "app/api/extensions/near/routes.js",
+      "app/[locale]/admin/extensions/backup/page.ts.bak",
+      "app/[locale]/administrator/extensions/page.js",
+      "app/public-api/extensions/route.jsx",
+    ];
+
+    try {
+      writeFixtureFiles(root, [...protectedFiles, ...decoys]);
+
+      expect(repositoryProtectedFiles(root)).toEqual([...protectedFiles].sort());
+      expect((nextConfig as {pageExtensions?: readonly string[]}).pageExtensions).toBeUndefined();
+    } finally {
+      rmSync(root, {recursive: true, force: true});
+    }
+  });
+
+  it("validates owners for every route-file extension in the installed Next default", () => {
+    const cases = [
+      ["admin-tsx", "app/(group)/[locale]/admin/extensions/tsx/page.tsx", "/admin/extensions/tsx", "admin"],
+      ["admin-ts", "app/@slot/[locale]/admin/extensions/ts/page.ts", "/admin/extensions/ts", "admin"],
+      ["admin-jsx", "app/[locale]/@modal/(.)admin/extensions/jsx/page.jsx", "/admin/extensions/jsx", "admin"],
+      ["admin-js", "app/(group)/[locale]/admin/extensions/js/page.js", "/admin/extensions/js", "admin"],
+      ["api-tsx", "app/(server)/api/extensions/tsx/route.tsx", "/api/extensions/tsx", "api"],
+      ["api-ts", "app/@slot/(...)[locale]/api/extensions/ts/route.ts", "/api/extensions/ts", "api"],
+      ["api-jsx", "app/(server)/[locale]/api/extensions/jsx/route.jsx", "/api/extensions/jsx", "api"],
+      ["api-js", "app/api/extensions/js/route.js", "/api/extensions/js", "api"],
+    ] as const;
+    const inventory = cases.map(([id, filePath, routePath, family]) => (
+      extensionOwner(id, filePath, routePath, family)
+    ));
+
+    expect(validateProtectedRouteOwnership({
+      inventory,
+      codeFiles: cases.map(([, filePath]) => filePath),
+    })).toEqual([]);
+  });
+
   it("discovers localized protected routes after URL-less groups and slots", () => {
     const root = mkdtempSync(join(tmpdir(), "wisetech-protected-locales-"));
     const fixtureFiles = [
@@ -64,11 +142,7 @@ describe("WiseTech protected route ownership", () => {
     ];
 
     try {
-      for (const file of fixtureFiles) {
-        const absolute = resolve(root, file);
-        mkdirSync(resolve(absolute, ".."), {recursive: true});
-        writeFileSync(absolute, "export {};\n");
-      }
+      writeFixtureFiles(root, fixtureFiles);
 
       expect(repositoryProtectedFiles(root)).toEqual(fixtureFiles);
     } finally {
@@ -84,11 +158,7 @@ describe("WiseTech protected route ownership", () => {
     ];
 
     try {
-      for (const file of fixtureFiles) {
-        const absolute = resolve(root, file);
-        mkdirSync(resolve(absolute, ".."), {recursive: true});
-        writeFileSync(absolute, "export {};\n");
-      }
+      writeFixtureFiles(root, fixtureFiles);
 
       expect(repositoryProtectedFiles(root)).toEqual(fixtureFiles);
     } finally {
