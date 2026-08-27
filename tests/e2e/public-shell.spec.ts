@@ -45,11 +45,18 @@ test("mobile Sheet traps focus, resets Accordion, closes on navigation, and rest
   await group.click();
   await expect(dialog.getByRole("link", {name: "活動", exact: true})).toHaveAttribute("aria-current", "page");
   await page.screenshot({path: testInfo.outputPath("mobile-zh-navigation.png"), fullPage: true});
+
   await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
   await expect(trigger).toBeFocused();
   await trigger.click();
+  await expect(dialog).toBeVisible();
   await expect(page.getByRole("button", {name: "活動及計劃"})).toHaveAttribute("aria-expanded", "false");
-  await page.keyboard.press("Escape");
+
+  await group.click();
+  await dialog.getByRole("link", {name: "加入 WiseTech"}).click();
+  await expect(page).toHaveURL(/\/zh\/join$/);
+  await expect(dialog).toBeHidden();
 });
 
 test("captures all four open desktop menu shapes", async ({page}, testInfo) => {

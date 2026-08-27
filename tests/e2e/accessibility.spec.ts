@@ -7,6 +7,8 @@ const pages = [
 ];
 
 async function expectNoSeriousOrCritical(page: import("@playwright/test").Page) {
+  await expect(page.locator("main#main-content")).toBeVisible();
+  await expect(page.locator("[data-nextjs-dialog], .vite-error-overlay, #webpack-dev-server-client-overlay")).toHaveCount(0);
   const results = await new AxeBuilder({page}).analyze();
   const violations = results.violations.filter(({impact}) => impact === "serious" || impact === "critical");
   expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
@@ -37,6 +39,7 @@ test("skip link targets the sole main content landmark", async ({page}) => {
   const skipLink = page.locator("a.skip-link");
   await expect(skipLink).toHaveAttribute("href", "#main-content");
   await skipLink.focus();
+  await expect(skipLink).toBeFocused();
   await expect(skipLink).toBeVisible();
   await skipLink.press("Enter");
   await expect(page).toHaveURL(/#main-content$/);
