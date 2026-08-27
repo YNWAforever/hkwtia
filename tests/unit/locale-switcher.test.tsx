@@ -27,6 +27,20 @@ const labels = {
 describe("LocaleSwitcher", () => {
   beforeEach(() => {
     routerReplace.mockReset();
+    window.history.replaceState(null, "", "/");
+  });
+
+  it("preserves the current fragment after path and query when switching locale", () => {
+    searchState.current = new URLSearchParams("filter=member");
+    window.history.replaceState(null, "", "/events?filter=member#schedule");
+    render(<LocaleSwitcher locale="en" {...labels} />);
+
+    fireEvent.click(screen.getByRole("button", {name: labels.switchToChineseLabel}));
+
+    expect(routerReplace).toHaveBeenCalledWith(
+      "/events?filter=member#schedule",
+      {locale: "zh-HK"},
+    );
   });
 
   it("preserves serialized query values when switching from English to Chinese", () => {

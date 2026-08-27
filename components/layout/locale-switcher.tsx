@@ -53,12 +53,17 @@ function LocaleSwitcherContent({
   const label = targetLocale === 'en' ? englishLabel : chineseLabel;
   const accessibleLabel = targetLocale === 'en' ? switchToEnglishLabel : switchToChineseLabel;
   const search = searchParams.toString();
-  const href = search ? `${pathname}?${search}` : pathname;
+
+  function switchLocale() {
+    const query = search ? `?${search}` : '';
+    const fragment = window.location.hash;
+    router.replace(`${pathname}${query}${fragment}`, {locale: targetLocale});
+  }
 
   return <LocaleSwitcherButton
     accessibleLabel={accessibleLabel}
     label={label}
-    onClick={() => router.replace(href, {locale: targetLocale})}
+    onClick={switchLocale}
   />;
 }
 
