@@ -5,7 +5,10 @@ import {join, resolve} from "node:path";
 import {describe, expect, it} from "vitest";
 
 import nextConfig from "@/next.config";
-import {protectedRouteOwnershipInventory} from "@/config/wisetech-protected-route-inventory";
+import {
+  protectedRouteFamilyEvidence,
+  protectedRouteOwnershipInventory,
+} from "@/config/wisetech-protected-route-inventory";
 import type {ProtectedRouteOwner} from "@/config/wisetech-protected-route-inventory";
 import {validateProtectedRouteOwnership} from "@/lib/integration/protected-route-ownership";
 import {
@@ -75,6 +78,47 @@ describe("WiseTech protected route ownership", () => {
         "app/[locale]/admin/conventional/page.tsx",
         "app/api/conventional/route.ts",
       ]);
+    } finally {
+      rmSync(root, {recursive: true, force: true});
+    }
+  });
+
+  it("discovers every convention file under protected boundaries before rejecting wrong kinds", () => {
+    const root = mkdtempSync(join(tmpdir(), "wisetech-protected-wrong-kinds-"));
+    const protectedFiles = [
+      "app/(group)/[locale]/admin/export/route.ts",
+      "app/@slot/(...)[locale]/api/debug/page.tsx",
+      "app/[locale]/admin/unowned/page.jsx",
+    ];
+    const publicDecoys = [
+      "app/[locale]/administrator/export/route.js",
+      "app/public-api/debug/page.jsx",
+    ];
+
+    try {
+      writeFixtureFiles(root, [...protectedFiles, ...publicDecoys]);
+
+      const discovered = repositoryProtectedFiles(root);
+      expect(discovered).toEqual([...protectedFiles].sort());
+
+      const errors = validateProtectedRouteOwnership({inventory: [], codeFiles: discovered});
+      expect(errors).toHaveLength(3);
+      expect(errors).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          entryId: "app/(group)/[locale]/admin/export/route.ts",
+          code: "invalid-protected-route-file",
+          reason: expect.stringContaining("must own an /admin page or /api route path"),
+        }),
+        expect.objectContaining({
+          entryId: "app/@slot/(...)[locale]/api/debug/page.tsx",
+          code: "invalid-protected-route-file",
+          reason: expect.stringContaining("must own an /admin page or /api route path"),
+        }),
+        expect.objectContaining({
+          entryId: "app/[locale]/admin/unowned/page.jsx",
+          code: "unowned-protected-route",
+        }),
+      ]));
     } finally {
       rmSync(root, {recursive: true, force: true});
     }
@@ -268,6 +312,26 @@ describe("WiseTech protected route ownership", () => {
     expect(count("job-handler")).toBe(9);
     expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(20);
     expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(17);
+  });
+
+  it("publishes deeply immutable protected conventions for every installed default extension", () => {
+    expect(protectedRouteFamilyEvidence).toEqual([
+      {
+        family: "admin",
+        sourcePattern: "/admin/*",
+        convention: "app/**/page.{tsx,ts,jsx,js}",
+        evidence: "master-plan",
+      },
+      {
+        family: "api",
+        sourcePattern: "/api/*",
+        convention: "app/**/route.{tsx,ts,jsx,js}",
+        evidence: "master-plan",
+      },
+    ]);
+    expect(Object.isFrozen(protectedRouteFamilyEvidence)).toBe(true);
+    for (const item of protectedRouteFamilyEvidence) expect(Object.isFrozen(item)).toBe(true);
+    expect(JSON.parse(JSON.stringify(protectedRouteFamilyEvidence))).toEqual(protectedRouteFamilyEvidence);
   });
 
   it("deep-freezes the ownership inventory", () => {

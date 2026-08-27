@@ -21,9 +21,7 @@ export function repositoryProtectedFiles(root = process.cwd()): string[] {
     .filter((file) => {
       const route = appRouteFromFilePath(file);
       if (route === null) return false;
-      const kind = nextAppRouteFileKind(file);
-      if (kind === "page") return isProtectedAdminRoute(route);
-      return kind === "route" && (route === "/api" || route.startsWith("/api/"));
+      return isProtectedAdminRoute(route) || route === "/api" || route.startsWith("/api/");
     })
     .sort();
 }

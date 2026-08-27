@@ -1,3 +1,5 @@
+import {nextAppRouteFileConvention} from "@/lib/integration/next-route-file-conventions";
+
 export const protectedRouteFamilies = ["admin", "api"] as const;
 export const protectedRouteClassifications = [
   "admin-page",
@@ -21,20 +23,22 @@ export type ProtectedRouteOwner = Readonly<{
   routeEvidence: "hkwtia-repository";
 }>;
 
-export const protectedRouteFamilyEvidence = Object.freeze([
+export const protectedRouteConventions = Object.freeze([
   Object.freeze({
     family: "admin" as const,
     sourcePattern: "/admin/*" as const,
-    convention: "page.tsx" as const,
+    convention: nextAppRouteFileConvention("page"),
     evidence: "master-plan" as const,
   }),
   Object.freeze({
     family: "api" as const,
     sourcePattern: "/api/*" as const,
-    convention: "route.ts" as const,
+    convention: nextAppRouteFileConvention("route"),
     evidence: "master-plan" as const,
   }),
 ]);
+
+export const protectedRouteFamilyEvidence = protectedRouteConventions;
 
 function owner(
   value: Omit<ProtectedRouteOwner, "masterFamilyPattern" | "familyEvidence" | "routeEvidence">,

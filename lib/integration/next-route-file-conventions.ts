@@ -16,7 +16,10 @@ export function nextAppRouteFileKind(filePath: string): NextAppRouteFileKind | n
   return match?.[1] === "page" || match?.[1] === "route" ? match[1] : null;
 }
 
+export function nextAppRouteFileConvention(kind: NextAppRouteFileKind): string {
+  return `app/**/${kind}.{${defaultNextPageExtensions.join(",")}}`;
+}
+
 export function defaultNextRouteFileConventions(): string {
-  const extensions = defaultNextPageExtensions.join(",");
-  return `valid app/**/page.{${extensions}} or app/**/route.{${extensions}}`;
+  return `valid ${nextAppRouteFileConvention("page")} or ${nextAppRouteFileConvention("route")}`;
 }
