@@ -55,6 +55,27 @@ describe("WiseTech protected route ownership", () => {
     }
   });
 
+  it("discovers localized protected routes after URL-less groups and slots", () => {
+    const root = mkdtempSync(join(tmpdir(), "wisetech-protected-locales-"));
+    const fixtureFiles = [
+      "app/(group)/[locale]/admin/hidden/page.tsx",
+      "app/(server)/[locale]/api/hidden/route.ts",
+      "app/@slot/[locale]/admin/slot/page.tsx",
+    ];
+
+    try {
+      for (const file of fixtureFiles) {
+        const absolute = resolve(root, file);
+        mkdirSync(resolve(absolute, ".."), {recursive: true});
+        writeFileSync(absolute, "export {};\n");
+      }
+
+      expect(repositoryProtectedFiles(root)).toEqual(fixtureFiles);
+    } finally {
+      rmSync(root, {recursive: true, force: true});
+    }
+  });
+
   it("rejects missing admin/API owners, a fabricated owner, and misclassified webhook/job handlers", () => {
     const inventory: readonly ProtectedRouteOwner[] = [
       {

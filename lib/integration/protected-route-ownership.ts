@@ -101,7 +101,10 @@ export function appRouteFromFilePath(filePath: string): string | null {
   }
 
   const sourceSegments = segments.slice(1, -1);
-  if (sourceSegments[0] === "[locale]") sourceSegments.shift();
+  const firstRouteSegment = sourceSegments.findIndex(
+    (segment) => !isParallelRouteSlot(segment) && !isRouteGroup(segment),
+  );
+  if (sourceSegments[firstRouteSegment] === "[locale]") sourceSegments.splice(firstRouteSegment, 1);
 
   const routeSegments: string[] = [];
   for (const segment of sourceSegments) {
