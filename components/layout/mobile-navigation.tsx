@@ -112,7 +112,7 @@ export function MobileNavigation({locale, navigation, labels}: MobileNavigationP
               {navigation.memberPortal.label}
             </Link>
           </SheetClose>
-          <div className="[&_button]:min-w-11">
+          <div className="[&_button]:min-w-11" onClick={() => handleOpenChange(false)}>
             <LocaleSwitcher
               locale={locale}
               englishLabel={labels.english}
