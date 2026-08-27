@@ -18,7 +18,7 @@ type DualBrandLockupProps = {
 
 export function DualBrandLockup({labels, priority = false, compact = false}: DualBrandLockupProps) {
   return (
-    <Link className="group inline-flex min-w-0 items-center gap-3" href="/" aria-label={labels.homeLabel}>
+    <Link className="group inline-flex min-h-11 min-w-11 max-w-full min-w-0 items-center gap-3" href="/" aria-label={labels.homeLabel}>
       <Image
         src="/images/wtia-logo.png"
         alt={labels.logoAlt}
