@@ -102,4 +102,11 @@ describe("LocaleSwitcher", () => {
 
     expect(routerReplace).toHaveBeenCalledWith("/events?flag=", {locale: "en"});
   });
+  it("renders a 44px locale target in each Suspense state", () => {
+    render(<LocaleSwitcher locale="en" {...labels} />);
+
+    expect(screen.getByRole("button", {name: labels.switchToChineseLabel})).toHaveClass(
+      "inline-flex", "min-h-11", "min-w-11", "items-center", "justify-center",
+    );
+  });
 });

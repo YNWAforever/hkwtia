@@ -65,7 +65,7 @@ export async function SiteHeader({locale, variant = "solid"}: SiteHeaderProps) {
       </div>
       <div className="hidden border-t border-shell-border lg:block">
         <div className="mx-auto flex min-h-14 max-w-shell items-center justify-between gap-5 px-6">
-          <Suspense fallback={<nav aria-label={t("primaryLabel")} />}>
+          <Suspense fallback={<div aria-hidden="true" className="hidden min-h-11 min-w-0 flex-1 lg:block" />}>
             <DesktopMegaNavigation groups={navigation.groups} primaryLabel={t("primaryLabel")} />
           </Suspense>
           <Button asChild className="min-h-11 shrink-0 rounded-full bg-shell-navy px-5 text-white hover:bg-shell-blue">
