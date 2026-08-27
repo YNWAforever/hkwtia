@@ -134,7 +134,7 @@ The design map's already-canonical routes (`/events`, `/events/[slug]`, `/member
 | `form-event-registration` | `/events/[slug]` | `events`, `event_registrations` |
 | `form-cohort-application` | `/launchpad` | `cohorts`, `cohort_applications`; form is absent without an open cohort |
 | `form-showcase-introduction` | `/showcase/[slug]` | Reviewed listing and `leads` |
-| `locale-language-toggle` | Current route via `router.replace(pathname, {locale})` | `next-intl`; `zh-HK` maps to public `/zh`, never a constructed `/zh-HK` path |
+| `locale-language-toggle` | Current pathname plus the `useSearchParams()` query serialized with `.toString()` when non-empty (no bare `?`), then `router.replace(href, {locale})` | `next-intl`; `zh-HK` maps to public `/zh`, never a constructed `/zh-HK` path |
 
 ## Exit condition
 
