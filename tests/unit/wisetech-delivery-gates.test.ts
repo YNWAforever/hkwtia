@@ -131,9 +131,12 @@ function validateBrowserReleaseGates(delivery: string, template: string) {
 
   const templateReleaseSection = sections[1][1];
   for (const [command] of browserReleaseGates) {
-    const checklist = "- [ ] " + `\`${command}\``;
-    if (new RegExp(`^${escapeRegex(checklist)}`, "m").test(templateReleaseSection)) {
-      errors.push(`${command} must be an evidence request, not a misleading unchecked PR checkbox`);
+    const checkboxPattern = new RegExp(
+      `^- \\[[ xX]\\] ${escapeRegex(`\`${command}\``)}\\s*$`,
+      "m",
+    );
+    if (checkboxPattern.test(templateReleaseSection)) {
+      errors.push(`${command} must be an evidence request, not a misleading PR checkbox`);
     }
   }
   return errors;
@@ -169,5 +172,20 @@ describe("WiseTech delivery gates", () => {
       readRequired(paths.delivery, "WiseTech delivery-gates document"),
       readRequired(paths.template, "pull-request template"),
     )).toEqual([]);
+  });
+
+  it("rejects checked completion claims for exact browser release commands", () => {
+    const delivery = readRequired(paths.delivery, "WiseTech delivery-gates document");
+    const template = readRequired(paths.template, "pull-request template");
+    const tableHeading = "| Exact command | Current status | Browser | Credentials | Isolated infrastructure | Evidence required |";
+    const cases = [
+      ["lowercase checked E2E claim", "x", browserReleaseGates[0][0]],
+      ["uppercase checked Lighthouse claim", "X", browserReleaseGates[1][0]],
+    ] as const;
+
+    for (const [label, marker, command] of cases) {
+      const hostileTemplate = template.replace(tableHeading, `- [${marker}] \`${command}\`\n\n${tableHeading}`);
+      expect(validateBrowserReleaseGates(delivery, hostileTemplate), `${label} must fail browser release validation`).not.toEqual([]);
+    }
   });
 });
