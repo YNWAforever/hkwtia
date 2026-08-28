@@ -51,7 +51,7 @@ export default async function HomePage({params}: Props) {
           </div>
         </Section>
       </div>
-      {partners?.length ? <HomePartnerWall intro={t('featuresIntro')} partners={partners} title={t('featuresTitle')} /> : null}
+      {partners?.length ? <HomePartnerWall intro={t('partnerWallIntro')} partners={partners} title={t('partnerWallTitle')} /> : null}
       <Section heading={t('featuresTitle')} intro={t('featuresIntro')}><FeatureGrid features={features} /></Section>
       <Section heading={t('programsTitle')} intro={t('programsIntro')}><ProgramGrid labels={programLabels} viewLabel={t('viewProgram')} /></Section>
     </>
