@@ -37,7 +37,7 @@ export default async function HomePage({params}: Props) {
     <>
       <StructuredData data={buildOrganizationData()} />
       <EditorialHero actions={[{label: t('actions.events'), href: '/events'}, {label: t('actions.membership'), href: '/membership'}]} description={t('summary')} discoverLabel={t('actions.discover')} eyebrow={t('eyebrow')} image="/images/projects-hero.jpg" imageAlt={t('imageAlt')} title={t('question')} />
-      <div id="home-discover">
+      <div className="scroll-mt-24 lg:scroll-mt-36" id="home-discover">
         <Section heading={t('highlightsTitle')} intro={t('highlightsIntro')}>
           <div className="grid gap-6 lg:grid-cols-3">
             <HomeHighlightCard actionLabel={t('highlights.event.view')} href={event.status === 'available' ? `/events/${event.item.slug}` : '/events'} label={t('highlights.event.label')} meta={event.status === 'available' ? formatDate(event.item.startsAt) : undefined} state={event.status} stateMessage={event.status === 'empty' ? t('highlights.event.empty') : event.status === 'unavailable' ? t('highlights.event.unavailable') : undefined} summary={event.status === 'available' ? event.item.description : undefined} title={event.status === 'available' ? event.item.title : undefined} />

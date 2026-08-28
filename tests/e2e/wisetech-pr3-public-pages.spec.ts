@@ -10,6 +10,7 @@ const homeCases = [
     imageAlt: "Hong Kong technology community",
     eventAction: "Find an event",
     membershipAction: "Explore membership",
+    discoverAction: "Discover WiseTech",
     concierge: "Ask WTIA",
     retiredStatsHeading: "A platform for the whole ecosystem",
     highlights: [
@@ -24,6 +25,7 @@ const homeCases = [
     imageAlt: "香港創科社群",
     eventAction: "尋找活動",
     membershipAction: "探索會員服務",
+    discoverAction: "探索 WiseTech",
     concierge: "詢問 WTIA",
     retiredStatsHeading: "服務整個創科生態",
     highlights: [
@@ -138,6 +140,35 @@ for (const homeCase of homeCases) {
       for (const actionBox of actionBoxes) {
         expect(rectanglesOverlap(actionBox, conciergeBox!)).toBe(false);
       }
+
+      await page.setViewportSize({width, height: 600});
+      const discoverTarget = page.locator("#home-discover");
+      const discoverLink = hero.getByRole("link", {name: homeCase.discoverAction});
+      await expect(discoverLink).toBeInViewport();
+      await expect(discoverTarget).not.toBeInViewport();
+      await page.evaluate(() => {
+        document.documentElement.dataset.testScrollEnded = "false";
+        document.addEventListener("scrollend", () => {
+          document.documentElement.dataset.testScrollEnded = "true";
+        }, {once: true});
+      });
+      await discoverLink.click();
+      await expect(page).toHaveURL(/#home-discover$/);
+      await expect(page.locator("html")).toHaveAttribute("data-test-scroll-ended", "true");
+      await expect(discoverTarget).toBeInViewport();
+
+      const renderedHeader = page.locator('header[data-variant="solid"]');
+      await expect(renderedHeader).toBeVisible();
+      const [headerBox, targetBox] = await Promise.all([
+        renderedHeader.boundingBox(),
+        discoverTarget.boundingBox(),
+      ]);
+      expect(headerBox).not.toBeNull();
+      expect(targetBox).not.toBeNull();
+      expect(
+        targetBox!.y,
+        "the Discover target must clear the rendered sticky header",
+      ).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height);
     });
   }
 }
