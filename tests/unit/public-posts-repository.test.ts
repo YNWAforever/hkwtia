@@ -76,11 +76,13 @@ function predicateSensitiveProxy(dataset: readonly FixtureRow[]) {
     statements.push({sql: normalizedSql(query, params), params});
     let filtered = [...dataset];
 
-    if (
-      /"posts"\."kind"\s*=\s*\$\d+/i.test(query)
-      && params.includes("buildlog")
-    ) {
-      filtered = filtered.filter((fixture) => fixture.kind === "buildlog");
+    if (/"posts"\."kind"\s*=\s*\$\d+/i.test(query)) {
+      const selectedKind = params.find(
+        (value) => value === "buildlog" || value === "news" || value === "page",
+      );
+      if (typeof selectedKind === "string") {
+        filtered = filtered.filter((fixture) => fixture.kind === selectedKind);
+      }
     }
     if (/"posts"\."published_at"\s+is\s+not\s+null/i.test(query)) {
       filtered = filtered.filter((fixture) => fixture.publishedAt !== null);
@@ -258,6 +260,36 @@ describe("public posts repository", () => {
     expect(summaries.map(({slug}) => slug)).toContain("news-post");
     expect(summaries.map(({slug}) => slug)).not.toContain("archived-news-post");
     expect(fixture.statements[0]?.sql).toMatch(/archived_at.*IS NULL/i);
+  });
+
+  it("applies a deterministic SQL limit without weakening news publication predicates", async () => {
+    const fixture = predicateSensitiveProxy([
+      row("zulu-news", {kind: "news"}),
+      row("alpha-news", {kind: "news"}),
+      row("future-news", {kind: "news", publishedAt: new Date("2026-07-31T00:00:00.000Z")}),
+      row("draft-news", {kind: "news", publishedAt: null}),
+      row("archived-news", {kind: "news", archivedAt: new Date("2026-07-30T00:00:00.000Z")}),
+      row("buildlog-only"),
+    ]);
+    const repository = createPublicPostsRepository(async () => fixture.database as never);
+
+    await expect(repository.listPublishedNews(asOf, {limit: 1}))
+      .resolves.toMatchObject([{slug: "alpha-news"}]);
+    expect(fixture.statements[0]?.sql).toMatch(/kind.*=.*news/i);
+    expect(fixture.statements[0]?.sql).toMatch(/published_at.*IS NOT NULL/i);
+    expect(fixture.statements[0]?.sql).toMatch(/published_at.*<=/i);
+    expect(fixture.statements[0]?.sql).toMatch(/archived_at.*IS NULL/i);
+    expect(fixture.statements[0]?.sql).toMatch(/ORDER BY.*published_at.*DESC.*slug.*ASC/i);
+    expect(fixture.statements[0]?.sql).toMatch(/LIMIT/i);
+    expect(fixture.statements[0]?.params).toContain(1);
+  });
+
+  it.each([0, 13, 1.5])("rejects invalid news limit %s before loading the database", async (limit) => {
+    const loadDatabase = vi.fn();
+    const repository = createPublicPostsRepository(loadDatabase);
+
+    await expect(repository.listPublishedNews(asOf, {limit})).rejects.toThrow();
+    expect(loadDatabase).not.toHaveBeenCalled();
   });
 
   it("returns null for an archived news slug", async () => {
