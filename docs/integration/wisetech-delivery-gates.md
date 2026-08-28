@@ -6,7 +6,7 @@
 - Recorded clean `origin/main` base when this isolated worktree was created: `c0e9d6a786ee7dcff1fa50638bd1ecb36814c58f`.
 - Isolated worktree branch: `codex/wisetech-hkwtia-integration`.
 - Site donor identity: ChatGPT Site `wisetech-hong-kong`, saved version 13, source SHA `d2d82c01099490a8c2768c942186735667bbc881`.
-- Site archive identity: SHA-256 `411837ea096a11d3a7f49f77f028879b1f4c3599ab643d1ee3ce92de56a02e54`; archive contents remain unavailable.
+- Historical archive identity: SHA-256 `411837ea096a11d3a7f49f77f028879b1f4c3599ab643d1ee3ce92de56a02e54`; its byte/history equivalence with the locally reconciled authorized Git donor remains unverified and non-blocking.
 
 The source contains the `quality` CI job. That is source configuration, not proof that GitHub requires it on `main` or that a remote run has passed.
 
@@ -59,20 +59,27 @@ Fail closed: every status below is `NOT PASSED` until the listed evidence is rec
 
 | Gate | Status | Required evidence before it may be marked passed |
 |---|---|---|
-| Site source archive transfer | Site source archive transfer: NOT PASSED | Transfer through an approved credential-safe channel; recompute and match the recorded archive SHA-256; reconcile every source route, CTA, form, locale, component, content item, and asset. |
 | GitHub branch protection | GitHub branch protection: NOT PASSED | An administrator enables `quality` as a required `main` check. The private repository's current GitHub plan/API cannot enable the required rules from this task. |
 | Isolated test infrastructure | isolated Neon/test identities/providers: NOT PASSED | Credential-safe confirmation of isolated Neon, test identities, and provider configuration; do not use production identities or provider accounts. |
 | Preview and UAT | Preview/UAT: NOT PASSED | An independent Preview, assigned UAT owner, recorded results, and a tested rollback path. |
 | Production release | production approval: NOT PASSED | Explicit approval from the authorized production approver after all prior gates are passed. |
 | Unsubscribe fallback | 6 September 2026 unsubscribe fallback deadline: NOT PASSED | An authorized owner records the completed fallback decision and evidence no later than 6 September 2026. |
 
-The first two rows are Phase 0's unresolved external completion gates: archive reconciliation and required GitHub branch protection. The remaining rows are future release gates and must also remain fail-closed.
+The five rows are external completion gates only: GitHub branch protection, isolated infrastructure, Preview/UAT, production approval, and unsubscribe fallback. Historical archive equivalence is optional future provenance evidence, not an external prerequisite.
 
 ## Safe handoff sequence
 
 1. Preserve this branch as the PR 1 local evidence handoff; do not start visual redesign here.
-2. Obtain the authoritative Site v13 archive without exposing credentials, validate its hash, and complete source-item reconciliation.
-3. Have repository administration configure `quality` as required on `main`; this cannot be represented as a source-only change.
+2. Have repository administration configure `quality` as required on `main`; this cannot be represented as a source-only change.
+3. Preserve historical archive bytes only if later supplied for optional byte/history-equivalence evidence; do not treat them as a release prerequisite.
 4. Create each subsequent PR from its approved predecessor and retain a discrete revert point.
 5. Before a release candidate, use browser access and credential-safe, isolated infrastructure for Preview/UAT; record outcomes without copying credentials into the repository.
 6. Only an authorized approver can authorize production action after every applicable gate is passed. No production operation is authorized by this document.
+
+## Authoritative source status
+
+The user-authorized Git donor `https://github.com/YNWAforever/wisetech` is PASSED LOCALLY: commit `f91ecc5fa29c2b9d416ed8315f23e9492baf993d`, tree `d13a99e6c47f2b3ea279c5d02da5cf15008807b7`, 138 tracked files, and tree-list SHA-256 `79d543e6794f604af6c59cfe43928ac4b5e5fa578ba4559d354e6291cfe8f24c`. It is evidence only, not a byte or history continuity claim.
+
+Historical master-plan commit `d2d82c01099490a8c2768c942186735667bbc881` and archive SHA-256 `411837ea096a11d3a7f49f77f028879b1f4c3599ab643d1ee3ce92de56a02e54` remain unverified provenance. This is non-blocking for the donor integration, and it does not change the external fail-closed states above.
+
+The fixture/validator procedure is documented in [authoritative source reconciliation](wisetech-authoritative-source-reconciliation.md).

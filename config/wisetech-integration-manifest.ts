@@ -1,3 +1,8 @@
+import {
+  authoritativeSourceInventory,
+  reportedArchiveIdentity,
+} from "@/config/wisetech-authoritative-source-inventory";
+
 export const integrationKinds = ["route", "cta", "form", "locale", "asset"] as const;
 export const integrationDispositions = ["retain", "merge", "redirect", "retire"] as const;
 export const evidenceKinds = [
@@ -21,6 +26,7 @@ export type IntegrationManifestEntry = Readonly<{
   dataOwner: string;
   rationale: string;
   evidence: IntegrationEvidence;
+  sourceEvidenceId?: string;
   destinationChain?: readonly string[];
   durableOwners?: readonly DurableOwner[];
   localeMechanism?: "next-intl-router-replace";
@@ -28,17 +34,25 @@ export type IntegrationManifestEntry = Readonly<{
 
 export const wisetechIntegrationProvenance = Object.freeze({
   repositoryBaseSha: "c0e9d6a786ee7dcff1fa50638bd1ecb36814c58f",
+  reportedArchiveIdentity: Object.freeze({...reportedArchiveIdentity}),
+  authoritativeDonor: Object.freeze({
+    ...authoritativeSourceInventory.identity,
+    reconciliationStatus: "locally-reconciled" as const,
+    continuityWithReportedArchive: false as const,
+  }),
+  // PR2's logo-byte contract consumes this derived compatibility view; the
+  // canonical archive and donor identities remain deliberately split above.
   site: Object.freeze({
-    projectSlug: "wisetech-hong-kong",
-    savedVersion: 13,
-    sourceCommit: "d2d82c01099490a8c2768c942186735667bbc881",
-    reportedArchiveSha256: "411837ea096a11d3a7f49f77f028879b1f4c3599ab643d1ee3ce92de56a02e54",
+    projectSlug: reportedArchiveIdentity.projectSlug,
+    savedVersion: reportedArchiveIdentity.savedVersion,
+    sourceCommit: reportedArchiveIdentity.commit,
+    reportedArchiveSha256: reportedArchiveIdentity.archiveSha256,
     archiveAvailable: false,
     archiveStatus: "Identity recorded by the master plan; archive bytes are unavailable for reconciliation.",
     currentDonor: Object.freeze({
-      repository: "https://github.com/YNWAforever/wisetech",
-      importedCommit: "f91ecc5fa29c2b9d416ed8315f23e9492baf993d",
-      gitTree: "d13a99e6c47f2b3ea279c5d02da5cf15008807b7",
+      repository: authoritativeSourceInventory.identity.repository,
+      importedCommit: authoritativeSourceInventory.identity.commit,
+      gitTree: authoritativeSourceInventory.identity.tree,
       continuityWithReportedArchive: false,
       logo: Object.freeze({
         sourcePath: "public/brand/wtia-legacy-logo.png",
@@ -221,6 +235,24 @@ const retiredDesignRoutes: readonly IntegrationManifestEntry[] = [
   evidence: "site-v13-design-doc",
 }));
 
+const authoritativeDonorRouteAliases: readonly IntegrationManifestEntry[] = [
+  entry({id: "route-source-event-asia-smart-innovation-awards-summit-2025", kind: "route", source: "/events/asia-smart-innovation-awards-summit-2025", canonicalPath: "/events/[slug]", disposition: "merge", dataOwner: "Published events repository and event CMS; source evidence is not publication state.", rationale: "Historical donor event evidence only; this mapping neither seeds nor publishes an hkwtia event.", evidence: "site-v13-source"}),
+  entry({id: "route-source-event-smart-innovation-meets-genai", kind: "route", source: "/events/smart-innovation-meets-genai", canonicalPath: "/events/[slug]", disposition: "merge", dataOwner: "Published events repository and event CMS; source evidence is not publication state.", rationale: "Historical donor event evidence only; this mapping neither seeds nor publishes an hkwtia event.", evidence: "site-v13-source"}),
+  entry({id: "route-source-program-tech-connect", kind: "route", source: "/programmes/tech-connect", canonicalPath: "/programs/tct", disposition: "merge", dataOwner: "Verified typed Tech to Connect programme record.", rationale: "The donor programme path is source evidence only; the current typed record remains authoritative.", evidence: "site-v13-source"}),
+  entry({id: "route-source-program-asia-smart-innovation-awards", kind: "route", source: "/programmes/asia-smart-innovation-awards", canonicalPath: "/programs/asa", disposition: "merge", dataOwner: "Verified typed ASA programme record.", rationale: "The donor programme path is source evidence only; the current typed record remains authoritative.", evidence: "site-v13-source"}),
+  entry({id: "route-source-program-asia-smart-innovation-awards-2025", kind: "route", source: "/programmes/asia-smart-innovation-awards/2025", canonicalPath: "/programs/asa", disposition: "merge", dataOwner: "Verified typed ASA programme record.", rationale: "The donor edition path is evidence only and does not manufacture an hkwtia programme edition.", evidence: "site-v13-source"}),
+  entry({id: "route-source-program-hkict-startup-award", kind: "route", source: "/programmes/hkict-startup-award", canonicalPath: "/programs/hkict", disposition: "merge", dataOwner: "Verified typed HKICT programme record.", rationale: "The donor programme path is source evidence only; the current typed record remains authoritative.", evidence: "site-v13-source"}),
+];
+
+const donorSitemapEvidenceBySource = new Map(
+  authoritativeSourceInventory.sitemapRoutes.map(({id, sourcePath}) => [sourcePath, id]),
+);
+
+function attachDonorSitemapEvidence(manifestEntry: IntegrationManifestEntry): IntegrationManifestEntry {
+  const sourceEvidenceId = donorSitemapEvidenceBySource.get(manifestEntry.source);
+  return sourceEvidenceId === undefined ? manifestEntry : entry({...manifestEntry, sourceEvidenceId});
+}
+
 const contractEntries: readonly IntegrationManifestEntry[] = [
   entry({id: "cta-find-event", kind: "cta", source: "cta:find-event-or-activity", canonicalPath: "/events", disposition: "merge", dataOwner: "events repository and event CMS publication state.", rationale: "Only published events are actionable.", evidence: "master-plan", destinationChain: ["/events"]}),
   entry({id: "cta-join-wisetech", kind: "cta", source: "cta:join-wisetech", canonicalPath: "/membership", disposition: "merge", dataOwner: "canonical plan codes, membership application state and server-owned checkout.", rationale: "Visitors compare canonical plans before entering the focused join flow.", evidence: "master-plan", destinationChain: ["/membership", "/join?plan=<canonical-plan>"]}),
@@ -234,16 +266,7 @@ const contractEntries: readonly IntegrationManifestEntry[] = [
 ];
 
 const assetEntries: readonly IntegrationManifestEntry[] = [
-  entry({
-    id: "asset-wtia-logo",
-    kind: "asset",
-    source: "https://github.com/YNWAforever/wisetech/blob/f91ecc5fa29c2b9d416ed8315f23e9492baf993d/public/brand/wtia-legacy-logo.png",
-    canonicalPath: "public/images/wtia-logo.png",
-    disposition: "retain",
-    dataOwner: "User-authoritative WiseTech donor commit plus the tracked own-origin copy.",
-    rationale: "The pinned WTIA logo supports legal-operator identity without importing the donor runtime or implying a member or partner relationship.",
-    evidence: "site-v13-source",
-  }),
+  entry({id: "asset-wtia-logo", kind: "asset", source: "asset:wtia-logo", canonicalPath: "public/images/wtia-logo.png", disposition: "retain", dataOwner: "Tracked repository asset and legal WTIA identity.", rationale: "The tracked logo is repository evidence, not proof of any member or partner relationship.", evidence: "hkwtia-repository"}),
   entry({id: "asset-page-heroes", kind: "asset", source: "asset:page-heroes", canonicalPath: "public/images/", disposition: "retain", dataOwner: "Tracked repository assets used by current pages.", rationale: "Only tracked own-origin hero assets may be reused after rights and alt-text review.", evidence: "hkwtia-repository"}),
   entry({id: "asset-history-archive", kind: "asset", source: "asset:history-archive", canonicalPath: "public/images/history/", disposition: "retain", dataOwner: "Typed history records and tracked repository archive.", rationale: "Use only against the matching verified institutional record and reviewed alt text.", evidence: "hkwtia-repository"}),
   entry({id: "asset-programme-archive", kind: "asset", source: "asset:programme-archive", canonicalPath: "public/images/programs/", disposition: "retain", dataOwner: "Typed programme records and tracked repository archive.", rationale: "Use only against the matching verified programme evidence and reviewed alt text.", evidence: "hkwtia-repository"}),
@@ -258,6 +281,7 @@ export const wisetechIntegrationManifest: readonly IntegrationManifestEntry[] = 
   ...redirectRoutes,
   ...designRouteMerges,
   ...retiredDesignRoutes,
+  ...authoritativeDonorRouteAliases,
   ...contractEntries,
   ...assetEntries,
-]);
+].map(attachDonorSitemapEvidence));

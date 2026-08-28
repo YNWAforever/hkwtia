@@ -4,9 +4,9 @@ This document maps content to existing authorities so a later visual port cannot
 
 ## Evidence basis
 
-Repository base: `c0e9d6a786ee7dcff1fa50638bd1ecb36814c58f`. Site metadata reported by the master plan: `wisetech-hong-kong` v13, source commit `d2d82c01099490a8c2768c942186735667bbc881`, reported archive SHA-256 `411837ea096a11d3a7f49f77f028879b1f4c3599ab643d1ee3ce92de56a02e54`. The archive is unavailable, so no Site copy file/content ID is source-verified.
+Repository base: `c0e9d6a786ee7dcff1fa50638bd1ecb36814c58f`. Historical master-plan identity: `wisetech-hong-kong` v13, commit `d2d82c01099490a8c2768c942186735667bbc881`, archive SHA-256 `411837ea096a11d3a7f49f77f028879b1f4c3599ab643d1ee3ce92de56a02e54`; byte/history equivalence remains unverified. The separate authorized Git donor is PASSED LOCALLY for frozen implementation/source evidence, not current data.
 
-Evidence legend: `hkwtia-repository` is current code/data ownership; `site-v13-design-doc` is design intent only; `master-plan` is the integration requirement; `site-v13-source` has zero current records; unavailable archive evidence cannot close parity.
+Evidence legend: `hkwtia-repository` is current code/data ownership; `site-v13-design-doc` is design intent only; `master-plan` is the integration requirement; checked-in donor `site-v13-source` evidence is source-only and cannot close current-data parity.
 
 ## Canonical ownership
 
@@ -31,9 +31,9 @@ Evidence legend: `hkwtia-repository` is current code/data ownership; `site-v13-d
 | Admin CMS/CRM | The 20 explicit localized admin `page.tsx` owners in `config/wisetech-protected-route-inventory.ts` plus their authorised audited repositories/actions | Extend only for a proven content gap; any new/deleted page must update the bidirectional inventory | Master-plan `/admin/*` family plus repository-verified file owners |
 | Server API, webhooks and jobs | The 17 explicit `app/api/**/route.ts` owners: 6 general handlers, 2 webhooks and 9 jobs | Preserve authentication, idempotency and secrets; any new/deleted handler or classification change must update the bidirectional inventory | Master-plan `/api/*` family plus repository-verified file owners |
 | Locale routing | `next-intl`, current switcher and `/zh` public prefix | Preserve path/query via router locale replacement; do not store `/zh-HK` browser links | Repository-verified |
-| Assets and alt text | Tracked own-origin assets plus curated media metadata | Reconcile every Site file, rights status and localized alt text after archive transfer | Repository/design document; gate open |
+| Assets and alt text | Tracked own-origin assets plus frozen donor source inventory | All donor source inventory is reconciled; rights, relationship, localized alt text, and publication remain separate reviews | Repository/design document; historical archive bytes are optional provenance only |
 
-The protected route inventory is code-ownership evidence only. Route groups do not add URL segments, the locale wrapper is removed, and dynamic/catch-all patterns retain Next.js notation. It does not imply that the unavailable Site archive has been reconciled or that any proposed design-only route exists.
+The protected route inventory is code-ownership evidence only. Route groups do not add URL segments, the locale wrapper is removed, and dynamic/catch-all patterns retain Next.js notation. All donor source inventory is reconciled as frozen evidence; historical archive bytes are optional provenance only and proposed design-only routes still require current owners.
 
 ## CTA content rules
 
@@ -47,4 +47,12 @@ The protected route inventory is code-ownership evidence only. Route groups do n
 
 No schema or seed is authorized by this document. Future additions named in the master plan—announcements, partners, media upload, event presentation fields, localized article bodies, general inquiries, approved resources and unified membership catalog—each need their own design, migration, rollback and isolated-data verification.
 
-Site content transfer remains blocked on the authoritative archive. The recorded Site commit/hash establishes identity only. Once safely supplied, compare routes, copy, locale variants, structured content, forms and assets; classify conflicts without overwriting repository/CMS authority. Until reconciliation completes, Phase 0 content parity is not closed.
+Site content has been reconciled as frozen source evidence, not current data. If historical bytes are later supplied, compare them only for optional byte/history provenance without overwriting repository/CMS authority; no Phase 0 delivery gate depends on that comparison.
+
+## Authoritative donor content boundary
+
+The user-authorized Git donor is `https://github.com/YNWAforever/wisetech` at `f91ecc5fa29c2b9d416ed8315f23e9492baf993d`, tree `d13a99e6c47f2b3ea279c5d02da5cf15008807b7`, with 138 tracked files and tree-list SHA-256 `79d543e6794f604af6c59cfe43928ac4b5e5fa578ba4559d354e6291cfe8f24c`; reconciliation is PASSED LOCALLY. It is source evidence, not current data. The historical identity `d2d82c01099490a8c2768c942186735667bbc881` / `411837ea096a11d3a7f49f77f028879b1f4c3599ab643d1ee3ce92de56a02e54` remains unverified and separate.
+
+The frozen buckets (52 bilingual headings, 14 navigation sets, 21 inner-route checks, 4 enquiry checks, 5 Chinese parity checks, 2 historical events, and 79 partner records) are source evidence, not current data. There is no donor event/programme edition/metrics/testimonials/membership/portal/form persistence import. Current hkwtia repositories and publication authorities remain the only data authority.
+
+See [authoritative source reconciliation](wisetech-authoritative-source-reconciliation.md) for its deterministic offline evidence contract.

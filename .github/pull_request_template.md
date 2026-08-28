@@ -28,7 +28,6 @@ Do not convert these unresolved commands into completion checkboxes before their
 
 ## Delivery gates — fail closed
 
-- [ ] Site source archive transfer has hash-verified reconciliation evidence.
 - [ ] GitHub branch protection requires the `quality` check on `main`.
 - [ ] isolated Neon/test identities/providers are provisioned and independently verified.
 - [ ] Preview/UAT has an isolated preview URL, test evidence, and rollback owner.
