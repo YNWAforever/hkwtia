@@ -560,6 +560,7 @@
       "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。"
     },
     "record": {
+      "statusHeading": "最新狀況",
       "editionsHeading": "歷屆",
       "winnersHeading": "得獎者",
       "categoryHeading": "組別",

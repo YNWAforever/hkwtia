@@ -1,4 +1,5 @@
-import Image from 'next/image';
+import {MediaGallery} from '@/components/marketing/media-gallery';
+import {StorySection} from '@/components/marketing/story-section';
 
 /**
  * CPAI, which is a credential and not an event series.
@@ -40,9 +41,8 @@ export function ProgramCredential({
   images
 }: ProgramCredentialProps) {
   return (
-    <section className="container mx-auto px-6 py-16">
-      <div className="glass-card p-6">
-        <h2 className="text-2xl font-semibold">{courseName}</h2>
+    <StorySection heading={courseName} tone="plain">
+      <div className="rounded-shell-lg bg-shell-warm p-6 sm:p-8">
         <dl className="mt-6 space-y-4">
           <Fact label={issuerHeading} value={issuer} />
           <Fact label={coursePartnerHeading} value={coursePartner} />
@@ -62,20 +62,11 @@ export function ProgramCredential({
       ) : null}
 
       {images.length > 0 ? (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          {images.map((image) => (
-            <Image
-              key={image.src}
-              alt={image.alt}
-              className="h-auto w-full rounded-lg"
-              height={427}
-              src={image.src}
-              width={640}
-            />
-          ))}
+        <div className="mt-8">
+          <MediaGallery images={images} />
         </div>
       ) : null}
-    </section>
+    </StorySection>
   );
 }
 

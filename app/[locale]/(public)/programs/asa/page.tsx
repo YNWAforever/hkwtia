@@ -31,7 +31,13 @@ export default async function AsaPage({params}: Props) {
 
   return (
     <>
-      <ProgramDetail program={program} title={t('title')} description={t('description')} status={t('status')} />
+      <ProgramDetail
+        program={program}
+        title={t('title')}
+        description={t('description')}
+        statusHeading={tr('statusHeading')}
+        status={t('status')}
+      />
       <ProgramEditions
         categoryHeading={tr('categoryHeading')}
         editionsHeading={tr('editionsHeading')}
