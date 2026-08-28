@@ -8,7 +8,7 @@ import {StructuredData} from "@/components/seo/structured-data";
 import type {AppLocale} from "@/i18n/routing";
 import {eventsRepository} from "@/lib/db/repos/events";
 import {eventBoundary} from "@/lib/events/public";
-import {isRegistrableMediaUrl} from "@/lib/media/url";
+import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl} from "@/lib/media/url";
 import {runPublicEventRegistrationAction, type RegistrationActionState} from "@/lib/events/registration-action";
 import {buildPageMetadata} from "@/lib/metadata";
 import {buildEventData} from "@/lib/structured-data";
@@ -30,7 +30,7 @@ export default async function EventPage({params}: Props) {
   const asOf = new Date();
   const [event, t] = await Promise.all([eventsRepository.getPublicBySlug(slug, locale, {asOf}).catch(() => null), getTranslations({locale, namespace: "Events"})]);
   if (!event) notFound();
-  const displayEvent = event.hero && !isRegistrableMediaUrl(event.hero.url) ? {...event, hero: null} : event;
+  const displayEvent = event.hero && !(isPrivateMediaDeliveryUrl(event.hero.url) || isRegistrableMediaUrl(event.hero.url)) ? {...event, hero: null} : event;
   const appLocale = locale as AppLocale;
   const registrationMessages = {registered: t("registration.registered"), waitlist: t("registration.waitlist"), alreadyRegistered: t("registration.alreadyRegistered"), alreadyWaitlisted: t("registration.alreadyWaitlisted"), unauthenticated: t("registration.unauthenticated"), ineligible: t("registration.ineligible"), closed: t("registration.closed"), error: t("registration.error")};
   async function registerAction(state: RegistrationActionState, formData: FormData): Promise<RegistrationActionState> { "use server"; return runPublicEventRegistrationAction(state, formData, {messages: registrationMessages}); }

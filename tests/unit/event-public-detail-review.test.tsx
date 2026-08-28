@@ -12,6 +12,7 @@ vi.mock("@/lib/db/repos/public-posts", () => publicPosts);
 vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: showcase}));
 vi.mock("next-intl/server", () => ({getTranslations: async () => (key: string) => key, setRequestLocale: () => undefined}));
 vi.mock("next/navigation", () => ({notFound: () => { throw new Error("NEXT_NOT_FOUND"); }}));
+vi.mock("next/image", () => ({default: ({unoptimized, ...props}: {unoptimized?: boolean; [key: string]: unknown}) => <img {...props} data-unoptimized={String(unoptimized)}/> }));
 vi.mock("@/components/portal/event-registration-form", () => ({EventRegistrationForm: () => <div data-registration-form="true"/>}));
 
 import EventPage, {generateMetadata} from "@/app/[locale]/(public)/events/[slug]/page";
@@ -57,6 +58,17 @@ describe("public Event detail page review regressions", () => {
     const rendered = renderToStaticMarkup(await EventPage(props));
 
     expect(rendered).not.toContain('data-registration-form="true"');
+  });
+
+  it("keeps a private delivery hero in detail markup, unoptimized, and structured data", async () => {
+    const url = "/api/media/10000000-0000-4000-8000-000000000001";
+    events.getPublicBySlug.mockResolvedValue(event("2030-01-01T12:00:00.000Z", {url, alt: "Private hero"}));
+
+    const rendered = renderToStaticMarkup(await EventPage(props));
+
+    expect(rendered).toContain(url);
+    expect(rendered).toContain('data-unoptimized="true"');
+    expect(rendered).toContain('"image":"http://localhost:3000/api/media/10000000-0000-4000-8000-000000000001"');
   });
 
   it("uses repository public visibility for metadata and detail markup, excluding an unsafe archived-or-donor hero", async () => {

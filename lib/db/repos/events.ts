@@ -8,7 +8,7 @@ import {getDb} from "@/lib/db/repos/common";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {auditEvents, companyMembers, eventRegistrations, events, media, memberships, profiles, type Event} from "@/lib/db/server-schema";
 import {eventBoundary, type PublicEventProjection, type PublicEventStatus} from "@/lib/events/public";
-import {isRegistrableMediaUrl} from "@/lib/media/url";
+import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl} from "@/lib/media/url";
 import {requireMember, type Actor, type AdminActor} from "@/lib/membership/lifecycle";
 
 const eventIdSchema = z.string().uuid();
@@ -121,7 +121,7 @@ function projectPublicEvent(row: PublicEventMemoryRow, locale: string): PublicEv
     endsAt: event.endsAt?.toISOString() ?? null,
     venue: event.venue,
     capacity: event.capacity,
-    hero: hero && hero.archivedAt === null && isRegistrableMediaUrl(hero.url) ? {url: hero.url, alt: useChinese ? hero.altZh : hero.altEn} : null,
+    hero: hero && hero.archivedAt === null && (isPrivateMediaDeliveryUrl(hero.url) || isRegistrableMediaUrl(hero.url)) ? {url: hero.url, alt: useChinese ? hero.altZh : hero.altEn} : null,
   };
 }
 

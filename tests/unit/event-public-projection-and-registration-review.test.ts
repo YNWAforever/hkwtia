@@ -51,6 +51,13 @@ function registrationDependencies(overrides: Partial<{
 }
 
 describe("public Event projection review regression", () => {
+  it("keeps an own-origin private media hero in the public DTO", async () => {
+    const url = "/api/media/10000000-0000-4000-8000-000000000001";
+    const source = [{event: publicEvent(), hero: {url, altEn: "Private hero", altZh: "私人圖片", archivedAt: null}}] as const;
+
+    await expect(getPublicEventBySlug("public-event", "en", {asOf: now, source})).resolves.toMatchObject({hero: {url, alt: "Private hero"}});
+  });
+
   it("drops an unarchived external donor hero before it enters the public DTO", async () => {
     const source = [{
       event: publicEvent(),
