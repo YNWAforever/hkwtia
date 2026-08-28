@@ -4,10 +4,12 @@ import {getTranslations, setRequestLocale} from 'next-intl/server';
 import {EditorialHero} from '@/components/marketing/editorial-hero';
 import {FeatureGrid} from '@/components/marketing/feature-grid';
 import {HomeHighlightCard} from '@/components/marketing/home-highlight-card';
+import {HomePartnerWall} from '@/components/marketing/home-partner-wall';
 import {ProgramGrid} from '@/components/marketing/program-grid';
 import {Section} from '@/components/marketing/section';
 import {StructuredData} from '@/components/seo/structured-data';
 import type {AppLocale} from '@/i18n/routing';
+import {partnersRepository} from '@/lib/db/repos/partners';
 import {loadHomeHighlights} from '@/lib/home/home-highlights';
 import {buildPageMetadata} from '@/lib/metadata';
 import {buildOrganizationData} from '@/lib/structured-data';
@@ -26,8 +28,11 @@ export default async function HomePage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
   const appLocale = locale as AppLocale;
-  const t = await getTranslations('Home');
-  const highlights = await loadHomeHighlights({locale: appLocale});
+  const [t, highlights, partners] = await Promise.all([
+    getTranslations('Home'),
+    loadHomeHighlights({locale: appLocale}),
+    partnersRepository.listPublished(appLocale, {limit: 12}).catch(() => null),
+  ]);
   const formatDate = (value: Date | string) => new Intl.DateTimeFormat(locale, {dateStyle: 'long', timeZone: 'Asia/Hong_Kong'}).format(new Date(value));
   const features = ['connect', 'accelerate', 'represent'].map((key) => ({title: t(`features.${key}.title`), description: t(`features.${key}.description`)}));
   const programLabels = Object.fromEntries(['cpai', 'hkict', 'tct', 'asa'].map((id) => [id, {title: t(`programs.${id}.title`), description: t(`programs.${id}.description`)}]));
@@ -46,6 +51,7 @@ export default async function HomePage({params}: Props) {
           </div>
         </Section>
       </div>
+      {partners?.length ? <HomePartnerWall intro={t('featuresIntro')} partners={partners} title={t('featuresTitle')} /> : null}
       <Section heading={t('featuresTitle')} intro={t('featuresIntro')}><FeatureGrid features={features} /></Section>
       <Section heading={t('programsTitle')} intro={t('programsIntro')}><ProgramGrid labels={programLabels} viewLabel={t('viewProgram')} /></Section>
     </>
