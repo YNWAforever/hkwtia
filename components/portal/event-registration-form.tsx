@@ -7,7 +7,7 @@ import type {RegistrationActionMessages, RegistrationActionState} from "@/lib/ev
 
 const initialState: RegistrationActionState = {};
 
-export function EventRegistrationForm({action, eventId, links, messages, registerLabel, pendingLabel}: Readonly<{
+export function EventRegistrationForm({action, eventId, links, registerLabel, pendingLabel}: Readonly<{
   action: (state: RegistrationActionState, formData: FormData) => Promise<RegistrationActionState>;
   eventId: string;
   registerLabel: string;
@@ -17,5 +17,5 @@ export function EventRegistrationForm({action, eventId, links, messages, registe
 }>) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const recovery = state.code === "unauthenticated" ? links?.unauthenticated : state.code === "ineligible" ? links?.ineligible : undefined;
-  return <form action={formAction} className="space-y-2"><input name="eventId" type="hidden" value={eventId}/><button className="min-h-11 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending} type="submit">{pending ? pendingLabel : registerLabel}</button>{state.message ? <p aria-live="polite" className={state.code === "error" ? "text-sm text-destructive" : "text-sm text-muted-foreground"} role={state.code === "error" ? "alert" : "status"}>{state.message}{recovery ? <> <Link className="underline" href={recovery}>{state.code === "unauthenticated" ? messages.unauthenticated : messages.ineligible}</Link></> : null}</p> : null}</form>;
+  return <form action={formAction} className="space-y-2"><input name="eventId" type="hidden" value={eventId}/><button className="min-h-11 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending} type="submit">{pending ? pendingLabel : registerLabel}</button>{state.message ? <p aria-live="polite" className={state.code === "error" ? "text-sm text-destructive" : "text-sm text-muted-foreground"} role={state.code === "error" ? "alert" : "status"}>{recovery ? <Link className="underline" href={recovery}>{state.message}</Link> : state.message}</p> : null}</form>;
 }
