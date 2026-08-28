@@ -11,6 +11,10 @@ import {
   wisetechIntegrationManifest,
   wisetechIntegrationProvenance,
 } from "@/config/wisetech-integration-manifest";
+import {
+  authoritativeSourceInventory,
+  reportedArchiveIdentity,
+} from "@/config/wisetech-authoritative-source-inventory";
 import type {IntegrationManifestEntry} from "@/config/wisetech-integration-manifest";
 import {protectedRouteOwnershipInventory} from "@/config/wisetech-protected-route-inventory";
 import {
@@ -63,6 +67,72 @@ function withIdentity(
   changes: Partial<IntegrationManifestEntry>,
 ): IntegrationManifestEntry {
   return {...base, id, source, ...changes};
+}
+type DonorRouteContractError = Readonly<{
+  code: "missing-donor-route" | "duplicate-donor-route" | "wrong-source-evidence" | "wrong-route-contract";
+  sourcePath: string;
+}>;
+
+function donorRouteContractErrors(
+  entries: readonly IntegrationManifestEntry[],
+): readonly DonorRouteContractError[] {
+  const errors: DonorRouteContractError[] = [];
+  for (const expected of authoritativeSourceInventory.sitemapRoutes) {
+    const matches = entries.filter(({kind, source}) => kind === "route" && source === expected.sourcePath);
+    if (matches.length === 0) {
+      errors.push({code: "missing-donor-route", sourcePath: expected.sourcePath});
+      continue;
+    }
+    if (matches.length > 1) {
+      errors.push({code: "duplicate-donor-route", sourcePath: expected.sourcePath});
+      continue;
+    }
+    const [match] = matches;
+    if (match!.sourceEvidenceId !== expected.id) {
+      errors.push({code: "wrong-source-evidence", sourcePath: expected.sourcePath});
+    }
+    if (match!.disposition !== expected.disposition || match!.canonicalPath !== expected.canonicalPath) {
+      errors.push({code: "wrong-route-contract", sourcePath: expected.sourcePath});
+    }
+  }
+  return errors;
+}
+
+function provenanceErrors(value: typeof wisetechIntegrationProvenance): readonly string[] {
+  const errors: string[] = [];
+  const donor = authoritativeSourceInventory.identity;
+  const archive = value.reportedArchiveIdentity;
+  const authoritativeDonor = value.authoritativeDonor;
+  if (JSON.stringify(archive) !== JSON.stringify(reportedArchiveIdentity)) {
+    errors.push("reported-archive-drift");
+  }
+  if (
+    authoritativeDonor.repository !== donor.repository
+    || authoritativeDonor.commit !== donor.commit
+    || authoritativeDonor.tree !== donor.tree
+    || authoritativeDonor.trackedFileCount !== donor.trackedFileCount
+    || authoritativeDonor.treeListingSha256 !== donor.treeListingSha256
+  ) {
+    errors.push("authoritative-donor-drift");
+  }
+  if (authoritativeDonor.reconciliationStatus !== "locally-reconciled") {
+    errors.push("donor-not-locally-reconciled");
+  }
+  if (authoritativeDonor.continuityWithReportedArchive !== false) {
+    errors.push("false-archive-continuity");
+  }
+  const archiveSha256: string = archive.archiveSha256;
+  const donorTree: string = authoritativeDonor.tree;
+  const donorTreeListingSha256: string = authoritativeDonor.treeListingSha256;
+  if (archiveSha256 === donorTree || archiveSha256 === donorTreeListingSha256) {
+    errors.push("archive-sha-replaced-with-git-identity");
+  }
+  return errors;
+}
+
+function isDeeplyFrozen(value: unknown): boolean {
+  if (typeof value !== "object" || value === null) return true;
+  return Object.isFrozen(value) && Object.values(value).every(isDeeplyFrozen);
 }
 
 describe("WiseTech route parity manifest", () => {
@@ -126,12 +196,31 @@ describe("WiseTech route parity manifest", () => {
     expect(byId.get("cta-register-interest")?.durableOwners).toEqual(["events", "cohorts"]);
   });
 
-  it("uses next-intl without claiming unavailable Site source evidence", () => {
+  it("uses next-intl while preserving exact, discontinuous donor and archive provenance", () => {
     const locale = wisetechIntegrationManifest.find(({id}) => id === "locale-language-toggle");
     expect(locale?.localeMechanism).toBe("next-intl-router-replace");
     expect(JSON.stringify(locale)).not.toContain("/zh-HK");
-    expect(wisetechIntegrationProvenance.site.archiveAvailable).toBe(false);
-    expect(wisetechIntegrationManifest.filter(({evidence}) => evidence === "site-v13-source")).toEqual([]);
+    expect(provenanceErrors(wisetechIntegrationProvenance)).toEqual([]);
+  });
+
+  it("maps every frozen donor sitemap row exactly once with its evidence ID and unchanged reconciliation", () => {
+    expect(donorRouteContractErrors(wisetechIntegrationManifest)).toEqual([]);
+    expect(wisetechIntegrationManifest.filter(({sourceEvidenceId}) => sourceEvidenceId !== undefined)).toHaveLength(67);
+    expect(wisetechIntegrationManifest.filter(({sourceEvidenceId}) => sourceEvidenceId !== undefined).map(({sourceEvidenceId}) => sourceEvidenceId).sort()).toEqual(
+      authoritativeSourceInventory.sitemapRoutes.map(({id}) => id).sort(),
+    );
+  });
+
+  it("adds only historical evidence for the six reconciled donor aliases", () => {
+    const bySource = new Map(wisetechIntegrationManifest.map((item) => [item.source, item]));
+    expect(bySource.get("/events/asia-smart-innovation-awards-summit-2025")).toMatchObject({kind: "route", canonicalPath: "/events/[slug]", disposition: "merge", sourceEvidenceId: "sitemap-18"});
+    expect(bySource.get("/events/smart-innovation-meets-genai")).toMatchObject({kind: "route", canonicalPath: "/events/[slug]", disposition: "merge", sourceEvidenceId: "sitemap-19"});
+    expect(bySource.get("/programmes/tech-connect")).toMatchObject({kind: "route", canonicalPath: "/programs/tct", disposition: "merge", sourceEvidenceId: "sitemap-30"});
+    expect(bySource.get("/programmes/asia-smart-innovation-awards")).toMatchObject({kind: "route", canonicalPath: "/programs/asa", disposition: "merge", sourceEvidenceId: "sitemap-31"});
+    expect(bySource.get("/programmes/asia-smart-innovation-awards/2025")).toMatchObject({kind: "route", canonicalPath: "/programs/asa", disposition: "merge", sourceEvidenceId: "sitemap-32"});
+    expect(bySource.get("/programmes/hkict-startup-award")).toMatchObject({kind: "route", canonicalPath: "/programs/hkict", disposition: "merge", sourceEvidenceId: "sitemap-33"});
+    expect(bySource.get("/events/asia-smart-innovation-awards-summit-2025")?.rationale.toLowerCase()).toContain("historical");
+    expect(bySource.get("/programmes/asia-smart-innovation-awards/2025")?.rationale).toContain("edition");
   });
 
   it("deep-freezes the manifest and nested contract arrays", () => {
@@ -145,6 +234,44 @@ describe("WiseTech route parity manifest", () => {
     const original = [...join.destinationChain!];
     expect(() => (join.destinationChain as string[]).push("/contact")).toThrow(TypeError);
     expect(join.destinationChain).toEqual(original);
+    expect(isDeeplyFrozen(wisetechIntegrationProvenance)).toBe(true);
+    for (const entry of wisetechIntegrationManifest.filter(({sourceEvidenceId}) => sourceEvidenceId !== undefined)) {
+      expect(typeof entry.sourceEvidenceId, entry.id).toBe("string");
+    }
+  });
+
+  it("rejects hostile donor route disappearance, duplication, evidence drift, and route-contract drift", () => {
+    const source = "/events/smart-innovation-meets-genai";
+    const expected = wisetechIntegrationManifest.find(({source: value}) => value === source)!;
+    const missing = wisetechIntegrationManifest.filter(({source: value}) => value !== source);
+    const duplicate = [...wisetechIntegrationManifest, {...expected, id: "hostile-duplicate-donor-route"}];
+    const wrongEvidence = wisetechIntegrationManifest.map((item) => item === expected ? {...item, sourceEvidenceId: "sitemap-01"} : item);
+    const wrongContract = wisetechIntegrationManifest.map((item) => item === expected ? {...item, disposition: "retire" as const, canonicalPath: null} : item);
+    expect(donorRouteContractErrors(missing)).toContainEqual({code: "missing-donor-route", sourcePath: source});
+    expect(donorRouteContractErrors(duplicate)).toContainEqual({code: "duplicate-donor-route", sourcePath: source});
+    expect(donorRouteContractErrors(wrongEvidence)).toContainEqual({code: "wrong-source-evidence", sourcePath: source});
+    expect(donorRouteContractErrors(wrongContract)).toContainEqual({code: "wrong-route-contract", sourcePath: source});
+  });
+
+  it("rejects hostile provenance continuity and replacement of the historical archive SHA", () => {
+    const continuity = structuredClone(wisetechIntegrationProvenance) as unknown as {
+      authoritativeDonor: {continuityWithReportedArchive: boolean};
+      reportedArchiveIdentity: {archiveSha256: string; commit: string};
+    };
+    continuity.authoritativeDonor.continuityWithReportedArchive = true;
+    const replacedArchiveSha = structuredClone(wisetechIntegrationProvenance) as unknown as {
+      authoritativeDonor: {tree: string};
+      reportedArchiveIdentity: {archiveSha256: string; commit: string};
+    };
+    replacedArchiveSha.reportedArchiveIdentity.archiveSha256 = replacedArchiveSha.authoritativeDonor.tree;
+    const collapsed = structuredClone(wisetechIntegrationProvenance) as unknown as {
+      authoritativeDonor: {commit: string};
+      reportedArchiveIdentity: {archiveSha256: string; commit: string};
+    };
+    collapsed.reportedArchiveIdentity.commit = collapsed.authoritativeDonor.commit;
+    expect(provenanceErrors(continuity as typeof wisetechIntegrationProvenance)).toContain("false-archive-continuity");
+    expect(provenanceErrors(replacedArchiveSha as typeof wisetechIntegrationProvenance)).toContain("archive-sha-replaced-with-git-identity");
+    expect(provenanceErrors(collapsed as typeof wisetechIntegrationProvenance)).toContain("reported-archive-drift");
   });
 
   it("validates every non-retired destination against the repository", async () => {

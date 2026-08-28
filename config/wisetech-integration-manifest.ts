@@ -1,3 +1,8 @@
+import {
+  authoritativeSourceInventory,
+  reportedArchiveIdentity,
+} from "@/config/wisetech-authoritative-source-inventory";
+
 export const integrationKinds = ["route", "cta", "form", "locale", "asset"] as const;
 export const integrationDispositions = ["retain", "merge", "redirect", "retire"] as const;
 export const evidenceKinds = [
@@ -21,6 +26,7 @@ export type IntegrationManifestEntry = Readonly<{
   dataOwner: string;
   rationale: string;
   evidence: IntegrationEvidence;
+  sourceEvidenceId?: string;
   destinationChain?: readonly string[];
   durableOwners?: readonly DurableOwner[];
   localeMechanism?: "next-intl-router-replace";
@@ -28,13 +34,11 @@ export type IntegrationManifestEntry = Readonly<{
 
 export const wisetechIntegrationProvenance = Object.freeze({
   repositoryBaseSha: "c0e9d6a786ee7dcff1fa50638bd1ecb36814c58f",
-  site: Object.freeze({
-    projectSlug: "wisetech-hong-kong",
-    savedVersion: 13,
-    sourceCommit: "d2d82c01099490a8c2768c942186735667bbc881",
-    reportedArchiveSha256: "411837ea096a11d3a7f49f77f028879b1f4c3599ab643d1ee3ce92de56a02e54",
-    archiveAvailable: false,
-    archiveStatus: "Identity recorded by the master plan; archive bytes are unavailable for reconciliation.",
+  reportedArchiveIdentity: Object.freeze({...reportedArchiveIdentity}),
+  authoritativeDonor: Object.freeze({
+    ...authoritativeSourceInventory.identity,
+    reconciliationStatus: "locally-reconciled" as const,
+    continuityWithReportedArchive: false as const,
   }),
 });
 
@@ -208,6 +212,24 @@ const retiredDesignRoutes: readonly IntegrationManifestEntry[] = [
   evidence: "site-v13-design-doc",
 }));
 
+const authoritativeDonorRouteAliases: readonly IntegrationManifestEntry[] = [
+  entry({id: "route-source-event-asia-smart-innovation-awards-summit-2025", kind: "route", source: "/events/asia-smart-innovation-awards-summit-2025", canonicalPath: "/events/[slug]", disposition: "merge", dataOwner: "Published events repository and event CMS; source evidence is not publication state.", rationale: "Historical donor event evidence only; this mapping neither seeds nor publishes an hkwtia event.", evidence: "site-v13-source"}),
+  entry({id: "route-source-event-smart-innovation-meets-genai", kind: "route", source: "/events/smart-innovation-meets-genai", canonicalPath: "/events/[slug]", disposition: "merge", dataOwner: "Published events repository and event CMS; source evidence is not publication state.", rationale: "Historical donor event evidence only; this mapping neither seeds nor publishes an hkwtia event.", evidence: "site-v13-source"}),
+  entry({id: "route-source-program-tech-connect", kind: "route", source: "/programmes/tech-connect", canonicalPath: "/programs/tct", disposition: "merge", dataOwner: "Verified typed Tech to Connect programme record.", rationale: "The donor programme path is source evidence only; the current typed record remains authoritative.", evidence: "site-v13-source"}),
+  entry({id: "route-source-program-asia-smart-innovation-awards", kind: "route", source: "/programmes/asia-smart-innovation-awards", canonicalPath: "/programs/asa", disposition: "merge", dataOwner: "Verified typed ASA programme record.", rationale: "The donor programme path is source evidence only; the current typed record remains authoritative.", evidence: "site-v13-source"}),
+  entry({id: "route-source-program-asia-smart-innovation-awards-2025", kind: "route", source: "/programmes/asia-smart-innovation-awards/2025", canonicalPath: "/programs/asa", disposition: "merge", dataOwner: "Verified typed ASA programme record.", rationale: "The donor edition path is evidence only and does not manufacture an hkwtia programme edition.", evidence: "site-v13-source"}),
+  entry({id: "route-source-program-hkict-startup-award", kind: "route", source: "/programmes/hkict-startup-award", canonicalPath: "/programs/hkict", disposition: "merge", dataOwner: "Verified typed HKICT programme record.", rationale: "The donor programme path is source evidence only; the current typed record remains authoritative.", evidence: "site-v13-source"}),
+];
+
+const donorSitemapEvidenceBySource = new Map(
+  authoritativeSourceInventory.sitemapRoutes.map(({id, sourcePath}) => [sourcePath, id]),
+);
+
+function attachDonorSitemapEvidence(manifestEntry: IntegrationManifestEntry): IntegrationManifestEntry {
+  const sourceEvidenceId = donorSitemapEvidenceBySource.get(manifestEntry.source);
+  return sourceEvidenceId === undefined ? manifestEntry : entry({...manifestEntry, sourceEvidenceId});
+}
+
 const contractEntries: readonly IntegrationManifestEntry[] = [
   entry({id: "cta-find-event", kind: "cta", source: "cta:find-event-or-activity", canonicalPath: "/events", disposition: "merge", dataOwner: "events repository and event CMS publication state.", rationale: "Only published events are actionable.", evidence: "master-plan", destinationChain: ["/events"]}),
   entry({id: "cta-join-wisetech", kind: "cta", source: "cta:join-wisetech", canonicalPath: "/membership", disposition: "merge", dataOwner: "canonical plan codes, membership application state and server-owned checkout.", rationale: "Visitors compare canonical plans before entering the focused join flow.", evidence: "master-plan", destinationChain: ["/membership", "/join?plan=<canonical-plan>"]}),
@@ -236,6 +258,7 @@ export const wisetechIntegrationManifest: readonly IntegrationManifestEntry[] = 
   ...redirectRoutes,
   ...designRouteMerges,
   ...retiredDesignRoutes,
+  ...authoritativeDonorRouteAliases,
   ...contractEntries,
   ...assetEntries,
-]);
+].map(attachDonorSitemapEvidence));

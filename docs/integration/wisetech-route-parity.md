@@ -7,17 +7,17 @@ This is the human-readable route/CTA view of `config/wisetech-integration-manife
 - Repository integration base: `c0e9d6a786ee7dcff1fa50638bd1ecb36814c58f`.
 - Repository evidence inspected for this record: task anchor `8cb72eccc7c57a5b00b4ca84308758aa8592ac99`.
 - Site identity reported by the master plan: project `wisetech-hong-kong`, saved version `13`, source commit `d2d82c01099490a8c2768c942186735667bbc881`, reported archive SHA-256 `411837ea096a11d3a7f49f77f028879b1f4c3599ab643d1ee3ce92de56a02e54`.
-- The authoritative Site archive is not available in this workspace. Its bytes, route files, CTA implementations, forms, locale code, components, content and assets have not been reconciled. Phase 0 parity therefore remains open.
+- Historical archive bytes are unavailable for byte/history comparison; the user-authorized Git donor is reconciled separately below. Historical equivalence remains unverified.
 
 | Evidence label | Meaning in this record |
 |---|---|
 | `hkwtia-repository` | Verified in the App Router, redirect configuration, action/component, typed content or repository assets. |
 | `site-v13-design-doc` | Stated by an attached design instruction; not verified against Site source files. |
 | `master-plan` | Required by the integration plan, including the CTA contract and the `/admin/*` and `/api/*` families. |
-| `site-v13-source` | Reserved for evidence from the transferred archive. There are currently zero such entries. |
+| `site-v13-source` | Checked-in user-authorized Git donor evidence for implementation facts; it never replaces current hkwtia ownership. |
 | Unavailable archive | A known Site identity/hash without locally inspectable archive bytes; never parity-closure evidence. |
 
-The integration manifest has 127 entries: route 110, CTA 5, form 3, locale 1 and asset 8. Dispositions are retain 47, redirect 4, merge 61 and retire 15. Evidence labels are repository 52, design document 70, master plan 5 and Site source 0. The separate protected inventory has 37 repository-owned code routes: 20 admin pages and 17 API handlers, classified as 6 general API handlers, 2 webhook handlers and 9 job handlers.
+The integration manifest has 133 entries: route 116, CTA 5, form 3, locale 1 and asset 8. Dispositions are retain 47, redirect 4, merge 67 and retire 15. Evidence labels include 6 direct `site-v13-source` evidence rows. Frozen donor `sourceEvidenceId` values attach to all 67 sitemap routes exactly once. The separate protected inventory has 37 repository-owned code routes: 20 admin pages and 17 API handlers, classified as 6 general API handlers, 2 webhook handlers and 9 job handlers.
 
 ## Repository-backed canonical routes
 
@@ -63,7 +63,7 @@ The master plan is the requirements evidence for the `/admin/*` and `/api/*` fam
 | Webhook handlers (2) | `/api/stripe/webhook`; `/api/webhooks/woztell` |
 | Job handlers (9) | `/api/jobs/aiops-metrics`; `/api/jobs/approvals-expirer`; `/api/jobs/board-reporter`; `/api/jobs/chat-retention`; `/api/jobs/engagement-score`; `/api/jobs/journey-runner`; `/api/jobs/renewal-runner`; `/api/jobs/retention-analyst`; `/api/jobs/worker-alert` |
 
-The contract compares exact normalized file paths and canonical paths in both directions. A new code route without an owner, a deleted code route with a stale owner, a fabricated owner, a duplicate owner, a wrong family, or a webhook/job classified as a general handler all fail. This inventory proves current `hkwtia` code ownership only; it does not classify any unavailable Site archive route.
+The contract compares exact normalized file paths and canonical paths in both directions. A new code route without an owner, a deleted code route with a stale owner, a fabricated owner, a duplicate owner, a wrong family, or a webhook/job classified as a general handler all fail. This protected inventory proves current `hkwtia` `/admin` and `/api` ownership only; all 67 donor sitemap routes are separately classified exactly once in the frozen donor fixture/manifest. Only historical archive byte/history equivalence remains unavailable and unverified.
 
 ## Explicit current redirects
 
@@ -138,4 +138,23 @@ The design map's already-canonical routes (`/events`, `/events/[slug]`, `/member
 
 ## Exit condition
 
-The machine-readable boundary passes against the current repository and catches injected invalid canonicals with otherwise valid chains, empty/inconsistent chains, chains on retired entries, submitted dynamic patterns, fabricated/wrong-target redirects, unsupported durable owners/actions, unmapped routes and nonexistent CTA destinations. The protected family contract additionally discovers every installed default page/route convention file under exact protected boundaries before kind/family validation, and catches wrong-kind files, new code routes, deleted code routes, fabricated owners, wrong file conventions, family drift and webhook/job misclassification while pinning the exact current 20/17 ownership sets. It also pins zero `site-v13-source` entries while the archive is unavailable and deep-freezes all inventory objects and nested contract arrays. That does not close Site parity. Closure requires a credential-safe archive transfer, verification of the reported archive hash, and reconciliation of every source route, CTA, form, locale, component, content item and asset without introducing fabricated data or destinations.
+The machine-readable boundary passes against the current repository and catches injected invalid canonicals with otherwise valid chains, empty/inconsistent chains, chains on retired entries, submitted dynamic patterns, fabricated/wrong-target redirects, unsupported durable owners/actions, unmapped routes and nonexistent CTA destinations. The protected family contract additionally discovers every installed default page/route convention file under exact protected boundaries before kind/family validation, and catches wrong-kind files, new code routes, deleted code routes, fabricated owners, wrong file conventions, family drift and webhook/job misclassification while pinning the exact current 20/17 ownership sets. The separate frozen donor fixture pins all source evidence, while historical archive byte/history equivalence remains unverified. That does not change current hkwtia ownership or invent destinations.
+
+## Authoritative donor route reconciliation
+
+The user-authorized donor `https://github.com/YNWAforever/wisetech` is locally reconciled at `f91ecc5fa29c2b9d416ed8315f23e9492baf993d`, tree `d13a99e6c47f2b3ea279c5d02da5cf15008807b7`, 138 tracked files, and tree-list SHA-256 `79d543e6794f604af6c59cfe43928ac4b5e5fa578ba4559d354e6291cfe8f24c`; its Git source status is PASSED LOCALLY. The historical master-plan commit `d2d82c01099490a8c2768c942186735667bbc881` and archive SHA-256 `411837ea096a11d3a7f49f77f028879b1f4c3599ab643d1ee3ce92de56a02e54` remain separate and unverified.
+
+all 67 sitemap paths are classified exactly once, under two donor locales (134 locale URLs), together with 27 dispatcher behaviors and 35 navigation placements. The runtime/dispatcher mapping remains evidence-only and current hkwtia route owners remain authoritative.
+
+| Explicit source alias | Canonical disposition and hard boundary |
+|---|---|
+| `/events/asia-smart-innovation-awards-summit-2025`, `/events/smart-innovation-meets-genai` | `merge` to `/events/[slug]`; historical/no-seed/no-edition: no donor event is seeded or published. |
+| `/programmes/tech-connect` | `merge` to `/programs/tct`; typed authority owns current content. |
+| `/programmes/asia-smart-innovation-awards` | `merge` to `/programs/asa`; no donor edition is manufactured. |
+| `/programmes/asia-smart-innovation-awards/2025` | `merge` to `/programs/asa`; historical/no-seed/no-edition evidence only. |
+| `/programmes/hkict-startup-award` | `merge` to `/programs/hkict`; typed authority owns current content. |
+
+The Git donor does not prove historical archive byte/history continuity. See [authoritative source reconciliation](wisetech-authoritative-source-reconciliation.md).
+The 67 sitemap dispositions are `retain` 11, `redirect` 1, `merge` 45, and `retire` 4. Each source path has one frozen `sitemap-01` through `sitemap-67` evidence identity in `config/wisetech-integration-manifest.ts`; the 27 dispatcher behaviors have their own frozen identities and are not counted as sitemap paths.
+
+The English donor `/en/*` and Traditional Chinese donor `/zh/*` URLs are source-locale evidence only. Current hkwtia keeps unprefixed English and `/zh` routing through `next-intl`; no `/zh-HK` route is constructed.
