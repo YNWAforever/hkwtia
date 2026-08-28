@@ -21,11 +21,18 @@ import {
 } from "drizzle-orm/pg-core";
 import {sql} from "drizzle-orm";
 
+import {publicRoutes} from "@/config/public-routes";
 import {M3_AUTOMATION_JOB_KIND_SQL_LIST} from "@/lib/jobs/kinds";
 import {MEMBERSHIP_PLAN_CODES, MEMBERSHIP_STATUSES} from "@/lib/membership/constants";
 
 const createdAt = (name: string) => timestamp(name, {withTimezone: true}).defaultNow().notNull();
 const updatedAt = (name: string) => timestamp(name, {withTimezone: true}).defaultNow().notNull();
+const canonicalPublicRouteSql = sql.raw(
+  publicRoutes.map((route) => `\'${route.replaceAll("\'", "\'\'")}\'`).join(", "),
+);
+const ecmaScriptTrimCharactersSql = sql.raw(
+  "U&'\\0009\\000A\\000B\\000C\\000D\\0020\\00A0\\1680\\2000\\2001\\2002\\2003\\2004\\2005\\2006\\2007\\2008\\2009\\200A\\2028\\2029\\202F\\205F\\3000\\FEFF'",
+);
 
 export const membershipStatusEnum = pgEnum("membership_status", MEMBERSHIP_STATUSES);
 export const membershipPlanCodeEnum = pgEnum("membership_plan_code", MEMBERSHIP_PLAN_CODES);
@@ -667,6 +674,66 @@ export const posts = pgTable(
   ],
 );
 
+
+/**
+ * Scheduled bilingual notices for the public shell. PR4 deliberately leaves
+ * the public layout disconnected; this table and its repository establish the
+ * reviewed authoring and selection boundary for the later cutover.
+ */
+export const siteAnnouncements = pgTable(
+  "site_announcements",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    titleEn: text("title_en").notNull(),
+    titleZhHk: text("title_zh_hk").notNull(),
+    ctaLabelEn: text("cta_label_en").notNull(),
+    ctaLabelZhHk: text("cta_label_zh_hk").notNull(),
+    href: text("href").notNull(),
+    startsAt: timestamp("starts_at", {withTimezone: true}).notNull(),
+    endsAt: timestamp("ends_at", {withTimezone: true}).notNull(),
+    priority: integer("priority").default(0).notNull(),
+    publishedAt: timestamp("published_at", {withTimezone: true}),
+    archivedAt: timestamp("archived_at", {withTimezone: true}),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    check("site_announcements_window_check", sql`${table.endsAt} > ${table.startsAt}`),
+    check(
+      "site_announcements_priority_check",
+      sql`${table.priority} >= 0 AND ${table.priority} <= 1000`,
+    ),
+    check(
+      "site_announcements_title_en_check",
+      sql`char_length(btrim(${table.titleEn}, ${ecmaScriptTrimCharactersSql})) BETWEEN 1 AND 180`,
+    ),
+    check(
+      "site_announcements_title_zh_hk_check",
+      sql`char_length(btrim(${table.titleZhHk}, ${ecmaScriptTrimCharactersSql})) BETWEEN 1 AND 180`,
+    ),
+    check(
+      "site_announcements_cta_label_en_check",
+      sql`char_length(btrim(${table.ctaLabelEn}, ${ecmaScriptTrimCharactersSql})) BETWEEN 1 AND 60`,
+    ),
+    check(
+      "site_announcements_cta_label_zh_hk_check",
+      sql`char_length(btrim(${table.ctaLabelZhHk}, ${ecmaScriptTrimCharactersSql})) BETWEEN 1 AND 60`,
+    ),
+    check(
+      "site_announcements_href_check",
+      sql`${table.href} IN (${canonicalPublicRouteSql})`,
+    ),
+    index("site_announcements_active_idx").on(
+      table.archivedAt,
+      table.publishedAt,
+      table.startsAt,
+      table.endsAt,
+      table.priority,
+      table.id,
+    ),
+  ],
+);
+
 /**
  * Images staff have curated for use on the site.
  *
@@ -1151,6 +1218,7 @@ export type Event = typeof events.$inferSelect;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
 export type Approval = typeof approvals.$inferSelect;
 export type Post = typeof posts.$inferSelect;
+export type SiteAnnouncement = typeof siteAnnouncements.$inferSelect;
 export type PageCopyRow = typeof pageCopy.$inferSelect;
 export type MediaRow = typeof media.$inferSelect;
 export type ShowcaseListing = typeof showcaseListings.$inferSelect;

@@ -127,6 +127,13 @@
       "when": 1786388379363,
       "tag": "0018_m7_archive",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1787924282165,
+      "tag": "0019_wisetech_announcements",
+      "breakpoints": true
     }
   ]
 }
