@@ -2,6 +2,7 @@ import {existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from "node
 import {tmpdir} from "node:os";
 import {join, resolve} from "node:path";
 import {spawnSync} from "node:child_process";
+import {isDeepStrictEqual} from "node:util";
 
 import {describe, expect, it} from "vitest";
 
@@ -12,6 +13,55 @@ const authTreeProcessTimeoutMs = 18_000;
 const authTreeContractTimeoutMs = 50_000;
 const neonAuthLockRoots = ["node_modules/@neondatabase/auth", "node_modules/@neondatabase/auth-ui"];
 const requiredCiCommands = ["npm ci", authTreeCommand, "npm run audit:strings", "npm test", "npm run lint", "npm run typecheck", "npm run build", "npm audit --omit=dev --audit-level=high"];
+const requiredNpm10OptionalPeerClosure: Record<string, Record<string, unknown>> = {
+  "node_modules/@neondatabase/auth-ui/node_modules/ajv": {
+    version: "8.20.0",
+    resolved: "https://registry.npmjs.org/ajv/-/ajv-8.20.0.tgz",
+    integrity: "sha512-Thbli+OlOj+iMPYFBVBfJ3OmCAnaSyNn4M1vz9T6Gka5Jt9ba/HIR56joy65tY6kx/FCF5VXNB819Y7/GUrBGA==",
+    license: "MIT",
+    optional: true,
+    peer: true,
+    dependencies: {
+      "fast-deep-equal": "^3.1.3",
+      "fast-uri": "^3.0.1",
+      "json-schema-traverse": "^1.0.0",
+      "require-from-string": "^2.0.2",
+    },
+    funding: {
+      type: "github",
+      url: "https://github.com/sponsors/epoberezkin",
+    },
+  },
+  "node_modules/@neondatabase/auth-ui/node_modules/json-schema-traverse": {
+    version: "1.0.0",
+    resolved: "https://registry.npmjs.org/json-schema-traverse/-/json-schema-traverse-1.0.0.tgz",
+    integrity: "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==",
+    license: "MIT",
+    optional: true,
+    peer: true,
+  },
+  "node_modules/fast-uri": {
+    version: "3.1.6",
+    resolved: "https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.6.tgz",
+    integrity: "sha512-7Ical1vFEMr0onbVzEDIreM22I4khW+fzyQPwvAFWBp1iwdshSZRsL4jjRvPG9JP1uiqMHRto+YU6R2/CzDz5Q==",
+    funding: [
+      {type: "github", url: "https://github.com/sponsors/fastify"},
+      {type: "opencollective", url: "https://opencollective.com/fastify"},
+    ],
+    license: "BSD-3-Clause",
+    optional: true,
+    peer: true,
+  },
+  "node_modules/require-from-string": {
+    version: "2.0.2",
+    resolved: "https://registry.npmjs.org/require-from-string/-/require-from-string-2.0.2.tgz",
+    integrity: "sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==",
+    license: "MIT",
+    optional: true,
+    peer: true,
+    engines: {node: ">=0.10.0"},
+  },
+};
 
 type AuthTreeProcessOptions = {
   executable?: string;
@@ -48,6 +98,14 @@ function resolvedVersionsUnder(lockfile: Record<string, unknown>, packageName: s
     .filter(([path]) => path.endsWith(`/node_modules/${packageName}`))
     .map(([, packageInfo]) => packageInfo.version)
     .filter((version): version is string => Boolean(version));
+}
+
+function npm10OptionalPeerClosureMismatches(lockfile: Record<string, unknown>) {
+  const packages = lockfile.packages as Record<string, Record<string, unknown>> | undefined;
+
+  return Object.entries(requiredNpm10OptionalPeerClosure)
+    .filter(([path, expectedRecord]) => !isDeepStrictEqual(packages?.[path], expectedRecord))
+    .map(([path]) => path);
 }
 
 function workflowRunSteps(workflow: string) {
@@ -134,6 +192,32 @@ describe("CI and production dependency security contract", () => {
     expect(picomatchVersions.length, "package-lock.json must resolve Picomatch entries including node_modules/picomatch").toBeGreaterThan(0);
     expect(picomatch2Versions.length, "package-lock.json must retain and patch at least one Picomatch 2.x entry").toBeGreaterThan(0);
     expect(picomatch2Versions.every((version) => versionAtLeast(version, [2, 3, 2])), `package-lock.json contains unsafe Picomatch 2.x versions: ${picomatch2Versions.join(", ")}`).toBe(true);
+  });
+
+  it("retains the exact npm 10 optional-peer closure required by npm ci", () => {
+    const lockfile = readJson("package-lock.json");
+
+    expect(
+      npm10OptionalPeerClosureMismatches(lockfile),
+      "package-lock.json must retain npm 10's canonical Ajv optional-peer closure",
+    ).toEqual([]);
+  });
+
+  it("rejects every missing or metadata-drifted npm 10 optional-peer closure record", () => {
+    const validFixture: Record<string, unknown> = {
+      packages: structuredClone(requiredNpm10OptionalPeerClosure),
+    };
+
+    for (const path of Object.keys(requiredNpm10OptionalPeerClosure)) {
+      const missingRecord = structuredClone(validFixture);
+      delete (missingRecord.packages as Record<string, unknown>)[path];
+      expect(npm10OptionalPeerClosureMismatches(missingRecord), `deleting ${path} must fail`).toEqual([path]);
+
+      const driftedRecord = structuredClone(validFixture);
+      const driftedPackages = driftedRecord.packages as Record<string, Record<string, unknown>>;
+      driftedPackages[path] = {...driftedPackages[path], integrity: "sha512-hostile-drift"};
+      expect(npm10OptionalPeerClosureMismatches(driftedRecord), `drifting ${path} must fail`).toEqual([path]);
+    }
   });
 
   it("scopes Better Auth lock assertions to Neon Auth ancestry", () => {
