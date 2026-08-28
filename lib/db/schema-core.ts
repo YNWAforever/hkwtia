@@ -88,6 +88,9 @@ export const cohortApplicationStageEnum = pgEnum("cohort_application_stage", [
 export const landingPartnerMouStatusEnum = pgEnum("landing_partner_mou_status", [
   "prospect", "in_discussion", "signed", "inactive",
 ]);
+export const partnerCategoryEnum = pgEnum("partner_category", [
+  "supporting", "media", "regional", "programme", "sponsor",
+]);
 export type ShowcaseListingStatus = (typeof showcaseListingStatusEnum.enumValues)[number];
 
 const vector = customType<{data: number[]; driverData: string}>({
@@ -761,6 +764,37 @@ export const media = pgTable(
   (table) => [uniqueIndex("media_url_unique").on(table.url)],
 );
 
+/** General partner authority with separate relationship, rights and publication gates. */
+export const partners = pgTable(
+  "partners",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    nameEn: text("name_en").notNull(),
+    nameZhHk: text("name_zh_hk").notNull(),
+    category: partnerCategoryEnum("category").notNull(),
+    websiteUrl: text("website_url"),
+    logoMediaId: uuid("logo_media_id").references(() => media.id, {onDelete: "set null"}),
+    displayOrder: integer("display_order").default(0).notNull(),
+    featured: boolean("featured").default(false).notNull(),
+    relationshipStartsOn: date("relationship_starts_on"),
+    relationshipEndsOn: date("relationship_ends_on"),
+    relationshipConfirmedAt: timestamp("relationship_confirmed_at", {withTimezone: true}),
+    logoRightsConfirmedAt: timestamp("logo_rights_confirmed_at", {withTimezone: true}),
+    publishedAt: timestamp("published_at", {withTimezone: true}),
+    archivedAt: timestamp("archived_at", {withTimezone: true}),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    check("partners_name_en_check", sql`char_length(btrim(${table.nameEn}, ${ecmaScriptTrimCharactersSql})) BETWEEN 1 AND 160`),
+    check("partners_name_zh_hk_check", sql`char_length(btrim(${table.nameZhHk}, ${ecmaScriptTrimCharactersSql})) BETWEEN 1 AND 160`),
+    check("partners_display_order_check", sql`${table.displayOrder} >= 0 AND ${table.displayOrder} <= 10000`),
+    check("partners_relationship_window_check", sql`${table.relationshipEndsOn} IS NULL OR ${table.relationshipStartsOn} IS NULL OR ${table.relationshipEndsOn} >= ${table.relationshipStartsOn}`),
+    index("partners_public_state_idx").on(table.archivedAt, table.publishedAt, table.featured, table.displayOrder, table.id),
+    index("partners_logo_media_idx").on(table.logoMediaId),
+  ],
+);
+
 /**
  * Staff overrides for individual marketing copy strings. The message bundles
  * stay the structural source of truth and the fallback: a row here only ever
@@ -899,11 +933,14 @@ export const landingPartners = pgTable(
     mouStatus: landingPartnerMouStatusEnum("mou_status").default("prospect").notNull(),
     contact: jsonb("contact").$type<Record<string, unknown>>().default({}).notNull(),
     notes: text("notes"),
+    publishedAt: timestamp("published_at", {withTimezone: true}),
+    archivedAt: timestamp("archived_at", {withTimezone: true}),
     createdAt: createdAt("created_at"),
     updatedAt: updatedAt("updated_at"),
   },
   (table) => [
     index("landing_partners_public_market_status_idx").on(table.market, table.mouStatus),
+    index("landing_partners_publication_idx").on(table.publishedAt, table.archivedAt, table.market, table.id),
   ],
 );
 
@@ -1221,6 +1258,8 @@ export type Post = typeof posts.$inferSelect;
 export type SiteAnnouncement = typeof siteAnnouncements.$inferSelect;
 export type PageCopyRow = typeof pageCopy.$inferSelect;
 export type MediaRow = typeof media.$inferSelect;
+export type Partner = typeof partners.$inferSelect;
+export type NewPartner = typeof partners.$inferInsert;
 export type ShowcaseListing = typeof showcaseListings.$inferSelect;
 export type NewShowcaseListing = typeof showcaseListings.$inferInsert;
 export type Cohort = typeof cohorts.$inferSelect;

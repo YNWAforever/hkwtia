@@ -195,9 +195,16 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseS
     },
     async setLogoMedia(id, mediaId) {
       const database = await loadDatabase();
-      return (await database.update(showcaseListings)
-        .set({logoMediaId: mediaId, updatedAt: new Date()})
-        .where(eq(showcaseListings.id, id)).returning())[0] ?? null;
+      return database.transaction(async (tx) => {
+        if (mediaId) {
+          const selected = (await tx.select({id: media.id, archivedAt: media.archivedAt})
+            .from(media).where(eq(media.id, mediaId)).for("update"))[0] ?? null;
+          if (!selected || selected.archivedAt) throw new Error("MEDIA_NOT_AVAILABLE");
+        }
+        return (await tx.update(showcaseListings)
+          .set({logoMediaId: mediaId, updatedAt: new Date()})
+          .where(eq(showcaseListings.id, id)).returning())[0] ?? null;
+      });
     },
     async listPublished(filters, options = {}) {
       const limit = readLimit(options);

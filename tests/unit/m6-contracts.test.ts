@@ -1,3 +1,4 @@
+import {readFileSync} from "node:fs";
 import {describe, expect, it} from "vitest";
 
 import {
@@ -7,6 +8,7 @@ import {
   parseCohortStage,
 } from "@/lib/launchpad/contracts";
 import {landingPartners} from "@/config/landing-partners";
+import {listPublishedLandingPartners} from "@/lib/db/repos/landing-partners";
 
 describe("M6 Launch Pad contracts", () => {
   it("rejects an invalid cohort ID before an application reaches a repository", () => {
@@ -50,5 +52,11 @@ describe("M6 Launch Pad contracts", () => {
       ]);
       expect(JSON.stringify(partner)).not.toMatch(/prospect|in_discussion|contact|notes/i);
     }
+  });
+  it("keeps PR4 on the static source and pins the atomic PR5 cutover", () => {
+    const source = readFileSync("app/[locale]/(public)/launchpad/page.tsx", "utf8");
+    expect(source).toContain("landingPartners");
+    expect(source).not.toContain("listPublishedLandingPartners");
+    expect(typeof listPublishedLandingPartners).toBe("function");
   });
 });

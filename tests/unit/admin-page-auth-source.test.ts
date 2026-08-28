@@ -24,7 +24,7 @@ describe("every admin route uses the shared 404 auth boundary", () => {
   // admin index, so those routes were unguarded by the test that exists to
   // guard them — and a new section could ship the same way with a green suite.
   it("discovers every admin page and layout", () => {
-    expect(routes.length).toBeGreaterThanOrEqual(22);
+    expect(routes.length).toBeGreaterThanOrEqual(26);
     for (const known of [
       "app/[locale]/(admin)/admin/layout.tsx",
       "app/[locale]/(admin)/admin/page.tsx",
@@ -34,6 +34,10 @@ describe("every admin route uses the shared 404 auth boundary", () => {
       "app/[locale]/(admin)/admin/automations/page.tsx",
       "app/[locale]/(admin)/admin/announcements/page.tsx",
       "app/[locale]/(admin)/admin/announcements/[id]/page.tsx",
+      "app/[locale]/(admin)/admin/partners/page.tsx",
+      "app/[locale]/(admin)/admin/partners/[id]/page.tsx",
+      "app/[locale]/(admin)/admin/landing-partners/page.tsx",
+      "app/[locale]/(admin)/admin/landing-partners/[id]/page.tsx",
       "app/[locale]/(admin)/admin/news/page.tsx",
       "app/[locale]/(admin)/admin/page-copy/[namespace]/page.tsx",
       "app/[locale]/(admin)/admin/media/page.tsx",

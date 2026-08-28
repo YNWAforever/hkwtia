@@ -5,7 +5,7 @@ import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb} from "@/lib/db/repos/common";
-import {auditEvents, media, showcaseListings, type MediaRow} from "@/lib/db/server-schema";
+import {auditEvents, media, partners, showcaseListings, type MediaRow} from "@/lib/db/server-schema";
 import {isRegistrableMediaUrl} from "@/lib/media/url";
 import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 
@@ -44,6 +44,7 @@ export type MediaMutationDependencies = Readonly<{transaction: <T>(work: (transa
   lockMedia: (id: string) => Promise<MediaRow | null>;
   updateMedia: (id: string, input: StoredMediaUpdate) => Promise<MediaRow | null>;
   countListingReferences: (id: string) => Promise<number>;
+  countPartnerReferences?: (id: string) => Promise<number>;
   setArchivedAt: (id: string, archivedAt: Date | null) => Promise<MediaRow | null>;
   insertAudit: (input: MediaAudit) => Promise<void>;
 }>) => Promise<T>) => Promise<T>}>;
@@ -96,6 +97,9 @@ async function defaultMutationDependencies(): Promise<MediaMutationDependencies>
     countListingReferences: async (id) =>
       (await tx.select({total: count()}).from(showcaseListings)
         .where(eq(showcaseListings.logoMediaId, id)))[0]?.total ?? 0,
+    countPartnerReferences: async (id) =>
+      (await tx.select({total: count()}).from(partners)
+        .where(eq(partners.logoMediaId, id)))[0]?.total ?? 0,
     setArchivedAt: async (id, archivedAt) =>
       (await tx.update(media).set({archivedAt, updatedAt: new Date()})
         .where(eq(media.id, id)).returning())[0] ?? null,
@@ -186,7 +190,8 @@ export async function setMediaArchived(
     if (archived === (current.archivedAt !== null)) return current;
     if (archived) {
       const listings = await transaction.countListingReferences(mediaId);
-      if (listings > 0) throw mediaInUseError(listings);
+      const partnerReferences = await transaction.countPartnerReferences?.(mediaId) ?? 0;
+      if (listings + partnerReferences > 0) throw mediaInUseError(listings + partnerReferences);
     }
     const row = await transaction.setArchivedAt(mediaId, archived ? now() : null);
     if (!row) return null;

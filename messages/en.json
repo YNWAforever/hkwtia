@@ -1223,6 +1223,8 @@
       "members": "Members",
       "atRisk": "At risk",
       "announcements": "Announcements",
+      "partners": "Partners",
+      "landingPartners": "Launch Pad partners",
       "news": "News",
       "pageCopy": "Page copy",
       "media": "Media",
@@ -1487,6 +1489,23 @@
       "updateSuccess": "Announcement updated.",
       "validation": "Check the highlighted fields.",
       "error": "Something went wrong. Try again."
+    },
+    "partners": {
+      "eyebrow": "Partner operations", "title": "General partners", "description": "Manage bilingual partner records, relationship approval, logo rights and publication separately.",
+      "existing": "All partners", "empty": "No partners yet.", "nameEn": "Name (English)", "nameZhHk": "Name (Traditional Chinese)",
+      "category": "Category", "category_supporting": "Supporting", "category_media": "Media", "category_regional": "Regional", "category_programme": "Programme", "category_sponsor": "Sponsor",
+      "websiteUrl": "HTTPS website", "logoMediaId": "Approved logo", "noLogo": "No logo", "displayOrder": "Display order", "featured": "Featured",
+      "relationshipStartsOn": "Relationship starts", "relationshipEndsOn": "Relationship ends", "relationshipConfirmed": "Relationship confirmed", "logoRightsConfirmed": "Logo rights confirmed",
+      "statusDraft": "Draft", "statusPublished": "Published", "statusArchived": "Archived", "publish": "Publish", "unpublish": "Unpublish", "archive": "Archive", "unarchive": "Restore",
+      "save": "Save partner", "saving": "Saving…", "createSuccess": "Partner created.", "updateSuccess": "Partner updated.", "validation": "Check the highlighted partner fields.", "error": "We could not save this partner. Try again."
+    },
+    "landingPartners": {
+      "eyebrow": "Launch Pad operations", "title": "Launch Pad partners", "description": "Keep negotiation details private and publish only signed, approved records.",
+      "existing": "All Launch Pad partners", "empty": "No Launch Pad partners yet.", "organizationEn": "Organisation (English)", "organizationZhHk": "Organisation (Traditional Chinese)",
+      "market": "Market", "region": "Region", "mouStatus": "MOU status", "mou_prospect": "Prospect", "mou_in_discussion": "In discussion", "mou_signed": "Signed", "mou_inactive": "Inactive",
+      "contactJson": "Private contact JSON", "notes": "Private negotiation notes", "statusDraft": "Draft", "statusPublished": "Published", "statusArchived": "Archived",
+      "publish": "Publish", "unpublish": "Unpublish", "archive": "Archive", "unarchive": "Restore", "save": "Save Launch Pad partner", "saving": "Saving…",
+      "createSuccess": "Launch Pad partner created.", "updateSuccess": "Launch Pad partner updated.", "validation": "Check the highlighted Launch Pad partner fields.", "error": "We could not save this Launch Pad partner. Try again."
     },
     "media": {
       "statusArchived": "Archived",

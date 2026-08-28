@@ -75,3 +75,89 @@ Application rollback deploys the preceding application commit while retaining
 the additive table and its rows. Destructive schema downgrade and row deletion
 are not part of rollback. The public layout remains on `announcement={null}` in
 PR4, so rolling back Task 2 does not require a public-content switch.
+
+## Task 3 — general and Launch Pad partners
+
+Migration `drizzle/0020_wisetech_partners.sql` additively creates the typed
+`partners` authority and adds nullable `published_at` and `archived_at` to
+`landing_partners`. It was generated with `drizzle/meta/0020_snapshot.json`
+and journal index `20`.
+
+This implementation did **not** execute the migration, inspect database rows,
+seed/import partner content, or contact Neon, R2, Vercel, or another provider.
+
+### Publication verification
+
+Before a later public cutover, these queries must return zero rows. The bilingual-alt
+checks use the same fixed Unicode whitespace set as JavaScript `String.prototype.trim()`.
+
+```sql
+SELECT p.id
+FROM partners p
+LEFT JOIN media m ON m.id = p.logo_media_id
+WHERE p.published_at IS NOT NULL
+  AND (p.published_at > CURRENT_TIMESTAMP
+    OR p.archived_at IS NOT NULL
+    OR p.relationship_confirmed_at IS NULL
+    OR p.logo_rights_confirmed_at IS NULL
+    OR m.id IS NULL OR m.archived_at IS NOT NULL
+    OR char_length(btrim(m.alt_en, U&'\0009\000A\000B\000C\000D\0020\00A0\1680\2000\2001\2002\2003\2004\2005\2006\2007\2008\2009\200A\2028\2029\202F\205F\3000\FEFF')) = 0
+    OR char_length(btrim(m.alt_zh, U&'\0009\000A\000B\000C\000D\0020\00A0\1680\2000\2001\2002\2003\2004\2005\2006\2007\2008\2009\200A\2028\2029\202F\205F\3000\FEFF')) = 0);
+
+SELECT p.id
+FROM partners p
+WHERE p.published_at IS NOT NULL
+  AND (p.relationship_starts_on > (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Hong_Kong')::date
+    OR p.relationship_ends_on < (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Hong_Kong')::date);
+
+SELECT 'partner' AS authority, p.id, p.logo_media_id
+FROM partners p
+JOIN media m ON m.id = p.logo_media_id
+WHERE m.archived_at IS NOT NULL
+UNION ALL
+SELECT 'showcase_listing' AS authority, s.id, s.logo_media_id
+FROM showcase_listings s
+JOIN media m ON m.id = s.logo_media_id
+WHERE m.archived_at IS NOT NULL;
+
+SELECT id
+FROM landing_partners
+WHERE published_at IS NOT NULL
+  AND (archived_at IS NOT NULL OR mou_status <> 'signed');
+```
+
+The archived-media query covers both authorities that can attach a logo: general
+`partners` and existing `showcase_listings`. Relationship start and end are inclusive
+Hong Kong calendar dates. Both production and injected public projections enforce the
+injected clock, the same bilingual-alt and date rules, requested-locale ordering, and a
+caller bound of 1–100. The output omits general-partner internal state plus Launch Pad
+`contact`, `notes`, and MOU negotiation state.
+
+### Zero-row import schemas
+
+No row accompanies PR4 Task 3. A later isolated import requires reviewed relationship,
+logo-rights, bilingual-alt, and content-owner approval. Each authority has its own schema:
+
+```csv
+external_key,name_en,name_zh_hk,category,website_url,logo_external_key,display_order,featured,relationship_starts_on,relationship_ends_on,relationship_confirmed,logo_rights_confirmed,publish
+```
+
+```csv
+external_key,organization_en,organization_zh_hk,market,region,mou_status,contact_json,notes,publish
+```
+
+The import must apply publication through the audited repositories, never by directly
+inserting timestamps. `contact_json`, `notes`, and non-signed negotiation state remain
+staff-only and must not appear in the public projection.
+
+PR4 deliberately preserves `config/landing-partners.json` as the Launch Pad
+runtime authority. PR5 must switch the public page to the bounded repository
+projection and delete that static file in the **same atomic change**; a split
+switch/delete is not an acceptable migration state.
+
+### Rollback boundary
+
+Application rollback deploys the preceding application commit while retaining
+the additive schema and rows. Destructive schema downgrade and row deletion are
+not rollback. Because PR4 makes no public cutover, rollback has no public data
+source switch.
