@@ -35,12 +35,13 @@ describe("WiseTech PR5 Event hero schema", () => {
       tables?: Record<string, {
         columns?: Record<string, {notNull?: boolean}>;
         indexes?: Record<string, {name?: string; columns?: Array<{expression?: string}>}>;
-        foreignKeys?: Record<string, {columnsFrom?: string[]; columnsTo?: string[]; onDelete?: string}>;
+        foreignKeys?: Record<string, {tableTo?: string; columnsFrom?: string[]; columnsTo?: string[]; onDelete?: string}>;
       }>;
     };
     const eventTable = snapshot.tables?.["public.events"];
     expect(eventTable?.columns?.hero_media_id?.notNull).toBe(false);
     expect(eventTable?.foreignKeys?.events_hero_media_id_media_id_fk).toMatchObject({
+      tableTo: "media",
       columnsFrom: ["hero_media_id"],
       columnsTo: ["id"],
       onDelete: "set null",

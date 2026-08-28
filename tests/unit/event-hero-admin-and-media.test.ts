@@ -179,6 +179,7 @@ describe("Event hero administration and media lifecycle", () => {
   it("invokes the Event hero counter and blocks an archive before writing", async () => {
     const countEventHeroReferences = vi.fn(async () => 1);
     const setArchivedAt = vi.fn();
+    const insertAudit = vi.fn();
     const eventReferencedMediaDependencies: MediaMutationDependencies = {
       transaction: (work) => work({
         findByUrl: vi.fn(),
@@ -189,7 +190,7 @@ describe("Event hero administration and media lifecycle", () => {
         countPartnerReferences: vi.fn(async () => 0),
         countEventHeroReferences,
         setArchivedAt,
-        insertAudit: vi.fn(),
+        insertAudit,
       } as never),
     };
 
@@ -197,5 +198,6 @@ describe("Event hero administration and media lifecycle", () => {
       .rejects.toMatchObject({issues: [expect.objectContaining({message: "MEDIA_IN_USE"})]});
     expect(countEventHeroReferences).toHaveBeenCalledExactlyOnceWith(heroMediaId);
     expect(setArchivedAt).not.toHaveBeenCalled();
+    expect(insertAudit).not.toHaveBeenCalled();
   });
 });
