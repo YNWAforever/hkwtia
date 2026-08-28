@@ -10,7 +10,7 @@ const member: Actor = {kind: "member", userId: "auth-member", profileId: "profil
 function event(slug: string, overrides: Partial<Event> = {}): Event {
   return {id: `${slug}-id`, slug, titleEn: `${slug} title`, titleZh: null, descriptionEn: `${slug} description`, descriptionZh: null,
     startsAt: new Date("2099-09-01T10:00:00.000Z"), endsAt: new Date("2099-09-01T12:00:00.000Z"), venue: "WTIA",
-    capacity: null, memberOnly: false, published: true, createdAt: new Date("2026-07-20T00:00:00.000Z"), updatedAt: new Date("2026-07-20T00:00:00.000Z"), ...overrides};
+    capacity: null, memberOnly: false, published: true, heroMediaId: null, createdAt: new Date("2026-07-20T00:00:00.000Z"), updatedAt: new Date("2026-07-20T00:00:00.000Z"), ...overrides};
 }
 
 describe("repository-backed event visibility", () => {

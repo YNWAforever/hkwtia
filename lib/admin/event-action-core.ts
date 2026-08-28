@@ -16,7 +16,7 @@ type EventFormOptions = Readonly<{
   mutate: (formData: FormData) => Promise<unknown>;
 }>;
 type SimpleOptions = Readonly<{successMessage: string; errorMessage: string; mutate: (formData: FormData) => Promise<unknown>}>;
-const preservedFields = ["slug", "titleEn", "titleZh", "descriptionEn", "descriptionZh", "startsAt", "endsAt", "venue", "capacity", "memberOnly", "published"] as const;
+const preservedFields = ["slug", "titleEn", "titleZh", "descriptionEn", "descriptionZh", "startsAt", "endsAt", "venue", "capacity", "memberOnly", "published", "heroMediaId"] as const;
 
 export async function runEventFormAction(_state: EventActionState, formData: FormData, options: EventFormOptions): Promise<EventActionState> {
   const values = Object.fromEntries(preservedFields.map((name) => [name, String(formData.get(name) ?? "")]));

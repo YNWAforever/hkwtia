@@ -617,9 +617,13 @@ export const events = pgTable("events", {
   capacity: integer("capacity"),
   memberOnly: boolean("member_only").default(false).notNull(),
   published: boolean("published").default(false).notNull(),
+  heroMediaId: uuid("hero_media_id").references(() => media.id, {onDelete: "set null"}),
   createdAt: createdAt("created_at"),
   updatedAt: updatedAt("updated_at"),
-}, (table) => [index("events_published_starts_idx").on(table.published, table.startsAt)]);
+}, (table) => [
+  index("events_published_starts_idx").on(table.published, table.startsAt),
+  index("events_hero_media_idx").on(table.heroMediaId),
+]);
 
 export const eventRegistrations = pgTable("event_registrations", {
   eventId: uuid("event_id").notNull().references(() => events.id, {onDelete: "cascade"}),

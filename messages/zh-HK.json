@@ -1432,6 +1432,8 @@
       "endsAt": "結束時間",
       "venue": "地點",
       "capacity": "名額",
+      "heroMediaId": "活動主圖",
+      "noHeroMedia": "不使用主圖",
       "memberOnly": "僅限會員",
       "published": "已發佈",
       "create": "建立活動",

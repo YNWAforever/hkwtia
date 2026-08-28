@@ -1430,6 +1430,8 @@
       "endsAt": "Ends at",
       "venue": "Venue",
       "capacity": "Capacity",
+      "heroMediaId": "Hero media",
+      "noHeroMedia": "No hero media",
       "memberOnly": "Members only",
       "published": "Published",
       "create": "Create event",

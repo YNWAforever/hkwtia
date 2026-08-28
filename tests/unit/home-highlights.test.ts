@@ -23,6 +23,7 @@ const event = {
   capacity: 80,
   memberOnly: false,
   published: true,
+  heroMediaId: null,
   createdAt: asOf,
   updatedAt: asOf,
 } satisfies Event;

@@ -6,7 +6,7 @@ import {z} from "zod";
 import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb} from "@/lib/db/repos/common";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
-import {auditEvents, companyMembers, eventRegistrations, events, memberships, profiles, type Event} from "@/lib/db/server-schema";
+import {auditEvents, companyMembers, eventRegistrations, events, media, memberships, profiles, type Event} from "@/lib/db/server-schema";
 import {requireMember, type Actor, type AdminActor} from "@/lib/membership/lifecycle";
 
 const eventIdSchema = z.string().uuid();
@@ -24,6 +24,7 @@ const eventInputObjectSchema = z.object({
   capacity: z.number().int().positive().nullable().optional().default(null),
   memberOnly: z.boolean().optional().default(false),
   published: z.boolean().optional().default(false),
+  heroMediaId: z.string().uuid().nullable().optional().default(null),
 }).strict();
 const eventInputSchema = eventInputObjectSchema.superRefine((input, context) => {
   if (input.endsAt && input.endsAt <= input.startsAt) context.addIssue({code: z.ZodIssueCode.custom, path: ["endsAt"], message: "endsAt must be after startsAt"});
@@ -55,6 +56,7 @@ export type EventMutationDependencies = Readonly<{transaction: <T>(work: (transa
   insertEvent: (input: StoredEventInput) => Promise<Event>;
   lockEvent: (id: string) => Promise<Event | null>;
   updateEvent: (id: string, input: StoredEventUpdate) => Promise<Event | null>;
+  lockActiveMedia: (id: string) => Promise<Readonly<{id: string; archivedAt: Date | null}> | null>;
   insertAudit: (input: EventAudit) => Promise<void>;
 }>) => Promise<T>) => Promise<T>}>;
 export type RegistrationStatus = "registered" | "waitlist" | "cancelled" | "attended" | "no_show";
@@ -146,6 +148,7 @@ async function defaultMutationDependencies(): Promise<EventMutationDependencies>
     },
     lockEvent: async (id) => (await tx.select().from(events).where(eq(events.id, id)).for("update"))[0] ?? null,
     updateEvent: async (id, input) => (await tx.update(events).set({...input, updatedAt: new Date()}).where(eq(events.id, id)).returning())[0] ?? null,
+    lockActiveMedia: async (id) => (await tx.select({id: media.id, archivedAt: media.archivedAt}).from(media).where(eq(media.id, id)).for("update"))[0] ?? null,
     insertAudit: async (input) => { await tx.insert(auditEvents).values(input); },
   }))};
 }
@@ -154,6 +157,10 @@ export async function createEvent(actor: Actor, input: unknown, dependencies?: E
   requireAdmin(actor);
   const parsed = eventInputSchema.parse(input);
   return (dependencies ?? await defaultMutationDependencies()).transaction(async (transaction) => {
+    if (parsed.heroMediaId !== null) {
+      const mediaRow = await transaction.lockActiveMedia(parsed.heroMediaId);
+      if (!mediaRow || mediaRow.archivedAt !== null) throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["heroMediaId"], message: "EVENT_HERO_MEDIA_INVALID"}]);
+    }
     const event = await transaction.insertEvent(parsed);
     await transaction.insertAudit({actorUserId: actor.profileId, actorType: actor.kind, action: "event.created", targetType: "event", targetId: event.id, metadata: {slug: event.slug}});
     return event;
@@ -168,6 +175,10 @@ export async function updateEvent(actor: Actor, id: unknown, input: unknown, dep
     const current = await transaction.lockEvent(eventId);
     if (!current) return null;
     eventPeriodSchema.parse({startsAt: parsed.startsAt ?? current.startsAt, endsAt: parsed.endsAt === undefined ? current.endsAt : parsed.endsAt});
+    if (parsed.heroMediaId !== undefined && parsed.heroMediaId !== null) {
+      const mediaRow = await transaction.lockActiveMedia(parsed.heroMediaId);
+      if (!mediaRow || mediaRow.archivedAt !== null) throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["heroMediaId"], message: "EVENT_HERO_MEDIA_INVALID"}]);
+    }
     const event = await transaction.updateEvent(eventId, parsed);
     if (!event) return null;
     await transaction.insertAudit({actorUserId: actor.profileId, actorType: actor.kind, action: "event.updated", targetType: "event", targetId: event.id, metadata: {fields: Object.keys(parsed).sort()}});
