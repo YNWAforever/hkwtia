@@ -803,7 +803,42 @@
     "title": "活動",
     "description": "掌握即將舉行的 WTIA 聚會及交流機會。",
     "emptyTitle": "暫未有已發布活動",
-    "emptyDescription": "確認日期及詳情後，WTIA 活動會在此顯示。"
+    "emptyDescription": "確認日期及詳情後，WTIA 活動會在此顯示。",
+    "statusLabel": "活動狀態",
+    "status": {
+      "open": "進行中",
+      "past": "已結束"
+    },
+    "unavailableTitle": "暫時未能載入活動",
+    "unavailableDescription": "請稍後再試。",
+    "empty": {
+      "open": {
+        "title": "暫未有進行中活動",
+        "description": "目前沒有即將舉行的活動。"
+      },
+      "past": {
+        "title": "暫未有已結束活動",
+        "description": "已結束活動會在可供查閱時顯示。"
+      }
+    },
+    "detail": {
+      "date": "日期及時間",
+      "venue": "地點",
+      "capacity": "名額"
+    },
+    "registration": {
+      "title": "登記參加此活動",
+      "submit": "登記",
+      "pending": "登記中……",
+      "registered": "已確認活動登記。",
+      "waitlist": "你已加入候補名單。",
+      "alreadyRegistered": "你已登記此活動。",
+      "alreadyWaitlisted": "你已在候補名單上。",
+      "unauthenticated": "請先登入再登記。",
+      "ineligible": "需要符合資格的會籍。",
+      "closed": "活動登記已截止。",
+      "error": "未能為你登記此活動，請再試一次。"
+    }
   },
   "News": {
     "metaTitle": "消息 | WTIA",
@@ -1130,7 +1165,14 @@
       "register": "登記",
       "registering": "登記中……",
       "registerSuccess": "已確認活動登記。",
-      "registerError": "未能為你登記此活動，請再試一次。"
+      "registerError": "未能為你登記此活動，請再試一次。",
+      "registered": "已確認活動登記。",
+      "waitlist": "你已加入候補名單。",
+      "alreadyRegistered": "你已登記此活動。",
+      "alreadyWaitlisted": "你已在候補名單上。",
+      "unauthenticated": "請先登入再登記。",
+      "ineligible": "需要符合資格的會籍。",
+      "closed": "活動登記已截止。"
     },
     "documents": {
       "title": "文件及收據",
@@ -1495,21 +1537,72 @@
       "error": "發生錯誤，請再試一次。"
     },
     "partners": {
-      "eyebrow": "合作夥伴管理", "title": "一般合作夥伴", "description": "分開管理雙語夥伴資料、合作關係確認、標誌使用權及發布狀態。",
-      "existing": "所有合作夥伴", "empty": "尚未有合作夥伴。", "nameEn": "名稱（英文）", "nameZhHk": "名稱（繁體中文）",
-      "category": "類別", "category_supporting": "支持夥伴", "category_media": "媒體夥伴", "category_regional": "地區夥伴", "category_programme": "計劃夥伴", "category_sponsor": "贊助夥伴",
-      "websiteUrl": "HTTPS 網站", "logoMediaId": "已審批標誌", "noLogo": "沒有標誌", "displayOrder": "顯示次序", "featured": "精選",
-      "relationshipStartsOn": "合作開始日期", "relationshipEndsOn": "合作結束日期", "relationshipConfirmed": "合作關係已確認", "logoRightsConfirmed": "標誌使用權已確認",
-      "statusDraft": "草稿", "statusPublished": "已發布", "statusArchived": "已封存", "publish": "發布", "unpublish": "取消發布", "archive": "封存", "unarchive": "復原",
-      "save": "儲存合作夥伴", "saving": "儲存中…", "createSuccess": "合作夥伴已建立。", "updateSuccess": "合作夥伴已更新。", "validation": "請檢查已標示的合作夥伴欄位。", "error": "未能儲存合作夥伴，請再試一次。"
+      "eyebrow": "合作夥伴管理",
+      "title": "一般合作夥伴",
+      "description": "分開管理雙語夥伴資料、合作關係確認、標誌使用權及發布狀態。",
+      "existing": "所有合作夥伴",
+      "empty": "尚未有合作夥伴。",
+      "nameEn": "名稱（英文）",
+      "nameZhHk": "名稱（繁體中文）",
+      "category": "類別",
+      "category_supporting": "支持夥伴",
+      "category_media": "媒體夥伴",
+      "category_regional": "地區夥伴",
+      "category_programme": "計劃夥伴",
+      "category_sponsor": "贊助夥伴",
+      "websiteUrl": "HTTPS 網站",
+      "logoMediaId": "已審批標誌",
+      "noLogo": "沒有標誌",
+      "displayOrder": "顯示次序",
+      "featured": "精選",
+      "relationshipStartsOn": "合作開始日期",
+      "relationshipEndsOn": "合作結束日期",
+      "relationshipConfirmed": "合作關係已確認",
+      "logoRightsConfirmed": "標誌使用權已確認",
+      "statusDraft": "草稿",
+      "statusPublished": "已發布",
+      "statusArchived": "已封存",
+      "publish": "發布",
+      "unpublish": "取消發布",
+      "archive": "封存",
+      "unarchive": "復原",
+      "save": "儲存合作夥伴",
+      "saving": "儲存中…",
+      "createSuccess": "合作夥伴已建立。",
+      "updateSuccess": "合作夥伴已更新。",
+      "validation": "請檢查已標示的合作夥伴欄位。",
+      "error": "未能儲存合作夥伴，請再試一次。"
     },
     "landingPartners": {
-      "eyebrow": "啟航計劃管理", "title": "啟航計劃夥伴", "description": "保密洽談資料，只發布已簽署及已審批的紀錄。",
-      "existing": "所有啟航計劃夥伴", "empty": "尚未有啟航計劃夥伴。", "organizationEn": "機構（英文）", "organizationZhHk": "機構（繁體中文）",
-      "market": "市場", "region": "地區", "mouStatus": "合作備忘錄狀態", "mou_prospect": "潛在夥伴", "mou_in_discussion": "洽談中", "mou_signed": "已簽署", "mou_inactive": "已停用",
-      "contactJson": "私人聯絡資料 JSON", "notes": "私人洽談備註", "statusDraft": "草稿", "statusPublished": "已發布", "statusArchived": "已封存",
-      "publish": "發布", "unpublish": "取消發布", "archive": "封存", "unarchive": "復原", "save": "儲存啟航計劃夥伴", "saving": "儲存中…",
-      "createSuccess": "啟航計劃夥伴已建立。", "updateSuccess": "啟航計劃夥伴已更新。", "validation": "請檢查已標示的啟航計劃夥伴欄位。", "error": "未能儲存啟航計劃夥伴，請再試一次。"
+      "eyebrow": "啟航計劃管理",
+      "title": "啟航計劃夥伴",
+      "description": "保密洽談資料，只發布已簽署及已審批的紀錄。",
+      "existing": "所有啟航計劃夥伴",
+      "empty": "尚未有啟航計劃夥伴。",
+      "organizationEn": "機構（英文）",
+      "organizationZhHk": "機構（繁體中文）",
+      "market": "市場",
+      "region": "地區",
+      "mouStatus": "合作備忘錄狀態",
+      "mou_prospect": "潛在夥伴",
+      "mou_in_discussion": "洽談中",
+      "mou_signed": "已簽署",
+      "mou_inactive": "已停用",
+      "contactJson": "私人聯絡資料 JSON",
+      "notes": "私人洽談備註",
+      "statusDraft": "草稿",
+      "statusPublished": "已發布",
+      "statusArchived": "已封存",
+      "publish": "發布",
+      "unpublish": "取消發布",
+      "archive": "封存",
+      "unarchive": "復原",
+      "save": "儲存啟航計劃夥伴",
+      "saving": "儲存中…",
+      "createSuccess": "啟航計劃夥伴已建立。",
+      "updateSuccess": "啟航計劃夥伴已更新。",
+      "validation": "請檢查已標示的啟航計劃夥伴欄位。",
+      "error": "未能儲存啟航計劃夥伴，請再試一次。"
     },
     "media": {
       "statusArchived": "已封存",

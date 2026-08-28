@@ -1,12 +1,13 @@
 import "server-only";
 
-import {and, asc, count, eq, gte, inArray, isNull, or} from "drizzle-orm";
+import {and, asc, count, desc, eq, gte, inArray, isNull, lt, or, sql} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb} from "@/lib/db/repos/common";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {auditEvents, companyMembers, eventRegistrations, events, media, memberships, profiles, type Event} from "@/lib/db/server-schema";
+import {eventBoundary, type PublicEventProjection, type PublicEventStatus} from "@/lib/events/public";
 import {requireMember, type Actor, type AdminActor} from "@/lib/membership/lifecycle";
 
 const eventIdSchema = z.string().uuid();
@@ -51,6 +52,11 @@ type EventAudit = Readonly<{
 
 export type EventRows = readonly Event[] | Readonly<{list: () => Promise<readonly Event[]>}>;
 export type FeaturedPublicEventOptions = Readonly<{asOf: Date; limit: number}>;
+type PublicEventHeroSource = Readonly<{url: string; altEn: string; altZh: string; archivedAt: Date | null}>;
+type PublicEventMemoryRow = Readonly<{event: Event; hero: PublicEventHeroSource | null}>;
+export type PublicEventSource = readonly (Event | PublicEventMemoryRow)[] | Readonly<{list: () => Promise<readonly (Event | PublicEventMemoryRow)[]>}>;
+export type PublicEventReadOptions = Readonly<{status: PublicEventStatus; asOf: Date; locale?: string; source?: PublicEventSource}>;
+export type PublicEventSlugOptions = Readonly<{asOf: Date; source?: PublicEventSource}>;
 export type MemberEventEligibility = Readonly<{hasEligibleMembership: (actor: Extract<Actor, {kind: "member"}>) => Promise<boolean>}>;
 export type EventMutationDependencies = Readonly<{transaction: <T>(work: (transaction: Readonly<{
   insertEvent: (input: StoredEventInput) => Promise<Event>;
@@ -61,13 +67,13 @@ export type EventMutationDependencies = Readonly<{transaction: <T>(work: (transa
 }>) => Promise<T>) => Promise<T>}>;
 export type RegistrationStatus = "registered" | "waitlist" | "cancelled" | "attended" | "no_show";
 export type EventRegistrationDependencies = Readonly<{transaction: <T>(work: (transaction: Readonly<{
-  lockEvent: (eventId: string) => Promise<Readonly<{id: string; capacity: number | null; published: boolean}> | null>;
+  lockEvent: (eventId: string) => Promise<Readonly<{id: string; capacity: number | null; published: boolean; startsAt: Date; endsAt: Date | null}> | null>;
   hasEligibleMembership: (profileId: string) => Promise<boolean>;
   getRegistration: (eventId: string, profileId: string) => Promise<Readonly<{status: RegistrationStatus}> | null>;
   countRegistered: (eventId: string) => Promise<number>;
   upsertRegistration: (eventId: string, profileId: string, status: "registered" | "waitlist") => Promise<void>;
   insertAudit: (input: EventAudit) => Promise<void>;
-}>) => Promise<T>) => Promise<T>}>;
+}>) => Promise<T>) => Promise<T>; now?: () => Date}>;
 
 export type LocalizedEvent = Readonly<{
   id: string; slug: string; title: string; description: string; startsAt: string; endsAt: string | null;
@@ -85,32 +91,91 @@ function sorted(rows: readonly Event[]): Event[] {
   return [...rows].sort((left, right) => left.startsAt.getTime() - right.startsAt.getTime() || left.slug.localeCompare(right.slug));
 }
 
-export async function listPublicEvents(_actor: Actor, source?: EventRows): Promise<Event[]> {
-  return sorted((await rowsFrom(source)).filter((event) => event.published && !event.memberOnly));
+function isPublicMemoryRow(row: Event | PublicEventMemoryRow): row is PublicEventMemoryRow {
+  return "event" in row;
+}
+
+async function publicRowsFrom(source?: PublicEventSource): Promise<readonly PublicEventMemoryRow[]> {
+  if (source) {
+    const rows = "list" in source ? await source.list() : source;
+    return rows.map((row) => isPublicMemoryRow(row) ? row : {event: row, hero: null});
+  }
+  const database = await getDb();
+  const rows = await database.select({
+    event: events,
+    hero: {url: media.url, altEn: media.altEn, altZh: media.altZh, archivedAt: media.archivedAt},
+  }).from(events).leftJoin(media, eq(events.heroMediaId, media.id));
+  return rows.map((row) => ({event: row.event, hero: row.hero === null || row.hero.url === null ? null : row.hero as PublicEventHeroSource}));
+}
+
+function projectPublicEvent(row: PublicEventMemoryRow, locale: string): PublicEventProjection {
+  const {event, hero} = row;
+  const useChinese = locale === "zh-HK";
+  return {
+    id: event.id,
+    slug: event.slug,
+    title: useChinese && event.titleZh ? event.titleZh : event.titleEn,
+    description: useChinese && event.descriptionZh ? event.descriptionZh : event.descriptionEn,
+    startsAt: event.startsAt.toISOString(),
+    endsAt: event.endsAt?.toISOString() ?? null,
+    venue: event.venue,
+    capacity: event.capacity,
+    hero: hero && hero.archivedAt === null ? {url: hero.url, alt: useChinese ? hero.altZh : hero.altEn} : null,
+  };
+}
+
+function publicRowsByStatus(rows: readonly PublicEventMemoryRow[], status: PublicEventStatus, asOf: Date): PublicEventMemoryRow[] {
+  return rows
+    .filter(({event}) => event.published && !event.memberOnly)
+    .filter(({event}) => status === "open" ? eventBoundary(event) >= asOf : eventBoundary(event) < asOf)
+    .toSorted((left, right) => {
+      const boundaryOrder = eventBoundary(left.event).getTime() - eventBoundary(right.event).getTime();
+      const timeOrder = status === "open" ? boundaryOrder : -boundaryOrder;
+      return timeOrder || left.event.slug.localeCompare(right.event.slug) || left.event.id.localeCompare(right.event.id);
+    });
+}
+
+export async function listPublicEvents(_actor: Actor, options: PublicEventReadOptions): Promise<PublicEventProjection[]> {
+  const asOf = z.coerce.date().parse(options.asOf);
+  const locale = options.locale ?? "en";
+  if (options.source) return publicRowsByStatus(await publicRowsFrom(options.source), options.status, asOf).map((row) => projectPublicEvent(row, locale));
+  const boundary = sql<Date>`coalesce(${events.endsAt}, ${events.startsAt})`;
+  const predicate = options.status === "open" ? gte(boundary, asOf) : lt(boundary, asOf);
+  const order = options.status === "open" ? [asc(boundary), asc(events.slug), asc(events.id)] : [desc(boundary), asc(events.slug), asc(events.id)];
+  const database = await getDb();
+  const rows = await database.select({
+    event: events,
+    hero: {url: media.url, altEn: media.altEn, altZh: media.altZh, archivedAt: media.archivedAt},
+  }).from(events).leftJoin(media, eq(events.heroMediaId, media.id))
+    .where(and(eq(events.published, true), eq(events.memberOnly, false), predicate)).orderBy(...order);
+  return rows.map((row) => projectPublicEvent({event: row.event, hero: row.hero === null || row.hero.url === null ? null : row.hero as PublicEventHeroSource}, locale));
+}
+
+export async function getPublicEventBySlug(slug: unknown, locale: string, options: PublicEventSlugOptions): Promise<PublicEventProjection | null> {
+  const parsedSlug = slugSchema.safeParse(slug);
+  if (!parsedSlug.success) return null;
+  if (options.source) {
+    const row = (await publicRowsFrom(options.source)).find(({event}) => event.slug === parsedSlug.data && event.published && !event.memberOnly);
+    return row ? projectPublicEvent(row, locale) : null;
+  }
+  const database = await getDb();
+  const [row] = await database.select({
+    event: events,
+    hero: {url: media.url, altEn: media.altEn, altZh: media.altZh, archivedAt: media.archivedAt},
+  }).from(events).leftJoin(media, eq(events.heroMediaId, media.id))
+    .where(and(eq(events.slug, parsedSlug.data), eq(events.published, true), eq(events.memberOnly, false))).limit(1);
+  if (!row) return null;
+  return projectPublicEvent({event: row.event, hero: row.hero === null || row.hero.url === null ? null : row.hero as PublicEventHeroSource}, locale);
 }
 
 export async function listFeaturedPublicEvents(
-  _actor: Actor,
+  actor: Actor,
   options: FeaturedPublicEventOptions,
-  source?: EventRows,
-): Promise<Event[]> {
+  source?: PublicEventSource,
+): Promise<PublicEventProjection[]> {
   const limit = publicReadLimitSchema.parse(options.limit);
   const asOf = z.coerce.date().parse(options.asOf);
-  if (source) {
-    return sorted(await rowsFrom(source))
-      .filter((event) => event.published && !event.memberOnly && event.startsAt >= asOf)
-      .sort((left, right) => left.startsAt.getTime() - right.startsAt.getTime() || left.slug.localeCompare(right.slug))
-      .slice(0, limit);
-  }
-  const database = await getDb();
-  return database.select().from(events)
-    .where(and(
-      eq(events.published, true),
-      eq(events.memberOnly, false),
-      gte(events.startsAt, asOf),
-    ))
-    .orderBy(asc(events.startsAt), asc(events.slug))
-    .limit(limit);
+  return (await listPublicEvents(actor, {status: "open", asOf, source})).slice(0, limit);
 }
 
 const eligibleStatuses = ["active", "past_due", "cancel_at_period_end"] as const;
@@ -189,7 +254,7 @@ export async function updateEvent(actor: Actor, id: unknown, input: unknown, dep
 async function defaultRegistrationDependencies(): Promise<EventRegistrationDependencies> {
   const db = await getDb();
   return {transaction: (work) => db.transaction(async (tx) => work({
-    lockEvent: async (eventId) => (await tx.select({id: events.id, capacity: events.capacity, published: events.published}).from(events).where(eq(events.id, eventId)).for("update"))[0] ?? null,
+    lockEvent: async (eventId) => (await tx.select({id: events.id, capacity: events.capacity, published: events.published, startsAt: events.startsAt, endsAt: events.endsAt}).from(events).where(eq(events.id, eventId)).for("update"))[0] ?? null,
     hasEligibleMembership: async (profileId) => Boolean((await tx.select({id: memberships.id}).from(memberships)
       .leftJoin(companyMembers, and(eq(companyMembers.companyId, memberships.companyId), eq(companyMembers.userId, profileId), isNull(companyMembers.revokedAt)))
       .where(and(or(eq(memberships.ownerUserId, profileId), eq(companyMembers.userId, profileId)), inArray(memberships.status, eligibleStatuses))).limit(1))[0]),
@@ -203,9 +268,11 @@ async function defaultRegistrationDependencies(): Promise<EventRegistrationDepen
 export async function registerForEvent(actor: Actor, input: unknown, dependencies?: EventRegistrationDependencies): Promise<Readonly<{disposition: "registered" | "waitlist" | "already_registered" | "already_waitlisted"}>> {
   requireMember(actor);
   const {eventId} = registrationInputSchema.parse(input);
-  return (dependencies ?? await defaultRegistrationDependencies()).transaction(async (transaction) => {
+  const resolved = dependencies ?? await defaultRegistrationDependencies();
+  return resolved.transaction(async (transaction) => {
     const event = await transaction.lockEvent(eventId);
     if (!event || !event.published) throw new Error("EVENT_NOT_FOUND");
+    if (eventBoundary(event) < (resolved.now?.() ?? new Date())) throw new Error("EVENT_REGISTRATION_CLOSED");
     if (!await transaction.hasEligibleMembership(actor.profileId)) throw new Error("MEMBERSHIP_INACTIVE");
     const existing = await transaction.getRegistration(eventId, actor.profileId);
     if (existing?.status === "registered" || existing?.status === "attended") return {disposition: "already_registered"};
@@ -244,6 +311,7 @@ export async function listEventAttendees(actor: Actor, eventIdInput: unknown) {
 
 export const eventsRepository = {
   listPublic: listPublicEvents,
+  getPublicBySlug: getPublicEventBySlug,
   listFeaturedPublic: listFeaturedPublicEvents,
   listForMember: listMemberEvents,
   getBySlug: getEventBySlug,
