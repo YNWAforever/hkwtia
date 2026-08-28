@@ -2,6 +2,7 @@ import Image from "next/image";
 import type {ReactNode} from "react";
 
 import type {AppLocale} from "@/i18n/routing";
+import {isPrivateMediaDeliveryUrl} from "@/lib/media/url";
 import type {PublicListing} from "@/lib/showcase/contracts";
 import {localizedPath} from "@/lib/urls";
 
@@ -22,7 +23,7 @@ export function ShowcaseDetail({listing, locale, labels, requestIntro}: Readonly
   return <article className="mx-auto max-w-4xl space-y-10">
     <header className="space-y-4">
       {listing.logo
-        ? <Image alt={listing.logo.alt} className="h-16 w-auto object-contain" height={64} src={listing.logo.url} width={160}/>
+        ? <Image alt={listing.logo.alt} className="h-16 w-auto object-contain" height={64} src={listing.logo.url} unoptimized={isPrivateMediaDeliveryUrl(listing.logo.url)} width={160}/>
         : null}
       <div className="flex flex-wrap items-center gap-3">
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{listing.category}</p>

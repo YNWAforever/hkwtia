@@ -141,6 +141,13 @@
       "when": 1787925951316,
       "tag": "0020_wisetech_partners",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1787931579198,
+      "tag": "0021_wisetech_media_upload",
+      "breakpoints": true
     }
   ]
 }

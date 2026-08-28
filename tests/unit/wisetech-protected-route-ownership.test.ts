@@ -291,8 +291,8 @@ describe("WiseTech protected route ownership", () => {
     const codeFiles = repositoryProtectedFiles();
     const inventoryFiles = protectedRouteOwnershipInventory.map(({filePath}) => filePath).sort();
 
-    expect(codeFiles).toHaveLength(43);
-    expect(inventoryFiles).toHaveLength(43);
+    expect(codeFiles).toHaveLength(45);
+    expect(inventoryFiles).toHaveLength(45);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -308,11 +308,11 @@ describe("WiseTech protected route ownership", () => {
     );
 
     expect(count("admin-page")).toBe(26);
-    expect(count("api-handler")).toBe(6);
+    expect(count("api-handler")).toBe(8);
     expect(count("webhook-handler")).toBe(2);
     expect(count("job-handler")).toBe(9);
     expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(26);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(17);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(19);
   });
 
   it("publishes only the canonical deeply immutable protected conventions export", () => {

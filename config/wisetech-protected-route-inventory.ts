@@ -82,6 +82,8 @@ export const protectedRouteOwnershipInventory: readonly ProtectedRouteOwner[] = 
   owner({id: "api-ai-conversation-feedback", family: "api", classification: "api-handler", routePath: "/api/ai/conversations/[id]/feedback", filePath: "app/api/ai/conversations/[id]/feedback/route.ts", dataOwner: "Conversation feedback action selected by id."}),
   owner({id: "api-auth-catch-all", family: "api", classification: "api-handler", routePath: "/api/auth/[...path]", filePath: "app/api/auth/[...path]/route.ts", dataOwner: "Neon Auth catch-all handler."}),
   owner({id: "api-showcase-view", family: "api", classification: "api-handler", routePath: "/api/showcase/[slug]/view", filePath: "app/api/showcase/[slug]/view/route.ts", dataOwner: "Published showcase view recording."}),
+  owner({id: "api-admin-media-upload", family: "api", classification: "api-handler", routePath: "/api/admin/media/upload", filePath: "app/api/admin/media/upload/route.ts", dataOwner: "Actor-first private media upload and audited registration."}),
+  owner({id: "api-media-delivery", family: "api", classification: "api-handler", routePath: "/api/media/[id]", filePath: "app/api/media/[id]/route.ts", dataOwner: "Revocation-aware ETag-bound private media delivery."}),
   owner({id: "api-unsubscribe", family: "api", classification: "api-handler", routePath: "/api/unsubscribe", filePath: "app/api/unsubscribe/route.ts", dataOwner: "Signed suppression action."}),
 
   owner({id: "api-stripe-webhook", family: "api", classification: "webhook-handler", routePath: "/api/stripe/webhook", filePath: "app/api/stripe/webhook/route.ts", dataOwner: "Stripe webhook verification and idempotent lifecycle processing."}),

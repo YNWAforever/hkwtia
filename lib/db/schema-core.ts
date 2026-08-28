@@ -740,11 +740,10 @@ export const siteAnnouncements = pgTable(
 /**
  * Images staff have curated for use on the site.
  *
- * The registry is a curation boundary, not an upload mechanism: `url` is
- * validated as own-origin only (`lib/media/url.ts`), because an allowlist of
- * third-party hosts cannot be made safe for a render target. There are
- * deliberately no `width`/`height` columns — with no upload they could only be
- * typed by hand, where a wrong value silently distorts the image.
+ * Manual registry rows keep the upload metadata group entirely null and retain
+ * an own-origin `url`. Private-R2 upload rows require the complete verified
+ * metadata group and use only `/api/media/<id>`, so archive revocation and
+ * integrity checks remain on the application origin.
  */
 export const media = pgTable(
   "media",
@@ -753,15 +752,58 @@ export const media = pgTable(
     url: text("url").notNull(),
     altEn: text("alt_en").notNull(),
     altZh: text("alt_zh").notNull(),
-    registeredByProfileId: text("registered_by_profile_id")
-      .references(() => profiles.id, {onDelete: "set null"}),
+    storageKey: text("storage_key"),
+    storageEtag: text("storage_etag"),
+    originalFilename: text("original_filename"),
+    contentType: text("content_type"),
+    byteSize: integer("byte_size"),
+    width: integer("width"),
+    height: integer("height"),
+    focalX: integer("focal_x"),
+    focalY: integer("focal_y"),
+    checksumSha256: text("checksum_sha256"),
+    registeredByProfileId: text("registered_by_profile_id").references(
+      () => profiles.id,
+      { onDelete: "set null" },
+    ),
     // Archive rather than delete: a registry entry may already be referenced by
     // a published listing, and the row is the record of what was shown.
-    archivedAt: timestamp("archived_at", {withTimezone: true}),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
     createdAt: createdAt("created_at"),
     updatedAt: updatedAt("updated_at"),
   },
-  (table) => [uniqueIndex("media_url_unique").on(table.url)],
+  (table) => [
+    uniqueIndex("media_url_unique").on(table.url),
+    uniqueIndex("media_storage_key_unique").on(table.storageKey),
+    check(
+      "media_upload_metadata_all_or_none_check",
+      sql`num_nonnulls(${table.storageKey}, ${table.storageEtag}, ${table.originalFilename}, ${table.contentType}, ${table.byteSize}, ${table.width}, ${table.height}, ${table.focalX}, ${table.focalY}, ${table.checksumSha256}) IN (0, 10)`,
+    ),
+    check(
+      "media_upload_byte_size_check",
+      sql`${table.byteSize} IS NULL OR ${table.byteSize} BETWEEN 1 AND 4194304`,
+    ),
+    check(
+      "media_upload_dimensions_check",
+      sql`${table.width} IS NULL OR (${table.width} BETWEEN 1 AND 10000 AND ${table.height} BETWEEN 1 AND 10000 AND ${table.width}::bigint * ${table.height}::bigint <= 40000000)`,
+    ),
+    check(
+      "media_upload_focal_check",
+      sql`${table.focalX} IS NULL OR (${table.focalX} BETWEEN 0 AND 100 AND ${table.focalY} BETWEEN 0 AND 100)`,
+    ),
+    check(
+      "media_upload_checksum_check",
+      sql`${table.checksumSha256} IS NULL OR ${table.checksumSha256} ~ '^[0-9a-f]{64}$'`,
+    ),
+    check(
+      "media_upload_etag_check",
+      sql`${table.storageEtag} IS NULL OR char_length(btrim(${table.storageEtag}, ${ecmaScriptTrimCharactersSql})) > 0`,
+    ),
+    check(
+      "media_upload_content_type_check",
+      sql`${table.contentType} IS NULL OR ${table.contentType} IN ('image/png', 'image/jpeg', 'image/webp')`,
+    ),
+  ],
 );
 
 /** General partner authority with separate relationship, rights and publication gates. */

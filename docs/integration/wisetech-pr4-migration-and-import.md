@@ -161,3 +161,87 @@ Application rollback deploys the preceding application commit while retaining
 the additive schema and rows. Destructive schema downgrade and row deletion are
 not rollback. Because PR4 makes no public cutover, rollback has no public data
 source switch.
+
+## Task 4 — secure media upload and delivery
+
+Migration `drizzle/0021_wisetech_media_upload.sql` additively extends the existing
+`media` registry with nullable private-object metadata. It was generated with
+`drizzle/meta/0021_snapshot.json` and journal index `21`.
+
+This implementation did **not** execute the migration, inspect database or object
+rows, seed/import media, contact R2, or delete any provider object. Bucket
+jurisdiction matching remains an external prerequisite.
+
+### Forward and integrity verification
+
+After an explicitly approved isolated migration, operators can inspect the
+additive columns and checks without changing rows:
+
+```sql
+SELECT column_name, is_nullable, data_type
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'media'
+ORDER BY ordinal_position;
+
+SELECT conname, pg_get_constraintdef(oid)
+FROM pg_constraint
+WHERE conrelid = 'public.media'::regclass
+  AND conname LIKE 'media_upload_%'
+ORDER BY conname;
+```
+
+The following query must return zero rows. It reports uploaded media with incomplete metadata,
+a missing provider ETag, invalid checksum, invalid bounds,
+or a browser URL that is not the row's own revocation-aware route:
+
+```sql
+SELECT id
+FROM media
+WHERE num_nonnulls(
+  storage_key, storage_etag, original_filename, content_type, byte_size,
+  width, height, focal_x, focal_y, checksum_sha256
+) NOT IN (0, 10)
+OR (storage_key IS NOT NULL AND (
+  char_length(btrim(storage_etag, U&'\0009\000A\000B\000C\000D\0020\00A0\1680\2000\2001\2002\2003\2004\2005\2006\2007\2008\2009\200A\2028\2029\202F\205F\3000\FEFF')) = 0
+  OR checksum_sha256 !~ '^[0-9a-f]{64}$'
+  OR content_type NOT IN ('image/png', 'image/jpeg', 'image/webp')
+  OR byte_size NOT BETWEEN 1 AND 4194304
+  OR width NOT BETWEEN 1 AND 10000 OR height NOT BETWEEN 1 AND 10000
+  OR width::bigint * height::bigint > 40000000
+  OR focal_x NOT BETWEEN 0 AND 100 OR focal_y NOT BETWEEN 0 AND 100
+  OR url <> '/api/media/' || id::text
+));
+```
+
+Database SQL cannot prove private object bytes. Before a later cutover, an
+explicitly authorized isolated application verification must issue an
+ETag-bound GetObject for every uploaded row and report zero objects whose ETag,
+exact length, content type, `sha256` object metadata, or streamed body digest
+differs from the stored row. PR4 performs no provider read.
+
+The archived-reference query in Task 3 remains authoritative across both
+`partners` and `showcase_listings`; it must also return zero rows before an
+archive/cutover. Uploading never weakens the transaction-held media-row locks on
+either attachment path.
+
+### Zero-row import schema
+
+No file or row accompanies PR4 Task 4. A later PR7 isolated import may use only
+this reviewed header after rights, bilingual-alt, and jurisdiction approval:
+
+```csv
+original_filename,alt_en,alt_zh,focal_x,focal_y,source_file
+```
+
+`source_file` is an isolated operator input and is never stored as a URL or
+object key. Every row must pass through the actor-first upload endpoint,
+normalization, private R2 Put, and same-transaction `media.uploaded` audit; a
+CSV/database insert is not an upload substitute.
+
+### Rollback boundary
+
+Application rollback deploys the preceding application commit while retaining
+the additive columns, rows, and private objects. Destructive schema downgrade,
+object deletion, and garbage collection are not rollback. PR4 makes no public
+content cutover; the own-origin GET route is revocation-aware delivery
+infrastructure only.

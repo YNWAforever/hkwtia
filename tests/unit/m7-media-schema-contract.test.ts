@@ -22,17 +22,27 @@ describe("M7.3 media schema contract", () => {
     if (!table) return;
 
     expect(table.name).toBe("media");
-    // width/height are deliberately absent: with no upload they could only be
-    // typed by hand, where a wrong value silently distorts the image.
+    // The original manual-registry columns remain, while Task 4 adds one
+    // all-or-none set of private-object upload metadata.
     expect(table.columns.map((column) => column.name).sort()).toEqual([
       "alt_en",
       "alt_zh",
       "archived_at",
+      "byte_size",
+      "checksum_sha256",
+      "content_type",
       "created_at",
+      "focal_x",
+      "focal_y",
+      "height",
       "id",
+      "original_filename",
       "registered_by_profile_id",
+      "storage_etag",
+      "storage_key",
       "updated_at",
       "url",
+      "width",
     ]);
   });
 
