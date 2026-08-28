@@ -169,6 +169,7 @@ describe.skipIf(!testDatabaseUrl)("M1 through M3 database migration and seed", (
         {table_name: "posts", column_name: "agent_run_id", is_nullable: "YES"},
         {table_name: "posts", column_name: "created_at", is_nullable: "NO"},
         {table_name: "posts", column_name: "updated_at", is_nullable: "NO"},
+        {table_name: "posts", column_name: "body_mdx_zh_hk", is_nullable: "YES"},
       ]);
 
       const m4bIndexes = await client.query<{indexname: string; indexdef: string}>(

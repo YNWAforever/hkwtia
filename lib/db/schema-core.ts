@@ -657,6 +657,7 @@ export const posts = pgTable(
     titleEn: text("title_en").notNull(),
     titleZh: text("title_zh").notNull(),
     bodyMdx: text("body_mdx").notNull(),
+    bodyMdxZhHk: text("body_mdx_zh_hk"),
     publishedAt: timestamp("published_at", {withTimezone: true}),
     // Distinct from publishedAt: unpublishing returns a post to draft and keeps
     // it in the authoring list, archiving retires it from that list entirely.

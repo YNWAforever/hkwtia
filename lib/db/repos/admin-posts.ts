@@ -25,15 +25,16 @@ const newsInputObjectSchema = z.object({
   titleEn: z.string().trim().min(1).max(500),
   titleZh: z.string().trim().min(1).max(500),
   bodyMdx: z.string().trim().min(1).max(500_000),
+  bodyMdxZhHk: z.string().trim().min(1).max(500_000),
   author: z.string().trim().min(1).max(200),
   publishedAt: z.date().nullable(),
 }).strict();
 
 const newsInputSchema = newsInputObjectSchema;
-const newsUpdateSchema = newsInputObjectSchema.partial().refine(
-  (value) => Object.keys(value).length > 0,
-  {message: "NEWS_UPDATE_EMPTY"},
-);
+const newsUpdateSchema = newsInputObjectSchema.partial().extend({
+  bodyMdx: newsInputObjectSchema.shape.bodyMdx,
+  bodyMdxZhHk: newsInputObjectSchema.shape.bodyMdxZhHk,
+});
 
 type StoredNewsInput = z.output<typeof newsInputSchema>;
 type StoredNewsUpdate = z.output<typeof newsUpdateSchema>;

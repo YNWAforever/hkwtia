@@ -49,7 +49,9 @@ describe("every admin route uses the shared 404 auth boundary", () => {
 
   it.each(routes)("protects %s", (path) => {
     const source = readFileSync(resolve(process.cwd(), path), "utf8");
-    expect(source).toContain('import {requireAdminPageActor} from "@/lib/admin/page-auth";');
+    expect(source).toMatch(
+      /import\s*\{\s*requireAdminPageActor\s*\}\s*from\s*"@\/lib\/admin\/page-auth";/,
+    );
     expect(source).toContain("requireAdminPageActor()");
     // requireAdminActor throws for the action boundary; a page must 404 instead
     // so the admin surface's existence is never disclosed.

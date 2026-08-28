@@ -245,3 +245,57 @@ the additive columns, rows, and private objects. Destructive schema downgrade,
 object deletion, and garbage collection are not rollback. PR4 makes no public
 content cutover; the own-origin GET route is revocation-aware delivery
 infrastructure only.
+
+## Task 5 — localized news authoring
+
+Migration `drizzle/0022_wisetech_localized_news.sql` additively adds nullable
+`posts.body_mdx_zh_hk`. It was generated with
+`drizzle/meta/0022_snapshot.json` and journal index `22`.
+
+This implementation did **not** execute the migration, inspect database rows,
+copy English content into a Chinese-labelled field, seed/import news, or contact
+Neon or another provider. Legacy rows therefore remain null until an authorized
+CMS edit or separately approved PR7 isolated import supplies reviewed content.
+
+### Missing-translation verification
+
+After an explicitly approved isolated migration, this query reports every news
+row still requiring explicitly supplied and content-owner-reviewed Traditional
+Chinese content. A non-zero result blocks the PR5 localized public selection for
+the affected rows; string equality is not treated as translation approval.
+
+```sql
+SELECT id, slug
+FROM posts
+WHERE kind = 'news'
+  AND (body_mdx_zh_hk IS NULL
+    OR char_length(btrim(body_mdx_zh_hk, U&'\0009\000A\000B\000C\000D\0020\00A0\1680\2000\2001\2002\2003\2004\2005\2006\2007\2008\2009\200A\2028\2029\202F\205F\3000\FEFF')) = 0)
+ORDER BY slug, id;
+```
+
+### Zero-row reviewed-translation import schema
+
+No content row or row identity accompanies PR4 Task 5. A later PR7
+isolated-environment import may use this reviewed manifest only after an
+authorized database read establishes the target mapping:
+
+```csv
+external_key,slug,title_en,title_zh_hk,body_mdx_en,body_mdx_zh_hk,author,publish,translation_reviewed_by,translation_reviewed_at,content_owner_approved_by,content_owner_approved_at
+```
+
+`external_key` belongs to the isolated import manifest and is not stored by
+this migration. Both body fields require explicit source and translation review;
+`publish` must use the audited news action rather than a direct timestamp
+insert. PR4 makes no claim about existing row identities or translation status.
+
+PR4 deliberately leaves `lib/db/repos/public-posts.ts`, public news routes,
+the shared safe structured-content renderer, and locale selection unchanged.
+PR5 owns the public read-model cutover after the missing-translation report and
+content approval gates are clear.
+
+### Rollback boundary
+
+Application rollback deploys the preceding application commit while retaining
+the nullable additive column and any reviewed translations. Destructive schema
+downgrade or row deletion is not rollback. Because PR4 makes no public news
+cutover, rollback has no public data-source switch.

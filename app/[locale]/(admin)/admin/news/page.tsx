@@ -26,7 +26,8 @@ export default async function AdminNewsPage({params}: Props) {
   const createAction = createNewsAction.bind(null, "/" + locale + "/admin/news", createActionMessages);
   const labels = {
     slug: t("slug"), titleEn: t("titleEn"), titleZh: t("titleZh"), author: t("author"),
-    bodyMdx: t("bodyMdx"), bodyHelp: t("bodyHelp"), published: t("published"),
+    bodyMdx: t("bodyMdx"), bodyMdxZhHk: t("bodyMdxZhHk"),
+    bodyHelp: t("bodyHelp"), published: t("published"),
     save: t("create"), saving: t("saving"),
   };
 

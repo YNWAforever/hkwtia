@@ -51,7 +51,10 @@ describe("WiseTech private media upload schema", () => {
     const journal = JSON.parse(readFileSync(join(process.cwd(), "drizzle/meta/_journal.json"), "utf8")) as {
       entries: Array<{idx: number; tag: string}>;
     };
-    expect(journal.entries.at(-1)).toMatchObject({idx: 21, tag: "0021_wisetech_media_upload"});
+    expect(journal.entries).toContainEqual(expect.objectContaining({
+      idx: 21,
+      tag: "0021_wisetech_media_upload",
+    }));
 
     const evidence = readFileSync(
       join(process.cwd(), "docs/integration/wisetech-pr4-migration-and-import.md"), "utf8",
