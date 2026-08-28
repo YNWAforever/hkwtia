@@ -31,6 +31,25 @@ describe("WiseTech PR5 Event hero schema", () => {
     expect(migration).toContain('CREATE INDEX "events_hero_media_idx" ON "events" USING btree ("hero_media_id")');
     expect(migration).not.toMatch(/\b(?:INSERT INTO|UPDATE "events" SET)\b/i);
 
+    const snapshot = JSON.parse(readFileSync(snapshotPath, "utf8")) as {
+      tables?: Record<string, {
+        columns?: Record<string, {notNull?: boolean}>;
+        indexes?: Record<string, {name?: string; columns?: Array<{expression?: string}>}>;
+        foreignKeys?: Record<string, {columnsFrom?: string[]; columnsTo?: string[]; onDelete?: string}>;
+      }>;
+    };
+    const eventTable = snapshot.tables?.["public.events"];
+    expect(eventTable?.columns?.hero_media_id?.notNull).toBe(false);
+    expect(eventTable?.foreignKeys?.events_hero_media_id_media_id_fk).toMatchObject({
+      columnsFrom: ["hero_media_id"],
+      columnsTo: ["id"],
+      onDelete: "set null",
+    });
+    expect(eventTable?.indexes?.events_hero_media_idx).toMatchObject({
+      name: "events_hero_media_idx",
+      columns: [{expression: "hero_media_id"}],
+    });
+
     const journal = JSON.parse(readFileSync(join(process.cwd(), "drizzle", "meta", "_journal.json"), "utf8")) as {entries?: Array<{idx?: number; tag?: string}>};
     expect(journal.entries?.find((entry) => entry.tag === "0023_wisetech_event_hero")).toMatchObject({idx: 23});
   });

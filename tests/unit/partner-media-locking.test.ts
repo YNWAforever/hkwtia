@@ -10,7 +10,7 @@ describe("partner and Showcase media locking", () => {
     const tx = {findByUrl: async () => null, insertMedia: async () => null as never,
       lockMedia: async () => ({id, url: "/logo.png", altEn: "Logo", altZh: "標誌", archivedAt: null}) as never,
       updateMedia: async () => null, countListingReferences: async () => 0,
-      countPartnerReferences: async () => 1, setArchivedAt: async () => null,
+      countEventHeroReferences: async () => 0, countPartnerReferences: async () => 1, setArchivedAt: async () => null,
       insertAudit: async () => undefined};
     const dependencies: MediaMutationDependencies = {transaction: (work) => work(tx as never)};
     await expect(setMediaArchived(staff, id, true, dependencies)).rejects.toThrow("MEDIA_IN_USE");

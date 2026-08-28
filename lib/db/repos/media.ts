@@ -314,7 +314,7 @@ export async function setMediaArchived(
         const listings = await transaction.countListingReferences(mediaId);
         const partnerReferences =
           (await transaction.countPartnerReferences?.(mediaId)) ?? 0;
-        const eventHeroReferences = await transaction.countEventHeroReferences?.(mediaId) ?? 0;
+        const eventHeroReferences = await transaction.countEventHeroReferences(mediaId);
         if (listings + partnerReferences + eventHeroReferences > 0)
           throw mediaInUseError(listings + partnerReferences + eventHeroReferences);
       }
