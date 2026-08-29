@@ -15,12 +15,21 @@ describe("membership tier content", () => {
       .toEqual([...MEMBERSHIP_PLAN_CODES].sort());
   });
 
-  it.each(bundles)("%s gives every plan a complete card", (_locale, bundle) => {
+  it.each(bundles)("%s gives every plan durable localized identity copy", (_locale, bundle) => {
     for (const code of MEMBERSHIP_PLAN_CODES) {
       const tier = bundle.Membership.tiers[code];
-      for (const field of ["name", "price", "cadence", "description"] as const) {
+      for (const field of ["name", "description"] as const) {
         expect(tier[field], `${code}.${field}`).toBeTruthy();
       }
+      expect(tier).not.toHaveProperty("price");
+      expect(tier).not.toHaveProperty("cadence");
     }
+  });
+
+  it.each(bundles)("%s localizes semantic prices, cadences, actions, and failure copy", (_locale, bundle) => {
+    expect(Object.values(bundle.Membership.priceLabels).every(Boolean)).toBe(true);
+    expect(Object.values(bundle.Membership.cadenceLabels).every(Boolean)).toBe(true);
+    expect(Object.values(bundle.Membership.actions).every(Boolean)).toBe(true);
+    expect(bundle.Membership.unavailable).toBeTruthy();
   });
 });

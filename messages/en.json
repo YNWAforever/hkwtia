@@ -422,8 +422,7 @@
     "title": "Find your place in Hong Kong's technology community.",
     "summary": "Choose the membership tier that fits how you participate, grow and contribute.",
     "tiersTitle": "Membership tiers",
-    "tiersIntro": "Annual membership is shown first. A monthly option is available for the Startup tier.",
-    "joinAction": "Choose this plan",
+    "tiersIntro": "Available fees and billing options reflect the current membership catalog.",
     "benefits": {
       "network": "Community and networking access",
       "programs": "Programme participation",
@@ -432,26 +431,18 @@
     "tiers": {
       "community": {
         "name": "Community",
-        "price": "Free",
-        "cadence": "No annual fee",
         "description": "Stay connected to public WTIA news and opportunities."
       },
       "startup": {
         "name": "Startup",
-        "price": "HKD 1,200",
-        "cadence": "per year · HKD 120 monthly available",
         "description": "For early-stage technology companies and teams."
       },
       "corporate": {
         "name": "Corporate",
-        "price": "HKD 1,800",
-        "cadence": "per year",
         "description": "For established organisations engaging the ecosystem."
       },
       "patron": {
         "name": "Patron",
-        "price": "Contact us",
-        "cadence": "Reviewed individually",
         "description": "For strategic supporters of WTIA's mission."
       }
     },
@@ -462,14 +453,27 @@
         "answer": "Yes. Community, Startup and Corporate membership can be applied for and paid online. Patron membership begins with a contact request."
       },
       "1": {
-        "question": "Which tiers offer monthly payment?",
-        "answer": "Monthly payment is available for the Startup tier. Other paid tiers are billed annually."
+        "question": "Where can I see current membership fees and billing options?",
+        "answer": "Current available fees and billing cadences are shown in the membership tier cards."
       },
       "2": {
         "question": "How is Patron membership arranged?",
         "answer": "Patron membership begins with a contact request and is reviewed manually by WTIA staff."
       }
-    }
+    },
+    "priceLabels": {
+      "free": "Free",
+      "review": "Contact us"
+    },
+    "cadenceLabels": {
+      "annual": "per year",
+      "monthly": "per month"
+    },
+    "actions": {
+      "join": "Choose this plan",
+      "contact": "Contact us"
+    },
+    "unavailable": "Membership is currently unavailable"
   },
   "Join": {
     "backToMembership": "Back to membership",
