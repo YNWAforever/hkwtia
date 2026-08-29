@@ -1,4 +1,4 @@
-import {fireEvent, render, screen, waitFor} from "@testing-library/react";
+import {act, fireEvent, render, screen, waitFor} from "@testing-library/react";
 import type {ReactElement} from "react";
 import {afterEach, describe, expect, it, vi} from "vitest";
 
@@ -6,6 +6,7 @@ import {
   ConciergeWidget,
   type ConciergeLabels,
 } from "@/components/ai/concierge-widget";
+import {CONCIERGE_OPEN_EVENT} from "@/lib/ai/concierge-open";
 
 const CONVERSATION_ID = "11111111-1111-4111-8111-111111111111";
 const RUN_ID = "22222222-2222-4222-8222-222222222222";
@@ -91,6 +92,15 @@ afterEach(() => {
 });
 
 describe("ConciergeWidget", () => {
+  it("opens the one existing widget via a no-payload same-window event", async () => {
+    render(widget());
+
+    act(() => window.dispatchEvent(new Event(CONCIERGE_OPEN_EVENT)));
+
+    expect(await screen.findByRole("dialog", {name: labels.title})).toBeVisible();
+    expect(screen.getByRole("textbox", {name: labels.messageLabel})).toHaveFocus();
+  });
+
   it("labels its launcher and dialog, moves focus inside, closes with Escape, and returns focus", async () => {
     render(widget());
     const launcher = screen.getByRole("button", {name: labels.launcher});

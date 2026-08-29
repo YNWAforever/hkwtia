@@ -868,7 +868,31 @@
     "eyebrow": "聯絡",
     "title": "與我們聯繫",
     "description": "歡迎透過辦公室或電郵聯絡 WTIA。",
-    "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓"
+    "channelsTitle": "直接聯絡 WTIA",
+    "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
+    "routesTitle": "選擇合適的下一步",
+    "routesDescription": "前往現有的 WTIA 服務頁面，查閱最新資料或採取行動。",
+    "routes": {
+      "events": {
+        "title": "活動及交流",
+        "description": "瀏覽 WTIA 已發布的活動及交流機會。"
+      },
+      "membership": {
+        "title": "會員計劃",
+        "description": "比較現有會員計劃及申請資格。"
+      },
+      "showcase": {
+        "title": "會員及方案",
+        "description": "探索已發布的會員科技方案。"
+      },
+      "launchpad": {
+        "title": "創科加速平台",
+        "description": "了解現正接受申請的計劃、項目及資助指引。"
+      }
+    },
+    "conciergeTitle": "未確定從哪裡開始？",
+    "conciergeDescription": "透過 WTIA 現有的 Concierge 諮詢 WiseTech。",
+    "conciergeLauncher": "諮詢 WiseTech"
   },
   "Privacy": {
     "metaTitle": "私隱 | WTIA",

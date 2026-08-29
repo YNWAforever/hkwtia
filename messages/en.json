@@ -867,7 +867,31 @@
     "eyebrow": "Contact",
     "title": "Let's connect",
     "description": "Reach WTIA at the office or by email.",
-    "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong"
+    "channelsTitle": "Contact WTIA directly",
+    "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
+    "routesTitle": "Choose the right next step",
+    "routesDescription": "Use an established WTIA journey to find current information or take action.",
+    "routes": {
+      "events": {
+        "title": "Events and activities",
+        "description": "Browse published events and activities from WTIA."
+      },
+      "membership": {
+        "title": "Membership",
+        "description": "Compare current membership options and eligibility."
+      },
+      "showcase": {
+        "title": "Members and solutions",
+        "description": "Explore published member technology solutions."
+      },
+      "launchpad": {
+        "title": "Launch Pad",
+        "description": "Discover open cohorts, programmes and funding guidance."
+      }
+    },
+    "conciergeTitle": "Not sure where to start?",
+    "conciergeDescription": "Ask WiseTech through WTIA's existing Concierge.",
+    "conciergeLauncher": "Ask WiseTech"
   },
   "Privacy": {
     "metaTitle": "Privacy | WTIA",

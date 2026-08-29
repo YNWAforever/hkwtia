@@ -6,6 +6,7 @@ import {type FormEvent, useEffect, useId, useRef, useState} from "react";
 
 import {Button} from "@/components/ui/button";
 import type {ConciergeLabels} from "@/lib/ai/concierge-labels";
+import {CONCIERGE_OPEN_EVENT} from "@/lib/ai/concierge-open";
 import {cn} from "@/lib/utils";
 
 export type {ConciergeLabels} from "@/lib/ai/concierge-labels";
@@ -222,6 +223,12 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
       window.removeEventListener("online", updateOnline);
       window.removeEventListener("offline", updateOnline);
     };
+  }, []);
+
+  useEffect(() => {
+    const handleOpen = () => setOpen(true);
+    window.addEventListener(CONCIERGE_OPEN_EVENT, handleOpen);
+    return () => window.removeEventListener(CONCIERGE_OPEN_EVENT, handleOpen);
   }, []);
 
   // Rendered only while the panel is open, so the challenge is not requested
