@@ -114,8 +114,10 @@ Those Task 10 outcomes are historical. The final current-HEAD full-suite result 
 
 ### Whole-branch remediation chronology
 
-- Public/data remediation commit `38a70b8b4e60d85a4ab9fb530c58009e3371d45f` added nullable Stripe-reference rules, a SQL-bounded homepage Event reader, and Event-card wrapping. Whole-branch review approved it with 0 critical, 0 important, and 0 minor findings.
-- Security-policy remediation commit `a6d2840e8675fdfd77f09b07ea188de2f52fd0d2` added TypeChecker-resolved actor aliases and AST directive-prologue handling. Whole-branch review approved it with 0 critical, 0 important, and 0 minor findings; the exact review suites passed 249/249 and 109/109 tests.
+- Public/data remediation commit `38a70b8b4e60d85a4ab9fb530c58009e3371d45f` added nullable Stripe-reference rules, a SQL-bounded homepage Event reader, and Event-card wrapping. The fresh public/data remediation package review reported 0 critical, 0 important, and 0 minor findings.
+- Security-policy remediation commit `a6d2840e8675fdfd77f09b07ea188de2f52fd0d2` added TypeChecker-resolved actor aliases and AST directive-prologue handling. The fresh security-policy fix package review reported 0 critical, 0 important, and 0 minor findings; the exact review suites passed 249/249 and 109/109 tests.
+
+The final PR4-to-PR5 whole-branch re-review remained pending at the time of this record.
 
 ## Credential and external gates
 
