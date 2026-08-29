@@ -7,7 +7,6 @@ import {
   parseCohortApplicationInput,
   parseCohortStage,
 } from "@/lib/launchpad/contracts";
-import {landingPartners} from "@/config/landing-partners";
 import {listPublishedLandingPartners} from "@/lib/db/repos/landing-partners";
 
 describe("M6 Launch Pad contracts", () => {
@@ -44,19 +43,11 @@ describe("M6 Launch Pad contracts", () => {
     expect(parseCohortStage("accepted")).toBe("accepted");
   });
 
-  it("ships only curated public fields in the static Landing Partner map", () => {
-    expect(landingPartners.length).toBeGreaterThan(0);
-    for (const partner of landingPartners) {
-      expect(Object.keys(partner).sort()).toEqual([
-        "id", "market", "organizationEn", "organizationZhHk", "region",
-      ]);
-      expect(JSON.stringify(partner)).not.toMatch(/prospect|in_discussion|contact|notes/i);
-    }
-  });
-  it("keeps PR4 on the static source and pins the atomic PR5 cutover", () => {
+  it("uses the repository's public projection as the Launch Pad partner authority", () => {
     const source = readFileSync("app/[locale]/(public)/launchpad/page.tsx", "utf8");
-    expect(source).toContain("landingPartners");
-    expect(source).not.toContain("listPublishedLandingPartners");
+
+    expect(source).toContain("landingPartnersRepository.listPublished({limit: 100})");
+    expect(source).not.toContain("config/landing-partners");
     expect(typeof listPublishedLandingPartners).toBe("function");
   });
 });

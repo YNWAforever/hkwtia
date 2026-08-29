@@ -169,14 +169,14 @@ export const DELETE_ORDER: readonly string[] = [
  *  - events.published -> false: boolean, not an enum; public gate is
  *    `lib/db/repos/events.ts` filtering on `published && !memberOnly`.
  *
- * `companies` and `landing_partners` are deliberately absent: `companies.
+ * `companies` is deliberately absent: `companies.
  * directory_visible` is read only by a Server Action behind
  * `requireActor()` and by tests (confirmed by reading every caller of
  * `companiesRepository`) — no anonymous request can reach it, so there is
- * no public state to flip. `landing_partners` has no repository file at
- * all; the public Launch Pad page renders a curated static JSON
- * (`config/landing-partners.json`) instead, so the DB table is never read
- * publicly either.
+ * no public state to flip. `landing_partners.published_at` is the public
+ * Launch Pad publication gate through `landingPartnersRepository.
+ * listPublished({limit: 100})`, so the M6 marker rows must be hidden by
+ * clearing that timestamp.
  */
 export const HIDE_STATEMENTS: readonly Readonly<{table: string; sql: string; matchType: MarkerValueType}>[] = [
   {
@@ -187,6 +187,11 @@ export const HIDE_STATEMENTS: readonly Readonly<{table: string; sql: string; mat
   {
     table: "cohorts",
     sql: "UPDATE cohorts SET status = 'archived'::cohort_status, updated_at = now() WHERE id = ANY($1::uuid[]) RETURNING id",
+    matchType: "uuid",
+  },
+  {
+    table: "landing_partners",
+    sql: "UPDATE landing_partners SET published_at = NULL, updated_at = now() WHERE id = ANY($1::uuid[]) RETURNING id",
     matchType: "uuid",
   },
   {
