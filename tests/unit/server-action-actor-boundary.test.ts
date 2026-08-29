@@ -95,31 +95,150 @@ function nonAsyncFunctionExports(source: string, fileName: string): string[] {
     fileName, source, ts.ScriptTarget.Latest, true,
     fileName.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
   );
-  const offenders: string[] = [];
+  const runtimeBindings = new Map<string, ts.Node>();
+  const offenders = new Set<string>();
+
+  const hasModifier = (node: ts.Node, kind: ts.SyntaxKind): boolean => (
+    ts.canHaveModifiers(node)
+    && Boolean(ts.getModifiers(node)?.some((modifier) => modifier.kind === kind))
+  );
+
+  const bindingNames = (name: ts.BindingName): string[] => {
+    if (ts.isIdentifier(name)) return [name.text];
+    return name.elements.flatMap((element) => (
+      ts.isOmittedExpression(element) ? [] : bindingNames(element.name)
+    ));
+  };
 
   for (const statement of file.statements) {
-    const exported = ts.canHaveModifiers(statement)
-      && ts.getModifiers(statement)?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
-    if (!exported) continue;
-
-    if (ts.isFunctionDeclaration(statement) && statement.name) {
-      const asyncFunction = ts.getModifiers(statement)
-        ?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword);
-      if (!asyncFunction) offenders.push(statement.name.text);
+    if (ts.isFunctionDeclaration(statement) && statement.name && statement.body) {
+      runtimeBindings.set(statement.name.text, statement);
+      continue;
     }
     if (ts.isVariableStatement(statement)) {
       for (const declaration of statement.declarationList.declarations) {
-        const initializer = declaration.initializer;
-        if (!ts.isIdentifier(declaration.name) || !initializer) continue;
-        if (!ts.isArrowFunction(initializer) && !ts.isFunctionExpression(initializer)) continue;
-        const asyncFunction = ts.getModifiers(initializer)
-          ?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword);
-        if (!asyncFunction) offenders.push(declaration.name.text);
+        if (ts.isIdentifier(declaration.name) && declaration.initializer) {
+          runtimeBindings.set(declaration.name.text, declaration.initializer);
+        }
       }
+      continue;
+    }
+    if (
+      (ts.isClassDeclaration(statement)
+        || ts.isEnumDeclaration(statement)
+        || ts.isModuleDeclaration(statement))
+      && statement.name
+    ) {
+      runtimeBindings.set(statement.name.text, statement);
     }
   }
 
-  return offenders;
+  const isProvablyAsync = (node: ts.Node | undefined, seen = new Set<string>()): boolean => {
+    if (!node) return false;
+    if (
+      ts.isFunctionDeclaration(node)
+      || ts.isFunctionExpression(node)
+      || ts.isArrowFunction(node)
+    ) {
+      return hasModifier(node, ts.SyntaxKind.AsyncKeyword);
+    }
+    if (ts.isIdentifier(node)) {
+      if (seen.has(node.text)) return false;
+      const nextSeen = new Set(seen);
+      nextSeen.add(node.text);
+      return isProvablyAsync(runtimeBindings.get(node.text), nextSeen);
+    }
+    if (
+      ts.isParenthesizedExpression(node)
+      || ts.isAsExpression(node)
+      || ts.isTypeAssertionExpression(node)
+      || ts.isSatisfiesExpression(node)
+      || ts.isNonNullExpression(node)
+    ) {
+      return isProvablyAsync(node.expression, seen);
+    }
+    return false;
+  };
+
+  for (const statement of file.statements) {
+    if (ts.isExportDeclaration(statement)) {
+      if (statement.isTypeOnly) continue;
+      if (!statement.exportClause) {
+        offenders.add("*");
+        continue;
+      }
+      if (ts.isNamespaceExport(statement.exportClause)) {
+        offenders.add(statement.exportClause.name.text);
+        continue;
+      }
+      for (const element of statement.exportClause.elements) {
+        if (element.isTypeOnly) continue;
+        const exportedName = element.name.text;
+        if (statement.moduleSpecifier) {
+          offenders.add(exportedName);
+          continue;
+        }
+        const localName = element.propertyName ?? element.name;
+        if (!ts.isIdentifier(localName) || !isProvablyAsync(localName)) {
+          offenders.add(exportedName);
+        }
+      }
+      continue;
+    }
+
+    if (ts.isExportAssignment(statement)) {
+      if (!isProvablyAsync(statement.expression)) {
+        offenders.add(statement.isExportEquals ? "export=" : "default");
+      }
+      continue;
+    }
+
+    if (!hasModifier(statement, ts.SyntaxKind.ExportKeyword)) continue;
+    if (hasModifier(statement, ts.SyntaxKind.DeclareKeyword)) continue;
+    if (ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) continue;
+
+    if (ts.isFunctionDeclaration(statement)) {
+      // A bodyless overload declaration is erased; its concrete implementation
+      // is inventoried separately (or resolved through a local export list).
+      if (!statement.body) continue;
+      const exportedName = hasModifier(statement, ts.SyntaxKind.DefaultKeyword)
+        ? "default"
+        : statement.name?.text ?? "default";
+      if (!isProvablyAsync(statement)) offenders.add(exportedName);
+      continue;
+    }
+
+    if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        const names = bindingNames(declaration.name);
+        if (
+          !ts.isIdentifier(declaration.name)
+          || !isProvablyAsync(declaration.initializer)
+        ) {
+          for (const name of names) offenders.add(name);
+        }
+      }
+      continue;
+    }
+
+    if (
+      ts.isClassDeclaration(statement)
+      || ts.isEnumDeclaration(statement)
+      || ts.isModuleDeclaration(statement)
+    ) {
+      const exportedName = hasModifier(statement, ts.SyntaxKind.DefaultKeyword)
+        ? "default"
+        : statement.name?.text ?? "default";
+      offenders.add(exportedName);
+      continue;
+    }
+
+    if (ts.isImportEqualsDeclaration(statement) && !statement.isTypeOnly) {
+      offenders.add(statement.name.text);
+    }
+  }
+
+  return [...offenders];
 }
 
 const modules = ["lib", "app"]
@@ -157,7 +276,7 @@ describe("Server Action actor boundary", () => {
     ).toEqual([]);
   });
 
-  it.each(modules)("%s exports only async runtime functions", (path) => {
+  it.each(modules)("%s exports only provably async runtime functions", (path) => {
     const offenders = nonAsyncFunctionExports(
       readFileSync(resolve(process.cwd(), path), "utf8"),
       path,
@@ -165,10 +284,11 @@ describe("Server Action actor boundary", () => {
 
     expect(
       offenders,
-      `${path} exports non-async runtime functions: ${offenders.join(", ")}. `
-      + 'Top-level "use server" publishes every runtime function export as a '
-      + "Server Action, and Next.js requires every Server Action to be async. "
-      + "Move pure helpers into a plain module.",
+      `${path} has runtime exports that are not provably async functions: ${offenders.join(", ")}. `
+      + 'Top-level "use server" exposes every runtime export as a Server Action, '
+      + "and Next.js requires each one to be an async function. Keep only locally "
+      + "resolvable async function exports here; move values, re-exports, and pure "
+      + "helpers into a plain module.",
     ).toEqual([]);
   });
 
@@ -195,21 +315,69 @@ describe("Server Action actor boundary", () => {
     }
   });
 
-  it("detects non-async runtime exports without rejecting types or async actions", () => {
-    const hostile = [
-      "export function a() { return true; }",
-      "export const b = () => true;",
-      "export const c = function () { return true; };",
+  it("inventories every runtime export and requires provably async functions", () => {
+    const hostile: {source: string; offenders: string[]}[] = [
+      {source: "export function a() { return true; }", offenders: ["a"]},
+      {source: "export const b = () => true;", offenders: ["b"]},
+      {source: "export const c = function () { return true; };", offenders: ["c"]},
+      {
+        source: "function hidden() { return true; } export {hidden};",
+        offenders: ["hidden"],
+      },
+      {
+        source: 'export {remote, other as renamed} from "./actions";',
+        offenders: ["remote", "renamed"],
+      },
+      {source: 'export * from "./actions";', offenders: ["*"]},
+      {source: "export default function () { return true; }", offenders: ["default"]},
+      {source: "export = function () { return true; };", offenders: ["export="]},
+      {
+        source: "function hidden() { return true; } export const alias = hidden;",
+        offenders: ["alias"],
+      },
+      {source: "export const value = 1, config = {};", offenders: ["value", "config"]},
+      {source: "export const action = createAction();", offenders: ["action"]},
+      {source: "const value = 1; export default value;", offenders: ["default"]},
+      {
+        source: 'import {action} from "./actions"; export {action};',
+        offenders: ["action"],
+      },
+      {source: "export class Service {}", offenders: ["Service"]},
+      {source: "export enum Mode {One}", offenders: ["Mode"]},
     ];
-    for (const source of hostile) {
-      expect(nonAsyncFunctionExports(source, "candidate.ts"), source).not.toEqual([]);
+    for (const {source, offenders} of hostile) {
+      expect(nonAsyncFunctionExports(source, "candidate.ts"), source).toEqual(offenders);
     }
 
     const safe = [
-      "export async function d() { return true; }",
-      "export const e = async () => true;",
-      "export type F = () => void;",
-      "function g() { return true; }",
+      "export async function direct() { return true; }",
+      "export const arrow = async () => true;",
+      "async function local() { return true; } export {local};",
+      [
+        "const first = async () => true;",
+        "const second = first;",
+        "const third = second;",
+        "export {third as action};",
+      ].join("\n"),
+      [
+        "type Local = () => void;",
+        "interface Shape {value: string}",
+        "export type Alias = Local;",
+        "export interface PublicShape extends Shape {}",
+        "export {type Local};",
+        'export type {Remote} from "./types";',
+      ].join("\n"),
+      [
+        "export function overloaded(value: string): Promise<string>;",
+        "export async function overloaded(value: string) { return value; }",
+      ].join("\n"),
+      [
+        "function localOverload(value: string): Promise<string>;",
+        "async function localOverload(value: string) { return value; }",
+        "export {localOverload};",
+      ].join("\n"),
+      "export default async function () { return true; }",
+      "export default async () => true;",
     ];
     for (const source of safe) {
       expect(nonAsyncFunctionExports(source, "candidate.ts"), source).toEqual([]);
