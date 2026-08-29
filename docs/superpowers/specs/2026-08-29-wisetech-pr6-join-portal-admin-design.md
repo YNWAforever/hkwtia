@@ -156,7 +156,7 @@ The page and Join flow call one shared `requestMagicLink` Server Action and the 
 
 An already authenticated member is redirected to the validated continuation. An authenticated non-member receives an honest localized member-access state and no Portal data.
 
-The public header consumes the single typed `memberPortalAction` in `config/navigation.ts`; PR6 changes that owner to `/member-login`, so desktop and mobile entries cannot drift. Protected Portal redirects use the same route. Join CTAs come only from the reconciled catalog: Community uses `/join?plan=community&interval=none`, the currently supported paid options use `/join?plan=<code>&interval=annual`, and Patron remains a Contact/review action.
+The public header consumes the single typed navigation owners in `config/navigation.ts`. PR6 changes `memberPortalAction` to `/member-login`, so desktop and mobile member entries cannot drift, and changes the generic `publicShellActions.join` destination from bare `/join` to `/membership`, where a visitor must choose an available catalog option. Protected Portal redirects use `/member-login`. Only reconciled catalog options create Join URLs: Community uses `/join?plan=community&interval=none`, the currently supported paid options use `/join?plan=<code>&interval=annual`, and Patron remains a Contact/review action.
 
 ### Portal sign-out
 
@@ -293,6 +293,7 @@ Every behavioral task begins with a focused failing test, records the exact RED 
 - continuation allowlist normalization and rejection, including negative `/portal/showcase`, unknown Portal prefixes, query/fragment, cross-locale, CRLF, backslash, and external-origin cases;
 - `/member-login` default/explicit continuation, sent state, already-member redirect, non-member state, rate limiting, and one Neon action path;
 - sign-out pending, single invocation, success navigation/refresh, and failure-without-navigation;
+- one public navigation contract proving both desktop and mobile member entry -> `/member-login`, generic Join -> `/membership`, and each catalog option -> its exact plan/interval URL;
 - shared catalog reconciliation for public and transactional consumers, no secret/browser serialization, unavailable-option no-mutation, monthly omission without a distinct mapping, and an advertised-option -> typed Join input -> persisted membership interval -> exact `(planCode, billingInterval)` checkout-price contract;
 - typed Join outcomes and direct profile/company/checkout/review/complete destinations, including resume and durable-interval precedence;
 - checkout/completion actor scope, webhook-authoritative processing-to-active behavior, and forged-success rejection;
