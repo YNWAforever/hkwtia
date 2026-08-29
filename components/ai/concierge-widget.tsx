@@ -230,7 +230,11 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
     const handleOpen = () => {
       const activeElement = document.activeElement;
       externalInvokerRef.current =
-        activeElement instanceof HTMLElement ? activeElement : null;
+        activeElement instanceof HTMLElement
+          && activeElement !== document.body
+          && activeElement !== document.documentElement
+          ? activeElement
+          : null;
       setOpen(true);
     };
     window.addEventListener(CONCIERGE_OPEN_EVENT, handleOpen);

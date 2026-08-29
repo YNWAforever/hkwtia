@@ -95,13 +95,19 @@ afterEach(() => {
 });
 
 describe("ConciergeWidget", () => {
-  it("opens the one existing widget via a no-payload same-window event", async () => {
+  it("falls back to the native trigger after a no-payload event from the document body", async () => {
     render(widget());
+    const launcher = screen.getByRole("button", {name: labels.launcher});
 
+    expect(document.body).toHaveFocus();
     act(() => window.dispatchEvent(new Event(CONCIERGE_OPEN_EVENT)));
 
     expect(await screen.findByRole("dialog", {name: labels.title})).toBeVisible();
     expect(screen.getByRole("textbox", {name: labels.messageLabel})).toHaveFocus();
+
+    fireEvent.click(screen.getByRole("button", {name: labels.close}));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(launcher).toHaveFocus();
   });
 
   it("returns focus to the Contact launcher after Close and Escape", async () => {
@@ -113,7 +119,7 @@ describe("ConciergeWidget", () => {
     );
     const contactLauncher = screen.getByRole("button", {name: "Ask WiseTech"});
 
-    contactLauncher.focus();
+    expect(document.body).toHaveFocus();
     fireEvent.click(contactLauncher);
     expect(await screen.findByRole("dialog", {name: labels.title})).toBeVisible();
     expect(screen.getByRole("textbox", {name: labels.messageLabel})).toHaveFocus();
