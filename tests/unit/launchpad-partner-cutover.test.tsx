@@ -82,12 +82,12 @@ describe("Launch Pad landing-partner repository cutover", () => {
 
     state.listPublishedPartners.mockResolvedValueOnce([]);
     const emptyMarkup = renderToStaticMarkup(await LaunchPadPage(pageProps()));
-    expect(emptyMarkup).toContain("partners.empty");
+    expect(emptyMarkup.match(/partners\.empty/g)).toHaveLength(1);
     expect(emptyMarkup).not.toContain("Repository Partner");
 
     state.listPublishedPartners.mockRejectedValueOnce(new Error("database unavailable"));
     const errorMarkup = renderToStaticMarkup(await LaunchPadPage(pageProps()));
-    expect(errorMarkup).toContain("partners.empty");
+    expect(errorMarkup.match(/partners\.empty/g)).toHaveLength(1);
     expect(errorMarkup).not.toContain("Repository Partner");
   });
 
