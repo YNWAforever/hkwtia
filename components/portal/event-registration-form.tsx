@@ -3,7 +3,7 @@
 import Link from "next/link";
 import {useActionState} from "react";
 
-import type {RegistrationActionMessages, RegistrationActionState} from "@/lib/events/registration-action";
+import type {RegistrationActionMessages, RegistrationActionState} from "@/lib/events/registration-state";
 
 const initialState: RegistrationActionState = {};
 

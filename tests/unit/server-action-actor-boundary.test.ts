@@ -90,6 +90,38 @@ function actorTakingExports(source: string, fileName: string): string[] {
   return offenders;
 }
 
+function nonAsyncFunctionExports(source: string, fileName: string): string[] {
+  const file = ts.createSourceFile(
+    fileName, source, ts.ScriptTarget.Latest, true,
+    fileName.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  );
+  const offenders: string[] = [];
+
+  for (const statement of file.statements) {
+    const exported = ts.canHaveModifiers(statement)
+      && ts.getModifiers(statement)?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
+    if (!exported) continue;
+
+    if (ts.isFunctionDeclaration(statement) && statement.name) {
+      const asyncFunction = ts.getModifiers(statement)
+        ?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword);
+      if (!asyncFunction) offenders.push(statement.name.text);
+    }
+    if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        const initializer = declaration.initializer;
+        if (!ts.isIdentifier(declaration.name) || !initializer) continue;
+        if (!ts.isArrowFunction(initializer) && !ts.isFunctionExpression(initializer)) continue;
+        const asyncFunction = ts.getModifiers(initializer)
+          ?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword);
+        if (!asyncFunction) offenders.push(declaration.name.text);
+      }
+    }
+  }
+
+  return offenders;
+}
+
 const modules = ["lib", "app"]
   .flatMap((root) => sourceFiles(resolve(process.cwd(), root)))
   .filter((path) => isUseServerModule(readFileSync(path, "utf8")))
@@ -125,6 +157,21 @@ describe("Server Action actor boundary", () => {
     ).toEqual([]);
   });
 
+  it.each(modules)("%s exports only async runtime functions", (path) => {
+    const offenders = nonAsyncFunctionExports(
+      readFileSync(resolve(process.cwd(), path), "utf8"),
+      path,
+    );
+
+    expect(
+      offenders,
+      `${path} exports non-async runtime functions: ${offenders.join(", ")}. `
+      + 'Top-level "use server" publishes every runtime function export as a '
+      + "Server Action, and Next.js requires every Server Action to be async. "
+      + "Move pure helpers into a plain module.",
+    ).toEqual([]);
+  });
+
   it("detects the shapes it is meant to catch", () => {
     const hostile = [
       'export async function a(actor: AdminActor, id: string) { return id; }',
@@ -145,6 +192,27 @@ describe("Server Action actor boundary", () => {
     ];
     for (const source of safe) {
       expect(actorTakingExports(source, "candidate.ts"), source).toEqual([]);
+    }
+  });
+
+  it("detects non-async runtime exports without rejecting types or async actions", () => {
+    const hostile = [
+      "export function a() { return true; }",
+      "export const b = () => true;",
+      "export const c = function () { return true; };",
+    ];
+    for (const source of hostile) {
+      expect(nonAsyncFunctionExports(source, "candidate.ts"), source).not.toEqual([]);
+    }
+
+    const safe = [
+      "export async function d() { return true; }",
+      "export const e = async () => true;",
+      "export type F = () => void;",
+      "function g() { return true; }",
+    ];
+    for (const source of safe) {
+      expect(nonAsyncFunctionExports(source, "candidate.ts"), source).toEqual([]);
     }
   });
 });

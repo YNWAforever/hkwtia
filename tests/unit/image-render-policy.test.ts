@@ -19,7 +19,9 @@ const revocationAwareConsumers = new Set([
   "app/[locale]/(admin)/admin/media/page.tsx",
   "components/admin/media-form.tsx",
   "components/admin/showcase-review-table.tsx",
+  "components/marketing/event-detail.tsx",
   "components/marketing/home-highlight-card.tsx",
+  "components/marketing/home-partner-wall.tsx",
   "components/marketing/showcase-card.tsx",
   "components/marketing/showcase-detail.tsx",
 ]);

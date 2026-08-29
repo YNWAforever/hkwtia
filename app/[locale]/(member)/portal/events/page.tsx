@@ -5,7 +5,8 @@ import {EventRegistrationForm} from "@/components/portal/event-registration-form
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
 import {registerForEvent} from "@/lib/db/repos/events";
-import {runEventRegistrationAction, type RegistrationActionState} from "@/lib/portal/event-action-core";
+import type {RegistrationActionState} from "@/lib/events/registration-state";
+import {runEventRegistrationAction} from "@/lib/portal/event-action-core";
 import {getMemberEvents} from "@/lib/portal/content";
 import {localizedPath} from "@/lib/urls";
 

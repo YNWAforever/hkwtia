@@ -3,11 +3,8 @@ import {
   mapEventRegistrationResult,
   type RegistrationActionMessages,
   type RegistrationActionState,
-} from "@/lib/events/registration-action";
-
-export type {RegistrationActionState};
-
-type RegistrationDisposition = "registered" | "waitlist" | "already_registered" | "already_waitlisted";
+  type RegistrationDisposition,
+} from "@/lib/events/registration-state";
 
 export async function runEventRegistrationAction(
   _state: RegistrationActionState,
