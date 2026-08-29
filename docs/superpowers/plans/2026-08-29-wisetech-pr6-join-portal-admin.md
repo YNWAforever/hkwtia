@@ -205,19 +205,20 @@
     git add -- ':(literal)lib/membership/constants.ts' ':(literal)lib/membership/catalog.ts' ':(literal)lib/membership/public-catalog.ts' ':(literal)app/[locale]/(public)/membership/page.tsx' ':(literal)components/marketing/tier-comparison.tsx' ':(literal)config/navigation.ts' ':(literal)tests/unit/membership-catalog.test.ts' ':(literal)tests/unit/membership-public-catalog.test.ts' ':(literal)tests/unit/membership-page-catalog.test.tsx' ':(literal)tests/unit/membership-links.test.tsx' ':(literal)tests/unit/navigation.test.ts' ':(literal)tests/unit/mobile-navigation.test.tsx' ':(literal)tests/e2e/public-shell.spec.ts'
     git commit -m "feat: reconcile membership billing options"
 
-### Task 2: Carry typed Join context into durable membership outcomes
+### Task 2: Carry typed Join context into one atomic durable terminal outcome
 
 **Files:**
 
-- Modify: `lib/membership/join-schema.ts`, `lib/membership/join-navigation.ts`, `lib/membership/onboarding.ts`, `lib/membership/join-service.ts`, `lib/membership/lifecycle.ts`, `lib/db/repos/applications.ts`, `lib/db/repos/memberships.ts`.
+- Modify: `lib/membership/join-schema.ts`, `lib/membership/join-navigation.ts`, `lib/membership/onboarding.ts`, `lib/membership/join-service.ts`, `lib/membership/lifecycle.ts`, `lib/automation/enrollment.ts`, `lib/db/repos/applications.ts`, `lib/db/repos/memberships.ts`.
+- Create: `lib/membership/join-terminal-state.ts`, `lib/db/repos/join-terminal.ts`.
 - Modify: `app/[locale]/(join)/join/actions.ts`, `app/[locale]/(join)/join/page.tsx`, `app/[locale]/(join)/join/profile/page.tsx`, `app/[locale]/(join)/join/company/page.tsx`.
-- Create test: `tests/unit/join-application-reconciliation.test.ts`.
+- Create tests: `tests/unit/join-terminal-state.test.ts`, `tests/unit/join-terminal-transaction.test.ts`.
 - Modify tests: `tests/unit/join-schema.test.ts`, `tests/unit/join-navigation.test.ts`, `tests/unit/join-service.test.ts`, `tests/unit/join-service-review.test.ts`, `tests/unit/join-actions.test.ts`, `tests/unit/join-actions-profile-identity.test.ts`, `tests/unit/join-page.test.tsx`, `tests/unit/profile-identity-billing.test.ts`, `tests/unit/checkout-service.test.ts`, `tests/unit/checkout-recovery-service.test.ts`, `tests/unit/portal-content-scope.test.ts`, `tests/unit/repository-production-security.test.ts`, `tests/e2e/join-auth.spec.ts`.
 - Modify localization: `messages/en.json`, `messages/zh-HK.json`.
 
 **Interfaces:**
 
-- Consumes: `resolveMembershipOption(selection)` from Task 1 and existing actor-scoped applications, profiles, companies, memberships, and journey enrollment.
+- Consumes: `resolveMembershipOption(selection)` from Task 1 and existing actor-scoped applications, profiles, companies, memberships, company-member authorization, and journey enrollment.
 - Produces:
 
     export type JoinEntry = "join" | "member-login";
@@ -247,39 +248,52 @@
         selection: MembershipSelection,
       ): Promise<ResolvedMembershipOption | null>;
     }>;
-    export type JoinApplicationVersion = Readonly<{
-      id: string;
-      planCode: PlanCode;
-      currentStep: JoinStep;
-      status: "draft" | "pending_payment" | "pending_review" | "completed" | "abandoned";
-      updatedAt: Date;
-    }>;
-    export type JoinApplicationProjection = Readonly<{
-      planCode: PlanCode;
-      currentStep: "checkout" | "review" | "complete";
-      status: "pending_payment" | "pending_review" | "completed";
-    }>;
-    export type JoinApplicationReconciliation = Readonly<{
-      expected: JoinApplicationVersion;
-      projection: JoinApplicationProjection;
-    }>;
     export type PreparedJoinSubmission =
       | Readonly<{
           kind: "terminal";
-          outcome: Extract<JoinOutcome, {next: "checkout" | "review" | "complete"}>;
-          reconciliation: JoinApplicationReconciliation | null;
-          activeMembershipNeedsJourneyEnrollment: boolean;
+          applicationId: string;
+          membershipId: string;
         }>
       | Readonly<{
           kind: "draft";
           applicationId: string | null;
           option: ResolvedMembershipOption;
         }>;
+    export type JoinTerminalDescriptor = Readonly<{
+      applicationId: string;
+      membershipId: string;
+    }>;
+    export type JoinTerminalProjection = Readonly<{
+      outcome: Extract<JoinOutcome, {next: "checkout" | "review" | "complete"}>;
+      application: Readonly<{
+        currentStep: "checkout" | "review" | "complete";
+        status: "pending_payment" | "pending_review" | "completed";
+      }>;
+      requiresActivationJourney: boolean;
+    }>;
+    export type JoinTerminalRepository = Readonly<{
+      complete(
+        actor: Extract<Actor, {kind: "member"}>,
+        descriptor: JoinTerminalDescriptor,
+      ): Promise<JoinTerminalProjection["outcome"]>;
+    }>;
+    export type JoinTerminalDependencies = Readonly<{
+      terminal: JoinTerminalRepository;
+    }>;
+    export function projectJoinTerminalState(
+      membershipStatus: MembershipStatus,
+      ids: JoinTerminalDescriptor,
+    ): JoinTerminalProjection;
     export async function prepareJoinSubmission(
       actor: Extract<Actor, {kind: "member"}>,
       rawInput: unknown,
       dependencies?: JoinSubmissionReadDependencies,
     ): Promise<PreparedJoinSubmission>;
+    export async function completePreparedTerminal(
+      actor: Extract<Actor, {kind: "member"}>,
+      descriptor: JoinTerminalDescriptor,
+      dependencies?: JoinTerminalDependencies,
+    ): Promise<Extract<JoinOutcome, {next: "checkout" | "review" | "complete"}>>;
 
     export const PORTAL_CONTINUATIONS = [
       "/portal",
@@ -300,10 +314,11 @@
     export function destinationForJoin(locale: AppLocale, outcome: JoinOutcome): string;
 
 - `MembershipRecord` and `JoinMembership` gain required `billingInterval: BillingInterval`.
+- `PreparedJoinSubmission.kind === "terminal"` deliberately carries only immutable row identities. It never carries a previously read membership status, outcome, application projection, timestamp, version, or journey decision. `completePreparedTerminal` must obtain all of those from rows locked inside its transaction.
 
-- [ ] **Step 1: Write failing schema, service, outcome, and route-handoff tests**
+- [ ] **Step 1: Write failing schema, state-machine, transaction, service, action, and route-handoff tests**
 
-    Add these cases to the focused suites:
+    Add these focused schema and outcome cases:
 
     expect(joinInputSchema.parse({
       plan: "startup",
@@ -345,17 +360,38 @@
       membershipId: "membership-a",
     })).toBe("/join/checkout?membership_id=membership-a");
 
-    Add resume tests proving:
+    In `join-terminal-state.test.ts`, drive the real membership-status union through an exhaustive table. Require exactly:
 
-    - a terminal application returns its actor-scoped membership ID;
-    - a terminal application with no actor-scoped membership throws `MEMBERSHIP_NOT_FOUND`;
-    - a stored annual membership remains annual when either query plan or interval is missing or conflicts with the durable row;
-    - failures injected immediately after membership creation, during active-journey enrollment, and during application projection leave a recoverable split state: resume with missing, invalid, multi-valued, or conflicting query input uses the actor-scoped membership, performs idempotent active-journey enrollment when required, compare-and-swap reconciles the application, and returns the durable destination without catalog, profile, company, or provider work;
-    - a concurrent application version/field change makes reconciliation fail with `JOIN_APPLICATION_RECONCILIATION_CONFLICT`, overwrites nothing, and never reaches checkout/provider work; an already-reconciled exact projection is idempotent;
-    - a missing, monthly, unknown, multi-valued, or unavailable plan/interval on a new or nonterminal draft performs no profile, company, application, membership, journey, limiter, or provider mutation;
+    - `pending_payment` maps to outcome `checkout` plus application `{currentStep: "checkout", status: "pending_payment"}` and no activation journey;
+    - `pending_review` maps to outcome `review` plus application `{currentStep: "review", status: "pending_review"}` and no activation journey;
+    - `active` maps to outcome `complete` plus application `{currentStep: "complete", status: "completed"}` and requires the exact `onboarding_90d` activation journey;
+    - `past_due`, `cancel_at_period_end`, `cancelled`, and `expired` each throw `MEMBERSHIP_NOT_JOIN_RESUMABLE` before application, journey, catalog, or provider work.
+
+    Require a `never` exhaustiveness assertion in the switch so a future status cannot silently fall into checkout. Test every allowed and rejected application predecessor pair against an explicit matrix: target `pending_payment/checkout` accepts only that exact pair or `draft` at `profile`, `company`, or `checkout`; target `pending_review/review` accepts only that exact pair or `draft` at `profile`, `company`, or `review`; target `completed/complete` accepts only that exact pair, `draft` at `profile`, `company`, or `complete`, `pending_payment/checkout`, or `pending_review/review`. `abandoned` and every other step/status combination are rejected with `JOIN_APPLICATION_STATE_CONFLICT`.
+
+    In `join-terminal-transaction.test.ts`, exercise the real transaction executor and SQL ordering. It must:
+
+    - lock the exact application and membership together with `FOR UPDATE OF membership_applications, memberships` before deriving status or writing;
+    - require `membership.applicationId === application.id` and exact plan equality;
+    - require `application.applicantUserId === actor.profileId`;
+    - for a personal target, require null application/company membership targets plus `membership.ownerUserId === actor.profileId`;
+    - for a company target, require `membership.ownerUserId === null` and `membership.companyId === application.companyId`, then select and row-lock an active company-member authorization row for that same actor/company before writes;
+    - reject missing, foreign, mismatched, abandoned, or incompatible rows before writes;
+    - derive the projection from the locked membership status, update only the exact application projection, and for `active` insert every exact `onboarding_90d` step with `instanceKey = "activation:" + membershipId` using `ON CONFLICT DO NOTHING`;
+    - verify the complete expected activation-step key set before commit, then return the freshly derived outcome only after commit;
+    - make an exact already-projected application plus complete activation-step set idempotent.
+
+    Add scripted races where the status changes after preparation: `pending_payment -> active` must return the fresh complete outcome and atomically complete the application/journey, while `active -> past_due` must fail without mutation. Add application target, plan, abandoned-status, step/status, membership-link, owner, company, and company-member authorization drift cases. Inject application-update, journey-insert, and journey-verification failures and prove the whole terminal transaction rolls back. Prove PostgreSQL microsecond `updated_at` values are irrelevant: no JavaScript `Date` compare-and-swap or stale preflight field participates in correctness.
+
+    Add resume/service tests proving:
+
+    - a membership-bearing application prepares only `{kind: "terminal", applicationId, membershipId}`, and a terminal application with no actor-scoped membership throws `MEMBERSHIP_NOT_FOUND`;
+    - a stored annual membership remains annual when query plan/interval is missing or conflicts with the durable row;
+    - failures after membership creation or inside terminal completion leave one durable, recoverable membership; retry re-locks fresh rows, performs the atomic application/journey transaction, and returns the durable destination without catalog, profile, company, or provider work;
+    - missing, monthly, unknown, multi-valued, or unavailable plan/interval on a new or nonterminal draft performs no profile, company, application, membership, journey, limiter, or provider mutation;
     - Community persists `none` and routes to complete; Patron persists `none` and routes to review.
 
-    In `join-actions.test.ts` and `join-actions-profile-identity.test.ts`, invoke the real bound `saveProfile` and `saveCompany` actions with an injected `resolveOption` fake that returns `null` and one that rejects. Assert zero calls after that injected resolver to profile upsert, company upsert, application create/update, membership create/update, journey enrollment, limiter, or provider seams. Add terminal-resume cases proving durable membership plan and interval override missing or conflicting query plan/interval and redirect before profile/company mutation; a terminal application without its actor-scoped membership fails before mutation.
+    In `join-actions.test.ts` and `join-actions-profile-identity.test.ts`, invoke the real bound `saveProfile` and `saveCompany` actions. For each action, require terminal preparation to call `completePreparedTerminal` and receive its committed result before redirect, with zero profile/company/application-creation/membership-creation/catalog/limiter/provider writes outside that transaction. Exercise `checkout`, `review`, `complete`, and all four unsupported membership statuses. A terminal application without its actor-scoped membership fails before mutation. For draft paths, inject `resolveOption` returning `null` and rejecting, and assert zero calls after the resolver to profile upsert, company upsert, application create/update, membership create/update, journey enrollment, limiter, or provider seams.
 
     At the same action boundary, call `requestMagicLink` with syntactically valid `{plan: "startup", billingInterval: "annual"}` while an injected `resolveMembershipOption` fake returns `null` and while it rejects. Both cases return the same localized unavailable response and call neither `checkAuthSend`, `auth.signIn.magicLink`, nor any non-catalog repository/provider seam after the fake. A separate real-resolver action test permits exactly one read-only `plans.list()` catalog call, then requires zero limiter, auth-provider, profile/company/application/membership/journey mutation, or other repository calls on `null` or rejection. A valid resolved option calls the resolver once and builds the callback from `option.planCode`/`option.billingInterval`, not the raw selection. The `entry: "member-login"` plus null-selection branch never calls the catalog and continues to use only the validated Portal continuation. Assert no `ResolvedMembershipOption` or `stripePriceReference` is serialized into form state, bound arguments, markup, or callback URLs.
 
@@ -370,9 +406,9 @@
 
     Run:
 
-    npm.cmd test -- tests/unit/join-schema.test.ts tests/unit/join-navigation.test.ts tests/unit/join-service.test.ts tests/unit/join-service-review.test.ts tests/unit/join-application-reconciliation.test.ts tests/unit/join-actions.test.ts tests/unit/join-actions-profile-identity.test.ts tests/unit/join-page.test.tsx tests/unit/profile-identity-billing.test.ts
+    npm.cmd test -- tests/unit/join-schema.test.ts tests/unit/join-navigation.test.ts tests/unit/join-service.test.ts tests/unit/join-service-review.test.ts tests/unit/join-terminal-state.test.ts tests/unit/join-terminal-transaction.test.ts tests/unit/join-actions.test.ts tests/unit/join-actions-profile-identity.test.ts tests/unit/join-page.test.tsx tests/unit/profile-identity-billing.test.ts
 
-    Expected: FAIL because Join input has no interval, membership creation relies on the database default, terminal resume has no membership ID, a committed membership followed by journey/application failure has no CAS recovery path, actions can write profile/company or send/count a magic link before discovering an unavailable option, and actions discard `CompleteApplicationResult`.
+    Expected: FAIL because Join input has no interval, membership creation relies on the database default, terminal resume has no membership ID, no shared exhaustive terminal state mapper or cross-row transaction exists, actions do not call committed terminal completion, and actions can write profile/company or send/count a magic link before discovering an unavailable option.
 
     Run:
 
@@ -380,22 +416,26 @@
 
     Expected: FAIL because the newly written valid journeys require explicit `annual`/`none` context and the new missing, monthly, unknown, and multi-valued interval cases expect fail-closed recovery, while the current browser flow still accepts plan-only/invalid interval input. Record the exact URL/assertion failures as browser RED.
 
-- [ ] **Step 3: Implement the final Join types and service ordering**
+- [ ] **Step 3: Implement fresh locked-state completion and final Join ordering**
 
-    Add `billingIntervalSchema = z.enum(BILLING_INTERVALS)`. Validate scalar query values without making plan/interval authoritative over a durable row: parse the optional scalar application ID independently, and defer plan/interval validation until the flow is known to have no membership. Implement `prepareJoinSubmission` with exact defaults `{applications: applicationsRepository, memberships: membershipsRepository, resolveOption: resolveMembershipOption}`. When an application ID is present, require a member and load the actor-scoped application plus membership first. Any actor-scoped membership, including one paired with a still-draft application after a prior partial failure, must match `application.planCode` and determines plan, interval, status, ID, and destination even when query plan/interval is absent, invalid, multi-valued, or conflicting. A terminal application without that membership throws `MEMBERSHIP_NOT_FOUND`. Only a new/nonterminal draft with no membership parses scalar plan/interval and calls `resolveOption` exactly once; missing, monthly, unknown, multi-valued, or unavailable input fails before mutation. The prepared option and reconciliation descriptor are server-only and are never accepted from form data or a Client Component.
+    Add `billingIntervalSchema = z.enum(BILLING_INTERVALS)`. Validate scalar query values without making plan/interval authoritative over a durable row: parse the optional scalar application ID independently, and defer plan/interval validation until the flow is known to have no membership. Implement `prepareJoinSubmission` with exact defaults `{applications: applicationsRepository, memberships: membershipsRepository, resolveOption: resolveMembershipOption}`. When an application ID is present, require a member and load the actor-scoped application plus membership first. Any actor-scoped membership, including one paired with a still-draft application after a prior partial failure, must match `application.planCode` and determines plan, interval, ID, and the fact that completion is required even when query plan/interval is absent, invalid, multi-valued, or conflicting. Preparation returns only the two row IDs for this terminal path; it does not derive or cache the status/outcome/projection. A terminal application without that membership throws `MEMBERSHIP_NOT_FOUND`. Only a new/nonterminal draft with no membership parses scalar plan/interval and calls `resolveOption` exactly once. The prepared option and terminal descriptor are server-only and are never accepted from form data or a Client Component.
 
-    Split the mutation phase into internal `continuePreparedJoin(actor, preparedDraft, dependencies)`, `completePreparedApplication(actor, preparedDraft, input, dependencies)`, and `completePreparedTerminal(actor, preparedTerminal, dependencies)` seams. `startJoin` keeps its anonymous no-write draft-ID result; for a member it composes the same preflight with `continuePreparedJoin`. None of the prepared seams re-reads environment or re-resolves the option. This makes the exact order:
+    Split the mutation phase into internal `continuePreparedJoin(actor, preparedDraft, dependencies)`, `completePreparedApplication(actor, preparedDraft, input, dependencies)`, and `completePreparedTerminal(actor, descriptor, dependencies)` seams. `startJoin` keeps its anonymous no-write draft-ID result. For a member, it calls `prepareJoinSubmission` and then must await `completePreparedTerminal` whenever preparation is terminal; only a draft may call `continuePreparedJoin`. None of the prepared seams re-reads environment or re-resolves the option. This makes the exact order:
 
     1. Parse only the optional scalar application ID; reject a multi-valued/invalid application ID independently of plan/interval.
     2. If resuming, require a member and load the actor-scoped application plus `memberships.getByApplicationId(actor, application.id)` before interpreting query plan/interval.
-    3. If any actor-scoped membership exists, require `application.planCode === membership.planCode`, derive the terminal outcome from the durable membership plan, billing interval, status, and ID, and compare the complete application projection with that membership; ignore missing, invalid, multi-valued, or conflicting query plan/interval. Return `reconciliation: null` only when plan/current-step/status are already exact, otherwise return the full expected application version and durable projection; independently set `activeMembershipNeedsJourneyEnrollment` from membership status so an already-projected active row still retries idempotent enrollment.
+    3. If a membership exists, validate only its immutable relation and plan at preflight, return `{kind: "terminal", applicationId, membershipId}`, and defer status, destination, application compatibility, authorization revalidation, and journey decisions to the transaction.
     4. If the application claims a terminal status but its actor-scoped membership is absent, throw `MEMBERSHIP_NOT_FOUND`.
     5. Only for a new/nonterminal draft with no membership, parse scalar plan/interval, verify any application plan against that selection, and call `resolveOption` exactly once to produce `PreparedJoinSubmission.kind === "draft"`; no mutation has occurred.
-    6. Only that server-produced prepared draft may reach profile, company, application, membership, or journey writes.
+    6. Only that server-produced prepared draft may reach ordinary profile, company, application, or membership writes.
 
-    Add actor-scoped `applicationsRepository.reconcileFromMembership(actor, expected, projection): Promise<"updated" | "already_reconciled" | "conflict">`. Its guarded update matches application ID, actor scope, `updatedAt`, plan, current step, and status from `expected`; it writes only the exact durable plan/current-step/status projection. On zero updated rows it re-reads actor-scoped state: exact projection is `already_reconciled`, otherwise `conflict`. It never performs a blind retry. `completePreparedTerminal` idempotently enrolls whenever `activeMembershipNeedsJourneyEnrollment` is true, even when reconciliation is null; it then performs any required reconciliation and throws `JOIN_APPLICATION_RECONCILIATION_CONFLICT` on drift and returns the outcome only after `updated`/`already_reconciled`. Injected enrollment failure leaves the application untouched and retryable.
+    Implement `projectJoinTerminalState` as the single exhaustive policy above. There is no default success branch. Every unsupported status throws `MEMBERSHIP_NOT_JOIN_RESUMABLE`, and a compile-time `never` assertion makes the status table total.
 
-    `completePreparedApplication` checks again for an existing actor-scoped membership before creating one. A membership found in this second check uses the same durable reconciliation path. Otherwise the seam consumes the already prepared option rather than accepting query interval as authority. For a new membership, create with:
+    Implement `completePreparedTerminal` with exact default `{terminal: joinTerminalRepository}` and make it return only `await dependencies.terminal.complete(actor, descriptor)`. Implement `joinTerminalRepository.complete(actor, descriptor)` as one database transaction. Its first statement locks the exact joined application and membership rows together. Under those locks it revalidates actor, relation, plan, and personal/company target; for a company target it additionally obtains a blocking row lock on the actor's exact active company-member authorization before any write; re-reads the membership status; calls `projectJoinTerminalState`; and validates the exact predecessor matrix before any write. It then updates the application to the mapper's exact step/status. For `active`, reuse a new exported pure `buildActivationJourneyEnrollment({profileId, membershipId, anchor})` from `lib/automation/enrollment.ts`; the existing `enrollActivatedMembership` delegates to that builder, while the transaction inserts the resulting rows on its own executor with `ON CONFLICT DO NOTHING` and verifies every expected journey/instance/step/delivery key before commit. Use the locked membership's database timestamp only as a stable scheduling anchor, never as a concurrency token. Return the mapper's freshly derived outcome after the transaction commits.
+
+    Do not add a schema column or migration and do not use `updatedAt`/JavaScript `Date` compare-and-swap. The two row locks are the freshness authority. Exact already-projected state and exact already-enrolled activation keys are idempotent; an incomplete activation set is repaired inside the same transaction. Any invalid row or failed update/insert/verification rolls back every application/journey write. A membership created by an earlier committed repository call may remain after a terminal transaction failure; the identity-only descriptor makes the next request safely recover it.
+
+    `completePreparedApplication` checks again for an existing actor-scoped membership before creating one. A membership found in this second check calls the same `completePreparedTerminal` transaction. Otherwise the seam consumes the already prepared option rather than accepting query interval as authority. For a new membership, create with:
 
     {
       applicationId: application.id,
@@ -411,11 +451,9 @@
       seatLimit: option.seatAllowance,
     }
 
-    Add `billingInterval` to `MembershipInput` and the lifecycle projection. Do not modify `lib/db/schema-core.ts` or add a migration; the column and enum already exist.
+    After membership creation, call `completePreparedTerminal(actor, {applicationId: application.id, membershipId: membership.id})` unconditionally; do not directly update the application or call `enrollActivatedMembership` outside the transaction. Add `billingInterval` to `MembershipInput` and the lifecycle projection. Do not modify `lib/db/schema-core.ts` or add a migration; the column and enums already exist.
 
     Replace status-only `destinationForJoin` results with one href for every outcome. Profile/company hrefs carry plan, interval, and application. Checkout/review/complete hrefs carry only the opaque membership ID.
-
-    After membership creation, route active-journey enrollment and application projection through the same reconciliation seam. Failure after the membership commit is intentionally recoverable on the next request; do not delete or recreate that durable membership. Unit tests inject each failure boundary, prove the retry uses durable plan/interval without `resolveOption`, and prove Task 4 never receives an unreconciled application/membership pair.
 
     Change `requestMagicLink` to its final bound signature:
 
@@ -430,15 +468,15 @@
 
     For `entry: "join"`, keep `MembershipSelection` as the client-safe bound input but call server-only `resolveMembershipOption(selection)` inside the action after syntactic/email validation and before `checkAuthSend` or `auth.signIn.magicLink`. The real resolver may make exactly its documented read-only `plans.list()` catalog call. On `null` or rejection, return the same localized unavailable response with zero limiter, auth-provider, Join mutation, or any other repository/provider call after that catalog read. Direct-action tests with an injected resolver assert no additional seam at all after the injected `null`/rejection. On success, build the callback only from the returned `option.planCode` and `option.billingInterval`; never bind or serialize `ResolvedMembershipOption`. Task 3 consumes the `entry: "member-login"` branch with a required null selection; that branch validates only `PortalContinuation` and does not touch the catalog.
 
-    Make `saveProfile` and `saveCompany` bind the interval, validate form shape, require the member actor, and call `prepareJoinSubmission` before their existing profile/company write. A terminal preparation redirects immediately. Only a draft preparation may write the profile/company and then call the matching prepared mutation seam; both seams consume that exact server-resolved option. Redirect directly through `destinationForJoin(locale, result)`. Update profile/company anonymous recovery URLs to preserve plan and interval. Remove the terminal status-card branch from `JoinPage`; authenticated terminal outcomes redirect to checkout or completion.
+    Make `saveProfile` and `saveCompany` bind the interval, validate form shape, require the member actor, and call `prepareJoinSubmission` before their existing profile/company write. A terminal preparation must await `completePreparedTerminal` and redirect from its committed fresh result; it may not redirect directly from preparation. Only a draft preparation may write the profile/company and then call the matching prepared mutation seam; both seams consume that exact server-resolved option. Redirect directly through `destinationForJoin(locale, result)`. Update profile/company anonymous recovery URLs to preserve plan and interval. Remove the terminal status-card branch from `JoinPage`; authenticated terminal outcomes complete transactionally before checkout/review/complete redirect.
 
-- [ ] **Step 4: Run GREEN and verify no default-interval dependence remains**
+- [ ] **Step 4: Run GREEN and verify no default-interval or split-state dependence remains**
 
     Run:
 
-    npm.cmd test -- tests/unit/join-schema.test.ts tests/unit/join-navigation.test.ts tests/unit/join-service.test.ts tests/unit/join-service-review.test.ts tests/unit/join-application-reconciliation.test.ts tests/unit/join-actions.test.ts tests/unit/join-actions-profile-identity.test.ts tests/unit/join-page.test.tsx tests/unit/profile-identity-billing.test.ts
+    npm.cmd test -- tests/unit/join-schema.test.ts tests/unit/join-navigation.test.ts tests/unit/join-service.test.ts tests/unit/join-service-review.test.ts tests/unit/join-terminal-state.test.ts tests/unit/join-terminal-transaction.test.ts tests/unit/join-actions.test.ts tests/unit/join-actions-profile-identity.test.ts tests/unit/join-page.test.tsx tests/unit/profile-identity-billing.test.ts
 
-    Expected: PASS with exact profile/company/checkout/review/complete destinations, explicit membership intervals, durable membership precedence over missing/conflicting query plan and interval, idempotent CAS recovery of every membership/application split state, and read-only action preflight. Unavailable/rejected real catalog resolution performs exactly its one allowed `plans.list()` read and then zero profile/company/application/membership/journey/limiter/provider or other repository calls; injected-resolver tests permit no additional seam after the fake. Add `billingInterval: "annual"` or `"none"` to every typed `MembershipRecord` and `MembershipInput` fixture touched by the required property; do not weaken the property to optional.
+    Expected: PASS with exact profile/company/checkout/review/complete destinations, explicit membership intervals, durable membership precedence over missing/conflicting query plan and interval, exhaustive status handling, fresh row-locked completion, atomic application/journey recovery, and every real terminal caller awaiting the transaction before redirect or profile/company mutation. Unavailable/rejected real catalog resolution performs exactly its one allowed `plans.list()` read and then zero profile/company/application/membership/journey/limiter/provider or other repository calls; injected-resolver tests permit no additional seam after the fake. Add `billingInterval: "annual"` or `"none"` to every typed `MembershipRecord` and `MembershipInput` fixture touched by the required property; do not weaken the property to optional.
 
     Run:
 
@@ -456,7 +494,7 @@
 
     npm.cmd run typecheck
 
-    Expected: PASS with the required durable interval across Join, repository-security, checkout, recovery, and Portal-content fixtures.
+    Expected: PASS with the required durable interval and the exhaustive seven-status mapper across Join, repository-security, checkout, recovery, and Portal-content fixtures.
 
     Run:
 
@@ -464,10 +502,10 @@
 
     Expected: every production membership-creation path in scope either supplies `billingInterval` explicitly or is an existing seed/system path with an explicit value. No Join path relies on `default("annual")`.
 
-- [ ] **Step 5: Commit the typed Join slice**
+- [ ] **Step 5: Commit the typed atomic Join slice**
 
-    git add -- ':(literal)lib/membership/join-schema.ts' ':(literal)lib/membership/join-navigation.ts' ':(literal)lib/membership/onboarding.ts' ':(literal)lib/membership/join-service.ts' ':(literal)lib/membership/lifecycle.ts' ':(literal)lib/db/repos/applications.ts' ':(literal)lib/db/repos/memberships.ts' ':(literal)app/[locale]/(join)/join/actions.ts' ':(literal)app/[locale]/(join)/join/page.tsx' ':(literal)app/[locale]/(join)/join/profile/page.tsx' ':(literal)app/[locale]/(join)/join/company/page.tsx' ':(literal)messages/en.json' ':(literal)messages/zh-HK.json' ':(literal)tests/unit/join-schema.test.ts' ':(literal)tests/unit/join-navigation.test.ts' ':(literal)tests/unit/join-service.test.ts' ':(literal)tests/unit/join-service-review.test.ts' ':(literal)tests/unit/join-application-reconciliation.test.ts' ':(literal)tests/unit/join-actions.test.ts' ':(literal)tests/unit/join-actions-profile-identity.test.ts' ':(literal)tests/unit/join-page.test.tsx' ':(literal)tests/unit/profile-identity-billing.test.ts' ':(literal)tests/unit/checkout-service.test.ts' ':(literal)tests/unit/checkout-recovery-service.test.ts' ':(literal)tests/unit/portal-content-scope.test.ts' ':(literal)tests/unit/repository-production-security.test.ts' ':(literal)tests/e2e/join-auth.spec.ts'
-    git commit -m "feat: route durable join outcomes"
+    git add -- ':(literal)lib/membership/join-schema.ts' ':(literal)lib/membership/join-navigation.ts' ':(literal)lib/membership/onboarding.ts' ':(literal)lib/membership/join-service.ts' ':(literal)lib/membership/join-terminal-state.ts' ':(literal)lib/membership/lifecycle.ts' ':(literal)lib/automation/enrollment.ts' ':(literal)lib/db/repos/applications.ts' ':(literal)lib/db/repos/memberships.ts' ':(literal)lib/db/repos/join-terminal.ts' ':(literal)app/[locale]/(join)/join/actions.ts' ':(literal)app/[locale]/(join)/join/page.tsx' ':(literal)app/[locale]/(join)/join/profile/page.tsx' ':(literal)app/[locale]/(join)/join/company/page.tsx' ':(literal)messages/en.json' ':(literal)messages/zh-HK.json' ':(literal)tests/unit/join-schema.test.ts' ':(literal)tests/unit/join-navigation.test.ts' ':(literal)tests/unit/join-service.test.ts' ':(literal)tests/unit/join-service-review.test.ts' ':(literal)tests/unit/join-terminal-state.test.ts' ':(literal)tests/unit/join-terminal-transaction.test.ts' ':(literal)tests/unit/join-actions.test.ts' ':(literal)tests/unit/join-actions-profile-identity.test.ts' ':(literal)tests/unit/join-page.test.tsx' ':(literal)tests/unit/profile-identity-billing.test.ts' ':(literal)tests/unit/checkout-service.test.ts' ':(literal)tests/unit/checkout-recovery-service.test.ts' ':(literal)tests/unit/portal-content-scope.test.ts' ':(literal)tests/unit/repository-production-security.test.ts' ':(literal)tests/e2e/join-auth.spec.ts'
+    git commit -m "feat: route atomic durable join outcomes"
 
 ### Task 3: Add explicit member login, one safe continuation authority, and Portal sign-out
 
@@ -605,16 +643,16 @@
 
 **Files:**
 
-- Modify: `lib/billing/checkout-service.ts`, `lib/db/repos/billing-attempts.ts`, `lib/membership/join-billing-state.ts`.
+- Modify: `lib/billing/checkout-service.ts`, `lib/db/repos/billing-attempts.ts`, `lib/db/repos/jobs.ts`, `lib/membership/join-billing-state.ts`.
 - Modify shared managed runtime: `playwright.config.ts`, `tests/fixtures/m2-runtime-env.ts`.
 - Modify: `app/[locale]/(join)/join/checkout/page.tsx`, `app/[locale]/(join)/join/complete/page.tsx`, `app/[locale]/(member)/portal/billing/page.tsx`, `components/billing/checkout-status.tsx`.
 - Create: `tests/fixtures/isolated-runtime-env.ts`, `tests/unit/isolated-runtime-environment.test.ts`, `tests/fixtures/managed-auth-session.ts`, `tests/unit/managed-auth-session.test.ts`, `tests/fixtures/m1-live-acceptance.ts`, `tests/unit/m1-live-acceptance-safety.test.ts`.
-- Modify tests: `tests/unit/checkout-service.test.ts`, `tests/unit/checkout-recovery-service.test.ts`, `tests/unit/billing-checkout-locking.test.ts`, `tests/unit/billing-recovery-cas.test.ts`, `tests/unit/join-billing-pages.test.tsx`, `tests/unit/portal-billing-actions.test.tsx`, `tests/unit/m1-acceptance-services.test.ts`, `tests/e2e/m1-acceptance.spec.ts`.
+- Modify tests: `tests/unit/checkout-service.test.ts`, `tests/unit/checkout-recovery-service.test.ts`, `tests/unit/billing-checkout-locking.test.ts`, `tests/unit/billing-recovery-cas.test.ts`, `tests/unit/join-billing-pages.test.tsx`, `tests/unit/portal-billing-actions.test.tsx`, `tests/unit/webhook-service.test.ts`, `tests/unit/webhook-repository-sequential.test.ts`, `tests/unit/m1-acceptance-services.test.ts`, `tests/e2e/m1-acceptance.spec.ts`.
 - Modify localization: `messages/en.json`, `messages/zh-HK.json`.
 
 **Interfaces:**
 
-- Consumes: durable `MembershipRecord.planCode` and `MembershipRecord.billingInterval`, Task 1 `resolveMembershipOption`, actor-scoped applications, existing billing-attempt repository, Stripe adapter, and webhook-owned membership status.
+- Consumes: durable `MembershipRecord.planCode` and `MembershipRecord.billingInterval`, Task 1 `resolveMembershipOption`, Task 2's exhaustive `projectJoinTerminalState` and pure activation-journey builder, actor-scoped applications, existing billing-attempt/job repositories, Stripe adapter, and webhook-owned membership status.
 - Produces:
 
     export type JoinMembershipState = Readonly<{
@@ -623,12 +661,13 @@
         applicationId: string;
         status: "pending_payment" | "pending_review" | "active";
       };
-      application: Readonly<{id: string; planCode: string; status: string}>;
+      application: JoinStateApplication;
     }>;
     export type JoinStateApplication = Readonly<{
       id: string;
       planCode: string;
-      status: string;
+      currentStep: "checkout" | "review" | "complete";
+      status: "pending_payment" | "pending_review" | "completed";
     }>;
     export type JoinStateDependencies = Readonly<{
       memberships: Readonly<{
@@ -684,9 +723,9 @@
 
   Any nonempty value for any sentinel name activates the no-reuse safety posture even when the value is wrong. Reject more than one active mutating suite, reject any present `PLAYWRIGHT_BASE_URL`, validate one canonical decimal `PLAYWRIGHT_PORT` (default `3000`), and derive exactly `http://localhost:<port>`. That origin is the sole `use.baseURL`, `webServer.url`, child `APP_URL`, child `NEXT_PUBLIC_SITE_URL`, and suite allowed origin. `reuseExistingServer` is `false` for any nonempty destructive sentinel, so an occupied port fails instead of attaching to a stale server.
 
-  Build `webServer.env` deny-by-default for external capability. First copy only defined ambient values. Then blank every name matched by `/(?:^|_)(?:API_KEY|SECRET|TOKEN|PASSWORD|PRIVATE_KEY|ACCESS_KEY_ID)(?:_|$)/`, every suite-source name matched by `/^(?:M[1-7](?:[A-Z])?|PR6|NEON_AUTH_TEST|STRIPE_TEST)_/`, and every entry in an exported `MANAGED_RUNTIME_EXTERNAL_CAPABILITY_NAMES` tuple. That tuple is exact for the current repository and includes `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `DATABASE_URL_TEST`, and `NEON_PROJECT_ID`; `VERCEL`/`VERCEL_ENV`; all live and test Stripe keys, publishable key, webhook secret, and Price IDs; Resend/email sender/delivery mode; OpenAI/Anthropic keys, Concierge secret, agent/model/live-eval flags; R2 account/jurisdiction/bucket/public URL; all WOZTELL runtime/acceptance credentials, channel/recipient/host/template/live-delivery flags; Turnstile keys; Sentry/Plausible destinations; cron/unsubscribe secrets; Neon Auth standard/test names; `SHOWCASE_STAFF_EMAIL`; `VERCEL_SHARE_TOKEN`; and `PLAYWRIGHT_BASE_URL`/`PLAYWRIGHT_PORT`. The pure source contract enumerates the exact names currently declared by `.env.example`, `lib/config/env.ts`, `lib/media/r2-storage.ts`, `lib/channels/woztell.ts`, `lib/ai/woztell-production.ts`, and `lib/jobs/runners.ts`; it fails when any external-capability name is neither matched nor explicitly classified. Canary tests prove future secret-like names are scrubbed while harmless runtime names such as `PATH`, `CI`, and `NODE_ENV` survive.
+  Build `webServer.env` deny-by-default for external capability with Windows-safe case folding on every platform. Reject the input before any child launch when two defined keys share the same ASCII-uppercase key identity, then copy only defined ambient values. Delete every case-insensitive name matched by `/(?:^|_)(?:API_KEY|SECRET|TOKEN|PASSWORD|PRIVATE_KEY|ACCESS_KEY_ID)(?:_|$)/i`, every suite-source name matched by `/^(?:M[1-7](?:[A-Z])?|PR6|NEON_AUTH_TEST|STRIPE_TEST)_/i`, and every case-insensitive entry in an exported `MANAGED_RUNTIME_EXTERNAL_CAPABILITY_NAMES` tuple; scrubbed keys must be omitted from the child object, never serialized as empty strings. Before adding any approved canonical-uppercase remap, delete every case-fold-equal key and reject a remap source object with a case-fold collision. That tuple is exact for the current repository and includes `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `DATABASE_URL_TEST`, and `NEON_PROJECT_ID`; `VERCEL`/`VERCEL_ENV`; all live and test Stripe keys, publishable key, webhook secret, and Price IDs; Resend/email sender/delivery mode; OpenAI/Anthropic keys, Concierge secret, agent/model/live-eval flags; R2 account/jurisdiction/bucket/public URL; all WOZTELL runtime/acceptance credentials, channel/recipient/host/template/live-delivery flags; Turnstile keys; Sentry/Plausible destinations; cron/unsubscribe secrets; Neon Auth standard/test names; `SHOWCASE_STAFF_EMAIL`; `VERCEL_SHARE_TOKEN`; and `PLAYWRIGHT_BASE_URL`/`PLAYWRIGHT_PORT`. The pure source contract enumerates the exact names currently declared by `.env.example`, `lib/config/env.ts`, `lib/media/r2-storage.ts`, `lib/channels/woztell.ts`, `lib/ai/woztell-production.ts`, and `lib/jobs/runners.ts`; it fails when any external-capability name is neither matched nor explicitly classified. Canary tests prove future secret-like names are scrubbed while harmless runtime names such as `PATH`, `CI`, and `NODE_ENV` survive.
 
-  Only after neutral scrubbing may the builder set `DATABASE_URL <- DATABASE_URL_TEST`, `APP_URL`/`NEXT_PUBLIC_SITE_URL <- managed origin`, and the active suite's exact standard child names from the original guarded test-source object. M1, M2, M6, M7, and authenticated Axe map child `NEON_PROJECT_ID` only from their respective `M1_TEST_NEON_PROJECT_ID`, `M2_TEST_NEON_PROJECT_ID`, `M6_TEST_NEON_PROJECT_ID`, `M7_TEST_NEON_PROJECT_ID`, or `PR6_AXE_TEST_NEON_PROJECT_ID`, and only after the independently supplied ambient `NEON_PROJECT_ID` is exact-equal; other suites leave the child name blank. M1/M2 map all four `STRIPE_TEST_*` names; M2 maps `M2_TEST_CRON_SECRET` and `M2_TEST_UNSUBSCRIBE_TOKEN_SECRET`; M3 maps `M3_TEST_UNSUBSCRIBE_TOKEN_SECRET`; and every authenticated managed suite maps `NEON_AUTH_TEST_BASE_URL`/`NEON_AUTH_TEST_COOKIE_SECRET` only after canonical non-production HTTPS and exact independent `NEON_AUTH_TEST_ALLOWED_ORIGIN` equality. Test-source names themselves remain blank in the child. Missing suite-required values fail before a Pool, browser, auth, provider, or mutation client is constructed. Unit tests fill every current live/provider/toggle name with a distinct canary and prove no canary survives except through the exact named test-to-standard mappings. This makes an auth/order regression in M2 fail closed without usable Resend, AI, R2, WOZTELL, Turnstile, telemetry, database, Stripe, cron, unsubscribe, or live Auth capability.
+  Only after neutral scrubbing may the builder set `DATABASE_URL <- DATABASE_URL_TEST`, `APP_URL`/`NEXT_PUBLIC_SITE_URL <- managed origin`, and the active suite's exact standard child names from the original guarded test-source object. M1, M2, M6, M7, and authenticated Axe map child `NEON_PROJECT_ID` only from their respective `M1_TEST_NEON_PROJECT_ID`, `M2_TEST_NEON_PROJECT_ID`, `M6_TEST_NEON_PROJECT_ID`, `M7_TEST_NEON_PROJECT_ID`, or `PR6_AXE_TEST_NEON_PROJECT_ID`, and only after the independently supplied ambient `NEON_PROJECT_ID` is exact-equal; other suites leave the child name absent. M1/M2 map all four `STRIPE_TEST_*` names; M2 maps `M2_TEST_CRON_SECRET` and `M2_TEST_UNSUBSCRIBE_TOKEN_SECRET`; M3 maps `M3_TEST_UNSUBSCRIBE_TOKEN_SECRET`; and every authenticated managed suite maps `NEON_AUTH_TEST_BASE_URL`/`NEON_AUTH_TEST_COOKIE_SECRET` only after canonical non-production HTTPS and exact independent `NEON_AUTH_TEST_ALLOWED_ORIGIN` equality. Test-source names themselves remain absent from the child. Missing suite-required values fail before a Pool, browser, auth, provider, or mutation client is constructed. Unit tests fill every current live/provider/toggle name with a distinct canary and prove every scrubbed property is absent—not `""`—except for the exact named test-to-standard mappings. Mixed-case canaries and duplicate-case ambient/source keys prove case-insensitive deletion, collision rejection before spawn, and one canonical-uppercase child key per approved remap. They run the real environment parsers with representative optional Concierge, Turnstile, Resend, R2, and WOZTELL names removed, and prove M2's invalid-signature WOZTELL request still reaches the existing 401 contract instead of failing environment parsing. This makes an auth/order regression in M2 fail closed without usable Resend, AI, R2, WOZTELL, Turnstile, telemetry, database, Stripe, cron, unsubscribe, or live Auth capability.
 
   Task 4 also owns `managed-auth-session.ts`. Every real Neon Auth sign-in in M1, M2, M3, M4B, M5, M6, M7, and authenticated Axe must return a registry-owned context; suites may not call `context.close()` directly. In aggregate cleanup, and before any profile restoration, the registry independently attempts real same-origin `POST /api/auth/sign-out` from each still-open authenticated context, requires a successful response, then requires `GET /api/auth/get-session` to resolve anonymous/null and one protected route to exhibit the expected anonymous redirect/404. It still closes every context if another revocation fails, aggregates all failures, and makes incomplete revocation `NOT PASSED`. A success-path sign-out is verified again rather than trusted. The helper never creates, deletes, or resets an auth user.
 
@@ -720,7 +759,7 @@
     }>;
 
   Pure environment/target/provider checks run before constructing a Pool, browser, inbox, Neon Auth, or Stripe client. Only after those pass may one guarded read-only Pool load the full owner/invitee snapshots; both profiles must exist with `role === "member"`, each configured email must equal its normalized profile email, and normalized emails, auth-user IDs, and profile IDs must be pairwise distinct. `M1_TEST_OVERFLOW_EMAIL` is a third distinct controlled-inbox test address. The owner must have no pre-existing Join application, membership, or company context that the journey would overwrite; fail after the guarded DB preflight but before browser/inbox/Auth/Stripe construction or mutation. The run target company does not yet exist at preflight: after owner onboarding creates it and before invitation, require the invitee has no active membership in that exact new company and require the exact active company-member count to be one.
-- `M1StripeRunLedger` records the run ID; exact run-owned application, membership, billing-attempt, Checkout Session, Customer, Subscription, Invoice, PaymentIntent, and Charge IDs; request window and expected price/idempotency context; and every cleanup disposition. Provider Session/Subscription metadata ownership is exactly `{membershipId, applicationId, planCode}`—never an attempt ID. Billing-attempt ownership is proven by the guarded attempt row whose attached Session ID, membership ID, exact price, and idempotency key match the run. `M1DatabaseRunLedger` records the exact signed Stripe event ID, job ID, webhook audit ID, and webhook-created journey IDs. A successful job must have `runKey === eventId`, `kind === "checkout.session.completed"`, `state === "completed"`, and its expected attempt/time window; its audit must have null actor user, actor type `system`, action `stripe.webhook.processed`, target type `membership`, target ID equal to the run membership, request ID equal to the event ID, and exact metadata `{eventType, stripeCreated, eventId, status: "active"}`. A partial webhook failure may leave the exact failed job and no audit. Because the production Billing Portal boundary exposes only its redirect URL, record sanitized redirect/locale-return evidence as `retained_immutable_unaddressable_test_record` without inventing a provider ID.
+- `M1StripeRunLedger` records the run ID; exact run-owned application, membership, billing-attempt, Checkout Session, Customer, Subscription, Invoice, PaymentIntent, and Charge IDs; request window and expected price/idempotency context; and every cleanup disposition. Provider Session/Subscription metadata ownership is exactly `{membershipId, applicationId, planCode}`—never an attempt ID. Billing-attempt ownership is proven by the guarded attempt row whose attached Session ID, membership ID, exact price, and idempotency key match the run. `M1DatabaseRunLedger` records the exact signed Stripe event ID, job ID, webhook audit ID, webhook-created journey IDs, and post-webhook application projection. A successful job must have `runKey === eventId`, `kind === "checkout.session.completed"`, `state === "completed"`, its expected attempt/time window, membership `active`, application `completed/complete`, and the complete exact activation-journey key set; its audit must have null actor user, actor type `system`, action `stripe.webhook.processed`, target type `membership`, target ID equal to the run membership, request ID equal to the event ID, and exact metadata `{eventType, stripeCreated, eventId, status: "active"}`. A partial webhook failure may leave the exact failed job and no audit, but the locked membership/application/attempt/journey transaction must have rolled back. Because the production Billing Portal boundary exposes only its redirect URL, record sanitized redirect/locale-return evidence as `retained_immutable_unaddressable_test_record` without inventing a provider ID.
 - The controlled inbox adapter has this exact test-only contract:
 
     export type M1MagicLinkInboxResponse = Readonly<{
@@ -769,6 +808,11 @@
       state.membership = {...state.membership, status};
       state.application = {
         ...state.application,
+        currentStep: status === "active"
+          ? "complete"
+          : status === "pending_review"
+            ? "review"
+            : "checkout",
         status: status === "active" ? "completed" : status,
       };
       const html = renderToStaticMarkup(await CompletePage(props({
@@ -779,6 +823,10 @@
     });
 
     Add cancelled, expired, plan-mismatch, missing application, foreign actor, and multi-valued membership ID cases; each must call no Stripe adapter and return not-found/recovery.
+
+    In `webhook-repository-sequential.test.ts`, extend the real scripted `checkout.session.completed` transaction contract. Its first locked read must join the exact membership and application and use `FOR UPDATE OF memberships, membership_applications`. Require exact event membership/application/plan/target correlation and the only paid predecessor `pending_payment` membership plus `pending_payment/checkout` application. The transaction must then update membership to `active`, project the application to `completed/complete` through Task 2's shared mapper, complete the exact billing attempt, and insert/verify the exact activation-journey keys before commit. Inject failure at the application update, attempt update, journey insert, and journey verification statements; each rolls back membership, application, attempt, and journey together. Replays accept only an exact `active` membership plus `completed/complete` application and exact Stripe correlation, and create no second journey/audit/mutation. A draft, abandoned, review, mismatched-plan, mismatched-target, missing-application, or foreign-link row fails as a correlation error before writes. Update the scripted statement count/order explicitly rather than relaxing the SQL harness.
+
+    In `webhook-service.test.ts`, preserve signed-event and job idempotency while asserting that a successful checkout job cannot report processed until both the membership and application projections commit. A repository projection/correlation failure produces the existing failed-job behavior and no processed audit.
 
     Assert Chinese Billing Portal return:
 
@@ -798,9 +846,9 @@
 
     Run:
 
-    npm.cmd test -- tests/unit/isolated-runtime-environment.test.ts tests/unit/managed-auth-session.test.ts tests/unit/checkout-service.test.ts tests/unit/checkout-recovery-service.test.ts tests/unit/billing-checkout-locking.test.ts tests/unit/billing-recovery-cas.test.ts tests/unit/join-billing-pages.test.tsx tests/unit/portal-billing-actions.test.tsx tests/unit/m1-acceptance-services.test.ts tests/unit/m1-live-acceptance-safety.test.ts
+    npm.cmd test -- tests/unit/isolated-runtime-environment.test.ts tests/unit/managed-auth-session.test.ts tests/unit/checkout-service.test.ts tests/unit/checkout-recovery-service.test.ts tests/unit/billing-checkout-locking.test.ts tests/unit/billing-recovery-cas.test.ts tests/unit/join-billing-pages.test.tsx tests/unit/portal-billing-actions.test.tsx tests/unit/webhook-service.test.ts tests/unit/webhook-repository-sequential.test.ts tests/unit/m1-acceptance-services.test.ts tests/unit/m1-live-acceptance-safety.test.ts
 
-    Expected: FAIL because checkout resolves by plan only, locked membership rows/direct recovery omit interval/full selection, completion accepts pending payment only, Billing Portal returns to English, and the shared deny-by-default managed-runtime boundary plus isolated M1 environment, deterministic session revocation/no auth artifacts, explicit 900-second live/600-second cleanup budgets, distinct-invitee journey, retrieval-only magic-link contract, profile quiescence/CAS restoration, recoverable provider lineage, signed local webhook, database residue ledger, and aggregate cleanup dispositions do not exist.
+    Expected: FAIL because checkout resolves by plan only, locked membership rows/direct recovery omit interval/full selection, the paid webhook locks/projects only the membership and can leave its application stale, completion accepts pending payment only, Billing Portal returns to English, and the shared deny-by-default managed-runtime boundary plus isolated M1 environment, deterministic session revocation/no auth artifacts, explicit 900-second live/600-second cleanup budgets, distinct-invitee journey, retrieval-only magic-link contract, profile quiescence/CAS restoration, recoverable provider lineage, signed local webhook, database residue ledger, and aggregate cleanup dispositions do not exist.
 
 - [ ] **Step 3: Implement durable billing and status projection**
 
@@ -820,11 +868,13 @@
 
     Replace the pending-only Join loader with `loadJoinMembershipState`. It returns only a member-owned membership linked to an actor-scoped application with equal plan and one compatible pair:
 
-    - `pending_payment` membership with `pending_payment` application;
-    - `pending_review` membership with `pending_review` application;
-    - `active` membership with `completed` application.
+    - `pending_payment` membership with `pending_payment/checkout` application;
+    - `pending_review` membership with `pending_review/review` application;
+    - `active` membership with `completed/complete` application.
 
     Keep `CheckoutPage` restricted to `pending_payment` after loading. Make `CompletePage` render processing, review, or active from the durable projection. Ignore `session_id`, `status`, `success`, plan, and interval query keys when choosing state. Keep webhook processing as the only Stripe activation authority.
+
+    Harden the existing `checkout.session.completed` job transaction in `lib/db/repos/jobs.ts`; do not add a later best-effort application repair. Its locked query selects the membership and linked application together and uses `FOR UPDATE OF memberships, membership_applications`. Under those locks, require the exact event/application/membership IDs, equal plan, exact personal/company target lineage, `pending_payment` plus `pending_payment/checkout` as the only mutable predecessor, and the existing exact Stripe Session/Customer/Subscription/attempt correlation. Call Task 2's exhaustive mapper for `active`, then within that same transaction update membership activation fields, update the application to `completed/complete`, complete the attempt, insert every activation-journey row from the shared pure builder with `ON CONFLICT DO NOTHING`, and verify the expected journey keys. Only after every statement succeeds may the job transaction commit and the service write its processed audit. An exact already-active/completed replay remains idempotent; any incompatible application, relation, target, attempt, or journey state is a correlation failure with no mutation. Thus a successful paid checkout can never expose an `active` membership paired with a stale application.
 
     Pass locale from Portal billing to `createBillingPortalSession` and build the return URL with `localizedPath(locale, "/portal/billing")`.
 
@@ -832,7 +882,7 @@
 
     After guarded DB preflight and before browser authentication, snapshot every owner/invitee profile column and record `runStartedAt`. Retrieve both configured Stripe test Prices and require active annual recurring HKD values. Tag every disposable DB row with one `runId`. Maintain both ledgers. Start Session ownership from the attempt-attached Session when present; otherwise, whenever the provider boundary may have been crossed, run the bounded read-only recovery search above before DB deletion. Require Session/Subscription metadata exactly `{membershipId, applicationId, planCode}` and prove attempt ID only through the guarded billing-attempt row. Record exact reachable provider lineage and named immutable residuals; do not add test-only production metadata or widen the strict webhook schema.
 
-    Request the owner's real test-mode Neon magic link, retrieve it without dereferencing, navigate exactly once in a fresh browser context, validate its redirect chain/final managed origin, complete run-ID-marked profile/company onboarding, prove durable annual option and exact Startup Price, and complete Stripe test checkout. Register every authenticated context with the shared managed-session owner; a success-path sign-out calls its idempotent revoke/verify/close operation, while aggregate cleanup owns any unfinished context. Retrieve the exact owned Session and Subscription from the test API, build one supported `checkout.session.completed` event with a unique run-owned event ID and the retrieved test objects, serialize one exact raw body, generate its valid Stripe signature with `STRIPE_TEST_WEBHOOK_SECRET`, and POST it to the real managed-origin `/api/stripe/webhook` route. Require `processed` behavior, durable activation, exact completed job/audit/journey ledger rows, then replay the identical signed body and require idempotent duplicate behavior with no second audit or mutation. Do not wait for external Stripe delivery and do not create a tunnel or mutate webhook endpoint/provider configuration. Render active completion, open locale-correct Billing Portal, and verify receipts/secondary pages. Before invitation, require the invitee is not already in the exact run-owned company and its exact active member count is one; then invite `M1_TEST_INVITEE_EMAIL`, capture the exact invitation/request time, finish the owner session through the shared revoke/anonymous-verify/close registry.
+    Request the owner's real test-mode Neon magic link, retrieve it without dereferencing, navigate exactly once in a fresh browser context, validate its redirect chain/final managed origin, complete run-ID-marked profile/company onboarding, prove durable annual option and exact Startup Price, and complete Stripe test checkout. Register every authenticated context with the shared managed-session owner; a success-path sign-out calls its idempotent revoke/verify/close operation, while aggregate cleanup owns any unfinished context. Retrieve the exact owned Session and Subscription from the test API, build one supported `checkout.session.completed` event with a unique run-owned event ID and the retrieved test objects, serialize one exact raw body, generate its valid Stripe signature with `STRIPE_TEST_WEBHOOK_SECRET`, and POST it to the real managed-origin `/api/stripe/webhook` route. Require `processed` behavior, durable membership activation, exact `completed/complete` application projection, exact completed job/audit/journey ledger rows, then replay the identical signed body and require idempotent duplicate behavior with no second audit or mutation. Do not wait for external Stripe delivery and do not create a tunnel or mutate webhook endpoint/provider configuration. Render active completion, open locale-correct Billing Portal, and verify receipts/secondary pages. Before invitation, require the invitee is not already in the exact run-owned company and its exact active member count is one; then invite `M1_TEST_INVITEE_EMAIL`, capture the exact invitation/request time, finish the owner session through the shared revoke/anonymous-verify/close registry.
 
     Open a fresh isolated browser context, retrieve the new invitee message without dereferencing, navigate to its exact HTTPS auth link once, validate the allowed redirect chain and final managed `/portal/company/seats/accept?token=...` path, and verify exactly one company-member row for the snapshotted invitee plus exact accepted invitation and active count two. Replay the already-consumed application callback state through the browser and require localized safe error/no second membership; never prefetch the one-time auth link. Finish that invitee session through the same registry. Reopen a fresh owner context through a newly retrieved owner link navigated once, insert exactly `seatLimit - 2` run-owned synthetic members, require active count equals `seatLimit`, then prove the distinct overflow invitation fails with no row and no inbox message through the bounded window. Record identity checkpoints after every authenticated/profile mutation and finish the last owner session through the same registry.
 
@@ -844,9 +894,9 @@
 
     Run:
 
-    npm.cmd test -- tests/unit/isolated-runtime-environment.test.ts tests/unit/managed-auth-session.test.ts tests/unit/checkout-service.test.ts tests/unit/checkout-recovery-service.test.ts tests/unit/billing-checkout-locking.test.ts tests/unit/billing-recovery-cas.test.ts tests/unit/join-billing-pages.test.tsx tests/unit/portal-billing-actions.test.tsx tests/unit/m1-acceptance-services.test.ts tests/unit/m1-live-acceptance-safety.test.ts
+    npm.cmd test -- tests/unit/isolated-runtime-environment.test.ts tests/unit/managed-auth-session.test.ts tests/unit/checkout-service.test.ts tests/unit/checkout-recovery-service.test.ts tests/unit/billing-checkout-locking.test.ts tests/unit/billing-recovery-cas.test.ts tests/unit/join-billing-pages.test.tsx tests/unit/portal-billing-actions.test.tsx tests/unit/webhook-service.test.ts tests/unit/webhook-repository-sequential.test.ts tests/unit/m1-acceptance-services.test.ts tests/unit/m1-live-acceptance-safety.test.ts
 
-    Expected: PASS. Price selection uses the durable pair, all completion states are actor-scoped, forged success never activates/selects state, shared runtime mapping binds destructive suites to one managed loopback/test-resource process with no reuse and no ambient external capability, every authenticated context is revoked/verified before close without disk state or traces, the M1 live and cleanup timeout budgets exceed every bounded inbox/provider/cleanup window, every unsafe M1 identity/environment fails at its correct pure or guarded-DB phase, and provider/database/profile cleanup remains independent under injected failures including orphan Session recovery, partial webhook residue, delayed login touches, and a timed-out live body.
+    Expected: PASS. Price selection uses the durable pair, paid activation/application/attempt/journey projection is one locked transaction with rollback and replay proof, all completion states are actor-scoped, forged success never activates/selects state, shared runtime mapping binds destructive suites to one managed loopback/test-resource process with no reuse and no ambient external capability, every authenticated context is revoked/verified before close without disk state or traces, the M1 live and cleanup timeout budgets exceed every bounded inbox/provider/cleanup window, every unsafe M1 identity/environment fails at its correct pure or guarded-DB phase, and provider/database/profile cleanup remains independent under injected failures including orphan Session recovery, partial webhook residue, delayed login touches, and a timed-out live body.
 
     Run:
 
@@ -856,7 +906,7 @@
 
 - [ ] **Step 5: Commit the durable billing slice**
 
-    git add -- ':(literal)playwright.config.ts' ':(literal)tests/fixtures/isolated-runtime-env.ts' ':(literal)tests/unit/isolated-runtime-environment.test.ts' ':(literal)tests/fixtures/managed-auth-session.ts' ':(literal)tests/unit/managed-auth-session.test.ts' ':(literal)tests/fixtures/m2-runtime-env.ts' ':(literal)lib/billing/checkout-service.ts' ':(literal)lib/db/repos/billing-attempts.ts' ':(literal)lib/membership/join-billing-state.ts' ':(literal)app/[locale]/(join)/join/checkout/page.tsx' ':(literal)app/[locale]/(join)/join/complete/page.tsx' ':(literal)app/[locale]/(member)/portal/billing/page.tsx' ':(literal)components/billing/checkout-status.tsx' ':(literal)messages/en.json' ':(literal)messages/zh-HK.json' ':(literal)tests/fixtures/m1-live-acceptance.ts' ':(literal)tests/unit/m1-live-acceptance-safety.test.ts' ':(literal)tests/unit/checkout-service.test.ts' ':(literal)tests/unit/checkout-recovery-service.test.ts' ':(literal)tests/unit/billing-checkout-locking.test.ts' ':(literal)tests/unit/billing-recovery-cas.test.ts' ':(literal)tests/unit/join-billing-pages.test.tsx' ':(literal)tests/unit/portal-billing-actions.test.tsx' ':(literal)tests/unit/m1-acceptance-services.test.ts' ':(literal)tests/e2e/m1-acceptance.spec.ts'
+    git add -- ':(literal)playwright.config.ts' ':(literal)tests/fixtures/isolated-runtime-env.ts' ':(literal)tests/unit/isolated-runtime-environment.test.ts' ':(literal)tests/fixtures/managed-auth-session.ts' ':(literal)tests/unit/managed-auth-session.test.ts' ':(literal)tests/fixtures/m2-runtime-env.ts' ':(literal)lib/billing/checkout-service.ts' ':(literal)lib/db/repos/billing-attempts.ts' ':(literal)lib/db/repos/jobs.ts' ':(literal)lib/membership/join-billing-state.ts' ':(literal)app/[locale]/(join)/join/checkout/page.tsx' ':(literal)app/[locale]/(join)/join/complete/page.tsx' ':(literal)app/[locale]/(member)/portal/billing/page.tsx' ':(literal)components/billing/checkout-status.tsx' ':(literal)messages/en.json' ':(literal)messages/zh-HK.json' ':(literal)tests/fixtures/m1-live-acceptance.ts' ':(literal)tests/unit/m1-live-acceptance-safety.test.ts' ':(literal)tests/unit/checkout-service.test.ts' ':(literal)tests/unit/checkout-recovery-service.test.ts' ':(literal)tests/unit/billing-checkout-locking.test.ts' ':(literal)tests/unit/billing-recovery-cas.test.ts' ':(literal)tests/unit/join-billing-pages.test.tsx' ':(literal)tests/unit/portal-billing-actions.test.tsx' ':(literal)tests/unit/webhook-service.test.ts' ':(literal)tests/unit/webhook-repository-sequential.test.ts' ':(literal)tests/unit/m1-acceptance-services.test.ts' ':(literal)tests/e2e/m1-acceptance.spec.ts'
     git commit -m "feat: project durable billing state"
 
 ### Task 5: Lock the one-time seat invitation callback at route level
@@ -1619,7 +1669,7 @@
 
     Run:
 
-    npm.cmd test -- tests/unit/membership-catalog.test.ts tests/unit/membership-public-catalog.test.ts tests/unit/membership-links.test.tsx tests/unit/join-schema.test.ts tests/unit/join-navigation.test.ts tests/unit/join-service.test.ts tests/unit/join-application-reconciliation.test.ts tests/unit/join-actions.test.ts tests/unit/member-login-page.test.tsx tests/unit/portal-sign-out-button.test.tsx tests/unit/isolated-runtime-environment.test.ts tests/unit/managed-auth-session.test.ts tests/unit/checkout-service.test.ts tests/unit/checkout-recovery-service.test.ts tests/unit/billing-recovery-cas.test.ts tests/unit/join-billing-pages.test.tsx tests/unit/m1-live-acceptance-safety.test.ts tests/unit/seat-invitation-routes.test.tsx tests/unit/seat-service.test.ts tests/unit/internal-navigation.test.tsx tests/unit/internal-shell.test.tsx tests/unit/wisetech-pr6-route-inventory.test.ts tests/unit/wisetech-pr6-join-shell.test.tsx tests/unit/locale-switcher.test.tsx tests/unit/wisetech-pr6-portal-shell.test.tsx tests/unit/portal-company-context.test.ts tests/unit/wisetech-pr6-admin-crm-shell.test.tsx tests/unit/m2-auth-reset.test.ts tests/unit/m2-runtime-environment.test.ts tests/unit/m2-browser-acceptance-contract.test.ts tests/unit/m3-e2e-safety.test.ts tests/unit/m3-browser-lifecycle.test.ts tests/unit/authenticated-identity-safety.test.ts tests/unit/wisetech-pr6-admin-cms-shell.test.tsx tests/unit/m7-acceptance-safety.test.ts tests/unit/m7-browser-acceptance-contract.test.ts tests/unit/wisetech-pr6-admin-operations-shell.test.tsx tests/unit/m6-e2e-safety-contract.test.ts tests/unit/m5-browser-lifecycle.test.ts tests/unit/pr6-authenticated-accessibility-lifecycle.test.ts tests/unit/lighthouse-runner.test.ts tests/unit/lighthouse-config.test.ts
+    npm.cmd test -- tests/unit/membership-catalog.test.ts tests/unit/membership-public-catalog.test.ts tests/unit/membership-links.test.tsx tests/unit/join-schema.test.ts tests/unit/join-navigation.test.ts tests/unit/join-service.test.ts tests/unit/join-terminal-state.test.ts tests/unit/join-terminal-transaction.test.ts tests/unit/join-actions.test.ts tests/unit/member-login-page.test.tsx tests/unit/portal-sign-out-button.test.tsx tests/unit/isolated-runtime-environment.test.ts tests/unit/managed-auth-session.test.ts tests/unit/checkout-service.test.ts tests/unit/checkout-recovery-service.test.ts tests/unit/billing-recovery-cas.test.ts tests/unit/join-billing-pages.test.tsx tests/unit/webhook-service.test.ts tests/unit/webhook-repository-sequential.test.ts tests/unit/m1-live-acceptance-safety.test.ts tests/unit/seat-invitation-routes.test.tsx tests/unit/seat-service.test.ts tests/unit/internal-navigation.test.tsx tests/unit/internal-shell.test.tsx tests/unit/wisetech-pr6-route-inventory.test.ts tests/unit/wisetech-pr6-join-shell.test.tsx tests/unit/locale-switcher.test.tsx tests/unit/wisetech-pr6-portal-shell.test.tsx tests/unit/portal-company-context.test.ts tests/unit/wisetech-pr6-admin-crm-shell.test.tsx tests/unit/m2-auth-reset.test.ts tests/unit/m2-runtime-environment.test.ts tests/unit/m2-browser-acceptance-contract.test.ts tests/unit/m3-e2e-safety.test.ts tests/unit/m3-browser-lifecycle.test.ts tests/unit/authenticated-identity-safety.test.ts tests/unit/wisetech-pr6-admin-cms-shell.test.tsx tests/unit/m7-acceptance-safety.test.ts tests/unit/m7-browser-acceptance-contract.test.ts tests/unit/wisetech-pr6-admin-operations-shell.test.tsx tests/unit/m6-e2e-safety-contract.test.ts tests/unit/m5-browser-lifecycle.test.ts tests/unit/pr6-authenticated-accessibility-lifecycle.test.ts tests/unit/lighthouse-runner.test.ts tests/unit/lighthouse-config.test.ts
 
     Expected: PASS. Record timestamp, exit code, files, test total, warnings, and skips.
 
@@ -1704,18 +1754,20 @@
 
 - [ ] **Step 6: Run the exact authorized-Preview Lighthouse and field-performance gates**
 
-    Use the fail-closed wrapper/config contracts implemented before Step 2. `run-lighthouse-preview.mjs` validates the repository root and absolute local `@lhci/cli` entrypoint without a shell, generates one canonical lowercase UUID run ID, resolves `runRoot = path.join(os.tmpdir(), "wisetech-pr6-lhci-" + runId)`, and requires that exact path to be absent. It creates only that directory, then spawns `process.execPath` with the absolute repository-local `@lhci/cli` JavaScript entrypoint and arguments `autorun --config <absolute repository lighthouserc.js>` under `shell: false`, with `cwd` set to `runRoot` and child `LHCI_RUN_ROOT`/`LHCI_OUTPUT_DIR=<runRoot>/upload`. Thus LHCI's mandatory `.lighthouseci` collect/assert working directory and the filesystem upload directory both live inside one unique run-owned OS-temp root, never the repository. The wrapper rejects symlink/path mismatch, an existing root, a nonlocal CLI/config, shell execution, or an output path outside the exact root; it propagates the native exit code and prints only the sanitized run root for evidence. It retains that unique directory on success or failure for the verification record and never deletes or reuses another run's evidence.
+    Use the fail-closed wrapper/config contracts implemented before Step 2. Before creating a run root or launching Chrome, `run-lighthouse-preview.mjs` requires the separately approved exact `LHCI_PREVIEW_DEPLOYMENT_ID`, canonical `LHCI_PREVIEW_DEPLOYMENT_URL`, `LHCI_VERCEL_PROJECT_ID`, optional exact `LHCI_VERCEL_TEAM_ID`, canonical JSON `LHCI_PRODUCTION_ORIGINS_JSON` from that same approval record, `LHCI_REVIEWED_HEAD`, `LHCI_REVIEWED_BRANCH=codex/wisetech-pr6-join-portal-admin`, and parent-only scoped `LHCI_VERCEL_READ_TOKEN`. It performs one bounded, no-redirect authenticated `GET https://api.vercel.com/v13/deployments/{encodedDeploymentId}` with only the exact optional team query. Require HTTP 200 plus response `id === LHCI_PREVIEW_DEPLOYMENT_ID`, `projectId === LHCI_VERCEL_PROJECT_ID`, optional exact team/owner identity, `readyState === "READY"`, and `target === null`; the exact null target is the provider-returned standard Preview proof, while `"production"`, `"staging"`, any custom target, an omitted target, or any other value is `NOT PASSED`. Require Git metadata `githubCommitOrg: "YNWAforever"`, `githubCommitRepo: "wisetech"`, `githubCommitRef` equal to the reviewed branch, and `githubCommitSha` equal to the reviewed head; if legacy duplicate `githubOrg`/ `githubRepo` keys are present, they must agree exactly rather than substitute for the commit keys. Require `LHCI_PREVIEW_DEPLOYMENT_URL === "https://" + response.url`; this provider-returned deployment hostname, not any member of `alias`/`automaticAliases`, becomes the verified immutable base. Reject the canonical production origin `https://hkwtia.vercel.app`, every canonical origin in the nonempty approval-record denylist, any response alias equal to one of them, malformed/duplicate denylist entries, missing or ambiguous metadata, redirects, non-GET attempts, and provider errors. The read token, approval input, and raw provider response remain parent-only and are never written to disk or passed to LHCI/Chrome; only their validated non-secret projections and hashes enter the record. This is a read-only metadata proof under the separately authorized Preview gate; it never creates, promotes, aliases, or mutates a deployment.
 
-    `lighthouserc.js` requires canonical HTTPS `LHCI_BASE_URL` and independently supplied `LHCI_ALLOWED_ORIGIN` to be exact-equal, requires `VERCEL_ENV=preview` or `LHCI_PREVIEW_ONLY=true`, rejects localhost and production-labelled hosts, and never reads `PLAYWRIGHT_BASE_URL`. It also requires canonical absolute `LHCI_RUN_ROOT`/`LHCI_OUTPUT_DIR`, proves the latter equals `<runRoot>/upload`, sets `upload.target = "filesystem"` and exact `upload.outputDir`, and contains no `collect.startServerCommand`, `startServerReadyPattern`, `startServerReadyTimeout`, or `staticDistDir`. Collect exactly `/membership`, `/zh/membership`, `/join?plan=startup&interval=annual`, and `/zh/join?plan=startup&interval=annual` for three runs against the already authorized Preview. Never include noindex `/member-login` or authenticated routes. Assert performance at least 0.90, accessibility at least 0.95, SEO at least 0.95, `largest-contentful-paint` at most 2,500 ms, and `cumulative-layout-shift` at most 0.1. Never use temporary public storage.
+    Only after provider proof, the wrapper validates the repository root and absolute local `@lhci/cli` entrypoint without a shell, generates one canonical lowercase UUID run ID, resolves `runRoot = path.join(os.tmpdir(), "wisetech-pr6-lhci-" + runId)`, and requires that exact path to be absent. It creates only that directory, then spawns `process.execPath` with the absolute repository-local `@lhci/cli` JavaScript entrypoint and arguments `autorun --config <absolute repository lighthouserc.js>` under `shell: false`, with `cwd` set to `runRoot`. The minimal child environment contains exact-equal provider-verified `LHCI_BASE_URL`, `LHCI_ALLOWED_ORIGIN`, and `LHCI_VERIFIED_DEPLOYMENT_URL`; `LHCI_VERIFIED_DEPLOYMENT_ID`, `LHCI_VERIFIED_GIT_SHA`, and `LHCI_VERIFIED_GIT_BRANCH`; validated non-secret `LHCI_VERIFIED_PRODUCTION_ORIGINS_JSON`; and `LHCI_RUN_ROOT`/`LHCI_OUTPUT_DIR=<runRoot>/upload`. It contains no Vercel token, raw provider response, parent approval variable, or self-asserted Preview flag. Thus LHCI's mandatory `.lighthouseci` collect/assert working directory and the filesystem upload directory both live inside one unique run-owned OS-temp root, never the repository. The wrapper rejects symlink/path mismatch, an existing root, a nonlocal CLI/config, shell execution, or an output path outside the exact root; it propagates the native exit code and prints only sanitized deployment ID/SHA/run-root evidence. It retains that unique directory on success or failure for the verification record and never deletes or reuses another run's evidence.
 
-    `lighthouse-runner.test.ts` uses injected filesystem/spawn/UUID seams to prove unique absent OS-temp ownership, local no-shell CLI/config invocation, exact child cwd/env, exit propagation, retention on failure, and rejection of a preexisting/symlink/outside-worktree-or-temp mismatch without touching the filesystem. `lighthouse-config.test.ts` imports the real config under a synthetic owned root and proves exact route equality, guard-before-collect behavior, thresholds, run count, explicit filesystem `outputDir`, no local server/autodiscovery fields, no local/private/noindex routes, and no public upload.
+    `lighthouserc.js` requires canonical HTTPS `LHCI_BASE_URL`, `LHCI_ALLOWED_ORIGIN`, and wrapper-owned `LHCI_VERIFIED_DEPLOYMENT_URL` to be exact-equal; requires exact nonempty `LHCI_VERIFIED_DEPLOYMENT_ID`, `LHCI_VERIFIED_GIT_SHA`, and `LHCI_VERIFIED_GIT_BRANCH=codex/wisetech-pr6-join-portal-admin`; and parses the wrapper-validated `LHCI_VERIFIED_PRODUCTION_ORIGINS_JSON`. It rejects localhost, `https://hkwtia.vercel.app`, every verified production origin, and any base/route origin mismatch, and never trusts `VERCEL_ENV`, `LHCI_PREVIEW_ONLY`, `LHCI_PREVIEW_DEPLOYMENT_URL`, or `PLAYWRIGHT_BASE_URL`. It also requires canonical absolute `LHCI_RUN_ROOT`/`LHCI_OUTPUT_DIR`, proves the latter equals `<runRoot>/upload`, sets `upload.target = "filesystem"` and exact `upload.outputDir`, and contains no `collect.startServerCommand`, `startServerReadyPattern`, `startServerReadyTimeout`, or `staticDistDir`. Collect exactly `/membership`, `/zh/membership`, `/join?plan=startup&interval=annual`, and `/zh/join?plan=startup&interval=annual` for three runs against that provider-verified immutable Preview. Never include noindex `/member-login` or authenticated routes. Assert performance at least 0.90, accessibility at least 0.95, SEO at least 0.95, `largest-contentful-paint` at most 2,500 ms, and `cumulative-layout-shift` at most 0.1. Never use temporary public storage.
+
+    `lighthouse-runner.test.ts` uses injected fetch/filesystem/spawn/UUID seams to prove guard-before-network, GET-only exact Vercel path/team query, timeout/no-redirect behavior, exact deployment/project/team/READY/`target === null`/generated-URL/Git-commit-org/repo/SHA/ref binding, agreement of any duplicate legacy org/repo keys, canonical approval-record production-origin parsing/rejection, parent-only token/raw-response handling, unique absent OS-temp ownership, local no-shell CLI/config invocation, minimal token-free child cwd/env with exact verified markers, exit propagation, retention on failure, and rejection of missing/non-null/custom targets, aliases, metadata ambiguity, a preexisting/symlink/outside-worktree-or-temp mismatch, or any attempted provider mutation without touching the real network/filesystem. `lighthouse-config.test.ts` imports the real config under synthetic provider-verified markers and proves exact verified-URL/origin/denylist equality, route equality, guard-before-collect behavior, thresholds, run count, explicit filesystem `outputDir`, no self-asserted Preview or parent approval variable, no local server/autodiscovery fields, no local/private/production/noindex routes, and no public upload.
 
     Run:
 
     npm.cmd test -- tests/unit/lighthouse-runner.test.ts tests/unit/lighthouse-config.test.ts
     npm.cmd run test:lighthouse
 
-    Expected: the runner/config contracts and authorized Preview collection PASS for the exact four public URLs. Require `<runRoot>/.lighthouseci` and `<runRoot>/upload/manifest.json` to be the only LHCI roots, require the manifest URLs/runs to match the exact allowlist, hash the retained manifest/reports into the verification record, and verify `git status --short` is unchanged because no artifact is inside the worktree. Record LCP at most 2.5 seconds and CLS at most 0.1 from those run-owned artifacts. Record INP at most 200 ms at p75 only from separately authorized field/Preview telemetry; if that evidence is absent, older than the reviewed deployment, bound to another origin, or above 200 ms, the INP/performance external gate is `NOT PASSED`. Retain and report the exact unique OS-temp run root as local external evidence; never stage, overwrite, reuse, or claim cleanup of it.
+    Expected: the runner/config contracts, exact read-only Vercel deployment metadata proof, and authorized immutable-Preview collection PASS for the exact four public URLs. Require the verification record to bind deployment ID, generated URL, project ID, reviewed SHA/branch, READY/Preview target, provider response hash with token removed, and production-origin denylist. Require `<runRoot>/.lighthouseci` and `<runRoot>/upload/manifest.json` to be the only LHCI roots, require the manifest URLs/runs to match the exact allowlist, hash the retained manifest/reports into the verification record, and verify `git status --short` is unchanged because no artifact is inside the worktree. Record LCP at most 2.5 seconds and CLS at most 0.1 from those run-owned artifacts. Record INP at most 200 ms at p75 only from separately authorized field/Preview telemetry; if that evidence is absent, older than the reviewed deployment, bound to another origin, or above 200 ms, the INP/performance external gate is `NOT PASSED`. Retain and report the exact unique OS-temp run root as local external evidence; never stage, overwrite, reuse, or claim cleanup of it.
 
 - [ ] **Step 7: Write the verification record and prove the committed range**
 
@@ -1780,15 +1832,37 @@
 
     $reviewedHead = (Read-Host "Paste the exact SHA printed by the zero-finding PR6 review").Trim()
     if ($reviewedHead -cnotmatch "^[0-9a-f]{40}$") { throw "PR6_REVIEWED_HEAD_INVALID" }
+    $expectedOwner = "YNWAforever"
     $expectedBranch = "codex/wisetech-pr6-join-portal-admin"
     $expectedBaseBranch = "codex/wisetech-pr5-public-journeys"
     $expectedBase = "3856dd71842f9a2e1d9c4b7a46521416a5bd83ae"
     $expectedRepo = "YNWAforever/wisetech"
+    $expectedRepoUrl = "https://github.com/YNWAforever/wisetech"
+    $expectedGitRemote = "https://github.com/YNWAforever/wisetech.git"
+    $remoteHeadRef = "refs/heads/$expectedBranch"
     $bodyPath = "docs/integration/wisetech-pr6-pr-body.md"
     & git cat-file -e "$reviewedHead^{commit}"
     if ($LASTEXITCODE -ne 0) { throw "PR6_REVIEWED_HEAD_MISSING" }
 
-    Define fail-closed helpers. They validate native-command exit codes, exact branch, every tracked/untracked status entry, detached-HEAD/ref drift, and one unambiguous remote ref:
+    Refuse every visible Git `url.*` configuration section before any remote lookup or mutation, covering both fetch and push rewrite forms without depending on a narrower key suffix. Independently bind the GitHub CLI repository identity; the local `origin` is intentionally never read or used because this checkout may belong to another repository:
+
+    $urlRewriteLines = @(& git config --show-origin --get-regexp "^url\.")
+    $urlRewriteExit = $LASTEXITCODE
+    if ($urlRewriteExit -ne 0 -and $urlRewriteExit -ne 1) { throw "PR6_GIT_URL_REWRITE_CHECK_FAILED" }
+    if ($urlRewriteLines.Count -ne 0) { throw "PR6_GIT_URL_REWRITE_PRESENT" }
+
+    $repoJsonLines = @(& gh repo view $expectedRepo --json nameWithOwner,url)
+    if ($LASTEXITCODE -ne 0) { throw "PR6_GITHUB_REPOSITORY_LOOKUP_FAILED" }
+    try {
+      $repository = (($repoJsonLines -join "`n") | ConvertFrom-Json)
+    } catch {
+      throw "PR6_GITHUB_REPOSITORY_JSON_INVALID"
+    }
+    if ($repository.nameWithOwner -cne $expectedRepo -or $repository.url -cne $expectedRepoUrl) {
+      throw "PR6_GITHUB_REPOSITORY_IDENTITY_MISMATCH"
+    }
+
+    Define fail-closed helpers. They validate native-command exit codes, exact branch, every tracked/untracked status entry, detached-HEAD/ref drift, unambiguous remote refs, and exact repository-owner/head PR identity:
 
     function Assert-Pr6LocalState([string] $phase) {
       $branchLines = @(& git branch --show-current)
@@ -1811,9 +1885,11 @@
       }
     }
 
-    function Get-Pr6RemoteOid([string] $ref, [string] $errorCode) {
-      $remoteLines = @(& git ls-remote --exit-code origin $ref)
-      if ($LASTEXITCODE -ne 0 -or $remoteLines.Count -ne 1) { throw $errorCode }
+    function Get-Pr6OptionalRemoteOid([string] $ref, [string] $errorCode) {
+      $remoteLines = @(& git ls-remote $expectedGitRemote $ref)
+      if ($LASTEXITCODE -ne 0) { throw $errorCode }
+      if ($remoteLines.Count -eq 0) { return $null }
+      if ($remoteLines.Count -ne 1) { throw $errorCode }
       $fields = @($remoteLines[0] -split "\s+")
       if ($fields.Count -lt 2 -or $fields[0] -cnotmatch "^[0-9a-f]{40}$" -or $fields[1] -cne $ref) {
         throw $errorCode
@@ -1821,13 +1897,36 @@
       return $fields[0]
     }
 
+    function Get-Pr6RemoteOid([string] $ref, [string] $errorCode) {
+      $oid = Get-Pr6OptionalRemoteOid $ref $errorCode
+      if ($null -eq $oid) { throw $errorCode }
+      return $oid
+    }
+
     function Assert-Pr6RemoteBase([string] $phase) {
       $remoteBase = Get-Pr6RemoteOid "refs/heads/$expectedBaseBranch" "PR6_REMOTE_BASE_LOOKUP_FAILED:$phase"
       if ($remoteBase -cne $expectedBase) { throw "PR6_REMOTE_BASE_DRIFT:$phase" }
     }
 
+    function Get-Pr6OpenHeadPrs([string] $phase) {
+      $listLines = @(& gh pr list --repo $expectedRepo --state open --head $expectedBranch --limit 1000 --json number,url,headRefName,headRepositoryOwner)
+      if ($LASTEXITCODE -ne 0) { throw "PR6_PR_DISCOVERY_FAILED:$phase" }
+      try {
+        $parsed = (($listLines -join "`n") | ConvertFrom-Json)
+      } catch {
+        throw "PR6_PR_DISCOVERY_JSON_INVALID:$phase"
+      }
+      $exact = @(@($parsed) | Where-Object {
+        $_.headRefName -ceq $expectedBranch -and
+        $_.headRepositoryOwner.login -ceq $expectedOwner
+      })
+      return @($exact)
+    }
+
     Assert-Pr6LocalState "pre-body"
     Assert-Pr6RemoteBase "pre-body"
+    $openHeadPrs = @(Get-Pr6OpenHeadPrs "pre-body")
+    if ($openHeadPrs.Count -ne 0) { throw "PR6_PREEXISTING_OPEN_HEAD_PR:pre-body" }
 
     Source the PR body only from the reviewed commit blob. Never read the mutable working-tree file for publication or verification:
 
@@ -1837,71 +1936,80 @@
     $expectedBody = (($bodyLines -join "`n") -replace "`r`n", "`n").TrimEnd("`r", "`n")
     if ([string]::IsNullOrWhiteSpace($expectedBody)) { throw "PR6_REVIEWED_BODY_EMPTY" }
 
-    Immediately before push, repeat local/base checks. Push the reviewed object itself to the exact remote ref with no force; never push a mutable branch-name source:
+    Immediately before any push, repeat local/base/open-PR checks and inspect the exact remote head ref. A different remote SHA fails without mutation. If the ref is absent, create it with an empty-expectation lease; `--force-with-lease=<ref>:` is used only as an atomic create-if-absent compare-and-set and can never overwrite an existing ref. If the ref already equals the reviewed SHA, perform no push:
 
     Assert-Pr6LocalState "pre-push"
     Assert-Pr6RemoteBase "pre-push"
-    $pushRefspec = "${reviewedHead}:refs/heads/$expectedBranch"
-    & git push origin $pushRefspec
-    if ($LASTEXITCODE -ne 0) { throw "PR6_PUSH_FAILED" }
+    $openHeadPrs = @(Get-Pr6OpenHeadPrs "pre-push")
+    if ($openHeadPrs.Count -ne 0) { throw "PR6_PREEXISTING_OPEN_HEAD_PR:pre-push" }
+    $remoteHeadBefore = Get-Pr6OptionalRemoteOid $remoteHeadRef "PR6_REMOTE_HEAD_LOOKUP_FAILED:pre-push"
+    if ($null -ne $remoteHeadBefore -and $remoteHeadBefore -cne $reviewedHead) {
+      throw "PR6_REMOTE_HEAD_DRIFT:pre-push"
+    }
+    if ($null -eq $remoteHeadBefore) {
+      $createOnlyLease = "--force-with-lease=${remoteHeadRef}:"
+      $pushRefspec = "${reviewedHead}:$remoteHeadRef"
+      & git push $createOnlyLease $expectedGitRemote $pushRefspec
+      if ($LASTEXITCODE -ne 0) { throw "PR6_CREATE_ONLY_PUSH_FAILED" }
+    }
 
-    $remoteHead = Get-Pr6RemoteOid "refs/heads/$expectedBranch" "PR6_REMOTE_HEAD_LOOKUP_FAILED:post-push"
+    $remoteHead = Get-Pr6RemoteOid $remoteHeadRef "PR6_REMOTE_HEAD_LOOKUP_FAILED:post-push"
     if ($remoteHead -cne $reviewedHead) { throw "PR6_REMOTE_HEAD_MISMATCH:post-push" }
 
-    Immediately before PR creation, reassert the exact local branch/clean/ref state, immutable remote base, and pushed remote head. No command that can create a commit, update a branch, or edit a file may intervene:
+    Immediately before PR creation, reassert the exact local branch/clean/ref state, immutable remote base, pushed remote head, and absence of an existing exact-owner/head open PR. No command that can create a commit, update a branch, or edit a file may intervene:
 
     Assert-Pr6LocalState "pre-create"
     Assert-Pr6RemoteBase "pre-create"
-    $remoteHead = Get-Pr6RemoteOid "refs/heads/$expectedBranch" "PR6_REMOTE_HEAD_LOOKUP_FAILED:pre-create"
+    $remoteHead = Get-Pr6RemoteOid $remoteHeadRef "PR6_REMOTE_HEAD_LOOKUP_FAILED:pre-create"
     if ($remoteHead -cne $reviewedHead) { throw "PR6_REMOTE_HEAD_MISMATCH:pre-create" }
-
-    Prove there is no pre-existing open PR for this exact head before creation. Query results are parsed as JSON and any CLI/JSON ambiguity fails:
-
-    function Get-Pr6OpenHeadPrs([string] $phase) {
-      $listLines = @(& gh pr list --repo $expectedRepo --state open --head "YNWAforever:$expectedBranch" --json number,url)
-      if ($LASTEXITCODE -ne 0) { throw "PR6_PR_DISCOVERY_FAILED:$phase" }
-      try {
-        $parsed = (($listLines -join "`n") | ConvertFrom-Json)
-      } catch {
-        throw "PR6_PR_DISCOVERY_JSON_INVALID:$phase"
-      }
-      return @($parsed)
-    }
-
     $preExistingPrs = @(Get-Pr6OpenHeadPrs "pre-create")
-    if ($preExistingPrs.Count -ne 0) { throw "PR6_PREEXISTING_OPEN_HEAD_PR" }
+    if ($preExistingPrs.Count -ne 0) { throw "PR6_PREEXISTING_OPEN_HEAD_PR:pre-create" }
 
-    Create the stacked draft with the reviewed-blob body. Immediately discover it through the repository/head query; because the pre-create query proved zero, exactly one result is the only safely attributable candidate. A failed create exit with one discovered candidate is still treated as a failed attempt and closed; zero or multiple candidates is `NOT PASSED` and reported for manual inspection because there is no safe exact close target:
+    Create the stacked draft with the reviewed-blob body. Only a zero native exit plus exactly one exact repository URL/number emitted by that `gh pr create` invocation may establish the automatic-close identity. Independently discover the exact owner/head candidate for validation, but never use discovery alone as a close target; an absent/ambiguous stdout identity or any nonzero/uncertain create exit fails for manual inspection without closing or otherwise mutating a discovered PR:
 
     $createOutput = @(& gh pr create --repo $expectedRepo --draft --base $expectedBaseBranch --head $expectedBranch --title "feat: align WiseTech Join Portal and Admin" --body $expectedBody)
     $createExit = $LASTEXITCODE
 
-    $postCreateCandidates = @(Get-Pr6OpenHeadPrs "post-create-discovery")
-    if ($postCreateCandidates.Count -ne 1) {
-      throw "PR6_CREATED_PR_DISCOVERY_AMBIGUOUS:$($postCreateCandidates.Count):CREATE_EXIT_$createExit"
+    $stdoutIdentities = @()
+    foreach ($line in $createOutput) {
+      $stdoutMatch = [regex]::Match(([string]$line).Trim(), "^https://github\.com/YNWAforever/wisetech/pull/([1-9][0-9]*)$")
+      if ($stdoutMatch.Success) {
+        $stdoutIdentities += [pscustomobject]@{
+          number = $stdoutMatch.Groups[1].Value
+          url = $stdoutMatch.Value
+        }
+      }
     }
 
-    $numberText = [string]$postCreateCandidates[0].number
-    if ($numberText -cnotmatch "^[1-9][0-9]*$") { throw "PR6_CREATED_PR_NUMBER_INVALID" }
-    $createdPrNumber = $numberText
-    $prUrl = ([string]$postCreateCandidates[0].url).Trim()
+    $postCreateCandidates = @()
+    $discoveryFailure = $null
+    try {
+      $postCreateCandidates = @(Get-Pr6OpenHeadPrs "post-create-discovery")
+    } catch {
+      $discoveryFailure = $_
+    }
 
-    Validate the exact discovered draft in a guarded block. If the native create exit or any local/remote/base/head/body/OID/state check fails after unique discovery, close only that captured draft PR, retain the reviewed remote branch for diagnosis, verify closure, and rethrow; never leave a uniquely attributable known-wrong draft open:
+    if ($createExit -ne 0 -or $stdoutIdentities.Count -ne 1) {
+      throw "PR6_CREATED_PR_HAS_NO_SAFE_CLOSE_TARGET:STDOUT_$($stdoutIdentities.Count):CREATE_EXIT_$createExit"
+    }
+    $createdPrNumber = [string]$stdoutIdentities[0].number
+    $prUrl = [string]$stdoutIdentities[0].url
+
+    Validate the exact stdout-captured draft in a guarded block. If independent discovery or any local/remote/base/head/body/OID/state check fails after that successful-create capture, close only that exact emitted draft PR, retain the reviewed remote branch for diagnosis, verify closure, and rethrow:
 
     try {
-      if ($createExit -ne 0) { throw "PR6_PR_CREATE_FAILED_AFTER_DISCOVERY:$createExit" }
-
-      $urlMatch = [regex]::Match($prUrl, "^https://github\.com/YNWAforever/wisetech/pull/([1-9][0-9]*)$")
-      if (-not $urlMatch.Success -or $urlMatch.Groups[1].Value -cne $createdPrNumber) {
-        throw "PR6_CREATED_PR_URL_INVALID"
+      if ($createExit -ne 0) { throw "PR6_PR_CREATE_FAILED_AFTER_CAPTURE:$createExit" }
+      if ($null -ne $discoveryFailure) { throw $discoveryFailure }
+      if ($postCreateCandidates.Count -ne 1 -or [string]($postCreateCandidates[0].number) -cne $createdPrNumber) {
+        throw "PR6_CREATED_PR_DISCOVERY_MISMATCH"
       }
 
       Assert-Pr6LocalState "post-create"
       Assert-Pr6RemoteBase "post-create"
-      $remoteHead = Get-Pr6RemoteOid "refs/heads/$expectedBranch" "PR6_REMOTE_HEAD_LOOKUP_FAILED:post-create"
+      $remoteHead = Get-Pr6RemoteOid $remoteHeadRef "PR6_REMOTE_HEAD_LOOKUP_FAILED:post-create"
       if ($remoteHead -cne $reviewedHead) { throw "PR6_REMOTE_HEAD_MISMATCH:post-create" }
 
-      $viewJsonLines = @(& gh pr view $createdPrNumber --repo $expectedRepo --json url,state,isDraft,baseRefName,baseRefOid,headRefName,headRefOid,body,mergeStateStatus,statusCheckRollup)
+      $viewJsonLines = @(& gh pr view $createdPrNumber --repo $expectedRepo --json url,state,isDraft,baseRefName,baseRefOid,headRefName,headRefOid,headRepositoryOwner,body,mergeStateStatus,statusCheckRollup)
       if ($LASTEXITCODE -ne 0) { throw "PR6_PR_VIEW_FAILED" }
       try {
         $published = (($viewJsonLines -join "`n") | ConvertFrom-Json)
@@ -1916,16 +2024,16 @@
       if ($published.baseRefName -cne $expectedBaseBranch -or $published.baseRefOid -cne $expectedBase) {
         throw "PR6_PR_BASE_MISMATCH"
       }
-      if ($published.headRefName -cne $expectedBranch -or $published.headRefOid -cne $reviewedHead) {
+      if ($published.headRefName -cne $expectedBranch -or $published.headRepositoryOwner.login -cne $expectedOwner -or $published.headRefOid -cne $reviewedHead) {
         throw "PR6_PR_HEAD_MISMATCH"
       }
 
       Assert-Pr6LocalState "post-validate"
       Assert-Pr6RemoteBase "post-validate"
-      $remoteHead = Get-Pr6RemoteOid "refs/heads/$expectedBranch" "PR6_REMOTE_HEAD_LOOKUP_FAILED:post-validate"
+      $remoteHead = Get-Pr6RemoteOid $remoteHeadRef "PR6_REMOTE_HEAD_LOOKUP_FAILED:post-validate"
       if ($remoteHead -cne $reviewedHead) { throw "PR6_REMOTE_HEAD_MISMATCH:post-validate" }
       $finalCandidates = @(Get-Pr6OpenHeadPrs "post-validate")
-      if ($finalCandidates.Count -ne 1 -or [string]$finalCandidates[0].number -cne $createdPrNumber) {
+      if ($finalCandidates.Count -ne 1 -or [string]($finalCandidates[0].number) -cne $createdPrNumber) {
         throw "PR6_OPEN_HEAD_PR_SET_CHANGED"
       }
     } catch {
@@ -1954,10 +2062,10 @@
 
 ## Self-Review
 
-- Spec coverage: Tasks 1-2 cover the one catalog authority, interval identity, typed Join context/outcomes, direct terminal navigation, durable membership precedence, explicit persistence, and idempotent CAS recovery when membership creation commits before journey/application projection. Task 3 covers the complete continuation allowlist, explicit noindex member login, one Neon magic-link path, member-only Portal entry, public navigation destinations, and sign-out behavior. Task 4 covers durable checkout pricing, lock projection, webhook-authoritative completion, and localized Billing Portal return. Task 5 covers invitation callback/token identity, replay, expiry, revocation, and provider-free route tests.
+- Spec coverage: Tasks 1-2 cover the one catalog authority, interval identity, typed Join context/outcomes, direct terminal navigation, durable membership precedence, explicit persistence, exhaustive handling of all seven membership statuses, and fresh row-locked application/journey completion when membership creation committed first. Task 3 covers the complete continuation allowlist, explicit noindex member login, one Neon magic-link path, member-only Portal entry, public navigation destinations, and sign-out behavior. Task 4 covers durable checkout pricing, atomic membership/application/attempt/journey webhook projection, webhook-authoritative completion, and localized Billing Portal return. Task 5 covers invitation callback/token identity, replay, expiry, revocation, and provider-free route tests.
 - Presentation coverage: Task 6 creates the shared shell family, grouped eight-item Portal and 4/6/6 Admin navigation, active specificity, skip/main/mobile/focus/table/feedback behavior, and exact 6/10/26 route inventories. Tasks 7-8 align every Join/member-login and Portal route while preserving current owners and failing closed on ambiguous company context. Tasks 9-11 align every Admin CRM, CMS, and Operations page while retaining authorization, audits, publication/media locks, approvals, reports, automations, Showcase, and cohort transitions.
 - Verification coverage: Task 12 includes exact credential-free and 60-case authenticated matrices, 26-page/19-API denial proof, unit/safety aggregates, managed M1-M7/M4B/M5/Axe lifecycles with deny-by-default external-capability scrubbing, exact test-only remapping, real session revocation/no disk auth artifacts, and complete identity/data restoration; M1 bounded timeout/immutable evidence; M2 pre-reset baseline/test-secret/quiescence safety; M3 pre-seed identity plus complete seed ledger; M4B exact read-only fixture preflight; M6 GET-only provider proof plus conflict-key/all-Showcase restoration; M7 full catalog-derived Privacy namespace/database-clock/audit-object ownership; an exact four-route authorized-Preview Lighthouse wrapper/config with no local server and a unique outside-worktree run root; stage-before-commit ordering; post-commit immutable range proof; and publication bound to the exact zero-finding SHA, reviewed commit body, local/remote refs, captured PR identity, and automatic closure of a mismatched created draft.
-- Type consistency: `BillingInterval`, `MembershipSelection`, `MembershipPriceIds`, and the exact `{plans.list, loadPriceIds}` `MembershipCatalogDependencies` boundary originate in Task 1 and all later catalog/Join/checkout signatures consume those names. `PreparedJoinSubmission`, its durable terminal reconciliation descriptor, and its read-only dependencies are fully defined in Task 2; only a server-produced draft reaches ordinary writes, while a terminal split state reaches only the exact CAS reconciliation seam. `PortalContinuation` is defined once in Task 2 and consumed by Task 3. `JoinStateDependencies` is fully defined in Task 4. `InternalNavigationGroup` and shell primitive names originate in Task 6 and are used unchanged in Tasks 7-11.
+- Type consistency: `BillingInterval`, `MembershipSelection`, `MembershipPriceIds`, and the exact `{plans.list, loadPriceIds}` `MembershipCatalogDependencies` boundary originate in Task 1 and all later catalog/Join/checkout signatures consume those names. `PreparedJoinSubmission` carries only terminal row identities or one server-resolved draft; `JoinTerminalDescriptor`, the exhaustive terminal mapper, and the row-locked transaction originate in Task 2 and are reused by Task 4's paid-webhook projection. No JavaScript timestamp is a concurrency token. `PortalContinuation` is defined once in Task 2 and consumed by Task 3. `JoinStateDependencies` is fully defined in Task 4. `InternalNavigationGroup` and shell primitive names originate in Task 6 and are used unchanged in Tasks 7-11.
 - Placeholder scan: every task names exact files, interfaces, RED/GREEN or final commands, expected evidence, constraints, and staging. M1 names provider/Auth-session/webhook/profile ledgers; M2 exact 26/19 matrices plus pre-reset profile/no-artifact cleanup; M3 complete seed/unsubscribe/retry/audit/session/identity reset; M6 provider metadata plus full seed/application/audit/Showcase/session/identity restore; M7 full-namespace Page Copy and exact News/Media audit predicates plus real-action public restore and failing containment; Task 12 names external artifacts, managed identities/sessions, and executable commit/review/publication order. No implementation step delegates an unspecified safety or ownership decision.
 
 ## Execution Handoff
