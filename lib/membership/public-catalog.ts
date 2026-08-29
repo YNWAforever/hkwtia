@@ -55,7 +55,7 @@ function paidTier(
   money: Intl.NumberFormat,
 ): PublicMembershipTier | null {
   if (configuredPriceId.length === 0 || configuredPriceId !== configuredPriceId.trim()) return null;
-  if (row.stripePriceReference !== configuredPriceId) return null;
+  if (row.stripePriceReference !== null && row.stripePriceReference !== configuredPriceId) return null;
   if (row.annualPriceHkd === null || row.annualPriceHkd <= 0) return null;
   if (row.monthlyPriceHkd !== null && row.monthlyPriceHkd <= 0) return null;
 

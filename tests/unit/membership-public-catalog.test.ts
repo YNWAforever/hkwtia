@@ -133,9 +133,25 @@ describe("public Membership catalog", () => {
     });
   });
 
+  it("keeps paid tiers with valid persisted amounts when their optional Stripe references are null", () => {
+    const result = catalog([
+      startup({stripePriceReference: null}),
+      {...validRows[2], stripePriceReference: null},
+    ]);
+
+    expect(result.map((tier) => tier.code)).toEqual(["startup", "corporate"]);
+    expect(result).toMatchObject([
+      {code: "startup", price: {kind: "paid"}, cta: {href: "/join?plan=startup"}},
+      {code: "corporate", price: {kind: "paid"}, cta: {href: "/join?plan=corporate"}},
+    ]);
+    const serialized = JSON.stringify(result);
+    expect(serialized).not.toContain("stripePriceReference");
+    expect(serialized).not.toContain(priceIds.startup);
+    expect(serialized).not.toContain(priceIds.corporate);
+  });
+
   it.each([
     ["missing configured ID", {startup: "", corporate: priceIds.corporate}, priceIds.startup],
-    ["missing row reference", priceIds, null],
     ["similar row reference", priceIds, `${priceIds.startup}_other`],
     ["different configured ID", {startup: "price_other", corporate: priceIds.corporate}, priceIds.startup],
   ] as const)("omits a paid plan for %s", (_label, configured, stripePriceReference) => {

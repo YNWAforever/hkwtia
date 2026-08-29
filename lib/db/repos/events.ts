@@ -52,11 +52,11 @@ type EventAudit = Readonly<{
 }>;
 
 export type EventRows = readonly Event[] | Readonly<{list: () => Promise<readonly Event[]>}>;
-export type FeaturedPublicEventOptions = Readonly<{asOf: Date; limit: number}>;
+export type FeaturedPublicEventOptions = Readonly<{asOf: Date; limit: number; locale?: string}>;
 type PublicEventHeroSource = Readonly<{url: string; altEn: string; altZh: string; archivedAt: Date | null}>;
 type PublicEventMemoryRow = Readonly<{event: Event; hero: PublicEventHeroSource | null}>;
 export type PublicEventSource = readonly (Event | PublicEventMemoryRow)[] | Readonly<{list: () => Promise<readonly (Event | PublicEventMemoryRow)[]>}>;
-export type PublicEventReadOptions = Readonly<{status: PublicEventStatus; asOf: Date; locale?: string; source?: PublicEventSource}>;
+export type PublicEventReadOptions = Readonly<{status: PublicEventStatus; asOf: Date; locale?: string; limit?: number; source?: PublicEventSource}>;
 export type PublicEventSlugOptions = Readonly<{asOf: Date; source?: PublicEventSource}>;
 export type MemberEventEligibility = Readonly<{hasEligibleMembership: (actor: Extract<Actor, {kind: "member"}>) => Promise<boolean>}>;
 export type EventMutationDependencies = Readonly<{transaction: <T>(work: (transaction: Readonly<{
@@ -137,18 +137,23 @@ function publicRowsByStatus(rows: readonly PublicEventMemoryRow[], status: Publi
 }
 
 export async function listPublicEvents(_actor: Actor, options: PublicEventReadOptions): Promise<PublicEventProjection[]> {
+  const limit = options.limit === undefined ? undefined : publicReadLimitSchema.parse(options.limit);
   const asOf = z.coerce.date().parse(options.asOf);
   const locale = options.locale ?? "en";
-  if (options.source) return publicRowsByStatus(await publicRowsFrom(options.source), options.status, asOf).map((row) => projectPublicEvent(row, locale));
+  if (options.source) {
+    const rows = publicRowsByStatus(await publicRowsFrom(options.source), options.status, asOf);
+    return (limit === undefined ? rows : rows.slice(0, limit)).map((row) => projectPublicEvent(row, locale));
+  }
   const boundary = sql<Date>`coalesce(${events.endsAt}, ${events.startsAt})`;
   const predicate = options.status === "open" ? gte(boundary, asOf) : lt(boundary, asOf);
   const order = options.status === "open" ? [asc(boundary), asc(events.slug), asc(events.id)] : [desc(boundary), asc(events.slug), asc(events.id)];
   const database = await getDb();
-  const rows = await database.select({
+  const query = database.select({
     event: events,
     hero: {url: media.url, altEn: media.altEn, altZh: media.altZh, archivedAt: media.archivedAt},
   }).from(events).leftJoin(media, eq(events.heroMediaId, media.id))
     .where(and(eq(events.published, true), eq(events.memberOnly, false), predicate)).orderBy(...order);
+  const rows = await (limit === undefined ? query : query.limit(limit));
   return rows.map((row) => projectPublicEvent({event: row.event, hero: row.hero === null || row.hero.url === null ? null : row.hero as PublicEventHeroSource}, locale));
 }
 
@@ -174,9 +179,13 @@ export async function listFeaturedPublicEvents(
   options: FeaturedPublicEventOptions,
   source?: PublicEventSource,
 ): Promise<PublicEventProjection[]> {
-  const limit = publicReadLimitSchema.parse(options.limit);
-  const asOf = z.coerce.date().parse(options.asOf);
-  return (await listPublicEvents(actor, {status: "open", asOf, source})).slice(0, limit);
+  return listPublicEvents(actor, {
+    status: "open",
+    asOf: options.asOf,
+    locale: options.locale,
+    limit: options.limit,
+    source,
+  });
 }
 
 const eligibleStatuses = ["active", "past_due", "cancel_at_period_end"] as const;

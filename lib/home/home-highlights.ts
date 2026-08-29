@@ -59,8 +59,7 @@ export async function loadHomeHighlights(input: Readonly<{
 }>): Promise<HomeHighlights> {
   const {locale, asOf = new Date(), readers} = input;
   const eventReader = readers?.events ?? ((options: FeaturedPublicEventOptions) =>
-    eventsRepository.listPublic(anonymous, {status: "open", asOf: options.asOf, locale})
-      .then((rows) => rows.slice(0, options.limit)));
+    eventsRepository.listFeaturedPublic(anonymous, {...options, locale}));
   const newsReader = readers?.news ?? defaultReaders.news;
   const showcaseReader = readers?.showcase ?? defaultReaders.showcase;
   const [eventResult, newsResult, showcaseResult] = await Promise.allSettled([

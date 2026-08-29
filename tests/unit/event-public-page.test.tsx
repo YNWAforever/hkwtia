@@ -52,4 +52,23 @@ describe("public Event status controls", () => {
 
     await expect(renderEventsPage(undefined)).resolves.toContain("unavailableTitle");
   });
+
+  it("clamps list-card descriptions, breaks long tokens, and preserves the meaningful text", async () => {
+    const longDescription = "A".repeat(240);
+    events.listPublic.mockResolvedValue([{
+      id: "10000000-0000-4000-8000-000000000001",
+      slug: "long-description",
+      title: "Long description Event",
+      description: longDescription,
+      startsAt: "2030-01-01T10:00:00.000Z",
+      endsAt: null,
+      venue: "Hong Kong",
+      capacity: null,
+      hero: null,
+    }]);
+
+    const rendered = await renderEventsPage("open");
+
+    expect(rendered).toContain(`class="line-clamp-3 break-words">${longDescription}</p>`);
+  });
 });
