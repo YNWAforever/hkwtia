@@ -712,6 +712,11 @@
     "eyebrow": "AI 展示",
     "title": "尋找合適的 WTIA 會員夥伴",
     "description": "探索香港科技公司的實用產品及服務。",
+    "introTitle": "面向實際業務需要的科技方案",
+    "introDescription": "按使用場景、部署方式、語言及整合需要，比較已發布的 WTIA 會員方案。",
+    "ownerCta": "管理你的展示頁",
+    "resultsTitle": "探索會員方案",
+    "resultsDescription": "使用篩選條件，找出切合你需要的方案。",
     "emptyTitle": "沒有符合的已發布展示頁",
     "emptyDescription": "請嘗試更改篩選條件或搜尋字詞。",
     "premium": "精選",
@@ -729,6 +734,8 @@
       "clear": "清除篩選"
     },
     "details": {
+      "overview": "方案概覽",
+      "capabilities": "方案能力",
       "useCases": "使用場景",
       "deployment": "部署方式",
       "languages": "語言",

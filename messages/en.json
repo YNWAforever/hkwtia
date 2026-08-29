@@ -711,6 +711,11 @@
     "eyebrow": "AI Showcase",
     "title": "Find the right WTIA member partner",
     "description": "Explore practical products and services from Hong Kong technology companies.",
+    "introTitle": "Technology solutions for practical business needs",
+    "introDescription": "Compare published WTIA member solutions by use case, deployment, language, and integration fit.",
+    "ownerCta": "Manage your showcase listing",
+    "resultsTitle": "Explore member solutions",
+    "resultsDescription": "Use the filters to narrow the directory to solutions that fit your needs.",
     "emptyTitle": "No published listings match",
     "emptyDescription": "Try changing a filter or search term.",
     "premium": "Premium",
@@ -728,6 +733,8 @@
       "clear": "Clear filters"
     },
     "details": {
+      "overview": "Solution overview",
+      "capabilities": "Capabilities",
       "useCases": "Use cases",
       "deployment": "Deployment",
       "languages": "Languages",
