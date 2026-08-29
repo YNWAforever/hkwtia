@@ -47,6 +47,20 @@ describe("LocaleSwitcher", () => {
     );
   });
 
+  it("retains the selected Event status and fragment through the real switcher", () => {
+    pathState.current = "/events";
+    searchState.current = new URLSearchParams("status=past");
+    window.history.replaceState(null, "", "/events?status=past#results");
+    render(<LocaleSwitcher locale="en" {...labels} />);
+
+    fireEvent.click(screen.getByRole("button", {name: labels.switchToChineseLabel}));
+
+    expect(routerReplace).toHaveBeenCalledWith(
+      "/events?status=past#results",
+      {locale: "zh-HK"},
+    );
+  });
+
   it("preserves the current fragment after path and query when switching locale", () => {
     searchState.current = new URLSearchParams("filter=member");
     window.history.replaceState(null, "", "/events?filter=member#schedule");
