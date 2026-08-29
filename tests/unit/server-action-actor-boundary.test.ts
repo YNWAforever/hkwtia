@@ -17,9 +17,157 @@ import {describe, expect, it} from "vitest";
  * session, and actor-taking cores belong in a plain `server-only` module.
  */
 const actorParameterNames = new Set(["actor", "_actor", "adminActor", "sessionActor"]);
-const actorTypeNames = new Set([
-  "Actor", "AdminActor", "SessionActor", "AgentRunActor", "ScheduledAgentActor", "ConciergeAgentActor",
-]);
+const projectRoot = process.cwd();
+const actorModuleExports = [
+  {fileName: resolve(projectRoot, "lib/membership/lifecycle.ts"), exportName: "Actor"},
+  {fileName: resolve(projectRoot, "lib/auth/agent-actor.ts"), exportName: "Actor"},
+] as const;
+
+function diagnosticMessage(diagnostic: ts.Diagnostic): string {
+  return ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
+}
+
+const configPath = resolve(projectRoot, "tsconfig.json");
+const configFile = ts.readConfigFile(configPath, ts.sys.readFile);
+if (configFile.error) {
+  throw new Error(`Cannot read ${configPath}: ${diagnosticMessage(configFile.error)}`);
+}
+const parsedConfig = ts.parseJsonConfigFileContent(
+  configFile.config,
+  ts.sys,
+  projectRoot,
+  {incremental: false, noEmit: true},
+  configPath,
+);
+if (parsedConfig.errors.length > 0) {
+  throw new Error(
+    `Cannot parse ${configPath}: ${parsedConfig.errors.map(diagnosticMessage).join("; ")}`,
+  );
+}
+
+type ActorAnalysis = {
+  program: ts.Program;
+  checker: ts.TypeChecker;
+  actorTypes: readonly ts.Type[];
+};
+
+function normalizedPath(fileName: string): string {
+  return resolve(fileName).replaceAll("\\", "/").toLowerCase();
+}
+
+function createAnalysisProgram(
+  rootNames: readonly string[],
+  virtualSources: ReadonlyMap<string, string> = new Map(),
+): ts.Program {
+  const sourcesByPath = new Map(
+    [...virtualSources].map(([fileName, source]) => [normalizedPath(fileName), source]),
+  );
+  const host = ts.createCompilerHost(parsedConfig.options, true);
+  const baseFileExists = host.fileExists.bind(host);
+  const baseReadFile = host.readFile.bind(host);
+  const baseGetSourceFile = host.getSourceFile.bind(host);
+
+  host.fileExists = (fileName) => (
+    sourcesByPath.has(normalizedPath(fileName)) || baseFileExists(fileName)
+  );
+  host.readFile = (fileName) => (
+    sourcesByPath.get(normalizedPath(fileName)) ?? baseReadFile(fileName)
+  );
+  host.getSourceFile = (
+    fileName,
+    languageVersionOrOptions,
+    onError,
+    shouldCreateNewSourceFile,
+  ) => {
+    const source = sourcesByPath.get(normalizedPath(fileName));
+    if (source === undefined) {
+      return baseGetSourceFile(
+        fileName,
+        languageVersionOrOptions,
+        onError,
+        shouldCreateNewSourceFile,
+      );
+    }
+    return ts.createSourceFile(
+      fileName,
+      source,
+      languageVersionOrOptions,
+      true,
+      fileName.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+    );
+  };
+
+  const uniqueRootNames = new Map<string, string>();
+  for (const fileName of [...rootNames, ...virtualSources.keys()]) {
+    uniqueRootNames.set(normalizedPath(fileName), resolve(fileName));
+  }
+  return ts.createProgram({
+    rootNames: [...uniqueRootNames.values()],
+    options: parsedConfig.options,
+    host,
+  });
+}
+
+function sourceFileInProgram(program: ts.Program, fileName: string): ts.SourceFile {
+  const normalizedFileName = normalizedPath(fileName);
+  const sourceFile = program.getSourceFiles().find(
+    (candidate) => normalizedPath(candidate.fileName) === normalizedFileName,
+  );
+  if (!sourceFile) {
+    throw new Error(`Actor analysis Program did not include ${fileName}`);
+  }
+  return sourceFile;
+}
+
+function createActorAnalysis(
+  rootNames: readonly string[],
+  virtualSources: ReadonlyMap<string, string> = new Map(),
+): ActorAnalysis {
+  const program = createAnalysisProgram(
+    [...rootNames, ...actorModuleExports.map(({fileName}) => fileName)],
+    virtualSources,
+  );
+  const checker = program.getTypeChecker();
+  const actorTypes = actorModuleExports.map(({fileName, exportName}) => {
+    const moduleFile = sourceFileInProgram(program, fileName);
+    const moduleSymbol = checker.getSymbolAtLocation(moduleFile);
+    if (!moduleSymbol) {
+      throw new Error(`Cannot resolve module symbol for canonical actor module ${fileName}`);
+    }
+    const exportedSymbol = checker.getExportsOfModule(moduleSymbol).find(
+      (candidate) => candidate.name === exportName,
+    );
+    if (!exportedSymbol) {
+      throw new Error(`Cannot resolve canonical actor export ${exportName} from ${fileName}`);
+    }
+    const targetSymbol = exportedSymbol.flags & ts.SymbolFlags.Alias
+      ? checker.getAliasedSymbol(exportedSymbol)
+      : exportedSymbol;
+    const actorType = checker.getDeclaredTypeOfSymbol(targetSymbol);
+    if (actorType.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown | ts.TypeFlags.Never)) {
+      throw new Error(
+        `Canonical actor export ${exportName} from ${fileName} resolved to `
+        + checker.typeToString(actorType),
+      );
+    }
+    return actorType;
+  });
+  if (actorTypes.length !== actorModuleExports.length) {
+    throw new Error("Canonical actor type resolution was incomplete");
+  }
+  return {program, checker, actorTypes};
+}
+
+const actorFixturePrelude = [
+  'import type {Actor, AdminActor, Actor as SessionActor} from "@/lib/membership/lifecycle";',
+  'import type {AgentRunActor, ScheduledAgentActor, ConciergeAgentActor} from "@/lib/auth/agent-actor";',
+].join("\n");
+
+function actorFixtureSource(source: string): string {
+  return source.includes('from "@/lib/')
+    ? source
+    : `${actorFixturePrelude}\n${source}`;
+}
 
 type RuntimeFunctionNode =
   | ts.FunctionDeclaration
@@ -39,24 +187,24 @@ function sourceFiles(directory: string): string[] {
   });
 }
 
-function isUseServerModule(source: string): boolean {
-  return /^\s*(["'])use server\1\s*;?/.test(source);
-}
-
-function typeNameOf(node: ts.TypeNode | undefined): string | null {
-  if (!node) return null;
-  if (ts.isTypeReferenceNode(node)) {
-    const name = node.typeName;
-    return ts.isIdentifier(name) ? name.text : name.right.text;
-  }
-  // Extract<Actor, {...}> and unions such as `Actor | null` resolve through here.
-  if (ts.isUnionTypeNode(node)) {
-    for (const member of node.types) {
-      const inner = typeNameOf(member);
-      if (inner && actorTypeNames.has(inner)) return inner;
+function isUseServerModule(source: string, fileName = "candidate.ts"): boolean {
+  const file = ts.createSourceFile(
+    fileName,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    fileName.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  );
+  for (const statement of file.statements) {
+    if (
+      !ts.isExpressionStatement(statement)
+      || !ts.isStringLiteral(statement.expression)
+    ) {
+      return false;
     }
+    if (statement.expression.text === "use server") return true;
   }
-  return null;
+  return false;
 }
 
 function hasModifier(node: ts.Node, kind: ts.SyntaxKind): boolean {
@@ -277,19 +425,45 @@ function localRuntimeExports(file: ts.SourceFile): RuntimeExport[] {
   return exports;
 }
 
-function actorTakingExports(source: string, fileName: string): string[] {
-  const file = ts.createSourceFile(
-    fileName, source, ts.ScriptTarget.Latest, true,
-    fileName.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
-  );
+function isActorType(
+  type: ts.Type,
+  checker: ts.TypeChecker,
+  actorTypes: readonly ts.Type[],
+  seen = new Set<ts.Type>(),
+): boolean {
+  if (seen.has(type)) return false;
+  seen.add(type);
 
+  if (type.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown | ts.TypeFlags.Never)) {
+    return false;
+  }
+  if (type.isUnion()) {
+    return type.types.some((member) => isActorType(member, checker, actorTypes, seen));
+  }
+  if (type.flags & ts.TypeFlags.TypeParameter) {
+    const constraint = checker.getBaseConstraintOfType(type);
+    return Boolean(
+      constraint
+      && constraint !== type
+      && isActorType(constraint, checker, actorTypes, seen),
+    );
+  }
+  return actorTypes.some((actorType) => checker.isTypeAssignableTo(type, actorType));
+}
+
+function actorTakingExports(
+  file: ts.SourceFile,
+  checker: ts.TypeChecker,
+  actorTypes: readonly ts.Type[],
+): string[] {
   return localRuntimeExports(file).flatMap(({name, functionNode}) => {
     if (!functionNode) return [];
     const offending = functionNode.parameters.some((parameter) => {
       const byName = ts.isIdentifier(parameter.name)
         && actorParameterNames.has(parameter.name.text);
-      const type = typeNameOf(parameter.type);
-      const byType = type !== null && actorTypeNames.has(type);
+      const byType = parameter.type
+        ? isActorType(checker.getTypeFromTypeNode(parameter.type), checker, actorTypes)
+        : false;
       return byName || byType;
     });
     return offending ? [name] : [];
@@ -310,12 +484,35 @@ function nonAsyncFunctionExports(source: string, fileName: string): string[] {
 }
 
 const modules = ["lib", "app"]
-  .flatMap((root) => sourceFiles(resolve(process.cwd(), root)))
-  .filter((path) => isUseServerModule(readFileSync(path, "utf8")))
-  .map((path) => relative(process.cwd(), path).replaceAll("\\", "/"))
+  .flatMap((root) => sourceFiles(resolve(projectRoot, root)))
+  .filter((path) => isUseServerModule(readFileSync(path, "utf8"), path))
+  .map((path) => relative(projectRoot, path).replaceAll("\\", "/"))
   .sort();
 
+const repositoryActorAnalysis = createActorAnalysis(
+  modules.map((fileName) => resolve(projectRoot, fileName)),
+);
+
 describe("Server Action actor boundary", () => {
+  it("discovers use-server directives through legal directive prologue trivia", () => {
+    const serverModules = [
+      '// server actions\n"use server";\nexport async function action() {}',
+      '/* server actions */\n"use server"\nexport async function action() {}',
+      '/*! licensed */\n\'use server\';\nexport async function action() {}',
+      '#!/usr/bin/env node\n"use server";\nexport async function action() {}',
+      '"use strict";\n"use server";\nexport async function action() {}',
+    ];
+    for (const source of serverModules) {
+      expect(isUseServerModule(source), source).toBe(true);
+    }
+
+    expect(isUseServerModule([
+      "const booted = true;",
+      '"use server";',
+      "export async function action() {}",
+    ].join("\n"))).toBe(false);
+  });
+
   it("discovers every \"use server\" module", () => {
     // Vacuous-pass guard: a broken walk would make every assertion below
     // trivially true.
@@ -333,7 +530,15 @@ describe("Server Action actor boundary", () => {
   });
 
   it.each(modules)("%s exports no function that accepts an actor", (path) => {
-    const offenders = actorTakingExports(readFileSync(resolve(process.cwd(), path), "utf8"), path);
+    const file = sourceFileInProgram(
+      repositoryActorAnalysis.program,
+      resolve(projectRoot, path),
+    );
+    const offenders = actorTakingExports(
+      file,
+      repositoryActorAnalysis.checker,
+      repositoryActorAnalysis.actorTypes,
+    );
 
     expect(
       offenders,
@@ -362,6 +567,51 @@ describe("Server Action actor boundary", () => {
 
   it("detects actor-taking runtime functions through every local export shape", () => {
     const hostile: {source: string; offenders: string[]}[] = [
+      {
+        source: [
+          'import type {AuthenticatedActor} from "@/lib/membership/lifecycle";',
+          "export async function actual(principal: AuthenticatedActor) { return principal; }",
+        ].join("\n"),
+        offenders: ["actual"],
+      },
+      {
+        source: [
+          'import type {AuthenticatedActor as Principal} from "@/lib/membership/lifecycle";',
+          "export async function importedAlias(principal: Principal) { return principal; }",
+        ].join("\n"),
+        offenders: ["importedAlias"],
+      },
+      {
+        source: [
+          'import type {AuthenticatedActor} from "@/lib/membership/lifecycle";',
+          "type LocalPrincipal = AuthenticatedActor;",
+          "export async function localAlias(principal: LocalPrincipal) { return principal; }",
+        ].join("\n"),
+        offenders: ["localAlias"],
+      },
+      {
+        source: [
+          'import type {AuthenticatedActor} from "@/lib/membership/lifecycle";',
+          "type FirstPrincipal = AuthenticatedActor;",
+          "type SecondPrincipal = FirstPrincipal;",
+          "export async function multiHop(principal: SecondPrincipal) { return principal; }",
+        ].join("\n"),
+        offenders: ["multiHop"],
+      },
+      {
+        source: [
+          'import type {Actor} from "@/lib/membership/lifecycle";',
+          "export async function nullable(principal: Actor | null) { return principal; }",
+        ].join("\n"),
+        offenders: ["nullable"],
+      },
+      {
+        source: [
+          'import type {AgentRunActor as AgentPrincipal} from "@/lib/auth/agent-actor";',
+          "export const agentAlias = async (principal: AgentPrincipal) => principal;",
+        ].join("\n"),
+        offenders: ["agentAlias"],
+      },
       {
         source: 'export async function a(actor: AdminActor, id: string) { return id; }',
         offenders: ["a"],
@@ -436,11 +686,6 @@ describe("Server Action actor boundary", () => {
         offenders: ["hidden"],
       },
     ];
-    for (const {source, offenders} of hostile) {
-      expect(actorTakingExports(source, "candidate.ts"), source).toEqual(offenders);
-      expect(nonAsyncFunctionExports(source, "candidate.ts"), source).toEqual([]);
-    }
-
     const safe = [
       'export async function f(path: string, formData: FormData) { return path; }',
       'async function g(actor: Actor) { return actor; }',
@@ -452,9 +697,64 @@ describe("Server Action actor boundary", () => {
       'declare function ambient(actor: Actor): Promise<Actor>; export {ambient};',
       'const actor = 1; export {actor};',
       'export {actor} from "./remote";',
+      'export async function unrelated(input: {kind: "staff"; label: string}) { return input; }',
+      'export async function primitive(input: string | null) { return input; }',
+      [
+        'import type {AuthenticatedActor} from "@/lib/membership/lifecycle";',
+        "async function helper(principal: AuthenticatedActor) { return principal; }",
+        "export async function publicAction(state: unknown, formData: FormData) { return state; }",
+      ].join("\n"),
     ];
-    for (const source of safe) {
-      expect(actorTakingExports(source, "candidate.ts"), source).toEqual([]);
+
+    const hostileFiles = hostile.map(({source}, index) => ({
+      fileName: resolve(
+        projectRoot,
+        "tests/unit/__server-action-fixtures__",
+        `hostile-${index}.ts`,
+      ),
+      source,
+    }));
+    const safeFiles = safe.map((source, index) => ({
+      fileName: resolve(
+        projectRoot,
+        "tests/unit/__server-action-fixtures__",
+        `safe-${index}.ts`,
+      ),
+      source,
+    }));
+    const fixtureSources = new Map([
+      ...hostileFiles,
+      ...safeFiles,
+    ].map(({fileName, source}) => [fileName, actorFixtureSource(source)]));
+    const fixtureActorAnalysis = createActorAnalysis(
+      [...fixtureSources.keys()],
+      fixtureSources,
+    );
+
+    for (const [{source, offenders}, {fileName}] of hostile.map(
+      (hostileCase, index) => [hostileCase, hostileFiles[index]] as const,
+    )) {
+      const file = sourceFileInProgram(fixtureActorAnalysis.program, fileName);
+      expect(
+        actorTakingExports(
+          file,
+          fixtureActorAnalysis.checker,
+          fixtureActorAnalysis.actorTypes,
+        ),
+        source,
+      ).toEqual(offenders);
+      expect(nonAsyncFunctionExports(source, fileName), source).toEqual([]);
+    }
+    for (const {source, fileName} of safeFiles) {
+      const file = sourceFileInProgram(fixtureActorAnalysis.program, fileName);
+      expect(
+        actorTakingExports(
+          file,
+          fixtureActorAnalysis.checker,
+          fixtureActorAnalysis.actorTypes,
+        ),
+        source,
+      ).toEqual([]);
     }
   });
 
