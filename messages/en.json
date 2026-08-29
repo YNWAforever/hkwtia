@@ -841,7 +841,7 @@
     "registration": {
       "title": "Register for this event",
       "submit": "Register",
-      "pending": "Registering...",
+      "pending": "Registering…",
       "registered": "Registration confirmed.",
       "waitlist": "You have been added to the waitlist.",
       "alreadyRegistered": "You are already registered.",

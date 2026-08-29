@@ -129,6 +129,9 @@ describe('message bundles', () => {
     }
   });
 
+  it('uses a single ellipsis for the public event registration pending label', () => {
+    expect(en.Events.registration.pending).toBe('Registering…');
+  });
 
   it("ships complete bilingual WiseTech shell labels", () => {
     expect(en.Navigation.groups).toEqual({
