@@ -13,7 +13,7 @@ All timestamps below are unambiguous ISO timestamps in Asia/Hong_Kong. Commands 
 
 ## Historical Task 1-9 evidence confirmation
 
-The ignored local implementer records `.superpowers/sdd/task-1-implementer-report.md` through `.superpowers/sdd/task-9-implementer-report.md` were inspected before current-HEAD verification. They retain the owning-task test-first and post-commit evidence. The summaries below are historical evidence, not commands rerun by this verifier.
+The ignored local implementer records `.superpowers/sdd/task-1-implementer-report.md` through `.superpowers/sdd/task-9-implementer-report.md` were inspected before current-HEAD verification. They retain the owning-task test-first and post-commit evidence. The summaries below are historical evidence, not commands rerun by this verifier. After review, the ignored Task 5 report was locally amended to spell out the same literal command already recorded for both RED Step 2 and final GREEN Step 4; that wording correction is not a new test run and the ignored report is not part of this commit.
 
 1. Task 1, Event hero relation and lifecycle protection
    - RED: `npm.cmd test -- tests/unit/wisetech-pr5-event-hero-schema.test.ts tests/unit/event-hero-admin-and-media.test.ts` exited 1 with four intended missing-contract assertions.
@@ -70,7 +70,38 @@ The exact required scan returned only these approved classes:
 - `remotePatterns` occurs in comments and policy tests. `next.config.ts` deliberately has no `images` key and no remote host allowlist.
 - `inquiry` occurs only in integration/provenance test or configuration language describing the retired/non-owned flow; there is no inquiry runtime under `app`, `components`, `lib`, or `scripts`.
 
-The narrow classification run (`2026-08-29T15:57:09.6563895+08:00` to `2026-08-29T15:57:10.4228189+08:00`, overall exit 0) produced:
+The supplemental narrow classification run used this exact sanitized PowerShell command:
+
+~~~powershell
+$started = Get-Date; Write-Output ('START_HKT=' + $started.ToString('o')); Write-Output 'CHECK=donor-runtime-imports-assets'; rg -n -i 'YNWAforever/wisetech|WiseTechSite|FullInnerPages|ExpansionPages|config/landing-partners|landing-partners\.(?:ts|json)' app components lib scripts; Write-Output ('RG_EXIT=' + $LASTEXITCODE); Write-Output 'CHECK=inquiry-runtime'; rg -n -i 'inquiry' app components lib scripts; Write-Output ('RG_EXIT=' + $LASTEXITCODE); Write-Output 'CHECK=remote-image-allowlist'; rg -n -i 'remotePatterns' next.config.ts; Write-Output ('RG_EXIT=' + $LASTEXITCODE); Write-Output 'CHECK=localized-news-english-fallback'; rg -n -i 'bodyMdxZhHk\s*(\?\?|\|\|).*bodyMdx|bodyMdx\s*(\?\?|\|\|).*bodyMdxZhHk|body_mdx_zh_hk\s*(\?\?|\|\|)' app components lib; Write-Output ('RG_EXIT=' + $LASTEXITCODE); Write-Output 'CHECK=client-secret-names-or-values'; $clientFiles = rg -l --glob '*.ts' --glob '*.tsx' '^["'']use client["''];?$' app components lib; if ($LASTEXITCODE -gt 1) { exit $LASTEXITCODE }; if ($clientFiles) { $matches = Select-String -Path $clientFiles -Pattern 'STRIPE_SECRET_KEY|sk_live_|whsec_|postgresql?://'; if ($matches) { $matches } else { Write-Output 'NO_HITS' } } else { Write-Output 'NO_CLIENT_FILES' }; Write-Output 'CHECK=static-landing-partner-files'; Write-Output ('config/landing-partners.ts=' + (Test-Path 'config\landing-partners.ts')); Write-Output ('config/landing-partners.json=' + (Test-Path 'config\landing-partners.json')); $ended = Get-Date; Write-Output ('END_HKT=' + $ended.ToString('o')); Write-Output 'EXIT_CODE=0'
+~~~
+
+Its exact sanitized output was:
+
+~~~text
+START_HKT=2026-08-29T15:57:09.6563895+08:00
+CHECK=donor-runtime-imports-assets
+RG_EXIT=1
+CHECK=inquiry-runtime
+RG_EXIT=1
+CHECK=remote-image-allowlist
+143: * values — `remotePatterns: []`, `dangerouslyAllowSVG: false`,
+148: * `remotePatterns` once while parsing the URL, then follows up to three
+RG_EXIT=0
+CHECK=localized-news-english-fallback
+RG_EXIT=1
+CHECK=client-secret-names-or-values
+NO_HITS
+CHECK=static-landing-partner-files
+config/landing-partners.ts=False
+config/landing-partners.json=False
+END_HKT=2026-08-29T15:57:10.4228189+08:00
+EXIT_CODE=0
+~~~
+
+For `rg`, exit 1 means zero matches; it is the expected result for the donor-runtime, inquiry-runtime, and localized-fallback checks. The overall shell exit was 0 because the final `Write-Output` succeeded; the command did not contain a hidden `exit 0`.
+
+That run produced:
 
 - zero hits for donor runtime/asset markers (`YNWAforever/wisetech`, `WiseTechSite`, `FullInnerPages`, `ExpansionPages`, `config/landing-partners`, or static `landing-partners.ts/json`) under runtime/script paths;
 - zero `inquiry` hits under runtime/script paths;
@@ -103,7 +134,36 @@ The fresh current-HEAD full-suite result recorded above independently passed and
 
 ## Credential and external gates
 
-A name-only preflight ran from `2026-08-29T15:57:41.5954848+08:00` to `2026-08-29T15:57:41.6306399+08:00` with exit 0. It reported `ABSENT` for `DATABASE_URL`, `DATABASE_URL_TEST`, `PLAYWRIGHT_BASE_URL`, the Neon Auth pair, Stripe secret/webhook/price IDs, the R2 account/access/secret/bucket variables, and the Turnstile site/secret pair. No value was inspected. Presence alone would not have passed any external gate.
+A name-only preflight used this exact PowerShell command:
+
+~~~powershell
+$started = Get-Date; Write-Output ('START_HKT=' + $started.ToString('o')); $names = @('DATABASE_URL','DATABASE_URL_TEST','PLAYWRIGHT_BASE_URL','NEON_AUTH_BASE_URL','NEON_AUTH_COOKIE_SECRET','STRIPE_SECRET_KEY','STRIPE_WEBHOOK_SECRET','STRIPE_STARTUP_PRICE_ID','STRIPE_CORPORATE_PRICE_ID','R2_ACCOUNT_ID','R2_ACCESS_KEY_ID','R2_SECRET_ACCESS_KEY','R2_BUCKET_NAME','TURNSTILE_SECRET_KEY','NEXT_PUBLIC_TURNSTILE_SITE_KEY'); foreach ($name in $names) { Write-Output ($name + '=' + $(if (Test-Path ('Env:' + $name)) {'PRESENT'} else {'ABSENT'})) }; $ended = Get-Date; Write-Output ('END_HKT=' + $ended.ToString('o')); Write-Output 'EXIT_CODE=0'
+~~~
+
+The exact names-only output was:
+
+~~~text
+START_HKT=2026-08-29T15:57:41.5954848+08:00
+DATABASE_URL=ABSENT
+DATABASE_URL_TEST=ABSENT
+PLAYWRIGHT_BASE_URL=ABSENT
+NEON_AUTH_BASE_URL=ABSENT
+NEON_AUTH_COOKIE_SECRET=ABSENT
+STRIPE_SECRET_KEY=ABSENT
+STRIPE_WEBHOOK_SECRET=ABSENT
+STRIPE_STARTUP_PRICE_ID=ABSENT
+STRIPE_CORPORATE_PRICE_ID=ABSENT
+R2_ACCOUNT_ID=ABSENT
+R2_ACCESS_KEY_ID=ABSENT
+R2_SECRET_ACCESS_KEY=ABSENT
+R2_BUCKET_NAME=ABSENT
+TURNSTILE_SECRET_KEY=ABSENT
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=ABSENT
+END_HKT=2026-08-29T15:57:41.6306399+08:00
+EXIT_CODE=0
+~~~
+
+No secret value was read or printed. Presence alone would not have passed any external gate.
 
 | External gate | Status | Evidence or reason |
 |---|---|---|
