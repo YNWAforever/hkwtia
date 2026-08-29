@@ -156,7 +156,7 @@ The page and Join flow call one shared `requestMagicLink` Server Action and the 
 
 An already authenticated member is redirected to the validated continuation. An authenticated non-member receives an honest localized member-access state and no Portal data.
 
-The public header's member entry points to `/member-login`; protected Portal redirects do the same. Join plan CTAs continue to point to `/join?plan=<code>`.
+The public header consumes the single typed `memberPortalAction` in `config/navigation.ts`; PR6 changes that owner to `/member-login`, so desktop and mobile entries cannot drift. Protected Portal redirects use the same route. Join CTAs come only from the reconciled catalog: Community uses `/join?plan=community&interval=none`, the currently supported paid options use `/join?plan=<code>&interval=annual`, and Patron remains a Contact/review action.
 
 ### Portal sign-out
 
@@ -168,32 +168,39 @@ The control appears in both desktop and mobile Portal navigation through one res
 
 ### One reconciled server authority
 
-PR5 established `membershipPlansRepository`, `PLAN_CODES`, `PLAN_CATALOG`, persisted structural checks, and server-only Stripe price-ID reconciliation for the public Membership page. PR6 extracts the non-display reconciliation into a shared server-only resolver and keeps `public-catalog.ts` as a formatter over that result.
+PR5 established `membershipPlansRepository`, `PLAN_CODES`, `PLAN_CATALOG`, persisted structural checks, and server-only Stripe price-ID reconciliation for the public Membership page. PR6 extracts the non-display reconciliation into one shared server-only catalog resolver and keeps `public-catalog.ts` as a formatter over that result.
 
-The transactional projection contains only the canonical plan code, audience, billing behavior, seat allowance, active state, and, for paid plans, the validated server-side price reference. It is never serialized to the browser. A requested plan is available only when exactly one persisted row matches its canonical definition; paid rows also require the matching configured Stripe price ID. Unknown, duplicated, inactive, malformed, or mismatched plans fail closed.
+The resolver makes billing interval part of plan identity. Free and review plans resolve to `billingInterval: "none"`. Each paid option is an inseparable tuple of canonical plan code, `billingInterval`, persisted amount, seat allowance, and validated server-side Stripe price reference. That tuple is never serialized with its price reference. A requested option is available only when exactly one persisted row matches its canonical plan definition and the selected interval has one exact configured Stripe mapping. Unknown, duplicated, inactive, malformed, or mismatched plans/options fail closed.
 
-`getPlan` remains the pure domain-code validator. New applications additionally require the reconciled transactional projection before any profile, company, membership, or checkout mutation. Existing owner-scoped applications may be inspected for their durable step, but paid checkout still requires the current reconciled price reference. No page imports Drizzle or reads environment values directly.
+PR6 preserves the current source contract without inventing a provider mapping: the single `STRIPE_STARTUP_PRICE_ID` and `STRIPE_CORPORATE_PRICE_ID` mappings are actionable only as the existing annual option. `annualPriceHkd` may be displayed only when that exact reference reconciles. `monthlyPriceHkd` remains persisted but is omitted from the public catalog and rejected by Join because the current schema/configuration has no distinct monthly Stripe reference. Adding monthly checkout requires a separately approved catalog/configuration contract; PR6 does not infer one or add a migration. Isolated provider acceptance must confirm that each configured Price is annual before the gate can pass.
 
-`createCheckoutSession` receives its price through this resolver instead of a separate environment-only mapping. Its actor-first billing access, membership/application validation, row locking, active-attempt reuse, idempotency key, opaque metadata, locale-aware success/cancel URLs, and no-activation rule remain unchanged.
+`getPlan` remains the pure domain-code validator. `joinInputSchema` and `completeApplicationSchema` add a typed `billingInterval`; the callback, profile route, company route, and bound Server Actions preserve it until membership creation. New applications require a reconciled `(planCode, billingInterval)` before any profile, company, membership, or checkout mutation. Membership creation writes `billingInterval` explicitly instead of relying on the database default: `none` for Community/Patron and the resolved interval for paid plans. Once a membership exists, its durable interval is authoritative and a conflicting or missing query cannot replace it. `MembershipRecord` and the owner-scoped Join projections include that field. No page imports Drizzle or reads environment values directly.
+
+`createCheckoutSession` resolves price by the authorized membership's `(planCode, billingInterval)`, never by a query parameter or plan alone. The recovery path uses the same durable pair. Actor-first billing access, membership/application validation, row locking, active-attempt reuse, exact price reference stored on the attempt, idempotency key, opaque metadata, locale-aware success/cancel URLs, and the no-activation rule remain unchanged.
 
 ### Typed outcome navigation
 
 The Join service returns a discriminated outcome with the identifiers required by its next route:
 
 ```ts
+type JoinDraftContext = {
+  plan: PlanCode;
+  billingInterval: BillingInterval;
+  applicationId: string;
+};
+
 type JoinOutcome =
-  | {next: "profile" | "company"; applicationId: string}
-  | {next: "checkout"; applicationId: string; membershipId: string}
-  | {next: "review" | "complete"; applicationId: string; membershipId: string};
+  | (JoinDraftContext & {next: "profile" | "company"})
+  | {next: "checkout" | "review" | "complete"; applicationId: string; membershipId: string};
 ```
 
-`saveProfile`, `saveCompany`, and resumed `/join` processing pass that result to one destination builder:
+`requestMagicLink`, `saveProfile`, `saveCompany`, and resumed `/join` processing pass validated draft context or durable membership outcome to one destination builder:
 
-- profile/company -> localized step route with plan and actor-scoped application ID;
-- checkout -> localized `/join/checkout?membership_id=<opaque-id>`;
+- profile/company -> localized step route with plan, billing interval, and actor-scoped application ID;
+- checkout -> localized `/join/checkout?membership_id=<opaque-id>`; and
 - review/complete -> localized `/join/complete?membership_id=<opaque-id>`.
 
-No `next=checkout`, `status=active`, success flag, or Stripe session query is trusted as state. A terminal application whose actor-scoped membership cannot be resolved fails closed instead of rendering a dead status card.
+Before membership creation, a missing, duplicated, or unsupported interval fails closed and returns to Membership recovery. After membership creation, checkout and completion derive interval only from the actor-scoped membership. No `next=checkout`, `status=active`, billing-interval query, success flag, or Stripe session query is trusted as durable state. A terminal application whose actor-scoped membership cannot be resolved fails closed instead of rendering a dead status card.
 
 ### Completion projection and Billing Portal locale
 
@@ -258,8 +265,9 @@ Acceptance requires:
 - 44 px minimum interactive targets, visible focus, reduced-motion support, and no keyboard traps;
 - mobile drawer Escape close and focus restoration;
 - live/alert semantics for action feedback without color-only meaning;
-- no document-level horizontal overflow at 320, 375, 768, 1024, and 1280 px; and
-- serious/critical Axe findings equal to zero on representative English and Chinese Join, Portal, CRM, CMS, reports, and automation surfaces that the test environment can authorize.
+- no document-level horizontal overflow or Concierge/navigation/control overlap at 320, 375, 768, 1024, and 1280 px;
+- serious/critical Axe findings equal to zero on representative English and Chinese Join, Portal, CRM, CMS, reports, and automation surfaces that the test environment can authorize; and
+- on an authorized Preview, Lighthouse meets at least 0.90 performance, 0.95 accessibility, and 0.95 SEO, with LCP at most 2.5 s, CLS at most 0.1, and INP at most 200 ms at the 75th percentile; otherwise this is recorded as `NOT PASSED`.
 
 ## Error and recovery behavior
 
@@ -285,10 +293,11 @@ Every behavioral task begins with a focused failing test, records the exact RED 
 - continuation allowlist normalization and rejection, including negative `/portal/showcase`, unknown Portal prefixes, query/fragment, cross-locale, CRLF, backslash, and external-origin cases;
 - `/member-login` default/explicit continuation, sent state, already-member redirect, non-member state, rate limiting, and one Neon action path;
 - sign-out pending, single invocation, success navigation/refresh, and failure-without-navigation;
-- shared catalog reconciliation for public and transactional consumers, no secret/browser serialization, unavailable-plan no-mutation, and paid checkout exact price selection;
-- typed Join outcomes and direct profile/company/checkout/review/complete destinations, including resume;
+- shared catalog reconciliation for public and transactional consumers, no secret/browser serialization, unavailable-option no-mutation, monthly omission without a distinct mapping, and an advertised-option -> typed Join input -> persisted membership interval -> exact `(planCode, billingInterval)` checkout-price contract;
+- typed Join outcomes and direct profile/company/checkout/review/complete destinations, including resume and durable-interval precedence;
 - checkout/completion actor scope, webhook-authoritative processing-to-active behavior, and forged-success rejection;
 - English/Chinese checkout URLs and Billing Portal return URLs;
+- a route-level seat-invitation callback test proving the Neon callback preserves the one-time token, the accept route delegates only for the invited identity, replay/expiry/revocation fail, and the token is never copied into generic `/member-login?next=` continuation; and
 - existing seat capacity/roles/last-owner, billing ownership/idempotency, Portal permission, Admin authorization, audit, lifecycle, approval, segment, report, automation, M5, M6, and M7 suites unchanged and passing.
 
 ### Credential-free browser contracts
@@ -297,14 +306,15 @@ Every behavioral task begins with a focused failing test, records the exact RED 
 - anonymous access to every stable Portal destination reaches localized member login with the correct canonical path; Admin denial remains 404;
 - Join invalid-plan and forged-completion paths fail closed;
 - pure/internal shell harnesses prove desktop/mobile grouping, active route, skip link, keyboard drawer behavior, focus return, one H1/main, and document overflow constraints without authenticating or mutating data;
+- the seat-invitation route harness uses a mocked Neon send and disposable service fixtures to prove exact callback/token handoff without sending mail or touching a provider;
 - representative empty/error states remain honest and usable; and
-- no browser test sends a magic link, creates a checkout, invokes Stripe/Neon/Resend/WOZTELL, mutates a database, or accepts an invitation unless isolated credentials and explicit authority are supplied.
+- no browser test sends a real magic link, creates a real checkout, invokes Stripe/Neon/Resend/WOZTELL, mutates a database, or accepts a live invitation unless isolated credentials and explicit authority are supplied.
 
 ### Isolated authenticated M1-M7 acceptance
 
 On an explicitly isolated Neon branch with test identities and test-mode providers, run:
 
-- M1: plan selection, magic-link redirect, profile/company onboarding, typed checkout handoff, signed webhook activation, completion, Billing Portal locale, receipts, seat limits, Portal secondary pages, and sign-out;
+- M1: advertised billing option and interval selection, magic-link redirect, profile/company onboarding, persisted interval, exact Stripe Price handoff, signed webhook activation, completion, Billing Portal locale, receipts, seat invitation callback/acceptance, seat limits, Portal secondary pages, and sign-out;
 - M2: Member 360, note, segment/CSV/campaign idempotency, at-risk, event check-in, approval audit, reports, and denial across the complete Admin inventory and protected APIs;
 - M3: automation data plus one eligible audited retry, with sent/ineligible rows denied;
 - M4: retention approvals and inert Board draft preview in both locales;
@@ -320,14 +330,17 @@ Before PR publication, run and record:
 
 - focused RED/GREEN commands for every behavior task;
 - the exact PR6 cross-surface unit aggregate;
+- `npm.cmd ci`;
 - `npm.cmd run audit:strings`;
 - `npm.cmd test`;
 - `npm.cmd run lint`;
 - `npm.cmd run typecheck`;
 - `npm.cmd run build`;
-- credential-free PR6 Playwright tests;
+- the focused credential-free PR6 Playwright command;
+- `npm.cmd run test:e2e` for the full repository browser gate;
 - isolated authenticated M1-M7 tests only when their explicit gate is available;
 - representative accessibility/responsive checks;
+- `npm.cmd run test:lighthouse`;
 - `npm.cmd audit --omit=dev --audit-level=high`;
 - `git diff --check`; and
 - exact committed-range and clean-worktree checks.
