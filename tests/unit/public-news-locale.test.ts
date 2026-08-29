@@ -39,7 +39,6 @@ const whitespaceOnlyNews: NewsFixture = {
 function fixtureDatabase(news: readonly NewsFixture[]) {
   return drizzle(async (query, params) => {
     const chinese = /body_mdx_zh_hk/i.test(query);
-    const detail = /\bLIMIT\b/i.test(query);
     const slug = /"posts"\."slug"\s*=\s*\$\d+/i.test(query)
       ? params.find((value) => typeof value === "string" && news.some((row) => row.slug === value)) as string | undefined
       : undefined;
@@ -49,9 +48,7 @@ function fixtureDatabase(news: readonly NewsFixture[]) {
       .map((row) => {
         const title = chinese ? row.titleZh : row.titleEn;
         const body = chinese ? row.bodyMdxZhHk : row.bodyMdx;
-        return detail
-          ? [row.slug, title, publishedAt, "WTIA", body]
-          : [row.slug, title, publishedAt, "WTIA"];
+        return [row.slug, title, publishedAt, "WTIA", body];
       });
     return {rows: visible};
   });
