@@ -134,16 +134,20 @@ The fresh current-HEAD full-suite result recorded above independently passed and
 
 ## Credential and external gates
 
-A name-only preflight used this exact PowerShell command:
+Historical correction: the earlier preflight at `2026-08-29T15:57:41.5954848+08:00` used three incorrect aliases—`R2_BUCKET_NAME`, `TURNSTILE_SECRET_KEY`, and `NEXT_PUBLIC_TURNSTILE_SITE_KEY`—instead of the repository contract names `R2_BUCKET`, `TURNSTILE_SECRET`, and `TURNSTILE_SITE_KEY`. That earlier output is not authoritative and is superseded by the corrected run below; it is retained here only to make the verification-history error explicit.
+
+The corrected names were verified read-only against the repository contract before the new run: `.env.example` declares `R2_BUCKET`, `TURNSTILE_SITE_KEY`, and `TURNSTILE_SECRET`; `lib/media/r2-storage.ts` requires `R2_BUCKET`; and `lib/config/env.ts` parses and enforces `TURNSTILE_SECRET` and `TURNSTILE_SITE_KEY`.
+
+The authoritative name-only preflight used this exact PowerShell command:
 
 ~~~powershell
-$started = Get-Date; Write-Output ('START_HKT=' + $started.ToString('o')); $names = @('DATABASE_URL','DATABASE_URL_TEST','PLAYWRIGHT_BASE_URL','NEON_AUTH_BASE_URL','NEON_AUTH_COOKIE_SECRET','STRIPE_SECRET_KEY','STRIPE_WEBHOOK_SECRET','STRIPE_STARTUP_PRICE_ID','STRIPE_CORPORATE_PRICE_ID','R2_ACCOUNT_ID','R2_ACCESS_KEY_ID','R2_SECRET_ACCESS_KEY','R2_BUCKET_NAME','TURNSTILE_SECRET_KEY','NEXT_PUBLIC_TURNSTILE_SITE_KEY'); foreach ($name in $names) { Write-Output ($name + '=' + $(if (Test-Path ('Env:' + $name)) {'PRESENT'} else {'ABSENT'})) }; $ended = Get-Date; Write-Output ('END_HKT=' + $ended.ToString('o')); Write-Output 'EXIT_CODE=0'
+$started = Get-Date; Write-Output ('START_HKT=' + $started.ToString('o')); $names = @('DATABASE_URL','DATABASE_URL_TEST','PLAYWRIGHT_BASE_URL','NEON_AUTH_BASE_URL','NEON_AUTH_COOKIE_SECRET','STRIPE_SECRET_KEY','STRIPE_WEBHOOK_SECRET','STRIPE_STARTUP_PRICE_ID','STRIPE_CORPORATE_PRICE_ID','R2_ACCOUNT_ID','R2_ACCESS_KEY_ID','R2_SECRET_ACCESS_KEY','R2_BUCKET','TURNSTILE_SECRET','TURNSTILE_SITE_KEY'); foreach ($name in $names) { Write-Output ($name + '=' + $(if (Test-Path ('Env:' + $name)) {'PRESENT'} else {'ABSENT'})) }; $ended = Get-Date; Write-Output ('END_HKT=' + $ended.ToString('o')); Write-Output 'EXIT_CODE=0'
 ~~~
 
 The exact names-only output was:
 
 ~~~text
-START_HKT=2026-08-29T15:57:41.5954848+08:00
+START_HKT=2026-08-29T16:34:23.5069228+08:00
 DATABASE_URL=ABSENT
 DATABASE_URL_TEST=ABSENT
 PLAYWRIGHT_BASE_URL=ABSENT
@@ -156,14 +160,14 @@ STRIPE_CORPORATE_PRICE_ID=ABSENT
 R2_ACCOUNT_ID=ABSENT
 R2_ACCESS_KEY_ID=ABSENT
 R2_SECRET_ACCESS_KEY=ABSENT
-R2_BUCKET_NAME=ABSENT
-TURNSTILE_SECRET_KEY=ABSENT
-NEXT_PUBLIC_TURNSTILE_SITE_KEY=ABSENT
-END_HKT=2026-08-29T15:57:41.6306399+08:00
+R2_BUCKET=ABSENT
+TURNSTILE_SECRET=ABSENT
+TURNSTILE_SITE_KEY=ABSENT
+END_HKT=2026-08-29T16:34:23.5335298+08:00
 EXIT_CODE=0
 ~~~
 
-No secret value was read or printed. Presence alone would not have passed any external gate.
+No secret value was read or printed. All 15 actual repository contract names were absent in this shell. Presence alone would not have passed any external gate.
 
 | External gate | Status | Evidence or reason |
 |---|---|---|
@@ -174,7 +178,7 @@ No secret value was read or printed. Presence alone would not have passed any ex
 | Provider activation or mutation | **NOT PASSED / NOT EXECUTED** | No Stripe, R2, Neon, Auth, Turnstile, messaging, or other provider mutation ran. |
 | Live content/data import | **NOT PASSED / NOT EXECUTED** | No content, partner, media, translation, Event, or Membership row was imported. |
 | Authenticated Event/cohort/Showcase UAT | **NOT PASSED / NOT EXECUTED** | The four browser journeys were deliberately credential-free and performed no registration, cohort application, or Showcase introduction. |
-| Production/browser-auth gate requiring credentials | **NOT PASSED / NOT EXECUTED** | Required identity/provider/test-environment credentials were absent; the credential-free E2E result does not upgrade this gate. |
+| Production/browser-auth gate requiring credentials | **NOT PASSED / NOT EXECUTED** | The authoritative preflight found all 15 actual repository contract names absent, including `R2_BUCKET`, `TURNSTILE_SECRET`, and `TURNSTILE_SITE_KEY`; even presence would not establish credential validity or upgrade this gate, and the credential-free E2E result does not upgrade it. |
 | R2 delivery, revocation, and jurisdiction | **NOT PASSED / NOT EXECUTED** | Local pure-presentation fixtures proved own-origin URLs only; no R2 object or jurisdiction check ran. |
 | Approved translations, content, and partner rights | **NOT PASSED / NOT EXECUTED** | Local code/message contracts are not content-owner or rights-holder approval. |
 | Accessibility/Lighthouse Preview review | **NOT PASSED / NOT EXECUTED** | No Preview Lighthouse or human accessibility review ran. |
