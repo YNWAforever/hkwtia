@@ -44,7 +44,7 @@ export default async function ShowcasePage({params, searchParams}: Props) {
         </div>
         <Link
           className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          href={localizedPath(locale, "/portal/showcase")}
+          href={localizedPath(locale, "/portal/company/listing")}
         >
           {t("ownerCta")}
         </Link>

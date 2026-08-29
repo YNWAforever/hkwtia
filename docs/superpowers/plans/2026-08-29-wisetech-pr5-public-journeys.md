@@ -646,7 +646,7 @@
 
 - [ ] **Step 3: Change only presentation**
 
-    Restyle the index/detail using existing public listing fields and localized explanatory copy. Preserve query-driven filters and current empty behavior. Add a localized direct CTA only to the existing authorized portal listing destination through localizedPath(locale, "/portal/showcase"); do not create a directory, endpoint, or lead form.
+    Restyle the index/detail using existing public listing fields and localized explanatory copy. Preserve query-driven filters and current empty behavior. Add a localized direct CTA only to the existing authorized portal listing destination through localizedPath(locale, "/portal/company/listing"); do not create a directory, endpoint, or lead form.
 
     Keep these detail lines present and owner-identical:
 

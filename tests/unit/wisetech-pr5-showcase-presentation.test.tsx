@@ -88,8 +88,13 @@ describe("WiseTech PR5 Showcase presentation", () => {
   });
 
   it("links the authorized owner directly to the existing localized portal listing", async () => {
-    expect(await renderIndex("en")).toContain('href="/portal/showcase"');
-    expect(await renderIndex("zh-HK")).toContain('href="/zh/portal/showcase"');
+    const en = await renderIndex("en");
+    const zh = await renderIndex("zh-HK");
+
+    expect(en).toContain('href="/portal/company/listing"');
+    expect(zh).toContain('href="/zh/portal/company/listing"');
+    expect(en).not.toContain('href="/portal/showcase"');
+    expect(zh).not.toContain('href="/zh/portal/showcase"');
   });
 
   it("uses localized explanatory headings on the existing public detail projection", () => {
