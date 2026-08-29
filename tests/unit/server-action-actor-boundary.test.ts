@@ -21,6 +21,16 @@ const actorTypeNames = new Set([
   "Actor", "AdminActor", "SessionActor", "AgentRunActor", "ScheduledAgentActor", "ConciergeAgentActor",
 ]);
 
+type RuntimeFunctionNode =
+  | ts.FunctionDeclaration
+  | ts.FunctionExpression
+  | ts.ArrowFunction;
+
+type RuntimeExport = {
+  name: string;
+  functionNode: RuntimeFunctionNode | null;
+};
+
 function sourceFiles(directory: string): string[] {
   return readdirSync(directory, {withFileTypes: true}).flatMap((entry) => {
     const path = join(directory, entry.name);
@@ -49,173 +59,40 @@ function typeNameOf(node: ts.TypeNode | undefined): string | null {
   return null;
 }
 
-function actorTakingExports(source: string, fileName: string): string[] {
-  const file = ts.createSourceFile(
-    fileName, source, ts.ScriptTarget.Latest, true,
-    fileName.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
-  );
-  const offenders: string[] = [];
-
-  for (const statement of file.statements) {
-    const exported = ts.canHaveModifiers(statement)
-      && ts.getModifiers(statement)?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
-    if (!exported) continue;
-
-    const declarations: {name: string; parameters: readonly ts.ParameterDeclaration[]}[] = [];
-    if (ts.isFunctionDeclaration(statement) && statement.name) {
-      declarations.push({name: statement.name.text, parameters: statement.parameters});
-    }
-    if (ts.isVariableStatement(statement)) {
-      for (const declaration of statement.declarationList.declarations) {
-        const initializer = declaration.initializer;
-        if (!ts.isIdentifier(declaration.name) || !initializer) continue;
-        if (ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer)) {
-          declarations.push({name: declaration.name.text, parameters: initializer.parameters});
-        }
-      }
-    }
-
-    for (const {name, parameters} of declarations) {
-      const offending = parameters.find((parameter) => {
-        const byName = ts.isIdentifier(parameter.name)
-          && actorParameterNames.has(parameter.name.text);
-        const type = typeNameOf(parameter.type);
-        const byType = type !== null && actorTypeNames.has(type);
-        return byName || byType;
-      });
-      if (offending) offenders.push(name);
-    }
-  }
-
-  return offenders;
+function hasModifier(node: ts.Node, kind: ts.SyntaxKind): boolean {
+  return ts.canHaveModifiers(node)
+    && Boolean(ts.getModifiers(node)?.some((modifier) => modifier.kind === kind));
 }
 
-function nonAsyncFunctionExports(source: string, fileName: string): string[] {
-  const file = ts.createSourceFile(
-    fileName, source, ts.ScriptTarget.Latest, true,
-    fileName.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
-  );
+function bindingNames(name: ts.BindingName): string[] {
+  if (ts.isIdentifier(name)) return [name.text];
+  return name.elements.flatMap((element) => (
+    ts.isOmittedExpression(element) ? [] : bindingNames(element.name)
+  ));
+}
+
+function localRuntimeExports(file: ts.SourceFile): RuntimeExport[] {
   const runtimeBindings = new Map<string, ts.Node>();
-  const offenders = new Set<string>();
-
-  const hasModifier = (node: ts.Node, kind: ts.SyntaxKind): boolean => (
-    ts.canHaveModifiers(node)
-    && Boolean(ts.getModifiers(node)?.some((modifier) => modifier.kind === kind))
-  );
-
-  const bindingNames = (name: ts.BindingName): string[] => {
-    if (ts.isIdentifier(name)) return [name.text];
-    return name.elements.flatMap((element) => (
-      ts.isOmittedExpression(element) ? [] : bindingNames(element.name)
-    ));
-  };
+  const erasedBindings = new Set<string>();
 
   for (const statement of file.statements) {
-    if (ts.isFunctionDeclaration(statement) && statement.name && statement.body) {
-      runtimeBindings.set(statement.name.text, statement);
-      continue;
-    }
-    if (ts.isVariableStatement(statement)) {
-      for (const declaration of statement.declarationList.declarations) {
-        if (ts.isIdentifier(declaration.name) && declaration.initializer) {
-          runtimeBindings.set(declaration.name.text, declaration.initializer);
-        }
+    if (ts.isFunctionDeclaration(statement) && statement.name) {
+      if (statement.body && !hasModifier(statement, ts.SyntaxKind.DeclareKeyword)) {
+        runtimeBindings.set(statement.name.text, statement);
+      } else {
+        erasedBindings.add(statement.name.text);
       }
-      continue;
-    }
-    if (
-      (ts.isClassDeclaration(statement)
-        || ts.isEnumDeclaration(statement)
-        || ts.isModuleDeclaration(statement))
-      && statement.name
-    ) {
-      runtimeBindings.set(statement.name.text, statement);
-    }
-  }
-
-  const isProvablyAsync = (node: ts.Node | undefined, seen = new Set<string>()): boolean => {
-    if (!node) return false;
-    if (
-      ts.isFunctionDeclaration(node)
-      || ts.isFunctionExpression(node)
-      || ts.isArrowFunction(node)
-    ) {
-      return hasModifier(node, ts.SyntaxKind.AsyncKeyword);
-    }
-    if (ts.isIdentifier(node)) {
-      if (seen.has(node.text)) return false;
-      const nextSeen = new Set(seen);
-      nextSeen.add(node.text);
-      return isProvablyAsync(runtimeBindings.get(node.text), nextSeen);
-    }
-    if (
-      ts.isParenthesizedExpression(node)
-      || ts.isAsExpression(node)
-      || ts.isTypeAssertionExpression(node)
-      || ts.isSatisfiesExpression(node)
-      || ts.isNonNullExpression(node)
-    ) {
-      return isProvablyAsync(node.expression, seen);
-    }
-    return false;
-  };
-
-  for (const statement of file.statements) {
-    if (ts.isExportDeclaration(statement)) {
-      if (statement.isTypeOnly) continue;
-      if (!statement.exportClause) {
-        offenders.add("*");
-        continue;
-      }
-      if (ts.isNamespaceExport(statement.exportClause)) {
-        offenders.add(statement.exportClause.name.text);
-        continue;
-      }
-      for (const element of statement.exportClause.elements) {
-        if (element.isTypeOnly) continue;
-        const exportedName = element.name.text;
-        if (statement.moduleSpecifier) {
-          offenders.add(exportedName);
-          continue;
-        }
-        const localName = element.propertyName ?? element.name;
-        if (!ts.isIdentifier(localName) || !isProvablyAsync(localName)) {
-          offenders.add(exportedName);
-        }
-      }
-      continue;
-    }
-
-    if (ts.isExportAssignment(statement)) {
-      if (!isProvablyAsync(statement.expression)) {
-        offenders.add(statement.isExportEquals ? "export=" : "default");
-      }
-      continue;
-    }
-
-    if (!hasModifier(statement, ts.SyntaxKind.ExportKeyword)) continue;
-    if (hasModifier(statement, ts.SyntaxKind.DeclareKeyword)) continue;
-    if (ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) continue;
-
-    if (ts.isFunctionDeclaration(statement)) {
-      // A bodyless overload declaration is erased; its concrete implementation
-      // is inventoried separately (or resolved through a local export list).
-      if (!statement.body) continue;
-      const exportedName = hasModifier(statement, ts.SyntaxKind.DefaultKeyword)
-        ? "default"
-        : statement.name?.text ?? "default";
-      if (!isProvablyAsync(statement)) offenders.add(exportedName);
       continue;
     }
 
     if (ts.isVariableStatement(statement)) {
+      const declared = hasModifier(statement, ts.SyntaxKind.DeclareKeyword);
       for (const declaration of statement.declarationList.declarations) {
         const names = bindingNames(declaration.name);
-        if (
-          !ts.isIdentifier(declaration.name)
-          || !isProvablyAsync(declaration.initializer)
-        ) {
-          for (const name of names) offenders.add(name);
+        if (declared) {
+          for (const name of names) erasedBindings.add(name);
+        } else if (ts.isIdentifier(declaration.name) && declaration.initializer) {
+          runtimeBindings.set(declaration.name.text, declaration.initializer);
         }
       }
       continue;
@@ -226,19 +103,210 @@ function nonAsyncFunctionExports(source: string, fileName: string): string[] {
       || ts.isEnumDeclaration(statement)
       || ts.isModuleDeclaration(statement)
     ) {
-      const exportedName = hasModifier(statement, ts.SyntaxKind.DefaultKeyword)
-        ? "default"
-        : statement.name?.text ?? "default";
-      offenders.add(exportedName);
+      if (!statement.name) continue;
+      if (hasModifier(statement, ts.SyntaxKind.DeclareKeyword)) {
+        erasedBindings.add(statement.name.text);
+      } else {
+        runtimeBindings.set(statement.name.text, statement);
+      }
+      continue;
+    }
+
+    if (ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) {
+      erasedBindings.add(statement.name.text);
+      continue;
+    }
+
+    if (ts.isImportDeclaration(statement) && statement.importClause) {
+      const {importClause} = statement;
+      if (importClause.isTypeOnly) {
+        if (importClause.name) erasedBindings.add(importClause.name.text);
+        if (importClause.namedBindings) {
+          if (ts.isNamespaceImport(importClause.namedBindings)) {
+            erasedBindings.add(importClause.namedBindings.name.text);
+          } else {
+            for (const element of importClause.namedBindings.elements) {
+              erasedBindings.add(element.name.text);
+            }
+          }
+        }
+      } else if (
+        importClause.namedBindings
+        && ts.isNamedImports(importClause.namedBindings)
+      ) {
+        for (const element of importClause.namedBindings.elements) {
+          if (element.isTypeOnly) erasedBindings.add(element.name.text);
+        }
+      }
+      continue;
+    }
+
+    if (ts.isImportEqualsDeclaration(statement) && statement.isTypeOnly) {
+      erasedBindings.add(statement.name.text);
+    }
+  }
+
+  const resolveFunction = (
+    node: ts.Node | undefined,
+    seen = new Set<string>(),
+  ): RuntimeFunctionNode | null => {
+    if (!node) return null;
+    if (
+      ts.isFunctionDeclaration(node)
+      || ts.isFunctionExpression(node)
+      || ts.isArrowFunction(node)
+    ) {
+      return node;
+    }
+    if (ts.isIdentifier(node)) {
+      if (seen.has(node.text)) return null;
+      const nextSeen = new Set(seen);
+      nextSeen.add(node.text);
+      return resolveFunction(runtimeBindings.get(node.text), nextSeen);
+    }
+    if (
+      ts.isParenthesizedExpression(node)
+      || ts.isAsExpression(node)
+      || ts.isTypeAssertionExpression(node)
+      || ts.isSatisfiesExpression(node)
+      || ts.isNonNullExpression(node)
+    ) {
+      return resolveFunction(node.expression, seen);
+    }
+    return null;
+  };
+
+  const exports: RuntimeExport[] = [];
+  const addExport = (name: string, node: ts.Node | undefined): void => {
+    exports.push({name, functionNode: resolveFunction(node)});
+  };
+
+  for (const statement of file.statements) {
+    if (ts.isExportDeclaration(statement)) {
+      if (statement.isTypeOnly) continue;
+      if (!statement.exportClause) {
+        addExport("*", undefined);
+        continue;
+      }
+      if (ts.isNamespaceExport(statement.exportClause)) {
+        addExport(statement.exportClause.name.text, undefined);
+        continue;
+      }
+      for (const element of statement.exportClause.elements) {
+        if (element.isTypeOnly) continue;
+        const exportedName = element.name.text;
+        if (statement.moduleSpecifier) {
+          addExport(exportedName, undefined);
+          continue;
+        }
+        const localName = element.propertyName ?? element.name;
+        if (
+          ts.isIdentifier(localName)
+          && erasedBindings.has(localName.text)
+          && !runtimeBindings.has(localName.text)
+        ) {
+          continue;
+        }
+        addExport(
+          exportedName,
+          ts.isIdentifier(localName) ? runtimeBindings.get(localName.text) : undefined,
+        );
+      }
+      continue;
+    }
+
+    if (ts.isExportAssignment(statement)) {
+      if (
+        ts.isIdentifier(statement.expression)
+        && erasedBindings.has(statement.expression.text)
+        && !runtimeBindings.has(statement.expression.text)
+      ) {
+        continue;
+      }
+      addExport(statement.isExportEquals ? "export=" : "default", statement.expression);
+      continue;
+    }
+
+    if (!hasModifier(statement, ts.SyntaxKind.ExportKeyword)) continue;
+    if (hasModifier(statement, ts.SyntaxKind.DeclareKeyword)) continue;
+    if (ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) continue;
+
+    if (ts.isFunctionDeclaration(statement)) {
+      // A bodyless overload declaration is erased. Its concrete implementation
+      // is inventoried directly or resolved through a local export list.
+      if (!statement.body) continue;
+      addExport(
+        hasModifier(statement, ts.SyntaxKind.DefaultKeyword)
+          ? "default"
+          : statement.name?.text ?? "default",
+        statement,
+      );
+      continue;
+    }
+
+    if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        if (ts.isIdentifier(declaration.name)) {
+          addExport(declaration.name.text, declaration.initializer);
+        } else {
+          for (const name of bindingNames(declaration.name)) addExport(name, undefined);
+        }
+      }
+      continue;
+    }
+
+    if (
+      ts.isClassDeclaration(statement)
+      || ts.isEnumDeclaration(statement)
+      || ts.isModuleDeclaration(statement)
+    ) {
+      addExport(
+        hasModifier(statement, ts.SyntaxKind.DefaultKeyword)
+          ? "default"
+          : statement.name?.text ?? "default",
+        statement,
+      );
       continue;
     }
 
     if (ts.isImportEqualsDeclaration(statement) && !statement.isTypeOnly) {
-      offenders.add(statement.name.text);
+      addExport(statement.name.text, statement);
     }
   }
 
-  return [...offenders];
+  return exports;
+}
+
+function actorTakingExports(source: string, fileName: string): string[] {
+  const file = ts.createSourceFile(
+    fileName, source, ts.ScriptTarget.Latest, true,
+    fileName.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  );
+
+  return localRuntimeExports(file).flatMap(({name, functionNode}) => {
+    if (!functionNode) return [];
+    const offending = functionNode.parameters.some((parameter) => {
+      const byName = ts.isIdentifier(parameter.name)
+        && actorParameterNames.has(parameter.name.text);
+      const type = typeNameOf(parameter.type);
+      const byType = type !== null && actorTypeNames.has(type);
+      return byName || byType;
+    });
+    return offending ? [name] : [];
+  });
+}
+
+function nonAsyncFunctionExports(source: string, fileName: string): string[] {
+  const file = ts.createSourceFile(
+    fileName, source, ts.ScriptTarget.Latest, true,
+    fileName.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  );
+
+  return localRuntimeExports(file)
+    .filter(({functionNode}) => (
+      !functionNode || !hasModifier(functionNode, ts.SyntaxKind.AsyncKeyword)
+    ))
+    .map(({name}) => name);
 }
 
 const modules = ["lib", "app"]
@@ -292,16 +360,85 @@ describe("Server Action actor boundary", () => {
     ).toEqual([]);
   });
 
-  it("detects the shapes it is meant to catch", () => {
-    const hostile = [
-      'export async function a(actor: AdminActor, id: string) { return id; }',
-      'export async function b(session: Actor) { return session; }',
-      'export async function c(actor: Extract<Actor, {kind: "member"}>) { return actor; }',
-      'export const d = async (actor: AdminActor) => actor;',
-      'export async function e(first: string, actor: Actor) { return actor; }',
+  it("detects actor-taking runtime functions through every local export shape", () => {
+    const hostile: {source: string; offenders: string[]}[] = [
+      {
+        source: 'export async function a(actor: AdminActor, id: string) { return id; }',
+        offenders: ["a"],
+      },
+      {
+        source: 'export async function b(session: Actor) { return session; }',
+        offenders: ["b"],
+      },
+      {
+        source: 'export async function c(actor: Extract<Actor, {kind: "member"}>) { return actor; }',
+        offenders: ["c"],
+      },
+      {
+        source: 'export const d = async (actor: AdminActor) => actor;',
+        offenders: ["d"],
+      },
+      {
+        source: 'export async function e(first: string, actor: Actor) { return actor; }',
+        offenders: ["e"],
+      },
+      {
+        source: 'export async function byAlias(sessionActor: unknown) { return sessionActor; }',
+        offenders: ["byAlias"],
+      },
+      {
+        source: 'export async function byType(principal: ConciergeAgentActor) { return principal; }',
+        offenders: ["byType"],
+      },
+      {
+        source: 'async function hidden(actor: Actor) { return actor; } export {hidden};',
+        offenders: ["hidden"],
+      },
+      {
+        source: 'const hidden = async (actor: Actor) => actor; export {hidden};',
+        offenders: ["hidden"],
+      },
+      {
+        source: 'async function hidden(actor: Actor) { return actor; } export const alias = hidden;',
+        offenders: ["alias"],
+      },
+      {
+        source: [
+          "async function hidden(principal: AdminActor) { return principal; }",
+          "const first = hidden;",
+          "const second = first;",
+          "export {second as action};",
+        ].join("\n"),
+        offenders: ["action"],
+      },
+      {
+        source: 'async function hidden(principal: SessionActor) { return principal; } export {hidden as default};',
+        offenders: ["default"],
+      },
+      {
+        source: 'async function hidden(_actor: unknown) { return _actor; } export default hidden;',
+        offenders: ["default"],
+      },
+      {
+        source: 'export default async function (actor: Actor) { return actor; }',
+        offenders: ["default"],
+      },
+      {
+        source: 'export default async (principal: ScheduledAgentActor) => principal;',
+        offenders: ["default"],
+      },
+      {
+        source: [
+          "function hidden(principal: Actor): Promise<Actor>;",
+          "async function hidden(principal: Actor) { return principal; }",
+          "export {hidden};",
+        ].join("\n"),
+        offenders: ["hidden"],
+      },
     ];
-    for (const source of hostile) {
-      expect(actorTakingExports(source, "candidate.ts"), source).not.toEqual([]);
+    for (const {source, offenders} of hostile) {
+      expect(actorTakingExports(source, "candidate.ts"), source).toEqual(offenders);
+      expect(nonAsyncFunctionExports(source, "candidate.ts"), source).toEqual([]);
     }
 
     const safe = [
@@ -309,6 +446,12 @@ describe("Server Action actor boundary", () => {
       'async function g(actor: Actor) { return actor; }',
       'export type H = (actor: Actor) => void;',
       'export async function i(state: unknown, formData: FormData) { return state; }',
+      'async function local(value: string) { return value; } export {local};',
+      'const local = async (value: string) => value; export {local as default};',
+      'type Hidden = (actor: Actor) => void; export {Hidden};',
+      'declare function ambient(actor: Actor): Promise<Actor>; export {ambient};',
+      'const actor = 1; export {actor};',
+      'export {actor} from "./remote";',
     ];
     for (const source of safe) {
       expect(actorTakingExports(source, "candidate.ts"), source).toEqual([]);
@@ -366,6 +509,11 @@ describe("Server Action actor boundary", () => {
         "export interface PublicShape extends Shape {}",
         "export {type Local};",
         'export type {Remote} from "./types";',
+      ].join("\n"),
+      [
+        "type Local = () => void;",
+        "declare function ambient(value: string): Promise<string>;",
+        "export {Local, ambient};",
       ].join("\n"),
       [
         "export function overloaded(value: string): Promise<string>;",
