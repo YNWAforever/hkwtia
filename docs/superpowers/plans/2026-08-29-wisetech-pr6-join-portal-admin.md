@@ -12,17 +12,17 @@
 
 - Work from PR6 branch `codex/wisetech-pr6-join-portal-admin` at approved-spec commit `8c83969e9f2244dadf8f9c9e3bc4d4431320c94a`, stacked on PR5 head `3856dd71842f9a2e1d9c4b7a46521416a5bd83ae`.
 - Treat `https://github.com/YNWAforever/wisetech` at commit `f91ecc5fa29c2b9d416ed8315f23e9492baf993d`, tree `d13a99e6c47f2b3ea279c5d02da5cf15008807b7`, as presentation evidence only. Import no donor runtime, router, data, content, asset, authentication, or provider configuration.
-- Add no schema, migration, seed/import, provider mutation, production session, deployment, merge, or production action.
+- Add no schema, migration, production seed/import, provider configuration, production session, deployment, merge, or production action. Code for disposable test-fixture reset/insert and test-provider verification may be added only behind the exact isolated-acceptance guards in Tasks 4, 9, 10, and 12; running any such mutation or provider call requires a separate recorded approval and is not authorized by approval of this plan.
 - Preserve the existing Next.js App Router, next-intl locale mapping (`en` and `zh-HK` at `/zh`), Neon Auth adapter, Stripe signed/idempotent webhook authority, Server Actions, repository authorization, same-transaction audits, lifecycle rules, seat rules, CMS/CRM owners, automation controls, and Concierge runtime.
 - Only Server Components, Server Actions, and `server-only` services may read repositories or provider configuration. Client Components receive localized labels, safe hrefs, presentation state, and sanitized action results.
 - Billing interval is part of plan identity. Community and Patron use `none`. Startup and Corporate expose only `annual` in PR6. Reject `monthly` until a distinct approved Stripe mapping exists.
 - Persist `billingInterval` explicitly on membership creation. Once a membership exists, its stored `planCode` and `billingInterval` override missing or conflicting query input.
 - Keep `/portal/company/listing` canonical and reject `/portal/showcase`. Keep invitation acceptance at `/portal/company/seats/accept?token=opaque-token` and never copy the token into generic member-login continuation.
 - Join, Portal, and Admin never import the public `SiteHeader`, announcement bar, mega menu, or public footer. The Portal continues to mount exactly one Concierge widget.
-- Every behavior task starts with a focused failing test, records the exact RED cause, makes the smallest production change, records GREEN, refactors, and commits only its explicit paths.
+- Every behavior task in Tasks 1-11 starts with a focused failing test, records the exact RED cause, makes the smallest production change, records GREEN, refactors, and commits only its explicit paths. Task 12 adds verification harnesses and aggregate evidence only: it must not manufacture a RED result; any newly exposed behavior failure returns to its owning task for a reviewed fix.
 - Every new English label/state has a Traditional Chinese peer. New controls are keyboard reachable, visibly focused, at least 44 px, reduced-motion safe, and do not rely on color alone.
 - Each numbered task is implemented by one fresh implementer, receives an immutable base/head review package, and reaches zero Critical, Important, and Minor findings before the next task starts.
-- Preserve unrelated work. Stage explicit paths only; never use `git add -A`.
+- Preserve unrelated work. Stage explicit paths only; never use `git add -A`. Every PowerShell staging command uses single-quoted `:(literal)` Git pathspecs so `[locale]` and route-group parentheses are never interpreted by PowerShell or Git glob matching.
 
 ## File Structure
 
@@ -35,7 +35,7 @@
 - Add route-level seat invitation tests around the existing page actions and seat repository service; do not create another invitation service or auth callback.
 - Create `config/internal-navigation.ts` and focused components under `components/internal-shell`: presentation-only shell, grouped responsive navigation, page header, section, status, table, empty, and action-feedback primitives.
 - Modify the Join and Portal layouts/pages, then the Admin layout/pages in CRM, CMS, and Operations slices. Pages keep their current readers, actions, authorization, audit, and lifecycle owners.
-- Create `tests/e2e/wisetech-pr6-internal-journeys.spec.ts` and `docs/integration/wisetech-pr6-verification.md`; extend existing focused suites without weakening M1-M7 gates.
+- Create credential-free and authenticated PR6 browser matrices plus `docs/integration/wisetech-pr6-verification.md`; replace M1's unconditional live skip, harden M2 mutation authority, add an isolated M7 CMS journey, and extend existing focused suites without weakening M1-M7 gates.
 
 ---
 
@@ -173,7 +173,7 @@
 
 - [ ] **Step 5: Commit the catalog slice**
 
-    git add lib/membership/constants.ts lib/membership/catalog.ts lib/membership/public-catalog.ts app/[locale]/(public)/membership/page.tsx components/marketing/tier-comparison.tsx config/navigation.ts tests/unit/membership-catalog.test.ts tests/unit/membership-public-catalog.test.ts tests/unit/membership-page-catalog.test.tsx tests/unit/navigation.test.ts tests/unit/mobile-navigation.test.tsx
+    git add -- ':(literal)lib/membership/constants.ts' ':(literal)lib/membership/catalog.ts' ':(literal)lib/membership/public-catalog.ts' ':(literal)app/[locale]/(public)/membership/page.tsx' ':(literal)components/marketing/tier-comparison.tsx' ':(literal)config/navigation.ts' ':(literal)tests/unit/membership-catalog.test.ts' ':(literal)tests/unit/membership-public-catalog.test.ts' ':(literal)tests/unit/membership-page-catalog.test.tsx' ':(literal)tests/unit/navigation.test.ts' ':(literal)tests/unit/mobile-navigation.test.tsx'
     git commit -m "feat: reconcile membership billing options"
 
 ### Task 2: Carry typed Join context into durable membership outcomes
@@ -363,7 +363,7 @@
 
 - [ ] **Step 5: Commit the typed Join slice**
 
-    git add lib/membership/join-schema.ts lib/membership/join-navigation.ts lib/membership/onboarding.ts lib/membership/join-service.ts lib/membership/lifecycle.ts lib/db/repos/memberships.ts app/[locale]/(join)/join/actions.ts app/[locale]/(join)/join/page.tsx app/[locale]/(join)/join/profile/page.tsx app/[locale]/(join)/join/company/page.tsx messages/en.json messages/zh-HK.json tests/unit/join-schema.test.ts tests/unit/join-navigation.test.ts tests/unit/join-service.test.ts tests/unit/join-service-review.test.ts tests/unit/join-actions.test.ts tests/unit/join-actions-profile-identity.test.ts tests/unit/join-page.test.tsx tests/unit/profile-identity-billing.test.ts tests/unit/checkout-service.test.ts tests/unit/checkout-recovery-service.test.ts tests/unit/portal-content-scope.test.ts tests/unit/repository-production-security.test.ts
+    git add -- ':(literal)lib/membership/join-schema.ts' ':(literal)lib/membership/join-navigation.ts' ':(literal)lib/membership/onboarding.ts' ':(literal)lib/membership/join-service.ts' ':(literal)lib/membership/lifecycle.ts' ':(literal)lib/db/repos/memberships.ts' ':(literal)app/[locale]/(join)/join/actions.ts' ':(literal)app/[locale]/(join)/join/page.tsx' ':(literal)app/[locale]/(join)/join/profile/page.tsx' ':(literal)app/[locale]/(join)/join/company/page.tsx' ':(literal)messages/en.json' ':(literal)messages/zh-HK.json' ':(literal)tests/unit/join-schema.test.ts' ':(literal)tests/unit/join-navigation.test.ts' ':(literal)tests/unit/join-service.test.ts' ':(literal)tests/unit/join-service-review.test.ts' ':(literal)tests/unit/join-actions.test.ts' ':(literal)tests/unit/join-actions-profile-identity.test.ts' ':(literal)tests/unit/join-page.test.tsx' ':(literal)tests/unit/profile-identity-billing.test.ts' ':(literal)tests/unit/checkout-service.test.ts' ':(literal)tests/unit/checkout-recovery-service.test.ts' ':(literal)tests/unit/portal-content-scope.test.ts' ':(literal)tests/unit/repository-production-security.test.ts'
     git commit -m "feat: route durable join outcomes"
 
 ### Task 3: Add explicit member login, one safe continuation authority, and Portal sign-out
@@ -393,21 +393,28 @@
 
 - [ ] **Step 1: Write failing continuation, login-page, actor-boundary, and sign-out tests**
 
-    Expand the continuation matrix to accept exactly the nine stable paths and reject:
+    Expand the continuation matrix to accept exactly the nine stable locale-neutral paths. For every rejected case below, call `parsePortalContinuation(value, locale)` with the shown locale and assert `null`:
 
-    [
-      "/portal/showcase",
-      "/portal/company/seats/accept",
-      "/portal/company/seats/accept?token=secret",
-      "/portal/unknown",
-      "/portal?query=1",
-      "/portal#fragment",
-      "//evil.example/portal",
-      "https://evil.example/portal",
-      "/portal\\company",
-      "/portal\r\n/admin",
-      ["/portal", "/admin"],
-    ]
+    const rejected = [
+      {locale: "en", value: "/portal/showcase"},
+      {locale: "en", value: "/portal/company/seats/accept"},
+      {locale: "en", value: "/portal/company/seats/accept?token=secret"},
+      {locale: "en", value: "/portal/unknown"},
+      {locale: "en", value: "/portal?query=1"},
+      {locale: "en", value: "/portal#fragment"},
+      {locale: "en", value: "/zh/portal"},
+      {locale: "zh-HK", value: "/en/portal"},
+      {locale: "zh-HK", value: "/fr/portal"},
+      {locale: "en", value: "//evil.example/portal"},
+      {locale: "en", value: "https://evil.example/portal"},
+      {locale: "en", value: "https://user:pass@evil.example/portal"},
+      {locale: "en", value: "/portal\\company"},
+      {locale: "en", value: "/portal\n"},
+      {locale: "en", value: "/portal/documents\t"},
+      {locale: "en", value: ["/portal", "/admin"]},
+    ] as const;
+
+    Reject C0 controls, credentials, protocol-relative/absolute URLs, query/hash state, cross-locale prefixes, unknown locale prefixes, arrays, and the token-bearing acceptance route before any authentication or provider call. Add positive EN and zh-HK cases for all nine allowlisted destinations.
 
     Assert:
 
@@ -424,6 +431,8 @@
     - an authenticated member redirects to the validated continuation;
     - an authenticated staff actor renders member-access denied and no Portal data;
     - metadata is `{index: false, follow: false}` in both locales.
+
+    In `join-actions.test.ts`, execute the final `entry: "member-login"` action branch directly. For Chinese Billing continuation, assert the only provider call has callback URL `https://members.example.test/zh/member-login?next=%2Fportal%2Fbilling`, the successful redirect is `/zh/member-login?sent=1&next=%2Fportal%2Fbilling`, and neither contains `/join`. Add an EN default-`/portal` case, rate-limited case, returned-provider-error case, thrown-provider-error case, and invalid-continuation case. The last four expose only localized safe state, do not redirect, and invalid continuation calls neither `checkAuthSend` nor `auth.signIn.magicLink`.
 
     In the sign-out test:
 
@@ -449,7 +458,7 @@
 
     In Portal layout:
 
-    const actor = await getActor().catch(() => null);
+    const actor = await getActor();
     if (!actor) {
       const requestHeaders = await headers();
       const continuation = parsePortalContinuation(
@@ -460,9 +469,11 @@
     }
     requirePortalMember(actor);
 
+    Add a layout test where `getActor` rejects with `NEON_SESSION_UNAVAILABLE`; `PortalLayout` must reject with the same error, `redirect` must remain uncalled, and `requirePortalMember` must remain uncalled. Only an actual `null` actor is anonymous; never convert configuration, session-reader, or profile-repository failures into login redirects.
+
     Do not accept arbitrary `startsWith("/portal")` paths. A staff/exco/superadmin actor must not acquire member access.
 
-    Build `MemberLoginPage` in the transactional layout. It validates one scalar continuation, is noindex, redirects an existing member, renders a localized denied state for a non-member actor, and binds the same Task 2 Server Action with `entry: "member-login"`, null selection, and the parsed continuation. The callback and sent-state route remain `/member-login`. Keep the existing email validation, per-IP/per-address limiter, `APP_URL` origin validation, provider adapter, and generic auth error.
+    Build `MemberLoginPage` in the transactional layout. It validates one scalar continuation before invoking authentication, is noindex, redirects an existing member, renders a localized denied state for a non-member actor, and binds the same Task 2 Server Action with `entry: "member-login"`, null selection, and the parsed continuation. The callback and sent-state route remain `/member-login`. Keep the existing email validation, per-IP/per-address limiter, `APP_URL` origin validation, provider adapter, rate-limited result, and generic sanitized provider error. Never fall back to `/join`.
 
     Change `memberPortalAction.href` to `/member-login`. Add `route-member-login` to the integration manifest as an hkwtia-owned retained route. Keep `/member-login` out of `publicRoutes` so sitemap generation does not index it.
 
@@ -474,7 +485,7 @@
 
     npm.cmd test -- tests/unit/join-navigation.test.ts tests/unit/join-actions.test.ts tests/unit/member-login-page.test.tsx tests/unit/portal-sign-out-button.test.tsx tests/unit/portal-layout-auth.test.tsx tests/unit/portal-authorization.test.ts tests/unit/navigation.test.ts tests/unit/mobile-navigation.test.tsx tests/unit/page-indexability.test.ts tests/unit/wisetech-route-parity.test.ts
 
-    Expected: PASS. Both navigation renderers target `/member-login`; generic Join targets `/membership`; continuation coverage is exact; sign-out has success, pending, and fail-stay behavior.
+    Expected: PASS. Both navigation renderers target `/member-login`; generic Join targets `/membership`; cross-locale/control/credential continuation rejection occurs before auth; the member-login action has exact callback/sent/rate-limit/provider-error behavior with no `/join` fallback; operational `getActor` rejection propagates; and sign-out has success, pending, and fail-stay behavior.
 
     Run:
 
@@ -484,7 +495,7 @@
 
 - [ ] **Step 5: Commit the member-access slice**
 
-    git add app/[locale]/(join)/member-login/page.tsx components/portal/portal-sign-out-button.tsx lib/membership/join-navigation.ts app/[locale]/(join)/join/actions.ts app/[locale]/(member)/portal/layout.tsx components/portal/portal-nav.tsx lib/portal/queries.ts config/navigation.ts config/wisetech-integration-manifest.ts messages/en.json messages/zh-HK.json tests/unit/member-login-page.test.tsx tests/unit/portal-sign-out-button.test.tsx tests/unit/portal-layout-auth.test.tsx tests/unit/join-navigation.test.ts tests/unit/join-actions.test.ts tests/unit/portal-authorization.test.ts tests/unit/navigation.test.ts tests/unit/mobile-navigation.test.tsx tests/unit/page-indexability.test.ts tests/unit/wisetech-route-parity.test.ts tests/e2e/portal-dashboard.spec.ts tests/e2e/portal-secondary-pages.spec.ts tests/e2e/seat-management.spec.ts tests/e2e/m2-admin-crm.spec.ts
+    git add -- ':(literal)app/[locale]/(join)/member-login/page.tsx' ':(literal)components/portal/portal-sign-out-button.tsx' ':(literal)lib/membership/join-navigation.ts' ':(literal)app/[locale]/(join)/join/actions.ts' ':(literal)app/[locale]/(member)/portal/layout.tsx' ':(literal)components/portal/portal-nav.tsx' ':(literal)lib/portal/queries.ts' ':(literal)config/navigation.ts' ':(literal)config/wisetech-integration-manifest.ts' ':(literal)messages/en.json' ':(literal)messages/zh-HK.json' ':(literal)tests/unit/member-login-page.test.tsx' ':(literal)tests/unit/portal-sign-out-button.test.tsx' ':(literal)tests/unit/portal-layout-auth.test.tsx' ':(literal)tests/unit/join-navigation.test.ts' ':(literal)tests/unit/join-actions.test.ts' ':(literal)tests/unit/portal-authorization.test.ts' ':(literal)tests/unit/navigation.test.ts' ':(literal)tests/unit/mobile-navigation.test.tsx' ':(literal)tests/unit/page-indexability.test.ts' ':(literal)tests/unit/wisetech-route-parity.test.ts' ':(literal)tests/e2e/portal-dashboard.spec.ts' ':(literal)tests/e2e/portal-secondary-pages.spec.ts' ':(literal)tests/e2e/seat-management.spec.ts' ':(literal)tests/e2e/m2-admin-crm.spec.ts'
     git commit -m "feat: add explicit member access controls"
 
 ### Task 4: Resolve checkout by durable option and project authoritative completion state
@@ -493,6 +504,7 @@
 
 - Modify: `lib/billing/checkout-service.ts`, `lib/db/repos/billing-attempts.ts`, `lib/membership/join-billing-state.ts`.
 - Modify: `app/[locale]/(join)/join/checkout/page.tsx`, `app/[locale]/(join)/join/complete/page.tsx`, `app/[locale]/(member)/portal/billing/page.tsx`, `components/billing/checkout-status.tsx`.
+- Create: `tests/fixtures/m1-live-acceptance.ts`, `tests/unit/m1-live-acceptance-safety.test.ts`.
 - Modify tests: `tests/unit/checkout-service.test.ts`, `tests/unit/checkout-recovery-service.test.ts`, `tests/unit/billing-checkout-locking.test.ts`, `tests/unit/join-billing-pages.test.tsx`, `tests/unit/portal-billing-actions.test.tsx`, `tests/unit/m1-acceptance-services.test.ts`, `tests/e2e/m1-acceptance.spec.ts`.
 - Modify localization: `messages/en.json`, `messages/zh-HK.json`.
 
@@ -508,6 +520,25 @@
         status: "pending_payment" | "pending_review" | "active";
       };
       application: Readonly<{id: string; planCode: string; status: string}>;
+    }>;
+    export type JoinStateApplication = Readonly<{
+      id: string;
+      planCode: string;
+      status: string;
+    }>;
+    export type JoinStateDependencies = Readonly<{
+      memberships: Readonly<{
+        getById(
+          actor: Actor,
+          membershipId: string,
+        ): Promise<MembershipRecord | null>;
+      }>;
+      applications: Readonly<{
+        getById(
+          actor: Actor,
+          applicationId: string,
+        ): Promise<JoinStateApplication | null>;
+      }>;
     }>;
     export async function loadJoinMembershipState(
       actor: Actor | null,
@@ -528,6 +559,19 @@
 
 - `claimActive` and `startNewAttempt` receive `BillingAttemptSelection`; a lock-time mismatch throws `BILLING_OPTION_CHANGED` before an attempt or Stripe call.
 - `createBillingPortalSession` final signature is `(actor, membershipId, locale, dependencies?)`.
+- The isolated provider harness exports `M1_ACCEPTANCE_DESTRUCTIVE_SENTINEL = "M1_ISOLATED_FIXTURES_ONLY"`, `M1_ACCEPTANCE_PROVIDER_SENTINEL = "M1_TEST_PROVIDERS_ONLY"`, `missingM1LiveEnvironment(environment)`, `requireM1LiveAcceptanceEnvironment(environment)`, `prepareM1Fixture(runId, guarded)`, and `cleanupM1Fixture(runId, guarded)`. It remains test-only and cannot be imported by `app`, `components`, or `lib` production modules.
+- The controlled inbox adapter has this exact test-only contract:
+
+    export type M1MagicLinkInboxResponse = Readonly<{
+      messages: readonly Readonly<{
+        id: string;
+        recipient: string;
+        receivedAt: string;
+        href: string;
+      }>[];
+    }>;
+
+  It sends `GET {M1_TEST_MAGIC_LINK_INBOX_URL}?recipient={encodedEmail}&after={encodedIsoTimestamp}` with `Authorization: Bearer {M1_TEST_MAGIC_LINK_INBOX_TOKEN}`. The response must contain exactly one post-request message for the exact recipient; `receivedAt` must parse after the request timestamp; `href` must be HTTPS with no URL credentials; and following it must finish on the exact allowlisted `APP_URL` origin. Reject extra matches, stale messages, redirects to another origin, malformed JSON, or timeouts after 60 seconds.
 
 - [ ] **Step 1: Write failing durable-price, locked-row, completion, and locale tests**
 
@@ -580,13 +624,15 @@
       returnUrl: "https://members.example.test/zh/portal/billing",
     });
 
+    In `m1-live-acceptance-safety.test.ts`, prove the guard rejects a missing or wrong destructive sentinel, missing or wrong provider sentinel, absent `DATABASE_URL_TEST`, `DATABASE_URL !== DATABASE_URL_TEST`, non-Neon/TLS-invalid/production-labelled/mismatched database hosts, `NEON_PROJECT_ID !== M1_TEST_NEON_PROJECT_ID`, missing or mismatched `M1_TEST_NEON_HOST`, missing `PLAYWRIGHT_BASE_URL`/`M1_E2E_ALLOWED_ORIGIN`, origin mismatch, non-HTTPS remote targets, the production host, non-test Stripe keys, and unallowlisted mailbox origins before a Pool, browser, inbox, Neon, or Stripe client is constructed.
+
 - [ ] **Step 2: Run the focused tests and record the RED reason**
 
     Run:
 
-    npm.cmd test -- tests/unit/checkout-service.test.ts tests/unit/checkout-recovery-service.test.ts tests/unit/billing-checkout-locking.test.ts tests/unit/join-billing-pages.test.tsx tests/unit/portal-billing-actions.test.tsx tests/unit/m1-acceptance-services.test.ts
+    npm.cmd test -- tests/unit/checkout-service.test.ts tests/unit/checkout-recovery-service.test.ts tests/unit/billing-checkout-locking.test.ts tests/unit/join-billing-pages.test.tsx tests/unit/portal-billing-actions.test.tsx tests/unit/m1-acceptance-services.test.ts tests/unit/m1-live-acceptance-safety.test.ts
 
-    Expected: FAIL because checkout resolves by plan only, locked membership rows omit interval, completion accepts pending payment only, and Billing Portal returns to the English path.
+    Expected: FAIL because checkout resolves by plan only, locked membership rows omit interval, completion accepts pending payment only, Billing Portal returns to the English path, and the isolated M1 provider/database/origin guard does not exist.
 
 - [ ] **Step 3: Implement durable billing and status projection**
 
@@ -614,29 +660,34 @@
 
     Pass locale from Portal billing to `createBillingPortalSession` and build the return URL with `localizedPath(locale, "/portal/billing")`.
 
-- [ ] **Step 4: Run GREEN and the M1 deterministic regression**
+    Implement `m1-live-acceptance.ts` as a test-only fail-closed harness. It requires all Task 12 M1 variables, exact `DATABASE_URL === DATABASE_URL_TEST`, an independently allowlisted non-production Neon project and TLS host, exact target/origin/`APP_URL` equality, an allowlisted HTTPS test-inbox origin, and Stripe `sk_test_` credentials before constructing external clients. Replace the unconditional always-skip case in `m1-acceptance.spec.ts` with one isolated describe whose skip condition is exactly `missingM1LiveEnvironment(process.env).length > 0`; a skip remains `NOT PASSED`.
+
+    Before the journey, retrieve both configured Stripe test Prices and require `active === true`, `type === "recurring"`, `currency === "hkd"`, and `recurring.interval === "year"`. Prepare rows and provider objects tagged by one generated `runId`; request the real test-mode Neon magic link, poll only the allowlisted controlled inbox for that recipient and request timestamp, open the returned callback, complete profile/company onboarding, prove the stored annual option and exact Startup or Corporate Price, complete Stripe test checkout, wait for the signed webhook to activate the durable membership, render active completion, open the locale-correct Billing Portal, verify receipts/seats/secondary pages, and sign out. `afterAll` deletes only rows and Stripe test objects bearing that `runId`; a cleanup failure fails the suite. Do not use a production email, customer, Price, endpoint, database, or catch-all deletion.
+
+- [ ] **Step 4: Run GREEN and prove the M1 harness can reach an authorized isolated result**
 
     Run:
 
-    npm.cmd test -- tests/unit/checkout-service.test.ts tests/unit/checkout-recovery-service.test.ts tests/unit/billing-checkout-locking.test.ts tests/unit/join-billing-pages.test.tsx tests/unit/portal-billing-actions.test.tsx tests/unit/m1-acceptance-services.test.ts
+    npm.cmd test -- tests/unit/checkout-service.test.ts tests/unit/checkout-recovery-service.test.ts tests/unit/billing-checkout-locking.test.ts tests/unit/join-billing-pages.test.tsx tests/unit/portal-billing-actions.test.tsx tests/unit/m1-acceptance-services.test.ts tests/unit/m1-live-acceptance-safety.test.ts
 
-    Expected: PASS. Price selection uses the durable pair, all completion states are actor-scoped, and forged success never activates or selects active state.
+    Expected: PASS. Price selection uses the durable pair, all completion states are actor-scoped, forged success never activates or selects active state, and every unsafe M1 environment fails before external construction.
 
     Run:
 
     npm.cmd run test:e2e -- tests/e2e/m1-acceptance.spec.ts
 
-    Expected: deterministic fixture checks PASS. Any live Neon/Stripe acceptance remains an explicit skip and is recorded as `NOT PASSED`.
+    Expected without the complete gate: deterministic fixture cases PASS and the isolated live describe is conditionally skipped as `NOT PASSED`; the old unconditional skip string is absent. After the separate provider/database mutation approval and every Task 12 M1 variable are present, the same command must execute the full isolated journey, confirm both configured Prices are annual recurring test Prices, perform deterministic before/after cleanup, and PASS. Never convert a missing variable or skip into acceptance.
 
 - [ ] **Step 5: Commit the durable billing slice**
 
-    git add lib/billing/checkout-service.ts lib/db/repos/billing-attempts.ts lib/membership/join-billing-state.ts app/[locale]/(join)/join/checkout/page.tsx app/[locale]/(join)/join/complete/page.tsx app/[locale]/(member)/portal/billing/page.tsx components/billing/checkout-status.tsx messages/en.json messages/zh-HK.json tests/unit/checkout-service.test.ts tests/unit/checkout-recovery-service.test.ts tests/unit/billing-checkout-locking.test.ts tests/unit/join-billing-pages.test.tsx tests/unit/portal-billing-actions.test.tsx tests/unit/m1-acceptance-services.test.ts tests/e2e/m1-acceptance.spec.ts
+    git add -- ':(literal)lib/billing/checkout-service.ts' ':(literal)lib/db/repos/billing-attempts.ts' ':(literal)lib/membership/join-billing-state.ts' ':(literal)app/[locale]/(join)/join/checkout/page.tsx' ':(literal)app/[locale]/(join)/join/complete/page.tsx' ':(literal)app/[locale]/(member)/portal/billing/page.tsx' ':(literal)components/billing/checkout-status.tsx' ':(literal)messages/en.json' ':(literal)messages/zh-HK.json' ':(literal)tests/fixtures/m1-live-acceptance.ts' ':(literal)tests/unit/m1-live-acceptance-safety.test.ts' ':(literal)tests/unit/checkout-service.test.ts' ':(literal)tests/unit/checkout-recovery-service.test.ts' ':(literal)tests/unit/billing-checkout-locking.test.ts' ':(literal)tests/unit/join-billing-pages.test.tsx' ':(literal)tests/unit/portal-billing-actions.test.tsx' ':(literal)tests/unit/m1-acceptance-services.test.ts' ':(literal)tests/e2e/m1-acceptance.spec.ts'
     git commit -m "feat: project durable billing state"
 
 ### Task 5: Lock the one-time seat invitation callback at route level
 
 **Files:**
 
+- Create: `app/[locale]/(member)/portal/company/seats/actions.ts`, `lib/portal/seat-invitation-callback.ts`.
 - Modify: `app/[locale]/(member)/portal/company/seats/page.tsx`, `app/[locale]/(member)/portal/company/seats/accept/page.tsx`.
 - Create test: `tests/unit/seat-invitation-routes.test.tsx`.
 - Modify tests: `tests/unit/seat-service.test.ts`, `tests/e2e/seat-management.spec.ts`.
@@ -644,11 +695,11 @@
 **Interfaces:**
 
 - Consumes: existing `inviteSeat`, `revokeInvitation`, `acceptSeatInvitation`, `auth.signIn.magicLink`, `requireActor`, `appEnv().appUrl`, and `SeatServiceError`.
-- Produces no new runtime service, endpoint, identity store, or callback handler. It exposes the existing page-local callback/action functions for deterministic route tests only.
+- Produces no new endpoint, identity store, or callback handler. `app/[locale]/(member)/portal/company/seats/actions.ts` begins with `"use server"` and exports the existing `inviteSeatAction(formData: FormData)`; `lib/portal/seat-invitation-callback.ts` begins with `import "server-only"` and exports `invitationCallbackUrl(appUrl: string, locale: AppLocale, token: string): string`. The page imports those seams and exports only Next-supported page-module fields.
 
 - [ ] **Step 1: Write failing invitation delivery, identity, replay, expiry, and revocation tests**
 
-    In `seat-invitation-routes.test.tsx`, mock the current repository/auth boundaries and assert:
+    In `seat-invitation-routes.test.tsx`, import `inviteSeatAction` from the adjacent `actions.ts`, import `invitationCallbackUrl` from its server-only module, import only the acceptance page's default component from `page.tsx`, mock the current repository/auth boundaries, and assert:
 
     await expect(inviteSeatAction(form)).rejects.toThrow("NEXT_REDIRECT");
     expect(auth.signIn.magicLink).toHaveBeenCalledWith({
@@ -681,11 +732,11 @@
 
     npm.cmd test -- tests/unit/seat-invitation-routes.test.tsx tests/unit/seat-service.test.ts
 
-    Expected: FAIL because the page-local callback and invite action are not test exports and the route-level delegation/token invariants are not covered.
+    Expected: FAIL because the valid adjacent Server Action and callback-builder modules do not exist and the route-level delegation/token invariants are not covered. Do not make a Next page module export arbitrary helpers to satisfy RED.
 
 - [ ] **Step 3: Make the existing route seams testable without creating a second flow**
 
-    Export the existing `invitationCallbackUrl` and `inviteSeatAction` from the seats page. Keep their production call sequence unchanged:
+    Move the existing invite Server Action, without widening behavior, to the adjacent `"use server"` `actions.ts`. Move URL construction to the server-only callback module and pass `appEnv().appUrl` from the action. Import the action into the seats page; do not export either helper from `page.tsx`. Keep the production call sequence unchanged:
 
     1. require the current actor;
     2. create or reuse the actor-authorized invitation;
@@ -711,7 +762,7 @@
 
 - [ ] **Step 5: Commit the invitation regression slice**
 
-    git add app/[locale]/(member)/portal/company/seats/page.tsx app/[locale]/(member)/portal/company/seats/accept/page.tsx tests/unit/seat-invitation-routes.test.tsx tests/unit/seat-service.test.ts tests/e2e/seat-management.spec.ts
+    git add -- ':(literal)app/[locale]/(member)/portal/company/seats/actions.ts' ':(literal)lib/portal/seat-invitation-callback.ts' ':(literal)app/[locale]/(member)/portal/company/seats/page.tsx' ':(literal)app/[locale]/(member)/portal/company/seats/accept/page.tsx' ':(literal)tests/unit/seat-invitation-routes.test.tsx' ':(literal)tests/unit/seat-service.test.ts' ':(literal)tests/e2e/seat-management.spec.ts'
     git commit -m "test: lock seat invitation callback"
 
 ### Task 6: Build shared internal-shell primitives and grouped navigation
@@ -797,6 +848,10 @@
       .toBe("company");
     expect(activeInternalNavigationItem("/admin/reports/board-drafts/a", adminGroups))
       .toBe("reports");
+    expect(activeInternalNavigationItem("/portal/companyish", portalGroups))
+      .toBeNull();
+    expect(activeInternalNavigationItem("/admin/reports-old", adminGroups))
+      .toBeNull();
 
     Render tests require one skip link, one `main#main-content`, named grouped navigation, `aria-current="page"` only on the most-specific item, 44 px target classes, table-local horizontal scrolling, and `role="alert"` only for error feedback.
 
@@ -812,7 +867,7 @@
 
 - [ ] **Step 3: Implement presentation-only primitives**
 
-    Put stable href/id/match data in `config/internal-navigation.ts` and localize labels in layouts. Dashboard uses `match: "exact"`. Other entries use prefix matching; `activeInternalNavigationItem` chooses the matching item with the longest href, so listing wins over company and reports own Board drafts.
+    Put stable href/id/match data in `config/internal-navigation.ts` and localize labels in layouts. Dashboard uses `match: "exact"`. A prefix item matches only when `pathname === href || pathname.startsWith(href + "/")`; then `activeInternalNavigationItem` chooses the matching item with the longest href, so listing wins over company and reports own Board drafts without near-prefix false positives.
 
     `InternalNavigation` is a Client Component using the existing `Sheet`, `SheetTrigger`, `SheetContent`, `SheetClose`, and localized `usePathname`. Render the same groups in a desktop sidebar and mobile Sheet. Wrap each mobile link in `SheetClose asChild`. Let Radix handle Escape and focus restoration; do not add document-level key listeners.
 
@@ -855,7 +910,7 @@
 
 - [ ] **Step 5: Commit the primitive slice**
 
-    git add config/internal-navigation.ts components/internal-shell/internal-app-shell.tsx components/internal-shell/internal-navigation.tsx components/internal-shell/internal-page-header.tsx components/internal-shell/internal-section.tsx components/internal-shell/internal-status-badge.tsx components/internal-shell/internal-table-frame.tsx components/internal-shell/internal-empty-state.tsx components/internal-shell/internal-action-feedback.tsx components/internal-shell/index.ts messages/en.json messages/zh-HK.json tests/unit/internal-navigation.test.tsx tests/unit/internal-shell.test.tsx tests/unit/wisetech-pr6-route-inventory.test.ts
+    git add -- ':(literal)config/internal-navigation.ts' ':(literal)components/internal-shell/internal-app-shell.tsx' ':(literal)components/internal-shell/internal-navigation.tsx' ':(literal)components/internal-shell/internal-page-header.tsx' ':(literal)components/internal-shell/internal-section.tsx' ':(literal)components/internal-shell/internal-status-badge.tsx' ':(literal)components/internal-shell/internal-table-frame.tsx' ':(literal)components/internal-shell/internal-empty-state.tsx' ':(literal)components/internal-shell/internal-action-feedback.tsx' ':(literal)components/internal-shell/index.ts' ':(literal)messages/en.json' ':(literal)messages/zh-HK.json' ':(literal)tests/unit/internal-navigation.test.tsx' ':(literal)tests/unit/internal-shell.test.tsx' ':(literal)tests/unit/wisetech-pr6-route-inventory.test.ts'
     git commit -m "feat: add internal application shell"
 
 ### Task 7: Apply the compact transactional shell to Join and member login
@@ -866,12 +921,12 @@
 - Modify: `app/[locale]/(join)/join/page.tsx`, `app/[locale]/(join)/join/profile/page.tsx`, `app/[locale]/(join)/join/company/page.tsx`, `app/[locale]/(join)/join/checkout/page.tsx`, `app/[locale]/(join)/join/complete/page.tsx`, `app/[locale]/(join)/member-login/page.tsx`.
 - Modify: `components/join/join-form.tsx`, `components/join/progress.tsx`, `components/billing/checkout-status.tsx`.
 - Create test: `tests/unit/wisetech-pr6-join-shell.test.tsx`.
-- Modify tests: `tests/unit/join-page.test.tsx`, `tests/unit/join-billing-pages.test.tsx`, `tests/unit/member-login-page.test.tsx`, `tests/unit/page-indexability.test.ts`, `tests/e2e/join-auth.spec.ts`.
+- Modify tests: `tests/unit/join-page.test.tsx`, `tests/unit/join-billing-pages.test.tsx`, `tests/unit/member-login-page.test.tsx`, `tests/unit/page-indexability.test.ts`, `tests/unit/locale-switcher.test.tsx`, `tests/e2e/join-auth.spec.ts`.
 - Modify localization: `messages/en.json`, `messages/zh-HK.json`.
 
 **Interfaces:**
 
-- Consumes: Task 6 `InternalAppShell`, `InternalNavigation`, `InternalPageHeader`, `InternalSection`, `InternalActionFeedback`, Task 2 Join outcomes, and Task 3 member login.
+- Consumes: Task 6 `InternalAppShell`, `InternalNavigation`, `InternalPageHeader`, `InternalSection`, `InternalActionFeedback`, the existing `LocaleSwitcher` and `Navigation` locale-label authority, Task 2 Join outcomes, and Task 3 member login.
 - Produces no new Join reader, action, repository, auth, or billing owner.
 
 - [ ] **Step 1: Write the failing Join shell/rendering contract**
@@ -883,6 +938,8 @@
     - one visible H1 per rendered page state;
     - the skip link targets `#main-content`;
     - WTIA home and Membership links are locale-correct;
+    - the existing `LocaleSwitcher` is mounted through `InternalAppShell.utility`;
+    - switching EN to zh-HK and zh-HK to EN on `/join?plan=startup&interval=annual#join-form` retains the exact pathname, serialized query, and hash passed to the locale-aware router;
     - form field names, labels, hidden/bound context, action functions, and `JoinProgress` step order remain unchanged;
     - input/button targets retain `min-h-11`;
     - invalid plan/interval/continuation states have localized recovery and make no repository/provider call.
@@ -898,13 +955,13 @@
 
     Run:
 
-    npm.cmd test -- tests/unit/wisetech-pr6-join-shell.test.tsx tests/unit/join-page.test.tsx tests/unit/join-billing-pages.test.tsx tests/unit/member-login-page.test.tsx tests/unit/page-indexability.test.ts
+    npm.cmd test -- tests/unit/wisetech-pr6-join-shell.test.tsx tests/unit/join-page.test.tsx tests/unit/join-billing-pages.test.tsx tests/unit/member-login-page.test.tsx tests/unit/page-indexability.test.ts tests/unit/locale-switcher.test.tsx
 
     Expected: FAIL because the transactional layout still owns bespoke markup and Join states do not use internal presentation primitives.
 
 - [ ] **Step 3: Adopt the compact shell without changing behavior owners**
 
-    Replace the layout frame with `InternalAppShell variant="join"`. Pass localized skip, brand, home, and Membership labels. Use the compact navigation variant for the two locale-correct links; do not mount the public header, public footer, or mega menu.
+    Replace the layout frame with `InternalAppShell variant="join"`. Load the existing `Navigation` locale labels, mount one existing `LocaleSwitcher` through `InternalAppShell.utility`, and pass localized skip, brand, home, and Membership labels. Use the compact navigation variant for the two locale-correct links; do not mount the public header, public footer, or mega menu.
 
     Replace each page's repeated card header/state markup with the exact semantic primitive:
 
@@ -923,9 +980,9 @@
 
     Run:
 
-    npm.cmd test -- tests/unit/wisetech-pr6-join-shell.test.tsx tests/unit/join-page.test.tsx tests/unit/join-billing-pages.test.tsx tests/unit/member-login-page.test.tsx tests/unit/page-indexability.test.ts
+    npm.cmd test -- tests/unit/wisetech-pr6-join-shell.test.tsx tests/unit/join-page.test.tsx tests/unit/join-billing-pages.test.tsx tests/unit/member-login-page.test.tsx tests/unit/page-indexability.test.ts tests/unit/locale-switcher.test.tsx
 
-    Expected: PASS with one H1/main, exact form/action contracts, and no public-shell import.
+    Expected: PASS with one H1/main, exact form/action contracts, no public-shell import, one utility locale switcher, and exact EN/zh-HK path/query/hash retention.
 
     Run:
 
@@ -935,7 +992,7 @@
 
 - [ ] **Step 5: Commit the Join presentation slice**
 
-    git add app/[locale]/(join)/layout.tsx app/[locale]/(join)/join/page.tsx app/[locale]/(join)/join/profile/page.tsx app/[locale]/(join)/join/company/page.tsx app/[locale]/(join)/join/checkout/page.tsx app/[locale]/(join)/join/complete/page.tsx app/[locale]/(join)/member-login/page.tsx components/join/join-form.tsx components/join/progress.tsx components/billing/checkout-status.tsx messages/en.json messages/zh-HK.json tests/unit/wisetech-pr6-join-shell.test.tsx tests/unit/join-page.test.tsx tests/unit/join-billing-pages.test.tsx tests/unit/member-login-page.test.tsx tests/unit/page-indexability.test.ts tests/e2e/join-auth.spec.ts
+    git add -- ':(literal)app/[locale]/(join)/layout.tsx' ':(literal)app/[locale]/(join)/join/page.tsx' ':(literal)app/[locale]/(join)/join/profile/page.tsx' ':(literal)app/[locale]/(join)/join/company/page.tsx' ':(literal)app/[locale]/(join)/join/checkout/page.tsx' ':(literal)app/[locale]/(join)/join/complete/page.tsx' ':(literal)app/[locale]/(join)/member-login/page.tsx' ':(literal)components/join/join-form.tsx' ':(literal)components/join/progress.tsx' ':(literal)components/billing/checkout-status.tsx' ':(literal)messages/en.json' ':(literal)messages/zh-HK.json' ':(literal)tests/unit/wisetech-pr6-join-shell.test.tsx' ':(literal)tests/unit/join-page.test.tsx' ':(literal)tests/unit/join-billing-pages.test.tsx' ':(literal)tests/unit/member-login-page.test.tsx' ':(literal)tests/unit/page-indexability.test.ts' ':(literal)tests/unit/locale-switcher.test.tsx' ':(literal)tests/e2e/join-auth.spec.ts'
     git commit -m "feat: align transactional join shell"
 
 ### Task 8: Apply the application shell to all Portal pages and fail closed on ambiguous company context
@@ -945,7 +1002,7 @@
 - Create: `lib/portal/company-context.ts`, `tests/unit/portal-company-context.test.ts`, `tests/unit/wisetech-pr6-portal-shell.test.tsx`.
 - Modify: `app/[locale]/(member)/portal/layout.tsx`, `components/portal/portal-nav.tsx`.
 - Modify all ten Portal pages: `app/[locale]/(member)/portal/page.tsx`, `app/[locale]/(member)/portal/profile/page.tsx`, `app/[locale]/(member)/portal/company/page.tsx`, `app/[locale]/(member)/portal/company/listing/page.tsx`, `app/[locale]/(member)/portal/company/seats/page.tsx`, `app/[locale]/(member)/portal/company/seats/accept/page.tsx`, `app/[locale]/(member)/portal/directory/page.tsx`, `app/[locale]/(member)/portal/events/page.tsx`, `app/[locale]/(member)/portal/documents/page.tsx`, `app/[locale]/(member)/portal/billing/page.tsx`.
-- Modify presentation components as needed: `components/portal/status-card.tsx`, `components/portal/directory-results.tsx`, `components/portal/document-list.tsx`, `components/portal/event-registration-form.tsx`, `components/portal/seat-invite-form.tsx`, `components/portal/seat-table.tsx`, `components/portal/showcase-listing-form.tsx`, `components/billing/billing-actions.tsx`.
+- Modify presentation components: `components/portal/status-card.tsx`, `components/portal/directory-results.tsx`, `components/portal/document-list.tsx`, `components/portal/event-registration-form.tsx`, `components/portal/seat-invite-form.tsx`, `components/portal/seat-table.tsx`, `components/portal/showcase-listing-form.tsx`, `components/billing/billing-actions.tsx`.
 - Modify tests: `tests/unit/portal-presentational.test.tsx`, `tests/unit/portal-content-scope.test.ts`, `tests/unit/portal-content-runtime-authorization.test.ts`, `tests/unit/portal-billing-actions.test.tsx`, `tests/unit/m5-member-listing.test.tsx`, `tests/unit/concierge-layouts.test.ts`, `tests/e2e/portal-dashboard.spec.ts`, `tests/e2e/portal-secondary-pages.spec.ts`.
 - Modify localization: `messages/en.json`, `messages/zh-HK.json`.
 
@@ -963,7 +1020,7 @@
 
 - [ ] **Step 1: Write failing Portal shell, navigation, company-context, and owner-preservation tests**
 
-    Assert exact eight-item navigation order, grouped semantics, Dashboard exact active state, Listing most-specific active state, seats owned by Company, mobile Sheet focus return, and sign-out in both responsive surfaces.
+    Assert exact eight-item navigation order, grouped semantics, Dashboard exact active state, Listing most-specific active state, seats owned by Company, mobile Sheet focus return, sign-out in both responsive surfaces, and one existing `LocaleSwitcher` mounted through the shell utility. Exercise EN to zh-HK and zh-HK to EN on `/portal/company/listing?status=draft#listing` and retain the exact pathname, serialized query, and hash.
 
     Assert every Portal page source:
 
@@ -996,7 +1053,7 @@
 
 - [ ] **Step 3: Adopt the Portal shell while keeping every data/action owner**
 
-    Build localized Portal groups from `config/internal-navigation.ts` and render them through `InternalNavigation`. Pass `PortalSignOutButton` as navigation footer content. Replace the layout's separate `main` with `InternalAppShell variant="portal"` and pass the existing single Concierge widget as `afterMain`.
+    Build localized Portal groups from `config/internal-navigation.ts` and render them through `InternalNavigation`. Load existing `Navigation` locale labels and pass one existing `LocaleSwitcher` through `InternalAppShell.utility`; pass `PortalSignOutButton` as navigation footer content. Replace the layout's separate `main` with `InternalAppShell variant="portal"` and pass the existing single Concierge widget as `afterMain`.
 
     Implement `selectPortalCompanyContext` as a pure length check. Company, Listing, and Seats pages must:
 
@@ -1019,7 +1076,7 @@
 
     npm.cmd test -- tests/unit/wisetech-pr6-portal-shell.test.tsx tests/unit/portal-company-context.test.ts tests/unit/portal-presentational.test.tsx tests/unit/portal-content-scope.test.ts tests/unit/portal-content-runtime-authorization.test.ts tests/unit/portal-billing-actions.test.tsx tests/unit/m5-member-listing.test.tsx tests/unit/concierge-layouts.test.ts
 
-    Expected: PASS with one main/H1, exact active nav, one-company behavior retained, and multi-company private data withheld pending a separate selector decision.
+    Expected: PASS with one main/H1, exact active nav, locale-switch path/query/hash retention, one-company behavior retained, and multi-company private data withheld pending a separate selector decision.
 
     Run:
 
@@ -1029,7 +1086,7 @@
 
 - [ ] **Step 5: Commit the Portal presentation slice**
 
-    git add lib/portal/company-context.ts app/[locale]/(member)/portal/layout.tsx components/portal/portal-nav.tsx app/[locale]/(member)/portal/page.tsx app/[locale]/(member)/portal/profile/page.tsx app/[locale]/(member)/portal/company/page.tsx app/[locale]/(member)/portal/company/listing/page.tsx app/[locale]/(member)/portal/company/seats/page.tsx app/[locale]/(member)/portal/company/seats/accept/page.tsx app/[locale]/(member)/portal/directory/page.tsx app/[locale]/(member)/portal/events/page.tsx app/[locale]/(member)/portal/documents/page.tsx app/[locale]/(member)/portal/billing/page.tsx components/portal/status-card.tsx components/portal/directory-results.tsx components/portal/document-list.tsx components/portal/event-registration-form.tsx components/portal/seat-invite-form.tsx components/portal/seat-table.tsx components/portal/showcase-listing-form.tsx components/billing/billing-actions.tsx messages/en.json messages/zh-HK.json tests/unit/portal-company-context.test.ts tests/unit/wisetech-pr6-portal-shell.test.tsx tests/unit/portal-presentational.test.tsx tests/unit/portal-content-scope.test.ts tests/unit/portal-content-runtime-authorization.test.ts tests/unit/portal-billing-actions.test.tsx tests/unit/m5-member-listing.test.tsx tests/unit/concierge-layouts.test.ts tests/e2e/portal-dashboard.spec.ts tests/e2e/portal-secondary-pages.spec.ts
+    git add -- ':(literal)lib/portal/company-context.ts' ':(literal)app/[locale]/(member)/portal/layout.tsx' ':(literal)components/portal/portal-nav.tsx' ':(literal)app/[locale]/(member)/portal/page.tsx' ':(literal)app/[locale]/(member)/portal/profile/page.tsx' ':(literal)app/[locale]/(member)/portal/company/page.tsx' ':(literal)app/[locale]/(member)/portal/company/listing/page.tsx' ':(literal)app/[locale]/(member)/portal/company/seats/page.tsx' ':(literal)app/[locale]/(member)/portal/company/seats/accept/page.tsx' ':(literal)app/[locale]/(member)/portal/directory/page.tsx' ':(literal)app/[locale]/(member)/portal/events/page.tsx' ':(literal)app/[locale]/(member)/portal/documents/page.tsx' ':(literal)app/[locale]/(member)/portal/billing/page.tsx' ':(literal)components/portal/status-card.tsx' ':(literal)components/portal/directory-results.tsx' ':(literal)components/portal/document-list.tsx' ':(literal)components/portal/event-registration-form.tsx' ':(literal)components/portal/seat-invite-form.tsx' ':(literal)components/portal/seat-table.tsx' ':(literal)components/portal/showcase-listing-form.tsx' ':(literal)components/billing/billing-actions.tsx' ':(literal)messages/en.json' ':(literal)messages/zh-HK.json' ':(literal)tests/unit/portal-company-context.test.ts' ':(literal)tests/unit/wisetech-pr6-portal-shell.test.tsx' ':(literal)tests/unit/portal-presentational.test.tsx' ':(literal)tests/unit/portal-content-scope.test.ts' ':(literal)tests/unit/portal-content-runtime-authorization.test.ts' ':(literal)tests/unit/portal-billing-actions.test.tsx' ':(literal)tests/unit/m5-member-listing.test.tsx' ':(literal)tests/unit/concierge-layouts.test.ts' ':(literal)tests/e2e/portal-dashboard.spec.ts' ':(literal)tests/e2e/portal-secondary-pages.spec.ts'
     git commit -m "feat: align member portal shell"
 
 ### Task 9: Apply grouped Admin shell to Dashboard and CRM pages
@@ -1040,12 +1097,13 @@
 - Modify CRM pages: `app/[locale]/(admin)/admin/page.tsx`, `app/[locale]/(admin)/admin/members/page.tsx`, `app/[locale]/(admin)/admin/members/[id]/page.tsx`, `app/[locale]/(admin)/admin/segments/page.tsx`, `app/[locale]/(admin)/admin/at-risk/page.tsx`.
 - Modify presentation components: `components/admin/dashboard-tiles.tsx`, `components/admin/member-table.tsx`, `components/admin/member-360.tsx`, `components/admin/member-note-form.tsx`, `components/admin/member-profile-form.tsx`, `components/admin/segment-builder.tsx`, `components/admin/segment-results.tsx`, `components/admin/segment-save-form.tsx`, `components/admin/at-risk-table.tsx`.
 - Create test: `tests/unit/wisetech-pr6-admin-crm-shell.test.tsx`.
-- Modify tests: `tests/unit/admin-presentational.test.tsx`, `tests/unit/admin-dashboard-tiles.test.tsx`, `tests/unit/admin-member-list.test.ts`, `tests/unit/admin-member-page-boundary.test.ts`, `tests/unit/admin-member-profile.test.ts`, `tests/unit/member-note-server-action-boundary.test.ts`, `tests/unit/segment-query.test.ts`, `tests/unit/segment-save-action.test.ts`, `tests/unit/campaign-server-action-auth.test.ts`, `tests/unit/at-risk-repository-boundary.test.ts`, `tests/unit/admin-page-auth.test.ts`.
+- Modify tests: `tests/unit/admin-presentational.test.tsx`, `tests/unit/admin-dashboard-tiles.test.tsx`, `tests/unit/admin-member-list.test.ts`, `tests/unit/admin-member-page-boundary.test.ts`, `tests/unit/admin-member-profile.test.ts`, `tests/unit/member-note-server-action-boundary.test.ts`, `tests/unit/segment-query.test.ts`, `tests/unit/segment-save-action.test.ts`, `tests/unit/campaign-server-action-auth.test.ts`, `tests/unit/at-risk-repository-boundary.test.ts`, `tests/unit/admin-page-auth.test.ts`, `tests/unit/m2-auth-reset.test.ts`, `tests/unit/m2-runtime-environment.test.ts`, `tests/unit/m2-browser-acceptance-contract.test.ts`.
+- Modify isolated fixtures: `tests/fixtures/m2-runtime-env.ts`, `tests/fixtures/m2-reset.ts`, `tests/e2e/m2-admin-crm.spec.ts`.
 - Modify localization: `messages/en.json`, `messages/zh-HK.json`.
 
 **Interfaces:**
 
-- Consumes: Task 6 Admin groups and shell primitives plus every existing Admin CRM reader/action.
+- Consumes: Task 6 Admin groups and shell primitives, the existing `LocaleSwitcher` and `Navigation` label authority, every existing Admin CRM reader/action, and the current M2 isolated reset/runtime boundary.
 - Produces presentation only. `requireAdminPageActor()` remains at layout/page boundaries; independent Server Actions still call `requireAdminActor()` before parsing or repository access.
 
 - [ ] **Step 1: Write failing grouped-navigation, source-owner, and CRM rendering tests**
@@ -1058,19 +1116,23 @@
 
     Assert Dashboard is a visible link and exact-active only at `/admin`. Assert Member detail inherits Members and no unlisted Admin href appears.
 
-    For the five CRM pages, assert one H1/main, grouped navigation label parity in English/Chinese, honest independent dashboard degradation, Member 360/note actions, exact segment query/export/campaign contracts, at-risk evidence, and existing auth-before-parse source ordering.
+    For the five CRM pages, assert one H1/main, grouped navigation label parity in English/Chinese, one existing `LocaleSwitcher` in `InternalAppShell.utility`, EN to zh-HK and zh-HK to EN retention on `/admin/reports?from=2026-01-01&to=2026-12-31#revenue`, honest independent dashboard degradation, Member 360/note actions, exact segment query/export/campaign contracts, at-risk evidence, and existing auth-before-parse source ordering.
+
+    Extend the existing M2 safety tests to require `M2_ACCEPTANCE_ALLOW_DESTRUCTIVE=M2_ISOLATED_FIXTURES_ONLY` and `M2_E2E_ALLOWED_ORIGIN`. Assert missing/wrong sentinel, missing/mismatched origin, production target/host, non-Neon host, project mismatch, raw `DATABASE_URL !== DATABASE_URL_TEST`, and missing TLS all fail before `connect` or `seedM2`. Assert `m2-admin-crm.spec.ts` calls the guarded reset in both `beforeAll` and `afterAll`, and cleanup failure fails the suite.
 
 - [ ] **Step 2: Run the focused tests and record the RED reason**
 
     Run:
 
-    npm.cmd test -- tests/unit/wisetech-pr6-admin-crm-shell.test.tsx tests/unit/admin-presentational.test.tsx tests/unit/admin-dashboard-tiles.test.tsx tests/unit/admin-member-list.test.ts tests/unit/admin-member-page-boundary.test.ts tests/unit/admin-member-profile.test.ts tests/unit/member-note-server-action-boundary.test.ts tests/unit/segment-query.test.ts tests/unit/segment-save-action.test.ts tests/unit/campaign-server-action-auth.test.ts tests/unit/at-risk-repository-boundary.test.ts tests/unit/admin-page-auth.test.ts
+    npm.cmd test -- tests/unit/wisetech-pr6-admin-crm-shell.test.tsx tests/unit/admin-presentational.test.tsx tests/unit/admin-dashboard-tiles.test.tsx tests/unit/admin-member-list.test.ts tests/unit/admin-member-page-boundary.test.ts tests/unit/admin-member-profile.test.ts tests/unit/member-note-server-action-boundary.test.ts tests/unit/segment-query.test.ts tests/unit/segment-save-action.test.ts tests/unit/campaign-server-action-auth.test.ts tests/unit/at-risk-repository-boundary.test.ts tests/unit/admin-page-auth.test.ts tests/unit/m2-auth-reset.test.ts tests/unit/m2-runtime-environment.test.ts tests/unit/m2-browser-acceptance-contract.test.ts
 
-    Expected: FAIL because Admin navigation is flat, Dashboard is reachable only through the brand, and CRM pages do not use the shared internal presentation family.
+    Expected: FAIL because Admin navigation is flat, Dashboard is reachable only through the brand, CRM pages do not use the shared internal presentation family, and M2 reset can seed/mutate without the new explicit destructive sentinel and target-origin contract.
 
 - [ ] **Step 3: Adopt Admin shell and CRM primitives without moving authority**
 
-    Build the three localized groups and render `InternalNavigation` from `AdminNav`. Replace the layout frame and separate main with `InternalAppShell variant="admin"`. Keep `await requireAdminPageActor()` before any private child render.
+    Build the three localized groups and render `InternalNavigation` from `AdminNav`. Load existing `Navigation` locale labels, mount one existing `LocaleSwitcher` through `InternalAppShell.utility`, and replace the layout frame and separate main with `InternalAppShell variant="admin"`. Keep `await requireAdminPageActor()` before any private child render.
+
+    Add `M2_ACCEPTANCE_DESTRUCTIVE_SENTINEL = "M2_ISOLATED_FIXTURES_ONLY"` and the two new names to `M2_LIVE_ENV_NAMES`. Before any delete or `seedM2`, require the exact sentinel, exact `DATABASE_URL === DATABASE_URL_TEST`, canonical TLS, a `.neon.tech` host with no prod/production/live label, `NEON_PROJECT_ID === M2_TEST_NEON_PROJECT_ID`, exact `M2_TEST_NEON_HOST`, and exact `PLAYWRIGHT_BASE_URL` (or managed `APP_URL`) origin equality with `M2_E2E_ALLOWED_ORIGIN`; forbid `hkwtia.vercel.app`. Run the same targeted reset before and after the authenticated describe. It may delete only named M2 mutation rows and rerun `seedM2`; no flag means the authenticated suite skips as `NOT PASSED`, not a mutation.
 
     Apply:
 
@@ -1086,17 +1148,17 @@
 
     Run the Step 2 command again.
 
-    Expected: PASS with grouped active navigation and unchanged CRM/security assertions.
+    Expected: PASS with grouped active navigation, locale-switch retention, unchanged CRM/security assertions, and all unsafe M2 reset/target cases blocked before connection or seed.
 
     Run:
 
     npm.cmd run test:e2e -- tests/e2e/m2-admin-crm.spec.ts
 
-    Expected: credential-free anonymous Admin 404 PASS. Authenticated CRM cases run only with the complete isolated M2 gate; absent credentials remain `NOT PASSED`.
+    Expected: credential-free anonymous Admin 404 PASS. Authenticated CRM cases run only after separate mutation approval and the complete M2 variable gate; `beforeAll` and `afterAll` both complete deterministic cleanup. Missing approval, sentinel, database identity, origin, or credentials remains `NOT PASSED` and never calls `seedM2`.
 
 - [ ] **Step 5: Commit the Admin CRM slice**
 
-    git add app/[locale]/(admin)/admin/layout.tsx components/admin/admin-nav.tsx app/[locale]/(admin)/admin/page.tsx app/[locale]/(admin)/admin/members/page.tsx app/[locale]/(admin)/admin/members/[id]/page.tsx app/[locale]/(admin)/admin/segments/page.tsx app/[locale]/(admin)/admin/at-risk/page.tsx components/admin/dashboard-tiles.tsx components/admin/member-table.tsx components/admin/member-360.tsx components/admin/member-note-form.tsx components/admin/member-profile-form.tsx components/admin/segment-builder.tsx components/admin/segment-results.tsx components/admin/segment-save-form.tsx components/admin/at-risk-table.tsx messages/en.json messages/zh-HK.json tests/unit/wisetech-pr6-admin-crm-shell.test.tsx tests/unit/admin-presentational.test.tsx tests/unit/admin-dashboard-tiles.test.tsx tests/unit/admin-member-list.test.ts tests/unit/admin-member-page-boundary.test.ts tests/unit/admin-member-profile.test.ts tests/unit/member-note-server-action-boundary.test.ts tests/unit/segment-query.test.ts tests/unit/segment-save-action.test.ts tests/unit/campaign-server-action-auth.test.ts tests/unit/at-risk-repository-boundary.test.ts tests/unit/admin-page-auth.test.ts tests/e2e/m2-admin-crm.spec.ts
+    git add -- ':(literal)app/[locale]/(admin)/admin/layout.tsx' ':(literal)components/admin/admin-nav.tsx' ':(literal)app/[locale]/(admin)/admin/page.tsx' ':(literal)app/[locale]/(admin)/admin/members/page.tsx' ':(literal)app/[locale]/(admin)/admin/members/[id]/page.tsx' ':(literal)app/[locale]/(admin)/admin/segments/page.tsx' ':(literal)app/[locale]/(admin)/admin/at-risk/page.tsx' ':(literal)components/admin/dashboard-tiles.tsx' ':(literal)components/admin/member-table.tsx' ':(literal)components/admin/member-360.tsx' ':(literal)components/admin/member-note-form.tsx' ':(literal)components/admin/member-profile-form.tsx' ':(literal)components/admin/segment-builder.tsx' ':(literal)components/admin/segment-results.tsx' ':(literal)components/admin/segment-save-form.tsx' ':(literal)components/admin/at-risk-table.tsx' ':(literal)messages/en.json' ':(literal)messages/zh-HK.json' ':(literal)tests/unit/wisetech-pr6-admin-crm-shell.test.tsx' ':(literal)tests/unit/admin-presentational.test.tsx' ':(literal)tests/unit/admin-dashboard-tiles.test.tsx' ':(literal)tests/unit/admin-member-list.test.ts' ':(literal)tests/unit/admin-member-page-boundary.test.ts' ':(literal)tests/unit/admin-member-profile.test.ts' ':(literal)tests/unit/member-note-server-action-boundary.test.ts' ':(literal)tests/unit/segment-query.test.ts' ':(literal)tests/unit/segment-save-action.test.ts' ':(literal)tests/unit/campaign-server-action-auth.test.ts' ':(literal)tests/unit/at-risk-repository-boundary.test.ts' ':(literal)tests/unit/admin-page-auth.test.ts' ':(literal)tests/unit/m2-auth-reset.test.ts' ':(literal)tests/unit/m2-runtime-environment.test.ts' ':(literal)tests/unit/m2-browser-acceptance-contract.test.ts' ':(literal)tests/fixtures/m2-runtime-env.ts' ':(literal)tests/fixtures/m2-reset.ts' ':(literal)tests/e2e/m2-admin-crm.spec.ts'
     git commit -m "feat: align admin crm shell"
 
 ### Task 10: Align all Admin CMS pages while preserving publication and media locks
@@ -1105,7 +1167,7 @@
 
 - Modify CMS pages: `app/[locale]/(admin)/admin/announcements/page.tsx`, `app/[locale]/(admin)/admin/announcements/[id]/page.tsx`, `app/[locale]/(admin)/admin/news/page.tsx`, `app/[locale]/(admin)/admin/news/[id]/page.tsx`, `app/[locale]/(admin)/admin/page-copy/page.tsx`, `app/[locale]/(admin)/admin/page-copy/[namespace]/page.tsx`, `app/[locale]/(admin)/admin/media/page.tsx`, `app/[locale]/(admin)/admin/media/[id]/page.tsx`, `app/[locale]/(admin)/admin/partners/page.tsx`, `app/[locale]/(admin)/admin/partners/[id]/page.tsx`, `app/[locale]/(admin)/admin/landing-partners/page.tsx`, `app/[locale]/(admin)/admin/landing-partners/[id]/page.tsx`.
 - Modify presentation components: `components/admin/announcement-form.tsx`, `components/admin/news-form.tsx`, `components/admin/page-copy-form.tsx`, `components/admin/media-form.tsx`, `components/admin/media-upload-form.tsx`, `components/admin/partner-form.tsx`, `components/admin/landing-partner-form.tsx`, `components/admin/archive-toggle.tsx`.
-- Create test: `tests/unit/wisetech-pr6-admin-cms-shell.test.tsx`.
+- Create tests/fixtures: `tests/unit/wisetech-pr6-admin-cms-shell.test.tsx`, `tests/fixtures/m7-acceptance-safety.ts`, `tests/unit/m7-acceptance-safety.test.ts`, `tests/unit/m7-browser-acceptance-contract.test.ts`, `tests/e2e/m7-cms.spec.ts`.
 - Modify tests: `tests/unit/admin-announcement-pages-rendered.test.tsx`, `tests/unit/announcement-form-rendered.test.tsx`, `tests/unit/admin-news.test.ts`, `tests/unit/news-actions-auth-order.test.ts`, `tests/unit/page-copy-action-state.test.ts`, `tests/unit/page-copy-scope.test.ts`, `tests/unit/admin-media.test.ts`, `tests/unit/media-upload-form-rendered.test.tsx`, `tests/unit/admin-partner-pages-rendered.test.tsx`, `tests/unit/admin-partners.test.ts`, `tests/unit/partner-media-locking.test.ts`, `tests/unit/admin-server-action-boundaries.test.ts`, `tests/unit/admin-revalidate-path.test.ts`.
 - Modify localization: `messages/en.json`, `messages/zh-HK.json`.
 
@@ -1129,29 +1191,37 @@
     - Landing Partner publication/archive behavior;
     - exact localized revalidation paths after mutation.
 
+    Add M7 safety RED cases for `M7_ACCEPTANCE_ALLOW_DESTRUCTIVE=M7_ISOLATED_FIXTURES_ONLY`, exact `DATABASE_URL === DATABASE_URL_TEST`, canonical TLS, independently matching `M7_TEST_NEON_PROJECT_ID`/`M7_TEST_NEON_HOST`, non-production host labels, exact `PLAYWRIGHT_BASE_URL === M7_E2E_ALLOWED_ORIGIN === APP_URL` origin, and staff credentials. Every bad case fails before Pool/auth/browser construction.
+
+    Define `m7-cms.spec.ts` as the isolated bilingual acceptance journey: a guarded fixture inserts only run-ID-owned disposable News, approved Page Copy leaves, Media, and reference rows; staff edits English and Traditional Chinese News, publishes and observes both public locales, updates an approved Page Copy leaf and observes both locales, proves referenced active Media cannot archive, removes only its disposable reference, archives it, and verifies the public URL no longer resolves. `beforeAll` and `afterAll` delete only rows bearing the run ID, and any cleanup failure fails the suite. Do not upload Blob data or call storage/provider APIs.
+
+    In `m7-browser-acceptance-contract.test.ts`, read the E2E/fixture sources and require the safety guard before Pool/auth construction, exact bilingual News/Page Copy/Media route markers, run-ID ownership, both `beforeAll` and `afterAll`, cleanup-failure propagation, reference-lock assertion, and absence of Blob/storage client imports. This non-mutating source contract supplies RED/GREEN evidence even when the separately authorized browser mutation cannot run.
+
 - [ ] **Step 2: Run the focused tests and record the RED reason**
 
     Run:
 
-    npm.cmd test -- tests/unit/wisetech-pr6-admin-cms-shell.test.tsx tests/unit/admin-announcement-pages-rendered.test.tsx tests/unit/announcement-form-rendered.test.tsx tests/unit/admin-news.test.ts tests/unit/news-actions-auth-order.test.ts tests/unit/page-copy-action-state.test.ts tests/unit/page-copy-scope.test.ts tests/unit/admin-media.test.ts tests/unit/media-upload-form-rendered.test.tsx tests/unit/admin-partner-pages-rendered.test.tsx tests/unit/admin-partners.test.ts tests/unit/partner-media-locking.test.ts tests/unit/admin-server-action-boundaries.test.ts tests/unit/admin-revalidate-path.test.ts
+    npm.cmd test -- tests/unit/wisetech-pr6-admin-cms-shell.test.tsx tests/unit/admin-announcement-pages-rendered.test.tsx tests/unit/announcement-form-rendered.test.tsx tests/unit/admin-news.test.ts tests/unit/news-actions-auth-order.test.ts tests/unit/page-copy-action-state.test.ts tests/unit/page-copy-scope.test.ts tests/unit/admin-media.test.ts tests/unit/media-upload-form-rendered.test.tsx tests/unit/admin-partner-pages-rendered.test.tsx tests/unit/admin-partners.test.ts tests/unit/partner-media-locking.test.ts tests/unit/admin-server-action-boundaries.test.ts tests/unit/admin-revalidate-path.test.ts tests/unit/m7-acceptance-safety.test.ts tests/unit/m7-browser-acceptance-contract.test.ts
 
-    Expected: FAIL only on the new presentation/source contract; existing publication, authorization, and reference-lock tests remain diagnostic controls.
+    Expected: FAIL on the new presentation/source contract and absent M7 guard/journey; existing publication, authorization, and reference-lock tests remain diagnostic controls.
 
 - [ ] **Step 3: Apply CMS presentation primitives**
 
     Use `InternalPageHeader` on every list/detail page, `InternalSection` around existing forms/previews, `InternalTableFrame` around existing semantic tables, `InternalEmptyState` for empty repository results, and `InternalActionFeedback` for existing sanitized action state.
 
-    Preserve all form names, hidden IDs, field-level errors, action bindings, repository calls, publication/archive locks, active-media transaction checks, partner provenance, bilingual News requirements, Page Copy allowlist, storage delivery paths, and localized revalidation. Do not add hard-coded content or synthetic rows.
+    Preserve all form names, hidden IDs, field-level errors, action bindings, repository calls, publication/archive locks, active-media transaction checks, partner provenance, bilingual News requirements, Page Copy allowlist, storage delivery paths, and localized revalidation. Do not add hard-coded production content or synthetic production rows.
+
+    Implement the M7 test-only safety module and run-ID fixture described in Step 1. Its guarded database connection is constructed only after every exact check; it exposes `prepareM7Fixture` and `cleanupM7Fixture` for the E2E suite and is forbidden from production imports. Remove no non-owned record and make cleanup idempotent.
 
 - [ ] **Step 4: Run GREEN and the complete CMS invariant subset**
 
     Run the Step 2 command again.
 
-    Expected: PASS with all twelve pages aligned and every existing CMS invariant unchanged.
+    Expected: PASS with all twelve pages aligned, every existing CMS invariant unchanged, every unsafe M7 environment rejected before connection, and the complete guarded E2E journey verified by the non-mutating source contract. Do not run the mutating M7 browser suite in this task without the separate isolated-mutation approval; absent approval is `NOT PASSED`, not GREEN evidence.
 
 - [ ] **Step 5: Commit the Admin CMS slice**
 
-    git add app/[locale]/(admin)/admin/announcements/page.tsx app/[locale]/(admin)/admin/announcements/[id]/page.tsx app/[locale]/(admin)/admin/news/page.tsx app/[locale]/(admin)/admin/news/[id]/page.tsx app/[locale]/(admin)/admin/page-copy/page.tsx app/[locale]/(admin)/admin/page-copy/[namespace]/page.tsx app/[locale]/(admin)/admin/media/page.tsx app/[locale]/(admin)/admin/media/[id]/page.tsx app/[locale]/(admin)/admin/partners/page.tsx app/[locale]/(admin)/admin/partners/[id]/page.tsx app/[locale]/(admin)/admin/landing-partners/page.tsx app/[locale]/(admin)/admin/landing-partners/[id]/page.tsx components/admin/announcement-form.tsx components/admin/news-form.tsx components/admin/page-copy-form.tsx components/admin/media-form.tsx components/admin/media-upload-form.tsx components/admin/partner-form.tsx components/admin/landing-partner-form.tsx components/admin/archive-toggle.tsx messages/en.json messages/zh-HK.json tests/unit/wisetech-pr6-admin-cms-shell.test.tsx tests/unit/admin-announcement-pages-rendered.test.tsx tests/unit/announcement-form-rendered.test.tsx tests/unit/admin-news.test.ts tests/unit/news-actions-auth-order.test.ts tests/unit/page-copy-action-state.test.ts tests/unit/page-copy-scope.test.ts tests/unit/admin-media.test.ts tests/unit/media-upload-form-rendered.test.tsx tests/unit/admin-partner-pages-rendered.test.tsx tests/unit/admin-partners.test.ts tests/unit/partner-media-locking.test.ts tests/unit/admin-server-action-boundaries.test.ts tests/unit/admin-revalidate-path.test.ts
+    git add -- ':(literal)app/[locale]/(admin)/admin/announcements/page.tsx' ':(literal)app/[locale]/(admin)/admin/announcements/[id]/page.tsx' ':(literal)app/[locale]/(admin)/admin/news/page.tsx' ':(literal)app/[locale]/(admin)/admin/news/[id]/page.tsx' ':(literal)app/[locale]/(admin)/admin/page-copy/page.tsx' ':(literal)app/[locale]/(admin)/admin/page-copy/[namespace]/page.tsx' ':(literal)app/[locale]/(admin)/admin/media/page.tsx' ':(literal)app/[locale]/(admin)/admin/media/[id]/page.tsx' ':(literal)app/[locale]/(admin)/admin/partners/page.tsx' ':(literal)app/[locale]/(admin)/admin/partners/[id]/page.tsx' ':(literal)app/[locale]/(admin)/admin/landing-partners/page.tsx' ':(literal)app/[locale]/(admin)/admin/landing-partners/[id]/page.tsx' ':(literal)components/admin/announcement-form.tsx' ':(literal)components/admin/news-form.tsx' ':(literal)components/admin/page-copy-form.tsx' ':(literal)components/admin/media-form.tsx' ':(literal)components/admin/media-upload-form.tsx' ':(literal)components/admin/partner-form.tsx' ':(literal)components/admin/landing-partner-form.tsx' ':(literal)components/admin/archive-toggle.tsx' ':(literal)messages/en.json' ':(literal)messages/zh-HK.json' ':(literal)tests/unit/wisetech-pr6-admin-cms-shell.test.tsx' ':(literal)tests/unit/admin-announcement-pages-rendered.test.tsx' ':(literal)tests/unit/announcement-form-rendered.test.tsx' ':(literal)tests/unit/admin-news.test.ts' ':(literal)tests/unit/news-actions-auth-order.test.ts' ':(literal)tests/unit/page-copy-action-state.test.ts' ':(literal)tests/unit/page-copy-scope.test.ts' ':(literal)tests/unit/admin-media.test.ts' ':(literal)tests/unit/media-upload-form-rendered.test.tsx' ':(literal)tests/unit/admin-partner-pages-rendered.test.tsx' ':(literal)tests/unit/admin-partners.test.ts' ':(literal)tests/unit/partner-media-locking.test.ts' ':(literal)tests/unit/admin-server-action-boundaries.test.ts' ':(literal)tests/unit/admin-revalidate-path.test.ts' ':(literal)tests/fixtures/m7-acceptance-safety.ts' ':(literal)tests/unit/m7-acceptance-safety.test.ts' ':(literal)tests/unit/m7-browser-acceptance-contract.test.ts' ':(literal)tests/e2e/m7-cms.spec.ts'
     git commit -m "feat: align admin cms shell"
 
 ### Task 11: Align Admin Operations pages and freeze lifecycle/audit controls
@@ -1211,42 +1281,55 @@
 
 - [ ] **Step 5: Commit the Admin Operations slice**
 
-    git add app/[locale]/(admin)/admin/events-mgmt/page.tsx app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx app/[locale]/(admin)/admin/listings-review/page.tsx app/[locale]/(admin)/admin/cohorts/page.tsx app/[locale]/(admin)/admin/cohorts/[id]/page.tsx app/[locale]/(admin)/admin/approvals/page.tsx app/[locale]/(admin)/admin/reports/page.tsx app/[locale]/(admin)/admin/reports/board-drafts/[id]/page.tsx app/[locale]/(admin)/admin/automations/page.tsx components/admin/event-form.tsx components/admin/attendee-table.tsx components/admin/showcase-review-table.tsx components/admin/cohort-form.tsx components/admin/cohort-kanban.tsx components/admin/approval-list.tsx components/admin/report-cards.tsx components/admin/board-draft-list.tsx components/admin/safe-generated-content.tsx components/admin/automation-dashboard.tsx components/admin/automation-retry-form.tsx messages/en.json messages/zh-HK.json tests/unit/wisetech-pr6-admin-operations-shell.test.tsx tests/unit/admin-events.test.ts tests/unit/event-check-in.test.ts tests/unit/m5-admin-review.test.tsx tests/unit/admin-cohort-management.test.ts tests/unit/m6-admin-cohorts.test.tsx tests/unit/approval-authorization.test.ts tests/unit/approval-server-action-auth.test.ts tests/unit/approval-list.test.tsx tests/unit/report-reconciliation.test.ts tests/unit/board-reporter-render.test.ts tests/unit/automation-dashboard-review.test.tsx tests/unit/automation-retry.test.ts tests/unit/admin-server-action-boundaries.test.ts
+    git add -- ':(literal)app/[locale]/(admin)/admin/events-mgmt/page.tsx' ':(literal)app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx' ':(literal)app/[locale]/(admin)/admin/listings-review/page.tsx' ':(literal)app/[locale]/(admin)/admin/cohorts/page.tsx' ':(literal)app/[locale]/(admin)/admin/cohorts/[id]/page.tsx' ':(literal)app/[locale]/(admin)/admin/approvals/page.tsx' ':(literal)app/[locale]/(admin)/admin/reports/page.tsx' ':(literal)app/[locale]/(admin)/admin/reports/board-drafts/[id]/page.tsx' ':(literal)app/[locale]/(admin)/admin/automations/page.tsx' ':(literal)components/admin/event-form.tsx' ':(literal)components/admin/attendee-table.tsx' ':(literal)components/admin/showcase-review-table.tsx' ':(literal)components/admin/cohort-form.tsx' ':(literal)components/admin/cohort-kanban.tsx' ':(literal)components/admin/approval-list.tsx' ':(literal)components/admin/report-cards.tsx' ':(literal)components/admin/board-draft-list.tsx' ':(literal)components/admin/safe-generated-content.tsx' ':(literal)components/admin/automation-dashboard.tsx' ':(literal)components/admin/automation-retry-form.tsx' ':(literal)messages/en.json' ':(literal)messages/zh-HK.json' ':(literal)tests/unit/wisetech-pr6-admin-operations-shell.test.tsx' ':(literal)tests/unit/admin-events.test.ts' ':(literal)tests/unit/event-check-in.test.ts' ':(literal)tests/unit/m5-admin-review.test.tsx' ':(literal)tests/unit/admin-cohort-management.test.ts' ':(literal)tests/unit/m6-admin-cohorts.test.tsx' ':(literal)tests/unit/approval-authorization.test.ts' ':(literal)tests/unit/approval-server-action-auth.test.ts' ':(literal)tests/unit/approval-list.test.tsx' ':(literal)tests/unit/report-reconciliation.test.ts' ':(literal)tests/unit/board-reporter-render.test.ts' ':(literal)tests/unit/automation-dashboard-review.test.tsx' ':(literal)tests/unit/automation-retry.test.ts' ':(literal)tests/unit/admin-server-action-boundaries.test.ts'
     git commit -m "feat: align admin operations shell"
 
 ### Task 12: Prove bilingual, accessibility, M1-M7, and delivery gates without widening authority
 
 **Files:**
 
-- Create: `tests/e2e/wisetech-pr6-internal-journeys.spec.ts`, `docs/integration/wisetech-pr6-verification.md`, `docs/integration/wisetech-pr6-pr-body.md`.
-- Modify: `tests/e2e/accessibility.spec.ts`, `tests/e2e/core-pages.spec.ts`, `tests/e2e/join-auth.spec.ts`, `tests/e2e/portal-dashboard.spec.ts`, `tests/e2e/portal-secondary-pages.spec.ts`, `tests/e2e/seat-management.spec.ts`, `tests/e2e/m1-acceptance.spec.ts`, `tests/e2e/m2-admin-crm.spec.ts`.
-- Modify only if required by measured route coverage: `lighthouserc.js`.
+- Create: `tests/e2e/wisetech-pr6-internal-journeys.spec.ts`, `tests/e2e/wisetech-pr6-authenticated-accessibility.spec.ts`, `docs/integration/wisetech-pr6-verification.md`, `docs/integration/wisetech-pr6-pr-body.md`.
+- Modify: `tests/e2e/accessibility.spec.ts`, `tests/e2e/core-pages.spec.ts`, `tests/e2e/join-auth.spec.ts`, `tests/e2e/portal-dashboard.spec.ts`, `tests/e2e/portal-secondary-pages.spec.ts`, `tests/e2e/seat-management.spec.ts`.
+- Consume without weakening: Task 4 `tests/fixtures/m1-live-acceptance.ts` and `tests/e2e/m1-acceptance.spec.ts`; Task 9 M2 safety/runtime/reset files and `tests/e2e/m2-admin-crm.spec.ts`; Task 10 M7 safety fixture and `tests/e2e/m7-cms.spec.ts`; existing M3-M6 guards and browser suites.
+- Modify only if required by measured public-route coverage: `lighthouserc.js`.
 
 **Interfaces:**
 
-- Consumes all Tasks 1-11 and existing isolated M1-M7 fixtures.
-- Produces command-by-command evidence only. It performs no migration, seed, live invitation, provider call, merge, deployment, or production mutation.
+- Consumes all Tasks 1-11 and their exact credential-free, deterministic, and isolated acceptance harnesses.
+- Produces command-by-command evidence only. It performs no schema migration, production seed/import, provider configuration, merge, deployment, or production mutation. It runs an isolated database/test-provider mutation only after a separate approval is recorded and every suite-specific guard below passes.
 
-- [ ] **Step 1: Write the failing credential-free PR6 browser contract**
+- [ ] **Step 1: Define final credential-free and authenticated browser verification matrices**
 
-    Cover both locales and widths 320, 375, 768, 1024, and 1280. The spec must assert:
+    This is final verification, not a manufactured RED step. Every behavior assertion should already be GREEN after Tasks 1-11. If a new assertion fails, record it, return the change to its owning task, obtain an immutable review for that fix, and rerun this step.
 
-    - `/member-login` is under 400, noindex in metadata/unit evidence, has one H1/main, validates bad email without a provider call, and preserves only a safe continuation;
-    - each stable Portal destination redirects anonymous users to localized member login with the exact canonical `next`;
-    - `/portal/showcase` is not a valid primary destination;
-    - anonymous Admin remains a real 404;
-    - invalid Join plan/interval and forged completion fail closed;
-    - skip link, visible focus, mobile drawer Escape/focus return, one main/H1, 44 px controls, and no document overflow hold on accessible credential-free pages;
-    - serious/critical Axe violations equal zero on all accessible English/Chinese representatives;
-    - no browser request reaches real Stripe, Neon magic-link send, Resend, WOZTELL, Cloudflare job, storage mutation, database mutation, or invitation acceptance.
+    In `wisetech-pr6-internal-journeys.spec.ts`, cover both locales at widths 320, 375, 768, 1024, and 1280. At each width, assert:
 
-    Use request interception to fail the test if a credential-free case attempts a provider/mutation endpoint. Do not synthesize authenticated HTML.
+    - `/join?plan=startup&interval=annual`, `/zh/join?plan=startup&interval=annual`, `/member-login`, and `/zh/member-login` are under 400, have one H1 and one `main#main-content`, have no document overflow, and expose one 44 px locale control;
+    - invalid Join plan/interval, invalid or multi-valued continuation, and forged completion fail closed without provider or database mutation;
+    - each stable Portal destination redirects anonymous users to localized member login with its exact canonical `next`; `/portal/showcase` and the token acceptance route are not generic continuations;
+    - anonymous Admin remains a real localized 404;
+    - the skip link, visible focus, mobile drawer Escape/focus return, one main/H1, 44 px controls, and table-local overflow contracts hold wherever their surface is reachable;
+    - switching locale on representative Join URLs retains exact pathname, serialized query, and hash;
+    - request interception fails the test if a credential-free case reaches Stripe, Neon magic-link send, Resend, WOZTELL, Cloudflare jobs, storage mutation, database mutation, invitation acceptance, or another mutating API. Do not synthesize authenticated HTML.
+
+    In `wisetech-pr6-authenticated-accessibility.spec.ts`, use the real guarded identities and run this exact EN/zh-HK route matrix at all five widths:
+
+    | Surface | English | Traditional Chinese | Guarded identity/fixture |
+    | --- | --- | --- | --- |
+    | Join | `/join?plan=startup&interval=annual#join-form` | `/zh/join?plan=startup&interval=annual#join-form` | credential-free |
+    | Portal | `/portal` | `/zh/portal` | M2 member |
+    | CRM | `/admin/members` | `/zh/admin/members` | M2 staff |
+    | CMS | `/admin/news` | `/zh/admin/news` | M7 staff |
+    | Reports | `/admin/reports` | `/zh/admin/reports` | M2 staff |
+    | Automations | `/admin/automations` | `/zh/admin/automations` | M3 staff |
+
+    For all 60 route/width cases, require zero serious/critical Axe violations, one H1/main, no document overflow, visible keyboard focus, and no console/page error. For Portal and Admin, widths 320, 375, and 768 require the mobile trigger, Escape close, and focus return; widths 1024 and 1280 require the desktop sidebar and no mobile trigger. Join retains its compact navigation and reachable locale control at all five widths. On `/portal/company/listing?status=draft#listing`, `/admin/reports?from=2026-01-01&to=2026-12-31#revenue`, and the Join URL above, switch EN to zh-HK and back and require exact serialized query/hash retention. The suite must skip as `NOT PASSED` before login if any required guard is absent; it may never fake auth state.
 
 - [ ] **Step 2: Run the focused PR6 cross-surface aggregate**
 
     Run:
 
-    npm.cmd test -- tests/unit/membership-catalog.test.ts tests/unit/membership-public-catalog.test.ts tests/unit/join-schema.test.ts tests/unit/join-navigation.test.ts tests/unit/join-service.test.ts tests/unit/join-actions.test.ts tests/unit/member-login-page.test.tsx tests/unit/portal-sign-out-button.test.tsx tests/unit/checkout-service.test.ts tests/unit/checkout-recovery-service.test.ts tests/unit/join-billing-pages.test.tsx tests/unit/seat-invitation-routes.test.tsx tests/unit/seat-service.test.ts tests/unit/internal-navigation.test.tsx tests/unit/internal-shell.test.tsx tests/unit/wisetech-pr6-route-inventory.test.ts tests/unit/wisetech-pr6-join-shell.test.tsx tests/unit/wisetech-pr6-portal-shell.test.tsx tests/unit/portal-company-context.test.ts tests/unit/wisetech-pr6-admin-crm-shell.test.tsx tests/unit/wisetech-pr6-admin-cms-shell.test.tsx tests/unit/wisetech-pr6-admin-operations-shell.test.tsx
+    npm.cmd test -- tests/unit/membership-catalog.test.ts tests/unit/membership-public-catalog.test.ts tests/unit/join-schema.test.ts tests/unit/join-navigation.test.ts tests/unit/join-service.test.ts tests/unit/join-actions.test.ts tests/unit/member-login-page.test.tsx tests/unit/portal-sign-out-button.test.tsx tests/unit/checkout-service.test.ts tests/unit/checkout-recovery-service.test.ts tests/unit/join-billing-pages.test.tsx tests/unit/m1-live-acceptance-safety.test.ts tests/unit/seat-invitation-routes.test.tsx tests/unit/seat-service.test.ts tests/unit/internal-navigation.test.tsx tests/unit/internal-shell.test.tsx tests/unit/wisetech-pr6-route-inventory.test.ts tests/unit/wisetech-pr6-join-shell.test.tsx tests/unit/locale-switcher.test.tsx tests/unit/wisetech-pr6-portal-shell.test.tsx tests/unit/portal-company-context.test.ts tests/unit/wisetech-pr6-admin-crm-shell.test.tsx tests/unit/m2-auth-reset.test.ts tests/unit/m2-runtime-environment.test.ts tests/unit/m2-browser-acceptance-contract.test.ts tests/unit/wisetech-pr6-admin-cms-shell.test.tsx tests/unit/m7-acceptance-safety.test.ts tests/unit/m7-browser-acceptance-contract.test.ts tests/unit/wisetech-pr6-admin-operations-shell.test.tsx
 
     Expected: PASS. Record timestamp, exit code, files, test total, warnings, and skips.
 
@@ -1265,19 +1348,67 @@
 
     Expected: source gates PASS; audit reports zero high vulnerabilities. If a command is blocked by the existing worktree junction, missing credential, or external environment, record the exact command/error and classify it as a baseline/environment gate, not a passing result and not a PR6 regression without reproduction against the base.
 
-- [ ] **Step 4: Run focused and full browser gates**
+- [ ] **Step 4: Run credential-free and complete repository browser gates**
 
     Run:
 
-    npm.cmd run test:e2e -- tests/e2e/wisetech-pr6-internal-journeys.spec.ts
+    npm.cmd run test:e2e -- tests/e2e/wisetech-pr6-internal-journeys.spec.ts tests/e2e/accessibility.spec.ts tests/e2e/core-pages.spec.ts tests/e2e/join-auth.spec.ts tests/e2e/portal-dashboard.spec.ts tests/e2e/portal-secondary-pages.spec.ts tests/e2e/seat-management.spec.ts
 
-    Expected: credential-free PR6 cases PASS.
+    Expected: credential-free PR6 cases PASS at the exact locale/width matrix without provider or mutation traffic.
 
     Run:
 
     npm.cmd run test:e2e
 
-    Expected: the complete repository browser gate PASS or records explicit credential-gated skips/failures without converting them to acceptance.
+    Expected: the complete repository browser gate PASS or record every credential-gated skip/failure without converting it to acceptance. A skipped M1, M2, M3, M4B, M4C, M5, M6, M7, or authenticated Axe suite is `NOT PASSED`.
+
+- [ ] **Step 5: Prove safety contracts, then run isolated M1-M7 only with separate authority**
+
+    First run the non-mutating safety-contract command:
+
+    npm.cmd test -- tests/unit/m1-live-acceptance-safety.test.ts tests/unit/m2-auth-reset.test.ts tests/unit/m2-runtime-environment.test.ts tests/unit/m2-browser-acceptance-contract.test.ts tests/unit/m3-acceptance-isolation.test.ts tests/unit/m3-acceptance-safety.test.ts tests/unit/m3-e2e-safety.test.ts tests/unit/m4b-runtime-guard.test.ts tests/unit/m4b-e2e-safety.test.ts tests/unit/m6-e2e-safety-contract.test.ts tests/unit/m7-acceptance-safety.test.ts
+
+    Expected: PASS with every destructive, provider, database, and target guard failing closed before client construction.
+
+    Record a separate operator approval reference in the verification document before setting any destructive/provider sentinel. Never print values. Required variables are exact:
+
+    - M1: `M1_ACCEPTANCE_ALLOW_DESTRUCTIVE=M1_ISOLATED_FIXTURES_ONLY`, `M1_ACCEPTANCE_ALLOW_PROVIDER_CALLS=M1_TEST_PROVIDERS_ONLY`, `DATABASE_URL_TEST`, equal runtime `DATABASE_URL`, `NEON_PROJECT_ID`, matching `M1_TEST_NEON_PROJECT_ID`, matching `M1_TEST_NEON_HOST`, `PLAYWRIGHT_BASE_URL`, identical `M1_E2E_ALLOWED_ORIGIN` and `APP_URL` origins, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `STRIPE_TEST_SECRET_KEY`, `STRIPE_TEST_WEBHOOK_SECRET`, `STRIPE_TEST_STARTUP_PRICE_ID`, `STRIPE_TEST_CORPORATE_PRICE_ID`, `M1_TEST_MEMBER_EMAIL`, `M1_TEST_MAGIC_LINK_INBOX_URL`, `M1_TEST_MAGIC_LINK_INBOX_ALLOWED_ORIGIN`, and `M1_TEST_MAGIC_LINK_INBOX_TOKEN`.
+    - M2: `M2_ACCEPTANCE_ALLOW_DESTRUCTIVE=M2_ISOLATED_FIXTURES_ONLY`, `DATABASE_URL_TEST`, equal mapped runtime `DATABASE_URL`, `NEON_PROJECT_ID`, matching `M2_TEST_NEON_PROJECT_ID`, matching `M2_TEST_NEON_HOST`, `PLAYWRIGHT_BASE_URL` or managed `APP_URL`, exact `M2_E2E_ALLOWED_ORIGIN`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `STRIPE_TEST_SECRET_KEY`, `STRIPE_TEST_WEBHOOK_SECRET`, `STRIPE_TEST_STARTUP_PRICE_ID`, `STRIPE_TEST_CORPORATE_PRICE_ID`, `M2_TEST_STAFF_EMAIL`, `M2_TEST_STAFF_PASSWORD`, `M2_TEST_MEMBER_EMAIL`, `M2_TEST_MEMBER_PASSWORD`, `M2_TEST_COMPANY_ADMIN_EMAIL`, and `M2_TEST_COMPANY_ADMIN_PASSWORD`.
+    - M3: `M3_ACCEPTANCE_ALLOW_DESTRUCTIVE=isolated-preview`, `DATABASE_URL_TEST`, independently different runtime `DATABASE_URL` where the existing integration guard requires it, `M3_ACCEPTANCE_EXPECTED_DB_HOST`, `PLAYWRIGHT_BASE_URL`, `M3_E2E_ALLOWED_ORIGIN`, `M3_TEST_STAFF_EMAIL`, `M3_TEST_STAFF_PASSWORD`, `M3_TEST_MEMBER_EMAIL`, `M3_TEST_MEMBER_PASSWORD`, `M3_TEST_UNSUBSCRIBE_TOKEN_EN`, `M3_TEST_UNSUBSCRIBE_TOKEN_ZH_HK`, and `VERCEL_SHARE_TOKEN` when Preview protection requires it.
+    - M4B: `PLAYWRIGHT_BASE_URL`, `M4B_E2E_ALLOWED_ORIGIN`, `VERCEL_ENV=preview` or `M4B_E2E_PREVIEW_ONLY=true`, `M4B_TEST_STAFF_EMAIL`, `M4B_TEST_STAFF_PASSWORD`, `M4B_TEST_MEMBER_EMAIL`, `M4B_TEST_MEMBER_PASSWORD`, and `VERCEL_SHARE_TOKEN` when required.
+    - M4C: non-production `PLAYWRIGHT_BASE_URL` and `VERCEL_SHARE_TOKEN` when required; it is read-only and must continue to assert the private canary is absent.
+    - M5: non-production `PLAYWRIGHT_BASE_URL`, `M5_ACCEPTANCE_EMAIL`, and `M5_ACCEPTANCE_PASSWORD`; the existing browser case is read-only.
+    - M6: managed loopback only, `M6_ACCEPTANCE_SEED=true`, `DATABASE_URL_TEST`, equal runtime `DATABASE_URL`, `M6_ACCEPTANCE_DATABASE_HOST_ALLOWLIST`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `M6_TEST_MEMBER_EMAIL`, `M6_TEST_MEMBER_PASSWORD`, `M6_TEST_MEMBER_COMPANY_DISPLAY_NAME`, `M6_TEST_STAFF_EMAIL`, `M6_TEST_STAFF_PASSWORD`, and `M6_TEST_GRADUATE_COMPANY_DISPLAY_NAME`.
+    - M7: `M7_ACCEPTANCE_ALLOW_DESTRUCTIVE=M7_ISOLATED_FIXTURES_ONLY`, `DATABASE_URL_TEST`, equal runtime `DATABASE_URL`, `NEON_PROJECT_ID`, matching `M7_TEST_NEON_PROJECT_ID`, matching `M7_TEST_NEON_HOST`, `PLAYWRIGHT_BASE_URL`, identical `M7_E2E_ALLOWED_ORIGIN` and `APP_URL` origins, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `M7_TEST_STAFF_EMAIL`, and `M7_TEST_STAFF_PASSWORD`.
+
+    Each target guard requires canonical URLs, exact origins, non-production hosts/projects, and its existing allowlist evidence. M1, M2, and M7 perform deterministic named cleanup before and after; cleanup failure fails the command. Existing M3 and M6 may run only under their documented isolated reset/seed lifecycle, and the verification record must show restoration evidence or mark that milestone `NOT PASSED`. Preview mutation, provider calls, or fixture reset remain forbidden until the separate approval explicitly names those suites and targets.
+
+    With approval and complete variables, run each suite separately for attributable evidence:
+
+    npm.cmd run test:e2e -- tests/e2e/m1-acceptance.spec.ts
+    npm.cmd run test:e2e -- tests/e2e/m2-admin-crm.spec.ts
+    npm.cmd run test:e2e -- tests/e2e/m3-automations.spec.ts
+    npm.cmd run test:e2e -- tests/e2e/m4b-agents.spec.ts
+    npm.cmd run test:e2e -- tests/e2e/m4c-aiops.spec.ts
+    npm.cmd run test:e2e -- tests/e2e/m5-showcase.spec.ts
+    npm.cmd run test:e2e -- tests/e2e/m6-launch-pad.spec.ts
+    npm.cmd run test:e2e -- tests/e2e/m7-cms.spec.ts
+    npm.cmd run test:e2e -- tests/e2e/wisetech-pr6-authenticated-accessibility.spec.ts
+
+    Required outcomes:
+
+    - M1 proves advertised annual interval, real test magic-link continuation, profile/company onboarding, persisted interval, both configured annual Stripe Price metadata, exact Checkout Price, signed webhook activation, completion, localized Billing Portal, receipts, seats, secondary pages, sign-out, and test-provider cleanup.
+    - M2 proves full Admin inventory denial plus Member 360, notes, segments/CSV/campaign, at-risk, check-in, approvals, reports, audits, and deterministic before/after reset.
+    - M3 proves automation data and one eligible audited retry while sent/ineligible rows are denied; unsubscribe mutation remains isolated, and missing restoration evidence is `NOT PASSED`.
+    - M4B proves retention approvals and inert Board draft preview; M4C proves bilingual privacy-safe AI-Ops without canary leakage.
+    - M5 proves canonical listing manager/member permissions and staff review/rejection reason.
+    - M6 proves legal cohort transitions and stage audit under its existing managed-loopback seed guard.
+    - M7 proves bilingual News, approved Page Copy, and Media lifecycle/reference locks through the real guarded UI with disposable fixtures and cleanup.
+    - Authenticated accessibility proves the exact 60-case route/locale/width matrix.
+
+    Missing separate authority, database, identities, test providers, allowlist, or cleanup capability means `NOT PASSED`. Do not seed, send, accept, mutate, or clean a live/Preview target without that separate approval.
+
+- [ ] **Step 6: Run Lighthouse and field-performance gates**
 
     Run:
 
@@ -1285,35 +1416,18 @@
 
     Expected: on an authorized reachable target, performance is at least 0.90, accessibility at least 0.95, and SEO at least 0.95. Record LCP at most 2.5 s and CLS at most 0.1 from Lighthouse. Record INP at most 200 ms at p75 only from authorized field/Preview evidence; if unavailable, mark the INP gate `NOT PASSED`. Do not upload private authenticated pages to public temporary storage.
 
-- [ ] **Step 5: Run isolated M1-M7 only when the explicit gate exists**
-
-    First run the existing environment-contract tests. If the complete isolated variables and explicit test authority are present, run:
-
-    npm.cmd run test:e2e -- tests/e2e/m1-acceptance.spec.ts tests/e2e/m2-admin-crm.spec.ts tests/e2e/m3-automations.spec.ts tests/e2e/m4b-agents.spec.ts tests/e2e/m4c-aiops.spec.ts tests/e2e/m5-showcase.spec.ts tests/e2e/m6-launch-pad.spec.ts tests/e2e/seat-management.spec.ts tests/e2e/portal-secondary-pages.spec.ts
-
-    Expected under an authorized isolated environment:
-
-    - M1 proves advertised interval, magic-link continuation, profile/company onboarding, persisted interval, exact Stripe Price, signed webhook activation, completion, localized Billing Portal, receipts, seats, secondary pages, and sign-out.
-    - M2 proves full Admin inventory denial plus Member 360, notes, segments/CSV/campaign, at-risk, check-in, approvals, reports, and audits.
-    - M3 proves automation data and one eligible audited retry while sent/ineligible rows are denied.
-    - M4 proves retention approvals and inert Board draft preview in both locales.
-    - M5 proves canonical listing manager/member permissions and staff review/rejection reason.
-    - M6 proves legal cohort transitions and stage audit.
-    - M7 proves bilingual News, Page Copy, and Media lifecycle/reference locks through its existing focused unit/integration suites.
-
-    Missing isolated database, identities, test providers, or cleanup authority means `NOT PASSED`. Do not seed, migrate, send, accept, or mutate a live/Preview environment without separate approval.
-
-- [ ] **Step 6: Write the verification record and prove the committed range**
+- [ ] **Step 7: Write the verification record and prove the committed range**
 
     In `docs/integration/wisetech-pr6-verification.md` record:
 
     - immutable PR5 base and PR6 head;
-    - every command, timestamp, exit code, totals, warnings, skips, and exact blocker;
-    - RED and GREEN evidence for Tasks 1-11;
+    - every command, timestamp, exit code, totals, warnings, skips, exact blocker, and separate operator-approval reference when an isolated suite ran;
+    - RED and GREEN evidence for Tasks 1-11, plus Task 12 aggregate verification without fabricated RED;
     - independent per-task review result;
     - credential-free versus isolated-authenticated evidence;
     - external gates as `PASSED` or `NOT PASSED` with no implied acceptance;
-    - confirmation of no schema/migration/seed/provider/production action;
+    - confirmation of no schema migration, production seed/import, provider configuration, or production action;
+    - exact disposable cleanup evidence for each authorized mutating suite;
     - source-only rollback: revert PR6 commits to PR5 head.
 
     Create `docs/integration/wisetech-pr6-pr-body.md` with this exact reviewable body:
@@ -1331,7 +1445,7 @@
 
     ## Safety
 
-    No migration, seed/import, provider configuration, production mutation, merge, or deployment is included.
+    No schema migration, production seed/import, provider configuration, production mutation, merge, or deployment is included. Isolated fixture/provider evidence ran only where the linked verification record names separate authority and deterministic cleanup.
 
     Run:
 
@@ -1342,24 +1456,29 @@
 
     Expected: only approved PR6 files, cohesive commits, no whitespace errors, and a clean worktree after the verification record commit.
 
-- [ ] **Step 7: Commit only the browser/evidence slice**
+- [ ] **Step 8: Commit only the browser/evidence slice**
 
-    git add tests/e2e/wisetech-pr6-internal-journeys.spec.ts tests/e2e/accessibility.spec.ts tests/e2e/core-pages.spec.ts tests/e2e/join-auth.spec.ts tests/e2e/portal-dashboard.spec.ts tests/e2e/portal-secondary-pages.spec.ts tests/e2e/seat-management.spec.ts tests/e2e/m1-acceptance.spec.ts tests/e2e/m2-admin-crm.spec.ts docs/integration/wisetech-pr6-verification.md docs/integration/wisetech-pr6-pr-body.md
+    git add -- ':(literal)tests/e2e/wisetech-pr6-internal-journeys.spec.ts' ':(literal)tests/e2e/wisetech-pr6-authenticated-accessibility.spec.ts' ':(literal)tests/e2e/accessibility.spec.ts' ':(literal)tests/e2e/core-pages.spec.ts' ':(literal)tests/e2e/join-auth.spec.ts' ':(literal)tests/e2e/portal-dashboard.spec.ts' ':(literal)tests/e2e/portal-secondary-pages.spec.ts' ':(literal)tests/e2e/seat-management.spec.ts' ':(literal)docs/integration/wisetech-pr6-verification.md' ':(literal)docs/integration/wisetech-pr6-pr-body.md'
     git commit -m "test: verify PR6 internal journeys"
 
-    If `lighthouserc.js` changed only to add approved public/member-login route collection without exposing authenticated URLs, stage that exact file too. Do not stage test results, traces, credentials, environment files, generated runtime output, or unrelated changes.
+    If `lighthouserc.js` changed only to add approved public/member-login route collection without exposing authenticated URLs, stage that exact file with `git add -- ':(literal)lighthouserc.js'` before the commit. Do not stage test results, traces, credentials, environment files, generated runtime output, or unrelated changes.
 
-- [ ] **Step 8: Complete independent review and publish the stacked draft PR**
+- [ ] **Step 9: Complete independent review and publish the stacked draft PR**
 
     Generate the final immutable review package from PR5 head to the committed PR6 head. A fresh reviewer must inspect the approved spec, this plan, the complete diff, focused RED/GREEN evidence, full verification record, authorization/import boundaries, and rollback statement. Resolve findings and repeat review until the result is zero Critical, zero Important, and zero Minor.
 
-    Confirm the exact branch and clean state:
+    Confirm the exact branch, clean state, immutable local head, and immutable remote base:
 
     git branch --show-current
     git status --short
     git rev-parse HEAD
+    $expectedBase = "3856dd71842f9a2e1d9c4b7a46521416a5bd83ae"
+    $remoteBaseLine = git ls-remote origin refs/heads/codex/wisetech-pr5-public-journeys
+    if ($LASTEXITCODE -ne 0) { throw "PR6_REMOTE_BASE_LOOKUP_FAILED" }
+    $remoteBase = ($remoteBaseLine -split "\s+")[0]
+    if ($remoteBase -cne $expectedBase) { throw "PR6_REMOTE_BASE_DRIFT" }
 
-    Expected: `codex/wisetech-pr6-join-portal-admin`, no worktree changes, and the reviewed head SHA.
+    Expected: `codex/wisetech-pr6-join-portal-admin`, no worktree changes, the reviewed local head SHA, and remote PR5 base exactly `3856dd71842f9a2e1d9c4b7a46521416a5bd83ae`. Stop before push if the base drifted.
 
     Push only the reviewed branch:
 
@@ -1369,20 +1488,30 @@
 
     gh pr create --draft --base codex/wisetech-pr5-public-journeys --head codex/wisetech-pr6-join-portal-admin --title "feat: align WiseTech Join Portal and Admin" --body-file docs/integration/wisetech-pr6-pr-body.md
 
-    Verify remote identity and observed checks:
+    Verify published body, refs, immutable OIDs, remote head, and observed checks:
 
-    gh pr view --json url,state,isDraft,baseRefName,headRefName,mergeStateStatus,statusCheckRollup
-    git ls-remote origin refs/heads/codex/wisetech-pr6-join-portal-admin
+    $localHead = git rev-parse HEAD
+    $published = gh pr view --json url,state,isDraft,baseRefName,baseRefOid,headRefName,headRefOid,body,mergeStateStatus,statusCheckRollup | ConvertFrom-Json
+    $expectedBody = ((Get-Content -Raw -LiteralPath "docs/integration/wisetech-pr6-pr-body.md") -replace "`r`n", "`n").TrimEnd("`r", "`n")
+    $publishedBody = ($published.body -replace "`r`n", "`n").TrimEnd("`r", "`n")
+    if ($publishedBody -cne $expectedBody) { throw "PR6_PR_BODY_MISMATCH" }
+    if ($published.baseRefName -cne "codex/wisetech-pr5-public-journeys" -or $published.baseRefOid -cne $expectedBase) { throw "PR6_PR_BASE_MISMATCH" }
+    if ($published.headRefName -cne "codex/wisetech-pr6-join-portal-admin" -or $published.headRefOid -cne $localHead) { throw "PR6_PR_HEAD_MISMATCH" }
+    $remoteHeadLine = git ls-remote origin refs/heads/codex/wisetech-pr6-join-portal-admin
+    if ($LASTEXITCODE -ne 0) { throw "PR6_REMOTE_HEAD_LOOKUP_FAILED" }
+    $remoteHead = ($remoteHeadLine -split "\s+")[0]
+    if ($remoteHead -cne $localHead) { throw "PR6_REMOTE_HEAD_MISMATCH" }
 
-    Expected: OPEN draft PR, base `codex/wisetech-pr5-public-journeys`, head `codex/wisetech-pr6-join-portal-admin`, and remote SHA equal to the reviewed local head. Report pending/failing remote checks separately. Do not merge, deploy, mutate providers, or convert an external gate into PASS.
+    Expected: OPEN draft PR, exact reviewed body, base name/OID `codex/wisetech-pr5-public-journeys`/`3856dd71842f9a2e1d9c4b7a46521416a5bd83ae`, head name/OID equal to the reviewed local PR6 head, and remote head equal to that same SHA. Report pending/failing remote checks separately. Do not merge, deploy, mutate providers, or convert an external gate into PASS.
+
 
 ## Self-Review
 
 - Spec coverage: Tasks 1-2 cover the one catalog authority, interval identity, typed Join context/outcomes, direct terminal navigation, durable interval precedence, and explicit membership persistence. Task 3 covers the complete continuation allowlist, explicit noindex member login, one Neon magic-link path, member-only Portal entry, public navigation destinations, and sign-out behavior. Task 4 covers durable checkout pricing, lock projection, webhook-authoritative completion, and localized Billing Portal return. Task 5 covers invitation callback/token identity, replay, expiry, revocation, and provider-free route tests.
 - Presentation coverage: Task 6 creates the shared shell family, grouped eight-item Portal and 4/6/6 Admin navigation, active specificity, skip/main/mobile/focus/table/feedback behavior, and exact 6/10/26 route inventories. Tasks 7-8 align every Join/member-login and Portal route while preserving current owners and failing closed on ambiguous company context. Tasks 9-11 align every Admin CRM, CMS, and Operations page while retaining authorization, audits, publication/media locks, approvals, reports, automations, Showcase, and cohort transitions.
-- Verification coverage: Task 12 includes the exact PR6 unit aggregate, `npm.cmd ci`, string audit, full unit/lint/type/build, focused and full Playwright, isolated M1-M7 gates, Lighthouse thresholds, high-vulnerability audit, diff/range/worktree checks, evidence classification, source-only rollback, final independent review, and stacked draft-PR publication with remote SHA verification.
-- Type consistency: `BillingInterval` and `MembershipSelection` originate in Tasks 1-2; all later Join, checkout, completion, navigation, and test signatures consume those exact names. `PortalContinuation` is defined once in Task 2 and consumed by Task 3. `InternalNavigationGroup` and shell primitive names originate in Task 6 and are used unchanged in Tasks 7-11.
-- Placeholder scan: every task names exact files, interfaces, RED/GREEN commands, expected failure/pass evidence, production constraints, and an explicit commit. No implementation step delegates an unspecified error, edge case, test, provider, or data decision.
+- Verification coverage: Task 12 includes exact credential-free and 60-case authenticated accessibility matrices, the PR6 unit/safety aggregates, `npm.cmd ci`, string audit, full unit/lint/type/build, focused and full Playwright, separately attributable isolated M1-M7 commands with exact variables and cleanup, Lighthouse thresholds, high-vulnerability audit, diff/range/worktree checks, evidence classification, source-only rollback, final independent review, immutable remote-base validation, published-body equality, and exact PR base/head/remote OID verification.
+- Type consistency: `BillingInterval` and `MembershipSelection` originate in Tasks 1-2; all later Join, checkout, completion, navigation, and test signatures consume those exact names. `PortalContinuation` is defined once in Task 2 and consumed by Task 3. `JoinStateDependencies` is fully defined in Task 4. `InternalNavigationGroup` and shell primitive names originate in Task 6 and are used unchanged in Tasks 7-11.
+- Placeholder scan: every task names exact files, interfaces, RED/GREEN or final-verification commands, expected failure/pass evidence, production constraints, and an explicit commit. M1, M2, and M7 name their sentinels, target/database/provider boundaries, disposable ownership, and cleanup. No implementation step delegates an unspecified error, edge case, test, provider, or data decision.
 
 ## Execution Handoff
 
