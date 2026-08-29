@@ -6,6 +6,9 @@ import {
   ConciergeWidget,
   type ConciergeLabels,
 } from "@/components/ai/concierge-widget";
+import {
+  ContactConciergeLauncher,
+} from "@/components/marketing/contact-concierge-launcher";
 import {CONCIERGE_OPEN_EVENT} from "@/lib/ai/concierge-open";
 
 const CONVERSATION_ID = "11111111-1111-4111-8111-111111111111";
@@ -99,6 +102,33 @@ describe("ConciergeWidget", () => {
 
     expect(await screen.findByRole("dialog", {name: labels.title})).toBeVisible();
     expect(screen.getByRole("textbox", {name: labels.messageLabel})).toHaveFocus();
+  });
+
+  it("returns focus to the Contact launcher after Close and Escape", async () => {
+    render(
+      <>
+        <ContactConciergeLauncher label="Ask WiseTech" />
+        {widget()}
+      </>,
+    );
+    const contactLauncher = screen.getByRole("button", {name: "Ask WiseTech"});
+
+    contactLauncher.focus();
+    fireEvent.click(contactLauncher);
+    expect(await screen.findByRole("dialog", {name: labels.title})).toBeVisible();
+    expect(screen.getByRole("textbox", {name: labels.messageLabel})).toHaveFocus();
+
+    fireEvent.click(screen.getByRole("button", {name: labels.close}));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(contactLauncher).toHaveFocus();
+
+    fireEvent.click(contactLauncher);
+    expect(await screen.findByRole("dialog", {name: labels.title})).toBeVisible();
+    expect(screen.getByRole("textbox", {name: labels.messageLabel})).toHaveFocus();
+
+    fireEvent.keyDown(document, {key: "Escape"});
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(contactLauncher).toHaveFocus();
   });
 
   it("labels its launcher and dialog, moves focus inside, closes with Escape, and returns focus", async () => {
