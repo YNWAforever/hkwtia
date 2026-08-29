@@ -66,9 +66,22 @@
       amountHkd: number | null;
       stripePriceReference: string | null;
     }>;
+    export type MembershipPriceIds = Readonly<{
+      startup: string;
+      corporate: string;
+    }>;
+    export type MembershipCatalogDependencies = Readonly<{
+      plans: Readonly<{
+        list(): Promise<readonly PersistedMembershipPlan[]>;
+      }>;
+      loadPriceIds(): MembershipPriceIds;
+    }>;
+    export function configuredMembershipPriceIds(
+      environment?: NodeJS.ProcessEnv,
+    ): MembershipPriceIds;
     export function reconcileMembershipOptions(input: Readonly<{
       rows: readonly PersistedMembershipPlan[];
-      priceIds: Readonly<{startup: string; corporate: string}>;
+      priceIds: MembershipPriceIds;
     }>): readonly ResolvedMembershipOption[];
     export async function resolveMembershipOption(
       selection: MembershipSelection,
@@ -124,6 +137,8 @@
     expect(JSON.stringify(catalog(canonicalRows))).not.toContain("price_startup");
     expect(JSON.stringify(catalog(canonicalRows))).not.toContain("stripePriceReference");
 
+    Inject `{plans, loadPriceIds}` into `resolveMembershipOption` tests. Require `plans.list()` and `loadPriceIds()` exactly once, prove the supplied IDs—not ambient `process.env`—drive reconciliation, and prove a rejected repository promise propagates rather than becoming `null`. Add direct `configuredMembershipPriceIds(environment)` cases for trimming only `STRIPE_STARTUP_PRICE_ID` and `STRIPE_CORPORATE_PRICE_ID`.
+
     Update navigation expectations so `publicShellActions.join.href` is `/membership` while `memberPortalAction` remains `/portal` until Task 3.
 
 - [ ] **Step 2: Run the focused tests and record the RED reason**
@@ -145,7 +160,7 @@
     - Startup/Corporate: `billingInterval: "annual"` only; annual amount is a positive Postgres integer; configured ID is non-empty after trimming; a persisted reference is either null or exactly the configured ID; optional monthly amount is structurally valid but is not emitted.
     - Any unknown, duplicate, inactive, malformed, or mismatched row is unavailable. Never infer a monthly mapping from the annual ID.
 
-    Make the default async resolver call `membershipPlansRepository.list()` and read only the two named price IDs on the server. Return `null` on an unavailable selection; do not catch repository errors into a valid option.
+    Define the default `MembershipCatalogDependencies` exactly as `{plans: membershipPlansRepository, loadPriceIds: () => configuredMembershipPriceIds(process.env)}`. The async resolver calls `plans.list()` and `loadPriceIds()` once each, passes both results to `reconcileMembershipOptions`, and reads no other environment field. Return `null` on an unavailable selection; do not catch repository or price-loader errors into a valid option.
 
     Make `buildPublicMembershipCatalog` accept reconciled options rather than independently reconciling rows. Format amounts by locale and omit `stripePriceReference`. Set exact CTAs:
 
@@ -489,9 +504,9 @@
 
     Run:
 
-    npm.cmd run test:e2e -- tests/e2e/portal-dashboard.spec.ts tests/e2e/portal-secondary-pages.spec.ts tests/e2e/seat-management.spec.ts
+    npm.cmd run test:e2e -- tests/e2e/portal-dashboard.spec.ts tests/e2e/portal-secondary-pages.spec.ts tests/e2e/seat-management.spec.ts tests/e2e/m2-admin-crm.spec.ts
 
-    Expected: PASS without credentials. Every stable Portal route reaches the localized `/member-login` route with its canonical allowlisted `next`. Seat acceptance is not a generic continuation.
+    Expected: PASS without credentials. Every stable Portal route reaches the localized `/member-login` route with its canonical allowlisted `next`; the M2 credential-free case now expects `/member-login?next=%2Fportal` rather than `/join?next=/portal`. Seat acceptance is not a generic continuation. Authenticated M2 cases remain separately gated and any skip is not acceptance evidence.
 
 - [ ] **Step 5: Commit the member-access slice**
 
@@ -1519,7 +1534,7 @@
 - Spec coverage: Tasks 1-2 cover the one catalog authority, interval identity, typed Join context/outcomes, direct terminal navigation, durable interval precedence, and explicit membership persistence. Task 3 covers the complete continuation allowlist, explicit noindex member login, one Neon magic-link path, member-only Portal entry, public navigation destinations, and sign-out behavior. Task 4 covers durable checkout pricing, lock projection, webhook-authoritative completion, and localized Billing Portal return. Task 5 covers invitation callback/token identity, replay, expiry, revocation, and provider-free route tests.
 - Presentation coverage: Task 6 creates the shared shell family, grouped eight-item Portal and 4/6/6 Admin navigation, active specificity, skip/main/mobile/focus/table/feedback behavior, and exact 6/10/26 route inventories. Tasks 7-8 align every Join/member-login and Portal route while preserving current owners and failing closed on ambiguous company context. Tasks 9-11 align every Admin CRM, CMS, and Operations page while retaining authorization, audits, publication/media locks, approvals, reports, automations, Showcase, and cohort transitions.
 - Verification coverage: Task 12 includes exact credential-free and 60-case authenticated accessibility matrices, the PR6 unit/safety aggregates, `npm.cmd ci`, string audit, full unit/lint/type/build, focused and full Playwright, separately attributable isolated M1-M7 commands with exact variables, cleanup and immutable-provider-record dispositions, Lighthouse thresholds, high-vulnerability audit, diff/range/worktree checks, evidence classification, source-only rollback, final independent review, immutable remote-base validation, published-body equality, explicit OPEN/draft assertions, and exact PR base/head/remote OID verification.
-- Type consistency: `BillingInterval` and `MembershipSelection` originate in Tasks 1-2; all later Join, checkout, completion, navigation, and test signatures consume those exact names. `PortalContinuation` is defined once in Task 2 and consumed by Task 3. `JoinStateDependencies` is fully defined in Task 4. `InternalNavigationGroup` and shell primitive names originate in Task 6 and are used unchanged in Tasks 7-11.
+- Type consistency: `BillingInterval`, `MembershipSelection`, `MembershipPriceIds`, and the exact `{plans.list, loadPriceIds}` `MembershipCatalogDependencies` boundary originate in Task 1 and all later catalog/Join/checkout signatures consume those names. `PortalContinuation` is defined once in Task 2 and consumed by Task 3. `JoinStateDependencies` is fully defined in Task 4. `InternalNavigationGroup` and shell primitive names originate in Task 6 and are used unchanged in Tasks 7-11.
 - Placeholder scan: every task names exact files, interfaces, RED/GREEN or final-verification commands, expected failure/pass evidence, production constraints, and an explicit commit. M1 names its provider-lineage ledger plus exact deletable and immutable dispositions; M2 and M7 name their sentinels, target/database boundaries, disposable ownership, and cleanup. No implementation step delegates an unspecified error, edge case, test, provider, or data decision.
 
 ## Execution Handoff
