@@ -12,6 +12,8 @@ import {buildPageMetadata} from "@/lib/metadata";
 import {buildPublicMembershipCatalog, publicPriceIds} from "@/lib/membership/public-catalog";
 import {buildFaqData} from "@/lib/structured-data";
 
+export const dynamic = "force-dynamic";
+
 type Props = {params: Promise<{locale: string}>};
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {

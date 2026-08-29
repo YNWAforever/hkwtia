@@ -38,7 +38,7 @@ vi.mock("next-intl/server", () => ({
   },
 }));
 
-import MembershipPage from "@/app/[locale]/(public)/membership/page";
+import MembershipPage, * as membershipPageModule from "@/app/[locale]/(public)/membership/page";
 
 const community = {
   code: "community",
@@ -60,6 +60,10 @@ describe("repository-backed Membership page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localeState.locale = "en";
+  });
+
+  it("renders dynamically so persisted availability and pricing stay current", () => {
+    expect((membershipPageModule as {dynamic?: string}).dynamic).toBe("force-dynamic");
   });
 
   it.each([
