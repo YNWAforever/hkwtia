@@ -4,12 +4,12 @@
 
 - Verification date: 2026-08-29 (Asia/Hong_Kong, UTC+08:00).
 - Source branch: `codex/wisetech-pr5-public-journeys`.
-- Source HEAD verified: `5bbc587b59b3055229e95f0c6582c6e223405e07`.
+- Source HEAD verified: `a6d2840e8675fdfd77f09b07ea188de2f52fd0d2`.
 - Starting and pre-document tracked status: clean.
 - Scope: local, credential-free source and browser verification for PR5 public journeys.
 - Boundary: this record does not claim a migration, database connection or write, seed/import, provider action, authenticated UAT, Preview acceptance, merge, push, pull-request publication, or deployment.
 
-All timestamps below are unambiguous ISO timestamps in Asia/Hong_Kong. Commands in the current-HEAD section were run freshly by the Task 10 verifier. Earlier task records and regression history are identified separately and are not presented as fresh runs.
+All timestamps below are unambiguous ISO timestamps in Asia/Hong_Kong. Commands in the current-HEAD section were run freshly by the final PR5 verifier. Earlier task records and regression history are identified separately and are not presented as fresh runs.
 
 ## Historical Task 1-9 evidence confirmation
 
@@ -45,23 +45,27 @@ The ignored local implementer records `.superpowers/sdd/task-1-implementer-repor
 
 ## Fresh current-HEAD verification
 
+This final run supersedes the earlier current-HEAD snapshot at `5bbc587b59b3055229e95f0c6582c6e223405e07`, including its 94-test cross-surface result, 382-file/3,136-test full-suite result, and no-build-warning result. Those values remain historical only and are not current evidence for `a6d2840e8675fdfd77f09b07ea188de2f52fd0d2`.
+
 | Exact command | Interval (HKT) | Exit | Result and material warnings |
 |---|---:|---:|---|
-| `npm.cmd test -- tests/unit/wisetech-pr5-event-hero-schema.test.ts tests/unit/event-hero-admin-and-media.test.ts tests/unit/event-public-status.test.ts tests/unit/event-public-page.test.tsx tests/unit/event-registration-public-action.test.ts tests/unit/event-private-media-render.test.tsx tests/unit/public-layout-announcement.test.tsx tests/unit/home-partner-wall.test.tsx tests/unit/public-news-locale.test.ts tests/unit/news-page-locale.test.tsx tests/unit/launchpad-partner-cutover.test.tsx tests/unit/membership-public-catalog.test.ts tests/unit/membership-page-catalog.test.tsx tests/unit/wisetech-pr5-showcase-presentation.test.tsx tests/unit/contact-concierge-launcher.test.tsx tests/unit/locale-switcher.test.tsx` | `2026-08-29T15:47:35.8545777+08:00` to `2026-08-29T15:47:43.5868782+08:00` | 0 | 16/16 files and 94/94 tests passed; Vitest duration 5.53s. |
-| `rg -n -i "wisetech\|YNWAforever\|landing-partners\|inquiry\|remotePatterns\|body_mdx_zh_hk\|STRIPE_SECRET_KEY" app components lib config scripts tests` | `2026-08-29T15:47:59.3647781+08:00` to `2026-08-29T15:48:00.7798496+08:00` | 0 | Expected hits were classified below; the hit-producing exit is not treated as a pass by itself. |
-| `npm.cmd test -- tests/unit/wisetech-pr5-event-hero-schema.test.ts tests/unit/m7-media-schema-contract.test.ts` | `2026-08-29T15:48:24.2074789+08:00` to `2026-08-29T15:48:27.9314916+08:00` | 0 | 2/2 files and 8/8 tests passed against committed schema, migration, snapshot, and journal artifacts only. No migration or database connection ran. |
-| `npm.cmd run audit:strings` | `2026-08-29T15:48:37.7009023+08:00` to `2026-08-29T15:48:39.2498277+08:00` | 0 | Passed; 166 TSX files scanned. |
-| `npm.cmd test` | `2026-08-29T15:48:49.5963156+08:00` to `2026-08-29T15:50:30.0843828+08:00` | 0 | 382 files passed, 15 environment-gated files skipped; 3,136 tests passed, 40 skipped; Vitest duration 98.92s. |
-| `npm.cmd run lint` | `2026-08-29T15:50:46.2564624+08:00` to `2026-08-29T15:51:01.3103640+08:00` | 0 | 0 errors and 12 warnings. Warnings are in test fixtures: unused mock arguments plus test-only `<img>`/alt-rule warnings. |
-| `npm.cmd run typecheck` | `2026-08-29T15:51:10.3113244+08:00` to `2026-08-29T15:51:16.7719347+08:00` | 0 | `tsc --noEmit` completed with no diagnostics. |
-| `npm.cmd run build` | `2026-08-29T15:51:38.6519648+08:00` to `2026-08-29T15:52:04.0501983+08:00` | 0 | Next.js 16.3.0 Webpack production build compiled, type-checked, and generated 122/122 static pages. No build warning was emitted. |
-| `npm.cmd audit --omit=dev --audit-level=high` | `2026-08-29T15:52:28.7784714+08:00` to `2026-08-29T15:52:31.0215307+08:00` | 0 | No high or critical vulnerability was reported at the required threshold. npm reported 4 moderate findings in the `esbuild`/`@esbuild-kit`/`drizzle-kit` chain and warned that its offered forced fix would install a breaking `drizzle-kit` version; no fix or install was run. |
-| `npm.cmd run test:e2e -- tests/e2e/wisetech-pr5-public-journeys.spec.ts` | `2026-08-29T15:52:42.0178754+08:00` to `2026-08-29T15:53:15.7919162+08:00` | 0 | 4/4 Chromium journeys passed in 31.5s. Warnings: `NO_COLOR` was ignored because `FORCE_COLOR` was set; Browserslist data was 14 months old; Next emitted its smooth-scroll advisory. |
-| `git diff --check` and `git status --short` | `2026-08-29T15:58:47.1935218+08:00` to `2026-08-29T15:58:50.7336891+08:00` | 0 | No whitespace errors; pre-document tracked status clean at the exact source HEAD above. |
+| `npm.cmd test -- tests/unit/wisetech-pr5-event-hero-schema.test.ts tests/unit/event-hero-admin-and-media.test.ts tests/unit/event-public-status.test.ts tests/unit/event-public-page.test.tsx tests/unit/event-registration-public-action.test.ts tests/unit/event-private-media-render.test.tsx tests/unit/public-layout-announcement.test.tsx tests/unit/home-partner-wall.test.tsx tests/unit/public-news-locale.test.ts tests/unit/news-page-locale.test.tsx tests/unit/launchpad-partner-cutover.test.tsx tests/unit/membership-public-catalog.test.ts tests/unit/membership-page-catalog.test.tsx tests/unit/wisetech-pr5-showcase-presentation.test.tsx tests/unit/contact-concierge-launcher.test.tsx tests/unit/locale-switcher.test.tsx` | `2026-08-29T18:06:36.048+08:00` to `2026-08-29T18:06:44.107+08:00` | 0 | 16/16 files and 95/95 tests passed. |
+| `npm.cmd test -- tests/unit/wisetech-pr5-event-hero-schema.test.ts tests/unit/m7-media-schema-contract.test.ts` | `2026-08-29T18:06:53.105+08:00` to `2026-08-29T18:06:55.902+08:00` | 0 | 2/2 files and 8/8 tests passed against committed schema, migration, snapshot, and journal artifacts only. No migration or database connection ran. |
+| `npm.cmd run audit:strings` | `2026-08-29T18:07:03.829+08:00` to `2026-08-29T18:07:05.847+08:00` | 0 | Passed; 166 TSX files scanned. |
+| Sanitized donor, fallback, and secret classification command reproduced below | `2026-08-29T18:07:31.719+08:00` to `2026-08-29T18:07:32.045+08:00` | 0 | Clean; only the expected approved classes described below were present. No secret value was read or printed. |
+| Exact 15-name credential preflight reproduced below | `2026-08-29T18:07:43.713+08:00` to `2026-08-29T18:07:43.736+08:00` | 0 | All 15 repository contract names were `ABSENT`; no value was read or printed. |
+| `npm.cmd test` | `2026-08-29T18:08:02.357+08:00` to `2026-08-29T18:09:45.640+08:00` | 0 | 384 files passed, 15 environment-gated files skipped; 3,144 tests passed, 40 skipped. |
+| `npm.cmd run lint` | `2026-08-29T18:10:00.779+08:00` to `2026-08-29T18:10:16.226+08:00` | 0 | 0 errors and 12 warnings. Warnings are in test fixtures: unused mock arguments plus test-only `<img>`/alt-rule warnings. |
+| `npm.cmd run typecheck` | `2026-08-29T18:10:26.047+08:00` to `2026-08-29T18:10:33.142+08:00` | 0 | `tsc --noEmit` completed with no diagnostics. |
+| `npm.cmd run build` | `2026-08-29T18:11:00.360+08:00` to `2026-08-29T18:11:24.942+08:00` | 0 | Next.js 16.3.0 Webpack production build compiled, type-checked, and generated 122/122 static pages. It emitted the stale Browserslist-data warning. |
+| `npm.cmd audit --omit=dev --audit-level=high` | `2026-08-29T18:11:47.213+08:00` to `2026-08-29T18:11:49.633+08:00` | 0 | The required high threshold passed. npm reported 4 moderate findings in the `esbuild`/`@esbuild-kit`/`drizzle-kit` chain; no fix or install was run. |
+| `npm.cmd run test:e2e -- tests/e2e/wisetech-pr5-public-journeys.spec.ts` | `2026-08-29T18:11:59.890+08:00` to `2026-08-29T18:12:33.738+08:00` | 0 | 4/4 Chromium journeys passed. Known warnings: `NO_COLOR` was ignored because `FORCE_COLOR` was set; Browserslist data was stale; Next emitted its smooth-scroll advisory. |
+| `git diff --check 07cbcf79ab0b5ee3676cc61c38e30437e8c8f184..a6d2840e8675fdfd77f09b07ea188de2f52fd0d2` | `2026-08-29T18:15:35.637+08:00` to `2026-08-29T18:15:35.857+08:00` | 0 | The exact whole-branch range had no whitespace errors. |
+| Final source-HEAD, managed-file hash, and tracked-status verification | `2026-08-29T18:15:48.426+08:00` to `2026-08-29T18:15:49.543+08:00` | 0 | Source HEAD was the exact hash above, managed files matched their HEAD objects, and pre-document tracked status was clean. |
 
 ### Donor, fallback, and secret classification
 
-The exact required scan returned only these approved classes:
+The fresh sanitized classification run returned only these approved classes:
 
 - `wisetech` and `YNWAforever` occur in product naming, frozen provenance/integration inventories, and tests that enforce the donor boundary.
 - `landing-partners` occurs in the repository-owned admin/public route and its tests. The prohibited static files `config/landing-partners.ts` and `config/landing-partners.json` are both absent.
@@ -76,30 +80,7 @@ The supplemental narrow classification run used this exact sanitized PowerShell 
 $started = Get-Date; Write-Output ('START_HKT=' + $started.ToString('o')); Write-Output 'CHECK=donor-runtime-imports-assets'; rg -n -i 'YNWAforever/wisetech|WiseTechSite|FullInnerPages|ExpansionPages|config/landing-partners|landing-partners\.(?:ts|json)' app components lib scripts; Write-Output ('RG_EXIT=' + $LASTEXITCODE); Write-Output 'CHECK=inquiry-runtime'; rg -n -i 'inquiry' app components lib scripts; Write-Output ('RG_EXIT=' + $LASTEXITCODE); Write-Output 'CHECK=remote-image-allowlist'; rg -n -i 'remotePatterns' next.config.ts; Write-Output ('RG_EXIT=' + $LASTEXITCODE); Write-Output 'CHECK=localized-news-english-fallback'; rg -n -i 'bodyMdxZhHk\s*(\?\?|\|\|).*bodyMdx|bodyMdx\s*(\?\?|\|\|).*bodyMdxZhHk|body_mdx_zh_hk\s*(\?\?|\|\|)' app components lib; Write-Output ('RG_EXIT=' + $LASTEXITCODE); Write-Output 'CHECK=client-secret-names-or-values'; $clientFiles = rg -l --glob '*.ts' --glob '*.tsx' '^["'']use client["''];?$' app components lib; if ($LASTEXITCODE -gt 1) { exit $LASTEXITCODE }; if ($clientFiles) { $matches = Select-String -Path $clientFiles -Pattern 'STRIPE_SECRET_KEY|sk_live_|whsec_|postgresql?://'; if ($matches) { $matches } else { Write-Output 'NO_HITS' } } else { Write-Output 'NO_CLIENT_FILES' }; Write-Output 'CHECK=static-landing-partner-files'; Write-Output ('config/landing-partners.ts=' + (Test-Path 'config\landing-partners.ts')); Write-Output ('config/landing-partners.json=' + (Test-Path 'config\landing-partners.json')); $ended = Get-Date; Write-Output ('END_HKT=' + $ended.ToString('o')); Write-Output 'EXIT_CODE=0'
 ~~~
 
-Its exact sanitized output was:
-
-~~~text
-START_HKT=2026-08-29T15:57:09.6563895+08:00
-CHECK=donor-runtime-imports-assets
-RG_EXIT=1
-CHECK=inquiry-runtime
-RG_EXIT=1
-CHECK=remote-image-allowlist
-143: * values — `remotePatterns: []`, `dangerouslyAllowSVG: false`,
-148: * `remotePatterns` once while parsing the URL, then follows up to three
-RG_EXIT=0
-CHECK=localized-news-english-fallback
-RG_EXIT=1
-CHECK=client-secret-names-or-values
-NO_HITS
-CHECK=static-landing-partner-files
-config/landing-partners.ts=False
-config/landing-partners.json=False
-END_HKT=2026-08-29T15:57:10.4228189+08:00
-EXIT_CODE=0
-~~~
-
-For `rg`, exit 1 means zero matches; it is the expected result for the donor-runtime, inquiry-runtime, and localized-fallback checks. The overall shell exit was 0 because the final `Write-Output` succeeded; the command did not contain a hidden `exit 0`.
+For `rg`, exit 1 means zero matches; it is the expected result for the donor-runtime, inquiry-runtime, and localized-fallback checks. The shell command completed with exit 0 and did not contain a hidden `exit 0`.
 
 That run produced:
 
@@ -107,15 +88,14 @@ That run produced:
 - zero `inquiry` hits under runtime/script paths;
 - zero localized-News English-body fallback patterns;
 - zero Stripe secret names or credential-shaped values in discovered `"use client"` files;
-- `False` for both prohibited static Landing Partner file paths.
+- `False` for both prohibited static Landing Partner file paths;
+- only the expected `remotePatterns` comments and policy-test classification.
 
 This proves the requested narrow source classification. It does not assert that a string scan can validate external content rights, provider state, or deployed bytes.
 
 ### Managed development-file cleanup
 
-Before build, `AGENTS.md` and `next-env.d.ts` matched HEAD objects `db641b22a398990032aa471fa2a7c114d2bb485e` and `ce4e94a6b10f160ee021fe18939af160d2927dcf`. The build left both unchanged.
-
-The managed Playwright server then made only its known changes: it appended the Next agent-rules block to `AGENTS.md` and changed the two `next-env.d.ts` imports from `.next/types` to `.next/dev/types`. The exact diff was inspected. Replacement files were created through official `apply_patch` in a new ignored scratch directory; their hashes were validated against the two HEAD objects; exact resolved paths were checked to remain inside this worktree; then each file was moved nonrecursively over its target. At `2026-08-29T15:56:23.1220163+08:00` to `2026-08-29T15:56:23.3443571+08:00`, both worktree hashes again exactly matched HEAD, the two-file diff was empty, and tracked status was clean. No `git restore`, `git checkout`, or `git reset` was used.
+The managed Playwright server made only its known tracked changes: it appended the Next agent-rules block to `AGENTS.md` and changed the two `next-env.d.ts` imports from `.next/types` to `.next/dev/types`. The exact diff was inspected. Replacement files were created through official `apply_patch` in a new ignored scratch directory; their hashes were validated against the HEAD objects; exact resolved paths were checked to remain inside this worktree; then each file was moved nonrecursively over its target. At `2026-08-29T18:15:48.426+08:00` to `2026-08-29T18:15:49.543+08:00`, both worktree hashes again exactly matched source HEAD `a6d2840e8675fdfd77f09b07ea188de2f52fd0d2`, the two-file diff was empty, and tracked status was clean. No `git restore`, `git checkout`, or `git reset` was used.
 
 ## Prior Task 10 regression history
 
@@ -130,7 +110,12 @@ Two prior intermediate full-suite failures were diagnosed as load-sensitive and 
 - After the async-export guard change, a full run had three 5-second timeout/leaked-state failures (`board-reporter-service`, `homepage-partner-wall-integration`, and `homepage`). The exact three-file isolated reproduction passed 3 files/14 tests without timeout changes, and a fresh idle full run passed 382 files with 3,136 tests plus the same environment-gated skips.
 - After the actor-alias guard change, the first full run had only `ci-security-contract` exceed its existing child-process deadline. Its isolated run passed 11/11 (the Auth-tree case took 3.265s) without a timeout change, and the fresh full rerun passed 382 files/3,136 tests.
 
-The fresh current-HEAD full-suite result recorded above independently passed and therefore supersedes those intermediate outcomes for local source verification.
+Those Task 10 outcomes are historical. The final current-HEAD full-suite result recorded above independently passed and supersedes them for local source verification.
+
+### Whole-branch remediation chronology
+
+- Public/data remediation commit `38a70b8b4e60d85a4ab9fb530c58009e3371d45f` added nullable Stripe-reference rules, a SQL-bounded homepage Event reader, and Event-card wrapping. Whole-branch review approved it with 0 critical, 0 important, and 0 minor findings.
+- Security-policy remediation commit `a6d2840e8675fdfd77f09b07ea188de2f52fd0d2` added TypeChecker-resolved actor aliases and AST directive-prologue handling. Whole-branch review approved it with 0 critical, 0 important, and 0 minor findings; the exact review suites passed 249/249 and 109/109 tests.
 
 ## Credential and external gates
 
@@ -147,7 +132,7 @@ $started = Get-Date; Write-Output ('START_HKT=' + $started.ToString('o')); $name
 The exact names-only output was:
 
 ~~~text
-START_HKT=2026-08-29T16:34:23.5069228+08:00
+START_HKT=2026-08-29T18:07:43.713+08:00
 DATABASE_URL=ABSENT
 DATABASE_URL_TEST=ABSENT
 PLAYWRIGHT_BASE_URL=ABSENT
@@ -163,7 +148,7 @@ R2_SECRET_ACCESS_KEY=ABSENT
 R2_BUCKET=ABSENT
 TURNSTILE_SECRET=ABSENT
 TURNSTILE_SITE_KEY=ABSENT
-END_HKT=2026-08-29T16:34:23.5335298+08:00
+END_HKT=2026-08-29T18:07:43.736+08:00
 EXIT_CODE=0
 ~~~
 
@@ -183,12 +168,12 @@ No secret value was read or printed. All 15 actual repository contract names wer
 | Approved translations, content, and partner rights | **NOT PASSED / NOT EXECUTED** | Local code/message contracts are not content-owner or rights-holder approval. |
 | Accessibility/Lighthouse Preview review | **NOT PASSED / NOT EXECUTED** | No Preview Lighthouse or human accessibility review ran. |
 | Preview/UAT and rollback rehearsal | **NOT PASSED / NOT EXECUTED** | No Preview target, UAT owner/result, or deployed rollback rehearsal was used. |
-| GitHub required checks | **NOT PASSED / NOT EXECUTED** | No PR exists for this branch, so no required-check result is available. |
-| Push / pull-request publication | **NOT PASSED / NOT EXECUTED** | At `2026-08-29T15:58:47.1935218+08:00`, the branch had no upstream; read-only `git ls-remote --heads origin refs/heads/codex/wisetech-pr5-public-journeys` exited 0 with no ref, and read-only `gh pr list --repo YNWAforever/hkwtia --head codex/wisetech-pr5-public-journeys --state all --json number,state,url,headRefName,baseRefName` exited 0 with `[]`. |
+| GitHub required checks | **NOT PASSED / NOT EXECUTED** | No pull-request publication or required-check execution was authorized or performed by this verification. |
+| Push / pull-request publication | **NOT PASSED / NOT EXECUTED** | No push, pull-request publication, or remote integration action was authorized or performed by this verification. Historical read-only remote checks do not upgrade this gate. |
 | Merge | **NOT PASSED / NOT EXECUTED** | No merge command or remote integration action ran. |
 | Deployment | **NOT PASSED / NOT EXECUTED** | The local production build is source evidence only; no deployment or promotion ran. |
 | Production approval and observation | **NOT PASSED / NOT EXECUTED** | No production approval, change, smoke test, or observation window was authorized or performed. |
 
 ## Local conclusion
 
-At source HEAD `5bbc587b59b3055229e95f0c6582c6e223405e07`, every required credential-free Task 10 source command passed at its stated threshold. The full unit suite retained 40 explicitly environment-gated skips, lint retained 12 test-fixture warnings, and the production audit retained 4 moderate findings. Those non-blocking local results do not upgrade any external gate in the table above.
+At source HEAD `a6d2840e8675fdfd77f09b07ea188de2f52fd0d2`, every required credential-free final PR5 source command passed at its stated threshold. The full unit suite passed 384 files and 3,144 tests while retaining 15 environment-gated files and 40 skipped tests; lint retained 12 test-fixture warnings; the build retained the stale Browserslist-data warning; and the production audit retained 4 moderate findings. Those non-blocking local results do not upgrade any external gate in the table above.
