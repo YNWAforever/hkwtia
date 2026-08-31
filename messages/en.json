@@ -7,36 +7,89 @@
     "description": "Connecting Hong Kong and Greater Bay Area innovation to global markets."
   },
   "Navigation": {
-    "about": "About",
-    "membership": "Membership",
-    "showcase": "Showcase",
-    "launchpad": "Launchpad",
-    "events": "Events",
-    "news": "News",
+    "brand": {
+      "publicName": "WiseTech Hong Kong",
+      "operator": "Operated by WTIA"
+    },
+    "groups": {
+      "eventsProgrammes": {
+        "label": "Events & Programmes",
+        "description": "Find current events, awards and programmes backed by WTIA records."
+      },
+      "membershipEcosystem": {
+        "label": "Membership & Ecosystem",
+        "description": "Join the association and discover reviewed member solutions."
+      },
+      "impactInsights": {
+        "label": "Impact & Insights",
+        "description": "Read published updates and inspect WTIA's AI evidence."
+      },
+      "aboutWtia": {
+        "label": "About WTIA",
+        "description": "Understand the association, its history, governance and contact channels."
+      }
+    },
+    "columns": {
+      "participate": "Participate",
+      "programmes": "Programmes",
+      "membership": "Membership",
+      "insights": "Evidence & insight",
+      "organisation": "Organisation",
+      "connect": "Connect"
+    },
+    "links": {
+      "events": "Events",
+      "launchpad": "Launch Pad",
+      "hkict": "HKICT Awards",
+      "asa": "Asia Smart App Awards",
+      "tct": "Tech to Connect",
+      "cpai": "CPAI",
+      "membership": "Membership",
+      "showcase": "Member & solution showcase",
+      "news": "News",
+      "aiOps": "AI operations",
+      "aiTransparency": "AI transparency",
+      "about": "About WTIA",
+      "history": "History",
+      "chairman": "Chairman's message",
+      "committees": "Committees",
+      "contact": "Contact"
+    },
+    "actions": {
+      "findEvent": "Find an event",
+      "join": "Join WiseTech",
+      "memberSignIn": "Member sign in"
+    },
     "openMenu": "Open navigation",
     "closeMenu": "Close navigation",
     "menuTitle": "Navigation",
-    "menuDescription": "Explore WTIA pages and change language.",
-    "join": "Join WTIA",
+    "menuDescription": "Explore WiseTech Hong Kong journeys and change language.",
     "english": "EN",
     "chinese": "中文",
     "switchToEnglish": "Switch to English",
     "switchToChinese": "Switch to Chinese",
-    "homeLabel": "WTIA home",
+    "homeLabel": "WiseTech Hong Kong home",
     "logoAlt": "WTIA",
     "primaryLabel": "Primary navigation"
   },
+  "Announcement": {
+    "label": "Announcement",
+    "dismiss": "Dismiss announcement"
+  },
   "Footer": {
-    "brand": "Innovate Hong Kong",
-    "summary": "The cross-border platform connecting Hong Kong, the Greater Bay Area and Asia to global technology markets, investors and opportunities. Powered by WTIA.",
+    "brand": {
+      "publicName": "WiseTech Hong Kong",
+      "operator": "Operated by WTIA",
+      "homeLabel": "WiseTech Hong Kong home",
+      "logoAlt": "WTIA"
+    },
+    "summary": "WiseTech Hong Kong connects technology businesses, practitioners and programmes through WTIA's verified public services.",
     "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
-    "navigate": "Navigate",
-    "home": "Home",
-    "membership": "Membership",
-    "about": "About",
-    "contact": "Contact",
-    "connect": "Connect",
-    "copyright": "© {year} Innovate Hong Kong — WTIA. All rights reserved."
+    "journeys": "Explore",
+    "connect": "Contact",
+    "legal": "Legal",
+    "privacy": "Privacy statement",
+    "copyright": "© {year} WiseTech Hong Kong. Operated by WTIA. All rights reserved."
   },
   "Email": {
     "brand": "WTIA",

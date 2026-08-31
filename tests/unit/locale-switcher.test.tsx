@@ -27,6 +27,20 @@ const labels = {
 describe("LocaleSwitcher", () => {
   beforeEach(() => {
     routerReplace.mockReset();
+    window.history.replaceState(null, "", "/");
+  });
+
+  it("preserves the current fragment after path and query when switching locale", () => {
+    searchState.current = new URLSearchParams("filter=member");
+    window.history.replaceState(null, "", "/events?filter=member#schedule");
+    render(<LocaleSwitcher locale="en" {...labels} />);
+
+    fireEvent.click(screen.getByRole("button", {name: labels.switchToChineseLabel}));
+
+    expect(routerReplace).toHaveBeenCalledWith(
+      "/events?filter=member#schedule",
+      {locale: "zh-HK"},
+    );
   });
 
   it("preserves serialized query values when switching from English to Chinese", () => {
@@ -87,5 +101,12 @@ describe("LocaleSwitcher", () => {
     fireEvent.click(screen.getByRole("button", {name: labels.switchToEnglishLabel}));
 
     expect(routerReplace).toHaveBeenCalledWith("/events?flag=", {locale: "en"});
+  });
+  it("renders a 44px locale target in each Suspense state", () => {
+    render(<LocaleSwitcher locale="en" {...labels} />);
+
+    expect(screen.getByRole("button", {name: labels.switchToChineseLabel})).toHaveClass(
+      "inline-flex", "min-h-11", "min-w-11", "items-center", "justify-center",
+    );
   });
 });
