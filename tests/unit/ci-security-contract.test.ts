@@ -112,6 +112,11 @@ function workflowRunSteps(workflow: string) {
   return [...workflow.matchAll(/^\s*- run: (.+)$/gm)].map(([, command]) => command);
 }
 
+function workflowTriggerBranches(workflow: string, event: "pull_request" | "push") {
+  const match = new RegExp(`${event}:\\s*\\n\\s*branches:\\s*\\[([^\\]]*)\\]`).exec(workflow);
+  return match ? match[1].split(",").map((branch) => branch.trim()).filter(Boolean) : [];
+}
+
 function workflowRunStepTimeoutMinutes(workflow: string, command: string) {
   const lines = workflow.split(/\r?\n/);
   const runLine = `      - run: ${command}`;
@@ -314,7 +319,14 @@ describe("CI and production dependency security contract", () => {
     expect(existsSync(workflowPath), "missing required .github/workflows/ci.yml workflow").toBe(true);
     const workflow = readFileSync(workflowPath, "utf8");
     expect(workflow, "CI must use read-only contents permissions").toMatch(/permissions:\s*\n\s*contents:\s*read/);
-    expect(workflow, "CI must trigger pull requests targeting main").toMatch(/pull_request:\s*\n\s*branches:\s*\[main\]/);
+    // Anchored on which branches are actually covered rather than one spelling of
+    // the list. `release` is the production branch and the repository default, so a
+    // trigger list that quietly stopped covering it would deploy production
+    // unchecked -- which is exactly the state this repository was in until CI was
+    // extended. Both events are pinned because only `push` guards the cutover
+    // itself; a pull_request-only trigger leaves the deploying push unverified.
+    expect(workflowTriggerBranches(workflow, "pull_request"), "CI must trigger pull requests targeting main and release").toEqual(expect.arrayContaining(["main", "release"]));
+    expect(workflowTriggerBranches(workflow, "push"), "CI must run on pushes to main and release, so production is never deployed unchecked").toEqual(expect.arrayContaining(["main", "release"]));
     expect(workflow, "CI must use Node 22 with npm caching").toMatch(/node-version:\s*22[\s\S]*cache:\s*npm/);
     expect(workflowRunSteps(workflow), "CI run steps must be exactly the required commands in order").toEqual(requiredCiCommands);
   });
@@ -329,7 +341,15 @@ describe("CI and production dependency security contract", () => {
   });
 
   it("rejects reordered, missing, or extra CI run commands", () => {
-    const workflow = readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8");
+    // Normalised because the mutations below are built from "\n" literals, and a
+    // Windows checkout with core.autocrlf gives this file CRLF endings. Without
+    // this, every `replace` silently matched nothing, each mutated variant was
+    // identical to the original, and all three "must fail the contract"
+    // assertions failed -- on the one platform where a developer is most likely
+    // to run the suite before handing off. `workflowRunSteps` itself is already
+    // CRLF-safe: JavaScript's `.` excludes carriage returns, so `(.+)$` stops
+    // before them.
+    const workflow = readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8").replace(/\r\n/g, "\n");
     const authTreeStep = `      - run: ${authTreeCommand}\n        timeout-minutes: 1`;
     const auditStep = "      - run: npm run audit:strings";
     const reordered = workflow.replace(`${authTreeStep}\n${auditStep}`, `${auditStep}\n${authTreeStep}`);
