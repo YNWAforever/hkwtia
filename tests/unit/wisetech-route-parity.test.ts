@@ -196,14 +196,35 @@ describe("WiseTech route parity manifest", () => {
     expect(byId.get("cta-register-interest")?.durableOwners).toEqual(["events", "cohorts"]);
   });
 
-  it("uses next-intl while preserving exact, discontinuous donor and archive provenance", () => {
+  it("uses next-intl and records the donor without rewriting the missing original archive", () => {
     const locale = wisetechIntegrationManifest.find(({id}) => id === "locale-language-toggle");
     expect(locale?.localeMechanism).toBe("next-intl-router-replace");
     expect(JSON.stringify(locale)).not.toContain("/zh-HK");
+
+    expect(wisetechIntegrationProvenance.site).toEqual(expect.objectContaining({
+      sourceCommit: "d2d82c01099490a8c2768c942186735667bbc881",
+      reportedArchiveSha256: "411837ea096a11d3a7f49f77f028879b1f4c3599ab643d1ee3ce92de56a02e54",
+      archiveAvailable: false,
+    }));
+    expect(wisetechIntegrationProvenance.site.currentDonor).toEqual({
+      repository: "https://github.com/YNWAforever/wisetech",
+      importedCommit: "f91ecc5fa29c2b9d416ed8315f23e9492baf993d",
+      gitTree: "d13a99e6c47f2b3ea279c5d02da5cf15008807b7",
+      continuityWithReportedArchive: false,
+      logo: {
+        sourcePath: "public/brand/wtia-legacy-logo.png",
+        canonicalPath: "public/images/wtia-logo.png",
+        sha256: "4ABAB36F7D09F36F6D54165E9A8F4C719CAD5CAA7B6CBBCD5F2819F6180DEC51",
+        width: 2001,
+        height: 721,
+      },
+    });
     expect(provenanceErrors(wisetechIntegrationProvenance)).toEqual([]);
   });
 
   it("maps every frozen donor sitemap row exactly once with its evidence ID and unchanged reconciliation", () => {
+    expect(wisetechIntegrationManifest).toHaveLength(133);
+    expect(wisetechIntegrationManifest.filter(({kind}) => kind === "route")).toHaveLength(116);
     expect(donorRouteContractErrors(wisetechIntegrationManifest)).toEqual([]);
     expect(wisetechIntegrationManifest.filter(({sourceEvidenceId}) => sourceEvidenceId !== undefined)).toHaveLength(67);
     expect(wisetechIntegrationManifest.filter(({sourceEvidenceId}) => sourceEvidenceId !== undefined).map(({sourceEvidenceId}) => sourceEvidenceId).sort()).toEqual(
@@ -213,6 +234,7 @@ describe("WiseTech route parity manifest", () => {
 
   it("adds only historical evidence for the six reconciled donor aliases", () => {
     const bySource = new Map(wisetechIntegrationManifest.map((item) => [item.source, item]));
+    expect(wisetechIntegrationManifest.filter(({evidence}) => evidence === "site-v13-source")).toHaveLength(6);
     expect(bySource.get("/events/asia-smart-innovation-awards-summit-2025")).toMatchObject({kind: "route", canonicalPath: "/events/[slug]", disposition: "merge", sourceEvidenceId: "sitemap-18"});
     expect(bySource.get("/events/smart-innovation-meets-genai")).toMatchObject({kind: "route", canonicalPath: "/events/[slug]", disposition: "merge", sourceEvidenceId: "sitemap-19"});
     expect(bySource.get("/programmes/tech-connect")).toMatchObject({kind: "route", canonicalPath: "/programs/tct", disposition: "merge", sourceEvidenceId: "sitemap-30"});
@@ -221,6 +243,20 @@ describe("WiseTech route parity manifest", () => {
     expect(bySource.get("/programmes/hkict-startup-award")).toMatchObject({kind: "route", canonicalPath: "/programs/hkict", disposition: "merge", sourceEvidenceId: "sitemap-33"});
     expect(bySource.get("/events/asia-smart-innovation-awards-summit-2025")?.rationale.toLowerCase()).toContain("historical");
     expect(bySource.get("/programmes/asia-smart-innovation-awards/2025")?.rationale).toContain("edition");
+  });
+
+  it("keeps the current WTIA logo separate from retired donor asset evidence", () => {
+    expect(wisetechIntegrationManifest.find(({id}) => id === "asset-wtia-logo")).toMatchObject({
+      source: "asset:wtia-logo",
+      canonicalPath: "public/images/wtia-logo.png",
+      disposition: "retain",
+      evidence: "hkwtia-repository",
+    });
+    expect(authoritativeSourceInventory.assets.find(({sourcePath}) => sourcePath === "public/brand/wtia-legacy-logo.png")).toMatchObject({
+      sha256: "4abab36f7d09f36f6d54165e9a8f4c719cad5caa7b6cbbcd5f2819f6180dec51",
+      disposition: "retire",
+      publishable: false,
+    });
   });
 
   it("deep-freezes the manifest and nested contract arrays", () => {

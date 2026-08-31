@@ -45,6 +45,31 @@ describe('message bundles', () => {
     expect(zh.Concierge.contactEmailError).toContain("有效");
   });
 
+
+  it("ships complete bilingual WiseTech shell labels", () => {
+    expect(en.Navigation.groups).toEqual({
+      eventsProgrammes: expect.objectContaining({label: "Events & Programmes"}),
+      membershipEcosystem: expect.objectContaining({label: "Membership & Ecosystem"}),
+      impactInsights: expect.objectContaining({label: "Impact & Insights"}),
+      aboutWtia: expect.objectContaining({label: "About WTIA"}),
+    });
+    expect(zh.Navigation.groups).toEqual({
+      eventsProgrammes: expect.objectContaining({label: "活動及計劃"}),
+      membershipEcosystem: expect.objectContaining({label: "會員與創科生態"}),
+      impactInsights: expect.objectContaining({label: "影響與洞察"}),
+      aboutWtia: expect.objectContaining({label: "關於 WTIA"}),
+    });
+    expect(en.Navigation.actions).toEqual({
+      findEvent: "Find an event",
+      join: "Join WiseTech",
+      memberSignIn: "Member sign in",
+    });
+    expect(zh.Navigation.actions).toEqual({
+      findEvent: "尋找活動",
+      join: "加入 WiseTech",
+      memberSignIn: "會員登入",
+    });
+  });
   it.each([en.Admin, zh.Admin])('includes equivalent retention approval and Board Reporter draft labels', (admin) => {
     expect(admin.approvals.actionTypes.retentionOutreach).toBeTruthy();
     expect(admin.approvals.subject).toBeTruthy();

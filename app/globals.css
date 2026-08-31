@@ -28,11 +28,26 @@
   --glow-primary: 210 100% 38%;
   --glow-accent: 25 95% 55%;
   --coral: 350 80% 55%;
+  --shell-canvas: 36 33% 98%;
+  --shell-raised: 0 0% 100%;
+  --shell-warm: 38 43% 95%;
+  --shell-ink: 216 38% 14%;
+  --shell-muted: 215 14% 40%;
+  --shell-navy: 218 48% 18%;
+  --shell-blue: 210 100% 38%;
+  --shell-accent: 25 95% 55%;
+  --shell-border: 214 18% 84%;
+  --shell-shadow-sm: 0 8px 24px hsl(218 48% 18% / 0.08);
+  --shell-shadow-lg: 0 24px 64px hsl(218 48% 18% / 0.16);
+  --shell-radius-sm: 0.5rem;
+  --shell-radius-lg: 1.25rem;
+  --shell-focus: 210 100% 38%;
+  --shell-content: 88rem;
 }
 
 * { box-sizing: border-box; border-color: hsl(var(--border)); }
 html { scroll-behavior: smooth; }
-body { margin: 0; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: var(--font-sans), system-ui, sans-serif; }
+body { margin: 0; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: var(--font-sans), "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif; }
 h1, h2, h3 { font-family: var(--font-serif), Georgia, serif; }
 a { transition: color 160ms ease; }
 
@@ -50,4 +65,13 @@ a { transition: color 160ms ease; }
   .animate-fade-in { animation: fade-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
   @keyframes fade-up { from { opacity: 0; transform: translateY(2.5rem); } to { opacity: 1; transform: translateY(0); } }
   @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
