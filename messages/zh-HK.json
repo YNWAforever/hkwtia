@@ -312,6 +312,8 @@
     },
     "featuresTitle": "連繫社群，推動成長",
     "featuresIntro": "WTIA 透過實際機遇凝聚創科社群。",
+    "partnerWallTitle": "我們的合作夥伴",
+    "partnerWallIntro": "認識支持 WTIA 社群的核准機構。",
     "features": {
       "connect": {
         "title": "連繫",
@@ -421,8 +423,7 @@
     "title": "在香港創科社群找到你的定位。",
     "summary": "選擇配合你參與、成長及貢獻方式的會員級別。",
     "tiersTitle": "會員級別",
-    "tiersIntro": "以年費為主要顯示；初創級別另提供月費選項。",
-    "joinAction": "選擇此計劃",
+    "tiersIntro": "現行會費及付款週期以目前會員目錄為準。",
     "benefits": {
       "network": "社群及交流機會",
       "programs": "參與計劃",
@@ -431,26 +432,18 @@
     "tiers": {
       "community": {
         "name": "社群",
-        "price": "免費",
-        "cadence": "毋須年費",
         "description": "接收 WTIA 公開消息及機遇。"
       },
       "startup": {
         "name": "初創",
-        "price": "港幣 1,200 元",
-        "cadence": "每年 · 可選港幣 120 元月費",
         "description": "適合早期科技公司及團隊。"
       },
       "corporate": {
         "name": "企業",
-        "price": "港幣 1,800 元",
-        "cadence": "每年",
         "description": "適合積極參與創科生態的成熟機構。"
       },
       "patron": {
         "name": "贊助人",
-        "price": "聯絡我們",
-        "cadence": "個別審批",
         "description": "適合支持 WTIA 使命的策略夥伴。"
       }
     },
@@ -461,14 +454,27 @@
         "answer": "可以。社群、初創及企業會籍均可於網上申請及付款；贊助人會籍由聯絡查詢開始。"
       },
       "1": {
-        "question": "哪些級別提供月費？",
-        "answer": "初創級別提供月費選項，其他收費級別按年收費。"
+        "question": "在哪裡查看現行會費及付款選項？",
+        "answer": "目前可用的會費及付款週期會顯示於會員級別卡片。"
       },
       "2": {
         "question": "如何申請贊助人會籍？",
         "answer": "先提交聯絡要求，再由 WTIA 職員人手審批。"
       }
-    }
+    },
+    "priceLabels": {
+      "free": "免費",
+      "review": "聯絡我們"
+    },
+    "cadenceLabels": {
+      "annual": "每年",
+      "monthly": "每月"
+    },
+    "actions": {
+      "join": "選擇此計劃",
+      "contact": "聯絡我們"
+    },
+    "unavailable": "會員計劃暫時未能提供"
   },
   "Join": {
     "backToMembership": "返回會員計劃",
@@ -706,6 +712,11 @@
     "eyebrow": "AI 展示",
     "title": "尋找合適的 WTIA 會員夥伴",
     "description": "探索香港科技公司的實用產品及服務。",
+    "introTitle": "面向實際業務需要的科技方案",
+    "introDescription": "按使用場景、部署方式、語言及整合需要，比較已發布的 WTIA 會員方案。",
+    "ownerCta": "管理你的展示頁",
+    "resultsTitle": "探索會員方案",
+    "resultsDescription": "使用篩選條件，找出切合你需要的方案。",
     "emptyTitle": "沒有符合的已發布展示頁",
     "emptyDescription": "請嘗試更改篩選條件或搜尋字詞。",
     "premium": "精選",
@@ -723,6 +734,8 @@
       "clear": "清除篩選"
     },
     "details": {
+      "overview": "方案概覽",
+      "capabilities": "方案能力",
       "useCases": "使用場景",
       "deployment": "部署方式",
       "languages": "語言",
@@ -803,7 +816,42 @@
     "title": "活動",
     "description": "掌握即將舉行的 WTIA 聚會及交流機會。",
     "emptyTitle": "暫未有已發布活動",
-    "emptyDescription": "確認日期及詳情後，WTIA 活動會在此顯示。"
+    "emptyDescription": "確認日期及詳情後，WTIA 活動會在此顯示。",
+    "statusLabel": "活動狀態",
+    "status": {
+      "open": "進行中",
+      "past": "已結束"
+    },
+    "unavailableTitle": "暫時未能載入活動",
+    "unavailableDescription": "請稍後再試。",
+    "empty": {
+      "open": {
+        "title": "暫未有進行中活動",
+        "description": "目前沒有即將舉行的活動。"
+      },
+      "past": {
+        "title": "暫未有已結束活動",
+        "description": "已結束活動會在可供查閱時顯示。"
+      }
+    },
+    "detail": {
+      "date": "日期及時間",
+      "venue": "地點",
+      "capacity": "名額"
+    },
+    "registration": {
+      "title": "登記參加此活動",
+      "submit": "登記",
+      "pending": "登記中……",
+      "registered": "已確認活動登記。",
+      "waitlist": "你已加入候補名單。",
+      "alreadyRegistered": "你已登記此活動。",
+      "alreadyWaitlisted": "你已在候補名單上。",
+      "unauthenticated": "請先登入再登記。",
+      "ineligible": "需要符合資格的會籍。",
+      "closed": "活動登記已截止。",
+      "error": "未能為你登記此活動，請再試一次。"
+    }
   },
   "News": {
     "metaTitle": "消息 | WTIA",
@@ -820,7 +868,31 @@
     "eyebrow": "聯絡",
     "title": "與我們聯繫",
     "description": "歡迎透過辦公室或電郵聯絡 WTIA。",
-    "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓"
+    "channelsTitle": "直接聯絡 WTIA",
+    "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
+    "routesTitle": "選擇合適的下一步",
+    "routesDescription": "前往現有的 WTIA 服務頁面，查閱最新資料或採取行動。",
+    "routes": {
+      "events": {
+        "title": "活動及交流",
+        "description": "瀏覽 WTIA 已發布的活動及交流機會。"
+      },
+      "membership": {
+        "title": "會員計劃",
+        "description": "比較現有會員計劃及申請資格。"
+      },
+      "showcase": {
+        "title": "會員及方案",
+        "description": "探索已發布的會員科技方案。"
+      },
+      "launchpad": {
+        "title": "創科加速平台",
+        "description": "了解現正接受申請的計劃、項目及資助指引。"
+      }
+    },
+    "conciergeTitle": "未確定從哪裡開始？",
+    "conciergeDescription": "透過 WTIA 現有的 Concierge 諮詢 WiseTech。",
+    "conciergeLauncher": "諮詢 WiseTech"
   },
   "Privacy": {
     "metaTitle": "私隱 | WTIA",
@@ -1130,7 +1202,14 @@
       "register": "登記",
       "registering": "登記中……",
       "registerSuccess": "已確認活動登記。",
-      "registerError": "未能為你登記此活動，請再試一次。"
+      "registerError": "未能為你登記此活動，請再試一次。",
+      "registered": "已確認活動登記。",
+      "waitlist": "你已加入候補名單。",
+      "alreadyRegistered": "你已登記此活動。",
+      "alreadyWaitlisted": "你已在候補名單上。",
+      "unauthenticated": "請先登入再登記。",
+      "ineligible": "需要符合資格的會籍。",
+      "closed": "活動登記已截止。"
     },
     "documents": {
       "title": "文件及收據",
@@ -1432,6 +1511,8 @@
       "endsAt": "結束時間",
       "venue": "地點",
       "capacity": "名額",
+      "heroMediaId": "活動主圖",
+      "noHeroMedia": "不使用主圖",
       "memberOnly": "僅限會員",
       "published": "已發佈",
       "create": "建立活動",
@@ -1493,13 +1574,41 @@
       "error": "發生錯誤，請再試一次。"
     },
     "partners": {
-      "eyebrow": "合作夥伴管理", "title": "一般合作夥伴", "description": "分開管理雙語夥伴資料、合作關係確認、標誌使用權及發布狀態。",
-      "existing": "所有合作夥伴", "empty": "尚未有合作夥伴。", "nameEn": "名稱（英文）", "nameZhHk": "名稱（繁體中文）",
-      "category": "類別", "category_supporting": "支持夥伴", "category_media": "媒體夥伴", "category_regional": "地區夥伴", "category_programme": "計劃夥伴", "category_sponsor": "贊助夥伴",
-      "websiteUrl": "HTTPS 網站", "logoMediaId": "已審批標誌", "noLogo": "沒有標誌", "displayOrder": "顯示次序", "featured": "精選",
-      "relationshipStartsOn": "合作開始日期", "relationshipEndsOn": "合作結束日期", "relationshipConfirmed": "合作關係已確認", "logoRightsConfirmed": "標誌使用權已確認",
-      "statusDraft": "草稿", "statusPublished": "已發布", "statusArchived": "已封存", "publish": "發布", "unpublish": "取消發布", "archive": "封存", "unarchive": "復原",
-      "save": "儲存合作夥伴", "saving": "儲存中…", "createSuccess": "合作夥伴已建立。", "updateSuccess": "合作夥伴已更新。", "validation": "請檢查已標示的合作夥伴欄位。", "error": "未能儲存合作夥伴，請再試一次。"
+      "eyebrow": "合作夥伴管理",
+      "title": "一般合作夥伴",
+      "description": "分開管理雙語夥伴資料、合作關係確認、標誌使用權及發布狀態。",
+      "existing": "所有合作夥伴",
+      "empty": "尚未有合作夥伴。",
+      "nameEn": "名稱（英文）",
+      "nameZhHk": "名稱（繁體中文）",
+      "category": "類別",
+      "category_supporting": "支持夥伴",
+      "category_media": "媒體夥伴",
+      "category_regional": "地區夥伴",
+      "category_programme": "計劃夥伴",
+      "category_sponsor": "贊助夥伴",
+      "websiteUrl": "HTTPS 網站",
+      "logoMediaId": "已審批標誌",
+      "noLogo": "沒有標誌",
+      "displayOrder": "顯示次序",
+      "featured": "精選",
+      "relationshipStartsOn": "合作開始日期",
+      "relationshipEndsOn": "合作結束日期",
+      "relationshipConfirmed": "合作關係已確認",
+      "logoRightsConfirmed": "標誌使用權已確認",
+      "statusDraft": "草稿",
+      "statusPublished": "已發布",
+      "statusArchived": "已封存",
+      "publish": "發布",
+      "unpublish": "取消發布",
+      "archive": "封存",
+      "unarchive": "復原",
+      "save": "儲存合作夥伴",
+      "saving": "儲存中…",
+      "createSuccess": "合作夥伴已建立。",
+      "updateSuccess": "合作夥伴已更新。",
+      "validation": "請檢查已標示的合作夥伴欄位。",
+      "error": "未能儲存合作夥伴，請再試一次。"
     },
     "landingPartners": {
       "eyebrow": "啟航計劃管理", "title": "啟航計劃夥伴", "description": "保密洽談資料，只發布已簽署及已審批的紀錄。",

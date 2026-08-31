@@ -7,9 +7,9 @@ import {FundingResults, FundingWizard} from '@/components/marketing/funding-wiza
 import {LandingPartnerMap} from '@/components/marketing/landing-partner-map';
 import {PageHero} from '@/components/marketing/page-hero';
 import {Section} from '@/components/marketing/section';
-import {landingPartners} from '@/config/landing-partners';
 import type {AppLocale} from '@/i18n/routing';
 import {cohortRepository} from '@/lib/db/repos/cohorts';
+import {landingPartnersRepository} from '@/lib/db/repos/landing-partners';
 import {getFundingResults, parseFundingAnswers} from '@/lib/launchpad/funding';
 import {applyToCohortAction} from '@/lib/launchpad/member-actions';
 import type {Actor} from '@/lib/membership/lifecycle';
@@ -35,6 +35,7 @@ export default async function LaunchPadPage({params, searchParams = Promise.reso
     getTranslations({locale: appLocale, namespace: 'LaunchPad'}),
     cohortRepository.listPublicCohorts(anonymous),
   ]);
+  const partners = await landingPartnersRepository.listPublished({limit: 100}).catch(() => []);
   const answers = parseFundingAnswers(query);
   const fundingResults = getFundingResults(query, appLocale);
   const calendarLabels = {title: t('calendar.title'), empty: t('calendar.empty'), starts: t('calendar.starts'), ends: t('calendar.ends'), noEnd: t('calendar.noEnd'), capacity: t('calendar.capacity'), fee: t('calendar.fee'), statuses: {planning: t('calendar.statuses.planning'), open: t('calendar.statuses.open'), active: t('calendar.statuses.active'), completed: t('calendar.statuses.completed'), archived: t('calendar.statuses.archived')}};
@@ -49,7 +50,7 @@ export default async function LaunchPadPage({params, searchParams = Promise.reso
       <PageHero eyebrow={t('eyebrow')} title={t('title')} description={t('description')} />
       <Section heading={t('program.title')} intro={t('program.intro')}><div className="glass-card space-y-4 p-6"><p className="text-lg font-medium">{t('program.outcomeTitle')}</p><p className="text-muted-foreground">{t('program.outcomeDescription')}</p></div></Section>
       <Section heading={t('calendar.title')} intro={t('calendar.intro')}><CohortCalendar cohorts={cohorts} locale={appLocale} labels={calendarLabels}/></Section>
-      <Section heading={t('partners.title')} intro={t('partners.intro')}><LandingPartnerMap partners={landingPartners} locale={appLocale} labels={partnerLabels}/></Section>
+      <Section heading={t('partners.title')} intro={t('partners.intro')}><LandingPartnerMap partners={partners} locale={appLocale} labels={partnerLabels}/></Section>
       <Section heading={t('funding.title')} intro={t('funding.intro')}><div className="space-y-10"><FundingWizard locale={appLocale} answers={answers} labels={fundingLabels}/><FundingResults results={fundingResults} labels={fundingResultsLabels}/></div></Section>
       {openCohorts.length > 0 ? <section className="container mx-auto px-6 pb-16"><CohortApplicationForm action={applyToCohortAction} cohorts={openCohorts} labels={applicationLabels} locale={appLocale}/></section> : null}
       <section className="container mx-auto px-6 pb-16 sm:pb-24"><div className="glass-card flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="font-serif text-2xl font-semibold">{t('clinic.title')}</h2><p className="mt-2 text-muted-foreground">{t('clinic.description')}</p></div><a className="rounded-md bg-primary px-5 py-3 font-semibold text-primary-foreground" href={localizedPath(appLocale, '/contact')}>{t('clinicCta')}</a></div></section>

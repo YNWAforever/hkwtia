@@ -1,6 +1,6 @@
 import {describe, expect, it, vi} from "vitest";
 
-import type {Event} from "@/lib/db/server-schema";
+import type {PublicEventProjection} from "@/lib/events/public";
 import type {PublishedNewsSummary} from "@/lib/db/repos/public-posts";
 import type {PublicShowcaseRow} from "@/lib/db/repos/showcase";
 import {
@@ -10,45 +10,57 @@ import {
 
 const asOf = new Date("2026-08-28T00:00:00.000Z");
 
-const event = {
-  id: "10000000-0000-4000-8000-000000000001",
-  slug: "event-one",
-  titleEn: "Event EN",
-  titleZh: "活動中文",
-  descriptionEn: "Event body EN",
-  descriptionZh: "活動內容中文",
-  startsAt: new Date("2026-09-01T00:00:00.000Z"),
-  endsAt: new Date("2026-09-01T02:00:00.000Z"),
-  venue: "Hong Kong",
-  capacity: 80,
-  memberOnly: false,
-  published: true,
-  createdAt: asOf,
-  updatedAt: asOf,
-} satisfies Event;
+const events = {
+  en: {
+    id: "10000000-0000-4000-8000-000000000001",
+    slug: "event-one",
+    title: "Event EN",
+    description: "Event body EN",
+    startsAt: "2026-09-01T00:00:00.000Z",
+    endsAt: "2026-09-01T02:00:00.000Z",
+    venue: "Hong Kong",
+    capacity: 80,
+    hero: null,
+  },
+  "zh-HK": {
+    id: "10000000-0000-4000-8000-000000000001",
+    slug: "event-one",
+    title: "活動中文",
+    description: "活動內容中文",
+    startsAt: "2026-09-01T00:00:00.000Z",
+    endsAt: "2026-09-01T02:00:00.000Z",
+    venue: "Hong Kong",
+    capacity: 80,
+    hero: null,
+  },
+} satisfies Record<"en" | "zh-HK", PublicEventProjection>;
 
 const secondEvent = {
-  ...event,
+  ...events.en,
   id: "10000000-0000-4000-8000-000000000002",
   slug: "event-two",
-  titleEn: "Wrong second event",
-  titleZh: "錯誤第二活動",
-} satisfies Event;
+  title: "Wrong second event",
+} satisfies PublicEventProjection;
 
 const news = {
-  slug: "news-one",
-  titleEn: "News EN",
-  titleZh: "消息中文",
-  publishedAt: asOf,
-  author: "WTIA",
-} satisfies PublishedNewsSummary;
+  en: {
+    slug: "news-one",
+    title: "News EN",
+    publishedAt: asOf,
+    author: "WTIA",
+  },
+  "zh-HK": {
+    slug: "news-one",
+    title: "消息中文",
+    publishedAt: asOf,
+    author: "WTIA",
+  },
+} satisfies Record<"en" | "zh-HK", PublishedNewsSummary>;
 
 const secondNews = {
-  ...news,
-  slug: "news-two",
-  titleEn: "Wrong second news",
-  titleZh: "錯誤第二消息",
-} satisfies PublishedNewsSummary;
+  en: {...news.en, slug: "news-two", title: "Wrong second news"},
+  "zh-HK": {...news["zh-HK"], slug: "news-two", title: "錯誤第二消息"},
+} satisfies Record<"en" | "zh-HK", PublishedNewsSummary>;
 
 const listing = {
   id: "20000000-0000-4000-8000-000000000001",
@@ -98,8 +110,8 @@ function createReaders(
   overrides: Partial<HomeHighlightReaders> = {},
 ): HomeHighlightReaders {
   return {
-    events: vi.fn(async () => [event, secondEvent]),
-    news: vi.fn(async () => [news, secondNews]),
+    events: vi.fn(async () => [events.en, secondEvent]),
+    news: vi.fn(async (locale: "en" | "zh-HK") => [news[locale], secondNews[locale]]),
     showcase: vi.fn(async () => [listing, secondListing]),
     ...overrides,
   };
@@ -116,16 +128,16 @@ describe("loadHomeHighlights", () => {
     ["en", "Event EN", "Event body EN", "Member EN", "Tagline EN", "Description EN", "Case study EN", "Member EN logo"],
     ["zh-HK", "活動中文", "活動內容中文", "會員中文", "標語中文", "介紹中文", "案例中文", "會員中文標誌"],
   ] as const)(
-    "maps the first repository record for the %s locale without rewriting news",
+    "maps the first display-safe public Event projection for the %s locale without rewriting News",
     async (locale, eventTitle, eventDescription, memberName, tagline, description, caseStudySummary, logoAlt) => {
-      const readers = createReaders();
+      const readers = createReaders({events: vi.fn(async () => [events[locale], secondEvent])});
 
       const result = await loadHomeHighlights({locale, asOf, readers});
 
       expect(result.event).toEqual({
         status: "available",
         item: {
-          id: event.id,
+          id: events.en.id,
           slug: "event-one",
           title: eventTitle,
           description: eventDescription,
@@ -133,8 +145,7 @@ describe("loadHomeHighlights", () => {
           endsAt: "2026-09-01T02:00:00.000Z",
           venue: "Hong Kong",
           capacity: 80,
-          memberOnly: false,
-          published: true,
+          hero: null,
         },
       });
       expect(result.showcase).toMatchObject({
@@ -148,9 +159,9 @@ describe("loadHomeHighlights", () => {
           logo: {url: "/images/showcase/member-one.png", alt: logoAlt},
         },
       });
-      expect(result.news).toEqual({status: "available", item: news});
+      expect(result.news).toEqual({status: "available", item: news[locale]});
       if (result.news.status !== "available") throw new Error("news fixture was not available");
-      expect(result.news.item).toBe(news);
+      expect(result.news.item).toBe(news[locale]);
       expectEachReaderCalledOnce(readers);
     },
   );
@@ -161,7 +172,7 @@ describe("loadHomeHighlights", () => {
     await loadHomeHighlights({locale: "en", asOf, readers});
 
     expect(readers.events).toHaveBeenCalledWith({asOf, limit: 1});
-    expect(readers.news).toHaveBeenCalledWith(asOf, {limit: 1});
+    expect(readers.news).toHaveBeenCalledWith("en", asOf, {limit: 1});
     expect(readers.showcase).toHaveBeenCalledWith({}, {limit: 1});
     expectEachReaderCalledOnce(readers);
   });
@@ -220,8 +231,8 @@ describe("loadHomeHighlights", () => {
       releases.push(() => resolve(value));
     });
     const readers = createReaders({
-      events: vi.fn(() => pending([event])),
-      news: vi.fn(() => pending([news])),
+      events: vi.fn(() => pending([events.en])),
+      news: vi.fn(() => pending([news.en])),
       showcase: vi.fn(() => pending([listing])),
     });
 

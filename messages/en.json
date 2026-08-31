@@ -311,6 +311,8 @@
     },
     "featuresTitle": "Built for connection and growth",
     "featuresIntro": "WTIA brings the technology community together around practical opportunities.",
+    "partnerWallTitle": "Our partners",
+    "partnerWallIntro": "Approved organisations supporting the WTIA community.",
     "features": {
       "connect": {
         "title": "Connect",
@@ -420,8 +422,7 @@
     "title": "Find your place in Hong Kong's technology community.",
     "summary": "Choose the membership tier that fits how you participate, grow and contribute.",
     "tiersTitle": "Membership tiers",
-    "tiersIntro": "Annual membership is shown first. A monthly option is available for the Startup tier.",
-    "joinAction": "Choose this plan",
+    "tiersIntro": "Available fees and billing options reflect the current membership catalog.",
     "benefits": {
       "network": "Community and networking access",
       "programs": "Programme participation",
@@ -430,26 +431,18 @@
     "tiers": {
       "community": {
         "name": "Community",
-        "price": "Free",
-        "cadence": "No annual fee",
         "description": "Stay connected to public WTIA news and opportunities."
       },
       "startup": {
         "name": "Startup",
-        "price": "HKD 1,200",
-        "cadence": "per year · HKD 120 monthly available",
         "description": "For early-stage technology companies and teams."
       },
       "corporate": {
         "name": "Corporate",
-        "price": "HKD 1,800",
-        "cadence": "per year",
         "description": "For established organisations engaging the ecosystem."
       },
       "patron": {
         "name": "Patron",
-        "price": "Contact us",
-        "cadence": "Reviewed individually",
         "description": "For strategic supporters of WTIA's mission."
       }
     },
@@ -460,14 +453,27 @@
         "answer": "Yes. Community, Startup and Corporate membership can be applied for and paid online. Patron membership begins with a contact request."
       },
       "1": {
-        "question": "Which tiers offer monthly payment?",
-        "answer": "Monthly payment is available for the Startup tier. Other paid tiers are billed annually."
+        "question": "Where can I see current membership fees and billing options?",
+        "answer": "Current available fees and billing cadences are shown in the membership tier cards."
       },
       "2": {
         "question": "How is Patron membership arranged?",
         "answer": "Patron membership begins with a contact request and is reviewed manually by WTIA staff."
       }
-    }
+    },
+    "priceLabels": {
+      "free": "Free",
+      "review": "Contact us"
+    },
+    "cadenceLabels": {
+      "annual": "per year",
+      "monthly": "per month"
+    },
+    "actions": {
+      "join": "Choose this plan",
+      "contact": "Contact us"
+    },
+    "unavailable": "Membership is currently unavailable"
   },
   "Join": {
     "backToMembership": "Back to membership",
@@ -705,6 +711,11 @@
     "eyebrow": "AI Showcase",
     "title": "Find the right WTIA member partner",
     "description": "Explore practical products and services from Hong Kong technology companies.",
+    "introTitle": "Technology solutions for practical business needs",
+    "introDescription": "Compare published WTIA member solutions by use case, deployment, language, and integration fit.",
+    "ownerCta": "Manage your showcase listing",
+    "resultsTitle": "Explore member solutions",
+    "resultsDescription": "Use the filters to narrow the directory to solutions that fit your needs.",
     "emptyTitle": "No published listings match",
     "emptyDescription": "Try changing a filter or search term.",
     "premium": "Premium",
@@ -722,6 +733,8 @@
       "clear": "Clear filters"
     },
     "details": {
+      "overview": "Solution overview",
+      "capabilities": "Capabilities",
       "useCases": "Use cases",
       "deployment": "Deployment",
       "languages": "Languages",
@@ -802,7 +815,42 @@
     "title": "Events",
     "description": "Stay connected to upcoming WTIA gatherings and opportunities.",
     "emptyTitle": "No events are published yet",
-    "emptyDescription": "WTIA events will appear here when dates and details are confirmed."
+    "emptyDescription": "WTIA events will appear here when dates and details are confirmed.",
+    "statusLabel": "Event status",
+    "status": {
+      "open": "Open",
+      "past": "Past"
+    },
+    "unavailableTitle": "Events are temporarily unavailable",
+    "unavailableDescription": "Please try again shortly.",
+    "empty": {
+      "open": {
+        "title": "No open events",
+        "description": "There are no upcoming events at the moment."
+      },
+      "past": {
+        "title": "No past events",
+        "description": "Past events will appear here when available."
+      }
+    },
+    "detail": {
+      "date": "Date and time",
+      "venue": "Venue",
+      "capacity": "Capacity"
+    },
+    "registration": {
+      "title": "Register for this event",
+      "submit": "Register",
+      "pending": "Registering…",
+      "registered": "Registration confirmed.",
+      "waitlist": "You have been added to the waitlist.",
+      "alreadyRegistered": "You are already registered.",
+      "alreadyWaitlisted": "You are already on the waitlist.",
+      "unauthenticated": "Sign in to register.",
+      "ineligible": "An eligible membership is required.",
+      "closed": "Registration is closed.",
+      "error": "We could not register you for this event. Please try again."
+    }
   },
   "News": {
     "metaTitle": "News | WTIA",
@@ -819,7 +867,31 @@
     "eyebrow": "Contact",
     "title": "Let's connect",
     "description": "Reach WTIA at the office or by email.",
-    "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong"
+    "channelsTitle": "Contact WTIA directly",
+    "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
+    "routesTitle": "Choose the right next step",
+    "routesDescription": "Use an established WTIA journey to find current information or take action.",
+    "routes": {
+      "events": {
+        "title": "Events and activities",
+        "description": "Browse published events and activities from WTIA."
+      },
+      "membership": {
+        "title": "Membership",
+        "description": "Compare current membership options and eligibility."
+      },
+      "showcase": {
+        "title": "Members and solutions",
+        "description": "Explore published member technology solutions."
+      },
+      "launchpad": {
+        "title": "Launch Pad",
+        "description": "Discover open cohorts, programmes and funding guidance."
+      }
+    },
+    "conciergeTitle": "Not sure where to start?",
+    "conciergeDescription": "Ask WiseTech through WTIA's existing Concierge.",
+    "conciergeLauncher": "Ask WiseTech"
   },
   "Privacy": {
     "metaTitle": "Privacy | WTIA",
@@ -1129,7 +1201,14 @@
       "register": "Register",
       "registering": "Registering...",
       "registerSuccess": "Registration confirmed.",
-      "registerError": "We could not register you for this event. Please try again."
+      "registerError": "We could not register you for this event. Please try again.",
+      "registered": "Registration confirmed.",
+      "waitlist": "You have been added to the waitlist.",
+      "alreadyRegistered": "You are already registered.",
+      "alreadyWaitlisted": "You are already on the waitlist.",
+      "unauthenticated": "Sign in to register.",
+      "ineligible": "An eligible membership is required.",
+      "closed": "Registration is closed."
     },
     "documents": {
       "title": "Documents and receipts",
@@ -1430,6 +1509,8 @@
       "endsAt": "Ends at",
       "venue": "Venue",
       "capacity": "Capacity",
+      "heroMediaId": "Hero media",
+      "noHeroMedia": "No hero media",
       "memberOnly": "Members only",
       "published": "Published",
       "create": "Create event",

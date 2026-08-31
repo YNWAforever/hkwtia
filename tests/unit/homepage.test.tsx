@@ -34,14 +34,16 @@ vi.mock("next-intl/server", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: ({alt, fill, priority, sizes, src, ...props}: {
+  default: ({alt, fill, priority, sizes, src, unoptimized, ...props}: {
     alt: string;
     fill?: boolean;
     priority?: boolean;
     sizes?: string;
     src: string;
+    unoptimized?: boolean;
   }) => {
     void fill;
+    void unoptimized;
     // eslint-disable-next-line @next/next/no-img-element -- unit-test projection of next/image
     return <img alt={alt} data-priority={priority ? "true" : undefined} sizes={sizes} src={src} {...props} />;
   },
@@ -74,16 +76,14 @@ function available(locale: "en" | "zh-HK"): HomeHighlights {
         endsAt: null,
         venue: "Hong Kong",
         capacity: 80,
-        memberOnly: false,
-        published: true,
+        hero: null,
       },
     },
     news: {
       status: "available",
       item: {
         slug: "repository-news",
-        titleEn: "Repository news",
-        titleZh: "資料庫消息",
+        title: locale === "zh-HK" ? "資料庫消息" : "Repository news",
         publishedAt: new Date("2026-08-30T16:30:00.000Z"),
         author: "WTIA editorial",
       },

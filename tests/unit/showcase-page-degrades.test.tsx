@@ -10,7 +10,7 @@ vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: showcase}));
 // than about the English copy.
 vi.mock("next-intl/server", () => ({
   setRequestLocale: () => undefined,
-  getTranslations: async () => (key: string) => key,
+  getTranslations: async () => (key: string) => key === "emptyTitle" ? "No showcase listings" : key,
 }));
 
 import ShowcasePage from "@/app/[locale]/(public)/showcase/page";
@@ -39,13 +39,13 @@ describe("public Showcase degradation", () => {
 
     const html = await render();
 
-    expect(html).toContain("emptyTitle");
+    expect(html).toContain("No showcase listings");
   });
 
   it("still renders listings when the read succeeds", async () => {
     showcase.listPublished.mockResolvedValue([]);
 
-    await expect(render()).resolves.toContain("emptyTitle");
+    await expect(render()).resolves.toContain("No showcase listings");
     expect(showcase.listPublished).toHaveBeenCalledOnce();
   });
 });

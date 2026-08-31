@@ -18,5 +18,6 @@ describe("Concierge layout translation loading", () => {
     expect(layout).toContain("Promise.all");
     expect(layout).toMatch(/namespace:\s*["']Concierge["']/);
     expect(layout).toContain("concierge.raw(key)");
+    expect(layout.match(/<ConciergeWidget\b/g)).toHaveLength(1);
   });
 });

@@ -1,6 +1,7 @@
 import {z} from "zod";
 
 import {publicRoutes, type PublicRoute} from "@/config/public-routes";
+import type {AppLocale} from "@/i18n/routing";
 
 const canonicalHref = z.custom<PublicRoute>(
   (value) => typeof value === "string" && publicRoutes.includes(value as PublicRoute),
@@ -51,6 +52,13 @@ export type ScheduledAnnouncementProjection = Readonly<{
   priority: number;
 }>;
 
+export type AnnouncementBarView = Readonly<{
+  id: string;
+  href: PublicRoute;
+  text: string;
+  ctaLabel: string;
+}>;
+
 /** Display-safe shape for the later public-layout cutover; lifecycle fields stay private. */
 export function projectPersistedAnnouncement(value: unknown): ScheduledAnnouncementProjection {
   const row = persistedAnnouncementSchema.parse(value);
@@ -63,6 +71,16 @@ export function projectPersistedAnnouncement(value: unknown): ScheduledAnnouncem
     endsAt: row.endsAt.toISOString(),
     priority: row.priority,
   };
+}
+
+export function toAnnouncementBarView(
+  projection: ScheduledAnnouncementProjection,
+  locale: AppLocale,
+): AnnouncementBarView | null {
+  const text = projection.title[locale]?.trim();
+  const ctaLabel = projection.ctaLabel[locale]?.trim();
+  if (!text || !ctaLabel || !publicRoutes.includes(projection.href)) return null;
+  return {id: projection.id, href: projection.href, text, ctaLabel};
 }
 
 export function resolveAnnouncement(value: unknown, now: Date): ActiveAnnouncement | null {

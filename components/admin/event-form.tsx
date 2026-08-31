@@ -5,11 +5,11 @@ import {useActionState} from "react";
 import type {EventActionState} from "@/lib/admin/event-action-core";
 import {formatHongKongDateTimeLocal} from "@/lib/admin/event-form-input";
 
-type Labels = Readonly<{slug: string; titleEn: string; titleZh: string; descriptionEn: string; descriptionZh: string; startsAt: string; endsAt: string; venue: string; capacity: string; memberOnly: string; published: string; save: string; saving: string}>;
-type Values = Partial<Readonly<{slug: string; titleEn: string; titleZh: string | null; descriptionEn: string; descriptionZh: string | null; startsAt: Date; endsAt: Date | null; venue: string | null; capacity: number | null; memberOnly: boolean; published: boolean}>>;
+type Labels = Readonly<{slug: string; titleEn: string; titleZh: string; descriptionEn: string; descriptionZh: string; startsAt: string; endsAt: string; venue: string; capacity: string; memberOnly: string; published: string; heroMediaId: string; noHeroMedia: string; save: string; saving: string}>;
+type Values = Partial<Readonly<{slug: string; titleEn: string; titleZh: string | null; descriptionEn: string; descriptionZh: string | null; startsAt: Date; endsAt: Date | null; venue: string | null; capacity: number | null; memberOnly: boolean; published: boolean; heroMediaId: string | null}>>;
 const initialState: EventActionState = {};
 
-export function EventForm({action, labels, values = {}}: Readonly<{action: (state: EventActionState, formData: FormData) => Promise<EventActionState>; labels: Labels; values?: Values}>) {
+export function EventForm({action, labels, values = {}, mediaRows = []}: Readonly<{action: (state: EventActionState, formData: FormData) => Promise<EventActionState>; labels: Labels; values?: Values; mediaRows?: readonly {id: string; altEn: string; altZh: string}[]}>) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const value = (name: string, fallback: string | number | null | undefined) => state.values?.[name] ?? fallback ?? "";
   const error = (name: string) => state.fieldErrors?.[name] ? <p className="text-sm text-destructive" id={`${name}-error`} role="alert">{state.fieldErrors[name]}</p> : null;
@@ -23,6 +23,7 @@ export function EventForm({action, labels, values = {}}: Readonly<{action: (stat
     <label>{labels.endsAt}<input {...fieldProps("endsAt")} className="mt-1 w-full rounded-md border p-2" defaultValue={value("endsAt", formatHongKongDateTimeLocal(values.endsAt))} name="endsAt" type="datetime-local"/>{error("endsAt")}</label>
     <label>{labels.venue}<input {...fieldProps("venue")} className="mt-1 w-full rounded-md border p-2" defaultValue={value("venue", values.venue)} name="venue"/>{error("venue")}</label>
     <label>{labels.capacity}<input {...fieldProps("capacity")} className="mt-1 w-full rounded-md border p-2" defaultValue={value("capacity", values.capacity)} min="1" name="capacity" type="number"/>{error("capacity")}</label>
+    <label>{labels.heroMediaId}<select {...fieldProps("heroMediaId")} className="mt-1 w-full rounded-md border p-2" defaultValue={value("heroMediaId", values.heroMediaId)} name="heroMediaId"><option value="">{labels.noHeroMedia}</option>{mediaRows.map((row) => <option key={row.id} value={row.id}>{row.altEn} / {row.altZh}</option>)}</select>{error("heroMediaId")}</label>
     <label className="flex items-center gap-2"><input defaultChecked={checked("memberOnly")} key={`memberOnly-${checked("memberOnly")}`} name="memberOnly" type="checkbox"/>{labels.memberOnly}</label>
     <label className="flex items-center gap-2"><input defaultChecked={checked("published")} key={`published-${checked("published")}`} name="published" type="checkbox"/>{labels.published}</label>
     <label className="md:col-span-2">{labels.descriptionEn}<textarea {...fieldProps("descriptionEn")} className="mt-1 min-h-24 w-full rounded-md border p-2" defaultValue={value("descriptionEn", values.descriptionEn)} name="descriptionEn" required/>{error("descriptionEn")}</label>

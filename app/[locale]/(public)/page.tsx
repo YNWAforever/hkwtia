@@ -4,10 +4,12 @@ import {getTranslations, setRequestLocale} from 'next-intl/server';
 import {EditorialHero} from '@/components/marketing/editorial-hero';
 import {FeatureGrid} from '@/components/marketing/feature-grid';
 import {HomeHighlightCard} from '@/components/marketing/home-highlight-card';
+import {HomePartnerWall} from '@/components/marketing/home-partner-wall';
 import {ProgramGrid} from '@/components/marketing/program-grid';
 import {Section} from '@/components/marketing/section';
 import {StructuredData} from '@/components/seo/structured-data';
 import type {AppLocale} from '@/i18n/routing';
+import {partnersRepository} from '@/lib/db/repos/partners';
 import {loadHomeHighlights} from '@/lib/home/home-highlights';
 import {buildPageMetadata} from '@/lib/metadata';
 import {buildOrganizationData} from '@/lib/structured-data';
@@ -26,8 +28,11 @@ export default async function HomePage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
   const appLocale = locale as AppLocale;
-  const t = await getTranslations('Home');
-  const highlights = await loadHomeHighlights({locale: appLocale});
+  const [t, highlights, partners] = await Promise.all([
+    getTranslations('Home'),
+    loadHomeHighlights({locale: appLocale}),
+    partnersRepository.listPublished(appLocale, {limit: 12}).catch(() => null),
+  ]);
   const formatDate = (value: Date | string) => new Intl.DateTimeFormat(locale, {dateStyle: 'long', timeZone: 'Asia/Hong_Kong'}).format(new Date(value));
   const features = ['connect', 'accelerate', 'represent'].map((key) => ({title: t(`features.${key}.title`), description: t(`features.${key}.description`)}));
   const programLabels = Object.fromEntries(['cpai', 'hkict', 'tct', 'asa'].map((id) => [id, {title: t(`programs.${id}.title`), description: t(`programs.${id}.description`)}]));
@@ -41,11 +46,12 @@ export default async function HomePage({params}: Props) {
         <Section heading={t('highlightsTitle')} intro={t('highlightsIntro')}>
           <div className="grid gap-6 lg:grid-cols-3">
             <HomeHighlightCard actionLabel={t('highlights.event.view')} href={event.status === 'available' ? `/events/${event.item.slug}` : '/events'} label={t('highlights.event.label')} meta={event.status === 'available' ? formatDate(event.item.startsAt) : undefined} state={event.status} stateMessage={event.status === 'empty' ? t('highlights.event.empty') : event.status === 'unavailable' ? t('highlights.event.unavailable') : undefined} summary={event.status === 'available' ? event.item.description : undefined} title={event.status === 'available' ? event.item.title : undefined} />
-            <HomeHighlightCard actionLabel={t('highlights.news.view')} href={news.status === 'available' ? `/news/${news.item.slug}` : '/news'} label={t('highlights.news.label')} meta={news.status === 'available' ? formatDate(news.item.publishedAt) : undefined} state={news.status} stateMessage={news.status === 'empty' ? t('highlights.news.empty') : news.status === 'unavailable' ? t('highlights.news.unavailable') : undefined} summary={news.status === 'available' ? news.item.author : undefined} title={news.status === 'available' ? (appLocale === 'zh-HK' ? news.item.titleZh : news.item.titleEn) : undefined} />
+            <HomeHighlightCard actionLabel={t('highlights.news.view')} href={news.status === 'available' ? `/news/${news.item.slug}` : '/news'} label={t('highlights.news.label')} meta={news.status === 'available' ? formatDate(news.item.publishedAt) : undefined} state={news.status} stateMessage={news.status === 'empty' ? t('highlights.news.empty') : news.status === 'unavailable' ? t('highlights.news.unavailable') : undefined} summary={news.status === 'available' ? news.item.author : undefined} title={news.status === 'available' ? news.item.title : undefined} />
             <HomeHighlightCard actionLabel={t('highlights.showcase.view')} href={showcase.status === 'available' ? `/showcase/${showcase.item.slug}` : '/showcase'} image={showcase.status === 'available' && showcase.item.logo ? {src: showcase.item.logo.url, alt: showcase.item.logo.alt} : undefined} label={t('highlights.showcase.label')} meta={showcase.status === 'available' ? showcase.item.category : undefined} state={showcase.status} stateMessage={showcase.status === 'empty' ? t('highlights.showcase.empty') : showcase.status === 'unavailable' ? t('highlights.showcase.unavailable') : undefined} summary={showcase.status === 'available' ? showcase.item.tagline : undefined} title={showcase.status === 'available' ? showcase.item.name : undefined} />
           </div>
         </Section>
       </div>
+      {partners?.length ? <HomePartnerWall intro={t('partnerWallIntro')} partners={partners} title={t('partnerWallTitle')} /> : null}
       <Section heading={t('featuresTitle')} intro={t('featuresIntro')}><FeatureGrid features={features} /></Section>
       <Section heading={t('programsTitle')} intro={t('programsIntro')}><ProgramGrid labels={programLabels} viewLabel={t('viewProgram')} /></Section>
     </>

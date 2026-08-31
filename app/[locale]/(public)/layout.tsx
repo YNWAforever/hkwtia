@@ -8,6 +8,8 @@ import {SiteHeader} from '@/components/layout/site-header';
 import type {AppLocale} from '@/i18n/routing';
 import {localizeConcierge} from '@/lib/ai/concierge-labels';
 import {publicEnv} from '@/lib/config/env';
+import {announcementsRepository} from '@/lib/db/repos/announcements';
+import {toAnnouncementBarView} from '@/lib/public-shell/announcement';
 
 type PublicLayoutProps = {
   children: ReactNode;
@@ -17,14 +19,16 @@ type PublicLayoutProps = {
 export default async function PublicLayout({children, params}: PublicLayoutProps) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const [t, concierge, announcement] = await Promise.all([
+  const [t, concierge, announcementMessages, activeAnnouncement] = await Promise.all([
     getTranslations({locale, namespace: 'Common'}),
     getTranslations({locale, namespace: 'Concierge'}),
     getTranslations({locale, namespace: 'Announcement'}),
+    announcementsRepository.getActive(new Date()).catch(() => null),
   ]);
   const appLocale = locale as AppLocale;
   const conciergeLabels = localizeConcierge((key) => concierge.raw(key));
   const {turnstileSiteKey} = publicEnv();
+  const announcement = activeAnnouncement ? toAnnouncementBarView(activeAnnouncement, appLocale) : null;
 
   return (
     <>
@@ -32,10 +36,9 @@ export default async function PublicLayout({children, params}: PublicLayoutProps
         {t('skipToContent')}
       </a>
       <AnnouncementBar
-        announcement={null}
-        locale={appLocale}
-        label={announcement('label')}
-        dismissLabel={announcement('dismiss')}
+        announcement={announcement}
+        label={announcementMessages('label')}
+        dismissLabel={announcementMessages('dismiss')}
       />
       <SiteHeader locale={appLocale} />
       <main id="main-content">{children}</main>
