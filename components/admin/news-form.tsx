@@ -10,6 +10,7 @@ type Labels = Readonly<{
   titleZh: string;
   author: string;
   bodyMdx: string;
+  bodyMdxZhHk: string;
   bodyHelp: string;
   published: string;
   save: string;
@@ -22,6 +23,7 @@ type Values = Partial<Readonly<{
   titleZh: string;
   author: string;
   bodyMdx: string;
+  bodyMdxZhHk: string | null;
   publishedAt: Date | null;
 }>>;
 
@@ -40,7 +42,7 @@ export function NewsForm({
 
   // Echoed submission values win over the stored row so a failed save never
   // discards what the author typed.
-  const value = (name: keyof Values, fallback?: string) =>
+  const value = (name: keyof Values, fallback?: string | null) =>
     state.values?.[name] ?? fallback ?? "";
   const error = (name: string) =>
     state.fieldErrors?.[name]
@@ -80,11 +82,17 @@ export function NewsForm({
         <input className={field} defaultValue={value("titleZh", values.titleZh)} id="news-title-zh" name="titleZh" required {...fieldProps("titleZh")}/>
         {error("titleZh")}
       </label>
-      <label className="text-sm font-semibold md:col-span-2" htmlFor="news-body">
+      <label className="text-sm font-semibold md:col-span-2" htmlFor="news-body-en">
         {labels.bodyMdx}
-        <textarea className={`${field} min-h-64 resize-y font-mono text-sm`} defaultValue={value("bodyMdx", values.bodyMdx)} id="news-body" name="bodyMdx" required rows={16} {...fieldProps("bodyMdx")}/>
+        <textarea className={`${field} min-h-64 resize-y font-mono text-sm`} defaultValue={value("bodyMdx", values.bodyMdx)} id="news-body-en" name="bodyMdx" required rows={16} {...fieldProps("bodyMdx")}/>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">{labels.bodyHelp}</p>
         {error("bodyMdx")}
+      </label>
+      <label className="text-sm font-semibold md:col-span-2" htmlFor="news-body-zh-hk">
+        {labels.bodyMdxZhHk}
+        <textarea className={`${field} min-h-64 resize-y font-mono text-sm`} defaultValue={value("bodyMdxZhHk", values.bodyMdxZhHk)} id="news-body-zh-hk" name="bodyMdxZhHk" required rows={16} {...fieldProps("bodyMdxZhHk")}/>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">{labels.bodyHelp}</p>
+        {error("bodyMdxZhHk")}
       </label>
       <label className="flex items-center gap-2 text-sm font-semibold" htmlFor="news-published">
         <input defaultChecked={published} id="news-published" key={`published-${published}`} name="published" type="checkbox"/>

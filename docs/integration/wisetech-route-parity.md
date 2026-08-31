@@ -17,7 +17,7 @@ This is the human-readable route/CTA view of `config/wisetech-integration-manife
 | `site-v13-source` | Checked-in user-authorized Git donor evidence for implementation facts; it never replaces current hkwtia ownership. |
 | Unavailable archive | A known Site identity/hash without locally inspectable archive bytes; never parity-closure evidence. |
 
-The integration manifest has 133 entries: route 116, CTA 5, form 3, locale 1 and asset 8. Dispositions are retain 47, redirect 4, merge 67 and retire 15. Evidence labels include 6 direct `site-v13-source` evidence rows. Frozen donor `sourceEvidenceId` values attach to all 67 sitemap routes exactly once. The separate protected inventory has 37 repository-owned code routes: 20 admin pages and 17 API handlers, classified as 6 general API handlers, 2 webhook handlers and 9 job handlers.
+The integration manifest has 133 entries: route 116, CTA 5, form 3, locale 1 and asset 8. Dispositions are retain 47, redirect 4, merge 67 and retire 15. Evidence labels include 6 direct `site-v13-source` evidence rows. Frozen donor `sourceEvidenceId` values attach to all 67 sitemap routes exactly once. The separate protected inventory has 45 repository-owned code routes: 26 admin pages and 19 API handlers, classified as 8 general API handlers, 2 webhook handlers and 9 job handlers.
 
 ## Repository-backed canonical routes
 
@@ -58,8 +58,8 @@ The master plan is the requirements evidence for the `/admin/*` and `/api/*` fam
 
 | Classification | Exact current canonical routes |
 |---|---|
-| Admin pages (20) | `/admin`; `/admin/approvals`; `/admin/at-risk`; `/admin/automations`; `/admin/cohorts`; `/admin/cohorts/[id]`; `/admin/events-mgmt`; `/admin/events-mgmt/[id]`; `/admin/listings-review`; `/admin/media`; `/admin/media/[id]`; `/admin/members`; `/admin/members/[id]`; `/admin/news`; `/admin/news/[id]`; `/admin/page-copy`; `/admin/page-copy/[namespace]`; `/admin/reports`; `/admin/reports/board-drafts/[id]`; `/admin/segments` |
-| General API handlers (6) | `/api/admin/segments/[id]/export`; `/api/ai/concierge`; `/api/ai/conversations/[id]/feedback`; `/api/auth/[...path]`; `/api/showcase/[slug]/view`; `/api/unsubscribe` |
+| Admin pages (26) | `/admin`; `/admin/announcements`; `/admin/announcements/[id]`; `/admin/approvals`; `/admin/at-risk`; `/admin/automations`; `/admin/cohorts`; `/admin/cohorts/[id]`; `/admin/events-mgmt`; `/admin/events-mgmt/[id]`; `/admin/landing-partners`; `/admin/landing-partners/[id]`; `/admin/listings-review`; `/admin/media`; `/admin/media/[id]`; `/admin/members`; `/admin/members/[id]`; `/admin/news`; `/admin/news/[id]`; `/admin/page-copy`; `/admin/page-copy/[namespace]`; `/admin/partners`; `/admin/partners/[id]`; `/admin/reports`; `/admin/reports/board-drafts/[id]`; `/admin/segments` |
+| General API handlers (8) | `/api/admin/media/upload`; `/api/admin/segments/[id]/export`; `/api/ai/concierge`; `/api/ai/conversations/[id]/feedback`; `/api/auth/[...path]`; `/api/media/[id]`; `/api/showcase/[slug]/view`; `/api/unsubscribe` |
 | Webhook handlers (2) | `/api/stripe/webhook`; `/api/webhooks/woztell` |
 | Job handlers (9) | `/api/jobs/aiops-metrics`; `/api/jobs/approvals-expirer`; `/api/jobs/board-reporter`; `/api/jobs/chat-retention`; `/api/jobs/engagement-score`; `/api/jobs/journey-runner`; `/api/jobs/renewal-runner`; `/api/jobs/retention-analyst`; `/api/jobs/worker-alert` |
 
@@ -138,7 +138,7 @@ The design map's already-canonical routes (`/events`, `/events/[slug]`, `/member
 
 ## Exit condition
 
-The machine-readable boundary passes against the current repository and catches injected invalid canonicals with otherwise valid chains, empty/inconsistent chains, chains on retired entries, submitted dynamic patterns, fabricated/wrong-target redirects, unsupported durable owners/actions, unmapped routes and nonexistent CTA destinations. The protected family contract additionally discovers every installed default page/route convention file under exact protected boundaries before kind/family validation, and catches wrong-kind files, new code routes, deleted code routes, fabricated owners, wrong file conventions, family drift and webhook/job misclassification while pinning the exact current 20/17 ownership sets. The separate frozen donor fixture pins all source evidence, while historical archive byte/history equivalence remains unverified. That does not change current hkwtia ownership or invent destinations.
+The machine-readable boundary passes against the current repository and catches injected invalid canonicals with otherwise valid chains, empty/inconsistent chains, chains on retired entries, submitted dynamic patterns, fabricated/wrong-target redirects, unsupported durable owners/actions, unmapped routes and nonexistent CTA destinations. The protected family contract additionally discovers every installed default page/route convention file under exact protected boundaries before kind/family validation, and catches wrong-kind files, new code routes, deleted code routes, fabricated owners, wrong file conventions, family drift and webhook/job misclassification while pinning the exact current 26/19 ownership sets. The separate frozen donor fixture pins all source evidence, while historical archive byte/history equivalence remains unverified. That does not change current hkwtia ownership or invent destinations.
 
 ## Authoritative donor route reconciliation
 

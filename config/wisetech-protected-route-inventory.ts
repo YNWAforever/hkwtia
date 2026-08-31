@@ -50,6 +50,12 @@ function owner(
 }
 
 export const protectedRouteOwnershipInventory: readonly ProtectedRouteOwner[] = Object.freeze([
+  owner({id: "admin-announcement-detail", family: "admin", classification: "admin-page", routePath: "/admin/announcements/[id]", filePath: "app/[locale]/(admin)/admin/announcements/[id]/page.tsx", dataOwner: "Scheduled bilingual announcement selected by id."}),
+  owner({id: "admin-announcements", family: "admin", classification: "admin-page", routePath: "/admin/announcements", filePath: "app/[locale]/(admin)/admin/announcements/page.tsx", dataOwner: "Audited announcement CMS list and lifecycle state."}),
+  owner({id: "admin-partner-detail", family: "admin", classification: "admin-page", routePath: "/admin/partners/[id]", filePath: "app/[locale]/(admin)/admin/partners/[id]/page.tsx", dataOwner: "General partner selected by id."}),
+  owner({id: "admin-partners", family: "admin", classification: "admin-page", routePath: "/admin/partners", filePath: "app/[locale]/(admin)/admin/partners/page.tsx", dataOwner: "Audited general partner CMS."}),
+  owner({id: "admin-landing-partner-detail", family: "admin", classification: "admin-page", routePath: "/admin/landing-partners/[id]", filePath: "app/[locale]/(admin)/admin/landing-partners/[id]/page.tsx", dataOwner: "Private Launch Pad partner record selected by id."}),
+  owner({id: "admin-landing-partners", family: "admin", classification: "admin-page", routePath: "/admin/landing-partners", filePath: "app/[locale]/(admin)/admin/landing-partners/page.tsx", dataOwner: "Audited Launch Pad partner CMS and future safe projection."}),
   owner({id: "admin-approvals", family: "admin", classification: "admin-page", routePath: "/admin/approvals", filePath: "app/[locale]/(admin)/admin/approvals/page.tsx", dataOwner: "Staff approval queue and audited approval actions."}),
   owner({id: "admin-at-risk", family: "admin", classification: "admin-page", routePath: "/admin/at-risk", filePath: "app/[locale]/(admin)/admin/at-risk/page.tsx", dataOwner: "Staff retention-risk read model."}),
   owner({id: "admin-automations", family: "admin", classification: "admin-page", routePath: "/admin/automations", filePath: "app/[locale]/(admin)/admin/automations/page.tsx", dataOwner: "Staff automation controls and audit rules."}),
@@ -76,6 +82,8 @@ export const protectedRouteOwnershipInventory: readonly ProtectedRouteOwner[] = 
   owner({id: "api-ai-conversation-feedback", family: "api", classification: "api-handler", routePath: "/api/ai/conversations/[id]/feedback", filePath: "app/api/ai/conversations/[id]/feedback/route.ts", dataOwner: "Conversation feedback action selected by id."}),
   owner({id: "api-auth-catch-all", family: "api", classification: "api-handler", routePath: "/api/auth/[...path]", filePath: "app/api/auth/[...path]/route.ts", dataOwner: "Neon Auth catch-all handler."}),
   owner({id: "api-showcase-view", family: "api", classification: "api-handler", routePath: "/api/showcase/[slug]/view", filePath: "app/api/showcase/[slug]/view/route.ts", dataOwner: "Published showcase view recording."}),
+  owner({id: "api-admin-media-upload", family: "api", classification: "api-handler", routePath: "/api/admin/media/upload", filePath: "app/api/admin/media/upload/route.ts", dataOwner: "Actor-first private media upload and audited registration."}),
+  owner({id: "api-media-delivery", family: "api", classification: "api-handler", routePath: "/api/media/[id]", filePath: "app/api/media/[id]/route.ts", dataOwner: "Revocation-aware ETag-bound private media delivery."}),
   owner({id: "api-unsubscribe", family: "api", classification: "api-handler", routePath: "/api/unsubscribe", filePath: "app/api/unsubscribe/route.ts", dataOwner: "Signed suppression action."}),
 
   owner({id: "api-stripe-webhook", family: "api", classification: "webhook-handler", routePath: "/api/stripe/webhook", filePath: "app/api/stripe/webhook/route.ts", dataOwner: "Stripe webhook verification and idempotent lifecycle processing."}),

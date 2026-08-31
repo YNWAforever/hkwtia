@@ -21,11 +21,18 @@ import {
 } from "drizzle-orm/pg-core";
 import {sql} from "drizzle-orm";
 
+import {publicRoutes} from "@/config/public-routes";
 import {M3_AUTOMATION_JOB_KIND_SQL_LIST} from "@/lib/jobs/kinds";
 import {MEMBERSHIP_PLAN_CODES, MEMBERSHIP_STATUSES} from "@/lib/membership/constants";
 
 const createdAt = (name: string) => timestamp(name, {withTimezone: true}).defaultNow().notNull();
 const updatedAt = (name: string) => timestamp(name, {withTimezone: true}).defaultNow().notNull();
+const canonicalPublicRouteSql = sql.raw(
+  publicRoutes.map((route) => `\'${route.replaceAll("\'", "\'\'")}\'`).join(", "),
+);
+const ecmaScriptTrimCharactersSql = sql.raw(
+  "U&'\\0009\\000A\\000B\\000C\\000D\\0020\\00A0\\1680\\2000\\2001\\2002\\2003\\2004\\2005\\2006\\2007\\2008\\2009\\200A\\2028\\2029\\202F\\205F\\3000\\FEFF'",
+);
 
 export const membershipStatusEnum = pgEnum("membership_status", MEMBERSHIP_STATUSES);
 export const membershipPlanCodeEnum = pgEnum("membership_plan_code", MEMBERSHIP_PLAN_CODES);
@@ -80,6 +87,9 @@ export const cohortApplicationStageEnum = pgEnum("cohort_application_stage", [
 ]);
 export const landingPartnerMouStatusEnum = pgEnum("landing_partner_mou_status", [
   "prospect", "in_discussion", "signed", "inactive",
+]);
+export const partnerCategoryEnum = pgEnum("partner_category", [
+  "supporting", "media", "regional", "programme", "sponsor",
 ]);
 export type ShowcaseListingStatus = (typeof showcaseListingStatusEnum.enumValues)[number];
 
@@ -647,6 +657,7 @@ export const posts = pgTable(
     titleEn: text("title_en").notNull(),
     titleZh: text("title_zh").notNull(),
     bodyMdx: text("body_mdx").notNull(),
+    bodyMdxZhHk: text("body_mdx_zh_hk"),
     publishedAt: timestamp("published_at", {withTimezone: true}),
     // Distinct from publishedAt: unpublishing returns a post to draft and keeps
     // it in the authoring list, archiving retires it from that list entirely.
@@ -667,14 +678,73 @@ export const posts = pgTable(
   ],
 );
 
+
+/**
+ * Scheduled bilingual notices for the public shell. PR4 deliberately leaves
+ * the public layout disconnected; this table and its repository establish the
+ * reviewed authoring and selection boundary for the later cutover.
+ */
+export const siteAnnouncements = pgTable(
+  "site_announcements",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    titleEn: text("title_en").notNull(),
+    titleZhHk: text("title_zh_hk").notNull(),
+    ctaLabelEn: text("cta_label_en").notNull(),
+    ctaLabelZhHk: text("cta_label_zh_hk").notNull(),
+    href: text("href").notNull(),
+    startsAt: timestamp("starts_at", {withTimezone: true}).notNull(),
+    endsAt: timestamp("ends_at", {withTimezone: true}).notNull(),
+    priority: integer("priority").default(0).notNull(),
+    publishedAt: timestamp("published_at", {withTimezone: true}),
+    archivedAt: timestamp("archived_at", {withTimezone: true}),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    check("site_announcements_window_check", sql`${table.endsAt} > ${table.startsAt}`),
+    check(
+      "site_announcements_priority_check",
+      sql`${table.priority} >= 0 AND ${table.priority} <= 1000`,
+    ),
+    check(
+      "site_announcements_title_en_check",
+      sql`char_length(btrim(${table.titleEn}, ${ecmaScriptTrimCharactersSql})) BETWEEN 1 AND 180`,
+    ),
+    check(
+      "site_announcements_title_zh_hk_check",
+      sql`char_length(btrim(${table.titleZhHk}, ${ecmaScriptTrimCharactersSql})) BETWEEN 1 AND 180`,
+    ),
+    check(
+      "site_announcements_cta_label_en_check",
+      sql`char_length(btrim(${table.ctaLabelEn}, ${ecmaScriptTrimCharactersSql})) BETWEEN 1 AND 60`,
+    ),
+    check(
+      "site_announcements_cta_label_zh_hk_check",
+      sql`char_length(btrim(${table.ctaLabelZhHk}, ${ecmaScriptTrimCharactersSql})) BETWEEN 1 AND 60`,
+    ),
+    check(
+      "site_announcements_href_check",
+      sql`${table.href} IN (${canonicalPublicRouteSql})`,
+    ),
+    index("site_announcements_active_idx").on(
+      table.archivedAt,
+      table.publishedAt,
+      table.startsAt,
+      table.endsAt,
+      table.priority,
+      table.id,
+    ),
+  ],
+);
+
 /**
  * Images staff have curated for use on the site.
  *
- * The registry is a curation boundary, not an upload mechanism: `url` is
- * validated as own-origin only (`lib/media/url.ts`), because an allowlist of
- * third-party hosts cannot be made safe for a render target. There are
- * deliberately no `width`/`height` columns — with no upload they could only be
- * typed by hand, where a wrong value silently distorts the image.
+ * Manual registry rows keep the upload metadata group entirely null and retain
+ * an own-origin `url`. Private-R2 upload rows require the complete verified
+ * metadata group and use only `/api/media/<id>`, so archive revocation and
+ * integrity checks remain on the application origin.
  */
 export const media = pgTable(
   "media",
@@ -683,15 +753,89 @@ export const media = pgTable(
     url: text("url").notNull(),
     altEn: text("alt_en").notNull(),
     altZh: text("alt_zh").notNull(),
-    registeredByProfileId: text("registered_by_profile_id")
-      .references(() => profiles.id, {onDelete: "set null"}),
+    storageKey: text("storage_key"),
+    storageEtag: text("storage_etag"),
+    originalFilename: text("original_filename"),
+    contentType: text("content_type"),
+    byteSize: integer("byte_size"),
+    width: integer("width"),
+    height: integer("height"),
+    focalX: integer("focal_x"),
+    focalY: integer("focal_y"),
+    checksumSha256: text("checksum_sha256"),
+    registeredByProfileId: text("registered_by_profile_id").references(
+      () => profiles.id,
+      { onDelete: "set null" },
+    ),
     // Archive rather than delete: a registry entry may already be referenced by
     // a published listing, and the row is the record of what was shown.
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    uniqueIndex("media_url_unique").on(table.url),
+    uniqueIndex("media_storage_key_unique").on(table.storageKey),
+    check(
+      "media_upload_metadata_all_or_none_check",
+      sql`num_nonnulls(${table.storageKey}, ${table.storageEtag}, ${table.originalFilename}, ${table.contentType}, ${table.byteSize}, ${table.width}, ${table.height}, ${table.focalX}, ${table.focalY}, ${table.checksumSha256}) IN (0, 10)`,
+    ),
+    check(
+      "media_upload_byte_size_check",
+      sql`${table.byteSize} IS NULL OR ${table.byteSize} BETWEEN 1 AND 4194304`,
+    ),
+    check(
+      "media_upload_dimensions_check",
+      sql`${table.width} IS NULL OR (${table.width} BETWEEN 1 AND 10000 AND ${table.height} BETWEEN 1 AND 10000 AND ${table.width}::bigint * ${table.height}::bigint <= 40000000)`,
+    ),
+    check(
+      "media_upload_focal_check",
+      sql`${table.focalX} IS NULL OR (${table.focalX} BETWEEN 0 AND 100 AND ${table.focalY} BETWEEN 0 AND 100)`,
+    ),
+    check(
+      "media_upload_checksum_check",
+      sql`${table.checksumSha256} IS NULL OR ${table.checksumSha256} ~ '^[0-9a-f]{64}$'`,
+    ),
+    check(
+      "media_upload_etag_check",
+      sql`${table.storageEtag} IS NULL OR char_length(btrim(${table.storageEtag}, ${ecmaScriptTrimCharactersSql})) > 0`,
+    ),
+    check(
+      "media_upload_content_type_check",
+      sql`${table.contentType} IS NULL OR ${table.contentType} IN ('image/png', 'image/jpeg', 'image/webp')`,
+    ),
+  ],
+);
+
+/** General partner authority with separate relationship, rights and publication gates. */
+export const partners = pgTable(
+  "partners",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    nameEn: text("name_en").notNull(),
+    nameZhHk: text("name_zh_hk").notNull(),
+    category: partnerCategoryEnum("category").notNull(),
+    websiteUrl: text("website_url"),
+    logoMediaId: uuid("logo_media_id").references(() => media.id, {onDelete: "set null"}),
+    displayOrder: integer("display_order").default(0).notNull(),
+    featured: boolean("featured").default(false).notNull(),
+    relationshipStartsOn: date("relationship_starts_on"),
+    relationshipEndsOn: date("relationship_ends_on"),
+    relationshipConfirmedAt: timestamp("relationship_confirmed_at", {withTimezone: true}),
+    logoRightsConfirmedAt: timestamp("logo_rights_confirmed_at", {withTimezone: true}),
+    publishedAt: timestamp("published_at", {withTimezone: true}),
     archivedAt: timestamp("archived_at", {withTimezone: true}),
     createdAt: createdAt("created_at"),
     updatedAt: updatedAt("updated_at"),
   },
-  (table) => [uniqueIndex("media_url_unique").on(table.url)],
+  (table) => [
+    check("partners_name_en_check", sql`char_length(btrim(${table.nameEn}, ${ecmaScriptTrimCharactersSql})) BETWEEN 1 AND 160`),
+    check("partners_name_zh_hk_check", sql`char_length(btrim(${table.nameZhHk}, ${ecmaScriptTrimCharactersSql})) BETWEEN 1 AND 160`),
+    check("partners_display_order_check", sql`${table.displayOrder} >= 0 AND ${table.displayOrder} <= 10000`),
+    check("partners_relationship_window_check", sql`${table.relationshipEndsOn} IS NULL OR ${table.relationshipStartsOn} IS NULL OR ${table.relationshipEndsOn} >= ${table.relationshipStartsOn}`),
+    index("partners_public_state_idx").on(table.archivedAt, table.publishedAt, table.featured, table.displayOrder, table.id),
+    index("partners_logo_media_idx").on(table.logoMediaId),
+  ],
 );
 
 /**
@@ -832,11 +976,14 @@ export const landingPartners = pgTable(
     mouStatus: landingPartnerMouStatusEnum("mou_status").default("prospect").notNull(),
     contact: jsonb("contact").$type<Record<string, unknown>>().default({}).notNull(),
     notes: text("notes"),
+    publishedAt: timestamp("published_at", {withTimezone: true}),
+    archivedAt: timestamp("archived_at", {withTimezone: true}),
     createdAt: createdAt("created_at"),
     updatedAt: updatedAt("updated_at"),
   },
   (table) => [
     index("landing_partners_public_market_status_idx").on(table.market, table.mouStatus),
+    index("landing_partners_publication_idx").on(table.publishedAt, table.archivedAt, table.market, table.id),
   ],
 );
 
@@ -1151,8 +1298,11 @@ export type Event = typeof events.$inferSelect;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
 export type Approval = typeof approvals.$inferSelect;
 export type Post = typeof posts.$inferSelect;
+export type SiteAnnouncement = typeof siteAnnouncements.$inferSelect;
 export type PageCopyRow = typeof pageCopy.$inferSelect;
 export type MediaRow = typeof media.$inferSelect;
+export type Partner = typeof partners.$inferSelect;
+export type NewPartner = typeof partners.$inferInsert;
 export type ShowcaseListing = typeof showcaseListings.$inferSelect;
 export type NewShowcaseListing = typeof showcaseListings.$inferInsert;
 export type Cohort = typeof cohorts.$inferSelect;

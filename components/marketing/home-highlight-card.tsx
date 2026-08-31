@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import {Link} from "@/i18n/navigation";
+import {isPrivateMediaDeliveryUrl} from "@/lib/media/url";
 
 export type HomeHighlightCardProps = Readonly<{
   label: string;
@@ -24,7 +25,7 @@ export function HomeHighlightCard({label, state, title, summary, meta, image, hr
       {state === "available" ? (
         <>
           <div className="mt-4 flex items-start gap-4">
-            {safeImage ? <Image alt={safeImage.alt} className="h-12 w-12 shrink-0 rounded-md object-contain" height={48} src={safeImage.src} width={48} /> : null}
+            {safeImage ? <Image alt={safeImage.alt} className="h-12 w-12 shrink-0 rounded-md object-contain" height={48} src={safeImage.src} unoptimized={isPrivateMediaDeliveryUrl(safeImage.src)} width={48} /> : null}
             <h3 className="font-serif text-2xl font-semibold">{title}</h3>
           </div>
           {summary ? <p className="mt-4 leading-relaxed text-muted-foreground">{summary}</p> : null}

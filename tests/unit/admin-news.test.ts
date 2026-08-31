@@ -18,6 +18,7 @@ const validInput = {
   titleEn: "WTIA welcomes new members",
   titleZh: "WTIA 歡迎新會員",
   bodyMdx: "## Welcome\n\nA **warm** welcome.",
+  bodyMdxZhHk: "## 歡迎\n\n**熱烈**歡迎。",
   author: "WTIA",
   publishedAt: null,
 };
@@ -111,7 +112,7 @@ describe("staff news repository", () => {
       lockPost: vi.fn(async () => null),
     });
 
-    await expect(updateNewsPost(staff, post().id, {titleEn: "New"}, dependencies))
+    await expect(updateNewsPost(staff, post().id, {titleEn: "New", bodyMdx: validInput.bodyMdx, bodyMdxZhHk: validInput.bodyMdxZhHk}, dependencies))
       .resolves.toBeNull();
     expect(transaction.updatePost).not.toHaveBeenCalled();
     expect(audits).toEqual([]);
@@ -129,7 +130,9 @@ describe("staff news repository", () => {
     await updateNewsPost(
       staff,
       post().id,
-      after === undefined ? {titleEn: "Edited"} : {publishedAt: after},
+      after === undefined
+        ? {titleEn: "Edited", bodyMdx: validInput.bodyMdx, bodyMdxZhHk: validInput.bodyMdxZhHk}
+        : {publishedAt: after, bodyMdx: validInput.bodyMdx, bodyMdxZhHk: validInput.bodyMdxZhHk},
       dependencies,
     );
 

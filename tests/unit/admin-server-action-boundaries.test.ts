@@ -7,6 +7,7 @@ describe("admin mutation Server Action boundaries", () => {
     ["segment", "lib/admin/segment-actions.ts"],
     ["event", "lib/admin/event-actions.ts"],
     ["member note", "lib/admin/member-note-actions.ts"],
+    ["announcement", "lib/admin/announcement-actions.ts"],
     ["news", "lib/admin/news-actions.ts"],
     ["page copy", "lib/admin/page-copy-actions.ts"],
     ["media", "lib/admin/media-actions.ts"],

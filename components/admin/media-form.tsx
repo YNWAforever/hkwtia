@@ -4,6 +4,7 @@ import Image from "next/image";
 import {useActionState} from "react";
 
 import type {MediaActionState} from "@/lib/admin/media-action-core";
+import {isPrivateMediaDeliveryUrl} from "@/lib/media/url";
 
 type Labels = Readonly<{
   url: string;
@@ -74,7 +75,7 @@ export function MediaForm({
         ? <figure className="md:col-span-2">
           <figcaption className="text-sm font-semibold">{labels.preview}</figcaption>
           <span className="mt-2 flex h-24 w-48 items-center justify-center overflow-hidden rounded-md border border-border/70 bg-muted/40">
-            <Image alt={preview.alt} className="max-h-24 w-auto object-contain" height={96} src={preview.url} width={192}/>
+            <Image alt={preview.alt} className="max-h-24 w-auto object-contain" height={96} src={preview.url} unoptimized={isPrivateMediaDeliveryUrl(preview.url)} width={192}/>
           </span>
         </figure>
         : null}
