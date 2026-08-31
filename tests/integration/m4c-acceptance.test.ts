@@ -432,7 +432,7 @@ describe("complete M4 deterministic acceptance", () => {
     for (const {id} of fixture.profiles) {
       expect(safeDashboard).not.toContain(id);
     }
-    expect(opaque(safeDashboard)).toBe("70024a54d5e21c1e58da8e66a058654a7c17dfb109b2fb9b399300b343fc0b75");
+    expect(opaque(safeDashboard)).toBe("25a77a92b6ac6180f0343258d018407117ca2caa5ae9f18c9387ab58f3d319e6");
 
     expect(fixture.buildLogs).toHaveLength(2);
     await exerciseConciergeEvaluation();

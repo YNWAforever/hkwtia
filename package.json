@@ -36,7 +36,7 @@
     "@ai-sdk/anthropic": "^4.0.21",
     "@ai-sdk/openai": "^4.0.20",
     "@hookform/resolvers": "^3.10.0",
-    "@neondatabase/auth": "^0.4.2-beta",
+    "@neondatabase/auth": "^0.5.0-beta",
     "@neondatabase/serverless": "^1.1.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -119,5 +119,12 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "vitest": "^3.2.4"
+  },
+  "overrides": {
+    "@neondatabase/auth-ui@0.3.0-beta": {
+      "@better-auth/core": "1.6.23",
+      "@daveyplate/better-auth-ui": "3.3.15"
+    },
+    "picomatch@2": "^2.3.2"
   }
 }

@@ -89,10 +89,18 @@ describe("public Showcase", () => {
     }
   });
 
-  it("renders buyer-facing card and URL-driven filters", () => {
-    render(<><ShowcaseFilters filters={{category: "software"}} labels={{search: "Search", category: "Category", useCase: "Use case", deployment: "Deployment", language: "Language", worksWith: "Works with", submit: "Filter", clear: "Clear"}}/><ShowcaseCard listing={listing} locale="en" labels={{premium: "Premium", goneGlobal: "Gone Global", memberSince: "WTIA member since", view: "View listing"}}/></>);
+  it("renders buyer-facing card and locale-aware URL-driven filters", () => {
+    const labels = {search: "Search", category: "Category", useCase: "Use case", deployment: "Deployment", language: "Language", worksWith: "Works with", submit: "Filter", clear: "Clear"};
+    render(<><ShowcaseFilters locale="en" filters={{category: "software"}} labels={labels}/><ShowcaseCard listing={listing} locale="en" labels={{premium: "Premium", goneGlobal: "Gone Global", memberSince: "WTIA member since", view: "View listing"}}/></>);
     expect(screen.getByRole("link", {name: /View listing/i})).toHaveAttribute("href", "/showcase/harbour-vision-ai");
+    expect(screen.getByRole("link", {name: "Clear"})).toHaveAttribute("href", "/showcase");
     expect(screen.getByLabelText("Category")).toHaveValue("software");
     expect(screen.getByText("Premium")).toBeInTheDocument();
+  });
+
+  it("keeps the Chinese Showcase clear link localized", () => {
+    render(<ShowcaseFilters locale="zh-HK" filters={{}} labels={{search: "搜尋", category: "分類", useCase: "應用案例", deployment: "部署", language: "語言", worksWith: "相容", submit: "篩選", clear: "清除"}}/>);
+
+    expect(screen.getByRole("link", {name: "清除"})).toHaveAttribute("href", "/zh/showcase");
   });
 });

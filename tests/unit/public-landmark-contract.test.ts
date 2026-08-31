@@ -1,0 +1,472 @@
+import { readFileSync, readdirSync, realpathSync, statSync } from "node:fs";
+import {
+  dirname,
+  extname,
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+  sep,
+  win32,
+} from "node:path";
+import ts from "typescript";
+import { describe, expect, it } from "vitest";
+
+type SourceFile = Readonly<{ path: string; source: string }>;
+type PathOperations = Readonly<{
+  relative(from: string, to: string): string;
+  separator: string;
+  isAbsolute(path: string): boolean;
+}>;
+type SourceReader = Readonly<{
+  root: string;
+  publicPageEntrypoints(): readonly string[];
+  canonicalFile(path: string): string | null;
+  read(path: string): string;
+}>;
+const publicRoot = "app/[locale]/(public)";
+const publicLayout = `${publicRoot}/layout.tsx`;
+const sourceExtensions = [".ts", ".tsx"] as const;
+const hostPaths: PathOperations = { relative, separator: sep, isAbsolute };
+const normalizePath = (path: string) =>
+  path.split(sep).join("/").replace(/^\.\//, "");
+function isWithin(
+  root: string,
+  path: string,
+  paths: PathOperations = hostPaths,
+): boolean {
+  const result = paths.relative(root, path);
+  return (
+    result !== ".." &&
+    !result.startsWith(`..${paths.separator}`) &&
+    !result.startsWith("../") &&
+    !result.startsWith("..\\") &&
+    !paths.isAbsolute(result)
+  );
+}
+function collectPublicPageEntrypoints(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    return entry.isDirectory()
+      ? collectPublicPageEntrypoints(path)
+      : entry.isFile() && /^page\.tsx?$/.test(entry.name)
+        ? [realpathSync(path)]
+        : [];
+  });
+}
+function nodeSourceReader(): SourceReader {
+  const root = realpathSync(resolve(process.cwd()));
+  return {
+    root,
+    publicPageEntrypoints: () =>
+      collectPublicPageEntrypoints(join(root, publicRoot)),
+    canonicalFile: (path) => {
+      try {
+        const canonical = realpathSync(path);
+        return statSync(canonical).isFile() ? canonical : null;
+      } catch {
+        return null;
+      }
+    },
+    read: (path) => readFileSync(path, "utf8"),
+  };
+}
+function staticSpecifiers(source: string, path: string): string[] {
+  const parsed = ts.createSourceFile(
+    path,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
+  return parsed.statements.flatMap((statement) => {
+    if (
+      !ts.isImportDeclaration(statement) &&
+      !ts.isExportDeclaration(statement)
+    )
+      return [];
+    const specifier = statement.moduleSpecifier;
+    return specifier && ts.isStringLiteral(specifier) ? [specifier.text] : [];
+  });
+}
+function resolveLocalImport(
+  from: string,
+  specifier: string,
+  reader: SourceReader,
+): string | null {
+  if (!specifier.startsWith("@/") && !specifier.startsWith(".")) return null;
+  const extension = extname(specifier);
+  const isExplicitSource = sourceExtensions.includes(
+    extension as (typeof sourceExtensions)[number],
+  );
+  const base = specifier.startsWith("@/")
+    ? resolve(reader.root, specifier.slice(2))
+    : resolve(dirname(from), specifier);
+  const substitutionBase =
+    extension === ".js" ? base.slice(0, -extension.length) : base;
+  const candidates = isExplicitSource
+    ? [base]
+    : [
+        ...sourceExtensions.map((suffix) => `${substitutionBase}${suffix}`),
+        ...sourceExtensions.map((suffix) => join(base, `index${suffix}`)),
+      ];
+  for (const candidate of candidates) {
+    const canonical = reader.canonicalFile(candidate);
+    if (canonical && isWithin(reader.root, canonical)) return canonical;
+  }
+  return null;
+}
+function projectSources(
+  reader: SourceReader = nodeSourceReader(),
+): SourceFile[] {
+  const owner = reader.canonicalFile(join(reader.root, publicLayout));
+  const pending = [
+    ...reader.publicPageEntrypoints(),
+    ...(owner ? [owner] : []),
+  ];
+  const visited = new Set<string>();
+  const sources = new Map<string, SourceFile>();
+  const specifiers = new Map<string, string[]>();
+  while (pending.length) {
+    const canonical = pending.shift();
+    if (
+      !canonical ||
+      visited.has(canonical) ||
+      !isWithin(reader.root, canonical)
+    )
+      continue;
+    visited.add(canonical);
+    let source = sources.get(canonical);
+    if (!source) {
+      source = {
+        path: normalizePath(relative(reader.root, canonical)),
+        source: reader.read(canonical),
+      };
+      sources.set(canonical, source);
+    }
+    let imports = specifiers.get(canonical);
+    if (!imports) {
+      imports = staticSpecifiers(source.source, source.path);
+      specifiers.set(canonical, imports);
+    }
+    for (const specifier of imports) {
+      const dependency = resolveLocalImport(canonical, specifier, reader);
+      if (dependency && !visited.has(dependency)) pending.push(dependency);
+    }
+  }
+  return [...visited].map((path) => sources.get(path)!).filter(Boolean);
+}
+function inMemorySourceReader(
+  sources: readonly SourceFile[],
+  onRead?: (path: string) => void,
+): SourceReader {
+  const root = resolve("landmark-contract-fixture");
+  const byPath = new Map(
+    sources.map((source) => [resolve(root, source.path), source.source]),
+  );
+  return {
+    root,
+    publicPageEntrypoints: () =>
+      sources
+        .filter(
+          ({ path }) =>
+            path.startsWith(`${publicRoot}/`) && /\/page\.tsx?$/.test(path),
+        )
+        .map(({ path }) => resolve(root, path)),
+    canonicalFile: (path) => {
+      const canonical = resolve(path);
+      return byPath.has(canonical) ? canonical : null;
+    },
+    read: (path) => {
+      onRead?.(normalizePath(relative(root, path)));
+      const source = byPath.get(path);
+      if (source === undefined)
+        throw new Error(`missing fixture source: ${path}`);
+      return source;
+    },
+  };
+}
+const reachable = (sources: readonly SourceFile[]) =>
+  projectSources(inMemorySourceReader(sources));
+const offenders = (sources: readonly SourceFile[]) =>
+  reachable(sources)
+    .filter(
+      ({ path, source }) => path !== publicLayout && /<main\b/.test(source),
+    )
+    .map(({ path }) => path)
+    .sort();
+function ownerIssues(source: string | undefined): string[] {
+  const parsed =
+    source &&
+    ts.createSourceFile(
+      "owner.tsx",
+      source,
+      ts.ScriptTarget.Latest,
+      true,
+      ts.ScriptKind.TSX,
+    );
+  const mains: ts.JsxOpeningLikeElement[] = [];
+  const visit = (node: ts.Node): void => {
+    if (
+      (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) &&
+      ts.isIdentifier(node.tagName) &&
+      node.tagName.text === "main"
+    )
+      mains.push(node);
+    ts.forEachChild(node, visit);
+  };
+  if (parsed) visit(parsed);
+  if (mains.length !== 1)
+    return [`expected exactly one <main>, found ${mains.length}`];
+  return mains[0]!.attributes.properties.some(
+    (attribute) =>
+      ts.isJsxAttribute(attribute) &&
+      ts.isIdentifier(attribute.name) &&
+      attribute.name.text === "id" &&
+      !!attribute.initializer &&
+      ts.isStringLiteral(attribute.initializer) &&
+      attribute.initializer.text === "main-content",
+  )
+    ? []
+    : ['owner <main> must have id="main-content"'];
+}
+function fixture(...sources: SourceFile[]): SourceFile[] {
+  return sources;
+}
+describe("public landmark contract", () => {
+  it("requires the public layout to own exactly one named main landmark", () =>
+    expect(
+      ownerIssues(
+        projectSources().find(({ path }) => path === publicLayout)?.source,
+      ),
+    ).toEqual([]));
+  it("rejects hostile owner markup", () => {
+    expect(ownerIssues(undefined)).toEqual([
+      "expected exactly one <main>, found 0",
+    ]);
+    expect(ownerIssues('<main/><main id="main-content"/>')).toEqual([
+      "expected exactly one <main>, found 2",
+    ]);
+    expect(ownerIssues('<main id="other"/>')).toEqual([
+      'owner <main> must have id="main-content"',
+    ]);
+    expect(ownerIssues("<main/>")).toEqual([
+      'owner <main> must have id="main-content"',
+    ]);
+    expect(ownerIssues('<main data-id="main-content"/>')).toEqual([
+      'owner <main> must have id="main-content"',
+    ]);
+  });
+  it("reads only public entrypoints, the owner, and each reachable source once", () => {
+    const reads: string[] = [];
+    const f = fixture(
+      { path: publicLayout, source: '<main id="main-content"/>' },
+      {
+        path: `${publicRoot}/sample/page.tsx`,
+        source: 'import "@/components/site/shared";',
+      },
+      { path: "components/site/shared.tsx", source: "" },
+      { path: "components/marketing/unreachable-main.tsx", source: "<main/>" },
+    );
+    expect(
+      projectSources(inMemorySourceReader(f, (path) => reads.push(path))).map(
+        ({ path }) => path,
+      ),
+    ).toEqual([
+      `${publicRoot}/sample/page.tsx`,
+      publicLayout,
+      "components/site/shared.tsx",
+    ]);
+    expect(reads).toEqual([
+      `${publicRoot}/sample/page.tsx`,
+      publicLayout,
+      "components/site/shared.tsx",
+    ]);
+  });
+  it("discovers public page.ts re-exports of TSX landmark offenders", () =>
+    expect(
+      offenders(
+        fixture(
+          { path: publicLayout, source: '<main id="main-content"/>' },
+          {
+            path: `${publicRoot}/typed/page.ts`,
+            source: 'export * from "@/components/typed";',
+          },
+          { path: "components/typed.tsx", source: "<main/>" },
+        ),
+      ),
+    ).toEqual(["components/typed.tsx"]));
+  it("resolves extensionless dotted TypeScript module basenames", () =>
+    expect(
+      offenders(
+        fixture(
+          { path: publicLayout, source: '<main id="main-content"/>' },
+          {
+            path: `${publicRoot}/dotted/page.tsx`,
+            source: 'import "./component.client";',
+          },
+          {
+            path: `${publicRoot}/dotted/component.client.tsx`,
+            source: "<main/>",
+          },
+        ),
+      ),
+    ).toEqual([`${publicRoot}/dotted/component.client.tsx`]));
+  it("substitutes TypeScript sources for explicit JavaScript specifiers", () =>
+    expect(
+      offenders(
+        fixture(
+          { path: publicLayout, source: '<main id="main-content"/>' },
+          {
+            path: `${publicRoot}/substitution/page.tsx`,
+            source: 'import "./component.js";',
+          },
+          {
+            path: `${publicRoot}/substitution/component.tsx`,
+            source: "<main/>",
+          },
+        ),
+      ),
+    ).toEqual([`${publicRoot}/substitution/component.tsx`]));
+  it("never reads explicit JSON or CSS imports", () => {
+    const reads: string[] = [];
+    const f = fixture(
+      { path: publicLayout, source: '<main id="main-content"/>' },
+      {
+        path: `${publicRoot}/assets/page.tsx`,
+        source: 'import "@/bad.json"; import "@/bad.css";',
+      },
+      { path: "bad.json", source: "<main/>" },
+      { path: "bad.css", source: "<main/>" },
+    );
+    expect(
+      projectSources(inMemorySourceReader(f, (p) => reads.push(p))).map(
+        ({ path }) => path,
+      ),
+    ).toEqual([`${publicRoot}/assets/page.tsx`, publicLayout]);
+    expect(reads).toEqual([`${publicRoot}/assets/page.tsx`, publicLayout]);
+  });
+  it("does not let an extensionless file shadow a TypeScript sibling", () =>
+    expect(
+      offenders(
+        fixture(
+          { path: publicLayout, source: '<main id="main-content"/>' },
+          {
+            path: `${publicRoot}/shadow/page.tsx`,
+            source: 'import "@/shadow";',
+          },
+          { path: "shadow", source: "<main/>" },
+          { path: "shadow.tsx", source: "" },
+        ),
+      ),
+    ).toEqual([]));
+  it("prefers foo.tsx before foo/index.ts", () => {
+    const reads: string[] = [];
+    const f = fixture(
+      { path: publicLayout, source: '<main id="main-content"/>' },
+      { path: `${publicRoot}/precedence/page.tsx`, source: 'import "./foo";' },
+      { path: `${publicRoot}/precedence/foo.tsx`, source: "<main/>" },
+      { path: `${publicRoot}/precedence/foo/index.ts`, source: "" },
+    );
+    expect(offenders(f)).toEqual([`${publicRoot}/precedence/foo.tsx`]);
+    expect(
+      projectSources(inMemorySourceReader(f, (p) => reads.push(p))).map(
+        ({ path }) => path,
+      ),
+    ).toEqual([
+      `${publicRoot}/precedence/page.tsx`,
+      publicLayout,
+      `${publicRoot}/precedence/foo.tsx`,
+    ]);
+    expect(reads).toEqual([
+      `${publicRoot}/precedence/page.tsx`,
+      publicLayout,
+      `${publicRoot}/precedence/foo.tsx`,
+    ]);
+  });
+  it("canonicalizes alias and relative dot segments to one cached physical source", () => {
+    const reads: string[] = [];
+    const f = fixture(
+      { path: publicLayout, source: '<main id="main-content"/>' },
+      {
+        path: `${publicRoot}/cache/page.tsx`,
+        source:
+          'import "@/./alias-shared"; import "@/./shared"; import "../../../.././shared";',
+      },
+      { path: "alias-shared.tsx", source: "" },
+      { path: "shared.tsx", source: "" },
+    );
+    expect(
+      projectSources(inMemorySourceReader(f, (p) => reads.push(p))).map(
+        ({ path }) => path,
+      ),
+    ).toEqual([
+      `${publicRoot}/cache/page.tsx`,
+      publicLayout,
+      "alias-shared.tsx",
+      "shared.tsx",
+    ]);
+    expect(reads).toEqual([
+      `${publicRoot}/cache/page.tsx`,
+      publicLayout,
+      "alias-shared.tsx",
+      "shared.tsx",
+    ]);
+  });
+  it("never reads alias or relative imports that escape the repository root", () => {
+    const reads: string[] = [];
+    const f = fixture(
+      { path: publicLayout, source: '<main id="main-content"/>' },
+      {
+        path: `${publicRoot}/escape/page.tsx`,
+        source: 'import "@/../outside"; import "../../../../../outside";',
+      },
+      { path: "../outside.tsx", source: "<main/>" },
+    );
+    expect(
+      projectSources(inMemorySourceReader(f, (p) => reads.push(p))).map(
+        ({ path }) => path,
+      ),
+    ).toEqual([`${publicRoot}/escape/page.tsx`, publicLayout]);
+    expect(reads).toEqual([`${publicRoot}/escape/page.tsx`, publicLayout]);
+  });
+  it("rejects UNC paths outside the physical repository root", () =>
+    expect(
+      isWithin("\\\\server\\share\\repo", "\\\\other\\share\\outside.tsx", {
+        relative: win32.relative,
+        separator: win32.sep,
+        isAbsolute: win32.isAbsolute,
+      }),
+    ).toBe(false));
+  it("resolves index.tsx from a public page.ts entrypoint", () =>
+    expect(
+      offenders(
+        fixture(
+          { path: publicLayout, source: '<main id="main-content"/>' },
+          {
+            path: `${publicRoot}/indexed/page.ts`,
+            source: 'export * from "@/indexed";',
+          },
+          { path: "indexed/index.tsx", source: "<main/>" },
+        ),
+      ),
+    ).toEqual(["indexed/index.tsx"]));
+  it("discovers nested mains through public import and re-export reachability", () =>
+    expect(
+      offenders(
+        fixture(
+          { path: publicLayout, source: '<main id="main-content"/>' },
+          {
+            path: `${publicRoot}/sample/page.tsx`,
+            source: 'import "@/external"; import "@/barrel";',
+          },
+          { path: "external.tsx", source: "<main/>" },
+          { path: "barrel.ts", source: 'export * from "./reexported";' },
+          { path: "reexported.tsx", source: "<main/>" },
+          { path: "marketing.tsx", source: "<main/>" },
+        ),
+      ),
+    ).toEqual(["external.tsx", "reexported.tsx"]));
+  it("keeps the public layout as the sole reachable main landmark owner", () =>
+    expect(offenders(projectSources())).toEqual([]));
+});
