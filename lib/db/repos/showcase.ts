@@ -29,6 +29,7 @@ import {
  * optional so every existing in-memory test double stays valid.
  */
 export type PublicShowcaseRow = ShowcaseListing & PublicLogoJoin;
+export type PublicReadOptions = Readonly<{limit?: number}>;
 
 const publicLogoColumns = {
   logoMediaUrl: media.url,
@@ -38,6 +39,9 @@ const publicLogoColumns = {
 
 const listingIdSchema = z.string().uuid().or(z.string().min(1));
 const slugSchema = z.string().min(2).max(96).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+const publicReadLimitSchema = z.number().int().min(1).max(12);
+const readLimit = (options: PublicReadOptions = {}) =>
+  options.limit === undefined ? undefined : publicReadLimitSchema.parse(options.limit);
 // An empty select clears the logo; anything else must be a real registry id.
 const mediaIdSchema = z.union([z.literal(""), z.null()]).transform(() => null)
   .or(z.string().uuid());
@@ -50,7 +54,7 @@ export type ShowcaseStore = Readonly<{
   setStatus: (id: string, status: "published" | "rejected" | "pending_review", reviewerId: string, rejectionReason?: string | null) => Promise<ShowcaseListing | null>;
   setPremium: (id: string, premium: boolean) => Promise<ShowcaseListing | null>;
   setLogoMedia: (id: string, mediaId: string | null) => Promise<ShowcaseListing | null>;
-  listPublished: (filters: ShowcaseFilters) => Promise<readonly PublicShowcaseRow[]>;
+  listPublished: (filters: ShowcaseFilters, options?: PublicReadOptions) => Promise<readonly PublicShowcaseRow[]>;
   getPublishedBySlug: (slug: string) => Promise<PublicShowcaseRow | null>;
   listPublishedSlugs: () => Promise<readonly string[]>;
   incrementViews: (slug: string) => Promise<void>;
@@ -71,7 +75,7 @@ export type ShowcaseRepository = Readonly<{
   reject: (actor: AdminActor, id: string, reason: string) => Promise<ShowcaseListing | null>;
   setPremium: (actor: AdminActor, id: string, premium: boolean) => Promise<ShowcaseListing | null>;
   setLogoMedia: (actor: AdminActor, id: string, mediaId: unknown) => Promise<ShowcaseListing | null>;
-  listPublished: (filters: ShowcaseFilters | Readonly<Record<string, unknown>>) => Promise<readonly PublicShowcaseRow[]>;
+  listPublished: (filters: ShowcaseFilters | Readonly<Record<string, unknown>>, options?: PublicReadOptions) => Promise<readonly PublicShowcaseRow[]>;
   getPublishedBySlug: (slug: string) => Promise<PublicShowcaseRow | null>;
   listPublishedSlugs: () => Promise<readonly string[]>;
   recordView: (slug: string) => Promise<void>;
@@ -195,7 +199,8 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseS
         .set({logoMediaId: mediaId, updatedAt: new Date()})
         .where(eq(showcaseListings.id, id)).returning())[0] ?? null;
     },
-    async listPublished(filters) {
+    async listPublished(filters, options = {}) {
+      const limit = readLimit(options);
       const database = await loadDatabase();
       const conditions = [eq(showcaseListings.status, "published" as const)];
       if (filters.category) conditions.push(eq(showcaseListings.category, filters.category));
@@ -213,12 +218,13 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseS
           ilike(showcaseListings.descriptionZhHk, `%${filters.q}%`),
         )!);
       }
-      return database
+      const query = database
         .select({...getTableColumns(showcaseListings), ...publicLogoColumns})
         .from(showcaseListings)
         .leftJoin(media, eq(showcaseListings.logoMediaId, media.id))
         .where(and(...conditions))
         .orderBy(desc(showcaseListings.premium), asc(showcaseListings.category), asc(showcaseListings.nameEn), asc(showcaseListings.slug));
+      return limit === undefined ? query : query.limit(limit);
     },
     async getPublishedBySlug(slug) {
       const database = await loadDatabase();
@@ -323,9 +329,11 @@ export function createShowcaseRepository(
       const parsed = mediaIdSchema.parse(mediaId);
       return store.setLogoMedia(listingIdSchema.parse(id), parsed);
     },
-    async listPublished(filters) {
+    async listPublished(filters, options = {}) {
+      const limit = readLimit(options);
       const parsed = parseShowcaseFilters(filters);
-      return publicSort(await store.listPublished(parsed));
+      const rows = publicSort(await store.listPublished(parsed, options));
+      return limit === undefined ? rows : rows.slice(0, limit);
     },
     async getPublishedBySlug(slug) {
       return store.getPublishedBySlug(slugSchema.parse(slug));

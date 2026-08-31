@@ -10,6 +10,7 @@ const slugSchema = z.string()
   .min(1)
   .max(200)
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+const publicReadLimitSchema = z.number().int().min(1).max(12);
 const publishedBuildLogSummaryRowSchema = z.object({
   slug: slugSchema,
   titleEn: z.string().min(1),
@@ -30,6 +31,10 @@ export type PublishedBuildLogDetail = Readonly<
 >;
 export type PublishedNewsSummary = PublishedBuildLogSummary;
 export type PublishedNewsDetail = PublishedBuildLogDetail;
+export type PublicReadOptions = Readonly<{limit?: number}>;
+
+const readLimit = (options: PublicReadOptions = {}) =>
+  options.limit === undefined ? undefined : publicReadLimitSchema.parse(options.limit);
 
 export type PublicPostsRepository = Readonly<{
   listPublishedBuildLogs: (
@@ -41,6 +46,7 @@ export type PublicPostsRepository = Readonly<{
   ) => Promise<PublishedBuildLogDetail | null>;
   listPublishedNews: (
     asOf?: Date,
+    options?: PublicReadOptions,
   ) => Promise<readonly PublishedNewsSummary[]>;
   getPublishedNewsBySlug: (
     slug: string,
@@ -107,9 +113,10 @@ export function createPublicPostsRepository(
     // Deliberately separate from the build-log readers rather than a shared
     // `kind` parameter: those feed the public AI-Ops evidence panel, where a
     // news article must never appear.
-    async listPublishedNews(asOf = new Date()) {
+    async listPublishedNews(asOf = new Date(), options = {}) {
+      const limit = readLimit(options);
       const database = await loadDatabase();
-      const rows = await database
+      const query = database
         .select({
           slug: posts.slug,
           titleEn: posts.titleEn,
@@ -127,6 +134,7 @@ export function createPublicPostsRepository(
           isNull(posts.archivedAt),
         ))
         .orderBy(desc(posts.publishedAt), asc(posts.slug));
+      const rows = await (limit === undefined ? query : query.limit(limit));
 
       return publishedBuildLogSummaryRowSchema.array().parse(rows);
     },
@@ -176,8 +184,9 @@ export function getPublishedBuildLogBySlug(
 
 export function listPublishedNews(
   asOf?: Date,
+  options?: PublicReadOptions,
 ): Promise<readonly PublishedNewsSummary[]> {
-  return publicPostsRepository.listPublishedNews(asOf);
+  return publicPostsRepository.listPublishedNews(asOf, options);
 }
 
 export function getPublishedNewsBySlug(

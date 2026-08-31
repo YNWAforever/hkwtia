@@ -2,6 +2,10 @@ import {expect, test} from '@playwright/test';
 
 const paths = [
   '/showcase', '/launchpad', '/ai-ops', '/events', '/news',
+  '/about', '/about/chairman', '/about/committees', '/about/history',
+  '/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets',
+  '/about/history/new-term-of-executive-committee-2022-2024',
+  '/about/history/wtia-21st-anniversary-celebration-and-inauguration-gala-dinner',
   '/programs/cpai', '/programs/hkict', '/programs/tct', '/programs/asa',
   '/contact', '/privacy', '/ai-transparency'
 ];

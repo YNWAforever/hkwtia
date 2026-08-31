@@ -280,8 +280,36 @@
     "metaDescription": "連繫香港及大灣區創新力量，接通全球市場。",
     "eyebrow": "創新香港",
     "title": "連繫大灣區創新力量，走向國際舞台。",
+    "question": "香港創新下一站，可以走多遠？",
     "summary": "連接香港、大灣區及亞洲創科社群與全球科技市場的跨境平台。",
     "imageAlt": "香港創科社群",
+    "actions": {
+      "events": "尋找活動",
+      "membership": "探索會員服務",
+      "discover": "探索 WiseTech"
+    },
+    "highlightsTitle": "最新動向",
+    "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
+    "highlights": {
+      "event": {
+        "label": "下一場活動",
+        "view": "查看活動",
+        "empty": "暫時沒有即將舉行的公開活動。",
+        "unavailable": "活動資訊暫時未能提供。"
+      },
+      "news": {
+        "label": "最新消息",
+        "view": "閱讀消息",
+        "empty": "暫時沒有已發布的消息。",
+        "unavailable": "消息資訊暫時未能提供。"
+      },
+      "showcase": {
+        "label": "會員方案",
+        "view": "探索方案",
+        "empty": "暫時沒有已發布的會員方案。",
+        "unavailable": "會員方案資訊暫時未能提供。"
+      }
+    },
     "featuresTitle": "連繫社群，推動成長",
     "featuresIntro": "WTIA 透過實際機遇凝聚創科社群。",
     "features": {
@@ -296,21 +324,6 @@
       "represent": {
         "title": "代表",
         "description": "為無線科技業界建立清晰而共同的聲音。"
-      }
-    },
-    "statsTitle": "服務整個創科生態",
-    "stats": {
-      "0": {
-        "value": "4",
-        "label": "重點計劃"
-      },
-      "1": {
-        "value": "2",
-        "label": "工作語言"
-      },
-      "2": {
-        "value": "1",
-        "label": "互聯創科社群"
       }
     },
     "programsTitle": "計劃與獎項",
@@ -398,6 +411,7 @@
     "eyebrow": "自2001年",
     "title": "我們的歷史",
     "intro": "回顧香港無線及科技產業二十五年來的發展里程碑。",
+    "storyTitle": "里程碑故事",
     "readMore": "閱讀更多"
   },
   "Membership": {
@@ -546,6 +560,7 @@
       "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。"
     },
     "record": {
+      "statusHeading": "最新狀況",
       "editionsHeading": "歷屆",
       "winnersHeading": "得獎者",
       "categoryHeading": "組別",

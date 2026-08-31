@@ -42,9 +42,9 @@ function listing(overrides: Partial<ShowcaseListing> = {}): ShowcaseListing {
   } as ShowcaseListing;
 }
 
-function memoryStore(initial: ShowcaseListing[]): ShowcaseStore & {viewWrites: number} {
+function memoryStore(initial: ShowcaseListing[]): ShowcaseStore & {viewWrites: number; listPublishedOptions: readonly unknown[]} {
   const rows = [...initial];
-  const state = {viewWrites: 0};
+  const state: {viewWrites: number; listPublishedOptions: unknown[]} = {viewWrites: 0, listPublishedOptions: []};
   return {
     getByCompany: async (companyId) => rows.find((row) => row.companyId === companyId) ?? null,
     getById: async (id) => rows.find((row) => row.id === id) ?? null,
@@ -80,7 +80,10 @@ function memoryStore(initial: ShowcaseListing[]): ShowcaseStore & {viewWrites: n
       row.logoMediaId = mediaId;
       return row;
     },
-    listPublished: async () => rows,
+    listPublished: async (_filters, options?: unknown) => {
+      state.listPublishedOptions.push(options);
+      return rows;
+    },
     getPublishedBySlug: async (slug) => rows.find((row) => row.slug === slug) ?? null,
     listPublishedSlugs: async () => rows.filter((row) => row.status === "published").map((row) => row.slug),
     incrementViews: async (slug) => {
@@ -93,6 +96,9 @@ function memoryStore(initial: ShowcaseListing[]): ShowcaseStore & {viewWrites: n
     insertLead: async () => null,
     get viewWrites() {
       return state.viewWrites;
+    },
+    get listPublishedOptions() {
+      return state.listPublishedOptions;
     },
   };
 }
@@ -152,6 +158,27 @@ describe("showcase repository", () => {
     const repo = createShowcaseRepository({store});
     const rows = await repo.listPublished({category: "software"});
     expect(rows.map((row) => row.slug)).toEqual(["premium", "free"]);
+  });
+
+  it("bounds the deterministic published order", async () => {
+    const store = memoryStore([
+      listing({id: "free", slug: "free", status: "published", premium: false}),
+      listing({id: "z", slug: "z", status: "published", premium: true, nameEn: "Zulu"}),
+      listing({id: "a", slug: "a", status: "published", premium: true, nameEn: "Alpha"}),
+    ]);
+    const repo = createShowcaseRepository({store});
+
+    await expect(repo.listPublished({}, {limit: 2}))
+      .resolves.toMatchObject([{slug: "a"}, {slug: "z"}]);
+    expect(store.listPublishedOptions).toEqual([{limit: 2}]);
+  });
+
+  it.each([0, 13, 1.5])("rejects invalid showcase limit %s before reading the store", async (limit) => {
+    const store = memoryStore([listing({status: "published"})]);
+    const repo = createShowcaseRepository({store});
+
+    await expect(repo.listPublished({}, {limit})).rejects.toThrow();
+    expect(store.listPublishedOptions).toEqual([]);
   });
 
   it("uses the repository view seam for an atomic increment", async () => {

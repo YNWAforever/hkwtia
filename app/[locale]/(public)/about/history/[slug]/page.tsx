@@ -1,8 +1,10 @@
 import type {Metadata} from "next";
-import Image from "next/image";
-import {setRequestLocale} from "next-intl/server";
+import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 
+import {InstitutionalPageIntro} from "@/components/marketing/institutional-page-intro";
+import {MediaGallery} from "@/components/marketing/media-gallery";
+import {StorySection} from "@/components/marketing/story-section";
 import {milestones} from "@/content/milestones";
 import type {MilestoneRecord} from "@/content/schemas";
 import type {AppLocale} from "@/i18n/routing";
@@ -57,36 +59,37 @@ export default async function HistoryDetailPage({params}: Props) {
   const milestone = resolveFeaturedMilestone(slug);
   if (!milestone) notFound();
   setRequestLocale(locale);
+  const t = await getTranslations("History");
 
   const title = locale === "zh-HK" ? milestone.titleZh : milestone.titleEn;
   const body = locale === "zh-HK" ? milestone.bodyZh : milestone.bodyEn;
+  const paragraphs = body.split("\n\n");
+  const images = milestone.images.map((image) => ({
+    alt: locale === "zh-HK" ? image.altZh : image.altEn,
+    src: image.src,
+  }));
 
   return (
-    <article className="container mx-auto px-6 py-16 sm:py-24">
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{milestone.year}</p>
-      <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight sm:text-6xl">{title}</h1>
-      <div className="mt-8 max-w-3xl space-y-6 text-lg leading-relaxed text-muted-foreground">
-        {body.split("\n\n").map((paragraph, index) => (
-          // Paragraphs belong to one frozen content record and never
-          // reorder, so an index key is stable for this page's lifetime.
-          <p key={index}>{paragraph}</p>
-        ))}
-      </div>
-      {milestone.images.length > 0 ? (
-        <div className="mt-10 grid gap-6 sm:grid-cols-2">
-          {milestone.images.map((image) => (
-            <div key={image.src} className="relative aspect-[4/3] overflow-hidden rounded-lg">
-              <Image
-                src={image.src}
-                alt={locale === "zh-HK" ? image.altZh : image.altEn}
-                fill
-                sizes="(min-width: 640px) 50vw, 100vw"
-                className="object-cover"
-              />
-            </div>
+    <>
+      <InstitutionalPageIntro
+        eyebrow={String(milestone.year)}
+        lead={paragraphs[0] ?? body}
+        title={title}
+      />
+      <StorySection heading={t("storyTitle")} tone="plain">
+        <div className="max-w-3xl space-y-6 text-lg leading-relaxed text-muted-foreground">
+          {paragraphs.slice(1).map((paragraph, index) => (
+            // Paragraphs belong to one frozen content record and never
+            // reorder, so an index key is stable for this page's lifetime.
+            <p key={index}>{paragraph}</p>
           ))}
         </div>
-      ) : null}
-    </article>
+        {images.length > 0 ? (
+          <div className="mt-12">
+            <MediaGallery images={images} />
+          </div>
+        ) : null}
+      </StorySection>
+    </>
   );
 }
