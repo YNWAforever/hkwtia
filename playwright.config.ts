@@ -8,6 +8,7 @@ const liveAcceptanceRequires = [...M2_LIVE_ENV_NAMES];
 
 export default defineConfig({
   testDir: './tests/e2e',
+  snapshotPathTemplate: '{testDir}/__screenshots__/{arg}-{platform}{-projectName}{ext}',
   metadata: {
     releaseGate: 'M2',
     liveAcceptanceRequires
