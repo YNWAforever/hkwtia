@@ -43,8 +43,14 @@ export function signUnsubscribeToken(
  * be rechecked rather than trusted. The split committed on 2026-08-06, but the
  * earliest production deployment carrying it is `e26cde88` (PR #10) at
  * 2026-08-09 14:32Z, so the last legacy token can stay valid until
- * 2026-09-08 14:32Z. This constant read 2026-09-06 until 2026-09-01, computed
- * from the commit instead -- about three days early.
+ * 2026-09-08 14:32Z. This date sits about a day and a half past that, which is
+ * the margin the paragraph above calls for -- the two are not meant to match,
+ * and the gap is deliberate rather than arithmetic left unfinished.
+ *
+ * The deployment record is an upper bound: every production deployment on
+ * record already carries the split, so the true stop can only be earlier, which
+ * would only make removal safer. This constant read 2026-09-06 until
+ * 2026-09-01, computed from the commit instead -- about three days early.
  *
  * After this date, delete `cronSecret` from the two `secrets` arrays
  * (`lib/api/unsubscribe-route.ts` and `app/[locale]/(public)/unsubscribe/page.tsx`)

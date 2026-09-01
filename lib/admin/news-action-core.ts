@@ -19,7 +19,7 @@ type NewsFormOptions = Readonly<{
 
 /** Explicit allowlist: only these are ever echoed back to the browser. */
 const preservedFields = [
-  "slug", "titleEn", "titleZh", "bodyMdx", "author", "published",
+  "slug", "titleEn", "titleZh", "bodyMdx", "bodyMdxZhHk", "author", "published",
 ] as const;
 
 export async function runNewsFormAction(

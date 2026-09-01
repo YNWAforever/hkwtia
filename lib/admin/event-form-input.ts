@@ -51,5 +51,6 @@ export function eventFormInput(formData: FormData) {
     capacity: capacity ? Number(capacity) : null,
     memberOnly: formData.get("memberOnly") === "on",
     published: formData.get("published") === "on",
+    heroMediaId: optional("heroMediaId"),
   };
 }

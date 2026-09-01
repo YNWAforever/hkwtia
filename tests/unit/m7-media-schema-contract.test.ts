@@ -22,17 +22,27 @@ describe("M7.3 media schema contract", () => {
     if (!table) return;
 
     expect(table.name).toBe("media");
-    // width/height are deliberately absent: with no upload they could only be
-    // typed by hand, where a wrong value silently distorts the image.
+    // The original manual-registry columns remain, while Task 4 adds one
+    // all-or-none set of private-object upload metadata.
     expect(table.columns.map((column) => column.name).sort()).toEqual([
       "alt_en",
       "alt_zh",
       "archived_at",
+      "byte_size",
+      "checksum_sha256",
+      "content_type",
       "created_at",
+      "focal_x",
+      "focal_y",
+      "height",
       "id",
+      "original_filename",
       "registered_by_profile_id",
+      "storage_etag",
+      "storage_key",
       "updated_at",
       "url",
+      "width",
     ]);
   });
 
@@ -101,6 +111,15 @@ describe("M7.3 media schema contract", () => {
       tables?: Record<string, unknown>;
     };
     expect(snapshot.tables).toHaveProperty("public.media");
+
+    const eventHeroMigration = join(process.cwd(), "drizzle", "0023_wisetech_event_hero.sql");
+    expect(existsSync(eventHeroMigration)).toBe(true);
+    if (existsSync(eventHeroMigration)) {
+      const heroSql = readFileSync(eventHeroMigration, "utf8");
+      expect(heroSql).toContain('ADD COLUMN "hero_media_id" uuid');
+      expect(heroSql).toContain('ON DELETE set null ON UPDATE no action');
+      expect(heroSql).toContain('"events_hero_media_idx"');
+    }
 
     const journal = JSON.parse(readFileSync(
       join(process.cwd(), "drizzle", "meta", "_journal.json"),

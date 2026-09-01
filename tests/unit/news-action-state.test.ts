@@ -17,6 +17,7 @@ function form(values: Record<string, string> = {}): FormData {
   data.set("titleEn", "WTIA welcomes new members");
   data.set("titleZh", "WTIA 歡迎新會員");
   data.set("bodyMdx", "## Welcome");
+  data.set("bodyMdxZhHk", "## 歡迎");
   data.set("author", "WTIA");
   for (const [key, value] of Object.entries(values)) data.set(key, value);
   return data;
@@ -45,6 +46,7 @@ describe("news form action core", () => {
         titleEn: "WTIA welcomes new members",
         titleZh: "WTIA 歡迎新會員",
         bodyMdx: "## Welcome",
+        bodyMdxZhHk: "## 歡迎",
         author: "WTIA",
         published: "",
       },

@@ -76,6 +76,7 @@ describe("M4B scheduled-agent schema contract", () => {
       "archived_at",
       "author",
       "body_mdx",
+      "body_mdx_zh_hk",
       "created_at",
       "id",
       "kind",
@@ -101,6 +102,7 @@ describe("M4B scheduled-agent schema contract", () => {
         .toBe(true);
     }
     expect(columns.get("published_at")?.notNull).toBe(false);
+    expect(columns.get("body_mdx_zh_hk")?.notNull).toBe(false);
     expect(columns.get("source_key")?.notNull).toBe(false);
     expect(columns.get("agent_run_id")?.notNull).toBe(false);
     // Nullable, and null for every row written before archiving existed, so

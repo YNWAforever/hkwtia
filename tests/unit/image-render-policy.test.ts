@@ -15,6 +15,17 @@ const sources = ["app", "components"]
   .map((path) => relative(process.cwd(), path).replaceAll("\\", "/"))
   .sort();
 
+const revocationAwareConsumers = new Set([
+  "app/[locale]/(admin)/admin/media/page.tsx",
+  "components/admin/media-form.tsx",
+  "components/admin/showcase-review-table.tsx",
+  "components/marketing/event-detail.tsx",
+  "components/marketing/home-highlight-card.tsx",
+  "components/marketing/home-partner-wall.tsx",
+  "components/marketing/showcase-card.tsx",
+  "components/marketing/showcase-detail.tsx",
+]);
+
 describe("image render policy", () => {
   it("discovers the component tree", () => {
     expect(sources.length).toBeGreaterThan(50);
@@ -22,16 +33,19 @@ describe("image render policy", () => {
     expect(sources).toContain("components/admin/media-form.tsx");
   });
 
-  // Both counts are zero today. The point is that they stay zero: `unoptimized`
-  // and a raw <img> are the two escape hatches a developer reaches for within
-  // minutes of hitting the own-origin restriction, and both work mechanically —
-  // they skip the loader entirely and move the fetch into the visitor's
-  // browser, leaking their IP and referer to whatever host is in the src.
-  it.each(sources)("%s uses neither a raw img tag nor unoptimized", (path) => {
+  // Raw images remain forbidden. The only optimizer bypass is the exact,
+  // conditional own-origin delivery path whose per-request database check makes
+  // archive revocation effective.
+  it.each(sources)("%s uses no raw img and only the authorized optimizer bypass", (path) => {
     const source = readFileSync(resolve(process.cwd(), path), "utf8");
 
     expect(source).not.toMatch(/<img[\s/>]/);
-    expect(source).not.toContain("unoptimized");
+    if (revocationAwareConsumers.has(path)) {
+      expect(source).toContain('from "@/lib/media/url"');
+      expect(source).toContain("unoptimized={isPrivateMediaDeliveryUrl(");
+    } else {
+      expect(source).not.toContain("unoptimized");
+    }
   });
 });
 

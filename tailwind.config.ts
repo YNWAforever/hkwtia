@@ -59,11 +59,29 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        shell: {
+          canvas: "hsl(var(--shell-canvas))",
+          raised: "hsl(var(--shell-raised))",
+          warm: "hsl(var(--shell-warm))",
+          ink: "hsl(var(--shell-ink))",
+          muted: "hsl(var(--shell-muted))",
+          navy: "hsl(var(--shell-navy))",
+          blue: "hsl(var(--shell-blue))",
+          accent: "hsl(var(--shell-accent))",
+          border: "hsl(var(--shell-border))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        "shell-sm": "var(--shell-radius-sm)",
+        "shell-lg": "var(--shell-radius-lg)",
+      },
+      maxWidth: {shell: "var(--shell-content)"},
+      boxShadow: {
+        "shell-sm": "var(--shell-shadow-sm)",
+        "shell-lg": "var(--shell-shadow-lg)",
       },
       keyframes: {
         "accordion-down": {

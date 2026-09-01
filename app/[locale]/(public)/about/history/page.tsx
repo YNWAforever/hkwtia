@@ -1,8 +1,8 @@
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {InstitutionalPageIntro} from "@/components/marketing/institutional-page-intro";
 import {MilestoneTimeline} from "@/components/marketing/milestone-timeline";
-import {PageHero} from "@/components/marketing/page-hero";
 import {milestones} from "@/content/milestones";
 import type {AppLocale} from "@/i18n/routing";
 import {milestonesOnly} from "@/lib/history/milestones";
@@ -30,7 +30,7 @@ export default async function HistoryPage({params}: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t("eyebrow")} title={t("title")} description={t("intro")} />
+      <InstitutionalPageIntro eyebrow={t("eyebrow")} lead={t("intro")} title={t("title")} />
       <MilestoneTimeline
         locale={locale as AppLocale}
         readMoreLabel={t("readMore")}

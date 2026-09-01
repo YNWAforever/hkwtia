@@ -113,8 +113,24 @@ function workflowRunSteps(workflow: string) {
 }
 
 function workflowTriggerBranches(workflow: string, event: "pull_request" | "push") {
-  const match = new RegExp(`${event}:\\s*\\n\\s*branches:\\s*\\[([^\\]]*)\\]`).exec(workflow);
+  // Normalised like its sibling tests rather than leaning on the regex
+  // backtracking over a stray carriage return. This file has already carried one
+  // CRLF bug; relying on a subtlety to survive the next one is how that happened.
+  const match = new RegExp(`${event}:\\s*\\n\\s*branches:\\s*\\[([^\\]]*)\\]`).exec(normalizeNewlines(workflow));
   return match ? match[1].split(",").map((branch) => branch.trim()).filter(Boolean) : [];
+}
+
+function normalizeNewlines(value: string) {
+  return value.replace(/\r\n/g, "\n");
+}
+
+function mutateFixture(label: string, fixture: string, needle: string, replacement: string) {
+  const normalizedFixture = normalizeNewlines(fixture);
+  const normalizedNeedle = normalizeNewlines(needle);
+  expect(normalizedFixture.includes(normalizedNeedle), label + " mutation needle was not found").toBe(true);
+  const mutatedFixture = normalizedFixture.replace(normalizedNeedle, normalizeNewlines(replacement));
+  expect(mutatedFixture, label + " fixture mutation unexpectedly no-op").not.toBe(normalizedFixture);
+  return mutatedFixture;
 }
 
 function workflowRunStepTimeoutMinutes(workflow: string, command: string) {
@@ -332,7 +348,7 @@ describe("CI and production dependency security contract", () => {
   });
 
   it("bounds the exact Auth dependency-tree CI step to one minute", () => {
-    const workflow = readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8");
+    const workflow = normalizeNewlines(readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8"));
 
     expect(
       workflowRunStepTimeoutMinutes(workflow, authTreeCommand),
@@ -341,20 +357,13 @@ describe("CI and production dependency security contract", () => {
   });
 
   it("rejects reordered, missing, or extra CI run commands", () => {
-    // Normalised because the mutations below are built from "\n" literals, and a
-    // Windows checkout with core.autocrlf gives this file CRLF endings. Without
-    // this, every `replace` silently matched nothing, each mutated variant was
-    // identical to the original, and all three "must fail the contract"
-    // assertions failed -- on the one platform where a developer is most likely
-    // to run the suite before handing off. `workflowRunSteps` itself is already
-    // CRLF-safe: JavaScript's `.` excludes carriage returns, so `(.+)$` stops
-    // before them.
-    const workflow = readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8").replace(/\r\n/g, "\n");
+    const workflow = normalizeNewlines(readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8"));
     const authTreeStep = `      - run: ${authTreeCommand}\n        timeout-minutes: 1`;
     const auditStep = "      - run: npm run audit:strings";
-    const reordered = workflow.replace(`${authTreeStep}\n${auditStep}`, `${auditStep}\n${authTreeStep}`);
-    const missingAuthTree = workflow.replace(`${authTreeStep}\n`, "");
+    const reordered = mutateFixture("reordered workflow commands", workflow, `${authTreeStep}\n${auditStep}`, `${auditStep}\n${authTreeStep}`);
+    const missingAuthTree = mutateFixture("missing Auth-tree validation", workflow, `${authTreeStep}\n`, "");
     const withExtraCommand = `${workflow}\n      - run: npm run e2e\n`;
+    expect(withExtraCommand, "extra workflow command fixture mutation unexpectedly no-op").not.toBe(workflow);
 
     expect(workflowRunSteps(reordered), "reordered workflow commands must fail the exact command contract").not.toEqual(requiredCiCommands);
     expect(workflowRunSteps(missingAuthTree), "missing Auth-tree validation must fail the exact command contract").not.toEqual(requiredCiCommands);

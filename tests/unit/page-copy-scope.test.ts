@@ -47,22 +47,26 @@ describe("page copy scope", () => {
     const sizes = pageCopyCatalogSizes();
 
     expect(sizes).toEqual({
-      Home: 32,
+      // PR5 added the two editable partner-wall labels.
+      Home: 45,
       About: 19,
       Chairman: 8,
       Committees: 12,
-      Contact: 6,
-      // 12 for the four programmes' title/description/status, plus the 16
-      // `programs.record` keys the programme records migration added. Those are
-      // page furniture -- headings, and sentences with {agency}/{count}
-      // placeholders -- so staff can reword them. The facts they frame come
-      // from content/programs/*.ts, which /admin/page-copy cannot reach.
-      programs: 28,
-      Membership: 34,
+      // PR5 added 14 editable labels for the Contact concierge journeys.
+      Contact: 20,
+      // 12 for the four programmes' title/description/status, plus the 17
+      // `programs.record` keys the programme records migration and PR3
+      // presentation added. Those are page furniture -- headings, and
+      // sentences with {agency}/{count} placeholders -- so staff can reword
+      // them. The facts they frame come from content/programs/*.ts, which
+      // /admin/page-copy cannot reach.
+      programs: 29,
+      // Static numeric pricing left copy, removing two editable fields.
+      Membership: 32,
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(215);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(241);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

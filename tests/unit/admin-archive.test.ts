@@ -33,6 +33,7 @@ function mediaTransaction(archivedAt: Date | null, listingReferences = 0) {
     lockMedia: vi.fn(async () => current),
     updateMedia: vi.fn(),
     countListingReferences: vi.fn(async () => listingReferences),
+    countEventHeroReferences: vi.fn(async () => 0),
     setArchivedAt: vi.fn(async (_id: string, next: Date | null) =>
       ({...(current as object), archivedAt: next}) as never),
     insertAudit: vi.fn(async (input: {action: string}) => { audits.push({action: input.action}); }),

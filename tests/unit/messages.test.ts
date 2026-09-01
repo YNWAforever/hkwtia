@@ -27,6 +27,78 @@ function collectLeafKeys(value: unknown, prefix = ''): string[] {
   });
 }
 
+function messageAt(value: unknown, path: string): string | undefined {
+  let current = value;
+  for (const segment of path.split('.')) {
+    if (current === null || typeof current !== 'object' || Array.isArray(current)) {
+      return undefined;
+    }
+    current = (current as MessageTree)[segment];
+  }
+  return typeof current === 'string' ? current : undefined;
+}
+
+const publicJourneyKeys = [
+  'Events.status.open',
+  'Events.status.past',
+  'Events.unavailableTitle',
+  'Events.unavailableDescription',
+  'Events.empty.open.title',
+  'Events.empty.open.description',
+  'Events.empty.past.title',
+  'Events.empty.past.description',
+  'Events.registration.title',
+  'Events.registration.submit',
+  'Events.registration.pending',
+  'Events.registration.registered',
+  'Events.registration.waitlist',
+  'Events.registration.alreadyRegistered',
+  'Events.registration.alreadyWaitlisted',
+  'Events.registration.unauthenticated',
+  'Events.registration.ineligible',
+  'Events.registration.closed',
+  'Events.registration.error',
+  'Home.highlights.event.empty',
+  'Home.highlights.event.unavailable',
+  'Home.highlights.news.empty',
+  'Home.highlights.news.unavailable',
+  'Home.highlights.showcase.empty',
+  'Home.highlights.showcase.unavailable',
+  'Home.partnerWallTitle',
+  'Home.partnerWallIntro',
+  'Membership.tiersTitle',
+  'Membership.tiersIntro',
+  'Membership.tiers.community.name',
+  'Membership.tiers.startup.name',
+  'Membership.tiers.corporate.name',
+  'Membership.tiers.patron.name',
+  'Membership.priceLabels.free',
+  'Membership.priceLabels.review',
+  'Membership.cadenceLabels.annual',
+  'Membership.cadenceLabels.monthly',
+  'Membership.actions.join',
+  'Membership.actions.contact',
+  'Membership.unavailable',
+  'Contact.channelsTitle',
+  'Contact.routesTitle',
+  'Contact.routesDescription',
+  'Contact.routes.events.title',
+  'Contact.routes.events.description',
+  'Contact.routes.membership.title',
+  'Contact.routes.membership.description',
+  'Contact.routes.showcase.title',
+  'Contact.routes.showcase.description',
+  'Contact.routes.launchpad.title',
+  'Contact.routes.launchpad.description',
+  'Contact.conciergeTitle',
+  'Contact.conciergeDescription',
+  'Contact.conciergeLauncher',
+  'Concierge.launcher',
+  'Concierge.title',
+  'Concierge.messageLabel',
+  'Concierge.close',
+] as const;
+
 describe('message bundles', () => {
   it('keep English and Traditional Chinese leaf keys in parity', () => {
     const englishKeys = collectLeafKeys(en).sort();
@@ -45,6 +117,46 @@ describe('message bundles', () => {
     expect(zh.Concierge.contactEmailError).toContain("有效");
   });
 
+  it('ships explicit English and Traditional Chinese public-journey state keys', () => {
+    for (const path of publicJourneyKeys) {
+      const english = messageAt(en, path);
+      const chinese = messageAt(zh, path);
+
+      expect(english, `en ${path}`).toBeTypeOf('string');
+      expect(english?.trim(), `en ${path}`).not.toBe('');
+      expect(chinese, `zh-HK ${path}`).toBeTypeOf('string');
+      expect(chinese?.trim(), `zh-HK ${path}`).not.toBe('');
+    }
+  });
+
+  it('uses a single ellipsis for the public event registration pending label', () => {
+    expect(en.Events.registration.pending).toBe('Registering…');
+  });
+
+  it("ships complete bilingual WiseTech shell labels", () => {
+    expect(en.Navigation.groups).toEqual({
+      eventsProgrammes: expect.objectContaining({label: "Events & Programmes"}),
+      membershipEcosystem: expect.objectContaining({label: "Membership & Ecosystem"}),
+      impactInsights: expect.objectContaining({label: "Impact & Insights"}),
+      aboutWtia: expect.objectContaining({label: "About WTIA"}),
+    });
+    expect(zh.Navigation.groups).toEqual({
+      eventsProgrammes: expect.objectContaining({label: "活動及計劃"}),
+      membershipEcosystem: expect.objectContaining({label: "會員與創科生態"}),
+      impactInsights: expect.objectContaining({label: "影響與洞察"}),
+      aboutWtia: expect.objectContaining({label: "關於 WTIA"}),
+    });
+    expect(en.Navigation.actions).toEqual({
+      findEvent: "Find an event",
+      join: "Join WiseTech",
+      memberSignIn: "Member sign in",
+    });
+    expect(zh.Navigation.actions).toEqual({
+      findEvent: "尋找活動",
+      join: "加入 WiseTech",
+      memberSignIn: "會員登入",
+    });
+  });
   it.each([en.Admin, zh.Admin])('includes equivalent retention approval and Board Reporter draft labels', (admin) => {
     expect(admin.approvals.actionTypes.retentionOutreach).toBeTruthy();
     expect(admin.approvals.subject).toBeTruthy();

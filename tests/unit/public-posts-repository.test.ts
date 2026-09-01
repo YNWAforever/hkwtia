@@ -12,6 +12,7 @@ type FixtureRow = Readonly<{
   titleEn: string;
   titleZh: string;
   bodyMdx: string;
+  bodyMdxZhHk: string | null;
   publishedAt: Date | null;
   archivedAt: Date | null;
   author: string | null;
@@ -27,6 +28,7 @@ function row(
     titleEn: `${slug} English`,
     titleZh: `${slug} 中文`,
     bodyMdx: `## ${slug}\n\nPublished evidence.`,
+    bodyMdxZhHk: `## ${slug}\n\n已發佈證據。`,
     publishedAt,
     archivedAt: null,
     author: "HKWTIA Engineering",
@@ -76,11 +78,11 @@ function predicateSensitiveProxy(dataset: readonly FixtureRow[]) {
     statements.push({sql: normalizedSql(query, params), params});
     let filtered = [...dataset];
 
-    if (
-      /"posts"\."kind"\s*=\s*\$\d+/i.test(query)
-      && params.includes("buildlog")
-    ) {
-      filtered = filtered.filter((fixture) => fixture.kind === "buildlog");
+    const selectedKind = params.find(
+      (value) => value === "buildlog" || value === "news" || value === "page",
+    );
+    if (/"posts"\."kind"\s*=\s*\$\d+/i.test(query) && typeof selectedKind === "string") {
+      filtered = filtered.filter((fixture) => fixture.kind === selectedKind);
     }
     if (/"posts"\."published_at"\s+is\s+not\s+null/i.test(query)) {
       filtered = filtered.filter((fixture) => fixture.publishedAt !== null);
@@ -91,24 +93,31 @@ function predicateSensitiveProxy(dataset: readonly FixtureRow[]) {
       );
       const cutoff = new Date(String(timestamp));
       filtered = filtered.filter(
-        (fixture) =>
-          fixture.publishedAt === null || fixture.publishedAt <= cutoff,
+        (fixture) => fixture.publishedAt === null || fixture.publishedAt <= cutoff,
       );
     }
     if (/"posts"\."archived_at"\s+is\s+null/i.test(query)) {
       filtered = filtered.filter((fixture) => fixture.archivedAt === null);
     }
-    if (/"posts"\."slug"\s*=\s*\$\d+/i.test(query)) {
-      const selectedSlug = params.find(
-        (value) =>
-          typeof value === "string"
-          && dataset.some((fixture) => fixture.slug === value),
-      );
+    if (/"posts"\."title_zh"\s+is\s+not\s+null/i.test(query)) {
+      filtered = filtered.filter((fixture) => fixture.titleZh !== null);
+    }
+    if (/btrim\("posts"\."title_zh"/i.test(query)) {
+      filtered = filtered.filter((fixture) => fixture.titleZh.trim().length > 0);
+    }
+    if (/"posts"\."body_mdx_zh_hk"\s+is\s+not\s+null/i.test(query)) {
+      filtered = filtered.filter((fixture) => fixture.bodyMdxZhHk !== null);
+    }
+    if (/btrim\("posts"\."body_mdx_zh_hk"/i.test(query)) {
+      filtered = filtered.filter((fixture) => fixture.bodyMdxZhHk?.trim().length);
+    }
+    const selectedSlug = params.find(
+      (value) => typeof value === "string" && dataset.some((fixture) => fixture.slug === value),
+    );
+    if (/"posts"\."slug"\s*=\s*\$\d+/i.test(query) && typeof selectedSlug === "string") {
       filtered = filtered.filter((fixture) => fixture.slug === selectedSlug);
     }
-    if (
-      /order by "posts"\."published_at" desc,\s*"posts"\."slug" asc/i.test(query)
-    ) {
+    if (/order by "posts"\."published_at" desc,\s*"posts"\."slug" asc/i.test(query)) {
       filtered.sort((left, right) => {
         const dateOrder =
           (right.publishedAt?.getTime() ?? Number.NEGATIVE_INFINITY)
@@ -121,9 +130,23 @@ function predicateSensitiveProxy(dataset: readonly FixtureRow[]) {
       filtered = filtered.slice(0, Number(limit));
     }
 
-    const detailProjection = /body_mdx/i.test(query);
+    const chineseNewsProjection =
+      selectedKind === "news" && /"posts"\."body_mdx_zh_hk"/i.test(query);
+    const detailProjection =
+      selectedKind === "buildlog"
+        ? /body_mdx/i.test(query)
+        : /"posts"\."slug"\s*=\s*\$\d+/i.test(query);
     return {
       rows: filtered.map((fixture) => {
+        if (selectedKind === "news") {
+          return [
+            fixture.slug,
+            chineseNewsProjection ? fixture.titleZh : fixture.titleEn,
+            fixture.publishedAt,
+            fixture.author,
+            chineseNewsProjection ? fixture.bodyMdxZhHk : fixture.bodyMdx,
+          ];
+        }
         const projected = [
           fixture.slug,
           fixture.titleEn,
@@ -253,18 +276,48 @@ describe("public posts repository", () => {
     const fixture = predicateSensitiveProxy(fullDataset);
     const repository = createPublicPostsRepository(async () => fixture.database as never);
 
-    const summaries = await repository.listPublishedNews(asOf);
+    const summaries = await repository.listPublishedNews("en", asOf);
 
     expect(summaries.map(({slug}) => slug)).toContain("news-post");
     expect(summaries.map(({slug}) => slug)).not.toContain("archived-news-post");
     expect(fixture.statements[0]?.sql).toMatch(/archived_at.*IS NULL/i);
   });
 
+  it("applies a deterministic SQL limit without weakening news publication predicates", async () => {
+    const fixture = predicateSensitiveProxy([
+      row("zulu-news", {kind: "news"}),
+      row("alpha-news", {kind: "news"}),
+      row("future-news", {kind: "news", publishedAt: new Date("2026-07-31T00:00:00.000Z")}),
+      row("draft-news", {kind: "news", publishedAt: null}),
+      row("archived-news", {kind: "news", archivedAt: new Date("2026-07-30T00:00:00.000Z")}),
+      row("buildlog-only"),
+    ]);
+    const repository = createPublicPostsRepository(async () => fixture.database as never);
+
+    await expect(repository.listPublishedNews("en", asOf, {limit: 1}))
+      .resolves.toMatchObject([{slug: "alpha-news"}]);
+    expect(fixture.statements[0]?.sql).toMatch(/kind.*=.*news/i);
+    expect(fixture.statements[0]?.sql).toMatch(/published_at.*IS NOT NULL/i);
+    expect(fixture.statements[0]?.sql).toMatch(/published_at.*<=/i);
+    expect(fixture.statements[0]?.sql).toMatch(/archived_at.*IS NULL/i);
+    expect(fixture.statements[0]?.sql).toMatch(/ORDER BY.*published_at.*DESC.*slug.*ASC/i);
+    expect(fixture.statements[0]?.sql).toMatch(/LIMIT/i);
+    expect(fixture.statements[0]?.params).toContain(1);
+  });
+
+  it.each([0, 13, 1.5])("rejects invalid news limit %s before loading the database", async (limit) => {
+    const loadDatabase = vi.fn();
+    const repository = createPublicPostsRepository(loadDatabase);
+
+    await expect(repository.listPublishedNews("en", asOf, {limit})).rejects.toThrow();
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
   it("returns null for an archived news slug", async () => {
     const fixture = predicateSensitiveProxy(fullDataset);
     const repository = createPublicPostsRepository(async () => fixture.database as never);
 
-    await expect(repository.getPublishedNewsBySlug("archived-news-post", asOf)).resolves.toBeNull();
-    await expect(repository.getPublishedNewsBySlug("news-post", asOf)).resolves.toMatchObject({slug: "news-post"});
+    await expect(repository.getPublishedNewsBySlug("en", "archived-news-post", asOf)).resolves.toBeNull();
+    await expect(repository.getPublishedNewsBySlug("en", "news-post", asOf)).resolves.toMatchObject({slug: "news-post"});
   });
 });

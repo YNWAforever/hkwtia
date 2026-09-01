@@ -6,6 +6,7 @@ import {type FormEvent, useEffect, useId, useRef, useState} from "react";
 
 import {Button} from "@/components/ui/button";
 import type {ConciergeLabels} from "@/lib/ai/concierge-labels";
+import {CONCIERGE_OPEN_EVENT} from "@/lib/ai/concierge-open";
 import {cn} from "@/lib/utils";
 
 export type {ConciergeLabels} from "@/lib/ai/concierge-labels";
@@ -186,6 +187,7 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
   const turnstileRef = useRef<HTMLDivElement>(null);
   const turnstileWidgetIdRef = useRef<string | undefined>(undefined);
   const contactEmailRef = useRef<HTMLInputElement>(null);
+  const externalInvokerRef = useRef<HTMLElement | null>(null);
   const terminalEscalationRef = useRef(false);
   const mountedRef = useRef(true);
   const conversationIdRef = useRef<string | undefined>(undefined);
@@ -222,6 +224,21 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
       window.removeEventListener("online", updateOnline);
       window.removeEventListener("offline", updateOnline);
     };
+  }, []);
+
+  useEffect(() => {
+    const handleOpen = () => {
+      const activeElement = document.activeElement;
+      externalInvokerRef.current =
+        activeElement instanceof HTMLElement
+          && activeElement !== document.body
+          && activeElement !== document.documentElement
+          ? activeElement
+          : null;
+      setOpen(true);
+    };
+    window.addEventListener(CONCIERGE_OPEN_EVENT, handleOpen);
+    return () => window.removeEventListener(CONCIERGE_OPEN_EVENT, handleOpen);
   }, []);
 
   // Rendered only while the panel is open, so the challenge is not requested
@@ -478,6 +495,11 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
 
   const composerLocked = Boolean(disabledState) || terminalEscalated;
 
+  function handleOpenChange(nextOpen: boolean) {
+    if (nextOpen) externalInvokerRef.current = null;
+    setOpen(nextOpen);
+  }
+
   function cancelRequest() {
     const controller = activeControllerRef.current;
     if (!controller) return;
@@ -488,7 +510,7 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
   }
 
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
+    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
       <Dialog.Trigger asChild>
         <button
           type="button"
@@ -508,6 +530,13 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
           onOpenAutoFocus={(event) => {
             event.preventDefault();
             textareaRef.current?.focus();
+          }}
+          onCloseAutoFocus={(event) => {
+            const externalInvoker = externalInvokerRef.current;
+            if (!externalInvoker?.isConnected) return;
+            event.preventDefault();
+            externalInvokerRef.current = null;
+            externalInvoker.focus();
           }}
           className="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-[calc(100vw-2rem-env(safe-area-inset-left)-env(safe-area-inset-right))] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border border-border bg-background shadow-xl motion-safe:data-[state=closed]:scale-95 motion-safe:data-[state=closed]:opacity-0 motion-safe:transition-[opacity,transform] motion-safe:duration-200"
         >

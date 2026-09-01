@@ -53,12 +53,17 @@ function LocaleSwitcherContent({
   const label = targetLocale === 'en' ? englishLabel : chineseLabel;
   const accessibleLabel = targetLocale === 'en' ? switchToEnglishLabel : switchToChineseLabel;
   const search = searchParams.toString();
-  const href = search ? `${pathname}?${search}` : pathname;
+
+  function switchLocale() {
+    const query = search ? `?${search}` : '';
+    const fragment = window.location.hash;
+    router.replace(`${pathname}${query}${fragment}`, {locale: targetLocale});
+  }
 
   return <LocaleSwitcherButton
     accessibleLabel={accessibleLabel}
     label={label}
-    onClick={() => router.replace(href, {locale: targetLocale})}
+    onClick={switchLocale}
   />;
 }
 
@@ -74,7 +79,7 @@ function LocaleSwitcherButton({
   return (
     <button
       type="button"
-      className="rounded-full border border-border px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-border px-3 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       aria-label={accessibleLabel}
       onClick={onClick}
     >
