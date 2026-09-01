@@ -162,6 +162,13 @@
       "when": 1787950727086,
       "tag": "0023_wisetech_event_hero",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1788277432176,
+      "tag": "0024_acceptance_sentinel",
+      "breakpoints": true
     }
   ]
 }
