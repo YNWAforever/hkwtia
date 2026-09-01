@@ -1,9 +1,12 @@
 import {AxeBuilder} from "@axe-core/playwright";
 import {expect, test} from "@playwright/test";
 
+const featuredHistorySlug = "the-strategies-for-expanding-global-internet-of-things-iot-markets";
 const pages = [
-  "/", "/events", "/membership", "/news", "/about",
-  "/zh", "/zh/events", "/zh/membership", "/zh/news", "/zh/about",
+  "/", "/events", "/membership", "/news", "/about", "/about/chairman",
+  `/about/history/${featuredHistorySlug}`, "/programs/asa",
+  "/zh", "/zh/events", "/zh/membership", "/zh/news", "/zh/about", "/zh/about/chairman",
+  `/zh/about/history/${featuredHistorySlug}`, "/zh/programs/asa",
 ];
 
 async function expectNoSeriousOrCritical(page: import("@playwright/test").Page) {

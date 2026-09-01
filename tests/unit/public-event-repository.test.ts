@@ -1,7 +1,7 @@
-import {describe, expect, it} from "vitest";
+import {describe, expect, it, vi} from "vitest";
 
 import type {Event} from "@/lib/db/server-schema";
-import {getEventBySlug, listMemberEvents, listPublicEvents} from "@/lib/db/repos/events";
+import {getEventBySlug, listFeaturedPublicEvents, listMemberEvents, listPublicEvents} from "@/lib/db/repos/events";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 const anonymous: Actor = {kind: "anonymous", userId: null};
@@ -18,6 +18,33 @@ describe("repository-backed event visibility", () => {
 
   it("returns only published public events to anonymous readers", async () => {
     expect((await listPublicEvents(anonymous, rows)).map((item) => item.slug)).toEqual(["published-public"]);
+  });
+
+  it("bounds the earliest upcoming public events with an inclusive cutoff and slug tie-break", async () => {
+    const asOf = new Date("2026-08-28T00:00:00.000Z");
+    const rows = [
+      event("past", {startsAt: new Date("2026-08-27T23:59:59.000Z")}),
+      event("same-z", {startsAt: new Date("2026-09-01T10:00:00.000Z")}),
+      event("same-a", {startsAt: new Date("2026-09-01T10:00:00.000Z")}),
+      event("equal", {startsAt: asOf}),
+      event("member", {memberOnly: true, startsAt: new Date("2026-08-29T00:00:00.000Z")}),
+      event("draft", {published: false, startsAt: new Date("2026-08-29T00:00:00.000Z")}),
+    ];
+
+    await expect(
+      listFeaturedPublicEvents(anonymous, {asOf, limit: 1}, rows),
+    ).resolves.toMatchObject([{slug: "equal"}]);
+    await expect(
+      listFeaturedPublicEvents(anonymous, {asOf, limit: 3}, rows),
+    ).resolves.toMatchObject([{slug: "equal"}, {slug: "same-a"}, {slug: "same-z"}]);
+  });
+
+  it.each([0, 13, 1.5])("rejects invalid feature limit %s before reading", async (limit) => {
+    const source = {list: vi.fn(async () => [event("never")])};
+    await expect(
+      listFeaturedPublicEvents(anonymous, {asOf: new Date(), limit}, source),
+    ).rejects.toThrow();
+    expect(source.list).not.toHaveBeenCalled();
   });
 
   it("returns public and member-only published events to eligible members in deterministic order", async () => {

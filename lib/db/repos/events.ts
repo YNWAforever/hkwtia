@@ -1,6 +1,6 @@
 import "server-only";
 
-import {and, asc, count, eq, inArray, isNull, or} from "drizzle-orm";
+import {and, asc, count, eq, gte, inArray, isNull, or} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
@@ -11,6 +11,7 @@ import {requireMember, type Actor, type AdminActor} from "@/lib/membership/lifec
 
 const eventIdSchema = z.string().uuid();
 const slugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+const publicReadLimitSchema = z.number().int().min(1).max(12);
 const eventInputObjectSchema = z.object({
   slug: slugSchema,
   titleEn: z.string().trim().min(1).max(200),
@@ -48,6 +49,7 @@ type EventAudit = Readonly<{
 }>;
 
 export type EventRows = readonly Event[] | Readonly<{list: () => Promise<readonly Event[]>}>;
+export type FeaturedPublicEventOptions = Readonly<{asOf: Date; limit: number}>;
 export type MemberEventEligibility = Readonly<{hasEligibleMembership: (actor: Extract<Actor, {kind: "member"}>) => Promise<boolean>}>;
 export type EventMutationDependencies = Readonly<{transaction: <T>(work: (transaction: Readonly<{
   insertEvent: (input: StoredEventInput) => Promise<Event>;
@@ -83,6 +85,30 @@ function sorted(rows: readonly Event[]): Event[] {
 
 export async function listPublicEvents(_actor: Actor, source?: EventRows): Promise<Event[]> {
   return sorted((await rowsFrom(source)).filter((event) => event.published && !event.memberOnly));
+}
+
+export async function listFeaturedPublicEvents(
+  _actor: Actor,
+  options: FeaturedPublicEventOptions,
+  source?: EventRows,
+): Promise<Event[]> {
+  const limit = publicReadLimitSchema.parse(options.limit);
+  const asOf = z.coerce.date().parse(options.asOf);
+  if (source) {
+    return sorted(await rowsFrom(source))
+      .filter((event) => event.published && !event.memberOnly && event.startsAt >= asOf)
+      .sort((left, right) => left.startsAt.getTime() - right.startsAt.getTime() || left.slug.localeCompare(right.slug))
+      .slice(0, limit);
+  }
+  const database = await getDb();
+  return database.select().from(events)
+    .where(and(
+      eq(events.published, true),
+      eq(events.memberOnly, false),
+      gte(events.startsAt, asOf),
+    ))
+    .orderBy(asc(events.startsAt), asc(events.slug))
+    .limit(limit);
 }
 
 const eligibleStatuses = ["active", "past_due", "cancel_at_period_end"] as const;
@@ -207,6 +233,7 @@ export async function listEventAttendees(actor: Actor, eventIdInput: unknown) {
 
 export const eventsRepository = {
   listPublic: listPublicEvents,
+  listFeaturedPublic: listFeaturedPublicEvents,
   listForMember: listMemberEvents,
   getBySlug: getEventBySlug,
   listForAdmin: listAdminEvents,

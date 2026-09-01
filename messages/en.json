@@ -279,8 +279,36 @@
     "metaDescription": "Connecting Hong Kong and Greater Bay Area innovation to global markets.",
     "eyebrow": "Innovate Hong Kong",
     "title": "Bridging GBA innovation to the global stage.",
+    "question": "Where can Hong Kong innovation go next?",
     "summary": "The cross-border platform connecting Hong Kong, the Greater Bay Area and Asia to global technology markets.",
     "imageAlt": "Hong Kong technology community",
+    "actions": {
+      "events": "Find an event",
+      "membership": "Explore membership",
+      "discover": "Discover WiseTech"
+    },
+    "highlightsTitle": "What is happening now",
+    "highlightsIntro": "Published opportunities and stories from the WTIA ecosystem.",
+    "highlights": {
+      "event": {
+        "label": "Next event",
+        "view": "View event",
+        "empty": "No upcoming public event is available.",
+        "unavailable": "Event information is temporarily unavailable."
+      },
+      "news": {
+        "label": "Latest news",
+        "view": "Read news",
+        "empty": "No published news is available.",
+        "unavailable": "News is temporarily unavailable."
+      },
+      "showcase": {
+        "label": "Member solution",
+        "view": "Explore solution",
+        "empty": "No published member solution is available.",
+        "unavailable": "Member solutions are temporarily unavailable."
+      }
+    },
     "featuresTitle": "Built for connection and growth",
     "featuresIntro": "WTIA brings the technology community together around practical opportunities.",
     "features": {
@@ -295,21 +323,6 @@
       "represent": {
         "title": "Represent",
         "description": "Give the wireless technology sector a clear, collective voice."
-      }
-    },
-    "statsTitle": "A platform for the whole ecosystem",
-    "stats": {
-      "0": {
-        "value": "4",
-        "label": "Flagship programmes"
-      },
-      "1": {
-        "value": "2",
-        "label": "Working languages"
-      },
-      "2": {
-        "value": "1",
-        "label": "Connected technology community"
       }
     },
     "programsTitle": "Programmes and awards",
@@ -397,6 +410,7 @@
     "eyebrow": "Since 2001",
     "title": "Our history",
     "intro": "Milestones from twenty-five years of building Hong Kong's wireless and technology industry.",
+    "storyTitle": "Milestone story",
     "readMore": "Read more"
   },
   "Membership": {
@@ -545,6 +559,7 @@
       "status": "Contact WTIA for the current programme timetable and how to take part."
     },
     "record": {
+      "statusHeading": "Current status",
       "editionsHeading": "Editions",
       "winnersHeading": "Winners",
       "categoryHeading": "Category",

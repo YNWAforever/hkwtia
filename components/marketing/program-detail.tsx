@@ -1,28 +1,28 @@
 import type {ProgramRecord} from '@/content/schemas';
-import {PageHero} from '@/components/marketing/page-hero';
+import {InstitutionalPageIntro} from '@/components/marketing/institutional-page-intro';
+import {StorySection} from '@/components/marketing/story-section';
 
 type ProgramDetailProps = {
   program: ProgramRecord;
   title: string;
   description: string;
+  statusHeading: string;
   status: string;
 };
 
-export function ProgramDetail({program, title, description, status}: ProgramDetailProps) {
+export function ProgramDetail({program, title, description, statusHeading, status}: ProgramDetailProps) {
   return (
     <>
-      <PageHero
+      <InstitutionalPageIntro
         eyebrow={program.id.toUpperCase()}
         title={title}
-        description={description}
+        lead={description}
         image={program.image}
         imageAlt=""
       />
-      <section className="container mx-auto px-6 py-16">
-        <div className="glass-card p-6">
-          <p className="text-muted-foreground">{status}</p>
-        </div>
-      </section>
+      <StorySection heading={statusHeading} tone="warm">
+        <p className="max-w-3xl text-lg leading-relaxed text-muted-foreground">{status}</p>
+      </StorySection>
     </>
   );
 }
