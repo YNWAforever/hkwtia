@@ -63,3 +63,38 @@ export function assertIsolatedSeedEnvironment(
 
   return databaseUrl as string;
 }
+
+/**
+ * The existing guard checks a name; this checks a property.
+ *
+ * `assertIsolatedSeedEnvironment` already notes that an allowlisted host is not
+ * proof of isolation and that the operator still has to confirm it. This is that
+ * confirmation, made checkable: provisioning plants one row in
+ * `acceptance_sentinel`, and a database without it cannot be seeded. Production
+ * never has one, because nobody would plant it there.
+ *
+ * Takes a count function rather than a client so the seeds can pass their own
+ * connection and the tests can pass a stub. An unreadable table is its own
+ * failure, distinct from an absent row -- a missing relation must not be read as
+ * "no sentinel, therefore refuse for the ordinary reason", because the two are
+ * fixed differently.
+ */
+export async function assertSeedSentinel(
+  prefix: string,
+  countSentinelRows: () => Promise<number>,
+): Promise<void> {
+  const fail = (code: string): never => {
+    throw new Error(`${prefix}_${code}`);
+  };
+
+  let rows: number;
+  try {
+    rows = await countSentinelRows();
+  } catch {
+    fail("SENTINEL_UNREADABLE");
+    return;
+  }
+
+  if (rows === 0) fail("SENTINEL_REQUIRED");
+  if (rows > 1) fail("SENTINEL_AMBIGUOUS");
+}
