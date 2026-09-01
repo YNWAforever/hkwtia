@@ -29,7 +29,7 @@ const deliveryRequirements = [
   "Preview must be independent from production",
   "rollback by reverting its independently deployable PR/commit",
   "Fail closed",
-  "No production database, provider, deploy, migration, or seed action was performed.",
+  "owner-directed bypasses of the gate sequence below",
 ] as const;
 const checklistItems = [
   "Focused RED evidence", "Focused GREEN evidence", "npm.cmd run audit:strings", "npm.cmd test", "npm.cmd run lint", "npm.cmd run typecheck", "npm.cmd run build", "npm.cmd audit --omit=dev --audit-level=high", "Route/content parity", "Database/provider gates", "Rollback notes", "GitHub branch protection", "isolated Neon/test identities/providers", "Preview/UAT", "production approval", "6 September 2026 unsubscribe fallback deadline", "Do not mark an external gate as passed without recorded evidence.",
