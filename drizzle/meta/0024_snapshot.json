@@ -1,5 +1,5 @@
 {
-  "id": "5d3d20ca-66d1-40ec-aa2c-ae2603aab8da",
+  "id": "43fad1e3-63ac-4929-9b42-2b4d7ad732d2",
   "prevId": "6daafab2-edfd-4aa4-8cbe-dbe1b61b2863",
   "version": "7",
   "dialect": "postgresql",
@@ -41,8 +41,8 @@
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {
-        "acceptance_sentinel_single_row": {
-          "name": "acceptance_sentinel_single_row",
+        "acceptance_sentinel_single_row_check": {
+          "name": "acceptance_sentinel_single_row_check",
           "value": "\"acceptance_sentinel\".\"id\""
         }
       },

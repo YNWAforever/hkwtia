@@ -3,5 +3,5 @@ CREATE TABLE "acceptance_sentinel" (
 	"designated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"designated_by" text NOT NULL,
 	"note" text,
-	CONSTRAINT "acceptance_sentinel_single_row" CHECK ("acceptance_sentinel"."id")
+	CONSTRAINT "acceptance_sentinel_single_row_check" CHECK ("acceptance_sentinel"."id")
 );

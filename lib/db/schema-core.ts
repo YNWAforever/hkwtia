@@ -1032,7 +1032,7 @@ export const acceptanceSentinel = pgTable(
     note: text("note"),
   },
   (table) => [
-    check("acceptance_sentinel_single_row", sql`${table.id}`),
+    check("acceptance_sentinel_single_row_check", sql`${table.id}`),
   ],
 );
 
