@@ -28,7 +28,11 @@ Preview must be independent from production: it needs separate infrastructure, t
 
 For every independently deployable PR, rollback by reverting its independently deployable PR/commit and documenting the route/content effect. If a later PR adds an additive migration, rollback the application behavior without schema downgrade; retain the additive schema until an authorized, separately planned data change.
 
-No production database, provider, deploy, migration, or seed action was performed.
+As of 2026-09-02, this is no longer true: migrations 0019-0024 were applied directly to the
+production Neon database, and this branch's commits (through the main-release cutover recorded in
+docs/integration/main-release-cutover-evidence.md) were deployed to production via release. Both
+actions were owner-directed bypasses of the gate sequence below, not evidence that gates 2-4 passed
+-- see that evidence record for what was and was not verified.
 
 ## Local command and evidence checklist
 
@@ -60,7 +64,7 @@ Fail closed: every status below is `NOT PASSED` until the listed evidence is rec
 | Gate | Status | Required evidence before it may be marked passed |
 |---|---|---|
 | GitHub branch protection | GitHub branch protection: NOT PASSED | An administrator enables `quality` as a required `main` check. The private repository's current GitHub plan/API cannot enable the required rules from this task. |
-| Isolated test infrastructure | isolated Neon/test identities/providers: NOT PASSED | Credential-safe confirmation of isolated Neon, test identities, and provider configuration; do not use production identities or provider accounts. |
+| Isolated test infrastructure | isolated Neon/test identities/providers: NOT PASSED | Credential-safe confirmation of isolated Neon, test identities, and provider configuration; do not use production identities or provider accounts. Bypassed 2026-09-02 for a direct production deployment -- see docs/integration/main-release-cutover-evidence.md. This status remains accurate: no isolated Neon, test identity, or provider configuration was ever created. |
 | Preview and UAT | Preview/UAT: NOT PASSED | An independent Preview, assigned UAT owner, recorded results, and a tested rollback path. |
 | Production release | production approval: NOT PASSED | Explicit approval from the authorized production approver after all prior gates are passed. |
 | Unsubscribe fallback | 6 September 2026 unsubscribe fallback deadline: NOT PASSED | An authorized owner records the completed fallback decision and evidence no later than 6 September 2026. |
