@@ -122,11 +122,20 @@ describe("seed sentinel", () => {
     ).rejects.toThrow("M5_ACCEPTANCE_SENTINEL_AMBIGUOUS");
   });
 
+  // The underlying error is preserved as `cause` rather than discarded --
+  // "unreadable" covers a missing relation, a refused connection, or a
+  // permissions error alike, and each is fixed differently.
   it("surfaces a query failure rather than treating it as absence", async () => {
-    await expect(
-      assertSeedSentinel("M5_ACCEPTANCE", async () => {
-        throw new Error('relation "acceptance_sentinel" does not exist');
-      }),
-    ).rejects.toThrow("M5_ACCEPTANCE_SENTINEL_UNREADABLE");
+    const queryError = new Error('relation "acceptance_sentinel" does not exist');
+
+    expect.assertions(2);
+    try {
+      await assertSeedSentinel("M5_ACCEPTANCE", async () => {
+        throw queryError;
+      });
+    } catch (error) {
+      expect(error).toHaveProperty("message", "M5_ACCEPTANCE_SENTINEL_UNREADABLE");
+      expect(error).toHaveProperty("cause", queryError);
+    }
   });
 });

@@ -90,9 +90,12 @@ export async function assertSeedSentinel(
   let rows: number;
   try {
     rows = await countSentinelRows();
-  } catch {
-    fail("SENTINEL_UNREADABLE");
-    return;
+  } catch (error) {
+    // Preserve the original error as `cause` -- "unreadable" covers a missing
+    // relation, a refused connection, and a permissions error alike, and each is
+    // fixed differently. Discarding it here would leave whoever hits this with
+    // only the code, not the diagnostic that tells them which fix applies.
+    throw new Error(`${prefix}_SENTINEL_UNREADABLE`, {cause: error});
   }
 
   if (rows === 0) fail("SENTINEL_REQUIRED");
