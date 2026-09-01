@@ -95,7 +95,7 @@ describe("the legacy fallback deletes itself on schedule", () => {
       Date.now() < sunset,
       `The CRON_SECRET fallback for unsubscribe links was due for removal on `
       + `${LEGACY_UNSUBSCRIBE_SECRET_SUNSET}. Every link signed with the old key has now `
-      + `expired. Drop serverEnv().cronSecret from the secrets arrays in `
+      + `expired. Drop unsubscribeEnv().cronSecret from the secrets arrays in `
       + `lib/api/unsubscribe-route.ts and app/[locale]/(public)/unsubscribe/page.tsx, `
       + `then delete LEGACY_UNSUBSCRIBE_SECRET_SUNSET and this test.`,
     ).toBe(true);
