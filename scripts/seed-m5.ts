@@ -2,7 +2,7 @@ import {fileURLToPath} from "node:url";
 
 import {Pool} from "pg";
 
-import {assertIsolatedSeedEnvironment} from "./lib/acceptance-guard.ts";
+import {assertIsolatedSeedEnvironment, assertSeedSentinel} from "./lib/acceptance-guard.ts";
 
 export const M5_ACCEPTANCE_SEED_ENV = "M5_ACCEPTANCE_SEED";
 export const M5_ACCEPTANCE_OWNERSHIP_KEY = "m5-showcase-acceptance-v1";
@@ -106,6 +106,15 @@ export async function seedM5(pool: M5SeedPool, options: Readonly<{asOf: Date}>):
   const connection = await pool.connect();
   let committed = false;
   try {
+    // Proves the target is a database provisioning deliberately marked disposable,
+    // not just one whose name and config happen to match -- see acceptance-guard.ts.
+    // Runs before BEGIN: an unmarked database must not even open a transaction.
+    await assertSeedSentinel("M5_ACCEPTANCE", async () => {
+      const {rows} = await connection.query(
+        "SELECT count(*)::text AS count FROM acceptance_sentinel",
+      );
+      return Number(rows?.[0]?.count ?? 0);
+    });
     await connection.query("BEGIN");
     await connection.query("SELECT pg_advisory_xact_lock(hashtext($1))", [M5_ACCEPTANCE_OWNERSHIP_KEY]);
     const listingIds = fixture.listings.map(({id}) => id);

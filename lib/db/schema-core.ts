@@ -1014,6 +1014,28 @@ export const leads = pgTable(
   ],
 );
 
+/**
+ * The marker that makes "this database is disposable" checkable rather than
+ * asserted. Planted once at provisioning time; read by assertSeedSentinel
+ * (see scripts/lib/acceptance-guard.ts) before any fixture seed is allowed to
+ * run. Production never receives one, because nobody would plant it there.
+ *
+ * The boolean primary key plus the check constraint below permits exactly one
+ * row: a second insert collides on the key rather than relying on convention.
+ */
+export const acceptanceSentinel = pgTable(
+  "acceptance_sentinel",
+  {
+    id: boolean("id").primaryKey().default(true),
+    designatedAt: createdAt("designated_at"),
+    designatedBy: text("designated_by").notNull(),
+    note: text("note"),
+  },
+  (table) => [
+    check("acceptance_sentinel_single_row_check", sql`${table.id}`),
+  ],
+);
+
 export const aiopsMonthlyMetrics = pgMaterializedView(
   "aiops_monthly_metrics",
   {
@@ -1317,3 +1339,4 @@ export type LandingPartner = typeof landingPartners.$inferSelect;
 export type NewLandingPartner = typeof landingPartners.$inferInsert;
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
+export type AcceptanceSentinel = typeof acceptanceSentinel.$inferSelect;
