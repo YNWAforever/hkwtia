@@ -31,9 +31,12 @@ export default async function LaunchPadPage({params, searchParams = Promise.reso
   const [{locale}, query] = await Promise.all([params, searchParams]);
   const appLocale = locale as AppLocale;
   setRequestLocale(appLocale);
+  // CLAUDE.md: public pages degrade rather than 500. The WP-0 visual baseline caught
+  // /launchpad returning 500 with an empty DATABASE_URL because this call, unlike the
+  // landing-partners read below, had no fallback.
   const [t, cohorts] = await Promise.all([
     getTranslations({locale: appLocale, namespace: 'LaunchPad'}),
-    cohortRepository.listPublicCohorts(anonymous),
+    cohortRepository.listPublicCohorts(anonymous).catch((): Awaited<ReturnType<typeof cohortRepository.listPublicCohorts>> => []),
   ]);
   const partners = await landingPartnersRepository.listPublished({limit: 100}).catch(() => []);
   const answers = parseFundingAnswers(query);

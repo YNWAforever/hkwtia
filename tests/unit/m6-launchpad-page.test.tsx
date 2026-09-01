@@ -86,6 +86,15 @@ describe("M6 Launch Pad public experience", () => {
     expect(markup).not.toContain("prospect");
   });
 
+  it("renders the localized cohort empty state when the cohort repository is unavailable", async () => {
+    state.listPublicCohorts.mockRejectedValue(new Error("DATABASE_URL is required to initialize the database client."));
+
+    const markup = renderToStaticMarkup(await LaunchPadPage(pageProps("en")));
+
+    expect(markup).toContain("calendar.empty");
+    expect(markup).not.toContain("cohort-application-title");
+  });
+
   it("passes the explicit anonymous actor to the database-backed cohort projection", async () => {
     await LaunchPadPage(pageProps("en"));
 
