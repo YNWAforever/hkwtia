@@ -39,12 +39,19 @@ export function signUnsubscribeToken(
  * are minted. The last legacy token is minted by the final job run before the
  * deploy, so the fallback must outlive that by a margin.
  *
+ * The clock starts at the deploy, not the commit -- named here so the date can
+ * be rechecked rather than trusted. The split committed on 2026-08-06, but the
+ * earliest production deployment carrying it is `e26cde88` (PR #10) at
+ * 2026-08-09 14:32Z, so the last legacy token can stay valid until
+ * 2026-09-08 14:32Z. This constant read 2026-09-06 until 2026-09-01, computed
+ * from the commit instead -- about three days early.
+ *
  * After this date, delete `cronSecret` from the two `secrets` arrays
  * (`lib/api/unsubscribe-route.ts` and `app/[locale]/(public)/unsubscribe/page.tsx`)
  * and remove this constant. A test fails once the date passes, so this is not
  * left to memory.
  */
-export const LEGACY_UNSUBSCRIBE_SECRET_SUNSET = "2026-09-06";
+export const LEGACY_UNSUBSCRIBE_SECRET_SUNSET = "2026-09-10";
 
 /**
  * Verifies against several keys in order, returning the first that matches.
