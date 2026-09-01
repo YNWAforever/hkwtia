@@ -1,0 +1,9 @@
+import Link from "next/link";
+import {getTranslations, setRequestLocale} from "next-intl/server";
+import {LandingPartnerForm} from "@/components/admin/landing-partner-form";
+import type {AppLocale} from "@/i18n/routing";
+import {createLandingPartnerAction} from "@/lib/admin/landing-partner-actions";
+import {requireAdminPageActor} from "@/lib/admin/page-auth";
+import {landingPartnersRepository} from "@/lib/db/repos/landing-partners";
+import {localizedPath} from "@/lib/urls";
+export default async function AdminLandingPartnersPage({params}: {params: Promise<{locale: string}>}) { const {locale: raw} = await params; const locale = raw as AppLocale; setRequestLocale(locale); const actor = await requireAdminPageActor(); const [rows, t] = await Promise.all([landingPartnersRepository.listForAdmin(actor), getTranslations({locale, namespace: "Admin.landingPartners"})]); const labels = Object.fromEntries(["organizationEn","organizationZhHk","market","region","mouStatus","contactJson","notes","save","saving","mou_prospect","mou_in_discussion","mou_signed","mou_inactive"].map((key) => [key, t(key)])); return <div className="space-y-8"><header><p>{t("eyebrow")}</p><h1>{t("title")}</h1><p>{t("description")}</p></header><LandingPartnerForm action={createLandingPartnerAction.bind(null, `/${locale}/admin/landing-partners`, {successMessage: t("createSuccess"), validationMessage: t("validation"), errorMessage: t("error")})} labels={labels}/><section><h2>{t("existing")}</h2>{rows.length ? <ul>{rows.map((row) => <li key={row.id}><Link href={localizedPath(locale, `/admin/landing-partners/${row.id}`)}>{locale === "zh-HK" ? row.organizationZhHk : row.organizationEn}</Link> · {row.archivedAt ? t("statusArchived") : row.publishedAt ? t("statusPublished") : t("statusDraft")}</li>)}</ul> : <p>{t("empty")}</p>}</section></div>; }

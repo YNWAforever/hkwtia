@@ -24,8 +24,8 @@ export async function createNewsAction(
   formData: FormData,
 ): Promise<NewsActionState> {
   try {
+    const actor = await requireAdminActor();
     return await runNewsFormAction(state, formData, {...messages, mutate: async (data) => {
-      const actor = await requireAdminActor();
       const post = await createNewsPost(actor, newsFormInput(data));
       revalidateAdminPath(path);
       revalidatePublicNews(post.slug);
@@ -44,10 +44,10 @@ export async function updateNewsAction(
   formData: FormData,
 ): Promise<NewsActionState> {
   try {
+    const actor = await requireAdminActor();
     return await runNewsFormAction(state, formData, {...messages, mutate: async (data) => {
-      const actor = await requireAdminActor();
-      // Read the current publication instant first so re-saving a published
-      // post keeps its original timestamp instead of bumping it to now.
+      // Read the current publication instant only after authorization so re-saving
+      // a published post keeps its original timestamp instead of bumping it.
       const current = await getNewsForAdmin(actor, postId);
       if (!current) throw new Error("NEWS_POST_NOT_FOUND");
       const updated = await updateNewsPost(

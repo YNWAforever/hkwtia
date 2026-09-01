@@ -16,11 +16,11 @@ type Props = Readonly<{params: Promise<{locale: string; id: string}>}>;
 export default async function AdminNewsDetailPage({params}: Props) {
   const {locale: localeValue, id: rawId} = await params;
   const locale = localeValue as AppLocale;
-  // Validate the untrusted route param before touching anything else.
-  const parsedId = idSchema.safeParse(rawId);
-  if (!parsedId.success) notFound();
   setRequestLocale(locale);
   const actor = await requireAdminPageActor();
+  // Authorization must precede parsing the untrusted route parameter.
+  const parsedId = idSchema.safeParse(rawId);
+  if (!parsedId.success) notFound();
   const post = await adminPostsRepository.getForAdmin(actor, parsedId.data);
   if (!post) notFound();
   const t = await getTranslations({locale, namespace: "Admin.news"});
@@ -38,7 +38,8 @@ export default async function AdminNewsDetailPage({params}: Props) {
   );
   const labels = {
     slug: t("slug"), titleEn: t("titleEn"), titleZh: t("titleZh"), author: t("author"),
-    bodyMdx: t("bodyMdx"), bodyHelp: t("bodyHelp"), published: t("published"),
+    bodyMdx: t("bodyMdx"), bodyMdxZhHk: t("bodyMdxZhHk"),
+    bodyHelp: t("bodyHelp"), published: t("published"),
     save: t("save"), saving: t("saving"),
   };
 

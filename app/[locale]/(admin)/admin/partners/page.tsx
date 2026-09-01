@@ -1,0 +1,10 @@
+import Link from "next/link";
+import {getTranslations, setRequestLocale} from "next-intl/server";
+import {PartnerForm} from "@/components/admin/partner-form";
+import type {AppLocale} from "@/i18n/routing";
+import {createPartnerAction} from "@/lib/admin/partner-actions";
+import {requireAdminPageActor} from "@/lib/admin/page-auth";
+import {mediaRepository} from "@/lib/db/repos/media";
+import {partnersRepository} from "@/lib/db/repos/partners";
+import {localizedPath} from "@/lib/urls";
+export default async function AdminPartnersPage({params}: {params: Promise<{locale: string}>}) { const {locale: raw} = await params; const locale = raw as AppLocale; setRequestLocale(locale); const actor = await requireAdminPageActor(); const [rows, mediaRows, t] = await Promise.all([partnersRepository.listForAdmin(actor), mediaRepository.listActiveForAdmin(actor), getTranslations({locale, namespace: "Admin.partners"})]); const labels = Object.fromEntries(["nameEn","nameZhHk","category","websiteUrl","logoMediaId","noLogo","displayOrder","featured","relationshipStartsOn","relationshipEndsOn","relationshipConfirmed","logoRightsConfirmed","save","saving","category_supporting","category_media","category_regional","category_programme","category_sponsor"].map((key) => [key, t(key)])); const messages = {successMessage: t("createSuccess"), validationMessage: t("validation"), errorMessage: t("error")}; return <div className="space-y-8"><header><p>{t("eyebrow")}</p><h1 className="font-serif text-4xl font-semibold">{t("title")}</h1><p>{t("description")}</p></header><PartnerForm action={createPartnerAction.bind(null, `/${locale}/admin/partners`, messages)} labels={labels} mediaRows={mediaRows}/><section className="glass-card p-6"><h2>{t("existing")}</h2>{rows.length ? <ul>{rows.map((row) => <li key={row.id}><Link href={localizedPath(locale, `/admin/partners/${row.id}`)}>{locale === "zh-HK" ? row.nameZhHk : row.nameEn}</Link> · {row.archivedAt ? t("statusArchived") : row.publishedAt ? t("statusPublished") : t("statusDraft")}</li>)}</ul> : <p>{t("empty")}</p>}</section></div>; }
