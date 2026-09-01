@@ -25,7 +25,7 @@ Rules (spec §5, §6):
 | # | WP | Area | Item (donor pattern → hkwtia target) | Check | Status | PR | Evidence |
 |---|---|---|---|---|---|---|---|
 | 0.1 | WP-0 | Harness | `tests/e2e/wisetech-visual-baseline.spec.ts`: 9 routes × 4 viewports × 2 locales, reduced motion, `maxDiffPixelRatio` 0.02 | first run writes the baselines, a second run passes unchanged | ported | | |
-| 0.2 | WP-0 | Harness | Baselines committed under `tests/e2e/__screenshots__/wisetech-visual-baseline/` with the platform in the file name | files present, spec green against them | ported | | |
+| 0.2 | WP-0 | Harness | Baselines committed under `tests/e2e/__screenshots__/wisetech-visual-baseline/` with the platform and project in the file name | files present, spec green against them | ported | | |
 | 0.3 | WP-0 | Docs | Spec committed as `docs/superpowers/plans/2026-09-01-wisetech-design-fidelity.md` with errata appendix; overview picture in `docs/integration/` | files present | ported | | |
 | 0.4 | WP-0 | Docs | `CLAUDE.md` pointer block (spec §0.4) and corrected unsubscribe sunset date | block present, date matches `lib/email/unsubscribe-token.ts` | ported | | |
 | 1.1 | WP-1 | Tokens | `--wt-*` colour, line, shadow and focus tokens with the exact donor values in `app/globals.css` (§4.1) | `tests/unit/wisetech-tokens.test.ts` | not started | | |
