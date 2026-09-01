@@ -40,6 +40,29 @@ export const wisetechIntegrationProvenance = Object.freeze({
     reconciliationStatus: "locally-reconciled" as const,
     continuityWithReportedArchive: false as const,
   }),
+  // PR2's logo-byte contract consumes this derived compatibility view; the
+  // canonical archive and donor identities remain deliberately split above.
+  site: Object.freeze({
+    projectSlug: reportedArchiveIdentity.projectSlug,
+    savedVersion: reportedArchiveIdentity.savedVersion,
+    sourceCommit: reportedArchiveIdentity.commit,
+    reportedArchiveSha256: reportedArchiveIdentity.archiveSha256,
+    archiveAvailable: false,
+    archiveStatus: "Identity recorded by the master plan; archive bytes are unavailable for reconciliation.",
+    currentDonor: Object.freeze({
+      repository: authoritativeSourceInventory.identity.repository,
+      importedCommit: authoritativeSourceInventory.identity.commit,
+      gitTree: authoritativeSourceInventory.identity.tree,
+      continuityWithReportedArchive: false,
+      logo: Object.freeze({
+        sourcePath: "public/brand/wtia-legacy-logo.png",
+        canonicalPath: "public/images/wtia-logo.png",
+        sha256: "4ABAB36F7D09F36F6D54165E9A8F4C719CAD5CAA7B6CBBCD5F2819F6180DEC51",
+        width: 2001,
+        height: 721,
+      }),
+    }),
+  }),
 });
 
 function entry(value: IntegrationManifestEntry): IntegrationManifestEntry {

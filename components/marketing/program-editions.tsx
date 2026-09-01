@@ -1,5 +1,5 @@
-import Image from 'next/image';
-
+import {MediaGallery} from '@/components/marketing/media-gallery';
+import {StorySection} from '@/components/marketing/story-section';
 import type {ProgramImage, ProgramWinners} from '@/content/schemas';
 
 /**
@@ -71,12 +71,11 @@ export function ProgramEditions({
   editions
 }: ProgramEditionsProps) {
   return (
-    <section className="container mx-auto px-6 py-16">
-      <h2 className="text-2xl font-semibold">{editionsHeading}</h2>
-      <ol className="mt-8 space-y-12">
+    <StorySection heading={editionsHeading} tone="plain">
+      <ol className="space-y-12">
         {editions.map((edition) => (
-          <li key={edition.heading} className="glass-card p-6">
-            <h3 className="text-xl font-semibold">{edition.heading}</h3>
+          <li key={edition.heading} className="rounded-shell-lg bg-shell-warm p-6 sm:p-8">
+            <h3 className="editorial-serif text-2xl font-semibold text-shell-ink">{edition.heading}</h3>
 
             {edition.lines.map((line) => (
               <p key={line} className="text-muted-foreground mt-2">
@@ -96,23 +95,14 @@ export function ProgramEditions({
             ) : null}
 
             {edition.images.length > 0 ? (
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                {edition.images.map((image) => (
-                  <Image
-                    key={image.src}
-                    alt={image.alt}
-                    className="h-auto w-full rounded-lg"
-                    height={427}
-                    src={image.src}
-                    width={640}
-                  />
-                ))}
+              <div className="mt-6">
+                <MediaGallery images={edition.images} />
               </div>
             ) : null}
           </li>
         ))}
       </ol>
-    </section>
+    </StorySection>
   );
 }
 

@@ -27,7 +27,13 @@ export default async function CpaiPage({params}: Props) {
 
   return (
     <>
-      <ProgramDetail program={program} title={t('title')} description={t('description')} status={t('status')} />
+      <ProgramDetail
+        program={program}
+        title={t('title')}
+        description={t('description')}
+        statusHeading={tr('statusHeading')}
+        status={t('status')}
+      />
       <ProgramCredential
         courseName={zh ? cpai.courseNameZh : cpai.courseNameEn}
         coursePartner={zh ? cpai.coursePartnerZh : cpai.coursePartnerEn}

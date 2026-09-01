@@ -47,14 +47,17 @@ const detail = {
 } as const;
 const newsSummary = {
   slug: "wtia-welcomes-new-members",
-  titleEn: "WTIA welcomes new members",
-  titleZh: "WTIA 歡迎新會員",
+  title: "WTIA welcomes new members",
   publishedAt: new Date("2026-08-01T02:00:00.000Z"),
   author: "WTIA",
 } as const;
+const zhNewsSummary = {
+  ...newsSummary,
+  title: "WTIA 歡迎新會員",
+} as const;
 const newsDetail = {
   ...newsSummary,
-  bodyMdx: ["## Welcome", "", "A **warm** welcome."].join("\n"),
+  body: ["## Welcome", "", "A **warm** welcome."].join("\n"),
 } as const;
 
 describe("published posts through news routes", () => {
@@ -67,6 +70,8 @@ describe("published posts through news routes", () => {
   });
 
   it("renders staff news and build-log cards with localized titles", async () => {
+    publicPosts.listPublishedNews.mockResolvedValueOnce([zhNewsSummary]);
+
     render(await NewsPage({params: Promise.resolve({locale: "zh-HK"})}));
 
     expect(
@@ -75,7 +80,7 @@ describe("published posts through news routes", () => {
     expect(
       screen.getByRole("link", {name: "我們如何建立 AI 營運儀表板"}),
     ).toHaveAttribute("href", "/zh/news/m4-ai-ops-dashboard");
-    expect(publicPosts.listPublishedNews).toHaveBeenCalledOnce();
+    expect(publicPosts.listPublishedNews).toHaveBeenCalledWith("zh-HK");
     expect(publicPosts.listPublishedBuildLogs).toHaveBeenCalledOnce();
   });
 
@@ -107,6 +112,7 @@ describe("published posts through news routes", () => {
     expect(
       screen.getAllByRole("heading", {level: 1, name: "WTIA welcomes new members"}),
     ).toHaveLength(1);
+    expect(publicPosts.getPublishedNewsBySlug).toHaveBeenCalledWith("en", newsSummary.slug);
     expect(publicPosts.getPublishedBuildLogBySlug).not.toHaveBeenCalled();
   });
 

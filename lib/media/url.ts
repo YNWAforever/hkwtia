@@ -32,6 +32,16 @@ export function hasUrlObfuscation(value: string): boolean {
 
 /** Formats `next/image` will actually serve under this repo's config. */
 const renderableExtension = /\.(?:png|jpe?g|webp|avif)$/i;
+const privateMediaDeliveryPath = /^\/api\/media\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * Uploaded media must bypass Next's optimizer so every browser request reaches
+ * the revocation and integrity checks on `/api/media/[id]`. The exact path
+ * shape prevents this exception from becoming a generic optimizer escape.
+ */
+export function isPrivateMediaDeliveryUrl(value: string): boolean {
+  return privateMediaDeliveryPath.test(value);
+}
 
 /**
  * A reference the site may render as an image.

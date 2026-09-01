@@ -10,6 +10,7 @@ const cardLabels = {
 } as const;
 const detailLabels = {
   ...cardLabels,
+  overview: "Solution overview", capabilities: "Capabilities",
   useCases: "Use cases", deployment: "Deployment", languages: "Languages",
   worksWith: "Works with", caseStudy: "Case study", video: "Video",
   requestIntro: "Request an introduction",

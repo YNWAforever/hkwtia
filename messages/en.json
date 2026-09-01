@@ -7,36 +7,89 @@
     "description": "Connecting Hong Kong and Greater Bay Area innovation to global markets."
   },
   "Navigation": {
-    "about": "About",
-    "membership": "Membership",
-    "showcase": "Showcase",
-    "launchpad": "Launchpad",
-    "events": "Events",
-    "news": "News",
+    "brand": {
+      "publicName": "WiseTech Hong Kong",
+      "operator": "Operated by WTIA"
+    },
+    "groups": {
+      "eventsProgrammes": {
+        "label": "Events & Programmes",
+        "description": "Find current events, awards and programmes backed by WTIA records."
+      },
+      "membershipEcosystem": {
+        "label": "Membership & Ecosystem",
+        "description": "Join the association and discover reviewed member solutions."
+      },
+      "impactInsights": {
+        "label": "Impact & Insights",
+        "description": "Read published updates and inspect WTIA's AI evidence."
+      },
+      "aboutWtia": {
+        "label": "About WTIA",
+        "description": "Understand the association, its history, governance and contact channels."
+      }
+    },
+    "columns": {
+      "participate": "Participate",
+      "programmes": "Programmes",
+      "membership": "Membership",
+      "insights": "Evidence & insight",
+      "organisation": "Organisation",
+      "connect": "Connect"
+    },
+    "links": {
+      "events": "Events",
+      "launchpad": "Launch Pad",
+      "hkict": "HKICT Awards",
+      "asa": "Asia Smart App Awards",
+      "tct": "Tech to Connect",
+      "cpai": "CPAI",
+      "membership": "Membership",
+      "showcase": "Member & solution showcase",
+      "news": "News",
+      "aiOps": "AI operations",
+      "aiTransparency": "AI transparency",
+      "about": "About WTIA",
+      "history": "History",
+      "chairman": "Chairman's message",
+      "committees": "Committees",
+      "contact": "Contact"
+    },
+    "actions": {
+      "findEvent": "Find an event",
+      "join": "Join WiseTech",
+      "memberSignIn": "Member sign in"
+    },
     "openMenu": "Open navigation",
     "closeMenu": "Close navigation",
     "menuTitle": "Navigation",
-    "menuDescription": "Explore WTIA pages and change language.",
-    "join": "Join WTIA",
+    "menuDescription": "Explore WiseTech Hong Kong journeys and change language.",
     "english": "EN",
     "chinese": "中文",
     "switchToEnglish": "Switch to English",
     "switchToChinese": "Switch to Chinese",
-    "homeLabel": "WTIA home",
+    "homeLabel": "WiseTech Hong Kong home",
     "logoAlt": "WTIA",
     "primaryLabel": "Primary navigation"
   },
+  "Announcement": {
+    "label": "Announcement",
+    "dismiss": "Dismiss announcement"
+  },
   "Footer": {
-    "brand": "Innovate Hong Kong",
-    "summary": "The cross-border platform connecting Hong Kong, the Greater Bay Area and Asia to global technology markets, investors and opportunities. Powered by WTIA.",
+    "brand": {
+      "publicName": "WiseTech Hong Kong",
+      "operator": "Operated by WTIA",
+      "homeLabel": "WiseTech Hong Kong home",
+      "logoAlt": "WTIA"
+    },
+    "summary": "WiseTech Hong Kong connects technology businesses, practitioners and programmes through WTIA's verified public services.",
     "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
-    "navigate": "Navigate",
-    "home": "Home",
-    "membership": "Membership",
-    "about": "About",
-    "contact": "Contact",
-    "connect": "Connect",
-    "copyright": "© {year} Innovate Hong Kong — WTIA. All rights reserved."
+    "journeys": "Explore",
+    "connect": "Contact",
+    "legal": "Legal",
+    "privacy": "Privacy statement",
+    "copyright": "© {year} WiseTech Hong Kong. Operated by WTIA. All rights reserved."
   },
   "Email": {
     "brand": "WTIA",
@@ -226,10 +279,40 @@
     "metaDescription": "Connecting Hong Kong and Greater Bay Area innovation to global markets.",
     "eyebrow": "Innovate Hong Kong",
     "title": "Bridging GBA innovation to the global stage.",
+    "question": "Where can Hong Kong innovation go next?",
     "summary": "The cross-border platform connecting Hong Kong, the Greater Bay Area and Asia to global technology markets.",
     "imageAlt": "Hong Kong technology community",
+    "actions": {
+      "events": "Find an event",
+      "membership": "Explore membership",
+      "discover": "Discover WiseTech"
+    },
+    "highlightsTitle": "What is happening now",
+    "highlightsIntro": "Published opportunities and stories from the WTIA ecosystem.",
+    "highlights": {
+      "event": {
+        "label": "Next event",
+        "view": "View event",
+        "empty": "No upcoming public event is available.",
+        "unavailable": "Event information is temporarily unavailable."
+      },
+      "news": {
+        "label": "Latest news",
+        "view": "Read news",
+        "empty": "No published news is available.",
+        "unavailable": "News is temporarily unavailable."
+      },
+      "showcase": {
+        "label": "Member solution",
+        "view": "Explore solution",
+        "empty": "No published member solution is available.",
+        "unavailable": "Member solutions are temporarily unavailable."
+      }
+    },
     "featuresTitle": "Built for connection and growth",
     "featuresIntro": "WTIA brings the technology community together around practical opportunities.",
+    "partnerWallTitle": "Our partners",
+    "partnerWallIntro": "Approved organisations supporting the WTIA community.",
     "features": {
       "connect": {
         "title": "Connect",
@@ -242,21 +325,6 @@
       "represent": {
         "title": "Represent",
         "description": "Give the wireless technology sector a clear, collective voice."
-      }
-    },
-    "statsTitle": "A platform for the whole ecosystem",
-    "stats": {
-      "0": {
-        "value": "4",
-        "label": "Flagship programmes"
-      },
-      "1": {
-        "value": "2",
-        "label": "Working languages"
-      },
-      "2": {
-        "value": "1",
-        "label": "Connected technology community"
       }
     },
     "programsTitle": "Programmes and awards",
@@ -344,6 +412,7 @@
     "eyebrow": "Since 2001",
     "title": "Our history",
     "intro": "Milestones from twenty-five years of building Hong Kong's wireless and technology industry.",
+    "storyTitle": "Milestone story",
     "readMore": "Read more"
   },
   "Membership": {
@@ -353,8 +422,7 @@
     "title": "Find your place in Hong Kong's technology community.",
     "summary": "Choose the membership tier that fits how you participate, grow and contribute.",
     "tiersTitle": "Membership tiers",
-    "tiersIntro": "Annual membership is shown first. A monthly option is available for the Startup tier.",
-    "joinAction": "Choose this plan",
+    "tiersIntro": "Available fees and billing options reflect the current membership catalog.",
     "benefits": {
       "network": "Community and networking access",
       "programs": "Programme participation",
@@ -363,26 +431,18 @@
     "tiers": {
       "community": {
         "name": "Community",
-        "price": "Free",
-        "cadence": "No annual fee",
         "description": "Stay connected to public WTIA news and opportunities."
       },
       "startup": {
         "name": "Startup",
-        "price": "HKD 1,200",
-        "cadence": "per year · HKD 120 monthly available",
         "description": "For early-stage technology companies and teams."
       },
       "corporate": {
         "name": "Corporate",
-        "price": "HKD 1,800",
-        "cadence": "per year",
         "description": "For established organisations engaging the ecosystem."
       },
       "patron": {
         "name": "Patron",
-        "price": "Contact us",
-        "cadence": "Reviewed individually",
         "description": "For strategic supporters of WTIA's mission."
       }
     },
@@ -393,14 +453,27 @@
         "answer": "Yes. Community, Startup and Corporate membership can be applied for and paid online. Patron membership begins with a contact request."
       },
       "1": {
-        "question": "Which tiers offer monthly payment?",
-        "answer": "Monthly payment is available for the Startup tier. Other paid tiers are billed annually."
+        "question": "Where can I see current membership fees and billing options?",
+        "answer": "Current available fees and billing cadences are shown in the membership tier cards."
       },
       "2": {
         "question": "How is Patron membership arranged?",
         "answer": "Patron membership begins with a contact request and is reviewed manually by WTIA staff."
       }
-    }
+    },
+    "priceLabels": {
+      "free": "Free",
+      "review": "Contact us"
+    },
+    "cadenceLabels": {
+      "annual": "per year",
+      "monthly": "per month"
+    },
+    "actions": {
+      "join": "Choose this plan",
+      "contact": "Contact us"
+    },
+    "unavailable": "Membership is currently unavailable"
   },
   "Join": {
     "backToMembership": "Back to membership",
@@ -492,6 +565,7 @@
       "status": "Contact WTIA for the current programme timetable and how to take part."
     },
     "record": {
+      "statusHeading": "Current status",
       "editionsHeading": "Editions",
       "winnersHeading": "Winners",
       "categoryHeading": "Category",
@@ -637,6 +711,11 @@
     "eyebrow": "AI Showcase",
     "title": "Find the right WTIA member partner",
     "description": "Explore practical products and services from Hong Kong technology companies.",
+    "introTitle": "Technology solutions for practical business needs",
+    "introDescription": "Compare published WTIA member solutions by use case, deployment, language, and integration fit.",
+    "ownerCta": "Manage your showcase listing",
+    "resultsTitle": "Explore member solutions",
+    "resultsDescription": "Use the filters to narrow the directory to solutions that fit your needs.",
     "emptyTitle": "No published listings match",
     "emptyDescription": "Try changing a filter or search term.",
     "premium": "Premium",
@@ -654,6 +733,8 @@
       "clear": "Clear filters"
     },
     "details": {
+      "overview": "Solution overview",
+      "capabilities": "Capabilities",
       "useCases": "Use cases",
       "deployment": "Deployment",
       "languages": "Languages",
@@ -734,7 +815,42 @@
     "title": "Events",
     "description": "Stay connected to upcoming WTIA gatherings and opportunities.",
     "emptyTitle": "No events are published yet",
-    "emptyDescription": "WTIA events will appear here when dates and details are confirmed."
+    "emptyDescription": "WTIA events will appear here when dates and details are confirmed.",
+    "statusLabel": "Event status",
+    "status": {
+      "open": "Open",
+      "past": "Past"
+    },
+    "unavailableTitle": "Events are temporarily unavailable",
+    "unavailableDescription": "Please try again shortly.",
+    "empty": {
+      "open": {
+        "title": "No open events",
+        "description": "There are no upcoming events at the moment."
+      },
+      "past": {
+        "title": "No past events",
+        "description": "Past events will appear here when available."
+      }
+    },
+    "detail": {
+      "date": "Date and time",
+      "venue": "Venue",
+      "capacity": "Capacity"
+    },
+    "registration": {
+      "title": "Register for this event",
+      "submit": "Register",
+      "pending": "Registering…",
+      "registered": "Registration confirmed.",
+      "waitlist": "You have been added to the waitlist.",
+      "alreadyRegistered": "You are already registered.",
+      "alreadyWaitlisted": "You are already on the waitlist.",
+      "unauthenticated": "Sign in to register.",
+      "ineligible": "An eligible membership is required.",
+      "closed": "Registration is closed.",
+      "error": "We could not register you for this event. Please try again."
+    }
   },
   "News": {
     "metaTitle": "News | WTIA",
@@ -751,7 +867,31 @@
     "eyebrow": "Contact",
     "title": "Let's connect",
     "description": "Reach WTIA at the office or by email.",
-    "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong"
+    "channelsTitle": "Contact WTIA directly",
+    "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
+    "routesTitle": "Choose the right next step",
+    "routesDescription": "Use an established WTIA journey to find current information or take action.",
+    "routes": {
+      "events": {
+        "title": "Events and activities",
+        "description": "Browse published events and activities from WTIA."
+      },
+      "membership": {
+        "title": "Membership",
+        "description": "Compare current membership options and eligibility."
+      },
+      "showcase": {
+        "title": "Members and solutions",
+        "description": "Explore published member technology solutions."
+      },
+      "launchpad": {
+        "title": "Launch Pad",
+        "description": "Discover open cohorts, programmes and funding guidance."
+      }
+    },
+    "conciergeTitle": "Not sure where to start?",
+    "conciergeDescription": "Ask WiseTech through WTIA's existing Concierge.",
+    "conciergeLauncher": "Ask WiseTech"
   },
   "Privacy": {
     "metaTitle": "Privacy | WTIA",
@@ -1061,7 +1201,14 @@
       "register": "Register",
       "registering": "Registering...",
       "registerSuccess": "Registration confirmed.",
-      "registerError": "We could not register you for this event. Please try again."
+      "registerError": "We could not register you for this event. Please try again.",
+      "registered": "Registration confirmed.",
+      "waitlist": "You have been added to the waitlist.",
+      "alreadyRegistered": "You are already registered.",
+      "alreadyWaitlisted": "You are already on the waitlist.",
+      "unauthenticated": "Sign in to register.",
+      "ineligible": "An eligible membership is required.",
+      "closed": "Registration is closed."
     },
     "documents": {
       "title": "Documents and receipts",
@@ -1154,6 +1301,9 @@
       "segments": "Segments",
       "members": "Members",
       "atRisk": "At risk",
+      "announcements": "Announcements",
+      "partners": "Partners",
+      "landingPartners": "Launch Pad partners",
       "news": "News",
       "pageCopy": "Page copy",
       "media": "Media",
@@ -1359,6 +1509,8 @@
       "endsAt": "Ends at",
       "venue": "Venue",
       "capacity": "Capacity",
+      "heroMediaId": "Hero media",
+      "noHeroMedia": "No hero media",
       "memberOnly": "Members only",
       "published": "Published",
       "create": "Create event",
@@ -1386,13 +1538,63 @@
         "noShow": "No show"
       }
     },
+    "announcements": {
+      "eyebrow": "Announcements",
+      "editEyebrow": "Edit announcement",
+      "title": "Announcements",
+      "description": "Prepare bilingual, scheduled notices for a later public-shell activation.",
+      "existing": "All announcements",
+      "empty": "No announcements yet.",
+      "titleEn": "Title (English)",
+      "titleZhHk": "Title (Traditional Chinese)",
+      "ctaLabelEn": "Call to action (English)",
+      "ctaLabelZhHk": "Call to action (Traditional Chinese)",
+      "href": "Destination",
+      "startsAt": "Starts at",
+      "endsAt": "Ends at",
+      "timeHelp": "Times use Hong Kong time. The end is exclusive.",
+      "priority": "Priority",
+      "priorityHelp": "0 to 1000. Higher values take precedence.",
+      "statusDraft": "Draft",
+      "statusPublished": "Published",
+      "statusArchived": "Archived",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "archive": "Archive",
+      "unarchive": "Restore",
+      "archivedNotice": "This announcement is archived.",
+      "create": "Create announcement",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "createSuccess": "Announcement created.",
+      "updateSuccess": "Announcement updated.",
+      "validation": "Check the highlighted fields.",
+      "error": "Something went wrong. Try again."
+    },
+    "partners": {
+      "eyebrow": "Partner operations", "title": "General partners", "description": "Manage bilingual partner records, relationship approval, logo rights and publication separately.",
+      "existing": "All partners", "empty": "No partners yet.", "nameEn": "Name (English)", "nameZhHk": "Name (Traditional Chinese)",
+      "category": "Category", "category_supporting": "Supporting", "category_media": "Media", "category_regional": "Regional", "category_programme": "Programme", "category_sponsor": "Sponsor",
+      "websiteUrl": "HTTPS website", "logoMediaId": "Approved logo", "noLogo": "No logo", "displayOrder": "Display order", "featured": "Featured",
+      "relationshipStartsOn": "Relationship starts", "relationshipEndsOn": "Relationship ends", "relationshipConfirmed": "Relationship confirmed", "logoRightsConfirmed": "Logo rights confirmed",
+      "statusDraft": "Draft", "statusPublished": "Published", "statusArchived": "Archived", "publish": "Publish", "unpublish": "Unpublish", "archive": "Archive", "unarchive": "Restore",
+      "save": "Save partner", "saving": "Saving…", "createSuccess": "Partner created.", "updateSuccess": "Partner updated.", "validation": "Check the highlighted partner fields.", "error": "We could not save this partner. Try again."
+    },
+    "landingPartners": {
+      "eyebrow": "Launch Pad operations", "title": "Launch Pad partners", "description": "Keep negotiation details private and publish only signed, approved records.",
+      "existing": "All Launch Pad partners", "empty": "No Launch Pad partners yet.", "organizationEn": "Organisation (English)", "organizationZhHk": "Organisation (Traditional Chinese)",
+      "market": "Market", "region": "Region", "mouStatus": "MOU status", "mou_prospect": "Prospect", "mou_in_discussion": "In discussion", "mou_signed": "Signed", "mou_inactive": "Inactive",
+      "contactJson": "Private contact JSON", "notes": "Private negotiation notes", "statusDraft": "Draft", "statusPublished": "Published", "statusArchived": "Archived",
+      "publish": "Publish", "unpublish": "Unpublish", "archive": "Archive", "unarchive": "Restore", "save": "Save Launch Pad partner", "saving": "Saving…",
+      "createSuccess": "Launch Pad partner created.", "updateSuccess": "Launch Pad partner updated.", "validation": "Check the highlighted Launch Pad partner fields.", "error": "We could not save this Launch Pad partner. Try again."
+    },
     "media": {
       "statusArchived": "Archived",
       "archive": "Archive",
       "unarchive": "Restore",
       "archiving": "Saving",
       "archivedNotice": "This item is archived and hidden from the public site.",
-      "archiveInUse": "Still used by {count} showcase listing(s). Remove the logo from those listings first.",
+      "archiveInUse": "Still used by {count} showcase or partner record(s). Remove the logo from those records first.",
       "eyebrow": "Media",
       "title": "Media library",
       "description": "Register images the site may display, with alt text in both languages.",
@@ -1413,7 +1615,20 @@
       "urlInvalid": "Use a path to a file on this site, ending in .png, .jpg, .webp or .avif.",
       "urlConflict": "That image is already registered.",
       "validation": "Check the fields.",
-      "error": "Something went wrong. Try again."
+      "error": "Something went wrong. Try again.",
+      "manualTitle": "Register an existing site image",
+      "manualDescription": "Keep using this form for an image that is already deployed on this site.",
+      "uploadTitle": "Upload a private image",
+      "uploadDescription": "The image is normalized, stripped of metadata, and stored privately before it is registered.",
+      "uploadFile": "Image file",
+      "uploadFileHelp": "PNG, JPEG or WebP, up to 4 MiB. Animated images are rejected.",
+      "focalX": "Horizontal focal point (%)",
+      "focalY": "Vertical focal point (%)",
+      "upload": "Upload image",
+      "uploading": "Uploading…",
+      "uploadSuccess": "Image uploaded and registered.",
+      "uploadInvalid": "Check the file and image details.",
+      "uploadError": "The image could not be uploaded. Try again."
     },
     "pageCopy": {
       "eyebrow": "Page copy",
@@ -1461,7 +1676,8 @@
       "titleEn": "Title (English)",
       "titleZh": "Title (Chinese)",
       "author": "Author",
-      "bodyMdx": "Body",
+      "bodyMdx": "Body (English)",
+      "bodyMdxZhHk": "Body (Traditional Chinese)",
       "bodyHelp": "Supported formatting: ## headings, - lists, **bold**, and links to WTIA pages such as [membership](/membership). Images and external links are not supported.",
       "published": "Published",
       "statusPublished": "Published",

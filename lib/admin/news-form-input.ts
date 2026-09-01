@@ -32,6 +32,7 @@ export function newsFormInput(
     titleEn: text(formData, "titleEn"),
     titleZh: text(formData, "titleZh"),
     bodyMdx: text(formData, "bodyMdx"),
+    bodyMdxZhHk: text(formData, "bodyMdxZhHk"),
     author: text(formData, "author"),
     publishedAt: newsPublishedAt(formData, current, now),
   };

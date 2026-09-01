@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 
-import {assertIsolatedSeedEnvironment} from "@/scripts/lib/acceptance-guard";
+import {assertIsolatedSeedEnvironment, assertSeedSentinel} from "@/scripts/lib/acceptance-guard";
 
 const prefix = "M5_ACCEPTANCE";
 const valid = {
@@ -97,6 +97,45 @@ describe("isolated seed guard", () => {
     } catch (error) {
       expect(error).not.toBeInstanceOf(TypeError);
       expect(error).toHaveProperty("message", "M6_ACCEPTANCE_DATABASE_URL_INVALID");
+    }
+  });
+});
+
+describe("seed sentinel", () => {
+  it("rejects a database with no sentinel row", async () => {
+    await expect(
+      assertSeedSentinel("M5_ACCEPTANCE", async () => 0),
+    ).rejects.toThrow("M5_ACCEPTANCE_SENTINEL_REQUIRED");
+  });
+
+  it("accepts a database whose sentinel is present", async () => {
+    await expect(
+      assertSeedSentinel("M5_ACCEPTANCE", async () => 1),
+    ).resolves.toBeUndefined();
+  });
+
+  // More than one row means something other than provisioning wrote to the
+  // table, so the marker no longer evidences a single deliberate act.
+  it("rejects a sentinel table with more than one row", async () => {
+    await expect(
+      assertSeedSentinel("M5_ACCEPTANCE", async () => 2),
+    ).rejects.toThrow("M5_ACCEPTANCE_SENTINEL_AMBIGUOUS");
+  });
+
+  // The underlying error is preserved as `cause` rather than discarded --
+  // "unreadable" covers a missing relation, a refused connection, or a
+  // permissions error alike, and each is fixed differently.
+  it("surfaces a query failure rather than treating it as absence", async () => {
+    const queryError = new Error('relation "acceptance_sentinel" does not exist');
+
+    expect.assertions(2);
+    try {
+      await assertSeedSentinel("M5_ACCEPTANCE", async () => {
+        throw queryError;
+      });
+    } catch (error) {
+      expect(error).toHaveProperty("message", "M5_ACCEPTANCE_SENTINEL_UNREADABLE");
+      expect(error).toHaveProperty("cause", queryError);
     }
   });
 });

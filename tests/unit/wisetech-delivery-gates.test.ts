@@ -65,6 +65,19 @@ function readRequired(path: string, label: string) {
   return readFileSync(path, "utf8").replace(/\r\n/g, "\n");
 }
 
+function normalizeNewlines(value: string) {
+  return value.replace(/\r\n/g, "\n");
+}
+
+function mutateFixture(label: string, fixture: string, needle: string, replacement: string) {
+  const normalizedFixture = normalizeNewlines(fixture);
+  const normalizedNeedle = normalizeNewlines(needle);
+  expect(normalizedFixture.includes(normalizedNeedle), label + " mutation needle was not found").toBe(true);
+  const mutatedFixture = normalizedFixture.replace(normalizedNeedle, normalizeNewlines(replacement));
+  expect(mutatedFixture, label + " fixture mutation unexpectedly no-op").not.toBe(normalizedFixture);
+  return mutatedFixture;
+}
+
 function section(markdown: string, heading: string) {
   const start = markdown.indexOf(heading);
   if (start < 0) return "";
@@ -160,11 +173,11 @@ describe("WiseTech delivery gates", () => {
     const template = readRequired(paths.template, "pull-request template");
     const provenance = readRequired(paths.provenance, "WiseTech provenance document");
     const cases = [
-      ["PR reorder", delivery.replace(`1. ${scopes[0]}\n2. ${scopes[1]}`, `2. ${scopes[1]}\n1. ${scopes[0]}`), template, provenance],
-      ["PR duplication", delivery.replace(`7. ${scopes[6]}`, `7. ${scopes[6]}\n1. ${scopes[0]}`), template, provenance],
-      ["contradictory production status", delivery.replace("production approval: NOT PASSED", "production approval: NOT PASSED\nproduction approval: PASSED"), template, provenance],
-      ["prose checklist", delivery, template.replace("- [ ] Focused RED evidence", "Focused RED evidence"), provenance],
-      ["removed provenance link", delivery, template, provenance.replace("[WiseTech delivery gates](wisetech-delivery-gates.md)", "WiseTech delivery gates")],
+      ["PR reorder", mutateFixture("PR reorder", delivery, `1. ${scopes[0]}\n2. ${scopes[1]}`, `2. ${scopes[1]}\n1. ${scopes[0]}`), template, provenance],
+      ["PR duplication", mutateFixture("PR duplication", delivery, `7. ${scopes[6]}`, `7. ${scopes[6]}\n1. ${scopes[0]}`), template, provenance],
+      ["contradictory production status", mutateFixture("contradictory production status", delivery, "production approval: NOT PASSED", "production approval: NOT PASSED\nproduction approval: PASSED"), template, provenance],
+      ["prose checklist", delivery, mutateFixture("prose checklist", template, "- [ ] Focused RED evidence", "Focused RED evidence"), provenance],
+      ["removed provenance link", delivery, template, mutateFixture("removed provenance link", provenance, "[WiseTech delivery gates](wisetech-delivery-gates.md)", "WiseTech delivery gates")],
     ] as const;
     for (const [label, hostileDelivery, hostileTemplate, hostileProvenance] of cases) {
       expect(validate(hostileDelivery, hostileTemplate, hostileProvenance), `${label} must fail delivery evidence validation`).not.toEqual([]);
