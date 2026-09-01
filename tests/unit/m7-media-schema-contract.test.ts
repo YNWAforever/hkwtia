@@ -112,6 +112,15 @@ describe("M7.3 media schema contract", () => {
     };
     expect(snapshot.tables).toHaveProperty("public.media");
 
+    const eventHeroMigration = join(process.cwd(), "drizzle", "0023_wisetech_event_hero.sql");
+    expect(existsSync(eventHeroMigration)).toBe(true);
+    if (existsSync(eventHeroMigration)) {
+      const heroSql = readFileSync(eventHeroMigration, "utf8");
+      expect(heroSql).toContain('ADD COLUMN "hero_media_id" uuid');
+      expect(heroSql).toContain('ON DELETE set null ON UPDATE no action');
+      expect(heroSql).toContain('"events_hero_media_idx"');
+    }
+
     const journal = JSON.parse(readFileSync(
       join(process.cwd(), "drizzle", "meta", "_journal.json"),
       "utf8",

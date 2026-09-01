@@ -25,9 +25,18 @@ describe("join navigation", () => {
   });
 
   it.each([
+    ["en", "/portal/company/listing", "https://preview.example.test/join?next=%2Fportal%2Fcompany%2Flisting"],
+    ["zh-HK", "/zh/portal/company/listing", "https://preview.example.test/zh/join?next=%2Fportal%2Fcompany%2Flisting"],
+  ] as const)("builds the %s callback for the canonical Showcase listing editor", (locale, continuation, expected) => {
+    expect(buildJoinCallback("https://preview.example.test", locale, null, continuation)).toBe(expected);
+  });
+
+  it.each([
     ["/portal", "en", "/portal"],
     ["/zh/portal/profile", "zh-HK", "/portal/profile"],
     ["/portal/company/seats", "en", "/portal/company/seats"],
+    ["/portal/company/listing", "en", "/portal/company/listing"],
+    ["/zh/portal/company/listing", "zh-HK", "/portal/company/listing"],
   ] as const)("normalizes an allowlisted localized continuation %s", (value, locale, canonical) => {
     expect(parseJoinContinuation(value, locale)).toBe(canonical);
   });

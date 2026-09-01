@@ -31,7 +31,7 @@ export default async function NewsPage({params}: Props) {
   const appLocale = locale as AppLocale;
   // A database outage degrades to the empty state rather than a 500.
   const [news, buildLogs] = await Promise.all([
-    listPublishedNews().catch(() => []),
+    listPublishedNews(appLocale).catch(() => []),
     listPublishedBuildLogs().catch(() => []),
   ]);
 
@@ -52,7 +52,7 @@ export default async function NewsPage({params}: Props) {
                 locale={appLocale}
                 publishedAt={post.publishedAt}
                 slug={post.slug}
-                title={appLocale === "zh-HK" ? post.titleZh : post.titleEn}
+                title={post.title}
               />
             ))}
             {buildLogs.map((post) => (

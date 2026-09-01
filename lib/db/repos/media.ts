@@ -7,6 +7,7 @@ import { requireAdmin } from "@/lib/auth/authorize";
 import { getDb } from "@/lib/db/repos/common";
 import {
   auditEvents,
+  events,
   media,
   partners,
   showcaseListings,
@@ -71,6 +72,7 @@ export type MediaMutationDependencies = Readonly<{
         ) => Promise<MediaRow | null>;
         countListingReferences: (id: string) => Promise<number>;
         countPartnerReferences?: (id: string) => Promise<number>;
+        countEventHeroReferences: (id: string) => Promise<number>;
         setArchivedAt: (
           id: string,
           archivedAt: Date | null,
@@ -173,6 +175,13 @@ async function defaultMutationDependencies(): Promise<MediaMutationDependencies>
                 .select({ total: count() })
                 .from(partners)
                 .where(eq(partners.logoMediaId, id))
+            )[0]?.total ?? 0,
+          countEventHeroReferences: async (id) =>
+            (
+              await tx
+                .select({ total: count() })
+                .from(events)
+                .where(eq(events.heroMediaId, id))
             )[0]?.total ?? 0,
           setArchivedAt: async (id, archivedAt) =>
             (
@@ -305,8 +314,9 @@ export async function setMediaArchived(
         const listings = await transaction.countListingReferences(mediaId);
         const partnerReferences =
           (await transaction.countPartnerReferences?.(mediaId)) ?? 0;
-        if (listings + partnerReferences > 0)
-          throw mediaInUseError(listings + partnerReferences);
+        const eventHeroReferences = await transaction.countEventHeroReferences(mediaId);
+        if (listings + partnerReferences + eventHeroReferences > 0)
+          throw mediaInUseError(listings + partnerReferences + eventHeroReferences);
       }
       const row = await transaction.setArchivedAt(
         mediaId,

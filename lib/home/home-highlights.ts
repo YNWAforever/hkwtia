@@ -1,39 +1,29 @@
 import "server-only";
 
-import {
-  eventsRepository,
-  localizeEvent,
-  type FeaturedPublicEventOptions,
-  type LocalizedEvent,
-} from "@/lib/db/repos/events";
+import type {AppLocale} from "@/i18n/routing";
+import {eventsRepository, type FeaturedPublicEventOptions} from "@/lib/db/repos/events";
 import {
   listPublishedNews,
   type PublishedNewsSummary,
   type PublicReadOptions as PublicPostsReadOptions,
 } from "@/lib/db/repos/public-posts";
-import {
-  showcaseRepository,
-  type PublicReadOptions as ShowcaseReadOptions,
-  type PublicShowcaseRow,
-} from "@/lib/db/repos/showcase";
-import type {Event} from "@/lib/db/server-schema";
+import {showcaseRepository, type PublicReadOptions as ShowcaseReadOptions, type PublicShowcaseRow} from "@/lib/db/repos/showcase";
+import type {PublicEventProjection} from "@/lib/events/public";
 import {toPublicListing, type PublicListing} from "@/lib/showcase/contracts";
-import type {AppLocale} from "@/i18n/routing";
 
 export type HomeSlot<T> =
   | Readonly<{status: "available"; item: T}>
   | Readonly<{status: "empty"}>
   | Readonly<{status: "unavailable"}>;
-
 export type HomeHighlights = Readonly<{
-  event: HomeSlot<LocalizedEvent>;
+  event: HomeSlot<PublicEventProjection>;
   news: HomeSlot<PublishedNewsSummary>;
   showcase: HomeSlot<PublicListing>;
 }>;
-
 export type HomeHighlightReaders = Readonly<{
-  events: (options: FeaturedPublicEventOptions) => Promise<readonly Event[]>;
+  events: (options: FeaturedPublicEventOptions) => Promise<readonly PublicEventProjection[]>;
   news: (
+    locale: AppLocale,
     asOf: Date,
     options: PublicPostsReadOptions,
   ) => Promise<readonly PublishedNewsSummary[]>;
@@ -44,11 +34,13 @@ export type HomeHighlightReaders = Readonly<{
 }>;
 
 const anonymous = {kind: "anonymous", userId: null} as const;
-
-const defaultReaders: HomeHighlightReaders = {
-  events: (options) => eventsRepository.listFeaturedPublic(anonymous, options),
-  news: (asOf, options) => listPublishedNews(asOf, options),
-  showcase: (filters, options) => showcaseRepository.listPublished(filters, options),
+const defaultReaders = {
+  news: (locale: AppLocale, asOf: Date, options: PublicPostsReadOptions) =>
+    listPublishedNews(locale, asOf, options),
+  showcase: (
+    filters: Readonly<Record<string, unknown>>,
+    options: ShowcaseReadOptions,
+  ) => showcaseRepository.listPublished(filters, options),
 };
 
 function slot<T, Mapped>(
@@ -57,9 +49,7 @@ function slot<T, Mapped>(
 ): HomeSlot<Mapped> {
   if (result.status === "rejected") return {status: "unavailable"};
   const [item] = result.value;
-  return item === undefined
-    ? {status: "empty"}
-    : {status: "available", item: map(item)};
+  return item === undefined ? {status: "empty"} : {status: "available", item: map(item)};
 }
 
 export async function loadHomeHighlights(input: Readonly<{
@@ -67,15 +57,18 @@ export async function loadHomeHighlights(input: Readonly<{
   asOf?: Date;
   readers?: HomeHighlightReaders;
 }>): Promise<HomeHighlights> {
-  const {locale, asOf = new Date(), readers = defaultReaders} = input;
+  const {locale, asOf = new Date(), readers} = input;
+  const eventReader = readers?.events ?? ((options: FeaturedPublicEventOptions) =>
+    eventsRepository.listFeaturedPublic(anonymous, {...options, locale}));
+  const newsReader = readers?.news ?? defaultReaders.news;
+  const showcaseReader = readers?.showcase ?? defaultReaders.showcase;
   const [eventResult, newsResult, showcaseResult] = await Promise.allSettled([
-    readers.events({asOf, limit: 1}),
-    readers.news(asOf, {limit: 1}),
-    readers.showcase({}, {limit: 1}),
+    eventReader({asOf, limit: 1}),
+    newsReader(locale, asOf, {limit: 1}),
+    showcaseReader({}, {limit: 1}),
   ] as const);
-
   return {
-    event: slot(eventResult, (event) => localizeEvent(event, locale)),
+    event: slot(eventResult, (event) => event),
     news: slot(newsResult, (item) => item),
     showcase: slot(showcaseResult, (listing) => toPublicListing(listing, locale)),
   };

@@ -76,10 +76,10 @@ describe("M6 Launch Pad public experience", () => {
     expect(markup).toContain("clinicCta");
   });
 
-  it("uses the curated static partner map with no database partner method available", async () => {
+  it("renders the localized partner empty state when the repository is unavailable", async () => {
     const markup = renderToStaticMarkup(await LaunchPadPage(pageProps("en")));
 
-    expect(markup).toContain("Singapore Trade Desk");
+    expect(markup).toContain("partners.empty");
     expect(markup).not.toContain("private-contact@example.com");
     expect(markup).not.toContain("private-partner-notes");
     expect(markup).not.toContain("in_discussion");

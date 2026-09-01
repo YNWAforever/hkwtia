@@ -179,6 +179,11 @@ describe("hideSyntheticContent (--hide)", () => {
     expect(showcase?.values?.[0]).toEqual(M5_LISTING_IDS);
     const cohort = calls.find(({text}) => text.includes("UPDATE cohorts"));
     expect(cohort?.values?.[0]).toEqual([M6_COHORT_ID]);
+    const landingPartners = calls.find(({text}) => text.includes("UPDATE landing_partners"));
+    expect(landingPartners?.text).toBe(
+      "UPDATE landing_partners SET published_at = NULL, updated_at = now() WHERE id = ANY($1::uuid[]) RETURNING id",
+    );
+    expect(landingPartners?.values?.[0]).toEqual(M6_PARTNER_IDS);
     const event = calls.find(({text}) => text.includes("UPDATE events"));
     expect(event?.values?.[0]).toEqual(M2_UUIDS.events);
   });

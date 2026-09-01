@@ -61,9 +61,10 @@ describe("WiseTech localized news schema contract", () => {
       join(process.cwd(), "drizzle", "meta", "_journal.json"),
       "utf8",
     )) as {entries?: Array<{idx?: number; tag?: string}>};
-    expect(journal.entries?.at(-1)).toMatchObject({
-      idx: 22,
-      tag: "0022_wisetech_localized_news",
-    });
+    const entries = journal.entries ?? [];
+    const localizedNewsIndex = entries.findIndex((entry) => entry.idx === 22 && entry.tag === "0022_wisetech_localized_news");
+    const eventHeroIndex = entries.findIndex((entry) => entry.idx === 23 && entry.tag === "0023_wisetech_event_hero");
+    expect(localizedNewsIndex).toBeGreaterThan(-1);
+    expect(eventHeroIndex).toBe(localizedNewsIndex + 1);
   });
 });

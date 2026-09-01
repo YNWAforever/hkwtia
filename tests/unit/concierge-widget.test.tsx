@@ -1,4 +1,4 @@
-import {fireEvent, render, screen, waitFor} from "@testing-library/react";
+import {act, fireEvent, render, screen, waitFor} from "@testing-library/react";
 import type {ReactElement} from "react";
 import {afterEach, describe, expect, it, vi} from "vitest";
 
@@ -6,6 +6,10 @@ import {
   ConciergeWidget,
   type ConciergeLabels,
 } from "@/components/ai/concierge-widget";
+import {
+  ContactConciergeLauncher,
+} from "@/components/marketing/contact-concierge-launcher";
+import {CONCIERGE_OPEN_EVENT} from "@/lib/ai/concierge-open";
 
 const CONVERSATION_ID = "11111111-1111-4111-8111-111111111111";
 const RUN_ID = "22222222-2222-4222-8222-222222222222";
@@ -91,6 +95,48 @@ afterEach(() => {
 });
 
 describe("ConciergeWidget", () => {
+  it("falls back to the native trigger after a no-payload event from the document body", async () => {
+    render(widget());
+    const launcher = screen.getByRole("button", {name: labels.launcher});
+
+    expect(document.body).toHaveFocus();
+    act(() => window.dispatchEvent(new Event(CONCIERGE_OPEN_EVENT)));
+
+    expect(await screen.findByRole("dialog", {name: labels.title})).toBeVisible();
+    expect(screen.getByRole("textbox", {name: labels.messageLabel})).toHaveFocus();
+
+    fireEvent.click(screen.getByRole("button", {name: labels.close}));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(launcher).toHaveFocus();
+  });
+
+  it("returns focus to the Contact launcher after Close and Escape", async () => {
+    render(
+      <>
+        <ContactConciergeLauncher label="Ask WiseTech" />
+        {widget()}
+      </>,
+    );
+    const contactLauncher = screen.getByRole("button", {name: "Ask WiseTech"});
+
+    expect(document.body).toHaveFocus();
+    fireEvent.click(contactLauncher);
+    expect(await screen.findByRole("dialog", {name: labels.title})).toBeVisible();
+    expect(screen.getByRole("textbox", {name: labels.messageLabel})).toHaveFocus();
+
+    fireEvent.click(screen.getByRole("button", {name: labels.close}));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(contactLauncher).toHaveFocus();
+
+    fireEvent.click(contactLauncher);
+    expect(await screen.findByRole("dialog", {name: labels.title})).toBeVisible();
+    expect(screen.getByRole("textbox", {name: labels.messageLabel})).toHaveFocus();
+
+    fireEvent.keyDown(document, {key: "Escape"});
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(contactLauncher).toHaveFocus();
+  });
+
   it("labels its launcher and dialog, moves focus inside, closes with Escape, and returns focus", async () => {
     render(widget());
     const launcher = screen.getByRole("button", {name: labels.launcher});

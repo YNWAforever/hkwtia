@@ -27,6 +27,8 @@ describe("uploaded media registry invariants", () => {
         lockMedia: vi.fn(async () => uploadedRow()),
         findByUrl: vi.fn(async () => null),
         updateMedia: update,
+        countListingReferences: vi.fn(async () => 0),
+        countEventHeroReferences: vi.fn(async () => 0),
         insertAudit: vi.fn(),
       }),
     } as MediaMutationDependencies;
