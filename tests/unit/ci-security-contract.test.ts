@@ -112,6 +112,14 @@ function workflowRunSteps(workflow: string) {
   return [...workflow.matchAll(/^\s*- run: (.+)$/gm)].map(([, command]) => command);
 }
 
+function workflowTriggerBranches(workflow: string, event: "pull_request" | "push") {
+  // Normalised like its sibling tests rather than leaning on the regex
+  // backtracking over a stray carriage return. This file has already carried one
+  // CRLF bug; relying on a subtlety to survive the next one is how that happened.
+  const match = new RegExp(`${event}:\\s*\\n\\s*branches:\\s*\\[([^\\]]*)\\]`).exec(normalizeNewlines(workflow));
+  return match ? match[1].split(",").map((branch) => branch.trim()).filter(Boolean) : [];
+}
+
 function normalizeNewlines(value: string) {
   return value.replace(/\r\n/g, "\n");
 }
@@ -327,7 +335,14 @@ describe("CI and production dependency security contract", () => {
     expect(existsSync(workflowPath), "missing required .github/workflows/ci.yml workflow").toBe(true);
     const workflow = readFileSync(workflowPath, "utf8");
     expect(workflow, "CI must use read-only contents permissions").toMatch(/permissions:\s*\n\s*contents:\s*read/);
-    expect(workflow, "CI must trigger pull requests targeting main").toMatch(/pull_request:\s*\n\s*branches:\s*\[main\]/);
+    // Anchored on which branches are actually covered rather than one spelling of
+    // the list. `release` is the production branch and the repository default, so a
+    // trigger list that quietly stopped covering it would deploy production
+    // unchecked -- which is exactly the state this repository was in until CI was
+    // extended. Both events are pinned because only `push` guards the cutover
+    // itself; a pull_request-only trigger leaves the deploying push unverified.
+    expect(workflowTriggerBranches(workflow, "pull_request"), "CI must trigger pull requests targeting main and release").toEqual(expect.arrayContaining(["main", "release"]));
+    expect(workflowTriggerBranches(workflow, "push"), "CI must run on pushes to main and release, so production is never deployed unchecked").toEqual(expect.arrayContaining(["main", "release"]));
     expect(workflow, "CI must use Node 22 with npm caching").toMatch(/node-version:\s*22[\s\S]*cache:\s*npm/);
     expect(workflowRunSteps(workflow), "CI run steps must be exactly the required commands in order").toEqual(requiredCiCommands);
   });
