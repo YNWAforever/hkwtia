@@ -13,3 +13,24 @@
  * instead. */
 .announcement[data-dismissed="true"] { display: none; }
 .announcement-text { min-width: 0; overflow-wrap: anywhere; }
+
+/* Dismissing the announcement no longer touches header.site-header directly (see
+ * components/layout/announcement-dismiss.tsx) -- HeaderShell (Task 3) re-renders that
+ * element's className from its own React state, which would silently drop a class added by
+ * direct DOM mutation the next time the reader scrolls. The dismissal is stamped on <html>
+ * instead and read here. Specificity 0,3,0 beats both rules it must override: the port's base
+ * `.site-header { top: 42px }` (0,1,0, app/styles/wisetech.css:51) and its
+ * `@media(max-width:820px) .site-header:not(.scrolled) { top: 48px }` (0,2,0, wisetech.css:845)
+ * -- so this wins regardless of viewport width or scroll state, with no `!important` and no
+ * need to duplicate the media query. */
+:root[data-announcement-dismissed="true"] .site-header { top: 0; }
+
+/* The port's above-820px header offset is a fixed `.site-header { top: 42px }` that assumes a
+ * one-line, `min-height: 42px` bar (wisetech.css:47,51) -- it does not measure the bar's actual
+ * rendered height. Below 820px the port switches to a fixed 48px offset and clamps the bar's
+ * second child (the text span) to two lines itself (wisetech.css:844-846), so this rule stops
+ * at that breakpoint; above it, truncating to one line keeps the 42px assumption true instead
+ * of letting a long announcement grow the bar until the header covers it. */
+@media (min-width: 821px) {
+  .announcement-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+}

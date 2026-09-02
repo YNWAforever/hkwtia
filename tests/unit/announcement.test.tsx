@@ -109,12 +109,15 @@ describe("AnnouncementBar", () => {
   beforeEach(() => {
     window.sessionStorage.clear();
     document.body.innerHTML = "";
+    // The dismissal island stamps this on <html>, outside document.body, so clearing the body
+    // above does not reset it -- without this, a dismissal from one test could leak into the
+    // next.
+    delete document.documentElement.dataset.announcementDismissed;
   });
 
   const announcement = {id: "launch", href: "/events" as const, text: "瀏覽即將舉行的活動", ctaLabel: "查看活動"};
 
   it("renders the donor bar and dismisses it for the session only", () => {
-    document.body.insertAdjacentHTML("afterbegin", '<header class="site-header"></header>');
     render(<AnnouncementBar announcement={announcement} label="公告" dismissLabel="關閉公告" />);
 
     const bar = screen.getByRole("complementary", {name: "公告"});
@@ -131,7 +134,8 @@ describe("AnnouncementBar", () => {
 
     expect(screen.queryByRole("complementary", {name: "公告"})).not.toBeInTheDocument();
     expect(screen.queryByRole("button", {name: "關閉公告"})).not.toBeInTheDocument();
-    expect(document.querySelector("header.site-header")).toHaveClass("no-announcement");
+    expect(bar).toHaveAttribute("data-dismissed", "true");
+    expect(document.documentElement.dataset.announcementDismissed).toBe("true");
     expect(window.sessionStorage.getItem("hkwtia:announcement-dismissed")).toBe("launch");
     expect(document.cookie).toBe("");
   });
@@ -140,10 +144,12 @@ describe("AnnouncementBar", () => {
     window.sessionStorage.setItem("hkwtia:announcement-dismissed", "launch");
     const first = render(<AnnouncementBar announcement={announcement} label="公告" dismissLabel="關閉公告" />);
     expect(screen.queryByRole("complementary", {name: "公告"})).not.toBeInTheDocument();
+    expect(document.documentElement.dataset.announcementDismissed).toBe("true");
     first.unmount();
 
     render(<AnnouncementBar announcement={{...announcement, id: "second"}} label="公告" dismissLabel="關閉公告" />);
     expect(screen.getByRole("complementary", {name: "公告"})).toBeInTheDocument();
+    expect(document.documentElement.dataset.announcementDismissed).toBeUndefined();
   });
 
   it("survives a sessionStorage that throws", () => {

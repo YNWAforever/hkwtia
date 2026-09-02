@@ -41,18 +41,27 @@ export function AnnouncementDismiss({announcementId, label, barId}: Announcement
     if (readDismissedId() === announcementId) setDismissed(true);
   }, [announcementId]);
 
-  // The bar and the header are server-rendered siblings, so the island writes to them
-  // directly rather than lifting their markup across the client boundary. React never
-  // re-renders those nodes, so nothing competes for these attributes.
+  // The bar is a server-rendered sibling, so the island writes to it directly rather than
+  // lifting its markup across the client boundary. React never re-renders that node, so
+  // nothing competes for the attribute below.
+  //
+  // The dismissal itself is stamped on <html>, not on header.site-header: HeaderShell (Task 3)
+  // is a client component that recomputes the header's className from its own React state
+  // (data-variant, .scrolled) on every render, so a class added here by direct DOM mutation
+  // would be silently dropped the next time the reader scrolls and HeaderShell re-renders.
+  // <html> belongs to the root layout, entirely outside HeaderShell's tree, so React never
+  // recomputes its attributes and nothing here competes with it. Task 3's own server-rendered
+  // "no-announcement" modifier is untouched and still covers the other case -- no announcement
+  // published at all; this attribute covers only "an announcement exists but was dismissed".
   useEffect(() => {
     const bar = document.getElementById(barId);
-    const header = document.querySelector<HTMLElement>("header.site-header");
     if (bar) {
       bar.setAttribute("data-dismissed", String(dismissed));
       if (dismissed) bar.setAttribute("aria-hidden", "true");
       else bar.removeAttribute("aria-hidden");
     }
-    header?.classList.toggle("no-announcement", dismissed);
+    if (dismissed) document.documentElement.dataset.announcementDismissed = "true";
+    else delete document.documentElement.dataset.announcementDismissed;
   }, [barId, dismissed]);
 
   if (dismissed) return null;

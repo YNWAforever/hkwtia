@@ -74,6 +74,12 @@ describe("WiseTech CSS port", () => {
     expect(publicLayout.indexOf('import "../../styles/wisetech-shell.css";'))
       .toBeGreaterThan(publicLayout.indexOf('import "../../styles/wisetech.css";'));
     expect(shellOverrides).not.toContain("@import");
+
+    // Pins the two selectors the dismissal island (components/layout/announcement-dismiss.tsx)
+    // depends on, so a rename on either side is caught here instead of silently breaking the
+    // bar's hiding or the header's dismissed-state offset.
+    expect(shellOverrides).toContain('[data-announcement-dismissed="true"] .site-header');
+    expect(shellOverrides).toContain('[data-dismissed="true"]');
   });
 
   it("carries no donor build directive, remote asset or donor route", () => {
