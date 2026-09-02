@@ -36,7 +36,7 @@ test("desktop navigation supports trigger traversal, open, Escape, active state,
   // ArrowDown is the entry move: it hands focus to the panel's first tabbable element, which in
   // the donor grammar is the heading's "View overview" link, ahead of the columns.
   await triggers.nth(0).press("ArrowDown");
-  await expect(panel.locator(":focus")).toHaveCount(1);
+  await expect(panel.getByRole("link", {name: "View overview"})).toBeFocused();
   await page.screenshot({path: testInfo.outputPath("desktop-events-menu.png"), fullPage: true});
   await page.keyboard.press("Escape");
   await expect(triggers.nth(0)).toHaveAttribute("aria-expanded", "false");

@@ -6,7 +6,6 @@ import * as React from "react";
 import {cn} from "@/lib/utils";
 
 const NavigationMenuItem = NavigationMenuPrimitive.Item;
-const NavigationMenuLink = NavigationMenuPrimitive.Link;
 
 const NavigationMenu = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Root>,
@@ -25,9 +24,11 @@ const NavigationMenu = React.forwardRef<
    * makes Tab move to the next trigger — which is what the donor header does anyway.
    *
    * A MutationObserver rather than a one-shot effect: the proxy is mounted and unmounted on
-   * every open, and Radix mounts it after this effect has already run for the new `value`.
-   * Writing tabIndex changes the attribute, which fires the observer once more; the element no
-   * longer matches `[tabindex="0"]`, so it settles immediately.
+   * every open, and Radix mounts it after any effect keyed on the open value has already run.
+   * The observer watches the whole subtree, so a single subscription for the lifetime of the
+   * root catches every open; re-creating it per open would be wasted work, which is why the
+   * dependency array is empty. Writing tabIndex changes the attribute and fires the observer
+   * once more; the element no longer matches `[tabindex="0"]`, so it settles immediately.
    */
   React.useEffect(() => {
     const root = rootRef.current;
@@ -47,7 +48,7 @@ const NavigationMenu = React.forwardRef<
       attributeFilter: ["tabindex", "aria-hidden"],
     });
     return () => observer.disconnect();
-  }, [value]);
+  }, []);
 
   return (
     <NavigationMenuPrimitive.Root
@@ -102,6 +103,9 @@ const NavigationMenuViewport = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Viewport>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Viewport>
 >(({className, ...props}, ref) => (
+  // Kept a sibling of NavigationMenuList, never a child: Radix's List renders an inner
+  // `position: relative` div around its items, which would re-anchor this panel to the
+  // trigger row instead of the header.
   // Neither this wrapper nor .desktop-nav is positioned, so `absolute` resolves against
   // .site-header — which is what centres the donor panel under the whole header rather than
   // under the trigger row. The panel sizes itself through .mega-menu-v2.
@@ -115,7 +119,6 @@ export {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
   NavigationMenuViewport,

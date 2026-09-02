@@ -130,4 +130,81 @@ describe("DesktopMegaNavigation", () => {
     await waitFor(() => expect(trigger).toHaveAttribute("aria-expanded", "false"));
     await waitFor(() => expect(trigger).toHaveFocus());
   });
+
+  it("keeps Radix's focus proxy out of the tab order without disarming after the first open", async () => {
+    render(<DesktopMegaNavigation groups={groups} primaryLabel="Primary navigation" exploreLabel="explore" viewOverviewLabel="viewOverview" />);
+    const trigger = screen.getAllByRole("button")[0]! as HTMLButtonElement;
+    trigger.focus();
+    activateButtonWithEnter(trigger);
+    await screen.findByRole("link", {name: "links.events"});
+
+    // The observer in components/ui/navigation-menu.tsx watches the Radix root, which is the
+    // inner <nav> the primitive renders, not the .desktop-nav landmark around it.
+    const root = screen.getByRole("navigation", {name: "Primary navigation"}).querySelector("nav")!;
+
+    // While a menu is open Radix renders a VisuallyHidden focus proxy beside the trigger with
+    // aria-hidden and tabIndex 0 (node_modules/@radix-ui/react-navigation-menu/dist/index.mjs
+    // :348-356). axe scores that a serious aria-hidden-focus violation, so nothing aria-hidden
+    // inside the root may stay focusable.
+    const proxies = [...root.querySelectorAll<HTMLElement>('[aria-hidden="true"][tabindex]')];
+    expect(proxies.length).toBeGreaterThan(0);
+    for (const proxy of proxies) expect(proxy.tabIndex).toBe(-1);
+    expect(root.querySelectorAll('[aria-hidden="true"][tabindex="0"]')).toHaveLength(0);
+
+    // A proxy appended after mount is neutralised too. This is what makes the effect's empty
+    // dependency array correct: one subscription with subtree: true covers every later open,
+    // so a one-shot pass keyed on the open value is not needed and would be wasted work.
+    const late = document.createElement("span");
+    late.setAttribute("aria-hidden", "true");
+    late.setAttribute("tabindex", "0");
+    root.append(late);
+    await waitFor(() => expect(late.tabIndex).toBe(-1));
+
+    // The trigger keeps its own place in the tab order; only the hidden proxy loses one.
+    expect(trigger.tabIndex).toBe(0);
+  });
+
+  it("renders the donor panel wrappers, named columns and an arrow on every link", async () => {
+    render(<DesktopMegaNavigation groups={groups} primaryLabel="Primary navigation" exploreLabel="explore" viewOverviewLabel="viewOverview" />);
+    const trigger = screen.getAllByRole("button")[0]! as HTMLButtonElement;
+    trigger.focus();
+    activateButtonWithEnter(trigger);
+
+    const events = await screen.findByRole("link", {name: "links.events"});
+    const panel = events.closest(".mega-menu-v2")!;
+    expect(panel.querySelector(".mega-menu-main")).not.toBeNull();
+    expect(panel.querySelector(".mega-columns")).not.toBeNull();
+
+    // Each column is a named group, so its links are read under their own heading rather than
+    // as one undifferentiated list. .mega-column stays a div and .mega-column-title stays a <p>,
+    // because the port styles both by those selectors.
+    const columns = [...panel.querySelectorAll(".mega-column")];
+    expect(columns).toHaveLength(groups[0]!.columns.length);
+    columns.forEach((column, index) => {
+      expect(column).toHaveAttribute("role", "group");
+      const title = column.querySelector(".mega-column-title")!;
+      expect(title.tagName).toBe("P");
+      expect(title.id).not.toBe("");
+      expect(column.getAttribute("aria-labelledby")).toBe(title.id);
+      expect(title).toHaveTextContent(groups[0]!.columns[index]!.label);
+    });
+    expect(new Set(columns.map((column) => column.getAttribute("aria-labelledby"))).size)
+      .toBe(columns.length);
+
+    // The port styles the trailing arrow through `.mega-column a span` and
+    // `.mega-menu-heading > a span` (app/styles/wisetech.css:308 and :1058), so every leaf, the
+    // overview link and the feature call to action must carry one -- and it must stay
+    // aria-hidden so the glyph never reaches the link's accessible name.
+    const arrowLinks = [
+      ...panel.querySelectorAll(".mega-column a"),
+      panel.querySelector(".mega-menu-heading > a")!,
+      panel.querySelector(".mega-feature-v2 > a")!,
+    ];
+    expect(arrowLinks).toHaveLength(groups[0]!.columns.flatMap((column) => column.links).length + 2);
+    for (const link of arrowLinks) {
+      const arrow = link.querySelector('span[aria-hidden="true"]');
+      expect(arrow, link.getAttribute("href") ?? "").not.toBeNull();
+      expect(arrow!.textContent).toBe("\u2197");
+    }
+  });
 });

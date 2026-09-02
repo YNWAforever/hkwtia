@@ -40,22 +40,29 @@ export function MegaMenuPanel({
           </Link>
         </div>
         <div className="mega-columns">
-          {group.columns.map((column) => (
-            <div className="mega-column" key={column.id}>
-              <p className="mega-column-title">{column.label}</p>
-              {column.links.map((link) => (
-                <Link
-                  key={link.id}
-                  href={link.href}
-                  aria-current={pathname === link.href ? "page" : undefined}
-                  onClick={onNavigate}
-                >
-                  {link.label}
-                  <Arrow />
-                </Link>
-              ))}
-            </div>
-          ))}
+          {group.columns.map((column) => {
+            // The donor's columns are bare divs, so a screen reader reads their links as one
+            // undifferentiated list. Naming each column from its own title restores the
+            // grouping without touching the markup the port styles: .mega-column stays a div
+            // and .mega-column-title stays a <p>, both only gaining attributes.
+            const titleId = `${group.id}-${column.id}-title`;
+            return (
+              <div className="mega-column" key={column.id} role="group" aria-labelledby={titleId}>
+                <p className="mega-column-title" id={titleId}>{column.label}</p>
+                {column.links.map((link) => (
+                  <Link
+                    key={link.id}
+                    href={link.href}
+                    aria-current={pathname === link.href ? "page" : undefined}
+                    onClick={onNavigate}
+                  >
+                    {link.label}
+                    <Arrow />
+                  </Link>
+                ))}
+              </div>
+            );
+          })}
         </div>
       </div>
       <aside className="mega-feature-v2">
