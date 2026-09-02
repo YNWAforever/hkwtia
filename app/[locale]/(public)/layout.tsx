@@ -31,7 +31,7 @@ export default async function PublicLayout({children, params}: PublicLayoutProps
   const announcement = activeAnnouncement ? toAnnouncementBarView(activeAnnouncement, appLocale) : null;
 
   return (
-    <>
+    <div className="site-root" lang={appLocale === "zh-HK" ? "zh-Hant-HK" : "en"}>
       <a className="skip-link" href="#main-content">
         {t('skipToContent')}
       </a>
@@ -48,6 +48,6 @@ export default async function PublicLayout({children, params}: PublicLayoutProps
         labels={conciergeLabels}
         {...(turnstileSiteKey === undefined ? {} : {turnstileSiteKey})}
       />
-    </>
+    </div>
   );
 }
