@@ -26,9 +26,13 @@ const keptSelectors = [
   ".site-footer", ".footer-top", ".footer-links", ".footer-bottom", ".concierge", ".concierge-panel",
 ];
 
+// The whole join family is donor-only: the donor's six-step join form is not ported and the
+// real /join flow is authoritative, so .join-options, .join-progress, .join-actions and
+// .join-success go with the four scaffold classes the plan first enumerated.
 const droppedSelectors = [
   ".portal-shell", ".portal-sub-hero", ".portal-module-grid", ".portal-preview-notice", ".join-page", ".join-card",
-  ".join-roadmap", ".join-success-hero", ".onboarding-actions", ".review-list", ".site-search-form", ".search-feedback", ".sr-only",
+  ".join-roadmap", ".join-success-hero", ".join-options", ".join-progress", ".join-actions", ".join-success",
+  ".onboarding-actions", ".review-list", ".site-search-form", ".search-feedback", ".sr-only",
 ];
 
 function selectorPattern(selector: string) {
@@ -54,6 +58,17 @@ describe("WiseTech CSS port", () => {
     const references = [...port.matchAll(/var\((--[a-z0-9-]+)/g)].map((match) => match[1]);
     expect(references.length).toBeGreaterThan(100);
     for (const name of new Set(references)) expect(name).toMatch(/^--(wt-|font-)/);
+  });
+
+  // The donor scopes smaller heading tokens inside @media(max-width:520px). Those blocks are
+  // overrides of the base clamps, not a token layer globals.css could own, so the port keeps
+  // them — indented, which is why the /^:root/m check above still means "no top-level tokens".
+  it("keeps the donor mobile heading overrides under the prefixed names", () => {
+    expect(port).toContain("--wt-heading-display: 50px");
+    expect(port).toContain("--wt-heading-section: 42px");
+    expect(port).toContain("--wt-heading-card: 31px");
+    expect(port).toContain("--wt-heading-section: 38px");
+    expect(port).not.toMatch(/--heading-(display|section|card):/);
   });
 
   it.each(keptSelectors)("keeps the donor selector %s", (selector) => {
