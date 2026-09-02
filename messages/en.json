@@ -137,10 +137,11 @@
       "mailBody": "Please add {email} to the WiseTech activity update list."
     },
     "summary": "WiseTech Hong Kong connects technology businesses, practitioners and programmes through WTIA's verified public services.",
-    "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
-    "journeys": "Explore",
-    "connect": "Contact",
-    "legal": "Legal",
+    "addressLines": [
+      "4/F, KOHO",
+      "73-75 Hung To Road",
+      "Kwun Tong, Hong Kong"
+    ],
     "privacy": "Privacy statement",
     "copyright": "© {year} WiseTech Hong Kong. Operated by WTIA. All rights reserved."
   },

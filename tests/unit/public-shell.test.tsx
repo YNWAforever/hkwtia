@@ -17,18 +17,24 @@ vi.mock("next-intl/server", async () => {
     en: JSON.parse(readFileSync(resolve(process.cwd(), "messages/en.json"), "utf8")),
     "zh-HK": JSON.parse(readFileSync(resolve(process.cwd(), "messages/zh-HK.json"), "utf8")),
   } as const;
+  const read = (locale: "en" | "zh-HK", namespace: string, key: string) =>
+    key.split(".").reduce<unknown>(
+      (current, segment) => (current as Record<string, unknown>)[segment],
+      (bundles[locale] as Record<string, unknown>)[namespace],
+    );
   return {
+    // `raw` as well as the callable: the footer reads `Footer.addressLines` (an array) and
+    // `Footer.newsletter.mailBody` (which carries a literal `{email}` the island interpolates),
+    // and next-intl resolves neither through `t()`.
     getTranslations: async ({locale, namespace}: {locale: "en" | "zh-HK"; namespace: string}) =>
-      (key: string, values?: Record<string, string | number>) => {
-        const value = key.split(".").reduce<unknown>(
-          (current, segment) => (current as Record<string, unknown>)[segment],
-          (bundles[locale] as Record<string, unknown>)[namespace],
-        );
-        return Object.entries(values ?? {}).reduce(
-          (text, [name, replacement]) => text.replace(`{${name}}`, String(replacement)),
-          String(value),
-        );
-      },
+      Object.assign(
+        (key: string, values?: Record<string, string | number>) =>
+          Object.entries(values ?? {}).reduce(
+            (text, [name, replacement]) => text.replace(`{${name}}`, String(replacement)),
+            String(read(locale, namespace, key)),
+          ),
+        {raw: (key: string) => read(locale, namespace, key)},
+      ),
   };
 });
 vi.mock("next/image", () => ({
@@ -129,7 +135,7 @@ describe("public shell server surfaces", () => {
       "/events", "/launchpad", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
       "/membership", "/showcase", "/news", "/ai-ops", "/ai-transparency", "/about", "/about/history",
       "/about/chairman", "/about/committees", "/contact", "/privacy",
-      "mailto:contact@hkwtia.org", "tel:+85229899164",
+      "mailto:contact@hkwtia.org",
     ]);
     const targets = within(footer).getAllByRole("link").filter((link) =>
       targetHrefs.has(link.getAttribute("href") ?? ""),

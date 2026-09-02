@@ -1,11 +1,30 @@
 import {getTranslations} from "next-intl/server";
 
 import {DualBrandLockup} from "@/components/layout/dual-brand-lockup";
-import {localizeNavigation, type NavigationMessageKey} from "@/config/navigation";
+import {FooterNewsletter} from "@/components/layout/footer-newsletter";
+import {LocaleSwitcher} from "@/components/layout/locale-switcher";
+import {
+  localizeNavigation,
+  type LocalizedNavigationGroup,
+  type LocalizedNavigationLink,
+  type NavigationGroupId,
+  type NavigationMessageKey,
+} from "@/config/navigation";
+import {siteConfig} from "@/config/site";
 import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 
-const footerTargetClassName = "inline-flex min-h-11 min-w-11 max-w-full items-center break-words underline-offset-4 hover:text-shell-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--shell-focus))]";
+// hkwtia's own 44px tap-target floor (spec §2.9); the donor's .footer-links a sets type only.
+const footerTargetClassName = "inline-flex min-h-11 min-w-11 max-w-full items-center break-words";
+
+/**
+ * A column entry is not a `LocalizedNavigationLink`: the Membership column also carries
+ * `/join` and `/portal`, and `/portal` is a member route, so it is deliberately absent from
+ * `PublicRoute`. Widening the href here rather than widening `PublicRoute` keeps the shell's
+ * canonical-destination contract (tests/unit/navigation.test.ts) exactly as narrow as it is.
+ */
+type FooterLink = Readonly<{id: string; href: string; label: string}>;
+type FooterColumn = Readonly<{id: string; label: string; links: readonly FooterLink[]}>;
 
 export async function SiteFooter({locale}: {locale: AppLocale}) {
   const [navigationT, t] = await Promise.all([
@@ -13,56 +32,115 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
     getTranslations({locale, namespace: "Footer"}),
   ]);
   const navigation = localizeNavigation((key: NavigationMessageKey) => navigationT(key));
+  const groups = Object.fromEntries(navigation.groups.map((group) => [group.id, group])) as
+    Record<NavigationGroupId, LocalizedNavigationGroup>;
+  const leaves = (id: NavigationGroupId): readonly LocalizedNavigationLink[] =>
+    groups[id].columns.flatMap((column) => column.links);
+  const addressLines = t.raw("addressLines") as readonly string[];
+
+  // Donor .footer-links (commit f91ecc5 :1030) is four columns. The donor's own columns
+  // are Explore / Connect / Membership / Contact, but its Connect column is entirely donor-only
+  // routes (member directory, solutions, partners, GBA, partner-with-us) that D-3 merges into
+  // /showcase, so hkwtia's fourth grouping is About instead (errata E-21). Every one of the 16
+  // navigation leaves appears exactly once.
+  const columns: readonly FooterColumn[] = [
+    {id: "explore", label: t("columns.explore"), links: leaves("events-programmes")},
+    {
+      id: "membership",
+      label: t("columns.membership"),
+      links: [
+        ...leaves("membership-ecosystem"),
+        {id: "join", href: navigation.actions.join.href, label: navigation.actions.join.label},
+        {id: "member-sign-in", href: navigation.memberPortal.href, label: navigation.memberPortal.label},
+      ],
+    },
+    {
+      id: "about",
+      label: t("columns.about"),
+      links: [
+        ...leaves("about-wtia").filter((link) => link.href !== "/contact"),
+        ...leaves("impact-insights"),
+      ],
+    },
+  ];
+
+  const contactLink = leaves("about-wtia").find((link) => link.href === "/contact")!;
 
   return (
-    <footer className="border-t border-shell-border bg-shell-warm py-14 text-shell-ink">
-      <div className="mx-auto grid max-w-shell gap-10 px-6 lg:grid-cols-[1.2fr_2fr]">
-        <div>
+    <footer className="site-footer">
+      <div className="shell footer-top">
+        <div className="footer-brand">
           <DualBrandLockup labels={{
             homeLabel: t("brand.homeLabel"),
             publicName: t("brand.publicName"),
             descriptor: t("brand.descriptor"),
             logoAlt: t("brand.logoAlt"),
           }} />
-          <p className="mt-5 max-w-md text-sm leading-6 text-shell-muted">{t("summary")}</p>
-          <p className="mt-4 text-xs leading-5 text-shell-muted">{t("address")}</p>
+          <p>{t("summary")}</p>
+          <small>{t("legalLine")}</small>
         </div>
+        <FooterNewsletter labels={{
+          eyebrow: t("newsletter.eyebrow"),
+          title: t("newsletter.title"),
+          emailLabel: t("newsletter.emailLabel"),
+          placeholder: t("newsletter.placeholder"),
+          submit: t("newsletter.submit"),
+          success: t("newsletter.success"),
+          error: t("newsletter.error"),
+          mailSubject: t("newsletter.mailSubject"),
+          mailBody: t.raw("newsletter.mailBody") as string,
+        }} />
+      </div>
 
-        <nav aria-label={t("journeys")}>
-          <h2 className="sr-only">{t("journeys")}</h2>
-          <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
-            {navigation.groups.map((group) => (
-              <section key={group.id} aria-labelledby={`footer-${group.id}`} className="min-w-0">
-                <h3 id={`footer-${group.id}`} className="text-sm font-bold">{group.label}</h3>
-                <ul className="mt-3 space-y-2 text-sm text-shell-muted">
-                  {group.columns.flatMap((column) => column.links).map((link) => (
-                    <li key={link.id} className="min-w-0">
-                      <Link className={footerTargetClassName} href={link.href}>
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </section>
+      <div className="shell footer-links">
+        {columns.map((column) => (
+          <div key={column.id}>
+            <strong>{column.label}</strong>
+            {column.links.map((link) => (
+              <Link className={footerTargetClassName} key={link.id} href={link.href}>
+                {link.label}
+              </Link>
             ))}
           </div>
-        </nav>
+        ))}
+        <div>
+          <strong>{t("columns.contact")}</strong>
+          <Link className={footerTargetClassName} href={contactLink.href}>{contactLink.label}</Link>
+          <a className={footerTargetClassName} href={`mailto:${siteConfig.contact.email}`}>
+            {siteConfig.contact.email}
+          </a>
+          {siteConfig.contact.phone === undefined ? null : (
+            <a className={footerTargetClassName} href={`tel:${siteConfig.contact.phone.replace(/\s/g, "")}`}>
+              {siteConfig.contact.phone}
+            </a>
+          )}
+          <address>
+            {addressLines.map((line, index) => (
+              <span key={line}>
+                {line}
+                {index === addressLines.length - 1 ? null : <br />}
+              </span>
+            ))}
+          </address>
+        </div>
+      </div>
 
-        <div className="border-t border-shell-border pt-6 lg:col-span-2">
-          <div className="flex flex-col gap-5 text-sm sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="font-bold">{t("connect")}</h2>
-              <address className="mt-2 space-y-1 not-italic text-shell-muted">
-                <a className={footerTargetClassName} href="mailto:contact@hkwtia.org">contact@hkwtia.org</a>
-                <a className={footerTargetClassName} href="tel:+85229899164">+852 2989 9164</a>
-              </address>
-            </div>
-            <div className="text-shell-muted">
-              <h2 className="font-bold text-shell-ink">{t("legal")}</h2>
-              <Link className={`mt-2 ${footerTargetClassName}`} href="/privacy">{t("privacy")}</Link>
-              <p className="mt-2 text-xs">{t("copyright", {year: new Date().getFullYear()})}</p>
-            </div>
-          </div>
+      <div className="shell footer-bottom">
+        <strong>{t("tagline")}</strong>
+        <div>
+          <Link className={footerTargetClassName} href="/privacy">{t("privacy")}</Link>
+          {/* Terms and Accessibility are `retire` in the manifest until WP-7 reviews copy for
+              them; the donor's bottom row links both. The donor carries no copyright line at
+              all — hkwtia keeps one, because a legal notice is worth more than that much
+              fidelity (errata E-22). */}
+          <small>{t("copyright", {year: new Date().getFullYear()})}</small>
+          <LocaleSwitcher
+            locale={locale}
+            englishLabel={navigationT("english")}
+            chineseLabel={navigationT("chinese")}
+            switchToEnglishLabel={navigationT("switchToEnglish")}
+            switchToChineseLabel={navigationT("switchToChinese")}
+          />
         </div>
       </div>
     </footer>

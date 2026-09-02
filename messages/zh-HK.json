@@ -138,10 +138,10 @@
       "mailBody": "請將 {email} 加入 WiseTech 活動通知名單。"
     },
     "summary": "WiseTech Hong Kong 透過 WTIA 經核實的公開服務，連繫科技企業、專業人士及計劃。",
-    "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
-    "journeys": "探索",
-    "connect": "聯絡",
-    "legal": "法律資訊",
+    "addressLines": [
+      "香港觀塘鴻圖道 73-75 號",
+      "KOHO 4 樓"
+    ],
     "privacy": "私隱聲明",
     "copyright": "© {year} WiseTech Hong Kong。由 WTIA 營運。版權所有。"
   },
