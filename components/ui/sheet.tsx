@@ -50,7 +50,11 @@ interface SheetContentProps
 const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Content>, SheetContentProps>(
   ({side = 'right', className, children, closeLabel, ...props}, ref) => (
     <SheetPortal>
-      <SheetOverlay />
+      {/* The full-bleed variant paints an opaque panel over the whole viewport above this
+          overlay, so its tint and blur are never seen — and a viewport-sized backdrop-filter is
+          real work for a phone to do every frame. The element itself stays: Radix routes
+          outside-pointer dismissal and the modal pointer-event block through it. */}
+      <SheetOverlay className={side === 'full' ? 'bg-transparent backdrop-blur-none' : undefined} />
       <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({side}), className)} {...props}>
         {children}
         {closeLabel === undefined ? null : (

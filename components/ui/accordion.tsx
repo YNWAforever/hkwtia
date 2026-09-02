@@ -28,8 +28,12 @@ const AccordionTrigger = React.forwardRef<
   <AccordionPrimitive.Header className="flex">
     <AccordionPrimitive.Trigger
       ref={ref}
+      // No size, padding or weight here: the only consumer is the mobile menu, and
+      // app/styles/wisetech-shell.css sets min-height, padding and the donor's 400-weight serif
+      // on `.mobile-accordion > h3 > button`, so utilities for those were dead weight that
+      // rendered the serif heading at 600. A future consumer brings its own through `className`.
       className={cn(
-        "group flex min-h-12 min-w-0 flex-1 items-center justify-between py-3 text-left text-base font-semibold break-words outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--shell-focus))] data-[current=true]:text-shell-blue",
+        "group flex min-w-0 flex-1 items-center justify-between text-left break-words outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--shell-focus))] data-[current=true]:text-shell-blue",
         className,
       )}
       {...props}

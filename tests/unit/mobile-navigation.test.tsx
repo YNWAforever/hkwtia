@@ -61,6 +61,13 @@ describe("MobileNavigation", () => {
 
     expect(within(dialog).getByText(labels.exploreEcosystem)).toHaveClass("eyebrow");
     expect(within(dialog).getAllByRole("button", {expanded: false})).toHaveLength(4);
+
+    // app/styles/wisetech-shell.css styles the trigger through `.mobile-accordion > h3 > button`,
+    // because Radix wraps it in Accordion.Header and the port's own `.mobile-accordion > button`
+    // rules never reach it. If a Radix release changes that element, those rules stop applying
+    // silently — the menu keeps working and only the donor type and the current-trigger contrast
+    // fix quietly disappear. Pin the wrapper so the break is named here instead.
+    expect(dialog.querySelector(".mobile-accordion")!.children[0].tagName).toBe("H3");
   });
 
   it("shows at most five leaves per group and closes each panel with a view-all link", () => {
