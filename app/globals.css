@@ -11,7 +11,8 @@
   --popover-foreground: 215 25% 15%;
   --primary: 209 67% 31%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 201 75% 41%;
+  /* AA fix: axe found 16 contrast violations from this blue as small text (nav triggers, eyebrow labels) at 4.36:1 on white; darkened to 37% lightness, --wt-cyan keeps the donor hex. */
+  --secondary: 201 75% 37%;
   --secondary-foreground: 0 0% 100%;
   --muted: 210 20% 96%;
   --muted-foreground: 0 0% 39%;
@@ -35,7 +36,8 @@
   --shell-ink: 208 79% 28%;
   --shell-muted: 0 0% 39%;
   --shell-navy: 208 79% 28%;
-  --shell-blue: 201 75% 41%;
+  /* Same AA darkening as --secondary: this text-shell-blue utility read 4.0:1 on #f5f5f5 in the axe run; --wt-cyan is untouched. */
+  --shell-blue: 201 75% 37%;
   --shell-accent: 42 79% 75%;
   --shell-border: 0 3% 87%;
   --shell-shadow-sm: 0 8px 24px hsl(218 48% 18% / 0.08);

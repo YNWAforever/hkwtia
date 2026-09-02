@@ -34,13 +34,15 @@ const donorTokens = {
 };
 
 // Exact HSL conversions of the donor hex values (spec §4.1).
+// --secondary and --shell-blue are darkened to 37% lightness for AA contrast (axe finding),
+// not exact conversions; --wt-cyan is unaffected.
 const retunedTriplets = {
   "--background": "0 0% 96%",
   "--foreground": "208 79% 28%",
   "--card": "0 0% 100%",
   "--popover": "0 0% 100%",
   "--primary": "209 67% 31%",
-  "--secondary": "201 75% 41%",
+  "--secondary": "201 75% 37%",
   "--muted-foreground": "0 0% 39%",
   "--accent": "42 79% 75%",
   "--accent-foreground": "208 79% 28%",
@@ -52,7 +54,7 @@ const retunedTriplets = {
   "--shell-ink": "208 79% 28%",
   "--shell-muted": "0 0% 39%",
   "--shell-navy": "208 79% 28%",
-  "--shell-blue": "201 75% 41%",
+  "--shell-blue": "201 75% 37%",
   "--shell-accent": "42 79% 75%",
   "--shell-border": "0 3% 87%",
   "--shell-shadow-lg": "0 32px 90px rgba(15, 76, 129, 0.14)",
