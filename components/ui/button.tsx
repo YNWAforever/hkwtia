@@ -12,13 +12,20 @@ const buttonVariants = cva(
         default: 'bg-primary text-primary-foreground hover:bg-primary/90',
         outline: 'border border-input bg-background hover:bg-muted',
         ghost: 'hover:bg-muted',
-        link: 'text-primary underline-offset-4 hover:underline'
+        link: 'text-primary underline-offset-4 hover:underline',
+        // WiseTech grammar from app/styles/wisetech.css; pair with size="wt" so no
+        // utility sizing competes with the donor rules.
+        wt: 'button',
+        wtDark: 'button button-dark',
+        wtLight: 'button button-light',
+        wtText: 'text-link'
       },
       size: {
         default: 'h-10 px-4 py-2',
         sm: 'h-9 rounded-md px-3',
         lg: 'h-11 rounded-md px-8',
-        icon: 'h-10 w-10'
+        icon: 'h-10 w-10',
+        wt: ''
       }
     },
     defaultVariants: {variant: 'default', size: 'default'}
