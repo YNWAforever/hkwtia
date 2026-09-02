@@ -7,6 +7,9 @@ import {describe, expect, it} from "vitest";
 const port = readFileSync(resolve(process.cwd(), "app/styles/wisetech.css"), "utf8");
 const rootLayout = readFileSync(resolve(process.cwd(), "app/[locale]/layout.tsx"), "utf8");
 const publicLayout = readFileSync(resolve(process.cwd(), "app/[locale]/(public)/layout.tsx"), "utf8");
+const shellOverrides = existsSync(resolve(process.cwd(), "app/styles/wisetech-shell.css"))
+  ? readFileSync(resolve(process.cwd(), "app/styles/wisetech-shell.css"), "utf8")
+  : null;
 
 // Selector matching runs against the rules alone. The provenance header names several of the
 // families this file drops, and matching prose would let a comment satisfy — or violate — a
@@ -64,6 +67,13 @@ describe("WiseTech CSS port", () => {
     expect(rootLayout).toContain('import "../globals.css";');
     expect(rootLayout).not.toContain("styles/wisetech.css");
     expect(publicLayout).toContain('import "../../styles/wisetech.css";');
+
+    // The hand-written companion must load after the generated port so its equal-specificity
+    // rules win, and it must not pull anything in of its own (errata E-24).
+    expect(shellOverrides).not.toBeNull();
+    expect(publicLayout.indexOf('import "../../styles/wisetech-shell.css";'))
+      .toBeGreaterThan(publicLayout.indexOf('import "../../styles/wisetech.css";'));
+    expect(shellOverrides).not.toContain("@import");
   });
 
   it("carries no donor build directive, remote asset or donor route", () => {

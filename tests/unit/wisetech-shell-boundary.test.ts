@@ -10,6 +10,8 @@ const implementationFiles = [
   "components/layout/desktop-mega-navigation.tsx",
   "components/layout/mobile-navigation.tsx",
   "app/[locale]/(public)/layout.tsx",
+  "components/layout/announcement-bar.tsx",
+  "components/layout/announcement-dismiss.tsx",
 ];
 
 describe("WiseTech PR2 source boundary", () => {

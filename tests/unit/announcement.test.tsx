@@ -1,7 +1,7 @@
 import {readFileSync} from "node:fs";
 
 import {fireEvent, render, screen} from "@testing-library/react";
-import {describe, expect, it, vi} from "vitest";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import {AnnouncementBar} from "@/components/layout/announcement-bar";
 import {projectPersistedAnnouncement, resolveAnnouncement, toAnnouncementBarView} from "@/lib/public-shell/announcement";
@@ -106,18 +106,53 @@ describe("persisted announcement projection", () => {
 });
 
 describe("AnnouncementBar", () => {
-  it("renders localized text and CTA as a canonical anchor and dismisses only local state", () => {
-    const announcement = {id: "launch", href: "/events" as const, text: record.text["zh-HK"], ctaLabel: "查看活動"};
+  beforeEach(() => {
+    window.sessionStorage.clear();
+    document.body.innerHTML = "";
+  });
+
+  const announcement = {id: "launch", href: "/events" as const, text: "瀏覽即將舉行的活動", ctaLabel: "查看活動"};
+
+  it("renders the donor bar and dismisses it for the session only", () => {
+    document.body.insertAdjacentHTML("afterbegin", '<header class="site-header"></header>');
     render(<AnnouncementBar announcement={announcement} label="公告" dismissLabel="關閉公告" />);
 
-    expect(screen.getByRole("complementary", {name: "公告"})).toBeInTheDocument();
-    expect(screen.getByRole("complementary", {name: "公告"})).toHaveAttribute("aria-live", "polite");
-    expect(screen.getByRole("complementary", {name: "公告"})).toHaveAttribute("aria-atomic", "true");
-    expect(screen.getByRole("link", {name: "瀏覽即將舉行的活動 查看活動"})).toHaveAttribute("href", "/events");
-    expect(screen.getByRole("link", {name: "瀏覽即將舉行的活動 查看活動"})).toHaveClass("min-h-11", "min-w-11");
-    fireEvent.click(screen.getByRole("button", {name: "關閉公告"}));
+    const bar = screen.getByRole("complementary", {name: "公告"});
+    expect(bar).toHaveClass("announcement");
+    expect(bar).toHaveAttribute("aria-live", "polite");
+    expect(bar).toHaveAttribute("aria-atomic", "true");
+    expect(bar.querySelector(".announcement-dot")).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByText("瀏覽即將舉行的活動")).toBeInTheDocument();
+    expect(screen.getByRole("link", {name: "查看活動"})).toHaveAttribute("href", "/events");
+
+    const dismiss = screen.getByRole("button", {name: "關閉公告"});
+    expect(dismiss).toHaveClass("announcement-close");
+    fireEvent.click(dismiss);
+
     expect(screen.queryByRole("complementary", {name: "公告"})).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", {name: "關閉公告"})).not.toBeInTheDocument();
+    expect(document.querySelector("header.site-header")).toHaveClass("no-announcement");
+    expect(window.sessionStorage.getItem("hkwtia:announcement-dismissed")).toBe("launch");
     expect(document.cookie).toBe("");
+  });
+
+  it("stays dismissed for the same id after a remount and returns for a new one", () => {
+    window.sessionStorage.setItem("hkwtia:announcement-dismissed", "launch");
+    const first = render(<AnnouncementBar announcement={announcement} label="公告" dismissLabel="關閉公告" />);
+    expect(screen.queryByRole("complementary", {name: "公告"})).not.toBeInTheDocument();
+    first.unmount();
+
+    render(<AnnouncementBar announcement={{...announcement, id: "second"}} label="公告" dismissLabel="關閉公告" />);
+    expect(screen.getByRole("complementary", {name: "公告"})).toBeInTheDocument();
+  });
+
+  it("survives a sessionStorage that throws", () => {
+    const getItem = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    render(<AnnouncementBar announcement={announcement} label="Announcement" dismissLabel="Dismiss announcement" />);
+    expect(screen.getByRole("complementary", {name: "Announcement"})).toBeInTheDocument();
+    getItem.mockRestore();
   });
 
   it("renders nothing for a null provider result", () => {
@@ -125,9 +160,8 @@ describe("AnnouncementBar", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("keeps an arbitrary allowed token shrinkable and breakable at narrow widths", () => {
-    const announcement = {id: "long", href: "/events" as const, text: "a".repeat(180), ctaLabel: "View"};
-    render(<AnnouncementBar announcement={announcement} label="Announcement" dismissLabel="Dismiss announcement" />);
-    expect(screen.getByRole("link", {name: "a".repeat(180) + " View"})).toHaveClass("flex-1", "break-all");
+  it("keeps an arbitrary allowed token breakable at narrow widths", () => {
+    render(<AnnouncementBar announcement={{...announcement, text: "a".repeat(180)}} label="Announcement" dismissLabel="Dismiss announcement" />);
+    expect(screen.getByText("a".repeat(180))).toHaveClass("announcement-text");
   });
 });

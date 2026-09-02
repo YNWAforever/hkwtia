@@ -20,6 +20,9 @@ import {toAnnouncementBarView} from '@/lib/public-shell/announcement';
 // :focus-visible, [id] scroll-margin) must not change them. WP-6 decides whether the
 // app shell adopts any of it.
 import "../../styles/wisetech.css";
+// Hand-written shell overrides; must load after the generated port so equal-specificity
+// rules win. See app/styles/wisetech-shell.css for what belongs here and why.
+import "../../styles/wisetech-shell.css";
 
 type PublicLayoutProps = {
   children: ReactNode;
@@ -50,7 +53,7 @@ export default async function PublicLayout({children, params}: PublicLayoutProps
         label={announcementMessages('label')}
         dismissLabel={announcementMessages('dismiss')}
       />
-      <SiteHeader locale={appLocale} />
+      <SiteHeader locale={appLocale} hasAnnouncement={announcement !== null} />
       <main id="main-content">{children}</main>
       <SiteFooter locale={appLocale} />
       <ConciergeWidget

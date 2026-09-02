@@ -5,7 +5,11 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 import type {ScheduledAnnouncementProjection} from "@/lib/public-shell/announcement";
 
 const announcements = vi.hoisted(() => ({getActive: vi.fn()}));
-const barState = vi.hoisted(() => ({announcement: null as Record<string, unknown> | null}));
+const barState = vi.hoisted(() => ({
+  announcement: null as Record<string, unknown> | null,
+  dismissLabel: "",
+  hasAnnouncement: undefined as boolean | undefined,
+}));
 
 vi.mock("@/lib/db/repos/announcements", () => ({announcementsRepository: announcements}));
 vi.mock("next-intl/server", () => ({
@@ -18,10 +22,16 @@ vi.mock("next-intl/server", () => ({
 vi.mock("@/lib/config/env", () => ({publicEnv: () => ({})}));
 vi.mock("@/components/ai/concierge-widget", () => ({ConciergeWidget: () => <div data-shell="concierge" />}));
 vi.mock("@/components/layout/site-footer", () => ({SiteFooter: () => <footer>Footer</footer>}));
-vi.mock("@/components/layout/site-header", () => ({SiteHeader: () => <header>Header</header>}));
+vi.mock("@/components/layout/site-header", () => ({
+  SiteHeader: (props: {hasAnnouncement?: boolean}) => {
+    barState.hasAnnouncement = props.hasAnnouncement;
+    return <header>Header</header>;
+  },
+}));
 vi.mock("@/components/layout/announcement-bar", () => ({
-  AnnouncementBar: ({announcement}: {announcement: {id: string; href: string; text: string; ctaLabel: string} | null}) => {
+  AnnouncementBar: ({announcement, dismissLabel}: {announcement: {id: string; href: string; text: string; ctaLabel: string} | null; dismissLabel: string}) => {
     barState.announcement = announcement;
+    barState.dismissLabel = dismissLabel;
     return announcement ? <aside>{announcement.text} {announcement.ctaLabel}</aside> : null;
   },
 }));
@@ -63,10 +73,13 @@ describe("public layout announcement cutover", () => {
     expect(barState.announcement).not.toHaveProperty("startsAt");
     expect(barState.announcement).not.toHaveProperty("endsAt");
     expect(barState.announcement).not.toHaveProperty("priority");
+    expect(barState.dismissLabel).toBe("dismiss");
+    expect(barState.hasAnnouncement).toBe(true);
 
     announcements.getActive.mockRejectedValueOnce(new Error("database"));
     await expect(renderPublicLayout("en")).resolves.toContain("Shell remains available");
     expect(barState.announcement).toBeNull();
+    expect(barState.hasAnnouncement).toBe(false);
 
     announcements.getActive.mockResolvedValueOnce({...activeProjection, title: {en: "", "zh-HK": ""}});
     await renderPublicLayout("en");
