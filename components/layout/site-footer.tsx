@@ -32,17 +32,25 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
     getTranslations({locale, namespace: "Footer"}),
   ]);
   const navigation = localizeNavigation((key: NavigationMessageKey) => navigationT(key));
-  const groups = Object.fromEntries(navigation.groups.map((group) => [group.id, group])) as
-    Record<NavigationGroupId, LocalizedNavigationGroup>;
+  // A map read through `get`, not a cast over Object.fromEntries: the cast asserts a shape the
+  // value may not have, so a renamed group id would reach `.columns` on `undefined` and throw
+  // during the render of every public page. Public pages degrade instead — the column loses its
+  // links, the page still serves, and public-shell.test.tsx's exact target count still fails in CI.
+  const groups: ReadonlyMap<NavigationGroupId, LocalizedNavigationGroup> =
+    new Map(navigation.groups.map((group) => [group.id, group] as const));
   const leaves = (id: NavigationGroupId): readonly LocalizedNavigationLink[] =>
-    groups[id].columns.flatMap((column) => column.links);
+    groups.get(id)?.columns.flatMap((column) => column.links) ?? [];
   const addressLines = t.raw("addressLines") as readonly string[];
 
-  // Donor .footer-links (commit f91ecc5 :1030) is four columns. The donor's own columns
-  // are Explore / Connect / Membership / Contact, but its Connect column is entirely donor-only
-  // routes (member directory, solutions, partners, GBA, partner-with-us) that D-3 merges into
-  // /showcase, so hkwtia's fourth grouping is About instead (errata E-21). Every one of the 16
-  // navigation leaves appears exactly once.
+  // Donor .footer-links (commit f91ecc5 :1030) is four columns, its own set being
+  // Explore / Connect / Membership / Contact. Three of that Connect column's five links do have
+  // canonical destinations here — /members and /solutions merge into /showcase, /gba into
+  // /launchpad and /partner-with-us into /contact (config/wisetech-integration-manifest.ts);
+  // only /partners retires. It is unusable for a different reason: reusing it would either
+  // repeat /contact in two columns, breaking the every-leaf-appears-once property that
+  // tests/unit/public-shell.test.tsx pins through its exact target count, or leave hkwtia's five
+  // About leaves with no column at all. hkwtia's fourth grouping is therefore About (errata
+  // E-21), and every one of the 16 navigation leaves appears exactly once.
   const columns: readonly FooterColumn[] = [
     {id: "explore", label: t("columns.explore"), links: leaves("events-programmes")},
     {
@@ -64,7 +72,7 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
     },
   ];
 
-  const contactLink = leaves("about-wtia").find((link) => link.href === "/contact")!;
+  const contactLink = leaves("about-wtia").find((link) => link.href === "/contact") ?? null;
 
   return (
     <footer className="site-footer">
@@ -105,7 +113,9 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
         ))}
         <div>
           <strong>{t("columns.contact")}</strong>
-          <Link className={footerTargetClassName} href={contactLink.href}>{contactLink.label}</Link>
+          {contactLink === null ? null : (
+            <Link className={footerTargetClassName} href={contactLink.href}>{contactLink.label}</Link>
+          )}
           <a className={footerTargetClassName} href={`mailto:${siteConfig.contact.email}`}>
             {siteConfig.contact.email}
           </a>
@@ -116,7 +126,7 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
           )}
           <address>
             {addressLines.map((line, index) => (
-              <span key={line}>
+              <span key={index}>
                 {line}
                 {index === addressLines.length - 1 ? null : <br />}
               </span>

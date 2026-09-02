@@ -173,3 +173,41 @@
 /* .footer-links a is a type rule only; the 44px floor comes from hkwtia's own utilities, and
  * this keeps the column stack from collapsing them onto one line. */
 .footer-links > div > a { align-self: flex-start; }
+
+/* The donor's success panel replaces the form outright (commit f91ecc5 :515-517); hkwtia keeps
+ * the form mounted and marks it `hidden`, so focus never falls off the button the reader just
+ * pressed. The attribute alone is not enough here: the port's `.footer-newsletter form
+ * { display: flex }` (app/styles/wisetech.css:285) outranks the UA sheet's [hidden] rule. */
+.footer-newsletter form[hidden] { display: none; }
+
+/* The validation message is a live region that must exist before it has anything to say, so it
+ * is rendered empty rather than mounted on demand. The port's 10px top margin would then be a
+ * permanent gap under the form; :empty removes it without taking the node out of the
+ * accessibility tree, which display:none would. */
+.newsletter-error:empty { margin-top: 0; }
+
+/* LocaleSwitcher is shared with the light header, where hover:bg-muted (--muted 210 20% 96%,
+ * near white) and focus-visible:ring-ring (--ring 209 67% 31% = #1a5184) belong. On the two
+ * dark hosts they do not: white-on-near-white text on hover, and a focus ring measuring 1.43:1
+ * against the footer's #363839 and 1.36:1 against the mobile panel's lighter gradient stop
+ * #0a3d67, both far under the 3:1 that WCAG 1.4.11 asks of a focus indicator.
+ *
+ * Both hosts render the switcher with no className of its own (site-footer.tsx and
+ * mobile-navigation.tsx pass none), so the button carries only the shared utilities and these
+ * element selectors reach it. Specificity is (0,2,1) against Tailwind's (0,2,0) for every
+ * declaration overridden here — class plus pseudo-class plus type beats class plus
+ * pseudo-class — so no !important is needed. box-shadow:none retires the ring itself, which
+ * Tailwind draws as a shadow rather than an outline.
+ *
+ * Measured with the WCAG formula: the translucent white hover ground blends to rgb(78,80,81)
+ * on the footer and rgb(39,84,121) on the lighter gradient stop, giving white text 8.12:1 and
+ * 7.95:1. The restored outline --wt-focus #ff5c4d (app/globals.css:67) scores 3.87:1 on the
+ * footer and 3.67:1 / 4.57:1 on the two gradient stops. */
+.footer-bottom button:hover,
+.mobile-utilities button:hover { background: rgba(255, 255, 255, 0.12); color: white; }
+.footer-bottom button:focus-visible,
+.mobile-utilities button:focus-visible {
+  outline: 3px solid var(--wt-focus);
+  outline-offset: 2px;
+  box-shadow: none;
+}

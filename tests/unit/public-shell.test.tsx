@@ -125,7 +125,8 @@ describe("public shell server surfaces", () => {
       "/membership", "/showcase", "/news", "/ai-ops", "/ai-transparency", "/about", "/about/history",
       "/about/chairman", "/about/committees", "/contact", "/privacy",
     ]) expect(hrefs, href).toContain(href);
-    expect(within(footer).queryByText(/newsletter/i)).not.toBeInTheDocument();
+    expect(within(footer).getByRole("heading", {level: 2, name: "What should Hong Kong build next?"}))
+      .toBeInTheDocument();
   });
 
   it("makes every footer route and contact control a 44px, wrapping-safe target", async () => {
@@ -135,6 +136,9 @@ describe("public shell server surfaces", () => {
       "/events", "/launchpad", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
       "/membership", "/showcase", "/news", "/ai-ops", "/ai-transparency", "/about", "/about/history",
       "/about/chairman", "/about/committees", "/contact", "/privacy",
+      // The Membership column carries the two action destinations as well; without them here a
+      // dropped Join or Member sign-in link would leave the count untouched.
+      "/join", "/portal",
       "mailto:contact@hkwtia.org",
     ]);
     const targets = within(footer).getAllByRole("link").filter((link) =>

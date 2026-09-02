@@ -46,6 +46,24 @@ beforeEach(() => {
 });
 afterEach(() => vi.restoreAllMocks());
 
+/** The newsletter block, addressed the way a reader reaches it. */
+async function renderFooter() {
+  render(await SiteFooter({locale: "en"}));
+  const footer = screen.getByRole("contentinfo");
+  const input = within(footer).getByLabelText("Work email");
+  return {
+    footer,
+    input,
+    form: input.closest("form")!,
+    // Both live regions are queried before any submit: a region the reader's software only
+    // meets at the moment its text arrives is a region that may never announce it.
+    status: within(footer).getByRole("status"),
+    alert: within(footer).getByRole("alert"),
+    submit: () => fireEvent.click(within(footer).getByRole("button", {name: "Prepare activity-update email"})),
+    type: (value: string) => fireEvent.change(input, {target: {value}}),
+  };
+}
+
 describe("SiteFooter", () => {
   it("renders four donor columns, the address and the bottom row", async () => {
     render(await SiteFooter({locale: "en"}));
@@ -92,26 +110,104 @@ describe("SiteFooter", () => {
   });
 
   it("prepares an email instead of subscribing, and reports both outcomes", async () => {
-    render(await SiteFooter({locale: "en"}));
-    const footer = screen.getByRole("contentinfo");
-    const input = within(footer).getByLabelText("Work email");
-    // Degradation, not decoration: with JavaScript off the submit reaches the same address the
-    // island composes rather than doing nothing.
-    expect(input.closest("form")).toHaveAttribute("action", `mailto:${siteConfig.contact.email}`);
+    const {footer, input, form, status, alert, submit, type} = await renderFooter();
 
-    fireEvent.change(input, {target: {value: "not-an-email"}});
-    fireEvent.click(within(footer).getByRole("button", {name: "Prepare activity-update email"}));
-    expect(within(footer).getByRole("alert")).toHaveTextContent("Enter a valid work email.");
+    type("not-an-email");
+    submit();
+    expect(alert).toHaveTextContent("Enter a valid work email.");
     expect(assign).not.toHaveBeenCalled();
 
-    fireEvent.change(input, {target: {value: "reader@example.com"}});
-    fireEvent.click(within(footer).getByRole("button", {name: "Prepare activity-update email"}));
-    expect(within(footer).getByRole("status")).toHaveTextContent("This page does not create a subscription automatically.");
+    type("reader@example.com");
+    submit();
+    expect(status).toHaveTextContent("This page does not create a subscription automatically.");
     expect(assign).toHaveBeenCalledTimes(1);
     const target = assign.mock.calls[0]![0] as string;
     expect(target.startsWith(`mailto:${siteConfig.contact.email}?`)).toBe(true);
     expect(decodeURIComponent(target)).toContain("reader@example.com");
-    expect(within(footer).queryByRole("alert")).toBeNull();
+    expect(alert).toBeEmptyDOMElement();
+
+    // The success panel replaces the form visually, but the button the reader just activated
+    // must not vanish out from under the focus ring: the form stays in the tree and focus is
+    // moved somewhere it can be read (WCAG 2.4.3).
+    expect(footer.contains(form)).toBe(true);
+    expect(form).toHaveAttribute("hidden");
+    expect(status).toHaveFocus();
+    expect(input.closest("form")).toBe(form);
+  });
+
+  /**
+   * Submitting the same wrong address twice must say so twice. React batches the reset and the
+   * re-flag into one commit, so the alert's words are identical across both attempts; only a
+   * replaced child node is a mutation the live region can observe.
+   */
+  it("re-announces when the same invalid address is submitted again", async () => {
+    const {alert, submit, type} = await renderFooter();
+
+    type("not-an-email");
+    submit();
+    const firstAnnouncement = alert.firstElementChild;
+    expect(firstAnnouncement).not.toBeNull();
+    expect(alert).toHaveTextContent("Enter a valid work email.");
+
+    submit();
+    expect(alert.firstElementChild).not.toBe(firstAnnouncement);
+    expect(alert).toHaveTextContent("Enter a valid work email.");
+  });
+
+  it.each([
+    ["@", false],
+    ["@@", false],
+    [" @ ", false],
+    ["a@b", false],
+    ["reader@example.co", true],
+  ])("treats %s as a usable address: %s", async (value, accepted) => {
+    const {alert, submit, type} = await renderFooter();
+
+    type(value);
+    submit();
+    expect(assign).toHaveBeenCalledTimes(accepted ? 1 : 0);
+    expect(alert).toHaveTextContent(accepted ? "" : "Enter a valid work email.");
+  });
+
+  it("links the validation message to the field only while it is showing", async () => {
+    const {input, alert, submit, type} = await renderFooter();
+
+    expect(input).not.toHaveAttribute("aria-describedby");
+    expect(input).toHaveAttribute("aria-invalid", "false");
+
+    type("not-an-email");
+    submit();
+    expect(alert.id).not.toBe("");
+    expect(input).toHaveAttribute("aria-describedby", alert.id);
+    expect(input).toHaveAttribute("aria-invalid", "true");
+
+    type("reader@example.com");
+    expect(input).not.toHaveAttribute("aria-describedby");
+  });
+
+  /** `$&`, `` $` `` and friends are replacement patterns; a typed address must stay literal. */
+  it("keeps a $ pattern in the address out of the replacement", async () => {
+    const {submit, type} = await renderFooter();
+
+    type("a$&b@example.com");
+    submit();
+    const body = decodeURIComponent(assign.mock.calls[0]![0] as string);
+    expect(body).toContain("a$&b@example.com");
+    expect(body).not.toContain("{email}");
+  });
+
+  /**
+   * Without script the browser GETs the mailto and appends the form fields as a query string.
+   * Mail clients honour `subject` and ignore everything else, so the reader reaches a titled
+   * but empty message addressed to WTIA — the typed address cannot travel, because building
+   * the body needs the script. That is still a working route, which an inert form is not.
+   */
+  it("degrades to a titled mail draft when the script never runs", async () => {
+    const {form} = await renderFooter();
+
+    expect(form).toHaveAttribute("action", `mailto:${siteConfig.contact.email}`);
+    expect(form.querySelector('input[type="hidden"][name="subject"]'))
+      .toHaveValue("WiseTech activity updates");
   });
 
   it("keeps the Chinese footer bilingual", async () => {
