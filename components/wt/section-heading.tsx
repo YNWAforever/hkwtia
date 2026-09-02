@@ -14,7 +14,7 @@ type SectionHeadingCommon = Readonly<{
 // The port has no `.section-heading>p` rule and the donor never pairs a lead with the
 // stacked grammar, so 'stacked' carries no `lead` at all.
 export type SectionHeadingProps =
-  | (SectionHeadingCommon & Readonly<{variant?: 'stacked'}>)
+  | (SectionHeadingCommon & Readonly<{variant?: 'stacked'; lead?: never}>)
   | (SectionHeadingCommon & Readonly<{variant: 'split' | 'inner'; lead?: string}>);
 
 export function SectionHeading(props: SectionHeadingProps) {

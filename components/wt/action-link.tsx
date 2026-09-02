@@ -1,11 +1,8 @@
 import type {ReactNode} from 'react';
 
 import {Arrow} from '@/components/wt/arrow';
-import type {WtAction} from '@/components/wt/types';
 import {Link} from '@/i18n/navigation';
 import {cn} from '@/lib/utils';
-
-export type {WtAction};
 
 export type ActionLinkVariant = 'button' | 'button-dark' | 'button-light' | 'text-link' | 'text-link-light';
 

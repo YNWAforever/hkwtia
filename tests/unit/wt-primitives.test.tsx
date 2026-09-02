@@ -112,14 +112,23 @@ describe("wt primitives", () => {
     expect(status.querySelector(".open-now-actions")).toBeNull();
   });
 
+  it("HonestEmpty renders no wrapper when the ink actions array is empty", () => {
+    render(<HonestEmpty label="l" title="t" copy="c" actions={[]} />);
+    const status = screen.getByRole("status");
+    expect(status.querySelector(".open-now-actions")).toBeNull();
+  });
+
   it("HonestEmpty variants map to the donor classes, and inner has no headingLevel choice", () => {
     const light = render(<HonestEmpty variant="light" label="l" title="t" copy="c" headingLevel={2} />);
     expect(light.container.firstElementChild).toHaveClass("honest-empty", "light-empty");
     expect(light.getByRole("heading", {level: 2})).toHaveTextContent("t");
-    const inner = render(<HonestEmpty variant="inner" label="l" title="t" copy="c" />);
+    const inner = render(
+      <HonestEmpty variant="inner" label="l" title="t" copy="c" actions={[{href: "mailto:contact@hkwtia.org", label: "Contact us"}]} />,
+    );
     expect(inner.container.firstElementChild).toHaveClass("inner-honest");
     expect(inner.container.firstElementChild).toHaveAttribute("role", "status");
     expect(inner.getByRole("heading", {level: 3})).toHaveTextContent("t");
+    expect(inner.getByRole("link", {name: "Contact us"})).toHaveClass("button", "button-dark");
   });
 
   it("HonestEmpty light variant omits the label and renders bare action links", () => {
@@ -135,7 +144,7 @@ describe("wt primitives", () => {
     expect(status).toHaveClass("honest-empty", "light-empty");
     expect(status.querySelector(".status-label")).toBeNull();
     expect(status.querySelector(".open-now-actions")).toBeNull();
-    expect(screen.getByRole("link", {name: "Contact us"})).toHaveClass("button");
+    expect(screen.getByRole("link", {name: "Contact us"})).toHaveClass("button", "button-dark");
   });
 
   it("PageHero renders the donor structure over an own-origin figure", () => {
