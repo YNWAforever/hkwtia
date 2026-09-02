@@ -8,6 +8,7 @@ const implementationFiles = [
   "components/layout/site-header.tsx",
   "components/layout/site-footer.tsx",
   "components/layout/desktop-mega-navigation.tsx",
+  "components/layout/mega-menu-panel.tsx",
   "components/layout/mobile-navigation.tsx",
   "app/[locale]/(public)/layout.tsx",
   "components/layout/announcement-bar.tsx",

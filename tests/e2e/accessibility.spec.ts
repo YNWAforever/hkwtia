@@ -25,7 +25,9 @@ for (const path of pages) {
 }
 
 test("open desktop and mobile navigation surfaces pass axe", async ({page}) => {
-  await page.setViewportSize({width: 1120, height: 900});
+  // Above the ported `@media(max-width:1240px)` collapse (app/styles/wisetech.css:1085-1090);
+  // at 1120 the trigger is `display: none` and the click would assert nothing.
+  await page.setViewportSize({width: 1360, height: 900});
   await page.goto("/");
   await page.getByRole("navigation", {name: "Primary navigation"}).getByRole("button").first().click();
   await expectNoSeriousOrCritical(page);

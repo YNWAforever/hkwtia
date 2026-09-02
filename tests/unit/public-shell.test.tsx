@@ -45,8 +45,10 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 vi.mock("next/navigation", () => ({useSearchParams: () => new URLSearchParams()}));
 
+import {MegaMenuPanel} from "@/components/layout/mega-menu-panel";
 import {SiteFooter} from "@/components/layout/site-footer";
 import {SiteHeader} from "@/components/layout/site-header";
+import {localizeNavigation} from "@/config/navigation";
 
 describe("public shell server surfaces", () => {
   it.each([
@@ -154,5 +156,67 @@ describe("public shell server surfaces", () => {
     expect(source).not.toContain("fallback={<nav");
     expect(source).toContain('fallback={<div aria-hidden="true" className="desktop-nav" />}');
     expect(source).toContain("<HeaderShell hasAnnouncement={hasAnnouncement}>");
+  });
+
+  it.each([
+    ["events-programmes", "See what is open before you plan.", "Browse what is open", "/events", true],
+    ["membership-ecosystem", "Bring a real business need into the network.", "Submit a challenge", "/contact", false],
+    ["impact-insights", "Practical progress needs responsible choices.", "AI transparency", "/ai-transparency", false],
+    ["about-wtia", "Read the association's own record.", "Read the history", "/about/history", false],
+  ] as const)("gives %s a heading, titled columns and a feature aside", (groupId, title, cta, href, eventFirst) => {
+    const groups = localizeNavigation((key) => key).groups;
+    const group = groups.find(({id}) => id === groupId)!;
+    const {container} = render(
+      <MegaMenuPanel
+        group={{
+          ...group,
+          label: "Group label",
+          feature: {label: "Status", title, copy: "Feature copy", cta, href},
+        }}
+        exploreLabel="Explore"
+        viewOverviewLabel="View overview"
+        pathname="/events"
+        onNavigate={() => undefined}
+      />,
+    );
+
+    const panel = container.querySelector(".mega-menu-v2")!;
+    expect(panel.classList.contains("mega-event")).toBe(eventFirst);
+    expect(within(panel as HTMLElement).getByText("Explore")).toBeInTheDocument();
+    expect(within(panel as HTMLElement).getByText("Group label").tagName).toBe("STRONG");
+    expect(within(panel as HTMLElement).getByRole("link", {name: "View overview"}))
+      .toHaveAttribute("href", group.landingHref);
+
+    expect(panel.querySelectorAll(".mega-column")).toHaveLength(group.columns.length);
+    expect(panel.querySelectorAll(".mega-column-title")).toHaveLength(group.columns.length);
+
+    const aside = panel.querySelector(".mega-feature-v2")!;
+    expect(within(aside as HTMLElement).getByText("Status")).toHaveClass("status-label");
+    expect(within(aside as HTMLElement).getByText(title).tagName).toBe("STRONG");
+    expect(within(aside as HTMLElement).getByText("Feature copy")).toBeInTheDocument();
+    expect(within(aside as HTMLElement).getByRole("link", {name: cta})).toHaveAttribute("href", href);
+  });
+
+  it("marks the exact current leaf inside a panel", () => {
+    const group = localizeNavigation((key) => key).groups[0]!;
+    const {container} = render(
+      <MegaMenuPanel
+        group={group}
+        exploreLabel="Explore"
+        viewOverviewLabel="View overview"
+        pathname="/events"
+        onNavigate={() => undefined}
+      />,
+    );
+    const links = [...container.querySelectorAll(".mega-column a")];
+    expect(links.filter((link) => link.getAttribute("aria-current") === "page")).toHaveLength(1);
+    expect(links[0]).toHaveAttribute("href", "/events");
+  });
+
+  it("marks the event-first trigger and keeps the trigger hook", async () => {
+    const markup = renderToStaticMarkup(await SiteHeader({locale: "en", hasAnnouncement: true}));
+    expect(markup).toContain("nav-button event-first");
+    expect(markup).toContain('data-navigation-trigger="events-programmes"');
+    expect(markup).toContain('class="desktop-nav"');
   });
 });
