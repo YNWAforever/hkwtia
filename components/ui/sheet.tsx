@@ -25,12 +25,15 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 const sheetVariants = cva(
-  'fixed z-50 gap-4 bg-background p-6 shadow-xl transition-transform',
+  'fixed z-50',
   {
     variants: {
       side: {
-        right: 'inset-y-0 right-0 h-full w-[min(24rem,88vw)] border-l',
-        left: 'inset-y-0 left-0 h-full w-[min(24rem,88vw)] border-r'
+        right: 'inset-y-0 right-0 h-full w-[min(24rem,88vw)] gap-4 border-l bg-background p-6 shadow-xl transition-transform',
+        left: 'inset-y-0 left-0 h-full w-[min(24rem,88vw)] gap-4 border-r bg-background p-6 shadow-xl transition-transform',
+        // The donor mobile menu is an opaque full-screen panel that brings its own background
+        // and padding through .mobile-menu; utilities here would only fight it.
+        full: 'inset-0'
       }
     },
     defaultVariants: {side: 'right'}
@@ -40,7 +43,8 @@ const sheetVariants = cva(
 interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {
-  closeLabel: string;
+  /** Omit to place the close control inside the panel yourself with `SheetClose`. */
+  closeLabel?: string;
 }
 
 const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Content>, SheetContentProps>(
@@ -49,12 +53,14 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
       <SheetOverlay />
       <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({side}), className)} {...props}>
         {children}
-        <SheetPrimitive.Close
-          className="absolute right-4 top-4 rounded-sm p-2 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label={closeLabel}
-        >
-          <X aria-hidden="true" />
-        </SheetPrimitive.Close>
+        {closeLabel === undefined ? null : (
+          <SheetPrimitive.Close
+            className="absolute right-4 top-4 rounded-sm p-2 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label={closeLabel}
+          >
+            <X aria-hidden="true" />
+          </SheetPrimitive.Close>
+        )}
       </SheetPrimitive.Content>
     </SheetPortal>
   )

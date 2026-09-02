@@ -1,15 +1,16 @@
 "use client";
 
-import {Menu} from "lucide-react";
 import {useRef, useState} from "react";
 
+import {DualBrandLockup} from "@/components/layout/dual-brand-lockup";
 import {LocaleSwitcher} from "@/components/layout/locale-switcher";
 import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
-import {Button} from "@/components/ui/button";
 import {Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle, SheetTrigger} from "@/components/ui/sheet";
-import type {NavigationViewModel} from "@/config/navigation";
+import {Arrow} from "@/components/wt/arrow";
+import type {LocalizedNavigationGroup, NavigationViewModel} from "@/config/navigation";
 import {Link, usePathname} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
+import {cn} from "@/lib/utils";
 
 type MobileNavigationProps = {
   locale: AppLocale;
@@ -19,14 +20,38 @@ type MobileNavigationProps = {
     close: string;
     title: string;
     description: string;
+    priority: string;
+    utilities: string;
+    exploreEcosystem: string;
+    search: string;
+    viewOverview: string;
     english: string;
     chinese: string;
     switchToEnglish: string;
     switchToChinese: string;
   };
+  brand: {homeLabel: string; publicName: string; descriptor: string; logoAlt: string};
 };
 
-export function MobileNavigation({locale, navigation, labels}: MobileNavigationProps) {
+/**
+ * The donor's own mobile link builder (commit f91ecc5 :358-363) flattens a group's columns and
+ * slices to five, where the donor's fifth entry is always its own "View All …" leaf. hkwtia's
+ * groups carry no such leaf, so the slice keeps the first five and the group landing route is
+ * appended as the view-all. The events group's sixth leaf (/programs/cpai) is therefore reached
+ * from the desktop mega menu and the footer, not this list — recorded as errata E-19.
+ */
+function mobileLinksFor(group: LocalizedNavigationGroup, viewOverviewLabel: string) {
+  const leaves = group.columns.flatMap((column) => column.links).slice(0, 5);
+  return [
+    ...leaves,
+    {id: `${group.id}-overview`, href: group.landingHref, label: viewOverviewLabel},
+  ];
+}
+
+// Donor commit f91ecc5 :446-469 — top bar, priority actions, utilities, the eyebrow and the
+// accordions. Radix Dialog supplies the focus trap, Escape close and scroll lock the donor
+// writes by hand.
+export function MobileNavigation({locale, navigation, labels, brand}: MobileNavigationProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [expandedGroup, setExpandedGroup] = useState("");
@@ -43,75 +68,51 @@ export function MobileNavigation({locale, navigation, labels}: MobileNavigationP
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
-        <Button ref={triggerRef} variant="ghost" size="icon" className="min-h-11 min-w-11 lg:hidden" aria-label={labels.open}>
-          <Menu aria-hidden="true" />
-        </Button>
+        <button ref={triggerRef} type="button" className="mobile-trigger" aria-label={labels.open}>
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+        </button>
       </SheetTrigger>
-      <SheetContent
-        closeLabel={labels.close}
-        className="overflow-y-auto bg-shell-raised text-shell-ink [&_button]:min-h-11 [&>button]:min-w-11"
-      >
-        <SheetTitle>{labels.title}</SheetTitle>
-        <SheetDescription>{labels.description}</SheetDescription>
+      <SheetContent side="full" className="mobile-menu">
+        {/* Radix Dialog requires a title; the donor names its dialog with aria-label instead,
+            so the heading is visually hidden and still supplies the accessible name. */}
+        <SheetTitle className="sr-only">{labels.title}</SheetTitle>
+        <SheetDescription className="sr-only">{labels.description}</SheetDescription>
 
-        <div className="mt-6 grid grid-cols-2 gap-3" data-testid="mobile-priority-actions">
-          {[navigation.actions.findEvent, navigation.actions.join].map((action) => (
-            <SheetClose asChild key={action.id}>
-              <Link
-                href={action.href}
-                className="inline-flex min-h-11 min-w-0 items-center justify-center rounded-full bg-shell-blue px-3 text-center text-sm font-bold text-white break-words first:bg-shell-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--shell-focus))]"
-              >
-                {action.label}
-              </Link>
-            </SheetClose>
-          ))}
+        <div className="mobile-menu-top">
+          <DualBrandLockup labels={brand} />
+          <SheetClose asChild>
+            <button type="button" aria-label={labels.close}>
+              <span aria-hidden="true">×</span>
+            </button>
+          </SheetClose>
         </div>
 
-        <nav className="mt-6" aria-label={labels.title}>
-          <Accordion type="single" collapsible value={expandedGroup} onValueChange={setExpandedGroup}>
-            {navigation.groups.map((group) => {
-              const current = group.columns.some((column) => column.links.some(({href}) =>
-                pathname === href || pathname.startsWith(`${href}/`),
-              ));
-              return (
-                <AccordionItem key={group.id} value={group.id}>
-                  <AccordionTrigger data-current={current ? "true" : undefined}>{group.label}</AccordionTrigger>
-                  <AccordionContent>
-                    {group.columns.map((column) => (
-                      <section key={column.id} className="mt-3 min-w-0" aria-labelledby={`mobile-${group.id}-${column.id}`}>
-                        <h2 id={`mobile-${group.id}-${column.id}`} className="break-words text-xs font-bold uppercase tracking-[0.14em] text-shell-muted">
-                          {column.label}
-                        </h2>
-                        <ul className="mt-2 space-y-1">
-                          {column.links.map((link) => (
-                            <li key={link.id}>
-                              <SheetClose asChild>
-                                <Link
-                                  href={link.href}
-                                  aria-current={pathname === link.href ? "page" : undefined}
-                                  className="block min-h-11 min-w-0 break-words rounded-shell-sm px-3 py-3 font-medium hover:bg-shell-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--shell-focus))]"
-                                >
-                                  {link.label}
-                                </Link>
-                              </SheetClose>
-                            </li>
-                          ))}
-                        </ul>
-                      </section>
-                    ))}
-                  </AccordionContent>
-                </AccordionItem>
-              );
-            })}
-          </Accordion>
-        </nav>
-
-        <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-shell-border pt-6">
+        <nav className="mobile-priority-actions" aria-label={labels.priority} data-testid="mobile-priority-actions">
           <SheetClose asChild>
-            <Link className="inline-flex min-h-11 min-w-11 items-center break-words rounded-full px-3 text-sm font-semibold hover:bg-shell-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--shell-focus))]" href={navigation.memberPortal.href}>
-              {navigation.memberPortal.label}
+            <Link className="mobile-event-action" href={navigation.actions.findEvent.href}>
+              {navigation.actions.findEvent.label}
+              <Arrow />
             </Link>
           </SheetClose>
+          <SheetClose asChild>
+            <Link href={navigation.actions.join.href}>
+              {navigation.actions.join.label}
+              <Arrow />
+            </Link>
+          </SheetClose>
+        </nav>
+
+        <nav className="mobile-utilities" aria-label={labels.utilities}>
+          <SheetClose asChild>
+            <Link href="/showcase">{labels.search}</Link>
+          </SheetClose>
+          <SheetClose asChild>
+            <Link href={navigation.memberPortal.href}>{navigation.memberPortal.label}</Link>
+          </SheetClose>
+          {/* Not a SheetClose: switching locale is a router.replace, not a Link navigation, so
+              the dialog has to be closed by hand. Removing this wrapper silently breaks
+              close-after-locale-switch, which tests/unit/mobile-navigation.test.tsx pins. */}
           <div className="[&_button]:min-w-11" onClick={() => handleOpenChange(false)}>
             <LocaleSwitcher
               locale={locale}
@@ -121,6 +122,47 @@ export function MobileNavigation({locale, navigation, labels}: MobileNavigationP
               switchToChineseLabel={labels.switchToChinese}
             />
           </div>
+        </nav>
+
+        <p className="eyebrow">{labels.exploreEcosystem}</p>
+
+        <div className="mobile-accordions">
+          <Accordion type="single" collapsible value={expandedGroup} onValueChange={setExpandedGroup}>
+            {navigation.groups.map((group) => {
+              const current = group.columns.some((column) => column.links.some(({href}) =>
+                pathname === href || pathname.startsWith(`${href}/`),
+              ));
+              const links = mobileLinksFor(group, labels.viewOverview);
+              return (
+                <AccordionItem
+                  key={group.id}
+                  value={group.id}
+                  className={cn("mobile-accordion", group.eventFirst && "event-first")}
+                >
+                  <AccordionTrigger
+                    data-current={current ? "true" : undefined}
+                    marker={<span aria-hidden="true">{expandedGroup === group.id ? "−" : "+"}</span>}
+                  >
+                    {group.label}
+                  </AccordionTrigger>
+                  <AccordionContent className="mobile-accordion-panel">
+                    {links.map((link, index) => (
+                      <SheetClose asChild key={link.id}>
+                        <Link
+                          className={index === links.length - 1 ? "mobile-view-all" : undefined}
+                          href={link.href}
+                          aria-current={pathname === link.href ? "page" : undefined}
+                        >
+                          {link.label}
+                          <Arrow />
+                        </Link>
+                      </SheetClose>
+                    ))}
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
         </div>
       </SheetContent>
     </Sheet>

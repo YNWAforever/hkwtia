@@ -16,10 +16,15 @@ const AccordionItem = React.forwardRef<
 ));
 AccordionItem.displayName = AccordionPrimitive.Item.displayName;
 
+type AccordionTriggerProps = React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger> & {
+  /** Replaces the chevron; the donor mobile menu uses a text `+` / `−` styled by CSS. */
+  marker?: React.ReactNode;
+};
+
 const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
->(({className, children, ...props}, ref) => (
+  AccordionTriggerProps
+>(({className, children, marker, ...props}, ref) => (
   <AccordionPrimitive.Header className="flex">
     <AccordionPrimitive.Trigger
       ref={ref}
@@ -30,7 +35,9 @@ const AccordionTrigger = React.forwardRef<
       {...props}
     >
       {children}
-      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" aria-hidden="true" />
+      {marker ?? (
+        <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" aria-hidden="true" />
+      )}
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ));

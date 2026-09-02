@@ -98,3 +98,37 @@
  * clear AA comfortably. The donor size and tracking are untouched -- axe scores contrast, not
  * size, and 9px is the donor presentation this work package is reproducing. */
 .brand-copy small { opacity: 1; }
+
+/* hkwtia switches locale with router.replace, so the donor's utility <a> is a <button> here. */
+.mobile-utilities button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+/* Radix Accordion wraps the trigger in a header element, so the donor's own
+ * `.mobile-accordion > button` rules (app/styles/wisetech.css:321-322 and :1079-1080) never
+ * reach it. These restate them one level deeper; keep the two in step if the port is
+ * regenerated. */
+.mobile-accordion > h3 { display: flex; margin: 0; }
+.mobile-accordion > h3 > button {
+  flex: 1 1 auto;
+  min-height: 62px;
+  border: 0;
+  background: transparent;
+  color: white;
+  font-family: var(--font-serif);
+  font-size: clamp(20px, 4.8vw, 24px);
+  padding: 10px 2px;
+  text-align: left;
+}
+.mobile-accordion.event-first > h3 > button { color: #8fc4e0; }
+.mobile-accordion > h3 > button span {
+  color: #8fc4e0;
+  font-family: var(--font-sans);
+  font-size: 22px;
+  font-weight: 400;
+}
