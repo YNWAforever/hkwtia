@@ -21,7 +21,7 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
           <DualBrandLockup labels={{
             homeLabel: t("brand.homeLabel"),
             publicName: t("brand.publicName"),
-            operator: t("brand.operator"),
+            descriptor: t("brand.descriptor"),
             logoAlt: t("brand.logoAlt"),
           }} />
           <p className="mt-5 max-w-md text-sm leading-6 text-shell-muted">{t("summary")}</p>

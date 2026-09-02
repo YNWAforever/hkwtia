@@ -12,6 +12,7 @@ const implementationFiles = [
   "app/[locale]/(public)/layout.tsx",
   "components/layout/announcement-bar.tsx",
   "components/layout/announcement-dismiss.tsx",
+  "components/layout/header-shell.tsx",
 ];
 
 describe("WiseTech PR2 source boundary", () => {

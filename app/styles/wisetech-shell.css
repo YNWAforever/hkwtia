@@ -34,3 +34,32 @@
 @media (min-width: 821px) {
   .announcement-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 }
+
+/* The donor header is always transparent over a photo hero. `solid` renders the donor's
+ * scrolled chrome at rest and stays in flow, so a page with no hero is not covered. Both
+ * selectors are needed: .site-header.scrolled would otherwise switch a solid header to
+ * position: fixed and pull it out of flow mid-scroll. */
+.site-header[data-variant="solid"],
+.site-header[data-variant="solid"].scrolled {
+  position: sticky;
+  top: 0;
+  color: var(--wt-ink);
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 1px 0 rgba(15, 76, 129, 0.14);
+  backdrop-filter: blur(18px);
+}
+
+/* Tap-target floor. The donor drops these below 44px; hkwtia's accessibility floor
+ * (spec §2.9) and the width sweep in tests/e2e/public-shell.spec.ts pin 44 (errata E-14). */
+.search-link { width: 44px; height: 44px; }
+.header-actions .button-small { min-height: 44px; }
+.language-link { display: inline-flex; min-height: 44px; align-items: center; }
+/* .signin-link is display:none at or below 1240px (app/styles/wisetech.css:1086) -- the ported
+ * collapse. An unconditional `display: inline-flex` here would come later in the cascade and
+ * un-hide it, so the floor is applied only above the breakpoint. */
+@media (min-width: 1241px) {
+  .signin-link { display: inline-flex; min-height: 44px; align-items: center; }
+}
+@media (max-width: 520px) {
+  .mobile-trigger { width: 44px; height: 44px; }
+}

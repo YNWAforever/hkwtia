@@ -2,9 +2,13 @@ import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 
 import {render, screen, within} from "@testing-library/react";
+import {renderToStaticMarkup} from "react-dom/server";
 import {describe, expect, it, vi} from "vitest";
 
-const {imagePriorities} = vi.hoisted(() => ({imagePriorities: [] as boolean[]}));
+const {imagePriorities, pathnameState} = vi.hoisted(() => ({
+  imagePriorities: [] as boolean[],
+  pathnameState: {current: "/events"},
+}));
 
 vi.mock("next-intl/server", async () => {
   const {readFileSync} = await import("node:fs");
@@ -34,7 +38,7 @@ vi.mock("next/image", () => ({
   },
 }));
 vi.mock("@/i18n/navigation", () => ({
-  usePathname: () => "/events",
+  usePathname: () => pathnameState.current,
   useRouter: () => ({replace: vi.fn()}),
   Link: ({href, ...props}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {href: string}) =>
     <a href={href} {...props} />,
@@ -46,18 +50,31 @@ import {SiteHeader} from "@/components/layout/site-header";
 
 describe("public shell server surfaces", () => {
   it.each([
-    ["en", "Events & Programmes", "Find an event", "Operated by WTIA"],
-    ["zh-HK", "活動及計劃", "尋找活動", "由 WTIA 營運"],
-  ] as const)("renders complete %s header copy", async (locale, group, action, operator) => {
-    const view = render(await SiteHeader({locale}));
+    ["en", "Events & Programmes", "Join WiseTech", "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association", "Search WiseTech"],
+    ["zh-HK", "活動及計劃", "加入 WiseTech", "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台 · 中文法定名稱待正式批准", "搜尋 WiseTech"],
+  ] as const)("renders complete %s header copy", async (locale, group, join, descriptor, search) => {
+    const view = render(await SiteHeader({locale, hasAnnouncement: true}));
     expect(screen.getByText("WiseTech Hong Kong")).toBeInTheDocument();
-    expect(screen.getByText(operator)).toBeInTheDocument();
+    expect(screen.getByText(descriptor)).toBeInTheDocument();
     expect(screen.getAllByText(group).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("link", {name: action}).length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", {name: join})).toHaveAttribute("href", "/join");
+    expect(screen.getByRole("link", {name: search})).toHaveAttribute("href", "/showcase");
     expect(screen.getByRole("img", {name: "WTIA"})).toHaveAttribute("src", "/images/wtia-logo.png");
     expect(screen.getByRole("img", {name: "WTIA"})).toHaveAttribute("data-priority", "true");
     expect(imagePriorities).toContain(true);
     view.unmount();
+  });
+
+  it("carries the route's variant and the announcement modifier on the header element", async () => {
+    pathnameState.current = "/";
+    const overlay = renderToStaticMarkup(await SiteHeader({locale: "en", hasAnnouncement: true}));
+    expect(overlay).toContain('data-variant="overlay"');
+    expect(overlay).toContain('class="site-header"');
+
+    pathnameState.current = "/events";
+    const solid = renderToStaticMarkup(await SiteHeader({locale: "en", hasAnnouncement: false}));
+    expect(solid).toContain('data-variant="solid"');
+    expect(solid).toContain("site-header no-announcement");
   });
 
   it("derives every English footer journey anchor from the shared navigation model", async () => {
@@ -104,6 +121,7 @@ describe("public shell server surfaces", () => {
     const source = readFileSync(resolve(process.cwd(), "components/layout/site-header.tsx"), "utf8");
 
     expect(source).not.toContain("fallback={<nav");
-    expect(source).toContain('fallback={<div aria-hidden="true" className="hidden min-h-11 min-w-0 flex-1 lg:block" />}');
+    expect(source).toContain('fallback={<div aria-hidden="true" className="desktop-nav" />}');
+    expect(source).toContain("<HeaderShell hasAnnouncement={hasAnnouncement}>");
   });
 });
