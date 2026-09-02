@@ -7,10 +7,6 @@ import type {ReactNode} from "react";
 import {routing} from "@/i18n/routing";
 
 import "../globals.css";
-// Ordered after globals.css so the donor rules land after the Tailwind layers. A CSS
-// @import inside globals.css would not achieve that: css-loader emits imported files
-// ahead of the importing file's own rules (design-fidelity errata E-9).
-import "../styles/wisetech.css";
 
 type LocaleParams = {params: Promise<{locale: string}>};
 type LocaleLayoutProps = LocaleParams & {children: ReactNode};

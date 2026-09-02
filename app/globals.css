@@ -77,7 +77,8 @@
 
 * { box-sizing: border-box; border-color: hsl(var(--border)); }
 html { scroll-behavior: smooth; }
-body { margin: 0; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: var(--font-sans); }
+body { margin: 0; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: var(--font-sans); text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+/* app/styles/wisetech.css re-declares these two rules identically on the public routes. */
 h1, h2 { font-family: var(--font-serif); font-weight: 500; letter-spacing: -0.045em; }
 h3 { letter-spacing: -0.025em; }
 a { transition: color 160ms ease; }

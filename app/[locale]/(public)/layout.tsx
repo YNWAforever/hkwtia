@@ -11,6 +11,16 @@ import {publicEnv} from '@/lib/config/env';
 import {announcementsRepository} from '@/lib/db/repos/announcements';
 import {toAnnouncementBarView} from '@/lib/public-shell/announcement';
 
+// Ordered after globals.css so the donor rules land after the Tailwind layers. A CSS
+// @import inside globals.css would not achieve that: css-loader emits imported files
+// ahead of the importing file's own rules (design-fidelity errata E-9). Next emits a
+// nested layout's CSS after the root layout's, so importing here keeps that order.
+// Scoped to the public route group on purpose: admin, portal and join never render the
+// donor markup, and the port's element-level rules (body line-height, the coral
+// :focus-visible, [id] scroll-margin) must not change them. WP-6 decides whether the
+// app shell adopts any of it.
+import "../../styles/wisetech.css";
+
 type PublicLayoutProps = {
   children: ReactNode;
   params: Promise<{locale: string}>;

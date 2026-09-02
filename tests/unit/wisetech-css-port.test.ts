@@ -1,17 +1,24 @@
-import {readFileSync} from "node:fs";
+import {existsSync, readFileSync} from "node:fs";
 import {resolve} from "node:path";
 
+import postcss from "postcss";
 import {describe, expect, it} from "vitest";
 
 const port = readFileSync(resolve(process.cwd(), "app/styles/wisetech.css"), "utf8");
 const rootLayout = readFileSync(resolve(process.cwd(), "app/[locale]/layout.tsx"), "utf8");
+const publicLayout = readFileSync(resolve(process.cwd(), "app/[locale]/(public)/layout.tsx"), "utf8");
+
+// Selector matching runs against the rules alone. The provenance header names several of the
+// families this file drops, and matching prose would let a comment satisfy — or violate — a
+// contract that is about CSS.
+const rules = port.replace(/\/\*[\s\S]*?\*\//g, "");
 
 // The plan's draft list also carried ".first-90". The donor never styles it: `git grep first-90
 // f91ecc5` finds it only as a marker class on <section className="section shell first-90"> in
 // app/WiseTechSite.tsx, and app/globals.css is the donor's only stylesheet at that commit. A
 // mechanical port cannot produce a rule the donor does not have, so it is not part of this
-// contract; the section is styled entirely by .section, .shell, .inner-section-heading,
-// .intro-process and .directory-actions, which are all pinned below.
+// contract; the section takes its appearance from .section, .shell, .inner-section-heading,
+// .intro-process and .directory-actions instead.
 const keptSelectors = [
   ".site-root", ".shell", ".section", ".eyebrow", ".status-label", ".button", ".button-dark", ".button-light",
   ".text-link", ".light-link", ".card-index", ".honest-empty", ".inner-honest", ".light-empty", ".pulse-ring",
@@ -22,8 +29,8 @@ const keptSelectors = [
   ".mega-menu-v2", ".mega-menu-main", ".mega-menu-heading", ".mega-columns", ".mega-column-title", ".mega-feature-v2",
   ".mobile-menu", ".mobile-priority-actions", ".mobile-accordion", ".hero", ".network-field", ".legacy-network",
   ".archive-photo-grid", ".impact-metrics", ".gba-section", ".conversion-grid", ".plan-grid", ".membership-dimensions",
-  ".partner-record-card", ".directory-prompts", ".solution-needs", ".event-quick-tabs", ".event-card-v2",
-  ".site-footer", ".footer-top", ".footer-links", ".footer-bottom", ".concierge", ".concierge-panel",
+  ".partner-record-card", ".directory-prompts", ".directory-actions", ".solution-needs", ".event-quick-tabs",
+  ".event-card-v2", ".site-footer", ".footer-top", ".footer-links", ".footer-bottom", ".concierge", ".concierge-panel",
 ];
 
 // The whole join family is donor-only: the donor's six-step join form is not ported and the
@@ -35,16 +42,28 @@ const droppedSelectors = [
   ".onboarding-actions", ".review-list", ".site-search-form", ".search-feedback", ".sr-only",
 ];
 
-function selectorPattern(selector: string) {
+// A kept selector has to head a top-level rule — a base rule, not merely a responsive override
+// inside a media query. Anchoring on the line start would be close but wrong: the donor packs
+// several top-level rules onto one physical line, which hides .principle-grid, .footer-top,
+// .footer-links and .footer-bottom mid-line. Parsing answers the actual question.
+const topLevelSelectors = postcss
+  .parse(port)
+  .nodes.flatMap((node) => (node.type === "rule" ? node.selector.split(",").map((part) => part.trim()) : []));
+
+function headsTopLevelRule(selector: string) {
+  const pattern = new RegExp(`^${selector.replace(/\./g, "\\.")}(?![\\w-])`);
+  return topLevelSelectors.some((part) => pattern.test(part));
+}
+
+function anywherePattern(selector: string) {
   return new RegExp(`(^|[\\s,}])${selector.replace(/\./g, "\\.")}(?![\\w-])`, "m");
 }
 
 describe("WiseTech CSS port", () => {
-  it("is imported from the root layout after the Tailwind layers", () => {
-    const globalsAt = rootLayout.indexOf('import "../globals.css";');
-    const portAt = rootLayout.indexOf('import "../styles/wisetech.css";');
-    expect(globalsAt).toBeGreaterThan(-1);
-    expect(portAt).toBeGreaterThan(globalsAt);
+  it("is imported by the public route group, after the Tailwind layers", () => {
+    expect(rootLayout).toContain('import "../globals.css";');
+    expect(rootLayout).not.toContain("styles/wisetech.css");
+    expect(publicLayout).toContain('import "../../styles/wisetech.css";');
   });
 
   it("carries no donor build directive, remote asset or donor route", () => {
@@ -53,8 +72,20 @@ describe("WiseTech CSS port", () => {
     for (const route of ["/activities", "/members", "/solutions"]) expect(port).not.toContain(route);
   });
 
+  // Two donor photographs have no counterpart under public/. Their rights are unreviewed and the
+  // asset inventory's disposition for them is "retire", so they enter, if at all, through WP-5.
+  // Pinning the exact pair keeps the debt explicit and fails any newly dangling own-origin URL.
+  it("pins the port's unresolved own-origin assets as known debt", () => {
+    const referenced = [...rules.matchAll(/url\(\s*["']?(\/[^"')]+)/g)].map((match) => match[1]);
+    expect(referenced.length).toBeGreaterThan(0);
+    const unresolved = [...new Set(referenced)]
+      .filter((path) => !existsSync(resolve(process.cwd(), "public", path.slice(1))))
+      .sort();
+    expect(unresolved).toEqual(["/archive/asia-smart-shanghai.webp", "/editorial/events-community.webp"]);
+  });
+
   it("declares no tokens of its own and references only prefixed ones", () => {
-    expect(port).not.toMatch(/^:root/m);
+    expect(rules).not.toMatch(/^:root/m);
     const references = [...port.matchAll(/var\((--[a-z0-9-]+)/g)].map((match) => match[1]);
     expect(references.length).toBeGreaterThan(100);
     for (const name of new Set(references)) expect(name).toMatch(/^--(wt-|font-)/);
@@ -72,11 +103,11 @@ describe("WiseTech CSS port", () => {
   });
 
   it.each(keptSelectors)("keeps the donor selector %s", (selector) => {
-    expect(port).toMatch(selectorPattern(selector));
+    expect(headsTopLevelRule(selector), `no top-level rule heads with ${selector}`).toBe(true);
   });
 
   it.each(droppedSelectors)("drops the donor-only selector %s", (selector) => {
-    expect(port).not.toMatch(selectorPattern(selector));
+    expect(rules).not.toMatch(anywherePattern(selector));
   });
 
   it("keeps every keyframe behind the reduced-motion preference", () => {
