@@ -16,7 +16,8 @@
   --muted: 210 20% 96%;
   --muted-foreground: 0 0% 39%;
   --accent: 42 79% 75%;
-  --accent-foreground: 0 0% 100%;
+  /* Ink, not white: shadcn's hover:bg-accent hover:text-accent-foreground would pair white with this light amber at ~1.4:1. */
+  --accent-foreground: 208 79% 28%;
   --destructive: 0 72% 55%;
   --destructive-foreground: 0 0% 100%;
   --border: 0 3% 87%;

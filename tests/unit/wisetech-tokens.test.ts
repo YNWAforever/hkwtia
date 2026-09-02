@@ -43,6 +43,7 @@ const retunedTriplets = {
   "--secondary": "201 75% 41%",
   "--muted-foreground": "0 0% 39%",
   "--accent": "42 79% 75%",
+  "--accent-foreground": "208 79% 28%",
   "--border": "0 3% 87%",
   "--input": "0 3% 87%",
   "--ring": "209 67% 31%",

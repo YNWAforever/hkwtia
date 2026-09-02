@@ -8,7 +8,6 @@ import {routing} from "@/i18n/routing";
 
 import "../globals.css";
 
-
 type LocaleParams = {params: Promise<{locale: string}>};
 type LocaleLayoutProps = LocaleParams & {children: ReactNode};
 
