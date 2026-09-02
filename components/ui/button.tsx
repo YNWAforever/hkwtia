@@ -41,7 +41,11 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({className, variant, size, asChild = false, ...props}, ref) => {
     const Comp = asChild ? Slot : 'button';
-    return <Comp className={cn(buttonVariants({variant, size, className}))} ref={ref} {...props} />;
+    // `.text-link`/`.button` declare their own padding in wisetech.css; a caller who picks a
+    // wt* variant but forgets size="wt" would otherwise inherit the default size's px-4 py-2
+    // on top of it. size="wt" stays available to pass explicitly too.
+    const resolvedSize = size ?? (variant?.startsWith('wt') ? 'wt' : undefined);
+    return <Comp className={cn(buttonVariants({variant, size: resolvedSize, className}))} ref={ref} {...props} />;
   }
 );
 Button.displayName = 'Button';

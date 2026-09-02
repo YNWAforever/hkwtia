@@ -19,8 +19,8 @@ import {StatusLabel} from "@/components/wt/status-label";
 import {StepGrid} from "@/components/wt/step-grid";
 
 vi.mock("next/image", () => ({
-  default: ({fill: _fill, priority: _priority, ...props}: React.ImgHTMLAttributes<HTMLImageElement> & {fill?: boolean; priority?: boolean}) =>
-    <img {...props} />,
+  default: ({fill, priority: _priority, sizes, ...props}: React.ImgHTMLAttributes<HTMLImageElement> & {fill?: boolean; priority?: boolean}) =>
+    <img {...props} data-fill={String(Boolean(fill))} data-sizes={sizes} />,
 }));
 vi.mock("@/i18n/navigation", () => ({
   Link: ({href, ...props}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {href: string}) => <a href={href} {...props} />,
@@ -56,30 +56,45 @@ describe("wt primitives", () => {
     expect(shell.container.firstElementChild).toHaveClass("shell", "grid");
   });
 
+  it("Section defaults to the plain paper tone", () => {
+    const {container} = render(<Section><p>x</p></Section>);
+    const section = container.querySelector("section");
+    expect(section).toHaveClass("section");
+    expect(section).not.toHaveClass("opportunity-section");
+    expect(section).not.toHaveClass("inner-section");
+    expect(section).not.toHaveClass("inner-section-tint");
+  });
+
   it("SectionHeading renders the stacked, split and inner grammars", () => {
-    const stacked = render(<SectionHeading eyebrow="Demand" title="Connections" id="s1" />);
+    const stacked = render(<SectionHeading eyebrow="Demand" title="Connections" headingId="s1" />);
     expect(stacked.container.firstElementChild).toHaveClass("section-heading");
     expect(stacked.container.querySelector("h2#s1")).toHaveTextContent("Connections");
-    const split = render(<SectionHeading layout="split" inverse eyebrow="Open now" title="What can you join?" lead="Only confirmed" />);
+    expect(stacked.container.querySelector("p:not(.eyebrow)")).toBeNull();
+    const split = render(<SectionHeading variant="split" inverse eyebrow="Open now" title="What can you join?" lead="Only confirmed" />);
     const splitRoot = split.container.firstElementChild;
     expect(splitRoot).toHaveClass("section-heading", "split-heading", "inverse");
     expect(splitRoot?.firstElementChild?.tagName).toBe("DIV");
     expect(split.getByText("Open now")).toHaveClass("eyebrow", "light");
     expect(splitRoot?.lastElementChild).toHaveTextContent("Only confirmed");
-    const inner = render(<SectionHeading layout="inner" eyebrow="Content hub" title="Knowledge" lead="Put to work" />);
+    const inner = render(<SectionHeading variant="inner" eyebrow="Content hub" title="Knowledge" lead="Put to work" />);
     expect(inner.container.firstElementChild).toHaveClass("inner-section-heading");
     expect(inner.container.firstElementChild?.lastElementChild?.tagName).toBe("P");
   });
 
-  it("ActionLink renders the donor link tones with a decorative arrow", () => {
-    render(<><ActionLink href="/events">Find an event</ActionLink><ActionLink href="/membership" tone="text-link-light">Compare</ActionLink></>);
+  it("ActionLink renders the donor link variants with a decorative arrow", () => {
+    render(<><ActionLink href="/events">Find an event</ActionLink><ActionLink href="/membership" variant="text-link-light">Compare</ActionLink></>);
     expect(screen.getByRole("link", {name: "Find an event"})).toHaveClass("button");
     expect(screen.getByRole("link", {name: "Compare"})).toHaveClass("text-link", "light-link");
   });
 
-  it("HonestEmpty is a polite status region with a decorative pulse ring and an action slot", () => {
+  it("HonestEmpty is a polite status region with a decorative pulse ring and wrapped ink actions", () => {
     render(
-      <HonestEmpty label="Current availability" title="No activities are currently open." copy="Only confirmed activities appear here." actions={<a href="mailto:contact@hkwtia.org">Updates</a>} />,
+      <HonestEmpty
+        label="Current availability"
+        title="No activities are currently open."
+        copy="Only confirmed activities appear here."
+        actions={[{href: "mailto:contact@hkwtia.org", label: "Updates"}]}
+      />,
     );
     const status = screen.getByRole("status");
     expect(status).toHaveAttribute("aria-live", "polite");
@@ -87,16 +102,40 @@ describe("wt primitives", () => {
     expect(status.querySelector(".pulse-ring")).toHaveAttribute("aria-hidden", "true");
     expect(screen.getByText("Current availability")).toHaveClass("status-label");
     expect(screen.getByRole("heading", {level: 3})).toHaveTextContent("No activities are currently open.");
+    expect(screen.getByRole("link", {name: "Updates"})).toHaveClass("button", "button-light");
     expect(status.querySelector(".open-now-actions a")).toHaveAttribute("href", "mailto:contact@hkwtia.org");
   });
 
-  it("HonestEmpty tones map to the donor classes", () => {
-    const light = render(<HonestEmpty tone="light" label="l" title="t" copy="c" headingLevel={2} />);
+  it("HonestEmpty renders without actions or a wrapper when none are given", () => {
+    render(<HonestEmpty label="l" title="t" copy="c" />);
+    const status = screen.getByRole("status");
+    expect(status.querySelector(".open-now-actions")).toBeNull();
+  });
+
+  it("HonestEmpty variants map to the donor classes, and inner has no headingLevel choice", () => {
+    const light = render(<HonestEmpty variant="light" label="l" title="t" copy="c" headingLevel={2} />);
     expect(light.container.firstElementChild).toHaveClass("honest-empty", "light-empty");
     expect(light.getByRole("heading", {level: 2})).toHaveTextContent("t");
-    const inner = render(<HonestEmpty tone="inner" label="l" title="t" copy="c" />);
+    const inner = render(<HonestEmpty variant="inner" label="l" title="t" copy="c" />);
     expect(inner.container.firstElementChild).toHaveClass("inner-honest");
     expect(inner.container.firstElementChild).toHaveAttribute("role", "status");
+    expect(inner.getByRole("heading", {level: 3})).toHaveTextContent("t");
+  });
+
+  it("HonestEmpty light variant omits the label and renders bare action links", () => {
+    render(
+      <HonestEmpty
+        variant="light"
+        title="No results yet"
+        copy="c"
+        actions={[{href: "mailto:contact@hkwtia.org", label: "Contact us"}]}
+      />,
+    );
+    const status = screen.getByRole("status");
+    expect(status).toHaveClass("honest-empty", "light-empty");
+    expect(status.querySelector(".status-label")).toBeNull();
+    expect(status.querySelector(".open-now-actions")).toBeNull();
+    expect(screen.getByRole("link", {name: "Contact us"})).toHaveClass("button");
   });
 
   it("PageHero renders the donor structure over an own-origin figure", () => {
@@ -108,7 +147,7 @@ describe("wt primitives", () => {
         lead="Lead copy"
         artMark="W+"
         image={{src: "/images/projects-hero.jpg", alt: "Community", caption: "WTIA archive"}}
-        actions={{primary: {href: "/events", label: "Find an event"}, secondary: {href: "/membership", label: "Compare"}}}
+        actions={[{href: "/events", label: "Find an event"}, {href: "/membership", label: "Compare"}]}
         breadcrumb={{homeHref: "/", homeLabel: "Home", current: "Events"}}
       />,
     );
@@ -116,7 +155,10 @@ describe("wt primitives", () => {
     expect(section).toHaveClass("page-hero", "inner-page-hero");
     expect(screen.getByRole("heading", {level: 1})).toHaveTextContent("Find an activity");
     expect(screen.getByText("Events", {selector: "p"})).toHaveClass("eyebrow", "light");
-    expect(screen.getByRole("img", {name: "Community"})).toHaveAttribute("src", "/images/projects-hero.jpg");
+    const image = screen.getByRole("img", {name: "Community"});
+    expect(image).toHaveAttribute("src", "/images/projects-hero.jpg");
+    expect(image).toHaveAttribute("data-fill", "true");
+    expect(image).toHaveAttribute("data-sizes", "(max-width: 820px) 100vw, 58vw");
     expect(screen.getByText("WTIA archive").tagName).toBe("FIGCAPTION");
     expect(screen.getByRole("link", {name: "Find an event"})).toHaveClass("button", "button-light");
     expect(screen.getByRole("link", {name: "Compare"})).toHaveClass("text-link", "light-link");
@@ -161,13 +203,28 @@ describe("wt primitives", () => {
     expect(screen.getByRole("heading", {level: 3, name: "Send"})).toBeInTheDocument();
   });
 
-  it("CardGrid renders linked items as service links and static items as articles", () => {
+  it("CardGrid renders service links with a trailing arrow and static items as articles", () => {
     render(<CardGrid variant="service" items={[{title: "Market entry", copy: "a", href: "/launchpad"}, {title: "Soft landing", copy: "b", marker: "★"}]} />);
     const grid = document.querySelector(".service-grid");
-    expect(grid?.querySelector("a.service-link")).toHaveAttribute("href", "/launchpad");
+    const link = grid?.querySelector("a.service-link");
+    expect(link).toHaveAttribute("href", "/launchpad");
+    expect(link?.lastElementChild).toHaveAttribute("aria-hidden", "true");
+    expect(link?.lastElementChild).toHaveTextContent("↗");
     expect(grid?.querySelector("article span")).toHaveTextContent("★");
-    const badge = render(<CardGrid variant="badge" items={[{title: "Verified", copy: "c"}]} />);
-    expect(badge.container.querySelector(".badge-grid article span")).toHaveTextContent("01");
+  });
+
+  it("CardGrid principle variant renders static articles with a zero-padded default marker", () => {
+    render(<CardGrid variant="principle" items={[{title: "Transparency", copy: "a"}, {title: "Rigor", copy: "b"}]} />);
+    const grid = document.querySelector(".principle-grid");
+    expect(grid?.querySelectorAll("article")).toHaveLength(2);
+    expect(grid?.querySelector("article span")).toHaveTextContent("01");
+  });
+
+  it("CardGrid badge variant defaults to a decorative ring marker", () => {
+    render(<CardGrid variant="badge" items={[{title: "Verified", copy: "c"}]} />);
+    const marker = document.querySelector(".badge-grid article span");
+    expect(marker).toHaveAttribute("aria-hidden", "true");
+    expect(marker).toHaveTextContent("○");
   });
 
   it("PageUpdated exposes a machine-readable time and an optional note", () => {
@@ -180,11 +237,29 @@ describe("wt primitives", () => {
     expect(screen.getByText(/Reviewed by staff/)).toBeInTheDocument();
   });
 
+  it("PageUpdated renders without a note and accepts an id like its siblings", () => {
+    render(<PageUpdated id="updated" label="Page updated" dateTime="2026-09-02" formattedDate="2 September 2026" />);
+    const section = document.querySelector("section#updated");
+    expect(section).toHaveClass("page-updated");
+    expect(document.querySelector("time")).toHaveTextContent("2 September 2026");
+    expect(section?.textContent).not.toContain("Reviewed");
+  });
+
   it("Button exposes the donor variants", () => {
-    render(<><Button variant="wtDark" size="wt">Dark</Button><Button variant="wtText" size="wt">Text</Button><Button variant="wtLight" size="wt">Light</Button></>);
+    render(
+      <>
+        <Button variant="wtDark" size="wt">Dark</Button>
+        <Button variant="wtText" size="wt">Text</Button>
+        <Button variant="wtLight" size="wt">Light</Button>
+        <Button variant="wtText">Bare</Button>
+      </>,
+    );
     expect(screen.getByRole("button", {name: "Dark"})).toHaveClass("button", "button-dark");
     expect(screen.getByRole("button", {name: "Light"})).toHaveClass("button", "button-light");
     expect(screen.getByRole("button", {name: "Text"})).toHaveClass("text-link");
     expect(screen.getByRole("button", {name: "Text"})).not.toHaveClass("h-10");
+    const bare = screen.getByRole("button", {name: "Bare"});
+    expect(bare).not.toHaveClass("h-10");
+    expect(bare).not.toHaveClass("px-4");
   });
 });

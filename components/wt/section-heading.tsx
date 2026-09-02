@@ -1,22 +1,31 @@
 import {Eyebrow} from '@/components/wt/eyebrow';
 import {cn} from '@/lib/utils';
 
-type SectionHeadingProps = Readonly<{
+type SectionHeadingCommon = Readonly<{
   eyebrow: string;
   title: string;
-  lead?: string;
-  id?: string;
-  layout?: 'stacked' | 'split' | 'inner';
+  // Lands on the <h2>, not the root: it pairs with Section's `labelledBy`, unlike every
+  // other primitive's root-level `id`.
+  headingId?: string;
   inverse?: boolean;
   className?: string;
 }>;
 
-export function SectionHeading({eyebrow, title, lead, id, layout = 'stacked', inverse = false, className}: SectionHeadingProps) {
-  if (layout === 'inner') {
+// The port has no `.section-heading>p` rule and the donor never pairs a lead with the
+// stacked grammar, so 'stacked' carries no `lead` at all.
+export type SectionHeadingProps =
+  | (SectionHeadingCommon & Readonly<{variant?: 'stacked'}>)
+  | (SectionHeadingCommon & Readonly<{variant: 'split' | 'inner'; lead?: string}>);
+
+export function SectionHeading(props: SectionHeadingProps) {
+  const {eyebrow, title, headingId, inverse = false, className} = props;
+
+  if (props.variant === 'inner') {
+    const {lead} = props;
     return (
       <div className={cn('inner-section-heading', className)}>
         <Eyebrow>{eyebrow}</Eyebrow>
-        <h2 id={id}>{title}</h2>
+        <h2 id={headingId}>{title}</h2>
         {lead ? <p>{lead}</p> : null}
       </div>
     );
@@ -25,11 +34,12 @@ export function SectionHeading({eyebrow, title, lead, id, layout = 'stacked', in
   const heading = (
     <>
       <Eyebrow light={inverse}>{eyebrow}</Eyebrow>
-      <h2 id={id}>{title}</h2>
+      <h2 id={headingId}>{title}</h2>
     </>
   );
 
-  if (layout === 'split') {
+  if (props.variant === 'split') {
+    const {lead} = props;
     return (
       <div className={cn('section-heading split-heading', inverse && 'inverse', className)}>
         <div>{heading}</div>
@@ -41,7 +51,6 @@ export function SectionHeading({eyebrow, title, lead, id, layout = 'stacked', in
   return (
     <div className={cn('section-heading', inverse && 'inverse', className)}>
       {heading}
-      {lead ? <p>{lead}</p> : null}
     </div>
   );
 }

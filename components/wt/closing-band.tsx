@@ -1,6 +1,7 @@
-import {ActionLink, type WtAction} from '@/components/wt/action-link';
+import {ActionLink} from '@/components/wt/action-link';
 import {Eyebrow} from '@/components/wt/eyebrow';
 import {Shell} from '@/components/wt/shell';
+import type {WtAction} from '@/components/wt/types';
 import {cn} from '@/lib/utils';
 
 type ClosingBandProps = Readonly<{eyebrow: string; title: string; copy: string; actions: readonly WtAction[]; id?: string; className?: string}>;
@@ -16,7 +17,7 @@ export function ClosingBand({eyebrow, title, copy, actions, id, className}: Clos
         </div>
         <div className="inner-closing-actions">
           {actions.map((action, index) => (
-            <ActionLink key={action.href} href={action.href} tone={index === 0 ? 'button-light' : 'text-link-light'}>
+            <ActionLink key={`${index}-${action.href}`} href={action.href} variant={index === 0 ? 'button-light' : 'text-link-light'}>
               {action.label}
             </ActionLink>
           ))}
