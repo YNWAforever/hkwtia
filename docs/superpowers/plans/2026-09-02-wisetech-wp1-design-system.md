@@ -434,83 +434,13 @@ describe("WiseTech CSS port", () => {
 Run: `npx vitest run tests/unit/wisetech-css-port.test.ts`
 Expected: FAIL at file load, `ENOENT … app/styles/wisetech.css`.
 
-- [ ] **Step 3: Generate the port with a throwaway PostCSS script**
+- [ ] **Step 3: Generate the port with the committed PostCSS script**
 
-Write the script to the scratchpad directory (never to the repo) and run it from the worktree root. It uses the `postcss` package that Tailwind already installs.
+The transform lives at `scripts/port-wisetech-css.mjs` and runs as `npm run port:wisetech`: it is the recorded, reproducible source for `app/styles/wisetech.css`, reads the donor from `git show f91ecc5:app/globals.css` (or from `WISETECH_DONOR_DIR` for a checkout outside git), and writes CRLF, so re-running it leaves `git diff --exit-code app/styles/wisetech.css` clean.
 
-```js
-// wp1-port-donor-css.cjs (scratchpad, not committed)
-const {execFileSync} = require("node:child_process");
-const fs = require("node:fs");
-const postcss = require("postcss");
+The inline draft that used to sit here is gone because it had already diverged from the artifact in three ways: it dropped only four `.join-*` prefixes instead of the whole join-form family, removed every `:root` including the two media-scoped heading overrides that must survive, and renamed `var()` references without renaming the declaration names that feed them.
 
-const donor = execFileSync("git", ["show", "f91ecc5:app/globals.css"], {encoding: "utf8"});
-const root = postcss.parse(donor);
-
-const dropPrefixes = [".portal-", ".join-page", ".join-card", ".join-roadmap", ".join-success-hero", ".onboarding-actions",
-  ".review-list", ".site-search-form", ".search-feedback", ".sr-only"];
-
-const renames = new Map([
-  ["var(--ink-soft)", "var(--wt-ink-soft)"], ["var(--ink)", "var(--wt-ink)"], ["var(--paper-bright)", "var(--wt-paper-bright)"],
-  ["var(--paper)", "var(--wt-paper)"], ["var(--stone)", "var(--wt-stone)"], ["var(--steel)", "var(--wt-steel)"],
-  ["var(--cyan)", "var(--wt-cyan)"], ["var(--jade)", "var(--wt-jade)"], ["var(--amber)", "var(--wt-amber)"],
-  ["var(--blue)", "var(--wt-blue)"], ["var(--violet)", "var(--wt-violet)"], ["var(--line-light)", "var(--wt-line-light)"],
-  ["var(--line)", "var(--wt-line)"], ["var(--shadow)", "var(--wt-shadow)"], ["var(--accent-text)", "var(--wt-accent-text)"],
-  ["var(--reading-width)", "var(--wt-reading-width)"], ["var(--heading-display)", "var(--wt-heading-display)"],
-  ["var(--heading-section)", "var(--wt-heading-section)"], ["var(--heading-card)", "var(--wt-heading-card)"],
-  ["var(--display)", "var(--font-serif)"], ["var(--sans)", "var(--font-sans)"],
-]);
-
-function isDropped(part) {
-  return dropPrefixes.some((prefix) => part.trim().startsWith(prefix));
-}
-
-root.walkAtRules("import", (rule) => rule.remove());
-root.walkRules((rule) => {
-  const selector = rule.selector.trim();
-  if (selector === ":root") { rule.remove(); return; }
-  if (rule.parent === root && (selector === "*" || selector === "html" || selector === "body")) {
-    // The donor's own `*`, `html { scroll-behavior; background }` and the first `body` rule are
-    // chrome owned by globals.css. `html { scroll-padding-top }` and the readability-pass
-    // `body { font-size; line-height }` are type rules and stay.
-    const props = rule.nodes.map((node) => node.prop);
-    if (props.includes("box-sizing") || props.includes("scroll-behavior") || props.includes("background")) { rule.remove(); return; }
-  }
-  const parts = selector.split(",");
-  if (parts.some(isDropped)) {
-    const kept = parts.map((part) => part.trim()).filter((part) => !isDropped(part));
-    if (kept.length === 0) rule.remove(); else rule.selector = kept.join(", ");
-  }
-});
-root.walkDecls((decl) => {
-  let value = decl.value;
-  for (const [from, to] of renames) value = value.split(from).join(to);
-  if (decl.prop === "outline" && value === "3px solid #ff5c4d") value = "3px solid var(--wt-focus)";
-  decl.value = value;
-});
-root.walkAtRules("media", (media) => { if (media.nodes.length === 0) media.remove(); });
-
-const keyframes = [];
-root.walkAtRules("keyframes", (rule) => { keyframes.push(rule.clone()); rule.remove(); });
-const guard = postcss.atRule({name: "media", params: "(prefers-reduced-motion: no-preference)"});
-keyframes.forEach((frame) => guard.append(frame));
-root.append(guard);
-
-const header = `/* Ported from the WiseTech donor app/globals.css at commit f91ecc5 (design-fidelity spec §4.2,
-   errata E-9 to E-11). Selectors are verbatim so this file can be diffed against the donor.
-   Mechanical transforms only: @import "tailwindcss" and the donor :root blocks removed (tokens
-   live in app/globals.css as --wt-*), var(--x) renamed to var(--wt-x) and the two font
-   variables to --font-serif / --font-sans, the focus colour routed through --wt-focus,
-   keyframes moved behind prefers-reduced-motion: no-preference, and the donor-only portal,
-   join-form, site-search and sr-only rules dropped (Tailwind provides .sr-only). The donor's
-   own *, html { scroll-behavior; background } and body chrome rules are owned by globals.css.
-   .filter is a donor pill class; Tailwind's filter utility is unused in this codebase. */\n\n`;
-fs.mkdirSync("app/styles", {recursive: true});
-fs.writeFileSync("app/styles/wisetech.css", header + root.toString().trim() + "\n");
-console.log("rules:", root.nodes.length, "keyframes:", keyframes.length);
-```
-
-Run: `node <scratchpad>/wp1-port-donor-css.cjs`
+Run: `npm run port:wisetech`
 Expected: prints a rule count and `keyframes: 3`. Then eyeball `app/styles/wisetech.css`: no `:root` remains, `grep -c "var(--wt-" app/styles/wisetech.css` is well over 100, and `grep -n "var(--" app/styles/wisetech.css | grep -v -E "var\(--(wt-|font-)"` prints nothing.
 
 - [ ] **Step 4: Verify the drop and rename logic against the donor**

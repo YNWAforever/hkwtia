@@ -14,6 +14,7 @@
     "e2e": "playwright test",
     "test:e2e": "playwright test",
     "test:lighthouse": "lhci autorun",
+    "port:wisetech": "node scripts/port-wisetech-css.mjs",
     "audit:strings": "node scripts/audit-visible-strings.mjs",
     "content:program-images": "tsx scripts/download-program-images.ts",
     "content:index-programs": "node --experimental-strip-types scripts/index-program-pages.ts",
