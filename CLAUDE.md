@@ -91,7 +91,15 @@ acceptance test at a shared or production database.
 
 ## Known deadline
 
-`lib/email/unsubscribe-token.ts` sets `LEGACY_UNSUBSCRIBE_SECRET_SUNSET = "2026-09-06"`. On that
-date `tests/unit/unsubscribe-secret-rotation.test.ts` starts failing by design. Remove the
-`cronSecret` fallback from `lib/api/unsubscribe-route.ts` and
+`lib/email/unsubscribe-token.ts` sets `LEGACY_UNSUBSCRIBE_SECRET_SUNSET = "2026-09-10"` (moved from
+2026-09-06 by Phase A of `docs/superpowers/plans/2026-09-01-unsubscribe-secret-sunset.md`). On that
+date `tests/unit/unsubscribe-secret-rotation.test.ts` starts failing by design. On or after it, never
+before, remove the `cronSecret` fallback from `lib/api/unsubscribe-route.ts` and
 `app/[locale]/(public)/unsubscribe/page.tsx`, then delete the constant and that test.
+
+## Active programme: WiseTech design fidelity (2026-09)
+
+Execution spec: `docs/superpowers/plans/2026-09-01-wisetech-design-fidelity.md` (read its Appendix D errata
+first). Work packages WP-0…WP-8 in order; design = presentation authority, hkwtia = data/route/auth
+authority; donor repo is read-only evidence (`../wisetech`, produced from local commit `f91ecc5`).
+Living status: `docs/integration/wisetech-design-fidelity-checklist.md`.
