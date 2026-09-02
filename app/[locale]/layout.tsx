@@ -1,5 +1,4 @@
 import type {Metadata} from "next";
-import {Inter, Playfair_Display} from "next/font/google";
 import {hasLocale, NextIntlClientProvider} from "next-intl";
 import {getMessages, getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
@@ -8,12 +7,6 @@ import type {ReactNode} from "react";
 import {routing} from "@/i18n/routing";
 
 import "../globals.css";
-
-const inter = Inter({subsets: ["latin"], variable: "--font-sans"});
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-serif",
-});
 
 type LocaleParams = {params: Promise<{locale: string}>};
 type LocaleLayoutProps = LocaleParams & {children: ReactNode};
@@ -47,7 +40,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${inter.variable} ${playfair.variable}`}>
+    <html lang={locale}>
       <body>
         <NextIntlClientProvider messages={messages}>
           {children}
