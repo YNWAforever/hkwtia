@@ -53,11 +53,19 @@
  * (spec §2.9) and the width sweep in tests/e2e/public-shell.spec.ts pin 44 (errata E-14). */
 .search-link { width: 44px; height: 44px; }
 .header-actions .button-small { min-height: 44px; }
-.language-link { display: inline-flex; min-height: 44px; align-items: center; }
-/* .signin-link is display:none at or below 1240px (app/styles/wisetech.css:1086) -- the ported
- * collapse. An unconditional `display: inline-flex` here would come later in the cascade and
- * un-hide it, so the floor is applied only above the breakpoint. */
-@media (min-width: 1241px) {
+/* min-width too, not just min-height: the port's `.language-link { min-width: 32px }`
+ * (app/styles/wisetech.css:70) is a plain declaration on the same element and lands after the
+ * Tailwind layers, so it beats the button's `min-w-11` at runtime and shrinks the control below
+ * the 44px floor. */
+.language-link { display: inline-flex; min-width: 44px; min-height: 44px; align-items: center; }
+/* The port hides .signin-link in three bands, not one: `@media(max-width:1240px)`
+ * (app/styles/wisetech.css:1087), `@media(max-width:1320px)` (:288) and
+ * `@media(max-width:1450px) and (min-width:1121px)` (:833-839). All three are specificity 0,1,0
+ * and this companion sheet loads after the port, so a floor starting at 1241px would win over
+ * two of them and un-hide the link from 1241px to 1450px -- including the 1440px visual
+ * baseline viewport. The link is genuinely visible only above 1450px, so that is where the
+ * tap-target floor starts. */
+@media (min-width: 1451px) {
   .signin-link { display: inline-flex; min-height: 44px; align-items: center; }
 }
 @media (max-width: 520px) {

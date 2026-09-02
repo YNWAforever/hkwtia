@@ -16,10 +16,12 @@ type DualBrandLockupProps = {
 };
 
 // Donor commit f91ecc5 :208-220 — a white 108x48 logo tile beside the wordmark and the
-// descriptor. The Tailwind utilities on the anchor are hkwtia's own 44px tap-target floor
-// (spec §2.9); the donor's .brand carries no minimum. No `min-w-0` here: `.brand` already
-// sets min-width: 0 (app/styles/wisetech.css:55), and passing both to `cn` would let
-// tailwind-merge drop `min-w-11` and fail the lockup's own 44px assertion. The PNG is
+// descriptor. `min-h-11` is hkwtia's own 44px tap-target floor (spec §2.9), which the donor's
+// .brand does not carry. The *width* floor is the 108px logo tile, not `min-w-11`: the port's
+// `.brand { min-width: 0 }` (app/styles/wisetech.css:55) lands after the Tailwind layers and
+// overrides it at runtime. The utility stays because it is the anchor's only width floor if the
+// tile is ever dropped, and because no `min-w-0` is passed alongside it — tailwind-merge would
+// resolve that conflict by discarding `min-w-11` from the class string entirely. The PNG is
 // byte-pinned by tests/unit/wisetech-asset-provenance.test.ts — restyle the tile, never the file.
 export function DualBrandLockup({labels, priority = false, className}: DualBrandLockupProps) {
   return (

@@ -77,6 +77,37 @@ describe("public shell server surfaces", () => {
     expect(solid).toContain("site-header no-announcement");
   });
 
+  it("emits the donor's header slots in order inside .header-inner", async () => {
+    pathnameState.current = "/";
+    const markup = renderToStaticMarkup(await SiteHeader({locale: "en", hasAnnouncement: true}));
+    const openMenuLabel = (JSON.parse(readFileSync(resolve(process.cwd(), "messages/en.json"), "utf8")) as {
+      Navigation: {openMenu: string};
+    }).Navigation.openMenu;
+
+    // Each slot is identified by the marker that survives Tasks 4 and 5: those tasks own what
+    // the desktop navigation and the mobile trigger render inside, so the earliest of either
+    // spelling — today's element or the donor class it is moving to — stands for the slot.
+    const earliestOf = (...markers: string[]) => {
+      const found = markers.map((marker) => markup.indexOf(marker)).filter((index) => index >= 0);
+      return found.length === 0 ? -1 : Math.min(...found);
+    };
+    const slots = {
+      headerInner: markup.indexOf('class="header-inner"'),
+      brand: markup.indexOf('class="brand'),
+      desktopNav: earliestOf("desktop-nav", "<nav"),
+      actions: markup.indexOf('class="header-actions"'),
+      search: markup.indexOf('class="search-link"'),
+      language: markup.indexOf("language-link"),
+      signIn: markup.indexOf('class="signin-link"'),
+      join: markup.indexOf("button button-small"),
+      mobileTrigger: earliestOf("mobile-trigger", `aria-label="${openMenuLabel}"`),
+    };
+
+    for (const [slot, index] of Object.entries(slots)) expect(index, slot).toBeGreaterThan(-1);
+    const order = Object.values(slots);
+    expect(order).toEqual([...order].sort((first, second) => first - second));
+  });
+
   it("derives every English footer journey anchor from the shared navigation model", async () => {
     render(await SiteFooter({locale: "en"}));
     const footer = screen.getByRole("contentinfo");

@@ -32,7 +32,10 @@ describe("DualBrandLockup", () => {
     expect(screen.getByText(labels.descriptor).tagName).toBe("SMALL");
   });
 
-  it("keeps long localized labels inside a 44px, width-constrained target", () => {
+  // The anchor's rendered width floor is the 108px `.brand-logo-wrap` tile, not `min-w-11`:
+  // the port's `.brand { min-width: 0 }` overrides that utility at runtime. This case pins the
+  // class list and the 44px height floor, which nothing in the port contests.
+  it("keeps the tap-floor classes and the 44px height with long localized labels", () => {
     const longLabels = {
       ...labels,
       publicName: "WiseTech Hong Kong 香港智慧科技創新協會國際合作及企業創新發展中心",
