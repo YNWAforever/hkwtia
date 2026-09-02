@@ -10,7 +10,7 @@
   "Navigation": {
     "brand": {
       "publicName": "WiseTech Hong Kong",
-      "operator": "由 WTIA 營運"
+      "descriptor": "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台 · 中文法定名稱待正式批准"
     },
     "groups": {
       "eventsProgrammes": {
@@ -28,6 +28,32 @@
       "aboutWtia": {
         "label": "關於 WTIA",
         "description": "了解協會、歷史、管治及聯絡渠道。"
+      }
+    },
+    "feature": {
+      "eventsProgrammes": {
+        "label": "現正開放",
+        "title": "先看清現正開放的項目，再作計劃。",
+        "copy": "報名、獎項及計劃輪次一經 WTIA 記錄確認，即會在此顯示。",
+        "cta": "瀏覽現正開放項目"
+      },
+      "membershipEcosystem": {
+        "label": "會員平台",
+        "title": "把真實業務需要帶進網絡。",
+        "copy": "在不公開機密資料或暗示保證配對下準備買家簡報。",
+        "cta": "提交挑戰"
+      },
+      "impactInsights": {
+        "label": "科技 + 智慧",
+        "title": "實務進步需要負責任選擇。",
+        "copy": "探索人的問責、資料保障、安全、透明度及持續評估。",
+        "cta": "人工智能透明度"
+      },
+      "aboutWtia": {
+        "label": "認識商會",
+        "title": "細閱商會的自身紀錄。",
+        "copy": "歷史里程碑、主席的話、委員會及聯絡渠道，均按 WTIA 持有的紀錄發布。",
+        "cta": "細閱歷史"
       }
     },
     "columns": {
@@ -61,6 +87,14 @@
       "join": "加入 WiseTech",
       "memberSignIn": "會員登入"
     },
+    "mobile": {
+      "priority": "主要操作",
+      "utilities": "實用導覽",
+      "exploreEcosystem": "探索生態系統"
+    },
+    "explore": "探索",
+    "viewOverview": "查看總覽",
+    "search": "搜尋 WiseTech",
     "openMenu": "開啟導覽選單",
     "closeMenu": "關閉導覽選單",
     "menuTitle": "網站導覽",
@@ -80,9 +114,28 @@
   "Footer": {
     "brand": {
       "publicName": "WiseTech Hong Kong",
-      "operator": "由 WTIA 營運",
+      "descriptor": "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台 · 中文法定名稱待正式批准",
       "homeLabel": "WiseTech Hong Kong 首頁",
       "logoAlt": "WTIA"
+    },
+    "tagline": "Technology + Wisdom. Hong Kong + The World.",
+    "legalLine": "WiseTech Hong Kong — Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台。[官方中文名稱待正式批准]",
+    "columns": {
+      "explore": "探索",
+      "membership": "會籍",
+      "about": "關於",
+      "contact": "聯絡"
+    },
+    "newsletter": {
+      "eyebrow": "活動通知",
+      "title": "香港下一步應建設甚麼？",
+      "emailLabel": "工作電郵",
+      "placeholder": "工作電郵",
+      "submit": "準備活動通知電郵",
+      "success": "你的電郵程式應會開啟並備妥查詢；本頁不會自動建立訂閱。",
+      "error": "請輸入有效工作電郵。",
+      "mailSubject": "WiseTech 活動通知",
+      "mailBody": "請將 {email} 加入 WiseTech 活動通知名單。"
     },
     "summary": "WiseTech Hong Kong 透過 WTIA 經核實的公開服務，連繫科技企業、專業人士及計劃。",
     "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
@@ -1252,7 +1305,14 @@
   },
   "Concierge": {
     "_review": true,
-    "launcher": "詢問 WTIA",
+    "launcher": "問 WiseTech",
+    "transparency": "了解智能助理運作方式",
+    "prompts": {
+      "home": ["WiseTech 如何幫助我的機構？", "顯示 AI+ 產業路徑"],
+      "membership": ["哪種會籍適合我的機構？", "初創企業可獲得甚麼權益？"],
+      "showcase": ["尋找服務中小企的供應商", "引薦流程如何運作？"],
+      "events": ["哪些活動適合零售業？", "顯示粵語活動"]
+    },
     "title": "WTIA 智能助理",
     "description": "查詢 WTIA 會籍、活動、計劃及支援。",
     "close": "關閉 WTIA 智能助理",

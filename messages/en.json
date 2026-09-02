@@ -9,7 +9,7 @@
   "Navigation": {
     "brand": {
       "publicName": "WiseTech Hong Kong",
-      "operator": "Operated by WTIA"
+      "descriptor": "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association"
     },
     "groups": {
       "eventsProgrammes": {
@@ -27,6 +27,32 @@
       "aboutWtia": {
         "label": "About WTIA",
         "description": "Understand the association, its history, governance and contact channels."
+      }
+    },
+    "feature": {
+      "eventsProgrammes": {
+        "label": "Open now",
+        "title": "See what is open before you plan.",
+        "copy": "Registrations, awards and programme rounds appear here as WTIA records confirm them.",
+        "cta": "Browse what is open"
+      },
+      "membershipEcosystem": {
+        "label": "Member platform",
+        "title": "Bring a real business need into the network.",
+        "copy": "Prepare a buyer brief without exposing confidential information or implying a guaranteed match.",
+        "cta": "Submit a challenge"
+      },
+      "impactInsights": {
+        "label": "Technology + Wisdom",
+        "title": "Practical progress needs responsible choices.",
+        "copy": "Explore human accountability, data protection, security, transparency and ongoing evaluation.",
+        "cta": "AI transparency"
+      },
+      "aboutWtia": {
+        "label": "The association",
+        "title": "Read the association's own record.",
+        "copy": "History milestones, the chairman's message, committees and contact channels are published as WTIA holds them.",
+        "cta": "Read the history"
       }
     },
     "columns": {
@@ -60,6 +86,14 @@
       "join": "Join WiseTech",
       "memberSignIn": "Member sign in"
     },
+    "mobile": {
+      "priority": "Priority actions",
+      "utilities": "Utility navigation",
+      "exploreEcosystem": "Explore the ecosystem"
+    },
+    "explore": "Explore",
+    "viewOverview": "View overview",
+    "search": "Search WiseTech",
     "openMenu": "Open navigation",
     "closeMenu": "Close navigation",
     "menuTitle": "Navigation",
@@ -79,9 +113,28 @@
   "Footer": {
     "brand": {
       "publicName": "WiseTech Hong Kong",
-      "operator": "Operated by WTIA",
+      "descriptor": "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association",
       "homeLabel": "WiseTech Hong Kong home",
       "logoAlt": "WTIA"
+    },
+    "tagline": "Technology + Wisdom. Hong Kong + The World.",
+    "legalLine": "WiseTech Hong Kong — the evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association.",
+    "columns": {
+      "explore": "Explore",
+      "membership": "Membership",
+      "about": "About",
+      "contact": "Contact"
+    },
+    "newsletter": {
+      "eyebrow": "Activity updates",
+      "title": "What should Hong Kong build next?",
+      "emailLabel": "Work email",
+      "placeholder": "Work email",
+      "submit": "Prepare activity-update email",
+      "success": "Your email app should open with a prepared request. This page does not create a subscription automatically.",
+      "error": "Enter a valid work email.",
+      "mailSubject": "WiseTech activity updates",
+      "mailBody": "Please add {email} to the WiseTech activity update list."
     },
     "summary": "WiseTech Hong Kong connects technology businesses, practitioners and programmes through WTIA's verified public services.",
     "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
@@ -1250,7 +1303,14 @@
     }
   },
   "Concierge": {
-    "launcher": "Ask WTIA",
+    "launcher": "Ask WiseTech",
+    "transparency": "How this assistant works",
+    "prompts": {
+      "home": ["How can WiseTech help my organisation?", "Show the AI+ industry pathways"],
+      "membership": ["Which membership suits my organisation?", "What benefits do startups receive?"],
+      "showcase": ["Find providers serving SMEs", "How do introductions work?"],
+      "events": ["Which event is relevant to retail?", "Show Cantonese events"]
+    },
     "title": "WTIA Concierge",
     "description": "Ask about WTIA membership, events, programmes and support.",
     "close": "Close Concierge",
