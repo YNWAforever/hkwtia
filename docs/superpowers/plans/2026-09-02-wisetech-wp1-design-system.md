@@ -4,7 +4,7 @@
 
 **Goal:** Put the WiseTech donor's tokens, type stacks, spacing, ported stylesheet and layout primitives into hkwtia so that later work packages can build pages from them, while nothing on screen changes except colours and fonts drifting toward the design.
 
-**Architecture:** Tokens live in `app/globals.css` as `--wt-*` variables next to the retuned shadcn and `--shell-*` triplets, so Tailwind utilities, shadcn components, portal and admin inherit the palette without a rewrite. The donor's `app/globals.css` (commit `f91ecc5`) is ported mechanically into `app/styles/wisetech.css` with its selectors verbatim and its variable references renamed to the `--wt-*` names; it is imported from the root layout after `globals.css`, which places it after the Tailwind layers. Fifteen Server-Component primitives in `components/wt/` render the donor's markup grammar over those classes, with every label arriving as a prop.
+**Architecture:** Tokens live in `app/globals.css` as `--wt-*` variables next to the retuned shadcn and `--shell-*` triplets, so Tailwind utilities, shadcn components, portal and admin inherit the palette without a rewrite. The donor's `app/globals.css` (commit `f91ecc5`) is ported mechanically into `app/styles/wisetech.css` with its selectors verbatim and its variable references renamed to the `--wt-*` names; it is imported from the public route-group layout, which Next orders after the root layout's `globals.css` and therefore after the Tailwind layers (spec errata E-9). Fifteen Server-Component primitives in `components/wt/` render the donor's markup grammar over those classes, with every label arriving as a prop.
 
 **Tech Stack:** Next.js 16 App Router (Webpack), React 19, Tailwind v3 with `tailwind.config.ts`, class-variance-authority, next-intl `Link`, vitest + Testing Library, Playwright 1.61.
 
@@ -22,8 +22,8 @@
 |---|---|
 | `app/globals.css` (modify) | Design tokens: `--wt-*` donor values, retuned shadcn and shell triplets, type stacks, donor heading rules |
 | `app/styles/wisetech.css` (create) | Mechanical port of the donor stylesheet: selectors verbatim, `var(--wt-*)` references, keyframes behind reduced motion, provenance header |
-| `app/[locale]/layout.tsx` (modify) | Drop `next/font`; import the port after `globals.css` |
-| `app/[locale]/(public)/layout.tsx` (modify) | `div.site-root` wrapper carrying `zh-Hant-HK` for the Chinese locale |
+| `app/[locale]/layout.tsx` (modify) | Drop `next/font` |
+| `app/[locale]/(public)/layout.tsx` (modify) | `div.site-root` wrapper carrying `zh-Hant-HK` for the Chinese locale; imports the port (errata E-9) |
 | `tailwind.config.ts` (modify) | `colors.wt.*`, donor max-width `screens`, type families |
 | `components/wt/*.tsx` (create, 15 files) | Presentation primitives over the ported classes; Server Components; `Readonly` props; no strings inside |
 | `components/ui/button.tsx` (modify) | `wt`, `wtDark`, `wtLight`, `wtText` variants and a `wt` size |
@@ -344,10 +344,12 @@ git commit -m "feat: adopt the WiseTech design tokens and type stacks (WP-1)" -m
 
 **Files:**
 - Create: `app/styles/wisetech.css`
-- Modify: `app/[locale]/layout.tsx:10` (add the import)
+- Modify: `app/[locale]/(public)/layout.tsx` (add the import; errata E-9)
 - Test: `tests/unit/wisetech-css-port.test.ts`
 
 - [ ] **Step 1: Write the failing port test**
+
+> Shipped as `tests/unit/wisetech-css-port.test.ts`, which pins the public-layout import (errata E-9), checks kept selectors as top-level postcss nodes, and pins the asset debt; the block below is the original draft.
 
 ```ts
 import {readFileSync} from "node:fs";
@@ -447,9 +449,9 @@ Expected: prints a rule count and `keyframes: 3`. Then eyeball `app/styles/wiset
 
 Run `grep -n -E "^(\.portal|\.join|\.sr-only|\.site-search|\.search-feedback|\.review-list|\.onboarding)" app/styles/wisetech.css` and expect no output. Run `grep -n "@keyframes" app/styles/wisetech.css` and expect three lines, all after the `prefers-reduced-motion: no-preference` line. Run `grep -c "^\." app/styles/wisetech.css` and compare with `git show f91ecc5:app/globals.css | grep -c "^\."`: the port has fewer top-level rules only by the dropped families (report both numbers).
 
-- [ ] **Step 5: Import the port from the root layout**
+- [ ] **Step 5: Import the port from the public layout**
 
-In `app/[locale]/layout.tsx`, directly after `import "../globals.css";` add:
+In `app/[locale]/(public)/layout.tsx`, with its other imports, add `import "../../styles/wisetech.css";` (the root layout keeps only `globals.css`; errata E-9). The comment on the import reads:
 
 ```tsx
 // Ordered after globals.css so the donor rules land after the Tailwind layers. A CSS
@@ -1227,11 +1229,7 @@ git commit -m "test: refresh the visual baselines after the WP-1 design-system f
 
 - [ ] **Step 1: Append errata rows E-9 to E-11 to Appendix D**
 
-```md
-| E-9 | WP-1 | `@import "./styles/wisetech.css"` in `app/globals.css` after the Tailwind directives | css-loader emits an imported stylesheet ahead of the importing file's own rules, so that placement would put the donor rules before the Tailwind layers. The port is imported from `app/[locale]/layout.tsx` directly after `../globals.css`, which orders it after the layers. | Keep the import in the root layout; do not add an `@import` to `globals.css`. |
-| E-10 | §4.1 | Token table ends at `--sans` | The donor's later `:root` passes add `--accent-text`, `--reading-width`, `--heading-display`, `--heading-section` and `--heading-card`, which later rules use. They are ported as `--wt-*` with the same values. Tailwind `screens` use `{max: …}` because the donor breakpoints are max-width. §4.3 names a `pulse-ring` keyframe; the donor has none (the ring is static); its keyframes are `hero-breathe`, `node-pulse` and `mega-menu-in`. | Use the `--wt-*` names; write `wt-md:` utilities as "at or below 820px". |
-| E-11 | §4.2, WP-1 | Fourteen files under `components/wt/` | Fifteen: `action-link.tsx` renders the donor's `<a className="button …">label <Arrow /></a>` pattern shared by the hero, closing band, interest band and card grid. The `Button` variants `wt*` pair with `size="wt"`. Dropped from the port as donor-only: portal preview, join form, site search and `.sr-only` (Tailwind provides it). | Use `ActionLink` for donor-styled links; use `Button variant="wt…" size="wt"` only for real buttons. |
-```
+The rows are recorded in Appendix D of the spec (E-9 to E-12); the spec is the authority and this plan's earlier draft of them is superseded.
 
 - [ ] **Step 2: Flip checklist rows 1.1 to 1.9**
 

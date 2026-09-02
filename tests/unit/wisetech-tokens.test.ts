@@ -33,7 +33,7 @@ const donorTokens = {
   "--wt-heading-card": "clamp(29px, 3vw, 44px)",
 };
 
-// Exact HSL conversions of the donor hex values (spec §4.1).
+// Integer-rounded HSL conversions of the donor hex values (spec §4.1, errata E-12).
 // --secondary and --shell-blue are darkened to 37% lightness for AA contrast (axe finding),
 // not exact conversions; --wt-cyan is unaffected.
 const retunedTriplets = {

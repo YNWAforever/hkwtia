@@ -82,6 +82,9 @@ export default {
           accent: "hsl(var(--shell-accent))",
           border: "hsl(var(--shell-border))",
         },
+        // Bare var() references keep the donor hexes verbatim, so Tailwind cannot apply
+        // an opacity modifier to them (bg-wt-ink/50 drops the /50 silently). Use the
+        // --shell-* HSL triplets when alpha is needed (design-fidelity errata E-12).
         wt: {
           ink: "var(--wt-ink)",
           inkSoft: "var(--wt-ink-soft)",

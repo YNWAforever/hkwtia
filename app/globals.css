@@ -48,7 +48,7 @@
   --shell-content: 1440px;
 
   /* WiseTech design tokens: the donor's :root values verbatim (design-fidelity spec §4.1
-     and errata E-10). The shadcn and --shell-* triplets above are exact HSL conversions of
+     and errata E-10). The shadcn and --shell-* triplets above are integer-rounded HSL conversions (one channel unit off; errata E-12) of
      the same hexes so Tailwind utilities, portal and admin inherit the palette. */
   --wt-ink: #0f4c81;
   --wt-ink-soft: #1a4f82;
