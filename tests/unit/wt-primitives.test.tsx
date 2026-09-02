@@ -79,7 +79,7 @@ describe("wt primitives", () => {
 
   it("HonestEmpty is a polite status region with a decorative pulse ring and an action slot", () => {
     render(
-      <HonestEmpty label="Current availability" title="No activities are currently open." copy="Only confirmed activities appear here." actions={<a href="/events">Updates</a>} />,
+      <HonestEmpty label="Current availability" title="No activities are currently open." copy="Only confirmed activities appear here." actions={<a href="mailto:contact@hkwtia.org">Updates</a>} />,
     );
     const status = screen.getByRole("status");
     expect(status).toHaveAttribute("aria-live", "polite");
@@ -87,7 +87,7 @@ describe("wt primitives", () => {
     expect(status.querySelector(".pulse-ring")).toHaveAttribute("aria-hidden", "true");
     expect(screen.getByText("Current availability")).toHaveClass("status-label");
     expect(screen.getByRole("heading", {level: 3})).toHaveTextContent("No activities are currently open.");
-    expect(status.querySelector(".open-now-actions a")).toHaveAttribute("href", "/events");
+    expect(status.querySelector(".open-now-actions a")).toHaveAttribute("href", "mailto:contact@hkwtia.org");
   });
 
   it("HonestEmpty tones map to the donor classes", () => {
