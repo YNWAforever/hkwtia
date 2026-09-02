@@ -1,0 +1,83 @@
+import {readFileSync} from "node:fs";
+import {resolve} from "node:path";
+
+import {describe, expect, it} from "vitest";
+
+const port = readFileSync(resolve(process.cwd(), "app/styles/wisetech.css"), "utf8");
+const rootLayout = readFileSync(resolve(process.cwd(), "app/[locale]/layout.tsx"), "utf8");
+
+// The plan's draft list also carried ".first-90". The donor never styles it: `git grep first-90
+// f91ecc5` finds it only as a marker class on <section className="section shell first-90"> in
+// app/WiseTechSite.tsx, and app/globals.css is the donor's only stylesheet at that commit. A
+// mechanical port cannot produce a rule the donor does not have, so it is not part of this
+// contract; the section is styled entirely by .section, .shell, .inner-section-heading,
+// .intro-process and .directory-actions, which are all pinned below.
+const keptSelectors = [
+  ".site-root", ".shell", ".section", ".eyebrow", ".status-label", ".button", ".button-dark", ".button-light",
+  ".text-link", ".light-link", ".card-index", ".honest-empty", ".inner-honest", ".light-empty", ".pulse-ring",
+  ".page-hero", ".inner-page-hero", ".page-hero-photo", ".page-hero-art", ".breadcrumb", ".inner-hero-actions",
+  ".inner-closing", ".event-interest", ".intro-process", ".service-grid", ".principle-grid", ".badge-grid",
+  ".page-updated", ".section-heading", ".split-heading", ".inner-section-heading", ".opportunity-section",
+  ".inner-section-tint", ".announcement", ".site-header", ".header-inner", ".brand", ".desktop-nav", ".nav-button",
+  ".mega-menu-v2", ".mega-menu-main", ".mega-menu-heading", ".mega-columns", ".mega-column-title", ".mega-feature-v2",
+  ".mobile-menu", ".mobile-priority-actions", ".mobile-accordion", ".hero", ".network-field", ".legacy-network",
+  ".archive-photo-grid", ".impact-metrics", ".gba-section", ".conversion-grid", ".plan-grid", ".membership-dimensions",
+  ".partner-record-card", ".directory-prompts", ".solution-needs", ".event-quick-tabs", ".event-card-v2",
+  ".site-footer", ".footer-top", ".footer-links", ".footer-bottom", ".concierge", ".concierge-panel",
+];
+
+const droppedSelectors = [
+  ".portal-shell", ".portal-sub-hero", ".portal-module-grid", ".portal-preview-notice", ".join-page", ".join-card",
+  ".join-roadmap", ".join-success-hero", ".onboarding-actions", ".review-list", ".site-search-form", ".search-feedback", ".sr-only",
+];
+
+function selectorPattern(selector: string) {
+  return new RegExp(`(^|[\\s,}])${selector.replace(/\./g, "\\.")}(?![\\w-])`, "m");
+}
+
+describe("WiseTech CSS port", () => {
+  it("is imported from the root layout after the Tailwind layers", () => {
+    const globalsAt = rootLayout.indexOf('import "../globals.css";');
+    const portAt = rootLayout.indexOf('import "../styles/wisetech.css";');
+    expect(globalsAt).toBeGreaterThan(-1);
+    expect(portAt).toBeGreaterThan(globalsAt);
+  });
+
+  it("carries no donor build directive, remote asset or donor route", () => {
+    expect(port).not.toContain('@import "tailwindcss"');
+    expect(port).not.toMatch(/url\(\s*["']?https?:/);
+    for (const route of ["/activities", "/members", "/solutions"]) expect(port).not.toContain(route);
+  });
+
+  it("declares no tokens of its own and references only prefixed ones", () => {
+    expect(port).not.toMatch(/^:root/m);
+    const references = [...port.matchAll(/var\((--[a-z0-9-]+)/g)].map((match) => match[1]);
+    expect(references.length).toBeGreaterThan(100);
+    for (const name of new Set(references)) expect(name).toMatch(/^--(wt-|font-)/);
+  });
+
+  it.each(keptSelectors)("keeps the donor selector %s", (selector) => {
+    expect(port).toMatch(selectorPattern(selector));
+  });
+
+  it.each(droppedSelectors)("drops the donor-only selector %s", (selector) => {
+    expect(port).not.toMatch(selectorPattern(selector));
+  });
+
+  it("keeps every keyframe behind the reduced-motion preference", () => {
+    const guardAt = port.indexOf("@media (prefers-reduced-motion: no-preference) {");
+    expect(guardAt).toBeGreaterThan(-1);
+    expect(port.indexOf("@keyframes")).toBeGreaterThan(guardAt);
+    expect(port.match(/@keyframes/g)).toHaveLength(3);
+    for (const name of ["hero-breathe", "node-pulse", "mega-menu-in"]) expect(port).toContain(`@keyframes ${name}`);
+  });
+
+  it("keeps the donor breakpoints and base rules", () => {
+    for (const width of ["1320px", "1120px", "820px", "520px"]) expect(port).toContain(`@media(max-width:${width})`);
+    expect(port).toContain("img { display: block; max-width: 100%; }");
+    expect(port).toContain("button, input, select { font: inherit; }");
+    expect(port).toContain(":focus-visible { outline: 3px solid var(--wt-focus); }");
+    expect(port).not.toMatch(/^html \{ scroll-behavior/m);
+    expect(port).not.toMatch(/^body \{ margin/m);
+  });
+});
