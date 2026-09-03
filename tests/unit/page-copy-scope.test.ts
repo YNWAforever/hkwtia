@@ -80,8 +80,13 @@ describe("page copy scope", () => {
       // that components/home/archive-stories.tsx reads. WP-3 Task 13 added 8
       // editable Legacy Network fields (eyebrow/title/note/viewAllAction/
       // previewNote, plus tabs.supporting/tabs.regional/tabs.media) that
-      // components/home/legacy-network.tsx reads.
-      Home: 187,
+      // components/home/legacy-network.tsx reads. WP-3 Task 14 added 19 editable
+      // Conversion Paths fields (eyebrow/title/intro, plus label/title/copy/
+      // primaryAction/secondaryAction and the 3 points array elements for each of
+      // the membership and partnership panels) that
+      // components/home/conversion-paths.tsx reads. It is the last of the 13
+      // homepage sections.
+      Home: 206,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -99,7 +104,7 @@ describe("page copy scope", () => {
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(383);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(402);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

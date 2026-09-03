@@ -561,6 +561,27 @@
         "media": "Media Partners"
       }
     },
+    "conversionPaths": {
+      "eyebrow": "Take part",
+      "title": "Choose the relationship that fits your goal.",
+      "intro": "Membership supports ongoing participation. Partnership starts with a defined audience, initiative and intended outcome.",
+      "membership": {
+        "label": "Membership",
+        "title": "Build an active route into the ecosystem.",
+        "copy": "Choose a pathway for professionals, startups, SMEs, corporates or strategic partners. Current fees and final entitlements are provided by the membership team.",
+        "points": ["Relevant activities and knowledge", "Profile and visibility choices", "A practical first-90-day journey"],
+        "primaryAction": "Compare Membership",
+        "secondaryAction": "Prepare a membership enquiry"
+      },
+      "partnership": {
+        "label": "Partnership",
+        "title": "Co-create a useful industry initiative.",
+        "copy": "Work with the Association on a business challenge, programme, knowledge initiative, event or market-access pathway with a defined purpose.",
+        "points": ["Purpose and audience defined first", "Roles and public claims agreed", "Next steps and outcomes made clear"],
+        "primaryAction": "Start a Partnership",
+        "secondaryAction": "Meet the Network"
+      }
+    },
     "highlightsTitle": "What is happening now",
     "highlightsIntro": "Published opportunities and stories from the WTIA ecosystem.",
     "highlights": {

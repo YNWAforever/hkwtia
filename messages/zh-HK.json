@@ -561,6 +561,27 @@
         "media": "媒體夥伴"
       }
     },
+    "conversionPaths": {
+      "eyebrow": "投入參與",
+      "title": "按你的目標，選擇合適參與關係。",
+      "intro": "會籍支援持續參與；夥伴合作則由清晰受眾、項目及預期成果開始。",
+      "membership": {
+        "label": "會籍",
+        "title": "建立持續參與生態系統的路徑。",
+        "copy": "專業人士、初創、中小企、企業及策略夥伴可選擇相應路徑；現行費用及最終權益由會員團隊提供。",
+        "points": ["相關活動及知識", "專頁及可見度選擇", "實用的首 90 天旅程"],
+        "primaryAction": "比較會籍",
+        "secondaryAction": "準備會籍查詢"
+      },
+      "partnership": {
+        "label": "夥伴合作",
+        "title": "共同設計有用的產業項目。",
+        "copy": "與商會就業務挑戰、計劃、知識項目、活動或市場拓展路徑合作，並清楚界定目的。",
+        "points": ["先界定目的及受眾", "協定角色及公開聲稱", "清楚列明下一步及成果"],
+        "primaryAction": "展開合作",
+        "secondaryAction": "認識夥伴網絡"
+      }
+    },
     "highlightsTitle": "最新動向",
     "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
     "highlights": {
