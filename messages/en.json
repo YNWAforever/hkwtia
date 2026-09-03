@@ -519,6 +519,29 @@
       "openCohortAction": "View open cohort",
       "exploreAction": "Explore Launch Pad"
     },
+    "impact": {
+      "eyebrow": "Published evidence",
+      "title": "Clear facts, with their context attached.",
+      "intro": "These figures describe available WTIA programme, event and network records. They are not presented as current Association-wide totals.",
+      "sourceLabel": "Source note",
+      "source": "Source: hkwtia.org published records.",
+      "sourceLink": "Visit hkwtia.org",
+      "pastEvents": {
+        "label": "completed event records",
+        "definition": "Definition: completed WTIA events published on this site",
+        "period": "As of {date}"
+      },
+      "publishedPartners": {
+        "label": "published partner records",
+        "definition": "Definition: published partner records across supporting, regional and media categories",
+        "period": "As of {date}"
+      },
+      "asaRegions": {
+        "label": "Asian regions represented",
+        "definition": "Definition: regions represented in the most recent Asia Smart Innovation Awards edition with a recorded count",
+        "period": "{year} edition"
+      }
+    },
     "highlightsTitle": "What is happening now",
     "highlightsIntro": "Published opportunities and stories from the WTIA ecosystem.",
     "highlights": {

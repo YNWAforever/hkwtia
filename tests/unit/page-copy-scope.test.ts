@@ -72,8 +72,11 @@ describe("page copy scope", () => {
       // for each of the 4 programme cards) that components/home/
       // programme-showcase.tsx reads. WP-3 Task 10 added 5 editable GBA Gateway
       // fields (eyebrow/title/copy/openCohortAction/exploreAction) that
-      // components/home/gba-gateway.tsx reads.
-      Home: 159,
+      // components/home/gba-gateway.tsx reads. WP-3 Task 11 added 15 editable
+      // Impact Evidence fields (eyebrow/title/intro/sourceLabel/source/sourceLink,
+      // plus label/definition/period for each of the 3 metric tiles) that
+      // components/home/impact-evidence.tsx reads.
+      Home: 174,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -91,7 +94,7 @@ describe("page copy scope", () => {
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(355);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(370);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

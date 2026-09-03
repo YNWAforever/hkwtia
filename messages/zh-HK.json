@@ -519,6 +519,29 @@
       "openCohortAction": "查看現正招募的小組",
       "exploreAction": "探索創科加速平台"
     },
+    "impact": {
+      "eyebrow": "已公布資料",
+      "title": "每項數據，都附有清晰脈絡。",
+      "intro": "以下數字描述現有 WTIA 計劃、活動及網絡紀錄，並不代表商會現時的整體總數。",
+      "sourceLabel": "來源說明",
+      "source": "來源：hkwtia.org 已發布紀錄。",
+      "sourceLink": "瀏覽 hkwtia.org",
+      "pastEvents": {
+        "label": "個已完成活動紀錄",
+        "definition": "定義：本網站已發布的已完成 WTIA 活動",
+        "period": "截至 {date}"
+      },
+      "publishedPartners": {
+        "label": "個已發布夥伴紀錄",
+        "definition": "定義：已發布的支持機構、區域及媒體夥伴紀錄",
+        "period": "截至 {date}"
+      },
+      "asaRegions": {
+        "label": "個亞洲地區參與",
+        "definition": "定義：最近一屆有記錄地區數目的亞洲智慧創新大獎所涵蓋地區",
+        "period": "{year} 年度"
+      }
+    },
     "highlightsTitle": "最新動向",
     "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
     "highlights": {
