@@ -2,8 +2,12 @@ import {defineConfig, devices} from '@playwright/test';
 
 import {M2_LIVE_ENV_NAMES, buildM2RuntimeEnvironment} from './tests/fixtures/m2-runtime-env';
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
 const port = process.env.PLAYWRIGHT_PORT ?? '3000';
+// Derive the default base URL from the port. These two used to default independently, so
+// `PLAYWRIGHT_PORT=3100` started the managed server on 3100 while every navigation still went to
+// localhost:3000 — and because `reuseExistingServer` accepts whatever answers there, an unrelated
+// project holding 3000 on a developer machine made a plain run silently test the wrong app.
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${port}`;
 const liveAcceptanceRequires = [...M2_LIVE_ENV_NAMES];
 
 export default defineConfig({
