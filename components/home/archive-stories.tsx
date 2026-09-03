@@ -1,6 +1,7 @@
 import {getTranslations} from 'next-intl/server';
 import Image from 'next/image';
 
+import {Arrow} from '@/components/wt/arrow';
 import {milestones} from '@/content/milestones';
 import {Link} from '@/i18n/navigation';
 import type {AppLocale} from '@/i18n/routing';
@@ -29,7 +30,7 @@ export async function ArchiveStories({locale}: Readonly<{locale: AppLocale}>) {
           <div>
             <p>{t('intro')}</p>
             <a className="text-link" href="https://hkwtia.org/photo-gallery/" target="_blank" rel="noreferrer">
-              {t('galleryAction')} <span aria-hidden="true">↗</span>
+              {t('galleryAction')} <Arrow />
             </a>
           </div>
         </div>
@@ -42,7 +43,17 @@ export async function ArchiveStories({locale}: Readonly<{locale: AppLocale}>) {
             return (
               <figure className={index === 0 ? 'archive-photo-card archive-photo-feature' : 'archive-photo-card'} key={story.slug}>
                 <div className="archive-photo-media">
-                  <Image alt={alt} height={606} src={image.src} width={960} />
+                  {/* .archive-photo-feature splits 1.42fr/.58fr (image/caption) above the 1120px
+                      breakpoint, where it collapses to a single stacked column (image full width);
+                      the other cards sit in the 2-column .archive-photo-grid until it collapses to
+                      1 column at 820px (wisetech.css:521,530,573,583). */}
+                  <Image
+                    alt={alt}
+                    height={606}
+                    sizes={index === 0 ? '(min-width: 1121px) 71vw, 100vw' : '(min-width: 821px) 50vw, 100vw'}
+                    src={image.src}
+                    width={960}
+                  />
                 </div>
                 <figcaption>
                   <span>{t('captionLabel')}</span>
