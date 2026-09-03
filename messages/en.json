@@ -512,6 +512,13 @@
         }
       }
     },
+    "gbaGateway": {
+      "eyebrow": "GBA Gateway",
+      "title": "Hong Kong expertise. GBA opportunity. Global ambition.",
+      "copy": "A practical route for market entry, soft landing, delegations, buyer matching and long-term regional partnerships.",
+      "openCohortAction": "View open cohort",
+      "exploreAction": "Explore Launch Pad"
+    },
     "highlightsTitle": "What is happening now",
     "highlightsIntro": "Published opportunities and stories from the WTIA ecosystem.",
     "highlights": {

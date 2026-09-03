@@ -512,6 +512,13 @@
         }
       }
     },
+    "gbaGateway": {
+      "eyebrow": "大灣區通道",
+      "title": "香港專長，大灣區機遇，全球視野。",
+      "copy": "提供市場進入、落地支援、考察團、買家配對及長期區域合作的實務路徑。",
+      "openCohortAction": "查看現正招募的小組",
+      "exploreAction": "探索創科加速平台"
+    },
     "highlightsTitle": "最新動向",
     "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
     "highlights": {
