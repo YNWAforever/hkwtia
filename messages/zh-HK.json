@@ -549,6 +549,18 @@
       "galleryAction": "查看官方相片集",
       "captionLabel": "WTIA 活動回顧"
     },
+    "legacyNetwork": {
+      "eyebrow": "承接真實合作網絡",
+      "title": "有歷史根基，也有未來方向的網絡。",
+      "note": "夥伴標誌來自 WTIA 已發布的支持機構、區域夥伴及媒體夥伴紀錄；除非另有確認，列入名單並不代表現時合作關係。",
+      "viewAllAction": "查看所有夥伴",
+      "previewNote": "顯示此分類 {total} 個紀錄中的 {shown} 個。",
+      "tabs": {
+        "supporting": "支持機構",
+        "regional": "區域夥伴",
+        "media": "媒體夥伴"
+      }
+    },
     "highlightsTitle": "最新動向",
     "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
     "highlights": {

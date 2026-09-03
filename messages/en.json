@@ -549,6 +549,18 @@
       "galleryAction": "View the official photo gallery",
       "captionLabel": "WTIA Event Highlights"
     },
+    "legacyNetwork": {
+      "eyebrow": "Built on real relationships",
+      "title": "A network with history — and a future.",
+      "note": "These partner logos come from WTIA's published supporting, regional and media network records. Inclusion does not imply a current relationship unless separately confirmed.",
+      "viewAllAction": "View all partners",
+      "previewNote": "Showing {shown} of {total} records in this category.",
+      "tabs": {
+        "supporting": "Supporting Organizations",
+        "regional": "Regional Partners",
+        "media": "Media Partners"
+      }
+    },
     "highlightsTitle": "What is happening now",
     "highlightsIntro": "Published opportunities and stories from the WTIA ecosystem.",
     "highlights": {

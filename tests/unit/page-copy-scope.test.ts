@@ -77,8 +77,11 @@ describe("page copy scope", () => {
       // plus label/definition/period for each of the 3 metric tiles) that
       // components/home/impact-evidence.tsx reads. WP-3 Task 12 added 5 editable
       // Archive Stories fields (eyebrow/title/intro/galleryAction/captionLabel)
-      // that components/home/archive-stories.tsx reads.
-      Home: 179,
+      // that components/home/archive-stories.tsx reads. WP-3 Task 13 added 8
+      // editable Legacy Network fields (eyebrow/title/note/viewAllAction/
+      // previewNote, plus tabs.supporting/tabs.regional/tabs.media) that
+      // components/home/legacy-network.tsx reads.
+      Home: 187,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -96,7 +99,7 @@ describe("page copy scope", () => {
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(375);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(383);
   });
 
   it("offers a Chinese placeholder for every English field", () => {
