@@ -421,6 +421,24 @@
       "emptyTitle": "No activities are currently open.",
       "viewAllAction": "View Open Now & Past Events"
     },
+    "marketProducts": {
+      "eyebrow": "Demand + Supply",
+      "title": "Connections built for implementation",
+      "directory": {
+        "label": "Member Directory",
+        "title": "Meet the people shaping what comes next.",
+        "copyEmpty": "The directory is ready for approved public profiles, with controlled visibility and consent-based introductions. No live member records are shown yet.",
+        "copyAvailable": "Published member solutions are now live, with controlled visibility and consent-based introductions.",
+        "action": "Discover members"
+      },
+      "marketplace": {
+        "label": "AI Solutions Marketplace",
+        "title": "Find AI ready for the real world.",
+        "copyEmpty": "The planned marketplace will compare maturity, deployment, security, market coverage and reviewed evidence. No live solution records are shown yet.",
+        "copyAvailable": "Published solutions are now live to compare, by use case, deployment and reviewed evidence.",
+        "action": "Explore solutions"
+      }
+    },
     "highlightsTitle": "What is happening now",
     "highlightsIntro": "Published opportunities and stories from the WTIA ecosystem.",
     "highlights": {

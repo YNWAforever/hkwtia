@@ -421,6 +421,24 @@
       "emptyTitle": "目前未有活動開放報名。",
       "viewAllAction": "查看現正開放及過往活動"
     },
+    "marketProducts": {
+      "eyebrow": "供需連結",
+      "title": "為真正落地而建立的連結",
+      "directory": {
+        "label": "會員名錄",
+        "title": "認識正在塑造未來的人。",
+        "copyEmpty": "名錄已準備承載獲批公開的專頁，並設有可控可見度及需獲同意的引薦流程；目前尚未顯示現行會員紀錄。",
+        "copyAvailable": "已發布的會員方案現已上線，設有可控可見度及需獲同意的引薦流程。",
+        "action": "探索會員"
+      },
+      "marketplace": {
+        "label": "AI 解決方案市場",
+        "title": "尋找可在真實環境落地的 AI。",
+        "copyEmpty": "規劃中的方案市場將比較成熟度、部署方式、安全、市場覆蓋及經審閱證據；目前尚未顯示現行方案紀錄。",
+        "copyAvailable": "已發布方案現已上線，可按用途、部署方式及已審閱證據比較。",
+        "action": "探索解決方案"
+      }
+    },
     "highlightsTitle": "最新動向",
     "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
     "highlights": {
