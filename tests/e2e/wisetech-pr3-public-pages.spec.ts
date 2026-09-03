@@ -164,12 +164,16 @@ for (const homeCase of homeCases) {
       // down, so at a 600px viewport the section's top edge already peeks in at rest.
       //
       // Measured on this tree, viewport ratio of #home-discover: at rest 0.000 (375px), 0.062
-      // (768px), 0.113 (1440px); after the anchor 0.447 to 1.000. 0.4 sits in the middle of that
-      // empty band. It is not 0.5 because at 375/768 the section renders ~1330px tall, more than
-      // twice the 600px probe viewport, so half of it can never be on screen at once. WP-3
+      // (768px), 0.113 (1440px); after the anchor 0.447 (375px), 0.452 (768px), up to 1.000 at
+      // the wider widths. The empty band is therefore 0.113 to 0.447, and 0.3 is deliberately
+      // near its low end rather than its midpoint (0.28): the resting side has 0.113 to spare
+      // either way, while the post-anchor side is pinned by a hard ceiling of ~0.451 at 375 and
+      // 768px, where the section renders ~1330px tall in the 600px probe viewport. That ceiling
+      // is also why the threshold cannot be 0.5 -- more than twice the viewport height can never
+      // be half on screen -- and why 0.4 was too close to it, leaving 0.047 of headroom. WP-3
       // replaces this hero, which will move both numbers; re-measure then rather than nudging
       // the threshold until it passes.
-      await expect(discoverTarget).not.toBeInViewport({ratio: 0.4});
+      await expect(discoverTarget).not.toBeInViewport({ratio: 0.3});
       await page.evaluate(() => {
         document.documentElement.dataset.testScrollEnded = "false";
         document.addEventListener("scrollend", () => {
@@ -179,7 +183,7 @@ for (const homeCase of homeCases) {
       await discoverLink.click();
       await expect(page).toHaveURL(/#home-discover$/);
       await expect(page.locator("html")).toHaveAttribute("data-test-scroll-ended", "true");
-      await expect(discoverTarget).toBeInViewport({ratio: 0.4});
+      await expect(discoverTarget).toBeInViewport({ratio: 0.3});
 
       // `/` is the one overlay route in lib/public-shell/hero-variant.ts since WP-2, so keying
       // this on `data-variant="solid"` stopped matching anything and the clearance assertion

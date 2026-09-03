@@ -55,13 +55,17 @@ test("open desktop and mobile navigation surfaces pass axe", async ({page}) => {
  * ratio the way axe would if it could — the trigger's colour against every stop of the panel
  * gradient, worst stop deciding — so a regression to `--shell-blue` (2.17:1) fails loudly.
  *
- * Only the *declared* stops are measured, not the interpolated pixels between them. That is
- * sound for the two-stop gradient this panel actually carries (`linear-gradient(180deg,#0a3d67
- * 0%,#082e4d 100%)`, app/styles/wisetech.css:1070): sRGB interpolation is monotonic per channel,
- * so every pixel between two stops has a relative luminance between theirs, and the worst
- * declared stop is therefore the worst pixel. A future gradient with a third stop lighter or
- * darker than both neighbours would break that, and this measurement would then need to sample
- * the interpolation rather than the declarations.
+ * Only the *declared* stops are measured, not the interpolated pixels between them. That holds
+ * here on two conditions, both true of this panel today. First, sRGB interpolation is monotonic
+ * per channel, so on the two-stop gradient it actually carries
+ * (`linear-gradient(180deg,#0a3d67 0%,#082e4d 100%)`, app/styles/wisetech.css:1070) every pixel
+ * between the stops has a relative luminance between theirs. Second — and this is the part that
+ * makes the shortcut valid rather than merely tidy — the foreground's luminance lies outside
+ * that range: white text over two dark stops, so contrast falls monotonically as the background
+ * lightens and the minimum is at a declared stop. A foreground *between* the stops would put the
+ * minimum at an interpolated pixel instead, where background and text meet in luminance, and so
+ * would a third stop lighter or darker than both neighbours. Either change means sampling the
+ * interpolation rather than the declarations.
  */
 test("the current mobile group passes axe and keeps AA contrast on the donor gradient", async ({page}) => {
   await page.setViewportSize({width: 375, height: 800});
@@ -79,9 +83,18 @@ test("the current mobile group passes axe and keeps AA contrast on the donor gra
     // gradient stops), so dropping it changes nothing — but a future `rgba(...)` with a
     // fractional fourth channel would make the ratio a fiction, so read it and let the
     // assertion below fail loudly rather than scoring a colour that is not on screen.
-    const numbers = (value: string) => (value.match(/[\d.]+/g) ?? []).map(Number);
-    const rgb = (value: string) => numbers(value).slice(0, 3);
-    const translucent = (value: string) => (numbers(value)[3] ?? 1) < 1;
+    //
+    // The alpha token keeps its `%` suffix. Both CSS alpha forms are legal and both can come
+    // back from getComputedStyle: the legacy `rgba(r, g, b, 0.72)` and the modern
+    // `rgb(r g b / 72%)`. Reading the fourth token as a bare number, as this did, scored
+    // `72% < 1` as false and waved a 72%-opaque colour through as opaque.
+    const tokens = (value: string) => value.match(/[\d.]+%?/g) ?? [];
+    const rgb = (value: string) => tokens(value).slice(0, 3).map(Number);
+    const translucent = (value: string) => {
+      const alpha = tokens(value)[3];
+      if (alpha === undefined) return false;
+      return alpha.endsWith("%") ? Number.parseFloat(alpha) < 100 : Number(alpha) < 1;
+    };
     const relative = (channels: number[]) => {
       const linear = channels.map((channel) => {
         const scaled = channel / 255;
@@ -101,6 +114,14 @@ test("the current mobile group passes axe and keeps AA contrast on the donor gra
       colour,
       stops: stops.map((stop) => `rgb(${stop.join(", ")})`),
       translucent: [colour, ...declared].filter(translucent),
+      // The guard proves it can still catch a violation. Every colour on this panel is opaque,
+      // so `translucent` above is satisfied vacuously and a helper that quietly stopped
+      // recognising alpha — as the bare-number version did for the `%` form — would read as a
+      // pass. These samples are the smallest thing that fails when that happens.
+      selfCheck: {
+        flags: ["rgb(255 255 255 / 72%)", "rgba(0, 0, 0, 0.5)", "rgba(0, 0, 0, 50%)"].filter(translucent),
+        clears: ["rgb(10, 61, 103)", "rgb(255 255 255 / 100%)", "rgba(0, 0, 0, 1)"].filter(translucent),
+      },
       // A flat background would leave this empty; the assertion below then fails and says so,
       // rather than silently passing on an empty `Math.min`.
       worst: stops.length === 0 ? 0 : Math.min(...stops.map((stop) => contrast(rgb(colour), stop))),
@@ -108,6 +129,8 @@ test("the current mobile group passes axe and keeps AA contrast on the donor gra
   });
 
   expect(reading.stops.length, JSON.stringify(reading)).toBeGreaterThan(0);
+  expect(reading.selfCheck.flags, JSON.stringify(reading)).toHaveLength(3);
+  expect(reading.selfCheck.clears, JSON.stringify(reading)).toEqual([]);
   expect(reading.translucent, JSON.stringify(reading)).toEqual([]);
   expect(reading.worst, JSON.stringify(reading)).toBeGreaterThanOrEqual(4.5);
 
