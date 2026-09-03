@@ -66,8 +66,12 @@ describe("page copy scope", () => {
       // components/home/outcomes.tsx reads. WP-3 Task 8 added 20 editable
       // Ecosystem fields (eyebrow/title/intro/selectedLabel/enterAction, the 3
       // focusAreas array elements, plus name/brief for each of the 6 industries)
-      // that components/home/ecosystem.tsx reads.
-      Home: 138,
+      // that components/home/ecosystem.tsx reads. WP-3 Task 9 added 16 editable
+      // Programme Showcase fields (eyebrow/title/intro/eventSeriesLabel/
+      // credentialLabel/editionsFact/credentialFact/action, plus name/description
+      // for each of the 4 programme cards) that components/home/
+      // programme-showcase.tsx reads.
+      Home: 154,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -85,7 +89,7 @@ describe("page copy scope", () => {
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(334);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(350);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

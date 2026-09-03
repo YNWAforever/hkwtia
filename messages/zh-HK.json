@@ -484,6 +484,34 @@
         }
       }
     },
+    "programmeShowcase": {
+      "eyebrow": "計劃 + 獎項",
+      "title": "把參與轉化為進步",
+      "intro": "保留現有計劃的品牌資產，並以成果、受眾及下一步行動重新呈現。",
+      "eventSeriesLabel": "活動系列",
+      "credentialLabel": "專業資格",
+      "editionsFact": "自 {year} 年起共 {count} 屆",
+      "credentialFact": "由 WTIA 直接頒發",
+      "action": "查看計劃",
+      "items": {
+        "cpai": {
+          "name": "CPAI",
+          "description": "支援應用創新的專項計劃。"
+        },
+        "hkict": {
+          "name": "香港資訊及通訊科技獎",
+          "description": "表揚香港科技界的卓越成果。"
+        },
+        "tct": {
+          "name": "TCT",
+          "description": "連接科技、能力與人才。"
+        },
+        "asa": {
+          "name": "亞洲智能應用程式大獎",
+          "description": "嘉許亞洲優秀智能應用程式。"
+        }
+      }
+    },
     "highlightsTitle": "最新動向",
     "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
     "highlights": {
