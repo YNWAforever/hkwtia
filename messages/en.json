@@ -450,6 +450,40 @@
       "emptyCopy": "The Association will add outcome stories only after the evidence, attribution and permission to publish have been confirmed. This avoids turning participation into an unsupported success claim.",
       "action": "Discuss a measurable initiative"
     },
+    "ecosystem": {
+      "eyebrow": "AI + Industry",
+      "title": "One ecosystem. Every industry moving forward.",
+      "intro": "Six industry pathways connect practical questions to technology, knowledge, programmes and market access.",
+      "selectedLabel": "Selected industry pathway",
+      "enterAction": "Enter this ecosystem",
+      "focusAreas": ["Industry challenges", "Relevant solution categories", "Programmes + events"],
+      "items": {
+        "commerce": {
+          "name": "Commerce + Professional Services",
+          "brief": "Trusted automation, intelligence and client delivery."
+        },
+        "manufacturing": {
+          "name": "Manufacturing + Robotics",
+          "brief": "From operational challenge to practical deployment."
+        },
+        "health": {
+          "name": "Health + Life Sciences",
+          "brief": "Human-centred adoption with evidence and care."
+        },
+        "responsibleAi": {
+          "name": "Responsible AI + Cybersecurity",
+          "brief": "Governance, privacy and resilience by design."
+        },
+        "retail": {
+          "name": "Retail + Creative Industries",
+          "brief": "New customer experiences and commercial models."
+        },
+        "education": {
+          "name": "Education + Future of Work",
+          "brief": "Skills, productivity and opportunity for people."
+        }
+      }
+    },
     "highlightsTitle": "What is happening now",
     "highlightsIntro": "Published opportunities and stories from the WTIA ecosystem.",
     "highlights": {

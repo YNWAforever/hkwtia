@@ -63,8 +63,11 @@ describe("page copy scope", () => {
       // panels) that components/home/market-products.tsx reads. WP-3 Task 7 added
       // 9 editable Outcomes fields (eyebrow/title/intro/frameworkLabel/
       // frameworkSteps/statusLabel/emptyTitle/emptyCopy/action) that
-      // components/home/outcomes.tsx reads.
-      Home: 118,
+      // components/home/outcomes.tsx reads. WP-3 Task 8 added 20 editable
+      // Ecosystem fields (eyebrow/title/intro/selectedLabel/enterAction, the 3
+      // focusAreas array elements, plus name/brief for each of the 6 industries)
+      // that components/home/ecosystem.tsx reads.
+      Home: 138,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -82,7 +85,7 @@ describe("page copy scope", () => {
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(314);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(334);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

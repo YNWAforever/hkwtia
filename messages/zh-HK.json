@@ -450,6 +450,40 @@
       "emptyCopy": "商會只會在證據、歸屬及發布許可獲確認後加入成果故事，避免把參與誤寫成未獲支持的成功聲稱。",
       "action": "洽談可量度項目"
     },
+    "ecosystem": {
+      "eyebrow": "AI + 產業",
+      "title": "一個生態系統，推動每個產業向前。",
+      "intro": "六條產業路徑把實務問題連接到科技、知識、計劃及市場拓展。",
+      "selectedLabel": "已選產業路徑",
+      "enterAction": "進入此生態系統",
+      "focusAreas": ["產業挑戰", "相關方案類別", "計劃 + 活動"],
+      "items": {
+        "commerce": {
+          "name": "商貿 + 專業服務",
+          "brief": "以可信任自動化、智能洞察及客戶服務提升競爭力。"
+        },
+        "manufacturing": {
+          "name": "製造 + 機械人",
+          "brief": "把營運挑戰轉化為可落地的技術部署。"
+        },
+        "health": {
+          "name": "健康 + 生命科學",
+          "brief": "兼顧實證、安全與人的需要。"
+        },
+        "responsibleAi": {
+          "name": "負責任 AI + 網絡安全",
+          "brief": "從設計開始融入管治、私隱與韌性。"
+        },
+        "retail": {
+          "name": "零售 + 創意產業",
+          "brief": "創造新的顧客體驗與商業模式。"
+        },
+        "education": {
+          "name": "教育 + 未來工作",
+          "brief": "為人才帶來技能、生產力與新機會。"
+        }
+      }
+    },
     "highlightsTitle": "最新動向",
     "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
     "highlights": {
