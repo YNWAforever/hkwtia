@@ -399,6 +399,28 @@
         }
       }
     },
+    "eventsJourney": {
+      "eyebrow": "即將舉行活動及參與機會",
+      "title": "有用活動是一段旅程，而不只是一個日期。",
+      "intro": "了解活動發現、準備及跟進流程，或瀏覽現正開放的活動。",
+      "stages": {
+        "before": {
+          "title": "活動前",
+          "copy": "推薦、票價、名額及配對。"
+        },
+        "during": {
+          "title": "活動中",
+          "copy": "登記、議程、提問及會面。"
+        },
+        "after": {
+          "title": "活動後",
+          "copy": "資源、引薦、跟進及成果。"
+        }
+      },
+      "statusLabel": "目前狀態",
+      "emptyTitle": "目前未有活動開放報名。",
+      "viewAllAction": "查看現正開放及過往活動"
+    },
     "highlightsTitle": "最新動向",
     "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
     "highlights": {

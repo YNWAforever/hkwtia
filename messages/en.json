@@ -399,6 +399,28 @@
         }
       }
     },
+    "eventsJourney": {
+      "eyebrow": "Upcoming Events & Activities",
+      "title": "A useful event is a journey, not a single date.",
+      "intro": "See how discovery, preparation and follow-through work, or explore what is currently open.",
+      "stages": {
+        "before": {
+          "title": "Before",
+          "copy": "Recommendations, pricing, capacity and matchmaking."
+        },
+        "during": {
+          "title": "During",
+          "copy": "Check-in, sessions, questions and meetings."
+        },
+        "after": {
+          "title": "After",
+          "copy": "Resources, introductions, follow-up and outcomes."
+        }
+      },
+      "statusLabel": "Current availability",
+      "emptyTitle": "No activities are currently open.",
+      "viewAllAction": "View Open Now & Past Events"
+    },
     "highlightsTitle": "What is happening now",
     "highlightsIntro": "Published opportunities and stories from the WTIA ecosystem.",
     "highlights": {

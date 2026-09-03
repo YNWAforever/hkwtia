@@ -54,8 +54,11 @@ describe("page copy scope", () => {
       // empty-state title/copy and the two interest actions) that
       // components/home/open-now.tsx reads. WP-3 Task 4 added 23 editable Pathways
       // fields (eyebrow/title/intro plus title/copy/benefits/cta for each of the 5
-      // audience cards) that components/home/pathways.tsx reads.
-      Home: 85,
+      // audience cards) that components/home/pathways.tsx reads. WP-3 Task 5 added
+      // 12 editable Events Journey fields (eyebrow/title/intro, title/copy for each
+      // of the 3 Before/During/After stages, plus statusLabel/emptyTitle/
+      // viewAllAction) that components/home/events-journey.tsx reads.
+      Home: 97,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -73,7 +76,7 @@ describe("page copy scope", () => {
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(281);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(293);
   });
 
   it("offers a Chinese placeholder for every English field", () => {
