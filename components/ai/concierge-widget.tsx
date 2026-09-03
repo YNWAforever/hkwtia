@@ -2,17 +2,14 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import {ExternalLink, Send, Star, X} from "lucide-react";
+import {usePathname} from "next/navigation";
 import {type FormEvent, useEffect, useId, useRef, useState} from "react";
 
 import {Button} from "@/components/ui/button";
 import {Arrow} from "@/components/wt/arrow";
 import type {ConciergeLabels} from "@/lib/ai/concierge-labels";
 import {CONCIERGE_OPEN_EVENT} from "@/lib/ai/concierge-open";
-import {
-  type ConciergePromptSection,
-  type ConciergePrompts,
-  resolveConciergePromptSection,
-} from "@/lib/ai/concierge-prompts";
+import {type ConciergePrompts, resolveConciergePromptSection} from "@/lib/ai/concierge-prompts";
 import {localizedPath} from "@/lib/urls";
 import {cn} from "@/lib/utils";
 
@@ -231,15 +228,17 @@ export function ConciergeWidget({
   >({});
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileFailed, setTurnstileFailed] = useState(false);
-  // The donor keys its prompt set on path[0]. Read from window.location, not a router hook:
-  // the widget renders inside both the public and the portal layouts and its suite mounts it
-  // with no router context. Presentation only — nothing here reaches the action.
-  const [promptSection, setPromptSection] = useState<ConciergePromptSection>("home");
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of the browser-only window.location after mount, the shape announcement-dismiss.tsx already uses; resolving it during render would read `window` on the server, and the cascade the rule warns about cannot happen here because the panel is portalled and renders nothing until the reader opens it.
-    setPromptSection(resolveConciergePromptSection(window.location.pathname));
-  }, []);
-  const sectionPrompts = prompts?.[promptSection] ?? [];
+  // The donor keys its prompt set on path[0]. Read during render, never resolved once into
+  // state: this widget is mounted by app/[locale]/(public)/layout.tsx, which survives every
+  // in-app navigation, so a value captured at mount would still serve the first route's
+  // prompts after the reader had clicked through the header, the mega menu and the footer.
+  // `next/navigation` rather than next-intl's hook, for two reasons: the latter needs locale
+  // context that tests/unit/concierge-widget.test.tsx does not provide, and it strips the `/zh`
+  // prefix that resolveConciergePromptSection expects to strip itself. Next's hook is
+  // useContext(PathnameContext) with a null default, so a bare render outside the App Router
+  // gets null rather than throwing. Presentation only — nothing here reaches the action.
+  const pathname = usePathname();
+  const sectionPrompts = prompts?.[resolveConciergePromptSection(pathname ?? "/")] ?? [];
 
   useEffect(() => {
     mountedRef.current = true;
@@ -545,13 +544,17 @@ export function ConciergeWidget({
           aria-label={labels.launcher}
           aria-controls={dialogId}
           aria-expanded={open}
-          className="concierge-trigger fixed touch-manipulation bottom-[calc(1rem+env(safe-area-inset-bottom))] right-[calc(1rem+env(safe-area-inset-right))] z-40 inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg motion-safe:transition-[opacity,transform] motion-safe:duration-200 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 active:opacity-90"
+          className="concierge-trigger fixed touch-manipulation bottom-[calc(1rem+env(safe-area-inset-bottom))] right-[calc(1rem+env(safe-area-inset-right))] z-40 inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg motion-safe:transition-[opacity,transform] motion-safe:duration-200 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 active:opacity-90"
         >
           {/* Both class families on purpose: `.concierge-trigger` and its `span` rule style this
               inside the public route group, where the port is loaded, and the Tailwind
-              utilities keep it looking right in the portal, where it is not (errata E-11). The
-              label must stay a bare text node — `.concierge-trigger span` turns any span into
-              the 38px badge. */}
+              utilities are the fallback in the portal, where it is not (errata E-11). They only
+              back the port up, never override it: `hover:bg-primary/90` was dropped because at
+              specificity (0,2,0) it beat `.concierge-trigger` (0,1,0) and repainted the donor
+              ink on hover, and the port declares no `.concierge-trigger:hover` of its own — so
+              the donor pill is deliberately static, with the cursor and the focus ring carrying
+              the affordance. The label must stay a bare text node — `.concierge-trigger span`
+              turns any span into the 38px badge. */}
           <span
             aria-hidden="true"
             className="inline-grid size-9 shrink-0 place-items-center rounded-full bg-white font-serif text-[15px] font-bold text-primary"
@@ -599,6 +602,11 @@ export function ConciergeWidget({
               aria-live="polite"
               className="min-h-40 flex-1 space-y-4 overflow-y-auto overscroll-contain overflow-x-hidden px-4 py-4"
             >
+              {/* Openers only while the transcript is empty. The donor keeps `.prompt-list`
+                  beside the answer (commit f91ecc5 :1050); hkwtia drops it once a real
+                  conversation exists, because re-offering "How can WiseTech help my
+                  organisation?" underneath the reader's own third question reads as the
+                  assistant having lost the thread. */}
               {messages.length === 0 && !disabledState ? (
                 <li className="text-sm leading-6 text-muted-foreground">
                   {labels.empty}
