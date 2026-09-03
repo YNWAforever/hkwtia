@@ -8,8 +8,16 @@ import type {PublicEventProjection} from "@/lib/events/public";
 
 function presentationComponents() {
   const {EventDetail} = tsxRequire("../../components/marketing/event-detail.tsx", import.meta.url);
-  const {HomePartnerWall} = tsxRequire("../../components/marketing/home-partner-wall.tsx", import.meta.url);
-  return {EventDetail, HomePartnerWall};
+  const {LegacyNetwork} = tsxRequire("../../components/home/legacy-network.tsx", import.meta.url);
+  // Resolved through the same tsxRequire call graph as LegacyNetwork itself (rather than a
+  // top-level `import {NextIntlClientProvider} from "next-intl"` in this file), because
+  // LegacyNetwork's `Link` (@/i18n/navigation, next-intl's createNavigation) calls useLocale()
+  // against a React context object created inside next-intl's own module instance. A
+  // top-level ESM import of "next-intl" in this spec resolves a second, distinct module
+  // instance with its own context object, so a Provider from that copy would not satisfy
+  // useLocale() in LegacyNetwork's copy and renderToStaticMarkup would throw.
+  const {NextIntlClientProvider} = tsxRequire("next-intl", import.meta.url);
+  return {EventDetail, LegacyNetwork, NextIntlClientProvider};
 }
 
 const EVENT_MEDIA_URL = "/api/media/10000000-0000-4000-8000-000000000001";
@@ -126,7 +134,7 @@ test("opens Contact Concierge, focuses the message, and restores the launcher af
 });
 
 test("renders exact own-origin private Event and partner media without optimization", async ({page}) => {
-  const {EventDetail, HomePartnerWall} = presentationComponents();
+  const {EventDetail, LegacyNetwork, NextIntlClientProvider} = presentationComponents();
   const eventHtml = renderToStaticMarkup(createElement(EventDetail, {
     event: eventFixtureWithPrivateHero,
     locale: "en",
@@ -134,10 +142,20 @@ test("renders exact own-origin private Event and partner media without optimizat
   }));
   await expectExactPrivateMedia(page, eventHtml, EVENT_MEDIA_URL);
 
-  const partnerHtml = renderToStaticMarkup(createElement(HomePartnerWall, {
-    partners: [partnerFixtureWithPrivateLogo],
-    title: "Approved partners",
-    intro: "Display-safe partner presentation fixture.",
-  }));
-  await expectExactPrivateMedia(page, partnerHtml, PARTNER_MEDIA_URL);
+  const legacyNetworkHtml = renderToStaticMarkup(createElement(NextIntlClientProvider, {locale: "en"}, createElement(LegacyNetwork, {
+    groups: [
+      {category: "supporting", partners: [partnerFixtureWithPrivateLogo]},
+      {category: "regional", partners: []},
+      {category: "media", partners: []},
+    ],
+    labels: {
+      eyebrow: "Built on real relationships",
+      title: "A network with history — and a future.",
+      note: "Display-safe partner presentation fixture.",
+      viewAllAction: "View all partners",
+      previewNote: "Showing {shown} of {total} records in this category.",
+      tabs: {supporting: "Supporting Organizations", regional: "Regional Partners", media: "Media Partners"},
+    },
+  })));
+  await expectExactPrivateMedia(page, legacyNetworkHtml, PARTNER_MEDIA_URL);
 });

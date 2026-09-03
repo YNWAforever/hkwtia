@@ -14,7 +14,6 @@ const implementationFiles: readonly string[] = [
   "app/[locale]/(public)/programs/cpai/page.tsx",
   "app/[locale]/(public)/programs/hkict/page.tsx",
   "app/[locale]/(public)/programs/tct/page.tsx",
-  "components/marketing/editorial-hero.tsx",
   "components/marketing/home-highlight-card.tsx",
   "components/marketing/institutional-page-intro.tsx",
   "components/marketing/media-gallery.tsx",
@@ -88,7 +87,6 @@ const requiredRouteAndComponentFiles = [
   "app/[locale]/(public)/programs/cpai/page.tsx",
   "app/[locale]/(public)/programs/hkict/page.tsx",
   "app/[locale]/(public)/programs/tct/page.tsx",
-  "components/marketing/editorial-hero.tsx",
   "components/marketing/home-highlight-card.tsx",
   "components/marketing/institutional-page-intro.tsx",
   "components/marketing/story-section.tsx",
@@ -97,7 +95,7 @@ const requiredRouteAndComponentFiles = [
 
 describe("WiseTech PR3 source boundary", () => {
   it("declares every expected PR3 route and component in an explicit allowlist", () => {
-    expect(implementationFiles).toHaveLength(25);
+    expect(implementationFiles).toHaveLength(24);
     for (const path of requiredRouteAndComponentFiles) {
       expect(implementationFiles, path).toContain(path);
       expect(existsSync(resolve(process.cwd(), path)), path).toBe(true);
