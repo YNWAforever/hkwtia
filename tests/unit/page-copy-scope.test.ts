@@ -86,7 +86,14 @@ describe("page copy scope", () => {
       // the membership and partnership panels) that
       // components/home/conversion-paths.tsx reads. It is the last of the 13
       // homepage sections.
-      Home: 206,
+      // Task 15 retired the pre-WP-3 flat Home.* keys (eyebrow/title/question/summary/
+      // imageAlt/actions, highlightsTitle/highlightsIntro/highlights,
+      // featuresTitle/featuresIntro/features, partnerWallTitle/partnerWallIntro,
+      // programsTitle/programsIntro/programs, viewProgram -- 43 leaves) once page.tsx was
+      // rewritten as a composition of the 13 home/* sections and nothing referenced them
+      // any more, leaving the 2 metaTitle/metaDescription leaves plus the 13 sections'
+      // 161 editable fields already accounted for above (206 - 43 = 163).
+      Home: 163,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -104,7 +111,7 @@ describe("page copy scope", () => {
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(402);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(359);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

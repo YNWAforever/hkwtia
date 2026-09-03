@@ -1,18 +1,25 @@
 import type {Metadata} from 'next';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 
-import {EditorialHero} from '@/components/marketing/editorial-hero';
-import {FeatureGrid} from '@/components/marketing/feature-grid';
-import {HomeHighlightCard} from '@/components/marketing/home-highlight-card';
-import {HomePartnerWall} from '@/components/marketing/home-partner-wall';
-import {ProgramGrid} from '@/components/marketing/program-grid';
-import {Section} from '@/components/marketing/section';
+import {ArchiveStories} from '@/components/home/archive-stories';
+import {ConversionPaths} from '@/components/home/conversion-paths';
+import {Ecosystem} from '@/components/home/ecosystem';
+import {EventsJourney} from '@/components/home/events-journey';
+import {GbaGateway} from '@/components/home/gba-gateway';
+import {Hero} from '@/components/home/hero';
+import {ImpactEvidence} from '@/components/home/impact-evidence';
+import {LegacyNetwork} from '@/components/home/legacy-network';
+import {MarketProducts} from '@/components/home/market-products';
+import {OpenNow} from '@/components/home/open-now';
+import {Outcomes} from '@/components/home/outcomes';
+import {Pathways} from '@/components/home/pathways';
+import {ProgrammeShowcase} from '@/components/home/programme-showcase';
 import {StructuredData} from '@/components/seo/structured-data';
 import type {AppLocale} from '@/i18n/routing';
-import {partnersRepository} from '@/lib/db/repos/partners';
-import {loadHomeHighlights} from '@/lib/home/home-highlights';
+import {buildEcosystemIndustries} from '@/lib/home/ecosystem-industries';
+import {loadLegacyNetworkGroups} from '@/lib/home/legacy-network-groups';
 import {buildPageMetadata} from '@/lib/metadata';
-import {buildOrganizationData} from '@/lib/structured-data';
+import {buildOrganizationData, buildWebSiteData} from '@/lib/structured-data';
 
 type Props = {params: Promise<{locale: string}>};
 
@@ -24,36 +31,84 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   return buildPageMetadata({locale: locale as AppLocale, pathname: '/', title: t('metaTitle'), description: t('metaDescription'), image: '/images/projects-hero.jpg'});
 }
 
+// 13 sections, each an independent read: Promise.all fans every section's own
+// .catch(() => [])/Promise.allSettled read out in parallel, so one slow or failing model
+// never blocks another. Ecosystem and LegacyNetwork are 'use client' presentational
+// components -- their data/translation resolution happens here, in server code, and is
+// passed down as plain serializable props (Tasks 8 and 13).
 export default async function HomePage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
   const appLocale = locale as AppLocale;
-  const [t, highlights, partners] = await Promise.all([
-    getTranslations('Home'),
-    loadHomeHighlights({locale: appLocale}),
-    partnersRepository.listPublished(appLocale, {limit: 12}).catch(() => null),
+
+  const [
+    hero, openNow, pathways, eventsJourney, marketProducts, outcomes,
+    programmeShowcase, gbaGateway, impactEvidence, archiveStories, conversionPaths,
+    ecosystemT, legacyNetworkGroups, legacyNetworkT,
+  ] = await Promise.all([
+    Hero({locale: appLocale}),
+    OpenNow({locale: appLocale}),
+    Pathways({locale: appLocale}),
+    EventsJourney({locale: appLocale}),
+    MarketProducts({locale: appLocale}),
+    Outcomes({locale: appLocale}),
+    ProgrammeShowcase({locale: appLocale}),
+    GbaGateway({locale: appLocale}),
+    ImpactEvidence({locale: appLocale}),
+    ArchiveStories({locale: appLocale}),
+    ConversionPaths({locale: appLocale}),
+    getTranslations({locale, namespace: 'Home.ecosystem'}),
+    loadLegacyNetworkGroups(appLocale),
+    getTranslations({locale, namespace: 'Home.legacyNetwork'}),
   ]);
-  const formatDate = (value: Date | string) => new Intl.DateTimeFormat(locale, {dateStyle: 'long', timeZone: 'Asia/Hong_Kong'}).format(new Date(value));
-  const features = ['connect', 'accelerate', 'represent'].map((key) => ({title: t(`features.${key}.title`), description: t(`features.${key}.description`)}));
-  const programLabels = Object.fromEntries(['cpai', 'hkict', 'tct', 'asa'].map((id) => [id, {title: t(`programs.${id}.title`), description: t(`programs.${id}.description`)}]));
-  const {event, news, showcase} = highlights;
+
+  const ecosystemIndustries = buildEcosystemIndustries((key) => ecosystemT(key));
 
   return (
     <>
       <StructuredData data={buildOrganizationData()} />
-      <EditorialHero actions={[{label: t('actions.events'), href: '/events'}, {label: t('actions.membership'), href: '/membership'}]} description={t('summary')} discoverLabel={t('actions.discover')} eyebrow={t('eyebrow')} image="/images/projects-hero.jpg" imageAlt={t('imageAlt')} title={t('question')} />
-      <div className="scroll-mt-24 lg:scroll-mt-36" id="home-discover">
-        <Section heading={t('highlightsTitle')} intro={t('highlightsIntro')}>
-          <div className="grid gap-6 lg:grid-cols-3">
-            <HomeHighlightCard actionLabel={t('highlights.event.view')} href={event.status === 'available' ? `/events/${event.item.slug}` : '/events'} label={t('highlights.event.label')} meta={event.status === 'available' ? formatDate(event.item.startsAt) : undefined} state={event.status} stateMessage={event.status === 'empty' ? t('highlights.event.empty') : event.status === 'unavailable' ? t('highlights.event.unavailable') : undefined} summary={event.status === 'available' ? event.item.description : undefined} title={event.status === 'available' ? event.item.title : undefined} />
-            <HomeHighlightCard actionLabel={t('highlights.news.view')} href={news.status === 'available' ? `/news/${news.item.slug}` : '/news'} label={t('highlights.news.label')} meta={news.status === 'available' ? formatDate(news.item.publishedAt) : undefined} state={news.status} stateMessage={news.status === 'empty' ? t('highlights.news.empty') : news.status === 'unavailable' ? t('highlights.news.unavailable') : undefined} summary={news.status === 'available' ? news.item.author : undefined} title={news.status === 'available' ? news.item.title : undefined} />
-            <HomeHighlightCard actionLabel={t('highlights.showcase.view')} href={showcase.status === 'available' ? `/showcase/${showcase.item.slug}` : '/showcase'} image={showcase.status === 'available' && showcase.item.logo ? {src: showcase.item.logo.url, alt: showcase.item.logo.alt} : undefined} label={t('highlights.showcase.label')} meta={showcase.status === 'available' ? showcase.item.category : undefined} state={showcase.status} stateMessage={showcase.status === 'empty' ? t('highlights.showcase.empty') : showcase.status === 'unavailable' ? t('highlights.showcase.unavailable') : undefined} summary={showcase.status === 'available' ? showcase.item.tagline : undefined} title={showcase.status === 'available' ? showcase.item.name : undefined} />
-          </div>
-        </Section>
-      </div>
-      {partners?.length ? <HomePartnerWall intro={t('partnerWallIntro')} partners={partners} title={t('partnerWallTitle')} /> : null}
-      <Section heading={t('featuresTitle')} intro={t('featuresIntro')}><FeatureGrid features={features} /></Section>
-      <Section heading={t('programsTitle')} intro={t('programsIntro')}><ProgramGrid labels={programLabels} viewLabel={t('viewProgram')} /></Section>
+      <StructuredData data={buildWebSiteData()} />
+      {hero}
+      {openNow}
+      {pathways}
+      {eventsJourney}
+      {marketProducts}
+      {outcomes}
+      <Ecosystem
+        industries={ecosystemIndustries}
+        labels={{
+          eyebrow: ecosystemT('eyebrow'),
+          title: ecosystemT('title'),
+          intro: ecosystemT('intro'),
+          selectedLabel: ecosystemT('selectedLabel'),
+          enterAction: ecosystemT('enterAction'),
+          focusAreas: ecosystemT.raw('focusAreas') as readonly string[],
+        }}
+      />
+      {programmeShowcase}
+      {gbaGateway}
+      {impactEvidence}
+      {archiveStories}
+      <LegacyNetwork
+        groups={legacyNetworkGroups}
+        labels={{
+          eyebrow: legacyNetworkT('eyebrow'),
+          title: legacyNetworkT('title'),
+          note: legacyNetworkT('note'),
+          viewAllAction: legacyNetworkT('viewAllAction'),
+          // Raw, not translated: the {shown}/{total} placeholders are filled in client-side
+          // by LegacyNetwork itself (Task 13), the same pattern Footer.newsletter.mailBody
+          // uses for {email} -- a function cannot cross the server/client boundary as a prop,
+          // so the template string does instead.
+          previewNote: legacyNetworkT.raw('previewNote') as string,
+          tabs: {
+            supporting: legacyNetworkT('tabs.supporting'),
+            regional: legacyNetworkT('tabs.regional'),
+            media: legacyNetworkT('tabs.media'),
+          },
+        }}
+      />
+      {conversionPaths}
     </>
   );
 }

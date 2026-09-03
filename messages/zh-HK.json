@@ -325,18 +325,8 @@
     "invalidDescription": "連結可能已過期或已被取代。如仍需協助，請聯絡 WTIA。"
   },
   "Home": {
-    "metaTitle": "WTIA｜創新香港",
-    "metaDescription": "連繫香港及大灣區創新力量，接通全球市場。",
-    "eyebrow": "創新香港",
-    "title": "連繫大灣區創新力量，走向國際舞台。",
-    "question": "香港創新下一站，可以走多遠？",
-    "summary": "連接香港、大灣區及亞洲創科社群與全球科技市場的跨境平台。",
-    "imageAlt": "香港創科社群",
-    "actions": {
-      "events": "尋找活動",
-      "membership": "探索會員服務",
-      "discover": "探索 WiseTech"
-    },
+    "metaTitle": "WiseTech Hong Kong",
+    "metaDescription": "WiseTech Hong Kong 連接可信 AI+ 應用、活動、會員、方案、計劃及大灣區市場機遇。",
     "hero": {
       "eyebrow": "WiseTech Hong Kong",
       "title": "香港如何引領 AI+ 時代？",
@@ -581,68 +571,7 @@
         "primaryAction": "展開合作",
         "secondaryAction": "認識夥伴網絡"
       }
-    },
-    "highlightsTitle": "最新動向",
-    "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
-    "highlights": {
-      "event": {
-        "label": "下一場活動",
-        "view": "查看活動",
-        "empty": "暫時沒有即將舉行的公開活動。",
-        "unavailable": "活動資訊暫時未能提供。"
-      },
-      "news": {
-        "label": "最新消息",
-        "view": "閱讀消息",
-        "empty": "暫時沒有已發布的消息。",
-        "unavailable": "消息資訊暫時未能提供。"
-      },
-      "showcase": {
-        "label": "會員方案",
-        "view": "探索方案",
-        "empty": "暫時沒有已發布的會員方案。",
-        "unavailable": "會員方案資訊暫時未能提供。"
-      }
-    },
-    "featuresTitle": "連繫社群，推動成長",
-    "featuresIntro": "WTIA 透過實際機遇凝聚創科社群。",
-    "partnerWallTitle": "我們的合作夥伴",
-    "partnerWallIntro": "認識支持 WTIA 社群的核准機構。",
-    "features": {
-      "connect": {
-        "title": "連繫",
-        "description": "連接業界、投資者及區域夥伴。"
-      },
-      "accelerate": {
-        "title": "加速",
-        "description": "透過專項計劃把創意轉化為市場機遇。"
-      },
-      "represent": {
-        "title": "代表",
-        "description": "為無線科技業界建立清晰而共同的聲音。"
-      }
-    },
-    "programsTitle": "計劃與獎項",
-    "programsIntro": "探索 WTIA 推動人才、創新及業界認可的項目。",
-    "programs": {
-      "cpai": {
-        "title": "CPAI",
-        "description": "支援應用創新的專項計劃。"
-      },
-      "hkict": {
-        "title": "香港資訊及通訊科技獎",
-        "description": "表揚香港科技界的卓越成果。"
-      },
-      "tct": {
-        "title": "TCT",
-        "description": "連接科技、能力與人才。"
-      },
-      "asa": {
-        "title": "亞洲智能應用程式大獎",
-        "description": "嘉許亞洲優秀智能應用程式。"
-      }
-    },
-    "viewProgram": "查看計劃"
+    }
   },
   "About": {
     "metaTitle": "關於 WTIA",

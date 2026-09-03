@@ -1,7 +1,7 @@
-import type {Event, FAQPage, Organization, SoftwareApplication, WithContext} from 'schema-dts';
+import type {Event, FAQPage, Organization, SoftwareApplication, WebSite, WithContext} from 'schema-dts';
 
 type StructuredDataProps = {
-  data: WithContext<Organization | FAQPage | Event | SoftwareApplication>;
+  data: WithContext<Organization | FAQPage | Event | SoftwareApplication | WebSite>;
 };
 
 export function StructuredData({data}: StructuredDataProps) {
