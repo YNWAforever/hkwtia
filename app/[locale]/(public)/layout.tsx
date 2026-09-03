@@ -7,6 +7,7 @@ import {SiteFooter} from '@/components/layout/site-footer';
 import {SiteHeader} from '@/components/layout/site-header';
 import type {AppLocale} from '@/i18n/routing';
 import {localizeConcierge} from '@/lib/ai/concierge-labels';
+import {localizeConciergePrompts} from '@/lib/ai/concierge-prompts';
 import {publicEnv} from '@/lib/config/env';
 import {announcementsRepository} from '@/lib/db/repos/announcements';
 import {toAnnouncementBarView} from '@/lib/public-shell/announcement';
@@ -40,6 +41,7 @@ export default async function PublicLayout({children, params}: PublicLayoutProps
   ]);
   const appLocale = locale as AppLocale;
   const conciergeLabels = localizeConcierge((key) => concierge.raw(key));
+  const conciergePrompts = localizeConciergePrompts((key) => concierge.raw(key));
   const {turnstileSiteKey} = publicEnv();
   const announcement = activeAnnouncement ? toAnnouncementBarView(activeAnnouncement, appLocale) : null;
 
@@ -59,6 +61,8 @@ export default async function PublicLayout({children, params}: PublicLayoutProps
       <ConciergeWidget
         locale={appLocale}
         labels={conciergeLabels}
+        prompts={conciergePrompts}
+        transparencyLabel={concierge('transparency')}
         {...(turnstileSiteKey === undefined ? {} : {turnstileSiteKey})}
       />
     </div>

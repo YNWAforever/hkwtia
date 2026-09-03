@@ -1,4 +1,16 @@
+import {readFileSync} from "node:fs";
+
 import {expect, test} from "@playwright/test";
+
+// Read the launcher copy from the bundles rather than repeating it. WP-2 renamed
+// `Concierge.launcher` from "Ask WTIA" to "Ask WiseTech", and a hard-coded label would have
+// silently retired this matrix's hero-action/launcher overlap assertion instead of failing.
+function conciergeLauncher(locale: "en" | "zh-HK"): string {
+  const bundle = JSON.parse(
+    readFileSync(new URL(`../../messages/${locale}.json`, import.meta.url), "utf8"),
+  ) as {Concierge: {launcher: string}};
+  return bundle.Concierge.launcher;
+}
 
 const featuredHistorySlug = "the-strategies-for-expanding-global-internet-of-things-iot-markets";
 const runtimeOverlay = "[data-nextjs-dialog], .vite-error-overlay, #webpack-dev-server-client-overlay";
@@ -11,7 +23,7 @@ const homeCases = [
     eventAction: "Find an event",
     membershipAction: "Explore membership",
     discoverAction: "Discover WiseTech",
-    concierge: "Ask WTIA",
+    concierge: conciergeLauncher("en"),
     retiredStatsHeading: "A platform for the whole ecosystem",
     highlights: [
       {label: "Next event", empty: "No upcoming public event is available.", unavailable: "Event information is temporarily unavailable.", href: /^\/events(?:\/|$)/},
@@ -26,7 +38,7 @@ const homeCases = [
     eventAction: "尋找活動",
     membershipAction: "探索會員服務",
     discoverAction: "探索 WiseTech",
-    concierge: "詢問 WTIA",
+    concierge: conciergeLauncher("zh-HK"),
     retiredStatsHeading: "服務整個創科生態",
     highlights: [
       {label: "下一場活動", empty: "暫時沒有即將舉行的公開活動。", unavailable: "活動資訊暫時未能提供。", href: /^\/zh\/events(?:\/|$)/},
