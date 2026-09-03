@@ -544,7 +544,7 @@ export function ConciergeWidget({
           aria-label={labels.launcher}
           aria-controls={dialogId}
           aria-expanded={open}
-          className="concierge-trigger fixed touch-manipulation bottom-[calc(1rem+env(safe-area-inset-bottom))] right-[calc(1rem+env(safe-area-inset-right))] z-40 inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg motion-safe:transition-[opacity,transform] motion-safe:duration-200 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 active:opacity-90"
+          className="concierge-trigger fixed touch-manipulation bottom-[calc(1rem+env(safe-area-inset-bottom))] right-[calc(1rem+env(safe-area-inset-right))] z-40 inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg motion-safe:transition-[opacity,transform] motion-safe:duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 active:opacity-90"
         >
           {/* Both class families on purpose: `.concierge-trigger` and its `span` rule style this
               inside the public route group, where the port is loaded, and the Tailwind
@@ -552,9 +552,12 @@ export function ConciergeWidget({
               back the port up, never override it: `hover:bg-primary/90` was dropped because at
               specificity (0,2,0) it beat `.concierge-trigger` (0,1,0) and repainted the donor
               ink on hover, and the port declares no `.concierge-trigger:hover` of its own — so
-              the donor pill is deliberately static, with the cursor and the focus ring carrying
-              the affordance. The label must stay a bare text node — `.concierge-trigger span`
-              turns any span into the 38px badge. */}
+              the donor pill keeps its colour. `hover:opacity-90` is the one hover effect that
+              does not repaint that ink: `.concierge-trigger` declares no `opacity`, so it
+              layers over both renderings rather than overriding either, and it matches the
+              `active:opacity-90` already here. Without it the portal launcher, which never
+              loads the port, would have no hover affordance at all. The label must stay a bare
+              text node — `.concierge-trigger span` turns any span into the 38px badge. */}
           <span
             aria-hidden="true"
             className="inline-grid size-9 shrink-0 place-items-center rounded-full bg-white font-serif text-[15px] font-bold text-primary"

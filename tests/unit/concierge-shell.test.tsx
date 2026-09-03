@@ -106,10 +106,16 @@ describe("Concierge shell", () => {
     fireEvent.click(screen.getByRole("button", {name: "How can WiseTech help my organisation?"}));
     fireEvent.click(screen.getByRole("button", {name: labels.send}));
 
+    // The chips go on the optimistic append inside sendTurn, before fetch resolves, so waiting
+    // for the Send control to return to its idle label is what makes the `done` frame
+    // load-bearing: while the stream is open the button reads `labels.sending`, and only
+    // termination puts `labels.send` back.
     await waitFor(() =>
-      expect(screen.queryByRole("button", {name: "How can WiseTech help my organisation?"})).toBeNull());
+      expect(screen.getByRole("button", {name: labels.send})).toBeInTheDocument());
+    expect(screen.queryByRole("button", {name: "How can WiseTech help my organisation?"})).toBeNull();
     expect(screen.queryByRole("button", {name: "Show the AI+ industry pathways"})).toBeNull();
     expect(screen.queryByText(labels.empty)).toBeNull();
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 
   it("links the transparency page with a locale-correct href and hides it when unlabelled", () => {

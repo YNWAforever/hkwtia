@@ -6,8 +6,10 @@ export type ConciergePrompts = Readonly<Record<ConciergePromptSection, readonly 
  * The donor branches on `path[0]` with `membership|join`, `members`, `events` and a default
  * (app/WiseTechSite.tsx `:1041-1044`). hkwtia merges the donor's members and solutions
  * sections into `/showcase` (D-3), so that donor branch supplies the showcase pair.
- * `pathname` may still carry the `/zh` prefix here: the Concierge reads it from
- * `window.location`, not from `usePathname`, so the widget needs no router hook.
+ * `pathname` may still carry the `/zh` prefix here, so this strips it itself: the Concierge
+ * passes the raw `next/navigation` pathname, which keeps the prefix. (next-intl's own
+ * `usePathname` would have removed it, but the widget cannot use that hook — it also mounts
+ * outside a locale context, in tests/unit/concierge-widget.test.tsx.)
  */
 export function resolveConciergePromptSection(pathname: string): ConciergePromptSection {
   const withoutLocale = pathname.startsWith("/zh/") ? pathname.slice(3) : pathname === "/zh" ? "/" : pathname;
