@@ -26,6 +26,21 @@ const footerTargetClassName = "inline-flex min-h-11 min-w-11 max-w-full items-ce
 type FooterLink = Readonly<{id: string; href: string; label: string}>;
 type FooterColumn = Readonly<{id: string; label: string; links: readonly FooterLink[]}>;
 
+/**
+ * `t.raw` returns whatever the bundle holds, and this footer renders on every public route, so
+ * a missing or reshaped `addressLines` used to throw during the render of the whole public
+ * site — `undefined.map` for a dropped key, and a printed `73` for an entry that stopped being
+ * a string. CLAUDE.md's rule for public pages is to degrade rather than 500, so the shape is
+ * checked here and the address block is dropped whole. All-or-nothing rather than a filter: a
+ * partial postal address is not a better answer than none, and a silently shortened one hides
+ * the bundle defect instead of showing it.
+ */
+function isAddressLines(value: unknown): value is readonly string[] {
+  return Array.isArray(value)
+    && value.length > 0
+    && value.every((line) => typeof line === "string" && line.trim() !== "");
+}
+
 export async function SiteFooter({locale}: {locale: AppLocale}) {
   const [navigationT, t] = await Promise.all([
     getTranslations({locale, namespace: "Navigation"}),
@@ -40,7 +55,8 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
     new Map(navigation.groups.map((group) => [group.id, group] as const));
   const leaves = (id: NavigationGroupId): readonly LocalizedNavigationLink[] =>
     groups.get(id)?.columns.flatMap((column) => column.links) ?? [];
-  const addressLines = t.raw("addressLines") as readonly string[];
+  const rawAddressLines: unknown = t.raw("addressLines");
+  const addressLines = isAddressLines(rawAddressLines) ? rawAddressLines : [];
 
   // Donor .footer-links (commit f91ecc5 :1030) is four columns, its own set being
   // Explore / Connect / Membership / Contact. Three of that Connect column's five links do have
@@ -124,14 +140,16 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
               {siteConfig.contact.phone}
             </a>
           )}
-          <address>
-            {addressLines.map((line, index) => (
-              <span key={index}>
-                {line}
-                {index === addressLines.length - 1 ? null : <br />}
-              </span>
-            ))}
-          </address>
+          {addressLines.length === 0 ? null : (
+            <address>
+              {addressLines.map((line, index) => (
+                <span key={index}>
+                  {line}
+                  {index === addressLines.length - 1 ? null : <br />}
+                </span>
+              ))}
+            </address>
+          )}
         </div>
       </div>
 

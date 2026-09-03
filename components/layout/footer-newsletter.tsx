@@ -4,6 +4,7 @@ import {useEffect, useRef, useState, type FormEvent} from "react";
 
 import {Eyebrow} from "@/components/wt/eyebrow";
 import {siteConfig} from "@/config/site";
+import {usePathname} from "@/i18n/navigation";
 
 export type FooterNewsletterLabels = Readonly<{
   eyebrow: string;
@@ -49,13 +50,42 @@ export function FooterNewsletter({labels}: {labels: FooterNewsletterLabels}) {
   const [attempt, setAttempt] = useState(0);
   const successRef = useRef<HTMLDivElement>(null);
   /**
-   * Also the form's `action`. Without script the browser GETs this address with the form fields
-   * appended as a query string; mail clients honour `subject` and ignore anything else, so the
-   * reader reaches a titled but empty message addressed to WTIA rather than a form that does
-   * nothing at all. The typed address cannot travel that route — composing the body needs the
-   * script — but a working route beats an inert one.
+   * Read during render and compared with the route this island last rendered for — the pattern
+   * the Concierge already uses (components/ai/concierge-widget.tsx:230-241), for the same
+   * reason. This island is mounted by app/[locale]/(public)/layout.tsx, which survives every
+   * in-app navigation, so a success held in state hid the form on every *other* public page
+   * for the rest of the session, and a half-typed address followed the reader off the page
+   * they typed it on. Resetting here makes the persistent island behave like the per-page form
+   * a reader takes it for. Setting state during render is React's own way to adjust state when
+   * an input changes: React re-runs this component before committing, so no frame ever paints
+   * the stale panel, which an effect would.
+   */
+  const pathname = usePathname();
+  const [renderedRoute, setRenderedRoute] = useState(pathname);
+  if (renderedRoute !== pathname) {
+    setRenderedRoute(pathname);
+    setState("idle");
+    setEmail("");
+  }
+  /**
+   * Two addresses, one route.
+   *
+   * `mailFallback` is the route that works: an ordinary link, followed with or without script,
+   * carrying the subject. The typed address cannot travel it — composing the body needs the
+   * script — but it reaches a titled draft addressed to WTIA, and it is rendered always rather
+   * than inside `<noscript>`, whose children are a hydration hazard in a client component.
+   *
+   * `mailto` stays on the form as an intentionally *inert* action, not as a fallback:
+   * next.config.ts sends `form-action 'self'` (:41) on `/:path*` (:153), a `mailto:` URL
+   * matches no source in that list, and the browser therefore refuses the submission outright —
+   * no navigation, no query string. Deleting it would not restore a fallback, it would open a
+   * leak: a form with no `action` submits to its own URL, which the policy does allow, so a
+   * no-script submit would reload the public page with the reader's address in the query
+   * string. `form-action` does not govern link navigation and this partial policy declares no
+   * `default-src`, so nothing constrains following `mailFallback`.
    */
   const mailto = `mailto:${siteConfig.contact.email}`;
+  const mailFallback = `${mailto}?subject=${encodeURIComponent(labels.mailSubject)}`;
 
   // The success panel takes the form's place, so the button the reader just activated goes
   // `hidden`. Without moving focus, it falls to <body> and the reader loses their position in
@@ -72,11 +102,12 @@ export function FooterNewsletter({labels}: {labels: FooterNewsletterLabels}) {
       return;
     }
     setState("success");
-    const subject = encodeURIComponent(labels.mailSubject);
     // The function form of `replace`: `$&`, "$`" and `$'` are replacement patterns, so a typed
     // address containing one would otherwise rewrite the sentence around it.
     const body = encodeURIComponent(labels.mailBody.replace("{email}", () => email));
-    window.location.assign(`${mailto}?subject=${subject}&body=${body}`);
+    // The same address the link offers, plus the body only the script can build, so the two
+    // routes cannot drift into titling the draft differently.
+    window.location.assign(`${mailFallback}&body=${body}`);
   }
 
   return (
@@ -118,8 +149,6 @@ export function FooterNewsletter({labels}: {labels: FooterNewsletterLabels}) {
             setState("idle");
           }}
         />
-        {/* Carried for the no-script route only; the script builds its own subject. */}
-        <input name="subject" type="hidden" value={labels.mailSubject} readOnly />
         {/* The port gives this button a width but no height, so its 44px would come only from
             the input stretching the flex row (spec §2.9). */}
         <button className="min-h-11" type="submit" aria-label={labels.submit}>
@@ -129,6 +158,16 @@ export function FooterNewsletter({labels}: {labels: FooterNewsletterLabels}) {
       <p className="newsletter-error" id={errorId} role="alert">
         {state === "error" ? <span key={attempt}>{labels.error}</span> : null}
       </p>
+      {/* Outside the form, so the success panel never takes it away: a reader whose mail client
+          did not open is exactly the one who needs it. No port rule targets `.footer-newsletter
+          a`, so the type comes from utilities here rather than from a stylesheet this file does
+          not own; `min-h-11` is hkwtia's own tap-target floor (spec §2.9). */}
+      <a
+        className="mt-4 inline-flex min-h-11 items-center text-[11px] text-white/70 underline underline-offset-4 hover:text-white"
+        href={mailFallback}
+      >
+        {labels.submit}
+      </a>
     </div>
   );
 }
