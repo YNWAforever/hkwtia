@@ -47,7 +47,7 @@
       },
       "aboutWtia": {
         "label": "認識商會",
-        "title": "細閱商會的自身紀錄。",
+        "title": "細閱商會自身的紀錄。",
         "copy": "歷史里程碑、主席的話、委員會及聯絡渠道，均按 WTIA 持有的紀錄發布。",
         "cta": "細閱歷史"
       }
@@ -110,15 +110,15 @@
   "Footer": {
     "brand": {
       "publicName": "WiseTech Hong Kong",
-      "descriptor": "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台 · 中文法定名稱待正式批准",
+      "descriptor": "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台",
       "homeLabel": "WiseTech Hong Kong 首頁",
       "logoAlt": "WTIA"
     },
     "tagline": "Technology + Wisdom. Hong Kong + The World.",
-    "legalLine": "WiseTech Hong Kong — Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台。[官方中文名稱待正式批准]",
+    "legalLine": "WiseTech Hong Kong 為 Hong Kong Wireless Technology Industry Association 的品牌名稱，中文法定名稱待正式批准。",
     "columns": {
       "explore": "探索",
-      "membership": "會籍",
+      "membership": "會員",
       "about": "關於",
       "contact": "聯絡"
     },
@@ -941,7 +941,7 @@
     },
     "conciergeTitle": "未確定從哪裡開始？",
     "conciergeDescription": "透過 WTIA 現有的 Concierge 諮詢 WiseTech。",
-    "conciergeLauncher": "諮詢 WiseTech"
+    "conciergeLauncher": "問 WiseTech"
   },
   "Privacy": {
     "metaTitle": "私隱 | WTIA",
