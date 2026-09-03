@@ -92,24 +92,23 @@ describe("public shell server surfaces", () => {
       Navigation: {openMenu: string};
     }).Navigation.openMenu;
 
-    // Each slot is identified by the marker that survives Tasks 4 and 5: those tasks own what
-    // the desktop navigation and the mobile trigger render inside, so the earliest of either
-    // spelling — today's element or the donor class it is moving to — stands for the slot.
-    const earliestOf = (...markers: string[]) => {
-      const found = markers.map((marker) => markup.indexOf(marker)).filter((index) => index >= 0);
-      return found.length === 0 ? -1 : Math.min(...found);
-    };
+    // Every slot is now pinned to the element the shipped header actually renders. The loose
+    // "either spelling" markers this test used to carry were scaffolding for Tasks 4 and 5,
+    // which owned the desktop navigation and the mobile trigger; both landed in this branch,
+    // so the donor classes are the real markup and a rename has to fail here.
     const slots = {
       headerInner: markup.indexOf('class="header-inner"'),
       brand: markup.indexOf('class="brand'),
-      desktopNav: earliestOf("desktop-nav", "<nav"),
+      desktopNav: markup.indexOf('<nav class="desktop-nav"'),
       actions: markup.indexOf('class="header-actions"'),
       search: markup.indexOf('class="search-link"'),
       language: markup.indexOf("language-link"),
       signIn: markup.indexOf('class="signin-link"'),
       join: markup.indexOf("button button-small"),
-      mobileTrigger: earliestOf("mobile-trigger", `aria-label="${openMenuLabel}"`),
+      mobileTrigger: markup.indexOf('class="mobile-trigger"'),
     };
+    // The trigger's accessible name is part of the slot, not a fallback for finding it.
+    expect(markup).toContain(`aria-label="${openMenuLabel}"`);
 
     for (const [slot, index] of Object.entries(slots)) expect(index, slot).toBeGreaterThan(-1);
     const order = Object.values(slots);
@@ -132,20 +131,25 @@ describe("public shell server surfaces", () => {
   it("makes every footer route and contact control a 44px, wrapping-safe target", async () => {
     render(await SiteFooter({locale: "en"}));
     const footer = screen.getByRole("contentinfo");
-    const targetHrefs = new Set([
+    const expectedHrefs = [
       "/events", "/launchpad", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
       "/membership", "/showcase", "/news", "/ai-ops", "/ai-transparency", "/about", "/about/history",
       "/about/chairman", "/about/committees", "/contact", "/privacy",
       // The Membership column carries the two action destinations as well; without them here a
-      // dropped Join or Member sign-in link would leave the count untouched.
+      // dropped Join or Member sign-in link would leave the sweep untouched.
       "/join", "/portal",
       "mailto:contact@hkwtia.org",
-    ]);
+    ];
+    const targetHrefs = new Set(expectedHrefs);
     const targets = within(footer).getAllByRole("link").filter((link) =>
       targetHrefs.has(link.getAttribute("href") ?? ""),
     );
 
-    expect(targets).toHaveLength(targetHrefs.size);
+    // A cardinality check passed a swap: pointing the member sign-in entry at the join href
+    // dropped /portal from the footer and duplicated /join, leaving the total at 20. The sorted
+    // multiset is the every-leaf-once property this test claims, and it names the two hrefs.
+    expect(targets.map((target) => target.getAttribute("href")).sort())
+      .toEqual([...expectedHrefs].sort());
     for (const target of targets) {
       expect(target).toHaveClass("inline-flex", "min-h-11", "min-w-11", "max-w-full", "items-center", "break-words");
     }
@@ -219,8 +223,12 @@ describe("public shell server surfaces", () => {
       />,
     );
     const links = [...container.querySelectorAll(".mega-column a")];
-    expect(links.filter((link) => link.getAttribute("aria-current") === "page")).toHaveLength(1);
-    expect(links[0]).toHaveAttribute("href", "/events");
+    const marked = links.filter((link) => link.getAttribute("aria-current") === "page");
+    // Both halves have to name the same element. Asserting "exactly one is marked" and "the
+    // first leaf is /events" separately let the mark land on any other leaf and still pass.
+    expect(marked).toHaveLength(1);
+    expect(marked[0]).toBe(links[0]);
+    expect(marked[0]).toHaveAttribute("href", "/events");
   });
 
   it("marks the event-first trigger and keeps the trigger hook", async () => {

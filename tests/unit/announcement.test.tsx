@@ -166,8 +166,25 @@ describe("AnnouncementBar", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("keeps an arbitrary allowed token breakable at narrow widths", () => {
-    render(<AnnouncementBar announcement={{...announcement, text: "a".repeat(180)}} label="Announcement" dismissLabel="Dismiss announcement" />);
-    expect(screen.getByText("a".repeat(180))).toHaveClass("announcement-text");
+  // Named for the hook, not for wrapping: jsdom applies no stylesheet, so no unit test here can
+  // observe that a long token actually breaks. The declaration that does the breaking
+  // (`overflow-wrap: anywhere` in app/styles/wisetech-shell.css) is pinned by
+  // tests/unit/wisetech-css-port.test.ts. What is observable here is that the rendered element
+  // carries, unabbreviated, the exact class that rule selects — so a rename on either side is
+  // caught by one of the two tests.
+  it("renders an arbitrary allowed token in full on the element the wrapping rule selects", () => {
+    const token = "a".repeat(180);
+    render(<AnnouncementBar announcement={{...announcement, text: token}} label="Announcement" dismissLabel="Dismiss announcement" />);
+
+    const text = screen.getByText(token);
+    expect(text).toHaveClass("announcement-text");
+    // Not truncated or split by the server render: the whole token reaches the DOM, and the
+    // stylesheet is the only thing deciding where it breaks.
+    expect(text.textContent).toBe(token);
+
+    const shellOverrides = readFileSync("app/styles/wisetech-shell.css", "utf8");
+    for (const className of text.classList) {
+      expect(shellOverrides, className).toContain(`.${className} {`);
+    }
   });
 });

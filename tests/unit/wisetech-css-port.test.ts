@@ -80,6 +80,20 @@ describe("WiseTech CSS port", () => {
     // bar's hiding or the header's dismissed-state offset.
     expect(shellOverrides).toContain('[data-announcement-dismissed="true"] .site-header');
     expect(shellOverrides).toContain('[data-dismissed="true"]');
+
+    // The declaration that actually keeps a long unbroken token inside the bar. jsdom applies
+    // no stylesheet, so tests/unit/announcement.test.tsx structurally cannot observe it and
+    // pins only the class hook; the wrapping behaviour is a CSS contract and belongs here.
+    // `overflow-wrap: anywhere` rather than `break-word` because only `anywhere` also shrinks
+    // the flex item's min-content width, which is what stops the bar from overflowing.
+    expect(shellOverrides).toContain(".announcement-text { min-width: 0; overflow-wrap: anywhere; }");
+
+    // Above 820px the bar truncates to one line instead of wrapping, because the port's
+    // `.site-header { top: 42px }` assumes a one-line bar. Pinning the pair together keeps the
+    // two halves of that decision from drifting apart.
+    expect(shellOverrides).toMatch(
+      /@media \(min-width: 821px\) \{\s*\.announcement-text \{[^}]*white-space: nowrap;[^}]*\}/,
+    );
   });
 
   it("carries no donor build directive, remote asset or donor route", () => {

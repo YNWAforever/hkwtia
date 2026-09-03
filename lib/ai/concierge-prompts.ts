@@ -4,8 +4,10 @@ export type ConciergePrompts = Readonly<Record<ConciergePromptSection, readonly 
 
 /**
  * The donor branches on `path[0]` with `membership|join`, `members`, `events` and a default
- * (app/WiseTechSite.tsx `:1041-1044`). hkwtia merges the donor's members and solutions
- * sections into `/showcase` (D-3), so that donor branch supplies the showcase pair.
+ * (donor commit f91ecc5 :1041-1044). hkwtia merges the donor's members and solutions
+ * sections into `/showcase` (D-3), so that donor branch supplies the showcase pair. The donor
+ * filename is deliberately cited as a commit and line range rather than spelled out:
+ * tests/unit/wisetech-shell-boundary.test.ts scans this file for exactly that literal string.
  * `pathname` may still carry the `/zh` prefix here, so this strips it itself: the Concierge
  * passes the raw `next/navigation` pathname, which keeps the prefix. (next-intl's own
  * `usePathname` would have removed it, but the widget cannot use that hook — it also mounts
