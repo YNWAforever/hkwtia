@@ -362,6 +362,43 @@
       "updatesAction": "接收活動通知",
       "challengeAction": "提交挑戰"
     },
+    "pathways": {
+      "eyebrow": "你的路徑",
+      "title": "你希望在哪裡創造影響？",
+      "intro": "不同目標需要不同路徑。先從你希望達成的成果開始，而非機構架構。",
+      "items": {
+        "corporates": {
+          "title": "企業",
+          "copy": "尋找技術方案、人才及創新夥伴。",
+          "benefits": "企業挑戰 · 高層簡報 · 產業委員會",
+          "cta": "探索會籍"
+        },
+        "smes": {
+          "title": "中小企",
+          "copy": "把 AI 機遇轉化為實際業務改善。",
+          "benefits": "準備度評估 · 診所 · 可信供應商",
+          "cta": "尋找活動"
+        },
+        "startups": {
+          "title": "初創企業",
+          "copy": "連繫買家、投資者及區域夥伴。",
+          "benefits": "結構化曝光 · 展示日 · 市場進入",
+          "cta": "探索方案展示"
+        },
+        "professionals": {
+          "title": "專業人士",
+          "copy": "增進技能、參與產業發展並拓展網絡。",
+          "benefits": "委員會 · 專業認證 · 導師計劃",
+          "cta": "探索會籍"
+        },
+        "gba": {
+          "title": "大灣區及國際夥伴",
+          "copy": "連接香港科技力量與市場機遇。",
+          "benefits": "落地支援 · 考察團 · 買家配對",
+          "cta": "探索創科加速平台"
+        }
+      }
+    },
     "highlightsTitle": "最新動向",
     "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
     "highlights": {

@@ -52,8 +52,10 @@ describe("page copy scope", () => {
       // three hero actions) that components/home/hero.tsx reads. WP-3 Task 3 added
       // the 8 editable Open Now fields (eyebrow/title/intro/statusLabel plus the
       // empty-state title/copy and the two interest actions) that
-      // components/home/open-now.tsx reads.
-      Home: 62,
+      // components/home/open-now.tsx reads. WP-3 Task 4 added 23 editable Pathways
+      // fields (eyebrow/title/intro plus title/copy/benefits/cta for each of the 5
+      // audience cards) that components/home/pathways.tsx reads.
+      Home: 85,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -71,7 +73,7 @@ describe("page copy scope", () => {
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(258);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(281);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

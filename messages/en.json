@@ -362,6 +362,43 @@
       "updatesAction": "Get activity updates",
       "challengeAction": "Submit a challenge"
     },
+    "pathways": {
+      "eyebrow": "Your pathway",
+      "title": "Where do you want to create impact?",
+      "intro": "Different ambitions need different routes. Start with the outcome you want, not the structure of an institution.",
+      "items": {
+        "corporates": {
+          "title": "For Corporates",
+          "copy": "Find solutions, talent and innovation partners.",
+          "benefits": "Buyer challenges · Executive briefings · Industry councils",
+          "cta": "Explore membership"
+        },
+        "smes": {
+          "title": "For SMEs",
+          "copy": "Turn AI opportunities into practical improvements.",
+          "benefits": "Readiness · Clinics · Trusted providers",
+          "cta": "Find an event"
+        },
+        "startups": {
+          "title": "For Startups",
+          "copy": "Meet buyers, investors and regional partners.",
+          "benefits": "Structured visibility · Demo days · Market entry",
+          "cta": "Explore the showcase"
+        },
+        "professionals": {
+          "title": "For Professionals",
+          "copy": "Build skills, influence industry and expand your network.",
+          "benefits": "Councils · Certification · Mentorship",
+          "cta": "Explore membership"
+        },
+        "gba": {
+          "title": "For GBA & Global Partners",
+          "copy": "Connect with Hong Kong technology and market opportunities.",
+          "benefits": "Soft landing · Delegations · Buyer matching",
+          "cta": "Explore Launch Pad"
+        }
+      }
+    },
     "highlightsTitle": "What is happening now",
     "highlightsIntro": "Published opportunities and stories from the WTIA ecosystem.",
     "highlights": {
