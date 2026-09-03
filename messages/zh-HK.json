@@ -14,20 +14,16 @@
     },
     "groups": {
       "eventsProgrammes": {
-        "label": "活動及計劃",
-        "description": "探索由 WTIA 記錄支持的最新活動、獎項及計劃。"
+        "label": "活動及計劃"
       },
       "membershipEcosystem": {
-        "label": "會員與創科生態",
-        "description": "加入協會，並探索經審核的會員方案。"
+        "label": "會員與創科生態"
       },
       "impactInsights": {
-        "label": "影響與洞察",
-        "description": "閱讀已發布消息，並查閱 WTIA 的人工智能實證。"
+        "label": "影響與洞察"
       },
       "aboutWtia": {
-        "label": "關於 WTIA",
-        "description": "了解協會、歷史、管治及聯絡渠道。"
+        "label": "關於 WTIA"
       }
     },
     "feature": {

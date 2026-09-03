@@ -13,20 +13,16 @@
     },
     "groups": {
       "eventsProgrammes": {
-        "label": "Events & Programmes",
-        "description": "Find current events, awards and programmes backed by WTIA records."
+        "label": "Events & Programmes"
       },
       "membershipEcosystem": {
-        "label": "Membership & Ecosystem",
-        "description": "Join the association and discover reviewed member solutions."
+        "label": "Membership & Ecosystem"
       },
       "impactInsights": {
-        "label": "Impact & Insights",
-        "description": "Read published updates and inspect WTIA's AI evidence."
+        "label": "Impact & Insights"
       },
       "aboutWtia": {
-        "label": "About WTIA",
-        "description": "Understand the association, its history, governance and contact channels."
+        "label": "About WTIA"
       }
     },
     "feature": {

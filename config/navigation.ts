@@ -2,10 +2,7 @@ import type {PublicRoute} from "@/config/public-routes";
 
 export type NavigationGroupId = "events-programmes" | "membership-ecosystem" | "impact-insights" | "about-wtia";
 export type NavigationMessageKey =
-  | "groups.eventsProgrammes.label" | "groups.eventsProgrammes.description"
-  | "groups.membershipEcosystem.label" | "groups.membershipEcosystem.description"
-  | "groups.impactInsights.label" | "groups.impactInsights.description"
-  | "groups.aboutWtia.label" | "groups.aboutWtia.description"
+  | "groups.eventsProgrammes.label" | "groups.membershipEcosystem.label" | "groups.impactInsights.label" | "groups.aboutWtia.label"
   | "feature.eventsProgrammes.label" | "feature.eventsProgrammes.title" | "feature.eventsProgrammes.copy" | "feature.eventsProgrammes.cta"
   | "feature.membershipEcosystem.label" | "feature.membershipEcosystem.title" | "feature.membershipEcosystem.copy" | "feature.membershipEcosystem.cta"
   | "feature.impactInsights.label" | "feature.impactInsights.title" | "feature.impactInsights.copy" | "feature.impactInsights.cta"
@@ -28,24 +25,27 @@ export type NavigationFeature = Readonly<{
   ctaKey: NavigationMessageKey;
   href: PublicRoute;
 }>;
-export type NavigationGroup = Readonly<{id: NavigationGroupId; landingHref: PublicRoute; eventFirst: boolean; labelKey: NavigationMessageKey; descriptionKey: NavigationMessageKey; feature: NavigationFeature; columns: readonly NavigationColumn[]}>;
+export type NavigationGroup = Readonly<{id: NavigationGroupId; landingHref: PublicRoute; eventFirst: boolean; labelKey: NavigationMessageKey; feature: NavigationFeature; columns: readonly NavigationColumn[]}>;
 export type LocalizedNavigationLink = Readonly<{id: string; href: PublicRoute; label: string}>;
 export type LocalizedNavigationFeature = Readonly<{label: string; title: string; copy: string; cta: string; href: PublicRoute}>;
-export type LocalizedNavigationGroup = Readonly<{id: NavigationGroupId; landingHref: PublicRoute; eventFirst: boolean; label: string; description: string; feature: LocalizedNavigationFeature; columns: readonly Readonly<{id: string; label: string; links: readonly LocalizedNavigationLink[]}>[]}>;
+export type LocalizedNavigationGroup = Readonly<{id: NavigationGroupId; landingHref: PublicRoute; eventFirst: boolean; label: string; feature: LocalizedNavigationFeature; columns: readonly Readonly<{id: string; label: string; links: readonly LocalizedNavigationLink[]}>[]}>;
 type PublicShellAction = Readonly<{id: "find-event" | "join-wisetech"; href: PublicRoute; labelKey: NavigationMessageKey; priority: "primary" | "secondary"}>;
 
+// No group description: the donor panel has none (commit f91ecc5 :423-444) and hkwtia's own
+// description tile went with the WP-2 rewrite, so `groups.*.description` was swept in Task 9.
+// Re-adding a key here means re-adding a renderer, not just a string.
 export const navigationGroups = [
-  {id: "events-programmes", landingHref: "/events", eventFirst: true, labelKey: "groups.eventsProgrammes.label", descriptionKey: "groups.eventsProgrammes.description",
+  {id: "events-programmes", landingHref: "/events", eventFirst: true, labelKey: "groups.eventsProgrammes.label",
     feature: {labelKey: "feature.eventsProgrammes.label", titleKey: "feature.eventsProgrammes.title", copyKey: "feature.eventsProgrammes.copy", ctaKey: "feature.eventsProgrammes.cta", href: "/events"}, columns: [
     {id: "participate", labelKey: "columns.participate", links: [{id: "events", href: "/events", labelKey: "links.events"}, {id: "launchpad", href: "/launchpad", labelKey: "links.launchpad"}]},
     {id: "programmes", labelKey: "columns.programmes", links: [{id: "hkict", href: "/programs/hkict", labelKey: "links.hkict"}, {id: "asa", href: "/programs/asa", labelKey: "links.asa"}, {id: "tct", href: "/programs/tct", labelKey: "links.tct"}, {id: "cpai", href: "/programs/cpai", labelKey: "links.cpai"}]},
   ]},
-  {id: "membership-ecosystem", landingHref: "/membership", eventFirst: false, labelKey: "groups.membershipEcosystem.label", descriptionKey: "groups.membershipEcosystem.description",
+  {id: "membership-ecosystem", landingHref: "/membership", eventFirst: false, labelKey: "groups.membershipEcosystem.label",
     feature: {labelKey: "feature.membershipEcosystem.label", titleKey: "feature.membershipEcosystem.title", copyKey: "feature.membershipEcosystem.copy", ctaKey: "feature.membershipEcosystem.cta", href: "/contact"}, columns: [{id: "membership", labelKey: "columns.membership", links: [{id: "membership", href: "/membership", labelKey: "links.membership"}, {id: "showcase", href: "/showcase", labelKey: "links.showcase"}]}]},
   // The cta reads "AI transparency" / "人工智能透明度", not the donor's "Responsible AI" / "負責任 AI": the href is /ai-transparency, and the donor's /responsible-ai is a merge-only route (config/wisetech-integration-manifest.ts), so the label names the real destination.
-  {id: "impact-insights", landingHref: "/news", eventFirst: false, labelKey: "groups.impactInsights.label", descriptionKey: "groups.impactInsights.description",
+  {id: "impact-insights", landingHref: "/news", eventFirst: false, labelKey: "groups.impactInsights.label",
     feature: {labelKey: "feature.impactInsights.label", titleKey: "feature.impactInsights.title", copyKey: "feature.impactInsights.copy", ctaKey: "feature.impactInsights.cta", href: "/ai-transparency"}, columns: [{id: "insights", labelKey: "columns.insights", links: [{id: "news", href: "/news", labelKey: "links.news"}, {id: "ai-ops", href: "/ai-ops", labelKey: "links.aiOps"}, {id: "ai-transparency", href: "/ai-transparency", labelKey: "links.aiTransparency"}]}]},
-  {id: "about-wtia", landingHref: "/about", eventFirst: false, labelKey: "groups.aboutWtia.label", descriptionKey: "groups.aboutWtia.description",
+  {id: "about-wtia", landingHref: "/about", eventFirst: false, labelKey: "groups.aboutWtia.label",
     feature: {labelKey: "feature.aboutWtia.label", titleKey: "feature.aboutWtia.title", copyKey: "feature.aboutWtia.copy", ctaKey: "feature.aboutWtia.cta", href: "/about/history"}, columns: [
     {id: "organisation", labelKey: "columns.organisation", links: [{id: "about", href: "/about", labelKey: "links.about"}, {id: "history", href: "/about/history", labelKey: "links.history"}, {id: "chairman", href: "/about/chairman", labelKey: "links.chairman"}, {id: "committees", href: "/about/committees", labelKey: "links.committees"}]},
     {id: "connect", labelKey: "columns.connect", links: [{id: "contact", href: "/contact", labelKey: "links.contact"}]},
@@ -70,7 +70,6 @@ export function localizeNavigation(translate: (key: NavigationMessageKey) => str
       landingHref: group.landingHref,
       eventFirst: group.eventFirst,
       label: translate(group.labelKey),
-      description: translate(group.descriptionKey),
       feature: {
         label: translate(group.feature.labelKey),
         title: translate(group.feature.titleKey),
