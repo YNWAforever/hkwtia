@@ -51,4 +51,18 @@ describe("LegacyNetwork", () => {
     expect(screen.getByText("Partner 3")).toBeInTheDocument();
     expect(screen.queryByText("Partner 1")).not.toBeInTheDocument();
   });
+
+  it("defaults to the first non-empty tab when supporting has no partners", async () => {
+    const {LegacyNetwork} = await import("@/components/home/legacy-network");
+    const groups = [
+      {category: "supporting" as const, partners: []},
+      {category: "regional" as const, partners: [partner("3")]},
+      {category: "media" as const, partners: [partner("4")]},
+    ];
+    render(<LegacyNetwork groups={groups} labels={labels} />);
+
+    expect(screen.getByRole("button", {name: /Regional Partners/})).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("Partner 3")).toBeInTheDocument();
+    expect(screen.queryByText("Partner 4")).not.toBeInTheDocument();
+  });
 });

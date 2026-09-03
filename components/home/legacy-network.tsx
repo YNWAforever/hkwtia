@@ -24,7 +24,9 @@ type LegacyNetworkProps = Readonly<{
 // never the donor's hard-coded 79. app/styles/wisetech.css:114 .legacy-network;
 // :124 .legacy-logo-rail; :125 .legacy-logo-card.
 export function LegacyNetwork({groups, labels}: LegacyNetworkProps) {
-  const [active, setActive] = useState<LegacyNetworkCategory>('supporting');
+  const [active, setActive] = useState<LegacyNetworkCategory>(
+    () => (groups.find((group) => group.partners.length > 0) ?? groups[0]!).category,
+  );
   if (groups.every((group) => group.partners.length === 0)) return null;
 
   const selected = groups.find((group) => group.category === active) ?? groups[0]!;
@@ -51,7 +53,7 @@ export function LegacyNetwork({groups, labels}: LegacyNetworkProps) {
             parent/child pairing. `role="group"` plus `aria-pressed` on each button gives
             assistive tech both the titled grouping and the current selection instead
             (matches components/home/ecosystem.tsx's industry-list precedent). */}
-        <div className="legacy-tabs" role="group" aria-label={labels.title}>
+        <div className="legacy-tabs" role="group" aria-label={labels.eyebrow}>
           {groups.map((group) => (
             <button
               key={group.category}
@@ -61,11 +63,11 @@ export function LegacyNetwork({groups, labels}: LegacyNetworkProps) {
               onClick={() => setActive(group.category)}
             >
               <span>{labels.tabs[group.category]}</span>
-              <b>{String(group.partners.length).padStart(2, '0')}</b>
+              <b>{String(Math.min(group.partners.length, 99)).padStart(2, '0')}</b>
             </button>
           ))}
         </div>
-        <div className="legacy-logo-rail" aria-live="polite">
+        <div className="legacy-logo-rail">
           {preview.map((partner) => (
             <article className="legacy-logo-card" key={partner.id}>
               <div className="legacy-logo-image">
@@ -78,7 +80,7 @@ export function LegacyNetwork({groups, labels}: LegacyNetworkProps) {
           ))}
         </div>
         <div className="legacy-directory-action">
-          <p>{previewNote}</p>
+          <p aria-live="polite">{previewNote}</p>
           <Link className="button button-dark" href="/about">{labels.viewAllAction}</Link>
         </div>
       </div>
