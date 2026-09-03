@@ -279,6 +279,52 @@ describe("SiteFooter", () => {
   });
 
   /**
+   * The same `t.raw` hazard one step later. `newsletter.mailBody` is not dereferenced during
+   * the render — the island only reads it inside the submit handler — so a bad shape does not
+   * 500 the public site the way `addressLines` did. It costs the reader the handoff instead:
+   * `undefined.replace` and `{}.replace` are TypeErrors thrown inside the click, so no mail
+   * client opens and the address they typed is gone. The bare-string case is the one a type
+   * check alone would wave through: it is a legal string that carries no `{email}`, so the
+   * draft would reach WTIA naming nobody.
+   *
+   * Each case asserts the handoff still happens, that the address is in the body, and that no
+   * `undefined`/`[object Object]` reached a real reader's mail client.
+   */
+  it.each([
+    ["missing", undefined],
+    ["an object", {greeting: "Please add me"}],
+    ["an array", ["Please add {email}"]],
+    ["a number", 42],
+    ["a string with no placeholder", "Please add me to the list."],
+  ])("still prepares a usable draft when mailBody is %s", async (_shape, value) => {
+    rawOverrides.set("Footer.newsletter.mailBody", value);
+    const {submit, type} = await renderFooter();
+
+    type("reader@example.com");
+    submit();
+
+    expect(assign).toHaveBeenCalledTimes(1);
+    const target = decodeURIComponent(assign.mock.calls[0]![0] as string);
+    expect(target.startsWith(`mailto:${siteConfig.contact.email}?`)).toBe(true);
+    expect(target).toContain("subject=WiseTech activity updates");
+    expect(target).toContain("body=reader@example.com");
+    expect(target).not.toContain("undefined");
+    expect(target).not.toContain("[object Object]");
+    expect(target).not.toContain("{email}");
+  });
+
+  /** The shipped bundle is not the fallback: a good value is passed through untouched. */
+  it("uses the bundle's own mailBody when it carries the placeholder", async () => {
+    const {submit, type} = await renderFooter();
+
+    type("reader@example.com");
+    submit();
+
+    const target = decodeURIComponent(assign.mock.calls[0]![0] as string);
+    expect(target).toContain("body=Please add reader@example.com to the WiseTech activity update list.");
+  });
+
+  /**
    * The island is mounted by app/[locale]/(public)/layout.tsx, which survives every in-app
    * navigation, so a success panel held in state hid the form on every other public page for
    * the rest of the session. Resetting on the route makes the persistent island behave like

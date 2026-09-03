@@ -96,6 +96,70 @@ describe("WiseTech CSS port", () => {
     );
   });
 
+  /**
+   * The three accessibility corrections the whole-branch review left. Each is a CSS contract —
+   * a stacking order, a scope, a colour — with no runtime this suite can observe, so they are
+   * pinned as source. Where a number matters, it is read out of the port rather than retyped,
+   * so a regenerated port that renumbered it fails here instead of quietly re-breaking the fix.
+   */
+  it("carries the companion sheet's three WP-2 accessibility corrections", () => {
+    // Comments name several of these selectors in prose; the contracts are about CSS.
+    const shellRules = (shellOverrides ?? "").replace(/\/\*[\s\S]*?\*\//g, "");
+
+    // 2a. The skip link is the first control a keyboard reader reaches on every public page,
+    // and the announcement bar is its later sibling in the same stacking context, so a tie
+    // buried it. The rule has to clear the bar and the header, both read from the port.
+    const barZ = Number(port.match(/\.announcement \{[^}]*z-index: (\d+)/)![1]);
+    const headerZ = Number(port.match(/\.site-header \{[^}]*z-index: (\d+)/)![1]);
+    expect([barZ, headerZ]).toEqual([100, 90]);
+    const skipLink = shellRules.match(/\.site-root > \.skip-link \{ z-index: (\d+); \}/);
+    expect(skipLink, "no .site-root > .skip-link stacking rule").not.toBeNull();
+    expect(Number(skipLink![1])).toBeGreaterThan(Math.max(barZ, headerZ));
+    // The child combinator is the point, not decoration: it lifts the rule to (0,2,0) over
+    // app/globals.css's (0,1,0), so the override does not depend on the order two different
+    // layouts' stylesheets happen to be emitted in.
+    expect(shellRules).not.toMatch(/^\.skip-link \{/m);
+
+    // 2b. The shared LocaleSwitcher carries light-theme utilities; the overlay header on `/` is
+    // the third dark host, after .footer-bottom and .mobile-utilities.
+    const overlayScope = '.site-header[data-variant="overlay"]:not(.scrolled) .language-link';
+    expect(shellRules).toContain(`${overlayScope}:hover`);
+    expect(shellRules).toContain(`${overlayScope}:focus-visible`);
+    // Desktop only. The port hides `.header-actions .language-link` below 821px, so a rule
+    // outside that band would style a control that is not on screen.
+    // The donor packs that whole band onto one physical line, so the line is the block.
+    const mobileBand = port.match(/^@media\(max-width:820px\)\{.*$/m)![0];
+    expect(mobileBand).toContain(".header-actions .language-link{display:none}");
+    const desktopBands = [...shellRules.matchAll(/@media \(min-width: 821px\) \{([\s\S]*?)\n\}/g)]
+      .map((match) => match[1]!);
+    expect(desktopBands.some((band) => band.includes(overlayScope))).toBe(true);
+    // Every rule that reaches this control has to stay scoped to the overlay header at rest:
+    // once it scrolls it takes white chrome, where the light-theme utilities are correct again.
+    for (const line of shellRules.match(/^.*\.language-link:(hover|focus-visible).*$/gm) ?? []) {
+      expect(line).toContain(overlayScope);
+    }
+    // Tailwind draws its focus ring as a box-shadow, so restoring the outline is not enough.
+    const overlayFocus = shellRules.match(
+      /\.site-header\[data-variant="overlay"\]:not\(\.scrolled\) \.language-link:focus-visible \{([^}]*)\}/,
+    );
+    expect(overlayFocus, "no overlay focus-visible rule").not.toBeNull();
+    expect(overlayFocus![1]).toContain("outline: 3px solid var(--wt-focus)");
+    expect(overlayFocus![1]).toContain("box-shadow: none");
+
+    // 2c. The current-section underline is the header's only "you are here" cue. The port's
+    // pale #8fc4e0 measures 1.885:1 on the solid header's white; --wt-ink is 8.86:1.
+    expect(port).toContain(".nav-button.current { box-shadow: inset 0 -2px 0 #8fc4e0; }");
+    expect(shellRules).toContain(".nav-button.current { box-shadow: inset 0 -2px 0 var(--wt-ink); }");
+    // The overlay header at rest is left on the donor treatment, where the pale blue belongs;
+    // every override here names either the solid variant or .scrolled, never overlay.
+    const underlineSelectors = shellRules.match(/^.*\.nav-button\.current.*$/gm) ?? [];
+    expect(underlineSelectors).toHaveLength(2);
+    for (const selector of underlineSelectors) {
+      expect(selector).toMatch(/\.site-header\[data-variant="solid"\] |\.site-header\.scrolled /);
+      expect(selector).not.toContain("overlay");
+    }
+  });
+
   it("carries no donor build directive, remote asset or donor route", () => {
     expect(port).not.toContain('@import "tailwindcss"');
     expect(port).not.toMatch(/url\(\s*["']?https?:/);

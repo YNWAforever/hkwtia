@@ -41,6 +41,30 @@ function isAddressLines(value: unknown): value is readonly string[] {
     && value.every((line) => typeof line === "string" && line.trim() !== "");
 }
 
+/**
+ * The same `t.raw` hazard as `addressLines`, one step later. This one cannot 500 the render —
+ * the value is only dereferenced inside FooterNewsletter's submit handler — but it costs the
+ * reader the thing they came for: a missing or reshaped key makes `mailBody.replace(...)` a
+ * TypeError thrown inside the click, so no mail client opens and the address they typed is
+ * gone, and a value that is a string but carries no `{email}` hands the recipient a draft with
+ * nobody in it. The cast this replaced would also have put a literal `undefined` in the body
+ * of a real email had `t.raw` ever returned one.
+ *
+ * The placeholder is required, not just the type: it is the only contract the island has with
+ * this string (components/layout/footer-newsletter.tsx interpolates it by hand, because
+ * next-intl would treat `{email}` as an ICU argument in a value read through `raw`).
+ *
+ * The fallback is the placeholder alone, so a degraded draft carries the reader's address and
+ * nothing else. That is deliberate rather than lazy: any prose here would need a message of its
+ * own in both bundles — and a bundle defect is exactly the situation where reaching for another
+ * message is least likely to work — so English would end up in a Chinese reader's draft.
+ */
+const FALLBACK_MAIL_BODY = "{email}";
+
+function toMailBody(value: unknown): string {
+  return typeof value === "string" && value.includes("{email}") ? value : FALLBACK_MAIL_BODY;
+}
+
 export async function SiteFooter({locale}: {locale: AppLocale}) {
   const [navigationT, t] = await Promise.all([
     getTranslations({locale, namespace: "Navigation"}),
@@ -112,7 +136,7 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
           success: t("newsletter.success"),
           error: t("newsletter.error"),
           mailSubject: t("newsletter.mailSubject"),
-          mailBody: t.raw("newsletter.mailBody") as string,
+          mailBody: toMailBody(t.raw("newsletter.mailBody")),
         }} />
       </div>
 

@@ -211,3 +211,90 @@
   outline-offset: 2px;
   box-shadow: none;
 }
+
+/* The overlay header is the third dark host, and the block above missed it. On `/` the header
+ * floats over the hero photograph, so the same two light-theme utilities are wrong there for
+ * the same reasons -- measured at 1440x900 and 1360x900 against the rendered pixels behind the
+ * control, with the port's scrim over the donor photo:
+ *
+ *   hover      white label on the opaque `hover:bg-muted` ground (#f3f5f7)   1.09:1
+ *              white label on rgba(255,255,255,.12) over the hero      12.3:1 / 12.1:1 (mean)
+ *   focus      `focus-visible:ring-ring` #1a5184 on the hero        1.99:1 / 2.14:1 (mean)
+ *              restored --wt-focus #ff5c4d on the hero              5.36:1 / 5.77:1 (mean)
+ *
+ * The hover reading is the one that does not depend on the photograph at all: `hover:bg-muted`
+ * is opaque, so hovering paints a near-white pill under a white label wherever the header
+ * floats. 1.09:1 is a WCAG 1.4.3 failure with no ground truth needed. The focus readings do
+ * depend on it, and honestly: no single colour clears 3:1 against every pixel of a photograph,
+ * and this hero carries a bright flare that at 1360 falls under the control and pulls the coral
+ * to 1.39:1 there. That limit is the donor's own -- the port paints the same coral outline over
+ * the same hero for every other focusable control on the page (`:focus-visible`,
+ * app/styles/wisetech.css:26) -- and against the ground that actually dominates the control the
+ * coral is roughly 2.7x the ring it replaces.
+ *
+ * Scope is deliberately narrow on three axes. The port hides `.header-actions .language-link`
+ * below 821px (app/styles/wisetech.css:290), so there is no control to style there;
+ * `[data-variant="overlay"]` is `/` alone today (lib/public-shell/hero-variant.ts); and
+ * `:not(.scrolled)` stops at the moment the header takes its white chrome, where the shared
+ * light-theme utilities are correct again and must be left alone.
+ *
+ * Specificity is (0,5,0) against Tailwind's (0,2,0) for `hover:bg-muted`,
+ * `focus-visible:outline-none` and `focus-visible:ring-*`, so no !important is needed.
+ * `box-shadow: none` retires the ring, which Tailwind draws as a shadow rather than an outline.
+ * No `color` is declared, unlike the footer rule above: nothing fades this label, so it is
+ * already white here and restating it would assert a change that is not being made. */
+@media (min-width: 821px) {
+  .site-header[data-variant="overlay"]:not(.scrolled) .language-link:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .site-header[data-variant="overlay"]:not(.scrolled) .language-link:focus-visible {
+    outline: 3px solid var(--wt-focus);
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+}
+
+/* The skip link is the first control a keyboard reader reaches on every public page, and WP-2
+ * put the announcement bar on top of it. app/[locale]/(public)/layout.tsx renders the link
+ * immediately before the bar and both are children of `.site-root`, which sets only
+ * `min-width`, `overflow: clip` and a background (app/styles/wisetech.css:29) -- none of which
+ * establishes a stacking context -- so the two compete directly in the root one. app/globals.css:88
+ * gives `.skip-link` `z-index: 100` and the port gives `.announcement` the same 100
+ * (app/styles/wisetech.css:47); on a tie the later sibling wins, and the bar is the later
+ * sibling, so a live announcement painted over the focused link.
+ *
+ * 200 clears the bar's 100 and the header's 90 (wisetech.css:51). The mobile dialog's 500
+ * (wisetech.css:84) is deliberately left above it: that dialog traps focus, so the skip link
+ * cannot be reached while it is open, and lifting the link over a modal would be the worse bug.
+ *
+ * `.site-root > .skip-link` (0,2,0) rather than a bare `.skip-link` (0,1,0) on purpose. Source
+ * order already favours this file -- globals.css belongs to the root layout and this sheet to
+ * the nested public layout, which Next emits second -- but that is an ordering between two
+ * different layouts' stylesheets, and the override should not depend on it. */
+.site-root > .skip-link { z-index: 200; }
+
+/* `.nav-button.current` is the header's only visual "you are here" cue: the trigger carries no
+ * `aria-current` -- it is a menu trigger, not the page, and
+ * tests/unit/desktop-mega-navigation.test.tsx:62 pins its absence while
+ * tests/unit/public-shell.test.tsx:226 pins the mark landing on the panel's leaf link instead --
+ * so this underline is the whole indicator for a sighted reader who never opens the menu. The
+ * port's last word on it is `box-shadow: inset 0 -2px 0 #8fc4e0`
+ * (app/styles/wisetech.css:1032), which measures 1.885:1 against the solid header's white --
+ * under the 3:1 WCAG 1.4.11 asks of a state indicator.
+ *
+ * This is WP-2's own doing, not the donor's: the donor header is always transparent over a
+ * photo hero, where that pale blue reads, and #8fc4e0 arrives here only because
+ * components/layout/desktop-mega-navigation.tsx applies `.current` and
+ * lib/public-shell/hero-variant.ts made `solid` -- an ink-on-white header -- the default host.
+ * The port is byte-pinned and regenerated by scripts/port-wisetech-css.mjs, so the correction
+ * lives here.
+ *
+ * --wt-ink #0f4c81 measures 8.86:1 on white (8.84:1 against the header's own
+ * `rgba(255,255,255,.97)` composite), and it is not an invented colour: it is exactly what the
+ * port's earlier `.nav-button.current { box-shadow: inset 0 -2px 0 currentColor }`
+ * (wisetech.css:759) resolves to on both of these hosts, before :1032 overrode it with the
+ * overlay treatment. The overlay header at rest matches neither selector and keeps the donor's
+ * #8fc4e0 over the dark hero, where it belongs; `.scrolled` covers the overlay header from the
+ * moment it takes white chrome. Both selectors are (0,4,0) against the port's (0,2,0). */
+.site-header[data-variant="solid"] .nav-button.current,
+.site-header.scrolled .nav-button.current { box-shadow: inset 0 -2px 0 var(--wt-ink); }
