@@ -3081,7 +3081,7 @@ git commit -m "docs: record the WP-2 errata and checklist status" -m "Co-Authore
 Write the body to the session scratchpad, not the repository — helper files stay out of git:
 
 ```bash
-SCRATCH="C:/Users/laich/AppData/Local/Temp/claude/C--Users-laich-Documents-hkwtia/9846a2a1-661b-48fc-88f4-af3f5fd61eaa/scratchpad"
+SCRATCH="$(mktemp -d)"   # or the running session's own scratchpad directory
 git push -u origin feat/wt-wp2-shell
 gh pr create --base main --title "WP-2: WiseTech public shell fidelity" --body-file "$SCRATCH/wp2-pr-body.md"
 ```
