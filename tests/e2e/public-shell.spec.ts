@@ -165,3 +165,25 @@ for (const [path, group] of [
     await expect(page.getByRole("button", {name: group})).toHaveAttribute("data-current", "true");
   });
 }
+
+test("the header floats over the hero, then goes solid past 56px", async ({page}) => {
+  await page.setViewportSize({width: 1360, height: 900});
+  await page.goto("/");
+  const header = page.locator("header.site-header");
+
+  // Playwright manages a dev server with no database, so getActive rejects and the layout
+  // renders no announcement: the header carries the donor's `.no-announcement` modifier and
+  // sits at top: 0. An announcement is covered by tests/unit/announcement.test.tsx instead.
+  await expect(header).toHaveClass(/no-announcement/);
+  await expect(header).toHaveAttribute("data-variant", "overlay");
+  await expect(header).not.toHaveClass(/scrolled/);
+
+  await page.mouse.wheel(0, 400);
+  await expect(header).toHaveClass(/scrolled/);
+
+  await page.mouse.wheel(0, -400);
+  await expect(header).not.toHaveClass(/scrolled/);
+
+  await page.goto("/events");
+  await expect(page.locator("header.site-header")).toHaveAttribute("data-variant", "solid");
+});
