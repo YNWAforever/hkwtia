@@ -98,7 +98,14 @@ test("opens Contact Concierge, focuses the message, and restores the launcher af
 
   const response = await page.goto("/contact");
   expect(response?.status()).toBe(200);
-  const launcher = page.getByRole("button", {name: "Ask WiseTech"});
+  // Two controls answer to "Ask WiseTech" on /contact since WP-2 renamed `Concierge.launcher`
+  // to match `Contact.conciergeLauncher`: the in-page contact button and the fixed launcher.
+  // That is correct — one name for one action, both opening the same panel — so scope the
+  // locator instead of renaming either. `.concierge-trigger` is the fixed launcher's donor
+  // class (components/ai/concierge-widget.tsx), and it is the one this test is about, because
+  // only it has a launcher to return focus to after Escape.
+  const launcher = page.locator("button.concierge-trigger");
+  await expect(launcher).toHaveAttribute("aria-label", "Ask WiseTech");
   await launcher.click();
 
   await expect(page.getByRole("dialog", {name: "WTIA Concierge"})).toBeVisible();

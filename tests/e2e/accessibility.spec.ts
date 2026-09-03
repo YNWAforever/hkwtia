@@ -54,6 +54,14 @@ test("open desktop and mobile navigation surfaces pass axe", async ({page}) => {
  * reads violations only. An axe assertion here would be permanently vacuous. This measures the
  * ratio the way axe would if it could — the trigger's colour against every stop of the panel
  * gradient, worst stop deciding — so a regression to `--shell-blue` (2.17:1) fails loudly.
+ *
+ * Only the *declared* stops are measured, not the interpolated pixels between them. That is
+ * sound for the two-stop gradient this panel actually carries (`linear-gradient(180deg,#0a3d67
+ * 0%,#082e4d 100%)`, app/styles/wisetech.css:1070): sRGB interpolation is monotonic per channel,
+ * so every pixel between two stops has a relative luminance between theirs, and the worst
+ * declared stop is therefore the worst pixel. A future gradient with a third stop lighter or
+ * darker than both neighbours would break that, and this measurement would then need to sample
+ * the interpolation rather than the declarations.
  */
 test("the current mobile group passes axe and keeps AA contrast on the donor gradient", async ({page}) => {
   await page.setViewportSize({width: 375, height: 800});
@@ -65,7 +73,15 @@ test("the current mobile group passes axe and keeps AA contrast on the donor gra
   await expect(group).toHaveAttribute("data-current", "true");
 
   const reading = await group.evaluate((trigger) => {
-    const rgb = (value: string) => (value.match(/\d+/g) ?? []).slice(0, 3).map(Number);
+    // Alpha is dropped on purpose: WCAG contrast is defined between opaque colours, and
+    // blending a translucent one needs the layer underneath, which this measurement does not
+    // have. Every colour it reads is opaque today (the trigger's `color`, the panel's two
+    // gradient stops), so dropping it changes nothing — but a future `rgba(...)` with a
+    // fractional fourth channel would make the ratio a fiction, so read it and let the
+    // assertion below fail loudly rather than scoring a colour that is not on screen.
+    const numbers = (value: string) => (value.match(/[\d.]+/g) ?? []).map(Number);
+    const rgb = (value: string) => numbers(value).slice(0, 3);
+    const translucent = (value: string) => (numbers(value)[3] ?? 1) < 1;
     const relative = (channels: number[]) => {
       const linear = channels.map((channel) => {
         const scaled = channel / 255;
@@ -79,10 +95,12 @@ test("the current mobile group passes axe and keeps AA contrast on the donor gra
     };
     const colour = getComputedStyle(trigger).color;
     const panel = trigger.closest(".mobile-menu") as HTMLElement;
-    const stops = (getComputedStyle(panel).backgroundImage.match(/rgba?\([^)]+\)/g) ?? []).map(rgb);
+    const declared = getComputedStyle(panel).backgroundImage.match(/rgba?\([^)]+\)/g) ?? [];
+    const stops = declared.map(rgb);
     return {
       colour,
       stops: stops.map((stop) => `rgb(${stop.join(", ")})`),
+      translucent: [colour, ...declared].filter(translucent),
       // A flat background would leave this empty; the assertion below then fails and says so,
       // rather than silently passing on an empty `Math.min`.
       worst: stops.length === 0 ? 0 : Math.min(...stops.map((stop) => contrast(rgb(colour), stop))),
@@ -90,6 +108,7 @@ test("the current mobile group passes axe and keeps AA contrast on the donor gra
   });
 
   expect(reading.stops.length, JSON.stringify(reading)).toBeGreaterThan(0);
+  expect(reading.translucent, JSON.stringify(reading)).toEqual([]);
   expect(reading.worst, JSON.stringify(reading)).toBeGreaterThanOrEqual(4.5);
 
   await group.click();

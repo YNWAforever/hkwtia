@@ -157,7 +157,19 @@ for (const homeCase of homeCases) {
       const discoverTarget = page.locator("#home-discover");
       const discoverLink = hero.getByRole("link", {name: homeCase.discoverAction});
       await expect(discoverLink).toBeInViewport();
-      await expect(discoverTarget).not.toBeInViewport();
+      // Mostly-out-of-view before, mostly-in-view after -- not "wholly off screen" before. The
+      // contract this test states is that the Discover anchor scrolls its section into view;
+      // "not in viewport at all" was only ever a proxy for it, and WP-2 retired that proxy: the
+      // overlay header is out of flow (app/styles/wisetech.css:51) and no longer pushes the hero
+      // down, so at a 600px viewport the section's top edge already peeks in at rest.
+      //
+      // Measured on this tree, viewport ratio of #home-discover: at rest 0.000 (375px), 0.062
+      // (768px), 0.113 (1440px); after the anchor 0.447 to 1.000. 0.4 sits in the middle of that
+      // empty band. It is not 0.5 because at 375/768 the section renders ~1330px tall, more than
+      // twice the 600px probe viewport, so half of it can never be on screen at once. WP-3
+      // replaces this hero, which will move both numbers; re-measure then rather than nudging
+      // the threshold until it passes.
+      await expect(discoverTarget).not.toBeInViewport({ratio: 0.4});
       await page.evaluate(() => {
         document.documentElement.dataset.testScrollEnded = "false";
         document.addEventListener("scrollend", () => {
@@ -167,10 +179,16 @@ for (const homeCase of homeCases) {
       await discoverLink.click();
       await expect(page).toHaveURL(/#home-discover$/);
       await expect(page.locator("html")).toHaveAttribute("data-test-scroll-ended", "true");
-      await expect(discoverTarget).toBeInViewport();
+      await expect(discoverTarget).toBeInViewport({ratio: 0.4});
 
-      const renderedHeader = page.locator('header[data-variant="solid"]');
+      // `/` is the one overlay route in lib/public-shell/hero-variant.ts since WP-2, so keying
+      // this on `data-variant="solid"` stopped matching anything and the clearance assertion
+      // below stopped running. The state it is really about is the header that covers content:
+      // past the 56px threshold the overlay header is `position: fixed; top: 0`
+      // (app/styles/wisetech.css:52), which the anchor scroll always reaches. Assert that state.
+      const renderedHeader = page.locator("header.site-header");
       await expect(renderedHeader).toBeVisible();
+      await expect(renderedHeader).toHaveClass(/scrolled/);
       const [headerBox, targetBox] = await Promise.all([
         renderedHeader.boundingBox(),
         discoverTarget.boundingBox(),
