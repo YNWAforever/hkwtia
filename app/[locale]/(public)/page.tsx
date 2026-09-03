@@ -16,8 +16,9 @@ import {Pathways} from '@/components/home/pathways';
 import {ProgrammeShowcase} from '@/components/home/programme-showcase';
 import {StructuredData} from '@/components/seo/structured-data';
 import type {AppLocale} from '@/i18n/routing';
-import {buildEcosystemIndustries} from '@/lib/home/ecosystem-industries';
+import {buildEcosystemIndustries, buildEcosystemLabels} from '@/lib/home/ecosystem-industries';
 import {loadLegacyNetworkGroups} from '@/lib/home/legacy-network-groups';
+import {buildLegacyNetworkLabels} from '@/lib/home/legacy-network-labels';
 import {buildPageMetadata} from '@/lib/metadata';
 import {buildOrganizationData, buildWebSiteData} from '@/lib/structured-data';
 
@@ -74,40 +75,12 @@ export default async function HomePage({params}: Props) {
       {eventsJourney}
       {marketProducts}
       {outcomes}
-      <Ecosystem
-        industries={ecosystemIndustries}
-        labels={{
-          eyebrow: ecosystemT('eyebrow'),
-          title: ecosystemT('title'),
-          intro: ecosystemT('intro'),
-          selectedLabel: ecosystemT('selectedLabel'),
-          enterAction: ecosystemT('enterAction'),
-          focusAreas: ecosystemT.raw('focusAreas') as readonly string[],
-        }}
-      />
+      <Ecosystem industries={ecosystemIndustries} labels={buildEcosystemLabels(ecosystemT)} />
       {programmeShowcase}
       {gbaGateway}
       {impactEvidence}
       {archiveStories}
-      <LegacyNetwork
-        groups={legacyNetworkGroups}
-        labels={{
-          eyebrow: legacyNetworkT('eyebrow'),
-          title: legacyNetworkT('title'),
-          note: legacyNetworkT('note'),
-          viewAllAction: legacyNetworkT('viewAllAction'),
-          // Raw, not translated: the {shown}/{total} placeholders are filled in client-side
-          // by LegacyNetwork itself (Task 13), the same pattern Footer.newsletter.mailBody
-          // uses for {email} -- a function cannot cross the server/client boundary as a prop,
-          // so the template string does instead.
-          previewNote: legacyNetworkT.raw('previewNote') as string,
-          tabs: {
-            supporting: legacyNetworkT('tabs.supporting'),
-            regional: legacyNetworkT('tabs.regional'),
-            media: legacyNetworkT('tabs.media'),
-          },
-        }}
-      />
+      <LegacyNetwork groups={legacyNetworkGroups} labels={buildLegacyNetworkLabels(legacyNetworkT)} />
       {conversionPaths}
     </>
   );

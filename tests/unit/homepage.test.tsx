@@ -33,7 +33,17 @@ vi.mock("next-intl/server", () => ({
   setRequestLocale: vi.fn(),
 }));
 vi.mock("next/image", () => ({
-  default: ({alt, src, ...props}: {alt: string; src: string}) => <img alt={alt} src={src} {...props} />,
+  default: ({alt, src, priority, fill, ...props}: {
+    alt: string;
+    src: string;
+    priority?: boolean;
+    fill?: boolean;
+  }) => {
+    void priority;
+    void fill;
+    // eslint-disable-next-line @next/next/no-img-element -- unit-test projection of next/image
+    return <img alt={alt} src={src} {...props} />;
+  },
 }));
 vi.mock("@/i18n/navigation", () => ({
   Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
