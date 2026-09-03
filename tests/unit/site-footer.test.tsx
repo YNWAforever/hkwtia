@@ -102,8 +102,16 @@ describe("SiteFooter", () => {
       "Explore", "Membership", "About", "Contact",
     ]);
 
+    // The printed address is `Footer.addressLines` from the message bundle, never
+    // config/site.ts. The old assertion looped over `siteConfig.contact.addressLines` and so
+    // proved nothing about the bundle: it passed because the English bundle happens to carry
+    // the same three lines. Both are pinned now -- what the footer prints, and the config
+    // record it has to agree with in English -- and the Chinese list, which is a different,
+    // shorter list, has a case of its own below (errata E-68).
     const address = footer.querySelector("address")!;
-    for (const line of siteConfig.contact.addressLines) expect(address.textContent).toContain(line);
+    const printed = [...address.querySelectorAll("span")].map((line) => line.textContent);
+    expect(printed).toEqual(["4/F, KOHO", "73-75 Hung To Road", "Kwun Tong, Hong Kong"]);
+    expect([...siteConfig.contact.addressLines]).toEqual(printed);
     expect(within(footer).getByRole("link", {name: siteConfig.contact.email}))
       .toHaveAttribute("href", `mailto:${siteConfig.contact.email}`);
     expect(footer.querySelector('a[href^="tel:"]')).toBeNull();
@@ -115,6 +123,18 @@ describe("SiteFooter", () => {
     expect(within(footer).queryByRole("link", {name: /terms|accessibility/i})).toBeNull();
     expect(footer.querySelector(".footer-bottom small")?.textContent)
       .toContain(`© ${new Date().getFullYear()} WiseTech Hong Kong.`);
+  });
+
+  /**
+   * The Chinese address was never pinned. It is not a translation of the English three lines --
+   * it is two lines in Chinese address order -- so a bundle edit could have shortened, reordered
+   * or emptied it and every footer assertion would have stayed green (errata E-68).
+   */
+  it("prints the Chinese address from the zh-HK bundle", async () => {
+    render(await SiteFooter({locale: "zh-HK"}));
+    const address = screen.getByRole("contentinfo").querySelector("address")!;
+    expect([...address.querySelectorAll("span")].map((line) => line.textContent))
+      .toEqual(["香港觀塘鴻圖道 73-75 號", "KOHO 4 樓"]);
   });
 
   /**
