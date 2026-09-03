@@ -41,6 +41,21 @@ export function DesktopMegaNavigation({
 }: DesktopMegaNavigationProps) {
   const pathname = usePathname();
   const [openGroup, setOpenGroup] = useState("");
+  /**
+   * A click on a panel link closes it through `onNavigate`; Back and Forward are navigations no
+   * click reports. This nav is mounted by app/[locale]/(public)/layout.tsx, which survives them,
+   * and Radix's NavigationMenu listens for keydown, pointerdown and focusin only — its bundle
+   * names no `popstate`, `hashchange` or `window.history` — so the panel stayed open over the
+   * page the reader had just gone back to. Compared during render, the way the Concierge reads
+   * its section (components/ai/concierge-widget.tsx:230-241): React re-runs this component
+   * before committing, so no frame paints the stale panel. No focus is moved here — a history
+   * navigation is not a link the reader activated, and Radix returns focus on close by itself.
+   */
+  const [renderedRoute, setRenderedRoute] = useState(pathname);
+  if (renderedRoute !== pathname) {
+    setRenderedRoute(pathname);
+    setOpenGroup("");
+  }
 
   function closeAndReturnFocus(groupId: string) {
     setOpenGroup("");

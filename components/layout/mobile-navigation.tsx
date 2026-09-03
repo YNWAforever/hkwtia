@@ -56,6 +56,24 @@ export function MobileNavigation({locale, navigation, labels, brand}: MobileNavi
   const [open, setOpen] = useState(false);
   const [expandedGroup, setExpandedGroup] = useState("");
   const triggerRef = useRef<HTMLButtonElement>(null);
+  /**
+   * Every link in the sheet is wrapped in SheetClose; Back and Forward are navigations no click
+   * reports. This menu is mounted by app/[locale]/(public)/layout.tsx, which survives them, and
+   * Radix's Dialog closes on Escape, on an outside pointerdown and on its own close controls
+   * only — neither its bundle nor DismissableLayer's names `popstate`, `hashchange` or
+   * `window.history` — so the dialog stayed over the newly rendered page, taking its focus trap
+   * and its scroll lock with it. Compared during render, the way the Concierge reads its
+   * section (components/ai/concierge-widget.tsx:230-241): React re-runs this component before
+   * committing, so no frame paints the stale dialog. Deliberately not `handleOpenChange`, which
+   * also moves focus back to the trigger: a history navigation is not a close the reader asked
+   * for, and Radix's own focus scope restores focus when the content unmounts.
+   */
+  const [renderedRoute, setRenderedRoute] = useState(pathname);
+  if (renderedRoute !== pathname) {
+    setRenderedRoute(pathname);
+    setOpen(false);
+    setExpandedGroup("");
+  }
 
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen);

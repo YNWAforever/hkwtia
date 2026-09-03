@@ -112,6 +112,32 @@ describe("DesktopMegaNavigation", () => {
     expect(trigger).toHaveFocus();
   });
 
+  /**
+   * A link click inside the panel closes it through `onNavigate`, but Back and Forward are
+   * navigations no click reports. This nav is mounted by app/[locale]/(public)/layout.tsx,
+   * which survives them, and Radix's NavigationMenu listens for keydown, pointerdown and
+   * focusin only — its dist bundle mentions no `popstate`, `hashchange` or `window.history` —
+   * so nothing else would have closed the panel over the newly rendered page.
+   */
+  it("closes the panel when the route changes underneath it", async () => {
+    // A fresh element each pass: React bails out of re-rendering a subtree whose element is
+    // referentially identical to the last one (tests/unit/concierge-shell.test.tsx:80-82).
+    const nav = () => (
+      <DesktopMegaNavigation groups={groups} primaryLabel="Primary navigation" exploreLabel="explore" viewOverviewLabel="viewOverview" />
+    );
+    const view = render(nav());
+    const trigger = screen.getAllByRole("button")[0]! as HTMLButtonElement;
+    trigger.focus();
+    activateButtonWithEnter(trigger);
+    await screen.findByRole("link", {name: "links.events"});
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+
+    route.pathname = "/showcase";
+    view.rerender(nav());
+
+    await waitFor(() => expect(trigger).toHaveAttribute("aria-expanded", "false"));
+  });
+
   it("moves focus from an Enter-opened trigger into the panel and returns it on Escape", async () => {
     render(<DesktopMegaNavigation groups={groups} primaryLabel="Primary navigation" exploreLabel="explore" viewOverviewLabel="viewOverview" />);
     const trigger = screen.getAllByRole("button")[0]! as HTMLButtonElement;
