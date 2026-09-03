@@ -60,8 +60,11 @@ describe("page copy scope", () => {
       // viewAllAction) that components/home/events-journey.tsx reads. WP-3 Task 6
       // added 12 editable Market Products fields (eyebrow/title, plus label/title/
       // copyEmpty/copyAvailable/action for each of the directory and marketplace
-      // panels) that components/home/market-products.tsx reads.
-      Home: 109,
+      // panels) that components/home/market-products.tsx reads. WP-3 Task 7 added
+      // 9 editable Outcomes fields (eyebrow/title/intro/frameworkLabel/
+      // frameworkSteps/statusLabel/emptyTitle/emptyCopy/action) that
+      // components/home/outcomes.tsx reads.
+      Home: 118,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -79,7 +82,7 @@ describe("page copy scope", () => {
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(305);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(314);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

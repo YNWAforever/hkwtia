@@ -439,6 +439,17 @@
         "action": "探索解決方案"
       }
     },
+    "outcomes": {
+      "eyebrow": "成果故事",
+      "title": "成果必須具體、有清晰歸屬並獲授權公開。",
+      "intro": "只有在參與機構、挑戰、行動、報告期及成果均可負責任地交代時，案例才會發布。",
+      "frameworkLabel": "發布框架",
+      "frameworkSteps": "挑戰 → 連結 → 行動 → 成果",
+      "statusLabel": "目前狀態",
+      "emptyTitle": "目前尚未有公開案例。",
+      "emptyCopy": "商會只會在證據、歸屬及發布許可獲確認後加入成果故事，避免把參與誤寫成未獲支持的成功聲稱。",
+      "action": "洽談可量度項目"
+    },
     "highlightsTitle": "最新動向",
     "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
     "highlights": {

@@ -439,6 +439,17 @@
         "action": "Explore solutions"
       }
     },
+    "outcomes": {
+      "eyebrow": "Outcome stories",
+      "title": "Results should be specific, attributable and permission-cleared.",
+      "intro": "A case is published only when the participating organisation, challenge, action, reporting period and result can be stated responsibly.",
+      "frameworkLabel": "Publishing framework",
+      "frameworkSteps": "Challenge → Connection → Action → Result",
+      "statusLabel": "Current availability",
+      "emptyTitle": "No public case study is available yet.",
+      "emptyCopy": "The Association will add outcome stories only after the evidence, attribution and permission to publish have been confirmed. This avoids turning participation into an unsupported success claim.",
+      "action": "Discuss a measurable initiative"
+    },
     "highlightsTitle": "What is happening now",
     "highlightsIntro": "Published opportunities and stories from the WTIA ecosystem.",
     "highlights": {
