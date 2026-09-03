@@ -30,7 +30,7 @@ type HeaderShellProps = {
  * (next/dist/client/components/navigation.js:125), the provider is rendered by AppRouter on the
  * server (app-router.js:435), and the dynamic-params bail applies only to prerender-client and
  * prerender-ppr with fallback params (server/app-render/dynamic-rendering.js:524-583).
- * components/layout/desktop-mega-navigation.tsx:30 already calls it on every static public
+ * components/layout/desktop-mega-navigation.tsx:42 already calls it on every static public
  * route. See errata E-13.
  */
 export function HeaderShell({hasAnnouncement, children}: HeaderShellProps) {

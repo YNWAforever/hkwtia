@@ -113,7 +113,7 @@ describe("Contact durable journeys and Concierge launcher", () => {
         showcase: {title: "會員及方案"},
         launchpad: {title: "創科加速平台"},
       },
-      // Unified with Concierge.launcher in 674dfc7: the shell launcher and this page's
+      // Unified with Concierge.launcher in 4158b40: the shell launcher and this page's
       // launcher are the same control to a reader, so they carry one label.
       conciergeLauncher: "問 WiseTech",
     });
