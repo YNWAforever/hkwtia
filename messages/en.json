@@ -350,6 +350,18 @@
       "note": "WiseTech Hong Kong · AI+ Industry Platform",
       "discover": "Discover WiseTech"
     },
+    "openNow": {
+      "eyebrow": "Open now",
+      "title": "What can you join today?",
+      "intro": "Only activities with confirmed dates, eligibility and registration details appear here.",
+      "statusLabel": "Current availability",
+      "empty": {
+        "title": "No activities are currently open.",
+        "copy": "Register for activity updates, or bring the team a defined business challenge to help shape a useful future session."
+      },
+      "updatesAction": "Get activity updates",
+      "challengeAction": "Submit a challenge"
+    },
     "highlightsTitle": "What is happening now",
     "highlightsIntro": "Published opportunities and stories from the WTIA ecosystem.",
     "highlights": {

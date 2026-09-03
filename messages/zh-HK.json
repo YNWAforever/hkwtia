@@ -350,6 +350,18 @@
       "note": "WiseTech Hong Kong · AI+ 產業平台",
       "discover": "探索 WiseTech"
     },
+    "openNow": {
+      "eyebrow": "現正開放",
+      "title": "今天有甚麼可以參加？",
+      "intro": "只有日期、資格及報名詳情已確認的活動，才會在此顯示。",
+      "statusLabel": "目前狀態",
+      "empty": {
+        "title": "目前未有活動開放報名。",
+        "copy": "登記接收活動通知，或向團隊提出明確業務挑戰，協助策劃實用的未來活動。"
+      },
+      "updatesAction": "接收活動通知",
+      "challengeAction": "提交挑戰"
+    },
     "highlightsTitle": "最新動向",
     "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
     "highlights": {
