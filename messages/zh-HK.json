@@ -542,6 +542,13 @@
         "period": "{year} 年度"
       }
     },
+    "archiveStories": {
+      "eyebrow": "WTIA 真實活動紀錄",
+      "title": "真實人物、真實計劃，一個承接歷史的平台。",
+      "intro": "回顧塑造 WTIA 社群的人物、計劃及區域交流活動。",
+      "galleryAction": "查看官方相片集",
+      "captionLabel": "WTIA 活動回顧"
+    },
     "highlightsTitle": "最新動向",
     "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
     "highlights": {

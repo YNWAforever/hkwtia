@@ -75,8 +75,10 @@ describe("page copy scope", () => {
       // components/home/gba-gateway.tsx reads. WP-3 Task 11 added 15 editable
       // Impact Evidence fields (eyebrow/title/intro/sourceLabel/source/sourceLink,
       // plus label/definition/period for each of the 3 metric tiles) that
-      // components/home/impact-evidence.tsx reads.
-      Home: 174,
+      // components/home/impact-evidence.tsx reads. WP-3 Task 12 added 5 editable
+      // Archive Stories fields (eyebrow/title/intro/galleryAction/captionLabel)
+      // that components/home/archive-stories.tsx reads.
+      Home: 179,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -94,7 +96,7 @@ describe("page copy scope", () => {
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(370);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(375);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

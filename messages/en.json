@@ -542,6 +542,13 @@
         "period": "{year} edition"
       }
     },
+    "archiveStories": {
+      "eyebrow": "From the WTIA archive",
+      "title": "Real people. Real programmes. A platform with history.",
+      "intro": "A look back at the people, programmes and regional exchanges that have shaped the WTIA community.",
+      "galleryAction": "View the official photo gallery",
+      "captionLabel": "WTIA Event Highlights"
+    },
     "highlightsTitle": "What is happening now",
     "highlightsIntro": "Published opportunities and stories from the WTIA ecosystem.",
     "highlights": {
