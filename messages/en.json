@@ -337,6 +337,19 @@
       "membership": "Explore membership",
       "discover": "Discover WiseTech"
     },
+    "hero": {
+      "eyebrow": "WiseTech Hong Kong",
+      "title": "How can Hong Kong lead the AI+ era?",
+      "lead": "WiseTech Hong Kong is the evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association — connecting corporates, SMEs, startups, professionals, academia, investors, public bodies, GBA partners and international markets.",
+      "imageAlt": "Hong Kong technology community",
+      "actions": {
+        "findEvent": "Find Event or Activity",
+        "join": "Join WiseTech",
+        "members": "Explore Members & Solutions"
+      },
+      "note": "WiseTech Hong Kong · AI+ Industry Platform",
+      "discover": "Discover WiseTech"
+    },
     "highlightsTitle": "What is happening now",
     "highlightsIntro": "Published opportunities and stories from the WTIA ecosystem.",
     "highlights": {

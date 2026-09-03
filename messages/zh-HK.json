@@ -337,6 +337,19 @@
       "membership": "探索會員服務",
       "discover": "探索 WiseTech"
     },
+    "hero": {
+      "eyebrow": "WiseTech Hong Kong",
+      "title": "香港如何引領 AI+ 時代？",
+      "lead": "WiseTech Hong Kong 是 Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台，連結企業、中小企、初創、專業人士、學界、投資者、公共機構、大灣區夥伴及國際市場。",
+      "imageAlt": "香港創科社群",
+      "actions": {
+        "findEvent": "尋找活動或參與機會",
+        "join": "加入 WiseTech",
+        "members": "探索會員及方案"
+      },
+      "note": "WiseTech Hong Kong · AI+ 產業平台",
+      "discover": "探索 WiseTech"
+    },
     "highlightsTitle": "最新動向",
     "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
     "highlights": {

@@ -47,8 +47,10 @@ describe("page copy scope", () => {
     const sizes = pageCopyCatalogSizes();
 
     expect(sizes).toEqual({
-      // PR5 added the two editable partner-wall labels.
-      Home: 45,
+      // PR5 added the two editable partner-wall labels. WP-3 Task 2 added the 9
+      // editable hero fields (eyebrow/title/lead/imageAlt/note/discover plus the
+      // three hero actions) that components/home/hero.tsx reads.
+      Home: 54,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -66,7 +68,7 @@ describe("page copy scope", () => {
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(241);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(250);
   });
 
   it("offers a Chinese placeholder for every English field", () => {
