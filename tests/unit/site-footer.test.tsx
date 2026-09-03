@@ -114,8 +114,9 @@ describe("SiteFooter", () => {
     expect([...siteConfig.contact.addressLines]).toEqual(printed);
     expect(within(footer).getByRole("link", {name: siteConfig.contact.email}))
       .toHaveAttribute("href", `mailto:${siteConfig.contact.email}`);
-    expect(footer.querySelector('a[href^="tel:"]')).toBeNull();
-    expect(siteConfig.contact.phone).toBeUndefined();
+    expect(within(footer).getByRole("link", {name: "+852 2989 9164"}))
+      .toHaveAttribute("href", "tel:+85229899164");
+    expect(siteConfig.contact.phone).toBe("+852 2989 9164");
 
     expect(within(footer).getByText("Technology + Wisdom. Hong Kong + The World.")).toBeInTheDocument();
     expect(within(footer).getByRole("link", {name: "Privacy statement"})).toHaveAttribute("href", "/privacy");
@@ -123,6 +124,30 @@ describe("SiteFooter", () => {
     expect(within(footer).queryByRole("link", {name: /terms|accessibility/i})).toBeNull();
     expect(footer.querySelector(".footer-bottom small")?.textContent)
       .toContain(`© ${new Date().getFullYear()} WiseTech Hong Kong.`);
+  });
+
+  /**
+   * The conditional in components/layout/site-footer.tsx:162 exists for a future unset phone
+   * — `SiteContact.phone` stays optional in config/site.ts precisely so that state can recur —
+   * and app/[locale]/(public)/contact/page.tsx mirrors the same check. Neither branch had a
+   * regression test for the unset case, so a later edit that dropped the `undefined` guard (and
+   * crashed the public page per CLAUDE.md's "degrade, not 500" rule) would have shipped green.
+   * Mutating the shared config for one render and restoring it afterward is the accepted
+   * pattern in this file (see the deleted `phone`-mutation test this replaces, and its footer
+   * counterpart in tests/unit/contact-concierge-launcher.test.tsx).
+   */
+  it("omits the tel: line when phone is unset", async () => {
+    const contact = siteConfig.contact as {phone?: string};
+    const original = contact.phone;
+    delete contact.phone;
+    try {
+      render(await SiteFooter({locale: "en"}));
+      const footer = screen.getByRole("contentinfo");
+      expect(within(footer).queryByRole("link", {name: /^\+852/})).toBeNull();
+      expect(footer.querySelector('a[href^="tel:"]')).toBeNull();
+    } finally {
+      contact.phone = original;
+    }
   });
 
   /**
@@ -135,25 +160,6 @@ describe("SiteFooter", () => {
     const address = screen.getByRole("contentinfo").querySelector("address")!;
     expect([...address.querySelectorAll("span")].map((line) => line.textContent))
       .toEqual(["香港觀塘鴻圖道 73-75 號", "KOHO 4 樓"]);
-  });
-
-  /**
-   * The unset phone is a decision, not an oversight (see config/site.ts), so no shipped input
-   * reaches the `tel:` branch and the assertion above would pass just as happily against a
-   * footer that could never render one. Setting the number on the shared record for a single
-   * render is what makes that assertion mean something — and it pins the space-stripping the
-   * href needs, which the rendered label deliberately keeps.
-   */
-  it("renders the tel: line once a phone is configured", async () => {
-    const contact = siteConfig.contact as {phone?: string};
-    contact.phone = "+852 2989 9164";
-    try {
-      render(await SiteFooter({locale: "en"}));
-      expect(within(screen.getByRole("contentinfo")).getByRole("link", {name: "+852 2989 9164"}))
-        .toHaveAttribute("href", "tel:+85229899164");
-    } finally {
-      delete contact.phone;
-    }
   });
 
   it("prepares an email instead of subscribing, and reports both outcomes", async () => {

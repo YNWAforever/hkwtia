@@ -6,6 +6,7 @@ import {describe, expect, it, vi} from "vitest";
 
 import ContactPage from "@/app/[locale]/(public)/contact/page";
 import {ContactConciergeLauncher} from "@/components/marketing/contact-concierge-launcher";
+import {siteConfig} from "@/config/site";
 import {
   CONCIERGE_OPEN_EVENT,
   openConcierge,
@@ -28,7 +29,12 @@ describe("Contact durable journeys and Concierge launcher", () => {
     const zh = await renderContact("zh-HK");
 
     expect(en).toContain('href="mailto:contact@hkwtia.org"');
-    expect(en).toContain('href="tel:+85229899164"');
+    expect(siteConfig.contact.phone).toBeDefined();
+    expect(en).toContain(`href="tel:${siteConfig.contact.phone!.replace(/\s/g, "")}"`);
+    expect(en).toContain(siteConfig.contact.phone!);
+    // Config-derived assertions above would still pass if config/site.ts itself carried a typo
+    // (e.g. a transposed digit) — this literal is the one check that would catch that.
+    expect(en).toContain('+852 2989 9164');
     expect(en).toContain('href="/events"');
     expect(en).toContain('href="/membership"');
     expect(en).toContain('href="/showcase"');
@@ -40,6 +46,27 @@ describe("Contact durable journeys and Concierge launcher", () => {
     expect(zh).toContain('href="/zh/showcase"');
     expect(zh).toContain('href="/zh/launchpad"');
     expect(zh).not.toMatch(/<form\b/);
+  });
+
+  /**
+   * app/[locale]/(public)/contact/page.tsx:55-58 mirrors the footer's `phone === undefined`
+   * guard (components/layout/site-footer.tsx:162) rather than asserting the field is present.
+   * `SiteContact.phone` stays optional in config/site.ts for exactly this state, and CLAUDE.md's
+   * "public pages degrade rather than 500" rule makes an unguarded `!` here a page-crashing
+   * regression, not a lint nit. This proves the guarded branch: the page still renders, still
+   * carries the mailto: link, and prints no tel: link at all when phone is unset.
+   */
+  it("renders without a tel: link when phone is unset, instead of throwing", async () => {
+    const contact = siteConfig.contact as {phone?: string};
+    const original = contact.phone;
+    delete contact.phone;
+    try {
+      const en = await renderContact("en");
+      expect(en).toContain('href="mailto:contact@hkwtia.org"');
+      expect(en).not.toContain('href="tel:');
+    } finally {
+      contact.phone = original;
+    }
   });
 
   it("dispatches one no-payload same-window event from a native 44px launcher", () => {

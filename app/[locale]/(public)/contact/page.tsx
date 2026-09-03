@@ -4,6 +4,7 @@ import {getTranslations, setRequestLocale} from 'next-intl/server';
 
 import {ContactConciergeLauncher} from '@/components/marketing/contact-concierge-launcher';
 import {PageHero} from '@/components/marketing/page-hero';
+import {siteConfig} from '@/config/site';
 import type {AppLocale} from '@/i18n/routing';
 import {buildPageMetadata} from '@/lib/metadata';
 import {localizedPath} from '@/lib/urls';
@@ -52,7 +53,9 @@ export default async function ContactPage({params}: Props) {
           <address className="glass-card space-y-3 p-6 not-italic text-muted-foreground">
             <h2 className="font-serif text-2xl font-semibold text-foreground">{t('channelsTitle')}</h2>
             <a className="block font-medium text-foreground underline-offset-4 hover:underline" href="mailto:contact@hkwtia.org">contact@hkwtia.org</a>
-            <a className="block font-medium text-foreground underline-offset-4 hover:underline" href="tel:+85229899164">+852 2989 9164</a>
+            {siteConfig.contact.phone === undefined ? null : (
+              <a className="block font-medium text-foreground underline-offset-4 hover:underline" href={`tel:${siteConfig.contact.phone.replace(/\s/g, '')}`}>{siteConfig.contact.phone}</a>
+            )}
             <p>{t('address')}</p>
           </address>
 
