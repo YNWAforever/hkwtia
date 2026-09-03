@@ -24,17 +24,21 @@ function latestRecordedAsaEdition() {
 
 export async function loadImpactMetrics(asOf: Date = new Date()): Promise<ImpactMetrics> {
   const [pastEventsResult, partnersResult] = await Promise.allSettled([
-    eventsRepository.listPublic(anonymous, {status: 'past', asOf, locale: 'en', limit: 500}),
+    eventsRepository.countPublic(anonymous, {status: 'past', asOf}),
     partnersRepository.listPublished('en', {limit: 100, asOf}),
   ]);
 
-  const pastEvents = pastEventsResult.status === 'fulfilled' && pastEventsResult.value.length > 0
-    ? {value: pastEventsResult.value.length, asOf}
+  const pastEvents = pastEventsResult.status === 'fulfilled' && pastEventsResult.value > 0
+    ? {value: pastEventsResult.value, asOf}
     : null;
   const publishedPartners = partnersResult.status === 'fulfilled' && partnersResult.value.length > 0
     ? {value: partnersResult.value.length, asOf}
     : null;
 
+  // The tile reports reach/scale, not the audit's attended-vs-co-organised distinction, so it
+  // deliberately collapses the schema's stricter two-measurement `regions` union (see the "never
+  // flattened into one number" comment in content/schemas.ts) into a single "regions represented"
+  // figure for whichever edition was most recently recorded.
   const latestAsa = latestRecordedAsaEdition();
   const asaRegions = latestAsa && latestAsa.regions.kind !== 'unrecorded'
     ? {value: latestAsa.regions.count, year: latestAsa.yearStart}
