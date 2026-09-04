@@ -1055,6 +1055,11 @@
       "open": "Open now",
       "past": "Past events"
     },
+    "viewSwitch": {
+      "label": "Switch how events are displayed",
+      "cards": "Cards",
+      "calendar": "By date"
+    },
     "activityStrip": {
       "label": "Related activities",
       "openLabel": "Open events",

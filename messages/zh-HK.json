@@ -1055,6 +1055,11 @@
       "open": "現正開放",
       "past": "已結束活動"
     },
+    "viewSwitch": {
+      "label": "切換活動顯示方式",
+      "cards": "卡片",
+      "calendar": "按日期"
+    },
     "activityStrip": {
       "label": "相關活動",
       "openLabel": "開放活動",

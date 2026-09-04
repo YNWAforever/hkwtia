@@ -1,7 +1,9 @@
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {EventCalendarView} from "@/components/marketing/event-calendar-view";
 import {EventCard} from "@/components/marketing/event-card";
+import {EventViewSwitch} from "@/components/marketing/event-view-switch";
 import {ActionLink} from "@/components/wt/action-link";
 import {Arrow} from "@/components/wt/arrow";
 import {ClosingBand} from "@/components/wt/closing-band";
@@ -41,6 +43,7 @@ export default async function EventsPage({params, searchParams}: Props) {
   ]);
   const appLocale = locale as AppLocale;
   const status = parsePublicEventStatus(query.status);
+  const view = query.view === "calendar" ? "calendar" : "cards";
   const asOf = new Date();
   const records = await eventsRepository.listPublic(anonymous, {status, asOf, locale}).catch(() => null);
   const cardLabels = {
@@ -81,13 +84,20 @@ export default async function EventsPage({params, searchParams}: Props) {
           <>
             <div className="event-results-head" role="status">
               <p><strong>{records.length}</strong>{t("resultsHead.label", {count: records.length})}</p>
+              {records.length > 0 ? (
+                <EventViewSwitch labels={{label: t("viewSwitch.label"), cards: t("viewSwitch.cards"), calendar: t("viewSwitch.calendar")}} />
+              ) : null}
             </div>
             {records.length > 0 ? (
-              <div className="event-library">
-                {records.map((event) => (
-                  <EventCard event={event} key={event.id} labels={cardLabels} locale={appLocale} status={status} />
-                ))}
-              </div>
+              view === "calendar" ? (
+                <EventCalendarView events={records} locale={appLocale} />
+              ) : (
+                <div className="event-library">
+                  {records.map((event) => (
+                    <EventCard event={event} key={event.id} labels={cardLabels} locale={appLocale} status={status} />
+                  ))}
+                </div>
+              )
             ) : (
               <HonestEmpty
                 actions={[{label: t("empty.action"), href: "/contact"}]}
