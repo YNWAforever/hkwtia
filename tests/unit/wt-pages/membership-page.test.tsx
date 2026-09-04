@@ -43,6 +43,10 @@ const patron: PersistedMembershipPlan = {
   code: "patron", audience: "patron", billingBehavior: "review", seatAllowance: 1, active: true,
   annualPriceHkd: null, monthlyPriceHkd: null, stripePriceReference: null,
 };
+const corporate: PersistedMembershipPlan = {
+  code: "corporate", audience: "corporate", billingBehavior: "checkout", seatAllowance: 25, active: true,
+  annualPriceHkd: 480000, monthlyPriceHkd: 48000, stripePriceReference: "price_corporate",
+};
 
 async function renderMembership(rows: readonly PersistedMembershipPlan[]) {
   membershipPlans.list.mockResolvedValue(rows);
@@ -79,7 +83,7 @@ describe("/membership rewrite", () => {
   });
 
   it("shows the confirmed-pricing note when both configured price ids resolve", async () => {
-    const html = await renderMembership([community, startup]);
+    const html = await renderMembership([community, startup, corporate]);
 
     expect(html).toContain('class="pricing-note"');
     expect(html).toContain(bundles.en.Membership.pricing.readyCopy);

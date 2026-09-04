@@ -57,12 +57,11 @@ export default async function MembershipPage({params}: Props) {
     action: t("actions.discuss"),
     href: tier.cta.href,
   }));
-  // "Ready" means at least one paid tier (Startup or Corporate) actually resolved into the
-  // catalog -- i.e. its configured Stripe price id and row data cleared buildPublicMembershipCatalog's
-  // gate. Requiring *both* tiers (the plan's literal draft) can never be satisfied in practice
-  // when only one of the two paid tiers is configured/active, which is the ordinary case, not
-  // an edge case -- so it is loosened to "any paid tier is confirmed" here.
-  const pricingReady = publicTiers.some((tier) => tier.price.kind === "paid");
+  // "Ready" means both configured Startup/Corporate price ids actually resolved into the
+  // catalog -- the same gate buildPublicMembershipCatalog already applies, read back here.
+  // If either tier didn't resolve, PlanGrid silently omits it, so the page must not claim
+  // both fees shown are confirmed -- only one would even be on the page.
+  const pricingReady = publicTiers.some((tier) => tier.code === "startup") && publicTiers.some((tier) => tier.code === "corporate");
   const dimensions = DIMENSION_KEYS.map((key) => ({title: t(`dimensions.${key}.title`), copy: t(`dimensions.${key}.copy`)}));
   const steps = [0, 1, 2, 3, 4].map((index) => ({title: t(`first90.steps.${index}.title`), copy: t(`first90.steps.${index}.copy`)}));
 
