@@ -1,17 +1,22 @@
 import type {Metadata} from 'next';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 
-import {ProgramDetail} from '@/components/marketing/program-detail';
+import {StorySection} from '@/components/marketing/story-section';
 import {
   localiseImages,
   localiseWinners,
   ProgramEditions
 } from '@/components/marketing/program-editions';
+import {PageHero} from '@/components/wt/page-hero';
+import {RichCompass} from '@/components/wt/rich-compass';
+import {siteConfig} from '@/config/site';
 import {programs} from '@/content/programs';
 import {AGENCIES} from '@/content/programs/agencies';
 import {hkict} from '@/content/programs/hkict';
 import type {AppLocale} from '@/i18n/routing';
+import {summarizeProgrammes} from '@/lib/home/programme-summaries';
 import {buildPageMetadata} from '@/lib/metadata';
+import {buildProgrammeHeaderFacts} from '@/lib/programs/programme-header';
 
 type Props = {params: Promise<{locale: string}>};
 const program = programs.find((item) => item.id === 'hkict')!;
@@ -27,17 +32,33 @@ export default async function HkictPage({params}: Props) {
   setRequestLocale(locale);
   const t = await getTranslations({locale, namespace: program.namespace});
   const tr = await getTranslations({locale, namespace: 'programs.record'});
+  const common = await getTranslations({locale, namespace: 'Common'});
   const zh = locale === 'zh-HK';
+
+  const summary = summarizeProgrammes().find((item) => item.id === 'hkict')!;
+  const facts = buildProgrammeHeaderFacts(summary, tr, t('title'));
+  const mailto = `mailto:${siteConfig.contact.email}?subject=${encodeURIComponent(facts.mailSubject)}`;
 
   return (
     <>
-      <ProgramDetail
-        program={program}
+      <PageHero
+        className="rich-page-hero"
+        eyebrow={facts.typeLabel}
         title={t('title')}
-        description={t('description')}
-        statusHeading={tr('statusHeading')}
-        status={t('status')}
+        lead={t('description')}
+        breadcrumb={{homeHref: '/', homeLabel: common('breadcrumbHome'), current: t('title')}}
+        breadcrumbLabel={common('breadcrumbLabel')}
       />
+      <RichCompass
+        items={[
+          {label: tr('compassFactLabel'), value: facts.fact},
+          {label: tr('compassAudienceLabel'), value: t('audience')},
+          {label: tr('compassActionLabel'), value: tr('askProgrammeTeam'), href: mailto}
+        ]}
+      />
+      <StorySection heading={tr('statusHeading')} tone="warm">
+        <p className="max-w-3xl text-lg leading-relaxed text-muted-foreground">{t('status')}</p>
+      </StorySection>
       <ProgramEditions
         categoryHeading={tr('categoryHeading')}
         editionsHeading={tr('editionsHeading')}

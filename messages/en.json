@@ -831,17 +831,20 @@
     "hkict": {
       "title": "HKICT Awards",
       "description": "Recognising excellence across Hong Kong's technology sector.",
-      "status": "Contact WTIA for the current programme timetable and how to take part."
+      "status": "Contact WTIA for the current programme timetable and how to take part.",
+      "audience": "Hong Kong technology companies and public-sector innovators."
     },
     "tct": {
       "title": "TCT",
       "description": "Connecting technology, capability and talent.",
-      "status": "Contact WTIA for the current programme timetable and how to take part."
+      "status": "Contact WTIA for the current programme timetable and how to take part.",
+      "audience": "SME leaders exploring practical, hands-on technology adoption."
     },
     "asa": {
       "title": "Asia Smart App Awards",
       "description": "Celebrating outstanding smart applications across Asia.",
-      "status": "Contact WTIA for the current programme timetable and how to take part."
+      "status": "Contact WTIA for the current programme timetable and how to take part.",
+      "audience": "Smart application teams and developers competing across Asia."
     },
     "record": {
       "statusHeading": "Current status",
@@ -860,7 +863,16 @@
       "credentialIssuer": "Issued by",
       "credentialCoursePartner": "Course delivered with",
       "credentialPartnerCertificate": "Graduates also receive",
-      "credentialSyllabus": "Syllabus"
+      "credentialSyllabus": "Syllabus",
+      "eventSeriesLabel": "Event series",
+      "credentialLabel": "Credential",
+      "compassFactLabel": "Track record",
+      "compassAudienceLabel": "Who it's for",
+      "compassActionLabel": "Get in touch",
+      "askProgrammeTeam": "Ask the programme team",
+      "editionsFact": "{count, plural, one {# edition} other {# editions}} since {year}",
+      "credentialFact": "Issued directly by WTIA",
+      "mailSubject": "{programme} programme enquiry"
     }
   },
   "LaunchPad": {

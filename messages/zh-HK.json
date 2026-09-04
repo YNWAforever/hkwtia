@@ -831,17 +831,20 @@
     "hkict": {
       "title": "香港資訊及通訊科技獎",
       "description": "表揚香港科技界的卓越成果。",
-      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。"
+      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。",
+      "audience": "香港科技企業及公共機構的創新團隊。"
     },
     "tct": {
       "title": "TCT",
       "description": "連接科技、能力與人才。",
-      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。"
+      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。",
+      "audience": "希望實踐科技應用的中小企領袖。"
     },
     "asa": {
       "title": "亞洲智能應用程式大獎",
       "description": "嘉許亞洲優秀智能應用程式。",
-      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。"
+      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。",
+      "audience": "參與亞洲賽事的智能應用程式開發團隊。"
     },
     "record": {
       "statusHeading": "最新狀況",
@@ -860,7 +863,16 @@
       "credentialIssuer": "頒發機構",
       "credentialCoursePartner": "課程合辦機構",
       "credentialPartnerCertificate": "畢業學員另可獲頒",
-      "credentialSyllabus": "課程內容"
+      "credentialSyllabus": "課程內容",
+      "eventSeriesLabel": "活動系列",
+      "credentialLabel": "專業資格",
+      "compassFactLabel": "往績",
+      "compassAudienceLabel": "適合對象",
+      "compassActionLabel": "聯絡方式",
+      "askProgrammeTeam": "聯絡計劃團隊",
+      "editionsFact": "自 {year} 年起共 {count} 屆",
+      "credentialFact": "由 WTIA 直接頒發",
+      "mailSubject": "查詢「{programme}」計劃"
     }
   },
   "LaunchPad": {

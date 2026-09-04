@@ -101,11 +101,15 @@ describe("page copy scope", () => {
       Contact: 20,
       // 12 for the four programmes' title/description/status, plus the 17
       // `programs.record` keys the programme records migration and PR3
-      // presentation added. Those are page furniture -- headings, and
-      // sentences with {agency}/{count} placeholders -- so staff can reword
-      // them. The facts they frame come from content/programs/*.ts, which
-      // /admin/page-copy cannot reach.
-      programs: 29,
+      // presentation added, plus 3 more for the WP-4 Task 15 `audience` field
+      // added to asa/hkict/tct, plus 9 more `programs.record` keys (eyebrow
+      // type labels, compass labels, the mailto ask, and the editions/
+      // credential facts) that Task 15's ProgrammeRecordPage header reads --
+      // 29 + 3 + 9 = 41. Those are page furniture -- headings, and sentences
+      // with {agency}/{count}/{programme} placeholders -- so staff can reword
+      // them. The facts they frame come from content/programs/*.ts and
+      // lib/home/programme-summaries.ts, which /admin/page-copy cannot reach.
+      programs: 41,
       // WP-4 Task 9 rewrote /membership to the donor's plan-grid/dimensions grammar, adding 50
       // editable fields: actions.discuss (1), the sme.* pathway card (4: label/title/copy/
       // action), pricing.* readiness note (4: ready/fallback label+copy), 12 membership
@@ -115,7 +119,7 @@ describe("page copy scope", () => {
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(409);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(421);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

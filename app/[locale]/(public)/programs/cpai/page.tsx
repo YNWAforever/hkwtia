@@ -1,9 +1,10 @@
 import type {Metadata} from 'next';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 
+import {InstitutionalPageIntro} from '@/components/marketing/institutional-page-intro';
 import {ProgramCredential} from '@/components/marketing/program-credential';
-import {ProgramDetail} from '@/components/marketing/program-detail';
 import {localiseImages} from '@/components/marketing/program-editions';
+import {StorySection} from '@/components/marketing/story-section';
 import {programs} from '@/content/programs';
 import {cpai} from '@/content/programs/cpai';
 import type {AppLocale} from '@/i18n/routing';
@@ -27,13 +28,19 @@ export default async function CpaiPage({params}: Props) {
 
   return (
     <>
-      <ProgramDetail
-        program={program}
+      {/* Inlined from the retired ProgramDetail wrapper (WP-4 Task 15 deleted
+          components/marketing/program-detail.tsx once asa/hkict/tct moved off it), unchanged in
+          shape pending WP-4 Task 16's own ProgrammeRecordPage rewrite of this route. */}
+      <InstitutionalPageIntro
+        eyebrow={program.id.toUpperCase()}
         title={t('title')}
-        description={t('description')}
-        statusHeading={tr('statusHeading')}
-        status={t('status')}
+        lead={t('description')}
+        image={program.image}
+        imageAlt=""
       />
+      <StorySection heading={tr('statusHeading')} tone="warm">
+        <p className="max-w-3xl text-lg leading-relaxed text-muted-foreground">{t('status')}</p>
+      </StorySection>
       <ProgramCredential
         courseName={zh ? cpai.courseNameZh : cpai.courseNameEn}
         coursePartner={zh ? cpai.coursePartnerZh : cpai.coursePartnerEn}
