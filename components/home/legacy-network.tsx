@@ -67,7 +67,14 @@ export function LegacyNetwork({groups, labels}: LegacyNetworkProps) {
             </button>
           ))}
         </div>
-        <div className="legacy-logo-rail">
+        {/* aria-live="polite" mirrors components/home/ecosystem.tsx's `.industry-focus`
+            precedent: this rail's contents swap when a different category tab is clicked, so
+            without a live region a screen reader user hears the tab press but never the
+            partner names that replaced the previous set. The count sentence in
+            .legacy-directory-action below is a separate, already-live region (Task 13) that
+            announces different content (a "showing X of Y" summary), so this does not
+            duplicate it. */}
+        <div className="legacy-logo-rail" aria-live="polite">
           {preview.map((partner) => (
             <article className="legacy-logo-card" key={partner.id}>
               <div className="legacy-logo-image">
