@@ -23,14 +23,19 @@ const runtimeOverlay = "[data-nextjs-dialog], .vite-error-overlay, #webpack-dev-
 // way (the section never peeks into the 600px probe viewport at rest, at any of the four
 // widths, now that the overlay header no longer pushes it down), while the post-anchor side is
 // bounded by how tall the section renders inside that same 600px probe viewport -- itself well
-// under 1.0 at every width measured.
+// under 1.0 at every width measured. 0.15 leaves 0.334 of headroom below the tightest
+// post-anchor reading (0.484 at 375px) -- more than double the 0.147 headroom the old threshold
+// (0.3) held against its own tightest reading (0.447) -- while still clearing the 0.000 resting
+// floor at every width by the full 0.15.
 const DISCOVER_REST_CEILING = 0.15;
 
 function homeMessage(locale: "en" | "zh-HK", key: string): string {
   const bundle = JSON.parse(
     readFileSync(new URL(`../../messages/${locale}.json`, import.meta.url), "utf8"),
   ) as {Home: Record<string, unknown>};
-  return key.split(".").reduce<unknown>((value, part) => (value as Record<string, unknown> | undefined)?.[part], bundle.Home) as string;
+  const value = key.split(".").reduce<unknown>((current, part) => (current as Record<string, unknown> | undefined)?.[part], bundle.Home);
+  if (typeof value !== "string") throw new Error(`Home.${key} did not resolve to a string in ${locale}.json`);
+  return value;
 }
 
 const homeCases = [
