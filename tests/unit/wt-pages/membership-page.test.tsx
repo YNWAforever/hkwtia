@@ -96,6 +96,17 @@ describe("/membership rewrite", () => {
     expect(html).toContain(bundles.en.Membership.pricing.fallbackCopy);
   });
 
+  it("falls back to the confirm-with-team copy when only one of the two named tiers resolves", async () => {
+    // Discriminates pricingReady's AND from an OR regression: startup alone resolving
+    // must not be enough to claim both fees are confirmed. Under OR this would incorrectly
+    // show readyCopy; the two pre-existing pricing tests (both tiers, or neither) can't
+    // tell AND from OR apart.
+    const html = await renderMembership([community, startup]);
+
+    expect(html).toContain(bundles.en.Membership.pricing.fallbackCopy);
+    expect(html).not.toContain(bundles.en.Membership.pricing.readyCopy);
+  });
+
   it("renders exactly one honest unavailable state for an empty catalog, unchanged", async () => {
     const html = await renderMembership([]);
 
