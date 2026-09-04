@@ -3,7 +3,7 @@ const baseUrl = process.env.LHCI_BASE_URL ?? process.env.PLAYWRIGHT_BASE_URL ?? 
 const config = {
   ci: {
     collect: {
-      url: [`${baseUrl}/membership`, `${baseUrl}/zh/membership`],
+      url: [`${baseUrl}/`, `${baseUrl}/zh`, `${baseUrl}/membership`, `${baseUrl}/zh/membership`],
       numberOfRuns: 1,
       startServerCommand: 'npm.cmd run start',
       startServerReadyPattern: 'Ready in',
