@@ -1063,6 +1063,11 @@
       "venue": "地點",
       "capacity": "名額"
     },
+    "card": {
+      "venueLabel": "地點",
+      "capacityLabel": "名額",
+      "cta": "查看活動"
+    },
     "registration": {
       "title": "登記參加此活動",
       "submit": "登記",

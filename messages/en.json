@@ -1063,6 +1063,11 @@
       "venue": "Venue",
       "capacity": "Capacity"
     },
+    "card": {
+      "venueLabel": "Venue",
+      "capacityLabel": "Capacity",
+      "cta": "View event"
+    },
     "registration": {
       "title": "Register for this event",
       "submit": "Register",
