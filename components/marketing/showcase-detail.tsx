@@ -35,13 +35,11 @@ export function ShowcaseDetail({listing, locale, labels, requestIntro}: Readonly
         </div>
         <h1>{listing.name}</h1>
         <p className="lead">{listing.tagline}</p>
-        <p>{labels.memberSince} {listing.memberSince}</p>
       </header>
+      <p>{labels.memberSince} {listing.memberSince}</p>
       {listing.videoUrl ? <section><h2>{labels.video}</h2><a href={listing.videoUrl} rel="noreferrer" target="_blank">{listing.videoUrl}</a></section> : null}
-      <section>
-        {labels.overview ? <h2>{labels.overview}</h2> : null}
-        <p className="whitespace-pre-line">{listing.description}</p>
-      </section>
+      {labels.overview ? <h2>{labels.overview}</h2> : null}
+      <p className="whitespace-pre-line">{listing.description}</p>
       <section>
         {labels.capabilities ? <h2>{labels.capabilities}</h2> : null}
         <dl className="practical-grid">
@@ -51,7 +49,13 @@ export function ShowcaseDetail({listing, locale, labels, requestIntro}: Readonly
           <div><dt>{labels.worksWith}</dt><dd>{listing.worksWith.join(", ")}</dd></div>
         </dl>
       </section>
-      {listing.caseStudySummary ? <section><h2>{labels.caseStudy}</h2><p>{listing.caseStudySummary}</p>{listing.caseStudyUrl ? <a href={listing.caseStudyUrl} rel="noreferrer" target="_blank">{listing.caseStudyUrl}</a> : null}</section> : null}
+      {listing.caseStudySummary
+        ? <>
+          <h2>{labels.caseStudy}</h2>
+          <p>{listing.caseStudySummary}</p>
+          {listing.caseStudyUrl ? <a href={listing.caseStudyUrl} rel="noreferrer" target="_blank">{listing.caseStudyUrl}</a> : null}
+        </>
+        : null}
     </div>
     <aside className="detail-aside">
       <h3>{labels.requestIntro}</h3>

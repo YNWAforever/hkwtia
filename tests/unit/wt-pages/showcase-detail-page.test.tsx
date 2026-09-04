@@ -45,6 +45,29 @@ describe("/showcase/[slug] restyle", () => {
     expect(grid?.querySelectorAll("dt")).toHaveLength(4);
   });
 
+  it("makes the member-since, description and case-study paragraphs real .detail-main direct children", () => {
+    // app/styles/wisetech.css:278 defines `.detail-main>p:not(.lead){...}` -- a direct-child
+    // combinator. If these paragraphs are nested inside <header>/<section> wrappers instead of
+    // being real children of .detail-main, that donor rule silently never matches and they fall
+    // back to unstyled browser defaults.
+    const caseStudyListing: PublicListing = {
+      ...listing,
+      caseStudySummary: "How Harbour Vision AI cut clearance time in half",
+      caseStudyUrl: "https://example.com/case-study",
+    };
+    render(<ShowcaseDetail labels={labels} listing={caseStudyListing} locale="en" />);
+
+    const detailMain = document.querySelector(".detail-main");
+    expect(detailMain).not.toBeNull();
+
+    const directChildParagraphs = Array.from(detailMain?.children ?? []).filter((el) => el.tagName === "P");
+    const directChildTexts = directChildParagraphs.map((el) => el.textContent);
+
+    expect(directChildTexts).toContain(`${labels.memberSince} ${listing.memberSince}`);
+    expect(directChildTexts).toContain(listing.description);
+    expect(directChildTexts).toContain(caseStudyListing.caseStudySummary);
+  });
+
   it("styles the request-intro form fields with the real donor form classes", () => {
     render(<RequestIntroForm action={async () => ({ok: true as const})} labels={{
       name: "Name", email: "Email", organization: "Organisation", message: "Message", website: "Website",
