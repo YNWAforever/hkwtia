@@ -1,7 +1,8 @@
 {
   "Common": {
     "skipToContent": "Skip to content",
-    "breadcrumbLabel": "Breadcrumb"
+    "breadcrumbLabel": "Breadcrumb",
+    "breadcrumbHome": "Home"
   },
   "Metadata": {
     "title": "WTIA | Innovate Hong Kong",
@@ -1039,12 +1040,29 @@
     "eyebrow": "Events",
     "title": "Events",
     "description": "Stay connected to upcoming WTIA gatherings and opportunities.",
+    "heroImageAlt": "Members networking at a WTIA event",
+    "breadcrumbCurrent": "Events",
+    "resultsHeading": "Event results",
     "emptyTitle": "No events are published yet",
     "emptyDescription": "WTIA events will appear here when dates and details are confirmed.",
     "statusLabel": "Event status",
     "status": {
       "open": "Open",
       "past": "Past"
+    },
+    "quickTabs": {
+      "label": "Filter events by status",
+      "open": "Open now",
+      "past": "Past events"
+    },
+    "activityStrip": {
+      "label": "Related activities",
+      "openLabel": "Open events",
+      "launchpadLabel": "Launch Pad",
+      "showcaseLabel": "Showcase"
+    },
+    "resultsHead": {
+      "label": "{count, plural, one {event found} other {events found}}"
     },
     "unavailableTitle": "Events are temporarily unavailable",
     "unavailableDescription": "Please try again shortly.",
@@ -1056,6 +1074,41 @@
       "past": {
         "title": "No past events",
         "description": "Past events will appear here when available."
+      },
+      "action": "Get in touch"
+    },
+    "recommendations": {
+      "items": {
+        "launchpad": {
+          "title": "Launch Pad",
+          "copy": "GBA market entry, soft landing and buyer matching for founders.",
+          "cta": "Explore Launch Pad"
+        },
+        "showcase": {
+          "title": "Showcase",
+          "copy": "Browse verified member solutions and request an introduction.",
+          "cta": "Browse the showcase"
+        },
+        "membership": {
+          "title": "Membership",
+          "copy": "Find the pathway that matches your organisation.",
+          "cta": "Compare plans"
+        }
+      }
+    },
+    "interest": {
+      "eyebrow": "Keep in touch",
+      "title": "Never miss an open activity",
+      "copy": "Register for activity updates and we will let you know as soon as a new session opens.",
+      "action": "Get activity updates"
+    },
+    "closing": {
+      "eyebrow": "Partner with us",
+      "title": "Host or partner on a future event",
+      "copy": "Bring a venue, a topic or a co-hosting proposal and the team will help shape it into a session.",
+      "actions": {
+        "primary": "Contact the team",
+        "secondary": "Explore membership"
       }
     },
     "detail": {

@@ -2,7 +2,8 @@
   "_review": true,
   "Common": {
     "skipToContent": "跳至主要內容",
-    "breadcrumbLabel": "位置導覽"
+    "breadcrumbLabel": "位置導覽",
+    "breadcrumbHome": "主頁"
   },
   "Metadata": {
     "title": "WTIA｜創新香港",
@@ -1039,12 +1040,29 @@
     "eyebrow": "活動",
     "title": "活動",
     "description": "掌握即將舉行的 WTIA 聚會及交流機會。",
+    "heroImageAlt": "WTIA 活動中的會員交流情況",
+    "breadcrumbCurrent": "活動",
+    "resultsHeading": "活動列表",
     "emptyTitle": "暫未有已發布活動",
     "emptyDescription": "確認日期及詳情後，WTIA 活動會在此顯示。",
     "statusLabel": "活動狀態",
     "status": {
       "open": "進行中",
       "past": "已結束"
+    },
+    "quickTabs": {
+      "label": "按狀態篩選活動",
+      "open": "現正開放",
+      "past": "已結束活動"
+    },
+    "activityStrip": {
+      "label": "相關活動",
+      "openLabel": "開放活動",
+      "launchpadLabel": "創科加速平台",
+      "showcaseLabel": "方案展示"
+    },
+    "resultsHead": {
+      "label": "{count, plural, other {個活動}}"
     },
     "unavailableTitle": "暫時未能載入活動",
     "unavailableDescription": "請稍後再試。",
@@ -1056,6 +1074,41 @@
       "past": {
         "title": "暫未有已結束活動",
         "description": "已結束活動會在可供查閱時顯示。"
+      },
+      "action": "與我們聯繫"
+    },
+    "recommendations": {
+      "items": {
+        "launchpad": {
+          "title": "創科加速平台",
+          "copy": "為初創企業提供大灣區市場進入、落地支援及買家配對。",
+          "cta": "探索創科加速平台"
+        },
+        "showcase": {
+          "title": "方案展示",
+          "copy": "瀏覽已驗證會員方案，並提出洽談請求。",
+          "cta": "瀏覽方案展示"
+        },
+        "membership": {
+          "title": "會籍",
+          "copy": "尋找切合貴機構的會籍路徑。",
+          "cta": "比較會籍方案"
+        }
+      }
+    },
+    "interest": {
+      "eyebrow": "保持聯繫",
+      "title": "緊貼公開活動資訊",
+      "copy": "登記接收活動通知，一有新場次開放，我們將盡快通知你。",
+      "action": "接收活動通知"
+    },
+    "closing": {
+      "eyebrow": "與我們合作",
+      "title": "有意主辦或合辦未來活動？",
+      "copy": "歡迎提供場地、主題或合辦建議，團隊將協助構思成實際活動。",
+      "actions": {
+        "primary": "聯絡團隊",
+        "secondary": "探索會籍"
       }
     },
     "detail": {

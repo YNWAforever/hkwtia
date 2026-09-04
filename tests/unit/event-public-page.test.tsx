@@ -1,4 +1,5 @@
 import {renderToStaticMarkup} from "react-dom/server";
+import type {ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const events = vi.hoisted(() => ({listPublic: vi.fn()}));
@@ -7,6 +8,9 @@ vi.mock("@/lib/db/repos/events", () => ({eventsRepository: events}));
 vi.mock("next-intl/server", () => ({
   setRequestLocale: () => undefined,
   getTranslations: async () => (key: string) => key,
+}));
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
 }));
 
 import EventsPage from "@/app/[locale]/(public)/events/page";
@@ -33,9 +37,18 @@ describe("public Event status controls", () => {
       anonymous,
       expect.objectContaining({status: "past", asOf: expect.any(Date)}),
     );
-    expect(rendered).toContain('aria-current="page"');
+    // The quick tabs are real <button> elements in a GET form (donor `.event-quick-tabs button`
+    // grammar, app/styles/wisetech.css:815), not styled anchors -- so the selected control is
+    // `aria-pressed`, and the status value travels as a form field, not a second href.
+    // React's SSR for <button> always flushes the `name` attribute after `value` regardless of
+    // JSX prop order (react-dom-server-legacy's `case "button"` captures `name` separately and
+    // emits it via `pushFormActionAttribute` at the end) -- so the match below follows that real
+    // attribute order rather than the JSX declaration order.
+    expect(rendered).toContain('aria-pressed="true"');
+    expect(rendered).toMatch(/<button[^>]*value="open"[^>]*name="status"/);
+    expect(rendered).toMatch(/<button[^>]*value="past"[^>]*name="status"/);
+    // The activity strip still links straight to the open filter.
     expect(rendered).toContain('href="/events?status=open"');
-    expect(rendered).toContain('href="/events?status=past"');
   });
 
   it.each([undefined, "", "future", ["past", "open"]] as const)("uses open for malformed status %o", async (status) => {
