@@ -639,7 +639,15 @@
     "title": "我們的歷史",
     "intro": "回顧香港無線及科技產業二十五年來的發展里程碑。",
     "storyTitle": "里程碑故事",
-    "readMore": "閱讀更多"
+    "readMore": "閱讀更多",
+    "compass": {
+      "foundedLabel": "成立年份",
+      "foundedValue": "{year}",
+      "milestonesLabel": "已記錄的里程碑",
+      "milestonesValue": "{count} 個里程碑",
+      "latestLabel": "最新記錄",
+      "latestValue": "{year}年"
+    }
   },
   "Membership": {
     "metaTitle": "會員計劃｜WTIA",

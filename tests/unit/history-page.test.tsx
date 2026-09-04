@@ -209,7 +209,7 @@ describe("history page", () => {
   });
 
   it.each(["en", "zh-HK"] as const)(
-    "uses the pinned %s History strings in one institutional intro before the timeline",
+    "uses the pinned %s History strings across the hero and compass, before the timeline",
     async (locale) => {
       const {default: HistoryPage} = await import("@/app/[locale]/(public)/about/history/page");
       const page = await HistoryPage({params: Promise.resolve({locale})});
@@ -219,10 +219,11 @@ describe("history page", () => {
       expect(setRequestLocaleSpy).toHaveBeenCalledExactlyOnceWith(locale);
       expect(screen.getAllByRole("heading", {level: 1})).toHaveLength(1);
       expect(screen.getByRole("heading", {level: 1, name: expected.title})).toBeVisible();
-      expect(screen.getByText(expected.eyebrow)).toBeVisible();
+      expect(screen.getAllByText(expected.eyebrow).length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText(expected.intro)).toBeVisible();
       expect(screen.getAllByRole("heading", {level: 2}).map(({textContent}) => textContent)).toEqual(["2010"]);
       expect(screen.getByText(locale === "en" ? "Body EN" : "正文")).toBeVisible();
+      expect(document.querySelectorAll(".rich-compass-grid>div")).toHaveLength(3);
       expect(document.querySelector("main")).not.toBeInTheDocument();
     },
   );
@@ -244,7 +245,7 @@ describe("history page", () => {
     }
   });
 
-  it("keeps the list route and timeline server-only on the new presentation primitive", () => {
+  it("keeps the list route and timeline server-only on the RichPage shell", () => {
     const pageSource = readFileSync(
       resolve(process.cwd(), "app/[locale]/(public)/about/history/page.tsx"),
       "utf8",
@@ -254,8 +255,9 @@ describe("history page", () => {
       "utf8",
     );
 
-    expect(pageSource).toContain("InstitutionalPageIntro");
-    expect(pageSource).not.toContain("PageHero");
+    expect(pageSource).toContain("PageHero");
+    expect(pageSource).toContain("RichCompass");
+    expect(pageSource).not.toContain("InstitutionalPageIntro");
     for (const source of [pageSource, timelineSource]) {
       expect(source).not.toMatch(/["']use client["']/);
       expect(source).not.toMatch(/<main\b/);
