@@ -298,3 +298,107 @@
  * moment it takes white chrome. Both selectors are (0,4,0) against the port's (0,2,0). */
 .site-header[data-variant="solid"] .nav-button.current,
 .site-header.scrolled .nav-button.current { box-shadow: inset 0 -2px 0 var(--wt-ink); }
+
+/* WP-3's Open Now section (components/home/open-now.tsx) is the first place `HonestEmpty`
+ * (components/wt/honest-empty.tsx) actually renders, and it renders inside `Section
+ * tone="ink"` -- `.opportunity-section { background: var(--wt-ink-soft) }`
+ * (app/styles/wisetech.css:184), a lighter blue than the genuinely dark hosts (a photo hero,
+ * the #363839 footer, the #0a3d67 mobile panel) the port's own cyan-family text colours were
+ * measured against elsewhere in this sheet.
+ *
+ * Two of the port's `.honest-empty` rules fall short of 4.5:1 on this specific host, measured
+ * with the WCAG formula against `--wt-ink-soft` (#1a4f82):
+ *
+ *   `.honest-empty .status-label { color: var(--wt-cyan) }`      (wisetech.css:194)   1.77:1
+ *   `.honest-empty p { color: rgba(255,255,255,.64) }`           (wisetech.css:196)   4.23:1
+ *
+ * Neither is fixable by reusing an existing dark-host colour from elsewhere in this file:
+ * #8fc4e0, the donor accent already used for the nav underline and the mobile accordion above,
+ * measures only 4.11:1 here -- calibrated for the darker hosts it already serves, not this
+ * lighter one. #a8d4ec is a lighter tint of the same cyan family (5.35:1 on --wt-ink-soft, kept
+ * visually distinct from the plain white the paragraph already uses), and the paragraph's own
+ * alpha moves from .64 to .75 (5.55:1) -- both chosen with real margin above 4.5, not sitting on
+ * it, matching this sheet's own practice elsewhere (design-fidelity errata E-71).
+ *
+ * Scoped to `.opportunity-section .honest-empty` rather than `.honest-empty` itself: the
+ * component's OTHER possible hosts (a paper or bright `Section` tone) inherit dark text by
+ * default and were never measured against this ink-soft background, so widening the fix beyond
+ * the one host that actually exists today would assert a correction nothing has verified.
+ * Specificity is (0,3,0) and (0,2,1) against the port's (0,2,0) and (0,1,1), so no `!important`
+ * is needed. */
+.opportunity-section .honest-empty .status-label { color: #a8d4ec; }
+.opportunity-section .honest-empty p { color: rgba(255, 255, 255, 0.75); }
+
+/* Running the pre-existing tests/e2e/accessibility.spec.ts against the WP-3 homepage for the
+ * first time (it was not in any WP-3 task's own test list, an oversight the way E-52 records
+ * WP-2's own browser suite going unrun until Task 8) surfaced eight more color-contrast
+ * failures, all the same shape as the one just above: a `--wt-cyan`/`--wt-jade`-family text
+ * colour, calibrated against one host, rendering for the first time on a different one. None
+ * of these are the shell-level `--secondary`/`--wt-cyan` finding errata E-12 already fixed
+ * (`app/globals.css:14-15`, `201 75% 41%` -> `37%`) -- that fix stands and is unrelated. These
+ * are new pairings, first exercised by WP-3's own sections. Recorded together as
+ * design-fidelity errata E-71.
+ *
+ * `#a8d4ec` is one companion value, reused across every "text that reads as the cyan family,
+ * sitting on a `--wt-ink` #0f4c81 background" case below, rather than a different light tint
+ * per site: it measures 5.61:1 on `--wt-ink` (WCAG formula), comfortable margin over both the
+ * 4.5:1 normal-text floor and the 3:1 large-text floor these cases need. */
+
+/* components/home/events-journey.tsx (Task 5): the Before/During/After step numbers.
+ * `.event-stage-grid span { color: var(--wt-jade) }` (wisetech.css:229) measures 3.45:1 on
+ * `--wt-paper` #f6f6f6 -- this grid has always rendered on paper, in every donor use, so this
+ * is not a new host; the port's own jade just does not clear AA there. `--wt-ink` is already
+ * the codebase's high-contrast blue for exactly this situation (8.2:1 on paper) rather than a
+ * new hue. */
+.event-stage-grid span { color: var(--wt-ink); }
+
+/* components/home/ecosystem.tsx (Task 8): the selected-industry panel's eyebrow.
+ * `.industry-focus .eyebrow { color: var(--wt-cyan) }` (wisetech.css:172) measures 2.03:1 on
+ * `.industry-focus`'s `--wt-ink` background -- E-12's own note ("place it on ink") assumed this
+ * would clear; measured, it does not. */
+.industry-focus .eyebrow { color: #a8d4ec; }
+
+/* components/home/programme-showcase.tsx (Task 9): the CPAI card is `.programme-card.feature`,
+ * the port's own dark variant (`background: var(--wt-ink)`, wisetech.css:219) of a card whose
+ * base is white. Two of its child rules were calibrated for that white base and never
+ * re-measured for the dark one: `.programme-card .status-label` inherits
+ * `--wt-accent-text` #315f82 (wisetech.css:825, 1.30:1 on ink) and `.card-index` inherits
+ * #6f7b7e (wisetech.css:145, 2.03:1 on ink). Scoped to `.feature` so the other three cards,
+ * which really are on white, are untouched below. */
+.programme-card.feature .status-label,
+.programme-card.feature .card-index { color: #a8d4ec; }
+
+/* `.card-index`'s own base colour (wisetech.css:145, #6f7b7e) measures 4.37:1 against the plain
+ * white the other three programme cards actually use -- short of 4.5:1 regardless of host, not
+ * a new-host problem like the rest of this block. `--wt-steel` is this codebase's own existing
+ * darker grey (already used for `.honest-empty p`'s host body copy and elsewhere), and clears
+ * white at 5.92:1. This rule is intentionally unscoped, matching the port's own unscoped
+ * `.card-index`, since nothing about this correction is specific to programme cards. */
+.card-index { color: var(--wt-steel); }
+
+/* components/home/impact-evidence.tsx (Task 11): the tile figures render `--wt-cyan` at 76px on
+ * `--wt-ink` (`.impact-metrics strong`, wisetech.css:242) -- 2.03:1, short even of the 3:1 large
+ * text needs at this size. */
+.impact-metrics strong { color: #a8d4ec; }
+
+/* Same section, the definition/period caption under each tile: `.impact-metrics small`
+ * (wisetech.css:244) sets `rgba(255,255,255,.5)`, which blends to 3.48:1 on `--wt-ink` -- short
+ * of the 4.5:1 this 14px bold text needs. .7 blends to 5.22:1; matches this sheet's existing
+ * practice of picking real headroom over the bare minimum (see the footer small-print rule
+ * above, which does the same with a different alpha). */
+.impact-metrics small { color: rgba(255, 255, 255, 0.7); }
+
+/* Same section, the sourcing note bar: `.impact-metrics .method-card` sets
+ * `background: var(--wt-cyan)` (wisetech.css:245) -- the donor's own exact hex, #1a80b6. Its
+ * luminance is too central to host ANY AA-compliant 11px text: black is the theoretical best
+ * case at 4.81:1 for the label, and the port's own `color: var(--wt-ink)` for the paragraph
+ * measures 2.03:1, `.status-label`'s inherited #646464 measures 1.35:1. No text colour choice
+ * fixes this against #1a80b6 itself, so the background moves instead, to #8fc4e0 -- not a new
+ * hue, the same donor-accent light cyan already used for dark grounds elsewhere in this sheet
+ * (the nav underline and mobile accordion, above), here doing the opposite job: lightening a
+ * background enough for dark text. `--wt-ink` (the paragraph's existing colour, left alone)
+ * measures 4.70:1 on it; `#0a3d67` -- the mobile panel's own gradient stop, already named in the
+ * LocaleSwitcher comment above -- measures 5.94:1 for the label, reusing a colour this sheet has
+ * already measured rather than adding an unrelated dark value. */
+.impact-metrics .method-card { background: #8fc4e0; }
+.impact-metrics .method-card .status-label { color: #0a3d67; }
