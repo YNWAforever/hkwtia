@@ -24,6 +24,24 @@ type Props = Readonly<{params: Promise<{locale: string; slug: string}>}>;
 // /editorial event photo is ported into public/ yet.
 const EVENT_HERO_PLACEHOLDER = "/images/projects-hero.jpg";
 
+/**
+ * Wraps a URL as a quoted CSS `url(...)` token, escaping embedded `"` and `\`.
+ *
+ * `isRegistrableMediaUrl` (lib/media/url.ts) and `isPrivateMediaDeliveryUrl` guard
+ * *which URLs may be treated as own-origin images* -- they don't, and were never
+ * meant to, forbid characters that are only dangerous at this specific CSS
+ * interpolation site (`(`, `)`, `;`, whitespace, quotes). In particular a
+ * manually-entered media URL (mediaInputSchema in lib/db/repos/media.ts) can
+ * contain those characters and still pass validation. Interpolating such a value
+ * unquoted into `url(...)` would let it terminate the token early and inject a
+ * second `background-image` declaration into this same inline style. Quoting
+ * the value turns every one of those characters into inert string content for
+ * the CSS parser, regardless of what the value contains.
+ */
+function cssUrlToken(value: string): string {
+  return `url("${value.replace(/["\\]/g, "\\$&")}")`;
+}
+
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
   const row = await eventsRepository.getPublicBySlug(slug, locale, {asOf: new Date()}).catch(() => null);
@@ -46,7 +64,7 @@ export default async function EventPage({params}: Props) {
   // app/styles/wisetech.css:565's `.event-detail-hero` background-image reads var(--wt-event-photo)
   // with no fallback -- an unset custom property invalidates the whole declaration, so this is
   // always set: the event's own validated, already-filtered hero, or the placeholder above.
-  const heroStyle = {"--wt-event-photo": `url(${displayEvent.hero?.url ?? EVENT_HERO_PLACEHOLDER})`} as CSSProperties;
+  const heroStyle = {"--wt-event-photo": cssUrlToken(displayEvent.hero?.url ?? EVENT_HERO_PLACEHOLDER)} as CSSProperties;
 
   return (
     <>

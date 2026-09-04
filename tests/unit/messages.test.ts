@@ -47,7 +47,6 @@ const publicJourneyKeys = [
   'Events.empty.open.description',
   'Events.empty.past.title',
   'Events.empty.past.description',
-  'Events.registration.title',
   'Events.registration.submit',
   'Events.registration.pending',
   'Events.registration.registered',

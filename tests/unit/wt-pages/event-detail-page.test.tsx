@@ -38,7 +38,7 @@ describe("event detail page donor markup", () => {
     const rendered = renderToStaticMarkup(await EventPage(props));
 
     expect(rendered).toContain('class="event-detail-hero"');
-    expect(rendered).toMatch(/--wt-event-photo:\s*url\(\/images\/projects-hero\.jpg\)/);
+    expect(rendered).toMatch(/--wt-event-photo:\s*url\(&quot;\/images\/projects-hero\.jpg&quot;\)/);
     expect(rendered).toContain('class="event-detail-facts"');
     expect(rendered).toContain('class="event-detail-layout"');
     expect(rendered).toContain('class="event-detail-aside"');
@@ -62,6 +62,39 @@ describe("event detail page donor markup", () => {
 
     const rendered = renderToStaticMarkup(await EventPage(props));
 
-    expect(rendered).toMatch(new RegExp(`--wt-event-photo:\\s*url\\(${url.replace(/\//g, "\\/")}\\)`));
+    expect(rendered).toMatch(new RegExp(`--wt-event-photo:\\s*url\\(&quot;${url.replace(/\//g, "\\/")}&quot;\\)`));
+  });
+
+  // A manually-entered media URL (lib/db/repos/media.ts's mediaInputSchema, via
+  // isRegistrableMediaUrl) forbids "?", "#", "..", backslash and control chars, but
+  // NOT "(", ")", ";", whitespace or quotes. Interpolating it raw into the
+  // `url(...)` CSS token would let an admin-entered value terminate that token and
+  // inject a second `background-image` declaration into the same inline style,
+  // defeating the same-origin guarantee lib/media/url.ts exists to enforce. The
+  // fix quotes the token and escapes embedded quotes/backslashes, so the CSS
+  // parser treats the whole value -- ")" ";" and all -- as one string, not new
+  // CSS syntax.
+  it("quotes and escapes an admin-entered hero URL so it cannot inject a second CSS declaration", async () => {
+    const malicious = "/a);background-image:url(https://evil.example.com/x.png";
+    events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z", {hero: {url: malicious, alt: "Hero"}}));
+
+    const rendered = renderToStaticMarkup(await EventPage(props));
+
+    // The entire value must be wrapped in a single quoted url() token (React
+    // HTML-escapes the CSS string's own `"` delimiters as `&quot;`).
+    expect(rendered).toContain(`--wt-event-photo:url(&quot;${malicious}&quot;)`);
+    // The raw, unquoted interpolation -- the injection shape -- must never appear.
+    expect(rendered).not.toContain(`--wt-event-photo:url(${malicious})`);
+  });
+
+  it("escapes an embedded double quote in the hero URL instead of letting it close the CSS string early", async () => {
+    const malicious = '/quote".png';
+    events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z", {hero: {url: malicious, alt: "Hero"}}));
+
+    const rendered = renderToStaticMarkup(await EventPage(props));
+
+    // Expected raw (pre-HTML-escaping) CSS text: url("/quote\".png") -- the
+    // embedded quote is backslash-escaped so it stays part of the string.
+    expect(rendered).toContain("--wt-event-photo:url(&quot;/quote\\&quot;.png&quot;)");
   });
 });

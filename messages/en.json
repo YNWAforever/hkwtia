@@ -1134,7 +1134,6 @@
       "cta": "View event"
     },
     "registration": {
-      "title": "Register for this event",
       "submit": "Register",
       "pending": "Registering…",
       "registered": "Registration confirmed.",
