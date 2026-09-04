@@ -697,9 +697,54 @@
     },
     "actions": {
       "join": "Choose this plan",
-      "contact": "Contact us"
+      "contact": "Contact us",
+      "discuss": "Discuss this pathway"
     },
-    "unavailable": "Membership is currently unavailable"
+    "unavailable": "Membership is currently unavailable",
+    "sme": {
+      "label": "For SMEs",
+      "title": "Not sure which tier fits?",
+      "copy": "Small and medium enterprises can start with a Community membership and move up as programme participation grows. WTIA staff can help you choose.",
+      "action": "Ask WTIA"
+    },
+    "pricing": {
+      "readyLabel": "Current pricing",
+      "readyCopy": "Startup and Corporate fees shown above are the current, confirmed rates from the membership catalog.",
+      "fallbackLabel": "Pricing",
+      "fallbackCopy": "Startup and Corporate fees are being finalised. Confirm current rates with the membership team before applying."
+    },
+    "dimensions": {
+      "network": {"title": "Network", "copy": "Community and networking access across the ecosystem."},
+      "programmes": {"title": "Programmes", "copy": "Participation in WTIA programmes (ASA, TCT, HKICT, CPAI)."},
+      "visibility": {"title": "Visibility", "copy": "Opportunities to be seen by other members and partners."},
+      "events": {"title": "Events", "copy": "Access to WTIA events, from open sessions to member-only sessions."},
+      "showcase": {"title": "Showcase", "copy": "Eligibility to list a solution on the public Showcase."},
+      "committees": {"title": "Committees", "copy": "Eligibility to join WTIA committees and working groups."},
+      "seats": {"title": "Seats", "copy": "Number of individual seats included under one membership."},
+      "billing": {"title": "Billing", "copy": "Billing cadence and available payment options."},
+      "onboarding": {"title": "Onboarding", "copy": "What to expect in your first 90 days as a member."},
+      "governance": {"title": "Governance", "copy": "Voting rights and involvement in WTIA governance, where applicable."},
+      "support": {"title": "Support", "copy": "Direct access to WTIA staff for enquiries and introductions."},
+      "renewal": {"title": "Renewal", "copy": "How and when membership is reviewed and renewed."}
+    },
+    "first90": {
+      "eyebrow": "First 90 days",
+      "heading": "What happens after you join",
+      "steps": {
+        "0": {"title": "Join", "copy": "Choose a tier and complete payment or review."},
+        "1": {"title": "Orientation", "copy": "Meet the WTIA team and get access to your member tools."},
+        "2": {"title": "First event", "copy": "Attend your first WTIA event as a member."},
+        "3": {"title": "First introduction", "copy": "Make your first connection through the network."},
+        "4": {"title": "Review", "copy": "WTIA checks in on how membership is working for you."}
+      }
+    },
+    "closing": {
+      "eyebrow": "Ready when you are",
+      "title": "Choose your tier, or ask us first.",
+      "copy": "Community, Startup and Corporate membership can be applied for online. Patron membership and any other question can start with a direct message.",
+      "join": "Join now",
+      "contact": "Email the membership team"
+    }
   },
   "Join": {
     "backToMembership": "Back to membership",

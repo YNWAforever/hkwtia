@@ -697,9 +697,54 @@
     },
     "actions": {
       "join": "選擇此計劃",
-      "contact": "聯絡我們"
+      "contact": "聯絡我們",
+      "discuss": "討論此參與路徑"
     },
-    "unavailable": "會員計劃暫時未能提供"
+    "unavailable": "會員計劃暫時未能提供",
+    "sme": {
+      "label": "適合中小企",
+      "title": "未確定哪個級別適合你？",
+      "copy": "中小企可先由社群會籍開始，隨參與計劃增加而升級。WTIA 職員可協助你選擇合適級別。",
+      "action": "查詢 WTIA"
+    },
+    "pricing": {
+      "readyLabel": "現行收費",
+      "readyCopy": "以上初創及企業會籍的收費，均為會員目錄中現行已確認的價格。",
+      "fallbackLabel": "收費",
+      "fallbackCopy": "初創及企業會籍收費仍在敲定中。申請前請向會員團隊確認現行收費。"
+    },
+    "dimensions": {
+      "network": {"title": "網絡", "copy": "遍及生態系統的社群及聯繫網絡。"},
+      "programmes": {"title": "計劃參與", "copy": "參與 WTIA 計劃（ASA、TCT、HKICT、CPAI）。"},
+      "visibility": {"title": "曝光機會", "copy": "讓其他會員及夥伴認識你的機會。"},
+      "events": {"title": "活動", "copy": "參與 WTIA 活動，由公開場次至會員專屬場次。"},
+      "showcase": {"title": "展示頁", "copy": "符合資格於公開展示頁刊登方案。"},
+      "committees": {"title": "委員會", "copy": "符合資格加入 WTIA 委員會及工作小組。"},
+      "seats": {"title": "名額", "copy": "每個會籍包含的個人名額數目。"},
+      "billing": {"title": "收費安排", "copy": "收費週期及可選付款方式。"},
+      "onboarding": {"title": "入會導引", "copy": "入會首 90 天可期望的安排。"},
+      "governance": {"title": "管治", "copy": "適用情況下的投票權及參與 WTIA 管治事務。"},
+      "support": {"title": "支援", "copy": "直接聯繫 WTIA 職員查詢及獲取引薦。"},
+      "renewal": {"title": "續會", "copy": "會籍檢視及續會的方式與時間。"}
+    },
+    "first90": {
+      "eyebrow": "首 90 天",
+      "heading": "加入後的安排",
+      "steps": {
+        "0": {"title": "加入", "copy": "選擇級別並完成付款或審批。"},
+        "1": {"title": "入會導引", "copy": "認識 WTIA 團隊，取得會員工具的使用權。"},
+        "2": {"title": "首次活動", "copy": "以會員身份出席首個 WTIA 活動。"},
+        "3": {"title": "首次引薦", "copy": "透過網絡建立第一個聯繫。"},
+        "4": {"title": "檢視", "copy": "WTIA 跟進了解會籍對你的實際幫助。"}
+      }
+    },
+    "closing": {
+      "eyebrow": "隨時歡迎你",
+      "title": "選擇級別，或先向我們查詢。",
+      "copy": "社群、初創及企業會籍均可網上申請。贊助人會籍或其他查詢，可直接與我們聯絡。",
+      "join": "立即加入",
+      "contact": "電郵會員團隊"
+    }
   },
   "Join": {
     "backToMembership": "返回會員計劃",

@@ -106,12 +106,16 @@ describe("page copy scope", () => {
       // them. The facts they frame come from content/programs/*.ts, which
       // /admin/page-copy cannot reach.
       programs: 29,
-      // Static numeric pricing left copy, removing two editable fields.
-      Membership: 32,
+      // WP-4 Task 9 rewrote /membership to the donor's plan-grid/dimensions grammar, adding 50
+      // editable fields: actions.discuss (1), the sme.* pathway card (4: label/title/copy/
+      // action), pricing.* readiness note (4: ready/fallback label+copy), 12 membership
+      // dimensions x title/copy (24), first90.* (12: eyebrow/heading plus title/copy for each
+      // of 5 steps), and closing.* (5: eyebrow/title/copy/join/contact) -- 32 + 50 = 82.
+      Membership: 82,
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(359);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(409);
   });
 
   it("offers a Chinese placeholder for every English field", () => {
