@@ -22,35 +22,40 @@ type Labels = Readonly<{
 }>;
 
 export function ShowcaseDetail({listing, locale, labels, requestIntro}: Readonly<{listing: PublicListing; locale: AppLocale; labels: Labels; requestIntro?: ReactNode}>) {
-  return <article className="mx-auto max-w-4xl space-y-10">
-    <header className="glass-card space-y-5 p-6 sm:p-8">
-      {listing.logo
-        ? <Image alt={listing.logo.alt} className="h-16 w-auto rounded-lg object-contain" height={64} src={listing.logo.url} unoptimized={isPrivateMediaDeliveryUrl(listing.logo.url)} width={160}/>
-        : null}
-      <div className="flex flex-wrap items-center gap-3">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{listing.category}</p>
-        {listing.premium ? <span className="rounded-full border border-primary/40 px-2 py-1 text-xs font-medium text-primary">{labels.premium}</span> : null}
-        {listing.goneGlobal ? <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">{labels.goneGlobal}</span> : null}
-      </div>
-      <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{listing.name}</h1>
-      <p className="max-w-2xl text-xl leading-8 text-muted-foreground">{listing.tagline}</p>
-      <p className="text-sm text-muted-foreground">{labels.memberSince} {listing.memberSince}</p>
-    </header>
-    {listing.videoUrl ? <section className="space-y-3"><h2 className="font-serif text-2xl font-semibold">{labels.video}</h2><a className="underline" href={listing.videoUrl} rel="noreferrer" target="_blank">{listing.videoUrl}</a></section> : null}
-    <section className="space-y-3">
-      {labels.overview ? <h2 className="font-serif text-2xl font-semibold">{labels.overview}</h2> : null}
-      <p className="whitespace-pre-line text-lg leading-8 text-muted-foreground">{listing.description}</p>
-    </section>
-    <section className="space-y-5">
-      {labels.capabilities ? <h2 className="font-serif text-2xl font-semibold">{labels.capabilities}</h2> : null}
-      <dl className="grid gap-5 sm:grid-cols-2">
-        <div className="rounded-lg border border-border/60 p-4"><dt className="font-medium">{labels.useCases}</dt><dd className="mt-2 text-muted-foreground">{listing.useCases.join(", ")}</dd></div>
-        <div className="rounded-lg border border-border/60 p-4"><dt className="font-medium">{labels.deployment}</dt><dd className="mt-2 text-muted-foreground">{listing.deploymentOptions.join(", ")}</dd></div>
-        <div className="rounded-lg border border-border/60 p-4"><dt className="font-medium">{labels.languages}</dt><dd className="mt-2 text-muted-foreground">{listing.supportedLanguages.join(", ")}</dd></div>
-        <div className="rounded-lg border border-border/60 p-4"><dt className="font-medium">{labels.worksWith}</dt><dd className="mt-2 text-muted-foreground">{listing.worksWith.join(", ")}</dd></div>
-      </dl>
-    </section>
-    {listing.caseStudySummary ? <section className="glass-card space-y-3 p-6"><h2 className="font-serif text-2xl font-semibold">{labels.caseStudy}</h2><p className="text-muted-foreground">{listing.caseStudySummary}</p>{listing.caseStudyUrl ? <a className="underline" href={listing.caseStudyUrl} rel="noreferrer" target="_blank">{listing.caseStudyUrl}</a> : null}</section> : null}
-    <section className="glass-card space-y-3 p-6"><h2 className="font-serif text-2xl font-semibold">{labels.requestIntro}</h2>{requestIntro ?? <p className="text-muted-foreground">{localizedPath(locale, "/contact")}</p>}</section>
-  </article>;
+  return <div className="detail-page">
+    <div className="detail-main">
+      <header>
+        {listing.logo
+          ? <Image alt={listing.logo.alt} className="h-16 w-auto rounded-lg object-contain" height={64} src={listing.logo.url} unoptimized={isPrivateMediaDeliveryUrl(listing.logo.url)} width={160} />
+          : null}
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{listing.category}</p>
+          {listing.premium ? <span className="partner-status">{labels.premium}</span> : null}
+          {listing.goneGlobal ? <span className="partner-status">{labels.goneGlobal}</span> : null}
+        </div>
+        <h1>{listing.name}</h1>
+        <p className="lead">{listing.tagline}</p>
+        <p>{labels.memberSince} {listing.memberSince}</p>
+      </header>
+      {listing.videoUrl ? <section><h2>{labels.video}</h2><a href={listing.videoUrl} rel="noreferrer" target="_blank">{listing.videoUrl}</a></section> : null}
+      <section>
+        {labels.overview ? <h2>{labels.overview}</h2> : null}
+        <p className="whitespace-pre-line">{listing.description}</p>
+      </section>
+      <section>
+        {labels.capabilities ? <h2>{labels.capabilities}</h2> : null}
+        <dl className="practical-grid">
+          <div><dt>{labels.useCases}</dt><dd>{listing.useCases.join(", ")}</dd></div>
+          <div><dt>{labels.deployment}</dt><dd>{listing.deploymentOptions.join(", ")}</dd></div>
+          <div><dt>{labels.languages}</dt><dd>{listing.supportedLanguages.join(", ")}</dd></div>
+          <div><dt>{labels.worksWith}</dt><dd>{listing.worksWith.join(", ")}</dd></div>
+        </dl>
+      </section>
+      {listing.caseStudySummary ? <section><h2>{labels.caseStudy}</h2><p>{listing.caseStudySummary}</p>{listing.caseStudyUrl ? <a href={listing.caseStudyUrl} rel="noreferrer" target="_blank">{listing.caseStudyUrl}</a> : null}</section> : null}
+    </div>
+    <aside className="detail-aside">
+      <h3>{labels.requestIntro}</h3>
+      {requestIntro ?? <p>{localizedPath(locale, "/contact")}</p>}
+    </aside>
+  </div>;
 }
