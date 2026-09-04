@@ -1,198 +1,148 @@
+import {readFileSync} from "node:fs";
+import {resolve} from "node:path";
+
 import {render, screen, within} from "@testing-library/react";
 import type {ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
-import en from "@/messages/en.json";
-import zh from "@/messages/zh-HK.json";
-import type {HomeHighlights} from "@/lib/home/home-highlights";
+const bundles = {
+  en: JSON.parse(readFileSync(resolve(process.cwd(), "messages/en.json"), "utf8")),
+  "zh-HK": JSON.parse(readFileSync(resolve(process.cwd(), "messages/zh-HK.json"), "utf8")),
+} as const;
 
-const translationState = vi.hoisted(() => ({
-  locale: "en" as "en" | "zh-HK",
-  messages: {} as Record<string, Record<string, unknown>>,
-}));
+function messageAt(locale: "en" | "zh-HK", namespace: string, key: string): unknown {
+  const root = namespace.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], bundles[locale]);
+  return key.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], root);
+}
 
-const loadHomeHighlights = vi.hoisted(() => vi.fn());
+const listPublic = vi.hoisted(() => vi.fn());
+const listFeaturedPublic = vi.hoisted(() => vi.fn());
+const showcaseListPublished = vi.hoisted(() => vi.fn());
+const partnersListPublished = vi.hoisted(() => vi.fn());
+const listPublicCohorts = vi.hoisted(() => vi.fn());
 
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async (input: string | {locale?: string; namespace: string}) => {
-    const namespace = typeof input === "string" ? input : input.namespace;
-    const locale = typeof input === "string"
-      ? translationState.locale
-      : (input.locale ?? translationState.locale);
-    return (key: string) => {
-      let value: unknown = translationState.messages[locale]?.[namespace];
-      for (const part of key.split(".")) {
-        value = (value as Record<string, unknown> | undefined)?.[part];
-      }
-      if (typeof value !== "string") throw new Error(`Missing test message: ${locale}.${namespace}.${key}`);
-      return value;
-    };
-  }),
-  setRequestLocale: vi.fn((locale: "en" | "zh-HK") => {
-    translationState.locale = locale;
-  }),
+  getTranslations: vi.fn(async ({locale, namespace}: {locale: "en" | "zh-HK"; namespace: string}) =>
+    Object.assign(
+      (key: string, values?: Record<string, string | number>) => {
+        const raw = String(messageAt(locale, namespace, key));
+        return Object.entries(values ?? {}).reduce((text, [name, replacement]) => text.replace(`{${name}}`, String(replacement)), raw);
+      },
+      {raw: (key: string) => messageAt(locale, namespace, key)},
+    )),
+  setRequestLocale: vi.fn(),
 }));
-
 vi.mock("next/image", () => ({
-  default: ({alt, fill, priority, sizes, src, unoptimized, ...props}: {
+  default: ({alt, src, priority, fill, ...props}: {
     alt: string;
-    fill?: boolean;
-    priority?: boolean;
-    sizes?: string;
     src: string;
-    unoptimized?: boolean;
+    priority?: boolean;
+    fill?: boolean;
   }) => {
+    void priority;
     void fill;
-    void unoptimized;
     // eslint-disable-next-line @next/next/no-img-element -- unit-test projection of next/image
-    return <img alt={alt} data-priority={priority ? "true" : undefined} sizes={sizes} src={src} {...props} />;
+    return <img alt={alt} src={src} {...props} />;
   },
 }));
-
 vi.mock("@/i18n/navigation", () => ({
-  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => {
-    const localizedHref = translationState.locale === "zh-HK" && href.startsWith("/")
-      ? `/zh${href}`
-      : href;
-    return <a href={localizedHref} {...props}>{children}</a>;
+  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
+}));
+vi.mock("@/lib/db/repos/events", () => ({
+  eventsRepository: {
+    listPublic: listPublic,
+    listFeaturedPublic: listFeaturedPublic,
+    countPublic: vi.fn(async () => 0),
   },
 }));
+vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: {listPublished: showcaseListPublished}}));
+vi.mock("@/lib/db/repos/partners", () => ({partnersRepository: {listPublished: partnersListPublished}}));
+vi.mock("@/lib/db/repos/cohorts", () => ({cohortRepository: {listPublicCohorts}}));
+// Deterministic: impact-evidence's asaRegions tile reads content/programs/asa directly, not
+// through a mockable repository. Forcing every edition "unrecorded" here means the section's
+// visibility in every test below depends only on the two repos this file already controls,
+// not on whatever content/programs/asa.ts happens to contain when the suite runs.
+vi.mock("@/content/programs/asa", () => ({
+  asa: {id: "asa", editions: [{labelEn: "x", labelZh: "x", yearStart: 2013, funder: {kind: "none-recorded"}, regions: {kind: "unrecorded"}, winners: {kind: "unrecorded"}, images: []}]},
+}));
 
-vi.mock("@/lib/home/home-highlights", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/home/home-highlights")>();
-  return {...actual, loadHomeHighlights};
-});
+const sectionIds = [
+  "hero-title", "open-now-title", "pathways-title", "events-journey-title",
+  "market-products-title", "outcomes-title", "ecosystem-title", "programme-showcase-title",
+  "gba-gateway-title", "impact-title", "archive-stories-title", "legacy-network-title",
+  "conversion-paths-title",
+] as const;
 
-function available(locale: "en" | "zh-HK"): HomeHighlights {
-  return {
-    event: {
-      status: "available",
-      item: {
-        id: "event-id",
-        slug: "repository-event",
-        title: locale === "zh-HK" ? "資料庫活動" : "Repository event",
-        description: locale === "zh-HK" ? "資料庫活動簡介" : "Repository event summary",
-        startsAt: "2026-08-31T16:30:00.000Z",
-        endsAt: null,
-        venue: "Hong Kong",
-        capacity: 80,
-        hero: null,
-      },
-    },
-    news: {
-      status: "available",
-      item: {
-        slug: "repository-news",
-        title: locale === "zh-HK" ? "資料庫消息" : "Repository news",
-        publishedAt: new Date("2026-08-30T16:30:00.000Z"),
-        author: "WTIA editorial",
-      },
-    },
-    showcase: {
-      status: "available",
-      item: {
-        slug: "repository-member",
-        premium: false,
-        goneGlobal: false,
-        views: 7,
-        memberSince: "2022-01-01",
-        name: locale === "zh-HK" ? "資料庫會員方案" : "Repository member solution",
-        tagline: locale === "zh-HK" ? "會員方案簡介" : "Member solution summary",
-        description: locale === "zh-HK" ? "會員方案內容" : "Member solution description",
-        category: "software",
-        useCases: ["logistics"],
-        deploymentOptions: ["cloud"],
-        supportedLanguages: ["en", "zh-HK"],
-        worksWith: ["ERP"],
-        videoUrl: null,
-        caseStudyUrl: null,
-        caseStudySummary: null,
-        logoReference: null,
-        logo: {
-          url: "/images/showcase/repository-member.png",
-          alt: locale === "zh-HK" ? "資料庫會員標誌" : "Repository member logo",
-        },
-      },
-    },
-  };
+function setEmptyFixtures() {
+  listPublic.mockResolvedValue([]);
+  listFeaturedPublic.mockResolvedValue([]);
+  showcaseListPublished.mockResolvedValue([]);
+  partnersListPublished.mockResolvedValue([]);
+  listPublicCohorts.mockResolvedValue([]);
 }
 
-async function renderHome(locale: "en" | "zh-HK", highlights: HomeHighlights) {
-  loadHomeHighlights.mockResolvedValueOnce(highlights);
-  const {default: HomePage} = await import("@/app/[locale]/(public)/page");
-  render(await HomePage({params: Promise.resolve({locale})}));
-}
+const pastEvent = {id: "1", slug: "past-event", title: "Past Event", description: "d", startsAt: "2025-01-01T02:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: null};
+const publishedPartner = {id: "1", name: "Partner", category: "supporting" as const, websiteUrl: null, logoUrl: null, logoAlt: null, displayOrder: 1, featured: false};
 
 describe("Home page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    translationState.locale = "en";
-    translationState.messages = {en, "zh-HK": zh};
+    setEmptyFixtures();
   });
 
-  it.each([
-    ["en", en.Home, "/events", "/membership", "/events/repository-event", "/news/repository-news", "/showcase/repository-member", "Repository event", "Repository news", "Repository member solution", "September 1, 2026", "August 31, 2026"],
-    ["zh-HK", zh.Home, "/zh/events", "/zh/membership", "/zh/events/repository-event", "/zh/news/repository-news", "/zh/showcase/repository-member", "資料庫活動", "資料庫消息", "資料庫會員方案", "2026年9月1日", "2026年8月31日"],
-  ] as const)(
-    "renders repository highlights and question-led actions in %s",
-    async (locale, messages, eventsHref, membershipHref, eventHref, newsHref, showcaseHref, eventTitle, newsTitle, showcaseTitle, eventDate, newsDate) => {
-      await renderHome(locale, available(locale));
+  it.each(["en", "zh-HK"] as const)("renders all 13 sections as labelled landmarks, in order, in %s", async (locale) => {
+    listPublic.mockImplementation(async (_actor: unknown, options: {status: string}) =>
+      options.status === "past" ? [pastEvent] : []);
+    partnersListPublished.mockResolvedValue([publishedPartner]);
 
-      expect(screen.getByRole("heading", {level: 1, name: messages.question})).toBeVisible();
-      expect(screen.getAllByRole("heading", {level: 1})).toHaveLength(1);
-      expect(screen.queryByRole("heading", {level: 1, name: messages.title})).not.toBeInTheDocument();
-      expect(screen.getByRole("link", {name: messages.actions.events})).toHaveAttribute("href", eventsHref);
-      expect(screen.getByRole("link", {name: messages.actions.membership})).toHaveAttribute("href", membershipHref);
-      expect(screen.getByRole("link", {name: messages.actions.discover})).toHaveAttribute("href", "#home-discover");
+    const {default: HomePage} = await import("@/app/[locale]/(public)/page");
+    render(await HomePage({params: Promise.resolve({locale})}));
 
-      const hero = screen.getByRole("img", {name: messages.imageAlt});
-      expect(hero).toHaveAttribute("src", "/images/projects-hero.jpg");
-      expect(hero).toHaveAttribute("sizes", "100vw");
-      expect(hero).toHaveAttribute("data-priority", "true");
-      expect(document.querySelector("#home-discover")).toBeInTheDocument();
+    const labelled = [...document.querySelectorAll("[aria-labelledby]")]
+      .map((el) => el.getAttribute("aria-labelledby"))
+      .filter((id): id is string => (sectionIds as readonly string[]).includes(id ?? ""));
+    expect(labelled).toEqual([...sectionIds]);
 
-      expect(screen.getByRole("heading", {level: 3, name: eventTitle})).toBeVisible();
-      expect(screen.getByRole("heading", {level: 3, name: newsTitle})).toBeVisible();
-      expect(screen.getByRole("heading", {level: 3, name: showcaseTitle})).toBeVisible();
-      expect(screen.getByText(eventDate)).toBeVisible();
-      expect(screen.getByText(newsDate)).toBeVisible();
-      expect(screen.getByText("software")).toBeVisible();
-      expect(screen.getByRole("img", {name: locale === "zh-HK" ? "資料庫會員標誌" : "Repository member logo"})).toHaveAttribute("src", "/images/showcase/repository-member.png");
-      expect(screen.getByRole("link", {name: messages.highlights.event.view})).toHaveAttribute("href", eventHref);
-      expect(screen.getByRole("link", {name: messages.highlights.news.view})).toHaveAttribute("href", newsHref);
-      expect(screen.getByRole("link", {name: messages.highlights.showcase.view})).toHaveAttribute("href", showcaseHref);
+    expect(screen.getAllByRole("heading", {level: 1})).toHaveLength(1);
+    expect(document.querySelector('script[type="application/ld+json"]')?.textContent).toContain('"@type":"Organization"');
+  });
 
-      expect(screen.queryByText(locale === "zh-HK" ? "服務整個創科生態" : "A platform for the whole ecosystem")).not.toBeInTheDocument();
-      expect(screen.queryByText(locale === "zh-HK" ? "重點計劃" : "Flagship programmes")).not.toBeInTheDocument();
-      expect(document.querySelector("main")).not.toBeInTheDocument();
-      expect(document.querySelector('a[href^="/zh/zh"]')).not.toBeInTheDocument();
-      expect(document.querySelector('script[type="application/ld+json"]')?.textContent).toContain('"@type":"Organization"');
-      expect(loadHomeHighlights).toHaveBeenCalledExactlyOnceWith({locale});
-    },
-  );
+  it("hides legacy-network at 0 published partners and shows it once a partner is published", async () => {
+    const {default: HomePage} = await import("@/app/[locale]/(public)/page");
 
-  it.each([
-    ["en", en.Home, "/events", "/news", "/showcase"],
-    ["zh-HK", zh.Home, "/zh/events", "/zh/news", "/zh/showcase"],
-  ] as const)("renders localized empty and unavailable states without placeholder records in %s", async (locale, messages, eventHref, newsHref, showcaseHref) => {
-    await renderHome(locale, {
-      event: {status: "empty"},
-      news: {status: "unavailable"},
-      showcase: {status: "empty"},
-    });
+    const first = render(await HomePage({params: Promise.resolve({locale: "en"})}));
+    expect(document.querySelector('[aria-labelledby="legacy-network-title"]')).toBeNull();
+    first.unmount();
 
-    expect(screen.getByText(messages.highlights.event.empty)).toBeVisible();
-    expect(screen.getByText(messages.highlights.news.unavailable)).toBeVisible();
-    expect(screen.getByText(messages.highlights.showcase.empty)).toBeVisible();
-    expect(screen.queryByText(/Repository event|資料庫活動/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Repository news|資料庫消息/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Repository member solution|資料庫會員方案/)).not.toBeInTheDocument();
+    partnersListPublished.mockResolvedValue([publishedPartner]);
+    render(await HomePage({params: Promise.resolve({locale: "en"})}));
+    expect(document.querySelector('[aria-labelledby="legacy-network-title"]')).not.toBeNull();
+  });
 
-    const discover = document.querySelector("#home-discover");
-    expect(discover).not.toBeNull();
-    expect(within(discover as HTMLElement).getByRole("link", {name: messages.highlights.event.view})).toHaveAttribute("href", eventHref);
-    expect(within(discover as HTMLElement).getByRole("link", {name: messages.highlights.news.view})).toHaveAttribute("href", newsHref);
-    expect(within(discover as HTMLElement).getByRole("link", {name: messages.highlights.showcase.view})).toHaveAttribute("href", showcaseHref);
+  it("omits every impact tile, and hides the section, when every metric is 0", async () => {
+    const {default: HomePage} = await import("@/app/[locale]/(public)/page");
+    render(await HomePage({params: Promise.resolve({locale: "en"})}));
+
+    expect(document.querySelector('[aria-labelledby="impact-title"]')).toBeNull();
+  });
+
+  it("renders the Open Now honest-empty state when no event is open, and available cards once one is", async () => {
+    const {default: HomePage} = await import("@/app/[locale]/(public)/page");
+
+    const first = render(await HomePage({params: Promise.resolve({locale: "en"})}));
+    // Scoped to the Open Now landmark: Home.eventsJourney.emptyTitle shares the identical
+    // English string with Home.openNow.empty.title ("No activities are currently open."), so
+    // an unscoped query would match both sections' empty states and fail as ambiguous.
+    const openNowSection = document.querySelector('[aria-labelledby="open-now-title"]') as HTMLElement;
+    expect(within(openNowSection).getByText(bundles.en.Home.openNow.empty.title)).toBeInTheDocument();
+    first.unmount();
+
+    listPublic.mockImplementation(async (_actor: unknown, options: {status: string}) =>
+      options.status === "open"
+        ? [{id: "1", slug: "ai-clinic", title: "AI Clinic", description: "d", startsAt: "2026-10-01T02:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: null}]
+        : []);
+    render(await HomePage({params: Promise.resolve({locale: "en"})}));
+    expect(screen.getByRole("heading", {level: 3, name: "AI Clinic"})).toBeInTheDocument();
   });
 
   it("exports a force-dynamic home route", async () => {

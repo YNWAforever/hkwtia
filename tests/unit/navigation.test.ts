@@ -30,7 +30,12 @@ describe("public shell navigation", () => {
 
   it("keeps every public destination canonical and retained", () => {
     const retained = new Set(wisetechIntegrationManifest.filter(({kind, disposition}) => kind === "route" && disposition === "retain").map(({canonicalPath}) => canonicalPath));
-    const destinations = [...groupShape.flatMap(({links}) => links), publicShellActions.findEvent.href, publicShellActions.join.href];
+    const destinations = [
+      ...groupShape.flatMap(({links}) => links),
+      ...navigationGroups.map((group) => group.feature.href),
+      publicShellActions.findEvent.href,
+      publicShellActions.join.href,
+    ];
     for (const href of destinations) {
       expect(publicRoutes, href).toContain(href);
       expect(retained.has(href), href).toBe(true);

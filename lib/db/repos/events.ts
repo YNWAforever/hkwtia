@@ -157,6 +157,24 @@ export async function listPublicEvents(_actor: Actor, options: PublicEventReadOp
   return rows.map((row) => projectPublicEvent({event: row.event, hero: row.hero === null || row.hero.url === null ? null : row.hero as PublicEventHeroSource}, locale));
 }
 
+export type PublicEventCountOptions = Readonly<{status: PublicEventStatus; asOf: Date; source?: PublicEventSource}>;
+
+// Aggregate count, not a capped list read: this backs figures like the homepage's
+// "past events" tile, which must reflect the true historical total rather than the
+// 12-row cap listPublicEvents enforces for paginated public list pages.
+export async function countPublicEvents(_actor: Actor, options: PublicEventCountOptions): Promise<number> {
+  const asOf = z.coerce.date().parse(options.asOf);
+  if (options.source) {
+    return publicRowsByStatus(await publicRowsFrom(options.source), options.status, asOf).length;
+  }
+  const boundary = sql<Date>`coalesce(${events.endsAt}, ${events.startsAt})`;
+  const predicate = options.status === "open" ? gte(boundary, asOf) : lt(boundary, asOf);
+  const database = await getDb();
+  const [row] = await database.select({value: count()}).from(events)
+    .where(and(eq(events.published, true), eq(events.memberOnly, false), predicate));
+  return Number(row?.value ?? 0);
+}
+
 export async function getPublicEventBySlug(slug: unknown, locale: string, options: PublicEventSlugOptions): Promise<PublicEventProjection | null> {
   const parsedSlug = slugSchema.safeParse(slug);
   if (!parsedSlug.success) return null;
@@ -321,6 +339,7 @@ export async function listEventAttendees(actor: Actor, eventIdInput: unknown) {
 
 export const eventsRepository = {
   listPublic: listPublicEvents,
+  countPublic: countPublicEvents,
   getPublicBySlug: getPublicEventBySlug,
   listFeaturedPublic: listFeaturedPublicEvents,
   listForMember: listMemberEvents,

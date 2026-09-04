@@ -10,24 +10,46 @@
   "Navigation": {
     "brand": {
       "publicName": "WiseTech Hong Kong",
-      "operator": "由 WTIA 營運"
+      "descriptor": "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台 · 中文法定名稱待正式批准"
     },
     "groups": {
       "eventsProgrammes": {
-        "label": "活動及計劃",
-        "description": "探索由 WTIA 記錄支持的最新活動、獎項及計劃。"
+        "label": "活動及計劃"
       },
       "membershipEcosystem": {
-        "label": "會員與創科生態",
-        "description": "加入協會，並探索經審核的會員方案。"
+        "label": "會員與創科生態"
       },
       "impactInsights": {
-        "label": "影響與洞察",
-        "description": "閱讀已發布消息，並查閱 WTIA 的人工智能實證。"
+        "label": "影響與洞察"
       },
       "aboutWtia": {
-        "label": "關於 WTIA",
-        "description": "了解協會、歷史、管治及聯絡渠道。"
+        "label": "關於 WTIA"
+      }
+    },
+    "feature": {
+      "eventsProgrammes": {
+        "label": "現正開放",
+        "title": "先看清現正開放的項目，再作計劃。",
+        "copy": "報名、獎項及計劃輪次一經 WTIA 記錄確認，即會在此顯示。",
+        "cta": "瀏覽現正開放項目"
+      },
+      "membershipEcosystem": {
+        "label": "會員平台",
+        "title": "把真實業務需要帶進網絡。",
+        "copy": "在不公開機密資料或暗示保證配對下準備買家簡報。",
+        "cta": "提交挑戰"
+      },
+      "impactInsights": {
+        "label": "科技 + 智慧",
+        "title": "實務進步需要負責任選擇。",
+        "copy": "探索人的問責、資料保障、安全、透明度及持續評估。",
+        "cta": "人工智能透明度"
+      },
+      "aboutWtia": {
+        "label": "認識商會",
+        "title": "細閱商會自身的紀錄。",
+        "copy": "歷史里程碑、主席的話、委員會及聯絡渠道，均按 WTIA 持有的紀錄發布。",
+        "cta": "細閱歷史"
       }
     },
     "columns": {
@@ -61,6 +83,14 @@
       "join": "加入 WiseTech",
       "memberSignIn": "會員登入"
     },
+    "mobile": {
+      "priority": "主要操作",
+      "utilities": "實用導覽",
+      "exploreEcosystem": "探索生態系統"
+    },
+    "explore": "探索",
+    "viewOverview": "查看總覽",
+    "search": "搜尋 WiseTech",
     "openMenu": "開啟導覽選單",
     "closeMenu": "關閉導覽選單",
     "menuTitle": "網站導覽",
@@ -80,15 +110,34 @@
   "Footer": {
     "brand": {
       "publicName": "WiseTech Hong Kong",
-      "operator": "由 WTIA 營運",
+      "descriptor": "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台",
       "homeLabel": "WiseTech Hong Kong 首頁",
       "logoAlt": "WTIA"
     },
+    "tagline": "Technology + Wisdom. Hong Kong + The World.",
+    "legalLine": "WiseTech Hong Kong 為 Hong Kong Wireless Technology Industry Association 的品牌名稱，中文法定名稱待正式批准。",
+    "columns": {
+      "explore": "探索",
+      "membership": "會員",
+      "about": "關於",
+      "contact": "聯絡"
+    },
+    "newsletter": {
+      "eyebrow": "活動通知",
+      "title": "香港下一步應建設甚麼？",
+      "emailLabel": "工作電郵",
+      "placeholder": "工作電郵",
+      "submit": "準備活動通知電郵",
+      "success": "你的電郵程式應會開啟並備妥查詢；本頁不會自動建立訂閱。",
+      "error": "請輸入有效工作電郵。",
+      "mailSubject": "WiseTech 活動通知",
+      "mailBody": "請將 {email} 加入 WiseTech 活動通知名單。"
+    },
     "summary": "WiseTech Hong Kong 透過 WTIA 經核實的公開服務，連繫科技企業、專業人士及計劃。",
-    "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
-    "journeys": "探索",
-    "connect": "聯絡",
-    "legal": "法律資訊",
+    "addressLines": [
+      "香港觀塘鴻圖道 73-75 號",
+      "KOHO 4 樓"
+    ],
     "privacy": "私隱聲明",
     "copyright": "© {year} WiseTech Hong Kong。由 WTIA 營運。版權所有。"
   },
@@ -276,79 +325,253 @@
     "invalidDescription": "連結可能已過期或已被取代。如仍需協助，請聯絡 WTIA。"
   },
   "Home": {
-    "metaTitle": "WTIA｜創新香港",
-    "metaDescription": "連繫香港及大灣區創新力量，接通全球市場。",
-    "eyebrow": "創新香港",
-    "title": "連繫大灣區創新力量，走向國際舞台。",
-    "question": "香港創新下一站，可以走多遠？",
-    "summary": "連接香港、大灣區及亞洲創科社群與全球科技市場的跨境平台。",
-    "imageAlt": "香港創科社群",
-    "actions": {
-      "events": "尋找活動",
-      "membership": "探索會員服務",
+    "metaTitle": "WiseTech Hong Kong",
+    "metaDescription": "WiseTech Hong Kong 連接可信 AI+ 應用、活動、會員、方案、計劃及大灣區市場機遇。",
+    "hero": {
+      "eyebrow": "WiseTech Hong Kong",
+      "title": "香港如何引領 AI+ 時代？",
+      "lead": "WiseTech Hong Kong 是 Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台，連結企業、中小企、初創、專業人士、學界、投資者、公共機構、大灣區夥伴及國際市場。",
+      "imageAlt": "香港創科社群",
+      "actions": {
+        "findEvent": "尋找活動或參與機會",
+        "join": "加入 WiseTech",
+        "members": "探索會員及方案"
+      },
+      "note": "WiseTech Hong Kong · AI+ 產業平台",
       "discover": "探索 WiseTech"
     },
-    "highlightsTitle": "最新動向",
-    "highlightsIntro": "掌握 WTIA 創科生態的最新公開機遇與故事。",
-    "highlights": {
-      "event": {
-        "label": "下一場活動",
-        "view": "查看活動",
-        "empty": "暫時沒有即將舉行的公開活動。",
-        "unavailable": "活動資訊暫時未能提供。"
+    "openNow": {
+      "eyebrow": "現正開放",
+      "title": "今天有甚麼可以參加？",
+      "intro": "只有日期、資格及報名詳情已確認的活動，才會在此顯示。",
+      "statusLabel": "目前狀態",
+      "empty": {
+        "title": "目前未有活動開放報名。",
+        "copy": "登記接收活動通知，或向團隊提出明確業務挑戰，協助策劃實用的未來活動。"
       },
-      "news": {
-        "label": "最新消息",
-        "view": "閱讀消息",
-        "empty": "暫時沒有已發布的消息。",
-        "unavailable": "消息資訊暫時未能提供。"
-      },
-      "showcase": {
-        "label": "會員方案",
-        "view": "探索方案",
-        "empty": "暫時沒有已發布的會員方案。",
-        "unavailable": "會員方案資訊暫時未能提供。"
+      "updatesAction": "接收活動通知",
+      "challengeAction": "提交挑戰"
+    },
+    "pathways": {
+      "eyebrow": "你的路徑",
+      "title": "你希望在哪裡創造影響？",
+      "intro": "不同目標需要不同路徑。先從你希望達成的成果開始，而非機構架構。",
+      "items": {
+        "corporates": {
+          "title": "企業",
+          "copy": "尋找技術方案、人才及創新夥伴。",
+          "benefits": "企業挑戰 · 高層簡報 · 產業委員會",
+          "cta": "探索會員"
+        },
+        "smes": {
+          "title": "中小企",
+          "copy": "把 AI 機遇轉化為實際業務改善。",
+          "benefits": "準備度評估 · 診所 · 可信供應商",
+          "cta": "尋找活動"
+        },
+        "startups": {
+          "title": "初創企業",
+          "copy": "連繫買家、投資者及區域夥伴。",
+          "benefits": "結構化曝光 · 展示日 · 市場進入",
+          "cta": "探索方案展示"
+        },
+        "professionals": {
+          "title": "專業人士",
+          "copy": "增進技能、參與產業發展並拓展網絡。",
+          "benefits": "委員會 · 專業認證 · 導師計劃",
+          "cta": "探索會員"
+        },
+        "gba": {
+          "title": "大灣區及國際夥伴",
+          "copy": "連接香港科技力量與市場機遇。",
+          "benefits": "落地支援 · 考察團 · 買家配對",
+          "cta": "探索創科起動"
+        }
       }
     },
-    "featuresTitle": "連繫社群，推動成長",
-    "featuresIntro": "WTIA 透過實際機遇凝聚創科社群。",
-    "partnerWallTitle": "我們的合作夥伴",
-    "partnerWallIntro": "認識支持 WTIA 社群的核准機構。",
-    "features": {
-      "connect": {
-        "title": "連繫",
-        "description": "連接業界、投資者及區域夥伴。"
+    "eventsJourney": {
+      "eyebrow": "即將舉行活動及參與機會",
+      "title": "有用活動是一段旅程，而不只是一個日期。",
+      "intro": "了解活動發現、準備及跟進流程，或瀏覽現正開放的活動。",
+      "stages": {
+        "before": {
+          "title": "活動前",
+          "copy": "推薦、票價、名額及配對。"
+        },
+        "during": {
+          "title": "活動中",
+          "copy": "登記、議程、提問及會面。"
+        },
+        "after": {
+          "title": "活動後",
+          "copy": "資源、引薦、跟進及成果。"
+        }
       },
-      "accelerate": {
-        "title": "加速",
-        "description": "透過專項計劃把創意轉化為市場機遇。"
+      "statusLabel": "目前狀態",
+      "emptyTitle": "目前未有活動開放報名。",
+      "viewAllAction": "查看現正開放及過往活動"
+    },
+    "marketProducts": {
+      "eyebrow": "供需連結",
+      "title": "為真正落地而建立的連結",
+      "directory": {
+        "label": "會員名錄",
+        "title": "認識正在塑造未來的人。",
+        "copyEmpty": "名錄已準備承載獲批公開的專頁，並設有可控可見度及需獲同意的引薦流程；目前尚未顯示現行會員紀錄。",
+        "copyAvailable": "已發布的會員方案現已上線，設有可控可見度及需獲同意的引薦流程。",
+        "action": "探索會員"
       },
-      "represent": {
-        "title": "代表",
-        "description": "為無線科技業界建立清晰而共同的聲音。"
+      "marketplace": {
+        "label": "AI 解決方案市場",
+        "title": "尋找可在真實環境落地的 AI。",
+        "copyEmpty": "規劃中的方案市場將比較成熟度、部署方式、安全、市場覆蓋及經審閱證據；目前尚未顯示現行方案紀錄。",
+        "copyAvailable": "已發布方案現已上線，可按用途、部署方式及已審閱證據比較。",
+        "action": "探索解決方案"
       }
     },
-    "programsTitle": "計劃與獎項",
-    "programsIntro": "探索 WTIA 推動人才、創新及業界認可的項目。",
-    "programs": {
-      "cpai": {
-        "title": "CPAI",
-        "description": "支援應用創新的專項計劃。"
-      },
-      "hkict": {
-        "title": "香港資訊及通訊科技獎",
-        "description": "表揚香港科技界的卓越成果。"
-      },
-      "tct": {
-        "title": "TCT",
-        "description": "連接科技、能力與人才。"
-      },
-      "asa": {
-        "title": "亞洲智能應用程式大獎",
-        "description": "嘉許亞洲優秀智能應用程式。"
+    "outcomes": {
+      "eyebrow": "成果故事",
+      "title": "成果必須具體、有清晰歸屬並獲授權公開。",
+      "intro": "只有在參與機構、挑戰、行動、報告期及成果均可負責任地交代時，案例才會發布。",
+      "frameworkLabel": "發布框架",
+      "frameworkSteps": "挑戰 → 連結 → 行動 → 成果",
+      "statusLabel": "目前狀態",
+      "emptyTitle": "目前尚未有公開案例。",
+      "emptyCopy": "商會只會在證據、歸屬及發布許可獲確認後加入成果故事，避免把參與誤寫成未獲支持的成功聲稱。",
+      "action": "洽談可量度項目"
+    },
+    "ecosystem": {
+      "eyebrow": "AI + 產業",
+      "title": "一個生態系統，推動每個產業向前。",
+      "intro": "六條產業路徑把實務問題連接到科技、知識、計劃及市場拓展。",
+      "selectedLabel": "已選產業路徑",
+      "enterAction": "進入此生態系統",
+      "focusAreas": ["產業挑戰", "相關方案類別", "計劃 + 活動"],
+      "items": {
+        "commerce": {
+          "name": "商貿 + 專業服務",
+          "brief": "以可信任自動化、智能洞察及客戶服務提升競爭力。"
+        },
+        "manufacturing": {
+          "name": "製造 + 機械人",
+          "brief": "把營運挑戰轉化為可落地的技術部署。"
+        },
+        "health": {
+          "name": "健康 + 生命科學",
+          "brief": "兼顧實證、安全與人的需要。"
+        },
+        "responsibleAi": {
+          "name": "負責任 AI + 網絡安全",
+          "brief": "從設計開始融入管治、私隱與韌性。"
+        },
+        "retail": {
+          "name": "零售 + 創意產業",
+          "brief": "創造新的顧客體驗與商業模式。"
+        },
+        "education": {
+          "name": "教育 + 未來工作",
+          "brief": "為人才帶來技能、生產力與新機會。"
+        }
       }
     },
-    "viewProgram": "查看計劃"
+    "programmeShowcase": {
+      "eyebrow": "計劃 + 獎項",
+      "title": "把參與轉化為進步",
+      "intro": "保留現有計劃的品牌資產，並以成果、受眾及下一步行動重新呈現。",
+      "eventSeriesLabel": "活動系列",
+      "credentialLabel": "專業資格",
+      "editionsFact": "自 {year} 年起共 {count} 屆",
+      "credentialFact": "由 WTIA 直接頒發",
+      "action": "查看計劃",
+      "items": {
+        "cpai": {
+          "name": "CPAI",
+          "description": "支援應用創新的專項計劃。"
+        },
+        "hkict": {
+          "name": "香港資訊及通訊科技獎",
+          "description": "表揚香港科技界的卓越成果。"
+        },
+        "tct": {
+          "name": "TCT",
+          "description": "連接科技、能力與人才。"
+        },
+        "asa": {
+          "name": "亞洲智能應用程式大獎",
+          "description": "嘉許亞洲優秀智能應用程式。"
+        }
+      }
+    },
+    "gbaGateway": {
+      "eyebrow": "大灣區通道",
+      "title": "香港專長，大灣區機遇，全球視野。",
+      "copy": "提供市場進入、落地支援、考察團、買家配對及長期區域合作的實務路徑。",
+      "openCohortAction": "查看現正招募的小組",
+      "exploreAction": "探索創科起動"
+    },
+    "impact": {
+      "eyebrow": "已公布資料",
+      "title": "每項數據，都附有清晰脈絡。",
+      "intro": "以下數字描述現有 WTIA 計劃、活動及網絡紀錄，並不代表商會現時的整體總數。",
+      "sourceLabel": "來源說明",
+      "source": "來源：hkwtia.org 已發布紀錄。",
+      "sourceLink": "瀏覽 hkwtia.org",
+      "pastEvents": {
+        "label": "個已完成活動紀錄",
+        "definition": "定義：本網站已發布的已完成 WTIA 活動",
+        "period": "截至 {date}"
+      },
+      "publishedPartners": {
+        "label": "個已發布夥伴紀錄",
+        "definition": "定義：已發布的支持機構、區域及媒體夥伴紀錄",
+        "period": "截至 {date}"
+      },
+      "asaRegions": {
+        "label": "個亞洲地區參與",
+        "definition": "定義：最近一屆有記錄地區數目的亞洲智慧創新大獎所涵蓋地區",
+        "period": "{year} 年度"
+      }
+    },
+    "archiveStories": {
+      "eyebrow": "WTIA 真實活動紀錄",
+      "title": "真實人物、真實計劃，一個承接歷史的平台。",
+      "intro": "回顧塑造 WTIA 社群的人物、計劃及區域交流活動。",
+      "galleryAction": "查看官方相片集",
+      "captionLabel": "WTIA 活動回顧"
+    },
+    "legacyNetwork": {
+      "eyebrow": "承接真實合作網絡",
+      "title": "有歷史根基，也有未來方向的網絡。",
+      "note": "夥伴標誌來自 WTIA 已發布的支持機構、區域夥伴及媒體夥伴紀錄；除非另有確認，列入名單並不代表現時合作關係。",
+      "viewAllAction": "查看所有夥伴",
+      "previewNote": "顯示此分類 {total} 個紀錄中的 {shown} 個。",
+      "tabs": {
+        "supporting": "支持機構",
+        "regional": "區域夥伴",
+        "media": "媒體夥伴"
+      }
+    },
+    "conversionPaths": {
+      "eyebrow": "投入參與",
+      "title": "按你的目標，選擇合適參與關係。",
+      "intro": "會員身份支援持續參與；夥伴合作則由清晰受眾、項目及預期成果開始。",
+      "membership": {
+        "label": "會員計劃",
+        "title": "建立持續參與生態系統的路徑。",
+        "copy": "專業人士、初創、中小企、企業及策略夥伴可選擇相應路徑；現行費用及最終權益由會員團隊提供。",
+        "points": ["相關活動及知識", "專頁及可見度選擇", "實用的首 90 天旅程"],
+        "primaryAction": "比較會員計劃",
+        "secondaryAction": "準備會員查詢"
+      },
+      "partnership": {
+        "label": "夥伴合作",
+        "title": "共同設計有用的產業項目。",
+        "copy": "與商會就業務挑戰、計劃、知識項目、活動或市場拓展路徑合作，並清楚界定目的。",
+        "points": ["先界定目的及受眾", "協定角色及公開聲稱", "清楚列明下一步及成果"],
+        "primaryAction": "展開合作",
+        "secondaryAction": "認識夥伴網絡"
+      }
+    }
   },
   "About": {
     "metaTitle": "關於 WTIA",
@@ -892,7 +1115,7 @@
     },
     "conciergeTitle": "未確定從哪裡開始？",
     "conciergeDescription": "透過 WTIA 現有的 Concierge 諮詢 WiseTech。",
-    "conciergeLauncher": "諮詢 WiseTech"
+    "conciergeLauncher": "問 WiseTech"
   },
   "Privacy": {
     "metaTitle": "私隱 | WTIA",
@@ -1252,7 +1475,14 @@
   },
   "Concierge": {
     "_review": true,
-    "launcher": "詢問 WTIA",
+    "launcher": "問 WiseTech",
+    "transparency": "了解智能助理運作方式",
+    "prompts": {
+      "home": ["WiseTech 如何幫助我的機構？", "顯示 AI+ 產業路徑"],
+      "membership": ["哪種會籍適合我的機構？", "初創企業可獲得甚麼權益？"],
+      "showcase": ["尋找服務中小企的供應商", "引薦流程如何運作？"],
+      "events": ["哪些活動適合零售業？", "顯示粵語活動"]
+    },
     "title": "WTIA 智能助理",
     "description": "查詢 WTIA 會籍、活動、計劃及支援。",
     "close": "關閉 WTIA 智能助理",

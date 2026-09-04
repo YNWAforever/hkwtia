@@ -7,6 +7,7 @@ import {SiteFooter} from '@/components/layout/site-footer';
 import {SiteHeader} from '@/components/layout/site-header';
 import type {AppLocale} from '@/i18n/routing';
 import {localizeConcierge} from '@/lib/ai/concierge-labels';
+import {localizeConciergePrompts} from '@/lib/ai/concierge-prompts';
 import {publicEnv} from '@/lib/config/env';
 import {announcementsRepository} from '@/lib/db/repos/announcements';
 import {toAnnouncementBarView} from '@/lib/public-shell/announcement';
@@ -20,6 +21,9 @@ import {toAnnouncementBarView} from '@/lib/public-shell/announcement';
 // :focus-visible, [id] scroll-margin) must not change them. WP-6 decides whether the
 // app shell adopts any of it.
 import "../../styles/wisetech.css";
+// Hand-written shell overrides; must load after the generated port so equal-specificity
+// rules win. See app/styles/wisetech-shell.css for what belongs here and why.
+import "../../styles/wisetech-shell.css";
 
 type PublicLayoutProps = {
   children: ReactNode;
@@ -37,6 +41,7 @@ export default async function PublicLayout({children, params}: PublicLayoutProps
   ]);
   const appLocale = locale as AppLocale;
   const conciergeLabels = localizeConcierge((key) => concierge.raw(key));
+  const conciergePrompts = localizeConciergePrompts((key) => concierge.raw(key));
   const {turnstileSiteKey} = publicEnv();
   const announcement = activeAnnouncement ? toAnnouncementBarView(activeAnnouncement, appLocale) : null;
 
@@ -50,12 +55,14 @@ export default async function PublicLayout({children, params}: PublicLayoutProps
         label={announcementMessages('label')}
         dismissLabel={announcementMessages('dismiss')}
       />
-      <SiteHeader locale={appLocale} />
+      <SiteHeader locale={appLocale} hasAnnouncement={announcement !== null} />
       <main id="main-content">{children}</main>
       <SiteFooter locale={appLocale} />
       <ConciergeWidget
         locale={appLocale}
         labels={conciergeLabels}
+        prompts={conciergePrompts}
+        transparencyLabel={concierge('transparency')}
         {...(turnstileSiteKey === undefined ? {} : {turnstileSiteKey})}
       />
     </div>

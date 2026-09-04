@@ -19,9 +19,9 @@ const revocationAwareConsumers = new Set([
   "app/[locale]/(admin)/admin/media/page.tsx",
   "components/admin/media-form.tsx",
   "components/admin/showcase-review-table.tsx",
+  "components/home/legacy-network.tsx",
   "components/marketing/event-detail.tsx",
   "components/marketing/home-highlight-card.tsx",
-  "components/marketing/home-partner-wall.tsx",
   "components/marketing/showcase-card.tsx",
   "components/marketing/showcase-detail.tsx",
 ]);
@@ -41,7 +41,7 @@ describe("image render policy", () => {
 
     expect(source).not.toMatch(/<img[\s/>]/);
     if (revocationAwareConsumers.has(path)) {
-      expect(source).toContain('from "@/lib/media/url"');
+      expect(source).toMatch(/from ['"]@\/lib\/media\/url['"]/);
       expect(source).toContain("unoptimized={isPrivateMediaDeliveryUrl(");
     } else {
       expect(source).not.toContain("unoptimized");

@@ -26,6 +26,11 @@ export type Actor =
   | AuthenticatedActor
   | Readonly<{kind: "system"; userId: null; source: "stripe-webhook"}>;
 
+// The one shared `Actor` value for reads made on behalf of an unauthenticated visitor (public
+// homepage sections, marketing pages). Previously copy-pasted as a local
+// `const anonymous = {kind: 'anonymous', userId: null} as const;` in four separate files.
+export const ANONYMOUS_ACTOR: Readonly<{kind: "anonymous"; userId: null}> = {kind: "anonymous", userId: null};
+
 export class AuthorizationError extends Error {
   readonly code = "FORBIDDEN";
 

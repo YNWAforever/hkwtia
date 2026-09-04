@@ -1,12 +1,16 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import {ExternalLink, MessageCircle, Send, Star, X} from "lucide-react";
+import {ExternalLink, Send, Star, X} from "lucide-react";
+import {usePathname} from "next/navigation";
 import {type FormEvent, useEffect, useId, useRef, useState} from "react";
 
 import {Button} from "@/components/ui/button";
+import {Arrow} from "@/components/wt/arrow";
 import type {ConciergeLabels} from "@/lib/ai/concierge-labels";
 import {CONCIERGE_OPEN_EVENT} from "@/lib/ai/concierge-open";
+import {type ConciergePrompts, resolveConciergePromptSection} from "@/lib/ai/concierge-prompts";
+import {localizedPath} from "@/lib/urls";
 import {cn} from "@/lib/utils";
 
 export type {ConciergeLabels} from "@/lib/ai/concierge-labels";
@@ -33,6 +37,12 @@ type Props = Readonly<{
   labels: ConciergeLabels;
   /** Absent when Turnstile is not configured; the challenge is then skipped. */
   turnstileSiteKey?: string;
+  /**
+   * Optional so the label contract (`ConciergeLabels`) stays a closed 31-key tuple and the
+   * widget's own suite keeps compiling. Absent means no prompt list and no transparency link.
+   */
+  prompts?: ConciergePrompts;
+  transparencyLabel?: string;
 }>;
 
 const TURNSTILE_SCRIPT_SRC =
@@ -181,7 +191,13 @@ async function readSse(
   }
 }
 
-export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
+export function ConciergeWidget({
+  locale,
+  labels,
+  turnstileSiteKey,
+  prompts,
+  transparencyLabel,
+}: Props) {
   const dialogId = useId();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const turnstileRef = useRef<HTMLDivElement>(null);
@@ -212,6 +228,17 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
   >({});
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileFailed, setTurnstileFailed] = useState(false);
+  // The donor keys its prompt set on path[0]. Read during render, never resolved once into
+  // state: this widget is mounted by app/[locale]/(public)/layout.tsx, which survives every
+  // in-app navigation, so a value captured at mount would still serve the first route's
+  // prompts after the reader had clicked through the header, the mega menu and the footer.
+  // `next/navigation` rather than next-intl's hook, for two reasons: the latter needs locale
+  // context that tests/unit/concierge-widget.test.tsx does not provide, and it strips the `/zh`
+  // prefix that resolveConciergePromptSection expects to strip itself. Next's hook is
+  // useContext(PathnameContext) with a null default, so a bare render outside the App Router
+  // gets null rather than throwing. Presentation only — nothing here reaches the action.
+  const pathname = usePathname();
+  const sectionPrompts = prompts?.[resolveConciergePromptSection(pathname ?? "/")] ?? [];
 
   useEffect(() => {
     mountedRef.current = true;
@@ -517,10 +544,27 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
           aria-label={labels.launcher}
           aria-controls={dialogId}
           aria-expanded={open}
-          className="fixed touch-manipulation bottom-[calc(1rem+env(safe-area-inset-bottom))] right-[calc(1rem+env(safe-area-inset-right))] z-40 inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg motion-safe:transition-[opacity,transform] motion-safe:duration-200 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 active:opacity-90"
+          className="concierge-trigger fixed touch-manipulation bottom-[calc(1rem+env(safe-area-inset-bottom))] right-[calc(1rem+env(safe-area-inset-right))] z-40 inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg motion-safe:transition-[opacity,transform] motion-safe:duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 active:opacity-90"
         >
-          <MessageCircle aria-hidden="true" className="size-5" />
-          <span>{labels.launcher}</span>
+          {/* Both class families on purpose: `.concierge-trigger` and its `span` rule style this
+              inside the public route group, where the port is loaded, and the Tailwind
+              utilities are the fallback in the portal, where it is not (errata E-11). They only
+              back the port up, never override it: `hover:bg-primary/90` was dropped because at
+              specificity (0,2,0) it beat `.concierge-trigger` (0,1,0) and repainted the donor
+              ink on hover, and the port declares no `.concierge-trigger:hover` of its own — so
+              the donor pill keeps its colour. `hover:opacity-90` is the one hover effect that
+              does not repaint that ink: `.concierge-trigger` declares no `opacity`, so it
+              layers over both renderings rather than overriding either, and it matches the
+              `active:opacity-90` already here. Without it the portal launcher, which never
+              loads the port, would have no hover affordance at all. The label must stay a bare
+              text node — `.concierge-trigger span` turns any span into the 38px badge. */}
+          <span
+            aria-hidden="true"
+            className="inline-grid size-9 shrink-0 place-items-center rounded-full bg-white font-serif text-[15px] font-bold text-primary"
+          >
+            W+
+          </span>
+          {labels.launcher}
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -561,9 +605,35 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
               aria-live="polite"
               className="min-h-40 flex-1 space-y-4 overflow-y-auto overscroll-contain overflow-x-hidden px-4 py-4"
             >
+              {/* Openers only while the transcript is empty. The donor keeps `.prompt-list`
+                  beside the answer (commit f91ecc5 :1050); hkwtia drops it once a real
+                  conversation exists, because re-offering "How can WiseTech help my
+                  organisation?" underneath the reader's own third question reads as the
+                  assistant having lost the thread. */}
               {messages.length === 0 && !disabledState ? (
                 <li className="text-sm leading-6 text-muted-foreground">
                   {labels.empty}
+                  {sectionPrompts.length > 0 ? (
+                    <div className="mt-3 grid gap-2">
+                      {sectionPrompts.map((prompt) => (
+                        <button
+                          key={prompt}
+                          type="button"
+                          className="flex min-h-11 touch-manipulation items-center justify-between gap-3 rounded-md border border-border px-3 py-2 text-left text-sm text-foreground hover:border-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+                          onClick={() => {
+                            // Fills the composer instead of sending: `submit` is the only path
+                            // that runs the contact-email and Turnstile gates, and WP-2 changes
+                            // no runtime behaviour (errata E-23).
+                            setDraft(prompt);
+                            textareaRef.current?.focus();
+                          }}
+                        >
+                          {prompt}
+                          <Arrow />
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
                 </li>
               ) : null}
               {messages.map((message) => (
@@ -676,6 +746,18 @@ export function ConciergeWidget({locale, labels, turnstileSiteKey}: Props) {
                 </li>
               ) : null}
             </ol>
+
+            {transparencyLabel === undefined ? null : (
+              <p className="px-4 pb-2 text-xs leading-5 text-muted-foreground">
+                <a
+                  className="inline-flex min-h-11 touch-manipulation items-center gap-1 underline decoration-muted-foreground/50 underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+                  href={localizedPath(locale, "/ai-transparency")}
+                >
+                  {transparencyLabel}
+                  <Arrow />
+                </a>
+              </p>
+            )}
 
             <div aria-live="assertive" className="px-4">
               {error ? (

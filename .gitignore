@@ -31,4 +31,7 @@ playwright-report/
 
 .legacy-capture/
 
+# superpowers:brainstorming visual-companion session artifacts (local, per-session)
+.superpowers/
+
 content/milestones.draft.json

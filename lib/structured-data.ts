@@ -1,4 +1,4 @@
-import type {Event, FAQPage, Organization, WithContext} from 'schema-dts';
+import type {Event, FAQPage, Organization, WebSite, WithContext} from 'schema-dts';
 
 import {siteConfig} from '@/config/site';
 import type {EventRecord} from '@/content/schemas';
@@ -10,15 +10,36 @@ export type FaqItem = Readonly<{
   answer: string;
 }>;
 
+// E-68: reads siteConfig.contact -- the English machine-readable record -- never
+// Footer.addressLines, which is the per-locale printed authority for what a reader sees.
 export function buildOrganizationData(): WithContext<Organization> {
+  const {contact} = siteConfig;
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: siteConfig.name,
-    alternateName: siteConfig.shortName,
+    alternateName: ['WiseTech Hong Kong', 'HKWTA', 'WTIA'],
     description: siteConfig.defaultDescription,
     url: absoluteUrl('/'),
     logo: absoluteUrl(siteConfig.defaultImage),
+    email: contact.email,
+    ...(contact.phone ? {telephone: contact.phone} : {}),
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: contact.addressLines.slice(0, -1).join(', '),
+      addressLocality: contact.addressLines.at(-1),
+      addressCountry: 'HK',
+    },
+  };
+}
+
+export function buildWebSiteData(): WithContext<WebSite> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: siteConfig.name,
+    url: absoluteUrl('/'),
+    inLanguage: ['en-HK', 'zh-Hant-HK'],
   };
 }
 

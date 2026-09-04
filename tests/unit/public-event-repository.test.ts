@@ -1,7 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
 import type {Event} from "@/lib/db/server-schema";
-import {getEventBySlug, getPublicEventBySlug, listFeaturedPublicEvents, listMemberEvents, listPublicEvents} from "@/lib/db/repos/events";
+import {countPublicEvents, getEventBySlug, getPublicEventBySlug, listFeaturedPublicEvents, listMemberEvents, listPublicEvents} from "@/lib/db/repos/events";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 const anonymous: Actor = {kind: "anonymous", userId: null};
@@ -62,5 +62,25 @@ describe("repository-backed Event visibility", () => {
 
   it("maps malformed public slugs to a safe not-found result", async () => {
     await expect(getEventBySlug(anonymous, "../private", rows)).resolves.toBeNull();
+  });
+
+  it("counts past and open published public Events with no 12-item cap", async () => {
+    const pastCount = 15;
+    const manyPast = Array.from({length: pastCount}, (_unused, index) =>
+      event(`past-${index}`, {startsAt: new Date("2030-01-01T07:00:00.000Z"), endsAt: null}));
+    const openEvents = [event("open-a", {startsAt: new Date("2030-01-02T10:00:00.000Z"), endsAt: null})];
+    const source = [...manyPast, ...openEvents];
+
+    await expect(countPublicEvents(anonymous, {status: "past", asOf, source})).resolves.toBe(pastCount);
+    await expect(countPublicEvents(anonymous, {status: "open", asOf, source})).resolves.toBe(openEvents.length);
+  });
+
+  it("excludes member-only and unpublished Events from the count", async () => {
+    const source = [
+      event("draft-public", {published: false, startsAt: new Date("2030-01-01T07:00:00.000Z"), endsAt: null}),
+      event("published-member", {memberOnly: true, startsAt: new Date("2030-01-01T07:00:00.000Z"), endsAt: null}),
+      event("published-public", {startsAt: new Date("2030-01-01T07:00:00.000Z"), endsAt: null}),
+    ];
+    await expect(countPublicEvents(anonymous, {status: "past", asOf, source})).resolves.toBe(1);
   });
 });

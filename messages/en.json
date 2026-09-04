@@ -9,24 +9,46 @@
   "Navigation": {
     "brand": {
       "publicName": "WiseTech Hong Kong",
-      "operator": "Operated by WTIA"
+      "descriptor": "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association"
     },
     "groups": {
       "eventsProgrammes": {
-        "label": "Events & Programmes",
-        "description": "Find current events, awards and programmes backed by WTIA records."
+        "label": "Events & Programmes"
       },
       "membershipEcosystem": {
-        "label": "Membership & Ecosystem",
-        "description": "Join the association and discover reviewed member solutions."
+        "label": "Membership & Ecosystem"
       },
       "impactInsights": {
-        "label": "Impact & Insights",
-        "description": "Read published updates and inspect WTIA's AI evidence."
+        "label": "Impact & Insights"
       },
       "aboutWtia": {
-        "label": "About WTIA",
-        "description": "Understand the association, its history, governance and contact channels."
+        "label": "About WTIA"
+      }
+    },
+    "feature": {
+      "eventsProgrammes": {
+        "label": "Open now",
+        "title": "See what is open before you plan.",
+        "copy": "Registrations, awards and programme rounds appear here as WTIA records confirm them.",
+        "cta": "Browse what is open"
+      },
+      "membershipEcosystem": {
+        "label": "Member platform",
+        "title": "Bring a real business need into the network.",
+        "copy": "Prepare a buyer brief without exposing confidential information or implying a guaranteed match.",
+        "cta": "Submit a challenge"
+      },
+      "impactInsights": {
+        "label": "Technology + Wisdom",
+        "title": "Practical progress needs responsible choices.",
+        "copy": "Explore human accountability, data protection, security, transparency and ongoing evaluation.",
+        "cta": "AI transparency"
+      },
+      "aboutWtia": {
+        "label": "The association",
+        "title": "Read the association's own record.",
+        "copy": "History milestones, the chairman's message, committees and contact channels are published as WTIA holds them.",
+        "cta": "Read the history"
       }
     },
     "columns": {
@@ -60,6 +82,14 @@
       "join": "Join WiseTech",
       "memberSignIn": "Member sign in"
     },
+    "mobile": {
+      "priority": "Priority actions",
+      "utilities": "Utility navigation",
+      "exploreEcosystem": "Explore the ecosystem"
+    },
+    "explore": "Explore",
+    "viewOverview": "View overview",
+    "search": "Search WiseTech",
     "openMenu": "Open navigation",
     "closeMenu": "Close navigation",
     "menuTitle": "Navigation",
@@ -79,15 +109,35 @@
   "Footer": {
     "brand": {
       "publicName": "WiseTech Hong Kong",
-      "operator": "Operated by WTIA",
+      "descriptor": "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association",
       "homeLabel": "WiseTech Hong Kong home",
       "logoAlt": "WTIA"
     },
+    "tagline": "Technology + Wisdom. Hong Kong + The World.",
+    "legalLine": "WiseTech Hong Kong — the evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association.",
+    "columns": {
+      "explore": "Explore",
+      "membership": "Membership",
+      "about": "About",
+      "contact": "Contact"
+    },
+    "newsletter": {
+      "eyebrow": "Activity updates",
+      "title": "What should Hong Kong build next?",
+      "emailLabel": "Work email",
+      "placeholder": "Work email",
+      "submit": "Prepare activity-update email",
+      "success": "Your email app should open with a prepared request. This page does not create a subscription automatically.",
+      "error": "Enter a valid work email.",
+      "mailSubject": "WiseTech activity updates",
+      "mailBody": "Please add {email} to the WiseTech activity update list."
+    },
     "summary": "WiseTech Hong Kong connects technology businesses, practitioners and programmes through WTIA's verified public services.",
-    "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
-    "journeys": "Explore",
-    "connect": "Contact",
-    "legal": "Legal",
+    "addressLines": [
+      "4/F, KOHO",
+      "73-75 Hung To Road",
+      "Kwun Tong, Hong Kong"
+    ],
     "privacy": "Privacy statement",
     "copyright": "© {year} WiseTech Hong Kong. Operated by WTIA. All rights reserved."
   },
@@ -275,79 +325,253 @@
     "invalidDescription": "The link may have expired or already been replaced. Contact WTIA if you still need help."
   },
   "Home": {
-    "metaTitle": "WTIA | Innovate Hong Kong",
-    "metaDescription": "Connecting Hong Kong and Greater Bay Area innovation to global markets.",
-    "eyebrow": "Innovate Hong Kong",
-    "title": "Bridging GBA innovation to the global stage.",
-    "question": "Where can Hong Kong innovation go next?",
-    "summary": "The cross-border platform connecting Hong Kong, the Greater Bay Area and Asia to global technology markets.",
-    "imageAlt": "Hong Kong technology community",
-    "actions": {
-      "events": "Find an event",
-      "membership": "Explore membership",
+    "metaTitle": "WiseTech Hong Kong",
+    "metaDescription": "WiseTech Hong Kong connects trusted AI+ adoption, events, members, solutions, programmes and GBA market opportunities.",
+    "hero": {
+      "eyebrow": "WiseTech Hong Kong",
+      "title": "How can Hong Kong lead the AI+ era?",
+      "lead": "WiseTech Hong Kong is the evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association — connecting corporates, SMEs, startups, professionals, academia, investors, public bodies, GBA partners and international markets.",
+      "imageAlt": "Hong Kong technology community",
+      "actions": {
+        "findEvent": "Find Event or Activity",
+        "join": "Join WiseTech",
+        "members": "Explore Members & Solutions"
+      },
+      "note": "WiseTech Hong Kong · AI+ Industry Platform",
       "discover": "Discover WiseTech"
     },
-    "highlightsTitle": "What is happening now",
-    "highlightsIntro": "Published opportunities and stories from the WTIA ecosystem.",
-    "highlights": {
-      "event": {
-        "label": "Next event",
-        "view": "View event",
-        "empty": "No upcoming public event is available.",
-        "unavailable": "Event information is temporarily unavailable."
+    "openNow": {
+      "eyebrow": "Open now",
+      "title": "What can you join today?",
+      "intro": "Only activities with confirmed dates, eligibility and registration details appear here.",
+      "statusLabel": "Current availability",
+      "empty": {
+        "title": "No activities are currently open.",
+        "copy": "Register for activity updates, or bring the team a defined business challenge to help shape a useful future session."
       },
-      "news": {
-        "label": "Latest news",
-        "view": "Read news",
-        "empty": "No published news is available.",
-        "unavailable": "News is temporarily unavailable."
-      },
-      "showcase": {
-        "label": "Member solution",
-        "view": "Explore solution",
-        "empty": "No published member solution is available.",
-        "unavailable": "Member solutions are temporarily unavailable."
+      "updatesAction": "Get activity updates",
+      "challengeAction": "Submit a challenge"
+    },
+    "pathways": {
+      "eyebrow": "Your pathway",
+      "title": "Where do you want to create impact?",
+      "intro": "Different ambitions need different routes. Start with the outcome you want, not the structure of an institution.",
+      "items": {
+        "corporates": {
+          "title": "For Corporates",
+          "copy": "Find solutions, talent and innovation partners.",
+          "benefits": "Buyer challenges · Executive briefings · Industry councils",
+          "cta": "Explore membership"
+        },
+        "smes": {
+          "title": "For SMEs",
+          "copy": "Turn AI opportunities into practical improvements.",
+          "benefits": "Readiness · Clinics · Trusted providers",
+          "cta": "Find an event"
+        },
+        "startups": {
+          "title": "For Startups",
+          "copy": "Meet buyers, investors and regional partners.",
+          "benefits": "Structured visibility · Demo days · Market entry",
+          "cta": "Explore the showcase"
+        },
+        "professionals": {
+          "title": "For Professionals",
+          "copy": "Build skills, influence industry and expand your network.",
+          "benefits": "Councils · Certification · Mentorship",
+          "cta": "Explore membership"
+        },
+        "gba": {
+          "title": "For GBA & Global Partners",
+          "copy": "Connect with Hong Kong technology and market opportunities.",
+          "benefits": "Soft landing · Delegations · Buyer matching",
+          "cta": "Explore Launch Pad"
+        }
       }
     },
-    "featuresTitle": "Built for connection and growth",
-    "featuresIntro": "WTIA brings the technology community together around practical opportunities.",
-    "partnerWallTitle": "Our partners",
-    "partnerWallIntro": "Approved organisations supporting the WTIA community.",
-    "features": {
-      "connect": {
-        "title": "Connect",
-        "description": "Build relationships across industry, investors and regional partners."
+    "eventsJourney": {
+      "eyebrow": "Upcoming Events & Activities",
+      "title": "A useful event is a journey, not a single date.",
+      "intro": "See how discovery, preparation and follow-through work, or explore what is currently open.",
+      "stages": {
+        "before": {
+          "title": "Before",
+          "copy": "Recommendations, pricing, capacity and matchmaking."
+        },
+        "during": {
+          "title": "During",
+          "copy": "Check-in, sessions, questions and meetings."
+        },
+        "after": {
+          "title": "After",
+          "copy": "Resources, introductions, follow-up and outcomes."
+        }
       },
-      "accelerate": {
-        "title": "Accelerate",
-        "description": "Turn ideas into market opportunities through focused programmes."
+      "statusLabel": "Current availability",
+      "emptyTitle": "No activities are currently open.",
+      "viewAllAction": "View Open Now & Past Events"
+    },
+    "marketProducts": {
+      "eyebrow": "Demand + Supply",
+      "title": "Connections built for implementation",
+      "directory": {
+        "label": "Member Directory",
+        "title": "Meet the people shaping what comes next.",
+        "copyEmpty": "The directory is ready for approved public profiles, with controlled visibility and consent-based introductions. No live member records are shown yet.",
+        "copyAvailable": "Published member solutions are now live, with controlled visibility and consent-based introductions.",
+        "action": "Discover members"
       },
-      "represent": {
-        "title": "Represent",
-        "description": "Give the wireless technology sector a clear, collective voice."
+      "marketplace": {
+        "label": "AI Solutions Marketplace",
+        "title": "Find AI ready for the real world.",
+        "copyEmpty": "The planned marketplace will compare maturity, deployment, security, market coverage and reviewed evidence. No live solution records are shown yet.",
+        "copyAvailable": "Published solutions are now live to compare, by use case, deployment and reviewed evidence.",
+        "action": "Explore solutions"
       }
     },
-    "programsTitle": "Programmes and awards",
-    "programsIntro": "Explore WTIA initiatives supporting talent, innovation and industry recognition.",
-    "programs": {
-      "cpai": {
-        "title": "CPAI",
-        "description": "A focused programme supporting applied innovation."
-      },
-      "hkict": {
-        "title": "HKICT Awards",
-        "description": "Recognising excellence across Hong Kong's technology sector."
-      },
-      "tct": {
-        "title": "TCT",
-        "description": "Connecting technology, capability and talent."
-      },
-      "asa": {
-        "title": "Asia Smart App Awards",
-        "description": "Celebrating outstanding smart applications across Asia."
+    "outcomes": {
+      "eyebrow": "Outcome stories",
+      "title": "Results should be specific, attributable and permission-cleared.",
+      "intro": "A case is published only when the participating organisation, challenge, action, reporting period and result can be stated responsibly.",
+      "frameworkLabel": "Publishing framework",
+      "frameworkSteps": "Challenge → Connection → Action → Result",
+      "statusLabel": "Current availability",
+      "emptyTitle": "No public case study is available yet.",
+      "emptyCopy": "The Association will add outcome stories only after the evidence, attribution and permission to publish have been confirmed. This avoids turning participation into an unsupported success claim.",
+      "action": "Discuss a measurable initiative"
+    },
+    "ecosystem": {
+      "eyebrow": "AI + Industry",
+      "title": "One ecosystem. Every industry moving forward.",
+      "intro": "Six industry pathways connect practical questions to technology, knowledge, programmes and market access.",
+      "selectedLabel": "Selected industry pathway",
+      "enterAction": "Enter this ecosystem",
+      "focusAreas": ["Industry challenges", "Relevant solution categories", "Programmes + events"],
+      "items": {
+        "commerce": {
+          "name": "Commerce + Professional Services",
+          "brief": "Trusted automation, intelligence and client delivery."
+        },
+        "manufacturing": {
+          "name": "Manufacturing + Robotics",
+          "brief": "From operational challenge to practical deployment."
+        },
+        "health": {
+          "name": "Health + Life Sciences",
+          "brief": "Human-centred adoption with evidence and care."
+        },
+        "responsibleAi": {
+          "name": "Responsible AI + Cybersecurity",
+          "brief": "Governance, privacy and resilience by design."
+        },
+        "retail": {
+          "name": "Retail + Creative Industries",
+          "brief": "New customer experiences and commercial models."
+        },
+        "education": {
+          "name": "Education + Future of Work",
+          "brief": "Skills, productivity and opportunity for people."
+        }
       }
     },
-    "viewProgram": "View programme"
+    "programmeShowcase": {
+      "eyebrow": "Programmes + awards",
+      "title": "Participation that turns into progress",
+      "intro": "Existing programme equity is retained and reframed around clear outcomes, audiences and the next action.",
+      "eventSeriesLabel": "Event series",
+      "credentialLabel": "Credential",
+      "editionsFact": "{count, plural, one {# edition} other {# editions}} since {year}",
+      "credentialFact": "Issued directly by WTIA",
+      "action": "View programme",
+      "items": {
+        "cpai": {
+          "name": "CPAI",
+          "description": "A focused programme supporting applied innovation."
+        },
+        "hkict": {
+          "name": "HKICT Awards",
+          "description": "Recognising excellence across Hong Kong's technology sector."
+        },
+        "tct": {
+          "name": "TCT",
+          "description": "Connecting technology, capability and talent."
+        },
+        "asa": {
+          "name": "Asia Smart App Awards",
+          "description": "Celebrating outstanding smart applications across Asia."
+        }
+      }
+    },
+    "gbaGateway": {
+      "eyebrow": "GBA Gateway",
+      "title": "Hong Kong expertise. GBA opportunity. Global ambition.",
+      "copy": "A practical route for market entry, soft landing, delegations, buyer matching and long-term regional partnerships.",
+      "openCohortAction": "View open cohort",
+      "exploreAction": "Explore Launch Pad"
+    },
+    "impact": {
+      "eyebrow": "Published evidence",
+      "title": "Clear facts, with their context attached.",
+      "intro": "These figures describe available WTIA programme, event and network records. They are not presented as current Association-wide totals.",
+      "sourceLabel": "Source note",
+      "source": "Source: hkwtia.org published records.",
+      "sourceLink": "Visit hkwtia.org",
+      "pastEvents": {
+        "label": "completed event records",
+        "definition": "Definition: completed WTIA events published on this site",
+        "period": "As of {date}"
+      },
+      "publishedPartners": {
+        "label": "published partner records",
+        "definition": "Definition: published partner records across supporting, regional and media categories",
+        "period": "As of {date}"
+      },
+      "asaRegions": {
+        "label": "Asian regions represented",
+        "definition": "Definition: regions represented in the most recent Asia Smart Innovation Awards edition with a recorded count",
+        "period": "{year} edition"
+      }
+    },
+    "archiveStories": {
+      "eyebrow": "From the WTIA archive",
+      "title": "Real people. Real programmes. A platform with history.",
+      "intro": "A look back at the people, programmes and regional exchanges that have shaped the WTIA community.",
+      "galleryAction": "View the official photo gallery",
+      "captionLabel": "WTIA Event Highlights"
+    },
+    "legacyNetwork": {
+      "eyebrow": "Built on real relationships",
+      "title": "A network with history — and a future.",
+      "note": "These partner logos come from WTIA's published supporting, regional and media network records. Inclusion does not imply a current relationship unless separately confirmed.",
+      "viewAllAction": "View all partners",
+      "previewNote": "Showing {shown} of {total} records in this category.",
+      "tabs": {
+        "supporting": "Supporting Organizations",
+        "regional": "Regional Partners",
+        "media": "Media Partners"
+      }
+    },
+    "conversionPaths": {
+      "eyebrow": "Take part",
+      "title": "Choose the relationship that fits your goal.",
+      "intro": "Membership supports ongoing participation. Partnership starts with a defined audience, initiative and intended outcome.",
+      "membership": {
+        "label": "Membership",
+        "title": "Build an active route into the ecosystem.",
+        "copy": "Choose a pathway for professionals, startups, SMEs, corporates or strategic partners. Current fees and final entitlements are provided by the membership team.",
+        "points": ["Relevant activities and knowledge", "Profile and visibility choices", "A practical first-90-day journey"],
+        "primaryAction": "Compare Membership",
+        "secondaryAction": "Prepare a membership enquiry"
+      },
+      "partnership": {
+        "label": "Partnership",
+        "title": "Co-create a useful industry initiative.",
+        "copy": "Work with the Association on a business challenge, programme, knowledge initiative, event or market-access pathway with a defined purpose.",
+        "points": ["Purpose and audience defined first", "Roles and public claims agreed", "Next steps and outcomes made clear"],
+        "primaryAction": "Start a Partnership",
+        "secondaryAction": "Meet the Network"
+      }
+    }
   },
   "About": {
     "metaTitle": "About WTIA",
@@ -1250,7 +1474,14 @@
     }
   },
   "Concierge": {
-    "launcher": "Ask WTIA",
+    "launcher": "Ask WiseTech",
+    "transparency": "How this assistant works",
+    "prompts": {
+      "home": ["How can WiseTech help my organisation?", "Show the AI+ industry pathways"],
+      "membership": ["Which membership suits my organisation?", "What benefits do startups receive?"],
+      "showcase": ["Find providers serving SMEs", "How do introductions work?"],
+      "events": ["Which event is relevant to retail?", "Show Cantonese events"]
+    },
     "title": "WTIA Concierge",
     "description": "Ask about WTIA membership, events, programmes and support.",
     "close": "Close Concierge",

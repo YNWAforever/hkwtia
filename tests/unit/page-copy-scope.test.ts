@@ -47,8 +47,53 @@ describe("page copy scope", () => {
     const sizes = pageCopyCatalogSizes();
 
     expect(sizes).toEqual({
-      // PR5 added the two editable partner-wall labels.
-      Home: 45,
+      // PR5 added the two editable partner-wall labels. WP-3 Task 2 added the 9
+      // editable hero fields (eyebrow/title/lead/imageAlt/note/discover plus the
+      // three hero actions) that components/home/hero.tsx reads. WP-3 Task 3 added
+      // the 8 editable Open Now fields (eyebrow/title/intro/statusLabel plus the
+      // empty-state title/copy and the two interest actions) that
+      // components/home/open-now.tsx reads. WP-3 Task 4 added 23 editable Pathways
+      // fields (eyebrow/title/intro plus title/copy/benefits/cta for each of the 5
+      // audience cards) that components/home/pathways.tsx reads. WP-3 Task 5 added
+      // 12 editable Events Journey fields (eyebrow/title/intro, title/copy for each
+      // of the 3 Before/During/After stages, plus statusLabel/emptyTitle/
+      // viewAllAction) that components/home/events-journey.tsx reads. WP-3 Task 6
+      // added 12 editable Market Products fields (eyebrow/title, plus label/title/
+      // copyEmpty/copyAvailable/action for each of the directory and marketplace
+      // panels) that components/home/market-products.tsx reads. WP-3 Task 7 added
+      // 9 editable Outcomes fields (eyebrow/title/intro/frameworkLabel/
+      // frameworkSteps/statusLabel/emptyTitle/emptyCopy/action) that
+      // components/home/outcomes.tsx reads. WP-3 Task 8 added 20 editable
+      // Ecosystem fields (eyebrow/title/intro/selectedLabel/enterAction, the 3
+      // focusAreas array elements, plus name/brief for each of the 6 industries)
+      // that components/home/ecosystem.tsx reads. WP-3 Task 9 added 16 editable
+      // Programme Showcase fields (eyebrow/title/intro/eventSeriesLabel/
+      // credentialLabel/editionsFact/credentialFact/action, plus name/description
+      // for each of the 4 programme cards) that components/home/
+      // programme-showcase.tsx reads. WP-3 Task 10 added 5 editable GBA Gateway
+      // fields (eyebrow/title/copy/openCohortAction/exploreAction) that
+      // components/home/gba-gateway.tsx reads. WP-3 Task 11 added 15 editable
+      // Impact Evidence fields (eyebrow/title/intro/sourceLabel/source/sourceLink,
+      // plus label/definition/period for each of the 3 metric tiles) that
+      // components/home/impact-evidence.tsx reads. WP-3 Task 12 added 5 editable
+      // Archive Stories fields (eyebrow/title/intro/galleryAction/captionLabel)
+      // that components/home/archive-stories.tsx reads. WP-3 Task 13 added 8
+      // editable Legacy Network fields (eyebrow/title/note/viewAllAction/
+      // previewNote, plus tabs.supporting/tabs.regional/tabs.media) that
+      // components/home/legacy-network.tsx reads. WP-3 Task 14 added 19 editable
+      // Conversion Paths fields (eyebrow/title/intro, plus label/title/copy/
+      // primaryAction/secondaryAction and the 3 points array elements for each of
+      // the membership and partnership panels) that
+      // components/home/conversion-paths.tsx reads. It is the last of the 13
+      // homepage sections.
+      // Task 15 retired the pre-WP-3 flat Home.* keys (eyebrow/title/question/summary/
+      // imageAlt/actions, highlightsTitle/highlightsIntro/highlights,
+      // featuresTitle/featuresIntro/features, partnerWallTitle/partnerWallIntro,
+      // programsTitle/programsIntro/programs, viewProgram -- 43 leaves) once page.tsx was
+      // rewritten as a composition of the 13 home/* sections and nothing referenced them
+      // any more, leaving the 2 metaTitle/metaDescription leaves plus the 13 sections'
+      // 161 editable fields already accounted for above (206 - 43 = 163).
+      Home: 163,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -66,7 +111,7 @@ describe("page copy scope", () => {
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(241);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(359);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

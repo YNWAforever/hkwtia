@@ -1,7 +1,7 @@
 import {expect, test} from "@playwright/test";
 
 test("desktop navigation supports trigger traversal, open, Escape, active state, and focus return", async ({page}, testInfo) => {
-  await page.setViewportSize({width: 1120, height: 900});
+  await page.setViewportSize({width: 1360, height: 900});
   await page.goto("/events");
   const nav = page.getByRole("navigation", {name: "Primary navigation"});
   const triggers = nav.getByRole("button");
@@ -17,11 +17,29 @@ test("desktop navigation supports trigger traversal, open, Escape, active state,
   await expect(triggers.nth(3)).toBeFocused();
   await triggers.nth(3).press("Home");
   await expect(triggers.nth(0)).toBeFocused();
+
+  // Enter, not ArrowDown, is what opens a Radix menu: NavigationMenuTrigger's own onKeyDown
+  // guards the entry key behind `open` (node_modules/@radix-ui/react-navigation-menu/
+  // dist/index.mjs:338-344), so ArrowDown on a closed trigger falls through to the roving focus
+  // group and merely moves to the next trigger. This step used to press ArrowDown and then
+  // assert on an unscoped `getByRole("link", {name: "Events"}).first()`, which resolved to the
+  // footer's own "Events" journey link — always visible, never `aria-current` — so the open
+  // never happened and only the attribute assertion ever failed.
+  await triggers.nth(0).press("Enter");
+  await expect(triggers.nth(0)).toHaveAttribute("aria-expanded", "true");
+  const panel = nav.locator(".mega-menu-v2");
+  await expect(panel).toBeVisible();
+  const eventsLink = nav.getByRole("link", {name: "Events", exact: true}).first();
+  await expect(eventsLink).toBeVisible();
+  await expect(eventsLink).toHaveAttribute("aria-current", "page");
+
+  // ArrowDown is the entry move: it hands focus to the panel's first tabbable element, which in
+  // the donor grammar is the heading's "View overview" link, ahead of the columns.
   await triggers.nth(0).press("ArrowDown");
-  await expect(page.getByRole("link", {name: "Events", exact: true}).first()).toBeVisible();
-  await expect(page.getByRole("link", {name: "Events", exact: true}).first()).toHaveAttribute("aria-current", "page");
+  await expect(panel.getByRole("link", {name: "View overview"})).toBeFocused();
   await page.screenshot({path: testInfo.outputPath("desktop-events-menu.png"), fullPage: true});
   await page.keyboard.press("Escape");
+  await expect(triggers.nth(0)).toHaveAttribute("aria-expanded", "false");
   await expect(triggers.nth(0)).toBeFocused();
 });
 
@@ -93,8 +111,15 @@ for (const width of [320, 375, 768, 1120, 1440]) {
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow).toBeLessThanOrEqual(0);
 
-      if (width < 1024) {
+      // The ported stylesheet collapses the desktop navigation at `@media(max-width:1240px)`
+      // (app/styles/wisetech.css:1085-1090), so the boundary is inclusive: 1240 is a mobile
+      // width, and 1120 now exercises this branch rather than the desktop one.
+      if (width <= 1240) {
         const trigger = page.getByRole("button", {name: /open navigation|開啟導覽選單/i});
+        // Assert visibility before measuring: `boundingBox()` on a `display: none` control waits
+        // out the whole 180s test timeout, which turns "no navigation surface at this width" into
+        // an unreadable stall instead of a named failure.
+        await expect(trigger).toBeVisible();
         const box = await trigger.boundingBox();
         expect(box?.width).toBeGreaterThanOrEqual(44);
         expect(box?.height).toBeGreaterThanOrEqual(44);
@@ -113,6 +138,7 @@ for (const width of [320, 375, 768, 1120, 1440]) {
           }
         }
       } else {
+        // Above the ported 1240px collapse the desktop navigation is the visible surface.
         await expect(page.getByRole("navigation", {name: /Primary navigation|主要導覽/})).toBeVisible();
       }
     });
@@ -123,7 +149,7 @@ test("locale switch preserves path, repeated query values, and fragment", async 
   await page.goto("/events?topic=ai&topic=cloud#main-content");
   await page.getByRole("button", {name: "Switch to Chinese"}).first().click();
   await expect(page).toHaveURL(/\/zh\/events\?topic=ai&topic=cloud#main-content$/);
-  await page.setViewportSize({width: 1120, height: 900});
+  await page.setViewportSize({width: 1360, height: 900});
   await expect(page.getByRole("button", {name: "活動及計劃"})).toHaveAttribute("data-current", "true");
 });
 
@@ -134,8 +160,30 @@ for (const [path, group] of [
   ["/about/history", "About WTIA"],
 ] as const) {
   test(`${path} marks ${group} as the active group`, async ({page}) => {
-    await page.setViewportSize({width: 1120, height: 900});
+    await page.setViewportSize({width: 1360, height: 900});
     await page.goto(path);
     await expect(page.getByRole("button", {name: group})).toHaveAttribute("data-current", "true");
   });
 }
+
+test("the header floats over the hero, then goes solid past 56px", async ({page}) => {
+  await page.setViewportSize({width: 1360, height: 900});
+  await page.goto("/");
+  const header = page.locator("header.site-header");
+
+  // Playwright manages a dev server with no database, so getActive rejects and the layout
+  // renders no announcement: the header carries the donor's `.no-announcement` modifier and
+  // sits at top: 0. An announcement is covered by tests/unit/announcement.test.tsx instead.
+  await expect(header).toHaveClass(/no-announcement/);
+  await expect(header).toHaveAttribute("data-variant", "overlay");
+  await expect(header).not.toHaveClass(/scrolled/);
+
+  await page.mouse.wheel(0, 400);
+  await expect(header).toHaveClass(/scrolled/);
+
+  await page.mouse.wheel(0, -400);
+  await expect(header).not.toHaveClass(/scrolled/);
+
+  await page.goto("/events");
+  await expect(page.locator("header.site-header")).toHaveAttribute("data-variant", "solid");
+});

@@ -8,8 +8,16 @@ import type {PublicEventProjection} from "@/lib/events/public";
 
 function presentationComponents() {
   const {EventDetail} = tsxRequire("../../components/marketing/event-detail.tsx", import.meta.url);
-  const {HomePartnerWall} = tsxRequire("../../components/marketing/home-partner-wall.tsx", import.meta.url);
-  return {EventDetail, HomePartnerWall};
+  const {LegacyNetwork} = tsxRequire("../../components/home/legacy-network.tsx", import.meta.url);
+  // Resolved through the same tsxRequire call graph as LegacyNetwork itself (rather than a
+  // top-level `import {NextIntlClientProvider} from "next-intl"` in this file), because
+  // LegacyNetwork's `Link` (@/i18n/navigation, next-intl's createNavigation) calls useLocale()
+  // against a React context object created inside next-intl's own module instance. A
+  // top-level ESM import of "next-intl" in this spec resolves a second, distinct module
+  // instance with its own context object, so a Provider from that copy would not satisfy
+  // useLocale() in LegacyNetwork's copy and renderToStaticMarkup would throw.
+  const {NextIntlClientProvider} = tsxRequire("next-intl", import.meta.url);
+  return {EventDetail, LegacyNetwork, NextIntlClientProvider};
 }
 
 const EVENT_MEDIA_URL = "/api/media/10000000-0000-4000-8000-000000000001";
@@ -85,7 +93,12 @@ test("keeps the bilingual Membership catalog honest without repository credentia
     const response = await page.goto(membershipCase.path);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", {name: membershipCase.title})).toBeVisible();
-    await expect(page.getByRole("status")).toHaveText(membershipCase.unavailable);
+    // Scoped to the page's own landmark: the WP-2 footer newsletter island mounts a second,
+    // idle `role="status"` region on every public route and never unmounts it, deliberately --
+    // a live region the reader's software first meets when its text arrives may never announce
+    // that text (components/layout/footer-newsletter.tsx:86-94). The shell's region is not this
+    // case's subject; the catalog's own unavailable notice is.
+    await expect(page.locator("main#main-content").getByRole("status")).toHaveText(membershipCase.unavailable);
     await expect(page.getByRole("heading", {name: membershipCase.faq})).toBeVisible();
   }
 });
@@ -98,7 +111,18 @@ test("opens Contact Concierge, focuses the message, and restores the launcher af
 
   const response = await page.goto("/contact");
   expect(response?.status()).toBe(200);
-  const launcher = page.getByRole("button", {name: "Ask WiseTech"});
+  // The subject is the contact page's own ContactConciergeLauncher, not the shell's fixed
+  // launcher: this case belongs to the /contact journey, and before WP-2 the role query named
+  // only that button because `Concierge.launcher` still read "Ask WTIA". Task 1 renamed it to
+  // match `Contact.conciergeLauncher`, so two controls now answer to "Ask WiseTech" on this
+  // route. That duplicate accessible name is intentional -- one name for one action, repeated
+  // by the shell -- so the fix is to scope the query to the page's own landmark, the same way
+  // the Membership case above does, and not to rename either control.
+  //
+  // Scoping is not about focus return: both controls restore focus after Escape, because
+  // ContactConciergeLauncher focuses itself before opening the panel
+  // (components/marketing/contact-concierge-launcher.tsx:9).
+  const launcher = page.locator("main#main-content").getByRole("button", {name: "Ask WiseTech"});
   await launcher.click();
 
   await expect(page.getByRole("dialog", {name: "WTIA Concierge"})).toBeVisible();
@@ -110,7 +134,7 @@ test("opens Contact Concierge, focuses the message, and restores the launcher af
 });
 
 test("renders exact own-origin private Event and partner media without optimization", async ({page}) => {
-  const {EventDetail, HomePartnerWall} = presentationComponents();
+  const {EventDetail, LegacyNetwork, NextIntlClientProvider} = presentationComponents();
   const eventHtml = renderToStaticMarkup(createElement(EventDetail, {
     event: eventFixtureWithPrivateHero,
     locale: "en",
@@ -118,10 +142,20 @@ test("renders exact own-origin private Event and partner media without optimizat
   }));
   await expectExactPrivateMedia(page, eventHtml, EVENT_MEDIA_URL);
 
-  const partnerHtml = renderToStaticMarkup(createElement(HomePartnerWall, {
-    partners: [partnerFixtureWithPrivateLogo],
-    title: "Approved partners",
-    intro: "Display-safe partner presentation fixture.",
-  }));
-  await expectExactPrivateMedia(page, partnerHtml, PARTNER_MEDIA_URL);
+  const legacyNetworkHtml = renderToStaticMarkup(createElement(NextIntlClientProvider, {locale: "en"}, createElement(LegacyNetwork, {
+    groups: [
+      {category: "supporting", partners: [partnerFixtureWithPrivateLogo]},
+      {category: "regional", partners: []},
+      {category: "media", partners: []},
+    ],
+    labels: {
+      eyebrow: "Built on real relationships",
+      title: "A network with history — and a future.",
+      note: "Display-safe partner presentation fixture.",
+      viewAllAction: "View all partners",
+      previewNote: "Showing {shown} of {total} records in this category.",
+      tabs: {supporting: "Supporting Organizations", regional: "Regional Partners", media: "Media Partners"},
+    },
+  })));
+  await expectExactPrivateMedia(page, legacyNetworkHtml, PARTNER_MEDIA_URL);
 });

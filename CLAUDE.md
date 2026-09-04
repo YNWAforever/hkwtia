@@ -59,7 +59,7 @@ caused production incidents recorded in the AGENTS.md changelog.
 
 ## Conventions
 
-- Server Components by default; `'use client'` only for interactive browser behaviour (25 files).
+- Server Components by default; `'use client'` only for interactive browser behaviour (40 files).
 - Files are kebab-case, without exception (378/378).
 - Strict TypeScript; no `any` unless the code carries a reasoned comment.
 - Zod for input validation at every boundary.

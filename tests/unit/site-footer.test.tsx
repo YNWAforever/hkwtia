@@ -1,0 +1,383 @@
+import {render, screen, within, fireEvent} from "@testing-library/react";
+import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
+
+/**
+ * `route` steers the shared pathname the footer's client island reads during render, and
+ * `rawOverrides` replaces one `t.raw` value with a shape the bundles do not carry. Both are
+ * hoisted so the `vi.mock` factories below — which run before this module's own body — can
+ * close over them; a value captured at module load could not be changed between two renders
+ * of the same mounted tree, which is exactly what a soft navigation is.
+ */
+const {route, rawOverrides} = vi.hoisted(() => ({
+  route: {pathname: "/"},
+  rawOverrides: new Map<string, unknown>(),
+}));
+
+vi.mock("next-intl/server", async () => {
+  const {readFileSync} = await import("node:fs");
+  const {resolve} = await import("node:path");
+  const bundles = {
+    en: JSON.parse(readFileSync(resolve(process.cwd(), "messages/en.json"), "utf8")),
+    "zh-HK": JSON.parse(readFileSync(resolve(process.cwd(), "messages/zh-HK.json"), "utf8")),
+  } as const;
+  const read = (locale: "en" | "zh-HK", namespace: string, key: string) =>
+    key.split(".").reduce<unknown>(
+      (current, segment) => (current as Record<string, unknown>)[segment],
+      (bundles[locale] as Record<string, unknown>)[namespace],
+    );
+  return {
+    getTranslations: async ({locale, namespace}: {locale: "en" | "zh-HK"; namespace: string}) =>
+      Object.assign(
+        (key: string, values?: Record<string, string | number>) =>
+          Object.entries(values ?? {}).reduce(
+            (text, [name, replacement]) => text.replace(`{${name}}`, String(replacement)),
+            String(read(locale, namespace, key)),
+          ),
+        {
+          raw: (key: string) => rawOverrides.has(`${namespace}.${key}`)
+            ? rawOverrides.get(`${namespace}.${key}`)
+            : read(locale, namespace, key),
+        },
+      ),
+  };
+});
+vi.mock("next/image", () => ({
+  default: ({priority: _priority, ...props}: React.ImgHTMLAttributes<HTMLImageElement> & {priority?: boolean}) => <img {...props} />,
+}));
+vi.mock("@/i18n/navigation", () => ({
+  usePathname: () => route.pathname,
+  useRouter: () => ({replace: vi.fn()}),
+  Link: ({href, ...props}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {href: string}) => <a href={href} {...props} />,
+}));
+vi.mock("next/navigation", () => ({useSearchParams: () => new URLSearchParams()}));
+
+import {SiteFooter} from "@/components/layout/site-footer";
+import {siteConfig} from "@/config/site";
+
+const assign = vi.fn();
+
+beforeEach(() => {
+  assign.mockReset();
+  route.pathname = "/";
+  rawOverrides.clear();
+  vi.spyOn(window, "location", "get").mockReturnValue({...window.location, assign} as unknown as Location);
+});
+afterEach(() => vi.restoreAllMocks());
+
+/** The newsletter block, addressed the way a reader reaches it. */
+async function renderFooter() {
+  const view = render(await SiteFooter({locale: "en"}));
+  const footer = screen.getByRole("contentinfo");
+  const input = within(footer).getByLabelText("Work email");
+  return {
+    view,
+    // A soft navigation re-renders the persistent layout; it does not remount it. Awaiting the
+    // server component again is what makes each pass a fresh element: React bails out of
+    // re-rendering a subtree whose element is referentially identical to the last one, so
+    // rerender(sameElement) would assert nothing (tests/unit/concierge-shell.test.tsx:80-82).
+    navigateTo: async (pathname: string) => {
+      route.pathname = pathname;
+      view.rerender(await SiteFooter({locale: "en"}));
+    },
+    footer,
+    input,
+    form: input.closest("form")!,
+    // Both live regions are queried before any submit: a region the reader's software only
+    // meets at the moment its text arrives is a region that may never announce it.
+    status: within(footer).getByRole("status"),
+    alert: within(footer).getByRole("alert"),
+    submit: () => fireEvent.click(within(footer).getByRole("button", {name: "Prepare activity-update email"})),
+    type: (value: string) => fireEvent.change(input, {target: {value}}),
+  };
+}
+
+describe("SiteFooter", () => {
+  it("renders four donor columns, the address and the bottom row", async () => {
+    render(await SiteFooter({locale: "en"}));
+    const footer = screen.getByRole("contentinfo");
+
+    const columns = footer.querySelectorAll(".footer-links > div");
+    expect(columns).toHaveLength(4);
+    expect([...columns].map((column) => column.querySelector("strong")?.textContent)).toEqual([
+      "Explore", "Membership", "About", "Contact",
+    ]);
+
+    // The printed address is `Footer.addressLines` from the message bundle, never
+    // config/site.ts. The old assertion looped over `siteConfig.contact.addressLines` and so
+    // proved nothing about the bundle: it passed because the English bundle happens to carry
+    // the same three lines. Both are pinned now -- what the footer prints, and the config
+    // record it has to agree with in English -- and the Chinese list, which is a different,
+    // shorter list, has a case of its own below (errata E-68).
+    const address = footer.querySelector("address")!;
+    const printed = [...address.querySelectorAll("span")].map((line) => line.textContent);
+    expect(printed).toEqual(["4/F, KOHO", "73-75 Hung To Road", "Kwun Tong, Hong Kong"]);
+    expect([...siteConfig.contact.addressLines]).toEqual(printed);
+    expect(within(footer).getByRole("link", {name: siteConfig.contact.email}))
+      .toHaveAttribute("href", `mailto:${siteConfig.contact.email}`);
+    expect(within(footer).getByRole("link", {name: "+852 2989 9164"}))
+      .toHaveAttribute("href", "tel:+85229899164");
+    expect(siteConfig.contact.phone).toBe("+852 2989 9164");
+
+    expect(within(footer).getByText("Technology + Wisdom. Hong Kong + The World.")).toBeInTheDocument();
+    expect(within(footer).getByRole("link", {name: "Privacy statement"})).toHaveAttribute("href", "/privacy");
+    expect(within(footer).getByRole("button", {name: "Switch to Chinese"})).toBeInTheDocument();
+    expect(within(footer).queryByRole("link", {name: /terms|accessibility/i})).toBeNull();
+    expect(footer.querySelector(".footer-bottom small")?.textContent)
+      .toContain(`© ${new Date().getFullYear()} WiseTech Hong Kong.`);
+  });
+
+  /**
+   * The conditional in components/layout/site-footer.tsx:162 exists for a future unset phone
+   * — `SiteContact.phone` stays optional in config/site.ts precisely so that state can recur —
+   * and app/[locale]/(public)/contact/page.tsx mirrors the same check. Neither branch had a
+   * regression test for the unset case, so a later edit that dropped the `undefined` guard (and
+   * crashed the public page per CLAUDE.md's "degrade, not 500" rule) would have shipped green.
+   * Mutating the shared config for one render and restoring it afterward is the accepted
+   * pattern in this file (see the deleted `phone`-mutation test this replaces, and its footer
+   * counterpart in tests/unit/contact-concierge-launcher.test.tsx).
+   */
+  it("omits the tel: line when phone is unset", async () => {
+    const contact = siteConfig.contact as {phone?: string};
+    const original = contact.phone;
+    delete contact.phone;
+    try {
+      render(await SiteFooter({locale: "en"}));
+      const footer = screen.getByRole("contentinfo");
+      expect(within(footer).queryByRole("link", {name: /^\+852/})).toBeNull();
+      expect(footer.querySelector('a[href^="tel:"]')).toBeNull();
+    } finally {
+      contact.phone = original;
+    }
+  });
+
+  /**
+   * The Chinese address was never pinned. It is not a translation of the English three lines --
+   * it is two lines in Chinese address order -- so a bundle edit could have shortened, reordered
+   * or emptied it and every footer assertion would have stayed green (errata E-68).
+   */
+  it("prints the Chinese address from the zh-HK bundle", async () => {
+    render(await SiteFooter({locale: "zh-HK"}));
+    const address = screen.getByRole("contentinfo").querySelector("address")!;
+    expect([...address.querySelectorAll("span")].map((line) => line.textContent))
+      .toEqual(["香港觀塘鴻圖道 73-75 號", "KOHO 4 樓"]);
+  });
+
+  it("prepares an email instead of subscribing, and reports both outcomes", async () => {
+    const {footer, input, form, status, alert, submit, type} = await renderFooter();
+
+    type("not-an-email");
+    submit();
+    expect(alert).toHaveTextContent("Enter a valid work email.");
+    expect(assign).not.toHaveBeenCalled();
+
+    type("reader@example.com");
+    submit();
+    expect(status).toHaveTextContent("This page does not create a subscription automatically.");
+    expect(assign).toHaveBeenCalledTimes(1);
+    const target = assign.mock.calls[0]![0] as string;
+    expect(target.startsWith(`mailto:${siteConfig.contact.email}?`)).toBe(true);
+    expect(decodeURIComponent(target)).toContain("reader@example.com");
+    expect(alert).toBeEmptyDOMElement();
+
+    // The success panel replaces the form visually, but the button the reader just activated
+    // must not vanish out from under the focus ring: the form stays in the tree and focus is
+    // moved somewhere it can be read (WCAG 2.4.3).
+    expect(footer.contains(form)).toBe(true);
+    expect(form).toHaveAttribute("hidden");
+    expect(status).toHaveFocus();
+    expect(input.closest("form")).toBe(form);
+  });
+
+  /**
+   * Submitting the same wrong address twice must say so twice. React batches the reset and the
+   * re-flag into one commit, so the alert's words are identical across both attempts; only a
+   * replaced child node is a mutation the live region can observe.
+   */
+  it("re-announces when the same invalid address is submitted again", async () => {
+    const {alert, submit, type} = await renderFooter();
+
+    type("not-an-email");
+    submit();
+    const firstAnnouncement = alert.firstElementChild;
+    expect(firstAnnouncement).not.toBeNull();
+    expect(alert).toHaveTextContent("Enter a valid work email.");
+
+    submit();
+    expect(alert.firstElementChild).not.toBe(firstAnnouncement);
+    expect(alert).toHaveTextContent("Enter a valid work email.");
+  });
+
+  it.each([
+    ["@", false],
+    ["@@", false],
+    [" @ ", false],
+    ["a@b", false],
+    ["reader@example.co", true],
+  ])("treats %s as a usable address: %s", async (value, accepted) => {
+    const {alert, submit, type} = await renderFooter();
+
+    type(value);
+    submit();
+    expect(assign).toHaveBeenCalledTimes(accepted ? 1 : 0);
+    expect(alert).toHaveTextContent(accepted ? "" : "Enter a valid work email.");
+  });
+
+  it("links the validation message to the field only while it is showing", async () => {
+    const {input, alert, submit, type} = await renderFooter();
+
+    expect(input).not.toHaveAttribute("aria-describedby");
+    expect(input).toHaveAttribute("aria-invalid", "false");
+
+    type("not-an-email");
+    submit();
+    expect(alert.id).not.toBe("");
+    expect(input).toHaveAttribute("aria-describedby", alert.id);
+    expect(input).toHaveAttribute("aria-invalid", "true");
+
+    type("reader@example.com");
+    expect(input).not.toHaveAttribute("aria-describedby");
+  });
+
+  /** `$&`, `` $` `` and friends are replacement patterns; a typed address must stay literal. */
+  it("keeps a $ pattern in the address out of the replacement", async () => {
+    const {submit, type} = await renderFooter();
+
+    type("a$&b@example.com");
+    submit();
+    const body = decodeURIComponent(assign.mock.calls[0]![0] as string);
+    expect(body).toContain("a$&b@example.com");
+    expect(body).not.toContain("{email}");
+  });
+
+  /**
+   * The form's own no-script route is inert, not working: `next.config.ts:41` sends
+   * `form-action 'self'` on `/:path*` (:153), and a `mailto:` action matches no source in that
+   * list, so the browser refuses the submission — no navigation, no query string. The link is
+   * therefore the route that functions, with and without script, and it carries the subject
+   * the blocked form could never deliver. Navigation is not what `form-action` governs, and
+   * this partial policy declares no `default-src`, so nothing constrains following it.
+   */
+  it("offers a working mail route that does not depend on the script", async () => {
+    const {footer, form, submit, type} = await renderFooter();
+
+    const fallback = within(footer).getByRole("link", {name: "Prepare activity-update email"});
+    expect(fallback).toHaveAttribute(
+      "href",
+      `mailto:${siteConfig.contact.email}?subject=${encodeURIComponent("WiseTech activity updates")}`,
+    );
+
+    // Still offered after a successful handoff: the success panel replaces the form, and a
+    // reader whose mail client never opened would otherwise be left with no route at all.
+    type("reader@example.com");
+    submit();
+    expect(form).toHaveAttribute("hidden");
+    expect(within(footer).getByRole("link", {name: "Prepare activity-update email"})).toBe(fallback);
+
+    // Deleting the inert action is not a tidy-up: a form with no action submits to its own URL,
+    // which `form-action 'self'` permits, so a no-script submit would reload the public page
+    // with the reader's address in the query string — the class of leak next.config.ts:134-135
+    // calls load-bearing. Pin the scheme, not the string: the guard is about the origin.
+    expect(form.getAttribute("action")).toMatch(/^mailto:/);
+  });
+
+  /**
+   * `t.raw` is untyped by construction, and this footer renders on every public route, so a
+   * bundle where `addressLines` is missing or reshaped used to throw during the render of the
+   * whole public site. CLAUDE.md's rule for public pages is to degrade, not to 500: the address
+   * block goes, the rest of the footer serves.
+   */
+  it.each([
+    ["missing", undefined],
+    ["a bare string", "4/F, KOHO"],
+    ["an object", {street: "4/F, KOHO"}],
+    ["an array holding a non-string", ["4/F, KOHO", 73]],
+    ["an array holding a blank line", ["4/F, KOHO", "   "]],
+  ])("renders no address block when addressLines is %s", async (_shape, value) => {
+    rawOverrides.set("Footer.addressLines", value);
+    render(await SiteFooter({locale: "en"}));
+    const footer = screen.getByRole("contentinfo");
+
+    expect(footer.querySelector("address")).toBeNull();
+    // Degraded, not broken: the column that owns the address still carries its other contacts.
+    expect(within(footer).getByRole("link", {name: siteConfig.contact.email}))
+      .toHaveAttribute("href", `mailto:${siteConfig.contact.email}`);
+    expect(within(footer).getByText("Technology + Wisdom. Hong Kong + The World.")).toBeInTheDocument();
+  });
+
+  /**
+   * The same `t.raw` hazard one step later. `newsletter.mailBody` is not dereferenced during
+   * the render — the island only reads it inside the submit handler — so a bad shape does not
+   * 500 the public site the way `addressLines` did. It costs the reader the handoff instead:
+   * `undefined.replace` and `{}.replace` are TypeErrors thrown inside the click, so no mail
+   * client opens and the address they typed is gone. The bare-string case is the one a type
+   * check alone would wave through: it is a legal string that carries no `{email}`, so the
+   * draft would reach WTIA naming nobody.
+   *
+   * Each case asserts the handoff still happens, that the address is in the body, and that no
+   * `undefined`/`[object Object]` reached a real reader's mail client.
+   */
+  it.each([
+    ["missing", undefined],
+    ["an object", {greeting: "Please add me"}],
+    ["an array", ["Please add {email}"]],
+    ["a number", 42],
+    ["a string with no placeholder", "Please add me to the list."],
+  ])("still prepares a usable draft when mailBody is %s", async (_shape, value) => {
+    rawOverrides.set("Footer.newsletter.mailBody", value);
+    const {submit, type} = await renderFooter();
+
+    type("reader@example.com");
+    submit();
+
+    expect(assign).toHaveBeenCalledTimes(1);
+    const target = decodeURIComponent(assign.mock.calls[0]![0] as string);
+    expect(target.startsWith(`mailto:${siteConfig.contact.email}?`)).toBe(true);
+    expect(target).toContain("subject=WiseTech activity updates");
+    expect(target).toContain("body=reader@example.com");
+    expect(target).not.toContain("undefined");
+    expect(target).not.toContain("[object Object]");
+    expect(target).not.toContain("{email}");
+  });
+
+  /** The shipped bundle is not the fallback: a good value is passed through untouched. */
+  it("uses the bundle's own mailBody when it carries the placeholder", async () => {
+    const {submit, type} = await renderFooter();
+
+    type("reader@example.com");
+    submit();
+
+    const target = decodeURIComponent(assign.mock.calls[0]![0] as string);
+    expect(target).toContain("body=Please add reader@example.com to the WiseTech activity update list.");
+  });
+
+  /**
+   * The island is mounted by app/[locale]/(public)/layout.tsx, which survives every in-app
+   * navigation, so a success panel held in state hid the form on every other public page for
+   * the rest of the session. Resetting on the route makes the persistent island behave like
+   * the per-page form a reader takes it for — the same defect the Concierge fixed by reading
+   * the route during render (components/ai/concierge-widget.tsx:230-241).
+   */
+  it("returns to the form when the reader moves to another public page", async () => {
+    const {footer, input, form, status, navigateTo, submit, type} = await renderFooter();
+
+    type("reader@example.com");
+    submit();
+    expect(status).toHaveTextContent("This page does not create a subscription automatically.");
+    expect(form).toHaveAttribute("hidden");
+
+    await navigateTo("/events");
+
+    expect(footer.contains(form)).toBe(true);
+    expect(form).not.toHaveAttribute("hidden");
+    expect(status).toBeEmptyDOMElement();
+    expect(input).toHaveValue("");
+  });
+
+  it("keeps the Chinese footer bilingual", async () => {
+    render(await SiteFooter({locale: "zh-HK"}));
+    const footer = screen.getByRole("contentinfo");
+    expect(within(footer).getByText("探索")).toBeInTheDocument();
+    expect(footer.querySelector("address")!.textContent).toContain("KOHO");
+    expect(within(footer).getByText("Technology + Wisdom. Hong Kong + The World.")).toBeInTheDocument();
+  });
+});

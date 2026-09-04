@@ -16,21 +16,32 @@ const AccordionItem = React.forwardRef<
 ));
 AccordionItem.displayName = AccordionPrimitive.Item.displayName;
 
+type AccordionTriggerProps = React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger> & {
+  /** Replaces the chevron; the donor mobile menu uses a text `+` / `−` styled by CSS. */
+  marker?: React.ReactNode;
+};
+
 const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
->(({className, children, ...props}, ref) => (
+  AccordionTriggerProps
+>(({className, children, marker, ...props}, ref) => (
   <AccordionPrimitive.Header className="flex">
     <AccordionPrimitive.Trigger
       ref={ref}
+      // No size, padding or weight here: the only consumer is the mobile menu, and
+      // app/styles/wisetech-shell.css sets min-height, padding and the donor's 400-weight serif
+      // on `.mobile-accordion > h3 > button`, so utilities for those were dead weight that
+      // rendered the serif heading at 600. A future consumer brings its own through `className`.
       className={cn(
-        "group flex min-h-12 min-w-0 flex-1 items-center justify-between py-3 text-left text-base font-semibold break-words outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--shell-focus))] data-[current=true]:text-shell-blue",
+        "group flex min-w-0 flex-1 items-center justify-between text-left break-words outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--shell-focus))] data-[current=true]:text-shell-blue",
         className,
       )}
       {...props}
     >
       {children}
-      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" aria-hidden="true" />
+      {marker ?? (
+        <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" aria-hidden="true" />
+      )}
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ));

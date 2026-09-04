@@ -25,7 +25,9 @@ for (const path of pages) {
 }
 
 test("open desktop and mobile navigation surfaces pass axe", async ({page}) => {
-  await page.setViewportSize({width: 1120, height: 900});
+  // Above the ported `@media(max-width:1240px)` collapse (app/styles/wisetech.css:1085-1090);
+  // at 1120 the trigger is `display: none` and the click would assert nothing.
+  await page.setViewportSize({width: 1360, height: 900});
   await page.goto("/");
   await page.getByRole("navigation", {name: "Primary navigation"}).getByRole("button").first().click();
   await expectNoSeriousOrCritical(page);
@@ -34,6 +36,105 @@ test("open desktop and mobile navigation surfaces pass axe", async ({page}) => {
   await page.goto("/zh");
   await page.getByRole("button", {name: "開啟導覽選單"}).click();
   await page.getByRole("button", {name: "活動及計劃"}).click();
+  await expectNoSeriousOrCritical(page);
+});
+
+/**
+ * The case above opens /zh, where no group is current, so it never renders a trigger with
+ * `data-current="true"` — a colour path of its own. Tailwind emits AccordionTrigger's
+ * `data-[current=true]:text-shell-blue` as `.data-\[current\=true\]\:text-shell-blue[data-current="true"]`,
+ * specificity (0,2,0), which outranks the companion sheet's `.mobile-accordion > h3 > button
+ * { color: white }` (0,1,2); `.event-first` (0,2,2) shields the events group, so only a route
+ * inside one of the other three groups reaches it.
+ *
+ * The contrast half is computed here rather than left to axe, because **axe cannot score any
+ * text in this dialog**: `.mobile-menu`'s background is a `linear-gradient`, so axe-core files
+ * every node inside it under `results.incomplete` with `messageKey: "bgGradient"` and
+ * `contrastRatio: 0` instead of under `results.violations`, and `expectNoSeriousOrCritical`
+ * reads violations only. An axe assertion here would be permanently vacuous. This measures the
+ * ratio the way axe would if it could — the trigger's colour against every stop of the panel
+ * gradient, worst stop deciding — so a regression to `--shell-blue` (2.17:1) fails loudly.
+ *
+ * Only the *declared* stops are measured, not the interpolated pixels between them. That holds
+ * here on two conditions, both true of this panel today. First, sRGB interpolation is monotonic
+ * per channel, so on the two-stop gradient it actually carries
+ * (`linear-gradient(180deg,#0a3d67 0%,#082e4d 100%)`, app/styles/wisetech.css:1070) every pixel
+ * between the stops has a relative luminance between theirs. Second — and this is the part that
+ * makes the shortcut valid rather than merely tidy — the foreground's luminance lies outside
+ * that range: white text over two dark stops, so contrast falls monotonically as the background
+ * lightens and the minimum is at a declared stop. A foreground *between* the stops would put the
+ * minimum at an interpolated pixel instead, where background and text meet in luminance, and so
+ * would a third stop lighter or darker than both neighbours. Either change means sampling the
+ * interpolation rather than the declarations.
+ */
+test("the current mobile group passes axe and keeps AA contrast on the donor gradient", async ({page}) => {
+  await page.setViewportSize({width: 375, height: 800});
+  await page.goto("/zh/membership");
+  await page.getByRole("button", {name: "開啟導覽選單"}).click();
+  const group = page.getByRole("button", {name: "會員與創科生態"});
+  // Without `data-current` this case covers nothing the one above does not, so assert the
+  // precondition rather than letting a future route change make it vacuous.
+  await expect(group).toHaveAttribute("data-current", "true");
+
+  const reading = await group.evaluate((trigger) => {
+    // Alpha is dropped on purpose: WCAG contrast is defined between opaque colours, and
+    // blending a translucent one needs the layer underneath, which this measurement does not
+    // have. Every colour it reads is opaque today (the trigger's `color`, the panel's two
+    // gradient stops), so dropping it changes nothing — but a future `rgba(...)` with a
+    // fractional fourth channel would make the ratio a fiction, so read it and let the
+    // assertion below fail loudly rather than scoring a colour that is not on screen.
+    //
+    // The alpha token keeps its `%` suffix. Both CSS alpha forms are legal and both can come
+    // back from getComputedStyle: the legacy `rgba(r, g, b, 0.72)` and the modern
+    // `rgb(r g b / 72%)`. Reading the fourth token as a bare number, as this did, scored
+    // `72% < 1` as false and waved a 72%-opaque colour through as opaque.
+    const tokens = (value: string) => value.match(/[\d.]+%?/g) ?? [];
+    const rgb = (value: string) => tokens(value).slice(0, 3).map(Number);
+    const translucent = (value: string) => {
+      const alpha = tokens(value)[3];
+      if (alpha === undefined) return false;
+      return alpha.endsWith("%") ? Number.parseFloat(alpha) < 100 : Number(alpha) < 1;
+    };
+    const relative = (channels: number[]) => {
+      const linear = channels.map((channel) => {
+        const scaled = channel / 255;
+        return scaled <= 0.03928 ? scaled / 12.92 : Math.pow((scaled + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+    };
+    const contrast = (a: number[], b: number[]) => {
+      const [light, dark] = [relative(a), relative(b)].sort((x, y) => y - x);
+      return (light + 0.05) / (dark + 0.05);
+    };
+    const colour = getComputedStyle(trigger).color;
+    const panel = trigger.closest(".mobile-menu") as HTMLElement;
+    const declared = getComputedStyle(panel).backgroundImage.match(/rgba?\([^)]+\)/g) ?? [];
+    const stops = declared.map(rgb);
+    return {
+      colour,
+      stops: stops.map((stop) => `rgb(${stop.join(", ")})`),
+      translucent: [colour, ...declared].filter(translucent),
+      // The guard proves it can still catch a violation. Every colour on this panel is opaque,
+      // so `translucent` above is satisfied vacuously and a helper that quietly stopped
+      // recognising alpha — as the bare-number version did for the `%` form — would read as a
+      // pass. These samples are the smallest thing that fails when that happens.
+      selfCheck: {
+        flags: ["rgb(255 255 255 / 72%)", "rgba(0, 0, 0, 0.5)", "rgba(0, 0, 0, 50%)"].filter(translucent),
+        clears: ["rgb(10, 61, 103)", "rgb(255 255 255 / 100%)", "rgba(0, 0, 0, 1)"].filter(translucent),
+      },
+      // A flat background would leave this empty; the assertion below then fails and says so,
+      // rather than silently passing on an empty `Math.min`.
+      worst: stops.length === 0 ? 0 : Math.min(...stops.map((stop) => contrast(rgb(colour), stop))),
+    };
+  });
+
+  expect(reading.stops.length, JSON.stringify(reading)).toBeGreaterThan(0);
+  expect(reading.selfCheck.flags, JSON.stringify(reading)).toHaveLength(3);
+  expect(reading.selfCheck.clears, JSON.stringify(reading)).toEqual([]);
+  expect(reading.translucent, JSON.stringify(reading)).toEqual([]);
+  expect(reading.worst, JSON.stringify(reading)).toBeGreaterThanOrEqual(4.5);
+
+  await group.click();
   await expectNoSeriousOrCritical(page);
 });
 

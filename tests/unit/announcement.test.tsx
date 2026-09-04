@@ -1,7 +1,7 @@
 import {readFileSync} from "node:fs";
 
 import {fireEvent, render, screen} from "@testing-library/react";
-import {describe, expect, it, vi} from "vitest";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import {AnnouncementBar} from "@/components/layout/announcement-bar";
 import {projectPersistedAnnouncement, resolveAnnouncement, toAnnouncementBarView} from "@/lib/public-shell/announcement";
@@ -106,18 +106,59 @@ describe("persisted announcement projection", () => {
 });
 
 describe("AnnouncementBar", () => {
-  it("renders localized text and CTA as a canonical anchor and dismisses only local state", () => {
-    const announcement = {id: "launch", href: "/events" as const, text: record.text["zh-HK"], ctaLabel: "查看活動"};
+  beforeEach(() => {
+    window.sessionStorage.clear();
+    document.body.innerHTML = "";
+    // The dismissal island stamps this on <html>, outside document.body, so clearing the body
+    // above does not reset it -- without this, a dismissal from one test could leak into the
+    // next.
+    delete document.documentElement.dataset.announcementDismissed;
+  });
+
+  const announcement = {id: "launch", href: "/events" as const, text: "瀏覽即將舉行的活動", ctaLabel: "查看活動"};
+
+  it("renders the donor bar and dismisses it for the session only", () => {
     render(<AnnouncementBar announcement={announcement} label="公告" dismissLabel="關閉公告" />);
 
-    expect(screen.getByRole("complementary", {name: "公告"})).toBeInTheDocument();
-    expect(screen.getByRole("complementary", {name: "公告"})).toHaveAttribute("aria-live", "polite");
-    expect(screen.getByRole("complementary", {name: "公告"})).toHaveAttribute("aria-atomic", "true");
-    expect(screen.getByRole("link", {name: "瀏覽即將舉行的活動 查看活動"})).toHaveAttribute("href", "/events");
-    expect(screen.getByRole("link", {name: "瀏覽即將舉行的活動 查看活動"})).toHaveClass("min-h-11", "min-w-11");
-    fireEvent.click(screen.getByRole("button", {name: "關閉公告"}));
+    const bar = screen.getByRole("complementary", {name: "公告"});
+    expect(bar).toHaveClass("announcement");
+    expect(bar).toHaveAttribute("aria-live", "polite");
+    expect(bar).toHaveAttribute("aria-atomic", "true");
+    expect(bar.querySelector(".announcement-dot")).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByText("瀏覽即將舉行的活動")).toBeInTheDocument();
+    expect(screen.getByRole("link", {name: "查看活動"})).toHaveAttribute("href", "/events");
+
+    const dismiss = screen.getByRole("button", {name: "關閉公告"});
+    expect(dismiss).toHaveClass("announcement-close");
+    fireEvent.click(dismiss);
+
     expect(screen.queryByRole("complementary", {name: "公告"})).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", {name: "關閉公告"})).not.toBeInTheDocument();
+    expect(bar).toHaveAttribute("data-dismissed", "true");
+    expect(document.documentElement.dataset.announcementDismissed).toBe("true");
+    expect(window.sessionStorage.getItem("hkwtia:announcement-dismissed")).toBe("launch");
     expect(document.cookie).toBe("");
+  });
+
+  it("stays dismissed for the same id after a remount and returns for a new one", () => {
+    window.sessionStorage.setItem("hkwtia:announcement-dismissed", "launch");
+    const first = render(<AnnouncementBar announcement={announcement} label="公告" dismissLabel="關閉公告" />);
+    expect(screen.queryByRole("complementary", {name: "公告"})).not.toBeInTheDocument();
+    expect(document.documentElement.dataset.announcementDismissed).toBe("true");
+    first.unmount();
+
+    render(<AnnouncementBar announcement={{...announcement, id: "second"}} label="公告" dismissLabel="關閉公告" />);
+    expect(screen.getByRole("complementary", {name: "公告"})).toBeInTheDocument();
+    expect(document.documentElement.dataset.announcementDismissed).toBeUndefined();
+  });
+
+  it("survives a sessionStorage that throws", () => {
+    const getItem = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    render(<AnnouncementBar announcement={announcement} label="Announcement" dismissLabel="Dismiss announcement" />);
+    expect(screen.getByRole("complementary", {name: "Announcement"})).toBeInTheDocument();
+    getItem.mockRestore();
   });
 
   it("renders nothing for a null provider result", () => {
@@ -125,9 +166,25 @@ describe("AnnouncementBar", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("keeps an arbitrary allowed token shrinkable and breakable at narrow widths", () => {
-    const announcement = {id: "long", href: "/events" as const, text: "a".repeat(180), ctaLabel: "View"};
-    render(<AnnouncementBar announcement={announcement} label="Announcement" dismissLabel="Dismiss announcement" />);
-    expect(screen.getByRole("link", {name: "a".repeat(180) + " View"})).toHaveClass("flex-1", "break-all");
+  // Named for the hook, not for wrapping: jsdom applies no stylesheet, so no unit test here can
+  // observe that a long token actually breaks. The declaration that does the breaking
+  // (`overflow-wrap: anywhere` in app/styles/wisetech-shell.css) is pinned by
+  // tests/unit/wisetech-css-port.test.ts. What is observable here is that the rendered element
+  // carries, unabbreviated, the exact class that rule selects — so a rename on either side is
+  // caught by one of the two tests.
+  it("renders an arbitrary allowed token in full on the element the wrapping rule selects", () => {
+    const token = "a".repeat(180);
+    render(<AnnouncementBar announcement={{...announcement, text: token}} label="Announcement" dismissLabel="Dismiss announcement" />);
+
+    const text = screen.getByText(token);
+    expect(text).toHaveClass("announcement-text");
+    // Not truncated or split by the server render: the whole token reaches the DOM, and the
+    // stylesheet is the only thing deciding where it breaks.
+    expect(text.textContent).toBe(token);
+
+    const shellOverrides = readFileSync("app/styles/wisetech-shell.css", "utf8");
+    for (const className of text.classList) {
+      expect(shellOverrides, className).toContain(`.${className} {`);
+    }
   });
 });
