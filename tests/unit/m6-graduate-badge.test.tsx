@@ -86,7 +86,10 @@ describe("M6 Gone Global public Showcase projection", () => {
     const {unmount} = render(<ShowcaseCard listing={listing(true)} locale={locale} labels={labels}/>);
     expect(screen.getByText(badge)).toBeInTheDocument();
     expect(screen.getByText(labels.premium)).toBeInTheDocument();
-    expect(screen.getByText(`${labels.memberSince} 2020-01-01`)).toBeInTheDocument();
+    // The restyled ShowcaseCard (WP-4 Group B) renders member-since as a donor `<dl><dt>/<dd>`
+    // pair rather than one text node, so the label and date are now separate elements.
+    expect(screen.getByText(labels.memberSince)).toBeInTheDocument();
+    expect(screen.getByText("2020-01-01")).toBeInTheDocument();
     unmount();
 
     render(<ShowcaseDetail listing={listing(true)} locale={locale} labels={{...labels, ...detailLabels}}/>);

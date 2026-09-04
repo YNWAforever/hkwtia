@@ -980,6 +980,67 @@
         "invalid": "Please check your details and try again.",
         "rateLimited": "Please try again later."
       }
+    },
+    "prompts": {
+      "aiConcierge": "AI concierge",
+      "cybersecurity": "Cybersecurity",
+      "crossBorderTrade": "Cross-border trade",
+      "cloudMigration": "Cloud migration",
+      "generativeAi": "Generative AI",
+      "fintech": "Fintech"
+    },
+    "needs": {
+      "customerService": "Customer service",
+      "cybersecurity": "Cybersecurity",
+      "tradeCompliance": "Trade & customs compliance",
+      "supplyChain": "Supply chain visibility",
+      "fintechPayments": "Fintech & payments",
+      "dataAnalytics": "Data & analytics",
+      "hrTalent": "HR & talent",
+      "marketingAutomation": "Marketing automation",
+      "legalCompliance": "Legal & regulatory compliance",
+      "smartManufacturing": "Smart manufacturing",
+      "sustainabilityEsg": "Sustainability & ESG",
+      "crossBorderTrade": "Cross-border trade"
+    },
+    "verification": {
+      "label": "Proposed badge definitions — not currently awarded",
+      "title": "How WTIA plans to verify showcased solutions",
+      "copy": "WTIA is developing a verification framework for showcased solutions. The badges below describe what each one would confirm once the framework is in place — none has been awarded yet.",
+      "badges": {
+        "verifiedDeployment": {
+          "title": "Verified deployment",
+          "copy": "Would confirm the solution has at least one active, confirmed deployment with a WTIA member organisation."
+        },
+        "reviewedEvidence": {
+          "title": "Reviewed evidence",
+          "copy": "Would confirm a case study or outcome evidence has been reviewed by WTIA staff before publication."
+        },
+        "dataHandling": {
+          "title": "Data handling disclosure",
+          "copy": "Would confirm the provider has disclosed how customer and business data is stored, processed and secured."
+        }
+      }
+    },
+    "pathways": {
+      "heading": "Two ways to engage the showcase",
+      "buyer": {
+        "label": "Looking for a solution",
+        "title": "Tell WTIA what you need.",
+        "copy": "Describe the business problem you are solving and WTIA staff will help connect you to a fitting member solution.",
+        "action": "Talk to WTIA"
+      },
+      "provider": {
+        "label": "Have a solution to list",
+        "title": "Manage your own showcase listing.",
+        "copy": "WTIA member companies can submit and manage their own listing directly. If you are not yet signed in, you will be asked to sign in first."
+      }
+    },
+    "interest": {
+      "eyebrow": "Stay involved",
+      "title": "See these solutions in person.",
+      "copy": "WTIA events regularly feature member solutions and the teams behind them.",
+      "action": "Browse events"
     }
   },
   "AiOps": {

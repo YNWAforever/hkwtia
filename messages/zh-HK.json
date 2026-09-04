@@ -980,6 +980,67 @@
         "invalid": "請檢查資料後再試。",
         "rateLimited": "請稍後再試。"
       }
+    },
+    "prompts": {
+      "aiConcierge": "AI 禮賓服務",
+      "cybersecurity": "網絡安全",
+      "crossBorderTrade": "跨境貿易",
+      "cloudMigration": "雲端遷移",
+      "generativeAi": "生成式 AI",
+      "fintech": "金融科技"
+    },
+    "needs": {
+      "customerService": "客戶服務",
+      "cybersecurity": "網絡安全",
+      "tradeCompliance": "貿易及海關合規",
+      "supplyChain": "供應鏈可視化",
+      "fintechPayments": "金融科技及支付",
+      "dataAnalytics": "數據分析",
+      "hrTalent": "人力資源及人才",
+      "marketingAutomation": "市場推廣自動化",
+      "legalCompliance": "法律及監管合規",
+      "smartManufacturing": "智能製造",
+      "sustainabilityEsg": "可持續發展及 ESG",
+      "crossBorderTrade": "跨境貿易"
+    },
+    "verification": {
+      "label": "建議中的認證標誌定義－目前尚未頒發任何認證",
+      "title": "WTIA 將如何驗證已展示的方案",
+      "copy": "WTIA 正在制訂方案展示的驗證框架。以下標誌說明框架落實後各項認證所代表的意思－目前尚未有任何方案獲頒發認證。",
+      "badges": {
+        "verifiedDeployment": {
+          "title": "已核實部署",
+          "copy": "將核實方案已在至少一間 WTIA 會員機構完成並持續運作中的部署。"
+        },
+        "reviewedEvidence": {
+          "title": "已審閱證據",
+          "copy": "將核實案例研究或成效證據已由 WTIA 職員審閱後才對外發布。"
+        },
+        "dataHandling": {
+          "title": "數據處理披露",
+          "copy": "將核實供應商已披露客戶及業務數據的儲存、處理及保安方式。"
+        }
+      }
+    },
+    "pathways": {
+      "heading": "兩種參與展示頁的方式",
+      "buyer": {
+        "label": "尋找方案",
+        "title": "告訴 WTIA 你的需要。",
+        "copy": "描述你要解決的業務問題，WTIA 職員將協助你聯繫合適的會員方案。",
+        "action": "聯絡 WTIA"
+      },
+      "provider": {
+        "label": "有方案想登記",
+        "title": "管理你自己的展示頁。",
+        "copy": "WTIA 會員公司可直接提交及管理自己的展示頁。如你尚未登入，系統將先要求你登入。"
+      }
+    },
+    "interest": {
+      "eyebrow": "保持參與",
+      "title": "親身認識這些方案。",
+      "copy": "WTIA 活動經常展示會員方案及其團隊。",
+      "action": "瀏覽活動"
     }
   },
   "AiOps": {

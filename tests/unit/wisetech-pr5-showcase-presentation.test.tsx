@@ -2,6 +2,7 @@ import {readFileSync} from "node:fs";
 
 import {render, screen} from "@testing-library/react";
 import {renderToStaticMarkup} from "react-dom/server";
+import type {ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import ShowcasePage from "@/app/[locale]/(public)/showcase/page";
@@ -9,11 +10,23 @@ import {ShowcaseDetail} from "@/components/marketing/showcase-detail";
 import type {PublicListing} from "@/lib/showcase/contracts";
 
 const showcase = vi.hoisted(() => ({listPublished: vi.fn()}));
+// The page now hands PageHero/ActionLink locale-relative paths and lets `@/i18n/navigation`'s
+// real Link add the `/zh` prefix itself (mirroring production, where pre-localizing here would
+// double-prefix). This mock has no request context to read the active locale from, so
+// `renderIndex` below stashes it here before each render and the mock applies the same
+// `/zh` prefix `localizedPath` would.
+const activeLocale = vi.hoisted(() => ({current: "en" as "en" | "zh-HK"}));
 
 vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: showcase}));
 vi.mock("next-intl/server", () => ({
   setRequestLocale: () => undefined,
   getTranslations: async () => (key: string) => key,
+}));
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => {
+    const localizedHref = activeLocale.current === "zh-HK" ? (href === "/" ? "/zh" : `/zh${href}`) : href;
+    return <a href={localizedHref} {...props}>{children}</a>;
+  },
 }));
 
 const listing: PublicListing = {
@@ -53,6 +66,7 @@ const detailLabels = {
 } as const;
 
 async function renderIndex(locale: "en" | "zh-HK"): Promise<string> {
+  activeLocale.current = locale;
   return renderToStaticMarkup(await ShowcasePage({
     params: Promise.resolve({locale}),
     searchParams: Promise.resolve({}),
