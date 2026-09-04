@@ -882,6 +882,35 @@
     "eyebrow": "Launch Pad",
     "title": "Go-global cohorts for technology teams.",
     "description": "Focused cohorts, practical market access, and clear next steps for Hong Kong technology teams expanding internationally.",
+    "breadcrumbCurrent": "Launch Pad",
+    "gbaOpening": {
+      "eyebrow": "GBA Gateway",
+      "title": "Hong Kong expertise. GBA opportunity. Global ambition.",
+      "copy": "A practical route for market entry, soft landing, delegations, buyer matching and long-term regional partnerships.",
+      "map": {
+        "hk": "HK",
+        "gz": "GZ",
+        "sz": "SZ"
+      }
+    },
+    "services": {
+      "marketEntry": {
+        "title": "Market entry",
+        "copy": "Structured guidance on registration, distribution and first commercial contracts across the Greater Bay Area."
+      },
+      "softLanding": {
+        "title": "Soft landing",
+        "copy": "Shared workspace introductions, local compliance orientation and practical first-90-day support for an incoming team."
+      },
+      "buyerMatching": {
+        "title": "Buyer matching",
+        "copy": "Warm introductions to landing partners and public buyers actively sourcing Hong Kong technology."
+      },
+      "delegations": {
+        "title": "Delegations",
+        "copy": "Organised study visits and delegation itineraries connecting cohorts with counterparts in Guangzhou and Shenzhen."
+      }
+    },
     "program": {
       "title": "A practical route to new markets",
       "intro": "Launch Pad brings selected teams together for structured market preparation, landing-partner connections, and peer learning.",
@@ -978,6 +1007,7 @@
       }
     },
     "clinic": {
+      "label": "Need help?",
       "title": "Need a funding or market-entry clinic?",
       "description": "Speak with WTIA about your next practical step."
     },

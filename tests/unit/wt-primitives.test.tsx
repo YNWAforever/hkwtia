@@ -287,3 +287,33 @@ describe("wt primitives", () => {
     expect(bare).not.toHaveClass("px-4");
   });
 });
+
+describe("RouteMap", () => {
+  it("renders the hero variant with four named, aria-hidden nodes inside .gba-map", async () => {
+    const {RouteMap} = await import("@/components/wt/route-map");
+    const {container} = render(
+      <RouteMap variant="hero" labels={{hk: "HK", gz: "GZ", sz: "SZ", world: "↗"}} />,
+    );
+    const wrapper = container.querySelector(".gba-map");
+    expect(wrapper).toHaveAttribute("aria-hidden", "true");
+    expect(wrapper?.querySelector(".hk-node")).toHaveTextContent("HK");
+    expect(wrapper?.querySelector(".gz-node")).toHaveTextContent("GZ");
+    expect(wrapper?.querySelector(".sz-node")).toHaveTextContent("SZ");
+    expect(wrapper?.querySelector(".world-node")).toHaveTextContent("↗");
+  });
+
+  it("renders the board variant with exactly three unlabelled nodes inside .route-map", async () => {
+    const {RouteMap} = await import("@/components/wt/route-map");
+    const {container} = render(
+      <RouteMap variant="board" labels={{hk: "HK", gz: "GZ", sz: "SZ"}} />,
+    );
+    const wrapper = container.querySelector(".route-map");
+    expect(wrapper).toHaveAttribute("aria-hidden", "true");
+    const spans = wrapper?.querySelectorAll("span") ?? [];
+    expect(spans).toHaveLength(3);
+    expect(spans[0]).toHaveTextContent("HK");
+    expect(spans[1]).toHaveTextContent("GZ");
+    expect(spans[2]).toHaveTextContent("SZ");
+    expect(wrapper?.querySelector(".world-node")).toBeNull();
+  });
+});
