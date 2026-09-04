@@ -19,11 +19,26 @@ export type EventCardProps = Readonly<{
   labels: EventCardLabels;
 }>;
 
+// `formatToParts` for {day: "numeric", month: "short"} interleaves a "literal" part between the
+// day/month values. For "en" that literal is just the separating space (e.g.
+// [month "Oct", literal " ", day "24"]) -- dropping it is correct. For "zh-HK" the literal is the
+// CJK unit marker itself (e.g. [month "10", literal "月", day "24", literal "日"]) -- dropping it
+// left the card rendering bare, unlabeled numbers ("10" over "24") with no indication of which was
+// the month and which was the day, unlike the adjacent `fullDate` aria-label. Appending the literal
+// immediately after a part only when it is non-whitespace keeps both locales correct without
+// hard-coding which locales use CJK markers.
 function dateBlockParts(value: string, locale: AppLocale): Readonly<{day: string; month: string}> {
   const parts = new Intl.DateTimeFormat(locale, {day: "numeric", month: "short", timeZone: "Asia/Hong_Kong"}).formatToParts(new Date(value));
+  const withTrailingUnit = (type: "day" | "month") => {
+    const index = parts.findIndex((part) => part.type === type);
+    if (index === -1) return "";
+    const next = parts[index + 1];
+    const unit = next?.type === "literal" && next.value.trim() !== "" ? next.value : "";
+    return parts[index].value + unit;
+  };
   return {
-    day: parts.find((part) => part.type === "day")?.value ?? "",
-    month: parts.find((part) => part.type === "month")?.value ?? "",
+    day: withTrailingUnit("day"),
+    month: withTrailingUnit("month"),
   };
 }
 

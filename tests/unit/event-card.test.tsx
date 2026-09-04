@@ -49,4 +49,21 @@ describe("EventCard", () => {
     expect(screen.queryByText("Capacity")).not.toBeInTheDocument();
     expect(screen.getByText(longDescription)).toHaveClass("line-clamp-3", "break-words");
   });
+
+  it("renders CJK day/month unit markers (日/月) in the date block for zh-HK, matching the aria-label's locale", () => {
+    render(
+      <EventCard
+        event={{id: "3", slug: "ai-clinic-zh", title: "AI 診所", description: "一個實踐工作坊。", startsAt: "2030-10-24T02:00:00.000Z", endsAt: null, venue: "觀塘", capacity: 40, hero: null}}
+        status="open"
+        locale="zh-HK"
+        labels={labels}
+      />,
+    );
+
+    const card = screen.getByRole("heading", {level: 3, name: "AI 診所"}).closest("article")!;
+    // Confirmed via Intl.DateTimeFormat("zh-HK", {day:"numeric", month:"short", timeZone:"Asia/Hong_Kong"})
+    // .formatToParts(new Date("2030-10-24T02:00:00.000Z")): month "10" + literal "月", day "24" + literal "日".
+    expect(within(card).getByText("24日")).toBeInTheDocument();
+    expect(within(card).getByText("10月")).toBeInTheDocument();
+  });
 });
