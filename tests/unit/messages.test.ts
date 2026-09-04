@@ -89,6 +89,7 @@ const publicJourneyKeys = [
   'Concierge.title',
   'Concierge.messageLabel',
   'Concierge.close',
+  'Common.breadcrumbLabel',
 ] as const;
 
 describe('message bundles', () => {

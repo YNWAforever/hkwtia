@@ -1,7 +1,8 @@
 {
   "_review": true,
   "Common": {
-    "skipToContent": "跳至主要內容"
+    "skipToContent": "跳至主要內容",
+    "breadcrumbLabel": "位置導覽"
   },
   "Metadata": {
     "title": "WTIA｜創新香港",

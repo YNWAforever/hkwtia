@@ -1,6 +1,7 @@
 {
   "Common": {
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "breadcrumbLabel": "Breadcrumb"
   },
   "Metadata": {
     "title": "WTIA | Innovate Hong Kong",
