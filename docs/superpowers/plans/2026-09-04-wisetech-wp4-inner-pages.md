@@ -2154,6 +2154,7 @@ export default async function ShowcasePage({params, searchParams}: Props) {
   return <>
     <PageHero
       breadcrumb={{homeHref: "/", homeLabel: tCommon("breadcrumbHome"), current: t("title")}}
+      breadcrumbLabel={tCommon("breadcrumbLabel")}
       eyebrow={t("eyebrow")}
       lead={t("description")}
       title={t("title")}
@@ -2797,6 +2798,7 @@ export default async function MembershipPage({params}: Props) {
   return <>
     <PageHero
       breadcrumb={{homeHref: "/", homeLabel: tCommon("breadcrumbHome"), current: t("title")}}
+      breadcrumbLabel={tCommon("breadcrumbLabel")}
       eyebrow={t("eyebrow")}
       lead={t("summary")}
       title={t("title")}
