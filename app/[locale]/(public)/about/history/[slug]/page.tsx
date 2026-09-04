@@ -48,7 +48,8 @@ export default async function HistoryDetailPage({params}: Props) {
   const t = await getTranslations("History");
   const common = await getTranslations({locale, namespace: "Common"});
   // Decision 1: identical hero/compass treatment to the list page, so the same real facts.
-  const facts = historyCompassFacts(milestonesOnly(milestones));
+  // historyCompassFacts filters to milestonesOnly internally -- no need to pre-filter here.
+  const facts = historyCompassFacts(milestones);
   const related = await buildOtherAboutRoutes(locale as AppLocale, "history");
 
   const title = locale === "zh-HK" ? milestone.titleZh : milestone.titleEn;
