@@ -15,10 +15,15 @@ function dayKey(value: string): string {
     .join("");
 }
 
+// Sorts defensively rather than trusting the caller to have pre-sorted by `startsAt` -- the sole
+// caller today pre-sorts by `coalesce(endsAt, startsAt)`, which is not the same ordering, so a
+// same-day short event scheduled after a longer earlier event could otherwise land out of true
+// date order. This keeps "chronological order" a guarantee this function makes itself.
 function groupByDay(events: readonly PublicEventProjection[], locale: AppLocale): readonly EventDayGroup[] {
+  const sorted = [...events].sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
   const order: string[] = [];
   const byKey = new Map<string, PublicEventProjection[]>();
-  for (const event of events) {
+  for (const event of sorted) {
     const key = dayKey(event.startsAt);
     const bucket = byKey.get(key);
     if (bucket) bucket.push(event);
@@ -42,7 +47,11 @@ export function EventCalendarView({events, locale}: Readonly<{events: readonly P
           <div className="event-calendar-view">
             {group.events.map((event) => (
               <Link href={`/events/${event.slug}`} key={event.id}>
-                <time dateTime={event.startsAt}>{new Intl.DateTimeFormat(locale, {day: "numeric", timeZone: "Asia/Hong_Kong"}).format(new Date(event.startsAt))}</time>
+                {/* aria-label mirrors EventCard's bare-day-number <time> (components/marketing/event-card.tsx)
+                    -- a lone number is meaningless out of context to a screen reader navigating link-by-link.
+                    Reuses the day group's own `heading`, which is the same full date for every event in this
+                    group, instead of a second Intl.DateTimeFormat call per event. */}
+                <time aria-label={group.heading} dateTime={event.startsAt}>{new Intl.DateTimeFormat(locale, {day: "numeric", timeZone: "Asia/Hong_Kong"}).format(new Date(event.startsAt))}</time>
                 <div>
                   {event.venue ? <span>{event.venue}</span> : null}
                   <h3>{event.title}</h3>

@@ -31,7 +31,9 @@ function EventViewSwitchContent({labels}: Readonly<{labels: EventViewSwitchLabel
     if (mode === "cards") next.delete("view");
     else next.set("view", "calendar");
     const query = next.toString();
-    router.replace(`${pathname}${query ? `?${query}` : ""}`);
+    // This is an in-page filter toggle over already-visible results, not a real navigation --
+    // the default `scroll: true` would jump a scrolled-down user back to the top on every click.
+    router.replace(`${pathname}${query ? `?${query}` : ""}`, {scroll: false});
   }
 
   return <EventViewSwitchButtons active={active} labels={labels} onSelect={select} />;

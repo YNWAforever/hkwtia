@@ -46,7 +46,7 @@ describe("EventViewSwitch", () => {
 
     fireEvent.click(screen.getByRole("button", {name: "By date"}));
 
-    expect(routerReplace).toHaveBeenCalledWith("/events?status=past&view=calendar");
+    expect(routerReplace).toHaveBeenCalledWith("/events?status=past&view=calendar", {scroll: false});
   });
 
   it("removes the view param when switching back to Cards", () => {
@@ -55,6 +55,14 @@ describe("EventViewSwitch", () => {
 
     fireEvent.click(screen.getByRole("button", {name: "Cards"}));
 
-    expect(routerReplace).toHaveBeenCalledWith("/events?status=past");
+    expect(routerReplace).toHaveBeenCalledWith("/events?status=past", {scroll: false});
+  });
+
+  it("does not scroll the page to top when toggling the view (in-page filter, not a navigation)", () => {
+    render(<EventViewSwitch labels={labels} />);
+
+    fireEvent.click(screen.getByRole("button", {name: "By date"}));
+
+    expect(routerReplace).toHaveBeenCalledWith(expect.any(String), {scroll: false});
   });
 });
