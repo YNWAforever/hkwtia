@@ -826,7 +826,8 @@
     "cpai": {
       "title": "CPAI",
       "description": "支援應用創新的 WTIA 計劃。",
-      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。"
+      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。",
+      "audience": "修讀 WTIA 應用人工智能專業資格的在職人士。"
     },
     "hkict": {
       "title": "香港資訊及通訊科技獎",

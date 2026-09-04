@@ -826,7 +826,8 @@
     "cpai": {
       "title": "CPAI",
       "description": "A focused WTIA programme supporting applied innovation.",
-      "status": "Contact WTIA for the current programme timetable and how to take part."
+      "status": "Contact WTIA for the current programme timetable and how to take part.",
+      "audience": "Professionals completing WTIA's applied AI credential."
     },
     "hkict": {
       "title": "HKICT Awards",
