@@ -1119,7 +1119,14 @@
     "detail": {
       "date": "Date and time",
       "venue": "Venue",
-      "capacity": "Capacity"
+      "capacity": "Capacity",
+      "eyebrow": "Event",
+      "factsTitle": "Practical information",
+      "asideTitle": "Questions about this event?",
+      "asideContact": "Contact the team",
+      "asideBrowse": "Browse all events",
+      "pastEventLabel": "Past event",
+      "pastEventNotice": "Registration for this event has closed. Browse open activities instead."
     },
     "card": {
       "venueLabel": "Venue",

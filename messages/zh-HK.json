@@ -1119,7 +1119,14 @@
     "detail": {
       "date": "日期及時間",
       "venue": "地點",
-      "capacity": "名額"
+      "capacity": "名額",
+      "eyebrow": "活動",
+      "factsTitle": "活動資訊",
+      "asideTitle": "對此活動有疑問？",
+      "asideContact": "聯絡團隊",
+      "asideBrowse": "瀏覽所有活動",
+      "pastEventLabel": "已結束活動",
+      "pastEventNotice": "此活動已截止登記，請瀏覽其他開放活動。"
     },
     "card": {
       "venueLabel": "地點",
