@@ -3,8 +3,7 @@ import {getTranslations} from 'next-intl/server';
 import {ActionLink} from '@/components/wt/action-link';
 import type {AppLocale} from '@/i18n/routing';
 import {cohortRepository} from '@/lib/db/repos/cohorts';
-
-const anonymous = {kind: 'anonymous', userId: null} as const;
+import {ANONYMOUS_ACTOR} from '@/lib/membership/lifecycle';
 
 // Section 9 of 13. cohortRepository.listPublicCohorts already filters to
 // PUBLIC_COHORT_STATUSES (open, active); the CTA label distinguishes a literally open
@@ -16,7 +15,7 @@ const anonymous = {kind: 'anonymous', userId: null} as const;
 // output is exactly what the donor CSS expects.
 export async function GbaGateway({locale}: Readonly<{locale: AppLocale}>) {
   const t = await getTranslations({locale, namespace: 'Home.gbaGateway'});
-  const cohorts = await cohortRepository.listPublicCohorts(anonymous).catch(() => []);
+  const cohorts = await cohortRepository.listPublicCohorts(ANONYMOUS_ACTOR).catch(() => []);
   const hasOpenCohort = cohorts.some((cohort) => cohort.status === 'open');
 
   return (

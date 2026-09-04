@@ -7,19 +7,16 @@ import {SectionHeading} from '@/components/wt/section-heading';
 import {StatusLabel} from '@/components/wt/status-label';
 import type {AppLocale} from '@/i18n/routing';
 import {eventsRepository} from '@/lib/db/repos/events';
+import {formatEventDate as formatDate} from '@/lib/home/format-event-date';
+import {ANONYMOUS_ACTOR} from '@/lib/membership/lifecycle';
 
-const anonymous = {kind: 'anonymous', userId: null} as const;
 const stageKeys = ['before', 'during', 'after'] as const;
-
-function formatDate(value: string, locale: AppLocale): string {
-  return new Intl.DateTimeFormat(locale, {dateStyle: 'long', timeZone: 'Asia/Hong_Kong'}).format(new Date(value));
-}
 
 // Section 4 of 13. app/styles/wisetech.css:227 .event-stage-grid; :232 .event-empty.
 export async function EventsJourney({locale}: Readonly<{locale: AppLocale}>) {
   const t = await getTranslations({locale, namespace: 'Home.eventsJourney'});
   const events = await eventsRepository
-    .listFeaturedPublic(anonymous, {asOf: new Date(), limit: 2, locale})
+    .listFeaturedPublic(ANONYMOUS_ACTOR, {asOf: new Date(), limit: 2, locale})
     .catch(() => []);
 
   return (

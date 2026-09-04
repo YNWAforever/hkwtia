@@ -3,6 +3,7 @@ import {getTranslations} from 'next-intl/server';
 import {Arrow} from '@/components/wt/arrow';
 import {StatusLabel} from '@/components/wt/status-label';
 import type {AppLocale} from '@/i18n/routing';
+import {formatEventDate} from '@/lib/home/format-event-date';
 import {loadImpactMetrics} from '@/lib/home/impact-metrics';
 
 // Section 10 of 13. app/styles/wisetech.css:235 .impact-section; :236 .impact-grid;
@@ -10,7 +11,7 @@ import {loadImpactMetrics} from '@/lib/home/impact-metrics';
 export async function ImpactEvidence({locale}: Readonly<{locale: AppLocale}>) {
   const t = await getTranslations({locale, namespace: 'Home.impact'});
   const metrics = await loadImpactMetrics();
-  const formatDate = (value: Date) => new Intl.DateTimeFormat(locale, {dateStyle: 'long', timeZone: 'Asia/Hong_Kong'}).format(value);
+  const formatDate = (value: Date) => formatEventDate(value, locale);
 
   const tiles = [
     metrics.pastEvents ? {

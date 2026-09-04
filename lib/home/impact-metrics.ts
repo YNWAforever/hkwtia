@@ -3,8 +3,7 @@ import 'server-only';
 import {asa} from '@/content/programs/asa';
 import {eventsRepository} from '@/lib/db/repos/events';
 import {partnersRepository} from '@/lib/db/repos/partners';
-
-const anonymous = {kind: 'anonymous', userId: null} as const;
+import {ANONYMOUS_ACTOR} from '@/lib/membership/lifecycle';
 
 export type ImpactDateTile = Readonly<{value: number; asOf: Date}>;
 export type ImpactYearTile = Readonly<{value: number; year: number}>;
@@ -24,7 +23,7 @@ function latestRecordedAsaEdition() {
 
 export async function loadImpactMetrics(asOf: Date = new Date()): Promise<ImpactMetrics> {
   const [pastEventsResult, partnersResult] = await Promise.allSettled([
-    eventsRepository.countPublic(anonymous, {status: 'past', asOf}),
+    eventsRepository.countPublic(ANONYMOUS_ACTOR, {status: 'past', asOf}),
     partnersRepository.listPublished('en', {limit: 100, asOf}),
   ]);
 

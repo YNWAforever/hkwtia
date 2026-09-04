@@ -6,12 +6,8 @@ import {Section} from '@/components/wt/section';
 import {SectionHeading} from '@/components/wt/section-heading';
 import type {AppLocale} from '@/i18n/routing';
 import {eventsRepository} from '@/lib/db/repos/events';
-
-const anonymous = {kind: 'anonymous', userId: null} as const;
-
-function formatDate(value: string, locale: AppLocale): string {
-  return new Intl.DateTimeFormat(locale, {dateStyle: 'long', timeZone: 'Asia/Hong_Kong'}).format(new Date(value));
-}
+import {formatEventDate as formatDate} from '@/lib/home/format-event-date';
+import {ANONYMOUS_ACTOR} from '@/lib/membership/lifecycle';
 
 // Section 2 of 13. #home-discover is the pre-existing scroll anchor (E-52); this is the
 // first section below the hero, so the anchor moved here from the old highlights grid.
@@ -19,7 +15,7 @@ function formatDate(value: string, locale: AppLocale): string {
 export async function OpenNow({locale}: Readonly<{locale: AppLocale}>) {
   const t = await getTranslations({locale, namespace: 'Home.openNow'});
   const events = await eventsRepository
-    .listPublic(anonymous, {status: 'open', asOf: new Date(), locale, limit: 3})
+    .listPublic(ANONYMOUS_ACTOR, {status: 'open', asOf: new Date(), locale, limit: 3})
     .catch(() => []);
 
   return (
