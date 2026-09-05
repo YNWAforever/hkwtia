@@ -1,7 +1,9 @@
 {
   "_review": true,
   "Common": {
-    "skipToContent": "跳至主要內容"
+    "skipToContent": "跳至主要內容",
+    "breadcrumbLabel": "位置導覽",
+    "breadcrumbHome": "主頁"
   },
   "Metadata": {
     "title": "WTIA｜創新香港",
@@ -637,7 +639,15 @@
     "title": "我們的歷史",
     "intro": "回顧香港無線及科技產業二十五年來的發展里程碑。",
     "storyTitle": "里程碑故事",
-    "readMore": "閱讀更多"
+    "readMore": "閱讀更多",
+    "compass": {
+      "foundedLabel": "成立年份",
+      "foundedValue": "{year}",
+      "milestonesLabel": "已記錄的里程碑",
+      "milestonesValue": "{count} 個里程碑",
+      "latestLabel": "最新記錄",
+      "latestValue": "{year}年"
+    }
   },
   "Membership": {
     "metaTitle": "會員計劃｜WTIA",
@@ -695,9 +705,54 @@
     },
     "actions": {
       "join": "選擇此計劃",
-      "contact": "聯絡我們"
+      "contact": "聯絡我們",
+      "discuss": "討論此參與路徑"
     },
-    "unavailable": "會員計劃暫時未能提供"
+    "unavailable": "會員計劃暫時未能提供",
+    "sme": {
+      "label": "適合中小企",
+      "title": "未確定哪個級別適合你？",
+      "copy": "中小企可先由社群會籍開始，隨參與計劃增加而升級。WTIA 職員可協助你選擇合適級別。",
+      "action": "查詢 WTIA"
+    },
+    "pricing": {
+      "readyLabel": "現行收費",
+      "readyCopy": "以上初創及企業會籍的收費，均為會員目錄中現行已確認的價格。",
+      "fallbackLabel": "收費",
+      "fallbackCopy": "初創及企業會籍收費仍在敲定中。申請前請向會員團隊確認現行收費。"
+    },
+    "dimensions": {
+      "network": {"title": "網絡", "copy": "遍及生態系統的社群及聯繫網絡。"},
+      "programmes": {"title": "計劃參與", "copy": "參與 WTIA 計劃（ASA、TCT、HKICT、CPAI）。"},
+      "visibility": {"title": "曝光機會", "copy": "讓其他會員及夥伴認識你的機會。"},
+      "events": {"title": "活動", "copy": "參與 WTIA 活動，由公開場次至會員專屬場次。"},
+      "showcase": {"title": "展示頁", "copy": "符合資格於公開展示頁刊登方案。"},
+      "committees": {"title": "委員會", "copy": "符合資格加入 WTIA 委員會及工作小組。"},
+      "seats": {"title": "名額", "copy": "每個會籍包含的個人名額數目。"},
+      "billing": {"title": "收費安排", "copy": "收費週期及可選付款方式。"},
+      "onboarding": {"title": "入會導引", "copy": "入會首 90 天可期望的安排。"},
+      "governance": {"title": "管治", "copy": "適用情況下的投票權及參與 WTIA 管治事務。"},
+      "support": {"title": "支援", "copy": "直接聯繫 WTIA 職員查詢及獲取引薦。"},
+      "renewal": {"title": "續會", "copy": "會籍檢視及續會的方式與時間。"}
+    },
+    "first90": {
+      "eyebrow": "首 90 天",
+      "heading": "加入後的安排",
+      "steps": {
+        "0": {"title": "加入", "copy": "選擇級別並完成付款或審批。"},
+        "1": {"title": "入會導引", "copy": "認識 WTIA 團隊，取得會員工具的使用權。"},
+        "2": {"title": "首次活動", "copy": "以會員身份出席首個 WTIA 活動。"},
+        "3": {"title": "首次引薦", "copy": "透過網絡建立第一個聯繫。"},
+        "4": {"title": "檢視", "copy": "WTIA 跟進了解會籍對你的實際幫助。"}
+      }
+    },
+    "closing": {
+      "eyebrow": "隨時歡迎你",
+      "title": "選擇級別，或先向我們查詢。",
+      "copy": "社群、初創及企業會籍均可網上申請。贊助人會籍或其他查詢，可直接與我們聯絡。",
+      "join": "立即加入",
+      "contact": "電郵會員團隊"
+    }
   },
   "Join": {
     "backToMembership": "返回會員計劃",
@@ -771,22 +826,26 @@
     "cpai": {
       "title": "CPAI",
       "description": "支援應用創新的 WTIA 計劃。",
-      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。"
+      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。",
+      "audience": "修讀 WTIA 應用人工智能專業資格的在職人士。"
     },
     "hkict": {
       "title": "香港資訊及通訊科技獎",
       "description": "表揚香港科技界的卓越成果。",
-      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。"
+      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。",
+      "audience": "香港科技企業及公共機構的創新團隊。"
     },
     "tct": {
       "title": "TCT",
       "description": "連接科技、能力與人才。",
-      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。"
+      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。",
+      "audience": "希望實踐科技應用的中小企領袖。"
     },
     "asa": {
       "title": "亞洲智能應用程式大獎",
       "description": "嘉許亞洲優秀智能應用程式。",
-      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。"
+      "status": "請聯絡 WTIA 了解最新計劃時間表及參與方法。",
+      "audience": "參與亞洲賽事的智能應用程式開發團隊。"
     },
     "record": {
       "statusHeading": "最新狀況",
@@ -805,7 +864,16 @@
       "credentialIssuer": "頒發機構",
       "credentialCoursePartner": "課程合辦機構",
       "credentialPartnerCertificate": "畢業學員另可獲頒",
-      "credentialSyllabus": "課程內容"
+      "credentialSyllabus": "課程內容",
+      "eventSeriesLabel": "活動系列",
+      "credentialLabel": "專業資格",
+      "compassFactLabel": "往績",
+      "compassAudienceLabel": "適合對象",
+      "compassActionLabel": "聯絡方式",
+      "askProgrammeTeam": "聯絡計劃團隊",
+      "editionsFact": "自 {year} 年起共 {count} 屆",
+      "credentialFact": "由 WTIA 直接頒發",
+      "mailSubject": "查詢「{programme}」計劃"
     }
   },
   "LaunchPad": {
@@ -814,13 +882,44 @@
     "eyebrow": "創科起動",
     "title": "協助科技團隊走向全球市場。",
     "description": "以專題小組、實用市場連接及清晰下一步，支援香港科技團隊拓展國際市場。",
+    "breadcrumbCurrent": "創科起動",
+    "gbaOpening": {
+      "eyebrow": "大灣區通道",
+      "title": "香港專長，大灣區機遇，全球視野。",
+      "copy": "提供市場進入、落地支援、考察團、買家配對及長期區域合作的實務路徑。",
+      "map": {
+        "hk": "HK",
+        "gz": "GZ",
+        "sz": "SZ"
+      }
+    },
+    "services": {
+      "marketEntry": {
+        "title": "市場進入",
+        "copy": "就大灣區內的註冊、分銷及首批商業合約提供有系統的指引。"
+      },
+      "softLanding": {
+        "title": "落地支援",
+        "copy": "為初到當地的團隊提供共用工作空間介紹、本地合規指導及實務的首 90 天支援。"
+      },
+      "buyerMatching": {
+        "title": "買家配對",
+        "copy": "主動引薦落地夥伴及正在物色香港科技的公營買家。"
+      },
+      "delegations": {
+        "title": "考察團",
+        "copy": "籌辦考察行程，讓學員與廣州、深圳的對口單位交流。"
+      }
+    },
     "program": {
+      "eyebrow": "計劃",
       "title": "通往新市場的實務路徑",
       "intro": "創科起動聚集獲選團隊，提供有系統的市場準備、落地夥伴連接及同儕學習。",
       "outcomeTitle": "由準備走向市場落地",
       "outcomeDescription": "每個小組均循清晰路徑推進：準備、夥伴配對、落地及擴展。"
     },
     "calendar": {
+      "eyebrow": "時間表",
       "title": "小組日曆",
       "intro": "探索現正開放及即將舉行的創科起動小組。",
       "empty": "目前未有公開小組安排。",
@@ -838,6 +937,7 @@
       }
     },
     "partners": {
+      "eyebrow": "落地夥伴",
       "title": "落地夥伴地圖",
       "intro": "認識協助小組探索優先市場的公開夥伴機構。",
       "empty": "落地夥伴將於稍後公布。",
@@ -851,6 +951,7 @@
       }
     },
     "funding": {
+      "eyebrow": "資助",
       "title": "資助計劃配對工具",
       "intro": "回答五條問題，按現行公開計劃條款取得資訊性初步配對。",
       "formLabel": "資助計劃配對工具",
@@ -910,6 +1011,7 @@
       }
     },
     "clinic": {
+      "label": "需要協助？",
       "title": "需要資助或市場落地諮詢？",
       "description": "與 WTIA 討論下一個實務步驟。"
     },
@@ -978,6 +1080,67 @@
         "invalid": "請檢查資料後再試。",
         "rateLimited": "請稍後再試。"
       }
+    },
+    "prompts": {
+      "aiConcierge": "AI 禮賓服務",
+      "cybersecurity": "網絡安全",
+      "crossBorderTrade": "跨境貿易",
+      "cloudMigration": "雲端遷移",
+      "generativeAi": "生成式 AI",
+      "fintech": "金融科技"
+    },
+    "needs": {
+      "customerService": "客戶服務",
+      "cybersecurity": "網絡安全",
+      "tradeCompliance": "貿易及海關合規",
+      "supplyChain": "供應鏈可視化",
+      "fintechPayments": "金融科技及支付",
+      "dataAnalytics": "數據分析",
+      "hrTalent": "人力資源及人才",
+      "marketingAutomation": "市場推廣自動化",
+      "legalCompliance": "法律及監管合規",
+      "smartManufacturing": "智能製造",
+      "sustainabilityEsg": "可持續發展及 ESG",
+      "crossBorderTrade": "跨境貿易"
+    },
+    "verification": {
+      "label": "建議中的認證標誌定義－目前尚未頒發任何認證",
+      "title": "WTIA 將如何驗證已展示的方案",
+      "copy": "WTIA 正在制訂方案展示的驗證框架。以下標誌說明框架落實後各項認證所代表的意思－目前尚未有任何方案獲頒發認證。",
+      "badges": {
+        "verifiedDeployment": {
+          "title": "已核實部署",
+          "copy": "將核實方案已在至少一間 WTIA 會員機構完成並持續運作中的部署。"
+        },
+        "reviewedEvidence": {
+          "title": "已審閱證據",
+          "copy": "將核實案例研究或成效證據已由 WTIA 職員審閱後才對外發布。"
+        },
+        "dataHandling": {
+          "title": "數據處理披露",
+          "copy": "將核實供應商已披露客戶及業務數據的儲存、處理及保安方式。"
+        }
+      }
+    },
+    "pathways": {
+      "heading": "兩種參與展示頁的方式",
+      "buyer": {
+        "label": "尋找方案",
+        "title": "告訴 WTIA 你的需要。",
+        "copy": "描述你要解決的業務問題，WTIA 職員將協助你聯繫合適的會員方案。",
+        "action": "聯絡 WTIA"
+      },
+      "provider": {
+        "label": "有方案想登記",
+        "title": "管理你自己的展示頁。",
+        "copy": "WTIA 會員公司可直接提交及管理自己的展示頁。如你尚未登入，系統將先要求你登入。"
+      }
+    },
+    "interest": {
+      "eyebrow": "保持參與",
+      "title": "親身認識這些方案。",
+      "copy": "WTIA 活動經常展示會員方案及其團隊。",
+      "action": "瀏覽活動"
     }
   },
   "AiOps": {
@@ -1030,7 +1193,8 @@
     "commits": "Commit 及 build 紀錄",
     "deployment": "正式網站",
     "acceptance": "M4 驗收實證",
-    "noBuildLogs": "暫未有已發布開發紀錄。"
+    "noBuildLogs": "暫未有已發布開發紀錄。",
+    "breadcrumbCurrent": "AI-Ops"
   },
   "Events": {
     "metaTitle": "活動 | WTIA",
@@ -1038,12 +1202,34 @@
     "eyebrow": "活動",
     "title": "活動",
     "description": "掌握即將舉行的 WTIA 聚會及交流機會。",
+    "heroImageAlt": "WTIA 活動中的會員交流情況",
+    "breadcrumbCurrent": "活動",
+    "resultsHeading": "活動列表",
     "emptyTitle": "暫未有已發布活動",
     "emptyDescription": "確認日期及詳情後，WTIA 活動會在此顯示。",
     "statusLabel": "活動狀態",
     "status": {
       "open": "進行中",
       "past": "已結束"
+    },
+    "quickTabs": {
+      "label": "按狀態篩選活動",
+      "open": "現正開放",
+      "past": "已結束活動"
+    },
+    "viewSwitch": {
+      "label": "切換活動顯示方式",
+      "cards": "卡片",
+      "calendar": "按日期"
+    },
+    "activityStrip": {
+      "label": "相關活動",
+      "openLabel": "開放活動",
+      "launchpadLabel": "創科加速平台",
+      "showcaseLabel": "方案展示"
+    },
+    "resultsHead": {
+      "label": "{count, plural, other {個活動}}"
     },
     "unavailableTitle": "暫時未能載入活動",
     "unavailableDescription": "請稍後再試。",
@@ -1055,15 +1241,61 @@
       "past": {
         "title": "暫未有已結束活動",
         "description": "已結束活動會在可供查閱時顯示。"
+      },
+      "action": "與我們聯繫"
+    },
+    "recommendations": {
+      "items": {
+        "launchpad": {
+          "title": "創科加速平台",
+          "copy": "為初創企業提供大灣區市場進入、落地支援及買家配對。",
+          "cta": "探索創科加速平台"
+        },
+        "showcase": {
+          "title": "方案展示",
+          "copy": "瀏覽已驗證會員方案，並提出洽談請求。",
+          "cta": "瀏覽方案展示"
+        },
+        "membership": {
+          "title": "會籍",
+          "copy": "尋找切合貴機構的會籍路徑。",
+          "cta": "比較會籍方案"
+        }
+      }
+    },
+    "interest": {
+      "eyebrow": "保持聯繫",
+      "title": "緊貼公開活動資訊",
+      "copy": "登記接收活動通知，一有新場次開放，我們將盡快通知你。",
+      "action": "接收活動通知"
+    },
+    "closing": {
+      "eyebrow": "與我們合作",
+      "title": "有意主辦或合辦未來活動？",
+      "copy": "歡迎提供場地、主題或合辦建議，團隊將協助構思成實際活動。",
+      "actions": {
+        "primary": "聯絡團隊",
+        "secondary": "探索會籍"
       }
     },
     "detail": {
       "date": "日期及時間",
       "venue": "地點",
-      "capacity": "名額"
+      "capacity": "名額",
+      "eyebrow": "活動",
+      "factsTitle": "活動資訊",
+      "asideTitle": "對此活動有疑問？",
+      "asideContact": "聯絡團隊",
+      "asideBrowse": "瀏覽所有活動",
+      "pastEventLabel": "已結束活動",
+      "pastEventNotice": "此活動已截止登記，請瀏覽其他開放活動。"
+    },
+    "card": {
+      "venueLabel": "地點",
+      "capacityLabel": "名額",
+      "cta": "查看活動"
     },
     "registration": {
-      "title": "登記參加此活動",
       "submit": "登記",
       "pending": "登記中……",
       "registered": "已確認活動登記。",
@@ -1083,7 +1315,26 @@
     "title": "WTIA 最新消息",
     "description": "瀏覽 WTIA 的公告及社群消息。",
     "emptyTitle": "暫未有已發布消息",
-    "emptyDescription": "消息內容確認後，會在此顯示。"
+    "emptyDescription": "消息內容確認後，會在此顯示。",
+    "breadcrumbCurrent": "新聞",
+    "statusNews": "新聞",
+    "statusBuildLog": "開發日誌",
+    "quality": {
+      "eyebrow": "編採標準",
+      "title": "WTIA 的報道方式",
+      "body": "每篇文章均由職員撰寫、註明日期及作者。開發日誌記錄本平台已實際推出的工程工作，並連結至 AI-Ops 頁面上相應的公開實證。"
+    },
+    "subscribe": {
+      "eyebrow": "掌握動態",
+      "title": "以電郵接收 WTIA 新聞",
+      "emailLabel": "電郵地址",
+      "placeholder": "you@example.com",
+      "submit": "訂閱",
+      "success": "多謝！請查看我們為你開啟的電郵草稿。",
+      "error": "請輸入有效的電郵地址。",
+      "mailSubject": "訂閱 WTIA 新聞",
+      "mailBody": "請將 {email} 加入 WTIA 新聞訂閱名單。"
+    }
   },
   "Contact": {
     "metaTitle": "聯絡 WTIA",
@@ -1091,10 +1342,12 @@
     "eyebrow": "聯絡",
     "title": "與我們聯繫",
     "description": "歡迎透過辦公室或電郵聯絡 WTIA。",
+    "breadcrumbCurrent": "聯絡我們",
     "channelsTitle": "直接聯絡 WTIA",
     "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
     "routesTitle": "選擇合適的下一步",
     "routesDescription": "前往現有的 WTIA 服務頁面，查閱最新資料或採取行動。",
+    "viewLabel": "查看",
     "routes": {
       "events": {
         "title": "活動及交流",
@@ -1111,6 +1364,53 @@
       "launchpad": {
         "title": "創科加速平台",
         "description": "了解現正接受申請的計劃、項目及資助指引。"
+      },
+      "about": {
+        "title": "關於 WTIA",
+        "description": "認識協會、其領導層及各委員會。"
+      },
+      "news": {
+        "title": "新聞",
+        "description": "閱讀職員撰寫的新聞及工程開發日誌。"
+      }
+    },
+    "emailTopics": {
+      "topicLabel": "你想查詢什麼？",
+      "composeAction": "撰寫電郵",
+      "portal": {
+        "label": "會員平台",
+        "subject": "會員平台查詢",
+        "body": "你好 WTIA，我想查詢會員平台的問題。"
+      },
+      "membership": {
+        "label": "會員計劃",
+        "subject": "會員計劃查詢",
+        "body": "你好 WTIA，我想查詢會員級別及申請資格。"
+      },
+      "events": {
+        "label": "活動",
+        "subject": "活動查詢",
+        "body": "你好 WTIA，我想查詢即將舉行的活動。"
+      },
+      "programmes": {
+        "label": "計劃項目",
+        "subject": "計劃項目查詢",
+        "body": "你好 WTIA，我想查詢其中一項計劃項目。"
+      },
+      "partnership": {
+        "label": "夥伴合作",
+        "subject": "夥伴合作查詢",
+        "body": "你好 WTIA，我們機構希望商討合作事宜。"
+      },
+      "privacy": {
+        "label": "私隱",
+        "subject": "私隱查詢",
+        "body": "你好 WTIA，我想查詢我的個人資料處理方式。"
+      },
+      "media": {
+        "label": "傳媒",
+        "subject": "傳媒查詢",
+        "body": "你好 WTIA，我代表傳媒機構聯絡。"
       }
     },
     "conciergeTitle": "未確定從哪裡開始？",
@@ -1123,6 +1423,7 @@
     "eyebrow": "私隱",
     "title": "我們如何處理你的資料",
     "description": "WTIA 平台收集甚麼資料、由誰處理，以及保存多久。",
+    "breadcrumbCurrent": "私隱",
     "sections": [
       {
         "heading": "適用範圍",
@@ -1225,6 +1526,7 @@
     "eyebrow": "AI 透明度",
     "title": "WTIA Concierge 如何運作",
     "description": "我們的 AI 助理能做甚麼、不能做甚麼，以及你的對話如何被處理。",
+    "breadcrumbCurrent": "AI 透明度",
     "sections": [
       {
         "heading": "Concierge 已經啟用",
@@ -1294,7 +1596,10 @@
     "title": "找不到頁面",
     "description": "頁面可能已移動，或網址有誤。",
     "home": "返回首頁",
-    "contact": "聯絡 WTIA"
+    "contact": "聯絡 WTIA",
+    "eyebrow": "找不到頁面",
+    "homeAction": "返回首頁",
+    "eventsAction": "尋找活動"
   },
   "Error": {
     "title": "發生錯誤",

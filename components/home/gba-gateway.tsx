@@ -1,6 +1,7 @@
 import {getTranslations} from 'next-intl/server';
 
 import {ActionLink} from '@/components/wt/action-link';
+import {RouteMap} from '@/components/wt/route-map';
 import type {AppLocale} from '@/i18n/routing';
 import {cohortRepository} from '@/lib/db/repos/cohorts';
 import {ANONYMOUS_ACTOR} from '@/lib/membership/lifecycle';
@@ -20,12 +21,7 @@ export async function GbaGateway({locale}: Readonly<{locale: AppLocale}>) {
 
   return (
     <section className="gba-section" aria-labelledby="gba-gateway-title">
-      <div className="gba-map" aria-hidden="true">
-        <span className="hk-node">HK</span>
-        <span className="gz-node">GZ</span>
-        <span className="sz-node">SZ</span>
-        <span className="world-node">↗</span>
-      </div>
+      <RouteMap variant="hero" labels={{hk: 'HK', gz: 'GZ', sz: 'SZ', world: '↗'}} />
       <div className="shell gba-copy">
         <p className="eyebrow light">{t('eyebrow')}</p>
         <h2 id="gba-gateway-title">{t('title')}</h2>

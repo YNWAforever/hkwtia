@@ -50,3 +50,22 @@ export function findBySlug(
 ): MilestoneRecord | null {
   return milestones.find((milestone) => milestone.slug === slug) ?? null;
 }
+
+export type HistoryCompassFacts = Readonly<{foundingYear: number; milestoneCount: number; latestYear: number}>;
+
+/**
+ * Real facts only: derived from actual `kind: "milestone"` records, never a hardcoded
+ * "since 2001" -- if the archive ever gained an earlier record, this would move with it
+ * rather than silently disagreeing with the timeline below it. Filters through
+ * `milestonesOnly` itself (rather than trusting the caller to have pre-filtered) so a
+ * member-story or press-release entry can never skew the founding year or latest year.
+ */
+export function historyCompassFacts(milestones: readonly MilestoneRecord[]): HistoryCompassFacts {
+  const history = milestonesOnly(milestones);
+  const years = history.map(({year}) => year);
+  return {
+    foundingYear: Math.min(...years),
+    milestoneCount: history.length,
+    latestYear: Math.max(...years),
+  };
+}

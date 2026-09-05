@@ -19,7 +19,6 @@ const implementationFiles: readonly string[] = [
   "components/marketing/media-gallery.tsx",
   "components/marketing/milestone-timeline.tsx",
   "components/marketing/program-credential.tsx",
-  "components/marketing/program-detail.tsx",
   "components/marketing/program-editions.tsx",
   "components/marketing/story-section.tsx",
   "lib/db/repos/events.ts",
@@ -95,7 +94,10 @@ const requiredRouteAndComponentFiles = [
 
 describe("WiseTech PR3 source boundary", () => {
   it("declares every expected PR3 route and component in an explicit allowlist", () => {
-    expect(implementationFiles).toHaveLength(24);
+    // components/marketing/program-detail.tsx was removed from this allowlist: WP-4 Task 15
+    // (docs/superpowers/plans/2026-09-04-wisetech-wp4-inner-pages.md) deleted the component it
+    // named, superseding it with PageHero + RichCompass on the routes PR3 first introduced.
+    expect(implementationFiles).toHaveLength(23);
     for (const path of requiredRouteAndComponentFiles) {
       expect(implementationFiles, path).toContain(path);
       expect(existsSync(resolve(process.cwd(), path)), path).toBe(true);

@@ -80,13 +80,20 @@ test("keeps the bilingual Membership catalog honest without repository credentia
     {
       path: "/membership",
       title: "Membership tiers",
-      unavailable: "Membership is currently unavailable",
+      // WP-4 (app/[locale]/(public)/membership/page.tsx) moved the empty state onto the shared
+      // HonestEmpty primitive (components/wt/honest-empty.tsx), which renders the title and the
+      // supporting copy as sibling elements inside one `role="status"` wrapper -- donor grammar,
+      // not a bug: see HonestEmpty's own "Honest states are a feature" comment. Previously this
+      // was a bare `<p role="status">{t("unavailable")}</p>` with no second sentence, which is
+      // what this string used to assert; it now has to match the concatenated text content of
+      // both nodes, in source order.
+      unavailable: "Membership is currently unavailableAvailable fees and billing options reflect the current membership catalog.",
       faq: "Membership FAQ",
     },
     {
       path: "/zh/membership",
       title: "會員級別",
-      unavailable: "會員計劃暫時未能提供",
+      unavailable: "會員計劃暫時未能提供現行會費及付款週期以目前會員目錄為準。",
       faq: "會員常見問題",
     },
   ] as const) {

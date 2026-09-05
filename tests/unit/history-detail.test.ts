@@ -2,6 +2,7 @@ import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 
 import {render, screen, within} from "@testing-library/react";
+import type {ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import {
@@ -40,17 +41,36 @@ const {buildPageMetadataSpy, notFoundSpy, setRequestLocaleSpy, translationState}
 
 vi.mock("@/lib/metadata", () => ({buildPageMetadata: buildPageMetadataSpy}));
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async (namespace: string) => (key: string) => {
-    let value: unknown = translationState.messages[translationState.locale]?.[namespace];
-    for (const part of key.split(".")) value = (value as Record<string, unknown> | undefined)?.[part];
-    if (typeof value !== "string") {
-      throw new Error(`Missing test message: ${translationState.locale}.${namespace}.${key}`);
-    }
-    return value;
+  // Accepts both call forms next-intl allows: a bare namespace string (locale implied by
+  // setRequestLocale) and {locale, namespace} (used for a namespace read ahead of
+  // setRequestLocale, e.g. the shared Common breadcrumb label -- see about/page.tsx).
+  getTranslations: vi.fn(async (input: string | {locale?: string; namespace: string}) => {
+    const namespace = typeof input === "string" ? input : input.namespace;
+    const locale = typeof input === "string" ? translationState.locale : ((input.locale ?? translationState.locale) as Locale);
+    return (key: string) => {
+      let value: unknown = translationState.messages[locale]?.[namespace];
+      for (const part of key.split(".")) value = (value as Record<string, unknown> | undefined)?.[part];
+      if (typeof value !== "string") {
+        throw new Error(`Missing test message: ${locale}.${namespace}.${key}`);
+      }
+      return value;
+    };
   }),
   setRequestLocale: setRequestLocaleSpy,
 }));
 vi.mock("next/navigation", () => ({notFound: notFoundSpy}));
+// PageHero's breadcrumb Link and RichRelatedRoutes' Links come from @/i18n/navigation,
+// which wraps next-intl's createNavigation -- that pulls in next/navigation exports this
+// file's mock above doesn't provide (redirect, usePathname, ...), crashing at module init.
+// Mocking @/i18n/navigation directly with a plain anchor sidesteps that, matching the
+// convention already used in tests/unit/wt-pages/event-detail-page.test.tsx.
+vi.mock("@/i18n/navigation", async () => {
+  const {createElement} = await vi.importActual<typeof import("react")>("react");
+  return {
+    Link: ({children, href, ...props}: {children: ReactNode; href: string}) =>
+      createElement("a", {href, ...props}, children),
+  };
+});
 vi.mock("next/image", async () => {
   const {createElement} = await vi.importActual<typeof import("react")>("react");
   return {
@@ -77,7 +97,7 @@ describe("history detail pages", () => {
     ["en", en],
     ["zh-HK", zh],
   ] as const)("pins the %s structural story heading in the message bundle", (locale, messages) => {
-    expect((messages.History as Record<string, string>).storyTitle).toBe(approvedStoryTitle[locale]);
+    expect((messages.History as {storyTitle: string}).storyTitle).toBe(approvedStoryTitle[locale]);
   });
 
   it("generates exactly the three pinned featured milestone params in content order", () => {
@@ -185,16 +205,16 @@ describe("history detail pages", () => {
     }
   });
 
-  it("keeps the detail route server-only and composed from all three Task 4 primitives", () => {
+  it("keeps the detail route server-only, composed from PageHero, RichCompass and MediaGallery", () => {
     const source = readFileSync(
       resolve(process.cwd(), "app/[locale]/(public)/about/history/[slug]/page.tsx"),
       "utf8",
     );
 
-    expect(source).toContain("InstitutionalPageIntro");
-    expect(source).toContain("StorySection");
+    expect(source).toContain("PageHero");
+    expect(source).toContain("RichCompass");
     expect(source).toContain("MediaGallery");
-    expect(source).not.toContain('from "next/image"');
+    expect(source).not.toContain("InstitutionalPageIntro");
     expect(source).not.toMatch(/["']use client["']/);
     expect(source).not.toMatch(/<main\b/);
     expect(source).not.toMatch(/\buse(?:State|Effect|LayoutEffect|Memo|Callback|Reducer|Ref|Context|Transition|DeferredValue|SyncExternalStore)\b/);

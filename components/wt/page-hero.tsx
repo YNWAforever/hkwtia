@@ -18,11 +18,17 @@ type PageHeroProps = Readonly<{
   actions?: readonly WtAction[];
   priority?: boolean;
   breadcrumb?: Readonly<{homeHref: string; homeLabel: string; current: string}>;
+  /** Accessible name for the breadcrumb `<nav>`. This primitive has no locale of its own, so
+   * callers resolve `Common.breadcrumbLabel` themselves and pass the translated string;
+   * `BREADCRUMB_LABEL_FALLBACK` only covers a caller that omits it. */
+  breadcrumbLabel?: string;
   id?: string;
   className?: string;
 }>;
 
-export function PageHero({eyebrow, title, lead, variant = 'page', image, artMark, actions, priority = true, breadcrumb, id, className}: PageHeroProps) {
+const BREADCRUMB_LABEL_FALLBACK = 'Breadcrumb';
+
+export function PageHero({eyebrow, title, lead, variant = 'page', image, artMark, actions, priority = true, breadcrumb, breadcrumbLabel, id, className}: PageHeroProps) {
   // CSP is img-src 'self': the figure is own-origin or the render fails, never a remote fetch.
   const imageSrc = image ? assertOwnOriginEditorialImage(image.src) : undefined;
 
@@ -58,11 +64,11 @@ export function PageHero({eyebrow, title, lead, variant = 'page', image, artMark
           </div>
         ) : null}
         {breadcrumb ? (
-          <div className="breadcrumb">
+          <nav className="breadcrumb" aria-label={breadcrumbLabel ?? BREADCRUMB_LABEL_FALLBACK}>
             <Link href={breadcrumb.homeHref}>{breadcrumb.homeLabel}</Link>
             <span aria-hidden="true">/</span>
             <b>{breadcrumb.current}</b>
-          </div>
+          </nav>
         ) : null}
       </Shell>
     </section>

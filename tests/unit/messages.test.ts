@@ -47,7 +47,6 @@ const publicJourneyKeys = [
   'Events.empty.open.description',
   'Events.empty.past.title',
   'Events.empty.past.description',
-  'Events.registration.title',
   'Events.registration.submit',
   'Events.registration.pending',
   'Events.registration.registered',
@@ -89,6 +88,7 @@ const publicJourneyKeys = [
   'Concierge.title',
   'Concierge.messageLabel',
   'Concierge.close',
+  'Common.breadcrumbLabel',
 ] as const;
 
 describe('message bundles', () => {

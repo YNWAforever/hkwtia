@@ -5,8 +5,10 @@ import {CohortCalendar} from '@/components/marketing/cohort-calendar';
 import {CohortApplicationForm} from '@/components/marketing/cohort-application-form';
 import {FundingResults, FundingWizard} from '@/components/marketing/funding-wizard';
 import {LandingPartnerMap} from '@/components/marketing/landing-partner-map';
-import {PageHero} from '@/components/marketing/page-hero';
-import {Section} from '@/components/marketing/section';
+import {LaunchpadGbaOpening} from '@/components/marketing/launchpad-gba-opening';
+import {ClosingBand} from '@/components/wt/closing-band';
+import {Section} from '@/components/wt/section';
+import {SectionHeading} from '@/components/wt/section-heading';
 import type {AppLocale} from '@/i18n/routing';
 import {cohortRepository} from '@/lib/db/repos/cohorts';
 import {landingPartnersRepository} from '@/lib/db/repos/landing-partners';
@@ -14,7 +16,6 @@ import {getFundingResults, parseFundingAnswers} from '@/lib/launchpad/funding';
 import {applyToCohortAction} from '@/lib/launchpad/member-actions';
 import type {Actor} from '@/lib/membership/lifecycle';
 import {buildPageMetadata} from '@/lib/metadata';
-import {localizedPath} from '@/lib/urls';
 
 type Props = {params: Promise<{locale: string}>; searchParams?: Promise<Record<string, string | string[] | undefined>>};
 
@@ -34,8 +35,9 @@ export default async function LaunchPadPage({params, searchParams = Promise.reso
   // CLAUDE.md: public pages degrade rather than 500. The WP-0 visual baseline caught
   // /launchpad returning 500 with an empty DATABASE_URL because this call, unlike the
   // landing-partners read below, had no fallback.
-  const [t, cohorts] = await Promise.all([
+  const [t, common, cohorts] = await Promise.all([
     getTranslations({locale: appLocale, namespace: 'LaunchPad'}),
+    getTranslations({locale: appLocale, namespace: 'Common'}),
     cohortRepository.listPublicCohorts(anonymous).catch((): Awaited<ReturnType<typeof cohortRepository.listPublicCohorts>> => []),
   ]);
   const partners = await landingPartnersRepository.listPublished({limit: 100}).catch(() => []);
@@ -47,16 +49,55 @@ export default async function LaunchPadPage({params, searchParams = Promise.reso
   const fundingResultsLabels = {heading: t('funding.results.heading'), eligible: t('funding.results.eligible'), ineligible: t('funding.results.ineligible'), source: t('funding.results.source'), asOf: t('funding.results.asOf')};
   const openCohorts = cohorts.filter((cohort) => cohort.status === 'open').map((cohort) => ({id: cohort.id, name: appLocale === 'zh-HK' ? cohort.nameZhHk : cohort.nameEn, status: cohort.status}));
   const applicationLabels = {title: t('application.title'), cohort: t('application.cohort'), market: t('application.market'), readiness: t('application.readiness'), consent: t('application.consent'), submit: t('application.submit'), submitting: t('application.submitting'), success: t('application.success'), invalid: t('application.invalid'), unauthorized: t('application.unauthorized'), signIn: t('application.signIn'), error: t('application.error')};
+  const openingLabels = {
+    eyebrow: t('eyebrow'), title: t('title'), lead: t('description'),
+    breadcrumbHome: common('breadcrumbHome'), breadcrumbLabel: common('breadcrumbLabel'), breadcrumbCurrent: t('breadcrumbCurrent'),
+    opening: {eyebrow: t('gbaOpening.eyebrow'), title: t('gbaOpening.title'), copy: t('gbaOpening.copy'), map: {hk: t('gbaOpening.map.hk'), gz: t('gbaOpening.map.gz'), sz: t('gbaOpening.map.sz')}},
+    services: [
+      {title: t('services.marketEntry.title'), copy: t('services.marketEntry.copy')},
+      {title: t('services.softLanding.title'), copy: t('services.softLanding.copy')},
+      {title: t('services.buyerMatching.title'), copy: t('services.buyerMatching.copy')},
+      {title: t('services.delegations.title'), copy: t('services.delegations.copy')},
+    ],
+  };
 
   return (
     <>
-      <PageHero eyebrow={t('eyebrow')} title={t('title')} description={t('description')} />
-      <Section heading={t('program.title')} intro={t('program.intro')}><div className="glass-card space-y-4 p-6"><p className="text-lg font-medium">{t('program.outcomeTitle')}</p><p className="text-muted-foreground">{t('program.outcomeDescription')}</p></div></Section>
-      <Section heading={t('calendar.title')} intro={t('calendar.intro')}><CohortCalendar cohorts={cohorts} locale={appLocale} labels={calendarLabels}/></Section>
-      <Section heading={t('partners.title')} intro={t('partners.intro')}><LandingPartnerMap partners={partners} locale={appLocale} labels={partnerLabels}/></Section>
-      <Section heading={t('funding.title')} intro={t('funding.intro')}><div className="space-y-10"><FundingWizard locale={appLocale} answers={answers} labels={fundingLabels}/><FundingResults results={fundingResults} labels={fundingResultsLabels}/></div></Section>
-      {openCohorts.length > 0 ? <section className="container mx-auto px-6 pb-16"><CohortApplicationForm action={applyToCohortAction} cohorts={openCohorts} labels={applicationLabels} locale={appLocale}/></section> : null}
-      <section className="container mx-auto px-6 pb-16 sm:pb-24"><div className="glass-card flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="font-serif text-2xl font-semibold">{t('clinic.title')}</h2><p className="mt-2 text-muted-foreground">{t('clinic.description')}</p></div><a className="rounded-md bg-primary px-5 py-3 font-semibold text-primary-foreground" href={localizedPath(appLocale, '/contact')}>{t('clinicCta')}</a></div></section>
+      <LaunchpadGbaOpening labels={openingLabels} />
+      <Section tone="paper">
+        <SectionHeading eyebrow={t('program.eyebrow')} title={t('program.title')} variant="stacked" />
+        <p className="mt-3 max-w-2xl text-muted-foreground">{t('program.intro')}</p>
+        <div className="mt-6 space-y-4">
+          <p className="text-lg font-medium">{t('program.outcomeTitle')}</p>
+          <p className="text-muted-foreground">{t('program.outcomeDescription')}</p>
+        </div>
+      </Section>
+      <Section tone="bright">
+        <SectionHeading eyebrow={t('calendar.eyebrow')} title={t('calendar.title')} variant="stacked" />
+        <p className="mt-3 max-w-2xl text-muted-foreground">{t('calendar.intro')}</p>
+        <div className="mt-6"><CohortCalendar cohorts={cohorts} locale={appLocale} labels={calendarLabels}/></div>
+      </Section>
+      <Section tone="paper">
+        <SectionHeading eyebrow={t('partners.eyebrow')} title={t('partners.title')} variant="stacked" />
+        <p className="mt-3 max-w-2xl text-muted-foreground">{t('partners.intro')}</p>
+        <div className="mt-6"><LandingPartnerMap partners={partners} locale={appLocale} labels={partnerLabels}/></div>
+      </Section>
+      <Section tone="bright">
+        <SectionHeading eyebrow={t('funding.eyebrow')} title={t('funding.title')} variant="stacked" />
+        <p className="mt-3 max-w-2xl text-muted-foreground">{t('funding.intro')}</p>
+        <div className="mt-6 space-y-10"><FundingWizard locale={appLocale} answers={answers} labels={fundingLabels}/><FundingResults results={fundingResults} labels={fundingResultsLabels}/></div>
+      </Section>
+      {openCohorts.length > 0 ? (
+        <Section tone="paper">
+          <CohortApplicationForm action={applyToCohortAction} cohorts={openCohorts} labels={applicationLabels} locale={appLocale}/>
+        </Section>
+      ) : null}
+      <ClosingBand
+        eyebrow={t('clinic.label')}
+        title={t('clinic.title')}
+        copy={t('clinic.description')}
+        actions={[{href: '/contact', label: t('clinicCta')}]}
+      />
     </>
   );
 }

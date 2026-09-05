@@ -1,4 +1,5 @@
 import {renderToStaticMarkup} from "react-dom/server";
+import type {ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const showcase = vi.hoisted(() => ({listPublished: vi.fn()}));
@@ -11,6 +12,9 @@ vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: showcase}));
 vi.mock("next-intl/server", () => ({
   setRequestLocale: () => undefined,
   getTranslations: async () => (key: string) => key === "emptyTitle" ? "No showcase listings" : key,
+}));
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
 }));
 
 import ShowcasePage from "@/app/[locale]/(public)/showcase/page";

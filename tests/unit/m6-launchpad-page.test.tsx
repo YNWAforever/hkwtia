@@ -28,6 +28,14 @@ vi.mock("@/lib/db/repos/cohorts", () => ({
     listPublicCohorts: (...args: unknown[]) => state.listPublicCohorts(...args),
   },
 }));
+// Task 17 gave the page a wt PageHero (breadcrumb) and ClosingBand (ActionLink), both of
+// which render @/i18n/navigation's Link -- a real next-intl navigation Link that reads
+// useLocale() from context. This suite renders the page with plain renderToStaticMarkup, no
+// NextIntlClientProvider, so the same projection every other wt-page test in this repo uses
+// (a plain <a>) is needed here too; nothing about the suite's own assertions changes.
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({href, ...props}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {href: string}) => <a href={href} {...props} />,
+}));
 
 import LaunchPadPage, {dynamic} from "@/app/[locale]/(public)/launchpad/page";
 import {CohortCalendar} from "@/components/marketing/cohort-calendar";

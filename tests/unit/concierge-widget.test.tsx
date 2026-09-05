@@ -455,4 +455,23 @@ describe("ConciergeWidget", () => {
     expect(screen.queryByRole("button", {name: "5 out of 5"}))
       .not.toBeInTheDocument();
   });
+
+  it("wraps the launcher in the donor .concierge positioning wrapper", () => {
+    render(widget());
+    const launcher = screen.getByRole("button", {name: labels.launcher});
+    const wrapper = launcher.closest(".concierge");
+    expect(wrapper).not.toBeNull();
+    expect(wrapper).not.toBe(launcher);
+    expect(wrapper).toHaveClass(
+      "concierge",
+      "fixed",
+      "bottom-[calc(1rem+env(safe-area-inset-bottom))]",
+      "right-[calc(1rem+env(safe-area-inset-right))]",
+      "z-40",
+    );
+    expect(launcher).toHaveClass("concierge-trigger", "touch-manipulation");
+    expect(launcher).not.toHaveClass("fixed", "z-40");
+    expect(launcher.className).not.toMatch(/bottom-\[calc\(1rem/);
+    expect(launcher.className).not.toMatch(/right-\[calc\(1rem/);
+  });
 });

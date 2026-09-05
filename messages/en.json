@@ -1,6 +1,8 @@
 {
   "Common": {
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "breadcrumbLabel": "Breadcrumb",
+    "breadcrumbHome": "Home"
   },
   "Metadata": {
     "title": "WTIA | Innovate Hong Kong",
@@ -637,7 +639,15 @@
     "title": "Our history",
     "intro": "Milestones from twenty-five years of building Hong Kong's wireless and technology industry.",
     "storyTitle": "Milestone story",
-    "readMore": "Read more"
+    "readMore": "Read more",
+    "compass": {
+      "foundedLabel": "Founding year",
+      "foundedValue": "{year}",
+      "milestonesLabel": "Milestones recorded",
+      "milestonesValue": "{count, plural, one {# milestone} other {# milestones}}",
+      "latestLabel": "Most recent milestone",
+      "latestValue": "{year}"
+    }
   },
   "Membership": {
     "metaTitle": "Membership | WTIA",
@@ -695,9 +705,54 @@
     },
     "actions": {
       "join": "Choose this plan",
-      "contact": "Contact us"
+      "contact": "Contact us",
+      "discuss": "Discuss this pathway"
     },
-    "unavailable": "Membership is currently unavailable"
+    "unavailable": "Membership is currently unavailable",
+    "sme": {
+      "label": "For SMEs",
+      "title": "Not sure which tier fits?",
+      "copy": "Small and medium enterprises can start with a Community membership and move up as programme participation grows. WTIA staff can help you choose.",
+      "action": "Ask WTIA"
+    },
+    "pricing": {
+      "readyLabel": "Current pricing",
+      "readyCopy": "Startup and Corporate fees shown above are the current, confirmed rates from the membership catalog.",
+      "fallbackLabel": "Pricing",
+      "fallbackCopy": "Startup and Corporate fees are being finalised. Confirm current rates with the membership team before applying."
+    },
+    "dimensions": {
+      "network": {"title": "Network", "copy": "Community and networking access across the ecosystem."},
+      "programmes": {"title": "Programmes", "copy": "Participation in WTIA programmes (ASA, TCT, HKICT, CPAI)."},
+      "visibility": {"title": "Visibility", "copy": "Opportunities to be seen by other members and partners."},
+      "events": {"title": "Events", "copy": "Access to WTIA events, from open sessions to member-only sessions."},
+      "showcase": {"title": "Showcase", "copy": "Eligibility to list a solution on the public Showcase."},
+      "committees": {"title": "Committees", "copy": "Eligibility to join WTIA committees and working groups."},
+      "seats": {"title": "Seats", "copy": "Number of individual seats included under one membership."},
+      "billing": {"title": "Billing", "copy": "Billing cadence and available payment options."},
+      "onboarding": {"title": "Onboarding", "copy": "What to expect in your first 90 days as a member."},
+      "governance": {"title": "Governance", "copy": "Voting rights and involvement in WTIA governance, where applicable."},
+      "support": {"title": "Support", "copy": "Direct access to WTIA staff for enquiries and introductions."},
+      "renewal": {"title": "Renewal", "copy": "How and when membership is reviewed and renewed."}
+    },
+    "first90": {
+      "eyebrow": "First 90 days",
+      "heading": "What happens after you join",
+      "steps": {
+        "0": {"title": "Join", "copy": "Choose a tier and complete payment or review."},
+        "1": {"title": "Orientation", "copy": "Meet the WTIA team and get access to your member tools."},
+        "2": {"title": "First event", "copy": "Attend your first WTIA event as a member."},
+        "3": {"title": "First introduction", "copy": "Make your first connection through the network."},
+        "4": {"title": "Review", "copy": "WTIA checks in on how membership is working for you."}
+      }
+    },
+    "closing": {
+      "eyebrow": "Ready when you are",
+      "title": "Choose your tier, or ask us first.",
+      "copy": "Community, Startup and Corporate membership can be applied for online. Patron membership and any other question can start with a direct message.",
+      "join": "Join now",
+      "contact": "Email the membership team"
+    }
   },
   "Join": {
     "backToMembership": "Back to membership",
@@ -771,22 +826,26 @@
     "cpai": {
       "title": "CPAI",
       "description": "A focused WTIA programme supporting applied innovation.",
-      "status": "Contact WTIA for the current programme timetable and how to take part."
+      "status": "Contact WTIA for the current programme timetable and how to take part.",
+      "audience": "Professionals completing WTIA's applied AI credential."
     },
     "hkict": {
       "title": "HKICT Awards",
       "description": "Recognising excellence across Hong Kong's technology sector.",
-      "status": "Contact WTIA for the current programme timetable and how to take part."
+      "status": "Contact WTIA for the current programme timetable and how to take part.",
+      "audience": "Hong Kong technology companies and public-sector innovators."
     },
     "tct": {
       "title": "TCT",
       "description": "Connecting technology, capability and talent.",
-      "status": "Contact WTIA for the current programme timetable and how to take part."
+      "status": "Contact WTIA for the current programme timetable and how to take part.",
+      "audience": "SME leaders exploring practical, hands-on technology adoption."
     },
     "asa": {
       "title": "Asia Smart App Awards",
       "description": "Celebrating outstanding smart applications across Asia.",
-      "status": "Contact WTIA for the current programme timetable and how to take part."
+      "status": "Contact WTIA for the current programme timetable and how to take part.",
+      "audience": "Smart application teams and developers competing across Asia."
     },
     "record": {
       "statusHeading": "Current status",
@@ -805,7 +864,16 @@
       "credentialIssuer": "Issued by",
       "credentialCoursePartner": "Course delivered with",
       "credentialPartnerCertificate": "Graduates also receive",
-      "credentialSyllabus": "Syllabus"
+      "credentialSyllabus": "Syllabus",
+      "eventSeriesLabel": "Event series",
+      "credentialLabel": "Credential",
+      "compassFactLabel": "Track record",
+      "compassAudienceLabel": "Who it's for",
+      "compassActionLabel": "Get in touch",
+      "askProgrammeTeam": "Ask the programme team",
+      "editionsFact": "{count, plural, one {# edition} other {# editions}} since {year}",
+      "credentialFact": "Issued directly by WTIA",
+      "mailSubject": "{programme} programme enquiry"
     }
   },
   "LaunchPad": {
@@ -814,13 +882,44 @@
     "eyebrow": "Launch Pad",
     "title": "Go-global cohorts for technology teams.",
     "description": "Focused cohorts, practical market access, and clear next steps for Hong Kong technology teams expanding internationally.",
+    "breadcrumbCurrent": "Launch Pad",
+    "gbaOpening": {
+      "eyebrow": "GBA Gateway",
+      "title": "Hong Kong expertise. GBA opportunity. Global ambition.",
+      "copy": "A practical route for market entry, soft landing, delegations, buyer matching and long-term regional partnerships.",
+      "map": {
+        "hk": "HK",
+        "gz": "GZ",
+        "sz": "SZ"
+      }
+    },
+    "services": {
+      "marketEntry": {
+        "title": "Market entry",
+        "copy": "Structured guidance on registration, distribution and first commercial contracts across the Greater Bay Area."
+      },
+      "softLanding": {
+        "title": "Soft landing",
+        "copy": "Shared workspace introductions, local compliance orientation and practical first-90-day support for an incoming team."
+      },
+      "buyerMatching": {
+        "title": "Buyer matching",
+        "copy": "Warm introductions to landing partners and public buyers actively sourcing Hong Kong technology."
+      },
+      "delegations": {
+        "title": "Delegations",
+        "copy": "Organised study visits and delegation itineraries connecting cohorts with counterparts in Guangzhou and Shenzhen."
+      }
+    },
     "program": {
+      "eyebrow": "Programme",
       "title": "A practical route to new markets",
       "intro": "Launch Pad brings selected teams together for structured market preparation, landing-partner connections, and peer learning.",
       "outcomeTitle": "From readiness to market entry",
       "outcomeDescription": "Each cohort follows a clear path through readiness, partner matching, landing, and scale."
     },
     "calendar": {
+      "eyebrow": "Schedule",
       "title": "Cohort calendar",
       "intro": "Explore current and upcoming Launch Pad cohorts.",
       "empty": "No public cohorts are scheduled yet.",
@@ -838,6 +937,7 @@
       }
     },
     "partners": {
+      "eyebrow": "Landing partners",
       "title": "Landing partner map",
       "intro": "Meet the public organisations that help cohorts navigate priority markets.",
       "empty": "Landing partners will be announced shortly.",
@@ -851,6 +951,7 @@
       }
     },
     "funding": {
+      "eyebrow": "Funding",
       "title": "Funding scheme picker",
       "intro": "Answer five questions for an informational screening against current published scheme rules.",
       "formLabel": "Funding scheme picker",
@@ -910,6 +1011,7 @@
       }
     },
     "clinic": {
+      "label": "Need help?",
       "title": "Need a funding or market-entry clinic?",
       "description": "Speak with WTIA about your next practical step."
     },
@@ -978,6 +1080,67 @@
         "invalid": "Please check your details and try again.",
         "rateLimited": "Please try again later."
       }
+    },
+    "prompts": {
+      "aiConcierge": "AI concierge",
+      "cybersecurity": "Cybersecurity",
+      "crossBorderTrade": "Cross-border trade",
+      "cloudMigration": "Cloud migration",
+      "generativeAi": "Generative AI",
+      "fintech": "Fintech"
+    },
+    "needs": {
+      "customerService": "Customer service",
+      "cybersecurity": "Cybersecurity",
+      "tradeCompliance": "Trade & customs compliance",
+      "supplyChain": "Supply chain visibility",
+      "fintechPayments": "Fintech & payments",
+      "dataAnalytics": "Data & analytics",
+      "hrTalent": "HR & talent",
+      "marketingAutomation": "Marketing automation",
+      "legalCompliance": "Legal & regulatory compliance",
+      "smartManufacturing": "Smart manufacturing",
+      "sustainabilityEsg": "Sustainability & ESG",
+      "crossBorderTrade": "Cross-border trade"
+    },
+    "verification": {
+      "label": "Proposed badge definitions — not currently awarded",
+      "title": "How WTIA plans to verify showcased solutions",
+      "copy": "WTIA is developing a verification framework for showcased solutions. The badges below describe what each one would confirm once the framework is in place — none has been awarded yet.",
+      "badges": {
+        "verifiedDeployment": {
+          "title": "Verified deployment",
+          "copy": "Would confirm the solution has at least one active, confirmed deployment with a WTIA member organisation."
+        },
+        "reviewedEvidence": {
+          "title": "Reviewed evidence",
+          "copy": "Would confirm a case study or outcome evidence has been reviewed by WTIA staff before publication."
+        },
+        "dataHandling": {
+          "title": "Data handling disclosure",
+          "copy": "Would confirm the provider has disclosed how customer and business data is stored, processed and secured."
+        }
+      }
+    },
+    "pathways": {
+      "heading": "Two ways to engage the showcase",
+      "buyer": {
+        "label": "Looking for a solution",
+        "title": "Tell WTIA what you need.",
+        "copy": "Describe the business problem you are solving and WTIA staff will help connect you to a fitting member solution.",
+        "action": "Talk to WTIA"
+      },
+      "provider": {
+        "label": "Have a solution to list",
+        "title": "Manage your own showcase listing.",
+        "copy": "WTIA member companies can submit and manage their own listing directly. If you are not yet signed in, you will be asked to sign in first."
+      }
+    },
+    "interest": {
+      "eyebrow": "Stay involved",
+      "title": "See these solutions in person.",
+      "copy": "WTIA events regularly feature member solutions and the teams behind them.",
+      "action": "Browse events"
     }
   },
   "AiOps": {
@@ -1030,7 +1193,8 @@
     "commits": "Commit and build history",
     "deployment": "Live deployment",
     "acceptance": "M4 acceptance evidence",
-    "noBuildLogs": "No published build logs are available."
+    "noBuildLogs": "No published build logs are available.",
+    "breadcrumbCurrent": "AI-Ops"
   },
   "Events": {
     "metaTitle": "Events | WTIA",
@@ -1038,12 +1202,34 @@
     "eyebrow": "Events",
     "title": "Events",
     "description": "Stay connected to upcoming WTIA gatherings and opportunities.",
+    "heroImageAlt": "Members networking at a WTIA event",
+    "breadcrumbCurrent": "Events",
+    "resultsHeading": "Event results",
     "emptyTitle": "No events are published yet",
     "emptyDescription": "WTIA events will appear here when dates and details are confirmed.",
     "statusLabel": "Event status",
     "status": {
       "open": "Open",
       "past": "Past"
+    },
+    "quickTabs": {
+      "label": "Filter events by status",
+      "open": "Open now",
+      "past": "Past events"
+    },
+    "viewSwitch": {
+      "label": "Switch how events are displayed",
+      "cards": "Cards",
+      "calendar": "By date"
+    },
+    "activityStrip": {
+      "label": "Related activities",
+      "openLabel": "Open events",
+      "launchpadLabel": "Launch Pad",
+      "showcaseLabel": "Showcase"
+    },
+    "resultsHead": {
+      "label": "{count, plural, one {event found} other {events found}}"
     },
     "unavailableTitle": "Events are temporarily unavailable",
     "unavailableDescription": "Please try again shortly.",
@@ -1055,15 +1241,61 @@
       "past": {
         "title": "No past events",
         "description": "Past events will appear here when available."
+      },
+      "action": "Get in touch"
+    },
+    "recommendations": {
+      "items": {
+        "launchpad": {
+          "title": "Launch Pad",
+          "copy": "GBA market entry, soft landing and buyer matching for founders.",
+          "cta": "Explore Launch Pad"
+        },
+        "showcase": {
+          "title": "Showcase",
+          "copy": "Browse verified member solutions and request an introduction.",
+          "cta": "Browse the showcase"
+        },
+        "membership": {
+          "title": "Membership",
+          "copy": "Find the pathway that matches your organisation.",
+          "cta": "Compare plans"
+        }
+      }
+    },
+    "interest": {
+      "eyebrow": "Keep in touch",
+      "title": "Never miss an open activity",
+      "copy": "Register for activity updates and we will let you know as soon as a new session opens.",
+      "action": "Get activity updates"
+    },
+    "closing": {
+      "eyebrow": "Partner with us",
+      "title": "Host or partner on a future event",
+      "copy": "Bring a venue, a topic or a co-hosting proposal and the team will help shape it into a session.",
+      "actions": {
+        "primary": "Contact the team",
+        "secondary": "Explore membership"
       }
     },
     "detail": {
       "date": "Date and time",
       "venue": "Venue",
-      "capacity": "Capacity"
+      "capacity": "Capacity",
+      "eyebrow": "Event",
+      "factsTitle": "Practical information",
+      "asideTitle": "Questions about this event?",
+      "asideContact": "Contact the team",
+      "asideBrowse": "Browse all events",
+      "pastEventLabel": "Past event",
+      "pastEventNotice": "Registration for this event has closed. Browse open activities instead."
+    },
+    "card": {
+      "venueLabel": "Venue",
+      "capacityLabel": "Capacity",
+      "cta": "View event"
     },
     "registration": {
-      "title": "Register for this event",
       "submit": "Register",
       "pending": "Registering…",
       "registered": "Registration confirmed.",
@@ -1083,7 +1315,26 @@
     "title": "WTIA news",
     "description": "Browse WTIA announcements and community news.",
     "emptyTitle": "No news is published yet",
-    "emptyDescription": "News will appear here when content is confirmed."
+    "emptyDescription": "News will appear here when content is confirmed.",
+    "breadcrumbCurrent": "News",
+    "statusNews": "News",
+    "statusBuildLog": "Build Log",
+    "quality": {
+      "eyebrow": "Editorial standards",
+      "title": "How WTIA reports",
+      "body": "Every article is staff-authored, dated and attributed. Build Log entries describe engineering work actually shipped to this platform, each linked to its own published evidence on the AI-Ops page."
+    },
+    "subscribe": {
+      "eyebrow": "Stay informed",
+      "title": "Get WTIA news by email",
+      "emailLabel": "Email address",
+      "placeholder": "you@example.com",
+      "submit": "Subscribe",
+      "success": "Thanks — check the draft email we opened for you.",
+      "error": "Enter a valid email address.",
+      "mailSubject": "Subscribe to WTIA news",
+      "mailBody": "Please add {email} to the WTIA news list."
+    }
   },
   "Contact": {
     "metaTitle": "Contact WTIA",
@@ -1091,10 +1342,12 @@
     "eyebrow": "Contact",
     "title": "Let's connect",
     "description": "Reach WTIA at the office or by email.",
+    "breadcrumbCurrent": "Contact",
     "channelsTitle": "Contact WTIA directly",
     "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
     "routesTitle": "Choose the right next step",
     "routesDescription": "Use an established WTIA journey to find current information or take action.",
+    "viewLabel": "View",
     "routes": {
       "events": {
         "title": "Events and activities",
@@ -1111,6 +1364,53 @@
       "launchpad": {
         "title": "Launch Pad",
         "description": "Discover open cohorts, programmes and funding guidance."
+      },
+      "about": {
+        "title": "About WTIA",
+        "description": "Meet the association, its leadership and its committees."
+      },
+      "news": {
+        "title": "News",
+        "description": "Read staff-authored news and engineering build logs."
+      }
+    },
+    "emailTopics": {
+      "topicLabel": "What is this about?",
+      "composeAction": "Compose email",
+      "portal": {
+        "label": "Member portal",
+        "subject": "Member portal enquiry",
+        "body": "Hello WTIA, I have a question about the member portal."
+      },
+      "membership": {
+        "label": "Membership",
+        "subject": "Membership enquiry",
+        "body": "Hello WTIA, I have a question about membership tiers and eligibility."
+      },
+      "events": {
+        "label": "Events",
+        "subject": "Events enquiry",
+        "body": "Hello WTIA, I have a question about an upcoming event."
+      },
+      "programmes": {
+        "label": "Programmes",
+        "subject": "Programmes enquiry",
+        "body": "Hello WTIA, I have a question about one of your programmes."
+      },
+      "partnership": {
+        "label": "Partnership",
+        "subject": "Partnership enquiry",
+        "body": "Hello WTIA, our organisation would like to discuss a partnership."
+      },
+      "privacy": {
+        "label": "Privacy",
+        "subject": "Privacy enquiry",
+        "body": "Hello WTIA, I have a question about how my information is handled."
+      },
+      "media": {
+        "label": "Media",
+        "subject": "Media enquiry",
+        "body": "Hello WTIA, I am writing on behalf of a media outlet."
       }
     },
     "conciergeTitle": "Not sure where to start?",
@@ -1123,6 +1423,7 @@
     "eyebrow": "Privacy",
     "title": "How we handle your information",
     "description": "What the WTIA platform collects, who processes it, and how long it is kept.",
+    "breadcrumbCurrent": "Privacy",
     "sections": [
       {
         "heading": "What this covers",
@@ -1225,6 +1526,7 @@
     "eyebrow": "AI transparency",
     "title": "How the WTIA Concierge works",
     "description": "What our AI assistant can and cannot do, and how your conversation is handled.",
+    "breadcrumbCurrent": "AI transparency",
     "sections": [
       {
         "heading": "The Concierge is live",
@@ -1294,7 +1596,10 @@
     "title": "Page not found",
     "description": "The page may have moved, or the address may be incorrect.",
     "home": "Return home",
-    "contact": "Contact WTIA"
+    "contact": "Contact WTIA",
+    "eyebrow": "Not found",
+    "homeAction": "Go to the homepage",
+    "eventsAction": "Find an event"
   },
   "Error": {
     "title": "Something went wrong",

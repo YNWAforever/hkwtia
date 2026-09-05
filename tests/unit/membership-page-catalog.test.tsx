@@ -1,4 +1,5 @@
 import {renderToStaticMarkup} from "react-dom/server";
+import type {ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import type {PersistedMembershipPlan} from "@/lib/membership/public-catalog";
@@ -36,6 +37,9 @@ vi.mock("next-intl/server", () => ({
     };
     return messages[localeState.locale]?.[key] ?? key;
   },
+}));
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
 }));
 
 import MembershipPage, * as membershipPageModule from "@/app/[locale]/(public)/membership/page";

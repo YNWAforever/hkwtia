@@ -1,4 +1,4 @@
-import {render, screen} from "@testing-library/react";
+import {render, screen, within} from "@testing-library/react";
 import {describe, expect, it, vi} from "vitest";
 
 import {Button} from "@/components/ui/button";
@@ -158,6 +158,7 @@ describe("wt primitives", () => {
         image={{src: "/images/projects-hero.jpg", alt: "Community", caption: "WTIA archive"}}
         actions={[{href: "/events", label: "Find an event"}, {href: "/membership", label: "Compare"}]}
         breadcrumb={{homeHref: "/", homeLabel: "Home", current: "Events"}}
+        breadcrumbLabel="Breadcrumb"
       />,
     );
     const section = document.querySelector("section");
@@ -171,10 +172,24 @@ describe("wt primitives", () => {
     expect(screen.getByText("WTIA archive").tagName).toBe("FIGCAPTION");
     expect(screen.getByRole("link", {name: "Find an event"})).toHaveClass("button", "button-light");
     expect(screen.getByRole("link", {name: "Compare"})).toHaveClass("text-link", "light-link");
-    expect(screen.getByRole("link", {name: "Home"})).toHaveAttribute("href", "/");
-    expect(document.querySelector(".breadcrumb b")).toHaveTextContent("Events");
+    const breadcrumbNav = screen.getByRole("navigation", {name: "Breadcrumb"});
+    expect(breadcrumbNav).toHaveClass("breadcrumb");
+    expect(within(breadcrumbNav).getByRole("link", {name: "Home"})).toHaveAttribute("href", "/");
+    expect(breadcrumbNav.querySelector("b")).toHaveTextContent("Events");
     expect(document.querySelector(".page-hero-art")).toHaveAttribute("aria-hidden", "true");
     expect(document.querySelector(".page-hero-art span")).toHaveTextContent("W+");
+  });
+
+  it("PageHero falls back to the default breadcrumb label when none is supplied", () => {
+    render(
+      <PageHero
+        eyebrow="About"
+        title="Who we are"
+        lead="Lead"
+        breadcrumb={{homeHref: "/", homeLabel: "Home", current: "About"}}
+      />,
+    );
+    expect(screen.getByRole("navigation", {name: "Breadcrumb"})).toBeInTheDocument();
   });
 
   it("PageHero omits the figure and art when not supplied and rejects images that are not own-origin", () => {
@@ -270,5 +285,35 @@ describe("wt primitives", () => {
     const bare = screen.getByRole("button", {name: "Bare"});
     expect(bare).not.toHaveClass("h-10");
     expect(bare).not.toHaveClass("px-4");
+  });
+});
+
+describe("RouteMap", () => {
+  it("renders the hero variant with four named, aria-hidden nodes inside .gba-map", async () => {
+    const {RouteMap} = await import("@/components/wt/route-map");
+    const {container} = render(
+      <RouteMap variant="hero" labels={{hk: "HK", gz: "GZ", sz: "SZ", world: "↗"}} />,
+    );
+    const wrapper = container.querySelector(".gba-map");
+    expect(wrapper).toHaveAttribute("aria-hidden", "true");
+    expect(wrapper?.querySelector(".hk-node")).toHaveTextContent("HK");
+    expect(wrapper?.querySelector(".gz-node")).toHaveTextContent("GZ");
+    expect(wrapper?.querySelector(".sz-node")).toHaveTextContent("SZ");
+    expect(wrapper?.querySelector(".world-node")).toHaveTextContent("↗");
+  });
+
+  it("renders the board variant with exactly three unlabelled nodes inside .route-map", async () => {
+    const {RouteMap} = await import("@/components/wt/route-map");
+    const {container} = render(
+      <RouteMap variant="board" labels={{hk: "HK", gz: "GZ", sz: "SZ"}} />,
+    );
+    const wrapper = container.querySelector(".route-map");
+    expect(wrapper).toHaveAttribute("aria-hidden", "true");
+    const spans = wrapper?.querySelectorAll("span") ?? [];
+    expect(spans).toHaveLength(3);
+    expect(spans[0]).toHaveTextContent("HK");
+    expect(spans[1]).toHaveTextContent("GZ");
+    expect(spans[2]).toHaveTextContent("SZ");
+    expect(wrapper?.querySelector(".world-node")).toBeNull();
   });
 });

@@ -1,9 +1,12 @@
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
-import {InstitutionalPageIntro} from "@/components/marketing/institutional-page-intro";
-import {StorySection} from "@/components/marketing/story-section";
+import {PageHero} from "@/components/wt/page-hero";
+import {RichRelatedRoutes} from "@/components/wt/rich-related-routes";
+import {Section} from "@/components/wt/section";
+import {SectionHeading} from "@/components/wt/section-heading";
 import type {AppLocale} from "@/i18n/routing";
+import {buildOtherAboutRoutes} from "@/lib/about/related-routes";
 import {buildPageMetadata} from "@/lib/metadata";
 
 type Props = {params: Promise<{locale: string}>};
@@ -23,21 +26,35 @@ export default async function CommitteesPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Committees");
+  const common = await getTranslations({locale, namespace: "Common"});
   const committees = ["executive", "innovation", "membership"] as const;
+  // No compass grid here: three fixed committees with no roster or cadence to count or
+  // link to (restraint, the same instinct HonestEmpty applies elsewhere).
+  const related = await buildOtherAboutRoutes(locale as AppLocale, "committees");
 
   return (
     <>
-      <InstitutionalPageIntro eyebrow={t("eyebrow")} lead={t("summary")} title={t("title")} />
-      <StorySection heading={t("structureTitle")} tone="plain">
-        <div className="grid gap-6 md:grid-cols-3">
-          {committees.map((committee) => (
-            <article className="glass-card p-6" key={committee}>
-              <h3 className="text-xl font-semibold">{t(`${committee}.title`)}</h3>
-              <p className="mt-3 leading-relaxed text-muted-foreground">{t(`${committee}.description`)}</p>
+      <PageHero
+        className="rich-page-hero"
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        lead={t("summary")}
+        breadcrumb={{homeHref: "/", homeLabel: common("breadcrumbHome"), current: t("eyebrow")}}
+        breadcrumbLabel={common("breadcrumbLabel")}
+      />
+      <Section labelledBy="committees-structure-title">
+        <SectionHeading eyebrow={t("eyebrow")} title={t("structureTitle")} headingId="committees-structure-title" variant="stacked" />
+        <div className="rich-items rich-items-cards">
+          {committees.map((committee, index) => (
+            <article key={committee}>
+              <span className="rich-item-number">{String(index + 1).padStart(2, "0")}</span>
+              <h3>{t(`${committee}.title`)}</h3>
+              <p>{t(`${committee}.description`)}</p>
             </article>
           ))}
         </div>
-      </StorySection>
+      </Section>
+      <RichRelatedRoutes items={related} />
     </>
   );
 }

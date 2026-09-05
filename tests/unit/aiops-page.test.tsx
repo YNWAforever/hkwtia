@@ -84,6 +84,19 @@ vi.mock("next/link", () => ({
     href: string;
   }) => <a href={href} {...props}>{children}</a>,
 }));
+// This page now renders PageHero, which links its breadcrumb "Home" item with the real
+// next-intl-backed Link from @/i18n/navigation; that module calls next-intl's createNavigation,
+// which in turn reads next/navigation's `redirect` -- mocked above as `{}` -- so it must be
+// mocked directly here too, matching the repo's established passthrough pattern (e.g.
+// tests/unit/wt-pages/news-page.test.tsx).
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({children, href, ...props}: {
+    children: React.ReactNode;
+    href: string;
+  }) => <a href={href} {...props}>{children}</a>,
+  usePathname: () => "/ai-ops",
+  useRouter: () => ({replace: vi.fn()}),
+}));
 
 import AiOpsPage, {
   generateMetadata,
@@ -239,6 +252,6 @@ describe("AI-Ops public page boundary", () => {
   });
   it("matches the complete approved Traditional Chinese AI-Ops copy", () => {
     const chinese = JSON.parse(readFileSync("messages/zh-HK.json", "utf8")).AiOps;
-    expect(Object.values(chinese)).toEqual(["公開 AI-Ops｜WTIA","公開 WTIA AI 代理的即時、保障私隱表現、升級處理及成本指標。","公開 AI-Ops","公開量度 AI 營運","每小時更新、保障私隱的 WTIA Concierge 及排程代理實證。","香港本月","本月至今","最後更新","指標已按時更新","指標可能延遲","本月暫未有指標","指標暫時無法提供","資料不足","對話數目","代理已解決","首次回應時間中位數","客戶滿意度","升級處理率","失敗率","估算節省職員工時","本月 LLM 成本","份回應","個樣本","小時","目標：70% 或以上","目標：4.5 / 5 或以上","十二個月續會趨勢","整體續會率","首年續會率","整體目標：88%","首年目標：82%","每月續會率","最近十二個香港月份的整體及首年續會率。","月份","已付款","應續會","比率","指標計算方法","聚合指標每小時更新。估算節省時間等於代理已解決對話乘以六分鐘。頁面不會公開任何會員層級資料。","WTIA AI-Ops 運作方式","網站及 WhatsApp 查詢經 Concierge runtime 及受限制工具處理。排程工作使用已驗證路由。所有生成操作仍受人工批准或發布關卡限制。","人工批准關卡","發布關卡","開發實證","已發布開發紀錄","原始碼倉庫","Commit 及 build 紀錄","正式網站","M4 驗收實證","暫未有已發布開發紀錄。"]);
+    expect(Object.values(chinese)).toEqual(["公開 AI-Ops｜WTIA","公開 WTIA AI 代理的即時、保障私隱表現、升級處理及成本指標。","公開 AI-Ops","公開量度 AI 營運","每小時更新、保障私隱的 WTIA Concierge 及排程代理實證。","香港本月","本月至今","最後更新","指標已按時更新","指標可能延遲","本月暫未有指標","指標暫時無法提供","資料不足","對話數目","代理已解決","首次回應時間中位數","客戶滿意度","升級處理率","失敗率","估算節省職員工時","本月 LLM 成本","份回應","個樣本","小時","目標：70% 或以上","目標：4.5 / 5 或以上","十二個月續會趨勢","整體續會率","首年續會率","整體目標：88%","首年目標：82%","每月續會率","最近十二個香港月份的整體及首年續會率。","月份","已付款","應續會","比率","指標計算方法","聚合指標每小時更新。估算節省時間等於代理已解決對話乘以六分鐘。頁面不會公開任何會員層級資料。","WTIA AI-Ops 運作方式","網站及 WhatsApp 查詢經 Concierge runtime 及受限制工具處理。排程工作使用已驗證路由。所有生成操作仍受人工批准或發布關卡限制。","人工批准關卡","發布關卡","開發實證","已發布開發紀錄","原始碼倉庫","Commit 及 build 紀錄","正式網站","M4 驗收實證","暫未有已發布開發紀錄。","AI-Ops"]);
   });
 });

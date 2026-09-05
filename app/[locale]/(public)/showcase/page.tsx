@@ -1,19 +1,45 @@
 import type {Metadata} from "next";
-import Link from "next/link";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {DirectoryPrompts} from "@/components/marketing/directory-prompts";
 import {ShowcaseCard} from "@/components/marketing/showcase-card";
 import {ShowcaseFilters} from "@/components/marketing/showcase-filters";
-import {EmptyState} from "@/components/marketing/empty-state";
-import {PageHero} from "@/components/marketing/page-hero";
+import {SolutionNeeds} from "@/components/marketing/solution-needs";
+import {SolutionPathways} from "@/components/marketing/solution-pathways";
+import {SolutionVerification} from "@/components/marketing/solution-verification";
+import {ActionLink} from "@/components/wt/action-link";
+import {HonestEmpty} from "@/components/wt/honest-empty";
+import {InterestBand} from "@/components/wt/interest-band";
+import {PageHero} from "@/components/wt/page-hero";
+import {Section} from "@/components/wt/section";
 import type {AppLocale} from "@/i18n/routing";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
 import {buildPageMetadata} from "@/lib/metadata";
 import {parseShowcaseFilters, toPublicListing} from "@/lib/showcase/contracts";
-import {localizedPath} from "@/lib/urls";
 
 export const dynamic = "force-dynamic";
 type Props = Readonly<{params: Promise<{locale: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>}>;
+
+const PROMPTS = [
+  {key: "aiConcierge", query: "AI concierge"},
+  {key: "cybersecurity", query: "Cybersecurity"},
+  {key: "crossBorderTrade", query: "Cross-border trade"},
+  {key: "cloudMigration", query: "Cloud migration"},
+  {key: "generativeAi", query: "Generative AI"},
+  {key: "fintech", query: "Fintech"},
+] as const;
+
+const USE_CASES = [
+  "customerService", "cybersecurity", "tradeCompliance", "supplyChain", "fintechPayments", "dataAnalytics",
+  "hrTalent", "marketingAutomation", "legalCompliance", "smartManufacturing", "sustainabilityEsg", "crossBorderTrade",
+] as const;
+const USE_CASE_SLUGS: Record<(typeof USE_CASES)[number], string> = {
+  customerService: "customer-service", cybersecurity: "cybersecurity", tradeCompliance: "trade-compliance",
+  supplyChain: "supply-chain", fintechPayments: "fintech-payments", dataAnalytics: "data-analytics",
+  hrTalent: "hr-talent", marketingAutomation: "marketing-automation", legalCompliance: "legal-compliance",
+  smartManufacturing: "smart-manufacturing", sustainabilityEsg: "sustainability-esg", crossBorderTrade: "cross-border-trade",
+};
+const BADGE_KEYS = ["verifiedDeployment", "reviewedEvidence", "dataHandling"] as const;
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
@@ -25,40 +51,51 @@ export default async function ShowcasePage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const [t, query] = await Promise.all([getTranslations({locale, namespace: "Showcase"}), searchParams]);
+  const [t, tCommon, query] = await Promise.all([
+    getTranslations({locale, namespace: "Showcase"}),
+    getTranslations({locale, namespace: "Common"}),
+    searchParams,
+  ]);
   const filters = parseShowcaseFilters(query);
-  // A database outage degrades to the empty state rather than a 500, matching
-  // /news. This page is also where eight migrated member-story redirects land,
-  // so someone following a link from a 2017 interview would otherwise meet an
-  // error page rather than a directory that happens to be empty.
+  // A database outage degrades to the empty state rather than a 500 -- unchanged from today.
   const rows = await showcaseRepository.listPublished(filters).catch(() => []);
   const listings = rows.map((row) => toPublicListing(row, locale));
-  const cardLabels = {premium: t("premium"), goneGlobal: t("goneGlobal"), memberSince: t("memberSince"), view: t("view")};
+  const cardLabels = {premium: t("premium"), goneGlobal: t("goneGlobal"), memberSince: t("memberSince"), category: t("filters.category"), view: t("view")};
+  const filterLabels = {search: t("filters.search"), category: t("filters.category"), useCase: t("filters.useCase"), deployment: t("filters.deployment"), language: t("filters.language"), worksWith: t("filters.worksWith"), submit: t("filters.submit"), clear: t("filters.clear")};
+  const prompts = PROMPTS.map((prompt) => ({query: prompt.query, label: t(`prompts.${prompt.key}`)}));
+  const chips = USE_CASES.map((key) => ({slug: USE_CASE_SLUGS[key], label: t(`needs.${key}`)}));
+  const badges = BADGE_KEYS.map((key) => ({title: t(`verification.badges.${key}.title`), copy: t(`verification.badges.${key}.copy`)}));
+
   return <>
-    <PageHero eyebrow={t("eyebrow")} title={t("title")} description={t("description")}/>
-    <section className="container mx-auto px-6 pt-16">
-      <div className="glass-card flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
-        <div className="max-w-2xl">
-          <h2 className="font-serif text-2xl font-semibold sm:text-3xl">{t("introTitle")}</h2>
-          <p className="mt-3 leading-7 text-muted-foreground">{t("introDescription")}</p>
-        </div>
-        <Link
-          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          href={localizedPath(locale, "/portal/company/listing")}
-        >
-          {t("ownerCta")}
-        </Link>
-      </div>
-    </section>
-    <section aria-labelledby="showcase-results-title" className="container mx-auto space-y-8 px-6 py-16" id="results">
-      <div className="max-w-2xl">
-        <h2 className="font-serif text-3xl font-semibold" id="showcase-results-title">{t("resultsTitle")}</h2>
-        <p className="mt-3 leading-7 text-muted-foreground">{t("resultsDescription")}</p>
-      </div>
-      <ShowcaseFilters locale={locale} filters={filters} labels={{search: t("filters.search"), category: t("filters.category"), useCase: t("filters.useCase"), deployment: t("filters.deployment"), language: t("filters.language"), worksWith: t("filters.worksWith"), submit: t("filters.submit"), clear: t("filters.clear")}}/>
-      {listings.length
-        ? <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">{listings.map((listing) => <ShowcaseCard key={listing.slug} listing={listing} locale={locale} labels={cardLabels}/>)}</div>
-        : <EmptyState title={t("emptyTitle")} description={t("emptyDescription")}/>}
-    </section>
+    <PageHero
+      breadcrumb={{homeHref: "/", homeLabel: tCommon("breadcrumbHome"), current: t("title")}}
+      breadcrumbLabel={tCommon("breadcrumbLabel")}
+      eyebrow={t("eyebrow")}
+      lead={t("description")}
+      title={t("title")}
+    />
+    <Section id="results" labelledBy="showcase-results-title">
+      <h2 className="sr-only" id="showcase-results-title">{t("resultsTitle")}</h2>
+      <DirectoryPrompts locale={locale} prompts={prompts} />
+      <ShowcaseFilters filters={filters} labels={filterLabels} locale={locale} />
+      <SolutionNeeds chips={chips} filters={filters} locale={locale} />
+      {listings.length > 0
+        ? <div className="partner-record-grid">{listings.map((listing) => <ShowcaseCard key={listing.slug} labels={cardLabels} listing={listing} locale={locale} />)}</div>
+        : <HonestEmpty actions={[{label: t("filters.clear"), href: "/showcase"}]} copy={t("emptyDescription")} title={t("emptyTitle")} variant="inner" />}
+    </Section>
+    <SolutionVerification badges={badges} copy={t("verification.copy")} label={t("verification.label")} title={t("verification.title")} />
+    <Section labelledBy="showcase-pathways-title">
+      <h2 className="sr-only" id="showcase-pathways-title">{t("pathways.heading")}</h2>
+      <SolutionPathways
+        buyer={{label: t("pathways.buyer.label"), title: t("pathways.buyer.title"), copy: t("pathways.buyer.copy"), action: t("pathways.buyer.action"), href: "/contact"}}
+        provider={{label: t("pathways.provider.label"), title: t("pathways.provider.title"), copy: t("pathways.provider.copy"), action: t("ownerCta"), href: "/portal/company/listing"}}
+      />
+    </Section>
+    <InterestBand
+      action={<ActionLink href="/events" variant="button-light">{t("interest.action")}</ActionLink>}
+      copy={t("interest.copy")}
+      eyebrow={t("interest.eyebrow")}
+      title={t("interest.title")}
+    />
   </>;
 }

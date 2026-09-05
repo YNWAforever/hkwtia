@@ -97,21 +97,35 @@ describe("page copy scope", () => {
       About: 19,
       Chairman: 8,
       Committees: 12,
-      // PR5 added 14 editable labels for the Contact concierge journeys.
-      Contact: 20,
+      // PR5 added 14 editable labels for the Contact concierge journeys. WP-4 Task 19 added 29
+      // more: breadcrumbCurrent, viewLabel, routes.about/routes.news (2 fields each, 4), and the
+      // new PreparedEmailForm's emailTopics (topicLabel/composeAction, plus label/subject/body
+      // for each of the 7 topics: 2 + 21 = 23) -- 8 + 21 = 29, so 20 + 29 = 49.
+      Contact: 49,
       // 12 for the four programmes' title/description/status, plus the 17
       // `programs.record` keys the programme records migration and PR3
-      // presentation added. Those are page furniture -- headings, and
-      // sentences with {agency}/{count} placeholders -- so staff can reword
-      // them. The facts they frame come from content/programs/*.ts, which
-      // /admin/page-copy cannot reach.
-      programs: 29,
-      // Static numeric pricing left copy, removing two editable fields.
-      Membership: 32,
-      Privacy: 46,
-      AiTransparency: 30,
+      // presentation added, plus 3 more for the WP-4 Task 15 `audience` field
+      // added to asa/hkict/tct, plus 9 more `programs.record` keys (eyebrow
+      // type labels, compass labels, the mailto ask, and the editions/
+      // credential facts) that Task 15's ProgrammeRecordPage header reads,
+      // plus 1 more for the WP-4 Task 16 `audience` field added to cpai --
+      // 29 + 3 + 9 + 1 = 42. Those are page furniture -- headings, and
+      // sentences with {agency}/{count}/{programme} placeholders -- so staff
+      // can reword them. The facts they frame come from content/programs/*.ts
+      // and lib/home/programme-summaries.ts, which /admin/page-copy cannot reach.
+      programs: 42,
+      // WP-4 Task 9 rewrote /membership to the donor's plan-grid/dimensions grammar, adding 50
+      // editable fields: actions.discuss (1), the sme.* pathway card (4: label/title/copy/
+      // action), pricing.* readiness note (4: ready/fallback label+copy), 12 membership
+      // dimensions x title/copy (24), first90.* (12: eyebrow/heading plus title/copy for each
+      // of 5 steps), and closing.* (5: eyebrow/title/copy/join/contact) -- 32 + 50 = 82.
+      Membership: 82,
+      // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
+      Privacy: 47,
+      // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
+      AiTransparency: 31,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(359);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(453);
   });
 
   it("offers a Chinese placeholder for every English field", () => {
