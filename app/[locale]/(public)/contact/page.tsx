@@ -2,12 +2,13 @@ import type {Metadata} from 'next';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 
 import {ContactConciergeLauncher} from '@/components/marketing/contact-concierge-launcher';
-import {CONTACT_TOPICS, PreparedEmailForm} from '@/components/marketing/prepared-email-form';
+import {PreparedEmailForm} from '@/components/marketing/prepared-email-form';
 import {InnerCardGrid} from '@/components/wt/inner-card-grid';
 import {PageHero} from '@/components/wt/page-hero';
 import {Section} from '@/components/wt/section';
 import {siteConfig} from '@/config/site';
 import type {AppLocale} from '@/i18n/routing';
+import {CONTACT_TOPICS} from '@/lib/contact/topics';
 import {buildPageMetadata} from '@/lib/metadata';
 import {localizedPath} from '@/lib/urls';
 

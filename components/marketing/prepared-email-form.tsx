@@ -3,9 +3,7 @@
 import {useState} from "react";
 
 import {siteConfig} from "@/config/site";
-
-export const CONTACT_TOPICS = ["portal", "membership", "events", "programmes", "partnership", "privacy", "media"] as const;
-export type ContactTopic = (typeof CONTACT_TOPICS)[number];
+import {CONTACT_TOPICS, isContactTopic, type ContactTopic} from "@/lib/contact/topics";
 
 export type PreparedEmailFormLabels = Readonly<{
   topicLabel: string;
@@ -14,10 +12,6 @@ export type PreparedEmailFormLabels = Readonly<{
   subjects: Readonly<Record<ContactTopic, string>>;
   bodies: Readonly<Record<ContactTopic, string>>;
 }>;
-
-function isContactTopic(value: string): value is ContactTopic {
-  return (CONTACT_TOPICS as readonly string[]).includes(value);
-}
 
 /**
  * D-6, matching the newsletter's own mailto pattern (components/layout/footer-newsletter.tsx):
