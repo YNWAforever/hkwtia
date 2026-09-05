@@ -1,3 +1,4 @@
+// Note: /portal/company/seats/accept deliberately excluded—it's a one-time, token-gated invitation route, not a generic continuation target.
 export const PORTAL_CONTINUATIONS = [
   "/portal",
   "/portal/profile",
