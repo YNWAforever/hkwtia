@@ -4,6 +4,7 @@ import {startJoin} from "@/lib/membership/join-service";
 import {completeApplication} from "@/lib/membership/onboarding";
 import type {JourneyEnrollment} from "@/lib/db/repos/journeys";
 import type {Actor} from "@/lib/membership/lifecycle";
+import type {BillingInterval} from "@/lib/membership/catalog";
 
 const actor: Extract<Actor, {kind: "member"}> = {kind: "member", userId: "user-a", profileId: "user-a"};
 
@@ -24,6 +25,7 @@ type TestMembership = {
   ownerUserId: string | null;
   companyId: string | null;
   seatLimit: number;
+  billingInterval: BillingInterval;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -77,6 +79,7 @@ function harness() {
           ownerUserId: (input.ownerUserId as string | null) ?? null,
           companyId: (input.companyId as string | null) ?? null,
           seatLimit: input.seatLimit as number,
+          billingInterval: input.billingInterval as BillingInterval,
           createdAt: new Date("2026-07-26T04:00:00.000Z"),
           updatedAt: new Date("2026-07-26T04:00:00.000Z"),
         };
@@ -123,7 +126,7 @@ describe("membership join orchestration", () => {
 
     expect(result.next).toBe("complete");
     expect(result.checkout).toBeUndefined();
-    expect(deps.inspect().memberships).toMatchObject([{planCode: "community", status: "active"}]);
+    expect(deps.inspect().memberships).toMatchObject([{planCode: "community", status: "active", billingInterval: "none"}]);
     expect([...deps.inspect().enrollmentRows.values()]).toContainEqual(expect.objectContaining({
       profileId: actor.profileId,
       journey: "onboarding_90d",
@@ -160,7 +163,7 @@ describe("membership join orchestration", () => {
 
     expect(result.next).toBe("checkout");
     expect(result.checkout).toMatchObject({kind: "membership_checkout", planCode: "corporate"});
-    expect(deps.inspect().memberships).toMatchObject([{planCode: "corporate", status: "pending_payment"}]);
+    expect(deps.inspect().memberships).toMatchObject([{planCode: "corporate", status: "pending_payment", billingInterval: "annual"}]);
   });
 
   it("sends patron applications to review without creating a charge", async () => {
@@ -177,6 +180,6 @@ describe("membership join orchestration", () => {
 
     expect(result.next).toBe("review");
     expect(result.checkout).toBeUndefined();
-    expect(deps.inspect().memberships).toMatchObject([{planCode: "patron", status: "pending_review"}]);
+    expect(deps.inspect().memberships).toMatchObject([{planCode: "patron", status: "pending_review", billingInterval: "none"}]);
   });
 });
