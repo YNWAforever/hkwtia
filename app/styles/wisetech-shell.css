@@ -402,3 +402,79 @@
  * already measured rather than adding an unrelated dark value. */
 .impact-metrics .method-card { background: #8fc4e0; }
 .impact-metrics .method-card .status-label { color: #0a3d67; }
+
+/* Task 24's whole-branch accessibility gate, run for the first time against WP-4's inner pages,
+ * found three more colour-contrast violations -- none of them the shape of the WP-3 findings
+ * above (a cyan/jade text colour on a new host); these are components that simply never
+ * rendered on a real, tested route until WP-4 wired them in. Each is fixed below.
+ *
+ * 1. components/wt/step-grid.tsx (StepGrid), first rendered live by Task 9's /membership
+ * rewrite. `.intro-process span` (wisetech.css:463) sets `color: var(--wt-blue)` (#729bb5) at
+ * 10px/800 on the article's `--wt-paper-bright` white background (wisetech.css:462) -- 2.96:1,
+ * short of 4.5:1. Large text does not apply: 10px is far under the 18.66px/14pt-bold large-text
+ * threshold, regardless of the 800 weight.
+ *
+ * `--wt-blue` itself is not touched: it is read in eleven other places in the port
+ * (wisetech.css:346,376,411-412,423,436,470,473,483,488,532,732), several already on inverted or
+ * accent-coloured grounds this task never measured, so darkening the token would risk trading a
+ * confirmed failure here for unconfirmed ones there. The fix is a selector-scoped override
+ * instead, following this sheet's own practice elsewhere (`.card-index`, `.event-stage-grid
+ * span`, above) of a genuinely darker shade of the same hue rather than an unrelated colour.
+ *
+ * #4a738c keeps `--wt-blue`'s hue (203°) and saturation (31%) exactly, only lowering HSL
+ * lightness from 58% to 42% (WCAG formula): 5.10:1 on white, real headroom over 4.5:1 rather
+ * than a bare pass. */
+.intro-process span { color: #4a738c; }
+
+/* 2. components/wt/interest-band.tsx (InterestBand), first rendered live by Task 4's /events
+ * rewrite (Task 7's /showcase also uses it, but /showcase is not in this suite's route list).
+ * `.event-interest` (wisetech.css:392) sets `background: var(--wt-blue)` with `color: white`,
+ * and the block carries three text treatments against it, all measured with the WCAG formula:
+ *
+ *   `.event-interest h2` (inherits `color: white`, wisetech.css:392)              2.96:1 (needs 3:1)
+ *   `.eyebrow.light` on the same background (wisetech.css:33)                    2.32:1 (needs 4.5:1)
+ *   `.event-interest p:not(.eyebrow)` (wisetech.css:395)                         2.29:1 (needs 4.5:1)
+ *
+ * The heading is already white -- the lightest colour there is -- so it cannot be fixed by
+ * changing text colour; the background has to move. `--wt-blue` itself is not touched, for the
+ * same reason as above (ten other uses, none of them this background role).
+ *
+ * `--wt-ink-soft` (#1a4f82) is not an invented value: it is the existing token this same sheet
+ * already uses as a section background for exactly this dark-ink-with-light-text role
+ * (`.opportunity-section { background: var(--wt-ink-soft) }`, wisetech.css:184, the Open Now
+ * section's host). Reused here it measures 8.45:1 for the white heading, 5.45:1 for the .74-alpha
+ * eyebrow and 5.26:1 for the .72-alpha body copy -- all comfortably clear of their respective
+ * 3:1 and 4.5:1 floors, and it keeps the section in the same "dark ink" family as the rest of
+ * the port rather than introducing a fourth dark shade. */
+.event-interest { background: var(--wt-ink-soft); }
+
+/* 3. The same whole-branch run surfaced a related, but genuinely separate, finding on the same
+ * two routes: `.honest-empty .status-label { color: var(--wt-cyan) }` (wisetech.css:194,
+ * #1a80b6) measures 4.36:1 against the `.light-empty` block's white `--wt-paper-bright`
+ * background (wisetech.css:273) -- short of 4.5:1, and unrelated to `.event-interest` above; it
+ * is `app/[locale]/(public)/events/page.tsx`'s two `<HonestEmpty variant="light">` empty states,
+ * not the interest band. components/wt/honest-empty.tsx already carries the comment "the donor's
+ * light blocks carry no label, and cyan-on-white only reaches 4.37:1" -- this sheet keeps the
+ * label (it is genuine status information for a reader on `aria-live="polite"`, not decoration)
+ * and darkens the colour instead, the same trade already made for `.opportunity-section
+ * .honest-empty .status-label` above rather than the donor's option of omitting the label.
+ *
+ * #1771a1 keeps `--wt-cyan`'s hue (201°) and saturation (75%) exactly, only lowering HSL
+ * lightness from 41% to 36% (WCAG formula): 5.37:1 on white. Scoped to `.light-empty
+ * .status-label` alone -- the base `.honest-empty .status-label` (dark-ground uses) and
+ * `.opportunity-section .honest-empty .status-label` (the ink-soft override just above) are
+ * different hosts this task did not re-measure, so widening the change to either would assert a
+ * correction nothing here has verified. */
+.light-empty .status-label { color: #1771a1; }
+
+/* Task 24, issue 3: components/layout/footer-newsletter.tsx's `h2` carries no colour of its own
+ * -- every other rule in this sheet and the port that reaches it relies on inheritance -- and
+ * `.site-footer` (wisetech.css:290, this component's original host) supplies `color: white`
+ * alongside its `background: #363839`. Task 18's /news page (commit df83370) mounts a second
+ * `FooterNewsletter` inside its own dark wrapper, `.news-subscribe-band { background: #363839 }`
+ * (wisetech.css:284) -- the identical background -- but that rule never repeats the colour, so
+ * the heading fell back to its unstyled default ink-blue (~#0f4c81) on the same dark ground:
+ * 1.31:1, far short of the 3:1 large text needs. Matching `.site-footer`'s own `color: white`
+ * exactly, rather than picking a new value, is what actually fixes it -- this wrapper sets the
+ * same background as that one, so the same text colour is correct for the same reason. */
+.news-subscribe-band { color: white; }
