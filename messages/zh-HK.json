@@ -1596,7 +1596,10 @@
     "title": "找不到頁面",
     "description": "頁面可能已移動，或網址有誤。",
     "home": "返回首頁",
-    "contact": "聯絡 WTIA"
+    "contact": "聯絡 WTIA",
+    "eyebrow": "找不到頁面",
+    "homeAction": "返回首頁",
+    "eventsAction": "尋找活動"
   },
   "Error": {
     "title": "發生錯誤",

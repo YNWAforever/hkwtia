@@ -1596,7 +1596,10 @@
     "title": "Page not found",
     "description": "The page may have moved, or the address may be incorrect.",
     "home": "Return home",
-    "contact": "Contact WTIA"
+    "contact": "Contact WTIA",
+    "eyebrow": "Not found",
+    "homeAction": "Go to the homepage",
+    "eventsAction": "Find an event"
   },
   "Error": {
     "title": "Something went wrong",
