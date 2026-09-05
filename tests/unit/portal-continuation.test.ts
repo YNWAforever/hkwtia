@@ -17,7 +17,7 @@ describe("PORTAL_CONTINUATIONS", () => {
       "/portal/billing",
       "/portal/documents",
       "/portal/events",
-      "/portal/showcase",
+      "/portal/directory",
     ]);
   });
 
