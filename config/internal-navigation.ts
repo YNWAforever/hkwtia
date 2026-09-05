@@ -1,7 +1,10 @@
 export type InternalNavLinkConfig = Readonly<{id: string; href: string}>;
 export type InternalNavGroupConfig = Readonly<{id: string; links: readonly InternalNavLinkConfig[]}>;
 
-export const portalNavigationGroups: readonly InternalNavGroupConfig[] = [
+// `as const satisfies` (rather than a plain `: readonly InternalNavGroupConfig[]` annotation)
+// keeps each `id` as its literal string type instead of widening to `string`, so nav components
+// can derive a literal union of real link ids and have TypeScript catch a typo'd label-key lookup.
+export const portalNavigationGroups = [
   {
     id: "primary",
     links: [
@@ -15,9 +18,9 @@ export const portalNavigationGroups: readonly InternalNavGroupConfig[] = [
       {id: "billing", href: "/portal/billing"},
     ],
   },
-];
+] as const satisfies readonly InternalNavGroupConfig[];
 
-export const adminNavigationGroups: readonly InternalNavGroupConfig[] = [
+export const adminNavigationGroups = [
   {
     id: "workspace",
     links: [
@@ -49,4 +52,4 @@ export const adminNavigationGroups: readonly InternalNavGroupConfig[] = [
       {id: "automations", href: "/admin/automations"},
     ],
   },
-];
+] as const satisfies readonly InternalNavGroupConfig[];

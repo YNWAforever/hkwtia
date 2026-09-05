@@ -1,10 +1,21 @@
 import {describe, expect, it} from "vitest";
 
-import {adminNavigationGroups, portalNavigationGroups} from "@/config/internal-navigation";
+import {
+  adminNavigationGroups,
+  portalNavigationGroups,
+  type InternalNavGroupConfig,
+} from "@/config/internal-navigation";
+
+// The configs are declared `as const satisfies readonly InternalNavGroupConfig[]` so nav components
+// can derive a literal union of link ids (see PortalNavLinkId/AdminNavLinkId). That makes each config
+// a tuple of distinctly-shaped group literals; widen back to InternalNavGroupConfig[] here so generic
+// array methods like .flatMap/.find aren't asked to unify those heterogeneous literal shapes.
+const portalGroups: readonly InternalNavGroupConfig[] = portalNavigationGroups;
+const adminGroups: readonly InternalNavGroupConfig[] = adminNavigationGroups;
 
 describe("internal navigation config", () => {
   it("defines exactly the Portal's 8 primary nav links, Dashboard first, no seats item", () => {
-    const links = portalNavigationGroups.flatMap((group) => group.links);
+    const links = portalGroups.flatMap((group) => group.links);
     expect(links.map((link) => link.href)).toEqual([
       "/portal",
       "/portal/profile",
@@ -19,10 +30,10 @@ describe("internal navigation config", () => {
   });
 
   it("groups the Admin's 16 nav links into exactly Workspace/Content/Operations", () => {
-    expect(adminNavigationGroups.map((group) => group.id)).toEqual(["workspace", "content", "operations"]);
-    const allLinks = adminNavigationGroups.flatMap((group) => group.links);
+    expect(adminGroups.map((group) => group.id)).toEqual(["workspace", "content", "operations"]);
+    const allLinks = adminGroups.flatMap((group) => group.links);
     expect(allLinks).toHaveLength(16);
-    const workspace = adminNavigationGroups.find((group) => group.id === "workspace")!;
+    const workspace = adminGroups.find((group) => group.id === "workspace")!;
     expect(workspace.links.map((link) => link.id)).toEqual(["dashboard", "members", "at-risk", "segments"]);
   });
 });

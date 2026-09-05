@@ -9,8 +9,11 @@ import {InternalNavigation, type InternalNavGroup} from "@/components/internal-s
 import type {AppLocale} from "@/i18n/routing";
 import {localizedPath} from "@/lib/urls";
 
+/** The real link ids configured for the admin nav — kept in sync with linkLabelKeys via `satisfies`. */
+type AdminNavLinkId = (typeof adminNavigationGroups)[number]["links"][number]["id"];
+
 /** Maps each config link id to the Admin.navigation message key that resolves its nav label. */
-const linkLabelKeys: Readonly<Record<string, string>> = {
+const linkLabelKeys = {
   dashboard: "navigation.dashboard",
   members: "navigation.members",
   "at-risk": "navigation.atRisk",
@@ -27,7 +30,7 @@ const linkLabelKeys: Readonly<Record<string, string>> = {
   approvals: "navigation.approvals",
   reports: "navigation.reports",
   automations: "navigation.automations",
-};
+} satisfies Record<AdminNavLinkId, string>;
 
 export function AdminNav({locale}: Readonly<{locale: AppLocale}>) {
   const pathname = usePathname();
@@ -39,17 +42,17 @@ export function AdminNav({locale}: Readonly<{locale: AppLocale}>) {
     links: group.links.map((link) => ({
       id: link.id,
       href: localizedPath(locale, link.href),
-      label: t(linkLabelKeys[link.id] ?? link.id),
+      label: t(linkLabelKeys[link.id]),
     })),
   }));
 
   return (
     <div>
-      <div className="mx-auto flex max-w-6xl items-center px-4 pt-4 sm:px-6">
+      <header className="mx-auto flex max-w-6xl items-center px-4 pt-4 sm:px-6">
         <Link className="font-serif text-xl font-semibold text-foreground" href={localizedPath(locale, "/admin")}>
           {t("brand")}
         </Link>
-      </div>
+      </header>
       <InternalNavigation
         groups={groups}
         labels={{navigationLabel: t("navigation.label"), openMenu: tCommon("openMenu"), closeMenu: tCommon("closeMenu")}}
