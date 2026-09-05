@@ -116,7 +116,6 @@
       "homeLabel": "WiseTech Hong Kong 首頁",
       "logoAlt": "WTIA"
     },
-    "tagline": "Technology + Wisdom. Hong Kong + The World.",
     "legalLine": "WiseTech Hong Kong 為 Hong Kong Wireless Technology Industry Association 的品牌名稱，中文法定名稱待正式批准。",
     "columns": {
       "explore": "探索",
@@ -2452,5 +2451,8 @@
       "noteValidation": "請輸入最多 4,000 個字元的備註。",
       "noteError": "未能儲存職員備註，請再試一次。"
     }
+  },
+  "MarketingExtras": {
+    "footerTagline": "Technology + Wisdom. Hong Kong + The World."
   }
 }

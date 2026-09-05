@@ -115,7 +115,6 @@
       "homeLabel": "WiseTech Hong Kong home",
       "logoAlt": "WTIA"
     },
-    "tagline": "Technology + Wisdom. Hong Kong + The World.",
     "legalLine": "WiseTech Hong Kong — the evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association.",
     "columns": {
       "explore": "Explore",
@@ -2423,5 +2422,8 @@
       "noteValidation": "Enter a note of up to 4,000 characters.",
       "noteError": "We could not save the staff note. Please try again."
     }
+  },
+  "MarketingExtras": {
+    "footerTagline": "Technology + Wisdom. Hong Kong + The World."
   }
 }

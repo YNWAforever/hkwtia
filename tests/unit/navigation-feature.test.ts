@@ -61,7 +61,7 @@ describe("navigation feature aside", () => {
       "Navigation.explore", "Navigation.viewOverview", "Navigation.search",
       "Navigation.brand.descriptor",
       "Navigation.mobile.priority", "Navigation.mobile.utilities", "Navigation.mobile.exploreEcosystem",
-      "Footer.tagline", "Footer.legalLine", "Footer.brand.descriptor",
+      "MarketingExtras.footerTagline", "Footer.legalLine", "Footer.brand.descriptor",
       "Footer.columns.explore", "Footer.columns.membership", "Footer.columns.about", "Footer.columns.contact",
       "Footer.newsletter.eyebrow", "Footer.newsletter.title", "Footer.newsletter.emailLabel",
       "Footer.newsletter.placeholder", "Footer.newsletter.submit", "Footer.newsletter.success",

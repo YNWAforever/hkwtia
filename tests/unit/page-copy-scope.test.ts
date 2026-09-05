@@ -32,6 +32,9 @@ describe("page copy scope", () => {
       expect(isPageCopyNamespace(namespace), namespace).toBe(false);
     }
     expect(isPageCopyNamespace("Privacy")).toBe(true);
+    // WP-5: Footer itself stays excluded (structural), but one specific marketing
+    // string (the footer tagline) is editable via this new, narrowly-scoped namespace.
+    expect(isPageCopyNamespace("MarketingExtras")).toBe(true);
     expect(isPageCopyNamespace("__proto__")).toBe(false);
     expect(isPageCopyNamespace(undefined)).toBe(false);
   });
@@ -124,8 +127,12 @@ describe("page copy scope", () => {
       Privacy: 47,
       // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
       AiTransparency: 31,
+      // WP-5 added one editable field: the footer tagline, moved out of the
+      // deliberately-excluded structural Footer namespace into this new,
+      // narrowly-scoped one so it alone (not the rest of Footer) is staff-editable.
+      MarketingExtras: 1,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(453);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(454);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

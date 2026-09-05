@@ -19,6 +19,10 @@ export const pageCopyNamespaces = [
   "Membership",
   "Privacy",
   "AiTransparency",
+  // WP-5: not a page namespace -- copy that renders sitewide but doesn't belong to
+  // the deliberately-excluded structural Footer namespace. Keep this small; it is
+  // not a place to route around Footer's own exclusion for anything else.
+  "MarketingExtras",
 ] as const;
 
 export type PageCopyNamespace = (typeof pageCopyNamespaces)[number];
@@ -38,6 +42,9 @@ export const pageCopyRoutes: Readonly<Record<PageCopyNamespace, readonly PublicR
   Membership: ["/membership"],
   Privacy: ["/privacy"],
   AiTransparency: ["/ai-transparency"],
+  // SiteFooter renders on every public route via the shared (public) layout, not
+  // just "/" -- a save here must invalidate all of them.
+  MarketingExtras: publicRoutes,
 };
 
 const namespaceSet: ReadonlySet<string> = new Set(pageCopyNamespaces);
