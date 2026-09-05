@@ -43,4 +43,10 @@ describe("internal shell primitives", () => {
     const alert = screen.getByRole("alert");
     expect(alert).toHaveTextContent("Something went wrong");
   });
+
+  it("InternalActionFeedback uses role=status for success tone, not alert", () => {
+    render(<InternalActionFeedback tone="success" message="Changes saved" />);
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("Changes saved");
+  });
 });
