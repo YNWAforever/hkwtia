@@ -65,7 +65,7 @@ export default async function LaunchPadPage({params, searchParams = Promise.reso
     <>
       <LaunchpadGbaOpening labels={openingLabels} />
       <Section tone="paper">
-        <SectionHeading eyebrow={t('program.title')} title={t('program.title')} variant="stacked" />
+        <SectionHeading eyebrow={t('program.eyebrow')} title={t('program.title')} variant="stacked" />
         <p className="mt-3 max-w-2xl text-muted-foreground">{t('program.intro')}</p>
         <div className="mt-6 space-y-4">
           <p className="text-lg font-medium">{t('program.outcomeTitle')}</p>
@@ -73,17 +73,17 @@ export default async function LaunchPadPage({params, searchParams = Promise.reso
         </div>
       </Section>
       <Section tone="bright">
-        <SectionHeading eyebrow={t('calendar.title')} title={t('calendar.title')} variant="stacked" />
+        <SectionHeading eyebrow={t('calendar.eyebrow')} title={t('calendar.title')} variant="stacked" />
         <p className="mt-3 max-w-2xl text-muted-foreground">{t('calendar.intro')}</p>
         <div className="mt-6"><CohortCalendar cohorts={cohorts} locale={appLocale} labels={calendarLabels}/></div>
       </Section>
       <Section tone="paper">
-        <SectionHeading eyebrow={t('partners.title')} title={t('partners.title')} variant="stacked" />
+        <SectionHeading eyebrow={t('partners.eyebrow')} title={t('partners.title')} variant="stacked" />
         <p className="mt-3 max-w-2xl text-muted-foreground">{t('partners.intro')}</p>
         <div className="mt-6"><LandingPartnerMap partners={partners} locale={appLocale} labels={partnerLabels}/></div>
       </Section>
       <Section tone="bright">
-        <SectionHeading eyebrow={t('funding.title')} title={t('funding.title')} variant="stacked" />
+        <SectionHeading eyebrow={t('funding.eyebrow')} title={t('funding.title')} variant="stacked" />
         <p className="mt-3 max-w-2xl text-muted-foreground">{t('funding.intro')}</p>
         <div className="mt-6 space-y-10"><FundingWizard locale={appLocale} answers={answers} labels={fundingLabels}/><FundingResults results={fundingResults} labels={fundingResultsLabels}/></div>
       </Section>

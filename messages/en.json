@@ -912,12 +912,14 @@
       }
     },
     "program": {
+      "eyebrow": "Programme",
       "title": "A practical route to new markets",
       "intro": "Launch Pad brings selected teams together for structured market preparation, landing-partner connections, and peer learning.",
       "outcomeTitle": "From readiness to market entry",
       "outcomeDescription": "Each cohort follows a clear path through readiness, partner matching, landing, and scale."
     },
     "calendar": {
+      "eyebrow": "Schedule",
       "title": "Cohort calendar",
       "intro": "Explore current and upcoming Launch Pad cohorts.",
       "empty": "No public cohorts are scheduled yet.",
@@ -935,6 +937,7 @@
       }
     },
     "partners": {
+      "eyebrow": "Landing partners",
       "title": "Landing partner map",
       "intro": "Meet the public organisations that help cohorts navigate priority markets.",
       "empty": "Landing partners will be announced shortly.",
@@ -948,6 +951,7 @@
       }
     },
     "funding": {
+      "eyebrow": "Funding",
       "title": "Funding scheme picker",
       "intro": "Answer five questions for an informational screening against current published scheme rules.",
       "formLabel": "Funding scheme picker",

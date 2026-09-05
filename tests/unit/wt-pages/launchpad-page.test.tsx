@@ -57,4 +57,20 @@ describe("Launch Pad page — GBA opening", () => {
     expect(screen.getByText(bundles.en.LaunchPad.services.buyerMatching.title)).toBeInTheDocument();
     expect(screen.getByText(bundles.en.LaunchPad.services.delegations.title)).toBeInTheDocument();
   });
+
+  it("gives each SectionHeading its own eyebrow, distinct from the section title", async () => {
+    const {default: LaunchPadPage} = await import("@/app/[locale]/(public)/launchpad/page");
+    render(await LaunchPadPage({
+      params: Promise.resolve({locale: "en"}),
+      searchParams: Promise.resolve({}),
+    }));
+
+    for (const section of ["program", "calendar", "partners", "funding"] as const) {
+      const eyebrow = bundles.en.LaunchPad[section].eyebrow as string;
+      const title = bundles.en.LaunchPad[section].title as string;
+      expect(eyebrow).not.toBe(title);
+      expect(screen.getByText(eyebrow)).toBeInTheDocument();
+      expect(screen.getByText(title)).toBeInTheDocument();
+    }
+  });
 });
