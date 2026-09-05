@@ -100,11 +100,13 @@ export const pageCopyNamespaces = [
 
 export const pageCopyRoutes: Readonly<Record<PageCopyNamespace, readonly PublicRoute[]>> = {
   // ...existing entries unchanged...
-  MarketingExtras: ["/"], // the footer renders on every public route, but the tagline is visually anchored to Home
+  MarketingExtras: publicRoutes, // SiteFooter renders on every public route via the shared layout, so a save must invalidate all of them, not just "/"
 };
 ```
 
 `messages/{en,zh-HK}.json` gain a new `MarketingExtras.footerTagline` key, seeded with the current `Footer.tagline` value. `components/layout/site-footer.tsx` reads `t("MarketingExtras.footerTagline")` in place of `t("Footer.tagline")` — a one-line change, since `SiteFooter` already resolves its own namespace translator per-call. `Footer.tagline` itself is removed from both bundles in the same commit (no orphaned, unread key) — `tests/unit/messages.test.ts`'s key-parity check and `npm run audit:strings` both catch a mismatch here if the swap is incomplete.
+
+**Self-review catch:** the first draft of this spec scoped `MarketingExtras` to `["/"]` only, reasoning that the tagline is "visually anchored to Home." That's wrong for what `pageCopyRoutes` actually does — invalidate the pages a save can change — and `SiteFooter` mounts on every public route via `app/[locale]/(public)/layout.tsx`, not just `/`. Fixed to `publicRoutes` (the full list, already imported by this file for `isPublicRoute`) before this spec was shown for review.
 
 ---
 
