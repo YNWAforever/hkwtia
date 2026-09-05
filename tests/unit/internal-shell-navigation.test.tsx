@@ -47,4 +47,22 @@ describe("InternalNavigation", () => {
     );
     expect(screen.getByRole("button", {name: "Sign out"})).toBeInTheDocument();
   });
+
+  it("marks only the most-specific link current when routes have ancestor/descendant relationships", () => {
+    const nestedGroups = [
+      {
+        id: "portals",
+        links: [
+          {id: "portal_root", href: "/portal", label: "Portal"},
+          {id: "company", href: "/portal/company", label: "Company"},
+          {id: "listing", href: "/portal/company/listing", label: "Showcase listing"},
+        ],
+      },
+    ];
+    // At /portal/company/listing, only "Showcase listing" should be marked current, not "Company" or "Portal"
+    render(<InternalNavigation groups={nestedGroups} labels={labels} currentPath="/portal/company/listing" />);
+    expect(screen.getByRole("link", {name: "Portal"})).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("link", {name: "Company"})).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("link", {name: "Showcase listing"})).toHaveAttribute("aria-current", "page");
+  });
 });

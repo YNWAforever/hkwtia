@@ -12,11 +12,25 @@ export type InternalNavigationLabels = Readonly<{navigationLabel: string; openMe
 const linkClassName =
   "flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground aria-[current=page]:bg-accent aria-[current=page]:text-accent-foreground";
 
-function isCurrent(href: string, currentPath: string): boolean {
-  return href === currentPath || (href !== "/portal" && href !== "/admin" && currentPath.startsWith(`${href}/`));
+/**
+ * Find the single longest-matching href for the current path.
+ * Among all hrefs that are either exactly equal to currentPath OR a genuine path-prefix of it,
+ * returns the longest one (most specific). Returns undefined if no match exists.
+ * This ensures exactly one link gets aria-current="page" even with nested routes.
+ */
+function findCurrentLink(groups: readonly InternalNavGroup[], currentPath: string): string | undefined {
+  const allHrefs = groups.flatMap((group) => group.links.map((link) => link.href));
+  const matchingHrefs = allHrefs.filter((href) => href === currentPath || currentPath.startsWith(`${href}/`));
+
+  if (matchingHrefs.length === 0) return undefined;
+
+  // Return the longest matching href (most specific)
+  return matchingHrefs.reduce((longest, current) => (current.length > longest.length ? current : longest));
 }
 
 function NavLinks({groups, currentPath, onNavigate}: {groups: readonly InternalNavGroup[]; currentPath: string; onNavigate?: () => void}) {
+  const currentLink = findCurrentLink(groups, currentPath);
+
   return (
     <>
       {groups.map((group) => (
@@ -27,7 +41,7 @@ function NavLinks({groups, currentPath, onNavigate}: {groups: readonly InternalN
               key={link.id}
               href={link.href}
               className={linkClassName}
-              aria-current={isCurrent(link.href, currentPath) ? "page" : undefined}
+              aria-current={link.href === currentLink ? "page" : undefined}
               onClick={onNavigate}
             >
               {link.label}
