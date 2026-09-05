@@ -7,9 +7,19 @@ vi.mock("next-intl/server", () => ({
 }));
 vi.mock("@/lib/auth/actor", () => ({getActor: vi.fn(async () => null)}));
 
+import {getActor} from "@/lib/auth/actor";
 import MemberLoginPage from "@/app/[locale]/member-login/page";
 
 describe("MemberLoginPage", () => {
+  it("shows the honest access message and no login form for an already-authenticated actor", async () => {
+    vi.mocked(getActor).mockResolvedValueOnce({kind: "member", userId: "u1", profileId: "p1"});
+
+    render(await MemberLoginPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({})}));
+
+    expect(screen.getByText("nonMemberAccess")).toBeInTheDocument();
+    expect(screen.queryByTestId("member-login-form")).not.toBeInTheDocument();
+  });
+
   it("renders an email field and a submit control when unauthenticated", async () => {
     render(await MemberLoginPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({})}));
     expect(screen.getByLabelText("emailLabel")).toBeInTheDocument();

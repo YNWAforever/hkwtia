@@ -825,7 +825,6 @@
     "formLabel": "會員登入",
     "emailLabel": "電郵地址",
     "submit": "傳送安全登入連結",
-    "sending": "傳送中…",
     "sent": "請查閱電郵中的安全登入連結；連結會帶你返回會員專區。",
     "nonMemberAccess": "你已登入帳戶。此登入連結僅用於登入另一個帳戶。",
     "errors": {

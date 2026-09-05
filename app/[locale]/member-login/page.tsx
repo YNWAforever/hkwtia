@@ -44,8 +44,7 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
   if (actor) {
     return (
       <section className="glass-card p-6 sm:p-10">
-        <h1 className="font-serif text-4xl font-semibold">{t("formLabel")}</h1>
-        <p className="mt-4 text-muted-foreground">{t("nonMemberAccess")}</p>
+        <p className="text-muted-foreground">{t("nonMemberAccess")}</p>
       </section>
     );
   }
