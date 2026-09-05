@@ -17,8 +17,12 @@ describe("AdminNav", () => {
 
   it("reaches Dashboard through a real labelled link, not only the brand", () => {
     render(<AdminNav locale="en" />);
-    const dashboardLinks = screen.getAllByRole("link").filter((link) => link.getAttribute("href")?.endsWith("/admin"));
-    expect(dashboardLinks.length).toBeGreaterThanOrEqual(1);
+    // Assert the Dashboard nav link exists with its distinct accessible name
+    const dashboardLink = screen.getByRole("link", {name: "navigation.dashboard"});
+    expect(dashboardLink).toHaveAttribute("href", expect.stringContaining("/admin"));
+    // Verify it's genuinely distinct from the brand link
+    const brandLink = screen.getByRole("link", {name: "brand"});
+    expect(dashboardLink).not.toBe(brandLink);
   });
 
   it("groups all 16 nav links across Workspace/Content/Operations", () => {
