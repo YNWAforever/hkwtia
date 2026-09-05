@@ -21,6 +21,7 @@ function membership(overrides: Record<string, unknown> = {}) {
     applicationId,
     planCode: "startup" as const,
     status: "pending_payment" as const,
+    billingInterval: "annual" as const,
     seatLimit: 5,
     stripeCustomerId: null,
     ...overrides,

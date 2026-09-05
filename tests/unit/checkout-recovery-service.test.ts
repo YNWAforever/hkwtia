@@ -10,7 +10,7 @@ const actor = actorFor("user-a");
 const membershipId = "20000000-0000-4000-8000-000000000002";
 const membership: MembershipRecord = {id: membershipId, ownerUserId: "user-a", companyId: null,
   applicationId: "10000000-0000-4000-8000-000000000001", planCode: "startup",
-  status: "pending_payment", seatLimit: 5, stripeCustomerId: null};
+  status: "pending_payment", billingInterval: "annual", seatLimit: 5, stripeCustomerId: null};
 const request = {expectedCurrentAttemptId: "attempt-1", recoveryRequestId: "recovery-double-click-1"};
 
 function setup(record: MembershipRecord = membership) {

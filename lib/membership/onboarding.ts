@@ -268,6 +268,11 @@ export async function completeApplication(
     planCode: plan.code,
     status: membershipStatus,
     seatLimit: plan.seatAllowance,
+    // billingInterval is part of plan identity (lib/membership/catalog.ts): free/review plans are
+    // always "none", and the only currently-configured paid option is "annual". Without this,
+    // the column's `"annual"` default silently applied to every membership, including free
+    // Community and review-track Patron ones.
+    billingInterval: plan.billingBehavior === "checkout" ? "annual" : "none",
   }, deps);
   const result = resultForMembership(application, membership);
   if (membership.status === "active" && deps.journeys) {

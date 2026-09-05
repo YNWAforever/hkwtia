@@ -6,6 +6,7 @@ import {
   type MembershipPlanCode,
   type MembershipStatus,
 } from "@/lib/membership/constants";
+import type {BillingInterval} from "@/lib/membership/catalog";
 
 export {MEMBERSHIP_PLAN_CODES, MEMBERSHIP_STATUSES};
 export type {MembershipPlanCode, MembershipStatus};
@@ -59,6 +60,7 @@ export interface MembershipRecord {
   readonly applicationId?: string | null;
   readonly planCode: MembershipPlanCode;
   readonly status: MembershipStatus;
+  readonly billingInterval: BillingInterval;
   readonly seatLimit: number;
   readonly stripeCustomerId?: string | null;
   readonly stripeSubscriptionId?: string | null;

@@ -15,6 +15,7 @@ function setup() {
     applicationId,
     planCode: "startup" as const,
     status: "pending_payment" as "pending_payment" | "active",
+    billingInterval: "annual" as const,
     seatLimit: 5,
     stripeCustomerId: "cus_m1_customer",
     stripeSubscriptionId: null,
