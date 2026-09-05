@@ -9,20 +9,17 @@ import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
 import {localizeConcierge} from "@/lib/ai/concierge-labels";
 import {publicEnv} from "@/lib/config/env";
-import {buildPortalSignInPath} from "@/lib/portal/queries";
+import {parsePortalContinuation} from "@/lib/portal/continuation";
+import {localizedPath} from "@/lib/urls";
 
 export const dynamic = "force-dynamic";
 
 type Props = Readonly<{children: ReactNode; params: Promise<{locale: string}>}>;
 
-function requestedPath(value: string | null): string {
-  if (!value) return "/portal";
-  try {
-    const url = new URL(value, "http://portal.local");
-    return url.origin === "http://portal.local" && url.pathname.startsWith("/portal") && !url.search && !url.hash ? url.pathname : "/portal";
-  } catch {
-    return "/portal";
-  }
+/** Build the dedicated member sign-in redirect for an unauthenticated Portal visitor. */
+function memberLoginPath(locale: AppLocale, continuation: string): string {
+  const query = new URLSearchParams({next: continuation});
+  return `${localizedPath(locale, "/member-login")}?${query.toString()}`;
 }
 
 export default async function PortalLayout({children, params}: Props) {
@@ -35,8 +32,8 @@ export default async function PortalLayout({children, params}: Props) {
   } catch (error) {
     if (error instanceof Error && error.message === "UNAUTHORIZED") {
       const requestHeaders = await headers();
-      const continuation = requestedPath(requestHeaders.get("next-url") ?? requestHeaders.get("x-invoke-path"));
-      redirect(buildPortalSignInPath(locale, continuation));
+      const continuation = parsePortalContinuation(requestHeaders.get("next-url") ?? requestHeaders.get("x-invoke-path"));
+      redirect(memberLoginPath(locale, continuation));
     }
     throw error;
   }

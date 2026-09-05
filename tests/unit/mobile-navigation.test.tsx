@@ -61,7 +61,7 @@ describe("MobileNavigation", () => {
 
     const utilities = within(dialog).getByRole("navigation", {name: labels.utilities});
     expect(within(utilities).getByRole("link", {name: labels.search})).toHaveAttribute("href", "/showcase");
-    expect(within(utilities).getByRole("link", {name: "actions.memberSignIn"})).toHaveAttribute("href", "/portal");
+    expect(within(utilities).getByRole("link", {name: "actions.memberSignIn"})).toHaveAttribute("href", "/member-login");
     expect(within(utilities).getByRole("button", {name: labels.switchToChinese}).parentElement).toHaveClass("[&_button]:min-w-11");
 
     expect(within(dialog).getByText(labels.exploreEcosystem)).toHaveClass("eyebrow");

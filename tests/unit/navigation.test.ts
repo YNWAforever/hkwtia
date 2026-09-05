@@ -47,7 +47,7 @@ describe("public shell navigation", () => {
       findEvent: {id: "find-event", href: "/events", labelKey: "actions.findEvent", priority: "primary"},
       join: {id: "join-wisetech", href: "/join", labelKey: "actions.join", priority: "secondary"},
     });
-    expect(memberPortalAction).toEqual({id: "member-sign-in", href: "/portal", labelKey: "actions.memberSignIn"});
+    expect(memberPortalAction).toEqual({id: "member-sign-in", href: "/member-login", labelKey: "actions.memberSignIn"});
     expect(publicRoutes).not.toContain("/portal" as never);
     expect(wisetechIntegrationManifest.find(({id}) => id === "route-portal")).toEqual(expect.objectContaining({canonicalPath: "/portal", disposition: "retain"}));
   });
