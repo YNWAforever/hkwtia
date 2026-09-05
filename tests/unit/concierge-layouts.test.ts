@@ -13,9 +13,10 @@ describe("Concierge layout translation loading", () => {
     // still needs Promise.all to load them in parallel.
     {file: "app/[locale]/(public)/layout.tsx", fetchesInParallel: true},
     // Task 7 moved Portal's own nav-label translations client-side (PortalNav now resolves them
-    // itself via next-intl's useTranslations), so this layout fetches only the Concierge
-    // namespace -- a single getTranslations call, with no second namespace left to parallelize.
-    {file: "app/[locale]/(member)/portal/layout.tsx", fetchesInParallel: false},
+    // itself via next-intl's useTranslations). Task 8 (InternalAppShell adoption) then added a
+    // second scoped fetch -- Common's skipToContent, for the shell's skip link -- so this layout
+    // is back to two namespaces loaded via Promise.all, alongside Concierge.
+    {file: "app/[locale]/(member)/portal/layout.tsx", fetchesInParallel: true},
   ])("loads scoped translations without the full catalog: $file", ({file, fetchesInParallel}) => {
     const layout = source(file);
 

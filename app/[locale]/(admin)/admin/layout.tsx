@@ -1,8 +1,9 @@
-import {setRequestLocale} from "next-intl/server";
+import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import type {ReactNode} from "react";
 
 import {AdminNav} from "@/components/admin/admin-nav";
+import {InternalAppShell} from "@/components/internal-shell/app-shell";
 import type {AppLocale} from "@/i18n/routing";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 
@@ -14,5 +15,10 @@ export default async function AdminLayout({children, params}: Props) {
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
   await requireAdminPageActor();
-  return <div className="min-h-screen bg-background"><AdminNav locale={locale} /><main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">{children}</main></div>;
+  const t = await getTranslations({locale, namespace: "Common"});
+  return (
+    <InternalAppShell navigation={<AdminNav locale={locale} />} skipLabel={t("skipToContent")}>
+      {children}
+    </InternalAppShell>
+  );
 }

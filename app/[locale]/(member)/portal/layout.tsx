@@ -4,6 +4,7 @@ import {redirect} from "next/navigation";
 import type {ReactNode} from "react";
 
 import {ConciergeWidget} from "@/components/ai/concierge-widget";
+import {InternalAppShell} from "@/components/internal-shell/app-shell";
 import {PortalNav} from "@/components/portal/portal-nav";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
@@ -38,19 +39,23 @@ export default async function PortalLayout({children, params}: Props) {
     throw error;
   }
 
-  const concierge = await getTranslations({locale, namespace: "Concierge"});
+  const [concierge, commonT] = await Promise.all([
+    getTranslations({locale, namespace: "Concierge"}),
+    getTranslations({locale, namespace: "Common"}),
+  ]);
   const conciergeLabels = localizeConcierge((key) => concierge.raw(key));
   const {turnstileSiteKey} = publicEnv();
 
   return (
-    <div className="min-h-screen bg-background">
-      <PortalNav locale={locale} />
-      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">{children}</main>
+    <>
+      <InternalAppShell navigation={<PortalNav locale={locale} />} skipLabel={commonT("skipToContent")}>
+        {children}
+      </InternalAppShell>
       <ConciergeWidget
         locale={locale}
         labels={conciergeLabels}
         {...(turnstileSiteKey === undefined ? {} : {turnstileSiteKey})}
       />
-    </div>
+    </>
   );
 }
