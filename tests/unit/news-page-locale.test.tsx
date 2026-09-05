@@ -1,3 +1,4 @@
+import type {ReactNode} from "react";
 import {renderToStaticMarkup} from "react-dom/server";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
@@ -20,6 +21,17 @@ vi.mock("next-intl/server", () => ({
 }));
 vi.mock("next/navigation", () => ({
   notFound: () => { throw new Error("NOT_FOUND"); },
+}));
+// The rewritten news index now renders PageHero and FooterNewsletter, both of which pull in
+// @/i18n/navigation's real createNavigation() output -- which needs the full next/navigation
+// export surface (redirect, permanentRedirect, etc.) that the partial mock above doesn't carry.
+// Mocked here with the repo's established plain-passthrough pattern (same situation Task 17 hit
+// with m6-launchpad-page.test.tsx / launchpad-partner-cutover.test.tsx); this file's own
+// assertions are unchanged.
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
+  usePathname: () => "/news",
+  useRouter: () => ({replace: vi.fn()}),
 }));
 
 import NewsPage from "@/app/[locale]/(public)/news/page";

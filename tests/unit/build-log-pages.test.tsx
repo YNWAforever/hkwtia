@@ -1,4 +1,5 @@
 import {render, screen} from "@testing-library/react";
+import type {ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const publicPosts = vi.hoisted(() => ({
@@ -21,6 +22,17 @@ vi.mock("next/navigation", () => navigation);
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async () => (key: string) => `translated:${key}`),
   setRequestLocale: vi.fn(),
+}));
+// The rewritten news index now renders PageHero and FooterNewsletter, both of which pull in
+// @/i18n/navigation's real createNavigation() output -- which needs the full next/navigation
+// export surface that the partial mock above (just `notFound`) doesn't carry. Mocked here with
+// the repo's established plain-passthrough pattern (same situation Task 17 hit with
+// m6-launchpad-page.test.tsx / launchpad-partner-cutover.test.tsx); this file's own assertions
+// (including the exact accessible link names below) are unchanged.
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
+  usePathname: () => "/news",
+  useRouter: () => ({replace: vi.fn()}),
 }));
 
 import NewsPage from "@/app/[locale]/(public)/news/page";

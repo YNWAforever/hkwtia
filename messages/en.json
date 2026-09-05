@@ -1314,7 +1314,26 @@
     "title": "WTIA news",
     "description": "Browse WTIA announcements and community news.",
     "emptyTitle": "No news is published yet",
-    "emptyDescription": "News will appear here when content is confirmed."
+    "emptyDescription": "News will appear here when content is confirmed.",
+    "breadcrumbCurrent": "News",
+    "statusNews": "News",
+    "statusBuildLog": "Build Log",
+    "quality": {
+      "eyebrow": "Editorial standards",
+      "title": "How WTIA reports",
+      "body": "Every article is staff-authored, dated and attributed. Build Log entries describe engineering work actually shipped to this platform, each linked to its own published evidence on the AI-Ops page."
+    },
+    "subscribe": {
+      "eyebrow": "Stay informed",
+      "title": "Get WTIA news by email",
+      "emailLabel": "Email address",
+      "placeholder": "you@example.com",
+      "submit": "Subscribe",
+      "success": "Thanks — check the draft email we opened for you.",
+      "error": "Enter a valid email address.",
+      "mailSubject": "Subscribe to WTIA news",
+      "mailBody": "Please add {email} to the WTIA news list."
+    }
   },
   "Contact": {
     "metaTitle": "Contact WTIA",

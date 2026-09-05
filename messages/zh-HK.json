@@ -1314,7 +1314,26 @@
     "title": "WTIA 最新消息",
     "description": "瀏覽 WTIA 的公告及社群消息。",
     "emptyTitle": "暫未有已發布消息",
-    "emptyDescription": "消息內容確認後，會在此顯示。"
+    "emptyDescription": "消息內容確認後，會在此顯示。",
+    "breadcrumbCurrent": "新聞",
+    "statusNews": "新聞",
+    "statusBuildLog": "開發日誌",
+    "quality": {
+      "eyebrow": "編採標準",
+      "title": "WTIA 的報道方式",
+      "body": "每篇文章均由職員撰寫、註明日期及作者。開發日誌記錄本平台已實際推出的工程工作，並連結至 AI-Ops 頁面上相應的公開實證。"
+    },
+    "subscribe": {
+      "eyebrow": "掌握動態",
+      "title": "以電郵接收 WTIA 新聞",
+      "emailLabel": "電郵地址",
+      "placeholder": "you@example.com",
+      "submit": "訂閱",
+      "success": "多謝！請查看我們為你開啟的電郵草稿。",
+      "error": "請輸入有效的電郵地址。",
+      "mailSubject": "訂閱 WTIA 新聞",
+      "mailBody": "請將 {email} 加入 WTIA 新聞訂閱名單。"
+    }
   },
   "Contact": {
     "metaTitle": "聯絡 WTIA",
