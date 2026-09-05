@@ -1624,6 +1624,7 @@
     "profile": "我的個人資料",
     "company": "公司資料",
     "signOut": "登出",
+    "signOutError": "無法登出你的帳戶，請再試一次。",
     "dashboardTitle": "你的 WTIA 控制台",
     "welcome": "歡迎回來，{name}。",
     "membershipStatus": "會員狀態",

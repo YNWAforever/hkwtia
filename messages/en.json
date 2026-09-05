@@ -1624,6 +1624,7 @@
     "profile": "My profile",
     "company": "Company",
     "signOut": "Sign out",
+    "signOutError": "We could not sign you out. Please try again.",
     "dashboardTitle": "Your WTIA dashboard",
     "welcome": "Welcome back, {name}.",
     "membershipStatus": "Membership status",
