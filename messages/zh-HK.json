@@ -1422,6 +1422,7 @@
     "eyebrow": "私隱",
     "title": "我們如何處理你的資料",
     "description": "WTIA 平台收集甚麼資料、由誰處理，以及保存多久。",
+    "breadcrumbCurrent": "私隱",
     "sections": [
       {
         "heading": "適用範圍",
@@ -1524,6 +1525,7 @@
     "eyebrow": "AI 透明度",
     "title": "WTIA Concierge 如何運作",
     "description": "我們的 AI 助理能做甚麼、不能做甚麼，以及你的對話如何被處理。",
+    "breadcrumbCurrent": "AI 透明度",
     "sections": [
       {
         "heading": "Concierge 已經啟用",

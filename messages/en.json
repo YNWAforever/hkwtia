@@ -1422,6 +1422,7 @@
     "eyebrow": "Privacy",
     "title": "How we handle your information",
     "description": "What the WTIA platform collects, who processes it, and how long it is kept.",
+    "breadcrumbCurrent": "Privacy",
     "sections": [
       {
         "heading": "What this covers",
@@ -1524,6 +1525,7 @@
     "eyebrow": "AI transparency",
     "title": "How the WTIA Concierge works",
     "description": "What our AI assistant can and cannot do, and how your conversation is handled.",
+    "breadcrumbCurrent": "AI transparency",
     "sections": [
       {
         "heading": "The Concierge is live",

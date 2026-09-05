@@ -120,10 +120,12 @@ describe("page copy scope", () => {
       // dimensions x title/copy (24), first90.* (12: eyebrow/heading plus title/copy for each
       // of 5 steps), and closing.* (5: eyebrow/title/copy/join/contact) -- 32 + 50 = 82.
       Membership: 82,
-      Privacy: 46,
-      AiTransparency: 30,
+      // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
+      Privacy: 47,
+      // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
+      AiTransparency: 31,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(451);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(453);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

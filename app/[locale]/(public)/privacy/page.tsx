@@ -1,8 +1,8 @@
 import type {Metadata} from 'next';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 
-import {PageHero} from '@/components/marketing/page-hero';
 import {parsePolicySections, PolicySections} from '@/components/marketing/policy-sections';
+import {PageHero} from '@/components/wt/page-hero';
 import type {AppLocale} from '@/i18n/routing';
 import {buildPageMetadata} from '@/lib/metadata';
 
@@ -17,11 +17,20 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function PrivacyPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const t = await getTranslations({locale, namespace: 'Privacy'});
+  const [t, common] = await Promise.all([
+    getTranslations({locale, namespace: 'Privacy'}),
+    getTranslations({locale, namespace: 'Common'}),
+  ]);
 
   return (
     <>
-      <PageHero eyebrow={t('eyebrow')} title={t('title')} description={t('description')} />
+      <PageHero
+        eyebrow={t('eyebrow')}
+        title={t('title')}
+        lead={t('description')}
+        breadcrumb={{homeHref: '/', homeLabel: common('breadcrumbHome'), current: t('breadcrumbCurrent')}}
+        breadcrumbLabel={common('breadcrumbLabel')}
+      />
       <PolicySections sections={parsePolicySections(t.raw('sections'))} />
     </>
   );
