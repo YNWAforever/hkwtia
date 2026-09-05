@@ -73,7 +73,7 @@ export default async function ContactPage({params, searchParams = Promise.resolv
         </div>
       </Section>
 
-      <Section tone="bright">
+      <Section tone="bright" labelledBy="contact-routes-title">
         <h2 id="contact-routes-title" className="font-serif text-3xl font-semibold">{t('routesTitle')}</h2>
         <p className="mt-3 max-w-2xl text-muted-foreground">{t('routesDescription')}</p>
         <div className="mt-6">

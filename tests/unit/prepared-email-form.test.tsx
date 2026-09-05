@@ -1,4 +1,4 @@
-import {render, screen} from "@testing-library/react";
+import {fireEvent, render, screen} from "@testing-library/react";
 import {describe, expect, it} from "vitest";
 
 import {PreparedEmailForm} from "@/components/marketing/prepared-email-form";
@@ -26,5 +26,17 @@ describe("PreparedEmailForm", () => {
     render(<PreparedEmailForm labels={labels} initialTopic="not-a-real-topic" />);
     const compose = screen.getByRole("link", {name: labels.composeAction});
     expect(compose.getAttribute("href")).toContain(encodeURIComponent(labels.subjects.portal));
+  });
+
+  it("updates the compose link's mailto subject and body when the topic select changes", () => {
+    render(<PreparedEmailForm labels={labels} initialTopic="membership" />);
+
+    const select = screen.getByRole("combobox", {name: labels.topicLabel});
+    fireEvent.change(select, {target: {value: "events"}});
+
+    const compose = screen.getByRole("link", {name: labels.composeAction});
+    expect(compose.getAttribute("href")).toBe(
+      `mailto:contact@hkwtia.org?subject=${encodeURIComponent(labels.subjects.events)}&body=${encodeURIComponent(labels.bodies.events)}`,
+    );
   });
 });
