@@ -1,4 +1,4 @@
-import {getTranslations} from 'next-intl/server';
+import {getLocale, getTranslations} from 'next-intl/server';
 
 import {PageHero} from '@/components/wt/page-hero';
 
@@ -12,13 +12,18 @@ import {PageHero} from '@/components/wt/page-hero';
  * shell could be mounted regardless (there is no locale to render SiteHeader's nav in).
  */
 export default async function PublicNotFound() {
-  // Locale-independent by design: Next.js renders a route group's not-found.tsx outside the
-  // normal params flow, so there is no {locale} to read here the way every other page in this
-  // programme does. English is deliberately correct for readers who fell out of any locale
-  // path (the same "no locale segment" caveat the root file's own not-found.tsx already lives
-  // with); a locale-aware Concierge or nav link the reader clicks from here still lands them on
-  // a fully localized page.
-  const t = await getTranslations({locale: 'en', namespace: 'NotFound'});
+  // Next.js doesn't pass {params} to a route-group not-found.tsx, but the locale is still
+  // knowable: this file only renders after [locale] has already matched (a real dead sub-route,
+  // e.g. /zh/some-missing-page) -- unlike the root not-found.tsx above, which is the fallback for
+  // when [locale] itself fails to match. `getLocale()` reads it from the same request-scoped
+  // source i18n/request.ts's `requestLocale` does: proxy.ts's next-intl middleware stamps every
+  // matched request with an `x-next-intl-locale` header (see
+  // node_modules/next-intl/dist/.../RequestLocale.js), and `getLocale()`/`getTranslations()` read
+  // that header via `next/headers` -- a per-request mechanism, not a props one, so it survives
+  // regardless of which segment or special file is rendering. Verified with a real dev-server
+  // request to a dead /zh/... sub-route (see the commit message for the transcript).
+  const locale = await getLocale();
+  const t = await getTranslations({locale, namespace: 'NotFound'});
 
   return (
     <PageHero
