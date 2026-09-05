@@ -1341,10 +1341,12 @@
     "eyebrow": "聯絡",
     "title": "與我們聯繫",
     "description": "歡迎透過辦公室或電郵聯絡 WTIA。",
+    "breadcrumbCurrent": "聯絡我們",
     "channelsTitle": "直接聯絡 WTIA",
     "address": "香港觀塘鴻圖道 73-75 號 KOHO 4 樓",
     "routesTitle": "選擇合適的下一步",
     "routesDescription": "前往現有的 WTIA 服務頁面，查閱最新資料或採取行動。",
+    "viewLabel": "查看",
     "routes": {
       "events": {
         "title": "活動及交流",
@@ -1361,6 +1363,53 @@
       "launchpad": {
         "title": "創科加速平台",
         "description": "了解現正接受申請的計劃、項目及資助指引。"
+      },
+      "about": {
+        "title": "關於 WTIA",
+        "description": "認識協會、其領導層及各委員會。"
+      },
+      "news": {
+        "title": "新聞",
+        "description": "閱讀職員撰寫的新聞及工程開發日誌。"
+      }
+    },
+    "emailTopics": {
+      "topicLabel": "你想查詢什麼？",
+      "composeAction": "撰寫電郵",
+      "portal": {
+        "label": "會員平台",
+        "subject": "會員平台查詢",
+        "body": "你好 WTIA，我想查詢會員平台的問題。"
+      },
+      "membership": {
+        "label": "會員計劃",
+        "subject": "會員計劃查詢",
+        "body": "你好 WTIA，我想查詢會員級別及申請資格。"
+      },
+      "events": {
+        "label": "活動",
+        "subject": "活動查詢",
+        "body": "你好 WTIA，我想查詢即將舉行的活動。"
+      },
+      "programmes": {
+        "label": "計劃項目",
+        "subject": "計劃項目查詢",
+        "body": "你好 WTIA，我想查詢其中一項計劃項目。"
+      },
+      "partnership": {
+        "label": "夥伴合作",
+        "subject": "夥伴合作查詢",
+        "body": "你好 WTIA，我們機構希望商討合作事宜。"
+      },
+      "privacy": {
+        "label": "私隱",
+        "subject": "私隱查詢",
+        "body": "你好 WTIA，我想查詢我的個人資料處理方式。"
+      },
+      "media": {
+        "label": "傳媒",
+        "subject": "傳媒查詢",
+        "body": "你好 WTIA，我代表傳媒機構聯絡。"
       }
     },
     "conciergeTitle": "未確定從哪裡開始？",

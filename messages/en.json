@@ -1341,10 +1341,12 @@
     "eyebrow": "Contact",
     "title": "Let's connect",
     "description": "Reach WTIA at the office or by email.",
+    "breadcrumbCurrent": "Contact",
     "channelsTitle": "Contact WTIA directly",
     "address": "4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong",
     "routesTitle": "Choose the right next step",
     "routesDescription": "Use an established WTIA journey to find current information or take action.",
+    "viewLabel": "View",
     "routes": {
       "events": {
         "title": "Events and activities",
@@ -1361,6 +1363,53 @@
       "launchpad": {
         "title": "Launch Pad",
         "description": "Discover open cohorts, programmes and funding guidance."
+      },
+      "about": {
+        "title": "About WTIA",
+        "description": "Meet the association, its leadership and its committees."
+      },
+      "news": {
+        "title": "News",
+        "description": "Read staff-authored news and engineering build logs."
+      }
+    },
+    "emailTopics": {
+      "topicLabel": "What is this about?",
+      "composeAction": "Compose email",
+      "portal": {
+        "label": "Member portal",
+        "subject": "Member portal enquiry",
+        "body": "Hello WTIA, I have a question about the member portal."
+      },
+      "membership": {
+        "label": "Membership",
+        "subject": "Membership enquiry",
+        "body": "Hello WTIA, I have a question about membership tiers and eligibility."
+      },
+      "events": {
+        "label": "Events",
+        "subject": "Events enquiry",
+        "body": "Hello WTIA, I have a question about an upcoming event."
+      },
+      "programmes": {
+        "label": "Programmes",
+        "subject": "Programmes enquiry",
+        "body": "Hello WTIA, I have a question about one of your programmes."
+      },
+      "partnership": {
+        "label": "Partnership",
+        "subject": "Partnership enquiry",
+        "body": "Hello WTIA, our organisation would like to discuss a partnership."
+      },
+      "privacy": {
+        "label": "Privacy",
+        "subject": "Privacy enquiry",
+        "body": "Hello WTIA, I have a question about how my information is handled."
+      },
+      "media": {
+        "label": "Media",
+        "subject": "Media enquiry",
+        "body": "Hello WTIA, I am writing on behalf of a media outlet."
       }
     },
     "conciergeTitle": "Not sure where to start?",

@@ -1,6 +1,7 @@
 import {readFileSync} from "node:fs";
 
 import {fireEvent, render, screen} from "@testing-library/react";
+import type {ReactNode} from "react";
 import {renderToStaticMarkup} from "react-dom/server";
 import {describe, expect, it, vi} from "vitest";
 
@@ -15,6 +16,14 @@ import {
 vi.mock("next-intl/server", () => ({
   setRequestLocale: () => undefined,
   getTranslations: async () => (key: string) => key,
+}));
+// Task 19: the rewritten Contact page's PageHero and InnerCardGrid render the real
+// @/i18n/navigation Link, which reads useLocale() from a next-intl context this suite's plain
+// renderToStaticMarkup call provides no NextIntlClientProvider for. Same situation and same
+// fix as Task 17's m6-launchpad-page.test.tsx and launchpad-partner-cutover.test.tsx: project
+// to a plain <a>, which is all this suite's own assertions (on rendered href values) need.
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
 }));
 
 async function renderContact(locale: "en" | "zh-HK"): Promise<string> {

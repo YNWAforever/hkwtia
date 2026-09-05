@@ -97,8 +97,11 @@ describe("page copy scope", () => {
       About: 19,
       Chairman: 8,
       Committees: 12,
-      // PR5 added 14 editable labels for the Contact concierge journeys.
-      Contact: 20,
+      // PR5 added 14 editable labels for the Contact concierge journeys. WP-4 Task 19 added 29
+      // more: breadcrumbCurrent, viewLabel, routes.about/routes.news (2 fields each, 4), and the
+      // new PreparedEmailForm's emailTopics (topicLabel/composeAction, plus label/subject/body
+      // for each of the 7 topics: 2 + 21 = 23) -- 8 + 21 = 29, so 20 + 29 = 49.
+      Contact: 49,
       // 12 for the four programmes' title/description/status, plus the 17
       // `programs.record` keys the programme records migration and PR3
       // presentation added, plus 3 more for the WP-4 Task 15 `audience` field
@@ -120,7 +123,7 @@ describe("page copy scope", () => {
       Privacy: 46,
       AiTransparency: 30,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(422);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(451);
   });
 
   it("offers a Chinese placeholder for every English field", () => {
