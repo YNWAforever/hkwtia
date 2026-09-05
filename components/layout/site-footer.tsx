@@ -43,9 +43,10 @@ function isAddressLines(value: unknown): value is readonly string[] {
 }
 
 export async function SiteFooter({locale}: {locale: AppLocale}) {
-  const [navigationT, t] = await Promise.all([
+  const [navigationT, t, marketingT] = await Promise.all([
     getTranslations({locale, namespace: "Navigation"}),
     getTranslations({locale, namespace: "Footer"}),
+    getTranslations({locale, namespace: "MarketingExtras"}),
   ]);
   const navigation = localizeNavigation((key: NavigationMessageKey) => navigationT(key));
   // A map read through `get`, not a cast over Object.fromEntries: the cast asserts a shape the
@@ -155,7 +156,7 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
       </div>
 
       <div className="shell footer-bottom">
-        <strong>{t("tagline")}</strong>
+        <strong>{marketingT("footerTagline")}</strong>
         <div>
           <Link className={footerTargetClassName} href="/privacy">{t("privacy")}</Link>
           {/* Terms and Accessibility are `retire` in the manifest until WP-7 reviews copy for
