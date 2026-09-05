@@ -3,7 +3,9 @@
   "Common": {
     "skipToContent": "跳至主要內容",
     "breadcrumbLabel": "位置導覽",
-    "breadcrumbHome": "主頁"
+    "breadcrumbHome": "主頁",
+    "openMenu": "開啟選單",
+    "closeMenu": "關閉選單"
   },
   "Metadata": {
     "title": "WTIA｜創新香港",
@@ -1848,6 +1850,7 @@
     },
     "navigation": {
       "label": "職員管理導覽",
+      "dashboard": "控制台",
       "segments": "分群",
       "members": "會員",
       "atRisk": "高風險",

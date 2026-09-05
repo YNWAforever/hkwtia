@@ -2,7 +2,9 @@
   "Common": {
     "skipToContent": "Skip to content",
     "breadcrumbLabel": "Breadcrumb",
-    "breadcrumbHome": "Home"
+    "breadcrumbHome": "Home",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "Metadata": {
     "title": "WTIA | Innovate Hong Kong",
@@ -1847,6 +1849,7 @@
     },
     "navigation": {
       "label": "Staff administration navigation",
+      "dashboard": "Dashboard",
       "segments": "Segments",
       "members": "Members",
       "atRisk": "At risk",

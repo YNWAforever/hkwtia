@@ -38,16 +38,13 @@ export default async function PortalLayout({children, params}: Props) {
     throw error;
   }
 
-  const [t, concierge] = await Promise.all([
-    getTranslations({locale, namespace: "Portal"}),
-    getTranslations({locale, namespace: "Concierge"}),
-  ]);
+  const concierge = await getTranslations({locale, namespace: "Concierge"});
   const conciergeLabels = localizeConcierge((key) => concierge.raw(key));
   const {turnstileSiteKey} = publicEnv();
 
   return (
     <div className="min-h-screen bg-background">
-      <PortalNav locale={locale} labels={{navigation: t("navigation"), dashboard: t("dashboard"), profile: t("profile"), company: t("company"), showcaseListing: t("showcaseListing.nav"), directory: t("directory.title"), events: t("events.title"), documents: t("documents.title"), billing: t("billing.title"), signOut: t("signOut")}} />
+      <PortalNav locale={locale} />
       <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">{children}</main>
       <ConciergeWidget
         locale={locale}

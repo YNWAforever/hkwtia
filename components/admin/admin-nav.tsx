@@ -1,21 +1,60 @@
-import Link from "next/link";
+"use client";
 
+import Link from "next/link";
+import {usePathname} from "next/navigation";
+import {useTranslations} from "next-intl";
+
+import {adminNavigationGroups} from "@/config/internal-navigation";
+import {InternalNavigation, type InternalNavGroup} from "@/components/internal-shell/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {localizedPath} from "@/lib/urls";
 
-export type AdminNavLabels = Readonly<{brand: string; label: string; members: string; segments: string; atRisk: string; events: string; announcements: string; partners: string; landingPartners: string; news: string; pageCopy: string; media: string; listingsReview: string; cohorts: string; approvals: string; reports: string; automations: string}>;
+/** Maps each config link id to the Admin.navigation message key that resolves its nav label. */
+const linkLabelKeys: Readonly<Record<string, string>> = {
+  dashboard: "navigation.dashboard",
+  members: "navigation.members",
+  "at-risk": "navigation.atRisk",
+  segments: "navigation.segments",
+  announcements: "navigation.announcements",
+  news: "navigation.news",
+  "page-copy": "navigation.pageCopy",
+  media: "navigation.media",
+  partners: "navigation.partners",
+  "landing-partners": "navigation.landingPartners",
+  events: "navigation.events",
+  listings: "navigation.listingsReview",
+  cohorts: "navigation.cohorts",
+  approvals: "navigation.approvals",
+  reports: "navigation.reports",
+  automations: "navigation.automations",
+};
 
-export function AdminNav({locale, labels}: {locale: AppLocale; labels: AdminNavLabels}) {
-  const items = [
-    {href: "/admin/members", label: labels.members}, {href: "/admin/segments", label: labels.segments},
-    {href: "/admin/at-risk", label: labels.atRisk}, {href: "/admin/events-mgmt", label: labels.events}, {href: "/admin/announcements", label: labels.announcements}, {href: "/admin/partners", label: labels.partners}, {href: "/admin/landing-partners", label: labels.landingPartners}, {href: "/admin/news", label: labels.news}, {href: "/admin/page-copy", label: labels.pageCopy}, {href: "/admin/media", label: labels.media}, {href: "/admin/listings-review", label: labels.listingsReview}, {href: "/admin/cohorts", label: labels.cohorts},
-    {href: "/admin/approvals", label: labels.approvals}, {href: "/admin/reports", label: labels.reports},
-    {href: "/admin/automations", label: labels.automations},
-  ];
-  return <nav aria-label={labels.label} className="border-b border-border/70 bg-background/85 px-4 py-4 backdrop-blur sm:px-6">
-    <div className="mx-auto flex max-w-6xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <Link className="font-serif text-xl font-semibold text-foreground" href={localizedPath(locale, "/admin")}>{labels.brand}</Link>
-      <div className="flex flex-wrap items-center gap-2 text-sm">{items.map((item) => <Link className="rounded-md px-3 py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" href={localizedPath(locale, item.href)} key={item.href}>{item.label}</Link>)}</div>
+export function AdminNav({locale}: Readonly<{locale: AppLocale}>) {
+  const pathname = usePathname();
+  const t = useTranslations("Admin");
+  const tCommon = useTranslations("Common");
+
+  const groups: readonly InternalNavGroup[] = adminNavigationGroups.map((group) => ({
+    id: group.id,
+    links: group.links.map((link) => ({
+      id: link.id,
+      href: localizedPath(locale, link.href),
+      label: t(linkLabelKeys[link.id] ?? link.id),
+    })),
+  }));
+
+  return (
+    <div>
+      <div className="mx-auto flex max-w-6xl items-center px-4 pt-4 sm:px-6">
+        <Link className="font-serif text-xl font-semibold text-foreground" href={localizedPath(locale, "/admin")}>
+          {t("brand")}
+        </Link>
+      </div>
+      <InternalNavigation
+        groups={groups}
+        labels={{navigationLabel: t("navigation.label"), openMenu: tCommon("openMenu"), closeMenu: tCommon("closeMenu")}}
+        currentPath={pathname}
+      />
     </div>
-  </nav>;
+  );
 }

@@ -1,12 +1,43 @@
+import {render} from "@testing-library/react";
 import {renderToStaticMarkup} from "react-dom/server";
-import {describe, expect, it} from "vitest";
+import {describe, expect, it, vi} from "vitest";
 
-import {AdminNav} from "@/components/admin/admin-nav";
 import {AtRiskTable} from "@/components/admin/at-risk-table";
 import {MemberTable} from "@/components/admin/member-table";
 import {ReportCards} from "@/components/admin/report-cards";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
+
+/**
+ * AdminNav (Task 7) became a "use client" component that resolves its own translations from
+ * next-intl and its own current path from next/navigation, instead of taking a pre-resolved
+ * `labels` prop. These two mocks let this suite still drive AdminNav through arbitrary
+ * en.Admin/zh.Admin label content per it.each case (exactly what the pre-Task-7 tests below did
+ * by passing a `labels` prop directly) by resolving each `t("a.b.c")` call as a real dot-path
+ * lookup against whichever labels object the current test case set, rather than collapsing to
+ * the raw key -- that would make the "localized brand copy" and "translated ... automations"
+ * assertions vacuously true regardless of the real message content.
+ */
+const adminNavMocks = vi.hoisted(() => ({
+  labels: {} as Record<string, unknown>,
+  pathname: "/admin",
+}));
+vi.mock("next/navigation", () => ({usePathname: () => adminNavMocks.pathname}));
+vi.mock("next-intl", () => ({
+  useTranslations: (namespace: string) => (key: string) => {
+    const root = namespace === "Admin" ? adminNavMocks.labels : {};
+    const value = key.split(".").reduce<unknown>((acc, segment) => {
+      if (acc && typeof acc === "object" && segment in (acc as Record<string, unknown>)) {
+        return (acc as Record<string, unknown>)[segment];
+      }
+      return undefined;
+    }, root);
+    return typeof value === "string" ? value : key;
+  },
+}));
+
+// eslint-disable-next-line import/first -- must follow the vi.mock calls above so the mocked modules are in place first.
+import {AdminNav} from "@/components/admin/admin-nav";
 
 describe("admin presentation", () => {
   it.each([
@@ -32,7 +63,9 @@ describe("admin presentation", () => {
   });
 
   it.each([en.Admin, zh.Admin])("renders one page heading, an accessible nav, a table caption, and translated empty state", (labels) => {
-    const nav = renderToStaticMarkup(<AdminNav locale="en" labels={{...labels.navigation, brand: labels.brand}}/>);
+    adminNavMocks.labels = labels;
+    const {container: navContainer} = render(<AdminNav locale="en" />);
+    const nav = navContainer.innerHTML;
     const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: null}} query="" locale="en"/>);
     const page = renderToStaticMarkup(<main><h1>{labels.members.title}</h1>{table}</main>);
 
@@ -44,7 +77,9 @@ describe("admin presentation", () => {
     expect(table).toContain(labels.members.empty);
   });
   it.each([en.Admin, zh.Admin])("uses localized brand copy and preserves the query in next-page links without a false previous link", (labels) => {
-    const nav = renderToStaticMarkup(<AdminNav locale="en" labels={{...labels.navigation, brand: labels.brand}}/>);
+    adminNavMocks.labels = labels;
+    const {container: navContainer} = render(<AdminNav locale="en" />);
+    const nav = navContainer.innerHTML;
     const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: "opaque-cursor"}} query="acme" locale="en"/>);
 
     expect(nav).toContain(labels.brand);

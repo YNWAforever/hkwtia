@@ -1,4 +1,4 @@
-import {getTranslations, setRequestLocale} from "next-intl/server";
+import {setRequestLocale} from "next-intl/server";
 
 import type {ReactNode} from "react";
 
@@ -14,6 +14,5 @@ export default async function AdminLayout({children, params}: Props) {
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
   await requireAdminPageActor();
-  const t = await getTranslations({locale, namespace: "Admin"});
-  return <div className="min-h-screen bg-background"><AdminNav locale={locale} labels={{brand: t("brand"), label: t("navigation.label"), members: t("navigation.members"), segments: t("navigation.segments"), atRisk: t("navigation.atRisk"), events: t("navigation.events"), announcements: t("navigation.announcements"), partners: t("navigation.partners"), landingPartners: t("navigation.landingPartners"), news: t("navigation.news"), pageCopy: t("navigation.pageCopy"), media: t("navigation.media"), listingsReview: t("navigation.listingsReview"), cohorts: t("navigation.cohorts"), approvals: t("navigation.approvals"), reports: t("navigation.reports"), automations: t("navigation.automations")}} /><main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">{children}</main></div>;
+  return <div className="min-h-screen bg-background"><AdminNav locale={locale} /><main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">{children}</main></div>;
 }
