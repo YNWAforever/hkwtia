@@ -7,8 +7,8 @@ import {Pool} from "pg";
 
 import {assertPartnerImportAuthorized, type PartnerImportAuthorization} from "@/scripts/lib/partner-import-guard";
 import {parseDonorPartnerFile, parseZhNameSidecar, resolveZhName, type DonorPartner} from "@/scripts/lib/partner-import-input";
-import {normalizeImageUpload, type NormalizedImageUpload} from "@/lib/media/image-upload";
-import {createR2Storage} from "@/lib/media/r2-storage";
+import {MediaUploadValidationError, normalizeImageUpload, type NormalizedImageUpload} from "@/lib/media/image-upload";
+import {createR2Storage, R2StorageError} from "@/lib/media/r2-storage";
 
 /**
  * The donor checkout's partner-data module is read relative to
@@ -77,6 +77,22 @@ export type PartnerImportDependencies = Readonly<{
 }>;
 
 export type PartnerImportSummary = Readonly<{created: number; skippedExisting: number; skippedError: number}>;
+
+/**
+ * Classifies a caught error into a safe, closed-set reason for logging. The spec requires the
+ * per-record skip log never contain a URL, name, or secret -- but in the real wiring, a missing
+ * or misnamed logo file surfaces as a Node `ENOENT` error whose `.message` embeds the operator's
+ * full absolute filesystem path (which typically also contains the partner's slugified name).
+ * `MediaUploadValidationError` and `R2StorageError` already carry a closed `.reason` enum
+ * (never raw, attacker/operator-controlled text), so those are safe to log verbatim. Anything
+ * else -- including a generic `Error` from `readLogoBytes`'s ENOENT -- is reduced to its
+ * constructor name only; the raw `.message` is never logged.
+ */
+function safeSkipReason(error: unknown): string {
+  if (error instanceof MediaUploadValidationError) return error.reason;
+  if (error instanceof R2StorageError) return error.reason;
+  return error instanceof Error ? error.constructor.name : "unknown error";
+}
 
 export async function importPartners(
   donorPartners: readonly DonorPartner[],
@@ -154,7 +170,7 @@ export async function importPartners(
       created += 1;
     } catch (error) {
       skippedError += 1;
-      deps.log(`skipped one record: ${error instanceof Error ? error.message : "unknown error"}`);
+      deps.log(`skipped one record: ${safeSkipReason(error)}`);
     }
   }
 
@@ -228,7 +244,7 @@ async function main(): Promise<void> {
           await client.query("COMMIT");
           return result;
         } catch (error) {
-          await client.query("ROLLBACK");
+          try { await client.query("ROLLBACK"); } catch { /* Preserve the original failure. */ }
           throw error;
         } finally {
           client.release();

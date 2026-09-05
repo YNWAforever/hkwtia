@@ -167,6 +167,28 @@ describe("importPartners", () => {
     expect(insertedPartners).toHaveLength(1);
   });
 
+  it("never logs a raw Error.message, since a real ENOENT embeds the operator's filesystem path and the partner's logo filename", async () => {
+    const logged: string[] = [];
+    const leakyPath = "C:\\Users\\operator\\donor\\public\\partners\\acme-corp-logo.png";
+    const deps = fakeDependencies({
+      log: (message: string) => { logged.push(message); },
+      readLogoBytes: async () => {
+        throw new Error(`ENOENT: no such file or directory, open '${leakyPath}'`);
+      },
+    });
+
+    const summary = await importPartners(donorPartners, new Map(), {actorProfileId: "staff-1", actorKind: "staff"}, deps);
+
+    expect(summary.skippedError).toBe(donorPartners.length);
+    for (const line of logged) {
+      expect(line).not.toContain(leakyPath);
+      expect(line).not.toContain("acme-corp-logo.png");
+      expect(line).not.toContain("ENOENT");
+      expect(line).not.toContain("operator");
+    }
+    expect(logged.some((line) => line.includes("skipped one record: Error"))).toBe(true);
+  });
+
   it("prints only a running count, never a name, URL, or secret", async () => {
     const logged: string[] = [];
     const deps = fakeDependencies({log: (message: string) => { logged.push(message); }});
