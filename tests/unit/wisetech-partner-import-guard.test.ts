@@ -58,8 +58,23 @@ describe("assertPartnerImportAuthorized", () => {
     )).rejects.toThrow("PARTNER_IMPORT_SENTINEL_CHECK_FAILED");
   });
 
-  it("accepts an explicit staff/exco/superadmin actor kind", async () => {
+  it("accepts an explicit staff actor kind", async () => {
+    const result = await assertPartnerImportAuthorized(env({WISETECH_IMPORT_ACTOR_KIND: "staff"}), disposable);
+    expect(result.actorKind).toBe("staff");
+  });
+
+  it("accepts an explicit exco actor kind", async () => {
+    const result = await assertPartnerImportAuthorized(env({WISETECH_IMPORT_ACTOR_KIND: "exco"}), disposable);
+    expect(result.actorKind).toBe("exco");
+  });
+
+  it("accepts an explicit superadmin actor kind", async () => {
     const result = await assertPartnerImportAuthorized(env({WISETECH_IMPORT_ACTOR_KIND: "superadmin"}), disposable);
     expect(result.actorKind).toBe("superadmin");
+  });
+
+  it("rejects a whitespace-only actor kind as invalid", async () => {
+    await expect(assertPartnerImportAuthorized(env({WISETECH_IMPORT_ACTOR_KIND: "   "}), disposable))
+      .rejects.toThrow("PARTNER_IMPORT_ACTOR_KIND_INVALID");
   });
 });

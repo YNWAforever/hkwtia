@@ -57,8 +57,11 @@ export async function assertPartnerImportAuthorized(
   if (!actorProfileIdRaw) fail("PARTNER_IMPORT_ACTOR_REQUIRED");
 
   const rawActorKind = environment.WISETECH_IMPORT_ACTOR_KIND?.trim();
-  const actorKind: PartnerImportActorKind = rawActorKind === undefined || rawActorKind === ""
+  // Distinguish "key not set at all" (default to staff) from "key set but blank" (invalid)
+  const actorKind: PartnerImportActorKind = rawActorKind === undefined
     ? "staff"
+    : rawActorKind === ""
+    ? fail("PARTNER_IMPORT_ACTOR_KIND_INVALID")
     : (isActorKind(rawActorKind) ? rawActorKind : fail("PARTNER_IMPORT_ACTOR_KIND_INVALID"));
 
   const disposable = await sentinelConfirmsDisposable(countSentinelRows);
