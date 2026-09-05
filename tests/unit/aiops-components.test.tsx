@@ -129,6 +129,7 @@ describe("public AI-Ops dashboard components", () => {
 
     expect(screen.getByText(labels.partialMonth)).toBeInTheDocument();
     expect(screen.getByText(labels.lastUpdated, {exact: false})).toBeInTheDocument();
+    expect(screen.getByRole("region", {name: labels.currentMonth})).toHaveClass("impact-metrics");
     expect(screen.getByText(labels.resolutionTarget)).toBeInTheDocument();
     expect(screen.getByText(labels.csatTarget)).toBeInTheDocument();
     expect(screen.getByText("15")).toBeInTheDocument();
