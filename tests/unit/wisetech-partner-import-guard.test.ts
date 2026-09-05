@@ -12,7 +12,6 @@ function env(overrides: Record<string, string | undefined> = {}): Record<string,
 
 const disposable = async () => 1;
 const notDisposable = async () => 0;
-const unreadable = async () => { throw new Error("relation does not exist"); };
 
 describe("assertPartnerImportAuthorized", () => {
   it("refuses when WISETECH_PARTNER_IMPORT is not exactly \"true\"", async () => {
@@ -52,10 +51,20 @@ describe("assertPartnerImportAuthorized", () => {
   });
 
   it("treats an unreadable sentinel table as a distinct, always-fatal failure", async () => {
-    await expect(assertPartnerImportAuthorized(
-      env({WISETECH_IMPORT_ALLOW_PRODUCTION: "true"}),
-      unreadable,
-    )).rejects.toThrow("PARTNER_IMPORT_SENTINEL_CHECK_FAILED");
+    const queryError = new Error("relation does not exist");
+
+    expect.assertions(2);
+    try {
+      await assertPartnerImportAuthorized(
+        env({WISETECH_IMPORT_ALLOW_PRODUCTION: "true"}),
+        async () => {
+          throw queryError;
+        },
+      );
+    } catch (error) {
+      expect(error).toHaveProperty("message", "PARTNER_IMPORT_SENTINEL_CHECK_FAILED");
+      expect(error).toHaveProperty("cause", queryError);
+    }
   });
 
   it("accepts an explicit staff actor kind", async () => {

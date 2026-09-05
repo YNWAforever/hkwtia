@@ -58,11 +58,14 @@ export async function assertPartnerImportAuthorized(
 
   const rawActorKind = environment.WISETECH_IMPORT_ACTOR_KIND?.trim();
   // Distinguish "key not set at all" (default to staff) from "key set but blank" (invalid)
-  const actorKind: PartnerImportActorKind = rawActorKind === undefined
-    ? "staff"
-    : rawActorKind === ""
-    ? fail("PARTNER_IMPORT_ACTOR_KIND_INVALID")
-    : (isActorKind(rawActorKind) ? rawActorKind : fail("PARTNER_IMPORT_ACTOR_KIND_INVALID"));
+  let actorKind: PartnerImportActorKind;
+  if (rawActorKind === undefined) {
+    actorKind = "staff";
+  } else if (isActorKind(rawActorKind)) {
+    actorKind = rawActorKind;
+  } else {
+    actorKind = fail("PARTNER_IMPORT_ACTOR_KIND_INVALID");
+  }
 
   const disposable = await sentinelConfirmsDisposable(countSentinelRows);
   if (!disposable && normalized(environment.WISETECH_IMPORT_ALLOW_PRODUCTION) !== "true") {
