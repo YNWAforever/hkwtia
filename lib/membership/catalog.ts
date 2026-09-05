@@ -18,9 +18,22 @@ type CatalogEnvironment = Readonly<{stripeStartupPriceId: string; stripeCorporat
 const freeOrReviewPlans = new Set<PlanCode>(["community", "patron"]);
 
 function paidPriceReference(planCode: PlanCode, environment: CatalogEnvironment): string | null {
-  if (planCode === "startup") return environment.stripeStartupPriceId.trim() || null;
-  if (planCode === "corporate") return environment.stripeCorporatePriceId.trim() || null;
-  return null;
+  switch (planCode) {
+    case "startup":
+      return environment.stripeStartupPriceId.trim() || null;
+    case "corporate":
+      return environment.stripeCorporatePriceId.trim() || null;
+    case "community":
+    case "patron":
+      // These cases should never be reached due to the early return in resolveMembershipOption
+      // but we include them for exhaustiveness checking
+      return null;
+    default:
+      // Exhaustiveness check: if a new plan is added to MEMBERSHIP_PLAN_CODES,
+      // this will fail to compile unless it's handled above.
+      const _exhaustive: never = planCode;
+      return _exhaustive;
+  }
 }
 
 /**
