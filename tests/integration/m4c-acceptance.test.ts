@@ -438,7 +438,12 @@ describe("complete M4 deterministic acceptance", () => {
     // Hash recomputed for WP-4 task 21: AiOpsDashboard's rendered HTML changed (header removed
     // per Decision 3, MetricGrid adopts .impact-metrics markup) -- see the methodologyHeading
     // note above. Re-verified deterministic across repeated runs before pinning.
-    expect(opaque(safeDashboard)).toBe("82af725ed1f2e4084cd31163dd94671da6859e7a8576bfc417053fa7811efcde");
+    // Recomputed again after commit 3da1be4 ("fix: restore region landmark on MetricGrid
+    // wrapper"), which added role="region" to MetricGrid's wrapper <div> as a reviewed
+    // accessibility fix -- the prior hash above was never updated for that markup change, so
+    // it went stale relative to real (non-private) rendered output. Re-verified deterministic
+    // across repeated runs before pinning.
+    expect(opaque(safeDashboard)).toBe("eac60d6e5f568c598e83981e58d45d66002b24bf4cdc013585d7c2744ba4e01f");
 
     expect(fixture.buildLogs).toHaveLength(2);
     await exerciseConciergeEvaluation();
