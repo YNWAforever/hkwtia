@@ -32,6 +32,9 @@ describe("page copy scope", () => {
       expect(isPageCopyNamespace(namespace), namespace).toBe(false);
     }
     expect(isPageCopyNamespace("Privacy")).toBe(true);
+    // WP-5: Footer itself stays excluded (structural), but one specific marketing
+    // string (the footer tagline) is editable via this new, narrowly-scoped namespace.
+    expect(isPageCopyNamespace("MarketingExtras")).toBe(true);
     expect(isPageCopyNamespace("__proto__")).toBe(false);
     expect(isPageCopyNamespace(undefined)).toBe(false);
   });
