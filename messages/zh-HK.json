@@ -1193,7 +1193,8 @@
     "commits": "Commit 及 build 紀錄",
     "deployment": "正式網站",
     "acceptance": "M4 驗收實證",
-    "noBuildLogs": "暫未有已發布開發紀錄。"
+    "noBuildLogs": "暫未有已發布開發紀錄。",
+    "breadcrumbCurrent": "AI-Ops"
   },
   "Events": {
     "metaTitle": "活動 | WTIA",

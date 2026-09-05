@@ -1193,7 +1193,8 @@
     "commits": "Commit and build history",
     "deployment": "Live deployment",
     "acceptance": "M4 acceptance evidence",
-    "noBuildLogs": "No published build logs are available."
+    "noBuildLogs": "No published build logs are available.",
+    "breadcrumbCurrent": "AI-Ops"
   },
   "Events": {
     "metaTitle": "Events | WTIA",

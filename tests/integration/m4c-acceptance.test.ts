@@ -421,7 +421,10 @@ describe("complete M4 deterministic acceptance", () => {
         evidence: [],
         labels,
       }));
-      expect(html).toContain(labels.title);
+      // Decision 3 (WP-4 task 21): eyebrow/title/description moved out of AiOpsDashboard into the
+      // page-level PageHero, so this component-level render no longer contains labels.title --
+      // assert on a label that stays in the shrunk AiOpsDashboardLabels contract instead.
+      expect(html).toContain(labels.methodologyHeading);
       expect(html).toContain(`aria-labelledby="ai-ops-evidence-${locale}"`);
       return {locale, html};
     });
@@ -432,7 +435,10 @@ describe("complete M4 deterministic acceptance", () => {
     for (const {id} of fixture.profiles) {
       expect(safeDashboard).not.toContain(id);
     }
-    expect(opaque(safeDashboard)).toBe("25a77a92b6ac6180f0343258d018407117ca2caa5ae9f18c9387ab58f3d319e6");
+    // Hash recomputed for WP-4 task 21: AiOpsDashboard's rendered HTML changed (header removed
+    // per Decision 3, MetricGrid adopts .impact-metrics markup) -- see the methodologyHeading
+    // note above. Re-verified deterministic across repeated runs before pinning.
+    expect(opaque(safeDashboard)).toBe("82af725ed1f2e4084cd31163dd94671da6859e7a8576bfc417053fa7811efcde");
 
     expect(fixture.buildLogs).toHaveLength(2);
     await exerciseConciergeEvaluation();
