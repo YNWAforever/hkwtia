@@ -75,7 +75,7 @@ export function InternalNavigation({
                 {labels.openMenu}
               </button>
             </SheetTrigger>
-            <SheetContent aria-label={labels.navigationLabel} side="left">
+            <SheetContent aria-label={labels.navigationLabel} side="left" closeLabel={labels.closeMenu}>
               <div className="flex flex-col gap-1 pt-6">
                 <NavLinks groups={groups} currentPath={currentPath} onNavigate={() => setOpen(false)} />
                 <div className="mt-4 border-t pt-4">{children}</div>

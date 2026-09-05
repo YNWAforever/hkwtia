@@ -65,4 +65,14 @@ describe("InternalNavigation", () => {
     expect(screen.getByRole("link", {name: "Company"})).not.toHaveAttribute("aria-current");
     expect(screen.getByRole("link", {name: "Showcase listing"})).toHaveAttribute("aria-current", "page");
   });
+
+  it("renders a visible close button with accessible name in the mobile drawer", async () => {
+    render(<InternalNavigation groups={groups} labels={labels} currentPath="/portal" />);
+    const trigger = screen.getByRole("button", {name: labels.openMenu});
+    fireEvent.click(trigger);
+    const closeButton = screen.getByRole("button", {name: labels.closeMenu});
+    expect(closeButton).toBeInTheDocument();
+    fireEvent.click(closeButton);
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
 });
