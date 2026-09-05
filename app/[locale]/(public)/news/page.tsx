@@ -10,6 +10,7 @@ import {PageHero} from "@/components/wt/page-hero";
 import {Section} from "@/components/wt/section";
 import type {AppLocale} from "@/i18n/routing";
 import {listPublishedBuildLogs, listPublishedNews} from "@/lib/db/repos/public-posts";
+import {toMailBody} from "@/lib/i18n/mail-body";
 import {buildPageMetadata} from "@/lib/metadata";
 
 export const dynamic = "force-dynamic";
@@ -84,7 +85,7 @@ export default async function NewsPage({params}: Props) {
             success: t("subscribe.success"),
             error: t("subscribe.error"),
             mailSubject: t("subscribe.mailSubject"),
-            mailBody: t("subscribe.mailBody"),
+            mailBody: toMailBody(t.raw("subscribe.mailBody")),
           }} />
         </div>
       </div>

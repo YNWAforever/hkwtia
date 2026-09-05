@@ -16,7 +16,7 @@ vi.mock("@/lib/db/repos/public-posts", () => publicPosts);
 vi.mock("@/lib/db/repos/events", () => ({eventsRepository: events}));
 vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: showcase}));
 vi.mock("next-intl/server", () => ({
-  getTranslations: async () => (key: string) => key,
+  getTranslations: async () => Object.assign((key: string) => key, {raw: (key: string) => key}),
   setRequestLocale: () => undefined,
 }));
 vi.mock("next/navigation", () => ({

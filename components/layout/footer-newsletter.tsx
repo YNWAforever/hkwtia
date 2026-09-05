@@ -15,7 +15,13 @@ export type FooterNewsletterLabels = Readonly<{
   success: string;
   error: string;
   mailSubject: string;
-  /** Carries a literal `{email}` placeholder; interpolated here, not by next-intl. */
+  /**
+   * Carries a literal `{email}` placeholder; interpolated here, not by next-intl. Build this
+   * with `toMailBody(t.raw(key))` from `@/lib/i18n/mail-body` -- not `t(key)`, which throws
+   * next-intl's ICU `FORMATTING_ERROR` for a `{email}` nobody passed `values.email` to, and not
+   * a bare `t.raw(key)`, which is untyped and can hand this island a value with no placeholder
+   * at all to interpolate into.
+   */
   mailBody: string;
 }>;
 

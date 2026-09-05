@@ -20,7 +20,10 @@ const listPublishedBuildLogs = vi.hoisted(() => vi.fn());
 
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async ({locale, namespace}: {locale: "en" | "zh-HK"; namespace: string}) =>
-    (key: string) => String(messageAt(locale, namespace, key))),
+    Object.assign(
+      (key: string) => String(messageAt(locale, namespace, key)),
+      {raw: (key: string) => messageAt(locale, namespace, key)},
+    )),
   setRequestLocale: vi.fn(),
 }));
 vi.mock("@/lib/db/repos/public-posts", () => ({listPublishedNews, listPublishedBuildLogs}));

@@ -20,7 +20,10 @@ vi.mock("@/lib/db/repos/public-posts", async (importOriginal) => ({
 }));
 vi.mock("next/navigation", () => navigation);
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async () => (key: string) => `translated:${key}`),
+  getTranslations: vi.fn(async () => Object.assign(
+    (key: string) => `translated:${key}`,
+    {raw: (key: string) => `translated:${key}`},
+  )),
   setRequestLocale: vi.fn(),
 }));
 // The rewritten news index now renders PageHero and FooterNewsletter, both of which pull in
