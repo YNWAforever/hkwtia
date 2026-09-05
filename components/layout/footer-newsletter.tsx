@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useRef, useState, type FormEvent} from "react";
+import {useEffect, useId, useRef, useState, type FormEvent} from "react";
 
 import {Eyebrow} from "@/components/wt/eyebrow";
 import {siteConfig} from "@/config/site";
@@ -29,8 +29,6 @@ export type FooterNewsletterLabels = Readonly<{
  */
 const usableAddress = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const errorId = "footer-newsletter-error";
-
 /**
  * D-6: there is no persisted subscriber model and adding one is a separate product decision,
  * so this prepares an email and hands over to the reader's mail client exactly as the donor
@@ -38,6 +36,15 @@ const errorId = "footer-newsletter-error";
  * validation message so the browser bubble cannot replace the `role="alert"` text.
  */
 export function FooterNewsletter({labels}: {labels: FooterNewsletterLabels}) {
+  // The site-wide footer mounts this island on every public page, and some pages (e.g. /news's
+  // `.news-subscribe-band`) mount a second instance directly in the body above it. Two instances
+  // sharing one literal id would leave the document with duplicate ids: per HTML `for`/
+  // `aria-describedby` semantics the browser resolves to the *first* matching id, so the second
+  // instance's label and error text would silently bind to the first instance's input instead
+  // of its own (WCAG 1.3.1/4.1.1). `useId()` gives each mounted instance its own stable prefix.
+  const instanceId = useId();
+  const emailId = `${instanceId}-email`;
+  const errorId = `${instanceId}-error`;
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "error" | "success">("idle");
   /**
@@ -132,9 +139,9 @@ export function FooterNewsletter({labels}: {labels: FooterNewsletterLabels}) {
         ) : null}
       </div>
       <form noValidate action={mailto} hidden={state === "success"} onSubmit={subscribe}>
-        <label className="sr-only" htmlFor="footer-newsletter-email">{labels.emailLabel}</label>
+        <label className="sr-only" htmlFor={emailId}>{labels.emailLabel}</label>
         <input
-          id="footer-newsletter-email"
+          id={emailId}
           name="email"
           type="email"
           autoComplete="email"
