@@ -6,7 +6,7 @@ import {CheckoutStatus} from "@/components/billing/checkout-status";
 import type {AppLocale} from "@/i18n/routing";
 import {buildPageMetadata} from "@/lib/metadata";
 import {getActor} from "@/lib/auth/actor";
-import {loadPendingJoinBillingState} from "@/lib/membership/join-billing-state";
+import {loadJoinCompletionState} from "@/lib/membership/join-billing-state";
 
 type Props = Readonly<{
   params: Promise<{locale: string}>;
@@ -37,17 +37,25 @@ export default async function CompletePage({params, searchParams}: Props) {
   setRequestLocale(locale);
 
   const actor = await getActor().catch(() => null);
-  const state = await loadPendingJoinBillingState(actor, queryValue(query.membership_id));
+  const state = await loadJoinCompletionState(actor, queryValue(query.membership_id));
   if (!state) notFound();
 
   const t = await getTranslations("Join");
+  // Map the webhook-authoritative display state to the same status.{key}.{title,description}
+  // copy /join/page.tsx's own resumption rendering already uses for these three outcomes.
+  const messageKey = state.display === "active" ? "complete" : state.display === "review" ? "review" : "checkout";
   return (
     <section className="glass-card p-6 sm:p-10">
-      <h1 className="font-serif text-4xl font-semibold">{t("status.checkout.title")}</h1>
+      <h1 className="font-serif text-4xl font-semibold">{t(`status.${messageKey}.title`)}</h1>
       <div className="mt-4 text-muted-foreground">
         <CheckoutStatus
-          labels={{processing: t("status.checkout.description"), active: t("status.checkout.description"), failed: t("errors.save")}}
-          status="processing"
+          labels={{
+            processing: t("status.checkout.description"),
+            active: t("status.complete.description"),
+            review: t("status.review.description"),
+            failed: t("errors.save"),
+          }}
+          status={state.display}
         />
       </div>
     </section>

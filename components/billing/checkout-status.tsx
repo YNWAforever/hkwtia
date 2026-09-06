@@ -1,6 +1,6 @@
 "use client";
 
-export type CheckoutStatus = "processing" | "active" | "failed";
+export type CheckoutStatus = "processing" | "active" | "review" | "failed";
 
 type CheckoutStatusProps = Readonly<{
   status: CheckoutStatus;

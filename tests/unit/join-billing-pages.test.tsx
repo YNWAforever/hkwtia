@@ -1,7 +1,7 @@
 import {renderToStaticMarkup} from "react-dom/server";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
-const actor = {kind: "member" as const, userId: "user-a"};
+const actor = {kind: "member" as const, userId: "user-a", profileId: "profile-a"};
 const state = vi.hoisted(() => ({
   membership: {id: "membership-a", applicationId: "application-a", ownerUserId: "user-a", companyId: null, planCode: "startup", status: "pending_payment"} as Record<string, unknown> | null,
   application: {id: "application-a", applicantUserId: "user-a", planCode: "startup", status: "pending_payment"} as Record<string, unknown> | null,
@@ -24,6 +24,7 @@ vi.mock("@/lib/billing/checkout-service", () => ({createCheckoutSession: async (
 
 import CheckoutPage from "@/app/[locale]/(join)/join/checkout/page";
 import CompletePage from "@/app/[locale]/(join)/join/complete/page";
+import {loadJoinCompletionState} from "@/lib/membership/join-billing-state";
 
 function props(locale = "en") {
   return {params: Promise.resolve({locale}), searchParams: Promise.resolve({membership_id: "membership-a"})};
@@ -62,9 +63,56 @@ describe("join billing pages", () => {
     expect(markup).not.toContain('data-checkout-status="active"');
   });
 
-  it("does not infer activation from a success-return query", async () => {
+  it("renders the active projection once the webhook has activated the membership, instead of 404ing", async () => {
     state.membership = {...state.membership, status: "active"};
-    await expect(CompletePage(props())).rejects.toThrow("NEXT_NOT_FOUND");
-    expect(state.notFound).toBe(true);
+    const markup = renderToStaticMarkup(await CompletePage(props()));
+    expect(state.notFound).toBe(false);
+    expect(markup).toContain('data-checkout-status="active"');
+    expect(markup).not.toContain('data-checkout-status="processing"');
+  });
+});
+
+describe("loadJoinCompletionState", () => {
+  beforeEach(() => {
+    state.membership = {id: "membership-a", applicationId: "application-a", ownerUserId: "user-a", companyId: null, planCode: "startup", status: "pending_payment"};
+    state.application = {id: "application-a", applicantUserId: "user-a", planCode: "startup", status: "pending_payment"};
+    state.membershipCalls = [];
+    state.applicationCalls = [];
+    state.notFound = false;
+  });
+
+  it("returns a processing projection for a pending_payment membership", async () => {
+    const result = await loadJoinCompletionState(actor, "membership-a");
+    expect(result).toMatchObject({display: "processing", membership: {applicationId: "application-a", planCode: "startup"}});
+  });
+
+  it("returns an active projection for an active membership", async () => {
+    state.membership = {...state.membership, status: "active"};
+    const result = await loadJoinCompletionState(actor, "membership-a");
+    expect(result).toMatchObject({display: "active"});
+  });
+
+  it("returns a review projection for a pending_review membership", async () => {
+    state.membership = {...state.membership, status: "pending_review"};
+    const result = await loadJoinCompletionState(actor, "membership-a");
+    expect(result).toMatchObject({display: "review"});
+  });
+
+  it.each(["cancelled", "expired", "past_due"])("returns null for a %s membership status", async (status) => {
+    state.membership = {...state.membership, status};
+    const result = await loadJoinCompletionState(actor, "membership-a");
+    expect(result).toBeNull();
+  });
+
+  it("returns null when the membership is missing", async () => {
+    state.membership = null;
+    const result = await loadJoinCompletionState(actor, "membership-a");
+    expect(result).toBeNull();
+  });
+
+  it("returns null when the application does not match the membership", async () => {
+    state.application = {...state.application, planCode: "corporate"};
+    const result = await loadJoinCompletionState(actor, "membership-a");
+    expect(result).toBeNull();
   });
 });
