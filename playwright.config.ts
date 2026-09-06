@@ -24,6 +24,9 @@ export default defineConfig({
   workers: 1,
   use: {
     baseURL,
+    // WP-8: a Vercel-protected Preview is entered through the session `scripts/vercel-preview-session.mjs`
+    // writes; unset locally, so the managed dev server path is unchanged.
+    storageState: process.env.PLAYWRIGHT_STORAGE_STATE || undefined,
     trace: process.env.VERCEL_SHARE_TOKEN ? 'off' : 'on-first-retry'
   },
   projects: [{name: 'chromium', use: {...devices['Desktop Chrome']}}],

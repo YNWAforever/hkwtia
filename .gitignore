@@ -27,6 +27,8 @@ dist-ssr
 *.sw?
 test-results/
 playwright-report/
+# WP-8: Vercel Preview session (storage state + cookie header) written by scripts/vercel-preview-session.mjs
+.playwright/
 .vercel
 
 .legacy-capture/

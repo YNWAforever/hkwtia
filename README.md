@@ -162,6 +162,20 @@ Preview authentication and never authorizes the target. Generate unsubscribe
 confirmation tokens from that Preview's signing configuration and never commit
 populated values.
 
+For the read-only public suites and Lighthouse against a protected Preview, turn
+a share link into a browser session instead. Mint the share URL from the Vercel
+dashboard (deployment → Share) or the Vercel tooling, then run
+`VERCEL_SHARE_URL=<share-url> node scripts/vercel-preview-session.mjs`. It
+visits the link once and writes `.playwright/preview-state.json` (Playwright
+storage state) and `.playwright/preview-cookie.txt` (the `_vercel_jwt` cookie
+header), printing only the Preview origin. Then run
+`PLAYWRIGHT_BASE_URL=<preview> PLAYWRIGHT_STORAGE_STATE=.playwright/preview-state.json npm run test:e2e -- <read-only specs>`
+and
+`LHCI_BASE_URL=<preview> LHCI_COOKIE_FILE=.playwright/preview-cookie.txt npm run test:lighthouse`
+(a remote base URL skips Lighthouse's local server). Both files expire with the
+share link, live under the git-ignored `.playwright/` directory, and must never
+be committed or pasted into a report.
+
 ## M3 Preview automation Worker
 
 The isolated [`workers`](./workers) package contains the Preview-only Cloudflare Cron Worker. It invokes the authenticated Next.js job routes and does not own journey or delivery state. Its UTC triggers are:
