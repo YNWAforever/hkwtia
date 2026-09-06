@@ -36,9 +36,18 @@ function harness() {
   const enrollmentRows = new Map<string, JourneyEnrollment>();
   const enrollmentActors: Actor[] = [];
   const membershipActors: Actor[] = [];
+  const profileRecords = new Map<string, {id: string; displayName: string}>();
+  const profileEnsureCalls: Actor[] = [];
   let nextId = 1;
 
   return {
+    profiles: {
+      async ensure(profileActor: Actor, input: {id: string; displayName: string}) {
+        profileEnsureCalls.push(profileActor);
+        profileRecords.set(input.id, {id: input.id, displayName: input.displayName});
+        return profileRecords.get(input.id)!;
+      },
+    },
     applications: {
       async getById(_actor: Actor, id: string) {
         return applications.get(id) ?? null;
@@ -97,7 +106,15 @@ function harness() {
       },
     },
     now: () => new Date("2026-07-26T04:00:00.000Z"),
-    inspect: () => ({applications, memberships, enrollmentRows, enrollmentActors, membershipActors}),
+    inspect: () => ({
+      applications,
+      memberships,
+      enrollmentRows,
+      enrollmentActors,
+      membershipActors,
+      profiles: profileRecords,
+      profileEnsureCalls,
+    }),
   };
 }
 
@@ -221,5 +238,7 @@ describe("completeApplication validates billingInterval before any mutation", ()
     const state = deps.inspect();
     expect(state.applications.size).toBe(0);
     expect(state.memberships).toHaveLength(0);
+    expect(state.profileEnsureCalls).toHaveLength(0);
+    expect(state.profiles.size).toBe(0);
   });
 });
