@@ -23,4 +23,13 @@ describe('M0 indexability', () => {
       expect.arrayContaining(['GPTBot', 'ClaudeBot', 'PerplexityBot']),
     );
   });
+
+  it('keeps authenticated and mid-flow surfaces out of every crawler', () => {
+    const rules = robots().rules;
+    const list = Array.isArray(rules) ? rules : [rules];
+    expect(list.length).toBeGreaterThanOrEqual(1);
+    for (const rule of list) {
+      expect(rule.disallow).toEqual(['/portal', '/admin', '/member-login', '/join/profile', '/join/company', '/join/checkout', '/join/complete', '/unsubscribe', '/api']);
+    }
+  });
 });
