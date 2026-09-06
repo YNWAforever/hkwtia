@@ -8,6 +8,8 @@ import {companiesRepository} from "@/lib/db/repos/companies";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
+import {resolveMembershipOption} from "@/lib/membership/catalog";
+import {billingEnv} from "@/lib/config/env";
 import {
   completeApplicationSchema,
   type CompanyInput,
@@ -237,6 +239,11 @@ export async function completeApplication(
   const input = completeApplicationSchema.parse(rawInput);
   const deps = dependencies(inputDependencies);
   const plan = getPlan(input.plan);
+  // Validate (planCode, billingInterval) against the membership catalog before touching
+  // profile, company, application, or membership state -- a missing, duplicated, or
+  // unsupported interval must fail closed before any write.
+  const membershipOption = resolveMembershipOption(plan.code, input.billingInterval, billingEnv());
+  if (!membershipOption.available) throw new Error("UNSUPPORTED_BILLING_INTERVAL");
   await ensureProfile(actor, input.profile, deps);
   const companyId = await validateCompanyTarget(actor, plan.code, input.company, deps);
   const application = await loadOrCreateApplication(actor, input, companyId, deps);
@@ -268,6 +275,9 @@ export async function completeApplication(
     planCode: plan.code,
     status: membershipStatus,
     seatLimit: plan.seatAllowance,
+    // The interval the catalog resolver just confirmed real for this (planCode, priceReference)
+    // pair -- not re-derived here. See the resolveMembershipOption() call above.
+    billingInterval: membershipOption.billingInterval,
   }, deps);
   const result = resultForMembership(application, membership);
   if (membership.status === "active" && deps.journeys) {

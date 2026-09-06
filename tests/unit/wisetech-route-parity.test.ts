@@ -223,8 +223,8 @@ describe("WiseTech route parity manifest", () => {
   });
 
   it("maps every frozen donor sitemap row exactly once with its evidence ID and unchanged reconciliation", () => {
-    expect(wisetechIntegrationManifest).toHaveLength(133);
-    expect(wisetechIntegrationManifest.filter(({kind}) => kind === "route")).toHaveLength(116);
+    expect(wisetechIntegrationManifest).toHaveLength(134);
+    expect(wisetechIntegrationManifest.filter(({kind}) => kind === "route")).toHaveLength(117);
     expect(donorRouteContractErrors(wisetechIntegrationManifest)).toEqual([]);
     expect(wisetechIntegrationManifest.filter(({sourceEvidenceId}) => sourceEvidenceId !== undefined)).toHaveLength(67);
     expect(wisetechIntegrationManifest.filter(({sourceEvidenceId}) => sourceEvidenceId !== undefined).map(({sourceEvidenceId}) => sourceEvidenceId).sort()).toEqual(

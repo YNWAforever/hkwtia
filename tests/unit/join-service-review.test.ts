@@ -1,4 +1,4 @@
-import {describe, expect, it} from "vitest";
+import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 
 import type {Actor} from "@/lib/membership/lifecycle";
 import {completeApplication} from "@/lib/membership/onboarding";
@@ -106,6 +106,19 @@ function durableHarness() {
 }
 
 describe("join review fixes", () => {
+  // The corporate/startup fixtures below exercise the checkout path, which requires
+  // resolveMembershipOption() (lib/membership/catalog.ts) to see a configured Stripe price
+  // mapping for the "annual" interval -- otherwise completeApplication() fails closed with
+  // UNSUPPORTED_BILLING_INTERVAL before reaching the behavior these tests actually assert.
+  beforeEach(() => {
+    vi.stubEnv("STRIPE_STARTUP_PRICE_ID", "price_startup");
+    vi.stubEnv("STRIPE_CORPORATE_PRICE_ID", "price_corporate");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("bootstraps an authenticated profile before creating an application", async () => {
     const deps = durableHarness();
     const result = await startJoin(actor, {plan: "community", applicationId: null}, deps);
@@ -118,7 +131,7 @@ describe("join review fixes", () => {
     const deps = durableHarness();
 
     await expect(
-      completeApplication(actor, {plan: "corporate", profile: {displayName: "A"}, company: null}, deps),
+      completeApplication(actor, {plan: "corporate", billingInterval: "annual", profile: {displayName: "A"}, company: null}, deps),
     ).rejects.toThrow("COMPANY_REQUIRED");
   });
 
@@ -128,14 +141,14 @@ describe("join review fixes", () => {
     await expect(
       completeApplication(
         actor,
-        {plan: "corporate", profile: {displayName: "A"}, company: {id: "company-b", legalName: "B", displayName: "B"}},
+        {plan: "corporate", billingInterval: "annual", profile: {displayName: "A"}, company: {id: "company-b", legalName: "B", displayName: "B"}},
         deps,
       ),
     ).rejects.toThrow("FORBIDDEN");
 
     const accepted = await completeApplication(
       actor,
-      {plan: "corporate", profile: {displayName: "A"}, company: {id: "company-a", legalName: "A", displayName: "A"}},
+      {plan: "corporate", billingInterval: "annual", profile: {displayName: "A"}, company: {id: "company-a", legalName: "A", displayName: "A"}},
       deps,
     );
     const application = deps.inspect().applications.get(accepted.applicationId);
@@ -146,12 +159,12 @@ describe("join review fixes", () => {
     const deps = durableHarness();
     const first = await completeApplication(
       actor,
-      {plan: "startup", profile: {displayName: "A"}, company: {id: "company-a", legalName: "A", displayName: "A"}},
+      {plan: "startup", billingInterval: "annual", profile: {displayName: "A"}, company: {id: "company-a", legalName: "A", displayName: "A"}},
       deps,
     );
     const second = await completeApplication(
       actor,
-      {plan: "startup", applicationId: first.applicationId, profile: {displayName: "A"}, company: {id: "company-a", legalName: "A", displayName: "A"}},
+      {plan: "startup", billingInterval: "annual", applicationId: first.applicationId, profile: {displayName: "A"}, company: {id: "company-a", legalName: "A", displayName: "A"}},
       deps,
     );
 

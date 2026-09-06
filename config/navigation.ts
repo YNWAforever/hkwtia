@@ -56,7 +56,7 @@ export const publicShellActions = Object.freeze({
   findEvent: Object.freeze({id: "find-event", href: "/events", labelKey: "actions.findEvent", priority: "primary"} satisfies PublicShellAction),
   join: Object.freeze({id: "join-wisetech", href: "/join", labelKey: "actions.join", priority: "secondary"} satisfies PublicShellAction),
 });
-export const memberPortalAction = Object.freeze({id: "member-sign-in", href: "/portal" as const, labelKey: "actions.memberSignIn" as const});
+export const memberPortalAction = Object.freeze({id: "member-sign-in", href: "/member-login" as const, labelKey: "actions.memberSignIn" as const});
 export type NavigationViewModel = Readonly<{
   groups: readonly LocalizedNavigationGroup[];
   actions: Readonly<{findEvent: Readonly<Omit<(typeof publicShellActions)["findEvent"], "labelKey"> & {label: string}>; join: Readonly<Omit<(typeof publicShellActions)["join"], "labelKey"> & {label: string}>}>;

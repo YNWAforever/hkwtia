@@ -21,6 +21,7 @@ function membership(overrides: Record<string, unknown> = {}) {
     applicationId,
     planCode: "startup" as const,
     status: "pending_payment" as const,
+    billingInterval: "annual" as const,
     seatLimit: 5,
     stripeCustomerId: null,
     ...overrides,
@@ -173,19 +174,28 @@ describe("membership checkout", () => {
 describe("billing ownership", () => {
   it("creates a portal only for the personal owner with a matching customer", async () => {
     const setup = dependencies(membership({status: "active", stripeCustomerId: "cus_owned"}));
-    await expect(createBillingPortalSession(actorFor("user@example.test"), membershipId, setup.dependencies)).resolves.toEqual({url: setup.stripe.portalUrl});
+    await expect(createBillingPortalSession(actorFor("user@example.test"), membershipId, "en", setup.dependencies)).resolves.toEqual({url: setup.stripe.portalUrl});
     expect(setup.stripe.portalRequests[0]).toEqual({customerId: "cus_owned", returnUrl: "https://members.example.test/portal/billing"});
   });
 
   it("denies Billing Portal to a non-admin company member", async () => {
     const setup = dependencies(membership({ownerUserId: null, companyId: "company-a", status: "active", stripeCustomerId: "cus_company"}));
-    await expect(createBillingPortalSession(actorFor("user-a", {"company-a": "member"}), membershipId, setup.dependencies)).rejects.toThrow("FORBIDDEN");
+    await expect(createBillingPortalSession(actorFor("user-a", {"company-a": "member"}), membershipId, "en", setup.dependencies)).rejects.toThrow("FORBIDDEN");
     expect(setup.stripe.portalRequests).toHaveLength(0);
   });
 
   it.each(["owner", "admin"] as const)("allows a company %s to open Billing Portal", async (role) => {
     const setup = dependencies(membership({ownerUserId: null, companyId: "company-a", status: "active", stripeCustomerId: "cus_company"}));
-    await expect(createBillingPortalSession(actorFor("user-a", {"company-a": role}), membershipId, setup.dependencies)).resolves.toEqual({url: setup.stripe.portalUrl});
+    await expect(createBillingPortalSession(actorFor("user-a", {"company-a": role}), membershipId, "en", setup.dependencies)).resolves.toEqual({url: setup.stripe.portalUrl});
+  });
+
+  it("builds the return URL through localizedPath for the given locale", async () => {
+    const setup = dependencies(membership({status: "active", stripeCustomerId: "cus_owned"}));
+    await createBillingPortalSession(actorFor("user@example.test"), membershipId, "zh-HK", setup.dependencies);
+    expect(setup.stripe.portalRequests[0]).toMatchObject({
+      customerId: "cus_owned",
+      returnUrl: "https://members.example.test/zh/portal/billing",
+    });
   });
 });
 

@@ -20,9 +20,10 @@ const footerTargetClassName = "inline-flex min-h-11 min-w-11 max-w-full items-ce
 
 /**
  * A column entry is not a `LocalizedNavigationLink`: the Membership column also carries
- * `/join` and `/portal`, and `/portal` is a member route, so it is deliberately absent from
- * `PublicRoute`. Widening the href here rather than widening `PublicRoute` keeps the shell's
- * canonical-destination contract (tests/unit/navigation.test.ts) exactly as narrow as it is.
+ * `/join` and `/member-login`, and `/member-login` is not part of the closed `PublicRoute`
+ * union used elsewhere in the shell, so it is deliberately absent from `PublicRoute`. Widening
+ * the href here rather than widening `PublicRoute` keeps the shell's canonical-destination
+ * contract (tests/unit/navigation.test.ts) exactly as narrow as it is.
  */
 type FooterLink = Readonly<{id: string; href: string; label: string}>;
 type FooterColumn = Readonly<{id: string; label: string; links: readonly FooterLink[]}>;

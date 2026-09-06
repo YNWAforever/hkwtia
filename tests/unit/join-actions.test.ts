@@ -9,6 +9,7 @@ const repoState = vi.hoisted(() => ({
   createdCompanyInput: null as null | Record<string, unknown>,
   updatedCompanyInput: null as null | Record<string, unknown>,
   completedInput: null as null | Record<string, unknown>,
+  completeResult: {applicationId: "application-a", next: "checkout", membershipId: "membership-a"} as Record<string, unknown>,
 }));
 
 vi.mock("next-intl/server", () => ({
@@ -37,14 +38,14 @@ vi.mock("@/lib/db/repos/companies", () => ({companiesRepository: {
 }}));
 vi.mock("@/lib/db/repos/profiles", () => ({profilesRepository: {getById: async () => repoState.profile, update: vi.fn(), ensure: vi.fn()}}));
 vi.mock("@/lib/membership/join-service", () => ({
-  startJoin: vi.fn(),
+  startJoin: async () => ({applicationId: "application-a"}),
   completeApplication: async (_actor: unknown, input: Record<string, unknown>) => {
     repoState.completedInput = input;
-    return {applicationId: "application-a", next: "checkout", membershipId: "membership-a"};
+    return repoState.completeResult;
   },
 }));
 
-import {requestMagicLink, saveCompany} from "@/app/[locale]/(join)/join/actions";
+import {requestMagicLink, saveCompany, saveProfile} from "@/app/[locale]/(join)/join/actions";
 
 describe("join Server Actions", () => {
   beforeEach(() => {
@@ -54,6 +55,7 @@ describe("join Server Actions", () => {
     repoState.createdCompanyInput = null;
     repoState.updatedCompanyInput = null;
     repoState.completedInput = null;
+    repoState.completeResult = {applicationId: "application-a", next: "checkout", membershipId: "membership-a"};
     repoState.application = {id: "application-a", applicantUserId: "user-a", companyId: null, planCode: "startup", currentStep: "company", status: "draft"};
     process.env.APP_URL = "https://m1-preview.example.test";
     process.env.NEXT_PUBLIC_SITE_URL = "https://canonical-marketing.example.test";
@@ -123,7 +125,7 @@ describe("join Server Actions", () => {
       applicationId: "application-a",
       company: {id: "company-a", legalName: "Acme Limited", displayName: "Acme"},
     });
-    expect(redirectState.url).toBe("/join?plan=startup&application=application-a");
+    expect(redirectState.url).toBe("/join/checkout?membership_id=membership-a");
   });
   it("denies a non-applicant company member before mutating an existing company", async () => {
     repoState.application = {
@@ -161,6 +163,44 @@ describe("join Server Actions", () => {
       applicationId: "application-a",
       company: {id: "company-a", legalName: "Acme Updated Limited", displayName: "Acme Updated"},
     });
+  });
+
+  it("redirects saveProfile straight to checkout when completeApplication reports checkout is next", async () => {
+    const form = new FormData();
+    form.set("displayName", "Member A");
+
+    await expect(saveProfile("en", "community", null, {}, form)).rejects.toThrow("NEXT_REDIRECT");
+    expect(redirectState.url).toBe("/join/checkout?membership_id=membership-a");
+  });
+
+  it("redirects saveCompany back to the company step when completeApplication reports company is still next", async () => {
+    repoState.completeResult = {applicationId: "application-a", next: "company"};
+    const form = new FormData();
+    form.set("legalName", "Acme Limited");
+    form.set("companyDisplayName", "Acme");
+
+    await expect(saveCompany("en", "startup", "application-a", {}, form)).rejects.toThrow("NEXT_REDIRECT");
+    expect(redirectState.url).toBe("/join/company?plan=startup&application=application-a");
+  });
+
+  it("redirects saveCompany to the complete page with the membership id when completeApplication reports review is next", async () => {
+    repoState.completeResult = {applicationId: "application-a", next: "review", membershipId: "membership-b"};
+    const form = new FormData();
+    form.set("legalName", "Acme Limited");
+    form.set("companyDisplayName", "Acme");
+
+    await expect(saveCompany("en", "startup", "application-a", {}, form)).rejects.toThrow("NEXT_REDIRECT");
+    expect(redirectState.url).toBe("/join/complete?membership_id=membership-b");
+  });
+
+  it("redirects saveCompany to the complete page with the membership id when completeApplication reports complete is next", async () => {
+    repoState.completeResult = {applicationId: "application-a", next: "complete", membershipId: "membership-c"};
+    const form = new FormData();
+    form.set("legalName", "Acme Limited");
+    form.set("companyDisplayName", "Acme");
+
+    await expect(saveCompany("en", "startup", "application-a", {}, form)).rejects.toThrow("NEXT_REDIRECT");
+    expect(redirectState.url).toBe("/join/complete?membership_id=membership-c");
   });
 
   it("refuses to keep mailing one address once the ceiling is reached", async () => {

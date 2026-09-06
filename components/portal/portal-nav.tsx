@@ -1,47 +1,58 @@
-import Link from "next/link";
+"use client";
 
+import Link from "next/link";
+import {usePathname} from "next/navigation";
+import {useTranslations} from "next-intl";
+
+import {portalNavigationGroups} from "@/config/internal-navigation";
+import {InternalNavigation, type InternalNavGroup} from "@/components/internal-shell/navigation";
+import {PortalSignOutButton} from "@/components/portal/portal-sign-out-button";
 import type {AppLocale} from "@/i18n/routing";
 import {localizedPath} from "@/lib/urls";
 
-export type PortalNavLabels = Readonly<{
-  navigation: string;
-  dashboard: string;
-  profile: string;
-  company: string;
-  showcaseListing: string;
-  directory: string;
-  events: string;
-  documents: string;
-  billing: string;
-  signOut: string;
-}>;
+/** The real link ids configured for the portal nav — kept in sync with linkLabelKeys via `satisfies`. */
+type PortalNavLinkId = (typeof portalNavigationGroups)[number]["links"][number]["id"];
 
-export function PortalNav({locale, labels}: {locale: AppLocale; labels: PortalNavLabels}) {
-  const items = [
-    {href: localizedPath(locale, "/portal"), label: labels.dashboard},
-    {href: localizedPath(locale, "/portal/profile"), label: labels.profile},
-    {href: localizedPath(locale, "/portal/company"), label: labels.company},
-    {href: localizedPath(locale, "/portal/company/listing"), label: labels.showcaseListing},
-    {href: localizedPath(locale, "/portal/directory"), label: labels.directory},
-    {href: localizedPath(locale, "/portal/events"), label: labels.events},
-    {href: localizedPath(locale, "/portal/documents"), label: labels.documents},
-    {href: localizedPath(locale, "/portal/billing"), label: labels.billing},
-  ];
+/** Maps each config link id to the Portal message key that resolves its nav label. */
+const linkLabelKeys = {
+  dashboard: "dashboard",
+  profile: "profile",
+  company: "company",
+  "showcase-listing": "showcaseListing.nav",
+  directory: "directory.title",
+  events: "events.title",
+  documents: "documents.title",
+  billing: "billing.title",
+} satisfies Record<PortalNavLinkId, string>;
+
+export function PortalNav({locale}: Readonly<{locale: AppLocale}>) {
+  const pathname = usePathname();
+  const t = useTranslations("Portal");
+  const tCommon = useTranslations("Common");
+
+  const groups: readonly InternalNavGroup[] = portalNavigationGroups.map((group) => ({
+    id: group.id,
+    links: group.links.map((link) => ({
+      id: link.id,
+      href: localizedPath(locale, link.href),
+      label: t(linkLabelKeys[link.id]),
+    })),
+  }));
 
   return (
-    <nav aria-label={labels.navigation} className="border-b border-border/70 bg-background/85 px-4 py-4 backdrop-blur sm:px-6">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <Link className="font-serif text-xl font-semibold text-foreground" href={localizedPath(locale, "/portal")}>WTIA</Link>
-        <div className="flex flex-wrap items-center gap-2 text-sm">
-          {items.map((item) => (
-            <Link className="rounded-md px-3 py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" href={item.href} key={item.href}>
-              {item.label}
-            </Link>
-          ))}
-          <span aria-hidden="true" className="hidden h-5 w-px bg-border sm:block" />
-          <span className="sr-only">{labels.signOut}</span>
-        </div>
-      </div>
-    </nav>
+    <div>
+      <header className="mx-auto flex max-w-6xl items-center px-4 pt-4 sm:px-6">
+        <Link className="font-serif text-xl font-semibold text-foreground" href={localizedPath(locale, "/portal")}>
+          WTIA
+        </Link>
+      </header>
+      <InternalNavigation
+        groups={groups}
+        labels={{navigationLabel: t("navigation"), openMenu: tCommon("openMenu"), closeMenu: tCommon("closeMenu")}}
+        currentPath={pathname}
+      >
+        <PortalSignOutButton label={t("signOut")} errorLabel={t("signOutError")} />
+      </InternalNavigation>
+    </div>
   );
 }

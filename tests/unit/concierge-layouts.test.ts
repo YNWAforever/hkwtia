@@ -9,13 +9,23 @@ function source(relative: string): string {
 
 describe("Concierge layout translation loading", () => {
   it.each([
-    "app/[locale]/(public)/layout.tsx",
-    "app/[locale]/(member)/portal/layout.tsx",
-  ])("loads scoped translations in parallel without the full catalog: %s", (file) => {
+    // The public layout fetches Common, Concierge and Announcement namespaces together, so it
+    // still needs Promise.all to load them in parallel.
+    {file: "app/[locale]/(public)/layout.tsx", fetchesInParallel: true},
+    // Task 7 moved Portal's own nav-label translations client-side (PortalNav now resolves them
+    // itself via next-intl's useTranslations). Task 8 (InternalAppShell adoption) then added a
+    // second scoped fetch -- Common's skipToContent, for the shell's skip link -- so this layout
+    // is back to two namespaces loaded via Promise.all, alongside Concierge.
+    {file: "app/[locale]/(member)/portal/layout.tsx", fetchesInParallel: true},
+  ])("loads scoped translations without the full catalog: $file", ({file, fetchesInParallel}) => {
     const layout = source(file);
 
     expect(layout).not.toContain("getMessages");
-    expect(layout).toContain("Promise.all");
+    if (fetchesInParallel) {
+      expect(layout).toContain("Promise.all");
+    } else {
+      expect(layout).not.toContain("Promise.all");
+    }
     expect(layout).toMatch(/namespace:\s*["']Concierge["']/);
     expect(layout).toContain("concierge.raw(key)");
     expect(layout.match(/<ConciergeWidget\b/g)).toHaveLength(1);

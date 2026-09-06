@@ -27,8 +27,14 @@ describe("membership join schemas", () => {
 
   it("requires a profile when completing an application", () => {
     expect(
-      completeApplicationSchema.safeParse({plan: "patron", profile: {displayName: "Patron"}}).success,
+      completeApplicationSchema.safeParse({plan: "patron", billingInterval: "none", profile: {displayName: "Patron"}}).success,
     ).toBe(true);
-    expect(completeApplicationSchema.safeParse({plan: "patron", company: null}).success).toBe(false);
+    expect(completeApplicationSchema.safeParse({plan: "patron", billingInterval: "none", company: null}).success).toBe(false);
+  });
+
+  it("requires an explicit billingInterval when completing an application", () => {
+    expect(
+      completeApplicationSchema.safeParse({plan: "patron", profile: {displayName: "Patron"}}).success,
+    ).toBe(false);
   });
 });

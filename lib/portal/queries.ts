@@ -6,8 +6,6 @@ import {companiesRepository} from "@/lib/db/repos/companies";
 import {type Company, type Membership, type Profile} from "@/lib/db/server-schema";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
-import type {AppLocale} from "@/i18n/routing";
-import {localizedPath} from "@/lib/urls";
 
 export const portalMembershipStatuses = [
   "pending_payment",
@@ -96,19 +94,6 @@ function primaryMembership(memberships: readonly DashboardMembership[]): Dashboa
     pending_payment: 1,
   };
   return [...memberships].sort((a, b) => rank[b.status] - rank[a.status])[0];
-}
-
-/** Build the only safe continuation accepted by the member sign-in flow. */
-export function buildPortalSignInPath(locale: AppLocale, continuation = "/portal"): string {
-  if (!continuation.startsWith("/") || continuation.startsWith("//") || continuation.includes("\\") || continuation.includes("\r") || continuation.includes("\n")) {
-    throw new Error("INVALID_CONTINUATION");
-  }
-  const parsed = new URL(continuation, "http://portal.local");
-  if (parsed.origin !== "http://portal.local" || parsed.pathname !== continuation || parsed.search || parsed.hash) {
-    throw new Error("INVALID_CONTINUATION");
-  }
-  const query = new URLSearchParams({next: continuation});
-  return `${localizedPath(locale, "/join")}?${query.toString()}`;
 }
 
 /** Read the member dashboard only after an actor and a recoverable membership are verified. */

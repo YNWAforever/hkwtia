@@ -1,9 +1,10 @@
-import {describe, expect, it} from "vitest";
+import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 
 import {startJoin} from "@/lib/membership/join-service";
 import {completeApplication} from "@/lib/membership/onboarding";
 import type {JourneyEnrollment} from "@/lib/db/repos/journeys";
 import type {Actor} from "@/lib/membership/lifecycle";
+import type {BillingInterval} from "@/lib/membership/catalog";
 
 const actor: Extract<Actor, {kind: "member"}> = {kind: "member", userId: "user-a", profileId: "user-a"};
 
@@ -24,6 +25,7 @@ type TestMembership = {
   ownerUserId: string | null;
   companyId: string | null;
   seatLimit: number;
+  billingInterval: BillingInterval;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -34,9 +36,18 @@ function harness() {
   const enrollmentRows = new Map<string, JourneyEnrollment>();
   const enrollmentActors: Actor[] = [];
   const membershipActors: Actor[] = [];
+  const profileRecords = new Map<string, {id: string; displayName: string}>();
+  const profileEnsureCalls: Actor[] = [];
   let nextId = 1;
 
   return {
+    profiles: {
+      async ensure(profileActor: Actor, input: {id: string; displayName: string}) {
+        profileEnsureCalls.push(profileActor);
+        profileRecords.set(input.id, {id: input.id, displayName: input.displayName});
+        return profileRecords.get(input.id)!;
+      },
+    },
     applications: {
       async getById(_actor: Actor, id: string) {
         return applications.get(id) ?? null;
@@ -77,6 +88,7 @@ function harness() {
           ownerUserId: (input.ownerUserId as string | null) ?? null,
           companyId: (input.companyId as string | null) ?? null,
           seatLimit: input.seatLimit as number,
+          billingInterval: input.billingInterval as BillingInterval,
           createdAt: new Date("2026-07-26T04:00:00.000Z"),
           updatedAt: new Date("2026-07-26T04:00:00.000Z"),
         };
@@ -94,11 +106,31 @@ function harness() {
       },
     },
     now: () => new Date("2026-07-26T04:00:00.000Z"),
-    inspect: () => ({applications, memberships, enrollmentRows, enrollmentActors, membershipActors}),
+    inspect: () => ({
+      applications,
+      memberships,
+      enrollmentRows,
+      enrollmentActors,
+      membershipActors,
+      profiles: profileRecords,
+      profileEnsureCalls,
+    }),
   };
 }
 
 describe("membership join orchestration", () => {
+  // The "corporate" checkout fixture below needs resolveMembershipOption() (catalog.ts) to see
+  // a configured Stripe price mapping for the "annual" interval, or completeApplication() fails
+  // closed with UNSUPPORTED_BILLING_INTERVAL before reaching the behavior under test.
+  beforeEach(() => {
+    vi.stubEnv("STRIPE_STARTUP_PRICE_ID", "price_startup");
+    vi.stubEnv("STRIPE_CORPORATE_PRICE_ID", "price_corporate");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("creates a draft and reuses it when a join page is refreshed", async () => {
     const deps = harness();
     const first = await startJoin(actor, {plan: "startup", applicationId: null}, deps);
@@ -115,6 +147,7 @@ describe("membership join orchestration", () => {
       actor,
       {
         plan: "community",
+        billingInterval: "none",
         profile: {displayName: "Community Member"},
         company: null,
       },
@@ -123,7 +156,7 @@ describe("membership join orchestration", () => {
 
     expect(result.next).toBe("complete");
     expect(result.checkout).toBeUndefined();
-    expect(deps.inspect().memberships).toMatchObject([{planCode: "community", status: "active"}]);
+    expect(deps.inspect().memberships).toMatchObject([{planCode: "community", status: "active", billingInterval: "none"}]);
     expect([...deps.inspect().enrollmentRows.values()]).toContainEqual(expect.objectContaining({
       profileId: actor.profileId,
       journey: "onboarding_90d",
@@ -138,6 +171,7 @@ describe("membership join orchestration", () => {
       {
         applicationId: result.applicationId,
         plan: "community",
+        billingInterval: "none",
         profile: {displayName: "Community Member"},
         company: null,
       },
@@ -152,6 +186,7 @@ describe("membership join orchestration", () => {
       actor,
       {
         plan: "corporate",
+        billingInterval: "annual",
         profile: {displayName: "Corporate Member"},
         company: {id: "company-a", legalName: "Corporate Ltd", displayName: "Corporate"},
       },
@@ -160,7 +195,7 @@ describe("membership join orchestration", () => {
 
     expect(result.next).toBe("checkout");
     expect(result.checkout).toMatchObject({kind: "membership_checkout", planCode: "corporate"});
-    expect(deps.inspect().memberships).toMatchObject([{planCode: "corporate", status: "pending_payment"}]);
+    expect(deps.inspect().memberships).toMatchObject([{planCode: "corporate", status: "pending_payment", billingInterval: "annual"}]);
   });
 
   it("sends patron applications to review without creating a charge", async () => {
@@ -169,6 +204,7 @@ describe("membership join orchestration", () => {
       actor,
       {
         plan: "patron",
+        billingInterval: "none",
         profile: {displayName: "Patron"},
         company: null,
       },
@@ -177,6 +213,32 @@ describe("membership join orchestration", () => {
 
     expect(result.next).toBe("review");
     expect(result.checkout).toBeUndefined();
-    expect(deps.inspect().memberships).toMatchObject([{planCode: "patron", status: "pending_review"}]);
+    expect(deps.inspect().memberships).toMatchObject([{planCode: "patron", status: "pending_review", billingInterval: "none"}]);
+  });
+});
+
+describe("completeApplication validates billingInterval before any mutation", () => {
+  it("rejects an unsupported interval for a paid plan before creating an application or profile", async () => {
+    const deps = harness();
+
+    await expect(
+      completeApplication(
+        actor,
+        {
+          plan: "startup",
+          billingInterval: "monthly" as BillingInterval,
+          applicationId: null,
+          profile: {displayName: "Test User"},
+          company: {id: "company-a", legalName: "Startup Ltd", displayName: "Startup"},
+        },
+        deps,
+      ),
+    ).rejects.toThrow();
+
+    const state = deps.inspect();
+    expect(state.applications.size).toBe(0);
+    expect(state.memberships).toHaveLength(0);
+    expect(state.profileEnsureCalls).toHaveLength(0);
+    expect(state.profiles.size).toBe(0);
   });
 });

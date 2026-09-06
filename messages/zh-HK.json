@@ -3,7 +3,9 @@
   "Common": {
     "skipToContent": "跳至主要內容",
     "breadcrumbLabel": "位置導覽",
-    "breadcrumbHome": "主頁"
+    "breadcrumbHome": "主頁",
+    "openMenu": "開啟選單",
+    "closeMenu": "關閉選單"
   },
   "Metadata": {
     "title": "WTIA｜創新香港",
@@ -821,6 +823,19 @@
       }
     }
   },
+  "MemberLogin": {
+    "formLabel": "會員登入",
+    "emailLabel": "電郵地址",
+    "submit": "傳送安全登入連結",
+    "sent": "請查閱電郵中的安全登入連結；連結會帶你返回會員專區。",
+    "nonMemberAccess": "你已登入帳戶。此登入連結僅用於登入另一個帳戶。",
+    "errors": {
+      "email": "請輸入有效電郵地址。",
+      "rateLimited": "登入電郵要求次數過多，請等待數分鐘後再試。",
+      "auth": "未能傳送登入連結，請再試一次。",
+      "invalidContinuation": "此登入連結無效，請從會員專區重新開始。"
+    }
+  },
   "programs": {
     "cpai": {
       "title": "CPAI",
@@ -1611,6 +1626,7 @@
     "profile": "我的個人資料",
     "company": "公司資料",
     "signOut": "登出",
+    "signOutError": "無法登出你的帳戶，請再試一次。",
     "dashboardTitle": "你的 WTIA 控制台",
     "welcome": "歡迎回來，{name}。",
     "membershipStatus": "會員狀態",
@@ -1834,6 +1850,7 @@
     },
     "navigation": {
       "label": "職員管理導覽",
+      "dashboard": "控制台",
       "segments": "分群",
       "members": "會員",
       "atRisk": "高風險",

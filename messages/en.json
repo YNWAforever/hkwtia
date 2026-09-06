@@ -2,7 +2,9 @@
   "Common": {
     "skipToContent": "Skip to content",
     "breadcrumbLabel": "Breadcrumb",
-    "breadcrumbHome": "Home"
+    "breadcrumbHome": "Home",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "Metadata": {
     "title": "WTIA | Innovate Hong Kong",
@@ -821,6 +823,19 @@
       }
     }
   },
+  "MemberLogin": {
+    "formLabel": "Member sign in",
+    "emailLabel": "Email address",
+    "submit": "Send secure sign-in link",
+    "sent": "Check your inbox for your secure sign-in link. It will return you to your member portal.",
+    "nonMemberAccess": "You're already signed in. This sign-in link is only for signing in to a different account.",
+    "errors": {
+      "email": "Enter a valid email address.",
+      "rateLimited": "Too many sign-in emails have been requested. Wait a few minutes and try again.",
+      "auth": "We could not send the sign-in link. Please try again.",
+      "invalidContinuation": "That sign-in link is not valid. Start again from the member portal."
+    }
+  },
   "programs": {
     "cpai": {
       "title": "CPAI",
@@ -1611,6 +1626,7 @@
     "profile": "My profile",
     "company": "Company",
     "signOut": "Sign out",
+    "signOutError": "We could not sign you out. Please try again.",
     "dashboardTitle": "Your WTIA dashboard",
     "welcome": "Welcome back, {name}.",
     "membershipStatus": "Membership status",
@@ -1833,6 +1849,7 @@
     },
     "navigation": {
       "label": "Staff administration navigation",
+      "dashboard": "Dashboard",
       "segments": "Segments",
       "members": "Members",
       "atRisk": "At risk",

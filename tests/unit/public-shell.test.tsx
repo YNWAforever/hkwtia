@@ -137,7 +137,7 @@ describe("public shell server surfaces", () => {
       "/about/chairman", "/about/committees", "/contact", "/privacy",
       // The Membership column carries the two action destinations as well; without them here a
       // dropped Join or Member sign-in link would leave the sweep untouched.
-      "/join", "/portal",
+      "/join", "/member-login",
       "mailto:contact@hkwtia.org",
     ];
     const targetHrefs = new Set(expectedHrefs);
@@ -146,8 +146,8 @@ describe("public shell server surfaces", () => {
     );
 
     // A cardinality check passed a swap: pointing the member sign-in entry at the join href
-    // dropped /portal from the footer and duplicated /join, leaving the total at 20. The sorted
-    // multiset is the every-leaf-once property this test claims, and it names the two hrefs.
+    // dropped /member-login from the footer and duplicated /join, leaving the total at 20. The
+    // sorted multiset is the every-leaf-once property this test claims, and it names the two hrefs.
     expect(targets.map((target) => target.getAttribute("href")).sort())
       .toEqual([...expectedHrefs].sort());
     for (const target of targets) {

@@ -2,7 +2,6 @@ import {describe, expect, it} from "vitest";
 
 import type {Actor} from "@/lib/membership/lifecycle";
 import {
-  buildPortalSignInPath,
   getDashboard,
   type PortalQueryDependencies,
 } from "@/lib/portal/queries";
@@ -137,12 +136,5 @@ describe("protected member portal", () => {
 
     await expect(updateCompany({...member, companyRoles: {"company-a": "owner"}}, {companyId: "company-a", displayName: "Updated Co"}, deps)).resolves.toMatchObject({displayName: "Updated Co"});
     await expect(updateCompany({...member, companyRoles: {"company-a": "member"}}, {companyId: "company-a", displayName: "Nope"}, deps)).rejects.toThrow("FORBIDDEN");
-  });
-
-  it("builds a locale-aware sign-in continuation and rejects open redirects", () => {
-    expect(buildPortalSignInPath("en", "/portal")).toBe("/join?next=%2Fportal");
-    expect(buildPortalSignInPath("zh-HK", "/portal/profile")).toBe("/zh/join?next=%2Fportal%2Fprofile");
-    expect(buildPortalSignInPath("en", "/portal/company/seats")).toBe("/join?next=%2Fportal%2Fcompany%2Fseats");
-    expect(() => buildPortalSignInPath("en", "https://evil.example/steal")).toThrow("INVALID_CONTINUATION");
   });
 });

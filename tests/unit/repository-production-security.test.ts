@@ -135,6 +135,7 @@ function companyMembershipInput(overrides: Partial<Parameters<typeof memberships
     planCode: "corporate" as const,
     status: "pending_payment" as const,
     seatLimit: 10,
+    billingInterval: "annual" as const,
     ...overrides,
   };
 }
@@ -154,6 +155,7 @@ describe("production repository security boundaries", () => {
         planCode: "community",
         status: "active",
         seatLimit: 1,
+        billingInterval: "none",
       } satisfies Parameters<typeof membershipsRepository.create>[1],
     },
     {
@@ -250,6 +252,53 @@ describe("production repository security boundaries", () => {
     expect(statements.at(-1)?.toLowerCase()).toContain('insert into "memberships"');
   });
 
+  it("writes an explicit billingInterval on the insert instead of relying on the column default", async () => {
+    const statements: string[] = [];
+    const parameters: unknown[][] = [];
+    database.current = drizzle(async (query, params) => {
+      statements.push(query);
+      parameters.push(params);
+      const normalized = query.toLowerCase();
+      if (normalized.includes('from "company_members"') && !normalized.includes('"membership_applications"')) {
+        return {rows: [["company-b"]]};
+      }
+      if (normalized.includes('from "membership_applications"')) return {rows: [applicationRow()]};
+      if (normalized.includes('insert into "memberships"')) return {rows: [membershipRow]};
+      return {rows: []};
+    });
+
+    await membershipsRepository.create(actor, companyMembershipInput({billingInterval: "annual"}));
+
+    const insertIndex = statements.findIndex((query) => query.toLowerCase().includes('insert into "memberships"'));
+    expect(insertIndex).toBeGreaterThanOrEqual(0);
+    expect(parameters[insertIndex]).toContain("annual");
+  });
+
+  it('writes billingInterval "none" for a free/review-track membership instead of the "annual" column default', async () => {
+    const statements: string[] = [];
+    const parameters: unknown[][] = [];
+    database.current = drizzle(async (query, params) => {
+      statements.push(query);
+      parameters.push(params);
+      const normalized = query.toLowerCase();
+      if (normalized.includes('from "membership_applications"')) {
+        return {rows: [applicationRow({companyId: null, planCode: "community"})]};
+      }
+      if (normalized.includes('insert into "memberships"')) return {rows: [membershipRow]};
+      return {rows: []};
+    });
+
+    await membershipsRepository.create(actor, {
+      ownerUserId: "user-a", companyId: null, applicationId: "application-b",
+      planCode: "community", status: "active", seatLimit: 1, billingInterval: "none",
+    });
+
+    const insertIndex = statements.findIndex((query) => query.toLowerCase().includes('insert into "memberships"'));
+    expect(insertIndex).toBeGreaterThanOrEqual(0);
+    expect(parameters[insertIndex]).toContain("none");
+    expect(parameters[insertIndex]).not.toContain("annual");
+  });
+
   it("requires an actor-scoped application check for a member-owned membership", async () => {
     const statements: string[] = [];
     database.current = drizzle(async (query) => {
@@ -267,7 +316,7 @@ describe("production repository security boundaries", () => {
     await expect(
       membershipsRepository.create(actor, {
         ownerUserId: "user-a", companyId: null, applicationId: "application-b",
-        planCode: "community", status: "active", seatLimit: 1,
+        planCode: "community", status: "active", seatLimit: 1, billingInterval: "none",
       }),
     ).resolves.toMatchObject({ownerUserId: "user-a", companyId: null, planCode: "community"});
     expect(statements.some((query) => query.toLowerCase().includes('from "membership_applications"'))).toBe(true);

@@ -36,7 +36,7 @@ export default async function BillingPage({params, searchParams}: Props) {
       try {
         session = membership.status === "pending_payment"
           ? await createCheckoutSession(currentActor, membership.id, locale)
-          : await createBillingPortalSession(currentActor, membership.id);
+          : await createBillingPortalSession(currentActor, membership.id, locale);
       } catch {
         redirect(errorPath);
       }

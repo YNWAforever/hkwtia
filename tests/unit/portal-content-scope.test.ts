@@ -19,6 +19,7 @@ const activeMembership: MembershipRecord = {
   companyId: null,
   planCode: "community",
   status: "active",
+  billingInterval: "none",
   seatLimit: 1,
 };
 
