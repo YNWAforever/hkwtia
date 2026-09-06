@@ -10,8 +10,11 @@ import type {IntegrationManifestEntry} from "./wisetech-integration-manifest";
  * Three sources per rule (D-6): the donor served `/en/*` and `/zh/*`. `/zh/<x>` must be matched
  * here because the next-intl proxy would otherwise rewrite it to a `zh-HK` page that does not
  * exist; `/en/<x>` is matched so the rule fires before the proxy rather than depending on the
- * proxy's default-locale strip. `permanent: false` (D-5): these are design paths, not the
- * hkwtia.org legacy urls in content/legacy-urls.json, which keep their 308s.
+ * proxy's default-locale strip. Except where an explicit `next.config.ts` rule already owns the
+ * bare shape (D-8): then the bare variant is left to that rule, and the two prefixed variants
+ * copy the explicit rule's own source and destination instead of the manifest's. `permanent:
+ * false` (D-5): these are design paths, not the hkwtia.org legacy urls in
+ * content/legacy-urls.json, which keep their 308s.
  */
 export type WisetechRedirect = Readonly<{source: string; destination: string; permanent: false}>;
 
@@ -30,10 +33,12 @@ function paramNames(pattern: string): ReadonlySet<string> {
 }
 
 /**
- * `/members/:id` and `/members/[slug]` are the same shape; explicit rules win (D-8), but only for
- * the variant they actually cover: an explicit bare `/members/:id` still leaves `/en/members/:slug`
- * and `/zh/members/:slug` to the generator, otherwise the proxy rewrites `/zh/members/<slug>` to a
- * `zh-HK` page that does not exist and the donor url 404s.
+ * `/members/:id` and `/members/[slug]` are the same shape; explicit rules win (D-8), including
+ * their destination: an explicit bare `/members/:id` -> `/showcase` owns the bare shape, so the
+ * generator skips its own bare variant and instead has `/en/members/:id` and `/zh/members/:id`
+ * carry the explicit rule's own destination, prefixed. Otherwise the proxy rewrites
+ * `/zh/members/<slug>` to a `zh-HK` page that does not exist and the donor url 404s, or (worse)
+ * the manifest's destination shape wins over the explicit one hkwtia actually serves.
  */
 function shape(path: string): string {
   return toNextPattern(path).replace(/:[^/]+/g, ":p");
@@ -54,10 +59,10 @@ function prefixed(prefix: string, path: string): string {
 }
 
 export function wisetechDesignRedirects(
-  explicitSources: readonly string[],
+  explicitRules: readonly {source: string; destination: string}[],
   manifest: readonly IntegrationManifestEntry[] = wisetechIntegrationManifest,
 ): readonly WisetechRedirect[] {
-  const explicit = new Set(explicitSources.map(shape));
+  const explicitByShape = new Map(explicitRules.map((rule) => [shape(rule.source), rule]));
   const rules: WisetechRedirect[] = [];
 
   for (const entry of manifest) {
@@ -77,11 +82,23 @@ export function wisetechDesignRedirects(
     // Only reachable when the D-7 cut collapses a dynamic canonical onto its own static source
     // (e.g. `/events` -> `/events/[slug]` cut back to `/events`); a self-redirect would loop.
     if (destination === source) continue;
+    // D-8: an explicit next.config.ts rule with the same bare shape already owns that variant
+    // (Next has it), and it owns the destination too — the two prefixed variants must carry the
+    // explicit rule's own source/destination forward, not the manifest's, or a locale-prefixed
+    // donor url would land somewhere the bare url does not.
+    const explicitMatch = explicitByShape.get(shape(source));
     for (const prefix of localePrefixes) {
-      const prefixedSource = prefixed(prefix.source, source);
-      if (explicit.has(shape(prefixedSource))) continue;
+      if (explicitMatch) {
+        if (prefix.source === "") continue;
+        rules.push({
+          source: prefixed(prefix.source, explicitMatch.source),
+          destination: prefixed(prefix.destination, explicitMatch.destination),
+          permanent: false,
+        });
+        continue;
+      }
       rules.push({
-        source: prefixedSource,
+        source: prefixed(prefix.source, source),
         destination: prefixed(prefix.destination, destination),
         permanent: false,
       });

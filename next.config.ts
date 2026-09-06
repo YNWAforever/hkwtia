@@ -167,7 +167,7 @@ const nextConfig: NextConfig = {
     // the shared list, but Next's load-custom-routes reassigns `r.source`/`r.destination` in
     // place on every rule it receives (basePath prefixing, unconditionally), and a frozen rule
     // fails `next build` with "Cannot assign to read only property 'source'".
-    const designRedirects = wisetechDesignRedirects(explicitRedirects.map(({source}) => source))
+    const designRedirects = wisetechDesignRedirects(explicitRedirects)
       .map((rule) => ({...rule}));
     return [
       ...explicitRedirects,

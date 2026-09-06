@@ -8,8 +8,13 @@ import {wisetechDesignRedirects} from "@/config/wisetech-redirects";
 import {routing} from "@/i18n/routing";
 import {listAppRoutes} from "@/tests/helpers/app-routes";
 
-const explicitSources = ["/projects", "/history", "/members", "/members/:id"];
-const rules = wisetechDesignRedirects(explicitSources);
+const explicitRules = [
+  {source: "/projects", destination: "/programs/asa"},
+  {source: "/history", destination: "/about"},
+  {source: "/members", destination: "/showcase"},
+  {source: "/members/:id", destination: "/showcase"},
+];
+const rules = wisetechDesignRedirects(explicitRules);
 const bySource = new Map(rules.map((rule) => [rule.source, rule]));
 const toPattern = (path: string) => path.replace(/\[([^/\]]+)\]/g, ":$1");
 
@@ -32,7 +37,12 @@ const KNOWN_DYNAMIC_ROUTE_SHADOWS = [
   "/events/smart-innovation-meets-genai",
 ] as const;
 
-/** `[x]` in a route matches any single non-empty segment; `:param` in a source only matches `[x]`. */
+/**
+ * `[x]` in a route matches any single non-empty segment; `:param` in a source matches both a
+ * dynamic route segment (`[x]`) and any static one — in Next, a redirect source `/about/:slug`
+ * also matches the static page `/about/chairman`, so a `:param` source shadows every route
+ * segment at that position, not just a dynamic one.
+ */
 function shadows(source: string, route: string): boolean {
   const sourceSegments = source.split("/");
   const routeSegments = route.split("/");
@@ -41,7 +51,7 @@ function shadows(source: string, route: string): boolean {
     const routeSegment = routeSegments[index]!;
     const dynamicRoute = routeSegment.startsWith("[") && routeSegment.endsWith("]");
     if (dynamicRoute) return segment !== "";
-    return !segment.startsWith(":") && segment === routeSegment;
+    return segment.startsWith(":") || segment === routeSegment;
   });
 }
 
@@ -85,12 +95,16 @@ describe("wisetechDesignRedirects", () => {
     expect(bySource.get("/zh/why-wisetech")?.destination).toBe("/zh/about");
   });
 
-  it("yields to an explicit rule only for the variant it covers (D-8)", () => {
-    // `/members/:id` is explicit in next.config, so the bare shape is skipped; the locale-prefixed
-    // donor urls still need a rule or the proxy rewrites `/zh/members/<slug>` to a missing page.
+  it("yields to an explicit rule, including its destination, for the variant it covers (D-8)", () => {
+    // `/members/:id` -> `/showcase` is explicit in next.config and owns the bare shape, so the
+    // generator skips its own bare variant entirely (Next already has it). The locale-prefixed
+    // donor urls still need a rule — the proxy would otherwise rewrite `/zh/members/<slug>` to a
+    // missing page — but they must carry the explicit rule's own destination (`/showcase`), not
+    // the manifest's `/showcase/:slug`, since that is what the bare url actually resolves to.
+    expect(bySource.get("/members/:id")).toBeUndefined();
     expect(bySource.get("/members/:slug")).toBeUndefined();
-    expect(bySource.get("/en/members/:slug")?.destination).toBe("/showcase/:slug");
-    expect(bySource.get("/zh/members/:slug")?.destination).toBe("/zh/showcase/:slug");
+    expect(bySource.get("/en/members/:id")?.destination).toBe("/showcase");
+    expect(bySource.get("/zh/members/:id")?.destination).toBe("/zh/showcase");
   });
 
   it("is temporary, self-free, sorted and frozen", () => {
@@ -119,11 +133,11 @@ describe("wisetechDesignRedirects", () => {
     }
   });
 
-  it("fails the build on a merge route without a canonical path", () => {
+  it("throws for a merge without a canonical path or with a non-path source", () => {
     const broken = wisetechIntegrationManifest.find(({id}) => id === "route-source-event-smart-innovation-meets-genai")!;
-    expect(() => wisetechDesignRedirects(explicitSources, [{...broken, canonicalPath: null}]))
+    expect(() => wisetechDesignRedirects(explicitRules, [{...broken, canonicalPath: null}]))
       .toThrow("WISETECH_REDIRECT_MISSING_CANONICAL:route-source-event-smart-innovation-meets-genai");
-    expect(() => wisetechDesignRedirects(explicitSources, [{...broken, source: "events/smart-innovation-meets-genai"}]))
+    expect(() => wisetechDesignRedirects(explicitRules, [{...broken, source: "events/smart-innovation-meets-genai"}]))
       .toThrow("WISETECH_REDIRECT_INVALID_SOURCE:route-source-event-smart-innovation-meets-genai");
   });
 
@@ -132,13 +146,16 @@ describe("wisetechDesignRedirects", () => {
     // pins those to the next-intl routing config so a prefix change cannot silently orphan them.
     expect(routing.defaultLocale).toBe("en");
     expect(routing.localePrefix).toEqual(expect.objectContaining({mode: "as-needed", prefixes: {"zh-HK": "/zh"}}));
+    // A third locale would be silently orphaned by the generator's hard-coded `/en`/`/zh`
+    // prefixes: `localePrefixes` above has no entry for it, so its donor urls would 404.
+    expect(routing.locales).toEqual(["en", "zh-HK"]);
   });
 
   it("is spread into next.config after the explicit rules and before the legacy rules", async () => {
     const configured = ((await nextConfig.redirects?.()) ?? []) as {source: string; destination: string; permanent: boolean}[];
     const sources = configured.map(({source}) => source);
     const firstGenerated = sources.indexOf(rules[0]!.source);
-    const lastExplicit = Math.max(...explicitSources.map((source) => sources.indexOf(source)));
+    const lastExplicit = Math.max(...explicitRules.map(({source}) => sources.indexOf(source)));
     const firstLegacy = sources.indexOf("/event/:path*");
     expect(firstGenerated).toBeGreaterThan(lastExplicit);
     expect(firstGenerated).toBeLessThan(firstLegacy);

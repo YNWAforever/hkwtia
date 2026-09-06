@@ -61,9 +61,15 @@ describe("legacy redirects", () => {
   it("makes every legacy rule permanent so link equity transfers", async () => {
     const redirects = await getRedirects();
     const preExisting = new Set(["/projects", "/history", "/members", "/members/:id"]);
+    const preExistingRules = [
+      {source: "/projects", destination: "/programs/asa"},
+      {source: "/history", destination: "/about"},
+      {source: "/members", destination: "/showcase"},
+      {source: "/members/:id", destination: "/showcase"},
+    ];
     // WiseTech design paths are 307s by design (config/wisetech-redirects.ts, D-5); only the
     // hkwtia.org legacy urls carry link equity worth a 308.
-    const generated = new Set(wisetechDesignRedirects([...preExisting]).map(({source}) => source));
+    const generated = new Set(wisetechDesignRedirects(preExistingRules).map(({source}) => source));
     const legacyRules = redirects.filter(({source}) => !preExisting.has(source) && !generated.has(source));
 
     // Sanity check that the filter above actually found the legacy rules and
