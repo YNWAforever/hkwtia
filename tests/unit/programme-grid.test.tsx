@@ -8,6 +8,8 @@ vi.mock("@/i18n/navigation", () => ({
 
 import {ProgrammeGrid} from "@/components/marketing/programme-grid";
 
+// hkict's firstYear (2020) and latestYear (2025) deliberately differ so the assertion below
+// catches a regression back to counting "since" the latest year: the decoy here is latestYear.
 const summaries = [
   {id: "cpai" as const, namespace: "programs.cpai", image: "/images/projects-hero.jpg", type: "credential" as const, editionCount: null, latestYear: null, firstYear: null},
   {id: "hkict" as const, namespace: "programs.hkict", image: "/images/projects-hero.jpg", type: "event-series" as const, editionCount: 6, latestYear: 2025, firstYear: 2020},
@@ -33,7 +35,7 @@ describe("ProgrammeGrid", () => {
     expect(cards).toHaveLength(2);
     expect(cards[0]).toHaveClass("feature");
     expect(screen.getByRole("heading", {name: "CPAI"}).closest("article")!.textContent).toContain("Issued directly by WTIA");
-    expect(screen.getByRole("heading", {name: "HKICT Awards"}).closest("article")!.textContent).toContain("6 editions since 2025");
+    expect(screen.getByRole("heading", {name: "HKICT Awards"}).closest("article")!.textContent).toContain("6 editions since 2020");
     expect(screen.getByRole("heading", {name: "CPAI"}).closest("article")!.querySelector("a")).toHaveAttribute("href", "/programs/cpai");
   });
 });

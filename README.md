@@ -30,7 +30,7 @@ Open `http://localhost:3000/` or `http://localhost:3000/zh`.
 | `npm run lint` | Run ESLint |
 | `npm run typecheck` | Run strict TypeScript checking |
 | `npm run build` | Create the production build |
-| `npm run test:lighthouse` | Run Lighthouse CI on `/membership` and `/zh/membership` |
+| `npm run test:lighthouse` | Run Lighthouse CI on the ten URLs in `lighthouserc.js`: `/`, `/membership`, `/events`, `/programmes`, `/partners`, each in both locales |
 | `npm run db:migrate` | Apply Drizzle migrations from `drizzle/` using `DATABASE_URL` |
 | `npm run db:seed` | Idempotently seed the M1 plans and deterministic M2 CRM demo data |
 | `npm run db:seed:m1` / `npm run db:seed:m2` | Run one seed layer directly |
@@ -161,6 +161,37 @@ used. Loopback targets are exempt from the remote allowlist. Set
 Preview authentication and never authorizes the target. Generate unsubscribe
 confirmation tokens from that Preview's signing configuration and never commit
 populated values.
+
+For the read-only public suites and Lighthouse against a protected Preview, turn
+a share link into a browser session instead. Mint the share URL from the Vercel
+dashboard (deployment → Share) or the Vercel tooling, then run
+`VERCEL_SHARE_URL=<share-url> node scripts/vercel-preview-session.mjs`. It
+visits the link once and writes `.playwright/preview-state.json` (Playwright
+storage state) and `.playwright/preview-cookie.txt` (the `_vercel_jwt` cookie
+header), printing only the Preview origin. Then run
+`PLAYWRIGHT_BASE_URL=<preview> PLAYWRIGHT_STORAGE_STATE=.playwright/preview-state.json npm run test:e2e -- <read-only specs>`
+and
+`LHCI_BASE_URL=<preview> LHCI_COOKIE_FILE=.playwright/preview-cookie.txt npm run test:lighthouse`
+(a remote base URL skips Lighthouse's local server). Both files expire with the
+share link, live under the git-ignored `.playwright/` directory, and must never
+be committed or pasted into a report. The script prints only its own error
+codes; a navigation failure is reported as `VERCEL_SHARE_URL_NAVIGATION_FAILED`
+because Playwright's own message would quote the share link.
+
+Lighthouse copies the `Cookie` header into every report it writes
+(`lhr.configSettings.extraHeaders`), so a run with `LHCI_COOKIE_FILE` set has
+`lighthouserc.js` select the filesystem target instead of the public one — do
+not pass `--upload.target` on the `lhci autorun` CLI for a cookie run, since a
+CLI flag overrides the rc file's `upload.target` and would silently restore the
+public upload. Its reports land in the
+git-ignored `.lighthouseci/` (Lighthouse's own working directory) and
+`.playwright/lighthouse` (the output directory). Those reports embed the session
+cookie, must be deleted together with the session files, and are never shared.
+The evidence record for a cookie run cites the category scores, never a report
+link or file; the public `temporary-public-storage` upload stays only for the
+cookie-less local run. With a session cookie, `LHCI_BASE_URL` must be an HTTPS
+`*.vercel.app` Preview; `https://hkwtia.vercel.app` and any other host are
+rejected before the cookie is read into the config.
 
 ## M3 Preview automation Worker
 
