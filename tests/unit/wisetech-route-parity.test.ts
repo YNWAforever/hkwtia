@@ -420,6 +420,15 @@ describe("WiseTech route parity manifest", () => {
     }
   });
 
+  it("un-retires /partners and /programmes now that their authorities exist (WP-7)", () => {
+    const bySource = new Map(wisetechIntegrationManifest.map((item) => [item.source, item]));
+    expect(bySource.get("/partners")).toMatchObject({id: "route-design-partners", disposition: "retain", canonicalPath: "/partners", evidence: "hkwtia-repository", sourceEvidenceId: "sitemap-45"});
+    expect(bySource.get("/programmes")).toMatchObject({id: "route-design-programmes", disposition: "retain", canonicalPath: "/programmes", evidence: "hkwtia-repository", sourceEvidenceId: "sitemap-29"});
+    expect(wisetechIntegrationManifest.filter(({disposition}) => disposition === "retire")).toHaveLength(13);
+    for (const route of ["/partners", "/programmes"]) expect(appRoutes.has(route), route).toBe(true);
+    expect(authoritativeSourceInventory.navigationTargets.filter(({path}) => path === "programmes").every(({disposition, canonicalPath}) => disposition === "retain" && canonicalPath === "/programmes")).toBe(true);
+  });
+
   it("rejects duplicate identity, missing fields and invalid retire destinations", async () => {
     const valid = wisetechIntegrationManifest[0]!;
     const duplicate = {...valid};

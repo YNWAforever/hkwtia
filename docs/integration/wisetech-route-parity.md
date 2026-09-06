@@ -17,7 +17,7 @@ This is the human-readable route/CTA view of `config/wisetech-integration-manife
 | `site-v13-source` | Checked-in user-authorized Git donor evidence for implementation facts; it never replaces current hkwtia ownership. |
 | Unavailable archive | A known Site identity/hash without locally inspectable archive bytes; never parity-closure evidence. |
 
-The integration manifest has 133 entries: route 116, CTA 5, form 3, locale 1 and asset 8. Dispositions are retain 47, redirect 4, merge 67 and retire 15. Evidence labels include 6 direct `site-v13-source` evidence rows. Frozen donor `sourceEvidenceId` values attach to all 67 sitemap routes exactly once. The separate protected inventory has 45 repository-owned code routes: 26 admin pages and 19 API handlers, classified as 8 general API handlers, 2 webhook handlers and 9 job handlers.
+The integration manifest has 134 entries: route 117, CTA 5, form 3, locale 1 and asset 8. Dispositions are retain 50, redirect 4, merge 67 and retire 13. Evidence labels include 6 direct `site-v13-source` evidence rows. Frozen donor `sourceEvidenceId` values attach to all 67 sitemap routes exactly once. The separate protected inventory has 45 repository-owned code routes: 26 admin pages and 19 API handlers, classified as 8 general API handlers, 2 webhook handlers and 9 job handlers.
 
 ## Repository-backed canonical routes
 
@@ -49,6 +49,8 @@ Each row below is a `retain` route with `hkwtia-repository` evidence. Dynamic pa
 | `/portal/directory`, `/portal/company/listing`, `/portal/events`, `/portal/documents`, `/portal/billing` | Existing member read/mutation models for each surface |
 | `/admin` | Staff-authorised CMS/CRM entry point; nested owners are enumerated below |
 | `/api/ai/concierge` | Existing guarded Concierge action; all API owners are enumerated below |
+| `/programmes` | Typed programme index over the four typed records (WP-7) |
+| `/partners` | Published partner records with both confirmations and bilingual logo alt (WP-7) |
 
 These rows cover every current destination represented by the master plan's route-and-journey matrix, including `/unsubscribe` and all four required public `[slug]` patterns. The `/portal/*` matrix family remains represented by its explicit current destinations. The master-plan `/admin/*` and `/api/*` family evidence is retained, but family completeness is established only by the protected inventory below; no representative route stands in for its siblings.
 
@@ -76,9 +78,9 @@ The contract compares exact normalized file paths and canonical paths in both di
 
 The validator receives the full source-to-destination mapping and rejects a fabricated source or a wrong target even when the claimed target is otherwise a real page. The broader legacy redirect fixture is outside the Site-specific parity scope and remains covered by `tests/unit/redirects.test.ts`.
 
-## Design-document routes merged into real destinations
+## Design-document routes redirected to real destinations
 
-These are classification decisions, not implemented redirects or newly published pages. Every destination is a current App Router page.
+Since WP-7 every `merge` route below is a real `next.config.ts` redirect (`permanent: false`), generated from the manifest by `config/wisetech-redirects.ts` and served for the bare path, `/en/<path>` and `/zh/<path>` (the donor served both prefixes). A static source that merges into a dynamic page redirects to that page's static prefix (`/request-introduction` → `/showcase`; the two historical event paths → `/events`). `/members/[slug]` yields to the pre-existing explicit `/members/:id` rule, whose `/en` and `/zh` variants are generated from that rule. `tests/unit/wisetech-redirects.test.ts` pins all of this against the frozen inventory.
 
 | Real destination | Design-document sources classified `merge` |
 |---|---|
@@ -108,11 +110,11 @@ The design map's already-canonical routes (`/events`, `/events/[slug]`, `/member
 
 `canonicalPath` is `null` only for these justified gaps. Retire here means “do not publish or link this proposed route in the current integration,” not deletion of existing production content.
 
+`/programmes` and `/partners` left this table in WP-7 (see the repository-backed table).
+
 | Source | Reason |
 |---|---|
-| `/programmes` | No generic programme index; an arbitrary redirect would privilege one of four records. |
 | `/programmes/[slug]`, `/programmes/[slug]/[edition]` | No generic programme/edition repository or dynamic route. |
-| `/partners` | No verified published partner model; a logo wall would risk relationship misrepresentation. |
 | `/search` | No repository-backed public search surface. |
 | `/accessibility` | No reviewed standalone page. |
 | `/terms` | No reviewed standalone terms page. |
@@ -155,6 +157,6 @@ all 67 sitemap paths are classified exactly once, under two donor locales (134 l
 | `/programmes/hkict-startup-award` | `merge` to `/programs/hkict`; typed authority owns current content. |
 
 The Git donor does not prove historical archive byte/history continuity. See [authoritative source reconciliation](wisetech-authoritative-source-reconciliation.md).
-The 67 sitemap dispositions are `retain` 11, `redirect` 1, `merge` 45, and `retire` 4. Each source path has one frozen `sitemap-01` through `sitemap-67` evidence identity in `config/wisetech-integration-manifest.ts`; the 27 dispatcher behaviors have their own frozen identities and are not counted as sitemap paths.
+The 67 sitemap dispositions are `retain` 13, `redirect` 1, `merge` 51, and `retire` 2. Each source path has one frozen `sitemap-01` through `sitemap-67` evidence identity in `config/wisetech-integration-manifest.ts`; the 27 dispatcher behaviors have their own frozen identities and are not counted as sitemap paths.
 
 The English donor `/en/*` and Traditional Chinese donor `/zh/*` URLs are source-locale evidence only. Current hkwtia keeps unprefixed English and `/zh` routing through `next-intl`; no `/zh-HK` route is constructed.

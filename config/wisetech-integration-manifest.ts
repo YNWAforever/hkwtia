@@ -121,6 +121,12 @@ const repositoryRoutes: readonly IntegrationManifestEntry[] = [
   ["route-member-login", "/member-login", "Neon Auth magic-link sign-in scoped to the typed Portal continuation allowlist."],
   ["route-admin", "/admin", "Staff-authorised CMS and CRM entry point."],
   ["route-concierge-api", "/api/ai/concierge", "Existing guarded Concierge API action."],
+  // WP-7 un-retired both (master plan §5 WP-7; docs/superpowers/specs/2026-09-06-wisetech-wp7-routes-seo-design.md
+  // §4.2): the retire rationales named a missing authority, and PR4/WP-5 (published partners) and
+  // the four typed programme records now provide one. The ids keep their route-design- prefix so
+  // every existing reference resolves.
+  ["route-design-programmes", "/programmes", "Typed programme index over content/programs/index.ts and the four typed records."],
+  ["route-design-partners", "/partners", "Published partner records (partners repository; both confirmations and bilingual logo alt required)."],
 ].map(([id, path, dataOwner]) => entry({
   id,
   kind: "route",
@@ -215,10 +221,8 @@ const designRouteMerges: readonly IntegrationManifestEntry[] = [
 }));
 
 const retiredDesignRoutes: readonly IntegrationManifestEntry[] = [
-  ["route-design-programmes", "/programmes", "No generic programme index exists; four verified typed routes must not be flattened into one arbitrary destination."],
   ["route-design-program-detail", "/programmes/[slug]", "No generic programme repository or dynamic route exists."],
   ["route-design-program-edition", "/programmes/[slug]/[edition]", "No generic edition repository or dynamic route exists."],
-  ["route-design-partners", "/partners", "No verified published partner model exists, so a logo wall would risk misrepresentation."],
   ["route-design-search", "/search", "No repository-backed public search surface exists."],
   ["route-design-accessibility", "/accessibility", "No reviewed standalone accessibility page exists."],
   ["route-design-terms", "/terms", "No reviewed standalone terms page exists."],
