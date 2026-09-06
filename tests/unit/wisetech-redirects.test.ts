@@ -2,23 +2,48 @@ import {describe, expect, it} from "vitest";
 
 import nextConfig from "@/next.config";
 import legacyUrls from "@/content/legacy-urls.json";
-import {publicRoutes} from "@/config/public-routes";
 import {authoritativeSourceInventory} from "@/config/wisetech-authoritative-source-inventory";
+import {wisetechIntegrationManifest} from "@/config/wisetech-integration-manifest";
 import {wisetechDesignRedirects} from "@/config/wisetech-redirects";
+import {routing} from "@/i18n/routing";
+import {listAppRoutes} from "@/tests/helpers/app-routes";
 
 const explicitSources = ["/projects", "/history", "/members", "/members/:id"];
 const rules = wisetechDesignRedirects(explicitSources);
 const bySource = new Map(rules.map((rule) => [rule.source, rule]));
 const toPattern = (path: string) => path.replace(/\[([^/\]]+)\]/g, ":$1");
 
-// Dispatcher rows whose source already IS the canonical page (identity) or whose source is
-// covered by a pre-existing explicit rule (design D-8). Everything else that is `merge` must
-// produce a rule.
+// Dispatcher rows whose source already IS the canonical page (identity) or whose bare source is
+// covered by a pre-existing explicit rule (design D-8, per variant). Everything else that is
+// `merge` must produce a rule.
 const identityDispatcher = new Set([
   "/events/[slug]", "/portal/profile", "/portal/company", "/portal/directory",
   "/portal/events", "/portal/documents", "/portal/billing",
 ]);
 const explicitCollision = new Set(["/members/[slug]"]);
+
+// D-7: the donor's two historical event pages have no hkwtia counterpart, so their sources are
+// cut back to `/events`. That makes each generated rule shadow the live `/events/[slug]` page
+// for exactly that slug: an hkwtia event published under either slug would be unreachable.
+// Adding a source here is a deliberate decision to reserve that slug, never a way to make the
+// inventory check pass.
+const KNOWN_DYNAMIC_ROUTE_SHADOWS = [
+  "/events/asia-smart-innovation-awards-summit-2025",
+  "/events/smart-innovation-meets-genai",
+] as const;
+
+/** `[x]` in a route matches any single non-empty segment; `:param` in a source only matches `[x]`. */
+function shadows(source: string, route: string): boolean {
+  const sourceSegments = source.split("/");
+  const routeSegments = route.split("/");
+  if (sourceSegments.length !== routeSegments.length) return false;
+  return sourceSegments.every((segment, index) => {
+    const routeSegment = routeSegments[index]!;
+    const dynamicRoute = routeSegment.startsWith("[") && routeSegment.endsWith("]");
+    if (dynamicRoute) return segment !== "";
+    return !segment.startsWith(":") && segment === routeSegment;
+  });
+}
 
 describe("wisetechDesignRedirects", () => {
   it("covers all 51 merge donor sitemap routes, three sources each", () => {
@@ -58,7 +83,14 @@ describe("wisetechDesignRedirects", () => {
     expect(bySource.get("/why-wisetech")?.destination).toBe("/about");
     expect(bySource.get("/en/why-wisetech")?.destination).toBe("/about");
     expect(bySource.get("/zh/why-wisetech")?.destination).toBe("/zh/about");
-    expect(bySource.get("/zh/members/:slug")).toBeUndefined();
+  });
+
+  it("yields to an explicit rule only for the variant it covers (D-8)", () => {
+    // `/members/:id` is explicit in next.config, so the bare shape is skipped; the locale-prefixed
+    // donor urls still need a rule or the proxy rewrites `/zh/members/<slug>` to a missing page.
+    expect(bySource.get("/members/:slug")).toBeUndefined();
+    expect(bySource.get("/en/members/:slug")?.destination).toBe("/showcase/:slug");
+    expect(bySource.get("/zh/members/:slug")?.destination).toBe("/zh/showcase/:slug");
   });
 
   it("is temporary, self-free, sorted and frozen", () => {
@@ -66,17 +98,40 @@ describe("wisetechDesignRedirects", () => {
       expect(rule.permanent, rule.source).toBe(false);
       expect(rule.source, rule.source).not.toBe(rule.destination);
     }
-    expect(rules.map(({source}) => source)).toEqual([...rules.map(({source}) => source)].sort((a, b) => a.localeCompare(b)));
+    const sources = rules.map(({source}) => source);
+    expect(sources).toEqual([...sources].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)));
     expect(Object.isFrozen(rules)).toBe(true);
     expect(rules.every((rule) => Object.isFrozen(rule))).toBe(true);
   });
 
-  it("never shadows a live public route or a classified legacy url", () => {
+  it("shadows no real page except the two reserved donor event slugs", () => {
+    const appRoutes = listAppRoutes();
+    expect(appRoutes).toContain("/events/[slug]");
+    const bareSources = rules.map(({source}) => source).filter((source) => !/^\/(en|zh)(\/|$)/.test(source));
+    const shadowing = bareSources.filter((source) => appRoutes.some((route) => shadows(source, route)));
+    expect([...shadowing].sort()).toEqual([...KNOWN_DYNAMIC_ROUTE_SHADOWS].sort());
+  });
+
+  it("never shadows a classified legacy url", () => {
     const legacySources = new Set(legacyUrls.entries.map(({from}) => (from.length > 1 && from.endsWith("/") ? from.slice(0, -1) : from)));
     for (const rule of rules) {
-      expect(publicRoutes, rule.source).not.toContain(rule.source);
       expect(legacySources.has(rule.source), rule.source).toBe(false);
     }
+  });
+
+  it("fails the build on a merge route without a canonical path", () => {
+    const broken = wisetechIntegrationManifest.find(({id}) => id === "route-source-event-smart-innovation-meets-genai")!;
+    expect(() => wisetechDesignRedirects(explicitSources, [{...broken, canonicalPath: null}]))
+      .toThrow("WISETECH_REDIRECT_MISSING_CANONICAL:route-source-event-smart-innovation-meets-genai");
+    expect(() => wisetechDesignRedirects(explicitSources, [{...broken, source: "events/smart-innovation-meets-genai"}]))
+      .toThrow("WISETECH_REDIRECT_INVALID_SOURCE:route-source-event-smart-innovation-meets-genai");
+  });
+
+  it("matches the proxy's locale prefixes", () => {
+    // The generator hard-codes `/en` (stripped) and `/zh` (kept) as its source prefixes; this
+    // pins those to the next-intl routing config so a prefix change cannot silently orphan them.
+    expect(routing.defaultLocale).toBe("en");
+    expect(routing.localePrefix).toEqual(expect.objectContaining({mode: "as-needed", prefixes: {"zh-HK": "/zh"}}));
   });
 
   it("is spread into next.config after the explicit rules and before the legacy rules", async () => {

@@ -1,4 +1,5 @@
 import {wisetechIntegrationManifest} from "./wisetech-integration-manifest";
+import type {IntegrationManifestEntry} from "./wisetech-integration-manifest";
 
 /**
  * Real redirects for every route the integration manifest classifies as `merge`: the donor
@@ -28,7 +29,12 @@ function paramNames(pattern: string): ReadonlySet<string> {
   return new Set([...pattern.matchAll(/:([^/]+)/g)].map((match) => match[1]!));
 }
 
-/** `/members/:id` and `/members/[slug]` are the same shape; explicit rules win (D-8). */
+/**
+ * `/members/:id` and `/members/[slug]` are the same shape; explicit rules win (D-8), but only for
+ * the variant they actually cover: an explicit bare `/members/:id` still leaves `/en/members/:slug`
+ * and `/zh/members/:slug` to the generator, otherwise the proxy rewrites `/zh/members/<slug>` to a
+ * `zh-HK` page that does not exist and the donor url 404s.
+ */
 function shape(path: string): string {
   return toNextPattern(path).replace(/:[^/]+/g, ":p");
 }
@@ -47,30 +53,43 @@ function prefixed(prefix: string, path: string): string {
   return path === "/" ? (prefix === "" ? "/" : prefix) : `${prefix}${path}`;
 }
 
-export function wisetechDesignRedirects(explicitSources: readonly string[]): readonly WisetechRedirect[] {
+export function wisetechDesignRedirects(
+  explicitSources: readonly string[],
+  manifest: readonly IntegrationManifestEntry[] = wisetechIntegrationManifest,
+): readonly WisetechRedirect[] {
   const explicit = new Set(explicitSources.map(shape));
   const rules: WisetechRedirect[] = [];
 
-  for (const entry of wisetechIntegrationManifest) {
-    if (entry.kind !== "route" || entry.disposition !== "merge" || !entry.source.startsWith("/")) continue;
+  for (const entry of manifest) {
+    if (entry.kind !== "route" || entry.disposition !== "merge") continue;
+    if (!entry.source.startsWith("/")) {
+      // Every route source in the manifest is an absolute path; anything else cannot be matched
+      // by next.config and would silently vanish, so fail the build instead.
+      throw new Error(`WISETECH_REDIRECT_INVALID_SOURCE:${entry.id}`);
+    }
     if (typeof entry.canonicalPath !== "string") {
       // A merge without a destination is a manifest bug: fail the build, never drop the rule.
       throw new Error(`WISETECH_REDIRECT_MISSING_CANONICAL:${entry.id}`);
     }
     const source = toNextPattern(entry.source);
     if (shape(source) === shape(entry.canonicalPath)) continue;
-    if (explicit.has(shape(source))) continue;
     const destination = resolveDestination(source, entry.canonicalPath);
+    // Only reachable when the D-7 cut collapses a dynamic canonical onto its own static source
+    // (e.g. `/events` -> `/events/[slug]` cut back to `/events`); a self-redirect would loop.
     if (destination === source) continue;
     for (const prefix of localePrefixes) {
+      const prefixedSource = prefixed(prefix.source, source);
+      if (explicit.has(shape(prefixedSource))) continue;
       rules.push({
-        source: prefixed(prefix.source, source),
+        source: prefixedSource,
         destination: prefixed(prefix.destination, destination),
         permanent: false,
       });
     }
   }
 
-  rules.sort((a, b) => a.source.localeCompare(b.source));
+  // Plain code-point order: `localeCompare` depends on the ICU data of the machine running the
+  // build, so the sorted-and-frozen test would drift between CI and a developer laptop.
+  rules.sort((a, b) => (a.source < b.source ? -1 : a.source > b.source ? 1 : 0));
   return Object.freeze(rules.map((rule) => Object.freeze(rule)));
 }

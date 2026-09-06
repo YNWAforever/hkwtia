@@ -239,7 +239,11 @@ const retiredDesignRoutes: readonly IntegrationManifestEntry[] = [
 }));
 
 const authoritativeDonorRouteAliases: readonly IntegrationManifestEntry[] = [
+  // The generated redirect (config/wisetech-redirects.ts, D-7) sends this slug to /events, so it
+  // shadows /events/[slug] and cannot be used for a real hkwtia event. Pinned by
+  // KNOWN_DYNAMIC_ROUTE_SHADOWS in tests/unit/wisetech-redirects.test.ts.
   entry({id: "route-source-event-asia-smart-innovation-awards-summit-2025", kind: "route", source: "/events/asia-smart-innovation-awards-summit-2025", canonicalPath: "/events/[slug]", disposition: "merge", dataOwner: "Published events repository and event CMS; source evidence is not publication state.", rationale: "Historical donor event evidence only; this mapping neither seeds nor publishes an hkwtia event.", evidence: "site-v13-source"}),
+  // Same reservation as the row above: this slug redirects to /events and is not usable for a real event.
   entry({id: "route-source-event-smart-innovation-meets-genai", kind: "route", source: "/events/smart-innovation-meets-genai", canonicalPath: "/events/[slug]", disposition: "merge", dataOwner: "Published events repository and event CMS; source evidence is not publication state.", rationale: "Historical donor event evidence only; this mapping neither seeds nor publishes an hkwtia event.", evidence: "site-v13-source"}),
   entry({id: "route-source-program-tech-connect", kind: "route", source: "/programmes/tech-connect", canonicalPath: "/programs/tct", disposition: "merge", dataOwner: "Verified typed Tech to Connect programme record.", rationale: "The donor programme path is source evidence only; the current typed record remains authoritative.", evidence: "site-v13-source"}),
   entry({id: "route-source-program-asia-smart-innovation-awards", kind: "route", source: "/programmes/asia-smart-innovation-awards", canonicalPath: "/programs/asa", disposition: "merge", dataOwner: "Verified typed ASA programme record.", rationale: "The donor programme path is source evidence only; the current typed record remains authoritative.", evidence: "site-v13-source"}),
