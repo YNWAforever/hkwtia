@@ -9,7 +9,15 @@ const cookie = process.env.LHCI_COOKIE_FILE ? readFileSync(process.env.LHCI_COOK
 const config = {
   ci: {
     collect: {
-      url: [`${baseUrl}/`, `${baseUrl}/zh`, `${baseUrl}/membership`, `${baseUrl}/zh/membership`],
+      // WP-8 row 8.3 names `/`, `/membership`, `/events`; `/programmes` and `/partners` are the
+      // WP-7 surfaces, audited because they are new. Each in both locales.
+      url: [
+        `${baseUrl}/`, `${baseUrl}/zh`,
+        `${baseUrl}/membership`, `${baseUrl}/zh/membership`,
+        `${baseUrl}/events`, `${baseUrl}/zh/events`,
+        `${baseUrl}/programmes`, `${baseUrl}/zh/programmes`,
+        `${baseUrl}/partners`, `${baseUrl}/zh/partners`
+      ],
       numberOfRuns: 1,
       // A remote base URL (a Preview) is already serving; lhci only starts a server when the
       // command is truthy, so `undefined` skips it while the ready pattern/timeout stay harmless.
