@@ -5,7 +5,7 @@ import {redirect} from "next/navigation";
 import {JoinForm} from "@/components/join/join-form";
 import {JoinProgress} from "@/components/join/progress";
 import type {AppLocale} from "@/i18n/routing";
-import {buildPageMetadata} from "@/lib/metadata";
+import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
 import {getActor} from "@/lib/auth/actor";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {localizedPath} from "@/lib/urls";
@@ -23,7 +23,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   return buildPageMetadata({
     locale: locale as AppLocale,
     pathname: "/join/company",
-    title: t("companyTitle"),
+    title: brandedTitle(locale as AppLocale, t("companyTitle")),
     description: t("companyDescription"),
     index: false,
   });

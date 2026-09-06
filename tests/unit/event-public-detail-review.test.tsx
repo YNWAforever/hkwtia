@@ -78,6 +78,12 @@ describe("public Event detail page review regressions", () => {
 
     const donorUrl = "https://donor.example/hero.png";
     events.getPublicBySlug.mockResolvedValue(event("2030-01-01T12:00:00.000Z", {url: donorUrl, alt: "Donor hero"}));
+    // D-1: the record title is branded at runtime; the description stays the row's own.
+    const metadata = await generateMetadata(props);
+    expect(metadata.title).toBe("Public Event | WiseTech Hong Kong");
+    expect(metadata.description).toBe("A public Event description.");
+    const zhMetadata = await generateMetadata({params: Promise.resolve({locale: "zh-HK", slug: "public-event"})});
+    expect(zhMetadata.title).toBe("Public Event｜WiseTech Hong Kong");
     const rendered = renderToStaticMarkup(await EventPage(props));
     expect(rendered).toContain("Public Event");
     expect(rendered).not.toContain(donorUrl);

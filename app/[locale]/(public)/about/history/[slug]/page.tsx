@@ -13,7 +13,7 @@ import type {MilestoneRecord} from "@/content/schemas";
 import type {AppLocale} from "@/i18n/routing";
 import {buildOtherAboutRoutes} from "@/lib/about/related-routes";
 import {featuredOnly, findBySlug, historyCompassFacts, milestonesOnly} from "@/lib/history/milestones";
-import {buildPageMetadata} from "@/lib/metadata";
+import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
 
 type Props = {params: Promise<{locale: string; slug: string}>};
 
@@ -34,7 +34,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   return buildPageMetadata({
     locale: locale as AppLocale,
     pathname: `/about/history/${slug}`,
-    title: locale === "zh-HK" ? milestone.titleZh : milestone.titleEn,
+    title: brandedTitle(locale as AppLocale, locale === "zh-HK" ? milestone.titleZh : milestone.titleEn),
     description: (locale === "zh-HK" ? milestone.bodyZh : milestone.bodyEn).slice(0, 160),
   });
 }

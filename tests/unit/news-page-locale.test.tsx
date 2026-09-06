@@ -103,7 +103,8 @@ describe("localized public News pages", () => {
 
     expect(publicPosts.getPublishedNewsBySlug).toHaveBeenCalledWith("zh-HK", chineseNews.slug);
     expect(html).toContain("繁體內容");
-    expect(metadata.title).toBe("繁體消息");
+    // D-1: record titles are branded at runtime with the fullwidth bar in zh-HK.
+    expect(metadata.title).toBe("繁體消息｜WiseTech Hong Kong");
   });
 
   it("returns a Chinese 404 when the News row has no eligible Chinese body", async () => {

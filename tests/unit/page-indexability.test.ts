@@ -28,6 +28,24 @@ describe("page indexability", () => {
     expect(metadata.robots).toEqual({index: false, follow: false});
   });
 
+  // D-1: noindex does not exempt the tab title. The billing steps reuse the branded Join.metaTitle;
+  // the two form steps brand their own step title at runtime.
+  it.each([
+    ["join/checkout", joinCheckoutMetadata, "translated:metaTitle"],
+    ["join/complete", joinCompleteMetadata, "translated:metaTitle"],
+    ["join/profile", joinProfileMetadata, "translated:profileTitle | WiseTech Hong Kong"],
+    ["join/company", joinCompanyMetadata, "translated:companyTitle | WiseTech Hong Kong"],
+  ])("gives %s a branded tab title", async (_name, build, title) => {
+    const metadata = await build({params, searchParams: Promise.resolve({})} as never);
+    expect(metadata.title).toBe(title);
+  });
+
+  it("brands the zh-HK join step titles with the fullwidth separator", async () => {
+    const zhParams = Promise.resolve({locale: "zh-HK"});
+    const metadata = await joinProfileMetadata({params: zhParams, searchParams: Promise.resolve({})} as never);
+    expect(metadata.title).toBe("translated:profileTitle｜WiseTech Hong Kong");
+  });
+
   it("lets the join entry page be indexed with full metadata", async () => {
     const metadata = await joinMetadata({params, searchParams: Promise.resolve({})} as never);
 

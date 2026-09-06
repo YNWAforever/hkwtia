@@ -8,6 +8,7 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
+import {programs} from "@/content/programs";
 import {cpai} from "@/content/programs/cpai";
 
 type Locale = "en" | "zh-HK";
@@ -39,7 +40,11 @@ vi.mock("next-intl/server", () => ({
   }),
   setRequestLocale: setRequestLocaleSpy,
 }));
-vi.mock("@/lib/metadata", () => ({buildPageMetadata: buildPageMetadataSpy}));
+// Only buildPageMetadata is spied; brandedTitle stays real so the D-1 suffix is asserted below.
+vi.mock("@/lib/metadata", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/metadata")>()),
+  buildPageMetadata: buildPageMetadataSpy,
+}));
 vi.mock("next/image", () => ({
   default: ({alt, ...props}: ImgHTMLAttributes<HTMLImageElement>) => {
     // eslint-disable-next-line @next/next/no-img-element -- unit-test projection of next/image
@@ -72,6 +77,26 @@ describe("/programs/cpai", () => {
 
     expect(screen.getByRole("heading", {level: 2, name: cpai.courseNameEn})).toBeVisible();
     expect(screen.getByRole("heading", {level: 3, name: en.programs.record.credentialSyllabus})).toBeVisible();
+  });
+
+  // D-1: `programs.cpai.title` is a lowercase-namespace programme title ("CPAI") with no
+  // metaTitle sibling, so the page brands it at runtime rather than shipping a bare <title>.
+  it("brands the programme title in metadata for both locales", async () => {
+    const {generateMetadata} = await import("@/app/[locale]/(public)/programs/cpai/page");
+    const bundles = {en, "zh-HK": zh} as const;
+
+    for (const locale of ["en", "zh-HK"] as const) {
+      buildPageMetadataSpy.mockClear();
+      const expected = {
+        locale,
+        pathname: "/programs/cpai",
+        title: `${bundles[locale].programs.cpai.title}${locale === "zh-HK" ? "｜" : " | "}WiseTech Hong Kong`,
+        description: bundles[locale].programs.cpai.description,
+        image: programs.find((item) => item.id === "cpai")!.image,
+      };
+      expect(await generateMetadata({params: Promise.resolve({locale})})).toEqual(expected);
+      expect(buildPageMetadataSpy).toHaveBeenCalledExactlyOnceWith(expected);
+    }
   });
 
   it("never imports ProgramEditions -- there is no edition data for a credential", () => {

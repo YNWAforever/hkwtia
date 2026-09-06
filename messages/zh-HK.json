@@ -1153,6 +1153,7 @@
   "Showcase": {
     "metaTitle": "展示頁｜WiseTech Hong Kong",
     "metaDescription": "探索 WTIA 會員公司、產品及實用科技方案。",
+    "detailFallbackDescription": "WTIA 會員展示",
     "eyebrow": "AI 展示",
     "title": "尋找合適的 WTIA 會員夥伴",
     "description": "探索香港科技公司的實用產品及服務。",

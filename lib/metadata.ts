@@ -14,6 +14,19 @@ interface BuildPageMetadataInput {
   index?: boolean;
 }
 
+// D-1: every public <title> is "<page> | WiseTech Hong Kong" (fullwidth bar, no spaces, in zh-HK).
+// Pages whose title is a record name (events, news, showcase, history) or a lowercase-namespace
+// programme title cannot carry the suffix in the message bundle, so they brand here. Exhaustive
+// over AppLocale so adding a locale fails typecheck rather than silently falling into one branch.
+const brandTitle: Record<AppLocale, (title: string) => string> = {
+  en: (title) => `${title} | ${siteConfig.publicBrand}`,
+  'zh-HK': (title) => `${title}｜${siteConfig.publicBrand}`
+};
+
+export function brandedTitle(locale: AppLocale, title: string): string {
+  return brandTitle[locale](title);
+}
+
 export function buildPageMetadata({
   locale,
   pathname,

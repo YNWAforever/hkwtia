@@ -12,7 +12,7 @@ import {
   type PublishedBuildLogDetail,
   type PublishedNewsDetail,
 } from "@/lib/db/repos/public-posts";
-import {buildPageMetadata} from "@/lib/metadata";
+import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +50,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   return buildPageMetadata({
     locale: appLocale,
     pathname: `/news/${post.slug}`,
-    title,
+    title: brandedTitle(appLocale, title),
     description: `${post.author} · ${new Intl.DateTimeFormat(locale, {
       dateStyle: "long",
       timeZone: "Asia/Hong_Kong",

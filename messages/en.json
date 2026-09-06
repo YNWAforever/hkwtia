@@ -1153,6 +1153,7 @@
   "Showcase": {
     "metaTitle": "Showcase | WiseTech Hong Kong",
     "metaDescription": "Discover WTIA member companies, products, and practical technology solutions.",
+    "detailFallbackDescription": "WTIA member showcase",
     "eyebrow": "AI Showcase",
     "title": "Find the right WTIA member partner",
     "description": "Explore practical products and services from Hong Kong technology companies.",

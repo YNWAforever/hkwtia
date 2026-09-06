@@ -19,6 +19,8 @@ describe("repository event detail SEO", () => {
   it("wires the dynamic detail page through the shared metadata and structured-data helpers", () => {
     const source = readFileSync("app/[locale]/(public)/events/[slug]/page.tsx", "utf8");
     expect(source).toContain("buildPageMetadata");
+    // D-1: an event's title is a record name, so the page brands it rather than a metaTitle key.
+    expect(source).toContain("brandedTitle(locale as AppLocale, row.title)");
     expect(source).toContain("<StructuredData");
     expect(source).toContain("buildEventData");
   });
