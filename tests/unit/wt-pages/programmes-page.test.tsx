@@ -69,14 +69,16 @@ describe("ProgrammesPage", () => {
     const history = document.querySelector("#history")!;
     expect(within(history as HTMLElement).getAllByRole("listitem")).toHaveLength(4);
     expect(history.textContent).toContain("2020–2025");
+    expect(history.textContent).toContain("6 recorded editions");
     expect(history.textContent).toContain(bundles.en.Programmes.history.credential);
   });
 
   it("builds indexable bilingual metadata", async () => {
     const {generateMetadata} = await import("@/app/[locale]/(public)/programmes/page");
     const metadata = await generateMetadata({params: Promise.resolve({locale: "zh-HK"})});
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
     expect(metadata.title).toBe(bundles["zh-HK"].Programmes.metaTitle);
-    expect(metadata.alternates?.canonical).toBe("http://localhost:3000/zh/programmes");
+    expect(metadata.alternates?.canonical).toBe(new URL("/zh/programmes", siteUrl).toString());
     expect(metadata.robots).toBeUndefined();
   });
 });

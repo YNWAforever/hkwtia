@@ -21,9 +21,10 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   return buildPageMetadata({locale: locale as AppLocale, pathname: '/programmes', title: t('metaTitle'), description: t('metaDescription')});
 }
 
-// The typed index the manifest retired for want of one (route-design-programmes, WP-7): four
-// records from content/programs/index.ts, the cohort-backed Launch Pad, and the archive's edition
-// spans. Nothing here is a count or a date typed by hand -- summarizeProgrammes() reads them.
+// The index the manifest had retired for want of one (route-design-programmes) until WP-7
+// supplied it: four records from content/programs/index.ts, the cohort-backed Launch Pad, and
+// the archive's edition spans. Nothing here is a count or a date typed by hand --
+// summarizeProgrammes() reads them.
 export default async function ProgrammesPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
@@ -96,11 +97,11 @@ export default async function ProgrammesPage({params}: Props) {
             <li key={programme.id}>
               <span>{String(index + 1).padStart(2, '0')}</span>
               <b>{labels.items[programme.id].name}</b>
-              {programme.type === 'credential' || programme.firstYear === null || programme.latestYear === null ? (
+              {programme.type === 'credential' || programme.firstYear === null || programme.latestYear === null || programme.editionCount === null ? (
                 <span>{t('history.credential')}</span>
               ) : (
                 <span>
-                  {t('history.span', {first: programme.firstYear, latest: programme.latestYear})} · {t('history.editions', {count: programme.editionCount ?? 0})}
+                  {t('history.span', {first: programme.firstYear, latest: programme.latestYear})} · {t('history.editions', {count: programme.editionCount})}
                 </span>
               )}
             </li>
