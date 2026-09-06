@@ -116,6 +116,7 @@ const repositoryRoutes: readonly IntegrationManifestEntry[] = [
   ["route-portal-events", "/portal/events", "Member event registrations."],
   ["route-portal-documents", "/portal/documents", "Approved member document surface."],
   ["route-portal-billing", "/portal/billing", "Server-owned billing portal journey."],
+  ["route-member-login", "/member-login", "Neon Auth magic-link sign-in scoped to the typed Portal continuation allowlist."],
   ["route-admin", "/admin", "Staff-authorised CMS and CRM entry point."],
   ["route-concierge-api", "/api/ai/concierge", "Existing guarded Concierge API action."],
 ].map(([id, path, dataOwner]) => entry({
