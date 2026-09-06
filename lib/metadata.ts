@@ -48,7 +48,8 @@ export function buildPageMetadata({
       canonical,
       languages: {
         en: englishUrl,
-        'zh-HK': chineseUrl
+        'zh-HK': chineseUrl,
+        'x-default': englishUrl // x-default -> English (design D-2): hreflang tags stay zh-HK, not the donor's zh-Hant.
       }
     },
     openGraph: {
