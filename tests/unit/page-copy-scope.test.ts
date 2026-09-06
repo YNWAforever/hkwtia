@@ -27,6 +27,13 @@ describe("page copy scope", () => {
     expect(Object.keys(pageCopyRoutes).sort()).toEqual([...pageCopyNamespaces].sort());
   });
 
+  it("revalidates /programmes on a Home save, not just the home page", () => {
+    // WP-7: /programmes prerenders Home.programmeShowcase's shared grid labels and is not
+    // force-dynamic, so a Home edit that only invalidated "/" would leave it stale.
+    expect(pageCopyRoutes.Home).toContain("/");
+    expect(pageCopyRoutes.Home).toContain("/programmes");
+  });
+
   it("keeps product UI and structural namespaces out of reach", () => {
     for (const namespace of ["LaunchPad", "AiOps", "Join", "Showcase", "Navigation", "Footer", "Metadata", "NotFound", "Error", "Admin", "Portal"]) {
       expect(isPageCopyNamespace(namespace), namespace).toBe(false);

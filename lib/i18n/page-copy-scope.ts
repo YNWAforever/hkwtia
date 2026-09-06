@@ -35,7 +35,10 @@ export type PageCopyNamespace = (typeof pageCopyNamespaces)[number];
  * a typo would silently stop invalidation, so a test asserts the mapping.
  */
 export const pageCopyRoutes: Readonly<Record<PageCopyNamespace, readonly PublicRoute[]>> = {
-  Home: ["/"],
+  // WP-7: /programmes prerenders `Home.programmeShowcase` copy (the shared grid labels) and,
+  // unlike "/", is not `force-dynamic`, so a staff edit to Home must revalidate it too or the
+  // programmes index keeps serving the stale labels until its next deploy.
+  Home: ["/", "/programmes"],
   About: ["/about"],
   Chairman: ["/about/chairman"],
   Committees: ["/about/committees"],

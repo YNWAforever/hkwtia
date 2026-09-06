@@ -141,6 +141,16 @@ describe("wisetechDesignRedirects", () => {
       .toThrow("WISETECH_REDIRECT_INVALID_SOURCE:route-source-event-smart-innovation-meets-genai");
   });
 
+  it("throws for a merge whose destination is not a same-site path", () => {
+    // A protocol-relative or absolute destination would turn every generated rule into an open
+    // redirect; the guard is symmetric with the source one and fails the build instead.
+    const broken = wisetechIntegrationManifest.find(({id}) => id === "route-source-event-smart-innovation-meets-genai")!;
+    expect(() => wisetechDesignRedirects(explicitRules, [{...broken, canonicalPath: "//evil.example"}]))
+      .toThrow("WISETECH_REDIRECT_INVALID_DESTINATION:route-source-event-smart-innovation-meets-genai");
+    expect(() => wisetechDesignRedirects(explicitRules, [{...broken, canonicalPath: "https://evil.example"}]))
+      .toThrow("WISETECH_REDIRECT_INVALID_DESTINATION:route-source-event-smart-innovation-meets-genai");
+  });
+
   it("matches the proxy's locale prefixes", () => {
     // The generator hard-codes `/en` (stripped) and `/zh` (kept) as its source prefixes; this
     // pins those to the next-intl routing config so a prefix change cannot silently orphan them.

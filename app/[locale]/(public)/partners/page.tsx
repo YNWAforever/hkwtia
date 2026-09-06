@@ -41,6 +41,8 @@ export default async function PartnersPage({params}: Props) {
   const [t, common, partners] = await Promise.all([
     getTranslations({locale, namespace: 'Partners'}),
     getTranslations({locale, namespace: 'Common'}),
+    // 100 is the repository's hard maximum: past 100 published records the count would understate
+    // and rows would be dropped silently. A follow-up pages the list or raises the cap.
     partnersRepository.listPublished(locale, {limit: 100}).catch((): readonly PartnerProjection[] => []),
   ]);
   const groups = groupPublishedPartners(partners);

@@ -79,6 +79,12 @@ export function wisetechDesignRedirects(
     const source = toNextPattern(entry.source);
     if (shape(source) === shape(entry.canonicalPath)) continue;
     const destination = resolveDestination(source, entry.canonicalPath);
+    if (!destination.startsWith("/") || destination.startsWith("//")) {
+      // Symmetric with the source guard: a destination that is not a same-site path (`//host`
+      // or `https://host`) would ship an open redirect from every generated rule, so fail the
+      // build rather than trust a manifest value that went wrong.
+      throw new Error(`WISETECH_REDIRECT_INVALID_DESTINATION:${entry.id}`);
+    }
     // Only reachable when the D-7 cut collapses a dynamic canonical onto its own static source
     // (e.g. `/events` -> `/events/[slug]` cut back to `/events`); a self-redirect would loop.
     if (destination === source) continue;

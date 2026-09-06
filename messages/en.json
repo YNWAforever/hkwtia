@@ -547,7 +547,7 @@
     "legacyNetwork": {
       "eyebrow": "Built on real relationships",
       "title": "A network with history — and a future.",
-      "note": "These partner logos come from WTIA's published supporting, regional and media network records. Inclusion does not imply a current relationship unless separately confirmed.",
+      "note": "Every organisation shown here is a published WTIA record with a confirmed relationship and confirmed logo rights; the full record is on the partners page.",
       "viewAllAction": "View all partners",
       "previewNote": "Showing {shown} of {total} records in this category.",
       "tabs": {
@@ -894,7 +894,7 @@
   },
   "Programmes": {
     "metaTitle": "Programmes | WiseTech Hong Kong",
-    "metaDescription": "WTIA's programmes and awards on the record: Tech to Connect, Asia Smart App Awards, HKICT Awards and CPAI, with their editions, funders and where each leads next.",
+    "metaDescription": "WTIA's programmes and awards on the record: Tech to Connect, Asia Smart App Awards, HKICT Awards and CPAI, with their editions and where each leads next.",
     "hero": {
       "eyebrow": "Programmes",
       "title": "Programmes that turn participation into progress.",
