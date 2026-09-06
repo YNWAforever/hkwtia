@@ -4,7 +4,10 @@ This file drafts the exact Markdown for the repository owner to paste into the R
 `https://github.com/YNWAforever/wisetech`. That repository is read-only to this programme —
 nothing in hkwtia touches it. Applying the note there, and archiving the repository on GitHub
 afterwards, are both actions for the owner to perform; WP-8 row 8.7 only records that the note
-was drafted, not that either action was taken.
+was drafted, not that either action was taken. The note's own text below states "This repository
+is now archived and read-only," so it is written for pasting after the owner archives the
+repository, not before — pasting it first would make the README claim an archived state the
+repository is not yet in.
 
 ```markdown
 ## Design integrated into WiseTech Hong Kong's platform
