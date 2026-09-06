@@ -2,7 +2,7 @@
 
 Programme spec: `docs/superpowers/plans/2026-09-01-wisetech-design-fidelity.md` (§5 "WP-8 · Verification, evidence and gate closure", §6 acceptance criteria, §7 verification order). Execution plan: `docs/superpowers/plans/2026-09-06-wisetech-wp8-verification.md`. Living status: `docs/integration/wisetech-design-fidelity-checklist.md`. Gate record: `docs/integration/wisetech-delivery-gates.md`. Format precedent: `docs/integration/wisetech-pr5-verification.md`.
 
-Cells that read `PENDING-LOCAL` are the local runs on this branch tip that were still executing when this record was written; they are filled by hand from the command log before the PR is opened, and a cell that still reads `PENDING-LOCAL` at review time means that run has no recorded result.
+The local runs in §2 and §4 were still executing when this record was first written; every cell was then filled by hand from the saved command logs on 2026-09-07 before the PR was opened. No cell was left unrecorded; cells that read "not reached" or "not measured" describe runs that aborted, with the reason given beneath the table.
 
 ## 1. Record identity and scope
 
@@ -20,13 +20,13 @@ Master plan §7 order. Windows note: the repository's own records substitute `np
 
 | Exact command | Date (HKT) | Exit | Result and material warnings |
 |---|---|---:|---|
-| `npm.cmd run audit:strings` | 2026-09-07 | PENDING-LOCAL | PENDING-LOCAL |
-| `npx vitest run tests/unit/wisetech-tokens.test.ts tests/unit/wisetech-css-port.test.ts tests/unit/homepage.test.tsx tests/unit/preview-session-harness.test.ts` | 2026-09-07 | PENDING-LOCAL | PENDING-LOCAL |
-| `npm.cmd test` | 2026-09-07 | PENDING-LOCAL | PENDING-LOCAL |
-| `npm.cmd run lint` | 2026-09-07 | PENDING-LOCAL | PENDING-LOCAL |
-| `npm.cmd run typecheck` | 2026-09-07 | PENDING-LOCAL | PENDING-LOCAL |
-| `npm.cmd run build` | 2026-09-07 | PENDING-LOCAL | PENDING-LOCAL |
-| `npm.cmd audit --omit=dev --audit-level=high` | 2026-09-07 | PENDING-LOCAL | PENDING-LOCAL |
+| `npm.cmd run audit:strings` | 2026-09-07 | 0 | Visible-string audit passed; 224 TSX files scanned |
+| `npx vitest run tests/unit/wisetech-tokens.test.ts tests/unit/wisetech-css-port.test.ts tests/unit/homepage.test.tsx tests/unit/preview-session-harness.test.ts tests/unit/zh-walk-regex.test.ts` | 2026-09-07 | 0 | 5 files, 159 tests passed (7.0 s) |
+| `npm.cmd test` | 2026-09-07 | 1 in-suite | 452 files passed, 2 failed, 15 skipped (469); 3768 tests passed, 3 failed, 40 skipped (3811). The two failing files (`tests/unit/wt-pages/launchpad-page.test.tsx`, `tests/unit/wt-pages/news-page.test.tsx`) were rerun alone: exit 0, 2 files / 3 tests passed (22.8 s) — load-related 5 s timeouts, the pattern recorded for this machine since WP-3 |
+| `npm.cmd run lint` | 2026-09-07 | 0 | 0 errors, 26 warnings (all pre-existing, in test fixtures) |
+| `npm.cmd run typecheck` | 2026-09-07 | 0 | `tsc --noEmit` completed with no diagnostics |
+| `npm.cmd run build` | 2026-09-07 | 0 | Next.js Webpack production build compiled; 128/128 static pages generated (12.5 s); `AGENTS.md` / `next-env.d.ts` unchanged afterwards |
+| `npm.cmd audit --omit=dev --audit-level=high` | 2026-09-07 | 0 | no high or critical findings at the required threshold; lower-severity advisories in the dev tool chain remain, no fix or install was run |
 
 Known load-sensitive files on the development machine (the WP-7 gate and `docs/integration/wisetech-pr5-verification.md` record the same behaviour): `board-reporter-service`, `ci-security-contract`, `homepage`, `public-environment-isolation`, `repository-boundary`, `wt-pages/about-chairman-committees`, `wt-pages/launchpad-page`, `wt-pages/about`, `wt-pages/programs-editions`. If any of them times out inside the full run, the isolated rerun is recorded next to the full-run total, not instead of it.
 
@@ -104,30 +104,36 @@ then `tests/e2e/concierge.spec.ts` with `M4A_DETERMINISTIC_ACCEPTANCE=true M4A_D
 
 | Suite | Local result (2026-09-07) | Why it runs locally |
 |---|---:|---|
-| `tests/e2e/public-shell.spec.ts` | PENDING-LOCAL | Managed-server counterpart of the Preview run, on the tip that carries `27065f2` |
-| `tests/e2e/accessibility.spec.ts` | PENDING-LOCAL | Same; note the SME card is not rendered locally (empty catalogue), so this run cannot re-verify `27065f2` |
-| `tests/e2e/public-route-matrix.spec.ts` | PENDING-LOCAL | Managed-server counterpart |
-| `tests/e2e/wisetech-redirects.spec.ts` | PENDING-LOCAL | Managed-server counterpart |
-| `tests/e2e/wisetech-pr3-public-pages.spec.ts` | PENDING-LOCAL | Managed-server counterpart |
-| `tests/e2e/wisetech-pr5-public-journeys.spec.ts` | PENDING-LOCAL | Managed-server counterpart; the "membership unavailable" case is expected to pass here (empty catalogue) |
-| `tests/e2e/wisetech-zh-walk.spec.ts` | PENDING-LOCAL | Managed-server counterpart |
-| `tests/e2e/wisetech-visual-baseline.spec.ts` | PENDING-LOCAL | Skips under `PLAYWRIGHT_BASE_URL` by design; 88 baselines, 0 diffs expected (WP-7 recaptured in `af97302`) |
-| `tests/e2e/concierge.spec.ts` | PENDING-LOCAL | Sends Concierge messages and needs the deterministic acceptance environment; never run against the Preview |
+| `tests/e2e/public-shell.spec.ts` | 21/21 passed | Managed-server counterpart of the Preview run, on the tip that carries `27065f2` (run 1 of 3: 89 passed, 7.0 min, exit 0) |
+| `tests/e2e/accessibility.spec.ts` | 19/19 passed | Same; note the SME card is not rendered locally (empty catalogue), so this run cannot re-verify `27065f2` |
+| `tests/e2e/public-route-matrix.spec.ts` | 42/42 passed | Managed-server counterpart |
+| `tests/e2e/wisetech-redirects.spec.ts` | 7/7 passed | Managed-server counterpart |
+| `tests/e2e/wisetech-pr3-public-pages.spec.ts` | 30/30 passed | Managed-server counterpart (run 2 of 3: 55 passed, 3.6 min, exit 0) |
+| `tests/e2e/wisetech-pr5-public-journeys.spec.ts` | 4/4 passed | Managed-server counterpart; the "membership unavailable" case passes here (empty catalogue), confirming the Preview failure was the environment difference, not the spec |
+| `tests/e2e/wisetech-zh-walk.spec.ts` | 21/21 passed | Managed-server counterpart |
+| `tests/e2e/wisetech-visual-baseline.spec.ts` | 88/88 passed, 0 diffs (5.4 min, exit 0) | Skips under `PLAYWRIGHT_BASE_URL` by design; the WP-7 baselines from `af97302` still hold on this tip — the `03904e3` copy change sits under the spec's 2% full-page tolerance and the `27065f2` card is not rendered locally (empty catalogue) |
+| `tests/e2e/concierge.spec.ts` | 4/4 passed, 1 skipped (36.7 s, exit 0) | Sends Concierge messages and needs the deterministic acceptance environment (`M4A_DETERMINISTIC_ACCEPTANCE=true`, `M4A_DETERMINISTIC_ACCEPTANCE_AUTHORIZED=true`, loopback `APP_URL=http://localhost:3100`); never run against the Preview. A first attempt without `APP_URL` failed all four cases with a 503 from the Concierge API — the boundary in `lib/ai/m4a-acceptance-boundary.ts` refuses the mock provider unless `APP_URL` is the served loopback origin; the retry with it passed |
 
 Local production-build Lighthouse (`npm run test:lighthouse` without `LHCI_BASE_URL`, which starts `npm.cmd run start` itself) — evidence only, never a verifying run for rows 3.19 / 8.3:
 
 | URL | Performance | Accessibility | SEO | LCP | CLS |
 |---|---:|---:|---:|---:|---:|
-| `/` | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL |
-| `/zh` | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL |
-| `/membership` | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL |
-| `/zh/membership` | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL |
-| `/events` | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL |
-| `/zh/events` | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL |
-| `/programmes` | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL |
-| `/zh/programmes` | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL |
-| `/partners` | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL |
-| `/zh/partners` | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL | PENDING-LOCAL |
+| `/` | not measured | not measured | not measured | not measured | not measured |
+| `/zh` | 0.63 (devtools throttling; not comparable) | 1.00 | 0.92 | 5302 | 0.000 |
+| `/membership` | not reached | not reached | not reached | not reached | not reached |
+| `/zh/membership` | not reached | not reached | not reached | not reached | not reached |
+| `/events` | not reached | not reached | not reached | not reached | not reached |
+| `/zh/events` | not reached | not reached | not reached | not reached | not reached |
+| `/programmes` | not reached | not reached | not reached | not reached | not reached |
+| `/zh/programmes` | not reached | not reached | not reached | not reached | not reached |
+| `/partners` | not reached | not reached | not reached | not reached | not reached |
+| `/zh/partners` | not reached | not reached | not reached | not reached | not reached |
+
+The local Lighthouse pass (production build from the gate above, `next start -p 3200`, `LHCI_BASE_URL=http://localhost:3200`) could not be completed in this session, so this table is not release evidence and rows 3.19 / 8.3 stay `ported`:
+
+- With the rc's default simulated throttling, Lighthouse 12.6.1 aborted on the first URL with its own `LanternError: Invalid dependency graph created, cycle detected` — the same error the Preview run hit on `/membership` — and `lhci autorun` stops at the first failed URL.
+- With `--collect.settings.throttlingMethod=devtools` (real throttling, no Lantern simulation) the first URL completed but is recorded above under `/zh`: Lighthouse's Chrome on this zh-HK workstation sends a Chinese `Accept-Language`, so the request for `/` is answered by the locale redirect to `/zh`. The second URL then failed the same way and the run aborted. Devtools-throttled performance scores are not comparable with the programme's simulated-throttling thresholds (WP-3 recorded 0.89–0.97 on the same pages), so the 0.63 is reported, not judged.
+- Rerun on a Linux CI runner with an English locale (or on a Preview exempted from SSO through Vercel's protection bypass for automation) with the rc defaults; if the Lantern error persists there, it is a Lighthouse defect to isolate (which request graph on `/` and `/membership` forms the cycle), not a site regression — recorded as a follow-up in §8.
 
 ## 5. `/zh` walk (row 8.4)
 
@@ -195,4 +201,4 @@ One line per work package: pull request and the final gate its record carries (f
 5. **`/partners` on the mobile accordion** — the sixth About leaf drops off the five-leaf mobile accordion (errata E-79, accepted; reachable from the footer and the home partner wall).
 6. **Earlier follow-up chips still open** — seat-invitation acceptance error codes; the admin `{placeholder}`-inside-`t()` suspicion.
 7. **Unsubscribe Phase B** — on or after 2026-09-10, never before (owner; `docs/superpowers/plans/2026-09-01-unsubscribe-secret-sunset.md` Phase A moved the sunset from 2026-09-06).
-8. **`PENDING-LOCAL` cells** in §2 and §4 — filled from the command log before the PR opens.
+8. **Lighthouse Lantern error** — Lighthouse 12.6.1 aborts with `LanternError: Invalid dependency graph created, cycle detected` on `/` (local, simulated throttling) and `/membership` (Preview); reproduce on a Linux runner and isolate which request graph forms the cycle. Until then no Lighthouse row can be verified from this workstation.
