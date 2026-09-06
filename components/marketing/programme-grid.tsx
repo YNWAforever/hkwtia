@@ -13,9 +13,11 @@ export type ProgrammeGridLabels = Readonly<{
   items: Readonly<Record<ProgrammeSummary['id'], Readonly<{name: string; description: string}>>>;
 }>;
 
-// The donor's .programme-grid (app/styles/wisetech.css:216-225), shared by home section 8 and
+// The donor's .programme-grid (app/styles/wisetech.css:216-226), shared by home section 8 and
 // /programmes so the two can never drift. A plain <Link> is used for the CTA rather than
-// ActionLink: `.programme-card>a` styles a bare child anchor directly.
+// ActionLink: app/styles/wisetech.css:226 `.programme-card>a` styles a bare child anchor
+// directly (border-top, its own flex layout) and defines no `.text-link`/`.button` rule for
+// this container, so ActionLink's variant class would double-style the anchor.
 export function ProgrammeGrid({summaries, labels}: Readonly<{summaries: readonly ProgrammeSummary[]; labels: ProgrammeGridLabels}>) {
   return (
     <div className="programme-grid">
@@ -28,6 +30,8 @@ export function ProgrammeGrid({summaries, labels}: Readonly<{summaries: readonly
           <h3>{labels.items[programme.id].name}</h3>
           <p>{labels.items[programme.id].description}</p>
           <small>
+            {/* `?? 0` is dormant (every event series has >= 1 edition) and only satisfies the
+                `year: number` label signature; a credential never reaches this branch. */}
             {programme.type === 'credential'
               ? labels.credentialFact
               : labels.editionsFact(programme.editionCount ?? 0, programme.latestYear ?? 0)}

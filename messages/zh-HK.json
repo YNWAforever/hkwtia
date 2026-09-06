@@ -890,6 +890,53 @@
       "mailSubject": "查詢「{programme}」計劃"
     }
   },
+  "Programmes": {
+    "metaTitle": "計劃總覽｜WiseTech Hong Kong",
+    "metaDescription": "WTIA 計劃及獎項的正式紀錄：Tech to Connect、亞洲智能應用程式大獎、香港資訊及通訊科技獎與 CPAI，包括歷屆內容、資助機構及下一步。",
+    "hero": {
+      "eyebrow": "計劃",
+      "title": "把參與轉化為進步的計劃。",
+      "lead": "探索 WiseTech 生態系統的獎項、學習、市場拓展及產業發展計劃，每項均以 WTIA 自身的結構化紀錄為依據。",
+      "breadcrumbCurrent": "計劃總覽"
+    },
+    "groupings": {
+      "label": "計劃分組",
+      "catalogue": "計劃目錄",
+      "launchpad": "市場拓展",
+      "history": "計劃歷史"
+    },
+    "open": {
+      "eyebrow": "計劃目錄",
+      "title": "尋找推動你向前的計劃。",
+      "intro": "按目的、受眾及歷屆內容瀏覽。申請只會透過各計劃專頁或創科起動的開放梯隊進行，不會經由此總覽頁。",
+      "statusLabel": "開放申請",
+      "emptyTitle": "本網站目前沒有開放申請的計劃。",
+      "emptyCopy": "歡迎向計劃團隊查詢新一屆內容、參加資格及重要日期。",
+      "action": "聯絡計劃團隊",
+      "mailSubject": "計劃查詢"
+    },
+    "catalogue": {
+      "eyebrow": "目錄",
+      "title": "四項有紀錄可依的計劃。",
+      "intro": "每張卡片均讀取自結構化計劃紀錄；屆數由紀錄計算得出，並非人手輸入。"
+    },
+    "launchpad": {
+      "eyebrow": "市場拓展",
+      "title": "創科起動是以梯隊為本、進入大灣區的路徑。",
+      "copy": "各梯隊在其專頁公布真實日期，申請表格只在梯隊開放期間出現。",
+      "action": "探索創科起動"
+    },
+    "history": {
+      "eyebrow": "計劃歷史",
+      "title": "承接具長遠價值的計劃經驗。",
+      "intro": "WTIA 檔案所記錄的每一屆，由首屆到最新一屆；新計劃資訊將陸續加入。",
+      "span": "{first}–{latest}",
+      "editions": "{count} 屆紀錄",
+      "credential": "由 WTIA 直接頒發的專業資格，沒有屆數紀錄。",
+      "events": "查看相關活動",
+      "partner": "成為計劃夥伴"
+    }
+  },
   "LaunchPad": {
     "metaTitle": "創科起動｜WTIA",
     "metaDescription": "WTIA 的全球市場小組計劃、落地夥伴及資助計劃配對工具。",

@@ -890,6 +890,53 @@
       "mailSubject": "{programme} programme enquiry"
     }
   },
+  "Programmes": {
+    "metaTitle": "Programmes | WiseTech Hong Kong",
+    "metaDescription": "WTIA's programmes and awards on the record: Tech to Connect, Asia Smart App Awards, HKICT Awards and CPAI, with their editions, funders and where each leads next.",
+    "hero": {
+      "eyebrow": "Programmes",
+      "title": "Programmes that turn participation into progress.",
+      "lead": "Explore awards, learning, market-access and industry-development programmes across the WiseTech ecosystem, each one backed by WTIA's own typed record.",
+      "breadcrumbCurrent": "Programmes"
+    },
+    "groupings": {
+      "label": "Programme groupings",
+      "catalogue": "Programme catalogue",
+      "launchpad": "Market access",
+      "history": "Programme history"
+    },
+    "open": {
+      "eyebrow": "Programme catalogue",
+      "title": "Find a programme that moves you forward.",
+      "intro": "Browse by purpose, audience and previous editions. Applications open through each programme's own page or through a Launch Pad cohort, never through this index.",
+      "statusLabel": "Open applications",
+      "emptyTitle": "No programme applications are open on this site.",
+      "emptyCopy": "Ask the programme team for upcoming editions, eligibility and key dates.",
+      "action": "Ask the programme team",
+      "mailSubject": "Programme enquiry"
+    },
+    "catalogue": {
+      "eyebrow": "Catalogue",
+      "title": "Four programmes with a record behind them.",
+      "intro": "Each card is read from the typed programme record; the edition counts are computed from it, never typed in."
+    },
+    "launchpad": {
+      "eyebrow": "Market access",
+      "title": "Launch Pad is the cohort-backed route into the Greater Bay Area.",
+      "copy": "Cohorts publish on their own page with real dates, and an application form appears only while a cohort is open.",
+      "action": "Explore Launch Pad"
+    },
+    "history": {
+      "eyebrow": "Programme history",
+      "title": "Built on programmes with lasting value.",
+      "intro": "Every edition WTIA's archive records, from the first to the latest, with new programme information added as it becomes available.",
+      "span": "{first}–{latest}",
+      "editions": "{count, plural, one {# recorded edition} other {# recorded editions}}",
+      "credential": "Credential issued directly by WTIA; no editions to record.",
+      "events": "View related activities",
+      "partner": "Become a programme partner"
+    }
+  },
   "LaunchPad": {
     "metaTitle": "Launch Pad | WTIA",
     "metaDescription": "WTIA's go-global cohort programme, landing partners, and funding-scheme picker.",
