@@ -4,7 +4,26 @@ const baseUrl = process.env.LHCI_BASE_URL ?? process.env.PLAYWRIGHT_BASE_URL ?? 
 const remote = Boolean(process.env.LHCI_BASE_URL ?? process.env.PLAYWRIGHT_BASE_URL);
 // WP-8: a protected Preview needs Vercel's session cookie; the file is written by
 // scripts/vercel-preview-session.mjs under the ignored .playwright/ directory.
-const cookie = process.env.LHCI_COOKIE_FILE ? readFileSync(process.env.LHCI_COOKIE_FILE, 'utf8').trim() : undefined;
+const cookieFile = process.env.LHCI_COOKIE_FILE;
+
+if (cookieFile) {
+  // The cookie is sent to whatever `baseUrl` names, so the target is checked before the cookie
+  // is even read: an https Preview host under the same rule as
+  // tests/fixtures/m3-acceptance-safety.ts (one label before `.vercel.app`), never the
+  // production alias.
+  let target;
+  try {
+    target = new URL(baseUrl);
+  } catch {
+    throw new Error('LHCI_COOKIE_REQUIRES_HTTPS_VERCEL_PREVIEW');
+  }
+  if (target.protocol !== 'https:') throw new Error('LHCI_COOKIE_REQUIRES_HTTPS_VERCEL_PREVIEW');
+  if (target.hostname === 'hkwtia.vercel.app') throw new Error('LHCI_COOKIE_PRODUCTION_TARGET_FORBIDDEN');
+  if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.vercel\.app$/.test(target.hostname)) {
+    throw new Error('LHCI_COOKIE_REQUIRES_HTTPS_VERCEL_PREVIEW');
+  }
+}
+const cookie = cookieFile ? readFileSync(cookieFile, 'utf8').trim() : undefined;
 
 const config = {
   ci: {
@@ -36,7 +55,11 @@ const config = {
         'categories:seo': ['error', {minScore: 0.95}]
       }
     },
-    upload: {target: 'temporary-public-storage'}
+    // Lighthouse copies `settings.extraHeaders` into every report (`lhr.configSettings`), so a
+    // cookie run's lhr-*.json/.html carry the `_vercel_jwt` session. Those must never reach
+    // temporary-public-storage: they stay on disk under the ignored .playwright/ directory and are
+    // deleted with the session. Only the cookie-less local run keeps the public upload.
+    upload: cookie ? {target: 'filesystem', outputDir: '.playwright/lighthouse'} : {target: 'temporary-public-storage'}
   }
 };
 

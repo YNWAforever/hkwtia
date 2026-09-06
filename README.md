@@ -30,7 +30,7 @@ Open `http://localhost:3000/` or `http://localhost:3000/zh`.
 | `npm run lint` | Run ESLint |
 | `npm run typecheck` | Run strict TypeScript checking |
 | `npm run build` | Create the production build |
-| `npm run test:lighthouse` | Run Lighthouse CI on `/membership` and `/zh/membership` |
+| `npm run test:lighthouse` | Run Lighthouse CI on the ten URLs in `lighthouserc.js`: `/`, `/membership`, `/events`, `/programmes`, `/partners`, each in both locales |
 | `npm run db:migrate` | Apply Drizzle migrations from `drizzle/` using `DATABASE_URL` |
 | `npm run db:seed` | Idempotently seed the M1 plans and deterministic M2 CRM demo data |
 | `npm run db:seed:m1` / `npm run db:seed:m2` | Run one seed layer directly |
@@ -174,7 +174,21 @@ and
 `LHCI_BASE_URL=<preview> LHCI_COOKIE_FILE=.playwright/preview-cookie.txt npm run test:lighthouse`
 (a remote base URL skips Lighthouse's local server). Both files expire with the
 share link, live under the git-ignored `.playwright/` directory, and must never
-be committed or pasted into a report.
+be committed or pasted into a report. The script prints only its own error
+codes; a navigation failure is reported as `VERCEL_SHARE_URL_NAVIGATION_FAILED`
+because Playwright's own message would quote the share link.
+
+Lighthouse copies the `Cookie` header into every report it writes
+(`lhr.configSettings.extraHeaders`), so a run with `LHCI_COOKIE_FILE` set never
+uploads: it is forced to the filesystem target, and its reports land in the
+git-ignored `.lighthouseci/` (Lighthouse's own working directory) and
+`.playwright/lighthouse` (the output directory). Those reports embed the session
+cookie, must be deleted together with the session files, and are never shared.
+The evidence record for a cookie run cites the category scores, never a report
+link or file; the public `temporary-public-storage` upload stays only for the
+cookie-less local run. With a session cookie, `LHCI_BASE_URL` must be an HTTPS
+`*.vercel.app` Preview; `https://hkwtia.vercel.app` and any other host are
+rejected before the cookie is read into the config.
 
 ## M3 Preview automation Worker
 
