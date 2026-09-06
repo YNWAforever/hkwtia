@@ -152,6 +152,7 @@ export async function startNewCheckoutAttempt(
 export async function createBillingPortalSession(
   actor: Actor,
   membershipId: string,
+  locale: AppLocale,
   dependencies: CheckoutDependencies = defaultDependencies(),
 ): Promise<{url: string}> {
   const membership = await getAuthorizedBillingMembership(actor, membershipId, dependencies);
@@ -160,6 +161,6 @@ export async function createBillingPortalSession(
   }
   return dependencies.stripe.createBillingPortalSession({
     customerId: membership.stripeCustomerId!,
-    returnUrl: `${appOrigin(dependencies.appUrl)}/portal/billing`,
+    returnUrl: `${appOrigin(dependencies.appUrl)}${localizedPath(locale, "/portal/billing")}`,
   });
 }

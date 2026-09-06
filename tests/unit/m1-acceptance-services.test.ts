@@ -88,8 +88,8 @@ describe("M1 acceptance service seams", () => {
   it("creates Billing Portal only for the membership owner", async () => {
     const {deps, membership, stripe} = setup();
     membership.status = "active";
-    await expect(createBillingPortalSession(actorFor("user-m1"), membershipId, deps)).resolves.toEqual({url: stripe.portalUrl});
-    await expect(createBillingPortalSession(actorFor("foreign-user"), membershipId, deps)).rejects.toThrow("FORBIDDEN");
+    await expect(createBillingPortalSession(actorFor("user-m1"), membershipId, "en", deps)).resolves.toEqual({url: stripe.portalUrl});
+    await expect(createBillingPortalSession(actorFor("foreign-user"), membershipId, "en", deps)).rejects.toThrow("FORBIDDEN");
     expect(stripe.portalRequests).toHaveLength(1);
   });
 });
