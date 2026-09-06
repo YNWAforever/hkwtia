@@ -30,11 +30,14 @@ export function ProgrammeGrid({summaries, labels}: Readonly<{summaries: readonly
           <h3>{labels.items[programme.id].name}</h3>
           <p>{labels.items[programme.id].description}</p>
           <small>
-            {/* `?? 0` is dormant (every event series has >= 1 edition) and only satisfies the
-                `year: number` label signature; a credential never reaches this branch. */}
-            {programme.type === 'credential'
-              ? labels.credentialFact
-              : labels.editionsFact(programme.editionCount ?? 0, programme.latestYear ?? 0)}
+            {/* Cards count editions since the FIRST year, not the latest (a programme running
+                2020-2025 reads "since 2020", not "since 2025"). The editions-fact branch narrows
+                on `firstYear !== null` rather than falling back with `?? 0`: every event series
+                is guaranteed a firstYear (>= 1 recorded edition), so the narrowing is provably
+                always true there, and a credential (firstYear: null) never reaches it. */}
+            {programme.type !== 'credential' && programme.firstYear !== null
+              ? labels.editionsFact(programme.editionCount ?? 0, programme.firstYear)
+              : labels.credentialFact}
           </small>
           <Link href={`/programs/${programme.id}`}>{labels.action} <Arrow /></Link>
         </article>
