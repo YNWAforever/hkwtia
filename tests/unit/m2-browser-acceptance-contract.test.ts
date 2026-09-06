@@ -64,7 +64,8 @@ describe("M2 authenticated browser release contract", () => {
     expect(runtime).not.toContain("VERCEL_SHARE_TOKEN");
     expect(spec.match(/toBeVisible\(\{timeout: 20_000\}\)/g)).toHaveLength(2);
     expect(spec).toContain('hostname.endsWith(".vercel.app")');
-    expect(config).toContain("process.env.VERCEL_SHARE_TOKEN ? 'off' : 'on-first-retry'");
+    // Traces are off for the storage-state path too: a retry trace would record the `_vercel_jwt` request header.
+    expect(config).toContain("trace: process.env.VERCEL_SHARE_TOKEN || process.env.PLAYWRIGHT_STORAGE_STATE ? 'off' : 'on-first-retry'");
   });
 
   it("casts approval audit target ids across the text and UUID boundary", () => {

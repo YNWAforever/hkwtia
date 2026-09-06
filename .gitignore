@@ -29,6 +29,8 @@ test-results/
 playwright-report/
 # WP-8: Vercel Preview session (storage state + cookie header) written by scripts/vercel-preview-session.mjs
 .playwright/
+# Lighthouse CI saves every report here before uploading; a cookie run's reports embed the session cookie
+.lighthouseci/
 .vercel
 
 .legacy-capture/

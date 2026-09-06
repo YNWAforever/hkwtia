@@ -27,7 +27,9 @@ export default defineConfig({
     // WP-8: a Vercel-protected Preview is entered through the session `scripts/vercel-preview-session.mjs`
     // writes; unset locally, so the managed dev server path is unchanged.
     storageState: process.env.PLAYWRIGHT_STORAGE_STATE || undefined,
-    trace: process.env.VERCEL_SHARE_TOKEN ? 'off' : 'on-first-retry'
+    // A retry trace records request headers, so with either Preview credential present it would
+    // capture the `_vercel_jwt` cookie into test-results/. Off whenever one is set.
+    trace: process.env.VERCEL_SHARE_TOKEN || process.env.PLAYWRIGHT_STORAGE_STATE ? 'off' : 'on-first-retry'
   },
   projects: [{name: 'chromium', use: {...devices['Desktop Chrome']}}],
   ...(process.env.PLAYWRIGHT_BASE_URL
