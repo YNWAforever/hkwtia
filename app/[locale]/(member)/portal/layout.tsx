@@ -1,3 +1,4 @@
+import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {headers} from "next/headers";
 import {redirect} from "next/navigation";
@@ -14,6 +15,10 @@ import {parsePortalContinuation} from "@/lib/portal/continuation";
 import {localizedPath} from "@/lib/urls";
 
 export const dynamic = "force-dynamic";
+
+// Authenticated surface: never indexed (master plan WP-7 SEO row). Layout metadata merges into
+// every page below it, so no page needs its own robots block.
+export const metadata: Metadata = {robots: {index: false, follow: false}};
 
 type Props = Readonly<{children: ReactNode; params: Promise<{locale: string}>}>;
 

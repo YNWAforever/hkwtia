@@ -8,7 +8,7 @@ export type NavigationMessageKey =
   | "feature.impactInsights.label" | "feature.impactInsights.title" | "feature.impactInsights.copy" | "feature.impactInsights.cta"
   | "feature.aboutWtia.label" | "feature.aboutWtia.title" | "feature.aboutWtia.copy" | "feature.aboutWtia.cta"
   | "columns.participate" | "columns.programmes" | "columns.membership" | "columns.insights" | "columns.organisation" | "columns.connect"
-  | "links.events" | "links.launchpad" | "links.hkict" | "links.asa" | "links.tct" | "links.cpai" | "links.membership" | "links.showcase" | "links.news" | "links.aiOps" | "links.aiTransparency" | "links.about" | "links.history" | "links.chairman" | "links.committees" | "links.contact"
+  | "links.events" | "links.launchpad" | "links.programmes" | "links.hkict" | "links.asa" | "links.tct" | "links.cpai" | "links.membership" | "links.showcase" | "links.news" | "links.aiOps" | "links.aiTransparency" | "links.about" | "links.history" | "links.chairman" | "links.committees" | "links.contact" | "links.partners"
   | "actions.findEvent" | "actions.join" | "actions.memberSignIn";
 
 export type NavigationLink = Readonly<{id: string; href: PublicRoute; labelKey: NavigationMessageKey}>;
@@ -34,11 +34,18 @@ type PublicShellAction = Readonly<{id: "find-event" | "join-wisetech"; href: Pub
 // No group description: the donor panel has none (commit f91ecc5 :423-444) and hkwtia's own
 // description tile went with the WP-2 rewrite, so `groups.*.description` was swept in Task 9.
 // Re-adding a key here means re-adding a renderer, not just a string.
+// WP-7 (design D-3): /programmes leads the Programmes column and /partners joins Connect. The
+// mobile accordion shows a group's first five leaves, so tct and cpai (now the Programmes
+// column's sixth and seventh entries) and /partners (the About group's sixth leaf) are cut from
+// that accordion. tct and cpai reach mobile users through /programmes, the desktop menu and the
+// footer; /partners reaches them through the footer's About column and the home page's partner
+// wall "view all" links (components/home/legacy-network.tsx), and reaches desktop users through
+// the mega menu (errata E-19).
 export const navigationGroups = [
   {id: "events-programmes", landingHref: "/events", eventFirst: true, labelKey: "groups.eventsProgrammes.label",
     feature: {labelKey: "feature.eventsProgrammes.label", titleKey: "feature.eventsProgrammes.title", copyKey: "feature.eventsProgrammes.copy", ctaKey: "feature.eventsProgrammes.cta", href: "/events"}, columns: [
     {id: "participate", labelKey: "columns.participate", links: [{id: "events", href: "/events", labelKey: "links.events"}, {id: "launchpad", href: "/launchpad", labelKey: "links.launchpad"}]},
-    {id: "programmes", labelKey: "columns.programmes", links: [{id: "hkict", href: "/programs/hkict", labelKey: "links.hkict"}, {id: "asa", href: "/programs/asa", labelKey: "links.asa"}, {id: "tct", href: "/programs/tct", labelKey: "links.tct"}, {id: "cpai", href: "/programs/cpai", labelKey: "links.cpai"}]},
+    {id: "programmes", labelKey: "columns.programmes", links: [{id: "programmes", href: "/programmes", labelKey: "links.programmes"}, {id: "hkict", href: "/programs/hkict", labelKey: "links.hkict"}, {id: "asa", href: "/programs/asa", labelKey: "links.asa"}, {id: "tct", href: "/programs/tct", labelKey: "links.tct"}, {id: "cpai", href: "/programs/cpai", labelKey: "links.cpai"}]},
   ]},
   {id: "membership-ecosystem", landingHref: "/membership", eventFirst: false, labelKey: "groups.membershipEcosystem.label",
     feature: {labelKey: "feature.membershipEcosystem.label", titleKey: "feature.membershipEcosystem.title", copyKey: "feature.membershipEcosystem.copy", ctaKey: "feature.membershipEcosystem.cta", href: "/contact"}, columns: [{id: "membership", labelKey: "columns.membership", links: [{id: "membership", href: "/membership", labelKey: "links.membership"}, {id: "showcase", href: "/showcase", labelKey: "links.showcase"}]}]},
@@ -48,7 +55,7 @@ export const navigationGroups = [
   {id: "about-wtia", landingHref: "/about", eventFirst: false, labelKey: "groups.aboutWtia.label",
     feature: {labelKey: "feature.aboutWtia.label", titleKey: "feature.aboutWtia.title", copyKey: "feature.aboutWtia.copy", ctaKey: "feature.aboutWtia.cta", href: "/about/history"}, columns: [
     {id: "organisation", labelKey: "columns.organisation", links: [{id: "about", href: "/about", labelKey: "links.about"}, {id: "history", href: "/about/history", labelKey: "links.history"}, {id: "chairman", href: "/about/chairman", labelKey: "links.chairman"}, {id: "committees", href: "/about/committees", labelKey: "links.committees"}]},
-    {id: "connect", labelKey: "columns.connect", links: [{id: "contact", href: "/contact", labelKey: "links.contact"}]},
+    {id: "connect", labelKey: "columns.connect", links: [{id: "contact", href: "/contact", labelKey: "links.contact"}, {id: "partners", href: "/partners", labelKey: "links.partners"}]},
   ]},
 ] as const satisfies readonly NavigationGroup[];
 

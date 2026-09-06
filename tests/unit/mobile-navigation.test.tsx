@@ -84,7 +84,7 @@ describe("MobileNavigation", () => {
     const links = within(panel as HTMLElement).getAllByRole("link");
     expect(links).toHaveLength(6);
     expect(links.slice(0, 5).map((link) => link.getAttribute("href"))).toEqual([
-      "/events", "/launchpad", "/programs/hkict", "/programs/asa", "/programs/tct",
+      "/events", "/launchpad", "/programmes", "/programs/hkict", "/programs/asa",
     ]);
     expect(links[5]).toHaveClass("mobile-view-all");
     expect(links[5]).toHaveAccessibleName(labels.viewOverview);

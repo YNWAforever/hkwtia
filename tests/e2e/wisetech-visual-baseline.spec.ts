@@ -45,7 +45,11 @@ const routes = [
   {slug: 'contact', path: '/contact'},
   {slug: 'programs-asa', path: '/programs/asa'},
   {slug: 'news', path: '/news'},
-  {slug: 'launchpad', path: '/launchpad'}
+  {slug: 'launchpad', path: '/launchpad'},
+  // WP-7 added these two public pages; they have no "before" capture, so their first baseline
+  // is the WP-7 render itself.
+  {slug: 'programmes', path: '/programmes'},
+  {slug: 'partners', path: '/partners'}
 ] as const;
 
 const locales = [

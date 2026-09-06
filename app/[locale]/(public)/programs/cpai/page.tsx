@@ -11,7 +11,7 @@ import {programs} from '@/content/programs';
 import {cpai} from '@/content/programs/cpai';
 import type {AppLocale} from '@/i18n/routing';
 import {summarizeProgrammes} from '@/lib/home/programme-summaries';
-import {buildPageMetadata} from '@/lib/metadata';
+import {brandedTitle, buildPageMetadata} from '@/lib/metadata';
 import {buildProgrammeHeaderFacts} from '@/lib/programs/programme-header';
 
 type Props = {params: Promise<{locale: string}>};
@@ -20,7 +20,7 @@ const program = programs.find((item) => item.id === 'cpai')!;
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
   const t = await getTranslations({locale, namespace: program.namespace});
-  return buildPageMetadata({locale: locale as AppLocale, pathname: '/programs/cpai', title: t('title'), description: t('description'), image: program.image});
+  return buildPageMetadata({locale: locale as AppLocale, pathname: '/programs/cpai', title: brandedTitle(locale as AppLocale, t('title')), description: t('description'), image: program.image});
 }
 
 export default async function CpaiPage({params}: Props) {

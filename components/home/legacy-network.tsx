@@ -21,8 +21,9 @@ type LegacyNetworkProps = Readonly<{
 
 // Section 12 of 13, 'use client': stateful tabs, data passed in from page.tsx. Replaces
 // components/marketing/home-partner-wall.tsx. Hidden entirely at 0 published partners --
-// never the donor's hard-coded 79. app/styles/wisetech.css:114 .legacy-network;
-// :124 .legacy-logo-rail; :125 .legacy-logo-card.
+// never the donor's hard-coded 79. The wall previews /partners (WP-7 Task 5), which lists the
+// same published authority in full, grouped across all five categories.
+// app/styles/wisetech.css:114 .legacy-network; :124 .legacy-logo-rail; :125 .legacy-logo-card.
 export function LegacyNetwork({groups, labels}: LegacyNetworkProps) {
   const [active, setActive] = useState<LegacyNetworkCategory>(
     () => (groups.find((group) => group.partners.length > 0) ?? groups[0]!).category,
@@ -45,7 +46,7 @@ export function LegacyNetwork({groups, labels}: LegacyNetworkProps) {
           </div>
           <div className="legacy-network-note">
             <p>{labels.note}</p>
-            <Link href="/about">{labels.viewAllAction}</Link>
+            <Link href="/partners">{labels.viewAllAction}</Link>
           </div>
         </div>
         {/* No `role="list"` here: the children are <button> elements, not `listitem`-role
@@ -88,7 +89,7 @@ export function LegacyNetwork({groups, labels}: LegacyNetworkProps) {
         </div>
         <div className="legacy-directory-action">
           <p aria-live="polite">{previewNote}</p>
-          <Link className="button button-dark" href="/about">{labels.viewAllAction}</Link>
+          <Link className="button button-dark" href="/partners">{labels.viewAllAction}</Link>
         </div>
       </div>
     </section>

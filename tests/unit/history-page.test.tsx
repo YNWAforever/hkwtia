@@ -16,14 +16,14 @@ type Locale = "en" | "zh-HK";
 
 const approvedHistory = {
   en: {
-    metaTitle: "History | WTIA",
+    metaTitle: "History | WiseTech Hong Kong",
     metaDescription: "Twenty-five years of the Hong Kong Wireless Technology Industry Association, 2001 to 2025.",
     eyebrow: "Since 2001",
     title: "Our history",
     intro: "Milestones from twenty-five years of building Hong Kong's wireless and technology industry.",
   },
   "zh-HK": {
-    metaTitle: "歷史｜WTIA",
+    metaTitle: "歷史｜WiseTech Hong Kong",
     metaDescription: "香港無線科技商會二十五年歷程，由2001年至2025年。",
     eyebrow: "自2001年",
     title: "我們的歷史",

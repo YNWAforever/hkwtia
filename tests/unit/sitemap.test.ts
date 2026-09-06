@@ -104,4 +104,22 @@ describe("published build logs in the sitemap", () => {
       "http://localhost:3000/zh",
     ]));
   });
+
+  it("declares en, zh-HK and an English x-default alternate on every static entry", async () => {
+    publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
+    const entries = await sitemap();
+    const home = entries.find((entry) => entry.url === "http://localhost:3000/")!;
+    expect(home.alternates?.languages).toEqual({
+      en: "http://localhost:3000/",
+      "zh-HK": "http://localhost:3000/zh",
+      "x-default": "http://localhost:3000/",
+    });
+
+    // Verify every entry has x-default matching its en value
+    for (const entry of entries) {
+      if (entry.alternates?.languages) {
+        expect(entry.alternates.languages["x-default"]).toBe(entry.alternates.languages.en);
+      }
+    }
+  });
 });

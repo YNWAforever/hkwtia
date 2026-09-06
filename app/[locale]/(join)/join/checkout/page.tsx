@@ -24,7 +24,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   return buildPageMetadata({
     locale: locale as AppLocale,
     pathname: "/join/checkout",
-    title: t("title"),
+    title: t("metaTitle"),
     description: t("authDescription"),
     index: false,
   });

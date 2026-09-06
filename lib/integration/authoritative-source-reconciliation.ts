@@ -25,12 +25,16 @@ type UnknownRecord = Record<string, unknown>;
 
 const expectedReportedArchiveFingerprint = "140b35532895b728c8e4d73ca56d1d00653b69d57ae8366a5460c61249715c62";
 
+// Each hash covers every field of its inventory group's rows, including hkwtia's own
+// `disposition`/`canonicalPath`. A deliberate re-classification (WP-7 un-retired `/programmes`
+// and `/partners`) rotates the `sitemapRoutes` and `navigationTargets` values together with the
+// regression test that pins them — a differing hash found any other way is tampering, not drift.
 const expectedFingerprints = Object.freeze({
   identity: "e2054bb31977224ad9ccab1d59f122a13e54d426eb95b98aeaf0e3f0cdcfc102",
   locales: "5977857e5ddad59cb252cebcafea43b7a3563098b7778aa6c4d816a7b68c5d41",
-  sitemapRoutes: "06e960215298b4dcfc92e2de622e66346a2046007fa4321a6c58753bf2518036",
+  sitemapRoutes: "d38ff03ff7e9f90c3b1789d07f5f92223be7bad3bb75d32d7befd03c811a4de9",
   dispatcherOnlyRoutes: "3ad964fd28f3b34bbf02113233fc111f4c39b1103edb35421c85c39f10300495",
-  navigationTargets: "9f023ef38743a53bac7134dd49bd39cc75eee970df6120131bdc845b1d93d94f",
+  navigationTargets: "399353b8b5439c5ce014bd412736bbbb8b8d51c02ef0ebd2f05fb20d46821dda",
   forms: "2d6170f4f8df1dcb7f20c223f8de52b41123eb64b6361dd42d25cd8ac370ce99",
   formFlows: "51486e568c916a9320f544420d8bb73cad73f06508f333bcf6982a7a62717b24",
   sourceArtifacts: "4e4cff89b3ff0f51843e371ddb752a8515018324b49cd59acd81f78360217d29",

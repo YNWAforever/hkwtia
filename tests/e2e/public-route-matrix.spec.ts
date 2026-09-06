@@ -1,7 +1,7 @@
 import {expect, test} from '@playwright/test';
 
 const paths = [
-  '/showcase', '/launchpad', '/ai-ops', '/events', '/news',
+  '/showcase', '/launchpad', '/ai-ops', '/events', '/news', '/programmes', '/partners',
   '/about', '/about/chairman', '/about/committees', '/about/history',
   '/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets',
   '/about/history/new-term-of-executive-committee-2022-2024',

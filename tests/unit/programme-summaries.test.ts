@@ -27,5 +27,10 @@ describe("summarizeProgrammes", () => {
     const asaSummary = summaries.find((programme) => programme.id === "asa")!;
     expect(asaSummary.editionCount).toBe(asa.editions.length);
     expect(asaSummary.latestYear).toBe(Math.max(...asa.editions.map((edition) => edition.yearStart)));
+
+    expect(cpai.firstYear).toBeNull();
+    expect(hkictSummary.firstYear).toBe(Math.min(...hkict.editions.map((edition) => edition.year)));
+    expect(tctSummary.firstYear).toBe(Math.min(...tct.editions.map((edition) => edition.year)));
+    expect(asaSummary.firstYear).toBe(Math.min(...asa.editions.map((edition) => edition.yearStart)));
   });
 });

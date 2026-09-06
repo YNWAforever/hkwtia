@@ -14,7 +14,7 @@ import {formatEventDate} from "@/lib/home/format-event-date";
 import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl} from "@/lib/media/url";
 import {runPublicEventRegistrationAction} from "@/lib/events/registration-action";
 import type {RegistrationActionState} from "@/lib/events/registration-state";
-import {buildPageMetadata} from "@/lib/metadata";
+import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
 import {buildEventData} from "@/lib/structured-data";
 import {localizedPath} from "@/lib/urls";
 
@@ -46,7 +46,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
   const row = await eventsRepository.getPublicBySlug(slug, locale, {asOf: new Date()}).catch(() => null);
   if (!row) return {};
-  return buildPageMetadata({locale: locale as AppLocale, pathname: `/events/${row.slug}`, title: row.title, description: row.description});
+  return buildPageMetadata({locale: locale as AppLocale, pathname: `/events/${row.slug}`, title: brandedTitle(locale as AppLocale, row.title), description: row.description});
 }
 
 export default async function EventPage({params}: Props) {

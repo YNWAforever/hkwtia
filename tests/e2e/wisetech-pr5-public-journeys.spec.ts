@@ -44,6 +44,8 @@ const partnerFixtureWithPrivateLogo = {
   logoAlt: "Approved partner logo",
   displayOrder: 1,
   featured: true,
+  relationshipStartsOn: null,
+  relationshipEndsOn: null,
 } satisfies PartnerProjection;
 
 async function expectExactPrivateMedia(

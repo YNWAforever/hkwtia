@@ -484,8 +484,9 @@ a.inner-card:hover,a.inner-card:focus-visible { z-index: 1; background: #e4eef6;
 .membership-dimensions h3 { margin: 55px 0 10px; font-family: var(--font-serif); font-size: 25px; font-weight: 500; }
 .membership-dimensions p { color: #5e6a6e; font-size: 10px; line-height: 1.55; }
 .programme-groupings { display: grid; grid-template-columns: repeat(4,1fr); border-top: 1px solid var(--wt-line); border-left: 1px solid var(--wt-line); margin-bottom: 38px; }
-.programme-groupings a { display: grid; min-height: 100px; align-items: center; grid-template-columns: 34px 1fr 20px; border-right: 1px solid var(--wt-line); border-bottom: 1px solid var(--wt-line); background: var(--wt-paper-bright); gap: 10px; font-size: 11px; font-weight: 750; padding: 15px; }
-.programme-groupings a span:first-child { color: var(--wt-blue); font-size: 9px; }
+/* WP-7: /programmes reuses the grouping grid for its non-link history list. */
+.programme-groupings a, .programme-groupings li { display: grid; min-height: 100px; align-items: center; grid-template-columns: 34px 1fr 20px; border-right: 1px solid var(--wt-line); border-bottom: 1px solid var(--wt-line); background: var(--wt-paper-bright); gap: 10px; font-size: 11px; font-weight: 750; padding: 15px; }
+.programme-groupings a span:first-child, .programme-groupings li span:first-child { color: var(--wt-blue); font-size: 9px; }
 
 @media(max-width:1120px){.intro-process{grid-template-columns:repeat(3,1fr)}.membership-dimensions{grid-template-columns:repeat(3,1fr)}.programme-groupings{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:820px){.directory-prompts,.solution-needs,.badge-grid{grid-template-columns:1fr 1fr}.intro-process{grid-template-columns:1fr 1fr}.solution-pathways{grid-template-columns:1fr}.membership-dimensions{grid-template-columns:1fr 1fr}.programme-groupings{grid-template-columns:1fr 1fr}}
@@ -638,7 +639,7 @@ p,li,dd { line-height: 1.68; }
 .mega-column a { font-size: 11px; line-height: 1.45; }
 .mega-feature-v2 p { font-size: 13px; }
 
-.legacy-logo-card>span, .legacy-scroll-hint, .tag-row span, .impact-metrics small, .footer-brand>small, .footer-bottom a, .event-calendar-view span, .event-status, .event-card-body dt, .event-detail-facts span, .resource-state>span, .practical-grid dt, .solution-needs button>span:first-child, .membership-dimensions span, .programme-groupings a span:first-child { font-size: 11px; }
+.legacy-logo-card>span, .legacy-scroll-hint, .tag-row span, .impact-metrics small, .footer-brand>small, .footer-bottom a, .event-calendar-view span, .event-status, .event-card-body dt, .event-detail-facts span, .resource-state>span, .practical-grid dt, .solution-needs button>span:first-child, .membership-dimensions span, .programme-groupings a span:first-child, .programme-groupings li span:first-child { font-size: 11px; }
 
 .inner-section-heading { max-width: 1240px; grid-template-columns: .34fr 1.08fr .78fr; }
 .inner-section-heading>p:last-child { font-size: 16px; }
@@ -652,7 +653,7 @@ p,li,dd { line-height: 1.68; }
 .marketplace-rules p,.plan-grid p,.plan-grid li,.archive-grid p,.journey-grid p,
 .service-grid p,.service-link p,.principle-grid p,.intro-process p,.badge-grid p,
 .solution-pathways p:not(.eyebrow),.membership-dimensions p { font-size: 14px; }
-.programme-card small, .footer-links a, .footer-links address, .view-switch button, .directory-prompts button, .programme-groupings a { font-size: 12px; }
+.programme-card small, .footer-links a, .footer-links address, .view-switch button, .directory-prompts button, .programme-groupings a, .programme-groupings li { font-size: 12px; }
 
 .event-filter-grid label, .partner-form label { font-size: 12px; }
 .event-filter-grid select, .partner-form input, .partner-form select, .partner-form textarea { min-height: 52px; font-size: 14px; }

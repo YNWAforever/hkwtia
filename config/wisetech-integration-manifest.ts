@@ -1,7 +1,9 @@
+// Relative, not `@/`: next.config.ts imports config/wisetech-redirects.ts, which imports this
+// file, and Next's config loader does not apply tsconfig paths.
 import {
   authoritativeSourceInventory,
   reportedArchiveIdentity,
-} from "@/config/wisetech-authoritative-source-inventory";
+} from "./wisetech-authoritative-source-inventory";
 
 export const integrationKinds = ["route", "cta", "form", "locale", "asset"] as const;
 export const integrationDispositions = ["retain", "merge", "redirect", "retire"] as const;
@@ -119,6 +121,12 @@ const repositoryRoutes: readonly IntegrationManifestEntry[] = [
   ["route-member-login", "/member-login", "Neon Auth magic-link sign-in scoped to the typed Portal continuation allowlist."],
   ["route-admin", "/admin", "Staff-authorised CMS and CRM entry point."],
   ["route-concierge-api", "/api/ai/concierge", "Existing guarded Concierge API action."],
+  // WP-7 un-retired both (master plan §5 WP-7; docs/superpowers/specs/2026-09-06-wisetech-wp7-routes-seo-design.md
+  // §4.2): the retire rationales named a missing authority, and PR4/WP-5 (published partners) and
+  // the four typed programme records now provide one. The ids keep their route-design- prefix so
+  // every existing reference resolves.
+  ["route-design-programmes", "/programmes", "Typed programme index over content/programs/index.ts and the four typed records."],
+  ["route-design-partners", "/partners", "Published partner records (partners repository; both confirmations and bilingual logo alt required)."],
 ].map(([id, path, dataOwner]) => entry({
   id,
   kind: "route",
@@ -213,10 +221,8 @@ const designRouteMerges: readonly IntegrationManifestEntry[] = [
 }));
 
 const retiredDesignRoutes: readonly IntegrationManifestEntry[] = [
-  ["route-design-programmes", "/programmes", "No generic programme index exists; four verified typed routes must not be flattened into one arbitrary destination."],
   ["route-design-program-detail", "/programmes/[slug]", "No generic programme repository or dynamic route exists."],
   ["route-design-program-edition", "/programmes/[slug]/[edition]", "No generic edition repository or dynamic route exists."],
-  ["route-design-partners", "/partners", "No verified published partner model exists, so a logo wall would risk misrepresentation."],
   ["route-design-search", "/search", "No repository-backed public search surface exists."],
   ["route-design-accessibility", "/accessibility", "No reviewed standalone accessibility page exists."],
   ["route-design-terms", "/terms", "No reviewed standalone terms page exists."],
@@ -237,7 +243,11 @@ const retiredDesignRoutes: readonly IntegrationManifestEntry[] = [
 }));
 
 const authoritativeDonorRouteAliases: readonly IntegrationManifestEntry[] = [
+  // The generated redirect (config/wisetech-redirects.ts, D-7) sends this slug to /events, so it
+  // shadows /events/[slug] and cannot be used for a real hkwtia event. Pinned by
+  // KNOWN_DYNAMIC_ROUTE_SHADOWS in tests/unit/wisetech-redirects.test.ts.
   entry({id: "route-source-event-asia-smart-innovation-awards-summit-2025", kind: "route", source: "/events/asia-smart-innovation-awards-summit-2025", canonicalPath: "/events/[slug]", disposition: "merge", dataOwner: "Published events repository and event CMS; source evidence is not publication state.", rationale: "Historical donor event evidence only; this mapping neither seeds nor publishes an hkwtia event.", evidence: "site-v13-source"}),
+  // Same reservation as the row above: this slug redirects to /events and is not usable for a real event.
   entry({id: "route-source-event-smart-innovation-meets-genai", kind: "route", source: "/events/smart-innovation-meets-genai", canonicalPath: "/events/[slug]", disposition: "merge", dataOwner: "Published events repository and event CMS; source evidence is not publication state.", rationale: "Historical donor event evidence only; this mapping neither seeds nor publishes an hkwtia event.", evidence: "site-v13-source"}),
   entry({id: "route-source-program-tech-connect", kind: "route", source: "/programmes/tech-connect", canonicalPath: "/programs/tct", disposition: "merge", dataOwner: "Verified typed Tech to Connect programme record.", rationale: "The donor programme path is source evidence only; the current typed record remains authoritative.", evidence: "site-v13-source"}),
   entry({id: "route-source-program-asia-smart-innovation-awards", kind: "route", source: "/programmes/asia-smart-innovation-awards", canonicalPath: "/programs/asa", disposition: "merge", dataOwner: "Verified typed ASA programme record.", rationale: "The donor programme path is source evidence only; the current typed record remains authoritative.", evidence: "site-v13-source"}),

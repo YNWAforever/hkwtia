@@ -15,7 +15,9 @@ export const publicRoutes = [
   '/programs/hkict',
   '/programs/tct',
   '/programs/asa',
+  '/programmes',
   '/contact',
+  '/partners',
   '/privacy',
   '/ai-transparency'
 ] as const;

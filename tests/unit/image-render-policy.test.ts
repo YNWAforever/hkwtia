@@ -17,6 +17,7 @@ const sources = ["app", "components"]
 
 const revocationAwareConsumers = new Set([
   "app/[locale]/(admin)/admin/media/page.tsx",
+  "app/[locale]/(public)/partners/page.tsx",
   "components/admin/media-form.tsx",
   "components/admin/showcase-review-table.tsx",
   "components/home/legacy-network.tsx",

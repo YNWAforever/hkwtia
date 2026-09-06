@@ -8,7 +8,7 @@ import {ShowcaseViewBeacon} from "@/components/marketing/showcase-view-beacon";
 import {StructuredData} from "@/components/seo/structured-data";
 import type {AppLocale} from "@/i18n/routing";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
-import {buildPageMetadata} from "@/lib/metadata";
+import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
 import {toPublicListing} from "@/lib/showcase/contracts";
 import {softwareApplicationJsonLd} from "@/lib/showcase/public";
 import {requestIntroAction} from "@/lib/showcase/lead-request-action";
@@ -20,9 +20,14 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale: localeValue, slug} = await params;
   const locale = localeValue as AppLocale;
   const row = await showcaseRepository.getPublishedBySlug(slug).catch(() => null);
-  if (!row) return buildPageMetadata({locale, pathname: `/showcase/${slug}`, title: "Showcase", description: "WTIA member showcase"});
+  if (!row) {
+    // Unknown or unpublished slug: the page 404s, but the metadata still renders, so it reads
+    // from the Showcase bundle (already branded there) instead of a hard-coded English pair.
+    const t = await getTranslations({locale, namespace: "Showcase"});
+    return buildPageMetadata({locale, pathname: `/showcase/${slug}`, title: t("metaTitle"), description: t("detailFallbackDescription")});
+  }
   const listing = toPublicListing(row, locale);
-  return buildPageMetadata({locale, pathname: `/showcase/${listing.slug}`, title: `${listing.name} | WTIA Showcase`, description: listing.description});
+  return buildPageMetadata({locale, pathname: `/showcase/${listing.slug}`, title: brandedTitle(locale, listing.name), description: listing.description});
 }
 
 export default async function ShowcaseDetailPage({params}: Props) {

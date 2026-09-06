@@ -27,6 +27,13 @@ describe("page copy scope", () => {
     expect(Object.keys(pageCopyRoutes).sort()).toEqual([...pageCopyNamespaces].sort());
   });
 
+  it("revalidates /programmes on a Home save, not just the home page", () => {
+    // WP-7: /programmes prerenders Home.programmeShowcase's shared grid labels and is not
+    // force-dynamic, so a Home edit that only invalidated "/" would leave it stale.
+    expect(pageCopyRoutes.Home).toContain("/");
+    expect(pageCopyRoutes.Home).toContain("/programmes");
+  });
+
   it("keeps product UI and structural namespaces out of reach", () => {
     for (const namespace of ["LaunchPad", "AiOps", "Join", "Showcase", "Navigation", "Footer", "Metadata", "NotFound", "Error", "Admin", "Portal"]) {
       expect(isPageCopyNamespace(namespace), namespace).toBe(false);
@@ -127,12 +134,16 @@ describe("page copy scope", () => {
       Privacy: 47,
       // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
       AiTransparency: 31,
+      // WP-7 Task 3: the /programmes index copy.
+      Programmes: 33,
+      // WP-7 Task 5: the /partners page copy.
+      Partners: 38,
       // WP-5 added one editable field: the footer tagline, moved out of the
       // deliberately-excluded structural Footer namespace into this new,
       // narrowly-scoped one so it alone (not the rest of Footer) is staff-editable.
       MarketingExtras: 1,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(454);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(525);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

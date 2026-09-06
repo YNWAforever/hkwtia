@@ -37,8 +37,12 @@ type MobileNavigationProps = {
  * The donor's own mobile link builder (commit f91ecc5 :358-363) flattens a group's columns and
  * slices to five, where the donor's fifth entry is always its own "View All …" leaf. hkwtia's
  * groups carry no such leaf, so the slice keeps the first five and the group landing route is
- * appended as the view-all. The events group's sixth leaf (/programs/cpai) is therefore reached
- * from the desktop mega menu and the footer, not this list — recorded as errata E-19.
+ * appended as the view-all. The events group's sixth and seventh leaves (/programs/tct and
+ * /programs/cpai) and the About group's sixth leaf (/partners) are therefore cut from this list.
+ * The programme leaves are reached from the desktop mega menu, the footer, and /programmes;
+ * /partners is reached from the desktop mega menu, the footer's About column and the home page's
+ * partner wall "view all" links (components/home/legacy-network.tsx) — matching
+ * config/navigation.ts and recorded as errata E-19 / E-79.
  */
 function mobileLinksFor(group: LocalizedNavigationGroup, viewOverviewLabel: string) {
   const leaves = group.columns.flatMap((column) => column.links).slice(0, 5);

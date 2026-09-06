@@ -12,6 +12,7 @@ import {
 } from "@/app/[locale]/(public)/about/history/[slug]/page";
 import {milestones} from "@/content/milestones";
 import {findBySlug} from "@/lib/history/milestones";
+import {brandedTitle} from "@/lib/metadata";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
 
@@ -39,7 +40,11 @@ const {buildPageMetadataSpy, notFoundSpy, setRequestLocaleSpy, translationState}
   };
 });
 
-vi.mock("@/lib/metadata", () => ({buildPageMetadata: buildPageMetadataSpy}));
+// Only buildPageMetadata is spied; brandedTitle stays real so the D-1 suffix is asserted below.
+vi.mock("@/lib/metadata", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/metadata")>()),
+  buildPageMetadata: buildPageMetadataSpy,
+}));
 vi.mock("next-intl/server", () => ({
   // Accepts both call forms next-intl allows: a bare namespace string (locale implied by
   // setRequestLocale) and {locale, namespace} (used for a namespace read ahead of
@@ -166,15 +171,17 @@ describe("history detail pages", () => {
       buildPageMetadataSpy.mockClear();
       const title = locale === "zh-HK" ? milestone.titleZh : milestone.titleEn;
       const body = locale === "zh-HK" ? milestone.bodyZh : milestone.bodyEn;
+      // D-1: a record title carries no suffix of its own, so the page brands it at runtime.
       const expected = {
         locale,
         pathname: `/about/history/${gallerySlug}`,
-        title,
+        title: brandedTitle(locale, title),
         description: body.slice(0, 160),
       };
 
       expect(await generateMetadata({params: Promise.resolve({locale, slug: gallerySlug})})).toEqual(expected);
       expect(buildPageMetadataSpy).toHaveBeenCalledExactlyOnceWith(expected);
+      expect(expected.title.endsWith(locale === "zh-HK" ? "｜WiseTech Hong Kong" : " | WiseTech Hong Kong")).toBe(true);
     }
 
     buildPageMetadataSpy.mockClear();

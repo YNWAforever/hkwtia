@@ -1,6 +1,3 @@
-import {readdirSync} from "node:fs";
-import {join, relative, resolve} from "node:path";
-
 import {describe, expect, it} from "vitest";
 
 import nextConfig from "@/next.config";
@@ -20,29 +17,10 @@ import {protectedRouteOwnershipInventory} from "@/config/wisetech-protected-rout
 import {
   validateRouteParity,
 } from "@/lib/integration/route-parity";
+import {listAppRoutes} from "@/tests/helpers/app-routes";
 import {repositoryProtectedFiles} from "@/tests/helpers/wisetech-protected-route-discovery";
 
-function filesNamed(directory: string, fileName: string): string[] {
-  return readdirSync(directory, {withFileTypes: true}).flatMap((item) => {
-    const path = join(directory, item.name);
-    if (item.isDirectory()) return filesNamed(path, fileName);
-    return item.isFile() && item.name === fileName ? [path] : [];
-  });
-}
-
-function appRouteForPage(file: string): string {
-  const appRoot = resolve(process.cwd(), "app", "[locale]");
-  const segments = relative(appRoot, file)
-    .replaceAll("\\", "/")
-    .split("/")
-    .slice(0, -1)
-    .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")));
-  return segments.length === 0 ? "/" : `/${segments.join("/")}`;
-}
-
-const appRoutes = new Set(
-  filesNamed(resolve(process.cwd(), "app", "[locale]"), "page.tsx").map(appRouteForPage),
-);
+const appRoutes = new Set(listAppRoutes());
 
 async function validationDestinations() {
   const configured = ((await nextConfig.redirects?.()) ?? []) as readonly {
@@ -440,6 +418,17 @@ describe("WiseTech route parity manifest", () => {
         expect.objectContaining({entryId: item.id, code: "unresolved-destination"}),
       ]);
     }
+  });
+
+  it("un-retires /partners and /programmes now that their authorities exist (WP-7)", () => {
+    const bySource = new Map(wisetechIntegrationManifest.map((item) => [item.source, item]));
+    expect(bySource.get("/partners")).toMatchObject({id: "route-design-partners", disposition: "retain", canonicalPath: "/partners", evidence: "hkwtia-repository", sourceEvidenceId: "sitemap-45"});
+    expect(bySource.get("/programmes")).toMatchObject({id: "route-design-programmes", disposition: "retain", canonicalPath: "/programmes", evidence: "hkwtia-repository", sourceEvidenceId: "sitemap-29"});
+    expect(wisetechIntegrationManifest.filter(({disposition}) => disposition === "retire")).toHaveLength(13);
+    for (const route of ["/partners", "/programmes"]) expect(appRoutes.has(route), route).toBe(true);
+    const programmesTargets = authoritativeSourceInventory.navigationTargets.filter(({path}) => path === "programmes");
+    expect(programmesTargets).toHaveLength(3);
+    expect(programmesTargets.every(({disposition, canonicalPath}) => disposition === "retain" && canonicalPath === "/programmes")).toBe(true);
   });
 
   it("rejects duplicate identity, missing fields and invalid retire destinations", async () => {

@@ -13,11 +13,11 @@ import {
 const resolvableDestinations = new Set([
   "/", "/about", "/about/chairman", "/about/committees", "/about/history", "/ai-ops",
   "/ai-transparency", "/contact", "/events", "/events/[slug]", "/join", "/join/complete",
-  "/launchpad", "/membership", "/news", "/news/[slug]", "/portal", "/portal/billing",
+  "/launchpad", "/membership", "/news", "/news/[slug]", "/partners", "/portal", "/portal/billing",
   "/portal/company", "/portal/company/listing", "/portal/company/seats", "/portal/directory",
-  "/portal/documents", "/portal/events", "/portal/profile", "/privacy", "/programs/asa",
-  "/programs/cpai", "/programs/hkict", "/programs/tct", "/showcase", "/showcase/[slug]",
-  "/unsubscribe",
+  "/portal/documents", "/portal/events", "/portal/profile", "/privacy", "/programmes",
+  "/programs/asa", "/programs/cpai", "/programs/hkict", "/programs/tct",
+  "/showcase", "/showcase/[slug]", "/unsubscribe",
 ]);
 
 const expectedSitemapPaths = [
@@ -96,12 +96,12 @@ const expectedNavigationRows = [
   ["ai-plus", "column", "ai-plus/responsible-ai-data-cybersecurity", "merge", "/ai-transparency"],
   ["ai-plus", "column", "ai-plus", "merge", "/ai-transparency"],
   ["ai-plus", "feature", "ai-plus", "merge", "/ai-transparency"],
-  ["programmes-gba", "root", "programmes", "retire", null],
-  ["programmes-gba", "column", "programmes", "retire", null],
+  ["programmes-gba", "root", "programmes", "retain", "/programmes"],
+  ["programmes-gba", "column", "programmes", "retain", "/programmes"],
   ["programmes-gba", "column", "programmes/launchpad", "merge", "/launchpad"],
   ["programmes-gba", "column", "gba/market-entry", "merge", "/launchpad"],
   ["programmes-gba", "column", "activities/gba-delegations", "merge", "/launchpad"],
-  ["programmes-gba", "column", "programmes", "retire", null],
+  ["programmes-gba", "column", "programmes", "retain", "/programmes"],
   ["programmes-gba", "feature", "gba/market-entry", "merge", "/launchpad"],
   ["insights-about", "root", "insights", "merge", "/news"],
   ["insights-about", "column", "insights/case-studies", "merge", "/showcase"],

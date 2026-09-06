@@ -55,7 +55,11 @@ vi.mock("next-intl/server", () => ({
   }),
   setRequestLocale: setRequestLocaleSpy,
 }));
-vi.mock("@/lib/metadata", () => ({buildPageMetadata: buildPageMetadataSpy}));
+// Only buildPageMetadata is spied; brandedTitle stays real so the D-1 suffix is asserted below.
+vi.mock("@/lib/metadata", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/metadata")>()),
+  buildPageMetadata: buildPageMetadataSpy,
+}));
 vi.mock("next/image", () => ({
   default: ({alt, ...props}: ImgHTMLAttributes<HTMLImageElement>) => {
     // eslint-disable-next-line @next/next/no-img-element -- unit-test projection of next/image
@@ -94,6 +98,33 @@ describe("/programs/asa (representative of asa/hkict/tct)", () => {
     expect(screen.getAllByRole("heading", {level: 3}).map(({textContent}) => textContent)).toEqual(
       asa.editions.map((edition) => edition.labelEn),
     );
+  });
+
+  // D-1: the `programs.<id>` namespaces carry a bare `title` and no metaTitle sibling, so each
+  // programme page brands it at runtime. All three edition-style pages are pinned here.
+  const programmePages = {
+    asa: () => import("@/app/[locale]/(public)/programs/asa/page"),
+    hkict: () => import("@/app/[locale]/(public)/programs/hkict/page"),
+    tct: () => import("@/app/[locale]/(public)/programs/tct/page"),
+  } as const;
+
+  it.each(["asa", "hkict", "tct"] as const)("brands the /programs/%s title in metadata for both locales", async (id) => {
+    const {generateMetadata} = await programmePages[id]();
+    const bundles = {en, "zh-HK": zh} as const;
+
+    for (const locale of ["en", "zh-HK"] as const) {
+      buildPageMetadataSpy.mockClear();
+      const programme = bundles[locale].programs[id];
+      const metadata = await generateMetadata({params: Promise.resolve({locale})});
+      expect(metadata).toMatchObject({
+        locale,
+        pathname: `/programs/${id}`,
+        title: `${programme.title}${locale === "zh-HK" ? "｜" : " | "}WiseTech Hong Kong`,
+        description: programme.description,
+      });
+      expect(metadata.title).not.toBe(programme.title);
+      expect(buildPageMetadataSpy).toHaveBeenCalledOnce();
+    }
   });
 
   it("stays server-only, without the retired ProgramDetail wrapper", () => {

@@ -22,7 +22,8 @@ describe('localizedPath', () => {
       canonical: 'http://localhost:3000/zh/membership',
       languages: {
         en: 'http://localhost:3000/membership',
-        'zh-HK': 'http://localhost:3000/zh/membership'
+        'zh-HK': 'http://localhost:3000/zh/membership',
+        'x-default': 'http://localhost:3000/membership'
       }
     });
   });

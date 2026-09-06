@@ -136,7 +136,10 @@ describe("programme editorial presentation", () => {
       expect(source).toContain(`item.id === '${id}'`);
       expect(source).toContain(mapping);
       expect(source).toContain(`pathname: '/programs/${id}'`);
-      expect(source).toContain("title: t('title')");
+      // D-1: the lowercase `programs.<id>` namespace has no metaTitle, so the page brands the
+      // bare `title` at runtime rather than shipping "<title>CPAI</title>" with no brand.
+      expect(source).toContain("title: brandedTitle(locale as AppLocale, t('title'))");
+      expect(source).not.toContain("title: t('title')");
       expect(source).toContain("description: t('description')");
       expect(source).toContain("image: program.image");
       expect(source).toContain("setRequestLocale(locale)");

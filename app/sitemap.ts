@@ -18,10 +18,12 @@ const locales: AppLocale[] = ["en", "zh-HK"];
 const anonymous = {kind: "anonymous", userId: null} as const;
 
 function alternates(pathname: string) {
+  const englishUrl = absoluteUrl(localizedPath("en", pathname));
   return {
     languages: {
-      en: absoluteUrl(localizedPath("en", pathname)),
+      en: englishUrl,
       "zh-HK": absoluteUrl(localizedPath("zh-HK", pathname)),
+      "x-default": englishUrl, // x-default -> English (design D-2): hreflang tags stay zh-HK, not the donor's zh-Hant.
     },
   };
 }
