@@ -19,10 +19,10 @@ const groupShape = navigationGroups.map((group) => ({
 describe("public shell navigation", () => {
   it("uses the approved group order, landing routes, and unique leaf ownership", () => {
     expect(groupShape).toEqual([
-      {id: "events-programmes", landingHref: "/events", eventFirst: true, links: ["/events", "/launchpad", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai"]},
+      {id: "events-programmes", landingHref: "/events", eventFirst: true, links: ["/events", "/launchpad", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai"]},
       {id: "membership-ecosystem", landingHref: "/membership", eventFirst: false, links: ["/membership", "/showcase"]},
       {id: "impact-insights", landingHref: "/news", eventFirst: false, links: ["/news", "/ai-ops", "/ai-transparency"]},
-      {id: "about-wtia", landingHref: "/about", eventFirst: false, links: ["/about", "/about/history", "/about/chairman", "/about/committees", "/contact"]},
+      {id: "about-wtia", landingHref: "/about", eventFirst: false, links: ["/about", "/about/history", "/about/chairman", "/about/committees", "/contact", "/partners"]},
     ]);
     const leaves = groupShape.flatMap(({links}) => links);
     expect(new Set(leaves).size).toBe(leaves.length);
@@ -55,7 +55,8 @@ describe("public shell navigation", () => {
   it("localizes one serializable model without adding visible strings to config", () => {
     const view = localizeNavigation((key) => `translated:${key}`);
     expect(view.groups[0]?.label).toBe("translated:groups.eventsProgrammes.label");
-    expect(view.groups[0]?.columns[1]?.links[0]?.label).toBe("translated:links.hkict");
+    expect(view.groups[0]?.columns[1]?.links[0]?.label).toBe("translated:links.programmes");
+    expect(view.groups[0]?.columns[1]?.links[1]?.label).toBe("translated:links.hkict");
     expect(view.actions.findEvent.label).toBe("translated:actions.findEvent");
     expect(view.memberPortal.label).toBe("translated:actions.memberSignIn");
     expect(JSON.parse(JSON.stringify(view))).toEqual(view);

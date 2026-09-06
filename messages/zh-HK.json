@@ -67,6 +67,7 @@
     "links": {
       "events": "活動",
       "launchpad": "創科起動",
+      "programmes": "計劃總覽",
       "hkict": "香港資訊及通訊科技獎",
       "asa": "亞洲智能應用程式大獎",
       "tct": "Tech to Connect",
@@ -80,7 +81,8 @@
       "history": "歷史",
       "chairman": "主席的話",
       "committees": "委員會",
-      "contact": "聯絡我們"
+      "contact": "聯絡我們",
+      "partners": "合作夥伴"
     },
     "actions": {
       "findEvent": "尋找活動",

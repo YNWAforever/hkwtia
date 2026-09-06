@@ -66,6 +66,7 @@
     "links": {
       "events": "Events",
       "launchpad": "Launch Pad",
+      "programmes": "Programmes",
       "hkict": "HKICT Awards",
       "asa": "Asia Smart App Awards",
       "tct": "Tech to Connect",
@@ -79,7 +80,8 @@
       "history": "History",
       "chairman": "Chairman's message",
       "committees": "Committees",
-      "contact": "Contact"
+      "contact": "Contact",
+      "partners": "Partners"
     },
     "actions": {
       "findEvent": "Find an event",

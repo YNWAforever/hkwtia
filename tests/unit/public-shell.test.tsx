@@ -132,9 +132,9 @@ describe("public shell server surfaces", () => {
     render(await SiteFooter({locale: "en"}));
     const footer = screen.getByRole("contentinfo");
     const expectedHrefs = [
-      "/events", "/launchpad", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
+      "/events", "/launchpad", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
       "/membership", "/showcase", "/news", "/ai-ops", "/ai-transparency", "/about", "/about/history",
-      "/about/chairman", "/about/committees", "/contact", "/privacy",
+      "/about/chairman", "/about/committees", "/contact", "/partners", "/privacy",
       // The Membership column carries the two action destinations as well; without them here a
       // dropped Join or Member sign-in link would leave the sweep untouched.
       "/join", "/member-login",
@@ -146,7 +146,7 @@ describe("public shell server surfaces", () => {
     );
 
     // A cardinality check passed a swap: pointing the member sign-in entry at the join href
-    // dropped /member-login from the footer and duplicated /join, leaving the total at 20. The
+    // dropped /member-login from the footer and duplicated /join, leaving the total at 22. The
     // sorted multiset is the every-leaf-once property this test claims, and it names the two hrefs.
     expect(targets.map((target) => target.getAttribute("href")).sort())
       .toEqual([...expectedHrefs].sort());
