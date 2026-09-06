@@ -47,7 +47,8 @@ export async function loadPendingJoinBillingState(
 // *real* status once Stripe (or the review workflow) has moved past pending_payment, not assume
 // payment is still pending. See docs/superpowers/plans/2026-09-01-wisetech-design-fidelity.md,
 // WP-6 Task 13 -- Task 12 started routing Community/Patron completions here before this existed,
-// which 404'd every non-pending_payment completion.
+// which 404'd every non-pending_payment completion. Stripe's webhook only writes memberships.status,
+// never membershipApplications.status, so checking application.status would reject the "active" case.
 export type JoinCompletionDisplay = "processing" | "review" | "active";
 
 export type JoinCompletionState = Readonly<{

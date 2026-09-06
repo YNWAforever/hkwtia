@@ -6,7 +6,7 @@ import {CheckoutStatus} from "@/components/billing/checkout-status";
 import type {AppLocale} from "@/i18n/routing";
 import {buildPageMetadata} from "@/lib/metadata";
 import {getActor} from "@/lib/auth/actor";
-import {loadJoinCompletionState} from "@/lib/membership/join-billing-state";
+import {loadJoinCompletionState, type JoinCompletionDisplay} from "@/lib/membership/join-billing-state";
 
 type Props = Readonly<{
   params: Promise<{locale: string}>;
@@ -43,7 +43,12 @@ export default async function CompletePage({params, searchParams}: Props) {
   const t = await getTranslations("Join");
   // Map the webhook-authoritative display state to the same status.{key}.{title,description}
   // copy /join/page.tsx's own resumption rendering already uses for these three outcomes.
-  const messageKey = state.display === "active" ? "complete" : state.display === "review" ? "review" : "checkout";
+  const displayToMessageKey: Record<JoinCompletionDisplay, "complete" | "review" | "checkout"> = {
+    active: "complete",
+    review: "review",
+    processing: "checkout",
+  };
+  const messageKey = displayToMessageKey[state.display];
   return (
     <section className="glass-card p-6 sm:p-10">
       <h1 className="font-serif text-4xl font-semibold">{t(`status.${messageKey}.title`)}</h1>
