@@ -45,6 +45,10 @@ const config = {
       startServerReadyTimeout: 120_000,
       settings: {
         chromeFlags: '--no-sandbox --disable-gpu --disable-dev-shm-usage',
+        // `extraHeaders` rides on every request the audited page makes, cross-origin included --
+        // not just the navigation to `baseUrl`. Today the ten routes make no third-party requests
+        // on a passive render, so the session cookie only ever reaches the Preview host; a future
+        // third-party script/font/image on an audited route would widen where it is sent.
         ...(cookie ? {extraHeaders: {Cookie: cookie}} : {})
       }
     },

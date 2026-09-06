@@ -1,4 +1,4 @@
-import {mkdirSync, writeFileSync} from "node:fs";
+import {chmodSync, mkdirSync, writeFileSync} from "node:fs";
 import {fileURLToPath} from "node:url";
 
 const STATE_DIR = ".playwright";
@@ -74,6 +74,12 @@ async function main() {
     mkdirSync(STATE_DIR, {recursive: true});
     writeFileSync(plan.statePath, `${JSON.stringify({cookies, origins: []}, null, 2)}\n`, {mode: 0o600});
     writeFileSync(plan.cookiePath, `_vercel_jwt=${jwt.value}\n`, {mode: 0o600});
+    // `writeFileSync`'s `mode` only applies when the call creates the file; a rerun that
+    // overwrites an existing file (from an earlier session, wider permissions) would silently
+    // keep those. chmod after every write so the perms are always tightened, not just on create.
+    // No-op on Windows (no POSIX permission bits); a real narrowing on POSIX.
+    chmodSync(plan.statePath, 0o600);
+    chmodSync(plan.cookiePath, 0o600);
     console.log(`preview session written for ${plan.origin} -> ${plan.statePath}, ${plan.cookiePath}`);
   } finally {
     await browser.close();
