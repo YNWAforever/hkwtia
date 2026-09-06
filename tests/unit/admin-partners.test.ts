@@ -62,7 +62,7 @@ describe("general partner repository", () => {
     const rows = [partner({id: "00000000-0000-4000-8000-000000000002", displayOrder: 1, nameEn: "Zulu", featured: false}), partner({id: "00000000-0000-4000-8000-000000000001", displayOrder: 1, nameEn: "Alpha", featured: true}), partner({id: "00000000-0000-4000-8000-000000000003", relationshipEndsOn: "2026-08-28"})];
     const result = await listPublishedPartners("en", {limit: 2, asOf: now}, rows as never);
     expect(result.map((row) => row.id)).toEqual(["00000000-0000-4000-8000-000000000001", "00000000-0000-4000-8000-000000000002"]);
-    expect(Object.keys(result[0]!).sort()).toEqual(["category", "displayOrder", "featured", "id", "logoAlt", "logoUrl", "name", "websiteUrl"]);
+    expect(Object.keys(result[0]!).sort()).toEqual(["category", "displayOrder", "featured", "id", "logoAlt", "logoUrl", "name", "relationshipEndsOn", "relationshipStartsOn", "websiteUrl"]);
     await expect(listPublishedPartners("en", {limit: 101, asOf: now}, rows as never)).rejects.toThrow();
   });
   it("applies identical bilingual-alt, clock, locale-order, and bound rules to injected and database sources", async () => {
