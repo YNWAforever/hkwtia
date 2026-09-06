@@ -3,6 +3,7 @@ import {describe, expect, it} from "vitest";
 import nextConfig from "@/next.config";
 import legacyUrls from "@/content/legacy-urls.json";
 import {publicRoutes} from "@/config/public-routes";
+import {wisetechDesignRedirects} from "@/config/wisetech-redirects";
 // Next bundles its own path-to-regexp fork and uses it internally to compile
 // `redirects()` `source` patterns into matchers (see next/dist/shared/lib/router
 // /utils/prepare-destination.js). Importing it here means "covered by some rule"
@@ -60,7 +61,10 @@ describe("legacy redirects", () => {
   it("makes every legacy rule permanent so link equity transfers", async () => {
     const redirects = await getRedirects();
     const preExisting = new Set(["/projects", "/history", "/members", "/members/:id"]);
-    const legacyRules = redirects.filter(({source}) => !preExisting.has(source));
+    // WiseTech design paths are 307s by design (config/wisetech-redirects.ts, D-5); only the
+    // hkwtia.org legacy urls carry link equity worth a 308.
+    const generated = new Set(wisetechDesignRedirects([...preExisting]).map(({source}) => source));
+    const legacyRules = redirects.filter(({source}) => !preExisting.has(source) && !generated.has(source));
 
     // Sanity check that the filter above actually found the legacy rules and
     // isn't vacuously passing over an empty array.

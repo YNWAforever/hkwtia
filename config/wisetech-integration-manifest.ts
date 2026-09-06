@@ -1,7 +1,9 @@
+// Relative, not `@/`: next.config.ts imports config/wisetech-redirects.ts, which imports this
+// file, and Next's config loader does not apply tsconfig paths.
 import {
   authoritativeSourceInventory,
   reportedArchiveIdentity,
-} from "@/config/wisetech-authoritative-source-inventory";
+} from "./wisetech-authoritative-source-inventory";
 
 export const integrationKinds = ["route", "cta", "form", "locale", "asset"] as const;
 export const integrationDispositions = ["retain", "merge", "redirect", "retire"] as const;

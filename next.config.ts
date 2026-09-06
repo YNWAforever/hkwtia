@@ -2,6 +2,7 @@ import type {NextConfig} from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 import legacyUrls from "./content/legacy-urls.json";
+import {wisetechDesignRedirects} from "./config/wisetech-redirects";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
@@ -153,11 +154,24 @@ const nextConfig: NextConfig = {
     return [{source: "/:path*", headers: [...securityHeaders]}];
   },
   async redirects() {
-    return [
+    // The four explicit rules pre-date the programme and stay as they are; the WiseTech design
+    // rules are generated from the manifest (config/wisetech-redirects.ts) and go before the
+    // hkwtia.org legacy list so a design path is never swallowed by a legacy pattern.
+    const explicitRedirects = [
       {source: "/projects", destination: "/programs/asa", permanent: true},
       {source: "/history", destination: "/about", permanent: true},
       {source: "/members", destination: "/showcase", permanent: false},
       {source: "/members/:id", destination: "/showcase", permanent: false},
+    ];
+    // Copied, not spread as-is: the generator returns frozen rules so no consumer can mutate
+    // the shared list, but Next's load-custom-routes reassigns `r.source`/`r.destination` in
+    // place on every rule it receives (basePath prefixing, unconditionally), and a frozen rule
+    // fails `next build` with "Cannot assign to read only property 'source'".
+    const designRedirects = wisetechDesignRedirects(explicitRedirects.map(({source}) => source))
+      .map((rule) => ({...rule}));
+    return [
+      ...explicitRedirects,
+      ...designRedirects,
       ...legacyPatternRedirects,
       ...legacyLiteralRedirects,
     ];
