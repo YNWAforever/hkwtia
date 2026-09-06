@@ -18,6 +18,7 @@ import {profilesRepository} from "@/lib/db/repos/profiles";
 import {buildJoinCallback, destinationForJoin, parseJoinContinuation, type JoinContinuation} from "@/lib/membership/join-navigation";
 import {companySchema, profileSchema} from "@/lib/membership/join-schema";
 import {completeApplication, startJoin} from "@/lib/membership/join-service";
+import type {JoinStep} from "@/lib/membership/onboarding";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {type BillingInterval} from "@/lib/membership/catalog";
 import {localizedPath} from "@/lib/urls";
@@ -38,6 +39,22 @@ async function formError(locale: AppLocale, field: string, key = "errors.require
 
 function defaultBillingInterval(plan: PlanCode): BillingInterval {
   return getPlan(plan).billingBehavior === "checkout" ? "annual" : "none";
+}
+
+// completeApplication() already knows exactly where the applicant belongs next --
+// redirect off that typed outcome directly instead of bouncing everyone back through
+// the generic /join?plan=...&application=... page to re-derive it.
+function redirectToOutcome(locale: AppLocale, plan: PlanCode, result: {applicationId: string; next: JoinStep; membershipId?: string}): never {
+  if (result.next === "profile" || result.next === "company") {
+    redirect(destinationForJoin(locale, plan, result.applicationId, result.next).href!);
+  }
+  if (result.next === "checkout") {
+    redirect(nextUrl(locale, "/join/checkout", {membership_id: result.membershipId ?? null}));
+  }
+  // "review" and "complete" both land on /join/complete, which renders three
+  // different projections (processing/review/active) off the membership's real
+  // status -- routing both outcomes here is intentional, not a placeholder.
+  redirect(nextUrl(locale, "/join/complete", {membership_id: result.membershipId ?? null}));
 }
 
 export async function requestMagicLink(locale: AppLocale, plan: PlanCode | null, continuation: JoinContinuation | null, _state: JoinFormState, formData: FormData): Promise<JoinFormState> {
@@ -103,7 +120,7 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
     // billingInterval is a real, validated input rather than something the server derives alone.
     const billingInterval = defaultBillingInterval(plan);
     const result = await completeApplication(actor, {plan, applicationId: id, billingInterval, profile: parsed.data, company: null});
-    redirect(nextUrl(locale, "/join", {plan, application: result.applicationId}));
+    redirectToOutcome(locale, plan, result);
   } catch (error) {
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
     return {message: t("errors.save")};
@@ -145,7 +162,7 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
       jobTitle: profile.jobTitle,
       locale: profile.locale,
     }, company: {...parsed.data, id: company.id}});
-    redirect(nextUrl(locale, "/join", {plan, application: result.applicationId}));
+    redirectToOutcome(locale, plan, result);
   } catch (error) {
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
     return {message: t("errors.save")};
