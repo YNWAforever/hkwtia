@@ -179,8 +179,11 @@ codes; a navigation failure is reported as `VERCEL_SHARE_URL_NAVIGATION_FAILED`
 because Playwright's own message would quote the share link.
 
 Lighthouse copies the `Cookie` header into every report it writes
-(`lhr.configSettings.extraHeaders`), so a run with `LHCI_COOKIE_FILE` set never
-uploads: it is forced to the filesystem target, and its reports land in the
+(`lhr.configSettings.extraHeaders`), so a run with `LHCI_COOKIE_FILE` set has
+`lighthouserc.js` select the filesystem target instead of the public one — do
+not pass `--upload.target` on the `lhci autorun` CLI for a cookie run, since a
+CLI flag overrides the rc file's `upload.target` and would silently restore the
+public upload. Its reports land in the
 git-ignored `.lighthouseci/` (Lighthouse's own working directory) and
 `.playwright/lighthouse` (the output directory). Those reports embed the session
 cookie, must be deleted together with the session files, and are never shared.

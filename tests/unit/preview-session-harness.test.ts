@@ -128,6 +128,9 @@ describe("preview session harness", () => {
       await expect(loadLighthouse({LHCI_BASE_URL: "http://hkwtia-x.vercel.app", LHCI_COOKIE_FILE: cookieFile()})).rejects.toThrow("LHCI_COOKIE_REQUIRES_HTTPS_VERCEL_PREVIEW");
       await expect(loadLighthouse({LHCI_BASE_URL: "https://example.com", LHCI_COOKIE_FILE: cookieFile()})).rejects.toThrow("LHCI_COOKIE_REQUIRES_HTTPS_VERCEL_PREVIEW");
       await expect(loadLighthouse({LHCI_BASE_URL: "https://evil.hkwtia-x.vercel.app", LHCI_COOKIE_FILE: cookieFile()})).rejects.toThrow("LHCI_COOKIE_REQUIRES_HTTPS_VERCEL_PREVIEW");
+      // PLAYWRIGHT_BASE_URL is the e2e fallback (see `baseUrl` above) but must not bypass the
+      // target check: a plain localhost dev server is not an https *.vercel.app Preview either.
+      await expect(loadLighthouse({PLAYWRIGHT_BASE_URL: "http://localhost:3000", LHCI_COOKIE_FILE: cookieFile()})).rejects.toThrow("LHCI_COOKIE_REQUIRES_HTTPS_VERCEL_PREVIEW");
       await expect(loadLighthouse({LHCI_COOKIE_FILE: cookieFile()})).rejects.toThrow("LHCI_COOKIE_REQUIRES_HTTPS_VERCEL_PREVIEW");
       await expect(loadLighthouse({LHCI_BASE_URL: "https://hkwtia.vercel.app", LHCI_COOKIE_FILE: cookieFile()})).rejects.toThrow("LHCI_COOKIE_PRODUCTION_TARGET_FORBIDDEN");
     });

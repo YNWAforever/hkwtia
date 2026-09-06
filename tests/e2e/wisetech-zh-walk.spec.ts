@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {expect, test} from "@playwright/test";
 
 import {publicRoutes} from "../../config/public-routes";
+import {buildRawMessageKeyPattern} from "../helpers/raw-message-key";
 
 // WP-8 row 8.4: the spec's "manual /zh walk" as a repeatable, read-only check. Every public
 // route under /zh must answer 200, declare a Chinese document language, carry exactly one h1,
@@ -12,11 +13,10 @@ import {publicRoutes} from "../../config/public-routes";
 // The raw-key pattern is built from the bundle's real top-level namespaces (read the same way
 // the sibling specs read the bundles), not a shape guess: a two-segment key such as
 // `Join.backToMembership` is caught, while `WTIA.org.hk` in the footer cannot match.
-const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const namespaces = Object.keys(
   JSON.parse(readFileSync(new URL("../../messages/zh-HK.json", import.meta.url), "utf8")) as Record<string, unknown>
 );
-const rawKey = new RegExp(`\\b(?:${namespaces.map(escapeRegExp).join("|")})\\.[A-Za-z]+(?:\\.[A-Za-z]+)*\\b`);
+const rawKey = buildRawMessageKeyPattern(namespaces);
 
 test.describe("zh-HK walk", () => {
   for (const route of publicRoutes) {
