@@ -45,16 +45,24 @@ function defaultBillingInterval(plan: PlanCode): BillingInterval {
 // redirect off that typed outcome directly instead of bouncing everyone back through
 // the generic /join?plan=...&application=... page to re-derive it.
 function redirectToOutcome(locale: AppLocale, plan: PlanCode, result: {applicationId: string; next: JoinStep; membershipId?: string}): never {
-  if (result.next === "profile" || result.next === "company") {
-    redirect(destinationForJoin(locale, plan, result.applicationId, result.next).href!);
+  switch (result.next) {
+    case "profile":
+    case "company":
+      redirect(destinationForJoin(locale, plan, result.applicationId, result.next).href!);
+    case "checkout":
+      redirect(nextUrl(locale, "/join/checkout", {membership_id: result.membershipId}));
+    case "review":
+    case "complete":
+      // "review" and "complete" both land on /join/complete, which renders three
+      // different projections (processing/review/active) off the membership's real
+      // status -- routing both outcomes here is intentional, not a placeholder.
+      redirect(nextUrl(locale, "/join/complete", {membership_id: result.membershipId}));
+    default:
+      // Exhaustiveness check: if a new JoinStep value is added, this will fail
+      // to compile unless it's handled above.
+      const _exhaustive: never = result.next;
+      throw new Error(`Unhandled JoinStep: ${_exhaustive}`);
   }
-  if (result.next === "checkout") {
-    redirect(nextUrl(locale, "/join/checkout", {membership_id: result.membershipId ?? null}));
-  }
-  // "review" and "complete" both land on /join/complete, which renders three
-  // different projections (processing/review/active) off the membership's real
-  // status -- routing both outcomes here is intentional, not a placeholder.
-  redirect(nextUrl(locale, "/join/complete", {membership_id: result.membershipId ?? null}));
 }
 
 export async function requestMagicLink(locale: AppLocale, plan: PlanCode | null, continuation: JoinContinuation | null, _state: JoinFormState, formData: FormData): Promise<JoinFormState> {
