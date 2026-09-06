@@ -19,6 +19,7 @@ import {buildJoinCallback, destinationForJoin, parseJoinContinuation, type JoinC
 import {companySchema, profileSchema} from "@/lib/membership/join-schema";
 import {completeApplication, startJoin} from "@/lib/membership/join-service";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
+import {type BillingInterval} from "@/lib/membership/catalog";
 import {localizedPath} from "@/lib/urls";
 
 const emailSchema = z.string().trim().email();
@@ -33,6 +34,10 @@ function nextUrl(locale: AppLocale, pathname: string, values: Record<string, str
 async function formError(locale: AppLocale, field: string, key = "errors.required"): Promise<JoinFormState> {
   const t = await getTranslations({locale, namespace: "Join"});
   return {fieldErrors: {[field]: t(key)}};
+}
+
+function defaultBillingInterval(plan: PlanCode): BillingInterval {
+  return getPlan(plan).billingBehavior === "checkout" ? "annual" : "none";
 }
 
 export async function requestMagicLink(locale: AppLocale, plan: PlanCode | null, continuation: JoinContinuation | null, _state: JoinFormState, formData: FormData): Promise<JoinFormState> {
@@ -96,7 +101,7 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
     // No interval-picker UI exists yet (out of scope here) -- this mirrors the derivation
     // completeApplication() used to make internally, now explicit at the caller since
     // billingInterval is a real, validated input rather than something the server derives alone.
-    const billingInterval = getPlan(plan).billingBehavior === "checkout" ? "annual" : "none";
+    const billingInterval = defaultBillingInterval(plan);
     const result = await completeApplication(actor, {plan, applicationId: id, billingInterval, profile: parsed.data, company: null});
     redirect(nextUrl(locale, "/join", {plan, application: result.applicationId}));
   } catch (error) {
@@ -133,7 +138,7 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
     if (!company) return {message: t("errors.save")};
     const profile = await profilesRepository.getById(actor, actor.profileId);
     if (!profile) return {message: t("errors.profile")};
-    const billingInterval = getPlan(plan).billingBehavior === "checkout" ? "annual" : "none";
+    const billingInterval = defaultBillingInterval(plan);
     const result = await completeApplication(actor, {plan, applicationId, billingInterval, profile: {
       displayName: profile.displayName,
       phone: profile.phone,
