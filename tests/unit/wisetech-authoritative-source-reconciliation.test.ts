@@ -13,10 +13,10 @@ import {
 const resolvableDestinations = new Set([
   "/", "/about", "/about/chairman", "/about/committees", "/about/history", "/ai-ops",
   "/ai-transparency", "/contact", "/events", "/events/[slug]", "/join", "/join/complete",
-  "/launchpad", "/membership", "/news", "/news/[slug]", "/portal", "/portal/billing",
+  "/launchpad", "/membership", "/news", "/news/[slug]", "/partners", "/portal", "/portal/billing",
   "/portal/company", "/portal/company/listing", "/portal/company/seats", "/portal/directory",
   "/portal/documents", "/portal/events", "/portal/profile", "/privacy", "/programmes",
-  "/programs/asa", "/programs/cpai", "/programs/hkict", "/programs/tct", "/partners",
+  "/programs/asa", "/programs/cpai", "/programs/hkict", "/programs/tct",
   "/showcase", "/showcase/[slug]", "/unsubscribe",
 ]);
 

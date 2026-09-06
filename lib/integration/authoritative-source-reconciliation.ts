@@ -25,6 +25,10 @@ type UnknownRecord = Record<string, unknown>;
 
 const expectedReportedArchiveFingerprint = "140b35532895b728c8e4d73ca56d1d00653b69d57ae8366a5460c61249715c62";
 
+// Each hash covers every field of its inventory group's rows, including hkwtia's own
+// `disposition`/`canonicalPath`. A deliberate re-classification (WP-7 un-retired `/programmes`
+// and `/partners`) rotates the `sitemapRoutes` and `navigationTargets` values together with the
+// regression test that pins them — a differing hash found any other way is tampering, not drift.
 const expectedFingerprints = Object.freeze({
   identity: "e2054bb31977224ad9ccab1d59f122a13e54d426eb95b98aeaf0e3f0cdcfc102",
   locales: "5977857e5ddad59cb252cebcafea43b7a3563098b7778aa6c4d816a7b68c5d41",

@@ -426,7 +426,9 @@ describe("WiseTech route parity manifest", () => {
     expect(bySource.get("/programmes")).toMatchObject({id: "route-design-programmes", disposition: "retain", canonicalPath: "/programmes", evidence: "hkwtia-repository", sourceEvidenceId: "sitemap-29"});
     expect(wisetechIntegrationManifest.filter(({disposition}) => disposition === "retire")).toHaveLength(13);
     for (const route of ["/partners", "/programmes"]) expect(appRoutes.has(route), route).toBe(true);
-    expect(authoritativeSourceInventory.navigationTargets.filter(({path}) => path === "programmes").every(({disposition, canonicalPath}) => disposition === "retain" && canonicalPath === "/programmes")).toBe(true);
+    const programmesTargets = authoritativeSourceInventory.navigationTargets.filter(({path}) => path === "programmes");
+    expect(programmesTargets).toHaveLength(3);
+    expect(programmesTargets.every(({disposition, canonicalPath}) => disposition === "retain" && canonicalPath === "/programmes")).toBe(true);
   });
 
   it("rejects duplicate identity, missing fields and invalid retire destinations", async () => {
