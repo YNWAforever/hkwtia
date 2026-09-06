@@ -80,7 +80,7 @@ The validator receives the full source-to-destination mapping and rejects a fabr
 
 ## Design-document routes redirected to real destinations
 
-Since WP-7 every `merge` route below is a real `next.config.ts` redirect (`permanent: false`), generated from the manifest by `config/wisetech-redirects.ts` and served for the bare path, `/en/<path>` and `/zh/<path>` (the donor served both prefixes). A static source that merges into a dynamic page redirects to that page's static prefix (`/request-introduction` → `/showcase`; the two historical event paths → `/events`). `/members/[slug]` yields to the pre-existing explicit `/members/:id` rule, whose `/en` and `/zh` variants are generated from that rule. `tests/unit/wisetech-redirects.test.ts` pins all of this against the frozen inventory.
+Since WP-7 every `merge` route below is a real `next.config.ts` redirect (`permanent: false`), generated from the manifest by `config/wisetech-redirects.ts` and served for the bare path, `/en/<path>` and `/zh/<path>` (the donor served both prefixes). A static source that merges into a dynamic page redirects to that page's static prefix, as `/request-introduction` → `/showcase` does below; the two historical event paths that redirect to `/events` the same way are classified in the reconciliation-alias table under "Authoritative donor route reconciliation" further down, not in the table immediately below. `/members/[slug]` yields to the pre-existing explicit `/members/:id` rule, whose `/en` and `/zh` variants are generated from that rule. `tests/unit/wisetech-redirects.test.ts` pins all of this against the frozen inventory.
 
 | Real destination | Design-document sources classified `merge` |
 |---|---|
