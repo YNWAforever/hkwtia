@@ -120,9 +120,9 @@ describe("public shell server surfaces", () => {
     const footer = screen.getByRole("contentinfo");
     const hrefs = within(footer).getAllByRole("link").map((link) => link.getAttribute("href"));
     for (const href of [
-      "/events", "/launchpad", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
+      "/events", "/launchpad", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
       "/membership", "/showcase", "/news", "/ai-ops", "/ai-transparency", "/about", "/about/history",
-      "/about/chairman", "/about/committees", "/contact", "/privacy",
+      "/about/chairman", "/about/committees", "/contact", "/partners", "/privacy",
     ]) expect(hrefs, href).toContain(href);
     expect(within(footer).getByRole("heading", {level: 2, name: "What should Hong Kong build next?"}))
       .toBeInTheDocument();

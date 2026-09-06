@@ -35,8 +35,12 @@ type PublicShellAction = Readonly<{id: "find-event" | "join-wisetech"; href: Pub
 // description tile went with the WP-2 rewrite, so `groups.*.description` was swept in Task 9.
 // Re-adding a key here means re-adding a renderer, not just a string.
 // WP-7 (design D-3): /programmes leads the Programmes column and /partners joins Connect. The
-// mobile accordion shows a group's first five leaves, so tct and cpai reach mobile users through
-// /programmes, the desktop menu and the footer (errata E-19).
+// mobile accordion shows a group's first five leaves, so tct and cpai (now the Programmes
+// column's sixth and seventh entries) and /partners (the About group's sixth leaf) are cut from
+// that accordion. tct and cpai reach mobile users through /programmes, the desktop menu and the
+// footer; /partners reaches them through the footer's About column and the home page's partner
+// wall "view all" links (components/home/legacy-network.tsx), and reaches desktop users through
+// the mega menu (errata E-19).
 export const navigationGroups = [
   {id: "events-programmes", landingHref: "/events", eventFirst: true, labelKey: "groups.eventsProgrammes.label",
     feature: {labelKey: "feature.eventsProgrammes.label", titleKey: "feature.eventsProgrammes.title", copyKey: "feature.eventsProgrammes.copy", ctaKey: "feature.eventsProgrammes.cta", href: "/events"}, columns: [

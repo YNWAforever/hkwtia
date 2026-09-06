@@ -64,12 +64,13 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
   // Donor .footer-links (commit f91ecc5 :1030) is four columns, its own set being
   // Explore / Connect / Membership / Contact. Three of that Connect column's five links do have
   // canonical destinations here — /members and /solutions merge into /showcase, /gba into
-  // /launchpad and /partner-with-us into /contact (config/wisetech-integration-manifest.ts);
-  // only /partners retires. It is unusable for a different reason: reusing it would either
+  // /launchpad and /partner-with-us into /contact (config/wisetech-integration-manifest.ts).
+  // /partners is retained since WP-7 and rendered in the About column below; only /contact is
+  // filtered out of that leaf list. It is unusable for a different reason: reusing it would either
   // repeat /contact in two columns, breaking the every-leaf-appears-once property that
-  // tests/unit/public-shell.test.tsx pins through its exact target count, or leave hkwtia's five
-  // About leaves with no column at all. hkwtia's fourth grouping is therefore About (errata
-  // E-21), and every one of the 16 navigation leaves appears exactly once.
+  // tests/unit/public-shell.test.tsx pins through its exact target count, or leave hkwtia's About
+  // leaves with no column at all. hkwtia's fourth grouping is therefore About (errata
+  // E-21), and every one of the 18 navigation leaves appears exactly once.
   const columns: readonly FooterColumn[] = [
     {id: "explore", label: t("columns.explore"), links: leaves("events-programmes")},
     {

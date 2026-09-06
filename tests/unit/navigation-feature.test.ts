@@ -44,6 +44,25 @@ describe("navigation feature aside", () => {
     }
   });
 
+  it("resolves every group, column, and link labelKey in both bundles to a string", () => {
+    // NavigationMessageKey is a hand-maintained union (config/navigation.ts) — a typo in it is a
+    // valid TypeScript string literal, so nothing here catches it except walking every labelKey
+    // the config actually carries against the real message bundles.
+    const keys = new Set<string>();
+    for (const group of navigationGroups) {
+      keys.add(group.labelKey);
+      for (const column of group.columns) {
+        keys.add(column.labelKey);
+        for (const link of column.links) keys.add(link.labelKey);
+      }
+    }
+    for (const key of keys) {
+      for (const [name, bundle] of [["en", en], ["zh-HK", zh]] as const) {
+        expect(messageAt(bundle, `Navigation.${key}`), `${name}:${key}`).toBeTypeOf("string");
+      }
+    }
+  });
+
   it("carries the feature into the localized view model", () => {
     const view = localizeNavigation((key) => `translated:${key}`);
     expect(view.groups[0]?.feature).toEqual({
