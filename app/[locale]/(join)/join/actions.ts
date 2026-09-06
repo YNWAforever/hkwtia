@@ -93,7 +93,11 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
       redirect(destination.href!);
     }
 
-    const result = await completeApplication(actor, {plan, applicationId: id, profile: parsed.data, company: null});
+    // No interval-picker UI exists yet (out of scope here) -- this mirrors the derivation
+    // completeApplication() used to make internally, now explicit at the caller since
+    // billingInterval is a real, validated input rather than something the server derives alone.
+    const billingInterval = getPlan(plan).billingBehavior === "checkout" ? "annual" : "none";
+    const result = await completeApplication(actor, {plan, applicationId: id, billingInterval, profile: parsed.data, company: null});
     redirect(nextUrl(locale, "/join", {plan, application: result.applicationId}));
   } catch (error) {
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
@@ -129,7 +133,8 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
     if (!company) return {message: t("errors.save")};
     const profile = await profilesRepository.getById(actor, actor.profileId);
     if (!profile) return {message: t("errors.profile")};
-    const result = await completeApplication(actor, {plan, applicationId, profile: {
+    const billingInterval = getPlan(plan).billingBehavior === "checkout" ? "annual" : "none";
+    const result = await completeApplication(actor, {plan, applicationId, billingInterval, profile: {
       displayName: profile.displayName,
       phone: profile.phone,
       jobTitle: profile.jobTitle,

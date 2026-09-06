@@ -44,7 +44,7 @@ describe("profile-backed member identity", () => {
       },
     };
 
-    await completeApplication(member, {plan: "community", profile: {displayName: "Member"}, company: null}, dependencies);
+    await completeApplication(member, {plan: "community", billingInterval: "none", profile: {displayName: "Member"}, company: null}, dependencies);
 
     expect(ensuredIds).toEqual(["member-1"]);
     expect(membershipInputs).toMatchObject([{ownerUserId: "member-1"}]);

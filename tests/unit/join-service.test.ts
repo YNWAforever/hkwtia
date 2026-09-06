@@ -1,4 +1,4 @@
-import {describe, expect, it} from "vitest";
+import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 
 import {startJoin} from "@/lib/membership/join-service";
 import {completeApplication} from "@/lib/membership/onboarding";
@@ -102,6 +102,18 @@ function harness() {
 }
 
 describe("membership join orchestration", () => {
+  // The "corporate" checkout fixture below needs resolveMembershipOption() (catalog.ts) to see
+  // a configured Stripe price mapping for the "annual" interval, or completeApplication() fails
+  // closed with UNSUPPORTED_BILLING_INTERVAL before reaching the behavior under test.
+  beforeEach(() => {
+    vi.stubEnv("STRIPE_STARTUP_PRICE_ID", "price_startup");
+    vi.stubEnv("STRIPE_CORPORATE_PRICE_ID", "price_corporate");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("creates a draft and reuses it when a join page is refreshed", async () => {
     const deps = harness();
     const first = await startJoin(actor, {plan: "startup", applicationId: null}, deps);
@@ -118,6 +130,7 @@ describe("membership join orchestration", () => {
       actor,
       {
         plan: "community",
+        billingInterval: "none",
         profile: {displayName: "Community Member"},
         company: null,
       },
@@ -141,6 +154,7 @@ describe("membership join orchestration", () => {
       {
         applicationId: result.applicationId,
         plan: "community",
+        billingInterval: "none",
         profile: {displayName: "Community Member"},
         company: null,
       },
@@ -155,6 +169,7 @@ describe("membership join orchestration", () => {
       actor,
       {
         plan: "corporate",
+        billingInterval: "annual",
         profile: {displayName: "Corporate Member"},
         company: {id: "company-a", legalName: "Corporate Ltd", displayName: "Corporate"},
       },
@@ -172,6 +187,7 @@ describe("membership join orchestration", () => {
       actor,
       {
         plan: "patron",
+        billingInterval: "none",
         profile: {displayName: "Patron"},
         company: null,
       },
@@ -181,5 +197,29 @@ describe("membership join orchestration", () => {
     expect(result.next).toBe("review");
     expect(result.checkout).toBeUndefined();
     expect(deps.inspect().memberships).toMatchObject([{planCode: "patron", status: "pending_review", billingInterval: "none"}]);
+  });
+});
+
+describe("completeApplication validates billingInterval before any mutation", () => {
+  it("rejects an unsupported interval for a paid plan before creating an application or profile", async () => {
+    const deps = harness();
+
+    await expect(
+      completeApplication(
+        actor,
+        {
+          plan: "startup",
+          billingInterval: "monthly" as BillingInterval,
+          applicationId: null,
+          profile: {displayName: "Test User"},
+          company: {id: "company-a", legalName: "Startup Ltd", displayName: "Startup"},
+        },
+        deps,
+      ),
+    ).rejects.toThrow();
+
+    const state = deps.inspect();
+    expect(state.applications.size).toBe(0);
+    expect(state.memberships).toHaveLength(0);
   });
 });
