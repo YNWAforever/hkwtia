@@ -4,9 +4,11 @@ vi.mock("next-intl/server", () => ({
   getTranslations: async () => (key: string) => `translated:${key}`,
   setRequestLocale: vi.fn(),
 }));
-// Portal and Admin layouts import these at module scope. `@/lib/auth/actor` transitively pulls
-// in `lib/auth/server`, which calls `authEnv()` while it evaluates -- a hard failure here without
-// the Neon Auth pair, so it must be mocked even though the layouts' static `metadata` export
+// Portal and Admin layouts import `@/lib/auth/actor` at module scope. Under vitest, the
+// `authEnv()` call inside `lib/auth/server` is not itself fatal here -- this same file imports
+// member-login/page.tsx -> actions.ts -> lib/auth/server unmocked below. What this mock actually
+// needs to cut is `@/lib/auth/actor` -> `lib/db/repos/profile-identities` -> `lib/db/client`,
+// which constructs a `Pool` at module scope, even though the layouts' static `metadata` export
 // never calls it.
 vi.mock("@/lib/auth/actor", () => ({requireActor: vi.fn(), getActor: vi.fn()}));
 vi.mock("@/lib/admin/page-auth", () => ({requireAdminPageActor: vi.fn()}));
