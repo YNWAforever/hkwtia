@@ -17,7 +17,7 @@ const labels = {
 };
 
 function partner(id: string) {
-  return {id, name: `Partner ${id}`, category: "supporting" as const, websiteUrl: null, logoUrl: null, logoAlt: null, displayOrder: 1, featured: false};
+  return {id, name: `Partner ${id}`, category: "supporting" as const, websiteUrl: null, logoUrl: null, logoAlt: null, displayOrder: 1, featured: false, relationshipStartsOn: null, relationshipEndsOn: null};
 }
 
 describe("LegacyNetwork", () => {
