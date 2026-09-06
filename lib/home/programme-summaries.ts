@@ -11,6 +11,7 @@ export type ProgrammeSummary = Readonly<{
   type: ProgrammeType;
   editionCount: number | null;
   latestYear: number | null;
+  firstYear: number | null;
 }>;
 
 // content/programs/index.ts is route identity only (id/namespace/image); the factual record --
@@ -19,14 +20,17 @@ export type ProgrammeSummary = Readonly<{
 export function summarizeProgrammes(): readonly ProgrammeSummary[] {
   return programs.map((record) => {
     if (record.id === 'cpai') {
-      return {...record, type: 'credential', editionCount: null, latestYear: null};
+      return {...record, type: 'credential', editionCount: null, latestYear: null, firstYear: null};
     }
     if (record.id === 'hkict') {
-      return {...record, type: 'event-series', editionCount: hkict.editions.length, latestYear: Math.max(...hkict.editions.map((edition) => edition.year))};
+      const years = hkict.editions.map((edition) => edition.year);
+      return {...record, type: 'event-series', editionCount: hkict.editions.length, latestYear: Math.max(...years), firstYear: Math.min(...years)};
     }
     if (record.id === 'tct') {
-      return {...record, type: 'event-series', editionCount: tct.editions.length, latestYear: Math.max(...tct.editions.map((edition) => edition.year))};
+      const years = tct.editions.map((edition) => edition.year);
+      return {...record, type: 'event-series', editionCount: tct.editions.length, latestYear: Math.max(...years), firstYear: Math.min(...years)};
     }
-    return {...record, type: 'event-series', editionCount: asa.editions.length, latestYear: Math.max(...asa.editions.map((edition) => edition.yearStart))};
+    const years = asa.editions.map((edition) => edition.yearStart);
+    return {...record, type: 'event-series', editionCount: asa.editions.length, latestYear: Math.max(...years), firstYear: Math.min(...years)};
   });
 }
