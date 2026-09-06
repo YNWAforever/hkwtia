@@ -129,12 +129,14 @@ describe("page copy scope", () => {
       AiTransparency: 31,
       // WP-7 Task 3: the /programmes index copy.
       Programmes: 33,
+      // WP-7 Task 5: the /partners page copy.
+      Partners: 38,
       // WP-5 added one editable field: the footer tagline, moved out of the
       // deliberately-excluded structural Footer namespace into this new,
       // narrowly-scoped one so it alone (not the rest of Footer) is staff-editable.
       MarketingExtras: 1,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(487);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(525);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

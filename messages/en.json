@@ -937,6 +937,62 @@
       "partner": "Become a programme partner"
     }
   },
+  "Partners": {
+    "metaTitle": "Partners | WiseTech Hong Kong",
+    "metaDescription": "WTIA's published partner records: supporting organisations, regional, media, programme and sponsor partners, each with a confirmed relationship and confirmed logo rights.",
+    "hero": {
+      "eyebrow": "Partner ecosystem",
+      "title": "The organisations WTIA works with, on the record.",
+      "lead": "Every record here is published by WTIA with a confirmed relationship and confirmed logo rights. Nothing is listed on the strength of a historical logo alone.",
+      "breadcrumbCurrent": "Partners"
+    },
+    "sourceNote": {
+      "eyebrow": "Relationship context",
+      "title": "Published records, not a scraped logo wall.",
+      "copy": "A record appears only after WTIA confirms both the relationship and the right to show the logo, and only while the relationship window is current.",
+      "count": "{count, plural, one {# published partner record} other {# published partner records}}"
+    },
+    "categories": {
+      "label": "Partner record categories",
+      "supporting": "Supporting Organisations",
+      "regional": "Regional Partners",
+      "media": "Media Partners",
+      "programme": "Programme Partners",
+      "sponsor": "Sponsors"
+    },
+    "group": {
+      "eyebrow": "Category",
+      "count": "{count, plural, one {# published record} other {# published records}}"
+    },
+    "record": {
+      "badge": "Published record",
+      "relationship": "Relationship",
+      "relationshipCopy": {
+        "supporting": "Listed by WTIA as a supporting organisation.",
+        "regional": "Listed by WTIA as a regional partner.",
+        "media": "Listed by WTIA as a media partner.",
+        "programme": "Listed by WTIA as a programme partner.",
+        "sponsor": "Listed by WTIA as a sponsor."
+      },
+      "website": "Website",
+      "status": "Current status",
+      "confirmed": "Confirmed by WTIA",
+      "since": "Confirmed by WTIA, since {year}",
+      "window": "Confirmed by WTIA, {start} to {end}"
+    },
+    "empty": {
+      "label": "Published records",
+      "title": "No published partner records yet.",
+      "copy": "Partner records appear here once WTIA confirms the relationship and the logo rights for each one.",
+      "action": "Contact the team"
+    },
+    "update": {
+      "eyebrow": "Update a record",
+      "title": "Represent one of these organisations?",
+      "copy": "Contact the team to confirm the present relationship, correct a listing or discuss a new collaboration.",
+      "action": "Contact the team"
+    }
+  },
   "LaunchPad": {
     "metaTitle": "Launch Pad | WTIA",
     "metaDescription": "WTIA's go-global cohort programme, landing partners, and funding-scheme picker.",

@@ -45,6 +45,7 @@ describe("LegacyNetwork", () => {
     const supportingTab = screen.getByRole("button", {name: /Supporting Organizations/});
     expect(within(supportingTab).getByText("02")).toBeInTheDocument();
     expect(screen.getByText("Partner 1")).toBeInTheDocument();
+    for (const link of screen.getAllByRole("link", {name: labels.viewAllAction})) expect(link).toHaveAttribute("href", "/partners");
     expect(screen.getByText(labels.previewNote.replace("{shown}", "2").replace("{total}", "2"))).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", {name: /Regional Partners/}));

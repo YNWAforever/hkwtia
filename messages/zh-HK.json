@@ -937,6 +937,62 @@
       "partner": "成為計劃夥伴"
     }
   },
+  "Partners": {
+    "metaTitle": "合作夥伴｜WiseTech Hong Kong",
+    "metaDescription": "WTIA 已發布的夥伴紀錄：支持機構、區域夥伴、媒體夥伴、計劃夥伴及贊助機構，每項均已確認合作關係及標誌使用權。",
+    "hero": {
+      "eyebrow": "夥伴生態系統",
+      "title": "與 WTIA 合作的機構，有紀錄可依。",
+      "lead": "此處每項紀錄均由 WTIA 發布，並已確認合作關係及標誌使用權；不會單憑過往標誌而列入名單。",
+      "breadcrumbCurrent": "合作夥伴"
+    },
+    "sourceNote": {
+      "eyebrow": "關係脈絡",
+      "title": "已發布的紀錄，而非抓取而來的標誌牆。",
+      "copy": "紀錄只會在 WTIA 同時確認合作關係及標誌使用權後出現，並只在合作期內顯示。",
+      "count": "{count} 項已發布夥伴紀錄"
+    },
+    "categories": {
+      "label": "夥伴紀錄分類",
+      "supporting": "支持機構",
+      "regional": "區域夥伴",
+      "media": "媒體夥伴",
+      "programme": "計劃夥伴",
+      "sponsor": "贊助機構"
+    },
+    "group": {
+      "eyebrow": "分類",
+      "count": "{count} 項已發布紀錄"
+    },
+    "record": {
+      "badge": "已發布紀錄",
+      "relationship": "關係",
+      "relationshipCopy": {
+        "supporting": "由 WTIA 列為支持機構。",
+        "regional": "由 WTIA 列為區域夥伴。",
+        "media": "由 WTIA 列為媒體夥伴。",
+        "programme": "由 WTIA 列為計劃夥伴。",
+        "sponsor": "由 WTIA 列為贊助機構。"
+      },
+      "website": "網站",
+      "status": "現時狀態",
+      "confirmed": "已由 WTIA 確認",
+      "since": "已由 WTIA 確認，自 {year} 年起",
+      "window": "已由 WTIA 確認，{start} 至 {end}"
+    },
+    "empty": {
+      "label": "已發布紀錄",
+      "title": "目前尚未有已發布的夥伴紀錄。",
+      "copy": "當 WTIA 逐項確認合作關係及標誌使用權後，夥伴紀錄便會在此顯示。",
+      "action": "聯絡團隊"
+    },
+    "update": {
+      "eyebrow": "更新紀錄",
+      "title": "你是否代表以上機構？",
+      "copy": "請聯絡團隊確認現時關係、修正名單，或洽談新合作。",
+      "action": "聯絡團隊"
+    }
+  },
   "LaunchPad": {
     "metaTitle": "創科起動｜WTIA",
     "metaDescription": "WTIA 的全球市場小組計劃、落地夥伴及資助計劃配對工具。",
