@@ -1345,7 +1345,7 @@
     "activityStrip": {
       "label": "相關活動",
       "openLabel": "開放活動",
-      "launchpadLabel": "創科加速平台",
+      "launchpadLabel": "創科起動",
       "showcaseLabel": "方案展示"
     },
     "resultsHead": {
@@ -1367,9 +1367,9 @@
     "recommendations": {
       "items": {
         "launchpad": {
-          "title": "創科加速平台",
+          "title": "創科起動",
           "copy": "為初創企業提供大灣區市場進入、落地支援及買家配對。",
-          "cta": "探索創科加速平台"
+          "cta": "探索創科起動"
         },
         "showcase": {
           "title": "方案展示",
