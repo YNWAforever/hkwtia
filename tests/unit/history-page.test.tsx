@@ -121,7 +121,7 @@ describe("milestone timeline", () => {
     expect(screen.queryByRole("heading", {level: 2, name: "2004"})).not.toBeInTheDocument();
   });
 
-  it("pins the current factual count, year order, and three featured destinations", async () => {
+  it("pins the current factual count, year order, and six featured destinations", async () => {
     const actual = await vi.importActual<typeof import("@/content/milestones")>("@/content/milestones");
     const history = milestonesOnly(actual.milestones);
 
@@ -132,9 +132,12 @@ describe("milestone timeline", () => {
       2014, 2013, 2007, 2006, 2005, 2003, 2002, 2001,
     ]);
     expect(featuredOnly(history).map(({slug}) => slug)).toEqual([
+      "2001-establishment-of-wtia",
+      "2014-wi-fi-hk",
       "the-strategies-for-expanding-global-internet-of-things-iot-markets",
       "new-term-of-executive-committee-2022-2024",
       "wtia-21st-anniversary-celebration-and-inauguration-gala-dinner",
+      "asia-smart-innovation-awards-2025",
     ]);
   });
 });

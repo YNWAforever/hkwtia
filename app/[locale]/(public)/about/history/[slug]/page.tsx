@@ -79,12 +79,18 @@ export default async function HistoryDetailPage({params}: Props) {
       />
       <Section labelledBy="history-story-title">
         <SectionHeading eyebrow={t("eyebrow")} title={t("storyTitle")} headingId="history-story-title" variant="stacked" />
-        <div className="max-w-3xl space-y-6 text-lg leading-relaxed text-muted-foreground">
-          {paragraphs.slice(1).map((paragraph, index) => (
-            // Paragraphs belong to one frozen content record and never reorder.
-            <p key={index}>{paragraph}</p>
-          ))}
-        </div>
+        {/* paragraphs[0] is already the hero lead, so the body is what follows it.
+            A single-paragraph milestone leaves nothing here: render the container
+            only when there is something to put in it, rather than an empty div
+            under the section heading. The gallery below still fills the section. */}
+        {paragraphs.length > 1 ? (
+          <div className="max-w-3xl space-y-6 text-lg leading-relaxed text-muted-foreground">
+            {paragraphs.slice(1).map((paragraph, index) => (
+              // Paragraphs belong to one frozen content record and never reorder.
+              <p key={index}>{paragraph}</p>
+            ))}
+          </div>
+        ) : null}
         {images.length > 0 ? (
           <div className="mt-12">
             <MediaGallery images={images} />

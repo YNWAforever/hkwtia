@@ -84,11 +84,21 @@ vi.mock("next/image", async () => {
   };
 });
 
+// Content order, which is the file's own chronological order. The 2001, 2014 and
+// 2025 entries were added to the featured set so the homepage archive grid fills
+// its four cards from more than one night in 2022; each one also gains a detail
+// page and a sitemap entry, which is what this list guards.
 const featuredSlugs = [
+  "2001-establishment-of-wtia",
+  "2014-wi-fi-hk",
   "the-strategies-for-expanding-global-internet-of-things-iot-markets",
   "new-term-of-executive-committee-2022-2024",
   "wtia-21st-anniversary-celebration-and-inauguration-gala-dinner",
+  "asia-smart-innovation-awards-2025",
 ] as const;
+// A milestone-kind record that is deliberately not featured, so it must have no
+// detail page, no metadata and a 404.
+const unfeaturedSlug = "2002-the-1st-wtia-panel-discussion-inter-operator-sms";
 const gallerySlug = "wtia-21st-anniversary-celebration-and-inauguration-gala-dinner";
 
 describe("history detail pages", () => {
@@ -105,7 +115,7 @@ describe("history detail pages", () => {
     expect((messages.History as {storyTitle: string}).storyTitle).toBe(approvedStoryTitle[locale]);
   });
 
-  it("generates exactly the three pinned featured milestone params in content order", () => {
+  it("generates exactly the six pinned featured milestone params in content order", () => {
     expect(generateStaticParams()).toEqual(featuredSlugs.map((slug) => ({slug})));
   });
 
@@ -186,7 +196,7 @@ describe("history detail pages", () => {
 
     buildPageMetadataSpy.mockClear();
     expect(await generateMetadata({
-      params: Promise.resolve({locale: "en", slug: "2001-establishment-of-wtia"}),
+      params: Promise.resolve({locale: "en", slug: unfeaturedSlug}),
     })).toEqual({});
     expect(buildPageMetadataSpy).not.toHaveBeenCalled();
   });
@@ -200,7 +210,7 @@ describe("history detail pages", () => {
     for (const slug of [
       memberStory!.slug,
       pressRelease!.slug,
-      "2001-establishment-of-wtia",
+      unfeaturedSlug,
       "unknown-history-record",
     ]) {
       notFoundSpy.mockClear();
