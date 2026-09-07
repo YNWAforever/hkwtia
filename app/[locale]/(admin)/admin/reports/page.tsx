@@ -3,7 +3,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {z} from "zod";
 
 import {BoardDraftList} from "@/components/admin/board-draft-list";
-import {ReportCards, type ReportCardLabels} from "@/components/admin/report-cards";
+import {ReportCards, toReportPeriodMessage, type ReportCardLabels} from "@/components/admin/report-cards";
 import type {AppLocale} from "@/i18n/routing";
 import {listBoardDrafts} from "@/lib/admin/board-drafts";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
@@ -62,7 +62,7 @@ export default async function AdminReportsPage({params, searchParams}: Props) {
     },
   };
   const labels: ReportCardLabels = {
-    cardsLabel: t("cardsLabel"), period: t("period"), arr: t("arr"), arrDescription: t("arrDescription"), mrr: t("mrr"), mrrDescription: t("mrrDescription"),
+    cardsLabel: t("cardsLabel"), period: toReportPeriodMessage(t.raw("period")), arr: t("arr"), arrDescription: t("arrDescription"), mrr: t("mrr"), mrrDescription: t("mrrDescription"),
     renewal: t("renewal"), renewalDescription: t("renewalDescription"), firstYearRenewal: t("firstYearRenewal"), firstYearRenewalDescription: t("firstYearRenewalDescription"),
     funnel: t("funnel"), funnelDescription: t("funnelDescription"), started: t("started"), profileCompleted: t("profileCompleted"), checkoutOrReview: t("checkoutOrReview"), activated: t("activated"),
     attendance: t("attendance"), attendanceDescription: t("attendanceDescription"), atRisk: t("atRisk"), atRiskDescription: t("atRiskDescription"),
