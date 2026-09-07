@@ -15,6 +15,17 @@ describe("internal shell primitives", () => {
     expect(screen.getByText("Overview")).toBeInTheDocument();
   });
 
+  it("InternalPageHeader renders an optional eyebrow above the heading", () => {
+    render(<InternalPageHeader eyebrow="Operations" title="Dashboard" description="Overview" />);
+    expect(screen.getByText("Operations")).toBeInTheDocument();
+    expect(screen.getByRole("heading", {level: 1, name: "Dashboard"})).toBeInTheDocument();
+  });
+
+  it("InternalPageHeader omits the eyebrow and description paragraphs when neither is given", () => {
+    const {container} = render(<InternalPageHeader title="Dashboard" />);
+    expect(container.querySelectorAll("p")).toHaveLength(0);
+  });
+
   it("InternalSection renders a real h2 heading and its children", () => {
     render(<InternalSection title="Profile"><p>Body</p></InternalSection>);
     expect(screen.getByRole("heading", {level: 2, name: "Profile"})).toBeInTheDocument();

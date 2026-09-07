@@ -18,8 +18,6 @@ const allowedMoves: Readonly<Record<CohortStage, readonly CohortStage[]>> = {
 };
 
 export type CohortKanbanLabels = Readonly<{
-  title: string;
-  description: string;
   application: string;
   moveTo: string;
   notes: string;
@@ -77,8 +75,8 @@ export function CohortKanban({applications, labels, moveAction}: Readonly<{
   labels: CohortKanbanLabels;
   moveAction: Action;
 }>) {
-  return <section aria-labelledby="cohort-kanban-title" className="space-y-5"><header className="space-y-2"><h1 className="font-serif text-4xl font-semibold" id="cohort-kanban-title">{labels.title}</h1><p className="text-muted-foreground">{labels.description}</p></header><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">{stages.map((stage) => {
+  return <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">{stages.map((stage) => {
     const rows = applications.filter((application) => application.stage === stage);
     return <section aria-labelledby={`cohort-stage-heading-${stage}`} className="space-y-3 rounded-xl border border-border/70 bg-muted/20 p-4" key={stage}><h2 className="font-serif text-xl font-semibold" id={`cohort-stage-heading-${stage}`}>{labels.stages[stage]}</h2>{rows.length === 0 ? <p className="text-sm text-muted-foreground">{labels.empty}</p> : rows.map((application) => <CohortApplicationCard action={moveAction} application={application} key={application.id} labels={labels}/>)}</section>;
-  })}</div></section>;
+  })}</div>;
 }

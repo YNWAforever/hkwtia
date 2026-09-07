@@ -11,9 +11,6 @@ import {localizedPath} from "@/lib/urls";
 export type {RetryAutomationAction};
 
 export type AutomationDashboardLabels = Readonly<{
-  eyebrow: string;
-  title: string;
-  description: string;
   evaluatedAt: string;
   countsLabel: string;
   due: string;
@@ -90,19 +87,10 @@ export function AutomationDashboardView({
 
   return (
     <div className="space-y-8">
-      <header className="max-w-3xl space-y-3">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">
-          {labels.eyebrow}
-        </p>
-        <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">
-          {labels.title}
-        </h1>
-        <p className="text-lg text-muted-foreground">{labels.description}</p>
-        <p className="text-sm text-muted-foreground">
-          {labels.evaluatedAt}{" "}
-          <time dateTime={dashboard.asOf}>{displayDate(dashboard.asOf)}</time>
-        </p>
-      </header>
+      <p className="max-w-3xl text-sm text-muted-foreground">
+        {labels.evaluatedAt}{" "}
+        <time dateTime={dashboard.asOf}>{displayDate(dashboard.asOf)}</time>
+      </p>
 
       <section aria-label={labels.countsLabel}>
         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

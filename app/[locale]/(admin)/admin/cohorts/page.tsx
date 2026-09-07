@@ -3,6 +3,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {CohortForm} from "@/components/admin/cohort-form";
 import {CohortKanban} from "@/components/admin/cohort-kanban";
+import {InternalPageHeader} from "@/components/internal-shell/page-header";
 import type {AppLocale} from "@/i18n/routing";
 import {createCohortAction, moveCohortApplicationAction} from "@/lib/admin/cohort-actions";
 import {cohortFormLabels, cohortFormMessages} from "@/lib/admin/cohort-labels";
@@ -25,7 +26,7 @@ export default async function AdminCohortsPage({params}: Props) {
   const t = await getTranslations({locale, namespace: "Admin.cohorts"});
   const path = localizedPath(locale, "/admin/cohorts");
   const labels = {
-    title: t("title"), description: t("description"), application: t("application"), moveTo: t("moveTo"), notes: t("notes"), move: t("move"), moving: t("moving"), empty: t("empty"),
+    application: t("application"), moveTo: t("moveTo"), notes: t("notes"), move: t("move"), moving: t("moving"), empty: t("empty"),
     errors: {invalid: t("errors.invalid"), forbidden: t("errors.forbidden"), error: t("errors.error")},
     stages: {applied: t("stages.applied"), accepted: t("stages.accepted"), ready: t("stages.ready"), match: t("stages.match"), land: t("stages.land"), scale: t("stages.scale"), graduated: t("stages.graduated"), rejected: t("stages.rejected")},
   };
@@ -41,6 +42,7 @@ export default async function AdminCohortsPage({params}: Props) {
 
   return (
     <div className="space-y-10">
+      <InternalPageHeader description={t("description")} title={t("title")}/>
       <CohortKanban applications={kanbanApplications} labels={labels} moveAction={moveCohortApplicationAction.bind(null, path)}/>
       <section className="space-y-4">
         <header className="space-y-1">
