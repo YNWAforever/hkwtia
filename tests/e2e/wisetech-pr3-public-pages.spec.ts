@@ -144,17 +144,18 @@ for (const homeCase of homeCases) {
       await page.setViewportSize({width, height: 600});
       const discoverTarget = page.locator("#home-discover");
       const discoverLink = hero.getByRole("link", {name: homeCase.discoverAction});
-      // New finding, outside what this measurement task was scoped to fix: the donor's
-      // `.hero-scroll` scroll-indicator -- hkwtia's only rendered Discover CTA -- is
+      // The donor's `.hero-scroll` scroll-indicator -- hkwtia's only rendered Discover CTA -- is
       // `display:none` below 820px (app/styles/wisetech.css:290, byte-pinned port:
       // `@media(max-width:820px){.hero-scroll{display:none}}`), so at 375/768px it is absent
       // from the accessibility tree and unreachable by click or keyboard. The retired
       // highlights-grid hero this task replaces did not have this gap -- its own measured
       // ratios covered 375/768/1440px, which only works if that Discover control was clickable
-      // there. Whether to make the WP-3 indicator reachable on mobile too, or accept it as
-      // desktop/mouse-only, is a product/design call this task is not authorized to make
-      // unilaterally (see the final report). The interactive click-and-scroll assertions below
-      // therefore only run where the control actually exists.
+      // there. Decided (Appendix D row E-82): accepted as an intentional simplification, not a
+      // WCAG conformance gap -- the `#home-discover` target stays reachable by ordinary
+      // scrolling on every viewport, and a scroll-affordance hint is not something touch users
+      // need the way desktop pointer users do. No companion-sheet override was added. The
+      // interactive click-and-scroll assertions below therefore only run where the control
+      // actually exists.
       const discoverLinkVisible = (await discoverLink.count()) > 0;
       if (discoverLinkVisible) {
         await expect(discoverLink).toBeInViewport();

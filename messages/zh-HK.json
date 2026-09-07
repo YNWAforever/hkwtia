@@ -1345,7 +1345,7 @@
     "activityStrip": {
       "label": "相關活動",
       "openLabel": "開放活動",
-      "launchpadLabel": "創科加速平台",
+      "launchpadLabel": "創科起動",
       "showcaseLabel": "方案展示"
     },
     "resultsHead": {
@@ -1367,9 +1367,9 @@
     "recommendations": {
       "items": {
         "launchpad": {
-          "title": "創科加速平台",
+          "title": "創科起動",
           "copy": "為初創企業提供大灣區市場進入、落地支援及買家配對。",
-          "cta": "探索創科加速平台"
+          "cta": "探索創科起動"
         },
         "showcase": {
           "title": "方案展示",
@@ -1482,7 +1482,7 @@
         "description": "探索已發布的會員科技方案。"
       },
       "launchpad": {
-        "title": "創科加速平台",
+        "title": "創科起動",
         "description": "了解現正接受申請的計劃、項目及資助指引。"
       },
       "about": {
@@ -1895,7 +1895,14 @@
       "member": "成員",
       "noPending": "沒有待接受邀請。",
       "errors": {
-        "generic": "未能更新公司席位，請再試一次。"
+        "generic": "未能更新公司席位，請再試一次。",
+        "invitationNotFound": "找不到此邀請。請檢查連結，或聯絡你的公司管理員重新發送邀請。",
+        "invitationRevoked": "此邀請已被取消。如仍需要相關權限，請聯絡你的公司管理員重新發送邀請。",
+        "invitationAlreadyAccepted": "此邀請已被接受。",
+        "invitationExpired": "此邀請已過期。請聯絡你的公司管理員重新發送邀請。",
+        "invitationEmailMismatch": "此邀請是發送至另一個電郵地址。請使用該帳戶登入，或聯絡你的公司管理員改為邀請此帳戶。",
+        "membershipExists": "你已經是此公司的成員。",
+        "seatLimitReached": "此公司的席位已達上限。請聯絡你的公司管理員騰出席位。"
       }
     }
   },

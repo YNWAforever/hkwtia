@@ -31,21 +31,37 @@ function splitCsvLine(line: string): readonly string[] {
  * Deliberately minimal: two required columns, no quoting/escaping support.
  * This sidecar is authored by hand by a human filling in a small number of
  * known Chinese names, not machine-generated -- a fuller CSV parser is not
- * warranted for that use case.
+ * warranted for that use case. Errors report the 1-based line number from
+ * the original file text (not the post-filter row index), so a blank line
+ * elsewhere in the file doesn't throw off which line a maintainer jumps to.
  */
 export function parseZhNameSidecar(csvText: string): ReadonlyMap<string, string> {
-  const lines = csvText.split(/\r?\n/).filter((line) => line.trim().length > 0);
-  if (lines.length === 0) throw new Error("PARTNER_IMPORT_ZH_CSV_INVALID");
+  const numberedLines = csvText
+    .split(/\r?\n/)
+    .map((content, index) => ({lineNumber: index + 1, content}))
+    .filter((line) => line.content.trim().length > 0);
+  if (numberedLines.length === 0) {
+    throw new Error("PARTNER_IMPORT_ZH_CSV_INVALID: row 1: file is empty");
+  }
 
-  const header = splitCsvLine(lines[0]!);
+  const headerRow = numberedLines[0]!;
+  const header = splitCsvLine(headerRow.content);
   if (header.length !== 2 || header[0] !== "name_en" || header[1] !== "name_zh_hk") {
-    throw new Error("PARTNER_IMPORT_ZH_CSV_INVALID");
+    throw new Error(
+      `PARTNER_IMPORT_ZH_CSV_INVALID: row ${headerRow.lineNumber}: expected header ` +
+        `"name_en,name_zh_hk", got "${headerRow.content}"`,
+    );
   }
 
   const map = new Map<string, string>();
-  for (const line of lines.slice(1)) {
-    const cells = splitCsvLine(line);
-    if (cells.length !== 2 || !cells[0] || !cells[1]) throw new Error("PARTNER_IMPORT_ZH_CSV_INVALID");
+  for (const row of numberedLines.slice(1)) {
+    const cells = splitCsvLine(row.content);
+    if (cells.length !== 2 || !cells[0] || !cells[1]) {
+      throw new Error(
+        `PARTNER_IMPORT_ZH_CSV_INVALID: row ${row.lineNumber}: expected 2 non-blank cells ` +
+          `(name_en,name_zh_hk), got "${row.content}"`,
+      );
+    }
     map.set(cells[0], cells[1]);
   }
   return map;

@@ -1,8 +1,15 @@
-export function InternalPageHeader({title, description}: Readonly<{title: string; description?: string}>) {
+export function InternalPageHeader({eyebrow, title, description}: Readonly<{
+  eyebrow?: string;
+  title: string;
+  description?: string;
+}>) {
   return (
-    <div className="mb-8 space-y-1">
-      <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-      {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
-    </div>
+    <header className="max-w-3xl space-y-3">
+      {eyebrow
+        ? <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">{eyebrow}</p>
+        : null}
+      <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{title}</h1>
+      {description ? <p className="text-lg text-muted-foreground">{description}</p> : null}
+    </header>
   );
 }

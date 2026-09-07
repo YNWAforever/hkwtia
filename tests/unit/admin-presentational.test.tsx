@@ -4,7 +4,7 @@ import {describe, expect, it, vi} from "vitest";
 
 import {AtRiskTable} from "@/components/admin/at-risk-table";
 import {MemberTable} from "@/components/admin/member-table";
-import {ReportCards} from "@/components/admin/report-cards";
+import {ReportCards, toReportPeriodMessage} from "@/components/admin/report-cards";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
 
@@ -113,5 +113,16 @@ describe("admin presentation", () => {
     expect(html).toContain(">8<");
     expect(html).toContain("<section");
     expect(html.match(/aria-labelledby=/g)?.length).toBeGreaterThanOrEqual(6);
+  });
+
+  it("passes a real Admin.reports.period value through toReportPeriodMessage untouched", () => {
+    expect(toReportPeriodMessage(en.Admin.reports.period)).toBe(en.Admin.reports.period);
+    expect(toReportPeriodMessage(zh.Admin.reports.period)).toBe(zh.Admin.reports.period);
+  });
+
+  it("falls back toReportPeriodMessage to a locale-neutral bare template when a value is missing a placeholder", () => {
+    expect(toReportPeriodMessage(undefined)).toBe("{from} {to} {timezone}");
+    expect(toReportPeriodMessage("{from} only")).toBe("{from} {to} {timezone}");
+    expect(toReportPeriodMessage(42)).toBe("{from} {to} {timezone}");
   });
 });

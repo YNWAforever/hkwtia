@@ -5,6 +5,7 @@ import {z} from "zod";
 import {ArchiveToggle} from "@/components/admin/archive-toggle";
 import {NewsForm} from "@/components/admin/news-form";
 import type {AppLocale} from "@/i18n/routing";
+import {toArchiveInUseMessage} from "@/lib/admin/archive-toggle-labels";
 import {setNewsArchivedAction, updateNewsAction} from "@/lib/admin/news-actions";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {adminPostsRepository} from "@/lib/db/repos/admin-posts";
@@ -67,7 +68,7 @@ export default async function AdminNewsDetailPage({params}: Props) {
         archived={post.archivedAt !== null}
         labels={{
           archive: t("archive"), unarchive: t("unarchive"), archiving: t("archiving"),
-          archivedNotice: t("archivedNotice"), inUse: t("archiveInUse"), error: t("error"),
+          archivedNotice: t("archivedNotice"), inUse: toArchiveInUseMessage(t.raw("archiveInUse")), error: t("error"),
         }}
       />
     </div>

@@ -4,6 +4,7 @@ import {
   AutomationDashboardView,
   type AutomationDashboardLabels,
 } from "@/components/admin/automation-dashboard";
+import {InternalPageHeader} from "@/components/internal-shell/page-header";
 import type {AppLocale} from "@/i18n/routing";
 import {retryAutomationAction} from "@/lib/admin/automation-actions";
 import {getAutomationDashboard} from "@/lib/admin/automations";
@@ -29,9 +30,6 @@ export default async function AdminAutomationsPage({
     namespace: "Admin.automations",
   });
   const labels: AutomationDashboardLabels = {
-    eyebrow: t("eyebrow"),
-    title: t("title"),
-    description: t("description"),
     evaluatedAt: t("evaluatedAt"),
     countsLabel: t("countsLabel"),
     due: t("due"),
@@ -65,11 +63,14 @@ export default async function AdminAutomationsPage({
   };
 
   return (
-    <AutomationDashboardView
-      action={retryAutomationAction}
-      dashboard={dashboard}
-      labels={labels}
-      locale={locale}
-    />
+    <div className="space-y-8">
+      <InternalPageHeader description={t("description")} eyebrow={t("eyebrow")} title={t("title")}/>
+      <AutomationDashboardView
+        action={retryAutomationAction}
+        dashboard={dashboard}
+        labels={labels}
+        locale={locale}
+      />
+    </div>
   );
 }
