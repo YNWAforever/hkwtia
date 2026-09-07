@@ -147,7 +147,7 @@ describe("Contact durable journeys and Concierge launcher", () => {
         events: {title: "活動及交流"},
         membership: {title: "會員計劃"},
         showcase: {title: "會員及方案"},
-        launchpad: {title: "創科加速平台"},
+        launchpad: {title: "創科起動"},
       },
       // Unified with Concierge.launcher in 4158b40: the shell launcher and this page's
       // launcher are the same control to a reader, so they carry one label.
