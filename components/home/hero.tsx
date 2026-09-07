@@ -6,11 +6,15 @@ import {ActionLink} from '@/components/wt/action-link';
 import {Link} from '@/i18n/navigation';
 import type {AppLocale} from '@/i18n/routing';
 
-const HERO_IMAGE = '/images/projects-hero.jpg';
+// The donor's own hero photograph (WiseTechSite.tsx:477), ported on the owner's 2026-09-07
+// instruction and byte-pinned by tests/unit/wisetech-asset-provenance.test.ts via the
+// integration manifest's `photos` provenance. It replaced the /images/projects-hero.jpg
+// placeholder that stood in until the donor photography was cleared for use.
+const HERO_IMAGE = '/archive/tech-connect-ai-leaders.webp';
 
 // Donor top-spanning scrim (design doc §2, closes E-47): app/styles/wisetech.css:92 .hero;
 // :93 .hero-image/.hero-scrim/.network-field; :99 .hero-content; :102 .hero-actions;
-// :103 .hero-note; :104 .hero-scroll. The photo stays the placeholder until WP-5.
+// :103 .hero-note; :104 .hero-scroll.
 export async function Hero({locale}: Readonly<{locale: AppLocale}>) {
   const t = await getTranslations({locale, namespace: 'Home.hero'});
   const image = assertOwnOriginEditorialImage(HERO_IMAGE);

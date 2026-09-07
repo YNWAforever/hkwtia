@@ -63,6 +63,58 @@ export const wisetechIntegrationProvenance = Object.freeze({
         width: 2001,
         height: 721,
       }),
+      // Donor photographs ported into public/ on the owner's 2026-09-07 instruction. They keep
+      // the donor's own paths so the byte-pinned CSS port resolves them unchanged, and each is
+      // sha256-pinned by tests/unit/wisetech-asset-provenance.test.ts exactly like the logo.
+      // The asset inventory's rows for these files stay `retire` on purpose: they describe the
+      // donor checkout as evidence, while `confirmation` records who cleared each port and when.
+      photos: Object.freeze([
+        Object.freeze({
+          sourcePath: "public/archive/tech-connect-ai-leaders.webp",
+          canonicalPath: "public/archive/tech-connect-ai-leaders.webp",
+          sha256: "90DE344357A757A9CBAE1B6DF4F92959476FC9CCD125B2FFEB676B29B901FD75",
+          width: 1800,
+          height: 1013,
+          usedBy: "components/home/hero.tsx",
+          confirmation: "Owner instruction, 2026-09-07 (branch claude/image-logo-display-fix-606b65)",
+        }),
+        Object.freeze({
+          sourcePath: "public/archive/tech-connect-community.webp",
+          canonicalPath: "public/archive/tech-connect-community.webp",
+          sha256: "595B6BECBF0EA051C44C87E554279EF5EF7E6CB64BDD8D2BE3C4F841ADBE23C1",
+          width: 1800,
+          height: 1350,
+          usedBy: "app/[locale]/(public)/events/page.tsx",
+          confirmation: "Owner instruction, 2026-09-07 (branch claude/image-logo-display-fix-606b65)",
+        }),
+        Object.freeze({
+          sourcePath: "public/archive/asia-smart-summit.webp",
+          canonicalPath: "public/archive/asia-smart-summit.webp",
+          sha256: "DD4F885D79A1F2C37A6B356BAA6A534FD0EA2C9A17B20BCD21789CC711FB14D0",
+          width: 1800,
+          height: 1200,
+          usedBy: "app/[locale]/(public)/about/page.tsx",
+          confirmation: "Owner instruction, 2026-09-07 (branch claude/image-logo-display-fix-606b65)",
+        }),
+        Object.freeze({
+          sourcePath: "public/archive/asia-smart-shanghai.webp",
+          canonicalPath: "public/archive/asia-smart-shanghai.webp",
+          sha256: "967826188F4F6BC2DF3BF714216797B3F4785656393309826FB11FF2FBB4F664",
+          width: 1800,
+          height: 1200,
+          usedBy: "app/styles/wisetech.css .gba-section",
+          confirmation: "Owner instruction, 2026-09-07 (branch claude/image-logo-display-fix-606b65)",
+        }),
+        Object.freeze({
+          sourcePath: "public/editorial/events-community.webp",
+          canonicalPath: "public/editorial/events-community.webp",
+          sha256: "20B1602282438AEB4B47526A406AF0DFF276D3B5DF7427CBD8712EAFE24AA7C3",
+          width: 1586,
+          height: 992,
+          usedBy: "app/[locale]/(public)/events/[slug]/page.tsx, components/marketing/event-card.tsx",
+          confirmation: "Owner instruction, 2026-09-07 (branch claude/image-logo-display-fix-606b65)",
+        }),
+      ]),
     }),
   }),
 });

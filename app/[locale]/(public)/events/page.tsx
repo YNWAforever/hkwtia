@@ -59,7 +59,7 @@ export default async function EventsPage({params, searchParams}: Props) {
         breadcrumb={{homeHref: "/", homeLabel: common("breadcrumbHome"), current: t("breadcrumbCurrent")}}
         breadcrumbLabel={common("breadcrumbLabel")}
         eyebrow={t("eyebrow")}
-        image={{src: "/images/projects-hero.jpg", alt: t("heroImageAlt")}}
+        image={{src: "/archive/tech-connect-community.webp", alt: t("heroImageAlt")}}
         lead={t("description")}
         title={t("title")}
         variant="inner"

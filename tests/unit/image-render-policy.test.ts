@@ -21,6 +21,7 @@ const revocationAwareConsumers = new Set([
   "components/admin/media-form.tsx",
   "components/admin/showcase-review-table.tsx",
   "components/home/legacy-network.tsx",
+  "components/marketing/event-card.tsx",
   "components/marketing/event-detail.tsx",
   "components/marketing/home-highlight-card.tsx",
   "components/marketing/showcase-card.tsx",

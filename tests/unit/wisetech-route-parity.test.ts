@@ -196,6 +196,15 @@ describe("WiseTech route parity manifest", () => {
         width: 2001,
         height: 721,
       },
+      // Byte contents are pinned by tests/unit/wisetech-asset-provenance.test.ts; this pins
+      // the set of ported donor photographs so an addition is a deliberate manifest change.
+      photos: [
+        expect.objectContaining({canonicalPath: "public/archive/tech-connect-ai-leaders.webp"}),
+        expect.objectContaining({canonicalPath: "public/archive/tech-connect-community.webp"}),
+        expect.objectContaining({canonicalPath: "public/archive/asia-smart-summit.webp"}),
+        expect.objectContaining({canonicalPath: "public/archive/asia-smart-shanghai.webp"}),
+        expect.objectContaining({canonicalPath: "public/editorial/events-community.webp"}),
+      ],
     });
     expect(provenanceErrors(wisetechIntegrationProvenance)).toEqual([]);
   });

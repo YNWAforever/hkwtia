@@ -39,7 +39,7 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 
 describe("Hero", () => {
-  it.each(["en", "zh-HK"] as const)("renders the donor top-scrim hero over the placeholder photo in %s", async (locale) => {
+  it.each(["en", "zh-HK"] as const)("renders the donor top-scrim hero over the donor's Tech Connect photo in %s", async (locale) => {
     const {Hero} = await import("@/components/home/hero");
     render(await Hero({locale}));
 
@@ -52,7 +52,7 @@ describe("Hero", () => {
     expect(section.querySelector(".network-field")).not.toBeNull();
 
     const image = screen.getByRole("img", {name: bundles[locale].Home.hero.imageAlt});
-    expect(image).toHaveAttribute("src", "/images/projects-hero.jpg");
+    expect(image).toHaveAttribute("src", "/archive/tech-connect-ai-leaders.webp");
     expect(image).toHaveClass("hero-image");
     expect(image).toHaveAttribute("data-priority", "true");
     expect(image).toHaveAttribute("sizes", "100vw");

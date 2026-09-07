@@ -20,9 +20,10 @@ import {localizedPath} from "@/lib/urls";
 
 export const dynamic = "force-dynamic";
 type Props = Readonly<{params: Promise<{locale: string; slug: string}>}>;
-// Same own-origin placeholder components/home/hero.tsx uses "until WP-5" -- no donor
-// /editorial event photo is ported into public/ yet.
-const EVENT_HERO_PLACEHOLDER = "/images/projects-hero.jpg";
+// The donor's own event-detail photograph (its globals.css `.event-detail-hero` default),
+// ported on the owner's 2026-09-07 instruction and byte-pinned through the integration
+// manifest's `photos` provenance. Used only when the event has no validated hero of its own.
+const EVENT_HERO_PLACEHOLDER = "/editorial/events-community.webp";
 
 /**
  * Wraps a URL as a quoted CSS `url(...)` token, escaping embedded `"` and `\`.

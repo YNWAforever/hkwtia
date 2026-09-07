@@ -45,7 +45,7 @@ export default async function AboutPage({params}: Props) {
         eyebrow={t("eyebrow")}
         title={t("title")}
         lead={t("summary")}
-        image={{src: "/images/about-hero.jpg", alt: t("imageAlt")}}
+        image={{src: "/archive/asia-smart-summit.webp", alt: t("imageAlt")}}
         breadcrumb={{homeHref: "/", homeLabel: common("breadcrumbHome"), current: t("eyebrow")}}
         breadcrumbLabel={common("breadcrumbLabel")}
       />
