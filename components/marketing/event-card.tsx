@@ -1,9 +1,19 @@
+import Image from "next/image";
+
 import {ActionLink} from "@/components/wt/action-link";
 import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import type {PublicEventProjection, PublicEventStatus} from "@/lib/events/public";
 import {formatEventDate} from "@/lib/home/format-event-date";
+import {isPrivateMediaDeliveryUrl} from "@/lib/media/url";
 import {cn} from "@/lib/utils";
+
+// The donor's card grammar always carries a photograph behind the date block
+// (ExpansionPages.tsx:960 `.event-card-photo`). An event's own hero -- already validated as
+// own-origin or private-media by the repository projection -- is the honest choice; without
+// one, the donor's general community photograph stands in as pure decoration (empty alt), so
+// the card never claims a photo it does not have.
+const EVENT_CARD_FALLBACK_PHOTO = "/editorial/events-community.webp";
 
 export type EventCardLabels = Readonly<{
   status: Readonly<{open: string; past: string}>;
@@ -56,6 +66,13 @@ export function EventCard({event, status, locale, labels}: EventCardProps) {
   return (
     <article className="event-card-v2">
       <div className="event-date-block">
+        {/* app/styles/wisetech.css:666 `.event-card-photo` positions it under the date scrim.
+            Uploaded media bypasses the optimizer so every request reaches /api/media's checks. */}
+        {event.hero ? (
+          <Image alt={event.hero.alt} className="event-card-photo" fill sizes="(max-width: 820px) 100vw, 31vw" src={event.hero.url} unoptimized={isPrivateMediaDeliveryUrl(event.hero.url)} />
+        ) : (
+          <Image alt="" className="event-card-photo" fill sizes="(max-width: 820px) 100vw, 31vw" src={EVENT_CARD_FALLBACK_PHOTO} />
+        )}
         <time aria-label={fullDate} dateTime={event.startsAt}>{day}</time>
         <span>{month}</span>
       </div>

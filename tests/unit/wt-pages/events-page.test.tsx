@@ -46,6 +46,8 @@ describe("Events page donor markup", () => {
 
     expect(screen.getByRole("heading", {level: 1, name: bundles.en.Events.title})).toBeInTheDocument();
     expect(screen.getByRole("link", {name: bundles.en.Common.breadcrumbHome})).toHaveAttribute("href", "/");
+    // next/image rewrites the src through the optimizer here, so decode before matching the path.
+    expect(decodeURIComponent(screen.getByRole("img", {name: bundles.en.Events.heroImageAlt}).getAttribute("src") ?? "")).toContain("/archive/tech-connect-community.webp");
 
     const strip = screen.getByRole("navigation", {name: bundles.en.Events.activityStrip.label});
     expect(within(strip).getByRole("link", {name: bundles.en.Events.activityStrip.launchpadLabel})).toHaveAttribute("href", "/launchpad");

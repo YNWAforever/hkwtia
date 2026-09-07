@@ -38,7 +38,7 @@ describe("event detail page donor markup", () => {
     const rendered = renderToStaticMarkup(await EventPage(props));
 
     expect(rendered).toContain('class="event-detail-hero"');
-    expect(rendered).toMatch(/--wt-event-photo:\s*url\(&quot;\/images\/projects-hero\.jpg&quot;\)/);
+    expect(rendered).toMatch(/--wt-event-photo:\s*url\(&quot;\/editorial\/events-community\.webp&quot;\)/);
     expect(rendered).toContain('class="event-detail-facts"');
     expect(rendered).toContain('class="event-detail-layout"');
     expect(rendered).toContain('class="event-detail-aside"');

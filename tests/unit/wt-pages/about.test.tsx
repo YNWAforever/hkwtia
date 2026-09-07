@@ -67,7 +67,7 @@ describe("/about", () => {
 
     expect(screen.getAllByRole("heading", {level: 1})).toHaveLength(1);
     expect(screen.getByRole("heading", {level: 1, name: messages.About.title})).toBeVisible();
-    expect(screen.getByRole("img", {name: messages.About.imageAlt})).toHaveAttribute("src", "/images/about-hero.jpg");
+    expect(screen.getByRole("img", {name: messages.About.imageAlt})).toHaveAttribute("src", "/archive/asia-smart-summit.webp");
 
     // Breadcrumb: the eyebrow text appears twice (hero eyebrow + breadcrumb current).
     expect(screen.getByRole("link", {name: messages.Common.breadcrumbHome})).toHaveAttribute("href", locale === "en" ? "/" : "/zh");

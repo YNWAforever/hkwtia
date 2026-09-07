@@ -166,16 +166,17 @@ describe("WiseTech CSS port", () => {
     for (const route of ["/activities", "/members", "/solutions"]) expect(port).not.toContain(route);
   });
 
-  // Two donor photographs have no counterpart under public/. Their rights are unreviewed and the
-  // asset inventory's disposition for them is "retire", so they enter, if at all, through WP-5.
-  // Pinning the exact pair keeps the debt explicit and fails any newly dangling own-origin URL.
-  it("pins the port's unresolved own-origin assets as known debt", () => {
+  // Every own-origin URL the port references must exist under public/. The two donor photographs
+  // this once pinned as debt (/archive/asia-smart-shanghai.webp, /editorial/events-community.webp)
+  // were ported on the owner's 2026-09-07 instruction and are byte-pinned by
+  // tests/unit/wisetech-asset-provenance.test.ts; any newly dangling URL fails here.
+  it("resolves every own-origin asset the port references", () => {
     const referenced = [...rules.matchAll(/url\(\s*["']?(\/[^"')]+)/g)].map((match) => match[1]);
     expect(referenced.length).toBeGreaterThan(0);
     const unresolved = [...new Set(referenced)]
       .filter((path) => !existsSync(resolve(process.cwd(), "public", path.slice(1))))
       .sort();
-    expect(unresolved).toEqual(["/archive/asia-smart-shanghai.webp", "/editorial/events-community.webp"]);
+    expect(unresolved).toEqual([]);
   });
 
   it("declares no tokens of its own and references only prefixed ones", () => {

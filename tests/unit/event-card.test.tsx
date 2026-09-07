@@ -50,6 +50,40 @@ describe("EventCard", () => {
     expect(screen.getByText(longDescription)).toHaveClass("line-clamp-3", "break-words");
   });
 
+  it("renders the event's own validated hero photo inside the date block, labelled by its alt text", () => {
+    render(
+      <EventCard
+        event={{id: "4", slug: "summit", title: "Summit", description: "d", startsAt: "2030-10-24T02:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: {url: "/api/media/0f8fad5b-d9cb-469f-a165-70867728950e", alt: "Summit stage"}}}
+        status="open"
+        locale="en"
+        labels={labels}
+      />,
+    );
+
+    const photo = screen.getByRole("img", {name: "Summit stage"});
+    expect(photo).toHaveClass("event-card-photo");
+    expect(photo).toHaveAttribute("src", "/api/media/0f8fad5b-d9cb-469f-a165-70867728950e");
+    expect(photo.closest(".event-date-block")).not.toBeNull();
+  });
+
+  it("falls back to the decorative donor community photo when an event has no hero of its own", () => {
+    const {container} = render(
+      <EventCard
+        event={{id: "5", slug: "clinic", title: "Clinic", description: "d", startsAt: "2030-10-24T02:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: null}}
+        status="open"
+        locale="en"
+        labels={labels}
+      />,
+    );
+
+    const photo = container.querySelector(".event-date-block img.event-card-photo");
+    expect(photo).not.toBeNull();
+    expect(photo).toHaveAttribute("alt", "");
+    expect(decodeURIComponent(photo?.getAttribute("src") ?? "")).toContain("/editorial/events-community.webp");
+    // Decorative: an empty alt keeps the fallback out of the accessibility tree.
+    expect(screen.queryByRole("img")).toBeNull();
+  });
+
   it("renders CJK day/month unit markers (日/月) in the date block for zh-HK, matching the aria-label's locale", () => {
     render(
       <EventCard
