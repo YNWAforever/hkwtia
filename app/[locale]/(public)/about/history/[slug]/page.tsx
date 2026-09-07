@@ -55,6 +55,7 @@ export default async function HistoryDetailPage({params}: Props) {
   const title = locale === "zh-HK" ? milestone.titleZh : milestone.titleEn;
   const body = locale === "zh-HK" ? milestone.bodyZh : milestone.bodyEn;
   const paragraphs = body.split("\n\n");
+  const storyParagraphs = paragraphs.slice(1);
   const images = milestone.images.map((image) => ({
     alt: locale === "zh-HK" ? image.altZh : image.altEn,
     src: image.src,
@@ -77,26 +78,30 @@ export default async function HistoryDetailPage({params}: Props) {
           {label: t("compass.latestLabel"), value: t("compass.latestValue", {year: facts.latestYear})},
         ]}
       />
-      <Section labelledBy="history-story-title">
-        <SectionHeading eyebrow={t("eyebrow")} title={t("storyTitle")} headingId="history-story-title" variant="stacked" />
-        {/* paragraphs[0] is already the hero lead, so the body is what follows it.
-            A single-paragraph milestone leaves nothing here: render the container
-            only when there is something to put in it, rather than an empty div
-            under the section heading. The gallery below still fills the section. */}
-        {paragraphs.length > 1 ? (
-          <div className="max-w-3xl space-y-6 text-lg leading-relaxed text-muted-foreground">
-            {paragraphs.slice(1).map((paragraph, index) => (
-              // Paragraphs belong to one frozen content record and never reorder.
-              <p key={index}>{paragraph}</p>
-            ))}
-          </div>
-        ) : null}
-        {images.length > 0 ? (
-          <div className="mt-12">
-            <MediaGallery images={images} />
-          </div>
-        ) : null}
-      </Section>
+      {/* paragraphs[0] is already the hero lead, so the story body is what follows it,
+          and a single-paragraph record has nothing to put here. Both halves of this
+          section are optional, so the section itself is: a heading reading "Milestone
+          story" over an empty container is worse than no section at all. A record with
+          one paragraph and no images -- which `featured` can create with a single flag
+          flip -- would otherwise render exactly that. */}
+      {storyParagraphs.length > 0 || images.length > 0 ? (
+        <Section labelledBy="history-story-title">
+          <SectionHeading eyebrow={t("eyebrow")} title={t("storyTitle")} headingId="history-story-title" variant="stacked" />
+          {storyParagraphs.length > 0 ? (
+            <div className="max-w-3xl space-y-6 text-lg leading-relaxed text-muted-foreground">
+              {storyParagraphs.map((paragraph, index) => (
+                // Paragraphs belong to one frozen content record and never reorder.
+                <p key={index}>{paragraph}</p>
+              ))}
+            </div>
+          ) : null}
+          {images.length > 0 ? (
+            <div className="mt-12">
+              <MediaGallery images={images} />
+            </div>
+          ) : null}
+        </Section>
+      ) : null}
       <RichRelatedRoutes items={related} />
     </>
   );

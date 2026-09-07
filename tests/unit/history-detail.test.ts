@@ -172,6 +172,24 @@ describe("history detail pages", () => {
     expect(document.querySelector("main")).not.toBeInTheDocument();
   });
 
+  // Until 2001/2014/2025 were featured, every featured record had a multi-paragraph
+  // body, so the single-paragraph path had never rendered. Its whole body is the hero
+  // lead, leaving the story section with only the gallery to show -- and it must not
+  // print the lead twice or head an empty container.
+  it("renders a single-paragraph milestone once, in the hero, with the gallery still shown", async () => {
+    const milestone = findBySlug(milestones, "2001-establishment-of-wtia");
+    expect(milestone).not.toBeNull();
+    if (!milestone) return;
+    expect(milestone.bodyEn).not.toContain("\n\n");
+    expect(milestone.images.length).toBeGreaterThan(0);
+
+    render(await HistoryDetailPage({params: Promise.resolve({locale: "en", slug: milestone.slug})}));
+
+    expect(screen.getAllByText(milestone.bodyEn)).toHaveLength(1);
+    expect(screen.getByRole("heading", {level: 2, name: approvedStoryTitle.en})).toBeVisible();
+    expect(within(screen.getByRole("list")).getAllByRole("img")).toHaveLength(milestone.images.length);
+  });
+
   it("preserves exact localized metadata inputs and returns empty metadata for a disallowed slug", async () => {
     const milestone = findBySlug(milestones, gallerySlug);
     expect(milestone).not.toBeNull();
