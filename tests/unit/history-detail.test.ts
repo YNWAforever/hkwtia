@@ -222,6 +222,26 @@ describe("history detail pages", () => {
     }
   });
 
+  // The 20+1 anniversary record shipped as a verbatim scrape of its own 2022
+  // announcement -- future tense, "*Seats Limited", ticket prices and a live
+  // registration URL -- and a featured record is a published one, so it sat on the
+  // homepage archive card and its own detail page inviting readers to a dinner that
+  // had happened four years earlier. Featured bodies carry the guard because those
+  // are the ones with a public page.
+  it("publishes no live event-registration copy in a featured milestone body", () => {
+    const registrationLink = /jotform\.com|lnkd\.in|eventbrite|forms\.gle|docs\.google\.com\/forms/i;
+    const ticketPrice = /(?:HKD?|US)?\$\s?[\d,]+(?:\.\d{2})?/;
+    const featured = milestones.filter(({featured: isFeatured}) => isFeatured);
+
+    expect(featured.length).toBeGreaterThan(0);
+    for (const {slug, bodyEn, bodyZh} of featured) {
+      for (const [locale, body] of [["en", bodyEn], ["zh-HK", bodyZh]] as const) {
+        expect(registrationLink.test(body), `${slug} (${locale}) registration link`).toBe(false);
+        expect(ticketPrice.test(body), `${slug} (${locale}) ticket price`).toBe(false);
+      }
+    }
+  });
+
   it("keeps the detail route server-only, composed from PageHero, RichCompass and MediaGallery", () => {
     const source = readFileSync(
       resolve(process.cwd(), "app/[locale]/(public)/about/history/[slug]/page.tsx"),

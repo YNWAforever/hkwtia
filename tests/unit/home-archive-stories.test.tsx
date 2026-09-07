@@ -51,6 +51,29 @@ describe("ArchiveStories", () => {
     expect(screen.getByRole("link", {name: bundles.en.Home.archiveStories.galleryAction})).toHaveAttribute("href", "https://hkwtia.org/photo-gallery/");
   });
 
+  // The card used to drop the whole body into one <p>. Bodies are multi-paragraph
+  // records separated by "\n\n", and inside a <p> those breaks collapse to spaces, so
+  // the card rendered as one run-on block. It now shows the lead paragraph only, which
+  // is what app/[locale]/(public)/about/history/[slug] already uses as its hero lead.
+  it("renders only the lead paragraph of a multi-paragraph body", async () => {
+    const {ArchiveStories} = await import("@/components/home/archive-stories");
+    render(await ArchiveStories({locale: "en"}));
+
+    const multiParagraph = featuredOnly(milestones)
+      .filter((milestone) => milestone.images.length > 0)
+      .slice(0, 4)
+      .filter((milestone) => milestone.bodyEn.includes("\n\n"));
+    expect(multiParagraph.length).toBeGreaterThan(0);
+
+    for (const milestone of multiParagraph) {
+      const [lead, ...rest] = milestone.bodyEn.split("\n\n");
+      expect(screen.getByText(lead!), milestone.slug).toBeInTheDocument();
+      for (const paragraph of rest) {
+        expect(screen.queryByText(paragraph), `${milestone.slug} continuation`).not.toBeInTheDocument();
+      }
+    }
+  });
+
   it("renders nothing when no featured milestone has an image", async () => {
     vi.doMock("@/content/milestones", () => ({milestones: []}));
     vi.resetModules();
