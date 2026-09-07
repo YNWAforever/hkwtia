@@ -12,6 +12,10 @@ describe("parseDonorPartnerFile", () => {
     expect(parsed[1]!.website).toBe("https://example.org");
   });
 
+  it("accepts an empty donor array", () => {
+    expect(parseDonorPartnerFile([])).toEqual([]);
+  });
+
   it("rejects an unknown category rather than silently coercing it", () => {
     expect(() => parseDonorPartnerFile([{name: "X", category: "sponsor-tier", logoFile: "x.png"}]))
       .toThrow();
@@ -19,6 +23,16 @@ describe("parseDonorPartnerFile", () => {
 
   it("rejects a record with no logo file reference", () => {
     expect(() => parseDonorPartnerFile([{name: "X", category: "supporting"}])).toThrow();
+  });
+
+  it("rejects a whitespace-only name once trimmed, pinning that .trim() runs before .min(1)", () => {
+    expect(() => parseDonorPartnerFile([{name: "   ", category: "supporting", logoFile: "x.png"}]))
+      .toThrow();
+  });
+
+  it("rejects a whitespace-only logoFile once trimmed, pinning that .trim() runs before .min(1)", () => {
+    expect(() => parseDonorPartnerFile([{name: "X", category: "supporting", logoFile: "   "}]))
+      .toThrow();
   });
 });
 
@@ -28,12 +42,27 @@ describe("parseZhNameSidecar", () => {
     expect(map.get("Harbour Trade Council")).toBe("港口貿易協會");
   });
 
-  it("rejects a CSV missing the required header", () => {
-    expect(() => parseZhNameSidecar("en,zh\nHarbour,港口\n")).toThrow("PARTNER_IMPORT_ZH_CSV_INVALID");
+  it("returns an empty map for a header-only CSV with no data rows", () => {
+    const map = parseZhNameSidecar("name_en,name_zh_hk\n");
+    expect(map.size).toBe(0);
   });
 
-  it("rejects a row with a blank name_en", () => {
-    expect(() => parseZhNameSidecar("name_en,name_zh_hk\n,港口貿易協會\n")).toThrow("PARTNER_IMPORT_ZH_CSV_INVALID");
+  it("parses a CSV using Windows-style \\r\\n line endings", () => {
+    const map = parseZhNameSidecar("name_en,name_zh_hk\r\nHarbour Trade Council,港口貿易協會\r\n");
+    expect(map.get("Harbour Trade Council")).toBe("港口貿易協會");
+  });
+
+  it("rejects empty CSV text and reports the missing header as row 1", () => {
+    expect(() => parseZhNameSidecar("")).toThrow("PARTNER_IMPORT_ZH_CSV_INVALID: row 1");
+  });
+
+  it("rejects a CSV missing the required header and names the row", () => {
+    expect(() => parseZhNameSidecar("en,zh\nHarbour,港口\n")).toThrow("PARTNER_IMPORT_ZH_CSV_INVALID: row 1");
+  });
+
+  it("rejects a row with a blank name_en and names the offending row, not just the header", () => {
+    expect(() => parseZhNameSidecar("name_en,name_zh_hk\nGood Co,好公司\n,港口貿易協會\n"))
+      .toThrow("PARTNER_IMPORT_ZH_CSV_INVALID: row 3");
   });
 });
 
