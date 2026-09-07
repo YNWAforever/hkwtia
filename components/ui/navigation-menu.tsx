@@ -23,22 +23,41 @@ const NavigationMenu = React.forwardRef<
    * order keeps Radix's ArrowDown entry (onEntryKeyDown) and its Escape return intact, and
    * makes Tab move to the next trigger — which is what the donor header does anyway.
    *
-   * A MutationObserver rather than a one-shot effect: the proxy is mounted and unmounted on
-   * every open, and Radix mounts it after any effect keyed on the open value has already run.
-   * The observer watches the whole subtree, so a single subscription for the lifetime of the
-   * root catches every open; re-creating it per open would be wasted work, which is why the
-   * dependency array is empty. Writing tabIndex changes the attribute and fires the observer
-   * once more; the element no longer matches `[tabindex="0"]`, so it settles immediately.
+   * Two correction paths, not one. The useLayoutEffect below, keyed on `value`, is the primary
+   * one: `open` for each trigger is derived synchronously from context.value during render
+   * (index.mjs:300), and with a controlled `value` prop -- which is how DesktopMegaNavigation
+   * always uses this component -- useControllableState (index.mjs:50) returns that prop
+   * directly rather than syncing it via its own effect. So the proxy commits to the DOM in the
+   * very same React commit as this component's re-render for the new `value`, and a layout
+   * effect keyed on `value` runs synchronously right after that commit, before the browser
+   * paints -- observing the proxy in the same tick the triggering click was handled in, with no
+   * async gap for axe (or a real keyboard user tabbing through at just the wrong moment) to see
+   * tabIndex 0 in between. That gap was real: the MutationObserver alone (still below, kept as
+   * a fallback) only reacted on the next microtask, which axe's own scan sometimes beat.
+   *
+   * The MutationObserver stays for what the value-driven path can't see: Radix's own
+   * hover-intent open/close timers, or any future consumer that uses this component
+   * uncontrolled. Its dependency array is empty so a single subscription for the lifetime of
+   * the root catches every open; re-creating it per open would be wasted work. Writing
+   * tabIndex changes the attribute and fires the observer once more; the element no longer
+   * matches `[tabindex="0"]`, so it settles immediately.
    */
+  const neutralise = React.useCallback(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    for (const proxy of root.querySelectorAll<HTMLElement>('[aria-hidden="true"][tabindex="0"]')) {
+      proxy.tabIndex = -1;
+    }
+  }, []);
+
+  React.useLayoutEffect(() => {
+    neutralise();
+  }, [value, neutralise]);
+
   React.useEffect(() => {
     const root = rootRef.current;
     if (!root) return undefined;
 
-    const neutralise = () => {
-      for (const proxy of root.querySelectorAll<HTMLElement>('[aria-hidden="true"][tabindex="0"]')) {
-        proxy.tabIndex = -1;
-      }
-    };
     neutralise();
     const observer = new MutationObserver(neutralise);
     observer.observe(root, {
@@ -48,7 +67,7 @@ const NavigationMenu = React.forwardRef<
       attributeFilter: ["tabindex", "aria-hidden"],
     });
     return () => observer.disconnect();
-  }, []);
+  }, [neutralise]);
 
   return (
     <NavigationMenuPrimitive.Root
