@@ -1895,7 +1895,14 @@
       "member": "成員",
       "noPending": "沒有待接受邀請。",
       "errors": {
-        "generic": "未能更新公司席位，請再試一次。"
+        "generic": "未能更新公司席位，請再試一次。",
+        "invitationNotFound": "找不到此邀請。請檢查連結，或聯絡你的公司管理員重新發送邀請。",
+        "invitationRevoked": "此邀請已被取消。如仍需要相關權限，請聯絡你的公司管理員重新發送邀請。",
+        "invitationAlreadyAccepted": "此邀請已被接受。",
+        "invitationExpired": "此邀請已過期。請聯絡你的公司管理員重新發送邀請。",
+        "invitationEmailMismatch": "此邀請是發送至另一個電郵地址。請使用該帳戶登入，或聯絡你的公司管理員改為邀請此帳戶。",
+        "membershipExists": "你已經是此公司的成員。",
+        "seatLimitReached": "此公司的席位已達上限。請聯絡你的公司管理員騰出席位。"
       }
     }
   },

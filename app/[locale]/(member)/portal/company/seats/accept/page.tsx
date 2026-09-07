@@ -4,6 +4,7 @@ import {redirect} from "next/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
 import {acceptSeatInvitation, SeatServiceError} from "@/lib/db/repos/seats";
+import {seatInvitationErrorKey} from "@/lib/portal/seat-invitation-errors";
 import {localizedPath} from "@/lib/urls";
 
 type Props = Readonly<{params: Promise<{locale: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>}>;
@@ -26,7 +27,10 @@ export default async function SeatInvitationAcceptancePage({params, searchParams
     redirect(localizedPath(locale, "/portal/company/seats"));
   } catch (error) {
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
-    if (error instanceof SeatServiceError) return <section className="glass-card space-y-3 p-6 sm:p-10"><h1 className="font-serif text-3xl font-semibold">{t("seats.title")}</h1><p className="text-destructive" role="alert">{t("seats.errors.generic")}</p></section>;
+    if (error instanceof SeatServiceError) {
+      const message = t(`seats.errors.${seatInvitationErrorKey(error.code)}`);
+      return <section className="glass-card space-y-3 p-6 sm:p-10"><h1 className="font-serif text-3xl font-semibold">{t("seats.title")}</h1><p className="text-destructive" role="alert">{message}</p></section>;
+    }
     return <section className="glass-card space-y-3 p-6 sm:p-10"><h1 className="font-serif text-3xl font-semibold">{t("seats.title")}</h1><p className="text-destructive" role="alert">{t("seats.errors.generic")}</p></section>;
   }
 }

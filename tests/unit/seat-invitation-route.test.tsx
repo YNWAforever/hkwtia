@@ -44,17 +44,31 @@ describe("seat invitation acceptance route", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("seats.errors.generic");
   });
 
-  it("renders an error for an expired token without redirecting, without calling requireActor twice or leaking the raw error", async () => {
+  it("renders a distinct expired-invitation error without redirecting, without calling requireActor twice or leaking the raw error", async () => {
     acceptSeatInvitation.mockRejectedValueOnce(new SeatServiceError("INVITATION_EXPIRED"));
     render(await SeatAcceptPage(props({token: "expired-token"})));
     expect(requireActor).toHaveBeenCalledTimes(1);
     expect(redirect).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveTextContent("seats.errors.generic");
+    expect(screen.getByRole("alert")).toHaveTextContent("seats.errors.invitationExpired");
   });
 
-  it("renders an error for an already-accepted token, distinctly from a missing token, but with the same current (generic) copy", async () => {
+  it("renders a distinct already-accepted error, not the generic fallback", async () => {
     acceptSeatInvitation.mockRejectedValueOnce(new SeatServiceError("INVITATION_ALREADY_ACCEPTED"));
     render(await SeatAcceptPage(props({token: "used-token"})));
+    expect(redirect).not.toHaveBeenCalled();
+    expect(screen.getByRole("alert")).toHaveTextContent("seats.errors.invitationAlreadyAccepted");
+  });
+
+  it("renders a distinct email-mismatch error telling the user they're signed in as the wrong account", async () => {
+    acceptSeatInvitation.mockRejectedValueOnce(new SeatServiceError("INVITATION_EMAIL_MISMATCH"));
+    render(await SeatAcceptPage(props({token: "wrong-account-token"})));
+    expect(redirect).not.toHaveBeenCalled();
+    expect(screen.getByRole("alert")).toHaveTextContent("seats.errors.invitationEmailMismatch");
+  });
+
+  it("falls back to the generic message for a SeatServiceError code with no dedicated copy", async () => {
+    acceptSeatInvitation.mockRejectedValueOnce(new SeatServiceError("INVALID_EMAIL"));
+    render(await SeatAcceptPage(props({token: "some-token"})));
     expect(redirect).not.toHaveBeenCalled();
     expect(screen.getByRole("alert")).toHaveTextContent("seats.errors.generic");
   });

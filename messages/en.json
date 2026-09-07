@@ -1895,7 +1895,14 @@
       "member": "Member",
       "noPending": "No pending invitations.",
       "errors": {
-        "generic": "We could not update company seats. Please try again."
+        "generic": "We could not update company seats. Please try again.",
+        "invitationNotFound": "We could not find this invitation. Check the link, or ask your company admin to send a new one.",
+        "invitationRevoked": "This invitation has been cancelled. Ask your company admin to send a new one if you still need access.",
+        "invitationAlreadyAccepted": "This invitation has already been accepted.",
+        "invitationExpired": "This invitation has expired. Ask your company admin to send a new one.",
+        "invitationEmailMismatch": "This invitation was sent to a different email address. Sign in with that account, or ask your company admin to invite this one instead.",
+        "membershipExists": "You are already a member of this company.",
+        "seatLimitReached": "This company has reached its seat limit. Ask your company admin to free up a seat."
       }
     }
   },
