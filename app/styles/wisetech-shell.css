@@ -478,3 +478,27 @@
  * exactly, rather than picking a new value, is what actually fixes it -- this wrapper sets the
  * same background as that one, so the same text colour is correct for the same reason. */
 .news-subscribe-band { color: white; }
+
+/* WP-8's Preview axe run (`color-contrast`, impact serious) found two failures the local unit
+ * suite cannot see: the managed test server maps `DATABASE_URL` to an empty test database, so
+ * `/membership` renders its "unavailable" notice and `.plan-grid` never mounts there, while the
+ * Preview has a real catalogue, so the fifth card -- SME pathway, D-7 -- renders. That card is
+ * `.plan-grid article:nth-child(5) { background: var(--wt-ink); color: white }` (wisetech.css:275,
+ * #0f4c81), a dark variant of a card whose base is white; two of its inherited child rules were
+ * calibrated for that white base and never re-measured for the dark one.
+ *
+ * `.card-index` inherits `var(--wt-steel)` (#646464, the WP-4 fix above for the four light cards)
+ * -- 1.49:1 against `--wt-ink`, the same shortfall pattern as `.programme-card.feature
+ * .card-index` above. `#a8d4ec`, this sheet's own existing cyan-family value for exactly that
+ * situation, measures 5.61:1 here (WCAG formula) -- comfortable headroom over the 4.5:1 this
+ * 10px/700 numeral needs.
+ *
+ * `.plan-grid article:nth-child(5) p, li` inherits `rgba(255,255,255,.62)` (wisetech.css:275),
+ * which blends to 4.46:1 on `--wt-ink` -- short of 4.5:1, and axe cannot score translucent text
+ * reliably (see the impact-metrics note above), so this sheet's practice is an opaque colour with
+ * real headroom rather than nudging the alpha. `#c9d8e6`, a lighter tint of the same `--wt-ink`
+ * hue, measures 6.09:1 on `--wt-ink`. Both rules are scoped to `:nth-child(5)` so the four light
+ * cards, whose WP-4 values are correct for their own white background, are untouched. */
+.plan-grid article:nth-child(5) .card-index { color: #a8d4ec; }
+.plan-grid article:nth-child(5) p,
+.plan-grid article:nth-child(5) li { color: #c9d8e6; }

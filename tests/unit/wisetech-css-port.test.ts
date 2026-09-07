@@ -213,6 +213,63 @@ describe("WiseTech CSS port", () => {
     for (const name of ["hero-breathe", "node-pulse", "mega-menu-in"]) expect(port).toContain(`@keyframes ${name}`);
   });
 
+  /**
+   * WP-8's Preview axe run found a `color-contrast` failure (impact serious) on `/membership`'s
+   * fifth plan card (SME pathway, D-7) -- `.plan-grid article:nth-child(5) { background:
+   * var(--wt-ink) }` (wisetech.css:275, #0f4c81) -- invisible to the local unit suite because the
+   * managed test database is empty there, so `.plan-grid` never mounts. The companion overrides
+   * added for it are pinned here as source, with the WCAG relative-luminance formula run against
+   * the real background rather than trusted from a comment, so a regenerated port or a future
+   * edit that quietly re-breaks either ratio fails this test instead of only a Preview axe run.
+   */
+  it("keeps the SME plan card's index and copy readable on its dark background", () => {
+    const shellRules = (shellOverrides ?? "").replace(/\/\*[\s\S]*?\*\//g, "");
+
+    function channelLuminance(channel: number) {
+      const c = channel / 255;
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    }
+
+    function relativeLuminance([r, g, b]: [number, number, number]) {
+      return 0.2126 * channelLuminance(r) + 0.7152 * channelLuminance(g) + 0.0722 * channelLuminance(b);
+    }
+
+    function contrastRatio(a: [number, number, number], b: [number, number, number]) {
+      const [lighter, darker] = [relativeLuminance(a), relativeLuminance(b)].sort((x, y) => y - x);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    function hex(value: string): [number, number, number] {
+      const match = value.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+      if (!match) throw new Error(`not a hex colour: ${value}`);
+      return [parseInt(match[1]!, 16), parseInt(match[2]!, 16), parseInt(match[3]!, 16)];
+    }
+
+    // The real background this card paints, read out of the port rather than retyped, so a
+    // regenerated port that changed `--wt-ink` or the card's background source would fail here.
+    expect(port).toContain(".plan-grid article:nth-child(5) { background: var(--wt-ink); color: white; }");
+    const ink = hex("#0f4c81");
+    expect(hex("#0f4c81")).toEqual([15, 76, 129]);
+
+    const cardIndex = shellRules.match(
+      /\.plan-grid article:nth-child\(5\) \.card-index \{ color: (#[0-9a-f]{6}); \}/,
+    );
+    expect(cardIndex, "no nth-child(5) .card-index override").not.toBeNull();
+    expect(contrastRatio(hex(cardIndex![1]!), ink)).toBeGreaterThanOrEqual(4.5);
+
+    const bodyCopy = shellRules.match(
+      /\.plan-grid article:nth-child\(5\) p,\s*\n\.plan-grid article:nth-child\(5\) li \{ color: (#[0-9a-f]{6}); \}/,
+    );
+    expect(bodyCopy, "no nth-child(5) p/li override").not.toBeNull();
+    expect(contrastRatio(hex(bodyCopy![1]!), ink)).toBeGreaterThanOrEqual(4.5);
+
+    // Scoped to the fifth card alone -- the four light cards' WP-4 `.card-index` value
+    // (`var(--wt-steel)`, above) and the port's own `.plan-grid p, li { color: #5b686c }` stay
+    // correct for their white background and must not be touched by this fix.
+    expect(shellRules).not.toMatch(/^\.plan-grid \.card-index \{ color: #a8d4ec/m);
+    expect(shellRules).not.toMatch(/^\.plan-grid p,\.plan-grid li/m);
+  });
+
   it("keeps the donor breakpoints and base rules", () => {
     for (const width of ["1320px", "1120px", "820px", "520px"]) expect(port).toContain(`@media(max-width:${width})`);
     expect(port).toContain("img { display: block; max-width: 100%; }");
