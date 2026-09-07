@@ -11,7 +11,7 @@ import {
   generateStaticParams,
 } from "@/app/[locale]/(public)/about/history/[slug]/page";
 import {milestones} from "@/content/milestones";
-import {findBySlug} from "@/lib/history/milestones";
+import {findBySlug, milestonesOnly} from "@/lib/history/milestones";
 import {brandedTitle} from "@/lib/metadata";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
@@ -242,19 +242,41 @@ describe("history detail pages", () => {
 
   // The 20+1 anniversary record shipped as a verbatim scrape of its own 2022
   // announcement -- future tense, "*Seats Limited", ticket prices and a live
-  // registration URL -- and a featured record is a published one, so it sat on the
-  // homepage archive card and its own detail page inviting readers to a dinner that
-  // had happened four years earlier. Featured bodies carry the guard because those
-  // are the ones with a public page.
-  it("publishes no live event-registration copy in a featured milestone body", () => {
+  // registration URL -- so it spent four years inviting readers to a dinner that had
+  // already happened.
+  //
+  // Scope note: `featured` is NOT the line between public and private. The timeline at
+  // /about/history renders every NON-featured milestone's full body inline (see
+  // components/marketing/milestone-timeline.tsx) and replaces a featured one with a
+  // "Read more" link, so all 61 bodies publish -- featuring adds a second page, it does
+  // not create the first. The link guard therefore covers every milestone-kind record.
+  it("solicits no event registration in any milestone body", () => {
     const registrationLink = /jotform\.com|lnkd\.in|eventbrite|forms\.gle|docs\.google\.com\/forms/i;
+    const records = milestonesOnly(milestones);
+
+    expect(records.length).toBeGreaterThan(0);
+    for (const {slug, bodyEn, bodyZh} of records) {
+      for (const [locale, body] of [["en", bodyEn], ["zh-HK", bodyZh]] as const) {
+        expect(registrationLink.test(body), `${slug} (${locale}) registration link`).toBe(false);
+      }
+    }
+  });
+
+  // Prices stay scoped to featured records, and deliberately so: a currency figure is
+  // only a red flag where the layout reads it as an offer -- a hero lead and a homepage
+  // card. In the archive at large it is ordinary history, and widening this to every
+  // record would reject two truthful entries: `2005-the-1st-wtia-sms-donation-campaign`
+  // ("raised HK $2 million for the victims of the 2004 Indian Ocean earthquake and
+  // tsunami") and `it-sme-anti-epidemic-fund-appeal` (the HK$137.5 billion Anti-epidemic
+  // Fund and its HK$9,000 wage-subsidy cap). Those are facts worth publishing, not
+  // ticketing copy. Do not "fix" this scope without re-reading those two bodies.
+  it("quotes no ticket price in a featured milestone body", () => {
     const ticketPrice = /(?:HKD?|US)?\$\s?[\d,]+(?:\.\d{2})?/;
-    const featured = milestones.filter(({featured: isFeatured}) => isFeatured);
+    const featured = milestonesOnly(milestones).filter(({featured: isFeatured}) => isFeatured);
 
     expect(featured.length).toBeGreaterThan(0);
     for (const {slug, bodyEn, bodyZh} of featured) {
       for (const [locale, body] of [["en", bodyEn], ["zh-HK", bodyZh]] as const) {
-        expect(registrationLink.test(body), `${slug} (${locale}) registration link`).toBe(false);
         expect(ticketPrice.test(body), `${slug} (${locale}) ticket price`).toBe(false);
       }
     }
