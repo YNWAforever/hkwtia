@@ -1928,6 +1928,72 @@
       "ineligible": "An eligible membership is required.",
       "closed": "Registration is closed."
     },
+    "memberEvents": {
+      "eyebrow": "Your organisation's events",
+      "newTitle": "Submit an event",
+      "newAction": "Submit an event",
+      "listTitle": "Events your organisation has submitted",
+      "listEmpty": "Your organisation has not submitted an event yet.",
+      "noCompany": "Event publishing needs a company you manage. Ask your company owner to make you an admin.",
+      "quota": "{used} of {limit} reviewed events used this quarter.",
+      "unlimited": "unlimited",
+      "submitted": "Submitted. WTIA reviews member events within three working days.",
+      "draftSaved": "Draft saved.",
+      "rejectedWith": "Returned by WTIA: {reason}",
+      "saveDraft": "Save draft",
+      "submit": "Submit for review",
+      "saving": "Saving…",
+      "edit": "Edit",
+      "status": {
+        "draft": "Draft",
+        "pending_review": "Awaiting review",
+        "published": "Published",
+        "rejected": "Returned",
+        "cancelled": "Cancelled"
+      },
+      "fields": {
+        "slug": "URL slug",
+        "titleEn": "Title (English)",
+        "titleZh": "Title (Chinese)",
+        "descriptionEn": "Description (English)",
+        "descriptionZh": "Description (Chinese)",
+        "startsAt": "Starts (Hong Kong time)",
+        "endsAt": "Ends (optional)",
+        "venue": "Venue",
+        "capacity": "Capacity (optional)",
+        "format": "Format",
+        "onlineUrl": "Online link (online and hybrid)",
+        "visibility": "Who can see it",
+        "registrationMode": "Registration",
+        "externalRegistrationUrl": "External registration link",
+        "tags": "Tags (comma separated)",
+        "heroMediaId": "Hero image id",
+        "heroHelp": "Upload an image below to get an id, or leave blank for the default photo."
+      },
+      "formats": {
+        "in_person": "In person",
+        "online": "Online",
+        "hybrid": "Hybrid"
+      },
+      "visibilities": {
+        "public": "Public",
+        "members_only": "Members only"
+      },
+      "registrationModes": {
+        "rsvp": "RSVP on this site",
+        "external": "External registration link"
+      },
+      "errors": {
+        "INVALID": "Check the required fields, dates and links, then try again.",
+        "EVENT_SLUG_TAKEN": "That URL slug is already used by another event.",
+        "EVENT_QUOTA_EXCEEDED": "Your plan's quota of reviewed events for this quarter is used up. Save as draft or upgrade.",
+        "EVENT_PUBLISHING_NOT_INCLUDED": "Community membership does not include event publishing.",
+        "EVENT_NOT_EDITABLE": "This event has already been published; ask WTIA to reopen it.",
+        "EVENT_HERO_MEDIA_INVALID": "That hero image id does not match an available image.",
+        "NO_MANAGED_COMPANY": "Event publishing needs a company you manage.",
+        "FORBIDDEN": "You can only edit events your organisation submitted."
+      }
+    },
     "documents": {
       "title": "Documents and receipts",
       "description": "Access approved WTIA resources and your billing receipts.",
