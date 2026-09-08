@@ -6,8 +6,9 @@ import type {Actor} from "@/lib/membership/lifecycle";
 import {profiles as profilesTable, type Profile} from "@/lib/db/server-schema";
 import {forbidden, getDb, requireMember, requireSystem} from "@/lib/db/repos/common";
 
-export type ProfileInput = Pick<Profile, "id" | "displayName"> & Partial<Pick<Profile, "phone" | "jobTitle" | "locale" | "onboardingState" | "directoryVisible">>;
-export type ProfileUpdate = Partial<Pick<Profile, "displayName" | "phone" | "jobTitle" | "locale" | "onboardingState" | "directoryVisible">>;
+type ProfileConsentColumns = "whatsappNumber" | "whatsappOptIn" | "whatsappConsentAt" | "whatsappConsentSource" | "whatsappConsentTextVersion" | "marketingConsentAt";
+export type ProfileInput = Pick<Profile, "id" | "displayName"> & Partial<Pick<Profile, "phone" | "jobTitle" | "locale" | "onboardingState" | "directoryVisible" | ProfileConsentColumns>>;
+export type ProfileUpdate = Partial<Pick<Profile, "displayName" | "phone" | "jobTitle" | "locale" | "onboardingState" | "directoryVisible" | ProfileConsentColumns>>;
 
 function profileScope(actor: Actor, userId: string) {
   if (actor.kind === "system") return sql`true`;

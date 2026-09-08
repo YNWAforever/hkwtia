@@ -4,6 +4,7 @@ import {z} from "zod";
 
 import {PLAN_CODES, type PlanCode} from "@/lib/membership/plans";
 import {BILLING_INTERVALS} from "@/lib/membership/catalog";
+import {normalizeWhatsAppNumber} from "@/lib/whatsapp/number";
 
 export const planCodeSchema = z.enum(PLAN_CODES);
 
@@ -23,6 +24,18 @@ export const profileSchema = z.object({
   phone: z.string().trim().max(64).optional().nullable(),
   jobTitle: z.string().trim().max(160).optional().nullable(),
   locale: z.string().trim().max(10).optional(),
+  whatsappNumber: z.string().trim().max(32).optional().nullable()
+    .transform((value, context) => {
+      if (!value) return null;
+      const normalized = normalizeWhatsAppNumber(value);
+      if (!normalized) context.addIssue({code: z.ZodIssueCode.custom, message: "INVALID_WHATSAPP_NUMBER"});
+      return normalized;
+    }),
+  whatsappOptIn: z.boolean().optional().default(false),
+}).superRefine((profile, context) => {
+  if (profile.whatsappOptIn && !profile.whatsappNumber) {
+    context.addIssue({code: z.ZodIssueCode.custom, path: ["whatsappNumber"], message: "WHATSAPP_NUMBER_REQUIRED"});
+  }
 });
 
 export const companySchema = z.object({

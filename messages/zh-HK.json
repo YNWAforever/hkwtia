@@ -809,6 +809,7 @@
       "displayName": "顯示名稱",
       "phone": "電話（選填）",
       "jobTitle": "職銜（選填）",
+      "whatsappNumber": "WhatsApp 號碼（選填）",
       "companyId": "WTIA 公司識別碼",
       "legalName": "公司法定名稱",
       "companyDisplayName": "公司公開名稱",
@@ -825,7 +826,8 @@
       "save": "未能儲存申請，請再試一次。",
       "company": "請使用你有權管理的公司。",
       "profile": "提交公司資料前，請先完成個人資料。",
-      "companyNotAllowed": "此計劃不接受公司資料。"
+      "companyNotAllowed": "此計劃不接受公司資料。",
+      "whatsappNumber": "請輸入包含國家代碼的有效 WhatsApp 號碼"
     },
     "status": {
       "complete": {
@@ -840,6 +842,11 @@
         "title": "申請審批中",
         "description": "WTIA 將審批你的贊助人申請，現時不會收取任何款項。"
       }
+    },
+    "whatsapp": {
+      "optIn": "透過 WhatsApp 向我發送 WTIA 活動更新及提醒",
+      "consent": "剔選即表示你同意 WTIA 可就活動、計劃及會籍事宜向此號碼發送訊息。你可隨時回覆「取消」以停止接收。詳見私隱聲明。",
+      "textVersion": "同意書版本 2026-09-v1"
     }
   },
   "MemberLogin": {

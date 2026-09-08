@@ -809,6 +809,7 @@
       "displayName": "Display name",
       "phone": "Phone (optional)",
       "jobTitle": "Job title (optional)",
+      "whatsappNumber": "WhatsApp number (optional)",
       "companyId": "WTIA company ID",
       "legalName": "Legal company name",
       "companyDisplayName": "Public company name",
@@ -825,7 +826,8 @@
       "save": "We could not save your application. Please try again.",
       "company": "Use a company that you are allowed to manage.",
       "profile": "Complete your profile before submitting company details.",
-      "companyNotAllowed": "This plan does not accept company details."
+      "companyNotAllowed": "This plan does not accept company details.",
+      "whatsappNumber": "Enter a valid WhatsApp number with country code"
     },
     "status": {
       "complete": {
@@ -840,6 +842,11 @@
         "title": "Application under review",
         "description": "WTIA will review your Patron application. No payment has been requested."
       }
+    },
+    "whatsapp": {
+      "optIn": "Send me WTIA activity updates and reminders on WhatsApp",
+      "consent": "By ticking this box you agree that WTIA may message this number about events, programmes and membership. Reply STOP at any time to opt out. See our privacy statement.",
+      "textVersion": "Consent wording 2026-09-v1"
     }
   },
   "MemberLogin": {

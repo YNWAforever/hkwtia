@@ -3,6 +3,7 @@ import {describe, expect, expectTypeOf, it} from "vitest";
 import {
   completeApplicationSchema,
   joinInputSchema,
+  profileSchema,
   type JoinInput,
 } from "@/lib/membership/join-schema";
 import {getPlan, PLAN_CODES} from "@/lib/membership/plans";
@@ -36,5 +37,11 @@ describe("membership join schemas", () => {
     expect(
       completeApplicationSchema.safeParse({plan: "patron", profile: {displayName: "Patron"}}).success,
     ).toBe(false);
+  });
+  it("normalises a WhatsApp number and refuses opt-in without a number", () => {
+    expect(profileSchema.parse({displayName: "Ada", whatsappNumber: "+852 9123 4567", whatsappOptIn: true})).toMatchObject({whatsappNumber: "+85291234567", whatsappOptIn: true});
+    expect(profileSchema.safeParse({displayName: "Ada", whatsappNumber: "12", whatsappOptIn: false}).success).toBe(false);
+    expect(profileSchema.safeParse({displayName: "Ada", whatsappOptIn: true}).success).toBe(false);
+    expect(profileSchema.parse({displayName: "Ada"})).toMatchObject({whatsappNumber: null, whatsappOptIn: false});
   });
 });
