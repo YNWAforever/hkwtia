@@ -35,7 +35,7 @@ describe("OpenNow", () => {
     expect(document.querySelector("#home-discover")).not.toBeNull();
     const heading = screen.getByRole("heading", {level: 3, name: bundles.en.Home.openNow.empty.title});
     expect(heading.closest(".honest-empty")).not.toBeNull();
-    expect(screen.getByRole("link", {name: bundles.en.Home.openNow.updatesAction})).toHaveAttribute("href", "/events?status=open");
+    expect(screen.getByRole("link", {name: bundles.en.Home.openNow.updatesAction})).toHaveAttribute("href", "/events#events-interest");
     expect(screen.getByRole("link", {name: bundles.en.Home.openNow.challengeAction})).toHaveAttribute("href", "/contact");
   });
 

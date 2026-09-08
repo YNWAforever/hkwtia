@@ -763,6 +763,19 @@
       "contact": "Email the membership team"
     }
   },
+  "Interest": {
+    "email": "Email address",
+    "displayName": "Name (optional)",
+    "whatsappNumber": "WhatsApp number (optional)",
+    "whatsappOptIn": "Also send me updates on WhatsApp",
+    "consent": "WTIA will use these details to tell you when an activity opens. Reply STOP on WhatsApp or use the unsubscribe link in any email to opt out.",
+    "website": "Leave this field empty",
+    "submit": "Get activity updates",
+    "submitting": "Saving…",
+    "success": "Thanks — we will let you know as soon as the next activity opens.",
+    "invalid": "Check the email address and WhatsApp number, then try again.",
+    "rateLimited": "Too many attempts from this connection. Try again in a few minutes."
+  },
   "Join": {
     "backToMembership": "Back to membership",
     "title": "Join WTIA",

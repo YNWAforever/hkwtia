@@ -763,6 +763,19 @@
       "contact": "電郵會員團隊"
     }
   },
+  "Interest": {
+    "email": "電郵地址",
+    "displayName": "姓名（選填）",
+    "whatsappNumber": "WhatsApp 號碼（選填）",
+    "whatsappOptIn": "同時透過 WhatsApp 向我發送更新",
+    "consent": "WTIA 會使用這些資料通知你活動開放報名。你可於 WhatsApp 回覆「取消」或使用電郵內的取消訂閱連結以停止接收。",
+    "website": "請留空此欄",
+    "submit": "接收活動更新",
+    "submitting": "儲存中…",
+    "success": "多謝 — 下一個活動開放時我們會通知你。",
+    "invalid": "請檢查電郵地址及 WhatsApp 號碼，然後再試一次。",
+    "rateLimited": "此連線嘗試次數過多，請稍後再試。"
+  },
   "Join": {
     "backToMembership": "返回會員計劃",
     "title": "加入 WTIA",

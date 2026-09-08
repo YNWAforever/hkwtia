@@ -129,7 +129,10 @@ describe("page copy scope", () => {
       // action), pricing.* readiness note (4: ready/fallback label+copy), 12 membership
       // dimensions x title/copy (24), first90.* (12: eyebrow/heading plus title/copy for each
       // of 5 steps), and closing.* (5: eyebrow/title/copy/join/contact) -- 32 + 50 = 82.
-      Membership: 82,
+      // Phase A Task 1 (programme D-5) added tierBenefits.* -- the per-tier benefit
+      // lists rendered on the plan grid (community 3 + startup 4 + corporate 5 +
+      // patron 4 = 16 array elements) -- 82 + 16 = 98.
+      Membership: 98,
       // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
       Privacy: 47,
       // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
@@ -143,7 +146,7 @@ describe("page copy scope", () => {
       // narrowly-scoped one so it alone (not the rest of Footer) is staff-editable.
       MarketingExtras: 1,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(525);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(541);
   });
 
   it("offers a Chinese placeholder for every English field", () => {
