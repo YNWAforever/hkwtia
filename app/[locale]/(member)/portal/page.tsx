@@ -1,9 +1,11 @@
 import {getTranslations, setRequestLocale} from "next-intl/server";
+import {redirect} from "next/navigation";
 
 import {StatusCard} from "@/components/portal/status-card";
 import type {AppLocale} from "@/i18n/routing";
-import {requireActor} from "@/lib/auth/actor";
+import {getActor} from "@/lib/auth/actor";
 import {getDashboard} from "@/lib/portal/queries";
+import {localizedPath} from "@/lib/urls";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +15,12 @@ export default async function PortalPage({params}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const actor = await requireActor();
+  // The layout redirects unauthenticated visitors, but Next renders layout and
+  // page in parallel, so requireActor() here threw UNAUTHORIZED into the
+  // runtime error log on every anonymous hit (Vercel, 2026-09; audit F21).
+  // Redirecting from the page as well keeps the log clean and the behaviour identical.
+  const actor = await getActor();
+  if (!actor) redirect(`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent("/portal")}`);
   const dashboard = await getDashboard(actor);
   const t = await getTranslations({locale, namespace: "Portal"});
   const status = dashboard.primaryStatus;

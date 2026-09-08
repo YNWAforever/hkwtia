@@ -20,7 +20,7 @@ describe("buildProgrammeHeaderFacts", () => {
     const facts = buildProgrammeHeaderFacts(asa, fakeT, "Asia Smart App Awards");
 
     expect(facts.typeLabel).toBe("Event series");
-    expect(facts.fact).toBe(`${asa.editionCount} editions since ${asa.latestYear}`);
+    expect(facts.fact).toBe(`${asa.editionCount} editions since ${asa.firstYear}`);
     expect(facts.mailSubject).toBe("Asia Smart App Awards programme enquiry");
   });
 
