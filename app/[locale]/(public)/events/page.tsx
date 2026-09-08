@@ -5,6 +5,7 @@ import {EventCalendarView} from "@/components/marketing/event-calendar-view";
 import {EventCard} from "@/components/marketing/event-card";
 import {EventViewSwitch} from "@/components/marketing/event-view-switch";
 import {InterestForm} from "@/components/marketing/interest-form";
+import {WhatsAppLink} from "@/components/marketing/whatsapp-link";
 import {Arrow} from "@/components/wt/arrow";
 import {ClosingBand} from "@/components/wt/closing-band";
 import {HonestEmpty} from "@/components/wt/honest-empty";
@@ -38,10 +39,11 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function EventsPage({params, searchParams}: Props) {
   const [{locale}, query] = await Promise.all([params, searchParams]);
   setRequestLocale(locale);
-  const [t, common, tInterest] = await Promise.all([
+  const [t, common, tInterest, tWhatsApp] = await Promise.all([
     getTranslations({locale, namespace: "Events"}),
     getTranslations({locale, namespace: "Common"}),
     getTranslations({locale, namespace: "Interest"}),
+    getTranslations({locale, namespace: "WhatsApp"}),
   ]);
   const appLocale = locale as AppLocale;
   const interestLabels = {
@@ -138,6 +140,7 @@ export default async function EventsPage({params, searchParams}: Props) {
       <ClosingBand
         actions={[{label: t("closing.actions.primary"), href: "/contact"}, {label: t("closing.actions.secondary"), href: "/membership"}]}
         copy={t("closing.copy")}
+        extra={<WhatsAppLink className="text-link light-link" label={tWhatsApp("chat")} locale={appLocale} prefill={tWhatsApp("prefill.events")} source="events" />}
         eyebrow={t("closing.eyebrow")}
         id="events-closing"
         title={t("closing.title")}

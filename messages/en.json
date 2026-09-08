@@ -771,6 +771,16 @@
       "contact": "Email the membership team"
     }
   },
+  "WhatsApp": {
+    "chat": "Chat on WhatsApp",
+    "prefill": {
+      "header": "Hi WTIA, I have a question.",
+      "contact": "Hi WTIA, I'd like to get in touch.",
+      "membership": "Hi WTIA, I'd like to know more about membership.",
+      "events": "Hi WTIA, please tell me about upcoming activities.",
+      "footer": "Hi WTIA."
+    }
+  },
   "Interest": {
     "email": "Email address",
     "displayName": "Name (optional)",

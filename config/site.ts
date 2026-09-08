@@ -28,12 +28,17 @@
 type SiteContact = Readonly<{
   email: string;
   phone?: string;
+  whatsapp?: string;
   addressLines: readonly string[];
 }>;
 
 export const siteContact: SiteContact = {
   email: 'contact@hkwtia.org',
   phone: '+852 2989 9164',
+  // WhatsApp Business number for click-to-chat (programme §8). Unset until the
+  // Woztell channel is provisioned; every WhatsAppLink renders nothing until then.
+  // When it exists, set it as '+852 XXXX XXXX'; clickToChatUrl strips formatting.
+  whatsapp: undefined,
   addressLines: ['4/F, KOHO', '73-75 Hung To Road', 'Kwun Tong, Hong Kong']
 };
 

@@ -6,6 +6,7 @@ import {DualBrandLockup} from "@/components/layout/dual-brand-lockup";
 import {HeaderShell} from "@/components/layout/header-shell";
 import {LocaleSwitcher} from "@/components/layout/locale-switcher";
 import {MobileNavigation} from "@/components/layout/mobile-navigation";
+import {WhatsAppLink} from "@/components/marketing/whatsapp-link";
 import {localizeNavigation, type NavigationMessageKey} from "@/config/navigation";
 import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
@@ -20,7 +21,10 @@ type SiteHeaderProps = {
 // second row ("Find an event") is gone; the donor carries that call to action on the
 // event-first navigation trigger and in the mobile priority actions (errata E-15).
 export async function SiteHeader({locale, hasAnnouncement = false}: SiteHeaderProps) {
-  const t = await getTranslations({locale, namespace: "Navigation"});
+  const [t, tWhatsApp] = await Promise.all([
+    getTranslations({locale, namespace: "Navigation"}),
+    getTranslations({locale, namespace: "WhatsApp"}),
+  ]);
   const navigation = localizeNavigation((key: NavigationMessageKey) => t(key));
   const mobileLabels = {
     open: t("openMenu"),
@@ -70,6 +74,7 @@ export async function SiteHeader({locale, hasAnnouncement = false}: SiteHeaderPr
             switchToEnglishLabel={mobileLabels.switchToEnglish}
             switchToChineseLabel={mobileLabels.switchToChinese}
           />
+          <WhatsAppLink className="signin-link" label={tWhatsApp("chat")} locale={locale} prefill={tWhatsApp("prefill.header")} source="header" />
           <Link className="signin-link" href={navigation.memberPortal.href}>
             {navigation.memberPortal.label}
           </Link>

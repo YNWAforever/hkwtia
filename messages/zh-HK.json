@@ -771,6 +771,16 @@
       "contact": "電郵會員團隊"
     }
   },
+  "WhatsApp": {
+    "chat": "WhatsApp 對話",
+    "prefill": {
+      "header": "你好 WTIA，我有一個問題。",
+      "contact": "你好 WTIA，我想聯絡你們。",
+      "membership": "你好 WTIA，我想了解會籍詳情。",
+      "events": "你好 WTIA，請告訴我即將舉行的活動。",
+      "footer": "你好 WTIA。"
+    }
+  },
   "Interest": {
     "email": "電郵地址",
     "displayName": "姓名（選填）",

@@ -4,6 +4,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {MembershipDimensions} from "@/components/marketing/membership-dimensions";
 import {PlanGrid, type PlanGridTier} from "@/components/marketing/plan-grid";
 import {PricingNote} from "@/components/marketing/pricing-note";
+import {WhatsAppLink} from "@/components/marketing/whatsapp-link";
 import {ClosingBand} from "@/components/wt/closing-band";
 import {HonestEmpty} from "@/components/wt/honest-empty";
 import {PageHero} from "@/components/wt/page-hero";
@@ -40,9 +41,10 @@ export default async function MembershipPage({params}: Props) {
   const locale = rawLocale as AppLocale;
   setRequestLocale(locale);
 
-  const [t, tCommon, rows] = await Promise.all([
+  const [t, tCommon, tWhatsApp, rows] = await Promise.all([
     getTranslations({locale, namespace: "Membership"}),
     getTranslations({locale, namespace: "Common"}),
+    getTranslations({locale, namespace: "WhatsApp"}),
     membershipPlansRepository.list().catch(() => null),
   ]);
   const publicTiers = rows === null ? [] : buildPublicMembershipCatalog({locale, rows, priceIds: publicPriceIds()});
@@ -95,6 +97,7 @@ export default async function MembershipPage({params}: Props) {
     <ClosingBand
       actions={[{label: t("closing.join"), href: "/join"}, {label: t("closing.contact"), href: `mailto:${siteConfig.contact.email}`}]}
       copy={t("closing.copy")}
+      extra={<WhatsAppLink className="text-link light-link" label={tWhatsApp("chat")} locale={locale} prefill={tWhatsApp("prefill.membership")} source="membership" />}
       eyebrow={t("closing.eyebrow")}
       title={t("closing.title")}
     />

@@ -3,6 +3,7 @@ import {getTranslations, setRequestLocale} from 'next-intl/server';
 
 import {ContactConciergeLauncher} from '@/components/marketing/contact-concierge-launcher';
 import {PreparedEmailForm} from '@/components/marketing/prepared-email-form';
+import {WhatsAppLink} from '@/components/marketing/whatsapp-link';
 import {InnerCardGrid} from '@/components/wt/inner-card-grid';
 import {PageHero} from '@/components/wt/page-hero';
 import {Section} from '@/components/wt/section';
@@ -23,9 +24,10 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function ContactPage({params, searchParams = Promise.resolve({})}: Props) {
   const [{locale}, query] = await Promise.all([params, searchParams]);
   setRequestLocale(locale);
-  const [t, common] = await Promise.all([
+  const [t, common, tWhatsApp] = await Promise.all([
     getTranslations({locale, namespace: 'Contact'}),
     getTranslations({locale, namespace: 'Common'}),
+    getTranslations({locale, namespace: 'WhatsApp'}),
   ]);
   const appLocale = locale as AppLocale;
   const rawTopic = query.topic;
@@ -65,6 +67,7 @@ export default async function ContactPage({params, searchParams = Promise.resolv
             {siteConfig.contact.phone === undefined ? null : (
               <a className="block font-medium text-foreground underline-offset-4 hover:underline" href={`tel:${siteConfig.contact.phone.replace(/\s/g, '')}`}>{siteConfig.contact.phone}</a>
             )}
+            <WhatsAppLink className="block font-medium text-foreground underline-offset-4 hover:underline" label={tWhatsApp('chat')} locale={appLocale} prefill={tWhatsApp('prefill.contact')} source="contact" />
             <p>{t('address')}</p>
           </address>
 
