@@ -1,5 +1,6 @@
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
+import {redirect} from "next/navigation";
 
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
@@ -37,21 +38,19 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
   setRequestLocale(locale);
   const t = await getTranslations("MemberLogin");
 
-  // Already-authenticated visitors get an honest access message, not a
-  // second sign-in form and not any Portal data — we never distinguish
-  // member/admin here, we just say this page isn't for them.
-  const actor = await getActor().catch(() => null);
-  if (actor) {
-    return (
-      <section className="glass-card p-6 sm:p-10">
-        <p className="text-muted-foreground">{t("nonMemberAccess")}</p>
-      </section>
-    );
-  }
-
   // Fails open to /portal for a stale or tampered `next` — this page must
   // never surface an error to a visitor over an invalid continuation alone.
   const continuation = parsePortalContinuation(queryValue(query.next));
+
+  // Clicking the magic-link email lands the browser back here already
+  // authenticated (Neon Auth verifies the token and redirects to this
+  // callback URL). Forward immediately, mirroring /join's page.tsx — this
+  // page must never leave an authenticated visitor stranded on a login
+  // form with no way to reach /portal.
+  const actor = await getActor().catch(() => null);
+  if (actor) {
+    redirect(localizedPath(locale, continuation));
+  }
   const sent = Boolean(queryValue(query.sent));
   const errorKey = errorMessageKey(queryValue(query.error));
 

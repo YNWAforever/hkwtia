@@ -830,7 +830,6 @@
     "emailLabel": "Email address",
     "submit": "Send secure sign-in link",
     "sent": "Check your inbox for your secure sign-in link. It will return you to your member portal.",
-    "nonMemberAccess": "You're already signed in. This sign-in link is only for signing in to a different account.",
     "errors": {
       "email": "Enter a valid email address.",
       "rateLimited": "Too many sign-in emails have been requested. Wait a few minutes and try again.",
