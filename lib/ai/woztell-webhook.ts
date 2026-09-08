@@ -122,6 +122,10 @@ export type WoztellWebhookProcessorDependencies =
     ) => Promise<void>;
     markCompleted?: (providerMessageId: string) => Promise<void>;
     setWhatsappOptIn: (profileId: string, optedIn: boolean) => Promise<void>;
+    /** Unknown sender → contacts row (programme D-6). Optional so existing tests keep passing. */
+    recordContact?: (input: Readonly<{phoneE164: string; locale: "en" | "zh-HK"; receivedAt: Date}>) => Promise<void>;
+    /** STOP/取消 → message_suppressions + contact opt-out (D-7). */
+    recordOptOut?: (input: Readonly<{profileId: string | null; phoneE164: string}>) => Promise<void>;
     concierge: Readonly<{
       startTurn(input: WoztellConciergeTurnInput): Promise<WoztellConciergeTurn>;
     }>;
@@ -207,6 +211,11 @@ export function createWoztellWebhookProcessor(
       const profile = await dependencies.resolveProfile(sender);
       const locale = localeFor(normalized.text, profile);
       const owner = ownerFor(profile, sender, dependencies);
+      if (!profile) {
+        // A stranger who writes in is the funnel's first signal (programme D-6):
+        // keep the number so a person can follow up, before any bot reply.
+        await dependencies.recordContact?.({phoneE164: sender, locale, receivedAt: normalized.receivedAt});
+      }
       const claim = await dependencies.claimInbound({
         owner,
         profileId: profile?.id ?? null,
@@ -230,6 +239,7 @@ export function createWoztellWebhookProcessor(
         if (claim.profileId) {
           await dependencies.setWhatsappOptIn(claim.profileId, false);
         }
+        await dependencies.recordOptOut?.({profileId: claim.profileId, phoneE164: sender});
         await dependencies.markCompleted?.(normalized.providerMessageId);
         return {status: "opted_out"};
       }

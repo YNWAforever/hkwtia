@@ -11,7 +11,9 @@ import type {ChannelAdapter} from "@/lib/channels/types";
 import type {AiEnv, AppEnv} from "@/lib/config/env";
 import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {agentToolsRepository} from "@/lib/db/repos/agent-tools";
+import {contactsRepository, contactWriterActor} from "@/lib/db/repos/contacts";
 import {conversationsRepository} from "@/lib/db/repos/conversations";
+import {suppressionsRepository, unsubscribeActor} from "@/lib/db/repos/suppressions";
 import {
   createPostgresWoztellStore,
   providerRunId,
@@ -137,6 +139,17 @@ export function createProductionWoztellProcessorDependencies(
         .digest("hex");
     },
     approvedTemplateKeys: approvedTemplateKeys(),
+    async recordContact(input) {
+      await contactsRepository.upsertFromWhatsApp(contactWriterActor("whatsapp"), {
+        phoneE164: input.phoneE164, locale: input.locale, receivedAt: input.receivedAt,
+      });
+    },
+    async recordOptOut(input) {
+      if (input.profileId) {
+        await suppressionsRepository.optOutWhatsApp(unsubscribeActor(), input.profileId, "whatsapp_stop");
+      }
+      await contactsRepository.markWhatsAppOptedOut(contactWriterActor("whatsapp"), input.phoneE164);
+    },
     supportUrl: `${appOrigin}/en/contact`,
     now,
     concierge: {
