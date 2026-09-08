@@ -7,6 +7,7 @@ import {eventFormInput} from "@/lib/admin/event-form-input";
 import {createEvent, updateEvent, type EventMutationDependencies} from "@/lib/db/repos/events";
 import {setMediaArchived, type MediaMutationDependencies} from "@/lib/db/repos/media";
 import type {Actor} from "@/lib/membership/lifecycle";
+import {legacyDerivedEventColumns} from "@/tests/fixtures/event-row";
 
 const staff: Actor = {kind: "staff", userId: "auth-staff", profileId: "profile-staff"};
 const heroMediaId = "11111111-1111-4111-8111-111111111111";
@@ -20,7 +21,14 @@ const createInput = {
 };
 
 function storedEvent(overrides: Record<string, unknown> = {}) {
+  const legacy = {
+    memberOnly: false,
+    published: false,
+    createdAt: new Date("2029-01-01T00:00:00.000Z"),
+    ...overrides,
+  } as Parameters<typeof legacyDerivedEventColumns>[0];
   return {
+    ...legacyDerivedEventColumns(legacy),
     id: eventId,
     slug: "public-event",
     titleEn: "Public event",
@@ -152,7 +160,9 @@ describe("Event hero administration and media lifecycle", () => {
     await expect(updateEvent(staff, eventId, {heroMediaId: null}, updateDependencies))
       .resolves.toMatchObject({heroMediaId: null});
     expect(lockActiveMedia).not.toHaveBeenCalled();
-    expect(updateEventRow).toHaveBeenCalledWith(eventId, {heroMediaId: null});
+    // D-12: a boolean-free admin update still writes both pairs, carried
+    // over from the locked row rather than reset.
+    expect(updateEventRow).toHaveBeenCalledWith(eventId, {heroMediaId: null, status: "draft", visibility: "public", published: false, memberOnly: false, publishedAt: null});
     expect(updateAudit).toHaveBeenCalledOnce();
   });
 

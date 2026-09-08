@@ -77,6 +77,35 @@ describe("repository-backed Event visibility", () => {
     await expect(countPublicEvents(anonymous, {status: "open", asOf, source})).resolves.toBe(openEvents.length);
   });
 
+  it("reads public events by status and visibility, not the legacy booleans", async () => {
+    const source = [
+      event("enum-published", {published: false, memberOnly: false, status: "published", visibility: "public"}),
+      event("bool-only", {published: true, memberOnly: false, status: "draft", visibility: "public"}),
+      event("members", {published: true, memberOnly: false, status: "published", visibility: "members_only"}),
+    ];
+    const slugs = (await listPublicEvents(anonymous, {status: "open", asOf, locale: "en", source})).map((item) => item.slug);
+    expect(slugs).toEqual(["enum-published"]);
+    await expect(countPublicEvents(anonymous, {status: "open", asOf, source})).resolves.toBe(1);
+    await expect(getPublicEventBySlug("bool-only", "en", {asOf, source})).resolves.toBeNull();
+    await expect(getPublicEventBySlug("enum-published", "en", {asOf, source})).resolves.toMatchObject({slug: "enum-published"});
+  });
+
+  it("serves members every published event except invite-only, by enum", async () => {
+    const source = [
+      event("invite", {status: "published", visibility: "invite_only"}),
+      event("members", {published: false, status: "published", visibility: "members_only"}),
+      event("pending", {published: true, status: "pending_review", visibility: "public"}),
+      event("public", {status: "published", visibility: "public"}),
+    ];
+    const listed = await listMemberEvents(member, source, {hasEligibleMembership: async () => true});
+    expect(listed.map((item) => item.slug)).toEqual(["members", "public"]);
+    await expect(getEventBySlug(member, "invite", source)).resolves.toBeNull();
+    await expect(getEventBySlug(member, "members", source)).resolves.toMatchObject({slug: "members"});
+    await expect(getEventBySlug(anonymous, "members", source)).resolves.toBeNull();
+    await expect(getEventBySlug(anonymous, "pending", source)).resolves.toBeNull();
+    await expect(getEventBySlug(anonymous, "public", source)).resolves.toMatchObject({slug: "public"});
+  });
+
   it("excludes member-only and unpublished Events from the count", async () => {
     const source = [
       event("draft-public", {published: false, startsAt: new Date("2030-01-01T07:00:00.000Z"), endsAt: null}),

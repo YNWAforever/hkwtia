@@ -53,10 +53,12 @@ describe("featured public Event query", () => {
       .resolves.toEqual([]);
 
     expect(statements).toHaveLength(1);
-    expect(statements[0]?.query).toMatch(/where.*published.*member_only/is);
+    // S-1: the public read filters on the enums, not the legacy booleans.
+    expect(statements[0]?.query).toMatch(/where.*"status".*"visibility"/is);
+    expect(statements[0]?.query).not.toMatch(/where.*"published".*"member_only"/is);
     expect(statements[0]?.query).toMatch(/order by.*coalesce.*slug.*id/is);
     expect(statements[0]?.query).toMatch(/limit/is);
-    expect(statements[0]?.params).toContain(1);
+    expect(statements[0]?.params).toEqual(expect.arrayContaining(["published", "public", 1]));
   });
 
   it("preserves filtering, ordering, localization, and limiting for an in-memory source", async () => {
