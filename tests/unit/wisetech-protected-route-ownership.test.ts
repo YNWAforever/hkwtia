@@ -291,8 +291,9 @@ describe("WiseTech protected route ownership", () => {
     const codeFiles = repositoryProtectedFiles();
     const inventoryFiles = protectedRouteOwnershipInventory.map(({filePath}) => filePath).sort();
 
-    expect(codeFiles).toHaveLength(45);
-    expect(inventoryFiles).toHaveLength(45);
+    // Phase A (audit F2) added /admin/inbox, /admin/inbox/[id] and /admin/tasks: 45 + 3 = 48.
+    expect(codeFiles).toHaveLength(48);
+    expect(inventoryFiles).toHaveLength(48);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -307,11 +308,11 @@ describe("WiseTech protected route ownership", () => {
       protectedRouteOwnershipInventory.filter((owner) => owner.classification === classification).length
     );
 
-    expect(count("admin-page")).toBe(26);
+    expect(count("admin-page")).toBe(29);
     expect(count("api-handler")).toBe(8);
     expect(count("webhook-handler")).toBe(2);
     expect(count("job-handler")).toBe(9);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(26);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(29);
     expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(19);
   });
 
