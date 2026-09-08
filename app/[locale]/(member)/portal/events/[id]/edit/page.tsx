@@ -1,26 +1,29 @@
 import {getTranslations, setRequestLocale} from "next-intl/server";
-import {notFound} from "next/navigation";
+import {notFound, redirect} from "next/navigation";
 
 import {EventForm} from "@/components/portal/event-form";
 import type {AppLocale} from "@/i18n/routing";
-import {requireActor} from "@/lib/auth/actor";
+import {getActor} from "@/lib/auth/actor";
 import {eventsRepository} from "@/lib/db/repos/events";
 import {saveMemberEventDraftAction, submitMemberEventAction} from "@/lib/events/member-actions";
 import {memberEventViewFromRow} from "@/lib/events/member-contract";
 import {loadMemberEventsContext} from "@/lib/events/member-core";
+import {localizedPath} from "@/lib/urls";
 
 import {eventFormLabels} from "../../labels";
 
 export const dynamic = "force-dynamic";
 type Props = Readonly<{params: Promise<{locale: string; id: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>}>;
 
-// The Portal layout already redirects an unauthenticated visitor to
-// /member-login with a continuation, so `requireActor` cannot throw here.
 export default async function EditMemberEventPage({params, searchParams}: Props) {
   const {locale: localeValue, id} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const actor = await requireActor();
+  // The portal layout's continuation allowlist doesn't cover this deep path,
+  // so the page-level redirect is what preserves /portal/events/{id}/edit as
+  // the post-login destination.
+  const actor = await getActor();
+  if (!actor) redirect(`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent(`/portal/events/${id}/edit`)}`);
   const t = await getTranslations({locale, namespace: "Portal.memberEvents"});
   // FORBIDDEN (another company's row, or an admin-authored one) and an invalid
   // id both render as not-found: the member learns nothing about rows they

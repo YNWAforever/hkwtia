@@ -1,23 +1,27 @@
 import {getTranslations, setRequestLocale} from "next-intl/server";
+import {redirect} from "next/navigation";
 
 import {EventForm} from "@/components/portal/event-form";
 import type {AppLocale} from "@/i18n/routing";
-import {requireActor} from "@/lib/auth/actor";
+import {getActor} from "@/lib/auth/actor";
 import {saveMemberEventDraftAction, submitMemberEventAction} from "@/lib/events/member-actions";
 import {loadMemberEventsContext} from "@/lib/events/member-core";
+import {localizedPath} from "@/lib/urls";
 
 import {eventFormLabels} from "../labels";
 
 export const dynamic = "force-dynamic";
 type Props = Readonly<{params: Promise<{locale: string}>}>;
 
-// The Portal layout already redirects an unauthenticated visitor to
-// /member-login with a continuation, so `requireActor` cannot throw here.
 export default async function NewMemberEventPage({params}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const actor = await requireActor();
+  // The portal layout's continuation allowlist doesn't cover this deep path,
+  // so the page-level redirect is what preserves /portal/events/new as the
+  // post-login destination.
+  const actor = await getActor();
+  if (!actor) redirect(`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent("/portal/events/new")}`);
   const t = await getTranslations({locale, namespace: "Portal.memberEvents"});
   // NO_MANAGED_COMPANY and MEMBERSHIP_INACTIVE both mean "nothing to publish from".
   const context = await loadMemberEventsContext(actor).catch(() => null);
