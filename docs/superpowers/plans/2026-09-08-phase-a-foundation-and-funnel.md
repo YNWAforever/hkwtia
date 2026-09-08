@@ -2839,8 +2839,16 @@ git commit -m "chore(phase-a): programme first-year fact, quiet portal redirect,
 
 ## Phase A exit checklist
 
-- [ ] Migration `0025_phase_a_contacts_consent` applied to production before the deploy that contains Task 4+ (the join step writes the new columns).
-- [ ] `WOZTELL_*` env unchanged (`RUN_LIVE_WOZTELL` unset) — the webhook still processes with the mock adapter; the contact and opt-out writes are real.
-- [ ] `config/site.ts` `whatsapp` stays `undefined` until the ops track (spec §8) delivers the number; then set it, redeploy, and the click-to-chat links appear.
-- [ ] Owner walk of the acceptance script in spec §4, both locales, on a Preview, then on production.
-- [ ] Playwright: add `tests/e2e/phase-a-funnel.spec.ts` covering bare `/join` → chooser, `/events` interest form success message, `/admin/inbox` and `/admin/tasks` reachable for the credential-gated admin fixture (`tests/fixtures/m2-auth.ts`), and the `/zh` equivalents.
+**Status (2026-09-09):** Tasks 1–13 merged to `main` as [#47](https://github.com/YNWAforever/hkwtia/pull/47)
+(squash `443b969`); spec correction [#48](https://github.com/YNWAforever/hkwtia/pull/48) (`4833ae1`). Code gate
+green in CI (`quality`) and on the Vercel preview. Production promoted the same day (deployment `838LfJYV…`).
+Content gate done. Owner gate partially walked — the two signed-in / secret-gated legs below remain.
+
+- [x] Migration `0025_phase_a_contacts_consent` applied to production before the deploy that contains Task 4+ — applied 2026-09-09 against Neon project `fragrant-mountain-25240574` (`hkwtia`, branch `production`) via `neonctl` + `npm run db:migrate`; journal now 25 rows, `contacts` present, `profiles` consent columns present. The same migration repaired `site_announcements_href_check` (WP-7 had widened `config/public-routes.ts` without a migration).
+- [x] `WOZTELL_*` env unchanged (`RUN_LIVE_WOZTELL` unset) — untouched; the webhook still runs the mock adapter.
+- [x] `config/site.ts` `whatsapp` stays `undefined` until the ops track (spec §8) delivers the number — still `undefined`; `/contact`, header, footer, membership and events render no WhatsApp link, as designed.
+- [x] Demo content archived (D-13, F14): `content:archive-demo` previewed then applied on production 2026-09-09 — three `%-demo` showcase listings → `rejected` ("demo content archived 2026-09"), post `wtia-demo-content-note-2026` → `archived_at` set. Nothing deleted.
+- [ ] Owner walk of the acceptance script in spec §4, both locales, on production. **Done by script/anonymous walk:** header "Join WiseTech" → chooser → Startup → magic-link form; `/events` interest form → `contacts` row with `source='interest_form'`, opt-in and consent provenance (one real submission per locale, both rows removed afterwards); `/membership` distinct benefits + "Choose this plan"; `/contact` WhatsApp button absent by design. **Still owner-only:** magic link → profile step (WhatsApp number + consent) → portal profile edit; signed mock inbound (`WOZTELL_WEBHOOK_SECRET` is a sensitive Vercel var) → `contacts` row + `/admin/inbox` thread → STOP → `message_suppressions` row → `/admin/tasks` resolve.
+- [x] Playwright `tests/e2e/phase-a-funnel.spec.ts` — bare `/join` chooser, `/events` interest form (via honeypot, no write), `/admin/inbox` + `/admin/tasks` for the M2 staff fixture, both locales. Passes against production (`PLAYWRIGHT_BASE_URL=https://hkwtia.vercel.app`); admin cases skip without `M2_TEST_STAFF_*`.
+
+**Known local gotchas recorded for Phase B:** `.env.local` carries empty `DATABASE_URL*` and `NEXT_PUBLIC_SITE_URL`, so `npm run db:migrate` needs an explicit URL and `npm run build` needs `NEXT_PUBLIC_SITE_URL=https://hkwtia.vercel.app`; Vercel marks `DATABASE_URL` sensitive (`vercel env pull` returns it empty) — use `neonctl connection-string production --project-id fragrant-mountain-25240574 --org-id org-soft-sunset-25251479`. Merges to `main` build as Preview only; production is released with `vercel promote <deployment-url> --scope ynwaforevers-projects`.
