@@ -91,6 +91,12 @@ export const landingPartnerMouStatusEnum = pgEnum("landing_partner_mou_status", 
 export const partnerCategoryEnum = pgEnum("partner_category", [
   "supporting", "media", "regional", "programme", "sponsor",
 ]);
+export const contactSourceEnum = pgEnum("contact_source", [
+  "whatsapp", "event_guest", "showcase_intro", "join_abandoned", "interest_form", "import",
+]);
+export const contactStageEnum = pgEnum("contact_stage", [
+  "new", "contacted", "qualified", "applied", "member", "closed",
+]);
 export type ShowcaseListingStatus = (typeof showcaseListingStatusEnum.enumValues)[number];
 
 const vector = customType<{data: number[]; driverData: string}>({
@@ -117,6 +123,13 @@ export const profiles = pgTable("profiles", {
   updatedAt: updatedAt("updated_at"),
   whatsappOptIn: boolean("whatsapp_opt_in").default(false).notNull(),
   whatsappNumber: text("whatsapp_number"),
+  // Programme D-7: consent is only useful if it can be shown. Source values:
+  // join | portal | rsvp | interest_form | whatsapp_inbound. Text version pins
+  // the wording the person agreed to (lib/whatsapp/consent.ts).
+  whatsappConsentAt: timestamp("whatsapp_consent_at", {withTimezone: true}),
+  whatsappConsentSource: text("whatsapp_consent_source"),
+  whatsappConsentTextVersion: text("whatsapp_consent_text_version"),
+  marketingConsentAt: timestamp("marketing_consent_at", {withTimezone: true}),
 });
 
 export const companies = pgTable("companies", {
@@ -1015,6 +1028,48 @@ export const leads = pgTable(
 );
 
 /**
+ * The funnel spine (programme D-6). A contact is anyone WTIA may need to
+ * reach who is not, or not yet, a profile: a WhatsApp sender we do not
+ * recognise, an interest-form submitter, an event guest, an abandoned join.
+ * When a contact later signs in, `profile_id` links the two; nothing is
+ * merged away. Numbers are stored to reply; marketing consent is separate
+ * and off by default.
+ */
+export const contacts = pgTable(
+  "contacts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    profileId: text("profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    companyId: uuid("company_id").references(() => companies.id, {onDelete: "set null"}),
+    displayName: text("display_name"),
+    email: text("email"),
+    phoneE164: text("phone_e164"),
+    whatsappMemberId: text("whatsapp_member_id"),
+    source: contactSourceEnum("source").notNull(),
+    stage: contactStageEnum("stage").default("new").notNull(),
+    ownerProfileId: text("owner_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    tags: text("tags").array().default(sql`'{}'::text[]`).notNull(),
+    locale: varchar("locale", {length: 10}).default("en").notNull(),
+    whatsappOptIn: boolean("whatsapp_opt_in").default(false).notNull(),
+    whatsappConsentAt: timestamp("whatsapp_consent_at", {withTimezone: true}),
+    whatsappConsentSource: text("whatsapp_consent_source"),
+    whatsappConsentTextVersion: text("whatsapp_consent_text_version"),
+    whatsappOptedOutAt: timestamp("whatsapp_opted_out_at", {withTimezone: true}),
+    lastInboundAt: timestamp("last_inbound_at", {withTimezone: true}),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    uniqueIndex("contacts_phone_unique").on(table.phoneE164).where(sql`${table.phoneE164} IS NOT NULL`),
+    uniqueIndex("contacts_whatsapp_member_unique").on(table.whatsappMemberId).where(sql`${table.whatsappMemberId} IS NOT NULL`),
+    uniqueIndex("contacts_profile_unique").on(table.profileId).where(sql`${table.profileId} IS NOT NULL`),
+    index("contacts_stage_owner_idx").on(table.stage, table.ownerProfileId),
+    index("contacts_email_idx").on(table.email),
+    check("contacts_identity_check", sql`${table.email} IS NOT NULL OR ${table.phoneE164} IS NOT NULL OR ${table.whatsappMemberId} IS NOT NULL`),
+  ],
+);
+
+/**
  * The marker that makes "this database is disposable" checkable rather than
  * asserted. Planted once at provisioning time; read by assertSeedSentinel
  * (see scripts/lib/acceptance-guard.ts) before any fixture seed is allowed to
@@ -1339,4 +1394,6 @@ export type LandingPartner = typeof landingPartners.$inferSelect;
 export type NewLandingPartner = typeof landingPartners.$inferInsert;
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
+export type Contact = typeof contacts.$inferSelect;
+export type NewContact = typeof contacts.$inferInsert;
 export type AcceptanceSentinel = typeof acceptanceSentinel.$inferSelect;

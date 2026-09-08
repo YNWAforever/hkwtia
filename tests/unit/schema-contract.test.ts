@@ -8,6 +8,7 @@ import {
   auditEvents,
   companies,
   companyMembers,
+  contacts,
   conversations,
   jobs,
   membershipApplications,
@@ -114,5 +115,26 @@ describe("M4A AI concierge schema contract", () => {
     expect(serverSchema.agentRuns.csatScore).toBeDefined();
     expect(serverSchema.agentRuns.createdAt).toBeDefined();
     expect(serverSchema.conversations.expiresAt).toBeDefined();
+  });
+});
+
+describe("phase A contacts and consent contract", () => {
+  it("records WhatsApp consent provenance on profiles", () => {
+    expect(profiles.whatsappConsentAt).toBeDefined();
+    expect(profiles.whatsappConsentSource).toBeDefined();
+    expect(profiles.whatsappConsentTextVersion).toBeDefined();
+    expect(profiles.marketingConsentAt).toBeDefined();
+  });
+
+  it("defines contacts with one row per phone and one per Woztell member id", () => {
+    const config = getTableConfig(contacts);
+    expect(config.name).toBe("contacts");
+    const indexNames = config.indexes.map((index) => index.config.name);
+    expect(indexNames).toContain("contacts_phone_unique");
+    expect(indexNames).toContain("contacts_whatsapp_member_unique");
+    expect(indexNames).toContain("contacts_profile_unique");
+    expect(contacts.source).toBeDefined();
+    expect(contacts.stage).toBeDefined();
+    expect(contacts.whatsappOptedOutAt).toBeDefined();
   });
 });
