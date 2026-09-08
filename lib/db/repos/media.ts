@@ -478,7 +478,7 @@ async function persistUploadedMediaAs(
         contentType: row.contentType,
         byteSize: row.byteSize,
         checksumSha256: row.checksumSha256,
-        ...(scope === "portal" ? {scope} : {}),
+        scope,
       },
     });
     return row;
@@ -510,18 +510,43 @@ export async function persistMemberUploadedMedia(
   return persistUploadedMediaAs(actor, input, "portal", dependencies);
 }
 
-/** Active media the member uploaded themselves; null otherwise (unknown, archived or someone else's — indistinguishable by design). */
+export type MediaOwnershipReadDependencies = Readonly<{
+  getOwnedByProfile: (id: string, profileId: string) => Promise<MediaRow | null>;
+}>;
+
+async function defaultOwnershipReadDependencies(): Promise<MediaOwnershipReadDependencies> {
+  const db = await getDb();
+  return {
+    getOwnedByProfile: async (id, profileId) =>
+      (
+        await db
+          .select()
+          .from(media)
+          .where(
+            and(
+              eq(media.id, id),
+              eq(media.registeredByProfileId, profileId),
+              isNull(media.archivedAt),
+            ),
+          )
+          .limit(1)
+      )[0] ?? null,
+  };
+}
+
+/** Active media the member uploaded themselves; null otherwise (unknown, archived or someone else's — indistinguishable by design). Ownership is enforced in SQL, not fetched-then-compared, so a member can never learn a fact about a row they don't own from timing or partial results. */
 export async function getMediaOwnedByProfile(
   actor: Actor,
   id: unknown,
-  dependencies?: MediaReadDependencies,
+  dependencies?: MediaOwnershipReadDependencies,
 ): Promise<MediaRow | null> {
   requireMember(actor);
   const mediaId = mediaIdSchema.safeParse(id);
   if (!mediaId.success) return null;
-  const row = await (dependencies ?? (await defaultReadDependencies())).get(mediaId.data);
-  if (!row || row.archivedAt !== null || row.registeredByProfileId !== actor.profileId) return null;
-  return row;
+  return (dependencies ?? (await defaultOwnershipReadDependencies())).getOwnedByProfile(
+    mediaId.data,
+    actor.profileId,
+  );
 }
 
 export type UploadedMediaRow = MediaRow &

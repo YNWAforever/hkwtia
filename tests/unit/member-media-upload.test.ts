@@ -1,6 +1,9 @@
 import {describe, expect, it, vi} from "vitest";
 
+import type {MediaUploadServiceDependencies} from "@/lib/admin/media-upload-service";
 import {createMemberMediaUploadPost, uploadMemberMedia} from "@/lib/portal/media-upload";
+import type {MediaRow} from "@/lib/db/server-schema";
+import type {R2Object} from "@/lib/media/r2-storage";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 const member: Actor = {kind: "member", userId: "u", profileId: "member-1"};
@@ -11,20 +14,26 @@ const input = {bytes: png, contentType: "image/png", fields: {filename: "x.png",
 
 function dependencies() {
   const order: string[] = [];
-  const persist = vi.fn(async (_actor: Actor, row: {id: string}) => { order.push("persist"); return {id: row.id, url: `/api/media/${row.id}`}; });
-  return {
-    order,
-    persist,
-    value: {
-      normalize: vi.fn(async () => {
-        order.push("normalize");
-        return {bytes: png, contentType: "image/png" as const, width: 10, height: 10, byteSize: png.byteLength, sha256: "a".repeat(64), objectKey: "media/2026/09/33333333-3333-4333-8333-333333333333.png", filename: "x.png", altEn: "x", altZh: "x", focalX: 50, focalY: 50};
-      }),
-      storage: {put: vi.fn(async () => { order.push("put"); return {etag: "\"e\""}; }), delete: vi.fn(async () => { order.push("delete"); }), get: vi.fn()},
-      persist,
-      uuid: () => ID,
+  const persist = vi.fn(async (_actor: Actor, row: {id: string}): Promise<MediaRow> => {
+    order.push("persist");
+    // Only `id` and `url` are exercised by the pipeline and its callers; the
+    // rest of MediaRow is irrelevant to this test's behaviour.
+    return {id: row.id, url: `/api/media/${row.id}`} as MediaRow;
+  });
+  const value: MediaUploadServiceDependencies = {
+    normalize: vi.fn(async () => {
+      order.push("normalize");
+      return {bytes: Buffer.from(png), contentType: "image/png" as const, width: 10, height: 10, byteSize: png.byteLength, sha256: "a".repeat(64), objectKey: "media/2026/09/33333333-3333-4333-8333-333333333333.png", filename: "x.png", altEn: "x", altZh: "x", focalX: 50, focalY: 50};
+    }),
+    storage: {
+      put: vi.fn(async () => { order.push("put"); return {etag: "\"e\""}; }),
+      delete: vi.fn(async () => { order.push("delete"); }),
+      get: vi.fn(async (): Promise<R2Object> => ({body: null, etag: null, contentLength: null, contentType: null, sha256: null})),
     },
+    persist,
+    uuid: () => ID,
   };
+  return {order, persist, value};
 }
 
 function uploadRequest(overrides: Readonly<{origin?: string}> = {}): Request {
@@ -37,10 +46,10 @@ function uploadRequest(overrides: Readonly<{origin?: string}> = {}): Request {
 describe("member media upload (programme B-2, S-3)", () => {
   it("refuses anonymous and staff actors before normalisation, storage or persistence", async () => {
     const {value, persist} = dependencies();
-    await expect(uploadMemberMedia({kind: "anonymous", userId: null}, input, value as never)).rejects.toThrow("FORBIDDEN");
+    await expect(uploadMemberMedia({kind: "anonymous", userId: null}, input, value)).rejects.toThrow("FORBIDDEN");
     // Staff use /api/admin/media/upload; the member path is member-only so a
     // staff-registered row can never carry a member's ownership stamp.
-    await expect(uploadMemberMedia(staff, input, value as never)).rejects.toThrow("FORBIDDEN");
+    await expect(uploadMemberMedia(staff, input, value)).rejects.toThrow("FORBIDDEN");
     expect(value.normalize).not.toHaveBeenCalled();
     expect(value.storage.put).not.toHaveBeenCalled();
     expect(persist).not.toHaveBeenCalled();
@@ -48,7 +57,7 @@ describe("member media upload (programme B-2, S-3)", () => {
 
   it("normalises, stores, then persists with the member as registrant", async () => {
     const {value, persist, order} = dependencies();
-    const result = await uploadMemberMedia(member, input, value as never);
+    const result = await uploadMemberMedia(member, input, value);
     expect(order).toEqual(["normalize", "put", "persist"]);
     expect(result).toEqual({id: ID, url: `/api/media/${ID}`});
     expect(persist).toHaveBeenCalledWith(member, expect.objectContaining({id: ID, url: `/api/media/${ID}`, storageEtag: "\"e\"", checksumSha256: "a".repeat(64)}));
@@ -57,7 +66,7 @@ describe("member media upload (programme B-2, S-3)", () => {
   it("deletes the stored object and reports a generic failure when persistence fails", async () => {
     const {value, persist, order} = dependencies();
     persist.mockRejectedValueOnce(new Error("db down"));
-    await expect(uploadMemberMedia(member, input, value as never)).rejects.toThrow("MEDIA_UPLOAD_FAILED");
+    await expect(uploadMemberMedia(member, input, value)).rejects.toThrow("MEDIA_UPLOAD_FAILED");
     expect(persist).toHaveBeenCalledTimes(1);
     expect(order).toEqual(["normalize", "put", "delete"]);
   });

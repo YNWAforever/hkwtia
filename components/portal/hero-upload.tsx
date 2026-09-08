@@ -46,7 +46,7 @@ export function HeroUpload({labels, onUploaded}: Readonly<{labels: HeroUploadLab
       </label>
       <label className="block font-medium">
         <span>{labels.alt}</span>
-        <input className={inputClass} maxLength={300} onChange={(event) => setAlt(event.target.value)} type="text" value={alt} />
+        <input className={inputClass} maxLength={300} onChange={(event) => { setAlt(event.target.value); setState("idle"); }} type="text" value={alt} />
       </label>
       <button aria-describedby={statusId} className="inline-flex min-h-11 items-center rounded-md border border-border px-4 font-medium disabled:opacity-60" disabled={state === "uploading" || !ready} onClick={upload} type="button">
         {state === "uploading" ? labels.uploading : labels.upload}
