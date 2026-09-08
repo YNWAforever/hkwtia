@@ -327,7 +327,15 @@
     "successTitle": "已停止推廣電郵",
     "successDescription": "你的偏好已更新，日後不會再收到 WTIA 推廣電郵。",
     "invalidTitle": "此取消訂閱連結無效",
-    "invalidDescription": "連結可能已過期或已被取代。如仍需協助，請聯絡 WTIA。"
+    "invalidDescription": "連結可能已過期或已被取代。如仍需協助，請聯絡 WTIA。",
+    "channel": {
+      "email": "推廣電郵",
+      "whatsapp": "WhatsApp 更新",
+      "all": "推廣電郵及 WhatsApp 更新",
+      "choose": "你想停止接收甚麼？",
+      "successWhatsapp": "已停止 WhatsApp 更新",
+      "successAll": "已停止推廣電郵及 WhatsApp 更新"
+    }
   },
   "Home": {
     "metaTitle": "WiseTech Hong Kong",

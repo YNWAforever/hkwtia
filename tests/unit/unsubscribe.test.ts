@@ -57,6 +57,7 @@ describe("unsubscribe token", () => {
       .mockResolvedValueOnce("existing");
     const post = createUnsubscribePost({
       secrets: [secret],
+      optOutWhatsApp: async () => "created" as const,
       appUrl: "https://www.hkwtia.org",
       now: () => past,
       unsubscribeEmailMarketing,
@@ -78,6 +79,7 @@ describe("unsubscribe token", () => {
     const unsubscribeEmailMarketing = vi.fn();
     const post = createUnsubscribePost({
       secrets: [secret],
+      optOutWhatsApp: async () => "created" as const,
       appUrl: "https://www.hkwtia.org",
       now: () => past,
       unsubscribeEmailMarketing,
@@ -96,6 +98,7 @@ describe("unsubscribe token", () => {
   it("redirects the confirmation form only to the token's localized success page", async () => {
     const post = createUnsubscribePost({
       secrets: [secret],
+      optOutWhatsApp: async () => "created" as const,
       appUrl: "https://www.hkwtia.org",
       now: () => past,
       unsubscribeEmailMarketing: async () => "created",
@@ -114,13 +117,14 @@ describe("unsubscribe token", () => {
     }));
 
     expect(response.status).toBe(303);
-    expect(response.headers.get("location")).toBe("https://www.hkwtia.org/zh/unsubscribe?status=success");
+    expect(response.headers.get("location")).toBe("https://www.hkwtia.org/zh/unsubscribe?status=success&channel=email");
   });
 
   it("accepts an application/json confirmation body", async () => {
     const unsubscribeEmailMarketing = vi.fn().mockResolvedValue("created");
     const post = createUnsubscribePost({
       secrets: [secret],
+      optOutWhatsApp: async () => "created" as const,
       appUrl: "https://www.hkwtia.org",
       now: () => past,
       unsubscribeEmailMarketing,
@@ -133,7 +137,7 @@ describe("unsubscribe token", () => {
     }));
 
     expect(response.status).toBe(303);
-    expect(response.headers.get("location")).toBe("https://www.hkwtia.org/unsubscribe?status=success");
+    expect(response.headers.get("location")).toBe("https://www.hkwtia.org/unsubscribe?status=success&channel=email");
     expect(unsubscribeEmailMarketing).toHaveBeenCalledWith("profile-1");
   });
 
@@ -141,6 +145,7 @@ describe("unsubscribe token", () => {
     const unsubscribeEmailMarketing = vi.fn();
     const post = createUnsubscribePost({
       secrets: [secret],
+      optOutWhatsApp: async () => "created" as const,
       appUrl: "https://www.hkwtia.org",
       now: () => past,
       unsubscribeEmailMarketing,
@@ -161,6 +166,7 @@ describe("unsubscribe token", () => {
     const unsubscribeEmailMarketing = vi.fn();
     const post = createUnsubscribePost({
       secrets: [secret],
+      optOutWhatsApp: async () => "created" as const,
       appUrl: "https://www.hkwtia.org",
       now: () => past,
       unsubscribeEmailMarketing,
@@ -236,5 +242,43 @@ describe("unsubscribe token", () => {
     await expect(repository.unsubscribeEmailMarketing(actor, "profile-1", "member_unsubscribe"))
       .resolves.toBe("created");
     expect(execute).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("unsubscribe channels", () => {
+  it("routes channel=whatsapp to the WhatsApp opt-out and channel=all to both", async () => {
+    const unsubscribeEmailMarketing = vi.fn(async () => "created" as const);
+    const optOutWhatsApp = vi.fn(async () => "created" as const);
+    const post = createUnsubscribePost({secrets: [secret], appUrl: "https://hkwtia.example", now: () => past, unsubscribeEmailMarketing, optOutWhatsApp});
+    const signed = token();
+
+    const whatsapp = await post(new Request(`https://hkwtia.example/api/unsubscribe?token=${signed}&channel=whatsapp`, {method: "POST"}));
+    expect(whatsapp.status).toBe(200);
+    expect(optOutWhatsApp).toHaveBeenCalledTimes(1);
+    expect(unsubscribeEmailMarketing).not.toHaveBeenCalled();
+
+    const all = await post(new Request(`https://hkwtia.example/api/unsubscribe?token=${signed}&channel=all`, {method: "POST"}));
+    expect(all.status).toBe(200);
+    expect(unsubscribeEmailMarketing).toHaveBeenCalledTimes(1);
+    expect(optOutWhatsApp).toHaveBeenCalledTimes(2);
+  });
+
+  it("defaults to email and rejects an unknown channel", async () => {
+    const unsubscribeEmailMarketing = vi.fn(async () => "created" as const);
+    const optOutWhatsApp = vi.fn(async () => "created" as const);
+    const post = createUnsubscribePost({secrets: [secret], appUrl: "https://hkwtia.example", now: () => past, unsubscribeEmailMarketing, optOutWhatsApp});
+    const signed = token();
+    expect((await post(new Request(`https://hkwtia.example/api/unsubscribe?token=${signed}`, {method: "POST"}))).status).toBe(200);
+    expect(unsubscribeEmailMarketing).toHaveBeenCalledTimes(1);
+    expect(optOutWhatsApp).not.toHaveBeenCalled();
+    expect((await post(new Request(`https://hkwtia.example/api/unsubscribe?token=${signed}&channel=fax`, {method: "POST"}))).status).toBe(400);
+  });
+
+  it("carries the channel into the localized success redirect", async () => {
+    const post = createUnsubscribePost({secrets: [secret], appUrl: "https://www.hkwtia.org", now: () => past, unsubscribeEmailMarketing: async () => "created", optOutWhatsApp: async () => "created"});
+    const body = new URLSearchParams({token: token("zh-HK"), redirect: "1", channel: "whatsapp"});
+    const response = await post(new Request("https://www.hkwtia.org/api/unsubscribe", {method: "POST", body: body.toString(), headers: {"content-type": "application/x-www-form-urlencoded"}}));
+    expect(response.status).toBe(303);
+    expect(response.headers.get("location")).toBe("https://www.hkwtia.org/zh/unsubscribe?status=success&channel=whatsapp");
   });
 });

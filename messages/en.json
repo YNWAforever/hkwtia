@@ -327,7 +327,15 @@
     "successTitle": "Marketing email stopped",
     "successDescription": "Your preference has been updated. You will no longer receive WTIA marketing email.",
     "invalidTitle": "This unsubscribe link is invalid",
-    "invalidDescription": "The link may have expired or already been replaced. Contact WTIA if you still need help."
+    "invalidDescription": "The link may have expired or already been replaced. Contact WTIA if you still need help.",
+    "channel": {
+      "email": "Marketing email",
+      "whatsapp": "WhatsApp updates",
+      "all": "Both marketing email and WhatsApp",
+      "choose": "What would you like to stop?",
+      "successWhatsapp": "WhatsApp updates stopped",
+      "successAll": "Marketing email and WhatsApp updates stopped"
+    }
   },
   "Home": {
     "metaTitle": "WiseTech Hong Kong",
