@@ -13,6 +13,7 @@ describe("segment filter schema", () => {
       renewalWithinDays: null,
       sector: "",
       lastLoginBeforeDays: null,
+      whatsappOptIn: null,
     });
   });
 
@@ -32,14 +33,14 @@ describe("segment filter schema", () => {
 
   it("parses URL filters without treating pagination keys as filter keys", () => {
     expect(parseSegmentRouteQuery({tier: "corporate", scoreMax: "19.99", renewalWithinDays: "60", limit: "25", cursor: null})).toEqual({
-      filter: {profileIds: [], tier: ["corporate"], status: [], scoreMin: null, scoreMax: 19.99, renewalWithinDays: 60, sector: "", lastLoginBeforeDays: null},
+      filter: {profileIds: [], tier: ["corporate"], status: [], scoreMin: null, scoreMax: 19.99, renewalWithinDays: 60, sector: "", lastLoginBeforeDays: null, whatsappOptIn: null},
       limit: 25,
       cursor: null,
     });
   });
 
   it.each(["", "   ", "\t"])("normalizes blank numeric filter input %j to null", (blank) => {
-    expect(segmentFilterSchema.parse({scoreMin: blank, scoreMax: blank, renewalWithinDays: blank, lastLoginBeforeDays: blank})).toMatchObject({scoreMin: null, scoreMax: null, renewalWithinDays: null, lastLoginBeforeDays: null});
+    expect(segmentFilterSchema.parse({scoreMin: blank, scoreMax: blank, renewalWithinDays: blank, lastLoginBeforeDays: blank})).toMatchObject({scoreMin: null, scoreMax: null, renewalWithinDays: null, lastLoginBeforeDays: null, whatsappOptIn: null});
   });
 
   it("keeps valid numeric strings bounded and rejects nonnumeric numeric filter input", () => {
@@ -48,6 +49,17 @@ describe("segment filter schema", () => {
   });
 
   it("keeps all blank URL numeric controls absent from the preview filter", () => {
-    expect(parseSegmentRouteQuery({scoreMin: " ", scoreMax: "", renewalWithinDays: "\t", lastLoginBeforeDays: "   "}).filter).toMatchObject({scoreMin: null, scoreMax: null, renewalWithinDays: null, lastLoginBeforeDays: null});
+    expect(parseSegmentRouteQuery({scoreMin: " ", scoreMax: "", renewalWithinDays: "\t", lastLoginBeforeDays: "   "}).filter).toMatchObject({scoreMin: null, scoreMax: null, renewalWithinDays: null, lastLoginBeforeDays: null, whatsappOptIn: null});
+  });
+});
+
+describe("segment filter v1.5 whatsappOptIn (Phase A, F11)", () => {
+  it("accepts a nullable whatsappOptIn tri-state and defaults it to null", () => {
+    expect(segmentFilterSchema.parse({}).whatsappOptIn).toBeNull();
+    expect(segmentFilterSchema.parse({whatsappOptIn: true}).whatsappOptIn).toBe(true);
+    expect(segmentFilterSchema.parse({whatsappOptIn: "true"}).whatsappOptIn).toBe(true);
+    expect(segmentFilterSchema.parse({whatsappOptIn: ""}).whatsappOptIn).toBeNull();
+    expect(parseSegmentRouteQuery({whatsappOptIn: "false"}).filter.whatsappOptIn).toBe(false);
+    expect(segmentFilterSchema.safeParse({whatsappOptIn: "maybe"}).success).toBe(false);
   });
 });

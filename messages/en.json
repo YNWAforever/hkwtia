@@ -1686,6 +1686,14 @@
         ]
       },
       {
+        "heading": "WhatsApp messages and enquiries",
+        "body": [
+          "If you message WTIA on WhatsApp we keep your number, the conversation and when you wrote so that we can reply. We only send you activity updates or announcements on WhatsApp if you have ticked a consent box on this site or asked us to; we record when and where you agreed.",
+          "Reply STOP to any WhatsApp message, use the unsubscribe link in any email, or update your member profile to withdraw consent at any time. Withdrawal stops marketing messages; we may still send transactional messages about a registration or membership you hold."
+        ],
+        "items": []
+      },
+      {
         "heading": "Contact",
         "body": [
           "Questions, requests and complaints about personal data can be sent to contact@hkwtia.org, or by post to WTIA at 4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong."
@@ -2175,6 +2183,10 @@
       "renewalWithinDays": "Renewal within days",
       "sector": "Sector",
       "lastLoginBeforeDays": "Last login before days",
+      "whatsappOptIn": "WhatsApp opt-in",
+      "whatsappAny": "Any",
+      "whatsappYes": "Opted in",
+      "whatsappNo": "Not opted in",
       "save": "Save segment",
       "saving": "Saving...",
       "saveSuccess": "Segment saved.",

@@ -48,7 +48,7 @@ describe("safe segment save action", () => {
       nameZh: null,
       filter: {
         profileIds: [], tier: ["corporate"], status: [], scoreMin: null, scoreMax: null,
-        renewalWithinDays: null, sector: "", lastLoginBeforeDays: null,
+        renewalWithinDays: null, sector: "", lastLoginBeforeDays: null, whatsappOptIn: null,
       },
     });
     expect(result).toEqual({status: "success", message: messages.success, fields: {nameEn: "", nameZh: ""}});

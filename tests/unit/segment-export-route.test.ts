@@ -14,7 +14,7 @@ vi.mock("@/lib/db/repos/segments", () => ({segmentsRepository: mocks}));
 import {GET} from "@/app/api/admin/segments/[id]/export/route";
 
 const segmentId = "11111111-1111-4111-8111-111111111111";
-const filters = {profileIds: [], tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null};
+const filters = {profileIds: [], tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null, whatsappOptIn: null};
 const member = {profileId: "member-1", displayName: "Member One", email: null, companyName: null, planCode: null, membershipStatus: null, renewalAt: null, score: null};
 
 describe("segment export completion audit", () => {
