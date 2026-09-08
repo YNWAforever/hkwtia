@@ -162,7 +162,9 @@ describe("phase B1 two-sided events contract", () => {
     expect(events.memberOnly).toBeDefined();
     const config = getTableConfig(events);
     expect(config.indexes.map((index) => index.config.name)).toContain("events_status_visibility_starts_idx");
+    expect(config.indexes.map((index) => index.config.name)).toContain("events_organiser_idx");
     expect(config.checks.map((check) => check.name)).toContain("events_online_url_check");
+    expect(config.checks.map((check) => check.name)).toContain("events_external_registration_check");
   });
 
   it("defines event_guest_registrations with one row per event and email", () => {

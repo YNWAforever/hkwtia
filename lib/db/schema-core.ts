@@ -97,11 +97,15 @@ export const contactSourceEnum = pgEnum("contact_source", [
 export const contactStageEnum = pgEnum("contact_stage", [
   "new", "contacted", "qualified", "applied", "member", "closed",
 ]);
-export const eventStatusEnum = pgEnum("event_status", ["draft", "pending_review", "published", "rejected", "cancelled"]);
+export const eventStatusEnum = pgEnum("event_status", [
+  "draft", "pending_review", "published", "rejected", "cancelled",
+]);
 export const eventVisibilityEnum = pgEnum("event_visibility", ["public", "members_only", "invite_only"]);
 export const eventFormatEnum = pgEnum("event_format", ["in_person", "online", "hybrid"]);
 export const registrationModeEnum = pgEnum("registration_mode", ["rsvp", "external", "ticketed"]);
-export const guestRegistrationStatusEnum = pgEnum("guest_registration_status", ["registered", "waitlist", "cancelled", "attended"]);
+export const guestRegistrationStatusEnum = pgEnum("guest_registration_status", [
+  "registered", "waitlist", "cancelled", "attended",
+]);
 export type ShowcaseListingStatus = (typeof showcaseListingStatusEnum.enumValues)[number];
 
 const vector = customType<{data: number[]; driverData: string}>({
@@ -638,9 +642,10 @@ export const events = pgTable("events", {
   heroMediaId: uuid("hero_media_id").references(() => media.id, {onDelete: "set null"}),
   createdAt: createdAt("created_at"),
   updatedAt: updatedAt("updated_at"),
-  // Programme B-1 (D-12): the enums are the new truth; `published` and
-  // `memberOnly` above are derived from them on every repository write and
-  // stay until the last reader moves. Backfilled by 0027.
+  // Programme B-1 (D-12): the enums are the new truth. Task 2 of the Phase B1
+  // plan (`derivedEventFlags` in lib/events/status.ts) makes every repository
+  // write derive `published`/`member_only` from these enums; readers move
+  // over during Phase B. Backfilled by 0027.
   organiserCompanyId: uuid("organiser_company_id").references(() => companies.id, {onDelete: "set null"}),
   submittedByProfileId: text("submitted_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
   submittedAt: timestamp("submitted_at", {withTimezone: true}),
@@ -659,6 +664,8 @@ export const events = pgTable("events", {
   index("events_published_starts_idx").on(table.published, table.startsAt),
   index("events_hero_media_idx").on(table.heroMediaId),
   index("events_status_visibility_starts_idx").on(table.status, table.visibility, table.startsAt),
+  // Quota count (plan S-4) filters organiser_company_id = ? AND submitted_at
+  // in quarter, then status; keep equality column first.
   index("events_organiser_idx").on(table.organiserCompanyId, table.submittedAt),
   check("events_online_url_check", sql`${table.format} = 'in_person' OR ${table.onlineUrl} IS NOT NULL`),
   check("events_external_registration_check", sql`${table.registrationMode} <> 'external' OR ${table.externalRegistrationUrl} IS NOT NULL`),
@@ -1462,3 +1469,4 @@ export type EventStatus = (typeof eventStatusEnum.enumValues)[number];
 export type EventVisibility = (typeof eventVisibilityEnum.enumValues)[number];
 export type EventFormat = (typeof eventFormatEnum.enumValues)[number];
 export type RegistrationMode = (typeof registrationModeEnum.enumValues)[number];
+export type GuestRegistrationStatus = (typeof guestRegistrationStatusEnum.enumValues)[number];

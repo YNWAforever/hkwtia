@@ -2,7 +2,7 @@ import {describe, expect, it, vi} from "vitest";
 
 import type {Event} from "@/lib/db/server-schema";
 import {getPublicEventBySlug, registerForEvent, type EventRegistrationDependencies} from "@/lib/db/repos/events";
-import {phaseB1EventColumns} from "@/tests/fixtures/event-row";
+import {legacyDerivedEventColumns} from "@/tests/fixtures/event-row";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 const eventId = "10000000-0000-4000-8000-000000000001";
@@ -29,7 +29,7 @@ function publicEvent(overrides: Partial<Event> = {}): Event {
     updatedAt: now,
     ...overrides,
   };
-  return {...phaseB1EventColumns(row), ...row};
+  return {...legacyDerivedEventColumns(row), ...row};
 }
 
 function registrationDependencies(overrides: Partial<{

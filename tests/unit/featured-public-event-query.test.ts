@@ -10,7 +10,7 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
 
 import {listFeaturedPublicEvents} from "@/lib/db/repos/events";
 import type {Event} from "@/lib/db/server-schema";
-import {phaseB1EventColumns} from "@/tests/fixtures/event-row";
+import {legacyDerivedEventColumns} from "@/tests/fixtures/event-row";
 
 const anonymous = {kind: "anonymous", userId: null} as const;
 const asOf = new Date("2030-01-01T10:00:00.000Z");
@@ -34,7 +34,7 @@ function event(slug: string, overrides: Partial<Event> = {}): Event {
     updatedAt: new Date("2026-07-20T00:00:00.000Z"),
     ...overrides,
   };
-  return {...phaseB1EventColumns(row), ...row};
+  return {...legacyDerivedEventColumns(row), ...row};
 }
 
 describe("featured public Event query", () => {

@@ -19,13 +19,17 @@ type PhaseB1EventColumns = Pick<
 >;
 
 /**
+ * Legacy-row fixtures only: derives the enums the way migration 0027 does.
+ * Never import from repository tests that exercise status/visibility
+ * directly.
+ *
  * The Phase B1 columns for an in-memory `events` row, derived from the legacy
  * booleans the way migration 0027 and the repository do (programme D-12): a
  * fixture that says `published: false` must not also claim `status:
  * "published"`, or a reader moved to the enums would see a different row than
  * one still on the booleans.
  */
-export function phaseB1EventColumns(row: Pick<Event, "published" | "memberOnly" | "createdAt">): PhaseB1EventColumns {
+export function legacyDerivedEventColumns(row: Pick<Event, "published" | "memberOnly" | "createdAt">): PhaseB1EventColumns {
   return {
     organiserCompanyId: null,
     submittedByProfileId: null,
