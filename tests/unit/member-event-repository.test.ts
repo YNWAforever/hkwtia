@@ -150,14 +150,25 @@ describe("member event writes (programme B-1)", () => {
   });
 
   it("refuses an archived hero and checks the asset before writing", async () => {
-    const archived = fakeDeps([[{id: HERO, archived_at: new Date("2026-01-01T00:00:00Z")}]]);
+    const archived = fakeDeps([[{id: HERO, archived_at: new Date("2026-01-01T00:00:00Z"), registered_by_profile_id: "member-1"}]]);
     await expect(saveMemberEventDraft(member, COMPANY, {...input, heroMediaId: HERO}, archived.deps)).rejects.toThrow("EVENT_HERO_MEDIA_INVALID");
     expect(archived.execute).toHaveBeenCalledTimes(1);
     const missing = fakeDeps([[]]);
     await expect(saveMemberEventDraft(member, COMPANY, {...input, heroMediaId: HERO}, missing.deps)).rejects.toThrow("EVENT_HERO_MEDIA_INVALID");
-    const active = fakeDeps([[{id: HERO, archived_at: null}], [row({hero_media_id: HERO})]]);
+    const active = fakeDeps([[{id: HERO, archived_at: null, registered_by_profile_id: "member-1"}], [row({hero_media_id: HERO})]]);
     await expect(saveMemberEventDraft(member, COMPANY, {...input, heroMediaId: HERO}, active.deps)).resolves.toMatchObject({hero_media_id: HERO});
     expect(active.execute).toHaveBeenCalledTimes(2);
+  });
+
+  it("refuses a hero another profile uploaded, in the same locked read (S-3)", async () => {
+    // Staff-registered (admin upload) and other members' rows both fail: the
+    // member may only attach media whose registered_by_profile_id is theirs.
+    const foreign = fakeDeps([[{id: HERO, archived_at: null, registered_by_profile_id: "staff-1"}]]);
+    await expect(saveMemberEventDraft(member, COMPANY, {...input, heroMediaId: HERO}, foreign.deps)).rejects.toThrow("EVENT_HERO_MEDIA_INVALID");
+    expect(foreign.execute).toHaveBeenCalledTimes(1);
+    expect(literalText(foreign.execute.mock.calls[0]?.[0])).toContain("FOR UPDATE");
+    const unstamped = fakeDeps([[{id: HERO, archived_at: null, registered_by_profile_id: null}]]);
+    await expect(saveMemberEventDraft(member, COMPANY, {...input, heroMediaId: HERO}, unstamped.deps)).rejects.toThrow("EVENT_HERO_MEDIA_INVALID");
   });
 
   it("reviews only from pending_review and audits in the same transaction", async () => {

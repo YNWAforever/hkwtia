@@ -13,6 +13,7 @@ export function eventFormLabels(t: Translate): EventFormLabels {
     onlineUrl: t("fields.onlineUrl"), visibility: t("fields.visibility"), visibilities: {public: t("visibilities.public"), members_only: t("visibilities.members_only")},
     registrationMode: t("fields.registrationMode"), registrationModes: {rsvp: t("registrationModes.rsvp"), external: t("registrationModes.external")},
     externalRegistrationUrl: t("fields.externalRegistrationUrl"), tags: t("fields.tags"), heroMediaId: t("fields.heroMediaId"), heroHelp: t("fields.heroHelp"),
+    hero: {choose: t("hero.choose"), alt: t("hero.alt"), upload: t("hero.upload"), uploading: t("hero.uploading"), done: t("hero.done"), failed: t("hero.failed")},
     saveDraft: t("saveDraft"), submit: t("submit"), saving: t("saving"),
     errors: {
       INVALID: t("errors.INVALID"), EVENT_SLUG_TAKEN: t("errors.EVENT_SLUG_TAKEN"), EVENT_QUOTA_EXCEEDED: t("errors.EVENT_QUOTA_EXCEEDED"),

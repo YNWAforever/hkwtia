@@ -86,6 +86,7 @@ export const protectedRouteOwnershipInventory: readonly ProtectedRouteOwner[] = 
   owner({id: "api-auth-catch-all", family: "api", classification: "api-handler", routePath: "/api/auth/[...path]", filePath: "app/api/auth/[...path]/route.ts", dataOwner: "Neon Auth catch-all handler."}),
   owner({id: "api-showcase-view", family: "api", classification: "api-handler", routePath: "/api/showcase/[slug]/view", filePath: "app/api/showcase/[slug]/view/route.ts", dataOwner: "Published showcase view recording."}),
   owner({id: "api-admin-media-upload", family: "api", classification: "api-handler", routePath: "/api/admin/media/upload", filePath: "app/api/admin/media/upload/route.ts", dataOwner: "Actor-first private media upload and audited registration."}),
+  owner({id: "api-portal-media-upload", family: "api", classification: "api-handler", routePath: "/api/portal/media/upload", filePath: "app/api/portal/media/upload/route.ts", dataOwner: "Member hero-image upload (Phase B1, S-3)."}),
   owner({id: "api-media-delivery", family: "api", classification: "api-handler", routePath: "/api/media/[id]", filePath: "app/api/media/[id]/route.ts", dataOwner: "Revocation-aware ETag-bound private media delivery."}),
   owner({id: "api-unsubscribe", family: "api", classification: "api-handler", routePath: "/api/unsubscribe", filePath: "app/api/unsubscribe/route.ts", dataOwner: "Signed suppression action."}),
 

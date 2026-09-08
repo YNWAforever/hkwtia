@@ -1979,6 +1979,14 @@
         "public": "公開",
         "members_only": "只限會員"
       },
+      "hero": {
+        "choose": "選擇主圖片（PNG、JPEG 或 WebP，最大 4 MB）",
+        "alt": "描述此圖片",
+        "upload": "上載",
+        "uploading": "上載中…",
+        "done": "已上載 — 編號已填入上方。",
+        "failed": "上載失敗。請檢查檔案類型及大小。"
+      },
       "registrationModes": {
         "rsvp": "於本網站報名",
         "external": "外部報名連結"
@@ -1989,7 +1997,7 @@
         "EVENT_QUOTA_EXCEEDED": "貴計劃本季的經審核活動名額已用完。請儲存為草稿或升級計劃。",
         "EVENT_PUBLISHING_NOT_INCLUDED": "社群會籍不包括發布活動。",
         "EVENT_NOT_EDITABLE": "此活動已發布；如需修改，請聯絡 WTIA。",
-        "EVENT_HERO_MEDIA_INVALID": "此主圖片編號與任何可用圖片不符。",
+        "EVENT_HERO_MEDIA_INVALID": "此圖片編號並非你上載的圖片。",
         "NO_MANAGED_COMPANY": "發布活動需要你管理的公司。",
         "NO_MEMBERSHIP_FOR_COMPANY": "貴公司沒有生效的會籍。",
         "FORBIDDEN": "你只可編輯貴機構提交的活動。"

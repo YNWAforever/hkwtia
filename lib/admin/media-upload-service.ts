@@ -48,14 +48,26 @@ export class MediaUploadServiceError extends Error {
   }
 }
 
-export async function uploadMedia(
-  actor: Actor,
+/**
+ * The normalise → store → persist pipeline, with no actor of its own. Who may
+ * run it, and which persist function stamps the row, is decided by the caller:
+ * `uploadMedia` gates with requireAdmin for /api/admin/media/upload, and the
+ * member path in lib/portal/media-upload.ts gates with requireMember and hands
+ * in a persist that records the member as registrant (programme S-3). Keeping
+ * the pipeline actor-free is what stops the member path from ever borrowing a
+ * staff-shaped actor to satisfy the admin gate.
+ */
+export type MediaUploadPipelineDependencies = Readonly<{
+  normalize: MediaUploadServiceDependencies["normalize"];
+  storage: R2Storage;
+  persist: (input: UploadedMediaInput) => Promise<MediaRow>;
+  uuid: () => string;
+}>;
+
+export async function runMediaUploadPipeline(
   input: MediaUploadServiceInput,
-  dependencies: MediaUploadServiceDependencies = defaultDependencies,
+  dependencies: MediaUploadPipelineDependencies,
 ): Promise<MediaRow> {
-  // Authorization deliberately precedes normalization, storage configuration,
-  // provider access, and database work.
-  requireAdmin(actor);
   const normalized = await dependencies.normalize(input.bytes, input.contentType, input.fields);
 
   try {
@@ -66,7 +78,7 @@ export async function uploadMedia(
       sha256: normalized.sha256,
     });
     const id = dependencies.uuid();
-    return await dependencies.persist(actor, {
+    return await dependencies.persist({
       id,
       url: `/api/media/${id}`,
       altEn: normalized.altEn,
@@ -88,4 +100,20 @@ export async function uploadMedia(
     try { await dependencies.storage.delete(normalized.objectKey); } catch { /* best effort */ }
     throw new MediaUploadServiceError();
   }
+}
+
+export async function uploadMedia(
+  actor: Actor,
+  input: MediaUploadServiceInput,
+  dependencies: MediaUploadServiceDependencies = defaultDependencies,
+): Promise<MediaRow> {
+  // Authorization deliberately precedes normalization, storage configuration,
+  // provider access, and database work.
+  requireAdmin(actor);
+  return runMediaUploadPipeline(input, {
+    normalize: dependencies.normalize,
+    storage: dependencies.storage,
+    uuid: dependencies.uuid,
+    persist: (row) => dependencies.persist(actor, row),
+  });
 }

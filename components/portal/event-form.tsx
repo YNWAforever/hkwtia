@@ -1,7 +1,8 @@
 "use client";
 
-import {useActionState} from "react";
+import {useActionState, useState} from "react";
 
+import {HeroUpload, type HeroUploadLabels} from "@/components/portal/hero-upload";
 import type {MemberEventFormState} from "@/lib/events/member-actions";
 import type {MemberEventView} from "@/lib/events/member-contract";
 
@@ -10,7 +11,7 @@ export type EventFormLabels = Readonly<{
   venue: string; capacity: string; format: string; formats: Readonly<{in_person: string; online: string; hybrid: string}>;
   onlineUrl: string; visibility: string; visibilities: Readonly<{public: string; members_only: string}>;
   registrationMode: string; registrationModes: Readonly<{rsvp: string; external: string}>; externalRegistrationUrl: string;
-  tags: string; heroMediaId: string; heroHelp: string; saveDraft: string; submit: string; saving: string;
+  tags: string; heroMediaId: string; heroHelp: string; hero: HeroUploadLabels; saveDraft: string; submit: string; saving: string;
   errors: Readonly<Record<string, string>>;
 }>;
 
@@ -29,12 +30,15 @@ const labelClass = "space-y-2 text-sm font-medium";
  * action state and a failed submission can never read as a failed draft save.
  * `notice` is the post-redirect "saved" copy from the edit page; the form owns
  * it so it disappears the moment a later attempt fails. The hero field is a
- * media id; Task 4 replaces the plain input with an upload widget that fills it in.
+ * media id: it stays a visible, editable input so a member can clear it or
+ * paste an id from an earlier upload, and `HeroUpload` beneath it fills it in
+ * after a successful post to /api/portal/media/upload (S-3).
  */
 export function EventForm({values, labels, action, canSubmit, notice = null}: Readonly<{
   values: MemberEventView | null; labels: EventFormLabels; action: Action; canSubmit: boolean; notice?: string | null;
 }>) {
   const [state, dispatch, pending] = useActionState(action, initial);
+  const [heroMediaId, setHeroMediaId] = useState(values?.heroMediaId ?? "");
   // `startsAt`/`endsAt` post under the parser's names while their defaults come
   // from the `*Local` view fields, hence the separate `name` argument.
   const field = (valueKey: TextField, label: string, type = "text", extra: Readonly<{name?: string; required?: boolean; pattern?: string; min?: number}> = {}) => (
@@ -79,9 +83,10 @@ export function EventForm({values, labels, action, canSubmit, notice = null}: Re
       {field("tags", labels.tags)}
       <label className={`${labelClass} sm:col-span-2`}>
         <span>{labels.heroMediaId}</span>
-        <input className={inputClass} defaultValue={values?.heroMediaId ?? ""} name="heroMediaId" type="text" />
+        <input className={inputClass} name="heroMediaId" onChange={(event) => setHeroMediaId(event.target.value)} type="text" value={heroMediaId} />
         <span className="block text-xs text-muted-foreground">{labels.heroHelp}</span>
       </label>
+      <HeroUpload labels={labels.hero} onUploaded={setHeroMediaId} />
       {state.status === "error" ? <p className="text-sm text-destructive sm:col-span-2" role="alert">{labels.errors[state.code ?? "INVALID"] ?? labels.errors.INVALID}</p> : null}
       <div className="flex flex-wrap gap-3 sm:col-span-2">
         <button className="inline-flex min-h-11 items-center rounded-md border border-border px-4 text-sm font-medium disabled:opacity-60" disabled={pending} formAction={dispatch} name="intent" type="submit" value="draft">{pending ? labels.saving : labels.saveDraft}</button>

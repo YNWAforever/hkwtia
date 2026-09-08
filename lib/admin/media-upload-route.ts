@@ -10,6 +10,13 @@ import {isSameOrigin} from "@/lib/security/request-origin";
 
 type Dependencies = Readonly<{
   actor: () => Promise<Actor>;
+  /**
+   * The gate applied to the resolved actor before anything else is read.
+   * Defaults to requireAdmin (the /api/admin route); the member-scoped
+   * /api/portal/media/upload passes requireMember. Whichever it is, failure
+   * is a 404 so the route's existence is not confirmed to the wrong audience.
+   */
+  authorize?: (actor: Actor) => void;
   expectedOrigin: () => string;
   upload: (actor: Actor, input: MediaUploadServiceInput) => Promise<Pick<MediaRow, "id" | "url">>;
 }>;
@@ -23,9 +30,12 @@ function json(status: number, body: Readonly<Record<string, unknown>>) {
 export function createMediaUploadPost(dependencies: Dependencies) {
   return async function post(request: Request): Promise<Response> {
     let actor: Actor;
+    // Typed as a plain predicate: TS refuses an `asserts` signature called
+    // through an expression, and the narrowing is not needed here anyway.
+    const authorize: (actor: Actor) => void = dependencies.authorize ?? requireAdmin;
     try {
       actor = await dependencies.actor();
-      requireAdmin(actor);
+      authorize(actor);
     } catch {
       return new Response("Not found", {status: 404, headers: {"cache-control": "no-store"}});
     }

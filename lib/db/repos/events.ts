@@ -559,8 +559,13 @@ async function writeMemberEvent(
   return database.transaction(async (transaction) => {
     if (parsed.heroMediaId !== null) {
       // Same rule as the admin path: an archived asset is never re-attached.
-      const hero = executedRows(await transaction.execute(sql`SELECT ${media.id} AS id, ${media.archivedAt} AS archived_at FROM ${media} WHERE ${media.id} = ${parsed.heroMediaId} FOR UPDATE`))[0];
-      if (!hero || (hero.archived_at !== null && hero.archived_at !== undefined)) throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["heroMediaId"], message: "EVENT_HERO_MEDIA_INVALID"}]);
+      // S-3 adds ownership: a member may only attach media they uploaded
+      // themselves through /api/portal/media/upload, so a guessed or shared id
+      // (staff-registered rows included) fails with the same field error and
+      // reveals nothing about the row. One locked read decides both.
+      const hero = executedRows(await transaction.execute(sql`SELECT ${media.id} AS id, ${media.archivedAt} AS archived_at, ${media.registeredByProfileId} AS registered_by_profile_id FROM ${media} WHERE ${media.id} = ${parsed.heroMediaId} FOR UPDATE`))[0];
+      const archived = hero !== undefined && hero.archived_at !== null && hero.archived_at !== undefined;
+      if (!hero || archived || hero.registered_by_profile_id !== actor.profileId) throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["heroMediaId"], message: "EVENT_HERO_MEDIA_INVALID"}]);
     }
     let result: unknown;
     try {

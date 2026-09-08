@@ -14,7 +14,7 @@ import {
   type MediaRow,
 } from "@/lib/db/server-schema";
 import { isRegistrableMediaUrl } from "@/lib/media/url";
-import type { Actor, AdminActor } from "@/lib/membership/lifecycle";
+import { requireMember, type Actor, type AdminActor } from "@/lib/membership/lifecycle";
 
 const mediaIdSchema = z.string().uuid();
 
@@ -45,7 +45,7 @@ type StoredMediaUpdate = z.output<typeof mediaUpdateSchema>;
 
 type MediaAudit = Readonly<{
   actorUserId: string;
-  actorType: AdminActor["kind"];
+  actorType: AdminActor["kind"] | "member";
   action:
     | "media.created"
     | "media.updated"
@@ -447,12 +447,18 @@ async function defaultUploadMutationDependencies(): Promise<MediaUploadMutationD
   };
 }
 
-export async function persistUploadedMedia(
-  actor: Actor,
+/**
+ * Shared body of the two upload-persist paths. The caller has already applied
+ * its actor gate; this records the row with that actor as registrant and the
+ * audit row in the same transaction. `scope` in the audit metadata is what
+ * later distinguishes a member's upload from a staff one in the audit log.
+ */
+async function persistUploadedMediaAs(
+  actor: Extract<Actor, {profileId: string}>,
   input: unknown,
+  scope: "admin" | "portal",
   dependencies?: MediaUploadMutationDependencies,
 ): Promise<MediaRow> {
-  requireAdmin(actor);
   const parsed = uploadedMediaInputSchema.parse(input);
   return (
     dependencies ?? (await defaultUploadMutationDependencies())
@@ -472,10 +478,50 @@ export async function persistUploadedMedia(
         contentType: row.contentType,
         byteSize: row.byteSize,
         checksumSha256: row.checksumSha256,
+        ...(scope === "portal" ? {scope} : {}),
       },
     });
     return row;
   });
+}
+
+export async function persistUploadedMedia(
+  actor: Actor,
+  input: unknown,
+  dependencies?: MediaUploadMutationDependencies,
+): Promise<MediaRow> {
+  requireAdmin(actor);
+  return persistUploadedMediaAs(actor, input, "admin", dependencies);
+}
+
+/**
+ * S-3: members upload event heroes through /api/portal/media/upload. Same
+ * validators and audit row as the admin path; the only differences are the
+ * actor gate and that `registered_by_profile_id` is the member. That ownership
+ * stamp is what `lib/db/repos/events.ts` checks before a member may attach the
+ * row as an event hero, so it must never be written from a staff-shaped actor.
+ */
+export async function persistMemberUploadedMedia(
+  actor: Actor,
+  input: unknown,
+  dependencies?: MediaUploadMutationDependencies,
+): Promise<MediaRow> {
+  requireMember(actor);
+  return persistUploadedMediaAs(actor, input, "portal", dependencies);
+}
+
+/** Active media the member uploaded themselves; null otherwise (unknown, archived or someone else's — indistinguishable by design). */
+export async function getMediaOwnedByProfile(
+  actor: Actor,
+  id: unknown,
+  dependencies?: MediaReadDependencies,
+): Promise<MediaRow | null> {
+  requireMember(actor);
+  const mediaId = mediaIdSchema.safeParse(id);
+  if (!mediaId.success) return null;
+  const row = await (dependencies ?? (await defaultReadDependencies())).get(mediaId.data);
+  if (!row || row.archivedAt !== null || row.registeredByProfileId !== actor.profileId) return null;
+  return row;
 }
 
 export type UploadedMediaRow = MediaRow &
@@ -564,5 +610,7 @@ export const mediaRepository = {
   listActiveForAdmin: listActiveMediaForAdmin,
   getForAdmin: getMediaForAdmin,
   persistUploaded: persistUploadedMedia,
+  persistMemberUploaded: persistMemberUploadedMedia,
+  getOwnedByProfile: getMediaOwnedByProfile,
   getUploadedForDelivery: getUploadedMediaForDelivery,
 };

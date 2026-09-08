@@ -1979,6 +1979,14 @@
         "public": "Public",
         "members_only": "Members only"
       },
+      "hero": {
+        "choose": "Choose a hero image (PNG, JPEG or WebP, up to 4 MB)",
+        "alt": "Describe the image",
+        "upload": "Upload",
+        "uploading": "Uploading…",
+        "done": "Uploaded — the id has been filled in above.",
+        "failed": "Upload failed. Check the file type and size."
+      },
       "registrationModes": {
         "rsvp": "RSVP on this site",
         "external": "External registration link"
@@ -1989,7 +1997,7 @@
         "EVENT_QUOTA_EXCEEDED": "Your plan's quota of reviewed events for this quarter is used up. Save as draft or upgrade.",
         "EVENT_PUBLISHING_NOT_INCLUDED": "Community membership does not include event publishing.",
         "EVENT_NOT_EDITABLE": "This event has already been published; ask WTIA to reopen it.",
-        "EVENT_HERO_MEDIA_INVALID": "That hero image id does not match an available image.",
+        "EVENT_HERO_MEDIA_INVALID": "That image id is not one you uploaded.",
         "NO_MANAGED_COMPANY": "Event publishing needs a company you manage.",
         "NO_MEMBERSHIP_FOR_COMPANY": "Your company has no active membership.",
         "FORBIDDEN": "You can only edit events your organisation submitted."

@@ -12,6 +12,7 @@ const routeFiles = [
   "app/api/jobs/chat-retention/route.ts",
   "app/api/jobs/retention-analyst/route.ts",
   "app/api/media/[id]/route.ts",
+  "app/api/portal/media/upload/route.ts",
   "app/api/stripe/webhook/route.ts",
   "app/api/unsubscribe/route.ts",
   "app/api/webhooks/woztell/route.ts",
