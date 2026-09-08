@@ -777,6 +777,17 @@
     "submitApplication": "提交申請",
     "invalidPlanTitle": "選擇會員計劃",
     "invalidPlanDescription": "此會員計劃並不可用。請返回會員頁面選擇現有計劃。",
+    "choosePlanTitle": "選擇會員計劃",
+    "choosePlanDescription": "選擇最適合貴機構參與方式的計劃。你可先在會員計劃頁比較費用及權益。",
+    "choosePlanCompare": "比較計劃及費用",
+    "choosePlan": {
+      "community": "免費。保持聯繫、報名公開活動、接收更新。",
+      "startup": "適合初創科技團隊：會員專頁、每季 2 個經審核活動、1 個方案展示頁。",
+      "corporate": "適合成熟機構：精選專頁、無限次經審核活動、WhatsApp 優先支援。",
+      "patron": "WTIA 使命的策略支持者 — 請與團隊聯絡。"
+    },
+    "choosePlanAction": "以{plan}繼續",
+    "choosePlanContact": "聯絡 WTIA",
     "profileTitle": "介紹你的資料",
     "profileDescription": "你的個人資料可協助 WTIA 支援會籍及繼續處理申請。",
     "companyTitle": "確認公司資料",

@@ -777,6 +777,17 @@
     "submitApplication": "Submit application",
     "invalidPlanTitle": "Choose a membership plan",
     "invalidPlanDescription": "This membership plan is unavailable. Return to the membership page to choose one of the current plans.",
+    "choosePlanTitle": "Choose a membership plan",
+    "choosePlanDescription": "Pick the plan that fits how your organisation participates. You can compare fees and benefits on the membership page first.",
+    "choosePlanCompare": "Compare plans and fees",
+    "choosePlan": {
+      "community": "Free. Stay connected, RSVP to public events, receive updates.",
+      "startup": "For early-stage technology teams: profile page, 2 reviewed events a quarter, 1 showcase listing.",
+      "corporate": "For established organisations: featured profile, unlimited reviewed events, priority WhatsApp support.",
+      "patron": "Strategic supporters of WTIA's mission — talk to the team."
+    },
+    "choosePlanAction": "Continue with {plan}",
+    "choosePlanContact": "Contact WTIA",
     "profileTitle": "Tell us about yourself",
     "profileDescription": "Your profile helps WTIA support your membership and keep your application moving.",
     "companyTitle": "Confirm your company",
