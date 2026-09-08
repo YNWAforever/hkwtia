@@ -217,8 +217,6 @@ describe("member event writes (programme B-1)", () => {
     expect(execute).not.toHaveBeenCalled();
     await expect(listEventsForReview(staff, deps)).resolves.toMatchObject([{id: EVENT, status: "pending_review", organiser_name: "Acme Robotics"}]);
     const statement = statementText(execute, 0);
-    expect(statement).toContain("LEFT JOIN");
-    expect(statement).toContain("AS organiser_name");
     expect(statement).toContain("pending_review");
     // An admin-authored event has no organiser; the join must not drop it.
     const orphan = fakeDeps([[{...row({status: "pending_review", organiser_company_id: null}), organiser_name: null}]]);

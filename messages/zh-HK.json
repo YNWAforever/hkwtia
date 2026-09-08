@@ -2389,8 +2389,8 @@
         "approve": "批准並發布",
         "reject": "退回",
         "rejectionReason": "退回原因",
-        "preview": "開啟",
-        "empty": "目前沒有等待審核的會員活動。"
+        "empty": "目前沒有等待審核的會員活動。",
+        "error": "無法載入等待審核的會員活動。"
       }
     },
     "announcements": {

@@ -19,7 +19,7 @@ import type {Actor} from "@/lib/membership/lifecycle";
  * non-admin from learning which ids or reasons are well-formed.
  */
 export type EventReviewer = Readonly<{
-  review: (actor: Actor, eventId: string, decision: EventReviewDecision) => Promise<Pick<MemberEventRow, "id" | "status">>;
+  review: (actor: Actor, eventId: string, decision: EventReviewDecision) => Promise<Pick<MemberEventRow, "id" | "status" | "slug">>;
 }>;
 
 const eventIdSchema = z.string().uuid();

@@ -15,20 +15,22 @@ import {requireAdminActor} from "@/lib/auth/actor";
  * cache. `revalidatePath` takes the internal app-router path, where `/zh-HK/…`
  * is correct (unlike an href, which goes through `localizedPath`).
  */
-function afterReview(path: string): void {
+function afterReview(path: string, slug: string): void {
   revalidateAdminPath(path);
   revalidatePath("/en/events");
   revalidatePath("/zh-HK/events");
+  revalidatePath(`/en/events/${slug}`);
+  revalidatePath(`/zh-HK/events/${slug}`);
 }
 
 export async function approveMemberEventAction(path: string, formData: FormData): Promise<void> {
   const actor = await requireAdminActor();
-  await approveMemberEvent(actor, formData.get("eventId"));
-  afterReview(path);
+  const {slug} = await approveMemberEvent(actor, formData.get("eventId"));
+  afterReview(path, slug);
 }
 
 export async function rejectMemberEventAction(path: string, formData: FormData): Promise<void> {
   const actor = await requireAdminActor();
-  await rejectMemberEvent(actor, formData.get("eventId"), formData.get("rejectionReason"));
-  afterReview(path);
+  const {slug} = await rejectMemberEvent(actor, formData.get("eventId"), formData.get("rejectionReason"));
+  afterReview(path, slug);
 }

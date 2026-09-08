@@ -9,7 +9,7 @@ const member: Actor = {kind: "member", userId: "u", profileId: "m"};
 
 describe("event review core (programme B-3)", () => {
   it("requires an admin and a uuid, then delegates the decision", async () => {
-    const review = vi.fn(async () => ({id: EVENT, status: "published" as const}));
+    const review = vi.fn(async () => ({id: EVENT, status: "published" as const, slug: "acme-launch"}));
     await expect(approveMemberEvent(member, EVENT, {review})).rejects.toThrow();
     await expect(approveMemberEvent(staff, "nope", {review})).rejects.toThrow();
     expect(review).not.toHaveBeenCalled();
@@ -20,7 +20,7 @@ describe("event review core (programme B-3)", () => {
   });
 
   it("refuses an empty or oversized rejection reason before delegating", async () => {
-    const review = vi.fn(async () => ({id: EVENT, status: "rejected" as const}));
+    const review = vi.fn(async () => ({id: EVENT, status: "rejected" as const, slug: "acme-launch"}));
     await expect(rejectMemberEvent(staff, EVENT, "   ", {review})).rejects.toThrow();
     await expect(rejectMemberEvent(staff, EVENT, "x".repeat(1_001), {review})).rejects.toThrow();
     await expect(rejectMemberEvent(member, EVENT, "duplicate", {review})).rejects.toThrow();

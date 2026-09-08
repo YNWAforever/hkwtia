@@ -2388,8 +2388,8 @@
         "approve": "Approve and publish",
         "reject": "Return",
         "rejectionReason": "Reason for returning",
-        "preview": "Open",
-        "empty": "No member events are waiting for review."
+        "empty": "No member events are waiting for review.",
+        "error": "Member events awaiting review could not be loaded."
       }
     },
     "announcements": {
