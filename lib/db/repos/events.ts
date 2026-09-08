@@ -277,12 +277,22 @@ export function reconciledEventFlags(
   input: Readonly<{published?: boolean; memberOnly?: boolean; status?: EventStatus; visibility?: EventVisibility}>,
   current?: Readonly<{status: EventStatus; visibility: EventVisibility}>,
 ): ReconciledEventFlags {
-  const fallbackStatus = current?.status ?? "draft";
-  const status: EventStatus = input.status
-    ?? (input.published === undefined ? fallbackStatus : input.published ? "published" : (fallbackStatus === "published" ? "draft" : fallbackStatus));
-  const visibility: EventVisibility = input.visibility
-    ?? (input.memberOnly === undefined ? (current?.visibility ?? "public") : input.memberOnly ? "members_only" : "public");
+  const status = statusFrom(input, current?.status ?? "draft");
+  const visibility = visibilityFrom(input, current?.visibility ?? "public");
   return {status, visibility, ...derivedEventFlags({status, visibility})};
+}
+
+function statusFrom(input: Readonly<{published?: boolean; status?: EventStatus}>, fallback: EventStatus): EventStatus {
+  if (input.status) return input.status;
+  if (input.published === undefined) return fallback;
+  if (input.published) return "published";
+  return fallback === "published" ? "draft" : fallback;
+}
+
+function visibilityFrom(input: Readonly<{memberOnly?: boolean; visibility?: EventVisibility}>, fallback: EventVisibility): EventVisibility {
+  if (input.visibility) return input.visibility;
+  if (input.memberOnly === undefined) return fallback;
+  return input.memberOnly ? "members_only" : "public";
 }
 
 async function defaultMutationDependencies(): Promise<EventMutationDependencies> {
@@ -418,13 +428,49 @@ const memberEventInputSchema = eventInputObjectSchema
   .superRefine(addEventShapeIssues);
 
 export type MemberEventInput = z.input<typeof memberEventInputSchema>;
-export type MemberEventRow = Record<string, unknown>;
+
+// The snake_case shape `SELECT * FROM events` returns through the raw-SQL seam.
+// Parsing at the read boundary (rather than trusting `Record<string, unknown>`)
+// means a renamed column fails loudly here instead of rendering as "undefined"
+// in a member's dashboard. `passthrough` keeps columns nobody renders yet.
+const memberEventRowSchema = z.object({
+  id: z.string().uuid(),
+  slug: z.string(),
+  title_en: z.string(),
+  title_zh: z.string().nullable(),
+  description_en: z.string(),
+  description_zh: z.string().nullable(),
+  starts_at: z.coerce.date(),
+  ends_at: z.coerce.date().nullable(),
+  venue: z.string().nullable(),
+  capacity: z.number().int().nullable(),
+  status: z.enum(["draft", "pending_review", "published", "rejected", "cancelled"]),
+  visibility: z.enum(["public", "members_only", "invite_only"]),
+  format: z.enum(["in_person", "online", "hybrid"]),
+  online_url: z.string().nullable(),
+  registration_mode: z.enum(["rsvp", "external", "ticketed"]),
+  external_registration_url: z.string().nullable(),
+  tags: z.array(z.string()),
+  hero_media_id: z.string().nullable(),
+  organiser_company_id: z.string().nullable(),
+  submitted_by_profile_id: z.string().nullable(),
+  submitted_at: z.coerce.date().nullable(),
+  published_at: z.coerce.date().nullable(),
+  reviewed_at: z.coerce.date().nullable(),
+  rejection_reason: z.string().nullable(),
+}).passthrough();
+
+export type MemberEventRow = z.infer<typeof memberEventRowSchema>;
 
 /** Neon returns `{rows}`; the in-memory executor in tests returns the array itself. */
-function executedRows(result: unknown): MemberEventRow[] {
-  if (Array.isArray(result)) return result as MemberEventRow[];
-  if (result && typeof result === "object" && "rows" in result && Array.isArray(result.rows)) return result.rows as MemberEventRow[];
+function executedRows(result: unknown): Record<string, unknown>[] {
+  if (Array.isArray(result)) return result as Record<string, unknown>[];
+  if (result && typeof result === "object" && "rows" in result && Array.isArray(result.rows)) return result.rows as Record<string, unknown>[];
   return [];
+}
+
+function memberEventRows(result: unknown): MemberEventRow[] {
+  return executedRows(result).map((row) => memberEventRowSchema.parse(row));
 }
 
 async function memberDatabase(deps: MemberEventDependencies): Promise<AutomationDatabase> {
@@ -437,6 +483,9 @@ function textArray(values: readonly string[]) {
   return sql`ARRAY[${sql.join(values.map((value) => sql`${value}`), sql`, `)}]::text[]`;
 }
 
+// Duplicates `requireCompanyManager` in `lib/db/repos/cohorts.ts`, which takes
+// the role resolver directly rather than a deps bag; unify when a third caller
+// appears rather than reshape either signature for two.
 async function requireCompanyManager(actor: Actor, companyId: string, deps: MemberEventDependencies): Promise<Extract<Actor, {kind: "member"}>> {
   requireMember(actor);
   const role = await (deps.getCompanyRole ?? portalContentRepository.getCompanyRole)(actor, companyId);
@@ -444,17 +493,25 @@ async function requireCompanyManager(actor: Actor, companyId: string, deps: Memb
   return actor;
 }
 
-async function upsertMemberEvent(actor: Extract<Actor, {kind: "member"}>, companyId: string, input: unknown, status: "draft" | "pending_review", deps: MemberEventDependencies): Promise<MemberEventRow> {
-  const parsed = memberEventInputSchema.parse(input);
+// Drizzle wraps driver errors, so the Postgres code may sit on `cause`.
+function isSlugUniqueViolation(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const candidate = error as {code?: unknown; constraint?: unknown; cause?: unknown};
+  if (candidate.code === "23505" && (candidate.constraint === undefined || candidate.constraint === "events_slug_unique")) return true;
+  return isSlugUniqueViolation(candidate.cause);
+}
+
+type MemberEventWrite = Readonly<{
+  parsed: z.output<typeof memberEventInputSchema>;
+  status: "draft" | "pending_review";
+  company: string;
+  profileId: string;
+  now: Date;
+}>;
+
+function insertMemberEventStatement({parsed, status, company, profileId, now}: MemberEventWrite) {
   const flags = derivedEventFlags({status, visibility: parsed.visibility});
-  const now = (deps.now ?? (() => new Date()))();
-  const company = eventIdSchema.parse(companyId);
-  const database = await memberDatabase(deps);
-  // One statement: insert, or update only a row this company organises that
-  // may still move to `status`. A slug held by anyone else — another
-  // organiser, an admin-authored event, or this company's own published or
-  // cancelled event — yields no row, which the caller reports as taken.
-  const row = executedRows(await database.execute(sql`
+  return sql`
     INSERT INTO ${events}
       (slug, title_en, title_zh, description_en, description_zh, starts_at, ends_at, venue, capacity,
        member_only, published, hero_media_id, organiser_company_id, submitted_by_profile_id, submitted_at,
@@ -462,46 +519,84 @@ async function upsertMemberEvent(actor: Extract<Actor, {kind: "member"}>, compan
     VALUES
       (${parsed.slug}, ${parsed.titleEn}, ${parsed.titleZh ?? null}, ${parsed.descriptionEn}, ${parsed.descriptionZh ?? null},
        ${parsed.startsAt}, ${parsed.endsAt ?? null}, ${parsed.venue ?? null}, ${parsed.capacity ?? null},
-       ${flags.memberOnly}, ${flags.published}, ${parsed.heroMediaId}, ${company}, ${actor.profileId},
+       ${flags.memberOnly}, ${flags.published}, ${parsed.heroMediaId}, ${company}, ${profileId},
        ${status === "pending_review" ? now : null}, ${status}, ${parsed.visibility}, ${parsed.format}, ${parsed.onlineUrl ?? null},
        ${parsed.registrationMode}, ${parsed.externalRegistrationUrl ?? null}, ${textArray(parsed.tags)})
-    ON CONFLICT (slug) DO UPDATE SET
-      title_en = EXCLUDED.title_en, title_zh = EXCLUDED.title_zh, description_en = EXCLUDED.description_en,
-      description_zh = EXCLUDED.description_zh, starts_at = EXCLUDED.starts_at, ends_at = EXCLUDED.ends_at,
-      venue = EXCLUDED.venue, capacity = EXCLUDED.capacity, member_only = EXCLUDED.member_only,
-      published = EXCLUDED.published, hero_media_id = EXCLUDED.hero_media_id,
-      submitted_by_profile_id = EXCLUDED.submitted_by_profile_id,
-      submitted_at = COALESCE(EXCLUDED.submitted_at, ${events.submittedAt}),
-      status = EXCLUDED.status, visibility = EXCLUDED.visibility, format = EXCLUDED.format,
-      online_url = EXCLUDED.online_url, registration_mode = EXCLUDED.registration_mode,
-      external_registration_url = EXCLUDED.external_registration_url, tags = EXCLUDED.tags,
-      reviewed_at = NULL, reviewed_by_profile_id = NULL, rejection_reason = NULL, updated_at = now()
-    WHERE ${events.organiserCompanyId} = ${company} AND ${events.status} IN ('draft', 'rejected', 'pending_review')
     RETURNING *
-  `))[0];
-  if (!row) throw new Error("EVENT_SLUG_TAKEN");
-  return row;
+  `;
 }
 
-export async function saveMemberEventDraft(actor: Actor, companyId: string, input: unknown, deps: MemberEventDependencies = {}): Promise<MemberEventRow> {
+// Only a row this company organises that may still move to `status` is
+// updated; the caller distinguishes "not yours" from "no longer editable".
+function updateMemberEventStatement(id: string, {parsed, status, company, profileId, now}: MemberEventWrite) {
+  const flags = derivedEventFlags({status, visibility: parsed.visibility});
+  // Submitting stamps `submitted_at` once; a later draft save keeps it.
+  const submittedAt = status === "pending_review" ? sql`COALESCE(${events.submittedAt}, ${now})` : events.submittedAt;
+  // The reviewer columns reset on every member write: a revised submission re-enters the queue clean.
+  return sql`
+    UPDATE ${events} SET
+      slug = ${parsed.slug}, title_en = ${parsed.titleEn}, title_zh = ${parsed.titleZh ?? null},
+      description_en = ${parsed.descriptionEn}, description_zh = ${parsed.descriptionZh ?? null},
+      starts_at = ${parsed.startsAt}, ends_at = ${parsed.endsAt ?? null}, venue = ${parsed.venue ?? null}, capacity = ${parsed.capacity ?? null},
+      member_only = ${flags.memberOnly}, published = ${flags.published}, hero_media_id = ${parsed.heroMediaId},
+      submitted_by_profile_id = ${profileId}, submitted_at = ${submittedAt},
+      status = ${status}, visibility = ${parsed.visibility}, format = ${parsed.format}, online_url = ${parsed.onlineUrl ?? null},
+      registration_mode = ${parsed.registrationMode}, external_registration_url = ${parsed.externalRegistrationUrl ?? null}, tags = ${textArray(parsed.tags)},
+      reviewed_at = NULL, reviewed_by_profile_id = NULL, rejection_reason = NULL, updated_at = now()
+    WHERE ${events.id} = ${id} AND ${events.organiserCompanyId} = ${company} AND ${events.status} IN ('draft', 'rejected', 'pending_review')
+    RETURNING *
+  `;
+}
+
+async function writeMemberEvent(
+  actor: Extract<Actor, {kind: "member"}>, companyId: string, input: unknown, status: "draft" | "pending_review",
+  deps: MemberEventDependencies, eventId?: string,
+): Promise<MemberEventRow> {
+  const parsed = memberEventInputSchema.parse(input);
+  const id = eventId === undefined ? null : eventIdSchema.parse(eventId);
+  const write: MemberEventWrite = {parsed, status, company: eventIdSchema.parse(companyId), profileId: actor.profileId, now: (deps.now ?? (() => new Date()))()};
+  const database = await memberDatabase(deps);
+  return database.transaction(async (transaction) => {
+    if (parsed.heroMediaId !== null) {
+      // Same rule as the admin path: an archived asset is never re-attached.
+      const hero = executedRows(await transaction.execute(sql`SELECT ${media.id} AS id, ${media.archivedAt} AS archived_at FROM ${media} WHERE ${media.id} = ${parsed.heroMediaId} FOR UPDATE`))[0];
+      if (!hero || (hero.archived_at !== null && hero.archived_at !== undefined)) throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["heroMediaId"], message: "EVENT_HERO_MEDIA_INVALID"}]);
+    }
+    let result: unknown;
+    try {
+      result = await transaction.execute(id === null ? insertMemberEventStatement(write) : updateMemberEventStatement(id, write));
+    } catch (error) {
+      if (isSlugUniqueViolation(error)) throw new Error("EVENT_SLUG_TAKEN");
+      throw error;
+    }
+    const row = memberEventRows(result)[0];
+    if (row) return row;
+    if (id === null) throw new Error("EVENT_INSERT_FAILED");
+    const owned = executedRows(await transaction.execute(sql`SELECT ${events.status} AS status FROM ${events} WHERE ${events.id} = ${id} AND ${events.organiserCompanyId} = ${write.company}`))[0];
+    throw new Error(owned ? "EVENT_NOT_EDITABLE" : "FORBIDDEN");
+  });
+}
+
+export async function saveMemberEventDraft(actor: Actor, companyId: string, input: unknown, deps: MemberEventDependencies = {}, eventId?: string): Promise<MemberEventRow> {
   const member = await requireCompanyManager(actor, companyId, deps);
-  return upsertMemberEvent(member, companyId, input, "draft", deps);
+  return writeMemberEvent(member, companyId, input, "draft", deps, eventId);
 }
 
 /** The caller supplies the plan and this quarter's count (`countCompanySubmissionsThisQuarter`); D-5 is asserted before any SQL. */
 export async function submitMemberEvent(
   actor: Actor, companyId: string, input: unknown,
   deps: MemberEventDependencies & Readonly<{plan: MembershipPlanCode; usedThisQuarter: number}>,
+  eventId?: string,
 ): Promise<MemberEventRow> {
   const member = await requireCompanyManager(actor, companyId, deps);
   assertCanSubmitEvent(deps.plan, deps.usedThisQuarter);
-  return upsertMemberEvent(member, companyId, input, "pending_review", deps);
+  return writeMemberEvent(member, companyId, input, "pending_review", deps, eventId);
 }
 
 export async function listCompanyEvents(actor: Actor, companyId: string, deps: MemberEventDependencies = {}): Promise<MemberEventRow[]> {
   await requireCompanyManager(actor, companyId, deps);
   const database = await memberDatabase(deps);
-  return executedRows(await database.execute(sql`
+  return memberEventRows(await database.execute(sql`
     SELECT * FROM ${events} WHERE ${events.organiserCompanyId} = ${eventIdSchema.parse(companyId)}
     ORDER BY ${events.startsAt} DESC, ${events.slug} ASC
   `));
@@ -511,12 +606,11 @@ export async function getEventForMemberEdit(actor: Actor, eventId: string, deps:
   requireMember(actor);
   const id = eventIdSchema.parse(eventId);
   const database = await memberDatabase(deps);
-  const row = executedRows(await database.execute(sql`SELECT * FROM ${events} WHERE ${events.id} = ${id}`))[0];
+  const row = memberEventRows(await database.execute(sql`SELECT * FROM ${events} WHERE ${events.id} = ${id}`))[0];
   if (!row) return null;
   // An admin-authored event has no organiser, so no member may edit it.
-  const organiser = row.organiser_company_id ?? row.organiserCompanyId;
-  if (typeof organiser !== "string") throw new Error("FORBIDDEN");
-  await requireCompanyManager(actor, organiser, deps);
+  if (row.organiser_company_id === null) throw new Error("FORBIDDEN");
+  await requireCompanyManager(actor, row.organiser_company_id, deps);
   return row;
 }
 
@@ -547,18 +641,19 @@ export async function reviewEvent(actor: Actor, eventId: string, decision: unkno
   const parsed = reviewDecisionSchema.parse(decision);
   const database = await memberDatabase(deps);
   return database.transaction(async (transaction) => {
-    const current = executedRows(await transaction.execute(sql`SELECT * FROM ${events} WHERE ${events.id} = ${id} FOR UPDATE`))[0];
+    // FOR UPDATE: a concurrent approve/reject on the same row must serialise so
+    // the transition check below sees the other reviewer's outcome, not stale state.
+    const current = memberEventRows(await transaction.execute(sql`SELECT * FROM ${events} WHERE ${events.id} = ${id} FOR UPDATE`))[0];
     if (!current) throw new Error("EVENT_NOT_FOUND");
-    const currentStatus = String(current.status) as EventStatus;
-    const visibility = String(current.visibility ?? "public") as EventVisibility;
     const next: EventStatus = parsed.decision === "approve" ? "published" : "rejected";
-    if (!canTransitionEvent(currentStatus, next)) throw new Error("INVALID_EVENT_TRANSITION");
-    const flags = derivedEventFlags({status: next, visibility});
+    if (!canTransitionEvent(current.status, next)) throw new Error("INVALID_EVENT_TRANSITION");
+    const flags = derivedEventFlags({status: next, visibility: current.visibility});
     const reason = parsed.decision === "reject" ? parsed.reason : null;
-    const updated = executedRows(await transaction.execute(sql`
+    // First publication stamps `published_at`; a rejection leaves it as is.
+    const publishedAt = flags.published ? sql`COALESCE(${events.publishedAt}, now())` : events.publishedAt;
+    const updated = memberEventRows(await transaction.execute(sql`
       UPDATE ${events}
-      SET status = ${next}, published = ${flags.published}, member_only = ${flags.memberOnly},
-          published_at = CASE WHEN ${next}::text = 'published' THEN COALESCE(${events.publishedAt}, now()) ELSE ${events.publishedAt} END,
+      SET status = ${next}, published = ${flags.published}, member_only = ${flags.memberOnly}, published_at = ${publishedAt},
           reviewed_at = now(), reviewed_by_profile_id = ${actor.profileId}, rejection_reason = ${reason}, updated_at = now()
       WHERE ${events.id} = ${id}
       RETURNING *
@@ -567,7 +662,7 @@ export async function reviewEvent(actor: Actor, eventId: string, decision: unkno
     await transaction.execute(sql`
       INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata)
       VALUES (${actor.profileId}, ${actor.kind}, ${parsed.decision === "approve" ? "event.review.approved" : "event.review.rejected"}, 'event', ${id},
-              ${JSON.stringify({slug: current.slug, organiserCompanyId: current.organiser_company_id ?? null, reason})}::jsonb)
+              ${JSON.stringify({slug: current.slug, organiserCompanyId: current.organiser_company_id, reason})}::jsonb)
     `);
     return updated;
   });
@@ -576,7 +671,7 @@ export async function reviewEvent(actor: Actor, eventId: string, decision: unkno
 export async function listEventsForReview(actor: Actor, deps: MemberEventDependencies = {}): Promise<MemberEventRow[]> {
   requireAdmin(actor);
   const database = await memberDatabase(deps);
-  return executedRows(await database.execute(sql`
+  return memberEventRows(await database.execute(sql`
     SELECT * FROM ${events} WHERE ${events.status} = 'pending_review'
     ORDER BY ${events.submittedAt} ASC NULLS LAST, ${events.slug} ASC
   `));
