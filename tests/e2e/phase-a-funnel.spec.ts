@@ -5,7 +5,7 @@ import {expect, test} from "@playwright/test";
 import {missingM2LiveEnvironment, signInForM2} from "../fixtures/m2-auth";
 
 type Bundle = Readonly<{
-  Join: Readonly<{choosePlanTitle: string; choosePlanCompare: string; plans: Readonly<Record<string, string>>}>;
+  Join: Readonly<{choosePlanTitle: string; choosePlanCompare: string; invalidPlanDescription: string; plans: Readonly<Record<string, string>>}>;
   Interest: Readonly<{email: string; submit: string; success: string; website: string}>;
   Admin: Readonly<{inbox: Readonly<{title: string}>; tasks: Readonly<{title: string}>}>;
 }>;
@@ -33,9 +33,12 @@ for (const {locale, prefix} of locales) {
       await expect(page.getByRole("heading", {level: 2, name: copy.Join.plans[code]})).toBeVisible();
     }
     await expect(page.getByRole("link", {name: copy.Join.choosePlanCompare})).toHaveAttribute("href", `${prefix}/membership`);
-    // A malformed plan still gets the "unavailable" state rather than the chooser.
+    // A malformed plan still gets the "unavailable" state rather than the chooser. Both
+    // states share the same h1 string, so the description and the absent plan cards are
+    // what tell them apart.
     await page.goto(`${prefix}/join?plan=gold`);
-    await expect(page.getByRole("heading", {level: 1, name: copy.Join.choosePlanTitle})).toHaveCount(0);
+    await expect(page.getByText(copy.Join.invalidPlanDescription)).toBeVisible();
+    await expect(page.getByRole("heading", {level: 2, name: copy.Join.plans.startup})).toHaveCount(0);
   });
 
   test(`${locale}: /events interest form acknowledges a submission`, async ({page}) => {
