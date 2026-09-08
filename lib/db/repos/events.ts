@@ -8,7 +8,7 @@ import {getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
-import {auditEvents, companyMembers, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility} from "@/lib/db/server-schema";
+import {auditEvents, companies, companyMembers, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility} from "@/lib/db/server-schema";
 import {assertCanSubmitEvent} from "@/lib/events/entitlement-core";
 import {eventBoundary, type PublicEventProjection, type PublicEventStatus} from "@/lib/events/public";
 import {canTransitionEvent, derivedEventFlags, hongKongQuarterBounds} from "@/lib/events/status";
@@ -458,6 +458,8 @@ const memberEventRowSchema = z.object({
   published_at: z.coerce.date().nullable(),
   reviewed_at: z.coerce.date().nullable(),
   rejection_reason: z.string().nullable(),
+  // Only `listEventsForReview` joins companies; every other read omits it.
+  organiser_name: z.string().nullable().optional(),
 }).passthrough();
 
 export type MemberEventRow = z.infer<typeof memberEventRowSchema>;
@@ -676,8 +678,14 @@ export async function reviewEvent(actor: Actor, eventId: string, decision: unkno
 export async function listEventsForReview(actor: Actor, deps: MemberEventDependencies = {}): Promise<MemberEventRow[]> {
   requireAdmin(actor);
   const database = await memberDatabase(deps);
+  // The organiser's display name rides along for the review queue: the
+  // companies repository is member-scoped, so staff cannot look it up per row.
+  // An admin-authored event has no organiser, hence the LEFT JOIN.
   return memberEventRows(await database.execute(sql`
-    SELECT * FROM ${events} WHERE ${events.status} = 'pending_review'
+    SELECT ${events}.*, ${companies.displayName} AS organiser_name
+    FROM ${events}
+    LEFT JOIN ${companies} ON ${companies.id} = ${events.organiserCompanyId}
+    WHERE ${events.status} = 'pending_review'
     ORDER BY ${events.submittedAt} ASC NULLS LAST, ${events.slug} ASC
   `));
 }

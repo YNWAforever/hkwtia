@@ -211,10 +211,17 @@ describe("member event writes (programme B-1)", () => {
     await expect(getEventForMemberEdit(member, EVENT, fakeDeps([[row({organiser_company_id: null, status: "published"})]]).deps)).rejects.toThrow("FORBIDDEN");
   });
 
-  it("lists the review queue for staff only", async () => {
-    const {execute, deps} = fakeDeps([[row({status: "pending_review"})]]);
+  it("lists the review queue for staff only, with the organiser's display name joined in", async () => {
+    const {execute, deps} = fakeDeps([[{...row({status: "pending_review"}), organiser_name: "Acme Robotics"}]]);
     await expect(listEventsForReview(member, deps)).rejects.toThrow("FORBIDDEN");
     expect(execute).not.toHaveBeenCalled();
-    await expect(listEventsForReview(staff, deps)).resolves.toMatchObject([{id: EVENT, status: "pending_review"}]);
+    await expect(listEventsForReview(staff, deps)).resolves.toMatchObject([{id: EVENT, status: "pending_review", organiser_name: "Acme Robotics"}]);
+    const statement = statementText(execute, 0);
+    expect(statement).toContain("LEFT JOIN");
+    expect(statement).toContain("AS organiser_name");
+    expect(statement).toContain("pending_review");
+    // An admin-authored event has no organiser; the join must not drop it.
+    const orphan = fakeDeps([[{...row({status: "pending_review", organiser_company_id: null}), organiser_name: null}]]);
+    await expect(listEventsForReview(staff, orphan.deps)).resolves.toMatchObject([{id: EVENT, organiser_name: null}]);
   });
 });

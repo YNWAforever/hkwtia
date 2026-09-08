@@ -2376,6 +2376,21 @@
         "cancelled": "已取消",
         "attended": "已出席",
         "noShow": "未出席"
+      },
+      "review": {
+        "title": "等待審核的會員活動",
+        "caption": "會員機構提交的活動",
+        "event": "活動",
+        "organiser": "主辦機構",
+        "starts": "開始",
+        "submitted": "提交時間",
+        "format": "形式",
+        "visibility": "可見範圍",
+        "approve": "批准並發布",
+        "reject": "退回",
+        "rejectionReason": "退回原因",
+        "preview": "開啟",
+        "empty": "目前沒有等待審核的會員活動。"
       }
     },
     "announcements": {

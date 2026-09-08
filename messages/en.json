@@ -2375,6 +2375,21 @@
         "cancelled": "Cancelled",
         "attended": "Attended",
         "noShow": "No show"
+      },
+      "review": {
+        "title": "Member events awaiting review",
+        "caption": "Events submitted by member organisations",
+        "event": "Event",
+        "organiser": "Organiser",
+        "starts": "Starts",
+        "submitted": "Submitted",
+        "format": "Format",
+        "visibility": "Visibility",
+        "approve": "Approve and publish",
+        "reject": "Return",
+        "rejectionReason": "Reason for returning",
+        "preview": "Open",
+        "empty": "No member events are waiting for review."
       }
     },
     "announcements": {
