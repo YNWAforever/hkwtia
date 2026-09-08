@@ -1,9 +1,14 @@
 import {render, screen} from "@testing-library/react";
-import {describe, expect, it, vi} from "vitest";
+import {beforeEach, describe, expect, it, vi} from "vitest";
+
+const state = vi.hoisted(() => ({redirectUrl: null as string | null}));
 
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async () => Object.assign((key: string) => key, {raw: (key: string) => key})),
   setRequestLocale: vi.fn(),
+}));
+vi.mock("next/navigation", () => ({
+  redirect: (url: string) => { state.redirectUrl = url; throw new Error("NEXT_REDIRECT"); },
 }));
 vi.mock("@/lib/auth/actor", () => ({getActor: vi.fn(async () => null)}));
 
@@ -11,13 +16,29 @@ import {getActor} from "@/lib/auth/actor";
 import MemberLoginPage from "@/app/[locale]/member-login/page";
 
 describe("MemberLoginPage", () => {
-  it("shows the honest access message and no login form for an already-authenticated actor", async () => {
+  beforeEach(() => {
+    state.redirectUrl = null;
+  });
+
+  // Regression: clicking the magic-link email landed an authenticated actor
+  // back on this page with a dead-end "already signed in" message and no
+  // way forward. Mirrors /join's page.tsx, which already redirects.
+  it("redirects an already-authenticated actor to the continuation instead of showing a login form", async () => {
     vi.mocked(getActor).mockResolvedValueOnce({kind: "member", userId: "u1", profileId: "p1"});
 
-    render(await MemberLoginPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({})}));
+    await expect(
+      MemberLoginPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({next: "/portal/billing"})}),
+    ).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.redirectUrl).toBe("/portal/billing");
+  });
 
-    expect(screen.getByText("nonMemberAccess")).toBeInTheDocument();
-    expect(screen.queryByTestId("member-login-form")).not.toBeInTheDocument();
+  it("redirects an authenticated actor to the default portal when next is absent", async () => {
+    vi.mocked(getActor).mockResolvedValueOnce({kind: "staff", userId: "u2", profileId: "p2"});
+
+    await expect(
+      MemberLoginPage({params: Promise.resolve({locale: "zh-HK"}), searchParams: Promise.resolve({})}),
+    ).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.redirectUrl).toBe("/zh/portal");
   });
 
   it("renders an email field and a submit control when unauthenticated", async () => {
