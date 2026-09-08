@@ -665,6 +665,12 @@
       "programs": "Programme participation",
       "visibility": "WTIA visibility opportunities"
     },
+    "tierBenefits": {
+      "community": ["Directory card on /members", "RSVP to public WTIA events", "Activity updates by email or WhatsApp"],
+      "startup": ["Full member profile page with logo", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing", "WhatsApp updates and standard support"],
+      "corporate": ["Featured member profile and logo wall", "Unlimited reviewed event publishing", "3 showcase listings", "Priority WhatsApp support lane", "Member tools included"],
+      "patron": ["Everything in Corporate", "Featured placement on the homepage", "Co-branded WTIA events", "Dedicated WhatsApp support"]
+    },
     "tiers": {
       "community": {
         "name": "Community",

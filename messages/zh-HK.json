@@ -665,6 +665,12 @@
       "programs": "參與計劃",
       "visibility": "WTIA 展示機會"
     },
+    "tierBenefits": {
+      "community": ["於 /members 顯示會員名片", "報名參加 WTIA 公開活動", "以電郵或 WhatsApp 接收活動更新"],
+      "startup": ["完整會員專頁（含商標）", "每季可提交最多 2 個活動供 WTIA 審核", "1 個方案展示頁", "WhatsApp 更新及標準支援"],
+      "corporate": ["精選會員專頁及商標牆", "無限次提交活動（經審核）", "3 個方案展示頁", "WhatsApp 優先支援通道", "包含會員工具"],
+      "patron": ["包含企業會員所有權益", "首頁精選位置", "與 WTIA 聯合品牌活動", "專屬 WhatsApp 支援"]
+    },
     "tiers": {
       "community": {
         "name": "社群",

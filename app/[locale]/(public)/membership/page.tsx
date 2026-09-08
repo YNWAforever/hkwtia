@@ -47,14 +47,16 @@ export default async function MembershipPage({params}: Props) {
   ]);
   const publicTiers = rows === null ? [] : buildPublicMembershipCatalog({locale, rows, priceIds: publicPriceIds()});
   const labels = {free: t("priceLabels.free"), review: t("priceLabels.review"), annual: t("cadenceLabels.annual"), monthly: t("cadenceLabels.monthly")};
-  const benefits = [t("benefits.network"), t("benefits.programs"), t("benefits.visibility")];
   const tiers: PlanGridTier[] = publicTiers.map((tier) => ({
     code: tier.code,
     name: t(`tiers.${tier.code}.name`),
     description: t(`tiers.${tier.code}.description`),
     priceLines: priceLines(tier.price, labels),
-    benefits,
-    action: t("actions.discuss"),
+    // Programme D-5: the copy for each tier's real entitlements lives in the
+    // bundle beside lib/membership/entitlements.ts; the old shared triple
+    // said the same thing about every tier, which sells nothing.
+    benefits: (t.raw(`tierBenefits.${tier.code}`) as string[]),
+    action: tier.cta.kind === "join" ? t("actions.join") : t("actions.contact"),
     href: tier.cta.href,
   }));
   // "Ready" means both configured Startup/Corporate price ids actually resolved into the

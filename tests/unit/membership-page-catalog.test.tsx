@@ -10,7 +10,15 @@ const localeState = vi.hoisted(() => ({locale: "en"}));
 vi.mock("@/lib/db/repos/membership-plans", () => ({membershipPlansRepository: membershipPlans}));
 vi.mock("next-intl/server", () => ({
   setRequestLocale: (locale: string) => { localeState.locale = locale; },
-  getTranslations: async () => (key: string) => {
+  getTranslations: async () => {
+    const t = (key: string) => lookup(key);
+    // The page reads the per-tier benefit arrays through t.raw (programme D-5).
+    (t as unknown as {raw: (key: string) => unknown}).raw = (key: string) => key.startsWith("tierBenefits.") ? [`${key} benefit`] : lookup(key);
+    return t;
+  },
+}));
+
+function lookup(key: string): string {
     const messages: Record<string, Record<string, string>> = {
       en: {
         unavailable: "Membership is currently unavailable",
@@ -36,8 +44,7 @@ vi.mock("next-intl/server", () => ({
       },
     };
     return messages[localeState.locale]?.[key] ?? key;
-  },
-}));
+}
 vi.mock("@/i18n/navigation", () => ({
   Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
 }));

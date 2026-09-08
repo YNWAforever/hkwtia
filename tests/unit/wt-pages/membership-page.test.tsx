@@ -22,8 +22,11 @@ const membershipPlans = vi.hoisted(() => ({list: vi.fn()}));
 vi.mock("@/lib/db/repos/membership-plans", () => ({membershipPlansRepository: membershipPlans}));
 vi.mock("next-intl/server", () => ({
   setRequestLocale: () => undefined,
-  getTranslations: vi.fn(async ({locale, namespace}: {locale: "en" | "zh-HK"; namespace: string}) =>
-    (key: string) => String(messageAt(locale, namespace, key))),
+  getTranslations: vi.fn(async ({locale, namespace}: {locale: "en" | "zh-HK"; namespace: string}) => {
+    const t = (key: string) => String(messageAt(locale, namespace, key));
+    (t as unknown as {raw: (key: string) => unknown}).raw = (key: string) => messageAt(locale, namespace, key);
+    return t;
+  }),
 }));
 vi.mock("@/i18n/navigation", () => ({
   Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
@@ -79,7 +82,12 @@ describe("/membership rewrite", () => {
     expect(html).toContain('href="/join?plan=community"');
     expect(html).toContain('href="/join?plan=startup"');
     expect(html).toContain('href="/contact"');
-    expect(html).toContain(bundles.en.Membership.actions.discuss);
+    expect(html).toContain(bundles.en.Membership.actions.join);
+    expect(html).toContain(bundles.en.Membership.actions.contact);
+    // This render carries community/startup/patron, so pin a startup benefit
+    // and the patron one to prove each tier gets its own list.
+    expect(html).toContain(bundles.en.Membership.tierBenefits.startup[1]);
+    expect(html).toContain(bundles.en.Membership.tierBenefits.patron[2]);
   });
 
   it("shows the confirmed-pricing note when both configured price ids resolve", async () => {
