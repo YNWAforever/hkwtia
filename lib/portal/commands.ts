@@ -21,6 +21,8 @@ export async function updateProfileAction(formData: FormData): Promise<void> {
     jobTitle: String(formData.get("jobTitle") ?? "").trim() || null,
     locale: String(formData.get("locale") ?? "en") as "en" | "zh-HK",
     directoryVisible: formData.get("directoryVisible") === "on",
+    whatsappNumber: String(formData.get("whatsappNumber") ?? "").trim() || null,
+    whatsappOptIn: formData.get("whatsappOptIn") === "on",
   });
   revalidatePath("/portal");
 

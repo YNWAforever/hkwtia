@@ -42,6 +42,8 @@ export type DashboardViewModel = Readonly<{
     | "locale"
     | "onboardingState"
     | "directoryVisible"
+    | "whatsappNumber"
+    | "whatsappOptIn"
   >;
   memberships: readonly DashboardMembership[];
   companies: readonly DashboardCompany[];
@@ -56,7 +58,7 @@ export type DashboardViewModel = Readonly<{
   privateDataAvailable: true;
 }>;
 
-type PortalProfile = Pick<Profile, "id" | "displayName" | "phone" | "jobTitle" | "locale" | "onboardingState" | "directoryVisible">;
+type PortalProfile = Pick<Profile, "id" | "displayName" | "phone" | "jobTitle" | "locale" | "onboardingState" | "directoryVisible" | "whatsappNumber" | "whatsappOptIn">;
 export type PortalMembershipRecord = Pick<Membership, "id" | "ownerUserId" | "companyId" | "planCode" | "status" | "seatLimit"> & Partial<Pick<Membership, "applicationId" | "cancelAtPeriodEnd" | "billingPeriodStart" | "billingPeriodEnd">>;
 type PortalCompanyRecord = Pick<Company, "id" | "legalName" | "displayName"> & Partial<Pick<Company, "website" | "industry" | "sizeBand" | "description" | "directoryVisible">>;
 type ProfileReader = {getById: (actor: Actor, userId: string) => Promise<PortalProfile | null>};
@@ -146,6 +148,8 @@ export async function getDashboard(
       locale: profile.locale,
       onboardingState: profile.onboardingState,
       directoryVisible: profile.directoryVisible,
+      whatsappNumber: profile.whatsappNumber,
+      whatsappOptIn: profile.whatsappOptIn,
     },
     memberships,
     companies,

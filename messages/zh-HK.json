@@ -1803,6 +1803,11 @@
     },
     "profileTitle": "我的個人資料",
     "profileDescription": "更新你的個人資料及目錄顯示選項。",
+    "whatsapp": {
+      "optIn": "透過 WhatsApp 向我發送 WTIA 活動更新及提醒",
+      "consent": "WTIA 可就活動、計劃及會籍事宜向此號碼發送訊息。你可隨時回覆「取消」以停止接收。",
+      "status": {"on": "WhatsApp 更新：已開啟", "off": "WhatsApp 更新：已關閉"}
+    },
     "companyTitle": "公司資料",
     "companyDescription": "公司擁有人及管理員可以更新公司資料。",
     "companyEmpty": "你目前的會員資格沒有公司資料。",
@@ -1811,6 +1816,7 @@
       "displayName": "顯示名稱",
       "phone": "電話",
       "jobTitle": "職位",
+      "whatsappNumber": "WhatsApp 號碼",
       "website": "網站",
       "legalName": "法定名稱",
       "industry": "行業",

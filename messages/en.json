@@ -1807,10 +1807,16 @@
     "companyDescription": "Owners and admins can update details for their company.",
     "companyEmpty": "Your current membership does not include a company profile.",
     "save": "Save changes",
+    "whatsapp": {
+      "optIn": "Send me WTIA activity updates and reminders on WhatsApp",
+      "consent": "WTIA may message this number about events, programmes and membership. Reply STOP at any time to opt out.",
+      "status": {"on": "WhatsApp updates: on", "off": "WhatsApp updates: off"}
+    },
     "fields": {
       "displayName": "Display name",
       "phone": "Phone",
       "jobTitle": "Job title",
+      "whatsappNumber": "WhatsApp number",
       "website": "Website",
       "legalName": "Legal name",
       "industry": "Industry",

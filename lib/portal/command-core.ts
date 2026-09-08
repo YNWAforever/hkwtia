@@ -8,6 +8,8 @@ import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 import {forbidden, requireMember} from "@/lib/membership/lifecycle";
 import {isPortalMembershipStatus} from "@/lib/portal/queries";
+import {whatsappConsentFields} from "@/lib/whatsapp/consent";
+import {normalizeWhatsAppNumber} from "@/lib/whatsapp/number";
 
 /**
  * Actor-taking cores, deliberately outside the `"use server"` module. That
@@ -22,6 +24,18 @@ const profileUpdateSchema = z.object({
   jobTitle: z.string().trim().max(120).nullable().optional(),
   locale: z.enum(["en", "zh-HK"]).optional(),
   directoryVisible: z.boolean().optional(),
+  whatsappNumber: z.string().trim().max(32).nullable().optional()
+    .transform((value, context) => {
+      if (!value) return null;
+      const normalized = normalizeWhatsAppNumber(value);
+      if (!normalized) context.addIssue({code: z.ZodIssueCode.custom, message: "INVALID_WHATSAPP_NUMBER"});
+      return normalized;
+    }),
+  whatsappOptIn: z.boolean().optional().default(false),
+}).superRefine((input, context) => {
+  if (input.whatsappOptIn && !input.whatsappNumber) {
+    context.addIssue({code: z.ZodIssueCode.custom, path: ["whatsappNumber"], message: "WHATSAPP_NUMBER_REQUIRED"});
+  }
 });
 
 const companyUpdateSchema = z.object({
@@ -35,7 +49,7 @@ const companyUpdateSchema = z.object({
   directoryVisible: z.boolean().optional(),
 });
 
-export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;
+export type ProfileUpdateInput = z.input<typeof profileUpdateSchema>;
 export type CompanyUpdateInput = z.infer<typeof companyUpdateSchema>;
 export type PortalActionState = Readonly<{ok: boolean; message?: string}>;
 
@@ -79,8 +93,12 @@ export async function updateProfile(
   const input = profileUpdateSchema.parse(rawInput);
   const deps = dependencies(inputDependencies);
   await requireRecoverableMembership(actor, deps);
+  const {whatsappOptIn, ...profileInput} = input;
   const result = await deps.profiles.update(actor, actor.profileId, {
-    ...input,
+    ...profileInput,
+    // Programme D-7: the portal is a consent source of its own; opting out
+    // clears the provenance rather than leaving a stale timestamp behind.
+    ...whatsappConsentFields({optIn: whatsappOptIn, source: "portal"}),
     // Profile completion is derived by the portal from this explicit state;
     // callers cannot set an arbitrary onboarding percentage.
     onboardingState: "complete",
