@@ -4,7 +4,7 @@ import {redirect} from "next/navigation";
 import {EventForm} from "@/components/portal/event-form";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
-import {saveMemberEventDraftAction, submitMemberEventAction} from "@/lib/events/member-actions";
+import {saveMemberEventAction} from "@/lib/events/member-actions";
 import {loadMemberEventsContext} from "@/lib/events/member-core";
 import {localizedPath} from "@/lib/urls";
 
@@ -17,9 +17,11 @@ export default async function NewMemberEventPage({params}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  // The portal layout's continuation allowlist doesn't cover this deep path,
-  // so the page-level redirect is what preserves /portal/events/new as the
-  // post-login destination.
+  // The layout redirects anonymous visitors too, but Next renders layout and
+  // page in parallel, so a page-level requireActor() would throw UNAUTHORIZED
+  // into the runtime log on every anonymous hit (audit F21). Redirect here as
+  // well; the continuation allowlist (lib/portal/continuation.ts) accepts this
+  // deep path, so sign-in returns to it rather than to /portal/events.
   const actor = await getActor();
   if (!actor) redirect(`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent("/portal/events/new")}`);
   const t = await getTranslations({locale, namespace: "Portal.memberEvents"});
@@ -35,7 +37,7 @@ export default async function NewMemberEventPage({params}: Props) {
         <h1 className="font-serif text-4xl font-semibold tracking-tight">{t("newTitle")}</h1>
         <p className="text-muted-foreground">{t("quota", {used: context.usedThisQuarter, limit: Number.isFinite(context.limit) ? String(context.limit) : t("unlimited")})}</p>
       </header>
-      <EventForm canSubmit={context.canPublish} draftAction={saveMemberEventDraftAction.bind(null, locale)} labels={eventFormLabels(t)} submitAction={submitMemberEventAction.bind(null, locale)} values={null} />
+      <EventForm action={saveMemberEventAction.bind(null, locale)} canSubmit={context.canPublish} labels={eventFormLabels(t)} values={null} />
     </div>
   );
 }

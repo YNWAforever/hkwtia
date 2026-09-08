@@ -1991,6 +1991,7 @@
         "EVENT_NOT_EDITABLE": "This event has already been published; ask WTIA to reopen it.",
         "EVENT_HERO_MEDIA_INVALID": "That hero image id does not match an available image.",
         "NO_MANAGED_COMPANY": "Event publishing needs a company you manage.",
+        "NO_MEMBERSHIP_FOR_COMPANY": "Your company has no active membership.",
         "FORBIDDEN": "You can only edit events your organisation submitted."
       }
     },

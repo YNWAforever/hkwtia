@@ -39,7 +39,8 @@ export function memberEventInputFromFormData(formData: FormData): MemberEventInp
     visibility: visibility === "members_only" ? "members_only" : "public",
     registrationMode: registrationMode === "external" ? "external" : "rsvp",
     externalRegistrationUrl: optional(formData, "externalRegistrationUrl"),
-    tags: text(formData, "tags").split(",").map((tag) => tag.trim()).filter((tag) => tag.length > 0),
+    // De-duplicated: "ai, health, ai" would otherwise store the tag twice.
+    tags: [...new Set(text(formData, "tags").split(",").map((tag) => tag.trim()).filter((tag) => tag.length > 0))],
     heroMediaId: optional(formData, "heroMediaId"),
   };
 }

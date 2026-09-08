@@ -34,24 +34,30 @@ export async function loadMemberEventsContext(actor: Actor, deps: MemberEventsDe
   const dashboard = await deps.dashboard(actor);
   const company = dashboard.companies.find((entry) => entry.canManage);
   if (!company) throw new Error("NO_MANAGED_COMPANY");
-  const membership = dashboard.memberships.find((entry) => entry.companyId === company.id) ?? dashboard.memberships[0];
+  // The plan must be the managed company's own: falling back to another
+  // company's membership (or to "community") would size the quota from the
+  // wrong contract, so a company without a membership is refused outright.
+  const membership = dashboard.memberships.find((entry) => entry.companyId === company.id);
+  if (!membership) throw new Error("NO_MEMBERSHIP_FOR_COMPANY");
   // `entitlementsFor` throws INVALID_PLAN_CODE for anything outside the plan
   // enum, so the cast never lets an unknown code through as "unlimited".
-  const plan = (membership?.planCode ?? "community") as MembershipPlanCode;
+  const plan = membership.planCode as MembershipPlanCode;
   const limit = entitlementsFor(plan).publishEventsPerQuarter;
   const usedThisQuarter = await deps.events.countCompanySubmissionsThisQuarter(actor, company.id);
   return {companyId: company.id, companyName: company.displayName, plan, usedThisQuarter, limit, canPublish: limit > 0 && usedThisQuarter < limit};
 }
 
+export type SaveMemberEventOptions = Readonly<{eventId?: string}>;
+
 /**
  * A draft never consumes quota; a submission is checked against the plan by
- * the repository (D-5). `eventId` turns the write into an id-keyed update of a
- * row the company already owns; without it a new row is inserted.
+ * the repository (D-5). `options.eventId` turns the write into an id-keyed
+ * update of a row the company already owns; without it a new row is inserted.
  */
-export async function saveMemberEvent(actor: Actor, mode: "draft" | "submit", input: unknown, deps: MemberEventsDependencies = defaultDependencies, eventId?: string) {
+export async function saveMemberEvent(actor: Actor, mode: "draft" | "submit", input: unknown, options: SaveMemberEventOptions = {}, deps: MemberEventsDependencies = defaultDependencies) {
   const context = await loadMemberEventsContext(actor, deps);
-  if (mode === "draft") return deps.events.saveMemberDraft(actor, context.companyId, input, undefined, eventId);
-  return deps.events.submitMember(actor, context.companyId, input, {plan: context.plan, usedThisQuarter: context.usedThisQuarter}, eventId);
+  if (mode === "draft") return deps.events.saveMemberDraft(actor, context.companyId, input, undefined, options.eventId);
+  return deps.events.submitMember(actor, context.companyId, input, {plan: context.plan, usedThisQuarter: context.usedThisQuarter}, options.eventId);
 }
 
 export async function listMyCompanyEvents(actor: Actor, deps: MemberEventsDependencies = defaultDependencies) {

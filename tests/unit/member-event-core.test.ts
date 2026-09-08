@@ -42,24 +42,34 @@ describe("member event core (programme B-2)", () => {
 
   it("saves a draft without a quota check and submits with one", async () => {
     const d = deps();
-    await saveMemberEvent(member, "draft", input, d as never);
+    await saveMemberEvent(member, "draft", input, {}, d as never);
     expect(d.events.saveMemberDraft).toHaveBeenCalledWith(member, COMPANY, input, undefined, undefined);
-    await saveMemberEvent(member, "submit", input, d as never);
+    await saveMemberEvent(member, "submit", input, {}, d as never);
     expect(d.events.submitMember).toHaveBeenCalledWith(member, COMPANY, input, {plan: "startup", usedThisQuarter: 1}, undefined);
   });
 
   it("forwards the event id on the edit path so the write is an id-keyed update", async () => {
     const d = deps();
-    await saveMemberEvent(member, "draft", input, d as never, EVENT);
+    await saveMemberEvent(member, "draft", input, {eventId: EVENT}, d as never);
     expect(d.events.saveMemberDraft).toHaveBeenCalledWith(member, COMPANY, input, undefined, EVENT);
-    await saveMemberEvent(member, "submit", input, d as never, EVENT);
+    await saveMemberEvent(member, "submit", input, {eventId: EVENT}, d as never);
     expect(d.events.submitMember).toHaveBeenCalledWith(member, COMPANY, input, {plan: "startup", usedThisQuarter: 1}, EVENT);
   });
 
   it("refuses when the member manages no company", async () => {
     const d = deps();
     d.dashboard.mockResolvedValueOnce({companies: [], memberships: []});
-    await expect(saveMemberEvent(member, "draft", input, d as never)).rejects.toThrow("NO_MANAGED_COMPANY");
+    await expect(saveMemberEvent(member, "draft", input, {}, d as never)).rejects.toThrow("NO_MANAGED_COMPANY");
+  });
+
+  it("refuses when the managed company has no membership instead of borrowing another plan", async () => {
+    const d = deps();
+    d.dashboard.mockResolvedValueOnce({
+      companies: [{id: COMPANY, canManage: true, displayName: "Acme"}],
+      memberships: [{planCode: "corporate", status: "active", companyId: "33333333-3333-4333-8333-333333333333"}],
+    });
+    await expect(loadMemberEventsContext(member, d as never)).rejects.toThrow("NO_MEMBERSHIP_FOR_COMPANY");
+    expect(d.events.countCompanySubmissionsThisQuarter).not.toHaveBeenCalled();
   });
 
   it("refuses a non-member actor before touching the dashboard", async () => {
