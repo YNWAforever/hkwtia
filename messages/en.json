@@ -2018,11 +2018,14 @@
       "pendingApprovals": "Pending approvals",
       "atRisk": "At-risk members",
       "listingsAwaitingReview": "Listings awaiting review",
-      "draftNews": "Draft news posts"
+      "draftNews": "Draft news posts",
+      "openTasks": "Open staff tasks"
     },
     "navigation": {
       "label": "Staff administration navigation",
       "dashboard": "Dashboard",
+      "inbox": "Inbox",
+      "tasks": "Tasks",
       "segments": "Segments",
       "members": "Members",
       "atRisk": "At risk",
@@ -2038,6 +2041,30 @@
       "approvals": "Approvals",
       "reports": "Reports",
       "automations": "Automations"
+    },
+    "inbox": {
+      "eyebrow": "Member and lead conversations",
+      "title": "Inbox",
+      "description": "Every concierge conversation on the web widget and WhatsApp. Read-only in this release; replying from here arrives with the WhatsApp operations phase.",
+      "filters": {"all": "All", "whatsapp": "WhatsApp", "web": "Web"},
+      "columns": {"owner": "Who", "channel": "Channel", "last": "Last message", "when": "Updated", "messages": "Messages", "status": "Status"},
+      "anonymous": "Prospect (not a member)",
+      "escalated": "Needs a person",
+      "empty": "No conversations yet.",
+      "error": "The inbox could not be loaded.",
+      "open": "Open",
+      "back": "Back to inbox",
+      "roles": {"user": "Sender", "assistant": "Concierge", "tool": "Tool"}
+    },
+    "tasks": {
+      "eyebrow": "Escalations",
+      "title": "Staff tasks",
+      "description": "Concierge hand-offs and automation follow-ups waiting for a person.",
+      "columns": {"kind": "Kind", "summary": "Summary", "member": "Member", "conversation": "Conversation", "created": "Created", "actions": "Actions"},
+      "resolve": "Mark resolved",
+      "openConversation": "Open conversation",
+      "empty": "Nothing is waiting for a person.",
+      "error": "Tasks could not be loaded."
     },
     "listingsReview": {
       "eyebrow": "Showcase operations",

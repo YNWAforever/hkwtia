@@ -32,8 +32,9 @@ describe("internal navigation config", () => {
   it("groups the Admin's 16 nav links into exactly Workspace/Content/Operations", () => {
     expect(adminGroups.map((group) => group.id)).toEqual(["workspace", "content", "operations"]);
     const allLinks = adminGroups.flatMap((group) => group.links);
-    expect(allLinks).toHaveLength(16);
+    // Phase A (audit F2) added the inbox and staff-task queue to the workspace group.
+    expect(allLinks).toHaveLength(18);
     const workspace = adminGroups.find((group) => group.id === "workspace")!;
-    expect(workspace.links.map((link) => link.id)).toEqual(["dashboard", "members", "at-risk", "segments"]);
+    expect(workspace.links.map((link) => link.id)).toEqual(["dashboard", "members", "at-risk", "inbox", "tasks", "segments"]);
   });
 });

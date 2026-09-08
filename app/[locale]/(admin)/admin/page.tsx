@@ -4,6 +4,7 @@ import {DashboardTiles, type DashboardTile} from "@/components/admin/dashboard-t
 import type {AppLocale} from "@/i18n/routing";
 import {listPendingApprovals} from "@/lib/admin/approvals";
 import {listAtRiskMembers} from "@/lib/admin/at-risk";
+import {listOpenTasks} from "@/lib/admin/inbox";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {adminPostsRepository} from "@/lib/db/repos/admin-posts";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
@@ -26,10 +27,11 @@ async function count<T>(read: Promise<readonly T[]>): Promise<number | null> {
 }
 
 async function queueCounts(actor: AdminActor) {
-  const [approvals, atRisk, listings, draftNews] = await Promise.all([
+  const [approvals, atRisk, listings, openTasks, draftNews] = await Promise.all([
     count(listPendingApprovals(actor)),
     count(listAtRiskMembers(actor, {asOf: new Date()})),
     count(showcaseRepository.listForReview(actor)),
+    count(listOpenTasks(actor)),
     (async () => {
       try {
         const posts = await adminPostsRepository.listForAdmin(actor);
@@ -39,7 +41,7 @@ async function queueCounts(actor: AdminActor) {
       }
     })(),
   ]);
-  return {approvals, atRisk, listings, draftNews};
+  return {approvals, atRisk, listings, openTasks, draftNews};
 }
 
 export default async function AdminPage({params}: Props) {
@@ -57,6 +59,7 @@ export default async function AdminPage({params}: Props) {
     {id: "approvals", href: "/admin/approvals", label: t("dashboard.pendingApprovals"), count: counts.approvals},
     {id: "at-risk", href: "/admin/at-risk", label: t("dashboard.atRisk"), count: counts.atRisk},
     {id: "listings", href: "/admin/listings-review", label: t("dashboard.listingsAwaitingReview"), count: counts.listings},
+    {id: "tasks", href: "/admin/tasks", label: t("dashboard.openTasks"), count: counts.openTasks},
     {id: "news", href: "/admin/news", label: t("dashboard.draftNews"), count: counts.draftNews},
   ];
 

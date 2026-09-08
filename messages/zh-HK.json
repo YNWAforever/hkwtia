@@ -2019,11 +2019,14 @@
       "pendingApprovals": "待審批項目",
       "atRisk": "高流失風險會員",
       "listingsAwaitingReview": "待審核展示企業",
-      "draftNews": "新聞草稿"
+      "draftNews": "新聞草稿",
+      "openTasks": "待處理員工任務"
     },
     "navigation": {
       "label": "職員管理導覽",
       "dashboard": "控制台",
+      "inbox": "訊息中心",
+      "tasks": "待辦",
       "segments": "分群",
       "members": "會員",
       "atRisk": "高風險",
@@ -2039,6 +2042,30 @@
       "approvals": "審批",
       "reports": "報告",
       "automations": "自動化"
+    },
+    "inbox": {
+      "eyebrow": "會員及潛在客戶對話",
+      "title": "訊息中心",
+      "description": "網頁小工具及 WhatsApp 上的所有禮賓對話。此版本只可閱讀；於 WhatsApp 營運階段將可直接回覆。",
+      "filters": {"all": "全部", "whatsapp": "WhatsApp", "web": "網頁"},
+      "columns": {"owner": "對象", "channel": "渠道", "last": "最後訊息", "when": "更新時間", "messages": "訊息數", "status": "狀態"},
+      "anonymous": "潛在客戶（非會員）",
+      "escalated": "需要真人跟進",
+      "empty": "尚未有對話。",
+      "error": "無法載入訊息中心。",
+      "open": "開啟",
+      "back": "返回訊息中心",
+      "roles": {"user": "發送者", "assistant": "禮賓", "tool": "工具"}
+    },
+    "tasks": {
+      "eyebrow": "升級個案",
+      "title": "員工任務",
+      "description": "等待真人處理的禮賓轉介及自動化跟進。",
+      "columns": {"kind": "類型", "summary": "摘要", "member": "會員", "conversation": "對話", "created": "建立時間", "actions": "操作"},
+      "resolve": "標記為已處理",
+      "openConversation": "開啟對話",
+      "empty": "目前沒有待處理項目。",
+      "error": "無法載入任務。"
     },
     "listingsReview": {
       "eyebrow": "展示頁管理",
