@@ -38,6 +38,18 @@ export default async function ProfilePage({params}: Props) {
           <span>{t("fields.jobTitle")}</span>
           <input className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={profile.jobTitle ?? ""} name="jobTitle" />
         </label>
+        <label className="space-y-2 text-sm font-medium">
+          <span>{t("fields.whatsappNumber")}</span>
+          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={profile.whatsappNumber ?? ""} name="whatsappNumber" type="tel" />
+        </label>
+        <div className="rounded-md border border-border p-4 text-sm sm:col-span-2">
+          <p className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-primary">{profile.whatsappOptIn ? t("whatsapp.status.on") : t("whatsapp.status.off")}</p>
+          <label className="flex items-start gap-3 font-medium">
+            <input className="mt-1" defaultChecked={profile.whatsappOptIn} name="whatsappOptIn" type="checkbox" />
+            <span>{t("whatsapp.optIn")}</span>
+          </label>
+          <p className="mt-2 text-muted-foreground">{t("whatsapp.consent")}</p>
+        </div>
         <input name="locale" type="hidden" value={locale} />
         <label className="flex items-center gap-3 text-sm font-medium sm:col-span-2">
           <input defaultChecked={profile.directoryVisible} name="directoryVisible" type="checkbox" />

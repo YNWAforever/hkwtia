@@ -327,7 +327,15 @@
     "successTitle": "Marketing email stopped",
     "successDescription": "Your preference has been updated. You will no longer receive WTIA marketing email.",
     "invalidTitle": "This unsubscribe link is invalid",
-    "invalidDescription": "The link may have expired or already been replaced. Contact WTIA if you still need help."
+    "invalidDescription": "The link may have expired or already been replaced. Contact WTIA if you still need help.",
+    "channel": {
+      "email": "Marketing email",
+      "whatsapp": "WhatsApp updates",
+      "all": "Both marketing email and WhatsApp",
+      "choose": "What would you like to stop?",
+      "successWhatsapp": "WhatsApp updates stopped",
+      "successAll": "Marketing email and WhatsApp updates stopped"
+    }
   },
   "Home": {
     "metaTitle": "WiseTech Hong Kong",
@@ -665,6 +673,12 @@
       "programs": "Programme participation",
       "visibility": "WTIA visibility opportunities"
     },
+    "tierBenefits": {
+      "community": ["Directory card on /members", "RSVP to public WTIA events", "Activity updates by email or WhatsApp"],
+      "startup": ["Full member profile page with logo", "Submit up to 2 events per quarter for WTIA review", "1 showcase listing", "WhatsApp updates and standard support"],
+      "corporate": ["Featured member profile and logo wall", "Unlimited reviewed event publishing", "3 showcase listings", "Priority WhatsApp support lane", "Member tools included"],
+      "patron": ["Everything in Corporate", "Featured placement on the homepage", "Co-branded WTIA events", "Dedicated WhatsApp support"]
+    },
     "tiers": {
       "community": {
         "name": "Community",
@@ -757,6 +771,29 @@
       "contact": "Email the membership team"
     }
   },
+  "WhatsApp": {
+    "chat": "Chat on WhatsApp",
+    "prefill": {
+      "header": "Hi WTIA, I have a question.",
+      "contact": "Hi WTIA, I'd like to get in touch.",
+      "membership": "Hi WTIA, I'd like to know more about membership.",
+      "events": "Hi WTIA, please tell me about upcoming activities.",
+      "footer": "Hi WTIA."
+    }
+  },
+  "Interest": {
+    "email": "Email address",
+    "displayName": "Name (optional)",
+    "whatsappNumber": "WhatsApp number (optional)",
+    "whatsappOptIn": "Also send me updates on WhatsApp",
+    "consent": "WTIA will use these details to tell you when an activity opens. Reply STOP on WhatsApp or use the unsubscribe link in any email to opt out.",
+    "website": "Leave this field empty",
+    "submit": "Get activity updates",
+    "submitting": "Saving…",
+    "success": "Thanks — we will let you know as soon as the next activity opens.",
+    "invalid": "Check the email address and WhatsApp number, then try again.",
+    "rateLimited": "Too many attempts from this connection. Try again in a few minutes."
+  },
   "Join": {
     "backToMembership": "Back to membership",
     "title": "Join WTIA",
@@ -771,6 +808,17 @@
     "submitApplication": "Submit application",
     "invalidPlanTitle": "Choose a membership plan",
     "invalidPlanDescription": "This membership plan is unavailable. Return to the membership page to choose one of the current plans.",
+    "choosePlanTitle": "Choose a membership plan",
+    "choosePlanDescription": "Pick the plan that fits how your organisation participates. You can compare fees and benefits on the membership page first.",
+    "choosePlanCompare": "Compare plans and fees",
+    "choosePlan": {
+      "community": "Free. Stay connected, RSVP to public events, receive updates.",
+      "startup": "For early-stage technology teams: profile page, 2 reviewed events a quarter, 1 showcase listing.",
+      "corporate": "For established organisations: featured profile, unlimited reviewed events, priority WhatsApp support.",
+      "patron": "Strategic supporters of WTIA's mission — talk to the team."
+    },
+    "choosePlanAction": "Continue with {plan}",
+    "choosePlanContact": "Contact WTIA",
     "profileTitle": "Tell us about yourself",
     "profileDescription": "Your profile helps WTIA support your membership and keep your application moving.",
     "companyTitle": "Confirm your company",
@@ -792,6 +840,7 @@
       "displayName": "Display name",
       "phone": "Phone (optional)",
       "jobTitle": "Job title (optional)",
+      "whatsappNumber": "WhatsApp number (optional)",
       "companyId": "WTIA company ID",
       "legalName": "Legal company name",
       "companyDisplayName": "Public company name",
@@ -808,7 +857,8 @@
       "save": "We could not save your application. Please try again.",
       "company": "Use a company that you are allowed to manage.",
       "profile": "Complete your profile before submitting company details.",
-      "companyNotAllowed": "This plan does not accept company details."
+      "companyNotAllowed": "This plan does not accept company details.",
+      "whatsappNumber": "Enter a valid WhatsApp number with country code"
     },
     "status": {
       "complete": {
@@ -823,6 +873,11 @@
         "title": "Application under review",
         "description": "WTIA will review your Patron application. No payment has been requested."
       }
+    },
+    "whatsapp": {
+      "optIn": "Send me WTIA activity updates and reminders on WhatsApp",
+      "consent": "By ticking this box you agree that WTIA may message this number about events, programmes and membership. Reply STOP at any time to opt out. See our privacy statement.",
+      "textVersion": "Consent wording 2026-09-v1"
     }
   },
   "MemberLogin": {
@@ -1631,6 +1686,14 @@
         ]
       },
       {
+        "heading": "WhatsApp messages and enquiries",
+        "body": [
+          "If you message WTIA on WhatsApp we keep your number, the conversation and when you wrote so that we can reply. We only send you activity updates or announcements on WhatsApp if you have ticked a consent box on this site or asked us to; we record when and where you agreed.",
+          "Reply STOP to any WhatsApp message, use the unsubscribe link in any email, or update your member profile to withdraw consent at any time. Withdrawal stops marketing messages; we may still send transactional messages about a registration or membership you hold."
+        ],
+        "items": []
+      },
+      {
         "heading": "Contact",
         "body": [
           "Questions, requests and complaints about personal data can be sent to contact@hkwtia.org, or by post to WTIA at 4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong."
@@ -1783,10 +1846,16 @@
     "companyDescription": "Owners and admins can update details for their company.",
     "companyEmpty": "Your current membership does not include a company profile.",
     "save": "Save changes",
+    "whatsapp": {
+      "optIn": "Send me WTIA activity updates and reminders on WhatsApp",
+      "consent": "WTIA may message this number about events, programmes and membership. Reply STOP at any time to opt out.",
+      "status": {"on": "WhatsApp updates: on", "off": "WhatsApp updates: off"}
+    },
     "fields": {
       "displayName": "Display name",
       "phone": "Phone",
       "jobTitle": "Job title",
+      "whatsappNumber": "WhatsApp number",
       "website": "Website",
       "legalName": "Legal name",
       "industry": "Industry",
@@ -1957,11 +2026,14 @@
       "pendingApprovals": "Pending approvals",
       "atRisk": "At-risk members",
       "listingsAwaitingReview": "Listings awaiting review",
-      "draftNews": "Draft news posts"
+      "draftNews": "Draft news posts",
+      "openTasks": "Open staff tasks"
     },
     "navigation": {
       "label": "Staff administration navigation",
       "dashboard": "Dashboard",
+      "inbox": "Inbox",
+      "tasks": "Tasks",
       "segments": "Segments",
       "members": "Members",
       "atRisk": "At risk",
@@ -1977,6 +2049,30 @@
       "approvals": "Approvals",
       "reports": "Reports",
       "automations": "Automations"
+    },
+    "inbox": {
+      "eyebrow": "Member and lead conversations",
+      "title": "Inbox",
+      "description": "Every concierge conversation on the web widget and WhatsApp. Read-only in this release; replying from here arrives with the WhatsApp operations phase.",
+      "filters": {"all": "All", "whatsapp": "WhatsApp", "web": "Web"},
+      "columns": {"owner": "Who", "channel": "Channel", "last": "Last message", "when": "Updated", "messages": "Messages", "status": "Status"},
+      "anonymous": "Prospect (not a member)",
+      "escalated": "Needs a person",
+      "empty": "No conversations yet.",
+      "error": "The inbox could not be loaded.",
+      "open": "Open",
+      "back": "Back to inbox",
+      "roles": {"user": "Sender", "assistant": "Concierge", "tool": "Tool"}
+    },
+    "tasks": {
+      "eyebrow": "Escalations",
+      "title": "Staff tasks",
+      "description": "Concierge hand-offs and automation follow-ups waiting for a person.",
+      "columns": {"kind": "Kind", "summary": "Summary", "member": "Member", "conversation": "Conversation", "created": "Created", "actions": "Actions"},
+      "resolve": "Mark resolved",
+      "openConversation": "Open conversation",
+      "empty": "Nothing is waiting for a person.",
+      "error": "Tasks could not be loaded."
     },
     "listingsReview": {
       "eyebrow": "Showcase operations",
@@ -2087,6 +2183,10 @@
       "renewalWithinDays": "Renewal within days",
       "sector": "Sector",
       "lastLoginBeforeDays": "Last login before days",
+      "whatsappOptIn": "WhatsApp opt-in",
+      "whatsappAny": "Any",
+      "whatsappYes": "Opted in",
+      "whatsappNo": "Not opted in",
       "save": "Save segment",
       "saving": "Saving...",
       "saveSuccess": "Segment saved.",

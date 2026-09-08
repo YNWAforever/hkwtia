@@ -7,6 +7,15 @@ function nullableNumber(schema: z.ZodNumber) {
   return z.preprocess((value) => typeof value === "string" && value.trim() === "" ? null : value, schema.nullable().default(null));
 }
 
+// Phase A segment v1.5 (audit F11): "" / undefined mean "any", so a saved
+// filter_version 1 segment and a blank <select> both parse to null.
+const triStateBoolean = z.preprocess((value) => {
+  if (value === "" || value === undefined || value === null) return null;
+  if (value === "true" || value === true) return true;
+  if (value === "false" || value === false) return false;
+  return value;
+}, z.boolean().nullable().default(null));
+
 export const segmentFilterSchema = z.object({
   profileIds: profileIdList,
   tier: stringList,
@@ -16,6 +25,7 @@ export const segmentFilterSchema = z.object({
   renewalWithinDays: nullableNumber(z.coerce.number().int().min(0).max(730)),
   sector: z.string().trim().max(100).default(""),
   lastLoginBeforeDays: nullableNumber(z.coerce.number().int().min(0).max(3650)),
+  whatsappOptIn: triStateBoolean,
 }).strict().superRefine((filter, context) => {
   if (filter.scoreMin !== null && filter.scoreMax !== null && filter.scoreMin > filter.scoreMax) {
     context.addIssue({code: z.ZodIssueCode.custom, path: ["scoreMax"], message: "scoreMax must be at least scoreMin"});
@@ -60,10 +70,11 @@ export const segmentRouteQuerySchema = z.object({
   renewalWithinDays: z.union([z.string(), z.number()]).optional().transform((value) => value ?? null),
   sector: z.string().optional().default(""),
   lastLoginBeforeDays: z.union([z.string(), z.number()]).optional().transform((value) => value ?? null),
+  whatsappOptIn: z.union([z.string(), z.boolean()]).optional().transform((value) => value ?? null),
   limit: z.union([z.string(), z.number()]).optional().default(50),
   cursor: z.string().nullable().optional().default(null),
-}).strict().transform(({profileId, tier, status, scoreMin, scoreMax, renewalWithinDays, sector, lastLoginBeforeDays, limit, cursor}): SegmentPreviewInput => ({
-  filter: segmentFilterSchema.parse({profileIds: profileId, tier, status, scoreMin, scoreMax, renewalWithinDays, sector, lastLoginBeforeDays}),
+}).strict().transform(({profileId, tier, status, scoreMin, scoreMax, renewalWithinDays, sector, lastLoginBeforeDays, whatsappOptIn, limit, cursor}): SegmentPreviewInput => ({
+  filter: segmentFilterSchema.parse({profileIds: profileId, tier, status, scoreMin, scoreMax, renewalWithinDays, sector, lastLoginBeforeDays, whatsappOptIn}),
   limit: segmentPaginationSchema.shape.limit.parse(limit),
   cursor: segmentPaginationSchema.shape.cursor.parse(cursor),
 }));

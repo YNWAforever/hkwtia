@@ -66,6 +66,7 @@ export function segmentPredicates(filter: SegmentFilterSet): SQL {
     const cutoff = new Date(Date.now() - filter.lastLoginBeforeDays * 86_400_000);
     terms.push(sql`${profiles.lastLoginAt} <= ${cutoff}`);
   }
+  if (filter.whatsappOptIn !== null) terms.push(sql`${profiles.whatsappOptIn} = ${filter.whatsappOptIn}`);
   return terms.length ? and(...terms)! : sql`TRUE`;
 }
 

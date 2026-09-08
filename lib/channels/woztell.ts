@@ -3,6 +3,12 @@ import "server-only";
 import {createHmac, timingSafeEqual} from "node:crypto";
 
 import {WHATSAPP_TEMPLATES} from "@/config/whatsapp-templates";
+import {normalizeWhatsAppNumber} from "@/lib/whatsapp/number";
+
+// The normaliser moved to lib/whatsapp/number.ts (Phase A) so the join and
+// portal forms share it; the re-export keeps lib/ai/woztell-webhook.ts and the
+// existing tests importing it from here.
+export {normalizeWhatsAppNumber};
 import type {
   ChannelAdapter,
   ChannelResult,
@@ -208,12 +214,6 @@ function validWebhookSignature(
   );
   const matched = timingSafeEqual(expectedBytes, fixedLengthCandidate);
   return receivedBytes.length === expectedBytes.length && matched;
-}
-
-export function normalizeWhatsAppNumber(value: string): string | null {
-  const digits = value.replace(/\D/g, "");
-  if (digits.length < 8 || digits.length > 15) return null;
-  return `+${digits}`;
 }
 
 export function createWoztellAdapter(

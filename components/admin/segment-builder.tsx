@@ -14,6 +14,10 @@ export type SegmentBuilderLabels = Readonly<{
   renewalWithinDays: string;
   sector: string;
   lastLoginBeforeDays: string;
+  whatsappOptIn: string;
+  whatsappAny: string;
+  whatsappYes: string;
+  whatsappNo: string;
   save: string;
   saving: string;
   nameEn: string;
@@ -50,6 +54,7 @@ export function SegmentBuilder({locale, labels, filter, saveAction}: Props) {
       <label className="space-y-2 text-sm" htmlFor="segment-renewal"><span>{labels.renewalWithinDays}</span><input className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={value(filter.renewalWithinDays)} id="segment-renewal" max="730" min="0" name="renewalWithinDays" type="number" /></label>
       <label className="space-y-2 text-sm" htmlFor="segment-sector"><span>{labels.sector}</span><input className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={filter.sector} id="segment-sector" name="sector" type="text" /></label>
       <label className="space-y-2 text-sm" htmlFor="segment-last-login"><span>{labels.lastLoginBeforeDays}</span><input className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={value(filter.lastLoginBeforeDays)} id="segment-last-login" max="3650" min="0" name="lastLoginBeforeDays" type="number" /></label>
+      <label className="space-y-2 text-sm" htmlFor="segment-whatsapp-opt-in"><span>{labels.whatsappOptIn}</span><select className="min-h-11 w-full rounded-md border border-input bg-background px-3" defaultValue={filter.whatsappOptIn === null ? "" : String(filter.whatsappOptIn)} id="segment-whatsapp-opt-in" name="whatsappOptIn"><option value="">{labels.whatsappAny}</option><option value="true">{labels.whatsappYes}</option><option value="false">{labels.whatsappNo}</option></select></label>
       <div className="flex items-end"><button className="min-h-11 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" type="submit">{labels.preview}</button></div>
     </form>
     <SegmentSaveForm action={saveAction} filter={filter} labels={{save: labels.save, saving: labels.saving, nameEn: labels.nameEn, nameZh: labels.nameZh}}/>

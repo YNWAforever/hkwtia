@@ -327,7 +327,15 @@
     "successTitle": "已停止推廣電郵",
     "successDescription": "你的偏好已更新，日後不會再收到 WTIA 推廣電郵。",
     "invalidTitle": "此取消訂閱連結無效",
-    "invalidDescription": "連結可能已過期或已被取代。如仍需協助，請聯絡 WTIA。"
+    "invalidDescription": "連結可能已過期或已被取代。如仍需協助，請聯絡 WTIA。",
+    "channel": {
+      "email": "推廣電郵",
+      "whatsapp": "WhatsApp 更新",
+      "all": "推廣電郵及 WhatsApp 更新",
+      "choose": "你想停止接收甚麼？",
+      "successWhatsapp": "已停止 WhatsApp 更新",
+      "successAll": "已停止推廣電郵及 WhatsApp 更新"
+    }
   },
   "Home": {
     "metaTitle": "WiseTech Hong Kong",
@@ -665,6 +673,12 @@
       "programs": "參與計劃",
       "visibility": "WTIA 展示機會"
     },
+    "tierBenefits": {
+      "community": ["於 /members 顯示會員名片", "報名參加 WTIA 公開活動", "以電郵或 WhatsApp 接收活動更新"],
+      "startup": ["完整會員專頁（含商標）", "每季可提交最多 2 個活動供 WTIA 審核", "1 個方案展示頁", "WhatsApp 更新及標準支援"],
+      "corporate": ["精選會員專頁及商標牆", "無限次提交活動（經審核）", "3 個方案展示頁", "WhatsApp 優先支援通道", "包含會員工具"],
+      "patron": ["包含企業會員所有權益", "首頁精選位置", "與 WTIA 聯合品牌活動", "專屬 WhatsApp 支援"]
+    },
     "tiers": {
       "community": {
         "name": "社群",
@@ -757,6 +771,29 @@
       "contact": "電郵會員團隊"
     }
   },
+  "WhatsApp": {
+    "chat": "WhatsApp 對話",
+    "prefill": {
+      "header": "你好 WTIA，我有一個問題。",
+      "contact": "你好 WTIA，我想聯絡你們。",
+      "membership": "你好 WTIA，我想了解會籍詳情。",
+      "events": "你好 WTIA，請告訴我即將舉行的活動。",
+      "footer": "你好 WTIA。"
+    }
+  },
+  "Interest": {
+    "email": "電郵地址",
+    "displayName": "姓名（選填）",
+    "whatsappNumber": "WhatsApp 號碼（選填）",
+    "whatsappOptIn": "同時透過 WhatsApp 向我發送更新",
+    "consent": "WTIA 會使用這些資料通知你活動開放報名。你可於 WhatsApp 回覆「取消」或使用電郵內的取消訂閱連結以停止接收。",
+    "website": "請留空此欄",
+    "submit": "接收活動更新",
+    "submitting": "儲存中…",
+    "success": "多謝 — 下一個活動開放時我們會通知你。",
+    "invalid": "請檢查電郵地址及 WhatsApp 號碼，然後再試一次。",
+    "rateLimited": "此連線嘗試次數過多，請稍後再試。"
+  },
   "Join": {
     "backToMembership": "返回會員計劃",
     "title": "加入 WTIA",
@@ -771,6 +808,17 @@
     "submitApplication": "提交申請",
     "invalidPlanTitle": "選擇會員計劃",
     "invalidPlanDescription": "此會員計劃並不可用。請返回會員頁面選擇現有計劃。",
+    "choosePlanTitle": "選擇會員計劃",
+    "choosePlanDescription": "選擇最適合貴機構參與方式的計劃。你可先在會員計劃頁比較費用及權益。",
+    "choosePlanCompare": "比較計劃及費用",
+    "choosePlan": {
+      "community": "免費。保持聯繫、報名公開活動、接收更新。",
+      "startup": "適合初創科技團隊：會員專頁、每季 2 個經審核活動、1 個方案展示頁。",
+      "corporate": "適合成熟機構：精選專頁、無限次經審核活動、WhatsApp 優先支援。",
+      "patron": "WTIA 使命的策略支持者 — 請與團隊聯絡。"
+    },
+    "choosePlanAction": "以{plan}繼續",
+    "choosePlanContact": "聯絡 WTIA",
     "profileTitle": "介紹你的資料",
     "profileDescription": "你的個人資料可協助 WTIA 支援會籍及繼續處理申請。",
     "companyTitle": "確認公司資料",
@@ -792,6 +840,7 @@
       "displayName": "顯示名稱",
       "phone": "電話（選填）",
       "jobTitle": "職銜（選填）",
+      "whatsappNumber": "WhatsApp 號碼（選填）",
       "companyId": "WTIA 公司識別碼",
       "legalName": "公司法定名稱",
       "companyDisplayName": "公司公開名稱",
@@ -808,7 +857,8 @@
       "save": "未能儲存申請，請再試一次。",
       "company": "請使用你有權管理的公司。",
       "profile": "提交公司資料前，請先完成個人資料。",
-      "companyNotAllowed": "此計劃不接受公司資料。"
+      "companyNotAllowed": "此計劃不接受公司資料。",
+      "whatsappNumber": "請輸入包含國家代碼的有效 WhatsApp 號碼"
     },
     "status": {
       "complete": {
@@ -823,6 +873,11 @@
         "title": "申請審批中",
         "description": "WTIA 將審批你的贊助人申請，現時不會收取任何款項。"
       }
+    },
+    "whatsapp": {
+      "optIn": "透過 WhatsApp 向我發送 WTIA 活動更新及提醒",
+      "consent": "剔選即表示你同意 WTIA 可就活動、計劃及會籍事宜向此號碼發送訊息。你可隨時回覆「取消」以停止接收。詳見私隱聲明。",
+      "textVersion": "同意書版本 2026-09-v1"
     }
   },
   "MemberLogin": {
@@ -1631,6 +1686,14 @@
         ]
       },
       {
+        "heading": "WhatsApp 訊息及查詢",
+        "body": [
+          "如你透過 WhatsApp 聯絡 WTIA，我們會保留你的號碼、對話內容及時間，以便回覆。只有在你於本網站剔選同意欄或主動要求後，我們才會透過 WhatsApp 向你發送活動更新或公告，並會記錄你同意的時間及途徑。",
+          "你可隨時回覆「取消」、使用電郵內的取消訂閱連結，或更新會員個人資料以撤回同意。撤回後我們會停止推廣訊息，但仍可能就你持有的報名或會籍發送交易性訊息。"
+        ],
+        "items": []
+      },
+      {
         "heading": "聯絡我們",
         "body": [
           "有關個人資料的查詢、要求及投訴，可電郵至 contact@hkwtia.org，或郵寄至香港觀塘鴻圖道 73-75 號 KOHO 4 樓 WTIA。"
@@ -1779,6 +1842,11 @@
     },
     "profileTitle": "我的個人資料",
     "profileDescription": "更新你的個人資料及目錄顯示選項。",
+    "whatsapp": {
+      "optIn": "透過 WhatsApp 向我發送 WTIA 活動更新及提醒",
+      "consent": "WTIA 可就活動、計劃及會籍事宜向此號碼發送訊息。你可隨時回覆「取消」以停止接收。",
+      "status": {"on": "WhatsApp 更新：已開啟", "off": "WhatsApp 更新：已關閉"}
+    },
     "companyTitle": "公司資料",
     "companyDescription": "公司擁有人及管理員可以更新公司資料。",
     "companyEmpty": "你目前的會員資格沒有公司資料。",
@@ -1787,6 +1855,7 @@
       "displayName": "顯示名稱",
       "phone": "電話",
       "jobTitle": "職位",
+      "whatsappNumber": "WhatsApp 號碼",
       "website": "網站",
       "legalName": "法定名稱",
       "industry": "行業",
@@ -1958,11 +2027,14 @@
       "pendingApprovals": "待審批項目",
       "atRisk": "高流失風險會員",
       "listingsAwaitingReview": "待審核展示企業",
-      "draftNews": "新聞草稿"
+      "draftNews": "新聞草稿",
+      "openTasks": "待處理員工任務"
     },
     "navigation": {
       "label": "職員管理導覽",
       "dashboard": "控制台",
+      "inbox": "訊息中心",
+      "tasks": "待辦",
       "segments": "分群",
       "members": "會員",
       "atRisk": "高風險",
@@ -1978,6 +2050,30 @@
       "approvals": "審批",
       "reports": "報告",
       "automations": "自動化"
+    },
+    "inbox": {
+      "eyebrow": "會員及潛在客戶對話",
+      "title": "訊息中心",
+      "description": "網頁小工具及 WhatsApp 上的所有禮賓對話。此版本只可閱讀；於 WhatsApp 營運階段將可直接回覆。",
+      "filters": {"all": "全部", "whatsapp": "WhatsApp", "web": "網頁"},
+      "columns": {"owner": "對象", "channel": "渠道", "last": "最後訊息", "when": "更新時間", "messages": "訊息數", "status": "狀態"},
+      "anonymous": "潛在客戶（非會員）",
+      "escalated": "需要真人跟進",
+      "empty": "尚未有對話。",
+      "error": "無法載入訊息中心。",
+      "open": "開啟",
+      "back": "返回訊息中心",
+      "roles": {"user": "發送者", "assistant": "禮賓", "tool": "工具"}
+    },
+    "tasks": {
+      "eyebrow": "升級個案",
+      "title": "員工任務",
+      "description": "等待真人處理的禮賓轉介及自動化跟進。",
+      "columns": {"kind": "類型", "summary": "摘要", "member": "會員", "conversation": "對話", "created": "建立時間", "actions": "操作"},
+      "resolve": "標記為已處理",
+      "openConversation": "開啟對話",
+      "empty": "目前沒有待處理項目。",
+      "error": "無法載入任務。"
     },
     "listingsReview": {
       "eyebrow": "展示頁管理",
@@ -2088,6 +2184,10 @@
       "renewalWithinDays": "???????",
       "sector": "??",
       "lastLoginBeforeDays": "????????",
+      "whatsappOptIn": "WhatsApp 同意接收",
+      "whatsappAny": "不限",
+      "whatsappYes": "已同意",
+      "whatsappNo": "未同意",
       "save": "儲存分群",
       "saving": "儲存中……",
       "saveSuccess": "已儲存分群。",

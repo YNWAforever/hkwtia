@@ -11,6 +11,8 @@ import {
   requireAutomationSystem,
   type AutomationRepositoryActor,
 } from "@/lib/auth/automation-actor";
+import {requireAdmin} from "@/lib/auth/authorize";
+import type {Actor} from "@/lib/membership/lifecycle";
 import {staffTasks} from "@/lib/db/server-schema";
 import type {AutomationDatabase, AutomationDatabaseLoader, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
 import {getDb} from "@/lib/db/repos/common";
@@ -76,6 +78,21 @@ export type AgentStaffTaskRecord = StaffTaskRecordFields & Readonly<{
 
 type AnyStaffTaskRecord = StaffTaskRecordFields & Readonly<{
   profileId: string | null;
+}>;
+
+/**
+ * Admin queue row (Phase A, audit F2). The agent/automation record types above
+ * carry no created_at, and concierge tasks have a null profileId, so the staff
+ * list gets its own shape rather than widening those contracts.
+ */
+export type OpenStaffTask = Readonly<{
+  id: string;
+  profileId: string | null;
+  kind: string;
+  summaryCode: string;
+  context: StaffTaskContext;
+  status: "open" | "resolved";
+  createdAt: Date;
 }>;
 
 type StaffTaskResult<T> = Readonly<{
@@ -265,7 +282,41 @@ export function createStaffTasksRepository(
     };
   }
 
-  return {createOnce};
+  async function listOpen(actor: Actor): Promise<readonly OpenStaffTask[]> {
+    requireAdmin(actor);
+    const database = await loadDatabase();
+    const rows = rowsFrom(await database.execute(sql`
+      SELECT id, profile_id, kind, summary_code, context, status, created_at
+      FROM ${staffTasks}
+      WHERE status = 'open'
+      ORDER BY created_at DESC, id DESC
+      LIMIT 200
+    `));
+    return rows.map((row) => ({
+      id: String(row.id),
+      profileId: typeof row.profile_id === "string" ? row.profile_id : null,
+      kind: String(row.kind),
+      summaryCode: String(row.summary_code),
+      context: (row.context && typeof row.context === "object" ? row.context : {}) as StaffTaskContext,
+      status: row.status === "resolved" ? "resolved" : "open",
+      createdAt: row.created_at instanceof Date ? row.created_at : new Date(String(row.created_at)),
+    }));
+  }
+
+  async function resolve(actor: Actor, taskId: string): Promise<Readonly<{id: string; disposition: "resolved" | "already_resolved"}>> {
+    requireAdmin(actor);
+    const id = z.string().uuid().parse(taskId);
+    const database = await loadDatabase();
+    const row = rowsFrom(await database.execute(sql`
+      UPDATE ${staffTasks}
+      SET status = 'resolved', resolved_at = now(), resolved_by_profile_id = ${actor.profileId}, updated_at = now()
+      WHERE id = ${id} AND status = 'open'
+      RETURNING id
+    `))[0];
+    return {id, disposition: row ? "resolved" : "already_resolved"};
+  }
+
+  return {createOnce, listOpen, resolve};
 }
 
 export type StaffTasksRepository = Readonly<{

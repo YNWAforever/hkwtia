@@ -3,6 +3,7 @@ import {getTranslations} from "next-intl/server";
 import {DualBrandLockup} from "@/components/layout/dual-brand-lockup";
 import {FooterNewsletter} from "@/components/layout/footer-newsletter";
 import {LocaleSwitcher} from "@/components/layout/locale-switcher";
+import {WhatsAppLink} from "@/components/marketing/whatsapp-link";
 import {
   localizeNavigation,
   type LocalizedNavigationGroup,
@@ -44,10 +45,11 @@ function isAddressLines(value: unknown): value is readonly string[] {
 }
 
 export async function SiteFooter({locale}: {locale: AppLocale}) {
-  const [navigationT, t, marketingT] = await Promise.all([
+  const [navigationT, t, marketingT, tWhatsApp] = await Promise.all([
     getTranslations({locale, namespace: "Navigation"}),
     getTranslations({locale, namespace: "Footer"}),
     getTranslations({locale, namespace: "MarketingExtras"}),
+    getTranslations({locale, namespace: "WhatsApp"}),
   ]);
   const navigation = localizeNavigation((key: NavigationMessageKey) => navigationT(key));
   // A map read through `get`, not a cast over Object.fromEntries: the cast asserts a shape the
@@ -144,6 +146,7 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
               {siteConfig.contact.phone}
             </a>
           )}
+          <WhatsAppLink className={footerTargetClassName} label={tWhatsApp("chat")} locale={locale} prefill={tWhatsApp("prefill.footer")} source="footer" />
           {addressLines.length === 0 ? null : (
             <address>
               {addressLines.map((line, index) => (

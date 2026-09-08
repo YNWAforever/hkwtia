@@ -50,6 +50,18 @@ describe("JoinPage portal continuation auth", () => {
     expect(state.startJoinCalls).toHaveLength(0);
   });
 
+  it("renders the plan chooser on a bare /join and the unavailable state for a malformed plan", async () => {
+    const chooser = renderToStaticMarkup(await JoinPage(props("zh-HK", {})));
+    expect(chooser).toContain("localized:choosePlanTitle");
+    expect(chooser).toContain('href="/zh/join?plan=startup"');
+    expect(chooser).toContain('href="/zh/contact"');
+    expect(chooser).toContain('data-active="plan"');
+
+    const malformed = renderToStaticMarkup(await JoinPage(props("en", {plan: "gold"})));
+    expect(malformed).toContain("localized:invalidPlanTitle");
+    expect(malformed).not.toContain("localized:choosePlanTitle");
+  });
+
   it("redirects an authenticated no-plan continuation directly to the portal", async () => {
     state.actor = {kind: "member", userId: "user-a"};
 

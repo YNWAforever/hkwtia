@@ -65,6 +65,7 @@ describe("RFC 8058 one-click unsubscribe", () => {
     const unsubscribeEmailMarketing = vi.fn(async () => "created" as const);
     const post = createUnsubscribePost({
       secrets: [SECRET],
+      optOutWhatsApp: async () => "created" as const,
       appUrl: APP_URL,
       unsubscribeEmailMarketing,
     });
@@ -86,6 +87,7 @@ describe("RFC 8058 one-click unsubscribe", () => {
     const unsubscribeEmailMarketing = vi.fn(async () => "created" as const);
     const post = createUnsubscribePost({
       secrets: [SECRET],
+      optOutWhatsApp: async () => "created" as const,
       appUrl: APP_URL,
       unsubscribeEmailMarketing,
     });

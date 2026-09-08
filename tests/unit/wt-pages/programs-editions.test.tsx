@@ -86,7 +86,8 @@ describe("/programs/asa (representative of asa/hkict/tct)", () => {
     expect(screen.getByRole("heading", {level: 1, name: en.programs.asa.title})).toBeVisible();
     const compass = document.querySelector(".rich-compass-grid");
     expect(compass?.textContent).toContain(String(summary.editionCount));
-    expect(compass?.textContent).toContain(String(summary.latestYear));
+    // Phase A (audit F20): the fact spans from the first edition, matching the programme grid card.
+    expect(compass?.textContent).toContain(String(summary.firstYear));
     expect(compass?.textContent).toContain(en.programs.asa.audience);
     const mailLink = screen.getByRole("link", {name: en.programs.record.askProgrammeTeam});
     expect(mailLink.getAttribute("href")).toMatch(/^mailto:contact@hkwtia\.org\?subject=/);

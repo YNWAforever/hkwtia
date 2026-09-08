@@ -4,7 +4,8 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {EventCalendarView} from "@/components/marketing/event-calendar-view";
 import {EventCard} from "@/components/marketing/event-card";
 import {EventViewSwitch} from "@/components/marketing/event-view-switch";
-import {ActionLink} from "@/components/wt/action-link";
+import {InterestForm} from "@/components/marketing/interest-form";
+import {WhatsAppLink} from "@/components/marketing/whatsapp-link";
 import {Arrow} from "@/components/wt/arrow";
 import {ClosingBand} from "@/components/wt/closing-band";
 import {HonestEmpty} from "@/components/wt/honest-empty";
@@ -15,6 +16,7 @@ import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {eventsRepository} from "@/lib/db/repos/events";
 import {parsePublicEventStatus} from "@/lib/events/public";
+import {submitInterestAction} from "@/lib/growth/interest-action";
 import {buildPageMetadata} from "@/lib/metadata";
 import {localizedPath} from "@/lib/urls";
 
@@ -37,11 +39,19 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function EventsPage({params, searchParams}: Props) {
   const [{locale}, query] = await Promise.all([params, searchParams]);
   setRequestLocale(locale);
-  const [t, common] = await Promise.all([
+  const [t, common, tInterest, tWhatsApp] = await Promise.all([
     getTranslations({locale, namespace: "Events"}),
     getTranslations({locale, namespace: "Common"}),
+    getTranslations({locale, namespace: "Interest"}),
+    getTranslations({locale, namespace: "WhatsApp"}),
   ]);
   const appLocale = locale as AppLocale;
+  const interestLabels = {
+    email: tInterest("email"), displayName: tInterest("displayName"), whatsappNumber: tInterest("whatsappNumber"),
+    whatsappOptIn: tInterest("whatsappOptIn"), consent: tInterest("consent"), website: tInterest("website"),
+    submit: tInterest("submit"), submitting: tInterest("submitting"), success: tInterest("success"),
+    invalid: tInterest("invalid"), rateLimited: tInterest("rateLimited"),
+  };
   const status = parsePublicEventStatus(query.status);
   const view = query.view === "calendar" ? "calendar" : "cards";
   const asOf = new Date();
@@ -121,7 +131,7 @@ export default async function EventsPage({params, searchParams}: Props) {
         </div>
       </Section>
       <InterestBand
-        action={<ActionLink href="/events?status=open" variant="button-light">{t("interest.action")}</ActionLink>}
+        action={<InterestForm action={submitInterestAction} id="events-interest-form" labels={interestLabels} locale={appLocale} />}
         copy={t("interest.copy")}
         eyebrow={t("interest.eyebrow")}
         id="events-interest"
@@ -130,6 +140,7 @@ export default async function EventsPage({params, searchParams}: Props) {
       <ClosingBand
         actions={[{label: t("closing.actions.primary"), href: "/contact"}, {label: t("closing.actions.secondary"), href: "/membership"}]}
         copy={t("closing.copy")}
+        extra={<WhatsAppLink className="text-link light-link" label={tWhatsApp("chat")} locale={appLocale} prefill={tWhatsApp("prefill.events")} source="events" />}
         eyebrow={t("closing.eyebrow")}
         id="events-closing"
         title={t("closing.title")}

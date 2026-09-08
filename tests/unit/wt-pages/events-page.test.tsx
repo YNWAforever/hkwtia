@@ -18,6 +18,7 @@ const listPublic = vi.hoisted(() => vi.fn());
 const searchState = vi.hoisted(() => ({current: new URLSearchParams()}));
 
 vi.mock("@/lib/db/repos/events", () => ({eventsRepository: {listPublic}}));
+vi.mock("@/lib/growth/interest-action", () => ({submitInterestAction: vi.fn()}));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async ({namespace}: {namespace: string}) => (key: string) => String(messageAt(namespace, key))),
   setRequestLocale: () => undefined,
@@ -62,7 +63,7 @@ describe("Events page donor markup", () => {
     expect(screen.getByRole("heading", {level: 3, name: bundles.en.Events.recommendations.items.showcase.title}).closest("a")).toHaveAttribute("href", "/showcase");
     expect(screen.getByRole("heading", {level: 3, name: bundles.en.Events.recommendations.items.membership.title}).closest("a")).toHaveAttribute("href", "/membership");
 
-    expect(screen.getByRole("link", {name: bundles.en.Events.interest.action})).toHaveAttribute("href", "/events?status=open");
+    expect(screen.getByRole("button", {name: bundles.en.Interest.submit})).toBeInTheDocument();
     expect(screen.getByRole("link", {name: bundles.en.Events.closing.actions.primary})).toHaveAttribute("href", "/contact");
     expect(screen.getByRole("link", {name: bundles.en.Events.closing.actions.secondary})).toHaveAttribute("href", "/membership");
   });

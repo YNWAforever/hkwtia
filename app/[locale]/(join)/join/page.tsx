@@ -12,6 +12,7 @@ import {buildPageMetadata} from "@/lib/metadata";
 import {startJoin} from "@/lib/membership/join-service";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {localizedPath} from "@/lib/urls";
+import {planChooserItems} from "@/lib/membership/join-plan-chooser";
 
 import {requestMagicLink} from "./actions";
 
@@ -44,13 +45,36 @@ export default async function JoinPage({params, searchParams}: Props) {
   const actor = await getActor().catch(() => null);
   if (actor && continuation) redirect(localizedPath(locale, continuation));
 
-  if (!plan && !continuation) return (
-    <section className="glass-card p-6 sm:p-10">
-      <h1 className="font-serif text-4xl font-semibold">{t("invalidPlanTitle")}</h1>
-      <p className="mt-4 text-muted-foreground">{t("invalidPlanDescription")}</p>
-      <Link className="mt-6 inline-flex text-primary underline" href={localizedPath(locale, "/membership")}>{t("backToMembership")}</Link>
-    </section>
-  );
+  if (!plan && !continuation) {
+    // A malformed ?plan= still gets the old "unavailable" message; a bare /join
+    // gets the chooser, because that is where every "Join WiseTech" CTA lands.
+    if (queryValue(query.plan) !== undefined) return (
+      <section className="glass-card p-6 sm:p-10">
+        <h1 className="font-serif text-4xl font-semibold">{t("invalidPlanTitle")}</h1>
+        <p className="mt-4 text-muted-foreground">{t("invalidPlanDescription")}</p>
+        <Link className="mt-6 inline-flex text-primary underline" href={localizedPath(locale, "/membership")}>{t("backToMembership")}</Link>
+      </section>
+    );
+    return (
+      <section className="glass-card p-6 sm:p-10">
+        <JoinProgress active="plan" labels={labels} showCompany={false}/>
+        <h1 className="mt-3 font-serif text-4xl font-semibold">{t("choosePlanTitle")}</h1>
+        <p className="mt-4 text-muted-foreground">{t("choosePlanDescription")}</p>
+        <ul className="mt-8 grid gap-4 sm:grid-cols-2">
+          {planChooserItems(locale).map((item) => (
+            <li className="rounded-lg border border-border p-5" key={item.code}>
+              <h2 className="font-serif text-2xl font-semibold">{t(`plans.${item.code}`)}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">{t(`choosePlan.${item.code}`)}</p>
+              <Link className="mt-4 inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground" href={item.href}>
+                {item.kind === "join" ? t("choosePlanAction", {plan: t(`plans.${item.code}`)}) : t("choosePlanContact")}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <Link className="mt-6 inline-flex text-primary underline" href={localizedPath(locale, "/membership")}>{t("choosePlanCompare")}</Link>
+      </section>
+    );
+  }
 
   if (!plan) {
     const action = requestMagicLink.bind(null, locale, null, continuation);

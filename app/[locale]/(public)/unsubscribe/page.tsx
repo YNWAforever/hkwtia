@@ -8,7 +8,7 @@ import {buildPageMetadata} from "@/lib/metadata";
 
 type Props = Readonly<{
   params: Promise<{locale: string}>;
-  searchParams: Promise<{token?: string; status?: string}>;
+  searchParams: Promise<{token?: string; status?: string; channel?: string}>;
 }>;
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
@@ -34,7 +34,7 @@ export default async function UnsubscribePage({params, searchParams}: Props) {
     return (
       <section className="container mx-auto max-w-2xl px-6 py-20" data-unsubscribe-state="success">
         <p className="text-sm font-semibold uppercase tracking-widest text-primary">{t("eyebrow")}</p>
-        <h1 className="mt-3 text-4xl font-semibold">{t("successTitle")}</h1>
+        <h1 className="mt-3 text-4xl font-semibold">{query.channel === "whatsapp" ? t("channel.successWhatsapp") : query.channel === "all" ? t("channel.successAll") : t("successTitle")}</h1>
         <p className="mt-4 text-muted-foreground">{t("successDescription")}</p>
       </section>
     );
@@ -77,6 +77,15 @@ export default async function UnsubscribePage({params, searchParams}: Props) {
       <form action="/api/unsubscribe" method="post" className="mt-8">
         <input type="hidden" name="token" value={query.token} />
         <input type="hidden" name="redirect" value="1" />
+        <fieldset className="mt-6 space-y-2 text-sm">
+          <legend className="font-medium">{t("channel.choose")}</legend>
+          {(["email", "whatsapp", "all"] as const).map((channel) => (
+            <label className="flex items-center gap-3" key={channel}>
+              <input defaultChecked={channel === "email"} name="channel" type="radio" value={channel} />
+              <span>{t(`channel.${channel}`)}</span>
+            </label>
+          ))}
+        </fieldset>
         <button type="submit" className="rounded-md bg-primary px-5 py-3 font-semibold text-primary-foreground">
           {t("confirmAction")}
         </button>

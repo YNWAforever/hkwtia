@@ -1,12 +1,18 @@
+import type {ReactNode} from 'react';
+
 import {ActionLink} from '@/components/wt/action-link';
 import {Eyebrow} from '@/components/wt/eyebrow';
 import {Shell} from '@/components/wt/shell';
 import type {WtAction} from '@/components/wt/types';
 import {cn} from '@/lib/utils';
 
-type ClosingBandProps = Readonly<{eyebrow: string; title: string; copy: string; actions: readonly WtAction[]; id?: string; className?: string}>;
+type ClosingBandProps = Readonly<{
+  eyebrow: string; title: string; copy: string; actions: readonly WtAction[]; id?: string; className?: string;
+  /** Optional trailing node beside the actions, e.g. a WhatsAppLink (Phase A F4), which renders nothing until configured. */
+  extra?: ReactNode;
+}>;
 
-export function ClosingBand({eyebrow, title, copy, actions, id, className}: ClosingBandProps) {
+export function ClosingBand({eyebrow, title, copy, actions, id, className, extra}: ClosingBandProps) {
   return (
     <section id={id} className={cn('inner-closing', className)}>
       <Shell className="inner-closing-grid">
@@ -21,6 +27,7 @@ export function ClosingBand({eyebrow, title, copy, actions, id, className}: Clos
               {action.label}
             </ActionLink>
           ))}
+          {extra}
         </div>
       </Shell>
     </section>

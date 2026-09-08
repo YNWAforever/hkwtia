@@ -27,6 +27,8 @@ export const adminNavigationGroups = [
       {id: "dashboard", href: "/admin"},
       {id: "members", href: "/admin/members"},
       {id: "at-risk", href: "/admin/at-risk"},
+      {id: "inbox", href: "/admin/inbox"},
+      {id: "tasks", href: "/admin/tasks"},
       {id: "segments", href: "/admin/segments"},
     ],
   },

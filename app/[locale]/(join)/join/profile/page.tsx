@@ -49,10 +49,18 @@ export default async function ProfilePage({params, searchParams}: Props) {
       <h1 className="font-serif text-4xl font-semibold">{t("profileTitle")}</h1>
       <p className="mt-4 text-muted-foreground">{t("profileDescription")}</p>
       <div className="mt-8">
-        <JoinForm action={action} fieldNames={["displayName", "phone", "jobTitle"]} pendingLabel={t("saving")} submitLabel={t("continue")}>
+        <JoinForm action={action} fieldNames={["displayName", "phone", "jobTitle", "whatsappNumber"]} pendingLabel={t("saving")} submitLabel={t("continue")}>
           <Field autoComplete="name" error="displayName-error" label={t("fields.displayName")} name="displayName" required/>
           <Field autoComplete="tel" error="phone-error" label={t("fields.phone")} name="phone" type="tel"/>
           <Field autoComplete="organization-title" error="jobTitle-error" label={t("fields.jobTitle")} name="jobTitle"/>
+          <Field autoComplete="tel" error="whatsappNumber-error" label={t("fields.whatsappNumber")} name="whatsappNumber" type="tel"/>
+          <div className="rounded-md border border-border p-4 text-sm">
+            <label className="flex items-start gap-3 font-medium" htmlFor="whatsappOptIn">
+              <input className="mt-1" id="whatsappOptIn" name="whatsappOptIn" type="checkbox"/>
+              <span>{t("whatsapp.optIn")}</span>
+            </label>
+            <p className="mt-2 text-muted-foreground">{t("whatsapp.consent")} <span className="sr-only">{t("whatsapp.textVersion")}</span></p>
+          </div>
         </JoinForm>
       </div>
     </section>

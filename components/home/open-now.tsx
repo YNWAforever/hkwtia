@@ -43,7 +43,9 @@ export async function OpenNow({locale}: Readonly<{locale: AppLocale}>) {
           title={t('empty.title')}
           copy={t('empty.copy')}
           actions={[
-            {label: t('updatesAction'), href: '/events?status=open'},
+            // Deep-links to the interest form on /events (Phase A, audit F7) instead of
+            // the open-events list, which is empty whenever this band is shown.
+            {label: t('updatesAction'), href: '/events#events-interest'},
             {label: t('challengeAction'), href: '/contact'},
           ]}
         />

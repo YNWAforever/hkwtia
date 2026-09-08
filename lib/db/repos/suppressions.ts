@@ -2,7 +2,7 @@ import "server-only";
 
 import {sql} from "drizzle-orm";
 
-import {messageSuppressions, profiles} from "@/lib/db/server-schema";
+import {auditEvents, messageSuppressions, profiles} from "@/lib/db/server-schema";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {getDb, requireSystem} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";
@@ -64,6 +64,43 @@ export function createSuppressionsRepository(loadDatabase: AutomationDatabaseLoa
           ON CONFLICT DO NOTHING
           RETURNING id
         `))[0];
+        return suppression ? "created" : "existing";
+      });
+    },
+
+    /**
+     * STOP / 取消 on WhatsApp, or channel=whatsapp on /api/unsubscribe. Writes
+     * the suppression, clears the profile flag and audits it in one transaction
+     * (programme D-7). A prospect with no profile is handled by
+     * contactsRepository.markWhatsAppOptedOut instead.
+     */
+    async optOutWhatsApp(
+      actor: Actor | UnsubscribeActor,
+      profileId: string,
+      reasonCode: string,
+    ): Promise<"created" | "existing"> {
+      requireSuppressionActor(actor);
+      const database = await loadDatabase();
+      return database.transaction(async (transaction) => {
+        const profile = rowsFrom(await transaction.execute(sql`
+          UPDATE ${profiles}
+          SET whatsapp_opt_in = false, updated_at = now()
+          WHERE id = ${profileId}
+          RETURNING id
+        `))[0];
+        if (!profile) throw new Error("PROFILE_NOT_FOUND");
+        const suppression = rowsFrom(await transaction.execute(sql`
+          INSERT INTO ${messageSuppressions}
+            (profile_id, channel, classification, reason_code)
+          VALUES (${profileId}, 'whatsapp', 'marketing', ${reasonCode})
+          ON CONFLICT DO NOTHING
+          RETURNING id
+        `))[0];
+        await transaction.execute(sql`
+          INSERT INTO ${auditEvents}
+            (actor_user_id, actor_type, action, target_type, target_id, metadata)
+          VALUES (NULL, ${actor.kind}, 'consent.whatsapp.revoked', 'profile', ${profileId}, ${JSON.stringify({reasonCode})}::jsonb)
+        `);
         return suppression ? "created" : "existing";
       });
     },

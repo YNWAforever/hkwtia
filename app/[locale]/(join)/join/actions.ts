@@ -17,6 +17,7 @@ import {companiesRepository} from "@/lib/db/repos/companies";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 import {buildJoinCallback, destinationForJoin, parseJoinContinuation, type JoinContinuation} from "@/lib/membership/join-navigation";
 import {companySchema, profileSchema} from "@/lib/membership/join-schema";
+import {whatsappConsentFields} from "@/lib/whatsapp/consent";
 import {completeApplication, startJoin} from "@/lib/membership/join-service";
 import type {JoinStep} from "@/lib/membership/onboarding";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
@@ -99,9 +100,12 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
     phone: formData.get("phone") || null,
     jobTitle: formData.get("jobTitle") || null,
     locale,
+    whatsappNumber: formData.get("whatsappNumber") || null,
+    whatsappOptIn: formData.get("whatsappOptIn") === "on",
   });
   if (!parsed.success) {
-    return formError(locale, parsed.error.issues[0]?.path[0]?.toString() ?? "displayName");
+    const field = parsed.error.issues[0]?.path[0]?.toString() ?? "displayName";
+    return formError(locale, field, field === "whatsappNumber" ? "errors.whatsappNumber" : "errors.required");
   }
   const t = await getTranslations({locale, namespace: "Join"});
 
@@ -109,10 +113,14 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
     const actor = await requireActor();
     if (actor.kind !== "member") return {message: t("errors.auth")};
     const existing = await profilesRepository.getById(actor, actor.profileId);
+    // Programme D-7: the join step is the consent source; provenance is stamped
+    // here, and completeApplication() only forwards name/locale afterwards.
+    const consent = whatsappConsentFields({optIn: parsed.data.whatsappOptIn, source: "join"});
+    const profileWrite = {...parsed.data, ...consent, onboardingState: "profile" as const};
     if (existing) {
-      await profilesRepository.update(actor, actor.profileId, {...parsed.data, onboardingState: "profile"});
+      await profilesRepository.update(actor, actor.profileId, profileWrite);
     } else {
-      await profilesRepository.ensure(actor, {id: actor.profileId, ...parsed.data, onboardingState: "profile"});
+      await profilesRepository.ensure(actor, {id: actor.profileId, ...profileWrite});
     }
     const application = await startJoin(actor, {plan, applicationId});
     const id = application.applicationId;
