@@ -38,7 +38,12 @@ export async function ArchiveStories({locale}: Readonly<{locale: AppLocale}>) {
           {stories.map((story, index) => {
             const image = story.images[0]!;
             const title = useChinese ? story.titleZh : story.titleEn;
-            const body = useChinese ? story.bodyZh : story.bodyEn;
+            // Lead paragraph only. Bodies are multi-paragraph records separated by
+            // '\n\n' (app/[locale]/(public)/about/history/[slug] splits on the same
+            // token and uses [0] as its hero lead); dropping the whole body into one
+            // <p> collapsed every break to a space and rendered the card as a single
+            // run-on block.
+            const body = (useChinese ? story.bodyZh : story.bodyEn).split('\n\n')[0]!;
             const alt = useChinese ? image.altZh : image.altEn;
             return (
               <figure className={index === 0 ? 'archive-photo-card archive-photo-feature' : 'archive-photo-card'} key={story.slug}>

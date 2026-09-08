@@ -11,7 +11,7 @@ import {
   generateStaticParams,
 } from "@/app/[locale]/(public)/about/history/[slug]/page";
 import {milestones} from "@/content/milestones";
-import {findBySlug} from "@/lib/history/milestones";
+import {findBySlug, milestonesOnly} from "@/lib/history/milestones";
 import {brandedTitle} from "@/lib/metadata";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
@@ -84,11 +84,21 @@ vi.mock("next/image", async () => {
   };
 });
 
+// Content order, which is the file's own chronological order. The 2001, 2014 and
+// 2025 entries were added to the featured set so the homepage archive grid fills
+// its four cards from more than one night in 2022; each one also gains a detail
+// page and a sitemap entry, which is what this list guards.
 const featuredSlugs = [
+  "2001-establishment-of-wtia",
+  "2014-wi-fi-hk",
   "the-strategies-for-expanding-global-internet-of-things-iot-markets",
   "new-term-of-executive-committee-2022-2024",
   "wtia-21st-anniversary-celebration-and-inauguration-gala-dinner",
+  "asia-smart-innovation-awards-2025",
 ] as const;
+// A milestone-kind record that is deliberately not featured, so it must have no
+// detail page, no metadata and a 404.
+const unfeaturedSlug = "2002-the-1st-wtia-panel-discussion-inter-operator-sms";
 const gallerySlug = "wtia-21st-anniversary-celebration-and-inauguration-gala-dinner";
 
 describe("history detail pages", () => {
@@ -105,7 +115,7 @@ describe("history detail pages", () => {
     expect((messages.History as {storyTitle: string}).storyTitle).toBe(approvedStoryTitle[locale]);
   });
 
-  it("generates exactly the three pinned featured milestone params in content order", () => {
+  it("generates exactly the six pinned featured milestone params in content order", () => {
     expect(generateStaticParams()).toEqual(featuredSlugs.map((slug) => ({slug})));
   });
 
@@ -162,6 +172,24 @@ describe("history detail pages", () => {
     expect(document.querySelector("main")).not.toBeInTheDocument();
   });
 
+  // Until 2001/2014/2025 were featured, every featured record had a multi-paragraph
+  // body, so the single-paragraph path had never rendered. Its whole body is the hero
+  // lead, leaving the story section with only the gallery to show -- and it must not
+  // print the lead twice or head an empty container.
+  it("renders a single-paragraph milestone once, in the hero, with the gallery still shown", async () => {
+    const milestone = findBySlug(milestones, "2001-establishment-of-wtia");
+    expect(milestone).not.toBeNull();
+    if (!milestone) return;
+    expect(milestone.bodyEn).not.toContain("\n\n");
+    expect(milestone.images.length).toBeGreaterThan(0);
+
+    render(await HistoryDetailPage({params: Promise.resolve({locale: "en", slug: milestone.slug})}));
+
+    expect(screen.getAllByText(milestone.bodyEn)).toHaveLength(1);
+    expect(screen.getByRole("heading", {level: 2, name: approvedStoryTitle.en})).toBeVisible();
+    expect(within(screen.getByRole("list")).getAllByRole("img")).toHaveLength(milestone.images.length);
+  });
+
   it("preserves exact localized metadata inputs and returns empty metadata for a disallowed slug", async () => {
     const milestone = findBySlug(milestones, gallerySlug);
     expect(milestone).not.toBeNull();
@@ -186,7 +214,7 @@ describe("history detail pages", () => {
 
     buildPageMetadataSpy.mockClear();
     expect(await generateMetadata({
-      params: Promise.resolve({locale: "en", slug: "2001-establishment-of-wtia"}),
+      params: Promise.resolve({locale: "en", slug: unfeaturedSlug}),
     })).toEqual({});
     expect(buildPageMetadataSpy).not.toHaveBeenCalled();
   });
@@ -200,7 +228,7 @@ describe("history detail pages", () => {
     for (const slug of [
       memberStory!.slug,
       pressRelease!.slug,
-      "2001-establishment-of-wtia",
+      unfeaturedSlug,
       "unknown-history-record",
     ]) {
       notFoundSpy.mockClear();
@@ -209,6 +237,48 @@ describe("history detail pages", () => {
       );
       expect(notFoundSpy).toHaveBeenCalledExactlyOnceWith();
       expect(setRequestLocaleSpy).not.toHaveBeenCalled();
+    }
+  });
+
+  // The 20+1 anniversary record shipped as a verbatim scrape of its own 2022
+  // announcement -- future tense, "*Seats Limited", ticket prices and a live
+  // registration URL -- so it spent four years inviting readers to a dinner that had
+  // already happened.
+  //
+  // Scope note: `featured` is NOT the line between public and private. The timeline at
+  // /about/history renders every NON-featured milestone's full body inline (see
+  // components/marketing/milestone-timeline.tsx) and replaces a featured one with a
+  // "Read more" link, so all 61 bodies publish -- featuring adds a second page, it does
+  // not create the first. The link guard therefore covers every milestone-kind record.
+  it("solicits no event registration in any milestone body", () => {
+    const registrationLink = /jotform\.com|lnkd\.in|eventbrite|forms\.gle|docs\.google\.com\/forms/i;
+    const records = milestonesOnly(milestones);
+
+    expect(records.length).toBeGreaterThan(0);
+    for (const {slug, bodyEn, bodyZh} of records) {
+      for (const [locale, body] of [["en", bodyEn], ["zh-HK", bodyZh]] as const) {
+        expect(registrationLink.test(body), `${slug} (${locale}) registration link`).toBe(false);
+      }
+    }
+  });
+
+  // Prices stay scoped to featured records, and deliberately so: a currency figure is
+  // only a red flag where the layout reads it as an offer -- a hero lead and a homepage
+  // card. In the archive at large it is ordinary history, and widening this to every
+  // record would reject two truthful entries: `2005-the-1st-wtia-sms-donation-campaign`
+  // ("raised HK $2 million for the victims of the 2004 Indian Ocean earthquake and
+  // tsunami") and `it-sme-anti-epidemic-fund-appeal` (the HK$137.5 billion Anti-epidemic
+  // Fund and its HK$9,000 wage-subsidy cap). Those are facts worth publishing, not
+  // ticketing copy. Do not "fix" this scope without re-reading those two bodies.
+  it("quotes no ticket price in a featured milestone body", () => {
+    const ticketPrice = /(?:HKD?|US)?\$\s?[\d,]+(?:\.\d{2})?/;
+    const featured = milestonesOnly(milestones).filter(({featured: isFeatured}) => isFeatured);
+
+    expect(featured.length).toBeGreaterThan(0);
+    for (const {slug, bodyEn, bodyZh} of featured) {
+      for (const [locale, body] of [["en", bodyEn], ["zh-HK", bodyZh]] as const) {
+        expect(ticketPrice.test(body), `${slug} (${locale}) ticket price`).toBe(false);
+      }
     }
   });
 

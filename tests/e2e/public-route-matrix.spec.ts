@@ -3,9 +3,15 @@ import {expect, test} from '@playwright/test';
 const paths = [
   '/showcase', '/launchpad', '/ai-ops', '/events', '/news', '/programmes', '/partners',
   '/about', '/about/chairman', '/about/committees', '/about/history',
+  // Every featured milestone, which is exactly the set with a detail page. Keep in
+  // step with `featured: true` in content/milestones.ts — tests/unit/history-detail
+  // pins that list, and this matrix is the deployed-route check over the same set.
+  '/about/history/2001-establishment-of-wtia',
+  '/about/history/2014-wi-fi-hk',
   '/about/history/the-strategies-for-expanding-global-internet-of-things-iot-markets',
   '/about/history/new-term-of-executive-committee-2022-2024',
   '/about/history/wtia-21st-anniversary-celebration-and-inauguration-gala-dinner',
+  '/about/history/asia-smart-innovation-awards-2025',
   '/programs/cpai', '/programs/hkict', '/programs/tct', '/programs/asa',
   '/contact', '/privacy', '/ai-transparency'
 ];
