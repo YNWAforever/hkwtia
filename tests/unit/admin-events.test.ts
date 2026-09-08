@@ -1,6 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
 import {createEvent, registerForEvent, updateEvent, type EventMutationDependencies, type EventRegistrationDependencies} from "@/lib/db/repos/events";
+import {phaseB1EventColumns} from "@/tests/fixtures/event-row";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 const staff: Actor = {kind: "staff", userId: "auth-staff", profileId: "profile-staff"};
@@ -38,7 +39,8 @@ describe("admin Event mutations and registration capacity", () => {
   });
 
   it("rejects Event updates whose resulting end is not after the start", async () => {
-    const current = {id: eventLock.id, ...createInput, startsAt: new Date(createInput.startsAt), endsAt: new Date(createInput.endsAt), createdAt: new Date(), updatedAt: new Date()};
+    const base = {id: eventLock.id, ...createInput, startsAt: new Date(createInput.startsAt), endsAt: new Date(createInput.endsAt), createdAt: new Date(), updatedAt: new Date()};
+    const current = {...base, ...phaseB1EventColumns(base)};
     const update = vi.fn();
     const dependencies: EventMutationDependencies = {transaction: (work) => work({insertEvent: vi.fn(), lockEvent: async () => current, updateEvent: update, lockActiveMedia: vi.fn(), insertAudit: vi.fn()})};
     await expect(updateEvent(staff, current.id, {endsAt: "2099-09-01T09:00:00.000Z"}, dependencies)).rejects.toThrow("endsAt must be after startsAt");

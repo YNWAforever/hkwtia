@@ -2,6 +2,7 @@ import {describe, expect, it, vi} from "vitest";
 
 import type {Event} from "@/lib/db/server-schema";
 import {getPublicEventBySlug, registerForEvent, type EventRegistrationDependencies} from "@/lib/db/repos/events";
+import {phaseB1EventColumns} from "@/tests/fixtures/event-row";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 const eventId = "10000000-0000-4000-8000-000000000001";
@@ -10,7 +11,7 @@ const now = new Date("2030-01-01T10:00:00.000Z");
 const member: Actor = {kind: "member", userId: "member-user", profileId};
 
 function publicEvent(overrides: Partial<Event> = {}): Event {
-  return {
+  const row = {
     id: eventId,
     slug: "public-event",
     titleEn: "Public Event",
@@ -28,6 +29,7 @@ function publicEvent(overrides: Partial<Event> = {}): Event {
     updatedAt: now,
     ...overrides,
   };
+  return {...phaseB1EventColumns(row), ...row};
 }
 
 function registrationDependencies(overrides: Partial<{
