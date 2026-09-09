@@ -301,11 +301,12 @@ Full gate: `npm run audit:strings && npm test && npm run lint && npm run typeche
 ## Phase B2 exit checklist
 
 **Code status (2026-09-10): Tasks 1–7 are implemented, reviewed and committed on
-`feat/phase-b2-member-directory`** — 21 commits from `1ad0c7a` (schema) to `d175de5` (the B-8
-acceptance spec), plus `a26e442` from the gate run below. Everything that remains is an owner
+`feat/phase-b2-member-directory`** — 22 commits from `8fb1086` (schema) to `d4137a6` (the B-8
+acceptance spec), plus `a119929` from the gate run below. The branch was rebased onto `main`
+after B1 merged, so these are its post-rebase hashes. Everything that remains is an owner
 action requiring production credentials or a signed-in browser; none of it is code.
 
-- [x] Full local gate green on the branch at `a26e442`. Run bare, judged by exit code:
+- [x] Full local gate green on the branch at `a119929`. Run bare, judged by exit code:
   `npm run audit:strings` (246 TSX files scanned, exit 0) · `npm test` (**494 files / 4132 tests
   passed, 16 files / 43 tests skipped**, exit 0 — the skips are the Postgres and live-service
   suites that need `DATABASE_URL_TEST` or `RUN_POSTGRES_INTEGRATION=1`) · `npm run lint`
@@ -316,18 +317,21 @@ action requiring production credentials or a signed-in browser; none of it is co
   - The only gate failure was two 5s timeouts in `public-environment-isolation` and
     `repository-boundary`, and neither was a Phase B2 regression: both are compile-bound tests
     whose cost tracks the size of the repo (a TypeScript walk of `lib/`, and cold module graphs
-    after `vi.resetModules()`), and the suite is now 510 files running in parallel. `a26e442`
+    after `vi.resetModules()`), and the suite is now 510 files running in parallel. `a119929`
     gives them explicit timeouts, the shape this repo already uses for the same hazard. No
     count-pinning test needed re-pinning: `page-copy-scope`, `wisetech-protected-route-ownership`,
     `internal-navigation-config`, `admin-nav` and `ci-security-contract` all agreed with reality,
     because Tasks 4 and 5 re-pinned them as they landed.
-- [ ] **Blocked on B1.** This branch is stacked on `feat/phase-b1-member-events`, which is not yet
-  in `main` (`main` is at `72e8ecd`). B1 must merge first: it owns migrations 0026–0027 and the
-  `organiser_company_id` column that the member page's events block and `4a5aa56`'s slug-matched
-  organiser links both read.
+- [x] **B1 has merged** (squashed into `main` as `9d68557`, PR #50), so this branch's dependency
+  on it is discharged: `main` now owns migrations 0026–0027 and the `organiser_company_id` column
+  that the member page's events block and `33613ec`'s slug-matched organiser links both read.
+  This branch was rebased off `feat/phase-b1-member-events` onto `main`, which applied cleanly
+  because the squash left `main` byte-identical to the B1 tip, so its PR shows only B2's work.
 - [ ] **Owner action —** migrations 0028–0030 applied to production before the deploy (0028 adds
   the profile columns, 0029 assigns slugs, 0030 widens the announcement href check to `/members`).
-  Apply 0026–0027 from B1 in the same pass, in order. Phase A recipe:
+  0026–0027 are **already applied** to production (verified: journal 25→27,
+  `event_guest_registrations` created, 14 new `events` columns, and 0 rows whose enums disagree
+  with their booleans), so this pass is 0028–0030 only, in order. Phase A recipe:
   `neonctl connection-string production --project-id fragrant-mountain-25240574 --org-id org-soft-sunset-25251479`,
   then `DATABASE_URL=… npm run db:migrate`. There is no local database here, so 0028–0030 have
   never been executed — they are pinned only by their TypeScript twins under `tests/fixtures/`
