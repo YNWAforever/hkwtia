@@ -1,7 +1,7 @@
 import "server-only";
 
 import {randomUUID} from "node:crypto";
-import {and, eq, exists, sql} from "drizzle-orm";
+import {and, eq, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";
 import {companies as companiesTable, companyMembers, membershipApplications, type Company} from "@/lib/db/server-schema";
@@ -70,16 +70,24 @@ function reviewResetFor(input: CompanyUpdate) {
   };
 }
 
+/**
+ * The `EXISTS` keyword and its parentheses are written out rather than built
+ * with Drizzle's `exists()`, which is `` sql`exists ${subquery}` `` and only
+ * parenthesises a `Subquery` object — handed a raw `sql` fragment like the ones
+ * below it pastes it in bare, and `EXISTS SELECT …` is a syntax error, because
+ * Postgres's grammar is `EXISTS select_with_parens`. That would not weaken the
+ * scope, it would take the whole repository off the air: every member-actor
+ * call here builds one of these predicates. Pinned by
+ * `tests/unit/repository-exists-scope-sql.test.ts`, which is the only thing
+ * that would notice — every other assertion in the suite is on generated SQL
+ * text, which renders the broken form just as happily as the working one.
+ */
 function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
-  return exists(
-    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companiesTable.id} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL`,
-  );
+  return sql`EXISTS (SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companiesTable.id} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL)`;
 }
 
 function companyManagementScope(actor: Extract<Actor, {kind: "member"}>) {
-  return exists(
-    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companiesTable.id} AND ${companyMembers.userId} = ${actor.profileId} AND (${companyMembers.role} = ${"owner"} OR ${companyMembers.role} = ${"admin"}) AND ${companyMembers.revokedAt} IS NULL`,
-  );
+  return sql`EXISTS (SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companiesTable.id} AND ${companyMembers.userId} = ${actor.profileId} AND (${companyMembers.role} = ${"owner"} OR ${companyMembers.role} = ${"admin"}) AND ${companyMembers.revokedAt} IS NULL)`;
 }
 
 function companyScope(actor: Actor, companyId: string) {
