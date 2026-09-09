@@ -19,7 +19,7 @@ describe("attendee CSV (programme B-4)", () => {
   it("quotes fields and lists members and guests", () => {
     const csv = attendeesCsv(rows);
     // BOM + CRLF match `encodeMemberCsv`, so Excel opens Chinese names cleanly.
-    expect(csv.startsWith("﻿")).toBe(true);
+    expect(csv.startsWith("\uFEFF")).toBe(true);
     expect(csv.slice(1).split("\r\n")[0]).toBe("kind,name,email,organisation,status,checked_in_at");
     expect(csv).toContain('member,Ada,ada@x.hk,,registered,\r\n');
     expect(csv).toContain('guest,"Bob ""B""",bob@x.hk,"Acme, Ltd",waitlist,\r\n');
@@ -54,6 +54,16 @@ describe("attendee CSV (programme B-4)", () => {
     expect(list).toHaveBeenCalledWith(staff, EVENT);
   });
 
+  it("404s for an unknown event and never audits it", async () => {
+    const list = vi.fn(async () => null);
+    const audit = vi.fn(async () => undefined);
+    const get = createAttendeesCsvGet({actor: async () => staff, list, audit});
+    const response = await get(request(), {params: Promise.resolve({id: EVENT})});
+    expect(response.status).toBe(404);
+    expect(list).toHaveBeenCalledWith(staff, EVENT);
+    expect(audit).not.toHaveBeenCalled();
+  });
+
   it("audits every export with the row count, before the file leaves", async () => {
     const audit = vi.fn(async () => undefined);
     const get = createAttendeesCsvGet({actor: async () => staff, list: async () => rows, audit});
@@ -68,10 +78,12 @@ describe("attendee CSV (programme B-4)", () => {
 
 describe("listEventAttendees (programme B-4)", () => {
   it("maps the member/guest union rows and requires an admin", async () => {
-    const execute = vi.fn(async () => [
-      {kind: "member", profile_id: "p1", guest_id: null, display_name: "Ada", email: "ada@x.hk", organisation: null, status: "registered", checked_in_at: "2030-03-01T02:00:00.000Z"},
-      {kind: "guest", profile_id: null, guest_id: "33333333-3333-4333-8333-333333333333", display_name: "Bob", email: "bob@x.hk", organisation: "Acme", status: "waitlist", checked_in_at: null},
-    ]);
+    const execute = vi.fn()
+      .mockResolvedValueOnce([{id: EVENT}])
+      .mockResolvedValueOnce([
+        {kind: "member", profile_id: "p1", guest_id: null, display_name: "Ada", email: "ada@x.hk", organisation: null, status: "registered", checked_in_at: "2030-03-01T02:00:00.000Z"},
+        {kind: "guest", profile_id: null, guest_id: "33333333-3333-4333-8333-333333333333", display_name: "Bob", email: "bob@x.hk", organisation: "Acme", status: "waitlist", checked_in_at: null},
+      ]);
     const loadDatabase = async () => ({execute, transaction: async () => { throw new Error("unused"); }}) as never;
     await expect(listEventAttendees({kind: "member", userId: "m", profileId: "m1"}, EVENT, {loadDatabase})).rejects.toThrow();
     expect(execute).not.toHaveBeenCalled();
@@ -81,6 +93,14 @@ describe("listEventAttendees (programme B-4)", () => {
       {kind: "member", profileId: "p1", guestId: null, displayName: "Ada", email: "ada@x.hk", organisation: null, status: "registered", checkedInAt: new Date("2030-03-01T02:00:00.000Z")},
       {kind: "guest", profileId: null, guestId: "33333333-3333-4333-8333-333333333333", displayName: "Bob", email: "bob@x.hk", organisation: "Acme", status: "waitlist", checkedInAt: null},
     ]);
+    expect(execute).toHaveBeenCalledTimes(2);
+  });
+
+  it("returns null for an unknown event without querying attendees", async () => {
+    const execute = vi.fn(async () => []);
+    const loadDatabase = async () => ({execute, transaction: async () => { throw new Error("unused"); }}) as never;
+    const attendees = await listEventAttendees(staff, EVENT, {loadDatabase});
+    expect(attendees).toBeNull();
     expect(execute).toHaveBeenCalledTimes(1);
   });
 });

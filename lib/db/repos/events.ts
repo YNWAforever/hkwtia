@@ -433,10 +433,33 @@ export type EventAttendee = Readonly<{
   checkedInAt: Date | null;
 }>;
 
-export async function listEventAttendees(actor: Actor, eventIdInput: unknown, deps: MemberEventDependencies = {}): Promise<EventAttendee[]> {
+// Validates the member/guest UNION rows from `listEventAttendees` the same
+// way `memberEventRowSchema` validates `events` rows: a renamed or
+// differently-typed column fails loudly here instead of silently coercing
+// (the old `String()`/`typeof` mapping let a missing column through as `""`
+// or `null` without complaint).
+const attendeeRowSchema = z.object({
+  kind: z.enum(["member", "guest"]),
+  profile_id: z.string().nullable(),
+  guest_id: z.string().nullable(),
+  display_name: z.string(),
+  email: z.string().nullable(),
+  organisation: z.string().nullable(),
+  status: z.string(),
+  checked_in_at: z.coerce.date().nullable(),
+});
+
+/**
+ * `null` means the event id doesn't exist, so the CSV export
+ * (lib/admin/event-attendees.ts) can 404 instead of auditing an export of a
+ * nonexistent target.
+ */
+export async function listEventAttendees(actor: Actor, eventIdInput: unknown, deps: MemberEventDependencies = {}): Promise<EventAttendee[] | null> {
   requireAdmin(actor);
   const eventId = eventIdSchema.parse(eventIdInput);
   const database = await memberDatabase(deps);
+  const existing = executedRows(await database.execute(sql`SELECT ${events.id} AS id FROM ${events} WHERE ${events.id} = ${eventId}`));
+  if (existing.length === 0) return null;
   // A UNION rather than two reads so the list arrives in one stable order and
   // the CSV export (lib/admin/event-attendees.ts) sees exactly what the page
   // shows. `profile_id` is text and `guest_id` uuid, hence the typed NULLs.
@@ -450,16 +473,19 @@ export async function listEventAttendees(actor: Actor, eventIdInput: unknown, de
     WHERE ${eventGuestRegistrations.eventId} = ${eventId}
     ORDER BY display_name ASC, kind ASC, profile_id ASC NULLS LAST, guest_id ASC NULLS LAST
   `));
-  return rows.map((row) => ({
-    kind: row.kind === "guest" ? "guest" : "member",
-    profileId: typeof row.profile_id === "string" ? row.profile_id : null,
-    guestId: typeof row.guest_id === "string" ? row.guest_id : null,
-    displayName: String(row.display_name ?? ""),
-    email: typeof row.email === "string" ? row.email : null,
-    organisation: typeof row.organisation === "string" ? row.organisation : null,
-    status: String(row.status),
-    checkedInAt: row.checked_in_at instanceof Date ? row.checked_in_at : row.checked_in_at ? new Date(String(row.checked_in_at)) : null,
-  }));
+  return rows.map((row) => {
+    const parsed = attendeeRowSchema.parse(row);
+    return {
+      kind: parsed.kind,
+      profileId: parsed.profile_id,
+      guestId: parsed.guest_id,
+      displayName: parsed.display_name,
+      email: parsed.email,
+      organisation: parsed.organisation,
+      status: parsed.status,
+      checkedInAt: parsed.checked_in_at,
+    };
+  });
 }
 
 // ---------------------------------------------------------------------------
