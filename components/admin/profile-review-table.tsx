@@ -17,16 +17,27 @@ export type ProfileReviewRow = Readonly<{
   website: string | null;
   taglineEn: string | null;
   taglineZhHk: string | null;
+  descriptionEn: string | null;
   descriptionZhHk: string | null;
+  industry: string | null;
+  sizeBand: string | null;
   logoUrl: string | null;
 }>;
 type Action = (formData: FormData) => void | Promise<void>;
-export type ProfileReviewLabels = Readonly<{caption: string; company: string; slug: string; tags: string; preview: string; approve: string; reject: string; rejectionReason: string; empty: string; taglineEn: string; taglineZhHk: string; descriptionZhHk: string; website: string; previewEmpty: string}>;
+export type ProfileReviewLabels = Readonly<{caption: string; company: string; slug: string; tags: string; preview: string; approve: string; reject: string; rejectionReason: string; empty: string; taglineEn: string; taglineZhHk: string; descriptionEn: string; descriptionZhHk: string; industry: string; sizeBand: string; website: string; previewEmpty: string}>;
 
 /**
  * The reviewer cannot open the page they are judging — it is `pending_review`,
- * so `/members/[slug]` 404s until they approve it. The `<details>` is therefore
- * the whole preview: every field `/members` will publish, in one place.
+ * so `/members/[slug]` 404s until they approve it. The `<details>` plus the
+ * company column is therefore the whole preview, and it has to carry every
+ * field `/members` will publish — most of all the five in
+ * `PUBLICLY_RENDERED_COLUMNS` (`lib/db/repos/companies.ts`), because rewriting
+ * one of those from `/portal/company` is what drags a live page back into this
+ * queue. `displayName` is the row's own column; `website`, `industry`,
+ * `sizeBand` and the English `description` are below. A field shown here but
+ * not on `/members` would only waste a reviewer's attention; a field on
+ * `/members` and not here means they publish copy they were never shown, which
+ * is the failure the demotion rule exists to prevent.
  *
  * Its terms come from the bundles rather than from inline `EN`/`ZH` markers so
  * a zh-HK reviewer reads the queue in their own language (CLAUDE.md rule 6).
@@ -35,7 +46,10 @@ function ProfilePreview({row, labels}: Readonly<{row: ProfileReviewRow; labels: 
   const entries = [
     {key: "tagline-en", term: labels.taglineEn, value: row.taglineEn},
     {key: "tagline-zh", term: labels.taglineZhHk, value: row.taglineZhHk},
+    {key: "description-en", term: labels.descriptionEn, value: row.descriptionEn},
     {key: "description-zh", term: labels.descriptionZhHk, value: row.descriptionZhHk},
+    {key: "industry", term: labels.industry, value: row.industry},
+    {key: "size-band", term: labels.sizeBand, value: row.sizeBand},
   ].filter((entry) => entry.value !== null);
   // A profile can reach the queue with a slug and nothing else, and a blank
   // `<details>` would read as a rendering fault rather than as thin copy.

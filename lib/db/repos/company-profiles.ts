@@ -182,6 +182,17 @@ const companyProfileRowSchema = z.object({
   tagline_en: z.string().nullable().optional(),
   tagline_zh_hk: z.string().nullable().optional(),
   description_zh_hk: z.string().nullable().optional(),
+  // The three `companies` columns the member directory renders that the profile
+  // form does not own. `PUBLICLY_RENDERED_COLUMNS` in `lib/db/repos/companies.ts`
+  // sends a published profile back to `pending_review` when `/portal/company`
+  // rewrites any of them, and `detailColumns` below puts all three on
+  // `/members/[slug]`, so the queue that gates that page has to be able to show
+  // them. `.passthrough()` already carried the values through `SELECT companies.*`;
+  // typing them here is what lets the queue page map them onto its preview
+  // instead of reading `unknown`.
+  description: z.string().nullable().optional(),
+  industry: z.string().nullable().optional(),
+  size_band: z.string().nullable().optional(),
   tags: z.array(z.string()).optional(),
   website: z.string().nullable().optional(),
   logo_media_id: z.string().nullable().optional(),
