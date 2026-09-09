@@ -47,6 +47,7 @@ function registrationDependencies(overrides: Partial<{
   const insertAudit = vi.fn(async () => { calls.push("audit"); });
   const dependencies: EventRegistrationDependencies = {
     now: () => now,
+    enrollReminder: async () => undefined,
     transaction: async (work) => work({lockEvent, hasEligibleMembership, getRegistration, countRegistered, upsertRegistration, insertAudit}),
   };
   return {calls, dependencies, lockEvent, hasEligibleMembership, getRegistration, countRegistered, upsertRegistration, insertAudit};

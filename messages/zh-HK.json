@@ -321,6 +321,13 @@
         "heading": "期待見到你",
         "body": "多謝報名。如計劃有變，請使用取消連結，讓候補名單上的人可以補上。{cancelUrl}",
         "cta": "查看活動"
+      },
+      "event_reminder_24h": {
+        "subject": "明天：{eventTitle}",
+        "preview": "你的 WTIA 活動明天舉行。",
+        "heading": "明天見",
+        "body": "{eventTitle} 將於 {startsAt} 開始。{venue}",
+        "cta": "活動詳情"
       }
     }
   },

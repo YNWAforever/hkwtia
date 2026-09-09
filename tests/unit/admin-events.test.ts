@@ -22,13 +22,24 @@ describe("admin Event mutations and registration capacity", () => {
   it("serializes capacity decisions and deterministically waitlists overflow registrations", async () => {
     const registrations = new Map<string, "registered" | "waitlist" | "cancelled">();
     const audits: unknown[] = [];
-    const dependencies: EventRegistrationDependencies = {now: () => new Date("2099-01-01T00:00:00.000Z"), transaction: async (work) => work({lockEvent: async () => eventLock, hasEligibleMembership: async () => true, getRegistration: async (_eventId, profileId) => registrations.has(profileId) ? {status: registrations.get(profileId)!} : null, countRegistered: async () => [...registrations.values()].filter((status) => status === "registered").length, upsertRegistration: async (_eventId, profileId, status) => { registrations.set(profileId, status); }, insertAudit: async (input) => { audits.push(input); }})};
+    const enrollReminder = vi.fn(async () => undefined);
+    const dependencies: EventRegistrationDependencies = {now: () => new Date("2099-01-01T00:00:00.000Z"), enrollReminder, transaction: async (work) => work({lockEvent: async () => eventLock, hasEligibleMembership: async () => true, getRegistration: async (_eventId, profileId) => registrations.has(profileId) ? {status: registrations.get(profileId)!} : null, countRegistered: async () => [...registrations.values()].filter((status) => status === "registered").length, upsertRegistration: async (_eventId, profileId, status) => { registrations.set(profileId, status); }, insertAudit: async (input) => { audits.push(input); }})};
     await expect(registerForEvent(member("profile-a"), {eventId: eventLock.id}, dependencies)).resolves.toMatchObject({disposition: "registered"});
     await expect(registerForEvent(member("profile-b"), {eventId: eventLock.id}, dependencies)).resolves.toMatchObject({disposition: "waitlist"});
     await expect(registerForEvent(member("profile-a"), {eventId: eventLock.id}, dependencies)).resolves.toMatchObject({disposition: "already_registered"});
     expect(registrations.get("profile-a")).toBe("registered");
     expect(registrations.get("profile-b")).toBe("waitlist");
     expect(audits).toHaveLength(2);
+    // B-5: only the confirmed seat gets the 24-hour reminder; the waitlisted member has nothing to attend yet.
+    expect(enrollReminder).toHaveBeenCalledTimes(1);
+    expect(enrollReminder).toHaveBeenCalledWith({profileId: "profile-a", eventId: eventLock.id, startsAt: eventLock.startsAt});
+  });
+
+  it("keeps a registration that succeeded when the reminder enrolment fails", async () => {
+    const enrollReminder = vi.fn(async () => { throw new Error("journey unavailable"); });
+    const dependencies: EventRegistrationDependencies = {now: () => new Date("2099-01-01T00:00:00.000Z"), enrollReminder, transaction: async (work) => work({lockEvent: async () => eventLock, hasEligibleMembership: async () => true, getRegistration: async () => null, countRegistered: async () => 0, upsertRegistration: async () => undefined, insertAudit: async () => undefined})};
+    await expect(registerForEvent(member("profile-a"), {eventId: eventLock.id}, dependencies)).resolves.toEqual({disposition: "registered"});
+    expect(enrollReminder).toHaveBeenCalledTimes(1);
   });
 
   it("checks Event closure before membership under the row lock", async () => {

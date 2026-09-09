@@ -38,4 +38,10 @@ export const JOURNEYS = {
     step("winback_21", 21, "winback_21", "marketing"),
     step("winback_60", 60, "winback_60", "marketing"),
   ],
+  // Programme B-5 (S-2): anchored on the event start, so -1 day is "24 hours
+  // before". One step per (profile, event); enrolled by
+  // lib/events/reminder-enrollment.ts, never by scheduleJourney.
+  event_reminder: [
+    step("reminder_24h", -1, "event_reminder_24h", "transactional", ["email", "whatsapp"]),
+  ],
 } as const satisfies Record<JourneyName, readonly JourneyStep[]>;

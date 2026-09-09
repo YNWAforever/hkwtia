@@ -11,6 +11,7 @@ import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {auditEvents, companies, companyMembers, eventGuestRegistrations, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility} from "@/lib/db/server-schema";
 import {assertCanSubmitEvent} from "@/lib/events/entitlement-core";
 import {eventBoundary, type PublicEventProjection, type PublicEventStatus} from "@/lib/events/public";
+import {enrollEventReminder, type EventReminderEnrollmentInput} from "@/lib/events/reminder-enrollment";
 import {canTransitionEvent, derivedEventFlags, hongKongQuarterBounds} from "@/lib/events/status";
 import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl} from "@/lib/media/url";
 import type {MembershipPlanCode} from "@/lib/membership/constants";
@@ -116,7 +117,7 @@ export type EventRegistrationDependencies = Readonly<{transaction: <T>(work: (tr
   countRegistered: (eventId: string) => Promise<number>;
   upsertRegistration: (eventId: string, profileId: string, status: "registered" | "waitlist") => Promise<void>;
   insertAudit: (input: EventAudit) => Promise<void>;
-}>) => Promise<T>) => Promise<T>; now?: () => Date}>;
+}>) => Promise<T>) => Promise<T>; now?: () => Date; enrollReminder?: (input: EventReminderEnrollmentInput) => Promise<void>}>;
 
 export type LocalizedEvent = Readonly<{
   id: string; slug: string; title: string; description: string; startsAt: string; endsAt: string | null;
@@ -378,14 +379,14 @@ async function defaultRegistrationDependencies(): Promise<EventRegistrationDepen
     countRegistered: async (eventId) => Number((await tx.select({value: count()}).from(eventRegistrations).where(and(eq(eventRegistrations.eventId, eventId), inArray(eventRegistrations.status, ["registered", "attended"]))))[0]?.value ?? 0),
     upsertRegistration: async (eventId, profileId, status) => { await tx.insert(eventRegistrations).values({eventId, profileId, status, checkedInAt: null}).onConflictDoUpdate({target: [eventRegistrations.eventId, eventRegistrations.profileId], set: {status, checkedInAt: null}}); },
     insertAudit: async (input) => { await tx.insert(auditEvents).values(input); },
-  }))};
+  })), enrollReminder: enrollEventReminder};
 }
 
 export async function registerForEvent(actor: Actor, input: unknown, dependencies?: EventRegistrationDependencies): Promise<Readonly<{disposition: "registered" | "waitlist" | "already_registered" | "already_waitlisted"}>> {
   requireMember(actor);
   const {eventId} = registrationInputSchema.parse(input);
   const resolved = dependencies ?? await defaultRegistrationDependencies();
-  return resolved.transaction(async (transaction) => {
+  const outcome = await resolved.transaction<Readonly<{disposition: "registered" | "waitlist" | "already_registered" | "already_waitlisted"; startsAt?: Date}>>(async (transaction) => {
     const event = await transaction.lockEvent(eventId);
     if (!event || !event.published) throw new Error("EVENT_NOT_FOUND");
     if (eventBoundary(event) < (resolved.now?.() ?? new Date())) throw new Error("EVENT_REGISTRATION_CLOSED");
@@ -396,8 +397,19 @@ export async function registerForEvent(actor: Actor, input: unknown, dependencie
     const disposition = event.capacity !== null && await transaction.countRegistered(eventId) >= event.capacity ? "waitlist" : "registered";
     await transaction.upsertRegistration(eventId, actor.profileId, disposition);
     await transaction.insertAudit({actorUserId: actor.profileId, actorType: "member", action: "event.registration.created", targetType: "event", targetId: eventId, metadata: {disposition}});
-    return {disposition};
+    return {disposition, startsAt: event.startsAt};
   });
+  if (outcome.disposition === "registered" && outcome.startsAt) {
+    // Programme B-5 (S-2): the 24-hour reminder is enrolled after the seat has
+    // committed, and only for a confirmed seat — a waitlisted member has
+    // nothing to attend yet. It runs outside the transaction and swallows its
+    // own failure on purpose: the seat is the member's contract, the reminder
+    // is a courtesy, and a journey_state outage must never turn a successful
+    // registration into an error the member retries into a duplicate.
+    await (resolved.enrollReminder ?? enrollEventReminder)({profileId: actor.profileId, eventId, startsAt: outcome.startsAt})
+      .catch((error: unknown) => { console.error("event-reminder-enrolment", error); });
+  }
+  return {disposition: outcome.disposition};
 }
 
 export async function getEventBySlug(actor: Actor, slug: unknown, source?: EventRows): Promise<Event | null> {

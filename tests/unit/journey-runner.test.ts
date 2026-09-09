@@ -460,4 +460,40 @@ describe("runJourneyBatch", () => {
       summaryCode: "attempts_exhausted",
     }));
   });
+
+  it("renders the 24-hour event reminder with the event variables from the loaded context (B-5)", async () => {
+    const eventId = "33333333-3333-4333-8333-333333333333";
+    const reminder = due("reminder_24h", {
+      journey: "event_reminder",
+      membershipId: null,
+      instanceKey: `event:${eventId}`,
+      deliveryKey: `journey:member-reminder_24h:event_reminder:event:${eventId}:reminder_24h`,
+    });
+    const eventVariables = {
+      eventTitle: "Fixture Event",
+      startsAt: "1 March 2030 at 10:00",
+      venue: "KOHO, Kwun Tong",
+      eventUrl: "https://example.test/events/fixture-event",
+      ctaUrl: "https://example.test/events/fixture-event",
+    };
+    const test = harness([reminder], () => context({
+      whatsappOptIn: true,
+      whatsappNumber: "+85255550000",
+      variables: {memberName: "Fixture Member", ...eventVariables},
+    }));
+
+    const summary = await runJourneyBatch(test.deps, {now, limit: 1});
+
+    expect(summary).toMatchObject({claimed: 1, sent: 1, skipped: 0, failed: 0});
+    expect(test.rendered).toEqual([expect.objectContaining({
+      template: "event_reminder_24h",
+      locale: "en",
+      variables: expect.objectContaining(eventVariables),
+    })]);
+    expect(test.sentEmails.map((item) => item.idempotencyKey)).toEqual([reminder.deliveryKey]);
+    expect(test.sentWhatsapp).toEqual([{
+      idempotencyKey: `${reminder.deliveryKey}:whatsapp`,
+      template: "event_reminder_24h",
+    }]);
+  });
 });

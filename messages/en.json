@@ -321,6 +321,13 @@
         "heading": "See you there",
         "body": "Thanks for registering. If your plans change, use the cancel link so someone on the waitlist can take your place. {cancelUrl}",
         "cta": "View the event"
+      },
+      "event_reminder_24h": {
+        "subject": "Tomorrow: {eventTitle}",
+        "preview": "Your WTIA event is tomorrow.",
+        "heading": "See you tomorrow",
+        "body": "{eventTitle} starts at {startsAt}. {venue}",
+        "cta": "Event details"
       }
     }
   },

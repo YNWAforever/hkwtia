@@ -11,6 +11,8 @@ const fixtureVars = {
   amount: "HK$1,000",
   eventTitle: "Fixture Event",
   cancelUrl: "https://www.hkwtia.org/api/events/guest/cancel?token=fixture",
+  startsAt: "1 March 2030 at 10:00",
+  venue: "KOHO, Kwun Tong",
 };
 
 describe("renderEmail", () => {
