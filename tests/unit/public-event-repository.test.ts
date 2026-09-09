@@ -1,7 +1,8 @@
 import {describe, expect, it, vi} from "vitest";
 
-import type {Event} from "@/lib/db/server-schema";
+import type {Event, PublicProfileStatus} from "@/lib/db/server-schema";
 import {countPublicEvents, getEventBySlug, getPublicEventBySlug, listFeaturedPublicEvents, listMemberEvents, listPublicEvents} from "@/lib/db/repos/events";
+import {parseEventFilters} from "@/lib/events/filters";
 import type {Actor} from "@/lib/membership/lifecycle";
 import {legacyDerivedEventColumns} from "@/tests/fixtures/event-row";
 
@@ -12,6 +13,16 @@ const asOf = new Date("2030-01-01T10:00:00.000Z");
 function event(slug: string, overrides: Partial<Event> = {}): Event {
   const row = {id: `${slug}-id`, slug, titleEn: `${slug} title`, titleZh: null, descriptionEn: `${slug} description`, descriptionZh: null, startsAt: new Date("2030-01-01T09:00:00.000Z"), endsAt: new Date("2030-01-01T12:00:00.000Z"), venue: "WTIA", capacity: null, memberOnly: false, published: true, heroMediaId: null, createdAt: new Date("2026-07-20T00:00:00.000Z"), updatedAt: new Date("2026-07-20T00:00:00.000Z"), ...overrides};
   return {...legacyDerivedEventColumns(row), ...row};
+}
+
+/**
+ * The three `companies` columns the public projection's LEFT JOIN hands back
+ * (B-6, D-11). `slug` is the stored column — every company has one after the
+ * 0029 backfill, published or not — and `publicProfileStatus` is what decides
+ * whether it may also become a /members link.
+ */
+function organiser(name: string, slug: string | null, publicProfileStatus: PublicProfileStatus = "published") {
+  return {name, slug, publicProfileStatus};
 }
 
 describe("repository-backed Event visibility", () => {
@@ -108,12 +119,12 @@ describe("repository-backed Event visibility", () => {
 
   it("projects format, registration mode, tags and the organiser name for the detail page (B-4)", async () => {
     const source = [
-      {event: event("hosted", {format: "hybrid", onlineUrl: "https://meet.example.hk/hosted", registrationMode: "external", externalRegistrationUrl: "https://tickets.example.hk/hosted", tags: ["ai", "fintech"], organiserCompanyId: "company-1"}), hero: null, organiser: {name: "Acme Robotics"}},
+      {event: event("hosted", {format: "hybrid", onlineUrl: "https://meet.example.hk/hosted", registrationMode: "external", externalRegistrationUrl: "https://tickets.example.hk/hosted", tags: ["ai", "fintech"], organiserCompanyId: "company-1"}), hero: null, organiser: organiser("Acme Robotics", "acme-robotics")},
       {event: event("admin-authored"), hero: null},
     ] as const;
     await expect(getPublicEventBySlug("hosted", "en", {asOf, source})).resolves.toMatchObject({
       format: "hybrid", onlineUrl: "https://meet.example.hk/hosted", registrationMode: "external", externalRegistrationUrl: "https://tickets.example.hk/hosted",
-      tags: ["ai", "fintech"], organiser: {name: "Acme Robotics", slug: null},
+      tags: ["ai", "fintech"], organiser: {name: "Acme Robotics", slug: "acme-robotics"},
     });
     await expect(getPublicEventBySlug("admin-authored", "en", {asOf, source})).resolves.toMatchObject({
       format: "in_person", onlineUrl: null, registrationMode: "rsvp", externalRegistrationUrl: null, tags: [], organiser: null,
@@ -122,28 +133,63 @@ describe("repository-backed Event visibility", () => {
     await expect(listPublicEvents(anonymous, {status: "open", asOf, source: [event("bare")]})).resolves.toMatchObject([{slug: "bare", registrationMode: "rsvp", organiser: null}]);
   });
 
+  // B-6 / D-11: /events/[slug] links the organiser on `organiser.slug` alone, so the
+  // projection is where "has a public page" is decided. A company keeps its slug through
+  // every profile state, so publishing it is the only difference between a link and text.
+  it("projects the organiser's member-page slug only where that page is published (B-6, D-11)", async () => {
+    const source = [
+      {event: event("published-organiser", {organiserCompanyId: "company-1"}), hero: null, organiser: organiser("Acme Robotics", "acme-robotics", "published")},
+      {event: event("pending-organiser", {organiserCompanyId: "company-2"}), hero: null, organiser: organiser("Beta Labs", "beta-labs", "pending_review")},
+      {event: event("hidden-organiser", {organiserCompanyId: "company-3"}), hero: null, organiser: organiser("Gamma Works", "gamma-works", "hidden")},
+      {event: event("rejected-organiser", {organiserCompanyId: "company-4"}), hero: null, organiser: organiser("Delta Systems", "delta-systems", "rejected")},
+      // `companies_public_profile_slug_check` forbids this pair in the database; the
+      // projection must still refuse to build `/members/null` if one ever arrives.
+      {event: event("slugless-organiser", {organiserCompanyId: "company-5"}), hero: null, organiser: organiser("Epsilon Group", null, "published")},
+    ] as const;
+    await expect(getPublicEventBySlug("published-organiser", "en", {asOf, source})).resolves.toMatchObject({organiser: {name: "Acme Robotics", slug: "acme-robotics"}});
+    // The name still renders for each of these; only the link is withheld.
+    const unlinked = [["pending-organiser", "Beta Labs"], ["hidden-organiser", "Gamma Works"], ["rejected-organiser", "Delta Systems"], ["slugless-organiser", "Epsilon Group"]] as const;
+    for (const [slug, name] of unlinked) {
+      await expect(getPublicEventBySlug(slug, "en", {asOf, source})).resolves.toMatchObject({organiser: {name, slug: null}});
+    }
+  });
+
   it("applies format, month (Hong Kong), organiser slug and tag filters (B-6)", async () => {
     const readAsOf = new Date("2026-09-01T00:00:00.000Z");
     const source = [
-      {event: event("online-oct", {startsAt: new Date("2026-10-05T02:00:00.000Z"), endsAt: null, format: "online", tags: ["ai"], organiserCompanyId: "company-1"}), hero: null, organiser: {name: "Acme Robotics"}},
-      // "Acme Ltd." must match ?organiser=acme-ltd: the derived slug trims the edge hyphen the trailing dot leaves.
-      {event: event("in-person-nov", {startsAt: new Date("2026-11-05T02:00:00.000Z"), endsAt: null, format: "in_person", tags: ["health"], organiserCompanyId: "company-2"}), hero: null, organiser: {name: "Acme Ltd."}},
+      {event: event("online-oct", {startsAt: new Date("2026-10-05T02:00:00.000Z"), endsAt: null, format: "online", tags: ["ai"], organiserCompanyId: "company-1"}), hero: null, organiser: organiser("Acme Robotics", "acme-robotics")},
+      // An organiser whose own page is still hidden: `?organiser=` matches the stored slug,
+      // so hiding a member's profile must not also hide the public events they run.
+      {event: event("in-person-nov", {startsAt: new Date("2026-11-05T02:00:00.000Z"), endsAt: null, format: "in_person", tags: ["health"], organiserCompanyId: "company-2"}), hero: null, organiser: organiser("Acme Ltd.", "acme-ltd", "hidden")},
       // 2026-10-31T17:00Z is already 1 November in Hong Kong: the month filter must use the HK boundary.
       {event: event("hk-november", {startsAt: new Date("2026-10-31T17:00:00.000Z"), endsAt: null, format: "hybrid", tags: ["ai", "health"]}), hero: null},
+      // An owner-edited slug, which 0029's derivation from `display_name` would never mint.
+      // This row is what separates "matches companies.slug" from "matches a derived name".
+      {event: event("renamed-dec", {startsAt: new Date("2026-12-05T02:00:00.000Z"), endsAt: null, organiserCompanyId: "company-3"}), hero: null, organiser: organiser("Gamma Works Limited", "gamma")},
     ] as const;
     const read = (filters: NonNullable<Parameters<typeof listPublicEvents>[1]["filters"]>) =>
       listPublicEvents(anonymous, {status: "open", asOf: readAsOf, locale: "en", filters, source}).then((rows) => rows.map((row) => row.slug));
     const none = {format: null, month: null, organiser: null, tag: null} as const;
-    await expect(read(none)).resolves.toEqual(["online-oct", "hk-november", "in-person-nov"]);
+    await expect(read(none)).resolves.toEqual(["online-oct", "hk-november", "in-person-nov", "renamed-dec"]);
     await expect(read({...none, format: "online"})).resolves.toEqual(["online-oct"]);
     await expect(read({...none, month: "2026-10"})).resolves.toEqual(["online-oct"]);
     await expect(read({...none, month: "2026-11"})).resolves.toEqual(["hk-november", "in-person-nov"]);
     await expect(read({...none, organiser: "acme-robotics"})).resolves.toEqual(["online-oct"]);
     await expect(read({...none, organiser: "acme-ltd"})).resolves.toEqual(["in-person-nov"]);
     await expect(read({...none, organiser: "someone-else"})).resolves.toEqual([]);
+    // The stored slug decides, not the display name: `gamma` hits and `gamma-works-limited` misses.
+    await expect(read({...none, organiser: "gamma"})).resolves.toEqual(["renamed-dec"]);
+    await expect(read({...none, organiser: "gamma-works-limited"})).resolves.toEqual([]);
     await expect(read({...none, tag: "health"})).resolves.toEqual(["hk-november", "in-person-nov"]);
     await expect(read({...none, format: "hybrid", tag: "ai"})).resolves.toEqual(["hk-november"]);
     await expect(countPublicEvents(anonymous, {status: "open", asOf: readAsOf, filters: {...none, tag: "ai"}, source})).resolves.toBe(2);
+
+    // The `?organiser=` text box takes a typed name, not a slug: parseEventFilters
+    // normalises it to the shape `companies.slug` holds, and the read still resolves.
+    // "Acme Ltd." keeps the case that made the old derivation subtle -- the trailing
+    // dot must not leave the edge hyphen the SLUG regex rejects.
+    await expect(read(parseEventFilters({organiser: "Acme Robotics"}))).resolves.toEqual(["online-oct"]);
+    await expect(read(parseEventFilters({organiser: "  acme LTD.  "}))).resolves.toEqual(["in-person-nov"]);
   });
 
   it("excludes member-only and unpublished Events from the count", async () => {

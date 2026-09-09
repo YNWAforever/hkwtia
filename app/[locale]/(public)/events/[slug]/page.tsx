@@ -73,8 +73,10 @@ export default async function EventPage({params}: Props) {
   async function registerAction(state: RegistrationActionState, formData: FormData): Promise<RegistrationActionState> { "use server"; return runPublicEventRegistrationAction(state, formData, {messages: registrationMessages}); }
   const past = eventBoundary({startsAt: new Date(displayEvent.startsAt), endsAt: displayEvent.endsAt ? new Date(displayEvent.endsAt) : null}) < asOf;
   const detailLabels = {date: t("detail.date"), venue: t("detail.venue"), capacity: t("detail.capacity")};
-  // Programme B-6: the organiser company links to its directory page only once Phase B2
-  // gives it a slug; until then it is a name in the facts grid and an unlinked Event.organizer.
+  // Programme B-6 / D-11: the organiser links to its /members page when it has one, and is
+  // otherwise a name in the facts grid and an unlinked Event.organizer. The slug alone is the
+  // condition on purpose -- `projectPublicEvent` in lib/db/repos/events.ts already withholds it
+  // for a company whose public profile is not `published`, so this page cannot link to a 404.
   const organiserHref = displayEvent.organiser?.slug ? localizedPath(appLocale, `/members/${displayEvent.organiser.slug}`) : null;
   const organiserData = displayEvent.organiser ? {name: displayEvent.organiser.name, url: organiserHref ? absoluteUrl(organiserHref) : null} : null;
   // app/styles/wisetech.css:565's `.event-detail-hero` background-image reads var(--wt-event-photo)

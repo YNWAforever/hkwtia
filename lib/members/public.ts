@@ -1,6 +1,7 @@
 import {isIndustryTag} from "@/config/industry-tags";
 import type {AppLocale} from "@/i18n/routing";
 import type {MemberFilters} from "@/lib/db/repos/company-profiles";
+import type {PublicProfileStatus} from "@/lib/db/server-schema";
 import {MEMBERSHIP_PLAN_CODES, type MembershipPlanCode} from "@/lib/membership/constants";
 
 /**
@@ -68,4 +69,25 @@ export function localeText(
 ): string | null {
   const [preferred, fallback] = locale === "zh-HK" ? [value.zhHk, value.en] : [value.en, value.zhHk];
   return (preferred?.trim() || fallback?.trim()) || null;
+}
+
+/**
+ * The address of a company's public page, or `null` when it has none — the JS
+ * twin of `publishedScope` in `lib/db/repos/company-profiles.ts`
+ * (`public_profile_status = 'published' AND slug IS NOT NULL`). Both halves are
+ * one rule, not two facts: `companies_public_profile_slug_check` makes a slug
+ * part of what `published` *means*, and a company can hold a slug from the 0029
+ * backfill while its profile is still `hidden`, `pending_review` or `rejected`.
+ *
+ * It exists because one reader cannot use the SQL scope. The public event
+ * projection (`lib/db/repos/events.ts`) reaches `companies` through a LEFT JOIN
+ * it must not filter on — an event organised by an unpublished company still
+ * has to render, as its organiser's *name*. So that read selects the two
+ * columns and decides here, with this rule, rather than growing a second one
+ * that could drift into linking to a page that 404s.
+ */
+export function publicMemberPageSlug(
+  company: Readonly<{slug: string | null; publicProfileStatus: PublicProfileStatus | null}>,
+): string | null {
+  return company.publicProfileStatus === "published" && company.slug ? company.slug : null;
 }

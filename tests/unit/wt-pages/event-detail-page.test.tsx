@@ -43,7 +43,11 @@ const event = (endsAt: string, overrides: Partial<Record<string, unknown>> = {})
 describe("event detail page donor markup", () => {
   beforeEach(() => { vi.clearAllMocks(); auth.getActor.mockResolvedValue(null); });
 
-  it("shows the organiser company in the facts grid and as Event.organizer, linking only once it has a public page (B-6)", async () => {
+  // `organiser.slug` is null unless the company's public profile is `published`
+  // (`publicMemberPageSlug`, applied in lib/db/repos/events.ts), so an unpublished or
+  // slug-less organiser reaches this page as a name and must render as plain text —
+  // a link to /members/[slug] would 404 (B-6, D-11).
+  it("shows the organiser company in the facts grid and as Event.organizer, linking only once its member page is published (B-6, D-11)", async () => {
     events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z", {format: "online", organiser: {name: "Acme Robotics", slug: null}}));
     const unlinked = renderToStaticMarkup(await EventPage(props));
     expect(unlinked).toContain("detail.organiser");

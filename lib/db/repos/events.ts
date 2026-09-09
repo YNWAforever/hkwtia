@@ -8,13 +8,14 @@ import {getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
-import {auditEvents, companies, companyMembers, eventGuestRegistrations, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility} from "@/lib/db/server-schema";
+import {auditEvents, companies, companyMembers, eventGuestRegistrations, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility, type PublicProfileStatus} from "@/lib/db/server-schema";
 import {assertCanSubmitEvent} from "@/lib/events/entitlement-core";
-import {EMPTY_EVENT_FILTERS, hongKongMonthBounds, normaliseEventTag, organiserSlugFromDisplayName, type EventFilters} from "@/lib/events/filters";
+import {EMPTY_EVENT_FILTERS, hongKongMonthBounds, normaliseEventTag, type EventFilters} from "@/lib/events/filters";
 import {eventBoundary, type PublicEventProjection, type PublicEventStatus} from "@/lib/events/public";
 import {enrollEventReminder, type EventReminderEnrollmentInput} from "@/lib/events/reminder-enrollment";
 import {canTransitionEvent, derivedEventFlags, hongKongQuarterBounds} from "@/lib/events/status";
 import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl} from "@/lib/media/url";
+import {publicMemberPageSlug} from "@/lib/members/public";
 import type {MembershipPlanCode} from "@/lib/membership/constants";
 import {requireMember, type Actor, type AdminActor, type CompanyRole} from "@/lib/membership/lifecycle";
 
@@ -86,22 +87,27 @@ type EventAudit = Readonly<{
 export type EventRows = readonly Event[] | Readonly<{list: () => Promise<readonly Event[]>}>;
 export type FeaturedPublicEventOptions = Readonly<{asOf: Date; limit: number; locale?: string}>;
 type PublicEventHeroSource = Readonly<{url: string; altEn: string; altZh: string; archivedAt: Date | null}>;
-type PublicEventOrganiserSource = Readonly<{name: string}>;
+type PublicEventOrganiserSource = Readonly<{name: string; slug: string | null; publicProfileStatus: PublicProfileStatus | null}>;
 type PublicEventMemoryRow = Readonly<{event: Event; hero: PublicEventHeroSource | null; organiser?: PublicEventOrganiserSource | null}>;
 // The shared select for every public projection read: the hero join, plus the
-// organiser company's display name (Phase B1, B-4/B-6). Selected as a nested
-// object so drizzle nulls it as a whole when the left join misses.
+// organiser company's display name and the two columns that decide whether it
+// also has a public page (Phase B1 B-4/B-6, completed by Phase B2 D-11).
+// Selected as a nested object so drizzle nulls it as a whole when the left join
+// misses. The raw `slug` rides along because `?organiser=` matches on it for
+// every company; only `publicMemberPageSlug` decides what may become a link.
 const publicProjectionSelection = {
   event: events,
   hero: {url: media.url, altEn: media.altEn, altZh: media.altZh, archivedAt: media.archivedAt},
-  organiser: {name: companies.displayName},
+  organiser: {name: companies.displayName, slug: companies.slug, publicProfileStatus: companies.publicProfileStatus},
 } as const;
-type PublicProjectionRow = Readonly<{event: Event; hero: Readonly<{url: string | null; altEn: string | null; altZh: string | null; archivedAt: Date | null}> | null; organiser: Readonly<{name: string | null}> | null}>;
+type PublicProjectionRow = Readonly<{event: Event; hero: Readonly<{url: string | null; altEn: string | null; altZh: string | null; archivedAt: Date | null}> | null; organiser: Readonly<{name: string | null; slug: string | null; publicProfileStatus: PublicProfileStatus | null}> | null}>;
 function publicMemoryRow(row: PublicProjectionRow): PublicEventMemoryRow {
   return {
     event: row.event,
     hero: row.hero === null || row.hero.url === null ? null : row.hero as PublicEventHeroSource,
-    organiser: row.organiser === null || row.organiser.name === null ? null : {name: row.organiser.name},
+    organiser: row.organiser === null || row.organiser.name === null
+      ? null
+      : {name: row.organiser.name, slug: row.organiser.slug, publicProfileStatus: row.organiser.publicProfileStatus},
   };
 }
 export type PublicEventSource = readonly (Event | PublicEventMemoryRow)[] | Readonly<{list: () => Promise<readonly (Event | PublicEventMemoryRow)[]>}>;
@@ -175,7 +181,9 @@ function projectPublicEvent(row: PublicEventMemoryRow, locale: string): PublicEv
     tags: [...event.tags],
     registrationMode: event.registrationMode,
     externalRegistrationUrl: event.externalRegistrationUrl,
-    organiser: organiser ? {name: organiser.name, slug: null} : null,
+    // The name is always projected; the slug only where the company really has
+    // a published page, so the detail view can never link to a 404 (D-11).
+    organiser: organiser ? {name: organiser.name, slug: publicMemberPageSlug(organiser)} : null,
   };
 }
 
@@ -196,13 +204,13 @@ function publicFilterPredicates(filters: EventFilters) {
   // Tags are normalised on every write (eventInputObjectSchema), so the stored spelling
   // is exactly what parseEventFilters produces and plain containment is enough.
   if (filters.tag) predicates.push(sql`${events.tags} @> ARRAY[${filters.tag}]::text[]`);
-  // `companies.slug` arrives with Phase B2 Task 1; until then the organiser filter matches
-  // a slug derived from the display name. This expression must agree character for
-  // character with organiserSlugFromDisplayName in lib/events/filters.ts: collapse every
-  // non-alphanumeric run to `-`, lowercase, then trim edge hyphens so "Acme Ltd." is
-  // `acme-ltd` on both sides. Replace with eq(companies.slug, filters.organiser) when B2
-  // merges, and organiserSlugFromDisplayName with it.
-  if (filters.organiser) predicates.push(sql`trim(both '-' from lower(regexp_replace(${companies.displayName}, '[^a-zA-Z0-9]+', '-', 'g'))) = ${filters.organiser}`);
+  // Phase B2 Task 1 landed `companies.slug` (partial unique index + shape check), so the
+  // organiser axis is now an equality on the real column rather than a slug derived from
+  // the display name in SQL. It matches on the slug of *any* company, published or not:
+  // the slug is the organiser's identity, and hiding a member's public page must not also
+  // hide the public events they run. `?organiser=` still accepts a typed name, which
+  // parseEventFilters normalises to this shape before it reaches here.
+  if (filters.organiser) predicates.push(eq(companies.slug, filters.organiser));
   return predicates;
 }
 
@@ -213,7 +221,9 @@ function matchesPublicFilters({event, organiser}: PublicEventMemoryRow, filters:
     if (event.startsAt < start || event.startsAt >= end) return false;
   }
   if (filters.tag && !event.tags.includes(filters.tag)) return false;
-  if (filters.organiser && (!organiser || organiserSlugFromDisplayName(organiser.name) !== filters.organiser)) return false;
+  // The twin of `eq(companies.slug, filters.organiser)` above: the stored slug, not the
+  // linkable one — an organiser whose page is unpublished is still filterable by slug.
+  if (filters.organiser && organiser?.slug !== filters.organiser) return false;
   return true;
 }
 

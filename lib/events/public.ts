@@ -13,8 +13,10 @@ export type PublicEventProjection = Readonly<{
   capacity: number | null;
   hero: Readonly<{url: string; alt: string}> | null;
   // Phase B1 (B-4, B-6): the detail page picks the registration path from these,
-  // and /events filters on format and tags. `organiser.slug` stays null until the
-  // Phase B2 directory gives companies a public page.
+  // and /events filters on format and tags. `organiser.slug` is the address of the
+  // company's /members page and is null unless that page is actually published
+  // (`publicMemberPageSlug`, lib/members/public.ts) -- so a reader of this type can
+  // link on the slug alone without checking a second condition it cannot see.
   format: PublicEventFormat;
   onlineUrl: string | null;
   tags: readonly string[];

@@ -289,6 +289,13 @@ function searchPattern(value: string | null): string | null {
  * The public scope, as a predicate rather than a filter applied to rows. An
  * unpublished company and a published one without a slug (which would have no
  * addressable page) are both invisible to every read below.
+ *
+ * `publicMemberPageSlug` in `lib/members/public.ts` is the JS twin of this
+ * expression, for the one reader that cannot use a WHERE clause: the public
+ * event projection joins `companies` to name an organiser whether or not it is
+ * published, and asks the twin whether that organiser also has a page to link
+ * to (programme B-6). Keep the two in step — a rule that holds only here would
+ * let /events/[slug] link to a /members/[slug] that 404s.
  */
 const publishedScope = sql`${companies.publicProfileStatus} = 'published' AND ${companies.slug} IS NOT NULL`;
 
