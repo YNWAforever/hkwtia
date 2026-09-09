@@ -1405,6 +1405,21 @@
       "open": "現正開放",
       "past": "已結束活動"
     },
+    "filters": {
+      "legend": "篩選活動",
+      "format": "形式",
+      "formats": {
+        "any": "任何形式",
+        "in_person": "實體",
+        "online": "網上",
+        "hybrid": "混合"
+      },
+      "month": "月份",
+      "organiser": "主辦機構",
+      "tag": "主題",
+      "apply": "套用篩選",
+      "clear": "清除"
+    },
     "viewSwitch": {
       "label": "切換活動顯示方式",
       "cards": "卡片",
@@ -1470,6 +1485,7 @@
       "date": "日期及時間",
       "venue": "地點",
       "capacity": "名額",
+      "organiser": "主辦",
       "eyebrow": "活動",
       "factsTitle": "活動資訊",
       "asideTitle": "對此活動有疑問？",

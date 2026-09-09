@@ -21,7 +21,7 @@ import {runPublicEventRegistrationAction} from "@/lib/events/registration-action
 import type {RegistrationActionState} from "@/lib/events/registration-state";
 import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
 import {buildEventData} from "@/lib/structured-data";
-import {localizedPath} from "@/lib/urls";
+import {absoluteUrl, localizedPath} from "@/lib/urls";
 
 export const dynamic = "force-dynamic";
 type Props = Readonly<{params: Promise<{locale: string; slug: string}>}>;
@@ -73,6 +73,10 @@ export default async function EventPage({params}: Props) {
   async function registerAction(state: RegistrationActionState, formData: FormData): Promise<RegistrationActionState> { "use server"; return runPublicEventRegistrationAction(state, formData, {messages: registrationMessages}); }
   const past = eventBoundary({startsAt: new Date(displayEvent.startsAt), endsAt: displayEvent.endsAt ? new Date(displayEvent.endsAt) : null}) < asOf;
   const detailLabels = {date: t("detail.date"), venue: t("detail.venue"), capacity: t("detail.capacity")};
+  // Programme B-6: the organiser company links to its directory page only once Phase B2
+  // gives it a slug; until then it is a name in the facts grid and an unlinked Event.organizer.
+  const organiserHref = displayEvent.organiser?.slug ? localizedPath(appLocale, `/members/${displayEvent.organiser.slug}`) : null;
+  const organiserData = displayEvent.organiser ? {name: displayEvent.organiser.name, url: organiserHref ? absoluteUrl(organiserHref) : null} : null;
   // app/styles/wisetech.css:565's `.event-detail-hero` background-image reads var(--wt-event-photo)
   // with no fallback -- an unset custom property invalidates the whole declaration, so this is
   // always set: the event's own validated, already-filtered hero, or the placeholder above.
@@ -93,7 +97,7 @@ export default async function EventPage({params}: Props) {
 
   return (
     <>
-      <StructuredData data={buildEventData({...displayEvent, image: displayEvent.hero?.url}, displayEvent.title, appLocale)} />
+      <StructuredData data={buildEventData({...displayEvent, image: displayEvent.hero?.url, organiser: organiserData}, displayEvent.title, appLocale)} />
       <section className="event-detail-page">
         {/* EventDetail is rendered completely unchanged inside this wrapper: its own <h1> is
             the page's only title, styled by the donor's `.event-detail-hero h1` descendant rule
@@ -116,6 +120,12 @@ export default async function EventPage({params}: Props) {
                   <div><span>{detailLabels.date}</span><time dateTime={displayEvent.startsAt}>{formatEventDate(displayEvent.startsAt, appLocale)}</time></div>
                   {displayEvent.venue ? <div><span>{detailLabels.venue}</span><strong>{displayEvent.venue}</strong></div> : null}
                   {displayEvent.capacity !== null ? <div><span>{detailLabels.capacity}</span><strong>{displayEvent.capacity}</strong></div> : null}
+                  {displayEvent.organiser ? (
+                    <div>
+                      <span>{t("detail.organiser")}</span>
+                      <strong>{organiserHref ? <Link href={organiserHref}>{displayEvent.organiser.name}</Link> : displayEvent.organiser.name}</strong>
+                    </div>
+                  ) : null}
                 </div>
               </section>
             </div>

@@ -109,4 +109,17 @@ describe("Events page donor markup", () => {
     expect(document.querySelector(".event-calendar-view")).not.toBeNull();
     expect(screen.getByRole("button", {name: bundles.en.Events.viewSwitch.calendar})).toHaveAttribute("aria-pressed", "true");
   });
+  it("parses ?format into repository filters and reflects it in the filter panel (B-6)", async () => {
+    listPublic.mockResolvedValueOnce([]);
+    await renderEventsPage({status: "past", format: "online", month: "2026-13", tag: "AI"});
+
+    expect(listPublic).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({status: "past", filters: {format: "online", month: null, organiser: null, tag: "ai"}}));
+    const panel = document.querySelector("form.event-filter-panel");
+    expect(panel).toHaveAttribute("method", "get");
+    expect(panel).toHaveAttribute("action", "/events");
+    expect(within(panel as HTMLElement).getByRole("combobox", {name: bundles.en.Events.filters.format})).toHaveValue("online");
+    expect(within(panel as HTMLElement).getByRole("textbox", {name: bundles.en.Events.filters.tag})).toHaveValue("ai");
+    expect(panel?.querySelector("input[name=status]")).toHaveAttribute("value", "past");
+    expect(within(panel as HTMLElement).getByRole("link", {name: bundles.en.Events.filters.clear})).toHaveAttribute("href", "/events?status=past");
+  });
 });

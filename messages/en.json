@@ -1405,6 +1405,21 @@
       "open": "Open now",
       "past": "Past events"
     },
+    "filters": {
+      "legend": "Filter events",
+      "format": "Format",
+      "formats": {
+        "any": "Any format",
+        "in_person": "In person",
+        "online": "Online",
+        "hybrid": "Hybrid"
+      },
+      "month": "Month",
+      "organiser": "Organiser",
+      "tag": "Topic",
+      "apply": "Apply filters",
+      "clear": "Clear"
+    },
     "viewSwitch": {
       "label": "Switch how events are displayed",
       "cards": "Cards",
@@ -1470,6 +1485,7 @@
       "date": "Date and time",
       "venue": "Venue",
       "capacity": "Capacity",
+      "organiser": "Organised by",
       "eyebrow": "Event",
       "factsTitle": "Practical information",
       "asideTitle": "Questions about this event?",

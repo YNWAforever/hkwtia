@@ -10,6 +10,7 @@ import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {auditEvents, companies, companyMembers, eventGuestRegistrations, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility} from "@/lib/db/server-schema";
 import {assertCanSubmitEvent} from "@/lib/events/entitlement-core";
+import {EMPTY_EVENT_FILTERS, hongKongMonthBounds, organiserSlugFromDisplayName, type EventFilters} from "@/lib/events/filters";
 import {eventBoundary, type PublicEventProjection, type PublicEventStatus} from "@/lib/events/public";
 import {enrollEventReminder, type EventReminderEnrollmentInput} from "@/lib/events/reminder-enrollment";
 import {canTransitionEvent, derivedEventFlags, hongKongQuarterBounds} from "@/lib/events/status";
@@ -99,7 +100,7 @@ function publicMemoryRow(row: PublicProjectionRow): PublicEventMemoryRow {
   };
 }
 export type PublicEventSource = readonly (Event | PublicEventMemoryRow)[] | Readonly<{list: () => Promise<readonly (Event | PublicEventMemoryRow)[]>}>;
-export type PublicEventReadOptions = Readonly<{status: PublicEventStatus; asOf: Date; locale?: string; limit?: number; source?: PublicEventSource}>;
+export type PublicEventReadOptions = Readonly<{status: PublicEventStatus; asOf: Date; locale?: string; limit?: number; filters?: EventFilters; source?: PublicEventSource}>;
 export type PublicEventSlugOptions = Readonly<{asOf: Date; source?: PublicEventSource}>;
 export type MemberEventEligibility = Readonly<{hasEligibleMembership: (actor: Extract<Actor, {kind: "member"}>) => Promise<boolean>}>;
 export type EventMutationDependencies = Readonly<{transaction: <T>(work: (transaction: Readonly<{
@@ -178,10 +179,39 @@ function isPubliclyVisible(event: Pick<Event, "status" | "visibility">): boolean
   return event.status === "published" && event.visibility === "public";
 }
 
-function publicRowsByStatus(rows: readonly PublicEventMemoryRow[], status: PublicEventStatus, asOf: Date): PublicEventMemoryRow[] {
+// Programme B-6: the /events filter axes as SQL, and below as the in-memory twin the
+// unit tests run against. Every axis is independent; an unset axis adds no predicate.
+function publicFilterPredicates(filters: EventFilters) {
+  const predicates = [];
+  if (filters.format) predicates.push(eq(events.format, filters.format));
+  if (filters.month) {
+    const {start, end} = hongKongMonthBounds(filters.month);
+    predicates.push(gte(events.startsAt, start), lt(events.startsAt, end));
+  }
+  if (filters.tag) predicates.push(sql`${events.tags} @> ARRAY[${filters.tag}]::text[]`);
+  // `companies.slug` arrives with Phase B2 Task 1; until then the organiser filter matches
+  // a slug derived from the display name. Replace with eq(companies.slug, filters.organiser)
+  // when B2 merges, and organiserSlugFromDisplayName in lib/events/filters.ts with it.
+  if (filters.organiser) predicates.push(sql`lower(regexp_replace(${companies.displayName}, '[^a-z0-9]+', '-', 'gi')) = ${filters.organiser}`);
+  return predicates;
+}
+
+function matchesPublicFilters({event, organiser}: PublicEventMemoryRow, filters: EventFilters): boolean {
+  if (filters.format && event.format !== filters.format) return false;
+  if (filters.month) {
+    const {start, end} = hongKongMonthBounds(filters.month);
+    if (event.startsAt < start || event.startsAt >= end) return false;
+  }
+  if (filters.tag && !event.tags.includes(filters.tag)) return false;
+  if (filters.organiser && (!organiser || organiserSlugFromDisplayName(organiser.name) !== filters.organiser)) return false;
+  return true;
+}
+
+function publicRowsByStatus(rows: readonly PublicEventMemoryRow[], status: PublicEventStatus, asOf: Date, filters: EventFilters = EMPTY_EVENT_FILTERS): PublicEventMemoryRow[] {
   return rows
     .filter(({event}) => isPubliclyVisible(event))
     .filter(({event}) => status === "open" ? eventBoundary(event) >= asOf : eventBoundary(event) < asOf)
+    .filter((row) => matchesPublicFilters(row, filters))
     .toSorted((left, right) => {
       const boundaryOrder = eventBoundary(left.event).getTime() - eventBoundary(right.event).getTime();
       const timeOrder = status === "open" ? boundaryOrder : -boundaryOrder;
@@ -193,8 +223,9 @@ export async function listPublicEvents(_actor: Actor, options: PublicEventReadOp
   const limit = options.limit === undefined ? undefined : publicReadLimitSchema.parse(options.limit);
   const asOf = z.coerce.date().parse(options.asOf);
   const locale = options.locale ?? "en";
+  const filters = options.filters ?? EMPTY_EVENT_FILTERS;
   if (options.source) {
-    const rows = publicRowsByStatus(await publicRowsFrom(options.source), options.status, asOf);
+    const rows = publicRowsByStatus(await publicRowsFrom(options.source), options.status, asOf, filters);
     return (limit === undefined ? rows : rows.slice(0, limit)).map((row) => projectPublicEvent(row, locale));
   }
   const boundary = sql<Date>`coalesce(${events.endsAt}, ${events.startsAt})`;
@@ -204,26 +235,29 @@ export async function listPublicEvents(_actor: Actor, options: PublicEventReadOp
   const query = database.select(publicProjectionSelection).from(events)
     .leftJoin(media, eq(events.heroMediaId, media.id))
     .leftJoin(companies, eq(events.organiserCompanyId, companies.id))
-    .where(and(eq(events.status, "published"), eq(events.visibility, "public"), predicate)).orderBy(...order);
+    .where(and(eq(events.status, "published"), eq(events.visibility, "public"), predicate, ...publicFilterPredicates(filters))).orderBy(...order);
   const rows = await (limit === undefined ? query : query.limit(limit));
   return rows.map((row) => projectPublicEvent(publicMemoryRow(row), locale));
 }
 
-export type PublicEventCountOptions = Readonly<{status: PublicEventStatus; asOf: Date; source?: PublicEventSource}>;
+export type PublicEventCountOptions = Readonly<{status: PublicEventStatus; asOf: Date; filters?: EventFilters; source?: PublicEventSource}>;
 
 // Aggregate count, not a capped list read: this backs figures like the homepage's
 // "past events" tile, which must reflect the true historical total rather than the
 // 12-row cap listPublicEvents enforces for paginated public list pages.
 export async function countPublicEvents(_actor: Actor, options: PublicEventCountOptions): Promise<number> {
   const asOf = z.coerce.date().parse(options.asOf);
+  const filters = options.filters ?? EMPTY_EVENT_FILTERS;
   if (options.source) {
-    return publicRowsByStatus(await publicRowsFrom(options.source), options.status, asOf).length;
+    return publicRowsByStatus(await publicRowsFrom(options.source), options.status, asOf, filters).length;
   }
   const boundary = sql<Date>`coalesce(${events.endsAt}, ${events.startsAt})`;
   const predicate = options.status === "open" ? gte(boundary, asOf) : lt(boundary, asOf);
   const database = await getDb();
+  // The organiser predicate reads companies, so the count joins it the way the list does.
   const [row] = await database.select({value: count()}).from(events)
-    .where(and(eq(events.status, "published"), eq(events.visibility, "public"), predicate));
+    .leftJoin(companies, eq(events.organiserCompanyId, companies.id))
+    .where(and(eq(events.status, "published"), eq(events.visibility, "public"), predicate, ...publicFilterPredicates(filters)));
   return Number(row?.value ?? 0);
 }
 

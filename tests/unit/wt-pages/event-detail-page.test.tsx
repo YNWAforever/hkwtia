@@ -43,6 +43,24 @@ const event = (endsAt: string, overrides: Partial<Record<string, unknown>> = {})
 describe("event detail page donor markup", () => {
   beforeEach(() => { vi.clearAllMocks(); auth.getActor.mockResolvedValue(null); });
 
+  it("shows the organiser company in the facts grid and as Event.organizer, linking only once it has a public page (B-6)", async () => {
+    events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z", {format: "online", organiser: {name: "Acme Robotics", slug: null}}));
+    const unlinked = renderToStaticMarkup(await EventPage(props));
+    expect(unlinked).toContain("detail.organiser");
+    expect(unlinked).toContain("<strong>Acme Robotics</strong>");
+    expect(unlinked).not.toContain('href="/members/');
+    expect(unlinked).toContain('"organizer":{"@type":"Organization","name":"Acme Robotics"}');
+    expect(unlinked).toContain('"eventAttendanceMode":"https://schema.org/OnlineEventAttendanceMode"');
+
+    events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z", {organiser: {name: "Acme Robotics", slug: "acme-robotics"}}));
+    const linked = renderToStaticMarkup(await EventPage(props));
+    expect(linked).toContain('href="/members/acme-robotics"');
+    expect(linked).toMatch(/"organizer":\{"@type":"Organization","name":"Acme Robotics","url":"[^"]*\/members\/acme-robotics"\}/);
+
+    events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z"));
+    expect(renderToStaticMarkup(await EventPage(props))).not.toContain("detail.organiser");
+  });
+
   it("renders the hero, facts grid, main/aside layout and a live action bar with the guest RSVP form for an anonymous visitor", async () => {
     events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z"));
 

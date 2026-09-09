@@ -122,6 +122,28 @@ describe("repository-backed Event visibility", () => {
     await expect(listPublicEvents(anonymous, {status: "open", asOf, source: [event("bare")]})).resolves.toMatchObject([{slug: "bare", registrationMode: "rsvp", organiser: null}]);
   });
 
+  it("applies format, month (Hong Kong), organiser slug and tag filters (B-6)", async () => {
+    const readAsOf = new Date("2026-09-01T00:00:00.000Z");
+    const source = [
+      {event: event("online-oct", {startsAt: new Date("2026-10-05T02:00:00.000Z"), endsAt: null, format: "online", tags: ["ai"], organiserCompanyId: "company-1"}), hero: null, organiser: {name: "Acme Robotics"}},
+      {event: event("in-person-nov", {startsAt: new Date("2026-11-05T02:00:00.000Z"), endsAt: null, format: "in_person", tags: ["health"]}), hero: null},
+      // 2026-10-31T17:00Z is already 1 November in Hong Kong: the month filter must use the HK boundary.
+      {event: event("hk-november", {startsAt: new Date("2026-10-31T17:00:00.000Z"), endsAt: null, format: "hybrid", tags: ["ai", "health"]}), hero: null},
+    ] as const;
+    const read = (filters: NonNullable<Parameters<typeof listPublicEvents>[1]["filters"]>) =>
+      listPublicEvents(anonymous, {status: "open", asOf: readAsOf, locale: "en", filters, source}).then((rows) => rows.map((row) => row.slug));
+    const none = {format: null, month: null, organiser: null, tag: null} as const;
+    await expect(read(none)).resolves.toEqual(["online-oct", "hk-november", "in-person-nov"]);
+    await expect(read({...none, format: "online"})).resolves.toEqual(["online-oct"]);
+    await expect(read({...none, month: "2026-10"})).resolves.toEqual(["online-oct"]);
+    await expect(read({...none, month: "2026-11"})).resolves.toEqual(["hk-november", "in-person-nov"]);
+    await expect(read({...none, organiser: "acme-robotics"})).resolves.toEqual(["online-oct"]);
+    await expect(read({...none, organiser: "someone-else"})).resolves.toEqual([]);
+    await expect(read({...none, tag: "health"})).resolves.toEqual(["hk-november", "in-person-nov"]);
+    await expect(read({...none, format: "hybrid", tag: "ai"})).resolves.toEqual(["hk-november"]);
+    await expect(countPublicEvents(anonymous, {status: "open", asOf: readAsOf, filters: {...none, tag: "ai"}, source})).resolves.toBe(2);
+  });
+
   it("excludes member-only and unpublished Events from the count", async () => {
     const source = [
       event("draft-public", {published: false, startsAt: new Date("2030-01-01T07:00:00.000Z"), endsAt: null}),
