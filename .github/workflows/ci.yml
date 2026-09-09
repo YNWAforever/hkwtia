@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
+  checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,8 +26,30 @@ jobs:
       - run: npm ls --package-lock-only @neondatabase/auth @neondatabase/auth-ui better-auth better-call
         timeout-minutes: 1
       - run: npm run audit:strings
-      - run: npm test
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
       - run: npm audit --omit=dev --audit-level=high
+  # Phase B1 (B-8): the unit suite is sharded two ways so the events and directory phases do
+  # not push a single 2-vCPU runner past its comfort zone.
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx vitest run --shard=${{ matrix.shard }}/2
+  # Keeping a job named `quality` that depends on the others preserves the branch-protection
+  # check name that PRs #47-#49 were gated on.
+  quality:
+    needs: [checks, tests]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "quality gate passed"

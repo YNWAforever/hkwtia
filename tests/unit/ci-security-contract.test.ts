@@ -12,7 +12,16 @@ const authTreeCommand = `npm ls --package-lock-only ${authTreePackages.join(" ")
 const authTreeProcessTimeoutMs = 18_000;
 const authTreeContractTimeoutMs = 50_000;
 const neonAuthLockRoots = ["node_modules/@neondatabase/auth", "node_modules/@neondatabase/auth-ui"];
-const requiredCiCommands = ["npm ci", authTreeCommand, "npm run audit:strings", "npm test", "npm run lint", "npm run typecheck", "npm run build", "npm audit --omit=dev --audit-level=high"];
+// Phase B1 (B-8) split the single `quality` job three ways: `checks` runs the static gates and the
+// build, `tests` shards the unit suite across two runners, and `quality` only aggregates the two
+// so the branch-protection check name PRs #47-#49 were gated on survives. The run steps are still
+// pinned as one ordered list across all jobs -- a shard that quietly dropped, or a gate that moved
+// out of `checks`, would change this sequence.
+const requiredCiCommands = [
+  "npm ci", authTreeCommand, "npm run audit:strings", "npm run lint", "npm run typecheck", "npm run build", "npm audit --omit=dev --audit-level=high",
+  "npm ci", "npx vitest run --shard=${{ matrix.shard }}/2",
+  'echo "quality gate passed"',
+];
 const requiredNpm10OptionalPeerClosure: Record<string, Record<string, unknown>> = {
   "node_modules/@neondatabase/auth-ui/node_modules/ajv": {
     version: "8.20.0",
@@ -345,6 +354,8 @@ describe("CI and production dependency security contract", () => {
     expect(workflowTriggerBranches(workflow, "push"), "CI must run on pushes to main and release, so production is never deployed unchecked").toEqual(expect.arrayContaining(["main", "release"]));
     expect(workflow, "CI must use Node 22 with npm caching").toMatch(/node-version:\s*22[\s\S]*cache:\s*npm/);
     expect(workflowRunSteps(workflow), "CI run steps must be exactly the required commands in order").toEqual(requiredCiCommands);
+    expect(normalizeNewlines(workflow), "the `quality` job must aggregate `checks` and `tests` so the branch-protection check name is preserved").toMatch(/^  quality:\n    needs: \[checks, tests\]/m);
+    expect(normalizeNewlines(workflow), "the unit suite must run as a two-way shard matrix").toMatch(/matrix:\n\s*shard: \[1, 2\]/);
   });
 
   it("bounds the exact Auth dependency-tree CI step to one minute", () => {
