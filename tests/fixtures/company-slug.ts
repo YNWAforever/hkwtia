@@ -17,6 +17,16 @@ const MIN_SLUG_LENGTH = 2;
 const MAX_SLUG_LENGTH = 96;
 
 /**
+ * `candidates.candidate ~ '^[a-z0-9]+(-[a-z0-9]+)*$'` in the migration (the
+ * portal's own rule, config S-2; Postgres needs no non-capturing marker).
+ * The length bound alone is not enough: a display name that slugifies to
+ * nothing — every CJK-only name in a zh-HK directory — leaves an empty base,
+ * and its n = 2 row derives `-2`, which is two characters long and collides
+ * with no base, because a base can never start with `-`.
+ */
+const PORTAL_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/**
  * The TypeScript twin of `drizzle/0029_phase_b_company_slugs.sql`, the way
  * tests/fixtures/event-row.ts mirrors 0027's derivation (programme D-12).
  * The backfill runs once, against a database no local gate has, so its
@@ -43,12 +53,13 @@ export function backfillCompanySlugs(rows: readonly CompanySlugSeedRow[]): reado
 
   return candidates.map((row) => {
     const withinLength = row.candidate.length >= MIN_SLUG_LENGTH && row.candidate.length <= MAX_SLUG_LENGTH;
+    const wellFormed = PORTAL_SLUG.test(row.candidate);
     // Only an ordinal can land on another row's base ("Acme" #2 derives
     // `acme-2`, which "Acme 2" owns outright). An n = 1 row carries candidate =
     // base and a base has exactly one n = 1 row, so guarding it too would strip
     // the bare slug from every duplicated name for no gain.
     const takenByAnotherBase = row.ordinal > 1
       && candidates.some((other) => other.id !== row.id && other.base === row.candidate);
-    return {...row, slug: withinLength && !takenByAnotherBase ? row.candidate : null};
+    return {...row, slug: withinLength && wellFormed && !takenByAnotherBase ? row.candidate : null};
   });
 }

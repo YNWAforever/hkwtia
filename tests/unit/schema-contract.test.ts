@@ -255,12 +255,13 @@ describe("phase B2 slug backfill (drizzle/0029)", () => {
     }
     // A skipped row keeps a NULL slug, and the owner has to type one before
     // `companies_public_profile_slug_check` lets the profile publish. So a row
-    // may only be skipped when its candidate is out of bounds or genuinely
-    // taken by another row.
+    // may only be skipped when its candidate is out of bounds, malformed, or
+    // genuinely taken by another row.
     for (const row of derived.filter((candidate) => candidate.slug === null)) {
       const outOfBounds = row.candidate.length < 2 || row.candidate.length > 96;
+      const malformed = !PORTAL_SLUG.test(row.candidate);
       const taken = derived.some((other) => other.id !== row.id && other.slug === row.candidate);
-      expect(outOfBounds || taken, `row ${row.id} lost the free slug "${row.candidate}"`).toBe(true);
+      expect(outOfBounds || malformed || taken, `row ${row.id} lost the free slug "${row.candidate}"`).toBe(true);
     }
     return new Map(derived.map((row) => [row.id, row.slug]));
   }
@@ -278,6 +279,20 @@ describe("phase B2 slug backfill (drizzle/0029)", () => {
     const slugs = backfill([seedRow("c1", "Acme", 0), seedRow("c2", "Acme", 1)]);
     expect(slugs.get("c1")).toBe("acme");
     expect(slugs.get("c2")).toBe("acme-2");
+  });
+
+  it("skips a name that slugifies to nothing instead of minting a bare ordinal", () => {
+    // CJK-only names are ordinary in a zh-HK directory and every one of them
+    // slugifies to "". Their n = 1 row is skipped by the length bound, but
+    // n = 2 derives `-2`: two characters, colliding with no base (a base can
+    // never start with `-`), and rejected by the portal's own regex the moment
+    // the owner opens the untouched form and saves it.
+    const slugs = backfill([
+      seedRow("c1", "香港科技有限公司", 0),
+      seedRow("c2", "香港物流有限公司", 1),
+      seedRow("c3", "數據與人工智能", 2),
+    ]);
+    expect([...slugs.values()]).toEqual([null, null, null]);
   });
 
   it("skips only the ordinal that a real display name already owns", () => {
