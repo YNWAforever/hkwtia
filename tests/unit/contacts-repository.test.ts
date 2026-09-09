@@ -34,6 +34,24 @@ describe("contactsRepository", () => {
     expect(execute).toHaveBeenCalledTimes(1);
   });
 
+  it("records the consent source the caller names, defaulting to the interest form", async () => {
+    const {database, execute} = fakeDatabase([{id: "c-3"}]);
+    const repository = createContactsRepository(async () => database as never);
+    // drizzle's sql`` keeps interpolated primitives unwrapped in queryChunks; SQL text arrives as StringChunk objects.
+    const params = () => (execute.mock.calls.at(-1) as unknown as [{queryChunks: unknown[]}])[0].queryChunks
+      .filter((chunk) => typeof chunk === "string");
+
+    await repository.upsertFromInterestForm(contactWriterActor("event_guest"), {...interestInput, whatsappOptIn: true, whatsappNumber: "+85291234567", consentSource: "rsvp"});
+    expect(params()).toContain("rsvp");
+    await repository.upsertFromInterestForm(contactWriterActor("interest_form"), {...interestInput, whatsappOptIn: true, whatsappNumber: "+85291234567"});
+    expect(params()).toContain("interest_form");
+    expect(params()).not.toContain("rsvp");
+    // No opt-in, no consent source: the column must stay null whatever the caller passed.
+    await repository.upsertFromInterestForm(contactWriterActor("event_guest"), {...interestInput, consentSource: "rsvp"});
+    expect(params()).not.toContain("rsvp");
+    await expect(repository.upsertFromInterestForm(contactWriterActor("event_guest"), {...interestInput, consentSource: "forged"})).rejects.toThrow();
+  });
+
   it("records an unknown WhatsApp sender by phone", async () => {
     const {database} = fakeDatabase([{id: "c-2"}]);
     const repository = createContactsRepository(async () => database as never);

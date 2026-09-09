@@ -314,6 +314,13 @@
         "heading": "WTIA 社群最新動向",
         "body": "{recipientName}，你好！探索為 WTIA 會員精選的最新消息、活動及發展機遇。",
         "cta": "閱讀最新消息"
+      },
+      "event_guest_confirmation": {
+        "subject": "已登記：{eventTitle}",
+        "preview": "你的報名已確認。",
+        "heading": "期待見到你",
+        "body": "多謝報名。如計劃有變，請使用取消連結，讓候補名單上的人可以補上。{cancelUrl}",
+        "cta": "查看活動"
       }
     }
   },
@@ -1462,7 +1469,30 @@
       "asideContact": "聯絡團隊",
       "asideBrowse": "瀏覽所有活動",
       "pastEventLabel": "已結束活動",
-      "pastEventNotice": "此活動已截止登記，請瀏覽其他開放活動。"
+      "pastEventNotice": "此活動已截止登記，請瀏覽其他開放活動。",
+      "registerExternally": "前往主辦機構網站報名"
+    },
+    "guest": {
+      "title": "預留名額",
+      "name": "姓名",
+      "email": "電郵地址",
+      "organisation": "機構（選填）",
+      "whatsappNumber": "WhatsApp 號碼（選填）",
+      "marketingConsent": "同時向我發送 WTIA 活動更新（電郵及 WhatsApp）",
+      "consent": "WTIA 會使用這些資料舉辦本活動；如你剔選方格，亦會通知你日後的活動。你可於 WhatsApp 回覆「取消」或使用取消訂閱連結以停止接收。",
+      "website": "請留空此欄",
+      "submit": "報名",
+      "submitting": "報名中…",
+      "registered": "已報名。確認電郵正發送至你的信箱。",
+      "waitlist": "活動已滿；你已列入候補名單，有名額時我們會電郵通知你。",
+      "already": "此電郵已報名參加本活動。",
+      "invalid": "請檢查姓名、電郵及 WhatsApp 號碼，然後再試。",
+      "rateLimited": "此連線嘗試次數過多，請稍後再試。",
+      "closed": "本活動已截止報名。",
+      "external": "本活動於主辦機構網站接受報名。",
+      "unavailable": "目前無法報名。",
+      "cancelled": "你的報名已取消。",
+      "cancelInvalid": "此取消連結已失效。"
     },
     "card": {
       "venueLabel": "地點",

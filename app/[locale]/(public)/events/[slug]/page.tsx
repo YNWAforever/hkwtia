@@ -5,10 +5,15 @@ import {notFound} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {EventDetail} from "@/components/marketing/event-detail";
+import {GuestRsvpForm} from "@/components/marketing/guest-rsvp-form";
 import {EventRegistrationForm} from "@/components/portal/event-registration-form";
 import {StructuredData} from "@/components/seo/structured-data";
 import type {AppLocale} from "@/i18n/routing";
+// lib/auth/actor reads the session (and so needs the Neon Auth pair); this page already
+// takes that dependency through registration-action.ts, so importing it here adds nothing.
+import {getActor} from "@/lib/auth/actor";
 import {eventsRepository} from "@/lib/db/repos/events";
+import {submitGuestRsvpAction} from "@/lib/events/guest-registration-action";
 import {eventBoundary} from "@/lib/events/public";
 import {formatEventDate} from "@/lib/home/format-event-date";
 import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl} from "@/lib/media/url";
@@ -54,7 +59,13 @@ export default async function EventPage({params}: Props) {
   const {locale, slug} = await params;
   setRequestLocale(locale);
   const asOf = new Date();
-  const [event, t] = await Promise.all([eventsRepository.getPublicBySlug(slug, locale, {asOf}).catch(() => null), getTranslations({locale, namespace: "Events"})]);
+  // A failed session read degrades to the anonymous path: the public page must render
+  // whether or not auth is reachable, and the guest form is the anonymous path anyway.
+  const [event, t, actor] = await Promise.all([
+    eventsRepository.getPublicBySlug(slug, locale, {asOf}).catch(() => null),
+    getTranslations({locale, namespace: "Events"}),
+    getActor().catch(() => null),
+  ]);
   if (!event) notFound();
   const displayEvent = event.hero && !(isPrivateMediaDeliveryUrl(event.hero.url) || isRegistrableMediaUrl(event.hero.url)) ? {...event, hero: null} : event;
   const appLocale = locale as AppLocale;
@@ -66,6 +77,19 @@ export default async function EventPage({params}: Props) {
   // with no fallback -- an unset custom property invalidates the whole declaration, so this is
   // always set: the event's own validated, already-filtered hero, or the placeholder above.
   const heroStyle = {"--wt-event-photo": cssUrlToken(displayEvent.hero?.url ?? EVENT_HERO_PLACEHOLDER)} as CSSProperties;
+  // Programme B-4: external registration always leaves the site; an anonymous visitor to an
+  // RSVP event gets the guest form; a signed-in member keeps the membership-gated form.
+  const registration = displayEvent.registrationMode === "external" && displayEvent.externalRegistrationUrl
+    ? {kind: "external" as const, url: displayEvent.externalRegistrationUrl}
+    : actor === null && displayEvent.registrationMode === "rsvp"
+      ? {kind: "guest" as const}
+      : {kind: "member" as const};
+  const guestLabels = {
+    title: t("guest.title"), name: t("guest.name"), email: t("guest.email"), organisation: t("guest.organisation"), whatsappNumber: t("guest.whatsappNumber"),
+    marketingConsent: t("guest.marketingConsent"), consent: t("guest.consent"), website: t("guest.website"), submit: t("guest.submit"), submitting: t("guest.submitting"),
+    registered: t("guest.registered"), waitlist: t("guest.waitlist"), already: t("guest.already"), invalid: t("guest.invalid"), rateLimited: t("guest.rateLimited"),
+    closed: t("guest.closed"), external: t("guest.external"), unavailable: t("guest.unavailable"),
+  };
 
   return (
     <>
@@ -114,7 +138,13 @@ export default async function EventPage({params}: Props) {
               <strong>{t("status.open")}</strong>
             </div>
             <div>
-              <EventRegistrationForm action={registerAction} eventId={displayEvent.id} links={{ineligible: localizedPath(appLocale, "/membership"), unauthenticated: localizedPath(appLocale, "/join")}} messages={registrationMessages} pendingLabel={t("registration.pending")} registerLabel={t("registration.submit")} />
+              {registration.kind === "external" ? (
+                <a className="button" href={registration.url} rel="noopener noreferrer" target="_blank">{t("detail.registerExternally")}</a>
+              ) : registration.kind === "guest" ? (
+                <GuestRsvpForm action={submitGuestRsvpAction} eventId={displayEvent.id} labels={guestLabels} locale={appLocale} slug={displayEvent.slug} />
+              ) : (
+                <EventRegistrationForm action={registerAction} eventId={displayEvent.id} links={{ineligible: localizedPath(appLocale, "/membership"), unauthenticated: localizedPath(appLocale, "/join")}} messages={registrationMessages} pendingLabel={t("registration.pending")} registerLabel={t("registration.submit")} />
+              )}
             </div>
           </div>
         ) : (

@@ -1,4 +1,6 @@
 export type PublicEventStatus = "open" | "past";
+export type PublicEventFormat = "in_person" | "online" | "hybrid";
+export type PublicEventRegistrationMode = "rsvp" | "external" | "ticketed";
 
 export type PublicEventProjection = Readonly<{
   id: string;
@@ -10,6 +12,15 @@ export type PublicEventProjection = Readonly<{
   venue: string | null;
   capacity: number | null;
   hero: Readonly<{url: string; alt: string}> | null;
+  // Phase B1 (B-4, B-6): the detail page picks the registration path from these,
+  // and /events filters on format and tags. `organiser.slug` stays null until the
+  // Phase B2 directory gives companies a public page.
+  format: PublicEventFormat;
+  onlineUrl: string | null;
+  tags: readonly string[];
+  registrationMode: PublicEventRegistrationMode;
+  externalRegistrationUrl: string | null;
+  organiser: Readonly<{name: string; slug: string | null}> | null;
 }>;
 
 export function parsePublicEventStatus(value: string | readonly string[] | undefined): PublicEventStatus {

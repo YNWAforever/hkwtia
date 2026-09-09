@@ -293,8 +293,9 @@ describe("WiseTech protected route ownership", () => {
 
     // Phase A (audit F2) added /admin/inbox, /admin/inbox/[id] and /admin/tasks: 45 + 3 = 48.
     // Phase B1 Task 4 (S-3) added /api/portal/media/upload: 48 + 1 = 49.
-    expect(codeFiles).toHaveLength(49);
-    expect(inventoryFiles).toHaveLength(49);
+    // Phase B1 Task 6 (B-4) added /api/events/guest/cancel: 49 + 1 = 50.
+    expect(codeFiles).toHaveLength(50);
+    expect(inventoryFiles).toHaveLength(50);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -310,11 +311,11 @@ describe("WiseTech protected route ownership", () => {
     );
 
     expect(count("admin-page")).toBe(29);
-    expect(count("api-handler")).toBe(9);
+    expect(count("api-handler")).toBe(10);
     expect(count("webhook-handler")).toBe(2);
     expect(count("job-handler")).toBe(9);
     expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(29);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(20);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(21);
   });
 
   it("publishes only the canonical deeply immutable protected conventions export", () => {

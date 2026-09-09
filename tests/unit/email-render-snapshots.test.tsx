@@ -9,6 +9,8 @@ const fixtureVars = {
   companyName: "Fixture Company",
   renewalDate: "30 September 2026",
   amount: "HK$1,000",
+  eventTitle: "Fixture Event",
+  cancelUrl: "https://www.hkwtia.org/api/events/guest/cancel?token=fixture",
 };
 
 describe("renderEmail", () => {

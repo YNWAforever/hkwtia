@@ -8,11 +8,12 @@ vi.mock("@/i18n/navigation", () => ({
 
 import {EventCalendarView} from "@/components/marketing/event-calendar-view";
 import {formatEventDate} from "@/lib/home/format-event-date";
+import {publicEventDefaults} from "@/tests/fixtures/public-event";
 
 const events = [
-  {id: "1", slug: "morning-clinic", title: "Morning Clinic", description: "d1", startsAt: "2030-10-24T01:00:00.000Z", endsAt: null, venue: "Kwun Tong", capacity: null, hero: null},
-  {id: "2", slug: "afternoon-demo", title: "Afternoon Demo", description: "d2", startsAt: "2030-10-24T08:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: null},
-  {id: "3", slug: "next-day-talk", title: "Next Day Talk", description: "d3", startsAt: "2030-10-25T01:00:00.000Z", endsAt: null, venue: "Central", capacity: 20, hero: null},
+  {id: "1", slug: "morning-clinic", title: "Morning Clinic", description: "d1", startsAt: "2030-10-24T01:00:00.000Z", endsAt: null, venue: "Kwun Tong", capacity: null, hero: null, ...publicEventDefaults},
+  {id: "2", slug: "afternoon-demo", title: "Afternoon Demo", description: "d2", startsAt: "2030-10-24T08:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: null, ...publicEventDefaults},
+  {id: "3", slug: "next-day-talk", title: "Next Day Talk", description: "d3", startsAt: "2030-10-25T01:00:00.000Z", endsAt: null, venue: "Central", capacity: 20, hero: null, ...publicEventDefaults},
 ];
 
 describe("EventCalendarView", () => {
@@ -36,9 +37,9 @@ describe("EventCalendarView", () => {
     // Deliberately out of chronological order, and NOT sorted by any other field either (e.g. not
     // by endsAt) -- groupByDay must not rely on a pre-sorted caller contract.
     const shuffled = [
-      {id: "3", slug: "next-day-talk", title: "Next Day Talk", description: "d3", startsAt: "2030-10-25T01:00:00.000Z", endsAt: null, venue: "Central", capacity: 20, hero: null},
-      {id: "2", slug: "afternoon-demo", title: "Afternoon Demo", description: "d2", startsAt: "2030-10-24T08:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: null},
-      {id: "1", slug: "morning-clinic", title: "Morning Clinic", description: "d1", startsAt: "2030-10-24T01:00:00.000Z", endsAt: null, venue: "Kwun Tong", capacity: null, hero: null},
+      {id: "3", slug: "next-day-talk", title: "Next Day Talk", description: "d3", startsAt: "2030-10-25T01:00:00.000Z", endsAt: null, venue: "Central", capacity: 20, hero: null, ...publicEventDefaults},
+      {id: "2", slug: "afternoon-demo", title: "Afternoon Demo", description: "d2", startsAt: "2030-10-24T08:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: null, ...publicEventDefaults},
+      {id: "1", slug: "morning-clinic", title: "Morning Clinic", description: "d1", startsAt: "2030-10-24T01:00:00.000Z", endsAt: null, venue: "Kwun Tong", capacity: null, hero: null, ...publicEventDefaults},
     ];
 
     render(<EventCalendarView events={shuffled} locale="en" />);

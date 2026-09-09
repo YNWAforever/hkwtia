@@ -27,6 +27,7 @@ export const EMAIL_TEMPLATE_IDS = [
   "lead_staff_notify",
   "approval_request",
   "campaign_generic",
+  "event_guest_confirmation",
 ] as const;
 
 export type EmailTemplateId = (typeof EMAIL_TEMPLATE_IDS)[number];
@@ -79,6 +80,9 @@ const DEFAULT_CLASSIFICATION = {
   lead_staff_notify: "transactional",
   approval_request: "transactional",
   campaign_generic: "marketing",
+  // Guest RSVP receipt (Phase B1, B-4): a reply to the guest's own action, carrying
+  // their cancel link, so it is transactional and must never gain a marketing footer.
+  event_guest_confirmation: "transactional",
 } as const satisfies Record<EmailTemplateId, MessageClassification>;
 
 function interpolate(message: string, variables: EmailVariables): string {

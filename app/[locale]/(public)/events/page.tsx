@@ -54,6 +54,10 @@ export default async function EventsPage({params, searchParams}: Props) {
   };
   const status = parsePublicEventStatus(query.status);
   const view = query.view === "calendar" ? "calendar" : "cards";
+  // Landing state from /api/events/guest/cancel (B-4). Anything else in ?guest is ignored,
+  // so the redirect target can never make this page echo a value it did not write.
+  const guestNotice = query.guest === "cancelled" ? t("guest.cancelled")
+    : query.guest === "unknown" || query.guest === "invalid" ? t("guest.cancelInvalid") : null;
   const asOf = new Date();
   const records = await eventsRepository.listPublic(anonymous, {status, asOf, locale}).catch(() => null);
   const cardLabels = {
@@ -76,6 +80,7 @@ export default async function EventsPage({params, searchParams}: Props) {
       />
       <Section id="events-results" labelledBy="events-results-title">
         <h2 className="sr-only" id="events-results-title">{t("resultsHeading")}</h2>
+        {guestNotice ? <p className="interest-form-status" role="status">{guestNotice}</p> : null}
         {/* Real <button> elements (not styled anchors): app/styles/wisetech.css:815 targets
             `.event-quick-tabs button`, not `a`. Plain GET navigation, same idiom as
             components/marketing/showcase-filters.tsx -- no client state. */}

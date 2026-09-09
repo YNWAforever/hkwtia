@@ -7,6 +7,7 @@ const routeFiles = [
   "app/api/admin/media/upload/route.ts",
   "app/api/ai/concierge/route.ts",
   "app/api/ai/conversations/[id]/feedback/route.ts",
+  "app/api/events/guest/cancel/route.ts",
   "app/api/jobs/aiops-metrics/route.ts",
   "app/api/jobs/board-reporter/route.ts",
   "app/api/jobs/chat-retention/route.ts",

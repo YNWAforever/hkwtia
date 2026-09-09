@@ -314,6 +314,13 @@
         "heading": "Latest from the WTIA community",
         "body": "Hello {recipientName}, explore the latest WTIA news, programmes and opportunities selected for our member community.",
         "cta": "Read the update"
+      },
+      "event_guest_confirmation": {
+        "subject": "You're on the list: {eventTitle}",
+        "preview": "Your RSVP is confirmed.",
+        "heading": "See you there",
+        "body": "Thanks for registering. If your plans change, use the cancel link so someone on the waitlist can take your place. {cancelUrl}",
+        "cta": "View the event"
       }
     }
   },
@@ -1462,7 +1469,30 @@
       "asideContact": "Contact the team",
       "asideBrowse": "Browse all events",
       "pastEventLabel": "Past event",
-      "pastEventNotice": "Registration for this event has closed. Browse open activities instead."
+      "pastEventNotice": "Registration for this event has closed. Browse open activities instead.",
+      "registerExternally": "Register on the organiser's site"
+    },
+    "guest": {
+      "title": "Reserve a place",
+      "name": "Name",
+      "email": "Email address",
+      "organisation": "Organisation (optional)",
+      "whatsappNumber": "WhatsApp number (optional)",
+      "marketingConsent": "Also send me WTIA activity updates (email and WhatsApp)",
+      "consent": "WTIA uses these details to run this event and, if you tick the box, to tell you about future activities. Reply STOP on WhatsApp or use the unsubscribe link to opt out.",
+      "website": "Leave this field empty",
+      "submit": "Register",
+      "submitting": "Registering…",
+      "registered": "You're registered. A confirmation is on its way to your inbox.",
+      "waitlist": "The event is full; you're on the waitlist and we'll email you if a place opens.",
+      "already": "That email is already registered for this event.",
+      "invalid": "Check your name, email and WhatsApp number, then try again.",
+      "rateLimited": "Too many attempts from this connection. Try again in a few minutes.",
+      "closed": "Registration for this event has closed.",
+      "external": "This event takes registrations on the organiser's site.",
+      "unavailable": "Registration is not available right now.",
+      "cancelled": "Your registration has been cancelled.",
+      "cancelInvalid": "That cancel link is not valid any more."
     },
     "card": {
       "venueLabel": "Venue",

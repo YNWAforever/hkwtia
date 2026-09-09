@@ -77,7 +77,24 @@ type EventAudit = Readonly<{
 export type EventRows = readonly Event[] | Readonly<{list: () => Promise<readonly Event[]>}>;
 export type FeaturedPublicEventOptions = Readonly<{asOf: Date; limit: number; locale?: string}>;
 type PublicEventHeroSource = Readonly<{url: string; altEn: string; altZh: string; archivedAt: Date | null}>;
-type PublicEventMemoryRow = Readonly<{event: Event; hero: PublicEventHeroSource | null}>;
+type PublicEventOrganiserSource = Readonly<{name: string}>;
+type PublicEventMemoryRow = Readonly<{event: Event; hero: PublicEventHeroSource | null; organiser?: PublicEventOrganiserSource | null}>;
+// The shared select for every public projection read: the hero join, plus the
+// organiser company's display name (Phase B1, B-4/B-6). Selected as a nested
+// object so drizzle nulls it as a whole when the left join misses.
+const publicProjectionSelection = {
+  event: events,
+  hero: {url: media.url, altEn: media.altEn, altZh: media.altZh, archivedAt: media.archivedAt},
+  organiser: {name: companies.displayName},
+} as const;
+type PublicProjectionRow = Readonly<{event: Event; hero: Readonly<{url: string | null; altEn: string | null; altZh: string | null; archivedAt: Date | null}> | null; organiser: Readonly<{name: string | null}> | null}>;
+function publicMemoryRow(row: PublicProjectionRow): PublicEventMemoryRow {
+  return {
+    event: row.event,
+    hero: row.hero === null || row.hero.url === null ? null : row.hero as PublicEventHeroSource,
+    organiser: row.organiser === null || row.organiser.name === null ? null : {name: row.organiser.name},
+  };
+}
 export type PublicEventSource = readonly (Event | PublicEventMemoryRow)[] | Readonly<{list: () => Promise<readonly (Event | PublicEventMemoryRow)[]>}>;
 export type PublicEventReadOptions = Readonly<{status: PublicEventStatus; asOf: Date; locale?: string; limit?: number; source?: PublicEventSource}>;
 export type PublicEventSlugOptions = Readonly<{asOf: Date; source?: PublicEventSource}>;
@@ -125,15 +142,14 @@ async function publicRowsFrom(source?: PublicEventSource): Promise<readonly Publ
     return rows.map((row) => isPublicMemoryRow(row) ? row : {event: row, hero: null});
   }
   const database = await getDb();
-  const rows = await database.select({
-    event: events,
-    hero: {url: media.url, altEn: media.altEn, altZh: media.altZh, archivedAt: media.archivedAt},
-  }).from(events).leftJoin(media, eq(events.heroMediaId, media.id));
-  return rows.map((row) => ({event: row.event, hero: row.hero === null || row.hero.url === null ? null : row.hero as PublicEventHeroSource}));
+  const rows = await database.select(publicProjectionSelection).from(events)
+    .leftJoin(media, eq(events.heroMediaId, media.id))
+    .leftJoin(companies, eq(events.organiserCompanyId, companies.id));
+  return rows.map(publicMemoryRow);
 }
 
 function projectPublicEvent(row: PublicEventMemoryRow, locale: string): PublicEventProjection {
-  const {event, hero} = row;
+  const {event, hero, organiser} = row;
   const useChinese = locale === "zh-HK";
   return {
     id: event.id,
@@ -145,6 +161,12 @@ function projectPublicEvent(row: PublicEventMemoryRow, locale: string): PublicEv
     venue: event.venue,
     capacity: event.capacity,
     hero: hero && hero.archivedAt === null && (isPrivateMediaDeliveryUrl(hero.url) || isRegistrableMediaUrl(hero.url)) ? {url: hero.url, alt: useChinese ? hero.altZh : hero.altEn} : null,
+    format: event.format,
+    onlineUrl: event.onlineUrl,
+    tags: [...event.tags],
+    registrationMode: event.registrationMode,
+    externalRegistrationUrl: event.externalRegistrationUrl,
+    organiser: organiser ? {name: organiser.name, slug: null} : null,
   };
 }
 
@@ -176,13 +198,12 @@ export async function listPublicEvents(_actor: Actor, options: PublicEventReadOp
   const predicate = options.status === "open" ? gte(boundary, asOf) : lt(boundary, asOf);
   const order = options.status === "open" ? [asc(boundary), asc(events.slug), asc(events.id)] : [desc(boundary), asc(events.slug), asc(events.id)];
   const database = await getDb();
-  const query = database.select({
-    event: events,
-    hero: {url: media.url, altEn: media.altEn, altZh: media.altZh, archivedAt: media.archivedAt},
-  }).from(events).leftJoin(media, eq(events.heroMediaId, media.id))
+  const query = database.select(publicProjectionSelection).from(events)
+    .leftJoin(media, eq(events.heroMediaId, media.id))
+    .leftJoin(companies, eq(events.organiserCompanyId, companies.id))
     .where(and(eq(events.status, "published"), eq(events.visibility, "public"), predicate)).orderBy(...order);
   const rows = await (limit === undefined ? query : query.limit(limit));
-  return rows.map((row) => projectPublicEvent({event: row.event, hero: row.hero === null || row.hero.url === null ? null : row.hero as PublicEventHeroSource}, locale));
+  return rows.map((row) => projectPublicEvent(publicMemoryRow(row), locale));
 }
 
 export type PublicEventCountOptions = Readonly<{status: PublicEventStatus; asOf: Date; source?: PublicEventSource}>;
@@ -211,13 +232,12 @@ export async function getPublicEventBySlug(slug: unknown, locale: string, option
     return row ? projectPublicEvent(row, locale) : null;
   }
   const database = await getDb();
-  const [row] = await database.select({
-    event: events,
-    hero: {url: media.url, altEn: media.altEn, altZh: media.altZh, archivedAt: media.archivedAt},
-  }).from(events).leftJoin(media, eq(events.heroMediaId, media.id))
+  const [row] = await database.select(publicProjectionSelection).from(events)
+    .leftJoin(media, eq(events.heroMediaId, media.id))
+    .leftJoin(companies, eq(events.organiserCompanyId, companies.id))
     .where(and(eq(events.slug, parsedSlug.data), eq(events.status, "published"), eq(events.visibility, "public"))).limit(1);
   if (!row) return null;
-  return projectPublicEvent({event: row.event, hero: row.hero === null || row.hero.url === null ? null : row.hero as PublicEventHeroSource}, locale);
+  return projectPublicEvent(publicMemoryRow(row), locale);
 }
 
 export async function listFeaturedPublicEvents(

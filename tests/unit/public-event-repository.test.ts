@@ -106,6 +106,22 @@ describe("repository-backed Event visibility", () => {
     await expect(getEventBySlug(anonymous, "public", source)).resolves.toMatchObject({slug: "public"});
   });
 
+  it("projects format, registration mode, tags and the organiser name for the detail page (B-4)", async () => {
+    const source = [
+      {event: event("hosted", {format: "hybrid", onlineUrl: "https://meet.example.hk/hosted", registrationMode: "external", externalRegistrationUrl: "https://tickets.example.hk/hosted", tags: ["ai", "fintech"], organiserCompanyId: "company-1"}), hero: null, organiser: {name: "Acme Robotics"}},
+      {event: event("admin-authored"), hero: null},
+    ] as const;
+    await expect(getPublicEventBySlug("hosted", "en", {asOf, source})).resolves.toMatchObject({
+      format: "hybrid", onlineUrl: "https://meet.example.hk/hosted", registrationMode: "external", externalRegistrationUrl: "https://tickets.example.hk/hosted",
+      tags: ["ai", "fintech"], organiser: {name: "Acme Robotics", slug: null},
+    });
+    await expect(getPublicEventBySlug("admin-authored", "en", {asOf, source})).resolves.toMatchObject({
+      format: "in_person", onlineUrl: null, registrationMode: "rsvp", externalRegistrationUrl: null, tags: [], organiser: null,
+    });
+    // A bare Event row (no memory wrapper) projects the same defaults.
+    await expect(listPublicEvents(anonymous, {status: "open", asOf, source: [event("bare")]})).resolves.toMatchObject([{slug: "bare", registrationMode: "rsvp", organiser: null}]);
+  });
+
   it("excludes member-only and unpublished Events from the count", async () => {
     const source = [
       event("draft-public", {published: false, startsAt: new Date("2030-01-01T07:00:00.000Z"), endsAt: null}),

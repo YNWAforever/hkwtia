@@ -77,6 +77,27 @@ describe("Events page donor markup", () => {
     expect(screen.queryByRole("button", {name: bundles.en.Events.viewSwitch.cards})).not.toBeInTheDocument();
   });
 
+  it.each([
+    ["cancelled", "cancelled"],
+    ["unknown", "cancelInvalid"],
+    ["invalid", "cancelInvalid"],
+  ])("announces the guest cancel outcome ?guest=%s beneath the hero (B-4)", async (guest, key) => {
+    listPublic.mockResolvedValueOnce([]);
+    await renderEventsPage({guest});
+
+    const notice = screen.getByText(bundles.en.Events.guest[key]);
+    expect(notice).toHaveAttribute("role", "status");
+    expect(notice.compareDocumentPosition(screen.getByRole("heading", {level: 1}))).toBe(Node.DOCUMENT_POSITION_PRECEDING);
+  });
+
+  it("renders no guest notice for an unrecognised ?guest value", async () => {
+    listPublic.mockResolvedValueOnce([]);
+    await renderEventsPage({guest: "<script>"});
+
+    expect(screen.queryByText(bundles.en.Events.guest.cancelled)).not.toBeInTheDocument();
+    expect(screen.queryByText(bundles.en.Events.guest.cancelInvalid)).not.toBeInTheDocument();
+  });
+
   it("renders the day-grouped calendar view instead of the card grid when ?view=calendar", async () => {
     searchState.current = new URLSearchParams("view=calendar");
     listPublic.mockResolvedValueOnce([
