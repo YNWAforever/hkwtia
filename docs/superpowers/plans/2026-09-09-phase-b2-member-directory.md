@@ -300,7 +300,46 @@ Full gate: `npm run audit:strings && npm test && npm run lint && npm run typeche
 
 ## Phase B2 exit checklist
 
-- [ ] Migrations 0028–0030 applied to production before the deploy (0029 assigns slugs; 0030 widens the announcement href check to `/members`). Phase A recipe: `neonctl connection-string production --project-id fragrant-mountain-25240574 --org-id org-soft-sunset-25251479`, then `DATABASE_URL=… npm run db:migrate`.
-- [ ] `vercel promote` after the migration; `/members` serves 200 (no 307) in both locales; one published `/members/<slug>` validates in Google's Rich Results test (spec §5 gate).
-- [ ] Owner gate: a Startup member publishes their page → staff approves → the page lists their showcase listing and, once B1 has merged, their approved event with organiser attribution.
+**Code status (2026-09-10): Tasks 1–7 are implemented, reviewed and committed on
+`feat/phase-b2-member-directory`** — 21 commits from `1ad0c7a` (schema) to `d175de5` (the B-8
+acceptance spec), plus `a26e442` from the gate run below. Everything that remains is an owner
+action requiring production credentials or a signed-in browser; none of it is code.
+
+- [x] Full local gate green on the branch at `a26e442`. Run bare, judged by exit code:
+  `npm run audit:strings` (246 TSX files scanned, exit 0) · `npm test` (**494 files / 4132 tests
+  passed, 16 files / 43 tests skipped**, exit 0 — the skips are the Postgres and live-service
+  suites that need `DATABASE_URL_TEST` or `RUN_POSTGRES_INTEGRATION=1`) · `npm run lint`
+  (0 errors, 31 pre-existing warnings in test mocks, exit 0) · `npm run typecheck` (exit 0) ·
+  `NEXT_PUBLIC_SITE_URL=https://hkwtia.vercel.app npm run build` (exit 0; `/[locale]/members` and
+  `/[locale]/members/[slug]` both compile as dynamic routes). Playwright was **not** run — the
+  B2 spec gates itself on a live environment.
+  - The only gate failure was two 5s timeouts in `public-environment-isolation` and
+    `repository-boundary`, and neither was a Phase B2 regression: both are compile-bound tests
+    whose cost tracks the size of the repo (a TypeScript walk of `lib/`, and cold module graphs
+    after `vi.resetModules()`), and the suite is now 510 files running in parallel. `a26e442`
+    gives them explicit timeouts, the shape this repo already uses for the same hazard. No
+    count-pinning test needed re-pinning: `page-copy-scope`, `wisetech-protected-route-ownership`,
+    `internal-navigation-config`, `admin-nav` and `ci-security-contract` all agreed with reality,
+    because Tasks 4 and 5 re-pinned them as they landed.
+- [ ] **Blocked on B1.** This branch is stacked on `feat/phase-b1-member-events`, which is not yet
+  in `main` (`main` is at `72e8ecd`). B1 must merge first: it owns migrations 0026–0027 and the
+  `organiser_company_id` column that the member page's events block and `4a5aa56`'s slug-matched
+  organiser links both read.
+- [ ] **Owner action —** migrations 0028–0030 applied to production before the deploy (0028 adds
+  the profile columns, 0029 assigns slugs, 0030 widens the announcement href check to `/members`).
+  Apply 0026–0027 from B1 in the same pass, in order. Phase A recipe:
+  `neonctl connection-string production --project-id fragrant-mountain-25240574 --org-id org-soft-sunset-25251479`,
+  then `DATABASE_URL=… npm run db:migrate`. There is no local database here, so 0028–0030 have
+  never been executed — they are pinned only by their TypeScript twins under `tests/fixtures/`
+  and by `tests/integration/company-review-demotion-postgres.test.ts`, which **skipped** in the
+  gate run above for want of `DATABASE_URL_TEST`. Run that suite against the isolated Neon branch
+  before touching production.
+- [ ] **Owner action —** `vercel promote` after the migration; `/members` serves 200 (no 307) in
+  both locales; one published `/members/<slug>` validates in Google's Rich Results test
+  (spec §5 gate). Nothing is public on day one: S-1 defaults every existing company to `hidden`,
+  so `/members` legitimately renders its empty state until the first owner publishes and staff
+  approve.
+- [ ] **Owner action —** the signed-in walk, which no unit test can stand in for: a Startup member
+  publishes their page → staff approves at `/admin/profiles-review` → the page lists their
+  showcase listing and, B1 having merged, their approved event with organiser attribution.
 - [x] B1 follow-up in the same PR as B2 Task 6 if B1 merged first: replace the display-name organiser matching in B1 Task 9 with `eq(companies.slug, filters.organiser)` and link the event organiser block to `/members/[slug]`. Done: the public projection now selects `companies.slug`/`companies.public_profile_status` and hands the detail page a slug only where `publicMemberPageSlug` (`lib/members/public.ts`, the JS twin of `publishedScope`) says a published page exists. `organiserSlugFromDisplayName` stays, now only to normalise a *typed* `?organiser=` query.
