@@ -193,8 +193,6 @@ const repositoryRoutes: readonly IntegrationManifestEntry[] = [
 const redirectRoutes: readonly IntegrationManifestEntry[] = [
   ["route-legacy-projects", "/projects", "/programs/asa", "The explicit permanent redirect preserves the legacy project entry."],
   ["route-legacy-history", "/history", "/about", "The explicit permanent redirect preserves the legacy history entry."],
-  ["route-design-members", "/members", "/showcase", "The explicit redirect consolidates public discovery under showcase."],
-  ["route-legacy-member-detail", "/members/:id", "/showcase", "The explicit redirect avoids presenting an unverified member profile."],
 ].map(([id, source, canonicalPath, rationale]) => entry({
   id,
   kind: "route",
@@ -202,6 +200,32 @@ const redirectRoutes: readonly IntegrationManifestEntry[] = [
   canonicalPath,
   disposition: "redirect",
   dataOwner: "next.config.ts redirects and the destination App Router page.",
+  rationale,
+  evidence: "hkwtia-repository",
+}));
+
+/**
+ * Phase B2 / D-11 un-redirected all three: the earlier rationales named a missing authority
+ * ("an unverified member profile"), and the reviewed public company profile — opt-in, staff
+ * approved, `public_profile_status = 'published'` — now provides one. The two temporary
+ * `/members` 307s to `/showcase` are gone from next.config.ts, so these entries must not stay
+ * `redirect`: route parity checks a redirect disposition against the real next.config rules.
+ * The ids keep their original prefixes so every existing reference resolves, exactly as WP-7
+ * did for `/programmes` and `/partners`.
+ */
+const memberDirectoryRoutes: readonly IntegrationManifestEntry[] = [
+  ["route-design-members", "/members", "/members", "The reviewed member directory is now a real hkwtia route over published company profiles."],
+  ["route-design-member-detail", "/members/[slug]", "/members/[slug]", "Reviewed public organisation detail is owned by the published company profile keyed by slug."],
+  // The legacy hkwtia.org detail shape. `/members/[slug]` serves it directly now, so it needs no
+  // rule of its own: a `/members/:id` redirect would shadow every real member page.
+  ["route-legacy-member-detail", "/members/:id", "/members/[slug]", "The legacy member detail url resolves against the reviewed member page instead of a redirect."],
+].map(([id, source, canonicalPath, rationale]) => entry({
+  id,
+  kind: "route",
+  source,
+  canonicalPath,
+  disposition: "retain",
+  dataOwner: "Published company public profiles (company-profiles repository) and their staff review state.",
   rationale,
   evidence: "hkwtia-repository",
 }));
@@ -220,7 +244,6 @@ const designRouteMerges: readonly IntegrationManifestEntry[] = [
   ["route-design-ai-plus-retail", "/ai-plus/retail-creative-industries", "/showcase", "No separate verified sector dataset exists; use reviewed solutions."],
   ["route-design-ai-plus-education", "/ai-plus/education-future-of-work", "/events", "No training catalogue exists; only published events are current opportunities."],
   ["route-design-ai-plus-responsible", "/ai-plus/responsible-ai-data-cybersecurity", "/ai-transparency", "Responsible-AI claims belong to the existing trust surface."],
-  ["route-design-member-detail", "/members/[slug]", "/showcase/[slug]", "Reviewed public organisation detail is owned by showcase listings."],
   ["route-design-solutions", "/solutions", "/showcase", "Reviewed solutions are already the public showcase."],
   ["route-design-solution-detail", "/solutions/[slug]", "/showcase/[slug]", "Reviewed solution detail is already the showcase detail."],
   ["route-design-submit-challenge", "/submit-challenge", "/contact", "No challenge record exists; Contact may explain channels without pretending submission persistence."],
@@ -342,6 +365,7 @@ const assetEntries: readonly IntegrationManifestEntry[] = [
 export const wisetechIntegrationManifest: readonly IntegrationManifestEntry[] = Object.freeze([
   ...repositoryRoutes,
   ...redirectRoutes,
+  ...memberDirectoryRoutes,
   ...designRouteMerges,
   ...retiredDesignRoutes,
   ...authoritativeDonorRouteAliases,

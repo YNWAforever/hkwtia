@@ -204,6 +204,13 @@
       "when": 1788962211585,
       "tag": "0029_phase_b_company_slugs",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1788978387038,
+      "tag": "0030_phase_b_members_route",
+      "breakpoints": true
     }
   ]
 }

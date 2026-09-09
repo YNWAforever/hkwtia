@@ -33,12 +33,15 @@ function paramNames(pattern: string): ReadonlySet<string> {
 }
 
 /**
- * `/members/:id` and `/members/[slug]` are the same shape; explicit rules win (D-8), including
- * their destination: an explicit bare `/members/:id` -> `/showcase` owns the bare shape, so the
- * generator skips its own bare variant and instead has `/en/members/:id` and `/zh/members/:id`
- * carry the explicit rule's own destination, prefixed. Otherwise the proxy rewrites
- * `/zh/members/<slug>` to a `zh-HK` page that does not exist and the donor url 404s, or (worse)
- * the manifest's destination shape wins over the explicit one hkwtia actually serves.
+ * A manifest source and an explicit next.config rule can be the same shape (`/members/:id` and
+ * `/members/[slug]` were, until Phase B2 / D-11 made the member pages real and deleted both
+ * `/members` redirects). Explicit rules win (D-8), including their destination: the explicit
+ * bare rule owns the bare shape, so the generator skips its own bare variant and instead has
+ * `/en/<source>` and `/zh/<source>` carry the explicit rule's own destination, prefixed.
+ * Otherwise the proxy rewrites `/zh/<source>` to a `zh-HK` page that does not exist and the
+ * donor url 404s, or (worse) the manifest's destination shape wins over the explicit one hkwtia
+ * actually serves. No live pair collides today; tests/unit/wisetech-redirects.test.ts keeps the
+ * behaviour covered with a synthetic one.
  */
 function shape(path: string): string {
   return toNextPattern(path).replace(/:[^/]+/g, ":p");

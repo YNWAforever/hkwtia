@@ -40,7 +40,10 @@ const sitemapRoutes = items("sitemap-", [
   "ai-plus/responsible-ai-data-cybersecurity|merge|/ai-transparency",
   "for-corporates|merge|/membership", "for-smes|merge|/events",
   "for-startups|merge|/showcase", "for-professionals|merge|/membership",
-  "for-gba-global|merge|/launchpad", "members|redirect|/showcase",
+  // Phase B2 / D-11: this row and the `members/[slug]` dispatcher row are `retain` because
+  // hkwtia serves both donor paths itself now, over reviewed public company profiles; they
+  // pointed at /showcase while no member page existed.
+  "for-gba-global|merge|/launchpad", "members|retain|/members",
   "solutions|merge|/showcase", "events|retain|/events",
   "events/asia-smart-innovation-awards-summit-2025|merge|/events/[slug]",
   "events/smart-innovation-meets-genai|merge|/events/[slug]",
@@ -74,7 +77,7 @@ const sitemapRoutes = items("sitemap-", [
 
 const dispatcherOnlyRoutes = items("dispatcher-", [
   "search|retire|", "join/success|merge|/join/complete",
-  "events/[slug]|merge|/events/[slug]", "members/[slug]|merge|/showcase/[slug]",
+  "events/[slug]|merge|/events/[slug]", "members/[slug]|retain|/members/[slug]",
   "solutions/[slug]|merge|/showcase/[slug]", "insights/[slug]|merge|/news/[slug]",
   "ai-plus/[slug]|retire|", "programmes/[slug]|retire|",
   "programmes/[slug]/[edition]|retire|", "programmes/hkict|merge|/programs/hkict",
@@ -96,12 +99,12 @@ const navigationTargets = freeze([
   ["events-activities", "column", "activities/industry-councils", "merge", "/events"],
   ["events-activities", "column", "activities", "merge", "/events"],
   ["events-activities", "feature", "events#interest", "merge", "/events"],
-  ["members-solutions", "root", "members", "redirect", "/showcase"],
-  ["members-solutions", "column", "members", "redirect", "/showcase"],
+  ["members-solutions", "root", "members", "retain", "/members"],
+  ["members-solutions", "column", "members", "retain", "/members"],
   ["members-solutions", "column", "solutions", "merge", "/showcase"],
   ["members-solutions", "column", "request-introduction", "merge", "/showcase/[slug]"],
   ["members-solutions", "column", "submit-challenge", "merge", "/contact"],
-  ["members-solutions", "column", "members", "redirect", "/showcase"],
+  ["members-solutions", "column", "members", "retain", "/members"],
   ["members-solutions", "feature", "submit-challenge", "merge", "/contact"],
   ["ai-plus", "root", "ai-plus", "merge", "/ai-transparency"],
   ["ai-plus", "column", "ai-plus", "merge", "/ai-transparency"],
@@ -145,7 +148,8 @@ const forms = freeze([
 
 const formFlows = freeze([
   {id: "event-filter", formId: "event-filter-form", sourcePath: "/events", disposition: "merge" as const, canonicalPath: "/events"},
-  {id: "directory-search", formId: "directory-search-form", sourcePath: "/members", disposition: "redirect" as const, canonicalPath: "/showcase"},
+  // Phase B2 / D-11: the donor's directory search is answered by the `/members` filter form.
+  {id: "directory-search", formId: "directory-search-form", sourcePath: "/members", disposition: "retain" as const, canonicalPath: "/members"},
   {id: "site-search", formId: "site-search-form", sourcePath: "/search", disposition: "retire" as const, canonicalPath: null},
   {id: "partner-enquiry", formId: "partner-enquiry-form", sourcePath: "/partner-with-us", disposition: "retire" as const, canonicalPath: null},
   {id: "submit-challenge", formId: "task-enquiry-form", sourcePath: "/submit-challenge", disposition: "retire" as const, canonicalPath: null},
