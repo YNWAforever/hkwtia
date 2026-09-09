@@ -31,6 +31,13 @@ describe("requestMemberLoginLink", () => {
     expect(signInMagicLink).not.toHaveBeenCalled();
   });
 
+  it("accepts the member event editor deep links through the same allowlist as the page", async () => {
+    const result = await requestMemberLoginLink({email: "a@example.com", next: "/portal/events/22222222-2222-4222-8222-222222222222/edit"}, "en");
+    expect(result).toEqual({ok: true});
+    expect(new URL(signInMagicLink.mock.calls[0][0].callbackURL).searchParams.get("next")).toBe("/portal/events/22222222-2222-4222-8222-222222222222/edit");
+    await expect(requestMemberLoginLink({email: "a@example.com", next: "/portal/events/not-a-uuid/edit"}, "en")).resolves.toEqual({ok: false, error: "invalid_continuation"});
+  });
+
   it("calls the shared magic-link provider with a member-login callback and a validated continuation", async () => {
     const result = await requestMemberLoginLink({email: "a@example.com", next: "/portal/billing"}, "en");
     expect(result).toEqual({ok: true});

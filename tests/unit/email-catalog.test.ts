@@ -30,21 +30,48 @@ const REQUIRED_TEMPLATE_IDS = [
   "lead_staff_notify",
   "approval_request",
   "campaign_generic",
+  "event_guest_confirmation",
+  "event_reminder_24h",
 ] as const satisfies readonly EmailTemplateId[];
 
+// Every placeholder any template interpolates; a template that needs a new one
+// must add it here, or the copy check below throws EMAIL_VARIABLE_MISSING.
+const FIXTURE_VARIABLES = {
+  recipientName: "Fixture Member",
+  eventTitle: "Fixture Event",
+  cancelUrl: "https://www.hkwtia.org/api/events/guest/cancel?token=fixture",
+  startsAt: "1 March 2030 at 10:00",
+  venue: "KOHO, Kwun Tong",
+} as const;
+
 describe("email catalogue", () => {
-  it("contains exactly the 23 approved template IDs in stable order", () => {
+  it("contains exactly the 25 approved template IDs in stable order", () => {
     expect(EMAIL_TEMPLATE_IDS).toEqual(REQUIRED_TEMPLATE_IDS);
-    expect(new Set(EMAIL_TEMPLATE_IDS).size).toBe(23);
+    expect(new Set(EMAIL_TEMPLATE_IDS).size).toBe(25);
+  });
+
+  it("keeps the guest confirmation transactional and carries the cancel link in its body", () => {
+    const template = getEmailTemplate("en", "event_guest_confirmation", FIXTURE_VARIABLES);
+    expect(template.classification).toBe("transactional");
+    expect(template.copy.subject).toContain("Fixture Event");
+    expect(template.copy.body).toContain(FIXTURE_VARIABLES.cancelUrl);
+    expect(() => getEmailTemplate("en", "event_guest_confirmation", FIXTURE_VARIABLES, "marketing")).toThrow("EMAIL_CLASSIFICATION_OVERRIDE_FORBIDDEN");
+  });
+
+  it("keeps the 24-hour event reminder transactional and names the start time and venue", () => {
+    const template = getEmailTemplate("en", "event_reminder_24h", FIXTURE_VARIABLES);
+    expect(template.classification).toBe("transactional");
+    expect(template.copy.subject).toContain("Fixture Event");
+    expect(template.copy.body).toContain(FIXTURE_VARIABLES.startsAt);
+    expect(template.copy.body).toContain(FIXTURE_VARIABLES.venue);
+    expect(() => getEmailTemplate("en", "event_reminder_24h", FIXTURE_VARIABLES, "marketing")).toThrow("EMAIL_CLASSIFICATION_OVERRIDE_FORBIDDEN");
   });
 
   it.each(["en", "zh-HK"] as const)(
     "provides complete copy for every template in %s",
     (locale) => {
       for (const templateId of REQUIRED_TEMPLATE_IDS) {
-        const template = getEmailTemplate(locale, templateId, {
-          recipientName: "Fixture Member",
-        });
+        const template = getEmailTemplate(locale, templateId, FIXTURE_VARIABLES);
 
         expect(Object.keys(template.copy).sort()).toEqual([
           "body",

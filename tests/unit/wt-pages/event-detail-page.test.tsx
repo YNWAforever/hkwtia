@@ -3,8 +3,13 @@ import type {ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const events = vi.hoisted(() => ({getPublicBySlug: vi.fn()}));
+const auth = vi.hoisted(() => ({getActor: vi.fn(async () => null as unknown)}));
 
 vi.mock("@/lib/db/repos/events", () => ({eventsRepository: events}));
+// registration-action.ts (still imported for the member form) reads requireActor from the same module.
+vi.mock("@/lib/auth/actor", () => ({getActor: auth.getActor, requireActor: vi.fn()}));
+vi.mock("@/lib/events/guest-registration-action", () => ({submitGuestRsvpAction: vi.fn()}));
+vi.mock("@/components/marketing/guest-rsvp-form", () => ({GuestRsvpForm: ({eventId}: {eventId: string}) => <div data-event-id={eventId} data-guest-rsvp-form="true" />}));
 vi.mock("next-intl/server", () => ({getTranslations: async () => (key: string) => key, setRequestLocale: () => undefined}));
 vi.mock("next/navigation", () => ({notFound: () => { throw new Error("NEXT_NOT_FOUND"); }}));
 vi.mock("next/image", () => ({default: ({unoptimized, ...props}: {unoptimized?: boolean; [key: string]: unknown}) => <img {...props} data-unoptimized={String(unoptimized)} />}));
@@ -26,13 +31,37 @@ const event = (endsAt: string, overrides: Partial<Record<string, unknown>> = {})
   venue: "Hong Kong",
   capacity: 20,
   hero: null,
+  format: "in_person",
+  onlineUrl: null,
+  tags: [],
+  registrationMode: "rsvp",
+  externalRegistrationUrl: null,
+  organiser: null,
   ...overrides,
 });
 
 describe("event detail page donor markup", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => { vi.clearAllMocks(); auth.getActor.mockResolvedValue(null); });
 
-  it("renders the hero, facts grid, main/aside layout and a live action bar for an open event", async () => {
+  it("shows the organiser company in the facts grid and as Event.organizer, linking only once it has a public page (B-6)", async () => {
+    events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z", {format: "online", organiser: {name: "Acme Robotics", slug: null}}));
+    const unlinked = renderToStaticMarkup(await EventPage(props));
+    expect(unlinked).toContain("detail.organiser");
+    expect(unlinked).toContain("<strong>Acme Robotics</strong>");
+    expect(unlinked).not.toContain('href="/members/');
+    expect(unlinked).toContain('"organizer":{"@type":"Organization","name":"Acme Robotics"}');
+    expect(unlinked).toContain('"eventAttendanceMode":"https://schema.org/OnlineEventAttendanceMode"');
+
+    events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z", {organiser: {name: "Acme Robotics", slug: "acme-robotics"}}));
+    const linked = renderToStaticMarkup(await EventPage(props));
+    expect(linked).toContain('href="/members/acme-robotics"');
+    expect(linked).toMatch(/"organizer":\{"@type":"Organization","name":"Acme Robotics","url":"[^"]*\/members\/acme-robotics"\}/);
+
+    events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z"));
+    expect(renderToStaticMarkup(await EventPage(props))).not.toContain("detail.organiser");
+  });
+
+  it("renders the hero, facts grid, main/aside layout and a live action bar with the guest RSVP form for an anonymous visitor", async () => {
     events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z"));
 
     const rendered = renderToStaticMarkup(await EventPage(props));
@@ -43,17 +72,55 @@ describe("event detail page donor markup", () => {
     expect(rendered).toContain('class="event-detail-layout"');
     expect(rendered).toContain('class="event-detail-aside"');
     expect(rendered).toContain('class="event-action-bar"');
-    expect(rendered).toContain('data-registration-form="true"');
+    expect(rendered).toContain('data-guest-rsvp-form="true"');
+    expect(rendered).toContain('data-event-id="10000000-0000-4000-8000-000000000001"');
+    expect(rendered).not.toContain('data-registration-form="true"');
     expect(rendered).not.toContain("pastEventLabel");
   });
 
-  it("shows the past-event action bar instead of the registration form once the boundary has passed", async () => {
+  it("keeps the member registration form for a signed-in visitor", async () => {
+    auth.getActor.mockResolvedValue({kind: "member", userId: "u", profileId: "p"});
+    events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z"));
+
+    const rendered = renderToStaticMarkup(await EventPage(props));
+
+    expect(rendered).toContain('data-registration-form="true"');
+    expect(rendered).not.toContain('data-guest-rsvp-form="true"');
+  });
+
+  it("falls back to the guest form when the session read fails rather than 500ing the public page", async () => {
+    auth.getActor.mockRejectedValue(new Error("AUTH_UNAVAILABLE"));
+    events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z"));
+
+    const rendered = renderToStaticMarkup(await EventPage(props));
+
+    expect(rendered).toContain('data-guest-rsvp-form="true"');
+  });
+
+  it("links out to the organiser's site for external registration, whoever is visiting", async () => {
+    events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z", {registrationMode: "external", externalRegistrationUrl: "https://tickets.example.hk/public-event"}));
+
+    const anonymous = renderToStaticMarkup(await EventPage(props));
+    expect(anonymous).toContain('href="https://tickets.example.hk/public-event"');
+    expect(anonymous).toContain('rel="noopener noreferrer"');
+    expect(anonymous).toContain("registerExternally");
+    expect(anonymous).not.toContain('data-guest-rsvp-form="true"');
+    expect(anonymous).not.toContain('data-registration-form="true"');
+
+    auth.getActor.mockResolvedValue({kind: "member", userId: "u", profileId: "p"});
+    const member = renderToStaticMarkup(await EventPage(props));
+    expect(member).toContain('href="https://tickets.example.hk/public-event"');
+    expect(member).not.toContain('data-registration-form="true"');
+  });
+
+  it("shows the past-event action bar instead of any registration form once the boundary has passed", async () => {
     events.getPublicBySlug.mockResolvedValue(event("2020-01-02T09:00:00.000Z"));
 
     const rendered = renderToStaticMarkup(await EventPage(props));
 
     expect(rendered).toContain("pastEventLabel");
     expect(rendered).not.toContain('data-registration-form="true"');
+    expect(rendered).not.toContain('data-guest-rsvp-form="true"');
   });
 
   it("sets --wt-event-photo from the event's own validated hero image", async () => {

@@ -13,6 +13,8 @@ import type {
 } from "@/lib/db/repos/journeys";
 import {
   engagementScores,
+  eventRegistrations,
+  events,
   memberships,
   messageSuppressions,
   profiles,
@@ -42,6 +44,21 @@ export type JobCampaignContextRecord = Readonly<{
   marketingConsent: boolean;
   emailSuppressed: boolean;
   locale: "en" | "zh-HK";
+}>;
+
+/**
+ * What the `event_reminder` journey needs at send time (programme B-5).
+ * `deliverable` is false when the event was cancelled or unpublished after the
+ * member registered, or when the member has since cancelled their seat.
+ */
+export type JobEventReminderContextRecord = Readonly<{
+  eventId: string;
+  slug: string;
+  titleEn: string;
+  titleZh: string | null;
+  startsAt: Date;
+  venue: string | null;
+  deliverable: boolean;
 }>;
 
 function rowsFrom(result: unknown): Record<string, unknown>[] {
@@ -155,6 +172,48 @@ export function createJobRunnerContextRepository(
         engagementScore: score(row.engagement_score),
         membershipStatus: membershipStatus(row.membership_status),
         billingPeriodEnd: optionalDate(row.billing_period_end),
+      };
+    },
+
+    async loadEventReminder(
+      actor: AutomationRepositoryActor,
+      profileId: string,
+      eventId: string,
+    ): Promise<JobEventReminderContextRecord | null> {
+      requireAutomationCron(actor);
+      const database = await loadDatabase();
+      const row = rowsFrom(await database.execute(sql`
+        SELECT
+          ${events.id} AS event_id,
+          ${events.slug} AS slug,
+          ${events.titleEn} AS title_en,
+          ${events.titleZh} AS title_zh,
+          ${events.startsAt} AS starts_at,
+          ${events.venue} AS venue,
+          ${events.status} AS event_status,
+          ${eventRegistrations.status} AS registration_status
+        FROM ${events}
+        LEFT JOIN ${eventRegistrations}
+          ON ${eventRegistrations.eventId} = ${events.id}
+         AND ${eventRegistrations.profileId} = ${profileId}
+        WHERE ${events.id} = ${eventId}
+        LIMIT 1
+      `))[0];
+      if (!row) return null;
+      const startsAt = optionalDate(row.starts_at);
+      const titleEn = optionalString(row.title_en);
+      const slug = optionalString(row.slug);
+      if (!startsAt || !titleEn || !slug) throw new Error("INVALID_JOB_CONTEXT");
+      const registrationStatus = optionalString(row.registration_status);
+      return {
+        eventId: String(row.event_id),
+        slug,
+        titleEn,
+        titleZh: optionalString(row.title_zh),
+        startsAt,
+        venue: optionalString(row.venue),
+        deliverable: row.event_status === "published"
+          && (registrationStatus === "registered" || registrationStatus === "attended"),
       };
     },
 

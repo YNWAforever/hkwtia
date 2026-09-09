@@ -7,6 +7,7 @@ import {
   loadHomeHighlights,
   type HomeHighlightReaders,
 } from "@/lib/home/home-highlights";
+import {publicEventDefaults} from "@/tests/fixtures/public-event";
 
 const asOf = new Date("2026-08-28T00:00:00.000Z");
 
@@ -21,6 +22,7 @@ const events = {
     venue: "Hong Kong",
     capacity: 80,
     hero: null,
+    ...publicEventDefaults,
   },
   "zh-HK": {
     id: "10000000-0000-4000-8000-000000000001",
@@ -32,6 +34,7 @@ const events = {
     venue: "Hong Kong",
     capacity: 80,
     hero: null,
+    ...publicEventDefaults,
   },
 } satisfies Record<"en" | "zh-HK", PublicEventProjection>;
 
@@ -146,6 +149,7 @@ describe("loadHomeHighlights", () => {
           venue: "Hong Kong",
           capacity: 80,
           hero: null,
+          ...publicEventDefaults,
         },
       });
       expect(result.showcase).toMatchObject({

@@ -4,14 +4,17 @@ import {join} from "node:path";
 import {describe, expect, it} from "vitest";
 
 const routeFiles = [
+  "app/api/admin/events/[id]/attendees.csv/route.ts",
   "app/api/admin/media/upload/route.ts",
   "app/api/ai/concierge/route.ts",
   "app/api/ai/conversations/[id]/feedback/route.ts",
+  "app/api/events/guest/cancel/route.ts",
   "app/api/jobs/aiops-metrics/route.ts",
   "app/api/jobs/board-reporter/route.ts",
   "app/api/jobs/chat-retention/route.ts",
   "app/api/jobs/retention-analyst/route.ts",
   "app/api/media/[id]/route.ts",
+  "app/api/portal/media/upload/route.ts",
   "app/api/stripe/webhook/route.ts",
   "app/api/unsubscribe/route.ts",
   "app/api/webhooks/woztell/route.ts",

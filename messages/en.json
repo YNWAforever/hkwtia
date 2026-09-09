@@ -314,6 +314,20 @@
         "heading": "Latest from the WTIA community",
         "body": "Hello {recipientName}, explore the latest WTIA news, programmes and opportunities selected for our member community.",
         "cta": "Read the update"
+      },
+      "event_guest_confirmation": {
+        "subject": "You're on the list: {eventTitle}",
+        "preview": "Your RSVP is confirmed.",
+        "heading": "See you there",
+        "body": "Thanks for registering. If your plans change, use the cancel link so someone on the waitlist can take your place. {cancelUrl}",
+        "cta": "View the event"
+      },
+      "event_reminder_24h": {
+        "subject": "Tomorrow: {eventTitle}",
+        "preview": "Your WTIA event is tomorrow.",
+        "heading": "See you tomorrow",
+        "body": "{eventTitle} starts at {startsAt}. {venue}",
+        "cta": "Event details"
       }
     }
   },
@@ -1391,6 +1405,21 @@
       "open": "Open now",
       "past": "Past events"
     },
+    "filters": {
+      "legend": "Filter events",
+      "format": "Format",
+      "formats": {
+        "any": "Any format",
+        "in_person": "In person",
+        "online": "Online",
+        "hybrid": "Hybrid"
+      },
+      "month": "Month",
+      "organiser": "Organiser",
+      "tag": "Topic",
+      "apply": "Apply filters",
+      "clear": "Clear"
+    },
     "viewSwitch": {
       "label": "Switch how events are displayed",
       "cards": "Cards",
@@ -1456,13 +1485,37 @@
       "date": "Date and time",
       "venue": "Venue",
       "capacity": "Capacity",
+      "organiser": "Organised by",
       "eyebrow": "Event",
       "factsTitle": "Practical information",
       "asideTitle": "Questions about this event?",
       "asideContact": "Contact the team",
       "asideBrowse": "Browse all events",
       "pastEventLabel": "Past event",
-      "pastEventNotice": "Registration for this event has closed. Browse open activities instead."
+      "pastEventNotice": "Registration for this event has closed. Browse open activities instead.",
+      "registerExternally": "Register on the organiser's site"
+    },
+    "guest": {
+      "title": "Reserve a place",
+      "name": "Name",
+      "email": "Email address",
+      "organisation": "Organisation (optional)",
+      "whatsappNumber": "WhatsApp number (optional)",
+      "marketingConsent": "Also send me WTIA activity updates (email and WhatsApp)",
+      "consent": "WTIA uses these details to run this event and, if you tick the box, to tell you about future activities. Reply STOP on WhatsApp or use the unsubscribe link to opt out.",
+      "website": "Leave this field empty",
+      "submit": "Register",
+      "submitting": "Registering…",
+      "registered": "You're registered. A confirmation is on its way to your inbox.",
+      "waitlist": "The event is full; you're on the waitlist and we'll email you if a place opens.",
+      "already": "That email is already registered for this event.",
+      "invalid": "Check your name, email and WhatsApp number, then try again.",
+      "rateLimited": "Too many attempts from this connection. Try again in a few minutes.",
+      "closed": "Registration for this event has closed.",
+      "external": "This event takes registrations on the organiser's site.",
+      "unavailable": "Registration is not available right now.",
+      "cancelled": "Your registration has been cancelled.",
+      "cancelInvalid": "That cancel link is not valid any more."
     },
     "card": {
       "venueLabel": "Venue",
@@ -1928,6 +1981,81 @@
       "ineligible": "An eligible membership is required.",
       "closed": "Registration is closed."
     },
+    "memberEvents": {
+      "eyebrow": "Your organisation's events",
+      "newTitle": "Submit an event",
+      "newAction": "Submit an event",
+      "listTitle": "Events your organisation has submitted",
+      "listEmpty": "Your organisation has not submitted an event yet.",
+      "noCompany": "Event publishing needs a company you manage. Ask your company owner to make you an admin.",
+      "quota": "{used} of {limit} reviewed events used this quarter.",
+      "unlimited": "unlimited",
+      "submitted": "Submitted. WTIA reviews member events within three working days.",
+      "draftSaved": "Draft saved.",
+      "rejectedWith": "Returned by WTIA: {reason}",
+      "saveDraft": "Save draft",
+      "submit": "Submit for review",
+      "saving": "Saving…",
+      "edit": "Edit",
+      "status": {
+        "draft": "Draft",
+        "pending_review": "Awaiting review",
+        "published": "Published",
+        "rejected": "Returned",
+        "cancelled": "Cancelled"
+      },
+      "fields": {
+        "slug": "URL slug",
+        "titleEn": "Title (English)",
+        "titleZh": "Title (Chinese)",
+        "descriptionEn": "Description (English)",
+        "descriptionZh": "Description (Chinese)",
+        "startsAt": "Starts (Hong Kong time)",
+        "endsAt": "Ends (optional)",
+        "venue": "Venue",
+        "capacity": "Capacity (optional)",
+        "format": "Format",
+        "onlineUrl": "Online link (online and hybrid)",
+        "visibility": "Who can see it",
+        "registrationMode": "Registration",
+        "externalRegistrationUrl": "External registration link",
+        "tags": "Tags (comma separated)",
+        "heroMediaId": "Hero image id",
+        "heroHelp": "Upload an image below to get an id, or leave blank for the default photo."
+      },
+      "formats": {
+        "in_person": "In person",
+        "online": "Online",
+        "hybrid": "Hybrid"
+      },
+      "visibilities": {
+        "public": "Public",
+        "members_only": "Members only"
+      },
+      "hero": {
+        "choose": "Choose a hero image (PNG, JPEG or WebP, up to 4 MB)",
+        "alt": "Describe the image",
+        "upload": "Upload",
+        "uploading": "Uploading…",
+        "done": "Uploaded — the id has been filled in above.",
+        "failed": "Upload failed. Check the file type and size."
+      },
+      "registrationModes": {
+        "rsvp": "RSVP on this site",
+        "external": "External registration link"
+      },
+      "errors": {
+        "INVALID": "Check the required fields, dates and links, then try again.",
+        "EVENT_SLUG_TAKEN": "That URL slug is already used by another event.",
+        "EVENT_QUOTA_EXCEEDED": "Your plan's quota of reviewed events for this quarter is used up. Save as draft or upgrade.",
+        "EVENT_PUBLISHING_NOT_INCLUDED": "Community membership does not include event publishing.",
+        "EVENT_NOT_EDITABLE": "This event has already been published; ask WTIA to reopen it.",
+        "EVENT_HERO_MEDIA_INVALID": "That image id is not one you uploaded.",
+        "NO_MANAGED_COMPANY": "Event publishing needs a company you manage.",
+        "NO_MEMBERSHIP_FOR_COMPANY": "Your company has no active membership.",
+        "FORBIDDEN": "You can only edit events your organisation submitted."
+      }
+    },
     "documents": {
       "title": "Documents and receipts",
       "description": "Access approved WTIA resources and your billing receipts.",
@@ -2294,12 +2422,34 @@
       "checkingIn": "Checking in...",
       "checkInSuccess": "Attendee checked in.",
       "checkInError": "We could not check in this attendee. Please try again.",
+      "exportCsv": "Download attendees (CSV)",
+      "kind": "Type",
+      "kinds": {
+        "member": "Member",
+        "guest": "Guest"
+      },
+      "organisation": "Organisation",
       "statuses": {
         "registered": "Registered",
         "waitlist": "Waitlisted",
         "cancelled": "Cancelled",
         "attended": "Attended",
         "noShow": "No show"
+      },
+      "review": {
+        "title": "Member events awaiting review",
+        "caption": "Events submitted by member organisations",
+        "event": "Event",
+        "organiser": "Organiser",
+        "starts": "Starts",
+        "submitted": "Submitted",
+        "format": "Format",
+        "visibility": "Visibility",
+        "approve": "Approve and publish",
+        "reject": "Return",
+        "rejectionReason": "Reason for returning",
+        "empty": "No member events are waiting for review.",
+        "error": "Member events awaiting review could not be loaded."
       }
     },
     "announcements": {

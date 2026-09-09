@@ -5,6 +5,7 @@ import {require as tsxRequire} from "tsx/cjs/api";
 
 import type {PartnerProjection} from "@/lib/db/repos/partners";
 import type {PublicEventProjection} from "@/lib/events/public";
+import {publicEventDefaults} from "@/tests/fixtures/public-event";
 
 function presentationComponents() {
   const {EventDetail} = tsxRequire("../../components/marketing/event-detail.tsx", import.meta.url);
@@ -33,6 +34,7 @@ const eventFixtureWithPrivateHero = {
   venue: "Hong Kong",
   capacity: 12,
   hero: {url: EVENT_MEDIA_URL, alt: "Curated Event hero"},
+  ...publicEventDefaults,
 } satisfies PublicEventProjection;
 
 const partnerFixtureWithPrivateLogo = {

@@ -77,6 +77,27 @@ describe("Events page donor markup", () => {
     expect(screen.queryByRole("button", {name: bundles.en.Events.viewSwitch.cards})).not.toBeInTheDocument();
   });
 
+  it.each([
+    ["cancelled", "cancelled"],
+    ["unknown", "cancelInvalid"],
+    ["invalid", "cancelInvalid"],
+  ])("announces the guest cancel outcome ?guest=%s beneath the hero (B-4)", async (guest, key) => {
+    listPublic.mockResolvedValueOnce([]);
+    await renderEventsPage({guest});
+
+    const notice = screen.getByText(bundles.en.Events.guest[key]);
+    expect(notice).toHaveAttribute("role", "status");
+    expect(notice.compareDocumentPosition(screen.getByRole("heading", {level: 1}))).toBe(Node.DOCUMENT_POSITION_PRECEDING);
+  });
+
+  it("renders no guest notice for an unrecognised ?guest value", async () => {
+    listPublic.mockResolvedValueOnce([]);
+    await renderEventsPage({guest: "<script>"});
+
+    expect(screen.queryByText(bundles.en.Events.guest.cancelled)).not.toBeInTheDocument();
+    expect(screen.queryByText(bundles.en.Events.guest.cancelInvalid)).not.toBeInTheDocument();
+  });
+
   it("renders the day-grouped calendar view instead of the card grid when ?view=calendar", async () => {
     searchState.current = new URLSearchParams("view=calendar");
     listPublic.mockResolvedValueOnce([
@@ -87,5 +108,29 @@ describe("Events page donor markup", () => {
     expect(document.querySelector(".event-library")).not.toBeInTheDocument();
     expect(document.querySelector(".event-calendar-view")).not.toBeNull();
     expect(screen.getByRole("button", {name: bundles.en.Events.viewSwitch.calendar})).toHaveAttribute("aria-pressed", "true");
+  });
+  it("parses ?format into repository filters and reflects it in the filter panel (B-6)", async () => {
+    listPublic.mockResolvedValueOnce([]);
+    await renderEventsPage({status: "past", format: "online", month: "2026-13", tag: "AI"});
+
+    expect(listPublic).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({status: "past", filters: {format: "online", month: null, organiser: null, tag: "ai"}}));
+    const panel = document.querySelector("form.event-filter-panel");
+    expect(panel).toHaveAttribute("method", "get");
+    expect(panel).toHaveAttribute("action", "/events");
+    expect(within(panel as HTMLElement).getByRole("combobox", {name: bundles.en.Events.filters.format})).toHaveValue("online");
+    expect(within(panel as HTMLElement).getByRole("textbox", {name: bundles.en.Events.filters.tag})).toHaveValue("ai");
+    expect(panel?.querySelector("input[name=status]")).toHaveAttribute("value", "past");
+    expect(panel?.querySelector("input[name=view]")).toBeNull();
+    expect(within(panel as HTMLElement).getByRole("link", {name: bundles.en.Events.filters.clear})).toHaveAttribute("href", "/events?status=past");
+  });
+
+  it("carries ?view=calendar through the filter panel so applying a filter keeps the calendar layout (B-6)", async () => {
+    searchState.current = new URLSearchParams("view=calendar");
+    listPublic.mockResolvedValueOnce([]);
+    await renderEventsPage({view: "calendar", organiser: "Acme Robotics"});
+
+    expect(listPublic).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({filters: expect.objectContaining({organiser: "acme-robotics"})}));
+    const panel = document.querySelector("form.event-filter-panel");
+    expect(panel?.querySelector("input[name=view]")).toHaveAttribute("value", "calendar");
   });
 });

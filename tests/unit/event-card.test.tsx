@@ -7,6 +7,7 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 
 import {EventCard} from "@/components/marketing/event-card";
+import {publicEventDefaults} from "@/tests/fixtures/public-event";
 
 const labels = {status: {open: "Open", past: "Past"}, venueLabel: "Venue", capacityLabel: "Capacity", cta: "View event"};
 
@@ -14,7 +15,7 @@ describe("EventCard", () => {
   it("renders the open-status pill, date block, venue, capacity and two links for an open event", () => {
     render(
       <EventCard
-        event={{id: "1", slug: "ai-clinic", title: "AI Clinic", description: "A hands-on clinic.", startsAt: "2030-10-24T02:00:00.000Z", endsAt: null, venue: "Kwun Tong", capacity: 40, hero: null}}
+        event={{id: "1", slug: "ai-clinic", title: "AI Clinic", description: "A hands-on clinic.", startsAt: "2030-10-24T02:00:00.000Z", endsAt: null, venue: "Kwun Tong", capacity: 40, hero: null, ...publicEventDefaults}}
         status="open"
         locale="en"
         labels={labels}
@@ -36,7 +37,7 @@ describe("EventCard", () => {
     const longDescription = "B".repeat(240);
     render(
       <EventCard
-        event={{id: "2", slug: "demo-day", title: "Demo Day", description: longDescription, startsAt: "2020-01-01T02:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: null}}
+        event={{id: "2", slug: "demo-day", title: "Demo Day", description: longDescription, startsAt: "2020-01-01T02:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: null, ...publicEventDefaults}}
         status="past"
         locale="en"
         labels={labels}
@@ -53,7 +54,7 @@ describe("EventCard", () => {
   it("renders the event's own validated hero photo inside the date block, labelled by its alt text", () => {
     render(
       <EventCard
-        event={{id: "4", slug: "summit", title: "Summit", description: "d", startsAt: "2030-10-24T02:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: {url: "/api/media/0f8fad5b-d9cb-469f-a165-70867728950e", alt: "Summit stage"}}}
+        event={{id: "4", slug: "summit", title: "Summit", description: "d", startsAt: "2030-10-24T02:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: {url: "/api/media/0f8fad5b-d9cb-469f-a165-70867728950e", alt: "Summit stage"}, ...publicEventDefaults}}
         status="open"
         locale="en"
         labels={labels}
@@ -69,7 +70,7 @@ describe("EventCard", () => {
   it("falls back to the decorative donor community photo when an event has no hero of its own", () => {
     const {container} = render(
       <EventCard
-        event={{id: "5", slug: "clinic", title: "Clinic", description: "d", startsAt: "2030-10-24T02:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: null}}
+        event={{id: "5", slug: "clinic", title: "Clinic", description: "d", startsAt: "2030-10-24T02:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: null, ...publicEventDefaults}}
         status="open"
         locale="en"
         labels={labels}
@@ -87,7 +88,7 @@ describe("EventCard", () => {
   it("renders CJK day/month unit markers (日/月) in the date block for zh-HK, matching the aria-label's locale", () => {
     render(
       <EventCard
-        event={{id: "3", slug: "ai-clinic-zh", title: "AI 診所", description: "一個實踐工作坊。", startsAt: "2030-10-24T02:00:00.000Z", endsAt: null, venue: "觀塘", capacity: 40, hero: null}}
+        event={{id: "3", slug: "ai-clinic-zh", title: "AI 診所", description: "一個實踐工作坊。", startsAt: "2030-10-24T02:00:00.000Z", endsAt: null, venue: "觀塘", capacity: 40, hero: null, ...publicEventDefaults}}
         status="open"
         locale="zh-HK"
         labels={labels}

@@ -520,6 +520,7 @@ describe("Server Action actor boundary", () => {
     for (const known of [
       "lib/admin/showcase-actions.ts",
       "lib/admin/media-actions.ts",
+      "lib/admin/event-review-actions.ts",
       "lib/portal/commands.ts",
       "lib/showcase/member-actions.ts",
       "lib/launchpad/member-actions.ts",

@@ -10,6 +10,8 @@ import {
   companyMembers,
   contacts,
   conversations,
+  eventGuestRegistrations,
+  events,
   jobs,
   membershipApplications,
   membershipPlans,
@@ -136,5 +138,43 @@ describe("phase A contacts and consent contract", () => {
     expect(contacts.source).toBeDefined();
     expect(contacts.stage).toBeDefined();
     expect(contacts.whatsappOptedOutAt).toBeDefined();
+  });
+});
+
+describe("phase B1 two-sided events contract", () => {
+  it("adds organiser, submission and review columns to events", () => {
+    expect(events.organiserCompanyId).toBeDefined();
+    expect(events.submittedByProfileId).toBeDefined();
+    expect(events.submittedAt).toBeDefined();
+    expect(events.status).toBeDefined();
+    expect(events.visibility).toBeDefined();
+    expect(events.format).toBeDefined();
+    expect(events.onlineUrl).toBeDefined();
+    expect(events.registrationMode).toBeDefined();
+    expect(events.externalRegistrationUrl).toBeDefined();
+    expect(events.tags).toBeDefined();
+    expect(events.publishedAt).toBeDefined();
+    expect(events.reviewedAt).toBeDefined();
+    expect(events.reviewedByProfileId).toBeDefined();
+    expect(events.rejectionReason).toBeDefined();
+    // The booleans stay until the last consumer moves (programme D-12).
+    expect(events.published).toBeDefined();
+    expect(events.memberOnly).toBeDefined();
+    const config = getTableConfig(events);
+    expect(config.indexes.map((index) => index.config.name)).toContain("events_status_visibility_starts_idx");
+    expect(config.indexes.map((index) => index.config.name)).toContain("events_organiser_idx");
+    expect(config.checks.map((check) => check.name)).toContain("events_online_url_check");
+    expect(config.checks.map((check) => check.name)).toContain("events_external_registration_check");
+  });
+
+  it("defines event_guest_registrations with one row per event and email", () => {
+    const config = getTableConfig(eventGuestRegistrations);
+    expect(config.name).toBe("event_guest_registrations");
+    expect(config.indexes.map((index) => index.config.name)).toContain("event_guest_registrations_event_email_unique");
+    expect(config.indexes.map((index) => index.config.name)).toContain("event_guest_registrations_idempotency_unique");
+    expect(eventGuestRegistrations.contactId).toBeDefined();
+    expect(eventGuestRegistrations.cancelTokenDigest).toBeDefined();
+    expect(eventGuestRegistrations.marketingConsentAt).toBeDefined();
+    expect(eventGuestRegistrations.checkedInAt).toBeDefined();
   });
 });

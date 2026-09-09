@@ -97,6 +97,15 @@ export const contactSourceEnum = pgEnum("contact_source", [
 export const contactStageEnum = pgEnum("contact_stage", [
   "new", "contacted", "qualified", "applied", "member", "closed",
 ]);
+export const eventStatusEnum = pgEnum("event_status", [
+  "draft", "pending_review", "published", "rejected", "cancelled",
+]);
+export const eventVisibilityEnum = pgEnum("event_visibility", ["public", "members_only", "invite_only"]);
+export const eventFormatEnum = pgEnum("event_format", ["in_person", "online", "hybrid"]);
+export const registrationModeEnum = pgEnum("registration_mode", ["rsvp", "external", "ticketed"]);
+export const guestRegistrationStatusEnum = pgEnum("guest_registration_status", [
+  "registered", "waitlist", "cancelled", "attended",
+]);
 export type ShowcaseListingStatus = (typeof showcaseListingStatusEnum.enumValues)[number];
 
 const vector = customType<{data: number[]; driverData: string}>({
@@ -633,9 +642,33 @@ export const events = pgTable("events", {
   heroMediaId: uuid("hero_media_id").references(() => media.id, {onDelete: "set null"}),
   createdAt: createdAt("created_at"),
   updatedAt: updatedAt("updated_at"),
+  // Programme B-1 (D-12): the enums are the new truth. Task 2 of the Phase B1
+  // plan (`derivedEventFlags` in lib/events/status.ts) makes every repository
+  // write derive `published`/`member_only` from these enums; readers move
+  // over during Phase B. Backfilled by 0027.
+  organiserCompanyId: uuid("organiser_company_id").references(() => companies.id, {onDelete: "set null"}),
+  submittedByProfileId: text("submitted_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  submittedAt: timestamp("submitted_at", {withTimezone: true}),
+  status: eventStatusEnum("status").default("draft").notNull(),
+  visibility: eventVisibilityEnum("visibility").default("public").notNull(),
+  format: eventFormatEnum("format").default("in_person").notNull(),
+  onlineUrl: text("online_url"),
+  registrationMode: registrationModeEnum("registration_mode").default("rsvp").notNull(),
+  externalRegistrationUrl: text("external_registration_url"),
+  tags: text("tags").array().default(sql`'{}'::text[]`).notNull(),
+  publishedAt: timestamp("published_at", {withTimezone: true}),
+  reviewedAt: timestamp("reviewed_at", {withTimezone: true}),
+  reviewedByProfileId: text("reviewed_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  rejectionReason: text("rejection_reason"),
 }, (table) => [
   index("events_published_starts_idx").on(table.published, table.startsAt),
   index("events_hero_media_idx").on(table.heroMediaId),
+  index("events_status_visibility_starts_idx").on(table.status, table.visibility, table.startsAt),
+  // Quota count (plan S-4) filters organiser_company_id = ? AND submitted_at
+  // in quarter, then status; keep equality column first.
+  index("events_organiser_idx").on(table.organiserCompanyId, table.submittedAt),
+  check("events_online_url_check", sql`${table.format} = 'in_person' OR ${table.onlineUrl} IS NOT NULL`),
+  check("events_external_registration_check", sql`${table.registrationMode} <> 'external' OR ${table.externalRegistrationUrl} IS NOT NULL`),
 ]);
 
 export const eventRegistrations = pgTable("event_registrations", {
@@ -1070,6 +1103,39 @@ export const contacts = pgTable(
 );
 
 /**
+ * Guest RSVPs (programme B-4). A guest is a contact, not a profile; the row
+ * carries what the check-in desk needs, a cancel token digest for the
+ * one-click cancel link, and an idempotency key so a double submit is one
+ * row. One registration per event and email.
+ */
+export const eventGuestRegistrations = pgTable(
+  "event_guest_registrations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    eventId: uuid("event_id").notNull().references(() => events.id, {onDelete: "cascade"}),
+    contactId: uuid("contact_id").references(() => contacts.id, {onDelete: "set null"}),
+    name: text("name").notNull(),
+    email: text("email").notNull(),
+    whatsappNumber: text("whatsapp_number"),
+    organisation: text("organisation"),
+    locale: varchar("locale", {length: 10}).default("en").notNull(),
+    status: guestRegistrationStatusEnum("status").default("registered").notNull(),
+    marketingConsentAt: timestamp("marketing_consent_at", {withTimezone: true}),
+    cancelTokenDigest: text("cancel_token_digest").notNull(),
+    idempotencyKey: text("idempotency_key").notNull(),
+    checkedInAt: timestamp("checked_in_at", {withTimezone: true}),
+    cancelledAt: timestamp("cancelled_at", {withTimezone: true}),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    uniqueIndex("event_guest_registrations_event_email_unique").on(table.eventId, table.email),
+    uniqueIndex("event_guest_registrations_idempotency_unique").on(table.idempotencyKey),
+    index("event_guest_registrations_event_status_idx").on(table.eventId, table.status),
+  ],
+);
+
+/**
  * The marker that makes "this database is disposable" checkable rather than
  * asserted. Planted once at provisioning time; read by assertSeedSentinel
  * (see scripts/lib/acceptance-guard.ts) before any fixture seed is allowed to
@@ -1397,3 +1463,10 @@ export type NewLead = typeof leads.$inferInsert;
 export type Contact = typeof contacts.$inferSelect;
 export type NewContact = typeof contacts.$inferInsert;
 export type AcceptanceSentinel = typeof acceptanceSentinel.$inferSelect;
+export type EventGuestRegistration = typeof eventGuestRegistrations.$inferSelect;
+export type NewEventGuestRegistration = typeof eventGuestRegistrations.$inferInsert;
+export type EventStatus = (typeof eventStatusEnum.enumValues)[number];
+export type EventVisibility = (typeof eventVisibilityEnum.enumValues)[number];
+export type EventFormat = (typeof eventFormatEnum.enumValues)[number];
+export type RegistrationMode = (typeof registrationModeEnum.enumValues)[number];
+export type GuestRegistrationStatus = (typeof guestRegistrationStatusEnum.enumValues)[number];

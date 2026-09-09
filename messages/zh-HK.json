@@ -314,6 +314,20 @@
         "heading": "WTIA 社群最新動向",
         "body": "{recipientName}，你好！探索為 WTIA 會員精選的最新消息、活動及發展機遇。",
         "cta": "閱讀最新消息"
+      },
+      "event_guest_confirmation": {
+        "subject": "已登記：{eventTitle}",
+        "preview": "你的報名已確認。",
+        "heading": "期待見到你",
+        "body": "多謝報名。如計劃有變，請使用取消連結，讓候補名單上的人可以補上。{cancelUrl}",
+        "cta": "查看活動"
+      },
+      "event_reminder_24h": {
+        "subject": "明天：{eventTitle}",
+        "preview": "你的 WTIA 活動明天舉行。",
+        "heading": "明天見",
+        "body": "{eventTitle} 將於 {startsAt} 開始。{venue}",
+        "cta": "活動詳情"
       }
     }
   },
@@ -1391,6 +1405,21 @@
       "open": "現正開放",
       "past": "已結束活動"
     },
+    "filters": {
+      "legend": "篩選活動",
+      "format": "形式",
+      "formats": {
+        "any": "任何形式",
+        "in_person": "實體",
+        "online": "網上",
+        "hybrid": "混合"
+      },
+      "month": "月份",
+      "organiser": "主辦機構",
+      "tag": "主題",
+      "apply": "套用篩選",
+      "clear": "清除"
+    },
     "viewSwitch": {
       "label": "切換活動顯示方式",
       "cards": "卡片",
@@ -1456,13 +1485,37 @@
       "date": "日期及時間",
       "venue": "地點",
       "capacity": "名額",
+      "organiser": "主辦",
       "eyebrow": "活動",
       "factsTitle": "活動資訊",
       "asideTitle": "對此活動有疑問？",
       "asideContact": "聯絡團隊",
       "asideBrowse": "瀏覽所有活動",
       "pastEventLabel": "已結束活動",
-      "pastEventNotice": "此活動已截止登記，請瀏覽其他開放活動。"
+      "pastEventNotice": "此活動已截止登記，請瀏覽其他開放活動。",
+      "registerExternally": "前往主辦機構網站報名"
+    },
+    "guest": {
+      "title": "預留名額",
+      "name": "姓名",
+      "email": "電郵地址",
+      "organisation": "機構（選填）",
+      "whatsappNumber": "WhatsApp 號碼（選填）",
+      "marketingConsent": "同時向我發送 WTIA 活動更新（電郵及 WhatsApp）",
+      "consent": "WTIA 會使用這些資料舉辦本活動；如你剔選方格，亦會通知你日後的活動。你可於 WhatsApp 回覆「取消」或使用取消訂閱連結以停止接收。",
+      "website": "請留空此欄",
+      "submit": "報名",
+      "submitting": "報名中…",
+      "registered": "已報名。確認電郵正發送至你的信箱。",
+      "waitlist": "活動已滿；你已列入候補名單，有名額時我們會電郵通知你。",
+      "already": "此電郵已報名參加本活動。",
+      "invalid": "請檢查姓名、電郵及 WhatsApp 號碼，然後再試。",
+      "rateLimited": "此連線嘗試次數過多，請稍後再試。",
+      "closed": "本活動已截止報名。",
+      "external": "本活動於主辦機構網站接受報名。",
+      "unavailable": "目前無法報名。",
+      "cancelled": "你的報名已取消。",
+      "cancelInvalid": "此取消連結已失效。"
     },
     "card": {
       "venueLabel": "地點",
@@ -1928,6 +1981,81 @@
       "ineligible": "需要符合資格的會籍。",
       "closed": "活動登記已截止。"
     },
+    "memberEvents": {
+      "eyebrow": "貴機構的活動",
+      "newTitle": "提交活動",
+      "newAction": "提交活動",
+      "listTitle": "貴機構已提交的活動",
+      "listEmpty": "貴機構尚未提交任何活動。",
+      "noCompany": "發布活動需要你管理的公司。請公司擁有人將你設為管理員。",
+      "quota": "本季已使用 {used} / {limit} 個經審核活動。",
+      "unlimited": "不限",
+      "submitted": "已提交。WTIA 會於三個工作天內審核會員活動。",
+      "draftSaved": "草稿已儲存。",
+      "rejectedWith": "WTIA 已退回：{reason}",
+      "saveDraft": "儲存草稿",
+      "submit": "提交審核",
+      "saving": "儲存中…",
+      "edit": "編輯",
+      "status": {
+        "draft": "草稿",
+        "pending_review": "等待審核",
+        "published": "已發布",
+        "rejected": "已退回",
+        "cancelled": "已取消"
+      },
+      "fields": {
+        "slug": "網址代稱",
+        "titleEn": "標題（英文）",
+        "titleZh": "標題（中文）",
+        "descriptionEn": "簡介（英文）",
+        "descriptionZh": "簡介（中文）",
+        "startsAt": "開始（香港時間）",
+        "endsAt": "結束（選填）",
+        "venue": "地點",
+        "capacity": "名額（選填）",
+        "format": "形式",
+        "onlineUrl": "網上連結（網上及混合形式）",
+        "visibility": "可見範圍",
+        "registrationMode": "報名方式",
+        "externalRegistrationUrl": "外部報名連結",
+        "tags": "標籤（以逗號分隔）",
+        "heroMediaId": "主圖片編號",
+        "heroHelp": "於下方上載圖片以取得編號，或留空以使用預設相片。"
+      },
+      "formats": {
+        "in_person": "實體",
+        "online": "網上",
+        "hybrid": "混合"
+      },
+      "visibilities": {
+        "public": "公開",
+        "members_only": "只限會員"
+      },
+      "hero": {
+        "choose": "選擇主圖片（PNG、JPEG 或 WebP，最大 4 MB）",
+        "alt": "描述此圖片",
+        "upload": "上載",
+        "uploading": "上載中…",
+        "done": "已上載 — 編號已填入上方。",
+        "failed": "上載失敗。請檢查檔案類型及大小。"
+      },
+      "registrationModes": {
+        "rsvp": "於本網站報名",
+        "external": "外部報名連結"
+      },
+      "errors": {
+        "INVALID": "請檢查必填欄位、日期及連結，然後再試。",
+        "EVENT_SLUG_TAKEN": "此網址代稱已被另一活動使用。",
+        "EVENT_QUOTA_EXCEEDED": "貴計劃本季的經審核活動名額已用完。請儲存為草稿或升級計劃。",
+        "EVENT_PUBLISHING_NOT_INCLUDED": "社群會籍不包括發布活動。",
+        "EVENT_NOT_EDITABLE": "此活動已發布；如需修改，請聯絡 WTIA。",
+        "EVENT_HERO_MEDIA_INVALID": "此圖片編號並非你上載的圖片。",
+        "NO_MANAGED_COMPANY": "發布活動需要你管理的公司。",
+        "NO_MEMBERSHIP_FOR_COMPANY": "貴公司沒有生效的會籍。",
+        "FORBIDDEN": "你只可編輯貴機構提交的活動。"
+      }
+    },
     "documents": {
       "title": "文件及收據",
       "description": "查閱 WTIA 已批准資源及你的付款收據。",
@@ -2295,12 +2423,34 @@
       "checkingIn": "簽到中……",
       "checkInSuccess": "已為參加者簽到。",
       "checkInError": "未能為參加者簽到，請再試一次。",
+      "exportCsv": "下載出席名單（CSV）",
+      "kind": "類別",
+      "kinds": {
+        "member": "會員",
+        "guest": "訪客"
+      },
+      "organisation": "機構",
       "statuses": {
         "registered": "已登記",
         "waitlist": "候補名單",
         "cancelled": "已取消",
         "attended": "已出席",
         "noShow": "未出席"
+      },
+      "review": {
+        "title": "等待審核的會員活動",
+        "caption": "會員機構提交的活動",
+        "event": "活動",
+        "organiser": "主辦機構",
+        "starts": "開始",
+        "submitted": "提交時間",
+        "format": "形式",
+        "visibility": "可見範圍",
+        "approve": "批准並發布",
+        "reject": "退回",
+        "rejectionReason": "退回原因",
+        "empty": "目前沒有等待審核的會員活動。",
+        "error": "無法載入等待審核的會員活動。"
       }
     },
     "announcements": {

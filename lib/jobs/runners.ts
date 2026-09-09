@@ -51,6 +51,10 @@ import {
   type EmailTransport,
 } from "@/lib/email/transport";
 import {signUnsubscribeToken} from "@/lib/email/unsubscribe-token";
+import {
+  eventIdFromInstanceKey,
+  eventReminderVariables,
+} from "@/lib/events/reminder-enrollment";
 import {JobRequestError, type PreparedJob} from "@/lib/jobs/handler";
 
 const MAX_WORKER_ALERT_BYTES = 4_096;
@@ -347,7 +351,7 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
         context.locale,
         now,
       );
-      return {
+      const base = {
         hasLoggedIn: context.lastLoginAt !== null,
         profileCompleteness: context.profileComplete ? 100 : 0,
         marketingConsent: context.marketingConsent,
@@ -370,6 +374,36 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
         unsubscribeUrl: unsubscribe.pageUrl,
         unsubscribeOneClickUrl: unsubscribe.oneClickUrl,
         membershipStatus: context.membershipStatus,
+      };
+      if (claim.journey !== "event_reminder") return base;
+      // Programme B-5: the instance key is `event:<id>`; the event itself
+      // supplies the title, start and venue, and the CTA points at its page.
+      const eventId = eventIdFromInstanceKey(claim.instanceKey);
+      const reminder = eventId === null
+        ? null
+        : await jobRunnerContextRepository.loadEventReminder(
+          actor,
+          context.profileId,
+          eventId,
+        );
+      if (!reminder || !reminder.deliverable) {
+        // An event cancelled or unpublished since the member booked, or a seat
+        // the member has since given up, must not produce a "see you tomorrow".
+        // Handing the runner no reachable channel makes it record the step as
+        // `recipient_ineligible` instead of retrying or raising a staff task.
+        return {...base, email: null, whatsappNumber: null};
+      }
+      return {
+        ...base,
+        variables: {
+          ...base.variables,
+          memberName: context.displayName,
+          ...eventReminderVariables({
+            locale: context.locale,
+            appUrl,
+            event: reminder,
+          }),
+        },
       };
     },
     renderEmail,

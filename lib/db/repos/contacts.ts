@@ -35,6 +35,9 @@ const interestInputSchema = z.object({
   locale: z.enum(["en", "zh-HK"]),
   whatsappNumber: z.string().regex(/^\+\d{8,15}$/).nullable(),
   whatsappOptIn: z.boolean(),
+  // Where the consent was given (Phase B1 guest RSVP reuses this write). Recorded
+  // only when opting in, so the value is auditable against the form that asked.
+  consentSource: z.enum(["interest_form", "rsvp"]).optional().default("interest_form"),
 }).strict();
 
 const whatsappInputSchema = z.object({
@@ -74,7 +77,7 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
         VALUES (
           ${parsed.email}, ${parsed.displayName}, ${parsed.locale}, ${actor.source},
           ${parsed.whatsappNumber}, ${parsed.whatsappOptIn}, ${consentAt},
-          ${parsed.whatsappOptIn ? "interest_form" : null}, ${parsed.whatsappOptIn ? WHATSAPP_CONSENT_TEXT_VERSION : null}
+          ${parsed.whatsappOptIn ? parsed.consentSource : null}, ${parsed.whatsappOptIn ? WHATSAPP_CONSENT_TEXT_VERSION : null}
         )
         ON CONFLICT (phone_e164) WHERE phone_e164 IS NOT NULL DO UPDATE SET
           email = COALESCE(${contacts.email}, EXCLUDED.email),

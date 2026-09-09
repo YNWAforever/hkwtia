@@ -3,6 +3,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {EventCalendarView} from "@/components/marketing/event-calendar-view";
 import {EventCard} from "@/components/marketing/event-card";
+import {EventFilterPanel} from "@/components/marketing/event-filter-panel";
 import {EventViewSwitch} from "@/components/marketing/event-view-switch";
 import {InterestForm} from "@/components/marketing/interest-form";
 import {WhatsAppLink} from "@/components/marketing/whatsapp-link";
@@ -15,6 +16,7 @@ import {Section} from "@/components/wt/section";
 import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {eventsRepository} from "@/lib/db/repos/events";
+import {parseEventFilters} from "@/lib/events/filters";
 import {parsePublicEventStatus} from "@/lib/events/public";
 import {submitInterestAction} from "@/lib/growth/interest-action";
 import {buildPageMetadata} from "@/lib/metadata";
@@ -53,9 +55,21 @@ export default async function EventsPage({params, searchParams}: Props) {
     invalid: tInterest("invalid"), rateLimited: tInterest("rateLimited"),
   };
   const status = parsePublicEventStatus(query.status);
+  // Programme B-6: the URL is the whole filter state; each axis validates on its own.
+  const filters = parseEventFilters(query);
+  const carriedFilters = Object.entries(filters).filter((entry): entry is [string, string] => entry[1] !== null);
   const view = query.view === "calendar" ? "calendar" : "cards";
+  // Landing state from /api/events/guest/cancel (B-4). Anything else in ?guest is ignored,
+  // so the redirect target can never make this page echo a value it did not write.
+  const guestNotice = query.guest === "cancelled" ? t("guest.cancelled")
+    : query.guest === "unknown" || query.guest === "invalid" ? t("guest.cancelInvalid") : null;
   const asOf = new Date();
-  const records = await eventsRepository.listPublic(anonymous, {status, asOf, locale}).catch(() => null);
+  const records = await eventsRepository.listPublic(anonymous, {status, asOf, locale, filters}).catch(() => null);
+  const filterLabels = {
+    legend: t("filters.legend"), format: t("filters.format"),
+    formats: {any: t("filters.formats.any"), in_person: t("filters.formats.in_person"), online: t("filters.formats.online"), hybrid: t("filters.formats.hybrid")},
+    month: t("filters.month"), organiser: t("filters.organiser"), tag: t("filters.tag"), apply: t("filters.apply"), clear: t("filters.clear"),
+  };
   const cardLabels = {
     status: {open: t("status.open"), past: t("status.past")},
     venueLabel: t("card.venueLabel"),
@@ -76,10 +90,13 @@ export default async function EventsPage({params, searchParams}: Props) {
       />
       <Section id="events-results" labelledBy="events-results-title">
         <h2 className="sr-only" id="events-results-title">{t("resultsHeading")}</h2>
+        {guestNotice ? <p className="interest-form-status" role="status">{guestNotice}</p> : null}
         {/* Real <button> elements (not styled anchors): app/styles/wisetech.css:815 targets
             `.event-quick-tabs button`, not `a`. Plain GET navigation, same idiom as
             components/marketing/showcase-filters.tsx -- no client state. */}
         <form action={localizedPath(appLocale, "/events")} aria-label={t("quickTabs.label")} className="event-quick-tabs" method="get">
+          {/* Switching open/past keeps the B-6 filters; only the status button changes. */}
+          {carriedFilters.map(([name, value]) => <input key={name} name={name} type="hidden" value={value} />)}
           <button aria-pressed={status === "open"} className={status === "open" ? "active" : undefined} name="status" type="submit" value="open">{t("quickTabs.open")}</button>
           <button aria-pressed={status === "past"} className={status === "past" ? "active" : undefined} name="status" type="submit" value="past">{t("quickTabs.past")}</button>
         </form>
@@ -88,6 +105,7 @@ export default async function EventsPage({params, searchParams}: Props) {
           <Link href="/launchpad">{t("activityStrip.launchpadLabel")}</Link>
           <Link href="/showcase">{t("activityStrip.showcaseLabel")}</Link>
         </nav>
+        <EventFilterPanel filters={filters} labels={filterLabels} locale={appLocale} status={status} view={view} />
         {records === null ? (
           <HonestEmpty copy={t("unavailableDescription")} label={t("statusLabel")} title={t("unavailableTitle")} variant="light" />
         ) : (

@@ -1,8 +1,9 @@
-import type {Event, FAQPage, Organization, WebSite, WithContext} from 'schema-dts';
+import type {Event, EventAttendanceModeEnumeration, FAQPage, Organization, WebSite, WithContext} from 'schema-dts';
 
 import {siteConfig} from '@/config/site';
 import type {EventRecord} from '@/content/schemas';
 import type {AppLocale} from '@/i18n/routing';
+import type {PublicEventFormat} from '@/lib/events/public';
 import {absoluteUrl, localizedPath} from '@/lib/urls';
 
 export type FaqItem = Readonly<{
@@ -58,7 +59,22 @@ export function buildFaqData(items: readonly FaqItem[]): WithContext<FAQPage> {
   };
 }
 
-type EventDataRecord = Pick<EventRecord, 'slug' | 'startsAt' | 'endsAt'> & Readonly<{venue: string | null; image?: string}>;
+// Programme B-6: a member-organised event names its company as the organizer, with a URL
+// only once Phase B2 gives the company a public page; an admin-authored event (no
+// organiser) keeps WTIA. `format` is optional because the static content records that
+// also feed this builder carry none.
+type EventDataRecord = Pick<EventRecord, 'slug' | 'startsAt' | 'endsAt'> & Readonly<{
+  venue: string | null;
+  image?: string;
+  format?: PublicEventFormat;
+  organiser?: Readonly<{name: string; url: string | null}> | null;
+}>;
+
+const ATTENDANCE_MODE: Readonly<Record<PublicEventFormat, EventAttendanceModeEnumeration>> = {
+  in_person: 'https://schema.org/OfflineEventAttendanceMode',
+  online: 'https://schema.org/OnlineEventAttendanceMode',
+  hybrid: 'https://schema.org/MixedEventAttendanceMode',
+};
 
 export function buildEventData(record: EventDataRecord, title: string, locale?: AppLocale): WithContext<Event> {
   return {
@@ -67,13 +83,18 @@ export function buildEventData(record: EventDataRecord, title: string, locale?: 
     name: title,
     startDate: record.startsAt,
     ...(record.endsAt ? {endDate: record.endsAt} : {}),
+    ...(record.format ? {eventAttendanceMode: ATTENDANCE_MODE[record.format]} : {}),
     image: absoluteUrl(record.image ?? siteConfig.defaultImage),
     url: absoluteUrl(locale ? localizedPath(locale, `/events/${record.slug}`) : `/events/${record.slug}`),
     ...(record.venue ? {location: {
       '@type': 'Place' as const,
       name: record.venue,
     }} : {}),
-    organizer: {
+    organizer: record.organiser ? {
+      '@type': 'Organization',
+      name: record.organiser.name,
+      ...(record.organiser.url ? {url: record.organiser.url} : {}),
+    } : {
       '@type': 'Organization',
       name: siteConfig.name,
       url: absoluteUrl('/'),
