@@ -1,6 +1,6 @@
 {
-  "id": "249069d3-40ab-4a4d-a607-b16164af1886",
-  "prevId": "c1911f4e-e0ce-4977-9b90-4f0f4ef8d0d6",
+  "id": "ff1b830c-c61d-48d0-9f9d-310700b76e03",
+  "prevId": "c5cf3491-cccb-443e-8896-bf6ca33832fa",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1463,7 +1463,12 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "companies_public_profile_slug_check": {
+          "name": "companies_public_profile_slug_check",
+          "value": "\"companies\".\"public_profile_status\" <> 'published' OR \"companies\".\"slug\" IS NOT NULL"
+        }
+      },
       "isRLSEnabled": false
     },
     "public.company_members": {

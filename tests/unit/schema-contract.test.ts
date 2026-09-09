@@ -197,7 +197,25 @@ describe("phase B2 company profile contract", () => {
     ] as const) {
       expect(companies[column]).toBeDefined();
     }
-    expect(getTableConfig(companies).indexes.map((index) => index.config.name)).toContain("companies_slug_unique");
+
+    const config = getTableConfig(companies);
+    const columns = new Map(config.columns.map((column) => [column.name, column]));
+    // S-1/D-11 is the whole privacy decision: opt-in, reviewed, hidden by
+    // default. Asserting only that the column exists would let a later edit
+    // default it to `published`, which publishes every existing company the
+    // moment the `/members` list lands.
+    expect(columns.get("public_profile_status")?.default).toBe("hidden");
+    expect(columns.get("public_profile_status")?.notNull).toBe(true);
+
+    // Partial *and* unique, not merely present: the partial predicate is what
+    // lets the legacy rows the 0029 backfill skips keep a NULL slug.
+    const slugIndex = config.indexes.find((index) => index.config.name === "companies_slug_unique");
+    expect(slugIndex?.config.unique).toBe(true);
+    expect(slugIndex?.config.where).toBeDefined();
+
+    // `published` promises an addressable /members/[slug], so the database —
+    // not just the repository — refuses a published profile without a slug.
+    expect(config.checks.map((check) => check.name)).toContain("companies_public_profile_slug_check");
   });
 
   it("lets a lead exist without a listing and link to a contact", () => {

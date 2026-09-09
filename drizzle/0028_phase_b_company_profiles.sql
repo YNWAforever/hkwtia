@@ -17,4 +17,5 @@ ALTER TABLE "companies" ADD CONSTRAINT "companies_profile_reviewed_by_profile_id
 ALTER TABLE "leads" ADD CONSTRAINT "leads_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "companies_slug_unique" ON "companies" USING btree ("slug") WHERE "companies"."slug" IS NOT NULL;--> statement-breakpoint
 CREATE INDEX "companies_public_profile_idx" ON "companies" USING btree ("public_profile_status","display_name");--> statement-breakpoint
+ALTER TABLE "companies" ADD CONSTRAINT "companies_public_profile_slug_check" CHECK ("companies"."public_profile_status" <> 'published' OR "companies"."slug" IS NOT NULL);--> statement-breakpoint
 ALTER TABLE "leads" ADD CONSTRAINT "leads_identity_check" CHECK ("leads"."listing_id" IS NOT NULL OR "leads"."contact_id" IS NOT NULL);

@@ -177,6 +177,15 @@ export const companies = pgTable("companies", {
   // Partial so the legacy rows that never get a slug cannot collide on NULL.
   uniqueIndex("companies_slug_unique").on(table.slug).where(sql`${table.slug} IS NOT NULL`),
   index("companies_public_profile_idx").on(table.publicProfileStatus, table.displayName),
+  // `published` means an addressable /members/[slug] exists, so the slug is
+  // part of the status, not repository etiquette: the submit path checks it,
+  // but the reviewer's `pending_review -> published` transition does not, and
+  // this is the last moment the constraint is free to add. Same class as
+  // `events_online_url_check` and `leads_identity_check` below.
+  check(
+    "companies_public_profile_slug_check",
+    sql`${table.publicProfileStatus} <> 'published' OR ${table.slug} IS NOT NULL`,
+  ),
 ]);
 
 export const companyMembers = pgTable(
