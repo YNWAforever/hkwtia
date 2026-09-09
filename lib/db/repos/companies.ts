@@ -31,23 +31,42 @@ const PUBLICLY_RENDERED_COLUMNS = ["displayName", "website", "industry", "sizeBa
  * so `listForReview` (which selects only `pending_review`) never shows staff
  * that anything changed.
  *
- * The rule is the column, not the caller — a write that touches public copy
+ * The rule is the column, not the caller — a write that rewrites public copy
  * re-enters review whoever makes it, so no future caller of this repository is
  * a second bypass. In practice only the join step and the portal reach here, both
- * as members; the Stripe webhook actor writes billing state, not copy. Reviewer
- * columns reset the same way `updateProfile` resets them, so a stale approval or
- * a stale rejection reason never describes copy nobody has read; a re-save of
- * identical text also re-enters review, which the SQL cannot tell apart from a
- * rewrite and which is the safe direction to be wrong in.
+ * as members; the Stripe webhook actor writes billing state, not copy.
+ *
+ * It is a *value* rule, not a "was this key sent" rule, because the portal form
+ * sends all five keys on every save: `updateCompanyAction` builds each of them
+ * with `String(formData.get(…))`, so none is ever `undefined`. Demoting on
+ * presence would take a published company off `/members`, `/members/[slug]` and
+ * the sitemap — `publishedScope` in `lib/db/repos/company-profiles.ts` selects
+ * `published` only — because its owner corrected the legal name that no member
+ * page renders, or pressed Save having changed nothing, and it would strand the
+ * company there until a human re-approved it. So a save that leaves the public
+ * copy byte-identical does not re-enter review, and a rewrite of any one of
+ * those columns does.
+ *
+ * The comparison stays inside the one UPDATE — `IS DISTINCT FROM` against the
+ * row's own pre-update values, which is what an UPDATE's SET expressions see —
+ * rather than reading the row first and deciding in TypeScript, where a
+ * concurrent writer between the read and the write would decide differently.
+ * The reviewer columns carry the same gate spelled out again (SET expressions
+ * cannot reference each other), so a stale approval or a stale rejection reason
+ * never survives a rewrite and never disappears on a save that changed nothing.
  */
 function reviewResetFor(input: CompanyUpdate) {
-  if (!PUBLICLY_RENDERED_COLUMNS.some((column) => input[column] !== undefined)) return {};
+  const rewrites = PUBLICLY_RENDERED_COLUMNS
+    .filter((column) => input[column] !== undefined)
+    .map((column) => sql`${companiesTable[column]} IS DISTINCT FROM ${input[column] ?? null}`);
+  if (rewrites.length === 0) return {};
+  const rewritesPublishedCopy = sql`${companiesTable.publicProfileStatus} = 'published' AND (${sql.join(rewrites, sql` OR `)})`;
   return {
-    publicProfileStatus: sql`CASE WHEN ${companiesTable.publicProfileStatus} = 'published'
+    publicProfileStatus: sql`CASE WHEN ${rewritesPublishedCopy}
       THEN 'pending_review'::public_profile_status ELSE ${companiesTable.publicProfileStatus} END`,
-    profileReviewedAt: null,
-    profileReviewedByProfileId: null,
-    profileRejectionReason: null,
+    profileReviewedAt: sql`CASE WHEN ${rewritesPublishedCopy} THEN NULL ELSE ${companiesTable.profileReviewedAt} END`,
+    profileReviewedByProfileId: sql`CASE WHEN ${rewritesPublishedCopy} THEN NULL ELSE ${companiesTable.profileReviewedByProfileId} END`,
+    profileRejectionReason: sql`CASE WHEN ${rewritesPublishedCopy} THEN NULL ELSE ${companiesTable.profileRejectionReason} END`,
   };
 }
 
