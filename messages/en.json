@@ -1331,6 +1331,41 @@
       "action": "Browse events"
     }
   },
+  "Members": {
+    "metaTitle": "Members | WiseTech Hong Kong",
+    "metaDescription": "Hong Kong wireless and AI+ technology companies in the WTIA member directory.",
+    "eyebrow": "Member directory",
+    "title": "WTIA members",
+    "description": "Organisations shaping Hong Kong's wireless, mobile and AI+ industry. Each page is maintained by the member and reviewed by WTIA.",
+    "breadcrumbCurrent": "Members",
+    "filters": {
+      "search": "Search members",
+      "tag": "Industry",
+      "anyTag": "All industries",
+      "plan": "Membership",
+      "anyPlan": "All tiers",
+      "submit": "Search",
+      "clear": "Clear"
+    },
+    "plans": {
+      "community": "Community",
+      "startup": "Startup",
+      "corporate": "Corporate",
+      "patron": "Patron"
+    },
+    "resultsTitle": "{count} members",
+    "emptyTitle": "No member pages match yet",
+    "emptyDescription": "Member pages appear here once organisations publish them. Try a broader search.",
+    "view": "View member page",
+    "detail": {
+      "website": "Website",
+      "showcase": "Solution in the WTIA Showcase",
+      "events": "Upcoming events by this member",
+      "noEvents": "No upcoming events.",
+      "joinCta": "Your organisation could be listed here",
+      "join": "See membership plans"
+    }
+  },
   "AiOps": {
     "metaTitle": "AI-Ops in public | WiseTech Hong Kong",
     "metaDescription": "Live, privacy-safe metrics showing how WTIA's AI agents perform, escalate and cost.",

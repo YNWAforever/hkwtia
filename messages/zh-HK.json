@@ -1331,6 +1331,41 @@
       "action": "瀏覽活動"
     }
   },
+  "Members": {
+    "metaTitle": "會員｜WiseTech Hong Kong",
+    "metaDescription": "WTIA 會員名錄中的香港無線及 AI+ 科技企業。",
+    "eyebrow": "會員名錄",
+    "title": "WTIA 會員",
+    "description": "塑造香港無線、流動及 AI+ 產業的機構。每個專頁由會員維護並經 WTIA 審核。",
+    "breadcrumbCurrent": "會員",
+    "filters": {
+      "search": "搜尋會員",
+      "tag": "行業",
+      "anyTag": "所有行業",
+      "plan": "會籍",
+      "anyPlan": "所有級別",
+      "submit": "搜尋",
+      "clear": "清除"
+    },
+    "plans": {
+      "community": "社群",
+      "startup": "初創",
+      "corporate": "企業",
+      "patron": "贊助人"
+    },
+    "resultsTitle": "{count} 個會員",
+    "emptyTitle": "暫時沒有相符的會員專頁",
+    "emptyDescription": "機構發布專頁後會在此顯示。請嘗試更廣泛的搜尋。",
+    "view": "查看會員專頁",
+    "detail": {
+      "website": "網站",
+      "showcase": "WTIA 方案展示中的方案",
+      "events": "此會員即將舉行的活動",
+      "noEvents": "暫無即將舉行的活動。",
+      "joinCta": "貴機構也可在此列出",
+      "join": "查看會員計劃"
+    }
+  },
   "AiOps": {
     "metaTitle": "公開 AI-Ops｜WiseTech Hong Kong",
     "metaDescription": "公開 WTIA AI 代理的即時、保障私隱表現、升級處理及成本指標。",

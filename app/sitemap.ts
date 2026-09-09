@@ -2,6 +2,7 @@ import type {MetadataRoute} from "next";
 
 import {publicRoutes} from "@/config/public-routes";
 import {milestones} from "@/content/milestones";
+import {companyProfilesRepository} from "@/lib/db/repos/company-profiles";
 import {eventsRepository} from "@/lib/db/repos/events";
 import {
   listPublishedBuildLogs,
@@ -66,7 +67,7 @@ export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const asOf = new Date();
-  const [buildLogs, eventSlugs, englishNews, chineseNews, showcaseSlugs] = await Promise.all([
+  const [buildLogs, eventSlugs, englishNews, chineseNews, showcaseSlugs, memberSlugs] = await Promise.all([
     listPublishedBuildLogs().catch((): readonly PublishedBuildLogSummary[] => []),
     eventsRepository.listPublic(anonymous, {status: "open", asOf})
       .then((rows) => rows.map(({slug}) => slug))
@@ -74,6 +75,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     listPublishedNews("en", asOf).catch((): readonly PublishedNewsSummary[] => []),
     listPublishedNews("zh-HK", asOf).catch((): readonly PublishedNewsSummary[] => []),
     showcaseRepository.listPublishedSlugs().catch((): readonly string[] => []),
+    // D-11: only reviewed, published profiles are addressable, and the repository
+    // scopes that in SQL. Caught like every other read so an unreachable database
+    // costs the member urls, not the document.
+    companyProfilesRepository.listPublishedSlugs().catch((): readonly string[] => []),
   ]);
   const staticEntries = publicRoutes.flatMap((pathname) => localizedEntries(pathname));
   const eventEntries = eventSlugs.flatMap((slug) => localizedEntries(`/events/${slug}`));
@@ -82,12 +87,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const milestoneEntries = featuredOnly(milestonesOnly(milestones))
     .flatMap(({slug}) => localizedEntries(`/about/history/${slug}`));
   const showcaseEntries = showcaseSlugs.flatMap((slug) => localizedEntries(`/showcase/${slug}`));
+  const memberEntries = memberSlugs.flatMap((slug) => localizedEntries(`/members/${slug}`));
   return [
     ...staticEntries,
     ...eventEntries,
     ...newsEntries,
     ...buildLogEntries,
     ...showcaseEntries,
+    ...memberEntries,
     ...milestoneEntries,
   ];
 }
