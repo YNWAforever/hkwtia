@@ -2399,6 +2399,13 @@
       "checkingIn": "Checking in...",
       "checkInSuccess": "Attendee checked in.",
       "checkInError": "We could not check in this attendee. Please try again.",
+      "exportCsv": "Download attendees (CSV)",
+      "kind": "Type",
+      "kinds": {
+        "member": "Member",
+        "guest": "Guest"
+      },
+      "organisation": "Organisation",
       "statuses": {
         "registered": "Registered",
         "waitlist": "Waitlisted",

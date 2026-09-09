@@ -4,6 +4,7 @@ import {join} from "node:path";
 import {describe, expect, it} from "vitest";
 
 const routeFiles = [
+  "app/api/admin/events/[id]/attendees.csv/route.ts",
   "app/api/admin/media/upload/route.ts",
   "app/api/ai/concierge/route.ts",
   "app/api/ai/conversations/[id]/feedback/route.ts",

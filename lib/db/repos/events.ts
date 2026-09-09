@@ -8,7 +8,7 @@ import {getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
-import {auditEvents, companies, companyMembers, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility} from "@/lib/db/server-schema";
+import {auditEvents, companies, companyMembers, eventGuestRegistrations, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility} from "@/lib/db/server-schema";
 import {assertCanSubmitEvent} from "@/lib/events/entitlement-core";
 import {eventBoundary, type PublicEventProjection, type PublicEventStatus} from "@/lib/events/public";
 import {canTransitionEvent, derivedEventFlags, hongKongQuarterBounds} from "@/lib/events/status";
@@ -416,13 +416,50 @@ export async function listAdminEvents(actor: Actor, source?: EventRows): Promise
   return sorted(await rowsFrom(source));
 }
 
-export async function listEventAttendees(actor: Actor, eventIdInput: unknown) {
+/**
+ * One row per person on the door list, whether they came through the member
+ * registration (profile-keyed) or the public guest form (B-4). `status` is the
+ * text of whichever enum the row came from; the two share `registered`,
+ * `waitlist`, `cancelled` and `attended`, and only members can be `no_show`.
+ */
+export type EventAttendee = Readonly<{
+  kind: "member" | "guest";
+  profileId: string | null;
+  guestId: string | null;
+  displayName: string;
+  email: string | null;
+  organisation: string | null;
+  status: string;
+  checkedInAt: Date | null;
+}>;
+
+export async function listEventAttendees(actor: Actor, eventIdInput: unknown, deps: MemberEventDependencies = {}): Promise<EventAttendee[]> {
   requireAdmin(actor);
   const eventId = eventIdSchema.parse(eventIdInput);
-  const db = await getDb();
-  return db.select({profileId: eventRegistrations.profileId, displayName: profiles.displayName, email: profiles.email, status: eventRegistrations.status, checkedInAt: eventRegistrations.checkedInAt})
-    .from(eventRegistrations).innerJoin(profiles, eq(profiles.id, eventRegistrations.profileId))
-    .where(eq(eventRegistrations.eventId, eventId)).orderBy(asc(profiles.displayName), asc(eventRegistrations.profileId));
+  const database = await memberDatabase(deps);
+  // A UNION rather than two reads so the list arrives in one stable order and
+  // the CSV export (lib/admin/event-attendees.ts) sees exactly what the page
+  // shows. `profile_id` is text and `guest_id` uuid, hence the typed NULLs.
+  const rows = executedRows(await database.execute(sql`
+    SELECT 'member' AS kind, ${eventRegistrations.profileId} AS profile_id, NULL::uuid AS guest_id, ${profiles.displayName} AS display_name, ${profiles.email} AS email, NULL::text AS organisation, ${eventRegistrations.status}::text AS status, ${eventRegistrations.checkedInAt} AS checked_in_at
+    FROM ${eventRegistrations} JOIN ${profiles} ON ${profiles.id} = ${eventRegistrations.profileId}
+    WHERE ${eventRegistrations.eventId} = ${eventId}
+    UNION ALL
+    SELECT 'guest', NULL::text, ${eventGuestRegistrations.id}, ${eventGuestRegistrations.name}, ${eventGuestRegistrations.email}, ${eventGuestRegistrations.organisation}, ${eventGuestRegistrations.status}::text, ${eventGuestRegistrations.checkedInAt}
+    FROM ${eventGuestRegistrations}
+    WHERE ${eventGuestRegistrations.eventId} = ${eventId}
+    ORDER BY display_name ASC, kind ASC, profile_id ASC NULLS LAST, guest_id ASC NULLS LAST
+  `));
+  return rows.map((row) => ({
+    kind: row.kind === "guest" ? "guest" : "member",
+    profileId: typeof row.profile_id === "string" ? row.profile_id : null,
+    guestId: typeof row.guest_id === "string" ? row.guest_id : null,
+    displayName: String(row.display_name ?? ""),
+    email: typeof row.email === "string" ? row.email : null,
+    organisation: typeof row.organisation === "string" ? row.organisation : null,
+    status: String(row.status),
+    checkedInAt: row.checked_in_at instanceof Date ? row.checked_in_at : row.checked_in_at ? new Date(String(row.checked_in_at)) : null,
+  }));
 }
 
 // ---------------------------------------------------------------------------

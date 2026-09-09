@@ -2400,6 +2400,13 @@
       "checkingIn": "簽到中……",
       "checkInSuccess": "已為參加者簽到。",
       "checkInError": "未能為參加者簽到，請再試一次。",
+      "exportCsv": "下載出席名單（CSV）",
+      "kind": "類別",
+      "kinds": {
+        "member": "會員",
+        "guest": "訪客"
+      },
+      "organisation": "機構",
       "statuses": {
         "registered": "已登記",
         "waitlist": "候補名單",
