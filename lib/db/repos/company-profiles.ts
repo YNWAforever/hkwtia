@@ -70,9 +70,12 @@ const companyIdSchema = z.string().uuid();
 // The one shape a directory slug may take, matching `companies_slug_unique`,
 // the 0029 backfill's own guard and tests/fixtures/company-slug.ts.
 const slugSchema = z.string().trim().min(2).max(96).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
-// Rendered as an anchor on the public page: `z.url()` alone admits javascript:
-// and data: schemes. Same guard as the events repository's `httpUrlSchema`.
-const httpUrlSchema = z.string().trim().url().max(500).refine((value) => /^https?:\/\//i.test(value), {message: "must be an http(s) URL"});
+// Rendered as an anchor on an anonymous public page: `z.url()` alone admits
+// javascript: and data: schemes. https only — unlike the events repository's
+// `httpUrlSchema`, which guards an organiser's meeting or registration link,
+// this URL is a public organisation website, so it follows the precedent set by
+// `lib/db/repos/partners.ts` (`canonicalHttpsUrl`) and never stores plain http.
+const httpsUrlSchema = z.string().trim().url().max(500).refine((value) => /^https:\/\//i.test(value), {message: "must be an https URL"});
 
 /** Empty text is a cleared field, not a blank tagline; the public page tests for null. */
 function optionalText(max: number) {
@@ -90,7 +93,7 @@ const profileInputSchema = z.object({
   tags: z.array(z.string()).max(8).default([])
     .refine((tags) => tags.every(isIndustryTag), {message: "COMPANY_TAG_UNKNOWN"}),
   logoMediaId: z.string().uuid().nullable().optional().default(null),
-  website: httpUrlSchema.nullable().optional().default(null),
+  website: httpsUrlSchema.nullable().optional().default(null),
 }).strict();
 
 export type CompanyProfileInput = z.input<typeof profileInputSchema>;
@@ -257,6 +260,33 @@ function directoryFilters(filters: MemberFilters): SQL {
   return predicates.length === 0 ? sql`` : sql` AND ${sql.join(predicates, sql` AND `)}`;
 }
 
+/**
+ * `updateProfile` is not the only writer of `companies.website`:
+ * `companyUpdateSchema` in `lib/portal/command-core.ts` and the join form's
+ * `companySchema` both accept `z.string().trim().max(500)` with no scheme
+ * check, and a company can reach `published` without ever passing through this
+ * repository — the 0029 backfill gives it a slug, `submitForReview` only asks
+ * for one, and `review` only asks for `pending_review`. So a legacy
+ * `javascript:`, `data:` or scheme-less value could otherwise reach the member
+ * page's anchor. Sanitise on the public read instead of trusting the column,
+ * exactly as `publicWebsiteUrl` in `lib/db/repos/partners.ts` does.
+ *
+ * `canonicalHttpsUrl` itself is the wrong tool here: it rejects any query
+ * string or fragment, which a member's own site legitimately carries (a
+ * language variant, a landing page). This is the same https-only rule without
+ * that clause, so it renders exactly what `httpsUrlSchema` above lets a member
+ * store and drops everything else.
+ */
+function publicWebsiteUrl(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === "https:" ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
 function summaryFrom(row: z.infer<typeof summaryRowSchema>): PublicMemberSummary {
   return {
     id: row.id,
@@ -265,7 +295,7 @@ function summaryFrom(row: z.infer<typeof summaryRowSchema>): PublicMemberSummary
     tagline: {en: row.tagline_en, zhHk: row.tagline_zh_hk},
     tags: row.tags,
     plan: row.plan_code,
-    website: row.website,
+    website: publicWebsiteUrl(row.website),
     logoUrl: row.logo_url,
   };
 }

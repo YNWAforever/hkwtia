@@ -104,6 +104,32 @@ describe("companyProfilesRepository (programme B-6, B-7)", () => {
     expect(statementText(execute, 0)).toContain("= 'published'");
   });
 
+  it("never hands the public page a website the column cannot vouch for", async () => {
+    // `companies.website` has other writers: `companyUpdateSchema` in
+    // lib/portal/command-core.ts and the join form both take free text with no
+    // scheme check, and a legacy company can reach 'published' without ever
+    // passing through `updateProfile` (0029 gave it a slug; `submitForReview`
+    // and `review` only look at the status). Sanitise on the read, exactly as
+    // `publicWebsiteUrl` in lib/db/repos/partners.ts does.
+    const {execute, load} = db([
+      [
+        {...directoryRow, website: "javascript:alert(1)"},
+        {...directoryRow, slug: "beta", website: "acme.example"},
+        {...directoryRow, slug: "gamma", website: "https://acme.example/en?ref=wtia"},
+      ],
+      [{...directoryRow, website: "data:text/html,<h1>hi", description: null, description_zh_hk: null, industry: null, size_band: null}],
+      [],
+      [],
+    ]);
+    const repository = createCompanyProfilesRepository({loadDatabase: load, getCompanyRole: roles});
+
+    const rows = await repository.listPublished({q: null, tag: null, plan: null});
+    expect(rows.map((row) => row.website)).toEqual([null, null, "https://acme.example/en?ref=wtia"]);
+
+    await expect(repository.getPublishedBySlug("acme")).resolves.toMatchObject({website: null});
+    expect(execute).toHaveBeenCalledTimes(4);
+  });
+
   it("rejects a slug the route could never have minted before opening the database", async () => {
     const {execute, load} = db([]);
     const repository = createCompanyProfilesRepository({loadDatabase: load, getCompanyRole: roles});
@@ -123,6 +149,15 @@ describe("companyProfilesRepository (programme B-6, B-7)", () => {
     // A published profile re-enters review on every owner edit, and the
     // reviewer columns reset, so a stale approval never covers new copy.
     expect(statementText(execute, 0)).toContain("pending_review");
+  });
+
+  it("stores an https website only, so the member page can never render a plain-http anchor", async () => {
+    const {execute, load} = db([[{id: COMPANY, public_profile_status: "hidden"}]]);
+    const repository = createCompanyProfilesRepository({loadDatabase: load, getCompanyRole: roles});
+
+    await expect(repository.updateProfile(member, COMPANY, {...profile, website: "http://acme.example"}))
+      .rejects.toThrow();
+    expect(execute).not.toHaveBeenCalled();
   });
 
   it("maps the slug unique violation to COMPANY_SLUG_TAKEN, wrapped or raw", async () => {
