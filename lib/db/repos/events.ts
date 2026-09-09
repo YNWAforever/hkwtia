@@ -441,7 +441,7 @@ export async function registerForEvent(actor: Actor, input: unknown, dependencie
     // is a courtesy, and a journey_state outage must never turn a successful
     // registration into an error the member retries into a duplicate.
     await (resolved.enrollReminder ?? enrollEventReminder)({profileId: actor.profileId, eventId, startsAt: outcome.startsAt})
-      .catch((error: unknown) => { console.error("event-reminder-enrolment", error); });
+      .catch((error: unknown) => { console.error("event-reminder-enrolment", {profileId: actor.profileId, eventId, error}); });
   }
   return {disposition: outcome.disposition};
 }

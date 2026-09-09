@@ -94,6 +94,10 @@ export function eventReminderVariables(input: Readonly<{
   const title = input.locale === "zh-HK" && input.event.titleZh?.trim()
     ? input.event.titleZh.trim()
     : input.event.titleEn;
+  // `appUrl` (server-validated `APP_URL`), not `absoluteUrl`/`NEXT_PUBLIC_SITE_URL`
+  // (client-exposed, silently falls back to localhost) — same base its
+  // runners.ts callers (unsubscribeUrls, portalUrl) already use for outbound
+  // links this automation sends.
   const url = new URL(localizedPath(input.locale, `/events/${input.event.slug}`), input.appUrl).toString();
   return {
     eventTitle: title,
