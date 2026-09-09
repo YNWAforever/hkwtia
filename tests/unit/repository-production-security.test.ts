@@ -103,6 +103,10 @@ const existingProfileRow = [
   new Date("2026-01-01T00:00:00.000Z"),
 ];
 
+// Positional, in `companies` column order: the proxy driver hands Drizzle a
+// raw tuple, so every column the table declares must be present. The tail is
+// the Phase B2 public-profile block (D-11); `tags` is NOT NULL, and Drizzle
+// maps it eagerly, so it has to be an array rather than null.
 const companyRow = [
   "company-b",
   "Acme Limited",
@@ -115,6 +119,17 @@ const companyRow = [
   false,
   new Date("2026-01-01T00:00:00.000Z"),
   new Date("2026-01-01T00:00:00.000Z"),
+  null,
+  null,
+  [],
+  null,
+  null,
+  null,
+  "hidden",
+  null,
+  null,
+  null,
+  null,
 ];
 
 const applicationRow = (overrides: {

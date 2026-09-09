@@ -13,6 +13,7 @@ import {
   eventGuestRegistrations,
   events,
   jobs,
+  leads,
   membershipApplications,
   membershipPlans,
   messages,
@@ -176,5 +177,31 @@ describe("phase B1 two-sided events contract", () => {
     expect(eventGuestRegistrations.cancelTokenDigest).toBeDefined();
     expect(eventGuestRegistrations.marketingConsentAt).toBeDefined();
     expect(eventGuestRegistrations.checkedInAt).toBeDefined();
+  });
+});
+
+describe("phase B2 company profile contract", () => {
+  it("adds public-profile columns and a partial unique slug", () => {
+    for (const column of [
+      "slug",
+      "logoMediaId",
+      "tags",
+      "taglineEn",
+      "taglineZhHk",
+      "descriptionZhHk",
+      "publicProfileStatus",
+      "publicProfilePublishedAt",
+      "profileReviewedAt",
+      "profileReviewedByProfileId",
+      "profileRejectionReason",
+    ] as const) {
+      expect(companies[column]).toBeDefined();
+    }
+    expect(getTableConfig(companies).indexes.map((index) => index.config.name)).toContain("companies_slug_unique");
+  });
+
+  it("lets a lead exist without a listing and link to a contact", () => {
+    expect(leads.listingId.notNull).toBe(false);
+    expect(leads.contactId).toBeDefined();
   });
 });

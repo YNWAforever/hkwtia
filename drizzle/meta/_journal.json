@@ -190,6 +190,20 @@
       "when": 1788893623737,
       "tag": "0027_phase_b_events_backfill",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1788960357208,
+      "tag": "0028_phase_b_company_profiles",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1788960371232,
+      "tag": "0029_phase_b_company_slugs",
+      "breakpoints": true
     }
   ]
 }

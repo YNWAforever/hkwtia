@@ -106,6 +106,11 @@ export const registrationModeEnum = pgEnum("registration_mode", ["rsvp", "extern
 export const guestRegistrationStatusEnum = pgEnum("guest_registration_status", [
   "registered", "waitlist", "cancelled", "attended",
 ]);
+// Programme D-11: a company's public member page is opt-in and staff-reviewed,
+// so the lifecycle mirrors the showcase one instead of a single boolean.
+export const publicProfileStatusEnum = pgEnum("public_profile_status", [
+  "hidden", "pending_review", "published", "rejected",
+]);
 export type ShowcaseListingStatus = (typeof showcaseListingStatusEnum.enumValues)[number];
 
 const vector = customType<{data: number[]; driverData: string}>({
@@ -153,7 +158,26 @@ export const companies = pgTable("companies", {
   directoryVisible: boolean("directory_visible").default(false).notNull(),
   createdAt: createdAt("created_at"),
   updatedAt: updatedAt("updated_at"),
-});
+  // Programme D-11: the public member page. Opt-in, reviewed, hidden by default.
+  // 0029 derives the first slug from `display_name`; owners edit it afterwards.
+  slug: text("slug"),
+  // `media` is declared after `companies`, so the reference has to be a typed
+  // lazy callback or TypeScript infers a circular type.
+  logoMediaId: uuid("logo_media_id").references((): AnyPgColumn => media.id, {onDelete: "set null"}),
+  tags: text("tags").array().default(sql`'{}'::text[]`).notNull(),
+  taglineEn: text("tagline_en"),
+  taglineZhHk: text("tagline_zh_hk"),
+  descriptionZhHk: text("description_zh_hk"),
+  publicProfileStatus: publicProfileStatusEnum("public_profile_status").default("hidden").notNull(),
+  publicProfilePublishedAt: timestamp("public_profile_published_at", {withTimezone: true}),
+  profileReviewedAt: timestamp("profile_reviewed_at", {withTimezone: true}),
+  profileReviewedByProfileId: text("profile_reviewed_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  profileRejectionReason: text("profile_rejection_reason"),
+}, (table) => [
+  // Partial so the legacy rows that never get a slug cannot collide on NULL.
+  uniqueIndex("companies_slug_unique").on(table.slug).where(sql`${table.slug} IS NOT NULL`),
+  index("companies_public_profile_idx").on(table.publicProfileStatus, table.displayName),
+]);
 
 export const companyMembers = pgTable(
   "company_members",
@@ -1041,9 +1065,12 @@ export const leads = pgTable(
   "leads",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    listingId: uuid("listing_id")
-      .notNull()
-      .references(() => showcaseListings.id, {onDelete: "cascade"}),
+    // Programme D-6/D-11: a lead may now arrive from a member page or an
+    // interest form rather than a showcase listing, so the listing is
+    // optional and a contact can stand in its place. The check below keeps
+    // every row attached to at least one of the two.
+    listingId: uuid("listing_id").references(() => showcaseListings.id, {onDelete: "cascade"}),
+    contactId: uuid("contact_id").references((): AnyPgColumn => contacts.id, {onDelete: "set null"}),
     contactName: text("contact_name").notNull(),
     email: text("email").notNull(),
     organization: text("organization"),
@@ -1057,6 +1084,7 @@ export const leads = pgTable(
   (table) => [
     unique("leads_idempotency_key_unique").on(table.idempotencyKey),
     index("leads_listing_created_idx").on(table.listingId, table.createdAt),
+    check("leads_identity_check", sql`${table.listingId} IS NOT NULL OR ${table.contactId} IS NOT NULL`),
   ],
 );
 
@@ -1470,3 +1498,4 @@ export type EventVisibility = (typeof eventVisibilityEnum.enumValues)[number];
 export type EventFormat = (typeof eventFormatEnum.enumValues)[number];
 export type RegistrationMode = (typeof registrationModeEnum.enumValues)[number];
 export type GuestRegistrationStatus = (typeof guestRegistrationStatusEnum.enumValues)[number];
+export type PublicProfileStatus = (typeof publicProfileStatusEnum.enumValues)[number];
