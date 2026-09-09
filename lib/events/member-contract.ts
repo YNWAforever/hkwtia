@@ -1,5 +1,6 @@
 import {formatHongKongDateTimeLocal, parseHongKongDateTimeLocal} from "@/lib/admin/event-form-input";
 import type {MemberEventInput, MemberEventRow} from "@/lib/db/repos/events";
+import {normaliseEventTag} from "@/lib/events/filters";
 
 function text(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -39,8 +40,9 @@ export function memberEventInputFromFormData(formData: FormData): MemberEventInp
     visibility: visibility === "members_only" ? "members_only" : "public",
     registrationMode: registrationMode === "external" ? "external" : "rsvp",
     externalRegistrationUrl: optional(formData, "externalRegistrationUrl"),
-    // De-duplicated: "ai, health, ai" would otherwise store the tag twice.
-    tags: [...new Set(text(formData, "tags").split(",").map((tag) => tag.trim()).filter((tag) => tag.length > 0))],
+    // Normalised then de-duplicated: "AI, Machine Learning, ai" stores ["ai", "machine-learning"],
+    // the spelling the /events `?tag=` predicate looks for (lib/events/filters.ts).
+    tags: [...new Set(text(formData, "tags").split(",").map(normaliseEventTag).filter((tag): tag is string => tag !== null))],
     heroMediaId: optional(formData, "heroMediaId"),
   };
 }

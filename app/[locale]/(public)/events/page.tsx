@@ -105,7 +105,7 @@ export default async function EventsPage({params, searchParams}: Props) {
           <Link href="/launchpad">{t("activityStrip.launchpadLabel")}</Link>
           <Link href="/showcase">{t("activityStrip.showcaseLabel")}</Link>
         </nav>
-        <EventFilterPanel filters={filters} labels={filterLabels} locale={appLocale} status={status} />
+        <EventFilterPanel filters={filters} labels={filterLabels} locale={appLocale} status={status} view={view} />
         {records === null ? (
           <HonestEmpty copy={t("unavailableDescription")} label={t("statusLabel")} title={t("unavailableTitle")} variant="light" />
         ) : (

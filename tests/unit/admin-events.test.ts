@@ -19,6 +19,13 @@ describe("admin Event mutations and registration capacity", () => {
     expect(audited).toHaveBeenCalledWith(expect.objectContaining({actorUserId: "profile-staff", action: "event.created", targetType: "event"}));
   });
 
+  it("normalises admin-authored tags at the write boundary so the public ?tag= predicate can match them (B-6)", async () => {
+    const inserted = vi.fn(async (input) => ({id: "11111111-1111-4111-8111-111111111111", ...input}));
+    const dependencies: EventMutationDependencies = {transaction: (work) => work({insertEvent: inserted, lockEvent: vi.fn(), updateEvent: vi.fn(), lockActiveMedia: vi.fn(), insertAudit: vi.fn(async () => undefined)})};
+    await expect(createEvent(staff, {...createInput, tags: ["AI", "Machine Learning", "ai", "###"]}, dependencies)).resolves.toMatchObject({tags: ["ai", "machine-learning"]});
+    expect(inserted).toHaveBeenCalledWith(expect.objectContaining({tags: ["ai", "machine-learning"]}));
+  });
+
   it("serializes capacity decisions and deterministically waitlists overflow registrations", async () => {
     const registrations = new Map<string, "registered" | "waitlist" | "cancelled">();
     const audits: unknown[] = [];

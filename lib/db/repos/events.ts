@@ -1,6 +1,6 @@
 import "server-only";
 
-import {and, asc, count, desc, eq, gte, inArray, isNull, lt, or, sql} from "drizzle-orm";
+import {and, asc, count, desc, eq, gte, inArray, isNull, lt, or, sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
@@ -10,7 +10,7 @@ import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {auditEvents, companies, companyMembers, eventGuestRegistrations, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility} from "@/lib/db/server-schema";
 import {assertCanSubmitEvent} from "@/lib/events/entitlement-core";
-import {EMPTY_EVENT_FILTERS, hongKongMonthBounds, organiserSlugFromDisplayName, type EventFilters} from "@/lib/events/filters";
+import {EMPTY_EVENT_FILTERS, hongKongMonthBounds, normaliseEventTag, organiserSlugFromDisplayName, type EventFilters} from "@/lib/events/filters";
 import {eventBoundary, type PublicEventProjection, type PublicEventStatus} from "@/lib/events/public";
 import {enrollEventReminder, type EventReminderEnrollmentInput} from "@/lib/events/reminder-enrollment";
 import {canTransitionEvent, derivedEventFlags, hongKongQuarterBounds} from "@/lib/events/status";
@@ -44,7 +44,12 @@ const eventInputObjectSchema = z.object({
   onlineUrl: httpUrlSchema.nullable().optional(),
   registrationMode: z.enum(["rsvp", "external", "ticketed"]).default("rsvp"),
   externalRegistrationUrl: httpUrlSchema.nullable().optional(),
-  tags: z.array(z.string().trim().min(1).max(40)).max(10).default([]),
+  // Normalised at the write boundary (programme B-6 review): the public `?tag=` predicate
+  // is `tags @> ARRAY['ai']`, so a row tagged "AI" or "Machine Learning" was unreachable.
+  // Admin-authored and member-authored tags alike land as `ai` / `machine-learning`;
+  // anything that normalises to nothing (punctuation only, over 40 chars) is dropped.
+  tags: z.array(z.string().max(200)).max(10).default([])
+    .transform((tags) => [...new Set(tags.map(normaliseEventTag).filter((tag): tag is string => tag !== null))]),
 }).strict();
 // Mirrors the `events_online_url_check` and `events_external_registration_check`
 // constraints so a bad form fails validation instead of a transaction.
@@ -182,17 +187,22 @@ function isPubliclyVisible(event: Pick<Event, "status" | "visibility">): boolean
 // Programme B-6: the /events filter axes as SQL, and below as the in-memory twin the
 // unit tests run against. Every axis is independent; an unset axis adds no predicate.
 function publicFilterPredicates(filters: EventFilters) {
-  const predicates = [];
+  const predicates: SQL[] = [];
   if (filters.format) predicates.push(eq(events.format, filters.format));
   if (filters.month) {
     const {start, end} = hongKongMonthBounds(filters.month);
     predicates.push(gte(events.startsAt, start), lt(events.startsAt, end));
   }
+  // Tags are normalised on every write (eventInputObjectSchema), so the stored spelling
+  // is exactly what parseEventFilters produces and plain containment is enough.
   if (filters.tag) predicates.push(sql`${events.tags} @> ARRAY[${filters.tag}]::text[]`);
   // `companies.slug` arrives with Phase B2 Task 1; until then the organiser filter matches
-  // a slug derived from the display name. Replace with eq(companies.slug, filters.organiser)
-  // when B2 merges, and organiserSlugFromDisplayName in lib/events/filters.ts with it.
-  if (filters.organiser) predicates.push(sql`lower(regexp_replace(${companies.displayName}, '[^a-z0-9]+', '-', 'gi')) = ${filters.organiser}`);
+  // a slug derived from the display name. This expression must agree character for
+  // character with organiserSlugFromDisplayName in lib/events/filters.ts: collapse every
+  // non-alphanumeric run to `-`, lowercase, then trim edge hyphens so "Acme Ltd." is
+  // `acme-ltd` on both sides. Replace with eq(companies.slug, filters.organiser) when B2
+  // merges, and organiserSlugFromDisplayName with it.
+  if (filters.organiser) predicates.push(sql`trim(both '-' from lower(regexp_replace(${companies.displayName}, '[^a-zA-Z0-9]+', '-', 'g'))) = ${filters.organiser}`);
   return predicates;
 }
 

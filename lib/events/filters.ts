@@ -17,23 +17,42 @@ export const EMPTY_EVENT_FILTERS: EventFilters = {format: null, month: null, org
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
 const HONG_KONG_OFFSET_MS = 8 * 60 * 60 * 1000;
+// The events.tags column limit the member form advertises; a longer value can never match a row.
+const MAX_TAG_LENGTH = 40;
 
 function first(value: string | readonly string[] | undefined): string {
   return (Array.isArray(value) ? value[0] : value) ?? "";
 }
 
+/** Trim, lowercase, collapse every run of non-alphanumerics to one hyphen and drop edge hyphens. */
+function slugify(value: string): string {
+  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+/**
+ * The one spelling a tag has on both sides of the `tags @> ARRAY[...]`
+ * predicate. Tags used to be stored as typed ("AI", "Machine Learning") while
+ * `?tag=` was lowercased and slug-validated, so a search for `ai` never matched
+ * a row tagged `AI`. Every write path (member form, admin form, repository
+ * schema) runs through this, and so does the URL parser; null means "no tag".
+ */
+export function normaliseEventTag(value: string): string | null {
+  const tag = slugify(value);
+  return tag.length > 0 && tag.length <= MAX_TAG_LENGTH ? tag : null;
+}
+
 export function parseEventFilters(query: Record<string, string | readonly string[] | undefined>): EventFilters {
   const format = first(query.format);
   const month = first(query.month);
-  const organiser = first(query.organiser).trim().toLowerCase();
-  const tag = first(query.tag).trim().toLowerCase();
+  // A typed organiser name ("Acme Robotics") becomes the same slug the predicate derives
+  // from companies.display_name, so the text box matches without the user knowing the slug.
+  const organiser = organiserSlugFromDisplayName(first(query.organiser));
   return {
     format: format === "in_person" || format === "online" || format === "hybrid" ? format : null,
     month: MONTH.test(month) ? month : null,
-    // 96 matches the longest slug the directory will mint (Phase B2); 40 matches
-    // the member event form's tag limit, so a longer value can never match a row.
+    // 96 matches the longest slug the directory will mint (Phase B2).
     organiser: organiser.length <= 96 && SLUG.test(organiser) ? organiser : null,
-    tag: tag.length > 0 && tag.length <= 40 && SLUG.test(tag) ? tag : null,
+    tag: normaliseEventTag(first(query.tag)),
   };
 }
 
@@ -63,9 +82,11 @@ export function hongKongMonthBounds(month: string): Readonly<{start: Date; end: 
 /**
  * The organiser slug a company display name matches until Phase B2 adds
  * `companies.slug`: the JS twin of the SQL expression in
- * lib/db/repos/events.ts (`organiserSlugPredicate`). Keep the two in step;
- * both are replaced by the real column when B2 merges.
+ * lib/db/repos/events.ts (`publicFilterPredicates`). Keep the two in step
+ * character for character -- "Acme Ltd." must be `acme-ltd` on both sides, not
+ * `acme-ltd-` (which the SLUG regex rejects). Both are replaced by the real
+ * column when B2 merges.
  */
 export function organiserSlugFromDisplayName(displayName: string): string {
-  return displayName.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+  return slugify(displayName);
 }

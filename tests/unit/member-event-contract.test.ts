@@ -47,6 +47,13 @@ describe("member event contract (programme B-2)", () => {
     expect(input.tags).toEqual(["ai", "health"]);
   });
 
+  it("normalises tags to the slug spelling the /events ?tag= filter matches (B-6)", () => {
+    const input = memberEventInputFromFormData(form({
+      slug: "s", titleEn: "T", descriptionEn: "d", startsAt: "2030-03-01T10:00", tags: "AI, Machine Learning, ai, ###, machine-learning",
+    }));
+    expect(input.tags).toEqual(["ai", "machine-learning"]);
+  });
+
   it("maps a snake_case row to the edit view", () => {
     const view = memberEventViewFromRow(row);
     expect(view).toMatchObject({id: "22222222-2222-4222-8222-222222222222", status: "rejected", rejectionReason: "duplicate", startsAtLocal: "2030-03-01T10:00", endsAtLocal: "", tags: "ai", capacity: "", submittedAt: null});

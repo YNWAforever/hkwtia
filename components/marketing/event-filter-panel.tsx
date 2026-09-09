@@ -20,8 +20,10 @@ const FORMATS: readonly PublicEventFormat[] = ["in_person", "online", "hybrid"];
 // and components/marketing/showcase-filters.tsx: the URL is the whole filter state, so a
 // filtered list is linkable and the page needs no client island. Donor classes
 // `.event-filter-panel`, `.event-filter-grid` and `.directory-actions` are already styled
-// in app/styles/wisetech.css. The hidden `status` keeps the open/past tab through a submit.
-export function EventFilterPanel({locale, status, filters, labels}: Readonly<{locale: AppLocale; status: PublicEventStatus; filters: EventFilters; labels: EventFilterPanelLabels}>) {
+// in app/styles/wisetech.css. The hidden `status` keeps the open/past tab through a submit,
+// and the hidden `view` keeps the calendar layout (`?view=calendar`) when one is active;
+// cards is the default, so it needs no carrier.
+export function EventFilterPanel({locale, status, filters, labels, view}: Readonly<{locale: AppLocale; status: PublicEventStatus; filters: EventFilters; labels: EventFilterPanelLabels; view?: "cards" | "calendar"}>) {
   const action = localizedPath(locale, "/events");
   const field = "min-h-11 w-full rounded-md border border-input bg-background px-3";
   return (
@@ -29,6 +31,7 @@ export function EventFilterPanel({locale, status, filters, labels}: Readonly<{lo
       <fieldset className="event-filter-grid">
         <legend className="sr-only">{labels.legend}</legend>
         <input name="status" type="hidden" value={status} />
+        {view === "calendar" ? <input name="view" type="hidden" value={view} /> : null}
         <label>
           <span>{labels.format}</span>
           <select className={field} defaultValue={filters.format ?? ""} name="format">

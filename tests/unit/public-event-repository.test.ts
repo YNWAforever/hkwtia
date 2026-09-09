@@ -126,7 +126,8 @@ describe("repository-backed Event visibility", () => {
     const readAsOf = new Date("2026-09-01T00:00:00.000Z");
     const source = [
       {event: event("online-oct", {startsAt: new Date("2026-10-05T02:00:00.000Z"), endsAt: null, format: "online", tags: ["ai"], organiserCompanyId: "company-1"}), hero: null, organiser: {name: "Acme Robotics"}},
-      {event: event("in-person-nov", {startsAt: new Date("2026-11-05T02:00:00.000Z"), endsAt: null, format: "in_person", tags: ["health"]}), hero: null},
+      // "Acme Ltd." must match ?organiser=acme-ltd: the derived slug trims the edge hyphen the trailing dot leaves.
+      {event: event("in-person-nov", {startsAt: new Date("2026-11-05T02:00:00.000Z"), endsAt: null, format: "in_person", tags: ["health"], organiserCompanyId: "company-2"}), hero: null, organiser: {name: "Acme Ltd."}},
       // 2026-10-31T17:00Z is already 1 November in Hong Kong: the month filter must use the HK boundary.
       {event: event("hk-november", {startsAt: new Date("2026-10-31T17:00:00.000Z"), endsAt: null, format: "hybrid", tags: ["ai", "health"]}), hero: null},
     ] as const;
@@ -138,6 +139,7 @@ describe("repository-backed Event visibility", () => {
     await expect(read({...none, month: "2026-10"})).resolves.toEqual(["online-oct"]);
     await expect(read({...none, month: "2026-11"})).resolves.toEqual(["hk-november", "in-person-nov"]);
     await expect(read({...none, organiser: "acme-robotics"})).resolves.toEqual(["online-oct"]);
+    await expect(read({...none, organiser: "acme-ltd"})).resolves.toEqual(["in-person-nov"]);
     await expect(read({...none, organiser: "someone-else"})).resolves.toEqual([]);
     await expect(read({...none, tag: "health"})).resolves.toEqual(["hk-november", "in-person-nov"]);
     await expect(read({...none, format: "hybrid", tag: "ai"})).resolves.toEqual(["hk-november"]);

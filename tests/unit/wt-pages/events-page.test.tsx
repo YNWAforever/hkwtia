@@ -120,6 +120,17 @@ describe("Events page donor markup", () => {
     expect(within(panel as HTMLElement).getByRole("combobox", {name: bundles.en.Events.filters.format})).toHaveValue("online");
     expect(within(panel as HTMLElement).getByRole("textbox", {name: bundles.en.Events.filters.tag})).toHaveValue("ai");
     expect(panel?.querySelector("input[name=status]")).toHaveAttribute("value", "past");
+    expect(panel?.querySelector("input[name=view]")).toBeNull();
     expect(within(panel as HTMLElement).getByRole("link", {name: bundles.en.Events.filters.clear})).toHaveAttribute("href", "/events?status=past");
+  });
+
+  it("carries ?view=calendar through the filter panel so applying a filter keeps the calendar layout (B-6)", async () => {
+    searchState.current = new URLSearchParams("view=calendar");
+    listPublic.mockResolvedValueOnce([]);
+    await renderEventsPage({view: "calendar", organiser: "Acme Robotics"});
+
+    expect(listPublic).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({filters: expect.objectContaining({organiser: "acme-robotics"})}));
+    const panel = document.querySelector("form.event-filter-panel");
+    expect(panel?.querySelector("input[name=view]")).toHaveAttribute("value", "calendar");
   });
 });
