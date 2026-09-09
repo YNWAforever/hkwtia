@@ -432,6 +432,17 @@ export function createCompanyProfilesRepository(dependencies: CompanyProfileDepe
      * Owner/admin of the company. Editing a published profile sends it back to
      * `pending_review` and clears the reviewer columns, so approved copy is
      * never silently replaced by unreviewed copy on a live page.
+     *
+     * That guarantee needs the other writer to keep it too, and this method is
+     * not it: `/portal/company` posts `updateCompanyAction` →
+     * `lib/portal/command-core.ts`'s `updateCompany` → `companiesRepository.update`,
+     * which writes `display_name`, `website`, `industry`, `size_band` and
+     * `description` — every one of them projected onto /members by
+     * `directoryColumns` and `detailColumns` above. `reviewResetFor` in
+     * `lib/db/repos/companies.ts` applies the same demotion and the same
+     * reviewer reset there. Those two are the only writers of public copy; a
+     * third that skips the rule would make the queue advisory rather than a
+     * gate, because `listForReview` only ever sees `pending_review`.
      */
     async updateProfile(actor: Actor, companyId: string, input: unknown): Promise<CompanyProfileRow> {
       const id = companyIdSchema.parse(companyId);

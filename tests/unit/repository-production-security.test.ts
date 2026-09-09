@@ -67,6 +67,14 @@ function normalizedSql(statement: string | undefined): string {
   return (statement ?? "").replace(/\s+/g, " ").trim().toLowerCase();
 }
 
+/** Everything an UPDATE writes, without the scope predicate or the `RETURNING` column list. */
+function setClause(statement: string | undefined): string {
+  const normalized = normalizedSql(statement);
+  const start = normalized.indexOf(" set ");
+  const end = normalized.indexOf(" where ");
+  return start === -1 ? "" : normalized.slice(start, end === -1 ? undefined : end);
+}
+
 const membershipRow = [
   "membership-a",
   null,
@@ -473,6 +481,50 @@ describe("production repository security boundaries", () => {
     expect(sql).toContain('from "company_members"');
     expect(sql).toContain('"role"');
     expect(parameters.flat()).toEqual(expect.arrayContaining(["owner", "admin"]));
+  });
+
+  // Programme B-7: `companies.update` is the other writer of the columns
+  // `/members` and `/members/[slug]` render (lib/db/repos/company-profiles.ts's
+  // `directoryColumns`/`detailColumns` project display_name, website, industry,
+  // size_band and description). `companyProfilesRepository.updateProfile` sends a
+  // published profile back to `pending_review`; without the same rule here, the
+  // portal company form at /portal/company would let an approved company rewrite
+  // its public copy indefinitely — the profile stays `published`, the review
+  // queue (which selects only `pending_review`) never learns anything changed.
+  it.each(["displayName", "website", "industry", "sizeBand", "description"] as const)(
+    "sends a published member page back to review when a company update rewrites %s",
+    async (field) => {
+      const statements: string[] = [];
+      database.current = drizzle(async (query) => {
+        statements.push(query);
+        return {rows: [companyRow]};
+      });
+
+      await expect(companiesRepository.update(actor, "company-b", {[field]: "Unreviewed copy"}))
+        .resolves.toMatchObject({id: "company-b"});
+
+      // `RETURNING` names every column, so only the SET clause proves the rule.
+      const sql = setClause(statements.join("\n"));
+      expect(sql).toContain('"public_profile_status"');
+      expect(sql).toContain("'pending_review'");
+      expect(sql).toContain('"profile_reviewed_at"');
+      expect(sql).toContain('"profile_reviewed_by_profile_id"');
+      expect(sql).toContain('"profile_rejection_reason"');
+    },
+  );
+
+  it("leaves the review status alone for a company update that changes nothing /members renders", async () => {
+    const statements: string[] = [];
+    database.current = drizzle(async (query) => {
+      statements.push(query);
+      return {rows: [companyRow]};
+    });
+
+    await expect(companiesRepository.update(actor, "company-b", {
+      legalName: "Acme Limited", directoryVisible: true, logoReference: "logo-1",
+    })).resolves.toMatchObject({id: "company-b"});
+
+    expect(setClause(statements.join("\n"))).not.toContain("public_profile_status");
   });
 
   it("preserves system company updates without member-role scoping", async () => {
