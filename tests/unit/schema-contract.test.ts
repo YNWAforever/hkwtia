@@ -23,6 +23,8 @@ import {
   staffTasks,
 } from "@/lib/db/server-schema";
 
+import {backfillCompanySlugs} from "@/tests/fixtures/company-slug";
+
 describe("membership schema contract", () => {
   it("defines all M1 application tables", () => {
     expect(profiles).toBeDefined();
@@ -221,5 +223,70 @@ describe("phase B2 company profile contract", () => {
   it("lets a lead exist without a listing and link to a contact", () => {
     expect(leads.listingId.notNull).toBe(false);
     expect(leads.contactId).toBeDefined();
+  });
+});
+
+/**
+ * The Drizzle assertions above pin the table; nothing pins `drizzle/0029`,
+ * whose de-duplication is the part that can silently cost a member their page
+ * address. `backfillCompanySlugs` mirrors that migration the way
+ * tests/fixtures/event-row.ts mirrors 0027, so the SQL's rules are asserted as
+ * behaviour on a machine with no Postgres.
+ */
+describe("phase B2 slug backfill (drizzle/0029)", () => {
+  // The portal's own rule (config S-2). A backfilled slug that fails it would
+  // reject the owner's first save of an untouched form.
+  const PORTAL_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+  function seedRow(id: string, displayName: string, createdAtMinute: number) {
+    return {id, displayName, createdAt: new Date(Date.UTC(2026, 8, 9, 0, createdAtMinute))};
+  }
+
+  /** The invariants every input must satisfy, whatever the display names are. */
+  function backfill(rows: readonly {id: string; displayName: string; createdAt: Date}[]) {
+    const derived = backfillCompanySlugs(rows);
+    const written = derived.filter((row) => row.slug !== null);
+
+    expect(new Set(written.map((row) => row.slug)).size).toBe(written.length);
+    for (const row of written) {
+      expect(row.slug).toMatch(PORTAL_SLUG);
+      expect(row.slug!.length).toBeGreaterThanOrEqual(2);
+      expect(row.slug!.length).toBeLessThanOrEqual(96);
+    }
+    // A skipped row keeps a NULL slug, and the owner has to type one before
+    // `companies_public_profile_slug_check` lets the profile publish. So a row
+    // may only be skipped when its candidate is out of bounds or genuinely
+    // taken by another row.
+    for (const row of derived.filter((candidate) => candidate.slug === null)) {
+      const outOfBounds = row.candidate.length < 2 || row.candidate.length > 96;
+      const taken = derived.some((other) => other.id !== row.id && other.slug === row.candidate);
+      expect(outOfBounds || taken, `row ${row.id} lost the free slug "${row.candidate}"`).toBe(true);
+    }
+    return new Map(derived.map((row) => [row.id, row.slug]));
+  }
+
+  it("slugifies distinct display names without a suffix", () => {
+    const slugs = backfill([
+      seedRow("c1", "Acme Robotics", 0),
+      seedRow("c2", "Widgets Ltd.", 1),
+      seedRow("c3", "Hong Kong Data & AI", 2),
+    ]);
+    expect([...slugs.values()]).toEqual(["acme-robotics", "widgets-ltd", "hong-kong-data-ai"]);
+  });
+
+  it("gives the older of two identical names the bare slug and the newer an ordinal", () => {
+    const slugs = backfill([seedRow("c1", "Acme", 0), seedRow("c2", "Acme", 1)]);
+    expect(slugs.get("c1")).toBe("acme");
+    expect(slugs.get("c2")).toBe("acme-2");
+  });
+
+  it("skips only the ordinal that a real display name already owns", () => {
+    // "Acme", "Acme", "Acme 2" derive `acme`, `acme-2` and `acme-2`: exactly
+    // one row has to give way, and it is the ordinal, not the row holding the
+    // free base.
+    const slugs = backfill([seedRow("c1", "Acme", 0), seedRow("c2", "Acme", 1), seedRow("c3", "Acme 2", 2)]);
+    expect(slugs.get("c1")).toBe("acme");
+    expect(slugs.get("c2")).toBeNull();
+    expect(slugs.get("c3")).toBe("acme-2");
   });
 });

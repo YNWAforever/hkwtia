@@ -9,6 +9,17 @@
 -- A `NOT EXISTS ... FROM companies` guard cannot catch it, because this
 -- statement's snapshot does not see the rows it is itself writing.
 --
+-- The guard runs on the ordinal rows only (`n > 1`); they are the only rows
+-- that can land on another row's base. Applying it to every row also stripped
+-- the n = 1 row of every duplicated name, because a sibling in the same
+-- partition carries `base` equal to that row's candidate: two plain "Acme"
+-- companies left `acme` free and unassigned while minting an `acme-2` with no
+-- `-1`, and an ordinary duplicate name silently cost that company its page
+-- address. Exempting n = 1 stays collision-free: those rows carry candidate =
+-- base and a base has exactly one n = 1 row, and two ordinals can never be
+-- equal because the integer suffix holds no `-`, so the last `-` of a
+-- candidate always separates base from n.
+--
 -- A row whose candidate collides keeps a NULL slug, which the partial unique
 -- index tolerates and the owner form lets them fix — the same outcome a name
 -- that slugifies to fewer than two characters already gets. The length bound
@@ -16,6 +27,11 @@
 -- base plus `-2` is 98, which both the profile slug schema and
 -- `lib/events/filters.ts` (organiser <= 96) reject, so the owner's first save
 -- of an untouched form would fail validation.
+--
+-- `tests/fixtures/company-slug.ts` is the TypeScript twin of this statement and
+-- `tests/unit/schema-contract.test.ts` asserts these rules as behaviour, since
+-- the backfill itself runs once against a database no local gate has. Keep the
+-- two in step.
 WITH bases AS (
   SELECT id,
          created_at,
@@ -25,7 +41,7 @@ WITH bases AS (
   SELECT id, base, row_number() OVER (PARTITION BY base ORDER BY created_at, id) AS n
   FROM bases
 ), candidates AS (
-  SELECT id, base, CASE WHEN n = 1 THEN base ELSE base || '-' || n END AS candidate
+  SELECT id, base, n, CASE WHEN n = 1 THEN base ELSE base || '-' || n END AS candidate
   FROM ordered
 )
 UPDATE "companies" c
@@ -33,7 +49,10 @@ SET "slug" = candidates.candidate
 FROM candidates
 WHERE c.id = candidates.id
   AND length(candidates.candidate) BETWEEN 2 AND 96
-  AND NOT EXISTS (
-    SELECT 1 FROM candidates other
-    WHERE other.id <> candidates.id AND other.base = candidates.candidate
+  AND (
+    candidates.n = 1
+    OR NOT EXISTS (
+      SELECT 1 FROM candidates other
+      WHERE other.id <> candidates.id AND other.base = candidates.candidate
+    )
   );
