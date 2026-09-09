@@ -16,12 +16,25 @@ const neonAuthLockRoots = ["node_modules/@neondatabase/auth", "node_modules/@neo
 // build, `tests` shards the unit suite across two runners, and `quality` only aggregates the two
 // so the branch-protection check name PRs #47-#49 were gated on survives. The run steps are still
 // pinned as one ordered list across all jobs -- a shard that quietly dropped, or a gate that moved
-// out of `checks`, would change this sequence.
+// out of `checks`, would change this sequence. The `quality` step is a block scalar (its `- run: |`
+// line is what this list sees); its body is pinned separately by `requiredQualityJob` because the
+// aggregate must fail on a red shard: without `if: always()` a failed `needs` skips the job, and a
+// skipped required status check counts as passing on GitHub.
 const requiredCiCommands = [
   "npm ci", authTreeCommand, "npm run audit:strings", "npm run lint", "npm run typecheck", "npm run build", "npm audit --omit=dev --audit-level=high",
   "npm ci", "npx vitest run --shard=${{ matrix.shard }}/2",
-  'echo "quality gate passed"',
+  "|",
 ];
+const requiredQualityJob = [
+  "  quality:",
+  "    needs: [checks, tests]",
+  "    if: ${{ always() }}",
+  "    runs-on: ubuntu-latest",
+  "    steps:",
+  "      - run: |",
+  '          test "${{ needs.checks.result }}" = "success" && test "${{ needs.tests.result }}" = "success" || exit 1',
+  '          echo "quality gate passed"',
+].join("\n") + "\n";
 const requiredNpm10OptionalPeerClosure: Record<string, Record<string, unknown>> = {
   "node_modules/@neondatabase/auth-ui/node_modules/ajv": {
     version: "8.20.0",
@@ -355,6 +368,9 @@ describe("CI and production dependency security contract", () => {
     expect(workflow, "CI must use Node 22 with npm caching").toMatch(/node-version:\s*22[\s\S]*cache:\s*npm/);
     expect(workflowRunSteps(workflow), "CI run steps must be exactly the required commands in order").toEqual(requiredCiCommands);
     expect(normalizeNewlines(workflow), "the `quality` job must aggregate `checks` and `tests` so the branch-protection check name is preserved").toMatch(/^  quality:\n    needs: \[checks, tests\]/m);
+    expect(normalizeNewlines(workflow), "the `quality` job must declare `if: ${{ always() }}` so a red shard fails it instead of skipping it").toMatch(/^  quality:\n    needs: \[checks, tests\]\n    if: \$\{\{ always\(\) \}\}\n/m);
+    expect(normalizeNewlines(workflow), "the `quality` step must check both needs.*.result values").toMatch(/test "\$\{\{ needs\.checks\.result \}\}" = "success" && test "\$\{\{ needs\.tests\.result \}\}" = "success" \|\| exit 1/);
+    expect(normalizeNewlines(workflow), "the `quality` job must be exactly the pinned always-run aggregate").toContain(requiredQualityJob);
     expect(normalizeNewlines(workflow), "the unit suite must run as a two-way shard matrix").toMatch(/matrix:\n\s*shard: \[1, 2\]/);
   });
 
@@ -379,5 +395,15 @@ describe("CI and production dependency security contract", () => {
     expect(workflowRunSteps(reordered), "reordered workflow commands must fail the exact command contract").not.toEqual(requiredCiCommands);
     expect(workflowRunSteps(missingAuthTree), "missing Auth-tree validation must fail the exact command contract").not.toEqual(requiredCiCommands);
     expect(workflowRunSteps(withExtraCommand), "extra workflow commands must fail the exact command contract").not.toEqual(requiredCiCommands);
+  });
+
+  it("rejects a quality gate that skips on a red shard or ignores one of the two results", () => {
+    const workflow = normalizeNewlines(readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8"));
+    const withoutAlways = mutateFixture("quality job without if: always()", workflow, "    if: ${{ always() }}\n", "");
+    const ignoringTests = mutateFixture("quality job ignoring the tests result", workflow, ' && test "${{ needs.tests.result }}" = "success"', "");
+    const ignoringChecks = mutateFixture("quality job ignoring the checks result", workflow, 'test "${{ needs.checks.result }}" = "success" && ', "");
+
+    expect(workflow).toContain(requiredQualityJob);
+    for (const mutated of [withoutAlways, ignoringTests, ignoringChecks]) expect(mutated).not.toContain(requiredQualityJob);
   });
 });

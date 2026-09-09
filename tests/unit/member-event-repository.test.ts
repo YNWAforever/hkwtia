@@ -68,6 +68,16 @@ function statementText(execute: ReturnType<typeof fakeDeps>["execute"], call: nu
   return literalText(execute.mock.calls[call]?.[0]);
 }
 
+/** The bound parameter values of a drizzle `sql` object, in order, nested templates included. */
+function paramValues(chunk: unknown): unknown[] {
+  // The template keeps raw values (strings, Dates) as chunks; drizzle wraps them in Param only at build time.
+  if (chunk === null || chunk === undefined) return [];
+  if (typeof chunk !== "object" || chunk instanceof Date) return [chunk];
+  if ("queryChunks" in chunk && Array.isArray(chunk.queryChunks)) return chunk.queryChunks.flatMap(paramValues);
+  if ("value" in chunk && !Array.isArray(chunk.value)) return [chunk.value];
+  return [];
+}
+
 describe("member event writes (programme B-1)", () => {
   it("refuses a member without a manager role on the organiser company before any SQL", async () => {
     const {execute, deps} = fakeDeps();
@@ -202,6 +212,8 @@ describe("member event writes (programme B-1)", () => {
     await expect(listCompanyEvents(outsider, COMPANY, deps)).rejects.toThrow("FORBIDDEN");
     await expect(countCompanySubmissionsThisQuarter(member, COMPANY, {...deps, now: () => new Date("2026-09-09T00:00:00Z")})).resolves.toBe(2);
     expect(execute).toHaveBeenCalledTimes(1);
+    expect(statementText(execute, 0)).not.toContain("<>");
+    expect(paramValues(execute.mock.calls[0]?.[0])).not.toContain(EVENT);
     await expect(listCompanyEvents(member, COMPANY, fakeDeps([[row()]]).deps)).resolves.toMatchObject([{id: EVENT}]);
     const edit = fakeDeps([[row()]]);
     await expect(getEventForMemberEdit(outsider, EVENT, edit.deps)).rejects.toThrow("FORBIDDEN");
@@ -209,6 +221,16 @@ describe("member event writes (programme B-1)", () => {
     await expect(getEventForMemberEdit(member, EVENT, own.deps)).resolves.toMatchObject({id: EVENT});
     await expect(getEventForMemberEdit(member, EVENT, fakeDeps([[]]).deps)).resolves.toBeNull();
     await expect(getEventForMemberEdit(member, EVENT, fakeDeps([[row({organiser_company_id: null, status: "published"})]]).deps)).rejects.toThrow("FORBIDDEN");
+  });
+
+  it("leaves the re-submitted event out of its own quarter count when asked", async () => {
+    const {execute, deps} = fakeDeps([[{count: 1}]]);
+    await expect(countCompanySubmissionsThisQuarter(member, COMPANY, {...deps, now: () => new Date("2026-09-09T00:00:00Z"), excludeEventId: EVENT})).resolves.toBe(1);
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(statementText(execute, 0)).toContain("<>");
+    expect(paramValues(execute.mock.calls[0]?.[0])).toContain(EVENT);
+    await expect(countCompanySubmissionsThisQuarter(member, COMPANY, {...deps, excludeEventId: "not-a-uuid"})).rejects.toThrow();
+    await expect(countCompanySubmissionsThisQuarter(outsider, COMPANY, {...deps, excludeEventId: EVENT})).rejects.toThrow("FORBIDDEN");
   });
 
   it("lists the review queue for staff only, with the organiser's display name joined in", async () => {

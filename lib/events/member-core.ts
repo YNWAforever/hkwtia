@@ -28,8 +28,13 @@ export type MemberEventsContext = Readonly<{
   companyId: string; companyName: string; plan: MembershipPlanCode; usedThisQuarter: number; limit: number; canPublish: boolean;
 }>;
 
+export type MemberEventsContextOptions = Readonly<{
+  /** An event being re-submitted already holds its quota slot, so it must not be counted against itself. */
+  excludeEventId?: string;
+}>;
+
 /** The first company the member manages, its plan, and the quota already used this quarter (S-4). */
-export async function loadMemberEventsContext(actor: Actor, deps: MemberEventsDependencies = defaultDependencies): Promise<MemberEventsContext> {
+export async function loadMemberEventsContext(actor: Actor, deps: MemberEventsDependencies = defaultDependencies, options: MemberEventsContextOptions = {}): Promise<MemberEventsContext> {
   requireMember(actor);
   const dashboard = await deps.dashboard(actor);
   const company = dashboard.companies.find((entry) => entry.canManage);
@@ -43,7 +48,9 @@ export async function loadMemberEventsContext(actor: Actor, deps: MemberEventsDe
   // enum, so the cast never lets an unknown code through as "unlimited".
   const plan = membership.planCode as MembershipPlanCode;
   const limit = entitlementsFor(plan).publishEventsPerQuarter;
-  const usedThisQuarter = await deps.events.countCompanySubmissionsThisQuarter(actor, company.id);
+  const usedThisQuarter = await deps.events.countCompanySubmissionsThisQuarter(
+    actor, company.id, options.excludeEventId === undefined ? undefined : {excludeEventId: options.excludeEventId},
+  );
   return {companyId: company.id, companyName: company.displayName, plan, usedThisQuarter, limit, canPublish: limit > 0 && usedThisQuarter < limit};
 }
 
@@ -55,7 +62,9 @@ export type SaveMemberEventOptions = Readonly<{eventId?: string}>;
  * update of a row the company already owns; without it a new row is inserted.
  */
 export async function saveMemberEvent(actor: Actor, mode: "draft" | "submit", input: unknown, options: SaveMemberEventOptions = {}, deps: MemberEventsDependencies = defaultDependencies) {
-  const context = await loadMemberEventsContext(actor, deps);
+  // Re-submitting a `pending_review` row must not count that row against its own
+  // quota: a Startup with two pending events could otherwise never re-submit an edit.
+  const context = await loadMemberEventsContext(actor, deps, mode === "submit" ? {excludeEventId: options.eventId} : {});
   if (mode === "draft") return deps.events.saveMemberDraft(actor, context.companyId, input, undefined, options.eventId);
   return deps.events.submitMember(actor, context.companyId, input, {plan: context.plan, usedThisQuarter: context.usedThisQuarter}, options.eventId);
 }

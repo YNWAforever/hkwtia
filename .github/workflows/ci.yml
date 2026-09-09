@@ -48,8 +48,13 @@ jobs:
       - run: npx vitest run --shard=${{ matrix.shard }}/2
   # Keeping a job named `quality` that depends on the others preserves the branch-protection
   # check name that PRs #47-#49 were gated on.
+  # `if: always()` is load-bearing: without it a red shard skips this job, and GitHub's required
+  # status check treats a skipped job as passing, so the step must read both results itself.
   quality:
     needs: [checks, tests]
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo "quality gate passed"
+      - run: |
+          test "${{ needs.checks.result }}" = "success" && test "${{ needs.tests.result }}" = "success" || exit 1
+          echo "quality gate passed"

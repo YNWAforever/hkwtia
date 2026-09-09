@@ -17,7 +17,7 @@ function deps(plan = "startup") {
     events: {
       saveMemberDraft: vi.fn(async () => ({id: "e1", status: "draft"})),
       submitMember: vi.fn(async () => ({id: "e1", status: "pending_review"})),
-      countCompanySubmissionsThisQuarter: vi.fn(async () => 1),
+      countCompanySubmissionsThisQuarter: vi.fn<(actor: unknown, company: unknown, options?: {excludeEventId?: string}) => Promise<number>>(async () => 1),
       listForCompany: vi.fn(async () => []),
     },
     dashboard: vi.fn(async () => ({
@@ -32,7 +32,7 @@ describe("member event core (programme B-2)", () => {
     const d = deps();
     const context = await loadMemberEventsContext(member, d as never);
     expect(context).toMatchObject({companyId: COMPANY, companyName: "Acme", plan: "startup", usedThisQuarter: 1, limit: 2, canPublish: true});
-    expect(d.events.countCompanySubmissionsThisQuarter).toHaveBeenCalledWith(member, COMPANY);
+    expect(d.events.countCompanySubmissionsThisQuarter).toHaveBeenCalledWith(member, COMPANY, undefined);
   });
 
   it("reports an unlimited corporate quota and a closed community one", async () => {
@@ -54,6 +54,21 @@ describe("member event core (programme B-2)", () => {
     expect(d.events.saveMemberDraft).toHaveBeenCalledWith(member, COMPANY, input, undefined, EVENT);
     await saveMemberEvent(member, "submit", input, {eventId: EVENT}, d as never);
     expect(d.events.submitMember).toHaveBeenCalledWith(member, COMPANY, input, {plan: "startup", usedThisQuarter: 1}, EVENT);
+  });
+
+  it("excludes the edited event from its own quota on re-submit, but not on a draft save", async () => {
+    // Startup limit is 2; the count already includes the pending row being edited.
+    const d = deps();
+    d.events.countCompanySubmissionsThisQuarter.mockImplementation(async (_actor, _company, options) => (options?.excludeEventId === EVENT ? 1 : 2));
+    await saveMemberEvent(member, "draft", input, {eventId: EVENT}, d as never);
+    expect(d.events.countCompanySubmissionsThisQuarter).toHaveBeenLastCalledWith(member, COMPANY, undefined);
+    await saveMemberEvent(member, "submit", input, {eventId: EVENT}, d as never);
+    expect(d.events.countCompanySubmissionsThisQuarter).toHaveBeenLastCalledWith(member, COMPANY, {excludeEventId: EVENT});
+    expect(d.events.submitMember).toHaveBeenCalledWith(member, COMPANY, input, {plan: "startup", usedThisQuarter: 1}, EVENT);
+    // A brand-new submission at the limit still refuses: nothing is excluded.
+    d.events.submitMember.mockRejectedValueOnce(new Error("EVENT_QUOTA_EXCEEDED"));
+    await expect(saveMemberEvent(member, "submit", input, {}, d as never)).rejects.toThrow("EVENT_QUOTA_EXCEEDED");
+    expect(d.events.countCompanySubmissionsThisQuarter).toHaveBeenLastCalledWith(member, COMPANY, undefined);
   });
 
   it("refuses when the member manages no company", async () => {

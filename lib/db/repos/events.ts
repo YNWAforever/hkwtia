@@ -557,6 +557,12 @@ export type MemberEventDependencies = Readonly<{
   loadDatabase?: AutomationDatabaseLoader;
   getCompanyRole?: (actor: Actor, companyId: string) => Promise<CompanyRole | null>;
   now?: () => Date;
+  /**
+   * Left out of this quarter's count. A `pending_review` row already counts, so
+   * re-submitting an edited one would otherwise count it against itself and
+   * refuse a company sitting exactly at its limit.
+   */
+  excludeEventId?: string;
 }>;
 
 // A member never sets `published`/`memberOnly` or `status` directly: the
@@ -767,11 +773,12 @@ export async function countCompanySubmissionsThisQuarter(actor: Actor, companyId
   await requireCompanyManager(actor, companyId, deps);
   const {start, end} = hongKongQuarterBounds((deps.now ?? (() => new Date()))());
   const database = await memberDatabase(deps);
+  const excluded = deps.excludeEventId === undefined ? sql`` : sql` AND ${events.id} <> ${eventIdSchema.parse(deps.excludeEventId)}`;
   const row = executedRows(await database.execute(sql`
     SELECT count(*)::int AS count FROM ${events}
     WHERE ${events.organiserCompanyId} = ${eventIdSchema.parse(companyId)}
       AND ${events.submittedAt} >= ${start} AND ${events.submittedAt} < ${end}
-      AND ${events.status} IN ('pending_review', 'published', 'cancelled')
+      AND ${events.status} IN ('pending_review', 'published', 'cancelled')${excluded}
   `))[0];
   return Number(row?.count ?? 0);
 }
