@@ -44,8 +44,12 @@ export default async function MemberDetailPage({params}: Props) {
   const {locale: localeValue, slug} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  // No `.catch(() => null)` here: a miss must 404, and a database outage must stay a 500 rather
-  // than telling a member their reviewed page does not exist.
+  // No `.catch(() => null)` here: `null` is a miss and 404s, a rejection is a transient outage and
+  // must stay a 500. Collapsing the two would tell a member their reviewed page does not exist —
+  // and, on the page that receives the retired `/members/:id` 307s and emits the JSON-LD below,
+  // would tell a crawler to drop it, where a 5xx only asks it to come back. `generateMetadata`
+  // above is the one place the catch belongs: it runs for the 404 too and has an honest fallback.
+  // Pinned by `tests/unit/member-detail-page.test.tsx`.
   const profile = await companyProfilesRepository.getPublishedBySlug(slug);
   if (!profile) notFound();
   const [t, tCommon] = await Promise.all([
