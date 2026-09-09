@@ -9,7 +9,7 @@ vi.mock("@/lib/db/repos/events", () => ({eventsRepository: events}));
 // registration-action.ts (still imported for the member form) reads requireActor from the same module.
 vi.mock("@/lib/auth/actor", () => ({getActor: auth.getActor, requireActor: vi.fn()}));
 vi.mock("@/lib/events/guest-registration-action", () => ({submitGuestRsvpAction: vi.fn()}));
-vi.mock("@/components/marketing/guest-rsvp-form", () => ({GuestRsvpForm: ({eventId, slug}: {eventId: string; slug: string}) => <div data-event-id={eventId} data-guest-rsvp-form="true" data-slug={slug} />}));
+vi.mock("@/components/marketing/guest-rsvp-form", () => ({GuestRsvpForm: ({eventId}: {eventId: string}) => <div data-event-id={eventId} data-guest-rsvp-form="true" />}));
 vi.mock("next-intl/server", () => ({getTranslations: async () => (key: string) => key, setRequestLocale: () => undefined}));
 vi.mock("next/navigation", () => ({notFound: () => { throw new Error("NEXT_NOT_FOUND"); }}));
 vi.mock("next/image", () => ({default: ({unoptimized, ...props}: {unoptimized?: boolean; [key: string]: unknown}) => <img {...props} data-unoptimized={String(unoptimized)} />}));
@@ -56,7 +56,6 @@ describe("event detail page donor markup", () => {
     expect(rendered).toContain('class="event-action-bar"');
     expect(rendered).toContain('data-guest-rsvp-form="true"');
     expect(rendered).toContain('data-event-id="10000000-0000-4000-8000-000000000001"');
-    expect(rendered).toContain('data-slug="public-event"');
     expect(rendered).not.toContain('data-registration-form="true"');
     expect(rendered).not.toContain("pastEventLabel");
   });

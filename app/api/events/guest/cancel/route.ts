@@ -16,6 +16,10 @@ export async function GET(request: Request): Promise<Response> {
   if (!/^[0-9a-f]{32}$/.test(token)) return Response.redirect(new URL("/events?guest=invalid", request.url), 303);
   const outcome = await eventGuestsRepository
     .cancelByToken(contactWriterActor("event_guest"), cancelTokenDigest(unsubscribeEnv().unsubscribeTokenSecret, token))
-    .catch(() => "unknown" as const);
+    .catch((error: unknown) => {
+      // The guest only ever sees `unknown`; the failure itself must reach the logs.
+      console.error("guest-cancel", error);
+      return "unknown" as const;
+    });
   return Response.redirect(new URL(`/events?guest=${outcome}`, request.url), 303);
 }

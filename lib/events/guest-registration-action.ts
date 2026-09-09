@@ -52,7 +52,9 @@ export async function submitGuestRsvpAction(formData: FormData): Promise<GuestRs
         html: rendered.html,
         text: rendered.text,
         headers: rendered.headers,
-        idempotencyKey: `guest-rsvp:${confirmation.slug}:${confirmation.to}`,
+        // Keyed on the registration and the token it carries, not the address:
+        // a cancel-then-re-register mints a new token and must send the new link.
+        idempotencyKey: `guest-rsvp:${confirmation.registrationId}:${confirmation.cancelTokenDigest.slice(0, 12)}`,
       });
     },
   });

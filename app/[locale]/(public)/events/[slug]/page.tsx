@@ -141,7 +141,7 @@ export default async function EventPage({params}: Props) {
               {registration.kind === "external" ? (
                 <a className="button" href={registration.url} rel="noopener noreferrer" target="_blank">{t("detail.registerExternally")}</a>
               ) : registration.kind === "guest" ? (
-                <GuestRsvpForm action={submitGuestRsvpAction} eventId={displayEvent.id} labels={guestLabels} locale={appLocale} slug={displayEvent.slug} />
+                <GuestRsvpForm action={submitGuestRsvpAction} eventId={displayEvent.id} labels={guestLabels} locale={appLocale} />
               ) : (
                 <EventRegistrationForm action={registerAction} eventId={displayEvent.id} links={{ineligible: localizedPath(appLocale, "/membership"), unauthenticated: localizedPath(appLocale, "/join")}} messages={registrationMessages} pendingLabel={t("registration.pending")} registerLabel={t("registration.submit")} />
               )}

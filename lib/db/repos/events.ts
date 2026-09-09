@@ -19,6 +19,8 @@ import {requireMember, type Actor, type AdminActor, type CompanyRole} from "@/li
 const eventIdSchema = z.string().uuid();
 const slugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 const publicReadLimitSchema = z.number().int().min(1).max(12);
+// Rendered as anchors on the public page: `z.url()` alone admits javascript: and data: schemes.
+const httpUrlSchema = z.string().trim().url().max(500).refine((value) => /^https?:\/\//i.test(value), {message: "must be an http(s) URL"});
 const eventInputObjectSchema = z.object({
   slug: slugSchema,
   titleEn: z.string().trim().min(1).max(200),
@@ -37,9 +39,9 @@ const eventInputObjectSchema = z.object({
   status: z.enum(["draft", "pending_review", "published", "rejected", "cancelled"]).optional(),
   visibility: z.enum(["public", "members_only", "invite_only"]).optional(),
   format: z.enum(["in_person", "online", "hybrid"]).default("in_person"),
-  onlineUrl: z.string().trim().url().max(500).nullable().optional(),
+  onlineUrl: httpUrlSchema.nullable().optional(),
   registrationMode: z.enum(["rsvp", "external", "ticketed"]).default("rsvp"),
-  externalRegistrationUrl: z.string().trim().url().max(500).nullable().optional(),
+  externalRegistrationUrl: httpUrlSchema.nullable().optional(),
   tags: z.array(z.string().trim().min(1).max(40)).max(10).default([]),
 }).strict();
 // Mirrors the `events_online_url_check` and `events_external_registration_check`

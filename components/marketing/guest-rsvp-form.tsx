@@ -17,10 +17,9 @@ const initialState: FormState = {status: "idle"};
 const FAILED: readonly FormStatus[] = ["invalid", "rate_limited", "closed", "external", "unavailable"];
 
 /** Anonymous RSVP on the event detail page (programme B-4), shaped like the interest form. */
-export function GuestRsvpForm({action, eventId, slug, locale, labels, id = "guest-rsvp"}: Readonly<{
+export function GuestRsvpForm({action, eventId, locale, labels, id = "guest-rsvp"}: Readonly<{
   action: (formData: FormData) => Promise<GuestRsvpResult>;
   eventId: string;
-  slug: string;
   locale: AppLocale;
   labels: GuestRsvpLabels;
   id?: string;
@@ -41,7 +40,6 @@ export function GuestRsvpForm({action, eventId, slug, locale, labels, id = "gues
   return <form action={formAction} aria-labelledby={`${id}-title`} className="partner-form guest-rsvp-form" noValidate>
     <h3 id={`${id}-title`}>{labels.title}</h3>
     <input name="eventId" type="hidden" value={eventId} />
-    <input name="slug" type="hidden" value={slug} />
     <input name="locale" type="hidden" value={locale} />
     <div className="form-grid">
       <label htmlFor={`${id}-name`}><span>{labels.name}</span><input aria-describedby={`${id}-status`} autoComplete="name" id={`${id}-name`} name="name" required type="text" /></label>
