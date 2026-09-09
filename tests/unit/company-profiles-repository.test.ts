@@ -110,12 +110,25 @@ describe("companyProfilesRepository (programme B-6, B-7)", () => {
     // scheme check, and a legacy company can reach 'published' without ever
     // passing through `updateProfile` (0029 gave it a slug; `submitForReview`
     // and `review` only look at the status). Sanitise on the read, exactly as
-    // `publicWebsiteUrl` in lib/db/repos/partners.ts does.
+    // `publicWebsiteUrl` in lib/db/repos/partners.ts does — through the same
+    // `canonicalHttpsUrl`, so the host clauses hold here too. The rows below
+    // are one per clause the projection must keep: `wtia.org.hk@evil.example`
+    // reads as ours until the parser reaches the '@', and the staff reviewer
+    // squinting at the same string in the queue is who that one is aimed at.
     const {execute, load} = db([
       [
         {...directoryRow, website: "javascript:alert(1)"},
         {...directoryRow, slug: "beta", website: "acme.example"},
         {...directoryRow, slug: "gamma", website: "https://acme.example/en?ref=wtia"},
+        {...directoryRow, slug: "delta", website: "https://wtia.org.hk@evil.example/login"},
+        {...directoryRow, slug: "epsilon", website: "https://localhost:3000/x"},
+        {...directoryRow, slug: "zeta", website: "https://127.0.0.1"},
+        {...directoryRow, slug: "eta", website: "https://[::1]/x"},
+        {...directoryRow, slug: "theta", website: `https://acme.example/${String.fromCodePoint(0x202e)}bad`},
+        // The two clauses this projection deliberately drops: a query or
+        // fragment a member's own site carries, and surrounding whitespace a
+        // free-text writer left in the column.
+        {...directoryRow, slug: "iota", website: "  https://acme.example/zh#about  "},
       ],
       [{...directoryRow, website: "data:text/html,<h1>hi", description: null, description_zh_hk: null, industry: null, size_band: null}],
       [],
@@ -124,7 +137,10 @@ describe("companyProfilesRepository (programme B-6, B-7)", () => {
     const repository = createCompanyProfilesRepository({loadDatabase: load, getCompanyRole: roles});
 
     const rows = await repository.listPublished({q: null, tag: null, plan: null});
-    expect(rows.map((row) => row.website)).toEqual([null, null, "https://acme.example/en?ref=wtia"]);
+    expect(rows.map((row) => row.website)).toEqual([
+      null, null, "https://acme.example/en?ref=wtia", null, null, null, null, null,
+      "https://acme.example/zh#about",
+    ]);
 
     await expect(repository.getPublishedBySlug("acme")).resolves.toMatchObject({website: null});
     expect(execute).toHaveBeenCalledTimes(4);
@@ -151,13 +167,27 @@ describe("companyProfilesRepository (programme B-6, B-7)", () => {
     expect(statementText(execute, 0)).toContain("pending_review");
   });
 
-  it("stores an https website only, so the member page can never render a plain-http anchor", async () => {
+  // The write schema and the public projection run the same `canonicalHttpsUrl`
+  // policy, so a value a member can store is exactly a value the member page
+  // will render — no second, looser rule on either side.
+  it.each([
+    "http://acme.example", "https://wtia.org.hk@evil.example/login", "https://acme.example:8443/",
+    "https://localhost/x", "https://127.0.0.1/", "https://[::1]/",
+  ])("refuses to store %j", async (website) => {
     const {execute, load} = db([[{id: COMPANY, public_profile_status: "hidden"}]]);
     const repository = createCompanyProfilesRepository({loadDatabase: load, getCompanyRole: roles});
 
-    await expect(repository.updateProfile(member, COMPANY, {...profile, website: "http://acme.example"}))
-      .rejects.toThrow();
+    await expect(repository.updateProfile(member, COMPANY, {...profile, website})).rejects.toThrow();
     expect(execute).not.toHaveBeenCalled();
+  });
+
+  it("stores the query and fragment a member's own site legitimately carries", async () => {
+    const {execute, load} = db([[{id: COMPANY, public_profile_status: "hidden"}]]);
+    const repository = createCompanyProfilesRepository({loadDatabase: load, getCompanyRole: roles});
+
+    await expect(repository.updateProfile(member, COMPANY, {...profile, website: "https://acme.example/en?ref=wtia#about"}))
+      .resolves.toMatchObject({id: COMPANY});
+    expect(execute).toHaveBeenCalledTimes(1);
   });
 
   it("maps the slug unique violation to COMPANY_SLUG_TAKEN, wrapped or raw", async () => {

@@ -12,6 +12,7 @@ import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {auditEvents, companies, events, media, memberships, showcaseListings} from "@/lib/db/server-schema";
 import {MEMBERSHIP_PLAN_CODES, type MembershipPlanCode} from "@/lib/membership/constants";
 import {requireMember, type Actor, type CompanyRole} from "@/lib/membership/lifecycle";
+import {canonicalHttpsUrl} from "@/lib/security/https-url";
 
 /**
  * Programme B-6 / B-7 (D-11): the public member directory and its moderation
@@ -70,12 +71,35 @@ const companyIdSchema = z.string().uuid();
 // The one shape a directory slug may take, matching `companies_slug_unique`,
 // the 0029 backfill's own guard and tests/fixtures/company-slug.ts.
 const slugSchema = z.string().trim().min(2).max(96).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
-// Rendered as an anchor on an anonymous public page: `z.url()` alone admits
-// javascript: and data: schemes. https only — unlike the events repository's
-// `httpUrlSchema`, which guards an organiser's meeting or registration link,
-// this URL is a public organisation website, so it follows the precedent set by
-// `lib/db/repos/partners.ts` (`canonicalHttpsUrl`) and never stores plain http.
-const httpsUrlSchema = z.string().trim().url().max(500).refine((value) => /^https:\/\//i.test(value), {message: "must be an https URL"});
+/**
+ * Rendered as an anchor on an anonymous public page, and as `sameAs` in that
+ * page's Organization JSON-LD, so the string a member types is the string a
+ * stranger reads — and the string the staff reviewer squints at in the queue.
+ * A scheme test is not enough for that: `z.url()` alone admits `javascript:`
+ * and `data:`, and even `^https://` still admits
+ * `https://wtia.org.hk@evil.example`, an explicit port, `localhost`, an IP
+ * literal and bidi overrides — every one of them a way to make a hostile host
+ * read as ours. So delegate to `canonicalHttpsUrl`, which owns that policy for
+ * the whole repo (`lib/db/repos/partners.ts` uses it too), instead of keeping a
+ * second, looser copy of it here.
+ *
+ * Two of its clauses are dropped deliberately, and only these two:
+ *  - `allowQuery` — a member's own site legitimately carries a language variant
+ *    or a landing-page parameter, which the partner rule rejects outright.
+ *  - the untrimmed-input clause — this is a form field, so `.trim()` normalises
+ *    the whitespace rather than failing the member for it.
+ * `lib/db/repos/events.ts`'s http-or-https `httpUrlSchema` guards an
+ * organiser's meeting or registration link, a different question; an
+ * organisation website on an anonymous page is https only.
+ */
+const httpsUrlSchema = z.string().trim().transform((value, context) => {
+  try {
+    return canonicalHttpsUrl(value, {allowQuery: true});
+  } catch {
+    context.addIssue({code: z.ZodIssueCode.custom, message: "COMPANY_WEBSITE_INVALID"});
+    return z.NEVER;
+  }
+});
 
 /** Empty text is a cleared field, not a blank tagline; the public page tests for null. */
 function optionalText(max: number) {
@@ -271,17 +295,19 @@ function directoryFilters(filters: MemberFilters): SQL {
  * page's anchor. Sanitise on the public read instead of trusting the column,
  * exactly as `publicWebsiteUrl` in `lib/db/repos/partners.ts` does.
  *
- * `canonicalHttpsUrl` itself is the wrong tool here: it rejects any query
- * string or fragment, which a member's own site legitimately carries (a
- * language variant, a landing page). This is the same https-only rule without
- * that clause, so it renders exactly what `httpsUrlSchema` above lets a member
- * store and drops everything else.
+ * It runs `httpsUrlSchema`'s rule exactly — the same `canonicalHttpsUrl` with
+ * the same two relaxations (`allowQuery`, and a trim instead of a rejection) —
+ * so the page renders what a member is allowed to store and nothing else. That
+ * means every host clause holds here as well as the scheme: no userinfo (a
+ * `https://wtia.org.hk@evil.example` reads as ours until the parser reaches
+ * the '@'), no explicit port, no `localhost` or IP-literal host, no bidi or
+ * control characters, at most 2048 code points. A value that fails any of them
+ * degrades to no link rather than to a link the reader cannot judge.
  */
 function publicWebsiteUrl(value: string | null): string | null {
   if (!value) return null;
   try {
-    const url = new URL(value.trim());
-    return url.protocol === "https:" ? url.href : null;
+    return canonicalHttpsUrl(value.trim(), {allowQuery: true});
   } catch {
     return null;
   }
