@@ -2056,6 +2056,49 @@
         "FORBIDDEN": "You can only edit events your organisation submitted."
       }
     },
+    "companyProfile": {
+      "title": "Public member page",
+      "description": "Choose what appears on your organisation's page in the WTIA member directory. Pages go live after a short WTIA review.",
+      "reviewNotice": "Editing a page that is already live — here, or the company details above — returns it to WTIA review, and it stays off the directory until staff approve it again.",
+      "statusLabel": "Status",
+      "fields": {
+        "slug": "Page address (hkwtia.org/members/…)",
+        "taglineEn": "Tagline (English)",
+        "taglineZhHk": "Tagline (Chinese)",
+        "descriptionZhHk": "Description (Chinese)",
+        "website": "Website",
+        "tags": "Industry tags (up to 8)",
+        "logoMediaId": "Logo image id"
+      },
+      "logo": {
+        "choose": "Choose a logo (PNG, JPEG or WebP, up to 4 MB)",
+        "upload": "Upload",
+        "uploading": "Uploading…",
+        "done": "Uploaded — the id has been filled in above.",
+        "failed": "Upload failed. Check the file type and size.",
+        "alt": "Describe the logo"
+      },
+      "save": "Save",
+      "publish": "Publish my profile",
+      "saved": "Saved.",
+      "submitted": "Submitted for review.",
+      "status": {
+        "hidden": "Not published",
+        "pending_review": "Awaiting WTIA review",
+        "published": "Live on /members",
+        "rejected": "Returned by WTIA"
+      },
+      "rejectedWith": "Returned by WTIA: {reason}",
+      "viewPublic": "View public page",
+      "errors": {
+        "INVALID": "Check the page address, tags and links.",
+        "FORBIDDEN": "Only company owners and admins can edit this.",
+        "NO_MANAGED_COMPANY": "You do not manage a company yet.",
+        "INVALID_PROFILE_TRANSITION": "Add a page address, then publish.",
+        "COMPANY_SLUG_TAKEN": "That page address is already used.",
+        "COMPANY_LOGO_INVALID": "That image id is not one you uploaded."
+      }
+    },
     "documents": {
       "title": "Documents and receipts",
       "description": "Access approved WTIA resources and your billing receipts.",

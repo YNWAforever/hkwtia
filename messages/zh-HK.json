@@ -2056,6 +2056,49 @@
         "FORBIDDEN": "你只可編輯貴機構提交的活動。"
       }
     },
+    "companyProfile": {
+      "title": "公開會員專頁",
+      "description": "選擇貴機構在 WTIA 會員名錄專頁上顯示的內容。專頁經 WTIA 簡短審核後上線。",
+      "reviewNotice": "編輯已上線的專頁（在此或上方的公司資料）會令專頁重新進入 WTIA 審核，在職員再次批准前不會在名錄顯示。",
+      "statusLabel": "狀態",
+      "fields": {
+        "slug": "專頁網址（hkwtia.org/members/…）",
+        "taglineEn": "標語（英文）",
+        "taglineZhHk": "標語（中文）",
+        "descriptionZhHk": "簡介（中文）",
+        "website": "網站",
+        "tags": "行業標籤（最多 8 個）",
+        "logoMediaId": "商標圖片編號"
+      },
+      "logo": {
+        "choose": "選擇商標（PNG、JPEG 或 WebP，最大 4 MB）",
+        "upload": "上載",
+        "uploading": "上載中…",
+        "done": "已上載 — 編號已填入上方。",
+        "failed": "上載失敗。請檢查檔案類型及大小。",
+        "alt": "描述此商標"
+      },
+      "save": "儲存",
+      "publish": "發布我的專頁",
+      "saved": "已儲存。",
+      "submitted": "已提交審核。",
+      "status": {
+        "hidden": "未發布",
+        "pending_review": "等待 WTIA 審核",
+        "published": "已於 /members 上線",
+        "rejected": "WTIA 已退回"
+      },
+      "rejectedWith": "WTIA 已退回：{reason}",
+      "viewPublic": "查看公開專頁",
+      "errors": {
+        "INVALID": "請檢查專頁網址、標籤及連結。",
+        "FORBIDDEN": "只有公司擁有人及管理員可編輯。",
+        "NO_MANAGED_COMPANY": "你尚未管理任何公司。",
+        "INVALID_PROFILE_TRANSITION": "請先填寫專頁網址，然後發布。",
+        "COMPANY_SLUG_TAKEN": "此專頁網址已被使用。",
+        "COMPANY_LOGO_INVALID": "此圖片編號並非你上載的圖片。"
+      }
+    },
     "documents": {
       "title": "文件及收據",
       "description": "查閱 WTIA 已批准資源及你的付款收據。",

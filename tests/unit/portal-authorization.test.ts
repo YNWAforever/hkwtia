@@ -98,6 +98,37 @@ describe("protected member portal", () => {
 
     const dashboard = await getDashboard(member, deps);
     expect(dashboard.companies).toMatchObject([{id: "company-a", role: null, canManage: false}]);
+    // A row read before 0028 (or a fake that omits the columns) is NOT published:
+    // defaulting the other way would put unreviewed copy on /members (B-7).
+    expect(dashboard.companies[0]).toMatchObject({publicProfileStatus: "hidden", slug: null, tags: [], logoMediaId: null});
+  });
+
+  it("carries the public member page's own copy onto the dashboard company (B-7)", async () => {
+    const deps = dependencies({
+      memberships: {
+        async list() { return [{id: "membership-company-a", ownerUserId: null, companyId: "company-a", applicationId: "application-company-a", planCode: "corporate" as const, status: "active" as const, seatLimit: 5, cancelAtPeriodEnd: false, billingPeriodStart: null, billingPeriodEnd: null}]; },
+      },
+      companies: {
+        async getById() {
+          return {
+            id: "company-a", legalName: "Company A", displayName: "Company A", website: "https://company-a.example",
+            slug: "company-a", tags: ["ai", "logistics"], taglineEn: "Ships things", taglineZhHk: "運送",
+            descriptionZhHk: "簡介", logoMediaId: "44444444-4444-4444-8444-444444444444",
+            publicProfileStatus: "rejected" as const, profileRejectionReason: "Add a Chinese tagline.",
+          };
+        },
+      },
+      getCompanyRole: async () => "owner" as const,
+    });
+
+    // /portal/company renders the profile form's defaults from these fields, so
+    // a projection that dropped one would silently blank it on the next save.
+    const dashboard = await getDashboard(member, deps);
+    expect(dashboard.companies[0]).toMatchObject({
+      canManage: true, slug: "company-a", tags: ["ai", "logistics"], taglineEn: "Ships things", taglineZhHk: "運送",
+      descriptionZhHk: "簡介", logoMediaId: "44444444-4444-4444-8444-444444444444",
+      publicProfileStatus: "rejected", profileRejectionReason: "Add a Chinese tagline.",
+    });
   });
 
   it("does not load private data for cancelled or expired memberships", async () => {
