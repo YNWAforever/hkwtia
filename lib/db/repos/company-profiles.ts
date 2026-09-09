@@ -130,11 +130,49 @@ const reviewDecisionSchema = z.discriminatedUnion("decision", [
 export type CompanyProfileReviewDecision = z.input<typeof reviewDecisionSchema>;
 
 /**
+ * `updateProfile` is not the only writer of `companies.website`:
+ * `companyUpdateSchema` in `lib/portal/command-core.ts` and the join form's
+ * `companySchema` both accept `z.string().trim().max(500)` with no scheme
+ * check, and a company can reach `pending_review` or `published` without ever
+ * passing through this repository — the 0029 backfill gives it a slug,
+ * `submitForReview` only asks for one, and `review` only asks for the status.
+ * So a legacy `javascript:`, `data:` or scheme-less value could otherwise reach
+ * a reader. Sanitise on the read instead of trusting the column, exactly as
+ * `publicWebsiteUrl` in `lib/db/repos/partners.ts` does.
+ *
+ * Every read that puts the column in front of somebody runs this: the
+ * directory, the member page, and the staff review queue below — the queue is a
+ * preview of that page, so it must not be the one leg that skips the policy,
+ * and its reviewer is the reader a `https://wtia.org.hk@evil.example` host is
+ * aimed at. `CompanyProfileRow.website` — the raw column a write hands back
+ * through `RETURNING *` — is the only place the string stays verbatim, and
+ * nothing renders that.
+ *
+ * It runs `httpsUrlSchema`'s rule exactly — the same `canonicalHttpsUrl` with
+ * the same two relaxations (`allowQuery`, and a trim instead of a rejection) —
+ * so a reader sees what a member is allowed to store and nothing else. That
+ * means every host clause holds here as well as the scheme: no userinfo (that
+ * host reads as ours until the parser reaches the '@'), no explicit port, no
+ * `localhost` or IP-literal host, no bidi or control characters, at most 2048
+ * code points. A value that fails any of them degrades to no link rather than
+ * to a link the reader cannot judge.
+ */
+function publicWebsiteUrl(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    return canonicalHttpsUrl(value.trim(), {allowQuery: true});
+  } catch {
+    return null;
+  }
+}
+
+/**
  * The snake_case shape `RETURNING *` / `SELECT *` hands back through the
  * raw-SQL seam. Only the two fields every caller branches on are required: a
  * write returns whatever columns the row has, and pinning the rest would make
  * this schema a second, drifting copy of `schema-core.ts`. The review queue
- * parses a stricter shape below, where a missing `display_name` really is a bug.
+ * parses a stricter shape below, where a missing `display_name` really is a bug
+ * and `website` is the policed href rather than the stored string.
  */
 const companyProfileRowSchema = z.object({
   id: z.string().uuid(),
@@ -156,9 +194,17 @@ const companyProfileRowSchema = z.object({
 
 export type CompanyProfileRow = z.infer<typeof companyProfileRowSchema>;
 
+/**
+ * What the staff queue hands its page. `website` is sanitised in the schema
+ * rather than at the call site so the contract, not a reviewer of this file,
+ * carries the guarantee: a queue row's `website` is a href the page may put in
+ * an anchor, and a stored value that fails the policy shows as no link there —
+ * which is exactly what `/members` will show once it is approved.
+ */
 const reviewQueueRowSchema = companyProfileRowSchema.extend({
   display_name: z.string(),
   logo_url: z.string().nullable(),
+  website: z.string().nullable().optional().transform((value) => publicWebsiteUrl(value ?? null)),
 });
 
 export type CompanyProfileReviewRow = z.infer<typeof reviewQueueRowSchema>;
@@ -282,35 +328,6 @@ function directoryFilters(filters: MemberFilters): SQL {
     predicates.push(sql`active_plan.plan_code = ${filters.plan}`);
   }
   return predicates.length === 0 ? sql`` : sql` AND ${sql.join(predicates, sql` AND `)}`;
-}
-
-/**
- * `updateProfile` is not the only writer of `companies.website`:
- * `companyUpdateSchema` in `lib/portal/command-core.ts` and the join form's
- * `companySchema` both accept `z.string().trim().max(500)` with no scheme
- * check, and a company can reach `published` without ever passing through this
- * repository — the 0029 backfill gives it a slug, `submitForReview` only asks
- * for one, and `review` only asks for `pending_review`. So a legacy
- * `javascript:`, `data:` or scheme-less value could otherwise reach the member
- * page's anchor. Sanitise on the public read instead of trusting the column,
- * exactly as `publicWebsiteUrl` in `lib/db/repos/partners.ts` does.
- *
- * It runs `httpsUrlSchema`'s rule exactly — the same `canonicalHttpsUrl` with
- * the same two relaxations (`allowQuery`, and a trim instead of a rejection) —
- * so the page renders what a member is allowed to store and nothing else. That
- * means every host clause holds here as well as the scheme: no userinfo (a
- * `https://wtia.org.hk@evil.example` reads as ours until the parser reaches
- * the '@'), no explicit port, no `localhost` or IP-literal host, no bidi or
- * control characters, at most 2048 code points. A value that fails any of them
- * degrades to no link rather than to a link the reader cannot judge.
- */
-function publicWebsiteUrl(value: string | null): string | null {
-  if (!value) return null;
-  try {
-    return canonicalHttpsUrl(value.trim(), {allowQuery: true});
-  } catch {
-    return null;
-  }
 }
 
 function summaryFrom(row: z.infer<typeof summaryRowSchema>): PublicMemberSummary {
@@ -476,7 +493,12 @@ export function createCompanyProfilesRepository(dependencies: CompanyProfileDepe
       return row;
     },
 
-    /** Staff. The review queue, oldest edit first, with the logo the member attached. */
+    /**
+     * Staff. The review queue, oldest edit first, with the logo the member
+     * attached and the website already through `publicWebsiteUrl` — see
+     * `reviewQueueRowSchema`: `SELECT companies.*` reads the raw column, and
+     * this leg has no `updateProfile` in front of it.
+     */
     async listForReview(actor: Actor): Promise<CompanyProfileReviewRow[]> {
       requireAdmin(actor);
       const database = await loadDatabase();

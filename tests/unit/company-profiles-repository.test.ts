@@ -249,4 +249,34 @@ describe("companyProfilesRepository (programme B-6, B-7)", () => {
     await expect(repository.listPublishedSlugs()).resolves.toEqual(["acme"]);
     expect(statementText(execute, 1)).toContain("= 'published'");
   });
+
+  it("hands the review queue the same policed website the public page renders", async () => {
+    // The queue is a preview of the page, so it must not be the one leg that
+    // skips the policy. Reaching it takes no `updateProfile` call at all: 0029
+    // gave every company a slug, the portal company form and the join form both
+    // write `website` as free text with no scheme check, and `submitForReview`
+    // asks only for the status and the slug. So the reviewer — the person a
+    // `https://wtia.org.hk@evil.example` host is aimed at — is exactly who would
+    // have met the raw string. Same helper as the public read, so the queue page
+    // may render `website` as an href.
+    const queued = (slug: string, website: string | null) => ({
+      id: COMPANY, public_profile_status: "pending_review", slug,
+      display_name: "Acme", logo_url: null, website,
+    });
+    const {load} = db([[
+      queued("acme", "javascript:alert(1)"),
+      queued("beta", "https://wtia.org.hk@evil.example/login"),
+      queued("gamma", "https://localhost:3000/x"),
+      queued("delta", `https://acme.example/${String.fromCodePoint(0x202e)}bad`),
+      queued("epsilon", "https://acme.example/en?ref=wtia"),
+      queued("zeta", null),
+    ]]);
+    const repository = createCompanyProfilesRepository({loadDatabase: load, getCompanyRole: roles});
+
+    const rows = await repository.listForReview(staff);
+
+    expect(rows.map((row) => row.website)).toEqual([
+      null, null, null, null, "https://acme.example/en?ref=wtia", null,
+    ]);
+  });
 });
