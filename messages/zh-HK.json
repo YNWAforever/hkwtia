@@ -2198,6 +2198,7 @@
       "pendingApprovals": "待審批項目",
       "atRisk": "高流失風險會員",
       "listingsAwaitingReview": "待審核展示企業",
+      "profilesAwaitingReview": "等待審核的會員專頁",
       "draftNews": "新聞草稿",
       "openTasks": "待處理員工任務"
     },
@@ -2217,6 +2218,7 @@
       "media": "媒體",
       "events": "活動",
       "listingsReview": "展示頁審核",
+      "profilesReview": "會員專頁",
       "cohorts": "啟航計劃",
       "approvals": "審批",
       "reports": "報告",
@@ -2262,6 +2264,26 @@
       "reject": "退回",
       "rejectionReason": "退回原因",
       "savePremium": "儲存"
+    },
+    "profilesReview": {
+      "eyebrow": "名錄營運",
+      "title": "審核會員專頁",
+      "description": "在機構專頁出現於 /members 前先行檢查。",
+      "caption": "等待審核的會員專頁",
+      "company": "公司",
+      "slug": "網址",
+      "tags": "標籤",
+      "preview": "預覽",
+      "taglineEn": "標語（英文）",
+      "taglineZhHk": "標語（中文）",
+      "descriptionZhHk": "簡介（中文）",
+      "website": "網站",
+      "previewEmpty": "此專頁尚未填寫內容。",
+      "approve": "發布",
+      "reject": "退回",
+      "rejectionReason": "退回原因",
+      "empty": "目前沒有等待審核的會員專頁。",
+      "error": "無法載入會員專頁。"
     },
     "cohorts": {
       "manage": {

@@ -28,6 +28,7 @@ const linkLabelKeys = {
   "landing-partners": "navigation.landingPartners",
   events: "navigation.events",
   listings: "navigation.listingsReview",
+  "profiles-review": "navigation.profilesReview",
   cohorts: "navigation.cohorts",
   approvals: "navigation.approvals",
   reports: "navigation.reports",

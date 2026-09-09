@@ -295,8 +295,9 @@ describe("WiseTech protected route ownership", () => {
     // Phase B1 Task 4 (S-3) added /api/portal/media/upload: 48 + 1 = 49.
     // Phase B1 Task 6 (B-4) added /api/events/guest/cancel: 49 + 1 = 50.
     // Phase B1 Task 7 (B-4) added /api/admin/events/[id]/attendees.csv: 50 + 1 = 51.
-    expect(codeFiles).toHaveLength(51);
-    expect(inventoryFiles).toHaveLength(51);
+    // Phase B2 Task 4 (B-7) added /admin/profiles-review: 51 + 1 = 52.
+    expect(codeFiles).toHaveLength(52);
+    expect(inventoryFiles).toHaveLength(52);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -311,11 +312,11 @@ describe("WiseTech protected route ownership", () => {
       protectedRouteOwnershipInventory.filter((owner) => owner.classification === classification).length
     );
 
-    expect(count("admin-page")).toBe(29);
+    expect(count("admin-page")).toBe(30);
     expect(count("api-handler")).toBe(11);
     expect(count("webhook-handler")).toBe(2);
     expect(count("job-handler")).toBe(9);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(29);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(30);
     expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(22);
   });
 

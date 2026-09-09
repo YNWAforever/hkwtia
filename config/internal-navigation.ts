@@ -48,6 +48,7 @@ export const adminNavigationGroups = [
     links: [
       {id: "events", href: "/admin/events-mgmt"},
       {id: "listings", href: "/admin/listings-review"},
+      {id: "profiles-review", href: "/admin/profiles-review"},
       {id: "cohorts", href: "/admin/cohorts"},
       {id: "approvals", href: "/admin/approvals"},
       {id: "reports", href: "/admin/reports"},

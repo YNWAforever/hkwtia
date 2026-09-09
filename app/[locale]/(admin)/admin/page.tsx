@@ -7,6 +7,7 @@ import {listAtRiskMembers} from "@/lib/admin/at-risk";
 import {listOpenTasks} from "@/lib/admin/inbox";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {adminPostsRepository} from "@/lib/db/repos/admin-posts";
+import {companyProfilesRepository} from "@/lib/db/repos/company-profiles";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
 import type {AdminActor} from "@/lib/membership/lifecycle";
 
@@ -27,10 +28,11 @@ async function count<T>(read: Promise<readonly T[]>): Promise<number | null> {
 }
 
 async function queueCounts(actor: AdminActor) {
-  const [approvals, atRisk, listings, openTasks, draftNews] = await Promise.all([
+  const [approvals, atRisk, listings, profiles, openTasks, draftNews] = await Promise.all([
     count(listPendingApprovals(actor)),
     count(listAtRiskMembers(actor, {asOf: new Date()})),
     count(showcaseRepository.listForReview(actor)),
+    count(companyProfilesRepository.listForReview(actor)),
     count(listOpenTasks(actor)),
     (async () => {
       try {
@@ -41,7 +43,7 @@ async function queueCounts(actor: AdminActor) {
       }
     })(),
   ]);
-  return {approvals, atRisk, listings, openTasks, draftNews};
+  return {approvals, atRisk, listings, profiles, openTasks, draftNews};
 }
 
 export default async function AdminPage({params}: Props) {
@@ -59,6 +61,7 @@ export default async function AdminPage({params}: Props) {
     {id: "approvals", href: "/admin/approvals", label: t("dashboard.pendingApprovals"), count: counts.approvals},
     {id: "at-risk", href: "/admin/at-risk", label: t("dashboard.atRisk"), count: counts.atRisk},
     {id: "listings", href: "/admin/listings-review", label: t("dashboard.listingsAwaitingReview"), count: counts.listings},
+    {id: "profiles-review", href: "/admin/profiles-review", label: t("dashboard.profilesAwaitingReview"), count: counts.profiles},
     {id: "tasks", href: "/admin/tasks", label: t("dashboard.openTasks"), count: counts.openTasks},
     {id: "news", href: "/admin/news", label: t("dashboard.draftNews"), count: counts.draftNews},
   ];

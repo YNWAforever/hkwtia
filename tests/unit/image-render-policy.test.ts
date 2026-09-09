@@ -19,6 +19,9 @@ const revocationAwareConsumers = new Set([
   "app/[locale]/(admin)/admin/media/page.tsx",
   "app/[locale]/(public)/partners/page.tsx",
   "components/admin/media-form.tsx",
+  // Phase B2 (B-7): the member-page queue previews the logo a member attached,
+  // which is the same private-delivery reference the showcase queue renders.
+  "components/admin/profile-review-table.tsx",
   "components/admin/showcase-review-table.tsx",
   "components/home/legacy-network.tsx",
   "components/marketing/event-card.tsx",
