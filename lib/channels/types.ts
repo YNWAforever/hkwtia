@@ -67,6 +67,25 @@ export type NormalizedInbound =
     sender: string | null;
     text: null;
     intent: null;
+  }>
+  /**
+   * C-1 review. A payload we DID recognise and are refusing anyway, because one
+   * of its provider-supplied strings is past the bound the repositories enforce
+   * (`lib/whatsapp/provider-field-limits.ts`). Its own arm rather than a fifth
+   * `unsupported` literal for two reasons: the two existing `unsupported`
+   * literals are pinned byte-identical by `tests/unit/woztell-review-gaps.test.ts`
+   * and adding a field would break them, and "we do not handle this kind of
+   * event" is a different fact from "we refused a hostile field" — the webhook's
+   * response body is this subsystem's only observability, and at C-9 nobody can
+   * act on a diagnosis that conflates the two. That is the same reasoning that
+   * removed the bare `{status: "ignored"}` arm in Task 4.
+   *
+   * The reason names the FIELD CLASS, never the value: a provider body carries
+   * credentials and PII and this layer deliberately logs none of it.
+   */
+  | Readonly<{
+    kind: "rejected";
+    reason: "provider_message_id_too_long" | "provider_text_too_long";
   }>;
 
 export interface ChannelAdapter {

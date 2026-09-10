@@ -236,7 +236,18 @@ export type WoztellProcessResult =
   | Readonly<{status: "duplicate"}>
   | Readonly<{
     status: "ignored";
-    reason: "unsupported_event" | "unnormalizable_sender";
+    reason:
+      | "unsupported_event"
+      | "unnormalizable_sender"
+      // C-1 review. A payload we recognised and refused because a
+      // provider-supplied string was past its bound
+      // (`lib/whatsapp/provider-field-limits.ts`). Distinct reasons rather than
+      // a fifth `unsupported_event`, for the reason the bare `{status:
+      // "ignored"}` arm was removed: this body is the only observability this
+      // subsystem has, and "we do not handle this event" and "we refused a
+      // hostile field" are different things to read at C-9.
+      | "provider_message_id_too_long"
+      | "provider_text_too_long";
   }>
   | Readonly<{status: "delivery_recorded"; matched: boolean}>
   | Readonly<{
@@ -333,6 +344,18 @@ export function createWoztellWebhookProcessor(
       // unrepresentable.
       if (normalized.kind === "unsupported") {
         return {status: "ignored", reason: "unsupported_event"};
+      }
+      // C-1 review. Sits beside `unsupported` because it is the same kind of
+      // answer — a deliberate 202 that ends the delivery — and it is here rather
+      // than deeper down because the whole point is that NOTHING runs on a
+      // payload carrying a field we have already decided we cannot store. The
+      // normaliser bounded it precisely so the zod `.max(…)` behind these
+      // branches can no longer throw: a throw is a 500, and a 500 is Woztell
+      // resending that payload for ever while the sender's message never lands.
+      // The reason travels verbatim into the response body; it names a field
+      // class and never a value.
+      if (normalized.kind === "rejected") {
+        return {status: "ignored", reason: normalized.reason};
       }
       if (normalized.kind === "delivery_status") {
         // A missing writer reports `matched: false` rather than `true`: an

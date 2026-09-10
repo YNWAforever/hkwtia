@@ -5,6 +5,12 @@ import {createHmac, timingSafeEqual} from "node:crypto";
 import {WHATSAPP_TEMPLATES} from "@/config/whatsapp-templates";
 import {normalizeWhatsAppNumber} from "@/lib/whatsapp/number";
 import {isOptOutText} from "@/lib/whatsapp/opt-out";
+import {
+  WOZTELL_MAX_ECHO_TEXT_CHARS,
+  WOZTELL_MAX_ERROR_CODE_CHARS,
+  WOZTELL_MAX_MEMBER_ID_CHARS,
+  WOZTELL_MAX_PROVIDER_MESSAGE_ID_CHARS,
+} from "@/lib/whatsapp/provider-field-limits";
 
 // The normaliser moved to lib/whatsapp/number.ts (Phase A) so the join and
 // portal forms share it; the re-export keeps lib/ai/woztell-webhook.ts and the
@@ -250,12 +256,58 @@ function trimmedString(value: unknown): string {
 /** C-1: the Woztell member id, stored on the conversation by Task 3. Two shapes
  * are accepted because the payload's own shape is unverified (O-1); a blank id
  * is reported as absent, since "" would otherwise be written to
- * `conversations.whatsapp_member_id` and match the next member-less sender. */
+ * `conversations.whatsapp_member_id` and match the next member-less sender.
+ *
+ * C-1 review: an OVER-LONG id is reported absent for the same reason a blank one
+ * is, and this is the one hostile field that is neither rejected nor truncated.
+ * It is an optional adornment on an otherwise perfectly good message, and C1
+ * reads it nowhere (resolution stays number-first, per O-3) — so refusing the
+ * whole inbound over it would lose a real prospect's message, which is the exact
+ * harm this whole change exists to stop. Truncating is worse than dropping:
+ * `contacts_whatsapp_member_unique` is a partial unique index and
+ * `linkWhatsAppMemberId` is first-identity-wins, so a shortened id that collides
+ * with a real one links a contact to the WRONG WhatsApp member, permanently, and
+ * C2 Task 5's merge work would then be reconciling damage we invented. Absent is
+ * the honest value: the link is simply not learned.
+ *
+ * Dropping it here is also what keeps `memberIdConflictSchema`'s own `.max(200)`
+ * out of reach — `lib/ai/woztell-production.ts` only files the conflict task when
+ * it still holds an id. */
 function memberIdFrom(payload: Record<string, unknown>): string | null {
   const value = payload.memberId
     ?? (isRecord(payload.member) ? payload.member.id : undefined);
   const trimmed = trimmedString(value);
-  return trimmed ? trimmed : null;
+  if (!trimmed || trimmed.length > WOZTELL_MAX_MEMBER_ID_CHARS) return null;
+  return trimmed;
+}
+
+/**
+ * C-1 review. A provider message id past its bound is REFUSED, in every arm,
+ * rather than truncated or stored.
+ *
+ * It is a key, not a label: `messages_provider_message_id_unique` indexes it,
+ * `claimInbound` recognises a redelivery by it, the echo probe recognises its own
+ * row by it, and `recordDeliveryStatus` reaches the row it must settle by it.
+ * Truncating would collapse two distinct ids that share a prefix into one key —
+ * a tick for A settling B's row, an echo for A adopting B's queued message,
+ * delivery state leaking between two contacts, which is precisely the harm the
+ * echo-adoption predicate already exists to prevent.
+ *
+ * The INBOUND arm refuses on the same bound even though nothing on that path
+ * parses it (`claimInbound` takes no zod, and `messages.provider_message_id` is
+ * an unbounded `text` column). One bound, one behaviour, because the alternative
+ * is worse than either: store an inbound under an id the tick and echo lanes
+ * would then refuse, and it is a message that can never be settled, never
+ * matched and — past roughly 2 700 bytes, where a btree entry stops fitting —
+ * cannot be inserted at all, which is a 500 and the retry loop again.
+ */
+const REJECTED_MESSAGE_ID = {
+  kind: "rejected",
+  reason: "provider_message_id_too_long",
+} as const;
+
+function providerMessageIdTooLong(providerMessageId: string): boolean {
+  return providerMessageId.length > WOZTELL_MAX_PROVIDER_MESSAGE_ID_CHARS;
 }
 
 function normalizedInbound(payload: unknown): NormalizedInbound {
@@ -277,6 +329,14 @@ function normalizedInbound(payload: unknown): NormalizedInbound {
     if (!sender || !text || !providerMessageId || receivedAt === null) {
       return unsupported;
     }
+    if (providerMessageIdTooLong(providerMessageId)) return REJECTED_MESSAGE_ID;
+    // NOTE what is deliberately NOT bounded here: `text`. The inbound body is
+    // written by `claimInbound` into `messages.content`, an unbounded `text`
+    // column, through a statement that parses nothing — so there is no bound on
+    // this path to fail closed against, and inventing one would truncate or drop
+    // a real person's message for no reason. `readBoundedText` in the route caps
+    // the whole body at 64 KB, which is the only limit that applies. The echo's
+    // body is a different story, because its repository does parse it.
     return {
       kind: "message",
       sender,
@@ -298,7 +358,19 @@ function normalizedInbound(payload: unknown): NormalizedInbound {
     if (!providerMessageId || status === null || occurredAt === null) {
       return unsupported;
     }
-    const errorCode = trimmedString(dataField(payload, "errorCode"));
+    if (providerMessageIdTooLong(providerMessageId)) return REJECTED_MESSAGE_ID;
+    // TRUNCATED, not rejected, and it is the opposite call from the id above for
+    // the opposite reason. `messages.error_code` is diagnostic prose in an
+    // unindexed `text` column that nothing joins or matches on: `inbox.ts`'s
+    // `refusedSendPredicate` compares it against the ADAPTER's own failure codes
+    // and only on rows with no provider id, which a tick by definition has. So
+    // the only question is keep the tick or lose it — and losing it is the
+    // failure plan O-1 already warns about, where the outbound row stays `sent`
+    // for ever and nobody learns the send failed. Worse, the error code rides on
+    // the `failed` tick, so a reject rule here would discard exactly the
+    // failures. A 200-character prefix is still the part a person reads first.
+    const errorCode = trimmedString(dataField(payload, "errorCode"))
+      .slice(0, WOZTELL_MAX_ERROR_CODE_CHARS);
     return {
       kind: "delivery_status",
       providerMessageId,
@@ -316,6 +388,18 @@ function normalizedInbound(payload: unknown): NormalizedInbound {
     const sentAt = receivedAtFrom(payload.timestamp);
     if (!recipient || !text || !providerMessageId || origin === null || sentAt === null) {
       return unsupported;
+    }
+    if (providerMessageIdTooLong(providerMessageId)) return REJECTED_MESSAGE_ID;
+    // REJECTED, never truncated. WhatsApp caps a text body at 4096 characters,
+    // so 20 000 is already five times anything real and a body past it is not a
+    // message we sent. Truncating would be actively harmful twice: the adopt
+    // statement in `recordOutboundEcho` joins on `candidate.content = <text>`,
+    // so a shortened body can never match the queued row it belongs to and
+    // inserts a SECOND outbound row instead — leaving the staff row `queued`,
+    // which is the re-send state — and a shortened body in the transcript is a
+    // falsified record staff then reply from.
+    if (text.length > WOZTELL_MAX_ECHO_TEXT_CHARS) {
+      return {kind: "rejected", reason: "provider_text_too_long"};
     }
     return {
       kind: "outbound_echo",

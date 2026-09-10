@@ -16,6 +16,12 @@ import {
   profiles,
   staffTasks,
 } from "@/lib/db/server-schema";
+import {
+  WOZTELL_MAX_ECHO_TEXT_CHARS,
+  WOZTELL_MAX_ERROR_CODE_CHARS,
+  WOZTELL_MAX_MEMBER_ID_CHARS,
+  WOZTELL_MAX_PROVIDER_MESSAGE_ID_CHARS,
+} from "@/lib/whatsapp/provider-field-limits";
 
 /**
  * S-14 / boundary 10. The route's HMAC is a gate on the ROUTE; this is the gate
@@ -108,10 +114,30 @@ export type StaffTaskNotificationResult = Readonly<{
   disposition: "created" | "existing";
 }>;
 
+/**
+ * C-1 review. Every bound below on a PROVIDER-supplied string now names a
+ * constant from `lib/whatsapp/provider-field-limits.ts` instead of an inline
+ * number, and the reason is a defect these schemas caused rather than caught.
+ *
+ * A `.max()` failure is a `ZodError`; `lib/api/woztell-webhook-route.ts` turns
+ * any throw into a 500; Woztell retries a 500. So a provider that sent one
+ * over-long id or error code did not get a rejected event — it got a permanent
+ * retry loop for that sender, whose message never persisted and never reached
+ * staff, while the route burned an invocation on every redelivery. The
+ * normaliser now bounds all four before the payload ever gets here (rejecting an
+ * id, dropping a member id, truncating an error code — the reasons differ per
+ * field and are recorded at each site), and these lines are the backstop for the
+ * other entry point rather than the gate. Sharing the numbers is what makes that
+ * true: a bound here that drifted BELOW the normaliser's clamp would silently
+ * reopen the loop, and this repository has no way to notice.
+ *
+ * `assignedToProfileId` and `conversationId` keep their inline bounds: both come
+ * off a row we wrote, not off the wire.
+ */
 const deliveryStatusSchema = z.object({
-  providerMessageId: z.string().trim().min(1).max(300),
+  providerMessageId: z.string().trim().min(1).max(WOZTELL_MAX_PROVIDER_MESSAGE_ID_CHARS),
   status: z.enum(["sent", "delivered", "read", "failed"]),
-  errorCode: z.string().trim().min(1).max(200).nullable(),
+  errorCode: z.string().trim().min(1).max(WOZTELL_MAX_ERROR_CODE_CHARS).nullable(),
   occurredAt: z.coerce.date(),
 }).strict();
 
@@ -122,14 +148,14 @@ const humanLaneSchema = z.object({
 }).strict();
 
 const memberIdConflictSchema = z.object({
-  whatsappMemberId: z.string().trim().min(1).max(200),
+  whatsappMemberId: z.string().trim().min(1).max(WOZTELL_MAX_MEMBER_ID_CHARS),
   locale: z.enum(["en", "zh-HK"]),
 }).strict();
 
 const outboundEchoSchema = z.object({
   recipient: z.string().regex(/^\+\d{8,15}$/),
-  text: z.string().min(1).max(20_000),
-  providerMessageId: z.string().trim().min(1).max(300),
+  text: z.string().min(1).max(WOZTELL_MAX_ECHO_TEXT_CHARS),
+  providerMessageId: z.string().trim().min(1).max(WOZTELL_MAX_PROVIDER_MESSAGE_ID_CHARS),
   origin: z.enum(["BOT", "MANUAL", "RELAY"]),
   sentAt: z.coerce.date(),
 }).strict();

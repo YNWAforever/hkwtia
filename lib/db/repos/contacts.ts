@@ -7,6 +7,7 @@ import {auditEvents, contacts} from "@/lib/db/server-schema";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {getDb} from "@/lib/db/repos/common";
 import {WHATSAPP_CONSENT_TEXT_VERSION} from "@/lib/whatsapp/consent";
+import {WOZTELL_MAX_MEMBER_ID_CHARS} from "@/lib/whatsapp/provider-field-limits";
 
 /**
  * Public writers (interest form, Woztell webhook, guest RSVP in Phase B) never
@@ -44,7 +45,14 @@ const whatsappInputSchema = z.object({
   phoneE164: z.string().regex(/^\+\d{8,15}$/),
   locale: z.enum(["en", "zh-HK"]),
   receivedAt: z.coerce.date(),
-  whatsappMemberId: z.string().trim().min(1).max(200).nullable().optional().default(null),
+  // C-1 review. The bound is still enforced here — this repository is also
+  // reachable from C-3's backfill — but the NUMBER lives in
+  // lib/whatsapp/provider-field-limits.ts, because the webhook normaliser has to
+  // apply the same one before this parse can be reached. A `.max()` that threw
+  // on a webhook payload was a 500, and a 500 is a Woztell retry loop for that
+  // sender's message; the normaliser now reports an over-long id as absent, so
+  // this line is a backstop for the second entry point rather than the gate.
+  whatsappMemberId: z.string().trim().min(1).max(WOZTELL_MAX_MEMBER_ID_CHARS).nullable().optional().default(null),
 }).strict();
 
 /**
