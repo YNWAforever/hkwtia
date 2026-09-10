@@ -32,6 +32,7 @@ describe("WOZTELL opted-out profile identity", () => {
           intent: null,
           providerMessageId: "wamid.opted-out",
           receivedAt: RECEIVED_AT,
+          whatsappMemberId: null,
         }),
         verifyWebhook: () => true,
         sendSessionMessage,

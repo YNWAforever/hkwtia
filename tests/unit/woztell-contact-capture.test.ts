@@ -10,7 +10,7 @@ function dependencies(text: string, profile: null | {id: string; displayName: st
   const setWhatsappOptIn = vi.fn(async () => undefined);
   const deps: WoztellWebhookProcessorDependencies = {
     channel: {
-      normalizeInbound: () => ({kind: "message", sender: "+852 9123 4567", text, intent: text === "STOP" ? "opt_out" : null, providerMessageId: `wamid.${text}`, receivedAt: RECEIVED_AT}),
+      normalizeInbound: () => ({kind: "message", sender: "+852 9123 4567", text, intent: text === "STOP" ? "opt_out" : null, providerMessageId: `wamid.${text}`, receivedAt: RECEIVED_AT, whatsappMemberId: null}),
       verifyWebhook: () => true,
       sendSessionMessage: vi.fn(async () => ({status: "sent" as const, providerId: "p1"})),
       sendTemplateMessage: vi.fn(async () => ({status: "sent" as const, providerId: "p2"})),

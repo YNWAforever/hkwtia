@@ -38,6 +38,9 @@ function dependencies(
         intent: null,
         providerMessageId: "wamid.recovery",
         receivedAt: RECEIVED_AT,
+        // C-1 Task 2 added the Woztell member id to the `message` arm; this fake
+        // predates it and carries none, which is the pre-Phase-C payload shape.
+        whatsappMemberId: null,
       }),
       verifyWebhook: () => true,
       sendSessionMessage,

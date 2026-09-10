@@ -36,6 +36,7 @@ function dependencies(
         intent: null,
         providerMessageId: "wamid.error-only",
         receivedAt: RECEIVED_AT,
+        whatsappMemberId: null,
       }),
       verifyWebhook: () => true,
       sendSessionMessage: vi.fn(),

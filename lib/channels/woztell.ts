@@ -4,6 +4,7 @@ import {createHmac, timingSafeEqual} from "node:crypto";
 
 import {WHATSAPP_TEMPLATES} from "@/config/whatsapp-templates";
 import {normalizeWhatsAppNumber} from "@/lib/whatsapp/number";
+import {isOptOutText} from "@/lib/whatsapp/opt-out";
 
 // The normaliser moved to lib/whatsapp/number.ts (Phase A) so the join and
 // portal forms share it; the re-export keeps lib/ai/woztell-webhook.ts and the
@@ -19,7 +20,11 @@ import type {
 } from "@/lib/channels/types";
 
 const WOZTELL_SEND_RESPONSES_URL = "https://bot.api.woztell.com/sendResponses";
-const CUSTOMER_SERVICE_WINDOW_MS = 24 * 60 * 60 * 1_000;
+// Exported for Task 7's pre-flight check and Task 8's countdown. Both used to
+// be free to retype `24 * 60 * 60 * 1_000`, which is how a UI comes to promise a
+// window that `sendSessionMessage` below then refuses. One constant, two
+// readers, no drift when Meta changes the window.
+export const CUSTOMER_SERVICE_WINDOW_MS = 24 * 60 * 60 * 1_000;
 const MIN_NUMERIC_TIMESTAMP_MS = Date.UTC(2000, 0, 1);
 const MAX_NUMERIC_TIMESTAMP_MS = Date.UTC(2100, 0, 1);
 const EPOCH_MILLISECONDS_THRESHOLD = 100_000_000_000;
@@ -161,37 +166,125 @@ function receivedAtFrom(value: unknown): Date | null {
   return Number.isFinite(parsed.getTime()) ? parsed : null;
 }
 
+// Programme C-1, plan O-1. THE TWO DISCRIMINATORS BELOW ARE PROVISIONAL. There
+// are no Woztell credentials, no captured provider payload and no provider
+// documentation in this tree; the only envelope that has ever existed here is
+// `{from, type:"TEXT", messageId, timestamp, data:{text}}`. Both new branches
+// live inside this one function, and nowhere else, so correcting them against a
+// real payload is a single-function change. Every branch fails closed onto the
+// inert `unsupported` variant rather than emitting a half-populated event that a
+// writer would then persist — and nothing here may throw, because the webhook
+// route turns a throw into a 500 and the provider into a retry loop.
+const DELIVERY_STATUSES = ["sent", "delivered", "read", "failed"] as const;
+const ECHO_ORIGINS = ["BOT", "MANUAL", "RELAY"] as const;
+
+type DeliveryStatus = (typeof DELIVERY_STATUSES)[number];
+type EchoOrigin = (typeof ECHO_ORIGINS)[number];
+
+/** Deliberately a `typeof` guard rather than `String(value)`: `String(Symbol())`
+ * throws, and a throw in the normaliser is a 500 on a webhook the provider then
+ * retries forever. A non-string discriminator is simply not one of ours. */
+function deliveryStatusFrom(value: unknown): DeliveryStatus | null {
+  if (typeof value !== "string") return null;
+  const lowered = value.trim().toLowerCase();
+  return DELIVERY_STATUSES.find((candidate) => candidate === lowered) ?? null;
+}
+
+function echoOriginFrom(value: unknown): EchoOrigin | null {
+  if (typeof value !== "string") return null;
+  const uppered = value.trim().toUpperCase();
+  return ECHO_ORIGINS.find((candidate) => candidate === uppered) ?? null;
+}
+
+function dataField(payload: Record<string, unknown>, key: string): unknown {
+  return isRecord(payload.data) ? payload.data[key] : undefined;
+}
+
+function trimmedString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+/** C-1: the Woztell member id, stored on the conversation by Task 3. Two shapes
+ * are accepted because the payload's own shape is unverified (O-1); a blank id
+ * is reported as absent, since "" would otherwise be written to
+ * `conversations.whatsapp_member_id` and match the next member-less sender. */
+function memberIdFrom(payload: Record<string, unknown>): string | null {
+  const value = payload.memberId
+    ?? (isRecord(payload.member) ? payload.member.id : undefined);
+  const trimmed = trimmedString(value);
+  return trimmed ? trimmed : null;
+}
+
 function normalizedInbound(payload: unknown): NormalizedInbound {
   if (!isRecord(payload)) {
     return {kind: "unsupported", sender: null, text: null, intent: null};
   }
   const sender = typeof payload.from === "string" ? payload.from : null;
-  const text = isRecord(payload.data) && typeof payload.data.text === "string"
-    ? payload.data.text.trim()
-    : null;
-  const providerMessageId = typeof payload.messageId === "string"
-    ? payload.messageId.trim()
-    : "";
-  const receivedAt = receivedAtFrom(payload.timestamp);
-  if (
-    payload.type !== "TEXT"
-    || !sender
-    || !text
-    || !providerMessageId
-    || receivedAt === null
-  ) {
-    return {kind: "unsupported", sender, text: null, intent: null};
-  }
-  return {
-    kind: "message",
+  const unsupported = {
+    kind: "unsupported",
     sender,
-    text,
-    intent: text.toUpperCase() === "STOP" || text === "\u53d6\u6d88"
-      ? "opt_out"
-      : null,
-    providerMessageId,
-    receivedAt,
-  };
+    text: null,
+    intent: null,
+  } as const;
+
+  if (payload.type === "TEXT") {
+    const text = trimmedString(dataField(payload, "text"));
+    const providerMessageId = trimmedString(payload.messageId);
+    const receivedAt = receivedAtFrom(payload.timestamp);
+    if (!sender || !text || !providerMessageId || receivedAt === null) {
+      return unsupported;
+    }
+    return {
+      kind: "message",
+      sender,
+      text,
+      // D-7 / plan S-11: the vocabulary is a closed token list in
+      // lib/whatsapp/opt-out.ts, not the `toUpperCase() === "STOP"` test that
+      // used to live here and missed "Stop.", "unsubscribe" and 退訂.
+      intent: isOptOutText(text) ? "opt_out" : null,
+      providerMessageId,
+      receivedAt,
+      whatsappMemberId: memberIdFrom(payload),
+    };
+  }
+
+  if (payload.type === "MESSAGE_STATUS") {
+    const providerMessageId = trimmedString(payload.messageId);
+    const status = deliveryStatusFrom(dataField(payload, "status"));
+    const occurredAt = receivedAtFrom(payload.timestamp);
+    if (!providerMessageId || status === null || occurredAt === null) {
+      return unsupported;
+    }
+    const errorCode = trimmedString(dataField(payload, "errorCode"));
+    return {
+      kind: "delivery_status",
+      providerMessageId,
+      status,
+      errorCode: errorCode ? errorCode : null,
+      occurredAt,
+    };
+  }
+
+  if (payload.type === "OUTBOUND") {
+    const recipient = trimmedString(payload.to);
+    const text = trimmedString(dataField(payload, "text"));
+    const providerMessageId = trimmedString(payload.messageId);
+    const origin = echoOriginFrom(payload.origin);
+    const sentAt = receivedAtFrom(payload.timestamp);
+    if (!recipient || !text || !providerMessageId || origin === null || sentAt === null) {
+      return unsupported;
+    }
+    return {
+      kind: "outbound_echo",
+      recipient,
+      text,
+      providerMessageId,
+      origin,
+      sentAt,
+    };
+  }
+
+  return unsupported;
 }
 
 function validWebhookSignature(

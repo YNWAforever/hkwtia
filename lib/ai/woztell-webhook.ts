@@ -204,7 +204,13 @@ export function createWoztellWebhookProcessor(
     async process(payload: unknown): Promise<WoztellProcessResult> {
       const normalized: NormalizedInbound =
         dependencies.channel.normalizeInbound(payload);
-      if (normalized.kind === "unsupported") return {status: "ignored"};
+      // C-1 Task 2 widened NormalizedInbound from two arms to four. Behaviour is
+      // unchanged by that widening: a delivery-status event and an outbound echo
+      // used to normalise to `unsupported` and be answered 202 {"ignored"}, and
+      // they still are. Narrowing on `!== "message"` rather than on
+      // `=== "unsupported"` is what keeps that true — and it is a type error, not
+      // a silent fall-through, when Task 4 adds the branches that persist them.
+      if (normalized.kind !== "message") return {status: "ignored"};
 
       const sender = normalizeWhatsAppNumber(normalized.sender);
       if (!sender) return {status: "ignored"};

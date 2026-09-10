@@ -28,6 +28,12 @@ export type SessionChannelResult =
     reason: "outside_customer_service_window";
   }>;
 
+// Programme C-1. The webhook used to answer 202 {"ignored"} to everything that
+// was not an inbound TEXT, so a delivery tick and an echo of our own outbound
+// message were indistinguishable from a malformed payload. The variants below
+// are added as NEW ARMS, never as optional fields on `message`: an arm that a
+// reader has not handled is a type error, whereas a field that is sometimes
+// absent is a runtime surprise.
 export type NormalizedInbound =
   | Readonly<{
     kind: "message";
@@ -36,6 +42,25 @@ export type NormalizedInbound =
     intent: "opt_out" | null;
     providerMessageId: string;
     receivedAt: Date;
+    /** C-1: the Woztell member id, resolved before the phone number. Null when
+     * the payload does not carry one — every payload shape before Phase C. */
+    whatsappMemberId: string | null;
+  }>
+  | Readonly<{
+    kind: "delivery_status";
+    /** The id of the OUTBOUND message this status is about. */
+    providerMessageId: string;
+    status: "sent" | "delivered" | "read" | "failed";
+    errorCode: string | null;
+    occurredAt: Date;
+  }>
+  | Readonly<{
+    kind: "outbound_echo";
+    recipient: string;
+    text: string;
+    providerMessageId: string;
+    origin: "BOT" | "MANUAL" | "RELAY";
+    sentAt: Date;
   }>
   | Readonly<{
     kind: "unsupported";

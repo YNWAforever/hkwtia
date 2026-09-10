@@ -90,6 +90,7 @@ describe("WOZTELL Concierge adapter", () => {
         intent: null,
         providerMessageId: "wamid.inbound.1",
         receivedAt: RECEIVED_AT,
+        whatsappMemberId: null,
       });
   });
 
