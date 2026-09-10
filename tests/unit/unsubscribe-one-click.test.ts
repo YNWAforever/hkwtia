@@ -23,6 +23,17 @@ const SECRET = "unsubscribe-token-secret-at-least-32-bytes";
 const CRON = "cron-secret-at-least-thirty-two-bytes-x";
 const APP_URL = "https://www.hkwtia.org";
 const NOW = new Date("2026-08-11T00:00:00.000Z");
+/**
+ * The handler must verify at the instant the fixture token was minted.
+ *
+ * `unsubscribeUrls` stamps `exp` at `NOW + UNSUBSCRIBE_TTL_SECONDS` (30 days),
+ * but `createUnsubscribePost` defaults to the wall clock — so these two cases
+ * passed for thirty days and then started returning 400 on 2026-09-10, the day
+ * the frozen fixture expired in real time. Nothing about the route or the token
+ * had changed. A fixed mint instant needs a fixed verification instant, or the
+ * test is a timer.
+ */
+const NOW_SECONDS = () => Math.floor(NOW.getTime() / 1000);
 
 describe("RFC 8058 one-click unsubscribe", () => {
   beforeEach(() => {
@@ -65,6 +76,7 @@ describe("RFC 8058 one-click unsubscribe", () => {
     const unsubscribeEmailMarketing = vi.fn(async () => "created" as const);
     const post = createUnsubscribePost({
       secrets: [SECRET],
+      now: NOW_SECONDS,
       optOutWhatsApp: async () => "created" as const,
       appUrl: APP_URL,
       unsubscribeEmailMarketing,
@@ -87,6 +99,7 @@ describe("RFC 8058 one-click unsubscribe", () => {
     const unsubscribeEmailMarketing = vi.fn(async () => "created" as const);
     const post = createUnsubscribePost({
       secrets: [SECRET],
+      now: NOW_SECONDS,
       optOutWhatsApp: async () => "created" as const,
       appUrl: APP_URL,
       unsubscribeEmailMarketing,
