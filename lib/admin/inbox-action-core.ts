@@ -140,6 +140,28 @@ export function replyWindow(lastInboundAt: Date | null, now: Date = new Date()):
   return {state: "open", remainingMs: Math.max(0, CUSTOMER_SERVICE_WINDOW_MS - elapsed)};
 }
 
+/**
+ * The countdown's two numbers, formatted on the SERVER from the same
+ * `ReplyWindow` the send gate reads.
+ *
+ * Deliberately not a live clock in the composer: a `setInterval` there would
+ * tick a number nothing consults — the enforcement is `sendInboxReply`'s window
+ * check and the adapter's own — so a ticking display would keep counting down
+ * past a boundary the server had already closed, and the first thing staff would
+ * learn about it is a refused send. A number that goes stale on a page that must
+ * be reloaded to change anything else is the honest one.
+ *
+ * Floored rather than rounded: "1h 0m left" that is really 30 seconds is a
+ * promise the adapter breaks.
+ */
+export function formatReplyWindow(window: ReplyWindow): Readonly<{hours: string; minutes: string}> {
+  const remaining = window.state === "open" ? Math.max(0, window.remainingMs) : 0;
+  return {
+    hours: String(Math.floor(remaining / 3_600_000)),
+    minutes: String(Math.floor((remaining % 3_600_000) / 60_000)),
+  };
+}
+
 export type InboxReplyDependencies = Readonly<{
   inbox: Pick<InboxRepository, "getTranscript" | "queueStaffMessage" | "settleStaffMessage">;
   eligibility: Pick<MessageEligibilityRepository, "whatsAppEligibility">;

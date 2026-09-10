@@ -83,8 +83,16 @@ export type QueuedStaffMessage = Readonly<{
   lastInboundAt: Date | null;
 }>;
 
+export type InboxHandlingFilter = "all" | InboxHandling;
+
 const listOptionsSchema = z.object({
   channel: z.enum(["all", "whatsapp", "web"]).default("all"),
+  // C-2 Task 8. The filter is here rather than a `.filter()` over the rows the
+  // page received, because this query carries a `LIMIT`: filtering after it
+  // would show "handled by a person" as whichever of those threads happened to
+  // fall inside the newest hundred, and would go quietly emptier as the inbox
+  // grew. Defaulted so every existing caller keeps its meaning.
+  handling: z.enum(["all", "bot", "human", "closed"]).default("all"),
   limit: z.number().int().min(1).max(200).default(50),
 }).strict();
 
@@ -418,6 +426,7 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
       // Scopes the CONVERSATION, not its newest message: `latest` no longer
       // projects a channel, because 0031 gave the conversation its own.
       const channelFilter = parsed.channel === "all" ? sql`TRUE` : sql`c.channel = ${parsed.channel}`;
+      const handlingFilter = parsed.handling === "all" ? sql`TRUE` : sql`c.handling = ${parsed.handling}`;
       const rows = rowsFrom(await database.execute(sql`
         WITH latest AS (
           SELECT DISTINCT ON (m.conversation_id)
@@ -445,7 +454,7 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
         LEFT JOIN latest ON latest.conversation_id = c.id
         LEFT JOIN counts ON counts.conversation_id = c.id
         LEFT JOIN tasks ON tasks.conversation_id = c.id::text
-        WHERE c.agent_kind = 'concierge' AND c.status <> 'deleted' AND ${channelFilter}
+        WHERE c.agent_kind = 'concierge' AND c.status <> 'deleted' AND ${channelFilter} AND ${handlingFilter}
         ORDER BY c.last_message_at DESC NULLS LAST, c.id DESC
         LIMIT ${parsed.limit}
       `));

@@ -2261,16 +2261,24 @@
     "inbox": {
       "eyebrow": "Member and lead conversations",
       "title": "Inbox",
-      "description": "Every concierge conversation on the web widget and WhatsApp. Read-only in this release; replying from here arrives with the WhatsApp operations phase.",
+      "description": "Every concierge conversation on the web widget and WhatsApp. Take a thread over to reply yourself, and hand it back when you are done.",
       "filters": {"all": "All", "whatsapp": "WhatsApp", "web": "Web"},
-      "columns": {"owner": "Who", "channel": "Channel", "last": "Last message", "when": "Updated", "messages": "Messages", "status": "Status"},
+      "columns": {"owner": "Who", "channel": "Channel", "last": "Last message", "when": "Updated", "messages": "Messages", "status": "Status", "handling": "Handled by", "assignee": "Assigned to", "unread": "Unread"},
       "anonymous": "Prospect (not a member)",
       "escalated": "Needs a person",
       "empty": "No conversations yet.",
       "error": "The inbox could not be loaded.",
       "open": "Open",
       "back": "Back to inbox",
-      "roles": {"user": "Sender", "assistant": "Concierge", "tool": "Tool", "staff": "Staff"}
+      "unassigned": "Nobody",
+      "unreadYes": "New",
+      "roles": {"user": "Sender", "assistant": "Concierge", "tool": "Tool", "staff": "WTIA staff"},
+      "handling": {"bot": "Concierge", "human": "A person", "closed": "Closed", "filterAll": "All threads", "filterHuman": "Handled by a person", "filterBot": "Handled by the concierge"},
+      "actions": {"take": "Take this over", "release": "Hand back to the concierge", "close": "Close this thread", "assignToMe": "Assign to me", "unassign": "Unassign", "markRead": "Mark as read"},
+      "window": {"open": "{hours}h {minutes}m left to reply freely", "closed": "The 24-hour reply window has closed. Send an approved template instead.", "never": "This person has not messaged in yet, so there is no open window."},
+      "compose": {"legend": "Reply", "kindSession": "Free-text reply", "kindTemplate": "Approved template", "message": "Your reply", "placeholder": "Write your reply…", "template": "Template", "templateNone": "Choose a template", "send": "Send", "sending": "Sending…", "sent": "Sent.", "draftRestored": "Draft restored."},
+      "delivery": {"queued": "Sending", "sent": "Sent", "delivered": "Delivered", "read": "Read", "failed": "Not delivered"},
+      "errors": {"INVALID": "Check the message and the template.", "FORBIDDEN": "You do not have access to this thread.", "WINDOW_CLOSED": "The 24-hour window has closed. Send an approved template instead.", "NOT_OPTED_IN": "This person has not opted in to WhatsApp.", "OPTED_OUT": "This person asked us to stop messaging them.", "SUPPRESSED": "This person is suppressed for marketing on WhatsApp.", "NO_NUMBER": "We have no WhatsApp number for this person.", "INVALID_INBOX_CHANNEL": "This thread is not a WhatsApp thread.", "INVALID_INBOX_HANDLING": "Take the thread over before replying.", "TEMPLATE_NOT_APPROVED": "That template is not approved for sending.", "SEND_IN_PROGRESS": "This reply is already being sent. Give it a moment before trying again.", "DELIVERY_FAILED": "WhatsApp did not accept the message. Try again shortly."}
     },
     "tasks": {
       "eyebrow": "Escalations",

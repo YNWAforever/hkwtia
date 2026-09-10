@@ -2262,16 +2262,24 @@
     "inbox": {
       "eyebrow": "會員及潛在客戶對話",
       "title": "訊息中心",
-      "description": "網頁小工具及 WhatsApp 上的所有禮賓對話。此版本只可閱讀；於 WhatsApp 營運階段將可直接回覆。",
+      "description": "網站聊天視窗及 WhatsApp 上的所有禮賓對話。接手對話即可親自回覆，完成後可交回禮賓助理。",
       "filters": {"all": "全部", "whatsapp": "WhatsApp", "web": "網頁"},
-      "columns": {"owner": "對象", "channel": "渠道", "last": "最後訊息", "when": "更新時間", "messages": "訊息數", "status": "狀態"},
+      "columns": {"owner": "對象", "channel": "渠道", "last": "最後訊息", "when": "更新時間", "messages": "訊息數", "status": "狀態", "handling": "處理方", "assignee": "負責人", "unread": "未讀"},
       "anonymous": "潛在客戶（非會員）",
       "escalated": "需要真人跟進",
       "empty": "尚未有對話。",
       "error": "無法載入訊息中心。",
       "open": "開啟",
       "back": "返回訊息中心",
-      "roles": {"user": "發送者", "assistant": "禮賓", "tool": "工具", "staff": "職員"}
+      "unassigned": "未指派",
+      "unreadYes": "新訊息",
+      "roles": {"user": "發送者", "assistant": "禮賓助理", "tool": "工具", "staff": "WTIA 職員"},
+      "handling": {"bot": "禮賓助理", "human": "由職員處理", "closed": "已結束", "filterAll": "所有對話", "filterHuman": "由職員處理", "filterBot": "由禮賓助理處理"},
+      "actions": {"take": "接手此對話", "release": "交回禮賓助理", "close": "結束此對話", "assignToMe": "指派給我", "unassign": "取消指派", "markRead": "標記為已讀"},
+      "window": {"open": "尚餘 {hours} 小時 {minutes} 分鐘可自由回覆", "closed": "24 小時回覆時限已過，請改用已批核範本。", "never": "對方尚未主動傳送訊息，因此沒有開啟中的回覆時限。"},
+      "compose": {"legend": "回覆", "kindSession": "自由文字回覆", "kindTemplate": "已批核範本", "message": "你的回覆", "placeholder": "輸入回覆內容…", "template": "範本", "templateNone": "選擇範本", "send": "發送", "sending": "發送中…", "sent": "已發送。", "draftRestored": "已回復草稿。"},
+      "delivery": {"queued": "發送中", "sent": "已發送", "delivered": "已送達", "read": "已讀", "failed": "未能送達"},
+      "errors": {"INVALID": "請檢查訊息內容及範本。", "FORBIDDEN": "你無權存取此對話。", "WINDOW_CLOSED": "24 小時時限已過，請改用已批核範本。", "NOT_OPTED_IN": "對方未同意接收 WhatsApp 訊息。", "OPTED_OUT": "對方已要求停止接收訊息。", "SUPPRESSED": "對方已停止接收 WhatsApp 推廣訊息。", "NO_NUMBER": "我們沒有對方的 WhatsApp 號碼。", "INVALID_INBOX_CHANNEL": "此對話並非 WhatsApp 對話。", "INVALID_INBOX_HANDLING": "請先接手此對話才可回覆。", "TEMPLATE_NOT_APPROVED": "該範本未獲批核發送。", "SEND_IN_PROGRESS": "此回覆正在發送中，請稍候再試。", "DELIVERY_FAILED": "WhatsApp 未接受此訊息，請稍後再試。"}
     },
     "tasks": {
       "eyebrow": "升級個案",

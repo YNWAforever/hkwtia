@@ -2,6 +2,7 @@ import "server-only";
 
 import {createHmac} from "node:crypto";
 
+import type {WhatsAppTemplateKey} from "@/config/whatsapp-templates";
 import {createConciergeService} from "@/lib/ai/agents/concierge";
 import {createOpenAIEmbeddingAdapter} from "@/lib/ai/embeddings";
 import type {WoztellWebhookProcessorDependencies} from "@/lib/ai/woztell-webhook";
@@ -31,6 +32,10 @@ import {
 import {
   createWoztellRunRecoveryRepository,
 } from "@/lib/db/repos/woztell-run-recovery";
+import {
+  approvedTemplateKeys,
+  CONCIERGE_FOLLOW_UP_TEMPLATE_KEYS,
+} from "@/lib/whatsapp/approved-templates";
 
 type RuntimeEnvironment = AppEnv & AiEnv;
 
@@ -104,20 +109,26 @@ function conversationsWithoutInboundAppend(runId: string) {
   };
 }
 
-function approvedTemplateKeys(): ReadonlySet<
-  "concierge_follow_up_en" | "concierge_follow_up_zh_hk"
-> {
-  const allowed = [
-    "concierge_follow_up_en",
-    "concierge_follow_up_zh_hk",
-  ] as const;
-  if (process.env.RUN_LIVE_WOZTELL !== "1") return new Set(allowed);
-  const configured = new Set(
-    (process.env.WOZTELL_APPROVED_TEMPLATE_KEYS ?? "")
-      .split(",")
-      .map((value) => value.trim()),
-  );
-  return new Set(allowed.filter((key) => configured.has(key)));
+/**
+ * What the concierge may send UNATTENDED: the operator allowlist narrowed to the
+ * two follow-up nudges.
+ *
+ * C1 Task 8 Step 0 moved the allowlist itself into
+ * `lib/whatsapp/approved-templates.ts` so an admin page can import it without
+ * dragging this module — and with it the concierge service, the OpenAI
+ * embedding adapter and the agent runtime — into a page render. The narrowing
+ * stays here, because it is a statement about the BOT and not about the
+ * allowlist: the staff picker widens to all five approved templates, and a bot
+ * that could reach for `dunning_3` on its own is a different product from one
+ * that can send a follow-up nudge.
+ *
+ * The result is byte-for-byte what the deleted private function returned in both
+ * modes, which is why `tests/unit/woztell-concierge.test.ts` and the four outbox
+ * integration tests need no edit.
+ */
+function conciergeApprovedTemplateKeys(): ReadonlySet<WhatsAppTemplateKey> {
+  const allowed = approvedTemplateKeys();
+  return new Set([...CONCIERGE_FOLLOW_UP_TEMPLATE_KEYS].filter((key) => allowed.has(key)));
 }
 
 export function createProductionWoztellProcessorDependencies(
@@ -171,7 +182,7 @@ export function createProductionWoztellProcessorDependencies(
         .update(normalizedSender)
         .digest("hex");
     },
-    approvedTemplateKeys: approvedTemplateKeys(),
+    approvedTemplateKeys: conciergeApprovedTemplateKeys(),
     async recordContact(input) {
       const contact = await contactsRepository.upsertFromWhatsApp(contactWriterActor("whatsapp"), {
         phoneE164: input.phoneE164,
