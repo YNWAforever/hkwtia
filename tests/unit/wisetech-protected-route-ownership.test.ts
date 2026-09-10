@@ -296,8 +296,9 @@ describe("WiseTech protected route ownership", () => {
     // Phase B1 Task 6 (B-4) added /api/events/guest/cancel: 49 + 1 = 50.
     // Phase B1 Task 7 (B-4) added /api/admin/events/[id]/attendees.csv: 50 + 1 = 51.
     // Phase B2 Task 4 (B-7) added /admin/profiles-review: 51 + 1 = 52.
-    expect(codeFiles).toHaveLength(52);
-    expect(inventoryFiles).toHaveLength(52);
+    // Phase C1 Task 11 (C-3) added /api/admin/woztell/backfill: 52 + 1 = 53.
+    expect(codeFiles).toHaveLength(53);
+    expect(inventoryFiles).toHaveLength(53);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -313,11 +314,15 @@ describe("WiseTech protected route ownership", () => {
     );
 
     expect(count("admin-page")).toBe(30);
-    expect(count("api-handler")).toBe(11);
+    // Phase C1 Task 11 (C-3) added the WOZTELL history backfill: 11 + 1 = 12.
+    // It is an `api-handler`, not a `webhook-handler`: the caller is a staff
+    // session, and there is no HMAC in front of it — which is exactly why its
+    // repository method carries its own capability actor (plan S-14).
+    expect(count("api-handler")).toBe(12);
     expect(count("webhook-handler")).toBe(2);
     expect(count("job-handler")).toBe(9);
     expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(30);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(22);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(23);
   });
 
   it("publishes only the canonical deeply immutable protected conventions export", () => {

@@ -16,6 +16,7 @@ import {createInboxRepository} from "@/lib/db/repos/inbox";
 import {createStaffTasksRepository} from "@/lib/db/repos/staff-tasks";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
+import {createPostgresWoztellStore} from "@/lib/db/repos/woztell";
 import {createWoztellDeliveryStampRepository} from "@/lib/db/repos/woztell-delivery-stamp";
 import {createWoztellInboundEventsRepository} from "@/lib/db/repos/woztell-inbound-events";
 import {ANONYMOUS_ACTOR, type Actor} from "@/lib/membership/lifecycle";
@@ -961,6 +962,46 @@ describe("production repository security boundaries", () => {
       await expect(stamp.stampConciergeDelivery(forged as never, {
         inboundProviderMessageId: providerMessageId,
         providerId: "wamid.outbound.security",
+      })).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * Phase C1 S-14, Task 11. The backfill is the second entry point into the
+   * `messages`/`conversations` rows the webhook writes, and it has NO HMAC in
+   * front of it. Its capability is a third `unique symbol`, distinct from the
+   * webhook's and the delivery stamp's, so the two entry points cannot reach
+   * each other's writers — which is why both of their actors are in this list.
+   * The host module's other methods are the standing pre-§9 exception and are
+   * deliberately not retrofitted here.
+   */
+  it.each([
+    ["member", actor],
+    ["admin", {kind: "staff", userId: "staff-a", profileId: "staff-a", role: "superadmin"}],
+    ["anonymous", ANONYMOUS_ACTOR],
+    ["hand-rolled backfill shape", {kind: "woztell-backfill", userId: null}],
+    ["woztell webhook shape", {kind: "woztell-webhook", userId: null}],
+    ["woztell delivery shape", {kind: "woztell-delivery", userId: null}],
+  ] as const)(
+    "refuses a %s actor on the WOZTELL history importer before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const store = createPostgresWoztellStore(() => securityNow, loadDatabase);
+
+      await expect(store.importHistoricalInbound(forged as never, {
+        owner: {kind: "anonymous", anonymousOwnerHash},
+        profileId: null,
+        locale: "en",
+        memberName: "Member",
+        whatsappOptIn: true,
+        sender: "+85290000000",
+        providerMessageId,
+        receivedAt: securityNow,
+        content: "Hello from the backlog",
+        channel: "whatsapp",
+        whatsappMemberId: null,
+        contactId: null,
       })).rejects.toThrow("FORBIDDEN");
       expect(loadDatabase).not.toHaveBeenCalled();
     },

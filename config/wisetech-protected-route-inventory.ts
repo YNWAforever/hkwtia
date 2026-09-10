@@ -92,6 +92,7 @@ export const protectedRouteOwnershipInventory: readonly ProtectedRouteOwner[] = 
   owner({id: "api-events-guest-cancel", family: "api", classification: "api-handler", routePath: "/api/events/guest/cancel", filePath: "app/api/events/guest/cancel/route.ts", dataOwner: "Guest RSVP one-click cancel (Phase B1, B-4)."}),
   owner({id: "api-media-delivery", family: "api", classification: "api-handler", routePath: "/api/media/[id]", filePath: "app/api/media/[id]/route.ts", dataOwner: "Revocation-aware ETag-bound private media delivery."}),
   owner({id: "api-unsubscribe", family: "api", classification: "api-handler", routePath: "/api/unsubscribe", filePath: "app/api/unsubscribe/route.ts", dataOwner: "Signed suppression action."}),
+  owner({id: "api-admin-woztell-backfill", family: "api", classification: "api-handler", routePath: "/api/admin/woztell/backfill", filePath: "app/api/admin/woztell/backfill/route.ts", dataOwner: "Admin-actor WOZTELL conversation history import (Phase C, C-3)."}),
 
   owner({id: "api-stripe-webhook", family: "api", classification: "webhook-handler", routePath: "/api/stripe/webhook", filePath: "app/api/stripe/webhook/route.ts", dataOwner: "Stripe webhook verification and idempotent lifecycle processing."}),
   owner({id: "api-woztell-webhook", family: "api", classification: "webhook-handler", routePath: "/api/webhooks/woztell", filePath: "app/api/webhooks/woztell/route.ts", dataOwner: "WOZTELL webhook verification and lifecycle processing."}),

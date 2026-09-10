@@ -236,7 +236,13 @@ type WoztellTurnOutcome =
 
 const EFFECT_LEASE_MS = 5 * 60 * 1_000;
 
-function localeFor(
+/**
+ * Exported for C-3's backfill (`lib/api/woztell-backfill-route.ts`), which
+ * imports the SAME rule rather than carrying a third copy of the CJK test. A
+ * backfill that guessed locale differently from the webhook would label half a
+ * thread `en` and half `zh-HK`, and the conversation carries one locale.
+ */
+export function localeFor(
   text: string,
   profile: WoztellProfile | null,
 ): "en" | "zh-HK" {

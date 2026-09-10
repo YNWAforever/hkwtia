@@ -1,10 +1,9 @@
 import "server-only";
 
-import {createHmac} from "node:crypto";
-
 import type {WhatsAppTemplateKey} from "@/config/whatsapp-templates";
 import {createConciergeService} from "@/lib/ai/agents/concierge";
 import {createOpenAIEmbeddingAdapter} from "@/lib/ai/embeddings";
+import {woztellAnonymousOwnerHash} from "@/lib/ai/woztell-credentials";
 import type {WoztellWebhookProcessorDependencies} from "@/lib/ai/woztell-webhook";
 import {createAgentRuntime} from "@/lib/ai/runtime";
 import {createConciergeTools} from "@/lib/ai/tools/registry";
@@ -192,11 +191,12 @@ export function createProductionWoztellProcessorDependencies(
         input,
       );
     },
+    // C-3 Task 11 moved the derivation into lib/ai/woztell-credentials.ts. The
+    // backfill route is the second entry point that must produce this exact hash
+    // for the same numbers, and two copies that drifted would open a second
+    // conversation per imported person rather than fail.
     anonymousOwnerHash(normalizedSender) {
-      const secret = env.conciergeCookieSecret ?? env.woztellWebhookSecret ?? "";
-      return createHmac("sha256", secret)
-        .update(normalizedSender)
-        .digest("hex");
+      return woztellAnonymousOwnerHash(env, normalizedSender);
     },
     approvedTemplateKeys: conciergeApprovedTemplateKeys(),
     async recordContact(input) {

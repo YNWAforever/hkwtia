@@ -1,5 +1,7 @@
 import "server-only";
 
+import {createHmac} from "node:crypto";
+
 import type {WoztellEnvironment} from "@/lib/channels/woztell";
 import type {AiEnv} from "@/lib/config/env";
 
@@ -34,4 +36,29 @@ export function woztellCredentialsFrom(ai: AiEnv): Partial<WoztellEnvironment> {
     ...(ai.woztellChannelId === undefined ? {} : {WOZTELL_CHANNEL_ID: ai.woztellChannelId}),
     ...(ai.woztellWebhookSecret === undefined ? {} : {WOZTELL_WEBHOOK_SECRET: ai.woztellWebhookSecret}),
   };
+}
+
+/**
+ * The anonymous conversation OWNER KEY, derived in one place.
+ *
+ * D-6 pins `conversations.anonymous_owner_hash` as the owner key for a
+ * conversation with no profile, and `conversations_owner_check` is two-armed:
+ * this HMAC is the only thing that says "these two threads are the same person".
+ * It was written inline in `createProductionWoztellProcessorDependencies`, and
+ * C-3's backfill is the second entry point that has to produce it — for the same
+ * numbers, into the same table, with the same reuse predicate. Two derivations
+ * that drifted by one character would not fail: they would quietly open a SECOND
+ * conversation for every person whose history was imported, splitting exactly
+ * the threads the inbox exists to unify.
+ *
+ * The secret falls back the way the webhook always has (`conciergeCookieSecret`
+ * then `woztellWebhookSecret` then `""`), and both call sites must keep that
+ * order — a different fallback is a different hash.
+ */
+export function woztellAnonymousOwnerHash(
+  ai: AiEnv,
+  normalizedSender: string,
+): string {
+  const secret = ai.conciergeCookieSecret ?? ai.woztellWebhookSecret ?? "";
+  return createHmac("sha256", secret).update(normalizedSender).digest("hex");
 }

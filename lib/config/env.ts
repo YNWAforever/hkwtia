@@ -50,6 +50,15 @@ export interface AiEnv {
   woztellApiToken?: string;
   woztellChannelId?: string;
   woztellWebhookSecret?: string;
+  /**
+   * Programme C-3. Configuration for the conversation-history backfill, and
+   * deliberately NOT in `serverKeys`: the backfill is an admin-triggered import,
+   * not a boot requirement, and boundary 7 exists because a transitive env pull
+   * once took `/sitemap.xml`, `/events`, `/showcase` and `/launchpad` down. The
+   * route answers 503 BACKFILL_NOT_CONFIGURED when it is blank rather than
+   * refusing to start the process.
+   */
+  woztellOpenApiToken?: string;
   turnstileSecret?: string;
   turnstileSiteKey?: string;
 }
@@ -137,6 +146,7 @@ const aiEnvironmentSchema = z.object({
   WOZTELL_API_TOKEN: z.string().optional(),
   WOZTELL_CHANNEL_ID: z.string().optional(),
   WOZTELL_WEBHOOK_SECRET: z.string().optional(),
+  WOZTELL_OPEN_API_TOKEN: z.string().optional(),
   TURNSTILE_SECRET: z.string().refine(
     (value) => value.trim().length > 0,
     {message: "TURNSTILE_SECRET must not be blank"},
@@ -171,6 +181,7 @@ function parseAiEnvironment(environment: Environment): AiEnv {
     ...(ai.WOZTELL_API_TOKEN === undefined ? {} : {woztellApiToken: ai.WOZTELL_API_TOKEN}),
     ...(ai.WOZTELL_CHANNEL_ID === undefined ? {} : {woztellChannelId: ai.WOZTELL_CHANNEL_ID}),
     ...(ai.WOZTELL_WEBHOOK_SECRET === undefined ? {} : {woztellWebhookSecret: ai.WOZTELL_WEBHOOK_SECRET}),
+    ...(ai.WOZTELL_OPEN_API_TOKEN === undefined ? {} : {woztellOpenApiToken: ai.WOZTELL_OPEN_API_TOKEN}),
     ...(ai.TURNSTILE_SECRET === undefined ? {} : {turnstileSecret: ai.TURNSTILE_SECRET}),
     ...(ai.TURNSTILE_SITE_KEY === undefined ? {} : {turnstileSiteKey: ai.TURNSTILE_SITE_KEY}),
   };
