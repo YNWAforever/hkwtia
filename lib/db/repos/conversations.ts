@@ -421,6 +421,15 @@ export function createConversationsRepository(
           SELECT ${conversations.id}
           FROM ${conversations}
           WHERE ${conversations.expiresAt} <= ${parsed.asOf}
+            -- Phase C1 S-10. This sweep deleted on age alone. A thread staff
+            -- took over in /admin/inbox is no longer a bot transcript: it has an
+            -- audit_events row pointing at it, a delivery record, and — for an
+            -- anonymous prospect — the only cleartext copy of their number in
+            -- messages.metadata.normalizedSender. Deleting it here would destroy
+            -- all three while the conversation is still being worked. How long a
+            -- human-handled thread IS kept is a WTIA decision, not an
+            -- engineering one (plan O-5, carried by C-9).
+            AND ${conversations.handling} = 'bot'
           ORDER BY ${conversations.expiresAt}, ${conversations.id}
           LIMIT ${parsed.limit}
           FOR UPDATE SKIP LOCKED
