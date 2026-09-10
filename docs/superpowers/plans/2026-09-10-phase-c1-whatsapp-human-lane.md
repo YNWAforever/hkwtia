@@ -1428,6 +1428,19 @@ is how a red gate gets reported green.
 | `npm run typecheck` | **0** | no output |
 | `export NEXT_PUBLIC_SITE_URL=https://hkwtia.vercel.app && npm run build` | **0** | `Compiled successfully in 22.3s`; `/api/admin/woztell/backfill` and `/api/webhooks/woztell` both present as dynamic handlers |
 
+The gate was run three times over the branch tip. The middle run went **red** on
+`tests/unit/homepage.test.tsx` and `tests/unit/wt-pages/launchpad-page.test.tsx`,
+neither of which C1 touches, and the cause is worth recording because the reported
+failure was two files from it: a whole-page render that takes ~1.1s alone crossed
+the default 5000ms bound under an 11-worker jsdom run, and a timed-out test's
+`render()` still resolves *after* Testing Library's `afterEach` cleanup — so it
+mounts into the next test's DOM and *that* test fails on duplicated nodes (13
+landmarks read as 26, one eyebrow as two). Since `0e5a725` a red shard fails the
+quality gate, so the flake costs a whole CI run. `vitest.config.ts` now sets
+`testTimeout: 20_000`, which hides no assertion: a genuinely hung test still
+fails, later. Both files pass in 1.1s in isolation and the run above is the
+post-fix one.
+
 The 16 skipped files are the `DATABASE_URL_TEST`-gated PostgreSQL suites plus
 `tests/integration/woztell-live.acceptance.test.ts`. They are skipped **here** for
 exactly the reason the owner list exists, and their being skipped is not evidence
