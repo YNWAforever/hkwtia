@@ -3,6 +3,7 @@ import {
   type WoztellProcessResult,
   type WoztellWebhookProcessorDependencies,
 } from "@/lib/ai/woztell-webhook";
+import {woztellCredentialsFrom} from "@/lib/ai/woztell-credentials";
 import {
   createProductionWoztellProcessorDependencies,
 } from "@/lib/ai/woztell-production";
@@ -82,15 +83,14 @@ export async function POST(request: Request): Promise<Response> {
   const env = aiEnv();
   const runtimeEnv = {...env, ...appEnv()};
   const channel = createWoztellAdapter({
-    ...(env.woztellApiToken === undefined
-      ? {}
-      : {WOZTELL_API_TOKEN: env.woztellApiToken}),
-    ...(env.woztellChannelId === undefined
-      ? {}
-      : {WOZTELL_CHANNEL_ID: env.woztellChannelId}),
-    ...(env.woztellWebhookSecret === undefined
-      ? {}
-      : {WOZTELL_WEBHOOK_SECRET: env.woztellWebhookSecret}),
+    // The three conditional spreads that used to be written out here now live in
+    // lib/ai/woztell-credentials.ts, because C-2's reply lane is a third
+    // construction site and three hand-written copies of "which credentials
+    // reach the provider" is three places to audit before C-9.
+    // `RUN_LIVE_WOZTELL` stays an explicit argument here, and at every other
+    // site, precisely because a helper that supplied it would make forgetting it
+    // invisible.
+    ...woztellCredentialsFrom(env),
     RUN_LIVE_WOZTELL: process.env.RUN_LIVE_WOZTELL,
   });
   const productionDependencies =

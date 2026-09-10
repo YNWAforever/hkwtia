@@ -5,6 +5,17 @@ import {inboxRepository, type InboxChannelFilter} from "@/lib/db/repos/inbox";
 import {staffTasksRepository} from "@/lib/db/repos/staff-tasks";
 import type {Actor} from "@/lib/membership/lifecycle";
 
+/**
+ * The inbox READ helpers, and only those.
+ *
+ * C-2's write lane — reply, take over, assign, close, mark read — lives in
+ * `lib/admin/inbox-action-core.ts`, not here, and this file must stay free of
+ * anything actor-taking that a `"use server"` module might be tempted to
+ * re-export: that directive publishes every export as an HTTP-callable
+ * endpoint, and an endpoint whose caller supplies the actor authorizes nothing.
+ * The wrappers in `lib/admin/inbox-actions.ts` are the only dispatchable
+ * surface, and each resolves its actor from the session.
+ */
 export async function listInbox(actor: Actor, channel: InboxChannelFilter) {
   requireAdmin(actor);
   return inboxRepository.listConversations(actor, {channel, limit: 100});
