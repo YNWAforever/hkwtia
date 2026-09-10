@@ -1331,6 +1331,41 @@
       "action": "Browse events"
     }
   },
+  "Members": {
+    "metaTitle": "Members | WiseTech Hong Kong",
+    "metaDescription": "Hong Kong wireless and AI+ technology companies in the WTIA member directory.",
+    "eyebrow": "Member directory",
+    "title": "WTIA members",
+    "description": "Organisations shaping Hong Kong's wireless, mobile and AI+ industry. Each page is maintained by the member and reviewed by WTIA.",
+    "breadcrumbCurrent": "Members",
+    "filters": {
+      "search": "Search members",
+      "tag": "Industry",
+      "anyTag": "All industries",
+      "plan": "Membership",
+      "anyPlan": "All tiers",
+      "submit": "Search",
+      "clear": "Clear"
+    },
+    "plans": {
+      "community": "Community",
+      "startup": "Startup",
+      "corporate": "Corporate",
+      "patron": "Patron"
+    },
+    "resultsTitle": "{count} members",
+    "emptyTitle": "No member pages match yet",
+    "emptyDescription": "Member pages appear here once organisations publish them. Try a broader search.",
+    "view": "View member page",
+    "detail": {
+      "website": "Website",
+      "showcase": "Solution in the WTIA Showcase",
+      "events": "Upcoming events by this member",
+      "noEvents": "No upcoming events.",
+      "joinCta": "Your organisation could be listed here",
+      "join": "See membership plans"
+    }
+  },
   "AiOps": {
     "metaTitle": "AI-Ops in public | WiseTech Hong Kong",
     "metaDescription": "Live, privacy-safe metrics showing how WTIA's AI agents perform, escalate and cost.",
@@ -2056,6 +2091,49 @@
         "FORBIDDEN": "You can only edit events your organisation submitted."
       }
     },
+    "companyProfile": {
+      "title": "Public member page",
+      "description": "Choose what appears on your organisation's page in the WTIA member directory. Pages go live after a short WTIA review.",
+      "reviewNotice": "Editing a page that is already live — here, or the company details above — returns it to WTIA review, and it stays off the directory until staff approve it again.",
+      "statusLabel": "Status",
+      "fields": {
+        "slug": "Page address (hkwtia.org/members/…)",
+        "taglineEn": "Tagline (English)",
+        "taglineZhHk": "Tagline (Chinese)",
+        "descriptionZhHk": "Description (Chinese)",
+        "website": "Website",
+        "tags": "Industry tags (up to 8)",
+        "logoMediaId": "Logo image id"
+      },
+      "logo": {
+        "choose": "Choose a logo (PNG, JPEG or WebP, up to 4 MB)",
+        "upload": "Upload",
+        "uploading": "Uploading…",
+        "done": "Uploaded — the id has been filled in above.",
+        "failed": "Upload failed. Check the file type and size.",
+        "alt": "Describe the logo"
+      },
+      "save": "Save",
+      "publish": "Publish my profile",
+      "saved": "Saved.",
+      "submitted": "Submitted for review.",
+      "status": {
+        "hidden": "Not published",
+        "pending_review": "Awaiting WTIA review",
+        "published": "Live on /members",
+        "rejected": "Returned by WTIA"
+      },
+      "rejectedWith": "Returned by WTIA: {reason}",
+      "viewPublic": "View public page",
+      "errors": {
+        "INVALID": "Check the page address, tags and links.",
+        "FORBIDDEN": "Only company owners and admins can edit this.",
+        "NO_MANAGED_COMPANY": "You do not manage a company yet.",
+        "INVALID_PROFILE_TRANSITION": "Add a page address, then publish.",
+        "COMPANY_SLUG_TAKEN": "That page address is already used.",
+        "COMPANY_LOGO_INVALID": "That image id is not one you uploaded."
+      }
+    },
     "documents": {
       "title": "Documents and receipts",
       "description": "Access approved WTIA resources and your billing receipts.",
@@ -2154,6 +2232,7 @@
       "pendingApprovals": "Pending approvals",
       "atRisk": "At-risk members",
       "listingsAwaitingReview": "Listings awaiting review",
+      "profilesAwaitingReview": "Member pages awaiting review",
       "draftNews": "Draft news posts",
       "openTasks": "Open staff tasks"
     },
@@ -2173,6 +2252,7 @@
       "media": "Media",
       "events": "Events",
       "listingsReview": "Showcase review",
+      "profilesReview": "Member pages",
       "cohorts": "Launch Pad cohorts",
       "approvals": "Approvals",
       "reports": "Reports",
@@ -2218,6 +2298,29 @@
       "reject": "Reject",
       "rejectionReason": "Rejection reason",
       "savePremium": "Save"
+    },
+    "profilesReview": {
+      "eyebrow": "Directory operations",
+      "title": "Review member pages",
+      "description": "Check each organisation's public page before it appears on /members.",
+      "caption": "Member pages awaiting review",
+      "company": "Company",
+      "slug": "Address",
+      "tags": "Tags",
+      "preview": "Preview",
+      "taglineEn": "Tagline (English)",
+      "taglineZhHk": "Tagline (Chinese)",
+      "descriptionEn": "Description (English)",
+      "descriptionZhHk": "Description (Chinese)",
+      "industry": "Industry",
+      "sizeBand": "Organisation size",
+      "website": "Website",
+      "previewEmpty": "This page has no copy yet.",
+      "approve": "Publish",
+      "reject": "Return",
+      "rejectionReason": "Reason for returning",
+      "empty": "No member pages are waiting for review.",
+      "error": "Member pages could not be loaded."
     },
     "cohorts": {
       "manage": {

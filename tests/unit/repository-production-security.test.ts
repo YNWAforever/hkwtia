@@ -8,7 +8,7 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
   return {...original, getDb: async () => database.current};
 });
 
-import {companiesRepository} from "@/lib/db/repos/companies";
+import {companiesRepository, type CompanyUpdate} from "@/lib/db/repos/companies";
 import {createApprovalsRepository} from "@/lib/db/repos/approvals";
 import {createAgentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {createConversationsRepository} from "@/lib/db/repos/conversations";
@@ -67,6 +67,74 @@ function normalizedSql(statement: string | undefined): string {
   return (statement ?? "").replace(/\s+/g, " ").trim().toLowerCase();
 }
 
+/** Everything an UPDATE writes, without the scope predicate or the `RETURNING` column list. */
+function setClause(statement: string | undefined): string {
+  const normalized = normalizedSql(statement);
+  const start = normalized.indexOf(" set ");
+  const end = normalized.indexOf(" where ");
+  return start === -1 ? "" : normalized.slice(start, end === -1 ? undefined : end);
+}
+
+/**
+ * The payload `/portal/company` really posts. `updateCompanyAction` in
+ * `lib/portal/commands.ts` builds every one of these keys with
+ * `String(formData.get(…))`, so not one of them is ever `undefined`: pressing
+ * Save having edited nothing sends the whole row back. That is why the review
+ * demotion in `lib/db/repos/companies.ts` has to compare values — counting the
+ * keys an update carries would demote on every save.
+ */
+function portalCompanySave(overrides: CompanyUpdate = {}): CompanyUpdate {
+  return {
+    legalName: "Acme Limited",
+    displayName: "Acme",
+    website: null,
+    industry: null,
+    sizeBand: null,
+    description: null,
+    directoryVisible: false,
+    ...overrides,
+  };
+}
+
+/** The stored row those values were read out of, already through staff review. */
+const publishedCompanyColumns = {
+  public_profile_status: "published",
+  display_name: "Acme",
+  website: null,
+  industry: null,
+  size_band: null,
+  description: null,
+};
+
+/**
+ * A unit run has no Postgres to evaluate the demotion gate, and a no-op save and
+ * a rewrite build the *same* statement — they differ only in the values bound to
+ * it. So read the gate back out of the statement the repository built and apply
+ * it to a stored row, which is the only way those two cases are distinguishable
+ * without a database. It understands exactly the grammar `reviewResetFor` emits
+ * and throws, rather than passing quietly, if that grammar changes.
+ */
+function demotionGate(statement: string | undefined, parameters: readonly unknown[]) {
+  const clause = setClause(statement);
+  const gate = /(case when (?:"[a-z_]+"\.)?"public_profile_status" = 'published' and \((.+?)\)) then 'pending_review'/.exec(clause);
+  if (!gate) throw new Error(`the SET clause carries no value-compared demotion gate: ${clause}`);
+  const comparisons = [...gate[2].matchAll(/(?:"[a-z_]+"\.)?"([a-z_]+)" is distinct from \$(\d+)/g)];
+  if (comparisons.length === 0) throw new Error(`the demotion gate compares no column values: ${gate[2]}`);
+  // Each occurrence of the gate binds its own placeholders, so compare the
+  // occurrences with the numbers taken out.
+  const anonymised = (text: string) => text.replace(/\$\d+/g, "?");
+  return {
+    /** The columns whose value the gate actually looks at. */
+    columns: comparisons.map(([, column]) => column),
+    /** How many SET expressions the gate protects: the status plus the reviewer columns. */
+    guardedExpressions: anonymised(clause).split(anonymised(gate[1])).length - 1,
+    /** What Postgres would decide for `stored`. */
+    fires: (stored: Record<string, unknown>) =>
+      stored.public_profile_status === "published"
+      && comparisons.some(([, column, placeholder]) => stored[column] !== parameters[Number(placeholder) - 1]),
+  };
+}
+
 const membershipRow = [
   "membership-a",
   null,
@@ -103,6 +171,10 @@ const existingProfileRow = [
   new Date("2026-01-01T00:00:00.000Z"),
 ];
 
+// Positional, in `companies` column order: the proxy driver hands Drizzle a
+// raw tuple, so every column the table declares must be present. The tail is
+// the Phase B2 public-profile block (D-11); `tags` is NOT NULL, and Drizzle
+// maps it eagerly, so it has to be an array rather than null.
 const companyRow = [
   "company-b",
   "Acme Limited",
@@ -115,6 +187,17 @@ const companyRow = [
   false,
   new Date("2026-01-01T00:00:00.000Z"),
   new Date("2026-01-01T00:00:00.000Z"),
+  null,
+  null,
+  [],
+  null,
+  null,
+  null,
+  "hidden",
+  null,
+  null,
+  null,
+  null,
 ];
 
 const applicationRow = (overrides: {
@@ -458,6 +541,92 @@ describe("production repository security boundaries", () => {
     expect(sql).toContain('from "company_members"');
     expect(sql).toContain('"role"');
     expect(parameters.flat()).toEqual(expect.arrayContaining(["owner", "admin"]));
+  });
+
+  // Programme B-7: `companies.update` is the other writer of the columns
+  // `/members` and `/members/[slug]` render (lib/db/repos/company-profiles.ts's
+  // `directoryColumns`/`detailColumns` project display_name, website, industry,
+  // size_band and description). `companyProfilesRepository.updateProfile` sends a
+  // published profile back to `pending_review`; without the same rule here, the
+  // portal company form at /portal/company would let an approved company rewrite
+  // its public copy indefinitely — the profile stays `published`, the review
+  // queue (which selects only `pending_review`) never learns anything changed.
+  it.each(["displayName", "website", "industry", "sizeBand", "description"] as const)(
+    "sends a published member page back to review when a company update rewrites %s",
+    async (field) => {
+      const statements: string[] = [];
+      database.current = drizzle(async (query) => {
+        statements.push(query);
+        return {rows: [companyRow]};
+      });
+
+      await expect(companiesRepository.update(actor, "company-b", {[field]: "Unreviewed copy"}))
+        .resolves.toMatchObject({id: "company-b"});
+
+      // `RETURNING` names every column, so only the SET clause proves the rule.
+      const sql = setClause(statements.join("\n"));
+      expect(sql).toContain('"public_profile_status"');
+      expect(sql).toContain("'pending_review'");
+      expect(sql).toContain('"profile_reviewed_at"');
+      expect(sql).toContain('"profile_reviewed_by_profile_id"');
+      expect(sql).toContain('"profile_rejection_reason"');
+    },
+  );
+
+  it("leaves the review status alone for a company update that changes nothing /members renders", async () => {
+    const statements: string[] = [];
+    database.current = drizzle(async (query) => {
+      statements.push(query);
+      return {rows: [companyRow]};
+    });
+
+    await expect(companiesRepository.update(actor, "company-b", {
+      legalName: "Acme Limited", directoryVisible: true, logoReference: "logo-1",
+    })).resolves.toMatchObject({id: "company-b"});
+
+    expect(setClause(statements.join("\n"))).not.toContain("public_profile_status");
+  });
+
+  // The three behaviours the demotion has to get right against the payload
+  // `/portal/company` actually sends, where every publicly rendered key is
+  // present on every save. Keying the demotion on "the key is present" would
+  // take a published company off `/members`, `/members/[slug]` and the sitemap
+  // for a legal-name correction or a Save with no edit at all, and null the
+  // reviewer columns with it, until a human re-approved.
+  describe.each([
+    ["saves the form back unchanged", portalCompanySave(), false],
+    ["changes only the legal name /members never renders", portalCompanySave({legalName: "Acme Group Limited"}), false],
+    ["rewrites the description /members renders", portalCompanySave({description: "Rewritten after approval"}), true],
+  ] as const)("when a published company %s", (_scenario, update, demotes) => {
+    async function updateAndReadGate() {
+      const calls: {query: string; params: unknown[]}[] = [];
+      database.current = drizzle(async (query: string, params: unknown[]) => {
+        calls.push({query, params});
+        return {rows: [companyRow]};
+      });
+      await expect(companiesRepository.update(actor, "company-b", update)).resolves.toMatchObject({id: "company-b"});
+      const statement = calls.find((call) => normalizedSql(call.query).startsWith("update"));
+      return {clause: setClause(statement?.query), gate: demotionGate(statement?.query, statement?.params ?? [])};
+    }
+
+    it(`${demotes ? "re-enters" : "stays out of"} review`, async () => {
+      const {gate} = await updateAndReadGate();
+      // `legal_name` is deliberately absent: no member page renders it.
+      expect(gate.columns).toEqual(["display_name", "website", "industry", "size_band", "description"]);
+      expect(gate.fires(publishedCompanyColumns)).toBe(demotes);
+    });
+
+    it(`${demotes ? "clears" : "keeps"} the reviewer columns`, async () => {
+      const {clause, gate} = await updateAndReadGate();
+      // The reviewer columns are reset by the same gate, so they move exactly
+      // when the status does rather than on every save.
+      for (const column of ["profile_reviewed_at", "profile_reviewed_by_profile_id", "profile_rejection_reason"]) {
+        expect(clause).toContain(`"${column}" = case when`);
+        expect(clause).not.toContain(`"${column}" = null`);
+      }
+      expect(gate.guardedExpressions).toBe(4);
+      expect(gate.fires(publishedCompanyColumns)).toBe(demotes);
+    });
   });
 
   it("preserves system company updates without member-role scoping", async () => {

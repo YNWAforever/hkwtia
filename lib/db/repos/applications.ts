@@ -1,6 +1,6 @@
 import "server-only";
 
-import {and, eq, exists, or, sql} from "drizzle-orm";
+import {and, eq, or, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";
 import {companyMembers, membershipApplications as membershipApplicationsTable, type MembershipApplication} from "@/lib/db/server-schema";
@@ -9,16 +9,15 @@ import {forbidden, getDb, requireMember} from "@/lib/db/repos/common";
 export type ApplicationInput = Pick<MembershipApplication, "planCode"> & Partial<Pick<MembershipApplication, "companyId" | "currentStep" | "status">>;
 export type ApplicationUpdate = Partial<Pick<MembershipApplication, "planCode" | "currentStep" | "status">>;
 
+// `EXISTS (…)` written out rather than built with Drizzle's `exists()`, which
+// pastes a raw `sql` fragment in without parentheses and so emits the syntax
+// error `EXISTS SELECT …`. See the note in `lib/db/repos/companies.ts`.
 function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
-  return exists(
-    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipApplicationsTable.companyId} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL`,
-  );
+  return sql`EXISTS (SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${membershipApplicationsTable.companyId} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL)`;
 }
 
 function companyAccessScope(actor: Extract<Actor, {kind: "member"}>, companyId: string) {
-  return exists(
-    sql`SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companyId} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL`,
-  );
+  return sql`EXISTS (SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companyId} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL)`;
 }
 function applicationScope(actor: Actor, applicationId: string) {
   if (actor.kind === "system") return and(eq(membershipApplicationsTable.id, applicationId), sql`true`);

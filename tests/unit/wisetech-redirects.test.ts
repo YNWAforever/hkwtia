@@ -8,24 +8,23 @@ import {wisetechDesignRedirects} from "@/config/wisetech-redirects";
 import {routing} from "@/i18n/routing";
 import {listAppRoutes} from "@/tests/helpers/app-routes";
 
+// The two rules next.config.ts actually configures: Phase B2 (D-11) removed the temporary
+// `/members` and `/members/:id` 307s to `/showcase`, so no explicit rule collides with a
+// manifest row any more — the D-8 behaviour is exercised with a synthetic pair below.
 const explicitRules = [
   {source: "/projects", destination: "/programs/asa"},
   {source: "/history", destination: "/about"},
-  {source: "/members", destination: "/showcase"},
-  {source: "/members/:id", destination: "/showcase"},
 ];
 const rules = wisetechDesignRedirects(explicitRules);
 const bySource = new Map(rules.map((rule) => [rule.source, rule]));
 const toPattern = (path: string) => path.replace(/\[([^/\]]+)\]/g, ":$1");
 
-// Dispatcher rows whose source already IS the canonical page (identity) or whose bare source is
-// covered by a pre-existing explicit rule (design D-8, per variant). Everything else that is
+// Dispatcher rows whose source already IS the canonical page (identity). Everything else that is
 // `merge` must produce a rule.
 const identityDispatcher = new Set([
   "/events/[slug]", "/portal/profile", "/portal/company", "/portal/directory",
   "/portal/events", "/portal/documents", "/portal/billing",
 ]);
-const explicitCollision = new Set(["/members/[slug]"]);
 
 // D-7: the donor's two historical event pages have no hkwtia counterpart, so their sources are
 // cut back to `/events`. That makes each generated rule shadow the live `/events/[slug]` page
@@ -67,12 +66,12 @@ describe("wisetechDesignRedirects", () => {
     }
   });
 
-  it("covers every merge dispatcher pattern except identities and explicit collisions", () => {
+  it("covers every merge dispatcher pattern except identities", () => {
     const merges = authoritativeSourceInventory.dispatcherOnlyRoutes.filter(({disposition}) => disposition === "merge");
     expect(merges.length).toBeGreaterThan(0);
     for (const row of merges) {
       const source = toPattern(row.sourcePath);
-      const expected = !identityDispatcher.has(row.sourcePath) && !explicitCollision.has(row.sourcePath);
+      const expected = !identityDispatcher.has(row.sourcePath);
       expect(bySource.has(source), row.sourcePath).toBe(expected);
     }
     expect(bySource.get("/join/success")?.destination).toBe("/join/complete");
@@ -96,15 +95,29 @@ describe("wisetechDesignRedirects", () => {
   });
 
   it("yields to an explicit rule, including its destination, for the variant it covers (D-8)", () => {
-    // `/members/:id` -> `/showcase` is explicit in next.config and owns the bare shape, so the
-    // generator skips its own bare variant entirely (Next already has it). The locale-prefixed
-    // donor urls still need a rule — the proxy would otherwise rewrite `/zh/members/<slug>` to a
-    // missing page — but they must carry the explicit rule's own destination (`/showcase`), not
-    // the manifest's `/showcase/:slug`, since that is what the bare url actually resolves to.
-    expect(bySource.get("/members/:id")).toBeUndefined();
-    expect(bySource.get("/members/:slug")).toBeUndefined();
-    expect(bySource.get("/en/members/:id")?.destination).toBe("/showcase");
-    expect(bySource.get("/zh/members/:id")?.destination).toBe("/zh/showcase");
+    // `/members/:id` -> `/showcase` used to be the live example; Phase B2 (D-11) deleted it, so
+    // the rule is driven here by a synthetic pair instead of losing the coverage. An explicit
+    // `/legacy-detail/:id` -> `/about` owns the bare shape, so the generator skips its own bare
+    // variant entirely (Next already has it). The locale-prefixed donor urls still need a rule —
+    // the proxy would otherwise rewrite `/zh/legacy-detail/<slug>` to a missing page — but they
+    // must carry the explicit rule's own destination (`/about`), not the manifest's
+    // `/showcase/:slug`, since that is what the bare url actually resolves to.
+    const colliding = [...explicitRules, {source: "/legacy-detail/:id", destination: "/about"}];
+    const donor = wisetechIntegrationManifest.find(({id}) => id === "route-design-solution-detail")!;
+    const generated = new Map(
+      wisetechDesignRedirects(colliding, [{...donor, id: "synthetic-collision", source: "/legacy-detail/[slug]"}])
+        .map((rule) => [rule.source, rule]),
+    );
+    expect(generated.get("/legacy-detail/:id")).toBeUndefined();
+    expect(generated.get("/legacy-detail/:slug")).toBeUndefined();
+    expect(generated.get("/en/legacy-detail/:id")?.destination).toBe("/about");
+    expect(generated.get("/zh/legacy-detail/:id")?.destination).toBe("/zh/about");
+  });
+
+  it("generates no /members rule now that both member pages are real (D-11)", () => {
+    // A surviving generated rule would shadow `/members` or `/members/[slug]` for every request,
+    // which is exactly what the deleted explicit redirects did.
+    expect(rules.filter(({source}) => /^(?:\/(?:en|zh))?\/members(?:\/|$)/.test(source))).toEqual([]);
   });
 
   it("is temporary, self-free, sorted and frozen", () => {

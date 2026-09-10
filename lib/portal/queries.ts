@@ -30,6 +30,17 @@ export type DashboardCompany = Pick<
   | "sizeBand"
   | "description"
   | "directoryVisible"
+  // Programme B-7: the public member page's own copy, so `/portal/company` can
+  // render the profile form's defaults from the dashboard it already loads
+  // rather than making a second company read.
+  | "slug"
+  | "tags"
+  | "taglineEn"
+  | "taglineZhHk"
+  | "descriptionZhHk"
+  | "logoMediaId"
+  | "publicProfileStatus"
+  | "profileRejectionReason"
 > & {role: PortalCompanyRole | null; canManage: boolean};
 
 export type DashboardViewModel = Readonly<{
@@ -60,7 +71,9 @@ export type DashboardViewModel = Readonly<{
 
 type PortalProfile = Pick<Profile, "id" | "displayName" | "phone" | "jobTitle" | "locale" | "onboardingState" | "directoryVisible" | "whatsappNumber" | "whatsappOptIn">;
 export type PortalMembershipRecord = Pick<Membership, "id" | "ownerUserId" | "companyId" | "planCode" | "status" | "seatLimit"> & Partial<Pick<Membership, "applicationId" | "cancelAtPeriodEnd" | "billingPeriodStart" | "billingPeriodEnd">>;
-type PortalCompanyRecord = Pick<Company, "id" | "legalName" | "displayName"> & Partial<Pick<Company, "website" | "industry" | "sizeBand" | "description" | "directoryVisible">>;
+// Everything past the three required keys stays optional: the reader is a
+// repository that returns whole rows, and the test fakes build the minimum.
+type PortalCompanyRecord = Pick<Company, "id" | "legalName" | "displayName"> & Partial<Pick<Company, "website" | "industry" | "sizeBand" | "description" | "directoryVisible" | "slug" | "tags" | "taglineEn" | "taglineZhHk" | "descriptionZhHk" | "logoMediaId" | "publicProfileStatus" | "profileRejectionReason">>;
 type ProfileReader = {getById: (actor: Actor, userId: string) => Promise<PortalProfile | null>};
 type MembershipReader = {list: (actor: Actor) => Promise<PortalMembershipRecord[]>};
 type CompanyReader = {getById: (actor: Actor, companyId: string) => Promise<PortalCompanyRecord | null>};
@@ -130,6 +143,16 @@ export async function getDashboard(
       sizeBand: company.sizeBand ?? null,
       description: company.description ?? null,
       directoryVisible: company.directoryVisible ?? false,
+      slug: company.slug ?? null,
+      tags: company.tags ?? [],
+      taglineEn: company.taglineEn ?? null,
+      taglineZhHk: company.taglineZhHk ?? null,
+      descriptionZhHk: company.descriptionZhHk ?? null,
+      logoMediaId: company.logoMediaId ?? null,
+      // A row that predates 0028 (or a fake that omits the column) is not
+      // published; defaulting the other way would put unreviewed copy on /members.
+      publicProfileStatus: company.publicProfileStatus ?? "hidden",
+      profileRejectionReason: company.profileRejectionReason ?? null,
       role,
       canManage: role === "owner" || role === "admin",
     } satisfies DashboardCompany;

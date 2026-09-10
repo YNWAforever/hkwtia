@@ -11,9 +11,13 @@ const publicPosts = vi.hoisted(() => ({
 const showcase = vi.hoisted(() => ({
   listPublishedSlugs: vi.fn(),
 }));
+const companyProfiles = vi.hoisted(() => ({
+  listPublishedSlugs: vi.fn(),
+}));
 
 vi.mock("@/lib/db/repos/public-posts", () => publicPosts);
 vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: showcase}));
+vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: companyProfiles}));
 vi.mock("@/content/news", () => ({
   newsPosts: [{
     slug: "static-update",
@@ -30,6 +34,7 @@ describe("published build logs in the sitemap", () => {
     vi.clearAllMocks();
     publicPosts.listPublishedNews.mockResolvedValue([]);
     showcase.listPublishedSlugs.mockResolvedValue([]);
+    companyProfiles.listPublishedSlugs.mockResolvedValue([]);
   });
 
   it("adds both localized URLs for each published build-log slug", async () => {
@@ -121,5 +126,34 @@ describe("published build logs in the sitemap", () => {
         expect(entry.alternates.languages["x-default"]).toBe(entry.alternates.languages.en);
       }
     }
+  });
+});
+
+describe("published member pages in the sitemap (D-11)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
+    publicPosts.listPublishedNews.mockResolvedValue([]);
+    showcase.listPublishedSlugs.mockResolvedValue([]);
+  });
+
+  it("adds both localized URLs for each published member slug", async () => {
+    companyProfiles.listPublishedSlugs.mockResolvedValue(["harbour-vision-ai"]);
+
+    const urls = (await sitemap()).map((entry) => entry.url);
+
+    expect(urls).toEqual(expect.arrayContaining([
+      "http://localhost:3000/members/harbour-vision-ai",
+      "http://localhost:3000/zh/members/harbour-vision-ai",
+    ]));
+  });
+
+  it("keeps the static routes when the member read fails", async () => {
+    companyProfiles.listPublishedSlugs.mockRejectedValue(new Error("DATABASE_UNAVAILABLE"));
+
+    const urls = (await sitemap()).map((entry) => entry.url);
+
+    expect(urls).toContain("http://localhost:3000/members");
+    expect(urls.some((url) => url.startsWith("http://localhost:3000/members/"))).toBe(false);
   });
 });

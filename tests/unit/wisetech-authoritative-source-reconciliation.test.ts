@@ -13,7 +13,8 @@ import {
 const resolvableDestinations = new Set([
   "/", "/about", "/about/chairman", "/about/committees", "/about/history", "/ai-ops",
   "/ai-transparency", "/contact", "/events", "/events/[slug]", "/join", "/join/complete",
-  "/launchpad", "/membership", "/news", "/news/[slug]", "/partners", "/portal", "/portal/billing",
+  "/launchpad", "/members", "/members/[slug]", "/membership", "/news", "/news/[slug]",
+  "/partners", "/portal", "/portal/billing",
   "/portal/company", "/portal/company/listing", "/portal/company/seats", "/portal/directory",
   "/portal/documents", "/portal/events", "/portal/profile", "/privacy", "/programmes",
   "/programs/asa", "/programs/cpai", "/programs/hkict", "/programs/tct",
@@ -48,7 +49,9 @@ const expectedDispatcherRows = [
   ["/search", "retire", null],
   ["/join/success", "merge", "/join/complete"],
   ["/events/[slug]", "merge", "/events/[slug]"],
-  ["/members/[slug]", "merge", "/showcase/[slug]"],
+  // Phase B2 / D-11: the donor's member detail dispatcher row is served by hkwtia's own
+  // reviewed member page instead of being folded into the showcase.
+  ["/members/[slug]", "retain", "/members/[slug]"],
   ["/solutions/[slug]", "merge", "/showcase/[slug]"],
   ["/insights/[slug]", "merge", "/news/[slug]"],
   ["/ai-plus/[slug]", "retire", null],
@@ -82,12 +85,12 @@ const expectedNavigationRows = [
   ["events-activities", "column", "activities/industry-councils", "merge", "/events"],
   ["events-activities", "column", "activities", "merge", "/events"],
   ["events-activities", "feature", "events#interest", "merge", "/events"],
-  ["members-solutions", "root", "members", "redirect", "/showcase"],
-  ["members-solutions", "column", "members", "redirect", "/showcase"],
+  ["members-solutions", "root", "members", "retain", "/members"],
+  ["members-solutions", "column", "members", "retain", "/members"],
   ["members-solutions", "column", "solutions", "merge", "/showcase"],
   ["members-solutions", "column", "request-introduction", "merge", "/showcase/[slug]"],
   ["members-solutions", "column", "submit-challenge", "merge", "/contact"],
-  ["members-solutions", "column", "members", "redirect", "/showcase"],
+  ["members-solutions", "column", "members", "retain", "/members"],
   ["members-solutions", "feature", "submit-challenge", "merge", "/contact"],
   ["ai-plus", "root", "ai-plus", "merge", "/ai-transparency"],
   ["ai-plus", "column", "ai-plus", "merge", "/ai-transparency"],
@@ -114,7 +117,7 @@ const expectedNavigationRows = [
 
 const expectedFormFlows = [
   ["event-filter", "event-filter-form", "/events", "merge", "/events"],
-  ["directory-search", "directory-search-form", "/members", "redirect", "/showcase"],
+  ["directory-search", "directory-search-form", "/members", "retain", "/members"],
   ["site-search", "site-search-form", "/search", "retire", null],
   ["partner-enquiry", "partner-enquiry-form", "/partner-with-us", "retire", null],
   ["submit-challenge", "task-enquiry-form", "/submit-challenge", "retire", null],

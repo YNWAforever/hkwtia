@@ -275,7 +275,7 @@ Strings — en `Admin.navigation.profilesReview: "Member pages"`, `Admin.dashboa
 - `components/marketing/member-filters.tsx` (C): GET form like `showcase-filters.tsx` — `.directory-search` with `#q` and submit; `.directory-actions` with a `tag` `<select>` from `INDUSTRY_TAGS` (`industryTagLabel`), a `plan` `<select>` from `MEMBERSHIP_PLAN_CODES` (`Members.plans.*`), and a clear `<Link href="/members">`.
 - `components/marketing/member-card.tsx` (C): `.partner-record-card` with logo (`next/image`, `unoptimized={isPrivateMediaDeliveryUrl(url)}`, fallback to a neutral mark), name, tagline by locale, up to 3 tag chips via `industryTagLabel`, plan badge `Members.plans.<plan>`, link `localizedPath(locale, \`/members/${slug}\`)` with `Members.view`.
 - `app/[locale]/(public)/members/page.tsx` (C): `export const dynamic = "force-dynamic"`; `generateMetadata` via `buildPageMetadata({locale, pathname: "/members", title: t("metaTitle"), description: t("metaDescription")})`; `PageHero` (breadcrumb like `/showcase`), `Section` with `MemberFilters`, `role="status"` results count `t("resultsTitle", {count})`, `partner-record-grid` of `MemberCard`, `HonestEmpty variant="inner"` with a clear action; repository read `companyProfilesRepository.listPublished(filters).catch(() => [])`; `ClosingBand` with `Members.detail.joinCta`/`join` → `/membership`.
-- `app/[locale]/(public)/members/[slug]/page.tsx` (C): `getPublishedBySlug(slug).catch(() => null)`, `notFound()` on miss; metadata `brandedTitle(locale, profile.name)` + tagline/description; `PageHero variant="inner"` with breadcrumb `Members.breadcrumbCurrent`; body: logo, taglines, tag chips, website link (`rel="noopener noreferrer"`), description by locale, showcase block (link `/showcase/[slug]`) when present, upcoming events list (link `/events/[slug]`, Hong Kong date) or `Members.detail.noEvents`; `<StructuredData data={buildMemberOrganizationData(profile, locale)} />` and `<StructuredData data={buildBreadcrumbData([{name: tCommon("breadcrumbHome"), url: absoluteUrl(localizedPath(locale, "/"))}, {name: t("breadcrumbCurrent"), url: absoluteUrl(localizedPath(locale, "/members"))}, {name: profile.name, url: absoluteUrl(localizedPath(locale, \`/members/${profile.slug}\`))}])} />`.
+- `app/[locale]/(public)/members/[slug]/page.tsx` (C): body awaits `getPublishedBySlug(slug)` **bare** and calls `notFound()` only on a `null` row — the catch belongs in `generateMetadata` alone, which keeps its `.catch(() => null)` fallback to the branded `Members.metaTitle`/`metaDescription` pair. (Corrected from the `.catch(() => null)` this bullet first specified for the body: that collapses a transient outage into a miss, and on the page that receives the retired `/members/:id` 307s and emits the JSON-LD below, a false 404 tells a crawler to drop a reviewed member page where a 5xx only asks it to retry — `/showcase/[slug]` draws the same line, and `tests/unit/member-detail-page.test.tsx` pins it.) Metadata `brandedTitle(locale, profile.name)` + tagline/description; `PageHero variant="inner"` with breadcrumb `Members.breadcrumbCurrent`; body: logo, taglines, tag chips, website link (`rel="noopener noreferrer"`), description by locale, showcase block (link `/showcase/[slug]`) when present, upcoming events list (link `/events/[slug]`, Hong Kong date) or `Members.detail.noEvents`; `<StructuredData data={buildMemberOrganizationData(profile, locale)} />` and `<StructuredData data={buildBreadcrumbData([{name: tCommon("breadcrumbHome"), url: absoluteUrl(localizedPath(locale, "/"))}, {name: t("breadcrumbCurrent"), url: absoluteUrl(localizedPath(locale, "/members"))}, {name: profile.name, url: absoluteUrl(localizedPath(locale, \`/members/${profile.slug}\`))}])} />`.
 - `lib/structured-data.ts` (M): `buildMemberOrganizationData(profile: {name, slug, website, logoUrl, description}, locale): WithContext<Organization>` → `{"@context": "https://schema.org", "@type": "Organization", name, url: absoluteUrl(localizedPath(locale, /members/slug)), ...(logoUrl ? {logo: absoluteUrl(logoUrl)} : {}), ...(website ? {sameAs: [website]} : {}), ...(description ? {description} : {}), memberOf: {"@type": "Organization", name: siteConfig.name, url: absoluteUrl("/")}}`; `buildBreadcrumbData(items: readonly {name: string; url: string}[]): WithContext<BreadcrumbList>` → `itemListElement: items.map((item, index) => ({"@type": "ListItem", position: index + 1, name: item.name, item: item.url}))`.
 - `components/seo/structured-data.tsx` (M): add `BreadcrumbList` to the accepted union.
 - `app/sitemap.ts` (M): sixth loader `companyProfilesRepository.listPublishedSlugs().catch(() => [])` → `memberEntries = slugs.flatMap((slug) => localizedEntries(\`/members/${slug}\`))`, returned after showcase.
@@ -300,7 +300,50 @@ Full gate: `npm run audit:strings && npm test && npm run lint && npm run typeche
 
 ## Phase B2 exit checklist
 
-- [ ] Migrations 0028–0030 applied to production before the deploy (0029 assigns slugs; 0030 widens the announcement href check to `/members`). Phase A recipe: `neonctl connection-string production --project-id fragrant-mountain-25240574 --org-id org-soft-sunset-25251479`, then `DATABASE_URL=… npm run db:migrate`.
-- [ ] `vercel promote` after the migration; `/members` serves 200 (no 307) in both locales; one published `/members/<slug>` validates in Google's Rich Results test (spec §5 gate).
-- [ ] Owner gate: a Startup member publishes their page → staff approves → the page lists their showcase listing and, once B1 has merged, their approved event with organiser attribution.
-- [ ] B1 follow-up in the same PR as B2 Task 6 if B1 merged first: replace the display-name organiser matching in B1 Task 9 with `eq(companies.slug, filters.organiser)` and link the event organiser block to `/members/[slug]`.
+**Code status (2026-09-10): Tasks 1–7 are implemented, reviewed and committed on
+`feat/phase-b2-member-directory`** — 22 commits from `8fb1086` (schema) to `d4137a6` (the B-8
+acceptance spec), plus `a119929` from the gate run below. The branch was rebased onto `main`
+after B1 merged, so these are its post-rebase hashes. Everything that remains is an owner
+action requiring production credentials or a signed-in browser; none of it is code.
+
+- [x] Full local gate green on the branch at `a119929`. Run bare, judged by exit code:
+  `npm run audit:strings` (246 TSX files scanned, exit 0) · `npm test` (**494 files / 4132 tests
+  passed, 16 files / 43 tests skipped**, exit 0 — the skips are the Postgres and live-service
+  suites that need `DATABASE_URL_TEST` or `RUN_POSTGRES_INTEGRATION=1`) · `npm run lint`
+  (0 errors, 31 pre-existing warnings in test mocks, exit 0) · `npm run typecheck` (exit 0) ·
+  `NEXT_PUBLIC_SITE_URL=https://hkwtia.vercel.app npm run build` (exit 0; `/[locale]/members` and
+  `/[locale]/members/[slug]` both compile as dynamic routes). Playwright was **not** run — the
+  B2 spec gates itself on a live environment.
+  - The only gate failure was two 5s timeouts in `public-environment-isolation` and
+    `repository-boundary`, and neither was a Phase B2 regression: both are compile-bound tests
+    whose cost tracks the size of the repo (a TypeScript walk of `lib/`, and cold module graphs
+    after `vi.resetModules()`), and the suite is now 510 files running in parallel. `a119929`
+    gives them explicit timeouts, the shape this repo already uses for the same hazard. No
+    count-pinning test needed re-pinning: `page-copy-scope`, `wisetech-protected-route-ownership`,
+    `internal-navigation-config`, `admin-nav` and `ci-security-contract` all agreed with reality,
+    because Tasks 4 and 5 re-pinned them as they landed.
+- [x] **B1 has merged** (squashed into `main` as `9d68557`, PR #50), so this branch's dependency
+  on it is discharged: `main` now owns migrations 0026–0027 and the `organiser_company_id` column
+  that the member page's events block and `33613ec`'s slug-matched organiser links both read.
+  This branch was rebased off `feat/phase-b1-member-events` onto `main`, which applied cleanly
+  because the squash left `main` byte-identical to the B1 tip, so its PR shows only B2's work.
+- [ ] **Owner action —** migrations 0028–0030 applied to production before the deploy (0028 adds
+  the profile columns, 0029 assigns slugs, 0030 widens the announcement href check to `/members`).
+  0026–0027 are **already applied** to production (verified: journal 25→27,
+  `event_guest_registrations` created, 14 new `events` columns, and 0 rows whose enums disagree
+  with their booleans), so this pass is 0028–0030 only, in order. Phase A recipe:
+  `neonctl connection-string production --project-id fragrant-mountain-25240574 --org-id org-soft-sunset-25251479`,
+  then `DATABASE_URL=… npm run db:migrate`. There is no local database here, so 0028–0030 have
+  never been executed — they are pinned only by their TypeScript twins under `tests/fixtures/`
+  and by `tests/integration/company-review-demotion-postgres.test.ts`, which **skipped** in the
+  gate run above for want of `DATABASE_URL_TEST`. Run that suite against the isolated Neon branch
+  before touching production.
+- [ ] **Owner action —** `vercel promote` after the migration; `/members` serves 200 (no 307) in
+  both locales; one published `/members/<slug>` validates in Google's Rich Results test
+  (spec §5 gate). Nothing is public on day one: S-1 defaults every existing company to `hidden`,
+  so `/members` legitimately renders its empty state until the first owner publishes and staff
+  approve.
+- [ ] **Owner action —** the signed-in walk, which no unit test can stand in for: a Startup member
+  publishes their page → staff approves at `/admin/profiles-review` → the page lists their
+  showcase listing and, B1 having merged, their approved event with organiser attribution.
+- [x] B1 follow-up in the same PR as B2 Task 6 if B1 merged first: replace the display-name organiser matching in B1 Task 9 with `eq(companies.slug, filters.organiser)` and link the event organiser block to `/members/[slug]`. Done: the public projection now selects `companies.slug`/`companies.public_profile_status` and hands the detail page a slug only where `publicMemberPageSlug` (`lib/members/public.ts`, the JS twin of `publishedScope`) says a published page exists. `organiserSlugFromDisplayName` stays, now only to normalise a *typed* `?organiser=` query.

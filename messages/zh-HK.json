@@ -1331,6 +1331,41 @@
       "action": "瀏覽活動"
     }
   },
+  "Members": {
+    "metaTitle": "會員｜WiseTech Hong Kong",
+    "metaDescription": "WTIA 會員名錄中的香港無線及 AI+ 科技企業。",
+    "eyebrow": "會員名錄",
+    "title": "WTIA 會員",
+    "description": "塑造香港無線、流動及 AI+ 產業的機構。每個專頁由會員維護並經 WTIA 審核。",
+    "breadcrumbCurrent": "會員",
+    "filters": {
+      "search": "搜尋會員",
+      "tag": "行業",
+      "anyTag": "所有行業",
+      "plan": "會籍",
+      "anyPlan": "所有級別",
+      "submit": "搜尋",
+      "clear": "清除"
+    },
+    "plans": {
+      "community": "社群",
+      "startup": "初創",
+      "corporate": "企業",
+      "patron": "贊助人"
+    },
+    "resultsTitle": "{count} 個會員",
+    "emptyTitle": "暫時沒有相符的會員專頁",
+    "emptyDescription": "機構發布專頁後會在此顯示。請嘗試更廣泛的搜尋。",
+    "view": "查看會員專頁",
+    "detail": {
+      "website": "網站",
+      "showcase": "WTIA 方案展示中的方案",
+      "events": "此會員即將舉行的活動",
+      "noEvents": "暫無即將舉行的活動。",
+      "joinCta": "貴機構也可在此列出",
+      "join": "查看會員計劃"
+    }
+  },
   "AiOps": {
     "metaTitle": "公開 AI-Ops｜WiseTech Hong Kong",
     "metaDescription": "公開 WTIA AI 代理的即時、保障私隱表現、升級處理及成本指標。",
@@ -2056,6 +2091,49 @@
         "FORBIDDEN": "你只可編輯貴機構提交的活動。"
       }
     },
+    "companyProfile": {
+      "title": "公開會員專頁",
+      "description": "選擇貴機構在 WTIA 會員名錄專頁上顯示的內容。專頁經 WTIA 簡短審核後上線。",
+      "reviewNotice": "編輯已上線的專頁（在此或上方的公司資料）會令專頁重新進入 WTIA 審核，在職員再次批准前不會在名錄顯示。",
+      "statusLabel": "狀態",
+      "fields": {
+        "slug": "專頁網址（hkwtia.org/members/…）",
+        "taglineEn": "標語（英文）",
+        "taglineZhHk": "標語（中文）",
+        "descriptionZhHk": "簡介（中文）",
+        "website": "網站",
+        "tags": "行業標籤（最多 8 個）",
+        "logoMediaId": "商標圖片編號"
+      },
+      "logo": {
+        "choose": "選擇商標（PNG、JPEG 或 WebP，最大 4 MB）",
+        "upload": "上載",
+        "uploading": "上載中…",
+        "done": "已上載 — 編號已填入上方。",
+        "failed": "上載失敗。請檢查檔案類型及大小。",
+        "alt": "描述此商標"
+      },
+      "save": "儲存",
+      "publish": "發布我的專頁",
+      "saved": "已儲存。",
+      "submitted": "已提交審核。",
+      "status": {
+        "hidden": "未發布",
+        "pending_review": "等待 WTIA 審核",
+        "published": "已於 /members 上線",
+        "rejected": "WTIA 已退回"
+      },
+      "rejectedWith": "WTIA 已退回：{reason}",
+      "viewPublic": "查看公開專頁",
+      "errors": {
+        "INVALID": "請檢查專頁網址、標籤及連結。",
+        "FORBIDDEN": "只有公司擁有人及管理員可編輯。",
+        "NO_MANAGED_COMPANY": "你尚未管理任何公司。",
+        "INVALID_PROFILE_TRANSITION": "請先填寫專頁網址，然後發布。",
+        "COMPANY_SLUG_TAKEN": "此專頁網址已被使用。",
+        "COMPANY_LOGO_INVALID": "此圖片編號並非你上載的圖片。"
+      }
+    },
     "documents": {
       "title": "文件及收據",
       "description": "查閱 WTIA 已批准資源及你的付款收據。",
@@ -2155,6 +2233,7 @@
       "pendingApprovals": "待審批項目",
       "atRisk": "高流失風險會員",
       "listingsAwaitingReview": "待審核展示企業",
+      "profilesAwaitingReview": "等待審核的會員專頁",
       "draftNews": "新聞草稿",
       "openTasks": "待處理員工任務"
     },
@@ -2174,6 +2253,7 @@
       "media": "媒體",
       "events": "活動",
       "listingsReview": "展示頁審核",
+      "profilesReview": "會員專頁",
       "cohorts": "啟航計劃",
       "approvals": "審批",
       "reports": "報告",
@@ -2219,6 +2299,29 @@
       "reject": "退回",
       "rejectionReason": "退回原因",
       "savePremium": "儲存"
+    },
+    "profilesReview": {
+      "eyebrow": "名錄營運",
+      "title": "審核會員專頁",
+      "description": "在機構專頁出現於 /members 前先行檢查。",
+      "caption": "等待審核的會員專頁",
+      "company": "公司",
+      "slug": "網址",
+      "tags": "標籤",
+      "preview": "預覽",
+      "taglineEn": "標語（英文）",
+      "taglineZhHk": "標語（中文）",
+      "descriptionEn": "簡介（英文）",
+      "descriptionZhHk": "簡介（中文）",
+      "industry": "行業",
+      "sizeBand": "機構規模",
+      "website": "網站",
+      "previewEmpty": "此專頁尚未填寫內容。",
+      "approve": "發布",
+      "reject": "退回",
+      "rejectionReason": "退回原因",
+      "empty": "目前沒有等待審核的會員專頁。",
+      "error": "無法載入會員專頁。"
     },
     "cohorts": {
       "manage": {

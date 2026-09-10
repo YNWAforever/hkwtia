@@ -17,13 +17,21 @@ const sources = ["app", "components"]
 
 const revocationAwareConsumers = new Set([
   "app/[locale]/(admin)/admin/media/page.tsx",
+  // Phase B2 (D-11): the public member page and its directory card render the logo the member
+  // uploaded, which is the same private-delivery reference — the optimizer cannot fetch a signed,
+  // short-lived asset, and going through it would also outlive an archived row.
+  "app/[locale]/(public)/members/[slug]/page.tsx",
   "app/[locale]/(public)/partners/page.tsx",
   "components/admin/media-form.tsx",
+  // Phase B2 (B-7): the member-page queue previews the logo a member attached,
+  // which is the same private-delivery reference the showcase queue renders.
+  "components/admin/profile-review-table.tsx",
   "components/admin/showcase-review-table.tsx",
   "components/home/legacy-network.tsx",
   "components/marketing/event-card.tsx",
   "components/marketing/event-detail.tsx",
   "components/marketing/home-highlight-card.tsx",
+  "components/marketing/member-card.tsx",
   "components/marketing/showcase-card.tsx",
   "components/marketing/showcase-detail.tsx",
 ]);

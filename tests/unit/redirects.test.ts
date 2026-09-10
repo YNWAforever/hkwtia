@@ -49,23 +49,24 @@ describe("legacy redirects", () => {
     }
   });
 
-  it("keeps the four pre-existing redirects", async () => {
+  // Two, not four: Phase B2 (D-11) removed the temporary `/members` and `/members/:id` 307s
+  // to `/showcase` because both paths are real reviewed member pages now, and a redirect would
+  // shadow every one of them.
+  it("keeps the two pre-existing redirects and no /members rule", async () => {
     const redirects = await getRedirects();
     const sources = redirects.map(({source}) => source);
 
-    expect(sources).toEqual(
-      expect.arrayContaining(["/projects", "/history", "/members", "/members/:id"]),
-    );
+    expect(sources).toEqual(expect.arrayContaining(["/projects", "/history"]));
+    expect(sources).not.toContain("/members");
+    expect(sources).not.toContain("/members/:id");
   });
 
   it("makes every legacy rule permanent so link equity transfers", async () => {
     const redirects = await getRedirects();
-    const preExisting = new Set(["/projects", "/history", "/members", "/members/:id"]);
+    const preExisting = new Set(["/projects", "/history"]);
     const preExistingRules = [
       {source: "/projects", destination: "/programs/asa"},
       {source: "/history", destination: "/about"},
-      {source: "/members", destination: "/showcase"},
-      {source: "/members/:id", destination: "/showcase"},
     ];
     // WiseTech design paths are 307s by design (config/wisetech-redirects.ts, D-5); only the
     // hkwtia.org legacy urls carry link equity worth a 308.

@@ -154,14 +154,15 @@ const nextConfig: NextConfig = {
     return [{source: "/:path*", headers: [...securityHeaders]}];
   },
   async redirects() {
-    // The four explicit rules pre-date the programme and stay as they are; the WiseTech design
+    // The two explicit rules pre-date the programme and stay as they are; the WiseTech design
     // rules are generated from the manifest (config/wisetech-redirects.ts) and go before the
     // hkwtia.org legacy list so a design path is never swallowed by a legacy pattern.
+    // Phase B2 (D-11) removed the temporary `/members` and `/members/:id` 307s to `/showcase`:
+    // `/members` and `/members/[slug]` are real reviewed member pages now, and a redirect here
+    // would shadow them for every request.
     const explicitRedirects = [
       {source: "/projects", destination: "/programs/asa", permanent: true},
       {source: "/history", destination: "/about", permanent: true},
-      {source: "/members", destination: "/showcase", permanent: false},
-      {source: "/members/:id", destination: "/showcase", permanent: false},
     ];
     // Copied, not spread as-is: the generator returns frozen rules so no consumer can mutate
     // the shared list, but Next's load-custom-routes reassigns `r.source`/`r.destination` in

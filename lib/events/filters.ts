@@ -44,8 +44,9 @@ export function normaliseEventTag(value: string): string | null {
 export function parseEventFilters(query: Record<string, string | readonly string[] | undefined>): EventFilters {
   const format = first(query.format);
   const month = first(query.month);
-  // A typed organiser name ("Acme Robotics") becomes the same slug the predicate derives
-  // from companies.display_name, so the text box matches without the user knowing the slug.
+  // A typed organiser name ("Acme Robotics") becomes a `companies.slug`-shaped value, so
+  // the text box matches without the visitor knowing the slug -- 0029 derives the first
+  // slug from `display_name` the same way. See organiserSlugFromDisplayName below.
   const organiser = organiserSlugFromDisplayName(first(query.organiser));
   return {
     format: format === "in_person" || format === "online" || format === "hybrid" ? format : null,
@@ -80,12 +81,24 @@ export function hongKongMonthBounds(month: string): Readonly<{start: Date; end: 
 }
 
 /**
- * The organiser slug a company display name matches until Phase B2 adds
- * `companies.slug`: the JS twin of the SQL expression in
- * lib/db/repos/events.ts (`publicFilterPredicates`). Keep the two in step
- * character for character -- "Acme Ltd." must be `acme-ltd` on both sides, not
- * `acme-ltd-` (which the SLUG regex rejects). Both are replaced by the real
- * column when B2 merges.
+ * Normalises a *typed* organiser query to the one shape a `companies.slug` can
+ * take -- "Acme Ltd." is `acme-ltd`, not `acme-ltd-` (which the SLUG regex
+ * rejects and would drop the whole axis).
+ *
+ * Phase B2 Task 1 gave companies a real `slug` column, so the SQL predicate is
+ * now `eq(companies.slug, filters.organiser)` and this is no longer the twin of
+ * anything in lib/db/repos/events.ts. It stays because `?organiser=` is a free
+ * text box: a visitor types a name, not a slug, and the derivation is what
+ * turns "Acme Robotics" into `acme-robotics`. That still hits, because
+ * `drizzle/0029_phase_b_company_slugs.sql` mints the first slug from
+ * `display_name` through exactly this function -- but only until an owner edits
+ * their slug, after which the slug is the identity and the old name stops
+ * matching. That is the intended B2 behaviour, not a regression.
+ *
+ * `parseEventFilters` above is its only production caller.
+ * `tests/fixtures/company-slug.ts`, the TypeScript twin of the 0029 backfill,
+ * is the other -- which is why the derivation must not change without changing
+ * that migration too.
  */
 export function organiserSlugFromDisplayName(displayName: string): string {
   return slugify(displayName);

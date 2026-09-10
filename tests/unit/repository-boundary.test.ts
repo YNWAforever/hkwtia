@@ -226,6 +226,13 @@ describe("repository database boundary", () => {
     }
   });
 
+  // The explicit timeout is contention insurance, not a hang budget. This case
+  // parses every production file under `lib/` with the TypeScript compiler, so
+  // its cost tracks the size of the tree rather than anything about the test:
+  // ~1.6s on an idle box at Phase B2, but the suite runs ~510 files in
+  // parallel and under that load it crossed Vitest's 5s default and failed the
+  // gate for scheduling reasons rather than for a violation. Do not read a
+  // pass here as "fast enough" — read it as "found no violations".
   it("allows runtime database imports only within repositories", async () => {
     const violations: string[] = [];
     for (const file of await productionTypeScriptFiles(root)) {
@@ -241,7 +248,7 @@ describe("repository database boundary", () => {
     }
 
     expect(violations).toEqual([]);
-  });
+  }, 30_000);
 
   it("distinguishes runtime server-schema imports from type-only imports", () => {
     expect(runtimeDatabaseImportSpecifiers(

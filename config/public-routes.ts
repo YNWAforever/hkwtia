@@ -19,7 +19,8 @@ export const publicRoutes = [
   '/contact',
   '/partners',
   '/privacy',
-  '/ai-transparency'
+  '/ai-transparency',
+  '/members'
 ] as const;
 
 export type PublicRoute = (typeof publicRoutes)[number];

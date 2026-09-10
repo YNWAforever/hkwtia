@@ -1,4 +1,4 @@
-import type {Event, EventAttendanceModeEnumeration, FAQPage, Organization, WebSite, WithContext} from 'schema-dts';
+import type {BreadcrumbList, Event, EventAttendanceModeEnumeration, FAQPage, Organization, WebSite, WithContext} from 'schema-dts';
 
 import {siteConfig} from '@/config/site';
 import type {EventRecord} from '@/content/schemas';
@@ -99,5 +99,56 @@ export function buildEventData(record: EventDataRecord, title: string, locale?: 
       name: siteConfig.name,
       url: absoluteUrl('/'),
     },
+  };
+}
+
+// Programme D-11: a reviewed member page describes the organisation it is about, not WTIA.
+// `url` is the member page itself (the canonical place to read about them on this site) and the
+// member's own site is `sameAs`, never `url`: a crawler that treated the member's domain as the
+// subject url would attribute this page's content to a site we do not control. Every optional
+// field is omitted rather than emitted null, because a null in JSON-LD is a claim of absence.
+export type MemberOrganizationRecord = Readonly<{
+  name: string;
+  slug: string;
+  website: string | null;
+  logoUrl: string | null;
+  description: string | null;
+}>;
+
+export function buildMemberOrganizationData(
+  member: MemberOrganizationRecord,
+  locale: AppLocale,
+): WithContext<Organization> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: member.name,
+    url: absoluteUrl(localizedPath(locale, `/members/${member.slug}`)),
+    ...(member.logoUrl ? {logo: absoluteUrl(member.logoUrl)} : {}),
+    ...(member.website ? {sameAs: [member.website]} : {}),
+    ...(member.description ? {description: member.description} : {}),
+    memberOf: {
+      '@type': 'Organization',
+      name: siteConfig.name,
+      url: absoluteUrl('/'),
+    },
+  };
+}
+
+export type BreadcrumbItem = Readonly<{name: string; url: string}>;
+
+// The caller supplies absolute, already-localized urls: this builder must not decide the locale
+// of a trail it is only positioning, and `localizedPath` is the one authority for that (CLAUDE.md
+// hard boundary 5 -- a hand-built `/zh-HK/...` here would be invisible until a crawler read it).
+export function buildBreadcrumbData(items: readonly BreadcrumbItem[]): WithContext<BreadcrumbList> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem' as const,
+      position: index + 1,
+      name: item.name,
+      item: item.url,
+    })),
   };
 }

@@ -27,16 +27,18 @@ const expectedReportedArchiveFingerprint = "140b35532895b728c8e4d73ca56d1d00653b
 
 // Each hash covers every field of its inventory group's rows, including hkwtia's own
 // `disposition`/`canonicalPath`. A deliberate re-classification (WP-7 un-retired `/programmes`
-// and `/partners`) rotates the `sitemapRoutes` and `navigationTargets` values together with the
-// regression test that pins them — a differing hash found any other way is tampering, not drift.
+// and `/partners`; Phase B2 / D-11 un-redirected `/members` and `/members/[slug]`, which rotated
+// `sitemapRoutes`, `dispatcherOnlyRoutes`, `navigationTargets` and `formFlows`) rotates the
+// affected values together with the regression test that pins them — a differing hash found any
+// other way is tampering, not drift.
 const expectedFingerprints = Object.freeze({
   identity: "e2054bb31977224ad9ccab1d59f122a13e54d426eb95b98aeaf0e3f0cdcfc102",
   locales: "5977857e5ddad59cb252cebcafea43b7a3563098b7778aa6c4d816a7b68c5d41",
-  sitemapRoutes: "d38ff03ff7e9f90c3b1789d07f5f92223be7bad3bb75d32d7befd03c811a4de9",
-  dispatcherOnlyRoutes: "3ad964fd28f3b34bbf02113233fc111f4c39b1103edb35421c85c39f10300495",
-  navigationTargets: "399353b8b5439c5ce014bd412736bbbb8b8d51c02ef0ebd2f05fb20d46821dda",
+  sitemapRoutes: "c08311ac80477e0d6a90bedaf1513e14279692dea65b97871c5514b6f0176073",
+  dispatcherOnlyRoutes: "a2e42f34e5abf8e7960cc558bf169e85262c25242759bf200b65826e64d61e41",
+  navigationTargets: "4021c449ec1023a91fe94866123fc797b5de3adfa08f4e7e847e03b3767adb5d",
   forms: "2d6170f4f8df1dcb7f20c223f8de52b41123eb64b6361dd42d25cd8ac370ce99",
-  formFlows: "51486e568c916a9320f544420d8bb73cad73f06508f333bcf6982a7a62717b24",
+  formFlows: "348b4d93a7dae34fdf8e82682503158cb27f50d0cc7bf76b538308f1aabe1283",
   sourceArtifacts: "4e4cff89b3ff0f51843e371ddb752a8515018324b49cd59acd81f78360217d29",
   componentGroups: "4537b37dd90e7158cdb7f528d2a0a297f4787c883709b8626a01f6644a9e412c",
   content: "844b6c938731eb0afb64a4ca5f4fbf7f58cf46a004668dce7697b2eef1c6240c",

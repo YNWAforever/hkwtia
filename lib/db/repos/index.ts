@@ -17,6 +17,7 @@ export {agentRunsRepo, agentRunsRepository} from "./agent-runs";
 export {postsRepository} from "./posts";
 export {boardDraftRepository} from "./board-drafts";
 export {contactsRepository} from "./contacts";
+export {companyProfilesRepository} from "./company-profiles";
 export {eventGuestsRepository} from "./event-guests";
 
 import {profiles} from "./profiles";
