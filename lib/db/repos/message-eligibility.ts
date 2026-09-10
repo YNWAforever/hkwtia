@@ -173,6 +173,16 @@ function suppressionExists(channel: "email" | "whatsapp"): SQL {
  * for every contact linked to a member who never opted in to marketing, and a
  * staff reply into a member-owned §6 thread would be blocked — rule 3's failure
  * mode, wearing rule 1's clothes. Reading the evidence has no false positives.
+ *
+ * Read the DATE as "withdrew at least once, at or before this", never as "the
+ * latest withdrawal". `optOutWhatsApp`'s suppression INSERT is
+ * `ON CONFLICT DO NOTHING` and nothing re-stamps `created_at`, so after a
+ * re-consent (the portal profile form grants `whatsapp_opt_in` back today) and
+ * a second withdrawal this still reports the FIRST one; the contact side's
+ * `COALESCE(whatsapp_opted_out_at, now())` freezes the same way, deliberately.
+ * `decideWhatsApp` only ever tests null / non-null, so no send decision moves —
+ * but **C2 Task 8's thread UI is the named consumer of this field** and is the
+ * first code that would print it as a date.
  */
 function linkedMemberWithdrawalAt(): SQL {
   return sql`(
