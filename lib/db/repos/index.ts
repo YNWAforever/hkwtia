@@ -17,6 +17,7 @@ export {agentRunsRepo, agentRunsRepository} from "./agent-runs";
 export {postsRepository} from "./posts";
 export {boardDraftRepository} from "./board-drafts";
 export {contactsRepository} from "./contacts";
+export {messageEligibilityRepository} from "./message-eligibility";
 export {companyProfilesRepository} from "./company-profiles";
 export {eventGuestsRepository} from "./event-guests";
 
@@ -36,6 +37,7 @@ import {conversationsRepository} from "./conversations";
 import {agentRunsRepository} from "./agent-runs";
 import {postsRepository} from "./posts";
 import {boardDraftRepository} from "./board-drafts";
+import {messageEligibilityRepository} from "./message-eligibility";
 
 export const repositories = {
   profiles,
@@ -54,4 +56,5 @@ export const repositories = {
   agentRuns: agentRunsRepository,
   posts: postsRepository,
   boardDrafts: boardDraftRepository,
+  messageEligibility: messageEligibilityRepository,
 };

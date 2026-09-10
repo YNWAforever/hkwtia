@@ -152,10 +152,17 @@ describe("contactsRepository", () => {
     });
   });
 
-  it("marks a phone opted out", async () => {
+  /**
+   * C-1 Task 5. The withdrawal is now three statements in one transaction — a
+   * timestamp back-fill, a guarded flag update and the `consent.whatsapp.revoked`
+   * audit row — so the count here moved from one to three deliberately.
+   * `tests/unit/contacts-consent-audit.test.ts` owns the behaviour; this case
+   * only keeps the happy path and the return value honest.
+   */
+  it("marks a phone opted out and reports that it revoked something", async () => {
     const {database, execute} = fakeDatabase([{id: "c-2"}]);
     const repository = createContactsRepository(async () => database as never);
-    await repository.markWhatsAppOptedOut(contactWriterActor("whatsapp"), "+85291234567");
-    expect(execute).toHaveBeenCalledTimes(1);
+    await expect(repository.markWhatsAppOptedOut(contactWriterActor("whatsapp"), "+85291234567")).resolves.toBe("revoked");
+    expect(execute).toHaveBeenCalledTimes(3);
   });
 });

@@ -3,7 +3,7 @@ import "server-only";
 import {sql} from "drizzle-orm";
 import {z} from "zod";
 
-import {contacts} from "@/lib/db/server-schema";
+import {auditEvents, contacts} from "@/lib/db/server-schema";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {getDb} from "@/lib/db/repos/common";
 import {WHATSAPP_CONSENT_TEXT_VERSION} from "@/lib/whatsapp/consent";
@@ -55,6 +55,13 @@ const whatsappInputSchema = z.object({
  * table, and a refusal nobody is told about is the same as no guard at all.
  */
 export type ContactMemberIdLink = "linked" | "unchanged" | "conflict";
+/**
+ * C-1 Task 5. `"already_revoked"` covers both retries of the same STOP and the
+ * common prospect case whose marketing flag was never true — see
+ * `markWhatsAppOptedOut`. Either way no second `consent.whatsapp.revoked` row
+ * is written, which is what the caller needs to know.
+ */
+export type ContactOptOutDisposition = "revoked" | "already_revoked";
 export type ContactWriteResult = Readonly<{
   id: string;
   disposition: "upserted";
@@ -103,7 +110,18 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
         ON CONFLICT (phone_e164) WHERE phone_e164 IS NOT NULL DO UPDATE SET
           email = COALESCE(${contacts.email}, EXCLUDED.email),
           display_name = COALESCE(EXCLUDED.display_name, ${contacts.displayName}),
-          whatsapp_opt_in = EXCLUDED.whatsapp_opt_in OR ${contacts.whatsappOptIn},
+          -- C-1 Task 5(b). This used to be a bare
+          -- EXCLUDED.whatsapp_opt_in OR contacts.whatsapp_opt_in, which never
+          -- consulted whatsapp_opted_out_at — so a later interest form or guest
+          -- RSVP carrying the same number silently re-opted-in somebody who had
+          -- sent STOP, and nothing recorded that it had happened. A prior
+          -- withdrawal now wins, and is cleared only by an explicit re-consent
+          -- flow, which does not exist yet (open question O-4: C-4 owns it, and
+          -- it must write consent.whatsapp.granted).
+          whatsapp_opt_in = CASE
+            WHEN ${contacts.whatsappOptedOutAt} IS NOT NULL THEN false
+            ELSE EXCLUDED.whatsapp_opt_in OR ${contacts.whatsappOptIn}
+          END,
           whatsapp_consent_at = COALESCE(EXCLUDED.whatsapp_consent_at, ${contacts.whatsappConsentAt}),
           whatsapp_consent_source = COALESCE(EXCLUDED.whatsapp_consent_source, ${contacts.whatsappConsentSource}),
           whatsapp_consent_text_version = COALESCE(EXCLUDED.whatsapp_consent_text_version, ${contacts.whatsappConsentTextVersion}),
@@ -148,15 +166,57 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
       };
     },
 
-    async markWhatsAppOptedOut(actor: unknown, phoneE164: string): Promise<void> {
+    /**
+     * D-7 / boundary 11. The audit row and the flag commit together or neither
+     * does — copying `suppressionsRepository.optOutWhatsApp`, which was the only
+     * consent writer in the tree that did this before Phase C. A prospect with
+     * no profile never reaches that method, so before C-1 the majority case for
+     * the funnel Phase C exists to serve had no audit trail at all.
+     *
+     * Three statements, in this order, and the order is the point.
+     *
+     * 1. The unguarded timestamp back-fill. `contacts.whatsapp_opt_in` is
+     *    `.default(false).notNull()` and `upsertFromWhatsApp` never sets it, so
+     *    a prospect who says STOP almost always has the flag already false and
+     *    a NULL `whatsapp_opted_out_at`. Without this statement the withdrawal
+     *    would leave no timestamp, and `upsertFromInterestForm`'s revival guard
+     *    reads exactly that column. It writes no audit row: nothing was
+     *    withdrawn here that had ever been granted.
+     * 2. The guarded flag update, `WHERE whatsapp_opt_in = true`. The webhook
+     *    route 500s on a throw, which makes Woztell retries routine, so an
+     *    unguarded UPDATE would write one consent row per redelivery of the
+     *    same withdrawal.
+     * 3. The audit row, only when step 2 actually revoked something.
+     */
+    async markWhatsAppOptedOut(actor: unknown, phoneE164: string): Promise<ContactOptOutDisposition> {
       requireContactWriter(actor);
       const phone = z.string().regex(/^\+\d{8,15}$/).parse(phoneE164);
       const database = await loadDatabase();
-      await database.execute(sql`
-        UPDATE ${contacts}
-        SET whatsapp_opt_in = false, whatsapp_opted_out_at = now(), updated_at = now()
-        WHERE ${contacts.phoneE164} = ${phone}
-      `);
+      return database.transaction(async (transaction) => {
+        await transaction.execute(sql`
+          UPDATE ${contacts}
+          SET whatsapp_opted_out_at = now(), updated_at = now()
+          WHERE ${contacts.phoneE164} = ${phone} AND ${contacts.whatsappOptedOutAt} IS NULL
+        `);
+        const row = rowsFrom(await transaction.execute(sql`
+          UPDATE ${contacts}
+          SET whatsapp_opt_in = false,
+            whatsapp_opted_out_at = COALESCE(${contacts.whatsappOptedOutAt}, now()),
+            updated_at = now()
+          WHERE ${contacts.phoneE164} = ${phone} AND ${contacts.whatsappOptIn} = true
+          RETURNING ${contacts.id} AS id
+        `))[0];
+        if (!row) return "already_revoked";
+        await transaction.execute(sql`
+          INSERT INTO ${auditEvents}
+            (actor_user_id, actor_type, action, target_type, target_id, metadata)
+          VALUES (
+            NULL, ${actor.kind}, 'consent.whatsapp.revoked', 'contact', ${String(row.id)},
+            ${JSON.stringify({source: actor.source, reasonCode: "whatsapp_stop"})}::jsonb
+          )
+        `);
+        return "revoked";
+      });
     },
   };
 }
