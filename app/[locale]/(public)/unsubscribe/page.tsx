@@ -41,10 +41,7 @@ export default async function UnsubscribePage({params, searchParams}: Props) {
   }
 
   const payload = query.token
-    ? (() => {
-      const env = unsubscribeEnv();
-      return verifyUnsubscribeTokenWithAny(query.token!, [env.unsubscribeTokenSecret, env.cronSecret]);
-    })()
+    ? verifyUnsubscribeTokenWithAny(query.token!, [unsubscribeEnv().unsubscribeTokenSecret])
     : null;
   /**
    * The signature and expiry decide this, not the locale the visitor landed in.

@@ -17,7 +17,11 @@ import {
   unsubscribeActor,
 } from "@/lib/db/repos/suppressions";
 
-const secret = "fixture-cron-secret-with-enough-entropy";
+// Named for the key it actually is. It read "fixture-cron-secret" while the
+// page still fell back to CRON_SECRET, and the two rendering cases below stubbed
+// that variable rather than the signing one — so they were exercising the
+// legacy path to test locale rendering, and went red the day it was removed.
+const secret = "fixture-unsubscribe-secret-with-enough-entropy";
 const future = 2_000_000_000;
 const past = 1_900_000_000;
 
@@ -188,7 +192,7 @@ describe("unsubscribe token", () => {
   });
 
   it("renders localized confirm, success, and invalid public states", async () => {
-    vi.stubEnv("CRON_SECRET", secret);
+    vi.stubEnv("UNSUBSCRIBE_TOKEN_SECRET", secret);
 
     const confirm = renderToStaticMarkup(await UnsubscribePage({
       params: Promise.resolve({locale: "en"}),
@@ -210,7 +214,7 @@ describe("unsubscribe token", () => {
   });
 
   it("honours a valid token on the other locale's page", async () => {
-    vi.stubEnv("CRON_SECRET", secret);
+    vi.stubEnv("UNSUBSCRIBE_TOKEN_SECRET", secret);
 
     // The locale cookie lasts a year and localePrefix is "as-needed", so a
     // recipient who has ever browsed in Chinese is redirected from
