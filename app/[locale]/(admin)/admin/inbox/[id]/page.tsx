@@ -25,7 +25,7 @@ export default async function AdminInboxThreadPage({params}: Props) {
         <h1 className="font-serif text-4xl font-semibold tracking-tight">{transcript.conversation.ownerLabel ?? t("anonymous")}</h1>
         <p className="text-muted-foreground">{transcript.conversation.channel} · {transcript.conversation.messageCount}</p>
       </header>
-      <InboxThread labels={{roles: {user: t("roles.user"), assistant: t("roles.assistant"), tool: t("roles.tool")}}} locale={locale} transcript={transcript} />
+      <InboxThread labels={{roles: {user: t("roles.user"), assistant: t("roles.assistant"), tool: t("roles.tool"), staff: t("roles.staff")}}} locale={locale} transcript={transcript} />
     </div>
   );
 }

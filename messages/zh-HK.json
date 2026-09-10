@@ -2271,7 +2271,7 @@
       "error": "無法載入訊息中心。",
       "open": "開啟",
       "back": "返回訊息中心",
-      "roles": {"user": "發送者", "assistant": "禮賓", "tool": "工具"}
+      "roles": {"user": "發送者", "assistant": "禮賓", "tool": "工具", "staff": "職員"}
     },
     "tasks": {
       "eyebrow": "升級個案",

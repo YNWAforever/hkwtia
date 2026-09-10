@@ -34,14 +34,17 @@ describe("every messages writer names direction", () => {
     expect(/\bdirection\b/.test(columnList)).toBe(false);
   });
 
-  // The two writers that exist today, named so a deletion is a decision rather
-  // than an accident: `claimInbound` (the webhook's inbound row) and
-  // `appendMessageFrom` (every concierge and web-widget row).
-  it("still finds both known writers, so the scan is not passing on an empty set", () => {
+  // The writers that exist today, named so a deletion is a decision rather than
+  // an accident: `claimInbound` (the webhook's inbound row, `woztell.ts`),
+  // `appendMessageFrom` (every concierge and web-widget row,
+  // `conversations.ts`), `recordOutboundEcho` (`woztell-inbound-events.ts`) and,
+  // since C-2 Task 6, `queueStaffMessage` — the write-ahead staff reply, which
+  // is the first writer whose row exists precisely to be sent.
+  it("still finds every known writer, so the scan is not passing on an empty set", () => {
     const files = readdirSync("lib/db/repos").filter((name) => name.endsWith(".ts"));
     const writers = files.filter((file) => (
       /INSERT\s+INTO\s+\$\{messages\}/i.test(readFileSync(`lib/db/repos/${file}`, "utf8"))
     ));
-    expect(writers.sort()).toEqual(["conversations.ts", "woztell-inbound-events.ts", "woztell.ts"]);
+    expect(writers.sort()).toEqual(["conversations.ts", "inbox.ts", "woztell-inbound-events.ts", "woztell.ts"]);
   });
 });

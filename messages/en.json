@@ -2270,7 +2270,7 @@
       "error": "The inbox could not be loaded.",
       "open": "Open",
       "back": "Back to inbox",
-      "roles": {"user": "Sender", "assistant": "Concierge", "tool": "Tool"}
+      "roles": {"user": "Sender", "assistant": "Concierge", "tool": "Tool", "staff": "Staff"}
     },
     "tasks": {
       "eyebrow": "Escalations",

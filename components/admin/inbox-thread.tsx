@@ -1,7 +1,14 @@
 import type {AppLocale} from "@/i18n/routing";
 import type {InboxTranscript} from "@/lib/db/repos/inbox";
 
-type Labels = Readonly<{roles: Readonly<{user: string; assistant: string; tool: string}>}>;
+/**
+ * `roles` is keyed by `InboxMessage["role"]`, which gained `staff` when 0031
+ * added it to `message_role`. Without the fourth key a staff reply renders under
+ * "Sender" / 「發送者」 — attributed to the prospect who wrote in. The thread's own
+ * presentation of direction, ticks and the window countdown is C-2 Task 8; this
+ * is only the label the widened read model now requires.
+ */
+type Labels = Readonly<{roles: Readonly<{user: string; assistant: string; tool: string; staff: string}>}>;
 
 export function InboxThread({locale, transcript, labels}: Readonly<{locale: AppLocale; transcript: InboxTranscript; labels: Labels}>) {
   const formatter = new Intl.DateTimeFormat(locale, {dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Hong_Kong"});

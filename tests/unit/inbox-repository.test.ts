@@ -20,10 +20,12 @@ describe("inboxRepository", () => {
     const repository = createInboxRepository(async () => database([{
       id: "11111111-1111-4111-8111-111111111111", agent_kind: "concierge", locale: "en", status: "active",
       last_message_at: new Date("2026-09-08T00:00:00Z"), profile_id: null, display_name: null,
-      channel: "whatsapp", last_message: "Hello", message_count: 2, open_task_count: 1,
+      // C-1 Task 1 gave the conversation its own channel and handling state; the
+      // summary reads them from the row rather than deriving either.
+      channel: "whatsapp", handling: "bot", last_message: "Hello", message_count: 2, open_task_count: 1,
     }]) as never);
     const rows = await repository.listConversations(admin, {channel: "whatsapp", limit: 50});
-    expect(rows).toEqual([expect.objectContaining({id: "11111111-1111-4111-8111-111111111111", channel: "whatsapp", ownerLabel: null, lastMessage: "Hello", messageCount: 2, escalated: true})]);
+    expect(rows).toEqual([expect.objectContaining({id: "11111111-1111-4111-8111-111111111111", channel: "whatsapp", handling: "bot", ownerLabel: null, lastMessage: "Hello", messageCount: 2, escalated: true, unread: true})]);
   });
 
   it("rejects an out-of-range limit and a non-uuid conversation id before touching the database", async () => {
