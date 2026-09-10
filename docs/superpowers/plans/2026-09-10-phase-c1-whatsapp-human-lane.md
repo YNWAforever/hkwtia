@@ -112,9 +112,18 @@ The obvious call is unbuildable four ways over, and every one of them fails at r
 
 Nor does the generic path work: `staffTasksRepository.createOnce` with an `AutomationRepositoryActor` throws `AUTOMATION_STAFF_TASK_PROFILE_REQUIRED` when `profileId` is null (`lib/db/repos/staff-tasks.ts`), which is exactly the prospect case.
 
-The working precedent is the direct `INSERT INTO staff_tasks (profile_id, journey_state_id, kind, dedupe_key, summary_code) … ON CONFLICT DO NOTHING RETURNING id` used by `lib/db/repos/campaign-recipient-delivery.ts:255`, `lib/db/repos/journeys.ts:275` and `lib/db/repos/dunning-lapse.ts:65`. `staff_tasks.profile_id` is **nullable** (`schema-core.ts:597`), `kind` is free `text` (:599), `dedupe_key` is uniquely indexed (:618), and `components/admin/task-table.tsx:19` renders `task.kind` raw — so a new free-text kind needs no label map and no bundle string. That is the shape the human lane uses, from `lib/db/repos/woztell-inbound-events.ts`, with `dedupe_key = \`inbox-waiting:${conversationId}\`` so a burst of inbound messages is one task and resolving it lets the next burst raise a new one.
+The working precedent is the direct `INSERT INTO staff_tasks (profile_id, journey_state_id, kind, dedupe_key, summary_code) … ON CONFLICT DO NOTHING RETURNING id` used by `lib/db/repos/campaign-recipient-delivery.ts:255`, `lib/db/repos/journeys.ts:275` and `lib/db/repos/dunning-lapse.ts:65`. `staff_tasks.profile_id` is **nullable** (`schema-core.ts:597`), `kind` is free `text` (:599), `dedupe_key` is uniquely indexed (:618), and `components/admin/task-table.tsx:19` renders `task.kind` raw — so a new free-text kind needs no label map and no bundle string. That is the shape the human lane uses, from `lib/db/repos/woztell-inbound-events.ts`, with `dedupe_key = \`inbox-waiting:${conversationId}\`` so a burst of inbound messages is one task.
 
-C2 Task 5 (`kind: "contact_merge_candidate"`) and C2 Task 10 Step 5 ("terminal with a staff task") inherit this decision and must use the same shape.
+**Correction (review of Task 4): the INSERT alone does not let the next burst raise a new task, and this paragraph used to claim it did.** `staff_tasks_dedupe_key_unique` is a plain `UNIQUE(dedupe_key)` (`schema-core.ts:688`, `drizzle/0007_m3_automations.sql:46`), **not** partial on `status`; `staffTasksRepository.resolve` only sets `status = 'resolved'` (`staff-tasks.ts:311`) and nothing deletes `staff_tasks` rows. So once the assignee resolves the first task, the key is consumed for the life of the thread: every later inbound conflicts with the resolved row, returns no id, and `listOpen`/the inbox `tasks` CTE — both `WHERE status = 'open'` — show nothing. The lane goes silent exactly one resolve in. Any writer using this shape for a **recurring** condition must therefore retire the resolved row's key inside the same transaction first:
+
+```sql
+UPDATE staff_tasks SET dedupe_key = dedupe_key || ':closed:' || id::text, updated_at = now()
+WHERE dedupe_key = $key AND status = 'resolved';
+```
+
+Retired rather than reopened: `/admin/tasks` orders by and prints `created_at`, so a re-raised task needs today's timestamp, and the resolved row must keep its `resolved_at` and `resolved_by_profile_id` — the only record that anyone handled it. The retired key keeps its prefix, so history stays greppable.
+
+C2 Task 5 (`kind: "contact_merge_candidate"`) and C2 Task 10 Step 5 ("terminal with a staff task") inherit this decision and must use the same shape, **including the retire statement** wherever the condition can recur after a resolve.
 
 **S-14 — the two new webhook-side repositories take capability actors, because the legacy exceptions are exceptions.**
 `lib/db/repos/woztell.ts` and `lib/db/repos/woztell-delivery-outbox.ts` take no `Actor` and authorize nothing. They predate the §9 capability-actor rule and are the standing exceptions — the C2 plan's debt list says in as many words "do not cite them as precedent for a new writer", and an earlier draft of this plan did exactly that. Boundary 1 says repositories are the authorization gate; boundary 10 says public writers use dedicated capability actors. Nothing in the tree enforces this automatically (`tests/unit/repository-production-security.test.ts` is a hand-written list and `tests/unit/repository-boundary.test.ts` only checks import specifiers), so "a comment saying the route's HMAC is the gate" is a claim, not a mechanism — and Task 11 would have disproved it anyway by adding `importHistoricalInbound` to the same actorless store, reachable from `/api/admin/woztell/backfill`, which has **no HMAC in front of it**.
@@ -786,6 +795,11 @@ if (!claim.whatsappOptIn) { await dependencies.markCompleted?.(…); return {sta
   implemented as the shape `lib/db/repos/campaign-recipient-delivery.ts:255` uses:
 
 ```sql
+-- Both statements, one transaction. See the correction in S-13: without the
+-- retire, the first resolve consumes the key for the life of the thread.
+UPDATE staff_tasks SET dedupe_key = dedupe_key || ':closed:' || id::text, updated_at = now()
+WHERE dedupe_key = ${`inbox-waiting:${conversationId}`} AND status = 'resolved';
+
 INSERT INTO staff_tasks (profile_id, journey_state_id, kind, dedupe_key, summary_code, context)
 VALUES ($assignedToProfileId, NULL, 'inbox_human_reply_waiting',
         ${`inbox-waiting:${conversationId}`}, 'human_requested',
@@ -794,7 +808,7 @@ ON CONFLICT DO NOTHING
 RETURNING id
 ```
 
-  `profile_id` is nullable and `kind` is free `text`; `staff_tasks_dedupe_key_unique` makes a burst of inbound messages one task, and resolving that task lets the next burst raise a new one. `components/admin/task-table.tsx:19` renders `task.kind` raw, so no label map and no bundle string is needed — assert that in the test rather than leaving a reader to wonder.
+  `profile_id` is nullable and `kind` is free `text`; `staff_tasks_dedupe_key_unique` makes a burst of inbound messages one OPEN task, and the retire statement is what lets the next burst raise a new one after the assignee has resolved the last — the unique index is not partial on `status`, so `ON CONFLICT DO NOTHING` on its own would go quiet for ever. `components/admin/task-table.tsx:19` renders `task.kind` raw, so no label map and no bundle string is needed — assert that in the test rather than leaving a reader to wonder.
 
   **The `whatsapp_member_id` write is guarded and isolated (see the corrections table).** `upsertFromWhatsApp` conflicts on `phone_e164` only, while `contacts_whatsapp_member_unique` is a separate partial unique index, so writing a member id that already belongs to another row raises 23505 → Step 7's 500 → Woztell retries that sender's message forever. Therefore:
   - `contactsRepository.upsertFromWhatsApp` **stops carrying `whatsapp_member_id` in its INSERT and ON CONFLICT clause** (delete the column from both; the field stays on the input schema);

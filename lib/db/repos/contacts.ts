@@ -166,9 +166,21 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
  * refuses the id when another contact already holds it, so the partial unique
  * index is never reached in the ordinary case; the `try`/`catch` closes the
  * concurrent race that predicate cannot, because two inbound webhooks for the
- * same member arriving together both pass it. Neither path throws: the caller
- * turns `conflict` into a staff task, and a thrown error here would be a 500 and
- * an endless Woztell retry of a message we have already stored.
+ * same member arriving together both pass it. Neither path throws: a thrown
+ * error here would be a 500 and an endless Woztell retry of a message we have
+ * already stored.
+ *
+ * Read the return precisely. `"conflict"` is the 23505 race ONLY — the caller
+ * files a staff task on it. The deterministic refusal, where another contact
+ * demonstrably holds the id, returns `"unchanged"`, which is the same answer as
+ * the overwhelmingly common "this contact already carries an id" and is
+ * therefore silent. That is deliberate for C1 and not a shrug: C1 never reads
+ * `contacts.whatsapp_member_id` (resolution stays number-first per O-3), so the
+ * refusal has no functional consequence here, and two contacts claiming one
+ * WhatsApp member is by definition a merge candidate — C2 Task 5's work, which
+ * detects them by query rather than by hoping a webhook happened to notice one.
+ * Anything that starts depending on the distinction must widen this return
+ * rather than infer it from `"unchanged"`.
  *
  * `whatsapp_member_id IS NULL` means the first identity we learn wins, matching
  * the COALESCE the phone upsert uses: a later payload cannot overwrite it.

@@ -181,9 +181,12 @@ export function createProductionWoztellProcessorDependencies(
       });
       // The member-id write is guarded and refuses rather than raising 23505,
       // because a 500 from this route makes Woztell retry that sender's message
-      // forever. A refusal nobody is told about is the same as no guard at all,
-      // so it becomes a staff task — deciding which contact keeps the id is C2
-      // Task 5's merge-candidate work, not the webhook's.
+      // forever. `"conflict"` is the concurrent race the predicate cannot close,
+      // and it becomes a staff task because a 23505 swallowed in silence is the
+      // same as no guard at all. The DETERMINISTIC refusal is not this branch:
+      // `linkWhatsAppMemberId` returns `"unchanged"` for it, deliberately — see
+      // the comment there. Deciding which contact keeps the id is C2 Task 5's
+      // merge-candidate work, not the webhook's.
       if (contact.memberIdLink === "conflict" && input.whatsappMemberId) {
         await inboundEvents.notifyMemberIdConflict(woztellWebhookActor(), {
           whatsappMemberId: input.whatsappMemberId,

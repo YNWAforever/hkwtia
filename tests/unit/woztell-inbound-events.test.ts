@@ -346,7 +346,7 @@ describe("WOZTELL inbound event writers (C-1 Task 3)", () => {
    */
   describe("notifyHumanLane", () => {
     it("files one open task per conversation, against a nullable profile", async () => {
-      const fixture = repository([[{id: "task-1"}]]);
+      const fixture = repository([[], [{id: "task-1"}]]);
 
       await expect(fixture.events.notifyHumanLane(woztellWebhookActor(), {
         conversationId: CONVERSATION_ID,
@@ -354,7 +354,7 @@ describe("WOZTELL inbound event writers (C-1 Task 3)", () => {
         locale: "zh-HK",
       })).resolves.toEqual({disposition: "created"});
 
-      const insert = fixture.queries[0];
+      const insert = fixture.queries[1];
       const sqlText = normalized(insert?.sql);
       expect(sqlText).toMatch(/^insert into "staff_tasks"/);
       expect(sqlText).toContain("on conflict do nothing");
@@ -365,24 +365,57 @@ describe("WOZTELL inbound event writers (C-1 Task 3)", () => {
         `inbox-waiting:${CONVERSATION_ID}`,
         "human_requested",
       ]));
-      // A burst of inbound messages is ONE task; resolving it lets the next
-      // burst raise a new one.
+      // A burst of inbound messages is ONE task.
       expect(insert?.params).toContain(null);
     });
 
+    /**
+     * The regression this pins is the one a `disposition` assertion cannot see.
+     * `staff_tasks_dedupe_key_unique` is a plain unique on `dedupe_key`, not a
+     * partial one on `status`; `staffTasksRepository.resolve` only flips
+     * `status`, and nothing deletes `staff_tasks` rows. Without the retire
+     * statement the first resolve consumes `inbox-waiting:<conversation>` for
+     * the life of the thread and every later burst reports "existing" with no
+     * open task behind it — the assignee is simply never told again.
+     */
+    it("retires a resolved task's dedupe key first, so the next burst can raise a new one", async () => {
+      const fixture = repository([[], [{id: "task-1"}]]);
+
+      await fixture.events.notifyHumanLane(woztellWebhookActor(), {
+        conversationId: CONVERSATION_ID,
+        assignedToProfileId: null,
+        locale: "en",
+      });
+
+      const retire = fixture.queries[0];
+      const sqlText = normalized(retire?.sql);
+      expect(sqlText).toMatch(/^update "staff_tasks" set/);
+      // Only a RESOLVED row is retired: the standing open task must survive, or
+      // a five-message burst becomes five tasks.
+      expect(sqlText).toContain(`"staff_tasks"."status" = 'resolved'`);
+      expect(sqlText).toContain(`"staff_tasks"."dedupe_key" || ':closed:'`);
+      expect(retire?.params).toEqual([`inbox-waiting:${CONVERSATION_ID}`]);
+      // Retired, not reopened: /admin/tasks orders by and prints `created_at`,
+      // so the re-raised task is a fresh row and the resolved one keeps its
+      // `resolved_at` / `resolved_by_profile_id`.
+      expect(sqlText).not.toContain("created_at");
+      expect(sqlText).not.toContain("resolved_at");
+      expect(normalized(fixture.queries[1]?.sql)).toMatch(/^insert into "staff_tasks"/);
+    });
+
     it("reports an existing task rather than failing, because a burst is one task", async () => {
-      const fixture = repository([[]]);
+      const fixture = repository([[], []]);
 
       await expect(fixture.events.notifyHumanLane(woztellWebhookActor(), {
         conversationId: CONVERSATION_ID,
         assignedToProfileId: "staff-a",
         locale: "en",
       })).resolves.toEqual({disposition: "existing"});
-      expect(fixture.queries[0]?.params).toEqual(expect.arrayContaining(["staff-a"]));
+      expect(fixture.queries[1]?.params).toEqual(expect.arrayContaining(["staff-a"]));
     });
 
     it("refuses a conversation id that is not one", async () => {
-      const fixture = repository([[]]);
+      const fixture = repository([[], []]);
 
       await expect(fixture.events.notifyHumanLane(woztellWebhookActor(), {
         conversationId: "'; DROP TABLE staff_tasks; --",
@@ -395,14 +428,17 @@ describe("WOZTELL inbound event writers (C-1 Task 3)", () => {
 
   describe("notifyMemberIdConflict", () => {
     it("files one task per contested member id, so a refused link is never silent", async () => {
-      const fixture = repository([[{id: "task-2"}]]);
+      const fixture = repository([[], [{id: "task-2"}]]);
 
       await expect(fixture.events.notifyMemberIdConflict(woztellWebhookActor(), {
         whatsappMemberId: "member-9001",
         locale: "en",
       })).resolves.toEqual({disposition: "created"});
 
-      const insert = fixture.queries[0];
+      // Same retire-then-insert shape: a conflict that recurs after staff
+      // resolved the last one must raise a task again, not go quiet.
+      expect(normalized(fixture.queries[0]?.sql)).toMatch(/^update "staff_tasks" set/);
+      const insert = fixture.queries[1];
       expect(normalized(insert?.sql)).toMatch(/^insert into "staff_tasks"/);
       expect(insert?.params).toEqual(expect.arrayContaining([
         "inbox_member_id_conflict",

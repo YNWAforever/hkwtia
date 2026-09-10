@@ -427,8 +427,11 @@ export function createWoztellInboundEventsRepository(
       requireWoztellWebhook(actor);
       const parsed = humanLaneSchema.parse(input);
       const database = await loadDatabase();
-      // One task per conversation: a burst of five messages must not become five
-      // tasks, and resolving the task lets the NEXT burst raise a new one.
+      // One OPEN task per conversation: a burst of five messages must not become
+      // five tasks, while resolving the standing task must let the next burst
+      // raise a new one — see `insertStaffTask`, which retires the resolved
+      // row's key rather than trusting `ON CONFLICT DO NOTHING` to do something
+      // a plain unique index cannot.
       return await insertStaffTask(database, {
         profileId: parsed.assignedToProfileId,
         kind: "inbox_human_reply_waiting",
@@ -470,10 +473,31 @@ export function createWoztellInboundEventsRepository(
 
 /**
  * `ON CONFLICT DO NOTHING RETURNING id` over `staff_tasks_dedupe_key_unique`:
- * a row back means we created it, nothing back means one is already open.
+ * a row back means we raised a task, nothing back means one is already OPEN.
+ *
+ * The retire statement is what makes that second half true, and it is not
+ * optional. `staff_tasks_dedupe_key_unique` is a PLAIN unique on `dedupe_key`
+ * (`schema-core.ts`, `drizzle/0007_m3_automations.sql:46`), not a partial one
+ * scoped to `status`; `staffTasksRepository.resolve` only flips `status` to
+ * `'resolved'`, and nothing in the tree ever deletes a `staff_tasks` row. So a
+ * bare DO NOTHING conflicts with the RESOLVED row for ever: the assignee
+ * resolves the first "someone is waiting" task, the member writes again three
+ * days later, the INSERT returns nothing, and `listOpen` — which filters
+ * `status = 'open'` — shows the assignee nothing. That is the exact silence the
+ * human lane exists to end, reappearing one resolve later on the ordinary
+ * reply-then-resolve lifecycle of every thread.
+ *
+ * Retiring the resolved row's key rather than reopening the row is deliberate:
+ * `/admin/tasks` both orders by `created_at` and prints it
+ * (`components/admin/task-table.tsx`), so a re-raised task must carry today's
+ * timestamp instead of June's or it sorts under every newer task and tells
+ * staff the wrong date; and the resolved row keeps its `resolved_at` and
+ * `resolved_by_profile_id`, which are the only record that anyone ever handled
+ * it. The retired key keeps its original prefix, so the history of a
+ * conversation is still one `LIKE 'inbox-waiting:%'` away.
  */
 async function insertStaffTask(
-  database: Pick<AutomationDatabase, "execute">,
+  database: Pick<AutomationDatabase, "transaction">,
   task: Readonly<{
     profileId: string | null;
     kind: string;
@@ -482,21 +506,36 @@ async function insertStaffTask(
     context: Readonly<Record<string, unknown>>;
   }>,
 ): Promise<StaffTaskNotificationResult> {
-  const created = rowsFrom(await database.execute(sql`
-    INSERT INTO ${staffTasks}
-      (profile_id, journey_state_id, kind, dedupe_key, summary_code, context)
-    VALUES (
-      ${task.profileId},
-      NULL,
-      ${task.kind},
-      ${task.dedupeKey},
-      ${task.summaryCode},
-      ${JSON.stringify(task.context)}::jsonb
-    )
-    ON CONFLICT DO NOTHING
-    RETURNING ${staffTasks.id} AS id
-  `))[0];
-  return {disposition: created ? "created" : "existing"};
+  return await database.transaction(async (transaction) => {
+    // Both statements in one transaction: retiring the key and failing to
+    // insert would leave the conversation with no task at all, which is worse
+    // than the bug being fixed. `id::text` because `uuid || text` has no
+    // operator. Matches at most one row — `dedupe_key` is unique — and locks
+    // nothing when the standing task is still open, which is the common case.
+    await transaction.execute(sql`
+      UPDATE ${staffTasks}
+      SET
+        dedupe_key = ${staffTasks.dedupeKey} || ':closed:' || ${staffTasks.id}::text,
+        updated_at = now()
+      WHERE ${staffTasks.dedupeKey} = ${task.dedupeKey}
+        AND ${staffTasks.status} = 'resolved'
+    `);
+    const created = rowsFrom(await transaction.execute(sql`
+      INSERT INTO ${staffTasks}
+        (profile_id, journey_state_id, kind, dedupe_key, summary_code, context)
+      VALUES (
+        ${task.profileId},
+        NULL,
+        ${task.kind},
+        ${task.dedupeKey},
+        ${task.summaryCode},
+        ${JSON.stringify(task.context)}::jsonb
+      )
+      ON CONFLICT DO NOTHING
+      RETURNING ${staffTasks.id} AS id
+    `))[0];
+    return {disposition: created ? "created" : "existing"};
+  });
 }
 
 /**
