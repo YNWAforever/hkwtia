@@ -62,8 +62,19 @@ export const approvalStatusEnum = pgEnum("approval_status", ["pending", "approve
 export const journeyStatusEnum = pgEnum("journey_status", ["scheduled", "processing", "sent", "skipped", "failed"]);
 export const staffTaskStatusEnum = pgEnum("staff_task_status", ["open", "resolved"]);
 export const conversationStatusEnum = pgEnum("conversation_status", ["active", "closed", "deleted"]);
-export const messageRoleEnum = pgEnum("message_role", ["user", "assistant", "tool"]);
+// Programme C-2: 'staff' is appended at the END so drizzle-kit emits a plain
+// `ALTER TYPE … ADD VALUE 'staff'` rather than 0008's `… BEFORE …` form.
+// `npm run db:migrate` runs EVERY pending migration inside ONE transaction
+// (drizzle-orm/pg-core/dialect.cjs:62), and PostgreSQL forbids using a value
+// added by ALTER TYPE in the transaction that added it. So no migration in this
+// release may name 'staff' — not in a DEFAULT, a CHECK or a backfill. Runtime
+// inserts commit in a later transaction and are unaffected.
+export const messageRoleEnum = pgEnum("message_role", ["user", "assistant", "tool", "staff"]);
 export const messageChannelEnum = pgEnum("message_channel", ["web", "whatsapp"]);
+// These three are CREATE TYPE, not ADD VALUE, so 0031 may use them freely.
+export const messageDirectionEnum = pgEnum("message_direction", ["inbound", "outbound"]);
+export const messageDeliveryStatusEnum = pgEnum("message_delivery_status", ["queued", "sent", "delivered", "read", "failed"]);
+export const conversationHandlingEnum = pgEnum("conversation_handling", ["bot", "human", "closed"]);
 export const agentRunStatusEnum = pgEnum("agent_run_status", ["running", "disabled", "completed", "failed", "escalated"]);
 export const agentNameEnum = pgEnum("agent_name", [
   "concierge",
@@ -112,6 +123,8 @@ export const publicProfileStatusEnum = pgEnum("public_profile_status", [
   "hidden", "pending_review", "published", "rejected",
 ]);
 export type ShowcaseListingStatus = (typeof showcaseListingStatusEnum.enumValues)[number];
+export type ConversationHandling = (typeof conversationHandlingEnum.enumValues)[number];
+export type MessageDeliveryStatus = (typeof messageDeliveryStatusEnum.enumValues)[number];
 
 const vector = customType<{data: number[]; driverData: string}>({
   dataType() {
@@ -514,6 +527,28 @@ export const conversations = pgTable(
     status: conversationStatusEnum("status").default("active").notNull(),
     lastMessageAt: timestamp("last_message_at", {withTimezone: true}),
     expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+    // Programme C-1/C-2. `channel` was derived from the newest message until now
+    // (see lib/db/repos/inbox.ts) — a derivation that calls a WhatsApp thread
+    // "web" the moment a web reply lands on it, and that the send path cannot
+    // trust. `handling` is the interlock between the concierge and a person:
+    // 'human' makes the webhook persist and notify without starting a bot turn.
+    channel: messageChannelEnum("channel").default("web").notNull(),
+    handling: conversationHandlingEnum("handling").default("bot").notNull(),
+    // D-6 keeps anonymous_owner_hash as the OWNER key, so this is a link, not an
+    // owner arm: conversations_owner_check stays two-armed and untouched.
+    contactId: uuid("contact_id").references((): AnyPgColumn => contacts.id, {onDelete: "set null"}),
+    assignedToProfileId: text("assigned_to_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    whatsappMemberId: text("whatsapp_member_id"),
+    // The 24-hour customer-service window is measured from here. NOT from
+    // last_message_at, which every outbound reply bumps and which would restart
+    // the window on every bot answer.
+    lastInboundAt: timestamp("last_inbound_at", {withTimezone: true}),
+    lastStaffReadAt: timestamp("last_staff_read_at", {withTimezone: true}),
+    // RESERVED. §6 lists it and no task in Phase C1 or C2 writes or reads it —
+    // stated here rather than discovered as a puzzling always-NULL column. The
+    // obvious future writer is a thread title on the composer; until one exists,
+    // do not add a read that would render an empty string as a title.
+    subject: text("subject"),
     createdAt: createdAt("created_at"),
     updatedAt: updatedAt("updated_at"),
   },
@@ -534,6 +569,8 @@ export const conversations = pgTable(
       table.agentKind,
       table.expiresAt,
     ),
+    index("conversations_handling_assigned_idx").on(table.handling, table.assignedToProfileId),
+    index("conversations_contact_idx").on(table.contactId),
   ],
 );
 
@@ -550,6 +587,33 @@ export const messages = pgTable(
     providerMessageId: text("provider_message_id"),
     metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}).notNull(),
     citations: jsonb("citations").$type<Array<Record<string, unknown>>>().default([]).notNull(),
+    // Programme C-1. Default 'inbound' deliberately (plan S-4): an inbound row is
+    // inert — it never carries a delivery_status and never triggers a send — so a
+    // writer that forgets the field cannot push a row into the send ledger.
+    // conversations.last_inbound_at is written explicitly by the webhook and is
+    // never derived from this column, so a mislabelled row cannot reopen the
+    // 24-hour window.
+    direction: messageDirectionEnum("direction").default("inbound").notNull(),
+    // NULL for every web row and every inbound row: "this message has no delivery
+    // state", not "unknown". Only outbound WhatsApp rows carry one.
+    deliveryStatus: messageDeliveryStatusEnum("delivery_status"),
+    sentByProfileId: text("sent_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+    templateKey: text("template_key"),
+    errorCode: text("error_code"),
+    deliveredAt: timestamp("delivered_at", {withTimezone: true}),
+    readAt: timestamp("read_at", {withTimezone: true}),
+    // Plan S-8. The write-ahead row has no provider id yet, so
+    // messages_provider_message_id_unique cannot dedupe a retried staff send.
+    // This key is deterministic in (conversation, kind, content, template) and is
+    // what makes the send action idempotent.
+    outboundKey: text("outbound_key"),
+    // Plan S-8, second half. outbound_key dedupes the ROW; this dedupes the SEND.
+    // Two concurrent submits of one draft both find (or create) the same row, and
+    // without a lease the loser calls the adapter anyway: one messages row, one
+    // audit row, two WhatsApp messages to the member. A caller may call the
+    // adapter only if it holds a live claim. Cleared by settleStaffMessage; a
+    // stale claim on a non-`queued` row is inert.
+    sendClaimExpiresAt: timestamp("send_claim_expires_at", {withTimezone: true}),
     createdAt: createdAt("created_at"),
   },
   (table) => [
@@ -558,6 +622,12 @@ export const messages = pgTable(
       .where(sql`${table.providerMessageId} IS NOT NULL`),
     index("messages_conversation_created_idx").on(table.conversationId, table.createdAt),
     index("messages_created_at_idx").on(table.createdAt),
+    uniqueIndex("messages_outbound_key_unique")
+      .on(table.outboundKey)
+      .where(sql`${table.outboundKey} IS NOT NULL`),
+    index("messages_delivery_status_idx")
+      .on(table.deliveryStatus)
+      .where(sql`${table.deliveryStatus} IS NOT NULL`),
   ],
 );
 

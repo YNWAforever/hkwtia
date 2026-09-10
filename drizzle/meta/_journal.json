@@ -211,6 +211,20 @@
       "when": 1788978387038,
       "tag": "0030_phase_b_members_route",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1789025983956,
+      "tag": "0031_phase_c_conversation_operations",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1789026015103,
+      "tag": "0032_phase_c_message_direction_backfill",
+      "breakpoints": true
     }
   ]
 }
