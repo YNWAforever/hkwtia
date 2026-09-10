@@ -1,15 +1,19 @@
 import "server-only";
 
+import {EVENT_REMINDER_24H_STEP} from "@/config/journeys";
 import type {AppLocale} from "@/i18n/routing";
+import {addHongKongDays} from "@/lib/automation/hong-kong-time";
 import {automationCronActor} from "@/lib/auth/automation-actor";
 import {journeysRepository} from "@/lib/db/repos/journeys";
 import type {EmailVariables} from "@/lib/email/catalog";
 import {localizedPath} from "@/lib/urls";
 
 export const EVENT_REMINDER_JOURNEY = "event_reminder" as const;
-export const EVENT_REMINDER_STEP = "reminder_24h" as const;
+// Both the key written into journey_state and the enrolment lead come from the
+// journey step itself (config/journeys.ts). Restating either here is what let
+// the 24-hour lead exist as two declarations that nothing pinned to each other.
+export const EVENT_REMINDER_STEP = EVENT_REMINDER_24H_STEP.key;
 
-const REMINDER_LEAD_MS = 24 * 60 * 60 * 1000;
 const INSTANCE_KEY_PREFIX = "event:";
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -52,7 +56,10 @@ export async function enrollEventReminder(
   deps: ReminderEnrollmentDependencies = {journeys: journeysRepository},
 ): Promise<void> {
   const now = (deps.now ?? (() => new Date()))();
-  const scheduledAt = new Date(input.startsAt.getTime() - REMINDER_LEAD_MS);
+  // The lead is the step's own `offsetDays`, applied exactly as scheduleJourney
+  // applies every other step's offset — this journey's anchor is the event start,
+  // so -1 day is 24 h before it. Hong Kong has no DST, so the day is a whole day.
+  const scheduledAt = addHongKongDays(input.startsAt, EVENT_REMINDER_24H_STEP.offsetDays);
   if (scheduledAt <= now) return;
   const instanceKey = eventInstanceKey(input.eventId);
   await deps.journeys.enroll(automationCronActor(), {

@@ -9,6 +9,18 @@ const step = (
   condition: StepCondition = "always",
 ): JourneyStep => ({key, offsetDays, template, classification, channels, condition});
 
+/**
+ * Programme B-5 (S-2): anchored on the event start, so -1 day is "24 hours
+ * before". One step per (profile, event); enrolled by
+ * lib/events/reminder-enrollment.ts, never by scheduleJourney — which is why the
+ * step is exported by name. That module derives both the step key it writes and
+ * the enrolment lead from this object. The lead used to be a second
+ * `24 * 60 * 60 * 1000` literal over there, so editing this offset would have
+ * moved the runner's expectation without moving enrolment, with every test on
+ * both sides still green.
+ */
+export const EVENT_REMINDER_24H_STEP = step("reminder_24h", -1, "event_reminder_24h", "transactional", ["email", "whatsapp"]);
+
 export const JOURNEYS = {
   onboarding_90d: [
     step("welcome", 0, "welcome", "transactional"),
@@ -38,10 +50,7 @@ export const JOURNEYS = {
     step("winback_21", 21, "winback_21", "marketing"),
     step("winback_60", 60, "winback_60", "marketing"),
   ],
-  // Programme B-5 (S-2): anchored on the event start, so -1 day is "24 hours
-  // before". One step per (profile, event); enrolled by
-  // lib/events/reminder-enrollment.ts, never by scheduleJourney.
-  event_reminder: [
-    step("reminder_24h", -1, "event_reminder_24h", "transactional", ["email", "whatsapp"]),
-  ],
+  // See EVENT_REMINDER_24H_STEP above: the step is declared there so enrolment
+  // can derive its lead from the same object the runner reads here.
+  event_reminder: [EVENT_REMINDER_24H_STEP],
 } as const satisfies Record<JourneyName, readonly JourneyStep[]>;

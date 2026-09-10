@@ -1,5 +1,6 @@
 import {describe, expect, it, vi} from "vitest";
 
+import {EVENT_REMINDER_24H_STEP} from "@/config/journeys";
 import type {JourneyEnrollment} from "@/lib/db/repos/journeys";
 import {
   enrollEventReminder,
@@ -28,6 +29,10 @@ describe("event reminder enrolment (programme B-5)", () => {
       instanceKey: `event:${EVENT}`,
       step: "reminder_24h",
     });
+    // The lead is no longer a constant inside reminder-enrollment.ts: it is this
+    // step's offset. Pinning both ends is the point — move the offset and this
+    // instant moves with it, which is the drift the old duplicate hid.
+    expect(EVENT_REMINDER_24H_STEP.offsetDays).toBe(-1);
     expect(enrollment.scheduledAt.toISOString()).toBe("2030-02-28T02:00:00.000Z");
     expect(enrollment.deliveryKey).toBe(`journey:p1:event_reminder:event:${EVENT}:reminder_24h`);
   });
