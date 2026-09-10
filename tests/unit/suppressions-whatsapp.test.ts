@@ -92,10 +92,19 @@ describe("suppressionsRepository.optOutWhatsApp", () => {
   });
 
   /**
-   * The webhook leg clears `whatsapp_opt_in` at `woztell-webhook.ts` before
-   * `recordOptOut` runs this method, so on that path the flag transition is
-   * always already spent and the suppression INSERT is the only half that can
-   * be new. This is the majority first-STOP shape for a member.
+   * The other single-evidence shape: the suppression is new and the flag
+   * transition is not, because `profiles.whatsapp_opt_in` is
+   * `.default(false).notNull()` and a member who never opted in to marketing
+   * has it false already. Their STOP is still a withdrawal — it is what stops
+   * a future blast — and the suppression INSERT is the only half that can
+   * record it.
+   *
+   * This case used to be described as the majority first-STOP shape, on the
+   * grounds that `lib/ai/woztell-webhook.ts` cleared the flag itself before
+   * `recordOptOut` ran this method. That ordering was the C-1 defect and is
+   * gone: the webhook now calls `recordOptOut` FIRST, so a member whose grant
+   * is standing spends the transition here, inside the transaction that writes
+   * the audit row.
    */
   it("audits a first withdrawal that only the suppression records", async () => {
     const recorder = transactionalRecorder([[], [{id: "profile-1"}], [{id: "suppression-1"}], []]);
@@ -114,9 +123,20 @@ describe("suppressionsRepository.optOutWhatsApp", () => {
    * `recordOptOut` runs this leg and the contact leg in two transactions and
    * the webhook route 500s on a throw, so a failure in the second one has
    * Woztell redeliver the same STOP. Neither half is new on that redelivery —
-   * the flag is already false and the suppression conflicts — so there is
-   * nothing to record and a second `consent.whatsapp.revoked` row would be a
-   * fiction.
+   * the flag was cleared by THIS method's own guarded UPDATE on the first
+   * delivery, and the suppression conflicts — so there is nothing to record and
+   * a second `consent.whatsapp.revoked` row would be a fiction.
+   *
+   * Read this case for what it is and not one step further. A redelivery and a
+   * genuine SECOND withdrawal are not the same input and must not be conflated:
+   * this case is silent only because nothing changed, while a member who
+   * re-granted in the portal and said STOP again arrives with the flag true and
+   * audits through the transition (the case two above). The C-1 defect was
+   * exactly that conflation — the webhook pre-cleared the flag, so a real
+   * second withdrawal reached this method looking indistinguishable from a
+   * redelivery and was answered with the same silence.
+   * `tests/unit/woztell-consent-audit.test.ts` drives both through the webhook
+   * and holds them apart.
    */
   it("writes no second audit row when neither the flag nor the suppression changed", async () => {
     const recorder = transactionalRecorder([[], [{id: "profile-1"}], []]);

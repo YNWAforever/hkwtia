@@ -85,9 +85,18 @@ export function createSuppressionsRepository(loadDatabase: AutomationDatabaseLoa
      * Woztell redeliver the same STOP, and an unguarded UPDATE plus an
      * unconditional INSERT wrote a second `consent.whatsapp.revoked` row for a
      * withdrawal already recorded. On that redelivery neither half is new: the
-     * webhook cleared `whatsapp_opt_in` itself before calling
-     * (`lib/ai/woztell-webhook.ts` opt_out branch) and
+     * guarded UPDATE below cleared `whatsapp_opt_in` on the first delivery and
      * `message_suppressions_profile_channel_classification_unique` conflicts.
+     *
+     * That first clause is load-bearing and was not true when this comment was
+     * written. `lib/ai/woztell-webhook.ts` used to clear the flag ITSELF, in an
+     * unaudited `UPDATE`, before calling `recordOptOut` — so the transition was
+     * always already spent by the time this method looked, and a genuine second
+     * withdrawal after a portal re-consent was indistinguishable from a
+     * redelivery: both halves answered "already done" and the audit INSERT below
+     * was skipped for a real consent change. The webhook now calls
+     * `recordOptOut` first and `setWhatsappOptIn` after (where it is a no-op).
+     * Do not reorder it back.
      *
      * A review caught the first attempt at this, which keyed the audit on the
      * suppression INSERT alone. Nothing in the tree DELETEs a suppression

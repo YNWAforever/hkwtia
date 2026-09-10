@@ -9,6 +9,7 @@ import type {WoztellRunRecovery} from "@/lib/ai/woztell-run-recovery";
 import type {NormalizedInbound} from "@/lib/channels/types";
 import {normalizeWhatsAppNumber} from "@/lib/channels/woztell";
 import type {ConversationOwner} from "@/lib/db/repos/conversations";
+import type {WhatsAppEligibility} from "@/lib/db/repos/message-eligibility";
 import type {ConversationHandling} from "@/lib/db/server-schema";
 
 export {
@@ -186,6 +187,23 @@ export type WoztellWebhookProcessorDependencies =
     }>) => Promise<void>;
     /** STOP/取消 → message_suppressions + contact opt-out (D-7). */
     recordOptOut?: (input: Readonly<{profileId: string | null; phoneE164: string}>) => Promise<void>;
+    /**
+     * The C-1 consent review. "May the concierge answer this person?", asked of
+     * `lib/db/repos/message-eligibility.ts` — the one module that answers it for
+     * the staff lane too, over BOTH consent stores. Optional only so the
+     * existing fixtures stay green; `tests/unit/woztell-production-wiring.test.ts`
+     * is what stops that optionality becoming a silently reopened hole.
+     *
+     * `purpose` is the literal `"service"` and not the union: a bot reply is
+     * always an answer inside the customer-service window, and a call site that
+     * could ask for `"marketing"` would be asking the wrong question.
+     */
+    checkSendEligibility?: (input: Readonly<{
+      profileId: string | null;
+      contactId: string | null;
+      phoneE164: string;
+      purpose: "service";
+    }>) => Promise<WhatsAppEligibility>;
     concierge: Readonly<{
       startTurn(input: WoztellConciergeTurnInput): Promise<WoztellConciergeTurn>;
     }>;
@@ -266,6 +284,24 @@ async function turnOutcome(
     }
   }
   return {status: "error"};
+}
+
+/**
+ * The bot lane blocks on a CONSENT answer and never on a reachability one.
+ *
+ * `messageEligibility` reads the STORED number — `profiles.whatsapp_number` is
+ * free text, and a sender whose contact row was never written has no row to read
+ * at all — while this lane is replying into an open session on the number the
+ * message just arrived from, which it already holds. Blocking on `no_number`
+ * here would silence the concierge for every member whose stored number carries
+ * a space, for no consent reason whatsoever.
+ *
+ * A real STOP can never reach us wearing that reason: `decideWhatsApp` tests the
+ * withdrawal FIRST, before it looks at any number, so `no_number` means only
+ * "nothing sendable is recorded", never "somebody told us to stop".
+ */
+function blockedByConsent(eligibility: WhatsAppEligibility): boolean {
+  return eligibility.status === "blocked" && eligibility.reason !== "no_number";
 }
 
 function ownerFor(
@@ -368,10 +404,35 @@ export function createWoztellWebhookProcessor(
       //    opted out returned before this branch, so the second STOP wrote no
       //    suppression and no contact opt-out at all.
       if (normalized.intent === "opt_out") {
+        // The order of these two calls is the C-1 consent review's fix, and it
+        // is load-bearing. `recordOptOut` runs
+        // `suppressionsRepository.optOutWhatsApp`, which treats the
+        // `whatsapp_opt_in` TRANSITION as the second, independent evidence that
+        // a withdrawal is new — the first being the suppression INSERT, which
+        // conflicts forever after the first STOP because nothing in this tree
+        // ever deletes a suppression row (`lib/db/repos/suppressions.ts` says
+        // so). Clearing the flag HERE first spent that evidence on every call,
+        // so a member who re-granted WhatsApp in the portal
+        // (`lib/portal/command-core.ts` sets the flag back) and then said STOP
+        // again had BOTH halves answer "already done": the guarded UPDATE
+        // matched nothing, the INSERT conflicted, and the audit row was skipped.
+        // The contact leg cannot save it either — `recordContact` never runs for
+        // a resolved profile, and where a contact row exists the first STOP
+        // already stamped `whatsapp_opted_out_at`, so `markWhatsAppOptedOut`
+        // returns `already_revoked` and audits nothing. Net: a real, member-
+        // initiated withdrawal invisible in `audit_events`, which is boundary 11.
+        //
+        // `setWhatsappOptIn` stays, after, because `recordOptOut` is optional
+        // and it is the only thing that clears the flag for a wiring without it.
+        // In production it is now a no-op: `optOutWhatsApp`'s own guarded UPDATE
+        // has already written the same value, in the same transaction as the
+        // audit row. Running it second also means a throw in `recordOptOut` can
+        // no longer leave the flag cleared with nothing recording why — the
+        // state that broke the boundary in the first place.
+        await dependencies.recordOptOut?.({profileId: claim.profileId, phoneE164: sender});
         if (claim.profileId) {
           await dependencies.setWhatsappOptIn(claim.profileId, false);
         }
-        await dependencies.recordOptOut?.({profileId: claim.profileId, phoneE164: sender});
         await dependencies.markCompleted?.(normalized.providerMessageId);
         return {status: "opted_out"};
       }
@@ -398,9 +459,31 @@ export function createWoztellWebhookProcessor(
         return {status: "human_handled"};
       }
 
-      // 3. The opt-in gate, unchanged, now guarding only the BOT lane it was
-      //    written for.
-      if (!claim.whatsappOptIn) {
+      // 3. The consent gate, guarding only the BOT lane it was written for — and
+      //    no longer answering the question from `claim.whatsappOptIn`.
+      //
+      //    That flag is `profile?.whatsappOptIn ?? true`, so a sender with no
+      //    profile arrived here opted in by construction, and this lane read
+      //    nothing else: a PROSPECT who said STOP — their withdrawal recorded on
+      //    `contacts.whatsapp_opted_out_at`, the only column that can hold it,
+      //    because `message_suppressions.profile_id` is NOT NULL — got a
+      //    concierge reply the next time they wrote. The `?? true` predates C-1;
+      //    C-1 made it materially larger by giving prospects a real contact lane.
+      //
+      //    The decision now comes from `messageEligibility`, the SAME module the
+      //    staff lane asks, over the same facts loader and the same precedence
+      //    table, so the two lanes cannot disagree about one person. The flag is
+      //    still passed to the delivery leg below, where it means something else
+      //    entirely: the adapter refuses to send when it is false
+      //    (`recipientNumber` in lib/channels/woztell.ts), and `?? true` is what
+      //    lets the concierge answer a prospect at all.
+      const consent = await dependencies.checkSendEligibility?.({
+        profileId: claim.profileId,
+        contactId,
+        phoneE164: sender,
+        purpose: "service",
+      });
+      if (consent ? blockedByConsent(consent) : !claim.whatsappOptIn) {
         await dependencies.markCompleted?.(normalized.providerMessageId);
         return {status: "opted_out"};
       }

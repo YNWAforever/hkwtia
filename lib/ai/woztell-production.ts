@@ -13,6 +13,7 @@ import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {agentToolsRepository} from "@/lib/db/repos/agent-tools";
 import {contactsRepository, contactWriterActor} from "@/lib/db/repos/contacts";
 import {conversationsRepository} from "@/lib/db/repos/conversations";
+import {messageEligibilityRepository} from "@/lib/db/repos/message-eligibility";
 import {suppressionsRepository, unsubscribeActor} from "@/lib/db/repos/suppressions";
 import {
   createPostgresWoztellStore,
@@ -221,6 +222,23 @@ export function createProductionWoztellProcessorDependencies(
         });
       }
       return {id: contact.id};
+    },
+    // The C-1 consent review. The bot lane's "may we send?" goes to the SAME
+    // module the staff lane asks, so a withdrawal recorded on either consent
+    // store blocks both lanes. NOT a spread, for the reason its siblings above
+    // are not: the repository's door takes a capability actor as its first
+    // parameter, and minting it here — one call site, in server-only wiring — is
+    // what keeps the `unique symbol` a gate rather than a claim.
+    async checkSendEligibility(input) {
+      return await messageEligibilityRepository.whatsAppEligibilityForWebhook(
+        woztellWebhookActor(),
+        {
+          profileId: input.profileId,
+          contactId: input.contactId,
+          phoneE164: input.phoneE164,
+          purpose: input.purpose,
+        },
+      );
     },
     async recordOptOut(input) {
       if (input.profileId) {

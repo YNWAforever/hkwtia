@@ -45,7 +45,13 @@ export function woztellWebhookActor(): WoztellWebhookActor {
   });
 }
 
-function requireWoztellWebhook(actor: unknown): asserts actor is WoztellWebhookActor {
+/**
+ * Exported for `lib/db/repos/message-eligibility.ts`, whose bot-lane door is
+ * gated by this same capability. The SYMBOL stays private, which is what makes
+ * the gate real: exporting the predicate lets a second repository check the
+ * capability, and still nothing outside this module can mint one.
+ */
+export function requireWoztellWebhook(actor: unknown): asserts actor is WoztellWebhookActor {
   const candidate = actor as Partial<WoztellWebhookActor> | null;
   if (
     !candidate

@@ -3,6 +3,7 @@ import {describe, expect, it, vi} from "vitest";
 import {z} from "zod";
 
 import {createMessageEligibilityRepository} from "@/lib/db/repos/message-eligibility";
+import {woztellWebhookActor} from "@/lib/db/repos/woztell-inbound-events";
 import {ANONYMOUS_ACTOR, type Actor} from "@/lib/membership/lifecycle";
 
 const dialect = new PgDialect();
@@ -309,5 +310,63 @@ describe("whatsAppEligibility precedence", () => {
     for (const statement of database.statements) {
       expect(statement.sql.split("(").length).toBe(statement.sql.split(")").length);
     }
+  });
+});
+
+/**
+ * The bot lane's door, added by the C-1 consent review.
+ *
+ * `lib/ai/woztell-webhook.ts` decided the bot's opt-in question from
+ * `profile?.whatsappOptIn ?? true` — a sender with no profile was always
+ * "opted in", and the lane never read `contacts.whatsapp_opted_out_at` at all,
+ * so a prospect who said STOP was answered by the concierge the next time they
+ * wrote. The fix is not a second consent reader: it is this door onto the SAME
+ * private facts loader and the SAME precedence, so the answer the bot gets and
+ * the answer staff get can never disagree.
+ *
+ * A separate door rather than a widened `requireAdmin`, for the reason the
+ * module already states about its two existing gates: the webhook holds a
+ * capability, not a session, and a gate that admitted both would be forgeable
+ * from either side.
+ */
+describe("whatsAppEligibilityForWebhook (the bot lane's door)", () => {
+  it("refuses every actor that is not the Woztell webhook capability", async () => {
+    const loadDatabase = vi.fn();
+    const repository = createMessageEligibilityRepository(loadDatabase as never);
+
+    for (const forged of [admin, member, system, ANONYMOUS_ACTOR, {kind: "woztell-webhook", userId: null}, null]) {
+      await expect(repository.whatsAppEligibilityForWebhook(forged, input())).rejects.toThrow("FORBIDDEN");
+    }
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
+  it("parses the input before the database is opened", async () => {
+    const loadDatabase = vi.fn();
+    const repository = createMessageEligibilityRepository(loadDatabase as never);
+
+    await expect(repository.whatsAppEligibilityForWebhook(woztellWebhookActor(), input({purpose: "promotional"})))
+      .rejects.toBeInstanceOf(z.ZodError);
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
+  it("answers a prospect's recorded STOP with the same precedence the staff lane gets", async () => {
+    const database = factsDatabase({contact: contactRow({whatsappOptedOutAt: new Date("2026-09-01T00:00:00Z")})});
+    const repository = createMessageEligibilityRepository(async () => database.database);
+
+    await expect(repository.whatsAppEligibilityForWebhook(woztellWebhookActor(), input({purpose: "service"})))
+      .resolves.toEqual({status: "blocked", reason: "opted_out"});
+  });
+
+  /**
+   * The population Phase C exists to serve. `contacts.whatsapp_opt_in` is false
+   * for every prospect who has ever written in, so a door that answered
+   * `not_opted_in` here would silence the concierge entirely.
+   */
+  it("lets the concierge answer a prospect who has not withdrawn", async () => {
+    const database = factsDatabase({contact: contactRow({whatsappOptIn: false})});
+    const repository = createMessageEligibilityRepository(async () => database.database);
+
+    await expect(repository.whatsAppEligibilityForWebhook(woztellWebhookActor(), input({purpose: "service"})))
+      .resolves.toEqual({status: "eligible", phoneE164: phone});
   });
 });

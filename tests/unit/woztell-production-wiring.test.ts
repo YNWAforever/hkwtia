@@ -78,6 +78,11 @@ describe("production WOZTELL processor wiring (C-1 Task 4)", () => {
     "stampOutbound",
     "recordContact",
     "recordOptOut",
+    // The C-1 consent review. Forgetting this one re-opens the hole it closed
+    // in silence: the bot lane falls back to `claim.whatsappOptIn`, which is
+    // `?? true` for every sender with no profile, and a prospect who said STOP
+    // is answered by the concierge again.
+    "checkSendEligibility",
     "claimInbound",
     "resolveProfile",
     "markCompleted",

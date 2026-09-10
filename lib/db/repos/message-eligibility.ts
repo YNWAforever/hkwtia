@@ -7,6 +7,7 @@ import {z} from "zod";
 import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
+import {requireWoztellWebhook} from "@/lib/db/repos/woztell-inbound-events";
 import {contacts, memberships, messageSuppressions, profiles} from "@/lib/db/server-schema";
 import type {Actor} from "@/lib/membership/lifecycle";
 
@@ -340,6 +341,28 @@ function decideWhatsApp(
   return {status: "eligible", phoneE164};
 }
 
+/**
+ * PRIVATE. The answer, once, for every door. Both gates below authorize and
+ * parse first and then call this — a second copy of the read-and-decide body is
+ * exactly how two doors start disagreeing about one person.
+ */
+async function answerWhatsApp(
+  loadDatabase: AutomationDatabaseLoader,
+  parsed: z.infer<typeof eligibilityInputSchema>,
+): Promise<WhatsAppEligibility> {
+  if (parsed.profileId === null && parsed.contactId === null) {
+    return {status: "blocked", reason: "no_number"};
+  }
+  const database = await loadDatabase();
+  const member = parsed.profileId === null
+    ? null
+    : await loadRecipientFacts(database, {kind: "member", profileId: parsed.profileId});
+  const contact = parsed.contactId === null
+    ? null
+    : await loadRecipientFacts(database, {kind: "contact", contactId: parsed.contactId});
+  return decideWhatsApp(parsed.purpose, member, contact);
+}
+
 export function createMessageEligibilityRepository(
   loadDatabase: AutomationDatabaseLoader = defaultDatabaseLoader,
 ) {
@@ -359,18 +382,29 @@ export function createMessageEligibilityRepository(
      */
     async whatsAppEligibility(actor: Actor, input: unknown): Promise<WhatsAppEligibility> {
       requireAdmin(actor);
-      const parsed = eligibilityInputSchema.parse(input);
-      if (parsed.profileId === null && parsed.contactId === null) {
-        return {status: "blocked", reason: "no_number"};
-      }
-      const database = await loadDatabase();
-      const member = parsed.profileId === null
-        ? null
-        : await loadRecipientFacts(database, {kind: "member", profileId: parsed.profileId});
-      const contact = parsed.contactId === null
-        ? null
-        : await loadRecipientFacts(database, {kind: "contact", contactId: parsed.contactId});
-      return decideWhatsApp(parsed.purpose, member, contact);
+      return await answerWhatsApp(loadDatabase, eligibilityInputSchema.parse(input));
+    },
+
+    /**
+     * The BOT lane's door, added by the C-1 consent review.
+     *
+     * `lib/ai/woztell-webhook.ts` decided the concierge's opt-in question from
+     * `profile?.whatsappOptIn ?? true`. A sender with no profile was therefore
+     * always opted in, and the lane consulted `contacts.whatsapp_opted_out_at`
+     * nowhere at all — so a prospect who said STOP was answered by the bot the
+     * next time they wrote. The fix is not a second consent reader with its own
+     * precedence; it is this door onto the same `loadRecipientFacts` and the same
+     * `decideWhatsApp`, so the answer the bot gets and the answer staff get
+     * cannot drift apart.
+     *
+     * A separate door rather than a widened `requireAdmin`, for the reason the
+     * module header already gives about its two other gates: the webhook holds a
+     * capability minted in server-only wiring, not a session, and one gate that
+     * admitted both would be forgeable from whichever side is weaker.
+     */
+    async whatsAppEligibilityForWebhook(actor: unknown, input: unknown): Promise<WhatsAppEligibility> {
+      requireWoztellWebhook(actor);
+      return await answerWhatsApp(loadDatabase, eligibilityInputSchema.parse(input));
     },
     // C2 Task 3 appends `factsFor(actor, recipient)` here, gated by
     // `requireDeliveryActor`, over `loadRecipientFacts` above.
