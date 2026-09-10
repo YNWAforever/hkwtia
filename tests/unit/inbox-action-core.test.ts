@@ -315,7 +315,13 @@ describe("sendInboxReply", () => {
     const live = process.env.RUN_LIVE_WOZTELL;
     delete process.env.RUN_LIVE_WOZTELL;
     try {
-      const {calls, deps} = dependencies({channel: createWoztellAdapter({})});
+      // The adapter MUST read the same pinned clock the flow does. Left on its
+      // wall-clock default it compares `NOW - 90min` (the fixed instant
+      // `queued.lastInboundAt` carries) against today's date, so this test would
+      // pass for 24 hours and then fail with WINDOW_CLOSED for a reason that has
+      // nothing to do with the code — and the cheapest-looking repair would be to
+      // weaken the one assertion that proves the D-4 no-credentials property.
+      const {calls, deps} = dependencies({channel: createWoztellAdapter({}, undefined, () => NOW)});
       await expect(sendInboxReply(admin, sessionReply, deps)).resolves.toEqual({status: "sent", messageId: MESSAGE_ID});
       expect(calls.settled).toEqual([{
         outboundKey: outboundKeyFor(sessionReply),
