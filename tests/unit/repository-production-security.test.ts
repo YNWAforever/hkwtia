@@ -921,6 +921,18 @@ describe("production repository security boundaries", () => {
         origin: "MANUAL",
         sentAt: securityNow,
       })).rejects.toThrow("FORBIDDEN");
+      // Task 4's two staff-task writers reach `staff_tasks` — the same table the
+      // admin panel resolves from — so they carry the same gate as the message
+      // writers, not a comment claiming the route's HMAC covers them.
+      await expect(events.notifyHumanLane(forged as never, {
+        conversationId: "11111111-1111-4111-8111-111111111111",
+        assignedToProfileId: null,
+        locale: "en",
+      })).rejects.toThrow("FORBIDDEN");
+      await expect(events.notifyMemberIdConflict(forged as never, {
+        whatsappMemberId: "member-9001",
+        locale: "en",
+      })).rejects.toThrow("FORBIDDEN");
       expect(loadDatabase).not.toHaveBeenCalled();
     },
   );

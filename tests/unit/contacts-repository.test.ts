@@ -1,6 +1,32 @@
+import {PgDialect} from "drizzle-orm/pg-core";
 import {describe, expect, it, vi} from "vitest";
 
 import {contactWriterActor, createContactsRepository} from "@/lib/db/repos/contacts";
+
+const dialect = new PgDialect();
+
+/** A fake whose statements can be read, for the two-statement member-id write. */
+function recordingDatabase(
+  responses: readonly (Record<string, unknown>[] | Error)[],
+) {
+  const statements: ReturnType<PgDialect["sqlToQuery"]>[] = [];
+  const queue = [...responses];
+  const execute = vi.fn(async (query: never) => {
+    statements.push(dialect.sqlToQuery(query));
+    const next = queue.shift() ?? [];
+    if (next instanceof Error) throw next;
+    return next;
+  });
+  return {statements, execute, database: {execute} as never};
+}
+
+function duplicateKeyError() {
+  return Object.assign(new Error("duplicate key value"), {code: "23505"});
+}
+
+function normalized(statement: string | undefined): string {
+  return (statement ?? "").replace(/\s+/g, " ").trim().toLowerCase();
+}
 
 function fakeDatabase(rows: Record<string, unknown>[] = []) {
   const execute = vi.fn(async () => rows);
@@ -59,6 +85,71 @@ describe("contactsRepository", () => {
       phoneE164: "+85291234567", locale: "en", receivedAt: new Date("2026-09-08T00:00:00Z"),
     });
     expect(result).toEqual({id: "c-2", disposition: "upserted"});
+  });
+
+  /**
+   * C-1 Task 4. `upsertFromWhatsApp` conflicts on `contacts_phone_unique` only,
+   * while `contacts_whatsapp_member_unique` is a SEPARATE partial unique index
+   * and therefore not the conflict target. Carrying the member id in the upsert
+   * meant an inbound whose id already belonged to a different phone row raised
+   * 23505 → a 500 from the webhook route → Woztell retrying that sender's
+   * message forever, so that sender's messages never persisted at all. Now the
+   * member id is a second, separately guarded statement.
+   */
+  describe("whatsapp_member_id is written outside the upsert", () => {
+    it("keeps the member id out of the INSERT and its ON CONFLICT clause", async () => {
+      const {database, statements} = recordingDatabase([[{id: "c-4"}], [{id: "c-4"}]]);
+      const repository = createContactsRepository(async () => database);
+
+      const result = await repository.upsertFromWhatsApp(contactWriterActor("whatsapp"), {
+        phoneE164: "+85291234567", locale: "en", receivedAt: new Date("2026-09-10T00:00:00Z"),
+        whatsappMemberId: "member-9001",
+      });
+
+      expect(result).toEqual({id: "c-4", disposition: "upserted", memberIdLink: "linked"});
+      const upsert = normalized(statements[0]?.sql);
+      expect(upsert).toMatch(/^insert into "contacts"/);
+      expect(upsert).not.toContain("whatsapp_member_id");
+      const link = normalized(statements[1]?.sql);
+      expect(link).toMatch(/^update "contacts"/);
+      expect(link).toContain(`"contacts"."whatsapp_member_id" is null`);
+      expect(link).toContain("not exists (");
+      expect(statements[1]?.params).toEqual(expect.arrayContaining(["member-9001", "c-4"]));
+    });
+
+    it("reports a conflict instead of throwing, because a 500 here is an infinite Woztell retry", async () => {
+      const {database} = recordingDatabase([[{id: "c-5"}], duplicateKeyError()]);
+      const repository = createContactsRepository(async () => database);
+
+      await expect(repository.upsertFromWhatsApp(contactWriterActor("whatsapp"), {
+        phoneE164: "+85291234567", locale: "en", receivedAt: new Date("2026-09-10T00:00:00Z"),
+        whatsappMemberId: "member-9001",
+      })).resolves.toEqual({id: "c-5", disposition: "upserted", memberIdLink: "conflict"});
+    });
+
+    it("still surfaces a failure that is not the member-id race", async () => {
+      const {database} = recordingDatabase([
+        [{id: "c-6"}],
+        Object.assign(new Error("connection terminated"), {code: "57P01"}),
+      ]);
+      const repository = createContactsRepository(async () => database);
+
+      await expect(repository.upsertFromWhatsApp(contactWriterActor("whatsapp"), {
+        phoneE164: "+85291234567", locale: "en", receivedAt: new Date("2026-09-10T00:00:00Z"),
+        whatsappMemberId: "member-9001",
+      })).rejects.toThrow("connection terminated");
+    });
+
+    it("runs one statement when the payload carries no member id", async () => {
+      const {database, statements} = recordingDatabase([[{id: "c-7"}]]);
+      const repository = createContactsRepository(async () => database);
+
+      await repository.upsertFromWhatsApp(contactWriterActor("whatsapp"), {
+        phoneE164: "+85291234567", locale: "en", receivedAt: new Date("2026-09-10T00:00:00Z"),
+      });
+
+      expect(statements).toHaveLength(1);
+    });
   });
 
   it("marks a phone opted out", async () => {

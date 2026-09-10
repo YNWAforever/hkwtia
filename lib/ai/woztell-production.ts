@@ -22,6 +22,10 @@ import {
   createWoztellDeliveryOutboxRepository,
 } from "@/lib/db/repos/woztell-delivery-outbox";
 import {
+  createWoztellInboundEventsRepository,
+  woztellWebhookActor,
+} from "@/lib/db/repos/woztell-inbound-events";
+import {
   createWoztellProfileResolverRepository,
 } from "@/lib/db/repos/woztell-profile-resolver";
 import {
@@ -125,13 +129,42 @@ export function createProductionWoztellProcessorDependencies(
   const profileResolver = createWoztellProfileResolverRepository();
   const recovery = createWoztellRunRecoveryRepository();
   const deliveryOutbox = createWoztellDeliveryOutboxRepository();
+  const inboundEvents = createWoztellInboundEventsRepository(now);
   const appOrigin = env.appUrl;
   return {
     channel,
+    // Spread order is load-bearing and must not be tidied: `store.resolveProfile`
+    // filters `WHERE profiles.whatsapp_opt_in = true` and
+    // `profileResolver.resolveProfile` does not. The later spread wins, and
+    // reversing these two turns an opted-out member into a stranger — a contact
+    // row is created for them and the concierge answers. Anything added below
+    // must not shadow either.
     ...store,
     ...profileResolver,
     ...recovery,
     ...deliveryOutbox,
+    // C-1 Task 4. NOT a spread: S-14 gives every method on this repository a
+    // capability actor as its first parameter, so the shapes do not match the
+    // processor's `(event) => …` dependencies. Minting the actor here — one call
+    // site, in server-only wiring — is what keeps the `unique symbol` a real gate
+    // rather than a claim.
+    async recordDeliveryStatus(event) {
+      const {matched} = await inboundEvents.recordDeliveryStatus(
+        woztellWebhookActor(),
+        event,
+      );
+      return {matched};
+    },
+    async recordOutboundEcho(event) {
+      const {disposition} = await inboundEvents.recordOutboundEcho(
+        woztellWebhookActor(),
+        event,
+      );
+      return {disposition};
+    },
+    async notifyAssignee(input) {
+      await inboundEvents.notifyHumanLane(woztellWebhookActor(), input);
+    },
     anonymousOwnerHash(normalizedSender) {
       const secret = env.conciergeCookieSecret ?? env.woztellWebhookSecret ?? "";
       return createHmac("sha256", secret)
@@ -140,9 +173,24 @@ export function createProductionWoztellProcessorDependencies(
     },
     approvedTemplateKeys: approvedTemplateKeys(),
     async recordContact(input) {
-      await contactsRepository.upsertFromWhatsApp(contactWriterActor("whatsapp"), {
-        phoneE164: input.phoneE164, locale: input.locale, receivedAt: input.receivedAt,
+      const contact = await contactsRepository.upsertFromWhatsApp(contactWriterActor("whatsapp"), {
+        phoneE164: input.phoneE164,
+        locale: input.locale,
+        receivedAt: input.receivedAt,
+        whatsappMemberId: input.whatsappMemberId,
       });
+      // The member-id write is guarded and refuses rather than raising 23505,
+      // because a 500 from this route makes Woztell retry that sender's message
+      // forever. A refusal nobody is told about is the same as no guard at all,
+      // so it becomes a staff task — deciding which contact keeps the id is C2
+      // Task 5's merge-candidate work, not the webhook's.
+      if (contact.memberIdLink === "conflict" && input.whatsappMemberId) {
+        await inboundEvents.notifyMemberIdConflict(woztellWebhookActor(), {
+          whatsappMemberId: input.whatsappMemberId,
+          locale: input.locale,
+        });
+      }
+      return {id: contact.id};
     },
     async recordOptOut(input) {
       if (input.profileId) {

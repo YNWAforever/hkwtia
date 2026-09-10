@@ -14,6 +14,7 @@ import {
   conversations,
   messages,
   profiles,
+  staffTasks,
 } from "@/lib/db/server-schema";
 
 /**
@@ -86,11 +87,37 @@ export type OutboundEchoResult = Readonly<{
   disposition: "adopted" | "inserted" | "duplicate";
 }>;
 
+export type HumanLaneNotification = Readonly<{
+  conversationId: string;
+  assignedToProfileId: string | null;
+  locale: "en" | "zh-HK";
+}>;
+
+export type MemberIdConflictNotification = Readonly<{
+  whatsappMemberId: string;
+  locale: "en" | "zh-HK";
+}>;
+
+export type StaffTaskNotificationResult = Readonly<{
+  disposition: "created" | "existing";
+}>;
+
 const deliveryStatusSchema = z.object({
   providerMessageId: z.string().trim().min(1).max(300),
   status: z.enum(["sent", "delivered", "read", "failed"]),
   errorCode: z.string().trim().min(1).max(200).nullable(),
   occurredAt: z.coerce.date(),
+}).strict();
+
+const humanLaneSchema = z.object({
+  conversationId: z.string().uuid(),
+  assignedToProfileId: z.string().trim().min(1).max(200).nullable(),
+  locale: z.enum(["en", "zh-HK"]),
+}).strict();
+
+const memberIdConflictSchema = z.object({
+  whatsappMemberId: z.string().trim().min(1).max(200),
+  locale: z.enum(["en", "zh-HK"]),
 }).strict();
 
 const outboundEchoSchema = z.object({
@@ -376,7 +403,100 @@ export function createWoztellInboundEventsRepository(
         return {disposition: "inserted"};
       });
     },
+
+    /**
+     * S-13. A person owns this thread and a message just landed on it, so tell
+     * them — with no agent run, no `runId` and, for a prospect, no profile at
+     * all. `agentToolsRepository.createStaffTask` cannot express any of that:
+     * it opens with `requireConciergeAgent`, parses `kind` against a closed
+     * `z.enum` of five `concierge_*` values, throws
+     * `INVALID_AGENT_STAFF_TASK_PROFILE` when the profile is not the actor's,
+     * and derives `dedupeKey` rather than accepting one. The generic
+     * `staffTasksRepository.createOnce` throws
+     * `AUTOMATION_STAFF_TASK_PROFILE_REQUIRED` for a null profile — the prospect
+     * case exactly. So this is the direct INSERT shape
+     * `campaign-recipient-delivery.ts`, `journeys.ts` and `dunning-lapse.ts`
+     * already use: `staff_tasks.profile_id` is nullable, `kind` is free text,
+     * and `components/admin/task-table.tsx` renders `kind` raw, so a new kind
+     * needs no label map and no bundle string.
+     */
+    async notifyHumanLane(
+      actor: unknown,
+      input: HumanLaneNotification,
+    ): Promise<StaffTaskNotificationResult> {
+      requireWoztellWebhook(actor);
+      const parsed = humanLaneSchema.parse(input);
+      const database = await loadDatabase();
+      // One task per conversation: a burst of five messages must not become five
+      // tasks, and resolving the task lets the NEXT burst raise a new one.
+      return await insertStaffTask(database, {
+        profileId: parsed.assignedToProfileId,
+        kind: "inbox_human_reply_waiting",
+        dedupeKey: `inbox-waiting:${parsed.conversationId}`,
+        summaryCode: "human_requested",
+        context: {conversationId: parsed.conversationId, locale: parsed.locale},
+      });
+    },
+
+    /**
+     * The guarded `contacts.whatsapp_member_id` write refuses when another
+     * contact already holds the id, and the concurrent race it cannot close
+     * raises 23505. Both are swallowed — a webhook that 500s makes Woztell retry
+     * that sender's message forever — so this is what stops "swallowed" meaning
+     * "silent". Keyed on the contested id, because the conflict is about the id
+     * and not about either row; deciding which contact should keep it is C2
+     * Task 5's merge-candidate work.
+     */
+    async notifyMemberIdConflict(
+      actor: unknown,
+      input: MemberIdConflictNotification,
+    ): Promise<StaffTaskNotificationResult> {
+      requireWoztellWebhook(actor);
+      const parsed = memberIdConflictSchema.parse(input);
+      const database = await loadDatabase();
+      return await insertStaffTask(database, {
+        profileId: null,
+        kind: "inbox_member_id_conflict",
+        dedupeKey: `inbox-member-id-conflict:${parsed.whatsappMemberId}`,
+        summaryCode: "whatsapp_member_id_conflict",
+        // Only the keys `staff_tasks.context` declares. The contested id lives in
+        // the dedupe key rather than in an undeclared field a typed reader would
+        // never see.
+        context: {reasonCode: "whatsapp_member_id_conflict", locale: parsed.locale},
+      });
+    },
   };
+}
+
+/**
+ * `ON CONFLICT DO NOTHING RETURNING id` over `staff_tasks_dedupe_key_unique`:
+ * a row back means we created it, nothing back means one is already open.
+ */
+async function insertStaffTask(
+  database: Pick<AutomationDatabase, "execute">,
+  task: Readonly<{
+    profileId: string | null;
+    kind: string;
+    dedupeKey: string;
+    summaryCode: string;
+    context: Readonly<Record<string, unknown>>;
+  }>,
+): Promise<StaffTaskNotificationResult> {
+  const created = rowsFrom(await database.execute(sql`
+    INSERT INTO ${staffTasks}
+      (profile_id, journey_state_id, kind, dedupe_key, summary_code, context)
+    VALUES (
+      ${task.profileId},
+      NULL,
+      ${task.kind},
+      ${task.dedupeKey},
+      ${task.summaryCode},
+      ${JSON.stringify(task.context)}::jsonb
+    )
+    ON CONFLICT DO NOTHING
+    RETURNING ${staffTasks.id} AS id
+  `))[0];
+  return {disposition: created ? "created" : "existing"};
 }
 
 /**

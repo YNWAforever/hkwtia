@@ -47,7 +47,28 @@ const whatsappInputSchema = z.object({
   whatsappMemberId: z.string().trim().min(1).max(200).nullable().optional().default(null),
 }).strict();
 
-export type ContactWriteResult = Readonly<{id: string; disposition: "upserted"}>;
+/**
+ * C-1 Task 4. `memberIdLink` is present only when the caller supplied a Woztell
+ * member id, so a caller that does not care keeps the old two-field shape. It is
+ * how the Woztell wiring learns that a link was REFUSED — the repository cannot
+ * file the staff task itself without reaching across into another repository's
+ * table, and a refusal nobody is told about is the same as no guard at all.
+ */
+export type ContactMemberIdLink = "linked" | "unchanged" | "conflict";
+export type ContactWriteResult = Readonly<{
+  id: string;
+  disposition: "upserted";
+  memberIdLink?: ContactMemberIdLink;
+}>;
+
+function duplicateKey(error: unknown): boolean {
+  return Boolean(
+    error
+    && typeof error === "object"
+    && "code" in error
+    && error.code === "23505",
+  );
+}
 
 function rowsFrom(result: unknown): Record<string, unknown>[] {
   if (Array.isArray(result)) return result as Record<string, unknown>[];
@@ -93,23 +114,38 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
       return {id: String(row.id), disposition: "upserted"};
     },
 
-    /** Unknown WhatsApp sender: stored to reply (D-6); marketing opt-in stays false. */
+    /**
+     * Unknown WhatsApp sender: stored to reply (D-6); marketing opt-in stays false.
+     *
+     * C-1 Task 4 took `whatsapp_member_id` OUT of this statement. The ON CONFLICT
+     * target is `contacts_phone_unique`; `contacts_whatsapp_member_unique` is a
+     * separate partial unique index and is therefore not a conflict target at
+     * all. An inbound whose member id already belonged to a different phone row
+     * raised 23505 here, which the webhook route turns into a 500, which makes
+     * Woztell retry that sender's message forever — so the one identity we were
+     * trying to record cost us every message from that sender.
+     */
     async upsertFromWhatsApp(actor: unknown, input: unknown): Promise<ContactWriteResult> {
       requireContactWriter(actor);
       const parsed = whatsappInputSchema.parse(input);
       const database = await loadDatabase();
       const row = rowsFrom(await database.execute(sql`
         INSERT INTO ${contacts}
-          (phone_e164, whatsapp_member_id, locale, source, last_inbound_at)
-        VALUES (${parsed.phoneE164}, ${parsed.whatsappMemberId}, ${parsed.locale}, 'whatsapp', ${parsed.receivedAt})
+          (phone_e164, locale, source, last_inbound_at)
+        VALUES (${parsed.phoneE164}, ${parsed.locale}, 'whatsapp', ${parsed.receivedAt})
         ON CONFLICT (phone_e164) WHERE phone_e164 IS NOT NULL DO UPDATE SET
-          whatsapp_member_id = COALESCE(${contacts.whatsappMemberId}, EXCLUDED.whatsapp_member_id),
           last_inbound_at = GREATEST(COALESCE(${contacts.lastInboundAt}, EXCLUDED.last_inbound_at), EXCLUDED.last_inbound_at),
           updated_at = now()
         RETURNING ${contacts.id} AS id
       `))[0];
       if (!row) throw new Error("CONTACT_UPSERT_FAILED");
-      return {id: String(row.id), disposition: "upserted"};
+      const id = String(row.id);
+      if (!parsed.whatsappMemberId) return {id, disposition: "upserted"};
+      return {
+        id,
+        disposition: "upserted",
+        memberIdLink: await linkWhatsAppMemberId(database, id, parsed.whatsappMemberId),
+      };
     },
 
     async markWhatsAppOptedOut(actor: unknown, phoneE164: string): Promise<void> {
@@ -123,6 +159,42 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
       `);
     },
   };
+}
+
+/**
+ * The second, separately guarded half of the member-id write. `NOT EXISTS`
+ * refuses the id when another contact already holds it, so the partial unique
+ * index is never reached in the ordinary case; the `try`/`catch` closes the
+ * concurrent race that predicate cannot, because two inbound webhooks for the
+ * same member arriving together both pass it. Neither path throws: the caller
+ * turns `conflict` into a staff task, and a thrown error here would be a 500 and
+ * an endless Woztell retry of a message we have already stored.
+ *
+ * `whatsapp_member_id IS NULL` means the first identity we learn wins, matching
+ * the COALESCE the phone upsert uses: a later payload cannot overwrite it.
+ */
+async function linkWhatsAppMemberId(
+  database: AutomationDatabase,
+  id: string,
+  memberId: string,
+): Promise<ContactMemberIdLink> {
+  try {
+    const linked = rowsFrom(await database.execute(sql`
+      UPDATE ${contacts}
+      SET whatsapp_member_id = ${memberId}, updated_at = now()
+      WHERE ${contacts.id} = ${id}
+        AND ${contacts.whatsappMemberId} IS NULL
+        AND NOT EXISTS (
+          SELECT 1 FROM ${contacts} AS other
+          WHERE other.whatsapp_member_id = ${memberId}
+        )
+      RETURNING ${contacts.id} AS id
+    `))[0];
+    return linked ? "linked" : "unchanged";
+  } catch (error) {
+    if (!duplicateKey(error)) throw error;
+    return "conflict";
+  }
 }
 
 export type ContactsRepository = ReturnType<typeof createContactsRepository>;

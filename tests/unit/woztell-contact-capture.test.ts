@@ -5,7 +5,9 @@ import {createWoztellWebhookProcessor, type WoztellWebhookProcessorDependencies}
 const RECEIVED_AT = new Date("2026-09-08T01:00:00.000Z");
 
 function dependencies(text: string, profile: null | {id: string; displayName: string; locale: "en"; whatsappOptIn: boolean}) {
-  const recordContact = vi.fn(async () => undefined);
+  // C-1 Task 4: recordContact now returns the contact id, because claimInbound
+  // needs it for conversations.contact_id (D-6/S-3: a link, not an owner arm).
+  const recordContact = vi.fn(async () => ({id: "contact-1"}));
   const recordOptOut = vi.fn(async () => undefined);
   const setWhatsappOptIn = vi.fn(async () => undefined);
   const deps: WoztellWebhookProcessorDependencies = {
@@ -16,7 +18,7 @@ function dependencies(text: string, profile: null | {id: string; displayName: st
       sendTemplateMessage: vi.fn(async () => ({status: "sent" as const, providerId: "p2"})),
     },
     resolveProfile: vi.fn(async () => profile),
-    claimInbound: vi.fn(async (input) => ({status: "accepted" as const, conversationId: "11111111-1111-4111-8111-111111111111", owner: input.owner, profileId: input.profileId, locale: input.locale, memberName: input.memberName, whatsappOptIn: input.whatsappOptIn, handling: "bot" as const, lastInboundAt: null})),
+    claimInbound: vi.fn(async (input) => ({status: "accepted" as const, conversationId: "11111111-1111-4111-8111-111111111111", owner: input.owner, profileId: input.profileId, locale: input.locale, memberName: input.memberName, whatsappOptIn: input.whatsappOptIn, handling: "bot" as const, assignedToProfileId: null, lastInboundAt: null})),
     recordContact,
     recordOptOut,
     setWhatsappOptIn,
@@ -34,7 +36,7 @@ describe("WOZTELL contact capture (programme D-6)", () => {
   it("records an unknown sender as a contact before the concierge runs", async () => {
     const {deps, recordContact} = dependencies("Hello", null);
     await createWoztellWebhookProcessor(deps).process({});
-    expect(recordContact).toHaveBeenCalledWith({phoneE164: "+85291234567", locale: "en", receivedAt: RECEIVED_AT});
+    expect(recordContact).toHaveBeenCalledWith({phoneE164: "+85291234567", locale: "en", receivedAt: RECEIVED_AT, whatsappMemberId: null});
   });
 
   it("does not create a contact for a recognised member", async () => {

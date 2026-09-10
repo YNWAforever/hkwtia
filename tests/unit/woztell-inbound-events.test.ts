@@ -91,6 +91,29 @@ describe("WOZTELL inbound event writers (C-1 Task 3)", () => {
       expect(loadDatabase).not.toHaveBeenCalled();
     });
 
+    it.each(forgedActors)("refuses a %s actor on notifyHumanLane before opening the database", async (_name, actor) => {
+      const loadDatabase = vi.fn();
+      const events = createWoztellInboundEventsRepository(() => NOW, loadDatabase);
+
+      await expect(events.notifyHumanLane(actor as never, {
+        conversationId: CONVERSATION_ID,
+        assignedToProfileId: null,
+        locale: "en",
+      })).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    });
+
+    it.each(forgedActors)("refuses a %s actor on notifyMemberIdConflict before opening the database", async (_name, actor) => {
+      const loadDatabase = vi.fn();
+      const events = createWoztellInboundEventsRepository(() => NOW, loadDatabase);
+
+      await expect(events.notifyMemberIdConflict(actor as never, {
+        whatsappMemberId: "member-9001",
+        locale: "en",
+      })).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    });
+
     it("authorizes before parsing attacker-controlled input", async () => {
       const loadDatabase = vi.fn();
       const events = createWoztellInboundEventsRepository(() => NOW, loadDatabase);
@@ -304,6 +327,87 @@ describe("WOZTELL inbound event writers (C-1 Task 3)", () => {
         echo({origin: "SYSTEM"}),
       )).rejects.toThrow();
       expect(fixture.queries).toHaveLength(0);
+    });
+  });
+
+  /**
+   * S-13. The obvious call — `agentToolsRepository.createStaffTask` — is
+   * unbuildable four ways over, and every one of them fails at runtime rather
+   * than at compile time: it opens with `requireConciergeAgent` and the human
+   * lane deliberately starts no agent run; its input schema parses `kind`
+   * against a closed `z.enum` of five `concierge_*` values; it throws
+   * `INVALID_AGENT_STAFF_TASK_PROFILE` for a prospect who has no profile; and it
+   * derives `dedupeKey` rather than accepting one. The generic
+   * `staffTasksRepository.createOnce` throws
+   * `AUTOMATION_STAFF_TASK_PROFILE_REQUIRED` for a null profile, which is the
+   * prospect case exactly. So this is the direct INSERT that
+   * `campaign-recipient-delivery.ts`, `journeys.ts` and `dunning-lapse.ts`
+   * already use.
+   */
+  describe("notifyHumanLane", () => {
+    it("files one open task per conversation, against a nullable profile", async () => {
+      const fixture = repository([[{id: "task-1"}]]);
+
+      await expect(fixture.events.notifyHumanLane(woztellWebhookActor(), {
+        conversationId: CONVERSATION_ID,
+        assignedToProfileId: null,
+        locale: "zh-HK",
+      })).resolves.toEqual({disposition: "created"});
+
+      const insert = fixture.queries[0];
+      const sqlText = normalized(insert?.sql);
+      expect(sqlText).toMatch(/^insert into "staff_tasks"/);
+      expect(sqlText).toContain("on conflict do nothing");
+      // `staff_tasks.kind` is free text and components/admin/task-table.tsx
+      // renders it raw, so a new kind needs no label map and no bundle string.
+      expect(insert?.params).toEqual(expect.arrayContaining([
+        "inbox_human_reply_waiting",
+        `inbox-waiting:${CONVERSATION_ID}`,
+        "human_requested",
+      ]));
+      // A burst of inbound messages is ONE task; resolving it lets the next
+      // burst raise a new one.
+      expect(insert?.params).toContain(null);
+    });
+
+    it("reports an existing task rather than failing, because a burst is one task", async () => {
+      const fixture = repository([[]]);
+
+      await expect(fixture.events.notifyHumanLane(woztellWebhookActor(), {
+        conversationId: CONVERSATION_ID,
+        assignedToProfileId: "staff-a",
+        locale: "en",
+      })).resolves.toEqual({disposition: "existing"});
+      expect(fixture.queries[0]?.params).toEqual(expect.arrayContaining(["staff-a"]));
+    });
+
+    it("refuses a conversation id that is not one", async () => {
+      const fixture = repository([[]]);
+
+      await expect(fixture.events.notifyHumanLane(woztellWebhookActor(), {
+        conversationId: "'; DROP TABLE staff_tasks; --",
+        assignedToProfileId: null,
+        locale: "en",
+      })).rejects.toThrow();
+      expect(fixture.queries).toHaveLength(0);
+    });
+  });
+
+  describe("notifyMemberIdConflict", () => {
+    it("files one task per contested member id, so a refused link is never silent", async () => {
+      const fixture = repository([[{id: "task-2"}]]);
+
+      await expect(fixture.events.notifyMemberIdConflict(woztellWebhookActor(), {
+        whatsappMemberId: "member-9001",
+        locale: "en",
+      })).resolves.toEqual({disposition: "created"});
+
+      const insert = fixture.queries[0];
+      expect(normalized(insert?.sql)).toMatch(/^insert into "staff_tasks"/);
+      expect(insert?.params).toEqual(expect.arrayContaining([
+        "inbox_member_id_conflict",
+        "inbox-member-id-conflict:member-9001",
+      ]));
     });
   });
 });

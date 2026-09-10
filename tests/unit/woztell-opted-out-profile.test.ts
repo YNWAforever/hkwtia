@@ -24,6 +24,7 @@ describe("WOZTELL opted-out profile identity", () => {
       whatsappOptIn: input.whatsappOptIn,
       // C-1 Task 3: 'bot' is the pre-Phase-C behaviour this fixture pins.
       handling: "bot" as const,
+      assignedToProfileId: null,
       lastInboundAt: null,
     }));
     const dependencies: WoztellWebhookProcessorDependencies = {

@@ -43,7 +43,22 @@ export function createWoztellWebhookPostHandler(
     } catch {
       return Response.json({error: "INVALID_REQUEST"}, {status: 400});
     }
-    const result = await dependencies.process(payload);
+    // C-1 Task 4. A throw used to escape into the route runtime, where a webhook
+    // POST becomes an unhandled rejection and the provider is told nothing
+    // usable. The STOP path writes two legs in two repositories and both are
+    // idempotent by design, so a 500 that makes Woztell retry is strictly better
+    // than a 202 that drops a consent withdrawal on the floor — and better than a
+    // leaked exception either way. Every non-throwing outcome is still 202, and
+    // the processor result IS the body: the `reason` / `matched` / `disposition`
+    // discriminators are this subsystem's only observability, readable in
+    // Woztell's own delivery log without logging a provider body that carries
+    // credentials and PII.
+    let result: WoztellProcessResult;
+    try {
+      result = await dependencies.process(payload);
+    } catch {
+      return Response.json({error: "PROCESSING_FAILED"}, {status: 500});
+    }
     return Response.json(result, {status: 202});
   };
 }

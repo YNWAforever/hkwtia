@@ -170,9 +170,9 @@ describe("WOZTELL inbound claim v2 (C-1 Task 3)", () => {
     const fixture = fakeDatabase([
       [],
       [],
-      [{id: CONVERSATION_ID, handling: "human", last_inbound_at: null}],
+      [{id: CONVERSATION_ID, handling: "human", last_inbound_at: null, assigned_to_profile_id: "staff-a"}],
       [{id: "33333333-3333-4333-8333-333333333333"}],
-      [{handling: "human", last_inbound_at: RECEIVED_AT}],
+      [{handling: "human", last_inbound_at: RECEIVED_AT, assigned_to_profile_id: "staff-a"}],
     ]);
 
     const claim = await createPostgresWoztellStore(() => NOW).claimInbound(claimInput());
@@ -182,6 +182,9 @@ describe("WOZTELL inbound claim v2 (C-1 Task 3)", () => {
       conversationId: CONVERSATION_ID,
       handling: "human",
       lastInboundAt: RECEIVED_AT,
+      // C-1 Task 4: whom the human lane notifies. Read from the same locked row
+      // as `handling`, because a second read is a second answer.
+      assignedToProfileId: "staff-a",
     });
     expect(fixture.queries.some((query) => /insert into "conversations"/i.test(query.sql))).toBe(false);
   });
@@ -193,12 +196,29 @@ describe("WOZTELL inbound claim v2 (C-1 Task 3)", () => {
         conversation_id: CONVERSATION_ID,
         metadata: {woztellState: "claimed", woztellLeaseUntil: "2026-09-10T08:00:00.000Z"},
       }],
-      [{handling: "human", last_inbound_at: RECEIVED_AT}],
+      [{handling: "human", last_inbound_at: RECEIVED_AT, assigned_to_profile_id: "staff-a"}],
       [],
     ]);
 
     const claim = await createPostgresWoztellStore(() => NOW).claimInbound(claimInput());
 
-    expect(claim).toMatchObject({status: "accepted", handling: "human"});
+    expect(claim).toMatchObject({
+      status: "accepted",
+      handling: "human",
+      assignedToProfileId: "staff-a",
+    });
+  });
+
+  it("reports an unassigned thread as null rather than inventing an assignee", async () => {
+    const fixture = fakeDatabase(freshClaimResults());
+
+    const claim = await createPostgresWoztellStore(() => NOW).claimInbound(claimInput());
+
+    // staff_tasks.profile_id is nullable precisely so a prospect's unassigned
+    // thread can still raise a task; a fabricated id would file it against a
+    // person who never saw the thread.
+    expect(claim).toMatchObject({status: "accepted", assignedToProfileId: null});
+    const bump = fixture.queries.find((query) => /^\s*update "conversations"/i.test(query.sql));
+    expect(normalized(bump?.sql)).toContain("assigned_to_profile_id");
   });
 });

@@ -78,6 +78,9 @@ export function providerRunId(providerMessageId: string): string {
  */
 type ClaimedConversationState = Readonly<{
   handling: ConversationHandling;
+  /** C-1 Task 4. Whom the human lane notifies, read from the same locked row as
+   * `handling` for the same reason. */
+  assignedToProfileId: string | null;
   lastInboundAt: Date | null;
 }>;
 
@@ -97,6 +100,9 @@ function dateFrom(value: unknown): Date | null {
 function conversationStateFrom(row: Row | undefined): ClaimedConversationState {
   return {
     handling: handlingFrom(row?.handling),
+    assignedToProfileId: typeof row?.assigned_to_profile_id === "string"
+      ? row.assigned_to_profile_id
+      : null,
     lastInboundAt: dateFrom(row?.last_inbound_at),
   };
 }
@@ -116,6 +122,7 @@ function acceptedClaim(
     memberName: input.memberName,
     whatsappOptIn: input.whatsappOptIn,
     handling: state.handling,
+    assignedToProfileId: state.assignedToProfileId,
     lastInboundAt: state.lastInboundAt,
     ...(pendingReply === undefined ? {} : {pendingReply}),
   };
@@ -213,6 +220,7 @@ export function createPostgresWoztellStore(
           const resumedState = conversationStateFrom(rowsFrom(await transaction.execute(sql`
             SELECT
               ${conversations.handling} AS handling,
+              ${conversations.assignedToProfileId} AS assigned_to_profile_id,
               ${conversations.lastInboundAt} AS last_inbound_at
             FROM ${conversations}
             WHERE ${conversations.id} = ${String(existing.conversation_id)}
@@ -261,6 +269,7 @@ export function createPostgresWoztellStore(
           SELECT
             ${conversations.id} AS id,
             ${conversations.handling} AS handling,
+            ${conversations.assignedToProfileId} AS assigned_to_profile_id,
             ${conversations.lastInboundAt} AS last_inbound_at
           FROM ${conversations}
           WHERE ${ownerSql(input)}
@@ -369,6 +378,7 @@ export function createPostgresWoztellStore(
           WHERE ${conversations.id} = ${conversationId}
           RETURNING
             ${conversations.handling} AS handling,
+            ${conversations.assignedToProfileId} AS assigned_to_profile_id,
             ${conversations.lastInboundAt} AS last_inbound_at
         `))[0];
         return acceptedClaim(
