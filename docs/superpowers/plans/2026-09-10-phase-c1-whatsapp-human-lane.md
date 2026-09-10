@@ -1406,20 +1406,54 @@ Full gate, run bare and judged by exit code: `npm run audit:strings && npm test 
 
 ## Phase C1 exit checklist
 
-**What code can prove**
+Two lists, and the line between them is the whole point of the section. The first
+is what this branch **executed**, with the transcript to show for it. The second is
+what nothing in this worktree can execute at all — there is no local database here
+and no Woztell credential anywhere in the tree, so O-1, O-2 and O-9 are still open
+by construction rather than by neglect. Anything moved from the second list to the
+first without a real run is a lie the next reader will act on.
 
-- [ ] Full local gate green: `npm run audit:strings` · `npm test` · `npm run lint` · `npm run typecheck` · `NEXT_PUBLIC_SITE_URL=https://hkwtia.vercel.app npm run build`, each judged by exit code, none piped into `grep`.
-- [ ] `drizzle/meta/0031_snapshot.json`'s `prevId` equals `9e39066a-db08-42f7-9531-76134f2dfe4b` and `_journal.json` ends at idx 32. `drizzle/meta/*` committed exactly as generated.
-- [ ] `grep -n "staff" drizzle/0031_*.sql drizzle/0032_*.sql` returns **only** the `ALTER TYPE … ADD VALUE 'staff'` line. Anything else aborts the whole deploy with `unsafe use of new value "staff" of enum type message_role`, on a fresh database, at deploy time, invisible to every incremental test (S-1).
-- [ ] `tests/unit/internal-navigation-config.test.ts` and `tests/unit/admin-nav.test.tsx` are **unmodified** — C1 adds no admin page.
-- [ ] The four woztell outbox integration tests pass unchanged (S-5).
-- [ ] The `Admin.inbox.description` read-only sentence is gone from **both** bundles, and `npm run audit:strings` is green.
-- [ ] `tests/unit/message-direction-writers.test.ts` finds no `INSERT INTO ${messages}` under `lib/db/repos/` that omits `direction` (Task 3 Step 5). Without it, `appendMessageFrom` labels every bot reply `inbound` and four things fail silently at once.
-- [ ] `tests/unit/repository-production-security.test.ts` refuses a member, an admin and an anonymous actor for **every** method on `woztell-inbound-events.ts`, `woztell-delivery-stamp.ts` and `importHistoricalInbound`, before `loadDatabase` (S-14). No new repository in this plan is actorless.
-- [ ] Every code in `INBOX_REPLY_ERROR_CODES` has a producer in `lib/admin/inbox-action-core.ts` (Task 7 Step 4) — in particular `TEMPLATE_NOT_APPROVED`, which without Task 7's approval check is a translated string with no code path that raises it.
-- [ ] `lib/db/repos/message-eligibility.ts` exists with **one** private facts query and `whatsAppEligibility` gated by `requireAdmin`; C2's `factsFor` is an append to it, not a second module. Confirm the C2 plan's Task 3 file-map entry reads **(M)**, not (C), before starting C2.
+**Proved on this branch — the gate**
 
-**What only an owner with production credentials can**
+Run at the tip of `feat/phase-c-whatsapp-operations` with all twelve tasks in,
+each command on its own line and judged by its exit code. None was piped into
+`grep`/`head`/`tail`: a vitest run piped to `grep` exits 0 on a red suite, which
+is how a red gate gets reported green.
+
+| Command | Exit | Tail |
+|---|---|---|
+| `npm run audit:strings` | **0** | `Visible-string audit passed (247 TSX files scanned).` |
+| `npm test` | **0** | `Test Files 515 passed, 16 skipped (531)` / `Tests 4425 passed, 43 skipped (4468)` |
+| `npm run lint` | **0** | `31 problems (0 errors, 31 warnings)` — every warning pre-existing (`<img>` in test doubles, `_priority`/`row` unused args) |
+| `npm run typecheck` | **0** | no output |
+| `export NEXT_PUBLIC_SITE_URL=https://hkwtia.vercel.app && npm run build` | **0** | `Compiled successfully in 22.3s`; `/api/admin/woztell/backfill` and `/api/webhooks/woztell` both present as dynamic handlers |
+
+The 16 skipped files are the `DATABASE_URL_TEST`-gated PostgreSQL suites plus
+`tests/integration/woztell-live.acceptance.test.ts`. They are skipped **here** for
+exactly the reason the owner list exists, and their being skipped is not evidence
+of anything. Playwright was **not** run: there is no live environment to run it
+against, and `missingM2LiveEnvironment()` would gate the signed-in half regardless.
+
+**Proved on this branch — the structural invariants**
+
+- [x] `drizzle/meta/0031_snapshot.json`'s `prevId` is `9e39066a-db08-42f7-9531-76134f2dfe4b`, 0031's own id `bd5ecc5f-d613-494a-bd42-5046b6aca4cc` is 0032's `prevId`, and `_journal.json` ends at idx 32 (`0032_phase_c_message_direction_backfill`). `drizzle/meta/*` is committed exactly as generated.
+- [x] No migration in this release **uses** the `'staff'` enum literal (S-1): `grep -n "'staff'" drizzle/0031_*.sql drizzle/0032_*.sql` returns the `ALTER TYPE "public"."message_role" ADD VALUE 'staff'` line and one comment in 0032 saying that nothing else names it. **Correction to the wording this item shipped with:** the unquoted `grep -n "staff"` it originally specified also matches `conversations.last_staff_read_at` and two prose lines, so it can never return a single line and reads as a failure to whoever runs it as written. The invariant is about the quoted literal appearing in a DEFAULT, CHECK or backfill — grep for `'staff'`, not `staff`.
+- [x] `tests/unit/internal-navigation-config.test.ts`, `tests/unit/admin-nav.test.tsx`, `components/admin/admin-nav.tsx` and `config/internal-navigation.ts` carry no C1 diff (`git diff --name-only 246b22b..HEAD --` returns nothing for all four), so the `toHaveLength(19)` and its ordered id arrays stand untouched. C1 adds no admin page; `/api/admin/woztell/backfill` is a route handler and is registered in `config/wisetech-protected-route-inventory.ts` and `tests/unit/next-route-exports.test.ts` instead.
+- [x] The jsonb delivery outbox is untouched (S-5): `lib/db/repos/woztell-delivery-outbox.ts` and both its test files carry no C1 diff, and their four tests pass inside the green run above. Two ledgers, still two questions, still no overlap.
+- [x] The `Admin.inbox.description` read-only sentence is gone from **both** bundles — English no longer says "Read-only in this release", `zh-HK` no longer says 「此版本只可閱讀」 — and `npm run audit:strings` is green over the replacements.
+- [x] `tests/unit/message-direction-writers.test.ts` scans `lib/db/repos/` and finds no `INSERT INTO ${messages}` that omits `direction`, so `appendMessageFrom` cannot silently label a bot reply `inbound` again.
+- [x] `tests/unit/repository-production-security.test.ts` refuses a member, an admin and an anonymous actor **before `loadDatabase`** for every method on `woztell-inbound-events.ts`, `woztell-delivery-stamp.ts` and `importHistoricalInbound`, and for all six new `inboxRepository` staff writes (S-14, S-6). No repository this plan added is actorless, and the two legacy exceptions were not cited.
+- [x] Every code in `INBOX_REPLY_ERROR_CODES` has a producer: `tests/unit/inbox-action-core.test.ts` asserts set equality between the twelve declared codes and the codes twelve driven calls actually raise — `TEMPLATE_NOT_APPROVED` included — with a vacuous-pass guard so a helper that stops detecting failures fails the test rather than passing it.
+- [x] `lib/db/repos/message-eligibility.ts` exists with **one** private `loadRecipientFacts`, an exported `RecipientFacts`, and a `whatsAppEligibility` whose first statement is `requireAdmin(actor)`. The C2 plan's ownership table names it **(M, not C)**, so C2 appends `factsFor` rather than creating a second module.
+- [x] Every flow is exercisable through the **mock** adapter (D-4): `tests/integration/phase-c1-human-lane.test.ts` drives `createWoztellWebhookProcessor` with an inbound payload and then a delivery-status payload carrying the id the mock adapter returned, and asserts one `messages` row moving `queued → sent → delivered`. No test added by this plan needs a credential, and none would only pass against real Woztell.
+
+**What only an owner with production credentials or live Woztell can prove**
+
+Nothing in this list has been executed anywhere. Each entry is a claim the branch
+could not test — not a step someone forgot — and the first four are the ones where
+a wrong guess is indistinguishable from a provider outage.
+
+- [ ] **Owner action —** the acceptance spec `tests/e2e/phase-c1-whatsapp-human-lane.spec.ts` has **never been run**. Its ungated half (both locales render the inbox h1, the channel filter, the new handling filter, and a description that no longer contains the Phase A read-only sentence) needs only a built app; its `M2_TEST_*`-gated half — take over, compose, send, see `Admin.inbox.delivery.sent` against a `mock:` provider id, hand back — needs the credential pair. Until both halves run, the UI half of C-2 is reviewed, typechecked and unit-tested, but not walked.
 
 - [ ] **Owner action —** migrations 0031 and 0032 applied to production before the deploy, **as one unit, in one `npm run db:migrate` invocation**. They are separate files but they are not separable: Task 3 replaces `claimInbound`'s reuse predicate (`EXISTS (… prior_message.channel = 'whatsapp')`) with `conversations.channel = 'whatsapp'`, and that new predicate is "at least as inclusive" *only because* 0032 backfills `channel`. Apply 0031 without 0032 and every existing WhatsApp conversation reads `channel='web'`, no thread is reused, and the webhook opens a **second conversation per person** on the first inbound after deploy — splitting exactly the threads the inbox exists to unify. There is no local database in this worktree, so neither file has ever been executed; they are pinned only by their TypeScript twins under `tests/fixtures/` and by the schema contract. Run both against an isolated Neon branch first, then: `neonctl connection-string production --project-id fragrant-mountain-25240574 --org-id org-soft-sunset-25251479`, then `DATABASE_URL=… npm run db:migrate`. Confirm afterwards that `SELECT count(*) FROM messages WHERE direction IS NULL` is 0 and that `SELECT count(*) FROM conversations c WHERE c.channel = 'web' AND EXISTS (SELECT 1 FROM messages m WHERE m.conversation_id = c.id AND m.channel = 'whatsapp')` is 0.
 
