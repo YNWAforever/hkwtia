@@ -82,6 +82,16 @@ function contactRow(overrides: FactRow = {}): FactRow {
   };
 }
 
+/**
+ * `--` comments are house style inside these templates and they run to the end
+ * of a LINE, so they have to be stripped before the newlines are collapsed —
+ * otherwise the collapse splices a comment across the rest of the statement and
+ * every assertion below reads the wrong text.
+ */
+function flatten(statement: string | undefined): string {
+  return (statement ?? "").replace(/--[^\n]*/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
 function input(overrides: Readonly<Record<string, unknown>> = {}) {
   return {profileId: null, contactId, phoneE164: phone, purpose: "service", ...overrides};
 }
@@ -242,6 +252,42 @@ describe("whatsAppEligibility precedence", () => {
     expect(text).not.toContain(`"email_log"`);
     expect(database.statements.some((statement) => statement.params.includes(profileId))).toBe(true);
     expect(database.statements.some((statement) => statement.params.includes(contactId))).toBe(true);
+  });
+
+  /**
+   * The consent hole a review of Task 5 found, closed inside the module.
+   *
+   * A member who withdrew through `/api/unsubscribe?channel=whatsapp` gets the
+   * profile leg only — `suppressionsRepository.optOutWhatsApp` never touches
+   * their `contacts` row — so a caller that resolves a thread by `contactId`
+   * alone (C2 Task 7 builds those) read `contacts.whatsapp_opted_out_at IS NULL`
+   * and was answered `eligible` for a service reply to somebody who had told us
+   * to stop.
+   *
+   * The derivation reads the EVIDENCE — the profile flag off AND a
+   * `channel='whatsapp'` suppression, which that one method writes together and
+   * nothing else writes at all — never the flag alone. The flag alone is
+   * `.default(false).notNull()`, so it would answer `opted_out` for every
+   * contact linked to a member who never opted in to marketing and would block
+   * staff from replying in a member-owned §6 thread: rule 3's failure mode
+   * wearing rule 1's clothes.
+   */
+  it("derives a linked member's recorded withdrawal, from the evidence and not the flag", async () => {
+    const database = factsDatabase({member: memberRow(), contact: contactRow()});
+    const repository = createMessageEligibilityRepository(async () => database.database);
+
+    await repository.whatsAppEligibility(admin, input({profileId}));
+
+    const contactSide = database.statements.find((statement) => statement.sql.toLowerCase().includes(`from "contacts"`));
+    const text = flatten(contactSide?.sql);
+    expect(text).toContain(`coalesce(target.whatsapp_opted_out_at, ( select "message_suppressions"."created_at"`);
+    expect(text).toContain(`"message_suppressions"."profile_id" = target.profile_id`);
+    expect(text).toContain(`"message_suppressions"."channel" = 'whatsapp'`);
+    expect(text).toContain(`"profiles"."whatsapp_opt_in" = false`);
+    expect(text).toContain(`order by "message_suppressions"."created_at" asc limit 1`);
+    // The contact's own marketing flag stays the contact's own: the derivation
+    // answers the withdrawal question, never the opt-in one.
+    expect(text).toContain(`"contacts"."whatsapp_opt_in" as whatsapp_opt_in`);
   });
 
   /**

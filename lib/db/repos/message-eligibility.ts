@@ -128,12 +128,62 @@ async function defaultDatabaseLoader(): Promise<AutomationDatabase> {
  * The scope is `target.profile_id`, which for a contact is its optional profile
  * link. That is not an oversight: it is exactly how a contact can be suppressed
  * at all, given `message_suppressions.profile_id` is NOT NULL.
+ *
+ * S-9 rule 2 words this as a `classification='marketing'` suppression and this
+ * does not filter on classification — a decision, not an omission. Today the
+ * two are the same set: `suppressionsRepository` is the only writer of the
+ * table and both of its INSERTs are `'marketing'`. If a stronger classification
+ * is ever added, the unfiltered read over-blocks `marketing` (safe) where the
+ * filtered one would let a blast through a suppression stronger than the one it
+ * was checking for. Either way rule 2 leaves a `service` reply alone, so
+ * neither spelling can gag an answer inside the customer-service window.
  */
 function suppressionExists(channel: "email" | "whatsapp"): SQL {
   return sql`EXISTS (
     SELECT 1 FROM ${messageSuppressions}
     WHERE ${messageSuppressions.profileId} = target.profile_id
       AND ${messageSuppressions.channel} = ${channel}
+  )`;
+}
+
+/**
+ * A member's recorded WhatsApp withdrawal, as a timestamp, for a row that
+ * carries no withdrawal column of its own.
+ *
+ * `profiles` has no `whatsapp_opted_out_at`. `suppressionsRepository
+ * .optOutWhatsApp` records a member's STOP by clearing `whatsapp_opt_in` AND
+ * inserting the `channel='whatsapp'` suppression in one transaction, and it is
+ * the only writer of either — so the PAIR is evidence of an explicit
+ * withdrawal where neither half is evidence alone. `profiles.whatsapp_opt_in`
+ * is `.default(false).notNull()` (`schema-core.ts:151`), so a member who simply
+ * never opted in has it false too; and the suppression on its own would outlive
+ * a re-consent that turned the flag back on.
+ *
+ * This exists because of the hole a review found on the CONTACT side. A member
+ * who withdrew through `/api/unsubscribe?channel=whatsapp` gets the profile leg
+ * only — `suppressionsRepository` never touches their `contacts` row — so a
+ * caller that resolves a thread by `contactId` alone (C2 Task 7 builds those
+ * call sites; none exists yet) read `contacts.whatsapp_opted_out_at IS NULL`
+ * and was answered `eligible` for a service reply to somebody who had told us
+ * to stop. Closing that here, rather than trusting every future caller to pass
+ * both ids, is what this module is for.
+ *
+ * The obvious closure is the trap and not the fix: reading the linked profile's
+ * `whatsapp_opt_in` the way rule 1's member arm does would answer `opted_out`
+ * for every contact linked to a member who never opted in to marketing, and a
+ * staff reply into a member-owned §6 thread would be blocked — rule 3's failure
+ * mode, wearing rule 1's clothes. Reading the evidence has no false positives.
+ */
+function linkedMemberWithdrawalAt(): SQL {
+  return sql`(
+    SELECT ${messageSuppressions.createdAt}
+    FROM ${messageSuppressions}
+    JOIN ${profiles} ON ${profiles.id} = ${messageSuppressions.profileId}
+    WHERE ${messageSuppressions.profileId} = target.profile_id
+      AND ${messageSuppressions.channel} = 'whatsapp'
+      AND ${profiles.whatsappOptIn} = false
+    ORDER BY ${messageSuppressions.createdAt} ASC
+    LIMIT 1
   )`;
 }
 
@@ -163,8 +213,8 @@ async function loadRecipientFacts(
           ${profiles.locale} AS locale,
           ${profiles.consentMarketing} AS marketing_consent,
           ${profiles.whatsappOptIn} AS whatsapp_opt_in,
-          -- profiles has no withdrawal timestamp; suppressionsRepository
-          -- .optOutWhatsApp records a member's STOP by clearing the flag above.
+          -- profiles has no withdrawal column of its own; the outer SELECT
+          -- derives one from the recorded withdrawal (linkedMemberWithdrawalAt).
           NULL::timestamptz AS whatsapp_opted_out_at
         FROM ${profiles}
         WHERE ${profiles.id} = ${recipient.profileId}
@@ -196,7 +246,9 @@ async function loadRecipientFacts(
       membership.plan_code AS "planCode",
       target.marketing_consent AS "marketingConsent",
       target.whatsapp_opt_in AS "whatsappOptIn",
-      target.whatsapp_opted_out_at AS "whatsappOptedOutAt",
+      -- Both sides of the withdrawal fact in one column: the row's own
+      -- timestamp (contacts), or the linked member's recorded withdrawal.
+      COALESCE(target.whatsapp_opted_out_at, ${linkedMemberWithdrawalAt()}) AS "whatsappOptedOutAt",
       ${suppressionExists("email")} AS "emailSuppressed",
       ${suppressionExists("whatsapp")} AS "whatsappSuppressed"
     FROM target
@@ -240,8 +292,19 @@ function sendableNumber(facts: RecipientFacts | null): string | null {
  * Rule 1's member arm reads `profiles.whatsapp_opt_in = false`, which is also
  * the column's default: a member who never opted in is answered `opted_out`
  * rather than `eligible`. That is the conservative direction and it is the one
- * the table names. It matters only for a member-owned thread, never for the
- * prospect funnel rule 3 protects, and a member is never silently sent to.
+ * the table names, so it stays — but name the cost, because a review raised it
+ * and the next task inherits it. It is rule 3's over-block wearing rule 1's
+ * clothes: a member-owned §6 thread cannot be replied to, and C2 Task 8's UI
+ * will tell staff the member "opted out" when they never opted in. Splitting
+ * the reason is C2 Task 8's call, not a change to make underneath it while the
+ * precedence table calls itself non-negotiable and no caller exists yet; the
+ * evidence needed to split it honestly is already computed here as
+ * `whatsappOptedOutAt` (see `linkedMemberWithdrawalAt`), which is non-null only
+ * for a member who actually withdrew.
+ *
+ * Rule 1's CONTACT arm covers a linked member's recorded withdrawal too, so a
+ * caller holding only a `contactId` cannot be answered `eligible` for someone
+ * who unsubscribed on the profile side.
  */
 function decideWhatsApp(
   purpose: WhatsAppSendPurpose,

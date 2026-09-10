@@ -73,6 +73,19 @@ export function createSuppressionsRepository(loadDatabase: AutomationDatabaseLoa
      * the suppression, clears the profile flag and audits it in one transaction
      * (programme D-7). A prospect with no profile is handled by
      * contactsRepository.markWhatsAppOptedOut instead.
+     *
+     * C-1 review fix: the audit row is written only when the suppression INSERT
+     * actually created one. `lib/ai/woztell-production.ts:recordOptOut` runs
+     * this leg in its own transaction and THEN the contact leg in another, and
+     * the webhook route 500s on a throw — so a failure in the second leg makes
+     * Woztell redeliver the same STOP and, unguarded, this leg wrote a second
+     * `consent.whatsapp.revoked` row for a withdrawal it had already recorded.
+     * The plan's Task 4 Step 7 rationale claims both legs are idempotent; this
+     * is the half that was not. `message_suppressions_profile_channel_classification_unique`
+     * makes the INSERT the idempotency key, and it is the right one: a repeat
+     * STOP from someone already suppressed is not a new consent change. If
+     * C-4's re-consent flow (O-4) ever grants WhatsApp back it must DELETE this
+     * row, or a later withdrawal would find it still there and go unaudited.
      */
     async optOutWhatsApp(
       actor: Actor | UnsubscribeActor,
@@ -96,12 +109,13 @@ export function createSuppressionsRepository(loadDatabase: AutomationDatabaseLoa
           ON CONFLICT DO NOTHING
           RETURNING id
         `))[0];
+        if (!suppression) return "existing";
         await transaction.execute(sql`
           INSERT INTO ${auditEvents}
             (actor_user_id, actor_type, action, target_type, target_id, metadata)
           VALUES (NULL, ${actor.kind}, 'consent.whatsapp.revoked', 'profile', ${profileId}, ${JSON.stringify({reasonCode})}::jsonb)
         `);
-        return suppression ? "created" : "existing";
+        return "created";
       });
     },
   };

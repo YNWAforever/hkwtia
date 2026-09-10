@@ -66,12 +66,13 @@ const phone = "+85291234567";
 
 describe("contact consent withdrawal is audited (D-7, boundary 11)", () => {
   it("flips the flag and writes consent.whatsapp.revoked in one transaction", async () => {
-    // The timestamp back-fill returns nothing, then the guarded UPDATE matches.
-    const recorder = transactionalRecorder([[], [{id: "c-1"}], []]);
+    // The guarded revoke matches, so the timestamp stamp is never run.
+    const recorder = transactionalRecorder([[{id: "c-1"}], []]);
     const repository = createContactsRepository(async () => recorder.database);
 
     await expect(repository.markWhatsAppOptedOut(stopActor, phone)).resolves.toBe("revoked");
 
+    expect(recorder.statements).toHaveLength(2);
     expect(recorder.transactionCount()).toBe(1);
     expect(new Set(recorder.transactionOf)).toEqual(new Set([1]));
     const audits = auditStatements(recorder.statements);
@@ -83,37 +84,47 @@ describe("contact consent withdrawal is audited (D-7, boundary 11)", () => {
     expect(normalized(audit?.sql)).toContain("'contact'");
     expect(audit?.params).toEqual(expect.arrayContaining(["contact-writer", "c-1"]));
     const metadata = (audit?.params ?? []).find((value) => typeof value === "string" && value.includes("whatsapp_stop"));
-    expect(JSON.parse(String(metadata))).toEqual({source: "whatsapp", reasonCode: "whatsapp_stop"});
+    expect(JSON.parse(String(metadata))).toEqual({source: "whatsapp", reasonCode: "whatsapp_stop", clearedMarketingOptIn: true});
   });
 
-  it("guards the flag update so a webhook retry writes no second audit row", async () => {
+  it("guards both statements so a webhook retry writes no second audit row", async () => {
     // The route 500s on a throw, so Woztell retries are routine: the second
     // delivery of the same STOP must be a no-op, not a second consent record.
+    // Both guards miss — the flag is already false and the timestamp is set.
     const recorder = transactionalRecorder([[], []]);
     const repository = createContactsRepository(async () => recorder.database);
 
     await expect(repository.markWhatsAppOptedOut(stopActor, phone)).resolves.toBe("already_revoked");
 
     expect(auditStatements(recorder.statements)).toHaveLength(0);
-    const guarded = recorder.statements.map((statement) => normalized(statement.sql)).find((text) => text.includes(`"whatsapp_opt_in" = true`));
-    expect(guarded).toBeDefined();
+    const texts = recorder.statements.map((statement) => normalized(statement.sql));
+    expect(texts.find((text) => text.includes(`"whatsapp_opt_in" = true`))).toBeDefined();
+    expect(texts.find((text) => text.includes(`"whatsapp_opted_out_at" is null`))).toBeDefined();
   });
 
-  it("stamps whatsapp_opted_out_at for a contact whose flag was already false, without auditing it", async () => {
-    // A prospect never opted in (contacts.whatsapp_opt_in defaults to false) but
-    // has now said STOP. The withdrawal timestamp is what the interest-form
-    // revival guard reads, so it has to be written even though the guarded
-    // UPDATE matches nothing — and it is not a new withdrawal to audit.
-    const recorder = transactionalRecorder([[{id: "c-2"}], []]);
+  it("audits the withdrawal of a contact whose marketing flag was never true", async () => {
+    // The majority prospect shape: contacts.whatsapp_opt_in defaults to false
+    // and upsertFromWhatsApp never sets it, so the guarded revoke matches
+    // nothing and the timestamp stamp is the ONLY record of the STOP. It is
+    // still a consent change — messageEligibility answers blocked/opted_out for
+    // both purposes afterwards, and the interest form can no longer revive the
+    // number — so it is audited, and the metadata says the grant was never
+    // there. The plan's Step 3 said not to audit this; that was the defect.
+    const recorder = transactionalRecorder([[], [{id: "c-2"}], []]);
     const repository = createContactsRepository(async () => recorder.database);
 
-    await expect(repository.markWhatsAppOptedOut(stopActor, phone)).resolves.toBe("already_revoked");
+    await expect(repository.markWhatsAppOptedOut(stopActor, phone)).resolves.toBe("revoked");
 
-    const backfill = normalized(recorder.statements[0]?.sql);
-    expect(backfill).toMatch(/^update "contacts"/);
-    expect(backfill).toContain(`"whatsapp_opted_out_at" is null`);
-    expect(backfill).not.toContain(`"whatsapp_opt_in" = true`);
-    expect(auditStatements(recorder.statements)).toHaveLength(0);
+    const stamp = normalized(recorder.statements[1]?.sql);
+    expect(stamp).toMatch(/^update "contacts"/);
+    expect(stamp).toContain(`"whatsapp_opted_out_at" is null`);
+    expect(stamp).not.toContain(`"whatsapp_opt_in" = true`);
+    const audits = auditStatements(recorder.statements);
+    expect(audits).toHaveLength(1);
+    expect(new Set(recorder.transactionOf)).toEqual(new Set([1]));
+    expect(audits[0]?.params).toEqual(expect.arrayContaining(["c-2"]));
+    const metadata = (audits[0]?.params ?? []).find((value) => typeof value === "string" && value.includes("whatsapp_stop"));
+    expect(JSON.parse(String(metadata))).toEqual({source: "whatsapp", reasonCode: "whatsapp_stop", clearedMarketingOptIn: false});
   });
 
   it("still refuses an actor without the contact-writer capability, before any statement", async () => {
@@ -170,6 +181,34 @@ describe("an interest form cannot revive a WhatsApp opt-out", () => {
     expect(merge({optedOutAt: null, optIn: false}, true)).toBe(true);
     expect(merge({optedOutAt: null, optIn: true}, false)).toBe(true);
     expect(merge({optedOutAt: null, optIn: false}, false)).toBe(false);
+  });
+
+  /**
+   * The flag is only half the row. Refreshing the consent EVIDENCE columns on a
+   * submission the CASE above forces to false leaves `whatsapp_consent_at`
+   * NEWER than the `whatsapp_opted_out_at` that beat it — the state C-4's
+   * re-consent flow (O-4) will read to decide whether this person came back,
+   * and it would read it as a yes.
+   */
+  it("freezes the consent evidence columns on a withdrawn row", async () => {
+    const recorder = transactionalRecorder([[{id: "c-5"}]]);
+    const repository = createContactsRepository(async () => recorder.database);
+
+    await repository.upsertFromInterestForm(contactWriterActor("interest_form"), {
+      email: "ada@example.hk",
+      displayName: "Ada",
+      locale: "en",
+      whatsappNumber: phone,
+      whatsappOptIn: true,
+    });
+
+    const clause = normalized(recorder.statements[0]?.sql);
+    for (const column of ["whatsapp_consent_at", "whatsapp_consent_source", "whatsapp_consent_text_version"]) {
+      expect(clause).toContain(
+        `${column} = case when "contacts"."whatsapp_opted_out_at" is not null then "contacts"."${column}"`
+        + ` else coalesce(excluded.${column}, "contacts"."${column}") end`,
+      );
+    }
   });
 
   it.each([
