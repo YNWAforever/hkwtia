@@ -167,6 +167,15 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
      * raised 23505 here, which the webhook route turns into a 500, which makes
      * Woztell retry that sender's message forever — so the one identity we were
      * trying to record cost us every message from that sender.
+     *
+     * `source` is the ACTOR's, the way `upsertFromInterestForm` has always done
+     * it, rather than a hard-coded `'whatsapp'`. The webhook passes
+     * `contactWriterActor("whatsapp")` and is unchanged by that; C-3's backfill
+     * passes `contactWriterActor("import")`, and its comment claimed the source
+     * made a backfilled contact greppable in `contacts.source` at a time when
+     * this statement ignored the actor entirely. Only the INSERT arm carries it:
+     * the ON CONFLICT arm touches `last_inbound_at` alone, so importing a year of
+     * history can never relabel a contact who arrived live.
      */
     async upsertFromWhatsApp(actor: unknown, input: unknown): Promise<ContactWriteResult> {
       requireContactWriter(actor);
@@ -175,7 +184,7 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
       const row = rowsFrom(await database.execute(sql`
         INSERT INTO ${contacts}
           (phone_e164, locale, source, last_inbound_at)
-        VALUES (${parsed.phoneE164}, ${parsed.locale}, 'whatsapp', ${parsed.receivedAt})
+        VALUES (${parsed.phoneE164}, ${parsed.locale}, ${actor.source}, ${parsed.receivedAt})
         ON CONFLICT (phone_e164) WHERE phone_e164 IS NOT NULL DO UPDATE SET
           last_inbound_at = GREATEST(COALESCE(${contacts.lastInboundAt}, EXCLUDED.last_inbound_at), EXCLUDED.last_inbound_at),
           updated_at = now()

@@ -158,13 +158,38 @@ export type WoztellInboundEnvelope = Readonly<{
   type: "TEXT";
   from: string;
   messageId: string;
-  timestamp: string;
+  /**
+   * `string | number`, because `receivedAtFrom` in `lib/channels/woztell.ts`
+   * accepts both and applies the seconds/milliseconds threshold and the range
+   * bounds itself. Passing only strings was the likeliest way for the whole
+   * backlog to report as `skipped` against a provider that pages history with
+   * epoch timestamps (O-2) — every entry would map to `null` at the normaliser,
+   * fail closed, and look like an empty backlog. Validation stays where it was;
+   * this only stops the mapper throwing the value away before it gets there.
+   */
+  timestamp: string | number;
   data: Readonly<{text: string}>;
   memberId?: string;
 }>;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * The timestamp alone may be a number. Everything else in the envelope is a
+ * string in every shape anyone has seen, but a numeric epoch is the ordinary way
+ * a provider pages history, and `receivedAtFrom` already knows what to do with
+ * one. `0` is not accepted: it is 1970, which `receivedAtFrom`'s range bounds
+ * would reject anyway, and treating a falsy epoch as present would only move the
+ * refusal one layer later.
+ */
+function firstTimestamp(...values: readonly unknown[]): string | number | null {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+    if (typeof value === "number" && Number.isFinite(value) && value > 0) return value;
+  }
+  return null;
 }
 
 function firstString(...values: readonly unknown[]): string {
@@ -210,13 +235,13 @@ export function historyEntryToWebhookEnvelope(
 
   const from = firstString(entry.from, entry.sender, entry.contactNumber, entry.phone);
   const messageId = firstString(entry.messageId, entry.id);
-  const timestamp = firstString(entry.timestamp, entry.createdAt, entry.sentAt);
+  const timestamp = firstTimestamp(entry.timestamp, entry.createdAt, entry.sentAt);
   const text = firstString(
     entry.text,
     isRecord(entry.data) ? entry.data.text : undefined,
     isRecord(entry.message) ? entry.message.text : undefined,
   );
-  if (!from || !messageId || !timestamp || !text) return null;
+  if (!from || !messageId || timestamp === null || !text) return null;
 
   const memberId = firstString(
     entry.memberId,

@@ -88,6 +88,33 @@ describe("contactsRepository", () => {
   });
 
   /**
+   * C-3 Task 11. `source` used to be the literal `'whatsapp'`, so C-3's backfill
+   * — which passes `contactWriterActor("import")` and whose comment claimed the
+   * source made a backfilled contact greppable — wrote rows indistinguishable
+   * from a live inbound. The INSERT arm carries the actor's source; the ON
+   * CONFLICT arm still touches `last_inbound_at` only, so an import can never
+   * relabel a contact who arrived live.
+   */
+  it("writes the actor's source rather than a hard-coded whatsapp", async () => {
+    const {database, statements} = recordingDatabase([[{id: "c-8"}], [{id: "c-9"}]]);
+    const repository = createContactsRepository(async () => database);
+
+    await repository.upsertFromWhatsApp(contactWriterActor("import"), {
+      phoneE164: "+85291234567", locale: "en", receivedAt: new Date("2026-09-08T00:00:00Z"),
+    });
+    expect(statements[0]?.params).toContain("import");
+    expect(normalized(statements[0]?.sql)).not.toContain("'whatsapp'");
+
+    await repository.upsertFromWhatsApp(contactWriterActor("whatsapp"), {
+      phoneE164: "+85291234567", locale: "en", receivedAt: new Date("2026-09-08T00:00:00Z"),
+    });
+    expect(statements[1]?.params).toContain("whatsapp");
+    // The update arm is the only thing a repeat touches, so nothing an import
+    // does can rewrite the source of a contact who arrived live.
+    expect(normalized(statements[1]?.sql)).toContain("do update set last_inbound_at");
+  });
+
+  /**
    * C-1 Task 4. `upsertFromWhatsApp` conflicts on `contacts_phone_unique` only,
    * while `contacts_whatsapp_member_unique` is a SEPARATE partial unique index
    * and therefore not the conflict target. Carrying the member id in the upsert

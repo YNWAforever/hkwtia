@@ -16,6 +16,7 @@ import {
 import {
   createWoztellBackfillPost,
   type WoztellBackfillDependencies,
+  type WoztellBackfillRunRecord,
 } from "@/lib/api/woztell-backfill-route";
 import type {ChannelAdapter} from "@/lib/channels/types";
 import {createWoztellAdapter} from "@/lib/channels/woztell";
@@ -100,6 +101,8 @@ function spiedChannel() {
   return channel;
 }
 
+const APP_ORIGIN = "https://app.test";
+
 type Harness = Readonly<{
   post: (request: Request) => Promise<Response>;
   channel: ChannelAdapter;
@@ -108,7 +111,9 @@ type Harness = Readonly<{
   recordContact: ReturnType<typeof vi.fn>;
   importInbound: ReturnType<typeof vi.fn>;
   resolveProfile: ReturnType<typeof vi.fn>;
+  recordRun: ReturnType<typeof vi.fn>;
   imported: WoztellInboundClaimInput[];
+  runs: WoztellBackfillRunRecord[];
 }>;
 
 function harness(
@@ -125,15 +130,22 @@ function harness(
     return "imported" as const;
   });
   const resolveProfile = vi.fn(async (): Promise<WoztellProfile | null> => null);
+  const runs: WoztellBackfillRunRecord[] = [];
+  const recordRun = vi.fn(async (_actor: Actor, record: WoztellBackfillRunRecord) => {
+    runs.push(record);
+  });
   const post = createWoztellBackfillPost({
     actor: async () => ADMIN,
+    expectedOrigin: () => APP_ORIGIN,
     openApiToken: () => "open-api-token",
+    openApiChannelId: () => "channel-1",
     createClient,
     channel,
     resolveProfile,
     anonymousOwnerHash: (sender) => `hash:${sender}`,
     recordContact,
     importInbound,
+    recordRun,
     pageSize: 25,
     ...overrides,
   });
@@ -145,14 +157,22 @@ function harness(
     recordContact,
     importInbound,
     resolveProfile,
+    recordRun,
     imported,
+    runs,
   };
 }
 
-function backfillRequest(body: Readonly<Record<string, unknown>> = {}): Request {
+function backfillRequest(
+  body: Readonly<Record<string, unknown>> = {},
+  origin: string | null = APP_ORIGIN,
+): Request {
   return new Request("https://app.test/api/admin/woztell/backfill", {
     method: "POST",
-    headers: {"content-type": "application/json"},
+    headers: {
+      "content-type": "application/json",
+      ...(origin === null ? {} : {origin}),
+    },
     body: JSON.stringify(body),
   });
 }
@@ -189,14 +209,84 @@ describe("WOZTELL history backfill route (C-3 Task 11)", () => {
     }
   });
 
-  it("answers 503 BACKFILL_NOT_CONFIGURED when the Open API token is blank", async () => {
-    const {post, createClient} = harness([], {openApiToken: () => "   "});
+  /**
+   * The route is cookie-authenticated (Step 6's deliberate spec deviation),
+   * `proxy.ts`'s matcher is `/((?!api|trpc|_next|_vercel|.*\..*).*)` so `/api`
+   * never reaches it, and `next.config.ts` sets response headers only. Without
+   * this gate a staff member with a live admin session merely had to open an
+   * attacker page: a cross-origin form post with `enctype="text/plain"` needs no
+   * preflight and never reads the response, and `{"after":"=","pages":20}` is
+   * both one valid form field and valid JSON. Twenty pages would have written
+   * `contacts` rows, `messages` rows and a bumped `conversations.last_inbound_at`
+   * — the column the inbox reads to decide a 24-hour window is open — with no
+   * staff intent behind any of it.
+   */
+  it("refuses a cross-origin post from an authorised session, before it reads the token", async () => {
+    const openApiToken = vi.fn(() => "open-api-token");
+    const {post, createClient, importInbound, recordRun} = harness([
+      page([historyEntry()], null, false),
+    ], {openApiToken});
 
-    const response = await post(backfillRequest());
+    const response = await post(backfillRequest({}, "https://attacker.example"));
 
-    expect(response.status).toBe(503);
-    expect(await jsonBody(response)).toEqual({error: "BACKFILL_NOT_CONFIGURED"});
+    expect(response.status).toBe(403);
+    expect(await jsonBody(response)).toEqual({error: "BACKFILL_ORIGIN_DENIED"});
+    expect(openApiToken).not.toHaveBeenCalled();
     expect(createClient).not.toHaveBeenCalled();
+    expect(importInbound).not.toHaveBeenCalled();
+    expect(recordRun).not.toHaveBeenCalled();
+  });
+
+  it("refuses a post that carries no Origin header at all", async () => {
+    const {post, createClient} = harness([]);
+
+    const response = await post(backfillRequest({}, null));
+
+    expect(response.status).toBe(403);
+    expect(createClient).not.toHaveBeenCalled();
+  });
+
+  it("keeps the 404 ahead of the origin check, so a refused caller learns nothing else", async () => {
+    const expectedOrigin = vi.fn(() => APP_ORIGIN);
+    const {post} = harness([], {
+      actor: async () => {
+        throw new Error("UNAUTHORIZED");
+      },
+      expectedOrigin,
+    });
+
+    const response = await post(backfillRequest({}, "https://attacker.example"));
+
+    expect(response.status).toBe(404);
+    expect(expectedOrigin).not.toHaveBeenCalled();
+  });
+
+  it("answers 503 BACKFILL_NOT_CONFIGURED when the token or the channel id is blank", async () => {
+    for (const override of [
+      {openApiToken: () => "   "},
+      // A deployment with WOZTELL_OPEN_API_TOKEN set and WOZTELL_CHANNEL_ID
+      // unset is not configured. It used to get past this gate and send the
+      // query with an empty `ID!`, which either 502s or answers an empty page —
+      // and staff read an empty page as "there is no backlog".
+      {openApiChannelId: () => undefined},
+      {openApiChannelId: () => " "},
+    ] satisfies Partial<WoztellBackfillDependencies>[]) {
+      const {post, createClient} = harness([], override);
+
+      const response = await post(backfillRequest());
+
+      expect(response.status).toBe(503);
+      expect(await jsonBody(response)).toEqual({error: "BACKFILL_NOT_CONFIGURED"});
+      expect(createClient).not.toHaveBeenCalled();
+    }
+  });
+
+  it("hands the client both credentials, so the query is scoped to the configured channel", async () => {
+    const {post, createClient} = harness([page([], null, false)]);
+
+    await post(backfillRequest());
+
+    expect(createClient).toHaveBeenCalledWith({token: "open-api-token", channelId: "channel-1"});
   });
 
   it("stops at hasNextPage:false and passes each page's endCursor to the next request", async () => {
@@ -362,14 +452,123 @@ describe("WOZTELL history backfill route (C-3 Task 11)", () => {
     expect(channel.sendTemplateMessage).not.toHaveBeenCalled();
   });
 
+  it("imports an entry whose timestamp is a numeric epoch, through the same normaliser", async () => {
+    const {post, imported} = harness([
+      page([historyEntry({timestamp: 1_785_549_600})], null, false),
+    ]);
+
+    expect(await jsonBody(await post(backfillRequest()))).toMatchObject({imported: 1, skipped: 0});
+    expect(imported[0]?.receivedAt).toEqual(RECEIVED_AT);
+  });
+
+  /**
+   * The webhook files a staff task for a contested member id
+   * (`notifyMemberIdConflict`, guarded by the WEBHOOK capability). This route
+   * cannot reach that writer by design — S-14 mints a distinct capability — so
+   * the disposition has to surface somewhere else, or a collision the backlog
+   * contains is invisible to the person who imported it.
+   */
+  it("counts a contested member id rather than dropping the disposition", async () => {
+    const recordContact: WoztellBackfillDependencies["recordContact"] = async () => ({
+      id: CONTACT_ID,
+      memberIdLink: "conflict",
+    });
+    const {post} = harness([
+      page([
+        historyEntry({id: "wamid.history.1", memberId: "member-9001"}),
+        historyEntry({id: "wamid.history.2", memberId: "member-9001"}),
+      ], null, false),
+    ], {recordContact});
+
+    expect(await jsonBody(await post(backfillRequest()))).toMatchObject({
+      contacts: 2,
+      memberIdConflicts: 2,
+    });
+  });
+
+  it("writes one audit row naming the actor, the cursor window and what landed", async () => {
+    const {post, recordRun, runs} = harness([
+      page([historyEntry({id: "wamid.history.1"})], "cursor-2", false),
+    ]);
+
+    await post(backfillRequest({after: "cursor-1"}));
+
+    expect(recordRun).toHaveBeenCalledTimes(1);
+    expect(recordRun.mock.calls[0]?.[0]).toBe(ADMIN);
+    expect(runs[0]).toEqual({
+      after: "cursor-1",
+      endCursor: "cursor-2",
+      hasNextPage: false,
+      outcome: "completed",
+      imported: 1,
+      duplicates: 0,
+      skipped: 0,
+      contacts: 1,
+      memberIdConflicts: 0,
+    });
+  });
+
+  it("records the partial run when the provider fails part-way", async () => {
+    const remaining = [page([historyEntry({id: "wamid.history.1"})], "cursor-1", true)];
+    const client: WoztellOpenApiClient = {
+      async conversationHistory() {
+        const next = remaining.shift();
+        if (!next) throw new WoztellOpenApiFailure("provider_rejected");
+        return next;
+      },
+    };
+    const {post, runs} = harness([], {createClient: () => client});
+
+    const response = await post(backfillRequest({pages: 3}));
+
+    expect(response.status).toBe(502);
+    expect(runs[0]).toMatchObject({
+      outcome: "provider_failed",
+      imported: 1,
+      endCursor: "cursor-1",
+      hasNextPage: true,
+    });
+  });
+
+  it("answers 500 rather than 200 when the run cannot be recorded", async () => {
+    const {post} = harness([page([historyEntry()], null, false)], {
+      recordRun: async () => {
+        throw new Error("AUDIT_WRITE_FAILED");
+      },
+    });
+
+    const response = await post(backfillRequest());
+
+    expect(response.status).toBe(500);
+    expect(await jsonBody(response)).toEqual({error: "BACKFILL_FAILED"});
+  });
+
+  /**
+   * `endCursor: null` with `hasNextPage: true` used to set the cursor back to
+   * null and re-read page one for every remaining iteration — up to `pages`
+   * provider calls that import nothing new and inflate `duplicates`.
+   */
+  it("stops when the cursor does not advance instead of re-reading page one to the cap", async () => {
+    const nullCursor = harness([page([historyEntry()], null, true)]);
+    const nullResponse = await nullCursor.post(backfillRequest({pages: 20}));
+
+    expect(nullCursor.calls).toHaveLength(1);
+    expect(await jsonBody(nullResponse)).toMatchObject({
+      imported: 1,
+      endCursor: null,
+      hasNextPage: true,
+    });
+
+    const stuck = harness([page([historyEntry()], "cursor-1", true)]);
+    await stuck.post(backfillRequest({after: "cursor-1", pages: 20}));
+
+    expect(stuck.calls).toEqual([{after: "cursor-1", first: 25}]);
+  });
+
   it("rejects a body the schema does not recognise without calling the provider", async () => {
     const {post, createClient} = harness([]);
 
-    const response = await post(new Request("https://app.test/api/admin/woztell/backfill", {
-      method: "POST",
-      headers: {"content-type": "application/json"},
-      body: JSON.stringify({pages: 999, unexpected: true}),
-    }));
+    const response = await post(backfillRequest({pages: 999, unexpected: true}));
 
     expect(response.status).toBe(400);
     expect(await jsonBody(response)).toEqual({error: "INVALID_REQUEST"});
@@ -428,6 +627,26 @@ describe("WOZTELL history entry mapping (C-3, plan O-2)", () => {
     expect(historyEntryToWebhookEnvelope("entry")).toBeNull();
     for (const missing of ["from", "id", "timestamp", "text"] as const) {
       expect(historyEntryToWebhookEnvelope(historyEntry({[missing]: undefined})), missing).toBeNull();
+    }
+  });
+
+  /**
+   * `receivedAtFrom` in `lib/channels/woztell.ts` has always accepted a numeric
+   * epoch, with its own seconds/milliseconds threshold and range bounds. The
+   * mapper used to accept strings only, so a provider that pages history with
+   * epoch timestamps would have mapped EVERY entry to null and reported the whole
+   * backlog as `skipped` — the single most likely O-2 correction, and one that
+   * looks exactly like an empty backlog.
+   */
+  it("carries a numeric epoch through rather than throwing the entry away", () => {
+    expect(historyEntryToWebhookEnvelope(historyEntry({timestamp: 1_785_549_600})))
+      .toMatchObject({timestamp: 1_785_549_600});
+    expect(historyEntryToWebhookEnvelope(historyEntry({timestamp: 1_785_549_600_000})))
+      .toMatchObject({timestamp: 1_785_549_600_000});
+    // Validation stays where it was: 0 and NaN are refused here, and the range
+    // bounds are still the normaliser's.
+    for (const rejected of [0, -1, Number.NaN]) {
+      expect(historyEntryToWebhookEnvelope(historyEntry({timestamp: rejected})), String(rejected)).toBeNull();
     }
   });
 });

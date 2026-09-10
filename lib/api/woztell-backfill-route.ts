@@ -17,8 +17,13 @@ import {
   WoztellOpenApiFailure,
   type WoztellOpenApiClient,
 } from "@/lib/channels/woztell-open-api";
-import {aiEnv} from "@/lib/config/env";
-import {contactsRepository, contactWriterActor} from "@/lib/db/repos/contacts";
+import {aiEnv, appEnv} from "@/lib/config/env";
+import {auditEventsRepository} from "@/lib/db/repos/audit-events";
+import {
+  contactsRepository,
+  contactWriterActor,
+  type ContactMemberIdLink,
+} from "@/lib/db/repos/contacts";
 import {
   createPostgresWoztellStore,
   woztellBackfillActor,
@@ -28,6 +33,7 @@ import {
 } from "@/lib/db/repos/woztell-profile-resolver";
 import type {Actor} from "@/lib/membership/lifecycle";
 import {BoundedBodyError, readBoundedText} from "@/lib/security/bounded-body";
+import {isSameOrigin} from "@/lib/security/request-origin";
 
 /** The request body is a cursor and a page count. 8 KiB is generous for both. */
 const MAX_BACKFILL_BODY_BYTES = 8 * 1_024;
@@ -41,7 +47,9 @@ const HISTORY_PAGE_SIZE = 50;
  * the session-actor route is the pattern every other admin API route in this
  * repository already uses (`app/api/admin/media/upload/route.ts`,
  * `app/api/admin/segments/[id]/export/route.ts`). `WOZTELL_OPEN_API_TOKEN`
- * remains required as CONFIGURATION, never as the caller's credential.
+ * remains required as CONFIGURATION, never as the caller's credential. What that
+ * choice costs is that the caller's credential is a session COOKIE, which is why
+ * the same-origin gate in `post` is not optional — see the comment on it.
  *
  * Note what this route is NOT: there is no concierge dependency and no adapter
  * send in the surface below, and the store method it calls
@@ -55,11 +63,47 @@ const backfillBodySchema = z.object({
   pages: z.number().int().min(1).max(20).default(5),
 }).strict();
 
+/**
+ * What one run is answerable for. Written to `audit_events` once the loop is
+ * over, so "who imported this backlog, over which cursor window, and how much
+ * landed" has an answer that outlives the HTTP response.
+ */
+export type WoztellBackfillRunRecord = Readonly<{
+  after: string | null;
+  endCursor: string | null;
+  hasNextPage: boolean;
+  outcome: "completed" | "provider_failed" | "failed";
+  imported: number;
+  duplicates: number;
+  skipped: number;
+  contacts: number;
+  memberIdConflicts: number;
+}>;
+
 export type WoztellBackfillDependencies = Readonly<{
   actor: () => Promise<Actor>;
+  /**
+   * `APP_URL`, read late through a dependency rather than at module scope. This
+   * file already pulls `aiEnv()`; boundary 7 exists because a second env
+   * contract evaluated at import time is how a page that needed one variable
+   * came to require three.
+   */
+  expectedOrigin: () => string;
   /** Configuration, not a credential. Blank ⇒ 503 BACKFILL_NOT_CONFIGURED. */
   openApiToken: () => string | undefined;
-  createClient: (token: string) => WoztellOpenApiClient;
+  /**
+   * Also configuration, and checked in the SAME breath as the token. A
+   * deployment with `WOZTELL_OPEN_API_TOKEN` set and `WOZTELL_CHANNEL_ID` unset
+   * is not configured, but it used to get past this gate: the query went out
+   * with an empty `ID!` and either 502'd or answered with an empty page, which
+   * staff read as "there is no backlog". Under O-2 it is also unknown whether an
+   * empty channel id WIDENS the query's scope rather than narrowing it, and
+   * guessing wrong there imports another channel's history.
+   */
+  openApiChannelId: () => string | undefined;
+  createClient: (
+    credentials: Readonly<{token: string; channelId: string}>,
+  ) => WoztellOpenApiClient;
   /** Only the normaliser is needed, and only the normaliser is offered. */
   channel: Pick<ChannelAdapter, "normalizeInbound">;
   resolveProfile: (normalizedSender: string) => Promise<WoztellProfile | null>;
@@ -69,10 +113,11 @@ export type WoztellBackfillDependencies = Readonly<{
     locale: "en" | "zh-HK";
     receivedAt: Date;
     whatsappMemberId: string | null;
-  }>) => Promise<Readonly<{id: string}>>;
+  }>) => Promise<Readonly<{id: string; memberIdLink?: ContactMemberIdLink}>>;
   importInbound: (
     input: WoztellInboundClaimInput,
   ) => Promise<"imported" | "duplicate">;
+  recordRun: (actor: Actor, record: WoztellBackfillRunRecord) => Promise<void>;
   pageSize?: number;
 }>;
 
@@ -81,6 +126,7 @@ type BackfillCounters = {
   duplicates: number;
   skipped: number;
   contacts: number;
+  memberIdConflicts: number;
 };
 
 const jsonHeaders = {"cache-control": "no-store", "content-type": "application/json"};
@@ -146,13 +192,31 @@ export function createWoztellBackfillPost(
       });
       contactId = contact.id;
       counters.contacts += 1;
+      // The webhook turns a `"conflict"` into a staff task
+      // (`notifyMemberIdConflict`), and this route deliberately cannot: S-14
+      // mints `woztellBackfillActor` as a capability DISTINCT from the webhook's
+      // so the backfill cannot reach the webhook's writers, and borrowing the
+      // webhook actor here to file one task would hand it all of them. It is
+      // still not dropped on the floor — a year of backlog is exactly where
+      // contested member ids live. It is counted, returned in the response and
+      // written into the run's audit row, which is what the person who started
+      // the import actually reads. Deciding which contact keeps a contested id
+      // is C2 Task 5's merge-candidate work either way.
+      if (contact.memberIdLink === "conflict") counters.memberIdConflicts += 1;
     }
 
     // `normalized.intent` may well be `opt_out` — a STOP somewhere in the
-    // backlog. It is deliberately NOT acted on: consent is whatever the live
-    // tables already say, and replaying a year-old withdrawal (or, worse, its
-    // absence) from an import would rewrite it. The message is stored as what it
-    // is, a message.
+    // backlog. It is deliberately NOT acted on, and the reason is not that a
+    // replay could rewrite a withdrawal: `markWhatsAppOptedOut` is monotonic
+    // (`COALESCE(whatsapp_opted_out_at, now())`, and `already_revoked` on a
+    // repeat), so replaying one cannot move it. It is that consent is whatever
+    // the live tables already say, and nothing here can tell a withdrawal the
+    // webhook already recorded from one it never saw. The residual risk runs the
+    // OTHER way, and the plan's exit checklist carries it: importing a recent
+    // STOP the webhook missed bumps `conversations.last_inbound_at` while the
+    // withdrawal is in no table, so `messageEligibility` answers `eligible` for a
+    // service reply to somebody who asked us to stop. The message is stored as
+    // what it is, a message.
     const outcome = await dependencies.importInbound({
       owner: profile
         ? {kind: "profile", profileId: profile.id}
@@ -184,8 +248,33 @@ export function createWoztellBackfillPost(
       return notFound();
     }
 
+    // CSRF, and why it is a live hazard here rather than a checklist item: the
+    // caller's credential is a session COOKIE, `proxy.ts`'s matcher is
+    // `/((?!api|trpc|_next|_vercel|.*\..*).*)` so `/api` never reaches it, and
+    // `next.config.ts` sets RESPONSE headers only. Nothing else in this tree asks
+    // who called. A staff member with a live admin session opening an attacker
+    // page is the whole attack: a cross-origin form post with
+    // `enctype="text/plain"` needs no preflight and never has to read the
+    // response, and a body this small straddles the `=` and still parses as JSON
+    // (`{"after":"=","pages":20}`). Twenty pages would import with no staff
+    // intent — `contacts` rows, `messages` rows, and a bumped
+    // `conversations.last_inbound_at`, which is the column the inbox reads to
+    // decide that a 24-hour customer-service window is open and staff may
+    // free-text. Same gate, same order and same 403 as `createMediaUploadPost`.
+    // An operator driving this from a shell must send `Origin: $APP_URL`.
+    let expectedOrigin: string;
+    try {
+      expectedOrigin = dependencies.expectedOrigin();
+    } catch {
+      return json(500, {error: "BACKFILL_FAILED"});
+    }
+    if (!isSameOrigin(request, expectedOrigin)) {
+      return json(403, {error: "BACKFILL_ORIGIN_DENIED"});
+    }
+
     const token = dependencies.openApiToken()?.trim();
-    if (!token) return json(503, {error: "BACKFILL_NOT_CONFIGURED"});
+    const channelId = dependencies.openApiChannelId()?.trim();
+    if (!token || !channelId) return json(503, {error: "BACKFILL_NOT_CONFIGURED"});
 
     let body: unknown;
     try {
@@ -200,29 +289,59 @@ export function createWoztellBackfillPost(
     if (!parsed.success) return json(400, {error: "INVALID_REQUEST"});
 
     const counters: BackfillCounters = {
-      imported: 0, duplicates: 0, skipped: 0, contacts: 0,
+      imported: 0, duplicates: 0, skipped: 0, contacts: 0, memberIdConflicts: 0,
     };
     let cursor = parsed.data.after;
     let hasNextPage = false;
+    let failure: "provider" | "internal" | null = null;
     try {
-      const client = dependencies.createClient(token);
+      const client = dependencies.createClient({token, channelId});
       for (let read = 0; read < parsed.data.pages; read += 1) {
+        const requested = cursor;
         const page = await client.conversationHistory({after: cursor, first: pageSize});
         for (const entry of page.entries) await importEntry(entry, counters);
         cursor = page.endCursor;
         hasNextPage = page.hasNextPage;
-        if (!page.hasNextPage) break;
+        // A cursor that did not advance cannot resume. `endCursor: null` with
+        // `hasNextPage: true` — or an endCursor equal to the one just sent —
+        // would re-read page one on every remaining iteration, up to `pages`
+        // provider calls for nothing. The import is idempotent, so the only cost
+        // is wasted provider calls and an inflated `duplicates`; the honest
+        // answer is to stop and hand back the cursor that stuck.
+        if (!page.hasNextPage || cursor === requested) break;
       }
     } catch (error) {
       // Classify, never echo: a provider body carries a bearer token and a
       // recipient number, and this layer logs nothing for the same reason
       // `lib/channels/woztell.ts` does not.
-      if (error instanceof WoztellOpenApiFailure) {
-        return json(502, {error: "BACKFILL_PROVIDER_FAILED"});
-      }
+      failure = error instanceof WoztellOpenApiFailure ? "provider" : "internal";
+    }
+
+    // One row per run that reached the provider: who ran it, the cursor window it
+    // covered, and what landed. `segmentsRepository.auditExport` audits a mere
+    // CSV READ; this route writes `contacts` rows, `messages` rows and a bumped
+    // `conversations.last_inbound_at`, and until now nothing recorded that it had
+    // happened at all. Awaited plainly, like that precedent, and before the
+    // outcome is classified, so a 200 from this route means the run is on the
+    // record. Losing this write costs the caller their cursor — but re-running
+    // from the same `after` is idempotent, while an unaudited bulk import of a
+    // member backlog is the thing a PDPO reviewer asks to see.
+    try {
+      await dependencies.recordRun(actor, {
+        after: parsed.data.after,
+        endCursor: cursor,
+        hasNextPage,
+        outcome: failure === "provider"
+          ? "provider_failed"
+          : failure ? "failed" : "completed",
+        ...counters,
+      });
+    } catch {
       return json(500, {error: "BACKFILL_FAILED"});
     }
 
+    if (failure === "provider") return json(502, {error: "BACKFILL_PROVIDER_FAILED"});
+    if (failure) return json(500, {error: "BACKFILL_FAILED"});
     // The cursor comes back so the caller can resume: the page cap exists so one
     // request cannot run for an unbounded time, not so the backlog is truncated.
     return json(200, {...counters, endCursor: cursor, hasNextPage});
@@ -244,19 +363,22 @@ export async function POST(request: Request): Promise<Response> {
       const {requireAdminActor} = await import("@/lib/auth/actor");
       return await requireAdminActor();
     },
+    expectedOrigin: () => appEnv().appUrl,
     openApiToken: () => env.woztellOpenApiToken,
-    createClient: (token) => createWoztellOpenApiClient({
-      token,
-      channelId: env.woztellChannelId ?? "",
-    }),
+    openApiChannelId: () => env.woztellChannelId,
+    createClient: (credentials) => createWoztellOpenApiClient(credentials),
     channel,
     resolveProfile: profileResolver.resolveProfile,
     anonymousOwnerHash: (sender) => woztellAnonymousOwnerHash(env, sender),
     async recordContact(input) {
       const contact = await contactsRepository.upsertFromWhatsApp(
-        // A distinct source from the webhook's `"whatsapp"`, so a contact that
-        // arrived through the backfill is greppable in `contacts.source` and in
-        // the audit trail rather than indistinguishable from a live inbound.
+        // A distinct source from the webhook's `"whatsapp"`. `upsertFromWhatsApp`
+        // writes `actor.source` into `contacts.source` on INSERT — and only on
+        // INSERT, so an existing live contact is never relabelled by an import —
+        // which is where a backfilled contact is greppable. It writes no
+        // `audit_events` row: an earlier version of this comment claimed an audit
+        // trail that does not exist. The run's own row, written by `recordRun`,
+        // is the record of who imported what.
         contactWriterActor("import"),
         {
           phoneE164: input.phoneE164,
@@ -265,11 +387,23 @@ export async function POST(request: Request): Promise<Response> {
           whatsappMemberId: input.whatsappMemberId,
         },
       );
-      return {id: contact.id};
+      return contact.memberIdLink === undefined
+        ? {id: contact.id}
+        : {id: contact.id, memberIdLink: contact.memberIdLink};
     },
     importInbound: (input) => store.importHistoricalInbound(
       woztellBackfillActor(),
       input,
     ),
+    async recordRun(actor, record) {
+      await auditEventsRepository.append(actor, {
+        action: "woztell.history_imported",
+        // The channel is the thing imported FROM, and the only stable identity a
+        // run has: there is no row in this database that a backfill is "of".
+        targetType: "woztell_channel",
+        targetId: env.woztellChannelId ?? "",
+        metadata: {...record},
+      });
+    },
   })(request);
 }
