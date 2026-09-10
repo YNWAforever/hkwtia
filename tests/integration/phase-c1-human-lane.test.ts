@@ -369,13 +369,21 @@ function statusPayload(messageId: string, status: string, at: Date = TICK_AT) {
   return {type: "MESSAGE_STATUS", messageId, timestamp: at.toISOString(), data: {status}};
 }
 
-function replyInput(content: string) {
+/**
+ * The composer's per-attempt token (C-2). Defaulted here because every walk in
+ * this file is ONE attempt — including the double-submit, which is two submits
+ * of one attempt and is exactly why the token is stable across them.
+ */
+const ATTEMPT_ID = "55555555-5555-4555-8555-555555555555";
+
+function replyInput(content: string, attemptId: string = ATTEMPT_ID) {
   return {
     conversationId: CONVERSATION_ID,
     kind: "session" as const,
     content,
     templateKey: null,
     templateVariables: {},
+    attemptId,
   };
 }
 

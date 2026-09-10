@@ -163,6 +163,14 @@ test.describe("staff reply from the inbox", () => {
     }
     expect(countdown).toMatch(countdownPattern(copy.Admin.inbox.window.open));
 
+    // Timestamped so repeated runs against one target stay distinguishable in a
+    // real inbox — NOT because the send lane needs distinct text. It once did,
+    // and this string is why nothing here saw it: `outbound_key` hashed the
+    // draft alone, so an identical sentence sent into one thread a second time
+    // collided with the settled row and was dropped, and a timestamped draft
+    // sidesteps that by construction. C-2 bounded the key to one send attempt;
+    // the collision itself is pinned in tests/unit/inbox-repeat-reply.test.ts,
+    // which is where it belongs — this walk cannot span two days.
     const reply = `Playwright acceptance ${Date.now()}`;
     await composer.locator("#inbox-content").fill(reply);
     // `exact` matters: "Send" is a substring of the pending label "Sending…".

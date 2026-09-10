@@ -20,6 +20,9 @@ const CONVERSATION_ID = "11111111-1111-4111-8111-111111111111";
 const MESSAGE_ID = "33333333-3333-4333-8333-333333333333";
 const CONTACT_ID = "44444444-4444-4444-8444-444444444444";
 const PHONE = "+85290000000";
+/** The composer's per-attempt token (C-2). One send attempt, one value. */
+const ATTEMPT_ID = "55555555-5555-4555-8555-555555555555";
+const OTHER_ATTEMPT_ID = "66666666-6666-4666-8666-666666666666";
 
 const NOW = new Date("2026-09-10T12:00:00.000Z");
 /** Two hours inside the window, so the countdown is genuinely open. */
@@ -142,6 +145,7 @@ const sessionReply = {
   content: "Thanks for writing in — the next intake opens in October.",
   templateKey: null,
   templateVariables: {},
+  attemptId: ATTEMPT_ID,
 } as const;
 
 const templateReply = {
@@ -150,6 +154,7 @@ const templateReply = {
   content: "Follow-up",
   templateKey: "concierge_follow_up_en",
   templateVariables: {memberName: "Ada", supportUrl: "https://www.hkwtia.org/en/contact"},
+  attemptId: ATTEMPT_ID,
 } as const;
 
 /** The code a rejected send reports, or the error itself if it carried none. */
@@ -179,6 +184,20 @@ describe("outboundKeyFor", () => {
       .not.toBe(outboundKeyFor(sessionReply));
     expect(outboundKeyFor({...templateReply, templateKey: "concierge_follow_up_zh_hk"}))
       .not.toBe(outboundKeyFor(templateReply));
+  });
+
+  /**
+   * C-2(a). Deterministic in the draft ALONE made the dedupe window unbounded
+   * in time: `messages_outbound_key_unique` is permanent and no retention sweep
+   * touches a human-handled thread, so the second time staff sent an identical
+   * canned line into one thread — days later — the key collided and the reply
+   * was dropped. The attempt token is what bounds the window to one send.
+   */
+  it("is scoped to the send attempt, so the same sentence twice is two keys", () => {
+    expect(outboundKeyFor({...sessionReply, attemptId: OTHER_ATTEMPT_ID}))
+      .not.toBe(outboundKeyFor(sessionReply));
+    // ...and unchanged within one attempt, which is the double-submit guard.
+    expect(outboundKeyFor({...sessionReply})).toBe(outboundKeyFor(sessionReply));
   });
 });
 
@@ -274,6 +293,32 @@ describe("sendInboxReply", () => {
     expect(inFlight.calls.order).not.toContain("sendSessionMessage");
   });
 
+  /**
+   * C-2. The code staff are shown is decided by whether the row this settles can
+   * actually be re-taken, not by how the send failed — because the only thing
+   * the message can honestly promise is what a second Send click will do.
+   * `retryable_network`, `provider_acceptance_uncertain` and
+   * `provider_unclassified_failure` are excluded from `PROVIDER_REFUSED_SEND`,
+   * so the claim UPDATE will not re-take them and "Try again shortly" would
+   * invite a click that answers `already_sent` while nothing is sent.
+   */
+  it("separates a definite provider refusal from an acceptance it cannot confirm", async () => {
+    for (const [failure, code] of [
+      ["provider_client_error", "DELIVERY_FAILED"],
+      ["retryable_rate_limit", "DELIVERY_FAILED"],
+      ["retryable_network", "DELIVERY_UNCERTAIN"],
+      ["provider_acceptance_uncertain", "DELIVERY_UNCERTAIN"],
+      ["provider_unclassified_failure", "DELIVERY_UNCERTAIN"],
+    ] as const) {
+      const {deps} = dependencies({
+        sendSession: async () => {
+          throw new WoztellDeliveryFailure(failure);
+        },
+      });
+      expect(await codeOf(sendInboxReply(admin, sessionReply, deps)), failure).toBe(code);
+    }
+  });
+
   it("settles the row failed with the adapter's own code and rethrows", async () => {
     const {calls, deps} = dependencies({
       sendSession: async () => {
@@ -361,6 +406,14 @@ describe("sendInboxReply", () => {
     await record(sendInboxReply(admin, sessionReply, dependencies({transcript: summary({handling: "bot"})}).deps));
     await record(sendInboxReply(admin, templateReply, dependencies({approved: []}).deps));
     await record(sendInboxReply(admin, sessionReply, dependencies({queued: queued({disposition: "already_queued"})}).deps));
+    // The two halves of an adapter failure, and they are not interchangeable:
+    // only a definite refusal leaves a row the claim UPDATE can re-take, so only
+    // that one may be reported with a string that invites another Send click.
+    await record(sendInboxReply(admin, sessionReply, dependencies({
+      sendSession: async () => {
+        throw new WoztellDeliveryFailure("provider_client_error");
+      },
+    }).deps));
     await record(sendInboxReply(admin, sessionReply, dependencies({
       sendSession: async () => {
         throw new WoztellDeliveryFailure("retryable_network");

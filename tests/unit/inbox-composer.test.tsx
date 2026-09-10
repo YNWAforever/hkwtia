@@ -139,6 +139,59 @@ describe("InboxComposer", () => {
     expect(screen.getByLabelText(labels.message)).toHaveValue("Still typeable");
   });
 
+  /**
+   * C-2(b). `already_sent` means a row under this `outbound_key` had already
+   * settled and the adapter was never called — the member got nothing from THIS
+   * attempt. Reported as "Sent." it is a lost reply dressed as a success, and
+   * the draft that was the only remaining copy of the text is cleared with it.
+   */
+  it("does not say Sent when the send was short-circuited, and keeps the draft", async () => {
+    composer({action: async () => ({status: "already_sent" as const, messageId: "m1"})});
+    fireEvent.change(screen.getByLabelText(labels.message), {target: {value: "Thanks!"}});
+    fireEvent.click(screen.getByRole("button", {name: labels.send}));
+
+    // An outcome the composer has no words for is an outcome staff never learn
+    // about, which is how a dropped reply reads as a success.
+    const status = await screen.findByRole("status");
+    await vi.waitFor(() => expect(status).not.toBeEmptyDOMElement());
+    expect(status).toHaveTextContent(labels.alreadySent);
+    expect(status).not.toHaveTextContent(labels.sent);
+    // The text staff typed is the evidence of what did NOT go out, so it stays.
+    expect(screen.getByLabelText(labels.message)).toHaveValue("Thanks!");
+    expect(window.sessionStorage.getItem(draftKey)).toBe("Thanks!");
+  });
+
+  /**
+   * C-2(a). The per-attempt token is what bounds the `outbound_key` dedupe to
+   * one send attempt instead of forever. It has to survive a reload — the retry
+   * after a timeout has to find the same row — and it has to rotate once the
+   * reply is sent, or the next identical sentence mints the same key again and
+   * is silently dropped.
+   */
+  it("carries a per-attempt token that survives a reload and rotates once the reply is sent", async () => {
+    const {container, unmount} = composer();
+    const attempt = () => container.querySelector('input[name="attemptId"]') as HTMLInputElement | null;
+    const first = attempt()?.value ?? "";
+    expect(first).toMatch(/^[0-9a-f-]{36}$/);
+
+    // A reload of the same unfinished attempt: same thread, same token.
+    unmount();
+    const reloaded = composer();
+    const afterReload = reloaded.container.querySelector('input[name="attemptId"]') as HTMLInputElement | null;
+    await vi.waitFor(() => expect(afterReload?.value).toBe(first));
+    reloaded.unmount();
+
+    const sent = composer({action: async () => ({status: "sent" as const, messageId: "m1"})});
+    // The textarea is `required`, and jsdom runs constraint validation before it
+    // will fire `submit` — an empty one silently never reaches the action.
+    fireEvent.change(screen.getByLabelText(labels.message), {target: {value: "On my way"}});
+    fireEvent.click(screen.getByRole("button", {name: labels.send}));
+    expect(await screen.findByText(labels.sent)).toBeInTheDocument();
+    const rotated = sent.container.querySelector('input[name="attemptId"]') as HTMLInputElement | null;
+    expect(rotated?.value).toMatch(/^[0-9a-f-]{36}$/);
+    expect(rotated?.value).not.toBe(first);
+  });
+
   it("renders a refused send through the translated error map", async () => {
     composer({action: async () => ({status: "error" as const, code: "WINDOW_CLOSED" as const})});
     fireEvent.change(screen.getByLabelText(labels.message), {target: {value: "Too late"}});

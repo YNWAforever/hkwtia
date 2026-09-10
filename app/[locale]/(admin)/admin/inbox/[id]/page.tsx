@@ -150,6 +150,7 @@ export default async function AdminInboxThreadPage({params}: Props) {
             send: t("compose.send"),
             sending: t("compose.sending"),
             sent: t("compose.sent"),
+            alreadySent: t("compose.alreadySent"),
             draftRestored: t("compose.draftRestored"),
             errors,
           }}

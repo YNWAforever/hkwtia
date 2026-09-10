@@ -28,6 +28,10 @@ describe("WOZTELL review coverage", () => {
     expect(fetchImpl).toHaveBeenCalledWith("https://bot.api.woztell.com/sendResponses", {
       method: "POST",
       headers: {authorization: "Bearer woztell-test-token", "content-type": "application/json"},
+      // C-2. Every live send now carries the abort signal that keeps a request
+      // inside the two-minute send claim; asserted as a type because the bound
+      // itself is pinned in tests/unit/inbox-write-repository.test.ts.
+      signal: expect.any(AbortSignal),
       body: JSON.stringify({
         channelId: "channel-123",
         recipientId: "85290000000",
@@ -57,6 +61,10 @@ describe("WOZTELL review coverage", () => {
     expect(fetchImpl).toHaveBeenCalledWith("https://bot.api.woztell.com/sendResponses", {
       method: "POST",
       headers: {authorization: "Bearer woztell-test-token", "content-type": "application/json"},
+      // C-2. Every live send now carries the abort signal that keeps a request
+      // inside the two-minute send claim; asserted as a type because the bound
+      // itself is pinned in tests/unit/inbox-write-repository.test.ts.
+      signal: expect.any(AbortSignal),
       body: JSON.stringify({
         channelId: "channel-123",
         recipientId: "85290000000",

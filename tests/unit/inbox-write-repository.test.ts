@@ -2,7 +2,8 @@ import {PgDialect} from "drizzle-orm/pg-core";
 import {describe, expect, it, vi} from "vitest";
 
 import type {AutomationDatabase, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
-import {createInboxRepository} from "@/lib/db/repos/inbox";
+import {WOZTELL_REQUEST_TIMEOUT_MS} from "@/lib/channels/woztell";
+import {createInboxRepository, SEND_CLAIM_LEASE_MS} from "@/lib/db/repos/inbox";
 
 const CONVERSATION_ID = "11111111-1111-4111-8111-111111111111";
 const MESSAGE_ID = "33333333-3333-4333-8333-333333333333";
@@ -185,13 +186,33 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       expect(fixture.queries).toHaveLength(3);
     });
 
-    it("leases the send for two minutes so a double-click cannot call the adapter twice (S-8)", async () => {
+    it("leases the send so a double-click cannot call the adapter twice (S-8)", async () => {
       const fixture = repository([[conversationRow()], [{id: MESSAGE_ID}], []]);
 
       await fixture.inbox.queueStaffMessage(admin, draft());
 
+      // The interval is built FROM the exported constant rather than spelled out
+      // beside it, so the SQL and the number a test can reason about cannot
+      // drift — the value below is derived here for the same reason.
       expect(normalized(fixture.queries[1]?.sql)).toContain("send_claim_expires_at");
-      expect(normalized(fixture.queries[1]?.sql)).toContain("now() + interval '2 minutes'");
+      expect(normalized(fixture.queries[1]?.sql))
+        .toContain(`now() + interval '${SEND_CLAIM_LEASE_MS / 1_000} seconds'`);
+    });
+
+    /**
+     * C-2. The lease's whole justification is that it outlives one adapter
+     * request: if a send can hang for longer, its claim expires underneath it,
+     * the next submit inherits the claim and calls the adapter again, and the
+     * member gets the reply twice from one `messages` row and one audit row.
+     *
+     * That justification was false. `sendLive` called `fetch` with no `signal`
+     * and no timeout, so the real bound was undici's ~300s header timeout —
+     * two and a half times this lease. The adapter now carries a real one, and
+     * this is the assertion that keeps the two in the right order; a comment
+     * asserting a bound nothing enforces is worse than no comment.
+     */
+    it("keeps the lease longer than the adapter's own request timeout", () => {
+      expect(WOZTELL_REQUEST_TIMEOUT_MS).toBeLessThan(SEND_CLAIM_LEASE_MS);
     });
 
     /**

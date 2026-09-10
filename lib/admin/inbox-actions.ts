@@ -69,9 +69,19 @@ export async function sendInboxReplyAction(
       content: text(formData, "content"),
       templateKey: text(formData, "templateKey"),
       templateVariables: templateVariables(formData),
+      // The composer's per-attempt token. Unprefixed, so it is one of the
+      // action's own controls and can never arrive as a template variable.
+      attemptId: text(formData, "attemptId"),
     });
     revalidateAdminPath(path);
-    return {status: "sent", messageId: result.messageId};
+    // `result.status` VERBATIM, never flattened to "sent". C-2: the two statuses
+    // are the difference between a reply the adapter took and one it was never
+    // handed because a row under the same `outbound_key` had already settled.
+    // Collapsed to "sent" the composer rendered `Admin.inbox.compose.sent` and
+    // cleared the draft for a message the member never received — a dropped
+    // reply that looked, to the only person who could have noticed, like a
+    // success.
+    return {status: result.status, messageId: result.messageId};
   } catch (error) {
     if (isAuthorizationDenial(error)) notFound();
     const code = inboxReplyErrorCode(error);

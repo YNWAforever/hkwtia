@@ -25,6 +25,25 @@ const WOZTELL_SEND_RESPONSES_URL = "https://bot.api.woztell.com/sendResponses";
 // window that `sendSessionMessage` below then refuses. One constant, two
 // readers, no drift when Meta changes the window.
 export const CUSTOMER_SERVICE_WINDOW_MS = 24 * 60 * 60 * 1_000;
+/**
+ * How long one send may spend inside `fetch` before it is aborted.
+ *
+ * C-2. `lib/db/repos/inbox.ts` leases a staff send for `SEND_CLAIM_LEASE_MS`
+ * and justified that number by saying it "comfortably exceeds the adapter's own
+ * request timeout". The adapter had no such timeout: `sendLive` called `fetch`
+ * with no `signal`, so the real bound was undici's ~300s header timeout — two
+ * and a half times the lease. A send that hangs that long has its claim expire
+ * underneath it, the next submit inherits the claim and calls the adapter
+ * again, and the member receives the reply twice from one `messages` row and
+ * one audit row. The lease's justification is now true by construction, and
+ * `tests/unit/inbox-write-repository.test.ts` keeps the two in that order.
+ *
+ * An abort lands in `sendLive`'s `catch` as `retryable_network`, which is
+ * deliberately NOT one of `PROVIDER_REFUSED_SEND`'s definite refusals: a
+ * timeout cannot tell a connection that was never made from a response that was
+ * never read off a request the provider did process.
+ */
+export const WOZTELL_REQUEST_TIMEOUT_MS = 30_000;
 const MIN_NUMERIC_TIMESTAMP_MS = Date.UTC(2000, 0, 1);
 const MAX_NUMERIC_TIMESTAMP_MS = Date.UTC(2100, 0, 1);
 const EPOCH_MILLISECONDS_THRESHOLD = 100_000_000_000;
@@ -111,40 +130,64 @@ async function sendLive(
   fetchImpl: FetchLike,
   recipientId: string,
   response: readonly Record<string, unknown>[],
+  requestTimeoutMs: number,
 ): Promise<ChannelResult> {
-  let httpResponse: Response;
+  // Built from AbortController and setTimeout rather than `AbortSignal.timeout`,
+  // which is NOT universally present — jsdom has no such static, and a missing
+  // global would throw inside the try below and be reported as
+  // `retryable_network`: every live send failing as a network error, each one
+  // leaving a row `PROVIDER_REFUSED_SEND` will not let staff re-take. The two
+  // primitives used here exist in every runtime this ships to.
+  //
+  // The timer spans the body read as well as the fetch, because a response whose
+  // headers arrived and whose body never does holds the send claim just as long.
+  const controller = new AbortController();
+  const expiry = setTimeout(() => controller.abort(), requestTimeoutMs);
   try {
-    httpResponse = await fetchImpl(WOZTELL_SEND_RESPONSES_URL, {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${credentials.token}`,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        channelId: credentials.channelId,
-        recipientId,
-        response,
-      }),
-    });
-  } catch {
-    throw new WoztellDeliveryFailure("retryable_network");
-  }
+    let httpResponse: Response;
+    try {
+      httpResponse = await fetchImpl(WOZTELL_SEND_RESPONSES_URL, {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${credentials.token}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          channelId: credentials.channelId,
+          recipientId,
+          response,
+        }),
+        // The bound the send-claim lease is sized against. Without it the
+        // request outlives its own claim and the reply can be delivered twice;
+        // see WOZTELL_REQUEST_TIMEOUT_MS.
+        signal: controller.signal,
+      });
+    } catch {
+      // An abort arrives here too, and `retryable_network` is the honest code
+      // for it: the request may have been processed and we cannot know.
+      throw new WoztellDeliveryFailure("retryable_network");
+    }
 
-  if (!httpResponse.ok) {
-    throw new WoztellDeliveryFailure(failureCode(httpResponse.status));
-  }
+    if (!httpResponse.ok) {
+      throw new WoztellDeliveryFailure(failureCode(httpResponse.status));
+    }
 
-  let body: unknown;
-  try {
-    body = await httpResponse.json();
-  } catch {
-    throw new WoztellDeliveryFailure("provider_unclassified_failure");
+    let body: unknown;
+    try {
+      body = await httpResponse.json();
+    } catch {
+      throw new WoztellDeliveryFailure("provider_unclassified_failure");
+    }
+    const id = providerId(body);
+    if (!id) {
+      throw new WoztellDeliveryFailure("provider_unclassified_failure");
+    }
+    return {status: "sent", providerId: id};
+  } finally {
+    // Cleared on every exit, or a settled send leaves a live timer holding the
+    // process open for the rest of the window.
+    clearTimeout(expiry);
   }
-  const id = providerId(body);
-  if (!id) {
-    throw new WoztellDeliveryFailure("provider_unclassified_failure");
-  }
-  return {status: "sent", providerId: id};
 }
 
 function receivedAtFrom(value: unknown): Date | null {
@@ -313,6 +356,10 @@ export function createWoztellAdapter(
   env: WoztellEnvironment,
   fetchImpl: FetchLike = fetch,
   now: () => Date = () => new Date(),
+  // Injectable only so the abort path can be exercised by a test that finishes.
+  // Every production construction site takes the default: a per-call timeout is
+  // a bound on how long one send may hold its claim, not a tuning knob.
+  requestTimeoutMs: number = WOZTELL_REQUEST_TIMEOUT_MS,
 ): ChannelAdapter {
   const credentials = liveCredentials(env);
   const webhookSecret = nonblank(env.WOZTELL_WEBHOOK_SECRET);
@@ -329,7 +376,7 @@ export function createWoztellAdapter(
     if (!credentials) {
       return {status: "sent", providerId: `mock:${idempotencyKey}`};
     }
-    return sendLive(credentials, fetchImpl, recipientId, response);
+    return sendLive(credentials, fetchImpl, recipientId, response, requestTimeoutMs);
   }
 
   return {

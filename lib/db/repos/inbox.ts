@@ -144,15 +144,38 @@ const assignSchema = z.object({
 const conversationIdSchema = z.string().uuid();
 
 /**
- * S-8. Two minutes comfortably exceeds the adapter's own request timeout and is
- * short enough that a send abandoned by a crash is retryable inside one staff
- * attention span. Built fresh on each use rather than shared as one `SQL`
- * object, the way `woztell-inbound-events.ts` builds its tick order: two slots
- * of one statement holding the same fragment instance is a question nobody
- * should have to answer.
+ * S-8. How long one submit owns the right to call the adapter.
+ *
+ * Two minutes, and the number has to outlive one adapter request or it stops
+ * being a lease: a send still in flight when its claim expires is a send the
+ * next submit will inherit and make again, delivering the member the reply
+ * twice from one `messages` row and one audit row.
+ *
+ * That relation used to be asserted by a comment here — "comfortably exceeds
+ * the adapter's own request timeout" — and was false. `lib/channels/woztell.ts`
+ * called `fetch` with no `signal`, so the real bound was undici's ~300s header
+ * timeout, two and a half times this lease. The adapter now carries
+ * `WOZTELL_REQUEST_TIMEOUT_MS`, and `tests/unit/inbox-write-repository.test.ts`
+ * pins `WOZTELL_REQUEST_TIMEOUT_MS < SEND_CLAIM_LEASE_MS` so neither can be
+ * moved past the other. The constant is NOT imported here: the adapter import
+ * above is type-only on purpose (see it), and a value import would pull the
+ * adapter and its `server-only` into every module that reads a conversation.
+ */
+export const SEND_CLAIM_LEASE_MS = 2 * 60 * 1_000;
+
+/**
+ * Built fresh on each use rather than shared as one `SQL` object, the way
+ * `woztell-inbound-events.ts` builds its tick order: two slots of one statement
+ * holding the same fragment instance is a question nobody should have to
+ * answer.
+ *
+ * `sql.raw` and not a bound parameter because `INTERVAL $1` is not valid
+ * syntax; the interpolated value is a module constant this file owns, never
+ * caller input. Derived rather than spelled out so the SQL and the exported
+ * number cannot drift.
  */
 function sendClaimLease(): SQL {
-  return sql`now() + INTERVAL '2 minutes'`;
+  return sql.raw(`now() + INTERVAL '${SEND_CLAIM_LEASE_MS / 1_000} seconds'`);
 }
 
 function rowsFrom(result: unknown): Record<string, unknown>[] {
@@ -388,6 +411,23 @@ const PROVIDER_REFUSED_SEND = {
 const PROVIDER_REFUSED_ERROR_CODES: readonly string[] = Object.entries(PROVIDER_REFUSED_SEND)
   .filter(([, refused]) => refused)
   .map(([code]) => code);
+
+/**
+ * The same classification, for the one caller outside this module that needs
+ * it: `lib/admin/inbox-action-core.ts`, which has to tell staff what a second
+ * Send click will actually do.
+ *
+ * C-2. A failure this returns `false` for leaves a row the claim `UPDATE` above
+ * will not re-take, so the next submit short-circuits to `already_sent` and
+ * nothing is sent. Reporting that outcome with a "try again shortly" string —
+ * which is what the single `DELIVERY_FAILED` code did — invites a retry that
+ * silently does nothing, which is worse than the original failure. Exported
+ * from here rather than duplicated there so the message staff read and the
+ * statement that decides the outcome cannot disagree.
+ */
+export function providerRefusedSend(errorCode: string): boolean {
+  return PROVIDER_REFUSED_ERROR_CODES.includes(errorCode);
+}
 
 /**
  * The re-take arm of the claim `UPDATE`, built from the map above so the two

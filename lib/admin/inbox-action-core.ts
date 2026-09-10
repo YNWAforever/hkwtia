@@ -13,6 +13,7 @@ import {createWoztellAdapter, CUSTOMER_SERVICE_WINDOW_MS, WoztellDeliveryFailure
 import {aiEnv} from "@/lib/config/env";
 import {
   inboxRepository,
+  providerRefusedSend,
   type InboxConversationSummary,
   type InboxRepository,
   type StaffOutboundKind,
@@ -53,6 +54,11 @@ export type InboxReplyInput = Readonly<{
   content: string;
   templateKey: string | null;
   templateVariables: Readonly<Record<string, string>>;
+  /**
+   * The composer's per-attempt token — see `outboundKeyFor` for what it bounds
+   * and why nothing else could.
+   */
+  attemptId: string;
 }>;
 
 export type InboxReplyResult = Readonly<{status: "sent" | "already_sent"; messageId: string}>;
@@ -77,6 +83,7 @@ export const INBOX_REPLY_ERROR_CODES = [
   "TEMPLATE_NOT_APPROVED",
   "SEND_IN_PROGRESS",
   "DELIVERY_FAILED",
+  "DELIVERY_UNCERTAIN",
 ] as const;
 
 export type InboxReplyErrorCode = (typeof INBOX_REPLY_ERROR_CODES)[number];
@@ -114,7 +121,14 @@ export function inboxReplyErrorCode(error: unknown): InboxReplyErrorCode | null 
 }
 
 export type InboxReplyState = Readonly<{
-  status: "idle" | "sent" | "error";
+  /**
+   * `already_sent` is its own state and never folds into `sent`. It means a row
+   * under this `outbound_key` had already settled and the adapter was never
+   * called — the member received nothing from THIS attempt. Reported as "Sent."
+   * it is a lost reply dressed as a success, and the composer clears the draft
+   * that was the only remaining copy of the text on the way out.
+   */
+  status: "idle" | "sent" | "already_sent" | "error";
   code?: InboxReplyErrorCode;
   messageId?: string;
 }>;
@@ -206,6 +220,11 @@ const replyInputSchema = z.object({
   content: z.string().trim().min(1).max(4_096),
   templateKey: z.string().trim().min(1).max(120).nullable().default(null),
   templateVariables: z.record(z.string().max(1_000)).default({}),
+  // Required, never defaulted: see `outboundKeyFor`. Lower-cased for the reason
+  // `conversationIdSchema` is — the key it feeds has to be reproducible byte for
+  // byte by the next submit of the same attempt, and a client that upper-cased
+  // a uuid would mint a second key for one attempt.
+  attemptId: z.string().uuid().transform((value) => value.toLowerCase()),
 }).strict()
   .refine((value) => value.kind === "session" || value.templateKey !== null, {message: "TEMPLATE_KEY_REQUIRED"});
 
@@ -303,14 +322,56 @@ export function adapterRecipient(eligibility: WhatsAppEligibility): WhatsAppReci
 
 /**
  * `"inbox:" + conversationId + ":" + sha256(kind, content, templateKey, sorted
- * variables).slice(0, 32)` — plan S-8.
+ * variables, attemptId).slice(0, 32)` — plan S-8, corrected by C-2.
  *
- * Deterministic in the draft and nothing else: two submits of the same draft
- * mint the same key, hit `messages_outbound_key_unique` and become one row,
- * while an edited draft mints a new key and is a new row (which is also the
- * escape hatch for a send the provider refused in a way we will not re-take).
+ * **The dedupe window is one send attempt, not a span of time.** It opens when
+ * staff start composing a reply and closes the moment the server reports that
+ * attempt reached the provider; two submits inside it are one row, and anything
+ * after it is a new reply.
  *
- * The four inputs are hashed as JSON rather than joined on "|" so a message
+ * It used to be unbounded, and that dropped replies. The hash covered the draft
+ * and nothing else, `messages_outbound_key_unique` is permanent, and C1 exempted
+ * human-handled and closed threads from both retention sweeps
+ * (lib/db/repos/chat-retention.ts, lib/db/repos/conversations.ts) — so no row
+ * carrying one of these keys is ever deleted. The second time staff sent an
+ * identical sentence into one thread, days later, to a prospect who had written
+ * in again, the INSERT conflicted, the claim `UPDATE` refused a settled `sent`
+ * row, the fallback SELECT answered `already_sent` and this module returned
+ * before the adapter. The member received nothing, the transcript grew no row,
+ * and no audit row recorded the attempt. An inbox runs on canned replies, as
+ * lib/db/repos/woztell-inbound-events.ts says itself, so the collision is the
+ * ordinary case rather than an edge one.
+ *
+ * `attemptId` is the fix and it is deliberately NOT a clock. A time bucket has
+ * an edge, and a double-click that straddles it is exactly the event this key
+ * exists to stop; widening the bucket to make the edge rare widens the span in
+ * which a deliberate re-send is swallowed. There is no width that is both. The
+ * composer is the only thing that knows "this is the same attempt as the last
+ * submit", so it mints the token, keeps it beside the draft in `sessionStorage`
+ * (so a reload, and the retry after a timeout, still find the same row) and
+ * rotates it once a send reaches the provider. What the key still stops:
+ *
+ *   - the double-click and the Server Action a client retried — same live form,
+ *     same token, one row, and the claim lease then dedupes the send itself;
+ *   - the retry after a crash between the adapter and the settle — the draft and
+ *     its token both come back from `sessionStorage`, so the row is inherited
+ *     rather than duplicated;
+ *   - a re-take of a send the provider definitively refused, which is the same
+ *     row under the same key.
+ *
+ * What it no longer stops, on purpose: the same sentence sent again as a new
+ * attempt. That was never dedupe; it was data loss.
+ *
+ * The token is REQUIRED rather than defaulted. A missing one would silently
+ * disable the dedupe, which is the failure mode the key exists to prevent, and
+ * a fallback that is not deterministic in the attempt dedupes nothing — so a
+ * hand-posted formData without one is `INVALID` instead. The residual is honest
+ * and small: with site data blocked `sessionStorage` throws, the token lives
+ * only for the life of the mounted composer, and a reload mid-send mints a new
+ * one. The claim lease still covers the first two minutes of that, and beyond it
+ * the old design re-took the row and sent again anyway.
+ *
+ * The five inputs are hashed as JSON rather than joined on "|" so a message
  * whose text contains the separator cannot collide with a different draft —
  * a collision here is one reply silently replacing another.
  */
@@ -319,10 +380,32 @@ export function outboundKeyFor(input: InboxReplyInput): string {
     .sort()
     .map((key) => [key, input.templateVariables[key] ?? ""]);
   const digest = createHash("sha256")
-    .update(JSON.stringify([input.kind, input.content, input.templateKey, variables]))
+    .update(JSON.stringify([input.kind, input.content, input.templateKey, variables, input.attemptId]))
     .digest("hex")
     .slice(0, 32);
   return `inbox:${input.conversationId}:${digest}`;
+}
+
+/**
+ * Which code an adapter failure is reported to staff under.
+ *
+ * C-2. The question the message has to answer is not "how did the send fail"
+ * but "what will a second Send click do", and only `PROVIDER_REFUSED_SEND` can
+ * answer it: a row whose `error_code` it classifies as a definite refusal is
+ * re-taken by `queueStaffMessage`'s claim `UPDATE`, so the retry genuinely
+ * re-sends. Every other code leaves the row settled, so the retry short-circuits
+ * to `already_sent` and nothing is sent — and `DELIVERY_FAILED`'s string invites
+ * exactly that click. `retryable_network`, `provider_acceptance_uncertain` and
+ * `provider_unclassified_failure` all fall on that side, and the last is the
+ * most likely bring-up failure of all (plan O-1).
+ *
+ * `recipient_ineligible` — the adapter's `skipped` outcome — is not a Woztell
+ * failure code and is not re-takeable either, so it lands here too. It is
+ * unreachable while `adapterRecipient` derives from an `eligible` answer, which
+ * is why it is routed rather than assumed away.
+ */
+function deliveryFailureCode(errorCode: string): InboxReplyErrorCode {
+  return providerRefusedSend(errorCode) ? "DELIVERY_FAILED" : "DELIVERY_UNCERTAIN";
 }
 
 /**
@@ -400,7 +483,25 @@ export async function sendInboxReply(
   }
 
   const outboundKey = outboundKeyFor(reply);
-  const queued = await throughRepository(() => deps.inbox.queueStaffMessage(actor, {...reply, outboundKey}));
+  // Spelled out rather than spread. `queueStaffMessageSchema` is `.strict()`, so
+  // a field on the reply input it does not declare is a ZodError two layers
+  // down — reported to staff as "Check the message and the template" for EVERY
+  // reply in the product, and invisible to every test on either side of this
+  // boundary, because each one substitutes the other. C-2 added `attemptId` and
+  // did exactly that; `tests/unit/inbox-repeat-reply.test.ts` now drives the
+  // real repository method so the next such field cannot ship.
+  //
+  // `attemptId` is deliberately not among these: it is already folded into
+  // `outboundKey`, and a column the repository would store it in would be a
+  // second, weaker copy of the same fact.
+  const queued = await throughRepository(() => deps.inbox.queueStaffMessage(actor, {
+    conversationId: reply.conversationId,
+    kind: reply.kind,
+    content: reply.content,
+    templateKey: reply.templateKey,
+    templateVariables: reply.templateVariables,
+    outboundKey,
+  }));
   // Both short-circuits skip the adapter and they mean different things (S-8).
   // `already_sent` is a settled row: this draft has already gone. `already_queued`
   // is a LIVE send claim held by another submit — a double-click, or a Server
@@ -438,7 +539,9 @@ export async function sendInboxReply(
     // substitutes a summary of its own makes every failure un-resendable —
     // fail-closed, but silently.
     await settle(actor, deps, outboundKey, {status: "failed", errorCode: error.code});
-    throw new InboxReplyError("DELIVERY_FAILED", {cause: error});
+    // The SAME column decides which of the two codes staff see, so the message
+    // and the statement that will answer their next click cannot disagree.
+    throw new InboxReplyError(deliveryFailureCode(error.code), {cause: error});
   }
 
   if (outcome.status === "blocked") {
@@ -453,7 +556,7 @@ export async function sendInboxReply(
     // answer — which is exactly why it is recorded rather than assumed away: if
     // it ever fires, the row says which gate disagreed with which.
     await settle(actor, deps, outboundKey, {status: "failed", errorCode: outcome.reason});
-    throw new InboxReplyError("DELIVERY_FAILED");
+    throw new InboxReplyError(deliveryFailureCode(outcome.reason));
   }
 
   await settle(actor, deps, outboundKey, {status: "sent", providerId: outcome.providerId});
