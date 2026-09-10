@@ -23,6 +23,10 @@ import {
   createWoztellDeliveryOutboxRepository,
 } from "@/lib/db/repos/woztell-delivery-outbox";
 import {
+  createWoztellDeliveryStampRepository,
+  woztellDeliveryActor,
+} from "@/lib/db/repos/woztell-delivery-stamp";
+import {
   createWoztellInboundEventsRepository,
   woztellWebhookActor,
 } from "@/lib/db/repos/woztell-inbound-events";
@@ -140,6 +144,7 @@ export function createProductionWoztellProcessorDependencies(
   const profileResolver = createWoztellProfileResolverRepository();
   const recovery = createWoztellRunRecoveryRepository();
   const deliveryOutbox = createWoztellDeliveryOutboxRepository();
+  const deliveryStamp = createWoztellDeliveryStampRepository();
   const inboundEvents = createWoztellInboundEventsRepository(now);
   const appOrigin = env.appUrl;
   return {
@@ -175,6 +180,17 @@ export function createProductionWoztellProcessorDependencies(
     },
     async notifyAssignee(input) {
       await inboundEvents.notifyHumanLane(woztellWebhookActor(), input);
+    },
+    // C-1 Task 10. The outbox above reserved against the INBOUND row and holds
+    // the concierge's send decision (S-5); this stamps the OUTBOUND row it
+    // produced, so `recordDeliveryStatus` has something to match when the ticks
+    // come back. A separate capability from the webhook's, minted at this one
+    // wiring site for the same reason as its sibling above.
+    async stampOutbound(input) {
+      return await deliveryStamp.stampConciergeDelivery(
+        woztellDeliveryActor(),
+        input,
+      );
     },
     anonymousOwnerHash(normalizedSender) {
       const secret = env.conciergeCookieSecret ?? env.woztellWebhookSecret ?? "";

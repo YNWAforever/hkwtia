@@ -72,6 +72,10 @@ describe("production WOZTELL processor wiring (C-1 Task 4)", () => {
     "recordDeliveryStatus",
     "recordOutboundEcho",
     "notifyAssignee",
+    // C-1 Task 10. Forgetting this one is the quietest failure of the lot: the
+    // send succeeds, the outbox says accepted, and the only symptom is that no
+    // bot reply ever shows a tick — which C-9 would read as a provider problem.
+    "stampOutbound",
     "recordContact",
     "recordOptOut",
     "claimInbound",

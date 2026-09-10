@@ -16,6 +16,7 @@ import {createInboxRepository} from "@/lib/db/repos/inbox";
 import {createStaffTasksRepository} from "@/lib/db/repos/staff-tasks";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
+import {createWoztellDeliveryStampRepository} from "@/lib/db/repos/woztell-delivery-stamp";
 import {createWoztellInboundEventsRepository} from "@/lib/db/repos/woztell-inbound-events";
 import {ANONYMOUS_ACTOR, type Actor} from "@/lib/membership/lifecycle";
 import type {ConciergeAgentActor} from "@/lib/auth/agent-actor";
@@ -933,6 +934,33 @@ describe("production repository security boundaries", () => {
       await expect(events.notifyMemberIdConflict(forged as never, {
         whatsappMemberId: "member-9001",
         locale: "en",
+      })).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * Phase C1 S-14, Task 10. The stamp writes the provider id onto an outbound
+   * row, which is what makes every later delivery tick land somewhere; a caller
+   * that could choose the row could point a member's ticks at another thread's
+   * message. Its capability is a DIFFERENT `unique symbol` from the webhook's —
+   * one per entry point — so the webhook's own actor is in this list too.
+   */
+  it.each([
+    ["member", actor],
+    ["admin", {kind: "staff", userId: "staff-a", profileId: "staff-a", role: "superadmin"}],
+    ["anonymous", ANONYMOUS_ACTOR],
+    ["hand-rolled delivery shape", {kind: "woztell-delivery", userId: null}],
+    ["woztell webhook shape", {kind: "woztell-webhook", userId: null}],
+  ] as const)(
+    "refuses a %s actor on the concierge delivery stamp before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const stamp = createWoztellDeliveryStampRepository(loadDatabase);
+
+      await expect(stamp.stampConciergeDelivery(forged as never, {
+        inboundProviderMessageId: providerMessageId,
+        providerId: "wamid.outbound.security",
       })).rejects.toThrow("FORBIDDEN");
       expect(loadDatabase).not.toHaveBeenCalled();
     },
