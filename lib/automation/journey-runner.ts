@@ -1,7 +1,11 @@
 import "server-only";
 
 import {JOURNEYS} from "@/config/journeys";
-import {WHATSAPP_TEMPLATES, type WhatsAppTemplateKey} from "@/config/whatsapp-templates";
+import {
+  LOCALIZED_WHATSAPP_TEMPLATES,
+  WHATSAPP_TEMPLATES,
+  type WhatsAppTemplateKey,
+} from "@/config/whatsapp-templates";
 import {evaluateStep, shouldCreateStaffTask} from "@/lib/automation/conditions";
 import {
   authorizedProviderFailureCode,
@@ -160,6 +164,13 @@ export type JourneyRunnerDependencies = Readonly<{
   renderEmail: (input: RenderEmailInput) => Promise<RenderedEmail>;
   emailTransport: EmailTransport;
   whatsappTransport: Pick<ChannelAdapter, "sendTemplateMessage">;
+  /**
+   * The keys WOZTELL has approved (lib/channels/approved-templates.ts).
+   * Required, not optional-defaulting-to-open: a caller that forgets it would
+   * otherwise send unapproved templates live, and the compiler is the only
+   * thing that catches a new call site.
+   */
+  approvedTemplateKeys: ReadonlySet<WhatsAppTemplateKey>;
   emailFrom: string;
 }>;
 
@@ -442,7 +453,28 @@ function whatsappVariables(
   );
 }
 
-function whatsappTemplate(step: JourneyStep): WhatsAppTemplateKey | null {
+/**
+ * B-5: the member's own language decides the template, not the step. A step
+ * whose template is registered as a per-locale pair
+ * (LOCALIZED_WHATSAPP_TEMPLATES) resolves through that pair; every other step
+ * keeps the identity mapping it has always had, so renewal_14 and dunning_3 are
+ * untouched. `context.locale` was already loaded for the email leg — the email
+ * has always rendered in the member's language — so nothing new has to reach
+ * here for the two legs to agree.
+ */
+function whatsappTemplate(
+  step: JourneyStep,
+  locale: AppLocale,
+): WhatsAppTemplateKey | null {
+  const pair = Object.prototype.hasOwnProperty.call(
+    LOCALIZED_WHATSAPP_TEMPLATES,
+    step.template,
+  )
+    ? LOCALIZED_WHATSAPP_TEMPLATES[
+      step.template as keyof typeof LOCALIZED_WHATSAPP_TEMPLATES
+    ]
+    : null;
+  if (pair) return pair[locale];
   return Object.prototype.hasOwnProperty.call(WHATSAPP_TEMPLATES, step.template)
     ? step.template as WhatsAppTemplateKey
     : null;
@@ -470,7 +502,7 @@ async function sendWhatsapp(
   step: JourneyStep,
   context: JourneyRunnerContext,
 ): Promise<boolean> {
-  const template = whatsappTemplate(step);
+  const template = whatsappTemplate(step, context.locale);
   const whatsappNumber = context.whatsappNumber?.trim();
   if (
     !step.channels.includes("whatsapp")
@@ -480,6 +512,19 @@ async function sendWhatsapp(
   ) {
     return false;
   }
+  // B-5: when the member's own language has no approved template, drop the
+  // WhatsApp leg and let the step deliver by email alone — the email carries
+  // the same message in that language. The rejected alternative is sending the
+  // other language's template: that would make "which language a member is
+  // written to in" a function of which half of a pair ops got approved first,
+  // which is the exact defect this pair was registered to fix, and it would
+  // happen silently on a channel the email already covers. Sending the
+  // unapproved template instead is not an option either — WOZTELL answers 4xx,
+  // which settles the whole step as a permanent failure after the email is
+  // already out. Returning false here is not a failure: `processClaim` marks
+  // the step sent on the email leg alone, and `recipient_ineligible` only when
+  // neither leg delivers.
+  if (!dependencies.approvedTemplateKeys.has(template)) return false;
 
   const idempotencyKey = `${claim.deliveryKey}:whatsapp`;
   let reservation: Awaited<ReturnType<DeliveryMutations["reserveWhatsapp"]>>;

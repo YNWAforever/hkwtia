@@ -1,5 +1,9 @@
 import {describe, expect, it, vi} from "vitest";
 
+import {
+  WHATSAPP_TEMPLATE_KEYS,
+  type WhatsAppTemplateKey,
+} from "@/config/whatsapp-templates";
 import {runJourneyBatch, type JourneyRunnerContext, type JourneyRunnerDependencies} from "@/lib/automation/journey-runner";
 import {DeliveryFailure, type DeliveryFailureCode} from "@/lib/email/transport";
 import type {JourneyClaim} from "@/lib/db/repos/journeys";
@@ -76,6 +80,10 @@ function harness(
   claims: JourneyClaim[],
   contextFor: (claim: JourneyClaim) => JourneyRunnerContext = () => context(),
   claimBatches: readonly (readonly JourneyClaim[])[] = [claims],
+  // Default: every registered key. Most of these cases predate the B-5
+  // approval gate and assert on the send path itself, not on which templates
+  // ops approved; the B-5 cases pass a narrower set.
+  approvedTemplateKeys: ReadonlySet<WhatsAppTemplateKey> = new Set(WHATSAPP_TEMPLATE_KEYS),
 ) {
   const logs = new Map<string, DeliveryRecord>();
   const tasks = new Map<string, {
@@ -240,6 +248,7 @@ function harness(
         return {status: "sent" as const, providerId: `wa-${input.idempotencyKey}`};
       },
     },
+    approvedTemplateKeys,
     emailFrom: "WTIA <members@example.test>",
   };
 
@@ -491,9 +500,114 @@ describe("runJourneyBatch", () => {
       variables: expect.objectContaining(eventVariables),
     })]);
     expect(test.sentEmails.map((item) => item.idempotencyKey)).toEqual([reminder.deliveryKey]);
+    // The step's template id is `event_reminder_24h` for email; WhatsApp
+    // resolves it through the registered locale pair, so an `en` member gets
+    // the `en_US` half.
     expect(test.sentWhatsapp).toEqual([{
       idempotencyKey: `${reminder.deliveryKey}:whatsapp`,
-      template: "event_reminder_24h",
+      template: "event_reminder_24h_en",
     }]);
+  });
+
+  // B-5 gap the Phase B audit found: one en_US reminder template meant a zh-HK
+  // member read their reminder email in Chinese and their WhatsApp in English.
+  describe("24-hour event reminder template language (B-5)", () => {
+    const eventId = "44444444-4444-4444-8444-444444444444";
+
+    function reminderClaim(): JourneyClaim {
+      return due("reminder_24h", {
+        journey: "event_reminder",
+        membershipId: null,
+        instanceKey: `event:${eventId}`,
+        deliveryKey: `journey:member-reminder_24h:event_reminder:event:${eventId}:reminder_24h`,
+      });
+    }
+
+    function reminderContext(locale: "en" | "zh-HK"): JourneyRunnerContext {
+      return context({
+        locale,
+        whatsappOptIn: true,
+        whatsappNumber: "+85255550000",
+        variables: {
+          memberName: "Fixture Member",
+          eventTitle: locale === "zh-HK" ? "示範活動" : "Fixture Event",
+          startsAt: "1 March 2030 at 10:00",
+          venue: "KOHO, Kwun Tong",
+          eventUrl: "https://example.test/events/fixture-event",
+          ctaUrl: "https://example.test/events/fixture-event",
+        },
+      });
+    }
+
+    it("sends a zh-HK member the zh-HK template", async () => {
+      const reminder = reminderClaim();
+      const test = harness([reminder], () => reminderContext("zh-HK"));
+
+      const summary = await runJourneyBatch(test.deps, {now, limit: 1});
+
+      expect(summary).toMatchObject({claimed: 1, sent: 1, failed: 0});
+      expect(test.sentWhatsapp.map((item) => item.template))
+        .toEqual(["event_reminder_24h_zh_hk"]);
+    });
+
+    it(
+      "delivers by email alone when only the other language is approved",
+      async () => {
+        const reminder = reminderClaim();
+        const test = harness(
+          [reminder],
+          () => reminderContext("zh-HK"),
+          undefined,
+          new Set<WhatsAppTemplateKey>(["event_reminder_24h_en"]),
+        );
+
+        const summary = await runJourneyBatch(test.deps, {now, limit: 1});
+
+        // The decision this pins: an unapproved zh_HK template drops the
+        // WhatsApp leg rather than falling back to the approved English one.
+        // Which language a member is written to must not be decided by which
+        // half of the pair ops happened to get approved first.
+        expect(test.sentWhatsapp).toEqual([]);
+        // Not a failure and not `recipient_ineligible`: the email leg still
+        // carries the reminder, in the member's own language.
+        expect(summary).toMatchObject({claimed: 1, sent: 1, skipped: 0, failed: 0, retried: 0});
+        expect(test.sentEmails.map((item) => item.idempotencyKey))
+          .toEqual([reminder.deliveryKey]);
+        expect(test.rendered.map((item) => item.locale)).toEqual(["zh-HK"]);
+      },
+    );
+
+    it("reserves the whatsapp_log row against the resolved template", async () => {
+      const reminder = reminderClaim();
+      const test = harness([reminder], () => reminderContext("zh-HK"));
+
+      await runJourneyBatch(test.deps, {now, limit: 1});
+
+      // The delivery row names the template that actually went out, so an
+      // audit of whatsapp_log can tell the two languages apart.
+      expect([...test.logs.values()]
+        .filter((record) => record.channel === "whatsapp")
+        .map((record) => record.idempotencyKey))
+        .toEqual([`${reminder.deliveryKey}:whatsapp`]);
+    });
+
+    it("leaves a step with no registered locale pair on its own name", async () => {
+      const renewal = due("renewal_14", {
+        journey: "renewal",
+        instanceKey: `renewal:${membershipId}`,
+      });
+      const test = harness([renewal], () => context({
+        locale: "zh-HK",
+        whatsappOptIn: true,
+        whatsappNumber: "+85255550000",
+      }));
+
+      await runJourneyBatch(test.deps, {now, limit: 1});
+
+      // renewal_14 and dunning_3 are single en_US templates until ops submits
+      // pairs for them; resolving by locale must not invent a key that is not
+      // registered, or the step would silently stop sending WhatsApp.
+      expect(test.sentWhatsapp.map((item) => item.template)).toEqual(["renewal_14"]);
+    });
   });
 });
