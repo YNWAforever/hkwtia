@@ -39,7 +39,6 @@ export interface AutomationEnv {
 
 export interface UnsubscribeEnv {
   unsubscribeTokenSecret: string;
-  cronSecret: string;
 }
 
 export interface AiEnv {
@@ -316,12 +315,16 @@ export function automationEnv(): AutomationEnv {
   return parseAutomationEnv(process.env);
 }
 
+// `CRON_SECRET` was required here while unsubscribe links signed with it were
+// still being honoured. Now that the fallback is gone, keeping it would make a
+// public page fail to boot over a variable it never reads — the transitive
+// coupling that once took /sitemap.xml down. `automationEnv().cronSecret` still
+// serves the job routes.
 export function parseUnsubscribeEnv(environment: Environment = process.env): UnsubscribeEnv {
-  requireProductionKeys(environment, ["UNSUBSCRIBE_TOKEN_SECRET", "CRON_SECRET"]);
+  requireProductionKeys(environment, ["UNSUBSCRIBE_TOKEN_SECRET"]);
 
   return {
     unsubscribeTokenSecret: valueFor(environment, "UNSUBSCRIBE_TOKEN_SECRET"),
-    cronSecret: valueFor(environment, "CRON_SECRET"),
   };
 }
 

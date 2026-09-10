@@ -136,12 +136,10 @@ export function createUnsubscribePost(dependencies: Dependencies) {
 }
 
 export const POST = createUnsubscribePost({
-  // Legacy fallback: links already in inboxes were signed with CRON_SECRET.
-  // Remove it after LEGACY_UNSUBSCRIBE_SECRET_SUNSET.
-  secrets: () => {
-    const env = unsubscribeEnv();
-    return [env.unsubscribeTokenSecret, env.cronSecret];
-  },
+  // Array-shaped even with one key: `verifyUnsubscribeTokenWithAny` is
+  // array-first precisely so the next rotation can add a key at the front and
+  // drop the old one from the back without touching this call site.
+  secrets: () => [unsubscribeEnv().unsubscribeTokenSecret],
   appUrl: () => appEnv().appUrl,
   unsubscribeEmailMarketing(profileId) {
     return suppressionsRepository.unsubscribeEmailMarketing(

@@ -4,7 +4,6 @@ import {resolve} from "node:path";
 import {describe, expect, it} from "vitest";
 
 import {
-  LEGACY_UNSUBSCRIBE_SECRET_SUNSET,
   signUnsubscribeToken,
   verifyUnsubscribeToken,
   verifyUnsubscribeTokenWithAny,
@@ -81,23 +80,16 @@ describe("the split is real, not aliased", () => {
     expect(source).toContain("verifyUnsubscribeTokenWithAny");
     expect(source).toContain("unsubscribeTokenSecret");
   });
-});
 
-describe("the legacy fallback deletes itself on schedule", () => {
-  // Deliberately self-detonating. The last token signed with CRON_SECRET stays
-  // valid for the 30-day UNSUBSCRIBE_TTL_SECONDS after the deploy, so the
-  // fallback cannot be removed before then — and should not linger after.
-  it(`fails once ${LEGACY_UNSUBSCRIBE_SECRET_SUNSET} has passed`, () => {
-    const sunset = Date.parse(`${LEGACY_UNSUBSCRIBE_SECRET_SUNSET}T00:00:00Z`);
+  it.each([
+    "lib/api/unsubscribe-route.ts",
+    "app/[locale]/(public)/unsubscribe/page.tsx",
+  ])("%s no longer verifies against the retired cron secret", (path) => {
+    const source = readFileSync(resolve(process.cwd(), path), "utf8");
 
-    expect(Number.isNaN(sunset)).toBe(false);
-    expect(
-      Date.now() < sunset,
-      `The CRON_SECRET fallback for unsubscribe links was due for removal on `
-      + `${LEGACY_UNSUBSCRIBE_SECRET_SUNSET}. Every link signed with the old key has now `
-      + `expired. Drop unsubscribeEnv().cronSecret from the secrets arrays in `
-      + `lib/api/unsubscribe-route.ts and app/[locale]/(public)/unsubscribe/page.tsx, `
-      + `then delete LEGACY_UNSUBSCRIBE_SECRET_SUNSET and this test.`,
-    ).toBe(true);
+    // Replaces the sunset timer that used to live at the bottom of this file.
+    // The timer could only fire once; this keeps the fallback from returning,
+    // which is the property that actually needed guarding.
+    expect(source).not.toContain("cronSecret");
   });
 });
