@@ -242,6 +242,58 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       expect(fixture.queries.some((query) => /insert into "audit_events"/i.test(query.sql))).toBe(false);
     });
 
+    /**
+     * S-8 promises a `failed` row is immediately re-sendable, and clearing the
+     * lease in `settleStaffMessage` does not deliver that on its own: the claim
+     * has to be able to re-take the row. Without this, the adapter throws, the
+     * thread shows "Not delivered", staff press send again, the deterministic
+     * key finds the settled row — and the caller is told `already_sent` while
+     * the member never got the message.
+     */
+    it("re-queues a reply the adapter refused, because the provider never took that message", async () => {
+      const fixture = repository([
+        [conversationRow()],
+        [],
+        [{id: MESSAGE_ID}],
+      ]);
+
+      await expect(fixture.inbox.queueStaffMessage(admin, draft())).resolves.toMatchObject({
+        disposition: "queued",
+        messageId: MESSAGE_ID,
+      });
+
+      const claimSql = normalized(fixture.queries[2]?.sql);
+      // Back to the re-send state, and without the stale error code the thread
+      // would otherwise render beside "Sending".
+      expect(claimSql).toContain("set delivery_status = 'queued', error_code = null");
+      expect(claimSql).toContain(`"messages"."delivery_status" = 'failed'`);
+      expect(claimSql).toContain(`"messages"."provider_message_id" is null`);
+      // The commitment was recorded when the row was inserted; a retry is not a
+      // second commitment.
+      expect(fixture.queries.some((query) => /insert into "audit_events"/i.test(query.sql))).toBe(false);
+    });
+
+    /**
+     * The other half of the same narrowing. A row that reached `failed` through
+     * `recordDeliveryStatus` was matched BY its provider id, so WhatsApp did
+     * take it; re-queueing that one under the same key would be a silent second
+     * send — and the delivery-status payload shape is still an unverified guess
+     * (O-1), so a mis-mapped status must not be able to cause one.
+     */
+    it("leaves a provider-reported delivery failure settled rather than re-sending it", async () => {
+      const fixture = repository([
+        [conversationRow()],
+        [],
+        [],
+        [{id: MESSAGE_ID, delivery_status: "failed", provider_message_id: "wamid.1"}],
+      ]);
+
+      await expect(fixture.inbox.queueStaffMessage(admin, draft())).resolves.toMatchObject({
+        disposition: "already_sent",
+        messageId: MESSAGE_ID,
+      });
+    });
+
     it("reports already_sent when the row has left the queued state", async () => {
       const fixture = repository([
         [conversationRow()],
@@ -254,6 +306,23 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
         disposition: "already_sent",
         messageId: MESSAGE_ID,
       });
+    });
+
+    /**
+     * The two conflict statements match on `outbound_key` alone, so a key minted
+     * for another conversation would pair that conversation's `messageId` with
+     * this one's recipient — a reply queued against one thread and sent to the
+     * number behind another. The pair is refused at the boundary instead.
+     */
+    it("refuses an outbound key minted for a different conversation, before opening the database", async () => {
+      const loadDatabase = vi.fn();
+      const inbox = createInboxRepository(loadDatabase);
+      const otherConversation = "22222222-2222-4222-8222-222222222222";
+
+      await expect(inbox.queueStaffMessage(admin, draft({
+        outboundKey: `inbox:${otherConversation}:${"b".repeat(32)}`,
+      }))).rejects.toThrow("OUTBOUND_KEY_CONVERSATION_MISMATCH");
+      expect(loadDatabase).not.toHaveBeenCalled();
     });
 
     it("refuses a thread the concierge still owns, because taking it over is a separate audited act", async () => {
@@ -377,6 +446,11 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
       expect(update).toContain(`delivery_status = 'failed'`);
       expect(update).toContain("error_code =");
       expect(update).toContain("send_claim_expires_at = null");
+      // Leaving `provider_message_id` NULL is what lets the claim in
+      // `queueStaffMessage` tell this failure — the provider never took the
+      // message — from a delivery failure reported against a provider id it did
+      // take. Stamping one here would make the row permanently un-resendable.
+      expect(update).not.toContain("provider_message_id");
       expect(fixture.queries[0]?.params).toEqual(expect.arrayContaining(["131047"]));
     });
 

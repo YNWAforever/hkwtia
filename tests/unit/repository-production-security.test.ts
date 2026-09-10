@@ -12,6 +12,7 @@ import {companiesRepository, type CompanyUpdate} from "@/lib/db/repos/companies"
 import {createApprovalsRepository} from "@/lib/db/repos/approvals";
 import {createAgentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {createConversationsRepository} from "@/lib/db/repos/conversations";
+import {createInboxRepository} from "@/lib/db/repos/inbox";
 import {createStaffTasksRepository} from "@/lib/db/repos/staff-tasks";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
@@ -953,6 +954,47 @@ describe("production repository security boundaries", () => {
         actor as never,
         inputByMethod[method] as never,
       )).rejects.toMatchObject({code: "FORBIDDEN"});
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * Phase C1 S-6. The inbox's write path is the first place in this repository
+   * where a row exists in order to be *sent to a member's phone*, so its gate
+   * belongs in this hand-maintained inventory and not only in the focused test.
+   * `requireAdmin` runs before the `.strict()` parse and before the loader, so a
+   * non-staff actor cannot reach the database even with input crafted to crash
+   * the parse first.
+   */
+  it.each([
+    ["member", actor],
+    ["anonymous", ANONYMOUS_ACTOR],
+    // A concierge agent is a capability principal with a `profileId`; it must
+    // not be able to reply as staff into the thread it is handling.
+    ["concierge agent", agent],
+  ] as const)(
+    "refuses a %s actor on every inbox staff write before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const inbox = createInboxRepository(loadDatabase);
+      const conversationId = agent.conversationId;
+
+      await expect(inbox.queueStaffMessage(forged as never, {
+        conversationId,
+        kind: "session",
+        content: "Thanks — someone will come back to you shortly.",
+        outboundKey: `inbox:${conversationId}:${"a".repeat(32)}`,
+      })).rejects.toThrow("FORBIDDEN");
+      await expect(inbox.settleStaffMessage(forged as never, {
+        outboundKey: `inbox:${conversationId}:${"a".repeat(32)}`,
+        outcome: {status: "sent", providerId: providerMessageId},
+      })).rejects.toThrow("FORBIDDEN");
+      await expect(inbox.setHandling(forged as never, {conversationId, handling: "human"}))
+        .rejects.toThrow("FORBIDDEN");
+      await expect(inbox.assign(forged as never, {conversationId, assignedToProfileId: "staff-a"}))
+        .rejects.toThrow("FORBIDDEN");
+      await expect(inbox.markRead(forged as never, conversationId)).rejects.toThrow("FORBIDDEN");
+      await expect(inbox.close(forged as never, conversationId)).rejects.toThrow("FORBIDDEN");
       expect(loadDatabase).not.toHaveBeenCalled();
     },
   );

@@ -77,7 +77,7 @@ One row is not one send. Two concurrent submits of the same draft — a double-c
 
 So `messages` carries `send_claim_expires_at`, and `queueStaffMessage` **claims the send atomically**:
 - the fresh `INSERT` sets `send_claim_expires_at = now() + INTERVAL '2 minutes'` → `disposition:"queued"`, this caller owns the send;
-- on conflict, a guarded `UPDATE … SET send_claim_expires_at = now() + INTERVAL '2 minutes' WHERE outbound_key = $k AND delivery_status = 'queued' AND (send_claim_expires_at IS NULL OR send_claim_expires_at <= now()) RETURNING id`. A row back → `disposition:"queued"`, this caller inherits an abandoned send. Nothing back → `already_queued` (another submit holds a live claim) or `already_sent` (the row left `queued`);
+- on conflict, a guarded `UPDATE … SET delivery_status = 'queued', error_code = NULL, send_claim_expires_at = now() + INTERVAL '2 minutes' WHERE outbound_key = $k AND (delivery_status = 'queued' OR (delivery_status = 'failed' AND provider_message_id IS NULL)) AND (send_claim_expires_at IS NULL OR send_claim_expires_at <= now()) RETURNING id`. A row back → `disposition:"queued"`, this caller inherits an abandoned send or re-queues one the provider refused. Nothing back → `already_queued` (another submit holds a live claim) or `already_sent` (the row is settled: sent/delivered/read, or failed against a provider id the provider did issue). **The `failed` arm is load-bearing, not tidiness** — see Task 6 step 3: without it a refused reply is un-resendable and the retry is reported as `already_sent`;
 - `already_queued` and `already_sent` both **short-circuit before the adapter**. `already_queued` surfaces as `SEND_IN_PROGRESS`, which is a distinct thing to tell staff from `sent`.
 
 Two minutes is the lease because it comfortably exceeds the adapter's own request timeout and is short enough that a crashed send is retryable within one staff attention span. The lease is not an audit fact: `settleStaffMessage` clears it, and a `sent` row's stale claim is inert.
@@ -998,6 +998,7 @@ S-6: these methods live here, not on `conversationsRepository`. Every existing m
   - calling it twice with the same `outboundKey` **while the first claim is live** returns `disposition:"already_queued"` the second time and inserts one audit row, not two;
   - calling it again after the claim has **expired** returns `disposition:"queued"` and still inserts no second audit row — the send is retryable, the commitment was already recorded (S-8);
   - when the existing row is already `sent`, it returns `disposition:"already_sent"`;
+  - a settled `failed` row with **no** `provider_message_id` is re-taken — `disposition:"queued"`, still no second audit row — while a `failed` row carrying one stays `already_sent` (step 3's correction);
   - `settleStaffMessage({outcome:{status:"sent", providerId}})` flips `queued → sent` and stamps `provider_message_id`, and is a no-op when the row is no longer `queued`;
   - `setHandling` refuses a transition to `'human'` on a conversation whose `channel` is `'web'`;
   - `getTranscript` maps `role:'staff'` to `'staff'` — **not** to `'user'`.
@@ -1062,21 +1063,23 @@ close(actor: Actor, conversationId: string): Promise<InboxConversationSummary>
 
 ```sql
 UPDATE messages
-SET send_claim_expires_at = now() + INTERVAL '2 minutes'
+SET delivery_status = 'queued', error_code = NULL, send_claim_expires_at = now() + INTERVAL '2 minutes'
 WHERE outbound_key = $key
-  AND delivery_status = 'queued'
+  AND (delivery_status = 'queued' OR (delivery_status = 'failed' AND provider_message_id IS NULL))
   AND (send_claim_expires_at IS NULL OR send_claim_expires_at <= now())
-RETURNING id, delivery_status
+RETURNING id
 ```
 
-   - a row back → `disposition:"queued"`: this caller inherits an abandoned send (the previous attempt crashed between the adapter and the settle). It may call the adapter.
+   **Correction, from the Task 6 review:** this guard read `delivery_status = 'queued'` alone, which made the `settleStaffMessage` sentence below ("clearing the claim is what makes a `failed` row immediately re-sendable") false. Nothing moved a row back to `queued`, so a staff retry of a reply the adapter had refused — same deterministic key, so the `INSERT` does nothing — matched nothing here, fell through to the `SELECT` and came back `already_sent`, which the action layer short-circuits before the adapter: the member never got the reply and the inbox called it sent. The `failed` arm delivers the promise; `provider_message_id IS NULL` keeps it narrow, because `settleStaffMessage({status:"failed"})` never stamps an id while `recordDeliveryStatus` only ever matches a row *by* one. So a send the provider never accepted is re-taken, and a provider-reported delivery failure stays settled — re-sending that one is an edit away, and a mis-mapped `failed` (O-1: the payload shape is still a guess) cannot become a silent second send.
+
+   - a row back → `disposition:"queued"`: this caller inherits an abandoned send (the previous attempt crashed between the adapter and the settle) or re-queues a refused one. It may call the adapter.
    - nothing back → re-`SELECT` the row. `delivery_status <> 'queued'` → `already_sent`. Otherwise → `already_queued`: another submit holds a **live** claim.
    - **Write no audit row in this step, on any branch.** The commitment was recorded when the row was inserted.
 
    Without this, `already_queued` is a row-level fact with no send-level meaning, and the naive action calls the adapter anyway: one `messages` row, one `conversation.reply.queued` audit row, **two WhatsApp messages to the member** on any double-click. S-8 is titled "idempotency" and would otherwise deliver row-idempotency while naming send-idempotency.
 4. On a genuine insert, `INSERT INTO audit_events (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${actor.profileId}, ${actor.kind}, 'conversation.reply.queued', 'conversation', ${conversationId}, …)` with metadata `{messageId, outboundKey, kind, templateKey}` — S-7: the commitment to send and its audit row commit together or neither does.
 
-`settleStaffMessage`: one guarded `UPDATE … SET delivery_status = 'sent', provider_message_id = $providerId, send_claim_expires_at = NULL` / `= 'failed', error_code = $errorCode, send_claim_expires_at = NULL` `WHERE outbound_key = $key AND delivery_status = 'queued'`. Clearing the claim is what makes a `failed` row immediately re-sendable. Catch a Postgres `23505` on `messages_provider_message_id_unique` — the echo adopted the row first — and fall back to `UPDATE … SET delivery_status = 'sent', send_claim_expires_at = NULL WHERE outbound_key = $key AND delivery_status = 'queued'`, leaving the provider id where the echo put it. No throw either way: the message went out; only the bookkeeping raced.
+`settleStaffMessage`: one guarded `UPDATE … SET delivery_status = 'sent', provider_message_id = $providerId, send_claim_expires_at = NULL` / `= 'failed', error_code = $errorCode, send_claim_expires_at = NULL` `WHERE outbound_key = $key AND delivery_status = 'queued'`. Clearing the claim is half of what makes a `failed` row immediately re-sendable; the step-3 `UPDATE` above is the other half, and neither works alone. It must **not** stamp a `provider_message_id` on the failed arm — that column is what tells a send the provider never took from a delivery the provider reported. Catch a Postgres `23505` on `messages_provider_message_id_unique` — the echo adopted the row first — and fall back to `UPDATE … SET delivery_status = 'sent', send_claim_expires_at = NULL WHERE outbound_key = $key AND delivery_status = 'queued'`, leaving the provider id where the echo put it. No throw either way: the message went out; only the bookkeeping raced.
 
 `setHandling`, `assign` and `close` each write their audit row (`conversation.handling.changed`, `conversation.assigned`, `conversation.closed`) inside the same transaction as the `UPDATE`. `markRead` writes `last_staff_read_at = now()` and **no** audit row — reading is not a mutation that matters, and auditing it would bury the ones that do.
 

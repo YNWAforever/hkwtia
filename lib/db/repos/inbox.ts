@@ -98,7 +98,16 @@ const queueStaffMessageSchema = z.object({
   templateKey: z.string().trim().min(1).max(120).nullable().default(null),
   templateVariables: z.record(z.string().max(1_000)).default({}),
   outboundKey: outboundKeySchema,
-}).strict().refine((value) => value.kind === "session" || value.templateKey !== null, {message: "TEMPLATE_KEY_REQUIRED"});
+}).strict()
+  .refine((value) => value.kind === "session" || value.templateKey !== null, {message: "TEMPLATE_KEY_REQUIRED"})
+  // The key embeds a conversation id, and the two conflict statements below
+  // match on `outbound_key` alone. A key minted for a different conversation
+  // would return that conversation's `messageId` beside this one's `recipient`
+  // and `lastInboundAt` — a reply queued against one thread and sent to the
+  // number of another. Only a programming error can produce that pair today,
+  // because Task 7 mints the key from the same parsed input, so this is what
+  // makes the branch self-consistent by construction rather than by discipline.
+  .refine((value) => value.outboundKey.startsWith(`inbox:${value.conversationId}:`), {message: "OUTBOUND_KEY_CONVERSATION_MISMATCH"});
 
 const settleStaffMessageSchema = z.object({
   outboundKey: outboundKeySchema,
@@ -503,25 +512,51 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
           };
         }
 
-        // Another submit owns the row. A conflicting INSERT can wait for the
-        // other transaction, but every CTE in that statement still shares the
-        // original snapshot — so this is a SEPARATE statement, the same shape
-        // and for the same reason as `appendMessageFrom`.
+        // Another submit owns the row, or an earlier attempt left it behind. A
+        // conflicting INSERT can wait for the other transaction, but every CTE
+        // in that statement still shares the original snapshot — so this is a
+        // SEPARATE statement, the same shape and for the same reason as
+        // `appendMessageFrom`.
         //
         // Nothing below writes an audit row on any branch: the commitment was
         // recorded when the row was inserted, and a second row per retry would
         // turn the audit trail into a retry log.
+        //
+        // Re-taking a settled `failed` row is what makes S-8's "a failed row is
+        // immediately re-sendable" true. Clearing `send_claim_expires_at` in
+        // `settleStaffMessage` is necessary and, alone, inert: while this guard
+        // read `delivery_status = 'queued'` only, a staff retry of a reply the
+        // adapter had refused matched nothing here, fell through to the SELECT
+        // below and came back `already_sent`. The action layer short-circuits
+        // that before the adapter, so the member never received the reply and
+        // the inbox reported it as sent — a lost message dressed as a success,
+        // with no path in this repository that could ever re-send the row.
+        //
+        // `provider_message_id IS NULL` is the narrowing that keeps the re-take
+        // honest. `settleStaffMessage({status:"failed"})` never stamps an id
+        // because the adapter never returned one, while `recordDeliveryStatus`
+        // only reaches a row BY its provider id — so this re-takes exactly the
+        // sends the provider never accepted, and leaves a provider-reported
+        // delivery failure settled. Re-sending that one is an edit away, since
+        // the key is deterministic in the content, rather than a silent second
+        // send of a message WhatsApp already took off our hands — which matters
+        // doubly while the delivery-status payload shape is still an unverified
+        // guess (O-1): a mis-mapped `failed` must not become a re-send.
         const claimed = rowsFrom(await transaction.execute(sql`
           UPDATE ${messages}
-          SET send_claim_expires_at = ${sendClaimLease()}
+          SET delivery_status = 'queued', error_code = NULL, send_claim_expires_at = ${sendClaimLease()}
           WHERE ${messages.outboundKey} = ${parsed.outboundKey}
-            AND ${messages.deliveryStatus} = 'queued'
+            AND (
+              ${messages.deliveryStatus} = 'queued'
+              OR (${messages.deliveryStatus} = 'failed' AND ${messages.providerMessageId} IS NULL)
+            )
             AND (${messages.sendClaimExpiresAt} IS NULL OR ${messages.sendClaimExpiresAt} <= now())
-          RETURNING ${messages.id} AS id, ${messages.deliveryStatus} AS delivery_status
+          RETURNING ${messages.id} AS id
         `))[0];
         if (claimed) {
-          // An abandoned send inherited: the previous attempt crashed between
-          // the adapter and the settle, and `queued` is the re-send state.
+          // Either an abandoned send inherited — the previous attempt crashed
+          // between the adapter and the settle — or a refused one re-queued.
+          // Both are now `queued`, and `queued` is the re-send state.
           return {
             messageId: String(claimed.id),
             conversationId: parsed.conversationId,
@@ -543,8 +578,11 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
           messageId: String(existing.id),
           conversationId: parsed.conversationId,
           outboundKey: parsed.outboundKey,
-          // Left `queued` means another submit holds a LIVE claim; anything else
-          // means the row has already been settled.
+          // Left `queued` means another submit holds a LIVE claim. Anything else
+          // is a settled row the claim above deliberately refused: `sent`,
+          // `delivered`, `read`, or a `failed` row carrying a provider id, which
+          // is a message WhatsApp accepted and then could not deliver. None of
+          // them is this caller's send to make.
           disposition: existing.delivery_status === "queued" ? "already_queued" : "already_sent",
           recipient,
           lastInboundAt,
@@ -554,8 +592,11 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
 
     /**
      * The settle half. Guarded on `delivery_status = 'queued'` so it is a no-op
-     * once the row has moved on, and it clears the claim either way — clearing
-     * it is what makes a `failed` row immediately re-sendable.
+     * once the row has moved on, and it clears the claim either way. Clearing it
+     * is half of what makes a `failed` row immediately re-sendable (S-8); the
+     * other half is `queueStaffMessage`'s claim `UPDATE`, which re-takes a
+     * `failed` row the provider never accepted. Neither half works alone: a
+     * cleared lease on a row no statement will ever re-take is inert.
      */
     async settleStaffMessage(actor: Actor, input: unknown): Promise<void> {
       requireAdmin(actor);
