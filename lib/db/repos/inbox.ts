@@ -5,6 +5,12 @@ import type {SQL} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
+// Type-only, so nothing of the adapter (or its `server-only` import) is pulled
+// into this module at runtime — the same shape `lib/db/repos/deliveries.ts` uses
+// for `DeliveryFailureCode`. The union is imported rather than retyped because
+// the classification below has to stay exhaustive over the codes the adapter
+// actually throws; a local copy would go stale silently.
+import type {WoztellDeliveryFailureCode} from "@/lib/channels/woztell";
 import {derivedMessageDirection} from "@/lib/db/message-direction";
 import {
   auditEvents,
@@ -324,6 +330,74 @@ function uniqueViolation(error: unknown): boolean {
 const STAFF_ROLE = "staff" as const;
 
 /**
+ * Which adapter failures mean **the provider definitively did not take the
+ * message**, and are therefore the only ones a re-take may re-send under the
+ * same deterministic `outbound_key`.
+ *
+ * This guard used to be `delivery_status = 'failed' AND provider_message_id IS
+ * NULL`, which reads as "the provider never issued an id, so it never accepted
+ * it" — and is wrong, because the adapter throws before it can return an id no
+ * matter *why* it threw. Three of the five codes below mean acceptance is
+ * UNCERTAIN, not refused, and the most likely one of all is the bring-up
+ * failure O-1 predicts: `sendLive` gets HTTP 200, WhatsApp delivers the
+ * message, `providerId(body)` does not recognise the response shape (still an
+ * unverified guess) and `lib/channels/woztell.ts` throws
+ * `provider_unclassified_failure` — *after* the `!httpResponse.ok` arm has
+ * already passed. Settling that row `failed` with no id and then re-taking it
+ * on the next Send click sends the member the same reply twice, once more per
+ * click, with nothing on the row or in `audit_events` recording it.
+ *
+ * So the discriminator is the code the row already carries, not the absence of
+ * an id. `provider_message_id IS NULL` stays as the second half of the guard —
+ * `recordDeliveryStatus` only ever reaches a row BY its provider id, so a
+ * provider-reported delivery failure keeps its id and stays settled either way.
+ *
+ * A `Record` rather than a list, so that a sixth `WoztellDeliveryFailureCode`
+ * is a compile error here and someone has to decide which side it falls on. An
+ * unrecognised or NULL `error_code` matches nothing below and is therefore not
+ * re-takeable: the guard fails closed, towards "do not send it again". Staff
+ * are not stuck — the key is deterministic in the content, so an edited draft
+ * mints a new key and a new row, which is the same escape hatch a
+ * provider-reported failure has always had.
+ */
+const PROVIDER_REFUSED_SEND = {
+  // 4xx. The request was rejected outright; nothing was queued at WhatsApp.
+  provider_client_error: true,
+  // 429. Refused before acceptance, by definition of the status.
+  retryable_rate_limit: true,
+  // `fetch` itself threw. That covers a connection that was never made AND a
+  // response that was never read off a request the provider did process, and
+  // we cannot tell the two apart from here.
+  retryable_network: false,
+  // 5xx. Named for exactly this: the provider may have taken it and then failed
+  // to say so.
+  provider_acceptance_uncertain: false,
+  // HTTP 200 with a body `providerId()` did not recognise, or a body that was
+  // not JSON. The status line says the provider accepted it.
+  provider_unclassified_failure: false,
+} as const satisfies Record<WoztellDeliveryFailureCode, boolean>;
+
+const PROVIDER_REFUSED_ERROR_CODES: readonly string[] = Object.entries(PROVIDER_REFUSED_SEND)
+  .filter(([, refused]) => refused)
+  .map(([code]) => code);
+
+/**
+ * The re-take arm of the claim `UPDATE`, built from the map above so the two
+ * cannot drift. `FALSE` when the map classifies nothing as refused, because
+ * `IN ()` is a syntax error and a release that could not re-send anything is a
+ * far smaller problem than one whose claim statement never parses.
+ */
+function refusedSendPredicate(): SQL {
+  if (PROVIDER_REFUSED_ERROR_CODES.length === 0) return sql`FALSE`;
+  const codes = sql.join(PROVIDER_REFUSED_ERROR_CODES.map((code) => sql`${code}`), sql`, `);
+  return sql`(
+                ${messages.deliveryStatus} = 'failed'
+                AND ${messages.providerMessageId} IS NULL
+                AND ${messages.errorCode} IN (${codes})
+              )`;
+}
+
+/**
  * Staff read model and staff write path over conversations + messages +
  * staff_tasks.
  *
@@ -532,23 +606,32 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
         // the inbox reported it as sent — a lost message dressed as a success,
         // with no path in this repository that could ever re-send the row.
         //
-        // `provider_message_id IS NULL` is the narrowing that keeps the re-take
-        // honest. `settleStaffMessage({status:"failed"})` never stamps an id
-        // because the adapter never returned one, while `recordDeliveryStatus`
-        // only reaches a row BY its provider id — so this re-takes exactly the
-        // sends the provider never accepted, and leaves a provider-reported
-        // delivery failure settled. Re-sending that one is an edit away, since
-        // the key is deterministic in the content, rather than a silent second
-        // send of a message WhatsApp already took off our hands — which matters
-        // doubly while the delivery-status payload shape is still an unverified
-        // guess (O-1): a mis-mapped `failed` must not become a re-send.
+        // `PROVIDER_REFUSED_SEND` is the narrowing that keeps the re-take
+        // honest, and it reads the code the row already carries rather than the
+        // absence of a provider id: the adapter throws before it returns an id
+        // whatever went wrong, so `provider_message_id IS NULL` cannot tell a
+        // definite refusal from a send WhatsApp has already accepted. See that
+        // constant for the incident.
+        //
+        // The old `error_code` is folded into `metadata` before the column is
+        // cleared. This branch deliberately writes no audit row (below), so
+        // without it a re-take erases the only evidence that the provider was
+        // ever handed this message — which is the one fact you need to answer
+        // "did the member get it twice?" after the fact.
         const claimed = rowsFrom(await transaction.execute(sql`
           UPDATE ${messages}
-          SET delivery_status = 'queued', error_code = NULL, send_claim_expires_at = ${sendClaimLease()}
+          SET delivery_status = 'queued',
+              error_code = NULL,
+              send_claim_expires_at = ${sendClaimLease()},
+              metadata = ${messages.metadata} || jsonb_build_object(
+                'sendRetakes',
+                COALESCE(${messages.metadata} -> 'sendRetakes', '[]'::jsonb)
+                  || jsonb_build_object('at', now(), 'previousErrorCode', ${messages.errorCode})
+              )
           WHERE ${messages.outboundKey} = ${parsed.outboundKey}
             AND (
               ${messages.deliveryStatus} = 'queued'
-              OR (${messages.deliveryStatus} = 'failed' AND ${messages.providerMessageId} IS NULL)
+              OR ${refusedSendPredicate()}
             )
             AND (${messages.sendClaimExpiresAt} IS NULL OR ${messages.sendClaimExpiresAt} <= now())
           RETURNING ${messages.id} AS id
@@ -580,9 +663,10 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
           outboundKey: parsed.outboundKey,
           // Left `queued` means another submit holds a LIVE claim. Anything else
           // is a settled row the claim above deliberately refused: `sent`,
-          // `delivered`, `read`, or a `failed` row carrying a provider id, which
-          // is a message WhatsApp accepted and then could not deliver. None of
-          // them is this caller's send to make.
+          // `delivered`, `read`, a `failed` row carrying a provider id (a
+          // message WhatsApp accepted and then could not deliver), or a `failed`
+          // row whose `error_code` leaves acceptance uncertain. None of them is
+          // this caller's send to make.
           disposition: existing.delivery_status === "queued" ? "already_queued" : "already_sent",
           recipient,
           lastInboundAt,
@@ -595,8 +679,14 @@ export function createInboxRepository(loadDatabase: AutomationDatabaseLoader = d
      * once the row has moved on, and it clears the claim either way. Clearing it
      * is half of what makes a `failed` row immediately re-sendable (S-8); the
      * other half is `queueStaffMessage`'s claim `UPDATE`, which re-takes a
-     * `failed` row the provider never accepted. Neither half works alone: a
-     * cleared lease on a row no statement will ever re-take is inert.
+     * `failed` row only when `error_code` says the provider definitively
+     * refused it (`PROVIDER_REFUSED_SEND`). Neither half works alone: a cleared
+     * lease on a row no statement will ever re-take is inert.
+     *
+     * `errorCode` therefore stops being a label and becomes load-bearing. Write
+     * the adapter's own `WoztellDeliveryFailure.code` here verbatim; a caller
+     * that substitutes a summary of its own makes every failure un-retakeable,
+     * which fails closed but silently.
      */
     async settleStaffMessage(actor: Actor, input: unknown): Promise<void> {
       requireAdmin(actor);

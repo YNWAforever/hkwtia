@@ -262,23 +262,39 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
         messageId: MESSAGE_ID,
       });
 
-      const claimSql = normalized(fixture.queries[2]?.sql);
+      const claim = fixture.queries[2];
+      const claimSql = normalized(claim?.sql);
       // Back to the re-send state, and without the stale error code the thread
       // would otherwise render beside "Sending".
       expect(claimSql).toContain("set delivery_status = 'queued', error_code = null");
       expect(claimSql).toContain(`"messages"."delivery_status" = 'failed'`);
       expect(claimSql).toContain(`"messages"."provider_message_id" is null`);
+      // The re-take is decided by the code the row carries, not by the absence
+      // of a provider id — the adapter throws before it can return one however
+      // it failed, so the id says nothing about acceptance.
+      expect(claimSql).toContain(`"messages"."error_code" in (`);
+      expect(claim?.params).toEqual(expect.arrayContaining(["provider_client_error", "retryable_rate_limit"]));
+      // The column is cleared, so the code has to survive somewhere: this branch
+      // writes no audit row, and without the fold a re-take would erase the only
+      // record that the provider was ever handed this message.
+      expect(claimSql).toContain("'sendretakes'");
+      expect(claimSql).toContain(`'previouserrorcode', "messages"."error_code"`);
       // The commitment was recorded when the row was inserted; a retry is not a
       // second commitment.
       expect(fixture.queries.some((query) => /insert into "audit_events"/i.test(query.sql))).toBe(false);
     });
 
     /**
-     * The other half of the same narrowing. A row that reached `failed` through
+     * Half of the narrowing. A row that reached `failed` through
      * `recordDeliveryStatus` was matched BY its provider id, so WhatsApp did
      * take it; re-queueing that one under the same key would be a silent second
      * send — and the delivery-status payload shape is still an unverified guess
      * (O-1), so a mis-mapped status must not be able to cause one.
+     *
+     * The fake answers by position rather than by evaluating SQL, so the
+     * `already_sent` below only pins the fallback SELECT's mapping. The guard
+     * itself is pinned by the claim statement's own text, asserted here for the
+     * same reason it is asserted in the test above.
      */
     it("leaves a provider-reported delivery failure settled rather than re-sending it", async () => {
       const fixture = repository([
@@ -292,6 +308,47 @@ describe("inboxRepository staff write path (C-2 Task 6)", () => {
         disposition: "already_sent",
         messageId: MESSAGE_ID,
       });
+
+      expect(normalized(fixture.queries[2]?.sql)).toContain(`"messages"."provider_message_id" is null`);
+    });
+
+    /**
+     * The other half, and the one `provider_message_id IS NULL` cannot express.
+     * Three of the adapter's five failure codes leave acceptance UNCERTAIN, and
+     * the row looks identical to a definite refusal: the adapter threw, so it
+     * returned no id either way.
+     *
+     * The trace that matters is O-1's most likely bring-up failure. `sendLive`
+     * gets HTTP 200 and WhatsApp delivers the reply, but `providerId(body)` does
+     * not recognise the response shape and the adapter throws
+     * `provider_unclassified_failure` — past the `!httpResponse.ok` arm. Task 7
+     * settles the row `failed` with that code. If the claim re-took it, the
+     * thread would show "Not delivered", the draft would still be in the
+     * composer, and every Send click would deliver the member another copy,
+     * with no audit row on this branch to record that it happened.
+     */
+    it("refuses to re-take a failure whose code leaves provider acceptance uncertain", async () => {
+      const fixture = repository([
+        [conversationRow()],
+        [],
+        [],
+        [{id: MESSAGE_ID, delivery_status: "failed", provider_message_id: null, error_code: "provider_unclassified_failure"}],
+      ]);
+
+      await expect(fixture.inbox.queueStaffMessage(admin, draft())).resolves.toMatchObject({
+        disposition: "already_sent",
+        messageId: MESSAGE_ID,
+      });
+
+      // The list is bound, not inlined, so the codes are parameters. Exactly the
+      // two definite refusals may appear; a code that means "the provider may
+      // already have it" appearing here is the double-send.
+      const claimParams = fixture.queries[2]?.params ?? [];
+      expect(claimParams).toContain("provider_client_error");
+      expect(claimParams).toContain("retryable_rate_limit");
+      expect(claimParams).not.toContain("retryable_network");
+      expect(claimParams).not.toContain("provider_acceptance_uncertain");
+      expect(claimParams).not.toContain("provider_unclassified_failure");
     });
 
     it("reports already_sent when the row has left the queued state", async () => {
