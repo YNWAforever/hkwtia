@@ -214,7 +214,13 @@ export function InboxComposer({
     setAttemptId(readAttemptId(conversationId));
     const saved = readDraft(conversationId);
     if (saved === null || saved === "") return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- see above; the draft and its attempt token are read together because they are one fact.
+    // Deliberately NOT a second disable directive: react-hooks/set-state-in-effect
+    // reports one diagnostic per effect, anchored on the first synchronous
+    // setState, so the directive above is the only one that can ever match and a
+    // second one is dead text that reads as a suppressed rule. The draft and its
+    // attempt token are read together because they are one fact — a retry has to
+    // find the row its first attempt wrote, so the token has to come back with
+    // the text it belongs to.
     setDraft({content: saved, restored: true});
   }, [conversationId]);
 
