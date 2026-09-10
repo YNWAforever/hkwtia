@@ -115,6 +115,18 @@ describe("InboxThread", () => {
     expect(html).toContain("provider_client_error");
   });
 
+  it("names the template a reply went out as, because the row's text is not what was delivered", () => {
+    // For `kind='template'` the persisted `content` is the free text staff typed
+    // into "Your reply"; the body WhatsApp delivered came from the template and
+    // its `variable.*` fields. The key is the only thing on the row that says
+    // so, and an inbound row has none, so nothing is drawn there.
+    const html = markup([
+      message({id: "m5", role: "staff", direction: "outbound", deliveryStatus: "sent", templateKey: "renewal_14"}),
+    ]);
+    expect(html).toContain("renewal_14");
+    expect(markup([message({id: "m1"})])).not.toContain("renewal_14");
+  });
+
   it("aligns by direction rather than by role", () => {
     // A `role='tool'` row is outbound and a `role='user'` row is inbound, but the
     // classification the reader cares about is which way the message travelled —

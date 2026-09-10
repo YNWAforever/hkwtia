@@ -56,6 +56,23 @@ export function InboxThread({locale, transcript, labels}: Readonly<{locale: AppL
             <span aria-hidden="true">·</span>
             <span>{message.channel}</span>
             <span aria-hidden="true">·</span>
+            {/* The template's own key, when the row went out as one. Not
+                decoration: for `kind='template'` the persisted `content` is the
+                free text staff typed into "Your reply", while what WhatsApp
+                actually delivered is the template body filled from the
+                `variable.*` fields (lib/admin/inbox-action-core.ts's
+                `sendTemplateMessage` branch). Without the key beside it, a later
+                reader of the thread sees an outbound message that was never
+                sent, with nothing on the row to say so. The provider's key
+                rather than a translated label, for the same reason the picker
+                shows the element name: it is the string staff read back in the
+                WOZTELL console. */}
+            {message.templateKey === null ? null : (
+              <>
+                <span>{message.templateKey}</span>
+                <span aria-hidden="true">·</span>
+              </>
+            )}
             <time dateTime={message.createdAt.toISOString()}>{formatter.format(message.createdAt)}</time>
             {message.deliveryStatus === null ? null : <span aria-hidden="true">·</span>}
             <DeliveryIndicator labels={labels} message={message} />

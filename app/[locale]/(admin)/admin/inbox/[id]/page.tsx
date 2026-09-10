@@ -90,9 +90,22 @@ export default async function AdminInboxThreadPage({params}: Props) {
         <p className="text-muted-foreground">{t("columns.assignee")}: {conversation.assigneeLabel ?? t("unassigned")}</p>
       </header>
       <div className="flex flex-wrap gap-3">
+        {/* The same rule the composer below states, applied to the control that
+            reaches it: `setHandling` refuses `human` on a thread that is not
+            WhatsApp (INVALID_INBOX_CHANNEL, lib/db/repos/inbox.ts), and
+            `setInboxHandlingAction` returns `void` — it has no `useActionState`
+            channel to carry an error code back, so that refusal would replace
+            the page with the generic error boundary and lose its state, on a
+            button that could never have succeeded. `Admin.inbox.errors
+            .INVALID_INBOX_CHANNEL` exists for the composer, which can show it.
+            Release needs no such gate: handing a thread back is `handling='bot'`,
+            which the repository accepts on either channel, and hiding it would
+            strand any web thread that somehow already reads `human`. */}
         {conversation.handling === "human"
           ? handlingForm("bot", t("actions.release"))
-          : handlingForm("human", t("actions.take"))}
+          : conversation.channel === "whatsapp"
+            ? handlingForm("human", t("actions.take"))
+            : null}
         {conversation.assignedToProfileId === actor.profileId
           ? assignForm("", t("actions.unassign"))
           : assignForm(actor.profileId, t("actions.assignToMe"))}
