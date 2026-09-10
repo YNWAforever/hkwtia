@@ -550,6 +550,10 @@ export function createM4AAcceptanceBoundary(
             locale: input.locale,
             memberName: input.memberName,
             whatsappOptIn: input.whatsappOptIn,
+            // C-1 Task 3. This boundary never takes a thread over, so every
+            // conversation it invents stays on the bot lane.
+            handling: "bot",
+            lastInboundAt: input.receivedAt,
           };
         },
         async markRunOwned() {},

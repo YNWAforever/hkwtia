@@ -16,7 +16,7 @@ function dependencies(text: string, profile: null | {id: string; displayName: st
       sendTemplateMessage: vi.fn(async () => ({status: "sent" as const, providerId: "p2"})),
     },
     resolveProfile: vi.fn(async () => profile),
-    claimInbound: vi.fn(async (input) => ({status: "accepted" as const, conversationId: "11111111-1111-4111-8111-111111111111", owner: input.owner, profileId: input.profileId, locale: input.locale, memberName: input.memberName, whatsappOptIn: input.whatsappOptIn})),
+    claimInbound: vi.fn(async (input) => ({status: "accepted" as const, conversationId: "11111111-1111-4111-8111-111111111111", owner: input.owner, profileId: input.profileId, locale: input.locale, memberName: input.memberName, whatsappOptIn: input.whatsappOptIn, handling: "bot" as const, lastInboundAt: null})),
     recordContact,
     recordOptOut,
     setWhatsappOptIn,

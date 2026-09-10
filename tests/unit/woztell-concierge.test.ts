@@ -38,6 +38,10 @@ function acceptedClaim(
     locale: "en",
     memberName: "Member",
     whatsappOptIn: true,
+    // C-1 Task 3: the claim now reports the conversation's handling state and
+    // window clock. 'bot' is the pre-Phase-C behaviour this fixture pins.
+    handling: "bot",
+    lastInboundAt: null,
     ...overrides,
   };
 }

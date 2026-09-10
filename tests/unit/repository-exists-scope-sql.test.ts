@@ -14,7 +14,12 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
 import {applicationsRepository} from "@/lib/db/repos/applications";
 import {billingAttemptsRepository} from "@/lib/db/repos/billing-attempts";
 import {companiesRepository} from "@/lib/db/repos/companies";
+import type {AutomationDatabase} from "@/lib/db/repos/journeys";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
+import {
+  createWoztellInboundEventsRepository,
+  woztellWebhookActor,
+} from "@/lib/db/repos/woztell-inbound-events";
 
 const actor = {kind: "member", userId: "user-a", profileId: "user-a"} as const;
 const reposDirectory = path.resolve(__dirname, "../../lib/db/repos");
@@ -42,6 +47,31 @@ const memberScopedCalls = [
     billingInterval: "none",
   })],
   ["billingAttempts.getById", () => billingAttemptsRepository.getById(actor, "attempt-a")],
+] as const;
+
+/**
+ * The same hazard, reached through a capability actor rather than a member one
+ * (programme §9 / Phase C1 S-14). `recordOutboundEcho` resolves an echo's thread
+ * through three hand-written `EXISTS` arms — the recipient's contact link, the
+ * member's own WhatsApp number, and the normalised sender recorded in message
+ * metadata — because D-6 keeps the conversation owner key an HMAC the repository
+ * cannot recompute. It runs inside a transaction, which the pg-proxy driver does
+ * not implement, so the loader below hands it the proxy database with a
+ * pass-through `transaction`. C2 Task 3 appends cases here; whoever lands second
+ * merges rather than replaces.
+ */
+const capabilityScopedCalls = [
+  ["woztellInboundEvents.recordOutboundEcho", (database: AutomationDatabase) =>
+    createWoztellInboundEventsRepository(
+      () => new Date("2026-09-10T09:00:00.000Z"),
+      async () => database,
+    ).recordOutboundEcho(woztellWebhookActor(), {
+      recipient: "+85290000000",
+      text: "Thanks — someone will come back to you shortly.",
+      providerMessageId: "wamid.echo.scope",
+      origin: "MANUAL",
+      sentAt: new Date("2026-09-10T08:59:00.000Z"),
+    })],
 ] as const;
 
 describe("EXISTS authorization scopes render as executable Postgres", () => {
@@ -73,6 +103,29 @@ describe("EXISTS authorization scopes render as executable Postgres", () => {
     }
     // Hand-written parentheses are hand-countable ones. A subquery left open
     // does not parse either, and reads as innocently as a balanced one.
+    for (const statement of statements) {
+      expect(statement.split("(").length).toBe(statement.split(")").length);
+    }
+  });
+
+  it.each(capabilityScopedCalls)("%s parenthesises its EXISTS subquery", async (_name, invoke) => {
+    const statements: string[] = [];
+    const proxy = drizzle(async (query: string) => {
+      statements.push(query);
+      return {rows: []};
+    });
+    const database = {
+      execute: (query: Parameters<AutomationDatabase["execute"]>[0]) => proxy.execute(query),
+      transaction: async <T,>(work: (tx: AutomationDatabase) => Promise<T>) => work(database),
+    } as AutomationDatabase;
+
+    await invoke(database).catch(() => undefined);
+
+    const sql = statements.join("\n");
+    expect(sql).toMatch(/\bexists\b/i);
+    for (const [, following] of sql.matchAll(/\bexists\b\s*(.)/gi)) {
+      expect(following).toBe("(");
+    }
     for (const statement of statements) {
       expect(statement.split("(").length).toBe(statement.split(")").length);
     }

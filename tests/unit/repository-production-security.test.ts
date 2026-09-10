@@ -15,7 +15,8 @@ import {createConversationsRepository} from "@/lib/db/repos/conversations";
 import {createStaffTasksRepository} from "@/lib/db/repos/staff-tasks";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
-import type {Actor} from "@/lib/membership/lifecycle";
+import {createWoztellInboundEventsRepository} from "@/lib/db/repos/woztell-inbound-events";
+import {ANONYMOUS_ACTOR, type Actor} from "@/lib/membership/lifecycle";
 import type {ConciergeAgentActor} from "@/lib/auth/agent-actor";
 
 const actor = {kind: "member", userId: "user-a", profileId: "user-a"} as const;
@@ -883,6 +884,46 @@ describe("production repository security boundaries", () => {
     )).rejects.toMatchObject({code: "FORBIDDEN"});
     expect(loadDatabase).not.toHaveBeenCalled();
   });
+
+  /**
+   * Phase C1 S-14. The webhook route's HMAC is a gate on the ROUTE; these are
+   * the gates on the REPOSITORY, and they are not the same claim — Task 11 adds
+   * a backfill route with no HMAC in front of it that reaches the same table.
+   * The two legacy woztell modules authorize nothing and predate §9; they are
+   * the standing exceptions, not the precedent, so every new writer refuses a
+   * member, an admin and an anonymous actor before it opens the database.
+   */
+  it.each([
+    ["member", actor],
+    ["admin", {kind: "staff", userId: "staff-a", profileId: "staff-a", role: "superadmin"}],
+    ["anonymous", ANONYMOUS_ACTOR],
+    // The shape a forged actor would take if `kind` alone were the check.
+    ["hand-rolled webhook shape", {kind: "woztell-webhook", userId: null}],
+  ] as const)(
+    "refuses a %s actor on every woztell inbound event writer before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const events = createWoztellInboundEventsRepository(
+        () => securityNow,
+        loadDatabase,
+      );
+
+      await expect(events.recordDeliveryStatus(forged as never, {
+        providerMessageId,
+        status: "delivered",
+        errorCode: null,
+        occurredAt: securityNow,
+      })).rejects.toThrow("FORBIDDEN");
+      await expect(events.recordOutboundEcho(forged as never, {
+        recipient: "+85290000000",
+        text: "Thanks — someone will come back to you shortly.",
+        providerMessageId,
+        origin: "MANUAL",
+        sentAt: securityNow,
+      })).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
 
   it.each(["finish", "fail", "escalate", "disable"] as const)(
     "authorizes %s before validating attacker-controlled input or opening the database",

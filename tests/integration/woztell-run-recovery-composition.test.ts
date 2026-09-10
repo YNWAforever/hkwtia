@@ -55,6 +55,10 @@ function dependencies(
       locale: "en" as const,
       memberName: "Member",
       whatsappOptIn: true,
+      // C-1 Task 3: the claim now reports the conversation's handling state and
+      // window clock. 'bot' is the pre-Phase-C behaviour this fixture pins.
+      handling: "bot" as const,
+      lastInboundAt: null,
     })),
     recoverRun: vi.fn(async () => recovery),
     markRunOwned: vi.fn(async () => undefined),

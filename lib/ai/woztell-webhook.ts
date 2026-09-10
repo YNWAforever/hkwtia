@@ -9,6 +9,7 @@ import type {WoztellRunRecovery} from "@/lib/ai/woztell-run-recovery";
 import type {NormalizedInbound} from "@/lib/channels/types";
 import {normalizeWhatsAppNumber} from "@/lib/channels/woztell";
 import type {ConversationOwner} from "@/lib/db/repos/conversations";
+import type {ConversationHandling} from "@/lib/db/server-schema";
 
 export {
   decideWoztellRunRecovery,
@@ -57,6 +58,14 @@ export type WoztellInboundClaim =
     locale: "en" | "zh-HK";
     memberName: string;
     whatsappOptIn: boolean;
+    /** C-1. The interlock between the concierge and a person, read from the row
+     * the claim transaction locked rather than checked separately afterwards —
+     * a second read is a second answer, and the bot would answer a message a
+     * person is already answering. Task 4 branches on it. */
+    handling: ConversationHandling;
+    /** The 24-hour customer-service window is measured from here, never from
+     * `last_message_at`, which every outbound reply bumps. */
+    lastInboundAt: Date | null;
     pendingReply?: string;
   }>;
 
@@ -71,6 +80,13 @@ export type WoztellInboundClaimInput = Readonly<{
   receivedAt: Date;
   content: string;
   channel: "whatsapp";
+  /** C-1. Stored on the conversation, which carries no unique index on it and is
+   * therefore always safe to write — unlike `contacts.whatsapp_member_id`, whose
+   * separate partial unique index is not the upsert's conflict target. */
+  whatsappMemberId: string | null;
+  /** D-6/S-3: a link, not an owner arm. `conversations_owner_check` stays
+   * two-armed and the HMAC stays the owner key. */
+  contactId: string | null;
 }>;
 
 export type WoztellConciergeTurnInput = Readonly<{
@@ -233,6 +249,11 @@ export function createWoztellWebhookProcessor(
         receivedAt: normalized.receivedAt,
         content: normalized.text,
         channel: "whatsapp",
+        whatsappMemberId: normalized.whatsappMemberId,
+        // C-1 Task 4 makes `recordContact` return the contact id and threads it
+        // here. Until then the claim writes no link, and `claimInbound`'s
+        // COALESCE leaves any link a later inbound establishes untouched.
+        contactId: null,
       });
       if (claim.status === "duplicate") return {status: "duplicate"};
 
