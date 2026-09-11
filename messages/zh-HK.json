@@ -2399,7 +2399,9 @@
         "suppressed": "已停止接收",
         "plan_ineligible": "會籍並非生效中",
         "missing_variable": "訊息內容未填妥",
-        "marketing_suppressed": "發送前同意狀態已改變"
+        "marketing_suppressed": "發送前同意狀態已改變",
+        "template_not_approved": "範本未獲批核發送",
+        "unknown_recipient": "收件人紀錄已不存在"
       },
       "status": {
         "draft": "草稿",

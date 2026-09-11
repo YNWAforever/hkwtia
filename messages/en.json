@@ -2398,7 +2398,9 @@
         "suppressed": "Opted out",
         "plan_ineligible": "Membership not active",
         "missing_variable": "Message details missing",
-        "marketing_suppressed": "Consent changed before sending"
+        "marketing_suppressed": "Consent changed before sending",
+        "template_not_approved": "Template not approved for sending",
+        "unknown_recipient": "Recipient no longer on file"
       },
       "status": {
         "draft": "Draft",

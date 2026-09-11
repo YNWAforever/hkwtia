@@ -1,6 +1,7 @@
 import {describe, expect, it} from "vitest";
 
 import {
+  CAMPAIGN_REPORT_REASONS,
   ELIGIBILITY_CATEGORIES,
   PLAN_ELIGIBLE_MEMBERSHIP_STATUSES,
   classifyRecipient,
@@ -8,6 +9,8 @@ import {
 } from "@/lib/admin/campaign-eligibility";
 import {createMessageEligibilityRepository, type RecipientFacts} from "@/lib/db/repos/message-eligibility";
 import type {AdminActor} from "@/lib/membership/lifecycle";
+import en from "@/messages/en.json";
+import zh from "@/messages/zh-HK.json";
 
 const admin: AdminActor = {kind: "staff", userId: "staff-1", profileId: "staff-1"};
 
@@ -200,5 +203,50 @@ describe("campaign template variables", () => {
   it("ignores an entry the template does not declare", () => {
     expect(resolveRecipientVariables({variables: ["memberName"]}, {memberName: "Hi", leftover: "{{email}}"}, memberFacts()))
       .toEqual({ok: true, variables: {memberName: "Hi"}});
+  });
+});
+
+/**
+ * The campaign detail page builds its label map from `CAMPAIGN_REPORT_REASONS`
+ * and `campaign-report.tsx` falls back to rendering an unlabelled key verbatim,
+ * so a code in that list with no bundle entry is an English snake_case token on
+ * the "Not sent" row — in front of a zh-HK admin, on the row that explains why
+ * a blast did not go out.
+ *
+ * Both halves are load-bearing. The list has to name every code a writer can
+ * produce (it was hand-listed once and missed three), and every code it names
+ * has to be in BOTH bundles. `template_not_approved` is the expensive one:
+ * `approvedTemplateKeys` fails closed on a registry read that throws, so one
+ * revoked or unreadable template blocks the whole tick and the entire panel
+ * becomes that single row.
+ */
+describe("the campaign report's reason vocabulary", () => {
+  it("labels every reason in both bundles", () => {
+    for (const reason of CAMPAIGN_REPORT_REASONS) {
+      expect(en.Admin.campaigns.eligibility, `en ${reason}`).toHaveProperty(reason);
+      expect(zh.Admin.campaigns.eligibility, `zh-HK ${reason}`).toHaveProperty(reason);
+    }
+  });
+
+  it("names every code a writer can produce", () => {
+    // The snapshot-time half: `blocked_reason` is an eligibility category, minus
+    // `eligible`, which `reportReasonFor` returns for nobody. Widened to
+    // `string[]` so the loop can ask about `eligible` at all — the whole point
+    // of the assertion is that one category is absent.
+    const reasons: readonly string[] = CAMPAIGN_REPORT_REASONS;
+    for (const category of ELIGIBILITY_CATEGORIES) {
+      expect(reasons.includes(category), category).toBe(category !== "eligible");
+    }
+    // The send-time half, which is what drifted: `campaign-runner.ts` writes
+    // `marketing_suppressed` as an `error_code` and `template_not_approved` as a
+    // `blocked_reason`, and `dispatchNotification` answers `missing_variable`,
+    // `template_not_approved` and `unknown_recipient` — every one of which the
+    // runner passes straight through to `markRecipientBlocked`.
+    expect(CAMPAIGN_REPORT_REASONS).toEqual(expect.arrayContaining([
+      "missing_variable",
+      "marketing_suppressed",
+      "template_not_approved",
+      "unknown_recipient",
+    ]));
   });
 });

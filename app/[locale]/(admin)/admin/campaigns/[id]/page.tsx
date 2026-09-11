@@ -3,7 +3,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {CampaignReport} from "@/components/admin/campaign-report";
 import type {AppLocale} from "@/i18n/routing";
-import {ELIGIBILITY_CATEGORIES} from "@/lib/admin/campaign-eligibility";
+import {CAMPAIGN_REPORT_REASONS} from "@/lib/admin/campaign-eligibility";
 import {
   approveCampaignAction,
   rejectCampaignAction,
@@ -51,12 +51,13 @@ export default async function AdminCampaignDetailPage({params}: Props) {
   const path = `/${locale}/admin/campaigns/${campaign.id}`;
   // Every reason key anything in the tree writes, not only the snapshot-time
   // ones. `campaign-report.tsx` falls back to the raw key for a code it has
-  // never seen, and `marketing_suppressed` — which `campaign-runner.ts` writes
-  // for any member who withdraws between draft and send — is the one code the
-  // runner actually produces, so without it a zh-HK admin routinely read an
-  // English snake_case token on the most sensitive row of the report.
+  // never seen, so a gap here is an English snake_case token on the most
+  // sensitive row of the report, read by a zh-HK admin. The list is imported
+  // rather than spelled out because spelling it out is what went wrong: it was
+  // hand-listed from `ELIGIBILITY_CATEGORIES` and missed `marketing_suppressed`,
+  // then missed Task 10's `template_not_approved` and `unknown_recipient`.
   const reasonLabels = Object.fromEntries(
-    [...ELIGIBILITY_CATEGORIES, "missing_variable", "marketing_suppressed"].map((reason) => [reason, t(`eligibility.${reason}`)]),
+    CAMPAIGN_REPORT_REASONS.map((reason) => [reason, t(`eligibility.${reason}`)]),
   );
 
   return (

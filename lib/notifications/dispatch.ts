@@ -7,8 +7,8 @@ import type {AppLocale} from "@/i18n/routing";
 import {
   campaignEmailFor,
   campaignNumberFor,
+  type CampaignReportReason,
   classifyRecipient,
-  type EligibilityCategory,
 } from "@/lib/admin/campaign-eligibility";
 import type {AutomationRepositoryActor} from "@/lib/auth/automation-actor";
 import type {MessageClassification} from "@/lib/automation/types";
@@ -126,15 +126,21 @@ export type NotificationRequest =
 export type NotificationFailureCode = DeliveryFailureCode | "provider_acceptance_uncertain";
 
 /**
- * `eligible` is excluded: it is the one category that is not a reason to skip.
- * Every value here is safe to write verbatim into
- * `campaign_recipients.blocked_reason`, which is what Task 10 does with it.
+ * Every value here is written verbatim into `campaign_recipients.blocked_reason`
+ * by Task 10's runner, so it is derived from the report's vocabulary rather
+ * than restated: a skip reason with no label renders to an admin as a raw
+ * English snake_case token on the row that says why a blast did not go out, and
+ * that has now happened twice. Declaring it this way makes the next added
+ * reason a compile error until `CampaignReportReason` names it, and a test
+ * failure until `CAMPAIGN_REPORT_REASONS` — which is what the detail page
+ * builds its label map from — and both bundles carry it.
+ *
+ * `marketing_suppressed` is the one report reason the dispatcher cannot answer:
+ * it is an `error_code` the email lane of `campaign-runner.ts` writes after a
+ * send is already under way, not a refusal made here. `eligible` is not a
+ * report reason at all — it is the one category that is not a reason to skip.
  */
-export type NotificationSkipReason =
-  | Exclude<EligibilityCategory, "eligible">
-  | "missing_variable"
-  | "template_not_approved"
-  | "unknown_recipient";
+export type NotificationSkipReason = Exclude<CampaignReportReason, "marketing_suppressed">;
 
 export type NotificationResult =
   | Readonly<{status: "sent"; providerId: string; deliveryId: string}>

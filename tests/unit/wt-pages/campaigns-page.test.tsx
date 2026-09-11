@@ -391,6 +391,34 @@ describe("the campaign detail page", () => {
     expect(screen.queryByText("marketing_suppressed")).toBeNull();
   });
 
+  /**
+   * Task 10's two additions to the same hole, and the reason the label map is
+   * now built from `CAMPAIGN_REPORT_REASONS` rather than hand-listed.
+   *
+   * `template_not_approved` is the one that empties a whole blast: the runner
+   * writes it for a registry key the code has retired, and `dispatchNotification`
+   * answers it whenever `approvedTemplateKeys` does not carry the template —
+   * including a registry read that throws, which fails closed with an EMPTY set.
+   * One revoked template after approval, and every recipient of the tick lands
+   * on this row, so the entire "Not sent" panel was a single English
+   * snake_case token. `unknown_recipient` is the quieter twin: a profile or
+   * contact deleted between the snapshot and the send.
+   */
+  it("names Task 10's send-queue refusals in the reader's language too", async () => {
+    state.actorProfileId = reviewerProfileId;
+    state.readCampaign.mockResolvedValue({
+      campaign: campaign(),
+      report: {total: 21, queued: 0, sent: 0, delivered: 0, read: 0, failed: 0, blocked: 21, byReason: {template_not_approved: 20, unknown_recipient: 1}},
+    });
+
+    render(await AdminCampaignDetailPage({params: Promise.resolve({locale: "en", id: campaignId})}));
+
+    expect(screen.getByText(en.Admin.campaigns.eligibility.template_not_approved)).toBeInTheDocument();
+    expect(screen.getByText(en.Admin.campaigns.eligibility.unknown_recipient)).toBeInTheDocument();
+    expect(screen.queryByText("template_not_approved")).toBeNull();
+    expect(screen.queryByText("unknown_recipient")).toBeNull();
+  });
+
   it("404s a campaign that does not exist and shows the error state when the read fails", async () => {
     state.actorProfileId = reviewerProfileId;
     state.readCampaign.mockResolvedValue(null);

@@ -57,6 +57,43 @@ export const ELIGIBILITY_CATEGORIES: readonly EligibilityCategory[] = [
 ];
 
 /**
+ * Every code `campaigns.ts`'s `reportReasonFor` can key the delivery report's
+ * `byReason` on — snapshot-time AND send-time — in one list, because the
+ * report's label map is built from it and `campaign-report.tsx` falls back to
+ * rendering an unlabelled key verbatim.
+ *
+ * It exists because that map was hand-listed from `ELIGIBILITY_CATEGORIES` and
+ * drifted twice. `marketing_suppressed` was the first gap; Task 10 opened two
+ * more the same day it landed, `template_not_approved` and `unknown_recipient`,
+ * and the second gap is the worse one: a template revoked in
+ * `whatsapp_templates` after approval — or a registry read that throws, which
+ * `approvedTemplateKeys` answers fail-closed with an empty set — blocks EVERY
+ * recipient of the tick, so a zh-HK admin read `template_not_approved  20` in
+ * English on the one row that explains why the blast did not go out.
+ *
+ * `eligible` is not here: `reportReasonFor` returns it for nobody, because a
+ * recipient who was eligible is counted as sent, queued or failed instead.
+ */
+export type CampaignReportReason =
+  | Exclude<EligibilityCategory, "eligible">
+  | "missing_variable"
+  | "marketing_suppressed"
+  | "template_not_approved"
+  | "unknown_recipient";
+
+export const CAMPAIGN_REPORT_REASONS: readonly CampaignReportReason[] = [
+  "no_email",
+  "no_number",
+  "not_opted_in",
+  "suppressed",
+  "plan_ineligible",
+  "missing_variable",
+  "marketing_suppressed",
+  "template_not_approved",
+  "unknown_recipient",
+];
+
+/**
  * `plan_ineligible` is narrower than the spec's label suggests, and the
  * narrowness is deliberate: it means a MEMBER whose membership is not currently
  * in force. There is no plan-TIER gate anywhere in this classifier — a campaign
