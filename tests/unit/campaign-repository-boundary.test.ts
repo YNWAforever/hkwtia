@@ -12,7 +12,10 @@ const segmentB = "22222222-2222-4222-8222-222222222222";
 const campaignA = "33333333-3333-4333-8333-333333333333";
 const campaignB = "44444444-4444-4444-8444-444444444444";
 const idempotencyKey = "55555555-5555-4555-8555-555555555555";
+// A stored `filter_version = 1` payload: the dispatcher reads the version off the
+// row, so the fake rows below carry it as the fourth selected column (C-6, S-9).
 const emptyFilter = {tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null};
+const filterVersion = 1;
 
 describe("campaign repository resource boundaries", () => {
   it("runtime-validates every public ID, filter, and input before database access", async () => {
@@ -35,9 +38,9 @@ describe("campaign repository resource boundaries", () => {
       const normalized = sql.toLowerCase();
       if (normalized.includes('from "saved_segments"')) {
         return params.includes(adminA.profileId) && params.includes(segmentA)
-          ? {rows: [[segmentA, adminA.profileId, emptyFilter]]}
+          ? {rows: [[segmentA, adminA.profileId, emptyFilter, filterVersion]]}
           : params.includes(adminB.profileId) && params.includes(segmentB)
-            ? {rows: [[segmentB, adminB.profileId, emptyFilter]]}
+            ? {rows: [[segmentB, adminB.profileId, emptyFilter, filterVersion]]}
             : {rows: []};
       }
       if (normalized.startsWith('insert into "campaigns"')) {

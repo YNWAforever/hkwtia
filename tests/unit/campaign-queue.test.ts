@@ -13,7 +13,10 @@ const input = {
   idempotencyKey: "22222222-2222-4222-8222-222222222222",
 };
 
+// What a `filter_version = 1` row still holds on disk, and what the same filter
+// looks like once `parseSegmentFilter` has dispatched it (C-6, S-9).
 const segmentFilters = {profileIds: [], tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null, whatsappOptIn: null};
+const dispatchedFilters = {...segmentFilters, industryTags: [], companyPlan: [], event: null, audience: "members" as const, contactStage: [], contactSource: []};
 
 class Barrier {
   private arrivals = 0;
@@ -90,7 +93,7 @@ function createConcurrentCampaignDatabase({parties = 2, failAt}: Readonly<{parti
       const transaction = {
         select: () => ({
           from: (table: unknown) => new FakeSelectQuery(async () => {
-            if (table === savedSegments) return [{id: input.segmentId, ownerProfileId: actor().profileId, filters: segmentFilters}];
+            if (table === savedSegments) return [{id: input.segmentId, ownerProfileId: actor().profileId, filters: segmentFilters, filterVersion: 1}];
             if (table === campaigns) {
               const isInitialLookup = !transactionState.initialCampaignLookup;
               if (isInitialLookup) {
@@ -186,7 +189,7 @@ function fakeDependencies() {
     recipients,
     dependencies: {
       transaction: async <T>(_actor: unknown, callback: (store: unknown) => Promise<T>) => callback({}),
-      getSavedSegment: async () => ({id: input.segmentId, ownerProfileId: "staff-1", filters: {profileIds: [], tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null, whatsappOptIn: null}}),
+      getSavedSegment: async () => ({id: input.segmentId, ownerProfileId: "staff-1", filters: dispatchedFilters}),
       membersForSegment: async (): Promise<readonly CampaignQueueMember[]> => [{profileId: "member-1", displayName: "Fixture Member", email: "member1@example.test", locale: "zh-HK", consentMarketing: true, suppressed: false, renewalAt: "2026-08-20"}],
       findCampaignByIdempotencyKey: async (_actor: unknown, _store: unknown, key: string) => {
         const campaign = campaigns.find((item) => item.idempotencyKey === key);
@@ -257,7 +260,7 @@ describe("campaign queue", () => {
     await expect(campaignsRepository.transaction(anonymous, async () => undefined)).rejects.toThrow();
     await expect(campaignsRepository.findCampaignByIdempotencyKey(anonymous, {}, "22222222-2222-4222-8222-222222222222", input.segmentId)).rejects.toThrow();
     await expect(campaignsRepository.getSavedSegment(anonymous, {}, input.segmentId)).rejects.toThrow();
-    await expect(campaignsRepository.membersForSegment(anonymous, {}, {profileIds: [], tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null, whatsappOptIn: null})).rejects.toThrow();
+    await expect(campaignsRepository.membersForSegment(anonymous, {}, dispatchedFilters)).rejects.toThrow();
     await expect(campaignsRepository.createCampaign(anonymous, {}, input)).rejects.toThrow();
     await expect(campaignsRepository.insertRecipients(anonymous, {}, "campaign-1", [])).rejects.toThrow();
     await expect(campaignsRepository.appendAudit(anonymous, {}, "campaign-1", 0)).rejects.toThrow();

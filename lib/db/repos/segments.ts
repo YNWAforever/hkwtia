@@ -4,7 +4,7 @@ import {and, eq, sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
 import type {SegmentMember, SegmentPreview} from "@/lib/admin/segments";
-import {segmentFilterSchema, segmentIdSchema, type SegmentFilterSet, type SegmentPagination, type SegmentSaveInput} from "@/lib/admin/segment-schema";
+import {SEGMENT_FILTER_VERSION, parseSegmentFilter, segmentIdSchema, type SegmentFilterSet, type SegmentPagination, type SegmentSaveInput} from "@/lib/admin/segment-schema";
 import {requireAdmin} from "@/lib/auth/authorize";
 import {auditEvents, companies, companyMembers, engagementScores, memberships, profiles, savedSegments} from "@/lib/db/server-schema";
 import {getDb} from "@/lib/db/repos/common";
@@ -90,8 +90,11 @@ function projectedMembers(filter: SegmentFilterSet): SQL {
   `;
 }
 
+// Every row of the /admin/segments list and every `get` lands here, so this one
+// call is the dispatch point for the whole list page. It reads the row's own
+// `filter_version` rather than assuming the current one (S-9).
 function toSavedSegment(record: z.infer<typeof savedSegmentSchema>): SavedSegmentRecord {
-  return {...record, filters: segmentFilterSchema.parse(record.filters), createdAt: record.createdAt.toISOString(), updatedAt: record.updatedAt.toISOString()};
+  return {...record, filters: parseSegmentFilter(record.filterVersion, record.filters), createdAt: record.createdAt.toISOString(), updatedAt: record.updatedAt.toISOString()};
 }
 
 export const segmentsRepository = {
@@ -110,7 +113,12 @@ export const segmentsRepository = {
     requireAdmin(actor);
     const db = await getDb();
     return db.transaction(async (tx) => {
-      const record = savedSegmentSchema.parse((await tx.insert(savedSegments).values({ownerProfileId: actor.profileId, nameEn: input.nameEn, nameZh: input.nameZh, filterVersion: 1, filters: input.filter}).returning())[0]);
+      // The hidden `filters` input the save form posts is whatever
+      // `parseSegmentRouteQuery` produced, which carries the six v2 keys from the
+      // moment the dispatcher lands. Writing `1` beside a v2 payload makes the row
+      // unreadable the instant `toSavedSegment` runs its frozen, strict v1 parse —
+      // so the version stamp follows the schema in the same commit (S-9).
+      const record = savedSegmentSchema.parse((await tx.insert(savedSegments).values({ownerProfileId: actor.profileId, nameEn: input.nameEn, nameZh: input.nameZh, filterVersion: SEGMENT_FILTER_VERSION, filters: input.filter}).returning())[0]);
       await tx.insert(auditEvents).values({actorUserId: actor.profileId, actorType: actor.kind, action: "segment.saved", targetType: "saved_segment", targetId: record.id, metadata: {filterVersion: record.filterVersion}});
       return toSavedSegment(record);
     });

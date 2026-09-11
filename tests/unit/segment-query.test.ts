@@ -22,7 +22,7 @@ describe("segment preview", () => {
 
     expect(preview.items.map((item) => item.profileId)).toEqual(["corporate-low-score"]);
     expect(calls).toEqual([{
-      filter: {profileIds: ["corporate-low-score"], tier: ["corporate"], status: [], scoreMin: null, scoreMax: 19.99, renewalWithinDays: 60, sector: "", lastLoginBeforeDays: null, whatsappOptIn: null},
+      filter: {profileIds: ["corporate-low-score"], tier: ["corporate"], status: [], scoreMin: null, scoreMax: 19.99, renewalWithinDays: 60, sector: "", lastLoginBeforeDays: null, whatsappOptIn: null, industryTags: [], companyPlan: [], event: null, audience: "members", contactStage: [], contactSource: []},
       pagination: {limit: 25, cursor: null},
     }]);
   });

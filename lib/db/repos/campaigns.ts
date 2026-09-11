@@ -4,7 +4,7 @@ import {and, eq, sql} from "drizzle-orm";
 import {z} from "zod";
 
 import {queueCampaignSchema, type CampaignQueueDependencies, type CampaignQueueMember, type CampaignQueueResult, type QueueCampaignInput} from "@/lib/admin/campaigns";
-import {segmentFilterSchema, segmentIdSchema, type SegmentFilterSet} from "@/lib/admin/segment-schema";
+import {SEGMENT_FILTER_VERSION, parseSegmentFilter, segmentIdSchema, type SegmentFilterSet} from "@/lib/admin/segment-schema";
 import {requireAdmin} from "@/lib/auth/authorize";
 import {auditEvents, campaignRecipients, campaigns, companies, companyMembers, emailLog, engagementScores, memberships, profiles, savedSegments} from "@/lib/db/server-schema";
 import {
@@ -16,7 +16,7 @@ import type {AutomationDatabase} from "@/lib/db/repos/journeys";
 import {segmentPredicates} from "@/lib/db/repos/segments";
 import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 
-const savedSegmentRowSchema = z.object({id: z.string().uuid(), ownerProfileId: z.string(), filters: z.record(z.unknown())});
+const savedSegmentRowSchema = z.object({id: z.string().uuid(), ownerProfileId: z.string(), filters: z.record(z.unknown()), filterVersion: z.number().int()});
 const audienceRowSchema = z.object({profileId: z.string(), displayName: z.string(), email: z.string().nullable(), locale: z.string(), consentMarketing: z.boolean(), suppressed: z.boolean(), renewalAt: z.coerce.date().nullable()});
 const campaignRowSchema = z.object({id: z.string().uuid()});
 const countRowSchema = z.object({count: z.coerce.number()});
@@ -49,13 +49,16 @@ function toQueueMember(row: z.infer<typeof audienceRowSchema>): CampaignQueueMem
 async function savedSegmentForActor(actor: AdminActor, store: unknown, segmentId: string) {
   const parsedSegmentId = segmentIdSchema.parse(segmentId);
   const db = asDb(store);
-  const row = (await db.select({id: savedSegments.id, ownerProfileId: savedSegments.ownerProfileId, filters: savedSegments.filters})
+  // `filterVersion` is selected only so the filters can be dispatched on it: a
+  // campaign built from a segment read at the wrong version addresses the wrong
+  // people, and the snapshot on `campaign_recipients` would make that permanent.
+  const row = (await db.select({id: savedSegments.id, ownerProfileId: savedSegments.ownerProfileId, filters: savedSegments.filters, filterVersion: savedSegments.filterVersion})
     .from(savedSegments)
     .where(and(eq(savedSegments.id, parsedSegmentId), eq(savedSegments.ownerProfileId, actor.profileId)))
     .limit(1))[0];
   if (!row) return null;
   const parsed = savedSegmentRowSchema.parse(row);
-  return {...parsed, filters: segmentFilterSchema.parse(parsed.filters)};
+  return {...parsed, filters: parseSegmentFilter(parsed.filterVersion, parsed.filters)};
 }
 
 async function ownedCampaign(actor: AdminActor, store: unknown, campaignId: string): Promise<string> {
@@ -139,7 +142,11 @@ export function createCampaignsRepository(
 
     async membersForSegment(actor, store, filter) {
       requireAdmin(actor);
-      const parsedFilter = segmentFilterSchema.parse(filter);
+      // The caller hands over an already-dispatched filter set, so this is the
+      // current version by construction; it still re-parses at the repository
+      // boundary because `store` is caller-supplied and this is the last gate
+      // before the audience SQL is built.
+      const parsedFilter = parseSegmentFilter(SEGMENT_FILTER_VERSION, filter);
       return campaignAudience(store, parsedFilter);
     },
 
