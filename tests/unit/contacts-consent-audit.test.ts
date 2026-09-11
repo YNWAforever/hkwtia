@@ -342,6 +342,37 @@ describe("a newly granted contact opt-in is audited (C-8, boundary 11)", () => {
     expect(normalized(recorder.statements[0]?.sql)).toMatch(/^insert into "contacts"/);
   });
 
+  /**
+   * The C2 review defect, and the reason the case above is not enough on its own:
+   * that one passes `whatsappNumber: null`, so the upsert can only INSERT a fresh
+   * row. The dangerous shape is a DECLINING submission that still carries a number
+   * an opted-in contact already holds. The lock read is skipped, so `priorOptIn` is
+   * a hard-coded `false`; the merge evaluates `false OR true` = true; and
+   * `RETURNING` reports that POST-update `true`. Reading those two together as a
+   * transition wrote one `consent.whatsapp.granted` row per submission, attributed
+   * to a form on which the person had declined.
+   *
+   * Both writers reach it. `lib/events/guest-registration-core.ts` posts
+   * `whatsappOptIn: marketingConsent && whatsappNumber !== null` — an unchecked box
+   * with a number filled in — and `lib/growth/interest-service.ts` rejects only
+   * opt-in WITHOUT a number, so number-present/opt-in-false is a valid submission
+   * there too.
+   */
+  it("writes nothing when a declining submission carries a number already opted in", async () => {
+    const recorder = transactionalRecorder([[{id: "c-15", whatsapp_opt_in: true}]]);
+
+    await expect(submit(recorder, {whatsappOptIn: false}))
+      .resolves.toEqual({id: "c-15", disposition: "upserted"});
+
+    expect(granted(recorder.statements)).toHaveLength(0);
+    // Still the single-statement path: the fix is in the condition that consumes
+    // the skipped read, not in reinstating the read. Reinstating it would put a
+    // row lock on the common declining submission for an audit row that, by
+    // definition, cannot be owed — this form asserted no consent.
+    expect(recorder.statements).toHaveLength(1);
+    expect(normalized(recorder.statements[0]?.sql)).toMatch(/^insert into "contacts"/);
+  });
+
   it("audits a first grant from the guest RSVP with that form's consent source", async () => {
     const recorder = transactionalRecorder([[], [{id: "c-14", whatsapp_opt_in: true}], []]);
     const repository = createContactsRepository(async () => recorder.database);

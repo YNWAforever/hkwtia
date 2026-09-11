@@ -153,7 +153,10 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
      * webhook the route 500s on. Skipped entirely when the submission is not opting
      * in, because the merge below can then only preserve what is already there —
      * there is no false → true transition to miss, and the common path keeps its
-     * single statement.
+     * single statement. That skip is safe for the READ but leaves `priorOptIn` a
+     * hard-coded `false` rather than an observed value, so the condition consuming
+     * it has to test that the read actually RAN before it trusts it; see the guard
+     * on the audit INSERT below.
      *
      * The RESULTING flag is read back from `RETURNING`, not assumed from the
      * input: on a row carrying `whatsapp_opted_out_at` the merge forces `false`,
@@ -225,7 +228,23 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
         `))[0];
         if (!row) throw new Error("CONTACT_UPSERT_FAILED");
         const id = String(row.id);
-        if (isTrue(row.whatsapp_opt_in) && !priorOptIn) {
+        // `parsed.whatsappOptIn` leads, and it is not redundant with the RETURNING
+        // read. It is this call site's spelling of the arm
+        // `profilesRepository.update` writes as `prior !== undefined`: the lock read
+        // above is skipped on a DECLINING submission, so `priorOptIn` is then a
+        // hard-coded `false` and not a prior value at all. A C2 review found the
+        // consequence. A guest RSVPs with the marketing box unchecked but supplies a
+        // number an opted-in contact already holds
+        // (`lib/events/guest-registration-core.ts` posts
+        // `marketingConsent && whatsappNumber !== null`; the interest form reaches the
+        // same shape because `lib/growth/interest-service.ts` only rejects opt-in
+        // WITHOUT a number). The merge is then `false OR true` = true, RETURNING hands
+        // back that POST-update `true`, and `isTrue(true) && !false` minted one
+        // `consent.whatsapp.granted` row per submission — a consent record attributed
+        // to a form on which the person declined. Auditing a grant nobody made is the
+        // one direction this leg must never err in, and it is worse than the missing
+        // row it was added to fix.
+        if (parsed.whatsappOptIn && isTrue(row.whatsapp_opt_in) && !priorOptIn) {
           await transaction.execute(sql`
             INSERT INTO ${auditEvents}
               (actor_user_id, actor_type, action, target_type, target_id, metadata)
