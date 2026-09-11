@@ -21,6 +21,7 @@ const linkLabelKeys = {
   contacts: "navigation.contacts",
   tasks: "navigation.tasks",
   segments: "navigation.segments",
+  campaigns: "navigation.campaigns",
   announcements: "navigation.announcements",
   news: "navigation.news",
   "page-copy": "navigation.pageCopy",

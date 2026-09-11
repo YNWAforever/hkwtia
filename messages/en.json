@@ -2258,7 +2258,8 @@
       "approvals": "Approvals",
       "reports": "Reports",
       "automations": "Automations",
-      "templates": "WhatsApp templates"
+      "templates": "WhatsApp templates",
+      "campaigns": "Campaigns"
     },
     "templates": {
       "eyebrow": "WhatsApp delivery",
@@ -2354,6 +2355,82 @@
       "empty": "No contacts match these filters.",
       "error": "We could not load the contacts pipeline.",
       "saved": "Contact updated."
+    },
+    "campaigns": {
+      "eyebrow": "Outbound",
+      "title": "Campaigns",
+      "description": "Name a campaign, choose a channel and template, pick a segment, check who it can actually reach, then have a second admin approve it.",
+      "steps": {
+        "name": "Name",
+        "channel": "Channel",
+        "template": "Template",
+        "variables": "Message details",
+        "segment": "Segment",
+        "preview": "Who this reaches"
+      },
+      "channel": {
+        "email": "Email",
+        "whatsapp": "WhatsApp"
+      },
+      "columns": {
+        "status": "Status",
+        "created": "Created"
+      },
+      "fields": {
+        "name": "Campaign name",
+        "template": "Template",
+        "segment": "Saved segment",
+        "scheduledAt": "Send at"
+      },
+      "variables": {
+        "legend": "Fill in the template",
+        "hint": "Type the words to send, or use a placeholder: {tokens}",
+        "missing": "Every field must be filled in before this template can be sent."
+      },
+      "noSegments": "Save a segment first: a campaign is addressed to a saved segment.",
+      "scheduleUnavailable": "Email campaigns send on the next hourly run and cannot be scheduled for a later time.",
+      "eligibility": {
+        "eligible": "Will be sent",
+        "no_email": "No email address",
+        "no_number": "No WhatsApp number",
+        "not_opted_in": "Not opted in",
+        "suppressed": "Opted out",
+        "plan_ineligible": "Membership not active",
+        "missing_variable": "Message details missing"
+      },
+      "status": {
+        "draft": "Draft",
+        "review": "In review",
+        "scheduled": "Scheduled",
+        "queued": "Queued",
+        "processing": "Sending",
+        "sending": "Sending",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "failed": "Failed"
+      },
+      "actions": {
+        "createDraft": "Create draft",
+        "submitForReview": "Submit for review",
+        "approve": "Approve and schedule",
+        "reject": "Reject",
+        "next": "Next",
+        "back": "Back"
+      },
+      "ownDraft": "A campaign must be approved by a different administrator.",
+      "rejectionReason": "Reason",
+      "templateUnapproved": "This template is not approved yet. Approve it under WhatsApp templates first.",
+      "report": {
+        "title": "Delivery",
+        "sent": "Sent",
+        "delivered": "Delivered",
+        "read": "Read",
+        "failed": "Failed",
+        "blocked": "Not sent",
+        "total": "Recipients"
+      },
+      "empty": "No campaigns yet.",
+      "error": "We could not load campaigns."
     },
     "inbox": {
       "eyebrow": "Member and lead conversations",

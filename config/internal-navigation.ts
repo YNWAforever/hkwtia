@@ -33,6 +33,9 @@ export const adminNavigationGroups = [
       {id: "contacts", href: "/admin/contacts"},
       {id: "tasks", href: "/admin/tasks"},
       {id: "segments", href: "/admin/segments"},
+      // Phase C2 (C-5): a campaign is addressed to a saved segment, so it sits
+      // immediately after the screen that builds one.
+      {id: "campaigns", href: "/admin/campaigns"},
     ],
   },
   {

@@ -24,6 +24,11 @@ describe("admin mutation Server Action boundaries", () => {
     // fell through to the redirect instead of notFound() would disclose the
     // surface it is meant to hide.
     ["contact", "lib/admin/contact-actions.ts"],
+    // C-5. This module decides whether a marketing blast goes out and is the
+    // only one that both redirects and writes a campaign, so a denial that
+    // fell through to the redirect instead of notFound() would disclose the
+    // surface it is meant to hide.
+    ["campaign review", "lib/admin/campaign-review-actions.ts"],
   ])("maps authorization denial to notFound in the top-level %s action module", (_name, path) => {
     const source = readFileSync(resolve(process.cwd(), path), "utf8");
     expect(source.trimStart()).toMatch(/^"use server";/);

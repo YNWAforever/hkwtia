@@ -2259,7 +2259,8 @@
       "approvals": "審批",
       "reports": "報告",
       "automations": "自動化",
-      "templates": "WhatsApp 範本"
+      "templates": "WhatsApp 範本",
+      "campaigns": "推廣活動"
     },
     "templates": {
       "eyebrow": "WhatsApp 發送",
@@ -2355,6 +2356,82 @@
       "empty": "沒有符合條件的潛在客戶。",
       "error": "無法載入潛在客戶流程。",
       "saved": "已更新潛在客戶。"
+    },
+    "campaigns": {
+      "eyebrow": "對外訊息",
+      "title": "推廣活動",
+      "description": "為活動命名、選擇渠道及範本、揀選分群，先確認實際可觸及的對象，再由另一位管理員批准。",
+      "steps": {
+        "name": "名稱",
+        "channel": "渠道",
+        "template": "範本",
+        "variables": "訊息內容",
+        "segment": "分群",
+        "preview": "觸及對象"
+      },
+      "channel": {
+        "email": "電郵",
+        "whatsapp": "WhatsApp"
+      },
+      "columns": {
+        "status": "狀態",
+        "created": "建立日期"
+      },
+      "fields": {
+        "name": "活動名稱",
+        "template": "範本",
+        "segment": "已儲存分群",
+        "scheduledAt": "發送時間"
+      },
+      "variables": {
+        "legend": "填寫範本內容",
+        "hint": "直接輸入文字，或使用預設代碼：{tokens}",
+        "missing": "所有欄位必須填妥，方可發送此範本。"
+      },
+      "noSegments": "請先儲存分群：推廣活動須對應一個已儲存的分群。",
+      "scheduleUnavailable": "電郵推廣活動會於下一個每小時排程發送，不可另行指定時間。",
+      "eligibility": {
+        "eligible": "將會發送",
+        "no_email": "沒有電郵地址",
+        "no_number": "沒有 WhatsApp 號碼",
+        "not_opted_in": "未同意接收",
+        "suppressed": "已停止接收",
+        "plan_ineligible": "會籍並非生效中",
+        "missing_variable": "訊息內容未填妥"
+      },
+      "status": {
+        "draft": "草稿",
+        "review": "待批",
+        "scheduled": "已排程",
+        "queued": "已排隊",
+        "processing": "發送中",
+        "sending": "發送中",
+        "completed": "已完成",
+        "cancelled": "已取消",
+        "failed": "失敗"
+      },
+      "actions": {
+        "createDraft": "建立草稿",
+        "submitForReview": "提交審批",
+        "approve": "批准並排程",
+        "reject": "拒絕",
+        "next": "下一步",
+        "back": "上一步"
+      },
+      "ownDraft": "推廣活動須由另一位管理員批准。",
+      "rejectionReason": "原因",
+      "templateUnapproved": "此範本尚未獲批准，請先於「WhatsApp 範本」批准。",
+      "report": {
+        "title": "發送情況",
+        "sent": "已發送",
+        "delivered": "已送達",
+        "read": "已閱讀",
+        "failed": "失敗",
+        "blocked": "未發送",
+        "total": "收件人"
+      },
+      "empty": "尚未有推廣活動。",
+      "error": "無法載入推廣活動。"
     },
     "inbox": {
       "eyebrow": "會員及潛在客戶對話",

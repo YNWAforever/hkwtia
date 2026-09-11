@@ -25,7 +25,7 @@ describe("AdminNav", () => {
     expect(dashboardLink).not.toBe(brandLink);
   });
 
-  it("groups all 20 nav links across Workspace/Content/Operations", () => {
+  it("groups all 22 nav links across Workspace/Content/Operations", () => {
     render(<AdminNav locale="en" />);
     const hrefs = screen.getAllByRole("link").map((link) => link.getAttribute("href"));
     expect(hrefs).toEqual(

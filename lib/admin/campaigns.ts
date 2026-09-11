@@ -97,6 +97,52 @@ export type CampaignAudienceSnapshot = Readonly<{
 
 export type CampaignAuditSummary = CampaignEligibilitySummary & Readonly<{action: "campaign.queued" | "campaign.drafted"}>;
 
+/**
+ * Every value `campaign_status` carries after 0033, in declaration order.
+ * `sending` is here for spec parity and is written by nothing (S-6) —
+ * `processing` is the in-flight state three statements in
+ * `campaign-recipient-delivery.ts` already spell — and `/admin/campaigns` still
+ * has to label it, because a status the screen cannot name renders as a blank
+ * cell rather than as an error.
+ */
+export type CampaignStatus =
+  | "queued" | "processing" | "completed" | "cancelled"
+  | "draft" | "review" | "scheduled" | "sending" | "failed";
+
+export const CAMPAIGN_STATUSES: readonly CampaignStatus[] = [
+  "queued", "processing", "completed", "cancelled",
+  "draft", "review", "scheduled", "sending", "failed",
+];
+
+/**
+ * One campaign row as `/admin/campaigns/[id]` reads it. An ADMIN read rather
+ * than a creator-scoped one, because the whole point of S-7 is that a second
+ * admin has to be able to see what they are approving; `reviewableCampaign` is
+ * what keeps them from approving their own, and it does that on the write.
+ */
+export type CampaignRecord = Readonly<{
+  id: string;
+  name: string | null;
+  channel: CampaignChannel;
+  template: string | null;
+  templateKey: string | null;
+  variablesTemplate: Readonly<Record<string, string>>;
+  status: CampaignStatus;
+  segmentId: string;
+  createdByProfileId: string;
+  scheduledAt: Date | null;
+  reviewedAt: Date | null;
+  reviewedByProfileId: string | null;
+  rejectionReason: string | null;
+  completedAt: Date | null;
+  createdAt: Date;
+}>;
+
+export type CampaignSummary = Pick<
+  CampaignRecord,
+  "id" | "name" | "channel" | "status" | "scheduledAt" | "createdAt" | "createdByProfileId"
+>;
+
 export type CampaignQueueResult = Readonly<{campaignId: string; recipientCount: number; disposition: "created" | "existing"}>;
 export type CampaignInsertResult = Readonly<{inserted: number; skipped: number}>;
 export type CampaignReviewDecision =
@@ -111,6 +157,24 @@ export type CampaignReport = Readonly<{
   failed: number;
   blocked: number;
   byReason: Readonly<Record<string, number>>;
+}>;
+
+/**
+ * The reads `/admin/campaigns` and `/admin/campaigns/[id]` need, kept OUT of
+ * `CampaignQueueDependencies`: that type is what the repository must satisfy in
+ * full, and widening it would make every existing partial fake in
+ * `tests/unit/campaign-queue.test.ts` a type error for a read they do not use.
+ *
+ * The detail page takes both of its reads inside one `transaction`, so the row
+ * and the counts it renders beside each other describe the same instant. A
+ * report read a second after the row can show a campaign that says "Draft" with
+ * twenty rows already sent.
+ */
+export type CampaignReadDependencies = Readonly<{
+  transaction: <T>(actor: Actor, callback: (store: unknown) => Promise<T>) => Promise<T>;
+  listCampaigns: (actor: Actor, store: unknown) => Promise<readonly CampaignSummary[]>;
+  campaignFor: (actor: Actor, store: unknown, campaignId: string) => Promise<CampaignRecord | null>;
+  campaignReportFor: (actor: Actor, store: unknown, campaignId: string) => Promise<CampaignReport>;
 }>;
 
 export type CampaignQueueDependencies = Readonly<{
@@ -215,6 +279,30 @@ export function snapshotAudience(
 function emailVariables(facts: RecipientFacts): Record<string, string> {
   const renewalDate = facts.renewalAt?.toISOString().slice(0, 10) ?? null;
   return {displayName: facts.displayName, ...(renewalDate ? {renewalDate} : {})};
+}
+
+/** The campaign index. Newest first, and bounded: this is a list, not an archive. */
+export async function listCampaigns(actor: Actor, dependencies: CampaignReadDependencies = campaignsRepository): Promise<readonly CampaignSummary[]> {
+  requireAdmin(actor);
+  return dependencies.transaction(actor, (store) => dependencies.listCampaigns(actor, store));
+}
+
+/**
+ * The detail page's whole read. `null` means the campaign does not exist, which
+ * the page turns into a 404 — never into an empty report, because "no
+ * recipients" and "no campaign" lead to opposite conclusions.
+ */
+export async function readCampaign(
+  actor: Actor,
+  campaignId: string,
+  dependencies: CampaignReadDependencies = campaignsRepository,
+): Promise<Readonly<{campaign: CampaignRecord; report: CampaignReport}> | null> {
+  requireAdmin(actor);
+  return dependencies.transaction(actor, async (store) => {
+    const campaign = await dependencies.campaignFor(actor, store, campaignId);
+    if (!campaign) return null;
+    return {campaign, report: await dependencies.campaignReportFor(actor, store, campaignId)};
+  });
 }
 
 export async function queueCampaign(actor: Actor, input: unknown, dependencies: CampaignQueueDependencies = campaignsRepository): Promise<CampaignQueueResult> {

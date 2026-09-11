@@ -299,8 +299,9 @@ describe("WiseTech protected route ownership", () => {
     // Phase C1 Task 11 (C-3) added /api/admin/woztell/backfill: 52 + 1 = 53.
     // Phase C2 Task 2 (C-7) added /admin/templates: 53 + 1 = 54.
     // Phase C2 Task 4 (C-4) added /admin/contacts: 54 + 1 = 55.
-    expect(codeFiles).toHaveLength(55);
-    expect(inventoryFiles).toHaveLength(55);
+    // Phase C2 Task 9 (C-5) added /admin/campaigns and /admin/campaigns/[id]: 55 + 2 = 57.
+    expect(codeFiles).toHaveLength(57);
+    expect(inventoryFiles).toHaveLength(57);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -317,7 +318,8 @@ describe("WiseTech protected route ownership", () => {
 
     // Phase C2 Task 2 (C-7) added the WhatsApp template registry: 30 + 1 = 31.
     // Phase C2 Task 4 (C-4) added the contacts pipeline: 31 + 1 = 32.
-    expect(count("admin-page")).toBe(32);
+    // Phase C2 Task 9 (C-5) added the campaign wizard and its detail page: 32 + 2 = 34.
+    expect(count("admin-page")).toBe(34);
     // Phase C1 Task 11 (C-3) added the WOZTELL history backfill: 11 + 1 = 12.
     // It is an `api-handler`, not a `webhook-handler`: the caller is a staff
     // session, and there is no HMAC in front of it — which is exactly why its
@@ -325,7 +327,7 @@ describe("WiseTech protected route ownership", () => {
     expect(count("api-handler")).toBe(12);
     expect(count("webhook-handler")).toBe(2);
     expect(count("job-handler")).toBe(9);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(32);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(34);
     expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(23);
   });
 

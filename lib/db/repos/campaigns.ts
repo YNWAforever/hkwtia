@@ -1,16 +1,20 @@
 import "server-only";
 
-import {and, eq, ne, sql, type SQL} from "drizzle-orm";
+import {and, desc, eq, ne, sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
 import {
+  CAMPAIGN_STATUSES,
   createCampaignSchema,
   type CampaignAuditSummary,
   type CampaignInsertResult,
   type CampaignQueueDependencies,
   type CampaignQueueResult,
+  type CampaignRecord,
   type CampaignReport,
   type CampaignReviewDecision,
+  type CampaignStatus,
+  type CampaignSummary,
   type CreateCampaignRecord,
 } from "@/lib/admin/campaigns";
 import {SEGMENT_FILTER_VERSION, parseSegmentFilter, segmentIdSchema, type SegmentFilterSet} from "@/lib/admin/segment-schema";
@@ -38,6 +42,33 @@ const auditSummarySchema = z.object({
   blocked: z.number().int().nonnegative(),
   byReason: z.record(z.number().int().nonnegative()),
 }).strict();
+/**
+ * `channel` is `text` + CHECK rather than a pgEnum (S-3), so nothing between
+ * Postgres and this module narrows it. Parsing it here is what keeps a row
+ * written before the CHECK existed from reaching a screen that indexes a label
+ * map by it and renders `undefined`.
+ */
+const campaignRecordSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().nullable(),
+  channel: z.enum(["email", "whatsapp"]),
+  template: z.string().nullable(),
+  templateKey: z.string().nullable(),
+  variablesTemplate: z.record(z.string()).nullable().transform((value) => value ?? {}),
+  status: z.enum(CAMPAIGN_STATUSES as [CampaignStatus, ...CampaignStatus[]]),
+  segmentId: z.string().uuid(),
+  createdByProfileId: z.string(),
+  scheduledAt: z.coerce.date().nullable(),
+  reviewedAt: z.coerce.date().nullable(),
+  reviewedByProfileId: z.string().nullable(),
+  rejectionReason: z.string().nullable(),
+  completedAt: z.coerce.date().nullable(),
+  createdAt: z.coerce.date(),
+});
+
+/** The index is a working list, not an archive: the newest fifty are the ones staff act on. */
+const CAMPAIGN_LIST_LIMIT = 50;
+
 const reviewDecisionSchema = z.discriminatedUnion("outcome", [
   z.object({outcome: z.literal("approved")}).strict(),
   z.object({outcome: z.literal("rejected"), reason: z.string().trim().min(1).max(500)}).strict(),
@@ -275,6 +306,9 @@ export type CampaignsRepository =
     submitForReview: (actor: Actor, store: unknown, campaignId: string) => Promise<void>;
     recordReview: (actor: Actor, store: unknown, campaignId: string, decision: CampaignReviewDecision) => Promise<void>;
     schedule: (actor: Actor, store: unknown, campaignId: string, scheduledAt: Date) => Promise<void>;
+    queueApproved: (actor: Actor, store: unknown, campaignId: string) => Promise<void>;
+    listCampaigns: (actor: Actor, store: unknown) => Promise<readonly CampaignSummary[]>;
+    campaignFor: (actor: Actor, store: unknown, campaignId: string) => Promise<CampaignRecord | null>;
     campaignReportFor: (actor: Actor, store: unknown, campaignId: string) => Promise<CampaignReport>;
   }>;
 
@@ -470,6 +504,87 @@ export function createCampaignsRepository(
       `));
       if (!rows.length) throw new Error("Campaign is not in a state that allows this transition");
       await appendCampaignAudit(db, actor, parsedCampaignId, "campaign.scheduled", {scheduledAt: parsedScheduledAt.toISOString()});
+    },
+
+    /**
+     * The email arm of an approval. S-6 gives `scheduled` a promotion step
+     * (Task 10 Step 4c) that nothing has wired yet, and a `scheduled` campaign
+     * nothing promotes fails silently and permanently: the cron fires, claims
+     * nothing, and returns a summary indistinguishable from an empty queue. An
+     * email campaign therefore goes straight to `queued`, which the hourly
+     * claim loop's existing `('queued','processing')` predicate already drains,
+     * and `/admin/campaigns` says so rather than offering a send time it cannot
+     * honour.
+     *
+     * The guard is `schedule`'s, verbatim and for the same reason: an approval
+     * and the transition that acts on it are two clicks, and a transition
+     * written without the review stamp would be a blast nobody signed off.
+     */
+    async queueApproved(actor, store, campaignId) {
+      requireAdmin(actor);
+      const parsedCampaignId = await reviewableCampaign(actor, store, campaignId);
+      const db = asDb(store);
+      const rows = resultRows(await db.execute(sql`
+        UPDATE ${campaigns} AS target
+        SET status = 'queued', updated_at = now()
+        WHERE target.id = ${parsedCampaignId}::uuid
+          AND target.status = 'review'
+          AND target.reviewed_at IS NOT NULL
+        RETURNING target.id
+      `));
+      if (!rows.length) throw new Error("Campaign is not in a state that allows this transition");
+      await appendCampaignAudit(db, actor, parsedCampaignId, "campaign.queued", {});
+    },
+
+    /**
+     * The index read. Not creator-scoped: a reviewer has to find the campaign
+     * waiting for them, and `reviewableCampaign` is what stops them approving
+     * their own — authorization on the write, visibility on the read.
+     */
+    async listCampaigns(actor, store): Promise<readonly CampaignSummary[]> {
+      requireAdmin(actor);
+      const rows = await asDb(store).select({
+        id: campaigns.id,
+        name: campaigns.name,
+        channel: campaigns.channel,
+        status: campaigns.status,
+        scheduledAt: campaigns.scheduledAt,
+        createdAt: campaigns.createdAt,
+        createdByProfileId: campaigns.createdByProfileId,
+      })
+        .from(campaigns)
+        .orderBy(desc(campaigns.createdAt))
+        .limit(CAMPAIGN_LIST_LIMIT);
+      return rows.map((row) => campaignRecordSchema.pick({
+        id: true, name: true, channel: true, status: true, scheduledAt: true, createdAt: true, createdByProfileId: true,
+      }).parse(row));
+    },
+
+    /** One campaign row, for the detail page. `null` becomes a 404, never an empty report. */
+    async campaignFor(actor, store, campaignId): Promise<CampaignRecord | null> {
+      requireAdmin(actor);
+      const parsedCampaignId = campaignIdSchema.parse(campaignId);
+      const row = (await asDb(store).select({
+        id: campaigns.id,
+        name: campaigns.name,
+        channel: campaigns.channel,
+        template: campaigns.template,
+        templateKey: campaigns.templateKey,
+        variablesTemplate: campaigns.variablesTemplate,
+        status: campaigns.status,
+        segmentId: campaigns.segmentId,
+        createdByProfileId: campaigns.createdByProfileId,
+        scheduledAt: campaigns.scheduledAt,
+        reviewedAt: campaigns.reviewedAt,
+        reviewedByProfileId: campaigns.reviewedByProfileId,
+        rejectionReason: campaigns.rejectionReason,
+        completedAt: campaigns.completedAt,
+        createdAt: campaigns.createdAt,
+      })
+        .from(campaigns)
+        .where(eq(campaigns.id, parsedCampaignId))
+        .limit(1))[0];
+      return row ? campaignRecordSchema.parse(row) : null;
     },
 
     /**
