@@ -1405,7 +1405,7 @@
     "due": "應續會",
     "rate": "比率",
     "methodologyHeading": "指標計算方法",
-    "methodologyDescription": "聚合指標每小時更新。估算節省時間等於代理已解決對話乘以六分鐘。頁面不會公開任何會員層級資料。",
+    "methodologyDescription": "聚合指標每小時更新。估算節省時間等於代理已解決對話乘以六分鐘。頁面不會公開任何會員層級資料。解決率、轉介率、失敗率及首次回覆時間只描述由智能助理處理到底的對話：職員在收件匣接手後，該對話不會產生代理結果，職員回覆亦不計作首次回覆。",
     "architectureHeading": "WTIA AI-Ops 運作方式",
     "architectureDescription": "網站及 WhatsApp 查詢經 Concierge runtime 及受限制工具處理。排程工作使用已驗證路由。所有生成操作仍受人工批准或發布關卡限制。",
     "approvalGate": "人工批准關卡",

@@ -1405,7 +1405,7 @@
     "due": "Due",
     "rate": "Rate",
     "methodologyHeading": "How these metrics are calculated",
-    "methodologyDescription": "Aggregates refresh hourly. Estimated time saved equals agent-resolved conversations multiplied by six minutes. No member-level data is published.",
+    "methodologyDescription": "Aggregates refresh hourly. Estimated time saved equals agent-resolved conversations multiplied by six minutes. No member-level data is published. Resolution, escalation, failure and first-response figures describe threads the concierge kept: once a person takes a conversation over in the staff inbox it produces no agent outcome, and a staff reply is not counted as a first response.",
     "architectureHeading": "How WTIA AI-Ops works",
     "architectureDescription": "Web and WhatsApp requests pass through the Concierge runtime and guarded tools. Scheduled jobs use authenticated routes. Generated actions remain behind approval or publication gates.",
     "approvalGate": "Human approval gate",
