@@ -119,6 +119,12 @@ describe("approvedTemplateKeys", () => {
       // The journey runner's dependency bag (C2 Task 2). The runner itself
       // receives the resolved set; the read happens in the wiring.
       "lib/jobs/runners.ts",
+      // The notifications dispatcher's own gate (C2 Task 11). This one reads it
+      // per dispatch rather than per batch, because the dispatcher is the last
+      // thing between a reviewed campaign and Meta and the approval can be
+      // withdrawn between the snapshot and the send. Off the live switch the
+      // read never opens a database, so it costs a set construction.
+      "lib/notifications/dispatch.ts",
       // The concierge's unattended fallback (C1 Task 8 Step 0).
       "lib/ai/woztell-production.ts",
     ].sort());

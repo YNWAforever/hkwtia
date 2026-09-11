@@ -32,7 +32,7 @@ import {
 } from "@/lib/acceptance/m4b-runtime-guard";
 import {automationCronActor} from "@/lib/auth/automation-actor";
 import {createWoztellAdapter} from "@/lib/channels/woztell";
-import {aiEnv, appEnv, emailEnv, unsubscribeEnv} from "@/lib/config/env";
+import {aiEnv, appEnv, emailEnv} from "@/lib/config/env";
 import {aiOpsMetricsRepository} from "@/lib/db/repos/aiops-metrics";
 import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {campaignsRepository} from "@/lib/db/repos/campaigns";
@@ -50,7 +50,7 @@ import {
   createConfiguredEmailTransport,
   type EmailTransport,
 } from "@/lib/email/transport";
-import {signUnsubscribeToken} from "@/lib/email/unsubscribe-token";
+import {unsubscribeUrls} from "@/lib/email/unsubscribe-urls";
 import {
   eventIdFromInstanceKey,
   eventReminderVariables,
@@ -60,7 +60,6 @@ import {approvedTemplateKeys} from "@/lib/whatsapp/approved-templates";
 
 const MAX_WORKER_ALERT_BYTES = 4_096;
 const RUNNER_BATCH_LIMIT = 100;
-const UNSUBSCRIBE_TTL_SECONDS = 30 * 24 * 60 * 60;
 
 const workerAlertSchema = z.object({
   job: z.enum([
@@ -296,38 +295,15 @@ export async function sendWorkerAlert(
 }
 
 /**
- * The two unsubscribe URLs a marketing send needs, sharing one signed token so
- * both routes accept the same link for the same window.
- *
- * `pageUrl` is the localized confirmation page a recipient clicks in the
- * footer. `oneClickUrl` is the route handler named by `List-Unsubscribe`, which
- * must answer POST because the accompanying `List-Unsubscribe-Post` header
- * makes the recipient's mail provider post to it directly. Pointing the header
- * at the page silently dropped every provider-issued unsubscribe: the page
- * exports no POST handler, so those requests took a 405 and no suppression row
- * was ever written.
+ * Re-exported, not defined here, since Phase C2 Task 11. The body moved to
+ * `lib/email/unsubscribe-urls.ts` so `lib/notifications/dispatch.ts` can mint
+ * the same pair for a marketing email without importing this module — Task 10
+ * makes `runners.ts → campaign-runner.ts → dispatch.ts` a real path, and an
+ * import back this way would close it into a cycle. The name stays exported
+ * here because every existing caller and `tests/unit/unsubscribe-one-click.test.ts`
+ * already import it from this module.
  */
-export function unsubscribeUrls(
-  profileId: string,
-  locale: "en" | "zh-HK",
-  now: Date,
-): Readonly<{pageUrl: string; oneClickUrl: string}> {
-  const {unsubscribeTokenSecret} = unsubscribeEnv();
-  const {appUrl} = appEnv();
-  const token = signUnsubscribeToken({
-    profileId,
-    locale,
-    exp: Math.floor(now.getTime() / 1000) + UNSUBSCRIBE_TTL_SECONDS,
-  }, unsubscribeTokenSecret);
-  const path = locale === "zh-HK" ? "/zh/unsubscribe" : "/unsubscribe";
-  const pageUrl = new URL(path, appUrl);
-  pageUrl.searchParams.set("token", token);
-  // Not locale-prefixed: /api is excluded from the proxy matcher, and the
-  // token already carries the locale the confirmation redirect uses.
-  const oneClickUrl = new URL("/api/unsubscribe", appUrl);
-  oneClickUrl.searchParams.set("token", token);
-  return {pageUrl: pageUrl.toString(), oneClickUrl: oneClickUrl.toString()};
-}
+export {unsubscribeUrls};
 
 async function runProductionJourneys(now: Date): Promise<unknown> {
   const {emailFrom} = emailEnv();
