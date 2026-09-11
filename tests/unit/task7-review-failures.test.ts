@@ -56,6 +56,7 @@ function journeyContext(): JourneyRunnerContext {
     emailSuppressed: false,
     whatsappOptIn: false,
     whatsappNumber: null,
+    whatsappOptedOutAt: null,
     engagementScore: 50,
     email: "review-member@example.test",
     recipientName: "Review Member",

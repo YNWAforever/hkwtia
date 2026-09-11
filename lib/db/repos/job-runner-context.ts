@@ -12,6 +12,7 @@ import type {
   AutomationDatabaseLoader,
 } from "@/lib/db/repos/journeys";
 import {
+  contacts,
   engagementScores,
   eventRegistrations,
   events,
@@ -34,6 +35,12 @@ export type JobJourneyContextRecord = Readonly<{
   profileComplete: boolean;
   whatsappOptIn: boolean;
   whatsappNumber: string | null;
+  /**
+   * The linked contact's recorded STOP (C-9 review). `profiles` carries no
+   * withdrawal column, so this is the other half of the fact `whatsappOptIn`
+   * only half answers — see the join in `loadJourney` for the incident.
+   */
+  whatsappOptedOutAt: Date | null;
   emailSuppressed: boolean;
   engagementScore: number | null;
   membershipStatus: MembershipStatus | null;
@@ -135,6 +142,26 @@ export function createJobRunnerContextRepository(
           ${profiles.onboardingState} AS onboarding_state,
           ${profiles.whatsappOptIn} AS whatsapp_opt_in,
           ${profiles.whatsappNumber} AS whatsapp_number,
+          -- C-9 review. The journey lane was the one send path that read only
+          -- profiles.whatsapp_opt_in, and that flag is not the whole consent
+          -- fact. woztell-profile-resolver returns null whenever two profiles
+          -- share the digits (a company handset: matches.length is not 1), so
+          -- the webhook STOP branch never reaches suppressionsRepository
+          -- .optOutWhatsApp -- only markWhatsAppOptedOut, which is keyed on the
+          -- PHONE and writes nothing but contacts. The flag stays true, no
+          -- message_suppressions row is ever written, and before this join
+          -- renewal_14, dunning_3 and event_reminder_24h kept going to a
+          -- handset that had said STOP on every tick after the flag flip.
+          --
+          -- Read it beside whatsapp_opt_in, never instead of it: together the
+          -- pair is exactly decideWhatsApp rule 1 for a member recipient
+          -- (lib/db/repos/message-eligibility.ts), whose member-side COALESCE
+          -- arm is non-null only when the flag is already false. Same join,
+          -- same precedence, so the journey lane, the blast and the inbox
+          -- cannot disagree about one person. contacts_profile_unique is a
+          -- partial UNIQUE index on profile_id, so this join is at most one row
+          -- and the journey row cannot fan out.
+          ${contacts.whatsappOptedOutAt} AS whatsapp_opted_out_at,
           ${engagementScores.score} AS engagement_score,
           ${memberships.status} AS membership_status,
           ${memberships.billingPeriodEnd} AS billing_period_end,
@@ -146,6 +173,8 @@ export function createJobRunnerContextRepository(
               AND ${messageSuppressions.classification} = 'marketing'
           ) AS email_suppressed
         FROM ${profiles}
+        LEFT JOIN ${contacts}
+          ON ${contacts.profileId} = ${profiles.id}
         LEFT JOIN ${engagementScores}
           ON ${engagementScores.profileId} = ${profiles.id}
         LEFT JOIN ${memberships}
@@ -168,6 +197,7 @@ export function createJobRunnerContextRepository(
         profileComplete: row.onboarding_state === "complete",
         whatsappOptIn: requiredBoolean(row.whatsapp_opt_in),
         whatsappNumber: optionalString(row.whatsapp_number),
+        whatsappOptedOutAt: optionalDate(row.whatsapp_opted_out_at),
         emailSuppressed: requiredBoolean(row.email_suppressed),
         engagementScore: score(row.engagement_score),
         membershipStatus: membershipStatus(row.membership_status),

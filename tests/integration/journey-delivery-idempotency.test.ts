@@ -110,6 +110,7 @@ describe("journey runner delivery idempotency", () => {
           emailSuppressed: true,
           whatsappOptIn: false,
           whatsappNumber: null,
+          whatsappOptedOutAt: null,
           engagementScore: 50,
           email: "member-concurrent@example.test",
           recipientName: "Concurrent Fixture",

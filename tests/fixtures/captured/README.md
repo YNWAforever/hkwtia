@@ -29,14 +29,24 @@ webhook body** exactly as Woztell posted it — no wrapper, no edits:
 `tests/unit/woztell-normalizer-captured.test.ts` picks up every such file
 automatically and asserts it lands on a handled variant — and on the variant the
 file name claims, because a delivery tick that normalised to `outbound_echo`
-would otherwise pass. With this directory empty the test **skips cleanly**; the
+would otherwise pass. The three prefixes above are therefore **required**: a
+`woztell-*.json` whose name matches none of them fails the run rather than
+falling back to the weaker "not unsupported" check. With this directory empty
+the test **skips cleanly**; the
 moment a file lands it becomes a hard gate, with no code change.
 
 ## Before committing one
 
 These are real provider payloads, so they carry a real phone number and real
-message text. Redact the message body and replace the sender/recipient with a
-test number **only if the shape survives it** — the field names, the nesting and
-the value types are what the replay asserts, and changing a `"timestamp"` from a
-string to a number is exactly the kind of edit that would make the fixture agree
-with the guess rather than correct it.
+message text. **Redact both** before committing: replace the sender/recipient
+with a test number and the message body with placeholder text. That is always
+safe, because substituting digits for digits and text for text leaves everything
+the replay asserts intact — the field names, the nesting and the value types.
+
+What must **not** change is the shape. Turning a `"timestamp"` from a string into
+a number, dropping a field because it looked empty, or unwrapping a nested object
+is exactly the kind of edit that would make the fixture agree with the guess
+rather than correct it. If a redaction would require changing a value's type,
+stop and ask rather than committing the real value: a payload that cannot be
+redacted without reshaping it is one to describe in the checklist row, not to
+store here permanently.

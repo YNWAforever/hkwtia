@@ -362,6 +362,9 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
         emailSuppressed: context.emailSuppressed,
         whatsappOptIn: context.whatsappOptIn,
         whatsappNumber: context.whatsappNumber,
+        // C-9 review: the contact-side STOP the profile flag cannot see. The
+        // repository reads both stores; the runner refuses on either.
+        whatsappOptedOutAt: context.whatsappOptedOutAt,
         engagementScore: context.engagementScore,
         email: context.email,
         recipientName: context.displayName,

@@ -62,6 +62,13 @@ export type RunnerSummary = Readonly<{
 }>;
 
 export type JourneyRunnerContext = JourneyContext & Readonly<{
+  /**
+   * The recorded WhatsApp withdrawal, from the store `whatsappOptIn` cannot
+   * see. REQUIRED rather than optional on purpose: a wiring that forgets it
+   * must fail to compile, because the failure it silences is a template sent to
+   * somebody who replied STOP. `sendWhatsapp` is the only reader.
+   */
+  whatsappOptedOutAt: Date | null;
   email: string | null;
   recipientName: string;
   locale: AppLocale;
@@ -505,6 +512,18 @@ async function sendWhatsapp(
     !step.channels.includes("whatsapp")
     || !template
     || !context.whatsappOptIn
+    // C-9 review. `whatsappOptIn` alone is half the consent fact, and this lane
+    // is the second send path the `RUN_LIVE_WOZTELL` flip turns on. A STOP from
+    // a handset two profiles share resolves no profile
+    // (`woztell-profile-resolver`: `matches.length !== 1`), so it stamps
+    // `contacts.whatsapp_opted_out_at` and leaves the profile flag true with no
+    // `message_suppressions` row — and every later tick kept sending. Together
+    // these two tests are `decideWhatsApp`'s rule 1 for a member recipient
+    // (`lib/db/repos/message-eligibility.ts`), which is the precedence the
+    // blast and the inbox already use. A withdrawal removes the WhatsApp
+    // channel only: returning false here leaves the email leg to send, which is
+    // right — a WhatsApp STOP is not an email unsubscribe.
+    || context.whatsappOptedOutAt !== null
     || !whatsappNumber
   ) {
     return false;

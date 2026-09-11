@@ -43,6 +43,7 @@ function context(overrides: Partial<JourneyRunnerContext> = {}): JourneyRunnerCo
     emailSuppressed: false,
     whatsappOptIn: false,
     whatsappNumber: null,
+    whatsappOptedOutAt: null,
     engagementScore: 50,
     email: "member@example.test",
     recipientName: "Fixture Member",
@@ -379,6 +380,42 @@ describe("runJourneyBatch", () => {
       idempotencyKey: `${renewal.deliveryKey}:whatsapp`,
       template: "renewal_14",
     }]);
+  });
+
+  /**
+   * C-9 review. The opt-in flag is half the consent fact, and this lane is the
+   * second send path `RUN_LIVE_WOZTELL=1` turns on.
+   *
+   * A STOP from a handset two profiles share resolves no profile
+   * (`woztellProfileResolver`: `matches.length !== 1`), so it stamps
+   * `contacts.whatsapp_opted_out_at` and leaves `profiles.whatsapp_opt_in` true
+   * with no `message_suppressions` row — the case above therefore cannot catch
+   * it, and before this gate `renewal_14` kept going out on every tick. The
+   * blast and the inbox already refuse that member through
+   * `messageEligibilityRepository`; this is the same rule 1, for the lane that
+   * holds no database of its own.
+   */
+  it("sends no WhatsApp when the linked contact recorded a STOP, even with the opt-in flag still true", async () => {
+    const renewal = due("renewal_14", {
+      journey: "renewal",
+      instanceKey: "period:2027-02-01T00:00:00.000Z",
+    });
+    const test = harness([renewal], () => context({
+      whatsappOptIn: true,
+      whatsappNumber: "+85255550000",
+      whatsappOptedOutAt: new Date("2027-01-10T02:00:00.000Z"),
+    }));
+
+    const summary = await runJourneyBatch(test.deps, {now, limit: 1});
+
+    expect(test.sentWhatsapp).toHaveLength(0);
+    // Not a reservation either: a withdrawal means "this step has no WhatsApp
+    // channel", so there is no delivery row for a later retry to replay.
+    expect([...test.logs.values()].filter((record) => record.channel === "whatsapp")).toHaveLength(0);
+    // A WhatsApp STOP is not an email unsubscribe. The step still delivers, and
+    // a gate that failed the step instead would raise a staff task per member.
+    expect(test.sentEmails).toHaveLength(1);
+    expect(summary).toMatchObject({sent: 1, failed: 0, tasksCreated: 0});
   });
 
   /**

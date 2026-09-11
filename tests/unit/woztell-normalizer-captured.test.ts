@@ -38,16 +38,32 @@ const capturedDirectory = resolve("tests/fixtures/captured");
 const HANDLED_KINDS = ["message", "delivery_status", "outbound_echo"] as const;
 
 /**
- * A file name is allowed to say which arm it is evidence for. Without this a
- * captured delivery status that normalised to `outbound_echo` would pass — both
- * are "not unsupported" — and the discriminator being wrong in exactly that way
- * is the O-1 failure mode, not a hypothetical one.
+ * A file name says which arm it is evidence for, and it is REQUIRED to
+ * (`recognisedKind` throws otherwise). Without this a captured delivery status
+ * that normalised to `outbound_echo` would pass — both are "not unsupported" —
+ * and the discriminator being wrong in exactly that way is the O-1 failure mode,
+ * not a hypothetical one. An earlier version only applied the hint when the name
+ * happened to match, so a file named outside these prefixes was asserted merely
+ * to be "not unsupported": the one payload the owner is most likely to capture
+ * first, a delivery tick, could have landed on `outbound_echo` and the row-3
+ * gate would have gone green on it. The README's table prescribes the names;
+ * this is what makes them binding.
  */
 const NAME_HINTS: ReadonlyArray<readonly [RegExp, (typeof HANDLED_KINDS)[number]]> = [
   [/^woztell-(delivery-status|message-status)/u, "delivery_status"],
   [/^woztell-(outbound-echo|outbound)/u, "outbound_echo"],
   [/^woztell-(inbound|message|text)/u, "message"],
 ];
+
+function recognisedKind(name: string): (typeof HANDLED_KINDS)[number] {
+  const hint = NAME_HINTS.find(([pattern]) => pattern.test(name))?.[1];
+  if (hint) return hint;
+  throw new Error(
+    `Captured payload ${name} does not name the arm it is evidence for. `
+    + "Rename it to woztell-delivery-status-*.json, woztell-outbound-echo-*.json "
+    + "or woztell-inbound-*.json (tests/fixtures/captured/README.md).",
+  );
+}
 
 function capturedFileNames(): string[] {
   if (!existsSync(capturedDirectory)) return [];
@@ -82,9 +98,7 @@ describe("captured Woztell payload replay (C-9, O-1)", () => {
       const raw = readFileSync(join(capturedDirectory, name), "utf8");
       const normalized = normalize(JSON.parse(raw) as unknown);
       expect(HANDLED_KINDS, name).toContain(normalized.kind);
-
-      const hint = NAME_HINTS.find(([pattern]) => pattern.test(name))?.[1];
-      if (hint) expect(normalized.kind, name).toBe(hint);
+      expect(normalized.kind, name).toBe(recognisedKind(name));
     });
   }
 
@@ -113,5 +127,15 @@ describe("captured Woztell payload replay (C-9, O-1)", () => {
       timestamp: "2026-09-10T01:05:00.000Z",
       data: {status: "DELIVERED"},
     }).kind).toBe("delivery_status");
+  });
+
+  // The name gate, watched from both sides on the day the directory is still
+  // empty — otherwise the refusal added above is a claim rather than evidence,
+  // and the first captured file would be the first time anyone ran it.
+  it("requires a captured file name to say which arm it is evidence for", () => {
+    expect(recognisedKind("woztell-delivery-status-2026-09-12.json")).toBe("delivery_status");
+    expect(recognisedKind("woztell-outbound-echo-2026-09-12.json")).toBe("outbound_echo");
+    expect(recognisedKind("woztell-inbound-2026-09-12.json")).toBe("message");
+    expect(() => recognisedKind("woztell-capture-2026-09-12.json")).toThrow(/does not name the arm/u);
   });
 });
