@@ -56,7 +56,25 @@ export const billingAttemptStateEnum = pgEnum("billing_attempt_state", ["active"
 export const userRoleEnum = pgEnum("user_role", ["member", "staff", "exco", "superadmin"]);
 export const billingIntervalEnum = pgEnum("billing_interval", ["annual", "monthly", "none"]);
 export const registrationStatusEnum = pgEnum("registration_status", ["registered", "waitlist", "cancelled", "attended", "no_show"]);
-export const campaignStatusEnum = pgEnum("campaign_status", ["queued", "processing", "completed", "cancelled"]);
+// Programme C-5. The five Phase C states are APPENDED, never interleaved, so
+// drizzle-kit emits plain `ALTER TYPE … ADD VALUE` rather than the `… BEFORE …`
+// form. Nothing in migrations 0031-0034 may USE one of them — no DEFAULT, no
+// CHECK, no backfill — because `db:migrate` applies every pending file in one
+// transaction and Postgres refuses a value added by ALTER TYPE inside it (S-2,
+// pinned by tests/unit/phase-c-schema-contract.test.ts). `sending` is added for
+// spec parity and deliberately never written: the in-flight campaign state is
+// spelled `processing` by three statements in campaign-recipient-delivery.ts.
+export const campaignStatusEnum = pgEnum("campaign_status", [
+  "queued",
+  "processing",
+  "completed",
+  "cancelled",
+  "draft",
+  "review",
+  "scheduled",
+  "sending",
+  "failed",
+]);
 export const recipientStatusEnum = pgEnum("campaign_recipient_status", ["queued", "processing", "sent", "failed", "suppressed"]);
 export const approvalStatusEnum = pgEnum("approval_status", ["pending", "approved", "rejected", "expired"]);
 export const journeyStatusEnum = pgEnum("journey_status", ["scheduled", "processing", "sent", "skipped", "failed"]);
@@ -456,11 +474,18 @@ export const emailLog = pgTable("email_log", {
   classification: text("classification").default("transactional").notNull(),
   attemptCount: integer("attempt_count").default(0).notNull(),
   errorCode: text("error_code"),
+  // S-8. A dispatch to a prospect logged an anonymous row before this column:
+  // both log tables keyed only on profile_id, and a contact has no profile.
+  // message_suppressions is deliberately NOT widened — the prospect lane stays
+  // contacts.whatsapp_opt_in / whatsapp_opted_out_at, and one repository
+  // (messageEligibilityRepository) owns reading both sources.
+  contactId: uuid("contact_id").references((): AnyPgColumn => contacts.id, {onDelete: "set null"}),
   createdAt: createdAt("created_at"),
 }, (table) => [
   unique("email_log_idempotency_key_unique").on(table.idempotencyKey),
   index("email_log_profile_created_idx").on(table.profileId, table.createdAt),
   index("email_log_journey_state_idx").on(table.journeyStateId),
+  index("email_log_contact_created_idx").on(table.contactId, table.createdAt),
 ]);
 
 export const whatsappLog = pgTable("whatsapp_log", {
@@ -475,11 +500,15 @@ export const whatsappLog = pgTable("whatsapp_log", {
   classification: text("classification").default("transactional").notNull(),
   attemptCount: integer("attempt_count").default(0).notNull(),
   errorCode: text("error_code"),
+  // S-8, as on email_log above: a prospect has no profile, and a marketing
+  // message to one has to be attributable to the row that consented.
+  contactId: uuid("contact_id").references((): AnyPgColumn => contacts.id, {onDelete: "set null"}),
   createdAt: createdAt("created_at"),
 }, (table) => [
   unique("whatsapp_log_idempotency_key_unique").on(table.idempotencyKey),
   index("whatsapp_log_profile_created_idx").on(table.profileId, table.createdAt),
   index("whatsapp_log_journey_state_idx").on(table.journeyStateId),
+  index("whatsapp_log_contact_created_idx").on(table.contactId, table.createdAt),
 ]);
 
 export const messageSuppressions = pgTable("message_suppressions", {
@@ -705,18 +734,53 @@ export const campaigns = pgTable("campaigns", {
   id: uuid("id").defaultRandom().primaryKey(),
   segmentId: uuid("segment_id").notNull().references(() => savedSegments.id, {onDelete: "restrict"}),
   createdByProfileId: text("created_by_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
-  template: text("template").notNull(),
+  // S-5: two template columns with two vocabularies. `template` stays the email
+  // source template (`renewal-reminder｜member-update｜membership_renewal`,
+  // interpreted by campaignTemplateMap) and becomes nullable because a WhatsApp
+  // campaign has none; `templateKey` names a whatsapp_templates row.
+  template: text("template"),
   localeStrategy: text("locale_strategy").default("profile").notNull(),
   status: campaignStatusEnum("status").default("queued").notNull(),
   idempotencyKey: text("idempotency_key").notNull().unique(),
+  name: text("name"),
+  // Programme C-5. Text + CHECK rather than a pgEnum: a value added by
+  // ALTER TYPE cannot be used in the transaction that adds it, and
+  // `db:migrate` runs every pending file in one (S-2/S-3).
+  channel: text("channel").default("email").notNull(),
+  templateKey: text("template_key").references((): AnyPgColumn => whatsappTemplates.key, {onDelete: "restrict"}),
+  variablesTemplate: jsonb("variables_template").$type<Record<string, string>>().default({}).notNull(),
+  scheduledAt: timestamp("scheduled_at", {withTimezone: true}),
+  // S-7: the reviewer triple. A campaign is reviewed by an admin who is not its
+  // creator, so two-person control is a property of the row, not of a screen.
+  reviewedAt: timestamp("reviewed_at", {withTimezone: true}),
+  reviewedByProfileId: text("reviewed_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  rejectionReason: text("rejection_reason"),
+  completedAt: timestamp("completed_at", {withTimezone: true}),
   createdAt: createdAt("created_at"),
-});
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  check("campaigns_channel_check", sql`${table.channel} IN ('email', 'whatsapp')`),
+  // The database enforces this and not only the repository, because a blast
+  // with no template is the one mistake that reaches members (D-9: blasts
+  // are template-only outside the 24-hour window).
+  check("campaigns_whatsapp_template_check", sql`${table.channel} <> 'whatsapp' OR ${table.templateKey} IS NOT NULL`),
+  check("campaigns_email_template_check", sql`${table.channel} <> 'email' OR ${table.template} IS NOT NULL`),
+  index("campaigns_status_scheduled_idx").on(table.status, table.scheduledAt),
+]);
 
 export const campaignRecipients = pgTable("campaign_recipients", {
   id: uuid("id").defaultRandom().primaryKey(),
   campaignId: uuid("campaign_id").notNull().references(() => campaigns.id, {onDelete: "cascade"}),
-  profileId: text("profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
-  email: text("email").notNull(),
+  // S-4: a recipient is a member OR a prospect, never both and never neither.
+  // Both identity columns are nullable so the check below can be the single
+  // statement of that rule; the two partial unique indexes are what keeps
+  // de-duplication working, because Postgres treats NULLs as distinct and a
+  // plain UNIQUE (campaign_id, profile_id) stops de-duplicating the moment
+  // profile_id may be null.
+  profileId: text("profile_id").references(() => profiles.id, {onDelete: "restrict"}),
+  contactId: uuid("contact_id").references((): AnyPgColumn => contacts.id, {onDelete: "restrict"}),
+  email: text("email"),
+  whatsappNumber: text("whatsapp_number"),
   locale: varchar("locale", {length: 10}).notNull(),
   variables: jsonb("variables").$type<Record<string, string>>().notNull(),
   status: recipientStatusEnum("status").default("queued").notNull(),
@@ -724,9 +788,34 @@ export const campaignRecipients = pgTable("campaign_recipients", {
   claimedAt: timestamp("claimed_at", {withTimezone: true}),
   claimExpiresAt: timestamp("claim_expires_at", {withTimezone: true}),
   errorCode: text("error_code"),
+  providerMessageId: text("provider_message_id"),
+  sentAt: timestamp("sent_at", {withTimezone: true}),
+  deliveredAt: timestamp("delivered_at", {withTimezone: true}),
+  readAt: timestamp("read_at", {withTimezone: true}),
+  blockedReason: text("blocked_reason"),
+  // The table has never carried a timestamp, so a stalled blast had nothing to
+  // order against. Existing rows take the migration instant; that is stated,
+  // not hidden (S-4).
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
 }, (table) => [
-  unique("campaign_recipients_campaign_profile_unique").on(table.campaignId, table.profileId),
+  // Deliberately NOT named "campaign_recipients_campaign_profile_unique".
+  // Postgres backs a unique CONSTRAINT with an index carrying the
+  // constraint's name, so reusing it would make the generated file's
+  // DROP CONSTRAINT / CREATE UNIQUE INDEX ordering load-bearing — and if
+  // drizzle-kit emitted them the wrong way round, the only repair would be
+  // hand-editing the SQL, which desynchronises drizzle/meta/0033_snapshot.json
+  // from what was actually applied. A new name makes the ordering irrelevant.
+  uniqueIndex("campaign_recipients_campaign_profile_idx").on(table.campaignId, table.profileId).where(sql`${table.profileId} IS NOT NULL`),
+  uniqueIndex("campaign_recipients_campaign_contact_idx").on(table.campaignId, table.contactId).where(sql`${table.contactId} IS NOT NULL`),
   index("campaign_recipients_due_idx").on(table.status, table.claimExpiresAt),
+  index("campaign_recipients_campaign_status_idx").on(table.campaignId, table.status),
+  // Phase C2 Task 10's delivery-status fall-through looks a recipient up by the
+  // provider's id when the `messages` UPDATE matches nothing. Not unique: two
+  // recipients in different campaigns could in principle carry one id, and a
+  // unique index here would turn that into a webhook 500.
+  index("campaign_recipients_provider_message_idx").on(table.providerMessageId),
+  check("campaign_recipients_identity_check", sql`(${table.profileId} IS NOT NULL) <> (${table.contactId} IS NOT NULL)`),
 ]);
 
 export const events = pgTable("events", {
@@ -1241,6 +1330,41 @@ export const eventGuestRegistrations = pgTable(
     index("event_guest_registrations_event_status_idx").on(table.eventId, table.status),
   ],
 );
+
+/**
+ * Programme C-7. "Approved" stops being an environment variable and becomes
+ * a row a named admin approved on a date. `status` defaults to 'pending', so
+ * an unseeded or half-migrated registry can send nothing (S-14).
+ *
+ * Declared here, after eventGuestRegistrations, and never between
+ * campaignRecipients and `export const events`: the slice
+ * tests/unit/campaign-recipient-lease-schema.test.ts reads is delimited by
+ * exactly those two markers, so a table declared inside it would silently
+ * widen what that test believes it is asserting.
+ */
+export const whatsappTemplates = pgTable("whatsapp_templates", {
+  key: text("key").primaryKey(),
+  elementName: text("element_name").notNull(),
+  languageCode: text("language_code").notNull(),
+  category: text("category").default("utility").notNull(),
+  variables: text("variables").array().default(sql`'{}'::text[]`).notNull(),
+  previews: jsonb("previews").$type<Record<string, string>>().default({}).notNull(),
+  status: text("status").default("pending").notNull(),
+  approvedAt: timestamp("approved_at", {withTimezone: true}),
+  reviewedByProfileId: text("reviewed_by_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  rejectionReason: text("rejection_reason"),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  uniqueIndex("whatsapp_templates_element_language_unique").on(table.elementName, table.languageCode),
+  check("whatsapp_templates_status_check", sql`${table.status} IN ('pending', 'approved', 'rejected', 'disabled')`),
+  check("whatsapp_templates_category_check", sql`${table.category} IN ('marketing', 'utility', 'authentication')`),
+  // An approval with no date is an approval nobody can audit, and the audit is
+  // the whole point of moving the allowlist out of an environment variable.
+  check("whatsapp_templates_approved_at_check", sql`${table.status} <> 'approved' OR ${table.approvedAt} IS NOT NULL`),
+]);
+export type WhatsAppTemplateStatus = "pending" | "approved" | "rejected" | "disabled";
+export type WhatsAppTemplateCategory = "marketing" | "utility" | "authentication";
 
 /**
  * The marker that makes "this database is disposable" checkable rather than

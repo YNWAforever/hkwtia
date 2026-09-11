@@ -138,8 +138,15 @@ export function createCampaignRecipientDeliveryRepository(
       return database.transaction(async (transaction) => {
         const result = await transaction.execute(sql`
           WITH completed AS (
+            -- Phase C2 Task 1 Step 4b: 0033 adds campaigns.completed_at, and this
+            -- sweep is the only statement that can know a blast has drained, so
+            -- the writer lands in the same commit as the column. A column with
+            -- no writer is worse than a missing one: the schema looks complete
+            -- and every report built on it reads null. The status list stays
+            -- ('queued', 'processing') — widening it would let this sweep stamp
+            -- a fresh draft as completed (S-6).
             UPDATE ${campaigns} AS idle
-            SET status = 'completed'
+            SET status = 'completed', completed_at = ${now}
             WHERE idle.status IN ('queued', 'processing')
               AND NOT EXISTS (
                 SELECT 1

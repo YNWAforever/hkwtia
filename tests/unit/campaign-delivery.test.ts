@@ -394,8 +394,12 @@ describe("campaign recipient repository fencing", () => {
 
     const sql = fake.commands[0]?.sql.replace(/\s+/g, " ");
     expect(sql).toMatch(
-      /UPDATE "campaigns".*SET status = 'completed'.*NOT EXISTS.*status IN \('queued', 'processing'\)/i,
+      /UPDATE "campaigns".*SET status = 'completed', completed_at = \$\d+.*NOT EXISTS.*status IN \('queued', 'processing'\)/i,
     );
+    // Phase C2 Task 1 Step 4b. 0033 adds campaigns.completed_at and this sweep
+    // is its only writer, so the timestamp is the claim's `now`, not a database
+    // clock a test cannot pin.
+    expect(fake.commands[0]?.params).toContain(now);
   });
 
   it("fences every recipient transition by the claim timestamp", async () => {
