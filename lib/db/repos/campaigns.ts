@@ -3,8 +3,19 @@ import "server-only";
 import {and, desc, eq, ne, sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
+import {CAMPAIGN_STATUSES, type CampaignStatus} from "@/lib/admin/campaign-status";
+/**
+ * `@/lib/admin/campaigns` imports THIS module for `campaignsRepository`, so the
+ * two are a cycle. Every RUNTIME binding taken from it below must therefore be
+ * dereferenced inside a method — `createCampaignSchema` inside `createCampaign`
+ * — and never at module scope, because a module-scope read runs while the admin
+ * module is still evaluating and hits the temporal dead zone. That is not
+ * hypothetical: `CAMPAIGN_STATUSES` used to be imported from here for the
+ * `campaignRecordSchema` below and failed `next build` exactly that way, which
+ * is why it now comes from the leaf on the line above. See
+ * `lib/admin/campaign-status.ts` for the incident.
+ */
 import {
-  CAMPAIGN_STATUSES,
   createCampaignSchema,
   type CampaignAuditSummary,
   type CampaignInsertResult,
@@ -13,7 +24,6 @@ import {
   type CampaignRecord,
   type CampaignReport,
   type CampaignReviewDecision,
-  type CampaignStatus,
   type CampaignSummary,
   type CreateCampaignRecord,
 } from "@/lib/admin/campaigns";

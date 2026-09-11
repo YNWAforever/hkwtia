@@ -9,6 +9,11 @@ import {
   resolveRecipientVariables,
   type CampaignChannel,
 } from "@/lib/admin/campaign-eligibility";
+// The status vocabulary lives in a leaf both this module and the repository
+// import, never in either of them: this pair is an import CYCLE, and a binding
+// on it that the repository dereferences at module scope crashes `next build`.
+// `lib/admin/campaign-status.ts` has the incident in full.
+import type {CampaignStatus} from "@/lib/admin/campaign-status";
 import type {SegmentFilterSet} from "@/lib/admin/segment-schema";
 import {requireAdmin} from "@/lib/auth/authorize";
 import {campaignsRepository} from "@/lib/db/repos/campaigns";
@@ -96,23 +101,6 @@ export type CampaignAudienceSnapshot = Readonly<{
 }>;
 
 export type CampaignAuditSummary = CampaignEligibilitySummary & Readonly<{action: "campaign.queued" | "campaign.drafted"}>;
-
-/**
- * Every value `campaign_status` carries after 0033, in declaration order.
- * `sending` is here for spec parity and is written by nothing (S-6) —
- * `processing` is the in-flight state three statements in
- * `campaign-recipient-delivery.ts` already spell — and `/admin/campaigns` still
- * has to label it, because a status the screen cannot name renders as a blank
- * cell rather than as an error.
- */
-export type CampaignStatus =
-  | "queued" | "processing" | "completed" | "cancelled"
-  | "draft" | "review" | "scheduled" | "sending" | "failed";
-
-export const CAMPAIGN_STATUSES: readonly CampaignStatus[] = [
-  "queued", "processing", "completed", "cancelled",
-  "draft", "review", "scheduled", "sending", "failed",
-];
 
 /**
  * One campaign row as `/admin/campaigns/[id]` reads it. An ADMIN read rather
