@@ -745,10 +745,15 @@ describe.skipIf(!testDatabaseUrl)(
         const recipient = await activePool.query<{
           recipient_status: string;
           campaign_status: string;
+          campaign_completed: boolean;
           attempt_count: number;
         }>(
+          // Phase C2 Task 1 Step 4b: completeCampaignIfIdle, not the claim
+          // sweep, is what flips a drained blast here, so this is the only
+          // place that proves completed_at is stamped on real Postgres.
           `SELECT recipient.status AS recipient_status,
                   campaign.status AS campaign_status,
+                  campaign.completed_at IS NOT NULL AS campaign_completed,
                   recipient.attempt_count
            FROM campaign_recipients AS recipient
            INNER JOIN campaigns AS campaign
@@ -759,6 +764,7 @@ describe.skipIf(!testDatabaseUrl)(
         expect(recipient.rows).toEqual([{
           recipient_status: "sent",
           campaign_status: "completed",
+          campaign_completed: true,
           attempt_count: 1,
         }]);
       },

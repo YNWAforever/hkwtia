@@ -94,6 +94,7 @@ function memoryHarness(
     summaryCode: string;
   }>();
   let campaignStatus: "queued" | "processing" | "completed" = "queued";
+  let campaignCompletedAt: Date | null = null;
 
   const deps: CampaignRunnerDependencies = {
     campaigns: {
@@ -170,10 +171,13 @@ function memoryHarness(
           taskDisposition,
         };
       },
-      async completeCampaignIfIdle(_actor, id) {
+      async completeCampaignIfIdle(_actor, id, completedAt) {
         const hasWork = recipients.some((item) =>
           item.campaignId === id && (item.status === "queued" || item.status === "processing"));
-        if (!hasWork) campaignStatus = "completed";
+        if (!hasWork) {
+          campaignStatus = "completed";
+          campaignCompletedAt = completedAt;
+        }
         return !hasWork;
       },
     },
@@ -247,6 +251,7 @@ function memoryHarness(
     recipients,
     rendered,
     status: () => campaignStatus,
+    completedAt: () => campaignCompletedAt,
   };
 }
 
@@ -317,6 +322,7 @@ describe("runCampaignBatch", () => {
       }),
     ]);
     expect(test.status()).toBe("processing");
+    expect(test.completedAt()).toBeNull();
 
     const retryNow = new Date(now.getTime() + 5 * 60_000);
     const secondRun = await runCampaignBatch(test.deps, {now: retryNow, limit: 10});
@@ -329,6 +335,13 @@ describe("runCampaignBatch", () => {
         `campaign:${campaignId}:${second.id}:email`,
       ]);
     expect(test.status()).toBe("completed");
+    // Phase C2 Task 1 Step 4b. A blast that drains over more than one batch is
+    // completed by completeCampaignIfIdle, never by the claim sweep — the sweep
+    // only looks at campaigns still in ('queued', 'processing'). Stamping the
+    // timestamp in the sweep alone left completed_at null for every campaign
+    // that finished normally, so pin that the runner's batch clock reaches the
+    // column on the path that actually fires.
+    expect(test.completedAt()).toEqual(retryNow);
   });
 });
 
@@ -396,9 +409,25 @@ describe("campaign recipient repository fencing", () => {
     expect(sql).toMatch(
       /UPDATE "campaigns".*SET status = 'completed', completed_at = \$\d+.*NOT EXISTS.*status IN \('queued', 'processing'\)/i,
     );
-    // Phase C2 Task 1 Step 4b. 0033 adds campaigns.completed_at and this sweep
-    // is its only writer, so the timestamp is the claim's `now`, not a database
-    // clock a test cannot pin.
+    // Phase C2 Task 1 Step 4b. The timestamp is the claim's `now`, not a
+    // database clock a test cannot pin.
+    expect(fake.commands[0]?.params).toContain(now);
+  });
+
+  it("stamps completed_at on the idle-completion path the runner actually calls", async () => {
+    // Phase C2 Task 1 Step 4b. The sweep above only reaches campaigns still in
+    // ('queued', 'processing'), and this statement is what moves a drained blast
+    // out of that set, so it has to stamp the column itself: once it has run the
+    // sweep can never see the row again to backfill it.
+    const fake = database([[{id: campaignId}]]);
+    const repo = createCampaignsRepository(async () => fake.db as never);
+
+    await expect(repo.completeCampaignIfIdle(system, campaignId, now)).resolves.toBe(true);
+
+    const sql = fake.commands[0]?.sql.replace(/\s+/g, " ");
+    expect(sql).toMatch(
+      /UPDATE "campaigns".*SET status = 'completed', completed_at = \$\d+.*NOT EXISTS.*status IN \('queued', 'processing'\)/i,
+    );
     expect(fake.commands[0]?.params).toContain(now);
   });
 

@@ -141,6 +141,7 @@ type CampaignRecipientMutations = Readonly<{
   completeCampaignIfIdle: (
     actor: AutomationCronActor,
     campaignId: string,
+    now: Date,
   ) => Promise<boolean>;
 }>;
 
@@ -495,7 +496,13 @@ export async function runCampaignBatch(
     }
   }
   for (const campaignId of campaigns) {
-    await dependencies.campaigns.completeCampaignIfIdle(runnerActor, campaignId);
+    // Phase C2 Task 1 Step 4b: the batch clock, not a database clock, so the
+    // completion timestamp matches the claim sweep's and a test can pin it.
+    await dependencies.campaigns.completeCampaignIfIdle(
+      runnerActor,
+      campaignId,
+      input.now,
+    );
   }
   return summary;
 }

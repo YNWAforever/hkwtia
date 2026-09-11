@@ -324,6 +324,15 @@ describe("phase C2 campaign schema contract", () => {
 
 - [ ] **Step 4b: `campaigns.completed_at` gets its writer, here, in the same commit that adds the column.** The `completed` CTE in `lib/db/repos/campaign-recipient-delivery.ts:141-151` stamps `status = 'completed'` and nothing else. Add `, completed_at = ${now}` to that `SET` — it is not a change to the CTE's `('queued','processing')` status list, so S-6 is untouched — and assert it in `tests/unit/campaign-delivery.test.ts`. Without this, `completed_at` is a column §6 asked for that is set by nothing, the same class of defect as `variables_template` (which Task 9 now writes) and `conversations.subject` (which C1 explicitly marks reserved). A column with no writer is worse than a missing column: the schema looks complete.
 
+  > **Errata (fix commit, review finding 1).** This step named only the CTE, and that is not
+  > enough: `completeCampaignIfIdle` in the same file is the statement the runner calls for every
+  > campaign a batch touched (`lib/automation/campaign-runner.ts`), so it — not the sweep — is what
+  > completes a blast that drains over more than one batch. Because the sweep's predicate is
+  > `status IN ('queued', 'processing')`, a campaign that method has already flipped is invisible to
+  > the sweep forever, so stamping only in the CTE left `completed_at` null for every campaign that
+  > finishes normally. **Both** writers set it, and `completeCampaignIfIdle` takes the runner's batch
+  > `now` as a third argument so the two agree and a test can pin it.
+
 - [ ] **Step 5: The config edit belongs to this task, not Task 2, and it adds four keys as well as `category`.**
 
   Task 1 and Task 2 were circular: Step 6's twin reads `template.category`, which Task 2 Step 3 adds — while Task 1's commit line already stages `config/whatsapp-templates.ts` and Task 2 claims to own the file. Resolve it here: **Task 1 owns the `config/whatsapp-templates.ts` data edit**; Task 2 owns only deleting the false comment on `event_reminder_24h` and replacing it with one that is true.

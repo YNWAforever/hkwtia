@@ -138,11 +138,14 @@ export function createCampaignRecipientDeliveryRepository(
       return database.transaction(async (transaction) => {
         const result = await transaction.execute(sql`
           WITH completed AS (
-            -- Phase C2 Task 1 Step 4b: 0033 adds campaigns.completed_at, and this
-            -- sweep is the only statement that can know a blast has drained, so
-            -- the writer lands in the same commit as the column. A column with
-            -- no writer is worse than a missing one: the schema looks complete
-            -- and every report built on it reads null. The status list stays
+            -- Phase C2 Task 1 Step 4b: 0033 adds campaigns.completed_at, so the
+            -- writer lands in the same commit as the column. This sweep is the
+            -- backstop, not the usual path: it catches a campaign whose last
+            -- recipient was settled by a batch that then crashed before
+            -- completeCampaignIfIdle ran, and a campaign queued with no
+            -- recipients at all. Both writers stamp completed_at, because a
+            -- column set on only one of two completion paths reads null for
+            -- every campaign that takes the other one. The status list stays
             -- ('queued', 'processing') — widening it would let this sweep stamp
             -- a fresh draft as completed (S-6).
             UPDATE ${campaigns} AS idle
@@ -282,12 +285,24 @@ export function createCampaignRecipientDeliveryRepository(
     async completeCampaignIfIdle(
       actor: AutomationRepositoryActor,
       campaignId: string,
+      now: Date,
     ): Promise<boolean> {
       requireAutomationSystem(actor);
       const database = await loadDatabase();
       const completed = rowsFrom(await database.execute(sql`
+        -- Phase C2 Task 1 Step 4b: this is the statement that actually completes
+        -- a blast — the runner calls it for every campaign a batch touched, so a
+        -- campaign that drains over several batches is flipped here, never by
+        -- the claim sweep above. That sweep only reaches a campaign still in
+        -- ('queued', 'processing'), so once this UPDATE has moved the row to
+        -- 'completed' the sweep can never see it again and can never backfill
+        -- the timestamp. Stamping only there left completed_at NULL for
+        -- every campaign that finishes normally, which is exactly the writerless
+        -- column that step set out to prevent. The timestamp is threaded from
+        -- the runner's batch clock, not a database clock, so both writers agree
+        -- and a test can pin it.
         UPDATE ${campaigns} AS campaign
-        SET status = 'completed'
+        SET status = 'completed', completed_at = ${now}
         WHERE campaign.id = ${campaignId}
           AND campaign.status IN ('queued', 'processing')
           AND NOT EXISTS (
