@@ -1,7 +1,7 @@
 # Captured Woztell payloads
 
 This directory is empty on purpose, and filling it is an **owner action gated on
-production access** — the first line of
+production access** — row 3 of the ordered table in
 [`docs/integration/phase-c-whatsapp-go-live.md`](../../../docs/integration/phase-c-whatsapp-go-live.md).
 
 Phase C1's delivery-status and outbound-echo discriminators in

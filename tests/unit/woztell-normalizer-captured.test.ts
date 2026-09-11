@@ -70,7 +70,7 @@ describe("captured Woztell payload replay (C-9, O-1)", () => {
       // real delivery-status payload and one real outbound echo, commit them as
       // tests/fixtures/captured/woztell-delivery-status-*.json and
       // woztell-outbound-echo-*.json, and run this file. See
-      // docs/integration/phase-c-whatsapp-go-live.md, line 3.
+      // docs/integration/phase-c-whatsapp-go-live.md, row 3 of its ordered table.
     });
 
     it("names the directory the owner must fill before the flag is flipped", () => {
