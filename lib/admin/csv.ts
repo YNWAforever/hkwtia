@@ -14,6 +14,16 @@ const header = [
   "whatsappNumber", "whatsappOptIn", "contactStage", "contactSource",
 ] as const;
 
+/**
+ * U+FEFF, the byte-order mark Excel needs in front of a UTF-8 CSV before it
+ * will stop reading the file as the local codepage — mojibake in every Chinese
+ * name otherwise. Named by code point rather than written into the template
+ * literal: a bare U+FEFF in the source is invisible, so a reader cannot tell
+ * whether the export still emits one, and any tool that trims BOM-looking
+ * bytes would delete it without a visible diff.
+ */
+const UTF8_BOM = String.fromCharCode(0xfeff);
+
 function neutralizeFormula(value: string): string {
   return /^\s*[=+\-@]/u.test(value) ? `'${value}` : value;
 }
@@ -44,5 +54,5 @@ export function encodeAudienceCsv(rows: readonly SegmentAudienceRow[], includeHe
     row.contactSource,
   ].map(csvCell).join(","));
   const output = [...(includeHeader ? [header.join(",")] : []), ...lines].join("\r\n");
-  return `${includeHeader ? "﻿" : ""}${output}${output ? "\r\n" : ""}`;
+  return `${includeHeader ? UTF8_BOM : ""}${output}${output ? "\r\n" : ""}`;
 }

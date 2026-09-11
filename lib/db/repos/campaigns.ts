@@ -77,13 +77,22 @@ async function ownedCampaign(actor: AdminActor, store: unknown, campaignId: stri
  * recipients are profiles: `campaign_recipients` is profile-keyed until Task 8
  * makes it identity-polymorphic. C-6 let a segment address contacts, so a
  * contacts-only segment queued through this path would fall through to the
- * member arm — whose predicates for a contact-shaped filter collapse to TRUE —
- * and mail every member on the site. An empty audience is the only safe
- * reading: the reviewed `/admin/campaigns` path is what can address contacts.
+ * member arm and mail every member on the site. An empty audience is the only
+ * safe reading: the reviewed `/admin/campaigns` path is what can address
+ * contacts.
  *
  * `audience: "both"` keeps its member arm and silently drops the contact half.
  * That under-sends, which is recoverable; the alternative over-sends, which is
  * not. Task 8 replaces this whole function with the classifier-fed audience.
+ *
+ * C-6 review: this guard is no longer the only thing standing between a staff
+ * member and a blast to the whole membership, because it reads `audience` and
+ * nothing else — `{audience: "both", contactStage: ["qualified"]}` walks
+ * straight past it. `memberPredicates` now answers `FALSE` to a contact-shaped
+ * filter, so that segment selects nobody rather than everybody. The two layers
+ * ask different questions and both stay: this one is about which arm the
+ * profile-keyed snapshot can express at all, that one about which rows the arm
+ * is allowed to match.
  */
 async function campaignAudience(store: unknown, filter: SegmentFilterSet, now: Date): Promise<readonly CampaignQueueMember[]> {
   if (filter.audience === "contacts") return [];

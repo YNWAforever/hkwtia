@@ -53,13 +53,22 @@ export default async function SegmentsPage({params, searchParams}: Props) {
     .filter((event) => event.published && event.startsAt.getTime() >= now.getTime())
     .map((event) => localizeEvent(event, locale));
   const selectedEventId = query.filter.event?.eventId ?? null;
+  const offered = upcoming.slice(0, EVENT_OPTION_LIMIT);
   // A saved segment can name an event that has already happened. Keeping it in
   // the option list is what stops the next "Preview" from silently dropping the
   // filter the segment was saved with.
-  const selected = selectedEventId !== null && !upcoming.some((event) => event.id === selectedEventId)
+  //
+  // C-6 review: the fallback is tested against the TRUNCATED list, not against
+  // every upcoming event. Testing it before the slice covered only the
+  // past-event case; a segment naming the 21st-soonest upcoming event was in
+  // `upcoming`, so no fallback was added, and then the slice dropped its
+  // <option> — the select fell back to the blank "Any" entry and the next
+  // Preview lost the event filter, which is the exact failure this fallback
+  // exists to prevent.
+  const selected = selectedEventId !== null && !offered.some((event) => event.id === selectedEventId)
     ? allEvents.filter((event) => event.id === selectedEventId).map((event) => localizeEvent(event, locale))
     : [];
-  const eventOptions: readonly SegmentEventOption[] = [...selected, ...upcoming.slice(0, EVENT_OPTION_LIMIT)].map((event) => ({id: event.id, title: event.title}));
+  const eventOptions: readonly SegmentEventOption[] = [...selected, ...offered].map((event) => ({id: event.id, title: event.title}));
   const presets: readonly SegmentPreset[] = upcoming.slice(0, PRESET_LIMIT).map((event) => ({eventId: event.id, label: t("presetNotRegistered", {event: event.title})}));
   const segmentPath = localizedPath(locale, "/admin/segments");
   const saveAction = saveSegmentAction.bind(null, segmentPath, {success: t("saveSuccess"), validation: t("saveValidation"), error: t("saveError")});

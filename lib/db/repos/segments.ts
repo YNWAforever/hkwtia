@@ -92,11 +92,36 @@ function memberEventPredicate(event: Readonly<{eventId: string; state: string}>)
   return sql`EXISTS (SELECT 1 FROM ${eventRegistrations} WHERE ${eventRegistrations.eventId} = ${event.eventId}::uuid AND ${eventRegistrations.profileId} = ${profiles.id} AND ${eventRegistrations.status} = ${event.state})`;
 }
 
+/**
+ * C-6 review. How a guest registration is tied back to a contact. The plan said
+ * `g.contact_id = contacts.id` and the column does exist — but NOTHING in the
+ * tree writes it: the single INSERT into `event_guest_registrations`
+ * (lib/db/repos/event-guests.ts) names ten columns and `contact_id` is not one
+ * of them, and no migration backfills it. Keyed on that column alone the whole
+ * contact arm was inert, and inert in the direction that sends mail: every row
+ * has `contact_id IS NULL`, so `NOT EXISTS` was always true and a prospect who
+ * had just RSVP'd to that exact event landed in the "not yet registered"
+ * audience and was invited again, while "contacts who attended event X"
+ * rendered an empty list and a zero total.
+ *
+ * The link the guest flow really creates is the email:
+ * lib/events/guest-registration-core.ts writes the registration and upserts the
+ * contact from the same address, lowercased once at the top of that service.
+ * `contact_id` stays as the first arm so a later backfill, or a registration
+ * that starts populating it, tightens the match without this predicate being
+ * edited again. `lower()` on both sides because both writers normalise at their
+ * Zod boundary today and a future one that forgets would fail silently here —
+ * and the silent failure is an unwanted invitation.
+ */
+function contactGuestLink(): SQL {
+  return sql`(${eventGuestRegistrations.contactId} = ${contacts.id} OR lower(${eventGuestRegistrations.email}) = lower(${contacts.email}))`;
+}
+
 function contactEventPredicate(event: Readonly<{eventId: string; state: string}>): SQL {
   if (event.state === "not_registered") {
-    return sql`NOT EXISTS (SELECT 1 FROM ${eventGuestRegistrations} WHERE ${eventGuestRegistrations.eventId} = ${event.eventId}::uuid AND ${eventGuestRegistrations.contactId} = ${contacts.id} AND ${eventGuestRegistrations.status} IN (${textList(ATTENDING_EVENT_STATES)}))`;
+    return sql`NOT EXISTS (SELECT 1 FROM ${eventGuestRegistrations} WHERE ${eventGuestRegistrations.eventId} = ${event.eventId}::uuid AND ${contactGuestLink()} AND ${eventGuestRegistrations.status} IN (${textList(ATTENDING_EVENT_STATES)}))`;
   }
-  return sql`EXISTS (SELECT 1 FROM ${eventGuestRegistrations} WHERE ${eventGuestRegistrations.eventId} = ${event.eventId}::uuid AND ${eventGuestRegistrations.contactId} = ${contacts.id} AND ${eventGuestRegistrations.status} = ${event.state})`;
+  return sql`EXISTS (SELECT 1 FROM ${eventGuestRegistrations} WHERE ${eventGuestRegistrations.eventId} = ${event.eventId}::uuid AND ${contactGuestLink()} AND ${eventGuestRegistrations.status} = ${event.state})`;
 }
 
 /**
@@ -107,6 +132,21 @@ function contactEventPredicate(event: Readonly<{eventId: string; state: string}>
  * CSV export drifted as the window slid.
  */
 export function memberPredicates(filter: SegmentFilterSet, now: Date): SQL {
+  // C-6 review, and the exact mirror of `contactPredicates` below. A profile
+  // carries no funnel stage and no acquisition source — both live on
+  // `contacts` — so no member can satisfy a filter that demands one. Dropping
+  // the two terms, which is what this builder used to do, left `terms` EMPTY
+  // for `{audience: "both", contactStage: ["qualified"]}` and fell through to
+  // `TRUE`: every profile on the site. That is not merely a wrong preview. The
+  // Queue button rendered beside each saved segment posts the segment id
+  // straight to `queueCampaign` with no count shown first, and the
+  // `filter.audience === "contacts"` guard in campaigns.ts does not fire for
+  // "both" or "members" — so the same TRUE snapshotted the whole membership
+  // onto `campaign_recipients` and the runner mailed them, from a segment a
+  // staff member had named after a prospect stage. Matching nothing
+  // under-sends, which is recoverable; the alternative is not.
+  if (filter.contactStage.length > 0 || filter.contactSource.length > 0) return sql`FALSE`;
+
   const terms: SQL[] = [];
   if (filter.profileIds.length) terms.push(sql`${profiles.id} IN (${textList(filter.profileIds)})`);
   if (filter.tier.length) terms.push(sql`${memberships.planCode} IN (${textList(filter.tier)})`);
