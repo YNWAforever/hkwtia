@@ -2,6 +2,7 @@ import {PgDialect} from "drizzle-orm/pg-core";
 import {describe, expect, it, vi} from "vitest";
 
 import {contactWriterActor, createContactsRepository} from "@/lib/db/repos/contacts";
+import {WHATSAPP_CONSENT_TEXT_VERSION} from "@/lib/whatsapp/consent";
 
 const dialect = new PgDialect();
 
@@ -59,6 +60,16 @@ function normalized(statement: string | undefined): string {
 
 function auditStatements(statements: readonly Statement[]): readonly Statement[] {
   return statements.filter((statement) => normalized(statement.sql).startsWith(`insert into "audit_events"`));
+}
+
+/**
+ * C2 Task 3 put a `SELECT … FOR UPDATE` in front of the upsert, so the upsert
+ * is no longer statement 0 on an opting-in submission. Find it by its shape
+ * rather than by index: these cases are about the merge expression, and an
+ * index that silently pointed at the lock read would assert nothing.
+ */
+function upsertStatement(statements: readonly Statement[]): Statement | undefined {
+  return statements.find((statement) => normalized(statement.sql).startsWith(`insert into "contacts"`));
 }
 
 const stopActor = contactWriterActor("whatsapp");
@@ -164,7 +175,8 @@ function optInMerge(statement: string | undefined): (stored: {optedOutAt: string
 
 describe("an interest form cannot revive a WhatsApp opt-out", () => {
   it("consults whatsapp_opted_out_at in the opt-in merge", async () => {
-    const recorder = transactionalRecorder([[{id: "c-3"}]]);
+    // [lock read, upsert]: the lock read answers "no prior row".
+    const recorder = transactionalRecorder([[], [{id: "c-3"}]]);
     const repository = createContactsRepository(async () => recorder.database);
 
     await repository.upsertFromInterestForm(contactWriterActor("interest_form"), {
@@ -175,7 +187,7 @@ describe("an interest form cannot revive a WhatsApp opt-out", () => {
       whatsappOptIn: true,
     });
 
-    const merge = optInMerge(recorder.statements[0]?.sql);
+    const merge = optInMerge(upsertStatement(recorder.statements)?.sql);
     expect(merge({optedOutAt: "2026-09-01T00:00:00Z", optIn: false}, true)).toBe(false);
     expect(merge({optedOutAt: "2026-09-01T00:00:00Z", optIn: true}, true)).toBe(false);
     expect(merge({optedOutAt: null, optIn: false}, true)).toBe(true);
@@ -191,7 +203,7 @@ describe("an interest form cannot revive a WhatsApp opt-out", () => {
    * and it would read it as a yes.
    */
   it("freezes the consent evidence columns on a withdrawn row", async () => {
-    const recorder = transactionalRecorder([[{id: "c-5"}]]);
+    const recorder = transactionalRecorder([[], [{id: "c-5"}]]);
     const repository = createContactsRepository(async () => recorder.database);
 
     await repository.upsertFromInterestForm(contactWriterActor("interest_form"), {
@@ -202,7 +214,7 @@ describe("an interest form cannot revive a WhatsApp opt-out", () => {
       whatsappOptIn: true,
     });
 
-    const clause = normalized(recorder.statements[0]?.sql);
+    const clause = normalized(upsertStatement(recorder.statements)?.sql);
     for (const column of ["whatsapp_consent_at", "whatsapp_consent_source", "whatsapp_consent_text_version"]) {
       expect(clause).toContain(
         `${column} = case when "contacts"."whatsapp_opted_out_at" is not null then "contacts"."${column}"`
@@ -215,7 +227,7 @@ describe("an interest form cannot revive a WhatsApp opt-out", () => {
     ["interest_form", "interest_form"],
     ["event_guest", "rsvp"],
   ] as const)("keeps the guard for the %s writer", async (source, consentSource) => {
-    const recorder = transactionalRecorder([[{id: "c-4"}]]);
+    const recorder = transactionalRecorder([[], [{id: "c-4"}]]);
     const repository = createContactsRepository(async () => recorder.database);
 
     await repository.upsertFromInterestForm(contactWriterActor(source), {
@@ -227,6 +239,129 @@ describe("an interest form cannot revive a WhatsApp opt-out", () => {
       consentSource,
     });
 
-    expect(normalized(recorder.statements[0]?.sql)).toContain(`"contacts"."whatsapp_opted_out_at" is not null`);
+    expect(normalized(upsertStatement(recorder.statements)?.sql)).toContain(`"contacts"."whatsapp_opted_out_at" is not null`);
+  });
+});
+
+/**
+ * C2 Task 3. The other half of C1's withdrawal leg, and boundary 11's remaining
+ * gap on the prospect side: a GRANT is a consent change, and the contact lane
+ * had no audit row for one. `consent.whatsapp.granted` already existed for
+ * PROFILES (`lib/db/repos/profiles.ts`, Phase A) — the plan's claim that a
+ * repo-wide grep returned zero hits was stale — so the shape here deliberately
+ * matches that one: a TRANSITION, audited in the same transaction as the write,
+ * never the posted value.
+ *
+ * The prior value is taken by `SELECT … FOR UPDATE` before the upsert, not out
+ * of the upsert's own `RETURNING`. `profilesRepository.update` records why: a
+ * self-join or CTE reading the old row inside the writing statement reads that
+ * statement's pre-lock snapshot, so two concurrent submissions for one number
+ * would both see `false` and both audit.
+ */
+describe("a newly granted contact opt-in is audited (C-8, boundary 11)", () => {
+  const granted = (statements: readonly Statement[]) =>
+    auditStatements(statements).filter((statement) => normalized(statement.sql).includes("'consent.whatsapp.granted'"));
+
+  async function submit(
+    recorder: ReturnType<typeof transactionalRecorder>,
+    overrides: Readonly<Record<string, unknown>> = {},
+  ) {
+    const repository = createContactsRepository(async () => recorder.database);
+    return repository.upsertFromInterestForm(contactWriterActor("interest_form"), {
+      email: "ada@example.hk",
+      displayName: "Ada",
+      locale: "en",
+      whatsappNumber: phone,
+      whatsappOptIn: true,
+      ...overrides,
+    });
+  }
+
+  it("takes the row lock before the upsert and audits the grant in the same transaction", async () => {
+    // [lock read: no prior row, upsert: now opted in, audit]
+    const recorder = transactionalRecorder([[], [{id: "c-10", whatsapp_opt_in: true}], []]);
+
+    await expect(submit(recorder)).resolves.toEqual({id: "c-10", disposition: "upserted"});
+
+    const lock = normalized(recorder.statements[0]?.sql);
+    expect(lock).toMatch(/^select /);
+    expect(lock).toContain("for update");
+    expect(normalized(recorder.statements[1]?.sql)).toMatch(/^insert into "contacts"/);
+    const rows = granted(recorder.statements);
+    expect(rows).toHaveLength(1);
+    // The action and the target type are inline literals, not bind parameters:
+    // they are facts about this call site, not values it was handed.
+    expect(normalized(rows[0]?.sql)).toContain("'contact'");
+    expect(rows[0]?.params).toEqual(expect.arrayContaining(["contact-writer", "c-10"]));
+    const metadata = (rows[0]?.params ?? []).find((value) => typeof value === "string" && value.includes("consentSource"));
+    expect(JSON.parse(String(metadata))).toEqual({
+      source: "interest_form",
+      consentSource: "interest_form",
+      consentTextVersion: WHATSAPP_CONSENT_TEXT_VERSION,
+    });
+    expect(recorder.transactionCount()).toBe(1);
+    expect(new Set(recorder.transactionOf)).toEqual(new Set([1]));
+  });
+
+  it("writes nothing when the contact was already opted in", async () => {
+    // The repeat submission that refreshes a consent already held. A trail that
+    // records every form post says nothing about when consent actually changed.
+    const recorder = transactionalRecorder([[{whatsapp_opt_in: true}], [{id: "c-11", whatsapp_opt_in: true}]]);
+
+    await expect(submit(recorder)).resolves.toEqual({id: "c-11", disposition: "upserted"});
+
+    expect(granted(recorder.statements)).toHaveLength(0);
+    expect(recorder.statements).toHaveLength(2);
+  });
+
+  /**
+   * The revival guard and the audit row have to agree. C1's merge forces
+   * `whatsapp_opt_in = false` on a row carrying `whatsapp_opted_out_at`, so the
+   * submission grants nothing — and a `consent.whatsapp.granted` row written
+   * from the INPUT rather than the RESULT would be a consent record for consent
+   * we refused to accept, on exactly the person who had sent STOP.
+   */
+  it("writes nothing when the revival guard refused the grant", async () => {
+    const recorder = transactionalRecorder([[{whatsapp_opt_in: false}], [{id: "c-12", whatsapp_opt_in: false}]]);
+
+    await expect(submit(recorder)).resolves.toEqual({id: "c-12", disposition: "upserted"});
+
+    expect(granted(recorder.statements)).toHaveLength(0);
+  });
+
+  it("does not take the lock at all when the submission is not opting in", async () => {
+    // `EXCLUDED.whatsapp_opt_in OR contacts.whatsapp_opt_in` with `false` on the
+    // left can only preserve what is there, so there is no transition to miss —
+    // and the common path keeps its single statement.
+    const recorder = transactionalRecorder([[{id: "c-13", whatsapp_opt_in: false}]]);
+
+    await expect(submit(recorder, {whatsappOptIn: false, whatsappNumber: null}))
+      .resolves.toEqual({id: "c-13", disposition: "upserted"});
+
+    expect(recorder.statements).toHaveLength(1);
+    expect(normalized(recorder.statements[0]?.sql)).toMatch(/^insert into "contacts"/);
+  });
+
+  it("audits a first grant from the guest RSVP with that form's consent source", async () => {
+    const recorder = transactionalRecorder([[], [{id: "c-14", whatsapp_opt_in: true}], []]);
+    const repository = createContactsRepository(async () => recorder.database);
+
+    await repository.upsertFromInterestForm(contactWriterActor("event_guest"), {
+      email: "ada@example.hk",
+      displayName: "Ada",
+      locale: "zh-HK",
+      whatsappNumber: phone,
+      whatsappOptIn: true,
+      consentSource: "rsvp",
+    });
+
+    const rows = granted(recorder.statements);
+    expect(rows).toHaveLength(1);
+    const metadata = (rows[0]?.params ?? []).find((value) => typeof value === "string" && value.includes("consentSource"));
+    expect(JSON.parse(String(metadata))).toEqual({
+      source: "event_guest",
+      consentSource: "rsvp",
+      consentTextVersion: WHATSAPP_CONSENT_TEXT_VERSION,
+    });
   });
 });

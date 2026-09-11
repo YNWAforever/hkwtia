@@ -14,7 +14,9 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
 import {applicationsRepository} from "@/lib/db/repos/applications";
 import {billingAttemptsRepository} from "@/lib/db/repos/billing-attempts";
 import {companiesRepository} from "@/lib/db/repos/companies";
+import {notificationActor} from "@/lib/db/repos/deliveries";
 import type {AutomationDatabase} from "@/lib/db/repos/journeys";
+import {createMessageEligibilityRepository} from "@/lib/db/repos/message-eligibility";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {
   createWoztellInboundEventsRepository,
@@ -72,6 +74,20 @@ const capabilityScopedCalls = [
       origin: "MANUAL",
       sentAt: new Date("2026-09-10T08:59:00.000Z"),
     })],
+  /**
+   * C2 Task 3. `factsFor` is the dispatcher's door onto the same private facts
+   * loader the staff door uses, and that loader carries two hand-written
+   * `EXISTS` sub-selects — one per suppression channel — plus the scalar
+   * sub-select that derives a linked member's recorded withdrawal. Both
+   * recipient kinds are exercised because the anchor differs per kind and only
+   * the outer SELECT is shared.
+   */
+  ["messageEligibility.factsFor(member)", (database: AutomationDatabase) =>
+    createMessageEligibilityRepository(async () => database)
+      .factsFor(notificationActor("campaign"), {kind: "member", profileId: "member-a"})],
+  ["messageEligibility.factsFor(contact)", (database: AutomationDatabase) =>
+    createMessageEligibilityRepository(async () => database)
+      .factsFor(notificationActor("campaign"), {kind: "contact", contactId: "11111111-1111-4111-8111-111111111111"})],
 ] as const;
 
 describe("EXISTS authorization scopes render as executable Postgres", () => {

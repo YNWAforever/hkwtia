@@ -2,6 +2,8 @@ import {PgDialect} from "drizzle-orm/pg-core";
 import {describe, expect, it, vi} from "vitest";
 import {z} from "zod";
 
+import {automationCronActor} from "@/lib/auth/automation-actor";
+import {notificationActor} from "@/lib/db/repos/deliveries";
 import {createMessageEligibilityRepository} from "@/lib/db/repos/message-eligibility";
 import {woztellWebhookActor} from "@/lib/db/repos/woztell-inbound-events";
 import {ANONYMOUS_ACTOR, type Actor} from "@/lib/membership/lifecycle";
@@ -368,5 +370,134 @@ describe("whatsAppEligibilityForWebhook (the bot lane's door)", () => {
 
     await expect(repository.whatsAppEligibilityForWebhook(woztellWebhookActor(), input({purpose: "service"})))
       .resolves.toEqual({status: "eligible", phoneE164: phone});
+  });
+});
+
+/**
+ * The DISPATCHER's door (C2 Task 3), onto the same private facts loader.
+ *
+ * Two doors on one module, deliberately, and the pair of refusals below is the
+ * whole point of having two: `requireAdmin` needs a `profileId` no capability
+ * actor has, and `requireDeliveryActor` is a capability check over a
+ * `unique symbol` no session actor can mint. Widening either to cover the other
+ * would make it forgeable from whichever side is weaker — a `"use server"`
+ * boundary can put `{kind: "notification", source: "campaign"}` in a request
+ * body and cannot put a symbol there.
+ *
+ * `factsFor` returns FACTS and not a verdict because its callers ask different
+ * questions of them: Task 8's classifier folds them into an eligibility
+ * category for a blast preview, the dispatcher picks a channel. One loader is
+ * what keeps the preview and the send from disagreeing about one person.
+ */
+describe("factsFor (the dispatcher's door)", () => {
+  it.each<[string, unknown]>([
+    ["member", member],
+    ["admin", admin],
+    ["anonymous", ANONYMOUS_ACTOR],
+  ])("refuses a %s actor before the database is opened", async (_name, actor) => {
+    const loadDatabase = vi.fn();
+    const repository = createMessageEligibilityRepository(loadDatabase as never);
+
+    await expect(repository.factsFor(actor as never, {kind: "member", profileId}))
+      .rejects.toMatchObject({code: "FORBIDDEN"});
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
+  it("refuses a forged notification actor that lacks the capability symbol", async () => {
+    const loadDatabase = vi.fn();
+    const repository = createMessageEligibilityRepository(loadDatabase as never);
+
+    await expect(repository.factsFor(
+      {kind: "notification", userId: null, source: "campaign"} as never,
+      {kind: "member", profileId},
+    )).rejects.toMatchObject({code: "FORBIDDEN"});
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
+  it("keeps the two doors apart: neither gate admits the other's actor", async () => {
+    const loadDatabase = vi.fn();
+    const repository = createMessageEligibilityRepository(loadDatabase as never);
+
+    await expect(repository.whatsAppEligibility(notificationActor("campaign") as never, input()))
+      .rejects.toMatchObject({code: "FORBIDDEN"});
+    await expect(repository.factsFor(admin as never, {kind: "member", profileId}))
+      .rejects.toMatchObject({code: "FORBIDDEN"});
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
+  it("admits the dispatcher capability and the automation cron", async () => {
+    const database = factsDatabase({member: memberRow()});
+    const repository = createMessageEligibilityRepository(async () => database.database);
+
+    for (const actor of [notificationActor("campaign"), automationCronActor(), system]) {
+      await expect(repository.factsFor(actor as never, {kind: "member", profileId}))
+        .resolves.toMatchObject({kind: "member", id: profileId});
+    }
+  });
+
+  it("parses the recipient before the database is opened", async () => {
+    const loadDatabase = vi.fn();
+    const repository = createMessageEligibilityRepository(loadDatabase as never);
+    const actor = notificationActor("campaign");
+
+    await expect(repository.factsFor(actor, {kind: "contact", contactId: "not-a-uuid"})).rejects.toBeInstanceOf(z.ZodError);
+    await expect(repository.factsFor(actor, {kind: "prospect", id: contactId})).rejects.toBeInstanceOf(z.ZodError);
+    await expect(repository.factsFor(actor, {kind: "member", profileId, contactId})).rejects.toBeInstanceOf(z.ZodError);
+    expect(loadDatabase).not.toHaveBeenCalled();
+  });
+
+  /**
+   * The resurrection case. `suppressionsRepository.optOutWhatsApp` clears
+   * `profiles.whatsapp_opt_in` and writes the `channel='whatsapp'` suppression
+   * together, but the portal profile form can grant the flag back and nothing
+   * deletes the suppression row — so a check that read the flag alone would call
+   * this member sendable again. The suppression is reported as its own fact.
+   */
+  it("reports a member's whatsapp suppression even when the opt-in flag is back on", async () => {
+    const database = factsDatabase({member: memberRow({whatsappOptIn: true, whatsappSuppressed: true})});
+    const repository = createMessageEligibilityRepository(async () => database.database);
+
+    await expect(repository.factsFor(notificationActor("campaign"), {kind: "member", profileId}))
+      .resolves.toMatchObject({kind: "member", whatsappOptIn: true, whatsappSuppressed: true});
+  });
+
+  /**
+   * The two facts stay SEPARATE in `RecipientFacts`. A prospect's STOP is
+   * `contacts.whatsapp_opted_out_at`; `message_suppressions.profile_id` is NOT
+   * NULL, so an unlinked contact can never have a row there at all. Folding them
+   * into one flag here is what would make the inbox call somebody OPTED_OUT
+   * while the campaign preview called them SUPPRESSED — Task 8's classifier is
+   * where a marketing send folds them, once.
+   */
+  it("keeps a contact's withdrawal and a marketing suppression as two facts", async () => {
+    const optedOutAt = new Date("2026-09-01T00:00:00.000Z");
+    const database = factsDatabase({contact: contactRow({whatsappOptedOutAt: optedOutAt})});
+    const repository = createMessageEligibilityRepository(async () => database.database);
+
+    const facts = await repository.factsFor(notificationActor("campaign"), {kind: "contact", contactId});
+    expect(facts).toMatchObject({kind: "contact", id: contactId, whatsappSuppressed: false});
+    expect(facts?.whatsappOptedOutAt).toEqual(optedOutAt);
+  });
+
+  it("reads one side per call, through the same loader the staff door uses", async () => {
+    const database = factsDatabase({contact: contactRow()});
+    const repository = createMessageEligibilityRepository(async () => database.database);
+
+    await repository.factsFor(notificationActor("campaign"), {kind: "contact", contactId});
+
+    expect(database.statements).toHaveLength(1);
+    const text = flatten(database.statements[0]?.sql);
+    expect(text).toContain(`from "contacts"`);
+    expect(text).toContain(`"message_suppressions"`);
+    // `campaignAudience`'s `suppressed` flag reads `email_log.status='suppressed'`,
+    // a value nothing in this repository ever writes. Do not reuse it.
+    expect(text).not.toContain(`"email_log"`);
+  });
+
+  it("answers null for a recipient that no longer exists", async () => {
+    const database = factsDatabase({contact: null});
+    const repository = createMessageEligibilityRepository(async () => database.database);
+
+    await expect(repository.factsFor(notificationActor("campaign"), {kind: "contact", contactId})).resolves.toBeNull();
   });
 });

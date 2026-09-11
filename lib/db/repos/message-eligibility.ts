@@ -6,6 +6,7 @@ import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb} from "@/lib/db/repos/common";
+import {requireDeliveryActor, type DeliveryActor} from "@/lib/db/repos/deliveries";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {requireWoztellWebhook} from "@/lib/db/repos/woztell-inbound-events";
 import {contacts, memberships, messageSuppressions, profiles} from "@/lib/db/server-schema";
@@ -84,6 +85,17 @@ export type WhatsAppEligibility =
  * send is the recoverable half of that pair.
  */
 const E164 = /^\+\d{8,15}$/;
+
+/**
+ * C2 Task 3. `factsFor`'s boundary. A discriminated union rather than the
+ * nullable pair `eligibilityInputSchema` takes, because this door answers about
+ * ONE identity: a caller holding both ids asks twice and folds the answers
+ * itself, which is what `answerWhatsApp` does above.
+ */
+const recipientSchema = z.discriminatedUnion("kind", [
+  z.object({kind: z.literal("member"), profileId: z.string().min(1).max(255)}).strict(),
+  z.object({kind: z.literal("contact"), contactId: z.string().uuid()}).strict(),
+]);
 
 const eligibilityInputSchema = z.object({
   profileId: z.string().min(1).max(255).nullable(),
@@ -406,8 +418,32 @@ export function createMessageEligibilityRepository(
       requireWoztellWebhook(actor);
       return await answerWhatsApp(loadDatabase, eligibilityInputSchema.parse(input));
     },
-    // C2 Task 3 appends `factsFor(actor, recipient)` here, gated by
-    // `requireDeliveryActor`, over `loadRecipientFacts` above.
+    /**
+     * The DISPATCHER's door (C2 Task 3), and the third gate on this module.
+     *
+     * It returns the facts rather than a verdict because its callers do not all
+     * ask the same question: C2 Task 8's classifier folds `whatsappOptedOutAt`,
+     * `whatsappSuppressed` and `marketingConsent` into an eligibility category
+     * for a blast preview, `lib/notifications/dispatch.ts` picks a channel, and
+     * both need the facts separately — `decideWhatsApp`'s five-way precedence
+     * answers only the WhatsApp send question. The facts still come from ONE
+     * loader, so a preview and a send cannot disagree about a person.
+     *
+     * `requireDeliveryActor` and not `requireAdmin`: the dispatcher holds a
+     * capability minted in server-only wiring and has no `profileId` for
+     * `requireAdmin` to check, while a session admin cannot mint the symbol.
+     * Neither gate can be widened to cover the other without becoming forgeable
+     * from whichever side is weaker — the reason the module header gives for
+     * its other two doors, applied a third time.
+     *
+     * Authorize, parse, then open the database, the order every repository in
+     * this tree keeps: a refusal must never be observable as a query.
+     */
+    async factsFor(actor: DeliveryActor, recipient: unknown): Promise<RecipientFacts | null> {
+      requireDeliveryActor(actor);
+      const parsed = recipientSchema.parse(recipient);
+      return await loadRecipientFacts(await loadDatabase(), parsed);
+    },
   };
 }
 

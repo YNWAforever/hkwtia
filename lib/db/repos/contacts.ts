@@ -100,69 +100,147 @@ function rowsFrom(result: unknown): Record<string, unknown>[] {
   return [];
 }
 
+/**
+ * A Postgres `boolean` arrives as a JS boolean through both drivers this tree
+ * uses, but a raw-SQL row is typed `unknown` and the pg-proxy fakes in the unit
+ * suite hand back strings. Anything that is not demonstrably true is read as
+ * false, which is the safe direction for a consent question: the cost of
+ * misreading is a missing audit row, never a send to somebody who did not
+ * consent (the send gate is `messageEligibilityRepository`, not this).
+ */
+function isTrue(value: unknown): boolean {
+  return value === true || value === "true" || value === "t";
+}
+
 async function defaultDatabaseLoader(): Promise<AutomationDatabase> {
   return await getDb() as unknown as AutomationDatabase;
 }
 
 export function createContactsRepository(loadDatabase: AutomationDatabaseLoader = defaultDatabaseLoader) {
   return {
-    /** Interest form: a repeat submission with the same number refreshes consent; never duplicates a phone. */
+    /**
+     * Interest form: a repeat submission with the same number refreshes consent;
+     * never duplicates a phone.
+     *
+     * C2 Task 3 / boundary 11. The other half of C1's withdrawal leg: a GRANT is
+     * a consent change too, and until now the only record of one was the row's
+     * own `whatsapp_consent_*` columns, which a later submission overwrites.
+     * `consent.whatsapp.granted` on the PROFILE side has existed since Phase A
+     * (`lib/db/repos/profiles.ts`); the contact side — the majority of this
+     * funnel — had nothing, which closes half of C1's open question O-4. The
+     * re-consent FLOW for a withdrawn prospect is still unbuilt; a grant that
+     * does happen is now audited.
+     *
+     * Only a TRANSITION is audited, exactly as `profilesRepository.update` does
+     * it. Every interest form and every guest RSVP posts a `whatsappOptIn` value
+     * because the checkbox is on the form either way, so auditing the value
+     * rather than the change would mint a consent event for every repeat
+     * submission, and a trail that says everything says nothing.
+     *
+     * The prior value is read with `SELECT … FOR UPDATE` inside the transaction,
+     * before the upsert, which is the shape `profilesRepository.update` records
+     * and NOT the "return the prior value from the upsert's RETURNING clause"
+     * the plan proposed: a self-join or CTE reading the old row inside the
+     * writing statement reads that statement's own pre-lock snapshot, so two
+     * concurrent submissions for one number would both see `false` and both
+     * audit. Taking the row lock first makes the loser re-read the committed
+     * value and stay silent. The one case it cannot serialise is two first-ever
+     * submissions of the SAME number arriving together: there is no row to lock
+     * yet, so both may audit a grant. That is two genuine consent assertions
+     * recorded twice rather than a consent we do not hold recorded once, which
+     * is the direction to err in — and it is unreachable from a retry, unlike
+     * the withdrawal leg, because these are user-initiated form posts and not a
+     * webhook the route 500s on. Skipped entirely when the submission is not opting
+     * in, because the merge below can then only preserve what is already there —
+     * there is no false → true transition to miss, and the common path keeps its
+     * single statement.
+     *
+     * The RESULTING flag is read back from `RETURNING`, not assumed from the
+     * input: on a row carrying `whatsapp_opted_out_at` the merge forces `false`,
+     * and auditing a grant that the revival guard just refused would be a
+     * consent record for consent we do not hold.
+     */
     async upsertFromInterestForm(actor: unknown, input: unknown): Promise<ContactWriteResult> {
       requireContactWriter(actor);
       const parsed = interestInputSchema.parse(input);
       const consentAt = parsed.whatsappOptIn ? new Date() : null;
       const database = await loadDatabase();
-      // The ON CONFLICT target must repeat the partial index predicate verbatim
-      // (contacts_phone_unique). An interest-form contact with no number has no
-      // conflict target on email by design: email is not unique, one person may
-      // register interest twice; the Phase C pipeline groups by email in the UI.
-      const row = rowsFrom(await database.execute(sql`
-        INSERT INTO ${contacts}
-          (email, display_name, locale, source, phone_e164, whatsapp_opt_in, whatsapp_consent_at, whatsapp_consent_source, whatsapp_consent_text_version)
-        VALUES (
-          ${parsed.email}, ${parsed.displayName}, ${parsed.locale}, ${actor.source},
-          ${parsed.whatsappNumber}, ${parsed.whatsappOptIn}, ${consentAt},
-          ${parsed.whatsappOptIn ? parsed.consentSource : null}, ${parsed.whatsappOptIn ? WHATSAPP_CONSENT_TEXT_VERSION : null}
-        )
-        ON CONFLICT (phone_e164) WHERE phone_e164 IS NOT NULL DO UPDATE SET
-          email = COALESCE(${contacts.email}, EXCLUDED.email),
-          display_name = COALESCE(EXCLUDED.display_name, ${contacts.displayName}),
-          -- C-1 Task 5(b). This used to be a bare
-          -- EXCLUDED.whatsapp_opt_in OR contacts.whatsapp_opt_in, which never
-          -- consulted whatsapp_opted_out_at — so a later interest form or guest
-          -- RSVP carrying the same number silently re-opted-in somebody who had
-          -- sent STOP, and nothing recorded that it had happened. A prior
-          -- withdrawal now wins, and is cleared only by an explicit re-consent
-          -- flow, which does not exist yet (open question O-4: C-4 owns it, and
-          -- it must write consent.whatsapp.granted).
-          whatsapp_opt_in = CASE
-            WHEN ${contacts.whatsappOptedOutAt} IS NOT NULL THEN false
-            ELSE EXCLUDED.whatsapp_opt_in OR ${contacts.whatsappOptIn}
-          END,
-          -- The same guard freezes the three consent EVIDENCE columns, because
-          -- refreshing them on a row the CASE above has just forced to false
-          -- leaves a consent timestamp NEWER than the withdrawal that beat it.
-          -- Nothing reads them for a send decision today, so this is not a
-          -- bypass — but C-4's re-consent flow (O-4) is precisely the code that
-          -- will read them to decide whether this person ever came back, and it
-          -- would have read that state as a yes.
-          whatsapp_consent_at = CASE
-            WHEN ${contacts.whatsappOptedOutAt} IS NOT NULL THEN ${contacts.whatsappConsentAt}
-            ELSE COALESCE(EXCLUDED.whatsapp_consent_at, ${contacts.whatsappConsentAt})
-          END,
-          whatsapp_consent_source = CASE
-            WHEN ${contacts.whatsappOptedOutAt} IS NOT NULL THEN ${contacts.whatsappConsentSource}
-            ELSE COALESCE(EXCLUDED.whatsapp_consent_source, ${contacts.whatsappConsentSource})
-          END,
-          whatsapp_consent_text_version = CASE
-            WHEN ${contacts.whatsappOptedOutAt} IS NOT NULL THEN ${contacts.whatsappConsentTextVersion}
-            ELSE COALESCE(EXCLUDED.whatsapp_consent_text_version, ${contacts.whatsappConsentTextVersion})
-          END,
-          updated_at = now()
-        RETURNING ${contacts.id} AS id
-      `))[0];
-      if (!row) throw new Error("CONTACT_UPSERT_FAILED");
-      return {id: String(row.id), disposition: "upserted"};
+      return database.transaction(async (transaction) => {
+        const priorOptIn = parsed.whatsappOptIn && parsed.whatsappNumber !== null
+          ? isTrue(rowsFrom(await transaction.execute(sql`
+              SELECT ${contacts.whatsappOptIn} AS whatsapp_opt_in
+              FROM ${contacts}
+              WHERE ${contacts.phoneE164} = ${parsed.whatsappNumber}
+              FOR UPDATE
+            `))[0]?.whatsapp_opt_in)
+          : false;
+        // The ON CONFLICT target must repeat the partial index predicate verbatim
+        // (contacts_phone_unique). An interest-form contact with no number has no
+        // conflict target on email by design: email is not unique, one person may
+        // register interest twice; the Phase C pipeline groups by email in the UI.
+        const row = rowsFrom(await transaction.execute(sql`
+          INSERT INTO ${contacts}
+            (email, display_name, locale, source, phone_e164, whatsapp_opt_in, whatsapp_consent_at, whatsapp_consent_source, whatsapp_consent_text_version)
+          VALUES (
+            ${parsed.email}, ${parsed.displayName}, ${parsed.locale}, ${actor.source},
+            ${parsed.whatsappNumber}, ${parsed.whatsappOptIn}, ${consentAt},
+            ${parsed.whatsappOptIn ? parsed.consentSource : null}, ${parsed.whatsappOptIn ? WHATSAPP_CONSENT_TEXT_VERSION : null}
+          )
+          ON CONFLICT (phone_e164) WHERE phone_e164 IS NOT NULL DO UPDATE SET
+            email = COALESCE(${contacts.email}, EXCLUDED.email),
+            display_name = COALESCE(EXCLUDED.display_name, ${contacts.displayName}),
+            -- C-1 Task 5(b). This used to be a bare
+            -- EXCLUDED.whatsapp_opt_in OR contacts.whatsapp_opt_in, which never
+            -- consulted whatsapp_opted_out_at — so a later interest form or guest
+            -- RSVP carrying the same number silently re-opted-in somebody who had
+            -- sent STOP, and nothing recorded that it had happened. A prior
+            -- withdrawal now wins, and is cleared only by an explicit re-consent
+            -- flow, which does not exist yet (open question O-4: C-4 owns it, and
+            -- it must write consent.whatsapp.granted).
+            whatsapp_opt_in = CASE
+              WHEN ${contacts.whatsappOptedOutAt} IS NOT NULL THEN false
+              ELSE EXCLUDED.whatsapp_opt_in OR ${contacts.whatsappOptIn}
+            END,
+            -- The same guard freezes the three consent EVIDENCE columns, because
+            -- refreshing them on a row the CASE above has just forced to false
+            -- leaves a consent timestamp NEWER than the withdrawal that beat it.
+            -- Nothing reads them for a send decision today, so this is not a
+            -- bypass — but C-4's re-consent flow (O-4) is precisely the code that
+            -- will read them to decide whether this person ever came back, and it
+            -- would have read that state as a yes.
+            whatsapp_consent_at = CASE
+              WHEN ${contacts.whatsappOptedOutAt} IS NOT NULL THEN ${contacts.whatsappConsentAt}
+              ELSE COALESCE(EXCLUDED.whatsapp_consent_at, ${contacts.whatsappConsentAt})
+            END,
+            whatsapp_consent_source = CASE
+              WHEN ${contacts.whatsappOptedOutAt} IS NOT NULL THEN ${contacts.whatsappConsentSource}
+              ELSE COALESCE(EXCLUDED.whatsapp_consent_source, ${contacts.whatsappConsentSource})
+            END,
+            whatsapp_consent_text_version = CASE
+              WHEN ${contacts.whatsappOptedOutAt} IS NOT NULL THEN ${contacts.whatsappConsentTextVersion}
+              ELSE COALESCE(EXCLUDED.whatsapp_consent_text_version, ${contacts.whatsappConsentTextVersion})
+            END,
+            updated_at = now()
+          RETURNING ${contacts.id} AS id, ${contacts.whatsappOptIn} AS whatsapp_opt_in
+        `))[0];
+        if (!row) throw new Error("CONTACT_UPSERT_FAILED");
+        const id = String(row.id);
+        if (isTrue(row.whatsapp_opt_in) && !priorOptIn) {
+          await transaction.execute(sql`
+            INSERT INTO ${auditEvents}
+              (actor_user_id, actor_type, action, target_type, target_id, metadata)
+            VALUES (
+              NULL, ${actor.kind}, 'consent.whatsapp.granted', 'contact', ${id},
+              ${JSON.stringify({
+                source: actor.source,
+                consentSource: parsed.consentSource,
+                consentTextVersion: WHATSAPP_CONSENT_TEXT_VERSION,
+              })}::jsonb
+            )
+          `);
+        }
+        return {id, disposition: "upserted"};
+      });
     },
 
     /**

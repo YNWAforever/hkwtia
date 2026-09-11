@@ -57,7 +57,13 @@ describe("contactsRepository", () => {
       email: "ADA@example.hk", locale: "zh-HK", whatsappOptIn: true, whatsappNumber: "+85291234567", displayName: "Ada",
     });
     expect(result).toEqual({id: "c-1", disposition: "upserted"});
-    expect(execute).toHaveBeenCalledTimes(1);
+    // Two, not one, since C2 Task 3: an opting-in submission takes the row lock
+    // (`SELECT … FOR UPDATE`) before the upsert so that exactly one of two
+    // concurrent submissions writes the `consent.whatsapp.granted` row. This
+    // fake answers every statement with `{id}` and no `whatsapp_opt_in`, so the
+    // resulting flag reads false and no audit row follows;
+    // `tests/unit/contacts-consent-audit.test.ts` owns that behaviour.
+    expect(execute).toHaveBeenCalledTimes(2);
   });
 
   it("records the consent source the caller names, defaulting to the interest form", async () => {
