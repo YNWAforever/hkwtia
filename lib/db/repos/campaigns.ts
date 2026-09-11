@@ -241,6 +241,23 @@ function audienceTargets(filter: SegmentFilterSet, now: Date): SQL {
   `;
 }
 
+/**
+ * One row per AUDIENCE row, and the audience is a union of two identity spaces:
+ * a member arm keyed by `profiles.id` and a contact arm keyed by `contacts.id`.
+ * A person who is both — a member whose `contacts.profile_id` links back to
+ * them, which C-4 writes — therefore appears twice in an `audience: "both"`
+ * segment, and `snapshotAudience` writes a recipient row for each. Both partial
+ * unique indexes on `campaign_recipients` are satisfied (different columns), so
+ * nothing downstream catches it.
+ *
+ * Harmless today only by construction: the sole `createCampaign` caller is
+ * `queueCampaign`, which hard-codes `channel: "email"`, and a contact's
+ * `marketingConsent` is `false` by construction, so the duplicate always lands
+ * `not_opted_in`. The moment a WhatsApp arm exists it stops being harmless —
+ * the same template goes twice to the same phone number. Whoever builds it owes
+ * this a cross-identity dedupe (or the contact arm has to drop contacts that
+ * carry a `profile_id`).
+ */
 async function campaignAudience(store: unknown, filter: SegmentFilterSet, now: Date): Promise<readonly RecipientFacts[]> {
   const db = asDb(store);
   const rows = await db.execute(sql`
@@ -376,11 +393,35 @@ export function createCampaignsRepository(
       await appendCampaignAudit(asDb(store), actor, parsedCampaignId, action, metadata);
     },
 
+    /**
+     * Clearing the review stamp is the whole point of this assignment, not
+     * tidiness. `schedule` reads "approved" off the row as `status = 'review'
+     * AND reviewed_at IS NOT NULL`, and a rejection also stamps `reviewed_at`
+     * (it has to: the rejecting admin is who the audit trail is about). So a
+     * reject → fix → resubmit that only flipped the status back to `review`
+     * left a row byte-identical to an approved one — `status = 'review'`,
+     * `reviewed_at` set, `rejection_reason` NULL — and the next admin to open
+     * it could schedule a marketing blast that nobody had signed off, with
+     * `reviewed_by_profile_id` durably crediting the sign-off to the admin who
+     * had in fact refused it. S-7 makes two-person control a property of the
+     * row, so this repository is where it either holds or does not.
+     *
+     * The rejection is not lost: `campaign.review.rejected` is in
+     * `audit_events` with its reason, which is where the history belongs.
+     *
+     * CALLER CONTRACT (this method, `recordReview` and `schedule` alike): the
+     * status change and its `audit_events` row are two statements against the
+     * caller's `store`, so the caller must pass a transaction — use this
+     * repository's `transaction(actor, …)`. Outside one, a failed audit insert
+     * leaves the transition standing and un-audited.
+     */
     async submitForReview(actor, store, campaignId) {
       requireAdmin(actor);
       const parsedCampaignId = await ownedCampaign(actor, store, campaignId);
       const db = asDb(store);
-      await transitionCampaign(db, parsedCampaignId, ["draft"], sql`status = 'review', rejection_reason = NULL`);
+      await transitionCampaign(db, parsedCampaignId, ["draft"], sql`
+        status = 'review', rejection_reason = NULL, reviewed_at = NULL, reviewed_by_profile_id = NULL
+      `);
       await appendCampaignAudit(db, actor, parsedCampaignId, "campaign.submitted_for_review", {});
     },
 
@@ -414,6 +455,11 @@ export function createCampaignsRepository(
       // `reviewed_at IS NOT NULL` is the second half of two-person control: the
       // approval and the schedule are two clicks, and a schedule written
       // without the approval would be a blast nobody signed off.
+      //
+      // That reading is only sound because `submitForReview` clears the stamp —
+      // otherwise a rejection's `reviewed_at` would satisfy this guard on the
+      // resubmitted draft. The two are one invariant; do not change either
+      // alone.
       const rows = resultRows(await db.execute(sql`
         UPDATE ${campaigns} AS target
         SET status = 'scheduled', scheduled_at = ${parsedScheduledAt}, updated_at = now()
@@ -434,16 +480,26 @@ export function createCampaignsRepository(
     async campaignReportFor(actor, store, campaignId): Promise<CampaignReport> {
       requireAdmin(actor);
       const parsedCampaignId = campaignIdSchema.parse(campaignId);
+      // `error_code` is grouped alongside `blocked_reason` because the two
+      // spell the same thing at different moments: a recipient blocked at
+      // snapshot time carries `blocked_reason`, one refused at SEND time
+      // carries only `error_code` (`markRecipientSuppressed` writes
+      // `status = 'suppressed'` with a code and never touches
+      // `blocked_reason`). Folding on `blocked_reason` alone counted the
+      // send-time refusals into `total` and into no other bucket, so a report
+      // read 20 recipients / 18 sent / 0 not sent with two people missing —
+      // and those two are the consent refusals staff most need to see.
       const rows = z.array(reportRowSchema).parse(resultRows(await asDb(store).execute(sql`
         SELECT
           ${campaignRecipients.status}::text AS "status",
           ${campaignRecipients.blockedReason} AS "blockedReason",
+          ${campaignRecipients.errorCode} AS "errorCode",
           count(*)::int AS "count",
           count(*) FILTER (WHERE ${campaignRecipients.deliveredAt} IS NOT NULL)::int AS "delivered",
           count(*) FILTER (WHERE ${campaignRecipients.readAt} IS NOT NULL)::int AS "read"
         FROM ${campaignRecipients}
         WHERE ${campaignRecipients.campaignId} = ${parsedCampaignId}::uuid
-        GROUP BY 1, 2
+        GROUP BY 1, 2, 3
       `)));
       return foldReport(rows);
     },
@@ -453,10 +509,31 @@ export function createCampaignsRepository(
 const reportRowSchema = z.object({
   status: z.enum(["queued", "processing", "sent", "failed", "suppressed"]),
   blockedReason: z.string().nullable(),
+  errorCode: z.string().nullable(),
   count: z.coerce.number().int().nonnegative(),
   delivered: z.coerce.number().int().nonnegative(),
   read: z.coerce.number().int().nonnegative(),
 });
+
+/**
+ * The reason key a recipient is reported under, or `null` when the recipient is
+ * not in the "not sent" bucket at all.
+ *
+ * `blocked_reason` first, because a snapshot-time block already names an
+ * `EligibilityCategory` (or `missing_variable`) and that is the vocabulary the
+ * preview a human approved was written in. A send-time suppression has no
+ * `blocked_reason`, so the runner's `error_code` stands in verbatim — the
+ * report renderer has to carry a label for each one (`marketing_suppressed` is
+ * the only writer today). Passing it through rather than collapsing it to
+ * `suppressed` is deliberate: `marketing_suppressed` covers BOTH a withdrawn
+ * marketing consent and an email suppression, so calling it "opted out" would
+ * mislabel half the rows it counts.
+ */
+function reportReasonFor(row: z.infer<typeof reportRowSchema>): string | null {
+  if (row.blockedReason !== null) return row.blockedReason;
+  if (row.status !== "suppressed") return null;
+  return row.errorCode ?? "suppressed";
+}
 
 function foldReport(rows: readonly z.infer<typeof reportRowSchema>[]): CampaignReport {
   const byReason: Record<string, number> = {};
@@ -468,9 +545,10 @@ function foldReport(rows: readonly z.infer<typeof reportRowSchema>[]): CampaignR
     if (row.status === "queued" || row.status === "processing") report.queued += row.count;
     if (row.status === "sent") report.sent += row.count;
     if (row.status === "failed") report.failed += row.count;
-    if (row.blockedReason !== null) {
+    const reason = reportReasonFor(row);
+    if (reason !== null) {
       report.blocked += row.count;
-      byReason[row.blockedReason] = (byReason[row.blockedReason] ?? 0) + row.count;
+      byReason[reason] = (byReason[reason] ?? 0) + row.count;
     }
   }
   return {...report, byReason};

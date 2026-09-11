@@ -13,18 +13,29 @@ import type {RecipientFacts} from "@/lib/db/repos/message-eligibility";
  * reply and a marketing suppression does not. Here they fold into one
  * `suppressed`, and the two spellings describe the same population:
  *
- * | `RecipientFacts`          | `whatsAppEligibility(purpose:"service")` | `whatsAppEligibility(purpose:"marketing")` | `classifyRecipient(…, "whatsapp")` |
- * |---------------------------|------------------------------------------|--------------------------------------------|------------------------------------|
- * | `whatsappOptedOutAt` set  | `blocked/opted_out`                      | `blocked/opted_out`                        | `suppressed`                       |
- * | `whatsappSuppressed`      | *eligible*                               | `blocked/suppressed`                       | `suppressed`                       |
- * | `whatsappOptIn === false` | *eligible*                               | `blocked/not_opted_in`                     | `not_opted_in`                     |
+ * | `RecipientFacts`                     | `whatsAppEligibility(purpose:"service")` | `whatsAppEligibility(purpose:"marketing")` | `classifyRecipient(…, "whatsapp")` |
+ * |--------------------------------------|------------------------------------------|--------------------------------------------|------------------------------------|
+ * | contact `whatsappOptedOutAt` set     | `blocked/opted_out`                      | `blocked/opted_out`                        | `suppressed`                       |
+ * | `whatsappSuppressed`                 | *eligible*                               | `blocked/suppressed`                       | `suppressed`                       |
+ * | member `whatsappOptIn === false`     | `blocked/opted_out`                      | `blocked/opted_out`                        | `not_opted_in`                     |
+ * | contact `whatsappOptIn === false`    | *eligible*                               | `blocked/not_opted_in`                     | `not_opted_in`                     |
  *
- * Read the marketing column and this one together: the same partition under
+ * Read the marketing column and this one together: the same PARTITION under
  * different names. `tests/unit/campaign-eligibility.test.ts` asserts that
  * equality over the consent facts, because the failure it prevents is subtle
  * and infuriating — the same person reading OPTED_OUT in the inbox and
  * `suppressed` in the campaign preview, with staff unable to tell whether those
  * are one problem or two.
+ *
+ * Partition, not vocabulary: row 3 is the one place the two words genuinely
+ * disagree. `decideWhatsApp`'s rule 1 answers a member with `whatsappOptIn ===
+ * false` as `opted_out` — conservatively, because `profiles.whatsapp_opt_in`
+ * defaults to false and it cannot tell "never opted in" from "withdrew"; that
+ * module's own precedence table names the cost and points at
+ * `whatsappOptedOutAt` as the evidence a future split would use. The preview
+ * has no `opted_out` category at all and says `not_opted_in`. Both are blocked,
+ * which is the property the test pins; do not "fix" one side into the other
+ * without reading rule 1, and do not read this table as saying the words match.
  */
 export type CampaignChannel = "email" | "whatsapp";
 
