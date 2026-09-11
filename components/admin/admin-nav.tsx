@@ -18,6 +18,7 @@ const linkLabelKeys = {
   members: "navigation.members",
   "at-risk": "navigation.atRisk",
   inbox: "navigation.inbox",
+  contacts: "navigation.contacts",
   tasks: "navigation.tasks",
   segments: "navigation.segments",
   announcements: "navigation.announcements",

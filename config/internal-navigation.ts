@@ -28,6 +28,9 @@ export const adminNavigationGroups = [
       {id: "members", href: "/admin/members"},
       {id: "at-risk", href: "/admin/at-risk"},
       {id: "inbox", href: "/admin/inbox"},
+      // Phase C2 (C-4): the prospect side of the same funnel the inbox shows the
+      // member side of, so it sits beside it rather than under operations.
+      {id: "contacts", href: "/admin/contacts"},
       {id: "tasks", href: "/admin/tasks"},
       {id: "segments", href: "/admin/segments"},
     ],

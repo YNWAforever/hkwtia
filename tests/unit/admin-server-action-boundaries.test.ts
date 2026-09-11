@@ -19,6 +19,11 @@ describe("admin mutation Server Action boundaries", () => {
     // all, so it is the second-last module that should be missing from a list
     // whose omissions fail nothing.
     ["whatsapp template", "lib/admin/template-registry-actions.ts"],
+    // C-4. The pipeline writes a person's stage and owner and audits both, and
+    // it is the one action module here that also redirects — so a denial that
+    // fell through to the redirect instead of notFound() would disclose the
+    // surface it is meant to hide.
+    ["contact", "lib/admin/contact-actions.ts"],
   ])("maps authorization denial to notFound in the top-level %s action module", (_name, path) => {
     const source = readFileSync(resolve(process.cwd(), path), "utf8");
     expect(source.trimStart()).toMatch(/^"use server";/);

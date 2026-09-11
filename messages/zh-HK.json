@@ -2241,6 +2241,7 @@
       "label": "職員管理導覽",
       "dashboard": "控制台",
       "inbox": "訊息中心",
+      "contacts": "潛在客戶",
       "tasks": "待辦",
       "segments": "分群",
       "members": "會員",
@@ -2294,6 +2295,66 @@
       "empty": "範本登記尚未有資料。在登記首個範本之前，以環境變數的已批准清單為準。",
       "error": "無法載入範本登記。",
       "goLive": "在此批准至少一個範本之前，WhatsApp 不會發出任何訊息。"
+    },
+    "contacts": {
+      "eyebrow": "潛在客戶流程",
+      "title": "潛在客戶",
+      "description": "所有尚未成為會員但需要聯絡的人：WhatsApp 來訊者、留下興趣表格者、活動賓客，以及中途離開的入會申請。",
+      "columns": {
+        "name": "姓名",
+        "stage": "階段",
+        "source": "來源",
+        "owner": "負責人",
+        "lastInbound": "最後來訊",
+        "optIn": "WhatsApp",
+        "actions": "操作"
+      },
+      "stage": {
+        "new": "新增",
+        "contacted": "已聯絡",
+        "qualified": "已評估",
+        "applied": "已申請",
+        "member": "已入會",
+        "closed": "已結束"
+      },
+      "source": {
+        "whatsapp": "WhatsApp",
+        "event_guest": "活動賓客",
+        "showcase_intro": "方案展示查詢",
+        "join_abandoned": "未完成入會",
+        "interest_form": "興趣表格",
+        "import": "匯入"
+      },
+      "optIn": {
+        "yes": "已同意接收",
+        "no": "未同意接收",
+        "stopped": "已停止接收"
+      },
+      "filters": {
+        "stage": "階段",
+        "source": "來源",
+        "owner": "負責人",
+        "search": "搜尋姓名、電郵或號碼",
+        "anyStage": "所有階段",
+        "anySource": "所有來源",
+        "anyOwner": "任何人",
+        "anyOptIn": "不限",
+        "submit": "篩選",
+        "clear": "清除"
+      },
+      "unassigned": "未指派",
+      "assign": "指派",
+      "assignToMe": "指派給我",
+      "save": "儲存",
+      "next": "下一頁",
+      "openThread": "開啟對話",
+      "noThread": "尚無對話",
+      "convert": "邀請入會",
+      "linkedMember": "會員記錄",
+      "duplicates": "有 {count} 筆記錄使用此電郵",
+      "empty": "沒有符合條件的潛在客戶。",
+      "error": "無法載入潛在客戶流程。",
+      "saved": "已更新潛在客戶。"
     },
     "inbox": {
       "eyebrow": "會員及潛在客戶對話",

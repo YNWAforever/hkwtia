@@ -1,11 +1,21 @@
 import "server-only";
 
 import {sql} from "drizzle-orm";
+import type {SQL} from "drizzle-orm";
 import {z} from "zod";
 
-import {auditEvents, contacts} from "@/lib/db/server-schema";
+import {requireAdmin} from "@/lib/auth/authorize";
+import {
+  auditEvents,
+  contactSourceEnum,
+  contactStageEnum,
+  contacts,
+  conversations,
+  profiles,
+} from "@/lib/db/server-schema";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {getDb} from "@/lib/db/repos/common";
+import type {Actor} from "@/lib/membership/lifecycle";
 import {WHATSAPP_CONSENT_TEXT_VERSION} from "@/lib/whatsapp/consent";
 import {WOZTELL_MAX_MEMBER_ID_CHARS} from "@/lib/whatsapp/provider-field-limits";
 
@@ -84,6 +94,229 @@ export type ContactWriteResult = Readonly<{
   disposition: "upserted";
   memberIdLink?: ContactMemberIdLink;
 }>;
+
+/**
+ * Programme C-4. The staff read surface, and the two fields staff own.
+ *
+ * The gate on everything below is `requireAdmin`, deliberately NOT the
+ * `contactWriterActor` capability above. They are different principals answering
+ * different questions: the capability says "a public form may create a row", and
+ * `requireAdmin` says "a named person may reclassify one". Widening the
+ * capability to cover staff — or adding a permissive branch to
+ * `requireContactWriter` — would make the webhook's writer reachable with a
+ * session actor, which is the whole reason the symbol exists (programme rule §9,
+ * boundary 10).
+ */
+export const CONTACT_STAGES = contactStageEnum.enumValues;
+export const CONTACT_SOURCES = contactSourceEnum.enumValues;
+export type ContactStage = (typeof CONTACT_STAGES)[number];
+export type ContactSource = (typeof CONTACT_SOURCES)[number];
+
+export type ContactListFilters = Readonly<{
+  stage: readonly ContactStage[];
+  source: readonly ContactSource[];
+  ownerProfileId: string | null;
+  q: string;
+  optIn: boolean | null;
+  limit: number;
+  cursor: string | null;
+}>;
+
+export type ContactRow = Readonly<{
+  id: string;
+  displayName: string | null;
+  email: string | null;
+  phoneE164: string | null;
+  stage: ContactStage;
+  source: ContactSource;
+  ownerProfileId: string | null;
+  ownerName: string | null;
+  profileId: string | null;
+  companyId: string | null;
+  tags: readonly string[];
+  whatsappOptIn: boolean;
+  whatsappOptedOutAt: Date | null;
+  lastInboundAt: Date | null;
+  /** The newest thread this contact owns, for the inbox deep link. */
+  conversationId: string | null;
+  /** How many rows in the WHOLE table share this email, this one included. */
+  duplicateCount: number;
+  createdAt: Date;
+}>;
+
+export type ContactPage = Readonly<{
+  items: readonly ContactRow[];
+  nextCursor: string | null;
+  total: number;
+}>;
+
+const contactIdSchema = z.string().uuid();
+
+const listFiltersSchema = z.object({
+  // Empty means "every stage", which is why the arrays default rather than
+  // being nullable: a filter bar that submits nothing is not a filter that
+  // matches nothing.
+  stage: z.array(z.enum(CONTACT_STAGES)).max(CONTACT_STAGES.length).default([]),
+  source: z.array(z.enum(CONTACT_SOURCES)).max(CONTACT_SOURCES.length).default([]),
+  ownerProfileId: z.string().min(1).max(255).nullable().default(null),
+  q: z.string().trim().max(200).default(""),
+  optIn: z.boolean().nullable().default(null),
+  limit: z.number().int().min(1).max(200).default(50),
+  cursor: z.string().max(500).nullable().default(null),
+}).strict();
+
+const updatePipelineSchema = z.object({
+  stage: z.enum(CONTACT_STAGES).optional(),
+  ownerProfileId: z.string().min(1).max(200).nullable().optional(),
+  tags: z.array(z.string().trim().min(1).max(40)).max(20).optional(),
+}).strict();
+
+const cursorSchema = z.object({createdAt: z.string(), id: z.string().uuid()}).strict();
+
+const pipelineRowSchema = z.object({
+  id: z.string(),
+  display_name: z.string().nullable(),
+  email: z.string().nullable(),
+  phone_e164: z.string().nullable(),
+  stage: z.enum(CONTACT_STAGES),
+  source: z.enum(CONTACT_SOURCES),
+  owner_profile_id: z.string().nullable(),
+  owner_name: z.string().nullable(),
+  profile_id: z.string().nullable(),
+  company_id: z.string().nullable(),
+  tags: z.array(z.string()).nullable().transform((value) => value ?? []),
+  whatsapp_opt_in: z.union([z.boolean(), z.string()]).nullable(),
+  whatsapp_opted_out_at: z.coerce.date().nullable(),
+  last_inbound_at: z.coerce.date().nullable(),
+  conversation_id: z.string().nullable(),
+  // `count(*)` is bigint, which both drivers hand back as a string.
+  duplicate_count: z.coerce.number().int().nonnegative(),
+  total_count: z.coerce.number().int().nonnegative(),
+  created_at: z.coerce.date(),
+});
+
+function toContactRow(row: Record<string, unknown>): ContactRow {
+  const parsed = pipelineRowSchema.parse(row);
+  return {
+    id: parsed.id,
+    displayName: parsed.display_name,
+    email: parsed.email,
+    phoneE164: parsed.phone_e164,
+    stage: parsed.stage,
+    source: parsed.source,
+    ownerProfileId: parsed.owner_profile_id,
+    ownerName: parsed.owner_name,
+    profileId: parsed.profile_id,
+    companyId: parsed.company_id,
+    tags: parsed.tags,
+    whatsappOptIn: isTrue(parsed.whatsapp_opt_in),
+    whatsappOptedOutAt: parsed.whatsapp_opted_out_at,
+    lastInboundAt: parsed.last_inbound_at,
+    conversationId: parsed.conversation_id,
+    duplicateCount: parsed.duplicate_count,
+    createdAt: parsed.created_at,
+  };
+}
+
+function encodeCursor(row: ContactRow): string {
+  return Buffer
+    .from(JSON.stringify({createdAt: row.createdAt.toISOString(), id: row.id}), "utf8")
+    .toString("base64url");
+}
+
+/**
+ * The keyset predicate is PARENTHESISED. Today it is the sole `WHERE` term of
+ * its query level, which is the only reason a bare `a < x OR (a = x AND b < y)`
+ * would be safe — and the next filter added beside it would silently turn the
+ * whole page into "everything older OR this narrow tail" (plan S-10 records the
+ * same hazard on the segment audience cursor).
+ */
+function cursorPredicate(cursor: string | null): SQL {
+  if (cursor === null || cursor === "") return sql`TRUE`;
+  const parsed = cursorSchema.parse(JSON.parse(Buffer.from(cursor, "base64url").toString("utf8")));
+  const createdAt = new Date(parsed.createdAt);
+  if (Number.isNaN(createdAt.getTime())) throw new Error("CONTACT_CURSOR_INVALID");
+  return sql`(created_at < ${createdAt} OR (created_at = ${createdAt} AND id < ${parsed.id}))`;
+}
+
+function listPredicates(filters: ContactListFilters): SQL {
+  const terms: SQL[] = [];
+  if (filters.stage.length) {
+    terms.push(sql`c.stage IN (${sql.join(filters.stage.map((stage) => sql`${stage}`), sql`, `)})`);
+  }
+  if (filters.source.length) {
+    terms.push(sql`c.source IN (${sql.join(filters.source.map((source) => sql`${source}`), sql`, `)})`);
+  }
+  if (filters.ownerProfileId !== null) terms.push(sql`c.owner_profile_id = ${filters.ownerProfileId}`);
+  if (filters.optIn !== null) terms.push(sql`c.whatsapp_opt_in = ${filters.optIn}`);
+  if (filters.q !== "") {
+    const pattern = `%${filters.q}%`;
+    // Parenthesised for the same reason the cursor is: this term sits beside
+    // the others under `AND`, and an unbracketed `OR` chain would widen the
+    // whole filter to "anything matching the search" the moment a stage filter
+    // was combined with it.
+    terms.push(sql`(c.display_name ILIKE ${pattern} OR c.email ILIKE ${pattern} OR c.phone_e164 ILIKE ${pattern})`);
+  }
+  return terms.length === 0 ? sql`TRUE` : sql.join(terms, sql` AND `);
+}
+
+/**
+ * One projection, used by both `list` and `get`, so a row read on its own can
+ * never disagree with the same row read in the table.
+ *
+ * `duplicate_count` is computed BEFORE the filters, because "how many rows share
+ * this email" is a fact about the table and not about whatever the operator has
+ * typed into the filter bar. A window over the filtered set would answer "one"
+ * for a contact whose twin is at a different stage, which is precisely the case
+ * the column exists to surface: `contacts_email_idx` is deliberately not unique
+ * (an interest-form contact with no phone has no conflict target on email), so
+ * duplicates are expected rather than a bug.
+ *
+ * `conversation_id` reads `conversations.contact_id` — C1's 0031 added it as a
+ * nullable LINK, not an owner arm, because `conversations_owner_check` stays
+ * two-armed with the HMAC as the owner key (spec D-6). Do not reach for the
+ * owner columns here.
+ */
+function contactProjection(where: SQL): SQL {
+  return sql`
+    WITH email_groups AS (
+      SELECT id,
+        CASE
+          WHEN email IS NULL THEN 1
+          ELSE count(*) OVER (PARTITION BY lower(email))
+        END AS duplicate_count
+      FROM ${contacts}
+    ),
+    matched AS (
+      SELECT c.id, c.display_name, c.email, c.phone_e164, c.stage, c.source,
+        c.owner_profile_id, owner_profile.display_name AS owner_name,
+        c.profile_id, c.company_id, c.tags, c.whatsapp_opt_in,
+        c.whatsapp_opted_out_at, c.last_inbound_at, c.created_at,
+        email_groups.duplicate_count,
+        (
+          SELECT thread.id FROM ${conversations} thread
+          WHERE thread.contact_id = c.id AND thread.status <> 'deleted'
+          ORDER BY thread.last_message_at DESC NULLS LAST, thread.id DESC
+          LIMIT 1
+        ) AS conversation_id
+      FROM ${contacts} c
+      LEFT JOIN ${profiles} owner_profile ON owner_profile.id = c.owner_profile_id
+      INNER JOIN email_groups ON email_groups.id = c.id
+      WHERE ${where}
+    )
+    SELECT matched.*, count(*) OVER () AS total_count FROM matched
+  `;
+}
+
+/** `'{}'::text[]` rather than `ARRAY[]`, which Postgres cannot type on its own. */
+function textArray(values: readonly string[]): SQL {
+  if (values.length === 0) return sql`'{}'::text[]`;
+  return sql`ARRAY[${sql.join(values.map((value) => sql`${value}`), sql`, `)}]::text[]`;
+}
+
+function tagsFrom(value: unknown): readonly string[] {
+  return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
+}
 
 function duplicateKey(error: unknown): boolean {
   return Boolean(
@@ -373,6 +606,121 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
           )
         `);
         return "revoked";
+      });
+    },
+
+    /**
+     * C-4. The pipeline page's read. One statement: the total, the page and the
+     * duplicate counts have to agree with each other, and three queries can
+     * disagree between them.
+     *
+     * `total` is read off the returned rows, so an EXHAUSTED page (a cursor
+     * pointing past the end, which only a hand-edited URL produces — `nextCursor`
+     * is offered exactly when another row exists) reports `0`. Stated rather
+     * than hidden: the alternative is a second count query on every render for a
+     * case the UI cannot reach on its own.
+     */
+    async list(actor: Actor, filters: unknown): Promise<ContactPage> {
+      requireAdmin(actor);
+      const parsed = listFiltersSchema.parse(filters ?? {});
+      // Both fragments are built BEFORE the connection: the cursor is decoded
+      // here, not by the schema, and a hand-edited one throws — which should
+      // cost nothing but a parse, the way an unknown stage does.
+      const predicates = listPredicates(parsed);
+      const keyset = cursorPredicate(parsed.cursor);
+      const database = await loadDatabase();
+      const rows = rowsFrom(await database.execute(sql`
+        SELECT * FROM (${contactProjection(predicates)}) AS page
+        WHERE ${keyset}
+        ORDER BY created_at DESC, id DESC
+        LIMIT ${parsed.limit + 1}
+      `));
+      const items = rows.slice(0, parsed.limit).map(toContactRow);
+      const hasNext = rows.length > parsed.limit;
+      const last = items[items.length - 1];
+      return {
+        items,
+        nextCursor: hasNext && last !== undefined ? encodeCursor(last) : null,
+        total: items.length === 0 ? 0 : Number(rows[0]?.total_count ?? 0),
+      };
+    },
+
+    async get(actor: Actor, id: unknown): Promise<ContactRow | null> {
+      requireAdmin(actor);
+      const contactId = contactIdSchema.parse(id);
+      const database = await loadDatabase();
+      const row = rowsFrom(await database.execute(sql`
+        SELECT * FROM (${contactProjection(sql`c.id = ${contactId}`)}) AS one LIMIT 1
+      `))[0];
+      return row ? toContactRow(row) : null;
+    },
+
+    /**
+     * C-4. The two fields staff own, plus tags, and the audit row that says who
+     * moved a prospect and when.
+     *
+     * Only a TRANSITION is written, the shape `upsertFromInterestForm` above and
+     * `profilesRepository.update` both use. The row form resubmits every field
+     * on every save, so auditing the submitted VALUES rather than the changes
+     * would mint a `contact.pipeline_updated` row each time an admin pressed
+     * Save on an unchanged row — and a trail that records everything records
+     * nothing. The prior row is taken `FOR UPDATE` first so two admins saving
+     * the same contact together serialise: the loser re-reads the committed
+     * value and stays silent rather than auditing a change the winner made.
+     */
+    async updatePipeline(actor: Actor, id: unknown, input: unknown): Promise<ContactRow> {
+      requireAdmin(actor);
+      const contactId = contactIdSchema.parse(id);
+      const parsed = updatePipelineSchema.parse(input ?? {});
+      const database = await loadDatabase();
+      return database.transaction(async (transaction) => {
+        const prior = rowsFrom(await transaction.execute(sql`
+          SELECT ${contacts.id} AS id, ${contacts.stage} AS stage,
+                 ${contacts.ownerProfileId} AS owner_profile_id, ${contacts.tags} AS tags
+          FROM ${contacts} WHERE ${contacts.id} = ${contactId} FOR UPDATE
+        `))[0];
+        if (!prior) throw new Error("CONTACT_NOT_FOUND");
+
+        const assignments: SQL[] = [];
+        const changed: Record<string, unknown> = {};
+        if (parsed.stage !== undefined && parsed.stage !== prior.stage) {
+          assignments.push(sql`stage = ${parsed.stage}`);
+          changed.stage = parsed.stage;
+        }
+        const priorOwner = typeof prior.owner_profile_id === "string" ? prior.owner_profile_id : null;
+        if (parsed.ownerProfileId !== undefined && parsed.ownerProfileId !== priorOwner) {
+          assignments.push(sql`owner_profile_id = ${parsed.ownerProfileId}`);
+          changed.ownerProfileId = parsed.ownerProfileId;
+        }
+        const priorTags = tagsFrom(prior.tags);
+        if (parsed.tags !== undefined && JSON.stringify(parsed.tags) !== JSON.stringify(priorTags)) {
+          assignments.push(sql`tags = ${textArray(parsed.tags)}`);
+          changed.tags = parsed.tags;
+        }
+
+        if (assignments.length > 0) {
+          await transaction.execute(sql`
+            UPDATE ${contacts}
+            SET ${sql.join(assignments, sql`, `)}, updated_at = now()
+            WHERE ${contacts.id} = ${contactId}
+          `);
+          // Boundary 11's shape, applied to a non-consent write: the change and
+          // the record of who made it commit together or neither does.
+          await transaction.execute(sql`
+            INSERT INTO ${auditEvents}
+              (actor_user_id, actor_type, action, target_type, target_id, metadata)
+            VALUES (
+              ${actor.profileId}, ${actor.kind}, 'contact.pipeline_updated', 'contact', ${contactId},
+              ${JSON.stringify(changed)}::jsonb
+            )
+          `);
+        }
+
+        const row = rowsFrom(await transaction.execute(sql`
+          SELECT * FROM (${contactProjection(sql`c.id = ${contactId}`)}) AS one LIMIT 1
+        `))[0];
+        if (!row) throw new Error("CONTACT_NOT_FOUND");
+        return toContactRow(row);
       });
     },
   };

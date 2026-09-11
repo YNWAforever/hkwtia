@@ -2240,6 +2240,7 @@
       "label": "Staff administration navigation",
       "dashboard": "Dashboard",
       "inbox": "Inbox",
+      "contacts": "Contacts",
       "tasks": "Tasks",
       "segments": "Segments",
       "members": "Members",
@@ -2293,6 +2294,66 @@
       "empty": "The registry is empty. The approved-key environment variable is the fallback until a template is registered.",
       "error": "We could not load the template registry.",
       "goLive": "Nothing is sent on WhatsApp until at least one template is approved here."
+    },
+    "contacts": {
+      "eyebrow": "Prospect pipeline",
+      "title": "Contacts",
+      "description": "Everyone WTIA may need to reach who is not, or not yet, a member — WhatsApp senders, interest-form submitters, event guests and abandoned joins.",
+      "columns": {
+        "name": "Name",
+        "stage": "Stage",
+        "source": "Source",
+        "owner": "Owner",
+        "lastInbound": "Last message in",
+        "optIn": "WhatsApp",
+        "actions": "Actions"
+      },
+      "stage": {
+        "new": "New",
+        "contacted": "Contacted",
+        "qualified": "Qualified",
+        "applied": "Applied",
+        "member": "Member",
+        "closed": "Closed"
+      },
+      "source": {
+        "whatsapp": "WhatsApp",
+        "event_guest": "Event guest",
+        "showcase_intro": "Showcase intro",
+        "join_abandoned": "Abandoned join",
+        "interest_form": "Interest form",
+        "import": "Import"
+      },
+      "optIn": {
+        "yes": "Opted in",
+        "no": "Not opted in",
+        "stopped": "Stopped"
+      },
+      "filters": {
+        "stage": "Stage",
+        "source": "Source",
+        "owner": "Owner",
+        "search": "Search name, email or number",
+        "anyStage": "All stages",
+        "anySource": "All sources",
+        "anyOwner": "Anyone",
+        "anyOptIn": "Any",
+        "submit": "Filter",
+        "clear": "Clear"
+      },
+      "unassigned": "Unassigned",
+      "assign": "Assign",
+      "assignToMe": "Assign to me",
+      "save": "Save",
+      "next": "Next page",
+      "openThread": "Open thread",
+      "noThread": "No thread yet",
+      "convert": "Invite to join",
+      "linkedMember": "Member record",
+      "duplicates": "{count} rows share this email",
+      "empty": "No contacts match these filters.",
+      "error": "We could not load the contacts pipeline.",
+      "saved": "Contact updated."
     },
     "inbox": {
       "eyebrow": "Member and lead conversations",
