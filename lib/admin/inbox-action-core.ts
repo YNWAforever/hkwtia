@@ -194,11 +194,12 @@ export type InboxReplyDependencies = Readonly<{
 export type InboxConversationWriter = Pick<InboxRepository, "setHandling" | "assign" | "markRead" | "close">;
 
 function defaultInboxReplyDependencies(): InboxReplyDependencies {
+  const ai = aiEnv();
   return {
     inbox: inboxRepository,
     eligibility: messageEligibilityRepository,
     channel: createWoztellAdapter({
-      ...woztellCredentialsFrom(aiEnv()),
+      ...woztellCredentialsFrom(ai),
       // Every construction site must pass this explicitly.
       // `lib/jobs/runners.ts:421-427` records the incident: an outbound path
       // omitted it, the adapter found no live credentials, and journey and
@@ -206,7 +207,9 @@ function defaultInboxReplyDependencies(): InboxReplyDependencies {
       // the building — a member in dunning never got the reminder the log says
       // they did. Omitting it here would fail as a clean success with a `mock:`
       // provider id written into the messages row, so nothing would alert.
-      RUN_LIVE_WOZTELL: process.env.RUN_LIVE_WOZTELL,
+      // C-9 (O-8) made it the parsed `aiEnv()` field rather than a bare
+      // `process.env` read, so a typo cannot downgrade this lane in silence.
+      RUN_LIVE_WOZTELL: ai.runLiveWoztell,
     }),
     approvedTemplateKeys: async () => await approvedTemplateKeys(),
     now: () => new Date(),

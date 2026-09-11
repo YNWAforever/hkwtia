@@ -91,7 +91,10 @@ export async function POST(request: Request): Promise<Response> {
     // site, precisely because a helper that supplied it would make forgetting it
     // invisible.
     ...woztellCredentialsFrom(env),
-    RUN_LIVE_WOZTELL: process.env.RUN_LIVE_WOZTELL,
+    // C-9 (O-8): the parsed contract, not a bare `process.env` read. `aiEnv()`
+    // rejects anything but "0" or "1", so `RUN_LIVE_WOZTELL=true` is now a
+    // startup error rather than a silent downgrade to mock mode.
+    RUN_LIVE_WOZTELL: env.runLiveWoztell,
   });
   // `await`ed since C-7 (C2 Task 2): the concierge's approved-template set is a
   // registry read in live mode, and the bag carries it as a resolved `Set`.

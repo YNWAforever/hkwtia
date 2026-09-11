@@ -428,7 +428,10 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
       // building, and a member in dunning never got the reminder the log says
       // they did. The inbound reply path in lib/api/woztell-webhook-route.ts
       // has always passed it; this outbound path is the one that omitted it.
-      RUN_LIVE_WOZTELL: process.env.RUN_LIVE_WOZTELL,
+      // C-9 (O-8) moved the read from bare `process.env` onto the parsed
+      // `aiEnv()` field, so `RUN_LIVE_WOZTELL=true` fails at startup rather than
+      // repeating the incident above with a spelling mistake.
+      RUN_LIVE_WOZTELL: ai.runLiveWoztell,
     }),
     // C-7 (C2 Task 2). The registry is read HERE, once per batch, and handed to
     // the runner as a resolved set: the runner must not read `process.env` or

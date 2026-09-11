@@ -606,7 +606,9 @@ export function createProductionNotificationDependencies(): NotificationDispatch
       ...(ai.woztellWebhookSecret === undefined
         ? {}
         : {WOZTELL_WEBHOOK_SECRET: ai.woztellWebhookSecret}),
-      RUN_LIVE_WOZTELL: process.env.RUN_LIVE_WOZTELL,
+      // C-9 (O-8): the parsed contract. `aiEnv()` accepts only "0" or "1", so a
+      // typo is a startup error and not a blast recorded as delivered.
+      RUN_LIVE_WOZTELL: ai.runLiveWoztell,
     }),
     renderEmail: renderEmailFn,
     unsubscribeUrls: unsubscribeUrlsFn,
