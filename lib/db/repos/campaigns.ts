@@ -579,14 +579,19 @@ export function createCampaignsRepository(
     },
 
     /**
-     * The email arm of an approval. S-6 gives `scheduled` a promotion step
-     * (Task 10 Step 4c) that nothing has wired yet, and a `scheduled` campaign
-     * nothing promotes fails silently and permanently: the cron fires, claims
-     * nothing, and returns a summary indistinguishable from an empty queue. An
-     * email campaign therefore goes straight to `queued`, which the hourly
-     * claim loop's existing `('queued','processing')` predicate already drains,
-     * and `/admin/campaigns` says so rather than offering a send time it cannot
-     * honour.
+     * The email arm of an approval, and it still goes straight to `queued`.
+     *
+     * S-6 gives `scheduled` a promotion step, which Task 10 Step 4c has since
+     * wired on BOTH legs (`promoteScheduledCampaigns`, called by
+     * `runProductionCampaigns` for email and by the ten-minute send queue for
+     * WhatsApp) — so the original reason for this shortcut, that a `scheduled`
+     * campaign nothing promotes fails silently and permanently, no longer
+     * holds. What still holds is the screen: `/admin/campaigns` offers no send
+     * time on the email channel, so there is nothing for the email promotion to
+     * pick up and queueing outright keeps the approval a single click. The
+     * hourly claim loop's `('queued','processing')` predicate drains this
+     * directly; the email promotion is the belt to that braces, so offering an
+     * email schedule later is a screen change rather than a silent outage.
      *
      * The guard is `schedule`'s, verbatim and for the same reason: an approval
      * and the transition that acts on it are two clicks, and a transition

@@ -331,10 +331,34 @@ async function loadRecipientFacts(
           ${profiles.locale} AS locale,
           ${profiles.consentMarketing} AS marketing_consent,
           ${profiles.whatsappOptIn} AS whatsapp_opt_in,
-          -- profiles has no withdrawal column of its own; the projection
-          -- derives one from the recorded withdrawal (linkedMemberWithdrawalAt).
-          NULL::timestamptz AS whatsapp_opted_out_at
+          -- profiles has no withdrawal column of its own, so the withdrawal a
+          -- MEMBER can carry is the linked contact's stamp; the projection
+          -- COALESCEs it with the profile-side evidence
+          -- (linkedMemberWithdrawalAt). This anchor hard-coded
+          -- NULL::timestamptz here until the C2 Task 10 review, and that cost:
+          --
+          -- markWhatsAppOptedOut is keyed on the PHONE and writes nothing but
+          -- contacts. suppressionsRepository.optOutWhatsApp -- the only writer
+          -- of message_suppressions and of profiles.whatsapp_opt_in -- runs
+          -- only when the webhook resolved a profile, and resolveProfile
+          -- returns null whenever two profiles share the digits (a company
+          -- handset: matches.length !== 1). So a STOP can leave
+          -- contacts.whatsapp_opted_out_at stamped while the profile flag stays
+          -- true and no suppression row exists at all. With the NULL here the
+          -- send-time recheck -- which Task 10 Step 5 names as the "one STOP
+          -- suppresses that member from the next blast" guarantee -- read
+          -- whatsappOptedOutAt as null for that member, and the marketing
+          -- template went out to somebody who said STOP.
+          --
+          -- campaignAudience already joins this way for exactly this hazard
+          -- (audienceTargets in lib/db/repos/campaigns.ts), so without the join
+          -- the SNAPSHOT a second admin approves was stricter than the RECHECK
+          -- that exists to backstop it. contacts_profile_unique is a partial
+          -- UNIQUE index on profile_id, so this join is at most one row and the
+          -- anchor cannot fan out.
+          ${contacts.whatsappOptedOutAt} AS whatsapp_opted_out_at
         FROM ${profiles}
+        LEFT JOIN ${contacts} ON ${contacts.profileId} = ${profiles.id}
         WHERE ${profiles.id} = ${recipient.profileId}
       `
     : sql`
@@ -397,7 +421,12 @@ function sendableNumber(facts: RecipientFacts | null): string | null {
  *
  * Rule 1's CONTACT arm covers a linked member's recorded withdrawal too, so a
  * caller holding only a `contactId` cannot be answered `eligible` for someone
- * who unsubscribed on the profile side.
+ * who unsubscribed on the profile side. Since the C2 Task 10 review the MEMBER
+ * arm is symmetric: it reads the linked contact's `whatsapp_opted_out_at` as
+ * well as the profile flag, so a caller holding only a `profileId` cannot be
+ * answered `eligible` for someone whose STOP resolved no profile. Both arms now
+ * test the same two facts, which is the property that keeps the inbox, the bot
+ * and a blast from disagreeing about one person.
  */
 function decideWhatsApp(
   purpose: WhatsAppSendPurpose,
@@ -409,8 +438,16 @@ function decideWhatsApp(
   // resolve to no recipient at all (nothing can backfill `conversations.contact_id`
   // — the owner key is a non-invertible HMAC), and they must not fall through.
   if (sides.length === 0) return {status: "blocked", reason: "no_number"};
-  const withdrew = (member !== null && !member.whatsappOptIn)
-    || (contact !== null && contact.whatsappOptedOutAt !== null);
+  // A recorded withdrawal on EITHER side, plus the member flag. The timestamp
+  // test used to be the contact arm's alone, which was sound only while the
+  // member anchor hard-coded the column to NULL; now that the anchor reads the
+  // linked contact's stamp, a member whose STOP resolved no profile carries the
+  // evidence too, and a caller holding only a `profileId` must not be answered
+  // `eligible` for them. This is strictly more blocking than what it replaces —
+  // `campaignAudience` and `classifyRecipient` already refuse that person — so
+  // it removes a disagreement between the doors rather than creating one.
+  const withdrew = sides.some((side) => side.whatsappOptedOutAt !== null)
+    || (member !== null && !member.whatsappOptIn);
   if (withdrew) return {status: "blocked", reason: "opted_out"};
   if (purpose === "marketing" && sides.some((side) => side.whatsappSuppressed)) {
     return {status: "blocked", reason: "suppressed"};

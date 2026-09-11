@@ -163,6 +163,29 @@ describe("whatsAppEligibility precedence", () => {
     }
   });
 
+  /**
+   * The Phase C2 Task 10 review's finding, on the door that decides.
+   *
+   * Two `profiles` rows carry the same WhatsApp digits (a shared company
+   * handset), so the webhook's `resolveProfile` answers null
+   * (`if (matches.length !== 1) return null`) and `recordOptOut` writes only
+   * `contactsRepository.markWhatsAppOptedOut(phoneE164)` — no
+   * `message_suppressions` row, and `profiles.whatsapp_opt_in` still true. A
+   * member arm that tested the flag alone answered `eligible`, and the blast
+   * reached somebody who had said STOP.
+   */
+  it("blocks both purposes when the STOP landed on the member's linked contact row", async () => {
+    const database = factsDatabase({
+      member: memberRow({whatsappOptIn: true, whatsappSuppressed: false, whatsappOptedOutAt: new Date("2026-09-05T00:00:00Z")}),
+    });
+    const repository = createMessageEligibilityRepository(async () => database.database);
+
+    for (const purpose of ["service", "marketing"] as const) {
+      await expect(repository.whatsAppEligibility(admin, input({profileId, contactId: null, purpose})))
+        .resolves.toEqual({status: "blocked", reason: "opted_out"});
+    }
+  });
+
   it("lets a marketing suppression block marketing only", async () => {
     // A service reply inside the window is a direct answer to a message the
     // recipient sent us minutes ago; a marketing suppression does not gag us
@@ -302,11 +325,45 @@ describe("whatsAppEligibility precedence", () => {
   });
 
   /**
+   * The other half of the same fix: the member ANCHOR has to read the column at
+   * all. It hard-coded `NULL::timestamptz AS whatsapp_opted_out_at` until the
+   * Phase C2 Task 10 review, so `whatsappOptedOutAt` could only ever be the
+   * PROFILE-side derivation for a member — and a STOP that resolved no profile
+   * writes nothing on that side. The consequence was an asymmetry in the wrong
+   * direction: `campaignAudience` joins `contacts` through its member arm for
+   * exactly this hazard, so the SNAPSHOT a second admin approves was stricter
+   * than the send-time RECHECK that exists to backstop it.
+   *
+   * `contacts_profile_unique` is a partial UNIQUE index on `profile_id`
+   * (`schema-core.ts`), so the join is at most one row and the anchor cannot
+   * fan out into two facts rows for one member.
+   */
+  it("reads the linked contact's withdrawal from the member anchor", async () => {
+    const database = factsDatabase({member: memberRow(), contact: contactRow()});
+    const repository = createMessageEligibilityRepository(async () => database.database);
+
+    await repository.whatsAppEligibility(admin, input({profileId}));
+
+    const memberSide = database.statements.find((statement) => !statement.sql.toLowerCase().includes(`from "contacts"`));
+    const text = flatten(memberSide?.sql);
+    expect(text).toContain(`from "profiles" left join "contacts" on "contacts"."profile_id" = "profiles"."id"`);
+    expect(text).toContain(`"contacts"."whatsapp_opted_out_at" as whatsapp_opted_out_at`);
+    expect(text).not.toContain("null::timestamptz");
+  });
+
+  /**
    * Postgres's grammar is `EXISTS select_with_parens`; a bare `EXISTS SELECT …`
    * is a syntax error, so a hand-written sub-select that forgets its parentheses
    * authorizes nothing and throws at the database instead of answering. The same
    * hazard `tests/unit/repository-exists-scope-sql.test.ts` pins for the
    * member-scoped repositories.
+   *
+   * It reads the statements through `stripped`, not raw, because an SQL comment
+   * is not SQL. The member anchor's `--` prose explains the withdrawal join in
+   * English, and the first English sentence to use the word "exists" — or to
+   * put a bracketed aside in a comment — failed this pin while the generated
+   * SQL was perfectly well formed. `flatten`'s docblock already records the
+   * same hazard from the other direction.
    */
   it("parenthesises every hand-written EXISTS sub-select", async () => {
     const database = factsDatabase({member: memberRow(), contact: contactRow()});
@@ -314,11 +371,12 @@ describe("whatsAppEligibility precedence", () => {
 
     await repository.whatsAppEligibility(admin, input({profileId}));
 
-    const text = database.statements.map((statement) => statement.sql).join("\n");
+    const stripped = database.statements.map((statement) => statement.sql.replace(/--[^\n]*/g, " "));
+    const text = stripped.join("\n");
     expect(text).toMatch(/\bexists\b/i);
     for (const [, following] of text.matchAll(/\bexists\b\s*(.)/gi)) expect(following).toBe("(");
-    for (const statement of database.statements) {
-      expect(statement.sql.split("(").length).toBe(statement.sql.split(")").length);
+    for (const statement of stripped) {
+      expect(statement.split("(").length).toBe(statement.split(")").length);
     }
   });
 });
@@ -500,6 +558,23 @@ describe("factsFor (the dispatcher's door)", () => {
     // `campaignAudience`'s `suppressed` flag reads `email_log.status='suppressed'`,
     // a value nothing in this repository ever writes. Do not reuse it.
     expect(text).not.toContain(`"email_log"`);
+  });
+
+  /**
+   * The field the Task 10 review found missing on this door. `classifyRecipient`
+   * folds `whatsappOptedOutAt` into `suppressed` and the send-queue runner
+   * writes that verbatim to `blocked_reason`, so a member anchor that could not
+   * produce the timestamp was the send-time recheck failing OPEN for the member
+   * half of every audience.
+   */
+  it("reports a withdrawal recorded only on a member's linked contact row", async () => {
+    const optedOutAt = new Date("2026-09-05T00:00:00.000Z");
+    const database = factsDatabase({member: memberRow({whatsappOptIn: true, whatsappOptedOutAt: optedOutAt})});
+    const repository = createMessageEligibilityRepository(async () => database.database);
+
+    const facts = await repository.factsFor(notificationActor("campaign"), {kind: "member", profileId});
+    expect(facts).toMatchObject({kind: "member", whatsappOptIn: true, whatsappSuppressed: false});
+    expect(facts?.whatsappOptedOutAt).toEqual(optedOutAt);
   });
 
   it("answers null for a recipient that no longer exists", async () => {

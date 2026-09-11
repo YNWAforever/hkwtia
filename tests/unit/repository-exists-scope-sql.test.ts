@@ -29,6 +29,20 @@ import {
 
 const actor = {kind: "member", userId: "user-a", profileId: "user-a"} as const;
 const reposDirectory = path.resolve(__dirname, "../../lib/db/repos");
+
+/**
+ * Every scan below reads SQL through this, because an SQL comment is not SQL.
+ * House style puts `--` prose inside these hand-written statements — the member
+ * anchor in `message-eligibility.ts` explains its withdrawal join that way —
+ * and the assertions here are a keyword scan and a parenthesis count over raw
+ * text. The first comment sentence to use the word "exists" in English, or to
+ * put a bracketed aside in a comment, failed the pin while the generated SQL
+ * was perfectly well formed. `tests/unit/message-eligibility.test.ts`'s
+ * `flatten` records the same hazard from the other direction.
+ */
+function withoutComments(statements: readonly string[]): string[] {
+  return statements.map((statement) => statement.replace(/--[^\n]*/g, " "));
+}
 const segmentEventId = "33333333-3333-4333-8333-333333333333";
 const segmentNow = new Date("2026-09-11T00:00:00.000Z");
 
@@ -138,14 +152,15 @@ describe("EXISTS authorization scopes render as executable Postgres", () => {
 
     await invoke().catch(() => undefined);
 
-    const sql = statements.join("\n");
+    const rendered = withoutComments(statements);
+    const sql = rendered.join("\n");
     expect(sql).toMatch(/\bexists\b/i);
     for (const [, following] of sql.matchAll(/\bexists\b\s*(.)/gi)) {
       expect(following).toBe("(");
     }
     // Hand-written parentheses are hand-countable ones. A subquery left open
     // does not parse either, and reads as innocently as a balanced one.
-    for (const statement of statements) {
+    for (const statement of rendered) {
       expect(statement.split("(").length).toBe(statement.split(")").length);
     }
   });
@@ -163,12 +178,13 @@ describe("EXISTS authorization scopes render as executable Postgres", () => {
 
     await invoke(database).catch(() => undefined);
 
-    const sql = statements.join("\n");
+    const rendered = withoutComments(statements);
+    const sql = rendered.join("\n");
     expect(sql).toMatch(/\bexists\b/i);
     for (const [, following] of sql.matchAll(/\bexists\b\s*(.)/gi)) {
       expect(following).toBe("(");
     }
-    for (const statement of statements) {
+    for (const statement of rendered) {
       expect(statement.split("(").length).toBe(statement.split(")").length);
     }
   });
@@ -182,12 +198,13 @@ describe("EXISTS authorization scopes render as executable Postgres", () => {
 
     await proxy.execute(sql`SELECT 1 WHERE ${build()}`).catch(() => undefined);
 
-    const rendered = statements.join("\n");
+    const stripped = withoutComments(statements);
+    const rendered = stripped.join("\n");
     expect(rendered).toMatch(/\bexists\b/i);
     for (const [, following] of rendered.matchAll(/\bexists\b\s*(.)/gi)) {
       expect(following).toBe("(");
     }
-    for (const statement of statements) {
+    for (const statement of stripped) {
       expect(statement.split("(").length).toBe(statement.split(")").length);
     }
   });
@@ -215,12 +232,13 @@ describe("EXISTS authorization scopes render as executable Postgres", () => {
       segmentFilterSchema.parse({audience: "both", event: {eventId: segmentEventId, state: "not_registered"}}),
     );
 
-    const rendered = statements.join("\n");
+    const stripped = withoutComments(statements);
+    const rendered = stripped.join("\n");
     expect(rendered).toMatch(/\bexists\b/i);
     for (const [, following] of rendered.matchAll(/\bexists\b\s*(.)/gi)) {
       expect(following).toBe("(");
     }
-    for (const statement of statements) {
+    for (const statement of stripped) {
       expect(statement.split("(").length).toBe(statement.split(")").length);
     }
   });
