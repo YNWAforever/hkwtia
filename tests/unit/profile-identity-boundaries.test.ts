@@ -19,6 +19,10 @@ describe("profile-backed member identity", () => {
       },
       memberships: {async list() { return [{id: "membership-1", ownerUserId: "member-1", companyId: null, applicationId: "application-1", planCode: "community" as const, status: "active" as const, seatLimit: 1}]; }},
       companies: {async getById() { return null; }},
+      // Phase C2 Task 5: the profile save fires the contact merge (S-16). It is
+      // stubbed here so this suite keeps asserting identity alone, with no
+      // database behind it.
+      contacts: {async linkProfile() { return {linked: null, matchedBy: null, candidates: []}; }},
       getCompanyRole: async () => null,
     } as unknown as PortalQueryDependencies & PortalCommandDependencies;
 

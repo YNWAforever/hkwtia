@@ -20,10 +20,19 @@ import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
 // the `Actor` type. Every runtime export must also be a provably-async function,
 // so the form parser and the return-path allowlist live in the core module.
 //
-// C-4's `linkContactToProfileAction` is NOT here yet: the merge it would call,
-// `contactsRepository.linkProfile`, is Phase C2 Task 5's (merge-on-write, S-16),
-// and an exported wrapper around a method that does not exist is a published
-// endpoint that 500s. It lands with the repository method, in that task.
+// C-4's `linkContactToProfileAction` is still NOT here, and Task 5 — which
+// landed `contactsRepository.linkProfile` — is where that stopped being a
+// question of the method existing. The merge matches on an IDENTITY (member id,
+// then number, then address) and needs the profile it is linking TO; a row on
+// this page whose `profileId` is null is by definition one we could not match,
+// and the table carries no profile picker and no `whatsappMemberId` to feed
+// `reconcileWhatsAppMemberId` either. An exported action is a published HTTP
+// endpoint, so wiring one to a control that cannot supply its input would
+// publish a merge anybody could aim at any profile — the failure the repository
+// is careful to make impossible (guessing merges two people's threads).
+// Spec C-4 asks for merge-on-login, which S-16 implements as merge-on-write;
+// the manual trigger needs a picker UI and its own strings, and belongs with
+// whatever task adds them.
 
 export async function updateContactPipelineAction(path: string, formData: FormData): Promise<void> {
   let back: string | null = null;

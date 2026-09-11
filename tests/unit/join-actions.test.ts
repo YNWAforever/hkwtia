@@ -5,7 +5,8 @@ const redirectState = vi.hoisted(() => ({url: null as string | null}));
 const repoState = vi.hoisted(() => ({
   application: {id: "application-a", applicantUserId: "user-a", companyId: null as string | null, planCode: "startup", currentStep: "company", status: "draft"},
   company: {id: "company-a", legalName: "Acme Limited", displayName: "Acme"},
-  profile: {id: "user-a", displayName: "Member A", phone: null, jobTitle: null, locale: "en"},
+  profile: {id: "user-a", displayName: "Member A", phone: null, jobTitle: null, locale: "en", email: "member-a@example.test"},
+  linkedContactInput: null as null | Record<string, unknown>,
   createdCompanyInput: null as null | Record<string, unknown>,
   updatedCompanyInput: null as null | Record<string, unknown>,
   completedInput: null as null | Record<string, unknown>,
@@ -36,7 +37,20 @@ vi.mock("@/lib/db/repos/companies", () => ({companiesRepository: {
   getById: async () => repoState.company,
   update: async (_actor: unknown, _companyId: string, input: Record<string, unknown>) => {repoState.updatedCompanyInput = input; return repoState.company;},
 }}));
-vi.mock("@/lib/db/repos/profiles", () => ({profilesRepository: {getById: async () => repoState.profile, update: vi.fn(), ensure: vi.fn()}}));
+vi.mock("@/lib/db/repos/profiles", () => ({profilesRepository: {getById: async () => repoState.profile, update: async () => repoState.profile, ensure: async () => repoState.profile}}));
+// Phase C2 Task 5. The join profile step is one of the two writes that can
+// change a member's matchable identity (S-16), so it now fires the contact
+// merge. Mocked rather than left to the real repository: the merge is
+// fire-and-forget, and an unmocked one would reach `getDb()` from a unit test.
+vi.mock("@/lib/db/repos/contacts", () => ({
+  contactWriterActor: (source: string) => ({kind: "contact-writer", userId: null, source}),
+  contactsRepository: {
+    linkProfile: async (_actor: unknown, input: Record<string, unknown>) => {
+      repoState.linkedContactInput = input;
+      return {linked: null, matchedBy: null, candidates: []};
+    },
+  },
+}));
 vi.mock("@/lib/membership/join-service", () => ({
   startJoin: async () => ({applicationId: "application-a"}),
   completeApplication: async (_actor: unknown, input: Record<string, unknown>) => {
@@ -54,6 +68,7 @@ describe("join Server Actions", () => {
     redirectState.url = null;
     repoState.createdCompanyInput = null;
     repoState.updatedCompanyInput = null;
+    repoState.linkedContactInput = null;
     repoState.completedInput = null;
     repoState.completeResult = {applicationId: "application-a", next: "checkout", membershipId: "membership-a"};
     repoState.application = {id: "application-a", applicantUserId: "user-a", companyId: null, planCode: "startup", currentStep: "company", status: "draft"};
@@ -162,6 +177,26 @@ describe("join Server Actions", () => {
     expect(repoState.completedInput).toMatchObject({
       applicationId: "application-a",
       company: {id: "company-a", legalName: "Acme Updated Limited", displayName: "Acme Updated"},
+    });
+  });
+
+  /**
+   * Programme C-4, plan S-16: merge-on-write, not merge-on-login. The prospect
+   * who messaged WTIA on this number becomes the same person as this applicant
+   * at the moment the applicant writes the number down.
+   */
+  it("links the matching contact to the profile the join step just saved", async () => {
+    const form = new FormData();
+    form.set("displayName", "Member A");
+    form.set("whatsappNumber", "+852 9123 4567");
+
+    await expect(saveProfile("en", "community", null, {}, form)).rejects.toThrow("NEXT_REDIRECT");
+
+    expect(repoState.linkedContactInput).toEqual({
+      profileId: "user-a",
+      email: "member-a@example.test",
+      // Normalised by `profileSchema` before it ever reaches the repository.
+      phoneE164: "+85291234567",
     });
   });
 

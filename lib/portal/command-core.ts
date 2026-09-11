@@ -4,6 +4,7 @@ import {z} from "zod";
 
 import type {Actor} from "@/lib/membership/lifecycle";
 import {companiesRepository} from "@/lib/db/repos/companies";
+import {contactWriterActor, contactsRepository} from "@/lib/db/repos/contacts";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 import {forbidden, requireMember} from "@/lib/membership/lifecycle";
@@ -56,17 +57,20 @@ export type PortalActionState = Readonly<{ok: boolean; message?: string}>;
 type ProfileWriter = Pick<typeof profilesRepository, "update">;
 type CompanyWriter = Pick<typeof companiesRepository, "getById" | "update">;
 type MembershipReader = Pick<typeof membershipsRepository, "list">;
+type ContactLinker = Pick<typeof contactsRepository, "linkProfile">;
 
 export type PortalCommandDependencies = Readonly<{
   profiles: ProfileWriter;
   companies: CompanyWriter;
   memberships: MembershipReader;
+  contacts: ContactLinker;
 }>;
 
 const defaultDependencies: PortalCommandDependencies = {
   profiles: profilesRepository,
   companies: companiesRepository,
   memberships: membershipsRepository,
+  contacts: contactsRepository,
 };
 
 function dependencies(input?: Partial<PortalCommandDependencies>): PortalCommandDependencies {
@@ -104,6 +108,24 @@ export async function updateProfile(
     onboardingState: "complete",
   });
   if (!result) throw new Error("PROFILE_NOT_FOUND");
+  // Programme C-4 / plan S-16. The spec says "merge on login"; `getActor()`
+  // calls `touchLastLogin` on *every* authenticated request rather than at
+  // login, so hooking the merge there would put a two-table lookup on every
+  // page render. The identity it matches on only changes when it is written, so
+  // the merge runs here and in the join profile step instead.
+  //
+  // Fire-and-forget, for the same reason `lib/auth/actor.ts` treats
+  // `touchLastLogin` that way: a prospect row we failed to link must not undo a
+  // profile the member has already saved. The repository swallows the
+  // `contacts_profile_unique` race itself; this `catch` covers the rest.
+  void deps.contacts.linkProfile(contactWriterActor("import"), {
+    profileId: actor.profileId,
+    email: result.email,
+    // Already normalised by `profileUpdateSchema`; `normalizeWhatsAppNumber`
+    // again so that a row written before that transform existed cannot reach
+    // the merge in a shape the repository would silently skip.
+    phoneE164: normalizeWhatsAppNumber(result.whatsappNumber ?? ""),
+  }).catch(() => undefined);
   return result;
 }
 

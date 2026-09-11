@@ -55,6 +55,9 @@ function dependencies(overrides: Record<string, unknown> = {}) {
         return {id: companyId, legalName: "Company A", displayName: input.displayName ?? "Company A"};
       },
     },
+    // Phase C2 Task 5: `updateProfile` fires the contact merge afterwards
+    // (S-16). Stubbed so this authorization suite never reaches a database.
+    contacts: {async linkProfile() { return {linked: null, matchedBy: null, candidates: []}; }},
     ...overrides,
   } as unknown as PortalQueryDependencies & PortalCommandDependencies;
 }

@@ -13,6 +13,10 @@ function deps() {
       profiles: {update},
       companies: {getById: vi.fn(), update: vi.fn()},
       memberships: {list: vi.fn(async () => [{id: "m1", status: "active", companyId: null}])},
+      // Phase C2 Task 5: the profile save now fires the contact merge (S-16).
+      // Injected so a unit test never reaches the real repository's `getDb()`;
+      // `tests/unit/contact-profile-merge.test.ts` owns what it is passed.
+      contacts: {linkProfile: vi.fn(async () => ({linked: null, matchedBy: null, candidates: []}))},
     },
   };
 }

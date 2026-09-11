@@ -12,8 +12,9 @@ import {
   contacts,
   conversations,
   profiles,
+  staffTasks,
 } from "@/lib/db/server-schema";
-import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
+import type {AutomationDatabase, AutomationDatabaseLoader, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
 import {getDb} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";
 import {WHATSAPP_CONSENT_TEXT_VERSION} from "@/lib/whatsapp/consent";
@@ -94,6 +95,77 @@ export type ContactWriteResult = Readonly<{
   disposition: "upserted";
   memberIdLink?: ContactMemberIdLink;
 }>;
+
+/**
+ * Programme C-4 / plan S-16. Which identity found the row, in the order spec
+ * C-1 asks for: the Woztell member id first, because it is the provider's own
+ * stable identity and survives a number change; then the number, which
+ * `contacts_phone_unique` makes exact; then the email, which is deliberately
+ * NOT unique (`contacts_email_idx`, and the reason is on `contactProjection`
+ * below).
+ */
+export type ContactProfileMatch = "member_id" | "phone" | "email";
+export type ContactProfileLink = Readonly<{
+  /** The contact this call claimed, or null when it claimed nothing. */
+  linked: string | null;
+  matchedBy: ContactProfileMatch | null;
+  /** Other rows sharing the identity, now tagged for a human to resolve. */
+  candidates: readonly string[];
+}>;
+
+/** The tag `/admin/contacts` filters on to find the rows a human must merge. */
+export const CONTACT_MERGE_CANDIDATE_TAG = "merge-candidate";
+const CONTACT_MERGE_TASK_KIND = "contact_merge_candidate";
+
+const NO_CONTACT_LINK: ContactProfileLink = Object.freeze({
+  linked: null,
+  matchedBy: null,
+  candidates: Object.freeze([]) as readonly string[],
+});
+
+/**
+ * C1's open question **O-3**. C1 writes `contacts.whatsapp_member_id` only when
+ * the id is FREE, because `upsertFromWhatsApp` conflicts on `phone_e164` while
+ * `contacts_whatsapp_member_unique` is a separate partial index and therefore
+ * not a conflict target — an unguarded write raises 23505, which the webhook
+ * route turns into a 500, which is an endless Woztell retry for that sender. The
+ * consequence was that an id which landed on the wrong row could never be
+ * corrected. This is the correction rule.
+ *
+ * `"conflict"` means "wrote nothing, a human must decide": either no row carries
+ * the number at all, or the number's row already carries a DIFFERENT id. Two
+ * identities on one number is exactly the case where guessing merges two
+ * people's threads.
+ */
+export type ContactMemberIdDisposition = "unchanged" | "assigned" | "reassigned" | "conflict";
+export type ContactMemberIdReconciliation = Readonly<{disposition: ContactMemberIdDisposition}>;
+
+/**
+ * Every field but `profileId` FAILS SOFT to null. The callers are the portal
+ * profile save and the join profile step, both fire-and-forget (S-16: the link
+ * never throws into a save the member already made), so a throw here is a merge
+ * that silently never happens. A number that does not normalise is SKIPPED
+ * rather than guessed at: `+90000000` and `+85290000000` are different people
+ * and nothing in the tree validates a country code.
+ */
+const linkProfileSchema = z.object({
+  profileId: z.string().trim().min(1).max(255),
+  email: z.string().trim().email().max(320).transform((value) => value.toLowerCase()).nullable().catch(null),
+  phoneE164: z.string().trim().regex(/^\+\d{8,15}$/).nullable().catch(null),
+  whatsappMemberId: z.string().trim().min(1).max(WOZTELL_MAX_MEMBER_ID_CHARS).nullable().catch(null),
+}).strict();
+
+type LinkProfileInput = z.infer<typeof linkProfileSchema>;
+
+/**
+ * No `.catch()` here, unlike the merge above: the callers are `/admin/contacts`
+ * and (once this has landed) the webhook, both of which hold a normalised number
+ * already. A malformed input is a bug to surface, not an identity to skip.
+ */
+const reconcileMemberIdSchema = z.object({
+  whatsappMemberId: z.string().trim().min(1).max(WOZTELL_MAX_MEMBER_ID_CHARS),
+  phoneE164: z.string().trim().regex(/^\+\d{8,15}$/),
+}).strict();
 
 /**
  * Programme C-4. The staff read surface, and the two fields staff own.
@@ -610,6 +682,194 @@ export function createContactsRepository(loadDatabase: AutomationDatabaseLoader 
     },
 
     /**
+     * Programme C-4, plan S-16. Set `contacts.profile_id` when the identity that
+     * would match it is WRITTEN — the portal profile save and the join profile
+     * step — rather than "on login" as the spec line reads. `getActor()` fires
+     * `touchLastLogin` on every authenticated request and not at login, so a
+     * session hook would put this two-table lookup on every page render; the
+     * identity it matches on only changes when somebody writes it.
+     *
+     * Precedence is member id → phone → email, which is the order spec C-1 asks
+     * for and which neither Phase C plan implemented until now (C1's O-3). The
+     * email arm is last AND narrower — `profile_id IS NULL`, oldest row first —
+     * because `contacts_email_idx` is deliberately not unique: an interest-form
+     * contact with no phone has no conflict target on email, so two rows sharing
+     * an address is the expected shape rather than a fault.
+     *
+     * Everything runs in ONE transaction, and the whole of it is guarded:
+     *
+     * - the claim carries `AND profile_id IS NULL`, so a second call is a no-op
+     *   instead of stealing a row from whichever profile reached it first;
+     * - `contacts_profile_unique` is a partial unique index, so a profile that
+     *   already owns a different contact row makes the claim raise 23505. That
+     *   rolls the transaction back and is answered as "linked nothing" —
+     *   a 500 here would surface as a failed profile save the member has already
+     *   made, on a path that is deliberately fire-and-forget.
+     *
+     * The rows that matched the same identity but were not claimed are tagged
+     * `merge-candidate` and reported in `candidates`, and one staff task is
+     * raised for the profile so a human decides which row is really them.
+     */
+    async linkProfile(actor: unknown, input: unknown): Promise<ContactProfileLink> {
+      requireContactWriter(actor);
+      const parsed = linkProfileSchema.parse(input);
+      // A profile with no matchable identity is the common case for a member who
+      // never gave a number and whose email no prospect ever used. Answer it
+      // without opening a connection: this runs on every profile save.
+      if (parsed.whatsappMemberId === null && parsed.phoneE164 === null && parsed.email === null) {
+        return NO_CONTACT_LINK;
+      }
+      const database = await loadDatabase();
+      try {
+        return await database.transaction(async (transaction) => {
+          const matched = await matchContactIdentity(transaction, parsed);
+          if (!matched) return NO_CONTACT_LINK;
+          const claimed = rowsFrom(await transaction.execute(sql`
+            UPDATE ${contacts}
+            SET profile_id = ${parsed.profileId},
+              -- A prospect who has become a member is no longer in the funnel.
+              -- Only the funnel stages move: 'closed' was a decision somebody
+              -- made and 'member' is already the answer.
+              stage = CASE
+                WHEN ${contacts.stage} IN ('new', 'contacted', 'qualified', 'applied') THEN 'member'
+                ELSE ${contacts.stage}
+              END,
+              updated_at = now()
+            WHERE ${contacts.id} = ${matched.id} AND ${contacts.profileId} IS NULL
+            RETURNING ${contacts.id} AS id
+          `))[0];
+          if (!claimed) return NO_CONTACT_LINK;
+          const id = String(claimed.id);
+          const candidates = await tagMergeCandidates(transaction, parsed, id);
+          if (candidates.length > 0) {
+            // The direct INSERT shape `campaign-recipient-delivery.ts`,
+            // `journeys.ts` and C1's `woztell-inbound-events.ts` use, for the
+            // reasons C1's S-13 works through: `agentToolsRepository.createStaffTask`
+            // parses `kind` against a closed `z.enum` of five `concierge_*` values
+            // behind `requireConciergeAgent`, and `staffTasksRepository.createOnce`
+            // throws `AUTOMATION_STAFF_TASK_PROFILE_REQUIRED` — neither can express
+            // this task. `staff_tasks.kind` is free text and
+            // `components/admin/task-table.tsx` renders it raw, so a new kind needs
+            // no label map and no bundle string.
+            //
+            // One task per profile, and a plain `ON CONFLICT DO NOTHING` rather
+            // than C1's retire-the-resolved-key dance: the claim above is a
+            // one-shot, so this INSERT is reached at most once per profile in
+            // practice and a resolved task cannot silently swallow a later one.
+            await transaction.execute(sql`
+              INSERT INTO ${staffTasks}
+                (profile_id, journey_state_id, kind, dedupe_key, summary_code, context)
+              VALUES (
+                ${parsed.profileId}, NULL, ${CONTACT_MERGE_TASK_KIND},
+                ${`contact-merge:${parsed.profileId}`}, ${CONTACT_MERGE_TASK_KIND},
+                ${JSON.stringify({reasonCode: CONTACT_MERGE_TASK_KIND})}::jsonb
+              )
+              ON CONFLICT DO NOTHING
+            `);
+          }
+          // Boundary 11's shape applied to an identity write: the link and the
+          // record of what it matched on commit together or neither does. The
+          // count rather than the ids — `candidates` are rows a reader can find
+          // by their tag, and an audit row is not a place to copy addresses to.
+          await transaction.execute(sql`
+            INSERT INTO ${auditEvents}
+              (actor_user_id, actor_type, action, target_type, target_id, metadata)
+            VALUES (
+              NULL, ${actor.kind}, 'contact.linked', 'contact', ${id},
+              ${JSON.stringify({
+                profileId: parsed.profileId,
+                matchedBy: matched.matchedBy,
+                candidates: candidates.length,
+              })}::jsonb
+            )
+          `);
+          return {linked: id, matchedBy: matched.matchedBy, candidates};
+        });
+      } catch (error) {
+        if (!duplicateKey(error)) throw error;
+        return NO_CONTACT_LINK;
+      }
+    },
+
+    /**
+     * C1's O-3, closed. Move a Woztell member id onto the contact that now owns
+     * the number it arrived with.
+     *
+     * The number is the stronger evidence: a member id follows a WhatsApp
+     * account, and the account messaging us now is the one we must be able to
+     * reply to. So a holder that no longer owns the number loses the id, in the
+     * SAME transaction that assigns it — `contacts_whatsapp_member_unique` is
+     * checked per statement and not at commit, so clearing second would raise
+     * 23505 against ourselves.
+     *
+     * Nothing is written when the number's row already carries a different id,
+     * or when no row carries the number at all. Both answer `"conflict"`, and
+     * the caller files the staff task: guessing which of two identities owns a
+     * number is how two people's threads merge.
+     */
+    async reconcileWhatsAppMemberId(actor: unknown, input: unknown): Promise<ContactMemberIdReconciliation> {
+      requireContactWriter(actor);
+      const parsed = reconcileMemberIdSchema.parse(input);
+      const database = await loadDatabase();
+      try {
+        return await database.transaction(async (transaction) => {
+          const holder = rowsFrom(await transaction.execute(sql`
+            SELECT ${contacts.id} AS id
+            FROM ${contacts}
+            WHERE ${contacts.whatsappMemberId} = ${parsed.whatsappMemberId}
+            FOR UPDATE
+          `))[0];
+          const target = rowsFrom(await transaction.execute(sql`
+            SELECT ${contacts.id} AS id, ${contacts.whatsappMemberId} AS whatsapp_member_id
+            FROM ${contacts}
+            WHERE ${contacts.phoneE164} = ${parsed.phoneE164}
+            FOR UPDATE
+          `))[0];
+          if (!target) return {disposition: "conflict"};
+          const targetId = String(target.id);
+          const held = target.whatsapp_member_id === null || target.whatsapp_member_id === undefined
+            ? null
+            : String(target.whatsapp_member_id);
+          if (held === parsed.whatsappMemberId) return {disposition: "unchanged"};
+          if (held !== null) return {disposition: "conflict"};
+          const holderId = holder ? String(holder.id) : null;
+          if (holderId !== null) {
+            await transaction.execute(sql`
+              UPDATE ${contacts}
+              SET whatsapp_member_id = NULL, updated_at = now()
+              WHERE ${contacts.id} = ${holderId}
+            `);
+          }
+          await transaction.execute(sql`
+            UPDATE ${contacts}
+            SET whatsapp_member_id = ${parsed.whatsappMemberId}, updated_at = now()
+            WHERE ${contacts.id} = ${targetId} AND ${contacts.whatsappMemberId} IS NULL
+          `);
+          if (holderId === null) return {disposition: "assigned"};
+          // Only the MOVE is audited. Assigning a free id is what C1's guarded
+          // write already does silently on every inbound; taking an identity off
+          // a row it was already on is the correction somebody may later have to
+          // explain.
+          await transaction.execute(sql`
+            INSERT INTO ${auditEvents}
+              (actor_user_id, actor_type, action, target_type, target_id, metadata)
+            VALUES (
+              NULL, ${actor.kind}, 'contact.member_id_reassigned', 'contact', ${targetId},
+              ${JSON.stringify({from: holderId, to: targetId, whatsappMemberId: parsed.whatsappMemberId})}::jsonb
+            )
+          `);
+          return {disposition: "reassigned"};
+        });
+      } catch (error) {
+        // The race the two locked reads cannot close. A throw would be a 500 on
+        // the webhook path this is destined for, and a 500 there is an endless
+        // Woztell retry of a message we have already stored.
+        if (!duplicateKey(error)) throw error;
+        return {disposition: "conflict"};
+      }
+    },
+
+    /**
      * C-4. The pipeline page's read. One statement: the total, the page and the
      * duplicate counts have to agree with each other, and three queries can
      * disagree between them.
@@ -772,6 +1032,92 @@ async function linkWhatsAppMemberId(
     if (!duplicateKey(error)) throw error;
     return "conflict";
   }
+}
+
+/**
+ * The precedence rule of `linkProfile`, as three guarded reads. Each takes the
+ * row lock, so two saves racing for one contact serialise on the row rather than
+ * both reaching the claim and one of them raising 23505.
+ *
+ * The phone and member-id arms do NOT filter on `profile_id IS NULL`: those
+ * identities are exact, so a row already claimed by somebody else is a fact the
+ * claim's own guard should refuse, not one to route around by silently linking
+ * the next-best row. The email arm does filter, because email is not unique and
+ * "the oldest unclaimed row with this address" is the most a non-unique
+ * identity can honestly assert.
+ */
+async function matchContactIdentity(
+  transaction: AutomationSqlExecutor,
+  parsed: LinkProfileInput,
+): Promise<Readonly<{id: string; matchedBy: ContactProfileMatch}> | null> {
+  if (parsed.whatsappMemberId !== null) {
+    const row = rowsFrom(await transaction.execute(sql`
+      SELECT ${contacts.id} AS id
+      FROM ${contacts}
+      WHERE ${contacts.whatsappMemberId} = ${parsed.whatsappMemberId}
+      FOR UPDATE
+    `))[0];
+    if (row) return {id: String(row.id), matchedBy: "member_id"};
+  }
+  if (parsed.phoneE164 !== null) {
+    const row = rowsFrom(await transaction.execute(sql`
+      SELECT ${contacts.id} AS id
+      FROM ${contacts}
+      WHERE ${contacts.phoneE164} = ${parsed.phoneE164}
+      FOR UPDATE
+    `))[0];
+    if (row) return {id: String(row.id), matchedBy: "phone"};
+  }
+  if (parsed.email !== null) {
+    const row = rowsFrom(await transaction.execute(sql`
+      SELECT ${contacts.id} AS id
+      FROM ${contacts}
+      WHERE lower(${contacts.email}) = lower(${parsed.email})
+        AND ${contacts.profileId} IS NULL
+      ORDER BY ${contacts.createdAt}
+      LIMIT 1
+      FOR UPDATE
+    `))[0];
+    if (row) return {id: String(row.id), matchedBy: "email"};
+  }
+  return null;
+}
+
+/**
+ * The rows that share the identity but were not claimed. They are tagged rather
+ * than merged: deciding that two rows are one person is a judgement, and the
+ * only cheap way to be wrong about it is to join two strangers' threads.
+ *
+ * The identity predicate is PARENTHESISED. It sits beside `id <> …` under
+ * `AND`, so a bare `OR` chain would tag every row that matched either half of a
+ * condition that was meant to be narrow — here, most of the table.
+ *
+ * `NOT (… = ANY(tags))` keeps the statement idempotent: a row already flagged is
+ * neither rewritten nor re-reported, so a repeat can raise no second staff task.
+ */
+async function tagMergeCandidates(
+  transaction: AutomationSqlExecutor,
+  parsed: LinkProfileInput,
+  linkedId: string,
+): Promise<readonly string[]> {
+  const identity: SQL[] = [];
+  if (parsed.email !== null) identity.push(sql`lower(${contacts.email}) = lower(${parsed.email})`);
+  if (parsed.phoneE164 !== null) identity.push(sql`${contacts.phoneE164} = ${parsed.phoneE164}`);
+  if (identity.length === 0) return [];
+  // `::text` on both, because `array_append` and `= ANY` are polymorphic over
+  // `anyarray`/`anyelement`: an untyped bind parameter gives Postgres nothing to
+  // resolve them against. The tag is a bound parameter rather than an inline
+  // literal so that `CONTACT_MERGE_CANDIDATE_TAG` stays the single spelling the
+  // admin filter and this writer share.
+  const rows = rowsFrom(await transaction.execute(sql`
+    UPDATE ${contacts}
+    SET tags = array_append(${contacts.tags}, ${CONTACT_MERGE_CANDIDATE_TAG}::text), updated_at = now()
+    WHERE ${contacts.id} <> ${linkedId}
+      AND (${sql.join(identity, sql` OR `)})
+      AND NOT (${CONTACT_MERGE_CANDIDATE_TAG}::text = ANY(${contacts.tags}))
+    RETURNING ${contacts.id} AS id
+  `));
+  return rows.map((row) => String(row.id));
 }
 
 export type ContactsRepository = ReturnType<typeof createContactsRepository>;
