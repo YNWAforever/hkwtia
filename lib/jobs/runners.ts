@@ -7,6 +7,8 @@ import {z} from "zod";
 import {
   createCampaignEmailRenderer,
   runCampaignBatch,
+  runWhatsAppCampaignBatch,
+  WHATSAPP_QUEUE_BATCH_LIMIT,
 } from "@/lib/automation/campaign-runner";
 import {
   BOARD_REPORTER_AGENT_CONFIG,
@@ -45,6 +47,10 @@ import {
   type StaffAlertRecipientsRepository,
 } from "@/lib/db/repos/staff-alert-recipients";
 import {staffTasksRepository} from "@/lib/db/repos/staff-tasks";
+import {
+  createProductionNotificationDependencies,
+  dispatchNotification,
+} from "@/lib/notifications/dispatch";
 import {renderEmail, type RenderedEmail} from "@/lib/email/render";
 import {
   createConfiguredEmailTransport,
@@ -61,6 +67,20 @@ import {approvedTemplateKeys} from "@/lib/whatsapp/approved-templates";
 const MAX_WORKER_ALERT_BYTES = 4_096;
 const RUNNER_BATCH_LIMIT = 100;
 
+/**
+ * Every member of the Worker's own `WorkerJob` union, and Phase C2 Task 10 is
+ * where that stopped being a subset.
+ *
+ * `aiops-metrics` and `chat-retention` were missing, so three failed runs of
+ * either produced a 400 `INVALID_WORKER_ALERT` and nobody was paged — the one
+ * code path whose entire purpose is to be noticed. `whatsapp-send-queue` would
+ * have been the ninth member of the same gap.
+ *
+ * Still an enum and never `z.string()`: the run key is a digest of this payload,
+ * so an unbounded `job` is an unbounded set of claimable run keys.
+ * `tests/unit/worker-alert-contract.test.ts` reads the union out of
+ * `workers/src/index.ts` and asserts this list covers it.
+ */
 const workerAlertSchema = z.object({
   job: z.enum([
     "journey-runner",
@@ -69,6 +89,9 @@ const workerAlertSchema = z.object({
     "approvals-expirer",
     "retention-analyst",
     "board-reporter",
+    "aiops-metrics",
+    "chat-retention",
+    "whatsapp-send-queue",
   ]),
   scheduledTime: z.string().min(1).max(64),
   attemptCount: z.number().int().min(1).max(3),
@@ -86,7 +109,10 @@ export type WorkerAlertPayload = Readonly<{
     | "engagement-score"
     | "approvals-expirer"
     | "retention-analyst"
-    | "board-reporter";
+    | "board-reporter"
+    | "aiops-metrics"
+    | "chat-retention"
+    | "whatsapp-send-queue";
   scheduledTime: string;
   attemptCount: number;
   errorCode: "JOB_HTTP_ERROR" | "JOB_NETWORK_ERROR" | "JOB_TIMEOUT";
@@ -108,6 +134,7 @@ type ProductionRunnerOverrides = Partial<Readonly<{
   runRetentionAnalyst(now: Date): Promise<unknown>;
   runBoardReporter(now: Date): Promise<unknown>;
   runAiOpsMetrics(now: Date): Promise<{refreshed: 1}>;
+  runWhatsAppSendQueue(now: Date): Promise<unknown>;
   runWorkerAlert(payload: WorkerAlertPayload): Promise<unknown>;
 }>>;
 
@@ -416,6 +443,14 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
 async function runProductionCampaigns(now: Date): Promise<unknown> {
   const {emailFrom} = emailEnv();
   const {appUrl} = appEnv();
+  // Phase C2 Task 10 Step 4c, the email leg. `runCampaignBatch`'s claim only
+  // reaches campaigns in ('queued', 'processing') and S-6 forbids widening it,
+  // so an email campaign written as `scheduled` would sit there for ever with
+  // no error anywhere. `/admin/campaigns` refuses a send time on the email
+  // channel today (`approveCampaign` queues it outright), which makes this the
+  // belt to that braces rather than the live path — and it is here so that
+  // offering an email schedule later is a screen change, not a silent outage.
+  await campaignsRepository.promoteScheduledCampaigns(automationCronActor(), now, "email");
   return runCampaignBatch({
     campaigns: campaignsRepository,
     deliveries: deliveriesRepository,
@@ -438,6 +473,27 @@ async function runProductionCampaigns(now: Date): Promise<unknown> {
     emailTransport: createConfiguredEmailTransport(),
     emailFrom,
   }, {now, limit: RUNNER_BATCH_LIMIT});
+}
+
+/**
+ * Programme C-5 / D-10. The ten-minute WhatsApp blast drain.
+ *
+ * The dependency bag is built ONCE per batch, not once per recipient:
+ * `dispatchNotification`'s default argument calls
+ * `createProductionNotificationDependencies()`, which reads `emailEnv()` and
+ * constructs both transports. Leaving it to the default would construct a
+ * WOZTELL adapter and a Resend transport twenty times a tick.
+ *
+ * No `createWoztellAdapter(` call here on purpose: the dispatcher owns the one
+ * construction for this path and passes `RUN_LIVE_WOZTELL` (S-13), which
+ * `tests/unit/woztell-adapter-live-flag.test.ts` discovers rather than trusts.
+ */
+export async function runProductionWhatsAppSendQueue(now: Date): Promise<unknown> {
+  const notifications = createProductionNotificationDependencies();
+  return runWhatsAppCampaignBatch({
+    campaigns: campaignsRepository,
+    dispatch: (actor, request) => dispatchNotification(actor, request, notifications),
+  }, {now, limit: WHATSAPP_QUEUE_BATCH_LIMIT});
 }
 
 export async function runProductionRenewal(now: Date): Promise<unknown> {
@@ -533,6 +589,8 @@ export function createJobRunners(
     overrides.runBoardReporter ?? runProductionBoardReporter;
   const runAiOpsMetrics =
     overrides.runAiOpsMetrics ?? runProductionAiOpsMetrics;
+  const runWhatsAppSendQueue =
+    overrides.runWhatsAppSendQueue ?? runProductionWhatsAppSendQueue;
   const runWorkerAlert = overrides.runWorkerAlert ?? sendWorkerAlert;
 
   return {
@@ -563,6 +621,9 @@ export function createJobRunners(
     },
     aiOpsMetrics(now: Date) {
       return runAiOpsMetrics(now);
+    },
+    whatsappSendQueue(now: Date) {
+      return runWhatsAppSendQueue(now);
     },
     workerAlert(payload: WorkerAlertPayload) {
       return runWorkerAlert(payload);

@@ -810,6 +810,9 @@ describe.skipIf(!testDatabaseUrl)(
           reclaimedAt,
           1,
           300_000,
+          // Phase C2 Task 10 (S-11): the claim is channel-scoped, and this
+          // fixture's campaign is an email one.
+          "email",
         );
         expect(claims).toMatchObject([{
           id: fencedRecipientId,

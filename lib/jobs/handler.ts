@@ -11,7 +11,15 @@ import {
 } from "@/lib/db/repos/jobs";
 import {verifyCronBearer} from "@/lib/jobs/auth";
 
-export type JobBucket = "hourly" | "daily";
+/**
+ * The window a job's `run_key` is derived from. Phase C2 (S-12) adds
+ * `"ten-minute"` because `jobsRepository.claim` only reclaims a row in state
+ * `failed`: on an `hourly` key, ticks 2-6 of every hour would claim the key tick
+ * 1 already completed, the route would answer `200 {"duplicate": true}`, and the
+ * WhatsApp send queue would drain once an hour while every log line said it was
+ * healthy.
+ */
+export type JobBucket = "hourly" | "daily" | "ten-minute";
 export type JobClaimResult = RepositoryJobClaimResult;
 
 export type JobHandlerRepository = Readonly<{
@@ -85,6 +93,11 @@ export function runKeyFor(
     throw new Error("INVALID_JOB_CONFIGURATION");
   }
   const instant = now.toISOString();
+  // `2026-09-10T04:23:45.678Z`.slice(0, 15) is `2026-09-10T04:2`, and the
+  // appended `0` floors it to the window. Built by slicing rather than by
+  // millisecond arithmetic so the key can never acquire a `.`, which
+  // SAFE_RUN_KEY refuses.
+  if (bucket === "ten-minute") return `${kind}:${instant.slice(0, 15)}0`;
   return `${kind}:${bucket === "hourly" ? instant.slice(0, 13) : instant.slice(0, 10)}`;
 }
 

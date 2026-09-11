@@ -14,6 +14,11 @@ const routeFiles = [
   "app/api/jobs/board-reporter/route.ts",
   "app/api/jobs/chat-retention/route.ts",
   "app/api/jobs/retention-analyst/route.ts",
+  // Phase C2 Task 10 (C-5, D-10). This tuple is hand-maintained and discovers
+  // nothing, so a route added without a line here ships uncovered by the
+  // export-shape guard — the same silent-omission failure both Phase C plans
+  // call out for tests/unit/admin-server-action-boundaries.test.ts.
+  "app/api/jobs/whatsapp-send-queue/route.ts",
   "app/api/media/[id]/route.ts",
   "app/api/portal/media/upload/route.ts",
   "app/api/stripe/webhook/route.ts",

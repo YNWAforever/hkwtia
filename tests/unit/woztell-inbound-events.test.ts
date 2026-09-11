@@ -128,7 +128,7 @@ describe("WOZTELL inbound event writers (C-1 Task 3)", () => {
 
   describe("recordDeliveryStatus", () => {
     it("reports a miss instead of throwing, because every message sent before this release is one", async () => {
-      const fixture = repository([[]]);
+      const fixture = repository([[], []]);
 
       await expect(fixture.events.recordDeliveryStatus(woztellWebhookActor(), {
         providerMessageId: "wamid.status.unknown",
@@ -136,6 +136,59 @@ describe("WOZTELL inbound event writers (C-1 Task 3)", () => {
         errorCode: null,
         occurredAt: OCCURRED_AT,
       })).resolves.toEqual({matched: false, target: null});
+    });
+
+    // Phase C2 Task 10 Step 4b. A campaign send writes its provider id to
+    // `campaign_recipients.provider_message_id` and creates NO `messages` row at
+    // all, so without this second statement the report's Delivered and Read
+    // counters are permanently zero and §6's "delivery ticks arrive" is met for
+    // the human lane and silently unmet for the blast.
+    it("settles a campaign recipient when no message carries the provider id", async () => {
+      const fixture = repository([[], [{id: "recipient-1"}]]);
+
+      await expect(fixture.events.recordDeliveryStatus(woztellWebhookActor(), {
+        providerMessageId: "wamid.blast.1",
+        status: "read",
+        errorCode: null,
+        occurredAt: OCCURRED_AT,
+      })).resolves.toEqual({matched: true, target: "campaign_recipient"});
+
+      expect(fixture.queries).toHaveLength(2);
+      const fallThrough = normalized(fixture.queries[1]?.sql);
+      expect(fallThrough).toMatch(/^update "campaign_recipients"/);
+      expect(fallThrough).toContain("target.provider_message_id =");
+      // COALESCE rather than assignment, so a late tick cannot walk a timestamp
+      // backwards without needing the `array_position` ordering the human lane
+      // uses: neither column is ever cleared.
+      expect(fallThrough).toContain("coalesce(target.delivered_at");
+      expect(fallThrough).toContain("coalesce(target.read_at");
+      expect(fallThrough).toContain("campaign_recipient_status");
+    });
+
+    it("costs the human lane nothing: one statement when the message matched", async () => {
+      const fixture = repository([[{id: MESSAGE_ID}], [{id: "recipient-1"}]]);
+
+      await expect(fixture.events.recordDeliveryStatus(woztellWebhookActor(), {
+        providerMessageId: "wamid.status.1",
+        status: "delivered",
+        errorCode: null,
+        occurredAt: OCCURRED_AT,
+      })).resolves.toEqual({matched: true, target: "message"});
+      expect(fixture.queries).toHaveLength(1);
+    });
+
+    it("carries a failure code onto the recipient row, and only on a failure", async () => {
+      const fixture = repository([[], [{id: "recipient-1"}]]);
+
+      await fixture.events.recordDeliveryStatus(woztellWebhookActor(), {
+        providerMessageId: "wamid.blast.1",
+        status: "failed",
+        errorCode: "131047",
+        occurredAt: OCCURRED_AT,
+      });
+
+      expect(fixture.queries[1]?.params).toEqual(expect.arrayContaining(["131047", "failed"]));
+      expect(normalized(fixture.queries[1]?.sql)).toContain("error_code = case when");
     });
 
     it("never walks a tick backwards and only touches outbound rows", async () => {

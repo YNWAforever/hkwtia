@@ -109,5 +109,6 @@ export const protectedRouteOwnershipInventory: readonly ProtectedRouteOwner[] = 
   owner({id: "api-job-journey-runner", family: "api", classification: "job-handler", routePath: "/api/jobs/journey-runner", filePath: "app/api/jobs/journey-runner/route.ts", dataOwner: "Authenticated lifecycle journey runner."}),
   owner({id: "api-job-renewal-runner", family: "api", classification: "job-handler", routePath: "/api/jobs/renewal-runner", filePath: "app/api/jobs/renewal-runner/route.ts", dataOwner: "Authenticated renewal runner."}),
   owner({id: "api-job-retention-analyst", family: "api", classification: "job-handler", routePath: "/api/jobs/retention-analyst", filePath: "app/api/jobs/retention-analyst/route.ts", dataOwner: "Authenticated retention-analysis job."}),
+  owner({id: "api-job-whatsapp-send-queue", family: "api", classification: "job-handler", routePath: "/api/jobs/whatsapp-send-queue", filePath: "app/api/jobs/whatsapp-send-queue/route.ts", dataOwner: "Authenticated ten-minute WhatsApp campaign send queue (Phase C2, C-5/D-10)."}),
   owner({id: "api-job-worker-alert", family: "api", classification: "job-handler", routePath: "/api/jobs/worker-alert", filePath: "app/api/jobs/worker-alert/route.ts", dataOwner: "Authenticated worker-alert delivery job."}),
 ]);

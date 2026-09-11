@@ -10,6 +10,7 @@ import type {
 } from "@/lib/db/repos/journeys";
 import {
   auditEvents,
+  campaignRecipients,
   contacts,
   conversations,
   messages,
@@ -87,12 +88,13 @@ export type OutboundEchoEvent = Readonly<{
 export type DeliveryStatusResult = Readonly<{
   matched: boolean;
   /**
-   * `target` exists so C2 Task 10 can extend the miss case to
-   * `campaign_recipients` — a campaign send writes its provider id there and
-   * creates no `messages` row at all — without changing this signature again.
-   * C1 only ever returns "message" | null.
+   * C2 Task 10 took the third arm C1 left room for. A campaign send writes its
+   * provider id to `campaign_recipients.provider_message_id` and creates no
+   * `messages` row at all, so the `messages` UPDATE misses for every blast tick.
+   * One method, two targets, one webhook branch — deliberately NOT a second
+   * delivery-status path.
    */
-  target: "message" | null;
+  target: "message" | "campaign_recipient" | null;
 }>;
 
 export type OutboundEchoResult = Readonly<{
@@ -247,8 +249,49 @@ export function createWoztellInboundEventsRepository(
               < array_position(${deliveryOrder()}, ${parsed.status}::text)
         RETURNING ${messages.id} AS id
       `))[0];
-      return row
-        ? {matched: true, target: "message"}
+      if (row) return {matched: true, target: "message"};
+
+      // C2 Task 10 Step 4b. The blast lane. Only reached when the `messages`
+      // UPDATE matched nothing, so the human lane keeps its single statement and
+      // the second one costs a campaign tick alone. Served by
+      // `campaign_recipients_provider_message_idx`, which 0033 adds for exactly
+      // this lookup and which is deliberately NOT unique: two recipients in
+      // different campaigns could in principle carry one provider id, and a
+      // unique index would turn that into a webhook 500 Woztell retries for ever.
+      //
+      // `delivered_at` and `read_at` are COALESCEd rather than assigned, which
+      // is how a late tick cannot walk the row backwards without needing the
+      // `array_position` ordering above: neither column is ever cleared, and
+      // only a 'failed' tick moves `status`.
+      const recipient = rowsFrom(await database.execute(sql`
+        UPDATE ${campaignRecipients} AS target
+        SET
+          delivered_at = CASE
+            WHEN ${parsed.status}::text IN ('delivered', 'read')
+              THEN COALESCE(target.delivered_at, ${parsed.occurredAt})
+            ELSE target.delivered_at
+          END,
+          read_at = CASE
+            WHEN ${parsed.status}::text = 'read'
+              THEN COALESCE(target.read_at, ${parsed.occurredAt})
+            ELSE target.read_at
+          END,
+          -- campaign_recipient_status, not recipient_status: the enum was
+          -- created under the longer name in M2 and 0033 did not rename it.
+          status = CASE
+            WHEN ${parsed.status}::text = 'failed' THEN 'failed'::campaign_recipient_status
+            ELSE target.status
+          END,
+          error_code = CASE
+            WHEN ${parsed.status}::text = 'failed' THEN ${parsed.errorCode}
+            ELSE target.error_code
+          END,
+          updated_at = now()
+        WHERE target.provider_message_id = ${parsed.providerMessageId}
+        RETURNING target.id AS id
+      `))[0];
+      return recipient
+        ? {matched: true, target: "campaign_recipient"}
         : {matched: false, target: null};
     },
 

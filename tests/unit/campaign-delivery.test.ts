@@ -87,7 +87,10 @@ function memoryHarness(
     unsubscribeOneClickUrl: string;
   }> = [];
   const tasks = new Map<string, {
-    profileId: string;
+    // Nullable since Phase C2 Task 10: a campaign recipient may be a prospect
+    // with no profile, and `staff_tasks.profile_id` is nullable for exactly
+    // that. The email lane always passes a member's id.
+    profileId: string | null;
     journeyStateId: string | null;
     kind: string;
     dedupeKey: string;
@@ -390,25 +393,37 @@ describe("campaign recipient repository fencing", () => {
     ]]);
     const repo = createCampaignsRepository(async () => fake.db as never);
 
-    await expect(repo.claimRecipients(system, now, 5, 300_000))
+    await expect(repo.claimRecipients(system, now, 5, 300_000, "email"))
       .resolves.toMatchObject([{id: row.id, attemptCount: 2, claimedAt: now}]);
 
     const sql = fake.commands[0]?.sql.replace(/\s+/g, " ");
+    // Phase C2 Task 10 Step 4 (S-11). The channel predicate is what keeps the
+    // hourly email sweep off a WhatsApp recipient, and the scheduled_at
+    // predicate keeps a campaign promoted early from sending early. Neither
+    // replaces what this case already proved: the two due arms, the skip-locked
+    // claim and the attempt increment.
+    expect(sql).toMatch(/campaign\.channel = \$\d+/i);
+    expect(sql).toMatch(/campaign\.scheduled_at IS NULL OR campaign\.scheduled_at <=/i);
     expect(sql).toMatch(/status = 'queued'.*status = 'processing'.*claim_expires_at <=/i);
     expect(sql).toMatch(/FOR UPDATE.*SKIP LOCKED/i);
     expect(sql).toMatch(/attempt_count = target\.attempt_count \+ 1/i);
+    expect(fake.commands[0]?.params).toContain("email");
   });
 
   it("completes campaigns with no queued or processing recipients during the claim sweep", async () => {
     const fake = database([[]]);
     const repo = createCampaignsRepository(async () => fake.db as never);
 
-    await expect(repo.claimRecipients(system, now, 5, 300_000)).resolves.toEqual([]);
+    await expect(repo.claimRecipients(system, now, 5, 300_000, "email")).resolves.toEqual([]);
 
     const sql = fake.commands[0]?.sql.replace(/\s+/g, " ");
     expect(sql).toMatch(
       /UPDATE "campaigns".*SET status = 'completed', completed_at = \$\d+.*NOT EXISTS.*status IN \('queued', 'processing'\)/i,
     );
+    // Phase C2 Task 10 Step 4. Channel-scoped like the claim: the hourly email
+    // sweep must not stamp a WhatsApp campaign complete before the ten-minute
+    // queue has reached its recipients.
+    expect(sql).toMatch(/idle\.channel = \$\d+/i);
     // Phase C2 Task 1 Step 4b. The timestamp is the claim's `now`, not a
     // database clock a test cannot pin.
     expect(fake.commands[0]?.params).toContain(now);

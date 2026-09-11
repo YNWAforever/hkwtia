@@ -37,3 +37,23 @@ export const M4_AI_JOB_KINDS = [
 ] as const;
 
 export type M4AiJobKind = typeof M4_AI_JOB_KINDS[number];
+
+/**
+ * Phase C2 (C-5, D-10). A group of its own, and deliberately NOT a member of
+ * `M3_AUTOMATION_JOB_KINDS` (S-11).
+ *
+ * That constant is interpolated into `jobs_automation_recent_idx`'s partial
+ * predicate and pinned by `tests/unit/automation-admin-indexes.test.ts`, so
+ * adding a member emits an unintended DROP INDEX / CREATE INDEX in the next
+ * generated migration and reddens two contract tests for a reason that has
+ * nothing to do with the send queue.
+ */
+export const PHASE_C_JOB_KIND = {
+  WHATSAPP_SEND_QUEUE: "whatsapp-send-queue",
+} as const;
+
+export const PHASE_C_JOB_KINDS = [
+  PHASE_C_JOB_KIND.WHATSAPP_SEND_QUEUE,
+] as const;
+
+export type PhaseCJobKind = typeof PHASE_C_JOB_KINDS[number];
