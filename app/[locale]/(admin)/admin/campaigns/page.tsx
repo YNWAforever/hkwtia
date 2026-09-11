@@ -94,8 +94,18 @@ export default async function AdminCampaignsPage({params, searchParams}: Props) 
   }));
 
   const templateVariables = templateVariablesFor(state, approved);
-  const steps = visibleWizardSteps(templateVariables);
+  // The state, not just the variables it resolved to: on the template step the
+  // key is still unchosen, and deriving the step set from the empty array alone
+  // is what made the Next button skip the variables step for every
+  // parameterised WhatsApp template.
+  const steps = visibleWizardSteps(state, templateVariables);
   const blocking = wizardBlockingStep(state, templateVariables);
+  // Named by step. "Every field must be filled in" is true of the variables
+  // step and of nothing else, and reading it on an unsaved segment sends the
+  // admin to fix a screen that was already right.
+  const blockedNotice = blocking === null
+    ? null
+    : blocking === "variables" ? t("variables.missing") : t("blocked", {step: t(`steps.${blocking}`)});
   const summary = state.step === "preview" && blocking === null && state.segmentId !== null
     ? await previewCampaignAudience(actor, {
       segmentId: state.segmentId,
@@ -120,6 +130,7 @@ export default async function AdminCampaignsPage({params, searchParams}: Props) 
       {header}
       <section className="glass-card space-y-4 p-6">
         <CampaignWizard
+          blockedNotice={blockedNotice}
           blocking={blocking}
           createAction={createCampaignDraftAction.bind(null, path, browserPath)}
           eligibility={eligibility}
@@ -138,9 +149,13 @@ export default async function AdminCampaignsPage({params, searchParams}: Props) 
             variables: {
               legend: t("variables.legend"),
               hint: t("variables.hint", {tokens: VARIABLE_TOKEN_HINT}),
-              missing: t("variables.missing"),
             },
-            actions: {createDraft: t("actions.createDraft"), next: t("actions.next"), back: t("actions.back")},
+            actions: {
+              createDraft: t("actions.createDraft"),
+              next: t("actions.next"),
+              back: t("actions.back"),
+              goToStep: t("actions.goToStep"),
+            },
             templateUnapproved: t("templateUnapproved"),
             noSegments: t("noSegments"),
             recipients: t("report.total"),

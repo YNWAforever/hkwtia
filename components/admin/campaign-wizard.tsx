@@ -1,4 +1,7 @@
 import {
+  nextWizardStep,
+  previousWizardStep,
+  resolveWizardStep,
   variableParamName,
   type CampaignWizardState,
   type CampaignWizardStep,
@@ -30,8 +33,8 @@ export type CampaignWizardLabels = Readonly<{
   steps: Readonly<Record<CampaignWizardStep, string>>;
   channel: Readonly<{email: string; whatsapp: string}>;
   fields: Readonly<{name: string; template: string; segment: string}>;
-  variables: Readonly<{legend: string; hint: string; missing: string}>;
-  actions: Readonly<{createDraft: string; next: string; back: string}>;
+  variables: Readonly<{legend: string; hint: string}>;
+  actions: Readonly<{createDraft: string; next: string; back: string; goToStep: string}>;
   templateUnapproved: string;
   noSegments: string;
   recipients: string;
@@ -46,6 +49,13 @@ type Props = Readonly<{
   eligibility: readonly CampaignEligibilityRow[] | null;
   summary: CampaignEligibilitySummary | null;
   blocking: CampaignWizardStep | null;
+  /**
+   * The sentence that names `blocking`, resolved by the page because only the
+   * page holds the translator. It used to be `labels.variables.missing` for
+   * every blocking step, which told an admin whose segment was unsaved that
+   * template fields were missing.
+   */
+  blockedNotice: string | null;
   formPath: string;
   labels: CampaignWizardLabels;
   createAction: (formData: FormData) => void | Promise<void>;
@@ -94,12 +104,15 @@ const fieldClass = "min-h-11 w-full rounded-md border border-input bg-background
 
 export function CampaignWizard({
   state, steps, templateVariables, templateOptions, segmentOptions,
-  eligibility, summary, blocking, formPath, labels, createAction,
+  eligibility, summary, blocking, blockedNotice, formPath, labels, createAction,
 }: Props) {
-  const index = Math.max(steps.indexOf(state.step), 0);
-  const current = steps[index];
-  const back = steps[Math.max(index - 1, 0)];
-  const forward = steps[Math.min(index + 1, steps.length - 1)];
+  // Through the helpers, not a second inline copy of them: the first version of
+  // this component reimplemented all three, so the unit test that pinned
+  // `nextWizardStep` stayed green while the live Next button skipped a step.
+  const current = resolveWizardStep(state.step, steps);
+  const index = Math.max(steps.indexOf(current), 0);
+  const back = previousWizardStep(current, steps);
+  const forward = nextWizardStep(current, steps);
   const omit = ownedParameters(current, templateVariables);
 
   return (
@@ -193,7 +206,7 @@ export function CampaignWizard({
                 recipient whose template parameter will not resolve is visible
                 here, before the blast, rather than as one permanent failure and
                 one staff task after it. */}
-            {blocking !== null ? <p className="text-sm text-destructive">{labels.variables.missing}</p> : null}
+            {blockedNotice === null ? null : <p className="text-sm text-destructive">{blockedNotice}</p>}
             {eligibility === null ? null : (
               <dl className="max-w-md divide-y divide-border rounded-md border border-border">
                 {eligibility.map((row) => (
@@ -222,6 +235,14 @@ export function CampaignWizard({
               {labels.actions.next}
             </button>
           )}
+          {/* The way out of a blocked preview. Without it the only exit is Back,
+              pressed once per step between here and the unanswered one, and a
+              reader who arrived by a shared link has no way to know how many. */}
+          {current === "preview" && blocking !== null ? (
+            <button className="min-h-11 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" name="step" type="submit" value={blocking}>
+              {labels.actions.goToStep}
+            </button>
+          ) : null}
         </div>
       </form>
 

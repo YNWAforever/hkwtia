@@ -2388,6 +2388,7 @@
         "hint": "直接輸入文字，或使用預設代碼：{tokens}",
         "missing": "所有欄位必須填妥，方可發送此範本。"
       },
+      "blocked": "尚未完成——「{step}」仍未填妥。",
       "noSegments": "請先儲存分群：推廣活動須對應一個已儲存的分群。",
       "scheduleUnavailable": "電郵推廣活動會於下一個每小時排程發送，不可另行指定時間。",
       "eligibility": {
@@ -2416,7 +2417,8 @@
         "approve": "批准並排程",
         "reject": "拒絕",
         "next": "下一步",
-        "back": "上一步"
+        "back": "上一步",
+        "goToStep": "前往該步驟"
       },
       "ownDraft": "推廣活動須由另一位管理員批准。",
       "rejectionReason": "原因",

@@ -163,16 +163,70 @@ describe("the campaign wizard page", () => {
     expect(screen.getByRole("button", {name: en.Admin.campaigns.actions.createDraft})).toBeInTheDocument();
   });
 
-  it("refuses to offer Create draft while an answer is still missing", async () => {
+  /**
+   * The forward path through a parameterised template, which is the primary
+   * path of this feature and was broken: the step set was derived from the
+   * template chosen in the PREVIOUS request, so while the staff member stood on
+   * the template step `templateKey` was still null, "Message details" was not in
+   * the list at all, and Next carried `value="segment"`. Selecting a template
+   * and pressing Next skipped the variables step and dead-ended on a preview
+   * whose only exit was Back.
+   */
+  it("points the template step's Next at the variables step, before any template is chosen", async () => {
+    render(await AdminCampaignsPage({
+      params: Promise.resolve({locale: "en"}),
+      searchParams: Promise.resolve({campaignDraft: draftId, step: "template", channel: "whatsapp", name: "September announcement"}),
+    }));
+
+    expect(screen.getByText(`4. ${en.Admin.campaigns.steps.variables}`)).toBeInTheDocument();
+    expect(screen.getByRole("button", {name: en.Admin.campaigns.actions.next})).toHaveAttribute("value", "variables");
+  });
+
+  it("leaves the variables step out for email, where there is nothing to type", async () => {
+    render(await AdminCampaignsPage({
+      params: Promise.resolve({locale: "en"}),
+      searchParams: Promise.resolve({campaignDraft: draftId, step: "template", channel: "email", name: "September announcement"}),
+    }));
+
+    expect(screen.queryByText(`4. ${en.Admin.campaigns.steps.variables}`)).toBeNull();
+    expect(screen.getByRole("button", {name: en.Admin.campaigns.actions.next})).toHaveAttribute("value", "segment");
+  });
+
+  it("refuses to offer Create draft while an answer is still missing, and names the step that is missing it", async () => {
     render(await AdminCampaignsPage({
       params: Promise.resolve({locale: "en"}),
       searchParams: Promise.resolve({campaignDraft: draftId, step: "preview", name: "September announcement", channel: "whatsapp"}),
     }));
 
     expect(screen.queryByRole("button", {name: en.Admin.campaigns.actions.createDraft})).toBeNull();
-    expect(screen.getByText(en.Admin.campaigns.variables.missing)).toBeInTheDocument();
+    // The template, not the template's fields: telling an admin whose segment
+    // or template is unchosen that "every field must be filled in" sends them
+    // to fix a screen that was already right.
+    expect(screen.getByText(en.Admin.campaigns.blocked.replaceAll("{step}", en.Admin.campaigns.steps.template))).toBeInTheDocument();
+    // And a way forward out of the preview, rather than Back pressed once per
+    // step between here and the unanswered one.
+    expect(screen.getByRole("button", {name: en.Admin.campaigns.actions.goToStep})).toHaveAttribute("value", "template");
     // And no audience read was attempted: a preview of half a campaign counts
     // the wrong people.
+    expect(state.preview).not.toHaveBeenCalled();
+  });
+
+  it("still says 'every field' when the template's own fields are what is missing", async () => {
+    render(await AdminCampaignsPage({
+      params: Promise.resolve({locale: "en"}),
+      searchParams: Promise.resolve({
+        campaignDraft: draftId,
+        step: "preview",
+        name: "September announcement",
+        channel: "whatsapp",
+        templateKey: "wtia_announcement_en",
+        segmentId,
+        var_memberName: "{{displayName}}",
+      }),
+    }));
+
+    expect(screen.getByText(en.Admin.campaigns.variables.missing)).toBeInTheDocument();
+    expect(screen.getByRole("button", {name: en.Admin.campaigns.actions.goToStep})).toHaveAttribute("value", "variables");
     expect(state.preview).not.toHaveBeenCalled();
   });
 

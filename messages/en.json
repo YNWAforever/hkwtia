@@ -2387,6 +2387,7 @@
         "hint": "Type the words to send, or use a placeholder: {tokens}",
         "missing": "Every field must be filled in before this template can be sent."
       },
+      "blocked": "Not finished yet — {step} still needs an answer.",
       "noSegments": "Save a segment first: a campaign is addressed to a saved segment.",
       "scheduleUnavailable": "Email campaigns send on the next hourly run and cannot be scheduled for a later time.",
       "eligibility": {
@@ -2415,7 +2416,8 @@
         "approve": "Approve and schedule",
         "reject": "Reject",
         "next": "Next",
-        "back": "Back"
+        "back": "Back",
+        "goToStep": "Go to that step"
       },
       "ownDraft": "A campaign must be approved by a different administrator.",
       "rejectionReason": "Reason",

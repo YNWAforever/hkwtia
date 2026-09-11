@@ -128,10 +128,49 @@ export function templateVariablesFor(
   return templates.find((template) => template.key === state.templateKey)?.variables ?? [];
 }
 
-export function visibleWizardSteps(templateVariables: readonly string[]): readonly CampaignWizardStep[] {
-  return templateVariables.length > 0
-    ? CAMPAIGN_WIZARD_STEPS
-    : CAMPAIGN_WIZARD_STEPS.filter((step) => step !== "variables");
+/**
+ * The steps this run of the wizard actually has.
+ *
+ * The subtlety is that the step set is computed one request BEFORE the answer
+ * that decides it. While a staff member is standing ON the template step their
+ * `templateKey` is still `null`, so `templateVariablesFor` returns `[]` — and an
+ * earlier version keyed this on that empty array alone, which dropped
+ * `variables` from the set and pointed the template step's Next button at
+ * `segment`. Every WhatsApp campaign built on a parameterised template (all four
+ * §8.3 marketing templates) therefore skipped its own details step on the
+ * forward path and dead-ended on a preview whose only exit was Back.
+ *
+ * So an UNCHOSEN WhatsApp template keeps the step: it might declare variables,
+ * and offering a step the next render removes is recoverable (`resolveWizardStep`
+ * moves past it) where skipping one the next render needs is not.
+ *
+ * Email never has the step: an email body is rendered from the source template
+ * and the recipient's own facts, which `snapshotAudience` fills in itself, so
+ * there is nothing for a human to type.
+ */
+export function visibleWizardSteps(
+  state: Pick<CampaignWizardState, "channel" | "templateKey">,
+  templateVariables: readonly string[],
+): readonly CampaignWizardStep[] {
+  const reachable = state.channel === "whatsapp" && (state.templateKey === null || templateVariables.length > 0);
+  return reachable ? CAMPAIGN_WIZARD_STEPS : CAMPAIGN_WIZARD_STEPS.filter((step) => step !== "variables");
+}
+
+/**
+ * The step to render for a requested one that this run does not have — a URL
+ * that still says `step=variables` after a template declaring none was chosen.
+ * It resolves FORWARD, to the next step that does exist, because the answer the
+ * skipped step would have collected is not needed: resolving backwards (or to
+ * index 0, as a bare `indexOf` clamped at zero does) would silently return the
+ * reader to "Name" with every answer intact and no explanation.
+ */
+export function resolveWizardStep(
+  step: CampaignWizardStep,
+  steps: readonly CampaignWizardStep[],
+): CampaignWizardStep {
+  if (steps.includes(step)) return step;
+  const requested = CAMPAIGN_WIZARD_STEPS.indexOf(step);
+  return steps.find((candidate) => CAMPAIGN_WIZARD_STEPS.indexOf(candidate) >= requested) ?? steps[steps.length - 1];
 }
 
 export function nextWizardStep(step: CampaignWizardStep, steps: readonly CampaignWizardStep[]): CampaignWizardStep {

@@ -12,6 +12,7 @@ import {
   nextWizardStep,
   parseCampaignWizardQuery,
   previousWizardStep,
+  resolveWizardStep,
   visibleWizardSteps,
   wizardBlockingStep,
 } from "@/lib/admin/campaign-wizard";
@@ -294,12 +295,34 @@ describe("the wizard's URL state", () => {
     expect(state.channel).toBe("email");
   });
 
-  it("skips the variables step for a template that declares none", () => {
-    const steps = visibleWizardSteps([]);
-    expect(steps).not.toContain("variables");
-    expect(nextWizardStep("template", steps)).toBe("segment");
-    expect(previousWizardStep("segment", steps)).toBe("template");
-    expect(visibleWizardSteps(["headline"])).toContain("variables");
+  /**
+   * The forward path, which is where this went wrong: the step set is computed
+   * one request BEFORE the template that decides it, so keying it on the
+   * resolved variables alone pointed the template step's Next at `segment` and
+   * every parameterised WhatsApp template skipped its own details step.
+   */
+  it("keeps the variables step reachable while the WhatsApp template is still unchosen", () => {
+    const pending = visibleWizardSteps({channel: "whatsapp", templateKey: null}, []);
+
+    expect(pending).toContain("variables");
+    expect(nextWizardStep("template", pending)).toBe("variables");
+  });
+
+  it("skips the variables step for email and for a template that declares none", () => {
+    const email = visibleWizardSteps({channel: "email", templateKey: null}, []);
+    expect(email).not.toContain("variables");
+    expect(nextWizardStep("template", email)).toBe("segment");
+    expect(previousWizardStep("segment", email)).toBe("template");
+
+    const chosen = visibleWizardSteps({channel: "whatsapp", templateKey: "wtia_announcement_en"}, []);
+    expect(chosen).not.toContain("variables");
+    // The step was offered a request ago, so a URL can still ask for it. It
+    // resolves FORWARD — landing back on "name" with every answer intact and no
+    // explanation is the worse of the two wrong answers.
+    expect(resolveWizardStep("variables", chosen)).toBe("segment");
+    expect(resolveWizardStep("segment", chosen)).toBe("segment");
+
+    expect(visibleWizardSteps({channel: "whatsapp", templateKey: "wtia_announcement_en"}, ["headline"])).toContain("variables");
   });
 
   it("names the first step still missing an answer, so the preview cannot be reached empty", () => {
