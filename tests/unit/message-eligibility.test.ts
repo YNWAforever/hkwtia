@@ -51,6 +51,11 @@ function factsDatabase(sides: Readonly<{member?: FactRow | null; contact?: FactR
 
 function memberRow(overrides: FactRow = {}): FactRow {
   return {
+    // `kind` and `renewalAt` joined the projection in Phase C2 Task 8: the
+    // campaign audience reads the same facts for a whole segment in one
+    // statement, so the row has to say which arm it came from and carry the
+    // membership date a renewal template interpolates.
+    kind: "member",
     id: profileId,
     displayName: "Ada Chan",
     email: "ada@example.hk",
@@ -58,6 +63,7 @@ function memberRow(overrides: FactRow = {}): FactRow {
     locale: "en",
     membershipStatus: "active",
     planCode: "community",
+    renewalAt: null,
     marketingConsent: true,
     whatsappOptIn: true,
     whatsappOptedOutAt: null,
@@ -69,6 +75,7 @@ function memberRow(overrides: FactRow = {}): FactRow {
 
 function contactRow(overrides: FactRow = {}): FactRow {
   return {
+    kind: "contact",
     id: contactId,
     displayName: null,
     email: null,
@@ -76,6 +83,7 @@ function contactRow(overrides: FactRow = {}): FactRow {
     locale: "zh-HK",
     membershipStatus: null,
     planCode: null,
+    renewalAt: null,
     marketingConsent: false,
     whatsappOptIn: false,
     whatsappOptedOutAt: null,

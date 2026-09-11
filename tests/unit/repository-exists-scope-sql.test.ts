@@ -14,6 +14,7 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
 
 import {applicationsRepository} from "@/lib/db/repos/applications";
 import {billingAttemptsRepository} from "@/lib/db/repos/billing-attempts";
+import {campaignsRepository} from "@/lib/db/repos/campaigns";
 import {companiesRepository} from "@/lib/db/repos/companies";
 import {notificationActor} from "@/lib/db/repos/deliveries";
 import type {AutomationDatabase} from "@/lib/db/repos/journeys";
@@ -180,6 +181,39 @@ describe("EXISTS authorization scopes render as executable Postgres", () => {
     });
 
     await proxy.execute(sql`SELECT 1 WHERE ${build()}`).catch(() => undefined);
+
+    const rendered = statements.join("\n");
+    expect(rendered).toMatch(/\bexists\b/i);
+    for (const [, following] of rendered.matchAll(/\bexists\b\s*(.)/gi)) {
+      expect(following).toBe("(");
+    }
+    for (const statement of statements) {
+      expect(statement.split("(").length).toBe(statement.split(")").length);
+    }
+  });
+
+  /**
+   * C2 Task 8. The campaign audience is the COMPOSITION of two hand-written
+   * families — `projectedAudience`'s UNION ALL arms and
+   * `recipientFactsProjection`'s two suppression sub-selects, wrapped in a
+   * re-join to `profiles` and `contacts`. Each half is rendered above on its
+   * own; only rendering them together proves the composition is a statement
+   * Postgres accepts, and this is the statement that decides who a blast
+   * reaches. The mixed `audience: "both"` filter is the shape that exercises
+   * every arm at once.
+   */
+  it("renders the campaign audience with balanced, parenthesised EXISTS subqueries", async () => {
+    const statements: string[] = [];
+    const proxy = drizzle(async (query: string) => {
+      statements.push(query);
+      return {rows: []};
+    });
+
+    await campaignsRepository.audienceForSegment(
+      {kind: "staff", userId: "staff-1", profileId: "staff-1"},
+      proxy,
+      segmentFilterSchema.parse({audience: "both", event: {eventId: segmentEventId, state: "not_registered"}}),
+    );
 
     const rendered = statements.join("\n");
     expect(rendered).toMatch(/\bexists\b/i);

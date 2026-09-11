@@ -9,7 +9,7 @@ import {getDb} from "@/lib/db/repos/common";
 import {requireDeliveryActor, type DeliveryActor} from "@/lib/db/repos/deliveries";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {requireWoztellWebhook} from "@/lib/db/repos/woztell-inbound-events";
-import {contacts, memberships, messageSuppressions, profiles} from "@/lib/db/server-schema";
+import {companyMembers, contacts, memberships, messageSuppressions, profiles} from "@/lib/db/server-schema";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 /**
@@ -23,11 +23,14 @@ import type {Actor} from "@/lib/membership/lifecycle";
  * send that reaches somebody who said STOP, and that is the single worst failure
  * mode available here. This reads both, for every answer.
  *
- * Two other reads look like they would do and must not be reused:
- * `campaignAudience`'s `suppressed` flag (`lib/db/repos/campaigns.ts`) tests
- * `email_log.status = 'suppressed'`, a value nothing in this repository ever
- * writes; and `contacts.whatsapp_opt_in` alone is marketing consent, not the
- * presence or absence of a withdrawal.
+ * One other read looks like it would do and must not be reused:
+ * `contacts.whatsapp_opt_in` alone is marketing consent, not the presence or
+ * absence of a withdrawal. The second one used to be `campaignAudience`'s
+ * `suppressed` flag (`lib/db/repos/campaigns.ts`), which tested
+ * `email_log.status = 'suppressed'` — a value nothing in this repository has
+ * ever written, so the flag was constant `false` from M2 until C2 Task 8
+ * deleted it. That audience now reads `recipientFactsProjection` below, so
+ * there is exactly one suppression reader left in the tree.
  *
  * **Ownership.** C1 Task 5 creates this file with the private facts loader, the
  * exported `RecipientFacts` type and the admin door. C2 Task 3 **modifies** it,
@@ -63,6 +66,15 @@ export type RecipientFacts = Readonly<{
   locale: "en" | "zh-HK";
   membershipStatus: string | null;
   planCode: string | null;
+  /**
+   * The linked membership's billing period end. C2 Task 3 Step 3's standing
+   * instruction — "if C1's loader does not yet project a field this plan needs,
+   * widen the loader; do not add a second query" — applied by Task 8: the
+   * `{{renewalDate}}` token a campaign resolves per recipient has to come from
+   * the same row every other consent fact comes from, or a blast interpolates
+   * one membership and blocks on another.
+   */
+  renewalAt: Date | null;
   marketingConsent: boolean;
   whatsappOptIn: boolean;
   whatsappOptedOutAt: Date | null;
@@ -105,6 +117,7 @@ const eligibilityInputSchema = z.object({
 }).strict();
 
 const factsRowSchema = z.object({
+  kind: z.enum(["member", "contact"]),
   id: z.union([z.string(), z.number()]).transform((value) => String(value)),
   displayName: z.string().nullable().transform((value) => value ?? ""),
   email: z.string().nullable(),
@@ -112,12 +125,25 @@ const factsRowSchema = z.object({
   locale: z.string().nullable().transform((value) => (value === "zh-HK" ? "zh-HK" as const : "en" as const)),
   membershipStatus: z.string().nullable(),
   planCode: z.string().nullable(),
+  renewalAt: z.coerce.date().nullable(),
   marketingConsent: z.coerce.boolean(),
   whatsappOptIn: z.coerce.boolean(),
   whatsappOptedOutAt: z.coerce.date().nullable(),
   emailSuppressed: z.coerce.boolean(),
   whatsappSuppressed: z.coerce.boolean(),
 });
+
+/**
+ * The one parse for a facts row, exported because C2 Task 8's audience query
+ * reads the SAME projection for a whole segment at once. A second zod schema
+ * over the same columns is how a set-based read and a single-row read start
+ * disagreeing about a coercion — `whatsappSuppressed` arrives as a boolean from
+ * the driver and as `'t'` from the proxy, and only one of two copies would ever
+ * be fixed.
+ */
+export function parseRecipientFactsRow(row: unknown): RecipientFacts {
+  return factsRowSchema.parse(row);
+}
 
 function rowsFrom(result: unknown): Record<string, unknown>[] {
   if (Array.isArray(result)) return result as Record<string, unknown>[];
@@ -211,15 +237,83 @@ function linkedMemberWithdrawalAt(): SQL {
 }
 
 /**
+ * The one projection. `targets` is any statement yielding the anchor columns
+ * (`kind`, `id`, `profile_id`, `display_name`, `email`, `whatsapp_number`,
+ * `locale`, `marketing_consent`, `whatsapp_opt_in`, `whatsapp_opted_out_at`);
+ * everything derived — the membership, the withdrawal, both suppressions — is
+ * computed here and nowhere else.
+ *
+ * Exported for C2 Task 8, whose campaign audience needs the same facts for a
+ * whole segment in one statement. It is a projection over a set rather than a
+ * second query precisely because the alternative was a copy: the eligibility
+ * preview a human approves and the send that follows must be able to disagree
+ * about nobody, and two hand-written `EXISTS` sub-selects over
+ * `message_suppressions` would have drifted the first time one of them was
+ * fixed. `campaignAudience`'s predecessor is the cautionary case — it read
+ * `email_log.status = 'suppressed'`, a value no writer in the tree ever wrote,
+ * so its suppression column had been constant `false` since M2.
+ *
+ * `marketingConsent` for a contact is `false` rather than its WhatsApp flag: a
+ * contact carries no marketing-consent column of its own, the interest form
+ * only ever asked about WhatsApp, and inferring an email opt-in from a WhatsApp
+ * one is the kind of quiet widening this module exists to refuse. The WhatsApp
+ * answer is reported where it belongs, in `whatsappOptIn`.
+ *
+ * The membership LATERAL picks the most recently created membership, which is
+ * the row a renewal or dunning message is about. The audience query this
+ * replaced picked the EARLIEST `billing_period_end`; for a member holding one
+ * membership — every member in the tree today — they are the same row.
+ *
+ * It reaches a COMPANY seat as well as an owner-held membership, and that arm
+ * is load-bearing rather than tidy. `memberships.owner_user_id` is NULL for
+ * every corporate row (the M2 fixture's first twelve are all company-held), so
+ * an owner-only join reports `membershipStatus: null` for most of the
+ * membership — and C2 Task 8 turns a null status into `plan_ineligible`, which
+ * would silently exclude every corporate member from every campaign while the
+ * preview cheerfully named a reason. The audience query this projection
+ * replaced joined both ways; losing that on the way in would have been the
+ * expensive kind of invisible.
+ */
+export function recipientFactsProjection(targets: SQL): SQL {
+  return sql`
+    WITH target AS (${targets})
+    SELECT
+      target.kind AS "kind",
+      target.id AS "id",
+      target.display_name AS "displayName",
+      target.email AS "email",
+      target.whatsapp_number AS "whatsappNumber",
+      target.locale AS "locale",
+      membership.status AS "membershipStatus",
+      membership.plan_code AS "planCode",
+      membership.renewal_at AS "renewalAt",
+      target.marketing_consent AS "marketingConsent",
+      target.whatsapp_opt_in AS "whatsappOptIn",
+      -- Both sides of the withdrawal fact in one column: the row's own
+      -- timestamp (contacts), or the linked member's recorded withdrawal.
+      COALESCE(target.whatsapp_opted_out_at, ${linkedMemberWithdrawalAt()}) AS "whatsappOptedOutAt",
+      ${suppressionExists("email")} AS "emailSuppressed",
+      ${suppressionExists("whatsapp")} AS "whatsappSuppressed"
+    FROM target
+    LEFT JOIN LATERAL (
+      SELECT ${memberships.status} AS status, ${memberships.planCode} AS plan_code, ${memberships.billingPeriodEnd} AS renewal_at
+      FROM ${memberships}
+      WHERE ${memberships.ownerUserId} = target.profile_id
+        OR ${memberships.companyId} IN (
+          SELECT ${companyMembers.companyId} FROM ${companyMembers}
+          WHERE ${companyMembers.userId} = target.profile_id AND ${companyMembers.revokedAt} IS NULL
+        )
+      ORDER BY ${memberships.createdAt} DESC
+      LIMIT 1
+    ) AS membership ON true
+  `;
+}
+
+/**
  * PRIVATE. The one query. C2 Task 3's `factsFor` calls this, not a second one.
  *
- * One statement per side, with the anchor chosen by recipient kind and the
- * membership join and both suppression sub-selects shared. `marketingConsent`
- * for a contact is `false` rather than its WhatsApp flag: a contact carries no
- * marketing-consent column of its own, the interest form only ever asked about
- * WhatsApp, and inferring an email opt-in from a WhatsApp one is the kind of
- * quiet widening this module exists to refuse. The WhatsApp answer is reported
- * where it belongs, in `whatsappOptIn`.
+ * One anchor per side, chosen by recipient kind, handed to the shared
+ * projection above.
  */
 async function loadRecipientFacts(
   database: AutomationDatabase,
@@ -228,6 +322,7 @@ async function loadRecipientFacts(
   const anchor = recipient.kind === "member"
     ? sql`
         SELECT
+          'member'::text AS kind,
           ${profiles.id} AS id,
           ${profiles.id} AS profile_id,
           ${profiles.displayName} AS display_name,
@@ -236,7 +331,7 @@ async function loadRecipientFacts(
           ${profiles.locale} AS locale,
           ${profiles.consentMarketing} AS marketing_consent,
           ${profiles.whatsappOptIn} AS whatsapp_opt_in,
-          -- profiles has no withdrawal column of its own; the outer SELECT
+          -- profiles has no withdrawal column of its own; the projection
           -- derives one from the recorded withdrawal (linkedMemberWithdrawalAt).
           NULL::timestamptz AS whatsapp_opted_out_at
         FROM ${profiles}
@@ -244,6 +339,7 @@ async function loadRecipientFacts(
       `
     : sql`
         SELECT
+          'contact'::text AS kind,
           ${contacts.id}::text AS id,
           ${contacts.profileId} AS profile_id,
           ${contacts.displayName} AS display_name,
@@ -257,34 +353,8 @@ async function loadRecipientFacts(
         WHERE ${contacts.id} = ${recipient.contactId}
       `;
 
-  const row = rowsFrom(await database.execute(sql`
-    WITH target AS (${anchor})
-    SELECT
-      target.id AS "id",
-      target.display_name AS "displayName",
-      target.email AS "email",
-      target.whatsapp_number AS "whatsappNumber",
-      target.locale AS "locale",
-      membership.status AS "membershipStatus",
-      membership.plan_code AS "planCode",
-      target.marketing_consent AS "marketingConsent",
-      target.whatsapp_opt_in AS "whatsappOptIn",
-      -- Both sides of the withdrawal fact in one column: the row's own
-      -- timestamp (contacts), or the linked member's recorded withdrawal.
-      COALESCE(target.whatsapp_opted_out_at, ${linkedMemberWithdrawalAt()}) AS "whatsappOptedOutAt",
-      ${suppressionExists("email")} AS "emailSuppressed",
-      ${suppressionExists("whatsapp")} AS "whatsappSuppressed"
-    FROM target
-    LEFT JOIN LATERAL (
-      SELECT ${memberships.status} AS status, ${memberships.planCode} AS plan_code
-      FROM ${memberships}
-      WHERE ${memberships.ownerUserId} = target.profile_id
-      ORDER BY ${memberships.createdAt} DESC
-      LIMIT 1
-    ) AS membership ON true
-  `))[0];
-  if (!row) return null;
-  return {kind: recipient.kind, ...factsRowSchema.parse(row)};
+  const row = rowsFrom(await database.execute(recipientFactsProjection(anchor)))[0];
+  return row ? parseRecipientFactsRow(row) : null;
 }
 
 function sendableNumber(facts: RecipientFacts | null): string | null {

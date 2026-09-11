@@ -25,10 +25,15 @@ describe("campaign repository resource boundaries", () => {
     await expect(repository.findCampaignByIdempotencyKey(adminA, privateStore, "bad-key", segmentA)).rejects.toBeInstanceOf(z.ZodError);
     await expect(repository.findCampaignByIdempotencyKey(adminA, privateStore, idempotencyKey, "bad-segment")).rejects.toBeInstanceOf(z.ZodError);
     await expect(repository.getSavedSegment(adminA, privateStore, "bad-segment")).rejects.toBeInstanceOf(z.ZodError);
-    await expect(repository.membersForSegment(adminA, privateStore, {unknown: true} as never)).rejects.toBeInstanceOf(z.ZodError);
+    // `membersForSegment` in every milestone up to C-6; renamed in Phase C2
+    // Task 8 because a segment can address prospects now and a name promising
+    // members was going to be read as a guarantee. Every ownership refusal
+    // below is unchanged — this file's subject is `ownedCampaign`, not the
+    // accessor's spelling.
+    await expect(repository.audienceForSegment(adminA, privateStore, {unknown: true} as never)).rejects.toBeInstanceOf(z.ZodError);
     await expect(repository.createCampaign(adminA, privateStore, {...queueInput(segmentA), template: ""})).rejects.toBeInstanceOf(z.ZodError);
     await expect(repository.insertRecipients(adminA, privateStore, campaignA, [{profileId: "member-1", email: "bad", locale: "en", variables: {displayName: "Member"}}])).rejects.toBeInstanceOf(z.ZodError);
-    await expect(repository.appendAudit(adminA, privateStore, campaignA, -1)).rejects.toBeInstanceOf(z.ZodError);
+    await expect(repository.appendAudit(adminA, privateStore, campaignA, -1 as never)).rejects.toBeInstanceOf(z.ZodError);
   });
 
   it("prevents another admin from creating against, recovering, counting, or mutating owned campaign resources", async () => {
@@ -70,7 +75,7 @@ describe("campaign repository resource boundaries", () => {
     expect(statements.some(({sql}) => sql.toLowerCase().startsWith('insert into "campaign_recipients"'))).toBe(false);
 
     statements.length = 0;
-    await expect(repository.appendAudit(adminB, database, campaignA, 1)).rejects.toThrow();
+    await expect(repository.appendAudit(adminB, database, campaignA, 1 as never)).rejects.toThrow();
     expect(statements.some(({sql}) => sql.toLowerCase().startsWith('insert into "audit_events"'))).toBe(false);
   });
 });
