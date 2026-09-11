@@ -140,6 +140,7 @@ export default async function AdminCampaignDetailPage({params}: Props) {
 
       <section className="glass-card p-6">
         <CampaignReport
+          channel={campaign.channel}
           labels={{
             title: t("report.title"),
             total: t("report.total"),

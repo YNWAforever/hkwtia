@@ -309,6 +309,31 @@ describe("the campaign detail page", () => {
     expect(screen.getByText(en.Admin.campaigns.eligibility.not_opted_in)).toBeInTheDocument();
   });
 
+  /**
+   * The counterpart, and the lane that can actually send on this branch. The
+   * delivery ticks arrive through `recordDeliveryStatus` — the Woztell
+   * delivery-status webhook — and this tree has exactly two webhook handlers,
+   * Woztell and Stripe. Nothing writes `campaign_recipients.delivered_at` or
+   * `read_at` for an email campaign and nothing is planned that would, so the
+   * two counters would sit at zero under "Sent 18" for the life of the
+   * campaign: staff read that as a blast that did not arrive and escalate a
+   * send that worked.
+   */
+  it("leaves Delivered and Read off an email report, where nothing will ever write them", async () => {
+    state.actorProfileId = reviewerProfileId;
+    state.readCampaign.mockResolvedValue({campaign: campaign({channel: "email", template: "member-update", templateKey: null}), report});
+
+    render(await AdminCampaignDetailPage({params: Promise.resolve({locale: "en", id: campaignId})}));
+
+    expect(screen.queryByText(en.Admin.campaigns.report.delivered)).toBeNull();
+    expect(screen.queryByText(en.Admin.campaigns.report.read)).toBeNull();
+    // The six counters that do have writers are untouched.
+    expect(screen.getByText(en.Admin.campaigns.report.total)).toBeInTheDocument();
+    expect(screen.getByText(en.Admin.campaigns.report.sent)).toBeInTheDocument();
+    expect(screen.getByText(en.Admin.campaigns.report.failed)).toBeInTheDocument();
+    expect(screen.getByText(en.Admin.campaigns.report.blocked)).toBeInTheDocument();
+  });
+
   it("404s a campaign that does not exist and shows the error state when the read fails", async () => {
     state.actorProfileId = reviewerProfileId;
     state.readCampaign.mockResolvedValue(null);
