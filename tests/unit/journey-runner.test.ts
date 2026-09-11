@@ -381,6 +381,68 @@ describe("runJourneyBatch", () => {
     }]);
   });
 
+  /**
+   * C-7 (C2 Task 2). The regression a fail-closed approval gate makes possible:
+   * Meta pauses `renewal_14`, the registry stops approving it, and a dunning or
+   * renewal step that used to reach the member by two channels turns into a
+   * permanent delivery failure plus a staff task per member — for an email that
+   * would have sent perfectly well.
+   *
+   * Nothing else in the suite asserts this, because every other fixture leaves
+   * `approvedTemplateKeys` absent, which means "no gate" and is the behaviour
+   * up to Phase C1.
+   */
+  it("delivers by email alone, with no failure and no staff task, when the template is not approved", async () => {
+    const renewal = due("renewal_14", {
+      journey: "renewal",
+      instanceKey: "period:2027-02-01T00:00:00.000Z",
+    });
+    const test = harness([renewal], () => context({
+      whatsappOptIn: true,
+      whatsappNumber: "+85255550000",
+    }));
+    const gated: JourneyRunnerDependencies = {
+      ...test.deps,
+      approvedTemplateKeys: new Set([]),
+    };
+
+    const summary = await runJourneyBatch(gated, {now, limit: 1});
+
+    expect(summary).toMatchObject({sent: 1, failed: 0, tasksCreated: 0});
+    expect(test.sentEmails).toHaveLength(1);
+    expect(test.sentWhatsapp).toHaveLength(0);
+    // Not even a reservation: an unapproved key is "this step has no WhatsApp
+    // channel", not "this step failed on WhatsApp", so there is no delivery row
+    // for a later retry to replay.
+    expect([...test.logs.values()].filter((record) => record.channel === "whatsapp")).toHaveLength(0);
+    expect(test.tasks.size).toBe(0);
+    expect(test.failed).toEqual([]);
+  });
+
+  it("still sends an approved template when the gate is supplied", async () => {
+    const renewal = due("renewal_14", {
+      journey: "renewal",
+      instanceKey: "period:2027-02-01T00:00:00.000Z",
+    });
+    const test = harness([renewal], () => context({
+      whatsappOptIn: true,
+      whatsappNumber: "+85255550000",
+    }));
+    // The positive control, so the assertion above can never go vacuous: a gate
+    // that refused everything would satisfy it just as well as a working one.
+    const gated: JourneyRunnerDependencies = {
+      ...test.deps,
+      approvedTemplateKeys: new Set(["renewal_14"]),
+    };
+
+    await runJourneyBatch(gated, {now, limit: 1});
+
+    expect(test.sentWhatsapp).toEqual([{
+      idempotencyKey: `${renewal.deliveryKey}:whatsapp`,
+      template: "renewal_14",
+    }]);
+  });
+
   it("reschedules a retryable first failure with the claim fencing token", async () => {
     const welcome = due("welcome");
     const test = harness([welcome]);

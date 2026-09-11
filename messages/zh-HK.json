@@ -2257,7 +2257,43 @@
       "cohorts": "啟航計劃",
       "approvals": "審批",
       "reports": "報告",
-      "automations": "自動化"
+      "automations": "自動化",
+      "templates": "WhatsApp 範本"
+    },
+    "templates": {
+      "eyebrow": "WhatsApp 發送",
+      "title": "WhatsApp 範本",
+      "description": "只有在此獲批准的範本才可發送。Meta 於 WhatsApp Business 帳戶批准後，方可在此批准該範本；其餘一律略過而非發送。",
+      "columns": {
+        "key": "識別碼",
+        "elementName": "範本名稱",
+        "language": "語言",
+        "category": "類別",
+        "variables": "變數",
+        "status": "狀態",
+        "approvedAt": "批准日期"
+      },
+      "status": {
+        "pending": "待批",
+        "approved": "已批准",
+        "rejected": "已拒絕",
+        "disabled": "已停用"
+      },
+      "category": {
+        "marketing": "推廣",
+        "utility": "通知",
+        "authentication": "驗證"
+      },
+      "approve": "批准",
+      "reject": "拒絕",
+      "disable": "停用",
+      "rejectionReason": "原因",
+      "previewEn": "預覽（英文）",
+      "previewZhHk": "預覽（繁體中文）",
+      "savePreview": "儲存預覽",
+      "empty": "範本登記尚未有資料。在登記首個範本之前，以環境變數的已批准清單為準。",
+      "error": "無法載入範本登記。",
+      "goLive": "在此批准至少一個範本之前，WhatsApp 不會發出任何訊息。"
     },
     "inbox": {
       "eyebrow": "會員及潛在客戶對話",

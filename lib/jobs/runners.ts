@@ -56,6 +56,7 @@ import {
   eventReminderVariables,
 } from "@/lib/events/reminder-enrollment";
 import {JobRequestError, type PreparedJob} from "@/lib/jobs/handler";
+import {approvedTemplateKeys} from "@/lib/whatsapp/approved-templates";
 
 const MAX_WORKER_ALERT_BYTES = 4_096;
 const RUNNER_BATCH_LIMIT = 100;
@@ -426,6 +427,12 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
       // has always passed it; this outbound path is the one that omitted it.
       RUN_LIVE_WOZTELL: process.env.RUN_LIVE_WOZTELL,
     }),
+    // C-7 (C2 Task 2). The registry is read HERE, once per batch, and handed to
+    // the runner as a resolved set: the runner must not read `process.env` or
+    // open a database of its own, and an unawaited promise parked on this key
+    // would answer `has(…) === false` for every template with no type error —
+    // silently demoting every journey WhatsApp send to email.
+    approvedTemplateKeys: await approvedTemplateKeys(),
     emailFrom,
   }, {now, limit: RUNNER_BATCH_LIMIT});
 }

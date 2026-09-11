@@ -130,15 +130,22 @@ function conversationsWithoutInboundAppend(runId: string) {
  * modes, which is why `tests/unit/woztell-concierge.test.ts` and the four outbox
  * integration tests need no edit.
  */
-function conciergeApprovedTemplateKeys(): ReadonlySet<WhatsAppTemplateKey> {
-  const allowed = approvedTemplateKeys();
+async function conciergeApprovedTemplateKeys(): Promise<ReadonlySet<WhatsAppTemplateKey>> {
+  const allowed = await approvedTemplateKeys();
   return new Set([...CONCIERGE_FOLLOW_UP_TEMPLATE_KEYS].filter((key) => allowed.has(key)));
 }
 
-export function createProductionWoztellProcessorDependencies(
+/**
+ * `async` since C-7 (C2 Task 2): the approved set is a database read in live
+ * mode. `WoztellDeliveryDependencies.approvedTemplateKeys` stays a RESOLVED
+ * `ReadonlySet` — an unawaited promise used as a `Set` answers
+ * `has(…) === false` for every key with no type error, which is a gate that
+ * silently refuses everything and a concierge that never follows up.
+ */
+export async function createProductionWoztellProcessorDependencies(
   env: RuntimeEnvironment,
   channel: ChannelAdapter,
-): WoztellWebhookProcessorDependencies {
+): Promise<WoztellWebhookProcessorDependencies> {
   const now = () => new Date();
   const store = createPostgresWoztellStore(now);
   const profileResolver = createWoztellProfileResolverRepository();
@@ -146,6 +153,10 @@ export function createProductionWoztellProcessorDependencies(
   const deliveryOutbox = createWoztellDeliveryOutboxRepository();
   const deliveryStamp = createWoztellDeliveryStampRepository();
   const inboundEvents = createWoztellInboundEventsRepository(now);
+  // Resolved BEFORE the bag is built, not inside it: the delivery dependency is
+  // typed as a plain `ReadonlySet`, so a promise parked there would type-check
+  // and refuse every template at run time.
+  const conciergeTemplates = await conciergeApprovedTemplateKeys();
   const appOrigin = env.appUrl;
   return {
     channel,
@@ -199,7 +210,7 @@ export function createProductionWoztellProcessorDependencies(
     anonymousOwnerHash(normalizedSender) {
       return woztellAnonymousOwnerHash(env, normalizedSender);
     },
-    approvedTemplateKeys: conciergeApprovedTemplateKeys(),
+    approvedTemplateKeys: conciergeTemplates,
     async recordContact(input) {
       const contact = await contactsRepository.upsertFromWhatsApp(contactWriterActor("whatsapp"), {
         phoneE164: input.phoneE164,

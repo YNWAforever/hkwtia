@@ -180,7 +180,14 @@ export type InboxReplyDependencies = Readonly<{
   inbox: Pick<InboxRepository, "getTranscript" | "queueStaffMessage" | "settleStaffMessage">;
   eligibility: Pick<MessageEligibilityRepository, "whatsAppEligibility">;
   channel: Pick<ChannelAdapter, "sendSessionMessage" | "sendTemplateMessage">;
-  approvedTemplateKeys: () => ReadonlySet<WhatsAppTemplateKey>;
+  /**
+   * Either shape, because C-7 (C2 Task 2) made the module function `async` while
+   * every fixture in the suite injects a plain `Set`. The call site `await`s, so
+   * a synchronous stub and the real registry read are both correct here — and a
+   * fixture that had to become a promise would have been eight files of churn
+   * for a gate they are not testing.
+   */
+  approvedTemplateKeys: () => ReadonlySet<WhatsAppTemplateKey> | Promise<ReadonlySet<WhatsAppTemplateKey>>;
   now: () => Date;
 }>;
 
@@ -201,7 +208,7 @@ function defaultInboxReplyDependencies(): InboxReplyDependencies {
       // provider id written into the messages row, so nothing would alert.
       RUN_LIVE_WOZTELL: process.env.RUN_LIVE_WOZTELL,
     }),
-    approvedTemplateKeys: () => approvedTemplateKeys(),
+    approvedTemplateKeys: async () => await approvedTemplateKeys(),
     now: () => new Date(),
   };
 }
@@ -477,7 +484,7 @@ export async function sendInboxReply(
     //    `<select>` alone would let a hand-posted formData carrying any config
     //    key reach `sendTemplateMessage` — an unapproved elementName is a
     //    provider 4xx, a permanent failure and a staff task per recipient (O-7).
-    if (!deps.approvedTemplateKeys().has(templateKey as WhatsAppTemplateKey)) {
+    if (!(await deps.approvedTemplateKeys()).has(templateKey as WhatsAppTemplateKey)) {
       throw new InboxReplyError("TEMPLATE_NOT_APPROVED");
     }
   }

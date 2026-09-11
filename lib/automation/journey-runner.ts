@@ -160,6 +160,18 @@ export type JourneyRunnerDependencies = Readonly<{
   renderEmail: (input: RenderEmailInput) => Promise<RenderedEmail>;
   emailTransport: EmailTransport;
   whatsappTransport: Pick<ChannelAdapter, "sendTemplateMessage">;
+  /**
+   * C-7 (C2 Task 2). Which template keys the `whatsapp_templates` registry has
+   * approved, resolved by the caller — `lib/jobs/runners.ts` is the only one
+   * that passes it. The runner must not read `process.env` or open a database
+   * of its own.
+   *
+   * OPTIONAL, and absent means "no gate", which is this runner's behaviour up to
+   * and including Phase C1. The gate is a production concern; a unit test that
+   * had to enumerate approved templates in order to exercise dunning would be
+   * testing the wrong thing, and eight fixtures construct this bag.
+   */
+  approvedTemplateKeys?: ReadonlySet<WhatsAppTemplateKey>;
   emailFrom: string;
 }>;
 
@@ -442,10 +454,27 @@ function whatsappVariables(
   );
 }
 
-function whatsappTemplate(step: JourneyStep): WhatsAppTemplateKey | null {
-  return Object.prototype.hasOwnProperty.call(WHATSAPP_TEMPLATES, step.template)
-    ? step.template as WhatsAppTemplateKey
-    : null;
+/**
+ * C-7 (C2 Task 2) closed the hole `config/whatsapp-templates.ts` claimed was
+ * already closed: this used to accept any own property of `WHATSAPP_TEMPLATES`,
+ * so `renewal_14`, `dunning_3` and `event_reminder_24h` reached the provider
+ * with no allowlist check at all.
+ *
+ * `null` is the deliberate answer for an unapproved key, not a failure:
+ * `sendWhatsapp` already reads `null` as "no WhatsApp channel for this step" and
+ * returns `false`, so the step delivers by email alone. Raising instead would
+ * turn a working dunning email into a permanent delivery failure plus a staff
+ * task per member the first time Meta paused a template — the exact regression
+ * a fail-closed gate makes available.
+ */
+function whatsappTemplate(
+  step: JourneyStep,
+  approved: ReadonlySet<WhatsAppTemplateKey> | undefined,
+): WhatsAppTemplateKey | null {
+  if (!Object.prototype.hasOwnProperty.call(WHATSAPP_TEMPLATES, step.template)) return null;
+  const template = step.template as WhatsAppTemplateKey;
+  // `undefined` means the caller supplied no registry answer: today's behaviour.
+  return approved === undefined || approved.has(template) ? template : null;
 }
 
 async function completeFailedWhatsapp(
@@ -470,7 +499,7 @@ async function sendWhatsapp(
   step: JourneyStep,
   context: JourneyRunnerContext,
 ): Promise<boolean> {
-  const template = whatsappTemplate(step);
+  const template = whatsappTemplate(step, dependencies.approvedTemplateKeys);
   const whatsappNumber = context.whatsappNumber?.trim();
   if (
     !step.channels.includes("whatsapp")

@@ -33,6 +33,7 @@ const linkLabelKeys = {
   approvals: "navigation.approvals",
   reports: "navigation.reports",
   automations: "navigation.automations",
+  templates: "navigation.templates",
 } satisfies Record<AdminNavLinkId, string>;
 
 export function AdminNav({locale}: Readonly<{locale: AppLocale}>) {

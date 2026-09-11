@@ -2256,7 +2256,43 @@
       "cohorts": "Launch Pad cohorts",
       "approvals": "Approvals",
       "reports": "Reports",
-      "automations": "Automations"
+      "automations": "Automations",
+      "templates": "WhatsApp templates"
+    },
+    "templates": {
+      "eyebrow": "WhatsApp delivery",
+      "title": "WhatsApp templates",
+      "description": "Only a template approved here can be sent. Approve a key once Meta has approved it in the WhatsApp Business account; anything else is skipped, not sent.",
+      "columns": {
+        "key": "Key",
+        "elementName": "Template name",
+        "language": "Language",
+        "category": "Category",
+        "variables": "Variables",
+        "status": "Status",
+        "approvedAt": "Approved"
+      },
+      "status": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "disabled": "Disabled"
+      },
+      "category": {
+        "marketing": "Marketing",
+        "utility": "Utility",
+        "authentication": "Authentication"
+      },
+      "approve": "Approve",
+      "reject": "Reject",
+      "disable": "Disable",
+      "rejectionReason": "Reason",
+      "previewEn": "Preview (English)",
+      "previewZhHk": "Preview (Traditional Chinese)",
+      "savePreview": "Save previews",
+      "empty": "The registry is empty. The approved-key environment variable is the fallback until a template is registered.",
+      "error": "We could not load the template registry.",
+      "goLive": "Nothing is sent on WhatsApp until at least one template is approved here."
     },
     "inbox": {
       "eyebrow": "Member and lead conversations",

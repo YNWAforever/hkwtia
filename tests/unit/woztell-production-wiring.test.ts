@@ -66,6 +66,10 @@ function channel(): ChannelAdapter {
  * forgotten spread and a permanently dropped delivery tick.
  */
 describe("production WOZTELL processor wiring (C-1 Task 4)", () => {
+  // A PROMISE since C-7 (C2 Task 2): the factory resolves the concierge's
+  // approved-template set before it builds the bag, because the delivery
+  // dependency is typed as a plain `ReadonlySet` and an unawaited promise parked
+  // there type-checks while refusing every template.
   const dependencies = createProductionWoztellProcessorDependencies(env, channel());
 
   it.each([
@@ -86,8 +90,8 @@ describe("production WOZTELL processor wiring (C-1 Task 4)", () => {
     "claimInbound",
     "resolveProfile",
     "markCompleted",
-  ] as const)("wires %s", (key) => {
-    expect(typeof dependencies[key]).toBe("function");
+  ] as const)("wires %s", async (key) => {
+    expect(typeof (await dependencies)[key]).toBe("function");
   });
 
   it("keeps the profile resolver's own resolveProfile last, so an opted-out member stays a member", async () => {
@@ -105,7 +109,7 @@ describe("production WOZTELL processor wiring (C-1 Task 4)", () => {
     // was green whichever way round the spreads went, which is the one thing it
     // existed to catch.
     const wired = capture();
-    await dependencies.resolveProfile("+85290000000");
+    await (await dependencies).resolveProfile("+85290000000");
     expect(wired.sql()).not.toMatch(OPT_IN_FILTER);
 
     // The positive control, so the assertion above can never go vacuous again:

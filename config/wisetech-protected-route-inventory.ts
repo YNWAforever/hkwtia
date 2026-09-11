@@ -80,6 +80,7 @@ export const protectedRouteOwnershipInventory: readonly ProtectedRouteOwner[] = 
   owner({id: "admin-board-draft-detail", family: "admin", classification: "admin-page", routePath: "/admin/reports/board-drafts/[id]", filePath: "app/[locale]/(admin)/admin/reports/board-drafts/[id]/page.tsx", dataOwner: "Board-report draft selected by id."}),
   owner({id: "admin-reports", family: "admin", classification: "admin-page", routePath: "/admin/reports", filePath: "app/[locale]/(admin)/admin/reports/page.tsx", dataOwner: "Staff reporting surfaces."}),
   owner({id: "admin-segments", family: "admin", classification: "admin-page", routePath: "/admin/segments", filePath: "app/[locale]/(admin)/admin/segments/page.tsx", dataOwner: "Staff segmentation controls."}),
+  owner({id: "admin-templates", family: "admin", classification: "admin-page", routePath: "/admin/templates", filePath: "app/[locale]/(admin)/admin/templates/page.tsx", dataOwner: "WhatsApp template approval registry (Phase C2, C-7)."}),
 
   owner({id: "api-admin-segment-export", family: "api", classification: "api-handler", routePath: "/api/admin/segments/[id]/export", filePath: "app/api/admin/segments/[id]/export/route.ts", dataOwner: "Authorised segment export handler."}),
   owner({id: "api-ai-concierge", family: "api", classification: "api-handler", routePath: "/api/ai/concierge", filePath: "app/api/ai/concierge/route.ts", dataOwner: "Guarded Concierge conversation action."}),

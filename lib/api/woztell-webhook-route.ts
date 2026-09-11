@@ -93,8 +93,10 @@ export async function POST(request: Request): Promise<Response> {
     ...woztellCredentialsFrom(env),
     RUN_LIVE_WOZTELL: process.env.RUN_LIVE_WOZTELL,
   });
+  // `await`ed since C-7 (C2 Task 2): the concierge's approved-template set is a
+  // registry read in live mode, and the bag carries it as a resolved `Set`.
   const productionDependencies =
-    createProductionWoztellProcessorDependencies(runtimeEnv, channel);
+    await createProductionWoztellProcessorDependencies(runtimeEnv, channel);
   return createProductionWoztellWebhookPostHandler({
     channel,
     processorDependencies:

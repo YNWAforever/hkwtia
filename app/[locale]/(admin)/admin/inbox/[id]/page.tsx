@@ -50,11 +50,14 @@ export default async function AdminInboxThreadPage({params}: Props) {
     ? t("window.open", countdown)
     : t(`window.${replyState.state}`);
 
-  // One call, one place, reading the same set as Task 7's TEMPLATE_NOT_APPROVED
-  // gate — a picker that offers a key the gate would refuse is a picker that
-  // lies. C-7 (C2 Task 2) swaps the source for the `whatsapp_templates` registry
-  // and makes this `await`; the prop shape does not change.
-  const approved = approvedTemplateKeys();
+  // One call, one place, reading the same set as C1 Task 7's
+  // TEMPLATE_NOT_APPROVED gate — a picker that offers a key the gate would
+  // refuse is a picker that lies. C-7 (C2 Task 2) swapped the source for the
+  // `whatsapp_templates` registry and made this `await`; the prop shape did not
+  // change. The `await` is load-bearing: an unawaited `Promise<ReadonlySet<…>>`
+  // has no `.has`, and spread through `Array.from` it would have offered an
+  // empty picker with no type error.
+  const approved = await approvedTemplateKeys();
   const templates = Object.keys(WHATSAPP_TEMPLATES)
     .filter((key): key is keyof typeof WHATSAPP_TEMPLATES => approved.has(key as keyof typeof WHATSAPP_TEMPLATES))
     // The provider's own element name, not a translated label: it is the string

@@ -53,6 +53,7 @@ export const adminNavigationGroups = [
       {id: "approvals", href: "/admin/approvals"},
       {id: "reports", href: "/admin/reports"},
       {id: "automations", href: "/admin/automations"},
+      {id: "templates", href: "/admin/templates"},
     ],
   },
 ] as const satisfies readonly InternalNavGroupConfig[];

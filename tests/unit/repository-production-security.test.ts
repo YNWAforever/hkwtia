@@ -19,6 +19,7 @@ import {profilesRepository} from "@/lib/db/repos/profiles";
 import {createPostgresWoztellStore} from "@/lib/db/repos/woztell";
 import {createWoztellDeliveryStampRepository} from "@/lib/db/repos/woztell-delivery-stamp";
 import {createWoztellInboundEventsRepository} from "@/lib/db/repos/woztell-inbound-events";
+import {createWhatsAppTemplatesRepository, templateRegistryActor} from "@/lib/db/repos/whatsapp-templates";
 import {ANONYMOUS_ACTOR, type Actor} from "@/lib/membership/lifecycle";
 import type {ConciergeAgentActor} from "@/lib/auth/agent-actor";
 
@@ -1003,6 +1004,52 @@ describe("production repository security boundaries", () => {
         whatsappMemberId: null,
         contactId: null,
       })).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * Phase C2 S-14, Task 2 (C-7). The registry decides which template may reach a
+   * member's phone at all, so its two principals are deliberately disjoint: the
+   * admin door refuses the capability actor, and the send gate's `approved` read
+   * refuses every session actor including an admin. A single door that accepted
+   * both would be reachable from a `"use server"` boundary with a forged actor —
+   * and approving a template is the one write in this phase that turns an
+   * unreviewed element name into something twenty people receive.
+   */
+  it.each([
+    ["member", actor],
+    ["admin", {kind: "staff", userId: "staff-a", profileId: "staff-a", role: "superadmin"}],
+    ["anonymous", ANONYMOUS_ACTOR],
+    ["hand-rolled registry shape", {kind: "template-registry", userId: null}],
+  ] as const)(
+    "refuses a %s actor on the WhatsApp template approval read before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const templates = createWhatsAppTemplatesRepository(loadDatabase);
+
+      await expect(templates.approved(forged as never)).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    ["member", actor],
+    ["anonymous", ANONYMOUS_ACTOR],
+    // The capability the send gate mints. It may READ the approved set and must
+    // never be able to change it — otherwise the gate could approve itself.
+    ["template registry capability", templateRegistryActor()],
+  ] as const)(
+    "refuses a %s actor on every WhatsApp template registry write before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const templates = createWhatsAppTemplatesRepository(loadDatabase);
+
+      await expect(templates.list(forged as never)).rejects.toThrow("FORBIDDEN");
+      await expect(templates.setStatus(forged as never, "renewal_14", "approved", null))
+        .rejects.toThrow("FORBIDDEN");
+      await expect(templates.updatePreviews(forged as never, "renewal_14", {en: "Hello"}))
+        .rejects.toThrow("FORBIDDEN");
       expect(loadDatabase).not.toHaveBeenCalled();
     },
   );
