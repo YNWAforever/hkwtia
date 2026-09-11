@@ -2398,7 +2398,8 @@
         "not_opted_in": "未同意接收",
         "suppressed": "已停止接收",
         "plan_ineligible": "會籍並非生效中",
-        "missing_variable": "訊息內容未填妥"
+        "missing_variable": "訊息內容未填妥",
+        "marketing_suppressed": "發送前同意狀態已改變"
       },
       "status": {
         "draft": "草稿",
@@ -2415,6 +2416,7 @@
         "createDraft": "建立草稿",
         "submitForReview": "提交審批",
         "approve": "批准並排程",
+        "approveEmail": "批准並加入發送隊列",
         "reject": "拒絕",
         "next": "下一步",
         "back": "上一步",
@@ -2425,6 +2427,7 @@
       "templateUnapproved": "此範本尚未獲批准，請先於「WhatsApp 範本」批准。",
       "report": {
         "title": "發送情況",
+        "queued": "待發送",
         "sent": "已發送",
         "delivered": "已送達",
         "read": "已閱讀",

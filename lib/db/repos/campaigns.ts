@@ -259,45 +259,107 @@ async function appendCampaignAudit(
  * never `audience."id"::uuid`: a member row's id is a text profile id, and
  * Postgres is free to evaluate the cast before the `kind` test, which would
  * fail the whole statement on the first mixed-audience segment.
+ *
+ * ONE ROW PER PERSON, and the `DISTINCT ON` below is the whole of it. Read this
+ * before touching either half; they are one fix and each is useless alone.
+ *
+ * The audience is a UNION of two identity spaces — a member arm keyed by
+ * `profiles.id` and a contact arm keyed by `contacts.id` — and `contactArm`
+ * does not drop a contact carrying a `profile_id`, so a person who is both
+ * appears TWICE in an `audience: "both"` segment. Until C2 Task 9 that was
+ * harmless by construction: the only `createCampaign` caller was `queueCampaign`
+ * with a hard-coded `channel: "email"`, and a contact's `marketingConsent` is
+ * `false` by construction, so the duplicate always landed `not_opted_in`. Task 9's
+ * `createCampaignDraft` is the first writer that passes `channel: "whatsapp"`,
+ * and that spent the precondition: both partial unique indexes on
+ * `campaign_recipients` are on DIFFERENT columns, so `insertRecipients`' bare
+ * `onConflictDoNothing()` cannot collapse the pair, the preview a second admin
+ * approves counts the person twice, the report says 20 recipients for 19 people,
+ * and the blast sends the same marketing template twice to one phone number.
+ *
+ * 1. The `contacts` join reaches BOTH arms — a member row now joins the contact
+ *    that links back to it. `contacts_profile_unique` is a partial UNIQUE index
+ *    on `profile_id`, so that is at most one row and the member arm cannot fan
+ *    out. This exists so the collapse in (2) cannot LOSE a withdrawal: a STOP
+ *    that resolved no profile (the webhook's `markWhatsAppOptedOut` is keyed on
+ *    the phone, and `message_suppressions.profile_id` is NOT NULL) stamps only
+ *    `contacts.whatsapp_opted_out_at`, which the member arm could not see. Drop
+ *    the contact row without this and the surviving member row reads
+ *    `whatsappOptedOutAt: null` and the blast reaches somebody who said STOP —
+ *    a worse bug than the duplicate it was fixing.
+ * 2. `DISTINCT ON` over the person, member row preferred. The member identity is
+ *    the one to keep: it carries the real `marketing_consent` (a contact's is
+ *    `false` by construction, so keeping the contact row would blank every
+ *    linked member out of an email campaign), the membership facts the template
+ *    variables resolve from, and a `profile_id` for the recipient row.
+ *
+ * What is deliberately NOT merged is the opt-in and the number. Those two are a
+ * PAIR — the number a person consented on — and `profiles.whatsapp_opt_in` /
+ * `profiles.whatsapp_number` is a different pair from `contacts.whatsapp_opt_in`
+ * / `contacts.phone_e164`. Crossing them is the quiet widening
+ * `linkedMemberWithdrawalAt` refuses for the same reason. A withdrawal is the
+ * one fact that belongs to the human rather than to either record, which is why
+ * it and only it is unioned. The visible consequence is that a member with a
+ * linked contact but no `profiles.whatsapp_number` reads `no_number` in the
+ * preview instead of being reached on the contact's phone; that is a count a
+ * human can see and fix, not a silent send.
  */
 function audienceTargets(filter: SegmentFilterSet, now: Date): SQL {
   return sql`
-    SELECT
-      audience."kind" AS kind,
-      audience."id" AS id,
-      -- The suppression sub-selects scope on profile_id, which for a prospect
-      -- is the optional member link C-4 writes. That is how a contact can be
-      -- suppressed at all, given message_suppressions.profile_id is NOT NULL.
-      COALESCE(${contacts.profileId}, ${profiles.id}) AS profile_id,
-      audience."displayName" AS display_name,
-      audience."email" AS email,
-      audience."whatsappNumber" AS whatsapp_number,
-      COALESCE(${profiles.locale}, ${contacts.locale}) AS locale,
-      COALESCE(${profiles.consentMarketing}, false) AS marketing_consent,
-      audience."whatsappOptIn" AS whatsapp_opt_in,
-      ${contacts.whatsappOptedOutAt} AS whatsapp_opted_out_at
-    FROM (${projectedAudience(filter, now)}) AS audience
-    LEFT JOIN ${profiles} ON audience."kind" = 'member' AND ${profiles.id} = audience."id"
-    LEFT JOIN ${contacts} ON audience."kind" = 'contact' AND ${contacts.id}::text = audience."id"
+    SELECT DISTINCT ON (person.person_key)
+      person.kind AS kind,
+      person.id AS id,
+      person.profile_id AS profile_id,
+      person.display_name AS display_name,
+      person.email AS email,
+      person.whatsapp_number AS whatsapp_number,
+      person.locale AS locale,
+      person.marketing_consent AS marketing_consent,
+      person.whatsapp_opt_in AS whatsapp_opt_in,
+      person.whatsapp_opted_out_at AS whatsapp_opted_out_at
+    FROM (
+      SELECT
+        audience."kind" AS kind,
+        audience."id" AS id,
+        -- The suppression sub-selects scope on profile_id, which for a prospect
+        -- is the optional member link C-4 writes. That is how a contact can be
+        -- suppressed at all, given message_suppressions.profile_id is NOT NULL.
+        COALESCE(${contacts.profileId}, ${profiles.id}) AS profile_id,
+        -- The person, not the row. A contact with no member link is only ever
+        -- itself, so it keys on its own id; both prefixes are spelled out so a
+        -- contact id can never collide with a profile id.
+        COALESCE('profile:' || COALESCE(${contacts.profileId}, ${profiles.id}), 'contact:' || audience."id") AS person_key,
+        audience."displayName" AS display_name,
+        audience."email" AS email,
+        audience."whatsappNumber" AS whatsapp_number,
+        COALESCE(${profiles.locale}, ${contacts.locale}) AS locale,
+        COALESCE(${profiles.consentMarketing}, false) AS marketing_consent,
+        audience."whatsappOptIn" AS whatsapp_opt_in,
+        ${contacts.whatsappOptedOutAt} AS whatsapp_opted_out_at
+      FROM (${projectedAudience(filter, now)}) AS audience
+      LEFT JOIN ${profiles} ON audience."kind" = 'member' AND ${profiles.id} = audience."id"
+      LEFT JOIN ${contacts} ON (
+        (audience."kind" = 'contact' AND ${contacts.id}::text = audience."id")
+        OR (audience."kind" = 'member' AND ${contacts.profileId} = audience."id")
+      )
+    ) AS person
+    -- Spelled as a boolean rather than relying on 'contact' < 'member': the
+    -- preference is "the member row wins", and an alphabetical accident is not
+    -- a rule the next reader can check.
+    ORDER BY person.person_key, (person.kind = 'member') DESC, person.id
   `;
 }
 
 /**
- * One row per AUDIENCE row, and the audience is a union of two identity spaces:
- * a member arm keyed by `profiles.id` and a contact arm keyed by `contacts.id`.
- * A person who is both — a member whose `contacts.profile_id` links back to
- * them, which C-4 writes — therefore appears twice in an `audience: "both"`
- * segment, and `snapshotAudience` writes a recipient row for each. Both partial
- * unique indexes on `campaign_recipients` are satisfied (different columns), so
- * nothing downstream catches it.
+ * One row per PERSON, not one per audience row: `audienceTargets` collapses the
+ * member and contact rows of somebody who is both, and unions their withdrawal
+ * evidence on the way. Read its docblock before changing anything here — the
+ * count this returns is the count a second admin approves under S-7, the size of
+ * the snapshot on `campaign_recipients`, and the number of messages the blast
+ * sends, and those three are the same number only because of that collapse.
  *
- * Harmless today only by construction: the sole `createCampaign` caller is
- * `queueCampaign`, which hard-codes `channel: "email"`, and a contact's
- * `marketingConsent` is `false` by construction, so the duplicate always lands
- * `not_opted_in`. The moment a WhatsApp arm exists it stops being harmless —
- * the same template goes twice to the same phone number. Whoever builds it owes
- * this a cross-identity dedupe (or the contact arm has to drop contacts that
- * carry a `profile_id`).
+ * `ORDER BY facts."kind", facts."id"` is presentation, not identity. It does no
+ * de-duplication and never did.
  */
 async function campaignAudience(store: unknown, filter: SegmentFilterSet, now: Date): Promise<readonly RecipientFacts[]> {
   const db = asDb(store);

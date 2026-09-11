@@ -2397,7 +2397,8 @@
         "not_opted_in": "Not opted in",
         "suppressed": "Opted out",
         "plan_ineligible": "Membership not active",
-        "missing_variable": "Message details missing"
+        "missing_variable": "Message details missing",
+        "marketing_suppressed": "Consent changed before sending"
       },
       "status": {
         "draft": "Draft",
@@ -2414,6 +2415,7 @@
         "createDraft": "Create draft",
         "submitForReview": "Submit for review",
         "approve": "Approve and schedule",
+        "approveEmail": "Approve and queue",
         "reject": "Reject",
         "next": "Next",
         "back": "Back",
@@ -2424,6 +2426,7 @@
       "templateUnapproved": "This template is not approved yet. Approve it under WhatsApp templates first.",
       "report": {
         "title": "Delivery",
+        "queued": "Waiting to send",
         "sent": "Sent",
         "delivered": "Delivered",
         "read": "Read",

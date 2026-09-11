@@ -8,6 +8,7 @@ import {
 } from "@/lib/admin/campaign-review-core";
 import {
   CAMPAIGN_WIZARD_STEPS,
+  campaignDraftKey,
   createCampaignDraft,
   nextWizardStep,
   parseCampaignWizardQuery,
@@ -160,6 +161,38 @@ describe("the campaign wizard's input contracts", () => {
 
     expect(result).toEqual({campaignId, recipientCount: 7, disposition: "existing"});
     expect(calls.createCampaign).not.toHaveBeenCalled();
+  });
+
+  /**
+   * The idempotency key is the wizard RUN and the SEGMENT, because the unique
+   * index behind it is on the key alone while the recovery read
+   * (`findCampaignByIdempotencyKey`) filters on `segment_id`. With the draft
+   * uuid as the whole key, a reader who created a draft, went Back to the wizard
+   * URL that still carries it, chose a different segment and pressed Create
+   * draft again made the INSERT conflict on a key the recovery read could not
+   * see — and `createCampaign` threw "Campaign idempotency claim was not
+   * visible" as a 500 on a button.
+   *
+   * Both halves are asserted together on purpose. A key that varied with the
+   * segment but not deterministically would fix the 500 by breaking the
+   * double-submit recovery the key exists for, which is the more expensive of
+   * the two failures: it writes a second blast.
+   */
+  it("keys the draft on the wizard run AND the segment, deterministically", async () => {
+    const otherSegmentId = "66666666-6666-4666-8666-666666666666";
+    const key = campaignDraftKey(draftId, segmentId);
+
+    expect(campaignDraftKey(draftId, segmentId)).toBe(key);
+    expect(campaignDraftKey(draftId, otherSegmentId)).not.toBe(key);
+    expect(key).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+
+    const {calls, dependencies} = wizardDependencies();
+    await createCampaignDraft(creator, whatsappDraft, dependencies);
+
+    // The same key for the recovery read and the write. The two disagreeing is
+    // what turns a refresh into a second campaign.
+    expect(calls.findCampaignByIdempotencyKey.mock.calls[0][2]).toBe(key);
+    expect(calls.createCampaign.mock.calls[0][2]).toMatchObject({idempotencyKey: key});
   });
 });
 

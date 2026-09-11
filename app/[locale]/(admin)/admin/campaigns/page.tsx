@@ -106,14 +106,20 @@ export default async function AdminCampaignsPage({params, searchParams}: Props) 
   const blockedNotice = blocking === null
     ? null
     : blocking === "variables" ? t("variables.missing") : t("blocked", {step: t(`steps.${blocking}`)});
-  const summary = state.step === "preview" && blocking === null && state.segmentId !== null
-    ? await previewCampaignAudience(actor, {
-      segmentId: state.segmentId,
+  // The three reads above are told apart from an outage by `t("error")`, and so
+  // is this one. "We could not ask" and "nobody in this segment is blocked" are
+  // the same empty table on the screen and opposite facts underneath, and the
+  // second admin who approves the blast is reading this number.
+  const previewSegmentId = state.step === "preview" && blocking === null ? state.segmentId : null;
+  const summary = previewSegmentId === null
+    ? null
+    : await previewCampaignAudience(actor, {
+      segmentId: previewSegmentId,
       channel: state.channel,
       templateVariables,
       variablesTemplate: state.variables,
-    }).catch(() => null)
-    : null;
+    }).catch(() => null);
+  const previewError = previewSegmentId !== null && summary === null ? t("error") : null;
   const eligibility: readonly CampaignEligibilityRow[] | null = summary === null ? null : PREVIEW_REASONS.map((reason) => ({
     reason,
     label: t(`eligibility.${reason}`),
@@ -135,6 +141,7 @@ export default async function AdminCampaignsPage({params, searchParams}: Props) 
           createAction={createCampaignDraftAction.bind(null, path, browserPath)}
           eligibility={eligibility}
           formPath={browserPath}
+          previewError={previewError}
           labels={{
             steps: {
               name: t("steps.name"),

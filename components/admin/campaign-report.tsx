@@ -15,20 +15,30 @@ import type {CampaignReport as CampaignReportRecord} from "@/lib/admin/campaigns
  * and nothing plans a third), so on an email campaign both columns stay NULL
  * forever and both counters would sit at zero underneath a "Sent 18" that in
  * fact went out. Staff read "Delivered 0" after "Sent 18" as "the blast did not
- * arrive" and escalate a working send, so the email report shows six honest
- * numbers rather than eight with two dead ones: a zero that means "not
- * implemented" is worse than an absent column. If Task 10 Step 4b is ever cut,
- * cut these two rows for WhatsApp as well and record why.
+ * arrive" and escalate a working send, so the email report shows only the
+ * counters that have a writer rather than two more that never tick: a zero that
+ * means "not implemented" is worse than an absent column. If Task 10 Step 4b is
+ * ever cut, cut these two rows for WhatsApp as well and record why.
  *
  * The blocked breakdown carries a label per reason and falls back to the reason
  * key itself. That fallback is deliberate: `blocked_reason` names an
  * eligibility category the preview was written in, but a recipient refused at
  * SEND time carries only an `error_code`, and inventing a friendly word for a
- * code this screen has never seen would mislabel it.
+ * code this screen has never seen would mislabel it. The caller is expected to
+ * carry a label for every code the tree actually writes — the fallback is for
+ * the ones it does not yet — because a raw `marketing_suppressed` rendered to a
+ * zh-HK admin is a localisation hole, not a safe default.
+ *
+ * `queued` is rendered so the six numbers RECONCILE. Without it a campaign
+ * halfway through a blast read Recipients 20 / Sent 6 / Failed 0 / Not sent 0,
+ * with fourteen people in no bucket at all — every counter honest and the set of
+ * them impossible, which is the mirror image of the defect the `error_code`
+ * fold above fixed.
  */
 export type CampaignReportLabels = Readonly<{
   title: string;
   total: string;
+  queued: string;
   sent: string;
   delivered: string;
   read: string;
@@ -46,6 +56,7 @@ export function CampaignReport({report, labels, channel}: Props) {
     channel === "whatsapp" ? [[labels.delivered, report.delivered], [labels.read, report.read]] : [];
   const counters: readonly (readonly [string, number])[] = [
     [labels.total, report.total],
+    [labels.queued, report.queued],
     [labels.sent, report.sent],
     ...deliveryCounters,
     [labels.failed, report.failed],

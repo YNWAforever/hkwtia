@@ -241,6 +241,36 @@ describe("the campaign wizard page", () => {
     expect(screen.getByText(en.Admin.campaigns.templateUnapproved)).toBeInTheDocument();
   });
 
+  /**
+   * "We could not ask" and "nobody here is blocked" render the same empty table,
+   * and only one of them is a reason to stop. The preview read was the one of
+   * this page's four reads that failed silently: the step rendered with no
+   * counts, no message, and "Create draft" still offered — one click from a
+   * write that would have failed on the same outage.
+   */
+  it("says the preview read failed rather than rendering an empty preview", async () => {
+    state.preview.mockRejectedValue(new Error("down"));
+
+    render(await AdminCampaignsPage({
+      params: Promise.resolve({locale: "en"}),
+      searchParams: Promise.resolve({
+        campaignDraft: draftId,
+        step: "preview",
+        name: "September announcement",
+        channel: "whatsapp",
+        templateKey: "wtia_announcement_en",
+        segmentId,
+        var_memberName: "{{displayName}}",
+        var_headline: "Trade week",
+        var_detailUrl: "https://hkwtia.org/news",
+      }),
+    }));
+
+    expect(screen.getByRole("alert")).toHaveTextContent(en.Admin.campaigns.error);
+    expect(screen.queryByRole("button", {name: en.Admin.campaigns.actions.createDraft})).toBeNull();
+    expect(screen.queryByText(en.Admin.campaigns.eligibility.eligible)).toBeNull();
+  });
+
   it("renders the error state rather than an empty list when a read fails", async () => {
     state.listCampaigns.mockRejectedValue(new Error("down"));
 
@@ -327,11 +357,38 @@ describe("the campaign detail page", () => {
 
     expect(screen.queryByText(en.Admin.campaigns.report.delivered)).toBeNull();
     expect(screen.queryByText(en.Admin.campaigns.report.read)).toBeNull();
-    // The six counters that do have writers are untouched.
+    // Every counter that does have a writer is untouched.
     expect(screen.getByText(en.Admin.campaigns.report.total)).toBeInTheDocument();
+    expect(screen.getByText(en.Admin.campaigns.report.queued)).toBeInTheDocument();
     expect(screen.getByText(en.Admin.campaigns.report.sent)).toBeInTheDocument();
     expect(screen.getByText(en.Admin.campaigns.report.failed)).toBeInTheDocument();
     expect(screen.getByText(en.Admin.campaigns.report.blocked)).toBeInTheDocument();
+  });
+
+  /**
+   * Mid-blast, the counters have to add up. Without `queued` the report read
+   * Recipients 20 / Sent 6 / Failed 0 / Not sent 0 with fourteen people in no
+   * bucket at all — every number honest and the set of them impossible.
+   *
+   * `marketing_suppressed` is the same screen's other hole and the reason this
+   * case carries both: it is the ONE `error_code` `campaign-runner.ts` writes,
+   * on any campaign where a member withdraws between draft and send, and the
+   * report falls back to rendering an unlabelled reason key verbatim — so a
+   * zh-HK admin read an English snake_case token on the row that says somebody
+   * was spared a message they had asked not to get.
+   */
+  it("reconciles a report mid-send and names the send-time refusal in the reader's language", async () => {
+    state.actorProfileId = reviewerProfileId;
+    state.readCampaign.mockResolvedValue({
+      campaign: campaign(),
+      report: {total: 20, queued: 14, sent: 3, delivered: 0, read: 0, failed: 0, blocked: 3, byReason: {marketing_suppressed: 3}},
+    });
+
+    render(await AdminCampaignDetailPage({params: Promise.resolve({locale: "en", id: campaignId})}));
+
+    expect(screen.getByText(en.Admin.campaigns.report.queued)).toBeInTheDocument();
+    expect(screen.getByText(en.Admin.campaigns.eligibility.marketing_suppressed)).toBeInTheDocument();
+    expect(screen.queryByText("marketing_suppressed")).toBeNull();
   });
 
   it("404s a campaign that does not exist and shows the error state when the read fails", async () => {

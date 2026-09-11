@@ -56,6 +56,15 @@ type Props = Readonly<{
    * template fields were missing.
    */
   blockedNotice: string | null;
+  /**
+   * Set when the preview read itself failed, which is NOT the same as a preview
+   * that found nobody. An outage used to render the preview step with no table,
+   * no message and "Create draft" still offered — indistinguishable from a
+   * segment nobody in is blocked, and one click from a write that would fail on
+   * the same outage. The page names the two cases apart for its other three
+   * reads already; this is the fourth.
+   */
+  previewError: string | null;
   formPath: string;
   labels: CampaignWizardLabels;
   createAction: (formData: FormData) => void | Promise<void>;
@@ -104,7 +113,7 @@ const fieldClass = "min-h-11 w-full rounded-md border border-input bg-background
 
 export function CampaignWizard({
   state, steps, templateVariables, templateOptions, segmentOptions,
-  eligibility, summary, blocking, blockedNotice, formPath, labels, createAction,
+  eligibility, summary, blocking, blockedNotice, previewError, formPath, labels, createAction,
 }: Props) {
   // Through the helpers, not a second inline copy of them: the first version of
   // this component reimplemented all three, so the unit test that pinned
@@ -207,6 +216,9 @@ export function CampaignWizard({
                 here, before the blast, rather than as one permanent failure and
                 one staff task after it. */}
             {blockedNotice === null ? null : <p className="text-sm text-destructive">{blockedNotice}</p>}
+            {previewError === null ? null : (
+              <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-4 text-destructive" role="alert">{previewError}</p>
+            )}
             {eligibility === null ? null : (
               <dl className="max-w-md divide-y divide-border rounded-md border border-border">
                 {eligibility.map((row) => (
@@ -248,7 +260,10 @@ export function CampaignWizard({
 
       {/* A sibling, never a child: nested forms are illegal, and the GET form
           above must not carry the action that writes. */}
-      {current === "preview" && blocking === null ? (
+      {/* Never offered on top of a failed preview: the draft write would fail on
+          the same outage, and a button that 500s is a worse answer than a
+          sentence saying we could not ask. */}
+      {current === "preview" && blocking === null && previewError === null ? (
         <form action={createAction}>
           <HiddenState omit={[]} state={state} />
           <button className="min-h-11 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" type="submit">

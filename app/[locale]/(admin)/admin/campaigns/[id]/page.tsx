@@ -49,8 +49,14 @@ export default async function AdminCampaignDetailPage({params}: Props) {
   // control that would refuse them.
   const isCreator = campaign.createdByProfileId === actor.profileId;
   const path = `/${locale}/admin/campaigns/${campaign.id}`;
+  // Every reason key anything in the tree writes, not only the snapshot-time
+  // ones. `campaign-report.tsx` falls back to the raw key for a code it has
+  // never seen, and `marketing_suppressed` — which `campaign-runner.ts` writes
+  // for any member who withdraws between draft and send — is the one code the
+  // runner actually produces, so without it a zh-HK admin routinely read an
+  // English snake_case token on the most sensitive row of the report.
   const reasonLabels = Object.fromEntries(
-    [...ELIGIBILITY_CATEGORIES, "missing_variable"].map((reason) => [reason, t(`eligibility.${reason}`)]),
+    [...ELIGIBILITY_CATEGORIES, "missing_variable", "marketing_suppressed"].map((reason) => [reason, t(`eligibility.${reason}`)]),
   );
 
   return (
@@ -120,8 +126,13 @@ export default async function AdminCampaignDetailPage({params}: Props) {
                 // silent, permanent, and indistinguishable from waiting.
                 <p className="text-sm text-muted-foreground">{t("scheduleUnavailable")}</p>
               )}
+              {/* The email arm says "queue", because the sentence directly above
+                  it says this campaign cannot be scheduled. One button reading
+                  "Approve and schedule" beside "cannot be scheduled for a later
+                  time" is a contradiction on the one screen whose whole purpose
+                  is a second admin reading carefully before a blast. */}
               <button className="min-h-11 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" type="submit">
-                {t("actions.approve")}
+                {campaign.channel === "whatsapp" ? t("actions.approve") : t("actions.approveEmail")}
               </button>
             </form>
             <form action={rejectCampaignAction.bind(null, path)} className="space-y-3">
@@ -144,6 +155,7 @@ export default async function AdminCampaignDetailPage({params}: Props) {
           labels={{
             title: t("report.title"),
             total: t("report.total"),
+            queued: t("report.queued"),
             sent: t("report.sent"),
             delivered: t("report.delivered"),
             read: t("report.read"),

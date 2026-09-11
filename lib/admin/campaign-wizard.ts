@@ -1,5 +1,7 @@
 import "server-only";
 
+import {createHash} from "node:crypto";
+
 import {z} from "zod";
 
 import {
@@ -353,14 +355,43 @@ export async function previewCampaignAudience(
 }
 
 /**
+ * The idempotency key for one wizard run against one segment.
+ *
+ * The `campaignDraft` uuid alone used to be the key, and `campaigns`' unique
+ * index is on that column across the whole table — so a reader who created a
+ * draft, went BACK in the browser to the wizard URL (which still carries the
+ * uuid), chose a different segment and pressed "Create draft" again reached the
+ * one state `createCampaign` cannot recover from. The INSERT conflicted on the
+ * spent key while `findCampaignByIdempotencyKey`, which filters on `segment_id`,
+ * could not see the row holding it, so `createCampaign` threw "Campaign
+ * idempotency claim was not visible" — a 500 on a button, with nothing a staff
+ * member could act on and no explanation of what they did.
+ *
+ * Deriving the key from BOTH halves states what the wizard actually means: the
+ * same run against the same segment is one campaign however many times its last
+ * step is submitted, and the same run against a different segment is a different
+ * campaign. It is a DIGEST and not a fresh random value precisely because the
+ * double-submit recovery is the whole point of the key.
+ */
+export function campaignDraftKey(draftId: string, segmentId: string): string {
+  const digest = createHash("sha256").update(`campaign-draft:${draftId}:${segmentId}`).digest("hex");
+  // Shaped as an RFC 4122 v5 uuid — version nibble `5`, variant `10xx` — because
+  // three schemas between here and the column parse this value as a uuid. No
+  // reader anywhere depends on those bits meaning anything.
+  const variant = ((parseInt(digest.slice(16, 17), 16) & 0x3) | 0x8).toString(16);
+  return `${digest.slice(0, 8)}-${digest.slice(8, 12)}-5${digest.slice(13, 16)}-${variant}${digest.slice(17, 20)}-${digest.slice(20, 32)}`;
+}
+
+/**
  * The wizard's last step. Shaped on `queueCampaign` and deliberately different
  * in two places: it writes `status: 'draft'` rather than `queued`, so nothing
  * sends until a second admin approves it (S-7), and it resolves the template's
  * parameters per recipient rather than letting the caller supply them.
  *
- * `draftId` is the idempotency key the URL has carried since the first step, so
- * a double-submitted final step — or a reader who refreshes it — recovers the
- * draft that already exists instead of writing a second one.
+ * The idempotency key is `campaignDraftKey(draftId, segmentId)` — see there for
+ * why it is not the URL's draft uuid on its own — so a double-submitted final
+ * step, or a reader who refreshes it, recovers the draft that already exists
+ * instead of writing a second one.
  */
 export async function createCampaignDraft(
   actor: Actor,
@@ -379,7 +410,10 @@ export async function createCampaignDraft(
   return campaigns.transaction(actor, async (store) => {
     const segment = await campaigns.getSavedSegment(actor, store, parsed.segmentId);
     if (!segment) throw new Error("CAMPAIGN_SEGMENT_NOT_FOUND");
-    const existing = await campaigns.findCampaignByIdempotencyKey(actor, store, parsed.draftId, segment.id);
+    // Computed once and used for both the recovery read and the write: the two
+    // disagreeing about the key is the failure this replaced.
+    const idempotencyKey = campaignDraftKey(parsed.draftId, parsed.segmentId);
+    const existing = await campaigns.findCampaignByIdempotencyKey(actor, store, idempotencyKey, segment.id);
     if (existing) return {...existing, disposition: "existing" as const};
     const audience = await campaigns.audienceForSegment(actor, store, segment.filters);
     const snapshot = snapshotAudience(audience, {
@@ -394,7 +428,7 @@ export async function createCampaignDraft(
       template: parsed.template,
       templateKey: parsed.templateKey,
       variablesTemplate: parsed.variablesTemplate,
-      idempotencyKey: parsed.draftId,
+      idempotencyKey,
       status: "draft",
     });
     if (campaign.disposition === "existing") return campaign;

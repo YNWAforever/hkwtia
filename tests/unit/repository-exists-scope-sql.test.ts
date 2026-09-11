@@ -226,6 +226,51 @@ describe("EXISTS authorization scopes render as executable Postgres", () => {
   });
 
   /**
+   * C2 Task 9. One row per PERSON, and this is a SHAPE assertion because there
+   * is no database in this suite to prove it behaviourally — the one Postgres
+   * harness in the tree (`tests/unit/task7-postgres-integration.test.ts`) is
+   * gated on `RUN_POSTGRES_INTEGRATION=1`, is not run by CI, and its hand-written
+   * DDL predates `contacts` and `message_suppressions` entirely, so it cannot
+   * execute this statement at all. The expectations below are therefore each a
+   * piece of the defect, spelled so that deleting any one of them fails here
+   * rather than in a blast.
+   *
+   * A member and the contact that links back to them are two rows of ONE person
+   * (`contactArm` does not drop a contact carrying a `profile_id`); both partial
+   * unique indexes on `campaign_recipients` are satisfied by that pair because
+   * they are on different columns, so `insertRecipients`' bare
+   * `onConflictDoNothing()` cannot collapse it. Before the `DISTINCT ON` the
+   * preview a second admin approves counted that person twice, the report read
+   * 20 recipients for 19 people, and a WhatsApp blast sent one marketing
+   * template twice to one number.
+   *
+   * The last expectation is the other half. The collapse keeps the MEMBER row,
+   * and without the member arm reaching its linked contact that row reads
+   * `whatsapp_opted_out_at` as NULL for somebody whose STOP resolved no profile
+   * — dropping a withdrawal, which is worse than the duplicate it replaced.
+   */
+  it("collapses the two identities of one person to a single campaign audience row", async () => {
+    const statements: string[] = [];
+    const proxy = drizzle(async (query: string) => {
+      statements.push(query);
+      return {rows: []};
+    });
+
+    await campaignsRepository.audienceForSegment(
+      {kind: "staff", userId: "staff-1", profileId: "staff-1"},
+      proxy,
+      segmentFilterSchema.parse({audience: "both"}),
+    );
+
+    const rendered = statements.join("\n");
+    expect(rendered).toMatch(/select\s+distinct\s+on\s*\(\s*person\.person_key\s*\)/i);
+    expect(rendered).toMatch(/'profile:'\s*\|\|/);
+    expect(rendered).toMatch(/'contact:'\s*\|\|/);
+    expect(rendered).toMatch(/order\s+by\s+person\.person_key,\s*\(\s*person\.kind\s*=\s*'member'\s*\)\s+desc/i);
+    expect(rendered).toMatch(/"contacts"\."profile_id"\s*=\s*audience\."id"/i);
+  });
+
+  /**
    * The runtime check above only sees the predicates its calls happen to build.
    * This one covers the helpers no entry point here reaches, and any future
    * one: the import is the footgun, so no repository takes it. Should a
