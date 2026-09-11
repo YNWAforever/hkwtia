@@ -4,7 +4,7 @@ import {describe, expect, it} from "vitest";
 import {SegmentResults, type SegmentResultsLabels} from "@/components/admin/segment-results";
 
 const labels: SegmentResultsLabels = {
-  caption: "Members", total: "Total", empty: "Empty", name: "Name", email: "Email", company: "Company", plan: "Plan", status: "Status", renewal: "Renewal", score: "Score", unavailable: "Unavailable", saved: "Saved", export: "Export", queue: "Queue", template: "Template", templateRenewal: "Renewal reminder", templateUpdate: "Member update", queued: "Queued", existing: "Existing", recipients: "recipients", newDraft: "New draft", error: "Localized queue error",
+  caption: "Members", total: "Total", empty: "Empty", kind: "Type", kindMember: "Member", kindContact: "Contact", name: "Name", email: "Email", company: "Company", plan: "Plan", status: "Status", renewal: "Renewal", score: "Score", unavailable: "Unavailable", saved: "Saved", export: "Export", queue: "Queue", template: "Template", templateRenewal: "Renewal reminder", templateUpdate: "Member update", queued: "Queued", existing: "Existing", recipients: "recipients", newDraft: "New draft", error: "Localized queue error",
 };
 
 describe("campaign queue form", () => {

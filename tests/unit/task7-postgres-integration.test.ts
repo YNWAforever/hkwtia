@@ -284,7 +284,7 @@ describe.skipIf(!enabled)("Task 7 production repositories on isolated Postgres 1
     });
     const preview = await previewSegment(staff, {...query, limit: 50, cursor: null});
     expect(preview.total).toBe(1);
-    expect(preview.items.map(({profileId}) => profileId)).toEqual(["risk-zero-b"]);
+    expect(preview.items.map(({id}) => id)).toEqual(["risk-zero-b"]);
     const audience = await campaignsRepository.membersForSegment(staff, database.current, query.filter);
     expect(audience.map(({profileId}) => profileId)).toEqual(["risk-zero-b"]);
   }, 20_000);

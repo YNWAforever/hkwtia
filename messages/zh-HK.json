@@ -2558,6 +2558,30 @@
       "existing": "現有活動",
       "recipients": "位收件人",
       "newDraft": "建立新活動",
+      "industryTags": "行業標籤",
+      "anyTag": "所有行業",
+      "companyPlan": "公司會籍",
+      "event": "活動",
+      "eventState": "報名狀態",
+      "eventStates": {
+        "registered": "已報名",
+        "waitlist": "候補",
+        "attended": "已出席",
+        "cancelled": "已取消",
+        "not_registered": "未報名"
+      },
+      "audience": "對象",
+      "audiences": {
+        "members": "會員",
+        "contacts": "潛在客戶",
+        "both": "會員及潛在客戶"
+      },
+      "contactStage": "潛在客戶階段",
+      "contactSource": "潛在客戶來源",
+      "presetNotRegistered": "尚未報名「{event}」的會員",
+      "kind": "類別",
+      "kindMember": "會員",
+      "kindContact": "潛在客戶",
       "error": "未能排入活動佇列，請再試一次。"
     },
     "atRisk": {

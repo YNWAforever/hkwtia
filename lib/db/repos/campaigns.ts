@@ -13,7 +13,7 @@ import {
 } from "@/lib/db/repos/campaign-recipient-delivery";
 import {getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase} from "@/lib/db/repos/journeys";
-import {segmentPredicates} from "@/lib/db/repos/segments";
+import {memberPredicates} from "@/lib/db/repos/segments";
 import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 
 const savedSegmentRowSchema = z.object({id: z.string().uuid(), ownerProfileId: z.string(), filters: z.record(z.unknown()), filterVersion: z.number().int()});
@@ -72,9 +72,23 @@ async function ownedCampaign(actor: AdminActor, store: unknown, campaignId: stri
   return campaignRowSchema.parse(row).id;
 }
 
-async function campaignAudience(store: unknown, filter: SegmentFilterSet): Promise<readonly CampaignQueueMember[]> {
+/**
+ * The `/admin/segments` queue shortcut (S-17) creates an EMAIL campaign, whose
+ * recipients are profiles: `campaign_recipients` is profile-keyed until Task 8
+ * makes it identity-polymorphic. C-6 let a segment address contacts, so a
+ * contacts-only segment queued through this path would fall through to the
+ * member arm — whose predicates for a contact-shaped filter collapse to TRUE —
+ * and mail every member on the site. An empty audience is the only safe
+ * reading: the reviewed `/admin/campaigns` path is what can address contacts.
+ *
+ * `audience: "both"` keeps its member arm and silently drops the contact half.
+ * That under-sends, which is recoverable; the alternative over-sends, which is
+ * not. Task 8 replaces this whole function with the classifier-fed audience.
+ */
+async function campaignAudience(store: unknown, filter: SegmentFilterSet, now: Date): Promise<readonly CampaignQueueMember[]> {
+  if (filter.audience === "contacts") return [];
   const db = asDb(store);
-  const predicates = segmentPredicates(filter);
+  const predicates = memberPredicates(filter, now);
   const rows = await db.execute(sql`
     WITH candidate_rows AS (
       SELECT ${profiles.id} AS profile_id, ${profiles.displayName} AS display_name, ${profiles.email} AS email,
@@ -147,7 +161,10 @@ export function createCampaignsRepository(
       // boundary because `store` is caller-supplied and this is the last gate
       // before the audience SQL is built.
       const parsedFilter = parseSegmentFilter(SEGMENT_FILTER_VERSION, filter);
-      return campaignAudience(store, parsedFilter);
+      // One clock for the whole audience read, for the same reason `preview`
+      // takes one: the relative renewal and last-login windows must not move
+      // between the count a human approved and the rows that get snapshotted.
+      return campaignAudience(store, parsedFilter, new Date());
     },
 
     async createCampaign(actor: Actor, store, input: QueueCampaignInput): Promise<CampaignQueueResult> {

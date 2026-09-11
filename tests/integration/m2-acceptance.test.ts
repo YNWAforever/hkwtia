@@ -283,7 +283,9 @@ describe.skipIf(!enabled)("M2 seed acceptance on isolated PostgreSQL", () => {
     vi.setSystemTime(M2_REFERENCE_INSTANT);
     const canonical = parseSegmentRouteQuery({tier: "corporate", status: ["active", "past_due"], scoreMax: "19.99", renewalWithinDays: "60"});
     const preview = await previewSegment(staff, {...canonical, limit: 50, cursor: null});
-    expect(preview.items.map(({profileId}) => profileId)).toEqual(M2_AT_RISK_PROFILE_IDS);
+    // C-6: a preview row is now discriminated audience, so its identity is
+    // `id` — a profile id for a member, a contact id for a contact.
+    expect(preview.items.map(({id}) => id)).toEqual(M2_AT_RISK_PROFILE_IDS);
     expect(preview.total).toBe(3);
 
     const atRisk = await listAtRiskMembers(staff, {asOf: M2_REFERENCE_INSTANT});

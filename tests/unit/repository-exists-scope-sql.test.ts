@@ -1,6 +1,7 @@
 import {readFileSync, readdirSync} from "node:fs";
 import path from "node:path";
 
+import {sql} from "drizzle-orm";
 import {drizzle} from "drizzle-orm/pg-proxy";
 import {describe, expect, it, vi} from "vitest";
 
@@ -18,6 +19,8 @@ import {notificationActor} from "@/lib/db/repos/deliveries";
 import type {AutomationDatabase} from "@/lib/db/repos/journeys";
 import {createMessageEligibilityRepository} from "@/lib/db/repos/message-eligibility";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
+import {segmentFilterSchema} from "@/lib/admin/segment-schema";
+import {contactPredicates, memberPredicates} from "@/lib/db/repos/segments";
 import {
   createWoztellInboundEventsRepository,
   woztellWebhookActor,
@@ -25,6 +28,28 @@ import {
 
 const actor = {kind: "member", userId: "user-a", profileId: "user-a"} as const;
 const reposDirectory = path.resolve(__dirname, "../../lib/db/repos");
+const segmentEventId = "33333333-3333-4333-8333-333333333333";
+const segmentNow = new Date("2026-09-11T00:00:00.000Z");
+
+/**
+ * C2 Task 7. The segment event-state filter is the third hand-written `EXISTS`
+ * family in the tree and the first one outside an authorization predicate: it
+ * decides who a campaign addresses. `not_registered` is the dangerous member of
+ * the pair — a `NOT EXISTS` whose closing parenthesis lands in the wrong place
+ * either fails to parse or, worse, inverts a different subexpression and
+ * silently selects the people who DID register. It is built as a bare `sql`
+ * fragment, so nothing but this file renders it before Postgres does.
+ */
+const segmentPredicateCalls = [
+  ["segments.memberPredicates(event registered)", () =>
+    memberPredicates(segmentFilterSchema.parse({event: {eventId: segmentEventId, state: "registered"}}), segmentNow)],
+  ["segments.memberPredicates(event not_registered)", () =>
+    memberPredicates(segmentFilterSchema.parse({event: {eventId: segmentEventId, state: "not_registered"}}), segmentNow)],
+  ["segments.contactPredicates(event attended)", () =>
+    contactPredicates(segmentFilterSchema.parse({audience: "contacts", event: {eventId: segmentEventId, state: "attended"}}))],
+  ["segments.contactPredicates(event not_registered)", () =>
+    contactPredicates(segmentFilterSchema.parse({audience: "contacts", event: {eventId: segmentEventId, state: "not_registered"}}))],
+] as const;
 
 /**
  * Every member-actor path whose authorization predicate is an `EXISTS` over
@@ -140,6 +165,25 @@ describe("EXISTS authorization scopes render as executable Postgres", () => {
     const sql = statements.join("\n");
     expect(sql).toMatch(/\bexists\b/i);
     for (const [, following] of sql.matchAll(/\bexists\b\s*(.)/gi)) {
+      expect(following).toBe("(");
+    }
+    for (const statement of statements) {
+      expect(statement.split("(").length).toBe(statement.split(")").length);
+    }
+  });
+
+  it.each(segmentPredicateCalls)("%s parenthesises its EXISTS subquery", async (_name, build) => {
+    const statements: string[] = [];
+    const proxy = drizzle(async (query: string) => {
+      statements.push(query);
+      return {rows: []};
+    });
+
+    await proxy.execute(sql`SELECT 1 WHERE ${build()}`).catch(() => undefined);
+
+    const rendered = statements.join("\n");
+    expect(rendered).toMatch(/\bexists\b/i);
+    for (const [, following] of rendered.matchAll(/\bexists\b\s*(.)/gi)) {
       expect(following).toBe("(");
     }
     for (const statement of statements) {

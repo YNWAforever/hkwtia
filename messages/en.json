@@ -2557,6 +2557,30 @@
       "existing": "Existing campaign",
       "recipients": "recipients",
       "newDraft": "Start new campaign",
+      "industryTags": "Industry tags",
+      "anyTag": "All industries",
+      "companyPlan": "Company plan",
+      "event": "Event",
+      "eventState": "Registration state",
+      "eventStates": {
+        "registered": "Registered",
+        "waitlist": "Waitlisted",
+        "attended": "Attended",
+        "cancelled": "Cancelled",
+        "not_registered": "Not registered"
+      },
+      "audience": "Audience",
+      "audiences": {
+        "members": "Members",
+        "contacts": "Contacts",
+        "both": "Members and contacts"
+      },
+      "contactStage": "Contact stage",
+      "contactSource": "Contact source",
+      "presetNotRegistered": "Members not yet registered for {event}",
+      "kind": "Type",
+      "kindMember": "Member",
+      "kindContact": "Contact",
       "error": "We could not queue this campaign. Please try again."
     },
     "atRisk": {
