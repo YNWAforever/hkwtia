@@ -1,7 +1,11 @@
 import "server-only";
 
 import {JOURNEYS} from "@/config/journeys";
-import {WHATSAPP_TEMPLATES, type WhatsAppTemplateKey} from "@/config/whatsapp-templates";
+import {
+  LOCALIZED_WHATSAPP_TEMPLATES,
+  WHATSAPP_TEMPLATES,
+  type WhatsAppTemplateKey,
+} from "@/config/whatsapp-templates";
 import {evaluateStep, shouldCreateStaffTask} from "@/lib/automation/conditions";
 import {
   authorizedProviderFailureCode,
@@ -454,27 +458,58 @@ async function sendEmail(
   return true;
 }
 
+function whatsappVariables(
+  variables: EmailVariables,
+): Readonly<Record<string, string>> {
+  return Object.fromEntries(
+    Object.entries(variables).map(([key, value]) => [key, String(value)]),
+  );
+}
+
 /**
- * C-7 (C2 Task 2) closed the hole `config/whatsapp-templates.ts` claimed was
- * already closed: this used to accept any own property of `WHATSAPP_TEMPLATES`,
- * so `renewal_14`, `dunning_3` and `event_reminder_24h` reached the provider
- * with no allowlist check at all.
+ * Two gates, reconciled 2026-09-12. **B-5:** the member's own language decides
+ * the template, not the step. A step whose template is registered as a
+ * per-locale pair (LOCALIZED_WHATSAPP_TEMPLATES) resolves through that pair;
+ * every other step keeps the identity mapping it has always had, so
+ * renewal_14 and dunning_3 are untouched. `context.locale` was already loaded
+ * for the email leg — the email has always rendered in the member's language —
+ * so nothing new has to reach here for the two legs to agree.
  *
- * `null` is the deliberate answer for an unapproved key, not a failure:
- * `sendWhatsapp` already reads `null` as "no WhatsApp channel for this step" and
- * returns `false`, so the step delivers by email alone. Raising instead would
- * turn a working dunning email into a permanent delivery failure plus a staff
- * task per member the first time Meta paused a template — the exact regression
- * a fail-closed gate makes available.
+ * **C-7 (C2 Task 2):** closed the hole `config/whatsapp-templates.ts` claimed
+ * was already closed — this used to accept any own property of
+ * `WHATSAPP_TEMPLATES` with no allowlist check at all. The resolved,
+ * locale-correct key is what gets checked against the registry, so an
+ * unapproved Chinese template cannot fall back to sending the English one
+ * live; it falls back to no WhatsApp at all, same as any other unapproved key.
+ *
+ * `null` is the deliberate answer for an unresolved or unapproved key, not a
+ * failure: `sendWhatsapp` already reads `null` as "no WhatsApp channel for
+ * this step" and returns `false`, so the step delivers by email alone. Raising
+ * instead would turn a working dunning email into a permanent delivery
+ * failure plus a staff task per member the first time Meta paused a template —
+ * the exact regression a fail-closed gate makes available.
  */
 function whatsappTemplate(
   step: JourneyStep,
+  locale: AppLocale,
   approved: ReadonlySet<WhatsAppTemplateKey> | undefined,
 ): WhatsAppTemplateKey | null {
-  if (!Object.prototype.hasOwnProperty.call(WHATSAPP_TEMPLATES, step.template)) return null;
-  const template = step.template as WhatsAppTemplateKey;
+  const pair = Object.prototype.hasOwnProperty.call(
+    LOCALIZED_WHATSAPP_TEMPLATES,
+    step.template,
+  )
+    ? LOCALIZED_WHATSAPP_TEMPLATES[
+      step.template as keyof typeof LOCALIZED_WHATSAPP_TEMPLATES
+    ]
+    : null;
+  const resolved = pair
+    ? pair[locale]
+    : Object.prototype.hasOwnProperty.call(WHATSAPP_TEMPLATES, step.template)
+      ? step.template as WhatsAppTemplateKey
+      : null;
+  if (resolved === null) return null;
   // `undefined` means the caller supplied no registry answer: today's behaviour.
-  return approved === undefined || approved.has(template) ? template : null;
+  return approved === undefined || approved.has(resolved) ? resolved : null;
 }
 
 async function completeFailedWhatsapp(
@@ -499,7 +534,7 @@ async function sendWhatsapp(
   step: JourneyStep,
   context: JourneyRunnerContext,
 ): Promise<boolean> {
-  const template = whatsappTemplate(step, dependencies.approvedTemplateKeys);
+  const template = whatsappTemplate(step, context.locale, dependencies.approvedTemplateKeys);
   // C-9 review, and it is computed BEFORE the reservation on purpose. Every
   // declared BODY parameter, resolved, or nothing: `lib/channels/woztell.ts`
   // fills a parameter it was not given with `""`, Meta rejects an empty BODY
@@ -540,6 +575,16 @@ async function sendWhatsapp(
   ) {
     return false;
   }
+  // B-5: when the member's own language has no approved template, `template`
+  // above is already `null` — `whatsappTemplate` resolves the locale-correct
+  // key and checks it against the registry in one place, so there is nothing
+  // left to gate here. The rejected alternative is sending the other
+  // language's template: that would make "which language a member is written
+  // to in" a function of which half of a pair ops got approved first, which is
+  // the exact defect this pair was registered to fix, and it would happen
+  // silently on a channel the email already covers. Returning false above is
+  // not a failure: `processClaim` marks the step sent on the email leg alone,
+  // and `recipient_ineligible` only when neither leg delivers.
 
   const idempotencyKey = `${claim.deliveryKey}:whatsapp`;
   let reservation: Awaited<ReturnType<DeliveryMutations["reserveWhatsapp"]>>;

@@ -14,6 +14,7 @@ import {
   type JourneyRunnerDependencies,
 } from "@/lib/automation/journey-runner";
 import {automationCronActor} from "@/lib/auth/automation-actor";
+import {WHATSAPP_TEMPLATE_KEYS} from "@/config/whatsapp-templates";
 import {createCampaignRecipientDeliveryRepository} from "@/lib/db/repos/campaign-recipient-delivery";
 import {createDeliveriesRepository} from "@/lib/db/repos/deliveries";
 import {
@@ -216,6 +217,9 @@ describe.skipIf(!testDatabaseUrl)(
               };
             },
           },
+          // Every registered key. These fixtures predate the B-5 approval gate and
+          // assert on the send path itself, not on which templates ops approved.
+          approvedTemplateKeys: new Set(WHATSAPP_TEMPLATE_KEYS),
           emailFrom: "WTIA <members@example.test>",
         } satisfies JourneyRunnerDependencies;
 
@@ -380,6 +384,9 @@ describe.skipIf(!testDatabaseUrl)(
               };
             },
           },
+          // Every registered key. These fixtures predate the B-5 approval gate and
+          // assert on the send path itself, not on which templates ops approved.
+          approvedTemplateKeys: new Set(WHATSAPP_TEMPLATE_KEYS),
           emailFrom: "WTIA <members@example.test>",
         } satisfies JourneyRunnerDependencies;
 

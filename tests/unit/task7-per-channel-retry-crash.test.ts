@@ -1,5 +1,7 @@
 import {PgDialect} from "drizzle-orm/pg-core";
 import {describe, expect, it, vi} from "vitest";
+
+import {WHATSAPP_TEMPLATE_KEYS} from "@/config/whatsapp-templates";
 import {
   authorizedProviderFailureCode,
   providerFailureCode,
@@ -343,6 +345,11 @@ function runnerHarness(
     })),
     emailTransport: {send: emailProvider},
     whatsappTransport: {sendTemplateMessage: whatsappProvider},
+    // `as unknown as JourneyRunnerDependencies` below means the compiler will
+    // not ask for this, but the runner reads it: without it the WhatsApp leg
+    // throws on `undefined.has`. Every registered key keeps these cases on the
+    // behaviour they were written for, which is retry authorization, not approval.
+    approvedTemplateKeys: new Set(WHATSAPP_TEMPLATE_KEYS),
     emailFrom: "WTIA <members@example.test>",
   } as unknown as JourneyRunnerDependencies;
 

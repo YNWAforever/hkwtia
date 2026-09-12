@@ -484,7 +484,9 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
     // the runner as a resolved set: the runner must not read `process.env` or
     // open a database of its own, and an unawaited promise parked on this key
     // would answer `has(…) === false` for every template with no type error —
-    // silently demoting every journey WhatsApp send to email.
+    // silently demoting every journey WhatsApp send to email. The runner
+    // resolves the member's locale-correct key (B-5) before checking it
+    // against this set, so a per-locale pair is gated as one answer, not two.
     approvedTemplateKeys: await approvedTemplateKeys(),
     emailFrom,
   }, {now, limit: RUNNER_BATCH_LIMIT});

@@ -1,5 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
+import {WHATSAPP_TEMPLATE_KEYS} from "@/config/whatsapp-templates";
+
 import {
   runCampaignBatch,
   type CampaignRecipientClaim,
@@ -173,6 +175,11 @@ function failedJourneyHarness(
         throw new Error("unexpected WhatsApp send");
       }),
     },
+    // `as unknown as JourneyRunnerDependencies` below means the compiler will
+    // not ask for this, but the runner reads it: without it the WhatsApp leg
+    // throws on `undefined.has`. Every registered key keeps these cases on the
+    // behaviour they were written for, which is retry authorization, not approval.
+    approvedTemplateKeys: new Set(WHATSAPP_TEMPLATE_KEYS),
     emailFrom: "WTIA <members@example.test>",
   } as unknown as JourneyRunnerDependencies;
   return {
@@ -392,6 +399,7 @@ describe("Task 7 review: provider-failure crash recovery", () => {
       }),
       emailTransport: {send: vi.fn()},
       whatsappTransport: {sendTemplateMessage: vi.fn()},
+      approvedTemplateKeys: new Set(WHATSAPP_TEMPLATE_KEYS),
       emailFrom: "WTIA <members@example.test>",
     } as unknown as JourneyRunnerDependencies;
 

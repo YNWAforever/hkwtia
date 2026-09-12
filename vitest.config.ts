@@ -7,19 +7,24 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./tests/setup.ts"],
-    // A timeout is a liveness bound, not an assertion, and 5000ms is not one
-    // on a loaded machine. Two whole-page renders (tests/unit/homepage.test.tsx
-    // and tests/unit/wt-pages/launchpad-page.test.tsx) take ~1.1s alone and
-    // have been observed crossing 5s under an 11-worker jsdom run, which is
-    // worse than a plain failure: a timed-out test's `render()` still resolves
-    // *after* Testing Library's afterEach cleanup has run, so it mounts into
-    // the next test's DOM and that test fails on duplicated nodes instead —
-    // 13 landmarks read as 26, one eyebrow reads as two. The reported failure
-    // is then two files away from the cause. Since 0e5a725 a red shard fails
-    // the quality gate, so this flake costs a whole CI run. Raising the bound
-    // hides no assertion: a test that genuinely hangs still fails, later.
-    testTimeout: 20_000,
     include: ["tests/unit/**/*.{test,spec}.{ts,tsx}", "tests/integration/**/*.{test,spec}.{ts,tsx}"],
+    /**
+     * Headroom over the 5000ms default, which the heavy page renders outgrew.
+     *
+     * `homepage`, `wt-pages/about`, `wt-pages/launchpad-page`,
+     * `public-environment-isolation` and `repository-boundary` each finish in
+     * under 1.2s alone, but a full `npm test` run on a loaded machine pushed
+     * all five past 5s at once — and the homepage's `en` case timed out
+     * mid-render, so its DOM survived into the `zh-HK` case, which then saw 26
+     * sections instead of 13. One timeout produced two red tests and neither
+     * named a real defect. CI shards two ways for the same reason (see
+     * `.github/workflows/ci.yml`), which lowers the odds without removing them.
+     *
+     * A genuinely hung test still fails here; it just takes 20s to say so.
+     * Raise this only with evidence, never to quiet a test that has begun to
+     * hang for a reason.
+     */
+    testTimeout: 20_000,
     // Vitest externalizes node_modules deps by default, resolving their
     // internal imports via plain Node rather than Vite. Node's classic
     // resolver won't follow the extensionless `next/navigation` that

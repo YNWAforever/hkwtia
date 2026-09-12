@@ -201,6 +201,30 @@ describe("member event writes (programme B-1)", () => {
     expect(statementText(execute, 1)).not.toContain("COALESCE");
   });
 
+  // B-3 names the two audit actions as a contract
+  // (docs/superpowers/specs/2026-09-08-wtia-two-sided-platform-programme.md §5),
+  // and these rows are the only record of who published a member's event. Nothing
+  // in the codebase enumerates audit action names — `audit_events.action` is a bare
+  // text column and every repository writes its own literal — so these assertions
+  // are the whole pin. The sibling test above only counts three statements, which a
+  // typo in either literal, or a swap between them, passes: the row would then be
+  // written under a name no action-filtered audit query looks for.
+  it("stamps each review decision with its exact spec audit action (B-3)", async () => {
+    const pending = row({status: "pending_review"});
+    const approve = fakeDeps([[pending], [{...pending, status: "published", published: true, published_at: new Date()}], []]);
+    await expect(reviewEvent(staff, EVENT, {decision: "approve"}, approve.deps)).resolves.toMatchObject({status: "published"});
+    const approved = paramValues(approve.execute.mock.calls[2]?.[0]);
+    expect(approved).toContain("event.review.approved");
+    expect(approved).not.toContain("event.review.rejected");
+    expect(statementText(approve.execute, 2)).toContain("'event'");
+
+    const reject = fakeDeps([[pending], [{...pending, status: "rejected", rejection_reason: "duplicate"}], []]);
+    await expect(reviewEvent(staff, EVENT, {decision: "reject", reason: "duplicate"}, reject.deps)).resolves.toMatchObject({status: "rejected"});
+    const rejected = paramValues(reject.execute.mock.calls[2]?.[0]);
+    expect(rejected).toContain("event.review.rejected");
+    expect(rejected).not.toContain("event.review.approved");
+  });
+
   it("requires a reason to reject and an existing row to review", async () => {
     const {deps} = fakeDeps([[]]);
     await expect(reviewEvent(staff, EVENT, {decision: "reject"}, deps)).rejects.toThrow();

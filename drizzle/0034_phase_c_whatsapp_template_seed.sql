@@ -11,6 +11,10 @@ INSERT INTO "whatsapp_templates" ("key", "element_name", "language_code", "categ
   ('concierge_follow_up_en', 'wtia_concierge_follow_up_en', 'en_US', 'utility', ARRAY['memberName','supportUrl']),
   ('concierge_follow_up_zh_hk', 'wtia_concierge_follow_up_zh_hk', 'zh_HK', 'utility', ARRAY['memberName','supportUrl']),
   ('event_reminder_24h', 'wtia_event_reminder_24h', 'en_US', 'utility', ARRAY['memberName','eventTitle','startsAt','eventUrl']),
+  -- Programme B-5's bilingual counterpart: a zh-HK member's reminder email
+  -- renders in Chinese, and the WhatsApp leg must match rather than default to
+  -- English while this half stays unapproved (config/whatsapp-templates.ts).
+  ('event_reminder_24h_zh_hk', 'wtia_event_reminder_24h_zh_hk', 'zh_HK', 'utility', ARRAY['memberName','eventTitle','startsAt','eventUrl']),
   -- §8.3's marketing templates. Without these the 'marketing' arm of
   -- whatsapp_templates_category_check is never exercised and the announcement
   -- blast /admin/campaigns exists for has no template to send.

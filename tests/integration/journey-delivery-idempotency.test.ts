@@ -1,6 +1,7 @@
 import {describe, expect, it} from "vitest";
 
 import {runJourneyBatch, type JourneyRunnerDependencies} from "@/lib/automation/journey-runner";
+import {WHATSAPP_TEMPLATE_KEYS} from "@/config/whatsapp-templates";
 import type {JourneyClaim} from "@/lib/db/repos/journeys";
 
 const now = new Date("2027-01-15T10:00:00.000Z");
@@ -140,6 +141,9 @@ describe("journey runner delivery idempotency", () => {
           throw new Error("unexpected WhatsApp send");
         },
       },
+      // Every registered key. These fixtures predate the B-5 approval gate and
+      // assert on the send path itself, not on which templates ops approved.
+      approvedTemplateKeys: new Set(WHATSAPP_TEMPLATE_KEYS),
       emailFrom: "WTIA <members@example.test>",
     };
 
