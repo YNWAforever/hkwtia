@@ -419,6 +419,76 @@ describe("runJourneyBatch", () => {
   });
 
   /**
+   * C-9 review. The third way this lane can reach the provider with something
+   * Meta refuses, after consent and approval: a BODY parameter it never
+   * resolved.
+   *
+   * `lib/channels/woztell.ts` fills a parameter it was not given with `""`, Meta
+   * rejects an empty BODY parameter, the adapter maps the 4xx to
+   * `provider_client_error` and S-15 makes it permanent — so an unresolved
+   * variable is one failed step and one staff task per member, and no member
+   * receives the message. That was the live state of `renewal_14` and
+   * `dunning_3` until `lib/jobs/runners.ts` started supplying `memberName` and
+   * `amountDue`, and every fixture in this file hand-wrote both, which is
+   * exactly why nothing here failed. `tests/unit/journey-whatsapp-template-variables.test.ts`
+   * drives the real production bag; this case pins the runner's refusal, so the
+   * gate cannot be removed on the argument that the bag is complete now.
+   */
+  it("delivers by email alone when a declared BODY parameter is blank", async () => {
+    const dunning = due("dunning_3", {
+      journey: "dunning",
+      instanceKey: "period:2027-02-01T00:00:00.000Z",
+    });
+    const test = harness([dunning], () => context({
+      whatsappOptIn: true,
+      whatsappNumber: "+85255550000",
+      // The shape production produces for a plan that records no price for its
+      // interval: `lib/jobs/runners.ts` writes "" rather than fabricating a
+      // figure, and this is the gate that turns that into "no WhatsApp channel".
+      variables: {
+        ctaUrl: "https://example.test/member",
+        memberName: "Fixture Member",
+        renewalDate: "2027-02-01",
+        renewalUrl: "https://example.test/renew",
+        amountDue: "",
+        paymentUrl: "https://example.test/pay",
+      },
+    }));
+
+    const summary = await runJourneyBatch(test.deps, {now, limit: 1});
+
+    expect(test.sentWhatsapp).toHaveLength(0);
+    // Not a reservation either, for the same reason an unapproved template is
+    // not one: there is nothing here for a later retry to replay.
+    expect([...test.logs.values()].filter((record) => record.channel === "whatsapp")).toHaveLength(0);
+    // The email still goes out, and no staff task is raised. Failing the step
+    // instead would cost one task per member in arrears — for a message the
+    // provider was always going to refuse.
+    expect(test.sentEmails).toHaveLength(1);
+    expect(summary).toMatchObject({sent: 1, failed: 0, tasksCreated: 0});
+  });
+
+  it("sends the WhatsApp leg when every declared BODY parameter resolves", async () => {
+    // The positive control for the case above: an assertion that only ever saw
+    // a blank would pass just as well against a lane that never sent at all.
+    const dunning = due("dunning_3", {
+      journey: "dunning",
+      instanceKey: "period:2027-02-01T00:00:00.000Z",
+    });
+    const test = harness([dunning], () => context({
+      whatsappOptIn: true,
+      whatsappNumber: "+85255550000",
+    }));
+
+    await runJourneyBatch(test.deps, {now, limit: 1});
+
+    expect(test.sentWhatsapp).toEqual([{
+      idempotencyKey: `${dunning.deliveryKey}:whatsapp`,
+      template: "dunning_3",
+    }]);
+  });
+
+  /**
    * C-7 (C2 Task 2). The regression a fail-closed approval gate makes possible:
    * Meta pauses `renewal_14`, the registry stops approving it, and a dunning or
    * renewal step that used to reach the member by two channels turns into a

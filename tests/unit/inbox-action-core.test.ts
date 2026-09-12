@@ -346,6 +346,36 @@ describe("sendInboxReply", () => {
     expect(unknown.calls.order).not.toContain("sendTemplateMessage");
   });
 
+  /**
+   * C-9 review. The staff reply lane is one of the outbound paths
+   * `RUN_LIVE_WOZTELL=1` turns on, and it had the same hole the journey lane
+   * had: `queueStaffMessageSchema` accepts `templateVariables: {}`, the composer
+   * marks each parameter `required` — a client-side attribute and nothing more —
+   * and `lib/channels/woztell.ts` fills a parameter it was not given with `""`.
+   * Meta rejects an empty BODY parameter, so a hand-posted formData turned a
+   * reply staff believed they sent into a permanent provider failure.
+   *
+   * Both halves matter: absent and blank are the same thing to the provider, and
+   * only one of them is what a hand-posted form produces.
+   */
+  it("refuses a template reply whose declared BODY parameters are absent or blank, before the adapter", async () => {
+    const absent = dependencies();
+    expect(await codeOf(sendInboxReply(admin, {...templateReply, templateVariables: {}}, absent.deps)))
+      .toBe("INVALID");
+    expect(absent.calls.order).not.toContain("sendTemplateMessage");
+    // Not queued either: a draft that cannot be sent must not consume its own
+    // outbound key, or the retry after the correction is refused as a repeat.
+    expect(absent.calls.order).not.toContain("queueStaffMessage");
+
+    const blank = dependencies();
+    expect(await codeOf(sendInboxReply(
+      admin,
+      {...templateReply, templateVariables: {...templateReply.templateVariables, memberName: "   "}},
+      blank.deps,
+    ))).toBe("INVALID");
+    expect(blank.calls.order).not.toContain("sendTemplateMessage");
+  });
+
   it("sends an approved template with the window shut, because that is what the picker is for", async () => {
     const {calls, deps} = dependencies({transcript: summary({lastInboundAt: null})});
     await expect(sendInboxReply(admin, templateReply, deps)).resolves.toEqual({status: "sent", messageId: MESSAGE_ID});

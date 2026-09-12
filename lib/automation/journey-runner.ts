@@ -46,6 +46,7 @@ import type {
 } from "@/lib/email/render";
 import type {AppLocale} from "@/i18n/routing";
 import type {MembershipStatus} from "@/lib/membership/lifecycle";
+import {resolveTemplateBody} from "@/lib/whatsapp/template-body";
 
 const LEASE_MS = 5 * 60_000;
 const emailTemplates = new Set<string>(EMAIL_TEMPLATE_IDS);
@@ -453,14 +454,6 @@ async function sendEmail(
   return true;
 }
 
-function whatsappVariables(
-  variables: EmailVariables,
-): Readonly<Record<string, string>> {
-  return Object.fromEntries(
-    Object.entries(variables).map(([key, value]) => [key, String(value)]),
-  );
-}
-
 /**
  * C-7 (C2 Task 2) closed the hole `config/whatsapp-templates.ts` claimed was
  * already closed: this used to accept any own property of `WHATSAPP_TEMPLATES`,
@@ -507,10 +500,29 @@ async function sendWhatsapp(
   context: JourneyRunnerContext,
 ): Promise<boolean> {
   const template = whatsappTemplate(step, dependencies.approvedTemplateKeys);
+  // C-9 review, and it is computed BEFORE the reservation on purpose. Every
+  // declared BODY parameter, resolved, or nothing: `lib/channels/woztell.ts`
+  // fills a parameter it was not given with `""`, Meta rejects an empty BODY
+  // parameter, and S-15 makes the resulting 4xx permanent — so an unresolved
+  // variable is not a degraded message, it is a guaranteed failed step and a
+  // staff task per member. The blast lane has refused this since C2 Task 8;
+  // this lane went to the adapter directly and passed through neither gate,
+  // which is how renewal_14 and dunning_3 came to be one flag flip away from
+  // sending empty parameters to every member with a step due.
+  //
+  // Refusing here reads as "no WhatsApp channel for this step", exactly as an
+  // unapproved template does — so the email leg still delivers and no staff task
+  // is raised. Failing instead would turn a working dunning email into a
+  // permanent delivery failure plus a task per member the first time a variable
+  // went missing, which is the regression a fail-closed gate makes available.
+  const body = template === null
+    ? null
+    : resolveTemplateBody(template, context.variables);
   const whatsappNumber = context.whatsappNumber?.trim();
   if (
     !step.channels.includes("whatsapp")
     || !template
+    || !body
     || !context.whatsappOptIn
     // C-9 review. `whatsappOptIn` alone is half the consent fact, and this lane
     // is the second send path the `RUN_LIVE_WOZTELL` flip turns on. A STOP from
@@ -574,7 +586,10 @@ async function sendWhatsapp(
       whatsappOptIn: context.whatsappOptIn,
       whatsappNumber,
       template,
-      variables: whatsappVariables(context.variables),
+      // The resolved body, not the whole context bag: the adapter only reads the
+      // declared keys, and handing it exactly those is what makes the refusal
+      // above the single place a blank can be caught.
+      variables: body,
       idempotencyKey,
     });
   } catch (error) {

@@ -16,6 +16,7 @@ import {
   engagementScores,
   eventRegistrations,
   events,
+  membershipPlans,
   memberships,
   messageSuppressions,
   profiles,
@@ -45,6 +46,23 @@ export type JobJourneyContextRecord = Readonly<{
   engagementScore: number | null;
   membershipStatus: MembershipStatus | null;
   billingPeriodEnd: Date | null;
+  /**
+   * What the membership's plan charges for its billing interval, in whole HKD,
+   * or `null` when the plan records no price for it (C-9 review).
+   *
+   * `dunning_3`'s WhatsApp template declares an `amountDue` BODY parameter and
+   * nothing produced one, so the runner sent it empty — which Meta rejects. This
+   * is the only recorded amount in the tree: there is no invoice table, and
+   * `billing_attempts.price_reference` is a Stripe price id, not a figure. It is
+   * the same number `lib/admin/report-formulas.ts` already treats as what a
+   * membership is worth, so the two cannot disagree about one member.
+   *
+   * Nullable on purpose, and the caller must not default it: a patron or
+   * community plan has no price for its interval, and "HK$0.00 outstanding" in a
+   * message chasing a payment is worse than no WhatsApp at all. A null makes
+   * `resolveTemplateBody` refuse the send and the email leg still goes out.
+   */
+  amountDueHkd: number | null;
 }>;
 
 export type JobCampaignContextRecord = Readonly<{
@@ -91,6 +109,46 @@ function optionalDate(value: unknown): Date | null {
   if (value === null || value === undefined) return null;
   const date = value instanceof Date ? value : new Date(String(value));
   return Number.isFinite(date.getTime()) ? date : null;
+}
+
+/**
+ * `optionalDate`, except that an unparseable value is an error rather than a
+ * `null` (C-9 review).
+ *
+ * The difference matters for exactly one column. `optionalDate` fails OPEN —
+ * anything it cannot read becomes "no date" — which is the right default for
+ * `last_login_at` or `billing_period_end`, where a missing date only changes a
+ * condition or a rendered string. `contacts.whatsapp_opted_out_at` is a consent
+ * gate: `null` there means "this person never said STOP", so a value this
+ * function could not read would be silently converted into permission to send.
+ * `lib/db/repos/message-eligibility.ts` reads the same column through
+ * `z.coerce.date()`, which fails closed; this is the same stance in the shape
+ * this module already uses.
+ *
+ * Nothing should ever reach the throw — the pg driver hands back a `Date` for a
+ * timestamptz, and Node parses its text form correctly when it does not — which
+ * is the point: if the driver's shape ever changes, the cron fails loudly and is
+ * retried rather than quietly sending to someone who opted out.
+ */
+function consentDate(value: unknown): Date | null {
+  if (value === null || value === undefined) return null;
+  const date = optionalDate(value);
+  if (date === null) throw new Error("INVALID_JOB_CONTEXT");
+  return date;
+}
+
+/**
+ * A recorded price in whole HKD, or `null` — and `0` is a `null` (C-9 review).
+ *
+ * The column is `integer` and nullable, and a zero-priced plan (community) has
+ * nothing outstanding, so both absences answer the same question the same way:
+ * there is no figure to put in `wtia_dunning_d3`'s second BODY parameter, and
+ * the send must be refused rather than padded.
+ */
+function priceAmount(value: unknown): number | null {
+  if (value === null || value === undefined) return null;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
 }
 
 function requiredBoolean(value: unknown): boolean {
@@ -165,6 +223,25 @@ export function createJobRunnerContextRepository(
           ${engagementScores.score} AS engagement_score,
           ${memberships.status} AS membership_status,
           ${memberships.billingPeriodEnd} AS billing_period_end,
+          -- C-9 review. dunning_3's WhatsApp template declares an amountDue
+          -- BODY parameter and nothing produced one, so every live tick would
+          -- have sent parameter 2 empty -- which Meta rejects, which the adapter
+          -- maps to provider_client_error, which S-15 makes permanent: one
+          -- failed step and one staff task per member in arrears, and no member
+          -- receiving the message at all.
+          --
+          -- The plan price for the membership's own interval is the only amount
+          -- this tree records. There is no invoice table, and
+          -- billing_attempts.price_reference is a Stripe price id rather than a
+          -- figure. lib/admin/report-formulas.ts already treats exactly this
+          -- number as what a membership is worth, so the dunning message and the
+          -- board report cannot disagree about one member. 'none' is the free
+          -- interval and has no arm here on purpose: NULL, not zero.
+          CASE ${memberships.billingInterval}
+            WHEN 'monthly' THEN ${membershipPlans.monthlyPriceHkd}
+            WHEN 'annual' THEN ${membershipPlans.annualPriceHkd}
+            ELSE NULL
+          END AS amount_due_hkd,
           EXISTS (
             SELECT 1
             FROM ${messageSuppressions}
@@ -179,6 +256,11 @@ export function createJobRunnerContextRepository(
           ON ${engagementScores.profileId} = ${profiles.id}
         LEFT JOIN ${memberships}
           ON ${memberships.id} = ${membershipId}
+        -- Keyed on the plan's primary key, so this join is at most one row and
+        -- the journey row cannot fan out -- the same property the contacts join
+        -- above relies on its partial unique index for.
+        LEFT JOIN ${membershipPlans}
+          ON ${membershipPlans.code} = ${memberships.planCode}
         WHERE ${profiles.id} = ${profileId}
         LIMIT 1
       `))[0];
@@ -197,11 +279,12 @@ export function createJobRunnerContextRepository(
         profileComplete: row.onboarding_state === "complete",
         whatsappOptIn: requiredBoolean(row.whatsapp_opt_in),
         whatsappNumber: optionalString(row.whatsapp_number),
-        whatsappOptedOutAt: optionalDate(row.whatsapp_opted_out_at),
+        whatsappOptedOutAt: consentDate(row.whatsapp_opted_out_at),
         emailSuppressed: requiredBoolean(row.email_suppressed),
         engagementScore: score(row.engagement_score),
         membershipStatus: membershipStatus(row.membership_status),
         billingPeriodEnd: optionalDate(row.billing_period_end),
+        amountDueHkd: priceAmount(row.amount_due_hkd),
       };
     },
 

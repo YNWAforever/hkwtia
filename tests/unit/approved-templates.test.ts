@@ -92,6 +92,34 @@ describe("approvedTemplateKeys", () => {
     expect([...await approvedTemplateKeys(registry(), environment({RUN_LIVE_WOZTELL: "1"}))]).toEqual([]);
   });
 
+  /**
+   * C-9 review. This module cannot call `aiEnv()` — that would put
+   * `CONCIERGE_COOKIE_SECRET` on `/admin/templates`, which is the boundary-7
+   * coupling that once took `/sitemap.xml` down — so it reads the environment by
+   * injection. It used to read it with a SECOND, looser rule (`!== "1"`), and a
+   * switch with two parses is a switch that can mean "live" on the send path and
+   * "mock" on the page deciding what may be sent. It now shares
+   * `runLiveWoztellSchema` with `aiEnv()`.
+   *
+   * A value the schema refuses counts as live: `RUN_LIVE_WOZTELL=true` is an
+   * operator who meant to go live, so the answer is "consult the registry",
+   * never "approve everything". A blank must still mean mock, because
+   * `.env.example` ships the key empty and Vercel hands an empty variable over
+   * as `""`.
+   */
+  it.each(["true", "TRUE", "yes", "0 "])(
+    "treats the unreadable live value %j as live rather than approving the whole config",
+    async (value) => {
+      const keys = await approvedTemplateKeys(registry(), environment({RUN_LIVE_WOZTELL: value}));
+      expect([...keys]).toEqual([]);
+    },
+  );
+
+  it.each(["", "   "])("still reads the blank live value %j as mock mode", async (value) => {
+    const keys = await approvedTemplateKeys(registry(), environment({RUN_LIVE_WOZTELL: value}));
+    expect([...keys].sort()).toEqual(Object.keys(WHATSAPP_TEMPLATES).sort());
+  });
+
   it("keeps the concierge fallback set to the two follow-ups and inside the config", async () => {
     expect([...CONCIERGE_FOLLOW_UP_TEMPLATE_KEYS].sort())
       .toEqual(["concierge_follow_up_en", "concierge_follow_up_zh_hk"]);

@@ -61,6 +61,7 @@ import {
   eventIdFromInstanceKey,
   eventReminderVariables,
 } from "@/lib/events/reminder-enrollment";
+import type {AppLocale} from "@/i18n/routing";
 import {JobRequestError, type PreparedJob} from "@/lib/jobs/handler";
 import {approvedTemplateKeys} from "@/lib/whatsapp/approved-templates";
 
@@ -332,6 +333,28 @@ export async function sendWorkerAlert(
  */
 export {unsubscribeUrls};
 
+/**
+ * `dunning_3`'s `amountDue` BODY parameter, or `""` when there is no honest
+ * figure (C-9 review).
+ *
+ * Formatted as currency rather than passed as a bare integer: the member reads
+ * this parameter inside a sentence about money they owe, and "1800" is ambiguous
+ * about the currency in a city that has three of them in daily use. Same
+ * `Intl.NumberFormat` shape as the public plan catalogue
+ * (`lib/membership/public-catalog.ts`), so the figure a member is chased for is
+ * spelled the way the figure they signed up for was.
+ *
+ * The empty string is the refusal, and it is `resolveTemplateBody` in
+ * `sendWhatsapp` that acts on it — not a default here. A plan with no price for
+ * its interval has no amount outstanding, and "HK$0.00" in a dunning message is
+ * a worse message than none.
+ */
+function amountDue(amountHkd: number | null, locale: AppLocale): string {
+  if (amountHkd === null) return "";
+  return new Intl.NumberFormat(locale, {style: "currency", currency: "HKD"})
+    .format(amountHkd);
+}
+
 async function runProductionJourneys(now: Date): Promise<unknown> {
   const {emailFrom} = emailEnv();
   const {appUrl} = appEnv();
@@ -371,11 +394,30 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
         locale: context.locale,
         variables: {
           displayName: context.displayName,
+          // C-9 review, and it belongs in the BASE bag rather than in one
+          // branch. `memberName` is a declared BODY parameter of all three
+          // WhatsApp journey templates (renewal_14, dunning_3,
+          // event_reminder_24h) and it used to be added only inside the
+          // event_reminder branch below — so renewal_14 and dunning_3 reached
+          // the adapter with parameter 1 unresolved, and
+          // `lib/channels/woztell.ts` fills a missing parameter with "". Meta
+          // rejects that, the adapter maps the 4xx to provider_client_error and
+          // S-15 makes it permanent: one failed step and one staff task per
+          // member with a step due, and nobody receiving either message. The
+          // email leg never showed it, because `interpolate` throws on a missing
+          // variable while the WhatsApp leg substitutes silently.
+          memberName: context.displayName,
           ctaUrl: portalUrl,
           profileUrl: portalUrl,
           renewalUrl: portalUrl,
           paymentUrl: portalUrl,
           renewalDate,
+          // dunning_3's second BODY parameter. Empty when the membership's plan
+          // records no price for its interval, which `resolveTemplateBody` then
+          // refuses in `sendWhatsapp` — deliberately, because a fabricated
+          // "HK$0.00 outstanding" chasing a payment is worse than the WhatsApp
+          // leg staying quiet while the email still goes out.
+          amountDue: amountDue(context.amountDueHkd, context.locale),
           membershipStatus: context.membershipStatus ?? "",
         },
         unsubscribeUrl: unsubscribe.pageUrl,
@@ -404,7 +446,9 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
         ...base,
         variables: {
           ...base.variables,
-          memberName: context.displayName,
+          // `memberName` is no longer re-stated here: the base bag carries it
+          // for every journey since the C-9 review, and a second copy is a
+          // second thing to keep in step.
           ...eventReminderVariables({
             locale: context.locale,
             appUrl,

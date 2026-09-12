@@ -44,6 +44,7 @@ import {
 } from "@/lib/email/transport";
 import {unsubscribeUrls as unsubscribeUrlsFn} from "@/lib/email/unsubscribe-urls";
 import {approvedTemplateKeys} from "@/lib/whatsapp/approved-templates";
+import {resolveTemplateBody} from "@/lib/whatsapp/template-body";
 
 /**
  * Programme C-8, Phase C2 Task 11. One place that answers "may we send this to
@@ -304,30 +305,6 @@ function whatsappClassification(template: WhatsAppTemplateKey): MessageClassific
   return WHATSAPP_TEMPLATES[template].category === "marketing" ? "marketing" : "transactional";
 }
 
-/**
- * Every declared BODY parameter, resolved, or nothing.
- *
- * `lib/channels/woztell.ts` builds the body as
- * `template.variables.map((key) => ({… text: input.variables[key] ?? ""}))`, and
- * Meta rejects a template whose BODY parameter is empty — a 4xx the adapter maps
- * to `provider_client_error`, which S-15 makes permanent. Task 8 already blocks
- * an unresolvable variable at snapshot time as `missing_variable`; this is the
- * same refusal at the last gate, for every caller, including the ones that never
- * go near `campaign_recipients`.
- */
-function resolvedBody(
-  template: WhatsAppTemplateKey,
-  variables: Readonly<Record<string, string>>,
-): Readonly<Record<string, string>> | null {
-  const body: Record<string, string> = {};
-  for (const key of WHATSAPP_TEMPLATES[template].variables) {
-    const value = variables[key] ?? "";
-    if (value.trim() === "") return null;
-    body[key] = value;
-  }
-  return body;
-}
-
 type Ledger = Readonly<{
   reserve: () => Promise<DeliveryReservation>;
   retry: (id: string, expectedErrorCode: string) => Promise<Readonly<{record: Readonly<{id: string}>}>>;
@@ -439,7 +416,13 @@ async function dispatchWhatsApp(
     return {status: "skipped", reason: "template_not_approved"};
   }
 
-  const variables = resolvedBody(request.template, request.variables);
+  // Task 8 already blocks an unresolvable variable at snapshot time as
+  // `missing_variable`; this is the same refusal at the last gate, for every
+  // caller, including the ones that never go near `campaign_recipients`. The
+  // C-9 review moved the body out to `lib/whatsapp/template-body.ts` when it
+  // found the journey lane missing this gate entirely — a second copy of the
+  // rule is how the two lanes came to disagree about a blank in the first place.
+  const variables = resolveTemplateBody(request.template, request.variables);
   if (variables === null) return {status: "skipped", reason: "missing_variable"};
 
   const whatsappNumber = campaignNumberFor(facts);

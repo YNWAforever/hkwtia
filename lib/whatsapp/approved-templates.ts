@@ -1,4 +1,5 @@
 import {WHATSAPP_TEMPLATES, type WhatsAppTemplateKey} from "@/config/whatsapp-templates";
+import {runLiveWoztellSchema} from "@/lib/config/env";
 import {
   templateRegistryActor,
   whatsappTemplatesRepository,
@@ -27,13 +28,25 @@ export async function approvedTemplateKeys(
   environment: NodeJS.ProcessEnv = process.env,
 ): Promise<ReadonlySet<WhatsAppTemplateKey>> {
   const configured = Object.keys(WHATSAPP_TEMPLATES) as WhatsAppTemplateKey[];
+  // The SAME parse `aiEnv()` applies, read here by injection rather than through
+  // `aiEnv()` itself — see `runLiveWoztellSchema` for why this module may not
+  // call it. The C-9 review found this reading the raw variable with a second,
+  // looser rule (`!== "1"`), which is how one switch comes to mean "live" on the
+  // send path and "mock" on the page that decides what may be sent.
+  //
+  // A value the schema refuses counts as LIVE, which is the fail-closed
+  // direction: `RUN_LIVE_WOZTELL=true` is an operator who meant to go live, and
+  // the answer to a switch we cannot read is "consult the registry", never
+  // "approve everything". It also matches what the send paths do with it —
+  // `aiEnv()` throws there, so nothing is sent either way.
+  const live = runLiveWoztellSchema.safeParse(environment.RUN_LIVE_WOZTELL);
   // Behaviour preserved exactly from the private original, so every non-live
   // test stays green: off the live switch, everything in the config is
   // sendable, because nothing leaves the building anyway (the adapter answers
   // with a `mock:` provider id). It also means CI never opens a database to
   // answer this question — the registry is not consulted at all on this branch,
   // which is what keeps every WhatsApp unit test a unit test.
-  if (environment.RUN_LIVE_WOZTELL !== "1") return new Set(configured);
+  if (live.success && live.data !== "1") return new Set(configured);
 
   let approval: Awaited<ReturnType<WhatsAppTemplateRegistryReader["approved"]>>;
   try {

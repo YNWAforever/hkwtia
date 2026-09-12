@@ -62,6 +62,7 @@ function baseJourneyRow(): JobJourneyContextRecord {
     engagementScore: 50,
     membershipStatus: null,
     billingPeriodEnd: null,
+    amountDueHkd: null,
   };
 }
 

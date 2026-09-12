@@ -168,6 +168,28 @@ function requireProductionKeys(
   }
 }
 
+/**
+ * The live-send switch, parsed in ONE place (C-9 O-8, and the C-9 review).
+ *
+ * Strict, and blank-tolerant on purpose: `.env.example` ships
+ * `RUN_LIVE_WOZTELL=` and an empty Vercel variable arrives as `""`, so a blank
+ * must keep meaning "not live" — while `true`, `yes` or `TRUE` must stop meaning
+ * it silently, because that typo used to find no live credentials and record
+ * every send as delivered with a `mock:` provider id.
+ *
+ * Exported because `lib/whatsapp/approved-templates.ts` decides "are we live?"
+ * for `/admin/templates` and the campaign wizard and deliberately cannot call
+ * `aiEnv()` — that would put `CONCIERGE_COOKIE_SECRET` on a page that sends
+ * nothing, which is the boundary-7 coupling that once took `/sitemap.xml` down.
+ * It reads the same schema instead, so the flip has one parse and not two: two
+ * parses of one switch is how a value that means "live" over here comes to mean
+ * "mock" over there.
+ */
+export const runLiveWoztellSchema = z.preprocess(
+  (value) => (typeof value === "string" && value.trim().length === 0 ? undefined : value),
+  z.enum(["0", "1"]).optional(),
+);
+
 const aiEnvironmentSchema = z.object({
   AGENTS_ENABLED: z.string().optional().transform((value) => value === "true"),
   AGENT_MODEL_CONCIERGE: z.string().default("openai:gpt-4.1-mini"),
@@ -181,14 +203,7 @@ const aiEnvironmentSchema = z.object({
   WOZTELL_CHANNEL_ID: z.string().optional(),
   WOZTELL_WEBHOOK_SECRET: z.string().optional(),
   WOZTELL_OPEN_API_TOKEN: z.string().optional(),
-  // C-9 (O-8). Strict, and blank-tolerant on purpose: `.env.example` ships
-  // `RUN_LIVE_WOZTELL=` and an empty Vercel variable arrives as `""`, so a blank
-  // must keep meaning "not live" — while `true`, `yes` or `TRUE` must stop
-  // meaning it silently.
-  RUN_LIVE_WOZTELL: z.preprocess(
-    (value) => (typeof value === "string" && value.trim().length === 0 ? undefined : value),
-    z.enum(["0", "1"]).optional(),
-  ),
+  RUN_LIVE_WOZTELL: runLiveWoztellSchema,
   WOZTELL_APPROVED_TEMPLATE_KEYS: z.string().optional(),
   TURNSTILE_SECRET: z.string().refine(
     (value) => value.trim().length > 0,

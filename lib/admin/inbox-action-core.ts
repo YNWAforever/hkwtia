@@ -26,6 +26,7 @@ import {
 } from "@/lib/db/repos/message-eligibility";
 import type {Actor} from "@/lib/membership/lifecycle";
 import {approvedTemplateKeys} from "@/lib/whatsapp/approved-templates";
+import {resolveTemplateBody} from "@/lib/whatsapp/template-body";
 
 /**
  * The actor-taking core of the inbox reply lane. It must never live in a
@@ -489,6 +490,18 @@ export async function sendInboxReply(
     //    provider 4xx, a permanent failure and a staff task per recipient (O-7).
     if (!(await deps.approvedTemplateKeys()).has(templateKey as WhatsAppTemplateKey)) {
       throw new InboxReplyError("TEMPLATE_NOT_APPROVED");
+    }
+    // 3. Every declared BODY parameter, actually resolved (C-9 review). The
+    //    composer marks each one `required`, which is a client-side attribute
+    //    and nothing more: a hand-posted formData, or a browser that skipped the
+    //    check, reaches `sendTemplateMessage` with the parameter absent, and
+    //    `lib/channels/woztell.ts` fills it with "". Meta rejects an empty BODY
+    //    parameter, so that is a provider 4xx and a permanent failure — for a
+    //    reply staff believe they sent. `INVALID` rather than a new code on
+    //    purpose: "Check the message and the template" is exactly the correction
+    //    needed, and the code set the composer can render is a pinned set.
+    if (resolveTemplateBody(templateKey as WhatsAppTemplateKey, reply.templateVariables) === null) {
+      throw new InboxReplyError("INVALID");
     }
   }
 
