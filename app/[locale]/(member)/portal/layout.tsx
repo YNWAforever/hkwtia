@@ -45,9 +45,11 @@ export default async function PortalLayout({children, params}: Props) {
     }
     throw error;
   }
-  // Mirrors the admin guard in page.tsx: a staff actor otherwise clears this
-  // layout and only then hits getDashboard's requireMember(), which throws
-  // FORBIDDEN into the error boundary instead of routing onward.
+  // Without this, an admin actor would still pay for the member shell's build --
+  // two getTranslations calls, localizeConcierge, and constructing
+  // InternalAppShell/PortalNav/ConciergeWidget -- before page.tsx's own guard
+  // ever ran. It also means this layout doesn't rely solely on that sibling
+  // file to keep an admin from flashing member-portal chrome.
   if (isAdminActor(actor)) redirect(localizedPath(locale, "/admin"));
 
   const [concierge, commonT] = await Promise.all([

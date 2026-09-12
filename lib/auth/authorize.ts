@@ -21,9 +21,6 @@ import {forbidden, type Actor, type AdminActor} from "@/lib/membership/lifecycle
  * Import from here when you have an `Actor`; import from `lib/auth/actor` when
  * you need to resolve one.
  */
-export function requireAdmin(actor: Actor): asserts actor is AdminActor {
-  if (actor.kind !== "staff" && actor.kind !== "exco" && actor.kind !== "superadmin") forbidden();
-}
 
 /**
  * The non-throwing half of `requireAdmin`. A caller that must *route* on the
@@ -33,6 +30,17 @@ export function requireAdmin(actor: Actor): asserts actor is AdminActor {
  */
 export function isAdminActor(actor: Actor): actor is AdminActor {
   return actor.kind === "staff" || actor.kind === "exco" || actor.kind === "superadmin";
+}
+
+/**
+ * Throwing counterpart to `isAdminActor`, for a caller that refuses rather than
+ * routes. Delegates to it so the admin-kind set is defined in exactly one
+ * place: TypeScript never checks a hand-written `x is T` predicate against
+ * `T`, so without this delegation nothing would force the two to move
+ * together if the admin-kind set ever changed.
+ */
+export function requireAdmin(actor: Actor): asserts actor is AdminActor {
+  if (!isAdminActor(actor)) forbidden();
 }
 
 export function systemActor(source: "stripe-webhook"): Actor {
