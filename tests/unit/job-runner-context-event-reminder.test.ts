@@ -34,6 +34,7 @@ vi.mock("@/lib/automation/journey-runner", async (importOriginal) => {
 });
 
 import {automationCronActor} from "@/lib/auth/automation-actor";
+import type {JobJourneyContextRecord} from "@/lib/db/repos/job-runner-context";
 import type {JourneyClaim} from "@/lib/db/repos/journeys";
 import {createJobRunners} from "@/lib/jobs/runners";
 
@@ -41,7 +42,11 @@ const now = new Date("2027-01-15T10:00:00.000Z");
 const eventId = "33333333-3333-4333-8333-333333333333";
 const profileId = "member-event-reminder";
 
-function baseJourneyRow() {
+// Typed against the repository contract, not hand-shaped: the loader is mocked
+// here, so a field the repository starts returning (whatsappOptedOutAt was the
+// last one) must show up as a type error rather than as a fixture that quietly
+// stops resembling production.
+function baseJourneyRow(): JobJourneyContextRecord {
   return {
     profileId,
     email: "member@example.test",
@@ -52,10 +57,12 @@ function baseJourneyRow() {
     profileComplete: true,
     whatsappOptIn: true,
     whatsappNumber: "+85255550000",
+    whatsappOptedOutAt: null,
     emailSuppressed: false,
     engagementScore: 50,
     membershipStatus: null,
     billingPeriodEnd: null,
+    amountDueHkd: null,
   };
 }
 
@@ -84,8 +91,11 @@ function claim(overrides: Partial<JourneyClaim> = {}): JourneyClaim {
   } as JourneyClaim;
 }
 
-async function loadContextFor(claimOverrides: Partial<JourneyClaim> = {}) {
-  loadJourney.mockResolvedValue(baseJourneyRow());
+async function loadContextFor(
+  claimOverrides: Partial<JourneyClaim> = {},
+  journeyRowOverrides: Partial<JobJourneyContextRecord> = {},
+) {
+  loadJourney.mockResolvedValue({...baseJourneyRow(), ...journeyRowOverrides});
   // Only the journeys leg is under test; the campaigns leg (unrelated to
   // this branch) is overridden to a no-op so an unmocked DB call there can't
   // fail the batch and mask what we're asserting on.
@@ -168,5 +178,36 @@ describe("runProductionJourneys loadContext — event_reminder branch (B-5)", ()
 
     expect(context.email).toBeNull();
     expect(context.whatsappNumber).toBeNull();
+  });
+
+  /**
+   * C-9 review, and it lives here because this file already owns the only
+   * harness that can reach `loadContext` — it is built inline inside
+   * `runProductionJourneys` and never exported.
+   *
+   * The repository reads both consent stores and the runner refuses on either
+   * (`tests/unit/journey-whatsapp-stop.test.ts`, `tests/unit/journey-runner.test.ts`).
+   * This is the join between them: the field is REQUIRED on
+   * `JourneyRunnerContext`, so a wiring that dropped it would not compile — but
+   * one that hard-coded `whatsappOptedOutAt: null` would, and that is a marketing
+   * template sent to somebody who replied STOP with every type check green.
+   */
+  it("carries the contact-side withdrawal from the repository into the runner context", async () => {
+    const stoppedAt = new Date("2027-01-10T02:00:00.000Z");
+    loadEventReminder.mockResolvedValue({
+      eventId,
+      slug: "fixture-event",
+      titleEn: "Fixture Event",
+      titleZh: null,
+      startsAt: new Date("2030-03-01T02:00:00.000Z"),
+      venue: null,
+      deliverable: true,
+    });
+
+    const context = await loadContextFor({}, {whatsappOptedOutAt: stoppedAt});
+
+    expect(context.whatsappOptedOutAt).toEqual(stoppedAt);
+    // Still true, which is the whole point: the flag alone would have sent.
+    expect(context.whatsappOptIn).toBe(true);
   });
 });

@@ -1405,7 +1405,7 @@
     "due": "應續會",
     "rate": "比率",
     "methodologyHeading": "指標計算方法",
-    "methodologyDescription": "聚合指標每小時更新。估算節省時間等於代理已解決對話乘以六分鐘。頁面不會公開任何會員層級資料。",
+    "methodologyDescription": "聚合指標每小時更新。估算節省時間等於代理已解決對話乘以六分鐘。頁面不會公開任何會員層級資料。解決率、轉介率、失敗率及首次回覆時間只描述由智能助理處理到底的對話：職員在收件匣接手後，該對話不會產生代理結果，職員回覆亦不計作首次回覆。",
     "architectureHeading": "WTIA AI-Ops 運作方式",
     "architectureDescription": "網站及 WhatsApp 查詢經 Concierge runtime 及受限制工具處理。排程工作使用已驗證路由。所有生成操作仍受人工批准或發布關卡限制。",
     "approvalGate": "人工批准關卡",
@@ -2241,6 +2241,7 @@
       "label": "職員管理導覽",
       "dashboard": "控制台",
       "inbox": "訊息中心",
+      "contacts": "潛在客戶",
       "tasks": "待辦",
       "segments": "分群",
       "members": "會員",
@@ -2257,21 +2258,209 @@
       "cohorts": "啟航計劃",
       "approvals": "審批",
       "reports": "報告",
-      "automations": "自動化"
+      "automations": "自動化",
+      "templates": "WhatsApp 範本",
+      "campaigns": "推廣活動"
+    },
+    "templates": {
+      "eyebrow": "WhatsApp 發送",
+      "title": "WhatsApp 範本",
+      "description": "只有在此獲批准的範本才可發送。Meta 於 WhatsApp Business 帳戶批准後，方可在此批准該範本；其餘一律略過而非發送。",
+      "columns": {
+        "key": "識別碼",
+        "elementName": "範本名稱",
+        "language": "語言",
+        "category": "類別",
+        "variables": "變數",
+        "status": "狀態",
+        "approvedAt": "批准日期"
+      },
+      "status": {
+        "pending": "待批",
+        "approved": "已批准",
+        "rejected": "已拒絕",
+        "disabled": "已停用"
+      },
+      "category": {
+        "marketing": "推廣",
+        "utility": "通知",
+        "authentication": "驗證"
+      },
+      "approve": "批准",
+      "reject": "拒絕",
+      "disable": "停用",
+      "rejectionReason": "原因",
+      "previewEn": "預覽（英文）",
+      "previewZhHk": "預覽（繁體中文）",
+      "savePreview": "儲存預覽",
+      "empty": "範本登記尚未有資料。在登記首個範本之前，以環境變數的已批准清單為準。",
+      "error": "無法載入範本登記。",
+      "goLive": "在此批准至少一個範本之前，WhatsApp 不會發出任何訊息。"
+    },
+    "contacts": {
+      "eyebrow": "潛在客戶流程",
+      "title": "潛在客戶",
+      "description": "所有尚未成為會員但需要聯絡的人：WhatsApp 來訊者、留下興趣表格者、活動賓客，以及中途離開的入會申請。",
+      "columns": {
+        "name": "姓名",
+        "stage": "階段",
+        "source": "來源",
+        "owner": "負責人",
+        "lastInbound": "最後來訊",
+        "optIn": "WhatsApp",
+        "actions": "操作"
+      },
+      "stage": {
+        "new": "新增",
+        "contacted": "已聯絡",
+        "qualified": "已評估",
+        "applied": "已申請",
+        "member": "已入會",
+        "closed": "已結束"
+      },
+      "source": {
+        "whatsapp": "WhatsApp",
+        "event_guest": "活動賓客",
+        "showcase_intro": "方案展示查詢",
+        "join_abandoned": "未完成入會",
+        "interest_form": "興趣表格",
+        "import": "匯入"
+      },
+      "optIn": {
+        "yes": "已同意接收",
+        "no": "未同意接收",
+        "stopped": "已停止接收"
+      },
+      "filters": {
+        "stage": "階段",
+        "source": "來源",
+        "owner": "負責人",
+        "search": "搜尋姓名、電郵或號碼",
+        "anyStage": "所有階段",
+        "anySource": "所有來源",
+        "anyOwner": "任何人",
+        "anyOptIn": "不限",
+        "submit": "篩選",
+        "clear": "清除"
+      },
+      "unassigned": "未指派",
+      "assign": "指派",
+      "assignToMe": "指派給我",
+      "save": "儲存",
+      "next": "下一頁",
+      "openThread": "開啟對話",
+      "noThread": "尚無對話",
+      "convert": "邀請入會",
+      "linkedMember": "會員記錄",
+      "duplicates": "有 {count} 筆記錄使用此電郵",
+      "empty": "沒有符合條件的潛在客戶。",
+      "error": "無法載入潛在客戶流程。",
+      "saved": "已更新潛在客戶。"
+    },
+    "campaigns": {
+      "eyebrow": "對外訊息",
+      "title": "推廣活動",
+      "description": "為活動命名、選擇渠道及範本、揀選分群，先確認實際可觸及的對象，再由另一位管理員批准。",
+      "steps": {
+        "name": "名稱",
+        "channel": "渠道",
+        "template": "範本",
+        "variables": "訊息內容",
+        "segment": "分群",
+        "preview": "觸及對象"
+      },
+      "channel": {
+        "email": "電郵",
+        "whatsapp": "WhatsApp"
+      },
+      "columns": {
+        "status": "狀態",
+        "created": "建立日期"
+      },
+      "fields": {
+        "name": "活動名稱",
+        "template": "範本",
+        "segment": "已儲存分群",
+        "scheduledAt": "發送時間"
+      },
+      "variables": {
+        "legend": "填寫範本內容",
+        "hint": "直接輸入文字，或使用預設代碼：{tokens}",
+        "missing": "所有欄位必須填妥，方可發送此範本。"
+      },
+      "blocked": "尚未完成——「{step}」仍未填妥。",
+      "noSegments": "請先儲存分群：推廣活動須對應一個已儲存的分群。",
+      "scheduleUnavailable": "電郵推廣活動會於下一個每小時排程發送，不可另行指定時間。",
+      "eligibility": {
+        "eligible": "將會發送",
+        "no_email": "沒有電郵地址",
+        "no_number": "沒有 WhatsApp 號碼",
+        "not_opted_in": "未同意接收",
+        "suppressed": "已停止接收",
+        "plan_ineligible": "會籍並非生效中",
+        "missing_variable": "訊息內容未填妥",
+        "marketing_suppressed": "發送前同意狀態已改變",
+        "template_not_approved": "範本未獲批核發送",
+        "unknown_recipient": "收件人紀錄已不存在"
+      },
+      "status": {
+        "draft": "草稿",
+        "review": "待批",
+        "scheduled": "已排程",
+        "queued": "已排隊",
+        "processing": "發送中",
+        "sending": "發送中",
+        "completed": "已完成",
+        "cancelled": "已取消",
+        "failed": "失敗"
+      },
+      "actions": {
+        "createDraft": "建立草稿",
+        "submitForReview": "提交審批",
+        "approve": "批准並排程",
+        "approveEmail": "批准並加入發送隊列",
+        "reject": "拒絕",
+        "next": "下一步",
+        "back": "上一步",
+        "goToStep": "前往該步驟"
+      },
+      "ownDraft": "推廣活動須由另一位管理員批准。",
+      "rejectionReason": "原因",
+      "templateUnapproved": "此範本尚未獲批准，請先於「WhatsApp 範本」批准。",
+      "report": {
+        "title": "發送情況",
+        "queued": "待發送",
+        "sent": "已發送",
+        "delivered": "已送達",
+        "read": "已閱讀",
+        "failed": "失敗",
+        "blocked": "未發送",
+        "total": "收件人"
+      },
+      "empty": "尚未有推廣活動。",
+      "error": "無法載入推廣活動。"
     },
     "inbox": {
       "eyebrow": "會員及潛在客戶對話",
       "title": "訊息中心",
-      "description": "網頁小工具及 WhatsApp 上的所有禮賓對話。此版本只可閱讀；於 WhatsApp 營運階段將可直接回覆。",
+      "description": "網站聊天視窗及 WhatsApp 上的所有禮賓對話。接手對話即可親自回覆，完成後可交回禮賓助理。",
       "filters": {"all": "全部", "whatsapp": "WhatsApp", "web": "網頁"},
-      "columns": {"owner": "對象", "channel": "渠道", "last": "最後訊息", "when": "更新時間", "messages": "訊息數", "status": "狀態"},
+      "columns": {"owner": "對象", "channel": "渠道", "last": "最後訊息", "when": "更新時間", "messages": "訊息數", "status": "狀態", "handling": "處理方", "assignee": "負責人", "unread": "未讀"},
       "anonymous": "潛在客戶（非會員）",
       "escalated": "需要真人跟進",
       "empty": "尚未有對話。",
       "error": "無法載入訊息中心。",
       "open": "開啟",
       "back": "返回訊息中心",
-      "roles": {"user": "發送者", "assistant": "禮賓", "tool": "工具"}
+      "unassigned": "未指派",
+      "unreadYes": "新訊息",
+      "roles": {"user": "發送者", "assistant": "禮賓助理", "tool": "工具", "staff": "WTIA 職員"},
+      "handling": {"bot": "禮賓助理", "human": "由職員處理", "closed": "已結束", "filterAll": "所有對話", "filterHuman": "由職員處理", "filterBot": "由禮賓助理處理"},
+      "actions": {"take": "接手此對話", "release": "交回禮賓助理", "close": "結束此對話", "assignToMe": "指派給我", "unassign": "取消指派", "markRead": "標記為已讀"},
+      "window": {"open": "尚餘 {hours} 小時 {minutes} 分鐘可自由回覆", "closed": "24 小時回覆時限已過，請改用已批核範本。", "never": "對方尚未主動傳送訊息，因此沒有開啟中的回覆時限。"},
+      "compose": {"legend": "回覆", "kindSession": "自由文字回覆", "kindTemplate": "已批核範本", "message": "你的回覆", "placeholder": "輸入回覆內容…", "template": "範本", "templateNone": "選擇範本", "send": "發送", "sending": "發送中…", "sent": "已發送。", "alreadySent": "未發送——此回覆已於本對話發送過，今次沒有發出新訊息。請先查看對話；若確實要再發一次，請修改內文。", "draftRestored": "已回復草稿。"},
+      "delivery": {"queued": "發送中", "sent": "已發送", "delivered": "已送達", "read": "已讀", "failed": "未能送達"},
+      "errors": {"INVALID": "請檢查訊息內容及範本。", "FORBIDDEN": "你無權存取此對話。", "WINDOW_CLOSED": "24 小時時限已過，請改用已批核範本。", "NOT_OPTED_IN": "對方未同意接收 WhatsApp 訊息。", "OPTED_OUT": "對方已要求停止接收訊息。", "SUPPRESSED": "對方已停止接收 WhatsApp 推廣訊息。", "NO_NUMBER": "我們沒有對方的 WhatsApp 號碼。", "INVALID_INBOX_CHANNEL": "此對話並非 WhatsApp 對話。", "INVALID_INBOX_HANDLING": "請先接手此對話才可回覆。", "TEMPLATE_NOT_APPROVED": "該範本未獲批核發送。", "SEND_IN_PROGRESS": "此回覆正在發送中，請稍候再試。", "DELIVERY_FAILED": "WhatsApp 拒絕了此訊息，請再按「發送」重試。", "DELIVERY_UNCERTAIN": "無法確認 WhatsApp 是否已接收此訊息。再次發送前請先到 WhatsApp 查看對話——再按「發送」不會重發此回覆，修改內文則會發出新訊息。"}
     },
     "tasks": {
       "eyebrow": "升級個案",
@@ -2453,6 +2642,30 @@
       "existing": "現有活動",
       "recipients": "位收件人",
       "newDraft": "建立新活動",
+      "industryTags": "行業標籤",
+      "anyTag": "所有行業",
+      "companyPlan": "公司會籍",
+      "event": "活動",
+      "eventState": "報名狀態",
+      "eventStates": {
+        "registered": "已報名",
+        "waitlist": "候補",
+        "attended": "已出席",
+        "cancelled": "已取消",
+        "not_registered": "未報名"
+      },
+      "audience": "對象",
+      "audiences": {
+        "members": "會員",
+        "contacts": "潛在客戶",
+        "both": "會員及潛在客戶"
+      },
+      "contactStage": "潛在客戶階段",
+      "contactSource": "潛在客戶來源",
+      "presetNotRegistered": "尚未報名「{event}」的會員",
+      "kind": "類別",
+      "kindMember": "會員",
+      "kindContact": "潛在客戶",
       "error": "未能排入活動佇列，請再試一次。"
     },
     "atRisk": {

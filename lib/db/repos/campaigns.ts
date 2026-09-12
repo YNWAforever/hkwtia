@@ -1,34 +1,129 @@
 import "server-only";
 
-import {and, eq, sql} from "drizzle-orm";
+import {and, desc, eq, ne, sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
-import {queueCampaignSchema, type CampaignQueueDependencies, type CampaignQueueMember, type CampaignQueueResult, type QueueCampaignInput} from "@/lib/admin/campaigns";
-import {segmentFilterSchema, segmentIdSchema, type SegmentFilterSet} from "@/lib/admin/segment-schema";
+import {CAMPAIGN_STATUSES, type CampaignStatus} from "@/lib/admin/campaign-status";
+/**
+ * `@/lib/admin/campaigns` imports THIS module for `campaignsRepository`, so the
+ * two are a cycle. Every RUNTIME binding taken from it below must therefore be
+ * dereferenced inside a method — `createCampaignSchema` inside `createCampaign`
+ * — and never at module scope, because a module-scope read runs while the admin
+ * module is still evaluating and hits the temporal dead zone. That is not
+ * hypothetical: `CAMPAIGN_STATUSES` used to be imported from here for the
+ * `campaignRecordSchema` below and failed `next build` exactly that way, which
+ * is why it now comes from the leaf on the line above. See
+ * `lib/admin/campaign-status.ts` for the incident.
+ */
+import {
+  createCampaignSchema,
+  type CampaignAuditSummary,
+  type CampaignInsertResult,
+  type CampaignQueueDependencies,
+  type CampaignQueueResult,
+  type CampaignRecord,
+  type CampaignReport,
+  type CampaignReviewDecision,
+  type CampaignSummary,
+  type CreateCampaignRecord,
+} from "@/lib/admin/campaigns";
+import {SEGMENT_FILTER_VERSION, parseSegmentFilter, segmentIdSchema, type SegmentFilterSet} from "@/lib/admin/segment-schema";
 import {requireAdmin} from "@/lib/auth/authorize";
-import {auditEvents, campaignRecipients, campaigns, companies, companyMembers, emailLog, engagementScores, memberships, profiles, savedSegments} from "@/lib/db/server-schema";
+import {auditEvents, campaignRecipients, campaigns, contacts, profiles, savedSegments} from "@/lib/db/server-schema";
 import {
   createCampaignRecipientDeliveryRepository,
   type CampaignRecipientDeliveryRepository,
 } from "@/lib/db/repos/campaign-recipient-delivery";
 import {getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase} from "@/lib/db/repos/journeys";
-import {segmentPredicates} from "@/lib/db/repos/segments";
+import {parseRecipientFactsRow, recipientFactsProjection, type RecipientFacts} from "@/lib/db/repos/message-eligibility";
+import {projectedAudience} from "@/lib/db/repos/segments";
 import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 
-const savedSegmentRowSchema = z.object({id: z.string().uuid(), ownerProfileId: z.string(), filters: z.record(z.unknown())});
-const audienceRowSchema = z.object({profileId: z.string(), displayName: z.string(), email: z.string().nullable(), locale: z.string(), consentMarketing: z.boolean(), suppressed: z.boolean(), renewalAt: z.coerce.date().nullable()});
+const savedSegmentRowSchema = z.object({id: z.string().uuid(), ownerProfileId: z.string(), filters: z.record(z.unknown()), filterVersion: z.number().int()});
 const campaignRowSchema = z.object({id: z.string().uuid()});
 const countRowSchema = z.object({count: z.coerce.number()});
 const idempotencyKeySchema = z.string().uuid();
 const campaignIdSchema = z.string().uuid();
-const recipientCountSchema = z.number().int().nonnegative();
-const campaignRecipientSchema = z.object({
-  profileId: z.string().min(1),
-  email: z.string().trim().email(),
+const scheduledAtSchema = z.date().refine((value) => !Number.isNaN(value.getTime()), "INVALID_SCHEDULED_AT");
+const auditSummarySchema = z.object({
+  action: z.enum(["campaign.queued", "campaign.drafted"]),
+  eligible: z.number().int().nonnegative(),
+  blocked: z.number().int().nonnegative(),
+  byReason: z.record(z.number().int().nonnegative()),
+}).strict();
+/**
+ * `channel` is `text` + CHECK rather than a pgEnum (S-3), so nothing between
+ * Postgres and this module narrows it. Parsing it here is what keeps a row
+ * written before the CHECK existed from reaching a screen that indexes a label
+ * map by it and renders `undefined`.
+ */
+const campaignRecordSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().nullable(),
+  channel: z.enum(["email", "whatsapp"]),
+  template: z.string().nullable(),
+  templateKey: z.string().nullable(),
+  variablesTemplate: z.record(z.string()).nullable().transform((value) => value ?? {}),
+  status: z.enum(CAMPAIGN_STATUSES as [CampaignStatus, ...CampaignStatus[]]),
+  segmentId: z.string().uuid(),
+  createdByProfileId: z.string(),
+  scheduledAt: z.coerce.date().nullable(),
+  reviewedAt: z.coerce.date().nullable(),
+  reviewedByProfileId: z.string().nullable(),
+  rejectionReason: z.string().nullable(),
+  completedAt: z.coerce.date().nullable(),
+  createdAt: z.coerce.date(),
+});
+
+/** The index is a working list, not an archive: the newest fifty are the ones staff act on. */
+const CAMPAIGN_LIST_LIMIT = 50;
+
+const reviewDecisionSchema = z.discriminatedUnion("outcome", [
+  z.object({outcome: z.literal("approved")}).strict(),
+  z.object({outcome: z.literal("rejected"), reason: z.string().trim().min(1).max(500)}).strict(),
+]);
+
+/**
+ * A queued row is one we are going to hand to a provider, so every variable it
+ * carries has to be non-empty: `lib/channels/woztell.ts` sends
+ * `variables[key] ?? ""` and Meta rejects an empty BODY parameter, which S-15
+ * makes a permanent failure. The check is scoped to rows carrying a WhatsApp
+ * number because that is exactly the set a template send addresses — an email
+ * row's `displayName` has been allowed to be blank since M2 and turning that
+ * into a 500 on the Queue button would be a regression, not a guard.
+ */
+function refuseEmptyTemplateVariable(
+  value: Readonly<{status: string; whatsappNumber: string | null; variables: Record<string, string>}>,
+  context: z.RefinementCtx,
+): void {
+  if (value.status !== "queued" || value.whatsappNumber === null) return;
+  for (const [key, text] of Object.entries(value.variables)) {
+    if (text.trim() === "") {
+      context.addIssue({code: z.ZodIssueCode.custom, message: "EMPTY_TEMPLATE_VARIABLE", path: ["variables", key]});
+    }
+  }
+}
+
+const recipientCommon = {
+  email: z.string().trim().email().nullable().default(null),
+  whatsappNumber: z.string().trim().min(1).max(32).nullable().default(null),
   locale: z.string().min(1).max(10),
   variables: z.record(z.string()),
-}).strict();
+  status: z.enum(["queued", "suppressed"]).default("queued"),
+  blockedReason: z.string().trim().min(1).max(64).nullable().default(null),
+};
+
+/**
+ * S-4 in one parse. The two arms are `.strict()`, so a row naming BOTH
+ * identities matches neither and a row naming neither matches neither — the
+ * Zod boundary and `campaign_recipients_identity_check` state the same rule,
+ * and the database's version exists for the writer nobody has written yet.
+ */
+const campaignRecipientSchema = z.union([
+  z.object({profileId: z.string().min(1).max(255), ...recipientCommon}).strict().superRefine(refuseEmptyTemplateVariable),
+  z.object({contactId: z.string().uuid(), ...recipientCommon}).strict().superRefine(refuseEmptyTemplateVariable),
+]);
 
 type DbExecutor = Pick<Awaited<ReturnType<typeof getDb>>, "select" | "insert" | "execute">;
 
@@ -42,20 +137,19 @@ function resultRows(result: unknown): unknown[] {
   return [];
 }
 
-function toQueueMember(row: z.infer<typeof audienceRowSchema>): CampaignQueueMember {
-  return {...row, renewalAt: row.renewalAt?.toISOString().slice(0, 10) ?? null};
-}
-
 async function savedSegmentForActor(actor: AdminActor, store: unknown, segmentId: string) {
   const parsedSegmentId = segmentIdSchema.parse(segmentId);
   const db = asDb(store);
-  const row = (await db.select({id: savedSegments.id, ownerProfileId: savedSegments.ownerProfileId, filters: savedSegments.filters})
+  // `filterVersion` is selected only so the filters can be dispatched on it: a
+  // campaign built from a segment read at the wrong version addresses the wrong
+  // people, and the snapshot on `campaign_recipients` would make that permanent.
+  const row = (await db.select({id: savedSegments.id, ownerProfileId: savedSegments.ownerProfileId, filters: savedSegments.filters, filterVersion: savedSegments.filterVersion})
     .from(savedSegments)
     .where(and(eq(savedSegments.id, parsedSegmentId), eq(savedSegments.ownerProfileId, actor.profileId)))
     .limit(1))[0];
   if (!row) return null;
   const parsed = savedSegmentRowSchema.parse(row);
-  return {...parsed, filters: segmentFilterSchema.parse(parsed.filters)};
+  return {...parsed, filters: parseSegmentFilter(parsed.filterVersion, parsed.filters)};
 }
 
 async function ownedCampaign(actor: AdminActor, store: unknown, campaignId: string): Promise<string> {
@@ -69,33 +163,226 @@ async function ownedCampaign(actor: AdminActor, store: unknown, campaignId: stri
   return campaignRowSchema.parse(row).id;
 }
 
-async function campaignAudience(store: unknown, filter: SegmentFilterSet): Promise<readonly CampaignQueueMember[]> {
+/**
+ * S-7. Two-person control as a property of the row rather than of a screen.
+ * `ownedCampaign` is untouched and still gates every creator write; this is its
+ * deliberate inverse, and the inequality is the whole authorization: an admin
+ * cannot approve the campaign they wrote.
+ *
+ * The reviewer reads the campaign row and the eligibility counts already
+ * snapshotted onto `campaign_recipients`, never `saved_segments`. That is what
+ * the snapshot is for — it makes the reviewable object campaign-scoped, so
+ * segment ownership (which names member emails) stays owner-only.
+ */
+async function reviewableCampaign(actor: AdminActor, store: unknown, campaignId: string): Promise<string> {
+  const parsedCampaignId = campaignIdSchema.parse(campaignId);
   const db = asDb(store);
-  const predicates = segmentPredicates(filter);
+  const row = (await db.select({id: campaigns.id})
+    .from(campaigns)
+    .where(and(eq(campaigns.id, parsedCampaignId), ne(campaigns.createdByProfileId, actor.profileId)))
+    .limit(1))[0];
+  if (!row) throw new Error("Campaign is not reviewable by this actor");
+  return campaignRowSchema.parse(row).id;
+}
+
+function statusList(values: readonly string[]): SQL {
+  return sql.join(values.map((value) => sql`${value}`), sql`, `);
+}
+
+async function transitionCampaign(
+  db: DbExecutor,
+  campaignId: string,
+  from: readonly string[],
+  assignment: SQL,
+): Promise<void> {
+  const rows = resultRows(await db.execute(sql`
+    UPDATE ${campaigns} AS target
+    SET ${assignment}, updated_at = now()
+    WHERE target.id = ${campaignId}::uuid
+      AND target.status IN (${statusList(from)})
+    RETURNING target.id
+  `));
+  // A transition that matched nothing is a stale screen, not a silent no-op:
+  // two admins on the same campaign would otherwise both be told the approval
+  // landed.
+  if (!rows.length) throw new Error("Campaign is not in a state that allows this transition");
+}
+
+async function appendCampaignAudit(
+  db: DbExecutor,
+  actor: AdminActor,
+  campaignId: string,
+  action: string,
+  metadata: Record<string, unknown>,
+): Promise<void> {
+  await db.insert(auditEvents).values({
+    actorUserId: actor.profileId,
+    actorType: actor.kind,
+    action,
+    targetType: "campaign",
+    targetId: campaignId,
+    metadata,
+  });
+}
+
+/**
+ * The audience, as facts rather than as a verdict.
+ *
+ * What this replaced projected a `suppressed` flag from
+ * `EXISTS(… email_log.status = 'suppressed')` — a value `DeliveryStatus`
+ * (`processing｜sent｜failed`) has never contained and no writer in the tree has
+ * ever written, so the column had been constant `false` since M2 and the
+ * "suppressed" category of the preview was decorative. Real suppression is
+ * `message_suppressions` per channel for a member and
+ * `contacts.whatsapp_opted_out_at` for a prospect, and both are read here
+ * through `recipientFactsProjection`, the same projection the inbox's
+ * eligibility door reads. One reader, so a preview and a send cannot disagree
+ * about a person.
+ *
+ * No `channel` parameter: the facts are channel-independent and
+ * `classifyRecipient` is where the channel enters. A channel argument here
+ * would imply the SQL filtered on it, and the first person to believe that
+ * would drop the other channel's audience.
+ *
+ * The `filter.audience === "contacts" → []` guard this replaced is gone, and
+ * deliberately. It existed because `campaign_recipients` was profile-keyed and
+ * a contacts segment queued through the email shortcut would have fallen
+ * through to the member arm and mailed the whole membership. The snapshot is
+ * identity-polymorphic now, and a prospect's `marketingConsent` is `false` by
+ * construction, so every contact in an email campaign lands `not_opted_in` —
+ * visible in the report, and never in a state the claim loop can see. The
+ * remaining layer, `memberPredicates` answering FALSE to a contact-shaped
+ * filter, is untouched.
+ */
+/**
+ * The join back to `contacts` is spelled `contacts.id::text = audience."id"` and
+ * never `audience."id"::uuid`: a member row's id is a text profile id, and
+ * Postgres is free to evaluate the cast before the `kind` test, which would
+ * fail the whole statement on the first mixed-audience segment.
+ *
+ * ONE ROW PER PERSON, and the `DISTINCT ON` below is the whole of it. Read this
+ * before touching either half; they are one fix and each is useless alone.
+ *
+ * The audience is a UNION of two identity spaces — a member arm keyed by
+ * `profiles.id` and a contact arm keyed by `contacts.id` — and `contactArm`
+ * does not drop a contact carrying a `profile_id`, so a person who is both
+ * appears TWICE in an `audience: "both"` segment. Until C2 Task 9 that was
+ * harmless by construction: the only `createCampaign` caller was `queueCampaign`
+ * with a hard-coded `channel: "email"`, and a contact's `marketingConsent` is
+ * `false` by construction, so the duplicate always landed `not_opted_in`. Task 9's
+ * `createCampaignDraft` is the first writer that passes `channel: "whatsapp"`,
+ * and that spent the precondition: both partial unique indexes on
+ * `campaign_recipients` are on DIFFERENT columns, so `insertRecipients`' bare
+ * `onConflictDoNothing()` cannot collapse the pair, the preview a second admin
+ * approves counts the person twice, the report says 20 recipients for 19 people,
+ * and the blast sends the same marketing template twice to one phone number.
+ *
+ * 1. The `contacts` join reaches BOTH arms — a member row now joins the contact
+ *    that links back to it. `contacts_profile_unique` is a partial UNIQUE index
+ *    on `profile_id`, so that is at most one row and the member arm cannot fan
+ *    out. This exists so the collapse in (2) cannot LOSE a withdrawal: a STOP
+ *    that resolved no profile (the webhook's `markWhatsAppOptedOut` is keyed on
+ *    the phone, and `message_suppressions.profile_id` is NOT NULL) stamps only
+ *    `contacts.whatsapp_opted_out_at`, which the member arm could not see. Drop
+ *    the contact row without this and the surviving member row reads
+ *    `whatsappOptedOutAt: null` and the blast reaches somebody who said STOP —
+ *    a worse bug than the duplicate it was fixing.
+ * 2. `DISTINCT ON` over the person, member row preferred. The member identity is
+ *    the one to keep: it carries the real `marketing_consent` (a contact's is
+ *    `false` by construction, so keeping the contact row would blank every
+ *    linked member out of an email campaign), the membership facts the template
+ *    variables resolve from, and a `profile_id` for the recipient row.
+ *
+ * What is deliberately NOT merged is the opt-in and the number. Those two are a
+ * PAIR — the number a person consented on — and `profiles.whatsapp_opt_in` /
+ * `profiles.whatsapp_number` is a different pair from `contacts.whatsapp_opt_in`
+ * / `contacts.phone_e164`. Crossing them is the quiet widening
+ * `linkedMemberWithdrawalAt` refuses for the same reason. A withdrawal is the
+ * one fact that belongs to the human rather than to either record, which is why
+ * it and only it is unioned. The visible consequence is that a member with a
+ * linked contact but no `profiles.whatsapp_number` reads `no_number` in the
+ * preview instead of being reached on the contact's phone; that is a count a
+ * human can see and fix, not a silent send.
+ */
+function audienceTargets(filter: SegmentFilterSet, now: Date): SQL {
+  return sql`
+    SELECT DISTINCT ON (person.person_key)
+      person.kind AS kind,
+      person.id AS id,
+      person.profile_id AS profile_id,
+      person.display_name AS display_name,
+      person.email AS email,
+      person.whatsapp_number AS whatsapp_number,
+      person.locale AS locale,
+      person.marketing_consent AS marketing_consent,
+      person.whatsapp_opt_in AS whatsapp_opt_in,
+      person.whatsapp_opted_out_at AS whatsapp_opted_out_at
+    FROM (
+      SELECT
+        audience."kind" AS kind,
+        audience."id" AS id,
+        -- The suppression sub-selects scope on profile_id, which for a prospect
+        -- is the optional member link C-4 writes. That is how a contact can be
+        -- suppressed at all, given message_suppressions.profile_id is NOT NULL.
+        COALESCE(${contacts.profileId}, ${profiles.id}) AS profile_id,
+        -- The person, not the row. A contact with no member link is only ever
+        -- itself, so it keys on its own id; both prefixes are spelled out so a
+        -- contact id can never collide with a profile id.
+        COALESCE('profile:' || COALESCE(${contacts.profileId}, ${profiles.id}), 'contact:' || audience."id") AS person_key,
+        audience."displayName" AS display_name,
+        audience."email" AS email,
+        audience."whatsappNumber" AS whatsapp_number,
+        COALESCE(${profiles.locale}, ${contacts.locale}) AS locale,
+        COALESCE(${profiles.consentMarketing}, false) AS marketing_consent,
+        audience."whatsappOptIn" AS whatsapp_opt_in,
+        ${contacts.whatsappOptedOutAt} AS whatsapp_opted_out_at
+      FROM (${projectedAudience(filter, now)}) AS audience
+      LEFT JOIN ${profiles} ON audience."kind" = 'member' AND ${profiles.id} = audience."id"
+      LEFT JOIN ${contacts} ON (
+        (audience."kind" = 'contact' AND ${contacts.id}::text = audience."id")
+        OR (audience."kind" = 'member' AND ${contacts.profileId} = audience."id")
+      )
+    ) AS person
+    -- Spelled as a boolean rather than relying on 'contact' < 'member': the
+    -- preference is "the member row wins", and an alphabetical accident is not
+    -- a rule the next reader can check.
+    ORDER BY person.person_key, (person.kind = 'member') DESC, person.id
+  `;
+}
+
+/**
+ * One row per PERSON, not one per audience row: `audienceTargets` collapses the
+ * member and contact rows of somebody who is both, and unions their withdrawal
+ * evidence on the way. Read its docblock before changing anything here — the
+ * count this returns is the count a second admin approves under S-7, the size of
+ * the snapshot on `campaign_recipients`, and the number of messages the blast
+ * sends, and those three are the same number only because of that collapse.
+ *
+ * `ORDER BY facts."kind", facts."id"` is presentation, not identity. It does no
+ * de-duplication and never did.
+ */
+async function campaignAudience(store: unknown, filter: SegmentFilterSet, now: Date): Promise<readonly RecipientFacts[]> {
+  const db = asDb(store);
   const rows = await db.execute(sql`
-    WITH candidate_rows AS (
-      SELECT ${profiles.id} AS profile_id, ${profiles.displayName} AS display_name, ${profiles.email} AS email,
-        ${profiles.locale} AS locale, ${profiles.consentMarketing} AS consent_marketing, ${memberships.billingPeriodEnd} AS renewal_at,
-        ROW_NUMBER() OVER (PARTITION BY ${profiles.id} ORDER BY ${memberships.billingPeriodEnd} ASC NULLS LAST, ${memberships.id} NULLS LAST, ${companies.id} NULLS LAST) AS row_rank
-      FROM ${profiles}
-      LEFT JOIN ${companyMembers} ON ${companyMembers.userId} = ${profiles.id} AND ${companyMembers.revokedAt} IS NULL
-      LEFT JOIN ${companies} ON ${companies.id} = ${companyMembers.companyId}
-      LEFT JOIN ${memberships} ON ${memberships.ownerUserId} = ${profiles.id} OR ${memberships.companyId} = ${companyMembers.companyId}
-      LEFT JOIN ${engagementScores} ON ${engagementScores.profileId} = ${profiles.id}
-      WHERE ${predicates}
-    )
-    SELECT candidate.profile_id AS "profileId", candidate.display_name AS "displayName", candidate.email, candidate.locale,
-      candidate.consent_marketing AS "consentMarketing", candidate.renewal_at AS "renewalAt",
-      EXISTS(SELECT 1 FROM ${emailLog} WHERE ${emailLog.profileId} = candidate.profile_id AND ${emailLog.status} = 'suppressed') AS suppressed
-    FROM candidate_rows AS candidate WHERE candidate.row_rank = 1 ORDER BY "profileId"
+    SELECT facts.* FROM (${recipientFactsProjection(audienceTargets(filter, now))}) AS facts
+    ORDER BY facts."kind", facts."id"
   `);
-  return z.array(audienceRowSchema).parse(resultRows(rows)).map(toQueueMember);
+  return resultRows(rows).map(parseRecipientFactsRow);
 }
 
 export type CampaignDbProvider = () => Promise<Awaited<ReturnType<typeof getDb>>>;
 export type CampaignsRepository =
   & CampaignQueueDependencies
-  & CampaignRecipientDeliveryRepository;
+  & CampaignRecipientDeliveryRepository
+  & Readonly<{
+    submitForReview: (actor: Actor, store: unknown, campaignId: string) => Promise<void>;
+    recordReview: (actor: Actor, store: unknown, campaignId: string, decision: CampaignReviewDecision) => Promise<void>;
+    schedule: (actor: Actor, store: unknown, campaignId: string, scheduledAt: Date) => Promise<void>;
+    queueApproved: (actor: Actor, store: unknown, campaignId: string) => Promise<void>;
+    listCampaigns: (actor: Actor, store: unknown) => Promise<readonly CampaignSummary[]>;
+    campaignFor: (actor: Actor, store: unknown, campaignId: string) => Promise<CampaignRecord | null>;
+    campaignReportFor: (actor: Actor, store: unknown, campaignId: string) => Promise<CampaignReport>;
+  }>;
 
 export function createCampaignsRepository(
   getDatabase: CampaignDbProvider,
@@ -126,9 +413,13 @@ export function createCampaignsRepository(
         .limit(1))[0];
       if (!campaign) return null;
       const parsedCampaign = campaignRowSchema.parse(campaign);
+      // Only the sendable rows, because the snapshot now also holds everyone
+      // the campaign could not reach. Counting all of them would report a
+      // recovered draft as larger than the one that was just created, from the
+      // same audience.
       const count = countRowSchema.parse((await db.select({count: sql<number>`count(*)`})
         .from(campaignRecipients)
-        .where(eq(campaignRecipients.campaignId, parsedCampaign.id)))[0]).count;
+        .where(and(eq(campaignRecipients.campaignId, parsedCampaign.id), sql`${campaignRecipients.blockedReason} IS NULL`)))[0]).count;
       return {campaignId: parsedCampaign.id, recipientCount: count};
     },
 
@@ -137,15 +428,22 @@ export function createCampaignsRepository(
       return savedSegmentForActor(actor, store, segmentId);
     },
 
-    async membersForSegment(actor, store, filter) {
+    async audienceForSegment(actor, store, filter) {
       requireAdmin(actor);
-      const parsedFilter = segmentFilterSchema.parse(filter);
-      return campaignAudience(store, parsedFilter);
+      // The caller hands over an already-dispatched filter set, so this is the
+      // current version by construction; it still re-parses at the repository
+      // boundary because `store` is caller-supplied and this is the last gate
+      // before the audience SQL is built.
+      const parsedFilter = parseSegmentFilter(SEGMENT_FILTER_VERSION, filter);
+      // One clock for the whole audience read, for the same reason `preview`
+      // takes one: the relative renewal and last-login windows must not move
+      // between the count a human approved and the rows that get snapshotted.
+      return campaignAudience(store, parsedFilter, new Date());
     },
 
-    async createCampaign(actor: Actor, store, input: QueueCampaignInput): Promise<CampaignQueueResult> {
+    async createCampaign(actor: Actor, store, input): Promise<CampaignQueueResult> {
       requireAdmin(actor);
-      const parsedInput = queueCampaignSchema.parse(input);
+      const parsedInput: CreateCampaignRecord = createCampaignSchema.parse(input);
       const segment = await savedSegmentForActor(actor, store, parsedInput.segmentId);
       if (!segment) throw new Error("Saved segment was not found");
       const db = asDb(store);
@@ -153,7 +451,12 @@ export function createCampaignsRepository(
         .values({
           segmentId: parsedInput.segmentId,
           createdByProfileId: actor.profileId,
+          name: parsedInput.name,
+          channel: parsedInput.channel,
           template: parsedInput.template,
+          templateKey: parsedInput.templateKey,
+          variablesTemplate: parsedInput.variablesTemplate,
+          status: parsedInput.status,
           localeStrategy: parsedInput.localeStrategy,
           idempotencyKey: parsedInput.idempotencyKey,
         })
@@ -165,34 +468,282 @@ export function createCampaignsRepository(
       return {...existing, disposition: "existing"};
     },
 
-    async insertRecipients(actor, store, campaignId, recipients) {
+    async insertRecipients(actor, store, campaignId, recipients): Promise<CampaignInsertResult> {
       requireAdmin(actor);
       const parsedRecipients = z.array(campaignRecipientSchema).parse(recipients);
       const parsedCampaignId = await ownedCampaign(actor, store, campaignId);
-      if (!parsedRecipients.length) return;
+      if (!parsedRecipients.length) return {inserted: 0, skipped: 0};
       const db = asDb(store);
-      await db.insert(campaignRecipients).values(parsedRecipients.map((recipient) => ({
+      // The BARE, targetless ON CONFLICT DO NOTHING: it covers every constraint
+      // on the table, so it needs no conflict target and therefore no verbatim
+      // repetition of each partial unique index's WHERE predicate. `createCampaign`
+      // directly above is already idempotent on `idempotencyKey`, so without
+      // this a re-entered wizard step or a retried snapshot raised 23505
+      // against the two partial indexes and surfaced as a 500 on "Create draft".
+      const written = await db.insert(campaignRecipients).values(parsedRecipients.map((recipient) => ({
         campaignId: parsedCampaignId,
         ...recipient,
-        variables: recipient.variables,
-      })));
+      })))
+        .onConflictDoNothing()
+        .returning({id: campaignRecipients.id});
+      return {inserted: written.length, skipped: parsedRecipients.length - written.length};
     },
 
-    async appendAudit(actor, store, campaignId, recipientCount) {
+    async appendAudit(actor, store, campaignId, summary: CampaignAuditSummary) {
       requireAdmin(actor);
-      const parsedRecipientCount = recipientCountSchema.parse(recipientCount);
+      const {action, ...metadata} = auditSummarySchema.parse(summary);
+      const parsedCampaignId = await ownedCampaign(actor, store, campaignId);
+      // `recipientCount` alone overstated the audience by exactly the number of
+      // rows the old dead `suppressed` flag failed to catch, so the metadata
+      // records the split and the reasons instead.
+      await appendCampaignAudit(asDb(store), actor, parsedCampaignId, action, metadata);
+    },
+
+    /**
+     * Clearing the review stamp is the whole point of this assignment, not
+     * tidiness. `schedule` reads "approved" off the row as `status = 'review'
+     * AND reviewed_at IS NOT NULL`, and a rejection also stamps `reviewed_at`
+     * (it has to: the rejecting admin is who the audit trail is about). So a
+     * reject → fix → resubmit that only flipped the status back to `review`
+     * left a row byte-identical to an approved one — `status = 'review'`,
+     * `reviewed_at` set, `rejection_reason` NULL — and the next admin to open
+     * it could schedule a marketing blast that nobody had signed off, with
+     * `reviewed_by_profile_id` durably crediting the sign-off to the admin who
+     * had in fact refused it. S-7 makes two-person control a property of the
+     * row, so this repository is where it either holds or does not.
+     *
+     * The rejection is not lost: `campaign.review.rejected` is in
+     * `audit_events` with its reason, which is where the history belongs.
+     *
+     * CALLER CONTRACT (this method, `recordReview` and `schedule` alike): the
+     * status change and its `audit_events` row are two statements against the
+     * caller's `store`, so the caller must pass a transaction — use this
+     * repository's `transaction(actor, …)`. Outside one, a failed audit insert
+     * leaves the transition standing and un-audited.
+     */
+    async submitForReview(actor, store, campaignId) {
+      requireAdmin(actor);
       const parsedCampaignId = await ownedCampaign(actor, store, campaignId);
       const db = asDb(store);
-      await db.insert(auditEvents).values({
-        actorUserId: actor.profileId,
-        actorType: actor.kind,
-        action: "campaign.queued",
-        targetType: "campaign",
-        targetId: parsedCampaignId,
-        metadata: {recipientCount: parsedRecipientCount},
-      });
+      await transitionCampaign(db, parsedCampaignId, ["draft"], sql`
+        status = 'review', rejection_reason = NULL, reviewed_at = NULL, reviewed_by_profile_id = NULL
+      `);
+      await appendCampaignAudit(db, actor, parsedCampaignId, "campaign.submitted_for_review", {});
+    },
+
+    async recordReview(actor, store, campaignId, decision) {
+      requireAdmin(actor);
+      const parsed = reviewDecisionSchema.parse(decision);
+      const parsedCampaignId = await reviewableCampaign(actor, store, campaignId);
+      const db = asDb(store);
+      if (parsed.outcome === "approved") {
+        await transitionCampaign(db, parsedCampaignId, ["review"], sql`
+          reviewed_at = now(), reviewed_by_profile_id = ${actor.profileId}, rejection_reason = NULL
+        `);
+        await appendCampaignAudit(db, actor, parsedCampaignId, "campaign.review.approved", {});
+        return;
+      }
+      // Back to `draft`, not `failed`: S-6 gives `failed` to the promotion step,
+      // and a rejected campaign is meant to be fixed and re-submitted rather
+      // than buried in a state the wizard cannot leave.
+      await transitionCampaign(db, parsedCampaignId, ["review"], sql`
+        status = 'draft', reviewed_at = now(), reviewed_by_profile_id = ${actor.profileId},
+        rejection_reason = ${parsed.reason}
+      `);
+      await appendCampaignAudit(db, actor, parsedCampaignId, "campaign.review.rejected", {reason: parsed.reason});
+    },
+
+    async schedule(actor, store, campaignId, scheduledAt) {
+      requireAdmin(actor);
+      const parsedScheduledAt = scheduledAtSchema.parse(scheduledAt);
+      const parsedCampaignId = await reviewableCampaign(actor, store, campaignId);
+      const db = asDb(store);
+      // `reviewed_at IS NOT NULL` is the second half of two-person control: the
+      // approval and the schedule are two clicks, and a schedule written
+      // without the approval would be a blast nobody signed off.
+      //
+      // That reading is only sound because `submitForReview` clears the stamp —
+      // otherwise a rejection's `reviewed_at` would satisfy this guard on the
+      // resubmitted draft. The two are one invariant; do not change either
+      // alone.
+      const rows = resultRows(await db.execute(sql`
+        UPDATE ${campaigns} AS target
+        SET status = 'scheduled', scheduled_at = ${parsedScheduledAt}, updated_at = now()
+        WHERE target.id = ${parsedCampaignId}::uuid
+          AND target.status = 'review'
+          AND target.reviewed_at IS NOT NULL
+        RETURNING target.id
+      `));
+      if (!rows.length) throw new Error("Campaign is not in a state that allows this transition");
+      await appendCampaignAudit(db, actor, parsedCampaignId, "campaign.scheduled", {scheduledAt: parsedScheduledAt.toISOString()});
+    },
+
+    /**
+     * The email arm of an approval, and it still goes straight to `queued`.
+     *
+     * S-6 gives `scheduled` a promotion step, which Task 10 Step 4c has since
+     * wired on BOTH legs (`promoteScheduledCampaigns`, called by
+     * `runProductionCampaigns` for email and by the ten-minute send queue for
+     * WhatsApp) — so the original reason for this shortcut, that a `scheduled`
+     * campaign nothing promotes fails silently and permanently, no longer
+     * holds. What still holds is the screen: `/admin/campaigns` offers no send
+     * time on the email channel, so there is nothing for the email promotion to
+     * pick up and queueing outright keeps the approval a single click. The
+     * hourly claim loop's `('queued','processing')` predicate drains this
+     * directly; the email promotion is the belt to that braces, so offering an
+     * email schedule later is a screen change rather than a silent outage.
+     *
+     * The guard is `schedule`'s, verbatim and for the same reason: an approval
+     * and the transition that acts on it are two clicks, and a transition
+     * written without the review stamp would be a blast nobody signed off.
+     */
+    async queueApproved(actor, store, campaignId) {
+      requireAdmin(actor);
+      const parsedCampaignId = await reviewableCampaign(actor, store, campaignId);
+      const db = asDb(store);
+      const rows = resultRows(await db.execute(sql`
+        UPDATE ${campaigns} AS target
+        SET status = 'queued', updated_at = now()
+        WHERE target.id = ${parsedCampaignId}::uuid
+          AND target.status = 'review'
+          AND target.reviewed_at IS NOT NULL
+        RETURNING target.id
+      `));
+      if (!rows.length) throw new Error("Campaign is not in a state that allows this transition");
+      await appendCampaignAudit(db, actor, parsedCampaignId, "campaign.queued", {});
+    },
+
+    /**
+     * The index read. Not creator-scoped: a reviewer has to find the campaign
+     * waiting for them, and `reviewableCampaign` is what stops them approving
+     * their own — authorization on the write, visibility on the read.
+     */
+    async listCampaigns(actor, store): Promise<readonly CampaignSummary[]> {
+      requireAdmin(actor);
+      const rows = await asDb(store).select({
+        id: campaigns.id,
+        name: campaigns.name,
+        channel: campaigns.channel,
+        status: campaigns.status,
+        scheduledAt: campaigns.scheduledAt,
+        createdAt: campaigns.createdAt,
+        createdByProfileId: campaigns.createdByProfileId,
+      })
+        .from(campaigns)
+        .orderBy(desc(campaigns.createdAt))
+        .limit(CAMPAIGN_LIST_LIMIT);
+      return rows.map((row) => campaignRecordSchema.pick({
+        id: true, name: true, channel: true, status: true, scheduledAt: true, createdAt: true, createdByProfileId: true,
+      }).parse(row));
+    },
+
+    /** One campaign row, for the detail page. `null` becomes a 404, never an empty report. */
+    async campaignFor(actor, store, campaignId): Promise<CampaignRecord | null> {
+      requireAdmin(actor);
+      const parsedCampaignId = campaignIdSchema.parse(campaignId);
+      const row = (await asDb(store).select({
+        id: campaigns.id,
+        name: campaigns.name,
+        channel: campaigns.channel,
+        template: campaigns.template,
+        templateKey: campaigns.templateKey,
+        variablesTemplate: campaigns.variablesTemplate,
+        status: campaigns.status,
+        segmentId: campaigns.segmentId,
+        createdByProfileId: campaigns.createdByProfileId,
+        scheduledAt: campaigns.scheduledAt,
+        reviewedAt: campaigns.reviewedAt,
+        reviewedByProfileId: campaigns.reviewedByProfileId,
+        rejectionReason: campaigns.rejectionReason,
+        completedAt: campaigns.completedAt,
+        createdAt: campaigns.createdAt,
+      })
+        .from(campaigns)
+        .where(eq(campaigns.id, parsedCampaignId))
+        .limit(1))[0];
+      return row ? campaignRecordSchema.parse(row) : null;
+    },
+
+    /**
+     * An admin read, not a creator-scoped one: the reviewer has to see the
+     * counts they are approving, and after the blast both of them have to see
+     * what happened. Served by `campaign_recipients_campaign_status_idx`.
+     */
+    async campaignReportFor(actor, store, campaignId): Promise<CampaignReport> {
+      requireAdmin(actor);
+      const parsedCampaignId = campaignIdSchema.parse(campaignId);
+      // `error_code` is grouped alongside `blocked_reason` because the two
+      // spell the same thing at different moments: a recipient blocked at
+      // snapshot time carries `blocked_reason`, one refused at SEND time
+      // carries only `error_code` (`markRecipientSuppressed` writes
+      // `status = 'suppressed'` with a code and never touches
+      // `blocked_reason`). Folding on `blocked_reason` alone counted the
+      // send-time refusals into `total` and into no other bucket, so a report
+      // read 20 recipients / 18 sent / 0 not sent with two people missing —
+      // and those two are the consent refusals staff most need to see.
+      const rows = z.array(reportRowSchema).parse(resultRows(await asDb(store).execute(sql`
+        SELECT
+          ${campaignRecipients.status}::text AS "status",
+          ${campaignRecipients.blockedReason} AS "blockedReason",
+          ${campaignRecipients.errorCode} AS "errorCode",
+          count(*)::int AS "count",
+          count(*) FILTER (WHERE ${campaignRecipients.deliveredAt} IS NOT NULL)::int AS "delivered",
+          count(*) FILTER (WHERE ${campaignRecipients.readAt} IS NOT NULL)::int AS "read"
+        FROM ${campaignRecipients}
+        WHERE ${campaignRecipients.campaignId} = ${parsedCampaignId}::uuid
+        GROUP BY 1, 2, 3
+      `)));
+      return foldReport(rows);
     },
   };
+}
+
+const reportRowSchema = z.object({
+  status: z.enum(["queued", "processing", "sent", "failed", "suppressed"]),
+  blockedReason: z.string().nullable(),
+  errorCode: z.string().nullable(),
+  count: z.coerce.number().int().nonnegative(),
+  delivered: z.coerce.number().int().nonnegative(),
+  read: z.coerce.number().int().nonnegative(),
+});
+
+/**
+ * The reason key a recipient is reported under, or `null` when the recipient is
+ * not in the "not sent" bucket at all.
+ *
+ * `blocked_reason` first, because a snapshot-time block already names an
+ * `EligibilityCategory` (or `missing_variable`) and that is the vocabulary the
+ * preview a human approved was written in. A send-time suppression has no
+ * `blocked_reason`, so the runner's `error_code` stands in verbatim — the
+ * report renderer has to carry a label for each one (`marketing_suppressed` is
+ * the only writer today). Passing it through rather than collapsing it to
+ * `suppressed` is deliberate: `marketing_suppressed` covers BOTH a withdrawn
+ * marketing consent and an email suppression, so calling it "opted out" would
+ * mislabel half the rows it counts.
+ */
+function reportReasonFor(row: z.infer<typeof reportRowSchema>): string | null {
+  if (row.blockedReason !== null) return row.blockedReason;
+  if (row.status !== "suppressed") return null;
+  return row.errorCode ?? "suppressed";
+}
+
+function foldReport(rows: readonly z.infer<typeof reportRowSchema>[]): CampaignReport {
+  const byReason: Record<string, number> = {};
+  const report = {total: 0, queued: 0, sent: 0, delivered: 0, read: 0, failed: 0, blocked: 0};
+  for (const row of rows) {
+    report.total += row.count;
+    report.delivered += row.delivered;
+    report.read += row.read;
+    if (row.status === "queued" || row.status === "processing") report.queued += row.count;
+    if (row.status === "sent") report.sent += row.count;
+    if (row.status === "failed") report.failed += row.count;
+    const reason = reportReasonFor(row);
+    if (reason !== null) {
+      report.blocked += row.count;
+      byReason[reason] = (byReason[reason] ?? 0) + row.count;
+    }
+  }
+  return {...report, byReason};
 }
 
 export const campaignsRepository = createCampaignsRepository(() => getDb());

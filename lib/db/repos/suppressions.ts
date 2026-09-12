@@ -73,6 +73,50 @@ export function createSuppressionsRepository(loadDatabase: AutomationDatabaseLoa
      * the suppression, clears the profile flag and audits it in one transaction
      * (programme D-7). A prospect with no profile is handled by
      * contactsRepository.markWhatsAppOptedOut instead.
+     *
+     * Two guarded halves and one audit row, the shape `contactsRepository
+     * .markWhatsAppOptedOut` uses. EITHER half being new is a consent change,
+     * and the row is written when either is.
+     *
+     * The idempotency this buys is what Task 4 Step 7's rationale assumed and
+     * this leg did not have: `lib/ai/woztell-production.ts:recordOptOut` runs
+     * this leg in its own transaction and THEN the contact leg in another, and
+     * the webhook route 500s on a throw — so a failure in the second leg makes
+     * Woztell redeliver the same STOP, and an unguarded UPDATE plus an
+     * unconditional INSERT wrote a second `consent.whatsapp.revoked` row for a
+     * withdrawal already recorded. On that redelivery neither half is new: the
+     * guarded UPDATE below cleared `whatsapp_opt_in` on the first delivery and
+     * `message_suppressions_profile_channel_classification_unique` conflicts.
+     *
+     * That first clause is load-bearing and was not true when this comment was
+     * written. `lib/ai/woztell-webhook.ts` used to clear the flag ITSELF, in an
+     * unaudited `UPDATE`, before calling `recordOptOut` — so the transition was
+     * always already spent by the time this method looked, and a genuine second
+     * withdrawal after a portal re-consent was indistinguishable from a
+     * redelivery: both halves answered "already done" and the audit INSERT below
+     * was skipped for a real consent change. The webhook now calls
+     * `recordOptOut` first and `setWhatsappOptIn` after (where it is a no-op).
+     * Do not reorder it back.
+     *
+     * A review caught the first attempt at this, which keyed the audit on the
+     * suppression INSERT alone. Nothing in the tree DELETEs a suppression
+     * outside the seeds, while a re-consent path already ships — the portal
+     * profile form writes `whatsapp_opt_in = true` through
+     * `lib/portal/command-core.ts` — so a member who re-granted and then
+     * withdrew again through `/api/unsubscribe?channel=whatsapp` had the flag
+     * cleared here (a real, member-initiated withdrawal) and got no audit row
+     * and no new suppression: no trace at all, breaking boundary 11. Hence the
+     * guard on the UPDATE rather than a guard on the INSERT: the flag
+     * TRANSITION is the second, independent evidence of newness, and the
+     * metadata says which half spoke.
+     *
+     * The guard costs the UPDATE its second job as an existence check, and
+     * `lib/api/unsubscribe-route.ts` turns PROFILE_NOT_FOUND into a 404 for a
+     * token that verifies but names nobody — hence the lookup, which runs only
+     * when the guard missed. Two concurrent STOPs serialise on the row lock and
+     * the loser re-evaluates its guard after the winner commits, so exactly one
+     * of them clears the flag; a self-join returning the OLD value in one
+     * statement would read its pre-lock snapshot and audit twice.
      */
     async optOutWhatsApp(
       actor: Actor | UnsubscribeActor,
@@ -82,13 +126,18 @@ export function createSuppressionsRepository(loadDatabase: AutomationDatabaseLoa
       requireSuppressionActor(actor);
       const database = await loadDatabase();
       return database.transaction(async (transaction) => {
-        const profile = rowsFrom(await transaction.execute(sql`
+        const cleared = rowsFrom(await transaction.execute(sql`
           UPDATE ${profiles}
           SET whatsapp_opt_in = false, updated_at = now()
-          WHERE id = ${profileId}
+          WHERE id = ${profileId} AND ${profiles.whatsappOptIn} = true
           RETURNING id
         `))[0];
-        if (!profile) throw new Error("PROFILE_NOT_FOUND");
+        if (!cleared) {
+          const profile = rowsFrom(await transaction.execute(sql`
+            SELECT ${profiles.id} AS id FROM ${profiles} WHERE ${profiles.id} = ${profileId}
+          `))[0];
+          if (!profile) throw new Error("PROFILE_NOT_FOUND");
+        }
         const suppression = rowsFrom(await transaction.execute(sql`
           INSERT INTO ${messageSuppressions}
             (profile_id, channel, classification, reason_code)
@@ -96,12 +145,20 @@ export function createSuppressionsRepository(loadDatabase: AutomationDatabaseLoa
           ON CONFLICT DO NOTHING
           RETURNING id
         `))[0];
+        if (!cleared && !suppression) return "existing";
         await transaction.execute(sql`
           INSERT INTO ${auditEvents}
             (actor_user_id, actor_type, action, target_type, target_id, metadata)
-          VALUES (NULL, ${actor.kind}, 'consent.whatsapp.revoked', 'profile', ${profileId}, ${JSON.stringify({reasonCode})}::jsonb)
+          VALUES (
+            NULL, ${actor.kind}, 'consent.whatsapp.revoked', 'profile', ${profileId},
+            ${JSON.stringify({
+              reasonCode,
+              clearedOptIn: cleared !== undefined,
+              suppressionCreated: suppression !== undefined,
+            })}::jsonb
+          )
         `);
-        return suppression ? "created" : "existing";
+        return "created";
       });
     },
   };

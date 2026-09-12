@@ -3,7 +3,7 @@ import {createHmac} from "node:crypto";
 import {describe, expect, it, vi} from "vitest";
 
 import {WHATSAPP_TEMPLATES} from "@/config/whatsapp-templates";
-import {createWoztellAdapter} from "@/lib/channels/woztell";
+import {createWoztellAdapter, WOZTELL_REQUEST_TIMEOUT_MS} from "@/lib/channels/woztell";
 import {eligibleWhatsAppRecipient, woztellEnv} from "@/tests/fixtures/woztell";
 
 describe("WOZTELL channel adapter", () => {
@@ -41,6 +41,10 @@ describe("WOZTELL channel adapter", () => {
         authorization: "Bearer woztell-test-token",
         "content-type": "application/json",
       },
+      // Asserted as a type rather than a value: the bound itself is pinned
+      // against the send-claim lease in tests/unit/inbox-write-repository.test.ts,
+      // and its absence is what this expectation is here to catch.
+      signal: expect.any(AbortSignal),
       body: JSON.stringify({
         channelId: "channel-123",
         recipientId: "85290000000",
@@ -59,6 +63,59 @@ describe("WOZTELL channel adapter", () => {
         }],
       }),
     });
+  });
+
+  /**
+   * C-2. `lib/db/repos/inbox.ts` leases a send for two minutes and used to
+   * justify that by saying it "comfortably exceeds the adapter's own request
+   * timeout". This adapter had no such timeout: `fetch` was called with no
+   * `signal`, so the real bound was undici's ~300s header timeout — longer than
+   * the lease. A send that hangs that long has its claim expire underneath it,
+   * the next submit inherits the claim and calls the adapter again, and the
+   * member gets the reply twice from one `messages` row.
+   */
+  it("bounds a send with an abort signal, so the request cannot outlive the send claim", async () => {
+    let signal: unknown = "no signal was passed";
+    const fetchImpl = vi.fn(async (_url: string, init: RequestInit) => {
+      signal = init.signal;
+      return new Response(JSON.stringify({
+        ok: 1,
+        sendResult: {ok: 1, result: [{messageEvent: {messageId: "wamid-1"}}]},
+      }), {status: 200});
+    });
+    const adapter = createWoztellAdapter(woztellEnv, fetchImpl);
+
+    await expect(adapter.sendSessionMessage({
+      ...eligibleWhatsAppRecipient,
+      text: "Inside the window.",
+      idempotencyKey: "delivery:session",
+    })).resolves.toEqual({status: "sent", providerId: "wamid-1"});
+
+    expect(signal).toBeInstanceOf(AbortSignal);
+    expect(WOZTELL_REQUEST_TIMEOUT_MS).toBeGreaterThan(0);
+  });
+
+  it("actually aborts a request that never answers, and calls that retryable_network", async () => {
+    // Driven through the injected bound rather than the real 30 seconds, so the
+    // abort path is exercised by a test that finishes. A signal object that is
+    // never wired to a timer would satisfy the assertion above and fail here.
+    //
+    // `retryable_network` and not a definite refusal: a timeout cannot tell a
+    // connection that was never made from a response that was never read off a
+    // request the provider did process, so `PROVIDER_REFUSED_SEND` must leave
+    // the row un-retakeable — otherwise the next Send click re-takes it and
+    // WhatsApp delivers the reply twice.
+    const adapter = createWoztellAdapter(woztellEnv, async (_url, init) => await new Promise<Response>(
+      (_resolve, reject) => {
+        init.signal?.addEventListener("abort", () => reject(new Error("aborted")));
+      },
+    ), undefined, 20);
+
+    await expect(adapter.sendSessionMessage({
+      ...eligibleWhatsAppRecipient,
+      text: "Never answered.",
+      idempotencyKey: "delivery:session",
+    })).rejects.toMatchObject({code: "retryable_network"});
   });
 
   it("maps provider failures to a sanitized code without logging sensitive values", async () => {

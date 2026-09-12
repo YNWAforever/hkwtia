@@ -17,8 +17,14 @@ export {agentRunsRepo, agentRunsRepository} from "./agent-runs";
 export {postsRepository} from "./posts";
 export {boardDraftRepository} from "./board-drafts";
 export {contactsRepository} from "./contacts";
+export {messageEligibilityRepository} from "./message-eligibility";
 export {companyProfilesRepository} from "./company-profiles";
 export {eventGuestsRepository} from "./event-guests";
+// C-7. Two independent hand-written lists below, with no test forcing them to
+// agree: the re-export block above and the `repositories` object at the bottom.
+// A repository added to one and not the other is importable through one door and
+// invisible through the other.
+export {whatsappTemplatesRepository} from "./whatsapp-templates";
 
 import {profiles} from "./profiles";
 import {companies} from "./companies";
@@ -36,6 +42,8 @@ import {conversationsRepository} from "./conversations";
 import {agentRunsRepository} from "./agent-runs";
 import {postsRepository} from "./posts";
 import {boardDraftRepository} from "./board-drafts";
+import {messageEligibilityRepository} from "./message-eligibility";
+import {whatsappTemplatesRepository} from "./whatsapp-templates";
 
 export const repositories = {
   profiles,
@@ -54,4 +62,6 @@ export const repositories = {
   agentRuns: agentRunsRepository,
   posts: postsRepository,
   boardDrafts: boardDraftRepository,
+  messageEligibility: messageEligibilityRepository,
+  whatsappTemplates: whatsappTemplatesRepository,
 };

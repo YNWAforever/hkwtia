@@ -50,6 +50,49 @@ export interface AiEnv {
   woztellApiToken?: string;
   woztellChannelId?: string;
   woztellWebhookSecret?: string;
+  /**
+   * Programme C-3. Configuration for the conversation-history backfill, and
+   * deliberately NOT in `serverKeys`: the backfill is an admin-triggered import,
+   * not a boot requirement, and boundary 7 exists because a transitive env pull
+   * once took `/sitemap.xml`, `/events`, `/showcase` and `/launchpad` down. The
+   * route answers 503 BACKFILL_NOT_CONFIGURED when it is blank rather than
+   * refusing to start the process.
+   */
+  woztellOpenApiToken?: string;
+  /**
+   * Programme C-9 (C1 open question O-8). The switch that decides whether a real
+   * WhatsApp message leaves the building.
+   *
+   * It and `woztellApprovedTemplateKeys` were the last two variables read from
+   * bare `process.env`, outside boundary 7 — no Zod parse and no owner — and
+   * this one fails in the worst available direction: `RUN_LIVE_WOZTELL=true`
+   * finds no live credentials, so every send returns
+   * `{status: "sent", providerId: "mock:…"}` and journey, dunning and blast
+   * messages are recorded as delivered while nothing is sent
+   * (`lib/jobs/runners.ts:421-427` is that incident). Parsed as `"0" | "1"`, a
+   * typo is a startup error instead of a silent downgrade.
+   *
+   * Deliberately NOT in `serverKeys`: it is optional everywhere, and a hard boot
+   * requirement there is how a transitive env pull once took `/sitemap.xml`,
+   * `/events`, `/showcase` and `/launchpad` down. A blank value — which
+   * `.env.example` ships and Vercel produces for an empty variable — reads as
+   * absent, exactly as it did before this contract existed.
+   */
+  runLiveWoztell?: "0" | "1";
+  /**
+   * Programme C-9 (O-8). The operator allowlist that `whatsapp_templates`
+   * replaced, kept as the fallback for one condition only: a registry with no
+   * rows at all, which is what a half-run migration or a database restored
+   * without 0034 looks like (S-14).
+   *
+   * Declared here so the variable has an owner and a parse. Its single reader,
+   * `lib/whatsapp/approved-templates.ts`, deliberately takes its environment by
+   * injection rather than calling `aiEnv()`: `/admin/templates` imports it, and
+   * `parseAiEnvironment` requires `CONCIERGE_COOKIE_SECRET` in production — so
+   * reading the contract from there would put a boot requirement on a page that
+   * sends nothing, which is the boundary-7 coupling above.
+   */
+  woztellApprovedTemplateKeys?: string;
   turnstileSecret?: string;
   turnstileSiteKey?: string;
 }
@@ -125,6 +168,28 @@ function requireProductionKeys(
   }
 }
 
+/**
+ * The live-send switch, parsed in ONE place (C-9 O-8, and the C-9 review).
+ *
+ * Strict, and blank-tolerant on purpose: `.env.example` ships
+ * `RUN_LIVE_WOZTELL=` and an empty Vercel variable arrives as `""`, so a blank
+ * must keep meaning "not live" — while `true`, `yes` or `TRUE` must stop meaning
+ * it silently, because that typo used to find no live credentials and record
+ * every send as delivered with a `mock:` provider id.
+ *
+ * Exported because `lib/whatsapp/approved-templates.ts` decides "are we live?"
+ * for `/admin/templates` and the campaign wizard and deliberately cannot call
+ * `aiEnv()` — that would put `CONCIERGE_COOKIE_SECRET` on a page that sends
+ * nothing, which is the boundary-7 coupling that once took `/sitemap.xml` down.
+ * It reads the same schema instead, so the flip has one parse and not two: two
+ * parses of one switch is how a value that means "live" over here comes to mean
+ * "mock" over there.
+ */
+export const runLiveWoztellSchema = z.preprocess(
+  (value) => (typeof value === "string" && value.trim().length === 0 ? undefined : value),
+  z.enum(["0", "1"]).optional(),
+);
+
 const aiEnvironmentSchema = z.object({
   AGENTS_ENABLED: z.string().optional().transform((value) => value === "true"),
   AGENT_MODEL_CONCIERGE: z.string().default("openai:gpt-4.1-mini"),
@@ -137,6 +202,9 @@ const aiEnvironmentSchema = z.object({
   WOZTELL_API_TOKEN: z.string().optional(),
   WOZTELL_CHANNEL_ID: z.string().optional(),
   WOZTELL_WEBHOOK_SECRET: z.string().optional(),
+  WOZTELL_OPEN_API_TOKEN: z.string().optional(),
+  RUN_LIVE_WOZTELL: runLiveWoztellSchema,
+  WOZTELL_APPROVED_TEMPLATE_KEYS: z.string().optional(),
   TURNSTILE_SECRET: z.string().refine(
     (value) => value.trim().length > 0,
     {message: "TURNSTILE_SECRET must not be blank"},
@@ -171,6 +239,11 @@ function parseAiEnvironment(environment: Environment): AiEnv {
     ...(ai.WOZTELL_API_TOKEN === undefined ? {} : {woztellApiToken: ai.WOZTELL_API_TOKEN}),
     ...(ai.WOZTELL_CHANNEL_ID === undefined ? {} : {woztellChannelId: ai.WOZTELL_CHANNEL_ID}),
     ...(ai.WOZTELL_WEBHOOK_SECRET === undefined ? {} : {woztellWebhookSecret: ai.WOZTELL_WEBHOOK_SECRET}),
+    ...(ai.WOZTELL_OPEN_API_TOKEN === undefined ? {} : {woztellOpenApiToken: ai.WOZTELL_OPEN_API_TOKEN}),
+    ...(ai.RUN_LIVE_WOZTELL === undefined ? {} : {runLiveWoztell: ai.RUN_LIVE_WOZTELL}),
+    ...(ai.WOZTELL_APPROVED_TEMPLATE_KEYS === undefined
+      ? {}
+      : {woztellApprovedTemplateKeys: ai.WOZTELL_APPROVED_TEMPLATE_KEYS}),
     ...(ai.TURNSTILE_SECRET === undefined ? {} : {turnstileSecret: ai.TURNSTILE_SECRET}),
     ...(ai.TURNSTILE_SITE_KEY === undefined ? {} : {turnstileSiteKey: ai.TURNSTILE_SITE_KEY}),
   };

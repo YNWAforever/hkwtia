@@ -7,7 +7,7 @@ import {
   requireAutomationSystem,
   type AutomationRepositoryActor,
 } from "@/lib/auth/automation-actor";
-import {campaignRecipients, campaigns, staffTasks} from "@/lib/db/server-schema";
+import {campaignRecipients, campaigns, staffTasks, whatsappTemplates} from "@/lib/db/server-schema";
 import type {
   AutomationDatabaseLoader,
   AutomationSqlExecutor,
@@ -21,6 +21,25 @@ export type CampaignRecipientStatus =
   | "sent"
   | "failed"
   | "suppressed";
+
+/**
+ * Phase C2 Task 10, S-11. The claim is channel-scoped so the hourly email sweep
+ * can never touch a WhatsApp recipient, and the ten-minute queue can never
+ * touch an email one. Two runners over one table with one claim predicate would
+ * be one runner sending the other's messages through the wrong transport.
+ */
+export type CampaignSendChannel = "email" | "whatsapp";
+
+/**
+ * Exactly one identity, which is what `campaign_recipients_identity_check`
+ * enforces in the database (S-4). Shaped to drop straight into
+ * `dispatchNotification`'s `recipient` without a translation step — a second
+ * spelling of "who is this" is how a member and their linked contact come to be
+ * addressed as two people.
+ */
+export type CampaignRecipientIdentity =
+  | Readonly<{kind: "member"; profileId: string}>
+  | Readonly<{kind: "contact"; contactId: string}>;
 
 export type CampaignRecipientClaim = Readonly<{
   id: string;
@@ -38,14 +57,55 @@ export type CampaignRecipientClaim = Readonly<{
   claimSource: "queued" | "retry" | "stale";
 }>;
 
-const claimSchema = z.object({
+/**
+ * A WhatsApp claim carries no phone number on purpose. The number is read again
+ * at send time from `messageEligibilityRepository.factsFor`, together with the
+ * consent facts, so a person who changed their number — or said STOP — between
+ * the snapshot and the blast is answered by the current row rather than by a
+ * frozen copy of it. What IS frozen is `variables`: the body a second admin
+ * approved (S-7).
+ */
+export type WhatsAppRecipientClaim = Readonly<{
+  id: string;
+  campaignId: string;
+  recipient: CampaignRecipientIdentity;
+  /** `null` for a prospect. The staff-task writer needs it; nothing else does. */
+  profileId: string | null;
+  locale: AppLocale;
+  variables: Readonly<Record<string, string>>;
+  templateKey: string;
+  status: "processing";
+  attemptCount: number;
+  claimedAt: Date;
+  claimExpiresAt: Date;
+  errorCode: string | null;
+  claimSource: "queued" | "retry" | "stale";
+}>;
+
+export type ClaimForChannel<C extends CampaignSendChannel> =
+  C extends "whatsapp" ? WhatsAppRecipientClaim : CampaignRecipientClaim;
+
+/**
+ * `staff_tasks.profile_id` is nullable and a campaign recipient may be a
+ * prospect, so the permanent-failure task this repository writes cannot require
+ * a profile the way `staffTasksRepository.createOnce` does (it throws
+ * `AUTOMATION_STAFF_TASK_PROFILE_REQUIRED`). That is also why the INSERT below
+ * is direct rather than going through that repository.
+ */
+export type CampaignStaffTask = Omit<StaffTaskInput, "profileId"> & Readonly<{
+  profileId: string | null;
+}>;
+
+export type CampaignPromotionResult = Readonly<{
+  promoted: readonly string[];
+  blocked: readonly string[];
+}>;
+
+const claimCommon = {
   id: z.string().uuid(),
   campaign_id: z.string().uuid(),
-  profile_id: z.string().min(1),
-  email: z.string().email(),
   locale: z.enum(["en", "zh-HK"]),
   variables: z.record(z.string()),
-  template: z.string().min(1),
   status: z.literal("processing"),
   attempt_count: z.coerce.number().int().positive(),
   claimed_at: z.coerce.date(),
@@ -53,7 +113,24 @@ const claimSchema = z.object({
   error_code: z.string().nullable(),
   prior_status: z.enum(["queued", "processing"]),
   prior_error_code: z.string().nullable(),
+};
+
+const claimSchema = z.object({
+  ...claimCommon,
+  profile_id: z.string().min(1),
+  email: z.string().email(),
+  template: z.string().min(1),
 });
+
+const whatsappClaimSchema = z.object({
+  ...claimCommon,
+  profile_id: z.string().min(1).nullable(),
+  contact_id: z.string().uuid().nullable(),
+  template_key: z.string().min(1),
+}).refine(
+  (row) => (row.profile_id !== null) !== (row.contact_id !== null),
+  {message: "INVALID_CAMPAIGN_RECIPIENT_IDENTITY"},
+);
 
 function rowsFrom(result: unknown): unknown[] {
   if (Array.isArray(result)) return result;
@@ -73,6 +150,29 @@ function claimFrom(row: unknown): CampaignRecipientClaim {
     locale: parsed.locale,
     variables: parsed.variables,
     template: parsed.template,
+    status: parsed.status,
+    attemptCount: parsed.attempt_count,
+    claimedAt: parsed.claimed_at,
+    claimExpiresAt: parsed.claim_expires_at,
+    errorCode: parsed.error_code,
+    claimSource: parsed.prior_status === "queued"
+      ? "queued"
+      : parsed.prior_error_code === null ? "stale" : "retry",
+  };
+}
+
+function whatsappClaimFrom(row: unknown): WhatsAppRecipientClaim {
+  const parsed = whatsappClaimSchema.parse(row);
+  return {
+    id: parsed.id,
+    campaignId: parsed.campaign_id,
+    recipient: parsed.profile_id !== null
+      ? {kind: "member", profileId: parsed.profile_id}
+      : {kind: "contact", contactId: parsed.contact_id as string},
+    profileId: parsed.profile_id,
+    locale: parsed.locale,
+    variables: parsed.variables,
+    templateKey: parsed.template_key,
     status: parsed.status,
     attemptCount: parsed.attempt_count,
     claimedAt: parsed.claimed_at,
@@ -124,12 +224,22 @@ export function createCampaignRecipientDeliveryRepository(
   loadDatabase: AutomationDatabaseLoader,
 ) {
   return {
-    async claimRecipients(
+    /**
+     * Phase C2 Task 10 Step 4. `channel` is required, not defaulted: a default
+     * is how the ten-minute queue would one day claim an email recipient.
+     *
+     * The generic is what lets one statement serve two claim shapes. A WhatsApp
+     * campaign's recipient may be a prospect with no `profile_id` and no
+     * `email`, which `claimSchema` refuses by design — the email runner reads
+     * both as non-null and would otherwise have to learn about contacts.
+     */
+    async claimRecipients<C extends CampaignSendChannel>(
       actor: AutomationRepositoryActor,
       now: Date,
       limit: number,
       leaseMs: number,
-    ): Promise<CampaignRecipientClaim[]> {
+      channel: C,
+    ): Promise<ClaimForChannel<C>[]> {
       requireAutomationSystem(actor);
       validClaimInput(now, limit, leaseMs);
       const database = await loadDatabase();
@@ -138,9 +248,23 @@ export function createCampaignRecipientDeliveryRepository(
       return database.transaction(async (transaction) => {
         const result = await transaction.execute(sql`
           WITH completed AS (
+            -- Phase C2 Task 1 Step 4b: 0033 adds campaigns.completed_at, so the
+            -- writer lands in the same commit as the column. This sweep is the
+            -- backstop, not the usual path: it catches a campaign whose last
+            -- recipient was settled by a batch that then crashed before
+            -- completeCampaignIfIdle ran, and a campaign queued with no
+            -- recipients at all. Both writers stamp completed_at, because a
+            -- column set on only one of two completion paths reads null for
+            -- every campaign that takes the other one. The status list stays
+            -- ('queued', 'processing') — widening it would let this sweep stamp
+            -- a fresh draft as completed (S-6).
             UPDATE ${campaigns} AS idle
-            SET status = 'completed'
+            SET status = 'completed', completed_at = ${now}
             WHERE idle.status IN ('queued', 'processing')
+              -- Channel-scoped like the due CTE below: the hourly email sweep
+              -- must not complete a WhatsApp campaign whose recipients the
+              -- ten-minute queue has not reached yet, and vice versa.
+              AND idle.channel = ${channel}
               AND NOT EXISTS (
                 SELECT 1
                 FROM ${campaignRecipients} AS pending
@@ -153,7 +277,14 @@ export function createCampaignRecipientDeliveryRepository(
             SELECT target.id, target.status AS prior_status, target.error_code AS prior_error_code
             FROM ${campaignRecipients} AS target
             INNER JOIN ${campaigns} AS campaign ON campaign.id = target.campaign_id
+            -- S-6: the status list stays ('queued', 'processing'). Widening it
+            -- to the Phase C states would let this loop drain a campaign that
+            -- is still a draft, or one a second admin has not approved.
             WHERE campaign.status IN ('queued', 'processing')
+              AND campaign.channel = ${channel}
+              -- A campaign promoted out of 'scheduled' early (a hand-repaired
+              -- row, a clock skew) must still wait for its send time.
+              AND (campaign.scheduled_at IS NULL OR campaign.scheduled_at <= ${now})
               AND (
                 target.status = 'queued'
                 OR (
@@ -183,11 +314,76 @@ export function createCampaignRecipientDeliveryRepository(
               AND campaign.status = 'queued'
             RETURNING campaign.id
           )
-          SELECT claimed.*, campaign.template
+          SELECT claimed.*, campaign.template, campaign.template_key
           FROM claimed
           INNER JOIN ${campaigns} AS campaign ON campaign.id = claimed.campaign_id
         `);
-        return rowsFrom(result).map(claimFrom);
+        const rows = rowsFrom(result);
+        // The conditional return type cannot be narrowed inside the body; the
+        // parse above it is what makes the cast true, and a row of the wrong
+        // shape throws there rather than reaching a caller.
+        return (channel === "whatsapp"
+          ? rows.map(whatsappClaimFrom)
+          : rows.map(claimFrom)) as ClaimForChannel<C>[];
+      });
+    },
+
+    /**
+     * Phase C2 Task 10 Step 4c. Without a promotion step a campaign the wizard
+     * wrote as `draft → review → scheduled` sits in `scheduled` for ever: the
+     * `due` CTE above only reaches `('queued', 'processing')` and S-6 forbids
+     * widening it, so the cron fires, claims nothing, and returns a summary
+     * indistinguishable from an empty queue.
+     *
+     * Two statements, and the ORDER IS LOAD-BEARING. The refusal runs first, so
+     * the promotion that follows can be a plain "everything still scheduled and
+     * due" — after the refusal has moved the unapproved ones out of that set. A
+     * promotion that ran first would queue a campaign whose template Meta may
+     * reject, and S-15 makes each of those rejections permanent.
+     *
+     * `'failed'` and `'queued'` are `campaign_status` values written at runtime,
+     * which is a different transaction from the one that added them (S-2 is
+     * about migrations only).
+     */
+    async promoteScheduledCampaigns(
+      actor: AutomationRepositoryActor,
+      now: Date,
+      channel: CampaignSendChannel,
+    ): Promise<CampaignPromotionResult> {
+      requireAutomationSystem(actor);
+      if (Number.isNaN(now.getTime())) throw new Error("INVALID_CAMPAIGN_PROMOTION_INPUT");
+      const database = await loadDatabase();
+      return database.transaction(async (transaction) => {
+        const refused = rowsFrom(await transaction.execute(sql`
+          UPDATE ${campaigns} AS target
+          SET status = 'failed', updated_at = now()
+          WHERE target.status = 'scheduled'
+            AND target.channel = ${channel}
+            AND target.scheduled_at IS NOT NULL
+            AND target.scheduled_at <= ${now}
+            -- The email arm matches nothing, spelled out rather than branched:
+            -- approval is a WhatsApp fact, and a reader should not have to hold
+            -- two versions of this statement in their head.
+            AND target.channel = 'whatsapp'
+            AND NOT EXISTS (
+              SELECT 1 FROM ${whatsappTemplates} AS template
+              WHERE template.key = target.template_key
+                AND template.status = 'approved'
+            )
+          RETURNING target.id AS id
+        `)).map((row) => String((row as Record<string, unknown>).id));
+
+        const promoted = rowsFrom(await transaction.execute(sql`
+          UPDATE ${campaigns} AS target
+          SET status = 'queued', updated_at = now()
+          WHERE target.status = 'scheduled'
+            AND target.channel = ${channel}
+            AND target.scheduled_at IS NOT NULL
+            AND target.scheduled_at <= ${now}
+          RETURNING target.id AS id
+        `)).map((row) => String((row as Record<string, unknown>).id));
+
+        return {promoted, blocked: refused};
       });
     },
 
@@ -195,13 +391,60 @@ export function createCampaignRecipientDeliveryRepository(
       actor: AutomationRepositoryActor,
       id: string,
       claimedAt: Date,
+      /**
+       * The WhatsApp lane's provider id, which is what
+       * `recordDeliveryStatus`'s campaign fall-through looks a recipient up by:
+       * a campaign send writes no `messages` row at all, so without this the
+       * report's Delivered and Read counters are permanently zero. The email
+       * path passes nothing and is byte-identical to what it was.
+       */
+      delivery?: Readonly<{providerMessageId: string; sentAt: Date}>,
+    ): Promise<unknown> {
+      requireAutomationSystem(actor);
+      const database = await loadDatabase();
+      return transitionRecipient(database, id, claimedAt, delivery
+        ? sql`
+          status = 'sent',
+          claim_expires_at = NULL,
+          error_code = NULL,
+          provider_message_id = ${delivery.providerMessageId},
+          sent_at = ${delivery.sentAt},
+          updated_at = now()
+        `
+        : sql`
+          status = 'sent',
+          claim_expires_at = NULL,
+          error_code = NULL
+        `);
+    },
+
+    /**
+     * A recipient the send-time recheck refused — suppressed, opted out, no
+     * number, an unresolvable variable, an unapproved template. It is NOT a
+     * delivery failure: no attempt was made, no provider was called, and the
+     * journey runner's habit of recording an ineligible recipient as a failure
+     * is the thing not to copy here. The reason is already an
+     * `EligibilityCategory` (or `missing_variable` / `template_not_approved`),
+     * which is the vocabulary the preview a human approved was written in, so
+     * it drops straight into `blocked_reason` and the report renders it.
+     *
+     * `markRecipientSuppressed` is left untouched: it writes `error_code` and
+     * the email path plus `tests/unit/campaign-review-boundary.test.ts` depend
+     * on exactly that.
+     */
+    async markRecipientBlocked(
+      actor: AutomationRepositoryActor,
+      id: string,
+      claimedAt: Date,
+      blockedReason: string,
     ): Promise<unknown> {
       requireAutomationSystem(actor);
       const database = await loadDatabase();
       return transitionRecipient(database, id, claimedAt, sql`
-        status = 'sent',
+        status = 'suppressed',
+        blocked_reason = ${blockedReason},
         claim_expires_at = NULL,
-        error_code = NULL
+        updated_at = now()
       `);
     },
 
@@ -240,7 +483,7 @@ export function createCampaignRecipientDeliveryRepository(
       id: string,
       claimedAt: Date,
       errorCode: string,
-      task: StaffTaskInput,
+      task: CampaignStaffTask,
     ): Promise<Readonly<{
       record: unknown;
       taskDisposition: "created" | "existing";
@@ -275,12 +518,24 @@ export function createCampaignRecipientDeliveryRepository(
     async completeCampaignIfIdle(
       actor: AutomationRepositoryActor,
       campaignId: string,
+      now: Date,
     ): Promise<boolean> {
       requireAutomationSystem(actor);
       const database = await loadDatabase();
       const completed = rowsFrom(await database.execute(sql`
+        -- Phase C2 Task 1 Step 4b: this is the statement that actually completes
+        -- a blast — the runner calls it for every campaign a batch touched, so a
+        -- campaign that drains over several batches is flipped here, never by
+        -- the claim sweep above. That sweep only reaches a campaign still in
+        -- ('queued', 'processing'), so once this UPDATE has moved the row to
+        -- 'completed' the sweep can never see it again and can never backfill
+        -- the timestamp. Stamping only there left completed_at NULL for
+        -- every campaign that finishes normally, which is exactly the writerless
+        -- column that step set out to prevent. The timestamp is threaded from
+        -- the runner's batch clock, not a database clock, so both writers agree
+        -- and a test can pin it.
         UPDATE ${campaigns} AS campaign
-        SET status = 'completed'
+        SET status = 'completed', completed_at = ${now}
         WHERE campaign.id = ${campaignId}
           AND campaign.status IN ('queued', 'processing')
           AND NOT EXISTS (

@@ -340,8 +340,10 @@ Rollback does not require a schema downgrade:
 
 1. Set `AGENTS_ENABLED=false` and redeploy, which preserves leave-message
    handling and zero-cost run evidence.
-2. Set `RUN_LIVE_WOZTELL` to a non-`1` value and remove live template
-   allowlisting.
+2. Set `RUN_LIVE_WOZTELL` to `0`, or remove it, and remove live template
+   allowlisting. Since C-9 it is parsed as `"0" | "1"`: any other value is a
+   startup error rather than a silent downgrade to mock mode, so "a non-`1`
+   value" is no longer a rollback instruction.
 3. Stop the retention scheduler while investigating; do not reverse or
    truncate additive migrations.
 4. Restore the prior application deployment if needed. Preserve conversations,

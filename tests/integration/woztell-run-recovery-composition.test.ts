@@ -38,6 +38,9 @@ function dependencies(
         intent: null,
         providerMessageId: "wamid.recovery",
         receivedAt: RECEIVED_AT,
+        // C-1 Task 2 added the Woztell member id to the `message` arm; this fake
+        // predates it and carries none, which is the pre-Phase-C payload shape.
+        whatsappMemberId: null,
       }),
       verifyWebhook: () => true,
       sendSessionMessage,
@@ -52,6 +55,11 @@ function dependencies(
       locale: "en" as const,
       memberName: "Member",
       whatsappOptIn: true,
+      // C-1 Task 3: the claim now reports the conversation's handling state and
+      // window clock. 'bot' is the pre-Phase-C behaviour this fixture pins.
+      handling: "bot" as const,
+      assignedToProfileId: null,
+      lastInboundAt: null,
     })),
     recoverRun: vi.fn(async () => recovery),
     markRunOwned: vi.fn(async () => undefined),

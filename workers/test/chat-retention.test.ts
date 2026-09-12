@@ -75,10 +75,18 @@ describe("chat retention Worker schedule", () => {
     ).toBe(false);
   });
 
-  it("configures all M3 and M4 production schedules", () => {
+  // Phase C2 Task 10 Step 7. This used to pin the exact `crons` string, which
+  // meant the same fact was stated in two files that must be edited together —
+  // and the root suite, the one CI actually runs, stated it nowhere. The
+  // stronger property (set-equality between this file and `JOBS_BY_CRON`) now
+  // lives in `tests/unit/worker-cron-contract.test.ts`, where a shard will
+  // catch it. What is left here is what only this package can say: the file
+  // parses and declares at least one trigger.
+  it("declares scheduled triggers wrangler can read", () => {
     const wrangler = readFileSync("wrangler.toml", "utf8");
-    expect(wrangler).toContain(
-      'crons = ["0 * * * *", "0 2 * * *", "0 18 * * *", "0 3 * * *", "15 18 * * *", "30 0 1 * *"]',
-    );
+    const crons = /^\s*crons\s*=\s*\[(.*?)\]/ms.exec(wrangler);
+
+    expect(crons).not.toBeNull();
+    expect([...(crons?.[1] ?? "").matchAll(/"([^"]+)"/g)].length).toBeGreaterThan(0);
   });
 });

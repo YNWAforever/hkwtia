@@ -1,4 +1,4 @@
-import {encodeMemberCsv} from "@/lib/admin/csv";
+import {encodeAudienceCsv} from "@/lib/admin/csv";
 import {segmentIdSchema} from "@/lib/admin/segment-schema";
 import {requireAdminActor} from "@/lib/auth/actor";
 import {segmentsRepository} from "@/lib/db/repos/segments";
@@ -12,7 +12,12 @@ export async function GET(_request: Request, {params}: Props): Promise<Response>
   const segment = await segmentsRepository.get(actor, id.data).catch(() => null);
   if (!segment) return new Response(null, {status: 404});
 
-  const first = await segmentsRepository.preview(actor, segment.filters, {limit: 500, cursor: null});
+  // C-6. One clock for the whole export. `renewalWithinDays` and
+  // `lastLoginBeforeDays` are windows relative to "now", so a per-page
+  // `new Date()` let the window slide between pages of the same download and
+  // the CSV silently gained or lost people at the boundary.
+  const now = new Date();
+  const first = await segmentsRepository.preview(actor, segment.filters, {limit: 500, cursor: null}, now);
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
@@ -22,10 +27,10 @@ export async function GET(_request: Request, {params}: Props): Promise<Response>
         let header = true;
         let rowCount = 0;
         while (page) {
-          controller.enqueue(encoder.encode(encodeMemberCsv(page.items, header)));
+          controller.enqueue(encoder.encode(encodeAudienceCsv(page.items, header)));
           rowCount += page.items.length;
           header = false;
-          page = page.nextCursor ? await segmentsRepository.preview(actor, segment.filters, {limit: 500, cursor: page.nextCursor}) : null;
+          page = page.nextCursor ? await segmentsRepository.preview(actor, segment.filters, {limit: 500, cursor: page.nextCursor}, now) : null;
         }
         await segmentsRepository.auditExport(actor, segment.id, segment.filterVersion, rowCount);
         controller.close();

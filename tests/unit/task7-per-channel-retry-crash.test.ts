@@ -113,6 +113,7 @@ function context(
     emailSuppressed: false,
     whatsappOptIn: true,
     whatsappNumber: "+85260000000",
+    whatsappOptedOutAt: null,
     engagementScore: 50,
     email: "member-1@example.test",
     recipientName: "Member One",

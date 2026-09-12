@@ -1405,7 +1405,7 @@
     "due": "Due",
     "rate": "Rate",
     "methodologyHeading": "How these metrics are calculated",
-    "methodologyDescription": "Aggregates refresh hourly. Estimated time saved equals agent-resolved conversations multiplied by six minutes. No member-level data is published.",
+    "methodologyDescription": "Aggregates refresh hourly. Estimated time saved equals agent-resolved conversations multiplied by six minutes. No member-level data is published. Resolution, escalation, failure and first-response figures describe threads the concierge kept: once a person takes a conversation over in the staff inbox it produces no agent outcome, and a staff reply is not counted as a first response.",
     "architectureHeading": "How WTIA AI-Ops works",
     "architectureDescription": "Web and WhatsApp requests pass through the Concierge runtime and guarded tools. Scheduled jobs use authenticated routes. Generated actions remain behind approval or publication gates.",
     "approvalGate": "Human approval gate",
@@ -2240,6 +2240,7 @@
       "label": "Staff administration navigation",
       "dashboard": "Dashboard",
       "inbox": "Inbox",
+      "contacts": "Contacts",
       "tasks": "Tasks",
       "segments": "Segments",
       "members": "Members",
@@ -2256,21 +2257,209 @@
       "cohorts": "Launch Pad cohorts",
       "approvals": "Approvals",
       "reports": "Reports",
-      "automations": "Automations"
+      "automations": "Automations",
+      "templates": "WhatsApp templates",
+      "campaigns": "Campaigns"
+    },
+    "templates": {
+      "eyebrow": "WhatsApp delivery",
+      "title": "WhatsApp templates",
+      "description": "Only a template approved here can be sent. Approve a key once Meta has approved it in the WhatsApp Business account; anything else is skipped, not sent.",
+      "columns": {
+        "key": "Key",
+        "elementName": "Template name",
+        "language": "Language",
+        "category": "Category",
+        "variables": "Variables",
+        "status": "Status",
+        "approvedAt": "Approved"
+      },
+      "status": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "disabled": "Disabled"
+      },
+      "category": {
+        "marketing": "Marketing",
+        "utility": "Utility",
+        "authentication": "Authentication"
+      },
+      "approve": "Approve",
+      "reject": "Reject",
+      "disable": "Disable",
+      "rejectionReason": "Reason",
+      "previewEn": "Preview (English)",
+      "previewZhHk": "Preview (Traditional Chinese)",
+      "savePreview": "Save previews",
+      "empty": "The registry is empty. The approved-key environment variable is the fallback until a template is registered.",
+      "error": "We could not load the template registry.",
+      "goLive": "Nothing is sent on WhatsApp until at least one template is approved here."
+    },
+    "contacts": {
+      "eyebrow": "Prospect pipeline",
+      "title": "Contacts",
+      "description": "Everyone WTIA may need to reach who is not, or not yet, a member — WhatsApp senders, interest-form submitters, event guests and abandoned joins.",
+      "columns": {
+        "name": "Name",
+        "stage": "Stage",
+        "source": "Source",
+        "owner": "Owner",
+        "lastInbound": "Last message in",
+        "optIn": "WhatsApp",
+        "actions": "Actions"
+      },
+      "stage": {
+        "new": "New",
+        "contacted": "Contacted",
+        "qualified": "Qualified",
+        "applied": "Applied",
+        "member": "Member",
+        "closed": "Closed"
+      },
+      "source": {
+        "whatsapp": "WhatsApp",
+        "event_guest": "Event guest",
+        "showcase_intro": "Showcase intro",
+        "join_abandoned": "Abandoned join",
+        "interest_form": "Interest form",
+        "import": "Import"
+      },
+      "optIn": {
+        "yes": "Opted in",
+        "no": "Not opted in",
+        "stopped": "Stopped"
+      },
+      "filters": {
+        "stage": "Stage",
+        "source": "Source",
+        "owner": "Owner",
+        "search": "Search name, email or number",
+        "anyStage": "All stages",
+        "anySource": "All sources",
+        "anyOwner": "Anyone",
+        "anyOptIn": "Any",
+        "submit": "Filter",
+        "clear": "Clear"
+      },
+      "unassigned": "Unassigned",
+      "assign": "Assign",
+      "assignToMe": "Assign to me",
+      "save": "Save",
+      "next": "Next page",
+      "openThread": "Open thread",
+      "noThread": "No thread yet",
+      "convert": "Invite to join",
+      "linkedMember": "Member record",
+      "duplicates": "{count} rows share this email",
+      "empty": "No contacts match these filters.",
+      "error": "We could not load the contacts pipeline.",
+      "saved": "Contact updated."
+    },
+    "campaigns": {
+      "eyebrow": "Outbound",
+      "title": "Campaigns",
+      "description": "Name a campaign, choose a channel and template, pick a segment, check who it can actually reach, then have a second admin approve it.",
+      "steps": {
+        "name": "Name",
+        "channel": "Channel",
+        "template": "Template",
+        "variables": "Message details",
+        "segment": "Segment",
+        "preview": "Who this reaches"
+      },
+      "channel": {
+        "email": "Email",
+        "whatsapp": "WhatsApp"
+      },
+      "columns": {
+        "status": "Status",
+        "created": "Created"
+      },
+      "fields": {
+        "name": "Campaign name",
+        "template": "Template",
+        "segment": "Saved segment",
+        "scheduledAt": "Send at"
+      },
+      "variables": {
+        "legend": "Fill in the template",
+        "hint": "Type the words to send, or use a placeholder: {tokens}",
+        "missing": "Every field must be filled in before this template can be sent."
+      },
+      "blocked": "Not finished yet — {step} still needs an answer.",
+      "noSegments": "Save a segment first: a campaign is addressed to a saved segment.",
+      "scheduleUnavailable": "Email campaigns send on the next hourly run and cannot be scheduled for a later time.",
+      "eligibility": {
+        "eligible": "Will be sent",
+        "no_email": "No email address",
+        "no_number": "No WhatsApp number",
+        "not_opted_in": "Not opted in",
+        "suppressed": "Opted out",
+        "plan_ineligible": "Membership not active",
+        "missing_variable": "Message details missing",
+        "marketing_suppressed": "Consent changed before sending",
+        "template_not_approved": "Template not approved for sending",
+        "unknown_recipient": "Recipient no longer on file"
+      },
+      "status": {
+        "draft": "Draft",
+        "review": "In review",
+        "scheduled": "Scheduled",
+        "queued": "Queued",
+        "processing": "Sending",
+        "sending": "Sending",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "failed": "Failed"
+      },
+      "actions": {
+        "createDraft": "Create draft",
+        "submitForReview": "Submit for review",
+        "approve": "Approve and schedule",
+        "approveEmail": "Approve and queue",
+        "reject": "Reject",
+        "next": "Next",
+        "back": "Back",
+        "goToStep": "Go to that step"
+      },
+      "ownDraft": "A campaign must be approved by a different administrator.",
+      "rejectionReason": "Reason",
+      "templateUnapproved": "This template is not approved yet. Approve it under WhatsApp templates first.",
+      "report": {
+        "title": "Delivery",
+        "queued": "Waiting to send",
+        "sent": "Sent",
+        "delivered": "Delivered",
+        "read": "Read",
+        "failed": "Failed",
+        "blocked": "Not sent",
+        "total": "Recipients"
+      },
+      "empty": "No campaigns yet.",
+      "error": "We could not load campaigns."
     },
     "inbox": {
       "eyebrow": "Member and lead conversations",
       "title": "Inbox",
-      "description": "Every concierge conversation on the web widget and WhatsApp. Read-only in this release; replying from here arrives with the WhatsApp operations phase.",
+      "description": "Every concierge conversation on the web widget and WhatsApp. Take a thread over to reply yourself, and hand it back when you are done.",
       "filters": {"all": "All", "whatsapp": "WhatsApp", "web": "Web"},
-      "columns": {"owner": "Who", "channel": "Channel", "last": "Last message", "when": "Updated", "messages": "Messages", "status": "Status"},
+      "columns": {"owner": "Who", "channel": "Channel", "last": "Last message", "when": "Updated", "messages": "Messages", "status": "Status", "handling": "Handled by", "assignee": "Assigned to", "unread": "Unread"},
       "anonymous": "Prospect (not a member)",
       "escalated": "Needs a person",
       "empty": "No conversations yet.",
       "error": "The inbox could not be loaded.",
       "open": "Open",
       "back": "Back to inbox",
-      "roles": {"user": "Sender", "assistant": "Concierge", "tool": "Tool"}
+      "unassigned": "Nobody",
+      "unreadYes": "New",
+      "roles": {"user": "Sender", "assistant": "Concierge", "tool": "Tool", "staff": "WTIA staff"},
+      "handling": {"bot": "Concierge", "human": "A person", "closed": "Closed", "filterAll": "All threads", "filterHuman": "Handled by a person", "filterBot": "Handled by the concierge"},
+      "actions": {"take": "Take this over", "release": "Hand back to the concierge", "close": "Close this thread", "assignToMe": "Assign to me", "unassign": "Unassign", "markRead": "Mark as read"},
+      "window": {"open": "{hours}h {minutes}m left to reply freely", "closed": "The 24-hour reply window has closed. Send an approved template instead.", "never": "This person has not messaged in yet, so there is no open window."},
+      "compose": {"legend": "Reply", "kindSession": "Free-text reply", "kindTemplate": "Approved template", "message": "Your reply", "placeholder": "Write your reply…", "template": "Template", "templateNone": "Choose a template", "send": "Send", "sending": "Sending…", "sent": "Sent.", "alreadySent": "Not sent — this exact reply had already been sent into this thread, so nothing new was sent. Check the thread, and edit the wording if you meant to send it again.", "draftRestored": "Draft restored."},
+      "delivery": {"queued": "Sending", "sent": "Sent", "delivered": "Delivered", "read": "Read", "failed": "Not delivered"},
+      "errors": {"INVALID": "Check the message and the template.", "FORBIDDEN": "You do not have access to this thread.", "WINDOW_CLOSED": "The 24-hour window has closed. Send an approved template instead.", "NOT_OPTED_IN": "This person has not opted in to WhatsApp.", "OPTED_OUT": "This person asked us to stop messaging them.", "SUPPRESSED": "This person is suppressed for marketing on WhatsApp.", "NO_NUMBER": "We have no WhatsApp number for this person.", "INVALID_INBOX_CHANNEL": "This thread is not a WhatsApp thread.", "INVALID_INBOX_HANDLING": "Take the thread over before replying.", "TEMPLATE_NOT_APPROVED": "That template is not approved for sending.", "SEND_IN_PROGRESS": "This reply is already being sent. Give it a moment before trying again.", "DELIVERY_FAILED": "WhatsApp refused the message. Press Send again to try once more.", "DELIVERY_UNCERTAIN": "We could not confirm whether WhatsApp took this message. Check the thread on WhatsApp before sending again — pressing Send will not re-send this reply, and editing the wording sends a new one."}
     },
     "tasks": {
       "eyebrow": "Escalations",
@@ -2452,6 +2641,30 @@
       "existing": "Existing campaign",
       "recipients": "recipients",
       "newDraft": "Start new campaign",
+      "industryTags": "Industry tags",
+      "anyTag": "All industries",
+      "companyPlan": "Company plan",
+      "event": "Event",
+      "eventState": "Registration state",
+      "eventStates": {
+        "registered": "Registered",
+        "waitlist": "Waitlisted",
+        "attended": "Attended",
+        "cancelled": "Cancelled",
+        "not_registered": "Not registered"
+      },
+      "audience": "Audience",
+      "audiences": {
+        "members": "Members",
+        "contacts": "Contacts",
+        "both": "Members and contacts"
+      },
+      "contactStage": "Contact stage",
+      "contactSource": "Contact source",
+      "presetNotRegistered": "Members not yet registered for {event}",
+      "kind": "Type",
+      "kindMember": "Member",
+      "kindContact": "Contact",
       "error": "We could not queue this campaign. Please try again."
     },
     "atRisk": {

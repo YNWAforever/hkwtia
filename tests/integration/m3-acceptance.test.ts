@@ -216,6 +216,7 @@ function journeyDependencies(
         emailSuppressed: context.emailSuppressed,
         whatsappOptIn: context.whatsappOptIn,
         whatsappNumber: context.whatsappNumber,
+        whatsappOptedOutAt: context.whatsappOptedOutAt,
         engagementScore: context.engagementScore,
         email: context.email,
         recipientName: context.displayName,

@@ -296,8 +296,13 @@ describe("WiseTech protected route ownership", () => {
     // Phase B1 Task 6 (B-4) added /api/events/guest/cancel: 49 + 1 = 50.
     // Phase B1 Task 7 (B-4) added /api/admin/events/[id]/attendees.csv: 50 + 1 = 51.
     // Phase B2 Task 4 (B-7) added /admin/profiles-review: 51 + 1 = 52.
-    expect(codeFiles).toHaveLength(52);
-    expect(inventoryFiles).toHaveLength(52);
+    // Phase C1 Task 11 (C-3) added /api/admin/woztell/backfill: 52 + 1 = 53.
+    // Phase C2 Task 2 (C-7) added /admin/templates: 53 + 1 = 54.
+    // Phase C2 Task 4 (C-4) added /admin/contacts: 54 + 1 = 55.
+    // Phase C2 Task 9 (C-5) added /admin/campaigns and /admin/campaigns/[id]: 55 + 2 = 57.
+    // Phase C2 Task 10 (C-5, D-10) added /api/jobs/whatsapp-send-queue: 57 + 1 = 58.
+    expect(codeFiles).toHaveLength(58);
+    expect(inventoryFiles).toHaveLength(58);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -312,12 +317,20 @@ describe("WiseTech protected route ownership", () => {
       protectedRouteOwnershipInventory.filter((owner) => owner.classification === classification).length
     );
 
-    expect(count("admin-page")).toBe(30);
-    expect(count("api-handler")).toBe(11);
+    // Phase C2 Task 2 (C-7) added the WhatsApp template registry: 30 + 1 = 31.
+    // Phase C2 Task 4 (C-4) added the contacts pipeline: 31 + 1 = 32.
+    // Phase C2 Task 9 (C-5) added the campaign wizard and its detail page: 32 + 2 = 34.
+    expect(count("admin-page")).toBe(34);
+    // Phase C1 Task 11 (C-3) added the WOZTELL history backfill: 11 + 1 = 12.
+    // It is an `api-handler`, not a `webhook-handler`: the caller is a staff
+    // session, and there is no HMAC in front of it — which is exactly why its
+    // repository method carries its own capability actor (plan S-14).
+    expect(count("api-handler")).toBe(12);
     expect(count("webhook-handler")).toBe(2);
-    expect(count("job-handler")).toBe(9);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(30);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(22);
+    // Phase C2 Task 10 (C-5, D-10) added the ten-minute WhatsApp send queue: 9 + 1 = 10.
+    expect(count("job-handler")).toBe(10);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(34);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(24);
   });
 
   it("publishes only the canonical deeply immutable protected conventions export", () => {

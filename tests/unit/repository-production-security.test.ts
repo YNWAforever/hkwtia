@@ -12,10 +12,15 @@ import {companiesRepository, type CompanyUpdate} from "@/lib/db/repos/companies"
 import {createApprovalsRepository} from "@/lib/db/repos/approvals";
 import {createAgentRunsRepository} from "@/lib/db/repos/agent-runs";
 import {createConversationsRepository} from "@/lib/db/repos/conversations";
+import {createInboxRepository} from "@/lib/db/repos/inbox";
 import {createStaffTasksRepository} from "@/lib/db/repos/staff-tasks";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {profilesRepository} from "@/lib/db/repos/profiles";
-import type {Actor} from "@/lib/membership/lifecycle";
+import {createPostgresWoztellStore} from "@/lib/db/repos/woztell";
+import {createWoztellDeliveryStampRepository} from "@/lib/db/repos/woztell-delivery-stamp";
+import {createWoztellInboundEventsRepository} from "@/lib/db/repos/woztell-inbound-events";
+import {createWhatsAppTemplatesRepository, templateRegistryActor} from "@/lib/db/repos/whatsapp-templates";
+import {ANONYMOUS_ACTOR, type Actor} from "@/lib/membership/lifecycle";
 import type {ConciergeAgentActor} from "@/lib/auth/agent-actor";
 
 const actor = {kind: "member", userId: "user-a", profileId: "user-a"} as const;
@@ -884,6 +889,171 @@ describe("production repository security boundaries", () => {
     expect(loadDatabase).not.toHaveBeenCalled();
   });
 
+  /**
+   * Phase C1 S-14. The webhook route's HMAC is a gate on the ROUTE; these are
+   * the gates on the REPOSITORY, and they are not the same claim — Task 11 adds
+   * a backfill route with no HMAC in front of it that reaches the same table.
+   * The two legacy woztell modules authorize nothing and predate §9; they are
+   * the standing exceptions, not the precedent, so every new writer refuses a
+   * member, an admin and an anonymous actor before it opens the database.
+   */
+  it.each([
+    ["member", actor],
+    ["admin", {kind: "staff", userId: "staff-a", profileId: "staff-a", role: "superadmin"}],
+    ["anonymous", ANONYMOUS_ACTOR],
+    // The shape a forged actor would take if `kind` alone were the check.
+    ["hand-rolled webhook shape", {kind: "woztell-webhook", userId: null}],
+  ] as const)(
+    "refuses a %s actor on every woztell inbound event writer before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const events = createWoztellInboundEventsRepository(
+        () => securityNow,
+        loadDatabase,
+      );
+
+      await expect(events.recordDeliveryStatus(forged as never, {
+        providerMessageId,
+        status: "delivered",
+        errorCode: null,
+        occurredAt: securityNow,
+      })).rejects.toThrow("FORBIDDEN");
+      await expect(events.recordOutboundEcho(forged as never, {
+        recipient: "+85290000000",
+        text: "Thanks — someone will come back to you shortly.",
+        providerMessageId,
+        origin: "MANUAL",
+        sentAt: securityNow,
+      })).rejects.toThrow("FORBIDDEN");
+      // Task 4's two staff-task writers reach `staff_tasks` — the same table the
+      // admin panel resolves from — so they carry the same gate as the message
+      // writers, not a comment claiming the route's HMAC covers them.
+      await expect(events.notifyHumanLane(forged as never, {
+        conversationId: "11111111-1111-4111-8111-111111111111",
+        assignedToProfileId: null,
+        locale: "en",
+      })).rejects.toThrow("FORBIDDEN");
+      await expect(events.notifyMemberIdConflict(forged as never, {
+        whatsappMemberId: "member-9001",
+        locale: "en",
+      })).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * Phase C1 S-14, Task 10. The stamp writes the provider id onto an outbound
+   * row, which is what makes every later delivery tick land somewhere; a caller
+   * that could choose the row could point a member's ticks at another thread's
+   * message. Its capability is a DIFFERENT `unique symbol` from the webhook's —
+   * one per entry point — so the webhook's own actor is in this list too.
+   */
+  it.each([
+    ["member", actor],
+    ["admin", {kind: "staff", userId: "staff-a", profileId: "staff-a", role: "superadmin"}],
+    ["anonymous", ANONYMOUS_ACTOR],
+    ["hand-rolled delivery shape", {kind: "woztell-delivery", userId: null}],
+    ["woztell webhook shape", {kind: "woztell-webhook", userId: null}],
+  ] as const)(
+    "refuses a %s actor on the concierge delivery stamp before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const stamp = createWoztellDeliveryStampRepository(loadDatabase);
+
+      await expect(stamp.stampConciergeDelivery(forged as never, {
+        inboundProviderMessageId: providerMessageId,
+        providerId: "wamid.outbound.security",
+      })).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * Phase C1 S-14, Task 11. The backfill is the second entry point into the
+   * `messages`/`conversations` rows the webhook writes, and it has NO HMAC in
+   * front of it. Its capability is a third `unique symbol`, distinct from the
+   * webhook's and the delivery stamp's, so the two entry points cannot reach
+   * each other's writers — which is why both of their actors are in this list.
+   * The host module's other methods are the standing pre-§9 exception and are
+   * deliberately not retrofitted here.
+   */
+  it.each([
+    ["member", actor],
+    ["admin", {kind: "staff", userId: "staff-a", profileId: "staff-a", role: "superadmin"}],
+    ["anonymous", ANONYMOUS_ACTOR],
+    ["hand-rolled backfill shape", {kind: "woztell-backfill", userId: null}],
+    ["woztell webhook shape", {kind: "woztell-webhook", userId: null}],
+    ["woztell delivery shape", {kind: "woztell-delivery", userId: null}],
+  ] as const)(
+    "refuses a %s actor on the WOZTELL history importer before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const store = createPostgresWoztellStore(() => securityNow, loadDatabase);
+
+      await expect(store.importHistoricalInbound(forged as never, {
+        owner: {kind: "anonymous", anonymousOwnerHash},
+        profileId: null,
+        locale: "en",
+        memberName: "Member",
+        whatsappOptIn: true,
+        sender: "+85290000000",
+        providerMessageId,
+        receivedAt: securityNow,
+        content: "Hello from the backlog",
+        channel: "whatsapp",
+        whatsappMemberId: null,
+        contactId: null,
+      })).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * Phase C2 S-14, Task 2 (C-7). The registry decides which template may reach a
+   * member's phone at all, so its two principals are deliberately disjoint: the
+   * admin door refuses the capability actor, and the send gate's `approved` read
+   * refuses every session actor including an admin. A single door that accepted
+   * both would be reachable from a `"use server"` boundary with a forged actor —
+   * and approving a template is the one write in this phase that turns an
+   * unreviewed element name into something twenty people receive.
+   */
+  it.each([
+    ["member", actor],
+    ["admin", {kind: "staff", userId: "staff-a", profileId: "staff-a", role: "superadmin"}],
+    ["anonymous", ANONYMOUS_ACTOR],
+    ["hand-rolled registry shape", {kind: "template-registry", userId: null}],
+  ] as const)(
+    "refuses a %s actor on the WhatsApp template approval read before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const templates = createWhatsAppTemplatesRepository(loadDatabase);
+
+      await expect(templates.approved(forged as never)).rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    ["member", actor],
+    ["anonymous", ANONYMOUS_ACTOR],
+    // The capability the send gate mints. It may READ the approved set and must
+    // never be able to change it — otherwise the gate could approve itself.
+    ["template registry capability", templateRegistryActor()],
+  ] as const)(
+    "refuses a %s actor on every WhatsApp template registry write before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const templates = createWhatsAppTemplatesRepository(loadDatabase);
+
+      await expect(templates.list(forged as never)).rejects.toThrow("FORBIDDEN");
+      await expect(templates.setStatus(forged as never, "renewal_14", "approved", null))
+        .rejects.toThrow("FORBIDDEN");
+      await expect(templates.updatePreviews(forged as never, "renewal_14", {en: "Hello"}))
+        .rejects.toThrow("FORBIDDEN");
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
   it.each(["finish", "fail", "escalate", "disable"] as const)(
     "authorizes %s before validating attacker-controlled input or opening the database",
     async (method) => {
@@ -900,6 +1070,47 @@ describe("production repository security boundaries", () => {
         actor as never,
         inputByMethod[method] as never,
       )).rejects.toMatchObject({code: "FORBIDDEN"});
+      expect(loadDatabase).not.toHaveBeenCalled();
+    },
+  );
+
+  /**
+   * Phase C1 S-6. The inbox's write path is the first place in this repository
+   * where a row exists in order to be *sent to a member's phone*, so its gate
+   * belongs in this hand-maintained inventory and not only in the focused test.
+   * `requireAdmin` runs before the `.strict()` parse and before the loader, so a
+   * non-staff actor cannot reach the database even with input crafted to crash
+   * the parse first.
+   */
+  it.each([
+    ["member", actor],
+    ["anonymous", ANONYMOUS_ACTOR],
+    // A concierge agent is a capability principal with a `profileId`; it must
+    // not be able to reply as staff into the thread it is handling.
+    ["concierge agent", agent],
+  ] as const)(
+    "refuses a %s actor on every inbox staff write before database access",
+    async (_name, forged) => {
+      const loadDatabase = vi.fn();
+      const inbox = createInboxRepository(loadDatabase);
+      const conversationId = agent.conversationId;
+
+      await expect(inbox.queueStaffMessage(forged as never, {
+        conversationId,
+        kind: "session",
+        content: "Thanks — someone will come back to you shortly.",
+        outboundKey: `inbox:${conversationId}:${"a".repeat(32)}`,
+      })).rejects.toThrow("FORBIDDEN");
+      await expect(inbox.settleStaffMessage(forged as never, {
+        outboundKey: `inbox:${conversationId}:${"a".repeat(32)}`,
+        outcome: {status: "sent", providerId: providerMessageId},
+      })).rejects.toThrow("FORBIDDEN");
+      await expect(inbox.setHandling(forged as never, {conversationId, handling: "human"}))
+        .rejects.toThrow("FORBIDDEN");
+      await expect(inbox.assign(forged as never, {conversationId, assignedToProfileId: "staff-a"}))
+        .rejects.toThrow("FORBIDDEN");
+      await expect(inbox.markRead(forged as never, conversationId)).rejects.toThrow("FORBIDDEN");
+      await expect(inbox.close(forged as never, conversationId)).rejects.toThrow("FORBIDDEN");
       expect(loadDatabase).not.toHaveBeenCalled();
     },
   );

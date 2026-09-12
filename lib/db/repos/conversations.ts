@@ -12,6 +12,7 @@ import {
   type AutomationRepositoryActor,
 } from "@/lib/auth/automation-actor";
 import {getDb} from "@/lib/db/repos/common";
+import {derivedMessageDirection} from "@/lib/db/message-direction";
 import type {
   AutomationDatabase,
   AutomationDatabaseLoader,
@@ -202,6 +203,7 @@ async function appendMessageFrom(
           conversation_id,
           role,
           channel,
+          direction,
           content,
           provider_message_id,
           metadata,
@@ -211,6 +213,15 @@ async function appendMessageFrom(
         ${parsedId},
         ${parsed.role},
         ${parsed.channel},
+        -- C-1. messages.direction defaults to 'inbound' (plan S-4) so a forgetful
+        -- writer cannot push a row into the SEND ledger; the cost is that the
+        -- same forgetfulness silently labels every concierge and web-widget
+        -- reply 'inbound'. Four things then fail at once, none of them a type
+        -- error: no bot reply gets a delivery tick, stampConciergeDelivery finds
+        -- nothing to stamp, an outbound echo inserts a duplicate row instead of
+        -- adopting, and the thread UI renders the concierge on the prospect's
+        -- side. Derived through the shared helper so the rule has one home.
+        ${derivedMessageDirection({role: parsed.role})},
         ${parsed.content},
         ${providerMessageId},
         ${parsed.metadata ?? {}},
@@ -410,6 +421,15 @@ export function createConversationsRepository(
           SELECT ${conversations.id}
           FROM ${conversations}
           WHERE ${conversations.expiresAt} <= ${parsed.asOf}
+            -- Phase C1 S-10. This sweep deleted on age alone. A thread staff
+            -- took over in /admin/inbox is no longer a bot transcript: it has an
+            -- audit_events row pointing at it, a delivery record, and — for an
+            -- anonymous prospect — the only cleartext copy of their number in
+            -- messages.metadata.normalizedSender. Deleting it here would destroy
+            -- all three while the conversation is still being worked. How long a
+            -- human-handled thread IS kept is a WTIA decision, not an
+            -- engineering one (plan O-5, carried by C-9).
+            AND ${conversations.handling} = 'bot'
           ORDER BY ${conversations.expiresAt}, ${conversations.id}
           LIMIT ${parsed.limit}
           FOR UPDATE SKIP LOCKED

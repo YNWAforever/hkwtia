@@ -443,7 +443,13 @@ describe("complete M4 deterministic acceptance", () => {
     // accessibility fix -- the prior hash above was never updated for that markup change, so
     // it went stale relative to real (non-private) rendered output. Re-verified deterministic
     // across repeated runs before pinning.
-    expect(opaque(safeDashboard)).toBe("eac60d6e5f568c598e83981e58d45d66002b24bf4cdc013585d7c2744ba4e01f");
+    // Recomputed again for C-9 (Phase C2 Task 13 Step 4): `AiOps.methodologyDescription` gained
+    // the human-takeover caveat in both bundles, because the `aiops_monthly_metrics` fix was
+    // declined -- drizzle-kit regenerates the materialized view without the unique index
+    // `REFRESH ... CONCURRENTLY` needs. The dashboard renders that string, so the hash moved for
+    // a copy change and nothing else. Re-verified deterministic across repeated runs before
+    // pinning.
+    expect(opaque(safeDashboard)).toBe("6c46019928f19e8e93ba4409c5a029a98dff270583a2163148651099ebdfc012");
 
     expect(fixture.buildLogs).toHaveLength(2);
     await exerciseConciergeEvaluation();

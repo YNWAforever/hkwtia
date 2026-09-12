@@ -14,6 +14,7 @@ import {appEnv} from "@/lib/config/env";
 import {clientIpFromHeaders} from "@/lib/security/request-origin";
 import {applicationsRepository} from "@/lib/db/repos/applications";
 import {companiesRepository} from "@/lib/db/repos/companies";
+import {contactWriterActor, contactsRepository} from "@/lib/db/repos/contacts";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 import {buildJoinCallback, destinationForJoin, parseJoinContinuation, type JoinContinuation} from "@/lib/membership/join-navigation";
 import {companySchema, profileSchema} from "@/lib/membership/join-schema";
@@ -117,11 +118,24 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
     // here, and completeApplication() only forwards name/locale afterwards.
     const consent = whatsappConsentFields({optIn: parsed.data.whatsappOptIn, source: "join"});
     const profileWrite = {...parsed.data, ...consent, onboardingState: "profile" as const};
-    if (existing) {
-      await profilesRepository.update(actor, actor.profileId, profileWrite);
-    } else {
-      await profilesRepository.ensure(actor, {id: actor.profileId, ...profileWrite});
-    }
+    const saved = existing
+      ? await profilesRepository.update(actor, actor.profileId, profileWrite)
+      : await profilesRepository.ensure(actor, {id: actor.profileId, ...profileWrite});
+    // Programme C-4 / plan S-16. The second of the two writes that can change a
+    // member's matchable identity (the other is the portal profile save). A
+    // prospect who wrote in on WhatsApp, or left an interest form, becomes the
+    // same person as this profile here.
+    //
+    // Fire-and-forget: an applicant mid-join must never see `errors.save`
+    // because a merge failed, on a profile the repository already wrote. The
+    // number comes from the parsed form because `profileSchema` has already
+    // normalised it; the address from the saved row, since the join form never
+    // asks for one.
+    void contactsRepository.linkProfile(contactWriterActor("import"), {
+      profileId: actor.profileId,
+      email: saved?.email ?? existing?.email ?? null,
+      phoneE164: parsed.data.whatsappNumber,
+    }).catch(() => undefined);
     const application = await startJoin(actor, {plan, applicationId});
     const id = application.applicationId;
     const companyPlan = ["startup", "corporate"].includes(plan);

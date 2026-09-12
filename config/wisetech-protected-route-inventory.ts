@@ -80,6 +80,10 @@ export const protectedRouteOwnershipInventory: readonly ProtectedRouteOwner[] = 
   owner({id: "admin-board-draft-detail", family: "admin", classification: "admin-page", routePath: "/admin/reports/board-drafts/[id]", filePath: "app/[locale]/(admin)/admin/reports/board-drafts/[id]/page.tsx", dataOwner: "Board-report draft selected by id."}),
   owner({id: "admin-reports", family: "admin", classification: "admin-page", routePath: "/admin/reports", filePath: "app/[locale]/(admin)/admin/reports/page.tsx", dataOwner: "Staff reporting surfaces."}),
   owner({id: "admin-segments", family: "admin", classification: "admin-page", routePath: "/admin/segments", filePath: "app/[locale]/(admin)/admin/segments/page.tsx", dataOwner: "Staff segmentation controls."}),
+  owner({id: "admin-templates", family: "admin", classification: "admin-page", routePath: "/admin/templates", filePath: "app/[locale]/(admin)/admin/templates/page.tsx", dataOwner: "WhatsApp template approval registry (Phase C2, C-7)."}),
+  owner({id: "admin-contacts", family: "admin", classification: "admin-page", routePath: "/admin/contacts", filePath: "app/[locale]/(admin)/admin/contacts/page.tsx", dataOwner: "Prospect pipeline: contact stage, owner and consent state (Phase C2, C-4)."}),
+  owner({id: "admin-campaigns", family: "admin", classification: "admin-page", routePath: "/admin/campaigns", filePath: "app/[locale]/(admin)/admin/campaigns/page.tsx", dataOwner: "Campaign wizard and eligibility preview over a saved segment (Phase C2, C-5)."}),
+  owner({id: "admin-campaign-detail", family: "admin", classification: "admin-page", routePath: "/admin/campaigns/[id]", filePath: "app/[locale]/(admin)/admin/campaigns/[id]/page.tsx", dataOwner: "One campaign's second-admin review, schedule and delivery report (Phase C2, C-5)."}),
 
   owner({id: "api-admin-segment-export", family: "api", classification: "api-handler", routePath: "/api/admin/segments/[id]/export", filePath: "app/api/admin/segments/[id]/export/route.ts", dataOwner: "Authorised segment export handler."}),
   owner({id: "api-ai-concierge", family: "api", classification: "api-handler", routePath: "/api/ai/concierge", filePath: "app/api/ai/concierge/route.ts", dataOwner: "Guarded Concierge conversation action."}),
@@ -92,6 +96,7 @@ export const protectedRouteOwnershipInventory: readonly ProtectedRouteOwner[] = 
   owner({id: "api-events-guest-cancel", family: "api", classification: "api-handler", routePath: "/api/events/guest/cancel", filePath: "app/api/events/guest/cancel/route.ts", dataOwner: "Guest RSVP one-click cancel (Phase B1, B-4)."}),
   owner({id: "api-media-delivery", family: "api", classification: "api-handler", routePath: "/api/media/[id]", filePath: "app/api/media/[id]/route.ts", dataOwner: "Revocation-aware ETag-bound private media delivery."}),
   owner({id: "api-unsubscribe", family: "api", classification: "api-handler", routePath: "/api/unsubscribe", filePath: "app/api/unsubscribe/route.ts", dataOwner: "Signed suppression action."}),
+  owner({id: "api-admin-woztell-backfill", family: "api", classification: "api-handler", routePath: "/api/admin/woztell/backfill", filePath: "app/api/admin/woztell/backfill/route.ts", dataOwner: "Admin-actor WOZTELL conversation history import (Phase C, C-3)."}),
 
   owner({id: "api-stripe-webhook", family: "api", classification: "webhook-handler", routePath: "/api/stripe/webhook", filePath: "app/api/stripe/webhook/route.ts", dataOwner: "Stripe webhook verification and idempotent lifecycle processing."}),
   owner({id: "api-woztell-webhook", family: "api", classification: "webhook-handler", routePath: "/api/webhooks/woztell", filePath: "app/api/webhooks/woztell/route.ts", dataOwner: "WOZTELL webhook verification and lifecycle processing."}),
@@ -104,5 +109,6 @@ export const protectedRouteOwnershipInventory: readonly ProtectedRouteOwner[] = 
   owner({id: "api-job-journey-runner", family: "api", classification: "job-handler", routePath: "/api/jobs/journey-runner", filePath: "app/api/jobs/journey-runner/route.ts", dataOwner: "Authenticated lifecycle journey runner."}),
   owner({id: "api-job-renewal-runner", family: "api", classification: "job-handler", routePath: "/api/jobs/renewal-runner", filePath: "app/api/jobs/renewal-runner/route.ts", dataOwner: "Authenticated renewal runner."}),
   owner({id: "api-job-retention-analyst", family: "api", classification: "job-handler", routePath: "/api/jobs/retention-analyst", filePath: "app/api/jobs/retention-analyst/route.ts", dataOwner: "Authenticated retention-analysis job."}),
+  owner({id: "api-job-whatsapp-send-queue", family: "api", classification: "job-handler", routePath: "/api/jobs/whatsapp-send-queue", filePath: "app/api/jobs/whatsapp-send-queue/route.ts", dataOwner: "Authenticated ten-minute WhatsApp campaign send queue (Phase C2, C-5/D-10)."}),
   owner({id: "api-job-worker-alert", family: "api", classification: "job-handler", routePath: "/api/jobs/worker-alert", filePath: "app/api/jobs/worker-alert/route.ts", dataOwner: "Authenticated worker-alert delivery job."}),
 ]);

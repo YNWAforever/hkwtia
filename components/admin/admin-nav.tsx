@@ -18,8 +18,10 @@ const linkLabelKeys = {
   members: "navigation.members",
   "at-risk": "navigation.atRisk",
   inbox: "navigation.inbox",
+  contacts: "navigation.contacts",
   tasks: "navigation.tasks",
   segments: "navigation.segments",
+  campaigns: "navigation.campaigns",
   announcements: "navigation.announcements",
   news: "navigation.news",
   "page-copy": "navigation.pageCopy",
@@ -33,6 +35,7 @@ const linkLabelKeys = {
   approvals: "navigation.approvals",
   reports: "navigation.reports",
   automations: "navigation.automations",
+  templates: "navigation.templates",
 } satisfies Record<AdminNavLinkId, string>;
 
 export function AdminNav({locale}: Readonly<{locale: AppLocale}>) {

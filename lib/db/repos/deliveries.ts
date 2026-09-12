@@ -16,11 +16,76 @@ import {emailLog, whatsappLog} from "@/lib/db/server-schema";
 import type {AutomationDatabase, AutomationDatabaseLoader, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
 import {getDb} from "@/lib/db/repos/common";
 
+/**
+ * C-8 / Phase C2 Task 3. The dispatcher's capability.
+ *
+ * Every delivery method was `requireAutomationSystem`, which admits exactly two
+ * `kind: "system"` sources — the Stripe webhook and the automation cron. The
+ * notifications dispatcher is neither: it runs from a guest RSVP, an event
+ * review, the campaign send queue, the inbox and a showcase lead, none of which
+ * holds a cron actor, and none of which may be handed one (a cron actor also
+ * opens `journeysRepository.claimDue`, so lending it out widens far more than a
+ * log write).
+ *
+ * A `unique symbol` rather than a `kind` string, the shape
+ * `contactWriterActor` (`lib/db/repos/contacts.ts`) and `unsubscribeActor`
+ * (`lib/db/repos/suppressions.ts`) already use: a `"use server"` boundary can
+ * forge `{kind: "notification", source: "campaign"}` out of a request body, and
+ * cannot mint a symbol that only server-only wiring holds.
+ *
+ * `requireAutomationSystem` itself is deliberately NOT widened.
+ * `tests/unit/automation-repository-authorization.test.ts` asserts a member, an
+ * admin and an anonymous actor get FORBIDDEN from these methods *and* that
+ * `loadDatabase` was never called; all of that stays true, because none of
+ * those actors can mint the symbol either.
+ */
+const notificationCapability: unique symbol = Symbol("notification-capability");
+
+export type NotificationSource =
+  | "guest-rsvp"
+  | "event-review"
+  | "event-reminder"
+  | "campaign"
+  | "inbox"
+  | "showcase-lead";
+
+export type NotificationActor = Readonly<{
+  kind: "notification";
+  userId: null;
+  source: NotificationSource;
+  [notificationCapability]: true;
+}>;
+
+export function notificationActor(source: NotificationSource): NotificationActor {
+  return Object.freeze({kind: "notification", userId: null, source, [notificationCapability]: true as const});
+}
+
+export type DeliveryActor = AutomationRepositoryActor | NotificationActor;
+
+function isNotificationActor(actor: DeliveryActor): actor is NotificationActor {
+  const candidate = actor as Partial<NotificationActor>;
+  return candidate.kind === "notification" && candidate[notificationCapability] === true;
+}
+
+/**
+ * The capability first, the old gate second, so the existing cron and webhook
+ * callers keep exactly the authorization they had. Exported because
+ * `lib/db/repos/message-eligibility.ts`'s `factsFor` is the same door onto the
+ * same principals (Phase C2 Task 3): the dispatcher asks "may we send?" and
+ * "record that we did" with one capability, and two gates that disagreed about
+ * who may do which would be a hole in one of them.
+ */
+export function requireDeliveryActor(actor: DeliveryActor): void {
+  if (isNotificationActor(actor)) return;
+  requireAutomationSystem(actor);
+}
+
 export type DeliveryStatus = "processing" | "sent" | "failed";
 export type DeliveryRecord = Readonly<{
   id: string;
   channel: JourneyChannel;
   profileId: string | null;
+  contactId: string | null;
   journeyStateId: string | null;
   template: string;
   status: DeliveryStatus;
@@ -40,6 +105,15 @@ export type DeliveryReservation = Readonly<{record: DeliveryRecord; disposition:
 
 type DeliveryBaseInput = Readonly<{
   profileId: string | null;
+  /**
+   * S-8. Optional, and absent from every existing caller on purpose: the two
+   * log tables keyed only on `profile_id` before 0033, so a dispatch to a
+   * prospect wrote a row attributable to nobody. `message_suppressions` is not
+   * widened to match — the prospect lane stays `contacts.whatsapp_opt_in` /
+   * `whatsapp_opted_out_at`, and `messageEligibilityRepository` is the one
+   * reader of both.
+   */
+  contactId?: string | null;
   journeyStateId: string | null;
   template: string;
   idempotencyKey: string;
@@ -65,6 +139,7 @@ function recordFrom(channel: JourneyChannel, row: Record<string, unknown>): Deli
     id: String(row.id),
     channel,
     profileId: row.profile_id === null || row.profile_id === undefined ? null : String(row.profile_id),
+    contactId: row.contact_id === null || row.contact_id === undefined ? null : String(row.contact_id),
     journeyStateId: row.journey_state_id === null || row.journey_state_id === undefined ? null : String(row.journey_state_id),
     template: String(row.template ?? ""),
     status: String(row.status) as DeliveryStatus,
@@ -174,14 +249,14 @@ async function completeReservedDelivery(
 
 export function createDeliveriesRepository(loadDatabase: AutomationDatabaseLoader = defaultDatabaseLoader) {
   return {
-    async reserveEmail(actor: AutomationRepositoryActor, input: EmailReservationInput): Promise<DeliveryReservation> {
-      requireAutomationSystem(actor);
+    async reserveEmail(actor: DeliveryActor, input: EmailReservationInput): Promise<DeliveryReservation> {
+      requireDeliveryActor(actor);
       const database = await loadDatabase();
       const result = await database.execute(sql`
         INSERT INTO ${emailLog}
-          (profile_id, journey_state_id, template, subject, status, idempotency_key, locale, classification, attempt_count)
+          (profile_id, contact_id, journey_state_id, template, subject, status, idempotency_key, locale, classification, attempt_count)
         VALUES (
-          ${input.profileId}, ${input.journeyStateId}, ${input.template}, ${input.subject}, 'processing',
+          ${input.profileId}, ${input.contactId ?? null}, ${input.journeyStateId}, ${input.template}, ${input.subject}, 'processing',
           ${input.idempotencyKey}, ${input.locale}, ${input.classification}, 1
         )
         ON CONFLICT DO NOTHING
@@ -193,29 +268,29 @@ export function createDeliveriesRepository(loadDatabase: AutomationDatabaseLoade
     },
 
     async retryEmailFailure(
-      actor: AutomationRepositoryActor,
+      actor: DeliveryActor,
       id: string,
       expectedErrorCode: string,
     ): Promise<DeliveryRetryResult> {
-      requireAutomationSystem(actor);
+      requireDeliveryActor(actor);
       const database = await loadDatabase();
       return retryFailedDelivery(database, "email", id, expectedErrorCode);
     },
 
-    async completeEmail(actor: AutomationRepositoryActor, id: string, completion: DeliveryCompletion): Promise<DeliveryRecord> {
-      requireAutomationSystem(actor);
+    async completeEmail(actor: DeliveryActor, id: string, completion: DeliveryCompletion): Promise<DeliveryRecord> {
+      requireDeliveryActor(actor);
       const database = await loadDatabase();
       return completeReservedDelivery(database, "email", id, completion);
     },
 
-    async reserveWhatsapp(actor: AutomationRepositoryActor, input: WhatsappReservationInput): Promise<DeliveryReservation> {
-      requireAutomationSystem(actor);
+    async reserveWhatsapp(actor: DeliveryActor, input: WhatsappReservationInput): Promise<DeliveryReservation> {
+      requireDeliveryActor(actor);
       const database = await loadDatabase();
       const result = await database.execute(sql`
         INSERT INTO ${whatsappLog}
-          (profile_id, journey_state_id, template, status, idempotency_key, locale, classification, attempt_count)
+          (profile_id, contact_id, journey_state_id, template, status, idempotency_key, locale, classification, attempt_count)
         VALUES (
-          ${input.profileId}, ${input.journeyStateId}, ${input.template}, 'processing',
+          ${input.profileId}, ${input.contactId ?? null}, ${input.journeyStateId}, ${input.template}, 'processing',
           ${input.idempotencyKey}, ${input.locale}, ${input.classification}, 1
         )
         ON CONFLICT DO NOTHING
@@ -227,17 +302,17 @@ export function createDeliveriesRepository(loadDatabase: AutomationDatabaseLoade
     },
 
     async retryWhatsappFailure(
-      actor: AutomationRepositoryActor,
+      actor: DeliveryActor,
       id: string,
       expectedErrorCode: string,
     ): Promise<DeliveryRetryResult> {
-      requireAutomationSystem(actor);
+      requireDeliveryActor(actor);
       const database = await loadDatabase();
       return retryFailedDelivery(database, "whatsapp", id, expectedErrorCode);
     },
 
-    async completeWhatsapp(actor: AutomationRepositoryActor, id: string, completion: DeliveryCompletion): Promise<DeliveryRecord> {
-      requireAutomationSystem(actor);
+    async completeWhatsapp(actor: DeliveryActor, id: string, completion: DeliveryCompletion): Promise<DeliveryRecord> {
+      requireDeliveryActor(actor);
       const database = await loadDatabase();
       return completeReservedDelivery(database, "whatsapp", id, completion);
     },

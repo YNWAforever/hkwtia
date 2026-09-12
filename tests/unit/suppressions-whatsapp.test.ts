@@ -1,14 +1,168 @@
+import {PgDialect} from "drizzle-orm/pg-core";
 import {describe, expect, it, vi} from "vitest";
 
 import {createSuppressionsRepository, unsubscribeActor} from "@/lib/db/repos/suppressions";
 
+const dialect = new PgDialect();
+
+type Statement = Readonly<{sql: string; params: readonly unknown[]}>;
+
+/**
+ * The same recorder shape as `tests/unit/contacts-consent-audit.test.ts`: the
+ * statements are recorded in order with their compiled SQL, because "which
+ * statement decided to audit" is the whole subject of this file and a bare
+ * call count cannot tell those cases apart.
+ */
+function transactionalRecorder(responses: readonly Record<string, unknown>[][]) {
+  const statements: Statement[] = [];
+  const queue = [...responses];
+  let transactions = 0;
+  const execute = vi.fn(async (query: never) => {
+    const compiled = dialect.sqlToQuery(query);
+    statements.push({sql: compiled.sql, params: compiled.params});
+    return queue.shift() ?? [];
+  });
+  const database = {
+    execute,
+    async transaction<T>(work: (transaction: {execute: typeof execute}) => Promise<T>): Promise<T> {
+      transactions += 1;
+      return await work({execute});
+    },
+  };
+  return {statements, execute, database: database as never, transactionCount: () => transactions};
+}
+
+/** `--` comments run to the end of a line; strip them before collapsing. */
+function normalized(statement: string | undefined): string {
+  return (statement ?? "").replace(/--[^\n]*/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function auditStatements(statements: readonly Statement[]): readonly Statement[] {
+  return statements.filter((statement) => normalized(statement.sql).startsWith(`insert into "audit_events"`));
+}
+
+function auditMetadata(statement: Statement | undefined): unknown {
+  const raw = (statement?.params ?? []).find((value) => typeof value === "string" && value.includes("reasonCode"));
+  return JSON.parse(String(raw));
+}
+
 describe("suppressionsRepository.optOutWhatsApp", () => {
   it("clears the profile flag, inserts the whatsapp suppression and an audit row in one transaction", async () => {
-    const execute = vi.fn(async () => [{id: "row"}]);
-    const database = {execute, transaction: async <T,>(work: (tx: {execute: typeof execute}) => Promise<T>) => work({execute})};
-    const repository = createSuppressionsRepository(async () => database as never);
+    const recorder = transactionalRecorder([[{id: "profile-1"}], [{id: "suppression-1"}], []]);
+    const repository = createSuppressionsRepository(async () => recorder.database);
+
     await expect(repository.optOutWhatsApp(unsubscribeActor(), "profile-1", "whatsapp_stop")).resolves.toBe("created");
-    expect(execute).toHaveBeenCalledTimes(3);
+
+    expect(recorder.statements).toHaveLength(3);
+    expect(recorder.transactionCount()).toBe(1);
+    const audits = auditStatements(recorder.statements);
+    expect(audits).toHaveLength(1);
+    expect(normalized(audits[0]?.sql)).toContain("'consent.whatsapp.revoked'");
+    expect(auditMetadata(audits[0])).toEqual({
+      reasonCode: "whatsapp_stop",
+      clearedOptIn: true,
+      suppressionCreated: true,
+    });
+  });
+
+  /**
+   * C-1 review fix, round 2. The first fix made the audit row conditional on
+   * the suppression INSERT alone, which regressed the case below: the member
+   * re-granted WhatsApp from the portal, the suppression row was never deleted
+   * (nothing in the tree deletes one outside the seeds), and their SECOND, real
+   * withdrawal through `/api/unsubscribe?channel=whatsapp` cleared the flag and
+   * wrote nothing anywhere — boundary 11 broken by the commit that fixed it on
+   * the contact side. Either half being new is a consent change.
+   */
+  it("audits a second withdrawal that only the profile flag records", async () => {
+    // The guarded UPDATE matches (the flag was true again after a re-consent);
+    // the suppression from the first withdrawal is still there and conflicts.
+    const recorder = transactionalRecorder([[{id: "profile-1"}], [], []]);
+    const repository = createSuppressionsRepository(async () => recorder.database);
+
+    await expect(repository.optOutWhatsApp(unsubscribeActor(), "profile-1", "member_unsubscribe")).resolves.toBe("created");
+
+    const audits = auditStatements(recorder.statements);
+    expect(audits).toHaveLength(1);
+    expect(auditMetadata(audits[0])).toEqual({
+      reasonCode: "member_unsubscribe",
+      clearedOptIn: true,
+      suppressionCreated: false,
+    });
+  });
+
+  /**
+   * The other single-evidence shape: the suppression is new and the flag
+   * transition is not, because `profiles.whatsapp_opt_in` is
+   * `.default(false).notNull()` and a member who never opted in to marketing
+   * has it false already. Their STOP is still a withdrawal — it is what stops
+   * a future blast — and the suppression INSERT is the only half that can
+   * record it.
+   *
+   * This case used to be described as the majority first-STOP shape, on the
+   * grounds that `lib/ai/woztell-webhook.ts` cleared the flag itself before
+   * `recordOptOut` ran this method. That ordering was the C-1 defect and is
+   * gone: the webhook now calls `recordOptOut` FIRST, so a member whose grant
+   * is standing spends the transition here, inside the transaction that writes
+   * the audit row.
+   */
+  it("audits a first withdrawal that only the suppression records", async () => {
+    const recorder = transactionalRecorder([[], [{id: "profile-1"}], [{id: "suppression-1"}], []]);
+    const repository = createSuppressionsRepository(async () => recorder.database);
+
+    await expect(repository.optOutWhatsApp(unsubscribeActor(), "profile-1", "whatsapp_stop")).resolves.toBe("created");
+
+    expect(auditMetadata(auditStatements(recorder.statements)[0])).toEqual({
+      reasonCode: "whatsapp_stop",
+      clearedOptIn: false,
+      suppressionCreated: true,
+    });
+  });
+
+  /**
+   * `recordOptOut` runs this leg and the contact leg in two transactions and
+   * the webhook route 500s on a throw, so a failure in the second one has
+   * Woztell redeliver the same STOP. Neither half is new on that redelivery —
+   * the flag was cleared by THIS method's own guarded UPDATE on the first
+   * delivery, and the suppression conflicts — so there is nothing to record and
+   * a second `consent.whatsapp.revoked` row would be a fiction.
+   *
+   * Read this case for what it is and not one step further. A redelivery and a
+   * genuine SECOND withdrawal are not the same input and must not be conflated:
+   * this case is silent only because nothing changed, while a member who
+   * re-granted in the portal and said STOP again arrives with the flag true and
+   * audits through the transition (the case two above). The C-1 defect was
+   * exactly that conflation — the webhook pre-cleared the flag, so a real
+   * second withdrawal reached this method looking indistinguishable from a
+   * redelivery and was answered with the same silence.
+   * `tests/unit/woztell-consent-audit.test.ts` drives both through the webhook
+   * and holds them apart.
+   */
+  it("writes no second audit row when neither the flag nor the suppression changed", async () => {
+    const recorder = transactionalRecorder([[], [{id: "profile-1"}], []]);
+    const repository = createSuppressionsRepository(async () => recorder.database);
+
+    await expect(repository.optOutWhatsApp(unsubscribeActor(), "profile-1", "whatsapp_stop")).resolves.toBe("existing");
+
+    expect(auditStatements(recorder.statements)).toHaveLength(0);
+    expect(normalized(recorder.statements[0]?.sql)).toContain(`"whatsapp_opt_in" = true`);
+  });
+
+  /**
+   * The guard costs the UPDATE its double duty as an existence check, and
+   * `lib/api/unsubscribe-route.ts` turns PROFILE_NOT_FOUND into a 404 that a
+   * forged-but-valid token relies on. The lookup that replaces it runs only
+   * when the guard missed.
+   */
+  it("still raises PROFILE_NOT_FOUND for a profile that does not exist", async () => {
+    const recorder = transactionalRecorder([[], []]);
+    const repository = createSuppressionsRepository(async () => recorder.database);
+
+    await expect(repository.optOutWhatsApp(unsubscribeActor(), "ghost", "member_unsubscribe")).rejects.toThrow("PROFILE_NOT_FOUND");
+
+    expect(recorder.statements).toHaveLength(2);
+    expect(auditStatements(recorder.statements)).toHaveLength(0);
+    expect(recorder.statements.some((statement) => normalized(statement.sql).startsWith(`insert into "message_suppressions"`))).toBe(false);
   });
 
   it("refuses a member actor", async () => {

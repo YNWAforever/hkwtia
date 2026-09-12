@@ -8,7 +8,8 @@ export type WorkerJob =
   | "engagement-score"
   | "chat-retention"
   | "retention-analyst"
-  | "board-reporter";
+  | "board-reporter"
+  | "whatsapp-send-queue";
 
 export type WorkerEnv = Readonly<{
   APP_URL: string;
@@ -54,6 +55,14 @@ export type AutomationWorker = Readonly<{
 
 export const REQUEST_TIMEOUT_MS = 10_000;
 export const AI_REQUEST_TIMEOUT_MS = 240_000;
+/**
+ * Programme D-10. Twenty WhatsApp template sends, each a provider round trip,
+ * do not fit in the ten-second default — and a timeout here is not free: the
+ * batch has already claimed its recipients, so every abort leaves leases to
+ * expire and be re-claimed, which is exactly the resumed-lease case the
+ * dispatcher has to answer with `provider_acceptance_uncertain`.
+ */
+export const QUEUE_REQUEST_TIMEOUT_MS = 30_000;
 const RETRY_DELAYS = [250, 1_000] as const;
 const ATTEMPT_COUNT = 3;
 const BASE_JOBS = [
@@ -68,6 +77,7 @@ const JOBS_BY_CRON = {
   "0 3 * * *": ["chat-retention"],
   "15 18 * * *": ["retention-analyst"],
   "30 0 1 * *": ["board-reporter"],
+  "*/10 * * * *": ["whatsapp-send-queue"],
 } as const satisfies Readonly<
   Record<string, readonly WorkerJob[]>
 >;
@@ -81,6 +91,7 @@ const REQUEST_TIMEOUT_BY_JOB = {
   "chat-retention": REQUEST_TIMEOUT_MS,
   "retention-analyst": AI_REQUEST_TIMEOUT_MS,
   "board-reporter": AI_REQUEST_TIMEOUT_MS,
+  "whatsapp-send-queue": QUEUE_REQUEST_TIMEOUT_MS,
 } as const satisfies Readonly<Record<WorkerJob, number>>;
 
 class WorkerConfigError extends Error {

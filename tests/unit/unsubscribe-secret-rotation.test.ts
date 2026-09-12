@@ -60,14 +60,34 @@ describe("unsubscribe secret rotation", () => {
 });
 
 describe("the split is real, not aliased", () => {
-  it("signs with the dedicated secret and never with the cron bearer", () => {
-    const source = readFileSync(resolve(process.cwd(), "lib/jobs/runners.ts"), "utf8");
+  /**
+   * The minting module, wherever it lives. It was `lib/jobs/runners.ts` until
+   * Phase C2 Task 11 moved `unsubscribeUrls` to a leaf so the notifications
+   * dispatcher could mint the same pair without importing the runner module —
+   * `runners.ts` re-exports the name, which is exactly the aliasing this guard
+   * has to see through. Anchored on the module that calls
+   * `signUnsubscribeToken`, so the next move re-points one constant rather than
+   * quietly retiring the assertion.
+   */
+  const SIGNING_MODULE = "lib/email/unsubscribe-urls.ts";
 
+  it("signs with the dedicated secret and never with the cron bearer", () => {
+    const source = readFileSync(resolve(process.cwd(), SIGNING_MODULE), "utf8");
+
+    // The module that mints is the module that must read the dedicated secret.
+    expect(source).toContain("signUnsubscribeToken");
     // Matched on the property name rather than a particular accessor
     // expression, so narrowing `serverEnv()` to a feature-scoped contract
     // stays a refactor instead of silently retiring this guard.
     expect(source).toMatch(/\bunsubscribeTokenSecret\b/);
     // If signing were merely aliased, a leaked bearer would still mint tokens.
+    expect(source).not.toContain("cronSecret");
+  });
+
+  it("leaves no second minting path behind in the job runners", () => {
+    const source = readFileSync(resolve(process.cwd(), "lib/jobs/runners.ts"), "utf8");
+
+    expect(source).not.toContain("signUnsubscribeToken");
     expect(source).not.toContain("cronSecret");
   });
 

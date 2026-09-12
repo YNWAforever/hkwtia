@@ -36,6 +36,7 @@ function dependencies(
         intent: null,
         providerMessageId: "wamid.error-only",
         receivedAt: RECEIVED_AT,
+        whatsappMemberId: null,
       }),
       verifyWebhook: () => true,
       sendSessionMessage: vi.fn(),
@@ -53,6 +54,10 @@ function dependencies(
       locale: "en" as const,
       memberName: "Member",
       whatsappOptIn: true,
+      // C-1 Task 3: 'bot' is the pre-Phase-C behaviour this fixture pins.
+      handling: "bot" as const,
+      assignedToProfileId: null,
+      lastInboundAt: null,
     })),
     markRunOwned: vi.fn(async () => undefined),
     markReplyReady: vi.fn(async () => undefined),

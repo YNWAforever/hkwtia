@@ -15,7 +15,7 @@ import {GET} from "@/app/api/admin/segments/[id]/export/route";
 
 const segmentId = "11111111-1111-4111-8111-111111111111";
 const filters = {profileIds: [], tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null, whatsappOptIn: null};
-const member = {profileId: "member-1", displayName: "Member One", email: null, companyName: null, planCode: null, membershipStatus: null, renewalAt: null, score: null};
+const member = {kind: "member", id: "member-1", displayName: "Member One", email: null, companyName: null, planCode: null, membershipStatus: null, renewalAt: null, score: null, whatsappNumber: null, whatsappOptIn: false, contactStage: null, contactSource: null};
 
 describe("segment export completion audit", () => {
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe("segment export completion audit", () => {
   it("records one exact row count only after all pages complete", async () => {
     mocks.preview
       .mockResolvedValueOnce({total: 2, items: [member], nextCursor: "next-page"})
-      .mockResolvedValueOnce({total: 2, items: [{...member, profileId: "member-2", displayName: "Member Two"}], nextCursor: null});
+      .mockResolvedValueOnce({total: 2, items: [{...member, id: "member-2", displayName: "Member Two"}], nextCursor: null});
 
     const response = await GET(new Request("http://localhost/api/admin/segments/export"), {params: Promise.resolve({id: segmentId})});
     await expect(response.text()).resolves.toContain("member-2");

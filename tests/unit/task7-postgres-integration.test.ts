@@ -284,9 +284,9 @@ describe.skipIf(!enabled)("Task 7 production repositories on isolated Postgres 1
     });
     const preview = await previewSegment(staff, {...query, limit: 50, cursor: null});
     expect(preview.total).toBe(1);
-    expect(preview.items.map(({profileId}) => profileId)).toEqual(["risk-zero-b"]);
-    const audience = await campaignsRepository.membersForSegment(staff, database.current, query.filter);
-    expect(audience.map(({profileId}) => profileId)).toEqual(["risk-zero-b"]);
+    expect(preview.items.map(({id}) => id)).toEqual(["risk-zero-b"]);
+    const audience = await campaignsRepository.audienceForSegment(staff, database.current, query.filter);
+    expect(audience.map(({kind, id}) => `${kind}:${id}`)).toEqual(["member:risk-zero-b"]);
   }, 20_000);
 
   it("uses the production jobs transaction for concurrent replay and stateful renewal ordinals despite poisoned legacy JSON", async () => {

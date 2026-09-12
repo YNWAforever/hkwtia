@@ -550,6 +550,12 @@ export function createM4AAcceptanceBoundary(
             locale: input.locale,
             memberName: input.memberName,
             whatsappOptIn: input.whatsappOptIn,
+            // C-1 Task 3. This boundary never takes a thread over, so every
+            // conversation it invents stays on the bot lane — and therefore has
+            // nobody assigned to notify (C-1 Task 4).
+            handling: "bot",
+            assignedToProfileId: null,
+            lastInboundAt: input.receivedAt,
           };
         },
         async markRunOwned() {},

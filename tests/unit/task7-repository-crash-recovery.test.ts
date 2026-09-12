@@ -172,7 +172,7 @@ describe("Task 7 repository crash-recovery contracts", () => {
     })]]);
     const repo = createCampaignRecipientDeliveryRepository(async () => fake.database);
 
-    await expect(repo.claimRecipients(cronActor, now, 1, 300_000))
+    await expect(repo.claimRecipients(cronActor, now, 1, 300_000, "email"))
       .resolves.toMatchObject([{claimSource: expectedSource}]);
 
     const command = fake.commands[0]?.sql.replace(/\s+/g, " ");

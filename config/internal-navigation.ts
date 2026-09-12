@@ -28,8 +28,14 @@ export const adminNavigationGroups = [
       {id: "members", href: "/admin/members"},
       {id: "at-risk", href: "/admin/at-risk"},
       {id: "inbox", href: "/admin/inbox"},
+      // Phase C2 (C-4): the prospect side of the same funnel the inbox shows the
+      // member side of, so it sits beside it rather than under operations.
+      {id: "contacts", href: "/admin/contacts"},
       {id: "tasks", href: "/admin/tasks"},
       {id: "segments", href: "/admin/segments"},
+      // Phase C2 (C-5): a campaign is addressed to a saved segment, so it sits
+      // immediately after the screen that builds one.
+      {id: "campaigns", href: "/admin/campaigns"},
     ],
   },
   {
@@ -53,6 +59,7 @@ export const adminNavigationGroups = [
       {id: "approvals", href: "/admin/approvals"},
       {id: "reports", href: "/admin/reports"},
       {id: "automations", href: "/admin/automations"},
+      {id: "templates", href: "/admin/templates"},
     ],
   },
 ] as const satisfies readonly InternalNavGroupConfig[];

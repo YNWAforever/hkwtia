@@ -14,6 +14,14 @@ describe("segment filter schema", () => {
       sector: "",
       lastLoginBeforeDays: null,
       whatsappOptIn: null,
+      // C-6: the v2 keys are spelled out rather than relaxed to `toMatchObject`,
+      // because this fixture is the contract for what a saved segment stores.
+      industryTags: [],
+      companyPlan: [],
+      event: null,
+      audience: "members",
+      contactStage: [],
+      contactSource: [],
     });
   });
 
@@ -33,7 +41,7 @@ describe("segment filter schema", () => {
 
   it("parses URL filters without treating pagination keys as filter keys", () => {
     expect(parseSegmentRouteQuery({tier: "corporate", scoreMax: "19.99", renewalWithinDays: "60", limit: "25", cursor: null})).toEqual({
-      filter: {profileIds: [], tier: ["corporate"], status: [], scoreMin: null, scoreMax: 19.99, renewalWithinDays: 60, sector: "", lastLoginBeforeDays: null, whatsappOptIn: null},
+      filter: {profileIds: [], tier: ["corporate"], status: [], scoreMin: null, scoreMax: 19.99, renewalWithinDays: 60, sector: "", lastLoginBeforeDays: null, whatsappOptIn: null, industryTags: [], companyPlan: [], event: null, audience: "members", contactStage: [], contactSource: []},
       limit: 25,
       cursor: null,
     });

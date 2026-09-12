@@ -1,7 +1,8 @@
 import {describe, expect, it} from "vitest";
 
-import {isEligibleCampaignEmail, queueCampaign, resolveCampaignDraft, type CampaignQueueMember} from "@/lib/admin/campaigns";
+import {isEligibleCampaignEmail, queueCampaign, resolveCampaignDraft} from "@/lib/admin/campaigns";
 import {campaignsRepository, createCampaignsRepository} from "@/lib/db/repos/campaigns";
+import type {RecipientFacts} from "@/lib/db/repos/message-eligibility";
 import {auditEvents, campaignRecipients, campaigns, savedSegments} from "@/lib/db/server-schema";
 import type {AdminActor} from "@/lib/membership/lifecycle";
 
@@ -13,7 +14,36 @@ const input = {
   idempotencyKey: "22222222-2222-4222-8222-222222222222",
 };
 
+// What a `filter_version = 1` row still holds on disk, and what the same filter
+// looks like once `parseSegmentFilter` has dispatched it (C-6, S-9).
 const segmentFilters = {profileIds: [], tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null, whatsappOptIn: null};
+const dispatchedFilters = {...segmentFilters, industryTags: [], companyPlan: [], event: null, audience: "members" as const, contactStage: [], contactSource: []};
+
+/**
+ * What `recipientFactsProjection` hands back for one member. Phase C2 Task 8
+ * replaced the audience row - which carried a `suppressed` flag read from
+ * `email_log.status`, a value nothing in the tree has ever written - with the
+ * same facts shape the inbox's eligibility door reads.
+ */
+function memberFacts(overrides: Partial<RecipientFacts> = {}): RecipientFacts {
+  return {
+    kind: "member",
+    id: "member-1",
+    displayName: "Fixture Member",
+    email: "member1@example.test",
+    whatsappNumber: null,
+    locale: "zh-HK",
+    membershipStatus: "active",
+    planCode: "corporate",
+    renewalAt: new Date("2026-08-20T00:00:00.000Z"),
+    marketingConsent: true,
+    whatsappOptIn: false,
+    whatsappOptedOutAt: null,
+    emailSuppressed: false,
+    whatsappSuppressed: false,
+    ...overrides,
+  };
+}
 
 class Barrier {
   private arrivals = 0;
@@ -36,8 +66,8 @@ function deferred<T>() {
 }
 
 type StoredCampaign = Readonly<{id: string; segmentId: string; createdByProfileId: string; template: string; localeStrategy: string; idempotencyKey: string}>;
-type StoredRecipient = Readonly<{campaignId: string; profileId: string; email: string; locale: string; variables: Readonly<Record<string, string | null>>}>;
-type StoredAudit = Readonly<{actorUserId: string; actorType: string; action: string; targetType: string; targetId: string; metadata: Readonly<{recipientCount: number}>}>;
+type StoredRecipient = Readonly<{campaignId: string; profileId?: string; contactId?: string; email: string | null; whatsappNumber: string | null; locale: string; variables: Readonly<Record<string, string | null>>; status: string; blockedReason: string | null}>;
+type StoredAudit = Readonly<{actorUserId: string; actorType: string; action: string; targetType: string; targetId: string; metadata: Readonly<{eligible: number; blocked: number; byReason: Readonly<Record<string, number>>}>}>;
 type TransactionState = {
   id: number;
   initialCampaignLookup: boolean;
@@ -90,7 +120,7 @@ function createConcurrentCampaignDatabase({parties = 2, failAt}: Readonly<{parti
       const transaction = {
         select: () => ({
           from: (table: unknown) => new FakeSelectQuery(async () => {
-            if (table === savedSegments) return [{id: input.segmentId, ownerProfileId: actor().profileId, filters: segmentFilters}];
+            if (table === savedSegments) return [{id: input.segmentId, ownerProfileId: actor().profileId, filters: segmentFilters, filterVersion: 1}];
             if (table === campaigns) {
               const isInitialLookup = !transactionState.initialCampaignLookup;
               if (isInitialLookup) {
@@ -105,15 +135,7 @@ function createConcurrentCampaignDatabase({parties = 2, failAt}: Readonly<{parti
             throw new Error("Unexpected campaign SELECT table");
           }),
         }),
-        execute: async () => ({rows: [{
-          profileId: "member-1",
-          displayName: "Fixture Member",
-          email: "member1@example.test",
-          locale: "zh-HK",
-          consentMarketing: true,
-          suppressed: false,
-          renewalAt: new Date("2026-08-20T00:00:00.000Z"),
-        }]}),
+        execute: async () => ({rows: [memberFacts()]}),
         insert: (table: unknown) => ({
           values: (value: unknown) => {
             if (table === campaigns) {
@@ -145,8 +167,11 @@ function createConcurrentCampaignDatabase({parties = 2, failAt}: Readonly<{parti
             }
             if (table === campaignRecipients) {
               if (failAt === "recipients") throw new Error("recipient insert failed");
-              transactionState.recipients.push(...value as StoredRecipient[]);
-              return Promise.resolve();
+              const rows = value as StoredRecipient[];
+              transactionState.recipients.push(...rows);
+              // The bare ON CONFLICT DO NOTHING Task 8 added: the production
+              // call reads `.returning()` to count what it actually wrote.
+              return {onConflictDoNothing: () => ({returning: async () => rows.map(() => ({id: "recipient-1"}))})};
             }
             if (table === auditEvents) {
               if (failAt === "audit") throw new Error("audit insert failed");
@@ -186,8 +211,8 @@ function fakeDependencies() {
     recipients,
     dependencies: {
       transaction: async <T>(_actor: unknown, callback: (store: unknown) => Promise<T>) => callback({}),
-      getSavedSegment: async () => ({id: input.segmentId, ownerProfileId: "staff-1", filters: {profileIds: [], tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null, whatsappOptIn: null}}),
-      membersForSegment: async (): Promise<readonly CampaignQueueMember[]> => [{profileId: "member-1", displayName: "Fixture Member", email: "member1@example.test", locale: "zh-HK", consentMarketing: true, suppressed: false, renewalAt: "2026-08-20"}],
+      getSavedSegment: async () => ({id: input.segmentId, ownerProfileId: "staff-1", filters: dispatchedFilters}),
+      audienceForSegment: async (): Promise<readonly RecipientFacts[]> => [memberFacts()],
       findCampaignByIdempotencyKey: async (_actor: unknown, _store: unknown, key: string) => {
         const campaign = campaigns.find((item) => item.idempotencyKey === key);
         return campaign ? {campaignId: campaign.campaignId, recipientCount: recipients.length} : null;
@@ -197,7 +222,7 @@ function fakeDependencies() {
         campaigns.push(created);
         return {campaignId: created.campaignId, recipientCount: 0, disposition: "created" as const};
       },
-      insertRecipients: async (_actor: unknown, _store: unknown, _campaignId: string, rows: readonly unknown[]) => { recipients.push(...rows); },
+      insertRecipients: async (_actor: unknown, _store: unknown, _campaignId: string, rows: readonly unknown[]) => { recipients.push(...rows); return {inserted: rows.length, skipped: 0}; },
       appendAudit: async () => undefined,
     },
   };
@@ -222,8 +247,11 @@ describe("campaign queue", () => {
       campaignId: "44444444-4444-4444-8444-444444444444",
       profileId: "member-1",
       email: "member1@example.test",
+      whatsappNumber: null,
       locale: "zh-HK",
       variables: {displayName: "Fixture Member", renewalDate: "2026-08-20"},
+      status: "queued",
+      blockedReason: null,
     }]);
     expect(race.store.audits).toEqual([{
       actorUserId: "staff-1",
@@ -231,7 +259,7 @@ describe("campaign queue", () => {
       action: "campaign.queued",
       targetType: "campaign",
       targetId: "44444444-4444-4444-8444-444444444444",
-      metadata: {recipientCount: 1},
+      metadata: {eligible: 1, blocked: 0, byReason: {}},
     }]);
     expect(race.store.commits.find(({disposition}) => disposition === "existing")).toEqual({
       disposition: "existing",
@@ -257,10 +285,10 @@ describe("campaign queue", () => {
     await expect(campaignsRepository.transaction(anonymous, async () => undefined)).rejects.toThrow();
     await expect(campaignsRepository.findCampaignByIdempotencyKey(anonymous, {}, "22222222-2222-4222-8222-222222222222", input.segmentId)).rejects.toThrow();
     await expect(campaignsRepository.getSavedSegment(anonymous, {}, input.segmentId)).rejects.toThrow();
-    await expect(campaignsRepository.membersForSegment(anonymous, {}, {profileIds: [], tier: [], status: [], scoreMin: null, scoreMax: null, renewalWithinDays: null, sector: "", lastLoginBeforeDays: null, whatsappOptIn: null})).rejects.toThrow();
+    await expect(campaignsRepository.audienceForSegment(anonymous, {}, dispatchedFilters)).rejects.toThrow();
     await expect(campaignsRepository.createCampaign(anonymous, {}, input)).rejects.toThrow();
     await expect(campaignsRepository.insertRecipients(anonymous, {}, "campaign-1", [])).rejects.toThrow();
-    await expect(campaignsRepository.appendAudit(anonymous, {}, "campaign-1", 0)).rejects.toThrow();
+    await expect(campaignsRepository.appendAudit(anonymous, {}, "campaign-1", {action: "campaign.queued", eligible: 0, blocked: 0, byReason: {}})).rejects.toThrow();
   });
   it("keeps the URL-bound draft stable until an explicit new draft is requested", () => {
     expect(resolveCampaignDraft("11111111-1111-4111-8111-111111111111", () => "new-draft")).toEqual({draftId: "11111111-1111-4111-8111-111111111111", created: false});
@@ -277,8 +305,11 @@ describe("campaign queue", () => {
     expect(fake.recipients).toEqual([{
       profileId: "member-1",
       email: "member1@example.test",
+      whatsappNumber: null,
       locale: "zh-HK",
       variables: {displayName: "Fixture Member", renewalDate: "2026-08-20"},
+      status: "queued",
+      blockedReason: null,
     }]);
   });
 
@@ -289,21 +320,27 @@ describe("campaign queue", () => {
     await expect(queueCampaign(actor(), input, fake.dependencies)).resolves.toEqual({campaignId: "campaign-1", recipientCount: 1, disposition: "existing"});
   });
 
-  it("excludes members without consent, an email address, or an active suppression", async () => {
+  // The snapshot now holds the WHOLE audience: an ineligible recipient lands
+  // `suppressed` carrying the classifier's category as its `blocked_reason`, so
+  // a campaign report can say who it could not reach and why. Only the eligible
+  // rows are counted, and only they are left in a state the claim loop can see.
+  it("snapshots every member and queues only the ones a marketing email may reach", async () => {
     const fake = fakeDependencies();
-    fake.dependencies.membersForSegment = async (): Promise<readonly CampaignQueueMember[]> => [
-      {profileId: "eligible", displayName: "Eligible", email: "eligible@example.test", locale: "en", consentMarketing: true, suppressed: false, renewalAt: null},
-      {profileId: "no-consent", displayName: "No Consent", email: "no-consent@example.test", locale: "en", consentMarketing: false, suppressed: false, renewalAt: null},
-      {profileId: "no-email", displayName: "No Email", email: null, locale: "en", consentMarketing: true, suppressed: false, renewalAt: null},
-      {profileId: "suppressed", displayName: "Suppressed", email: "suppressed@example.test", locale: "en", consentMarketing: true, suppressed: true, renewalAt: null},
+    fake.dependencies.audienceForSegment = async (): Promise<readonly RecipientFacts[]> => [
+      memberFacts({id: "eligible", displayName: "Eligible", email: "eligible@example.test", locale: "en", renewalAt: null}),
+      memberFacts({id: "no-consent", displayName: "No Consent", email: "no-consent@example.test", locale: "en", renewalAt: null, marketingConsent: false}),
+      memberFacts({id: "no-email", displayName: "No Email", email: null, locale: "en", renewalAt: null}),
+      memberFacts({id: "suppressed", displayName: "Suppressed", email: "suppressed@example.test", locale: "en", renewalAt: null, emailSuppressed: true}),
+      memberFacts({id: "lapsed", displayName: "Lapsed", email: "lapsed@example.test", locale: "en", renewalAt: null, membershipStatus: "expired"}),
     ];
 
     await expect(queueCampaign(actor(), {...input, idempotencyKey: "33333333-3333-4333-8333-333333333333"}, fake.dependencies)).resolves.toEqual({campaignId: "campaign-1", recipientCount: 1, disposition: "created"});
-    expect(fake.recipients).toEqual([{
-      profileId: "eligible",
-      email: "eligible@example.test",
-      locale: "en",
-      variables: {displayName: "Eligible"},
-    }]);
+    expect(fake.recipients).toEqual([
+      {profileId: "eligible", email: "eligible@example.test", whatsappNumber: null, locale: "en", variables: {displayName: "Eligible"}, status: "queued", blockedReason: null},
+      {profileId: "no-consent", email: "no-consent@example.test", whatsappNumber: null, locale: "en", variables: {}, status: "suppressed", blockedReason: "not_opted_in"},
+      {profileId: "no-email", email: null, whatsappNumber: null, locale: "en", variables: {}, status: "suppressed", blockedReason: "no_email"},
+      {profileId: "suppressed", email: "suppressed@example.test", whatsappNumber: null, locale: "en", variables: {}, status: "suppressed", blockedReason: "suppressed"},
+      {profileId: "lapsed", email: "lapsed@example.test", whatsappNumber: null, locale: "en", variables: {}, status: "suppressed", blockedReason: "plan_ineligible"},
+    ]);
   });
 });

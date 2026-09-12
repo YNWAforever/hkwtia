@@ -124,6 +124,56 @@ describe("runtime environment contract", () => {
     );
   });
 
+  // Programme C-9 (C1 open question O-8). `RUN_LIVE_WOZTELL` and
+  // `WOZTELL_APPROVED_TEMPLATE_KEYS` were the two variables read from bare
+  // `process.env` — the two that decide whether a real WhatsApp message leaves
+  // the building, and the two with no parse and no owner. The failure they used
+  // to have is the worst available one: a typo finds no live credentials, so
+  // every send answers {status:"sent", providerId:"mock:…"} and journey, dunning
+  // and blast messages are recorded as delivered while nothing is sent.
+  it("parses the live-WhatsApp switch strictly and the approved-key fallback loosely", () => {
+    expect(parseAiEnv({RUN_LIVE_WOZTELL: "1"})).toMatchObject({runLiveWoztell: "1"});
+    expect(parseAiEnv({RUN_LIVE_WOZTELL: "0"})).toMatchObject({runLiveWoztell: "0"});
+    expect(parseAiEnv({
+      WOZTELL_APPROVED_TEMPLATE_KEYS: "renewal_14,dunning_3",
+    })).toMatchObject({woztellApprovedTemplateKeys: "renewal_14,dunning_3"});
+  });
+
+  it.each(["true", "TRUE", "yes", "on", "2", " 1"])(
+    "refuses to downgrade to mock mode over RUN_LIVE_WOZTELL=%s",
+    (typo) => {
+      expect(() => parseAiEnv({RUN_LIVE_WOZTELL: typo}))
+        .toThrow(/RUN_LIVE_WOZTELL/);
+    },
+  );
+
+  // `.env.example` ships `RUN_LIVE_WOZTELL=` and an empty Vercel variable
+  // arrives as "". Blank has always meant "not live" and must keep meaning it,
+  // or this contract turns every developer who copied the example file into a
+  // boot failure.
+  it.each([undefined, "", "   "])(
+    "reads a blank live switch as absent, not as a typo",
+    (blank) => {
+      const parsed = parseAiEnv(blank === undefined ? {} : {RUN_LIVE_WOZTELL: blank});
+      expect(parsed).not.toHaveProperty("runLiveWoztell");
+    },
+  );
+
+  // The two fields are deliberately NOT part of the legacy aggregate: a hard
+  // boot requirement there is how a transitive env pull once took /sitemap.xml,
+  // /events, /showcase and /launchpad down.
+  it("keeps the live switch out of the aggregate server contract", () => {
+    const values = parseServerEnv({
+      ...productionEnvironment(),
+      TURNSTILE_SECRET: "turnstile-secret",
+      TURNSTILE_SITE_KEY: "turnstile-site-key",
+      RUN_LIVE_WOZTELL: "1",
+      WOZTELL_APPROVED_TEMPLATE_KEYS: "renewal_14",
+    });
+    expect(values).not.toHaveProperty("runLiveWoztell");
+    expect(values).not.toHaveProperty("woztellApprovedTemplateKeys");
+  });
+
   it("rejects a deployed runtime without server credentials", () => {
     expect(() =>
       parseServerEnv({
