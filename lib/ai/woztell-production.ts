@@ -7,6 +7,7 @@ import {createOpenAIEmbeddingAdapter} from "@/lib/ai/embeddings";
 import type {WoztellWebhookProcessorDependencies} from "@/lib/ai/woztell-webhook";
 import {createAgentRuntime} from "@/lib/ai/runtime";
 import {createConciergeTools} from "@/lib/ai/tools/registry";
+import {approvedWhatsAppTemplateKeys} from "@/lib/channels/approved-templates";
 import type {ChannelAdapter} from "@/lib/channels/types";
 import type {AiEnv, AppEnv} from "@/lib/config/env";
 import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
@@ -100,20 +101,18 @@ function conversationsWithoutInboundAppend(runId: string) {
   };
 }
 
+// The concierge reply can only ever reach for the follow-up pair, so it asks
+// about those two keys and no others. The gate itself lives in
+// lib/channels/approved-templates.ts because the journey runner needs the same
+// RUN_LIVE_WOZTELL / WOZTELL_APPROVED_TEMPLATE_KEYS reading, and two copies of
+// that pair of switches is how the two paths came to disagree in the first place.
 function approvedTemplateKeys(): ReadonlySet<
   "concierge_follow_up_en" | "concierge_follow_up_zh_hk"
 > {
-  const allowed = [
+  return approvedWhatsAppTemplateKeys([
     "concierge_follow_up_en",
     "concierge_follow_up_zh_hk",
-  ] as const;
-  if (process.env.RUN_LIVE_WOZTELL !== "1") return new Set(allowed);
-  const configured = new Set(
-    (process.env.WOZTELL_APPROVED_TEMPLATE_KEYS ?? "")
-      .split(",")
-      .map((value) => value.trim()),
-  );
-  return new Set(allowed.filter((key) => configured.has(key)));
+  ]);
 }
 
 export function createProductionWoztellProcessorDependencies(

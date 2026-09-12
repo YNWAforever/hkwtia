@@ -18,6 +18,7 @@ vi.mock("@/lib/db/repos/common", async (importOriginal) => {
 });
 
 import {getAutomationDashboard} from "@/lib/admin/automations";
+import {WHATSAPP_TEMPLATE_KEYS} from "@/config/whatsapp-templates";
 import {getMember360} from "@/lib/admin/member-360";
 import {runCampaignBatch, type CampaignRunnerDependencies} from "@/lib/automation/campaign-runner";
 import {expireStaleApprovals} from "@/lib/automation/approvals-expirer";
@@ -251,6 +252,9 @@ function journeyDependencies(
       },
       adapterFetch as unknown as typeof fetch,
     ),
+    // Every registered key. These fixtures predate the B-5 approval gate and
+    // assert on the send path itself, not on which templates ops approved.
+    approvedTemplateKeys: new Set(WHATSAPP_TEMPLATE_KEYS),
     emailFrom: "WTIA M3 Acceptance <automation@m3.example.test>",
   };
 }

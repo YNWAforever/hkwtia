@@ -322,7 +322,12 @@ WOZTELL templates (`concierge_follow_up_en` and
 `concierge_follow_up_zh_hk`) are approved with the exact two body parameters,
 and live acceptance is separately authorized. Live WhatsApp also requires
 `RUN_LIVE_WOZTELL=1`; set `WOZTELL_APPROVED_TEMPLATE_KEYS` only to template
-keys confirmed approved by WOZTELL. The live acceptance fixture has its own
+keys confirmed approved by WOZTELL. Both send paths read that allowlist — the
+concierge reply and, since B-5, the journey runner — so a registered but
+unapproved key never reaches WOZTELL, and the journey step delivers by email
+alone. Bilingual templates are approved as a pair
+(`wtia_event_reminder_24h_{en,zh_hk}`): approving one half does not make the
+runner write to the other language's members in the approved language. The live acceptance fixture has its own
 `RUN_LIVE_WOZTELL_ACCEPTANCE=1` gate and
 `WOZTELL_ACCEPTANCE_APPROVED_TEMPLATE_KEYS` allowlist.
 

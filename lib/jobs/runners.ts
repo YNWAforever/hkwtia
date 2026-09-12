@@ -31,6 +31,8 @@ import {
   resolveM4BAcceptanceOwnershipKey,
 } from "@/lib/acceptance/m4b-runtime-guard";
 import {automationCronActor} from "@/lib/auth/automation-actor";
+import {WHATSAPP_TEMPLATE_KEYS} from "@/config/whatsapp-templates";
+import {approvedWhatsAppTemplateKeys} from "@/lib/channels/approved-templates";
 import {createWoztellAdapter} from "@/lib/channels/woztell";
 import {aiEnv, appEnv, emailEnv, unsubscribeEnv} from "@/lib/config/env";
 import {aiOpsMetricsRepository} from "@/lib/db/repos/aiops-metrics";
@@ -426,6 +428,12 @@ async function runProductionJourneys(now: Date): Promise<unknown> {
       // has always passed it; this outbound path is the one that omitted it.
       RUN_LIVE_WOZTELL: process.env.RUN_LIVE_WOZTELL,
     }),
+    // B-5: the runner used to hand the adapter any registered key, so the
+    // "until approval the step delivers by email alone" the template registry
+    // promises was true of the concierge reply only. Asking about the whole
+    // registry keeps a template that is added but not yet approved from
+    // reaching WOZTELL at all.
+    approvedTemplateKeys: approvedWhatsAppTemplateKeys(WHATSAPP_TEMPLATE_KEYS),
     emailFrom,
   }, {now, limit: RUNNER_BATCH_LIMIT});
 }
