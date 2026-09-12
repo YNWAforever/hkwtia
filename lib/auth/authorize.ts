@@ -25,6 +25,16 @@ export function requireAdmin(actor: Actor): asserts actor is AdminActor {
   if (actor.kind !== "staff" && actor.kind !== "exco" && actor.kind !== "superadmin") forbidden();
 }
 
+/**
+ * The non-throwing half of `requireAdmin`. A caller that must *route* on the
+ * answer rather than refuse on it needs a predicate: throwing to decide where
+ * to redirect turns ordinary navigation into an error-boundary render, which
+ * is exactly what `/portal` did to every signed-in staff member.
+ */
+export function isAdminActor(actor: Actor): actor is AdminActor {
+  return actor.kind === "staff" || actor.kind === "exco" || actor.kind === "superadmin";
+}
+
 export function systemActor(source: "stripe-webhook"): Actor {
   return {kind: "system", userId: null, source};
 }

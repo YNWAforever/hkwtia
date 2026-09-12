@@ -4,6 +4,7 @@ import {redirect} from "next/navigation";
 import {StatusCard} from "@/components/portal/status-card";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
+import {isAdminActor} from "@/lib/auth/authorize";
 import {getDashboard} from "@/lib/portal/queries";
 import {localizedPath} from "@/lib/urls";
 
@@ -21,6 +22,10 @@ export default async function PortalPage({params}: Props) {
   // Redirecting from the page as well keeps the log clean and the behaviour identical.
   const actor = await getActor();
   if (!actor) redirect(`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent("/portal")}`);
+  // Staff have no member dashboard: getDashboard's requireMember() would throw
+  // FORBIDDEN into the error boundary. Same parallel-render reason as the
+  // anonymous guard above, so this lives in the page as well as the layout.
+  if (isAdminActor(actor)) redirect(localizedPath(locale, "/admin"));
   const dashboard = await getDashboard(actor);
   const t = await getTranslations({locale, namespace: "Portal"});
   const status = dashboard.primaryStatus;
