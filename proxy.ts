@@ -94,7 +94,13 @@ export function createNeonAuthExchange(
     }
     // No cookie means no session was minted. Redirecting anyway would strip the
     // verifier and land the visitor on the same form having silently spent it.
-    if (cookies.length === 0) return null;
+    if (cookies.length === 0) {
+      // The one case worth a word. An exchange that falls through without any
+      // signal is what made the original failure take a full session to find:
+      // from outside it is indistinguishable from never having run.
+      console.warn("[neon-auth] session exchange refused: verifier present, no session minted");
+      return null;
+    }
 
     const redirectUrl = new URL(request.url);
     redirectUrl.searchParams.delete(NEON_AUTH_SESSION_VERIFIER_PARAM);

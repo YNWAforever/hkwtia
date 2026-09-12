@@ -1,4 +1,4 @@
-import {describe, expect, it} from "vitest";
+import {describe, expect, it, vi} from "vitest";
 import {NextRequest} from "next/server";
 
 import {createNeonAuthExchange} from "@/proxy";
@@ -87,5 +87,23 @@ describe("createNeonAuthExchange", () => {
 
     expect(await exchange(new NextRequest(CALLBACK))).toBeNull();
     expect(called).toBe(false);
+  });
+
+  it("warns exactly once when Neon refuses to mint a session, and stays silent otherwise", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      const refused = createNeonAuthExchange(async () => new Response(null, {status: 401}), env);
+      await refused(new NextRequest(CALLBACK));
+      expect(warn).toHaveBeenCalledTimes(1);
+
+      warn.mockClear();
+      const ok = createNeonAuthExchange(async () => minted(), env);
+      await ok(new NextRequest(CALLBACK));
+      // A successful exchange and an ordinary request are both unremarkable.
+      await ok(new NextRequest("https://hkwtia.vercel.app/zh/admin"));
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+    }
   });
 });
