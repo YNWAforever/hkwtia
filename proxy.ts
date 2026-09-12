@@ -1,10 +1,37 @@
 import type {NextRequest} from "next/server";
 import {NextResponse} from "next/server";
 import createMiddleware from "next-intl/middleware";
-import {DEFAULT_AUTH_SKIP_ROUTES, processAuthMiddleware} from "@neondatabase/auth/server";
+import {
+  DEFAULT_AUTH_SKIP_ROUTES,
+  NEON_AUTH_SESSION_CHALLENGE_COOKIE_NAME,
+  NEON_AUTH_SESSION_COOKIE_NAME,
+  processAuthMiddleware,
+} from "@neondatabase/auth/server";
 
 import {authEnv} from "@/lib/config/env";
 import {routing} from "./i18n/routing";
+
+/**
+ * TEMPORARY diagnostic instrumentation (2026-09-12): a real magic-link click
+ * against production still lands back on /member-login un-exchanged, and the
+ * exchange itself is proxied to Neon's hosted backend -- invisible to static
+ * analysis. Logs presence-only (never cookie or token values) so the next
+ * live attempt pinpoints whether the precondition (verifier + challenge
+ * cookie) is even met, or whether processAuthMiddleware runs the exchange
+ * and it fails upstream. Remove once the real cause is confirmed.
+ */
+function logNeonAuthDiagnostic(request: NextRequest, result: NeonAuthExchangeResult | "env_error"): void {
+  const hasVerifier = request.nextUrl.searchParams.has("neon_auth_session_verifier");
+  if (!hasVerifier) return;
+  const cookieNames = new Set(request.cookies.getAll().map((cookie) => cookie.name));
+  console.log("[neon-auth-diagnostic]", JSON.stringify({
+    pathname: request.nextUrl.pathname,
+    hasChallengeCookie: cookieNames.has(NEON_AUTH_SESSION_CHALLENGE_COOKIE_NAME),
+    hasSessionCookie: cookieNames.has(NEON_AUTH_SESSION_COOKIE_NAME),
+    cookieCount: cookieNames.size,
+    result: result === "env_error" ? "env_error" : result.action,
+  }));
+}
 
 export type NeonAuthExchangeResult =
   | Readonly<{action: "redirect_oauth"; redirectUrl: URL; cookies: readonly string[]}>
@@ -66,6 +93,7 @@ export function createNeonAuthExchange(
     } catch {
       // A misconfigured Neon Auth pair must never take the whole site down;
       // every request on the site passes through here.
+      logNeonAuthDiagnostic(request, "env_error");
       return null;
     }
     const result = await runAuthMiddleware({
@@ -76,6 +104,7 @@ export function createNeonAuthExchange(
       baseUrl: environment.neonAuthBaseUrl,
       cookieSecret: environment.neonAuthCookieSecret,
     });
+    logNeonAuthDiagnostic(request, result);
     if (result.action !== "redirect_oauth") return null;
     const response = NextResponse.redirect(result.redirectUrl);
     for (const cookie of result.cookies) response.headers.append("Set-Cookie", cookie);
