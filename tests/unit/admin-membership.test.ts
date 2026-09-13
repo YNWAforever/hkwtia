@@ -5,10 +5,11 @@ import {ANONYMOUS_ACTOR} from "@/lib/membership/lifecycle";
 
 const admin = {kind: "staff", userId: "u-staff", profileId: "p-staff"} as const;
 
-function dependencies(overrides: Partial<{seatAllowance: number | null}> = {}) {
+function dependencies(overrides: Partial<{seatAllowance: number | null; liveMembership: boolean}> = {}) {
   const calls = {inserted: [] as unknown[], audited: [] as unknown[], order: [] as string[]};
   const deps: CompMembershipDependencies = {
     transaction: (work) => work({
+      hasLiveMembership: async () => { calls.order.push("check"); return overrides.liveMembership ?? false; },
       planSeatAllowance: async () => overrides.seatAllowance === undefined ? 5 : overrides.seatAllowance,
       insertMembership: async (input) => {
         calls.order.push("insert");
@@ -55,7 +56,7 @@ describe("compMembership", () => {
       metadata: {planCode: "corporate", ownerUserId: "p-1"},
     }]);
     // Audit must follow the insert inside the same transaction, never beside it.
-    expect(calls.order).toEqual(["insert", "audit"]);
+    expect(calls.order).toEqual(["check", "insert", "audit"]);
   });
 
   it.each([
@@ -66,6 +67,27 @@ describe("compMembership", () => {
   ])("rejects %s", async (_name, input) => {
     const {deps} = dependencies();
     await expect(compMembership(admin, input, deps)).rejects.toThrow();
+  });
+
+  it("refuses a second membership for a profile that still has a live one", async () => {
+    const {deps, calls} = dependencies({liveMembership: true});
+
+    await expect(compMembership(admin, {profileId: "p-1", planCode: "community"}, deps))
+      .rejects.toThrow("MEMBERSHIP_ALREADY_EXISTS");
+    // Refused before writing, not cleaned up afterwards.
+    expect(calls.inserted).toEqual([]);
+    expect(calls.audited).toEqual([]);
+  });
+
+  it("still comps a profile whose only memberships are cancelled or expired", async () => {
+    // Those two statuses are terminal in `allowedTransitions` -- nothing can carry them
+    // back to active -- so a lapsed member needs a new row, and refusing here would make
+    // the comp useless for exactly the people most likely to be given one.
+    const {deps, calls} = dependencies({liveMembership: false});
+
+    await compMembership(admin, {profileId: "p-1", planCode: "community"}, deps);
+
+    expect(calls.inserted).toHaveLength(1);
   });
 
   it("refuses when the plan has no seat allowance rather than inventing one", async () => {

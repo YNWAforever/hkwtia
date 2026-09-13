@@ -153,6 +153,7 @@ export default async function AdminMember360Page({params}: Props) {
           successMessage: t("membershipComp.success"),
           validationMessage: t("membershipComp.invalid"),
           errorMessage: t("membershipComp.error"),
+          duplicateMessage: t("membershipComp.duplicate"),
         })}
         labels={{
           title: t("membershipComp.title"),

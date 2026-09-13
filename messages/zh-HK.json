@@ -3156,7 +3156,8 @@
       "submit": "授予會籍",
       "success": "會籍已授予。",
       "invalid": "請先選擇會籍級別。",
-      "error": "無法授予會籍。"
+      "error": "無法授予會籍。",
+      "duplicate": "此會員已有會籍。請開啟現有會籍更改級別，而非另行授予。"
     }
   },
   "MarketingExtras": {

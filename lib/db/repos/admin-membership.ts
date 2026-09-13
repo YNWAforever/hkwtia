@@ -1,6 +1,6 @@
 import "server-only";
 
-import {eq} from "drizzle-orm";
+import {and, eq, notInArray} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
@@ -24,6 +24,14 @@ import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
  * - `stripeCustomerId`, `stripeSubscriptionId`, `billingPeriod*`, `cancelAtPeriodEnd` —
  *   billing facts. A comp is the absence of billing, not an edit to it.
  */
+/**
+ * The statuses a membership can never leave: `allowedTransitions` maps both to `[]`, so
+ * nothing carries them back to `active`. A profile holding only these has no membership
+ * in play, which is exactly when a comp is wanted -- refusing there would deny the comp
+ * to lapsed members, the people most likely to be given one.
+ */
+const TERMINAL_MEMBERSHIP_STATUSES = ["cancelled", "expired"] as const;
+
 const compSchema = z.object({
   profileId: z.string().trim().min(1).max(200),
   planCode: z.enum(MEMBERSHIP_PLAN_CODES),
@@ -32,6 +40,7 @@ const compSchema = z.object({
 export type CompMembershipInput = z.output<typeof compSchema>;
 
 export type CompMembershipDependencies = Readonly<{transaction: <T>(work: (transaction: Readonly<{
+  hasLiveMembership: (profileId: string) => Promise<boolean>;
   planSeatAllowance: (planCode: CompMembershipInput["planCode"]) => Promise<number | null>;
   insertMembership: (input: Readonly<{
     ownerUserId: string;
@@ -53,6 +62,11 @@ export type CompMembershipDependencies = Readonly<{transaction: <T>(work: (trans
 async function defaultDependencies(): Promise<CompMembershipDependencies> {
   const db = await getDb();
   return {transaction: (work) => db.transaction(async (tx) => work({
+    hasLiveMembership: async (profileId) =>
+      (await tx.select({id: memberships.id}).from(memberships).where(and(
+        eq(memberships.ownerUserId, profileId),
+        notInArray(memberships.status, [...TERMINAL_MEMBERSHIP_STATUSES]),
+      )).limit(1)).length > 0,
     planSeatAllowance: async (planCode) =>
       (await tx.select({seatAllowance: membershipPlans.seatAllowance})
         .from(membershipPlans).where(eq(membershipPlans.code, planCode)).limit(1))[0]?.seatAllowance ?? null,
@@ -79,6 +93,11 @@ export async function compMembership(
   requireAdmin(actor);
   const parsed = compSchema.parse(input);
   return (dependencies ?? await defaultDependencies()).transaction(async (transaction) => {
+    // Inside the transaction, so the read and the insert cannot straddle a concurrent
+    // grant. `memberships_owner_live_unique` is the backstop for the race this still
+    // leaves open under READ COMMITTED; this check exists to refuse in a way staff can
+    // read, rather than surfacing a constraint violation.
+    if (await transaction.hasLiveMembership(parsed.profileId)) throw new Error("MEMBERSHIP_ALREADY_EXISTS");
     const seatLimit = await transaction.planSeatAllowance(parsed.planCode);
     // A plan row missing or seatless is a seeding fault, not a membership to guess at.
     if (seatLimit === null) throw new Error("MEMBERSHIP_PLAN_NOT_FOUND");

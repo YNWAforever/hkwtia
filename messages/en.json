@@ -3127,7 +3127,8 @@
       "submit": "Grant membership",
       "success": "Membership granted.",
       "invalid": "Choose a plan before granting a membership.",
-      "error": "The membership could not be granted."
+      "error": "The membership could not be granted.",
+      "duplicate": "This member already has a membership. Open it to change the plan instead of granting a second one."
     }
   },
   "MarketingExtras": {
