@@ -3116,6 +3116,15 @@
       "noteSuccess": "Staff note saved.",
       "noteValidation": "Enter a note of up to 4,000 characters.",
       "noteError": "We could not save the staff note. Please try again."
+    },
+    "membershipComp": {
+      "title": "Grant a membership",
+      "description": "Creates an active membership without a payment — for a comp, a founding member, or a checkout that took money and never activated.",
+      "planLabel": "Plan",
+      "submit": "Grant membership",
+      "success": "Membership granted.",
+      "invalid": "Choose a plan before granting a membership.",
+      "error": "The membership could not be granted."
     }
   },
   "MarketingExtras": {

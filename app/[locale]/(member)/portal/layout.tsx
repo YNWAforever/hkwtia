@@ -9,6 +9,7 @@ import {InternalAppShell} from "@/components/internal-shell/app-shell";
 import {PortalNav} from "@/components/portal/portal-nav";
 import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
+import {isAdminActor} from "@/lib/auth/authorize";
 import {localizeConcierge} from "@/lib/ai/concierge-labels";
 import {publicEnv} from "@/lib/config/env";
 import {parsePortalContinuation} from "@/lib/portal/continuation";
@@ -33,8 +34,9 @@ export default async function PortalLayout({children, params}: Props) {
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
 
+  let actor;
   try {
-    await requireActor();
+    actor = await requireActor();
   } catch (error) {
     if (error instanceof Error && error.message === "UNAUTHORIZED") {
       const requestHeaders = await headers();
@@ -43,6 +45,12 @@ export default async function PortalLayout({children, params}: Props) {
     }
     throw error;
   }
+  // Without this, an admin actor would still pay for the member shell's build --
+  // two getTranslations calls, localizeConcierge, and constructing
+  // InternalAppShell/PortalNav/ConciergeWidget -- before page.tsx's own guard
+  // ever ran. It also means this layout doesn't rely solely on that sibling
+  // file to keep an admin from flashing member-portal chrome.
+  if (isAdminActor(actor)) redirect(localizedPath(locale, "/admin"));
 
   const [concierge, commonT] = await Promise.all([
     getTranslations({locale, namespace: "Concierge"}),
