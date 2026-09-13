@@ -115,10 +115,17 @@ a `schema-dts` union. This extends that pattern: three new builders (`buildArtic
 patterns, and a breadcrumb exists on exactly one page today. Hand-adding `<StructuredData>` to
 ~26 pages is the change that half-lands and then drifts.
 
-- **Static routes** — one breadcrumb rendered in the `(public)` layout, derived from the pathname
-  against a `route → labelKey` map. One place, cannot drift.
-- **Dynamic routes** — page-level, because the trail needs the entity's own title, which the layout
-  cannot reach. Already the pattern on `members/[slug]`.
+- **Static routes** — each page calls one shared `buildRouteBreadcrumb(locale, pathname)` helper,
+  backed by a single `route → labelKey` map. The call is per page because **a server layout cannot
+  read the pathname** in the App Router: Next does not pass it, `usePathname` would require a
+  `'use client'` component for non-interactive markup (against this project's convention), and
+  injecting a header from `proxy.ts` would couple SEO markup to auth middleware.
+- **Drift is prevented by a discovery test**, not by a single render site: the test reads the route
+  files and asserts every `publicRoutes` member renders the helper, and that every route has a
+  label. This is the enforcement style already used by `repository-boundary` and
+  `server-action-actor-boundary`.
+- **Dynamic routes** — page-level too, and additionally pass the entity's own title, which no shared
+  helper can know. Already the pattern on `members/[slug]`.
 
 A discovery test asserts every `publicRoutes` member has a label. This is deliberate: the
 `/admin/page-copy` `MISSING_MESSAGE` outage fixed earlier the same day was exactly this shape — a
@@ -157,7 +164,7 @@ site, which stays serveable throughout.
 | Piece | Approach |
 |---|---|
 | Structured data builders | Pure functions, unit tested on shape. |
-| Breadcrumb coverage | Discovery test: every `publicRoutes` member has a label. |
+| Breadcrumb coverage | Discovery test: every `publicRoutes` member renders the helper **and** has a label. |
 | Milestone lockstep | Test asserting route and sitemap share one filter. |
 | `resolveOgRenderer` | Pure, fully unit tested — renderer choice and props per entity. |
 | `/api/og` route | One smoke test per kind: content-type and non-trivial byte length. |
