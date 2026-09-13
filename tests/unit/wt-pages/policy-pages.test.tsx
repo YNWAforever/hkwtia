@@ -9,13 +9,15 @@ const bundles = {
   en: JSON.parse(readFileSync(resolve(process.cwd(), "messages/en.json"), "utf8")),
 } as const;
 
-function messageAt(namespace: string, key: string): unknown {
-  const root = namespace.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], bundles.en);
+function messageAt(namespace: string | undefined, key: string): unknown {
+  const root = namespace === undefined
+    ? bundles.en
+    : namespace.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], bundles.en);
   return key.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], root);
 }
 
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async ({namespace}: {namespace: string}) =>
+  getTranslations: vi.fn(async ({namespace}: {namespace?: string}) =>
     Object.assign((key: string) => String(messageAt(namespace, key)), {raw: (key: string) => messageAt(namespace, key)})),
   setRequestLocale: vi.fn(),
 }));

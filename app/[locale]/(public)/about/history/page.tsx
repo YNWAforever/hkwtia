@@ -2,6 +2,7 @@ import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {MilestoneTimeline} from "@/components/marketing/milestone-timeline";
+import {StructuredData} from "@/components/seo/structured-data";
 import {PageHero} from "@/components/wt/page-hero";
 import {RichCompass} from "@/components/wt/rich-compass";
 import {RichRelatedRoutes} from "@/components/wt/rich-related-routes";
@@ -10,6 +11,8 @@ import type {AppLocale} from "@/i18n/routing";
 import {buildOtherAboutRoutes} from "@/lib/about/related-routes";
 import {historyCompassFacts, milestonesOnly} from "@/lib/history/milestones";
 import {buildPageMetadata} from "@/lib/metadata";
+import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
+import {buildBreadcrumbData} from "@/lib/structured-data";
 
 type Props = {params: Promise<{locale: string}>};
 
@@ -30,6 +33,8 @@ export default async function HistoryPage({params}: Props) {
   setRequestLocale(locale);
   const t = await getTranslations("History");
   const common = await getTranslations({locale, namespace: "Common"});
+  // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
+  const tRoot = await getTranslations({locale});
   const history = milestonesOnly(milestones);
   const facts = historyCompassFacts(history);
   const related = await buildOtherAboutRoutes(locale as AppLocale, "history");
@@ -53,6 +58,7 @@ export default async function HistoryPage({params}: Props) {
       />
       <MilestoneTimeline locale={locale as AppLocale} readMoreLabel={t("readMore")} milestones={history} />
       <RichRelatedRoutes items={related} />
+      <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, "/about/history", tRoot))} />
     </>
   );
 }

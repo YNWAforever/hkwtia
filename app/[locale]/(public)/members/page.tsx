@@ -3,6 +3,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {MemberCard} from "@/components/marketing/member-card";
 import {MemberFilters} from "@/components/marketing/member-filters";
+import {StructuredData} from "@/components/seo/structured-data";
 import {ClosingBand} from "@/components/wt/closing-band";
 import {HonestEmpty} from "@/components/wt/honest-empty";
 import {PageHero} from "@/components/wt/page-hero";
@@ -12,6 +13,8 @@ import {companyProfilesRepository} from "@/lib/db/repos/company-profiles";
 import {buildPageMetadata} from "@/lib/metadata";
 import {parseMemberFilters} from "@/lib/members/public";
 import {MEMBERSHIP_PLAN_CODES, type MembershipPlanCode} from "@/lib/membership/constants";
+import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
+import {buildBreadcrumbData} from "@/lib/structured-data";
 
 // D-11: the public member directory, over reviewed `public_profile_status = 'published'` rows.
 // `force-dynamic` because the whole page is a filtered read of a table staff edit continuously;
@@ -30,9 +33,11 @@ export default async function MembersPage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const [t, tCommon, query] = await Promise.all([
+  const [t, tCommon, tRoot, query] = await Promise.all([
     getTranslations({locale, namespace: "Members"}),
     getTranslations({locale, namespace: "Common"}),
+    // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
+    getTranslations({locale}),
     searchParams,
   ]);
   const filters = parseMemberFilters(query);
@@ -76,5 +81,6 @@ export default async function MembersPage({params, searchParams}: Props) {
       eyebrow={t("eyebrow")}
       title={t("detail.joinCta")}
     />
+    <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale, "/members", tRoot))} />
   </>;
 }

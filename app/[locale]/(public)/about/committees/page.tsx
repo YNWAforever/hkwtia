@@ -1,6 +1,7 @@
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {StructuredData} from "@/components/seo/structured-data";
 import {PageHero} from "@/components/wt/page-hero";
 import {RichRelatedRoutes} from "@/components/wt/rich-related-routes";
 import {Section} from "@/components/wt/section";
@@ -8,6 +9,8 @@ import {SectionHeading} from "@/components/wt/section-heading";
 import type {AppLocale} from "@/i18n/routing";
 import {buildOtherAboutRoutes} from "@/lib/about/related-routes";
 import {buildPageMetadata} from "@/lib/metadata";
+import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
+import {buildBreadcrumbData} from "@/lib/structured-data";
 
 type Props = {params: Promise<{locale: string}>};
 
@@ -27,6 +30,8 @@ export default async function CommitteesPage({params}: Props) {
   setRequestLocale(locale);
   const t = await getTranslations("Committees");
   const common = await getTranslations({locale, namespace: "Common"});
+  // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
+  const tRoot = await getTranslations({locale});
   const committees = ["executive", "innovation", "membership"] as const;
   // No compass grid here: three fixed committees with no roster or cadence to count or
   // link to (restraint, the same instinct HonestEmpty applies elsewhere).
@@ -55,6 +60,7 @@ export default async function CommitteesPage({params}: Props) {
         </div>
       </Section>
       <RichRelatedRoutes items={related} />
+      <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, "/about/committees", tRoot))} />
     </>
   );
 }

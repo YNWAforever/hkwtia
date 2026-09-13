@@ -40,11 +40,15 @@ function resolveIcuPlural(raw: string, values: Record<string, string | number>):
 }
 
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async (input: string | {locale?: string; namespace: string}) => {
+  getTranslations: vi.fn(async (input: string | {locale?: string; namespace?: string}) => {
     const namespace = typeof input === "string" ? input : input.namespace;
     const locale = typeof input === "string" ? translationState.locale : (input.locale ?? translationState.locale);
     return (key: string, values?: Record<string, string | number>) => {
-      let value: unknown = translationState.messages[locale]?.[namespace];
+      // An unscoped getTranslations({locale}) resolves fully-qualified keys from the
+      // bundle root, so an absent namespace starts there rather than at [undefined].
+      let value: unknown = namespace === undefined
+        ? translationState.messages[locale]
+        : translationState.messages[locale]?.[namespace];
       for (const part of key.split(".")) value = (value as Record<string, unknown> | undefined)?.[part];
       if (typeof value !== "string") throw new Error(`Missing test message: ${locale}.${namespace}.${key}`);
       const raw = resolveIcuPlural(value, values ?? {});

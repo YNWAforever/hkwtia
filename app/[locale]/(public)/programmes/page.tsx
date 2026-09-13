@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 
 import {ProgrammeGrid, type ProgrammeGridLabels} from '@/components/marketing/programme-grid';
+import {StructuredData} from '@/components/seo/structured-data';
 import {ActionLink} from '@/components/wt/action-link';
 import {Arrow} from '@/components/wt/arrow';
 import {HonestEmpty} from '@/components/wt/honest-empty';
@@ -12,6 +13,8 @@ import {siteConfig} from '@/config/site';
 import type {AppLocale} from '@/i18n/routing';
 import {summarizeProgrammes} from '@/lib/home/programme-summaries';
 import {buildPageMetadata} from '@/lib/metadata';
+import {routeBreadcrumbItems} from '@/lib/seo/route-breadcrumbs';
+import {buildBreadcrumbData} from '@/lib/structured-data';
 
 type Props = {params: Promise<{locale: string}>};
 
@@ -28,10 +31,12 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function ProgrammesPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const [t, common, home] = await Promise.all([
+  const [t, common, home, tRoot] = await Promise.all([
     getTranslations({locale, namespace: 'Programmes'}),
     getTranslations({locale, namespace: 'Common'}),
     getTranslations({locale, namespace: 'Home.programmeShowcase'}),
+    // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.programmes`).
+    getTranslations({locale}),
   ]);
   const summaries = summarizeProgrammes();
   const mailto = `mailto:${siteConfig.contact.email}?subject=${encodeURIComponent(t('open.mailSubject'))}`;
@@ -112,6 +117,7 @@ export default async function ProgrammesPage({params}: Props) {
           <ActionLink href="/contact" variant="text-link">{t('history.partner')}</ActionLink>
         </div>
       </Section>
+      <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, '/programmes', tRoot))} />
     </>
   );
 }

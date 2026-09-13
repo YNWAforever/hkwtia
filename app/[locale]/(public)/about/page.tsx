@@ -1,6 +1,7 @@
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {StructuredData} from "@/components/seo/structured-data";
 import {Arrow} from "@/components/wt/arrow";
 import {Eyebrow} from "@/components/wt/eyebrow";
 import {PageHero} from "@/components/wt/page-hero";
@@ -12,6 +13,8 @@ import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {buildOtherAboutRoutes} from "@/lib/about/related-routes";
 import {buildPageMetadata} from "@/lib/metadata";
+import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
+import {buildBreadcrumbData} from "@/lib/structured-data";
 
 type Props = {params: Promise<{locale: string}>};
 
@@ -32,6 +35,8 @@ export default async function AboutPage({params}: Props) {
   setRequestLocale(locale);
   const t = await getTranslations("About");
   const common = await getTranslations({locale, namespace: "Common"});
+  // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
+  const tRoot = await getTranslations({locale});
   const history = await getTranslations({locale, namespace: "History"});
   const chairman = await getTranslations({locale, namespace: "Chairman"});
   const committees = await getTranslations({locale, namespace: "Committees"});
@@ -84,6 +89,7 @@ export default async function AboutPage({params}: Props) {
         </div>
       </section>
       <RichRelatedRoutes items={related} />
+      <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, "/about", tRoot))} />
     </>
   );
 }

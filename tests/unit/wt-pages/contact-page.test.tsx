@@ -9,8 +9,10 @@ const bundles = {
   en: JSON.parse(readFileSync(resolve(process.cwd(), "messages/en.json"), "utf8")),
 } as const;
 
-function messageAt(namespace: string, key: string): unknown {
-  const root = namespace.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], bundles.en);
+function messageAt(namespace: string | undefined, key: string): unknown {
+  const root = namespace === undefined
+    ? bundles.en
+    : namespace.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], bundles.en);
   return key.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], root);
 }
 
@@ -21,7 +23,7 @@ function messageAt(namespace: string, key: string): unknown {
 // pattern (tests/unit/wt-pages/news-page.test.tsx) so translated strings still come from the
 // real bundles -- this suite's own assertions compare against `bundles.en`.
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async ({namespace}: {namespace: string}) => (key: string) => String(messageAt(namespace, key))),
+  getTranslations: vi.fn(async ({namespace}: {namespace?: string}) => (key: string) => String(messageAt(namespace, key))),
   setRequestLocale: vi.fn(),
 }));
 // ContactPage's PageHero and InnerCardGrid both render the real @/i18n/navigation Link, which
