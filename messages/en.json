@@ -2887,7 +2887,10 @@
         "programs": "Programmes",
         "Membership": "Membership",
         "Privacy": "Privacy notice",
-        "AiTransparency": "AI transparency"
+        "AiTransparency": "AI transparency",
+        "Programmes": "Programmes index",
+        "Partners": "Partners",
+        "MarketingExtras": "Sitewide marketing copy"
       }
     },
     "news": {
