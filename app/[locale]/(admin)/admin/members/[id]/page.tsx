@@ -5,6 +5,7 @@ import {z} from "zod";
 import {Member360View} from "@/components/admin/member-360";
 import {MemberNoteForm} from "@/components/admin/member-note-form";
 import {MemberProfileForm} from "@/components/admin/member-profile-form";
+import {MembershipCompForm} from "@/components/admin/membership-comp-form";
 import type {AppLocale} from "@/i18n/routing";
 import {
   getMember360,
@@ -12,6 +13,7 @@ import {
 } from "@/lib/admin/member-360";
 import {appendMemberNoteAction} from "@/lib/admin/member-note-actions";
 import {updateMemberProfileAction} from "@/lib/admin/member-profile-actions";
+import {compMembershipAction} from "@/lib/admin/membership-comp-actions";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {getEditableMemberProfile} from "@/lib/db/repos/admin-member-profile";
 
@@ -146,6 +148,20 @@ export default async function AdminMember360Page({params}: Props) {
           values={editable}
         />
         : null}
+      <MembershipCompForm
+        action={compMembershipAction.bind(null, `/${locale}/admin/members/${profileId.data}`, {
+          successMessage: t("membershipComp.success"),
+          validationMessage: t("membershipComp.invalid"),
+          errorMessage: t("membershipComp.error"),
+        })}
+        labels={{
+          title: t("membershipComp.title"),
+          description: t("membershipComp.description"),
+          planLabel: t("membershipComp.planLabel"),
+          submit: t("membershipComp.submit"),
+        }}
+        profileId={profileId.data}
+      />
       <MemberNoteForm
         action={appendAction}
         labels={{

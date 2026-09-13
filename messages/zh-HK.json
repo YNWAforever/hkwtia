@@ -3145,6 +3145,15 @@
       "noteSuccess": "已儲存職員備註。",
       "noteValidation": "請輸入最多 4,000 個字元的備註。",
       "noteError": "未能儲存職員備註，請再試一次。"
+    },
+    "membershipComp": {
+      "title": "授予會籍",
+      "description": "毋須付款即建立生效會籍——適用於贈予會籍、創始會員，或已付款但未啟用的結帳。",
+      "planLabel": "會籍級別",
+      "submit": "授予會籍",
+      "success": "會籍已授予。",
+      "invalid": "請先選擇會籍級別。",
+      "error": "無法授予會籍。"
     }
   },
   "MarketingExtras": {
