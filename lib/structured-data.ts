@@ -1,4 +1,4 @@
-import type {BreadcrumbList, Event, EventAttendanceModeEnumeration, FAQPage, Organization, WebSite, WithContext} from 'schema-dts';
+import type {Article, BreadcrumbList, Event, EventAttendanceModeEnumeration, EventSeries, FAQPage, Organization, WebSite, WithContext} from 'schema-dts';
 
 import {siteConfig} from '@/config/site';
 import type {EventRecord} from '@/content/schemas';
@@ -132,6 +132,60 @@ export function buildMemberOrganizationData(
       name: siteConfig.name,
       url: absoluteUrl('/'),
     },
+  };
+}
+
+export type ArticleRecord = Readonly<{
+  slug: string;
+  title: string;
+  description: string;
+  publishedAt: Date;
+  updatedAt: Date | null;
+  author: string | null;
+}>;
+
+// Programme D (Phase D public surface): a news post states what it is and when it moved.
+// `image` is deliberately absent: `posts` has no image column, and a placeholder url here
+// would tell a crawler something exists when it does not. The og:image route still gives
+// these pages a share card -- that is a rendered fallback, not a claim about stored media.
+export function buildArticleData(record: ArticleRecord, locale: AppLocale): WithContext<Article> {
+  const url = absoluteUrl(localizedPath(locale, `/news/${record.slug}`));
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: record.title,
+    description: record.description,
+    datePublished: record.publishedAt.toISOString(),
+    // A post that was never edited is unmodified, not undated.
+    dateModified: (record.updatedAt ?? record.publishedAt).toISOString(),
+    mainEntityOfPage: url,
+    url,
+    inLanguage: locale === 'en' ? 'en-HK' : 'zh-HK',
+    ...(record.author ? {author: {'@type': 'Person' as const, name: record.author}} : {}),
+    publisher: buildOrganizationData(),
+  };
+}
+
+export type EventSeriesRecord = Readonly<{
+  key: 'cpai' | 'hkict' | 'tct' | 'asa';
+  name: string;
+  description: string;
+}>;
+
+// Programme D: EventSeries, not Event. These are recurring award and event programmes, and
+// Event would assert a single dated occurrence the page does not describe. Individual
+// editions remain Event, built by buildEventData.
+export function buildEventSeriesData(
+  record: EventSeriesRecord,
+  locale: AppLocale,
+): WithContext<EventSeries> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'EventSeries',
+    name: record.name,
+    description: record.description,
+    url: absoluteUrl(localizedPath(locale, `/programs/${record.key}`)),
+    organizer: buildOrganizationData(),
   };
 }
 

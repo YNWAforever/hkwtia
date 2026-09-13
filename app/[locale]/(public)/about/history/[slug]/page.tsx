@@ -12,37 +12,46 @@ import {milestones} from "@/content/milestones";
 import type {MilestoneRecord} from "@/content/schemas";
 import type {AppLocale} from "@/i18n/routing";
 import {buildOtherAboutRoutes} from "@/lib/about/related-routes";
-import {featuredOnly, findBySlug, historyCompassFacts, milestonesOnly} from "@/lib/history/milestones";
+import {findBySlug, historyCompassFacts, milestonesOnly} from "@/lib/history/milestones";
 import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
+import {ogImagePath} from "@/lib/og/resolve-renderer";
 
 type Props = {params: Promise<{locale: string; slug: string}>};
 
 export function generateStaticParams() {
-  return featuredOnly(milestonesOnly(milestones)).map(({slug}) => ({slug}));
+  // Every milestone, not only the featured six: 45 records of bilingual association
+  // history had a timeline entry but no page of their own. Must stay in lockstep with
+  // app/sitemap.ts -- a sitemap wider than this route publishes urls that 404.
+  return milestonesOnly(milestones).map(({slug}) => ({slug}));
 }
 
-function resolveFeaturedMilestone(slug: string): MilestoneRecord | null {
+function resolveMilestone(slug: string): MilestoneRecord | null {
   const milestone = findBySlug(milestones, slug);
-  return milestone && milestone.kind === "milestone" && milestone.featured ? milestone : null;
+  return milestone && milestone.kind === "milestone" ? milestone : null;
 }
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
-  const milestone = resolveFeaturedMilestone(slug);
+  const milestone = resolveMilestone(slug);
   if (!milestone) return {};
 
+  const t = await getTranslations({locale, namespace: "History"});
+  const title = locale === "zh-HK" ? milestone.titleZh : milestone.titleEn;
   return buildPageMetadata({
     locale: locale as AppLocale,
     pathname: `/about/history/${slug}`,
-    title: brandedTitle(locale as AppLocale, locale === "zh-HK" ? milestone.titleZh : milestone.titleEn),
+    title: brandedTitle(locale as AppLocale, title),
     description: (locale === "zh-HK" ? milestone.bodyZh : milestone.bodyEn).slice(0, 160),
+    // Milestone records carry images, but the card is editorial: the archive photographs are
+    // not a consistent 1200x630 hero, so the unadorned editorial treatment is the honest one.
+    image: ogImagePath({kind: "milestone", title, eyebrow: t("eyebrow"), imageUrl: null}),
   });
 }
 
 // No `dynamic` export: like /about/history, this reads typed content bundled at build time.
 export default async function HistoryDetailPage({params}: Props) {
   const {locale, slug} = await params;
-  const milestone = resolveFeaturedMilestone(slug);
+  const milestone = resolveMilestone(slug);
   if (!milestone) notFound();
   setRequestLocale(locale);
   const t = await getTranslations("History");

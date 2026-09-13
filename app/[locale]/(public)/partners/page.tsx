@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import Image from 'next/image';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 
+import {StructuredData} from '@/components/seo/structured-data';
 import {ActionLink} from '@/components/wt/action-link';
 import {Eyebrow} from '@/components/wt/eyebrow';
 import {HonestEmpty} from '@/components/wt/honest-empty';
@@ -13,6 +14,8 @@ import {partnersRepository, type PartnerProjection} from '@/lib/db/repos/partner
 import {isPrivateMediaDeliveryUrl} from '@/lib/media/url';
 import {buildPageMetadata} from '@/lib/metadata';
 import {groupPublishedPartners} from '@/lib/partners/public-groups';
+import {routeBreadcrumbItems} from '@/lib/seo/route-breadcrumbs';
+import {buildBreadcrumbData} from '@/lib/structured-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,9 +41,11 @@ export default async function PartnersPage({params}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const [t, common, partners] = await Promise.all([
+  const [t, common, tRoot, partners] = await Promise.all([
     getTranslations({locale, namespace: 'Partners'}),
     getTranslations({locale, namespace: 'Common'}),
+    // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.partners`).
+    getTranslations({locale}),
     // 100 is the repository's hard maximum: past 100 published records the count would understate
     // and rows would be dropped silently. A follow-up pages the list or raises the cap.
     partnersRepository.listPublished(locale, {limit: 100}).catch((): readonly PartnerProjection[] => []),
@@ -144,6 +149,7 @@ export default async function PartnersPage({params}: Props) {
           <ActionLink href="/contact" variant="button-light">{t('update.action')}</ActionLink>
         </div>
       </Section>
+      <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale, '/partners', tRoot))} />
     </>
   );
 }

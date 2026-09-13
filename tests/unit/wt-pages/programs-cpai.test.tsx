@@ -25,7 +25,7 @@ const {translationState, setRequestLocaleSpy} = vi.hoisted(() => {
 const buildPageMetadataSpy = vi.hoisted(() => vi.fn((input: unknown) => input));
 
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async (input: string | {locale?: string; namespace: string}) => {
+  getTranslations: vi.fn(async (input: string | {locale?: string; namespace?: string}) => {
     const namespace = typeof input === "string" ? input : input.namespace;
     const locale = typeof input === "string" ? translationState.locale : (input.locale ?? translationState.locale);
     return (key: string, values?: Record<string, string | number>) => {
@@ -33,7 +33,7 @@ vi.mock("next-intl/server", () => ({
       // segment-by-segment against the parsed JSON bundle exactly like `key` below, rather than
       // looked up as one flat key -- see tests/unit/wt-pages/programs-editions.test.tsx.
       let value: unknown = translationState.messages[locale];
-      for (const part of [...namespace.split("."), ...key.split(".")]) value = (value as Record<string, unknown> | undefined)?.[part];
+      for (const part of [...(namespace?.split(".") ?? []), ...key.split(".")]) value = (value as Record<string, unknown> | undefined)?.[part];
       if (typeof value !== "string") throw new Error(`Missing test message: ${locale}.${namespace}.${key}`);
       return Object.entries(values ?? {}).reduce((text, [name, replacement]) => text.replace(`{${name}}`, String(replacement)), value);
     };

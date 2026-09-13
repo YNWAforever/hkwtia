@@ -2,11 +2,14 @@ import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {StorySection} from "@/components/marketing/story-section";
+import {StructuredData} from "@/components/seo/structured-data";
 import {PageHero} from "@/components/wt/page-hero";
 import {RichRelatedRoutes} from "@/components/wt/rich-related-routes";
 import type {AppLocale} from "@/i18n/routing";
 import {buildOtherAboutRoutes} from "@/lib/about/related-routes";
 import {buildPageMetadata} from "@/lib/metadata";
+import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
+import {buildBreadcrumbData} from "@/lib/structured-data";
 
 type Props = {params: Promise<{locale: string}>};
 
@@ -26,6 +29,8 @@ export default async function ChairmanPage({params}: Props) {
   setRequestLocale(locale);
   const t = await getTranslations("Chairman");
   const common = await getTranslations({locale, namespace: "Common"});
+  // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
+  const tRoot = await getTranslations({locale});
   // No compass grid here: a single unattributed message has nothing to link or count
   // (restraint, the same instinct HonestEmpty applies elsewhere -- don't manufacture a
   // 3-item grid for it).
@@ -50,6 +55,7 @@ export default async function ChairmanPage({params}: Props) {
         </blockquote>
       </StorySection>
       <RichRelatedRoutes items={related} />
+      <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, "/about/chairman", tRoot))} />
     </>
   );
 }

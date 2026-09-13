@@ -11,7 +11,7 @@ import {
   type PublishedNewsSummary,
 } from "@/lib/db/repos/public-posts";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
-import {featuredOnly, milestonesOnly} from "@/lib/history/milestones";
+import {milestonesOnly} from "@/lib/history/milestones";
 import type {AppLocale} from "@/i18n/routing";
 import {absoluteUrl, localizedPath} from "@/lib/urls";
 
@@ -84,7 +84,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const eventEntries = eventSlugs.flatMap((slug) => localizedEntries(`/events/${slug}`));
   const buildLogEntries = buildLogs.flatMap(({slug}) => localizedEntries(`/news/${slug}`));
   const newsEntries = localizedNewsEntries(englishNews, chineseNews);
-  const milestoneEntries = featuredOnly(milestonesOnly(milestones))
+  // Every milestone, not only the featured six: these are 25 years of association
+  // history, already bilingual, and they are the largest body of indexable content the
+  // site has. Must stay in lockstep with generateStaticParams in the history route --
+  // a sitemap wider than the route publishes urls that 404.
+  const milestoneEntries = milestonesOnly(milestones)
     .flatMap(({slug}) => localizedEntries(`/about/history/${slug}`));
   const showcaseEntries = showcaseSlugs.flatMap((slug) => localizedEntries(`/showcase/${slug}`));
   const memberEntries = memberSlugs.flatMap((slug) => localizedEntries(`/members/${slug}`));

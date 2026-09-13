@@ -4,6 +4,7 @@ import {getTranslations, setRequestLocale} from 'next-intl/server';
 import {ContactConciergeLauncher} from '@/components/marketing/contact-concierge-launcher';
 import {PreparedEmailForm} from '@/components/marketing/prepared-email-form';
 import {WhatsAppLink} from '@/components/marketing/whatsapp-link';
+import {StructuredData} from '@/components/seo/structured-data';
 import {InnerCardGrid} from '@/components/wt/inner-card-grid';
 import {PageHero} from '@/components/wt/page-hero';
 import {Section} from '@/components/wt/section';
@@ -11,6 +12,8 @@ import {siteConfig} from '@/config/site';
 import type {AppLocale} from '@/i18n/routing';
 import {CONTACT_TOPICS} from '@/lib/contact/topics';
 import {buildPageMetadata} from '@/lib/metadata';
+import {routeBreadcrumbItems} from '@/lib/seo/route-breadcrumbs';
+import {buildBreadcrumbData} from '@/lib/structured-data';
 import {localizedPath} from '@/lib/urls';
 
 type Props = {params: Promise<{locale: string}>; searchParams?: Promise<Record<string, string | string[] | undefined>>};
@@ -24,10 +27,12 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function ContactPage({params, searchParams = Promise.resolve({})}: Props) {
   const [{locale}, query] = await Promise.all([params, searchParams]);
   setRequestLocale(locale);
-  const [t, common, tWhatsApp] = await Promise.all([
+  const [t, common, tWhatsApp, tRoot] = await Promise.all([
     getTranslations({locale, namespace: 'Contact'}),
     getTranslations({locale, namespace: 'Common'}),
     getTranslations({locale, namespace: 'WhatsApp'}),
+    // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.contact`).
+    getTranslations({locale}),
   ]);
   const appLocale = locale as AppLocale;
   const rawTopic = query.topic;
@@ -94,6 +99,7 @@ export default async function ContactPage({params, searchParams = Promise.resolv
           <ContactConciergeLauncher label={t('conciergeLauncher')} />
         </div>
       </Section>
+      <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(appLocale, '/contact', tRoot))} />
     </>
   );
 }

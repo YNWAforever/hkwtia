@@ -3,6 +3,7 @@ import {getTranslations, setRequestLocale} from 'next-intl/server';
 
 import {StorySection} from '@/components/marketing/story-section';
 import {localiseImages, ProgramEditions} from '@/components/marketing/program-editions';
+import {StructuredData} from '@/components/seo/structured-data';
 import {PageHero} from '@/components/wt/page-hero';
 import {RichCompass} from '@/components/wt/rich-compass';
 import {siteConfig} from '@/config/site';
@@ -12,6 +13,8 @@ import type {AppLocale} from '@/i18n/routing';
 import {summarizeProgrammes} from '@/lib/home/programme-summaries';
 import {brandedTitle, buildPageMetadata} from '@/lib/metadata';
 import {buildProgrammeHeaderFacts} from '@/lib/programs/programme-header';
+import {routeBreadcrumbItems} from '@/lib/seo/route-breadcrumbs';
+import {buildBreadcrumbData, buildEventSeriesData} from '@/lib/structured-data';
 
 type Props = {params: Promise<{locale: string}>};
 const program = programs.find((item) => item.id === 'tct')!;
@@ -28,6 +31,8 @@ export default async function TctPage({params}: Props) {
   const t = await getTranslations({locale, namespace: program.namespace});
   const tr = await getTranslations({locale, namespace: 'programs.record'});
   const common = await getTranslations({locale, namespace: 'Common'});
+  // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
+  const tRoot = await getTranslations({locale});
   const zh = locale === 'zh-HK';
 
   const summary = summarizeProgrammes().find((item) => item.id === 'tct')!;
@@ -87,6 +92,8 @@ export default async function TctPage({params}: Props) {
           };
         })}
       />
+      <StructuredData data={buildEventSeriesData({key: 'tct', name: t('title'), description: t('description')}, locale as AppLocale)} />
+      <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, '/programs/tct', tRoot))} />
     </>
   );
 }

@@ -9,8 +9,10 @@ const bundles = {
   en: JSON.parse(readFileSync(resolve(process.cwd(), "messages/en.json"), "utf8")),
 } as const;
 
-function messageAt(namespace: string, key: string): unknown {
-  const root = namespace.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], bundles.en);
+function messageAt(namespace: string | undefined, key: string): unknown {
+  const root = namespace === undefined
+    ? bundles.en
+    : namespace.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], bundles.en);
   return key.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], root);
 }
 
@@ -20,7 +22,7 @@ const searchState = vi.hoisted(() => ({current: new URLSearchParams()}));
 vi.mock("@/lib/db/repos/events", () => ({eventsRepository: {listPublic}}));
 vi.mock("@/lib/growth/interest-action", () => ({submitInterestAction: vi.fn()}));
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async ({namespace}: {namespace: string}) => (key: string) => String(messageAt(namespace, key))),
+  getTranslations: vi.fn(async ({namespace}: {namespace?: string}) => (key: string) => String(messageAt(namespace, key))),
   setRequestLocale: () => undefined,
 }));
 vi.mock("@/i18n/navigation", () => ({

@@ -20,6 +20,7 @@ import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl} from "@/lib/media/url"
 import {runPublicEventRegistrationAction} from "@/lib/events/registration-action";
 import type {RegistrationActionState} from "@/lib/events/registration-state";
 import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
+import {ogImagePath} from "@/lib/og/resolve-renderer";
 import {buildEventData} from "@/lib/structured-data";
 import {absoluteUrl, localizedPath} from "@/lib/urls";
 
@@ -50,9 +51,15 @@ function cssUrlToken(value: string): string {
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
-  const row = await eventsRepository.getPublicBySlug(slug, locale, {asOf: new Date()}).catch(() => null);
+  const [row, t] = await Promise.all([
+    eventsRepository.getPublicBySlug(slug, locale, {asOf: new Date()}).catch(() => null),
+    getTranslations({locale, namespace: "Events"}),
+  ]);
   if (!row) return {};
-  return buildPageMetadata({locale: locale as AppLocale, pathname: `/events/${row.slug}`, title: brandedTitle(locale as AppLocale, row.title), description: row.description});
+  // The same own-origin filter the page body applies: a donor or private-delivery hero must
+  // not be embedded in og:image any more than it is rendered in the hero.
+  const heroImageUrl = row.hero && !(isPrivateMediaDeliveryUrl(row.hero.url) || isRegistrableMediaUrl(row.hero.url)) ? row.hero.url : null;
+  return buildPageMetadata({locale: locale as AppLocale, pathname: `/events/${row.slug}`, title: brandedTitle(locale as AppLocale, row.title), description: row.description, image: ogImagePath({kind: "event", title: row.title, eyebrow: t("eyebrow"), imageUrl: heroImageUrl})});
 }
 
 export default async function EventPage({params}: Props) {

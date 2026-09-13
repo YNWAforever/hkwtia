@@ -5,6 +5,7 @@ import {MembershipDimensions} from "@/components/marketing/membership-dimensions
 import {PlanGrid, type PlanGridTier} from "@/components/marketing/plan-grid";
 import {PricingNote} from "@/components/marketing/pricing-note";
 import {WhatsAppLink} from "@/components/marketing/whatsapp-link";
+import {StructuredData} from "@/components/seo/structured-data";
 import {ClosingBand} from "@/components/wt/closing-band";
 import {HonestEmpty} from "@/components/wt/honest-empty";
 import {PageHero} from "@/components/wt/page-hero";
@@ -15,6 +16,8 @@ import type {AppLocale} from "@/i18n/routing";
 import {membershipPlansRepository} from "@/lib/db/repos/membership-plans";
 import {buildPageMetadata} from "@/lib/metadata";
 import {buildPublicMembershipCatalog, publicPriceIds, type PublicMembershipTier} from "@/lib/membership/public-catalog";
+import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
+import {buildBreadcrumbData} from "@/lib/structured-data";
 
 export const dynamic = "force-dynamic";
 type Props = {params: Promise<{locale: string}>};
@@ -41,10 +44,12 @@ export default async function MembershipPage({params}: Props) {
   const locale = rawLocale as AppLocale;
   setRequestLocale(locale);
 
-  const [t, tCommon, tWhatsApp, rows] = await Promise.all([
+  const [t, tCommon, tWhatsApp, tRoot, rows] = await Promise.all([
     getTranslations({locale, namespace: "Membership"}),
     getTranslations({locale, namespace: "Common"}),
     getTranslations({locale, namespace: "WhatsApp"}),
+    // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
+    getTranslations({locale}),
     membershipPlansRepository.list().catch(() => null),
   ]);
   const publicTiers = rows === null ? [] : buildPublicMembershipCatalog({locale, rows, priceIds: publicPriceIds()});
@@ -101,5 +106,6 @@ export default async function MembershipPage({params}: Props) {
       eyebrow={t("closing.eyebrow")}
       title={t("closing.title")}
     />
+    <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale, "/membership", tRoot))} />
   </>;
 }

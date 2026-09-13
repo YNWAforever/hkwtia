@@ -6,6 +6,7 @@ import {CohortApplicationForm} from '@/components/marketing/cohort-application-f
 import {FundingResults, FundingWizard} from '@/components/marketing/funding-wizard';
 import {LandingPartnerMap} from '@/components/marketing/landing-partner-map';
 import {LaunchpadGbaOpening} from '@/components/marketing/launchpad-gba-opening';
+import {StructuredData} from '@/components/seo/structured-data';
 import {ClosingBand} from '@/components/wt/closing-band';
 import {Section} from '@/components/wt/section';
 import {SectionHeading} from '@/components/wt/section-heading';
@@ -16,6 +17,8 @@ import {getFundingResults, parseFundingAnswers} from '@/lib/launchpad/funding';
 import {applyToCohortAction} from '@/lib/launchpad/member-actions';
 import type {Actor} from '@/lib/membership/lifecycle';
 import {buildPageMetadata} from '@/lib/metadata';
+import {routeBreadcrumbItems} from '@/lib/seo/route-breadcrumbs';
+import {buildBreadcrumbData} from '@/lib/structured-data';
 
 type Props = {params: Promise<{locale: string}>; searchParams?: Promise<Record<string, string | string[] | undefined>>};
 
@@ -35,9 +38,11 @@ export default async function LaunchPadPage({params, searchParams = Promise.reso
   // CLAUDE.md: public pages degrade rather than 500. The WP-0 visual baseline caught
   // /launchpad returning 500 with an empty DATABASE_URL because this call, unlike the
   // landing-partners read below, had no fallback.
-  const [t, common, cohorts] = await Promise.all([
+  const [t, common, tRoot, cohorts] = await Promise.all([
     getTranslations({locale: appLocale, namespace: 'LaunchPad'}),
     getTranslations({locale: appLocale, namespace: 'Common'}),
+    // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.launchpad`).
+    getTranslations({locale: appLocale}),
     cohortRepository.listPublicCohorts(anonymous).catch((): Awaited<ReturnType<typeof cohortRepository.listPublicCohorts>> => []),
   ]);
   const partners = await landingPartnersRepository.listPublished({limit: 100}).catch(() => []);
@@ -98,6 +103,7 @@ export default async function LaunchPadPage({params, searchParams = Promise.reso
         copy={t('clinic.description')}
         actions={[{href: '/contact', label: t('clinicCta')}]}
       />
+      <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(appLocale, '/launchpad', tRoot))} />
     </>
   );
 }

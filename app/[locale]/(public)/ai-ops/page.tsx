@@ -1,6 +1,7 @@
 import type {Metadata} from "next";
 import {getTranslations,setRequestLocale} from "next-intl/server";
 import {AiOpsDashboard,type AiOpsDashboardLabels} from "@/components/marketing/aiops/dashboard";
+import {StructuredData} from "@/components/seo/structured-data";
 import {PageHero} from "@/components/wt/page-hero";
 import {AI_OPS_EXTERNAL_EVIDENCE} from "@/config/aiops-evidence";
 import type {AppLocale} from "@/i18n/routing";
@@ -8,6 +9,8 @@ import {buildAiOpsDashboardState,unavailableAiOpsDashboardState} from "@/lib/aio
 import {aiOpsPublicRepository} from "@/lib/db/repos/aiops-public";
 import {publicPostsRepository} from "@/lib/db/repos/public-posts";
 import {buildPageMetadata} from "@/lib/metadata";
+import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
+import {buildBreadcrumbData} from "@/lib/structured-data";
 type Props={params:Promise<{locale:string}>}; export const revalidate=300;
 // Decision 3: eyebrow/title/description are page-level PageHero content now, not part of
 // AiOpsDashboardLabels -- see components/marketing/aiops/dashboard.tsx.
@@ -17,12 +20,14 @@ function safe(rows:Awaited<ReturnType<typeof publicPostsRepository.listPublished
 export async function generateMetadata({params}:Props):Promise<Metadata>{const {locale}=await params;const t=await getTranslations({locale,namespace:"AiOps"});return buildPageMetadata({locale:locale as AppLocale,pathname:"/ai-ops",title:t("metaTitle"),description:t("metaDescription")})}
 export default async function AiOpsPage({params}:Props){
   const {locale}=await params;setRequestLocale(locale);
-  const [rows,published,uiLabels,heroT,common]=await Promise.all([
+  const [rows,published,uiLabels,heroT,common,tRoot]=await Promise.all([
     aiOpsPublicRepository.readLatestTwelveMonths().catch(()=>null),
     publicPostsRepository.listPublishedBuildLogs().catch(()=>[]),
     labels(locale),
     getTranslations({locale,namespace:"AiOps"}),
     getTranslations({locale,namespace:"Common"}),
+    // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.aiOps`).
+    getTranslations({locale}),
   ]);
   const state=rows?buildAiOpsDashboardState(rows,new Date()):unavailableAiOpsDashboardState();
   return <>
@@ -34,5 +39,6 @@ export default async function AiOpsPage({params}:Props){
       breadcrumbLabel={common("breadcrumbLabel")}
     />
     <AiOpsDashboard locale={locale as AppLocale} state={state} buildLogs={safe(published)} evidence={AI_OPS_EXTERNAL_EVIDENCE} labels={uiLabels}/>
+    <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, "/ai-ops", tRoot))} />
   </>;
 }

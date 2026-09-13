@@ -22,6 +22,7 @@ async function getRedirects() {
     source: string;
     destination: string;
     permanent?: boolean;
+    has?: {type: string; value: string}[];
   }[];
 }
 
@@ -99,6 +100,34 @@ describe("legacy redirects", () => {
     for (const liveSlug of ["/events/some-real-upcoming-event", "/events/another-event-2027"]) {
       const shadowed = matchers.some((matcher) => matcher.test(liveSlug));
       expect(shadowed, `${liveSlug} should reach the live app, not a legacy redirect`).toBe(false);
+    }
+  });
+
+  // The vercel.app -> hkwtia.org redirect must not fire before DNS moves, or it sends every
+  // visitor to a WordPress site that no longer expects them, with no way back except a deploy.
+  // `redirects()` reads NEXT_PUBLIC_SITE_URL at call time, so this drives the real gate rather
+  // than asserting on the source text.
+  it("keeps the vercel.app redirect inert until the site url says the cutover happened", async () => {
+    const previous = process.env.NEXT_PUBLIC_SITE_URL;
+    const hostRuleOn = (redirects: Awaited<ReturnType<typeof getRedirects>>) =>
+      redirects.find((redirect) => redirect.has?.some((condition) => condition.type === "host" && condition.value === "hkwtia.vercel.app"));
+
+    try {
+      delete process.env.NEXT_PUBLIC_SITE_URL;
+      expect(hostRuleOn(await getRedirects())).toBeUndefined();
+
+      // Anything that does not name hkwtia.org leaves it inert too -- a typo must not arm it.
+      process.env.NEXT_PUBLIC_SITE_URL = "https://staging.example";
+      expect(hostRuleOn(await getRedirects())).toBeUndefined();
+
+      process.env.NEXT_PUBLIC_SITE_URL = "https://hkwtia.org";
+      const armed = hostRuleOn(await getRedirects());
+      expect(armed).toBeDefined();
+      expect(armed!.destination).toBe("https://hkwtia.org/:path*");
+      expect(armed!.permanent).toBe(true);
+    } finally {
+      if (previous === undefined) delete process.env.NEXT_PUBLIC_SITE_URL;
+      else process.env.NEXT_PUBLIC_SITE_URL = previous;
     }
   });
 });

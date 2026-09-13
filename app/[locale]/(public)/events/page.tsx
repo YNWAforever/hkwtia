@@ -7,6 +7,7 @@ import {EventFilterPanel} from "@/components/marketing/event-filter-panel";
 import {EventViewSwitch} from "@/components/marketing/event-view-switch";
 import {InterestForm} from "@/components/marketing/interest-form";
 import {WhatsAppLink} from "@/components/marketing/whatsapp-link";
+import {StructuredData} from "@/components/seo/structured-data";
 import {Arrow} from "@/components/wt/arrow";
 import {ClosingBand} from "@/components/wt/closing-band";
 import {HonestEmpty} from "@/components/wt/honest-empty";
@@ -20,6 +21,8 @@ import {parseEventFilters} from "@/lib/events/filters";
 import {parsePublicEventStatus} from "@/lib/events/public";
 import {submitInterestAction} from "@/lib/growth/interest-action";
 import {buildPageMetadata} from "@/lib/metadata";
+import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
+import {buildBreadcrumbData} from "@/lib/structured-data";
 import {localizedPath} from "@/lib/urls";
 
 export const dynamic = "force-dynamic";
@@ -41,11 +44,13 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function EventsPage({params, searchParams}: Props) {
   const [{locale}, query] = await Promise.all([params, searchParams]);
   setRequestLocale(locale);
-  const [t, common, tInterest, tWhatsApp] = await Promise.all([
+  const [t, common, tInterest, tWhatsApp, tRoot] = await Promise.all([
     getTranslations({locale, namespace: "Events"}),
     getTranslations({locale, namespace: "Common"}),
     getTranslations({locale, namespace: "Interest"}),
     getTranslations({locale, namespace: "WhatsApp"}),
+    // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
+    getTranslations({locale}),
   ]);
   const appLocale = locale as AppLocale;
   const interestLabels = {
@@ -163,6 +168,7 @@ export default async function EventsPage({params, searchParams}: Props) {
         id="events-closing"
         title={t("closing.title")}
       />
+      <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(appLocale, "/events", tRoot))} />
     </>
   );
 }

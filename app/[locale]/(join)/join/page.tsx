@@ -5,12 +5,15 @@ import {notFound, redirect} from "next/navigation";
 
 import {JoinForm} from "@/components/join/join-form";
 import {JoinProgress} from "@/components/join/progress";
+import {StructuredData} from "@/components/seo/structured-data";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
 import {destinationForJoin, parseJoinContinuation} from "@/lib/membership/join-navigation";
 import {buildPageMetadata} from "@/lib/metadata";
 import {startJoin} from "@/lib/membership/join-service";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
+import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
+import {buildBreadcrumbData} from "@/lib/structured-data";
 import {localizedPath} from "@/lib/urls";
 import {planChooserItems} from "@/lib/membership/join-plan-chooser";
 
@@ -38,6 +41,11 @@ export default async function JoinPage({params, searchParams}: Props) {
   const query = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("Join");
+  // Unscoped: the breadcrumb label keys are fully qualified (`Common.breadcrumbJoin`).
+  const tRoot = await getTranslations({locale});
+  // Five states render below -- chooser, invalid plan, two magic-link forms and the signed-in
+  // status -- but every one is /join at the same canonical URL, so each carries the same trail.
+  const trail = <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale, "/join", tRoot))} />;
   const plan = selectedPlan(queryValue(query.plan));
   const continuation = parseJoinContinuation(queryValue(query.next), locale);
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
@@ -53,6 +61,7 @@ export default async function JoinPage({params, searchParams}: Props) {
         <h1 className="font-serif text-4xl font-semibold">{t("invalidPlanTitle")}</h1>
         <p className="mt-4 text-muted-foreground">{t("invalidPlanDescription")}</p>
         <Link className="mt-6 inline-flex text-primary underline" href={localizedPath(locale, "/membership")}>{t("backToMembership")}</Link>
+        {trail}
       </section>
     );
     return (
@@ -72,6 +81,7 @@ export default async function JoinPage({params, searchParams}: Props) {
           ))}
         </ul>
         <Link className="mt-6 inline-flex text-primary underline" href={localizedPath(locale, "/membership")}>{t("choosePlanCompare")}</Link>
+        {trail}
       </section>
     );
   }
@@ -91,6 +101,7 @@ export default async function JoinPage({params, searchParams}: Props) {
             </div>
           </JoinForm>
         </div>
+        {trail}
       </section>
     );
   }
@@ -106,6 +117,7 @@ export default async function JoinPage({params, searchParams}: Props) {
         <JoinProgress active={companyPlan ? "company" : "profile"} labels={labels} showCompany={companyPlan}/>
         <h1 className="font-serif text-4xl font-semibold">{t(`status.${status}.title`)}</h1>
         <p className="mt-4 text-muted-foreground">{t(`status.${status}.description`)}</p>
+        {trail}
       </section>
     );
   }
@@ -125,6 +137,7 @@ export default async function JoinPage({params, searchParams}: Props) {
           </div>
         </JoinForm>
       </div>
+      {trail}
     </section>
   );
 }

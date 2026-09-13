@@ -11,8 +11,10 @@ const bundles = {
   "zh-HK": JSON.parse(readFileSync(resolve(process.cwd(), "messages/zh-HK.json"), "utf8")),
 } as const;
 
-function messageAt(locale: "en" | "zh-HK", namespace: string, key: string): unknown {
-  const root = namespace.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], bundles[locale]);
+function messageAt(locale: "en" | "zh-HK", namespace: string | undefined, key: string): unknown {
+  const root = namespace === undefined
+    ? bundles[locale]
+    : namespace.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], bundles[locale]);
   return key.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], root);
 }
 
@@ -21,7 +23,7 @@ const showcase = vi.hoisted(() => ({listPublished: vi.fn()}));
 vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: showcase}));
 vi.mock("next-intl/server", () => ({
   setRequestLocale: () => undefined,
-  getTranslations: vi.fn(async ({locale, namespace}: {locale: "en" | "zh-HK"; namespace: string}) =>
+  getTranslations: vi.fn(async ({locale, namespace}: {locale: "en" | "zh-HK"; namespace?: string}) =>
     (key: string) => String(messageAt(locale, namespace, key))),
 }));
 vi.mock("@/i18n/navigation", () => ({

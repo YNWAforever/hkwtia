@@ -5,6 +5,7 @@ import {BuildLogCard} from "@/components/marketing/build-log-card";
 import {NewsCard} from "@/components/marketing/news-card";
 import {NewsQualityPanel} from "@/components/marketing/news-quality-panel";
 import {FooterNewsletter} from "@/components/layout/footer-newsletter";
+import {StructuredData} from "@/components/seo/structured-data";
 import {HonestEmpty} from "@/components/wt/honest-empty";
 import {PageHero} from "@/components/wt/page-hero";
 import {Section} from "@/components/wt/section";
@@ -12,6 +13,8 @@ import type {AppLocale} from "@/i18n/routing";
 import {listPublishedBuildLogs, listPublishedNews} from "@/lib/db/repos/public-posts";
 import {toMailBody} from "@/lib/i18n/mail-body";
 import {buildPageMetadata} from "@/lib/metadata";
+import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
+import {buildBreadcrumbData} from "@/lib/structured-data";
 
 export const dynamic = "force-dynamic";
 
@@ -31,9 +34,11 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function NewsPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
-  const [t, common] = await Promise.all([
+  const [t, common, tRoot] = await Promise.all([
     getTranslations({locale, namespace: "News"}),
     getTranslations({locale, namespace: "Common"}),
+    // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
+    getTranslations({locale}),
   ]);
   const appLocale = locale as AppLocale;
   // A database outage degrades to the empty state rather than a 500.
@@ -89,6 +94,7 @@ export default async function NewsPage({params}: Props) {
           }} />
         </div>
       </div>
+      <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(appLocale, "/news", tRoot))} />
     </>
   );
 }

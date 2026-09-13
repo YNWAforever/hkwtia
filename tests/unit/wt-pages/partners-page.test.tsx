@@ -10,8 +10,10 @@ const bundles = {
   "zh-HK": JSON.parse(readFileSync(resolve(process.cwd(), "messages/zh-HK.json"), "utf8")),
 } as const;
 
-function messageAt(locale: "en" | "zh-HK", namespace: string, key: string): unknown {
-  const root = namespace.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], bundles[locale]);
+function messageAt(locale: "en" | "zh-HK", namespace: string | undefined, key: string): unknown {
+  const root = namespace === undefined
+    ? bundles[locale]
+    : namespace.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], bundles[locale]);
   return key.split(".").reduce<unknown>(
     (v, p) => (v as Record<string, unknown> | undefined)?.[p],
     root,
@@ -30,7 +32,7 @@ function resolveIcuPlural(raw: string, values: Record<string, string | number>):
 }
 
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async ({locale, namespace}: {locale: "en" | "zh-HK"; namespace: string}) =>
+  getTranslations: vi.fn(async ({locale, namespace}: {locale: "en" | "zh-HK"; namespace?: string}) =>
     Object.assign(
       (key: string, values?: Record<string, string | number>) => {
         const raw = resolveIcuPlural(String(messageAt(locale, namespace, key)), values ?? {});

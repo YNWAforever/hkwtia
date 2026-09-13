@@ -15,6 +15,7 @@ import {isPrivateMediaDeliveryUrl} from "@/lib/media/url";
 import {localeText} from "@/lib/members/public";
 import type {MembershipPlanCode} from "@/lib/membership/constants";
 import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
+import {ogImagePath} from "@/lib/og/resolve-renderer";
 import {buildBreadcrumbData, buildMemberOrganizationData} from "@/lib/structured-data";
 import {absoluteUrl, localizedPath} from "@/lib/urls";
 
@@ -30,13 +31,15 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   if (!profile) {
     // Unknown, unpublished or malformed slug: the page 404s, but the metadata still renders, so
     // it reads the directory's own branded pair rather than naming a company we will not show.
-    return buildPageMetadata({locale, pathname: `/members/${slug}`, title: t("metaTitle"), description: t("metaDescription")});
+    return buildPageMetadata({locale, pathname: `/members/${slug}`, title: t("metaTitle"), description: t("metaDescription"), image: ogImagePath({kind: "member", title: t("metaTitle"), eyebrow: t("eyebrow"), imageUrl: null})});
   }
   return buildPageMetadata({
     locale,
     pathname: `/members/${profile.slug}`,
     title: brandedTitle(locale, profile.name),
     description: localeText(profile.tagline, locale) ?? localeText(profile.description, locale) ?? t("metaDescription"),
+    // The member's logo, contained on a light ground rather than cropped under a scrim.
+    image: ogImagePath({kind: "member", title: profile.name, eyebrow: t("eyebrow"), imageUrl: profile.logoUrl ?? null}),
   });
 }
 

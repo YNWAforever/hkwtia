@@ -7,6 +7,7 @@ import {ShowcaseFilters} from "@/components/marketing/showcase-filters";
 import {SolutionNeeds} from "@/components/marketing/solution-needs";
 import {SolutionPathways} from "@/components/marketing/solution-pathways";
 import {SolutionVerification} from "@/components/marketing/solution-verification";
+import {StructuredData} from "@/components/seo/structured-data";
 import {ActionLink} from "@/components/wt/action-link";
 import {HonestEmpty} from "@/components/wt/honest-empty";
 import {InterestBand} from "@/components/wt/interest-band";
@@ -15,7 +16,9 @@ import {Section} from "@/components/wt/section";
 import type {AppLocale} from "@/i18n/routing";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
 import {buildPageMetadata} from "@/lib/metadata";
+import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
 import {parseShowcaseFilters, toPublicListing} from "@/lib/showcase/contracts";
+import {buildBreadcrumbData} from "@/lib/structured-data";
 
 export const dynamic = "force-dynamic";
 type Props = Readonly<{params: Promise<{locale: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>}>;
@@ -51,9 +54,11 @@ export default async function ShowcasePage({params, searchParams}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  const [t, tCommon, query] = await Promise.all([
+  const [t, tCommon, tRoot, query] = await Promise.all([
     getTranslations({locale, namespace: "Showcase"}),
     getTranslations({locale, namespace: "Common"}),
+    // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.*`).
+    getTranslations({locale}),
     searchParams,
   ]);
   const filters = parseShowcaseFilters(query);
@@ -97,5 +102,6 @@ export default async function ShowcasePage({params, searchParams}: Props) {
       eyebrow={t("interest.eyebrow")}
       title={t("interest.title")}
     />
+    <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale, "/showcase", tRoot))} />
   </>;
 }
