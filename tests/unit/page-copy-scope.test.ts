@@ -2,6 +2,7 @@ import {describe, expect, it} from "vitest";
 
 import {publicRoutes} from "@/config/public-routes";
 import en from "@/messages/en.json";
+import zhHK from "@/messages/zh-HK.json";
 import {
   pageCopyBundleValues,
   pageCopyCatalog,
@@ -50,6 +51,24 @@ describe("page copy scope", () => {
     for (const namespace of pageCopyNamespaces) {
       expect(en, namespace).toHaveProperty(namespace);
       expect(pageCopyCatalog(namespace).length, namespace).toBeGreaterThan(0);
+    }
+  });
+
+  it("gives every editable namespace an admin label in both bundles", () => {
+    // /admin/page-copy renders `t(`namespaces.${namespace}`)` for each entry, so a
+    // namespace without a label throws MISSING_MESSAGE and takes the page down. It
+    // has happened twice -- WP-5 added MarketingExtras and WP-7 added Programmes and
+    // Partners, both without labels -- because pageCopyRoutes is typed
+    // Record<PageCopyNamespace, ...> and so is checked by the compiler, while the
+    // label lives in a JSON bundle nothing checked at all.
+    for (const bundle of [{name: "en", messages: en}, {name: "zh-HK", messages: zhHK}]) {
+      const labels: Record<string, string> = bundle.messages.Admin.pageCopy.namespaces;
+      for (const namespace of pageCopyNamespaces) {
+        expect(labels[namespace], `${bundle.name}: Admin.pageCopy.namespaces.${namespace}`).toBeTruthy();
+      }
+      // A label left behind by a namespace that was removed is dead weight staff
+      // can never see, so hold the two sets equal rather than merely sufficient.
+      expect(Object.keys(labels).sort(), bundle.name).toEqual([...pageCopyNamespaces].sort());
     }
   });
 
