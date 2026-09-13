@@ -28,8 +28,8 @@ after.
 
 **In:**
 
-1. Structured data: `Article` on news, `Person` on the chairman page, `EventSeries` on programme
-   pages, `BreadcrumbList` across the public surface.
+1. Structured data: `Article` on news, `EventSeries` on programme pages, `BreadcrumbList` across
+   the public surface. (`Person` on the chairman page was **declined** — see below.)
 2. Per-entity `og:image` via `next/og`, with three renderers chosen by what the entity can supply.
 3. Publish all 51 history milestones — route and sitemap changed in lockstep.
 4. Cutover **preparation**: host correctness, redirect verification against the live WordPress
@@ -43,6 +43,7 @@ after.
 | GSC cross-reference | Needs Google Search Console access. The `hkwtia.org` property currently sits on the WordPress site's Site Kit, and no export is available to this work. |
 | The DNS move itself | The owner's action. This phase prepares and proves; it does not flip. |
 | Anything behind authentication | Belongs to the unproven half. See §1. |
+| `Person` on the chairman page | **Declined 2026-09-13.** The site does not store the chairman's name: the `Chairman` namespace ends at `signature`, which is `"Chairman, WTIA"` / `"WTIA 主席"` — a role. `Person` requires a real `name`, and inventing one, deriving it from prose, or scraping it from the legacy WordPress site would be a fabricated claim about a real individual. Reinstate by adding `Chairman.personName` to both bundles. |
 
 ## 3. Three corrections to the programme spec
 
@@ -185,8 +186,8 @@ can be tested honestly and the image itself gets a smoke test.
 
 ## 7. Definition of done
 
-1. `Article`, `Person`, `EventSeries` and `BreadcrumbList` render on every page that should carry
-   them, with the coverage test passing.
+1. `Article`, `EventSeries` and `BreadcrumbList` render on every page that should carry them, with
+   the coverage test passing. `Person` is out of scope (see §2).
 2. `/api/og` returns a correct image for each entity kind, with member logos undarkened and
    contained.
 3. All 51 milestones have pages and sitemap entries, route and sitemap pinned to one filter.

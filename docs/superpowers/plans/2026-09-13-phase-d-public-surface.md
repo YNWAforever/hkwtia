@@ -585,121 +585,22 @@ MSG
 
 ---
 
-## Task 4: Person JSON-LD on the chairman page
+## Task 4: Person JSON-LD on the chairman page — DECLINED, DO NOT IMPLEMENT
 
-> **BLOCKED until the owner supplies the chairman's name.** Verified while writing this plan:
-> the `Chairman` namespace holds `metaTitle`, `metaDescription`, `eyebrow`, `title`, `summary`,
-> `messageTitle`, `message`, `signature` — and `signature` is `"Chairman, WTIA"` / `"WTIA 主席"`,
-> a **role**, not a name. The site does not store the chairman's name anywhere.
->
-> `Person` requires a real `name`. Do **not** invent one, derive one from prose, or scrape it
-> from the legacy WordPress site: this is structured data asserting the identity of a real
-> individual, and a guess is a fabricated claim about a person.
->
-> **Do steps 1–5 now** — the builder and its tests need no name. **Stop before step 6** and
-> report `BLOCKED: chairman's name not in the codebase; owner must supply it in both locales`.
-> If the name arrives, add `Chairman.personName` to both bundles and finish step 6.
+**Status: declined by the owner on 2026-09-13. Skip this task entirely and move to Task 5.**
 
-**Files:**
-- Modify: `lib/structured-data.ts`, `components/seo/structured-data.tsx`
-- Modify: `app/[locale]/(public)/about/chairman/page.tsx` (step 6 only, once unblocked)
-- Test: `tests/unit/structured-data-person.test.ts` (create)
+The site does not store the chairman's name. The `Chairman` namespace holds `metaTitle`,
+`metaDescription`, `eyebrow`, `title`, `summary`, `messageTitle`, `message`, `signature` — and
+`signature` is `"Chairman, WTIA"` / `"WTIA 主席"`, a **role**, not a name.
 
-- [ ] **Step 1: Write the failing test**
+`Person` structured data requires a real `name`. Inventing one, deriving it from the page's
+prose, or scraping it from the legacy WordPress site would publish a fabricated claim about a
+real individual under WTIA's own domain. That is not a gap to work around.
 
-Create `tests/unit/structured-data-person.test.ts`:
-
-```ts
-import {describe, expect, it} from "vitest";
-
-import {buildPersonData} from "@/lib/structured-data";
-
-describe("buildPersonData", () => {
-  it("describes the chairman and affiliates them to WTIA", () => {
-    const data = buildPersonData({name: "Chan Tai Man", jobTitle: "Chairman"}, "en");
-
-    expect(data["@type"]).toBe("Person");
-    expect(data.name).toBe("Chan Tai Man");
-    expect(data.jobTitle).toBe("Chairman");
-    expect(data.url).toBe("https://hkwtia.vercel.app/about/chairman");
-    // affiliation ties the person to the organisation entity rather than repeating its
-    // details, so a crawler resolves one WTIA rather than two.
-    expect((data.affiliation as {"@type": string})["@type"]).toBe("Organization");
-  });
-
-  it("points the Chinese page at its /zh url", () => {
-    const data = buildPersonData({name: "陳大文", jobTitle: "主席"}, "zh-HK");
-
-    expect(data.url).toBe("https://hkwtia.vercel.app/zh/about/chairman");
-  });
-});
-```
-
-- [ ] **Step 2: Run test to verify it fails**
-
-Run: `npx vitest run tests/unit/structured-data-person.test.ts`
-Expected: FAIL — `buildPersonData is not a function`.
-
-- [ ] **Step 3: Write the builder**
-
-Add `Person` to the `schema-dts` import in `lib/structured-data.ts`, then append:
-
-```ts
-export type PersonRecord = Readonly<{name: string; jobTitle: string}>;
-
-/**
- * `Person` for the chairman.
- *
- * `affiliation` reuses the organisation entity rather than repeating its fields, so a
- * crawler resolves one WTIA rather than two that happen to share a name.
- */
-export function buildPersonData(record: PersonRecord, locale: AppLocale): WithContext<Person> {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Person',
-    name: record.name,
-    jobTitle: record.jobTitle,
-    url: absoluteUrl(localizedPath(locale, '/about/chairman')),
-    affiliation: buildOrganizationData(),
-  };
-}
-```
-
-- [ ] **Step 4: Widen the union**
-
-In `components/seo/structured-data.tsx`, add `Person` to the type import and the union.
-
-- [ ] **Step 5: Run test to verify it passes**
-
-Run: `npx vitest run tests/unit/structured-data-person.test.ts && npm run typecheck`
-Expected: PASS, 2 tests.
-
-- [ ] **Step 6: Render it — ONLY once the owner has supplied the name**
-
-If `Chairman.personName` does not exist in both bundles, stop here and report BLOCKED. Do not
-proceed with a placeholder.
-
-Once it exists, in `app/[locale]/(public)/about/chairman/page.tsx` — which already has
-`const t = await getTranslations("Chairman");` at line 27 — render:
-
-```tsx
-<StructuredData data={buildPersonData({name: t("personName"), jobTitle: t("signature")}, locale)} />
-```
-
-`signature` is the role as the page already prints it (`"Chairman, WTIA"` / `"WTIA 主席"`), so
-it is reused rather than duplicated into a new key.
-
-- [ ] **Step 7: Commit**
-
-```bash
-git add lib/structured-data.ts components/seo/structured-data.tsx "app/[locale]/(public)/about/chairman/page.tsx" tests/unit/structured-data-person.test.ts
-git commit -F - <<'MSG'
-feat(seo): Person structured data on the chairman page
-
-affiliation reuses the organisation entity rather than repeating its
-fields, so a crawler resolves one WTIA rather than two that share a name.
-MSG
-```
+To reinstate later: add `Chairman.personName` to both message bundles, then build
+`buildPersonData(record, locale)` returning `WithContext<Person>` with `name`, `jobTitle` from
+`signature`, `url` from `localizedPath(locale, "/about/chairman")`, and `affiliation` reusing
+`buildOrganizationData()`.
 
 ---
 
@@ -1773,7 +1674,7 @@ Against the spec's §7 Definition of done:
 
 | # | Done when | Task |
 |---|---|---|
-| 1 | `Article`, `Person`, `EventSeries`, `BreadcrumbList` render where they should, coverage test passing | 1–5 |
+| 1 | `Article`, `EventSeries`, `BreadcrumbList` render where they should, coverage test passing | 1–3, 5 (`Person`/Task 4 declined) |
 | 2 | `/api/og` returns a correct image per kind, member logos undarkened and contained | 7–9 |
 | 3 | All 51 milestones have pages and sitemap entries, route and sitemap on one filter | 6 |
 | 4 | Replay reports 576/576 reaching 200; drift reports zero uncovered literals | 10 |
