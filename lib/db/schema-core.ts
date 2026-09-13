@@ -334,6 +334,14 @@ export const memberships = pgTable(
     uniqueIndex("memberships_application_unique")
       .on(table.applicationId)
       .where(sql`${table.applicationId} IS NOT NULL`),
+    // One membership in play per owner. `cancelled` and `expired` are terminal in
+    // `allowedTransitions`, so rows in those states are history and may accumulate; every
+    // other status can still reach `active`, and a second row alongside one of them is a
+    // duplicate membership for the same person. Partial rather than plain unique so a
+    // lapsed member can be given a new membership.
+    uniqueIndex("memberships_owner_live_unique")
+      .on(table.ownerUserId)
+      .where(sql`${table.ownerUserId} IS NOT NULL AND ${table.status} NOT IN ('cancelled', 'expired')`),
     index("memberships_owner_idx").on(table.ownerUserId),
     index("memberships_company_idx").on(table.companyId),
     index("memberships_billing_period_end_idx").on(table.billingPeriodEnd),

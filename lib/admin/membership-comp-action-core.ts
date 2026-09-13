@@ -17,6 +17,7 @@ type CompMembershipOptions = Readonly<{
   successMessage: string;
   validationMessage: string;
   errorMessage: string;
+  duplicateMessage: string;
   mutate: (input: z.output<typeof formSchema>) => Promise<unknown>;
 }>;
 
@@ -37,6 +38,11 @@ export async function runCompMembershipAction(
     // A denial is the caller's to translate into notFound(); swallowing it here
     // would render the admin surface to someone who may not see it exists.
     if (isAuthorizationDenial(error)) throw error;
+    // The one failure staff can act on: the member already has a membership in play, so
+    // the next step is to look at that one rather than retry this form.
+    if (error instanceof Error && error.message === "MEMBERSHIP_ALREADY_EXISTS") {
+      return {status: "error", message: options.duplicateMessage};
+    }
     return {status: "error", message: options.errorMessage};
   }
 }

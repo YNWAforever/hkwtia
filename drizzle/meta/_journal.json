@@ -239,6 +239,13 @@
       "when": 1789085255362,
       "tag": "0034_phase_c_whatsapp_template_seed",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1789282554066,
+      "tag": "0035_refuse_duplicate_live_membership",
+      "breakpoints": true
     }
   ]
 }

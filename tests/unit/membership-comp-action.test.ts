@@ -6,6 +6,7 @@ const messages = {
   successMessage: "comped",
   validationMessage: "invalid",
   errorMessage: "failed",
+  duplicateMessage: "already has one",
 };
 
 function formData(values: Record<string, string>): FormData {
@@ -37,6 +38,16 @@ describe("runCompMembershipAction", () => {
     const state = await runCompMembershipAction({}, formData({profileId: "p-1", planCode: "community"}), {...messages, mutate});
 
     expect(state).toEqual({status: "error", message: "failed"});
+  });
+
+  it("names the duplicate refusal instead of reporting a generic failure", async () => {
+    // "The membership could not be granted." leaves staff with nothing to act on. The
+    // refusal is the one error here with an obvious next step -- look at the membership
+    // they already have -- so it is worth its own sentence.
+    const mutate = vi.fn(async () => { throw new Error("MEMBERSHIP_ALREADY_EXISTS"); });
+    const state = await runCompMembershipAction({}, formData({profileId: "p-1", planCode: "community"}), {...messages, mutate});
+
+    expect(state).toEqual({status: "error", message: "already has one"});
   });
 
   it("lets an authorization denial through so the caller can hide the surface", async () => {

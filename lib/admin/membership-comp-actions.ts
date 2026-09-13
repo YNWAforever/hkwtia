@@ -15,6 +15,7 @@ export type CompMembershipActionMessages = Readonly<{
   successMessage: string;
   validationMessage: string;
   errorMessage: string;
+  duplicateMessage: string;
 }>;
 
 export async function compMembershipAction(
