@@ -301,8 +301,9 @@ describe("WiseTech protected route ownership", () => {
     // Phase C2 Task 4 (C-4) added /admin/contacts: 54 + 1 = 55.
     // Phase C2 Task 9 (C-5) added /admin/campaigns and /admin/campaigns/[id]: 55 + 2 = 57.
     // Phase C2 Task 10 (C-5, D-10) added /api/jobs/whatsapp-send-queue: 57 + 1 = 58.
-    expect(codeFiles).toHaveLength(58);
-    expect(inventoryFiles).toHaveLength(58);
+    // Phase D Task 8 added /api/og: 58 + 1 = 59.
+    expect(codeFiles).toHaveLength(59);
+    expect(inventoryFiles).toHaveLength(59);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -325,12 +326,13 @@ describe("WiseTech protected route ownership", () => {
     // It is an `api-handler`, not a `webhook-handler`: the caller is a staff
     // session, and there is no HMAC in front of it — which is exactly why its
     // repository method carries its own capability actor (plan S-14).
-    expect(count("api-handler")).toBe(12);
+    // Phase D Task 8 added the public /api/og card renderer: 12 + 1 = 13.
+    expect(count("api-handler")).toBe(13);
     expect(count("webhook-handler")).toBe(2);
     // Phase C2 Task 10 (C-5, D-10) added the ten-minute WhatsApp send queue: 9 + 1 = 10.
     expect(count("job-handler")).toBe(10);
     expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(34);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(24);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(25);
   });
 
   it("publishes only the canonical deeply immutable protected conventions export", () => {

@@ -170,11 +170,25 @@ const nextConfig: NextConfig = {
     // fails `next build` with "Cannot assign to read only property 'source'".
     const designRedirects = wisetechDesignRedirects(explicitRedirects)
       .map((rule) => ({...rule}));
+    // Only once NEXT_PUBLIC_SITE_URL says the cutover has happened. Shipped unconditionally
+    // this would send every visitor to a WordPress site that no longer expects them, with no
+    // way back except a deploy. Gated, it is inert until the env var flips and instant when
+    // it does. Pinned by tests/unit/redirects.test.ts.
+    const cutoverDone = (process.env.NEXT_PUBLIC_SITE_URL ?? "").includes("hkwtia.org");
+    const hostRedirects = cutoverDone
+      ? [{
+          source: "/:path*",
+          has: [{type: "host" as const, value: "hkwtia.vercel.app"}],
+          destination: "https://hkwtia.org/:path*",
+          permanent: true,
+        }]
+      : [];
     return [
       ...explicitRedirects,
       ...designRedirects,
       ...legacyPatternRedirects,
       ...legacyLiteralRedirects,
+      ...hostRedirects,
     ];
   },
 };
