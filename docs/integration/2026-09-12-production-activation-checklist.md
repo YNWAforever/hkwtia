@@ -9,8 +9,8 @@ the owner has deliberately held.
 
 | # | Walk | Proof required | Status | Evidence |
 |---|---|---|---|---|
-| 1 | Staff signs in and lands on `/admin` | Four dashboard queues render real counts; no new runtime error group | blocked | Fix merged in #58 (`2971c99a`) but **not promoted**; production still serves `6b76ab3d`. The bug this walk covers is confirmed in production logs — see *Runtime errors* below. |
-| 2 | Staff comps a membership to a second profile; that account signs in | `/portal` renders status and onboarding; the comp wrote a `membership.comped` audit row | blocked | Same promote hold. The form, action and repository are merged and covered by 15 unit tests. |
+| 1 | Staff signs in and lands on `/admin` | Four dashboard queues render real counts; no new runtime error group | pending | **Unblocked 2026-09-13**: `2971c99a` promoted, alias confirmed (see *Promote* below). The bug this walk covers is confirmed in the pre-promote logs — see *Runtime errors*. Needs an owner magic-link sign-in. |
+| 2 | Staff comps a membership to a second profile; that account signs in | `/portal` renders status and onboarding; the comp wrote a `membership.comped` audit row | pending | **Unblocked 2026-09-13** by the same promote. The form, action and repository are live and covered by 15 unit tests. Needs an owner sign-in. |
 | 3 | A company profile is submitted and approved at `/admin/profiles-review` | The row appears on `/members` and `/members/[slug]` renders with JSON-LD | pending | Unblocked by the `0028`–`0030` apply below — the schema this walk needs was missing until 2026-09-13. All 3 companies are currently `public_profile_status = hidden`, so `/members` is legitimately empty until one is approved. |
 | 4 | `/join` renders four plans; selecting one creates a Checkout session | Session visible in Stripe. Stops there — no charge (spec P-4) | pending | Owner action. |
 
@@ -70,6 +70,34 @@ slugless companies : [{"slugless":0}]
 `templates = 10` is why the go-live checklist's exit condition was corrected from 9 —
 PR #54 added `event_reminder_24h_zh_hk`, so the stale check would have read a correct
 migration as a failed one.
+
+## Promote
+
+`2971c99a` (the #58 merge) was promoted to production on 2026-09-13, after the owner
+authorised it. Merging alone does not promote in this project — the merge built only a
+Preview (`hkwtia-pkwc825b8`), which is why the promote is a separate, explicit step.
+
+Confirmed on the deployment behind `hkwtia.vercel.app` rather than inferred from the
+promote command's exit code:
+
+```
+id            dpl_2GQJc8t7njvNyFifGnGgi8YHhLXW
+url           hkwtia-b8v4dw83x-ynwaforevers-projects.vercel.app
+githubCommitSha  2971c99ab48c47c1544dd6e4852eadc72b51f330
+target        production      readyState  READY
+action        promote         aliasError  null
+alias         hkwtia.vercel.app, hkwtia-ynwaforevers-projects.vercel.app,
+              hkwtia-git-main-ynwaforevers-projects.vercel.app
+```
+
+Nine public routes answered 200 in both locales afterwards, and the runtime-error API
+reported no groups in the following hour. Neither is proof the walks pass — a 200 from
+`/members` is exactly the signal this plan exists to distrust — they only establish that
+the promote broke nothing outright.
+
+`main` moved to `6b5bc4f1` when PR #59 merged shortly after. That commit is documentation
+only, so production intentionally serves `2971c99a`: the two are identical in application
+code.
 
 ## Runtime errors
 
