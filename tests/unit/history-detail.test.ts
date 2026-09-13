@@ -84,20 +84,12 @@ vi.mock("next/image", async () => {
   };
 });
 
-// Content order, which is the file's own chronological order. The 2001, 2014 and
-// 2025 entries were added to the featured set so the homepage archive grid fills
-// its four cards from more than one night in 2022; each one also gains a detail
-// page and a sitemap entry, which is what this list guards.
-const featuredSlugs = [
-  "2001-establishment-of-wtia",
-  "2014-wi-fi-hk",
-  "the-strategies-for-expanding-global-internet-of-things-iot-markets",
-  "new-term-of-executive-committee-2022-2024",
-  "wtia-21st-anniversary-celebration-and-inauguration-gala-dinner",
-  "asia-smart-innovation-awards-2025",
-] as const;
-// A milestone-kind record that is deliberately not featured, so it must have no
-// detail page, no metadata and a 404.
+// Every milestone-kind record has a detail page now, not only the featured six.
+// `featured` still drives the homepage archive grid and which timeline entries show a
+// "Read more" link, but it no longer decides whether a page exists.
+const allMilestoneSlugs = milestonesOnly(milestones).map(({slug}) => slug);
+// A milestone-kind record that is deliberately not featured: it used to have no page, and
+// was the fixture for the 404 and empty-metadata cases. It must now resolve like any other.
 const unfeaturedSlug = "2002-the-1st-wtia-panel-discussion-inter-operator-sms";
 const gallerySlug = "wtia-21st-anniversary-celebration-and-inauguration-gala-dinner";
 
@@ -115,8 +107,11 @@ describe("history detail pages", () => {
     expect((messages.History as {storyTitle: string}).storyTitle).toBe(approvedStoryTitle[locale]);
   });
 
-  it("generates exactly the six pinned featured milestone params in content order", () => {
-    expect(generateStaticParams()).toEqual(featuredSlugs.map((slug) => ({slug})));
+  it("generates a param for every milestone-kind record, in content order", () => {
+    // 45 of these were previously unpageable. The sitemap lists the same set, so a route
+    // narrower than the sitemap would publish urls that 404.
+    expect(allMilestoneSlugs.length).toBeGreaterThan(6);
+    expect(generateStaticParams()).toEqual(allMilestoneSlugs.map((slug) => ({slug})));
   });
 
   it("every generated slug resolves to its pinned milestone record", () => {
@@ -125,9 +120,9 @@ describe("history detail pages", () => {
     }
   });
 
-  it("generates no param for member stories, press releases, or non-featured milestones", () => {
+  it("generates no param for member stories or press releases", () => {
     const generated = new Set(generateStaticParams().map(({slug}) => slug));
-    const excluded = milestones.filter(({kind, featured}) => kind !== "milestone" || !featured);
+    const excluded = milestones.filter(({kind}) => kind !== "milestone");
 
     expect(excluded.length).toBeGreaterThan(0);
     for (const entry of excluded) expect(generated.has(entry.slug), entry.slug).toBe(false);
@@ -190,7 +185,7 @@ describe("history detail pages", () => {
     expect(within(screen.getByRole("list")).getAllByRole("img")).toHaveLength(milestone.images.length);
   });
 
-  it("preserves exact localized metadata inputs and returns empty metadata for a disallowed slug", async () => {
+  it("preserves exact localized metadata inputs for a milestone page", async () => {
     const milestone = findBySlug(milestones, gallerySlug);
     expect(milestone).not.toBeNull();
     if (!milestone) return;
@@ -211,15 +206,29 @@ describe("history detail pages", () => {
       expect(buildPageMetadataSpy).toHaveBeenCalledExactlyOnceWith(expected);
       expect(expected.title.endsWith(locale === "zh-HK" ? "｜WiseTech Hong Kong" : " | WiseTech Hong Kong")).toBe(true);
     }
-
-    buildPageMetadataSpy.mockClear();
-    expect(await generateMetadata({
-      params: Promise.resolve({locale: "en", slug: unfeaturedSlug}),
-    })).toEqual({});
-    expect(buildPageMetadataSpy).not.toHaveBeenCalled();
   });
 
-  it("404s direct requests for non-milestone, non-featured, and unknown slugs", async () => {
+  // Previously non-featured: the page must now carry real metadata rather than {}.
+  it("returns real metadata for a milestone that is no longer excluded", async () => {
+    const milestone = findBySlug(milestones, unfeaturedSlug);
+    expect(milestone).not.toBeNull();
+    if (!milestone) return;
+
+    buildPageMetadataSpy.mockClear();
+    const expected = {
+      locale: "en",
+      pathname: `/about/history/${unfeaturedSlug}`,
+      title: brandedTitle("en", milestone.titleEn),
+      description: milestone.bodyEn.slice(0, 160),
+    };
+
+    expect(await generateMetadata({
+      params: Promise.resolve({locale: "en", slug: unfeaturedSlug}),
+    })).toEqual(expected);
+    expect(buildPageMetadataSpy).toHaveBeenCalledExactlyOnceWith(expected);
+  });
+
+  it("404s direct requests for non-milestone kinds and unknown slugs", async () => {
     const memberStory = milestones.find(({kind}) => kind === "member-story");
     const pressRelease = milestones.find(({kind}) => kind === "press-release");
     expect(memberStory).toBeDefined();
@@ -228,7 +237,6 @@ describe("history detail pages", () => {
     for (const slug of [
       memberStory!.slug,
       pressRelease!.slug,
-      unfeaturedSlug,
       "unknown-history-record",
     ]) {
       notFoundSpy.mockClear();
@@ -238,6 +246,18 @@ describe("history detail pages", () => {
       expect(notFoundSpy).toHaveBeenCalledExactlyOnceWith();
       expect(setRequestLocaleSpy).not.toHaveBeenCalled();
     }
+  });
+
+  // The page must actually render for a record that used to 404 -- the sitemap lists it,
+  // so an unresolved param here is a published url that 404s.
+  it("renders a previously non-featured milestone", async () => {
+    const milestone = findBySlug(milestones, unfeaturedSlug);
+    expect(milestone).not.toBeNull();
+    if (!milestone) return;
+
+    render(await HistoryDetailPage({params: Promise.resolve({locale: "en", slug: unfeaturedSlug})}));
+
+    expect(screen.getByRole("heading", {level: 1, name: milestone.titleEn})).toBeVisible();
   });
 
   // The 20+1 anniversary record shipped as a verbatim scrape of its own 2022

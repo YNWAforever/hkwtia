@@ -12,23 +12,26 @@ import {milestones} from "@/content/milestones";
 import type {MilestoneRecord} from "@/content/schemas";
 import type {AppLocale} from "@/i18n/routing";
 import {buildOtherAboutRoutes} from "@/lib/about/related-routes";
-import {featuredOnly, findBySlug, historyCompassFacts, milestonesOnly} from "@/lib/history/milestones";
+import {findBySlug, historyCompassFacts, milestonesOnly} from "@/lib/history/milestones";
 import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
 
 type Props = {params: Promise<{locale: string; slug: string}>};
 
 export function generateStaticParams() {
-  return featuredOnly(milestonesOnly(milestones)).map(({slug}) => ({slug}));
+  // Every milestone, not only the featured six: 45 records of bilingual association
+  // history had a timeline entry but no page of their own. Must stay in lockstep with
+  // app/sitemap.ts -- a sitemap wider than this route publishes urls that 404.
+  return milestonesOnly(milestones).map(({slug}) => ({slug}));
 }
 
-function resolveFeaturedMilestone(slug: string): MilestoneRecord | null {
+function resolveMilestone(slug: string): MilestoneRecord | null {
   const milestone = findBySlug(milestones, slug);
-  return milestone && milestone.kind === "milestone" && milestone.featured ? milestone : null;
+  return milestone && milestone.kind === "milestone" ? milestone : null;
 }
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
-  const milestone = resolveFeaturedMilestone(slug);
+  const milestone = resolveMilestone(slug);
   if (!milestone) return {};
 
   return buildPageMetadata({
@@ -42,7 +45,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 // No `dynamic` export: like /about/history, this reads typed content bundled at build time.
 export default async function HistoryDetailPage({params}: Props) {
   const {locale, slug} = await params;
-  const milestone = resolveFeaturedMilestone(slug);
+  const milestone = resolveMilestone(slug);
   if (!milestone) notFound();
   setRequestLocale(locale);
   const t = await getTranslations("History");

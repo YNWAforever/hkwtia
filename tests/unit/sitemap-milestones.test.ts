@@ -1,3 +1,4 @@
+import {readFileSync} from "node:fs";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const publicPosts = vi.hoisted(() => ({
@@ -11,12 +12,12 @@ vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: showcase}));
 
 import sitemap from "@/app/sitemap";
 import {milestones} from "@/content/milestones";
-import {featuredOnly, milestonesOnly} from "@/lib/history/milestones";
+import {milestonesOnly} from "@/lib/history/milestones";
 
 /**
- * The featured milestones were given their own URLs so 25 years of inbound
- * links have somewhere specific to land. A page absent from the sitemap is a
- * page search engines have to stumble into, which defeats the reason it exists.
+ * Every milestone now has its own page, so every one belongs in the sitemap. A page
+ * absent from the sitemap is a page search engines have to stumble into; a sitemap entry
+ * with no page is worse, because it publishes a url that 404s.
  */
 describe("milestone detail pages in the sitemap", () => {
   beforeEach(() => {
@@ -26,26 +27,39 @@ describe("milestone detail pages in the sitemap", () => {
     showcase.listPublishedSlugs.mockResolvedValue([]);
   });
 
-  it("lists every featured milestone in both locales", async () => {
+  it("lists every milestone in both locales", async () => {
     const urls = (await sitemap()).map((entry) => entry.url);
-    const featured = featuredOnly(milestonesOnly(milestones));
+    const all = milestonesOnly(milestones);
 
-    expect(featured.length).toBeGreaterThan(0);
-    for (const {slug} of featured) {
+    // 51 milestones exist; only 6 were `featured`. The other 45 are real, bilingual,
+    // 25-year association history rescued from the WordPress archive.
+    expect(all.length).toBeGreaterThan(6);
+    for (const {slug} of all) {
       expect(urls, slug).toContain(`http://localhost:3000/about/history/${slug}`);
       expect(urls, slug).toContain(`http://localhost:3000/zh/about/history/${slug}`);
     }
   });
 
-  // A non-featured milestone has no page of its own — it renders inline on the
-  // timeline — so advertising a URL for it would list a 404.
-  it("lists no url for a milestone without its own page", async () => {
+  // Member stories redirect to /showcase and press releases to /news; neither is WTIA's
+  // own institutional history, so neither gets a history detail page or a sitemap entry.
+  it("lists no url for a member story or press release", async () => {
     const urls = new Set((await sitemap()).map((entry) => entry.url));
-    const unfeatured = milestonesOnly(milestones).filter(({featured}) => !featured);
+    const excluded = milestones.filter(({kind}) => kind !== "milestone");
 
-    expect(unfeatured.length).toBeGreaterThan(0);
-    for (const {slug} of unfeatured) {
+    expect(excluded.length).toBeGreaterThan(0);
+    for (const {slug} of excluded) {
       expect(urls.has(`http://localhost:3000/about/history/${slug}`), slug).toBe(false);
     }
+  });
+
+  it("keeps the sitemap and the route on the same filter", () => {
+    // These drifting apart is the actual failure mode: filtering the sitemap more widely
+    // than generateStaticParams publishes urls that 404, which is worse than omitting
+    // them. Read as source so the coupling is asserted, not assumed.
+    const route = readFileSync("app/[locale]/(public)/about/history/[slug]/page.tsx", "utf8");
+    const sitemapSource = readFileSync("app/sitemap.ts", "utf8");
+
+    const filterOf = (source: string) => (/featuredOnly\(milestonesOnly\(/.test(source) ? "featured" : "all");
+    expect(filterOf(route)).toBe(filterOf(sitemapSource));
   });
 });
