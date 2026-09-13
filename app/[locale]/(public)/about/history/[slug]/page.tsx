@@ -14,6 +14,7 @@ import type {AppLocale} from "@/i18n/routing";
 import {buildOtherAboutRoutes} from "@/lib/about/related-routes";
 import {findBySlug, historyCompassFacts, milestonesOnly} from "@/lib/history/milestones";
 import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
+import {ogImagePath} from "@/lib/og/resolve-renderer";
 
 type Props = {params: Promise<{locale: string; slug: string}>};
 
@@ -34,11 +35,16 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   const milestone = resolveMilestone(slug);
   if (!milestone) return {};
 
+  const t = await getTranslations({locale, namespace: "History"});
+  const title = locale === "zh-HK" ? milestone.titleZh : milestone.titleEn;
   return buildPageMetadata({
     locale: locale as AppLocale,
     pathname: `/about/history/${slug}`,
-    title: brandedTitle(locale as AppLocale, locale === "zh-HK" ? milestone.titleZh : milestone.titleEn),
+    title: brandedTitle(locale as AppLocale, title),
     description: (locale === "zh-HK" ? milestone.bodyZh : milestone.bodyEn).slice(0, 160),
+    // Milestone records carry images, but the card is editorial: the archive photographs are
+    // not a consistent 1200x630 hero, so the unadorned editorial treatment is the honest one.
+    image: ogImagePath({kind: "milestone", title, eyebrow: t("eyebrow"), imageUrl: null}),
   });
 }
 

@@ -13,6 +13,7 @@ import {
 import {milestones} from "@/content/milestones";
 import {findBySlug, milestonesOnly} from "@/lib/history/milestones";
 import {brandedTitle} from "@/lib/metadata";
+import {ogImagePath} from "@/lib/og/resolve-renderer";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh-HK.json";
 
@@ -194,12 +195,15 @@ describe("history detail pages", () => {
       buildPageMetadataSpy.mockClear();
       const title = locale === "zh-HK" ? milestone.titleZh : milestone.titleEn;
       const body = locale === "zh-HK" ? milestone.bodyZh : milestone.bodyEn;
+      const eyebrow = locale === "zh-HK" ? zh.History.eyebrow : en.History.eyebrow;
       // D-1: a record title carries no suffix of its own, so the page brands it at runtime.
       const expected = {
         locale,
         pathname: `/about/history/${gallerySlug}`,
         title: brandedTitle(locale, title),
         description: body.slice(0, 160),
+        // Phase D: every detail page now points its metadata at its own share card.
+        image: ogImagePath({kind: "milestone", title, eyebrow, imageUrl: null}),
       };
 
       expect(await generateMetadata({params: Promise.resolve({locale, slug: gallerySlug})})).toEqual(expected);
@@ -220,6 +224,7 @@ describe("history detail pages", () => {
       pathname: `/about/history/${unfeaturedSlug}`,
       title: brandedTitle("en", milestone.titleEn),
       description: milestone.bodyEn.slice(0, 160),
+      image: ogImagePath({kind: "milestone", title: milestone.titleEn, eyebrow: en.History.eyebrow, imageUrl: null}),
     };
 
     expect(await generateMetadata({

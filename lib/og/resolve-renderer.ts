@@ -51,3 +51,15 @@ export function resolveOgRenderer(entity: OgEntity): ResolvedOgRenderer {
   // to a renderer that would not know what to do with it.
   return {renderer: "editorial", props: base};
 }
+
+/**
+ * The `/api/og` url for an entity, for `buildPageMetadata`'s `image`.
+ *
+ * `URLSearchParams` does the encoding: a title containing `&` -- "Tech & Wisdom" is the
+ * site's own tagline -- would otherwise cut the query short and lose the eyebrow.
+ */
+export function ogImagePath(entity: OgEntity): string {
+  const params = new URLSearchParams({kind: entity.kind, title: entity.title, eyebrow: entity.eyebrow});
+  if (entity.imageUrl) params.set("image", entity.imageUrl);
+  return `/api/og?${params.toString()}`;
+}

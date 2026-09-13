@@ -1,5 +1,5 @@
 import type {Metadata} from "next";
-import {setRequestLocale} from "next-intl/server";
+import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 
 import {BuildLogDetail} from "@/components/marketing/build-log-detail";
@@ -14,6 +14,7 @@ import {
   type PublishedNewsDetail,
 } from "@/lib/db/repos/public-posts";
 import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
+import {ogImagePath} from "@/lib/og/resolve-renderer";
 import {buildArticleData} from "@/lib/structured-data";
 
 export const dynamic = "force-dynamic";
@@ -69,6 +70,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
     ? resolved.post.title
     : appLocale === "zh-HK" ? resolved.post.titleZh : resolved.post.titleEn;
   const post = resolved.post;
+  const t = await getTranslations({locale, namespace: "News"});
   return buildPageMetadata({
     locale: appLocale,
     pathname: `/news/${post.slug}`,
@@ -77,6 +79,9 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
       dateStyle: "long",
       timeZone: "Asia/Hong_Kong",
     }).format(post.publishedAt)}`,
+    // Build logs share this route and are editorial too, so both post kinds get the
+    // editorial card (neither carries an image column).
+    image: ogImagePath({kind: "news", title, eyebrow: t("eyebrow"), imageUrl: null}),
   });
 }
 
