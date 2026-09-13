@@ -44,13 +44,17 @@ describe("routeBreadcrumbItems", () => {
     const items = routeBreadcrumbItems("zh-HK", "/about/chairman", translate(zhHK));
 
     // CLAUDE.md hard boundary 5: zh-HK is served at /zh. A literal `/zh-HK/...` here
-    // would be invisible until a crawler read it. The home trail item is exactly "/zh"
-    // with no trailing slash -- localizedPath's own root-path case (also relied on by
-    // lib/ai/concierge-prompts.ts) -- so this checks for the prefix, not "/zh/".
-    for (const item of items) {
-      expect(item.url).toContain("/zh");
-      expect(item.url).not.toContain("/zh-HK/");
-    }
+    // would be invisible until a crawler read it.
+    //
+    // Whole urls rather than toContain("/zh"): "/zh" is a prefix of "/zh-HK", so the
+    // substring check passes for the very value it exists to reject. The root item is
+    // exactly "/zh" with no trailing slash -- localizedPath's own root-path case, also
+    // relied on by lib/ai/concierge-prompts.ts -- which is why it differs in shape.
+    expect(items.map((item) => item.url)).toEqual([
+      "http://localhost:3000/zh",
+      "http://localhost:3000/zh/about",
+      "http://localhost:3000/zh/about/chairman",
+    ]);
   });
 
   it("skips intermediate segments that are not themselves public routes", () => {
