@@ -15,7 +15,7 @@ import {summarizeProgrammes} from '@/lib/home/programme-summaries';
 import {brandedTitle, buildPageMetadata} from '@/lib/metadata';
 import {buildProgrammeHeaderFacts} from '@/lib/programs/programme-header';
 import {routeBreadcrumbItems} from '@/lib/seo/route-breadcrumbs';
-import {buildBreadcrumbData} from '@/lib/structured-data';
+import {buildBreadcrumbData, buildEventSeriesData} from '@/lib/structured-data';
 
 type Props = {params: Promise<{locale: string}>};
 const program = programs.find((item) => item.id === 'cpai')!;
@@ -77,6 +77,7 @@ export default async function CpaiPage({params}: Props) {
         syllabus={cpai.syllabus.map((module) => (zh ? module.titleZh : module.titleEn))}
         syllabusHeading={tr('credentialSyllabus')}
       />
+      <StructuredData data={buildEventSeriesData({key: 'cpai', name: t('title'), description: t('description')}, locale as AppLocale)} />
       <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, '/programs/cpai', tRoot))} />
     </>
   );

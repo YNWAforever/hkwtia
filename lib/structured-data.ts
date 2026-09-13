@@ -1,4 +1,4 @@
-import type {Article, BreadcrumbList, Event, EventAttendanceModeEnumeration, FAQPage, Organization, WebSite, WithContext} from 'schema-dts';
+import type {Article, BreadcrumbList, Event, EventAttendanceModeEnumeration, EventSeries, FAQPage, Organization, WebSite, WithContext} from 'schema-dts';
 
 import {siteConfig} from '@/config/site';
 import type {EventRecord} from '@/content/schemas';
@@ -163,6 +163,29 @@ export function buildArticleData(record: ArticleRecord, locale: AppLocale): With
     inLanguage: locale === 'en' ? 'en-HK' : 'zh-HK',
     ...(record.author ? {author: {'@type': 'Person' as const, name: record.author}} : {}),
     publisher: buildOrganizationData(),
+  };
+}
+
+export type EventSeriesRecord = Readonly<{
+  key: 'cpai' | 'hkict' | 'tct' | 'asa';
+  name: string;
+  description: string;
+}>;
+
+// Programme D: EventSeries, not Event. These are recurring award and event programmes, and
+// Event would assert a single dated occurrence the page does not describe. Individual
+// editions remain Event, built by buildEventData.
+export function buildEventSeriesData(
+  record: EventSeriesRecord,
+  locale: AppLocale,
+): WithContext<EventSeries> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'EventSeries',
+    name: record.name,
+    description: record.description,
+    url: absoluteUrl(localizedPath(locale, `/programs/${record.key}`)),
+    organizer: buildOrganizationData(),
   };
 }
 

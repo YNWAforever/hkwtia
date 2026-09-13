@@ -19,7 +19,7 @@ import {summarizeProgrammes} from '@/lib/home/programme-summaries';
 import {brandedTitle, buildPageMetadata} from '@/lib/metadata';
 import {buildProgrammeHeaderFacts} from '@/lib/programs/programme-header';
 import {routeBreadcrumbItems} from '@/lib/seo/route-breadcrumbs';
-import {buildBreadcrumbData} from '@/lib/structured-data';
+import {buildBreadcrumbData, buildEventSeriesData} from '@/lib/structured-data';
 
 type Props = {params: Promise<{locale: string}>};
 const program = programs.find((item) => item.id === 'asa')!;
@@ -109,6 +109,7 @@ export default async function AsaPage({params}: Props) {
           };
         })}
       />
+      <StructuredData data={buildEventSeriesData({key: 'asa', name: t('title'), description: t('description')}, locale as AppLocale)} />
       <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, '/programs/asa', tRoot))} />
     </>
   );
