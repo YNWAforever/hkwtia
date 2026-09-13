@@ -342,6 +342,14 @@ export const memberships = pgTable(
     uniqueIndex("memberships_owner_live_unique")
       .on(table.ownerUserId)
       .where(sql`${table.ownerUserId} IS NOT NULL AND ${table.status} NOT IN ('cancelled', 'expired')`),
+    // The company twin. getSeatOverview already joins memberships on company_id, filters
+    // to live statuses and takes LIMIT 1 -- so a second live row would not be rejected,
+    // it would be silently picked between, and the company's seat limit would depend on
+    // which row won. The invariant was already assumed; this is the first thing to
+    // enforce it.
+    uniqueIndex("memberships_company_live_unique")
+      .on(table.companyId)
+      .where(sql`${table.companyId} IS NOT NULL AND ${table.status} NOT IN ('cancelled', 'expired')`),
     index("memberships_owner_idx").on(table.ownerUserId),
     index("memberships_company_idx").on(table.companyId),
     index("memberships_billing_period_end_idx").on(table.billingPeriodEnd),
