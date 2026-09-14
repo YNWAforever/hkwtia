@@ -32,26 +32,46 @@ describe("agentRunsRepository writer runs", () => {
     await repository.start(writer, {provider: null, model: null});
     const sql = statements[0]!.sql.toLowerCase();
     expect(sql).toContain('insert into "agent_runs"');
-    expect(sql).not.toContain("from conversations");
+    // Drizzle quotes identifiers, so the unquoted `from conversations` this
+    // used to assert against could never match — the negative was vacuous.
+    // The writer actor takes the self-contained `INSERT … VALUES` arm; the
+    // concierge arm is `INSERT … SELECT … FROM "conversations"` and is
+    // ownership-guarded. Assert the discriminating shape, quoted.
+    expect(sql).toMatch(/insert into "agent_runs"[\s\S]*values/i);
+    expect(sql).not.toMatch(/from "conversations"/i);
     expect(statements[0]!.params).toContain("writer");
     expect(statements[0]!.params).toContain("profile-9");
     expect(statements[0]!.params).toContain("portal");
   });
 
   it("counts a member's writer runs since a timestamp", async () => {
-    const execute = vi.fn(async () => [{count: 3}]);
-    const repository = createAgentRunsRepository(async () => ({execute} as never));
+    const {database, statements} = recordingDatabase([[{count: 3}]]);
+    const repository = createAgentRunsRepository(async () => database);
     await expect(repository.countWriterRuns(
       {kind: "member", userId: "u1", profileId: "profile-9"},
       new Date("2026-09-01T00:00:00Z"),
     )).resolves.toBe(3);
+    // The resolved number is not evidence the query scoped to the actor: a
+    // regression that dropped `AND profile_id = …` would count every member's
+    // runs toward this member's quota and still resolve `3` from this fake.
+    // Assert the emitted statement carries both scopes and the actor's id.
+    expect(statements).toHaveLength(1);
+    const normalized = statements[0]!.sql.replace(/\s+/g, " ").toLowerCase();
+    expect(normalized).toMatch(/from "agent_runs"/);
+    expect(normalized).toMatch(/agent = 'writer'/);
+    expect(normalized).toMatch(/profile_id = \$1/);
+    expect(statements[0]!.params).toContain("profile-9");
   });
 
   it("refuses a non-member actor for the count", async () => {
-    const repository = createAgentRunsRepository(async () => ({execute: vi.fn()} as never));
+    const {database, execute} = recordingDatabase();
+    const repository = createAgentRunsRepository(async () => database);
     await expect(repository.countWriterRuns(
       {kind: "anonymous", userId: null},
       new Date(),
     )).rejects.toThrow("FORBIDDEN");
+    // `requireMember` fires before `loadDatabase`/`execute`, so the guard — not
+    // a downstream query — is what rejected the actor.
+    expect(execute).not.toHaveBeenCalled();
   });
 });
