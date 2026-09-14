@@ -9,6 +9,7 @@ import {
   type WriterAgentConfig,
   type WriterDependencies,
 } from "@/lib/ai/writers/generate";
+import {WRITER_KINDS, type WriterOutput} from "@/lib/ai/writers/contracts";
 import {writerSystemPrompt} from "@/config/agents/writer";
 
 const actor: WriterAgentActor = {
@@ -45,6 +46,49 @@ function harness(options: {deltas?: string[]; finish?: Record<string, unknown>} 
   return {agentConfig, adoptPrestarted, runtimeStream, finalize, fail};
 }
 
+function writerHarness(deltas: string[]) {
+  const finalize = vi.fn(async () => completedFinish());
+  const fail = vi.fn(async (error?: unknown) => (error instanceof AgentRuntimeError ? error : new AgentRuntimeError("invalid_provider_response")));
+  const runtimeStream = {
+    runId: actor.runId,
+    textStream: text(...deltas),
+    finish: Promise.resolve(completedFinish()),
+    finalize,
+    fail,
+  };
+  const adoptPrestarted = vi.fn(() => ({runId: actor.runId, fail}));
+  const stream = vi.fn(async () => runtimeStream);
+  const start = vi.fn(async () => {});
+  const dependencies: Partial<WriterDependencies> = {
+    agentRuns: {start} as unknown as WriterDependencies["agentRuns"],
+    runtime: {adoptPrestarted, stream},
+    credentials: {openaiApiKey: "test"},
+    enabled: true,
+    model: "openai:gpt-4.1-mini",
+    createRunId: () => actor.runId,
+  };
+  return {dependencies, adoptPrestarted, runtimeStream, finalize, fail, stream, start};
+}
+
+const writerOutputs = {
+  profile: {
+    taglineEn: "Profile tagline",
+    taglineZhHk: "\u7c21\u4ecb",
+    description: "Profile description",
+    descriptionZhHk: "\u63cf\u8ff0",
+  },
+  listing: {
+    taglineEn: "Listing tagline",
+    taglineZhHk: "\u5217\u8868",
+    descriptionEn: "Listing description",
+    descriptionZhHk: "\u63cf\u8ff0",
+  },
+  event: {
+    descriptionEn: "Event description",
+    descriptionZh: "\u6d3b\u52d5\u63cf\u8ff0",
+  },
+} satisfies WriterOutput;
+
 const okSchema = z.object({ok: z.boolean()}).strict();
 
 describe("runWriterJson", () => {
@@ -62,16 +106,24 @@ describe("runWriterJson", () => {
     ["a tool call", {finishReason: "tool-calls"}],
     ["a non-completed finish", {status: "disabled"}],
   ])("rejects %s", async (_case, finish) => {
-    const {agentConfig} = harness({deltas: ['{"ok":true}'], finish});
-    await expect(runWriterJson({actor, agentConfig, prompt: "brief", outputSchema: okSchema})).rejects.toBeInstanceOf(AgentRuntimeError);
+    const {agentConfig, finalize, fail} = harness({deltas: ['{"ok":true}'], finish});
+    const run = runWriterJson({actor, agentConfig, prompt: "brief", outputSchema: okSchema});
+    await expect(run).rejects.toBeInstanceOf(AgentRuntimeError);
+    await expect(run).rejects.toMatchObject({code: "invalid_provider_response"});
+    expect(fail).toHaveBeenCalledOnce();
+    expect(finalize).not.toHaveBeenCalled();
   });
 
   it.each([
     ["invalid JSON", ["not json"]],
     ["a field the schema refuses", ['{"ok":"yes"}']],
   ])("rejects %s", async (_case, deltas) => {
-    const {agentConfig} = harness({deltas});
-    await expect(runWriterJson({actor, agentConfig, prompt: "brief", outputSchema: okSchema})).rejects.toBeInstanceOf(AgentRuntimeError);
+    const {agentConfig, finalize, fail} = harness({deltas});
+    const run = runWriterJson({actor, agentConfig, prompt: "brief", outputSchema: okSchema});
+    await expect(run).rejects.toBeInstanceOf(AgentRuntimeError);
+    await expect(run).rejects.toMatchObject({code: "invalid_provider_response"});
+    expect(fail).toHaveBeenCalledOnce();
+    expect(finalize).not.toHaveBeenCalled();
   });
 });
 
@@ -133,5 +185,34 @@ describe("generateWriterCopy", () => {
       system: writerSystemPrompt("event"),
       tools: {},
     }));
+  });
+
+  it.each([...WRITER_KINDS])("validates kind %s against its own output schema", async (kind) => {
+    const expected = writerOutputs[kind];
+    const {dependencies, finalize, fail} = writerHarness([JSON.stringify(expected)]);
+
+    await expect(generateWriterCopy({
+      memberActor,
+      kind,
+      brief: "brief",
+      dependencies,
+    })).resolves.toEqual(expected);
+
+    expect(fail).not.toHaveBeenCalled();
+    expect(finalize).toHaveBeenCalledOnce();
+  });
+
+  it("refuses another kind's shape for the kind requested", async () => {
+    const {dependencies, finalize, fail} = writerHarness([JSON.stringify(writerOutputs.profile)]);
+
+    await expect(generateWriterCopy({
+      memberActor,
+      kind: "event",
+      brief: "brief",
+      dependencies,
+    })).rejects.toMatchObject({code: "invalid_provider_response"});
+
+    expect(fail).toHaveBeenCalledOnce();
+    expect(finalize).not.toHaveBeenCalled();
   });
 });
