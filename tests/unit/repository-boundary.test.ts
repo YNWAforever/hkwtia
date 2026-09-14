@@ -372,11 +372,22 @@ describe("repository database boundary", () => {
       /kind:\s*["']agent["']|AgentRunActor/,
     );
     expect(agentActor).toContain('kind: "agent"');
-    expect(agentActor).toContain(
-      "export type AgentRunActor = ConciergeAgentActor | ScheduledAgentActor;",
-    );
-    expect(agentActor).toContain(
-      "export type Actor = SessionActor | AgentRunActor;",
+    // Anchor on the property that matters — which agent actors the union names —
+    // rather than one exact spelling, so adding an actor does not silently
+    // retire this boundary check (Phase D-3 added WriterAgentActor).
+    const agentRunActor = agentActor.match(
+      /export type AgentRunActor\s*=([\s\S]*?);/,
+    )?.[1];
+    expect(agentRunActor).toBeDefined();
+    for (const member of [
+      "ConciergeAgentActor",
+      "ScheduledAgentActor",
+      "WriterAgentActor",
+    ]) {
+      expect(agentRunActor).toContain(member);
+    }
+    expect(agentActor).toMatch(
+      /export type Actor\s*=\s*SessionActor\s*\|\s*AgentRunActor;/,
     );
   });
 });

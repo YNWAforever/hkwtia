@@ -11,6 +11,8 @@ export type Entitlements = Readonly<{
   whatsappSupport: WhatsAppSupport;
   memberTools: "trial" | "included";
   coBrandedEvents: boolean;
+  /** AI writer generations attempted per Asia/Hong_Kong calendar month; Infinity = unlimited. */
+  aiWriterRunsPerMonth: number;
 }>;
 
 /**
@@ -20,10 +22,10 @@ export type Entitlements = Readonly<{
  * shown on /membership for the same facts.
  */
 export const ENTITLEMENTS: Readonly<Record<MembershipPlanCode, Entitlements>> = Object.freeze({
-  community: Object.freeze({directoryListing: "card", publishEventsPerQuarter: 0, showcaseListings: 0, whatsappSupport: "none", memberTools: "trial", coBrandedEvents: false}),
-  startup: Object.freeze({directoryListing: "profile", publishEventsPerQuarter: 2, showcaseListings: 1, whatsappSupport: "standard", memberTools: "included", coBrandedEvents: false}),
-  corporate: Object.freeze({directoryListing: "featured", publishEventsPerQuarter: Number.POSITIVE_INFINITY, showcaseListings: 3, whatsappSupport: "priority", memberTools: "included", coBrandedEvents: false}),
-  patron: Object.freeze({directoryListing: "featured", publishEventsPerQuarter: Number.POSITIVE_INFINITY, showcaseListings: 3, whatsappSupport: "dedicated", memberTools: "included", coBrandedEvents: true}),
+  community: Object.freeze({directoryListing: "card", publishEventsPerQuarter: 0, showcaseListings: 0, whatsappSupport: "none", memberTools: "trial", coBrandedEvents: false, aiWriterRunsPerMonth: 0}),
+  startup: Object.freeze({directoryListing: "profile", publishEventsPerQuarter: 2, showcaseListings: 1, whatsappSupport: "standard", memberTools: "included", coBrandedEvents: false, aiWriterRunsPerMonth: 20}),
+  corporate: Object.freeze({directoryListing: "featured", publishEventsPerQuarter: Number.POSITIVE_INFINITY, showcaseListings: 3, whatsappSupport: "priority", memberTools: "included", coBrandedEvents: false, aiWriterRunsPerMonth: 100}),
+  patron: Object.freeze({directoryListing: "featured", publishEventsPerQuarter: Number.POSITIVE_INFINITY, showcaseListings: 3, whatsappSupport: "dedicated", memberTools: "included", coBrandedEvents: true, aiWriterRunsPerMonth: Number.POSITIVE_INFINITY}),
 });
 
 export function entitlementsFor(plan: MembershipPlanCode): Entitlements {
@@ -33,4 +35,8 @@ export function entitlementsFor(plan: MembershipPlanCode): Entitlements {
 
 export function canPublishEvents(plan: MembershipPlanCode): boolean {
   return entitlementsFor(plan).publishEventsPerQuarter > 0;
+}
+
+export function aiWriterRunsPerMonth(plan: MembershipPlanCode): number {
+  return entitlementsFor(plan).aiWriterRunsPerMonth;
 }
