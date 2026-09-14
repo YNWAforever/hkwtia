@@ -28,13 +28,27 @@ function Host() {
   );
 }
 
+function CountingHost({onGenerated}: {onGenerated: (copy: Readonly<Record<string, string>>) => void}) {
+  const [, setTick] = useState(0);
+  return (
+    <>
+      <WriterAssist kind="event" labels={labels} quotaLabel="Unlimited generations" exhausted={false} onGenerated={(copy) => onGenerated(copy)} />
+      <button onClick={() => setTick((n) => n + 1)} type="button">rerender</button>
+    </>
+  );
+}
+
 describe("WriterAssist", () => {
   beforeEach(() => {
     state.result = {status: "ok", copy: {descriptionEn: "En", descriptionZh: "Zh"}};
   });
 
-  it("offers a brief, a Generate button and the quota line", () => {
+  // The control is a collapsed disclosure; open it before touching its contents.
+  const open = () => fireEvent.click(screen.getByText("Write with AI"));
+
+  it("offers a brief, a Generate button and the quota line once opened", () => {
     render(<Host />);
+    open();
     expect(screen.getByRole("button", {name: "Generate"})).toBeVisible();
     expect(screen.getByLabelText("What is this about?")).toBeVisible();
     expect(screen.getByText("Unlimited generations")).toBeVisible();
@@ -42,6 +56,7 @@ describe("WriterAssist", () => {
 
   it("hands the generated copy to onGenerated", async () => {
     render(<Host />);
+    open();
     fireEvent.change(screen.getByLabelText("What is this about?"), {target: {value: "A new workshop"}});
     fireEvent.click(screen.getByRole("button", {name: "Generate"}));
     await waitFor(() => expect(screen.getByTestId("copy")).toHaveTextContent('{"descriptionEn":"En","descriptionZh":"Zh"}'));
@@ -50,13 +65,38 @@ describe("WriterAssist", () => {
   it("renders the error code's message, not the code", async () => {
     state.result = {status: "error", code: "QUOTA_EXCEEDED"};
     render(<Host />);
+    open();
     fireEvent.click(screen.getByRole("button", {name: "Generate"}));
     expect(await screen.findByRole("alert")).toHaveTextContent("Quota");
   });
 
   it("disables Generate when the quota is exhausted", () => {
     render(<WriterAssist kind="event" labels={labels} quotaLabel="0 of 20 generations left this month" exhausted onGenerated={() => {}} />);
+    open();
     expect(screen.getByRole("button", {name: "Generate"})).toBeDisabled();
+  });
+
+  it("applies onGenerated once when the host re-renders without a new result", async () => {
+    const onGenerated = vi.fn();
+    render(<CountingHost onGenerated={onGenerated} />);
+    open();
+    fireEvent.click(screen.getByRole("button", {name: "Generate"}));
+    await waitFor(() => expect(onGenerated).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole("button", {name: "rerender"}));
+    fireEvent.click(screen.getByRole("button", {name: "rerender"}));
+    expect(onGenerated).toHaveBeenCalledTimes(1);
+  });
+
+  it("applies onGenerated again for a second generation", async () => {
+    const onGenerated = vi.fn();
+    render(<CountingHost onGenerated={onGenerated} />);
+    open();
+    fireEvent.click(screen.getByRole("button", {name: "Generate"}));
+    await waitFor(() => expect(onGenerated).toHaveBeenCalledTimes(1));
+    state.result = {status: "ok", copy: {descriptionEn: "En2", descriptionZh: "Zh2"}};
+    fireEvent.click(screen.getByRole("button", {name: "Generate"}));
+    await waitFor(() => expect(onGenerated).toHaveBeenCalledTimes(2));
+    expect(onGenerated).toHaveBeenLastCalledWith({descriptionEn: "En2", descriptionZh: "Zh2"});
   });
 });
 

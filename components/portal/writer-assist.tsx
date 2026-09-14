@@ -20,7 +20,7 @@ export type WriterAssistProps = Readonly<{
 /**
  * The one control every writer surface renders. It posts a brief to the shared
  * action and hands the returned copy to `onGenerated`; the surface decides which
- * of its fields that copy belongs in. A generation persists nothing — the member
+ * of its fields that copy belongs in. A generation persists nothing ??the member
  * still saves the form, and publication stays behind the existing review machine.
  */
 export function WriterAssist({kind, labels, quotaLabel, exhausted, onGenerated}: WriterAssistProps & {
@@ -39,7 +39,7 @@ export function WriterAssist({kind, labels, quotaLabel, exhausted, onGenerated}:
   }, [state, onGenerated]);
 
   return (
-    <details open className="rounded-md border border-border bg-muted/30 p-4">
+    <details className="rounded-md border border-border bg-muted/30 p-4">
       <summary className="cursor-pointer text-sm font-medium">{labels.label}</summary>
       <form action={dispatch} className="mt-3 space-y-3">
         <input name="kind" type="hidden" value={kind} />
