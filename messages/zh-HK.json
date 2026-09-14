@@ -1880,6 +1880,23 @@
     "retry": "再試一次"
   },
   "Portal": {
+    "writer": {
+      "label": "AI 撰寫",
+      "briefLabel": "想寫關於甚麼？",
+      "briefPlaceholder": "寫一兩句重點，AI 會為你生成中英文初稿。",
+      "generate": "生成",
+      "generating": "生成中…",
+      "quota": "本月尚餘 {remaining} / {cap} 次生成",
+      "quotaUnlimited": "不限次數生成",
+      "errors": {
+        "INVALID": "請先輸入簡短說明。",
+        "FORBIDDEN": "你沒有使用此功能的權限。",
+        "NOT_ENTITLED": "你的會籍計劃未包含 AI 撰寫。",
+        "QUOTA_EXCEEDED": "你已用完本月的生成次數。",
+        "UNAVAILABLE": "AI 撰寫暫時無法使用。",
+        "FAILED": "未能生成，請再試一次。"
+      }
+    },
     "navigation": "會員平台導覽",
     "dashboard": "控制台",
     "profile": "我的個人資料",
