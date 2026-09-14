@@ -188,8 +188,10 @@ boot.
 ### 4.7 Security and privacy
 
 - The brief is member-authored, is sent to the model, and is **never persisted**. The run's
-  `summary` stores a code (the writer kind), never the brief or the generated copy; any free-text
-  summary is passed through `redactAgentSummary`.
+  `summary` carries the runtime's completion code, never the brief or the generated copy; the
+  writer's surface (profile/listing/event) is **not** recorded per run in this slice, so
+  per-surface cost reporting is a later addition. Any free-text summary is passed through
+  `redactAgentSummary`.
 - **No tools are bound to the writer run**, so the model can neither write nor fetch. It can
   return text and nothing else.
 - The brief is untrusted input: the prompt frames it as material, output is bounded and
