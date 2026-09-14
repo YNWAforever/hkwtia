@@ -100,8 +100,10 @@ profile and no conversation, which is precisely the shape the current guard reje
 gains `"writer"`. A new read, `countWriterRuns(profileId, sinceDate)`, counts the profile's
 writer runs at or after a timestamp.
 
-`lib/ai/runtime.ts`'s `AgentRuntimeActorInput` union gains the writer shape; nothing else in the
-runtime changes, because a writer run is one step with an empty tool set.
+`lib/ai/runtime.ts`'s `AgentRuntimeActorInput` union gains the writer shape, and the runtime's
+`preparedRunFor` gains the writer branch beside the concierge and scheduled ones — without it a
+`portal` actor is refused at runtime even though the type admits it. A writer run is otherwise one
+step with an empty tool set.
 
 ### 4.3 Quota
 
