@@ -98,9 +98,10 @@ export const agentNameEnum = pgEnum("agent_name", [
   "concierge",
   "retention_analyst",
   "board_reporter",
+  "writer",
 ]);
 export const postKindEnum = pgEnum("post_kind", ["news", "buildlog", "page"]);
-export const agentTriggerEnum = pgEnum("agent_trigger", ["web", "whatsapp", "scheduled"]);
+export const agentTriggerEnum = pgEnum("agent_trigger", ["web", "whatsapp", "scheduled", "portal"]);
 export const showcaseListingStatusEnum = pgEnum("showcase_listing_status", [
   "draft",
   "pending_review",

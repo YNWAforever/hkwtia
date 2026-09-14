@@ -34,11 +34,13 @@ describe("M4B scheduled-agent schema contract", () => {
       "concierge",
       "retention_analyst",
       "board_reporter",
+      "writer",
     ]);
     expect(enumValues("agentTriggerEnum")).toEqual([
       "web",
       "whatsapp",
       "scheduled",
+      "portal",
     ]);
 
     const config = tableConfig("agentRuns");
