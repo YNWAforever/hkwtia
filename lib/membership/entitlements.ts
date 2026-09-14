@@ -11,7 +11,7 @@ export type Entitlements = Readonly<{
   whatsappSupport: WhatsAppSupport;
   memberTools: "trial" | "included";
   coBrandedEvents: boolean;
-  /** AI writer generations accepted per Asia/Hong_Kong calendar month; Infinity = unlimited. */
+  /** AI writer generations attempted per Asia/Hong_Kong calendar month; Infinity = unlimited. */
   aiWriterRunsPerMonth: number;
 }>;
 

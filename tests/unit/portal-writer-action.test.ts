@@ -36,8 +36,16 @@ describe("runWriterAssist", () => {
 
   it("takes the best plan when a member holds several", async () => {
     const countRuns = vi.fn(async () => 5);
-    await expect(runWriterAssist(member, {kind: "event", brief: "hello"}, deps({plansFor: async () => ["community", "corporate"], countRuns})))
+    await expect(runWriterAssist(member, {kind: "event", brief: "hello"}, deps({plansFor: async () => ["startup", "corporate"], countRuns})))
       .resolves.toEqual({status: "ok", copy: {descriptionEn: "a", descriptionZh: "b"}});
+  });
+
+  it("uses the best plan's cap, not the sum of the plans' caps", async () => {
+    // startup (20) + corporate (100): a count of 110 is over the max cap (100)
+    // though under the sum (120), so only a max would refuse it.
+    const countRuns = vi.fn(async () => 110);
+    await expect(runWriterAssist(member, {kind: "event", brief: "hello"}, deps({plansFor: async () => ["startup", "corporate"], countRuns})))
+      .resolves.toEqual({status: "error", code: "QUOTA_EXCEEDED"});
   });
 
   it("refuses a non-member actor and a malformed brief", async () => {
@@ -45,6 +53,27 @@ describe("runWriterAssist", () => {
       .resolves.toEqual({status: "error", code: "FORBIDDEN"});
     await expect(runWriterAssist(member, {kind: "event", brief: ""}, deps()))
       .resolves.toEqual({status: "error", code: "INVALID"});
+  });
+
+  it("maps a throwing plan read to FAILED instead of escaping the action", async () => {
+    const plansFor = vi.fn(async () => { throw new Error("db down"); });
+    await expect(runWriterAssist(member, {kind: "event", brief: "hello"}, deps({plansFor})))
+      .resolves.toEqual({status: "error", code: "FAILED"});
+  });
+
+  it("maps a throwing quota read to FAILED instead of escaping the action", async () => {
+    const countRuns = vi.fn(async () => { throw new Error("db down"); });
+    await expect(runWriterAssist(member, {kind: "event", brief: "hello"}, deps({countRuns})))
+      .resolves.toEqual({status: "error", code: "FAILED"});
+  });
+
+  it("never generates on a refusing path", async () => {
+    const generate = vi.fn(async () => ({descriptionEn: "a", descriptionZh: "b"}));
+    await runWriterAssist({kind: "anonymous", userId: null}, {kind: "event", brief: "hello"}, deps({generate}));
+    await runWriterAssist(member, {kind: "event", brief: "hello"}, deps({generate, plansFor: async () => ["community"]}));
+    await runWriterAssist(member, {kind: "event", brief: "hello"}, deps({generate, countRuns: async () => 20}));
+    await runWriterAssist(member, {kind: "event", brief: ""}, deps({generate}));
+    expect(generate).not.toHaveBeenCalled();
   });
 
   it("maps a generation failure to FAILED", async () => {
@@ -63,5 +92,13 @@ describe("runWriterAssist", () => {
 describe("startOfHongKongMonth", () => {
   it("is the first instant of the month in Hong Kong time", () => {
     expect(startOfHongKongMonth(new Date("2026-09-14T04:00:00Z")).toISOString()).toBe("2026-08-31T16:00:00.000Z");
+  });
+
+  it("starts September for an instant that is already September in Hong Kong", () => {
+    expect(startOfHongKongMonth(new Date("2026-08-31T17:00:00Z")).toISOString()).toBe("2026-08-31T16:00:00.000Z");
+  });
+
+  it("stays in August for an instant that is still August in Hong Kong", () => {
+    expect(startOfHongKongMonth(new Date("2026-08-31T15:00:00Z")).toISOString()).toBe("2026-07-31T16:00:00.000Z");
   });
 });

@@ -60,12 +60,26 @@ export async function runWriterAssist(
   const parsed = writerBriefSchema.safeParse(input);
   if (!parsed.success) return {status: "error", code: "INVALID"};
 
-  const plans = await dependencies.plansFor(actor);
+  let plans: readonly MembershipPlanCode[];
+  try {
+    plans = await dependencies.plansFor(actor);
+  } catch {
+    // A transient membership read is a server fault, but it must still reach the
+    // member as a state to render rather than as a rejected action that discards
+    // the brief they typed.
+    return {status: "error", code: "FAILED"};
+  }
   const cap = quotaFor(plans);
   if (cap === 0) return {status: "error", code: "NOT_ENTITLED"};
 
   const since = startOfHongKongMonth(dependencies.now());
-  if (await dependencies.countRuns(actor, since) >= cap) return {status: "error", code: "QUOTA_EXCEEDED"};
+  let runs: number;
+  try {
+    runs = await dependencies.countRuns(actor, since);
+  } catch {
+    return {status: "error", code: "FAILED"};
+  }
+  if (runs >= cap) return {status: "error", code: "QUOTA_EXCEEDED"};
 
   try {
     const copy = await dependencies.generate({memberActor: actor, kind: parsed.data.kind, brief: parsed.data.brief});
