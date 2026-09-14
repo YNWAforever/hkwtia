@@ -118,7 +118,9 @@ step with an empty tool set.
 
 The window is the **Asia/Hong_Kong calendar month**, matching how the application presents
 dates. The cap is the maximum across the member's active memberships; the count is per profile,
-so the three writers share one pool.
+so the three writers share one pool. **Every writer run in the window counts, whatever its
+outcome**: a provider call that fails may still have been billed, and the cap exists to bound
+spend, so the count is not filtered on status and the member-facing wording says "attempted".
 
 Enforced in the action core, not only in the UI: the control is hidden at cap 0 and disabled at
 the cap, but the action independently refuses, so a hand-made request cannot exceed the plan.
