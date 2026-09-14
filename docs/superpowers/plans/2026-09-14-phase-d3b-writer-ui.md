@@ -343,8 +343,12 @@ describe("WriterAssist", () => {
     state.result = {status: "ok", copy: {descriptionEn: "En", descriptionZh: "Zh"}};
   });
 
-  it("offers a brief, a Generate button and the quota line", () => {
+  // The control is a collapsed disclosure; open it before touching its contents.
+  const open = () => fireEvent.click(screen.getByText("Write with AI"));
+
+  it("offers a brief, a Generate button and the quota line once opened", () => {
     render(<Host />);
+    open();
     expect(screen.getByRole("button", {name: "Generate"})).toBeVisible();
     expect(screen.getByLabelText("What is this about?")).toBeVisible();
     expect(screen.getByText("Unlimited generations")).toBeVisible();
@@ -352,6 +356,7 @@ describe("WriterAssist", () => {
 
   it("hands the generated copy to onGenerated", async () => {
     render(<Host />);
+    open();
     fireEvent.change(screen.getByLabelText("What is this about?"), {target: {value: "A new workshop"}});
     fireEvent.click(screen.getByRole("button", {name: "Generate"}));
     expect(await screen.findByTestId("copy")).toHaveTextContent('{"descriptionEn":"En","descriptionZh":"Zh"}');
@@ -360,12 +365,14 @@ describe("WriterAssist", () => {
   it("renders the error code's message, not the code", async () => {
     state.result = {status: "error", code: "QUOTA_EXCEEDED"};
     render(<Host />);
+    open();
     fireEvent.click(screen.getByRole("button", {name: "Generate"}));
     expect(await screen.findByRole("alert")).toHaveTextContent("Quota");
   });
 
   it("disables Generate when the quota is exhausted", () => {
     render(<WriterAssist kind="event" labels={labels} quotaLabel="0 of 20 generations left this month" exhausted onGenerated={() => {}} />);
+    open();
     expect(screen.getByRole("button", {name: "Generate"})).toBeDisabled();
   });
 });
@@ -558,6 +565,7 @@ describe("EventForm writer integration", () => {
   it("fills both descriptions from one generation", async () => {
     render(<EventForm action={async () => ({status: "idle"})} canSubmit labels={labels} values={null} writer={writerProps} />);
 
+    fireEvent.click(screen.getByText("Write with AI"));
     fireEvent.change(screen.getByLabelText("What is this about?"), {target: {value: "A workshop"}});
     fireEvent.click(screen.getByRole("button", {name: "Generate"}));
 
@@ -602,26 +610,33 @@ Add the copy state beside `heroMediaId`:
   const [descriptionZh, setDescriptionZh] = useState(values?.descriptionZh ?? "");
 ```
 
-Replace the two description labels with controlled textareas, and render the control directly beneath them:
+Replace the two description labels with controlled textareas inside the form:
 
 ```tsx
       <label className={`${labelClass} sm:col-span-2`}><span>{labels.descriptionEn}</span><textarea className={textareaClass} name="descriptionEn" onChange={(event) => setDescriptionEn(event.target.value)} required value={descriptionEn} /></label>
       <label className={`${labelClass} sm:col-span-2`}><span>{labels.descriptionZh}</span><textarea className={textareaClass} name="descriptionZh" onChange={(event) => setDescriptionZh(event.target.value)} value={descriptionZh} /></label>
-      {writer ? (
-        <div className="sm:col-span-2">
-          <WriterAssist
-            kind="event"
-            labels={writer.labels}
-            quotaLabel={writer.quotaLabel}
-            exhausted={writer.exhausted}
-            onGenerated={(copy) => {
-              if (copy.descriptionEn) setDescriptionEn(copy.descriptionEn);
-              if (copy.descriptionZh) setDescriptionZh(copy.descriptionZh);
-            }}
-          />
-        </div>
-      ) : null}
 ```
+
+Then render the control **outside** the `<form>`, as the last child before the component's closing tag. `WriterAssist` renders its own `<form>` for its Server Action, and a form inside a form is dropped by the HTML parser during SSR — the fields would hydrate against a tree the server never sent:
+
+```tsx
+      <div className="mt-4">
+        <WriterAssist
+          kind="event"
+          labels={writer.labels}
+          quotaLabel={writer.quotaLabel}
+          exhausted={writer.exhausted}
+          onGenerated={(copy) => {
+            if (copy.descriptionEn) setDescriptionEn(copy.descriptionEn);
+            if (copy.descriptionZh) setDescriptionZh(copy.descriptionZh);
+          }}
+        />
+      </div>
+    </>
+  );
+```
+
+The two textareas stay inside the form (they submit with it); only the control moves out.
 
 - [ ] **Step 4: Pass the props from both event pages**
 
@@ -692,6 +707,7 @@ describe("ShowcaseListingForm writer integration", () => {
   it("fills the taglines and descriptions from one generation", async () => {
     render(<ShowcaseListingForm value={{}} labels={labels} readOnly={false} writer={writerProps} />);
 
+    fireEvent.click(screen.getByText("Write with AI"));
     fireEvent.change(screen.getByLabelText("What is this about?"), {target: {value: "Our product"}});
     fireEvent.click(screen.getByRole("button", {name: "Generate"}));
 
@@ -749,20 +765,22 @@ Leave the read-only arrays as they are for every field **except** the four copy 
         ))}
 ```
 
-Render the control inside the form, above the buttons:
+Render the control **after** the `</form>`, inside the section and above nothing else. `WriterAssist` renders its own `<form>` for its Server Action, and a form inside a form is dropped by the HTML parser during SSR:
 
 ```tsx
-        {writer ? (
-          <div className="sm:col-span-2">
-            <WriterAssist
-              kind="listing"
-              labels={writer.labels}
-              quotaLabel={writer.quotaLabel}
-              exhausted={writer.exhausted}
-              onGenerated={(generated) => setCopy((current) => ({...current, ...Object.fromEntries(Object.entries(generated).filter(([key]) => ["taglineEn", "taglineZhHk", "descriptionEn", "descriptionZhHk"].includes(key)))}))}
-            />
-          </div>
-        ) : null}
+      </form>
+      <div className="mt-4">
+        <WriterAssist
+          kind="listing"
+          labels={writer.labels}
+          quotaLabel={writer.quotaLabel}
+          exhausted={writer.exhausted}
+          onGenerated={(generated) => setCopy((current) => ({...current, ...Object.fromEntries(Object.entries(generated).filter(([key]) => ["taglineEn", "taglineZhHk", "descriptionEn", "descriptionZhHk"].includes(key)))}))}
+        />
+      </div>
+    </section>
+  );
+}
 ```
 
 - [ ] **Step 4: Pass the props from the listing page**
@@ -833,6 +851,7 @@ describe("CompanyForms writer integration", () => {
       writer={writerProps}
     />);
 
+    fireEvent.click(screen.getByText("Write with AI"));
     fireEvent.change(screen.getByLabelText("What is this about?"), {target: {value: "Acme"}});
     fireEvent.click(screen.getByRole("button", {name: "Generate"}));
 
