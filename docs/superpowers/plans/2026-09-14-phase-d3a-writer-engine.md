@@ -1118,6 +1118,7 @@ Create `tests/unit/portal-writer-action.test.ts`:
 ```ts
 import {describe, expect, it, vi} from "vitest";
 
+import {AgentRuntimeError} from "@/lib/ai/runtime";
 import {runWriterAssist, startOfHongKongMonth, type WriterActionDependencies} from "@/lib/portal/writer-action-core";
 
 const member = {kind: "member", userId: "u1", profileId: "profile-1"} as const;
@@ -1168,6 +1169,12 @@ describe("runWriterAssist", () => {
     const generate = vi.fn(async () => { throw new Error("provider down"); });
     await expect(runWriterAssist(member, {kind: "event", brief: "hello"}, deps({generate})))
       .resolves.toEqual({status: "error", code: "FAILED"});
+  });
+
+  it("reports an unconfigured agent as UNAVAILABLE", async () => {
+    const generate = vi.fn(async () => { throw new AgentRuntimeError("configuration_error"); });
+    await expect(runWriterAssist(member, {kind: "event", brief: "hello"}, deps({generate})))
+      .resolves.toEqual({status: "error", code: "UNAVAILABLE"});
   });
 });
 
@@ -1260,10 +1267,18 @@ export async function runWriterAssist(
     const copy = await dependencies.generate({memberActor: actor, kind: parsed.data.kind, brief: parsed.data.brief});
     return {status: "ok", copy};
   } catch (error) {
-    const code = error instanceof Error ? error.message : "";
-    return {status: "error", code: code.includes("configuration_error") ? "UNAVAILABLE" : "FAILED"};
+    // A missing key or an unconfigured model is not the member's problem, and
+    // reads differently from a transient provider failure.
+    const unavailable = error instanceof AgentRuntimeError && error.code === "configuration_error";
+    return {status: "error", code: unavailable ? "UNAVAILABLE" : "FAILED"};
   }
 }
+```
+
+Add the import to the core's import list:
+
+```ts
+import {AgentRuntimeError} from "@/lib/ai/runtime";
 ```
 
 - [ ] **Step 4: Implement the `"use server"` wrapper**
