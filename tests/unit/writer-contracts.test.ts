@@ -15,6 +15,25 @@ describe("writer contracts", () => {
     expect(writerOutputSchema[kind].parse(value)).toEqual(value);
   });
 
+  it("bounds each tagline by its receiving surface, not one shared limit", () => {
+    const tagline = (length: number) => "x".repeat(length);
+    // The profile tagline field is 160 while the showcase listing's is 240, so
+    // a single shared bound would either truncate a valid listing tagline or
+    // pass a profile tagline the profile repository then refuses.
+    expect(writerOutputSchema.profile.safeParse({
+      taglineEn: tagline(160), taglineZhHk: tagline(160), description: "d", descriptionZhHk: "d",
+    }).success).toBe(true);
+    expect(writerOutputSchema.profile.safeParse({
+      taglineEn: tagline(161), taglineZhHk: "b", description: "d", descriptionZhHk: "d",
+    }).success).toBe(false);
+    expect(writerOutputSchema.listing.safeParse({
+      taglineEn: tagline(240), taglineZhHk: tagline(240), descriptionEn: "d", descriptionZhHk: "d",
+    }).success).toBe(true);
+    expect(writerOutputSchema.listing.safeParse({
+      taglineEn: tagline(241), taglineZhHk: "b", descriptionEn: "d", descriptionZhHk: "d",
+    }).success).toBe(false);
+  });
+
   it("refuses HTML and unknown keys", () => {
     expect(() => writerOutputSchema.event.parse({descriptionEn: "<b>x</b>", descriptionZh: "y"})).toThrow();
     expect(() => writerOutputSchema.event.parse({descriptionEn: "x", descriptionZh: "y", extra: "z"})).toThrow();

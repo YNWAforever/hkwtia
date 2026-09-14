@@ -1,6 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
 import {AgentRuntimeError} from "@/lib/ai/runtime";
+import type {MembershipPlanCode} from "@/lib/membership/constants";
 import {runWriterAssist, startOfHongKongMonth, type WriterActionDependencies} from "@/lib/portal/writer-action-core";
 
 const member = {kind: "member", userId: "u1", profileId: "profile-1"} as const;
@@ -35,14 +36,18 @@ describe("runWriterAssist", () => {
   });
 
   it("takes the best plan when a member holds several", async () => {
-    const countRuns = vi.fn(async () => 5);
+    // startup (20) is listed first and is the smaller cap, so a first-match or
+    // minimum implementation would resolve 20 and refuse a count of 50; only the
+    // maximum (corporate 100) leaves room. A 5 would pass under all three.
+    const countRuns = vi.fn(async () => 50);
     await expect(runWriterAssist(member, {kind: "event", brief: "hello"}, deps({plansFor: async () => ["startup", "corporate"], countRuns})))
       .resolves.toEqual({status: "ok", copy: {descriptionEn: "a", descriptionZh: "b"}});
   });
 
   it("uses the best plan's cap, not the sum of the plans' caps", async () => {
     // startup (20) + corporate (100): a count of 110 is over the max cap (100)
-    // though under the sum (120), so only a max would refuse it.
+    // though under the sum (120), so only a max would refuse it; a sum
+    // implementation would allow it.
     const countRuns = vi.fn(async () => 110);
     await expect(runWriterAssist(member, {kind: "event", brief: "hello"}, deps({plansFor: async () => ["startup", "corporate"], countRuns})))
       .resolves.toEqual({status: "error", code: "QUOTA_EXCEEDED"});
@@ -64,6 +69,14 @@ describe("runWriterAssist", () => {
   it("maps a throwing quota read to FAILED instead of escaping the action", async () => {
     const countRuns = vi.fn(async () => { throw new Error("db down"); });
     await expect(runWriterAssist(member, {kind: "event", brief: "hello"}, deps({countRuns})))
+      .resolves.toEqual({status: "error", code: "FAILED"});
+  });
+
+  it("maps an unreadable plan allowance to FAILED instead of escaping the action", async () => {
+    // entitlementsFor throws on an unknown plan code; the plan column is an enum
+    // today, but nothing may throw out of the action.
+    const plansFor = vi.fn(async () => ["startup", "not-a-plan"] as unknown as readonly MembershipPlanCode[]);
+    await expect(runWriterAssist(member, {kind: "event", brief: "hello"}, deps({plansFor})))
       .resolves.toEqual({status: "error", code: "FAILED"});
   });
 

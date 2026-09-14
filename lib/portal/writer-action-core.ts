@@ -69,7 +69,14 @@ export async function runWriterAssist(
     // the brief they typed.
     return {status: "error", code: "FAILED"};
   }
-  const cap = quotaFor(plans);
+  let cap: number;
+  try {
+    cap = quotaFor(plans);
+  } catch {
+    // entitlementsFor throws on a plan code it does not know; the plan column is
+    // an enum today, but nothing may escape the action as a rejected promise.
+    return {status: "error", code: "FAILED"};
+  }
   if (cap === 0) return {status: "error", code: "NOT_ENTITLED"};
 
   const since = startOfHongKongMonth(dependencies.now());

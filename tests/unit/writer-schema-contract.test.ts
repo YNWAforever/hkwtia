@@ -29,5 +29,26 @@ describe("Phase D-3 writer agent schema contract", () => {
     expect(sql).not.toMatch(/DEFAULT\s+'writer'/i);
     expect(sql).not.toMatch(/DEFAULT\s+'portal'/i);
     expect(sql).not.toMatch(/=\s*'writer'/i);
+    expect(sql).not.toMatch(/=\s*'portal'/i);
+  });
+
+  // A migration that adds a value and then does anything else with it — a
+  // backfill, a column type, a trigger — would abort the whole deploy on a fresh
+  // database. Restricting the file to the two additions keeps the trap closed
+  // even though the value-usage patterns above only catch the shapes seen before.
+  it("contains nothing but the two enum additions", () => {
+    const statements = migrationSource()
+      .replace(/--[^\n]*/g, "")
+      .split(";")
+      .map((statement) => statement.trim().replace(/\s+/g, " "))
+      .filter((statement) => statement.length > 0);
+    expect(statements.length).toBeGreaterThan(0);
+    const allowed = [
+      /^ALTER TYPE (?:"public"\.)?"agent_name" ADD VALUE 'writer'$/i,
+      /^ALTER TYPE (?:"public"\.)?"agent_trigger" ADD VALUE 'portal'$/i,
+    ];
+    for (const statement of statements) {
+      expect(allowed.some((pattern) => pattern.test(statement)), statement).toBe(true);
+    }
   });
 });

@@ -7,29 +7,42 @@ export type WriterKind = (typeof WRITER_KINDS)[number];
 const htmlPattern = /<\s*\/?\s*[a-z][^>]*>/i;
 
 /**
- * One copy field. Bounds mirror the form inputs (`maxLength`) so a generated
- * value can never be longer than the field that receives it, and HTML is refused
- * for the same reason `draft-email` refuses it: the copy is plain text.
+ * The receiving bounds, per surface. These mirror the receiving
+ * repositories/contracts — a company profile tagline is 160 while a showcase
+ * listing tagline is 240 — not the form inputs, which carry no `maxLength` on
+ * several of these fields. `config/agents/writer.ts` tells the model the same
+ * numbers, so a prompt and its schema cannot drift; an over-long field rejects
+ * the whole response and still spends a quota unit.
+ */
+export const WRITER_BOUNDS = Object.freeze({
+  profile: Object.freeze({taglineMax: 160, descriptionMax: 2_000}),
+  listing: Object.freeze({taglineMax: 240, descriptionMax: 2_000}),
+  event: Object.freeze({taglineMax: null, descriptionMax: 2_000}),
+} as const satisfies Readonly<Record<WriterKind, {taglineMax: number | null; descriptionMax: number}>>);
+
+/**
+ * One copy field. HTML is refused for the same reason `draft-email` refuses it:
+ * the copy is plain text.
  */
 const copyText = (max: number) =>
   z.string().trim().min(1).max(max).refine((value) => !htmlPattern.test(value), "HTML is not allowed");
 
 export const writerOutputSchema = {
   profile: z.object({
-    taglineEn: copyText(160),
-    taglineZhHk: copyText(160),
-    description: copyText(2000),
-    descriptionZhHk: copyText(2000),
+    taglineEn: copyText(WRITER_BOUNDS.profile.taglineMax),
+    taglineZhHk: copyText(WRITER_BOUNDS.profile.taglineMax),
+    description: copyText(WRITER_BOUNDS.profile.descriptionMax),
+    descriptionZhHk: copyText(WRITER_BOUNDS.profile.descriptionMax),
   }).strict(),
   listing: z.object({
-    taglineEn: copyText(160),
-    taglineZhHk: copyText(160),
-    descriptionEn: copyText(2000),
-    descriptionZhHk: copyText(2000),
+    taglineEn: copyText(WRITER_BOUNDS.listing.taglineMax),
+    taglineZhHk: copyText(WRITER_BOUNDS.listing.taglineMax),
+    descriptionEn: copyText(WRITER_BOUNDS.listing.descriptionMax),
+    descriptionZhHk: copyText(WRITER_BOUNDS.listing.descriptionMax),
   }).strict(),
   event: z.object({
-    descriptionEn: copyText(2000),
-    descriptionZh: copyText(2000),
+    descriptionEn: copyText(WRITER_BOUNDS.event.descriptionMax),
+    descriptionZh: copyText(WRITER_BOUNDS.event.descriptionMax),
   }).strict(),
 } as const satisfies Readonly<Record<WriterKind, z.ZodTypeAny>>;
 

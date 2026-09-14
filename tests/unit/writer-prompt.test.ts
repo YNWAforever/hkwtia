@@ -21,6 +21,19 @@ describe("writerSystemPrompt", () => {
     expect(writerSystemPrompt(kind)).toContain(field);
   });
 
+  it.each([
+    ["profile", 160],
+    ["listing", 240],
+  ] as const)("states the %s tagline character bound", (kind, bound) => {
+    // The model is held to the same limit the output schema enforces: an
+    // over-long field rejects the whole response and still spends a quota unit.
+    expect(writerSystemPrompt(kind)).toContain(`${bound} characters`);
+  });
+
+  it.each(WRITER_KINDS)("states the %s description character bound", (kind) => {
+    expect(writerSystemPrompt(kind)).toContain("2000 characters");
+  });
+
   it("covers every kind", () => {
     for (const kind of WRITER_KINDS) expect(writerSystemPrompt(kind).length).toBeGreaterThan(0);
   });

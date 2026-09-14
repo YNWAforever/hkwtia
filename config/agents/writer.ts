@@ -1,4 +1,4 @@
-import type {WriterKind} from "@/lib/ai/writers/contracts";
+import {WRITER_BOUNDS, type WriterKind} from "@/lib/ai/writers/contracts";
 
 /**
  * The brief is member-authored and untrusted: it is material to rewrite, never
@@ -20,6 +20,12 @@ const FIELDS: Readonly<Record<WriterKind, string>> = Object.freeze({
   event: "descriptionEn, descriptionZh",
 });
 
+const BOUNDS: Readonly<Record<WriterKind, string>> = Object.freeze({
+  profile: `Keep each tagline at most ${WRITER_BOUNDS.profile.taglineMax} characters and each description at most ${WRITER_BOUNDS.profile.descriptionMax} characters.`,
+  listing: `Keep each tagline at most ${WRITER_BOUNDS.listing.taglineMax} characters and each description at most ${WRITER_BOUNDS.listing.descriptionMax} characters.`,
+  event: `Keep each description at most ${WRITER_BOUNDS.event.descriptionMax} characters.`,
+});
+
 export function writerSystemPrompt(kind: WriterKind): string {
-  return `${COMMON}\n\nReturn exactly these JSON keys: ${FIELDS[kind]}.`;
+  return `${COMMON}\n\nReturn exactly these JSON keys: ${FIELDS[kind]}. ${BOUNDS[kind]}`;
 }
