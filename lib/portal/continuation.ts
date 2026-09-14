@@ -9,6 +9,7 @@ export const PORTAL_CONTINUATIONS = [
   "/portal/documents",
   "/portal/events",
   "/portal/directory",
+  "/portal/tools",
 ] as const;
 
 // The member event editor is the one parameterised Portal destination. Its

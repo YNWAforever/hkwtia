@@ -7,7 +7,7 @@ import {
 } from "@/lib/portal/continuation";
 
 describe("PORTAL_CONTINUATIONS", () => {
-  it("lists exactly the Portal's 9 real destinations", () => {
+  it("lists exactly the Portal's 10 real destinations", () => {
     expect(PORTAL_CONTINUATIONS).toEqual([
       "/portal",
       "/portal/profile",
@@ -18,6 +18,7 @@ describe("PORTAL_CONTINUATIONS", () => {
       "/portal/documents",
       "/portal/events",
       "/portal/directory",
+      "/portal/tools",
     ]);
   });
 
@@ -31,6 +32,10 @@ describe("isPortalContinuation", () => {
     for (const path of PORTAL_CONTINUATIONS) {
       expect(isPortalContinuation(path)).toBe(true);
     }
+  });
+
+  it("accepts the member tools page so sign-in returns to it", () => {
+    expect(isPortalContinuation("/portal/tools")).toBe(true);
   });
 
   it("rejects the seat invitation acceptance route even though it is a real page", () => {
@@ -50,6 +55,7 @@ describe("isPortalContinuation", () => {
 describe("parsePortalContinuation", () => {
   it("returns the path when it is a valid continuation", () => {
     expect(parsePortalContinuation("/portal/billing")).toBe("/portal/billing");
+    expect(parsePortalContinuation("/portal/tools")).toBe("/portal/tools");
   });
 
   it("falls back to /portal for anything invalid or missing", () => {
