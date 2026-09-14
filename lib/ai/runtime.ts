@@ -62,6 +62,12 @@ export type AgentRuntimeActorInput =
     conversationId: null;
     profileId: null;
     trigger: "scheduled";
+  }>
+  | Readonly<{
+    agent: "writer";
+    conversationId: null;
+    profileId: string;
+    trigger: "portal";
   }>;
 
 export type AgentRuntimeRequest = Readonly<{
@@ -580,23 +586,32 @@ export function createAgentRuntime(dependencies: AgentRuntimeDependencies) {
     actorInput: AgentRuntimeRequest["actor"],
     runId: string,
   ): AgentRuntimePreparedRun {
-    const actor: AgentRunActor = actorInput.trigger === "scheduled"
+    const actor: AgentRunActor = actorInput.agent === "writer"
       ? {
         kind: "agent" as const,
-        agent: actorInput.agent,
+        agent: "writer" as const,
         runId,
         conversationId: null,
-        profileId: null,
-        trigger: "scheduled" as const,
-      }
-      : {
-        kind: "agent" as const,
-        agent: "concierge" as const,
-        runId,
-        conversationId: actorInput.conversationId,
         profileId: actorInput.profileId,
-        trigger: actorInput.trigger,
-      };
+        trigger: "portal" as const,
+      }
+      : actorInput.trigger === "scheduled"
+        ? {
+          kind: "agent" as const,
+          agent: actorInput.agent,
+          runId,
+          conversationId: null,
+          profileId: null,
+          trigger: "scheduled" as const,
+        }
+        : {
+          kind: "agent" as const,
+          agent: "concierge" as const,
+          runId,
+          conversationId: actorInput.conversationId,
+          profileId: actorInput.profileId,
+          trigger: actorInput.trigger,
+        };
     requireAgentRunActor(actor);
     const state: RunState = {actor, streamStarted: false};
     const prepared = Object.freeze({
