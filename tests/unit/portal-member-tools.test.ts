@@ -34,4 +34,12 @@ describe("toolFrameSrc", () => {
   it("keeps the registry's origin", () => {
     expect(new URL(toolFrameSrc(tool, "t")).origin).toBe(new URL(tool.url).origin);
   });
+
+  it("still returns a well-formed URL with an empty token parameter", () => {
+    // The page only reaches `toolFrameSrc` with a configured token, but the helper must not
+    // depend on that: an empty value yields `?token=` rather than a malformed or tokenless URL.
+    const url = new URL(toolFrameSrc(tool, ""));
+    expect(url.origin).toBe(new URL(tool.url).origin);
+    expect(url.searchParams.get(tool.tokenParam)).toBe("");
+  });
 });

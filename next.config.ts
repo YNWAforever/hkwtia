@@ -8,6 +8,17 @@ import {wisetechDesignRedirects} from "./config/wisetech-redirects";
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 /**
+ * The origin of the Cloudflare Turnstile challenge iframe the concierge widget loads
+ * (`components/ai/concierge-widget.tsx`). It shares the one `frame-src` directive with the
+ * member tools below, so it is named here rather than derived from their registry: dropping
+ * it silently refuses the challenge on every public and portal page, and production requires
+ * Turnstile (`lib/config/env.ts` throws without the pair), so the concierge would be disabled
+ * site-wide. `tests/unit/member-tools-csp.test.ts` reads the widget for this URL and fails if
+ * the directive stops naming it.
+ */
+const turnstileChallengeOrigin = "https://challenges.cloudflare.com";
+
+/**
  * A deliberately partial Content-Security-Policy.
  *
  * Directives that are absent fall back to `default-src`, and no `default-src`
@@ -41,11 +52,13 @@ const contentSecurityPolicy = [
   "base-uri 'self'",
   "object-src 'none'",
   "form-action 'self'",
-  // Phase D-2: the member tools are third-party pages iframed inside the portal, and only
-  // their origins may be framed. Derived from config/member-tools.ts, so a tool cannot be
-  // declared without its host being allowed. No `default-src` is declared: naming it would
-  // make every unnamed directive restrictive at once (see the block comment above).
-  `frame-src ${memberToolOrigins.length > 0 ? memberToolOrigins.join(" ") : "'none'"}`,
+  // Phase D-2: the member tools are third-party pages iframed inside the portal, and the
+  // concierge's Cloudflare Turnstile challenge is a third-party iframe on every page. Both
+  // origins are named here; the tool origins are derived from config/member-tools.ts so a
+  // tool cannot be declared without its host being allowed. No `default-src` is declared:
+  // naming it would make every unnamed directive restrictive at once (see the block
+  // comment above).
+  `frame-src ${[...memberToolOrigins, turnstileChallengeOrigin].join(" ")}`,
 ].join("; ");
 
 /**

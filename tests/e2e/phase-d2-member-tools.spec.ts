@@ -16,7 +16,15 @@ const locales = [
   {locale: "zh-HK" as const, prefix: "/zh"},
 ];
 
-const missing = missingM2LiveEnvironment();
+const missing = [
+  ...missingM2LiveEnvironment(),
+  // A blank token makes the detail page correctly render "temporarily unavailable", so the
+  // embed assertion would fail for a reason the walk is not measuring. Presence only; the
+  // value is never printed or asserted.
+  ...(process.env.MEMBER_TOOL_CONTENT_CALENDAR_TOKEN?.trim()
+    ? []
+    : ["MEMBER_TOOL_CONTENT_CALENDAR_TOKEN"]),
+];
 
 /**
  * Phase D-2 exit: an entitled member's tools page embeds the configured tool with its token.

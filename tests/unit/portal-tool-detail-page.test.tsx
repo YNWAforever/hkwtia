@@ -42,6 +42,12 @@ describe("/portal/tools/[key]", () => {
     expect(frame).not.toBeNull();
     expect(frame!.getAttribute("title")).toBe("tools.contentCalendar.title");
     expect(frame!.getAttribute("referrerpolicy")).toBe("no-referrer");
+    // Deliberate: the page's comment explains that a cross-origin frame is already isolated,
+    // and a `sandbox` without `allow-same-origin` would give it an opaque origin and stop it
+    // sending its SameSite=None; Partitioned auth cookie. Pinned so a "hardening" edit that
+    // adds either attribute cannot break the tool silently.
+    expect(frame!.hasAttribute("sandbox")).toBe(false);
+    expect(frame!.hasAttribute("allow")).toBe(false);
     const src = new URL(frame!.getAttribute("src") ?? "");
     expect(src.origin).toBe("https://content-calendar-internal.vercel.app");
     expect(src.searchParams.get("token")).toBe("fixture-token");

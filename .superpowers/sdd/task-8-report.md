@@ -101,7 +101,7 @@ Committed as `bdf983a2 test(e2e): a member opens the embedded tool with no secon
 
 Review found Task 8's second case name claimed more than it proves: it said the member
 "gets the tool embedded, not a second login", but the assertions only show an `iframe`
-exists at the configured origin with a `token` query param �X a tool login page satisfies
+exists at the configured origin with a `token` query param �X a tool login page satisfies
 that. The name will be cited as exit evidence, so it was made to state what is proven.
 
 Also removed the unused `Bundle.lockedTitle` field, which suggested the locked
@@ -120,4 +120,77 @@ Listing tests:
   [chromium] ? phase-d2-member-tools.spec.ts:31:3 ? zh-HK: the member tools list renders
   [chromium] ? phase-d2-member-tools.spec.ts:38:3 ? zh-HK: an entitled member's tools page embeds the configured tool with its token
 Total: 4 tests in 1 file
+```
+
+## Final whole-branch review fixes (2026-09-14)
+
+### Finding 1 — CRITICAL: `frame-src` broke Cloudflare Turnstile site-wide
+
+`next.config.ts` applies one CSP to `{source: "/:path*"}`. Task 4 made the member-tool origins
+the only `frame-src` entry, so the concierge widget's Turnstile challenge iframe
+(`components/ai/concierge-widget.tsx:49`, mounted on every public and portal page) was refused.
+Production requires Turnstile, so this silently disabled the concierge everywhere.
+
+- `next.config.ts:10-20` — named constant `turnstileChallengeOrigin = "https://challenges.cloudflare.com"`
+  with a comment naming it the concierge's challenge origin and pointing at the guard test.
+- `next.config.ts:55-63` — the direction now unions the registry origins with the constant:
+  `` `frame-src ${[...memberToolOrigins, turnstileChallengeOrigin].join(" ")}` `` (no `'none'`
+  fallback needed; the directive always names at least the challenge origin). Comment updated to
+  say both origins are named and why.
+- `tests/unit/member-tools-csp.test.ts` — replaced the exact-equality assertion (which would have
+  demanded the registry origins be the *only* entry) with `arrayContaining([...memberToolOrigins])`,
+  and added a discovery guard: the file is read and its `https://challenges.cloudflare.com/...`
+  string is extracted (mirroring `server-action-actor-boundary.test.ts`; `process.cwd()` because
+  `import.meta.url` is not a file URL under vitest), with `expect(widgetOrigins.length).toBeGreaterThan(0)`
+  as the vacuous-pass guard, then asserted present in `frame-src`. It keeps asserting
+  `frame-ancestors 'none'`.
+
+I chose source discovery over a literal so a future CSP edit cannot pass by hard-coding the host in
+both places; the test reads what the widget actually loads. The pre-fix run failed exactly as
+intended: `expected [ Array(1) ] to deeply equal ArrayContaining` received only
+`content-calendar-internal.vercel.app`.
+
+### Finding 2 — IMPORTANT: the e2e gate could fail for a reason it is not measuring
+
+`tests/e2e/phase-d2-member-tools.spec.ts:19-28` — `missing` now appends
+`MEMBER_TOOL_CONTENT_CALENDAR_TOKEN` when `process.env.MEMBER_TOOL_CONTENT_CALENDAR_TOKEN?.trim()`
+is blank, beside `missingM2LiveEnvironment()`. Presence only; the value is never printed or
+asserted, and the existing `Requires ${missing.join(", ")}` message is unchanged.
+
+### Finding 3 — IMPORTANT: pin the deliberate absence of `sandbox`/`allow`
+
+`tests/unit/portal-tool-detail-page.test.tsx:45-50` — the embed test now asserts
+`hasAttribute("sandbox")` and `hasAttribute("allow")` are both `false`, with a comment naming the
+security decision the page documents (`SameSite=None; Partitioned` cookie).
+
+### Finding 4 — IMPORTANT: prove every `titleKey` resolves
+
+`tests/unit/member-tools-config.test.ts:38-47` — added `it.each(MEMBER_TOOLS)` resolving
+`Portal.${tool.titleKey}` against `messages/en.json` and `messages/zh-HK.json` through a
+`messageAt` walk (same shape as `messages.test.ts`), asserting a non-empty string for each.
+
+### Finding 5 — MINOR
+
+- `tests/unit/member-tools-config.test.ts:32-36` — `tool.key` asserted against `/^[a-z][a-z0-9-]*$/`.
+- `tests/unit/portal-member-tools.test.ts:38-45` — `toolFrameSrc(tool, "")` returns a well-formed
+  URL at the registry origin with an empty (not missing) token param.
+- `tests/unit/portal-tools-list-page.test.tsx` — queries are scoped with `within(toolCard())` for
+  `MEMBER_TOOLS[0]`, replacing the page-wide singular `getByText`/`getByRole` that would throw
+  when a second tool is added. Imported `within` and the registry.
+
+`key` was not narrowed to a literal union; the charset test is the guard, as instructed.
+
+### Commands and results (full gate)
+
+```
+$ npx vitest run tests/unit/member-tools-csp.test.ts \
+    tests/unit/member-tools-config.test.ts tests/unit/portal-member-tools.test.ts \
+    tests/unit/portal-tool-detail-page.test.tsx tests/unit/portal-tools-list-page.test.tsx \
+    tests/unit/messages.test.ts
+  Test Files  6 passed (6); Tests  35 passed (35)
+$ npm run audit:strings   -> Visible-string audit passed (259 TSX files scanned).  EXIT=0
+$ npm run lint            -> 42 problems (0 errors, 42 pre-existing warnings).     EXIT=0
+$ npm run typecheck       -> tsc --noEmit, no output.                              EXIT=0
+$ npm test                -> Test Files 559 passed | 16 skipped; Tests 4963 passed | 44 skipped. EXIT=0
+$ npm run build           -> Compiled successfully in 13.0s; BUILD_EXIT=0
 ```
