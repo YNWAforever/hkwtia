@@ -2,6 +2,7 @@ import type {NextConfig} from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 import legacyUrls from "./content/legacy-urls.json";
+import {memberToolOrigins} from "./config/member-tools";
 import {wisetechDesignRedirects} from "./config/wisetech-redirects";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
@@ -40,6 +41,11 @@ const contentSecurityPolicy = [
   "base-uri 'self'",
   "object-src 'none'",
   "form-action 'self'",
+  // Phase D-2: the member tools are third-party pages iframed inside the portal, and only
+  // their origins may be framed. Derived from config/member-tools.ts, so a tool cannot be
+  // declared without its host being allowed. No `default-src` is declared: naming it would
+  // make every unnamed directive restrictive at once (see the block comment above).
+  `frame-src ${memberToolOrigins.length > 0 ? memberToolOrigins.join(" ") : "'none'"}`,
 ].join("; ");
 
 /**
