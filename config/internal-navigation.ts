@@ -15,6 +15,8 @@ export const portalNavigationGroups = [
       {id: "directory", href: "/portal/directory"},
       {id: "events", href: "/portal/events"},
       {id: "documents", href: "/portal/documents"},
+      // Phase D-2: the member tools sit with the account's benefits, before billing.
+      {id: "tools", href: "/portal/tools"},
       {id: "billing", href: "/portal/billing"},
     ],
   },

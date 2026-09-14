@@ -28,7 +28,7 @@ describe("PortalNav", () => {
     expect(screen.queryByText("signOut", {selector: "span.sr-only"})).not.toBeInTheDocument();
   });
 
-  it("renders every one of the Portal's 8 primary nav links plus a brand link", () => {
+  it("renders every one of the Portal's 9 primary nav links plus a brand link", () => {
     render(<PortalNav locale="en" />);
     const links = screen.getAllByRole("link");
     const hrefs = links.map((link) => link.getAttribute("href"));
@@ -41,6 +41,7 @@ describe("PortalNav", () => {
         "/portal/directory",
         "/portal/events",
         "/portal/documents",
+        "/portal/tools",
         "/portal/billing",
       ]),
     );

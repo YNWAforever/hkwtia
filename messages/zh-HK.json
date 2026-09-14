@@ -2145,6 +2145,20 @@
       "open": "開啟收據",
       "resource": "資源"
     },
+    "tools": {
+      "eyebrow": "會員工具",
+      "title": "你的會員工具",
+      "description": "包含於你的會籍計劃的工具。",
+      "open": "開啟工具",
+      "lockedTitle": "你的計劃未包含此工具",
+      "lockedDescription": "此工具適用於 Startup、Corporate 及 Patron 會籍。",
+      "upgrade": "查看會籍計劃",
+      "unavailableTitle": "暫時無法使用",
+      "unavailableDescription": "此工具暫時無法載入，請稍後再試。",
+      "contentCalendar": {
+        "title": "內容日曆"
+      }
+    },
     "billing": {
       "title": "帳單",
       "description": "管理會員帳單及付款恢復。",
