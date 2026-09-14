@@ -15,7 +15,7 @@ import type {
 } from "@/lib/db/repos/journeys";
 import type {ConversationOwner} from "@/lib/db/repos/conversations";
 import {agentRuns, conversations} from "@/lib/db/server-schema";
-import {forbidden} from "@/lib/membership/lifecycle";
+import {forbidden, requireMember, type Actor as SessionActor} from "@/lib/membership/lifecycle";
 
 export type AgentRunRecord = Readonly<{
   id: string;
@@ -170,7 +170,9 @@ function actorRunPredicate(actor: AgentRunActor): SQL {
     : sql`conversation_id = ${actor.conversationId}`;
   const profilePredicate = actor.agent === "concierge"
     ? sql`profile_id IS NOT DISTINCT FROM ${actor.profileId}`
-    : sql`profile_id IS NULL`;
+    : actor.agent === "writer"
+      ? sql`profile_id = ${actor.profileId}`
+      : sql`profile_id IS NULL`;
   return sql`id = ${actor.runId}
     AND agent = ${actor.agent}
     AND ${conversationPredicate}
@@ -309,7 +311,40 @@ export function createAgentRunsRepository(
           AND ${actorOwnerPredicate(actor)}
         RETURNING *
       `
-        : sql`
+        : actor.agent === "writer"
+          ? sql`
+        INSERT INTO ${agentRuns}
+          (
+            id,
+            agent,
+            conversation_id,
+            profile_id,
+            trigger,
+            status,
+            provider,
+            model,
+            summary,
+            started_at,
+            created_at,
+            updated_at
+          )
+        VALUES (
+          ${actor.runId},
+          ${actor.agent},
+          NULL,
+          ${actor.profileId},
+          ${actor.trigger},
+          'running',
+          ${parsed.provider ?? null},
+          ${parsed.model ?? null},
+          ${acceptanceSummary},
+          ${startedAt},
+          ${startedAt},
+          ${startedAt}
+        )
+        RETURNING *
+      `
+          : sql`
         INSERT INTO ${agentRuns}
           (
             id,
@@ -413,6 +448,28 @@ export function createAgentRunsRepository(
         errorCode: null,
         ...usageFrom(parsed),
       });
+    },
+
+    /**
+     * The member's writer generations since a timestamp, for the plan quota.
+     *
+     * Member-scoped rather than agent-scoped: the caller is the session that is
+     * about to spend a run, and the predicate is its own profile.
+     */
+    async countWriterRuns(
+      actor: SessionActor,
+      since: Date,
+    ): Promise<number> {
+      requireMember(actor);
+      const database = await loadDatabase();
+      const rows = rowsFrom(await database.execute(sql`
+        SELECT COUNT(*)::int AS count
+        FROM ${agentRuns}
+        WHERE agent = 'writer'
+          AND profile_id = ${actor.profileId}
+          AND created_at >= ${since}
+      `));
+      return Number(rows[0]?.count ?? 0);
     },
 
     async recordFeedback(
