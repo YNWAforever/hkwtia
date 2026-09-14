@@ -54,6 +54,13 @@ export interface MemberToolsEnv {
 export interface AiEnv {
   agentsEnabled: boolean;
   agentModelConcierge: string;
+  /**
+   * A dedicated model for the portal AI writers, so changing the concierge's
+   * model does not silently change them. Optional and deliberately NOT in
+   * `serverKeys`: a missing writer model must degrade the writer, not block
+   * boot — the boundary-7 coupling that once took /sitemap.xml down.
+   */
+  agentModelWriter: string;
   openaiApiKey?: string;
   anthropicApiKey?: string;
   conciergeCookieSecret?: string;
@@ -123,6 +130,7 @@ export interface ServerEnv {
   appUrl: string;
   agentsEnabled: boolean;
   agentModelConcierge: string;
+  agentModelWriter: string;
   openaiApiKey?: string;
   anthropicApiKey?: string;
   conciergeCookieSecret?: string;
@@ -203,6 +211,7 @@ export const runLiveWoztellSchema = z.preprocess(
 const aiEnvironmentSchema = z.object({
   AGENTS_ENABLED: z.string().optional().transform((value) => value === "true"),
   AGENT_MODEL_CONCIERGE: z.string().default("openai:gpt-4.1-mini"),
+  AGENT_MODEL_WRITER: z.string().default("openai:gpt-4.1-mini"),
   OPENAI_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
   CONCIERGE_COOKIE_SECRET: z.string().refine(
@@ -228,6 +237,7 @@ const aiEnvironmentSchema = z.object({
 function parseAiEnvironment(environment: Environment): AiEnv {
   const ai = aiEnvironmentSchema.parse(environment);
   parseAgentModel(ai.AGENT_MODEL_CONCIERGE);
+  parseAgentModel(ai.AGENT_MODEL_WRITER);
 
   if (environment.NODE_ENV === "production") {
     const conciergeSecret = valueFor(environment, "CONCIERGE_COOKIE_SECRET");
@@ -243,6 +253,7 @@ function parseAiEnvironment(environment: Environment): AiEnv {
   return {
     agentsEnabled: ai.AGENTS_ENABLED,
     agentModelConcierge: ai.AGENT_MODEL_CONCIERGE,
+    agentModelWriter: ai.AGENT_MODEL_WRITER,
     ...(ai.OPENAI_API_KEY === undefined ? {} : {openaiApiKey: ai.OPENAI_API_KEY}),
     ...(ai.ANTHROPIC_API_KEY === undefined ? {} : {anthropicApiKey: ai.ANTHROPIC_API_KEY}),
     ...(ai.CONCIERGE_COOKIE_SECRET === undefined ? {} : {conciergeCookieSecret: ai.CONCIERGE_COOKIE_SECRET}),
@@ -461,6 +472,7 @@ export function parseServerEnv(environment: Environment = process.env): ServerEn
     appUrl: valueFor(environment, "APP_URL"),
     agentsEnabled: ai.agentsEnabled,
     agentModelConcierge: ai.agentModelConcierge,
+    agentModelWriter: ai.agentModelWriter,
     ...(ai.openaiApiKey === undefined ? {} : {openaiApiKey: ai.openaiApiKey}),
     ...(ai.anthropicApiKey === undefined ? {} : {anthropicApiKey: ai.anthropicApiKey}),
     ...(ai.conciergeCookieSecret === undefined ? {} : {conciergeCookieSecret: ai.conciergeCookieSecret}),

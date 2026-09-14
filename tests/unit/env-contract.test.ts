@@ -223,6 +223,7 @@ describe("runtime environment contract", () => {
       appUrl: "https://www.example.test",
       agentsEnabled: false,
       agentModelConcierge: "openai:gpt-4.1-mini",
+      agentModelWriter: "openai:gpt-4.1-mini",
     });
     expect(values).not.toHaveProperty("NEXT_PUBLIC_SITE_URL");
   });
@@ -255,6 +256,7 @@ describe("runtime environment contract", () => {
       appUrl: "",
       agentsEnabled: false,
       agentModelConcierge: "openai:gpt-4.1-mini",
+      agentModelWriter: "openai:gpt-4.1-mini",
     });
   });
 
@@ -479,6 +481,13 @@ describe("runtime environment contract", () => {
       TURNSTILE_SECRET: "turnstile-secret",
       TURNSTILE_SITE_KEY: "turnstile-site-key",
     })).not.toThrow();
+  });
+
+  it("gives the writer its own model, defaulted so a missing value degrades rather than blocks", () => {
+    expect(parseAiEnv({}).agentModelWriter).toBe("openai:gpt-4.1-mini");
+    expect(parseAiEnv({AGENT_MODEL_WRITER: "anthropic:claude-sonnet-4-6"}).agentModelWriter)
+      .toBe("anthropic:claude-sonnet-4-6");
+    expect(() => parseAiEnv({AGENT_MODEL_WRITER: "nonsense"})).toThrow("AGENT_MODEL_INVALID");
   });
 });
 

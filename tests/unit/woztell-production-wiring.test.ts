@@ -19,6 +19,7 @@ const env: AppEnv & AiEnv = {
   appUrl: "https://hkwtia.example",
   agentsEnabled: false,
   agentModelConcierge: "test-model",
+  agentModelWriter: "test-model",
 };
 
 const dialect = new PgDialect();
