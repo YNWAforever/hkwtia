@@ -46,7 +46,10 @@ export default async function CompanyPage({params}: Props) {
   // With nothing managed it falls back to a read-only view of the first.
   const profileCompany = dashboard.companies.find((entry) => entry.canManage) ?? company;
   const writerT = await getTranslations({locale, namespace: "Portal.writer"});
-  const writer = actor.kind === "member" ? await writerAssistProps("profile", actor, writerT) : null;
+  // A read-only view cannot save a generation, so do not spend the memberships
+  // read and the run count on a control that is discarded. `CompanyForms` also
+  // refuses the control unless both of its forms are savable.
+  const writer = actor.kind === "member" && canManage ? await writerAssistProps("profile", actor, writerT) : null;
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <header className="space-y-3">

@@ -10,9 +10,22 @@ import {membershipsRepository} from "@/lib/db/repos/memberships";
 
 type MemberActor = Extract<Actor, {kind: "member"}>;
 
+/**
+ * The one owner of the writer's error vocabulary. The UI's label map is a
+ * `Record` over this union, so adding a code here and forgetting its string in
+ * both bundles is a compile error rather than a silent `FAILED` at runtime.
+ */
+export type WriterActionErrorCode =
+  | "INVALID"
+  | "FORBIDDEN"
+  | "NOT_ENTITLED"
+  | "QUOTA_EXCEEDED"
+  | "UNAVAILABLE"
+  | "FAILED";
+
 export type WriterActionState =
   | Readonly<{status: "ok"; copy: Record<string, string>}>
-  | Readonly<{status: "error"; code: "INVALID" | "FORBIDDEN" | "NOT_ENTITLED" | "QUOTA_EXCEEDED" | "UNAVAILABLE" | "FAILED"}>;
+  | Readonly<{status: "error"; code: WriterActionErrorCode}>;
 
 export type WriterActionDependencies = Readonly<{
   plansFor: (actor: MemberActor) => Promise<readonly MembershipPlanCode[]>;

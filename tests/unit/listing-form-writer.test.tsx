@@ -10,7 +10,7 @@ import type {WriterAssistProps} from "@/components/portal/writer-assist";
 
 const writerProps: WriterAssistProps = {
   kind: "listing", quotaLabel: "Unlimited generations", exhausted: false,
-  labels: {label: "Write with AI", briefLabel: "What is this about?", briefPlaceholder: "Notes", generate: "Generate", generating: "Generating…", errors: {}},
+  labels: {label: "Write with AI", briefLabel: "What is this about?", briefPlaceholder: "Notes", generate: "Generate", generating: "Generating…", errors: {INVALID: "Invalid", FORBIDDEN: "Forbidden", NOT_ENTITLED: "Not entitled", QUOTA_EXCEEDED: "Quota", UNAVAILABLE: "Unavailable", FAILED: "Failed"}},
 };
 
 const labels = {title: "Listing", slug: "Slug", nameEn: "Name (EN)", nameZhHk: "Name (ZH)", taglineEn: "Tagline (EN)", taglineZhHk: "Tagline (ZH)", descriptionEn: "Description (EN)", descriptionZhHk: "Description (ZH)", category: "Category", useCases: "Use cases", deploymentOptions: "Deployment", supportedLanguages: "Languages", worksWith: "Works with", videoUrl: "Video", caseStudyUrl: "Case study", caseStudySummaryEn: "Summary (EN)", caseStudySummaryZhHk: "Summary (ZH)", logoReference: "Logo", saveDraft: "Save", submit: "Submit"};

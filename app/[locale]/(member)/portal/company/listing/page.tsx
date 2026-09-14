@@ -22,7 +22,9 @@ export default async function CompanyShowcaseListingPage({params}: Props) {
     return <section className="glass-card space-y-3 p-6"><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("showcaseListing.eyebrow")}</p><h1 className="font-serif text-4xl font-semibold">{t("showcaseListing.title")}</h1><p className="text-muted-foreground">{t("companyEmpty")}</p></section>;
   }
   const writerT = await getTranslations({locale, namespace: "Portal.writer"});
-  const writer = actor.kind === "member" ? await writerAssistProps("listing", actor, writerT) : null;
+  // The form is read-only without a managed company, so the control would be
+  // discarded; skip the quota read that decides it.
+  const writer = actor.kind === "member" && company.canManage ? await writerAssistProps("listing", actor, writerT) : null;
   const listing = await showcaseRepository.getByCompany(actor, company.id);
   const labels = {
     title: t("showcaseListing.formTitle"), slug: t("showcaseListing.fields.slug"), nameEn: t("showcaseListing.fields.nameEn"), nameZhHk: t("showcaseListing.fields.nameZhHk"), taglineEn: t("showcaseListing.fields.taglineEn"), taglineZhHk: t("showcaseListing.fields.taglineZhHk"), descriptionEn: t("showcaseListing.fields.descriptionEn"), descriptionZhHk: t("showcaseListing.fields.descriptionZhHk"), category: t("showcaseListing.fields.category"), useCases: t("showcaseListing.fields.useCases"), deploymentOptions: t("showcaseListing.fields.deploymentOptions"), supportedLanguages: t("showcaseListing.fields.supportedLanguages"), worksWith: t("showcaseListing.fields.worksWith"), videoUrl: t("showcaseListing.fields.videoUrl"), caseStudyUrl: t("showcaseListing.fields.caseStudyUrl"), caseStudySummaryEn: t("showcaseListing.fields.caseStudySummaryEn"), caseStudySummaryZhHk: t("showcaseListing.fields.caseStudySummaryZhHk"), logoReference: t("showcaseListing.fields.logoReference"), saveDraft: t("showcaseListing.saveDraft"), submit: t("showcaseListing.submit"),

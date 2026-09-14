@@ -2,12 +2,12 @@
 
 import {useActionState, useEffect, useRef} from "react";
 
-import {writerAssistAction, type WriterActionState} from "@/lib/portal/writer-actions";
+import {writerAssistAction, type WriterActionErrorCode, type WriterActionState} from "@/lib/portal/writer-actions";
 import type {WriterKind} from "@/lib/ai/writers/contracts";
 
 export type WriterAssistLabels = Readonly<{
   label: string; briefLabel: string; briefPlaceholder: string; generate: string; generating: string;
-  errors: Readonly<Record<string, string>>;
+  errors: Readonly<Record<WriterActionErrorCode, string>>;
 }>;
 
 export type WriterAssistProps = Readonly<{
@@ -20,7 +20,7 @@ export type WriterAssistProps = Readonly<{
 /**
  * The one control every writer surface renders. It posts a brief to the shared
  * action and hands the returned copy to `onGenerated`; the surface decides which
- * of its fields that copy belongs in. A generation persists nothing ??the member
+ * of its fields that copy belongs in. A generation persists nothing — the member
  * still saves the form, and publication stays behind the existing review machine.
  */
 export function WriterAssist({kind, labels, quotaLabel, exhausted, onGenerated}: WriterAssistProps & {
@@ -53,7 +53,7 @@ export function WriterAssist({kind, labels, quotaLabel, exhausted, onGenerated}:
           </button>
           <span className="text-sm text-muted-foreground">{quotaLabel}</span>
         </div>
-        {state?.status === "error" ? <p className="text-sm text-destructive" role="alert">{labels.errors[state.code] ?? labels.errors.FAILED}</p> : null}
+        {state?.status === "error" ? <p className="text-sm text-destructive" role="alert">{labels.errors[state.code]}</p> : null}
       </form>
     </details>
   );

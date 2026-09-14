@@ -116,22 +116,33 @@ function deps(overrides: Partial<WriterActionDependencies> = {}): WriterActionDe
   };
 }
 
+const withOpenai = {openai: true, anthropic: false} as const;
+
 describe("writerAssistProps", () => {
   it("renders no control when the agent is disabled", async () => {
-    await expect(writerAssistProps("event", member, t, {enabled: false, dependencies: deps()})).resolves.toBeNull();
+    await expect(writerAssistProps("event", member, t, {enabled: false, credentials: withOpenai, dependencies: deps()})).resolves.toBeNull();
+  });
+
+  it("renders no control when neither provider key is configured", async () => {
+    await expect(writerAssistProps("event", member, t, {enabled: true, credentials: {openai: false, anthropic: false}, dependencies: deps()})).resolves.toBeNull();
+  });
+
+  it("offers the control when only one provider key is configured", async () => {
+    const props = await writerAssistProps("event", member, t, {enabled: true, credentials: {openai: false, anthropic: true}, dependencies: deps()});
+    expect(props).not.toBeNull();
   });
 
   it("renders no control when the plan has no allowance", async () => {
-    await expect(writerAssistProps("event", member, t, {enabled: true, dependencies: deps({plansFor: async () => ["community"]})})).resolves.toBeNull();
+    await expect(writerAssistProps("event", member, t, {enabled: true, credentials: withOpenai, dependencies: deps({plansFor: async () => ["community"]})})).resolves.toBeNull();
   });
 
   it("renders no control when the quota read fails", async () => {
     const failing = deps({plansFor: async () => { throw new Error("membership read failed"); }});
-    await expect(writerAssistProps("event", member, t, {enabled: true, dependencies: failing})).resolves.toBeNull();
+    await expect(writerAssistProps("event", member, t, {enabled: true, credentials: withOpenai, dependencies: failing})).resolves.toBeNull();
   });
 
   it("offers the control with a formatted remaining quota", async () => {
-    const props = await writerAssistProps("event", member, t, {enabled: true, dependencies: deps()});
+    const props = await writerAssistProps("event", member, t, {enabled: true, credentials: withOpenai, dependencies: deps()});
     expect(props).toMatchObject({
       kind: "event",
       exhausted: false,
@@ -141,12 +152,12 @@ describe("writerAssistProps", () => {
   });
 
   it("marks the control exhausted when nothing remains", async () => {
-    const props = await writerAssistProps("event", member, t, {enabled: true, dependencies: deps({countRuns: async () => 25})});
+    const props = await writerAssistProps("event", member, t, {enabled: true, credentials: withOpenai, dependencies: deps({countRuns: async () => 25})});
     expect(props).toMatchObject({exhausted: true, quotaLabel: "quota:0/20"});
   });
 
   it("labels an unlimited plan without a cap", async () => {
-    const props = await writerAssistProps("event", member, t, {enabled: true, dependencies: deps({plansFor: async () => ["patron"]})});
+    const props = await writerAssistProps("event", member, t, {enabled: true, credentials: withOpenai, dependencies: deps({plansFor: async () => ["patron"]})});
     expect(props).toMatchObject({exhausted: false, quotaLabel: "quotaUnlimited"});
   });
 });

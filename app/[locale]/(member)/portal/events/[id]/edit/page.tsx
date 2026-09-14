@@ -5,10 +5,12 @@ import {ZodError} from "zod";
 import {EventForm} from "@/components/portal/event-form";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
+import {isAdminActor} from "@/lib/auth/authorize";
 import {eventsRepository} from "@/lib/db/repos/events";
 import {saveMemberEventAction} from "@/lib/events/member-actions";
 import {memberEventViewFromRow} from "@/lib/events/member-contract";
 import {loadMemberEventsContext} from "@/lib/events/member-core";
+import {requireMember} from "@/lib/membership/lifecycle";
 import {writerAssistProps} from "@/lib/portal/writer-ui";
 import {localizedPath} from "@/lib/urls";
 
@@ -28,7 +30,8 @@ export default async function EditMemberEventPage({params, searchParams}: Props)
   // /portal/events/<uuid>/edit, so sign-in returns to this row.
   const actor = await getActor();
   if (!actor) redirect(`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent(`/portal/events/${id}/edit`)}`);
-  if (actor.kind !== "member") redirect(localizedPath(locale, "/admin"));
+  if (isAdminActor(actor)) redirect(localizedPath(locale, "/admin"));
+  requireMember(actor);
   const t = await getTranslations({locale, namespace: "Portal.memberEvents"});
   // FORBIDDEN (another company's row, or an admin-authored one) and an invalid
   // id (a ZodError from the id schema) both render as not-found: the member

@@ -30,7 +30,8 @@ const labelClass = "space-y-2 text-sm font-medium";
  * form writes the English description, the profile form writes the taglines and
  * the Chinese description. One generation fills all four, and neither form's save
  * is touched by it — the member still presses save, and review still governs
- * publication.
+ * publication. The control is offered only when *both* forms are savable: a
+ * generation that lands in a disabled textarea is a dead button with extra steps.
  */
 export function CompanyForms({details, profile, writer}: Readonly<{
   details: Readonly<{values: CompanyDetailsValues; labels: CompanyDetailsLabels; action: ((formData: FormData) => void | Promise<void>) | undefined; canManage: boolean}>;
@@ -85,7 +86,7 @@ export function CompanyForms({details, profile, writer}: Readonly<{
         )}
       </form>
 
-      {writer && !profile.readOnly ? (
+      {writer && !profile.readOnly && details.canManage ? (
         <WriterAssist
           kind="profile"
           labels={writer.labels}

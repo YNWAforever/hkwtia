@@ -4,8 +4,10 @@ import {redirect} from "next/navigation";
 import {EventForm} from "@/components/portal/event-form";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
+import {isAdminActor} from "@/lib/auth/authorize";
 import {saveMemberEventAction} from "@/lib/events/member-actions";
 import {loadMemberEventsContext} from "@/lib/events/member-core";
+import {requireMember} from "@/lib/membership/lifecycle";
 import {writerAssistProps} from "@/lib/portal/writer-ui";
 import {localizedPath} from "@/lib/urls";
 
@@ -25,7 +27,8 @@ export default async function NewMemberEventPage({params}: Props) {
   // deep path, so sign-in returns to it rather than to /portal/events.
   const actor = await getActor();
   if (!actor) redirect(`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent("/portal/events/new")}`);
-  if (actor.kind !== "member") redirect(localizedPath(locale, "/admin"));
+  if (isAdminActor(actor)) redirect(localizedPath(locale, "/admin"));
+  requireMember(actor);
   const t = await getTranslations({locale, namespace: "Portal.memberEvents"});
   // NO_MANAGED_COMPANY and MEMBERSHIP_INACTIVE both mean "nothing to publish from".
   const context = await loadMemberEventsContext(actor).catch(() => null);

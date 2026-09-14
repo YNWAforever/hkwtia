@@ -11,7 +11,7 @@ import type {WriterAssistProps} from "@/components/portal/writer-assist";
 
 const writerProps: WriterAssistProps = {
   kind: "profile", quotaLabel: "Unlimited generations", exhausted: false,
-  labels: {label: "Write with AI", briefLabel: "What is this about?", briefPlaceholder: "Notes", generate: "Generate", generating: "Generating…", errors: {}},
+  labels: {label: "Write with AI", briefLabel: "What is this about?", briefPlaceholder: "Notes", generate: "Generate", generating: "Generating…", errors: {INVALID: "Invalid", FORBIDDEN: "Forbidden", NOT_ENTITLED: "Not entitled", QUOTA_EXCEEDED: "Quota", UNAVAILABLE: "Unavailable", FAILED: "Failed"}},
 };
 
 const detailLabels = {legalName: "Legal name", displayName: "Display name", website: "Website", industry: "Industry", sizeBand: "Size", description: "Description (EN)", save: "Save", readOnly: "Read only"};
@@ -39,6 +39,20 @@ describe("CompanyForms writer integration", () => {
     render(<CompanyForms
       details={{values: {companyId: "acme", legalName: "Acme", displayName: "Acme", website: "", industry: "", sizeBand: "", description: ""}, labels: detailLabels, action: undefined, canManage: false}}
       profile={{values: {slug: "acme", taglineEn: "", taglineZhHk: "", descriptionZhHk: "", website: "", logoMediaId: "", tags: [], status: "hidden", rejectionReason: null}, labels: profileLabels, action: async () => ({status: "idle"}), locale: "en", readOnly: true, publicHref: null}}
+      writer={writerProps}
+    />);
+
+    expect(screen.queryByText("Write with AI")).not.toBeInTheDocument();
+  });
+
+  // Regression: the page can assemble these props from two different companies —
+  // the first (unmanaged, so the details textarea is disabled) and the first
+  // *managed* one (so the profile form is editable). Offering the control then
+  // filled an English description into a field that could never be saved.
+  it("offers no control when the details form is read-only even if the profile form is not", () => {
+    render(<CompanyForms
+      details={{values: {companyId: "acme", legalName: "Acme", displayName: "Acme", website: "", industry: "", sizeBand: "", description: ""}, labels: detailLabels, action: undefined, canManage: false}}
+      profile={{values: {slug: "acme", taglineEn: "", taglineZhHk: "", descriptionZhHk: "", website: "", logoMediaId: "", tags: [], status: "hidden", rejectionReason: null}, labels: profileLabels, action: async () => ({status: "idle"}), locale: "en", readOnly: false, publicHref: null}}
       writer={writerProps}
     />);
 

@@ -20,7 +20,7 @@ const labels = {
 
 const writerProps: WriterAssistProps = {
   kind: "event", quotaLabel: "Unlimited generations", exhausted: false,
-  labels: {label: "Write with AI", briefLabel: "What is this about?", briefPlaceholder: "Notes", generate: "Generate", generating: "Generating…", errors: {}},
+  labels: {label: "Write with AI", briefLabel: "What is this about?", briefPlaceholder: "Notes", generate: "Generate", generating: "Generating…", errors: {INVALID: "Invalid", FORBIDDEN: "Forbidden", NOT_ENTITLED: "Not entitled", QUOTA_EXCEEDED: "Quota", UNAVAILABLE: "Unavailable", FAILED: "Failed"}},
 };
 
 describe("EventForm writer integration", () => {
