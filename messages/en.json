@@ -2145,6 +2145,20 @@
       "open": "Open receipt",
       "resource": "Resource"
     },
+    "tools": {
+      "eyebrow": "Member tools",
+      "title": "Your member tools",
+      "description": "Tools included with your membership plan.",
+      "open": "Open tool",
+      "lockedTitle": "Not included in your plan",
+      "lockedDescription": "This tool is available on the Startup, Corporate and Patron plans.",
+      "upgrade": "View membership plans",
+      "unavailableTitle": "Temporarily unavailable",
+      "unavailableDescription": "This tool could not be loaded. Please try again shortly.",
+      "contentCalendar": {
+        "title": "Content calendar"
+      }
+    },
     "billing": {
       "title": "Billing",
       "description": "Manage your membership billing and payment recovery.",

@@ -14,7 +14,7 @@ const portalGroups: readonly InternalNavGroupConfig[] = portalNavigationGroups;
 const adminGroups: readonly InternalNavGroupConfig[] = adminNavigationGroups;
 
 describe("internal navigation config", () => {
-  it("defines exactly the Portal's 8 primary nav links, Dashboard first, no seats item", () => {
+  it("defines exactly the Portal's 9 primary nav links, Dashboard first, no seats item", () => {
     const links = portalGroups.flatMap((group) => group.links);
     expect(links.map((link) => link.href)).toEqual([
       "/portal",
@@ -24,6 +24,7 @@ describe("internal navigation config", () => {
       "/portal/directory",
       "/portal/events",
       "/portal/documents",
+      "/portal/tools",
       "/portal/billing",
     ]);
     expect(links.some((link) => link.href.includes("seats"))).toBe(false);

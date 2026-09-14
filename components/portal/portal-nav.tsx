@@ -22,6 +22,7 @@ const linkLabelKeys = {
   directory: "directory.title",
   events: "events.title",
   documents: "documents.title",
+  tools: "tools.title",
   billing: "billing.title",
 } satisfies Record<PortalNavLinkId, string>;
 

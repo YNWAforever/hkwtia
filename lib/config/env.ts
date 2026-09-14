@@ -41,6 +41,16 @@ export interface UnsubscribeEnv {
   unsubscribeTokenSecret: string;
 }
 
+export interface MemberToolsEnv {
+  /**
+   * The access token for the Content Calendar member tool (Phase D-2). Optional and
+   * deliberately NOT in `serverKeys`: a missing token makes one portal page degrade to
+   * "temporarily unavailable", and a hard boot requirement for a value only that page
+   * reads is the boundary-7 coupling that once took /sitemap.xml down.
+   */
+  contentCalendarToken?: string;
+}
+
 export interface AiEnv {
   agentsEnabled: boolean;
   agentModelConcierge: string;
@@ -403,6 +413,20 @@ export function parseUnsubscribeEnv(environment: Environment = process.env): Uns
 
 export function unsubscribeEnv(): UnsubscribeEnv {
   return parseUnsubscribeEnv(process.env);
+}
+
+const memberToolsEnvironmentSchema = z.object({
+  MEMBER_TOOL_CONTENT_CALENDAR_TOKEN: z.string().optional(),
+});
+
+export function parseMemberToolsEnv(environment: Environment = process.env): MemberToolsEnv {
+  const parsed = memberToolsEnvironmentSchema.parse(environment);
+  const token = parsed.MEMBER_TOOL_CONTENT_CALENDAR_TOKEN?.trim();
+  return token ? {contentCalendarToken: token} : {};
+}
+
+export function memberToolsEnv(): MemberToolsEnv {
+  return parseMemberToolsEnv(process.env);
 }
 
 export function parseAiEnv(environment: Environment = process.env): AiEnv {

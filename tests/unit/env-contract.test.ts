@@ -10,6 +10,7 @@ import {
   parseDatabaseEnv,
   parseEmailEnv,
   parseAutomationEnv,
+  parseMemberToolsEnv,
   parseServerEnv,
   publicEnv,
   serverEnv,
@@ -451,6 +452,33 @@ describe("runtime environment contract", () => {
       TURNSTILE_SITE_KEY: "turnstile-site-key",
       UNSUBSCRIBE_TOKEN_SECRET: "too-short",
     })).toThrow("UNSUBSCRIBE_TOKEN_SECRET must be at least 32 bytes");
+  });
+
+  it("reads a blank member-tool token as absent, never as configured", () => {
+    expect(parseMemberToolsEnv({})).toEqual({});
+    expect(parseMemberToolsEnv({MEMBER_TOOL_CONTENT_CALENDAR_TOKEN: "   "})).toEqual({});
+    expect(parseMemberToolsEnv({MEMBER_TOOL_CONTENT_CALENDAR_TOKEN: "  tool-token  "})).toEqual({
+      contentCalendarToken: "tool-token",
+    });
+  });
+
+  // The token is optional by design: a portal page that renders an unconfigured tool is a
+  // degradation, and a hard boot requirement here is how a transitive env pull once took
+  // /sitemap.xml, /events and /showcase down.
+  it("keeps the member-tool token out of the aggregate server contract", () => {
+    const values = parseServerEnv({
+      ...productionEnvironment(),
+      TURNSTILE_SECRET: "turnstile-secret",
+      TURNSTILE_SITE_KEY: "turnstile-site-key",
+      MEMBER_TOOL_CONTENT_CALENDAR_TOKEN: "tool-token",
+    });
+
+    expect(values).not.toHaveProperty("contentCalendarToken");
+    expect(() => parseServerEnv({
+      ...productionEnvironment(),
+      TURNSTILE_SECRET: "turnstile-secret",
+      TURNSTILE_SITE_KEY: "turnstile-site-key",
+    })).not.toThrow();
   });
 });
 
