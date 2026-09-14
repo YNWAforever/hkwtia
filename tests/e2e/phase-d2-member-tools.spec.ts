@@ -5,7 +5,7 @@ import {expect, test} from "@playwright/test";
 import {missingM2LiveEnvironment, signInForM2} from "../fixtures/m2-auth";
 
 type Bundle = Readonly<{
-  Portal: Readonly<{tools: Readonly<{title: string; lockedTitle: string}>}>;
+  Portal: Readonly<{tools: Readonly<{title: string}>}>;
 }>;
 
 const bundle = (locale: "en" | "zh-HK") =>
@@ -19,7 +19,7 @@ const locales = [
 const missing = missingM2LiveEnvironment();
 
 /**
- * Phase D-2 exit: a member opens the embedded tool from the portal without a second login.
+ * Phase D-2 exit: an entitled member's tools page embeds the configured tool with its token.
  * The frame's src is built from `config/member-tools.ts`; the token comes from the
  * environment and is never printed, only asserted for presence. A member fixture that is
  * Community-only will fail the frame assertion — that is a fixture problem, not a product
@@ -35,7 +35,7 @@ for (const {locale, prefix} of locales) {
     await expect(page.getByRole("heading", {level: 1, name: copy.Portal.tools.title})).toBeVisible();
   });
 
-  test(`${locale}: an entitled member gets the tool embedded, not a second login`, async ({page}) => {
+  test(`${locale}: an entitled member's tools page embeds the configured tool with its token`, async ({page}) => {
     test.skip(missing.length > 0, `Requires ${missing.join(", ")}`);
     await signInForM2(page, "member");
     const response = await page.goto(`${prefix}/portal/tools/content-calendar`);
