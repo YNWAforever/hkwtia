@@ -136,8 +136,11 @@ describe("admin presentation", () => {
    * `tests/unit/event-attendees-ticket-rows.test.ts`.
    */
   it.each([en.Admin.eventsMgmt, zh.Admin.eventsMgmt])("renders a ticket seat's paid status from the door-list labels", (events) => {
-    const labels = {caption: events.attendees, kind: events.kind, kinds: {member: events.kinds.member, guest: events.kinds.guest, ticket: events.kinds.ticket}, name: events.name, email: events.email, organisation: events.organisation, status: events.status, checkedIn: events.checkedIn, checkIn: events.checkIn, checkingIn: events.checkingIn, unavailable: events.unavailable, statuses: {registered: events.statuses.registered, waitlist: events.statuses.waitlist, cancelled: events.statuses.cancelled, attended: events.statuses.attended, no_show: events.statuses.noShow, paid: events.statuses.paid}};
-    const {container} = render(<AttendeeTable attendees={[{kind: "ticket", profileId: null, guestId: null, seatId: "seat-1", orderId: "order-1", displayName: "Ada Lovelace", email: "ada@example.test", organisation: null, status: "paid", checkedInAt: null}]} checkInAction={async () => ({})} labels={labels} locale="en"/>);
+    const labels = {caption: events.attendees, kind: events.kind, kinds: {member: events.kinds.member, guest: events.kinds.guest, ticket: events.kinds.ticket}, name: events.name, email: events.email, organisation: events.organisation, status: events.status, checkedIn: events.checkedIn, checkIn: events.checkIn, checkingIn: events.checkingIn, resendPass: events.resendPass, resending: events.resending, unavailable: events.unavailable, statuses: {registered: events.statuses.registered, waitlist: events.statuses.waitlist, cancelled: events.statuses.cancelled, attended: events.statuses.attended, no_show: events.statuses.noShow, paid: events.statuses.paid}};
+    const {container} = render(<AttendeeTable attendees={[{kind: "ticket", profileId: null, guestId: null, seatId: "seat-1", orderId: "order-1", displayName: "Ada Lovelace", email: "ada@example.test", organisation: null, status: "paid", checkedInAt: null}]} checkInAction={async () => ({})} labels={labels} locale="en" resendPassMessages={{successMessage: events.resendSuccess, errorMessage: events.resendError}} resendPassPath="/en/admin/events-mgmt/event-1"/>);
     expect(container.textContent).toContain(events.statuses.paid);
+    // A ticket seat's only door-list control is the resend: the pass admits on
+    // its own check-in page, never from this list.
+    expect(container.textContent).toContain(events.resendPass);
   });
 });

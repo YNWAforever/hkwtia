@@ -2827,6 +2827,10 @@
       "checkingIn": "簽到中……",
       "checkInSuccess": "已為參加者簽到。",
       "checkInError": "未能為參加者簽到，請再試一次。",
+      "resendPass": "重發門票",
+      "resending": "正在傳送門票……",
+      "resendSuccess": "門票電郵已發送。",
+      "resendError": "未能發送門票電郵，請再試一次。",
       "exportCsv": "下載出席名單（CSV）",
       "kind": "類別",
       "kinds": {

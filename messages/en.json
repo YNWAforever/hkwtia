@@ -2826,6 +2826,10 @@
       "checkingIn": "Checking in...",
       "checkInSuccess": "Attendee checked in.",
       "checkInError": "We could not check in this attendee. Please try again.",
+      "resendPass": "Resend pass",
+      "resending": "Sending pass...",
+      "resendSuccess": "Pass email sent.",
+      "resendError": "We could not send this pass email. Please try again.",
       "exportCsv": "Download attendees (CSV)",
       "kind": "Type",
       "kinds": {

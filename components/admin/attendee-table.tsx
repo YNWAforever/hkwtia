@@ -2,10 +2,12 @@
 
 import {useActionState} from "react";
 
+import type {CheckInActionMessages} from "@/lib/admin/event-actions";
+import {resendPassAction} from "@/lib/admin/event-actions";
 import type {EventActionState} from "@/lib/admin/event-action-core";
 import type {EventAttendee} from "@/lib/db/repos/events";
 
-type Labels = Readonly<{caption: string; kind: string; kinds: Readonly<{member: string; guest: string; ticket: string}>; name: string; email: string; organisation: string; status: string; checkedIn: string; checkIn: string; checkingIn: string; unavailable: string; statuses: Readonly<Record<string, string>>}>;
+type Labels = Readonly<{caption: string; kind: string; kinds: Readonly<{member: string; guest: string; ticket: string}>; name: string; email: string; organisation: string; status: string; checkedIn: string; checkIn: string; checkingIn: string; resendPass: string; resending: string; unavailable: string; statuses: Readonly<Record<string, string>>}>;
 const initialState: EventActionState = {};
 
 function CheckInForm({action, profileId, labels, disabled}: Readonly<{action: (state: EventActionState, formData: FormData) => Promise<EventActionState>; profileId: string; labels: Labels; disabled: boolean}>) {
@@ -14,11 +16,26 @@ function CheckInForm({action, profileId, labels, disabled}: Readonly<{action: (s
 }
 
 /**
- * Members and guests share one door list (programme B-4). Only members get the
- * check-in button: the action is keyed by profile id, and guest check-in lands
- * with Phase D ticketing rather than as a second, guest-keyed action here.
+ * A ticket seat's pass is sent by the webhook on payment, so this is a resend:
+ * staff press it when an attendee says the email never arrived. The action
+ * supplies its own fresh attempt key, so pressing it again always sends.
+ *
+ * It is bound here rather than in the page because the seat id varies per row,
+ * and `resendPassAction` takes the seat id first.
  */
-export function AttendeeTable({attendees, labels, checkInAction, locale}: Readonly<{attendees: readonly EventAttendee[]; labels: Labels; checkInAction: (state: EventActionState, formData: FormData) => Promise<EventActionState>; locale: string}>) {
+function ResendPassForm({seatId, path, messages, labels}: Readonly<{seatId: string; path: string; messages: CheckInActionMessages; labels: Labels}>) {
+  const [state, formAction, pending] = useActionState(resendPassAction.bind(null, seatId, path, messages), initialState);
+  return <form action={formAction} className="space-y-1"><input name="seatId" type="hidden" value={seatId}/><button className="text-sm underline disabled:no-underline disabled:opacity-60" disabled={pending} type="submit">{pending ? labels.resending : labels.resendPass}</button>{state.message ? <p aria-live="polite" className={state.status === "error" ? "text-xs text-destructive" : "text-xs text-muted-foreground"} role={state.status === "error" ? "alert" : "status"}>{state.message}</p> : null}</form>;
+}
+
+/**
+ * Members and guests share one door list (programme B-4). Only members get the
+ * member check-in button: the action is keyed by profile id, and a guest arrives
+ * through Phase B's own form. A ticket seat (Phase D-4b) gets the resend control
+ * instead; its admission happens on the pass's own check-in page, by scanning the
+ * QR, never from this list.
+ */
+export function AttendeeTable({attendees, labels, checkInAction, resendPassPath, resendPassMessages, locale}: Readonly<{attendees: readonly EventAttendee[]; labels: Labels; checkInAction: (state: EventActionState, formData: FormData) => Promise<EventActionState>; resendPassPath: string; resendPassMessages: CheckInActionMessages; locale: string}>) {
   const formatter = new Intl.DateTimeFormat(locale, {dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Hong_Kong"});
-  return <div className="overflow-x-auto"><table className="w-full text-left"><caption className="sr-only">{labels.caption}</caption><thead><tr><th className="p-3">{labels.kind}</th><th className="p-3">{labels.name}</th><th className="p-3">{labels.email}</th><th className="p-3">{labels.organisation}</th><th className="p-3">{labels.status}</th><th className="p-3">{labels.checkedIn}</th><th className="p-3">{labels.checkIn}</th></tr></thead><tbody>{attendees.map((attendee) => <tr className="border-t" key={`${attendee.kind}:${attendee.profileId ?? attendee.guestId ?? attendee.seatId ?? attendee.email ?? attendee.displayName}`}><td className="p-3">{labels.kinds[attendee.kind]}</td><td className="p-3">{attendee.displayName}</td><td className="p-3">{attendee.email ?? labels.unavailable}</td><td className="p-3">{attendee.organisation ?? labels.unavailable}</td><td className="p-3">{labels.statuses[attendee.status] ?? labels.unavailable}</td><td className="p-3">{attendee.checkedInAt ? formatter.format(attendee.checkedInAt) : labels.unavailable}</td><td className="p-3">{attendee.kind === "member" && attendee.profileId ? <CheckInForm action={checkInAction} disabled={Boolean(attendee.checkedInAt)} labels={labels} profileId={attendee.profileId}/> : <span className="text-muted-foreground">{labels.unavailable}</span>}</td></tr>)}</tbody></table></div>;
+  return <div className="overflow-x-auto"><table className="w-full text-left"><caption className="sr-only">{labels.caption}</caption><thead><tr><th className="p-3">{labels.kind}</th><th className="p-3">{labels.name}</th><th className="p-3">{labels.email}</th><th className="p-3">{labels.organisation}</th><th className="p-3">{labels.status}</th><th className="p-3">{labels.checkedIn}</th><th className="p-3">{labels.checkIn}</th></tr></thead><tbody>{attendees.map((attendee) => <tr className="border-t" key={`${attendee.kind}:${attendee.profileId ?? attendee.guestId ?? attendee.seatId ?? attendee.email ?? attendee.displayName}`}><td className="p-3">{labels.kinds[attendee.kind]}</td><td className="p-3">{attendee.displayName}</td><td className="p-3">{attendee.email ?? labels.unavailable}</td><td className="p-3">{attendee.organisation ?? labels.unavailable}</td><td className="p-3">{labels.statuses[attendee.status] ?? labels.unavailable}</td><td className="p-3">{attendee.checkedInAt ? formatter.format(attendee.checkedInAt) : labels.unavailable}</td><td className="p-3">{attendee.kind === "member" && attendee.profileId ? <CheckInForm action={checkInAction} disabled={Boolean(attendee.checkedInAt)} labels={labels} profileId={attendee.profileId}/> : attendee.kind === "ticket" && attendee.seatId ? <ResendPassForm labels={labels} messages={resendPassMessages} path={resendPassPath} seatId={attendee.seatId}/> : <span className="text-muted-foreground">{labels.unavailable}</span>}</td></tr>)}</tbody></table></div>;
 }

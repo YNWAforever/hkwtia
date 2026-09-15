@@ -1,7 +1,10 @@
 import "server-only";
 
 import type {Actor} from "@/lib/membership/lifecycle";
+import {stripeBillingAdapter} from "@/lib/billing/stripe";
 import type {EventOrdersRepository, OrderRecord} from "@/lib/db/repos/event-orders";
+import {eventOrdersRepository} from "@/lib/db/repos/event-orders";
+import {appEnv, emailEnv, ticketPassEnv} from "@/lib/config/env";
 import {renderEmail} from "@/lib/email/render";
 import type {EmailVariables} from "@/lib/email/catalog";
 import {createConfiguredEmailTransport} from "@/lib/email/transport";
@@ -145,6 +148,28 @@ export async function sendSeatPass(
     ctaUrl: passUrl,
     idempotencyKey: `ticket-pass:${seat.seatId}:${input.attemptKey}`,
   });
+}
+
+let defaultDependencies: TicketProcessorDependencies | undefined;
+
+/**
+ * The production dependency bag, built on first use so no env is read at import.
+ *
+ * The staff resend (`resendPassAction`) consumes `sendSeatPass` with the same bag
+ * the webhook builds, so both paths send the identical email rather than two
+ * implementations that drift.
+ */
+export function ticketProcessorDependencies(): TicketProcessorDependencies {
+  defaultDependencies ??= {
+    orders: eventOrdersRepository,
+    refundPaymentIntent: (paymentIntentId, idempotencyKey) => stripeBillingAdapter().refundPaymentIntent(paymentIntentId, idempotencyKey),
+    email: {renderEmail, transport: createConfiguredEmailTransport(), emailFrom: emailEnv().emailFrom},
+    appUrl: appEnv().appUrl,
+    passSecret: ticketPassEnv().ticketPassTokenSecret,
+    now: () => new Date(),
+    onEmailError(error, context) { console.error("ticket email failed", context, error); },
+  };
+  return defaultDependencies;
 }
 
 export function createTicketProcessor(dependencies: TicketProcessorDependencies): TicketProcessor {
