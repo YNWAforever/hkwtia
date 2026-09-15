@@ -3,7 +3,7 @@ import "server-only";
 import {sql} from "drizzle-orm";
 import {z} from "zod";
 
-import {TICKET_HOLD_MS} from "@/config/tickets";
+import {MAX_TICKET_SEATS, TICKET_HOLD_MS} from "@/config/tickets";
 import {getDb} from "@/lib/db/repos/common";
 import {auditEvents, eventOrderSeats, eventOrders, events} from "@/lib/db/server-schema";
 
@@ -33,10 +33,10 @@ export type CreateOrderInput = Readonly<{
 
 export type CreateOrderResult =
   | Readonly<{ok: true; order: OrderRecord; reused: boolean}>
-  | Readonly<{ok: false; reason: "EVENT_NOT_FOUND" | "SOLD_OUT"}>;
+  | Readonly<{ok: false; reason: "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "AMOUNT_MISMATCH" | "SOLD_OUT"}>;
 
 export type SettleResult =
-  | Readonly<{status: "paid" | "duplicate" | "ignored" | "oversold" | "unknown"; order: OrderRecord | null}>;
+  | Readonly<{status: "paid" | "duplicate" | "ignored" | "oversold" | "refund_due" | "unknown"; order: OrderRecord | null}>;
 
 export type EventOrdersTransaction = Readonly<{
   lockEvent: (eventId: string) => Promise<LockedEvent | null>;
@@ -54,7 +54,7 @@ export type EventOrdersTransaction = Readonly<{
 }>;
 
 const seatSchema = z.object({name: z.string().trim().min(1).max(200), email: z.string().trim().toLowerCase().pipe(z.string().email().max(320))}).strict();
-export const ticketSeatsSchema = z.array(seatSchema).min(1);
+export const ticketSeatsSchema = z.array(seatSchema).min(1).max(MAX_TICKET_SEATS);
 
 function rows<T>(result: unknown): T[] {
   if (Array.isArray(result)) return result as T[];
@@ -102,14 +102,44 @@ function orderFrom(row: Record<string, unknown>): OrderRecord {
   };
 }
 
+/**
+ * The lock row is aliased to camelCase in the SQL, but a driver returning
+ * `timestamptz` as a string would still leave `startsAt` a string typed as a
+ * `Date`. Folding it through the same helpers as `orderFrom` keeps the type
+ * honest for Task 7, which formats `eventSummary.startsAt`.
+ */
+function lockedEventFrom(row: Record<string, unknown>): LockedEvent {
+  return {
+    id: String(row.id),
+    capacity: row.capacity === null || row.capacity === undefined ? null : Number(row.capacity),
+    published: Boolean(row.published),
+    startsAt: requiredDate(row.startsAt),
+    endsAt: optionalDate(row.endsAt),
+    registrationMode: String(row.registrationMode),
+    ticketPriceHkdCents: row.ticketPriceHkdCents === null || row.ticketPriceHkdCents === undefined ? null : Number(row.ticketPriceHkdCents),
+  };
+}
+
+function eventSummaryFrom(row: Record<string, unknown>): {titleEn: string; titleZh: string | null; startsAt: Date; slug: string} {
+  return {
+    titleEn: String(row.titleEn),
+    titleZh: optionalString(row.titleZh),
+    startsAt: requiredDate(row.startsAt),
+    slug: String(row.slug),
+  };
+}
+
 async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promise<T>): Promise<T> {
   const db = await getDb();
   return db.transaction(async (tx) => work({
-    lockEvent: async (eventId) => rows<LockedEvent>(await tx.execute(sql`
-      SELECT id, capacity, published, starts_at AS "startsAt", ends_at AS "endsAt",
-             registration_mode AS "registrationMode", ticket_price_hkd_cents AS "ticketPriceHkdCents"
-      FROM ${events} WHERE id = ${eventId} FOR UPDATE
-    `))[0] ?? null,
+    lockEvent: async (eventId) => {
+      const row = rows<Record<string, unknown>>(await tx.execute(sql`
+        SELECT id, capacity, published, starts_at AS "startsAt", ends_at AS "endsAt",
+               registration_mode AS "registrationMode", ticket_price_hkd_cents AS "ticketPriceHkdCents"
+        FROM ${events} WHERE id = ${eventId} FOR UPDATE
+      `))[0];
+      return row ? lockedEventFrom(row) : null;
+    },
     orderByIdempotencyKey: async (key) => {
       const row = rows<Record<string, unknown>>(await tx.execute(sql`SELECT * FROM ${eventOrders} WHERE idempotency_key = ${key} LIMIT 1`))[0];
       return row ? orderFrom(row) : null;
@@ -139,9 +169,9 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
     attachSession: async (orderId, sessionId, url) => { await tx.execute(sql`UPDATE ${eventOrders} SET stripe_checkout_session_id = ${sessionId}, stripe_checkout_url = ${url}, updated_at = NOW() WHERE id = ${orderId}`); },
     markStatus: async (orderId, status, patch) => { await tx.execute(sql`UPDATE ${eventOrders} SET status = ${status}, paid_at = ${patch.paidAt ?? null}, refunded_at = ${patch.refundedAt ?? null}, refund_reason = ${patch.refundReason ?? null}, updated_at = NOW() WHERE id = ${orderId}`); },
     insertAudit: async (input) => { await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${input.actorUserId}, ${input.actorType}, ${input.action}, ${input.targetType}, ${input.targetId}, ${JSON.stringify(input.metadata)}::jsonb)`); },
-    eventSummary: async (eventId) => rows<{titleEn: string; titleZh: string | null; startsAt: Date; slug: string}>(await tx.execute(sql`
+    eventSummary: async (eventId) => rows<Record<string, unknown>>(await tx.execute(sql`
       SELECT title_en AS "titleEn", title_zh AS "titleZh", starts_at AS "startsAt", slug FROM ${events} WHERE id = ${eventId} LIMIT 1
-    `)),
+    `)).map((row) => eventSummaryFrom(row)),
   }));
 }
 
@@ -151,8 +181,17 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
       return runTransaction(async (tx) => {
         const event = await tx.lockEvent(input.eventId);
         if (!event) return {ok: false, reason: "EVENT_NOT_FOUND"};
+        // The lock already holds the authoritative mode and price, so the
+        // "a client-supplied amount is never read" invariant is enforced here
+        // rather than resting on the caller being correct forever.
+        if (event.registrationMode !== "ticketed" || event.ticketPriceHkdCents === null) {
+          return {ok: false, reason: "EVENT_NOT_TICKETED"};
+        }
         const existing = await tx.orderByIdempotencyKey(input.idempotencyKey);
         if (existing) return {ok: true, order: existing, reused: true};
+        if (input.amountHkdCents !== event.ticketPriceHkdCents * input.seats.length) {
+          return {ok: false, reason: "AMOUNT_MISMATCH"};
+        }
         if (event.capacity !== null) {
           const held = await tx.heldSeats(input.eventId, input.now);
           if (held + input.seats.length > event.capacity) return {ok: false, reason: "SOLD_OUT"};
@@ -174,6 +213,14 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
         const order = await tx.orderBySessionId(sessionId);
         if (!order) return {status: "unknown", order: null};
         if (order.status === "paid") return {status: "duplicate", order};
+        // A session can be paid in the moment it lapses locally, so an order we
+        // already expired may still carry a real payment. Refund it rather than
+        // answer `ignored`, which would take money and hand back no seats.
+        if (order.status === "expired") {
+          await tx.markStatus(order.id, "refunded", {refundedAt: now, refundReason: "cancelled"});
+          await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.refunded", targetType: "event_order", targetId: order.id, metadata: {reason: "late_payment"}});
+          return {status: "refund_due", order: {...order, status: "refunded", refundedAt: now, refundReason: "cancelled"}};
+        }
         if (order.status !== "pending") return {status: "ignored", order};
         const event = await tx.lockEvent(order.eventId);
         if (event && event.capacity !== null) {
