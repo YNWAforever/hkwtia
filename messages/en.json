@@ -2860,6 +2860,27 @@
         "rejectionReason": "Reason for returning",
         "empty": "No member events are waiting for review.",
         "error": "Member events awaiting review could not be loaded."
+      },
+      "orders": {
+        "heading": "Orders",
+        "unavailable": "Orders could not be loaded right now.",
+        "caption": "Orders",
+        "buyer": "Buyer",
+        "seats": "Seats",
+        "amount": "Amount",
+        "status": "Status",
+        "refundedOn": "Refunded on",
+        "refund": "Refund",
+        "cancel": "Cancel",
+        "note": "Note",
+        "confirm": "Refund {buyer}'s seats ({seats}) for {amount}?",
+        "statuses": {
+          "pending": "Pending",
+          "paid": "Paid",
+          "expired": "Expired",
+          "failed": "Failed",
+          "refunded": "Refunded"
+        }
       }
     },
     "announcements": {

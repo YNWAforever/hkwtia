@@ -5,10 +5,13 @@ import {z} from "zod";
 
 import {AttendeeTable} from "@/components/admin/attendee-table";
 import {EventForm} from "@/components/admin/event-form";
+import {OrdersTable} from "@/components/admin/orders-table";
 import type {AppLocale} from "@/i18n/routing";
 import {checkInEventAttendeeAction, updateEventAction} from "@/lib/admin/event-actions";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
+import {toRefundConfirmMessage} from "@/lib/admin/refund-confirm-message";
 import {submitSeatCheckInAction} from "@/lib/tickets/check-in-actions";
+import {submitRefundOrderAction} from "@/lib/tickets/refund-actions";
 
 
 import {eventOrdersRepository} from "@/lib/db/repos/event-orders";
@@ -43,6 +46,12 @@ export default async function AdminEventDetailPage({params}: Props) {
       eventOrdersRepository.paidSeats(event.id),
     ]).then(([held, paid]) => ({held, paid})).catch(() => null)
     : null;
+  // Only a ticketed event can have orders, so the read is skipped elsewhere. A
+  // failed read is `null`, never `[]`: an unreachable table must not look like
+  // an event nobody bought.
+  const orders = event.registrationMode === "ticketed"
+    ? await eventOrdersRepository.listEventOrders(event.id).catch(() => null)
+    : [];
   // `attendees` is only `null` when the event id doesn't exist; `event` above
   // already proved it does, so this is defensive, not expected in practice.
   const attendeeRows = attendees ?? [];
@@ -51,6 +60,7 @@ export default async function AdminEventDetailPage({params}: Props) {
   // The seat outcomes reuse the check-in page's own copy: the door-list fallback
   // and the scanned page are the same write, so they report it in the same words.
   const tc = await getTranslations({locale, namespace: "Admin.checkIn"});
+  const tOrders = await getTranslations({locale, namespace: "Admin.eventsMgmt.orders"});
   const updateActionMessages = {successMessage: t("updateSuccess"), validationMessage: t("validation"), errorMessage: t("error")};
   const checkInActionMessages = {successMessage: t("checkInSuccess"), errorMessage: t("checkInError")};
   const resendPassMessages = {successMessage: t("resendSuccess"), errorMessage: t("resendError")};
@@ -63,7 +73,9 @@ export default async function AdminEventDetailPage({params}: Props) {
   // successful check-in revalidates it (twice, which is idempotent) so the row
   // re-renders as checked in.
   const seatCheckInAction = submitSeatCheckInAction.bind(null, eventPath, eventPath, seatCheckInMessages);
+  const refundAction = submitRefundOrderAction.bind(null, eventPath);
   const labels = {slug: t("slug"), titleEn: t("titleEn"), titleZh: t("titleZh"), descriptionEn: t("descriptionEn"), descriptionZh: t("descriptionZh"), startsAt: t("startsAt"), endsAt: t("endsAt"), venue: t("venue"), capacity: t("capacity"), registrationMode: t("registrationMode"), registrationModes: {rsvp: t("registrationModes.rsvp"), external: t("registrationModes.external"), ticketed: t("registrationModes.ticketed")}, ticketPriceHkdCents: t("ticketPriceHkdCents"), memberOnly: t("memberOnly"), published: t("published"), heroMediaId: t("heroMediaId"), noHeroMedia: t("noHeroMedia"), save: t("save"), saving: t("saving")};
   const attendeeLabels = {caption: t("attendees"), kind: t("kind"), kinds: {member: t("kinds.member"), guest: t("kinds.guest"), ticket: t("kinds.ticket")}, name: t("name"), email: t("email"), organisation: t("organisation"), status: t("status"), checkedIn: t("checkedIn"), checkIn: t("checkIn"), checkingIn: t("checkingIn"), resendPass: t("resendPass"), resending: t("resending"), unavailable: t("unavailable"), statuses: {registered: t("statuses.registered"), waitlist: t("statuses.waitlist"), cancelled: t("statuses.cancelled"), attended: t("statuses.attended"), no_show: t("statuses.noShow"), paid: t("statuses.paid")}};
-  return <div className="space-y-8"><header><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("eyebrow")}</p><h1 className="font-serif text-4xl font-semibold">{localized.title}</h1>{event.registrationMode === "ticketed" ? seatCounts === null ? <p className="mt-3 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive" role="alert">{t("seatsUnavailable")}</p> : <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm">{event.capacity !== null ? <div className="flex items-baseline gap-2"><dt className="text-muted-foreground">{t("capacity")}</dt><dd className="font-medium">{event.capacity}</dd></div> : null}<div className="flex items-baseline gap-2"><dt className="text-muted-foreground">{t("seatsPaid")}</dt><dd className="font-medium">{seatCounts.paid}</dd></div><div className="flex items-baseline gap-2"><dt className="text-muted-foreground">{t("seatsHeld")}</dt><dd className="font-medium">{seatCounts.held}</dd></div></dl> : null}</header><EventForm action={updateAction} labels={labels} mediaRows={mediaRows} values={event}/><section className="glass-card p-6"><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-serif text-2xl font-semibold">{t("attendees")}</h2><a className="text-primary underline" href={`/api/admin/events/${event.id}/attendees.csv`}>{t("exportCsv")}</a></div><AttendeeTable attendees={attendeeRows} checkInAction={checkInAction} labels={attendeeLabels} locale={locale} resendPassMessages={resendPassMessages} resendPassPath={eventPath} seatCheckInAction={seatCheckInAction}/></section></div>;
+  const ordersLabels = {caption: tOrders("caption"), buyer: tOrders("buyer"), seats: tOrders("seats"), amount: tOrders("amount"), status: tOrders("status"), refundedOn: tOrders("refundedOn"), refund: tOrders("refund"), confirm: toRefundConfirmMessage(tOrders.raw("confirm")), cancel: tOrders("cancel"), note: tOrders("note"), statuses: {pending: tOrders("statuses.pending"), paid: tOrders("statuses.paid"), expired: tOrders("statuses.expired"), failed: tOrders("statuses.failed"), refunded: tOrders("statuses.refunded")}};
+  return <div className="space-y-8"><header><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("eyebrow")}</p><h1 className="font-serif text-4xl font-semibold">{localized.title}</h1>{event.registrationMode === "ticketed" ? seatCounts === null ? <p className="mt-3 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive" role="alert">{t("seatsUnavailable")}</p> : <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm">{event.capacity !== null ? <div className="flex items-baseline gap-2"><dt className="text-muted-foreground">{t("capacity")}</dt><dd className="font-medium">{event.capacity}</dd></div> : null}<div className="flex items-baseline gap-2"><dt className="text-muted-foreground">{t("seatsPaid")}</dt><dd className="font-medium">{seatCounts.paid}</dd></div><div className="flex items-baseline gap-2"><dt className="text-muted-foreground">{t("seatsHeld")}</dt><dd className="font-medium">{seatCounts.held}</dd></div></dl> : null}</header><EventForm action={updateAction} labels={labels} mediaRows={mediaRows} values={event}/>{event.registrationMode === "ticketed" ? <section className="glass-card p-6"><h2 className="font-serif text-2xl font-semibold">{tOrders("heading")}</h2>{orders === null ? <p role="alert">{tOrders("unavailable")}</p> : <OrdersTable action={refundAction} labels={ordersLabels} rows={orders}/>}</section> : null}<section className="glass-card p-6"><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-serif text-2xl font-semibold">{t("attendees")}</h2><a className="text-primary underline" href={`/api/admin/events/${event.id}/attendees.csv`}>{t("exportCsv")}</a></div><AttendeeTable attendees={attendeeRows} checkInAction={checkInAction} labels={attendeeLabels} locale={locale} resendPassMessages={resendPassMessages} resendPassPath={eventPath} seatCheckInAction={seatCheckInAction}/></section></div>;
 }

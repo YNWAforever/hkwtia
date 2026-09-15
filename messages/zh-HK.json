@@ -2861,6 +2861,27 @@
         "rejectionReason": "退回原因",
         "empty": "目前沒有等待審核的會員活動。",
         "error": "無法載入等待審核的會員活動。"
+      },
+      "orders": {
+        "heading": "訂單",
+        "unavailable": "暫時無法載入訂單。",
+        "caption": "訂單",
+        "buyer": "買家",
+        "seats": "座位",
+        "amount": "金額",
+        "status": "狀態",
+        "refundedOn": "退款日期",
+        "refund": "退款",
+        "cancel": "取消",
+        "note": "備註",
+        "confirm": "確定向 {buyer} 退款 {amount}（座位：{seats}）？",
+        "statuses": {
+          "pending": "待付款",
+          "paid": "已付款",
+          "expired": "已過期",
+          "failed": "失敗",
+          "refunded": "已退款"
+        }
       }
     },
     "announcements": {

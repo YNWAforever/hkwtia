@@ -1,0 +1,25 @@
+import {describe, expect, it} from "vitest";
+
+import {toRefundConfirmMessage} from "@/lib/admin/refund-confirm-message";
+
+describe("toRefundConfirmMessage", () => {
+  it("passes through a template carrying all three placeholders", () => {
+    const value = "Refund {buyer}'s seats ({seats}) for {amount}?";
+
+    expect(toRefundConfirmMessage(value)).toBe(value);
+  });
+
+  it.each([
+    ["a non-string", 42],
+    ["undefined", undefined],
+    ["a template missing the buyer", "Refund the seats ({seats}) for {amount}?"],
+    ["a template missing the seats", "Refund {buyer} for {amount}?"],
+    ["a template missing the amount", "Refund {buyer}'s seats ({seats})?"],
+  ])("falls back to a full template for %s", (_label, value) => {
+    const message = toRefundConfirmMessage(value);
+
+    expect(message).toContain("{buyer}");
+    expect(message).toContain("{seats}");
+    expect(message).toContain("{amount}");
+  });
+});
