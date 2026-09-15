@@ -48,6 +48,14 @@ export type EventOrdersTransaction = Readonly<{
   orderByIdempotencyKey: (key: string) => Promise<OrderRecord | null>;
   orderBySessionId: (sessionId: string) => Promise<OrderRecord | null>;
   seatsOfOrder: (orderId: string) => Promise<number>;
+  /**
+   * Every seat of an order in position order. `attendeeName` rides along because
+   * the receipt names the attendees and the per-attendee passes need each id:
+   * one read serves both, rather than a second query per recipient.
+   */
+  orderSeats: (orderId: string) => Promise<readonly Readonly<{seatId: string; position: number; attendeeName: string}>[]>;
+  /** One seat with its paid order, for a single pass. */
+  seatForPass: (seatId: string) => Promise<Readonly<{seatId: string; attendeeName: string; attendeeEmail: string; eventId: string; buyerLocale: "en" | "zh-HK"; order: OrderRecord}> | null>;
   /** Seats of paid orders, or of pending ones whose hold has not lapsed. */
   heldSeats: (eventId: string, now: Date, excludingOrderId?: string) => Promise<number>;
   /** Seats of paid orders only -- the subset of `heldSeats` that has been bought. */
@@ -57,7 +65,7 @@ export type EventOrdersTransaction = Readonly<{
   attachSession: (orderId: string, sessionId: string, url: string) => Promise<void>;
   markStatus: (orderId: string, status: OrderStatus, patch: Readonly<{paidAt?: Date; refundedAt?: Date; refundReason?: RefundReason}>) => Promise<void>;
   insertAudit: (input: Readonly<{actorUserId: string | null; actorType: string; action: string; targetType: string; targetId: string; metadata: Record<string, unknown>}>) => Promise<void>;
-  eventSummary: (eventId: string) => Promise<readonly Readonly<{titleEn: string; titleZh: string | null; startsAt: Date; slug: string}>[]>;
+  eventSummary: (eventId: string) => Promise<readonly Readonly<{titleEn: string; titleZh: string | null; startsAt: Date; slug: string; venue: string | null}>[]>;
 }>;
 
 const seatSchema = z.object({name: z.string().trim().min(1).max(200), email: z.string().trim().toLowerCase().pipe(z.string().email().max(320))}).strict();
@@ -127,12 +135,13 @@ function lockedEventFrom(row: Record<string, unknown>): LockedEvent {
   };
 }
 
-function eventSummaryFrom(row: Record<string, unknown>): {titleEn: string; titleZh: string | null; startsAt: Date; slug: string} {
+function eventSummaryFrom(row: Record<string, unknown>): {titleEn: string; titleZh: string | null; startsAt: Date; slug: string; venue: string | null} {
   return {
     titleEn: String(row.titleEn),
     titleZh: optionalString(row.titleZh),
     startsAt: requiredDate(row.startsAt),
     slug: String(row.slug),
+    venue: optionalString(row.venue),
   };
 }
 
@@ -156,6 +165,21 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       return row ? orderFrom(row) : null;
     },
     seatsOfOrder: async (orderId) => Number(rows<{value: number}>(await tx.execute(sql`SELECT COUNT(*)::int AS value FROM ${eventOrderSeats} WHERE order_id = ${orderId}`))[0]?.value ?? 0),
+    orderSeats: async (orderId) => rows<{seatId: string; position: number; attendeeName: string}>(await tx.execute(sql`
+      SELECT id AS "seatId", position, attendee_name AS "attendeeName" FROM ${eventOrderSeats} WHERE order_id = ${orderId} ORDER BY position ASC
+    `)),
+    seatForPass: async (seatId) => {
+      const row = rows<Record<string, unknown>>(await tx.execute(sql`
+        SELECT s.id AS "seatId", s.attendee_name AS "attendeeName", s.attendee_email AS "attendeeEmail",
+               o.event_id AS "eventId", o.buyer_locale AS "buyerLocale", o.*
+        FROM ${eventOrderSeats} s JOIN ${eventOrders} o ON o.id = s.order_id
+        WHERE s.id = ${seatId} AND o.status = 'paid' LIMIT 1
+      `))[0];
+      if (!row) return null;
+      // `o.*` arrives snake_case; `orderFrom` is the existing folder that already
+      // handles those columns, so the order is folded once, not mapped twice.
+      return {seatId: String(row.seatId), attendeeName: String(row.attendeeName), attendeeEmail: String(row.attendeeEmail), eventId: String(row.eventId), buyerLocale: row.buyerLocale === "zh-HK" ? "zh-HK" : "en", order: orderFrom(row)};
+    },
     heldSeats: async (eventId, now, excludingOrderId) => Number(rows<{value: number}>(await tx.execute(sql`
       SELECT COUNT(*)::int AS value FROM ${eventOrderSeats} AS s
       JOIN ${eventOrders} AS o ON o.id = s.order_id
@@ -193,7 +217,7 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
     },
     insertAudit: async (input) => { await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${input.actorUserId}, ${input.actorType}, ${input.action}, ${input.targetType}, ${input.targetId}, ${JSON.stringify(input.metadata)}::jsonb)`); },
     eventSummary: async (eventId) => rows<Record<string, unknown>>(await tx.execute(sql`
-      SELECT title_en AS "titleEn", title_zh AS "titleZh", starts_at AS "startsAt", slug FROM ${events} WHERE id = ${eventId} LIMIT 1
+      SELECT title_en AS "titleEn", title_zh AS "titleZh", starts_at AS "startsAt", slug, venue FROM ${events} WHERE id = ${eventId} LIMIT 1
     `)).map((row) => eventSummaryFrom(row)),
   }));
 }
@@ -303,17 +327,27 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
     },
 
     /** The localized title the receipt names. Not transactional: a read of one row. */
-    async eventSummary(eventId: string, locale: "en" | "zh-HK"): Promise<{title: string; startsAt: Date; slug: string} | null> {
+    async eventSummary(eventId: string, locale: "en" | "zh-HK"): Promise<{title: string; startsAt: Date; slug: string; venue: string | null} | null> {
       return runTransaction(async (tx) => {
         const row = (await tx.eventSummary(eventId))[0];
         if (!row) return null;
-        return {title: locale === "zh-HK" ? row.titleZh ?? row.titleEn : row.titleEn, startsAt: row.startsAt, slug: row.slug};
+        return {title: locale === "zh-HK" ? row.titleZh ?? row.titleEn : row.titleEn, startsAt: row.startsAt, slug: row.slug, venue: row.venue};
       });
     },
 
     /** The seat count the receipt names; the transaction holds it already. */
     async seatsOfOrder(orderId: string): Promise<number> {
       return runTransaction((tx) => tx.seatsOfOrder(orderId));
+    },
+
+    /** Each seat of an order, in position order, for the receipt and the passes. */
+    async orderSeats(orderId: string): Promise<readonly {seatId: string; position: number; attendeeName: string}[]> {
+      return runTransaction((tx) => tx.orderSeats(orderId));
+    },
+
+    /** One seat with its order, for a single pass. `null` unless the order is paid. */
+    async seatForPass(seatId: string): Promise<Readonly<{seatId: string; attendeeName: string; attendeeEmail: string; eventId: string; buyerLocale: "en" | "zh-HK"; order: OrderRecord}> | null> {
+      return runTransaction((tx) => tx.seatForPass(seatId));
     },
   };
 }

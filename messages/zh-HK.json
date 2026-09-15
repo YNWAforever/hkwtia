@@ -336,7 +336,7 @@
         "subject": "{eventTitle} 的門票",
         "preview": "訂單 {orderId} 已確認，共 {seatCount} 個座位。",
         "heading": "你將參加 {eventTitle}",
-        "body": "多謝支持。我們已收到 HK${amount}，共 {seatCount} 個座位。活動日期為 {eventDate}。",
+        "body": "多謝支持。我們已收到 HK${amount}，共 {seatCount} 個座位：{attendees}。活動日期為 {eventDate}。每位出席者將另函收到專屬門票。",
         "cta": "查看活動"
       },
       "event_ticket_refunded": {
@@ -345,6 +345,13 @@
         "heading": "款項已退回",
         "body": "我們已就訂單 {orderId}（{eventTitle}）退回 HK${amount}。視乎銀行處理，款項可能需要數天才顯示。",
         "cta": "查看活動"
+      },
+      "event_ticket_pass": {
+        "subject": "{eventTitle} 的門票",
+        "preview": "{attendeeName} 的專屬入場門票。",
+        "heading": "{attendeeName}，這是你的門票",
+        "body": "請於活動當日在入口出示此門票。活動：{eventTitle}，日期：{eventDate}，地點：{venue}。每張門票只限一人入場，請勿轉發。",
+        "cta": "開啟門票"
       }
     }
   },
@@ -1606,6 +1613,14 @@
       "RATE_LIMITED": "此連線嘗試次數過多，請稍後再試。"
     }
   },
+  "Pass": {
+    "eyebrow": "活動通行證",
+    "attendee": "出席者",
+    "seat": "座位 {position}",
+    "qrLabel": "報到二維碼",
+    "checkedIn": "已報到",
+    "presentAtDoor": "請於現場出示此通行證。"
+  },
   "News": {
     "metaTitle": "消息｜WiseTech Hong Kong",
     "metaDescription": "閱讀 WTIA 最新消息。",
@@ -2312,6 +2327,19 @@
       "templates": "WhatsApp 範本",
       "campaigns": "推廣活動"
     },
+    "checkIn": {
+      "eyebrow": "現場簽到",
+      "seat": "座位 {position}",
+      "alreadyCheckedIn": "已簽到。",
+      "checkIn": "簽到",
+      "undo": "取消簽到",
+      "backToEvent": "返回活動",
+      "checkInSuccess": "已完成簽到。",
+      "undoSuccess": "已取消簽到。",
+      "notCheckedIn": "此座位尚未簽到。",
+      "notAdmissible": "此座位不可入場。",
+      "updateError": "未能更新此座位。"
+    },
     "templates": {
       "eyebrow": "WhatsApp 發送",
       "title": "WhatsApp 範本",
@@ -2799,11 +2827,16 @@
       "checkingIn": "簽到中……",
       "checkInSuccess": "已為參加者簽到。",
       "checkInError": "未能為參加者簽到，請再試一次。",
+      "resendPass": "重發門票",
+      "resending": "正在傳送門票……",
+      "resendSuccess": "門票電郵已發送。",
+      "resendError": "未能發送門票電郵，請再試一次。",
       "exportCsv": "下載出席名單（CSV）",
       "kind": "類別",
       "kinds": {
         "member": "會員",
-        "guest": "訪客"
+        "guest": "訪客",
+        "ticket": "門票"
       },
       "organisation": "機構",
       "statuses": {
@@ -2811,7 +2844,8 @@
         "waitlist": "候補名單",
         "cancelled": "已取消",
         "attended": "已出席",
-        "noShow": "未出席"
+        "noShow": "未出席",
+        "paid": "已付款"
       },
       "review": {
         "title": "等待審核的會員活動",

@@ -336,7 +336,7 @@
         "subject": "Your tickets for {eventTitle}",
         "preview": "Order {orderId} confirmed, {seatCount} seat(s).",
         "heading": "You're going to {eventTitle}",
-        "body": "Thank you. We received HK${amount} for {seatCount} seat(s). The event is on {eventDate}.",
+        "body": "Thank you. We received HK${amount} for {seatCount} seat(s): {attendees}. The event is on {eventDate}. Each attendee will receive their own pass in a separate email.",
         "cta": "View the event"
       },
       "event_ticket_refunded": {
@@ -345,6 +345,13 @@
         "heading": "Your payment has been returned",
         "body": "We have refunded HK${amount} for order {orderId} ({eventTitle}). Depending on your bank, it can take a few days to appear.",
         "cta": "View the event"
+      },
+      "event_ticket_pass": {
+        "subject": "Your pass for {eventTitle}",
+        "preview": "Your personal entry pass, {attendeeName}.",
+        "heading": "Your pass, {attendeeName}",
+        "body": "Show this email's pass at the door for {eventTitle} on {eventDate} at {venue}. Each pass admits one person, so please do not forward it.",
+        "cta": "Open your pass"
       }
     }
   },
@@ -1606,6 +1613,14 @@
       "RATE_LIMITED": "Too many attempts from this connection. Try again in a few minutes."
     }
   },
+  "Pass": {
+    "eyebrow": "Event pass",
+    "attendee": "Attendee",
+    "seat": "Seat {position}",
+    "qrLabel": "Check-in QR code",
+    "checkedIn": "Checked in",
+    "presentAtDoor": "Present this pass at the door."
+  },
   "News": {
     "metaTitle": "News | WiseTech Hong Kong",
     "metaDescription": "Read the latest news from WTIA.",
@@ -2311,6 +2326,19 @@
       "templates": "WhatsApp templates",
       "campaigns": "Campaigns"
     },
+    "checkIn": {
+      "eyebrow": "Door check-in",
+      "seat": "Seat {position}",
+      "alreadyCheckedIn": "Already checked in.",
+      "checkIn": "Check in",
+      "undo": "Undo check-in",
+      "backToEvent": "Back to the event",
+      "checkInSuccess": "Checked in.",
+      "undoSuccess": "Check-in undone.",
+      "notCheckedIn": "This seat was not checked in.",
+      "notAdmissible": "This seat is not admissible.",
+      "updateError": "Could not update this seat."
+    },
     "templates": {
       "eyebrow": "WhatsApp delivery",
       "title": "WhatsApp templates",
@@ -2798,11 +2826,16 @@
       "checkingIn": "Checking in...",
       "checkInSuccess": "Attendee checked in.",
       "checkInError": "We could not check in this attendee. Please try again.",
+      "resendPass": "Resend pass",
+      "resending": "Sending pass...",
+      "resendSuccess": "Pass email sent.",
+      "resendError": "We could not send this pass email. Please try again.",
       "exportCsv": "Download attendees (CSV)",
       "kind": "Type",
       "kinds": {
         "member": "Member",
-        "guest": "Guest"
+        "guest": "Guest",
+        "ticket": "Ticket"
       },
       "organisation": "Organisation",
       "statuses": {
@@ -2810,7 +2843,8 @@
         "waitlist": "Waitlisted",
         "cancelled": "Cancelled",
         "attended": "Attended",
-        "noShow": "No show"
+        "noShow": "No show",
+        "paid": "Paid"
       },
       "review": {
         "title": "Member events awaiting review",
