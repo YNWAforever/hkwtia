@@ -29,6 +29,8 @@ export const EMAIL_TEMPLATE_IDS = [
   "campaign_generic",
   "event_guest_confirmation",
   "event_reminder_24h",
+  "event_ticket_confirmation",
+  "event_ticket_refunded",
 ] as const;
 
 export type EmailTemplateId = (typeof EMAIL_TEMPLATE_IDS)[number];
@@ -87,6 +89,10 @@ const DEFAULT_CLASSIFICATION = {
   // 24-hour reminder for a seat the member booked (Phase B1, B-5): a service
   // message about their own registration, so it ignores marketing suppression.
   event_reminder_24h: "transactional",
+  // Ticket receipts (Phase D-4a): replies to the buyer's own purchase, so
+  // transactional and never given a marketing footer.
+  event_ticket_confirmation: "transactional",
+  event_ticket_refunded: "transactional",
 } as const satisfies Record<EmailTemplateId, MessageClassification>;
 
 function interpolate(message: string, variables: EmailVariables): string {

@@ -331,6 +331,20 @@
         "heading": "See you tomorrow",
         "body": "{eventTitle} starts at {startsAt}. {venue}",
         "cta": "Event details"
+      },
+      "event_ticket_confirmation": {
+        "subject": "Your tickets for {eventTitle}",
+        "preview": "Order {orderId} confirmed, {seatCount} seat(s).",
+        "heading": "You're going to {eventTitle}",
+        "body": "Thank you. We received HK${amount} for {seatCount} seat(s). The event is on {eventDate}. Each attendee will receive their own pass in a separate email.",
+        "cta": "View the event"
+      },
+      "event_ticket_refunded": {
+        "subject": "Your refund for {eventTitle}",
+        "preview": "Order {orderId} has been refunded.",
+        "heading": "Your payment has been returned",
+        "body": "We have refunded HK${amount} for order {orderId} ({eventTitle}). Depending on your bank, it can take a few days to appear.",
+        "cta": "View the event"
       }
     }
   },
