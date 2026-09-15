@@ -73,7 +73,16 @@ export default async function AdminEventDetailPage({params}: Props) {
   // successful check-in revalidates it (twice, which is idempotent) so the row
   // re-renders as checked in.
   const seatCheckInAction = submitSeatCheckInAction.bind(null, eventPath, eventPath, seatCheckInMessages);
-  const refundAction = submitRefundOrderAction.bind(null, eventPath);
+  // The refund outcomes are resolved here from the staff member's own locale and
+  // bound in, so a zh-HK page reports "nothing was charged back" in Chinese.
+  const refundMessages = {
+    refunded: tOrders("refundOutcomes.refunded"),
+    alreadyRefunded: tOrders("refundOutcomes.alreadyRefunded"),
+    notAdmissible: tOrders("refundOutcomes.notAdmissible"),
+    providerFailed: tOrders("refundOutcomes.providerFailed"),
+    notFound: tOrders("refundOutcomes.notFound"),
+  };
+  const refundAction = submitRefundOrderAction.bind(null, eventPath, refundMessages);
   const labels = {slug: t("slug"), titleEn: t("titleEn"), titleZh: t("titleZh"), descriptionEn: t("descriptionEn"), descriptionZh: t("descriptionZh"), startsAt: t("startsAt"), endsAt: t("endsAt"), venue: t("venue"), capacity: t("capacity"), registrationMode: t("registrationMode"), registrationModes: {rsvp: t("registrationModes.rsvp"), external: t("registrationModes.external"), ticketed: t("registrationModes.ticketed")}, ticketPriceHkdCents: t("ticketPriceHkdCents"), memberOnly: t("memberOnly"), published: t("published"), heroMediaId: t("heroMediaId"), noHeroMedia: t("noHeroMedia"), save: t("save"), saving: t("saving")};
   const attendeeLabels = {caption: t("attendees"), kind: t("kind"), kinds: {member: t("kinds.member"), guest: t("kinds.guest"), ticket: t("kinds.ticket")}, name: t("name"), email: t("email"), organisation: t("organisation"), status: t("status"), checkedIn: t("checkedIn"), checkIn: t("checkIn"), checkingIn: t("checkingIn"), resendPass: t("resendPass"), resending: t("resending"), unavailable: t("unavailable"), statuses: {registered: t("statuses.registered"), waitlist: t("statuses.waitlist"), cancelled: t("statuses.cancelled"), attended: t("statuses.attended"), no_show: t("statuses.noShow"), paid: t("statuses.paid")}};
   const ordersLabels = {caption: tOrders("caption"), buyer: tOrders("buyer"), seats: tOrders("seats"), amount: tOrders("amount"), status: tOrders("status"), refundedOn: tOrders("refundedOn"), refund: tOrders("refund"), confirm: toRefundConfirmMessage(tOrders.raw("confirm")), cancel: tOrders("cancel"), note: tOrders("note"), statuses: {pending: tOrders("statuses.pending"), paid: tOrders("statuses.paid"), expired: tOrders("statuses.expired"), failed: tOrders("statuses.failed"), refunded: tOrders("statuses.refunded")}};

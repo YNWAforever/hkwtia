@@ -2880,6 +2880,13 @@
           "expired": "Expired",
           "failed": "Failed",
           "refunded": "Refunded"
+        },
+        "refundOutcomes": {
+          "refunded": "Refunded.",
+          "alreadyRefunded": "This order was already refunded.",
+          "notAdmissible": "This order is not payable, so there is nothing to refund.",
+          "providerFailed": "The refund did not go through, so nothing was charged back. You can try again.",
+          "notFound": "That order could not be found."
         }
       }
     },

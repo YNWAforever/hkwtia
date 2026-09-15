@@ -2881,6 +2881,13 @@
           "expired": "已過期",
           "failed": "失敗",
           "refunded": "已退款"
+        },
+        "refundOutcomes": {
+          "refunded": "已退款。",
+          "alreadyRefunded": "此訂單已經退款。",
+          "notAdmissible": "此訂單並非已付款，沒有可退款項。",
+          "providerFailed": "退款未能完成，因此沒有從買家一方扣回任何款項。請再試一次。",
+          "notFound": "找不到此訂單。"
         }
       }
     },
