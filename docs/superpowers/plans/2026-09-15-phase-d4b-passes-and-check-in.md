@@ -225,7 +225,7 @@ git commit -m "feat(tickets): a signed per-seat pass token"
 
 **Interfaces:**
 - Consumes: `PassClaims` (Task 1) for the shape of a verified pass; `event_order_seats`, `event_orders`, `events`, `audit_events` from `@/lib/db/server-schema`.
-- Produces: `createTicketCheckInRepository(transaction?)` returning `{passForSeat(claims), checkInSeat(actor, {seatId}), undoSeatCheckIn(actor, {seatId})}`; `PassView`, `SeatCheckInView`, `TicketCheckInTransaction`.
+- Produces: `createTicketCheckInRepository(transaction?)` returning `{passForSeat(claims), checkInSeat(actor, {seatId}), undoSeatCheckIn(actor, {seatId})}`; `PassView`, `SeatRow`, `TicketCheckInTransaction`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -326,7 +326,7 @@ export function createTicketCheckInRepository(
       lockSeat: async (seatId) => {
         const row = (await tx.select({
           seatId: eventOrderSeats.id,
-          eventId: eventOrderSeats.eventId ?? eventOrders.eventId,
+          eventId: eventOrders.eventId,
           position: eventOrderSeats.position,
           attendeeName: eventOrderSeats.attendeeName,
           attendeeEmail: eventOrderSeats.attendeeEmail,
