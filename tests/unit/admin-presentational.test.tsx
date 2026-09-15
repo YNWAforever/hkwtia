@@ -1,4 +1,4 @@
-import {render} from "@testing-library/react";
+import {render, screen} from "@testing-library/react";
 import {renderToStaticMarkup} from "react-dom/server";
 import {describe, expect, it, vi} from "vitest";
 
@@ -137,10 +137,13 @@ describe("admin presentation", () => {
    */
   it.each([en.Admin.eventsMgmt, zh.Admin.eventsMgmt])("renders a ticket seat's paid status from the door-list labels", (events) => {
     const labels = {caption: events.attendees, kind: events.kind, kinds: {member: events.kinds.member, guest: events.kinds.guest, ticket: events.kinds.ticket}, name: events.name, email: events.email, organisation: events.organisation, status: events.status, checkedIn: events.checkedIn, checkIn: events.checkIn, checkingIn: events.checkingIn, resendPass: events.resendPass, resending: events.resending, unavailable: events.unavailable, statuses: {registered: events.statuses.registered, waitlist: events.statuses.waitlist, cancelled: events.statuses.cancelled, attended: events.statuses.attended, no_show: events.statuses.noShow, paid: events.statuses.paid}};
-    const {container} = render(<AttendeeTable attendees={[{kind: "ticket", profileId: null, guestId: null, seatId: "seat-1", orderId: "order-1", displayName: "Ada Lovelace", email: "ada@example.test", organisation: null, status: "paid", checkedInAt: null}]} checkInAction={async () => ({})} labels={labels} locale="en" resendPassMessages={{successMessage: events.resendSuccess, errorMessage: events.resendError}} resendPassPath="/en/admin/events-mgmt/event-1"/>);
+    const {container} = render(<AttendeeTable attendees={[{kind: "ticket", profileId: null, guestId: null, seatId: "seat-1", orderId: "order-1", displayName: "Ada Lovelace", email: "ada@example.test", organisation: null, status: "paid", checkedInAt: null}]} checkInAction={async () => ({})} labels={labels} locale="en" resendPassMessages={{successMessage: events.resendSuccess, errorMessage: events.resendError}} resendPassPath="/en/admin/events-mgmt/event-1" seatCheckInAction={async () => ({})}/>);
     expect(container.textContent).toContain(events.statuses.paid);
-    // A ticket seat's only door-list control is the resend: the pass admits on
-    // its own check-in page, never from this list.
+    // A ticket seat carries both controls: the seat-keyed Check in fallback for a
+    // pass that cannot be produced, and the resend (spec section 4.3). The Check
+    // in control is asserted by role, because the column header already renders
+    // the same word and a text assertion would pass without the button.
     expect(container.textContent).toContain(events.resendPass);
+    expect(screen.getByRole("button", {name: events.checkIn})).toBeInTheDocument();
   });
 });
