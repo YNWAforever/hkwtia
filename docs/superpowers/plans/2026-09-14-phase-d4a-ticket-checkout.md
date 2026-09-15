@@ -374,12 +374,18 @@ In `lib/billing/stripe.ts`, add the input type:
 ```ts
 export type EventTicketSessionInput = Readonly<{
   eventTitle: string;
-  amountHkdCents: number;
+  /**
+   * The PER-SEAT price. Stripe multiplies `unit_amount` by `quantity`, so
+   * passing an order total here charges the buyer `price × seats²`. The order's
+   * total is `amount_hkd_cents`; this is the unit.
+   */
+  unitAmountHkdCents: number;
   seats: number;
   orderId: string;
   successUrl: string;
   cancelUrl: string;
   idempotencyKey: string;
+  /** Must be at least 30 minutes after session CREATION, so it carries a margin. */
   expiresAt: Date;
 }>;
 ```
@@ -408,7 +414,7 @@ Implement both methods in `createStripeBillingAdapter`:
         line_items: [{
           price_data: {
             currency: "hkd",
-            unit_amount: input.amountHkdCents,
+            unit_amount: input.unitAmountHkdCents,
             product_data: {name: input.eventTitle},
           },
           quantity: input.seats,
@@ -565,8 +571,15 @@ Create `config/tickets.ts`:
 ```ts
 /** The most seats one order may buy; a policy cap, not a technical limit. */
 export const MAX_TICKET_SEATS = 10;
-/** How long a pending order holds its seats — the Stripe session's own expiry. */
+/** How long a pending order holds its seats. */
 export const TICKET_HOLD_MS = 30 * 60_000;
+/**
+ * The expiry handed to Stripe, which must be at least 30 minutes after the
+ * session is CREATED. The hold is computed before the order write and the
+ * network call, so passing `TICKET_HOLD_MS` verbatim is a rejection by a few
+ * seconds of latency. Stripe's lower bound plus slack.
+ */
+export const TICKET_SESSION_MIN_MS = TICKET_HOLD_MS + 5 * 60_000;
 ```
 
 Create `lib/db/repos/event-orders.ts`. It owns its transaction and takes a loader so tests inject a fake:
@@ -882,7 +895,7 @@ Create `lib/tickets/checkout-core.ts`:
 ```ts
 import "server-only";
 
-import {MAX_TICKET_SEATS} from "@/config/tickets";
+import {MAX_TICKET_SEATS, TICKET_SESSION_MIN_MS} from "@/config/tickets";
 import type {AppLocale} from "@/i18n/routing";
 import {appEnv} from "@/lib/config/env";
 import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
@@ -962,6 +975,11 @@ export async function createTicketCheckout(
   if (!event.published || event.startsAt <= now) return {status: "error", code: "EVENT_CLOSED"};
 
   const amountHkdCents = event.ticketPriceHkdCents * parsedSeats.data.length;
+  // Validated BEFORE the order row is written: a bad `APP_URL` must fail with no
+  // side effect, not strand a pending order holding the buyer's seats for the
+  // whole hold window and then error.
+  const origin = appOrigin(dependencies.appUrl);
+  const eventPath = localizedPath(input.locale, `/events/${event.slug}`);
   const created = await dependencies.orders.createOrder({
     eventId: event.id,
     buyerProfileId: input.buyer.profileId,
@@ -991,18 +1009,27 @@ export async function createTicketCheckout(
     return {status: "redirect", url: created.order.stripeCheckoutUrl};
   }
 
-  const origin = appOrigin(dependencies.appUrl);
-  const eventPath = localizedPath(input.locale, `/events/${event.slug}`);
   try {
+    // Resolved INSIDE the try and before the session call, but the order row
+    // already exists at this point — so a present-but-invalid `APP_URL` must be
+    // caught before `createOrder`, not here, or it strands a pending order that
+    // holds seats for the whole window. The origin is therefore computed above.
     const session = await dependencies.stripe.createEventTicketSession({
       eventTitle: input.locale === "zh-HK" ? event.titleZh : event.titleEn,
-      amountHkdCents,
+      // The PER-SEAT price: Stripe multiplies it by `seats`. The order's own
+      // `amountHkdCents` is the total, and it is what the receipt reports — so
+      // the two must be the same number only when one seat is bought.
+      unitAmountHkdCents: event.ticketPriceHkdCents,
       seats: parsedSeats.data.length,
       orderId: created.order.id,
       successUrl: `${origin}${eventPath}?ticket=received`,
       cancelUrl: `${origin}${eventPath}?ticket=cancelled`,
       idempotencyKey: created.order.idempotencyKey,
-      expiresAt: created.order.expiresAt,
+      // Stripe demands at least 30 minutes after session CREATION, and this
+      // clock read is taken after the order write, so a bare `TICKET_HOLD_MS`
+      // is a rejection. The margin is Stripe's lower bound plus slack; the
+      // database hold stays `TICKET_HOLD_MS`.
+      expiresAt: new Date(dependencies.now().getTime() + TICKET_SESSION_MIN_MS),
     });
     await dependencies.orders.attachSession(created.order.id, session.id, session.url);
     return {status: "redirect", url: session.url};
