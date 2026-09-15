@@ -144,10 +144,17 @@ export const eventOrders = pgTable("event_orders", {
   buyerProfileId: text("buyer_profile_id").references(() => profiles.id, {onDelete: "set null"}),
   buyerName: text("buyer_name").notNull(),
   buyerEmail: text("buyer_email").notNull(),
+  // The webhook has no request context to read a locale from, so the buyer's
+  // chosen language is persisted at checkout and read back when the receipt is
+  // sent. Without it every receipt would go out in whatever the webhook defaults to.
+  buyerLocale: text("buyer_locale").notNull(),
   amountHkdCents: integer("amount_hkd_cents").notNull(),
   currency: text("currency").default("hkd").notNull(),
   status: eventOrderStatusEnum("status").default("pending").notNull(),
   stripeCheckoutSessionId: text("stripe_checkout_session_id"),
+  // Stored, not derived: a repeated idempotency key must return the exact url
+  // this order's session minted, and a session id alone cannot reconstruct it.
+  stripeCheckoutUrl: text("stripe_checkout_url"),
   idempotencyKey: text("idempotency_key").notNull(),
   expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
   paidAt: timestamp("paid_at", {withTimezone: true}),
@@ -464,7 +471,7 @@ const now = new Date("2026-09-14T04:00:00Z");
 const event: LockedEvent = {id: "ev-1", capacity: 2, published: true, startsAt: new Date("2026-10-01T10:00:00Z"), endsAt: null, registrationMode: "ticketed", ticketPriceHkdCents: 25_000};
 
 function order(overrides: Partial<OrderRecord> = {}): OrderRecord {
-  return {id: "order-1", eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", amountHkdCents: 25_000, currency: "hkd", status: "pending", stripeCheckoutSessionId: null, idempotencyKey: "idem-1", expiresAt: new Date(now.getTime() + 1_800_000), paidAt: null, refundedAt: null, refundReason: null, ...overrides};
+  return {id: "order-1", eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", amountHkdCents: 25_000, currency: "hkd", status: "pending", stripeCheckoutSessionId: null, stripeCheckoutUrl: null, idempotencyKey: "idem-1", expiresAt: new Date(now.getTime() + 1_800_000), paidAt: null, refundedAt: null, refundReason: null, ...overrides};
 }
 
 function transaction(overrides: Partial<EventOrdersTransaction> = {}): EventOrdersTransaction {
@@ -577,7 +584,9 @@ export type RefundReason = "oversold" | "staff" | "cancelled";
 
 export type OrderRecord = Readonly<{
   id: string; eventId: string; buyerProfileId: string | null; buyerName: string; buyerEmail: string;
+  buyerLocale: "en" | "zh-HK";
   amountHkdCents: number; currency: string; status: OrderStatus; stripeCheckoutSessionId: string | null;
+  stripeCheckoutUrl: string | null;
   idempotencyKey: string; expiresAt: Date; paidAt: Date | null; refundedAt: Date | null; refundReason: RefundReason | null;
 }>;
 
@@ -590,6 +599,7 @@ export type SeatInput = Readonly<{name: string; email: string}>;
 
 export type CreateOrderInput = Readonly<{
   eventId: string; buyerProfileId: string | null; buyerName: string; buyerEmail: string;
+  buyerLocale: "en" | "zh-HK";
   idempotencyKey: string; seats: readonly SeatInput[]; amountHkdCents: number; now: Date;
 }>;
 
@@ -609,9 +619,10 @@ export type EventOrdersTransaction = Readonly<{
   heldSeats: (eventId: string, now: Date, excludingOrderId?: string) => Promise<number>;
   insertOrder: (input: CreateOrderInput & {expiresAt: Date; status: "pending"}) => Promise<OrderRecord>;
   insertSeats: (orderId: string, seats: readonly SeatInput[]) => Promise<void>;
-  attachSession: (orderId: string, sessionId: string) => Promise<void>;
+  attachSession: (orderId: string, sessionId: string, url: string) => Promise<void>;
   markStatus: (orderId: string, status: OrderStatus, patch: Readonly<{paidAt?: Date; refundedAt?: Date; refundReason?: RefundReason}>) => Promise<void>;
   insertAudit: (input: Readonly<{actorUserId: string | null; actorType: string; action: string; targetType: string; targetId: string; metadata: Record<string, unknown>}>) => Promise<void>;
+  eventSummary: (eventId: string) => Promise<readonly Readonly<{titleEn: string; titleZh: string | null; startsAt: Date}>[]>;
 }>;
 
 const seatSchema = z.object({name: z.string().trim().min(1).max(200), email: z.string().trim().toLowerCase().pipe(z.string().email().max(320))}).strict();
@@ -646,14 +657,17 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
         AND (o.status = 'paid' OR (o.status = 'pending' AND o.expires_at > ${now}))
     `))[0]?.value ?? 0),
     insertOrder: async (input) => rows<OrderRecord>(await tx.execute(sql`
-      INSERT INTO ${eventOrders} (id, event_id, buyer_profile_id, buyer_name, buyer_email, amount_hkd_cents, currency, status, idempotency_key, expires_at, created_at, updated_at)
-      VALUES (gen_random_uuid(), ${input.eventId}, ${input.buyerProfileId}, ${input.buyerName}, ${input.buyerEmail}, ${input.amountHkdCents}, 'hkd', 'pending', ${input.idempotencyKey}, ${input.expiresAt}, NOW(), NOW())
+      INSERT INTO ${eventOrders} (id, event_id, buyer_profile_id, buyer_name, buyer_email, buyer_locale, amount_hkd_cents, currency, status, idempotency_key, expires_at, created_at, updated_at)
+      VALUES (gen_random_uuid(), ${input.eventId}, ${input.buyerProfileId}, ${input.buyerName}, ${input.buyerEmail}, ${input.buyerLocale}, ${input.amountHkdCents}, 'hkd', 'pending', ${input.idempotencyKey}, ${input.expiresAt}, NOW(), NOW())
       RETURNING *
     `))[0]!,
     insertSeats: async (orderId, seats) => { for (const [index, seat] of seats.entries()) await tx.execute(sql`INSERT INTO ${eventOrderSeats} (order_id, position, attendee_name, attendee_email, created_at) VALUES (${orderId}, ${index + 1}, ${seat.name}, ${seat.email}, NOW())`); },
-    attachSession: async (orderId, sessionId) => { await tx.execute(sql`UPDATE ${eventOrders} SET stripe_checkout_session_id = ${sessionId}, updated_at = NOW() WHERE id = ${orderId}`); },
+    attachSession: async (orderId, sessionId, url) => { await tx.execute(sql`UPDATE ${eventOrders} SET stripe_checkout_session_id = ${sessionId}, stripe_checkout_url = ${url}, updated_at = NOW() WHERE id = ${orderId}`); },
     markStatus: async (orderId, status, patch) => { await tx.execute(sql`UPDATE ${eventOrders} SET status = ${status}, paid_at = ${patch.paidAt ?? null}, refunded_at = ${patch.refundedAt ?? null}, refund_reason = ${patch.refundReason ?? null}, updated_at = NOW() WHERE id = ${orderId}`); },
     insertAudit: async (input) => { await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${input.actorUserId}, ${input.actorType}, ${input.action}, ${input.targetType}, ${input.targetId}, ${JSON.stringify(input.metadata)}::jsonb)`); },
+    eventSummary: async (eventId) => rows<{titleEn: string; titleZh: string | null; startsAt: Date}>(await tx.execute(sql`
+      SELECT title_en AS "titleEn", title_zh AS "titleZh", starts_at AS "startsAt" FROM ${events} WHERE id = ${eventId} LIMIT 1
+    `)),
   }));
 }
 
@@ -677,8 +691,8 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
       });
     },
 
-    async attachSession(orderId: string, sessionId: string): Promise<void> {
-      await runTransaction(async (tx) => { await tx.attachSession(orderId, sessionId); });
+    async attachSession(orderId: string, sessionId: string, url: string): Promise<void> {
+      await runTransaction(async (tx) => { await tx.attachSession(orderId, sessionId, url); });
     },
 
     async settlePaid(sessionId: string, now: Date): Promise<SettleResult> {
@@ -715,6 +729,15 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
 
     async heldSeats(eventId: string, now: Date): Promise<number> {
       return runTransaction((tx) => tx.heldSeats(eventId, now));
+    },
+
+    /** The localized title the receipt names. Not transactional: a read of one row. */
+    async eventSummary(eventId: string, locale: "en" | "zh-HK"): Promise<{title: string; startsAt: Date} | null> {
+      return runTransaction(async (tx) => {
+        const row = (await tx.eventSummary(eventId))[0];
+        if (!row) return null;
+        return {title: locale === "zh-HK" ? row.titleZh : row.titleEn, startsAt: row.startsAt};
+      });
     },
   };
 }
@@ -823,7 +846,144 @@ Expected: FAIL — `Failed to resolve import`.
 
 - [ ] **Step 3: Implement**
 
-Create `lib/tickets/checkout-core.ts` following the injected-dependencies pattern `lib/billing/checkout-service.ts` uses: validate the event (exists, `registrationMode === "ticketed"`, `published`, `startsAt > now`), validate the seats against `MAX_TICKET_SEATS` and `ticketSeatsSchema`, compute `amountHkdCents = event.ticketPriceHkdCents * seats.length` (refuse if the price is null with `EVENT_NOT_TICKETED`), call `orders.createOrder`, map `SOLD_OUT` and `EVENT_NOT_FOUND`, then — for a fresh order — `stripe.createEventTicketSession` with the event title in the buyer's locale, `success_url`/`cancel_url` on the event page, and `expiresAt = order.expiresAt`, and `orders.attachSession(order.id, session.id, session.url)`. A reused order returns its stored `stripeCheckoutUrl`. A Stripe failure returns `{status: "error", code: "UNAVAILABLE"}` and leaves the pending order to expire.
+Create `lib/tickets/checkout-core.ts`:
+
+```ts
+import "server-only";
+
+import {eq} from "drizzle-orm";
+
+import {MAX_TICKET_SEATS} from "@/config/tickets";
+import type {AppLocale} from "@/i18n/routing";
+import {appEnv} from "@/lib/config/env";
+import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
+import {getDb} from "@/lib/db/repos/common";
+import {eventOrdersRepository, ticketSeatsSchema, type EventOrdersRepository, type SeatInput} from "@/lib/db/repos/event-orders";
+import {events} from "@/lib/db/server-schema";
+import {localizedPath} from "@/lib/urls";
+
+export type TicketEvent = Readonly<{
+  id: string; slug: string; titleEn: string; titleZh: string; startsAt: Date;
+  published: boolean; registrationMode: string; ticketPriceHkdCents: number | null;
+}>;
+
+export type TicketCheckoutInput = Readonly<{
+  eventId: string;
+  buyer: Readonly<{profileId: string | null; name: string; email: string}>;
+  seats: readonly SeatInput[];
+  idempotencyKey: string;
+  locale: AppLocale;
+}>;
+
+export type TicketCheckoutErrorCode =
+  | "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "SOLD_OUT" | "INVALID_SEATS" | "UNAVAILABLE";
+
+export type TicketCheckoutResult =
+  | Readonly<{status: "redirect"; url: string}>
+  | Readonly<{status: "error"; code: TicketCheckoutErrorCode}>;
+
+export type TicketCheckoutDependencies = Readonly<{
+  orders: EventOrdersRepository;
+  stripe: Pick<StripeBillingAdapter, "createEventTicketSession">;
+  eventForTicket: (eventId: string) => Promise<TicketEvent | null>;
+  appUrl: string;
+  now: () => Date;
+}>;
+
+async function defaultEventForTicket(eventId: string): Promise<TicketEvent | null> {
+  const db = await getDb();
+  const row = (await db.select({
+    id: events.id, slug: events.slug, titleEn: events.titleEn, titleZh: events.titleZh, startsAt: events.startsAt,
+    published: events.published, registrationMode: events.registrationMode, ticketPriceHkdCents: events.ticketPriceHkdCents,
+  }).from(events).where(eq(events.id, eventId)).limit(1))[0];
+  return row ?? null;
+}
+
+function defaultDependencies(): TicketCheckoutDependencies {
+  return {
+    orders: eventOrdersRepository,
+    stripe: stripeBillingAdapter(),
+    eventForTicket: defaultEventForTicket,
+    appUrl: appEnv().appUrl,
+    now: () => new Date(),
+  };
+}
+
+function appOrigin(appUrl: string): string {
+  try {
+    const parsed = new URL(appUrl);
+    if (!["http:", "https:"].includes(parsed.protocol) || parsed.username || parsed.password) throw new Error();
+    return parsed.origin;
+  } catch {
+    throw new Error("INVALID_APP_URL");
+  }
+}
+
+/**
+ * Buy seats for a ticketed event. The amount is computed here, from the event's
+ * own price — a request never carries a number that becomes money.
+ */
+export async function createTicketCheckout(
+  input: TicketCheckoutInput,
+  dependencies: TicketCheckoutDependencies = defaultDependencies(),
+): Promise<TicketCheckoutResult> {
+  const parsedSeats = ticketSeatsSchema.safeParse(input.seats);
+  if (!parsedSeats.success || parsedSeats.data.length > MAX_TICKET_SEATS) {
+    return {status: "error", code: "INVALID_SEATS"};
+  }
+
+  const event = await dependencies.eventForTicket(input.eventId);
+  if (!event) return {status: "error", code: "EVENT_NOT_FOUND"};
+  if (event.registrationMode !== "ticketed" || event.ticketPriceHkdCents === null) {
+    return {status: "error", code: "EVENT_NOT_TICKETED"};
+  }
+  const now = dependencies.now();
+  if (!event.published || event.startsAt <= now) return {status: "error", code: "EVENT_CLOSED"};
+
+  const amountHkdCents = event.ticketPriceHkdCents * parsedSeats.data.length;
+  const created = await dependencies.orders.createOrder({
+    eventId: event.id,
+    buyerProfileId: input.buyer.profileId,
+    buyerName: input.buyer.name,
+    buyerEmail: input.buyer.email,
+    buyerLocale: input.locale,
+    idempotencyKey: input.idempotencyKey,
+    seats: parsedSeats.data,
+    amountHkdCents,
+    now,
+  });
+  if (!created.ok) {
+    return {status: "error", code: created.reason === "SOLD_OUT" ? "SOLD_OUT" : "EVENT_NOT_FOUND"};
+  }
+  // A reused key returns the session it already minted; minting a second one
+  // would charge the buyer twice for one form.
+  if (created.order.stripeCheckoutUrl) {
+    return {status: "redirect", url: created.order.stripeCheckoutUrl};
+  }
+
+  const origin = appOrigin(dependencies.appUrl);
+  const eventPath = localizedPath(input.locale, `/events/${event.slug}`);
+  try {
+    const session = await dependencies.stripe.createEventTicketSession({
+      eventTitle: input.locale === "zh-HK" ? event.titleZh : event.titleEn,
+      amountHkdCents,
+      seats: parsedSeats.data.length,
+      orderId: created.order.id,
+      successUrl: `${origin}${eventPath}?ticket=received`,
+      cancelUrl: `${origin}${eventPath}?ticket=cancelled`,
+      idempotencyKey: created.order.idempotencyKey,
+      expiresAt: created.order.expiresAt,
+    });
+    await dependencies.orders.attachSession(created.order.id, session.id, session.url);
+    return {status: "redirect", url: session.url};
+  } catch {
+    // The order stays pending and expires; the buyer is never charged.
+    return {status: "error", code: "UNAVAILABLE"};
+  }
+}
+```
+
+`TicketEvent` and `TicketCheckoutErrorCode` are exported for the action and tests.
 
 **Recorded deviation:** the spec's `event_orders` has no URL column. Add `stripe_checkout_url text` to `event_orders` in Task 1 and to the migration, so a reused idempotency key can return the exact session URL instead of guessing it.
 
@@ -865,15 +1025,221 @@ Expected: FAIL — the modules do not exist.
 
 - [ ] **Step 3: Implement the action**
 
-Create `lib/tickets/checkout-actions.ts` as a `"use server"` module that exports only `submitTicketCheckoutAction`, resolves the actor itself (`getActor()`; a member becomes the buyer's `profileId`, an anonymous visitor is a guest), applies the honeypot and a process-local rate limiter (`createInMemoryRateLimiter({limit: 5, windowMs: 15 * 60_000})`, the guest RSVP's numbers), parses the form through a zod schema (`eventId` uuid, `idempotencyKey` uuid, buyer name/email, `seatCount` 1..`MAX_TICKET_SEATS`, and `seatName-<i>`/`seatEmail-<i>` for each), and delegates to `createTicketCheckout`. It returns a discriminated state whose `redirect` carries the Stripe URL for the client to follow.
+Create `lib/tickets/checkout-actions.ts`:
+
+```ts
+"use server";
+
+import {headers} from "next/headers";
+import {z} from "zod";
+
+import {MAX_TICKET_SEATS} from "@/config/tickets";
+import type {AppLocale} from "@/i18n/routing";
+import {getActor} from "@/lib/auth/actor";
+import {createInMemoryRateLimiter} from "@/lib/security/rate-limit";
+import {clientIpFromHeaders} from "@/lib/security/request-origin";
+import {createTicketCheckout} from "@/lib/tickets/checkout-core";
+
+// Process-local, the guest RSVP's numbers: a bot cannot complete a payment, but
+// it can create pending orders, and this bounds that.
+const ticketRateLimiter = createInMemoryRateLimiter({limit: 5, windowMs: 15 * 60_000});
+
+const seatSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  email: z.string().trim().toLowerCase().pipe(z.string().email().max(320)),
+}).strict();
+
+const ticketFormSchema = z.object({
+  eventId: z.string().uuid(),
+  idempotencyKey: z.string().uuid(),
+  buyerName: z.string().trim().min(1).max(200),
+  buyerEmail: z.string().trim().toLowerCase().pipe(z.string().email().max(320)),
+  locale: z.enum(["en", "zh-HK"]),
+  seats: z.array(seatSchema).min(1).max(MAX_TICKET_SEATS),
+}).strict();
+
+export type TicketCheckoutState =
+  | Readonly<{status: "idle"}>
+  | Readonly<{status: "redirect"; url: string}>
+  | Readonly<{status: "ignored"}>
+  | Readonly<{status: "error"; code: string}>;
+
+/** The attendee rows the form rendered, in order, skipping any it left blank. */
+function seatsFromFormData(formData: FormData): readonly {name: string; email: string}[] {
+  const seats: {name: string; email: string}[] = [];
+  for (let index = 0; index < MAX_TICKET_SEATS; index += 1) {
+    const name = String(formData.get(`seatName-${index}`) ?? "").trim();
+    const email = String(formData.get(`seatEmail-${index}`) ?? "").trim();
+    if (!name && !email) continue;
+    seats.push({name, email});
+  }
+  return seats;
+}
+
+/**
+ * The public buyer boundary. Only this wrapper is exported; it resolves its own
+ * actor, so a signed-in member is linked to the order and an anonymous visitor
+ * buys as a guest.
+ *
+ * `useActionState` passes the previous state first, so the signature is
+ * `(previous, formData)` even though the previous value is unused.
+ */
+export async function submitTicketCheckoutAction(_previous: TicketCheckoutState, formData: FormData): Promise<TicketCheckoutState> {
+  if (String(formData.get("website") ?? "").length > 0) return {status: "ignored"};
+  if (!ticketRateLimiter.check(clientIpFromHeaders(await headers())).allowed) {
+    return {status: "error", code: "RATE_LIMITED"};
+  }
+
+  const parsed = ticketFormSchema.safeParse({
+    eventId: formData.get("eventId"),
+    idempotencyKey: formData.get("idempotencyKey"),
+    buyerName: formData.get("buyerName"),
+    buyerEmail: formData.get("buyerEmail"),
+    locale: formData.get("locale"),
+    seats: seatsFromFormData(formData),
+  });
+  if (!parsed.success) return {status: "error", code: "INVALID"};
+
+  const actor = await getActor();
+  const result = await createTicketCheckout({
+    eventId: parsed.data.eventId,
+    buyer: {
+      profileId: actor?.kind === "member" ? actor.profileId : null,
+      name: parsed.data.buyerName,
+      email: parsed.data.buyerEmail,
+    },
+    seats: parsed.data.seats,
+    idempotencyKey: parsed.data.idempotencyKey,
+    locale: parsed.data.locale as AppLocale,
+  });
+  return result.status === "redirect" ? {status: "redirect", url: result.url} : {status: "error", code: result.code};
+}
+```
 
 - [ ] **Step 4: Implement the form**
 
-Create `components/marketing/ticket-checkout-form.tsx` as a client component: buyer name and email (prefilled for a member), a seat count select, and one attendee name/email pair per seat. It mints `idempotencyKey` once with `useState(() => crypto.randomUUID())` so a retry reuses it, posts to `submitTicketCheckoutAction`, and redirects on the returned URL with `window.location.assign`. Every string comes from a `Ticket` bundle namespace.
+Create `components/marketing/ticket-checkout-form.tsx`:
+
+```tsx
+"use client";
+
+import {useActionState, useEffect, useState} from "react";
+
+import {submitTicketCheckoutAction, type TicketCheckoutState} from "@/lib/tickets/checkout-actions";
+
+export type TicketCheckoutLabels = Readonly<{
+  heading: string; buyerName: string; buyerEmail: string; seatCount: string;
+  attendeeName: string; attendeeEmail: string; pricePerSeat: string;
+  submit: string; submitting: string;
+  errors: Readonly<Record<string, string>>;
+}>;
+
+const MAX_SEATS = 10;
+const initial: TicketCheckoutState = {status: "idle"};
+
+export function TicketCheckoutForm({eventId, locale, pricePerSeat, labels}: Readonly<{
+  eventId: string; locale: "en" | "zh-HK"; pricePerSeat: string; labels: TicketCheckoutLabels;
+}>) {
+  const [state, dispatch, pending] = useActionState(submitTicketCheckoutAction, initial);
+  const [seatCount, setSeatCount] = useState(1);
+  // Minted once per form instance, so a retry after a network error reuses the
+  // same key and cannot charge twice.
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
+
+  useEffect(() => {
+    if (state.status === "redirect") window.location.assign(state.url);
+  }, [state]);
+
+  const inputClass = "min-h-11 w-full rounded-md border border-input bg-background px-3";
+  return (
+    <form action={dispatch} className="space-y-4" noValidate>
+      <h3 className="font-serif text-xl font-semibold">{labels.heading}</h3>
+      <input name="eventId" type="hidden" value={eventId}/>
+      <input name="locale" type="hidden" value={locale}/>
+      <input name="idempotencyKey" type="hidden" value={idempotencyKey}/>
+      {/* Honeypot: a bot fills it, a person never sees it. */}
+      <label className="sr-only" htmlFor="ticket-website">Website</label>
+      <input autoComplete="off" className="hidden" id="ticket-website" name="website" tabIndex={-1} type="text"/>
+      <label className="block space-y-2 text-sm font-medium">
+        <span>{labels.buyerName}</span>
+        <input className={inputClass} name="buyerName" required type="text"/>
+      </label>
+      <label className="block space-y-2 text-sm font-medium">
+        <span>{labels.buyerEmail}</span>
+        <input className={inputClass} name="buyerEmail" required type="email"/>
+      </label>
+      <label className="block space-y-2 text-sm font-medium">
+        <span>{labels.seatCount}</span>
+        <select className={inputClass} onChange={(event) => setSeatCount(Number(event.target.value))} value={seatCount}>
+          {Array.from({length: MAX_SEATS}, (_, index) => index + 1).map((count) => <option key={count} value={count}>{count}</option>)}
+        </select>
+      </label>
+      {Array.from({length: seatCount}, (_, index) => (
+        <div className="grid gap-3 sm:grid-cols-2" key={index}>
+          <label className="block space-y-2 text-sm font-medium">
+            <span>{labels.attendeeName} {index + 1}</span>
+            <input className={inputClass} name={`seatName-${index}`} required type="text"/>
+          </label>
+          <label className="block space-y-2 text-sm font-medium">
+            <span>{labels.attendeeEmail} {index + 1}</span>
+            <input className={inputClass} name={`seatEmail-${index}`} required type="email"/>
+          </label>
+        </div>
+      ))}
+      <p className="text-sm text-muted-foreground">{pricePerSeat}</p>
+      <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending} type="submit">
+        {pending ? labels.submitting : labels.submit}
+      </button>
+      {state.status === "error" ? <p className="text-sm text-destructive" role="alert">{labels.errors[state.code] ?? labels.errors.INVALID}</p> : null}
+    </form>
+  );
+}
+```
 
 - [ ] **Step 5: Render it on the event page**
 
-In `app/[locale]/(public)/events/[slug]/page.tsx`, in the registration branch, render `<TicketCheckoutForm …/>` when `displayEvent.registrationMode === "ticketed"`, before the RSVP/guest branches; pass the event id, slug, title, price and remaining seats. Add the `Ticket` strings to both bundles.
+In `app/[locale]/(public)/events/[slug]/page.tsx`:
+
+Add the import:
+
+```tsx
+import {TicketCheckoutForm} from "@/components/marketing/ticket-checkout-form";
+```
+
+Extend the registration union so a ticketed event is its own kind — it is bought by a member or a guest alike, so it cannot fall into the guest/member arms:
+
+```tsx
+  const registration = displayEvent.registrationMode === "ticketed"
+    ? {kind: "ticket" as const}
+    : displayEvent.registrationMode === "external" && displayEvent.externalRegistrationUrl
+      ? {kind: "external" as const, url: displayEvent.externalRegistrationUrl}
+      : actor === null && displayEvent.registrationMode === "rsvp"
+        ? {kind: "guest" as const}
+        : {kind: "member" as const};
+```
+
+Render it first in the action bar's branch:
+
+```tsx
+              {registration.kind === "ticket" ? (
+                <TicketCheckoutForm
+                  eventId={displayEvent.id}
+                  locale={appLocale}
+                  pricePerSeat={t("ticket.price", {price: formatTicketPrice(displayEvent.ticketPriceHkdCents, appLocale)})}
+                  labels={{
+                    heading: t("ticket.heading"), buyerName: t("ticket.buyerName"), buyerEmail: t("ticket.buyerEmail"),
+                    seatCount: t("ticket.seatCount"), attendeeName: t("ticket.attendeeName"), attendeeEmail: t("ticket.attendeeEmail"),
+                    pricePerSeat: t("ticket.pricePerSeat"), submit: t("ticket.submit"), submitting: t("ticket.submitting"),
+                    errors: {INVALID: t("ticket.errors.INVALID"), SOLD_OUT: t("ticket.errors.SOLD_OUT"), EVENT_CLOSED: t("ticket.errors.EVENT_CLOSED"), UNAVAILABLE: t("ticket.errors.UNAVAILABLE"), RATE_LIMITED: t("ticket.errors.RATE_LIMITED")},
+                  }}
+                />
+              ) : registration.kind === "external" ? (
+                ...the existing arms, unchanged
+```
+
+`displayEvent.ticketPriceHkdCents` must be on the public projection (Task 8 adds it to `PublicEventProjection`). `formatTicketPrice(cents, locale)` is a tiny helper in `lib/tickets/format.ts` — `new Intl.NumberFormat(locale, {style: "currency", currency: "HKD"}).format(cents / 100)` — exported and unit-tested in Task 9's suite.
+
+Add a `Ticket` namespace to both bundles with `heading`, `buyerName`, `buyerEmail`, `seatCount`, `attendeeName`, `attendeeEmail`, `price`, `pricePerSeat`, `submit`, `submitting`, and `errors.{INVALID,SOLD_OUT,EVENT_CLOSED,UNAVAILABLE,RATE_LIMITED}`, in parity.
 
 - [ ] **Step 6: Run the tests and the gate**
 
@@ -892,7 +1258,8 @@ git commit -m "feat(events): buy tickets from the event page"
 ### Task 7: The webhook branch and the ticket emails
 
 **Files:**
-- Modify: `lib/billing/webhook-service.ts`, `lib/api/stripe-webhook-route.ts`
+- Modify: `lib/billing/webhook-service.ts`, `lib/api/stripe-webhook-route.ts`, `lib/db/repos/event-orders.ts`
+- Create: `lib/billing/ticket-webhook-processor.ts`
 - Test: `tests/unit/ticket-webhook.test.ts` (create)
 
 **Interfaces:**
@@ -966,7 +1333,148 @@ export async function processStripeEvent(
 }
 ```
 
-In `lib/api/stripe-webhook-route.ts`, build the ticket processor: for `completed`, `settlePaid(sessionId, new Date())`; on `"paid"` send the confirmation (best-effort, logged on failure); on `"oversold"` call `refundPaymentIntent(paymentIntentId)` then send the refund email (also best-effort); for `expired`, `expireBySession(sessionId)`. Both mailers use `renderEmail` + `createConfiguredEmailTransport`, keyed idempotently on the order and outcome (`ticket-confirmation:<orderId>`, `ticket-refund:<orderId>`).
+Create `lib/billing/ticket-webhook-processor.ts`:
+
+```ts
+import "server-only";
+
+import type {Actor} from "@/lib/membership/lifecycle";
+import type {EventOrdersRepository, OrderRecord} from "@/lib/db/repos/event-orders";
+import {renderEmail} from "@/lib/email/render";
+import {createConfiguredEmailTransport} from "@/lib/email/transport";
+import {emailEnv} from "@/lib/config/env";
+import type {TicketProcessor, TicketWebhookCommand} from "@/lib/billing/webhook-service";
+
+type TicketEmailDependencies = Readonly<{
+  renderEmail: typeof renderEmail;
+  transport: ReturnType<typeof createConfiguredEmailTransport>;
+  emailFrom: string;
+}>;
+
+export type TicketProcessorDependencies = Readonly<{
+  orders: Pick<EventOrdersRepository, "settlePaid" | "expireBySession" | "eventSummary">;
+  refundPaymentIntent: (paymentIntentId: string) => Promise<void>;
+  email: TicketEmailDependencies;
+  now: () => Date;
+  /** Best-effort: a mail failure must not fail the webhook, which Stripe retries. */
+  onEmailError?: (error: unknown, context: Readonly<{orderId: string; template: string}>) => void;
+}>;
+
+async function sendTicketEmail(
+  dependencies: TicketProcessorDependencies,
+  template: "event_ticket_confirmation" | "event_ticket_refunded",
+  order: OrderRecord,
+  eventTitle: string,
+): Promise<void> {
+  try {
+    const rendered = await dependencies.email.renderEmail({
+      template,
+      locale: order.buyerLocale,
+      recipientName: order.buyerName,
+      classification: "transactional",
+      variables: {
+        eventTitle,
+        amount: (order.amountHkdCents / 100).toFixed(2),
+        orderId: order.id,
+      },
+    });
+    await dependencies.email.transport.send({
+      to: order.buyerEmail,
+      from: dependencies.email.emailFrom,
+      subject: rendered.subject,
+      html: rendered.html,
+      text: rendered.text,
+      headers: rendered.headers,
+      // Keyed on the order and the outcome: a redelivered webhook re-renders the
+      // same message and is a no-op at the transport, while a later refund of the
+      // same order is a different key and still sends.
+      idempotencyKey: `${template === "event_ticket_confirmation" ? "ticket-confirmation" : "ticket-refund"}:${order.id}`,
+    });
+  } catch (error) {
+    dependencies.onEmailError?.(error, {orderId: order.id, template});
+  }
+}
+
+export function createTicketProcessor(dependencies: TicketProcessorDependencies): TicketProcessor {
+  return {
+    async process(_actor: Actor, command: TicketWebhookCommand): Promise<"processed" | "duplicate"> {
+      if (command.eventType === "checkout.session.expired") {
+        await dependencies.orders.expireBySession(command.checkoutSessionId);
+        return "processed";
+      }
+
+      const settlement = await dependencies.orders.settlePaid(command.checkoutSessionId, dependencies.now());
+      const order = settlement.order;
+      if (!order) return "duplicate";
+
+      if (settlement.status === "oversold") {
+        // The seats were sold between checkout and payment; refund the whole
+        // charge rather than a partial credit, and tell the buyer why.
+        if (command.paymentIntentId) await dependencies.refundPaymentIntent(command.paymentIntentId);
+        const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
+        await sendTicketEmail(dependencies, "event_ticket_refunded", order, event?.title ?? "");
+        return "processed";
+      }
+      if (settlement.status === "paid") {
+        const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
+        await sendTicketEmail(dependencies, "event_ticket_confirmation", order, event?.title ?? "");
+      }
+      return "processed";
+    },
+  };
+}
+```
+
+In `lib/api/stripe-webhook-route.ts`, wire it into the production `POST` — the ticket processor is built once, lazily, beside the Stripe client:
+
+```ts
+import {stripeBillingAdapter} from "@/lib/billing/stripe";
+import {createTicketProcessor} from "@/lib/billing/ticket-webhook-processor";
+import type {TicketProcessor} from "@/lib/billing/webhook-service";
+import {emailEnv} from "@/lib/config/env";
+import {eventOrdersRepository} from "@/lib/db/repos/event-orders";
+import {renderEmail} from "@/lib/email/render";
+import {createConfiguredEmailTransport} from "@/lib/email/transport";
+
+let ticketProcessor: TicketProcessor | undefined;
+
+function productionTicketProcessor(): TicketProcessor {
+  ticketProcessor ??= createTicketProcessor({
+    orders: eventOrdersRepository,
+    refundPaymentIntent: (paymentIntentId) => stripeBillingAdapter().refundPaymentIntent(paymentIntentId),
+    email: {
+      renderEmail,
+      transport: createConfiguredEmailTransport(),
+      emailFrom: emailEnv().emailFrom,
+    },
+    now: () => new Date(),
+    onEmailError(error, context) {
+      // Never rethrow: the settlement is committed, and a 500 would make Stripe
+      // redeliver a webhook that is already fully applied.
+      console.error("ticket email failed", context, error);
+    },
+  });
+  return ticketProcessor;
+}
+```
+
+and change the production wiring from
+
+```ts
+  processEvent(event) {
+    return processStripeEvent(event, stripeWebhookActor);
+  },
+```
+
+to
+
+```ts
+  processEvent(event) {
+    return processStripeEvent(event, stripeWebhookActor, undefined, productionTicketProcessor());
+  },
+```
+
+`undefined` keeps the membership processor's default; the route's `Dependencies.processEvent` type is unchanged, so the existing route tests still compile. `eventOrdersRepository` gains an `eventSummary(eventId, locale)` read (event id → localized title) in Task 4.
 
 - [ ] **Step 4: Run the test to verify it passes**
 
@@ -976,7 +1484,7 @@ Expected: PASS — including the existing membership webhook tests, which must b
 - [ ] **Step 5: Commit**
 
 ```bash
-git add lib/billing/webhook-service.ts lib/api/stripe-webhook-route.ts tests/unit/ticket-webhook.test.ts
+git add lib/billing/webhook-service.ts lib/billing/ticket-webhook-processor.ts lib/api/stripe-webhook-route.ts lib/db/repos/event-orders.ts tests/unit/ticket-webhook.test.ts
 git commit -m "feat(billing): settle ticket orders from the Stripe webhook"
 ```
 
@@ -985,7 +1493,7 @@ git commit -m "feat(billing): settle ticket orders from the Stripe webhook"
 ### Task 8: The staff price and mode
 
 **Files:**
-- Modify: `lib/admin/event-form-input.ts`, `lib/admin/event-action-core.ts`, `app/[locale]/(admin)/admin/events-mgmt` (the form and its page), `lib/db/repos/events.ts`
+- Modify: `lib/admin/event-form-input.ts`, `lib/admin/event-action-core.ts`, `components/admin/event-form.tsx`, `app/[locale]/(admin)/admin/events-mgmt` (the page's labels), `lib/db/repos/events.ts`, `lib/events/public.ts`, `messages/en.json`, `messages/zh-HK.json`
 - Test: `tests/unit/admin-event-ticket-price.test.ts` (create)
 
 **Interfaces:**
@@ -1024,7 +1532,99 @@ Expected: FAIL — `parseTicketPrice is not a function`.
 
 - [ ] **Step 3: Implement**
 
-In `lib/admin/event-form-input.ts`, add `registrationMode` (`rsvp` | `external` | `ticketed`, defaulting to `rsvp`) and `ticketPriceHkdCents`, read from the form as whole dollars and converted to cents by an exported `parseTicketPrice({mode, price})` that returns `null` for a non-ticketed event, throws for a ticketed event with a blank or non-positive price, and otherwise returns `Math.round(Number(price) * 100)`. Extend the admin event form's select with the third mode and a price input shown for it. Extend the repository's event input schema to carry both and refuse the same two conditions again as the second layer — the page is not the authority.
+**A. `lib/admin/event-form-input.ts`** — add the exported parser and the two fields:
+
+```ts
+/**
+ * HKD is a two-decimal currency but staff price in whole dollars, so the form
+ * takes dollars and the boundary converts to cents. A price on a non-ticketed
+ * event is discarded rather than carried: the repository refuses it too, but
+ * nulling it here keeps the form and the database answering the same question.
+ */
+export function parseTicketPrice(input: Readonly<{mode: string; price: string}>): number | null {
+  if (input.mode !== "ticketed") return null;
+  const trimmed = input.price.trim();
+  const dollars = Number(trimmed);
+  if (!trimmed || !Number.isFinite(dollars) || dollars <= 0) {
+    throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "a ticketed event needs a positive price"}]);
+  }
+  return Math.round(dollars * 100);
+}
+```
+
+and in `eventFormInput`'s returned object:
+
+```ts
+    registrationMode: String(formData.get("registrationMode") ?? "rsvp"),
+    ticketPriceHkdCents: parseTicketPrice({
+      mode: String(formData.get("registrationMode") ?? "rsvp"),
+      price: String(formData.get("ticketPriceHkdCents") ?? ""),
+    }),
+```
+
+**B. `components/admin/event-form.tsx`** — the form gains the mode select and the price. Extend `Labels` with `registrationMode: string; registrationModes: Readonly<{rsvp: string; external: string; ticketed: string}>; ticketPriceHkdCents: string;` and `Values` with `registrationMode: string; ticketPriceHkdCents: number | null;`, then add after the capacity field:
+
+```tsx
+    <label>{labels.registrationMode}
+      <select {...fieldProps("registrationMode")} className="mt-1 w-full rounded-md border p-2" defaultValue={value("registrationMode", values.registrationMode ?? "rsvp")} name="registrationMode">
+        {(["rsvp", "external", "ticketed"] as const).map((key) => <option key={key} value={key}>{labels.registrationModes[key]}</option>)}
+      </select>{error("registrationMode")}
+    </label>
+    <label>{labels.ticketPriceHkdCents}
+      <input {...fieldProps("ticketPriceHkdCents")} className="mt-1 w-full rounded-md border p-2" defaultValue={values.ticketPriceHkdCents == null ? "" : String(values.ticketPriceHkdCents / 100)} min="1" name="ticketPriceHkdCents" step="1" type="number"/>{error("ticketPriceHkdCents")}
+    </label>
+```
+
+Add both names to the action state's field list in `lib/admin/event-action-core.ts` and the `Admin.eventsMgmt.events.form` labels to both bundles (`registrationMode`, `registrationModes.{rsvp,external,ticketed}`, `ticketPriceHkdCents`, `ticketPriceHkdCents.dollars` if the label needs the unit).
+
+**C. `lib/db/repos/events.ts`** — the second layer. Add the field to `eventInputObjectSchema` immediately after `externalRegistrationUrl`:
+
+```ts
+  ticketPriceHkdCents: z.number().int().positive().nullable().optional().default(null),
+```
+
+Extend `addEventShapeIssues`:
+
+```ts
+function addEventShapeIssues(
+  input: Readonly<{startsAt?: Date; endsAt?: Date | null; format?: string; onlineUrl?: string | null; registrationMode?: string; externalRegistrationUrl?: string | null; ticketPriceHkdCents?: number | null}>,
+  context: z.RefinementCtx,
+): void {
+  // ...the existing three rules unchanged...
+  const ticketed = input.registrationMode === "ticketed";
+  if (ticketed && !(typeof input.ticketPriceHkdCents === "number" && input.ticketPriceHkdCents > 0)) {
+    context.addIssue({code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "ticketPriceHkdCents is required for ticketed events"});
+  }
+  // Guarded on the mode being *present*: a partial update that changes only the
+  // price of an already-ticketed event sends no mode, and the row's own mode
+  // governs there — the database check is the backstop for that path.
+  if (input.registrationMode !== undefined && !ticketed && input.ticketPriceHkdCents != null) {
+    context.addIssue({code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "ticketPriceHkdCents is only valid for ticketed events"});
+  }
+}
+```
+
+Omit the field from the member schema — a member may not price anything, and `.strict()` would otherwise admit it:
+
+```ts
+const memberEventInputSchema = eventInputObjectSchema
+  .omit({published: true, memberOnly: true, status: true, ticketPriceHkdCents: true})
+  .extend({visibility: z.enum(["public", "members_only"]), heroMediaId: z.string().uuid().nullable()})
+  .strict()
+  .superRefine(addEventShapeIssues);
+```
+
+The admin create/update path spreads the parsed input into Drizzle, so `ticketPriceHkdCents` reaches the column once the schema carries it, and `memberCreateEvent`'s explicit column list never names `ticket_price_hkd_cents` — leave it that way.
+
+**D. The public projection.** Add the price to `PublicEventProjection` in `lib/events/public.ts` (`ticketPriceHkdCents: number | null;`) and to `projectPublicEvent`:
+
+```ts
+    registrationMode: event.registrationMode,
+    ticketPriceHkdCents: event.ticketPriceHkdCents,
+    externalRegistrationUrl: event.externalRegistrationUrl,
+```
+
+The admin edit page's `values` come from the Drizzle `Event`, so `registrationMode`/`ticketPriceHkdCents` ride along with no further mapping.
 
 - [ ] **Step 4: Run the tests and the gate**
 
@@ -1050,7 +1650,96 @@ git commit -m "feat(admin): price a ticketed event"
 
 - [ ] **Step 1: Write the spec**
 
-Create `tests/e2e/phase-d4a-ticket-checkout.spec.ts`, gated the way the other acceptance specs are (`missingM2LiveEnvironment()` and a skip when Stripe test keys are absent). It signs in as the `company-admin` fixture role, walks the ticketed event page, fills two attendee seats, submits, and asserts the redirect reaches a Stripe Checkout URL — it does not complete a payment, which is the owner's step.
+Create `tests/e2e/phase-d4a-ticket-checkout.spec.ts`:
+
+```ts
+import {readFileSync} from "node:fs";
+
+import {expect, test} from "@playwright/test";
+
+import {missingM2LiveEnvironment, signInForM2} from "../fixtures/m2-auth";
+
+type Bundle = Readonly<{
+  Admin: Readonly<{eventsMgmt: Readonly<{
+    slug: string; titleEn: string; descriptionEn: string; startsAt: string; capacity: string; published: string;
+    registrationMode: string; registrationModes: Readonly<{ticketed: string}>;
+    ticketPriceHkdCents: string; create: string;
+  }>}>;
+  Ticket: Readonly<{
+    heading: string; buyerName: string; buyerEmail: string; seatCount: string;
+    attendeeName: string; attendeeEmail: string; submit: string;
+  }>;
+}>;
+
+const bundle = (locale: "en" | "zh-HK") =>
+  JSON.parse(readFileSync(new URL(`../../messages/${locale}.json`, import.meta.url), "utf8")) as Bundle;
+
+const missing = missingM2LiveEnvironment();
+const locales = [
+  {locale: "en" as const, prefix: ""},
+  {locale: "zh-HK" as const, prefix: "/zh"},
+];
+
+/**
+ * Phase D-4a gate (spec §9): staff mark an event ticketed and set its price,
+ * then a buyer takes two named seats and reaches Stripe Checkout. The walk stops
+ * at the redirect — completing the payment needs the Stripe test dashboard and
+ * is the owner's step — so it proves the amount, the seat rows and the session
+ * reached the provider, not that the money moved.
+ *
+ * It writes, so `missingM2LiveEnvironment()` gates it to the isolated M2 database
+ * and a unique slug per run keeps a re-run from colliding with the prior row.
+ */
+for (const {locale, prefix} of locales) {
+  test(`staff price a ticketed event and a buyer reaches Stripe Checkout (${locale})`, async ({browser}) => {
+    test.skip(missing.length > 0, `Requires ${missing.join(", ")}`);
+    const copy = bundle(locale);
+    const slug = `d4a-ticket-walk-${locale === "zh-HK" ? "zh" : "en"}-${Date.now().toString(36)}`;
+    const title = `D4a walk ${slug}`;
+
+    // Staff author the ticketed event, in their own context so the buyer stays anonymous.
+    const staffContext = await browser.newContext();
+    const staffPage = await staffContext.newPage();
+    await signInForM2(staffPage, "staff");
+    await staffPage.goto(`${prefix}/admin/events-mgmt`);
+    const form = staffPage.locator("form").filter({hasText: copy.Admin.eventsMgmt.slug}).first();
+    await form.locator('input[name="slug"]').fill(slug);
+    await form.locator('input[name="titleEn"]').fill(title);
+    await form.locator('input[name="descriptionEn"]').fill("Ticket checkout acceptance walk.");
+    await form.locator('input[name="startsAt"]').fill("2026-12-01T19:00");
+    await form.locator('input[name="capacity"]').fill("4");
+    await form.locator('select[name="registrationMode"]').selectOption("ticketed");
+    await form.locator('input[name="ticketPriceHkdCents"]').fill("250");
+    await form.locator('input[name="published"]').check();
+    await form.getByRole("button", {name: copy.Admin.eventsMgmt.create}).click();
+    await expect(staffPage.getByRole("link", {name: title})).toBeVisible();
+
+    // The buyer, signed out, buys two named seats. The public page rendering at
+    // all is the assertion that staff authoring left the event published and public.
+    const buyerContext = await browser.newContext();
+    const buyerPage = await buyerContext.newPage();
+    await buyerPage.goto(`${prefix}/events/${slug}`);
+    await expect(buyerPage.getByText(copy.Ticket.heading)).toBeVisible();
+    await buyerPage.locator('input[name="buyerName"]').fill("Ada Lovelace");
+    await buyerPage.locator('input[name="buyerEmail"]').fill("ada@example.test");
+    await buyerPage.locator('select[name="seatCount"]').selectOption("2");
+    await buyerPage.locator('input[name="seatName-0"]').fill("Ada Lovelace");
+    await buyerPage.locator('input[name="seatEmail-0"]').fill("ada@example.test");
+    await buyerPage.locator('input[name="seatName-1"]').fill("Grace Hopper");
+    await buyerPage.locator('input[name="seatEmail-1"]').fill("grace@example.test");
+    await Promise.all([
+      buyerPage.waitForURL(/checkout\.stripe\.com/),
+      buyerPage.getByRole("button", {name: copy.Ticket.submit}).click(),
+    ]);
+    expect(buyerPage.url()).toContain("checkout.stripe.com");
+
+    await staffContext.close();
+    await buyerContext.close();
+  });
+}
+```
+
+Field names (`slug`, `titleEn`, `descriptionEn`, `startsAt`, `capacity`, `published`, `registrationMode`, `ticketPriceHkdCents`) and the `Ticket` namespace keys are the contract Tasks 5–8 establish; if a selector drifts, fix the selector and record why, never the gate sentence.
 
 - [ ] **Step 2: Run the full gate**
 

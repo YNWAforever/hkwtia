@@ -72,6 +72,9 @@ owner chose **multi-seat orders with named attendees**, and money is stored as i
   `unit_amount` is already integer cents. `currency` is kept.
 - a `stripe_checkout_url` column is added, because a repeated idempotency key must return the
   exact session URL it already minted rather than mint a second one or guess it from the id.
+- a `buyer_locale` column is added, because the webhook that sends the receipt has no request
+  context to read a language from. Without it the receipt's language would be whatever the
+  webhook happens to default to, not the buyer's choice.
 
 ## 4. Design
 
@@ -87,7 +90,7 @@ One generated migration (Drizzle):
 - `refund_reason` — a nullable enum: `oversold | staff | cancelled`. A refund says *why* without
   multiplying statuses; D-4a only ever writes `oversold`.
 - `event_orders` — `id`, `event_id` (FK, cascade), `buyer_profile_id` (FK profiles, set null),
-  `buyer_name`, `buyer_email`, `amount_hkd_cents`, `currency` (default `hkd`),
+  `buyer_name`, `buyer_email`, `buyer_locale`, `amount_hkd_cents`, `currency` (default `hkd`),
   `status` (default `pending`), `stripe_checkout_session_id` (unique), `stripe_checkout_url`,
   `idempotency_key` (unique), `expires_at`, `paid_at`, `refunded_at`, `refund_reason`, timestamps.
 - `event_order_seats` — `id`, `order_id` (FK, cascade), `position`, `attendee_name`,
