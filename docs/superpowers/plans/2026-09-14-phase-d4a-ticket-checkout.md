@@ -622,7 +622,7 @@ export type EventOrdersTransaction = Readonly<{
   attachSession: (orderId: string, sessionId: string, url: string) => Promise<void>;
   markStatus: (orderId: string, status: OrderStatus, patch: Readonly<{paidAt?: Date; refundedAt?: Date; refundReason?: RefundReason}>) => Promise<void>;
   insertAudit: (input: Readonly<{actorUserId: string | null; actorType: string; action: string; targetType: string; targetId: string; metadata: Record<string, unknown>}>) => Promise<void>;
-  eventSummary: (eventId: string) => Promise<readonly Readonly<{titleEn: string; titleZh: string | null; startsAt: Date}>[]>;
+  eventSummary: (eventId: string) => Promise<readonly Readonly<{titleEn: string; titleZh: string | null; startsAt: Date; slug: string}>[]>;
 }>;
 
 const seatSchema = z.object({name: z.string().trim().min(1).max(200), email: z.string().trim().toLowerCase().pipe(z.string().email().max(320))}).strict();
@@ -665,8 +665,8 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
     attachSession: async (orderId, sessionId, url) => { await tx.execute(sql`UPDATE ${eventOrders} SET stripe_checkout_session_id = ${sessionId}, stripe_checkout_url = ${url}, updated_at = NOW() WHERE id = ${orderId}`); },
     markStatus: async (orderId, status, patch) => { await tx.execute(sql`UPDATE ${eventOrders} SET status = ${status}, paid_at = ${patch.paidAt ?? null}, refunded_at = ${patch.refundedAt ?? null}, refund_reason = ${patch.refundReason ?? null}, updated_at = NOW() WHERE id = ${orderId}`); },
     insertAudit: async (input) => { await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${input.actorUserId}, ${input.actorType}, ${input.action}, ${input.targetType}, ${input.targetId}, ${JSON.stringify(input.metadata)}::jsonb)`); },
-    eventSummary: async (eventId) => rows<{titleEn: string; titleZh: string | null; startsAt: Date}>(await tx.execute(sql`
-      SELECT title_en AS "titleEn", title_zh AS "titleZh", starts_at AS "startsAt" FROM ${events} WHERE id = ${eventId} LIMIT 1
+    eventSummary: async (eventId) => rows<{titleEn: string; titleZh: string | null; startsAt: Date; slug: string}>(await tx.execute(sql`
+      SELECT title_en AS "titleEn", title_zh AS "titleZh", starts_at AS "startsAt", slug FROM ${events} WHERE id = ${eventId} LIMIT 1
     `)),
   }));
 }
@@ -732,12 +732,17 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
     },
 
     /** The localized title the receipt names. Not transactional: a read of one row. */
-    async eventSummary(eventId: string, locale: "en" | "zh-HK"): Promise<{title: string; startsAt: Date} | null> {
+    async eventSummary(eventId: string, locale: "en" | "zh-HK"): Promise<{title: string; startsAt: Date; slug: string} | null> {
       return runTransaction(async (tx) => {
         const row = (await tx.eventSummary(eventId))[0];
         if (!row) return null;
-        return {title: locale === "zh-HK" ? row.titleZh : row.titleEn, startsAt: row.startsAt};
+        return {title: locale === "zh-HK" ? row.titleZh ?? row.titleEn : row.titleEn, startsAt: row.startsAt, slug: row.slug};
       });
+    },
+
+    /** The seat count the receipt names; the transaction holds it already. */
+    async seatsOfOrder(orderId: string): Promise<number> {
+      return runTransaction((tx) => tx.seatsOfOrder(orderId));
     },
   };
 }
@@ -1352,31 +1357,71 @@ type TicketEmailDependencies = Readonly<{
 }>;
 
 export type TicketProcessorDependencies = Readonly<{
-  orders: Pick<EventOrdersRepository, "settlePaid" | "expireBySession" | "eventSummary">;
+  orders: Pick<EventOrdersRepository, "settlePaid" | "expireBySession" | "eventSummary" | "seatsOfOrder">;
   refundPaymentIntent: (paymentIntentId: string) => Promise<void>;
   email: TicketEmailDependencies;
+  /** For the receipt's "view the event" link, built from the order's own locale. */
+  appUrl: string;
   now: () => Date;
   /** Best-effort: a mail failure must not fail the webhook, which Stripe retries. */
   onEmailError?: (error: unknown, context: Readonly<{orderId: string; template: string}>) => void;
 }>;
 
+/**
+ * Grouped to two decimals in the buyer's locale, because the copy reads
+ * `HK${amount}` and a bare `toFixed(2)` renders 100000 as `HK$1000.00`.
+ */
+function formatHkd(cents: number, locale: "en" | "zh-HK"): string {
+  return new Intl.NumberFormat(locale === "zh-HK" ? "zh-HK" : "en-HK", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(cents / 100);
+}
+
+function formatEventDate(value: Date, locale: "en" | "zh-HK"): string {
+  return new Intl.DateTimeFormat(locale === "zh-HK" ? "zh-HK" : "en-HK", {
+    dateStyle: "long",
+    timeZone: "Asia/Hong_Kong",
+  }).format(value);
+}
+
+type EventSummary = Readonly<{title: string; startsAt: Date; slug: string}>;
+
 async function sendTicketEmail(
   dependencies: TicketProcessorDependencies,
   template: "event_ticket_confirmation" | "event_ticket_refunded",
   order: OrderRecord,
-  eventTitle: string,
+  event: EventSummary | null,
 ): Promise<void> {
+  const eventTitle = event?.title ?? "";
+  const ctaUrl = event
+    ? `${dependencies.appUrl}${localizedPath(order.buyerLocale, `/events/${event.slug}`)}`
+    : dependencies.appUrl;
   try {
+    // Every placeholder the copy uses must be supplied here: the renderer throws
+    // `EMAIL_VARIABLE_MISSING` / `EMAIL_CTA_URL_REQUIRED`, and because the failure
+    // is caught below it would otherwise send nothing and look like success.
+    const variables = template === "event_ticket_confirmation"
+      ? {
+        eventTitle,
+        eventDate: event ? formatEventDate(event.startsAt, order.buyerLocale) : "",
+        seatCount: String(await dependencies.orders.seatsOfOrder(order.id)),
+        amount: formatHkd(order.amountHkdCents, order.buyerLocale),
+        orderId: order.id,
+        ctaUrl,
+      }
+      : {
+        eventTitle,
+        amount: formatHkd(order.amountHkdCents, order.buyerLocale),
+        orderId: order.id,
+        ctaUrl,
+      };
     const rendered = await dependencies.email.renderEmail({
       template,
       locale: order.buyerLocale,
       recipientName: order.buyerName,
       classification: "transactional",
-      variables: {
-        eventTitle,
-        amount: (order.amountHkdCents / 100).toFixed(2),
-        orderId: order.id,
-      },
+      variables,
     });
     await dependencies.email.transport.send({
       to: order.buyerEmail,
@@ -1412,12 +1457,12 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
         // charge rather than a partial credit, and tell the buyer why.
         if (command.paymentIntentId) await dependencies.refundPaymentIntent(command.paymentIntentId);
         const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
-        await sendTicketEmail(dependencies, "event_ticket_refunded", order, event?.title ?? "");
+        await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
         return "processed";
       }
       if (settlement.status === "paid") {
         const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
-        await sendTicketEmail(dependencies, "event_ticket_confirmation", order, event?.title ?? "");
+        await sendTicketEmail(dependencies, "event_ticket_confirmation", order, event);
       }
       return "processed";
     },
@@ -1425,13 +1470,17 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
 }
 ```
 
+`localizedPath` is imported from `@/lib/urls`; `TicketEmailDependencies.renderEmail` is the real `renderEmail`, whose throw is what the `catch` above absorbs.
+
+Add one test to `tests/unit/ticket-webhook.test.ts` for this specifically: a `paid` settlement must call `renderEmail` with **every** placeholder the confirmation copy uses. Assert the `variables` object's keys contain `eventTitle`, `eventDate`, `seatCount`, `amount`, `orderId` and `ctaUrl` — a missing one is invisible in production because the `catch` swallows it, so the test is the only thing that can see it.
+
 In `lib/api/stripe-webhook-route.ts`, wire it into the production `POST` — the ticket processor is built once, lazily, beside the Stripe client:
 
 ```ts
 import {stripeBillingAdapter} from "@/lib/billing/stripe";
 import {createTicketProcessor} from "@/lib/billing/ticket-webhook-processor";
 import type {TicketProcessor} from "@/lib/billing/webhook-service";
-import {emailEnv} from "@/lib/config/env";
+import {emailEnv, appEnv} from "@/lib/config/env";
 import {eventOrdersRepository} from "@/lib/db/repos/event-orders";
 import {renderEmail} from "@/lib/email/render";
 import {createConfiguredEmailTransport} from "@/lib/email/transport";
@@ -1447,6 +1496,7 @@ function productionTicketProcessor(): TicketProcessor {
       transport: createConfiguredEmailTransport(),
       emailFrom: emailEnv().emailFrom,
     },
+    appUrl: appEnv().appUrl,
     now: () => new Date(),
     onEmailError(error, context) {
       // Never rethrow: the settlement is committed, and a 500 would make Stripe
@@ -1474,7 +1524,7 @@ to
   },
 ```
 
-`undefined` keeps the membership processor's default; the route's `Dependencies.processEvent` type is unchanged, so the existing route tests still compile. `eventOrdersRepository` gains an `eventSummary(eventId, locale)` read (event id → localized title) in Task 4.
+`undefined` keeps the membership processor's default; the route's `Dependencies.processEvent` type is unchanged, so the existing route tests still compile. `eventOrdersRepository` gains an `eventSummary(eventId, locale)` read (event id → localized title + slug + start time) and a public `seatsOfOrder(orderId)` in Task 4; the receipt needs all three, because the copy uses `{eventDate}`, `{seatCount}` and `{ctaUrl}` as well as `{eventTitle}`.
 
 - [ ] **Step 4: Run the test to verify it passes**
 
