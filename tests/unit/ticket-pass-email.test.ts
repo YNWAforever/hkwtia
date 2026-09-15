@@ -95,7 +95,7 @@ function createIdempotentTransport(): EmailTransport & Readonly<{sends: EmailSen
   };
 }
 
-function build(options: {settle?: SettleResult} = {}) {
+function build(options: {settle?: SettleResult; onEmailError?: (error: unknown, context: Readonly<{orderId: string; template: string}>) => void} = {}) {
   const orders = {
     settlePaid: vi.fn(async (): Promise<SettleResult> => options.settle ?? {status: "paid", order: paidOrder}),
     expireBySession: vi.fn(async () => undefined),
@@ -119,6 +119,7 @@ function build(options: {settle?: SettleResult} = {}) {
     appUrl: "https://w.test",
     passSecret,
     now: () => settlement,
+    onEmailError: options.onEmailError,
   };
   return {processor: createTicketProcessor(dependencies), dependencies, orders, transport, renderEmail: renderEmailSpy};
 }
@@ -154,6 +155,11 @@ describe("ticket pass email", () => {
     expect(tokens.map((token) => token?.seatId).sort()).toEqual([seatA, seatB].sort());
     expect(tokens.every((token) => token?.eventId === eventId)).toBe(true);
     expect(new Set(inputs.map((input) => input.variables.ctaUrl)).size).toBe(2);
+
+    // The dedupe key must carry the settlement instant, not the wall clock: a
+    // redelivery re-derives the same key and is a no-op, while Task 7's resend
+    // supplies a fresh attempt key and still sends.
+    expect(sends[0]!.idempotencyKey).toBe(`ticket-pass:${seatA}:${settlement.getTime()}`);
   });
 
   it("supplies every placeholder the pass copy uses", async () => {
@@ -191,6 +197,35 @@ describe("ticket pass email", () => {
 
     expect(passSends(transport.sends)).toEqual([]);
     expect(renderEmailSpy.mock.calls.some(([input]) => (input as RenderEmailInput).template === "event_ticket_pass")).toBe(false);
+  });
+
+  it("logs a failed pass read instead of 500ing the settled order", async () => {
+    const onEmailError = vi.fn();
+    const {processor, orders} = build({onEmailError});
+    // The receipt's own `orderSeats` read succeeds; the pass path's read throws.
+    // The settlement is already committed, so the failure must be swallowed,
+    // reported, and left for Task 7's resend rather than escaping as a 500 that
+    // a Stripe redelivery would short-circuit to `duplicate` with no pass sent.
+    orders.orderSeats.mockResolvedValueOnce(seatRows).mockRejectedValueOnce(new Error("event_orders read failed"));
+
+    await expect(processor.process(systemActor("stripe-webhook"), command)).resolves.toBe("processed");
+
+    expect(onEmailError).toHaveBeenCalledWith(expect.any(Error), {orderId, template: "event_ticket_pass"});
+  });
+
+  it("keeps sending the remaining passes when one seat's read fails", async () => {
+    const onEmailError = vi.fn();
+    const {processor, orders, transport} = build({onEmailError});
+    orders.seatForPass.mockImplementation(async (seatId: string) => {
+      if (seatId === seatA) throw new Error("seat read failed");
+      return seatPasses[seatId] ?? null;
+    });
+
+    await expect(processor.process(systemActor("stripe-webhook"), command)).resolves.toBe("processed");
+
+    const sends = passSends(transport.sends);
+    expect(sends.map((send) => send.to)).toEqual(["bob@example.test"]);
+    expect(onEmailError).toHaveBeenCalledWith(expect.any(Error), {orderId, template: "event_ticket_pass"});
   });
 
   it("sends no second pass on a webhook redelivery", async () => {

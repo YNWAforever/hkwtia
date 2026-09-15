@@ -154,7 +154,14 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
     const seats = await dependencies.orders.orderSeats(order.id);
     const settlement = order.paidAt?.getTime() ?? 0;
     for (const seat of seats) {
-      await sendSeatPass(dependencies, {seatId: seat.seatId, attemptKey: String(settlement)});
+      // Per-seat guard: one seat's failed read must not drop the passes for the
+      // seats after it. The settlement is already committed, so the loss is
+      // recoverable only by Task 7's staff resend.
+      try {
+        await sendSeatPass(dependencies, {seatId: seat.seatId, attemptKey: String(settlement)});
+      } catch (error) {
+        dependencies.onEmailError?.(error, {orderId: order.id, template: "event_ticket_pass"});
+      }
     }
   }
 
@@ -190,7 +197,18 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
         await sendTicketEmail(dependencies, "event_ticket_confirmation", order, event);
         // Only a paid settlement admits anyone, so only it earns a pass. An
         // oversold or late-paid order has already taken the refund branch above.
-        await sendPassEmails(order);
+        //
+        // This guard exists because the settlement is already committed. Without
+        // it a failed pass read escapes `process`, the route answers 500, and
+        // Stripe redelivers — but the redelivery makes `settlePaid` answer
+        // `duplicate`, so the paid branch is skipped before the loop runs and no
+        // pass is ever sent or ever retried. Log the failure and leave the
+        // recovery to Task 7's resend rather than to a Stripe redelivery.
+        try {
+          await sendPassEmails(order);
+        } catch (error) {
+          dependencies.onEmailError?.(error, {orderId: order.id, template: "event_ticket_pass"});
+        }
       }
       return "processed";
     },
