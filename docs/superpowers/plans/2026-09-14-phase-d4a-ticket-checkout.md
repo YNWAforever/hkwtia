@@ -1713,9 +1713,12 @@ function addEventShapeIssues(
   if (ticketed && !(typeof input.ticketPriceHkdCents === "number" && input.ticketPriceHkdCents > 0)) {
     context.addIssue({code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "ticketPriceHkdCents is required for ticketed events"});
   }
-  // Guarded on the mode being *present*: a partial update that changes only the
-  // price of an already-ticketed event sends no mode, and the row's own mode
-  // governs there — the database check is the backstop for that path.
+  // Guarded on the mode being *present*, because a partial update that changes
+  // only the price of an already-ticketed event sends no mode. The update path
+  // therefore re-applies this rule against the row's OWN mode (see updateEvent);
+  // the schema check alone cannot catch a price-only update on a non-ticketed
+  // row, because `registration_mode <> 'ticketed' OR price IS NOT NULL AND > 0`
+  // is satisfied by exactly that row.
   if (input.registrationMode !== undefined && !ticketed && input.ticketPriceHkdCents != null) {
     context.addIssue({code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "ticketPriceHkdCents is only valid for ticketed events"});
   }
@@ -1733,6 +1736,19 @@ const memberEventInputSchema = eventInputObjectSchema
 ```
 
 The admin create/update path spreads the parsed input into Drizzle, so `ticketPriceHkdCents` reaches the column once the schema carries it, and `memberCreateEvent`'s explicit column list never names `ticket_price_hkd_cents` — leave it that way.
+
+`updateEvent` re-applies the ticketed rule against the row's own mode, because a price-only partial update never sends `registrationMode` and the table check cannot catch it:
+
+```ts
+  // A price-only update sends no mode, so the shape rule above cannot see the
+  // conflict: the row's own mode has to decide. It is already locked here.
+  const effectiveMode = parsed.registrationMode ?? current.registrationMode;
+  if (effectiveMode !== "ticketed" && parsed.ticketPriceHkdCents != null) {
+    throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "ticketPriceHkdCents is only valid for ticketed events"}]);
+  }
+```
+
+with the same rejection on the create arm, where `parsed.registrationMode` is the whole story.
 
 **D. The public projection.** Add the price to `PublicEventProjection` in `lib/events/public.ts` (`ticketPriceHkdCents: number | null;`) and to `projectPublicEvent`:
 
