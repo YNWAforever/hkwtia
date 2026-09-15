@@ -605,10 +605,10 @@ export type CreateOrderInput = Readonly<{
 
 export type CreateOrderResult =
   | Readonly<{ok: true; order: OrderRecord; reused: boolean}>
-  | Readonly<{ok: false; reason: "EVENT_NOT_FOUND" | "SOLD_OUT"}>;
+  | Readonly<{ok: false; reason: "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "AMOUNT_MISMATCH" | "SOLD_OUT"}>;
 
 export type SettleResult =
-  | Readonly<{status: "paid" | "duplicate" | "ignored" | "oversold" | "unknown"; order: OrderRecord | null}>;
+  | Readonly<{status: "paid" | "duplicate" | "ignored" | "oversold" | "refund_due" | "unknown"; order: OrderRecord | null}>;
 
 export type EventOrdersTransaction = Readonly<{
   lockEvent: (eventId: string) => Promise<LockedEvent | null>;
@@ -677,8 +677,17 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
       return runTransaction(async (tx) => {
         const event = await tx.lockEvent(input.eventId);
         if (!event) return {ok: false, reason: "EVENT_NOT_FOUND"};
+        // The lock already holds the authoritative mode and price, so the
+        // "a client-supplied amount is never read" invariant is enforced here
+        // rather than resting on the caller being correct forever.
+        if (event.registrationMode !== "ticketed" || event.ticketPriceHkdCents === null) {
+          return {ok: false, reason: "EVENT_NOT_TICKETED"};
+        }
         const existing = await tx.orderByIdempotencyKey(input.idempotencyKey);
         if (existing) return {ok: true, order: existing, reused: true};
+        if (input.amountHkdCents !== event.ticketPriceHkdCents * input.seats.length) {
+          return {ok: false, reason: "AMOUNT_MISMATCH"};
+        }
         if (event.capacity !== null) {
           const held = await tx.heldSeats(input.eventId, input.now);
           if (held + input.seats.length > event.capacity) return {ok: false, reason: "SOLD_OUT"};
@@ -700,6 +709,14 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
         const order = await tx.orderBySessionId(sessionId);
         if (!order) return {status: "unknown", order: null};
         if (order.status === "paid") return {status: "duplicate", order};
+        // A session can be paid in the moment it lapses locally, so an order we
+        // already expired may still carry a real payment. Refund it rather than
+        // answer `ignored`, which would take money and hand back no seats.
+        if (order.status === "expired") {
+          await tx.markStatus(order.id, "refunded", {refundedAt: now, refundReason: "cancelled"});
+          await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.refunded", targetType: "event_order", targetId: order.id, metadata: {reason: "late_payment"}});
+          return {status: "refund_due", order: {...order, status: "refunded", refundedAt: now, refundReason: "cancelled"}};
+        }
         if (order.status !== "pending") return {status: "ignored", order};
         const event = await tx.lockEvent(order.eventId);
         if (event && event.capacity !== null) {
@@ -856,15 +873,11 @@ Create `lib/tickets/checkout-core.ts`:
 ```ts
 import "server-only";
 
-import {eq} from "drizzle-orm";
-
 import {MAX_TICKET_SEATS} from "@/config/tickets";
 import type {AppLocale} from "@/i18n/routing";
 import {appEnv} from "@/lib/config/env";
 import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
-import {getDb} from "@/lib/db/repos/common";
-import {eventOrdersRepository, ticketSeatsSchema, type EventOrdersRepository, type SeatInput} from "@/lib/db/repos/event-orders";
-import {events} from "@/lib/db/server-schema";
+import {eventOrdersRepository, ticketEventFor, ticketSeatsSchema, type EventOrdersRepository, type SeatInput} from "@/lib/db/repos/event-orders";
 import {localizedPath} from "@/lib/urls";
 
 export type TicketEvent = Readonly<{
@@ -895,20 +908,14 @@ export type TicketCheckoutDependencies = Readonly<{
   now: () => Date;
 }>;
 
-async function defaultEventForTicket(eventId: string): Promise<TicketEvent | null> {
-  const db = await getDb();
-  const row = (await db.select({
-    id: events.id, slug: events.slug, titleEn: events.titleEn, titleZh: events.titleZh, startsAt: events.startsAt,
-    published: events.published, registrationMode: events.registrationMode, ticketPriceHkdCents: events.ticketPriceHkdCents,
-  }).from(events).where(eq(events.id, eventId)).limit(1))[0];
-  return row ?? null;
-}
-
 function defaultDependencies(): TicketCheckoutDependencies {
   return {
     orders: eventOrdersRepository,
     stripe: stripeBillingAdapter(),
-    eventForTicket: defaultEventForTicket,
+    // `ticketEventFor` lives in the repository module on purpose: `lib/tickets/`
+    // is not allowed to import the database client (the repository-boundary lint
+    // rule), and the read also coalesces a null `title_zh` to the English title.
+    eventForTicket: ticketEventFor,
     appUrl: appEnv().appUrl,
     now: () => new Date(),
   };
@@ -958,7 +965,16 @@ export async function createTicketCheckout(
     now,
   });
   if (!created.ok) {
-    return {status: "error", code: created.reason === "SOLD_OUT" ? "SOLD_OUT" : "EVENT_NOT_FOUND"};
+    const code: TicketCheckoutErrorCode = created.reason === "SOLD_OUT"
+      ? "SOLD_OUT"
+      : created.reason === "EVENT_NOT_TICKETED"
+        ? "EVENT_NOT_TICKETED"
+        // A mismatch means this service computed the amount wrongly; it is our
+        // bug, not the buyer's, so it is reported as unavailable.
+        : created.reason === "AMOUNT_MISMATCH"
+          ? "UNAVAILABLE"
+          : "EVENT_NOT_FOUND";
+    return {status: "error", code};
   }
   // A reused key returns the session it already minted; minting a second one
   // would charge the buyer twice for one form.
@@ -1131,6 +1147,7 @@ Create `components/marketing/ticket-checkout-form.tsx`:
 import {useActionState, useEffect, useState} from "react";
 
 import {submitTicketCheckoutAction, type TicketCheckoutState} from "@/lib/tickets/checkout-actions";
+import {newAttemptId} from "@/lib/random-id";
 
 export type TicketCheckoutLabels = Readonly<{
   heading: string; buyerName: string; buyerEmail: string; seatCount: string;
@@ -1147,9 +1164,13 @@ export function TicketCheckoutForm({eventId, locale, pricePerSeat, labels}: Read
 }>) {
   const [state, dispatch, pending] = useActionState(submitTicketCheckoutAction, initial);
   const [seatCount, setSeatCount] = useState(1);
-  // Minted once per form instance, so a retry after a network error reuses the
-  // same key and cannot charge twice.
-  const [idempotencyKey] = useState(() => crypto.randomUUID());
+  // Minted once, AFTER mount: a value minted during render differs between the
+  // server and the client, which is a hydration mismatch. `newAttemptId` steps
+  // down to `getRandomValues` because `crypto.randomUUID` is secure-context
+  // only — the same helper `components/admin/inbox-composer.tsx` uses, lifted
+  // to `lib/random-id.ts` so there is one implementation, not two.
+  const [idempotencyKey, setIdempotencyKey] = useState("");
+  useEffect(() => { setIdempotencyKey(newAttemptId()); }, []);
 
   useEffect(() => {
     if (state.status === "redirect") window.location.assign(state.url);
@@ -1210,6 +1231,25 @@ Add the import:
 ```tsx
 import {TicketCheckoutForm} from "@/components/marketing/ticket-checkout-form";
 ```
+
+Prefill a signed-in member's own details. The page already holds the actor; the read is caught so an unreachable profile leaves an empty form rather than failing the page:
+
+```tsx
+  // The spec requires a signed-in member's own details prefilled. `catch(() => null)`
+  // because a profile read is an optimisation here, not the page's content.
+  const memberProfile = actor?.kind === "member"
+    ? await profilesRepository.getById(actor, actor.profileId).catch(() => null)
+    : null;
+```
+
+and pass them on the form:
+
+```tsx
+                  defaultBuyerName={memberProfile?.displayName ?? undefined}
+                  defaultBuyerEmail={memberProfile?.email ?? undefined}
+```
+
+Add `formatTicketPrice` to a unit test (`tests/unit/ticket-format.test.ts`, created in Step 1) asserting `25000 → "HK$250.00"` in both locales and the `null` fallback — the brief previously deferred this to Task 9, which is the e2e walk and cannot cover it.
 
 Extend the registration union so a ticketed event is its own kind — it is bought by a member or a guest alike, so it cannot fall into the guest/member arms:
 
@@ -1452,9 +1492,10 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
       const order = settlement.order;
       if (!order) return "duplicate";
 
-      if (settlement.status === "oversold") {
-        // The seats were sold between checkout and payment; refund the whole
-        // charge rather than a partial credit, and tell the buyer why.
+      if (settlement.status === "oversold" || settlement.status === "refund_due") {
+        // `oversold`: the seats were sold between checkout and payment.
+        // `refund_due`: the session was paid in the moment our hold lapsed.
+        // Either way the whole charge is returned, never a partial credit.
         if (command.paymentIntentId) await dependencies.refundPaymentIntent(command.paymentIntentId);
         const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
         await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
