@@ -8,7 +8,7 @@ import {submitTicketCheckoutAction, type TicketCheckoutState} from "@/lib/ticket
 
 export type TicketCheckoutLabels = Readonly<{
   heading: string; buyerName: string; buyerEmail: string; seatCount: string;
-  attendeeName: string; attendeeEmail: string; website: string; pricePerSeat: string;
+  attendeeName: string; attendeeEmail: string; website: string;
   submit: string; submitting: string;
   errors: Readonly<Record<string, string>>;
 }>;

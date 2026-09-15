@@ -118,7 +118,7 @@ export default async function EventPage({params}: Props) {
   const ticketLabels = {
     heading: tTicket("heading"), buyerName: tTicket("buyerName"), buyerEmail: tTicket("buyerEmail"),
     seatCount: tTicket("seatCount"), attendeeName: tTicket("attendeeName"), attendeeEmail: tTicket("attendeeEmail"),
-    website: tTicket("website"), pricePerSeat: tTicket("pricePerSeat"), submit: tTicket("submit"), submitting: tTicket("submitting"),
+    website: tTicket("website"), submit: tTicket("submit"), submitting: tTicket("submitting"),
     errors: {INVALID: tTicket("errors.INVALID"), SOLD_OUT: tTicket("errors.SOLD_OUT"), EVENT_CLOSED: tTicket("errors.EVENT_CLOSED"), UNAVAILABLE: tTicket("errors.UNAVAILABLE"), RATE_LIMITED: tTicket("errors.RATE_LIMITED")},
   };
 

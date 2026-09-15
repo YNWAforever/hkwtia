@@ -30,7 +30,6 @@ const labels: TicketCheckoutLabels = {
   attendeeName: "Attendee name",
   attendeeEmail: "Attendee email",
   website: "Leave this field empty",
-  pricePerSeat: "Price per seat",
   submit: "Buy tickets",
   submitting: "Redirecting to payment…",
   errors: {

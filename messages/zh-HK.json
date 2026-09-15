@@ -336,7 +336,7 @@
         "subject": "{eventTitle} 的門票",
         "preview": "訂單 {orderId} 已確認，共 {seatCount} 個座位。",
         "heading": "你將參加 {eventTitle}",
-        "body": "多謝支持。我們已收到 HK${amount}，共 {seatCount} 個座位。活動日期為 {eventDate}。每位出席者將另函收到專屬門票。",
+        "body": "多謝支持。我們已收到 HK${amount}，共 {seatCount} 個座位。活動日期為 {eventDate}。",
         "cta": "查看活動"
       },
       "event_ticket_refunded": {
@@ -1596,7 +1596,6 @@
     "attendeeEmail": "出席者電郵",
     "website": "請留空此欄",
     "price": "每張門票：{price}",
-    "pricePerSeat": "每張門票",
     "submit": "前往付款",
     "submitting": "正在前往付款……",
     "errors": {
