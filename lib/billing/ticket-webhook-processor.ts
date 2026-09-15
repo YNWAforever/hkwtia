@@ -7,6 +7,7 @@ import type {EmailVariables} from "@/lib/email/catalog";
 import {createConfiguredEmailTransport} from "@/lib/email/transport";
 import type {TicketProcessor, TicketWebhookCommand} from "@/lib/billing/webhook-service";
 import {localizedPath} from "@/lib/urls";
+import {signPassToken} from "@/lib/tickets/pass-token";
 
 type TicketEmailDependencies = Readonly<{
   renderEmail: typeof renderEmail;
@@ -15,12 +16,14 @@ type TicketEmailDependencies = Readonly<{
 }>;
 
 export type TicketProcessorDependencies = Readonly<{
-  orders: Pick<EventOrdersRepository, "settlePaid" | "expireBySession" | "eventSummary" | "seatsOfOrder">;
+  orders: Pick<EventOrdersRepository, "settlePaid" | "expireBySession" | "eventSummary" | "seatsOfOrder" | "orderSeats" | "seatForPass">;
   /** The deterministic key makes a retried refund safe to re-issue. */
   refundPaymentIntent: (paymentIntentId: string, idempotencyKey: string) => Promise<void>;
   email: TicketEmailDependencies;
   /** For the receipt's "view the event" link, built from the order's own locale. */
   appUrl: string;
+  /** Signs each attendee's pass URL; the pass page verifies with the same key. */
+  passSecret: string;
   now: () => Date;
   /** Best-effort: a mail failure must not fail the webhook, which Stripe retries. */
   onEmailError?: (error: unknown, context: Readonly<{orderId: string; template: string}>) => void;
@@ -44,18 +47,28 @@ function formatEventDate(value: Date, locale: "en" | "zh-HK"): string {
   }).format(value);
 }
 
-type EventSummary = Readonly<{title: string; startsAt: Date; slug: string}>;
+type EventSummary = Readonly<{title: string; startsAt: Date; slug: string; venue: string | null}>;
+
+type TicketEmailTemplate = "event_ticket_confirmation" | "event_ticket_refunded" | "event_ticket_pass";
+
+/**
+ * Overrides for the per-attendee pass: the receipt is the buyer's, so its
+ * recipient and link come from the order, while each pass goes to one seat with
+ * that seat's own link and its own idempotency key.
+ */
+type TicketEmailOverrides = Readonly<{attendeeName?: string; to?: string; ctaUrl?: string; idempotencyKey?: string}>;
 
 async function sendTicketEmail(
   dependencies: TicketProcessorDependencies,
-  template: "event_ticket_confirmation" | "event_ticket_refunded",
+  template: TicketEmailTemplate,
   order: OrderRecord,
   event: EventSummary | null,
+  overrides: TicketEmailOverrides = {},
 ): Promise<void> {
   const eventTitle = event?.title ?? "";
-  const ctaUrl = event
+  const ctaUrl = overrides.ctaUrl ?? (event
     ? `${dependencies.appUrl}${localizedPath(order.buyerLocale, `/events/${event.slug}`)}`
-    : dependencies.appUrl;
+    : dependencies.appUrl);
   try {
     // Every placeholder the copy uses must be supplied here: the renderer throws
     // `EMAIL_VARIABLE_MISSING` / `EMAIL_CTA_URL_REQUIRED`, and because the failure
@@ -65,16 +78,25 @@ async function sendTicketEmail(
         eventTitle,
         eventDate: event ? formatEventDate(event.startsAt, order.buyerLocale) : "",
         seatCount: String(await dependencies.orders.seatsOfOrder(order.id)),
+        attendees: (await dependencies.orders.orderSeats(order.id)).map((seat) => seat.attendeeName).join(", "),
         amount: formatHkd(order.amountHkdCents, order.buyerLocale),
         orderId: order.id,
         ctaUrl,
       }
-      : {
-        eventTitle,
-        amount: formatHkd(order.amountHkdCents, order.buyerLocale),
-        orderId: order.id,
-        ctaUrl,
-      };
+      : template === "event_ticket_pass"
+        ? {
+          eventTitle,
+          attendeeName: overrides.attendeeName ?? "",
+          eventDate: event ? formatEventDate(event.startsAt, order.buyerLocale) : "",
+          venue: event?.venue ?? "",
+          ctaUrl,
+        }
+        : {
+          eventTitle,
+          amount: formatHkd(order.amountHkdCents, order.buyerLocale),
+          orderId: order.id,
+          ctaUrl,
+        };
     const rendered = await dependencies.email.renderEmail({
       template,
       locale: order.buyerLocale,
@@ -83,7 +105,7 @@ async function sendTicketEmail(
       variables,
     });
     await dependencies.email.transport.send({
-      to: order.buyerEmail,
+      to: overrides.to ?? order.buyerEmail,
       from: dependencies.email.emailFrom,
       subject: rendered.subject,
       html: rendered.html,
@@ -92,14 +114,50 @@ async function sendTicketEmail(
       // Keyed on the order and the outcome: a redelivered webhook re-renders the
       // same message and is a no-op at the transport, while a later refund of the
       // same order is a different key and still sends.
-      idempotencyKey: `${template === "event_ticket_confirmation" ? "ticket-confirmation" : "ticket-refund"}:${order.id}`,
+      idempotencyKey: overrides.idempotencyKey ?? `${template === "event_ticket_confirmation" ? "ticket-confirmation" : "ticket-refund"}:${order.id}`,
     });
   } catch (error) {
     dependencies.onEmailError?.(error, {orderId: order.id, template});
   }
 }
 
+/**
+ * One seat's pass, with the attempt key supplied by the caller: the webhook
+ * passes the settlement instant (so a redelivery is a no-op) and the staff
+ * resend passes a fresh attempt (so a deliberate resend is never suppressed).
+ *
+ * The seat id is the only input: the order and the event are resolved here, so
+ * a caller cannot pair a seat with the wrong order.
+ */
+export async function sendSeatPass(
+  dependencies: TicketProcessorDependencies,
+  input: Readonly<{seatId: string; attemptKey: string}>,
+): Promise<void> {
+  const seat = await dependencies.orders.seatForPass(input.seatId);
+  // `seatForPass` returns null for a seat whose order is not `paid`, the same
+  // refusal the pass page makes; nothing is sent for a refunded seat.
+  if (!seat) return;
+  const event = await dependencies.orders.eventSummary(seat.eventId, seat.buyerLocale);
+  const passUrl = `${dependencies.appUrl}${localizedPath(seat.buyerLocale, `/pass/${signPassToken({seatId: seat.seatId, eventId: seat.eventId}, dependencies.passSecret)}`)}`;
+  await sendTicketEmail(dependencies, "event_ticket_pass", seat.order, event, {
+    attendeeName: seat.attendeeName,
+    to: seat.attendeeEmail,
+    ctaUrl: passUrl,
+    idempotencyKey: `ticket-pass:${seat.seatId}:${input.attemptKey}`,
+  });
+}
+
 export function createTicketProcessor(dependencies: TicketProcessorDependencies): TicketProcessor {
+  /** One pass per seat. The key carries the settlement instant: identical on a
+   *  redelivery (so nothing is re-sent) and different on a deliberate resend. */
+  async function sendPassEmails(order: OrderRecord): Promise<void> {
+    const seats = await dependencies.orders.orderSeats(order.id);
+    const settlement = order.paidAt?.getTime() ?? 0;
+    for (const seat of seats) {
+      await sendSeatPass(dependencies, {seatId: seat.seatId, attemptKey: String(settlement)});
+    }
+  }
+
   return {
     async process(_actor: Actor, command: TicketWebhookCommand): Promise<"processed" | "duplicate"> {
       if (command.eventType === "checkout.session.expired") {
@@ -130,6 +188,9 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
       if (settlement.status === "paid") {
         const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
         await sendTicketEmail(dependencies, "event_ticket_confirmation", order, event);
+        // Only a paid settlement admits anyone, so only it earns a pass. An
+        // oversold or late-paid order has already taken the refund branch above.
+        await sendPassEmails(order);
       }
       return "processed";
     },

@@ -34,6 +34,7 @@ const REQUIRED_TEMPLATE_IDS = [
   "event_reminder_24h",
   "event_ticket_confirmation",
   "event_ticket_refunded",
+  "event_ticket_pass",
 ] as const satisfies readonly EmailTemplateId[];
 
 // Every placeholder any template interpolates; a template that needs a new one
@@ -48,12 +49,14 @@ const FIXTURE_VARIABLES = {
   seatCount: 2,
   amount: "1,000.00",
   orderId: "order_fixture",
+  attendeeName: "Fixture Attendee",
+  attendees: "Fixture Member, Fixture Attendee",
 } as const;
 
 describe("email catalogue", () => {
-  it("contains exactly the 27 approved template IDs in stable order", () => {
+  it("contains exactly the 28 approved template IDs in stable order", () => {
     expect(EMAIL_TEMPLATE_IDS).toEqual(REQUIRED_TEMPLATE_IDS);
-    expect(new Set(EMAIL_TEMPLATE_IDS).size).toBe(27);
+    expect(new Set(EMAIL_TEMPLATE_IDS).size).toBe(28);
   });
 
   it("keeps the guest confirmation transactional and carries the cancel link in its body", () => {

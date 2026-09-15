@@ -16,6 +16,8 @@ const fixtureVars = {
   eventDate: "1 March 2030",
   seatCount: 2,
   orderId: "order_fixture",
+  attendeeName: "Fixture Attendee",
+  attendees: "Fixture Member, Fixture Attendee",
 };
 
 describe("renderEmail", () => {

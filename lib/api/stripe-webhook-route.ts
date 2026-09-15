@@ -7,7 +7,7 @@ import {stripeBillingAdapter} from "@/lib/billing/stripe";
 import {createTicketProcessor} from "@/lib/billing/ticket-webhook-processor";
 import {processStripeEvent, WebhookInputError} from "@/lib/billing/webhook-service";
 import type {TicketProcessor} from "@/lib/billing/webhook-service";
-import {billingEnv, emailEnv, appEnv} from "@/lib/config/env";
+import {billingEnv, emailEnv, appEnv, ticketPassEnv} from "@/lib/config/env";
 import {eventOrdersRepository} from "@/lib/db/repos/event-orders";
 import {renderEmail} from "@/lib/email/render";
 import {createConfiguredEmailTransport} from "@/lib/email/transport";
@@ -77,6 +77,7 @@ function buildTicketProcessor(): TicketProcessor {
       emailFrom: emailEnv().emailFrom,
     },
     appUrl: appEnv().appUrl,
+    passSecret: ticketPassEnv().ticketPassTokenSecret,
     now: () => new Date(),
     onEmailError(error, context) {
       // Never rethrow: the settlement is committed, and a 500 would make Stripe

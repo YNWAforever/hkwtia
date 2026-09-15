@@ -46,6 +46,7 @@ const eventSummary = {
   title: "Edge AI for Builders",
   startsAt: new Date("2026-10-01T10:00:00Z"),
   slug: "edge-ai-for-builders",
+  venue: "KOHO, Kwun Tong",
 };
 
 type TicketEventType = "checkout.session.completed" | "checkout.session.async_payment_succeeded" | "checkout.session.expired";
@@ -95,13 +96,16 @@ function captureTicketProcessor() {
 function buildTicketProcessor(options: {
   settle?: SettleResult;
   seats?: number;
-  summary?: {title: string; startsAt: Date; slug: string} | null;
+  summary?: {title: string; startsAt: Date; slug: string; venue: string | null} | null;
+  orderSeats?: readonly {seatId: string; position: number; attendeeName: string}[];
 } = {}) {
   const orders = {
     settlePaid: vi.fn(async (): Promise<SettleResult> => options.settle ?? {status: "paid", order: pendingOrder}),
     expireBySession: vi.fn(async () => undefined),
     eventSummary: vi.fn(async () => (options.summary === undefined ? eventSummary : options.summary)),
     seatsOfOrder: vi.fn(async () => options.seats ?? 2),
+    orderSeats: vi.fn(async () => options.orderSeats ?? []),
+    seatForPass: vi.fn(async () => null),
   };
   const refundPaymentIntent = vi.fn(async () => undefined);
   // The real renderer runs behind the spy, so a missing placeholder throws and
@@ -117,6 +121,7 @@ function buildTicketProcessor(options: {
       emailFrom: "tickets@wtia.test",
     },
     appUrl: "https://w.test",
+    passSecret: "pass-secret-fixture",
     now: () => new Date("2026-09-14T04:00:00Z"),
   };
   return {
@@ -273,6 +278,8 @@ describe("createTicketProcessor", () => {
       expireBySession: vi.fn(async () => undefined),
       eventSummary: vi.fn(async () => eventSummary),
       seatsOfOrder: vi.fn(async () => 2),
+      orderSeats: vi.fn(async () => []),
+      seatForPass: vi.fn(async () => null),
     };
     const refundPaymentIntent = vi.fn()
       .mockRejectedValueOnce(new Error("stripe unavailable"))
@@ -283,6 +290,7 @@ describe("createTicketProcessor", () => {
       refundPaymentIntent,
       email: {renderEmail, transport, emailFrom: "tickets@wtia.test"},
       appUrl: "https://w.test",
+      passSecret: "pass-secret-fixture",
       now: () => new Date("2026-09-14T04:00:00Z"),
     });
 
@@ -334,7 +342,7 @@ describe("createTicketProcessor", () => {
 
     const input = (renderEmail.mock.calls[0] as unknown as [RenderEmailInput])[0];
     expect(Object.keys(input.variables)).toEqual(expect.arrayContaining([
-      "eventTitle", "eventDate", "seatCount", "amount", "orderId", "ctaUrl",
+      "eventTitle", "eventDate", "seatCount", "attendees", "amount", "orderId", "ctaUrl",
     ]));
     expect(input.variables).toMatchObject({eventTitle: eventSummary.title, seatCount: "3", orderId});
     // The real renderer ran, so a missing placeholder would have thrown and left
@@ -367,6 +375,8 @@ describe("createTicketProcessor", () => {
       expireBySession: vi.fn(async () => undefined),
       eventSummary: vi.fn(async () => eventSummary),
       seatsOfOrder: vi.fn(async () => 1),
+      orderSeats: vi.fn(async () => []),
+      seatForPass: vi.fn(async () => null),
     };
     const onEmailError = vi.fn();
     const processor = createTicketProcessor({
@@ -378,6 +388,7 @@ describe("createTicketProcessor", () => {
         emailFrom: "tickets@wtia.test",
       },
       appUrl: "https://w.test",
+      passSecret: "pass-secret-fixture",
       now: () => new Date("2026-09-14T04:00:00Z"),
       onEmailError,
     });

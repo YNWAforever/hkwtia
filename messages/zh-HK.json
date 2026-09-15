@@ -336,7 +336,7 @@
         "subject": "{eventTitle} 的門票",
         "preview": "訂單 {orderId} 已確認，共 {seatCount} 個座位。",
         "heading": "你將參加 {eventTitle}",
-        "body": "多謝支持。我們已收到 HK${amount}，共 {seatCount} 個座位。活動日期為 {eventDate}。",
+        "body": "多謝支持。我們已收到 HK${amount}，共 {seatCount} 個座位：{attendees}。活動日期為 {eventDate}。每位出席者將另函收到專屬門票。",
         "cta": "查看活動"
       },
       "event_ticket_refunded": {
@@ -345,6 +345,13 @@
         "heading": "款項已退回",
         "body": "我們已就訂單 {orderId}（{eventTitle}）退回 HK${amount}。視乎銀行處理，款項可能需要數天才顯示。",
         "cta": "查看活動"
+      },
+      "event_ticket_pass": {
+        "subject": "{eventTitle} 的門票",
+        "preview": "{attendeeName} 的專屬入場門票。",
+        "heading": "{attendeeName}，這是你的門票",
+        "body": "請於活動當日在入口出示此門票。活動：{eventTitle}，日期：{eventDate}，地點：{venue}。每張門票只限一人入場，請勿轉發。",
+        "cta": "開啟門票"
       }
     }
   },

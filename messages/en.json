@@ -336,7 +336,7 @@
         "subject": "Your tickets for {eventTitle}",
         "preview": "Order {orderId} confirmed, {seatCount} seat(s).",
         "heading": "You're going to {eventTitle}",
-        "body": "Thank you. We received HK${amount} for {seatCount} seat(s). The event is on {eventDate}.",
+        "body": "Thank you. We received HK${amount} for {seatCount} seat(s): {attendees}. The event is on {eventDate}. Each attendee will receive their own pass in a separate email.",
         "cta": "View the event"
       },
       "event_ticket_refunded": {
@@ -345,6 +345,13 @@
         "heading": "Your payment has been returned",
         "body": "We have refunded HK${amount} for order {orderId} ({eventTitle}). Depending on your bank, it can take a few days to appear.",
         "cta": "View the event"
+      },
+      "event_ticket_pass": {
+        "subject": "Your pass for {eventTitle}",
+        "preview": "Your personal entry pass, {attendeeName}.",
+        "heading": "Your pass, {attendeeName}",
+        "body": "Show this email's pass at the door for {eventTitle} on {eventDate} at {venue}. Each pass admits one person, so please do not forward it.",
+        "cta": "Open your pass"
       }
     }
   },
