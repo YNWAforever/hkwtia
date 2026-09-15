@@ -50,6 +50,8 @@ export type EventOrdersTransaction = Readonly<{
   seatsOfOrder: (orderId: string) => Promise<number>;
   /** Seats of paid orders, or of pending ones whose hold has not lapsed. */
   heldSeats: (eventId: string, now: Date, excludingOrderId?: string) => Promise<number>;
+  /** Seats of paid orders only -- the subset of `heldSeats` that has been bought. */
+  paidSeats: (eventId: string) => Promise<number>;
   insertOrder: (input: CreateOrderInput & {expiresAt: Date; status: "pending"}) => Promise<OrderRecord>;
   insertSeats: (orderId: string, seats: readonly SeatInput[]) => Promise<void>;
   attachSession: (orderId: string, sessionId: string, url: string) => Promise<void>;
@@ -160,6 +162,11 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       WHERE o.event_id = ${eventId}
         AND (${excludingOrderId === undefined ? sql`TRUE` : sql`o.id <> ${excludingOrderId}`})
         AND (o.status = 'paid' OR (o.status = 'pending' AND o.expires_at > ${now}))
+    `))[0]?.value ?? 0),
+    paidSeats: async (eventId) => Number(rows<{value: number}>(await tx.execute(sql`
+      SELECT COUNT(*)::int AS value FROM ${eventOrderSeats} AS s
+      JOIN ${eventOrders} AS o ON o.id = s.order_id
+      WHERE o.event_id = ${eventId} AND o.status = 'paid'
     `))[0]?.value ?? 0),
     insertOrder: async (input) => {
       const row = rows<Record<string, unknown>>(await tx.execute(sql`
@@ -278,6 +285,10 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
 
     async heldSeats(eventId: string, now: Date): Promise<number> {
       return runTransaction((tx) => tx.heldSeats(eventId, now));
+    },
+
+    async paidSeats(eventId: string): Promise<number> {
+      return runTransaction((tx) => tx.paidSeats(eventId));
     },
 
     /** The localized title the receipt names. Not transactional: a read of one row. */

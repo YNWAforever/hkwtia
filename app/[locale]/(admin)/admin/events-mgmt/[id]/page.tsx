@@ -10,6 +10,7 @@ import {checkInEventAttendeeAction, updateEventAction} from "@/lib/admin/event-a
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 
 
+import {eventOrdersRepository} from "@/lib/db/repos/event-orders";
 import {eventsRepository, localizeEvent} from "@/lib/db/repos/events";
 import {mediaRepository} from "@/lib/db/repos/media";
 
@@ -30,6 +31,17 @@ export default async function AdminEventDetailPage({params}: Props) {
   ]);
   const event = allEvents.find((row) => row.id === parsedId.data);
   if (!event) notFound();
+  // Spec section 4.5: the admin event page shows the paid and held seat counts
+  // beside capacity, so staff can see a filling event. A failed order read must
+  // not render as an empty count -- "nothing sold" and "we could not ask" are
+  // different answers -- so a failure becomes an explicit unavailable state,
+  // the rule the admin queues follow.
+  const seatCounts = event.registrationMode === "ticketed"
+    ? await Promise.all([
+      eventOrdersRepository.heldSeats(event.id, new Date()),
+      eventOrdersRepository.paidSeats(event.id),
+    ]).then(([held, paid]) => ({held, paid})).catch(() => null)
+    : null;
   // `attendees` is only `null` when the event id doesn't exist; `event` above
   // already proved it does, so this is defensive, not expected in practice.
   const attendeeRows = attendees ?? [];
@@ -42,5 +54,5 @@ export default async function AdminEventDetailPage({params}: Props) {
   const checkInAction = checkInEventAttendeeAction.bind(null, parsedId.data, eventPath, checkInActionMessages);
   const labels = {slug: t("slug"), titleEn: t("titleEn"), titleZh: t("titleZh"), descriptionEn: t("descriptionEn"), descriptionZh: t("descriptionZh"), startsAt: t("startsAt"), endsAt: t("endsAt"), venue: t("venue"), capacity: t("capacity"), registrationMode: t("registrationMode"), registrationModes: {rsvp: t("registrationModes.rsvp"), external: t("registrationModes.external"), ticketed: t("registrationModes.ticketed")}, ticketPriceHkdCents: t("ticketPriceHkdCents"), memberOnly: t("memberOnly"), published: t("published"), heroMediaId: t("heroMediaId"), noHeroMedia: t("noHeroMedia"), save: t("save"), saving: t("saving")};
   const attendeeLabels = {caption: t("attendees"), kind: t("kind"), kinds: {member: t("kinds.member"), guest: t("kinds.guest")}, name: t("name"), email: t("email"), organisation: t("organisation"), status: t("status"), checkedIn: t("checkedIn"), checkIn: t("checkIn"), checkingIn: t("checkingIn"), unavailable: t("unavailable"), statuses: {registered: t("statuses.registered"), waitlist: t("statuses.waitlist"), cancelled: t("statuses.cancelled"), attended: t("statuses.attended"), no_show: t("statuses.noShow")}};
-  return <div className="space-y-8"><header><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("eyebrow")}</p><h1 className="font-serif text-4xl font-semibold">{localized.title}</h1></header><EventForm action={updateAction} labels={labels} mediaRows={mediaRows} values={event}/><section className="glass-card p-6"><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-serif text-2xl font-semibold">{t("attendees")}</h2><a className="text-primary underline" href={`/api/admin/events/${event.id}/attendees.csv`}>{t("exportCsv")}</a></div><AttendeeTable attendees={attendeeRows} checkInAction={checkInAction} labels={attendeeLabels} locale={locale}/></section></div>;
+  return <div className="space-y-8"><header><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("eyebrow")}</p><h1 className="font-serif text-4xl font-semibold">{localized.title}</h1>{event.registrationMode === "ticketed" ? seatCounts === null ? <p className="mt-3 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive" role="alert">{t("seatsUnavailable")}</p> : <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm">{event.capacity !== null ? <div className="flex items-baseline gap-2"><dt className="text-muted-foreground">{t("capacity")}</dt><dd className="font-medium">{event.capacity}</dd></div> : null}<div className="flex items-baseline gap-2"><dt className="text-muted-foreground">{t("seatsPaid")}</dt><dd className="font-medium">{seatCounts.paid}</dd></div><div className="flex items-baseline gap-2"><dt className="text-muted-foreground">{t("seatsHeld")}</dt><dd className="font-medium">{seatCounts.held}</dd></div></dl> : null}</header><EventForm action={updateAction} labels={labels} mediaRows={mediaRows} values={event}/><section className="glass-card p-6"><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-serif text-2xl font-semibold">{t("attendees")}</h2><a className="text-primary underline" href={`/api/admin/events/${event.id}/attendees.csv`}>{t("exportCsv")}</a></div><AttendeeTable attendees={attendeeRows} checkInAction={checkInAction} labels={attendeeLabels} locale={locale}/></section></div>;
 }

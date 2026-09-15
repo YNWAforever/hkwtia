@@ -16,6 +16,7 @@ function transaction(overrides: Partial<EventOrdersTransaction> = {}): EventOrde
     orderBySessionId: vi.fn(async () => null),
     seatsOfOrder: vi.fn(async () => 1),
     heldSeats: vi.fn(async () => 0),
+    paidSeats: vi.fn(async () => 0),
     insertOrder: vi.fn(async () => order()),
     insertSeats: vi.fn(async () => undefined),
     attachSession: vi.fn(async () => undefined),
@@ -121,6 +122,14 @@ describe("eventOrdersRepository.settlePaid", () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order()), heldSeats: vi.fn(async () => 0)});
     await createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now);
     expect(tx.heldSeats).toHaveBeenCalledWith("ev-1", now, "order-1");
+  });
+});
+
+describe("eventOrdersRepository.paidSeats", () => {
+  it("counts the paid seats of one event", async () => {
+    const tx = transaction({paidSeats: vi.fn(async () => 3)});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).paidSeats("ev-1")).resolves.toBe(3);
+    expect(tx.paidSeats).toHaveBeenCalledWith("ev-1");
   });
 });
 

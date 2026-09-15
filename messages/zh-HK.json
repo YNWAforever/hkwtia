@@ -2769,6 +2769,9 @@
       "endsAt": "結束時間",
       "venue": "地點",
       "capacity": "名額",
+      "seatsPaid": "已付款座位",
+      "seatsHeld": "保留座位",
+      "seatsUnavailable": "暫時無法取得座位數目。",
       "registrationMode": "報名方式",
       "registrationModes": {
         "rsvp": "在此網站報名",

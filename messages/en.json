@@ -2768,6 +2768,9 @@
       "endsAt": "Ends at",
       "venue": "Venue",
       "capacity": "Capacity",
+      "seatsPaid": "Paid seats",
+      "seatsHeld": "Held seats",
+      "seatsUnavailable": "Seat counts are unavailable right now.",
       "registrationMode": "Registration",
       "registrationModes": {
         "rsvp": "RSVP on this site",
