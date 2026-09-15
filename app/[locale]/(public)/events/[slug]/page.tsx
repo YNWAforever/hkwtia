@@ -14,6 +14,7 @@ import type {AppLocale} from "@/i18n/routing";
 // takes that dependency through registration-action.ts, so importing it here adds nothing.
 import {getActor} from "@/lib/auth/actor";
 import {eventsRepository} from "@/lib/db/repos/events";
+import {profilesRepository} from "@/lib/db/repos/profiles";
 import {submitGuestRsvpAction} from "@/lib/events/guest-registration-action";
 import {eventBoundary} from "@/lib/events/public";
 import {formatEventDate} from "@/lib/home/format-event-date";
@@ -79,6 +80,12 @@ export default async function EventPage({params}: Props) {
   if (!event) notFound();
   const displayEvent = event.hero && !(isPrivateMediaDeliveryUrl(event.hero.url) || isRegistrableMediaUrl(event.hero.url)) ? {...event, hero: null} : event;
   const appLocale = locale as AppLocale;
+  // The spec requires a signed-in member's own details prefilled. The read is
+  // caught because it is an optimisation here, not the page's content: an
+  // unreachable profile leaves an empty form rather than failing the page.
+  const memberProfile = actor?.kind === "member"
+    ? await profilesRepository.getById(actor, actor.profileId).catch(() => null)
+    : null;
   const registrationMessages = {registered: t("registration.registered"), waitlist: t("registration.waitlist"), alreadyRegistered: t("registration.alreadyRegistered"), alreadyWaitlisted: t("registration.alreadyWaitlisted"), unauthenticated: t("registration.unauthenticated"), ineligible: t("registration.ineligible"), closed: t("registration.closed"), error: t("registration.error")};
   async function registerAction(state: RegistrationActionState, formData: FormData): Promise<RegistrationActionState> { "use server"; return runPublicEventRegistrationAction(state, formData, {messages: registrationMessages}); }
   const past = eventBoundary({startsAt: new Date(displayEvent.startsAt), endsAt: displayEvent.endsAt ? new Date(displayEvent.endsAt) : null}) < asOf;
@@ -170,6 +177,8 @@ export default async function EventPage({params}: Props) {
             <div>
               {registration.kind === "ticket" ? (
                 <TicketCheckoutForm
+                  defaultBuyerEmail={memberProfile?.email ?? undefined}
+                  defaultBuyerName={memberProfile?.displayName ?? undefined}
                   eventId={displayEvent.id}
                   locale={appLocale}
                   labels={ticketLabels}

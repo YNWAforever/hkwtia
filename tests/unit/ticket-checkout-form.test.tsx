@@ -1,4 +1,5 @@
 import {fireEvent, render, screen} from "@testing-library/react";
+import {renderToStaticMarkup} from "react-dom/server";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const reactState = vi.hoisted(() => ({
@@ -8,8 +9,11 @@ const reactState = vi.hoisted(() => ({
 
 vi.mock("react", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react")>();
+  // Reads the queued result rather than shifting it: the form re-renders once
+  // after mount (the idempotency-key effect), and a shift would consume the
+  // queued state on the first render and hand the re-render the idle default.
   reactState.useActionState.mockImplementation((action: (formData: FormData) => void, initial: unknown) =>
-    reactState.results.shift() ?? [initial, action, false]);
+    reactState.results[0] ?? [initial, action, false]);
   return {...actual, useActionState: reactState.useActionState};
 });
 
@@ -74,6 +78,27 @@ describe("TicketCheckoutForm", () => {
 
     expect(screen.getByLabelText(labels.buyerName)).toHaveValue("Ada Lovelace");
     expect(screen.getByLabelText(labels.buyerEmail)).toHaveValue("ada@example.hk");
+  });
+
+  it("mints the idempotency key after mount so the server and client markup agree", () => {
+    const {container} = renderForm();
+
+    const hidden = container.querySelector<HTMLInputElement>('input[name="idempotencyKey"]');
+    expect(hidden?.value).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+  });
+
+  // The server render must not mint a key: a value produced during render differs
+  // between server and client (a hydration mismatch), and `crypto.randomUUID` is
+  // secure-context only. The form therefore mints after mount and cannot submit
+  // until it has, which the server's `z.string().uuid()` requires.
+  it("cannot be submitted before the key is minted", () => {
+    const markup = renderToStaticMarkup(
+      <TicketCheckoutForm eventId="10000000-0000-4000-8000-000000000001" labels={labels} locale="en" pricePerSeat="Price per seat: HK$250.00" />,
+    );
+
+    expect(markup).toContain('name="idempotencyKey"');
+    expect(markup).toMatch(/<input[^>]*name="idempotencyKey"[^>]*value=""/);
+    expect(markup).toMatch(/<button[^>]*\bdisabled\b/);
   });
 
   it("disables the submit button while the checkout is pending", () => {

@@ -4,13 +4,25 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const events = vi.hoisted(() => ({getPublicBySlug: vi.fn()}));
 const auth = vi.hoisted(() => ({getActor: vi.fn(async () => null as unknown)}));
+const profiles = vi.hoisted(() => ({getById: vi.fn(async () => null as unknown)}));
 
 vi.mock("@/lib/db/repos/events", () => ({eventsRepository: events}));
+vi.mock("@/lib/db/repos/profiles", () => ({profilesRepository: profiles}));
 // registration-action.ts (still imported for the member form) reads requireActor from the same module.
 vi.mock("@/lib/auth/actor", () => ({getActor: auth.getActor, requireActor: vi.fn()}));
 vi.mock("@/lib/events/guest-registration-action", () => ({submitGuestRsvpAction: vi.fn()}));
 vi.mock("@/components/marketing/guest-rsvp-form", () => ({GuestRsvpForm: ({eventId}: {eventId: string}) => <div data-event-id={eventId} data-guest-rsvp-form="true" />}));
-vi.mock("@/components/marketing/ticket-checkout-form", () => ({TicketCheckoutForm: ({eventId, pricePerSeat}: {eventId: string; pricePerSeat: string}) => <div data-event-id={eventId} data-price-per-seat={pricePerSeat} data-ticket-checkout-form="true" />}));
+vi.mock("@/components/marketing/ticket-checkout-form", () => ({
+  TicketCheckoutForm: ({eventId, pricePerSeat, defaultBuyerName, defaultBuyerEmail}: {eventId: string; pricePerSeat: string; defaultBuyerName?: string; defaultBuyerEmail?: string}) => (
+    <div
+      data-default-buyer-email={defaultBuyerEmail}
+      data-default-buyer-name={defaultBuyerName}
+      data-event-id={eventId}
+      data-price-per-seat={pricePerSeat}
+      data-ticket-checkout-form="true"
+    />
+  ),
+}));
 vi.mock("next-intl/server", () => ({getTranslations: async () => (key: string) => key, setRequestLocale: () => undefined}));
 vi.mock("next/navigation", () => ({notFound: () => { throw new Error("NEXT_NOT_FOUND"); }}));
 vi.mock("next/image", () => ({default: ({unoptimized, ...props}: {unoptimized?: boolean; [key: string]: unknown}) => <img {...props} data-unoptimized={String(unoptimized)} />}));
@@ -42,7 +54,7 @@ const event = (endsAt: string, overrides: Partial<Record<string, unknown>> = {})
 });
 
 describe("event detail page donor markup", () => {
-  beforeEach(() => { vi.clearAllMocks(); auth.getActor.mockResolvedValue(null); });
+  beforeEach(() => { vi.clearAllMocks(); auth.getActor.mockResolvedValue(null); profiles.getById.mockResolvedValue(null); });
 
   // `organiser.slug` is null unless the company's public profile is `published`
   // (`publicMemberPageSlug`, applied in lib/db/repos/events.ts), so an unpublished or
@@ -119,19 +131,27 @@ describe("event detail page donor markup", () => {
   });
 
   // Phase D-4a: a ticketed event is bought by a member or a guest alike, so the
-  // ticket arm is selected ahead of the actor-dependent guest/member arms.
-  it("renders the ticket checkout form for a ticketed event, whoever is visiting", async () => {
+  // ticket arm is selected ahead of the actor-dependent guest/member arms. A
+  // signed-in member's own name and email are prefilled, which is the product
+  // requirement — the form component alone cannot supply them.
+  it("renders the ticket checkout form for a ticketed event, prefilling a member's details", async () => {
     events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z", {registrationMode: "ticketed", ticketPriceHkdCents: 25_000}));
 
     const anonymous = renderToStaticMarkup(await EventPage(props));
     expect(anonymous).toContain('data-ticket-checkout-form="true"');
+    expect(anonymous).not.toContain("data-default-buyer-name");
+    expect(anonymous).not.toContain("data-default-buyer-email");
     expect(anonymous).not.toContain('data-guest-rsvp-form="true"');
     expect(anonymous).not.toContain('data-registration-form="true"');
 
     auth.getActor.mockResolvedValue({kind: "member", userId: "u", profileId: "p"});
+    profiles.getById.mockResolvedValue({id: "p", displayName: "Ada Lovelace", email: "ada@example.hk"});
     const member = renderToStaticMarkup(await EventPage(props));
     expect(member).toContain('data-ticket-checkout-form="true"');
+    expect(member).toContain('data-default-buyer-name="Ada Lovelace"');
+    expect(member).toContain('data-default-buyer-email="ada@example.hk"');
     expect(member).not.toContain('data-registration-form="true"');
+    expect(profiles.getById).toHaveBeenCalledWith({kind: "member", userId: "u", profileId: "p"}, "p");
   });
 
   it("shows the past-event action bar instead of any registration form once the boundary has passed", async () => {

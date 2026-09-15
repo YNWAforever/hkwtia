@@ -2,6 +2,8 @@
 
 import {useActionState, useEffect, useState} from "react";
 
+import {MAX_TICKET_SEATS} from "@/config/tickets";
+import {newAttemptId} from "@/lib/random-id";
 import {submitTicketCheckoutAction, type TicketCheckoutState} from "@/lib/tickets/checkout-actions";
 
 export type TicketCheckoutLabels = Readonly<{
@@ -11,7 +13,6 @@ export type TicketCheckoutLabels = Readonly<{
   errors: Readonly<Record<string, string>>;
 }>;
 
-const MAX_SEATS = 10;
 const initial: TicketCheckoutState = {status: "idle"};
 
 export function TicketCheckoutForm({eventId, locale, pricePerSeat, labels, defaultBuyerName = "", defaultBuyerEmail = ""}: Readonly<{
@@ -20,9 +21,15 @@ export function TicketCheckoutForm({eventId, locale, pricePerSeat, labels, defau
 }>) {
   const [state, dispatch, pending] = useActionState(submitTicketCheckoutAction, initial);
   const [seatCount, setSeatCount] = useState(1);
-  // Minted once per form instance, so a retry after a network error reuses the
-  // same key and cannot charge twice.
-  const [idempotencyKey] = useState(() => crypto.randomUUID());
+  // Minted once, AFTER mount: a value minted during render differs between the
+  // server and the client, which is a hydration mismatch. `newAttemptId` steps
+  // down to `getRandomValues` because `crypto.randomUUID` is secure-context
+  // only — one implementation, shared with the inbox composer. The submit button
+  // stays disabled until it is non-empty, so a submit can never reach the server
+  // without the uuid its schema requires.
+  const [idempotencyKey, setIdempotencyKey] = useState("");
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time mint of a browser-only value after mount; minting during render instead would mismatch the server-rendered markup, which never has one.
+  useEffect(() => { setIdempotencyKey(newAttemptId()); }, []);
 
   useEffect(() => {
     if (state.status === "redirect") window.location.assign(state.url);
@@ -49,7 +56,7 @@ export function TicketCheckoutForm({eventId, locale, pricePerSeat, labels, defau
       <label className="block space-y-2 text-sm font-medium">
         <span>{labels.seatCount}</span>
         <select className={inputClass} onChange={(event) => setSeatCount(Number(event.target.value))} value={seatCount}>
-          {Array.from({length: MAX_SEATS}, (_, index) => index + 1).map((count) => <option key={count} value={count}>{count}</option>)}
+          {Array.from({length: MAX_TICKET_SEATS}, (_, index) => index + 1).map((count) => <option key={count} value={count}>{count}</option>)}
         </select>
       </label>
       {Array.from({length: seatCount}, (_, index) => (
@@ -65,7 +72,7 @@ export function TicketCheckoutForm({eventId, locale, pricePerSeat, labels, defau
         </div>
       ))}
       <p className="text-sm text-muted-foreground">{pricePerSeat}</p>
-      <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending} type="submit">
+      <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending || idempotencyKey === ""} type="submit">
         {pending ? labels.submitting : labels.submit}
       </button>
       {state.status === "error" ? <p className="text-sm text-destructive" role="alert">{labels.errors[state.code] ?? labels.errors.INVALID}</p> : null}

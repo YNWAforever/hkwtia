@@ -73,7 +73,10 @@ export async function submitTicketCheckoutAction(_previous: TicketCheckoutState,
   });
   if (!parsed.success) return {status: "error", code: "INVALID"};
 
-  const actor = await getActor();
+  // A failed session read degrades to the guest path rather than throwing out of
+  // the Server Action: an identity-provider outage must not turn a purchase into
+  // a 500, and the guest path is the one an anonymous visitor already takes.
+  const actor = await getActor().catch(() => null);
   const result = await createTicketCheckout({
     eventId: parsed.data.eventId,
     buyer: {

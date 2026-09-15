@@ -3,6 +3,7 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 const state = vi.hoisted(() => ({
   ip: "203.0.113.9",
   actor: null as unknown,
+  actorThrows: false,
   result: {status: "redirect", url: "https://checkout.stripe.com/session"} as Record<string, unknown>,
   calls: [] as Array<Record<string, unknown>>,
 }));
@@ -10,7 +11,12 @@ const state = vi.hoisted(() => ({
 vi.mock("next/headers", () => ({
   headers: async () => new Headers({"x-vercel-forwarded-for": state.ip}),
 }));
-vi.mock("@/lib/auth/actor", () => ({getActor: async () => state.actor}));
+vi.mock("@/lib/auth/actor", () => ({
+  getActor: async () => {
+    if (state.actorThrows) throw new Error("AUTH_UNAVAILABLE");
+    return state.actor;
+  },
+}));
 vi.mock("@/lib/tickets/checkout-core", () => ({
   createTicketCheckout: async (input: Record<string, unknown>) => {
     state.calls.push(input);
@@ -44,6 +50,7 @@ describe("submitTicketCheckoutAction", () => {
   beforeEach(() => {
     state.ip = "203.0.113.9";
     state.actor = null;
+    state.actorThrows = false;
     state.result = {status: "redirect", url: "https://checkout.stripe.com/session"};
     state.calls = [];
   });
@@ -87,6 +94,22 @@ describe("submitTicketCheckoutAction", () => {
 
     expect(state.calls).toEqual([expect.objectContaining({
       buyer: {profileId: "profile-1", name: "Ada Lovelace", email: "ada@example.hk"},
+    })]);
+  });
+
+  // An identity-provider outage must not 500 the payment boundary: a visitor whose
+  // session cannot be read buys as a guest, which is the same path an anonymous
+  // visitor takes.
+  it("buys as a guest when the session read throws rather than failing the action", async () => {
+    state.actorThrows = true;
+    const action = await loadAction();
+
+    await expect(action({status: "idle"}, form())).resolves.toEqual({
+      status: "redirect",
+      url: "https://checkout.stripe.com/session",
+    });
+    expect(state.calls).toEqual([expect.objectContaining({
+      buyer: {profileId: null, name: "Ada Lovelace", email: "ada@example.hk"},
     })]);
   });
 

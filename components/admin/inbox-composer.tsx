@@ -4,6 +4,7 @@ import {useActionState, useEffect, useState} from "react";
 
 import {WHATSAPP_TEMPLATES} from "@/config/whatsapp-templates";
 import type {InboxReplyErrorCode, InboxReplyState} from "@/lib/admin/inbox-action-core";
+import {newAttemptId} from "@/lib/random-id";
 
 /**
  * The staff reply box: the one `'use client'` file C-2 adds.
@@ -68,34 +69,6 @@ function draftKey(conversationId: string): string {
  */
 function attemptKey(conversationId: string): string {
   return `wtia:inbox-attempt:${conversationId}`;
-}
-
-/**
- * `crypto.randomUUID` is secure-context only. The admin panel is HTTPS (and
- * localhost counts), but a token this component cannot mint is a composer that
- * cannot send at all, so the fallbacks step down rather than throw. The value
- * only has to be unique per attempt; it is never a secret and never an
- * authorization input — the server authorizes the actor and reads the thread
- * itself.
- */
-function newAttemptId(): string {
-  const cryptoApi = globalThis.crypto as Crypto | undefined;
-  try {
-    if (typeof cryptoApi?.randomUUID === "function") return cryptoApi.randomUUID();
-    if (typeof cryptoApi?.getRandomValues === "function") {
-      const bytes = cryptoApi.getRandomValues(new Uint8Array(16));
-      // RFC 4122 version 4 and variant bits, because the server parses this
-      // with `z.string().uuid()`.
-      bytes[6] = (bytes[6] & 0x0f) | 0x40;
-      bytes[8] = (bytes[8] & 0x3f) | 0x80;
-      const hex = [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("");
-      return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
-    }
-  } catch {
-    // Fall through to the last resort below.
-  }
-  const random = () => Math.floor(Math.random() * 0x10000).toString(16).padStart(4, "0");
-  return `${random()}${random()}-${random()}-4${random().slice(1)}-8${random().slice(1)}-${random()}${random()}${random()}`;
 }
 
 /**
