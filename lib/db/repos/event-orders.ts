@@ -1,6 +1,6 @@
 import "server-only";
 
-import {eq, sql} from "drizzle-orm";
+import {eq, sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
 import {MAX_TICKET_SEATS, TICKET_HOLD_MS} from "@/config/tickets";
@@ -16,6 +16,12 @@ export type OrderRecord = Readonly<{
   amountHkdCents: number; currency: string; status: OrderStatus; stripeCheckoutSessionId: string | null;
   stripeCheckoutUrl: string | null;
   idempotencyKey: string; expiresAt: Date; paidAt: Date | null; refundedAt: Date | null; refundReason: RefundReason | null;
+}>;
+
+export type EventOrderRow = Readonly<{
+  order: OrderRecord;
+  seatCount: number;
+  seatNames: readonly string[];
 }>;
 
 export type LockedEvent = Readonly<{
@@ -64,6 +70,15 @@ export type EventOrdersTransaction = Readonly<{
   insertSeats: (orderId: string, seats: readonly SeatInput[]) => Promise<void>;
   attachSession: (orderId: string, sessionId: string, url: string) => Promise<void>;
   markStatus: (orderId: string, status: OrderStatus, patch: Readonly<{paidAt?: Date; refundedAt?: Date; refundReason?: RefundReason}>) => Promise<void>;
+  orderById: (orderId: string) => Promise<OrderRecord | null>;
+  /** Every order of an event with its seats, newest paid first. */
+  listEventOrders: (eventId: string) => Promise<readonly EventOrderRow[]>;
+  /**
+   * The refund commit: moves the row only while it is still `paid`, and writes
+   * the audit row in the same transaction. `false` means someone else got there
+   * first, which is a result rather than an error.
+   */
+  refundPaidOrder: (orderId: string, input: Readonly<{refundedAt: Date; actorUserId: string | null; actorType: string; note: string | null}>) => Promise<boolean>;
   insertAudit: (input: Readonly<{actorUserId: string | null; actorType: string; action: string; targetType: string; targetId: string; metadata: Record<string, unknown>}>) => Promise<void>;
   eventSummary: (eventId: string) => Promise<readonly Readonly<{titleEn: string; titleZh: string | null; startsAt: Date; slug: string; venue: string | null}>[]>;
 }>;
@@ -145,6 +160,19 @@ function eventSummaryFrom(row: Record<string, unknown>): {titleEn: string; title
   };
 }
 
+/**
+ * The audit INSERT, written once. `refundPaidOrder` runs inside the default
+ * transaction where the only handle is the driver `tx`, so it cannot reach the
+ * built `insertAudit` sibling -- both delegate here rather than letting the two
+ * copies of the statement drift.
+ */
+async function writeAuditRow(
+  tx: Readonly<{execute: (query: SQL) => Promise<unknown>}>,
+  input: Readonly<{actorUserId: string | null; actorType: string; action: string; targetType: string; targetId: string; metadata: Record<string, unknown>}>,
+): Promise<void> {
+  await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${input.actorUserId}, ${input.actorType}, ${input.action}, ${input.targetType}, ${input.targetId}, ${JSON.stringify(input.metadata)}::jsonb)`);
+}
+
 async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promise<T>): Promise<T> {
   const db = await getDb();
   return db.transaction(async (tx) => work({
@@ -215,7 +243,45 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       assignments.push(sql`updated_at = NOW()`);
       await tx.execute(sql`UPDATE ${eventOrders} SET ${sql.join(assignments, sql`, `)} WHERE id = ${orderId}`);
     },
-    insertAudit: async (input) => { await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${input.actorUserId}, ${input.actorType}, ${input.action}, ${input.targetType}, ${input.targetId}, ${JSON.stringify(input.metadata)}::jsonb)`); },
+    orderById: async (orderId) => {
+      const row = rows<Record<string, unknown>>(await tx.execute(sql`SELECT * FROM ${eventOrders} WHERE id = ${orderId} LIMIT 1`))[0];
+      return row ? orderFrom(row) : null;
+    },
+    listEventOrders: async (eventId) => rows<Record<string, unknown>>(await tx.execute(sql`
+      SELECT o.*, COALESCE(seats.seat_names, ARRAY[]::text[]) AS seat_names, COALESCE(seats.seat_count, 0) AS seat_count
+      FROM ${eventOrders} o
+      LEFT JOIN (
+        SELECT order_id, array_agg(attendee_name ORDER BY position ASC) AS seat_names, count(*)::int AS seat_count
+        FROM ${eventOrderSeats} GROUP BY order_id
+      ) seats ON seats.order_id = o.id
+      WHERE event_id = ${eventId}
+      ORDER BY o.paid_at DESC NULLS LAST, o.created_at DESC
+    `)).map((row) => ({
+      order: orderFrom(row),
+      seatCount: Number(row.seat_count),
+      seatNames: Array.isArray(row.seat_names) ? (row.seat_names as string[]) : [],
+    })),
+    refundPaidOrder: async (orderId, input) => {
+      // `AND status = 'paid'` is the whole guard: two staff clicking at once
+      // produce one transition because the second UPDATE matches no row.
+      const updated = rows<{id: string}>(await tx.execute(sql`
+        UPDATE ${eventOrders}
+        SET status = 'refunded', refunded_at = ${input.refundedAt}, refund_reason = 'staff', updated_at = NOW()
+        WHERE id = ${orderId} AND status = 'paid'
+        RETURNING id
+      `));
+      if (updated.length === 0) return false;
+      await writeAuditRow(tx, {
+        actorUserId: input.actorUserId,
+        actorType: input.actorType,
+        action: "event.order.refunded",
+        targetType: "event_order",
+        targetId: orderId,
+        metadata: {reason: "staff", note: input.note},
+      });
+      return true;
+    },
+    insertAudit: async (input) => { await writeAuditRow(tx, input); },
     eventSummary: async (eventId) => rows<Record<string, unknown>>(await tx.execute(sql`
       SELECT title_en AS "titleEn", title_zh AS "titleZh", starts_at AS "startsAt", slug, venue FROM ${events} WHERE id = ${eventId} LIMIT 1
     `)).map((row) => eventSummaryFrom(row)),
@@ -338,6 +404,25 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
     /** The seat count the receipt names; the transaction holds it already. */
     async seatsOfOrder(orderId: string): Promise<number> {
       return runTransaction((tx) => tx.seatsOfOrder(orderId));
+    },
+
+    /** One order, for the refund path. */
+    async orderById(orderId: string): Promise<OrderRecord | null> {
+      return runTransaction((tx) => tx.orderById(orderId));
+    },
+
+    /** Every order of an event, for the admin Orders section. */
+    async listEventOrders(eventId: string): Promise<readonly EventOrderRow[]> {
+      return runTransaction((tx) => tx.listEventOrders(eventId));
+    },
+
+    /**
+     * The conditional refund commit. `false` means the order was not `paid` when
+     * the statement ran, so the caller reports "already refunded" rather than
+     * claiming a refund it did not make.
+     */
+    async refundPaidOrder(orderId: string, input: Readonly<{refundedAt: Date; actorUserId: string | null; actorType: string; note: string | null}>): Promise<boolean> {
+      return runTransaction((tx) => tx.refundPaidOrder(orderId, input));
     },
 
     /** Each seat of an order, in position order, for the receipt and the passes. */
