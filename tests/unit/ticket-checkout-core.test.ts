@@ -95,4 +95,27 @@ describe("createTicketCheckout", () => {
     // still errors.
     expect(deps.orders.createOrder).not.toHaveBeenCalled();
   });
+
+  // Stripe requires `expires_at` to be at least 30 minutes after the session is
+  // CREATED. The hold is computed before the order write and the network call,
+  // so the reading taken at the call is the one the margin must clear.
+  it("expires the Stripe session at least 30 minutes after the reading taken at the call", async () => {
+    const orderTime = new Date("2026-09-14T04:00:00Z");
+    const callTime = new Date(orderTime.getTime() + 60_000);
+    const readings = [orderTime, callTime];
+    let index = 0;
+    const deps = dependencies({
+      now: () => readings[Math.min(index++, readings.length - 1)]!,
+      orders: {
+        createOrder: vi.fn(async () => ({ok: true, reused: false, order: {...pendingOrder, expiresAt: new Date(orderTime.getTime() + 1_800_000)}})),
+        attachSession: vi.fn(async () => undefined),
+      } as never,
+    });
+
+    await createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps);
+
+    const adapter = deps.stripe.createEventTicketSession as unknown as {mock: {calls: Array<[{expiresAt: Date}]>}};
+    const expiresAt = adapter.mock.calls[0]![0].expiresAt;
+    expect(expiresAt.getTime()).toBeGreaterThanOrEqual(callTime.getTime() + 1_800_000);
+  });
 });

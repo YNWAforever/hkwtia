@@ -1,6 +1,6 @@
 import "server-only";
 
-import {MAX_TICKET_SEATS} from "@/config/tickets";
+import {MAX_TICKET_SEATS, TICKET_SESSION_MIN_MS} from "@/config/tickets";
 import type {AppLocale} from "@/i18n/routing";
 import {appEnv} from "@/lib/config/env";
 import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
@@ -121,7 +121,11 @@ export async function createTicketCheckout(
       successUrl: `${origin}${eventPath}?ticket=received`,
       cancelUrl: `${origin}${eventPath}?ticket=cancelled`,
       idempotencyKey: created.order.idempotencyKey,
-      expiresAt: created.order.expiresAt,
+      // Stripe demands at least 30 minutes after session CREATION, and this
+      // clock read is taken after the order write, so a bare `TICKET_HOLD_MS`
+      // is a rejection. The margin is Stripe's lower bound plus slack; the
+      // database hold stays `TICKET_HOLD_MS`.
+      expiresAt: new Date(dependencies.now().getTime() + TICKET_SESSION_MIN_MS),
     });
     await dependencies.orders.attachSession(created.order.id, session.id, session.url);
     return {status: "redirect", url: session.url};
