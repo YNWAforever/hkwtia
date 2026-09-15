@@ -7,7 +7,7 @@ import {missingM2LiveEnvironment, signInForM2} from "../fixtures/m2-auth";
 type Bundle = Readonly<{
   Admin: Readonly<{
     checkIn: Readonly<{alreadyCheckedIn: string; checkIn: string; undo: string; checkInSuccess: string; undoSuccess: string}>;
-    eventsMgmt: Readonly<{resendPass: string}>;
+    eventsMgmt: Readonly<{attendees: string; resendPass: string}>;
   }>;
   Pass: Readonly<{qrLabel: string}>;
 }>;
@@ -56,7 +56,13 @@ test.describe("phase D-4b passes and check-in", () => {
       await signInForM2(staffPage, "staff");
       await staffPage.goto(`${testCase.prefix}/admin/events-mgmt`);
       await staffPage.getByRole("link", {name: /d4b/i}).first().click();
-      const seatRow = staffPage.locator("tr", {has: staffPage.getByRole("cell", {name: testCase.seatName})});
+      // Scoped to the door list's own table and matched exactly: the Orders
+      // section (Phase D-4c) renders one row whose seat cell holds BOTH seat
+      // names as one string, and role-name matching is a substring by default,
+      // so a page-wide cell match would count that row too and the strict
+      // `toHaveCount(1)` would fail. The door list is where the row must be.
+      const doorTable = staffPage.getByRole("table", {name: copy.Admin.eventsMgmt.attendees, exact: true});
+      const seatRow = doorTable.locator("tr", {has: doorTable.getByRole("cell", {name: testCase.seatName, exact: true})});
       await expect(seatRow).toHaveCount(1);
       await expect(seatRow.getByRole("button", {name: copy.Admin.eventsMgmt.resendPass, exact: true})).toBeVisible();
 
