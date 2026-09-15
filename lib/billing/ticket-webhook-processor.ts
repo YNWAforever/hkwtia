@@ -16,7 +16,8 @@ type TicketEmailDependencies = Readonly<{
 
 export type TicketProcessorDependencies = Readonly<{
   orders: Pick<EventOrdersRepository, "settlePaid" | "expireBySession" | "eventSummary" | "seatsOfOrder">;
-  refundPaymentIntent: (paymentIntentId: string) => Promise<void>;
+  /** The deterministic key makes a retried refund safe to re-issue. */
+  refundPaymentIntent: (paymentIntentId: string, idempotencyKey: string) => Promise<void>;
   email: TicketEmailDependencies;
   /** For the receipt's "view the event" link, built from the order's own locale. */
   appUrl: string;
@@ -112,11 +113,18 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
 
       if (settlement.status === "oversold" || settlement.status === "refund_due") {
         // `oversold`: the seats were sold between checkout and payment.
-        // `refund_due`: the session was paid in the moment our hold lapsed.
+        // `refund_due`: the session was paid in the moment our hold lapsed, or a
+        // refund we committed but whose provider call failed.
         // Either way the whole charge is returned, never a partial credit.
-        if (command.paymentIntentId) await dependencies.refundPaymentIntent(command.paymentIntentId);
-        const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
-        await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
+        if (command.paymentIntentId) {
+          // Re-issuing is safe: the deterministic key makes a redelivery after a
+          // failed provider call refund the same payment intent once, not twice.
+          await dependencies.refundPaymentIntent(command.paymentIntentId, `ticket-refund:${order.id}`);
+          // Only promise what actually happened — a settlement with no payment
+          // intent issues no refund, so it must send no refund email either.
+          const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
+          await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
+        }
         return "processed";
       }
       if (settlement.status === "paid") {

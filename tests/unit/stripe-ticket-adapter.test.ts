@@ -37,9 +37,9 @@ describe("event ticket checkout session", () => {
     expect((create.mock.calls[0]![1] as {idempotencyKey: string}).idempotencyKey).toBe("idem-1");
   });
 
-  it("refunds the payment intent behind a session", async () => {
+  it("refunds the payment intent behind a session with a stable idempotency key", async () => {
     const {refund, value} = client();
-    await createStripeBillingAdapter(value).refundPaymentIntent("pi_1");
-    expect(refund).toHaveBeenCalledWith({payment_intent: "pi_1"});
+    await createStripeBillingAdapter(value).refundPaymentIntent("pi_1", "ticket-refund:order-1");
+    expect(refund).toHaveBeenCalledWith({payment_intent: "pi_1"}, {idempotencyKey: "ticket-refund:order-1"});
   });
 });

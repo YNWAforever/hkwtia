@@ -48,7 +48,7 @@ const eventSummary = {
   slug: "edge-ai-for-builders",
 };
 
-type TicketEventType = "checkout.session.completed" | "checkout.session.expired";
+type TicketEventType = "checkout.session.completed" | "checkout.session.async_payment_succeeded" | "checkout.session.expired";
 
 function ticketEvent(type: TicketEventType, id = "evt_ticket", overrides: Record<string, unknown> = {}): Stripe.Event {
   return {
@@ -60,6 +60,9 @@ function ticketEvent(type: TicketEventType, id = "evt_ticket", overrides: Record
         id: sessionId,
         client_reference_id: orderId,
         payment_intent: paymentIntentId,
+        // Stripe sends `paid` on a settled session; the ticket lane must refuse
+        // `unpaid` with a delayed-notification payment method.
+        payment_status: "paid",
         metadata: {kind: "event_ticket", orderId},
         ...overrides,
       },
@@ -125,7 +128,7 @@ function buildTicketProcessor(options: {
   };
 }
 
-function command(eventType: TicketEventType): TicketWebhookCommand {
+function command(eventType: TicketWebhookCommand["eventType"]): TicketWebhookCommand {
   return {eventId: "evt_ticket", eventType, orderId, checkoutSessionId: sessionId, paymentIntentId};
 }
 
@@ -190,6 +193,52 @@ describe("processStripeEvent ticket branch", () => {
     expect(membership.commands).toEqual([]);
     expect(ticket.commands).toEqual([]);
   });
+
+  it("does not settle a completed ticket session that Stripe reports as unpaid", async () => {
+    const {processor, orders, refundPaymentIntent, transport} = buildTicketProcessor();
+
+    await expect(
+      processStripeEvent(
+        ticketEvent("checkout.session.completed", "evt_unpaid", {payment_status: "unpaid"}),
+        systemActor("stripe-webhook"),
+        captureMembershipProcessor().processor,
+        processor,
+      ),
+    ).rejects.toMatchObject({code: "INVALID_WEBHOOK_EVENT"});
+
+    expect(orders.settlePaid).not.toHaveBeenCalled();
+    expect(refundPaymentIntent).not.toHaveBeenCalled();
+    expect(transport.sends).toEqual([]);
+  });
+
+  it("settles a paid async_payment_succeeded exactly like a completed session", async () => {
+    const {processor, orders, transport} = buildTicketProcessor({settle: {status: "paid", order: {...pendingOrder, status: "paid"}}});
+    const membership = captureMembershipProcessor();
+
+    await expect(
+      processStripeEvent(ticketEvent("checkout.session.async_payment_succeeded"), systemActor("stripe-webhook"), membership.processor, processor),
+    ).resolves.toBe("processed");
+
+    expect(membership.commands).toEqual([]);
+    expect(orders.settlePaid).toHaveBeenCalledWith(sessionId, expect.any(Date));
+    expect(transport.sends).toHaveLength(1);
+  });
+
+  it("normalises an async_payment_succeeded to the completed event type", async () => {
+    const ticket = captureTicketProcessor();
+
+    await expect(
+      processStripeEvent(ticketEvent("checkout.session.async_payment_succeeded"), systemActor("stripe-webhook"), captureMembershipProcessor().processor, ticket.processor),
+    ).resolves.toBe("processed");
+
+    expect(ticket.commands).toEqual([{
+      eventId: "evt_ticket",
+      eventType: "checkout.session.completed",
+      orderId,
+      checkoutSessionId: sessionId,
+      paymentIntentId,
+    }]);
+  });
 });
 
 describe("createTicketProcessor", () => {
@@ -211,9 +260,56 @@ describe("createTicketProcessor", () => {
 
     await expect(processor.process(systemActor("stripe-webhook"), command("checkout.session.completed"))).resolves.toBe("processed");
 
-    expect(refundPaymentIntent).toHaveBeenCalledWith(paymentIntentId);
+    expect(refundPaymentIntent).toHaveBeenCalledWith(paymentIntentId, `ticket-refund:${orderId}`);
     expect(renderEmail).toHaveBeenCalledWith(expect.objectContaining({template: "event_ticket_refunded", locale: "en", recipientName: "Ada"}));
     expect(transport.sends).toHaveLength(1);
+  });
+
+  it("re-issues the refund on redelivery when the first provider call threw, with the same idempotency key", async () => {
+    const orders = {
+      settlePaid: vi.fn()
+        .mockResolvedValueOnce({status: "oversold", order: {...pendingOrder, status: "refunded", refundReason: "oversold"}} as SettleResult)
+        .mockResolvedValueOnce({status: "refund_due", order: {...pendingOrder, status: "refunded", refundReason: "oversold"}} as SettleResult),
+      expireBySession: vi.fn(async () => undefined),
+      eventSummary: vi.fn(async () => eventSummary),
+      seatsOfOrder: vi.fn(async () => 2),
+    };
+    const refundPaymentIntent = vi.fn()
+      .mockRejectedValueOnce(new Error("stripe unavailable"))
+      .mockResolvedValue(undefined);
+    const transport = createTestTransport();
+    const processor = createTicketProcessor({
+      orders: orders as unknown as TicketProcessorDependencies["orders"],
+      refundPaymentIntent,
+      email: {renderEmail, transport, emailFrom: "tickets@wtia.test"},
+      appUrl: "https://w.test",
+      now: () => new Date("2026-09-14T04:00:00Z"),
+    });
+
+    // First delivery: the settlement commits the refund, the provider call throws,
+    // and the throw must reach the route so Stripe redelivers.
+    await expect(processor.process(systemActor("stripe-webhook"), command("checkout.session.completed"))).rejects.toThrow("stripe unavailable");
+    // Redelivery: the repository answers `refund_due`, the refund is re-issued and
+    // the email is sent.
+    await expect(processor.process(systemActor("stripe-webhook"), command("checkout.session.completed"))).resolves.toBe("processed");
+
+    expect(refundPaymentIntent).toHaveBeenCalledTimes(2);
+    expect(refundPaymentIntent.mock.calls[0]![1]).toBe(`ticket-refund:${orderId}`);
+    expect(refundPaymentIntent.mock.calls[1]![1]).toBe(`ticket-refund:${orderId}`);
+    expect(transport.sends).toHaveLength(1);
+  });
+
+  it("sends no refund email when there is no payment intent to refund", async () => {
+    const {processor, refundPaymentIntent, transport} = buildTicketProcessor({
+      settle: {status: "oversold", order: {...pendingOrder, status: "refunded", refundReason: "oversold"}},
+    });
+
+    await expect(
+      processor.process(systemActor("stripe-webhook"), {...command("checkout.session.completed"), paymentIntentId: null}),
+    ).resolves.toBe("processed");
+
+    expect(refundPaymentIntent).not.toHaveBeenCalled();
+    expect(transport.sends).toEqual([]);
   });
 
   it("sends the confirmation email when the settlement is paid", async () => {

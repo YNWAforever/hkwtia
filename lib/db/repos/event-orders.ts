@@ -241,6 +241,14 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
           await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.refunded", targetType: "event_order", targetId: order.id, metadata: {reason: "late_payment"}});
           return {status: "refund_due", order: {...order, status: "refunded", refundedAt: now, refundReason: "cancelled"}};
         }
+        // A refund we committed but could not finish. The row is already
+        // `refunded`, but if the provider call failed the money is still here, so
+        // the retry must re-issue it — safe because the provider call carries the
+        // deterministic `ticket-refund:<orderId>` idempotency key. `staff` refunds
+        // (D-4c) are not this lane's to re-attempt.
+        if (order.status === "refunded" && (order.refundReason === "oversold" || order.refundReason === "cancelled")) {
+          return {status: "refund_due", order};
+        }
         if (order.status !== "pending") return {status: "ignored", order};
         const event = await tx.lockEvent(order.eventId);
         if (event && event.capacity !== null) {

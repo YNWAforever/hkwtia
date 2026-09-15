@@ -61,8 +61,17 @@ function normalize(event: Stripe.Event): WebhookLifecycleCommand | null {
   return {eventId: event.id, eventType, eventCreated: event.created, ...metadata, stripeCustomerId: customerId, stripeSubscriptionId: subscriptionId, stripeCheckoutSessionId, nextStatus, billingPeriodStart, billingPeriodEnd, cancelAtPeriodEnd, isRenewal};
 }
 function normalizeTicket(event: Stripe.Event): TicketWebhookCommand | null {
-  if (event.type !== "checkout.session.completed" && event.type !== "checkout.session.expired") return null;
+  // `completed` alone is not proof of payment: with a delayed-notification
+  // payment method Stripe sends it with `payment_status: "unpaid"` and settles
+  // later via `async_payment_succeeded`. Settling on the first would mail a
+  // receipt and take seats for money that never arrived, so both arms require
+  // `payment_status === "paid"` and the async success is accepted as the
+  // completion it is. The membership lane guards the same field.
+  const completed = event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded";
+  const expired = event.type === "checkout.session.expired";
+  if (!completed && !expired) return null;
   const object = objectValue(event.data?.object);
+  if (completed && object.payment_status !== "paid") return null;
   const metadata = object.metadata;
   if (!metadata || typeof metadata !== "object" || (metadata as Record<string, unknown>).kind !== "event_ticket") return null;
   const parsed = z.object({kind: z.literal("event_ticket"), orderId: z.string().uuid()}).strict().safeParse(metadata);
@@ -70,7 +79,7 @@ function normalizeTicket(event: Stripe.Event): TicketWebhookCommand | null {
   const checkoutSessionId = stringId(object.id);
   if (object.client_reference_id !== parsed.data.orderId) throw new WebhookInputError();
   return {
-    eventId: event.id, eventType: event.type,
+    eventId: event.id, eventType: completed ? "checkout.session.completed" : "checkout.session.expired",
     orderId: parsed.data.orderId, checkoutSessionId,
     paymentIntentId: typeof object.payment_intent === "string" ? object.payment_intent : null,
   };

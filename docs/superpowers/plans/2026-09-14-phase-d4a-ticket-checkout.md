@@ -390,7 +390,8 @@ Extend the interface:
 export interface StripeBillingAdapter {
   createCheckoutSession(input: CheckoutSessionInput): Promise<{id: string; url: string}>;
   createEventTicketSession(input: EventTicketSessionInput): Promise<{id: string; url: string}>;
-  refundPaymentIntent(paymentIntentId: string): Promise<void>;
+  /** `idempotencyKey` makes a retried refund after a failed webhook safe to re-issue. */
+  refundPaymentIntent(paymentIntentId: string, idempotencyKey: string): Promise<void>;
   createBillingPortalSession(input: PortalSessionInput): Promise<{url: string}>;
   listInvoices(customerId: string): Promise<InvoiceRecord[]>;
 }
@@ -426,8 +427,8 @@ Implement both methods in `createStripeBillingAdapter`:
       return {id: session.id, url: session.url};
     },
 
-    async refundPaymentIntent(paymentIntentId) {
-      await client.refunds.create({payment_intent: paymentIntentId});
+    async refundPaymentIntent(paymentIntentId, idempotencyKey) {
+      await client.refunds.create({payment_intent: paymentIntentId}, {idempotencyKey});
     },
 ```
 
@@ -716,6 +717,14 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
           await tx.markStatus(order.id, "refunded", {refundedAt: now, refundReason: "cancelled"});
           await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.refunded", targetType: "event_order", targetId: order.id, metadata: {reason: "late_payment"}});
           return {status: "refund_due", order: {...order, status: "refunded", refundedAt: now, refundReason: "cancelled"}};
+        }
+        // A refund we committed but could not finish. The row is already
+        // `refunded`, but if the provider call failed the money is still here, so
+        // the retry must re-issue it — safe because the provider call carries the
+        // deterministic `ticket-refund:<orderId>` idempotency key. `staff` refunds
+        // (D-4c) are not this lane's to re-attempt.
+        if (order.status === "refunded" && (order.refundReason === "oversold" || order.refundReason === "cancelled")) {
+          return {status: "refund_due", order};
         }
         if (order.status !== "pending") return {status: "ignored", order};
         const event = await tx.lockEvent(order.eventId);
@@ -1339,8 +1348,17 @@ export type TicketWebhookCommand = Readonly<{
 export interface TicketProcessor { process(actor: Actor, command: TicketWebhookCommand): Promise<"processed" | "duplicate">; }
 
 function normalizeTicket(event: Stripe.Event): TicketWebhookCommand | null {
-  if (event.type !== "checkout.session.completed" && event.type !== "checkout.session.expired") return null;
+  // `completed` alone is not proof of payment: with a delayed-notification
+  // payment method Stripe sends it with `payment_status: "unpaid"` and settles
+  // later via `async_payment_succeeded`. Settling on the first would mail a
+  // receipt and take seats for money that never arrived, so both arms require
+  // `payment_status === "paid"` and the async success is accepted as the
+  // completion it is. The membership lane guards the same field.
+  const completed = event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded";
+  const expired = event.type === "checkout.session.expired";
+  if (!completed && !expired) return null;
   const object = objectValue(event.data?.object);
+  if (completed && object.payment_status !== "paid") return null;
   const metadata = object.metadata;
   if (!metadata || typeof metadata !== "object" || (metadata as Record<string, unknown>).kind !== "event_ticket") return null;
   const parsed = z.object({kind: z.literal("event_ticket"), orderId: z.string().uuid()}).strict().safeParse(metadata);
@@ -1348,7 +1366,7 @@ function normalizeTicket(event: Stripe.Event): TicketWebhookCommand | null {
   const checkoutSessionId = stringId(object.id);
   if (object.client_reference_id !== parsed.data.orderId) throw new WebhookInputError();
   return {
-    eventId: event.id, eventType: event.type,
+    eventId: event.id, eventType: completed ? "checkout.session.completed" : "checkout.session.expired",
     orderId: parsed.data.orderId, checkoutSessionId,
     paymentIntentId: typeof object.payment_intent === "string" ? object.payment_intent : null,
   };
@@ -1386,8 +1404,8 @@ import "server-only";
 import type {Actor} from "@/lib/membership/lifecycle";
 import type {EventOrdersRepository, OrderRecord} from "@/lib/db/repos/event-orders";
 import {renderEmail} from "@/lib/email/render";
+import type {EmailVariables} from "@/lib/email/catalog";
 import {createConfiguredEmailTransport} from "@/lib/email/transport";
-import {emailEnv} from "@/lib/config/env";
 import type {TicketProcessor, TicketWebhookCommand} from "@/lib/billing/webhook-service";
 
 type TicketEmailDependencies = Readonly<{
@@ -1398,7 +1416,8 @@ type TicketEmailDependencies = Readonly<{
 
 export type TicketProcessorDependencies = Readonly<{
   orders: Pick<EventOrdersRepository, "settlePaid" | "expireBySession" | "eventSummary" | "seatsOfOrder">;
-  refundPaymentIntent: (paymentIntentId: string) => Promise<void>;
+  /** The deterministic key makes a retried refund safe to re-issue. */
+  refundPaymentIntent: (paymentIntentId: string, idempotencyKey: string) => Promise<void>;
   email: TicketEmailDependencies;
   /** For the receipt's "view the event" link, built from the order's own locale. */
   appUrl: string;
@@ -1441,7 +1460,7 @@ async function sendTicketEmail(
     // Every placeholder the copy uses must be supplied here: the renderer throws
     // `EMAIL_VARIABLE_MISSING` / `EMAIL_CTA_URL_REQUIRED`, and because the failure
     // is caught below it would otherwise send nothing and look like success.
-    const variables = template === "event_ticket_confirmation"
+    const variables: EmailVariables = template === "event_ticket_confirmation"
       ? {
         eventTitle,
         eventDate: event ? formatEventDate(event.startsAt, order.buyerLocale) : "",
@@ -1496,7 +1515,7 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
         // `oversold`: the seats were sold between checkout and payment.
         // `refund_due`: the session was paid in the moment our hold lapsed.
         // Either way the whole charge is returned, never a partial credit.
-        if (command.paymentIntentId) await dependencies.refundPaymentIntent(command.paymentIntentId);
+        if (command.paymentIntentId) await dependencies.refundPaymentIntent(command.paymentIntentId, `ticket-refund:${order.id}`);
         const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
         await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
         return "processed";
@@ -1515,7 +1534,7 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
 
 Add one test to `tests/unit/ticket-webhook.test.ts` for this specifically: a `paid` settlement must call `renderEmail` with **every** placeholder the confirmation copy uses. Assert the `variables` object's keys contain `eventTitle`, `eventDate`, `seatCount`, `amount`, `orderId` and `ctaUrl` — a missing one is invisible in production because the `catch` swallows it, so the test is the only thing that can see it.
 
-In `lib/api/stripe-webhook-route.ts`, wire it into the production `POST` — the ticket processor is built once, lazily, beside the Stripe client:
+In `lib/api/stripe-webhook-route.ts`, wire it into the production `POST`. **Nothing here may read email or app config at module scope or at boot**: `createConfiguredEmailTransport()` and `appEnv()` throw without their variables, and building the processor eagerly made an unrelated membership webhook answer 500 — which is why the real transport and `appUrl` are resolved inside `buildTicketProcessor()`, called on the first ticket event only:
 
 ```ts
 import {stripeBillingAdapter} from "@/lib/billing/stripe";
@@ -1526,12 +1545,16 @@ import {eventOrdersRepository} from "@/lib/db/repos/event-orders";
 import {renderEmail} from "@/lib/email/render";
 import {createConfiguredEmailTransport} from "@/lib/email/transport";
 
+// Memoised on first use, never at module scope: `createConfiguredEmailTransport`
+// and `appEnv` throw without their variables, and the membership lane must not
+// need the ticket lane's config to answer a membership webhook.
 let ticketProcessor: TicketProcessor | undefined;
 
-function productionTicketProcessor(): TicketProcessor {
+function buildTicketProcessor(): TicketProcessor {
   ticketProcessor ??= createTicketProcessor({
     orders: eventOrdersRepository,
-    refundPaymentIntent: (paymentIntentId) => stripeBillingAdapter().refundPaymentIntent(paymentIntentId),
+    refundPaymentIntent: (paymentIntentId, idempotencyKey) =>
+      stripeBillingAdapter().refundPaymentIntent(paymentIntentId, idempotencyKey),
     email: {
       renderEmail,
       transport: createConfiguredEmailTransport(),
@@ -1546,6 +1569,10 @@ function productionTicketProcessor(): TicketProcessor {
     },
   });
   return ticketProcessor;
+}
+
+function productionTicketProcessor(): TicketProcessor {
+  return {process(_actor, command) { return buildTicketProcessor().process(_actor, command); }};
 }
 ```
 

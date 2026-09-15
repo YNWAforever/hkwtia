@@ -63,7 +63,7 @@ export class FakeStripeBillingAdapter implements StripeBillingAdapter {
     return {id: this.ticketSessionId, url: this.ticketUrl};
   }
 
-  async refundPaymentIntent(paymentIntentId: string): Promise<void> {
+  async refundPaymentIntent(paymentIntentId: string, _idempotencyKey: string): Promise<void> {
     this.refundedPaymentIntents.push(paymentIntentId);
   }
 

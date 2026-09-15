@@ -48,7 +48,8 @@ export type InvoiceRecord = Readonly<{
 export interface StripeBillingAdapter {
   createCheckoutSession(input: CheckoutSessionInput): Promise<{id: string; url: string}>;
   createEventTicketSession(input: EventTicketSessionInput): Promise<{id: string; url: string}>;
-  refundPaymentIntent(paymentIntentId: string): Promise<void>;
+  /** `idempotencyKey` makes a retried refund after a failed webhook safe to re-issue. */
+  refundPaymentIntent(paymentIntentId: string, idempotencyKey: string): Promise<void>;
   createBillingPortalSession(input: PortalSessionInput): Promise<{url: string}>;
   listInvoices(customerId: string): Promise<InvoiceRecord[]>;
 }
@@ -64,7 +65,7 @@ type StripeClient = {
   invoices: {list(
     params: Stripe.InvoiceListParams,
   ): Promise<{data: Array<Pick<Stripe.Invoice, "id" | "created" | "amount_paid" | "currency" | "status" | "hosted_invoice_url">>}>};
-  refunds: {create(params: {payment_intent: string}): Promise<unknown>};
+  refunds: {create(params: {payment_intent: string}, options?: Stripe.RequestOptions): Promise<unknown>};
 };
 
 export function createStripeBillingAdapter(client: StripeClient): StripeBillingAdapter {
@@ -108,8 +109,8 @@ export function createStripeBillingAdapter(client: StripeClient): StripeBillingA
       return {id: session.id, url: session.url};
     },
 
-    async refundPaymentIntent(paymentIntentId) {
-      await client.refunds.create({payment_intent: paymentIntentId});
+    async refundPaymentIntent(paymentIntentId, idempotencyKey) {
+      await client.refunds.create({payment_intent: paymentIntentId}, {idempotencyKey});
     },
 
     async createBillingPortalSession(input) {

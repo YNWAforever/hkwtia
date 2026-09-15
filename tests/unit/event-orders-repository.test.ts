@@ -97,6 +97,19 @@ describe("eventOrdersRepository.settlePaid", () => {
     expect(tx.markStatus).not.toHaveBeenCalled();
   });
 
+  it.each(["oversold", "cancelled"] as const)("re-issues a refund committed as %s but not finished", async (refundReason) => {
+    const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "refunded", refundReason}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now))
+      .resolves.toMatchObject({status: "refund_due", order: expect.objectContaining({status: "refunded", refundReason})});
+    expect(tx.markStatus).not.toHaveBeenCalled();
+  });
+
+  it("leaves a staff refund to the staff lane", async () => {
+    const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "refunded", refundReason: "staff"}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now)).resolves.toMatchObject({status: "ignored"});
+    expect(tx.markStatus).not.toHaveBeenCalled();
+  });
+
   it("refunds an order that lost the race for the last seat", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order()), heldSeats: vi.fn(async () => 2)});
     await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now)).resolves.toMatchObject({status: "oversold"});

@@ -70,7 +70,7 @@ let builtTicketProcessor: TicketProcessor | undefined;
 function buildTicketProcessor(): TicketProcessor {
   builtTicketProcessor ??= createTicketProcessor({
     orders: eventOrdersRepository,
-    refundPaymentIntent: (paymentIntentId) => stripeBillingAdapter().refundPaymentIntent(paymentIntentId),
+    refundPaymentIntent: (paymentIntentId, idempotencyKey) => stripeBillingAdapter().refundPaymentIntent(paymentIntentId, idempotencyKey),
     email: {
       renderEmail,
       transport: createConfiguredEmailTransport(),
