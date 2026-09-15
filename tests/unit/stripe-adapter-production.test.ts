@@ -6,6 +6,7 @@ function client(portalCreate = vi.fn(), invoiceList = vi.fn()) {
     checkout: {sessions: {create: vi.fn()}},
     billingPortal: {sessions: {create: portalCreate}},
     invoices: {list: invoiceList},
+    refunds: {create: vi.fn()},
   };
 }
 

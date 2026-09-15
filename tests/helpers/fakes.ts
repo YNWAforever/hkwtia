@@ -1,6 +1,7 @@
 import type {Actor} from "@/lib/membership/lifecycle";
 import type {
   CheckoutSessionInput,
+  EventTicketSessionInput,
   InvoiceRecord,
   PortalSessionInput,
   StripeBillingAdapter,
@@ -42,15 +43,28 @@ export function createFakeRepositories() {
 
 export class FakeStripeBillingAdapter implements StripeBillingAdapter {
   readonly checkoutRequests: CheckoutSessionInput[] = [];
+  readonly ticketRequests: EventTicketSessionInput[] = [];
   readonly portalRequests: PortalSessionInput[] = [];
+  readonly refundedPaymentIntents: string[] = [];
   invoices: InvoiceRecord[] = [];
   checkoutSessionId = "cs_test_session";
   checkoutUrl = "https://checkout.stripe.test/session";
+  ticketSessionId = "cs_test_ticket";
+  ticketUrl = "https://checkout.stripe.test/ticket";
   portalUrl = "https://billing.stripe.test/session";
 
   async createCheckoutSession(input: CheckoutSessionInput): Promise<{id: string; url: string}> {
     this.checkoutRequests.push(structuredClone(input));
     return {id: this.checkoutSessionId, url: this.checkoutUrl};
+  }
+
+  async createEventTicketSession(input: EventTicketSessionInput): Promise<{id: string; url: string}> {
+    this.ticketRequests.push(structuredClone(input));
+    return {id: this.ticketSessionId, url: this.ticketUrl};
+  }
+
+  async refundPaymentIntent(paymentIntentId: string): Promise<void> {
+    this.refundedPaymentIntents.push(paymentIntentId);
   }
 
   async createBillingPortalSession(input: PortalSessionInput): Promise<{url: string}> {

@@ -20,6 +20,17 @@ export type CheckoutSessionInput = Readonly<{
   idempotencyKey: string;
 }>;
 
+export type EventTicketSessionInput = Readonly<{
+  eventTitle: string;
+  amountHkdCents: number;
+  seats: number;
+  orderId: string;
+  successUrl: string;
+  cancelUrl: string;
+  idempotencyKey: string;
+  expiresAt: Date;
+}>;
+
 export type PortalSessionInput = Readonly<{
   customerId: string;
   returnUrl: string;
@@ -36,6 +47,8 @@ export type InvoiceRecord = Readonly<{
 
 export interface StripeBillingAdapter {
   createCheckoutSession(input: CheckoutSessionInput): Promise<{id: string; url: string}>;
+  createEventTicketSession(input: EventTicketSessionInput): Promise<{id: string; url: string}>;
+  refundPaymentIntent(paymentIntentId: string): Promise<void>;
   createBillingPortalSession(input: PortalSessionInput): Promise<{url: string}>;
   listInvoices(customerId: string): Promise<InvoiceRecord[]>;
 }
@@ -51,6 +64,7 @@ type StripeClient = {
   invoices: {list(
     params: Stripe.InvoiceListParams,
   ): Promise<{data: Array<Pick<Stripe.Invoice, "id" | "created" | "amount_paid" | "currency" | "status" | "hosted_invoice_url">>}>};
+  refunds: {create(params: {payment_intent: string}): Promise<unknown>};
 };
 
 export function createStripeBillingAdapter(client: StripeClient): StripeBillingAdapter {
@@ -67,6 +81,35 @@ export function createStripeBillingAdapter(client: StripeClient): StripeBillingA
       }, {idempotencyKey: input.idempotencyKey});
       if (!session.url) throw new Error("STRIPE_CHECKOUT_URL_MISSING");
       return {id: session.id, url: session.url};
+    },
+
+    async createEventTicketSession(input) {
+      const session = await client.checkout.sessions.create({
+        mode: "payment",
+        line_items: [{
+          price_data: {
+            currency: "hkd",
+            unit_amount: input.amountHkdCents,
+            product_data: {name: input.eventTitle},
+          },
+          quantity: input.seats,
+        }],
+        client_reference_id: input.orderId,
+        // The kind discriminator is how the webhook tells a ticket from a
+        // membership; the order id is the only other thing it trusts.
+        metadata: {kind: "event_ticket", orderId: input.orderId},
+        // Stripe's clock and ours agree on the hold, so an abandoned checkout
+        // releases its seats at the same instant `heldSeats` stops counting them.
+        expires_at: Math.floor(input.expiresAt.getTime() / 1000),
+        success_url: input.successUrl,
+        cancel_url: input.cancelUrl,
+      }, {idempotencyKey: input.idempotencyKey});
+      if (!session.url) throw new Error("STRIPE_CHECKOUT_URL_MISSING");
+      return {id: session.id, url: session.url};
+    },
+
+    async refundPaymentIntent(paymentIntentId) {
+      await client.refunds.create({payment_intent: paymentIntentId});
     },
 
     async createBillingPortalSession(input) {
