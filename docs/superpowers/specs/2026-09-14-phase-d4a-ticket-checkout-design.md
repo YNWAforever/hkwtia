@@ -148,7 +148,9 @@ processor. Everything else — signature verification, `WebhookInputError`, the 
 
 Every status transition writes an `audit_events` row in the same transaction (`order.paid`,
 `order.refunded` carrying the reason), so money movement is legible after the fact. An oversell
-adds an email to the staff recipient through the notifications dispatcher on top of that.
+refunds in full, writes that audit row, and emails the buyer that they were refunded; staff see
+the refunded order in the admin list. A separate staff alert email is out of D-4a's scope and is
+recorded rather than implied.
 
 The re-check exists because two buyers can each pass the creation check against the same last
 seat; the lock makes the payment-time decision final, and the refund is the honest way to lose a
@@ -163,9 +165,15 @@ do not offer `ticketed` and cannot set a price.
 
 ### 4.6 The confirmation
 
-On payment the buyer receives one email listing the order (event, seats, amount, order id).
-D-4b adds the per-attendee pass email. Delivery goes through `lib/notifications/dispatch.ts` as a
-transactional email, so a marketing opt-out never blocks a receipt.
+On payment the buyer receives one email listing the order (event, seats, amount, order id), and
+on a refund one email saying the payment was returned. D-4b adds the per-attendee pass email.
+Delivery uses two new templates in `lib/email/catalog.ts` (`event_ticket_confirmation`,
+`event_ticket_refunded`) and the configured email transport — the same path the guest RSVP
+confirmation uses. `lib/notifications/dispatch.ts` is deliberately **not** used: its own
+documentation records that its gate is a marketing classifier, so a transactional send through
+it would be refused for a buyer who never gave marketing consent, which is every guest. Both
+sends happen after the order has settled and are best-effort: a mail failure is logged and never
+turns the webhook into a 500 that Stripe would retry forever.
 
 ## 5. Error and edge cases
 
