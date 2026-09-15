@@ -67,6 +67,7 @@ async function sendTicketEmail(
   order: OrderRecord,
   event: EventSummary | null,
   overrides: TicketEmailOverrides = {},
+  options: Readonly<{throwOnError?: boolean}> = {},
 ): Promise<void> {
   const eventTitle = event?.title ?? "";
   const ctaUrl = overrides.ctaUrl ?? (event
@@ -120,9 +121,21 @@ async function sendTicketEmail(
       idempotencyKey: overrides.idempotencyKey ?? `${template === "event_ticket_confirmation" ? "ticket-confirmation" : "ticket-refund"}:${order.id}`,
     });
   } catch (error) {
+    // The settlement-committed sends (receipt, refund) keep swallowing: the
+    // order is already paid and a throw here would 500 a webhook Stripe only
+    // redelivers into a `duplicate`. A user-initiated send opts into `throwOnError`
+    // so its caller can tell "sent" from "nothing was sent".
+    if (options.throwOnError) throw error;
     dependencies.onEmailError?.(error, {orderId: order.id, template});
   }
 }
+
+/**
+ * What a pass send actually did. The webhook ignores this (a settled order is
+ * never failed over mail), but a staff resend must not report a send that never
+ * left: `undeliverable` and `not_admissible` both resolve to the failure message.
+ */
+export type SeatPassOutcome = "sent" | "undeliverable" | "not_admissible";
 
 /**
  * One seat's pass, with the attempt key supplied by the caller: the webhook
@@ -135,19 +148,27 @@ async function sendTicketEmail(
 export async function sendSeatPass(
   dependencies: TicketProcessorDependencies,
   input: Readonly<{seatId: string; attemptKey: string}>,
-): Promise<void> {
+): Promise<SeatPassOutcome> {
   const seat = await dependencies.orders.seatForPass(input.seatId);
   // `seatForPass` returns null for a seat whose order is not `paid`, the same
   // refusal the pass page makes; nothing is sent for a refunded seat.
-  if (!seat) return;
+  if (!seat) return "not_admissible";
   const event = await dependencies.orders.eventSummary(seat.eventId, seat.buyerLocale);
   const passUrl = `${dependencies.appUrl}${localizedPath(seat.buyerLocale, `/pass/${signPassToken({seatId: seat.seatId, eventId: seat.eventId}, dependencies.passSecret)}`)}`;
-  await sendTicketEmail(dependencies, "event_ticket_pass", seat.order, event, {
-    attendeeName: seat.attendeeName,
-    to: seat.attendeeEmail,
-    ctaUrl: passUrl,
-    idempotencyKey: `ticket-pass:${seat.seatId}:${input.attemptKey}`,
-  });
+  try {
+    await sendTicketEmail(dependencies, "event_ticket_pass", seat.order, event, {
+      attendeeName: seat.attendeeName,
+      to: seat.attendeeEmail,
+      ctaUrl: passUrl,
+      idempotencyKey: `ticket-pass:${seat.seatId}:${input.attemptKey}`,
+    }, {throwOnError: true});
+    return "sent";
+  } catch (error) {
+    // Still logged here, once: the webhook's own guard only sees reads that
+    // threw before this point, so an email failure must not go unrecorded.
+    dependencies.onEmailError?.(error, {orderId: seat.order.id, template: "event_ticket_pass"});
+    return "undeliverable";
+  }
 }
 
 let defaultDependencies: TicketProcessorDependencies | undefined;
@@ -218,17 +239,23 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
         return "processed";
       }
       if (settlement.status === "paid") {
-        const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
-        await sendTicketEmail(dependencies, "event_ticket_confirmation", order, event);
         // Only a paid settlement admits anyone, so only it earns a pass. An
         // oversold or late-paid order has already taken the refund branch above.
         //
-        // This guard exists because the settlement is already committed. Without
-        // it a failed pass read escapes `process`, the route answers 500, and
-        // Stripe redelivers — but the redelivery makes `settlePaid` answer
-        // `duplicate`, so the paid branch is skipped before the loop runs and no
-        // pass is ever sent or ever retried. Log the failure and leave the
-        // recovery to Task 7's resend rather than to a Stripe redelivery.
+        // Both guards exist because the settlement is already committed. Without
+        // them a failed read escapes `process`, the route answers 500, and Stripe
+        // redelivers — but the redelivery makes `settlePaid` answer `duplicate`,
+        // so the paid branch is skipped before either send runs and the receipt
+        // and every pass are lost with no retry. Log the failure and leave the
+        // recovery to the staff resend rather than to a Stripe redelivery. The
+        // receipt's own guard covers `eventSummary`, which throws *before* the
+        // email catch inside `sendTicketEmail` can see it.
+        try {
+          const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
+          await sendTicketEmail(dependencies, "event_ticket_confirmation", order, event);
+        } catch (error) {
+          dependencies.onEmailError?.(error, {orderId: order.id, template: "event_ticket_confirmation"});
+        }
         try {
           await sendPassEmails(order);
         } catch (error) {

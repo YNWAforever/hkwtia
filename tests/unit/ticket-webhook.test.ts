@@ -369,6 +369,33 @@ describe("createTicketProcessor", () => {
     expect(transport.sends).toEqual([]);
   });
 
+  // The receipt's event read throws *before* `sendTicketEmail`'s own catch, so an
+  // unguarded paid branch rejects `process` → 500, and on redelivery `settlePaid`
+  // answers `duplicate` and neither receipt nor pass is ever sent.
+  it("keeps the webhook successful when the paid branch's event read fails", async () => {
+    const orders = {
+      settlePaid: vi.fn(async (): Promise<SettleResult> => ({status: "paid", order: {...pendingOrder, status: "paid"}})),
+      expireBySession: vi.fn(async () => undefined),
+      eventSummary: vi.fn(async () => { throw new Error("EVENT_SUMMARY_UNAVAILABLE"); }),
+      seatsOfOrder: vi.fn(async () => 1),
+      orderSeats: vi.fn(async () => []),
+      seatForPass: vi.fn(async () => null),
+    };
+    const onEmailError = vi.fn();
+    const processor = createTicketProcessor({
+      orders: orders as unknown as TicketProcessorDependencies["orders"],
+      refundPaymentIntent: vi.fn(async () => undefined),
+      email: {renderEmail, transport: createTestTransport(), emailFrom: "tickets@wtia.test"},
+      appUrl: "https://w.test",
+      passSecret: "pass-secret-fixture",
+      now: () => new Date("2026-09-14T04:00:00Z"),
+      onEmailError,
+    });
+
+    await expect(processor.process(systemActor("stripe-webhook"), command("checkout.session.completed"))).resolves.toBe("processed");
+    expect(onEmailError).toHaveBeenCalledWith(expect.any(Error), {orderId, template: "event_ticket_confirmation"});
+  });
+
   it("keeps the webhook successful when the ticket email fails", async () => {
     const orders = {
       settlePaid: vi.fn(async (): Promise<SettleResult> => ({status: "paid", order: {...pendingOrder, status: "paid"}})),

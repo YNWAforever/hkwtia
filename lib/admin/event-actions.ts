@@ -57,12 +57,27 @@ export async function checkInEventAttendeeAction(eventId: string, path: string, 
  * instant, so a redelivery is a no-op — which also means re-using that key here
  * would let the transport swallow a deliberate resend and report it as sent. The
  * fresh attempt key is what makes the resend actually send.
+ *
+ * The attempt key is a random uuid rather than a clock reading: two presses in
+ * one millisecond are two deliberate sends, and a wall-clock key would collapse
+ * them at the provider into one — the same silent swallow the fresh key exists
+ * to prevent.
  */
 export async function resendPassAction(seatId: string, path: string, messages: CheckInActionMessages, state: EventActionState, formData: FormData): Promise<EventActionState> {
-  return runCheckInAction(state, formData, {...messages, mutate: async (data) => {
-    await requireAdminActor();
-    const fromForm = data.get("seatId");
-    const parsed = z.object({seatId: z.string().uuid()}).strict().parse({seatId: typeof fromForm === "string" && fromForm.length > 0 ? fromForm : seatId});
-    await sendSeatPass(ticketProcessorDependencies(), {seatId: parsed.seatId, attemptKey: `resend:${Date.now()}`});
-  }});
+  try {
+    return await runCheckInAction(state, formData, {...messages, mutate: async (data) => {
+      await requireAdminActor();
+      const fromForm = data.get("seatId");
+      const parsed = z.object({seatId: z.string().uuid()}).strict().parse({seatId: typeof fromForm === "string" && fromForm.length > 0 ? fromForm : seatId});
+      const outcome = await sendSeatPass(ticketProcessorDependencies(), {seatId: parsed.seatId, attemptKey: `resend:${crypto.randomUUID()}`});
+      // A staff-initiated send is honest: a refunded seat and a refused
+      // transport both resolve to the failure message rather than to "sent".
+      if (outcome !== "sent") throw new Error(outcome === "not_admissible" ? "PASS_NOT_ADMISSIBLE" : "PASS_UNDELIVERABLE");
+      // Only a send that actually left revalidates the row it belongs to.
+      revalidatePath(path);
+    }});
+  } catch (error) {
+    if (isAuthorizationDenial(error)) notFound();
+    throw error;
+  }
 }

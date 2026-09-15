@@ -1,3 +1,4 @@
+import {revalidatePath} from "next/cache";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import type {TicketProcessorDependencies} from "@/lib/billing/ticket-webhook-processor";
@@ -84,21 +85,23 @@ function createIdempotentTransport(): EmailTransport & Readonly<{sends: EmailSen
 
 let transport: ReturnType<typeof createIdempotentTransport>;
 
-function buildDependencies(): TicketProcessorDependencies {
+const seatForPass = {
+  seatId,
+  attendeeName: "D4B Acceptance One",
+  attendeeEmail: "d4b-one@example.test",
+  eventId,
+  buyerLocale: "en" as const,
+  order: paidOrder,
+};
+
+function buildDependencies(options: Readonly<{seatPresent?: boolean}> = {}): TicketProcessorDependencies {
   transport = createIdempotentTransport();
   const orders = {
     settlePaid: vi.fn(),
     expireBySession: vi.fn(),
     seatsOfOrder: vi.fn(async () => 1),
     orderSeats: vi.fn(async () => [{seatId, position: 1, attendeeName: "D4B Acceptance One"}]),
-    seatForPass: vi.fn(async () => ({
-      seatId,
-      attendeeName: "D4B Acceptance One",
-      attendeeEmail: "d4b-one@example.test",
-      eventId,
-      buyerLocale: "en" as const,
-      order: paidOrder,
-    })),
+    seatForPass: vi.fn(async () => (options.seatPresent === false ? null : seatForPass)),
     eventSummary: vi.fn(async () => ({
       title: "D4B Acceptance Ticket Event",
       startsAt: new Date("2026-10-14T11:00:00Z"),
@@ -128,6 +131,7 @@ describe("resendPassAction", () => {
   beforeEach(() => {
     state.noSession = false;
     state.dependencies = buildDependencies();
+    vi.mocked(revalidatePath).mockClear();
   });
 
   it("sends again with a fresh attempt key, escaping the settlement-derived key", async () => {
@@ -147,11 +151,13 @@ describe("resendPassAction", () => {
       status: "success",
       message: "Pass email sent.",
     });
+    // A send that actually left revalidates the event page the row lives on.
+    expect(revalidatePath).toHaveBeenCalledWith(path);
 
     const sends = passSends();
     expect(sends).toHaveLength(2);
     expect(sends[0]!.idempotencyKey).toBe(`ticket-pass:${seatId}:${settlement.getTime()}`);
-    expect(sends[1]!.idempotencyKey).toMatch(new RegExp(`^ticket-pass:${seatId}:resend:\\d+$`));
+    expect(sends[1]!.idempotencyKey).toMatch(new RegExp(`^ticket-pass:${seatId}:resend:[0-9a-f-]{36}$`));
     expect(sends[1]!.idempotencyKey).not.toBe(sends[0]!.idempotencyKey);
     expect(sends[1]!.to).toBe("d4b-one@example.test");
   });
@@ -160,9 +166,8 @@ describe("resendPassAction", () => {
     const {resendPassAction} = await loadActions();
 
     await resendPassAction(seatId, path, messages, {}, form(seatId));
-    // A real gap separates two presses: the attempt key is a clock reading, so the
-    // two presses must not land in the same millisecond or the second is swallowed.
-    await new Promise((resolve) => setTimeout(resolve, 5));
+    // No sleep separates the two presses: the attempt key is a random uuid, so
+    // two presses in the same millisecond still carry distinct keys.
     await resendPassAction(seatId, path, messages, {}, form(seatId));
 
     const sends = passSends();
@@ -170,12 +175,43 @@ describe("resendPassAction", () => {
     expect(sends[0]!.idempotencyKey).not.toBe(sends[1]!.idempotencyKey);
   });
 
-  it("refuses without a staff session and never sends", async () => {
+  // A user-initiated send must be honest: the transport throwing is not a
+  // success. `resendError` exists in both bundles precisely for this, and before
+  // this fix the catch inside `sendTicketEmail` reported every failure as sent.
+  it("reports a transport failure as not sent", async () => {
+    const dependencies = buildDependencies();
+    state.dependencies = {...dependencies, email: {renderEmail, transport: {async send() { throw new Error("provider 5xx"); }}, emailFrom: "tickets@wtia.test"}};
+    const {resendPassAction} = await loadActions();
+
+    await expect(resendPassAction(seatId, path, messages, {}, form(seatId))).resolves.toEqual({
+      status: "error",
+      message: "We could not send this pass email. Please try again.",
+    });
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  // A refunded seat resolves to no seat at all, so nothing was sent; reporting
+  // "Pass email sent." would be a lie the staff member would act on.
+  it("reports a refunded or absent seat as not sent", async () => {
+    state.dependencies = buildDependencies({seatPresent: false});
+    const {resendPassAction} = await loadActions();
+
+    await expect(resendPassAction(seatId, path, messages, {}, form(seatId))).resolves.toEqual({
+      status: "error",
+      message: "We could not send this pass email. Please try again.",
+    });
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  // A staff-session denial is not a form outcome: it maps to notFound, the same
+  // shape every sibling action in the module uses, so a signed-out caller sees
+  // the route's 404 rather than a 500.
+  it("refuses without a staff session, maps to notFound, and never sends", async () => {
     state.noSession = true;
     const {resendPassAction} = await loadActions();
 
     await expect(resendPassAction(seatId, path, messages, {}, form(seatId)))
-      .rejects.toThrow("UNAUTHORIZED");
+      .rejects.toThrow("NEXT_NOT_FOUND");
     expect(passSends()).toHaveLength(0);
   });
 
