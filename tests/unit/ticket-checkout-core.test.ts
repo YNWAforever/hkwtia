@@ -33,7 +33,7 @@ describe("createTicketCheckout", () => {
     await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "redirect", url: "https://checkout.stripe.test/1"});
     expect((deps.orders.createOrder as unknown as {mock: {calls: unknown[][]}}).mock.calls[0]![0]).toMatchObject({amountHkdCents: 25_000});
-    expect(deps.stripe.createEventTicketSession).toHaveBeenCalledWith(expect.objectContaining({amountHkdCents: 25_000, seats: 1, orderId: "order-1"}));
+    expect(deps.stripe.createEventTicketSession).toHaveBeenCalledWith(expect.objectContaining({unitAmountHkdCents: 25_000, seats: 1, orderId: "order-1"}));
   });
 
   it.each([
@@ -90,5 +90,9 @@ describe("createTicketCheckout", () => {
     const deps = dependencies({appUrl: "https://wtia.org.hk@evil.example"});
     await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .rejects.toThrow("INVALID_APP_URL");
+    // The write-then-throw defect: a bad APP_URL must be rejected before the
+    // pending order exists, or it strands seats for the whole hold window and
+    // still errors.
+    expect(deps.orders.createOrder).not.toHaveBeenCalled();
   });
 });

@@ -74,6 +74,12 @@ export async function createTicketCheckout(
   if (!event.published || event.startsAt <= now) return {status: "error", code: "EVENT_CLOSED"};
 
   const amountHkdCents = event.ticketPriceHkdCents * parsedSeats.data.length;
+  // Validated BEFORE the order row is written: a bad `APP_URL` must fail with no
+  // side effect, not strand a pending order holding the buyer's seats for the
+  // whole hold window and then error. Nothing between the row write and the
+  // session call reads configuration, so this is the only place that can.
+  const origin = appOrigin(dependencies.appUrl);
+  const eventPath = localizedPath(input.locale, `/events/${event.slug}`);
   const created = await dependencies.orders.createOrder({
     eventId: event.id,
     buyerProfileId: input.buyer.profileId,
@@ -103,12 +109,13 @@ export async function createTicketCheckout(
     return {status: "redirect", url: created.order.stripeCheckoutUrl};
   }
 
-  const origin = appOrigin(dependencies.appUrl);
-  const eventPath = localizedPath(input.locale, `/events/${event.slug}`);
   try {
     const session = await dependencies.stripe.createEventTicketSession({
       eventTitle: input.locale === "zh-HK" ? event.titleZh : event.titleEn,
-      amountHkdCents,
+      // The PER-SEAT price: Stripe multiplies it by `seats`. The order's own
+      // `amountHkdCents` is the total, and it is what the receipt reports -- so
+      // the two are the same number only when one seat is bought.
+      unitAmountHkdCents: event.ticketPriceHkdCents,
       seats: parsedSeats.data.length,
       orderId: created.order.id,
       successUrl: `${origin}${eventPath}?ticket=received`,

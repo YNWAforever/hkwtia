@@ -22,12 +22,18 @@ export type CheckoutSessionInput = Readonly<{
 
 export type EventTicketSessionInput = Readonly<{
   eventTitle: string;
-  amountHkdCents: number;
+  /**
+   * The PER-SEAT price. Stripe multiplies `unit_amount` by `quantity`, so
+   * passing an order total here charges the buyer `price × seats²`. The order's
+   * total is `amount_hkd_cents`; this is the unit.
+   */
+  unitAmountHkdCents: number;
   seats: number;
   orderId: string;
   successUrl: string;
   cancelUrl: string;
   idempotencyKey: string;
+  /** Must be at least 30 minutes after session CREATION, so it carries a margin. */
   expiresAt: Date;
 }>;
 
@@ -90,7 +96,7 @@ export function createStripeBillingAdapter(client: StripeClient): StripeBillingA
         line_items: [{
           price_data: {
             currency: "hkd",
-            unit_amount: input.amountHkdCents,
+            unit_amount: input.unitAmountHkdCents,
             product_data: {name: input.eventTitle},
           },
           quantity: input.seats,
