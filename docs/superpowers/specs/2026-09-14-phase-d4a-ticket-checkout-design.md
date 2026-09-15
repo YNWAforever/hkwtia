@@ -70,6 +70,8 @@ owner chose **multi-seat orders with named attendees**, and money is stored as i
   attendees and only one of them, if any, has an account.
 - `amount_hkd` becomes `amount_hkd_cents`, because a price must never be a float and Stripe's
   `unit_amount` is already integer cents. `currency` is kept.
+- a `stripe_checkout_url` column is added, because a repeated idempotency key must return the
+  exact session URL it already minted rather than mint a second one or guess it from the id.
 
 ## 4. Design
 
@@ -86,8 +88,8 @@ One generated migration (Drizzle):
   multiplying statuses; D-4a only ever writes `oversold`.
 - `event_orders` — `id`, `event_id` (FK, cascade), `buyer_profile_id` (FK profiles, set null),
   `buyer_name`, `buyer_email`, `amount_hkd_cents`, `currency` (default `hkd`),
-  `status` (default `pending`), `stripe_checkout_session_id` (unique), `idempotency_key` (unique),
-  `expires_at`, `paid_at`, `refunded_at`, `refund_reason`, timestamps.
+  `status` (default `pending`), `stripe_checkout_session_id` (unique), `stripe_checkout_url`,
+  `idempotency_key` (unique), `expires_at`, `paid_at`, `refunded_at`, `refund_reason`, timestamps.
 - `event_order_seats` — `id`, `order_id` (FK, cascade), `position`, `attendee_name`,
   `attendee_email`, `checked_in_at`, `created_at`; unique `(order_id, position)`.
 
