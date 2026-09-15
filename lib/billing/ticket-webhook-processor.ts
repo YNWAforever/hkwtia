@@ -1,0 +1,129 @@
+import "server-only";
+
+import type {Actor} from "@/lib/membership/lifecycle";
+import type {EventOrdersRepository, OrderRecord} from "@/lib/db/repos/event-orders";
+import {renderEmail} from "@/lib/email/render";
+import type {EmailVariables} from "@/lib/email/catalog";
+import {createConfiguredEmailTransport} from "@/lib/email/transport";
+import type {TicketProcessor, TicketWebhookCommand} from "@/lib/billing/webhook-service";
+import {localizedPath} from "@/lib/urls";
+
+type TicketEmailDependencies = Readonly<{
+  renderEmail: typeof renderEmail;
+  transport: ReturnType<typeof createConfiguredEmailTransport>;
+  emailFrom: string;
+}>;
+
+export type TicketProcessorDependencies = Readonly<{
+  orders: Pick<EventOrdersRepository, "settlePaid" | "expireBySession" | "eventSummary" | "seatsOfOrder">;
+  refundPaymentIntent: (paymentIntentId: string) => Promise<void>;
+  email: TicketEmailDependencies;
+  /** For the receipt's "view the event" link, built from the order's own locale. */
+  appUrl: string;
+  now: () => Date;
+  /** Best-effort: a mail failure must not fail the webhook, which Stripe retries. */
+  onEmailError?: (error: unknown, context: Readonly<{orderId: string; template: string}>) => void;
+}>;
+
+/**
+ * Grouped to two decimals in the buyer's locale, because the copy reads
+ * `HK${amount}` and a bare `toFixed(2)` renders 100000 as `HK$1000.00`.
+ */
+function formatHkd(cents: number, locale: "en" | "zh-HK"): string {
+  return new Intl.NumberFormat(locale === "zh-HK" ? "zh-HK" : "en-HK", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(cents / 100);
+}
+
+function formatEventDate(value: Date, locale: "en" | "zh-HK"): string {
+  return new Intl.DateTimeFormat(locale === "zh-HK" ? "zh-HK" : "en-HK", {
+    dateStyle: "long",
+    timeZone: "Asia/Hong_Kong",
+  }).format(value);
+}
+
+type EventSummary = Readonly<{title: string; startsAt: Date; slug: string}>;
+
+async function sendTicketEmail(
+  dependencies: TicketProcessorDependencies,
+  template: "event_ticket_confirmation" | "event_ticket_refunded",
+  order: OrderRecord,
+  event: EventSummary | null,
+): Promise<void> {
+  const eventTitle = event?.title ?? "";
+  const ctaUrl = event
+    ? `${dependencies.appUrl}${localizedPath(order.buyerLocale, `/events/${event.slug}`)}`
+    : dependencies.appUrl;
+  try {
+    // Every placeholder the copy uses must be supplied here: the renderer throws
+    // `EMAIL_VARIABLE_MISSING` / `EMAIL_CTA_URL_REQUIRED`, and because the failure
+    // is caught below it would otherwise send nothing and look like success.
+    const variables: EmailVariables = template === "event_ticket_confirmation"
+      ? {
+        eventTitle,
+        eventDate: event ? formatEventDate(event.startsAt, order.buyerLocale) : "",
+        seatCount: String(await dependencies.orders.seatsOfOrder(order.id)),
+        amount: formatHkd(order.amountHkdCents, order.buyerLocale),
+        orderId: order.id,
+        ctaUrl,
+      }
+      : {
+        eventTitle,
+        amount: formatHkd(order.amountHkdCents, order.buyerLocale),
+        orderId: order.id,
+        ctaUrl,
+      };
+    const rendered = await dependencies.email.renderEmail({
+      template,
+      locale: order.buyerLocale,
+      recipientName: order.buyerName,
+      classification: "transactional",
+      variables,
+    });
+    await dependencies.email.transport.send({
+      to: order.buyerEmail,
+      from: dependencies.email.emailFrom,
+      subject: rendered.subject,
+      html: rendered.html,
+      text: rendered.text,
+      headers: rendered.headers,
+      // Keyed on the order and the outcome: a redelivered webhook re-renders the
+      // same message and is a no-op at the transport, while a later refund of the
+      // same order is a different key and still sends.
+      idempotencyKey: `${template === "event_ticket_confirmation" ? "ticket-confirmation" : "ticket-refund"}:${order.id}`,
+    });
+  } catch (error) {
+    dependencies.onEmailError?.(error, {orderId: order.id, template});
+  }
+}
+
+export function createTicketProcessor(dependencies: TicketProcessorDependencies): TicketProcessor {
+  return {
+    async process(_actor: Actor, command: TicketWebhookCommand): Promise<"processed" | "duplicate"> {
+      if (command.eventType === "checkout.session.expired") {
+        await dependencies.orders.expireBySession(command.checkoutSessionId);
+        return "processed";
+      }
+
+      const settlement = await dependencies.orders.settlePaid(command.checkoutSessionId, dependencies.now());
+      const order = settlement.order;
+      if (!order) return "duplicate";
+
+      if (settlement.status === "oversold" || settlement.status === "refund_due") {
+        // `oversold`: the seats were sold between checkout and payment.
+        // `refund_due`: the session was paid in the moment our hold lapsed.
+        // Either way the whole charge is returned, never a partial credit.
+        if (command.paymentIntentId) await dependencies.refundPaymentIntent(command.paymentIntentId);
+        const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
+        await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
+        return "processed";
+      }
+      if (settlement.status === "paid") {
+        const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
+        await sendTicketEmail(dependencies, "event_ticket_confirmation", order, event);
+      }
+      return "processed";
+    },
+  };
+}
