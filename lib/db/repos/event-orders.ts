@@ -179,7 +179,18 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
     },
     insertSeats: async (orderId, seats) => { for (const [index, seat] of seats.entries()) await tx.execute(sql`INSERT INTO ${eventOrderSeats} (order_id, position, attendee_name, attendee_email, created_at) VALUES (${orderId}, ${index + 1}, ${seat.name}, ${seat.email}, NOW())`); },
     attachSession: async (orderId, sessionId, url) => { await tx.execute(sql`UPDATE ${eventOrders} SET stripe_checkout_session_id = ${sessionId}, stripe_checkout_url = ${url}, updated_at = NOW() WHERE id = ${orderId}`); },
-    markStatus: async (orderId, status, patch) => { await tx.execute(sql`UPDATE ${eventOrders} SET status = ${status}, paid_at = ${patch.paidAt ?? null}, refunded_at = ${patch.refundedAt ?? null}, refund_reason = ${patch.refundReason ?? null}, updated_at = NOW() WHERE id = ${orderId}`); },
+    // The patch is genuinely partial: only the columns it supplies are written.
+    // Setting every column on every transition would let the NEXT transition
+    // erase the previous one -- a staff refund (D-4c) would null `paid_at`, and
+    // an expiry would null a refund beside it.
+    markStatus: async (orderId, status, patch) => {
+      const assignments = [sql`status = ${status}`];
+      if (patch.paidAt !== undefined) assignments.push(sql`paid_at = ${patch.paidAt}`);
+      if (patch.refundedAt !== undefined) assignments.push(sql`refunded_at = ${patch.refundedAt}`);
+      if (patch.refundReason !== undefined) assignments.push(sql`refund_reason = ${patch.refundReason}`);
+      assignments.push(sql`updated_at = NOW()`);
+      await tx.execute(sql`UPDATE ${eventOrders} SET ${sql.join(assignments, sql`, `)} WHERE id = ${orderId}`);
+    },
     insertAudit: async (input) => { await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${input.actorUserId}, ${input.actorType}, ${input.action}, ${input.targetType}, ${input.targetId}, ${JSON.stringify(input.metadata)}::jsonb)`); },
     eventSummary: async (eventId) => rows<Record<string, unknown>>(await tx.execute(sql`
       SELECT title_en AS "titleEn", title_zh AS "titleZh", starts_at AS "startsAt", slug FROM ${events} WHERE id = ${eventId} LIMIT 1
