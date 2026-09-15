@@ -11,6 +11,7 @@ type PhaseB1EventColumns = Pick<
   | "onlineUrl"
   | "registrationMode"
   | "externalRegistrationUrl"
+  | "ticketPriceHkdCents"
   | "tags"
   | "publishedAt"
   | "reviewedAt"
@@ -40,6 +41,7 @@ export function legacyDerivedEventColumns(row: Pick<Event, "published" | "member
     onlineUrl: null,
     registrationMode: "rsvp",
     externalRegistrationUrl: null,
+    ticketPriceHkdCents: null,
     tags: [],
     publishedAt: row.published ? row.createdAt : null,
     reviewedAt: null,
