@@ -1606,6 +1606,14 @@
       "RATE_LIMITED": "Too many attempts from this connection. Try again in a few minutes."
     }
   },
+  "Pass": {
+    "eyebrow": "Event pass",
+    "attendee": "Attendee",
+    "seat": "Seat {position}",
+    "qrLabel": "Check-in QR code",
+    "checkedIn": "Checked in",
+    "presentAtDoor": "Present this pass at the door."
+  },
   "News": {
     "metaTitle": "News | WiseTech Hong Kong",
     "metaDescription": "Read the latest news from WTIA.",
