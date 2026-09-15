@@ -1056,7 +1056,61 @@ Then the send itself, which Task 7's resend also calls, so both paths send the i
     }
 ```
 
-Define `sendSeatPass` immediately above `createTicketProcessor` (its exact body is in Task 7 Step 1, which is where the resend consumes it too). `sendTicketEmail` gains an optional fourth parameter:
+Then `sendSeatPass`, defined here immediately above `createTicketProcessor` because the webhook is its first caller (Task 7's resend consumes the same function, so both paths send the identical email):
+
+```ts
+/**
+ * One seat's pass, with the attempt key supplied by the caller: the webhook
+ * passes the settlement instant (so a redelivery is a no-op) and the staff
+ * resend passes a fresh attempt (so a deliberate resend is never suppressed).
+ *
+ * The seat id is the only input: the order and the event are resolved here, so
+ * a caller cannot pair a seat with the wrong order.
+ */
+export async function sendSeatPass(
+  dependencies: TicketProcessorDependencies,
+  input: Readonly<{seatId: string; attemptKey: string}>,
+): Promise<void> {
+  const seat = await dependencies.orders.seatForPass(input.seatId);
+  // `seatForPass` returns null for a seat whose order is not `paid`, the same
+  // refusal the pass page makes; nothing is sent for a refunded seat.
+  if (!seat) return;
+  const event = await dependencies.orders.eventSummary(seat.eventId, seat.buyerLocale);
+  const passUrl = `${dependencies.appUrl}${localizedPath(seat.buyerLocale, `/pass/${signPassToken({seatId: seat.seatId, eventId: seat.eventId}, dependencies.passSecret)}`)}`;
+  await sendTicketEmail(dependencies, "event_ticket_pass", seat.order, event, {
+    attendeeName: seat.attendeeName,
+    to: seat.attendeeEmail,
+    ctaUrl: passUrl,
+    idempotencyKey: `ticket-pass:${seat.seatId}:${input.attemptKey}`,
+  });
+}
+```
+
+with `seatForPass(seatId)` on `lib/db/repos/event-orders.ts`, returning `{seatId, attendeeName, attendeeEmail, eventId, buyerLocale, order} | null` and `null` unless the order is `paid`:
+
+```ts
+    /** One seat with its order, for a single pass. `null` unless the order is paid. */
+    async seatForPass(seatId: string): Promise<Readonly<{seatId: string; attendeeName: string; attendeeEmail: string; eventId: string; buyerLocale: "en" | "zh-HK"; order: OrderRecord}> | null> {
+      return runTransaction((tx) => tx.seatForPass(seatId));
+    },
+```
+
+```ts
+    seatForPass: async (seatId) => {
+      const row = rows<Record<string, unknown>>(await tx.execute(sql`
+        SELECT s.id AS "seatId", s.attendee_name AS "attendeeName", s.attendee_email AS "attendeeEmail",
+               o.event_id AS "eventId", o.buyer_locale AS "buyerLocale", o.*
+        FROM ${eventOrderSeats} s JOIN ${eventOrders} o ON o.id = s.order_id
+        WHERE s.id = ${seatId} AND o.status = 'paid' LIMIT 1
+      `))[0];
+      if (!row) return null;
+      // `o.*` arrives snake_case; `orderFrom` is the existing folder that already
+      // handles those columns, so the order is folded once, not mapped twice.
+      return {seatId: String(row.seatId), attendeeName: String(row.attendeeName), attendeeEmail: String(row.attendeeEmail), eventId: String(row.eventId), buyerLocale: row.buyerLocale === "zh-HK" ? "zh-HK" : "en", order: orderFrom(row)};
+    },
+```
+
+and the matching member on `EventOrdersTransaction`. `sendTicketEmail` gains an optional fourth parameter:
 
 ```ts
   overrides: Readonly<{attendeeName?: string; to?: string; ctaUrl?: string; idempotencyKey?: string}> = {},
@@ -1092,56 +1146,7 @@ git commit -m "feat(email): a pass per attendee, and a receipt that names them"
 
 The webhook and the resend must send the identical email, so the send lives in one exported function in `lib/billing/ticket-webhook-processor.ts` and both call it:
 
-```ts
-/**
- * One seat's pass, with the attempt key supplied by the caller: the webhook
- * passes the settlement instant (so a redelivery is a no-op) and the staff
- * resend passes a fresh attempt (so a deliberate resend is never suppressed).
- *
- * The seat id is the only input: the order and the event are resolved here, so
- * a caller cannot pair a seat with the wrong order.
- */
-export async function sendSeatPass(
-  dependencies: TicketProcessorDependencies,
-  input: Readonly<{seatId: string; attemptKey: string}>,
-): Promise<void> {
-  const seat = await dependencies.orders.seatForPass(input.seatId);
-  // `seatForPass` returns null for a seat whose order is not `paid`, which is
-  // the same refusal the pass page makes; nothing is sent for a refunded seat.
-  if (!seat) return;
-  const event = await dependencies.orders.eventSummary(seat.eventId, seat.buyerLocale);
-  const passUrl = `${dependencies.appUrl}${localizedPath(seat.buyerLocale, `/pass/${signPassToken({seatId: seat.seatId, eventId: seat.eventId}, dependencies.passSecret)}`)}`;
-  await sendTicketEmail(dependencies, "event_ticket_pass", seat.order, event, {
-    attendeeName: seat.attendeeName,
-    to: seat.attendeeEmail,
-    ctaUrl: passUrl,
-    idempotencyKey: `ticket-pass:${seat.seatId}:${input.attemptKey}`,
-  });
-}
-```
-
-Add `seatForPass(seatId)` to `lib/db/repos/event-orders.ts` returning `{seatId, attendeeName, attendeeEmail, eventId, buyerLocale, order} | null` and returning `null` unless the order's status is `paid`:
-
-```ts
-    /** One seat with its order, for a single pass. `null` unless the order is paid. */
-    async seatForPass(seatId: string): Promise<Readonly<{seatId: string; attendeeName: string; attendeeEmail: string; eventId: string; buyerLocale: "en" | "zh-HK"; order: OrderRecord}> | null> {
-      return runTransaction((tx) => tx.seatForPass(seatId));
-    },
-```
-
-```ts
-    seatForPass: async (seatId) => (await tx.execute<OrderRecord & {seatId: string; attendeeName: string; attendeeEmail: string; eventId: string; buyerLocale: "en" | "zh-HK"}>(sql`
-      SELECT s.id AS "seatId", s.attendee_name AS "attendeeName", s.attendee_email AS "attendeeEmail",
-             o.event_id AS "eventId", o.buyer_locale AS "buyerLocale",
-             o.id, o.event_id, o.buyer_profile_id, o.buyer_name, o.buyer_email, o.amount_hkd_cents,
-             o.currency, o.status, o.stripe_checkout_session_id, o.stripe_checkout_url, o.idempotency_key,
-             o.expires_at, o.paid_at, o.refunded_at, o.refund_reason
-      FROM ${eventOrderSeats} s JOIN ${eventOrders} o ON o.id = s.order_id
-      WHERE s.id = ${seatId} AND o.status = 'paid' LIMIT 1
-    `)).rows[0] ?? null,
-```
-
-The row's snake_case order columns still need `orderFrom` folding; reuse the existing helper rather than mapping twice.
+This task **consumes** `sendSeatPass` and `seatForPass`, both of which Task 6 already defines in `lib/billing/ticket-webhook-processor.ts` and `lib/db/repos/event-orders.ts`. Do not redefine either here; the resend exists so a staff member can send the same email again, and re-implementing the send would let the two paths drift.
 
 Export a lazily-built production dependency bag from the processor module so the action can reuse it (`buildTicketProcessor` stays as it is; this is only its dependency object):
 
