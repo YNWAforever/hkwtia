@@ -10,6 +10,7 @@ vi.mock("@/lib/db/repos/events", () => ({eventsRepository: events}));
 vi.mock("@/lib/auth/actor", () => ({getActor: auth.getActor, requireActor: vi.fn()}));
 vi.mock("@/lib/events/guest-registration-action", () => ({submitGuestRsvpAction: vi.fn()}));
 vi.mock("@/components/marketing/guest-rsvp-form", () => ({GuestRsvpForm: ({eventId}: {eventId: string}) => <div data-event-id={eventId} data-guest-rsvp-form="true" />}));
+vi.mock("@/components/marketing/ticket-checkout-form", () => ({TicketCheckoutForm: ({eventId, pricePerSeat}: {eventId: string; pricePerSeat: string}) => <div data-event-id={eventId} data-price-per-seat={pricePerSeat} data-ticket-checkout-form="true" />}));
 vi.mock("next-intl/server", () => ({getTranslations: async () => (key: string) => key, setRequestLocale: () => undefined}));
 vi.mock("next/navigation", () => ({notFound: () => { throw new Error("NEXT_NOT_FOUND"); }}));
 vi.mock("next/image", () => ({default: ({unoptimized, ...props}: {unoptimized?: boolean; [key: string]: unknown}) => <img {...props} data-unoptimized={String(unoptimized)} />}));
@@ -114,6 +115,22 @@ describe("event detail page donor markup", () => {
     auth.getActor.mockResolvedValue({kind: "member", userId: "u", profileId: "p"});
     const member = renderToStaticMarkup(await EventPage(props));
     expect(member).toContain('href="https://tickets.example.hk/public-event"');
+    expect(member).not.toContain('data-registration-form="true"');
+  });
+
+  // Phase D-4a: a ticketed event is bought by a member or a guest alike, so the
+  // ticket arm is selected ahead of the actor-dependent guest/member arms.
+  it("renders the ticket checkout form for a ticketed event, whoever is visiting", async () => {
+    events.getPublicBySlug.mockResolvedValue(event("2030-01-02T09:00:00.000Z", {registrationMode: "ticketed", ticketPriceHkdCents: 25_000}));
+
+    const anonymous = renderToStaticMarkup(await EventPage(props));
+    expect(anonymous).toContain('data-ticket-checkout-form="true"');
+    expect(anonymous).not.toContain('data-guest-rsvp-form="true"');
+    expect(anonymous).not.toContain('data-registration-form="true"');
+
+    auth.getActor.mockResolvedValue({kind: "member", userId: "u", profileId: "p"});
+    const member = renderToStaticMarkup(await EventPage(props));
+    expect(member).toContain('data-ticket-checkout-form="true"');
     expect(member).not.toContain('data-registration-form="true"');
   });
 

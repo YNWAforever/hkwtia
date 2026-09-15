@@ -12,5 +12,7 @@ export const publicEventDefaults = {
   tags: [],
   registrationMode: "rsvp",
   externalRegistrationUrl: null,
+  // Phase D-4a: an RSVP event has no price; only the detail page's ticket arm reads it.
+  ticketPriceHkdCents: null,
   organiser: null,
-} as const satisfies Pick<PublicEventProjection, "format" | "onlineUrl" | "tags" | "registrationMode" | "externalRegistrationUrl" | "organiser">;
+} as const satisfies Pick<PublicEventProjection, "format" | "onlineUrl" | "tags" | "registrationMode" | "externalRegistrationUrl" | "ticketPriceHkdCents" | "organiser">;

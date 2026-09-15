@@ -181,6 +181,7 @@ function projectPublicEvent(row: PublicEventMemoryRow, locale: string): PublicEv
     tags: [...event.tags],
     registrationMode: event.registrationMode,
     externalRegistrationUrl: event.externalRegistrationUrl,
+    ticketPriceHkdCents: event.ticketPriceHkdCents,
     // The name is always projected; the slug only where the company really has
     // a published page, so the detail view can never link to a 404 (D-11).
     organiser: organiser ? {name: organiser.name, slug: publicMemberPageSlug(organiser)} : null,

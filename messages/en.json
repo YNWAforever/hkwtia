@@ -1587,6 +1587,26 @@
       "error": "We could not register you for this event. Please try again."
     }
   },
+  "Ticket": {
+    "heading": "Buy tickets",
+    "buyerName": "Your name",
+    "buyerEmail": "Your email address",
+    "seatCount": "Number of seats",
+    "attendeeName": "Attendee name",
+    "attendeeEmail": "Attendee email",
+    "website": "Leave this field empty",
+    "price": "Price per seat: {price}",
+    "pricePerSeat": "Price per seat",
+    "submit": "Continue to payment",
+    "submitting": "Redirecting to payment…",
+    "errors": {
+      "INVALID": "Check the buyer and attendee details, then try again.",
+      "SOLD_OUT": "There are not enough seats left for this order.",
+      "EVENT_CLOSED": "Ticket sales for this event have closed.",
+      "UNAVAILABLE": "Ticket checkout is not available right now. Please try again shortly.",
+      "RATE_LIMITED": "Too many attempts from this connection. Try again in a few minutes."
+    }
+  },
   "News": {
     "metaTitle": "News | WiseTech Hong Kong",
     "metaDescription": "Read the latest news from WTIA.",
