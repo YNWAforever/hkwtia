@@ -1,7 +1,14 @@
-import {getTableConfig} from "drizzle-orm/pg-core";
+import {PgDialect, getTableConfig} from "drizzle-orm/pg-core";
 import {describe, expect, it} from "vitest";
 
 import {eventOrderSeats, eventOrders, eventOrderStatusEnum, eventRefundReasonEnum, events} from "@/lib/db/schema-core";
+
+const dialect = new PgDialect();
+const checkBody = (table: Parameters<typeof getTableConfig>[0], name: string): string => {
+  const check = getTableConfig(table).checks.find((entry) => entry.name === name);
+  if (!check) throw new Error(`missing check ${name}`);
+  return dialect.sqlToQuery(check.value).sql;
+};
 
 describe("phase D-4a ticket schema contract", () => {
   it("defines the order status and refund reason vocabularies", () => {
@@ -20,6 +27,22 @@ describe("phase D-4a ticket schema contract", () => {
   it("requires a positive price exactly when the event is ticketed", () => {
     const checks = getTableConfig(events).checks.map((check) => check.name);
     expect(checks).toContain("events_ticketed_price_check");
+  });
+
+  // The name pins that a check exists; only its body pins what it says. A
+  // mistyped predicate under the right name would pass every other assertion
+  // here and sell a free seat or a negative-priced order.
+  it("renders the ticketed-price check as the mode predicate and a positivity test", () => {
+    const body = checkBody(events, "events_ticketed_price_check");
+    expect(body).toMatch(/<>\s*'ticketed'/);
+    expect(body).toContain("IS NOT NULL");
+    expect(body).toMatch(/>\s*0/);
+  });
+
+  it("requires a positive order amount", () => {
+    const body = checkBody(eventOrders, "event_orders_amount_check");
+    expect(body).toMatch(/amount_hkd_cents/);
+    expect(body).toMatch(/>\s*0/);
   });
 
   it("keeps one seat position per order and links seats to the order", () => {
