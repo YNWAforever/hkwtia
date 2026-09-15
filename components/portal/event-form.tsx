@@ -3,6 +3,7 @@
 import {useActionState, useState} from "react";
 
 import {HeroUpload, type HeroUploadLabels} from "@/components/portal/hero-upload";
+import {WriterAssist, type WriterAssistProps} from "@/components/portal/writer-assist";
 import type {MemberEventFormState} from "@/lib/events/member-actions";
 import type {MemberEventView} from "@/lib/events/member-contract";
 
@@ -34,11 +35,13 @@ const labelClass = "space-y-2 text-sm font-medium";
  * paste an id from an earlier upload, and `HeroUpload` beneath it fills it in
  * after a successful post to /api/portal/media/upload (S-3).
  */
-export function EventForm({values, labels, action, canSubmit, notice = null}: Readonly<{
-  values: MemberEventView | null; labels: EventFormLabels; action: Action; canSubmit: boolean; notice?: string | null;
+export function EventForm({values, labels, action, canSubmit, notice = null, writer = null}: Readonly<{
+  values: MemberEventView | null; labels: EventFormLabels; action: Action; canSubmit: boolean; notice?: string | null; writer?: WriterAssistProps | null;
 }>) {
   const [state, dispatch, pending] = useActionState(action, initial);
   const [heroMediaId, setHeroMediaId] = useState(values?.heroMediaId ?? "");
+  const [descriptionEn, setDescriptionEn] = useState(values?.descriptionEn ?? "");
+  const [descriptionZh, setDescriptionZh] = useState(values?.descriptionZh ?? "");
   // `startsAt`/`endsAt` post under the parser's names while their defaults come
   // from the `*Local` view fields, hence the separate `name` argument.
   const field = (valueKey: TextField, label: string, type = "text", extra: Readonly<{name?: string; required?: boolean; pattern?: string; min?: number}> = {}) => (
@@ -48,14 +51,15 @@ export function EventForm({values, labels, action, canSubmit, notice = null}: Re
     </label>
   );
   return (
+    <>
     <form action={dispatch} className="glass-card grid gap-5 p-5 sm:grid-cols-2 sm:p-8" noValidate>
       {notice && state.status !== "error" ? <p className="text-sm text-muted-foreground sm:col-span-2" role="status">{notice}</p> : null}
       {values ? <input name="eventId" type="hidden" value={values.id} /> : null}
       {field("slug", labels.slug, "text", {required: true, pattern: "[a-z0-9]+(?:-[a-z0-9]+)*"})}
       {field("titleEn", labels.titleEn, "text", {required: true})}
       {field("titleZh", labels.titleZh)}
-      <label className={`${labelClass} sm:col-span-2`}><span>{labels.descriptionEn}</span><textarea className={textareaClass} defaultValue={values?.descriptionEn ?? ""} name="descriptionEn" required /></label>
-      <label className={`${labelClass} sm:col-span-2`}><span>{labels.descriptionZh}</span><textarea className={textareaClass} defaultValue={values?.descriptionZh ?? ""} name="descriptionZh" /></label>
+      <label className={`${labelClass} sm:col-span-2`}><span>{labels.descriptionEn}</span><textarea className={textareaClass} name="descriptionEn" onChange={(event) => setDescriptionEn(event.target.value)} required value={descriptionEn} /></label>
+      <label className={`${labelClass} sm:col-span-2`}><span>{labels.descriptionZh}</span><textarea className={textareaClass} name="descriptionZh" onChange={(event) => setDescriptionZh(event.target.value)} value={descriptionZh} /></label>
       {field("startsAtLocal", labels.startsAt, "datetime-local", {name: "startsAt", required: true})}
       {field("endsAtLocal", labels.endsAt, "datetime-local", {name: "endsAt"})}
       {field("venue", labels.venue)}
@@ -93,5 +97,20 @@ export function EventForm({values, labels, action, canSubmit, notice = null}: Re
         <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending || !canSubmit} name="intent" type="submit" value="submit">{pending ? labels.saving : labels.submit}</button>
       </div>
     </form>
+    {writer ? (
+      <div className="mt-4">
+        <WriterAssist
+          kind="event"
+          labels={writer.labels}
+          quotaLabel={writer.quotaLabel}
+          exhausted={writer.exhausted}
+          onGenerated={(copy) => {
+            if (copy.descriptionEn) setDescriptionEn(copy.descriptionEn);
+            if (copy.descriptionZh) setDescriptionZh(copy.descriptionZh);
+          }}
+        />
+      </div>
+    ) : null}
+    </>
   );
 }

@@ -3,7 +3,7 @@
 import {requireActor} from "@/lib/auth/actor";
 import {runWriterAssist, type WriterActionState} from "@/lib/portal/writer-action-core";
 
-export type {WriterActionState};
+export type {WriterActionErrorCode, WriterActionState} from "@/lib/portal/writer-action-core";
 
 /**
  * Only the formData-shaped wrapper is exported. `"use server"` publishes every

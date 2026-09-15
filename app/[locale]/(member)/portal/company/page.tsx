@@ -1,12 +1,13 @@
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {redirect} from "next/navigation";
 
-import {CompanyProfileForm} from "@/components/portal/company-profile-form";
+import {CompanyForms} from "@/components/portal/company-forms";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
 import {saveCompanyProfileAction} from "@/lib/portal/company-profile-actions";
 import {updateCompanyAction} from "@/lib/portal/commands";
 import {getDashboard} from "@/lib/portal/queries";
+import {writerAssistProps} from "@/lib/portal/writer-ui";
 import {localizedPath} from "@/lib/urls";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +45,11 @@ export default async function CompanyPage({params}: Props) {
   // page would render one company's page while the Save button wrote another's.
   // With nothing managed it falls back to a read-only view of the first.
   const profileCompany = dashboard.companies.find((entry) => entry.canManage) ?? company;
+  const writerT = await getTranslations({locale, namespace: "Portal.writer"});
+  // A read-only view cannot save a generation, so do not spend the memberships
+  // read and the run count on a control that is discarded. `CompanyForms` also
+  // refuses the control unless both of its forms are savable.
+  const writer = actor.kind === "member" && canManage ? await writerAssistProps("profile", actor, writerT) : null;
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <header className="space-y-3">
@@ -51,40 +57,24 @@ export default async function CompanyPage({params}: Props) {
         <h1 className="font-serif text-4xl font-semibold tracking-tight">{t("companyTitle")}</h1>
         <p className="text-muted-foreground">{t("companyDescription")}</p>
       </header>
-      <form action={canManage ? updateCompanyAction : undefined} className="glass-card grid gap-5 p-5 sm:grid-cols-2 sm:p-8">
-        <input name="companyId" type="hidden" value={company.id} />
-        <label className="space-y-2 text-sm font-medium sm:col-span-2">
-          <span>{t("fields.legalName")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3 disabled:opacity-60" defaultValue={company.legalName} disabled={!canManage} name="legalName" required />
-        </label>
-        <label className="space-y-2 text-sm font-medium sm:col-span-2">
-          <span>{t("fields.displayName")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3 disabled:opacity-60" defaultValue={company.displayName} disabled={!canManage} name="displayName" required />
-        </label>
-        <label className="space-y-2 text-sm font-medium">
-          <span>{t("fields.website")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3 disabled:opacity-60" defaultValue={company.website ?? ""} disabled={!canManage} name="website" type="url" />
-        </label>
-        <label className="space-y-2 text-sm font-medium">
-          <span>{t("fields.industry")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3 disabled:opacity-60" defaultValue={company.industry ?? ""} disabled={!canManage} name="industry" />
-        </label>
-        <label className="space-y-2 text-sm font-medium">
-          <span>{t("fields.sizeBand")}</span>
-          <input className="min-h-11 w-full rounded-md border border-input bg-background px-3 disabled:opacity-60" defaultValue={company.sizeBand ?? ""} disabled={!canManage} name="sizeBand" />
-        </label>
-        <label className="space-y-2 text-sm font-medium sm:col-span-2">
-          <span>{t("fields.description")}</span>
-          <textarea className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2 disabled:opacity-60" defaultValue={company.description ?? ""} disabled={!canManage} name="description" />
-        </label>
-        {canManage ? <button className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 sm:col-span-2 sm:justify-self-start" type="submit">{t("save")}</button> : <p className="text-sm text-muted-foreground sm:col-span-2">{t("readOnly")}</p>}
-      </form>
       <section className="space-y-3">
         <h2 className="font-serif text-3xl font-semibold tracking-tight">{tProfile("title")}</h2>
         <p className="text-muted-foreground">{tProfile("description")}</p>
-        <CompanyProfileForm
-          action={saveCompanyProfileAction.bind(null, locale)}
-          labels={{
+      </section>
+      <CompanyForms
+        details={{
+          values: {companyId: company.id, legalName: company.legalName, displayName: company.displayName, website: company.website ?? "", industry: company.industry ?? "", sizeBand: company.sizeBand ?? "", description: company.description ?? ""},
+          labels: {legalName: t("fields.legalName"), displayName: t("fields.displayName"), website: t("fields.website"), industry: t("fields.industry"), sizeBand: t("fields.sizeBand"), description: t("fields.description"), save: t("save"), readOnly: t("readOnly")},
+          action: canManage ? updateCompanyAction : undefined,
+          canManage,
+        }}
+        profile={{
+          values: {
+            slug: profileCompany.slug ?? "", taglineEn: profileCompany.taglineEn ?? "", taglineZhHk: profileCompany.taglineZhHk ?? "",
+            descriptionZhHk: profileCompany.descriptionZhHk ?? "", website: profileCompany.website ?? "", logoMediaId: profileCompany.logoMediaId ?? "",
+            tags: profileCompany.tags, status: profileCompany.publicProfileStatus, rejectionReason: profileCompany.profileRejectionReason,
+          },
+          labels: {
             fields: {
               slug: tProfile("fields.slug"), taglineEn: tProfile("fields.taglineEn"), taglineZhHk: tProfile("fields.taglineZhHk"),
               descriptionZhHk: tProfile("fields.descriptionZhHk"), website: tProfile("fields.website"), tags: tProfile("fields.tags"),
@@ -114,17 +104,14 @@ export default async function CompanyPage({params}: Props) {
               COMPANY_SLUG_TAKEN: tProfile("errors.COMPANY_SLUG_TAKEN"),
               COMPANY_LOGO_INVALID: tProfile("errors.COMPANY_LOGO_INVALID"),
             },
-          }}
-          locale={locale}
-          publicHref={profileCompany.publicProfileStatus === "published" && profileCompany.slug ? localizedPath(locale, `/members/${profileCompany.slug}`) : null}
-          readOnly={!profileCompany.canManage}
-          values={{
-            slug: profileCompany.slug ?? "", taglineEn: profileCompany.taglineEn ?? "", taglineZhHk: profileCompany.taglineZhHk ?? "",
-            descriptionZhHk: profileCompany.descriptionZhHk ?? "", website: profileCompany.website ?? "", logoMediaId: profileCompany.logoMediaId ?? "",
-            tags: profileCompany.tags, status: profileCompany.publicProfileStatus, rejectionReason: profileCompany.profileRejectionReason,
-          }}
-        />
-      </section>
+          },
+          action: saveCompanyProfileAction.bind(null, locale),
+          locale,
+          readOnly: !profileCompany.canManage,
+          publicHref: profileCompany.publicProfileStatus === "published" && profileCompany.slug ? localizedPath(locale, `/members/${profileCompany.slug}`) : null,
+        }}
+        writer={writer}
+      />
     </div>
   );
 }

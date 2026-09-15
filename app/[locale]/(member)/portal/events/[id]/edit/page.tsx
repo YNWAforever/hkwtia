@@ -5,10 +5,13 @@ import {ZodError} from "zod";
 import {EventForm} from "@/components/portal/event-form";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
+import {isAdminActor} from "@/lib/auth/authorize";
 import {eventsRepository} from "@/lib/db/repos/events";
 import {saveMemberEventAction} from "@/lib/events/member-actions";
 import {memberEventViewFromRow} from "@/lib/events/member-contract";
 import {loadMemberEventsContext} from "@/lib/events/member-core";
+import {requireMember} from "@/lib/membership/lifecycle";
+import {writerAssistProps} from "@/lib/portal/writer-ui";
 import {localizedPath} from "@/lib/urls";
 
 import {eventFormLabels} from "../../labels";
@@ -27,6 +30,8 @@ export default async function EditMemberEventPage({params, searchParams}: Props)
   // /portal/events/<uuid>/edit, so sign-in returns to this row.
   const actor = await getActor();
   if (!actor) redirect(`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent(`/portal/events/${id}/edit`)}`);
+  if (isAdminActor(actor)) redirect(localizedPath(locale, "/admin"));
+  requireMember(actor);
   const t = await getTranslations({locale, namespace: "Portal.memberEvents"});
   // FORBIDDEN (another company's row, or an admin-authored one) and an invalid
   // id (a ZodError from the id schema) both render as not-found: the member
@@ -41,6 +46,8 @@ export default async function EditMemberEventPage({params, searchParams}: Props)
   const context = await loadMemberEventsContext(actor).catch(() => null);
   const saved = (await searchParams).saved;
   const notice = saved === "submit" ? t("submitted") : saved === "draft" ? t("draftSaved") : null;
+  const writerT = await getTranslations({locale, namespace: "Portal.writer"});
+  const writer = await writerAssistProps("event", actor, writerT);
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <header className="space-y-3">
@@ -48,7 +55,7 @@ export default async function EditMemberEventPage({params, searchParams}: Props)
         <h1 className="font-serif text-4xl font-semibold tracking-tight">{values.titleEn}</h1>
         {values.rejectionReason ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{t("rejectedWith", {reason: values.rejectionReason})}</p> : null}
       </header>
-      <EventForm action={saveMemberEventAction.bind(null, locale)} canSubmit={Boolean(context?.canPublish) || values.status === "pending_review"} labels={eventFormLabels(t)} notice={notice} values={values} />
+      <EventForm action={saveMemberEventAction.bind(null, locale)} canSubmit={Boolean(context?.canPublish) || values.status === "pending_review"} labels={eventFormLabels(t)} notice={notice} values={values} writer={writer} />
     </div>
   );
 }

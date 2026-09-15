@@ -58,6 +58,21 @@ export function CompanyProfileForm({values, labels, action, locale, readOnly, pu
   const [state, dispatch, pending] = useActionState(action, initial);
   const [logoMediaId, setLogoMediaId] = useState(values.logoMediaId);
   const [slug, setSlug] = useState(values.slug);
+  const [taglineEn, setTaglineEn] = useState(values.taglineEn);
+  const [taglineZhHk, setTaglineZhHk] = useState(values.taglineZhHk);
+  const [descriptionZhHk, setDescriptionZhHk] = useState(values.descriptionZhHk);
+  const [seed, setSeed] = useState({taglineEn: values.taglineEn, taglineZhHk: values.taglineZhHk, descriptionZhHk: values.descriptionZhHk});
+  // Re-seed when the parent replaces the values — a generated copy arrives that
+  // way. Adjusted during render, not in an effect: the effect form is the
+  // `react-hooks/set-state-in-effect` hard error, and React re-runs this render
+  // before committing, so no stale copy is shown. The guard compares primitives,
+  // so typing here does not reset the fields on every render.
+  if (seed.taglineEn !== values.taglineEn || seed.taglineZhHk !== values.taglineZhHk || seed.descriptionZhHk !== values.descriptionZhHk) {
+    setSeed({taglineEn: values.taglineEn, taglineZhHk: values.taglineZhHk, descriptionZhHk: values.descriptionZhHk});
+    setTaglineEn(values.taglineEn);
+    setTaglineZhHk(values.taglineZhHk);
+    setDescriptionZhHk(values.descriptionZhHk);
+  }
   const canPublish = !readOnly && slug.trim().length > 0 && (values.status === "hidden" || values.status === "rejected");
   return (
     <form action={dispatch} className="glass-card grid gap-5 p-5 sm:grid-cols-2 sm:p-8" noValidate>
@@ -80,15 +95,15 @@ export function CompanyProfileForm({values, labels, action, locale, readOnly, pu
       </label>
       <label className={labelClass}>
         <span>{labels.fields.taglineEn}</span>
-        <input className={inputClass} defaultValue={values.taglineEn} disabled={readOnly} maxLength={160} name="taglineEn" type="text" />
+        <input className={inputClass} disabled={readOnly} maxLength={160} name="taglineEn" onChange={(event) => setTaglineEn(event.target.value)} type="text" value={taglineEn} />
       </label>
       <label className={labelClass}>
         <span>{labels.fields.taglineZhHk}</span>
-        <input className={inputClass} defaultValue={values.taglineZhHk} disabled={readOnly} maxLength={160} name="taglineZhHk" type="text" />
+        <input className={inputClass} disabled={readOnly} maxLength={160} name="taglineZhHk" onChange={(event) => setTaglineZhHk(event.target.value)} type="text" value={taglineZhHk} />
       </label>
       <label className={`${labelClass} sm:col-span-2`}>
         <span>{labels.fields.descriptionZhHk}</span>
-        <textarea className={textareaClass} defaultValue={values.descriptionZhHk} disabled={readOnly} maxLength={2000} name="descriptionZhHk" />
+        <textarea className={textareaClass} disabled={readOnly} maxLength={2000} name="descriptionZhHk" onChange={(event) => setDescriptionZhHk(event.target.value)} value={descriptionZhHk} />
       </label>
       <fieldset className="space-y-3 text-sm sm:col-span-2" disabled={readOnly}>
         <legend className="font-medium">{labels.fields.tags}</legend>

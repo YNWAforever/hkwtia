@@ -1880,6 +1880,23 @@
     "retry": "Try again"
   },
   "Portal": {
+    "writer": {
+      "label": "Write with AI",
+      "briefLabel": "What is this about?",
+      "briefPlaceholder": "A sentence or two of notes; the assistant writes the English and Chinese drafts.",
+      "generate": "Generate",
+      "generating": "Generating…",
+      "quota": "{remaining} of {cap} generations left this month",
+      "quotaUnlimited": "Unlimited generations",
+      "errors": {
+        "INVALID": "Please add a short brief first.",
+        "FORBIDDEN": "You do not have access to this.",
+        "NOT_ENTITLED": "AI writing is not included in your plan.",
+        "QUOTA_EXCEEDED": "You have used all your generations this month.",
+        "UNAVAILABLE": "AI writing is temporarily unavailable.",
+        "FAILED": "That did not work. Please try again."
+      }
+    },
     "navigation": "Member portal navigation",
     "dashboard": "Dashboard",
     "profile": "My profile",

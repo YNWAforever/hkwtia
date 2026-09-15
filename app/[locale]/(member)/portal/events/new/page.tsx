@@ -4,8 +4,11 @@ import {redirect} from "next/navigation";
 import {EventForm} from "@/components/portal/event-form";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
+import {isAdminActor} from "@/lib/auth/authorize";
 import {saveMemberEventAction} from "@/lib/events/member-actions";
 import {loadMemberEventsContext} from "@/lib/events/member-core";
+import {requireMember} from "@/lib/membership/lifecycle";
+import {writerAssistProps} from "@/lib/portal/writer-ui";
 import {localizedPath} from "@/lib/urls";
 
 import {eventFormLabels} from "../labels";
@@ -24,12 +27,16 @@ export default async function NewMemberEventPage({params}: Props) {
   // deep path, so sign-in returns to it rather than to /portal/events.
   const actor = await getActor();
   if (!actor) redirect(`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent("/portal/events/new")}`);
+  if (isAdminActor(actor)) redirect(localizedPath(locale, "/admin"));
+  requireMember(actor);
   const t = await getTranslations({locale, namespace: "Portal.memberEvents"});
   // NO_MANAGED_COMPANY and MEMBERSHIP_INACTIVE both mean "nothing to publish from".
   const context = await loadMemberEventsContext(actor).catch(() => null);
   if (!context) {
     return <section className="glass-card space-y-3 p-6"><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("eyebrow")}</p><h1 className="font-serif text-4xl font-semibold">{t("newTitle")}</h1><p className="text-muted-foreground">{t("noCompany")}</p></section>;
   }
+  const writerT = await getTranslations({locale, namespace: "Portal.writer"});
+  const writer = await writerAssistProps("event", actor, writerT);
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <header className="space-y-3">
@@ -37,7 +44,7 @@ export default async function NewMemberEventPage({params}: Props) {
         <h1 className="font-serif text-4xl font-semibold tracking-tight">{t("newTitle")}</h1>
         <p className="text-muted-foreground">{t("quota", {used: context.usedThisQuarter, limit: Number.isFinite(context.limit) ? String(context.limit) : t("unlimited")})}</p>
       </header>
-      <EventForm action={saveMemberEventAction.bind(null, locale)} canSubmit={context.canPublish} labels={eventFormLabels(t)} values={null} />
+      <EventForm action={saveMemberEventAction.bind(null, locale)} canSubmit={context.canPublish} labels={eventFormLabels(t)} values={null} writer={writer} />
     </div>
   );
 }

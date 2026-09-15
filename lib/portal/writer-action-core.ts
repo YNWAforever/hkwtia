@@ -10,9 +10,22 @@ import {membershipsRepository} from "@/lib/db/repos/memberships";
 
 type MemberActor = Extract<Actor, {kind: "member"}>;
 
+/**
+ * The one owner of the writer's error vocabulary. The UI's label map is a
+ * `Record` over this union, so adding a code here and forgetting its string in
+ * both bundles is a compile error rather than a silent `FAILED` at runtime.
+ */
+export type WriterActionErrorCode =
+  | "INVALID"
+  | "FORBIDDEN"
+  | "NOT_ENTITLED"
+  | "QUOTA_EXCEEDED"
+  | "UNAVAILABLE"
+  | "FAILED";
+
 export type WriterActionState =
   | Readonly<{status: "ok"; copy: Record<string, string>}>
-  | Readonly<{status: "error"; code: "INVALID" | "FORBIDDEN" | "NOT_ENTITLED" | "QUOTA_EXCEEDED" | "UNAVAILABLE" | "FAILED"}>;
+  | Readonly<{status: "error"; code: WriterActionErrorCode}>;
 
 export type WriterActionDependencies = Readonly<{
   plansFor: (actor: MemberActor) => Promise<readonly MembershipPlanCode[]>;
@@ -46,6 +59,24 @@ function quotaFor(plans: readonly MembershipPlanCode[]): number {
   return plans.reduce((best, plan) => Math.max(best, aiWriterRunsPerMonth(plan)), 0);
 }
 
+export type WriterQuota = Readonly<{cap: number; used: number; remaining: number}>;
+
+/**
+ * The member's writer allowance for the current Hong Kong month.
+ *
+ * Member-typed rather than actor-checked: every caller already holds a member
+ * actor from `requireActor`/`requireMember`, and the one read that needs the
+ * `FORBIDDEN` guard belongs to `runWriterAssist`.
+ */
+export async function writerQuotaFor(
+  actor: MemberActor,
+  dependencies: WriterActionDependencies = defaultDependencies,
+): Promise<WriterQuota> {
+  const cap = quotaFor(await dependencies.plansFor(actor));
+  const used = cap === 0 ? 0 : await dependencies.countRuns(actor, startOfHongKongMonth(dependencies.now()));
+  return {cap, used, remaining: Math.max(0, cap - used)};
+}
+
 export async function runWriterAssist(
   actor: Actor,
   input: unknown,
@@ -60,33 +91,18 @@ export async function runWriterAssist(
   const parsed = writerBriefSchema.safeParse(input);
   if (!parsed.success) return {status: "error", code: "INVALID"};
 
-  let plans: readonly MembershipPlanCode[];
+  let quota: WriterQuota;
   try {
-    plans = await dependencies.plansFor(actor);
+    quota = await writerQuotaFor(actor, dependencies);
   } catch {
-    // A transient membership read is a server fault, but it must still reach the
-    // member as a state to render rather than as a rejected action that discards
-    // the brief they typed.
+    // A transient membership or run-count read is a server fault, but it must
+    // still reach the member as a state to render rather than as a rejected
+    // action that discards the brief they typed. `entitlementsFor` throwing on
+    // an unknown plan code is covered here too.
     return {status: "error", code: "FAILED"};
   }
-  let cap: number;
-  try {
-    cap = quotaFor(plans);
-  } catch {
-    // entitlementsFor throws on a plan code it does not know; the plan column is
-    // an enum today, but nothing may escape the action as a rejected promise.
-    return {status: "error", code: "FAILED"};
-  }
-  if (cap === 0) return {status: "error", code: "NOT_ENTITLED"};
-
-  const since = startOfHongKongMonth(dependencies.now());
-  let runs: number;
-  try {
-    runs = await dependencies.countRuns(actor, since);
-  } catch {
-    return {status: "error", code: "FAILED"};
-  }
-  if (runs >= cap) return {status: "error", code: "QUOTA_EXCEEDED"};
+  if (quota.cap === 0) return {status: "error", code: "NOT_ENTITLED"};
+  if (quota.remaining <= 0) return {status: "error", code: "QUOTA_EXCEEDED"};
 
   try {
     const copy = await dependencies.generate({memberActor: actor, kind: parsed.data.kind, brief: parsed.data.brief});
