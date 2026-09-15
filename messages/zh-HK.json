@@ -2326,7 +2326,12 @@
       "alreadyCheckedIn": "已簽到。",
       "checkIn": "簽到",
       "undo": "取消簽到",
-      "backToEvent": "返回活動"
+      "backToEvent": "返回活動",
+      "checkInSuccess": "已完成簽到。",
+      "undoSuccess": "已取消簽到。",
+      "notCheckedIn": "此座位尚未簽到。",
+      "notAdmissible": "此座位不可入場。",
+      "updateError": "未能更新此座位。"
     },
     "templates": {
       "eyebrow": "WhatsApp 發送",

@@ -3,10 +3,10 @@ import {notFound} from "next/navigation";
 
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {CheckInForm} from "@/components/admin/check-in-form";
 import type {AppLocale} from "@/i18n/routing";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {loadCheckIn} from "@/lib/tickets/check-in-page";
-import {submitSeatCheckInAction, submitSeatUndoAction} from "@/lib/tickets/check-in-actions";
 import {localizedPath} from "@/lib/urls";
 
 export default async function CheckInPage({params}: Readonly<{params: Promise<{locale: string; token: string}>}>) {
@@ -19,10 +19,15 @@ export default async function CheckInPage({params}: Readonly<{params: Promise<{l
   if (!result) notFound();
   const t = await getTranslations({locale, namespace: "Admin.checkIn"});
   const title = locale === "zh-HK" ? result.seat.eventTitleZh ?? result.seat.eventTitleEn : result.seat.eventTitleEn;
-  // The wrappers return a state for `useActionState`; these plain forms discard
-  // it, and a React `form action` must return `void`, so each is adapted here.
-  const checkIn = async (formData: FormData) => { await submitSeatCheckInAction({}, formData); };
-  const undo = async (formData: FormData) => { await submitSeatUndoAction({}, formData); };
+  const messages = {
+    successMessage: t("checkInSuccess"),
+    successMessageAlready: t("alreadyCheckedIn"),
+    successMessageUndone: t("undoSuccess"),
+    notCheckedInMessage: t("notCheckedIn"),
+    notAdmissibleMessage: t("notAdmissible"),
+    errorMessage: t("updateError"),
+  };
+  const labels = {checkIn: t("checkIn"), undo: t("undo"), alreadyCheckedIn: t("alreadyCheckedIn")};
   return (
     <main className="mx-auto max-w-md space-y-6 p-6">
       <header className="space-y-1">
@@ -32,20 +37,14 @@ export default async function CheckInPage({params}: Readonly<{params: Promise<{l
       </header>
       <section className="glass-card space-y-4 p-6">
         <p className="text-lg font-medium">{result.seat.attendeeName}</p>
-        {result.state === "already_checked_in" ? (
-          <>
-            <p role="status" className="text-sm text-muted-foreground">{t("alreadyCheckedIn")}</p>
-            <form action={undo}>
-              <input name="seatId" type="hidden" value={result.seat.seatId}/>
-              <button className="min-h-11 rounded-md border px-4" type="submit">{t("undo")}</button>
-            </form>
-          </>
-        ) : (
-          <form action={checkIn}>
-            <input name="seatId" type="hidden" value={result.seat.seatId}/>
-            <button className="min-h-11 rounded-md bg-primary px-4 text-primary-foreground" type="submit">{t("checkIn")}</button>
-          </form>
-        )}
+        <CheckInForm
+          checkedIn={result.state === "already_checked_in"}
+          checkInPath={`/${locale}/admin/check-in/${token}`}
+          eventPath={`/${locale}/admin/events-mgmt/${result.seat.eventId}`}
+          labels={labels}
+          messages={messages}
+          seatId={result.seat.seatId}
+        />
         <Link className="text-sm underline" href={localizedPath(locale, `/admin/events-mgmt/${result.seat.eventId}`)}>{t("backToEvent")}</Link>
       </section>
     </main>

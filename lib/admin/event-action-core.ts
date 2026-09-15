@@ -43,19 +43,37 @@ export async function runCheckInAction(_state: EventActionState, formData: FormD
   }
 }
 
-type SeatCheckInOptions = SimpleOptions & Readonly<{successMessageAlready: string; successMessageUndone: string; notAdmissibleMessage: string}>;
+/**
+ * The seat outcomes each carry their own wording. The messages are supplied by
+ * the caller (localized in the page) rather than hardcoded here, so every
+ * branch a seat can land on has a distinct string and none of them can be
+ * mistaken for another.
+ */
+export type SeatCheckInMessages = Readonly<{
+  successMessage: string;
+  successMessageAlready: string;
+  successMessageUndone: string;
+  notCheckedInMessage: string;
+  notAdmissibleMessage: string;
+  errorMessage: string;
+}>;
+
+type SeatCheckInOptions = SeatCheckInMessages & Readonly<{mutate: (formData: FormData) => Promise<unknown>}>;
 
 /**
  * The seat check-in outcome is a string the repository decides under the row
  * lock, so the core maps it to a message rather than guessing from the form.
- * `already_checked_in` and `undone` are successes: a double scan and a
- * deliberate reversal both asked for a state the seat is now in.
+ * `already_checked_in`, `undone` and `not_checked_in` are successes: a double
+ * scan, a deliberate reversal and an undo of an already-clear seat all asked
+ * for a state the seat is now in. Each still gets its own message — an undo
+ * that says "Checked in." would describe the opposite of what happened.
  */
 export async function runSeatCheckInAction(_state: EventActionState, formData: FormData, options: SeatCheckInOptions): Promise<EventActionState> {
   try {
     const outcome = await options.mutate(formData);
     if (outcome === "already_checked_in") return {status: "success", message: options.successMessageAlready};
     if (outcome === "undone") return {status: "success", message: options.successMessageUndone};
+    if (outcome === "not_checked_in") return {status: "success", message: options.notCheckedInMessage};
     if (outcome === "not_admissible") return {status: "error", message: options.notAdmissibleMessage};
     return {status: "success", message: options.successMessage};
   } catch (error) {

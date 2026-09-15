@@ -1,3 +1,4 @@
+import {renderToStaticMarkup} from "react-dom/server";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const navigation = vi.hoisted(() => ({
@@ -9,6 +10,7 @@ const auth = vi.hoisted(() => ({
 }));
 
 vi.mock("next/navigation", () => navigation);
+vi.mock("next/cache", () => ({revalidatePath: vi.fn()}));
 vi.mock("next-intl/server", () => ({
   setRequestLocale: () => undefined,
   getTranslations: vi.fn(async () => (key: string) => key),
@@ -25,7 +27,17 @@ vi.mock("@/lib/tickets/check-in-page", async (importOriginal) => {
   return {...actual, loadCheckIn: vi.fn(actual.loadCheckIn)};
 });
 
+// Wrapping rather than replacing keeps the real client form in the rendered
+// tree while exposing the props the page crossed the server/client boundary
+// with. A function in those props is exactly the defect this suite exists to
+// catch: React's RSC serializer rejects it, but a plain SSR render does not.
+vi.mock("@/components/admin/check-in-form", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/admin/check-in-form")>();
+  return {...actual, CheckInForm: vi.fn(actual.CheckInForm)};
+});
+
 import CheckInPage from "@/app/[locale]/(admin)/admin/check-in/[token]/page";
+import {CheckInForm} from "@/components/admin/check-in-form";
 import type {PassView} from "@/lib/db/repos/ticket-check-in";
 import {createCheckInLoader, loadCheckIn, type CheckInPageDependencies} from "@/lib/tickets/check-in-page";
 import type {PassClaims} from "@/lib/tickets/pass-token";
@@ -61,6 +73,19 @@ function loader(overrides: Partial<CheckInPageDependencies> = {}) {
   });
 }
 
+function pageProps(locale = "en", token = "tok") {
+  return {params: Promise.resolve({locale, token})};
+}
+
+function functionValues(value: unknown, seen = new Set<unknown>()): readonly string[] {
+  if (typeof value === "function") return ["<function>"];
+  if (typeof value !== "object" || value === null) return [];
+  if (seen.has(value)) return [];
+  seen.add(value);
+  if (Array.isArray(value)) return value.flatMap((item) => functionValues(item, seen));
+  return Object.values(value).flatMap((item) => functionValues(item, seen));
+}
+
 describe("the check-in loader", () => {
   it("resolves ready for an admissible seat that has not been checked in", async () => {
     await expect(loader()("tok")).resolves.toEqual({state: "ready", seat: seat()});
@@ -89,13 +114,14 @@ describe("the check-in route", () => {
   beforeEach(() => {
     auth.requireAdminPageActor.mockResolvedValue({kind: "staff", userId: "auth-1", profileId: "p-1"});
     vi.mocked(loadCheckIn).mockClear();
+    vi.mocked(CheckInForm).mockClear();
   });
 
   it("checks the staff session before reading any seat", async () => {
     auth.requireAdminPageActor.mockRejectedValueOnce(new Error("UNAUTHORIZED_SENTINEL"));
 
     await expect(
-      CheckInPage({params: Promise.resolve({locale: "en", token: "tok"})}),
+      CheckInPage(pageProps()),
     ).rejects.toThrow("UNAUTHORIZED_SENTINEL");
     expect(loadCheckIn).not.toHaveBeenCalled();
   });
@@ -104,8 +130,47 @@ describe("the check-in route", () => {
     vi.mocked(loadCheckIn).mockResolvedValueOnce(null);
 
     await expect(
-      CheckInPage({params: Promise.resolve({locale: "en", token: "bad"})}),
+      CheckInPage(pageProps("en", "bad")),
     ).rejects.toThrow("NEXT_NOT_FOUND_SENTINEL");
     expect(navigation.notFound).toHaveBeenCalledOnce();
+  });
+
+  it("renders the check-in form with the seat and the button", async () => {
+    vi.mocked(loadCheckIn).mockResolvedValueOnce({state: "ready", seat: seat()});
+
+    const html = renderToStaticMarkup(await CheckInPage(pageProps()));
+
+    expect(html).toContain(`name="seatId"`);
+    expect(html).toContain(`value="${claims.seatId}"`);
+    expect(html).toContain(">checkIn<");
+    expect(html).not.toContain(">undo<");
+  });
+
+  it("renders the undo form once the seat is already checked in", async () => {
+    vi.mocked(loadCheckIn).mockResolvedValueOnce({
+      state: "already_checked_in",
+      seat: seat({checkedInAt: new Date("2026-09-16T01:00:00.000Z")}),
+    });
+
+    const html = renderToStaticMarkup(await CheckInPage(pageProps()));
+
+    expect(html).toContain(">undo<");
+    expect(html).toContain(">alreadyCheckedIn<");
+    expect(html).not.toContain(">checkIn<");
+  });
+
+  // The page must hand the client form data only. A locally-defined closure in
+  // those props is not a Server Function, and React's RSC serializer rejects it
+  // at render — but a plain `renderToStaticMarkup` renders it happily, which is
+  // why the assertion is on the props rather than on the markup.
+  it("crosses the client boundary with serializable data only", async () => {
+    vi.mocked(loadCheckIn).mockResolvedValueOnce({state: "ready", seat: seat()});
+
+    renderToStaticMarkup(await CheckInPage(pageProps()));
+
+    expect(CheckInForm).toHaveBeenCalled();
+    const props = vi.mocked(CheckInForm).mock.calls.at(-1)?.[0];
+    expect(props).toBeDefined();
+    expect(functionValues(props)).toEqual([]);
   });
 });

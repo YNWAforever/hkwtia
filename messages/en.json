@@ -2325,7 +2325,12 @@
       "alreadyCheckedIn": "Already checked in.",
       "checkIn": "Check in",
       "undo": "Undo check-in",
-      "backToEvent": "Back to the event"
+      "backToEvent": "Back to the event",
+      "checkInSuccess": "Checked in.",
+      "undoSuccess": "Check-in undone.",
+      "notCheckedIn": "This seat was not checked in.",
+      "notAdmissible": "This seat is not admissible.",
+      "updateError": "Could not update this seat."
     },
     "templates": {
       "eyebrow": "WhatsApp delivery",
