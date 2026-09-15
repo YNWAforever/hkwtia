@@ -71,6 +71,9 @@ describe("the door list", () => {
     const union = unions[0];
     expect(union).toContain("UNION ALL");
     expect(union).toContain("'ticket'");
+    // Without the event_id conjunct every event's paid seats land on this
+    // event's door list, and the behavioural cases above would still be green.
+    expect(union).toMatch(/"event_orders"\."event_id"\s*=\s*\$\d+/);
     expect(union).toMatch(/"event_orders"\."status"\s*=\s*'paid'/);
     expect(union).toMatch(/FROM\s+"event_order_seats"\s+JOIN\s+"event_orders"\s+ON\s+"event_orders"\."id"\s*=\s*"event_order_seats"\."order_id"/);
     expect(union).toMatch(/SELECT\s+'ticket',\s*NULL::text,\s*NULL::uuid,\s*"event_order_seats"\."id",\s*"event_orders"\."id"/);

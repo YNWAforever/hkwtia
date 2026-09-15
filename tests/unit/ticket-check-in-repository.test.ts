@@ -32,21 +32,23 @@ function seatRow(overrides: Partial<SeatRow> = {}): SeatRow {
 }
 
 function fake(overrides: Partial<{orderStatus: string; checkedInAt: Date | null; eventStatus: string; eventId: string; row: SeatRow | null}> = {}) {
+  const row = overrides.row === null
+    ? null
+    : seatRow({
+      eventId: overrides.eventId ?? eventId,
+      orderStatus: overrides.orderStatus ?? "paid",
+      eventStatus: overrides.eventStatus ?? "published",
+      checkedInAt: overrides.checkedInAt ?? null,
+    });
+  // Both spies record the seat id they were handed: a selector that asked for
+  // the wrong seat must not stay green. `passForSeat` must use `readSeat` and
+  // never take the write lock.
+  const readSeat = vi.fn(async () => row);
+  const lockSeat = vi.fn(async () => row);
   const update = vi.fn(async () => undefined);
   const insertAudit = vi.fn(async () => undefined);
-  const transaction: TicketCheckInTransaction = {
-    lockSeat: vi.fn(async () => overrides.row === null
-      ? null
-      : seatRow({
-        eventId: overrides.eventId ?? eventId,
-        orderStatus: overrides.orderStatus ?? "paid",
-        eventStatus: overrides.eventStatus ?? "published",
-        checkedInAt: overrides.checkedInAt ?? null,
-      })),
-    update,
-    insertAudit,
-  };
-  return {transaction, update, insertAudit};
+  const transaction: TicketCheckInTransaction = {readSeat, lockSeat, update, insertAudit};
+  return {transaction, readSeat, lockSeat, update, insertAudit};
 }
 
 function repository(transaction: TicketCheckInTransaction) {
@@ -55,7 +57,7 @@ function repository(transaction: TicketCheckInTransaction) {
 
 describe("ticket check-in repository", () => {
   it("passForSeat returns the seat facts for a paid order", async () => {
-    const {transaction} = fake();
+    const {transaction, readSeat, lockSeat} = fake();
     await expect(repository(transaction).passForSeat({seatId, eventId})).resolves.toEqual({
       seatId,
       orderId,
@@ -70,6 +72,10 @@ describe("ticket check-in repository", () => {
       eventVenue: "HKSTP",
       buyerLocale: "zh-HK",
     });
+    // A public read must not take the row lock, and it must select the seat it
+    // was asked for — a wrong-seat selector would otherwise stay green.
+    expect(readSeat).toHaveBeenCalledWith(seatId);
+    expect(lockSeat).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -98,8 +104,9 @@ describe("ticket check-in repository", () => {
   });
 
   it("checkInSeat sets checked_in_at and audits event.seat.checked_in", async () => {
-    const {transaction, update, insertAudit} = fake();
+    const {transaction, lockSeat, update, insertAudit} = fake();
     await expect(repository(transaction).checkInSeat(staff, {seatId})).resolves.toEqual({disposition: "checked_in"});
+    expect(lockSeat).toHaveBeenCalledWith(seatId);
     expect(update).toHaveBeenCalledTimes(1);
     expect(update).toHaveBeenCalledWith(seatId, {checkedInAt: occurredAt});
     expect(insertAudit).toHaveBeenCalledTimes(1);
@@ -125,6 +132,7 @@ describe("ticket check-in repository", () => {
     const update = vi.fn(async (_seatId: string, patch: Readonly<{checkedInAt: Date | null}>) => { checkedInAt = patch.checkedInAt; });
     const insertAudit = vi.fn(async () => undefined);
     const transaction: TicketCheckInTransaction = {
+      readSeat: async () => seatRow({checkedInAt}),
       lockSeat: async () => seatRow({checkedInAt}),
       update,
       insertAudit,

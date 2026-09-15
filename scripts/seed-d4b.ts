@@ -96,7 +96,7 @@ export async function seedD4b(pool: D4bSeedPool, options: Readonly<{asOf: Date}>
        (id, event_id, buyer_profile_id, buyer_name, buyer_email, buyer_locale, amount_hkd_cents,
         currency, status, idempotency_key, expires_at, paid_at, created_at, updated_at)
        VALUES ($1, $2, NULL, $3, $4, 'en', 50000, 'hkd', 'paid'::event_order_status, $5, $6, $6, $6, $6)
-       ON CONFLICT (id) DO UPDATE SET
+       ON CONFLICT (idempotency_key) DO UPDATE SET
          event_id = EXCLUDED.event_id, buyer_name = EXCLUDED.buyer_name,
          buyer_email = EXCLUDED.buyer_email, buyer_locale = EXCLUDED.buyer_locale,
          amount_hkd_cents = EXCLUDED.amount_hkd_cents, status = EXCLUDED.status,
