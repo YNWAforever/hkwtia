@@ -42,3 +42,24 @@ export async function runCheckInAction(_state: EventActionState, formData: FormD
     return {status: "error", message: options.errorMessage};
   }
 }
+
+type SeatCheckInOptions = SimpleOptions & Readonly<{successMessageAlready: string; successMessageUndone: string; notAdmissibleMessage: string}>;
+
+/**
+ * The seat check-in outcome is a string the repository decides under the row
+ * lock, so the core maps it to a message rather than guessing from the form.
+ * `already_checked_in` and `undone` are successes: a double scan and a
+ * deliberate reversal both asked for a state the seat is now in.
+ */
+export async function runSeatCheckInAction(_state: EventActionState, formData: FormData, options: SeatCheckInOptions): Promise<EventActionState> {
+  try {
+    const outcome = await options.mutate(formData);
+    if (outcome === "already_checked_in") return {status: "success", message: options.successMessageAlready};
+    if (outcome === "undone") return {status: "success", message: options.successMessageUndone};
+    if (outcome === "not_admissible") return {status: "error", message: options.notAdmissibleMessage};
+    return {status: "success", message: options.successMessage};
+  } catch (error) {
+    if (isAuthorizationDenial(error)) throw error;
+    return {status: "error", message: options.errorMessage};
+  }
+}

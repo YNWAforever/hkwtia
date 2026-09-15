@@ -2320,6 +2320,14 @@
       "templates": "WhatsApp 範本",
       "campaigns": "推廣活動"
     },
+    "checkIn": {
+      "eyebrow": "現場簽到",
+      "seat": "座位 {position}",
+      "alreadyCheckedIn": "已簽到。",
+      "checkIn": "簽到",
+      "undo": "取消簽到",
+      "backToEvent": "返回活動"
+    },
     "templates": {
       "eyebrow": "WhatsApp 發送",
       "title": "WhatsApp 範本",

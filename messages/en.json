@@ -2319,6 +2319,14 @@
       "templates": "WhatsApp templates",
       "campaigns": "Campaigns"
     },
+    "checkIn": {
+      "eyebrow": "Door check-in",
+      "seat": "Seat {position}",
+      "alreadyCheckedIn": "Already checked in.",
+      "checkIn": "Check in",
+      "undo": "Undo check-in",
+      "backToEvent": "Back to the event"
+    },
     "templates": {
       "eyebrow": "WhatsApp delivery",
       "title": "WhatsApp templates",
