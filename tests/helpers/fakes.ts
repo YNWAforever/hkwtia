@@ -45,7 +45,8 @@ export class FakeStripeBillingAdapter implements StripeBillingAdapter {
   readonly checkoutRequests: CheckoutSessionInput[] = [];
   readonly ticketRequests: EventTicketSessionInput[] = [];
   readonly portalRequests: PortalSessionInput[] = [];
-  readonly refundedPaymentIntents: string[] = [];
+  readonly   refundedPaymentIntents: string[] = [];
+  paymentIntentId: string | null = "pi_test_intent";
   invoices: InvoiceRecord[] = [];
   checkoutSessionId = "cs_test_session";
   checkoutUrl = "https://checkout.stripe.test/session";
@@ -61,6 +62,10 @@ export class FakeStripeBillingAdapter implements StripeBillingAdapter {
   async createEventTicketSession(input: EventTicketSessionInput): Promise<{id: string; url: string}> {
     this.ticketRequests.push(structuredClone(input));
     return {id: this.ticketSessionId, url: this.ticketUrl};
+  }
+
+  async paymentIntentForSession(_sessionId: string): Promise<string | null> {
+    return this.paymentIntentId;
   }
 
   async refundPaymentIntent(paymentIntentId: string, _idempotencyKey: string): Promise<void> {
