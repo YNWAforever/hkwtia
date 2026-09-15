@@ -2811,7 +2811,8 @@
       "kind": "類別",
       "kinds": {
         "member": "會員",
-        "guest": "訪客"
+        "guest": "訪客",
+        "ticket": "門票"
       },
       "organisation": "機構",
       "statuses": {

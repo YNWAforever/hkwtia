@@ -2810,7 +2810,8 @@
       "kind": "Type",
       "kinds": {
         "member": "Member",
-        "guest": "Guest"
+        "guest": "Guest",
+        "ticket": "Ticket"
       },
       "organisation": "Organisation",
       "statuses": {
