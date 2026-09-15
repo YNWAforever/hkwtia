@@ -378,7 +378,7 @@ git commit -m "feat(tickets): refund a whole order, provider first"
 
 **Interfaces:**
 - Consumes: `refundOrder`, `RefundResult` (Task 2); `listEventOrders`, `EventOrderRow` (Task 1).
-- Produces: `submitRefundOrderAction(eventPath, previous, formData)` (bound by the page to its own path, mirroring `createEventAction`); `OrdersTable({action, rows, labels})`; the `Admin.eventsMgmt.orders.*` labels.
+- Produces: `submitRefundOrderAction(eventPath, messages, previous, formData)` (bound by the page to its own path and locale, mirroring `createEventAction` and `submitSeatCheckInAction`); `RefundOutcomeMessages`; `OrdersTable({action, rows, labels})`; the `Admin.eventsMgmt.orders.*` labels, including `refundOutcomes`.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -386,8 +386,9 @@ git commit -m "feat(tickets): refund a whole order, provider first"
 - the module exports only the formData wrapper plus its state type (compare `Object.keys` of the module namespace to the allowed set — the actor-boundary test's shape);
 - without a staff session it refuses and never calls `refundOrder`;
 - a `paid` order returns the success state and revalidates the event page;
-- each of `already_refunded`, `not_admissible`, `provider_failed` and `not_found` maps to its **own** message, with `provider_failed`'s text saying nothing was charged back;
-- it parses the seat id as a uuid and rejects a malformed one without calling the service.
+- each of `already_refunded`, `not_admissible`, `provider_failed` and `not_found` maps to its **own** message **from the set the caller bound in**, with `provider_failed`'s text saying nothing was charged back — and a zh-HK set is reported in Chinese, so a regression to a hard-coded English literal fails;
+- it parses the seat id as a uuid and rejects a malformed one without calling the service;
+- an untouched note input (`""`) reaches the service as no note, not as an empty string.
 
 `tests/unit/orders-table.test.tsx` asserts:
 - an order row renders the buyer, the seat names, the amount and the status label;
@@ -402,11 +403,12 @@ Expected: FAIL — `Failed to resolve import`.
 
 - [ ] **Step 3: Implement**
 
-Create `lib/tickets/refund-actions.ts` with a single exported wrapper:
+Create `lib/tickets/refund-actions.ts` with a single exported wrapper. The five outcome strings arrive as a bound argument, exactly as `submitSeatCheckInAction` receives its `SeatCheckInMessages`: a hard-coded English literal here would sit in a `.ts` module the visible-string audit never scans, so a zh-HK staff member would read English for every refund result.
 
 ```ts
 "use server";
 
+import {revalidatePath} from "next/cache";
 import {z} from "zod";
 
 import {requireAdminActor} from "@/lib/auth/actor";
@@ -414,32 +416,44 @@ import {refundOrder, type RefundResult} from "@/lib/tickets/refund-core";
 
 export type RefundOrderState = Readonly<{status: "idle"} | {status: "ok"; message: string} | {status: "error"; message: string}>;
 
+export type RefundOutcomeMessages = Readonly<{
+  refunded: string;
+  alreadyRefunded: string;
+  notAdmissible: string;
+  providerFailed: string;
+  notFound: string;
+}>;
+
 const refundInput = z.object({orderId: z.string().uuid(), note: z.string().trim().max(500).optional()}).strict();
 
-const messages: Readonly<Record<RefundResult["status"], string>> = {
-  refunded: "Refunded.",
-  already_refunded: "This order was already refunded.",
-  not_admissible: "This order is not payable, so there is nothing to refund.",
-  provider_failed: "The refund did not go through, so nothing was charged back. You can try again.",
-  not_found: "That order could not be found.",
+const messageKey: Readonly<Record<RefundResult["status"], keyof RefundOutcomeMessages>> = {
+  refunded: "refunded",
+  already_refunded: "alreadyRefunded",
+  not_admissible: "notAdmissible",
+  provider_failed: "providerFailed",
+  not_found: "notFound",
 };
 
-export async function submitRefundOrderAction(eventPath: string, _previous: RefundOrderState, formData: FormData): Promise<RefundOrderState> {
+/** An untouched note input submits `""`, which means "no note" -- `null` in the audit row. */
+function noteFrom(formData: FormData): string | undefined {
+  const value = formData.get("note");
+  return typeof value === "string" && value.trim() !== "" ? value : undefined;
+}
+
+export async function submitRefundOrderAction(eventPath: string, messages: RefundOutcomeMessages, _previous: RefundOrderState, formData: FormData): Promise<RefundOrderState> {
   const actor = await requireAdminActor();
-  const parsed = refundInput.safeParse({orderId: formData.get("orderId"), note: formData.get("note") ?? undefined});
-  if (!parsed.success) return {status: "error", message: messages.not_found};
+  const parsed = refundInput.safeParse({orderId: formData.get("orderId"), note: noteFrom(formData)});
+  if (!parsed.success) return {status: "error", message: messages.notFound};
   const result = await refundOrder(actor, parsed.data);
-  // The page binds the internal path, the way `createEventAction.bind(null, path, …)`
-  // does; revalidating it refreshes both the Orders row and the door list, which
-  // change together when a refund lands.
-  revalidatePath(eventPath);
+  // Revalidate only when something changed: a refusal leaves the page correct.
+  if (result.status === "refunded" || result.status === "already_refunded") revalidatePath(eventPath);
   return result.status === "refunded"
     ? {status: "ok", message: messages.refunded}
-    : {status: "error", message: messages[result.status]};
+    : {status: "error", message: messages[messageKey[result.status]]};
 }
 ```
 
-with `import {revalidatePath} from "next/cache";` at the top. The page binds it: `const refundAction = submitRefundOrderAction.bind(null, path);` where `path` is the internal path the page already computes for its other bound actions, and `OrdersTable` receives `refundAction` and passes it to `<form action={refundAction.bind(null, {})}>` so the `useActionState` signature is satisfied.
+The page resolves the messages from `Admin.eventsMgmt.orders.refundOutcomes` and binds them: `const refundAction = submitRefundOrderAction.bind(null, eventPath, refundMessages);`, where `eventPath` is the internal path the page already computes for its other bound actions. `OrdersTable` receives `refundAction` as `action` and passes it to `useActionState`, which produces the `dispatch` the form action uses.
 
 Create `components/admin/orders-table.tsx` as a client component with `useActionState`, rendering the rows and a two-step confirm:
 
@@ -481,10 +495,14 @@ export function OrdersTable({action, rows, labels}: Readonly<{action: (state: Re
           <th scope="col">{labels.amount}</th><th scope="col">{labels.status}</th><th scope="col"/>
         </tr></thead>
         <tbody>
-          {rows.map(({order, seatCount, seatNames}) => (
+          {rows.map(({order, seatCount, seatNames}) => {
+            // The row's seat cell and the confirmation must name the same seats, so
+            // the summarising `+N` is part of the one string both render.
+            const seatsText = seatNames.join(", ") + (seatCount > seatNames.length ? ` +${seatCount - seatNames.length}` : "");
+            return (
             <tr key={order.id}>
               <td>{order.buyerName}</td>
-              <td>{seatNames.join(", ")}{seatCount > seatNames.length ? ` +${seatCount - seatNames.length}` : ""}</td>
+              <td>{seatsText}</td>
               <td>{amountLabel(order.amountHkdCents)}</td>
               <td>{labels.statuses[order.status] ?? order.status}</td>
               <td>
@@ -494,7 +512,11 @@ export function OrdersTable({action, rows, labels}: Readonly<{action: (state: Re
                   confirming === order.id ? (
                     <form action={dispatch} className="space-y-2">
                       <input name="orderId" type="hidden" value={order.id}/>
-                      <p role="alert">{labels.confirm.replace("{buyer}", order.buyerName).replace("{seats}", seatNames.join(", ")).replace("{amount}", amountLabel(order.amountHkdCents))}</p>
+                      {/* Function replacements: a name containing `$&` or `$'` is inserted literally. */}
+                      <p role="status">{labels.confirm
+                        .replace("{buyer}", () => order.buyerName)
+                        .replace("{seats}", () => seatsText)
+                        .replace("{amount}", () => amountLabel(order.amountHkdCents))}</p>
                       <label>{labels.note}<input className="ml-2 rounded-md border p-1" name="note" type="text"/></label>
                       <button className="min-h-11 rounded-md bg-destructive px-4 text-destructive-foreground" disabled={pending} type="submit">{labels.refund}</button>
                       <button className="ml-2 min-h-11 rounded-md border px-4" onClick={() => setConfirming(null)} type="button">{labels.cancel}</button>
@@ -505,7 +527,8 @@ export function OrdersTable({action, rows, labels}: Readonly<{action: (state: Re
                 ) : null}
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
       {state.status !== "idle" ? <p className="mt-3 text-sm" role={state.status === "error" ? "alert" : "status"}>{state.message}</p> : null}
@@ -514,7 +537,7 @@ export function OrdersTable({action, rows, labels}: Readonly<{action: (state: Re
 }
 ```
 
-Add `Admin.eventsMgmt.orders` to both bundles in parity — `heading` and `unavailable` (used by the page), and the table's own `caption`, `buyer`, `seats`, `amount`, `status`, `refundedOn`, `refund`, `confirm`, `cancel`, `note`, plus `statuses.{pending,paid,expired,failed,refunded}` (five statuses, because a missing one renders a placeholder).
+Add `Admin.eventsMgmt.orders` to both bundles in parity — `heading` and `unavailable` (used by the page), the table's own `caption`, `buyer`, `seats`, `amount`, `status`, `refundedOn`, `refund`, `confirm`, `cancel`, `note`, `statuses.{pending,paid,expired,failed,refunded}` (five statuses, because a missing one renders a placeholder), and `refundOutcomes.{refunded,alreadyRefunded,notAdmissible,providerFailed,notFound}` — the action's outcome copy, which the page resolves and binds in so no refund result is shown in the wrong language. The `providerFailed` copy must say nothing was charged back.
 
 Render it in `app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx` for a ticketed event, above the attendees section, with a read failure rendered as an error rather than an empty section:
 
