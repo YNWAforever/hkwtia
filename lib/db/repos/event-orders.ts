@@ -1,6 +1,6 @@
 import "server-only";
 
-import {sql} from "drizzle-orm";
+import {eq, sql} from "drizzle-orm";
 import {z} from "zod";
 
 import {MAX_TICKET_SEATS, TICKET_HOLD_MS} from "@/config/tickets";
@@ -21,6 +21,11 @@ export type OrderRecord = Readonly<{
 export type LockedEvent = Readonly<{
   id: string; capacity: number | null; published: boolean; startsAt: Date; endsAt: Date | null;
   registrationMode: string; ticketPriceHkdCents: number | null;
+}>;
+
+export type TicketEvent = Readonly<{
+  id: string; slug: string; titleEn: string; titleZh: string; startsAt: Date;
+  published: boolean; registrationMode: string; ticketPriceHkdCents: number | null;
 }>;
 
 export type SeatInput = Readonly<{name: string; email: string}>;
@@ -173,6 +178,21 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       SELECT title_en AS "titleEn", title_zh AS "titleZh", starts_at AS "startsAt", slug FROM ${events} WHERE id = ${eventId} LIMIT 1
     `)).map((row) => eventSummaryFrom(row)),
   }));
+}
+
+/**
+ * The event a ticket checkout is being bought for. `title_zh` is nullable, so an
+ * untranslated event shows its English title rather than naming the Stripe line
+ * item "null" -- the same fallback `eventSummary` makes for the receipt.
+ */
+export async function ticketEventFor(eventId: string): Promise<TicketEvent | null> {
+  const db = await getDb();
+  const row = (await db.select({
+    id: events.id, slug: events.slug, titleEn: events.titleEn, titleZh: events.titleZh, startsAt: events.startsAt,
+    published: events.published, registrationMode: events.registrationMode, ticketPriceHkdCents: events.ticketPriceHkdCents,
+  }).from(events).where(eq(events.id, eventId)).limit(1))[0];
+  if (!row) return null;
+  return {...row, titleZh: row.titleZh ?? row.titleEn};
 }
 
 export function createEventOrdersRepository(runTransaction: <T>(work: (tx: EventOrdersTransaction) => Promise<T>) => Promise<T> = defaultTransaction) {
