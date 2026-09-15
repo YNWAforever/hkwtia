@@ -23,12 +23,29 @@ const en = {locale: "en" as const, prefix: "", passUrlVar: "D4B_PASS_URL_ONE"};
 const zh = {locale: "zh-HK" as const, prefix: "/zh", passUrlVar: "D4B_PASS_URL_TWO_ZH"};
 const passVars = [en.passUrlVar, zh.passUrlVar];
 
+// A refund can only complete against a payment that exists at the provider.
+// `refundOrder` refuses (`provider_failed`) BEFORE it writes when the order
+// carries no retrievable Stripe checkout session (`lib/tickets/refund-core.ts`),
+// and `db:seed:d4b` is provider-free by design (D-4b design §8), so its order has
+// none: the confirmation would answer `providerFailed` and the row would stay
+// `paid`, so asserting `Refunded.` would fail rather than prove anything. The walk
+// therefore requires an explicit, out-of-band fact that a provider-backed order
+// was seeded, decided before any navigation or write so it can never mask a real
+// failure as a skip. No fixture in this tree sets it, because minting a refundable
+// Stripe test payment is D-4c's one remaining gap: the refund's provider
+// interaction is UNVERIFIED in this environment and this skip is the honest record
+// of that, exactly as D-4a discloses that it stops at the checkout redirect.
+const REFUNDABLE_ORDER_ENV = "D4B_ORDER_REFUNDABLE";
+const refundableOrderMissing =
+  `${REFUNDABLE_ORDER_ENV}=true (a d4b order backed by a retrievable Stripe test payment; db:seed:d4b is provider-free)`;
+
 // Every missing environment fact is named: a bare "requires acceptance env" can
 // never be told apart from a feature that is actually broken.
 const missing = [
   ...missingM2LiveEnvironment(),
   ...(process.env.D4B_ACCEPTANCE_SEED === "true" ? [] : ["D4B_ACCEPTANCE_SEED=true"]),
   ...passVars.filter((name) => !process.env[name]?.trim()),
+  ...(process.env[REFUNDABLE_ORDER_ENV] === "true" ? [] : [refundableOrderMissing]),
 ];
 
 const SEAT_ONE = "D4B Acceptance One";
@@ -69,7 +86,7 @@ async function openSeededEvent(page: Page, prefix: string): Promise<void> {
  * `lib/email/catalog.ts`, driven by `tests/unit/ticket-webhook.test.ts` and the
  * email snapshot tests — rather than left as an implicit gap.
  *
- * It writes, so it runs only against the isolated D-4b seed. Two operational
+ * It writes, so it runs only against the isolated D-4b seed. Three operational
  * facts follow from that:
  *  - `db:seed:d4b` mints ONE paid order holding both seats, and a refund is
  *    whole-order, so the refund can be committed only once. The two-step
@@ -79,9 +96,15 @@ async function openSeededEvent(page: Page, prefix: string): Promise<void> {
  *  - `refundOrder` calls the payment provider BEFORE it writes, reading the intent
  *    through the order's `stripe_checkout_session_id`. An order without a
  *    retrievable Stripe test checkout session answers `provider_failed` and stays
- *    `paid`, so a real run needs a seeded order that carries one. The walk can
- *    also run only once per seed: `db:seed:d4b` refuses to reuse its order once it
- *    is no longer `paid`, rather than silently resetting it.
+ *    `paid`, so a real run needs a seeded order that carries one. `db:seed:d4b` is
+ *    provider-free by design (D-4b design §8), so the walk also requires
+ *    `D4B_ORDER_REFUNDABLE=true` and SKIPS — rather than failing — without it. No
+ *    fixture in this tree sets that fact: minting a real Stripe test payment is
+ *    D-4c's one remaining gap, so the refund's provider interaction is UNVERIFIED
+ *    in this environment. The assertion is kept, never weakened, so a
+ *    provider-backed fixture is all this walk needs to become evidence.
+ *  - The walk can also run only once per seed: `db:seed:d4b` refuses to reuse its
+ *    order once it is no longer `paid`, rather than silently resetting it.
  */
 test.describe("phase D-4c refunds and policy", () => {
   test.skip(missing.length > 0, `Requires ${missing.join(", ")}`);
