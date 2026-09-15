@@ -426,6 +426,20 @@ export function unsubscribeEnv(): UnsubscribeEnv {
   return parseUnsubscribeEnv(process.env);
 }
 
+export type TicketPassEnv = Readonly<{ticketPassTokenSecret: string}>;
+
+export function parseTicketPassEnv(environment: Environment = process.env): TicketPassEnv {
+  requireProductionKeys(environment, ["TICKET_PASS_TOKEN_SECRET"]);
+
+  return {
+    ticketPassTokenSecret: valueFor(environment, "TICKET_PASS_TOKEN_SECRET"),
+  };
+}
+
+export function ticketPassEnv(): TicketPassEnv {
+  return parseTicketPassEnv(process.env);
+}
+
 const memberToolsEnvironmentSchema = z.object({
   MEMBER_TOOL_CONTENT_CALENDAR_TOKEN: z.string().optional(),
 });
