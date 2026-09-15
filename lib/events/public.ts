@@ -22,6 +22,10 @@ export type PublicEventProjection = Readonly<{
   tags: readonly string[];
   registrationMode: PublicEventRegistrationMode;
   externalRegistrationUrl: string | null;
+  // Phase D-4a: the staff-set price of a `ticketed` event, in integer HKD
+  // cents, or null when the event is not ticketed. The detail page renders its
+  // checkout form only in the "ticketed" arm, where the column is non-null.
+  ticketPriceHkdCents: number | null;
   organiser: Readonly<{name: string; slug: string | null}> | null;
 }>;
 

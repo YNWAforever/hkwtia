@@ -331,6 +331,20 @@
         "heading": "See you tomorrow",
         "body": "{eventTitle} starts at {startsAt}. {venue}",
         "cta": "Event details"
+      },
+      "event_ticket_confirmation": {
+        "subject": "Your tickets for {eventTitle}",
+        "preview": "Order {orderId} confirmed, {seatCount} seat(s).",
+        "heading": "You're going to {eventTitle}",
+        "body": "Thank you. We received HK${amount} for {seatCount} seat(s). The event is on {eventDate}.",
+        "cta": "View the event"
+      },
+      "event_ticket_refunded": {
+        "subject": "Your refund for {eventTitle}",
+        "preview": "Order {orderId} has been refunded.",
+        "heading": "Your payment has been returned",
+        "body": "We have refunded HK${amount} for order {orderId} ({eventTitle}). Depending on your bank, it can take a few days to appear.",
+        "cta": "View the event"
       }
     }
   },
@@ -1573,6 +1587,25 @@
       "error": "We could not register you for this event. Please try again."
     }
   },
+  "Ticket": {
+    "heading": "Buy tickets",
+    "buyerName": "Your name",
+    "buyerEmail": "Your email address",
+    "seatCount": "Number of seats",
+    "attendeeName": "Attendee name",
+    "attendeeEmail": "Attendee email",
+    "website": "Leave this field empty",
+    "price": "Price per seat: {price}",
+    "submit": "Continue to payment",
+    "submitting": "Redirecting to payment…",
+    "errors": {
+      "INVALID": "Check the buyer and attendee details, then try again.",
+      "SOLD_OUT": "There are not enough seats left for this order.",
+      "EVENT_CLOSED": "Ticket sales for this event have closed.",
+      "UNAVAILABLE": "Ticket checkout is not available right now. Please try again shortly.",
+      "RATE_LIMITED": "Too many attempts from this connection. Try again in a few minutes."
+    }
+  },
   "News": {
     "metaTitle": "News | WiseTech Hong Kong",
     "metaDescription": "Read the latest news from WTIA.",
@@ -2734,6 +2767,16 @@
       "endsAt": "Ends at",
       "venue": "Venue",
       "capacity": "Capacity",
+      "seatsPaid": "Paid seats",
+      "seatsHeld": "Held seats",
+      "seatsUnavailable": "Seat counts are unavailable right now.",
+      "registrationMode": "Registration",
+      "registrationModes": {
+        "rsvp": "RSVP on this site",
+        "external": "External registration link",
+        "ticketed": "Paid ticket"
+      },
+      "ticketPriceHkdCents": "Ticket price (HKD)",
       "heroMediaId": "Hero media",
       "noHeroMedia": "No hero media",
       "memberOnly": "Members only",

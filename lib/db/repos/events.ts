@@ -45,6 +45,7 @@ const eventInputObjectSchema = z.object({
   onlineUrl: httpUrlSchema.nullable().optional(),
   registrationMode: z.enum(["rsvp", "external", "ticketed"]).default("rsvp"),
   externalRegistrationUrl: httpUrlSchema.nullable().optional(),
+  ticketPriceHkdCents: z.number().int().positive().nullable().optional().default(null),
   // Normalised at the write boundary (programme B-6 review): the public `?tag=` predicate
   // is `tags @> ARRAY['ai']`, so a row tagged "AI" or "Machine Learning" was unreachable.
   // Admin-authored and member-authored tags alike land as `ai` / `machine-learning`;
@@ -55,12 +56,34 @@ const eventInputObjectSchema = z.object({
 // Mirrors the `events_online_url_check` and `events_external_registration_check`
 // constraints so a bad form fails validation instead of a transaction.
 function addEventShapeIssues(
-  input: Readonly<{startsAt?: Date; endsAt?: Date | null; format?: string; onlineUrl?: string | null; registrationMode?: string; externalRegistrationUrl?: string | null}>,
+  input: Readonly<{startsAt?: Date; endsAt?: Date | null; format?: string; onlineUrl?: string | null; registrationMode?: string; externalRegistrationUrl?: string | null; ticketPriceHkdCents?: number | null}>,
   context: z.RefinementCtx,
 ): void {
   if (input.startsAt && input.endsAt && input.endsAt <= input.startsAt) context.addIssue({code: z.ZodIssueCode.custom, path: ["endsAt"], message: "endsAt must be after startsAt"});
   if (input.format !== undefined && input.format !== "in_person" && !input.onlineUrl) context.addIssue({code: z.ZodIssueCode.custom, path: ["onlineUrl"], message: "onlineUrl is required for online and hybrid events"});
   if (input.registrationMode === "external" && !input.externalRegistrationUrl) context.addIssue({code: z.ZodIssueCode.custom, path: ["externalRegistrationUrl"], message: "externalRegistrationUrl is required for external registration"});
+  const ticketed = input.registrationMode === "ticketed";
+  if (ticketed && !(typeof input.ticketPriceHkdCents === "number" && input.ticketPriceHkdCents > 0)) {
+    context.addIssue({code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "ticketPriceHkdCents is required for ticketed events"});
+  }
+  // Guarded on the mode being *present*, because a partial update that changes
+  // only the price of an already-ticketed event sends no mode. The update path
+  // therefore re-applies this rule against the row's OWN mode (see updateEvent);
+  // the schema check alone cannot catch a price-only update on a non-ticketed
+  // row, because `registration_mode <> 'ticketed' OR price IS NOT NULL AND > 0`
+  // is satisfied by exactly that row.
+  if (input.registrationMode !== undefined && !ticketed && input.ticketPriceHkdCents != null) {
+    context.addIssue({code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "ticketPriceHkdCents is only valid for ticketed events"});
+  }
+}
+// A price-only partial update never names the mode, so the shape rule above
+// cannot see the conflict and the table check is satisfied by a non-ticketed row
+// carrying a price. The row's own mode decides on update; on create the parsed
+// mode is the row's mode by definition.
+function assertPriceOnlyOnTicketed(mode: string, price: number | null | undefined): void {
+  if (mode !== "ticketed" && price != null) {
+    throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "ticketPriceHkdCents is only valid for ticketed events"}]);
+  }
 }
 const eventInputSchema = eventInputObjectSchema.superRefine(addEventShapeIssues);
 const eventUpdateSchema = eventInputObjectSchema.partial().superRefine((input, context) => {
@@ -181,6 +204,7 @@ function projectPublicEvent(row: PublicEventMemoryRow, locale: string): PublicEv
     tags: [...event.tags],
     registrationMode: event.registrationMode,
     externalRegistrationUrl: event.externalRegistrationUrl,
+    ticketPriceHkdCents: event.ticketPriceHkdCents,
     // The name is always projected; the slug only where the company really has
     // a published page, so the detail view can never link to a 404 (D-11).
     organiser: organiser ? {name: organiser.name, slug: publicMemberPageSlug(organiser)} : null,
@@ -390,6 +414,8 @@ async function defaultMutationDependencies(): Promise<EventMutationDependencies>
 export async function createEvent(actor: Actor, input: unknown, dependencies?: EventMutationDependencies): Promise<Event> {
   requireAdmin(actor);
   const parsed = eventInputSchema.parse(input);
+  // The create arm has the whole story — the parsed mode is the row's mode.
+  assertPriceOnlyOnTicketed(parsed.registrationMode, parsed.ticketPriceHkdCents);
   return (dependencies ?? await defaultMutationDependencies()).transaction(async (transaction) => {
     if (parsed.heroMediaId !== null) {
       const mediaRow = await transaction.lockActiveMedia(parsed.heroMediaId);
@@ -409,6 +435,7 @@ export async function updateEvent(actor: Actor, id: unknown, input: unknown, dep
   return (dependencies ?? await defaultMutationDependencies()).transaction(async (transaction) => {
     const current = await transaction.lockEvent(eventId);
     if (!current) return null;
+    assertPriceOnlyOnTicketed(parsed.registrationMode ?? current.registrationMode, parsed.ticketPriceHkdCents);
     eventPeriodSchema.parse({startsAt: parsed.startsAt ?? current.startsAt, endsAt: parsed.endsAt === undefined ? current.endsAt : parsed.endsAt});
     if (parsed.heroMediaId !== undefined && parsed.heroMediaId !== null) {
       const mediaRow = await transaction.lockActiveMedia(parsed.heroMediaId);
@@ -579,7 +606,7 @@ export type MemberEventDependencies = Readonly<{
 // status comes from which method they call and the booleans from the enums.
 // `invite_only` is a staff-only visibility until the invitation flow exists.
 const memberEventInputSchema = eventInputObjectSchema
-  .omit({published: true, memberOnly: true, status: true})
+  .omit({published: true, memberOnly: true, status: true, ticketPriceHkdCents: true})
   .extend({visibility: z.enum(["public", "members_only"]), heroMediaId: z.string().uuid().nullable()})
   .strict()
   .superRefine(addEventShapeIssues);

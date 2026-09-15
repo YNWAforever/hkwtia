@@ -36,9 +36,26 @@ function formDate(formData: FormData, name: "startsAt" | "endsAt", optional = fa
   }
 }
 
+/**
+ * HKD is a two-decimal currency but staff price in whole dollars, so the form
+ * takes dollars and the boundary converts to cents. A price on a non-ticketed
+ * event is discarded rather than carried: the repository refuses it too, but
+ * nulling it here keeps the form and the database answering the same question.
+ */
+export function parseTicketPrice(input: Readonly<{mode: string; price: string}>): number | null {
+  if (input.mode !== "ticketed") return null;
+  const trimmed = input.price.trim();
+  const dollars = Number(trimmed);
+  if (!trimmed || !Number.isFinite(dollars) || dollars <= 0) {
+    throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "a ticketed event needs a positive price"}]);
+  }
+  return Math.round(dollars * 100);
+}
+
 export function eventFormInput(formData: FormData) {
   const capacity = String(formData.get("capacity") ?? "").trim();
   const optional = (name: string) => String(formData.get(name) ?? "").trim() || null;
+  const registrationMode = String(formData.get("registrationMode") ?? "rsvp");
   return {
     slug: formData.get("slug"),
     titleEn: formData.get("titleEn"),
@@ -52,5 +69,10 @@ export function eventFormInput(formData: FormData) {
     memberOnly: formData.get("memberOnly") === "on",
     published: formData.get("published") === "on",
     heroMediaId: optional("heroMediaId"),
+    registrationMode,
+    ticketPriceHkdCents: parseTicketPrice({
+      mode: registrationMode,
+      price: String(formData.get("ticketPriceHkdCents") ?? ""),
+    }),
   };
 }

@@ -6,6 +6,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {EventDetail} from "@/components/marketing/event-detail";
 import {GuestRsvpForm} from "@/components/marketing/guest-rsvp-form";
+import {TicketCheckoutForm} from "@/components/marketing/ticket-checkout-form";
 import {EventRegistrationForm} from "@/components/portal/event-registration-form";
 import {StructuredData} from "@/components/seo/structured-data";
 import type {AppLocale} from "@/i18n/routing";
@@ -13,12 +14,14 @@ import type {AppLocale} from "@/i18n/routing";
 // takes that dependency through registration-action.ts, so importing it here adds nothing.
 import {getActor} from "@/lib/auth/actor";
 import {eventsRepository} from "@/lib/db/repos/events";
+import {profilesRepository} from "@/lib/db/repos/profiles";
 import {submitGuestRsvpAction} from "@/lib/events/guest-registration-action";
 import {eventBoundary} from "@/lib/events/public";
 import {formatEventDate} from "@/lib/home/format-event-date";
 import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl} from "@/lib/media/url";
 import {runPublicEventRegistrationAction} from "@/lib/events/registration-action";
 import type {RegistrationActionState} from "@/lib/events/registration-state";
+import {formatTicketPrice} from "@/lib/tickets/format";
 import {brandedTitle, buildPageMetadata} from "@/lib/metadata";
 import {ogImagePath} from "@/lib/og/resolve-renderer";
 import {buildEventData} from "@/lib/structured-data";
@@ -68,14 +71,21 @@ export default async function EventPage({params}: Props) {
   const asOf = new Date();
   // A failed session read degrades to the anonymous path: the public page must render
   // whether or not auth is reachable, and the guest form is the anonymous path anyway.
-  const [event, t, actor] = await Promise.all([
+  const [event, t, tTicket, actor] = await Promise.all([
     eventsRepository.getPublicBySlug(slug, locale, {asOf}).catch(() => null),
     getTranslations({locale, namespace: "Events"}),
+    getTranslations({locale, namespace: "Ticket"}),
     getActor().catch(() => null),
   ]);
   if (!event) notFound();
   const displayEvent = event.hero && !(isPrivateMediaDeliveryUrl(event.hero.url) || isRegistrableMediaUrl(event.hero.url)) ? {...event, hero: null} : event;
   const appLocale = locale as AppLocale;
+  // The spec requires a signed-in member's own details prefilled. The read is
+  // caught because it is an optimisation here, not the page's content: an
+  // unreachable profile leaves an empty form rather than failing the page.
+  const memberProfile = actor?.kind === "member"
+    ? await profilesRepository.getById(actor, actor.profileId).catch(() => null)
+    : null;
   const registrationMessages = {registered: t("registration.registered"), waitlist: t("registration.waitlist"), alreadyRegistered: t("registration.alreadyRegistered"), alreadyWaitlisted: t("registration.alreadyWaitlisted"), unauthenticated: t("registration.unauthenticated"), ineligible: t("registration.ineligible"), closed: t("registration.closed"), error: t("registration.error")};
   async function registerAction(state: RegistrationActionState, formData: FormData): Promise<RegistrationActionState> { "use server"; return runPublicEventRegistrationAction(state, formData, {messages: registrationMessages}); }
   const past = eventBoundary({startsAt: new Date(displayEvent.startsAt), endsAt: displayEvent.endsAt ? new Date(displayEvent.endsAt) : null}) < asOf;
@@ -92,16 +102,24 @@ export default async function EventPage({params}: Props) {
   const heroStyle = {"--wt-event-photo": cssUrlToken(displayEvent.hero?.url ?? EVENT_HERO_PLACEHOLDER)} as CSSProperties;
   // Programme B-4: external registration always leaves the site; an anonymous visitor to an
   // RSVP event gets the guest form; a signed-in member keeps the membership-gated form.
-  const registration = displayEvent.registrationMode === "external" && displayEvent.externalRegistrationUrl
-    ? {kind: "external" as const, url: displayEvent.externalRegistrationUrl}
-    : actor === null && displayEvent.registrationMode === "rsvp"
-      ? {kind: "guest" as const}
-      : {kind: "member" as const};
+  const registration = displayEvent.registrationMode === "ticketed"
+    ? {kind: "ticket" as const}
+    : displayEvent.registrationMode === "external" && displayEvent.externalRegistrationUrl
+      ? {kind: "external" as const, url: displayEvent.externalRegistrationUrl}
+      : actor === null && displayEvent.registrationMode === "rsvp"
+        ? {kind: "guest" as const}
+        : {kind: "member" as const};
   const guestLabels = {
     title: t("guest.title"), name: t("guest.name"), email: t("guest.email"), organisation: t("guest.organisation"), whatsappNumber: t("guest.whatsappNumber"),
     marketingConsent: t("guest.marketingConsent"), consent: t("guest.consent"), website: t("guest.website"), submit: t("guest.submit"), submitting: t("guest.submitting"),
     registered: t("guest.registered"), waitlist: t("guest.waitlist"), already: t("guest.already"), invalid: t("guest.invalid"), rateLimited: t("guest.rateLimited"),
     closed: t("guest.closed"), external: t("guest.external"), unavailable: t("guest.unavailable"),
+  };
+  const ticketLabels = {
+    heading: tTicket("heading"), buyerName: tTicket("buyerName"), buyerEmail: tTicket("buyerEmail"),
+    seatCount: tTicket("seatCount"), attendeeName: tTicket("attendeeName"), attendeeEmail: tTicket("attendeeEmail"),
+    website: tTicket("website"), submit: tTicket("submit"), submitting: tTicket("submitting"),
+    errors: {INVALID: tTicket("errors.INVALID"), SOLD_OUT: tTicket("errors.SOLD_OUT"), EVENT_CLOSED: tTicket("errors.EVENT_CLOSED"), UNAVAILABLE: tTicket("errors.UNAVAILABLE"), RATE_LIMITED: tTicket("errors.RATE_LIMITED")},
   };
 
   return (
@@ -157,7 +175,16 @@ export default async function EventPage({params}: Props) {
               <strong>{t("status.open")}</strong>
             </div>
             <div>
-              {registration.kind === "external" ? (
+              {registration.kind === "ticket" ? (
+                <TicketCheckoutForm
+                  defaultBuyerEmail={memberProfile?.email ?? undefined}
+                  defaultBuyerName={memberProfile?.displayName ?? undefined}
+                  eventId={displayEvent.id}
+                  locale={appLocale}
+                  labels={ticketLabels}
+                  pricePerSeat={tTicket("price", {price: formatTicketPrice(displayEvent.ticketPriceHkdCents, appLocale)})}
+                />
+              ) : registration.kind === "external" ? (
                 <a className="button" href={registration.url} rel="noopener noreferrer" target="_blank">{t("detail.registerExternally")}</a>
               ) : registration.kind === "guest" ? (
                 <GuestRsvpForm action={submitGuestRsvpAction} eventId={displayEvent.id} labels={guestLabels} locale={appLocale} />

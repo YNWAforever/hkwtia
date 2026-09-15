@@ -331,6 +331,20 @@
         "heading": "明天見",
         "body": "{eventTitle} 將於 {startsAt} 開始。{venue}",
         "cta": "活動詳情"
+      },
+      "event_ticket_confirmation": {
+        "subject": "{eventTitle} 的門票",
+        "preview": "訂單 {orderId} 已確認，共 {seatCount} 個座位。",
+        "heading": "你將參加 {eventTitle}",
+        "body": "多謝支持。我們已收到 HK${amount}，共 {seatCount} 個座位。活動日期為 {eventDate}。",
+        "cta": "查看活動"
+      },
+      "event_ticket_refunded": {
+        "subject": "{eventTitle} 的退款",
+        "preview": "訂單 {orderId} 已退款。",
+        "heading": "款項已退回",
+        "body": "我們已就訂單 {orderId}（{eventTitle}）退回 HK${amount}。視乎銀行處理，款項可能需要數天才顯示。",
+        "cta": "查看活動"
       }
     }
   },
@@ -1573,6 +1587,25 @@
       "error": "未能為你登記此活動，請再試一次。"
     }
   },
+  "Ticket": {
+    "heading": "購買門票",
+    "buyerName": "你的姓名",
+    "buyerEmail": "你的電郵地址",
+    "seatCount": "座位數目",
+    "attendeeName": "出席者姓名",
+    "attendeeEmail": "出席者電郵",
+    "website": "請留空此欄",
+    "price": "每張門票：{price}",
+    "submit": "前往付款",
+    "submitting": "正在前往付款……",
+    "errors": {
+      "INVALID": "請檢查購買者及出席者資料，然後再試。",
+      "SOLD_OUT": "剩餘座位不足以完成此訂單。",
+      "EVENT_CLOSED": "本活動已截止售票。",
+      "UNAVAILABLE": "暫時未能進行購票，請稍後再試。",
+      "RATE_LIMITED": "此連線嘗試次數過多，請稍後再試。"
+    }
+  },
   "News": {
     "metaTitle": "消息｜WiseTech Hong Kong",
     "metaDescription": "閱讀 WTIA 最新消息。",
@@ -2735,6 +2768,16 @@
       "endsAt": "結束時間",
       "venue": "地點",
       "capacity": "名額",
+      "seatsPaid": "已付款座位",
+      "seatsHeld": "保留座位",
+      "seatsUnavailable": "暫時無法取得座位數目。",
+      "registrationMode": "報名方式",
+      "registrationModes": {
+        "rsvp": "在此網站報名",
+        "external": "外部報名連結",
+        "ticketed": "收費門票"
+      },
+      "ticketPriceHkdCents": "門票價格（港元）",
       "heroMediaId": "活動主圖",
       "noHeroMedia": "不使用主圖",
       "memberOnly": "僅限會員",

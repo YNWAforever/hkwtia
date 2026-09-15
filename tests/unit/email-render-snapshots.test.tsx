@@ -8,11 +8,14 @@ const fixtureVars = {
   ctaUrl: "https://www.hkwtia.org/portal",
   companyName: "Fixture Company",
   renewalDate: "30 September 2026",
-  amount: "HK$1,000",
+  amount: "1,000.00",
   eventTitle: "Fixture Event",
   cancelUrl: "https://www.hkwtia.org/api/events/guest/cancel?token=fixture",
   startsAt: "1 March 2030 at 10:00",
   venue: "KOHO, Kwun Tong",
+  eventDate: "1 March 2030",
+  seatCount: 2,
+  orderId: "order_fixture",
 };
 
 describe("renderEmail", () => {

@@ -9,6 +9,11 @@ const supportedEventTypes = ["checkout.session.completed", "invoice.paid", "invo
 export type SupportedStripeEventType = typeof supportedEventTypes[number];
 export type WebhookLifecycleCommand = Readonly<{eventId: string; eventType: SupportedStripeEventType; eventCreated: number; membershipId: string; applicationId: string; planCode: MembershipPlanCode; stripeCustomerId: string; stripeSubscriptionId: string; stripeCheckoutSessionId: string | null; nextStatus: MembershipStatus; billingPeriodStart: Date | null; billingPeriodEnd: Date | null; cancelAtPeriodEnd: boolean; isRenewal: boolean}>;
 export interface WebhookProcessor { process(actor: Actor, command: WebhookLifecycleCommand): Promise<"processed" | "duplicate">; }
+export type TicketWebhookCommand = Readonly<{
+  eventId: string; eventType: "checkout.session.completed" | "checkout.session.expired";
+  orderId: string; checkoutSessionId: string; paymentIntentId: string | null;
+}>;
+export interface TicketProcessor { process(actor: Actor, command: TicketWebhookCommand): Promise<"processed" | "duplicate">; }
 export class WebhookInputError extends Error { readonly code = "INVALID_WEBHOOK_EVENT"; constructor() { super("INVALID_WEBHOOK_EVENT"); this.name = "WebhookInputError"; } }
 const metadataSchema = z.object({membershipId: z.string().uuid(), applicationId: z.string().uuid(), planCode: z.enum(["community", "startup", "corporate", "patron"])}).strict();
 type StripeObject = Record<string, unknown>;
@@ -55,5 +60,46 @@ function normalize(event: Stripe.Event): WebhookLifecycleCommand | null {
   if (eventType === "checkout.session.completed" && object.client_reference_id !== metadata.membershipId) throw new WebhookInputError();
   return {eventId: event.id, eventType, eventCreated: event.created, ...metadata, stripeCustomerId: customerId, stripeSubscriptionId: subscriptionId, stripeCheckoutSessionId, nextStatus, billingPeriodStart, billingPeriodEnd, cancelAtPeriodEnd, isRenewal};
 }
+function normalizeTicket(event: Stripe.Event): TicketWebhookCommand | null {
+  // `completed` alone is not proof of payment: with a delayed-notification
+  // payment method Stripe sends it with `payment_status: "unpaid"` and settles
+  // later via `async_payment_succeeded`. Settling on the first would mail a
+  // receipt and take seats for money that never arrived, so both arms require
+  // `payment_status === "paid"` and the async success is accepted as the
+  // completion it is. The membership lane guards the same field.
+  const completed = event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded";
+  const expired = event.type === "checkout.session.expired";
+  if (!completed && !expired) return null;
+  const object = objectValue(event.data?.object);
+  if (completed && object.payment_status !== "paid") return null;
+  const metadata = object.metadata;
+  if (!metadata || typeof metadata !== "object" || (metadata as Record<string, unknown>).kind !== "event_ticket") return null;
+  const parsed = z.object({kind: z.literal("event_ticket"), orderId: z.string().uuid()}).strict().safeParse(metadata);
+  if (!parsed.success) throw new WebhookInputError();
+  const checkoutSessionId = stringId(object.id);
+  if (object.client_reference_id !== parsed.data.orderId) throw new WebhookInputError();
+  return {
+    eventId: event.id, eventType: completed ? "checkout.session.completed" : "checkout.session.expired",
+    orderId: parsed.data.orderId, checkoutSessionId,
+    paymentIntentId: typeof object.payment_intent === "string" ? object.payment_intent : null,
+  };
+}
 const productionProcessor: WebhookProcessor = {process: (actor, command) => jobsRepository.processWebhookLifecycle(actor, command)};
-export async function processStripeEvent(event: Stripe.Event, actor: Actor, processor: WebhookProcessor = productionProcessor): Promise<"processed" | "duplicate"> { requireSystem(actor); const command = normalize(event); if (!command) return "processed"; try { return await processor.process(actor, command); } catch (error) { if (error && typeof error === "object" && "code" in error && error.code === "INVALID_WEBHOOK_EVENT") throw new WebhookInputError(); throw error; } }
+export async function processStripeEvent(
+  event: Stripe.Event,
+  actor: Actor,
+  processor: WebhookProcessor = productionProcessor,
+  ticketProcessor: TicketProcessor | null = null,
+): Promise<"processed" | "duplicate"> {
+  requireSystem(actor);
+  const ticket = normalizeTicket(event);
+  if (ticket) {
+    if (!ticketProcessor) return "processed";
+    try { return await ticketProcessor.process(actor, ticket); }
+    catch (error) { if (error && typeof error === "object" && "code" in error && error.code === "INVALID_WEBHOOK_EVENT") throw new WebhookInputError(); throw error; }
+  }
+  const command = normalize(event);
+  if (!command) return "processed";
+  try { return await processor.process(actor, command); }
+  catch (error) { if (error && typeof error === "object" && "code" in error && error.code === "INVALID_WEBHOOK_EVENT") throw new WebhookInputError(); throw error; }
+}

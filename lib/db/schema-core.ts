@@ -133,6 +133,8 @@ export const eventStatusEnum = pgEnum("event_status", [
 export const eventVisibilityEnum = pgEnum("event_visibility", ["public", "members_only", "invite_only"]);
 export const eventFormatEnum = pgEnum("event_format", ["in_person", "online", "hybrid"]);
 export const registrationModeEnum = pgEnum("registration_mode", ["rsvp", "external", "ticketed"]);
+export const eventOrderStatusEnum = pgEnum("event_order_status", ["pending", "paid", "expired", "failed", "refunded"]);
+export const eventRefundReasonEnum = pgEnum("event_refund_reason", ["oversold", "staff", "cancelled"]);
 export const guestRegistrationStatusEnum = pgEnum("guest_registration_status", [
   "registered", "waitlist", "cancelled", "attended",
 ]);
@@ -864,6 +866,9 @@ export const events = pgTable("events", {
   onlineUrl: text("online_url"),
   registrationMode: registrationModeEnum("registration_mode").default("rsvp").notNull(),
   externalRegistrationUrl: text("external_registration_url"),
+  // Programme D-4a: the ticket price in HKD cents, staff-set. Integer because a
+  // price must never be a float, and Stripe's `unit_amount` is the same integer.
+  ticketPriceHkdCents: integer("ticket_price_hkd_cents"),
   tags: text("tags").array().default(sql`'{}'::text[]`).notNull(),
   publishedAt: timestamp("published_at", {withTimezone: true}),
   reviewedAt: timestamp("reviewed_at", {withTimezone: true}),
@@ -878,6 +883,7 @@ export const events = pgTable("events", {
   index("events_organiser_idx").on(table.organiserCompanyId, table.submittedAt),
   check("events_online_url_check", sql`${table.format} = 'in_person' OR ${table.onlineUrl} IS NOT NULL`),
   check("events_external_registration_check", sql`${table.registrationMode} <> 'external' OR ${table.externalRegistrationUrl} IS NOT NULL`),
+  check("events_ticketed_price_check", sql`${table.registrationMode} <> 'ticketed' OR (${table.ticketPriceHkdCents} IS NOT NULL AND ${table.ticketPriceHkdCents} > 0)`),
 ]);
 
 export const eventRegistrations = pgTable("event_registrations", {
@@ -888,6 +894,50 @@ export const eventRegistrations = pgTable("event_registrations", {
 }, (table) => [
   primaryKey({columns: [table.eventId, table.profileId]}),
   index("event_registrations_profile_idx").on(table.profileId),
+]);
+
+export const eventOrders = pgTable("event_orders", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  eventId: uuid("event_id").notNull().references(() => events.id, {onDelete: "cascade"}),
+  buyerProfileId: text("buyer_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  buyerName: text("buyer_name").notNull(),
+  buyerEmail: text("buyer_email").notNull(),
+  // The webhook has no request context to read a locale from, so the buyer's
+  // chosen language is persisted at checkout and read back when the receipt is
+  // sent. Without it every receipt would go out in whatever the webhook defaults to.
+  buyerLocale: text("buyer_locale").notNull(),
+  amountHkdCents: integer("amount_hkd_cents").notNull(),
+  currency: text("currency").default("hkd").notNull(),
+  status: eventOrderStatusEnum("status").default("pending").notNull(),
+  stripeCheckoutSessionId: text("stripe_checkout_session_id"),
+  // Stored, not derived: a repeated idempotency key must return the exact url
+  // this order's session minted, and a session id alone cannot reconstruct it.
+  stripeCheckoutUrl: text("stripe_checkout_url"),
+  idempotencyKey: text("idempotency_key").notNull(),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  paidAt: timestamp("paid_at", {withTimezone: true}),
+  refundedAt: timestamp("refunded_at", {withTimezone: true}),
+  refundReason: eventRefundReasonEnum("refund_reason"),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  uniqueIndex("event_orders_session_unique").on(table.stripeCheckoutSessionId).where(sql`${table.stripeCheckoutSessionId} IS NOT NULL`),
+  uniqueIndex("event_orders_idempotency_unique").on(table.idempotencyKey),
+  index("event_orders_event_status_idx").on(table.eventId, table.status),
+  check("event_orders_amount_check", sql`${table.amountHkdCents} > 0`),
+]);
+
+export const eventOrderSeats = pgTable("event_order_seats", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orderId: uuid("order_id").notNull().references(() => eventOrders.id, {onDelete: "cascade"}),
+  position: integer("position").notNull(),
+  attendeeName: text("attendee_name").notNull(),
+  attendeeEmail: text("attendee_email").notNull(),
+  // D-4b's check-in writes this; D-4a leaves it null.
+  checkedInAt: timestamp("checked_in_at", {withTimezone: true}),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  uniqueIndex("event_order_seats_position_unique").on(table.orderId, table.position),
 ]);
 
 export const approvals = pgTable("approvals", {

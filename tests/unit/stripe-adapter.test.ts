@@ -9,6 +9,7 @@ describe("Stripe billing adapter", () => {
       checkout: {sessions: {create}},
       billingPortal: {sessions: {create: vi.fn()}},
       invoices: {list: vi.fn()},
+      refunds: {create: vi.fn()},
     });
     await adapter.createCheckoutSession({
       priceReference: "price_startup_test",
@@ -34,6 +35,7 @@ describe("Stripe billing adapter", () => {
       checkout: {sessions: {create: vi.fn().mockResolvedValue({url: null})}},
       billingPortal: {sessions: {create: vi.fn()}},
       invoices: {list: vi.fn()},
+      refunds: {create: vi.fn()},
     });
     await expect(adapter.createCheckoutSession({
       priceReference: "price_test",
