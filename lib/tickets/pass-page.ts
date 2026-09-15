@@ -14,6 +14,7 @@ export type PassPageData = Readonly<{
 export type PassPageDependencies = Readonly<{
   verify: (token: string) => PassClaims | null;
   passForSeat: (claims: PassClaims) => Promise<PassView | null>;
+  qr?: (text: string) => Promise<string>;
 }>;
 
 /**
@@ -45,6 +46,6 @@ export async function loadPassPage(token: string, dependencies: PassPageDependen
     eventVenue: view.eventVenue,
     checkedInAt: view.checkedInAt,
     checkInUrl,
-    qr: await qrSvg(checkInUrl),
+    qr: await (dependencies.qr ?? qrSvg)(checkInUrl),
   };
 }
