@@ -66,11 +66,23 @@ function addEventShapeIssues(
   if (ticketed && !(typeof input.ticketPriceHkdCents === "number" && input.ticketPriceHkdCents > 0)) {
     context.addIssue({code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "ticketPriceHkdCents is required for ticketed events"});
   }
-  // Guarded on the mode being *present*: a partial update that changes only the
-  // price of an already-ticketed event sends no mode, and the row's own mode
-  // governs there — the database check is the backstop for that path.
+  // Guarded on the mode being *present*, because a partial update that changes
+  // only the price of an already-ticketed event sends no mode. The update path
+  // therefore re-applies this rule against the row's OWN mode (see updateEvent);
+  // the schema check alone cannot catch a price-only update on a non-ticketed
+  // row, because `registration_mode <> 'ticketed' OR price IS NOT NULL AND > 0`
+  // is satisfied by exactly that row.
   if (input.registrationMode !== undefined && !ticketed && input.ticketPriceHkdCents != null) {
     context.addIssue({code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "ticketPriceHkdCents is only valid for ticketed events"});
+  }
+}
+// A price-only partial update never names the mode, so the shape rule above
+// cannot see the conflict and the table check is satisfied by a non-ticketed row
+// carrying a price. The row's own mode decides on update; on create the parsed
+// mode is the row's mode by definition.
+function assertPriceOnlyOnTicketed(mode: string, price: number | null | undefined): void {
+  if (mode !== "ticketed" && price != null) {
+    throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "ticketPriceHkdCents is only valid for ticketed events"}]);
   }
 }
 const eventInputSchema = eventInputObjectSchema.superRefine(addEventShapeIssues);
@@ -402,6 +414,8 @@ async function defaultMutationDependencies(): Promise<EventMutationDependencies>
 export async function createEvent(actor: Actor, input: unknown, dependencies?: EventMutationDependencies): Promise<Event> {
   requireAdmin(actor);
   const parsed = eventInputSchema.parse(input);
+  // The create arm has the whole story — the parsed mode is the row's mode.
+  assertPriceOnlyOnTicketed(parsed.registrationMode, parsed.ticketPriceHkdCents);
   return (dependencies ?? await defaultMutationDependencies()).transaction(async (transaction) => {
     if (parsed.heroMediaId !== null) {
       const mediaRow = await transaction.lockActiveMedia(parsed.heroMediaId);
@@ -421,6 +435,7 @@ export async function updateEvent(actor: Actor, id: unknown, input: unknown, dep
   return (dependencies ?? await defaultMutationDependencies()).transaction(async (transaction) => {
     const current = await transaction.lockEvent(eventId);
     if (!current) return null;
+    assertPriceOnlyOnTicketed(parsed.registrationMode ?? current.registrationMode, parsed.ticketPriceHkdCents);
     eventPeriodSchema.parse({startsAt: parsed.startsAt ?? current.startsAt, endsAt: parsed.endsAt === undefined ? current.endsAt : parsed.endsAt});
     if (parsed.heroMediaId !== undefined && parsed.heroMediaId !== null) {
       const mediaRow = await transaction.lockActiveMedia(parsed.heroMediaId);

@@ -2,7 +2,8 @@ import {describe, expect, it, vi} from "vitest";
 import {z} from "zod";
 
 import {parseTicketPrice} from "@/lib/admin/event-form-input";
-import {createEvent, saveMemberEventDraft, type EventMutationDependencies, type MemberEventDependencies} from "@/lib/db/repos/events";
+import {createEvent, saveMemberEventDraft, updateEvent, type EventMutationDependencies, type MemberEventDependencies} from "@/lib/db/repos/events";
+import {legacyDerivedEventColumns} from "@/tests/fixtures/event-row";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 describe("parseTicketPrice", () => {
@@ -27,6 +28,12 @@ describe("parseTicketPrice", () => {
 describe("the event write boundary prices only ticketed events", () => {
   const staff: Actor = {kind: "staff", userId: "auth-staff", profileId: "profile-staff"};
   const base = {slug: "ai-clinic", titleEn: "AI clinic", descriptionEn: "Hands on", startsAt: "2099-09-01T10:00:00.000Z"};
+  // A full row, derived the way the fixture does, so `lockEvent` satisfies the
+  // `Event` return type rather than a hand-built partial.
+  const storedEvent = (registrationMode: "rsvp" | "ticketed") => {
+    const row = {id: "11111111-1111-4111-8111-111111111111", ...base, startsAt: new Date(base.startsAt), titleZh: null, descriptionZh: null, endsAt: null, venue: null, capacity: null, memberOnly: false, published: false, heroMediaId: null, createdAt: new Date(), updatedAt: new Date()};
+    return {...row, ...legacyDerivedEventColumns(row), registrationMode};
+  };
   const dependencies = (inserted = vi.fn(async (input) => ({id: "11111111-1111-4111-8111-111111111111", ...input}))): EventMutationDependencies => ({
     transaction: (work) => work({insertEvent: inserted, lockEvent: vi.fn(), updateEvent: vi.fn(), lockActiveMedia: vi.fn(), insertAudit: vi.fn(async () => undefined)}),
   });
@@ -43,6 +50,30 @@ describe("the event write boundary prices only ticketed events", () => {
     const inserted = vi.fn(async (input) => ({id: "11111111-1111-4111-8111-111111111111", ...input}));
     await createEvent(staff, {...base, registrationMode: "ticketed", ticketPriceHkdCents: 25_000}, dependencies(inserted));
     expect(inserted).toHaveBeenCalledWith(expect.objectContaining({registrationMode: "ticketed", ticketPriceHkdCents: 25_000}));
+  });
+
+  // A price-only partial update sends no `registrationMode`, so the shape rule
+  // above cannot see the conflict: the row's own mode has to decide, and the
+  // `events_ticketed_price_check` table check is satisfied by a non-ticketed row
+  // carrying a price. Without the update-path guard this writes.
+  it("refuses a price-only update on a non-ticketed row", async () => {
+    const id = "11111111-1111-4111-8111-111111111111";
+    const current = storedEvent("rsvp");
+    const update = vi.fn(async (updateId, input) => ({id: updateId, ...input}));
+    const updateDependencies: EventMutationDependencies = {transaction: (work) => work({insertEvent: vi.fn(), lockEvent: async () => current, updateEvent: update, lockActiveMedia: vi.fn(), insertAudit: vi.fn(async () => undefined)})};
+    await expect(updateEvent(staff, id, {ticketPriceHkdCents: 25_000}, updateDependencies)).rejects.toThrow("ticketPriceHkdCents is only valid for ticketed events");
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  // The brief's carve-out, pinned: a legitimate partial update that only changes
+  // the price of an already-ticketed row must still be accepted.
+  it("accepts a price-only update on an already-ticketed row", async () => {
+    const id = "11111111-1111-4111-8111-111111111111";
+    const current = storedEvent("ticketed");
+    const update = vi.fn(async (updateId, input) => ({id: updateId, ...input}));
+    const updateDependencies: EventMutationDependencies = {transaction: (work) => work({insertEvent: vi.fn(), lockEvent: async () => current, updateEvent: update, lockActiveMedia: vi.fn(), insertAudit: vi.fn(async () => undefined)})};
+    await expect(updateEvent(staff, id, {ticketPriceHkdCents: 25_000}, updateDependencies)).resolves.toMatchObject({ticketPriceHkdCents: 25_000});
+    expect(update).toHaveBeenCalledWith(id, expect.objectContaining({ticketPriceHkdCents: 25_000}));
   });
 });
 
