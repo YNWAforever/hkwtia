@@ -24,7 +24,7 @@ describe("public policy pages", () => {
   });
 
   it("keeps both locales structurally in parity", () => {
-    for (const key of ["Privacy", "AiTransparency"] as const) {
+    for (const key of ["Privacy", "RefundPolicy", "AiTransparency"] as const) {
       const source = parsePolicySections(en[key].sections);
       const target = parsePolicySections(zhHK[key].sections);
       expect(target).toHaveLength(source.length);
@@ -43,7 +43,7 @@ describe("public policy pages", () => {
     // Namespaces rendered to the public. Staff-facing copy is out of scope.
     const publicNamespaces = [
       "Home", "About", "Chairman", "Committees", "Contact", "Privacy",
-      "AiTransparency", "News", "Events", "programs", "Membership",
+      "RefundPolicy", "AiTransparency", "News", "Events", "programs", "Membership",
       "LaunchPad", "Showcase", "AiOps", "NotFound", "Error", "Navigation",
       "Footer", "Metadata", "Join",
     ] as const;

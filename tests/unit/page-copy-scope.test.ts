@@ -156,6 +156,11 @@ describe("page copy scope", () => {
       // Phase A Task 13 (programme D-6/D-7) added the "WhatsApp messages and enquiries"
       // section: heading + 2 body paragraphs = 3 leaves -- 47 + 3 = 50.
       Privacy: 50,
+      // D-4c Task 4 added the refund policy: the six scalar fields (metaTitle,
+      // metaDescription, eyebrow, title, description, breadcrumbCurrent) plus the
+      // 9 string leaves across its four sections (3 in "When we refund", 2 in each
+      // of the other three) -- 6 + 9 = 15.
+      RefundPolicy: 15,
       // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
       AiTransparency: 31,
       // WP-7 Task 3: the /programmes index copy.
@@ -167,7 +172,7 @@ describe("page copy scope", () => {
       // narrowly-scoped one so it alone (not the rest of Footer) is staff-editable.
       MarketingExtras: 1,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(544);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(559);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

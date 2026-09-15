@@ -19,6 +19,7 @@ export const publicRoutes = [
   '/contact',
   '/partners',
   '/privacy',
+  '/refund-policy',
   '/ai-transparency',
   '/members'
 ] as const;

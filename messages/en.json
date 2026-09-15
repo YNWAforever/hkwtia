@@ -5,6 +5,7 @@
     "breadcrumbHome": "Home",
     "breadcrumbJoin": "Membership application",
     "breadcrumbPrivacy": "Privacy",
+    "breadcrumbRefundPolicy": "Refund policy",
     "breadcrumbMembers": "Members",
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
@@ -1841,6 +1842,45 @@
       }
     ]
   },
+  "RefundPolicy": {
+    "metaTitle": "Refund policy | WiseTech Hong Kong",
+    "metaDescription": "How and when WTIA refunds a paid ticket order, and what happens if we cancel an event.",
+    "eyebrow": "Policy",
+    "title": "Refund policy",
+    "description": "How we handle refunds for paid event tickets.",
+    "breadcrumbCurrent": "Refund policy",
+    "sections": [
+      {
+        "heading": "When we refund",
+        "body": [
+          "We refund a whole order, not an individual seat. If a seat in your order cannot be used, the whole order is refunded.",
+          "Refunds are at WTIA's discretion and considered on request. We look at the circumstances and at how close to the event you asked."
+        ],
+        "items": []
+      },
+      {
+        "heading": "If we cancel an event",
+        "body": [
+          "If WTIA cancels an event, every paid order is refunded in full."
+        ],
+        "items": []
+      },
+      {
+        "heading": "How and when",
+        "body": [
+          "Refunds go back to the payment method you used. Once we issue it, the time it takes to appear depends on your bank, and is usually a few business days."
+        ],
+        "items": []
+      },
+      {
+        "heading": "How to ask",
+        "body": [
+          "Contact us with your order reference, or reply to your confirmation email."
+        ],
+        "items": []
+      }
+    ]
+  },
   "AiTransparency": {
     "metaTitle": "AI Transparency | WiseTech Hong Kong",
     "metaDescription": "How the WTIA Concierge works, what it can do, and when a person takes over.",
@@ -3009,6 +3049,7 @@
         "programs": "Programmes",
         "Membership": "Membership",
         "Privacy": "Privacy notice",
+        "RefundPolicy": "Refund policy",
         "AiTransparency": "AI transparency",
         "Programmes": "Programmes index",
         "Partners": "Partners",

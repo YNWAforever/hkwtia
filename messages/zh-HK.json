@@ -6,6 +6,7 @@
     "breadcrumbHome": "主頁",
     "breadcrumbJoin": "會籍申請",
     "breadcrumbPrivacy": "私隱聲明",
+    "breadcrumbRefundPolicy": "退款政策",
     "breadcrumbMembers": "會員名錄",
     "openMenu": "開啟選單",
     "closeMenu": "關閉選單"
@@ -1841,6 +1842,45 @@
       }
     ]
   },
+  "RefundPolicy": {
+    "metaTitle": "退款政策｜WiseTech Hong Kong",
+    "metaDescription": "WTIA 如何及何時就付費門票訂單退款，以及我們取消活動時的安排。",
+    "eyebrow": "政策",
+    "title": "退款政策",
+    "description": "我們如何處理付費活動門票的退款。",
+    "breadcrumbCurrent": "退款政策",
+    "sections": [
+      {
+        "heading": "退款情況",
+        "body": [
+          "我們會就整張訂單退款，而非個別座位。若訂單中某個座位無法使用，整張訂單將獲退款。",
+          "退款由 WTIA 酌情決定，須經申請並逐一考慮。我們會視乎實際情況，以及你提出申請時距離活動舉行的時間。"
+        ],
+        "items": []
+      },
+      {
+        "heading": "如我們取消活動",
+        "body": [
+          "如 WTIA 取消活動，所有已付款訂單將獲全額退款。"
+        ],
+        "items": []
+      },
+      {
+        "heading": "退款方式及時間",
+        "body": [
+          "退款將退回你原先使用的付款方式。我們一經發出退款，款項實際到帳時間視乎你的銀行而定，一般為數個工作日。"
+        ],
+        "items": []
+      },
+      {
+        "heading": "如何申請",
+        "body": [
+          "請提供你的訂單編號與我們聯絡，或直接回覆確認電郵。"
+        ],
+        "items": []
+      }
+    ]
+  },
   "AiTransparency": {
     "metaTitle": "AI 透明度｜WiseTech Hong Kong",
     "metaDescription": "WTIA Concierge 的運作方式、能力範圍，以及何時交由真人接手。",
@@ -3038,6 +3078,7 @@
         "programs": "計劃",
         "Membership": "會籍",
         "Privacy": "私隱聲明",
+        "RefundPolicy": "退款政策",
         "AiTransparency": "AI 透明度",
         "Programmes": "計劃總覽",
         "Partners": "合作夥伴",
