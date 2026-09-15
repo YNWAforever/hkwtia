@@ -2820,7 +2820,8 @@
         "waitlist": "候補名單",
         "cancelled": "已取消",
         "attended": "已出席",
-        "noShow": "未出席"
+        "noShow": "未出席",
+        "paid": "已付款"
       },
       "review": {
         "title": "等待審核的會員活動",

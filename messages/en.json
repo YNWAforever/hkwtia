@@ -2819,7 +2819,8 @@
         "waitlist": "Waitlisted",
         "cancelled": "Cancelled",
         "attended": "Attended",
-        "noShow": "No show"
+        "noShow": "No show",
+        "paid": "Paid"
       },
       "review": {
         "title": "Member events awaiting review",

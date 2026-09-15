@@ -3,6 +3,7 @@ import {renderToStaticMarkup} from "react-dom/server";
 import {describe, expect, it, vi} from "vitest";
 
 import {AtRiskTable} from "@/components/admin/at-risk-table";
+import {AttendeeTable} from "@/components/admin/attendee-table";
 import {MemberTable} from "@/components/admin/member-table";
 import {ReportCards, toReportPeriodMessage} from "@/components/admin/report-cards";
 import en from "@/messages/en.json";
@@ -124,5 +125,19 @@ describe("admin presentation", () => {
     expect(toReportPeriodMessage(undefined)).toBe("{from} {to} {timezone}");
     expect(toReportPeriodMessage("{from} only")).toBe("{from} {to} {timezone}");
     expect(toReportPeriodMessage(42)).toBe("{from} {to} {timezone}");
+  });
+
+  /**
+   * The ticket arm emits `status = 'paid'`; the door-list label map only knew
+   * the five registration statuses, so every paid seat rendered "Not
+   * available". This drives `AttendeeTable` with the shipped bundles so a
+   * missing label fails here rather than only in front of a staff member. The
+   * page's inline label map is pinned in
+   * `tests/unit/event-attendees-ticket-rows.test.ts`.
+   */
+  it.each([en.Admin.eventsMgmt, zh.Admin.eventsMgmt])("renders a ticket seat's paid status from the door-list labels", (events) => {
+    const labels = {caption: events.attendees, kind: events.kind, kinds: {member: events.kinds.member, guest: events.kinds.guest, ticket: events.kinds.ticket}, name: events.name, email: events.email, organisation: events.organisation, status: events.status, checkedIn: events.checkedIn, checkIn: events.checkIn, checkingIn: events.checkingIn, unavailable: events.unavailable, statuses: {registered: events.statuses.registered, waitlist: events.statuses.waitlist, cancelled: events.statuses.cancelled, attended: events.statuses.attended, no_show: events.statuses.noShow, paid: events.statuses.paid}};
+    const {container} = render(<AttendeeTable attendees={[{kind: "ticket", profileId: null, guestId: null, seatId: "seat-1", orderId: "order-1", displayName: "Ada Lovelace", email: "ada@example.test", organisation: null, status: "paid", checkedInAt: null}]} checkInAction={async () => ({})} labels={labels} locale="en"/>);
+    expect(container.textContent).toContain(events.statuses.paid);
   });
 });
