@@ -22,4 +22,15 @@ describe("toRefundConfirmMessage", () => {
     expect(message).toContain("{seats}");
     expect(message).toContain("{amount}");
   });
+
+  // The fallback is language-neutral on purpose: a broken `confirm` on a zh-HK
+  // page must not render an English sentence.
+  it("falls back to a language-neutral placeholder set, not an English sentence", () => {
+    const message = toRefundConfirmMessage(undefined);
+
+    expect(message).toBe("{buyer} · {seats} · {amount}");
+    // Nothing but separators remains once the placeholders are removed, so the
+    // fallback carries no English words of its own.
+    expect(message.replaceAll(/\{(?:buyer|seats|amount)\}/g, "")).toMatch(/^[\p{P}\p{S}\s]*$/u);
+  });
 });

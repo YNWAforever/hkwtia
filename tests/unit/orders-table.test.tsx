@@ -87,7 +87,9 @@ describe("OrdersTable", () => {
     fireEvent.click(start);
 
     expect(action).not.toHaveBeenCalled();
-    const confirm = screen.getByRole("alert");
+    // The confirmation is a polite status region, not an assertive alert: it is
+    // a question the staff member just opened, not an error that interrupted them.
+    const confirm = screen.getByRole("status");
     expect(confirm).toHaveTextContent("Katherine Johnson");
     expect(confirm).toHaveTextContent("Ada Lovelace, Alan Turing");
     expect(confirm).toHaveTextContent(amountLabel(50_000));
@@ -97,6 +99,28 @@ describe("OrdersTable", () => {
     await waitFor(() => expect(action).toHaveBeenCalledTimes(1));
     const formData = action.mock.calls[0]![1];
     expect(formData.get("orderId")).toBe(ORDER_ID);
+  });
+
+  // A string replacement would reinterpret `$&` / `$'` in the replacement text, so
+  // a buyer whose name contains a dollar sign would corrupt the confirmation.
+  it("prints a buyer name containing dollar signs literally", () => {
+    render(<OrdersTable action={noopAction()} labels={labels} rows={[orderRow({buyerName: "Ada $& Lovelace"})]} />);
+
+    fireEvent.click(screen.getByRole("button", {name: "Refund"}));
+
+    expect(screen.getByRole("status")).toHaveTextContent("Ada $& Lovelace");
+  });
+
+  // The row and the confirmation must name the same seats: the row's summarising
+  // `+N` is not a shorter list, it is how the row spells the rest of it.
+  it("names the summarised extra seats in the confirmation as well as the row", () => {
+    render(<OrdersTable action={noopAction()} labels={labels} rows={[orderRow({}, ["Ada Lovelace"], 3)]} />);
+
+    expect(screen.getByText("Ada Lovelace +2")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", {name: "Refund"}));
+
+    expect(screen.getByRole("status")).toHaveTextContent("Ada Lovelace +2");
   });
 
   it("renders a refunded row with its date and no refund control", () => {
@@ -122,5 +146,14 @@ describe("the orders status labels", () => {
 
     expect(Object.keys(en.Admin.eventsMgmt.orders.statuses).sort()).toEqual(statuses);
     expect(Object.keys(zhHk.Admin.eventsMgmt.orders.statuses).sort()).toEqual(statuses);
+  });
+
+  // The five outcomes the action maps every refund result onto, in both bundles:
+  // a missing key is a refund result rendered as `undefined`.
+  it("ships every refund outcome key in both bundles", () => {
+    const outcomes = ["alreadyRefunded", "notAdmissible", "notFound", "providerFailed", "refunded"];
+
+    expect(Object.keys(en.Admin.eventsMgmt.orders.refundOutcomes).sort()).toEqual(outcomes);
+    expect(Object.keys(zhHk.Admin.eventsMgmt.orders.refundOutcomes).sort()).toEqual(outcomes);
   });
 });
