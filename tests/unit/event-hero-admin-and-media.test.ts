@@ -1,5 +1,5 @@
 import {createElement} from "react";
-import {render, screen} from "@testing-library/react";
+import {render, screen, within} from "@testing-library/react";
 import {describe, expect, it, vi} from "vitest";
 
 import {EventForm} from "@/components/admin/event-form";
@@ -52,14 +52,14 @@ describe("Event hero administration and media lifecycle", () => {
   it("offers only supplied active media IDs in the Event hero selector", () => {
     render(createElement(EventForm, {
       action: async () => ({}),
-      labels: {slug: "Slug", titleEn: "Title", titleZh: "Title", descriptionEn: "Description", descriptionZh: "Description", startsAt: "Starts", endsAt: "Ends", venue: "Venue", capacity: "Capacity", memberOnly: "Members", published: "Published", heroMediaId: "Hero media", noHeroMedia: "No hero media", save: "Save", saving: "Saving"},
+      labels: {slug: "Slug", titleEn: "Title", titleZh: "Title", descriptionEn: "Description", descriptionZh: "Description", startsAt: "Starts", endsAt: "Ends", venue: "Venue", capacity: "Capacity", registrationMode: "Registration", registrationModes: {rsvp: "RSVP", external: "External", ticketed: "Ticketed"}, ticketPriceHkdCents: "Ticket price (HKD)", memberOnly: "Members", published: "Published", heroMediaId: "Hero media", noHeroMedia: "No hero media", save: "Save", saving: "Saving"},
       mediaRows: [{id: heroMediaId, altEn: "Active image", altZh: "啟用圖片"}],
     }));
 
     const selector = screen.getByLabelText("Hero media");
     expect(selector).toHaveAttribute("name", "heroMediaId");
     expect(screen.getByRole("option", {name: "Active image / 啟用圖片"})).toHaveValue(heroMediaId);
-    expect(screen.getAllByRole("option").map((option) => option.getAttribute("value"))).toEqual(["", heroMediaId]);
+    expect(within(selector).getAllByRole("option").map((option) => option.getAttribute("value"))).toEqual(["", heroMediaId]);
   });
 
   it("normalizes an empty heroMediaId and rejects archived media inside the write transaction", async () => {

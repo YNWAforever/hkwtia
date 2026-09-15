@@ -31,7 +31,7 @@ export default async function AdminEventsPage({params}: Props) {
   const path = "/" + locale + "/admin/events-mgmt";
   const createActionMessages = {successMessage: t("createSuccess"), validationMessage: t("validation"), errorMessage: t("error")};
   const createAction = createEventAction.bind(null, path, createActionMessages);
-  const labels = {slug: t("slug"), titleEn: t("titleEn"), titleZh: t("titleZh"), descriptionEn: t("descriptionEn"), descriptionZh: t("descriptionZh"), startsAt: t("startsAt"), endsAt: t("endsAt"), venue: t("venue"), capacity: t("capacity"), memberOnly: t("memberOnly"), published: t("published"), heroMediaId: t("heroMediaId"), noHeroMedia: t("noHeroMedia"), save: t("create"), saving: t("saving")};
+  const labels = {slug: t("slug"), titleEn: t("titleEn"), titleZh: t("titleZh"), descriptionEn: t("descriptionEn"), descriptionZh: t("descriptionZh"), startsAt: t("startsAt"), endsAt: t("endsAt"), venue: t("venue"), capacity: t("capacity"), registrationMode: t("registrationMode"), registrationModes: {rsvp: t("registrationModes.rsvp"), external: t("registrationModes.external"), ticketed: t("registrationModes.ticketed")}, ticketPriceHkdCents: t("ticketPriceHkdCents"), memberOnly: t("memberOnly"), published: t("published"), heroMediaId: t("heroMediaId"), noHeroMedia: t("noHeroMedia"), save: t("create"), saving: t("saving")};
   // Snake_case rows from the raw-SQL seam, mapped field by field so the table
   // never renders a raw database row.
   const reviewRows: ReviewRow[] | null = pendingRows === null ? null : pendingRows.map((row) => ({

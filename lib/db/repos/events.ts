@@ -45,6 +45,7 @@ const eventInputObjectSchema = z.object({
   onlineUrl: httpUrlSchema.nullable().optional(),
   registrationMode: z.enum(["rsvp", "external", "ticketed"]).default("rsvp"),
   externalRegistrationUrl: httpUrlSchema.nullable().optional(),
+  ticketPriceHkdCents: z.number().int().positive().nullable().optional().default(null),
   // Normalised at the write boundary (programme B-6 review): the public `?tag=` predicate
   // is `tags @> ARRAY['ai']`, so a row tagged "AI" or "Machine Learning" was unreachable.
   // Admin-authored and member-authored tags alike land as `ai` / `machine-learning`;
@@ -55,12 +56,22 @@ const eventInputObjectSchema = z.object({
 // Mirrors the `events_online_url_check` and `events_external_registration_check`
 // constraints so a bad form fails validation instead of a transaction.
 function addEventShapeIssues(
-  input: Readonly<{startsAt?: Date; endsAt?: Date | null; format?: string; onlineUrl?: string | null; registrationMode?: string; externalRegistrationUrl?: string | null}>,
+  input: Readonly<{startsAt?: Date; endsAt?: Date | null; format?: string; onlineUrl?: string | null; registrationMode?: string; externalRegistrationUrl?: string | null; ticketPriceHkdCents?: number | null}>,
   context: z.RefinementCtx,
 ): void {
   if (input.startsAt && input.endsAt && input.endsAt <= input.startsAt) context.addIssue({code: z.ZodIssueCode.custom, path: ["endsAt"], message: "endsAt must be after startsAt"});
   if (input.format !== undefined && input.format !== "in_person" && !input.onlineUrl) context.addIssue({code: z.ZodIssueCode.custom, path: ["onlineUrl"], message: "onlineUrl is required for online and hybrid events"});
   if (input.registrationMode === "external" && !input.externalRegistrationUrl) context.addIssue({code: z.ZodIssueCode.custom, path: ["externalRegistrationUrl"], message: "externalRegistrationUrl is required for external registration"});
+  const ticketed = input.registrationMode === "ticketed";
+  if (ticketed && !(typeof input.ticketPriceHkdCents === "number" && input.ticketPriceHkdCents > 0)) {
+    context.addIssue({code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "ticketPriceHkdCents is required for ticketed events"});
+  }
+  // Guarded on the mode being *present*: a partial update that changes only the
+  // price of an already-ticketed event sends no mode, and the row's own mode
+  // governs there — the database check is the backstop for that path.
+  if (input.registrationMode !== undefined && !ticketed && input.ticketPriceHkdCents != null) {
+    context.addIssue({code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "ticketPriceHkdCents is only valid for ticketed events"});
+  }
 }
 const eventInputSchema = eventInputObjectSchema.superRefine(addEventShapeIssues);
 const eventUpdateSchema = eventInputObjectSchema.partial().superRefine((input, context) => {
@@ -580,7 +591,7 @@ export type MemberEventDependencies = Readonly<{
 // status comes from which method they call and the booleans from the enums.
 // `invite_only` is a staff-only visibility until the invitation flow exists.
 const memberEventInputSchema = eventInputObjectSchema
-  .omit({published: true, memberOnly: true, status: true})
+  .omit({published: true, memberOnly: true, status: true, ticketPriceHkdCents: true})
   .extend({visibility: z.enum(["public", "members_only"]), heroMediaId: z.string().uuid().nullable()})
   .strict()
   .superRefine(addEventShapeIssues);

@@ -2769,6 +2769,13 @@
       "endsAt": "結束時間",
       "venue": "地點",
       "capacity": "名額",
+      "registrationMode": "報名方式",
+      "registrationModes": {
+        "rsvp": "在此網站報名",
+        "external": "外部報名連結",
+        "ticketed": "收費門票"
+      },
+      "ticketPriceHkdCents": "門票價格（港元）",
       "heroMediaId": "活動主圖",
       "noHeroMedia": "不使用主圖",
       "memberOnly": "僅限會員",

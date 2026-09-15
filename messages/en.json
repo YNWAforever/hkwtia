@@ -2768,6 +2768,13 @@
       "endsAt": "Ends at",
       "venue": "Venue",
       "capacity": "Capacity",
+      "registrationMode": "Registration",
+      "registrationModes": {
+        "rsvp": "RSVP on this site",
+        "external": "External registration link",
+        "ticketed": "Paid ticket"
+      },
+      "ticketPriceHkdCents": "Ticket price (HKD)",
       "heroMediaId": "Hero media",
       "noHeroMedia": "No hero media",
       "memberOnly": "Members only",
