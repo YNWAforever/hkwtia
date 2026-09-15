@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {useActionState, useEffect, useState} from "react";
 
 import {MAX_TICKET_SEATS} from "@/config/tickets";
@@ -9,14 +10,14 @@ import {submitTicketCheckoutAction, type TicketCheckoutState} from "@/lib/ticket
 export type TicketCheckoutLabels = Readonly<{
   heading: string; buyerName: string; buyerEmail: string; seatCount: string;
   attendeeName: string; attendeeEmail: string; website: string;
-  submit: string; submitting: string;
+  submit: string; submitting: string; refundPolicy: string;
   errors: Readonly<Record<string, string>>;
 }>;
 
 const initial: TicketCheckoutState = {status: "idle"};
 
-export function TicketCheckoutForm({eventId, locale, pricePerSeat, labels, defaultBuyerName = "", defaultBuyerEmail = ""}: Readonly<{
-  eventId: string; locale: "en" | "zh-HK"; pricePerSeat: string; labels: TicketCheckoutLabels;
+export function TicketCheckoutForm({eventId, locale, pricePerSeat, labels, refundPolicyHref, defaultBuyerName = "", defaultBuyerEmail = ""}: Readonly<{
+  eventId: string; locale: "en" | "zh-HK"; pricePerSeat: string; labels: TicketCheckoutLabels; refundPolicyHref: string;
   defaultBuyerName?: string; defaultBuyerEmail?: string;
 }>) {
   const [state, dispatch, pending] = useActionState(submitTicketCheckoutAction, initial);
@@ -72,6 +73,7 @@ export function TicketCheckoutForm({eventId, locale, pricePerSeat, labels, defau
         </div>
       ))}
       <p className="text-sm text-muted-foreground">{pricePerSeat}</p>
+      <p className="text-sm"><Link className="underline" href={refundPolicyHref}>{labels.refundPolicy}</Link></p>
       <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending || idempotencyKey === ""} type="submit">
         {pending ? labels.submitting : labels.submit}
       </button>

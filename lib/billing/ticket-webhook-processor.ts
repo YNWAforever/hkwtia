@@ -86,6 +86,7 @@ async function sendTicketEmail(
         amount: formatHkd(order.amountHkdCents, order.buyerLocale),
         orderId: order.id,
         ctaUrl,
+        refundPolicyUrl: `${dependencies.appUrl}${localizedPath(order.buyerLocale, "/refund-policy")}`,
       }
       : template === "event_ticket_pass"
         ? {

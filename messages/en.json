@@ -337,7 +337,7 @@
         "subject": "Your tickets for {eventTitle}",
         "preview": "Order {orderId} confirmed, {seatCount} seat(s).",
         "heading": "You're going to {eventTitle}",
-        "body": "Thank you. We received HK${amount} for {seatCount} seat(s): {attendees}. The event is on {eventDate}. Each attendee will receive their own pass in a separate email.",
+        "body": "Thank you. We received HK${amount} for {seatCount} seat(s): {attendees}. The event is on {eventDate}. Each attendee will receive their own pass in a separate email. Refunds are covered by our refund policy: {refundPolicyUrl}",
         "cta": "View the event"
       },
       "event_ticket_refunded": {
@@ -1604,6 +1604,7 @@
     "attendeeEmail": "Attendee email",
     "website": "Leave this field empty",
     "price": "Price per seat: {price}",
+    "refundPolicy": "Refund policy",
     "submit": "Continue to payment",
     "submitting": "Redirecting to payment…",
     "errors": {

@@ -18,6 +18,7 @@ const fixtureVars = {
   orderId: "order_fixture",
   attendeeName: "Fixture Attendee",
   attendees: "Fixture Member, Fixture Attendee",
+  refundPolicyUrl: "https://www.hkwtia.org/refund-policy",
 };
 
 describe("renderEmail", () => {

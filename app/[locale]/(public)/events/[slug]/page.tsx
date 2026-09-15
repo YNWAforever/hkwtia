@@ -118,7 +118,7 @@ export default async function EventPage({params}: Props) {
   const ticketLabels = {
     heading: tTicket("heading"), buyerName: tTicket("buyerName"), buyerEmail: tTicket("buyerEmail"),
     seatCount: tTicket("seatCount"), attendeeName: tTicket("attendeeName"), attendeeEmail: tTicket("attendeeEmail"),
-    website: tTicket("website"), submit: tTicket("submit"), submitting: tTicket("submitting"),
+    website: tTicket("website"), submit: tTicket("submit"), submitting: tTicket("submitting"), refundPolicy: tTicket("refundPolicy"),
     errors: {INVALID: tTicket("errors.INVALID"), SOLD_OUT: tTicket("errors.SOLD_OUT"), EVENT_CLOSED: tTicket("errors.EVENT_CLOSED"), UNAVAILABLE: tTicket("errors.UNAVAILABLE"), RATE_LIMITED: tTicket("errors.RATE_LIMITED")},
   };
 
@@ -183,6 +183,7 @@ export default async function EventPage({params}: Props) {
                   locale={appLocale}
                   labels={ticketLabels}
                   pricePerSeat={tTicket("price", {price: formatTicketPrice(displayEvent.ticketPriceHkdCents, appLocale)})}
+                  refundPolicyHref={localizedPath(appLocale, "/refund-policy")}
                 />
               ) : registration.kind === "external" ? (
                 <a className="button" href={registration.url} rel="noopener noreferrer" target="_blank">{t("detail.registerExternally")}</a>

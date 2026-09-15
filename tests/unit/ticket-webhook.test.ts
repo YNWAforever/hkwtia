@@ -342,9 +342,17 @@ describe("createTicketProcessor", () => {
 
     const input = (renderEmail.mock.calls[0] as unknown as [RenderEmailInput])[0];
     expect(Object.keys(input.variables)).toEqual(expect.arrayContaining([
-      "eventTitle", "eventDate", "seatCount", "attendees", "amount", "orderId", "ctaUrl",
+      "eventTitle", "eventDate", "seatCount", "attendees", "amount", "orderId", "ctaUrl", "refundPolicyUrl",
     ]));
-    expect(input.variables).toMatchObject({eventTitle: eventSummary.title, seatCount: "3", orderId});
+    expect(input.variables).toMatchObject({
+      eventTitle: eventSummary.title,
+      seatCount: "3",
+      orderId,
+      // The only guard for a placeholder the error handler swallows: a missing
+      // `refundPolicyUrl` would stop the receipt sending while the webhook still
+      // reported success, so the key's presence and its order-built value are pinned.
+      refundPolicyUrl: "https://w.test/refund-policy",
+    });
     // The real renderer ran, so a missing placeholder would have thrown and left
     // the transport empty rather than failing the assertion above in silence.
     expect(transport.sends).toHaveLength(1);
@@ -358,6 +366,9 @@ describe("createTicketProcessor", () => {
     await processor.process(systemActor("stripe-webhook"), command("checkout.session.completed"));
 
     expect(renderEmail).toHaveBeenCalledWith(expect.objectContaining({locale: "zh-HK"}));
+    const input = (renderEmail.mock.calls[0] as unknown as [RenderEmailInput])[0];
+    // Built from the order's own locale, so the Chinese receipt links to the Chinese policy.
+    expect(input.variables).toMatchObject({refundPolicyUrl: "https://w.test/zh/refund-policy"});
     expect(transport.sends).toHaveLength(1);
   });
 
