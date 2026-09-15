@@ -514,7 +514,7 @@ export function OrdersTable({action, rows, labels}: Readonly<{action: (state: Re
 }
 ```
 
-Add `Admin.eventsMgmt.orders` to both bundles in parity (`caption`, `buyer`, `seats`, `amount`, `status`, `refundedOn`, `refund`, `confirm`, `cancel`, `note`, and `statuses.{pending,paid,expired,failed,refunded}` — five statuses, because a missing one renders a placeholder).
+Add `Admin.eventsMgmt.orders` to both bundles in parity — `heading` and `unavailable` (used by the page), and the table's own `caption`, `buyer`, `seats`, `amount`, `status`, `refundedOn`, `refund`, `confirm`, `cancel`, `note`, plus `statuses.{pending,paid,expired,failed,refunded}` (five statuses, because a missing one renders a placeholder).
 
 Render it in `app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx` for a ticketed event, above the attendees section, with a read failure rendered as an error rather than an empty section:
 
