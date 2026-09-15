@@ -1,6 +1,6 @@
 import {afterAll, beforeAll, describe, expect, it, vi} from "vitest";
 
-import {loadPassPage} from "@/app/[locale]/(public)/pass/[token]/page";
+import {loadPassPage} from "@/lib/tickets/pass-page";
 
 const claims = {seatId: "3f1c9d5e-6a2b-4c8d-9e0f-1a2b3c4d5e6f", eventId: "8b7a6c5d-4e3f-2a1b-9c8d-7e6f5a4b3c2d"};
 
