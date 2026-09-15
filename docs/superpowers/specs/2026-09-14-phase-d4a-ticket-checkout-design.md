@@ -88,7 +88,9 @@ One generated migration (Drizzle):
   Creating an enum and defaulting a column to one of its values in the same migration is safe;
   the Phase C transaction trap applies to `ALTER TYPE … ADD VALUE`, not to a new type.
 - `refund_reason` — a nullable enum: `oversold | staff | cancelled`. A refund says *why* without
-  multiplying statuses; D-4a only ever writes `oversold`.
+  multiplying statuses. D-4a writes `oversold` for an order that loses the payment-time capacity
+  race, and `cancelled` for a payment that arrives after the local hold lapsed (its audit metadata
+  records `late_payment`); `staff` belongs to D-4c's whole-order refunds.
 - `event_orders` — `id`, `event_id` (FK, cascade), `buyer_profile_id` (FK profiles, set null),
   `buyer_name`, `buyer_email`, `buyer_locale`, `amount_hkd_cents`, `currency` (default `hkd`),
   `status` (default `pending`), `stripe_checkout_session_id` (unique), `stripe_checkout_url`,
