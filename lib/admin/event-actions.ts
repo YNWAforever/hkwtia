@@ -4,13 +4,13 @@ import {revalidatePath} from "next/cache";
 import {notFound} from "next/navigation";
 import {z} from "zod";
 
-import {runCheckInAction, runEventFormAction, type EventActionState} from "@/lib/admin/event-action-core";
+import {runCancelEventAction, runCheckInAction, runEventFormAction, type CancelEventMessages, type EventActionState} from "@/lib/admin/event-action-core";
 import {eventFormInput} from "@/lib/admin/event-form-input";
 import {checkInAttendee} from "@/lib/admin/events";
 import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
 import {requireAdminActor} from "@/lib/auth/actor";
 import {sendSeatPass, ticketProcessorDependencies} from "@/lib/billing/ticket-webhook-processor";
-import {createEvent, updateEvent} from "@/lib/db/repos/events";
+import {cancelEvent, createEvent, updateEvent} from "@/lib/db/repos/events";
 
 export type EventFormActionMessages = Readonly<{successMessage: string; validationMessage: string; errorMessage: string}>;
 export type CheckInActionMessages = Readonly<{successMessage: string; errorMessage: string}>;
@@ -33,6 +33,33 @@ export async function updateEventAction(eventId: string, path: string, messages:
       const updated = await updateEvent(await requireAdminActor(), eventId, eventFormInput(data));
       if (!updated) throw new Error("EVENT_NOT_FOUND");
       revalidatePath(path);
+    }});
+  } catch (error) {
+    if (isAuthorizationDenial(error)) notFound();
+    throw error;
+  }
+}
+
+/**
+ * D-4d: the irreversible transition. Like its siblings it resolves its own actor
+ * from the session and is bound to the event path by the page; `cancelled` is
+ * terminal, so this is the one write whose confirmation the page prices first.
+ */
+export async function cancelEventAction(eventId: string, path: string, messages: CancelEventMessages, state: EventActionState, formData: FormData): Promise<EventActionState> {
+  try {
+    return await runCancelEventAction(state, formData, {...messages, mutate: async () => {
+      const outcome = await cancelEvent(await requireAdminActor(), eventId);
+      if (outcome.status === "cancelled") {
+        // A cancelled event leaves the public listing it was published in, so both
+        // locales' listings and detail pages drop their cache alongside the admin
+        // page. These are internal app-router paths, where `/zh-HK/…` is correct.
+        revalidatePath(path);
+        revalidatePath("/en/events");
+        revalidatePath("/zh-HK/events");
+        revalidatePath(`/en/events/${outcome.event.slug}`);
+        revalidatePath(`/zh-HK/events/${outcome.event.slug}`);
+      }
+      return outcome;
     }});
   } catch (error) {
     if (isAuthorizationDenial(error)) notFound();

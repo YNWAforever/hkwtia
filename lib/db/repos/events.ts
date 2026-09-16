@@ -874,6 +874,91 @@ export async function reviewEvent(actor: Actor, eventId: string, decision: unkno
   });
 }
 
+/**
+ * D-4d: the irreversible transition. `cancelled` is terminal, and the write that
+ * reaches it commits the status, its derived flags and its audit row together.
+ *
+ * The explicit `cancelled` refusal is load-bearing. `canTransitionEvent("cancelled",
+ * "cancelled")` is TRUE because the table maps `cancelled` to `["cancelled"]`, so a
+ * guard that consulted only the table would run a second UPDATE and mint a second
+ * `event.cancelled` audit row for one cancellation. `draft` and `rejected`, by
+ * contrast, *are* the table's job: it forbids them from reaching `cancelled`.
+ */
+export type CancelEventOutcome =
+  | Readonly<{status: "cancelled"; event: MemberEventRow}>
+  | Readonly<{status: "already_cancelled"}>
+  | Readonly<{status: "invalid_transition"; from: EventStatus}>
+  | Readonly<{status: "not_found"}>;
+
+export async function cancelEvent(actor: Actor, eventId: unknown, deps: MemberEventDependencies = {}): Promise<CancelEventOutcome> {
+  requireAdmin(actor);
+  const id = eventIdSchema.parse(eventId);
+  const database = await memberDatabase(deps);
+  return database.transaction(async (transaction) => {
+    // FOR UPDATE: a concurrent cancel or review on the same row must serialise so
+    // the checks below see the other writer's outcome, not stale state.
+    const current = memberEventRows(await transaction.execute(sql`SELECT * FROM ${events} WHERE ${events.id} = ${id} FOR UPDATE`))[0];
+    if (!current) return {status: "not_found" as const};
+    if (current.status === "cancelled") return {status: "already_cancelled" as const};
+    if (!canTransitionEvent(current.status, "cancelled")) return {status: "invalid_transition" as const, from: current.status};
+    const flags = derivedEventFlags({status: "cancelled", visibility: current.visibility});
+    // `published_at` is left as it stood: it records when the event *was*
+    // published, and the derived `published` flag is what unpublishes it now.
+    const updated = memberEventRows(await transaction.execute(sql`
+      UPDATE ${events}
+      SET status = 'cancelled', published = ${flags.published}, member_only = ${flags.memberOnly}, updated_at = now()
+      WHERE ${events.id} = ${id}
+      RETURNING *
+    `))[0];
+    if (!updated) return {status: "not_found" as const};
+    await transaction.execute(sql`
+      INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata)
+      VALUES (${actor.profileId}, ${actor.kind}, 'event.cancelled', 'event', ${id},
+              ${JSON.stringify({slug: current.slug, from: current.status})}::jsonb)
+    `);
+    return {status: "cancelled" as const, event: updated};
+  });
+}
+
+/** The numbers the cancellation confirmation shows before an irreversible act. */
+export type CancellationPreview = Readonly<{
+  paidOrders: number;
+  refundTotalHkdCents: number;
+  attendees: number;
+}>;
+
+const cancellationPreviewRowSchema = z.object({
+  paid_orders: z.coerce.number().int().min(0),
+  refund_total_hkd_cents: z.coerce.number().int().min(0),
+  attendees: z.coerce.number().int().min(0),
+});
+
+/**
+ * The costed preview: how many orders the sweep will refund, the total in HKD
+ * cents, and how many seats those orders cover. `null` means the event does not
+ * exist -- a free event is zeroes, not `null`, because "nothing was sold" and
+ * "there is no such event" are different answers.
+ *
+ * The three aggregates are separate scalar subqueries on purpose: a single
+ * `SELECT sum(amount) … FROM orders JOIN seats` multiplies each order amount by
+ * its seat count, so the refund total would overstate what is paid back.
+ */
+export async function cancellationPreview(actor: Actor, eventId: unknown, deps: MemberEventDependencies = {}): Promise<CancellationPreview | null> {
+  requireAdmin(actor);
+  const id = eventIdSchema.parse(eventId);
+  const database = await memberDatabase(deps);
+  const row = executedRows(await database.execute(sql`
+    SELECT
+      (SELECT count(*)::int FROM ${eventOrders} WHERE ${eventOrders.eventId} = ${events.id} AND ${eventOrders.status} = 'paid') AS paid_orders,
+      (SELECT COALESCE(sum(${eventOrders.amountHkdCents}), 0)::int FROM ${eventOrders} WHERE ${eventOrders.eventId} = ${events.id} AND ${eventOrders.status} = 'paid') AS refund_total_hkd_cents,
+      (SELECT count(*)::int FROM ${eventOrderSeats} JOIN ${eventOrders} ON ${eventOrders.id} = ${eventOrderSeats.orderId} WHERE ${eventOrders.eventId} = ${events.id} AND ${eventOrders.status} = 'paid') AS attendees
+    FROM ${events} WHERE ${events.id} = ${id}
+  `))[0];
+  if (!row) return null;
+  const parsed = cancellationPreviewRowSchema.parse(row);
+  return {paidOrders: parsed.paid_orders, refundTotalHkdCents: parsed.refund_total_hkd_cents, attendees: parsed.attendees};
+}
+
 export async function listEventsForReview(actor: Actor, deps: MemberEventDependencies = {}): Promise<MemberEventRow[]> {
   requireAdmin(actor);
   const database = await memberDatabase(deps);
@@ -908,4 +993,6 @@ export const eventsRepository = {
   countCompanySubmissionsThisQuarter,
   review: reviewEvent,
   listForReview: listEventsForReview,
+  cancel: cancelEvent,
+  cancellationPreview,
 };

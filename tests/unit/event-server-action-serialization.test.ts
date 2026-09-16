@@ -28,6 +28,18 @@ describe("client-bound event Server Actions", () => {
     expect(source).not.toContain('"use server"');
   });
 
+  // D-4d. The cancel panel receives its action as a prop, and a locally-defined
+  // closure passed from a Server Component to a Client Component is not a Server
+  // Function: Next.js refuses to serialize it and the page throws at render. The
+  // property that matters is therefore not the spelling of the prop but that the
+  // value is the `"use server"` export bound with `null`, never an inline arrow.
+  it("binds the cancel control to the server reference, not a locally-defined closure", () => {
+    const source = readFileSync("app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx", "utf8");
+    expect(source).toContain('from "@/lib/admin/event-actions"');
+    expect(source).toMatch(/const cancelAction = cancelEventAction\.bind\(null,/);
+    expect(source).toMatch(/<CancelEventPanel action=\{cancelAction\}/);
+  });
+
   it("does not capture the next-intl translator in member RSVP", () => {
     expect(actionSource("app/[locale]/(member)/portal/events/page.tsx", "registerAction", "\n  return <div")).not.toMatch(/\bt\(/);
   });

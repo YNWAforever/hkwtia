@@ -2902,6 +2902,23 @@
         "empty": "No member events are waiting for review.",
         "error": "Member events awaiting review could not be loaded."
       },
+      "cancel": {
+        "heading": "Cancel event",
+        "description": "Cancelling is final. Every paid order is refunded in full, the event leaves the public listing, and it cannot be published again.",
+        "button": "Cancel event",
+        "keep": "Keep event",
+        "submitting": "Cancelling...",
+        "unavailable": "The refund cost could not be loaded right now. Cancelling will still refund every paid order.",
+        "cancelledNotice": "This event has been cancelled. Every paid order is being refunded.",
+        "confirm": "Refund {orders} paid orders for {amount}, covering {attendees} attendees? This cannot be undone.",
+        "outcomes": {
+          "success": "Event cancelled. Every paid order will be refunded.",
+          "alreadyCancelled": "This event was already cancelled, so nothing changed.",
+          "invalidTransition": "A draft or returned event cannot be cancelled.",
+          "notFound": "That event could not be found.",
+          "error": "We could not cancel this event. Please try again."
+        }
+      },
       "orders": {
         "heading": "Orders",
         "unavailable": "Orders could not be loaded right now.",

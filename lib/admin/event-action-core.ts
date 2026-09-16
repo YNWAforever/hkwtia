@@ -1,6 +1,9 @@
 import {z} from "zod";
 
 import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
+// Type-only: erased at compile time, so this plain module stays importable from
+// the client without dragging the server-only repository in.
+import type {CancelEventOutcome} from "@/lib/db/repos/events";
 
 export type EventActionState = Readonly<{
   status?: "success" | "error";
@@ -75,6 +78,35 @@ export async function runSeatCheckInAction(_state: EventActionState, formData: F
     if (outcome === "undone") return {status: "success", message: options.successMessageUndone};
     if (outcome === "not_checked_in") return {status: "success", message: options.notCheckedInMessage};
     if (outcome === "not_admissible") return {status: "error", message: options.notAdmissibleMessage};
+    return {status: "success", message: options.successMessage};
+  } catch (error) {
+    if (isAuthorizationDenial(error)) throw error;
+    return {status: "error", message: options.errorMessage};
+  }
+}
+
+/**
+ * The four outcomes a cancellation can land on, each with its own wording, so a
+ * staff member is never told "cancelled" for a write that refused. The messages
+ * are supplied by the caller (localized in the page) rather than hardcoded here,
+ * because this is a `.ts` module the visible-string audit does not scan.
+ */
+export type CancelEventMessages = Readonly<{
+  successMessage: string;
+  alreadyCancelledMessage: string;
+  invalidTransitionMessage: string;
+  notFoundMessage: string;
+  errorMessage: string;
+}>;
+
+type CancelEventOptions = CancelEventMessages & Readonly<{mutate: (formData: FormData) => Promise<CancelEventOutcome>}>;
+
+export async function runCancelEventAction(_state: EventActionState, formData: FormData, options: CancelEventOptions): Promise<EventActionState> {
+  try {
+    const outcome = await options.mutate(formData);
+    if (outcome.status === "already_cancelled") return {status: "error", message: options.alreadyCancelledMessage};
+    if (outcome.status === "invalid_transition") return {status: "error", message: options.invalidTransitionMessage};
+    if (outcome.status === "not_found") return {status: "error", message: options.notFoundMessage};
     return {status: "success", message: options.successMessage};
   } catch (error) {
     if (isAuthorizationDenial(error)) throw error;
