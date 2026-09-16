@@ -63,11 +63,21 @@ describe("refundPaidOrder", () => {
 
     const audit = fake.queries.find((query) => /^\s*insert/i.test(query.sql));
     expect(audit?.sql).toMatch(/audit_events/);
-    // The literal is what D-4a's webhook writes for an oversold refund; only the
-    // metadata distinguishes a staff refund from it.
-    expect(audit?.params).toContain("event.order.refunded");
-    expect(audit?.params).toContain("event_order");
-    expect(audit?.params).toContain(JSON.stringify({reason: "staff", note: "duplicate purchase"}));
+    // Positional, not set-membership: because the action and the target type are
+    // bind parameters, `toContain` on both would pass even if the two were
+    // swapped and the audit log named the wrong action — the failure mode the
+    // changelog records for `event.review.approved|rejected`. The columns order
+    // is (actor_user_id, actor_type, action, target_type, target_id, metadata),
+    // and the literal is what D-4a's webhook writes for an oversold refund; only
+    // the metadata distinguishes a staff refund from it.
+    expect(audit?.params).toEqual([
+      "staff-1",
+      "staff",
+      "event.order.refunded",
+      "event_order",
+      "order-1",
+      JSON.stringify({reason: "staff", note: "duplicate purchase"}),
+    ]);
 
     // Both statements ran inside the single transaction the public method opened.
     expect(fake.db.transaction).toHaveBeenCalledTimes(1);

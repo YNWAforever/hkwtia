@@ -57,17 +57,22 @@ describe("refund policy page", () => {
     // §4.5 makes this a public promise, so it must survive an edit to the copy. The
     // assertion is semantic rather than a literal: the section must say a WTIA-cancelled
     // event refunds the whole paid order in full, in both locales.
+    // One claim, not two words: asserting `/refund/i` and `/full/i` independently
+    // passes on "Not every paid order is refunded in full." because both tokens
+    // are present and unrelated. The promise is the whole phrase, and a negation
+    // in front of "every" is rejected, not merely the vocabulary.
     const english = parsePolicySections(namespaceOf(bundles[0][1]).sections)
       .find((section) => /cancel/i.test(section.heading));
     expect(english, "no English cancellation section").toBeDefined();
-    expect(english!.body.join(" ")).toMatch(/refund/i);
-    expect(english!.body.join(" ")).toMatch(/full/i);
+    expect(english!.body.join(" ")).toMatch(/every paid order is refunded in full/i);
+    expect(english!.body.join(" ")).not.toMatch(/\bnot\s+every\b/i);
 
     const chinese = parsePolicySections(namespaceOf(bundles[1][1]).sections)
       .find((section) => /取消/.test(section.heading));
     expect(chinese, "no Chinese cancellation section").toBeDefined();
-    expect(chinese!.body.join(" ")).toMatch(/退款|退回/);
-    expect(chinese!.body.join(" ")).toMatch(/全額|悉數/);
+    // The Chinese promise, as a phrase: every paid order receives a full refund.
+    expect(chinese!.body.join(" ")).toMatch(/所有已付款訂單[^。]*全額退款/);
+    expect(chinese!.body.join(" ")).not.toMatch(/並非所有|不是所有/);
   });
 
   it("registers the route, its breadcrumb label and its editable namespace", () => {

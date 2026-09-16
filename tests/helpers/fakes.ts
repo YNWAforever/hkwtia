@@ -45,7 +45,7 @@ export class FakeStripeBillingAdapter implements StripeBillingAdapter {
   readonly checkoutRequests: CheckoutSessionInput[] = [];
   readonly ticketRequests: EventTicketSessionInput[] = [];
   readonly portalRequests: PortalSessionInput[] = [];
-  readonly   refundedPaymentIntents: string[] = [];
+  readonly refundedPaymentIntents: string[] = [];
   paymentIntentId: string | null = "pi_test_intent";
   invoices: InvoiceRecord[] = [];
   checkoutSessionId = "cs_test_session";
