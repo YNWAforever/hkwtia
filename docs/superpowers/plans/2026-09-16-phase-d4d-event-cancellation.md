@@ -309,12 +309,141 @@ git commit -m "feat(jobs): sweep cancelled events and refund their paid orders"
 
 ---
 
+### Task 3: The cancelled public state
+
+**Files:**
+- Modify: `lib/events/public.ts`, `lib/db/repos/events.ts`, `lib/structured-data.ts`, `app/[locale]/(public)/events/[slug]/page.tsx`, `messages/en.json`, `messages/zh-HK.json`
+- Test: `tests/unit/cancelled-event-page.test.tsx` (create), `tests/unit/events-repository-cancelled.test.ts` (create)
+
+**Interfaces:**
+- Consumes: Task 1's cancel write (an event can now hold `status = "cancelled"`); `buildEventData(record, title, locale?)`.
+- Produces: `PublicEventProjection.cancelled: boolean`; `EventDataRecord.eventStatus?: string`; the page's cancelled branch; the `Events.cancelled.*` copy.
+
+- [ ] **Step 1: Write the failing tests**
+
+`tests/unit/events-repository-cancelled.test.ts` asserts, driving the repository's injected database:
+- `getPublicEventBySlug` **returns** a row whose status is `cancelled` and whose visibility is `public`, and its projection carries `cancelled: true`;
+- it still returns `null` for a `draft` or `pending_review` row, so the change widened admission to `cancelled` and nothing else;
+- the **listing** read still excludes the cancelled row — this is the assertion that stops the two reads being conflated, and it must fail if someone changes `isPubliclyVisible` instead of adding a sibling;
+- a `published` event's projection carries `cancelled: false`.
+
+`tests/unit/cancelled-event-page.test.tsx` asserts, rendering the page's data path:
+- a cancelled event renders the notice and the event's title, date and venue;
+- it renders **no** registration, checkout or RSVP control — assert the form is absent, not disabled, because a disabled form still invites the idea that a payment is possible;
+- `generateMetadata` carries `robots: {index: false}`;
+- the `Event` JSON-LD carries `eventStatus: "https://schema.org/EventCancelled"`, and a published event's does **not** (so the spread is conditional, not unconditional).
+
+- [ ] **Step 2: Run the tests to verify they fail**
+
+Run: `npx vitest run tests/unit/events-repository-cancelled.test.ts tests/unit/cancelled-event-page.test.tsx`
+Expected: FAIL — the projection has no `cancelled` field and the read refuses a cancelled row.
+
+- [ ] **Step 3: Implement**
+
+**a. The projection** — `lib/events/public.ts`:
+
+```ts
+  // Phase D-4d: a cancelled event stays reachable so the link in a buyer's receipt
+  // resolves, but it is not a thing to attend, so it is never listed. This is the
+  // event's own status; `PublicEventStatus` above is a TIME status derived from the
+  // dates and must not be overloaded with it.
+  cancelled: boolean;
+```
+
+**b. The reads** — `lib/db/repos/events.ts`.
+
+`projectPublicEvent` gains one field:
+
+```ts
+    cancelled: event.status === "cancelled",
+```
+
+The detail read must admit a cancelled event, and **the listing must not**. `isPubliclyVisible` (line ~215) is shared by both today, so do not change it; add a sibling and use it only in `getPublicEventBySlug` (line ~308):
+
+```ts
+// Programme D-4d: the detail page is reachable for a cancelled event so a buyer's
+// receipt link resolves, while the listing stays opportunities-to-attend only. Two
+// predicates rather than one, because the two readers genuinely differ -- a single
+// widened rule would put cancelled events back in the listing.
+function isPubliclyReachable(event: Pick<Event, "status" | "visibility">): boolean {
+  return (event.status === "published" || event.status === "cancelled") && event.visibility === "public";
+}
+```
+
+If that read filters in SQL rather than through the predicate, add the `cancelled` arm to **its** filter only and leave the listing's SQL untouched; read the function and follow whichever it does, and say which in your report.
+
+**c. The structured data** — `lib/structured-data.ts`:
+
+```ts
+export type EventDataRecord = Readonly<{
+  // ...the existing fields...
+  /**
+   * schema.org's `eventStatus`. Omitted for a normal event rather than emitted as
+   * `EventScheduled`, because this builder spreads every optional field and a
+   * present-but-default value is a claim we do not need to make.
+   */
+  eventStatus?: string;
+}>;
+```
+
+and inside `buildEventData`'s returned object, beside the other spreads:
+
+```ts
+    ...(record.eventStatus ? {eventStatus: record.eventStatus} : {}),
+```
+
+**d. The page** — `app/[locale]/(public)/events/[slug]/page.tsx`.
+
+Where the registration union is computed (`ticket | external | guest | member`), a cancelled event takes none of them. Render a cancelled branch **before** the action bar, and render no form:
+
+```tsx
+      {displayEvent.cancelled ? (
+        <section className="glass-card p-6" role="status">
+          <h2 className="font-serif text-2xl font-semibold">{t("cancelled.heading")}</h2>
+          <p className="text-muted-foreground">{t("cancelled.body")}</p>
+          <Link className="underline" href={localizedPath(appLocale, "/refund-policy")}>{t("cancelled.refundPolicy")}</Link>
+        </section>
+      ) : null}
+```
+
+and make the action bar conditional on `!displayEvent.cancelled`, so no registration control renders at all.
+
+`generateMetadata` gains the noindex on the cancelled path:
+
+```ts
+  return {
+    ...base,
+    robots: displayEvent.cancelled ? {index: false, follow: false} : undefined,
+  };
+```
+
+and the JSON-LD call passes the status:
+
+```tsx
+  <StructuredData data={buildEventData({...record, eventStatus: displayEvent.cancelled ? "https://schema.org/EventCancelled" : undefined}, displayEvent.title, appLocale)}/>
+```
+
+**e. The copy**, in **both** bundles in parity — `Events.cancelled.heading`, `Events.cancelled.body` and `Events.cancelled.refundPolicy`, with real zh-HK Chinese. The body says the event has been cancelled and that any paid order is refunded in full, which is what the sweep you just built does.
+
+- [ ] **Step 4: Run the tests and the gate**
+
+Run: `npx vitest run tests/unit/events-repository-cancelled.test.ts tests/unit/cancelled-event-page.test.tsx tests/unit/wt-pages/event-detail-page.test.tsx && npm run audit:strings && npm run typecheck && npm run lint && npm run build`
+Expected: PASS, audit clean, typecheck silent, build green. Existing event-page tests may need the new projection field in their fixtures — add it, and report every file you touched that way.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add lib/events/public.ts lib/db/repos/events.ts lib/structured-data.ts "app/[locale]/(public)/events/[slug]/page.tsx" messages tests
+git commit -m "feat(events): a cancelled event says so, and is not a thing to register for"
+```
+
+---
+
 ## Not yet written
 
-**Tasks 3, 4 and 5 are not in this file yet.** They are:
+**Tasks 4 and 5 are not in this file yet.** They are:
 
-3. **The cancelled public state** — the detail read admits `published` or `cancelled` and projects a flag; the page renders the notice, the event's details and the refund-policy link with **no** registration control, is `noindex`, and publishes `EventCancelled`; the listing keeps excluding it.
-4. **The pass page's discriminated result** — `passForSeat` returns `active | cancelled | unavailable` instead of `null`, so the pass page can say the event was cancelled while `unavailable` still 404s.
+4. **The pass page's discriminated result** — `passForSeat` returns `active | cancelled | unavailable` instead of `null`, so the pass page can say the event was cancelled while `unavailable` still 404s. Interfaces are recorded in `.superpowers/sdd/d4d-handoff.md`.
 5. **The gated walk and the full gate** — cancel the seeded event, assert the costed confirmation, the public cancelled state, the listing exclusion and the pass page's cancelled state; then the five gate commands.
 
-Do not begin one of these from this file: it does not yet contain their code, and a half-written plan is worse than none. The spec's §5.4, §5.5 and §8, plus `.superpowers/sdd/d4d-handoff.md`, are the requirements for them.
+Do not begin one of these from this file: it does not yet contain their code. The spec's §5.5 and §8, plus `.superpowers/sdd/d4d-handoff.md`, are the requirements for them.
