@@ -1,3 +1,4 @@
+import {PgDialect} from "drizzle-orm/pg-core";
 import {describe, expect, it, vi} from "vitest";
 
 import {cancelEvent, cancellationPreview, type MemberEventRow} from "@/lib/db/repos/events";
@@ -6,6 +7,7 @@ import type {Actor} from "@/lib/membership/lifecycle";
 const EVENT = "22222222-2222-4222-8222-222222222222";
 const staff: Actor = {kind: "staff", userId: "s", profileId: "staff-1"};
 const member: Actor = {kind: "member", userId: "u", profileId: "member-1"};
+const dialect = new PgDialect();
 
 /** A full snake_case row as `SELECT * FROM events` returns it; the repository parses every read. */
 function row(overrides: Partial<MemberEventRow> = {}): MemberEventRow {
@@ -164,28 +166,51 @@ describe("cancellationPreview", () => {
     expect(execute).not.toHaveBeenCalled();
   });
 
-  it("returns the paid-order count, the refund total and the seats those orders cover", async () => {
-    const {execute, deps} = fakeDeps([[{paid_orders: 2, refund_total_hkd_cents: 100_000, attendees: 3}]]);
+  it("returns the paid-order count, the refund total, the seats those orders cover and the RSVP registrants", async () => {
+    const {execute, deps} = fakeDeps([[{paid_orders: 2, refund_total_hkd_cents: 100_000, attendees: 3, rsvp_registrants: 7}]]);
 
-    await expect(cancellationPreview(staff, EVENT, deps)).resolves.toEqual({paidOrders: 2, refundTotalHkdCents: 100_000, attendees: 3});
+    await expect(cancellationPreview(staff, EVENT, deps)).resolves.toEqual({paidOrders: 2, refundTotalHkdCents: 100_000, attendees: 3, rsvpRegistrants: 7});
 
     expect(execute).toHaveBeenCalledTimes(1);
     const text = statementText(execute, 0);
-    // The three aggregates are separate scalar subqueries. A single SELECT over a
-    // join of orders to seats multiplies each order amount by its seat count, so
-    // the refund total would silently overstate what is paid back. The count of
-    // SELECTs is the shape pin: one outer plus three subqueries.
-    expect(text.match(/SELECT/gi)).toHaveLength(4);
+    // The table identifiers are dialect-rendered: `literalText` intentionally
+    // drops them, so the two registrant tables are asserted on the full SQL.
+    const rendered = dialect.sqlToQuery(execute.mock.calls[0]?.[0] as never).sql;
+    // The aggregates are separate scalar subqueries. A single SELECT over a join
+    // of orders to seats multiplies each order amount by its seat count, so the
+    // refund total would silently overstate what is paid back. The count of
+    // SELECTs is the shape pin: one outer, three order/seat subqueries, and the
+    // two registrant subqueries (members and guests are different tables).
+    expect(text.match(/SELECT/gi)).toHaveLength(6);
     expect(text).toContain("AS paid_orders");
     expect(text).toContain("AS refund_total_hkd_cents");
     expect(text).toContain("AS attendees");
+    expect(text).toContain("AS rsvp_registrants");
+    // The door list reads both tables; the preview must not lose one of them.
+    expect(rendered).toContain("event_registrations");
+    expect(rendered).toContain("event_guest_registrations");
     // Only paid orders are refunded; a pending or expired order is not money.
     expect(text.match(/'paid'/g)).toHaveLength(3);
+    // A registrar who cancelled their own place is not a registrant, on either
+    // table.
+    expect(text.match(/'cancelled'/g)).toHaveLength(2);
+  });
+
+  // The finding this test pins: counting only paid-order seats made a free RSVP
+  // event read as "0 attendees" -- the exact event where cancelling emails
+  // nobody. Registrants are counted from their own tables, so the figure is real
+  // even when no order was ever paid.
+  it("counts RSVP registrants on a free event, where the paid figures are all zero", async () => {
+    const {execute, deps} = fakeDeps([[{paid_orders: 0, refund_total_hkd_cents: 0, attendees: 0, rsvp_registrants: 5}]]);
+
+    await expect(cancellationPreview(staff, EVENT, deps)).resolves.toEqual({paidOrders: 0, refundTotalHkdCents: 0, attendees: 0, rsvpRegistrants: 5});
+
+    expect(statementText(execute, 0)).toContain("AS rsvp_registrants");
   });
 
   it("returns zeroes for an event nobody paid for, rather than null", async () => {
-    const {deps} = fakeDeps([[{paid_orders: 0, refund_total_hkd_cents: 0, attendees: 0}]]);
-    await expect(cancellationPreview(staff, EVENT, deps)).resolves.toEqual({paidOrders: 0, refundTotalHkdCents: 0, attendees: 0});
+    const {deps} = fakeDeps([[{paid_orders: 0, refund_total_hkd_cents: 0, attendees: 0, rsvp_registrants: 0}]]);
+    await expect(cancellationPreview(staff, EVENT, deps)).resolves.toEqual({paidOrders: 0, refundTotalHkdCents: 0, attendees: 0, rsvpRegistrants: 0});
   });
 
   it("returns null for an event that does not exist", async () => {

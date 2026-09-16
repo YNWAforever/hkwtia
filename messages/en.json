@@ -2910,7 +2910,7 @@
         "submitting": "Cancelling...",
         "unavailable": "The refund cost could not be loaded right now. Cancelling will still refund every paid order.",
         "cancelledNotice": "This event has been cancelled. Every paid order is being refunded.",
-        "confirm": "Refund {orders} paid orders for {amount}, covering {attendees} attendees? This cannot be undone.",
+        "confirm": "Refund {orders} paid orders for {amount} ({attendees} paid attendees). {registrants} RSVP registrants will not be emailed. This cannot be undone.",
         "outcomes": {
           "success": "Event cancelled. Every paid order will be refunded.",
           "alreadyCancelled": "This event was already cancelled, so nothing changed.",

@@ -925,23 +925,35 @@ export type CancellationPreview = Readonly<{
   paidOrders: number;
   refundTotalHkdCents: number;
   attendees: number;
+  /**
+   * Member and guest RSVP registrations that are still standing. Separate from
+   * `attendees` because the two answer different questions: `attendees` is who
+   * a refund covers (paid seats), this is who the slice will *not* email. On a
+   * free event `attendees` is legitimately zero and this is the only figure that
+   * tells staff anyone is affected at all.
+   */
+  rsvpRegistrants: number;
 }>;
 
 const cancellationPreviewRowSchema = z.object({
   paid_orders: z.coerce.number().int().min(0),
   refund_total_hkd_cents: z.coerce.number().int().min(0),
   attendees: z.coerce.number().int().min(0),
+  rsvp_registrants: z.coerce.number().int().min(0),
 });
 
 /**
  * The costed preview: how many orders the sweep will refund, the total in HKD
- * cents, and how many seats those orders cover. `null` means the event does not
- * exist -- a free event is zeroes, not `null`, because "nothing was sold" and
- * "there is no such event" are different answers.
+ * cents, how many seats those orders cover, and how many RSVP registrants
+ * cancellation will leave un-notified. `null` means the event does not exist --
+ * a free event is zeroes, not `null`, because "nothing was sold" and "there is
+ * no such event" are different answers.
  *
- * The three aggregates are separate scalar subqueries on purpose: a single
+ * The aggregates are separate scalar subqueries on purpose: a single
  * `SELECT sum(amount) … FROM orders JOIN seats` multiplies each order amount by
- * its seat count, so the refund total would overstate what is paid back.
+ * its seat count, so the refund total would overstate what is paid back. The
+ * registrant figure reads the door list's two tables (member registrations and
+ * guest registrations); a row that cancelled its own place is not a registrant.
  */
 export async function cancellationPreview(actor: Actor, eventId: unknown, deps: MemberEventDependencies = {}): Promise<CancellationPreview | null> {
   requireAdmin(actor);
@@ -951,12 +963,14 @@ export async function cancellationPreview(actor: Actor, eventId: unknown, deps: 
     SELECT
       (SELECT count(*)::int FROM ${eventOrders} WHERE ${eventOrders.eventId} = ${events.id} AND ${eventOrders.status} = 'paid') AS paid_orders,
       (SELECT COALESCE(sum(${eventOrders.amountHkdCents}), 0)::int FROM ${eventOrders} WHERE ${eventOrders.eventId} = ${events.id} AND ${eventOrders.status} = 'paid') AS refund_total_hkd_cents,
-      (SELECT count(*)::int FROM ${eventOrderSeats} JOIN ${eventOrders} ON ${eventOrders.id} = ${eventOrderSeats.orderId} WHERE ${eventOrders.eventId} = ${events.id} AND ${eventOrders.status} = 'paid') AS attendees
+      (SELECT count(*)::int FROM ${eventOrderSeats} JOIN ${eventOrders} ON ${eventOrders.id} = ${eventOrderSeats.orderId} WHERE ${eventOrders.eventId} = ${events.id} AND ${eventOrders.status} = 'paid') AS attendees,
+      (SELECT count(*)::int FROM ${eventRegistrations} WHERE ${eventRegistrations.eventId} = ${events.id} AND ${eventRegistrations.status} <> 'cancelled')
+        + (SELECT count(*)::int FROM ${eventGuestRegistrations} WHERE ${eventGuestRegistrations.eventId} = ${events.id} AND ${eventGuestRegistrations.status} <> 'cancelled') AS rsvp_registrants
     FROM ${events} WHERE ${events.id} = ${id}
   `))[0];
   if (!row) return null;
   const parsed = cancellationPreviewRowSchema.parse(row);
-  return {paidOrders: parsed.paid_orders, refundTotalHkdCents: parsed.refund_total_hkd_cents, attendees: parsed.attendees};
+  return {paidOrders: parsed.paid_orders, refundTotalHkdCents: parsed.refund_total_hkd_cents, attendees: parsed.attendees, rsvpRegistrants: parsed.rsvp_registrants};
 }
 
 export async function listEventsForReview(actor: Actor, deps: MemberEventDependencies = {}): Promise<MemberEventRow[]> {

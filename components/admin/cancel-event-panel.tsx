@@ -29,7 +29,8 @@ function costedSentence(labels: CancelPanelLabels, preview: CancellationPreview,
   return labels.confirm
     .replace("{orders}", () => String(preview.paidOrders))
     .replace("{amount}", () => amountLabel(preview.refundTotalHkdCents, locale))
-    .replace("{attendees}", () => String(preview.attendees));
+    .replace("{attendees}", () => String(preview.attendees))
+    .replace("{registrants}", () => String(preview.rsvpRegistrants));
 }
 
 /**

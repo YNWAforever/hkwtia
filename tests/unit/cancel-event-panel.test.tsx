@@ -14,10 +14,10 @@ const labels: CancelPanelLabels = {
   keep: "Keep event",
   submitting: "Cancelling...",
   unavailable: "The refund cost could not be loaded right now.",
-  confirm: "Refund {orders} paid orders for {amount}, covering {attendees} attendees? This cannot be undone.",
+  confirm: "Refund {orders} paid orders for {amount} ({attendees} paid attendees). {registrants} RSVP registrants will not be emailed. This cannot be undone.",
 };
 
-const PREVIEW = {paidOrders: 2, refundTotalHkdCents: 100_000, attendees: 3};
+const PREVIEW = {paidOrders: 2, refundTotalHkdCents: 100_000, attendees: 3, rsvpRegistrants: 7};
 
 function amountLabel(cents: number, locale = "en-HK"): string {
   return new Intl.NumberFormat(locale, {style: "currency", currency: "HKD"}).format(cents / 100);
@@ -41,7 +41,7 @@ describe("CancelEventPanel", () => {
     expect(action).not.toHaveBeenCalled();
   });
 
-  it("names the orders, the refund total and the attendees before it submits", () => {
+  it("names the orders, the refund total, the attendees and the un-notified registrants before it submits", () => {
     render(<CancelEventPanel action={noopAction()} labels={labels} locale="en" preview={PREVIEW} />);
 
     fireEvent.click(screen.getByRole("button", {name: labels.button}));
@@ -50,6 +50,10 @@ describe("CancelEventPanel", () => {
     expect(confirm).toHaveTextContent("2");
     expect(confirm).toHaveTextContent(amountLabel(100_000));
     expect(confirm).toHaveTextContent("3");
+    // The finding this pins: the registrant count is interpolated too, so a free
+    // event whose only attendees are registrants is not reported as zero.
+    expect(confirm).toHaveTextContent("7");
+    expect(confirm).toHaveTextContent("will not be emailed");
     // No placeholder survived: a broken replacement would show the raw `{orders}`.
     expect(confirm.textContent).not.toContain("{");
     // The dismiss control is what lets staff stop before the irreversible write.
@@ -104,19 +108,34 @@ describe("the cancellation copy", () => {
 
   // The confirmation is interpolated by hand, not by next-intl, so a placeholder
   // dropped in one locale would render a confirmation that never names the cost.
-  it.each(["en", "zh-HK"] as const)("keeps all three cost placeholders in the %s confirmation", (locale) => {
+  it.each(["en", "zh-HK"] as const)("keeps all four cost placeholders in the %s confirmation", (locale) => {
     const confirm = (locale === "en" ? en : zhHk).Admin.eventsMgmt.cancel.confirm;
     expect(confirm).toContain("{orders}");
     expect(confirm).toContain("{amount}");
     expect(confirm).toContain("{attendees}");
+    expect(confirm).toContain("{registrants}");
+  });
+
+  // The finding this pins: naming the registrants is only honest if the copy says
+  // what happens to them. A free event's registrants are not emailed, and the
+  // confirmation must say so rather than reading as "nobody is affected".
+  it.each([
+    ["en", en],
+    ["zh-HK", zhHk],
+  ] as const)("says in the %s confirmation that RSVP registrants are not emailed", (_locale, bundle) => {
+    const confirm = bundle.Admin.eventsMgmt.cancel.confirm;
+    const saysNotEmailed = /not be emailed/i.test(confirm) || confirm.includes("不會");
+    expect(saysNotEmailed).toBe(true);
   });
 
   it("falls back to a language-neutral confirmation when a placeholder is missing", () => {
-    expect(toCancelConfirmMessage("{orders} {amount} {attendees}")).toBe("{orders} {amount} {attendees}");
+    expect(toCancelConfirmMessage("{orders} {amount} {attendees} {registrants}")).toBe("{orders} {amount} {attendees} {registrants}");
     expect(toCancelConfirmMessage("Refund {orders} for {amount}")).toBe(FALLBACK_CANCEL_CONFIRM_MESSAGE);
+    expect(toCancelConfirmMessage("Refund {orders} for {amount} covering {attendees}")).toBe(FALLBACK_CANCEL_CONFIRM_MESSAGE);
     expect(toCancelConfirmMessage(undefined)).toBe(FALLBACK_CANCEL_CONFIRM_MESSAGE);
     expect(FALLBACK_CANCEL_CONFIRM_MESSAGE).toContain("{orders}");
     expect(FALLBACK_CANCEL_CONFIRM_MESSAGE).toContain("{amount}");
     expect(FALLBACK_CANCEL_CONFIRM_MESSAGE).toContain("{attendees}");
+    expect(FALLBACK_CANCEL_CONFIRM_MESSAGE).toContain("{registrants}");
   });
 });
