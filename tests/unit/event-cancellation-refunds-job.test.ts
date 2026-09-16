@@ -44,6 +44,20 @@ describe("the event-cancellation refund sweep", () => {
     expect(refundOrder).toHaveBeenCalledTimes(2);
   });
 
+  it("continues the batch and counts a commit failure as failed", async () => {
+    const listOrders = vi.fn(async () => [
+      {orderId: "commit-failed", eventId: "ev-cancelled"},
+      {orderId: "refunded-ok", eventId: "ev-cancelled"},
+    ]);
+    const refundOrder = vi.fn(async (_actor, input: {orderId: string}) =>
+      input.orderId === "commit-failed" ? {status: "commit_failed" as const} : {status: "refunded" as const});
+    const result = await runEventCancellationRefunds(now, {listOrders, refundOrder});
+    // A commit failure is counted, not thrown: the order stays `paid` for the
+    // next run, and the order behind it must still be attempted.
+    expect(refundOrder).toHaveBeenCalledTimes(2);
+    expect(result).toMatchObject({scanned: 2, refunded: 1, failed: 1});
+  });
+
   it("bounds the batch, so one run cannot walk an unbounded backlog", async () => {
     const listOrders = vi.fn(async () => []);
     await runEventCancellationRefunds(now, {listOrders, refundOrder: vi.fn()});
