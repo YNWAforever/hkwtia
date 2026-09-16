@@ -2915,7 +2915,7 @@
         "outcomes": {
           "success": "活動已取消，所有已付款訂單將獲退款。",
           "alreadyCancelled": "此活動已取消，因此沒有任何變更。",
-          "invalidTransition": "草稿或已退回的活動無法取消。",
+          "invalidTransition": "只有已發布的活動可以取消。",
           "notFound": "找不到該活動。",
           "error": "無法取消此活動，請再試一次。"
         }

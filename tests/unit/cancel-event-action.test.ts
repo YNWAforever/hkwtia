@@ -44,7 +44,7 @@ const EVENT_PATH = `/en/admin/events-mgmt/${EVENT_ID}`;
 const MESSAGES: CancelEventMessages = {
   successMessage: "Event cancelled.",
   alreadyCancelledMessage: "This event was already cancelled, so nothing changed.",
-  invalidTransitionMessage: "A draft or returned event cannot be cancelled.",
+  invalidTransitionMessage: "Only a published event can be cancelled.",
   notFoundMessage: "That event could not be found.",
   errorMessage: "We could not cancel this event. Please try again.",
 };
