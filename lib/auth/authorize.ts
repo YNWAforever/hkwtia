@@ -43,6 +43,11 @@ export function requireAdmin(actor: Actor): asserts actor is AdminActor {
   if (!isAdminActor(actor)) forbidden();
 }
 
-export function systemActor(source: "stripe-webhook"): Actor {
+/**
+ * The authority an automated writer acts under. The source is a closed union so
+ * a new automated writer is a reviewed change rather than a string, and the
+ * audit records it instead of a person.
+ */
+export function systemActor(source: "stripe-webhook" | "event-cancellation"): Extract<Actor, {kind: "system"}> {
   return {kind: "system", userId: null, source};
 }

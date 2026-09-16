@@ -1,5 +1,6 @@
 import {describe, expect, it, vi} from "vitest";
 
+import {systemActor} from "@/lib/auth/authorize";
 import {refundOrder, type RefundDependencies} from "@/lib/tickets/refund-core";
 
 const staff = {kind: "staff" as const, userId: "auth-1", profileId: "p-1"};
@@ -201,5 +202,27 @@ describe("refundOrder", () => {
 
     expect(result).toEqual({status: "refunded"});
     expect(vi.mocked(deps.orders.refundPaidOrder)).toHaveBeenCalledTimes(1);
+  });
+
+  // The event-cancellation sweep refunds as `systemActor("event-cancellation")`.
+  // That actor must reach the refund while an anonymous one must never: the
+  // audit records `actorType: "system"` with no user id, and admitting a general
+  // `Actor` would let a public caller refund with no authority named at all.
+  it("admits the event-cancellation system actor and records it as the authority", async () => {
+    const deps = dependencies();
+
+    const result = await refundOrder(systemActor("event-cancellation"), {orderId}, deps);
+
+    expect(result).toEqual({status: "refunded"});
+    const commit = vi.mocked(deps.orders.refundPaidOrder).mock.calls[0]![1] as Record<string, unknown>;
+    expect(commit).toMatchObject({actorUserId: null, actorType: "system"});
+  });
+
+  it("refuses an anonymous actor by the type, so no refund can name no authority", () => {
+    const anonymous = {kind: "anonymous", userId: null} as const;
+    const call = () =>
+      // @ts-expect-error an anonymous actor is neither an admin nor the system authority
+      refundOrder(anonymous, {orderId}, dependencies());
+    expect(call).toBeTypeOf("function");
   });
 });

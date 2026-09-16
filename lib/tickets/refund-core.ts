@@ -3,7 +3,7 @@ import "server-only";
 import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
 import {sendOrderRefundEmail} from "@/lib/billing/ticket-webhook-processor";
 import {eventOrdersRepository, type EventOrdersRepository, type OrderRecord} from "@/lib/db/repos/event-orders";
-import type {AdminActor} from "@/lib/membership/lifecycle";
+import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 
 export type RefundResult =
   | Readonly<{status: "refunded"}>
@@ -20,6 +20,14 @@ export type RefundDependencies = Readonly<{
   sendRefundEmail: (order: OrderRecord) => Promise<void>;
   now: () => Date;
 }>;
+
+/**
+ * Who may refund. An admin acting from the panel, or the automated
+ * event-cancellation sweep via `systemActor`. It is deliberately not a general
+ * `Actor`: that union admits `anonymous`, so widening to it would let any public
+ * caller refund with no authority named in the audit at all.
+ */
+type RefundActor = AdminActor | Extract<Actor, {kind: "system"}>;
 
 function defaultDependencies(): RefundDependencies {
   return {
@@ -46,7 +54,7 @@ function defaultDependencies(): RefundDependencies {
  * a mail failure never changes the outcome of a completed refund.
  */
 export async function refundOrder(
-  actor: AdminActor,
+  actor: RefundActor,
   input: Readonly<{orderId: string; note?: string | null}>,
   dependencies: RefundDependencies = defaultDependencies(),
 ): Promise<RefundResult> {

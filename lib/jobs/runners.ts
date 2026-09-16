@@ -62,11 +62,21 @@ import {
   eventReminderVariables,
 } from "@/lib/events/reminder-enrollment";
 import type {AppLocale} from "@/i18n/routing";
+import {runEventCancellationRefunds, type EventCancellationRefundSummary} from "@/lib/jobs/event-cancellation-refunds";
 import {JobRequestError, type PreparedJob} from "@/lib/jobs/handler";
+import {RUNNER_BATCH_LIMIT} from "@/lib/jobs/limits";
 import {approvedTemplateKeys} from "@/lib/whatsapp/approved-templates";
 
 const MAX_WORKER_ALERT_BYTES = 4_096;
-const RUNNER_BATCH_LIMIT = 100;
+
+/**
+ * Re-exported, not defined here, since Phase D-4d. The batch bound moved to
+ * `lib/jobs/limits.ts` so `lib/jobs/event-cancellation-refunds.ts` can read it
+ * without importing this module — this module imports that runner, so the old
+ * location would have closed an import cycle. The name stays exported here so
+ * existing callers keep working.
+ */
+export {RUNNER_BATCH_LIMIT};
 
 /**
  * Every member of the Worker's own `WorkerJob` union, and Phase C2 Task 10 is
@@ -136,6 +146,7 @@ type ProductionRunnerOverrides = Partial<Readonly<{
   runBoardReporter(now: Date): Promise<unknown>;
   runAiOpsMetrics(now: Date): Promise<{refreshed: 1}>;
   runWhatsAppSendQueue(now: Date): Promise<unknown>;
+  runEventCancellationRefunds(now: Date): Promise<unknown>;
   runWorkerAlert(payload: WorkerAlertPayload): Promise<unknown>;
 }>>;
 
@@ -552,6 +563,10 @@ export async function runProductionRenewal(now: Date): Promise<unknown> {
   return runRenewalReconciliation(automationCronActor(), now);
 }
 
+export function runProductionEventCancellationRefunds(now: Date): Promise<EventCancellationRefundSummary> {
+  return runEventCancellationRefunds(now);
+}
+
 async function runProductionEngagement(now: Date): Promise<unknown> {
   return recomputeEngagementScores(automationCronActor(), now);
 }
@@ -643,6 +658,8 @@ export function createJobRunners(
     overrides.runAiOpsMetrics ?? runProductionAiOpsMetrics;
   const runWhatsAppSendQueue =
     overrides.runWhatsAppSendQueue ?? runProductionWhatsAppSendQueue;
+  const runEventCancellationRefunds =
+    overrides.runEventCancellationRefunds ?? runProductionEventCancellationRefunds;
   const runWorkerAlert = overrides.runWorkerAlert ?? sendWorkerAlert;
 
   return {
@@ -676,6 +693,9 @@ export function createJobRunners(
     },
     whatsappSendQueue(now: Date) {
       return runWhatsAppSendQueue(now);
+    },
+    eventCancellationRefunds(now: Date) {
+      return runEventCancellationRefunds(now);
     },
     workerAlert(payload: WorkerAlertPayload) {
       return runWorkerAlert(payload);

@@ -73,6 +73,8 @@ export type EventOrdersTransaction = Readonly<{
   orderById: (orderId: string) => Promise<OrderRecord | null>;
   /** Every order of an event with its seats, newest paid first. */
   listEventOrders: (eventId: string) => Promise<readonly EventOrderRow[]>;
+  /** Orders still owed a refund because their event was cancelled. */
+  ordersAwaitingCancellationRefund: (limit: number) => Promise<readonly Readonly<{orderId: string; eventId: string}>[]>;
   /**
    * The refund commit: moves the row only while it is still `paid`, and writes
    * the audit row in the same transaction. `false` means someone else got there
@@ -261,6 +263,13 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       seatCount: Number(row.seat_count),
       seatNames: Array.isArray(row.seat_names) ? (row.seat_names as string[]) : [],
     })),
+    ordersAwaitingCancellationRefund: async (limit) => rows<{orderId: string; eventId: string}>(await tx.execute(sql`
+      SELECT o.id AS "orderId", o.event_id AS "eventId"
+      FROM ${eventOrders} o JOIN ${events} e ON e.id = o.event_id
+      WHERE o.status = 'paid' AND e.status = 'cancelled'
+      ORDER BY o.paid_at ASC NULLS LAST, o.id ASC
+      LIMIT ${limit}
+    `)),
     refundPaidOrder: async (orderId, input) => {
       // `AND status = 'paid'` is the whole guard: two staff clicking at once
       // produce one transition because the second UPDATE matches no row.
@@ -414,6 +423,14 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
     /** Every order of an event, for the admin Orders section. */
     async listEventOrders(eventId: string): Promise<readonly EventOrderRow[]> {
       return runTransaction((tx) => tx.listEventOrders(eventId));
+    },
+
+    /**
+     * The sweep's work list. A query rather than a queue: the predicate is the
+     * work, so a missed run catches up and nothing has to be enqueued.
+     */
+    async ordersAwaitingCancellationRefund(limit: number): Promise<readonly Readonly<{orderId: string; eventId: string}>[]> {
+      return runTransaction((tx) => tx.ordersAwaitingCancellationRefund(limit));
     },
 
     /**

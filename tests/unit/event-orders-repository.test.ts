@@ -25,6 +25,7 @@ function transaction(overrides: Partial<EventOrdersTransaction> = {}): EventOrde
     markStatus: vi.fn(async () => undefined),
     orderById: vi.fn(async () => null),
     listEventOrders: vi.fn(async () => []),
+    ordersAwaitingCancellationRefund: vi.fn(async () => []),
     refundPaidOrder: vi.fn(async () => false),
     insertAudit: vi.fn(async () => undefined),
     eventSummary: vi.fn(async () => []),
