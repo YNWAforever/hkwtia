@@ -1,7 +1,8 @@
 import "server-only";
 
 import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
-import {eventOrdersRepository, type EventOrdersRepository} from "@/lib/db/repos/event-orders";
+import {sendOrderRefundEmail} from "@/lib/billing/ticket-webhook-processor";
+import {eventOrdersRepository, type EventOrdersRepository, type OrderRecord} from "@/lib/db/repos/event-orders";
 import type {AdminActor} from "@/lib/membership/lifecycle";
 
 export type RefundResult =
@@ -9,23 +10,40 @@ export type RefundResult =
   | Readonly<{status: "already_refunded"}>
   | Readonly<{status: "not_admissible"}>
   | Readonly<{status: "provider_failed"}>
+  | Readonly<{status: "commit_failed"}>
   | Readonly<{status: "not_found"}>;
 
 export type RefundDependencies = Readonly<{
   orders: Pick<EventOrdersRepository, "orderById" | "refundPaidOrder">;
   stripe: Pick<StripeBillingAdapter, "paymentIntentForSession" | "refundPaymentIntent">;
+  /** Best-effort: the refund is already committed, so a mail failure is logged, not thrown. */
+  sendRefundEmail: (order: OrderRecord) => Promise<void>;
   now: () => Date;
 }>;
 
 function defaultDependencies(): RefundDependencies {
-  return {orders: eventOrdersRepository, stripe: stripeBillingAdapter(), now: () => new Date()};
+  return {
+    orders: eventOrdersRepository,
+    stripe: stripeBillingAdapter(),
+    sendRefundEmail: (order) => sendOrderRefundEmail(order),
+    now: () => new Date(),
+  };
 }
 
 /**
  * Refund one whole order. The provider is called BEFORE anything is written, so
- * a refusal leaves the order `paid` and the action retryable; the deterministic
- * key makes that retry safe even if the provider succeeded and our commit did
- * not, because the provider returns the same refund rather than a second one.
+ * a refusal leaves the order `paid` and the action retryable.
+ *
+ * The deterministic `ticket-refund:<orderId>` key makes a retry after a commit
+ * failure safe, but only while the provider still holds the key: Stripe retains
+ * idempotency keys for roughly 24 hours, so a retry after that window re-issues
+ * a second refund against an order still shown `paid`. That is why a thrown
+ * commit yields the distinct `commit_failed` outcome rather than a generic
+ * error — staff are told the money may already have moved and must check the
+ * provider before retrying, rather than being invited to retry blind.
+ *
+ * The buyer's refund email is sent only once the commit succeeds, best-effort:
+ * a mail failure never changes the outcome of a completed refund.
  */
 export async function refundOrder(
   actor: AdminActor,
@@ -54,11 +72,26 @@ export async function refundOrder(
     return {status: "provider_failed"};
   }
 
-  const committed = await dependencies.orders.refundPaidOrder(order.id, {
-    refundedAt: dependencies.now(),
-    actorUserId: actor.userId,
-    actorType: actor.kind,
-    note: input.note ?? null,
-  });
-  return committed ? {status: "refunded"} : {status: "already_refunded"};
+  let committed: boolean;
+  try {
+    committed = await dependencies.orders.refundPaidOrder(order.id, {
+      refundedAt: dependencies.now(),
+      actorUserId: actor.userId,
+      actorType: actor.kind,
+      note: input.note ?? null,
+    });
+  } catch {
+    // The provider may already have moved the money while the order is not
+    // recorded. Do not claim a refund and do not email one: tell staff the
+    // truth so they check the provider instead of retrying blind.
+    return {status: "commit_failed"};
+  }
+  if (!committed) return {status: "already_refunded"};
+
+  try {
+    await dependencies.sendRefundEmail(order);
+  } catch {
+    // The refund is committed; a mail failure must not undo it or change the outcome.
+  }
+  return {status: "refunded"};
 }

@@ -172,6 +172,31 @@ export async function sendSeatPass(
   }
 }
 
+/**
+ * The refund email for a refund committed outside the webhook — a staff refund
+ * (Phase D-4c). Same template, recipient and deterministic `ticket-refund:<orderId>`
+ * key as the webhook's own refund lane, so the two paths cannot send two different
+ * messages for one refund, and a re-issue collapses at the transport rather than
+ * mailing the buyer twice.
+ *
+ * Best-effort by design: the refund is already committed, so a mail failure is
+ * logged and never thrown past the caller — a failed send must not undo a refund.
+ */
+export async function sendOrderRefundEmail(
+  order: OrderRecord,
+  dependencies: TicketProcessorDependencies = ticketProcessorDependencies(),
+): Promise<void> {
+  try {
+    // `eventSummary` throws *before* `sendTicketEmail`'s own catch, and a refund
+    // email with no event is still better than none, so the read is inside this
+    // guard rather than left to escape.
+    const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
+    await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
+  } catch (error) {
+    dependencies.onEmailError?.(error, {orderId: order.id, template: "event_ticket_refunded"});
+  }
+}
+
 let defaultDependencies: TicketProcessorDependencies | undefined;
 
 /**

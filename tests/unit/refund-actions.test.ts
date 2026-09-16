@@ -38,6 +38,7 @@ const MESSAGES: RefundOutcomeMessages = {
   alreadyRefunded: "This order was already refunded.",
   notAdmissible: "This order is not payable, so there is nothing to refund.",
   providerFailed: "The refund did not go through, so nothing was charged back. You can try again.",
+  commitFailed: "The provider may have refunded this order, but we could not record it. Check the provider before retrying.",
   notFound: "That order could not be found.",
 };
 
@@ -48,6 +49,7 @@ const ZH_MESSAGES: RefundOutcomeMessages = {
   alreadyRefunded: zhHk.Admin.eventsMgmt.orders.refundOutcomes.alreadyRefunded,
   notAdmissible: zhHk.Admin.eventsMgmt.orders.refundOutcomes.notAdmissible,
   providerFailed: zhHk.Admin.eventsMgmt.orders.refundOutcomes.providerFailed,
+  commitFailed: zhHk.Admin.eventsMgmt.orders.refundOutcomes.commitFailed,
   notFound: zhHk.Admin.eventsMgmt.orders.refundOutcomes.notFound,
 };
 
@@ -145,6 +147,20 @@ describe("submitRefundOrderAction", () => {
 
     expect(result).toEqual({status: "error", message: MESSAGES.providerFailed});
     expect(MESSAGES.providerFailed.toLowerCase()).toContain("nothing was charged back");
+    expect(cache.revalidatePath).not.toHaveBeenCalled();
+  });
+
+  // The provider may have moved the money while the order is unrecorded: the
+  // message must say so, in the bound locale, and the page must not revalidate
+  // as though a refund had been committed.
+  it("maps commit_failed to a message that says the provider may have refunded, in the bound locale", async () => {
+    state.result = {status: "commit_failed"};
+    const {submitRefundOrderAction} = await loadActions();
+
+    const result = await submitRefundOrderAction(EVENT_PATH, ZH_MESSAGES, {status: "idle"}, form());
+
+    expect(result).toEqual({status: "error", message: ZH_MESSAGES.commitFailed});
+    expect(result).not.toEqual({status: "error", message: MESSAGES.commitFailed});
     expect(cache.revalidatePath).not.toHaveBeenCalled();
   });
 

@@ -2907,6 +2907,7 @@
         "heading": "訂單",
         "unavailable": "暫時無法載入訂單。",
         "caption": "訂單",
+        "empty": "尚未有訂單。",
         "buyer": "買家",
         "seats": "座位",
         "amount": "金額",
@@ -2928,6 +2929,7 @@
           "alreadyRefunded": "此訂單已經退款。",
           "notAdmissible": "此訂單並非已付款，沒有可退款項。",
           "providerFailed": "退款未能完成，因此沒有從買家一方扣回任何款項。請再試一次。",
+          "commitFailed": "付款服務商可能已退款，但我們無法在此記錄。請先向付款服務商查核，切勿直接重試。",
           "notFound": "找不到此訂單。"
         }
       }

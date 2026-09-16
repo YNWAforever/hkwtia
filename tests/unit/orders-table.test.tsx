@@ -12,6 +12,7 @@ const ORDER_ID = "b1a2c3d4-1111-4222-8333-944455566677";
 
 const labels = {
   caption: "Orders",
+  empty: "No orders yet.",
   buyer: "Buyer",
   seats: "Seats",
   amount: "Amount",
@@ -60,7 +61,7 @@ function noopAction(overrides: Partial<RefundOrderState> = {}): (state: RefundOr
 
 describe("OrdersTable", () => {
   it("renders the buyer, the seat names, the amount and the status label", () => {
-    render(<OrdersTable action={noopAction()} labels={labels} rows={[orderRow()]} />);
+    render(<OrdersTable action={noopAction()} labels={labels} locale="en" rows={[orderRow()]} />);
 
     expect(screen.getByText("Katherine Johnson")).toBeInTheDocument();
     expect(screen.getByText("Ada Lovelace, Alan Turing")).toBeInTheDocument();
@@ -69,15 +70,15 @@ describe("OrdersTable", () => {
   });
 
   it("renders an empty list rather than an empty table", () => {
-    render(<OrdersTable action={noopAction()} labels={labels} rows={[]} />);
+    render(<OrdersTable action={noopAction()} labels={labels} locale="en" rows={[]} />);
 
-    expect(screen.getByText("Orders")).toBeInTheDocument();
+    expect(screen.getByText("No orders yet.")).toBeInTheDocument();
     expect(screen.queryByRole("table")).toBeNull();
   });
 
   it("offers the refund control on a paid row and submits it in one deliberate step", async () => {
     const action = vi.fn(noopAction());
-    render(<OrdersTable action={action} labels={labels} rows={[orderRow()]} />);
+    render(<OrdersTable action={action} labels={labels} locale="en" rows={[orderRow()]} />);
 
     // Nothing is posted until staff press Refund: the confirmation is the step
     // that turns a control into a form, so a stray click cannot refund.
@@ -104,7 +105,7 @@ describe("OrdersTable", () => {
   // A string replacement would reinterpret `$&` / `$'` in the replacement text, so
   // a buyer whose name contains a dollar sign would corrupt the confirmation.
   it("prints a buyer name containing dollar signs literally", () => {
-    render(<OrdersTable action={noopAction()} labels={labels} rows={[orderRow({buyerName: "Ada $& Lovelace"})]} />);
+    render(<OrdersTable action={noopAction()} labels={labels} locale="en" rows={[orderRow({buyerName: "Ada $& Lovelace"})]} />);
 
     fireEvent.click(screen.getByRole("button", {name: "Refund"}));
 
@@ -114,7 +115,7 @@ describe("OrdersTable", () => {
   // The row and the confirmation must name the same seats: the row's summarising
   // `+N` is not a shorter list, it is how the row spells the rest of it.
   it("names the summarised extra seats in the confirmation as well as the row", () => {
-    render(<OrdersTable action={noopAction()} labels={labels} rows={[orderRow({}, ["Ada Lovelace"], 3)]} />);
+    render(<OrdersTable action={noopAction()} labels={labels} locale="en" rows={[orderRow({}, ["Ada Lovelace"], 3)]} />);
 
     expect(screen.getByText("Ada Lovelace +2")).toBeInTheDocument();
 
@@ -123,15 +124,18 @@ describe("OrdersTable", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Ada Lovelace +2");
   });
 
-  it("renders a refunded row with its date and no refund control", () => {
-    render(<OrdersTable action={noopAction()} labels={labels} rows={[orderRow({status: "refunded", refundedAt: new Date("2026-09-14T05:00:00.000Z")})]} />);
+  it("renders a refunded row in Hong Kong time, not a UTC slice, with no refund control", () => {
+    // 20:00Z on the 13th is 04:00 on the 14th in Hong Kong. A `toISOString()`
+    // slice would paint the 13th; the formatter must show the 14th.
+    render(<OrdersTable action={noopAction()} labels={labels} locale="en" rows={[orderRow({status: "refunded", refundedAt: new Date("2026-09-13T20:00:00.000Z")})]} />);
 
     expect(screen.queryByRole("button", {name: "Refund"})).toBeNull();
-    expect(screen.getByText(/2026-09-14/)).toBeInTheDocument();
+    expect(screen.getByText(/Sep 14, 2026/)).toBeInTheDocument();
+    expect(screen.queryByText(/Sep 13, 2026/)).toBeNull();
   });
 
   it("renders no refund control on a row that is not paid", () => {
-    render(<OrdersTable action={noopAction()} labels={labels} rows={[orderRow({status: "pending"})]} />);
+    render(<OrdersTable action={noopAction()} labels={labels} locale="en" rows={[orderRow({status: "pending"})]} />);
 
     expect(screen.queryByRole("button", {name: "Refund"})).toBeNull();
   });
@@ -151,7 +155,7 @@ describe("the orders status labels", () => {
   // The five outcomes the action maps every refund result onto, in both bundles:
   // a missing key is a refund result rendered as `undefined`.
   it("ships every refund outcome key in both bundles", () => {
-    const outcomes = ["alreadyRefunded", "notAdmissible", "notFound", "providerFailed", "refunded"];
+    const outcomes = ["alreadyRefunded", "commitFailed", "notAdmissible", "notFound", "providerFailed", "refunded"];
 
     expect(Object.keys(en.Admin.eventsMgmt.orders.refundOutcomes).sort()).toEqual(outcomes);
     expect(Object.keys(zhHk.Admin.eventsMgmt.orders.refundOutcomes).sort()).toEqual(outcomes);

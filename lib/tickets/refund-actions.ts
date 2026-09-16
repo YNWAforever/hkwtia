@@ -20,6 +20,7 @@ export type RefundOutcomeMessages = Readonly<{
   alreadyRefunded: string;
   notAdmissible: string;
   providerFailed: string;
+  commitFailed: string;
   notFound: string;
 }>;
 
@@ -30,6 +31,7 @@ const messageKey: Readonly<Record<RefundResult["status"], keyof RefundOutcomeMes
   already_refunded: "alreadyRefunded",
   not_admissible: "notAdmissible",
   provider_failed: "providerFailed",
+  commit_failed: "commitFailed",
   not_found: "notFound",
 };
 

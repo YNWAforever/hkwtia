@@ -2906,6 +2906,7 @@
         "heading": "Orders",
         "unavailable": "Orders could not be loaded right now.",
         "caption": "Orders",
+        "empty": "No orders yet.",
         "buyer": "Buyer",
         "seats": "Seats",
         "amount": "Amount",
@@ -2927,6 +2928,7 @@
           "alreadyRefunded": "This order was already refunded.",
           "notAdmissible": "This order is not payable, so there is nothing to refund.",
           "providerFailed": "The refund did not go through, so nothing was charged back. You can try again.",
+          "commitFailed": "The payment provider may have refunded this order, but we could not record it here. Check the payment provider before trying again.",
           "notFound": "That order could not be found."
         }
       }

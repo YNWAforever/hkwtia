@@ -27,6 +27,7 @@ function dependencies(overrides: Partial<RefundDependencies> = {}): RefundDepend
       paymentIntentForSession: vi.fn(async () => "pi_1"),
       refundPaymentIntent: vi.fn(async () => undefined),
     },
+    sendRefundEmail: vi.fn(async () => undefined),
     now: () => new Date("2026-09-16T12:00:00Z"),
     ...overrides,
   };
@@ -139,5 +140,66 @@ describe("refundOrder", () => {
     expect(result).toEqual({status: "provider_failed"});
     expect(vi.mocked(deps.stripe.refundPaymentIntent)).not.toHaveBeenCalled();
     expect(vi.mocked(deps.orders.refundPaidOrder)).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when reading the payment intent throws", async () => {
+    const deps = dependencies({
+      stripe: {
+        paymentIntentForSession: vi.fn(async () => {
+          throw new Error("stripe_read_down");
+        }),
+        refundPaymentIntent: vi.fn(async () => undefined),
+      },
+    });
+
+    const result = await refundOrder(staff, {orderId}, deps);
+
+    expect(result).toEqual({status: "provider_failed"});
+    expect(vi.mocked(deps.stripe.refundPaymentIntent)).not.toHaveBeenCalled();
+    expect(vi.mocked(deps.orders.refundPaidOrder)).not.toHaveBeenCalled();
+  });
+
+  // The interleaving the five-outcome union had no word for: the provider
+  // refunded, but our commit threw. Staff must be told the money may have moved
+  // rather than handed a generic 500 that invites a blind retry.
+  it("reports commit_failed when the provider succeeded but the commit threw", async () => {
+    const deps = dependencies({
+      orders: {
+        orderById: vi.fn(async () => order()),
+        refundPaidOrder: vi.fn(async () => {
+          throw new Error("db_down");
+        }),
+      },
+    });
+
+    const result = await refundOrder(staff, {orderId}, deps);
+
+    expect(result).toEqual({status: "commit_failed"});
+    expect(vi.mocked(deps.stripe.refundPaymentIntent)).toHaveBeenCalledTimes(1);
+    // Nothing was recorded, so no refund email is claimed.
+    expect(vi.mocked(deps.sendRefundEmail)).not.toHaveBeenCalled();
+  });
+
+  it("emails the buyer once after a committed refund", async () => {
+    const deps = dependencies();
+
+    const result = await refundOrder(staff, {orderId}, deps);
+
+    expect(result).toEqual({status: "refunded"});
+    expect(vi.mocked(deps.sendRefundEmail)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(deps.sendRefundEmail).mock.calls[0]![0]).toMatchObject({id: orderId, buyerLocale: "en", amountHkdCents: 50_000});
+  });
+
+  it("keeps the refunded outcome when the refund email cannot be sent", async () => {
+    const deps = dependencies({
+      sendRefundEmail: vi.fn(async () => {
+        throw new Error("mail_down");
+      }),
+    });
+
+    const result = await refundOrder(staff, {orderId}, deps);
+
+    expect(result).toEqual({status: "refunded"});
+    expect(vi.mocked(deps.orders.refundPaidOrder)).toHaveBeenCalledTimes(1);
   });
 });
