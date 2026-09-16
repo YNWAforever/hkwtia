@@ -97,8 +97,12 @@ action.
 **Decided: provider first, then commit.** Call `refundPaymentIntent` with the deterministic
 `ticket-refund:<orderId>` key, and only mark the order `refunded` (with its audit row) once the provider
 accepts. A provider failure writes nothing, leaves the order `paid`, and leaves the button retryable.
-If the provider succeeds and *our* commit then fails, the retry is safe because the provider
-recognises the same key and returns the same refund rather than issuing a second.
+If the provider succeeds and *our* commit then fails, a retry within the provider's idempotency window
+is safe because the provider recognises the same key and returns the same refund rather than issuing a
+second. That window is bounded — Stripe retains keys for roughly 24 hours — so a retry after it would
+issue a second refund against an order still shown `paid`. A thrown commit therefore returns its own
+`commit_failed` outcome that tells staff to check the payment provider before retrying, rather than a
+generic error that invites a blind second attempt.
 
 **Rejected — commit first, as the webhook does:** the webhook is recoverable because `settlePaid`
 returns `refund_due` for an oversold order, but D-4b's hand-off records that its re-issue arm
@@ -157,6 +161,7 @@ refusal is a distinct thing staff must see:
 | `already_refunded` | the conditional update matched no row |
 | `not_admissible` | the order is not `paid` (pending, expired, failed) |
 | `provider_failed` | the provider refused or the network failed; **nothing was written** |
+| `commit_failed` | the provider accepted, but our commit threw; the order is still `paid` and the money **may** have moved |
 | `not_found` | no such order |
 
 Order of operations: read the order → refuse unless `paid` → `refundPaymentIntent(paymentIntentId,
@@ -201,12 +206,19 @@ attendees table:
 amount**, with an optional note, and only then submits. The seat names are the point: "refund Ada
 Lovelace, Grace Hopper — HK$500.00?" distinguishes the right order, where the amount alone would not.
 
-Every outcome is visible and distinct, because the five results mean five different things to a staff
+Every outcome is visible and distinct, because the six results mean six different things to a staff
 member: `refunded` announces the row is refunded; `already_refunded` says so and revalidates;
-`provider_failed` says **nothing was charged back** so staff know to retry; `not_admissible` and
-`not_found` have their own messages.
+`provider_failed` says **nothing was charged back** so staff know to retry; `commit_failed` says the
+provider may have refunded while nothing was recorded, so staff must check the provider before
+retrying; `not_admissible` and `not_found` have their own messages.
 
 The action revalidates the event page, so the Orders row and the door list update together.
+
+A committed refund also emails the buyer. `sendOrderRefundEmail` (in
+`lib/billing/ticket-webhook-processor.ts`) is the same `event_ticket_refunded` send the webhook's
+oversold lane makes, re-using the same `ticket-refund:<orderId>` transport key so a re-issue collapses
+rather than mailing twice. It is best-effort and runs after the commit: a mail failure is logged and
+never changes the outcome of a completed refund.
 
 A failed orders read renders as an error, never as "no orders": an empty section and an unreachable
 table must not look alike, which is the distinction this repo draws for its other admin queues.
@@ -248,7 +260,7 @@ admission record, and that split is what D-4b settled.
 | Order not `paid` | `not_admissible`; the action explains there is nothing to refund. No provider call. |
 | Order already refunded, including by the webhook's oversold path | `already_refunded`; the initial read refuses before any provider call, so nothing is sent. |
 | Provider refuses or the network fails | `provider_failed`; **no write**; the order stays `paid` and the button stays. |
-| Provider succeeds, our commit fails | The retry re-issues under the same provider key, which returns the existing refund rather than a second. |
+| Provider succeeds, our commit fails | `commit_failed`: the order stays `paid` and no email is sent. A retry within the provider's idempotency window re-issues under the same key and returns the existing refund rather than a second; after that window (roughly 24 hours for Stripe) it would issue a second refund, which is why the message tells staff to check the provider first. |
 | Two staff refund the same order at once | Both reads see `paid` and both call the provider, but the shared key makes the second a no-op that returns the first refund; one commit succeeds and the other reports `already_refunded`. The duplicate call is wasted work, never a double refund. |
 | The order's event was cancelled | A staff refund is still permitted; D-4d will automate the same outcome. |
 | The orders read fails | The section renders an error, not an empty state. |
@@ -269,9 +281,12 @@ admission record, and that split is what D-4b settled.
 
 ## 8. Testing
 
-- **`refund-core`:** all five outcomes; **a provider throw leaves the order `paid` and unmodified**
-  (assert no update); a commit matching zero rows yields `already_refunded`; the provider is called with
-  the deterministic `ticket-refund:<orderId>` key; the audit literal and `{reason: "staff", note}`.
+- **`refund-core`:** all six outcomes; **a provider throw leaves the order `paid` and unmodified**
+  (assert no update); a payment-intent read that *throws* also yields `provider_failed`; a commit that
+  throws yields `commit_failed` while a commit matching zero rows yields `already_refunded`; the
+  provider is called with the deterministic `ticket-refund:<orderId>` key; the audit literal and
+  `{reason: "staff", note}`; a committed refund sends exactly one `event_ticket_refunded` with the
+  order's locale and amount, and a mail failure does not change the outcome.
 - **The repository:** the conditional update moves only a `paid` row; the audit row is written in the
   same transaction; the orders read returns `null` for a missing event and excludes nothing else.
 - **The Orders section:** each status renders its label (a missing label would render a placeholder, the
@@ -283,9 +298,12 @@ admission record, and that split is what D-4b settled.
   in the page-copy allowlist; the ticket form carries the link; the receipt supplies
   `{refundPolicyUrl}` and the variable-completeness assertion covers it.
 - **The gated walk reuses D-4b's fixture** (`db:seed:d4b` already creates a paid order with two named
-  seats): staff refund it through the confirmation, then assert the four consequences — the row shows
-  refunded, the seats leave the door list, the pass URL 404s, and the refund email went out. It needs a
-  database, so it skips cleanly and names what is missing, exactly as D-4b's does.
+  seats): staff refund it through the confirmation, then assert the three observable consequences — the
+  row shows refunded, the seats leave the door list, and the pass URL 404s. The refund email is not
+  asserted here, because the walk cannot read a mailbox; its send is asserted at unit level, where the
+  staff refund drives the real `sendOrderRefundEmail` through a fake transport
+  (`tests/unit/refund-email.test.ts`). The walk needs a database, so it skips cleanly and names what is
+  missing, exactly as D-4b's does.
 
 ## 9. Risks
 

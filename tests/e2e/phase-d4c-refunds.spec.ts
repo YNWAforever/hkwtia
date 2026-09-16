@@ -55,6 +55,11 @@ const BUYER = "D4B Acceptance Buyer";
 // that could drift from the rendered amount.
 const AMOUNT = new Intl.NumberFormat("en-HK", {style: "currency", currency: "HKD"}).format(500);
 
+// The refunded date is Hong Kong time, not a UTC slice, so the expected string is
+// derived from the same formatter the table uses rather than a `YYYY-MM-DD` regex.
+const hkdDate = (value: Date, locale: "en" | "zh-HK") =>
+  new Intl.DateTimeFormat(locale, {dateStyle: "medium", timeZone: "Asia/Hong_Kong"}).format(value);
+
 /**
  * Each table carries an sr-only `<caption>`, which is the table's accessible
  * name, so the region is found by its heading and the table by its caption.
@@ -82,9 +87,9 @@ async function openSeededEvent(page: Page, prefix: string): Promise<void> {
  * refund, so the door list and the pass are asserted, not just the confirmation.
  *
  * The refund EMAIL is deliberately not asserted here: the walk cannot read a
- * mailbox. Its send is covered at unit level — `event_ticket_refunded` in
- * `lib/email/catalog.ts`, driven by `tests/unit/ticket-webhook.test.ts` and the
- * email snapshot tests — rather than left as an implicit gap.
+ * mailbox. Its send is covered at unit level — the staff refund drives the real
+ * `sendOrderRefundEmail` for `event_ticket_refunded` through a fake transport in
+ * `tests/unit/refund-email.test.ts` — rather than left as an implicit gap.
  *
  * It writes, so it runs only against the isolated D-4b seed. Three operational
  * facts follow from that:
@@ -169,11 +174,12 @@ test.describe("phase D-4c refunds and policy", () => {
     await expect(zhConfirm).toContainText(AMOUNT);
 
     // 3-4. Commit the refund once, from the zh-HK confirmation.
+    const refundedOn = new Date();
     await zhOrders.getByRole("button", {name: copyZh.Admin.eventsMgmt.orders.refund, exact: true}).click();
     await expect(zhOrders.getByRole("status")).toContainText(copyZh.Admin.eventsMgmt.orders.refundOutcomes.refunded);
     await expect(zhRow).toContainText(copyZh.Admin.eventsMgmt.orders.statuses.refunded);
     await expect(zhRow).toContainText(copyZh.Admin.eventsMgmt.orders.refundedOn);
-    await expect(zhRow).toContainText(/\d{4}-\d{2}-\d{2}/);
+    await expect(zhRow).toContainText(hkdDate(refundedOn, zh.locale));
     await expect(zhOrders.getByRole("button", {name: copyZh.Admin.eventsMgmt.orders.refund, exact: true})).toHaveCount(0);
 
     // 5. The seats leave the door list in zh-HK...
@@ -192,7 +198,7 @@ test.describe("phase D-4c refunds and policy", () => {
     await expect(enRowAfter).toHaveCount(1);
     await expect(enRowAfter).toContainText(copyEn.Admin.eventsMgmt.orders.statuses.refunded);
     await expect(enRowAfter).toContainText(copyEn.Admin.eventsMgmt.orders.refundedOn);
-    await expect(enRowAfter).toContainText(/\d{4}-\d{2}-\d{2}/);
+    await expect(enRowAfter).toContainText(hkdDate(refundedOn, en.locale));
     await expect(enOrdersAfter.getByRole("button", {name: copyEn.Admin.eventsMgmt.orders.refund, exact: true})).toHaveCount(0);
 
     const enDoorAfter = doorRegion(staffPage, copyEn).getByRole("table", {name: copyEn.Admin.eventsMgmt.attendees});

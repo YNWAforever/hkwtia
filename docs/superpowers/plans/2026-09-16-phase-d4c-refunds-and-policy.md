@@ -34,6 +34,7 @@
 |---|---|
 | `lib/tickets/refund-core.ts` | The refund service: read the order, refuse what cannot be refunded, call the provider, commit conditionally. One job: turn an order id into one of five outcomes. |
 | `lib/tickets/refund-actions.ts` | The `"use server"` formData wrapper. Nothing else exported. |
+| `lib/admin/refund-confirm-message.ts` | Guards the `{buyer}`/`{seats}`/`{amount}` contract `OrdersTable` interpolates, so a broken `confirm` (read with `t.raw`, not ICU) falls back to a language-neutral placeholder. |
 | `components/admin/orders-table.tsx` | The Orders section: rows, statuses, and the two-step refund confirmation. |
 | `app/[locale]/(public)/refund-policy/page.tsx` | The public policy page, mirroring `/privacy`. |
 | `scripts/seed-d4c.ts` | Not needed — the walk reuses `db:seed:d4b`'s paid order. |
@@ -45,8 +46,7 @@
 |---|---|
 | `lib/db/repos/event-orders.ts` | `orderById`, `listEventOrders`, `refundPaidOrder` (conditional + audit in one transaction), and the `EventOrderRow` type. |
 | `lib/billing/stripe.ts` | `paymentIntentForSession(sessionId)` — a staff refund has no webhook payload carrying the intent, and `event_orders` stores only the session id. |
-| `lib/admin/event-actions.ts` | Bind the refund action. |
-| `app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx` | Render the Orders section for a ticketed event. |
+| `app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx` | Render the Orders section for a ticketed event, binding the refund action itself (`lib/admin/event-actions.ts` was not touched). |
 | `components/marketing/ticket-checkout-form.tsx` | The policy link beside the price/CTA. |
 | `lib/billing/ticket-webhook-processor.ts` | Supply `{refundPolicyUrl}` to the receipt. |
 | `messages/en.json`, `messages/zh-HK.json` | The `RefundPolicy` namespace, `Common.breadcrumbRefundPolicy`, the orders labels, the form's link label, and the receipt sentence. |
@@ -372,8 +372,8 @@ git commit -m "feat(tickets): refund a whole order, provider first"
 ### Task 3: The refund action and the Orders section
 
 **Files:**
-- Create: `lib/tickets/refund-actions.ts`, `components/admin/orders-table.tsx`
-- Modify: `lib/admin/event-actions.ts`, `app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx`, both bundles
+- Create: `lib/tickets/refund-actions.ts`, `components/admin/orders-table.tsx`, `lib/admin/refund-confirm-message.ts`
+- Modify: `app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx`, both bundles
 - Test: `tests/unit/refund-actions.test.ts`, `tests/unit/orders-table.test.tsx` (create)
 
 **Interfaces:**
@@ -569,7 +569,7 @@ Expected: PASS, boundary green, audit clean, typecheck silent.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add lib/tickets/refund-actions.ts components/admin/orders-table.tsx lib/admin/event-actions.ts "app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx" tests/unit/refund-actions.test.ts tests/unit/orders-table.test.tsx messages
+git add lib/tickets/refund-actions.ts components/admin/orders-table.tsx lib/admin/refund-confirm-message.ts "app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx" tests/unit/refund-actions.test.ts tests/unit/orders-table.test.tsx messages
 git commit -m "feat(admin): refund a whole order from the event page"
 ```
 
