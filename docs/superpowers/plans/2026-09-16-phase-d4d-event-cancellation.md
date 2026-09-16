@@ -26,9 +26,9 @@
 ### Task 2: The actor widening and the sweep job
 
 **Files:**
-- Modify: `lib/auth/authorize.ts`, `lib/tickets/refund-core.ts`, `lib/db/repos/event-orders.ts`, `lib/jobs/kinds.ts`, `lib/jobs/runners.ts`
+- Modify: `lib/auth/authorize.ts`, `lib/tickets/refund-core.ts`, `lib/db/repos/event-orders.ts`, `lib/jobs/kinds.ts`, `lib/jobs/runners.ts`, `workers/src/index.ts` (the schedule)
 - Create: `lib/jobs/limits.ts` (the batch bound, moved out of `runners.ts` to break the import cycle), `lib/jobs/event-cancellation-refunds.ts`, `app/api/jobs/event-cancellation-refunds/route.ts`
-- Test: `tests/unit/event-cancellation-refunds-job.test.ts` (create), `tests/unit/refund-core.test.ts` (extend)
+- Test: `tests/unit/event-cancellation-refunds-job.test.ts` (create), `tests/unit/refund-core.test.ts` (extend), `tests/unit/event-orders-cancellation-refund-query.test.ts` (create, the predicate pin), `workers/tests/worker.test.ts` (extend, the schedule coverage)
 
 **Interfaces:**
 - Consumes: `eventOrdersRepository.ordersAwaitingCancellationRefund(limit)`, `refundOrder(actor, {orderId, note})` (D-4c), `systemActor(source)`, `RUNNER_BATCH_LIMIT` (existing, 100), `createJobPost({kind, bucket, run})`.
@@ -284,6 +284,16 @@ export const POST = createJobPost({
 ```
 
 If the repo pins its job routes in an inventory or a discovery test (the way admin routes and protected routes are pinned), add this route there with the reason recorded rather than letting a test fail with no explanation.
+
+- [ ] **Step 3h: schedule the job in the Worker, or it is not live**
+
+**A job route is not live until the Worker schedules it.** `workers/src/index.ts` is the only scheduler — there is no `vercel.json` and no workflow hitting `/api/jobs` — so a route the Worker does not know is dead code, and the sweep's headline promise is silently inert however complete its tests look. This is exactly how Task 2 first shipped: the route, the runner and the repository all worked and nothing ever invoked them.
+
+Add `"event-cancellation-refunds"` to the Worker's `WORKER_JOBS`, to the hourly cron group in `JOBS_BY_CRON` (a query sweep belongs beside the other hourly recovery jobs), and to `REQUEST_TIMEOUT_BY_JOB`. The `0 * * * *` cron already exists in `workers/wrangler.toml`, so no trigger changes — and `workers/tests/worker.test.ts` now asserts that every declared `WorkerJob` is scheduled on a cron, and that the scheduled crons match Wrangler's `[triggers] crons`, so the next job cannot ship without one.
+
+Extend `workers/tests/worker.test.ts`'s hourly job list and its per-job call-count assertions for the fourth hourly job.
+
+Run: `npx vitest run` in `workers/`.
 
 - [ ] **Step 4: Run the tests to verify they pass**
 

@@ -186,6 +186,13 @@ the statuses it is actually reached for.
 A job route under `app/api/jobs/` behind the cron bearer, plus a `runProduction…` runner, following the
 existing job pattern and batch limit.
 
+**A job route is not live until the Worker schedules it.** `workers/src/index.ts` is the only
+scheduler, so the route, the `runProduction…` runner, the job's member of the Worker's `WorkerJob`
+union, its entry in the hourly cron group and its `REQUEST_TIMEOUT_BY_JOB` deadline are one unit. A
+route nothing triggers is dead code and the sweep's headline promise is silently inert, however
+complete its own tests look. `workers/tests/worker.test.ts` fails if a declared job is absent from the
+schedule, or if the scheduled crons drift from `workers/wrangler.toml`'s `[triggers] crons`.
+
 Each run:
 
 1. selects `paid` orders whose event is `cancelled`, bounded by the batch limit;
