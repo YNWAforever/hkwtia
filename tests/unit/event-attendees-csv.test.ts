@@ -7,8 +7,9 @@ import type {Actor} from "@/lib/membership/lifecycle";
 const EVENT = "22222222-2222-4222-8222-222222222222";
 const staff: Actor = {kind: "staff", userId: "s", profileId: "s1"};
 const rows: EventAttendee[] = [
-  {kind: "member", profileId: "p1", guestId: null, displayName: "Ada", email: "ada@x.hk", organisation: null, status: "registered", checkedInAt: null},
-  {kind: "guest", profileId: null, guestId: "g1", displayName: 'Bob "B"', email: "bob@x.hk", organisation: "Acme, Ltd", status: "waitlist", checkedInAt: null},
+  {kind: "member", profileId: "p1", guestId: null, seatId: null, orderId: null, displayName: "Ada", email: "ada@x.hk", organisation: null, status: "registered", checkedInAt: null},
+  {kind: "guest", profileId: null, guestId: "g1", seatId: null, orderId: null, displayName: 'Bob "B"', email: "bob@x.hk", organisation: "Acme, Ltd", status: "waitlist", checkedInAt: null},
+  {kind: "ticket", profileId: null, guestId: null, seatId: "s1", orderId: "o1", displayName: "Cleo", email: "cleo@x.hk", organisation: null, status: "paid", checkedInAt: null},
 ];
 
 function request() {
@@ -23,6 +24,7 @@ describe("attendee CSV (programme B-4)", () => {
     expect(csv.slice(1).split("\r\n")[0]).toBe("kind,name,email,organisation,status,checked_in_at");
     expect(csv).toContain('member,Ada,ada@x.hk,,registered,\r\n');
     expect(csv).toContain('guest,"Bob ""B""",bob@x.hk,"Acme, Ltd",waitlist,\r\n');
+    expect(csv).toContain('ticket,Cleo,cleo@x.hk,,paid,\r\n');
   });
 
   it("neutralises spreadsheet formulas in guest-supplied fields and writes check-in times as ISO", () => {
@@ -69,7 +71,7 @@ describe("attendee CSV (programme B-4)", () => {
     const get = createAttendeesCsvGet({actor: async () => staff, list: async () => rows, audit});
     await get(request(), {params: Promise.resolve({id: EVENT})});
     expect(audit).toHaveBeenCalledTimes(1);
-    expect(audit).toHaveBeenCalledWith(staff, EVENT, 2);
+    expect(audit).toHaveBeenCalledWith(staff, EVENT, 3);
 
     const failing = createAttendeesCsvGet({actor: async () => staff, list: async () => rows, audit: async () => { throw new Error("AUDIT_DOWN"); }});
     await expect(failing(request(), {params: Promise.resolve({id: EVENT})})).rejects.toThrow("AUDIT_DOWN");
@@ -81,8 +83,9 @@ describe("listEventAttendees (programme B-4)", () => {
     const execute = vi.fn()
       .mockResolvedValueOnce([{id: EVENT}])
       .mockResolvedValueOnce([
-        {kind: "member", profile_id: "p1", guest_id: null, display_name: "Ada", email: "ada@x.hk", organisation: null, status: "registered", checked_in_at: "2030-03-01T02:00:00.000Z"},
-        {kind: "guest", profile_id: null, guest_id: "33333333-3333-4333-8333-333333333333", display_name: "Bob", email: "bob@x.hk", organisation: "Acme", status: "waitlist", checked_in_at: null},
+        {kind: "member", profile_id: "p1", guest_id: null, seat_id: null, order_id: null, display_name: "Ada", email: "ada@x.hk", organisation: null, status: "registered", checked_in_at: "2030-03-01T02:00:00.000Z"},
+        {kind: "guest", profile_id: null, guest_id: "33333333-3333-4333-8333-333333333333", seat_id: null, order_id: null, display_name: "Bob", email: "bob@x.hk", organisation: "Acme", status: "waitlist", checked_in_at: null},
+        {kind: "ticket", profile_id: null, guest_id: null, seat_id: "44444444-4444-4444-8444-444444444444", order_id: "55555555-5555-4555-8555-555555555555", display_name: "Cleo", email: "cleo@x.hk", organisation: null, status: "paid", checked_in_at: null},
       ]);
     const loadDatabase = async () => ({execute, transaction: async () => { throw new Error("unused"); }}) as never;
     await expect(listEventAttendees({kind: "member", userId: "m", profileId: "m1"}, EVENT, {loadDatabase})).rejects.toThrow();
@@ -90,8 +93,9 @@ describe("listEventAttendees (programme B-4)", () => {
 
     const attendees = await listEventAttendees(staff, EVENT, {loadDatabase});
     expect(attendees).toEqual([
-      {kind: "member", profileId: "p1", guestId: null, displayName: "Ada", email: "ada@x.hk", organisation: null, status: "registered", checkedInAt: new Date("2030-03-01T02:00:00.000Z")},
-      {kind: "guest", profileId: null, guestId: "33333333-3333-4333-8333-333333333333", displayName: "Bob", email: "bob@x.hk", organisation: "Acme", status: "waitlist", checkedInAt: null},
+      {kind: "member", profileId: "p1", guestId: null, seatId: null, orderId: null, displayName: "Ada", email: "ada@x.hk", organisation: null, status: "registered", checkedInAt: new Date("2030-03-01T02:00:00.000Z")},
+      {kind: "guest", profileId: null, guestId: "33333333-3333-4333-8333-333333333333", seatId: null, orderId: null, displayName: "Bob", email: "bob@x.hk", organisation: "Acme", status: "waitlist", checkedInAt: null},
+      {kind: "ticket", profileId: null, guestId: null, seatId: "44444444-4444-4444-8444-444444444444", orderId: "55555555-5555-4555-8555-555555555555", displayName: "Cleo", email: "cleo@x.hk", organisation: null, status: "paid", checkedInAt: null},
     ]);
     expect(execute).toHaveBeenCalledTimes(2);
   });

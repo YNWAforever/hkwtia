@@ -19,6 +19,7 @@ export const ROUTE_BREADCRUMB_LABEL_KEYS: Readonly<Partial<Record<PublicRoute, s
   "/": "Common.breadcrumbHome",
   "/join": "Common.breadcrumbJoin",
   "/privacy": "Common.breadcrumbPrivacy",
+  "/refund-policy": "Common.breadcrumbRefundPolicy",
   "/members": "Common.breadcrumbMembers",
   "/about": "Navigation.links.about",
   "/about/chairman": "Navigation.links.chairman",

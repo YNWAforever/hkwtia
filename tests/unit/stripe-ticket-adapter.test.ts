@@ -5,11 +5,12 @@ import {createTicketCheckout, type TicketCheckoutDependencies} from "@/lib/ticke
 
 function client() {
   const create = vi.fn(async (_params: unknown, _options?: unknown) => ({id: "cs_test_1", url: "https://checkout.stripe.test/1"}));
+  const retrieve = vi.fn(async (_id: string) => ({payment_intent: "pi_1"} as {payment_intent: string | {id: string} | null}));
   const refund = vi.fn(async () => ({}));
   return {
-    create, refund,
+    create, retrieve, refund,
     value: {
-      checkout: {sessions: {create}},
+      checkout: {sessions: {create, retrieve}},
       billingPortal: {sessions: {create: vi.fn()}},
       invoices: {list: vi.fn()},
       refunds: {create: refund},
@@ -42,6 +43,30 @@ describe("event ticket checkout session", () => {
     const {refund, value} = client();
     await createStripeBillingAdapter(value).refundPaymentIntent("pi_1", "ticket-refund:order-1");
     expect(refund).toHaveBeenCalledWith({payment_intent: "pi_1"}, {idempotencyKey: "ticket-refund:order-1"});
+  });
+});
+
+describe("reading the payment intent behind a settled session", () => {
+  it("returns the intent id when Stripe hands back a bare string", async () => {
+    const {retrieve, value} = client();
+    retrieve.mockResolvedValue({payment_intent: "pi_1"});
+
+    await expect(createStripeBillingAdapter(value).paymentIntentForSession("cs_test_1")).resolves.toBe("pi_1");
+    expect(retrieve).toHaveBeenCalledWith("cs_test_1");
+  });
+
+  it("returns the intent's id when Stripe expands it to an object", async () => {
+    const {retrieve, value} = client();
+    retrieve.mockResolvedValue({payment_intent: {id: "pi_expanded"}});
+
+    await expect(createStripeBillingAdapter(value).paymentIntentForSession("cs_test_1")).resolves.toBe("pi_expanded");
+  });
+
+  it("returns null when the session has no payment intent", async () => {
+    const {retrieve, value} = client();
+    retrieve.mockResolvedValue({payment_intent: null});
+
+    await expect(createStripeBillingAdapter(value).paymentIntentForSession("cs_test_1")).resolves.toBeNull();
   });
 });
 

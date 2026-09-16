@@ -5,6 +5,7 @@
     "breadcrumbHome": "Home",
     "breadcrumbJoin": "Membership application",
     "breadcrumbPrivacy": "Privacy",
+    "breadcrumbRefundPolicy": "Refund policy",
     "breadcrumbMembers": "Members",
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
@@ -336,7 +337,7 @@
         "subject": "Your tickets for {eventTitle}",
         "preview": "Order {orderId} confirmed, {seatCount} seat(s).",
         "heading": "You're going to {eventTitle}",
-        "body": "Thank you. We received HK${amount} for {seatCount} seat(s). The event is on {eventDate}.",
+        "body": "Thank you. We received HK${amount} for {seatCount} seat(s): {attendees}. The event is on {eventDate}. Each attendee will receive their own pass in a separate email. Refunds are covered by our refund policy: {refundPolicyUrl}",
         "cta": "View the event"
       },
       "event_ticket_refunded": {
@@ -345,6 +346,13 @@
         "heading": "Your payment has been returned",
         "body": "We have refunded HK${amount} for order {orderId} ({eventTitle}). Depending on your bank, it can take a few days to appear.",
         "cta": "View the event"
+      },
+      "event_ticket_pass": {
+        "subject": "Your pass for {eventTitle}",
+        "preview": "Your personal entry pass, {attendeeName}.",
+        "heading": "Your pass, {attendeeName}",
+        "body": "Show this email's pass at the door for {eventTitle} on {eventDate} at {venue}. Each pass admits one person, so please do not forward it.",
+        "cta": "Open your pass"
       }
     }
   },
@@ -1596,6 +1604,7 @@
     "attendeeEmail": "Attendee email",
     "website": "Leave this field empty",
     "price": "Price per seat: {price}",
+    "refundPolicy": "Refund policy",
     "submit": "Continue to payment",
     "submitting": "Redirecting to payment…",
     "errors": {
@@ -1605,6 +1614,14 @@
       "UNAVAILABLE": "Ticket checkout is not available right now. Please try again shortly.",
       "RATE_LIMITED": "Too many attempts from this connection. Try again in a few minutes."
     }
+  },
+  "Pass": {
+    "eyebrow": "Event pass",
+    "attendee": "Attendee",
+    "seat": "Seat {position}",
+    "qrLabel": "Check-in QR code",
+    "checkedIn": "Checked in",
+    "presentAtDoor": "Present this pass at the door."
   },
   "News": {
     "metaTitle": "News | WiseTech Hong Kong",
@@ -1821,6 +1838,45 @@
         "heading": "Contact",
         "body": [
           "Questions, requests and complaints about personal data can be sent to contact@hkwtia.org, or by post to WTIA at 4/F, KOHO, 73-75 Hung To Road, Kwun Tong, Hong Kong."
+        ],
+        "items": []
+      }
+    ]
+  },
+  "RefundPolicy": {
+    "metaTitle": "Refund policy | WiseTech Hong Kong",
+    "metaDescription": "How and when WTIA refunds a paid ticket order, and what happens if we cancel an event.",
+    "eyebrow": "Policy",
+    "title": "Refund policy",
+    "description": "How we handle refunds for paid event tickets.",
+    "breadcrumbCurrent": "Refund policy",
+    "sections": [
+      {
+        "heading": "When we refund",
+        "body": [
+          "We refund a whole order, not an individual seat. If a seat in your order cannot be used, the whole order is refunded.",
+          "Refunds are at WTIA's discretion and considered on request. We look at the circumstances and at how close to the event you asked."
+        ],
+        "items": []
+      },
+      {
+        "heading": "If we cancel an event",
+        "body": [
+          "If WTIA cancels an event, every paid order is refunded in full."
+        ],
+        "items": []
+      },
+      {
+        "heading": "How and when",
+        "body": [
+          "Refunds go back to the payment method you used. Once we issue it, the time it takes to appear depends on your bank, and is usually a few business days."
+        ],
+        "items": []
+      },
+      {
+        "heading": "How to ask",
+        "body": [
+          "Contact us with your order reference, or reply to your confirmation email."
         ],
         "items": []
       }
@@ -2311,6 +2367,19 @@
       "templates": "WhatsApp templates",
       "campaigns": "Campaigns"
     },
+    "checkIn": {
+      "eyebrow": "Door check-in",
+      "seat": "Seat {position}",
+      "alreadyCheckedIn": "Already checked in.",
+      "checkIn": "Check in",
+      "undo": "Undo check-in",
+      "backToEvent": "Back to the event",
+      "checkInSuccess": "Checked in.",
+      "undoSuccess": "Check-in undone.",
+      "notCheckedIn": "This seat was not checked in.",
+      "notAdmissible": "This seat is not admissible.",
+      "updateError": "Could not update this seat."
+    },
     "templates": {
       "eyebrow": "WhatsApp delivery",
       "title": "WhatsApp templates",
@@ -2798,11 +2867,16 @@
       "checkingIn": "Checking in...",
       "checkInSuccess": "Attendee checked in.",
       "checkInError": "We could not check in this attendee. Please try again.",
+      "resendPass": "Resend pass",
+      "resending": "Sending pass...",
+      "resendSuccess": "Pass email sent.",
+      "resendError": "We could not send this pass email. Please try again.",
       "exportCsv": "Download attendees (CSV)",
       "kind": "Type",
       "kinds": {
         "member": "Member",
-        "guest": "Guest"
+        "guest": "Guest",
+        "ticket": "Ticket"
       },
       "organisation": "Organisation",
       "statuses": {
@@ -2810,7 +2884,8 @@
         "waitlist": "Waitlisted",
         "cancelled": "Cancelled",
         "attended": "Attended",
-        "noShow": "No show"
+        "noShow": "No show",
+        "paid": "Paid"
       },
       "review": {
         "title": "Member events awaiting review",
@@ -2826,6 +2901,36 @@
         "rejectionReason": "Reason for returning",
         "empty": "No member events are waiting for review.",
         "error": "Member events awaiting review could not be loaded."
+      },
+      "orders": {
+        "heading": "Orders",
+        "unavailable": "Orders could not be loaded right now.",
+        "caption": "Orders",
+        "empty": "No orders yet.",
+        "buyer": "Buyer",
+        "seats": "Seats",
+        "amount": "Amount",
+        "status": "Status",
+        "refundedOn": "Refunded on",
+        "refund": "Refund",
+        "cancel": "Cancel",
+        "note": "Note",
+        "confirm": "Refund {buyer}'s seats ({seats}) for {amount}?",
+        "statuses": {
+          "pending": "Pending",
+          "paid": "Paid",
+          "expired": "Expired",
+          "failed": "Failed",
+          "refunded": "Refunded"
+        },
+        "refundOutcomes": {
+          "refunded": "Refunded.",
+          "alreadyRefunded": "This order was already refunded.",
+          "notAdmissible": "This order is not payable, so there is nothing to refund.",
+          "providerFailed": "The refund did not go through, so nothing was charged back. You can try again.",
+          "commitFailed": "The payment provider may have refunded this order, but we could not record it here. Check the payment provider before trying again.",
+          "notFound": "That order could not be found."
+        }
       }
     },
     "announcements": {
@@ -2947,6 +3052,7 @@
         "programs": "Programmes",
         "Membership": "Membership",
         "Privacy": "Privacy notice",
+        "RefundPolicy": "Refund policy",
         "AiTransparency": "AI transparency",
         "Programmes": "Programmes index",
         "Partners": "Partners",

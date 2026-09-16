@@ -54,6 +54,8 @@ export type InvoiceRecord = Readonly<{
 export interface StripeBillingAdapter {
   createCheckoutSession(input: CheckoutSessionInput): Promise<{id: string; url: string}>;
   createEventTicketSession(input: EventTicketSessionInput): Promise<{id: string; url: string}>;
+  /** The intent to refund for a settled session; `null` when the session has none. */
+  paymentIntentForSession(sessionId: string): Promise<string | null>;
   /** `idempotencyKey` makes a retried refund after a failed webhook safe to re-issue. */
   refundPaymentIntent(paymentIntentId: string, idempotencyKey: string): Promise<void>;
   createBillingPortalSession(input: PortalSessionInput): Promise<{url: string}>;
@@ -61,10 +63,13 @@ export interface StripeBillingAdapter {
 }
 
 type StripeClient = {
-  checkout: {sessions: {create(
-    params: Stripe.Checkout.SessionCreateParams,
-    options?: Stripe.RequestOptions,
-  ): Promise<Pick<Stripe.Checkout.Session, "id" | "url">>}};
+  checkout: {sessions: {
+    create(
+      params: Stripe.Checkout.SessionCreateParams,
+      options?: Stripe.RequestOptions,
+    ): Promise<Pick<Stripe.Checkout.Session, "id" | "url">>;
+    retrieve(id: string): Promise<Pick<Stripe.Checkout.Session, "payment_intent">>;
+  }};
   billingPortal: {sessions: {create(
     params: Stripe.BillingPortal.SessionCreateParams,
   ): Promise<Pick<Stripe.BillingPortal.Session, "url">>}};
@@ -113,6 +118,13 @@ export function createStripeBillingAdapter(client: StripeClient): StripeBillingA
       }, {idempotencyKey: input.idempotencyKey});
       if (!session.url) throw new Error("STRIPE_CHECKOUT_URL_MISSING");
       return {id: session.id, url: session.url};
+    },
+
+    async paymentIntentForSession(sessionId) {
+      const session = await client.checkout.sessions.retrieve(sessionId);
+      const intent = session.payment_intent;
+      // Stripe returns either the id or the expanded object.
+      return typeof intent === "string" ? intent : intent?.id ?? null;
     },
 
     async refundPaymentIntent(paymentIntentId, idempotencyKey) {

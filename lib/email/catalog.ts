@@ -31,6 +31,7 @@ export const EMAIL_TEMPLATE_IDS = [
   "event_reminder_24h",
   "event_ticket_confirmation",
   "event_ticket_refunded",
+  "event_ticket_pass",
 ] as const;
 
 export type EmailTemplateId = (typeof EMAIL_TEMPLATE_IDS)[number];
@@ -93,6 +94,9 @@ const DEFAULT_CLASSIFICATION = {
   // transactional and never given a marketing footer.
   event_ticket_confirmation: "transactional",
   event_ticket_refunded: "transactional",
+  // Per-attendee pass (Phase D-4b): one seat's own admission, so transactional
+  // and never given a marketing footer.
+  event_ticket_pass: "transactional",
 } as const satisfies Record<EmailTemplateId, MessageClassification>;
 
 function interpolate(message: string, variables: EmailVariables): string {

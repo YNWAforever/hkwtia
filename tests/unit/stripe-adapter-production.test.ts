@@ -3,7 +3,7 @@ import {createStripeBillingAdapter} from "@/lib/billing/stripe";
 
 function client(portalCreate = vi.fn(), invoiceList = vi.fn()) {
   return {
-    checkout: {sessions: {create: vi.fn()}},
+    checkout: {sessions: {create: vi.fn(), retrieve: vi.fn()}},
     billingPortal: {sessions: {create: portalCreate}},
     invoices: {list: invoiceList},
     refunds: {create: vi.fn()},

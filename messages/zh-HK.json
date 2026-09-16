@@ -6,6 +6,7 @@
     "breadcrumbHome": "主頁",
     "breadcrumbJoin": "會籍申請",
     "breadcrumbPrivacy": "私隱聲明",
+    "breadcrumbRefundPolicy": "退款政策",
     "breadcrumbMembers": "會員名錄",
     "openMenu": "開啟選單",
     "closeMenu": "關閉選單"
@@ -336,7 +337,7 @@
         "subject": "{eventTitle} 的門票",
         "preview": "訂單 {orderId} 已確認，共 {seatCount} 個座位。",
         "heading": "你將參加 {eventTitle}",
-        "body": "多謝支持。我們已收到 HK${amount}，共 {seatCount} 個座位。活動日期為 {eventDate}。",
+        "body": "多謝支持。我們已收到 HK${amount}，共 {seatCount} 個座位：{attendees}。活動日期為 {eventDate}。每位出席者將另函收到專屬門票。退款安排請參閱我們的退款政策：{refundPolicyUrl}",
         "cta": "查看活動"
       },
       "event_ticket_refunded": {
@@ -345,6 +346,13 @@
         "heading": "款項已退回",
         "body": "我們已就訂單 {orderId}（{eventTitle}）退回 HK${amount}。視乎銀行處理，款項可能需要數天才顯示。",
         "cta": "查看活動"
+      },
+      "event_ticket_pass": {
+        "subject": "{eventTitle} 的門票",
+        "preview": "{attendeeName} 的專屬入場門票。",
+        "heading": "{attendeeName}，這是你的門票",
+        "body": "請於活動當日在入口出示此門票。活動：{eventTitle}，日期：{eventDate}，地點：{venue}。每張門票只限一人入場，請勿轉發。",
+        "cta": "開啟門票"
       }
     }
   },
@@ -1596,6 +1604,7 @@
     "attendeeEmail": "出席者電郵",
     "website": "請留空此欄",
     "price": "每張門票：{price}",
+    "refundPolicy": "退款政策",
     "submit": "前往付款",
     "submitting": "正在前往付款……",
     "errors": {
@@ -1605,6 +1614,14 @@
       "UNAVAILABLE": "暫時未能進行購票，請稍後再試。",
       "RATE_LIMITED": "此連線嘗試次數過多，請稍後再試。"
     }
+  },
+  "Pass": {
+    "eyebrow": "活動通行證",
+    "attendee": "出席者",
+    "seat": "座位 {position}",
+    "qrLabel": "報到二維碼",
+    "checkedIn": "已報到",
+    "presentAtDoor": "請於現場出示此通行證。"
   },
   "News": {
     "metaTitle": "消息｜WiseTech Hong Kong",
@@ -1821,6 +1838,45 @@
         "heading": "聯絡我們",
         "body": [
           "有關個人資料的查詢、要求及投訴，可電郵至 contact@hkwtia.org，或郵寄至香港觀塘鴻圖道 73-75 號 KOHO 4 樓 WTIA。"
+        ],
+        "items": []
+      }
+    ]
+  },
+  "RefundPolicy": {
+    "metaTitle": "退款政策｜WiseTech Hong Kong",
+    "metaDescription": "WTIA 如何及何時就付費門票訂單退款，以及我們取消活動時的安排。",
+    "eyebrow": "政策",
+    "title": "退款政策",
+    "description": "我們如何處理付費活動門票的退款。",
+    "breadcrumbCurrent": "退款政策",
+    "sections": [
+      {
+        "heading": "退款情況",
+        "body": [
+          "我們會就整張訂單退款，而非個別座位。若訂單中某個座位無法使用，整張訂單將獲退款。",
+          "退款由 WTIA 酌情決定，須經申請並逐一考慮。我們會視乎實際情況，以及你提出申請時距離活動舉行的時間。"
+        ],
+        "items": []
+      },
+      {
+        "heading": "如我們取消活動",
+        "body": [
+          "如 WTIA 取消活動，所有已付款訂單將獲全額退款。"
+        ],
+        "items": []
+      },
+      {
+        "heading": "退款方式及時間",
+        "body": [
+          "退款將退回你原先使用的付款方式。我們一經發出退款，款項實際到帳時間視乎你的銀行而定，一般為數個工作日。"
+        ],
+        "items": []
+      },
+      {
+        "heading": "如何申請",
+        "body": [
+          "請提供你的訂單編號與我們聯絡，或直接回覆確認電郵。"
         ],
         "items": []
       }
@@ -2312,6 +2368,19 @@
       "templates": "WhatsApp 範本",
       "campaigns": "推廣活動"
     },
+    "checkIn": {
+      "eyebrow": "現場簽到",
+      "seat": "座位 {position}",
+      "alreadyCheckedIn": "已簽到。",
+      "checkIn": "簽到",
+      "undo": "取消簽到",
+      "backToEvent": "返回活動",
+      "checkInSuccess": "已完成簽到。",
+      "undoSuccess": "已取消簽到。",
+      "notCheckedIn": "此座位尚未簽到。",
+      "notAdmissible": "此座位不可入場。",
+      "updateError": "未能更新此座位。"
+    },
     "templates": {
       "eyebrow": "WhatsApp 發送",
       "title": "WhatsApp 範本",
@@ -2799,11 +2868,16 @@
       "checkingIn": "簽到中……",
       "checkInSuccess": "已為參加者簽到。",
       "checkInError": "未能為參加者簽到，請再試一次。",
+      "resendPass": "重發門票",
+      "resending": "正在傳送門票……",
+      "resendSuccess": "門票電郵已發送。",
+      "resendError": "未能發送門票電郵，請再試一次。",
       "exportCsv": "下載出席名單（CSV）",
       "kind": "類別",
       "kinds": {
         "member": "會員",
-        "guest": "訪客"
+        "guest": "訪客",
+        "ticket": "門票"
       },
       "organisation": "機構",
       "statuses": {
@@ -2811,7 +2885,8 @@
         "waitlist": "候補名單",
         "cancelled": "已取消",
         "attended": "已出席",
-        "noShow": "未出席"
+        "noShow": "未出席",
+        "paid": "已付款"
       },
       "review": {
         "title": "等待審核的會員活動",
@@ -2827,6 +2902,36 @@
         "rejectionReason": "退回原因",
         "empty": "目前沒有等待審核的會員活動。",
         "error": "無法載入等待審核的會員活動。"
+      },
+      "orders": {
+        "heading": "訂單",
+        "unavailable": "暫時無法載入訂單。",
+        "caption": "訂單",
+        "empty": "尚未有訂單。",
+        "buyer": "買家",
+        "seats": "座位",
+        "amount": "金額",
+        "status": "狀態",
+        "refundedOn": "退款日期",
+        "refund": "退款",
+        "cancel": "取消",
+        "note": "備註",
+        "confirm": "確定向 {buyer} 退款 {amount}（座位：{seats}）？",
+        "statuses": {
+          "pending": "待付款",
+          "paid": "已付款",
+          "expired": "已過期",
+          "failed": "失敗",
+          "refunded": "已退款"
+        },
+        "refundOutcomes": {
+          "refunded": "已退款。",
+          "alreadyRefunded": "此訂單已經退款。",
+          "notAdmissible": "此訂單並非已付款，沒有可退款項。",
+          "providerFailed": "退款未能完成，因此沒有從買家一方扣回任何款項。請再試一次。",
+          "commitFailed": "付款服務商可能已退款，但我們無法在此記錄。請先向付款服務商查核，切勿直接重試。",
+          "notFound": "找不到此訂單。"
+        }
       }
     },
     "announcements": {
@@ -2976,6 +3081,7 @@
         "programs": "計劃",
         "Membership": "會籍",
         "Privacy": "私隱聲明",
+        "RefundPolicy": "退款政策",
         "AiTransparency": "AI 透明度",
         "Programmes": "計劃總覽",
         "Partners": "合作夥伴",

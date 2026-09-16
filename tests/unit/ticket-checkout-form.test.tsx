@@ -32,6 +32,7 @@ const labels: TicketCheckoutLabels = {
   website: "Leave this field empty",
   submit: "Buy tickets",
   submitting: "Redirecting to payment…",
+  refundPolicy: "Refund policy",
   errors: {
     INVALID: "Check the form.",
     SOLD_OUT: "This event is sold out.",
@@ -47,6 +48,7 @@ function renderForm(overrides: Partial<Parameters<typeof TicketCheckoutForm>[0]>
     labels={labels}
     locale="en"
     pricePerSeat="Price per seat: HK$250.00"
+    refundPolicyHref="/refund-policy"
     {...overrides}
   />);
 }
@@ -92,7 +94,7 @@ describe("TicketCheckoutForm", () => {
   // until it has, which the server's `z.string().uuid()` requires.
   it("cannot be submitted before the key is minted", () => {
     const markup = renderToStaticMarkup(
-      <TicketCheckoutForm eventId="10000000-0000-4000-8000-000000000001" labels={labels} locale="en" pricePerSeat="Price per seat: HK$250.00" />,
+      <TicketCheckoutForm eventId="10000000-0000-4000-8000-000000000001" labels={labels} locale="en" pricePerSeat="Price per seat: HK$250.00" refundPolicyHref="/refund-policy" />,
     );
 
     expect(markup).toContain('name="idempotencyKey"');

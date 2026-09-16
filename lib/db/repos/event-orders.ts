@@ -1,6 +1,6 @@
 import "server-only";
 
-import {eq, sql} from "drizzle-orm";
+import {eq, sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
 import {MAX_TICKET_SEATS, TICKET_HOLD_MS} from "@/config/tickets";
@@ -16,6 +16,12 @@ export type OrderRecord = Readonly<{
   amountHkdCents: number; currency: string; status: OrderStatus; stripeCheckoutSessionId: string | null;
   stripeCheckoutUrl: string | null;
   idempotencyKey: string; expiresAt: Date; paidAt: Date | null; refundedAt: Date | null; refundReason: RefundReason | null;
+}>;
+
+export type EventOrderRow = Readonly<{
+  order: OrderRecord;
+  seatCount: number;
+  seatNames: readonly string[];
 }>;
 
 export type LockedEvent = Readonly<{
@@ -48,6 +54,14 @@ export type EventOrdersTransaction = Readonly<{
   orderByIdempotencyKey: (key: string) => Promise<OrderRecord | null>;
   orderBySessionId: (sessionId: string) => Promise<OrderRecord | null>;
   seatsOfOrder: (orderId: string) => Promise<number>;
+  /**
+   * Every seat of an order in position order. `attendeeName` rides along because
+   * the receipt names the attendees and the per-attendee passes need each id:
+   * one read serves both, rather than a second query per recipient.
+   */
+  orderSeats: (orderId: string) => Promise<readonly Readonly<{seatId: string; position: number; attendeeName: string}>[]>;
+  /** One seat with its paid order, for a single pass. */
+  seatForPass: (seatId: string) => Promise<Readonly<{seatId: string; attendeeName: string; attendeeEmail: string; eventId: string; buyerLocale: "en" | "zh-HK"; order: OrderRecord}> | null>;
   /** Seats of paid orders, or of pending ones whose hold has not lapsed. */
   heldSeats: (eventId: string, now: Date, excludingOrderId?: string) => Promise<number>;
   /** Seats of paid orders only -- the subset of `heldSeats` that has been bought. */
@@ -56,8 +70,17 @@ export type EventOrdersTransaction = Readonly<{
   insertSeats: (orderId: string, seats: readonly SeatInput[]) => Promise<void>;
   attachSession: (orderId: string, sessionId: string, url: string) => Promise<void>;
   markStatus: (orderId: string, status: OrderStatus, patch: Readonly<{paidAt?: Date; refundedAt?: Date; refundReason?: RefundReason}>) => Promise<void>;
+  orderById: (orderId: string) => Promise<OrderRecord | null>;
+  /** Every order of an event with its seats, newest paid first. */
+  listEventOrders: (eventId: string) => Promise<readonly EventOrderRow[]>;
+  /**
+   * The refund commit: moves the row only while it is still `paid`, and writes
+   * the audit row in the same transaction. `false` means someone else got there
+   * first, which is a result rather than an error.
+   */
+  refundPaidOrder: (orderId: string, input: Readonly<{refundedAt: Date; actorUserId: string | null; actorType: string; note: string | null}>) => Promise<boolean>;
   insertAudit: (input: Readonly<{actorUserId: string | null; actorType: string; action: string; targetType: string; targetId: string; metadata: Record<string, unknown>}>) => Promise<void>;
-  eventSummary: (eventId: string) => Promise<readonly Readonly<{titleEn: string; titleZh: string | null; startsAt: Date; slug: string}>[]>;
+  eventSummary: (eventId: string) => Promise<readonly Readonly<{titleEn: string; titleZh: string | null; startsAt: Date; slug: string; venue: string | null}>[]>;
 }>;
 
 const seatSchema = z.object({name: z.string().trim().min(1).max(200), email: z.string().trim().toLowerCase().pipe(z.string().email().max(320))}).strict();
@@ -127,13 +150,27 @@ function lockedEventFrom(row: Record<string, unknown>): LockedEvent {
   };
 }
 
-function eventSummaryFrom(row: Record<string, unknown>): {titleEn: string; titleZh: string | null; startsAt: Date; slug: string} {
+function eventSummaryFrom(row: Record<string, unknown>): {titleEn: string; titleZh: string | null; startsAt: Date; slug: string; venue: string | null} {
   return {
     titleEn: String(row.titleEn),
     titleZh: optionalString(row.titleZh),
     startsAt: requiredDate(row.startsAt),
     slug: String(row.slug),
+    venue: optionalString(row.venue),
   };
+}
+
+/**
+ * The audit INSERT, written once. `refundPaidOrder` runs inside the default
+ * transaction where the only handle is the driver `tx`, so it cannot reach the
+ * built `insertAudit` sibling -- both delegate here rather than letting the two
+ * copies of the statement drift.
+ */
+async function writeAuditRow(
+  tx: Readonly<{execute: (query: SQL) => Promise<unknown>}>,
+  input: Readonly<{actorUserId: string | null; actorType: string; action: string; targetType: string; targetId: string; metadata: Record<string, unknown>}>,
+): Promise<void> {
+  await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${input.actorUserId}, ${input.actorType}, ${input.action}, ${input.targetType}, ${input.targetId}, ${JSON.stringify(input.metadata)}::jsonb)`);
 }
 
 async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promise<T>): Promise<T> {
@@ -156,6 +193,21 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       return row ? orderFrom(row) : null;
     },
     seatsOfOrder: async (orderId) => Number(rows<{value: number}>(await tx.execute(sql`SELECT COUNT(*)::int AS value FROM ${eventOrderSeats} WHERE order_id = ${orderId}`))[0]?.value ?? 0),
+    orderSeats: async (orderId) => rows<{seatId: string; position: number; attendeeName: string}>(await tx.execute(sql`
+      SELECT id AS "seatId", position, attendee_name AS "attendeeName" FROM ${eventOrderSeats} WHERE order_id = ${orderId} ORDER BY position ASC
+    `)),
+    seatForPass: async (seatId) => {
+      const row = rows<Record<string, unknown>>(await tx.execute(sql`
+        SELECT s.id AS "seatId", s.attendee_name AS "attendeeName", s.attendee_email AS "attendeeEmail",
+               o.event_id AS "eventId", o.buyer_locale AS "buyerLocale", o.*
+        FROM ${eventOrderSeats} s JOIN ${eventOrders} o ON o.id = s.order_id
+        WHERE s.id = ${seatId} AND o.status = 'paid' LIMIT 1
+      `))[0];
+      if (!row) return null;
+      // `o.*` arrives snake_case; `orderFrom` is the existing folder that already
+      // handles those columns, so the order is folded once, not mapped twice.
+      return {seatId: String(row.seatId), attendeeName: String(row.attendeeName), attendeeEmail: String(row.attendeeEmail), eventId: String(row.eventId), buyerLocale: row.buyerLocale === "zh-HK" ? "zh-HK" : "en", order: orderFrom(row)};
+    },
     heldSeats: async (eventId, now, excludingOrderId) => Number(rows<{value: number}>(await tx.execute(sql`
       SELECT COUNT(*)::int AS value FROM ${eventOrderSeats} AS s
       JOIN ${eventOrders} AS o ON o.id = s.order_id
@@ -191,9 +243,47 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       assignments.push(sql`updated_at = NOW()`);
       await tx.execute(sql`UPDATE ${eventOrders} SET ${sql.join(assignments, sql`, `)} WHERE id = ${orderId}`);
     },
-    insertAudit: async (input) => { await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${input.actorUserId}, ${input.actorType}, ${input.action}, ${input.targetType}, ${input.targetId}, ${JSON.stringify(input.metadata)}::jsonb)`); },
+    orderById: async (orderId) => {
+      const row = rows<Record<string, unknown>>(await tx.execute(sql`SELECT * FROM ${eventOrders} WHERE id = ${orderId} LIMIT 1`))[0];
+      return row ? orderFrom(row) : null;
+    },
+    listEventOrders: async (eventId) => rows<Record<string, unknown>>(await tx.execute(sql`
+      SELECT o.*, COALESCE(seats.seat_names, ARRAY[]::text[]) AS seat_names, COALESCE(seats.seat_count, 0) AS seat_count
+      FROM ${eventOrders} o
+      LEFT JOIN (
+        SELECT order_id, array_agg(attendee_name ORDER BY position ASC) AS seat_names, count(*)::int AS seat_count
+        FROM ${eventOrderSeats} GROUP BY order_id
+      ) seats ON seats.order_id = o.id
+      WHERE event_id = ${eventId}
+      ORDER BY o.paid_at DESC NULLS LAST, o.created_at DESC
+    `)).map((row) => ({
+      order: orderFrom(row),
+      seatCount: Number(row.seat_count),
+      seatNames: Array.isArray(row.seat_names) ? (row.seat_names as string[]) : [],
+    })),
+    refundPaidOrder: async (orderId, input) => {
+      // `AND status = 'paid'` is the whole guard: two staff clicking at once
+      // produce one transition because the second UPDATE matches no row.
+      const updated = rows<{id: string}>(await tx.execute(sql`
+        UPDATE ${eventOrders}
+        SET status = 'refunded', refunded_at = ${input.refundedAt}, refund_reason = 'staff', updated_at = NOW()
+        WHERE id = ${orderId} AND status = 'paid'
+        RETURNING id
+      `));
+      if (updated.length === 0) return false;
+      await writeAuditRow(tx, {
+        actorUserId: input.actorUserId,
+        actorType: input.actorType,
+        action: "event.order.refunded",
+        targetType: "event_order",
+        targetId: orderId,
+        metadata: {reason: "staff", note: input.note},
+      });
+      return true;
+    },
+    insertAudit: async (input) => { await writeAuditRow(tx, input); },
     eventSummary: async (eventId) => rows<Record<string, unknown>>(await tx.execute(sql`
-      SELECT title_en AS "titleEn", title_zh AS "titleZh", starts_at AS "startsAt", slug FROM ${events} WHERE id = ${eventId} LIMIT 1
+      SELECT title_en AS "titleEn", title_zh AS "titleZh", starts_at AS "startsAt", slug, venue FROM ${events} WHERE id = ${eventId} LIMIT 1
     `)).map((row) => eventSummaryFrom(row)),
   }));
 }
@@ -303,17 +393,46 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
     },
 
     /** The localized title the receipt names. Not transactional: a read of one row. */
-    async eventSummary(eventId: string, locale: "en" | "zh-HK"): Promise<{title: string; startsAt: Date; slug: string} | null> {
+    async eventSummary(eventId: string, locale: "en" | "zh-HK"): Promise<{title: string; startsAt: Date; slug: string; venue: string | null} | null> {
       return runTransaction(async (tx) => {
         const row = (await tx.eventSummary(eventId))[0];
         if (!row) return null;
-        return {title: locale === "zh-HK" ? row.titleZh ?? row.titleEn : row.titleEn, startsAt: row.startsAt, slug: row.slug};
+        return {title: locale === "zh-HK" ? row.titleZh ?? row.titleEn : row.titleEn, startsAt: row.startsAt, slug: row.slug, venue: row.venue};
       });
     },
 
     /** The seat count the receipt names; the transaction holds it already. */
     async seatsOfOrder(orderId: string): Promise<number> {
       return runTransaction((tx) => tx.seatsOfOrder(orderId));
+    },
+
+    /** One order, for the refund path. */
+    async orderById(orderId: string): Promise<OrderRecord | null> {
+      return runTransaction((tx) => tx.orderById(orderId));
+    },
+
+    /** Every order of an event, for the admin Orders section. */
+    async listEventOrders(eventId: string): Promise<readonly EventOrderRow[]> {
+      return runTransaction((tx) => tx.listEventOrders(eventId));
+    },
+
+    /**
+     * The conditional refund commit. `false` means the order was not `paid` when
+     * the statement ran, so the caller reports "already refunded" rather than
+     * claiming a refund it did not make.
+     */
+    async refundPaidOrder(orderId: string, input: Readonly<{refundedAt: Date; actorUserId: string | null; actorType: string; note: string | null}>): Promise<boolean> {
+      return runTransaction((tx) => tx.refundPaidOrder(orderId, input));
+    },
+
+    /** Each seat of an order, in position order, for the receipt and the passes. */
+    async orderSeats(orderId: string): Promise<readonly {seatId: string; position: number; attendeeName: string}[]> {
+      return runTransaction((tx) => tx.orderSeats(orderId));
+    },
+
+    /** One seat with its order, for a single pass. `null` unless the order is paid. */
+    async seatForPass(seatId: string): Promise<Readonly<{seatId: string; attendeeName: string; attendeeEmail: string; eventId: string; buyerLocale: "en" | "zh-HK"; order: OrderRecord}> | null> {
+      return runTransaction((tx) => tx.seatForPass(seatId));
     },
   };
 }

@@ -46,6 +46,7 @@ const eventSummary = {
   title: "Edge AI for Builders",
   startsAt: new Date("2026-10-01T10:00:00Z"),
   slug: "edge-ai-for-builders",
+  venue: "KOHO, Kwun Tong",
 };
 
 type TicketEventType = "checkout.session.completed" | "checkout.session.async_payment_succeeded" | "checkout.session.expired";
@@ -95,13 +96,16 @@ function captureTicketProcessor() {
 function buildTicketProcessor(options: {
   settle?: SettleResult;
   seats?: number;
-  summary?: {title: string; startsAt: Date; slug: string} | null;
+  summary?: {title: string; startsAt: Date; slug: string; venue: string | null} | null;
+  orderSeats?: readonly {seatId: string; position: number; attendeeName: string}[];
 } = {}) {
   const orders = {
     settlePaid: vi.fn(async (): Promise<SettleResult> => options.settle ?? {status: "paid", order: pendingOrder}),
     expireBySession: vi.fn(async () => undefined),
     eventSummary: vi.fn(async () => (options.summary === undefined ? eventSummary : options.summary)),
     seatsOfOrder: vi.fn(async () => options.seats ?? 2),
+    orderSeats: vi.fn(async () => options.orderSeats ?? []),
+    seatForPass: vi.fn(async () => null),
   };
   const refundPaymentIntent = vi.fn(async () => undefined);
   // The real renderer runs behind the spy, so a missing placeholder throws and
@@ -117,6 +121,7 @@ function buildTicketProcessor(options: {
       emailFrom: "tickets@wtia.test",
     },
     appUrl: "https://w.test",
+    passSecret: "pass-secret-fixture",
     now: () => new Date("2026-09-14T04:00:00Z"),
   };
   return {
@@ -273,6 +278,8 @@ describe("createTicketProcessor", () => {
       expireBySession: vi.fn(async () => undefined),
       eventSummary: vi.fn(async () => eventSummary),
       seatsOfOrder: vi.fn(async () => 2),
+      orderSeats: vi.fn(async () => []),
+      seatForPass: vi.fn(async () => null),
     };
     const refundPaymentIntent = vi.fn()
       .mockRejectedValueOnce(new Error("stripe unavailable"))
@@ -283,6 +290,7 @@ describe("createTicketProcessor", () => {
       refundPaymentIntent,
       email: {renderEmail, transport, emailFrom: "tickets@wtia.test"},
       appUrl: "https://w.test",
+      passSecret: "pass-secret-fixture",
       now: () => new Date("2026-09-14T04:00:00Z"),
     });
 
@@ -334,9 +342,17 @@ describe("createTicketProcessor", () => {
 
     const input = (renderEmail.mock.calls[0] as unknown as [RenderEmailInput])[0];
     expect(Object.keys(input.variables)).toEqual(expect.arrayContaining([
-      "eventTitle", "eventDate", "seatCount", "amount", "orderId", "ctaUrl",
+      "eventTitle", "eventDate", "seatCount", "attendees", "amount", "orderId", "ctaUrl", "refundPolicyUrl",
     ]));
-    expect(input.variables).toMatchObject({eventTitle: eventSummary.title, seatCount: "3", orderId});
+    expect(input.variables).toMatchObject({
+      eventTitle: eventSummary.title,
+      seatCount: "3",
+      orderId,
+      // The only guard for a placeholder the error handler swallows: a missing
+      // `refundPolicyUrl` would stop the receipt sending while the webhook still
+      // reported success, so the key's presence and its order-built value are pinned.
+      refundPolicyUrl: "https://w.test/refund-policy",
+    });
     // The real renderer ran, so a missing placeholder would have thrown and left
     // the transport empty rather than failing the assertion above in silence.
     expect(transport.sends).toHaveLength(1);
@@ -350,6 +366,9 @@ describe("createTicketProcessor", () => {
     await processor.process(systemActor("stripe-webhook"), command("checkout.session.completed"));
 
     expect(renderEmail).toHaveBeenCalledWith(expect.objectContaining({locale: "zh-HK"}));
+    const input = (renderEmail.mock.calls[0] as unknown as [RenderEmailInput])[0];
+    // Built from the order's own locale, so the Chinese receipt links to the Chinese policy.
+    expect(input.variables).toMatchObject({refundPolicyUrl: "https://w.test/zh/refund-policy"});
     expect(transport.sends).toHaveLength(1);
   });
 
@@ -361,12 +380,41 @@ describe("createTicketProcessor", () => {
     expect(transport.sends).toEqual([]);
   });
 
+  // The receipt's event read throws *before* `sendTicketEmail`'s own catch, so an
+  // unguarded paid branch rejects `process` → 500, and on redelivery `settlePaid`
+  // answers `duplicate` and neither receipt nor pass is ever sent.
+  it("keeps the webhook successful when the paid branch's event read fails", async () => {
+    const orders = {
+      settlePaid: vi.fn(async (): Promise<SettleResult> => ({status: "paid", order: {...pendingOrder, status: "paid"}})),
+      expireBySession: vi.fn(async () => undefined),
+      eventSummary: vi.fn(async () => { throw new Error("EVENT_SUMMARY_UNAVAILABLE"); }),
+      seatsOfOrder: vi.fn(async () => 1),
+      orderSeats: vi.fn(async () => []),
+      seatForPass: vi.fn(async () => null),
+    };
+    const onEmailError = vi.fn();
+    const processor = createTicketProcessor({
+      orders: orders as unknown as TicketProcessorDependencies["orders"],
+      refundPaymentIntent: vi.fn(async () => undefined),
+      email: {renderEmail, transport: createTestTransport(), emailFrom: "tickets@wtia.test"},
+      appUrl: "https://w.test",
+      passSecret: "pass-secret-fixture",
+      now: () => new Date("2026-09-14T04:00:00Z"),
+      onEmailError,
+    });
+
+    await expect(processor.process(systemActor("stripe-webhook"), command("checkout.session.completed"))).resolves.toBe("processed");
+    expect(onEmailError).toHaveBeenCalledWith(expect.any(Error), {orderId, template: "event_ticket_confirmation"});
+  });
+
   it("keeps the webhook successful when the ticket email fails", async () => {
     const orders = {
       settlePaid: vi.fn(async (): Promise<SettleResult> => ({status: "paid", order: {...pendingOrder, status: "paid"}})),
       expireBySession: vi.fn(async () => undefined),
       eventSummary: vi.fn(async () => eventSummary),
       seatsOfOrder: vi.fn(async () => 1),
+      orderSeats: vi.fn(async () => []),
+      seatForPass: vi.fn(async () => null),
     };
     const onEmailError = vi.fn();
     const processor = createTicketProcessor({
@@ -378,6 +426,7 @@ describe("createTicketProcessor", () => {
         emailFrom: "tickets@wtia.test",
       },
       appUrl: "https://w.test",
+      passSecret: "pass-secret-fixture",
       now: () => new Date("2026-09-14T04:00:00Z"),
       onEmailError,
     });
