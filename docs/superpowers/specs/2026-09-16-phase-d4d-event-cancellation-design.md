@@ -65,8 +65,8 @@ reader does not re-litigate them.
 ### 4.1 How staff cancel
 
 **Decided:** a **dedicated Cancel event control** on the admin event page, separate from the edit form,
-behind a confirmation that names the cost — how many orders will be refunded, the total, and how many
-attendees that covers.
+behind a confirmation that names the cost — how many paid orders will be refunded, the total, how many
+paid attendees that covers, and how many RSVP registrants will be left un-notified.
 
 **Rejected — a status field in the existing edit form:** the most destructive and irreversible
 transition the product has would sit behind the same generic Save button as correcting a venue typo,
@@ -138,11 +138,15 @@ someone to try to attend it.
 ### 4.6 What is not notified
 
 **Decided:** ticket buyers are told (they already receive the refund email when the sweep refunds
-them); **RSVP registrants are not emailed by this slice**. The cancellation confirmation names how many
-attendees are affected, and staff can export the door list to contact them.
+them); **RSVP registrants are not emailed by this slice**. The cancellation confirmation names the paid
+attendees a refund covers *and* the RSVP registrants it will not email, and says plainly that those
+registrants are not notified; staff can export the door list to contact them.
 
 **Recorded consequence:** cancelling a **free** event emails nobody at all, because there are no paid
-orders to refund. The cancelled page state and the door-list export are the remedy until a
+orders to refund. The confirmation must therefore not read as "nobody is affected": on such an event the
+paid figures are legitimately zero and the registrant count is the only figure that shows anyone cares,
+so the preview counts the member and guest registrations — not the paid seats — and the copy states the
+consequence. The cancelled page state and the door-list export are the remaining remedy until a
 notification slice exists.
 
 **Rejected — emailing every RSVP registrant now:** the most complete outcome, and it would close that
@@ -169,8 +173,13 @@ The **action** is a staff-only, formData-shaped wrapper bound to the event path,
 revalidates the page.
 
 **The confirmation is costed.** A `cancellationPreview(eventId)` read returns the number of `paid`
-orders, the total that will be refunded, and the attendees affected. The control renders that panel
-before it submits, so staff see the price of an irreversible act rather than a bare yes/no.
+orders, the total that will be refunded, the paid attendees those orders seat, and the RSVP
+registrants (member and guest registrations that are not themselves cancelled) that cancellation will
+not email. The control renders that panel before it submits, so staff see the price of an irreversible
+act rather than a bare yes/no — and, on a free event, see the registrants the paid figures cannot show.
+The refusal copy for a status the table forbids says the rule it is enforcing: only a published event
+can be cancelled (`draft`, `pending_review` and `rejected` are all refused), so the message describes
+the statuses it is actually reached for.
 
 ### 5.2 The sweep
 
@@ -226,7 +235,7 @@ does: nothing should be admitted to an event that is not happening.
 | Case | Behaviour |
 |---|---|
 | Event already `cancelled` | The action refuses explicitly, naming that it is already cancelled; no second audit row. |
-| Event is `draft` or `rejected` | Refused by the transition table; the action reports it. |
+| Event is `draft`, `pending_review` or `rejected` | Refused by the transition table; the action reports that only a published event can be cancelled. |
 | No paid orders (a free event) | Cancelling succeeds, refunds nothing, and **emails nobody** — the recorded gap. |
 | A provider failure mid-sweep | That order stays `paid`; the next run retries it. The event is still cancelled. |
 | Two sweep runs overlap | One refund per order: the commit is conditional on `status = 'paid'`. |
@@ -254,8 +263,10 @@ does: nothing should be admitted to an event that is not happening.
   transaction; an already-cancelled event is refused **without** a second audit row (a test that fails
   if the explicit refusal is removed, since the transition table permits it); a `draft` event is
   refused by the table.
-- **The preview:** the counts match the orders and seats, so the number staff read before an
-  irreversible act is real.
+- **The preview:** the paid-order count, the refund total and the paid-attendee count match the orders
+  and seats, and the RSVP registrant count matches the member and guest registrations that are not
+  cancelled — including a **free event** whose paid figures are zero, where the registrant count is the
+  only figure that shows anyone is affected. The number staff read before an irreversible act is real.
 - **The sweep:** refunds only `paid` orders of `cancelled` events and leaves a live event's paid orders
   alone; a provider failure leaves that order `paid` rather than recording a refund; the batch is
   bounded; the audit names the system actor with no user id.
@@ -273,18 +284,18 @@ does: nothing should be admitted to an event that is not happening.
 
 | Risk | Mitigation |
 |---|---|
-| An irreversible action taken by mistake | The costed confirmation names the orders, the total and the attendees before it submits, and the status is terminal by design. |
+| An irreversible action taken by mistake | The costed confirmation names the orders, the total, the paid attendees and the RSVP registrants left un-notified before it submits, and the status is terminal by design. |
 | A half-finished sweep | Self-healing: the next run picks up whatever stayed `paid`, and the commit cannot refund twice. |
 | A double refund | The conditional `WHERE id = ? AND status = 'paid'` commit, already reviewed in D-4c. |
 | Someone admitted to a cancelled event | The check-in and pass rules already refuse a cancelled event's seats. |
 | A cancelled event leaking into the listing or into search | The listing filter is unchanged and the page is `noindex`, both with tests. |
 | A buyer seeing nothing when they follow their receipt | The page and the pass both render a cancelled state rather than a 404. |
-| Staff expecting RSVPs to have been emailed | §4.6 records that they are not, the confirmation names the attendee count, and the door list exports. |
+| Staff expecting RSVPs to have been emailed | §4.6 records that they are not, the confirmation names the registrant count and says they will not be emailed, and the door list exports. |
 
 ## 10. Definition of done
 
 1. Staff can cancel an event from the admin event page, having been shown how many orders and how much
-   money the confirmation will refund.
+   money the confirmation will refund, and how many RSVP registrants it will not notify.
 2. The sweep refunds every `paid` order of a cancelled event, and a provider failure leaves that order
    to the next run rather than recording a refund that did not happen.
 3. An automated refund is recorded as a system action, not as a person's.
