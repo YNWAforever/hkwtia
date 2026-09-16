@@ -14,15 +14,16 @@ import {prepareWorkerAlertRequest} from "@/lib/jobs/runners";
  * nobody was paged — the one code path whose entire purpose is to be noticed.
  * The send queue would have been the ninth member of the same gap.
  *
- * `WorkerJob` is read as TEXT: `workers/` is excluded from the root
+ * `WORKER_JOBS` is read as TEXT: `workers/` is excluded from the root
  * `tsconfig.json`, so importing it would be a typecheck failure rather than a
- * contract test.
+ * contract test. Phase D-4d made it a value (so `workers/tests/worker.test.ts`
+ * can prove every job is scheduled); the union is derived from it.
  */
 const WORKER_SOURCE_PATH = "workers/src/index.ts";
 
 function workerJobs(source: string): string[] {
-  const declaration = /export type WorkerJob =([\s\S]*?);/m.exec(source);
-  if (!declaration) throw new Error("WORKER_JOB_UNION_NOT_FOUND");
+  const declaration = /export const WORKER_JOBS = \[([\s\S]*?)\]\s*as const;/m.exec(source);
+  if (!declaration) throw new Error("WORKER_JOBS_DECLARATION_NOT_FOUND");
   return [...declaration[1].matchAll(/"([^"]+)"/g)].map((match) => match[1]);
 }
 

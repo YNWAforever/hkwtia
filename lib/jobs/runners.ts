@@ -85,11 +85,14 @@ export {RUNNER_BATCH_LIMIT};
  * `aiops-metrics` and `chat-retention` were missing, so three failed runs of
  * either produced a 400 `INVALID_WORKER_ALERT` and nobody was paged — the one
  * code path whose entire purpose is to be noticed. `whatsapp-send-queue` would
- * have been the ninth member of the same gap.
+ * have been the ninth member of the same gap. Phase D-4d scheduled the
+ * `event-cancellation-refunds` sweep, so it joins the vocabulary too: a
+ * scheduled job whose final failure the alert route refuses is a job nobody is
+ * paged about.
  *
  * Still an enum and never `z.string()`: the run key is a digest of this payload,
  * so an unbounded `job` is an unbounded set of claimable run keys.
- * `tests/unit/worker-alert-contract.test.ts` reads the union out of
+ * `tests/unit/worker-alert-contract.test.ts` reads `WORKER_JOBS` out of
  * `workers/src/index.ts` and asserts this list covers it.
  */
 const workerAlertSchema = z.object({
@@ -103,6 +106,7 @@ const workerAlertSchema = z.object({
     "aiops-metrics",
     "chat-retention",
     "whatsapp-send-queue",
+    "event-cancellation-refunds",
   ]),
   scheduledTime: z.string().min(1).max(64),
   attemptCount: z.number().int().min(1).max(3),
@@ -123,7 +127,8 @@ export type WorkerAlertPayload = Readonly<{
     | "board-reporter"
     | "aiops-metrics"
     | "chat-retention"
-    | "whatsapp-send-queue";
+    | "whatsapp-send-queue"
+    | "event-cancellation-refunds";
   scheduledTime: string;
   attemptCount: number;
   errorCode: "JOB_HTTP_ERROR" | "JOB_NETWORK_ERROR" | "JOB_TIMEOUT";

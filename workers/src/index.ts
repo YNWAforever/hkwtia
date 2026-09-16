@@ -1,15 +1,27 @@
 /// <reference types="@cloudflare/workers-types" />
 
-export type WorkerJob =
-  | "aiops-metrics"
-  | "journey-runner"
-  | "approvals-expirer"
-  | "renewal-runner"
-  | "engagement-score"
-  | "chat-retention"
-  | "retention-analyst"
-  | "board-reporter"
-  | "whatsapp-send-queue";
+/**
+ * Every job the Worker may invoke, declared as a value rather than a bare type
+ * so a test can enumerate it. A member added here but absent from
+ * `JOBS_BY_CRON` is a job the Worker never runs: the event-cancellation refund
+ * sweep shipped exactly that way, with a live route and no trigger, so its
+ * headline promise was silently inert until review. `WORKER_JOBS` and
+ * `JOBS_BY_CRON` move together, and `tests/worker.test.ts` fails if they drift.
+ */
+export const WORKER_JOBS = [
+  "aiops-metrics",
+  "journey-runner",
+  "approvals-expirer",
+  "renewal-runner",
+  "engagement-score",
+  "chat-retention",
+  "retention-analyst",
+  "board-reporter",
+  "whatsapp-send-queue",
+  "event-cancellation-refunds",
+] as const;
+
+export type WorkerJob = typeof WORKER_JOBS[number];
 
 export type WorkerEnv = Readonly<{
   APP_URL: string;
@@ -69,8 +81,14 @@ const BASE_JOBS = [
   "aiops-metrics",
   "approvals-expirer",
   "journey-runner",
+  "event-cancellation-refunds",
 ] as const satisfies readonly WorkerJob[];
-const JOBS_BY_CRON = {
+/**
+ * Exported so a test can prove every `WorkerJob` appears here: a job declared
+ * but never scheduled is dead code, and nothing about the route, its runner or
+ * its type would say so.
+ */
+export const JOBS_BY_CRON = {
   "0 * * * *": BASE_JOBS,
   "0 2 * * *": ["renewal-runner"],
   "0 18 * * *": ["engagement-score"],
@@ -92,6 +110,7 @@ const REQUEST_TIMEOUT_BY_JOB = {
   "retention-analyst": AI_REQUEST_TIMEOUT_MS,
   "board-reporter": AI_REQUEST_TIMEOUT_MS,
   "whatsapp-send-queue": QUEUE_REQUEST_TIMEOUT_MS,
+  "event-cancellation-refunds": REQUEST_TIMEOUT_MS,
 } as const satisfies Readonly<Record<WorkerJob, number>>;
 
 class WorkerConfigError extends Error {

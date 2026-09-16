@@ -1,10 +1,14 @@
 import {describe, expect, it, vi} from "vitest";
 
+// @ts-expect-error -- Vitest supports raw text imports for non-code assets.
+import wranglerToml from "../wrangler.toml?raw";
 import {
   createAutomationWorker,
+  JOBS_BY_CRON,
   type AutomationWorker,
   type WorkerDependencies,
   type WorkerEnv,
+  WORKER_JOBS,
 } from "../src/index";
 
 const DEFAULT_ENV: WorkerEnv = {
@@ -121,10 +125,43 @@ function guardedFailureResponse(): Response {
 }
 
 describe("Cloudflare automation scheduler", () => {
+  /**
+   * Phase D-4d Finding 1. The event-cancellation refund sweep shipped with a
+   * route and a runner and was never scheduled: no cron referenced it, so
+   * `POST /api/jobs/event-cancellation-refunds` was dead code and a cancelled
+   * event's paid orders stayed paid for ever. Nothing else here caught that,
+   * because every other case names the jobs it expects — a job missing from all
+   * of them is missing from all of them. This case enumerates instead, so a job
+   * declared and never scheduled fails here rather than in production.
+   */
+  it("schedules every declared WorkerJob on at least one cron", () => {
+    const scheduled = new Set(Object.values(JOBS_BY_CRON).flat());
+    // A minimum count, so a broken walk over WORKER_JOBS cannot pass vacuously.
+    expect(WORKER_JOBS.length).toBeGreaterThanOrEqual(10);
+    expect([...scheduled].sort()).toEqual([...WORKER_JOBS].sort());
+  });
+
+  /**
+   * The other half: a job in `JOBS_BY_CRON` under a cron Wrangler does not
+   * trigger is scheduled on paper only. The Worker's `[triggers] crons` array is
+   * the authoritative list of events Cloudflare will deliver.
+   */
+  it("keeps wrangler's cron triggers and the scheduled job map in step", () => {
+    const cronsLine = wranglerToml.match(/^crons\s*=\s*\[(.*)\]\s*$/m)?.[1] ?? "";
+    const declaredCrons = [...cronsLine.matchAll(/"([^"]+)"/g)].map((match) => match[1]);
+    expect(declaredCrons.length).toBeGreaterThan(0);
+    expect(declaredCrons.sort()).toEqual(Object.keys(JOBS_BY_CRON).sort());
+  });
+
   it.each([
     [
       "0 * * * *",
-      ["aiops-metrics", "approvals-expirer", "journey-runner"],
+      [
+        "aiops-metrics",
+        "approvals-expirer",
+        "journey-runner",
+        "event-cancellation-refunds",
+      ],
     ],
     ["0 2 * * *", ["renewal-runner"]],
     ["0 18 * * *", ["engagement-score"]],
@@ -175,6 +212,7 @@ describe("Cloudflare automation scheduler", () => {
         "aiops-metrics",
         "approvals-expirer",
         "journey-runner",
+        "event-cancellation-refunds",
         dailyJob,
       ]);
       expect(new Set(actualJobs).size).toBe(actualJobs.length);
@@ -245,6 +283,7 @@ describe("Cloudflare automation scheduler", () => {
       "https://app.example.test/base/api/jobs/aiops-metrics",
       "https://app.example.test/base/api/jobs/approvals-expirer",
       "https://app.example.test/base/api/jobs/journey-runner",
+      "https://app.example.test/base/api/jobs/event-cancellation-refunds",
     ]);
     for (const call of calls) {
       expect(call.init).toEqual({
@@ -275,7 +314,7 @@ describe("Cloudflare automation scheduler", () => {
       },
     });
 
-    expect(calls).toHaveLength(3);
+    expect(calls).toHaveLength(4);
     for (const call of calls) {
       expect(
         new Headers(call.init?.headers).get(
@@ -676,10 +715,15 @@ describe("Cloudflare automation scheduler", () => {
     expect(
       calls.filter((call) => call.url.endsWith("/approvals-expirer")),
     ).toHaveLength(3);
+    expect(
+      calls.filter((call) => call.url.endsWith("/event-cancellation-refunds")),
+    ).toHaveLength(3);
     expect(delays.sort((left, right) => left - right)).toEqual([
       250,
       250,
       250,
+      250,
+      1_000,
       1_000,
       1_000,
       1_000,
@@ -702,7 +746,7 @@ describe("Cloudflare automation scheduler", () => {
 
       await runScheduled(worker);
 
-      expect(calls).toHaveLength(3);
+      expect(calls).toHaveLength(4);
       expect(sleep).not.toHaveBeenCalled();
     },
   );
@@ -726,7 +770,7 @@ describe("Cloudflare automation scheduler", () => {
     const alerts = calls.filter((call) =>
       call.url.endsWith("/worker-alert"),
     );
-    expect(alerts).toHaveLength(3);
+    expect(alerts).toHaveLength(4);
     for (const alert of alerts) {
       expect(alert.init?.method).toBe("POST");
       expect(alert.init?.headers).toEqual({
@@ -736,7 +780,7 @@ describe("Cloudflare automation scheduler", () => {
       const payload = JSON.parse(String(alert.init?.body)) as unknown;
       expect(payload).toEqual({
         job: expect.stringMatching(
-          /^(aiops-metrics|journey-runner|approvals-expirer)$/,
+          /^(aiops-metrics|journey-runner|approvals-expirer|event-cancellation-refunds)$/,
         ),
         scheduledTime: "2026-07-26T02:00:00.000Z",
         attemptCount: 3,
@@ -771,7 +815,7 @@ describe("Cloudflare automation scheduler", () => {
 
     await runScheduled(worker);
 
-    expect(attempt).toBe(9);
+    expect(attempt).toBe(12);
     const payloads = calls
       .filter((call) => call.url.endsWith("/worker-alert"))
       .map((call) => JSON.parse(String(call.init?.body)) as {
@@ -790,6 +834,10 @@ describe("Cloudflare automation scheduler", () => {
         }),
         expect.objectContaining({
           job: "approvals-expirer",
+          errorCode: "JOB_NETWORK_ERROR",
+        }),
+        expect.objectContaining({
+          job: "event-cancellation-refunds",
           errorCode: "JOB_NETWORK_ERROR",
         }),
       ]),
@@ -894,6 +942,7 @@ describe("Cloudflare automation scheduler", () => {
       "http://localhost:3000/api/jobs/aiops-metrics",
       "http://localhost:3000/api/jobs/approvals-expirer",
       "http://localhost:3000/api/jobs/journey-runner",
+      "http://localhost:3000/api/jobs/event-cancellation-refunds",
     ]);
   });
 });
