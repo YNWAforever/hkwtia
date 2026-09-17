@@ -1460,6 +1460,11 @@
       "open": "進行中",
       "past": "已結束"
     },
+    "cancelled": {
+      "heading": "此活動已取消",
+      "body": "此活動將不會舉行。任何已付款的訂單將獲全額退款。",
+      "refundPolicy": "查閱退款政策"
+    },
     "quickTabs": {
       "label": "按狀態篩選活動",
       "open": "現正開放",

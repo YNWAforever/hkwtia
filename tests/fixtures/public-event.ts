@@ -14,5 +14,7 @@ export const publicEventDefaults = {
   externalRegistrationUrl: null,
   // Phase D-4a: an RSVP event has no price; only the detail page's ticket arm reads it.
   ticketPriceHkdCents: null,
+  // Phase D-4d: a fixture is a live event unless it says otherwise.
+  cancelled: false,
   organiser: null,
-} as const satisfies Pick<PublicEventProjection, "format" | "onlineUrl" | "tags" | "registrationMode" | "externalRegistrationUrl" | "ticketPriceHkdCents" | "organiser">;
+} as const satisfies Pick<PublicEventProjection, "format" | "onlineUrl" | "tags" | "registrationMode" | "externalRegistrationUrl" | "ticketPriceHkdCents" | "cancelled" | "organiser">;

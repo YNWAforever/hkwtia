@@ -62,7 +62,11 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   // The same own-origin filter the page body applies: a donor or private-delivery hero must
   // not be embedded in og:image any more than it is rendered in the hero.
   const heroImageUrl = row.hero && !(isPrivateMediaDeliveryUrl(row.hero.url) || isRegistrableMediaUrl(row.hero.url)) ? row.hero.url : null;
-  return buildPageMetadata({locale: locale as AppLocale, pathname: `/events/${row.slug}`, title: brandedTitle(locale as AppLocale, row.title), description: row.description, image: ogImagePath({kind: "event", title: row.title, eyebrow: t("eyebrow"), imageUrl: heroImageUrl})});
+  const base = buildPageMetadata({locale: locale as AppLocale, pathname: `/events/${row.slug}`, title: brandedTitle(locale as AppLocale, row.title), description: row.description, image: ogImagePath({kind: "event", title: row.title, eyebrow: t("eyebrow"), imageUrl: heroImageUrl})});
+  return {
+    ...base,
+    robots: row.cancelled ? {index: false, follow: false} : undefined,
+  };
 }
 
 export default async function EventPage({params}: Props) {
@@ -124,7 +128,7 @@ export default async function EventPage({params}: Props) {
 
   return (
     <>
-      <StructuredData data={buildEventData({...displayEvent, image: displayEvent.hero?.url, organiser: organiserData}, displayEvent.title, appLocale)} />
+      <StructuredData data={buildEventData({...displayEvent, image: displayEvent.hero?.url, organiser: organiserData, eventStatus: displayEvent.cancelled ? "https://schema.org/EventCancelled" : undefined}, displayEvent.title, appLocale)} />
       <section className="event-detail-page">
         {/* EventDetail is rendered completely unchanged inside this wrapper: its own <h1> is
             the page's only title, styled by the donor's `.event-detail-hero h1` descendant rule
@@ -168,7 +172,13 @@ export default async function EventPage({params}: Props) {
             </aside>
           </div>
         </div>
-        {!past ? (
+        {displayEvent.cancelled ? (
+          <section className="glass-card p-6" role="status">
+            <h2 className="font-serif text-2xl font-semibold">{t("cancelled.heading")}</h2>
+            <p className="text-muted-foreground">{t("cancelled.body")}</p>
+            <Link className="underline" href={localizedPath(appLocale, "/refund-policy")}>{t("cancelled.refundPolicy")}</Link>
+          </section>
+        ) : !past ? (
           <div className="event-action-bar">
             <div>
               <time dateTime={displayEvent.startsAt}>{formatEventDate(displayEvent.startsAt, appLocale)}</time>

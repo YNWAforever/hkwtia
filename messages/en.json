@@ -1460,6 +1460,11 @@
       "open": "Open",
       "past": "Past"
     },
+    "cancelled": {
+      "heading": "This event has been cancelled",
+      "body": "This event will not take place. Any paid order is refunded in full.",
+      "refundPolicy": "Read our refund policy"
+    },
     "quickTabs": {
       "label": "Filter events by status",
       "open": "Open now",

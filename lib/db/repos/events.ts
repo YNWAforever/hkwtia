@@ -205,6 +205,7 @@ function projectPublicEvent(row: PublicEventMemoryRow, locale: string): PublicEv
     registrationMode: event.registrationMode,
     externalRegistrationUrl: event.externalRegistrationUrl,
     ticketPriceHkdCents: event.ticketPriceHkdCents,
+    cancelled: event.status === "cancelled",
     // The name is always projected; the slug only where the company really has
     // a published page, so the detail view can never link to a 404 (D-11).
     organiser: organiser ? {name: organiser.name, slug: publicMemberPageSlug(organiser)} : null,
@@ -214,6 +215,14 @@ function projectPublicEvent(row: PublicEventMemoryRow, locale: string): PublicEv
 // S-1: public reads decide on the enums, never the legacy booleans.
 function isPubliclyVisible(event: Pick<Event, "status" | "visibility">): boolean {
   return event.status === "published" && event.visibility === "public";
+}
+
+// Programme D-4d: the detail page is reachable for a cancelled event so a buyer's
+// receipt link resolves, while the listing stays opportunities-to-attend only. Two
+// predicates rather than one, because the two readers genuinely differ -- a single
+// widened rule would put cancelled events back in the listing.
+function isPubliclyReachable(event: Pick<Event, "status" | "visibility">): boolean {
+  return (event.status === "published" || event.status === "cancelled") && event.visibility === "public";
 }
 
 // Programme B-6: the /events filter axes as SQL, and below as the in-memory twin the
@@ -309,14 +318,14 @@ export async function getPublicEventBySlug(slug: unknown, locale: string, option
   const parsedSlug = slugSchema.safeParse(slug);
   if (!parsedSlug.success) return null;
   if (options.source) {
-    const row = (await publicRowsFrom(options.source)).find(({event}) => event.slug === parsedSlug.data && isPubliclyVisible(event));
+    const row = (await publicRowsFrom(options.source)).find(({event}) => event.slug === parsedSlug.data && isPubliclyReachable(event));
     return row ? projectPublicEvent(row, locale) : null;
   }
   const database = await getDb();
   const [row] = await database.select(publicProjectionSelection).from(events)
     .leftJoin(media, eq(events.heroMediaId, media.id))
     .leftJoin(companies, eq(events.organiserCompanyId, companies.id))
-    .where(and(eq(events.slug, parsedSlug.data), eq(events.status, "published"), eq(events.visibility, "public"))).limit(1);
+    .where(and(eq(events.slug, parsedSlug.data), inArray(events.status, ["published", "cancelled"]), eq(events.visibility, "public"))).limit(1);
   if (!row) return null;
   return projectPublicEvent(publicMemoryRow(row), locale);
 }
