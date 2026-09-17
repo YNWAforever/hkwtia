@@ -1,4 +1,5 @@
-import {afterAll, beforeAll, describe, expect, it, vi} from "vitest";
+import {renderToStaticMarkup} from "react-dom/server";
+import {afterAll, beforeAll, beforeEach, describe, expect, it, vi} from "vitest";
 
 const navigation = vi.hoisted(() => ({
   notFound: vi.fn((): never => { throw new Error("NEXT_NOT_FOUND_SENTINEL"); }),
@@ -38,13 +39,14 @@ describe("the public pass page", () => {
     const qr = vi.fn(async (text: string) => `<svg data-length="${text.length}"></svg>`);
     const result = await loadPassPage("tok", {
       verify: () => ({...claims, v: 1}),
-      passForSeat: async () => ({seatId: claims.seatId, orderId: "o", eventId: claims.eventId, position: 1, attendeeName: "Ada", checkedInAt: null, eventTitleEn: "Edge AI", eventTitleZh: null, eventSlug: "edge-ai", eventStartsAt: new Date("2026-12-01T11:00:00Z"), eventVenue: "Cyberport", buyerLocale: "en"}),
+      passForSeat: async () => ({status: "active", view: {seatId: claims.seatId, orderId: "o", eventId: claims.eventId, position: 1, attendeeName: "Ada", checkedInAt: null, eventTitleEn: "Edge AI", eventTitleZh: null, eventSlug: "edge-ai", eventStartsAt: new Date("2026-12-01T11:00:00Z"), eventVenue: "Cyberport", buyerLocale: "en"}}),
       qr,
     });
-    expect(result).toMatchObject({attendeeName: "Ada", eventTitle: "Edge AI"});
-    expect(result?.checkInUrl).toContain("/admin/check-in/");
-    expect(result?.checkInUrl).not.toContain("/pass/");
-    expect(result?.qr).toContain("<svg");
+    expect(result).toMatchObject({state: "active", attendeeName: "Ada", eventTitle: "Edge AI"});
+    if (result?.state !== "active") throw new Error("expected an active pass result");
+    expect(result.checkInUrl).toContain("/admin/check-in/");
+    expect(result.checkInUrl).not.toContain("/pass/");
+    expect(result.qr).toContain("<svg");
 
     // The end-to-end invariant: what the encoder is actually handed is the
     // staff surface. Asserting on `checkInUrl` alone would pass just as happily
@@ -61,25 +63,70 @@ describe("the public pass page", () => {
     expect(url.origin).not.toBe("");
   });
 
-  it("returns null for an invalid token, and for a seat whose order is not paid", async () => {
-    expect(await loadPassPage("bad", {verify: () => null, passForSeat: async () => null})).toBeNull();
-    expect(await loadPassPage("tok", {verify: () => ({...claims, v: 1}), passForSeat: async () => null})).toBeNull();
+  it("returns null for an invalid token, and for an unavailable seat", async () => {
+    expect(await loadPassPage("bad", {verify: () => null, passForSeat: async () => ({status: "unavailable"})})).toBeNull();
+    expect(await loadPassPage("tok", {verify: () => ({...claims, v: 1}), passForSeat: async () => ({status: "unavailable"})})).toBeNull();
   });
 
   it("uses the Chinese title for a zh-HK pass", async () => {
     const result = await loadPassPage("tok", {
       verify: () => ({...claims, v: 1}),
-      passForSeat: async () => ({seatId: claims.seatId, orderId: "o", eventId: claims.eventId, position: 1, attendeeName: "Ada", checkedInAt: null, eventTitleEn: "Edge AI", eventTitleZh: "邊緣 AI", eventSlug: "edge-ai", eventStartsAt: new Date("2026-12-01T11:00:00Z"), eventVenue: null, buyerLocale: "zh-HK"}),
+      passForSeat: async () => ({status: "active", view: {seatId: claims.seatId, orderId: "o", eventId: claims.eventId, position: 1, attendeeName: "Ada", checkedInAt: null, eventTitleEn: "Edge AI", eventTitleZh: "邊緣 AI", eventSlug: "edge-ai", eventStartsAt: new Date("2026-12-01T11:00:00Z"), eventVenue: null, buyerLocale: "zh-HK"}}),
     });
-    expect(result?.eventTitle).toBe("邊緣 AI");
+    if (result?.state !== "active") throw new Error("expected an active pass result");
+    expect(result.eventTitle).toBe("邊緣 AI");
+  });
+
+  it("returns a cancelled state, with no check-in url or QR, when the event was cancelled", async () => {
+    const qr = vi.fn(async () => "<svg></svg>");
+    const result = await loadPassPage("tok", {
+      verify: () => ({...claims, v: 1}),
+      passForSeat: async () => ({status: "cancelled", view: {seatId: claims.seatId, orderId: "o", eventId: claims.eventId, position: 1, attendeeName: "Ada", checkedInAt: null, eventTitleEn: "Edge AI", eventTitleZh: "邊緣 AI", eventSlug: "edge-ai", eventStartsAt: new Date("2026-12-01T11:00:00Z"), eventVenue: "Cyberport", buyerLocale: "en"}}),
+      qr,
+    });
+    // The cancelled state is not the active pass minus a QR: it is its own
+    // shape, so a cancelled pass cannot accidentally carry a check-in URL.
+    expect(result).toEqual({
+      state: "cancelled", attendeeName: "Ada", eventTitle: "Edge AI",
+      eventStartsAt: new Date("2026-12-01T11:00:00Z"), eventVenue: "Cyberport",
+    });
+    expect(qr).not.toHaveBeenCalled();
+  });
+
+  it("uses the Chinese title for a cancelled zh-HK pass", async () => {
+    const result = await loadPassPage("tok", {
+      verify: () => ({...claims, v: 1}),
+      passForSeat: async () => ({status: "cancelled", view: {seatId: claims.seatId, orderId: "o", eventId: claims.eventId, position: 1, attendeeName: "Ada", checkedInAt: null, eventTitleEn: "Edge AI", eventTitleZh: "邊緣 AI", eventSlug: "edge-ai", eventStartsAt: new Date("2026-12-01T11:00:00Z"), eventVenue: null, buyerLocale: "zh-HK"}}),
+    });
+    if (result?.state !== "cancelled") throw new Error("expected a cancelled pass result");
+    expect(result.eventTitle).toBe("邊緣 AI");
   });
 });
 
 describe("the pass route", () => {
+  beforeEach(() => { navigation.notFound.mockClear(); });
+
   it("reaches notFound() for an invalid token instead of rendering a blank page", async () => {
     vi.mocked(loadPassPage).mockResolvedValueOnce(null);
 
     await expect(PassPage({params: Promise.resolve({locale: "en", token: "bad"})})).rejects.toThrow("NEXT_NOT_FOUND_SENTINEL");
     expect(navigation.notFound).toHaveBeenCalledOnce();
+  });
+
+  it("renders the cancelled notice and the refund policy instead of a QR", async () => {
+    vi.mocked(loadPassPage).mockResolvedValueOnce({
+      state: "cancelled", attendeeName: "Ada", eventTitle: "Edge AI",
+      eventStartsAt: new Date("2026-12-01T11:00:00Z"), eventVenue: "Cyberport",
+    });
+
+    const html = renderToStaticMarkup(await PassPage({params: Promise.resolve({locale: "en", token: "tok"})}));
+
+    expect(html).toContain("cancelled.heading");
+    expect(html).toContain("cancelled.body");
+    expect(html).toContain("/refund-policy");
+    // No QR: a check-in code on a cancelled pass would invite a scan that the
+    // check-in refuses anyway.
+    expect(html).not.toContain("<svg");
+    expect(navigation.notFound).not.toHaveBeenCalled();
   });
 });

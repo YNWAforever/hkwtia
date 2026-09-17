@@ -1626,7 +1626,12 @@
     "seat": "座位 {position}",
     "qrLabel": "報到二維碼",
     "checkedIn": "已報到",
-    "presentAtDoor": "請於現場出示此通行證。"
+    "presentAtDoor": "請於現場出示此通行證。",
+    "cancelled": {
+      "heading": "此活動已取消",
+      "body": "此活動將不會舉行。任何已付款的訂單將獲全額退款。",
+      "refundPolicy": "查閱退款政策"
+    }
   },
   "News": {
     "metaTitle": "消息｜WiseTech Hong Kong",

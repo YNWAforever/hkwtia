@@ -22,6 +22,18 @@ export type SeatRow = Readonly<{
   eventVenue?: string | null; buyerLocale?: "en" | "zh-HK";
 }>;
 
+/**
+ * Phase D-4d: a seat read is discriminated so a cancelled event can be
+ * explained rather than collapsed into "not found". `unavailable` (an unpaid,
+ * refunded or invalid seat) still 404s; only `cancelled` gains a rendered
+ * state, because the holder of a receipt link deserves to know the event is
+ * not happening rather than see a broken-link page.
+ */
+export type PassSeatResult =
+  | Readonly<{status: "active"; view: PassView}>
+  | Readonly<{status: "cancelled"; view: PassView}>
+  | Readonly<{status: "unavailable"}>;
+
 export type TicketCheckInTransaction = Readonly<{
   /** A plain read for the public pass page: the row is never locked. */
   readSeat: (seatId: string) => Promise<SeatRow | null>;
@@ -40,10 +52,37 @@ function inadmissible(row: SeatRow): boolean {
   return row.orderStatus !== "paid" || row.eventStatus === "cancelled";
 }
 
+function passView(row: SeatRow): PassView {
+  return {
+    seatId: row.seatId,
+    orderId: row.orderId,
+    eventId: row.eventId,
+    position: row.position,
+    attendeeName: row.attendeeName,
+    checkedInAt: row.checkedInAt,
+    eventTitleEn: row.eventTitleEn ?? "",
+    eventTitleZh: row.eventTitleZh ?? null,
+    eventSlug: row.eventSlug ?? "",
+    eventStartsAt: row.eventStartsAt ?? new Date(0),
+    eventVenue: row.eventVenue ?? null,
+    buyerLocale: row.buyerLocale ?? "en",
+  };
+}
+
+/**
+ * The order statuses that mean the seat was actually sold. A refunded seat was
+ * paid and then refunded — the steady state of a cancelled event's order once
+ * the sweep has run — so it still counts; a pending, failed or expired order
+ * never was sold and so never held a pass.
+ */
+function wasPaid(orderStatus: string): boolean {
+  return orderStatus === "paid" || orderStatus === "refunded";
+}
+
 export function createTicketCheckInRepository(
   overrides: Partial<TicketCheckInDependencies> = {},
 ): Readonly<{
-  passForSeat: (claims: PassClaims) => Promise<PassView | null>;
+  passForSeat: (claims: PassClaims) => Promise<PassSeatResult>;
   checkInSeat: (actor: AdminActor, input: Readonly<{seatId: string}>) => Promise<Readonly<{disposition: "checked_in" | "already_checked_in" | "not_admissible"}>>;
   undoSeatCheckIn: (actor: AdminActor, input: Readonly<{seatId: string}>) => Promise<Readonly<{disposition: "undone" | "not_checked_in"}>>;
 }> {
@@ -106,21 +145,17 @@ export function createTicketCheckInRepository(
         const row = await tx.readSeat(claims.seatId);
         // The event id must match the one that was signed: a token is for one
         // seat of one event, so a seat later moved between events is refused.
-        if (!row || row.eventId !== claims.eventId || inadmissible(row)) return null;
-        return {
-          seatId: row.seatId,
-          orderId: row.orderId,
-          eventId: row.eventId,
-          position: row.position,
-          attendeeName: row.attendeeName,
-          checkedInAt: row.checkedInAt,
-          eventTitleEn: row.eventTitleEn ?? "",
-          eventTitleZh: row.eventTitleZh ?? null,
-          eventSlug: row.eventSlug ?? "",
-          eventStartsAt: row.eventStartsAt ?? new Date(0),
-          eventVenue: row.eventVenue ?? null,
-          buyerLocale: row.buyerLocale ?? "en",
-        };
+        if (!row || row.eventId !== claims.eventId) return {status: "unavailable"};
+        const view = passView(row);
+        // A cancelled event dominates the seat's order status: the buyer's
+        // receipt link must keep explaining the cancellation even after the
+        // sweep has refunded the order. Refused only when the order was never
+        // sold, so an unfinished checkout on a cancelled event still 404s.
+        if (row.eventStatus === "cancelled") {
+          return wasPaid(row.orderStatus) ? {status: "cancelled", view} : {status: "unavailable"};
+        }
+        if (inadmissible(row)) return {status: "unavailable"};
+        return {status: "active", view};
       });
     },
 

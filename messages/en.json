@@ -1626,7 +1626,12 @@
     "seat": "Seat {position}",
     "qrLabel": "Check-in QR code",
     "checkedIn": "Checked in",
-    "presentAtDoor": "Present this pass at the door."
+    "presentAtDoor": "Present this pass at the door.",
+    "cancelled": {
+      "heading": "This event has been cancelled",
+      "body": "This event will not take place. Any paid order is refunded in full.",
+      "refundPolicy": "Read our refund policy"
+    }
   },
   "News": {
     "metaTitle": "News | WiseTech Hong Kong",
