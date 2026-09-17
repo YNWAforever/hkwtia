@@ -82,7 +82,7 @@ describe("d4bAcceptanceUrls", () => {
 
     const lines = d4bAcceptanceUrls("https://acceptance.test/", "fixture-pass-secret");
 
-    expect(lines).toHaveLength(8);
+    expect(lines).toHaveLength(12);
     expect(lines.filter((line) => line.startsWith("D4B_PASS_URL_ONE="))).toHaveLength(1);
     expect(lines.filter((line) => line.startsWith("D4B_CHECK_IN_URL_TWO_ZH=") && line.includes("/zh/admin/check-in/"))).toHaveLength(1);
   });
@@ -97,5 +97,30 @@ describe("d4bAcceptanceUrls", () => {
 
     expect(url.startsWith("https://acceptance.test/pass/")).toBe(true);
     expect(verifyPassToken(token, "fixture-pass-secret")?.seatId).toBe("d4b00000-0000-4000-8000-000000000001");
+  });
+
+  it("prints the D4D cancellation fixture's public and pass urls, on its own event", async () => {
+    const seed = await loadSeed();
+    const lines = seed.d4bAcceptanceUrls("https://acceptance.test/", "fixture-pass-secret");
+
+    // The cancellation walk needs its own event and its own seat's token: reusing
+    // D-4b's event would cancel the one D-4c's refund walk depends on.
+    expect(lines).toContain(`D4D_PUBLIC_URL=https://acceptance.test/events/${seed.D4D_EVENT_SLUG}`);
+    expect(lines).toContain(`D4D_PUBLIC_URL_ZH=https://acceptance.test/zh/events/${seed.D4D_EVENT_SLUG}`);
+    expect(lines.some((line) => line.startsWith("D4D_PASS_URL=https://acceptance.test/pass/"))).toBe(true);
+    expect(lines.some((line) => line.startsWith("D4D_PASS_URL_ZH=https://acceptance.test/zh/pass/"))).toBe(true);
+    expect(seed.D4D_EVENT_ID).not.toBe(seed.D4B_EVENT_ID);
+  });
+
+  it("signs the D4D pass url for the D4D seat and event, so the walk cannot cancel the D4B event", async () => {
+    const seed = await loadSeed();
+
+    const line = seed.d4bAcceptanceUrls("https://acceptance.test/", "fixture-pass-secret")
+      .find((candidate) => candidate.startsWith("D4D_PASS_URL="))!;
+    const token = line.slice("D4D_PASS_URL=".length).split("/pass/")[1]!;
+    const claims = verifyPassToken(token, "fixture-pass-secret");
+
+    expect(claims?.seatId).toBe(seed.D4D_SEAT_IDS[0]);
+    expect(claims?.eventId).toBe(seed.D4D_EVENT_ID);
   });
 });
