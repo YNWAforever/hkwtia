@@ -89,9 +89,12 @@ async function openSeededEvent(page: Page, prefix: string): Promise<void> {
  *    (design §4.6), so there is no message to observe.
  *
  * It writes and the cancellation is irreversible, so it runs once per seed against
- * the isolated database; re-run `db:seed:d4b` to reset the dedicated event to
- * `published`. Without every fact below the single case SKIPS -- never fails, and
- * a skip is not a pass.
+ * the isolated database. The walks are ORDERED: seed once, then D-4b, then D-4c,
+ * then D-4d. Re-running `db:seed:d4b` does NOT reset the dedicated event once
+ * D-4c has refunded D4B's order -- the seed aborts at
+ * `D4B_ACCEPTANCE_ORDER_NOT_PAID` before any D-4d write -- so repeating this walk
+ * needs a fresh seed, not a re-run. Without every fact below the single case
+ * SKIPS -- never fails, and a skip is not a pass.
  */
 test.describe("phase D-4d event cancellation", () => {
   test.skip(missing.length > 0, `Requires ${missing.join(", ")}`);
@@ -151,8 +154,11 @@ test.describe("phase D-4d event cancellation", () => {
       await expect(guestPage.getByRole("button", {name: copy.Ticket.submit, exact: true})).toHaveCount(0);
     }
 
-    // 4. The listing, which carried it in step 0, no longer does.
+    // 4. The listing, which carried it in step 0, no longer does -- in both
+    //    locales, since the two are separate cached routes.
     await guestPage.goto("/events");
+    await expect(publicLink(guestPage)).toHaveCount(0);
+    await guestPage.goto("/zh/events");
     await expect(publicLink(guestPage)).toHaveCount(0);
 
     // 5. The pass page says the event was cancelled instead of 404ing, in both

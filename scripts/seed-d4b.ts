@@ -27,8 +27,16 @@ const D4B_EVENT_TITLE_ZH = "D4B 驗收門票活動";
  * and whose seed refuses to reuse an order that is no longer `paid`, while
  * cancelling an event leaves its orders `paid` and makes D-4b's check-in walk
  * refuse admission. Three walks, three fates, so the event each one mutates is
- * its own. Cancelling does NOT change an order's status, so re-running
- * `db:seed:d4b` resets this event to `published` and the walk is repeatable.
+ * its own.
+ *
+ * The walks are ORDERED, not independently repeatable: seed once, then D-4b,
+ * then D-4c, then D-4d. Once D-4c's walk has refunded D4B's order, the guard
+ * below aborts at `D4B_ACCEPTANCE_ORDER_NOT_PAID` before it reaches any D-4d
+ * write, so re-running `db:seed:d4b` does NOT reset the D4D event. Repeating the
+ * D-4d walk therefore needs a fresh seed (a database D-4c has not mutated);
+ * re-seeding against the same database is deliberately refused rather than
+ * quietly restoring an order another acceptance run left in a state the
+ * evidence depends on.
  */
 export const D4D_EVENT_ID = "d4d00000-0000-4000-8000-000000000010";
 export const D4D_EVENT_SLUG = "d4d-acceptance-cancel-event";
