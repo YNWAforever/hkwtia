@@ -2877,6 +2877,7 @@
       "checkingIn": "Checking in...",
       "checkInSuccess": "Attendee checked in.",
       "checkInError": "We could not check in this attendee. Please try again.",
+      "checkInEventCancelled": "This event is cancelled, so nobody can be checked in.",
       "resendPass": "Resend pass",
       "resending": "Sending pass...",
       "resendSuccess": "Pass email sent.",

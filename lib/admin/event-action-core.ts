@@ -47,6 +47,33 @@ export async function runCheckInAction(_state: EventActionState, formData: FormD
 }
 
 /**
+ * The member/RSVP door's own disposition, distinct from the ticket seat's. A
+ * cancelled event is a refusal with its own message rather than the generic
+ * check-in error, so staff are told the event is cancelled instead of being
+ * invited to retry a write that can never succeed.
+ */
+export type MemberCheckInMessages = Readonly<{
+  successMessage: string;
+  eventCancelledMessage: string;
+  errorMessage: string;
+}>;
+
+type MemberCheckInOptions = MemberCheckInMessages & Readonly<{
+  mutate: (formData: FormData) => Promise<Readonly<{disposition: "checked_in" | "already_checked_in" | "event_cancelled"}>>;
+}>;
+
+export async function runMemberCheckInAction(_state: EventActionState, formData: FormData, options: MemberCheckInOptions): Promise<EventActionState> {
+  try {
+    const outcome = await options.mutate(formData);
+    if (outcome.disposition === "event_cancelled") return {status: "error", message: options.eventCancelledMessage};
+    return {status: "success", message: options.successMessage};
+  } catch (error) {
+    if (isAuthorizationDenial(error)) throw error;
+    return {status: "error", message: options.errorMessage};
+  }
+}
+
+/**
  * The seat outcomes each carry their own wording. The messages are supplied by
  * the caller (localized in the page) rather than hardcoded here, so every
  * branch a seat can land on has a distinct string and none of them can be

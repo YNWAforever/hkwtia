@@ -4,7 +4,7 @@ import {revalidatePath} from "next/cache";
 import {notFound} from "next/navigation";
 import {z} from "zod";
 
-import {runCancelEventAction, runCheckInAction, runEventFormAction, type CancelEventMessages, type EventActionState} from "@/lib/admin/event-action-core";
+import {runCancelEventAction, runCheckInAction, runEventFormAction, runMemberCheckInAction, type CancelEventMessages, type EventActionState, type MemberCheckInMessages} from "@/lib/admin/event-action-core";
 import {eventFormInput} from "@/lib/admin/event-form-input";
 import {checkInAttendee} from "@/lib/admin/events";
 import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
@@ -67,11 +67,14 @@ export async function cancelEventAction(eventId: string, path: string, messages:
   }
 }
 
-export async function checkInEventAttendeeAction(eventId: string, path: string, messages: CheckInActionMessages, state: EventActionState, formData: FormData): Promise<EventActionState> {
+export async function checkInEventAttendeeAction(eventId: string, path: string, messages: MemberCheckInMessages, state: EventActionState, formData: FormData): Promise<EventActionState> {
   try {
-    return await runCheckInAction(state, formData, {...messages, mutate: async (data) => {
-      await checkInAttendee(await requireAdminActor(), {eventId, profileId: data.get("profileId")});
-      revalidatePath(path);
+    return await runMemberCheckInAction(state, formData, {...messages, mutate: async (data) => {
+      const outcome = await checkInAttendee(await requireAdminActor(), {eventId, profileId: data.get("profileId")});
+      // A cancelled event's refusal wrote nothing, so there is nothing to
+      // revalidate; a real check-in re-renders the row as attended.
+      if (outcome.disposition !== "event_cancelled") revalidatePath(path);
+      return outcome;
     }});
   } catch (error) {
     if (isAuthorizationDenial(error)) notFound();
