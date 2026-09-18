@@ -3,6 +3,7 @@ import {describe, expect, it, vi} from "vitest";
 // @ts-expect-error -- Vitest supports raw text imports for non-code assets.
 import wranglerToml from "../wrangler.toml?raw";
 import {
+  CANCELLATION_REFUND_TIMEOUT_MS,
   createAutomationWorker,
   JOBS_BY_CRON,
   type AutomationWorker,
@@ -551,6 +552,72 @@ describe("Cloudflare automation scheduler", () => {
         attemptCount: 3,
         errorCode: "JOB_TIMEOUT",
       });
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
+  });
+
+  // Phase D-4d whole-branch finding. The sweep refunds up to 100 orders, each a
+  // sequential Stripe round trip, so it gets its own deadline rather than the
+  // ten-second default. This is the pin the value otherwise lacks: the job is
+  // safe and resumable, so a wrongly-short timeout stays invisible.
+  it("aborts a hanging event-cancellation sweep at its own 30 seconds", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(SCHEDULED_TIME);
+    try {
+      const calls: RecordedRequest[] = [];
+      const abortDurations: number[] = [];
+      const worker = createAutomationWorker({
+        fetch: createFetch(calls, (url, init) => {
+          if (url.endsWith("/worker-alert")) {
+            return new Response(null, {status: 204});
+          }
+          if (!url.endsWith("/event-cancellation-refunds")) {
+            return new Response(null, {status: 204});
+          }
+          const signal = init?.signal;
+          if (!(signal instanceof AbortSignal)) {
+            throw new Error("job request has no AbortSignal");
+          }
+          const startedAt = Date.now();
+          return new Promise<Response>((_resolve, reject) => {
+            const abort = () => {
+              abortDurations.push(Date.now() - startedAt);
+              reject(new DOMException("deadline reached", "AbortError"));
+            };
+            if (signal.aborted) {
+              abort();
+              return;
+            }
+            signal.addEventListener("abort", abort, {once: true});
+          });
+        }),
+        sleep: async (milliseconds) => {
+          await new Promise<void>((resolve) => {
+            setTimeout(resolve, milliseconds);
+          });
+        },
+        logger: {error: vi.fn()},
+      });
+
+      const completion = dispatchScheduled(worker);
+      await vi.runAllTimersAsync();
+      await completion;
+
+      expect(CANCELLATION_REFUND_TIMEOUT_MS).toBe(30_000);
+      expect(CANCELLATION_REFUND_TIMEOUT_MS).toBeGreaterThan(
+        EXPECTED_REQUEST_TIMEOUT_MS,
+      );
+      expect(abortDurations).toEqual([
+        CANCELLATION_REFUND_TIMEOUT_MS,
+        CANCELLATION_REFUND_TIMEOUT_MS,
+        CANCELLATION_REFUND_TIMEOUT_MS,
+      ]);
+      expect(
+        calls.filter((call) => call.url.endsWith("/event-cancellation-refunds")),
+      ).toHaveLength(3);
       expect(vi.getTimerCount()).toBe(0);
     } finally {
       vi.clearAllTimers();

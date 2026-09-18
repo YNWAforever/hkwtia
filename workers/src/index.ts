@@ -75,6 +75,20 @@ export const AI_REQUEST_TIMEOUT_MS = 240_000;
  * dispatcher has to answer with `provider_acceptance_uncertain`.
  */
 export const QUEUE_REQUEST_TIMEOUT_MS = 30_000;
+/**
+ * Phase D-4d whole-branch finding. The cancellation sweep refunds up to
+ * `RUNNER_BATCH_LIMIT` (100) orders in one pass, each a sequential Stripe round
+ * trip; that does not fit in the ten-second default, and the default is not a
+ * free ceiling — the batch has already done work when it aborts. Thirty seconds
+ * matches the `QUEUE_REQUEST_TIMEOUT_MS` precedent for "a batch of provider
+ * round-trips does not fit in 10s".
+ *
+ * A batch larger than fits in the window is not lost: the refund commit is
+ * conditional on `status = 'paid'` and the provider call carries a deterministic
+ * per-order key, so the next hourly run picks up whatever stayed `paid` and
+ * re-issuing an already-refunded order is a no-op.
+ */
+export const CANCELLATION_REFUND_TIMEOUT_MS = 30_000;
 const RETRY_DELAYS = [250, 1_000] as const;
 const ATTEMPT_COUNT = 3;
 const BASE_JOBS = [
@@ -110,7 +124,7 @@ const REQUEST_TIMEOUT_BY_JOB = {
   "retention-analyst": AI_REQUEST_TIMEOUT_MS,
   "board-reporter": AI_REQUEST_TIMEOUT_MS,
   "whatsapp-send-queue": QUEUE_REQUEST_TIMEOUT_MS,
-  "event-cancellation-refunds": REQUEST_TIMEOUT_MS,
+  "event-cancellation-refunds": CANCELLATION_REFUND_TIMEOUT_MS,
 } as const satisfies Readonly<Record<WorkerJob, number>>;
 
 class WorkerConfigError extends Error {
