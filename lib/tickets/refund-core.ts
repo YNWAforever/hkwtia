@@ -2,7 +2,7 @@ import "server-only";
 
 import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
 import {sendOrderRefundEmail} from "@/lib/billing/ticket-webhook-processor";
-import {eventOrdersRepository, type EventOrdersRepository, type OrderRecord} from "@/lib/db/repos/event-orders";
+import {eventOrdersRepository, type EventOrdersRepository, type OrderRecord, type RefundReason} from "@/lib/db/repos/event-orders";
 import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 
 export type RefundResult =
@@ -80,12 +80,21 @@ export async function refundOrder(
     return {status: "provider_failed"};
   }
 
+  // The issuer's reason. A person's refund is `staff`; the cancellation sweep's
+  // is the event being cancelled, and must not be recorded as a person's (D-4d
+  // whole-branch finding). The column takes the enum member; the audit metadata
+  // takes the more specific `event_cancelled` the enum cannot spell.
+  const refundReason: RefundReason = actor.kind === "system" ? "cancelled" : "staff";
+  const reason = actor.kind === "system" ? "event_cancelled" : "staff";
+
   let committed: boolean;
   try {
     committed = await dependencies.orders.refundPaidOrder(order.id, {
       refundedAt: dependencies.now(),
       actorUserId: actor.userId,
       actorType: actor.kind,
+      refundReason,
+      reason,
       note: input.note ?? null,
     });
   } catch {

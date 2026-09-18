@@ -79,8 +79,13 @@ export type EventOrdersTransaction = Readonly<{
    * The refund commit: moves the row only while it is still `paid`, and writes
    * the audit row in the same transaction. `false` means someone else got there
    * first, which is a result rather than an error.
+   *
+   * `refundReason` is the column's coarse enum; `reason` is the issuer-specific
+   * audit value. They are carried rather than hardcoded because a staff refund
+   * and the event-cancellation sweep both land here and a report must be able to
+   * tell them apart (D-4d whole-branch finding).
    */
-  refundPaidOrder: (orderId: string, input: Readonly<{refundedAt: Date; actorUserId: string | null; actorType: string; note: string | null}>) => Promise<boolean>;
+  refundPaidOrder: (orderId: string, input: Readonly<{refundedAt: Date; actorUserId: string | null; actorType: string; refundReason: RefundReason; reason: string; note: string | null}>) => Promise<boolean>;
   insertAudit: (input: Readonly<{actorUserId: string | null; actorType: string; action: string; targetType: string; targetId: string; metadata: Record<string, unknown>}>) => Promise<void>;
   eventSummary: (eventId: string) => Promise<readonly Readonly<{titleEn: string; titleZh: string | null; startsAt: Date; slug: string; venue: string | null}>[]>;
 }>;
@@ -275,7 +280,7 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       // produce one transition because the second UPDATE matches no row.
       const updated = rows<{id: string}>(await tx.execute(sql`
         UPDATE ${eventOrders}
-        SET status = 'refunded', refunded_at = ${input.refundedAt}, refund_reason = 'staff', updated_at = NOW()
+        SET status = 'refunded', refunded_at = ${input.refundedAt}, refund_reason = ${input.refundReason}, updated_at = NOW()
         WHERE id = ${orderId} AND status = 'paid'
         RETURNING id
       `));
@@ -286,7 +291,7 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
         action: "event.order.refunded",
         targetType: "event_order",
         targetId: orderId,
-        metadata: {reason: "staff", note: input.note},
+        metadata: {reason: input.reason, note: input.note},
       });
       return true;
     },
@@ -438,7 +443,7 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
      * the statement ran, so the caller reports "already refunded" rather than
      * claiming a refund it did not make.
      */
-    async refundPaidOrder(orderId: string, input: Readonly<{refundedAt: Date; actorUserId: string | null; actorType: string; note: string | null}>): Promise<boolean> {
+    async refundPaidOrder(orderId: string, input: Readonly<{refundedAt: Date; actorUserId: string | null; actorType: string; refundReason: RefundReason; reason: string; note: string | null}>): Promise<boolean> {
       return runTransaction((tx) => tx.refundPaidOrder(orderId, input));
     },
 

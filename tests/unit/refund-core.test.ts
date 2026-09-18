@@ -48,9 +48,12 @@ describe("refundOrder", () => {
       refundedAt: new Date("2026-09-16T12:00:00Z"),
       actorUserId: "auth-1",
       actorType: "staff",
+      // A staff refund is recorded as a staff reason in both the column and the
+      // audit metadata, so the system issuer below can be told apart from it.
+      refundReason: "staff",
+      reason: "staff",
       note: "Duplicate purchase",
     });
-    expect(commit).not.toHaveProperty("refundReason");
   });
 
   it("refuses an order that is not paid, without touching the provider", async () => {
@@ -215,7 +218,11 @@ describe("refundOrder", () => {
 
     expect(result).toEqual({status: "refunded"});
     const commit = vi.mocked(deps.orders.refundPaidOrder).mock.calls[0]![1] as Record<string, unknown>;
-    expect(commit).toMatchObject({actorUserId: null, actorType: "system"});
+    // The whole-branch finding: every refund was recorded `reason: "staff"`,
+    // including the sweep's, so a report filtering on the reason attributed a
+    // cancellation refund to a person. The column and the metadata now carry the
+    // event-cancellation reason while the staff path keeps `staff`.
+    expect(commit).toMatchObject({actorUserId: null, actorType: "system", refundReason: "cancelled", reason: "event_cancelled"});
   });
 
   it("refuses an anonymous actor by the type, so no refund can name no authority", () => {

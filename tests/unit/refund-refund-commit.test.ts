@@ -45,7 +45,7 @@ function fakeDatabase(updateRows: readonly unknown[]) {
 }
 
 const refundedAt = new Date("2026-09-14T05:00:00Z");
-const input = {refundedAt, actorUserId: "staff-1", actorType: "staff", note: "duplicate purchase"};
+const input = {refundedAt, actorUserId: "staff-1", actorType: "staff", refundReason: "staff" as const, reason: "staff", note: "duplicate purchase"};
 
 describe("refundPaidOrder", () => {
   it("commits the refund and its audit row in one transaction", async () => {
@@ -57,7 +57,10 @@ describe("refundPaidOrder", () => {
     const update = fake.queries.find((query) => /^\s*update/i.test(query.sql));
     expect(update?.sql).toMatch(/UPDATE\s+"event_orders"/);
     expect(update?.sql).toMatch(/status\s*=\s*'refunded'/);
-    expect(update?.sql).toMatch(/refund_reason\s*=\s*'staff'/);
+    // The reason is carried, not hardcoded, so the system issuer can record a
+    // different one; it travels as a bound parameter.
+    expect(update?.sql).toMatch(/refund_reason\s*=\s*\$\d+/);
+    expect(update?.params).toContain("staff");
     expect(update?.params).toContain(refundedAt);
     expect(update?.params).toContain("order-1");
 
@@ -82,6 +85,36 @@ describe("refundPaidOrder", () => {
     // Both statements ran inside the single transaction the public method opened.
     expect(fake.db.transaction).toHaveBeenCalledTimes(1);
     expect(fake.depths).toEqual([1, 1]);
+  });
+
+  // The whole-branch finding this pins: every refund used to record
+  // `reason: "staff"` in the column and the audit metadata, including the
+  // event-cancellation sweep's `systemActor`. A report filtering on the reason
+  // then attributed a cancellation refund to a person.
+  it("records a system cancellation refund as event_cancelled, distinguishable from a staff refund", async () => {
+    const fake = fakeDatabase([{id: "order-1"}]);
+    database.current = fake.db;
+
+    await expect(createEventOrdersRepository().refundPaidOrder("order-1", {
+      refundedAt, actorUserId: null, actorType: "system", refundReason: "cancelled", reason: "event_cancelled", note: "Event cancelled",
+    })).resolves.toBe(true);
+
+    const update = fake.queries.find((query) => /^\s*update/i.test(query.sql));
+    // The column is the enum home (`cancelled`), the metadata the issuer-specific
+    // one (`event_cancelled`); neither says `staff`.
+    expect(update?.sql).toMatch(/refund_reason\s*=\s*\$\d+/);
+    expect(update?.params).toContain("cancelled");
+    expect(update?.params).not.toContain("staff");
+
+    const audit = fake.queries.find((query) => /^\s*insert/i.test(query.sql));
+    expect(audit?.params).toEqual([
+      null,
+      "system",
+      "event.order.refunded",
+      "event_order",
+      "order-1",
+      JSON.stringify({reason: "event_cancelled", note: "Event cancelled"}),
+    ]);
   });
 
   it("reports false and writes no audit row when no paid order matched", async () => {
