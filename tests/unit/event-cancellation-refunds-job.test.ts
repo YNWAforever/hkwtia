@@ -2,8 +2,6 @@ import {describe, expect, it, vi} from "vitest";
 
 import {runEventCancellationRefunds, type EventCancellationRefundDependencies} from "@/lib/jobs/event-cancellation-refunds";
 
-const now = new Date("2026-09-16T04:00:00Z");
-
 function harness(overrides: Partial<EventCancellationRefundDependencies> = {}) {
   const orders = [
     {orderId: "cancelled-paid-1", eventId: "ev-cancelled"},
@@ -24,21 +22,21 @@ function harness(overrides: Partial<EventCancellationRefundDependencies> = {}) {
 describe("the event-cancellation refund sweep", () => {
   it("refunds every still-paid order it is given, and reports what happened", async () => {
     const {dependencies, refundOrder} = harness();
-    const result = await runEventCancellationRefunds(now, dependencies);
+    const result = await runEventCancellationRefunds(dependencies);
     expect(refundOrder).toHaveBeenCalledTimes(2);
-    expect(result).toMatchObject({scanned: 2, refunded: 1, failed: 1});
+    expect(result).toMatchObject({scanned: 2, refunded: 1, failed: 1, notAdmissible: 0, notFound: 0});
   });
 
   it("refunds as the system actor, so the audit cannot name a person", async () => {
     const {dependencies, refundOrder} = harness();
-    await runEventCancellationRefunds(now, dependencies);
+    await runEventCancellationRefunds(dependencies);
     const [actor] = refundOrder.mock.calls[0]!;
     expect(actor).toEqual({kind: "system", userId: null, source: "event-cancellation"});
   });
 
   it("leaves a provider failure for the next run rather than recording a refund", async () => {
     const {dependencies, refundOrder} = harness();
-    await runEventCancellationRefunds(now, dependencies);
+    await runEventCancellationRefunds(dependencies);
     // The sweep reports it and moves on: nothing here may throw, or one bad
     // order would stop the whole batch.
     expect(refundOrder).toHaveBeenCalledTimes(2);
@@ -51,7 +49,7 @@ describe("the event-cancellation refund sweep", () => {
     ]);
     const refundOrder = vi.fn(async (_actor, input: {orderId: string}) =>
       input.orderId === "commit-failed" ? {status: "commit_failed" as const} : {status: "refunded" as const});
-    const result = await runEventCancellationRefunds(now, {listOrders, refundOrder});
+    const result = await runEventCancellationRefunds({listOrders, refundOrder});
     // A commit failure is counted, not thrown: the order stays `paid` for the
     // next run, and the order behind it must still be attempted.
     expect(refundOrder).toHaveBeenCalledTimes(2);
@@ -60,13 +58,42 @@ describe("the event-cancellation refund sweep", () => {
 
   it("bounds the batch, so one run cannot walk an unbounded backlog", async () => {
     const listOrders = vi.fn(async () => []);
-    await runEventCancellationRefunds(now, {listOrders, refundOrder: vi.fn()});
+    await runEventCancellationRefunds({listOrders, refundOrder: vi.fn()});
     expect(listOrders).toHaveBeenCalledWith(100);
   });
 
   it("counts an already-refunded order without calling it a failure", async () => {
     const {dependencies} = harness({refundOrder: vi.fn(async () => ({status: "already_refunded" as const}))});
-    const result = await runEventCancellationRefunds(now, dependencies);
+    const result = await runEventCancellationRefunds(dependencies);
     expect(result).toMatchObject({refunded: 0, alreadyRefunded: 2, failed: 0});
+  });
+
+  // The whole-branch finding: `not_found` was counted nowhere and
+  // `not_admissible` was folded into `failed`, so a run's buckets did not add up
+  // to what it scanned. Every outcome now has a home, and this drives all six.
+  it("reconciles every bucket back to the number of orders scanned", async () => {
+    const listOrders = vi.fn(async () => [
+      {orderId: "refunded", eventId: "ev"},
+      {orderId: "already", eventId: "ev"},
+      {orderId: "provider", eventId: "ev"},
+      {orderId: "commit", eventId: "ev"},
+      {orderId: "inadmissible", eventId: "ev"},
+      {orderId: "gone", eventId: "ev"},
+    ]);
+    const byOrder: Readonly<Record<string, {status: "refunded" | "already_refunded" | "provider_failed" | "commit_failed" | "not_admissible" | "not_found"}>> = {
+      refunded: {status: "refunded"},
+      already: {status: "already_refunded"},
+      provider: {status: "provider_failed"},
+      commit: {status: "commit_failed"},
+      inadmissible: {status: "not_admissible"},
+      gone: {status: "not_found"},
+    };
+    const refundOrder = vi.fn(async (_actor, input: {orderId: string}) => byOrder[input.orderId]!);
+
+    const result = await runEventCancellationRefunds({listOrders, refundOrder});
+
+    expect(result).toEqual({scanned: 6, refunded: 1, alreadyRefunded: 1, failed: 2, notAdmissible: 1, notFound: 1});
+    const {scanned, ...buckets} = result;
+    expect(Object.values(buckets).reduce((sum, value) => sum + value, 0)).toBe(scanned);
   });
 });

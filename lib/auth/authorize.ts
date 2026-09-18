@@ -45,8 +45,10 @@ export function requireAdmin(actor: Actor): asserts actor is AdminActor {
 
 /**
  * The authority an automated writer acts under. The source is a closed union so
- * a new automated writer is a reviewed change rather than a string, and the
- * audit records it instead of a person.
+ * a new automated writer is a reviewed change rather than a string. It is the
+ * caller's own label for why it is acting: an audit row records the actor's
+ * *kind* (`actorType: "system"`, with no user id) rather than the source, so a
+ * person's action and an automated one are never confused in the log.
  */
 export function systemActor(source: "stripe-webhook" | "event-cancellation"): Extract<Actor, {kind: "system"}> {
   return {kind: "system", userId: null, source};

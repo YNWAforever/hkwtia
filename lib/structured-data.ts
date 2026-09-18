@@ -69,11 +69,13 @@ export type EventDataRecord = Pick<EventRecord, 'slug' | 'startsAt' | 'endsAt'> 
   format?: PublicEventFormat;
   organiser?: Readonly<{name: string; url: string | null}> | null;
   /**
-   * schema.org's `eventStatus`. Omitted for a normal event rather than emitted as
-   * `EventScheduled`, because this builder spreads every optional field and a
-   * present-but-default value is a claim we do not need to make.
+   * schema.org's `eventStatus`, typed to the schema's own union so a caller
+   * cannot pass a raw status string that the builder would have to assert.
+   * Omitted for a normal event rather than emitted as `EventScheduled`, because
+   * this builder spreads every optional field and a present-but-default value is
+   * a claim we do not need to make.
    */
-  eventStatus?: string;
+  eventStatus?: EventStatusType;
 }>;
 
 const ATTENDANCE_MODE: Readonly<Record<PublicEventFormat, EventAttendanceModeEnumeration>> = {
@@ -89,9 +91,7 @@ export function buildEventData(record: EventDataRecord, title: string, locale?: 
     name: title,
     startDate: record.startsAt,
     ...(record.endsAt ? {endDate: record.endsAt} : {}),
-    // schema-dts narrows `eventStatus` to its EventStatusType union, so the string
-    // the record carries is asserted at this one boundary.
-    ...(record.eventStatus ? {eventStatus: record.eventStatus as EventStatusType} : {}),
+    ...(record.eventStatus ? {eventStatus: record.eventStatus} : {}),
     ...(record.format ? {eventAttendanceMode: ATTENDANCE_MODE[record.format]} : {}),
     image: absoluteUrl(record.image ?? siteConfig.defaultImage),
     url: absoluteUrl(locale ? localizedPath(locale, `/events/${record.slug}`) : `/events/${record.slug}`),

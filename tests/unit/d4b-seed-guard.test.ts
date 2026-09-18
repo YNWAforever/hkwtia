@@ -77,7 +77,11 @@ describe("runD4bSeed", () => {
 });
 
 describe("d4bAcceptanceUrls", () => {
-  it("prints one pass and one check-in url per seat, in both locales", async () => {
+  // Deliberately describes the WHOLE output, not just the D4B seats: the count
+  // was written for eight D-4b lines and silently grew to twelve when D-4d added
+  // the cancellation fixture's public and pass pair, so a name that named only
+  // the seats described less than it checked.
+  it("prints the whole acceptance url set: eight D4B seat urls plus the D4D public and pass pair", async () => {
     const {d4bAcceptanceUrls} = await loadSeed();
 
     const lines = d4bAcceptanceUrls("https://acceptance.test/", "fixture-pass-secret");

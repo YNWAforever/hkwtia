@@ -151,7 +151,8 @@ type ProductionRunnerOverrides = Partial<Readonly<{
   runBoardReporter(now: Date): Promise<unknown>;
   runAiOpsMetrics(now: Date): Promise<{refreshed: 1}>;
   runWhatsAppSendQueue(now: Date): Promise<unknown>;
-  runEventCancellationRefunds(now: Date): Promise<unknown>;
+  /** No clock: the refund primitive reads its own when it commits. */
+  runEventCancellationRefunds(): Promise<unknown>;
   runWorkerAlert(payload: WorkerAlertPayload): Promise<unknown>;
 }>>;
 
@@ -568,8 +569,8 @@ export async function runProductionRenewal(now: Date): Promise<unknown> {
   return runRenewalReconciliation(automationCronActor(), now);
 }
 
-export function runProductionEventCancellationRefunds(now: Date): Promise<EventCancellationRefundSummary> {
-  return runEventCancellationRefunds(now);
+export function runProductionEventCancellationRefunds(): Promise<EventCancellationRefundSummary> {
+  return runEventCancellationRefunds();
 }
 
 async function runProductionEngagement(now: Date): Promise<unknown> {
@@ -699,8 +700,8 @@ export function createJobRunners(
     whatsappSendQueue(now: Date) {
       return runWhatsAppSendQueue(now);
     },
-    eventCancellationRefunds(now: Date) {
-      return runEventCancellationRefunds(now);
+    eventCancellationRefunds() {
+      return runEventCancellationRefunds();
     },
     workerAlert(payload: WorkerAlertPayload) {
       return runWorkerAlert(payload);
