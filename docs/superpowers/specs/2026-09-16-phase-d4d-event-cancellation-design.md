@@ -234,8 +234,13 @@ read** keeps its `published` filter. The page then renders:
 invalid seat — so the page can render "this event was cancelled" in both locales, with the refund
 policy linked, while `unavailable` still 404s.
 
-The **check-in** page keeps refusing a cancelled event, which its existing admissibility rule already
-does: nothing should be admitted to an event that is not happening.
+The **check-in** page keeps refusing a cancelled event's **ticket** seats, which its existing
+admissibility rule already did at both the loader and the write: nothing should be admitted to an
+event that is not happening. That rule is seat-scoped, though, and does not cover the member/RSVP
+door — `checkInAttendee` locks the registration, not the event — so D-4d additionally refuses the
+**member door check-in** server-side when the event is `cancelled`, as its own disposition with its
+own message and no attendance or engagement write. The Server Action is a published endpoint, so
+refusing in the write (not only hiding the control) is the requirement.
 
 ## 6. Error and edge cases
 
@@ -294,7 +299,7 @@ does: nothing should be admitted to an event that is not happening.
 | An irreversible action taken by mistake | The costed confirmation names the orders, the total, the paid attendees and the RSVP registrants left un-notified before it submits, and the status is terminal by design. |
 | A half-finished sweep | Self-healing: the next run picks up whatever stayed `paid`, and the commit cannot refund twice. |
 | A double refund | The conditional `WHERE id = ? AND status = 'paid'` commit, already reviewed in D-4c. |
-| Someone admitted to a cancelled event | The check-in and pass rules already refuse a cancelled event's seats. |
+| Someone admitted to a cancelled event | The ticket check-in and pass rules already refused a cancelled event's ticket seats; D-4d additionally refuses the member/RSVP door check-in server-side, with a distinct disposition and no attendance or engagement write, and an admission-matrix test enumerates every door into an event. |
 | A cancelled event leaking into the listing or into search | The listing filter is unchanged and the page is `noindex`, both with tests. |
 | A buyer seeing nothing when they follow their receipt | The page and the pass both render a cancelled state rather than a 404. |
 | Staff expecting RSVPs to have been emailed | §4.6 records that they are not, the confirmation names the registrant count and says they will not be emailed, and the door list exports. |
