@@ -148,19 +148,48 @@ git commit -m "test(seo): pin the sitemap and canonicals to the configured host"
 
 ### Task 2: The cutover runbook
 
+> **Correction (2026-09-22):** this task was written as if no cutover runbook existed. One did:
+> `docs/integration/2026-09-13-hkwtia-org-cutover-runbook.md`, which predates this slice and is the
+> document that governs — it carries the pre-window legacy-redirect and drift checks
+> (`scripts/verify-legacy-redirects.mjs`, `scripts/check-legacy-drift.mjs`) that cover the largest real
+> risk in the cutover and that this task's draft lacked. Two competing sequences for one operation is a
+> hazard, so this task's genuine additions were folded into that earlier runbook, and
+> `docs/integration/hkwtia-org-cutover.md` was deleted rather than kept. The paths below are corrected
+> to the governing runbook.
+
 **Files:**
-- Create: `docs/integration/hkwtia-org-cutover.md`
+- Edit: `docs/integration/2026-09-13-hkwtia-org-cutover-runbook.md` (the governing runbook; the additions are folded in)
+- Delete: `docs/integration/hkwtia-org-cutover.md` (the duplicate draft — never the operator's sequence)
 - Test: none — this is the document, and Task 1's suite plus the existing redirect test are the code's evidence
 
 **Interfaces:**
 - Consumes: the spec's §5.2 table and the existing arming guard in `next.config.ts` (`cutoverDone = (process.env.NEXT_PUBLIC_SITE_URL ?? "").includes("hkwtia.org")`).
 - Produces: the operator's sequence. Nothing in code depends on it.
 
-- [ ] **Step 1: Write the runbook**
+- [ ] **Step 1: Fold the genuine additions into the governing runbook**
 
-Create `docs/integration/hkwtia-org-cutover.md`, beside `docs/integration/phase-c-whatsapp-go-live.md` and following its shape — an ordered sequence where every line carries an owner and a verification, because the cutover cannot be rehearsed and the verification is what stands in for a rehearsal.
+The runbook already exists at `docs/integration/2026-09-13-hkwtia-org-cutover-runbook.md` (see the correction above). Fold this task's genuine additions into it, in its own register and without restructuring it. Only these three are genuinely missing from the governing document:
 
-The document carries, in this order:
+1. **The arming guard's soft edge** — the condition is a substring check
+   (`(process.env.NEXT_PUBLIC_SITE_URL ?? "").includes("hkwtia.org")`), so any value that merely
+   contains that string arms the 308. Pinned by `tests/unit/redirects.test.ts`; because the check
+   cannot tell a real cutover from a lookalike, the pre-flip state is verified by observation rather
+   than trusted to the check being clever.
+2. **The cutover cannot be rehearsed** — it happens once, against the live domain, and the per-step
+   verifications are what stand in for a rehearsal.
+3. **A pointer to Task 1's test** — `tests/unit/sitemap-host.test.ts` (committed `794c8522`) pins that
+   the sitemap and the page canonicals follow `NEXT_PUBLIC_SITE_URL` in both the cut-over and
+   pre-cutover states.
+
+Also genuinely missing from the governing runbook, and added in its own shape rather than by
+rewriting its sequence: the preconditions, the rollback's search-visibility residual, and the
+external-references step. Then delete the draft, so one document governs:
+
+```bash
+git rm docs/integration/hkwtia-org-cutover.md
+```
+
+The draft's original seven-section shape, recorded here and then superseded:
 
 1. **What this changes and what it does not** — one paragraph: canonicals, the sitemap's host, and a 308 from `hkwtia.vercel.app`. No application behaviour changes, and no data is touched.
 2. **Preconditions** — the domain is available to attach in Vercel, and somebody holds the DNS and Google Search Console accounts.
@@ -180,7 +209,7 @@ The document carries, in this order:
 6. **Rollback:** revert `NEXT_PUBLIC_SITE_URL` to the preview host and redeploy; the guard disarms the 308 with no code change. **Residual, stated:** canonicals and redirects already cached by crawlers take time to unwind, so a rollback is not instantaneous in search results even though it is instantaneous in behaviour.
 7. **What this runbook cannot do:** rehearse. The cutover happens once, against the live domain.
 
-Read `docs/integration/phase-c-whatsapp-go-live.md` first and match its register and its heading structure rather than inventing one.
+(The draft followed `docs/integration/phase-c-whatsapp-go-live.md`'s register; the additions above are written in the governing runbook's own.)
 
 - [ ] **Step 2: Verify it**
 
@@ -192,8 +221,10 @@ Expected: all green.
 - [ ] **Step 3: Commit**
 
 ```bash
-git add docs/integration/hkwtia-org-cutover.md
-git commit -m "docs(integration): the hkwtia.org cutover runbook"
+git add docs/integration/2026-09-13-hkwtia-org-cutover-runbook.md
+git commit -m "docs(integration): fold the D-5 additions into the governing cutover runbook"
+git rm docs/integration/hkwtia-org-cutover.md
+git commit -m "docs(integration): retire the duplicate hkwtia.org cutover runbook"
 ```
 
 ---

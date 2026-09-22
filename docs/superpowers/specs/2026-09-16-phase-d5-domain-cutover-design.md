@@ -78,6 +78,15 @@ says what it could not cover rather than asserting something weaker and looking 
 **Decided:** `docs/integration/hkwtia-org-cutover.md`, beside the C-9 go-live runbook, because that is
 where this repository already keeps ordered, owner-bearing activation sequences.
 
+**Correction (2026-09-22):** the runbook already existed. `docs/integration/2026-09-13-hkwtia-org-cutover-runbook.md`
+predates this slice (it belongs to `docs/superpowers/specs/2026-09-13-phase-d-public-surface-design.md`)
+and is the document that governs: it carries pre-window checks this design did not know about —
+`scripts/verify-legacy-redirects.mjs` (576 legacy destinations answer) and
+`scripts/check-legacy-drift.mjs` — and those legacy-redirect checks cover the largest real risk in the
+cutover, which a fresh draft lacked. Two competing sequences for one operation is a hazard, so this
+slice's genuine additions were folded into that earlier runbook and `docs/integration/hkwtia-org-cutover.md`
+was deleted. The governing path is `docs/integration/2026-09-13-hkwtia-org-cutover-runbook.md`.
+
 ## 5. Design
 
 ### 5.1 The sitemap-host test
@@ -96,7 +105,8 @@ where this repository already keeps ordered, owner-bearing activation sequences.
 
 ### 5.2 The runbook
 
-`docs/integration/hkwtia-org-cutover.md`, an ordered sequence with an owner and a verification per line:
+`docs/integration/2026-09-13-hkwtia-org-cutover-runbook.md` — the earlier document that governs (see
+§4.3) — an ordered sequence with an owner and a verification per line:
 
 | # | Step | Owner | Verified by |
 |---|---|---|---|
@@ -115,6 +125,13 @@ time to unwind.
 **Step 3 is the one that matters**, because the dangerous state is a cutover done halfway — DNS moved and
 the variable flipped while the domain does not yet resolve, which the 308 would turn into a site-wide
 outage. The sequence cannot be rehearsed, so the verification per step is what stands in for one.
+
+**Correction (2026-09-22):** the table above — and the step numbers and ordering claims §6 and §9 make from
+it — describe the sequence this design originally drafted. They are not authoritative. The governing runbook
+(§4.3) owns the operator's sequence, and its pre-window legacy-redirect and drift checks run before any step
+in this design.
+The draft's genuine additions — the guard's substring soft edge, the statement that the cutover cannot be
+rehearsed, and the pointer to `tests/unit/sitemap-host.test.ts` — were folded into the governing runbook.
 
 ## 6. Error and edge cases
 
@@ -156,8 +173,8 @@ test stays in place.
 1. A test asserts the sitemap's host follows `NEXT_PUBLIC_SITE_URL` in both the cut-over and pre-cutover
    states, that no entry mentions the wrong host, that the locale alternates agree, and that the page
    canonicals agree with the sitemap.
-2. `docs/integration/hkwtia-org-cutover.md` carries the ordered steps, an owner and a verification per
-   step, and the rollback with its residual.
+2. `docs/integration/2026-09-13-hkwtia-org-cutover-runbook.md` (the governing runbook, §4.3) carries the
+   ordered steps, an owner and a verification per step, and the rollback with its residual.
 3. No production behaviour changed: the redirect, the guard and the sitemap are as they were.
 4. The five gate commands are green.
 
