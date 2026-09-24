@@ -27,18 +27,22 @@ observation rather than trusted to that check being clever (see "The guard's sha
 
 ## The window
 
-1. **Vercel env.** Set `NEXT_PUBLIC_SITE_URL=https://hkwtia.org` for Production. This alone
-   changes canonicals, `og:url` and the sitemap host, and arms the `hkwtia.vercel.app` → 308.
-   Both the sitemap and the page canonicals follow this variable, in both the cut-over and
-   pre-cutover states — pinned by `tests/unit/sitemap-host.test.ts` (committed `794c8522`).
-2. **Redeploy and promote.** The env var is read at build time, so a redeploy is required;
-   merging alone builds only a Preview in this project. Promote explicitly and confirm with
-   `vercel inspect` that the alias carries the intended `githubCommitSha`.
-3. **Add the domain in Vercel.** Project → Domains → add `hkwtia.org` and `www.hkwtia.org`.
-   Vercel will state the required DNS records.
-4. **Cloudflare DNS.** Point the apex and `www` at Vercel as instructed. Keep the previous
-   record values written down before changing them — that note is the rollback.
-5. **Verify, in this order:**
+1. **Add the domain in Vercel.** Project → Domains → add `hkwtia.org` and `www.hkwtia.org`.
+   Vercel will state the required DNS records. Leave `NEXT_PUBLIC_SITE_URL` unchanged.
+2. **Cloudflare DNS.** Write down the existing apex and `www` records, then point both at
+   Vercel as instructed. The recorded values are needed for rollback.
+3. **Verify the domain before arming the redirect.** Confirm Vercel reports the domain and
+   certificate ready; `https://hkwtia.org/` must serve the intended app with `200`, and
+   `https://hkwtia.org/sitemap.xml` must answer. Confirm `hkwtia.vercel.app` still answers
+   `200` with no `location:` header. Stop and restore DNS if any check fails. During this
+   interval, canonicals still name the pre-cutover host; complete the next steps promptly.
+4. **Vercel env, redeploy and promote.** Set `NEXT_PUBLIC_SITE_URL=https://hkwtia.org` for
+   Production, redeploy, then promote explicitly — merging alone builds only a Preview in
+   this project. Confirm with `vercel inspect` that the alias carries the intended
+   `githubCommitSha`. The deployed value changes canonicals, `og:url` and the sitemap host,
+   and arms the `hkwtia.vercel.app` → 308. The sitemap and page canonicals follow the value
+   in both states, pinned by `tests/unit/sitemap-host.test.ts` (committed `794c8522`).
+5. **Verify the deployed cutover, in this order:**
    - `curl -sI https://hkwtia.org/ | head -1` → `200`
    - `curl -sI https://hkwtia.vercel.app/ | head -1` → `308`, `location: https://hkwtia.org/`
    - `curl -s https://hkwtia.org/sitemap.xml | grep -c "<loc>"` → well over 500
@@ -58,15 +62,16 @@ const cutoverDone = (process.env.NEXT_PUBLIC_SITE_URL ?? "").includes("hkwtia.or
 
 It compares strings, not hostnames, so **any value that merely contains `hkwtia.org` arms the
 308** — a preview host carrying the domain in a path or query, or a lookalike such as
-`https://hkwtia.org.example`, arms it just as the real value does. That is pinned by
-`tests/unit/redirects.test.ts`, which drives the real `redirects()` at call time: unset and
+`https://hkwtia.org.example`, arms it just as the real value does. The substring behaviour
+follows from `next.config.ts`; `tests/unit/redirects.test.ts` tests the ordinary on/off cases
+by driving the real `redirects()` at call time: unset and
 `https://staging.example` leave the host rule absent, and `https://hkwtia.org` arms it with
 destination `https://hkwtia.org/:path*` and `permanent: true`. Because the guard cannot tell a
 real cutover from a string that happens to contain the domain, the pre-flip state is verified by
 observation (check 5 above), not by trusting the check to be clever.
 
-The same shape produces the one dangerous state: **a cutover done halfway**, where DNS has moved
-and the variable names the domain while the domain does not yet resolve. The destination is
+The same shape produces the one dangerous state: **a cutover done halfway**, where the variable
+names the domain before the domain resolves. The destination is
 `https://hkwtia.org/:path*`, so arming it against a host that does not answer turns every visit
 to `hkwtia.vercel.app` into a redirect to a host that fails to load — a site-wide outage no
 application health check shows, because the application is healthy and only the hostname is
@@ -85,16 +90,17 @@ for the rehearsal and what to follow when the window opens.
 
 Any step failing verification:
 
-1. Restore the Cloudflare DNS records from the note taken in step 4. The WordPress site is
-   untouched and resumes serving.
-2. Unset `NEXT_PUBLIC_SITE_URL` (or set it back to the vercel.app host) and redeploy. The
-   `hkwtia.vercel.app` → 308 is gated on that value and goes inert with it.
+1. If step 4 deployed the new value, unset `NEXT_PUBLIC_SITE_URL` (or set it back to the
+   vercel.app host), redeploy and confirm `hkwtia.vercel.app` answers `200` with no
+   `location:` header. The 308 is gated on that value and goes inert with it.
+2. Restore the Cloudflare DNS records from the note taken in step 2. The WordPress site is
+   untouched and resumes serving. If the variable was never flipped, start here.
 
 Rollback is DNS plus one env var. Nothing in this phase is destructive.
 
-The residual, stated: rollback is instantaneous in behaviour and not in search results.
-Canonicals and redirects already crawled or cached — and a `308` is cached aggressively — take
-time to unwind, so a rollback fixes what happens next rather than what has already been indexed.
+The residual, stated: DNS changes and a redeploy take time to reach visitors. Canonicals and
+redirects already crawled or cached — and a `308` is cached aggressively — can persist after
+the rollback, so search results and some client paths take longer to unwind.
 
 ## After
 
