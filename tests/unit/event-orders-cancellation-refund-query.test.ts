@@ -61,7 +61,18 @@ describe("the event-cancellation sweep read", () => {
     // The bound: without it one run walks the whole backlog.
     expect(sql).toMatch(/LIMIT\s+\$\d+/i);
     expect(params).toContain(100);
-    // Oldest paid first, so a backlog larger than the bound drains in order.
-    expect(sql).toMatch(/ORDER\s+BY\s+o\.paid_at\s+ASC\s+NULLS\s+LAST/i);
+    // Failed attempts move to the tail so a full batch cannot hide later orders.
+    expect(sql).toMatch(/ORDER\s+BY\s+o\.updated_at\s+ASC/i);
+  });
+
+  it("moves a failed paid order to the retry tail without changing its refund status", async () => {
+    const statements = capture();
+    await eventOrdersRepository.deferFailedCancellationRefund("order-1");
+    expect(statements).toHaveLength(1);
+    const {sql, params} = statements[0]!;
+    expect(sql).toMatch(/UPDATE\s+"event_orders"/i);
+    expect(sql).toMatch(/updated_at\s*=\s*NOW\(\)/i);
+    expect(sql).toMatch(/status\s*=\s*'paid'/i);
+    expect(params).toContain("order-1");
   });
 });

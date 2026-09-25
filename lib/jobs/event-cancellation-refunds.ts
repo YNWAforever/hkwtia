@@ -7,6 +7,7 @@ import {refundOrder, type RefundResult} from "@/lib/tickets/refund-core";
 
 export type EventCancellationRefundDependencies = Readonly<{
   listOrders: (limit: number) => Promise<readonly Readonly<{orderId: string; eventId: string}>[]>;
+  deferFailedOrder: (orderId: string) => Promise<void>;
   refundOrder: (actor: ReturnType<typeof systemActor>, input: Readonly<{orderId: string; note?: string | null}>) => Promise<RefundResult>;
 }>;
 
@@ -25,24 +26,29 @@ export type EventCancellationRefundSummary = Readonly<{
   refunded: number;
   alreadyRefunded: number;
   failed: number;
+  /** Subset of failed: provider accepted the refund but the DB commit did not. */
+  commitFailed: number;
   notAdmissible: number;
   notFound: number;
 }>;
 
+/** The job handler turns this into a failed run and the Worker raises an alert. */
+export class EventCancellationRefundBatchError extends Error {
+  constructor(readonly summary: EventCancellationRefundSummary) {
+    super("EVENT_CANCELLATION_REFUNDS_FAILED");
+  }
+}
+
 /**
- * Refund every order still owed money because its event was cancelled.
- *
- * Nothing here throws for a single order's failure: a provider refusal leaves
- * that order `paid`, which is exactly what makes the next run retry it. Throwing
- * would abort the batch and strand the orders behind the one that failed.
- *
- * No clock is taken: the refund primitive reads its own `now` when it commits,
- * so a `now` accepted here and never used would be a misleading second source of
- * time.
+ * Attempt the whole bounded batch, then fail the job if any order still needs
+ * attention. Failed orders stay paid and move behind untouched work by their
+ * existing updated_at timestamp, so a full batch of persistent failures cannot
+ * starve later orders. No additional progress table or migration is needed.
  */
 export async function runEventCancellationRefunds(
   dependencies: EventCancellationRefundDependencies = {
     listOrders: (limit) => eventOrdersRepository.ordersAwaitingCancellationRefund(limit),
+    deferFailedOrder: (orderId) => eventOrdersRepository.deferFailedCancellationRefund(orderId),
     refundOrder: (actor, input) => refundOrder(actor, input),
   },
 ): Promise<EventCancellationRefundSummary> {
@@ -51,6 +57,7 @@ export async function runEventCancellationRefunds(
   let refunded = 0;
   let alreadyRefunded = 0;
   let failed = 0;
+  let commitFailed = 0;
   let notAdmissible = 0;
   let notFound = 0;
 
@@ -60,8 +67,17 @@ export async function runEventCancellationRefunds(
     else if (result.status === "already_refunded") alreadyRefunded += 1;
     else if (result.status === "not_admissible") notAdmissible += 1;
     else if (result.status === "not_found") notFound += 1;
-    else failed += 1;
+    else {
+      failed += 1;
+      if (result.status === "commit_failed") commitFailed += 1;
+      await dependencies.deferFailedOrder(order.orderId);
+    }
   }
 
-  return {scanned: orders.length, refunded, alreadyRefunded, failed, notAdmissible, notFound};
+  const summary = {scanned: orders.length, refunded, alreadyRefunded, failed, commitFailed, notAdmissible, notFound};
+  if (failed > 0) {
+    console.error("event-cancellation-refunds", {summary});
+    throw new EventCancellationRefundBatchError(summary);
+  }
+  return summary;
 }

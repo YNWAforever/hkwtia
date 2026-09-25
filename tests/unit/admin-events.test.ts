@@ -64,4 +64,26 @@ describe("admin Event mutations and registration capacity", () => {
     await expect(updateEvent(staff, current.id, {endsAt: "2099-09-01T09:00:00.000Z"}, dependencies)).rejects.toThrow("endsAt must be after startsAt");
     expect(update).not.toHaveBeenCalled();
   });
+  it("does not revive a cancelled event from a stale admin form submission", async () => {
+    const base = {id: eventLock.id, ...createInput, published: false, startsAt: new Date(createInput.startsAt), endsAt: new Date(createInput.endsAt), createdAt: new Date(), updatedAt: new Date()};
+    const current = {...base, ...legacyDerivedEventColumns(base), status: "cancelled" as const};
+    const update = vi.fn();
+    const audit = vi.fn();
+    const dependencies: EventMutationDependencies = {transaction: (work) => work({insertEvent: vi.fn(), lockEvent: async () => current, updateEvent: update, lockActiveMedia: vi.fn(), insertAudit: audit})};
+
+    await expect(updateEvent(staff, current.id, {published: true}, dependencies)).rejects.toThrow("EVENT_CANCELLED_TERMINAL");
+    expect(update).not.toHaveBeenCalled();
+    expect(audit).not.toHaveBeenCalled();
+  });
+
+  it.each([{slug: "changed-event"}, {memberOnly: true}])("keeps a cancelled event's receipt route stable after an admin edit", async (change) => {
+    const base = {id: eventLock.id, ...createInput, memberOnly: false, published: false, startsAt: new Date(createInput.startsAt), endsAt: new Date(createInput.endsAt), createdAt: new Date(), updatedAt: new Date()};
+    const current = {...base, ...legacyDerivedEventColumns(base), status: "cancelled" as const};
+    const update = vi.fn();
+    const dependencies: EventMutationDependencies = {transaction: (work) => work({insertEvent: vi.fn(), lockEvent: async () => current, updateEvent: update, lockActiveMedia: vi.fn(), insertAudit: vi.fn()})};
+
+    await expect(updateEvent(staff, current.id, change, dependencies)).rejects.toThrow("EVENT_CANCELLED_TERMINAL");
+    expect(update).not.toHaveBeenCalled();
+  });
+
 });

@@ -272,17 +272,18 @@ function logSanitized(
   }
 }
 
-async function notifyFinalFailure(
+async function notifyFailure(
   job: WorkerJob,
   scheduledTime: string,
   errorCode: JobFailureCode,
+  attemptCount: number,
   config: ValidConfig,
   dependencies: WorkerDependencies,
 ): Promise<void> {
   const payload = {
     job,
     scheduledTime,
-    attemptCount: ATTEMPT_COUNT,
+    attemptCount,
     errorCode,
   } as const;
 
@@ -354,17 +355,20 @@ async function invokeJob(
       finalErrorCode = exceptionCode(error);
     }
 
+    // A refund batch can fail for one order, then succeed on the next retry
+    // after deferring that order. Preserve the first failure as an alert.
+    if (job === "event-cancellation-refunds" && attempt === 1) {
+      await notifyFailure(
+        job, scheduledTime, finalErrorCode, attempt, config, dependencies,
+      );
+    }
     if (attempt < ATTEMPT_COUNT) {
       await dependencies.sleep(RETRY_DELAYS[attempt - 1]);
     }
   }
 
-  await notifyFinalFailure(
-    job,
-    scheduledTime,
-    finalErrorCode,
-    config,
-    dependencies,
+  await notifyFailure(
+    job, scheduledTime, finalErrorCode, ATTEMPT_COUNT, config, dependencies,
   );
 }
 

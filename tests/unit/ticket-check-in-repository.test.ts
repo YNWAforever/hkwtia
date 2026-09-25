@@ -45,10 +45,11 @@ function fake(overrides: Partial<{orderStatus: string; checkedInAt: Date | null;
   // never take the write lock.
   const readSeat = vi.fn(async () => row);
   const lockSeat = vi.fn(async () => row);
+  const lockEvent = vi.fn(async () => row?.eventStatus ?? null);
   const update = vi.fn(async () => undefined);
   const insertAudit = vi.fn(async () => undefined);
-  const transaction: TicketCheckInTransaction = {readSeat, lockSeat, update, insertAudit};
-  return {transaction, readSeat, lockSeat, update, insertAudit};
+  const transaction = {readSeat, lockEvent, lockSeat, update, insertAudit};
+  return {transaction, readSeat, lockEvent, lockSeat, update, insertAudit};
 }
 
 function repository(transaction: TicketCheckInTransaction) {
@@ -138,6 +139,22 @@ describe("ticket check-in repository", () => {
     });
   });
 
+  it("locks the event before the seat and refuses a cancellation that won the race", async () => {
+    const calls: string[] = [];
+    const readSeat = vi.fn(async () => { calls.push("readSeat"); return seatRow(); });
+    const lockEvent = vi.fn(async () => { calls.push("lockEvent"); return "cancelled"; });
+    const lockSeat = vi.fn(async () => { calls.push("lockSeat"); return seatRow(); });
+    const update = vi.fn(async () => undefined);
+    const insertAudit = vi.fn(async () => undefined);
+    const transaction = {readSeat, lockEvent, lockSeat, update, insertAudit};
+
+    await expect(repository(transaction).checkInSeat(staff, {seatId})).resolves.toEqual({disposition: "not_admissible"});
+    expect(calls).toEqual(["readSeat", "lockEvent"]);
+    expect(lockEvent).toHaveBeenCalledWith(eventId);
+    expect(update).not.toHaveBeenCalled();
+    expect(insertAudit).not.toHaveBeenCalled();
+  });
+
   it("checkInSeat on an already-checked-in seat returns already_checked_in and writes nothing", async () => {
     const {transaction, update, insertAudit} = fake({checkedInAt: earlier});
     await expect(repository(transaction).checkInSeat(staff, {seatId})).resolves.toEqual({disposition: "already_checked_in"});
@@ -149,8 +166,9 @@ describe("ticket check-in repository", () => {
     let checkedInAt: Date | null = null;
     const update = vi.fn(async (_seatId: string, patch: Readonly<{checkedInAt: Date | null}>) => { checkedInAt = patch.checkedInAt; });
     const insertAudit = vi.fn(async () => undefined);
-    const transaction: TicketCheckInTransaction = {
+    const transaction = {
       readSeat: async () => seatRow({checkedInAt}),
+      lockEvent: async () => "published",
       lockSeat: async () => seatRow({checkedInAt}),
       update,
       insertAudit,

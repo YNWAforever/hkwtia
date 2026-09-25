@@ -265,6 +265,13 @@ export async function renderWorkerAlert(
   payload: WorkerAlertPayload,
 ): Promise<RenderedEmail> {
   const subject = "WTIA automation alert";
+  const earlyFailure = payload.attemptCount < 3;
+  const summary = earlyFailure
+    ? "A scheduled automation failed on its first attempt. The Worker will continue its retries."
+    : "A scheduled automation did not succeed after its bounded retries.";
+  const guidance = earlyFailure
+    ? "Review the affected work in the automation dashboard; the Worker is still retrying."
+    : "Review the automation dashboard before retrying manually.";
   const details = [
     ["Job", payload.job],
     ["Scheduled time", payload.scheduledTime],
@@ -280,9 +287,10 @@ export async function renderWorkerAlert(
   const text = [
     subject,
     "",
+    summary,
     ...details.map(([label, value]) => `${label}: ${value}`),
     "",
-    "Review the automation dashboard before retrying manually.",
+    guidance,
   ].join("\n");
   return {
     subject,
@@ -291,9 +299,9 @@ export async function renderWorkerAlert(
       '<main style="max-width:640px;margin:32px auto;padding:32px;background:#fff;border:1px solid #e2e8f0">',
       '<p style="color:#2563eb;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">WTIA</p>',
       `<h1 style="color:#0f172a">${subject}</h1>`,
-      '<p style="color:#475569">A scheduled automation did not succeed after its bounded retries.</p>',
+      `<p style="color:#475569">${summary}</p>`,
       `<table role="presentation" style="border-collapse:collapse;width:100%">${rows}</table>`,
-      '<p style="color:#475569">Review the automation dashboard before retrying manually.</p>',
+      `<p style="color:#475569">${guidance}</p>`,
       "</main></body></html>",
     ].join(""),
     text,

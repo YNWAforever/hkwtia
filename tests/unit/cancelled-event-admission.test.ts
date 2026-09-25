@@ -138,7 +138,11 @@ async function attemptTicketDoorCheckIn(status: EventStatus): Promise<AttemptRes
         seatId: SEAT_ID, eventId: EVENT_ID, position: 1, attendeeName: "Seat", attendeeEmail: "seat@example.test",
         checkedInAt: null, orderId: ORDER_ID, orderStatus: "paid", eventStatus: status,
       }),
-      readSeat: async () => null,
+      readSeat: async () => ({
+        seatId: SEAT_ID, eventId: EVENT_ID, position: 1, attendeeName: "Seat", attendeeEmail: "seat@example.test",
+        checkedInAt: null, orderId: ORDER_ID, orderStatus: "paid", eventStatus: status,
+      }),
+      lockEvent: async () => status,
       update: async () => undefined,
       insertAudit: async () => undefined,
     }),

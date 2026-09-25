@@ -71,6 +71,7 @@ function refundDependencies(email: TicketProcessorDependencies): RefundDependenc
     stripe: {
       paymentIntentForSession: vi.fn(async () => "pi_1"),
       refundPaymentIntent: vi.fn(async () => undefined),
+      fullyRefundedPaymentIntent: vi.fn(async () => false),
     },
     sendRefundEmail: (committed) => sendOrderRefundEmail(committed, email),
     now: () => new Date("2026-09-16T12:00:00Z"),

@@ -6,7 +6,8 @@ function client(portalCreate = vi.fn(), invoiceList = vi.fn()) {
     checkout: {sessions: {create: vi.fn(), retrieve: vi.fn()}},
     billingPortal: {sessions: {create: portalCreate}},
     invoices: {list: invoiceList},
-    refunds: {create: vi.fn()},
+    refunds: {create: vi.fn(), list: vi.fn()},
+    paymentIntents: {retrieve: vi.fn()},
   };
 }
 

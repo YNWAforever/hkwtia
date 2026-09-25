@@ -27,6 +27,7 @@ function dependencies(overrides: Partial<RefundDependencies> = {}): RefundDepend
     stripe: {
       paymentIntentForSession: vi.fn(async () => "pi_1"),
       refundPaymentIntent: vi.fn(async () => undefined),
+      fullyRefundedPaymentIntent: vi.fn(async () => false),
     },
     sendRefundEmail: vi.fn(async () => undefined),
     now: () => new Date("2026-09-16T12:00:00Z"),
@@ -42,7 +43,7 @@ describe("refundOrder", () => {
 
     expect(result).toEqual({status: "refunded"});
     expect(vi.mocked(deps.stripe.paymentIntentForSession)).toHaveBeenCalledWith("cs_test_1");
-    expect(vi.mocked(deps.stripe.refundPaymentIntent)).toHaveBeenCalledWith("pi_1", `ticket-refund:${orderId}`);
+    expect(vi.mocked(deps.stripe.refundPaymentIntent)).toHaveBeenCalledWith("pi_1", `ticket-refund:${orderId}`, {requireSucceeded: true});
     const commit = vi.mocked(deps.orders.refundPaidOrder).mock.calls[0]![1] as Record<string, unknown>;
     expect(commit).toMatchObject({
       refundedAt: new Date("2026-09-16T12:00:00Z"),
@@ -109,6 +110,7 @@ describe("refundOrder", () => {
         refundPaymentIntent: vi.fn(async () => {
           throw new Error("stripe_down");
         }),
+        fullyRefundedPaymentIntent: vi.fn(async () => false),
       },
     });
 
@@ -116,6 +118,33 @@ describe("refundOrder", () => {
 
     expect(result).toEqual({status: "provider_failed"});
     expect(vi.mocked(deps.orders.refundPaidOrder)).not.toHaveBeenCalled();
+  });
+
+  it("reconciles a full provider refund after a lost commit without issuing another refund", async () => {
+    const refundPaymentIntent = vi.fn(async () => { throw new Error("already_refunded"); });
+    const fullyRefundedPaymentIntent = vi.fn(async () => true);
+    const deps = dependencies({
+      stripe: {paymentIntentForSession: vi.fn(async () => "pi_1"), refundPaymentIntent, fullyRefundedPaymentIntent},
+    });
+
+    await expect(refundOrder(systemActor("event-cancellation"), {orderId}, deps))
+      .resolves.toEqual({status: "refunded"});
+    expect(refundPaymentIntent).toHaveBeenCalledTimes(1);
+    expect(fullyRefundedPaymentIntent).toHaveBeenCalledWith("pi_1", 50_000);
+    expect(deps.orders.refundPaidOrder).toHaveBeenCalledWith(orderId, expect.objectContaining({reason: "provider_reconciled"}));
+    expect(deps.sendRefundEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not commit when the provider cannot prove the order was fully refunded", async () => {
+    const deps = dependencies({
+      stripe: {
+        paymentIntentForSession: vi.fn(async () => "pi_1"),
+        refundPaymentIntent: vi.fn(async () => { throw new Error("provider_down"); }),
+        fullyRefundedPaymentIntent: vi.fn(async () => false),
+      },
+    });
+    await expect(refundOrder(staff, {orderId}, deps)).resolves.toEqual({status: "provider_failed"});
+    expect(deps.orders.refundPaidOrder).not.toHaveBeenCalled();
   });
 
   it("reports already_refunded when the conditional commit loses the race", async () => {
@@ -136,6 +165,7 @@ describe("refundOrder", () => {
       stripe: {
         paymentIntentForSession: vi.fn(async () => null),
         refundPaymentIntent: vi.fn(async () => undefined),
+        fullyRefundedPaymentIntent: vi.fn(async () => false),
       },
     });
 
@@ -153,6 +183,7 @@ describe("refundOrder", () => {
           throw new Error("stripe_read_down");
         }),
         refundPaymentIntent: vi.fn(async () => undefined),
+        fullyRefundedPaymentIntent: vi.fn(async () => false),
       },
     });
 

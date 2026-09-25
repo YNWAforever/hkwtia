@@ -56,7 +56,7 @@ export function CancelEventPanel({action, labels, locale, preview}: Readonly<{
           {/* The confirmation is a polite status region, not an assertive alert:
               it is a question the staff member just opened. */}
           <p role="status">{preview === null ? labels.unavailable : costedSentence(labels, preview, locale)}</p>
-          <button className="min-h-11 rounded-md bg-destructive px-4 text-destructive-foreground" disabled={pending} type="submit">{pending ? labels.submitting : labels.button}</button>
+          <button className="min-h-11 rounded-md bg-destructive px-4 text-destructive-foreground" disabled={pending || preview === null} type="submit">{pending ? labels.submitting : labels.button}</button>
           <button className="ml-2 min-h-11 rounded-md border px-4" disabled={pending} onClick={() => setConfirming(false)} type="button">{labels.keep}</button>
         </form>
       ) : (

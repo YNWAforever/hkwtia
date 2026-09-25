@@ -2,7 +2,7 @@ import {readFileSync} from "node:fs";
 
 import {describe, expect, it} from "vitest";
 
-import {prepareWorkerAlertRequest} from "@/lib/jobs/runners";
+import {prepareWorkerAlertRequest, renderWorkerAlert} from "@/lib/jobs/runners";
 
 /**
  * Phase C2 Task 10 Step 1. The worker's escalation path and the route that
@@ -59,5 +59,27 @@ describe("worker alert job vocabulary", () => {
     // payload, so an unbounded `job` is an unbounded set of claimable run keys.
     await expect(prepareWorkerAlertRequest(alertRequest("not-a-job")))
       .rejects.toMatchObject({code: "INVALID_WORKER_ALERT"});
+  });
+});
+
+
+describe("refund-batch alert wording", () => {
+  it("describes the first failed attempt without claiming all retries failed", async () => {
+    const early = await renderWorkerAlert({
+      job: "event-cancellation-refunds",
+      scheduledTime: "2026-09-25T02:00:00.000Z",
+      attemptCount: 1,
+      errorCode: "JOB_HTTP_ERROR",
+    });
+    expect(early.html).toContain("first attempt");
+    expect(early.html).not.toContain("after its bounded retries");
+
+    const final = await renderWorkerAlert({
+      job: "journey-runner",
+      scheduledTime: "2026-09-25T02:00:00.000Z",
+      attemptCount: 3,
+      errorCode: "JOB_HTTP_ERROR",
+    });
+    expect(final.html).toContain("after its bounded retries");
   });
 });

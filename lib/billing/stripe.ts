@@ -57,7 +57,9 @@ export interface StripeBillingAdapter {
   /** The intent to refund for a settled session; `null` when the session has none. */
   paymentIntentForSession(sessionId: string): Promise<string | null>;
   /** `idempotencyKey` makes a retried refund after a failed webhook safe to re-issue. */
-  refundPaymentIntent(paymentIntentId: string, idempotencyKey: string): Promise<void>;
+  refundPaymentIntent(paymentIntentId: string, idempotencyKey: string, options?: {requireSucceeded?: boolean}): Promise<void>;
+  /** Prove a lost commit against the provider before recording a refund locally. */
+  fullyRefundedPaymentIntent(paymentIntentId: string, expectedAmountHkdCents: number): Promise<boolean>;
   createBillingPortalSession(input: PortalSessionInput): Promise<{url: string}>;
   listInvoices(customerId: string): Promise<InvoiceRecord[]>;
 }
@@ -76,7 +78,11 @@ type StripeClient = {
   invoices: {list(
     params: Stripe.InvoiceListParams,
   ): Promise<{data: Array<Pick<Stripe.Invoice, "id" | "created" | "amount_paid" | "currency" | "status" | "hosted_invoice_url">>}>};
-  refunds: {create(params: {payment_intent: string}, options?: Stripe.RequestOptions): Promise<unknown>};
+  refunds: {
+    create(params: {payment_intent: string}, options?: Stripe.RequestOptions): Promise<Pick<Stripe.Refund, "status">>;
+    list(params: {payment_intent: string; limit: number}): Promise<{data: Array<Pick<Stripe.Refund, "status" | "currency" | "amount">>; has_more: boolean}>;
+  };
+  paymentIntents: {retrieve(id: string, params: {expand: string[]}): Promise<Pick<Stripe.PaymentIntent, "id" | "status" | "currency" | "amount_received" | "latest_charge">>};
 };
 
 export function createStripeBillingAdapter(client: StripeClient): StripeBillingAdapter {
@@ -127,8 +133,35 @@ export function createStripeBillingAdapter(client: StripeClient): StripeBillingA
       return typeof intent === "string" ? intent : intent?.id ?? null;
     },
 
-    async refundPaymentIntent(paymentIntentId, idempotencyKey) {
-      await client.refunds.create({payment_intent: paymentIntentId}, {idempotencyKey});
+    async refundPaymentIntent(paymentIntentId, idempotencyKey, options) {
+      const refund = await client.refunds.create({payment_intent: paymentIntentId}, {idempotencyKey});
+      // refundOrder keeps paid orders until provider success. The existing
+      // oversold webhook has its own retry contract and opts out.
+      if (options?.requireSucceeded && refund.status !== "succeeded") {
+        throw new Error("STRIPE_REFUND_NOT_SUCCEEDED");
+      }
+    },
+
+    async fullyRefundedPaymentIntent(paymentIntentId, expectedAmountHkdCents) {
+      const intent = await client.paymentIntents.retrieve(paymentIntentId, {expand: ["latest_charge"]});
+      if (intent.id !== paymentIntentId || intent.status !== "succeeded" || intent.currency !== "hkd" ||
+          intent.amount_received !== expectedAmountHkdCents) {
+        throw new Error("STRIPE_REFUND_AMOUNT_MISMATCH");
+      }
+      const charge = intent.latest_charge;
+      if (!charge || typeof charge === "string" || !("amount_refunded" in charge) ||
+          charge.currency !== "hkd" || charge.amount_captured !== expectedAmountHkdCents) {
+        throw new Error("STRIPE_REFUND_CHARGE_UNVERIFIED");
+      }
+      if (charge.amount_refunded !== expectedAmountHkdCents) return false;
+      // The charge aggregate can include a refund that has not succeeded.
+      // Only a complete, currently succeeded refund set can repair a lost commit.
+      const refunds = await client.refunds.list({payment_intent: paymentIntentId, limit: 100});
+      if (refunds.has_more) throw new Error("STRIPE_REFUNDS_UNVERIFIED");
+      if (refunds.data.some((refund) => !["succeeded", "failed", "canceled"].includes(refund.status ?? ""))) return false;
+      const succeeded = refunds.data.filter((refund) => refund.status === "succeeded");
+      return succeeded.every((refund) => refund.currency === "hkd") &&
+        succeeded.reduce((total, refund) => total + refund.amount, 0) === expectedAmountHkdCents;
     },
 
     async createBillingPortalSession(input) {

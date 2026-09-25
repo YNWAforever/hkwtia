@@ -444,6 +444,7 @@ export async function updateEvent(actor: Actor, id: unknown, input: unknown, dep
   return (dependencies ?? await defaultMutationDependencies()).transaction(async (transaction) => {
     const current = await transaction.lockEvent(eventId);
     if (!current) return null;
+    if (current.status === "cancelled") throw new Error("EVENT_CANCELLED_TERMINAL");
     assertPriceOnlyOnTicketed(parsed.registrationMode ?? current.registrationMode, parsed.ticketPriceHkdCents);
     eventPeriodSchema.parse({startsAt: parsed.startsAt ?? current.startsAt, endsAt: parsed.endsAt === undefined ? current.endsAt : parsed.endsAt});
     if (parsed.heroMediaId !== undefined && parsed.heroMediaId !== null) {

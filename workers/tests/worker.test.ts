@@ -755,6 +755,34 @@ describe("Cloudflare automation scheduler", () => {
     });
   });
 
+  it("alerts on the first failed refund batch even when later retry batches succeed", async () => {
+    const calls: RecordedRequest[] = [];
+    let refundAttempts = 0;
+    const worker = createAutomationWorker({
+      fetch: createFetch(calls, (url) => {
+        if (url.endsWith("/event-cancellation-refunds")) {
+          refundAttempts += 1;
+          return new Response(null, {status: refundAttempts === 1 ? 500 : 204});
+        }
+        return new Response(null, {status: 204});
+      }),
+      sleep: async () => undefined,
+      logger: {error: vi.fn()},
+    });
+
+    await runScheduled(worker);
+
+    expect(refundAttempts).toBe(2);
+    const alerts = calls.filter((call) => call.url.endsWith("/worker-alert"));
+    expect(alerts).toHaveLength(1);
+    expect(JSON.parse(String(alerts[0]?.init?.body))).toEqual({
+      job: "event-cancellation-refunds",
+      scheduledTime: "2026-07-26T02:00:00.123Z",
+      attemptCount: 1,
+      errorCode: "JOB_HTTP_ERROR",
+    });
+  });
+
   it("counts fetch exceptions in the same three-attempt budget", async () => {
     const calls: RecordedRequest[] = [];
     const delays: number[] = [];
@@ -837,7 +865,11 @@ describe("Cloudflare automation scheduler", () => {
     const alerts = calls.filter((call) =>
       call.url.endsWith("/worker-alert"),
     );
-    expect(alerts).toHaveLength(4);
+    expect(alerts).toHaveLength(5);
+    const refundAlerts = alerts
+      .map((alert) => JSON.parse(String(alert.init?.body)) as {job: string; attemptCount: number})
+      .filter((payload) => payload.job === "event-cancellation-refunds");
+    expect(refundAlerts.map((payload) => payload.attemptCount)).toEqual([1, 3]);
     for (const alert of alerts) {
       expect(alert.init?.method).toBe("POST");
       expect(alert.init?.headers).toEqual({
@@ -850,7 +882,7 @@ describe("Cloudflare automation scheduler", () => {
           /^(aiops-metrics|journey-runner|approvals-expirer|event-cancellation-refunds)$/,
         ),
         scheduledTime: "2026-07-26T02:00:00.000Z",
-        attemptCount: 3,
+        attemptCount: expect.any(Number),
         errorCode: "JOB_HTTP_ERROR",
       });
       expect(Object.keys(payload as object).sort()).toEqual([

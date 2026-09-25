@@ -46,6 +46,7 @@ export class FakeStripeBillingAdapter implements StripeBillingAdapter {
   readonly ticketRequests: EventTicketSessionInput[] = [];
   readonly portalRequests: PortalSessionInput[] = [];
   readonly refundedPaymentIntents: string[] = [];
+  readonly refundStateQueries: Array<{paymentIntentId: string; expectedAmountHkdCents: number}> = [];
   paymentIntentId: string | null = "pi_test_intent";
   invoices: InvoiceRecord[] = [];
   checkoutSessionId = "cs_test_session";
@@ -70,6 +71,11 @@ export class FakeStripeBillingAdapter implements StripeBillingAdapter {
 
   async refundPaymentIntent(paymentIntentId: string, _idempotencyKey: string): Promise<void> {
     this.refundedPaymentIntents.push(paymentIntentId);
+  }
+
+  async fullyRefundedPaymentIntent(paymentIntentId: string, expectedAmountHkdCents: number): Promise<boolean> {
+    this.refundStateQueries.push({paymentIntentId, expectedAmountHkdCents});
+    return false;
   }
 
   async createBillingPortalSession(input: PortalSessionInput): Promise<{url: string}> {

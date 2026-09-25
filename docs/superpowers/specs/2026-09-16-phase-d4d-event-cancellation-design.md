@@ -204,6 +204,29 @@ Each run:
 **No new table, no migration, and no progress state on the event.** The orders' own `status` is the
 progress, and D-4c's Orders section is where staff watch it.
 
+**Review correction (2026-09-25):** A fixed oldest-first batch can be held by 100
+persistent failures, so the sweep orders paid cancelled-event orders by
+their existing updated_at value and touches that field after a failed attempt.
+It finishes the bounded batch, logs only outcome counts, then fails the job when
+any refund failed; the Worker alerts on the first failed batch, even if a
+retry then succeeds on a different batch. If every attempt fails, a second
+alert records the final failure. The commitFailed count distinguishes
+a provider-accepted refund whose local commit failed. On the next attempt the
+refund primitive verifies the exact paid HKD charge and succeeded Stripe
+Refund amounts before reconciling that local row; historical failed or cancelled
+refunds do not count against a later successful full refund. A newly
+created refund must also report succeeded before the order is marked refunded.
+An absent, pending, partial, paginated, or mismatched provider state stays
+unconfirmed for retry or staff review. The order status remains the durable
+work list.
+
+**Payment acceptance remains open:** Stripe documents a refund that first
+reports succeeded and later fails. This branch has no refund-failure event
+handler, and the sweep excludes orders already marked refunded. A provider
+event recovery path and a live test-mode replay are required before claiming
+that every cancellation refund has reached the buyer. See
+https://docs.stripe.com/testing for the delayed-failure test case.
+
 ### 5.3 The actor
 
 `systemActor`'s source union gains `"event-cancellation"`, and `refundOrder`'s actor parameter widens

@@ -13,6 +13,7 @@ function harness(overrides: Partial<EventCancellationRefundDependencies> = {}) {
     dependencies: {
       listOrders: vi.fn(async () => orders),
       refundOrder,
+      deferFailedOrder: vi.fn(async () => undefined),
       ...overrides,
     },
     refundOrder,
@@ -22,24 +23,26 @@ function harness(overrides: Partial<EventCancellationRefundDependencies> = {}) {
 describe("the event-cancellation refund sweep", () => {
   it("refunds every still-paid order it is given, and reports what happened", async () => {
     const {dependencies, refundOrder} = harness();
-    const result = await runEventCancellationRefunds(dependencies);
+    await expect(runEventCancellationRefunds(dependencies)).rejects.toMatchObject({
+      summary: {scanned: 2, refunded: 1, failed: 1, notAdmissible: 0, notFound: 0},
+    });
     expect(refundOrder).toHaveBeenCalledTimes(2);
-    expect(result).toMatchObject({scanned: 2, refunded: 1, failed: 1, notAdmissible: 0, notFound: 0});
+    expect(dependencies.deferFailedOrder).toHaveBeenCalledWith("cancelled-paid-2");
   });
 
   it("refunds as the system actor, so the audit cannot name a person", async () => {
     const {dependencies, refundOrder} = harness();
-    await runEventCancellationRefunds(dependencies);
+    await expect(runEventCancellationRefunds(dependencies)).rejects.toMatchObject({summary: {failed: 1}});
     const [actor] = refundOrder.mock.calls[0]!;
     expect(actor).toEqual({kind: "system", userId: null, source: "event-cancellation"});
   });
 
   it("leaves a provider failure for the next run rather than recording a refund", async () => {
     const {dependencies, refundOrder} = harness();
-    await runEventCancellationRefunds(dependencies);
-    // The sweep reports it and moves on: nothing here may throw, or one bad
-    // order would stop the whole batch.
+    await expect(runEventCancellationRefunds(dependencies)).rejects.toMatchObject({summary: {failed: 1}});
+    // The batch still advances, but the job must fail so the Worker alerts.
     expect(refundOrder).toHaveBeenCalledTimes(2);
+    expect(dependencies.deferFailedOrder).toHaveBeenCalledWith("cancelled-paid-2");
   });
 
   it("continues the batch and counts a commit failure as failed", async () => {
@@ -49,16 +52,16 @@ describe("the event-cancellation refund sweep", () => {
     ]);
     const refundOrder = vi.fn(async (_actor, input: {orderId: string}) =>
       input.orderId === "commit-failed" ? {status: "commit_failed" as const} : {status: "refunded" as const});
-    const result = await runEventCancellationRefunds({listOrders, refundOrder});
-    // A commit failure is counted, not thrown: the order stays `paid` for the
-    // next run, and the order behind it must still be attempted.
+    const deferFailedOrder = vi.fn(async () => undefined);
+    await expect(runEventCancellationRefunds({listOrders, refundOrder, deferFailedOrder}))
+      .rejects.toMatchObject({summary: {scanned: 2, refunded: 1, failed: 1, commitFailed: 1}});
     expect(refundOrder).toHaveBeenCalledTimes(2);
-    expect(result).toMatchObject({scanned: 2, refunded: 1, failed: 1});
+    expect(deferFailedOrder).toHaveBeenCalledWith("commit-failed");
   });
 
   it("bounds the batch, so one run cannot walk an unbounded backlog", async () => {
     const listOrders = vi.fn(async () => []);
-    await runEventCancellationRefunds({listOrders, refundOrder: vi.fn()});
+    await runEventCancellationRefunds({listOrders, deferFailedOrder: vi.fn(), refundOrder: vi.fn()});
     expect(listOrders).toHaveBeenCalledWith(100);
   });
 
@@ -90,10 +93,17 @@ describe("the event-cancellation refund sweep", () => {
     };
     const refundOrder = vi.fn(async (_actor, input: {orderId: string}) => byOrder[input.orderId]!);
 
-    const result = await runEventCancellationRefunds({listOrders, refundOrder});
+    const deferFailedOrder = vi.fn(async () => undefined);
+    let summary: Record<string, number> | undefined;
+    try {
+      await runEventCancellationRefunds({listOrders, refundOrder, deferFailedOrder});
+    } catch (error) {
+      summary = (error as {summary: Record<string, number>}).summary;
+    }
 
-    expect(result).toEqual({scanned: 6, refunded: 1, alreadyRefunded: 1, failed: 2, notAdmissible: 1, notFound: 1});
-    const {scanned, ...buckets} = result;
-    expect(Object.values(buckets).reduce((sum, value) => sum + value, 0)).toBe(scanned);
+    expect(summary).toEqual({scanned: 6, refunded: 1, alreadyRefunded: 1, failed: 2, commitFailed: 1, notAdmissible: 1, notFound: 1});
+    const {scanned, refunded, alreadyRefunded, failed, notAdmissible, notFound} = summary!;
+    expect(refunded + alreadyRefunded + failed + notAdmissible + notFound).toBe(scanned);
+    expect(deferFailedOrder).toHaveBeenCalledTimes(2);
   });
 });

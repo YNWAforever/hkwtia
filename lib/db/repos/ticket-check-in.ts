@@ -37,6 +37,8 @@ export type PassSeatResult =
 export type TicketCheckInTransaction = Readonly<{
   /** A plain read for the public pass page: the row is never locked. */
   readSeat: (seatId: string) => Promise<SeatRow | null>;
+  /** Serialize admission with cancellation, which locks the same event row. */
+  lockEvent: (eventId: string) => Promise<string | null>;
   /** The write lock for check-in and undo, where two scanners must serialize. */
   lockSeat: (seatId: string) => Promise<SeatRow | null>;
   update: (seatId: string, patch: Readonly<{checkedInAt: Date | null}>) => Promise<void>;
@@ -121,6 +123,7 @@ export function createTicketCheckInRepository(
           const row = (await selectSeat(seatId))[0];
           return row ? narrow(row) : null;
         },
+        lockEvent: async (eventId) => (await tx.select({status: events.status}).from(events).where(eq(events.id, eventId)).for("update"))[0]?.status ?? null,
         lockSeat: async (seatId) => {
           const row = (await selectSeat(seatId).for("update", {of: eventOrderSeats}))[0];
           return row ? narrow(row) : null;
@@ -162,8 +165,16 @@ export function createTicketCheckInRepository(
     async checkInSeat(actor, input) {
       const occurredAt = dependencies.now();
       return dependencies.transaction(async (tx) => {
+        // Resolve the seat's event, then take the same event-row lock as
+        // cancellation before locking the seat. Under READ COMMITTED this
+        // serializes the decision: either admission commits first or the
+        // cancellation is visible here and admission is refused.
+        const initial = await tx.readSeat(input.seatId);
+        if (!initial) return {disposition: "not_admissible" as const};
+        const eventStatus = await tx.lockEvent(initial.eventId);
+        if (eventStatus === null || eventStatus === "cancelled") return {disposition: "not_admissible" as const};
         const row = await tx.lockSeat(input.seatId);
-        if (!row || inadmissible(row)) return {disposition: "not_admissible" as const};
+        if (!row || row.eventId !== initial.eventId || inadmissible(row)) return {disposition: "not_admissible" as const};
         // The lock makes a double scan a no-op rather than two admissions.
         if (row.checkedInAt) return {disposition: "already_checked_in" as const};
         await tx.update(row.seatId, {checkedInAt: occurredAt});

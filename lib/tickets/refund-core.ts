@@ -15,7 +15,7 @@ export type RefundResult =
 
 export type RefundDependencies = Readonly<{
   orders: Pick<EventOrdersRepository, "orderById" | "refundPaidOrder">;
-  stripe: Pick<StripeBillingAdapter, "paymentIntentForSession" | "refundPaymentIntent">;
+  stripe: Pick<StripeBillingAdapter, "paymentIntentForSession" | "refundPaymentIntent" | "fullyRefundedPaymentIntent">;
   /** Best-effort: the refund is already committed, so a mail failure is logged, not thrown. */
   sendRefundEmail: (order: OrderRecord) => Promise<void>;
   now: () => Date;
@@ -42,13 +42,12 @@ function defaultDependencies(): RefundDependencies {
  * Refund one whole order. The provider is called BEFORE anything is written, so
  * a refusal leaves the order `paid` and the action retryable.
  *
- * The deterministic `ticket-refund:<orderId>` key makes a retry after a commit
- * failure safe, but only while the provider still holds the key: Stripe retains
- * idempotency keys for roughly 24 hours, so a retry after that window re-issues
- * a second refund against an order still shown `paid`. That is why a thrown
- * commit yields the distinct `commit_failed` outcome rather than a generic
- * error — staff are told the money may already have moved and must check the
- * provider before retrying, rather than being invited to retry blind.
+ * The deterministic refund key protects the provider request inside Stripe's
+ * idempotency retention window. If the provider accepted the refund but our
+ * commit failed, a later full-refund request is refused by Stripe; the catch
+ * checks the expanded charge for the exact HKD amount before recording the
+ * missing local transition. An unverified provider state stays provider_failed
+ * and raises the cancellation job's alert.
  *
  * The buyer's refund email is sent only once the commit succeeds, best-effort:
  * a mail failure never changes the outcome of a completed refund.
@@ -74,10 +73,18 @@ export async function refundOrder(
   }
   if (!paymentIntentId) return {status: "provider_failed"};
 
+  let providerReconciled = false;
   try {
-    await dependencies.stripe.refundPaymentIntent(paymentIntentId, `ticket-refund:${order.id}`);
+    await dependencies.stripe.refundPaymentIntent(paymentIntentId, `ticket-refund:${order.id}`, {requireSucceeded: true});
   } catch {
-    return {status: "provider_failed"};
+    // The provider may have accepted an earlier refund whose database commit
+    // failed. Reconcile only an exact full refund of this order's HKD charge.
+    try {
+      if (!await dependencies.stripe.fullyRefundedPaymentIntent(paymentIntentId, order.amountHkdCents)) return {status: "provider_failed"};
+      providerReconciled = true;
+    } catch {
+      return {status: "provider_failed"};
+    }
   }
 
   // The issuer's reason. A person's refund is `staff`; the cancellation sweep's
@@ -85,7 +92,7 @@ export async function refundOrder(
   // whole-branch finding). The column takes the enum member; the audit metadata
   // takes the more specific `event_cancelled` the enum cannot spell.
   const refundReason: RefundReason = actor.kind === "system" ? "cancelled" : "staff";
-  const reason = actor.kind === "system" ? "event_cancelled" : "staff";
+  const reason = providerReconciled ? "provider_reconciled" : actor.kind === "system" ? "event_cancelled" : "staff";
 
   let committed: boolean;
   try {

@@ -8,6 +8,8 @@ const state = vi.hoisted(() => ({
   noSession: false,
   outcome: {status: "cancelled", event: {slug: "ai-clinic-2026"}} as unknown,
   calls: [] as unknown[],
+  previewCalls: [] as unknown[],
+  preview: {paidOrders: 2, refundTotalHkdCents: 100_000, attendees: 3, rsvpRegistrants: 7} as unknown,
 }));
 
 const cache = vi.hoisted(() => ({revalidatePath: vi.fn()}));
@@ -24,6 +26,10 @@ vi.mock("@/lib/auth/actor", () => ({
 }));
 
 vi.mock("@/lib/db/repos/events", () => ({
+  cancellationPreview: async (actor: unknown, eventId: unknown) => {
+    state.previewCalls.push({actor, eventId});
+    return state.preview;
+  },
   cancelEvent: async (actor: unknown, eventId: unknown) => {
     state.calls.push({actor, eventId});
     return state.outcome;
@@ -68,6 +74,8 @@ describe("cancelEventAction", () => {
     state.noSession = false;
     state.outcome = {status: "cancelled", event: {slug: "ai-clinic-2026"}};
     state.calls = [];
+    state.previewCalls = [];
+    state.preview = {paidOrders: 2, refundTotalHkdCents: 100_000, attendees: 3, rsvpRegistrants: 7};
     cache.revalidatePath.mockClear();
     navigation.notFound.mockClear();
   });
@@ -101,6 +109,18 @@ describe("cancelEventAction", () => {
       ["/en/events/ai-clinic-2026"],
       ["/zh-HK/events/ai-clinic-2026"],
     ]);
+  });
+
+  it("refuses cancellation when a fresh cost preview is unavailable", async () => {
+    state.preview = null;
+    const {cancelEventAction} = await loadActions();
+
+    await expect(cancelEventAction(EVENT_ID, EVENT_PATH, MESSAGES, {}, new FormData()))
+      .resolves.toEqual({status: "error", message: MESSAGES.errorMessage});
+
+    expect(state.previewCalls).toEqual([{actor: state.session, eventId: EVENT_ID}]);
+    expect(state.calls).toHaveLength(0);
+    expect(cache.revalidatePath).not.toHaveBeenCalled();
   });
 
   it("reports already cancelled as its own message and revalidates nothing", async () => {

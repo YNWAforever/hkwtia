@@ -10,7 +10,7 @@ import {checkInAttendee} from "@/lib/admin/events";
 import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
 import {requireAdminActor} from "@/lib/auth/actor";
 import {sendSeatPass, ticketProcessorDependencies} from "@/lib/billing/ticket-webhook-processor";
-import {cancelEvent, createEvent, updateEvent} from "@/lib/db/repos/events";
+import {cancelEvent, cancellationPreview, createEvent, updateEvent} from "@/lib/db/repos/events";
 
 export type EventFormActionMessages = Readonly<{successMessage: string; validationMessage: string; errorMessage: string}>;
 export type CheckInActionMessages = Readonly<{successMessage: string; errorMessage: string}>;
@@ -48,7 +48,11 @@ export async function updateEventAction(eventId: string, path: string, messages:
 export async function cancelEventAction(eventId: string, path: string, messages: CancelEventMessages, state: EventActionState, formData: FormData): Promise<EventActionState> {
   try {
     return await runCancelEventAction(state, formData, {...messages, mutate: async () => {
-      const outcome = await cancelEvent(await requireAdminActor(), eventId);
+      const actor = await requireAdminActor();
+      // The page can render while the preview read is unavailable. A direct
+      // Server Action call must observe the same fail-closed condition.
+      if (await cancellationPreview(actor, eventId) === null) throw new Error("CANCELLATION_PREVIEW_UNAVAILABLE");
+      const outcome = await cancelEvent(actor, eventId);
       if (outcome.status === "cancelled") {
         // A cancelled event leaves the public listing it was published in, so both
         // locales' listings and detail pages drop their cache alongside the admin

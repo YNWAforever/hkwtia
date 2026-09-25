@@ -71,8 +71,9 @@ describe("CancelEventPanel", () => {
     expect(action.mock.calls[0]![1]).toBeInstanceOf(FormData);
   });
 
-  it("says the cost is unavailable rather than zero when the preview read failed", () => {
-    render(<CancelEventPanel action={noopAction()} labels={labels} locale="en" preview={null} />);
+  it("blocks cancellation when the cost preview could not be loaded", () => {
+    const action = vi.fn(noopAction());
+    render(<CancelEventPanel action={action} labels={labels} locale="en" preview={null} />);
 
     fireEvent.click(screen.getByRole("button", {name: labels.button}));
 
@@ -80,6 +81,8 @@ describe("CancelEventPanel", () => {
     expect(confirm).toHaveTextContent(labels.unavailable);
     // "Nothing will be refunded" and "we could not ask" are different answers.
     expect(confirm.textContent).not.toContain(amountLabel(0));
+    expect(screen.getByRole("button", {name: labels.button})).toBeDisabled();
+    expect(action).not.toHaveBeenCalled();
   });
 
   it("reports the action's outcome as an alert on failure and a status on success", async () => {

@@ -75,6 +75,8 @@ export type EventOrdersTransaction = Readonly<{
   listEventOrders: (eventId: string) => Promise<readonly EventOrderRow[]>;
   /** Orders still owed a refund because their event was cancelled. */
   ordersAwaitingCancellationRefund: (limit: number) => Promise<readonly Readonly<{orderId: string; eventId: string}>[]>;
+  /** Move a failed attempt to the retry tail while it remains paid. */
+  deferFailedCancellationRefund: (orderId: string) => Promise<void>;
   /**
    * The refund commit: moves the row only while it is still `paid`, and writes
    * the audit row in the same transaction. `false` means someone else got there
@@ -272,9 +274,12 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       SELECT o.id AS "orderId", o.event_id AS "eventId"
       FROM ${eventOrders} o JOIN ${events} e ON e.id = o.event_id
       WHERE o.status = 'paid' AND e.status = 'cancelled'
-      ORDER BY o.paid_at ASC NULLS LAST, o.id ASC
+      ORDER BY o.updated_at ASC, o.id ASC
       LIMIT ${limit}
     `)),
+    deferFailedCancellationRefund: async (orderId) => {
+      await tx.execute(sql`UPDATE ${eventOrders} SET updated_at = NOW() WHERE id = ${orderId} AND status = 'paid'`);
+    },
     refundPaidOrder: async (orderId, input) => {
       // `AND status = 'paid'` is the whole guard: two staff clicking at once
       // produce one transition because the second UPDATE matches no row.
@@ -436,6 +441,10 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
      */
     async ordersAwaitingCancellationRefund(limit: number): Promise<readonly Readonly<{orderId: string; eventId: string}>[]> {
       return runTransaction((tx) => tx.ordersAwaitingCancellationRefund(limit));
+    },
+
+    async deferFailedCancellationRefund(orderId: string): Promise<void> {
+      return runTransaction((tx) => tx.deferFailedCancellationRefund(orderId));
     },
 
     /**

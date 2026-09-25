@@ -6,14 +6,20 @@ import {createTicketCheckout, type TicketCheckoutDependencies} from "@/lib/ticke
 function client() {
   const create = vi.fn(async (_params: unknown, _options?: unknown) => ({id: "cs_test_1", url: "https://checkout.stripe.test/1"}));
   const retrieve = vi.fn(async (_id: string) => ({payment_intent: "pi_1"} as {payment_intent: string | {id: string} | null}));
-  const refund = vi.fn(async () => ({}));
+  const refund = vi.fn(async () => ({status: "succeeded"}));
+  const listRefunds = vi.fn(async () => ({data: [{id: "re_1", status: "succeeded", currency: "hkd", amount: 50_000}], has_more: false}));
+  const retrieveIntent = vi.fn(async () => ({
+    id: "pi_1", status: "succeeded", currency: "hkd", amount_received: 50_000,
+    latest_charge: {id: "ch_1", currency: "hkd", amount_captured: 50_000, amount_refunded: 50_000},
+  }));
   return {
-    create, retrieve, refund,
+    create, retrieve, refund, retrieveIntent, listRefunds,
     value: {
       checkout: {sessions: {create, retrieve}},
       billingPortal: {sessions: {create: vi.fn()}},
       invoices: {list: vi.fn()},
-      refunds: {create: refund},
+      refunds: {create: refund, list: listRefunds},
+      paymentIntents: {retrieve: retrieveIntent},
     } as never,
   };
 }
@@ -43,6 +49,39 @@ describe("event ticket checkout session", () => {
     const {refund, value} = client();
     await createStripeBillingAdapter(value).refundPaymentIntent("pi_1", "ticket-refund:order-1");
     expect(refund).toHaveBeenCalledWith({payment_intent: "pi_1"}, {idempotencyKey: "ticket-refund:order-1"});
+  });
+
+  it("does not report an accepted but pending provider refund as complete", async () => {
+    const {refund, value} = client();
+    refund.mockResolvedValue({status: "pending"});
+    await expect(createStripeBillingAdapter(value).refundPaymentIntent("pi_1", "ticket-refund:order-1", {requireSucceeded: true}))
+      .rejects.toThrow("STRIPE_REFUND_NOT_SUCCEEDED");
+    await expect(createStripeBillingAdapter(value).refundPaymentIntent("pi_1", "ticket-refund:order-1"))
+      .resolves.toBeUndefined();
+  });
+});
+
+describe("reconciling a provider refund after a lost database commit", () => {
+  it("accepts only a fully refunded charge for the exact HKD order amount", async () => {
+    const {retrieveIntent, listRefunds, value} = client();
+    await expect(createStripeBillingAdapter(value).fullyRefundedPaymentIntent("pi_1", 50_000)).resolves.toBe(true);
+    expect(retrieveIntent).toHaveBeenCalledWith("pi_1", {expand: ["latest_charge"]});
+    expect(listRefunds).toHaveBeenCalledWith({payment_intent: "pi_1", limit: 100});
+
+    listRefunds.mockResolvedValue({data: [{id: "re_1", status: "pending", currency: "hkd", amount: 50_000}], has_more: false});
+    await expect(createStripeBillingAdapter(value).fullyRefundedPaymentIntent("pi_1", 50_000)).resolves.toBe(false);
+    listRefunds.mockResolvedValue({data: [
+      {id: "re_failed", status: "failed", currency: "hkd", amount: 50_000},
+      {id: "re_succeeded", status: "succeeded", currency: "hkd", amount: 50_000},
+    ], has_more: false});
+    await expect(createStripeBillingAdapter(value).fullyRefundedPaymentIntent("pi_1", 50_000)).resolves.toBe(true);
+
+    retrieveIntent.mockResolvedValue({
+      id: "pi_1", status: "succeeded", currency: "hkd", amount_received: 50_000,
+      latest_charge: {id: "ch_1", currency: "hkd", amount_captured: 50_000, amount_refunded: 25_000},
+    });
+    await expect(createStripeBillingAdapter(value).fullyRefundedPaymentIntent("pi_1", 50_000)).resolves.toBe(false);
+    await expect(createStripeBillingAdapter(value).fullyRefundedPaymentIntent("pi_1", 25_000)).rejects.toThrow("STRIPE_REFUND_AMOUNT_MISMATCH");
   });
 });
 
