@@ -6,7 +6,7 @@ const publicPosts = vi.hoisted(() => ({
   listPublishedNews: vi.fn(),
 }));
 const showcase = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
-const events = vi.hoisted(() => ({listPublic: vi.fn()}));
+const events = vi.hoisted(() => ({listPublicSlugs: vi.fn()}));
 const companyProfiles = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
 
 vi.mock("@/lib/db/repos/public-posts", () => publicPosts);
@@ -29,7 +29,7 @@ describe("milestone detail pages in the sitemap", () => {
     publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
     publicPosts.listPublishedNews.mockResolvedValue([]);
     showcase.listPublishedSlugs.mockResolvedValue([]);
-    events.listPublic.mockResolvedValue([]);
+    events.listPublicSlugs.mockResolvedValue([]);
     companyProfiles.listPublishedSlugs.mockResolvedValue([]);
   });
 

@@ -293,6 +293,21 @@ export async function listPublicEvents(_actor: Actor, options: PublicEventReadOp
   return rows.map((row) => projectPublicEvent(publicMemoryRow(row), locale));
 }
 
+/** Anonymous sitemap read: every listed event, including past editions, without full projections. */
+export async function listPublicEventSlugs(source?: PublicEventSource): Promise<string[]> {
+  if (source) {
+    return (await publicRowsFrom(source))
+      .filter(({event}) => isPubliclyVisible(event))
+      .map(({event}) => event.slug)
+      .sort();
+  }
+  const database = await getDb();
+  const rows = await database.select({slug: events.slug}).from(events)
+    .where(and(eq(events.status, "published"), eq(events.visibility, "public")))
+    .orderBy(asc(events.slug));
+  return rows.map(({slug}) => slug);
+}
+
 export type PublicEventCountOptions = Readonly<{status: PublicEventStatus; asOf: Date; filters?: EventFilters; source?: PublicEventSource}>;
 
 // Aggregate count, not a capped list read: this backs figures like the homepage's
@@ -1000,6 +1015,7 @@ export async function listEventsForReview(actor: Actor, deps: MemberEventDepende
 
 export const eventsRepository = {
   listPublic: listPublicEvents,
+  listPublicSlugs: listPublicEventSlugs,
   countPublic: countPublicEvents,
   getPublicBySlug: getPublicEventBySlug,
   listFeaturedPublic: listFeaturedPublicEvents,

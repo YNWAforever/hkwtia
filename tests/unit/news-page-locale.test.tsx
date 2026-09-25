@@ -9,7 +9,7 @@ const publicPosts = vi.hoisted(() => ({
   getPublishedBuildLogBySlug: vi.fn(),
   parsePublishedBuildLogSlug: vi.fn((slug: string) => slug),
 }));
-const events = vi.hoisted(() => ({listPublic: vi.fn()}));
+const events = vi.hoisted(() => ({listPublicSlugs: vi.fn()}));
 const showcase = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
 const companyProfiles = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
 
@@ -88,7 +88,7 @@ describe("localized public News pages", () => {
     publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
     publicPosts.getPublishedNewsBySlug.mockResolvedValue(chineseNews);
     publicPosts.getPublishedBuildLogBySlug.mockResolvedValue(null);
-    events.listPublic.mockResolvedValue([]);
+    events.listPublicSlugs.mockResolvedValue([]);
     showcase.listPublishedSlugs.mockResolvedValue([]);
   });
 

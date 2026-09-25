@@ -11,7 +11,7 @@ const publicPosts = vi.hoisted(() => ({
 const showcase = vi.hoisted(() => ({
   listPublishedSlugs: vi.fn(),
 }));
-const events = vi.hoisted(() => ({listPublic: vi.fn()}));
+const events = vi.hoisted(() => ({listPublicSlugs: vi.fn()}));
 const companyProfiles = vi.hoisted(() => ({
   listPublishedSlugs: vi.fn(),
 }));
@@ -35,7 +35,7 @@ describe("published build logs in the sitemap", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     publicPosts.listPublishedNews.mockResolvedValue([]);
-    events.listPublic.mockResolvedValue([]);
+    events.listPublicSlugs.mockResolvedValue([]);
     showcase.listPublishedSlugs.mockResolvedValue([]);
     companyProfiles.listPublishedSlugs.mockResolvedValue([]);
   });
@@ -121,7 +121,7 @@ describe("published member pages in the sitemap (D-11)", () => {
     vi.clearAllMocks();
     publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
     publicPosts.listPublishedNews.mockResolvedValue([]);
-    events.listPublic.mockResolvedValue([]);
+    events.listPublicSlugs.mockResolvedValue([]);
     showcase.listPublishedSlugs.mockResolvedValue([]);
   });
 
