@@ -1,14 +1,16 @@
 import "server-only";
 
-import {and, asc, desc, eq, getTableColumns, ilike, or, sql} from "drizzle-orm";
+import {and, asc, desc, eq, getTableColumns, ilike, inArray, isNull, or, sql} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb, type Database} from "@/lib/db/repos/common";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {
+  companyMembers,
   leads,
   media,
+  memberships,
   showcaseListings,
   type Lead,
   type NewLead,
@@ -53,7 +55,7 @@ const mediaIdSchema = z.union([z.literal(""), z.null()]).transform(() => null)
 export type ShowcaseStore = Readonly<{
   getByCompany: (companyId: string) => Promise<ShowcaseListing | null>;
   getById: (id: string) => Promise<ShowcaseListing | null>;
-  upsert: (companyId: string, input: ListingInput, status: "draft" | "pending_review") => Promise<ShowcaseListing>;
+  upsert: (companyId: string, input: ListingInput, status: "draft" | "pending_review", managerProfileId: string) => Promise<ShowcaseListing>;
   listForReview: () => Promise<readonly ReviewShowcaseRow[]>;
   setStatus: (id: string, status: "published" | "rejected" | "pending_review", reviewerId: string, reviewVersion: string, rejectionReason?: string | null) => Promise<ShowcaseListing | null>;
   setPremium: (id: string, premium: boolean) => Promise<ShowcaseListing | null>;
@@ -114,40 +116,29 @@ export function databaseStore(loadDatabase: () => Promise<Database> = getDb): Sh
       const database = await loadDatabase();
       return (await database.select().from(showcaseListings).where(eq(showcaseListings.id, id)).limit(1))[0] ?? null;
     },
-    async upsert(companyId, input, status) {
+    async upsert(companyId, input, status, managerProfileId) {
       const database = await loadDatabase();
-      const current = (await database.select({memberSince: showcaseListings.memberSince}).from(showcaseListings).where(eq(showcaseListings.companyId, companyId)).limit(1))[0];
-      const [row] = await database.insert(showcaseListings).values({
-        companyId,
-        slug: input.slug,
-        status,
-        premium: false,
-        views: 0,
-        memberSince: current?.memberSince ?? new Date().toISOString().slice(0, 10),
-        nameEn: input.nameEn,
-        nameZhHk: input.nameZhHk,
-        taglineEn: input.taglineEn,
-        taglineZhHk: input.taglineZhHk,
-        descriptionEn: input.descriptionEn,
-        descriptionZhHk: input.descriptionZhHk,
-        category: input.category,
-        useCases: input.useCases,
-        deploymentOptions: input.deploymentOptions,
-        supportedLanguages: input.supportedLanguages,
-        worksWith: input.worksWith,
-        videoUrl: input.videoUrl,
-        caseStudyUrl: input.caseStudyUrl,
-        caseStudySummaryEn: input.caseStudySummaryEn,
-        caseStudySummaryZhHk: input.caseStudySummaryZhHk,
-        logoReference: input.logoReference,
-        reviewedAt: null,
-        reviewedByProfileId: null,
-        rejectionReason: null,
-      }).onConflictDoUpdate({
-        target: [showcaseListings.companyId],
-        set: {
+      return database.transaction(async (transaction) => {
+        // Seat revocation locks membership before company_members. Recheck the
+        // manager role under those locks before inserting or replacing copy.
+        await transaction.select({companyId: memberships.companyId}).from(memberships)
+          .where(eq(memberships.companyId, companyId)).limit(1).for("update");
+        const manager = (await transaction.select({role: companyMembers.role}).from(companyMembers)
+          .where(and(
+            eq(companyMembers.companyId, companyId),
+            eq(companyMembers.userId, managerProfileId),
+            isNull(companyMembers.revokedAt),
+            inArray(companyMembers.role, ["owner", "admin"]),
+          )).limit(1).for("update"))[0];
+        if (manager?.role !== "owner" && manager?.role !== "admin") throw new Error("FORBIDDEN");
+        const current = (await transaction.select({memberSince: showcaseListings.memberSince}).from(showcaseListings).where(eq(showcaseListings.companyId, companyId)).limit(1))[0];
+        const [row] = await transaction.insert(showcaseListings).values({
+          companyId,
           slug: input.slug,
           status,
+          premium: false,
+          views: 0,
+          memberSince: current?.memberSince ?? new Date().toISOString().slice(0, 10),
           nameEn: input.nameEn,
           nameZhHk: input.nameZhHk,
           taglineEn: input.taglineEn,
@@ -167,11 +158,36 @@ export function databaseStore(loadDatabase: () => Promise<Database> = getDb): Sh
           reviewedAt: null,
           reviewedByProfileId: null,
           rejectionReason: null,
-          updatedAt: new Date(),
-        },
-      }).returning();
-      if (!row) throw new Error("SHOWCASE_LISTING_WRITE_FAILED");
-      return row;
+        }).onConflictDoUpdate({
+          target: [showcaseListings.companyId],
+          set: {
+            slug: input.slug,
+            status,
+            nameEn: input.nameEn,
+            nameZhHk: input.nameZhHk,
+            taglineEn: input.taglineEn,
+            taglineZhHk: input.taglineZhHk,
+            descriptionEn: input.descriptionEn,
+            descriptionZhHk: input.descriptionZhHk,
+            category: input.category,
+            useCases: input.useCases,
+            deploymentOptions: input.deploymentOptions,
+            supportedLanguages: input.supportedLanguages,
+            worksWith: input.worksWith,
+            videoUrl: input.videoUrl,
+            caseStudyUrl: input.caseStudyUrl,
+            caseStudySummaryEn: input.caseStudySummaryEn,
+            caseStudySummaryZhHk: input.caseStudySummaryZhHk,
+            logoReference: input.logoReference,
+            reviewedAt: null,
+            reviewedByProfileId: null,
+            rejectionReason: null,
+            updatedAt: new Date(),
+          },
+        }).returning();
+        if (!row) throw new Error("SHOWCASE_LISTING_WRITE_FAILED");
+        return row;
+      });
     },
     async listForReview() {
       const database = await loadDatabase();
@@ -296,11 +312,11 @@ export function createShowcaseRepository(
       return store.getByCompany(companyId);
     },
     async upsertDraft(actor, companyId, input, status = "draft") {
-      await ensureCompanyManager(actor, companyId, dependencies.getCompanyRole);
+      const manager = await ensureCompanyManager(actor, companyId, dependencies.getCompanyRole);
       const parsed = listingInputSchema.parse(input);
       const current = await store.getByCompany(companyId);
       if (current && !transitionListingStatus(current.status, status)) throw new Error("INVALID_SHOWCASE_TRANSITION");
-      return store.upsert(companyId, parsed, status);
+      return store.upsert(companyId, parsed, status, manager.profileId);
     },
     async submitForReview(actor, companyId, input) {
       return this.upsertDraft(actor, companyId, input, "pending_review");
