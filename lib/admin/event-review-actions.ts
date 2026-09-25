@@ -25,12 +25,12 @@ function afterReview(path: string, slug: string): void {
 
 export async function approveMemberEventAction(path: string, formData: FormData): Promise<void> {
   const actor = await requireAdminActor();
-  const {slug} = await approveMemberEvent(actor, formData.get("eventId"));
+  const {slug} = await approveMemberEvent(actor, formData.get("eventId"), formData.get("reviewVersion"));
   afterReview(path, slug);
 }
 
 export async function rejectMemberEventAction(path: string, formData: FormData): Promise<void> {
   const actor = await requireAdminActor();
-  const {slug} = await rejectMemberEvent(actor, formData.get("eventId"), formData.get("rejectionReason"));
+  const {slug} = await rejectMemberEvent(actor, formData.get("eventId"), formData.get("rejectionReason"), formData.get("reviewVersion"));
   afterReview(path, slug);
 }

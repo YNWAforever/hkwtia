@@ -24,13 +24,14 @@ export type EventReviewer = Readonly<{
 
 const eventIdSchema = z.string().uuid();
 const rejectionReasonSchema = z.string().trim().min(1).max(1_000);
+const reviewVersionSchema = z.string().regex(/^\d{1,10}$/);
 
-export async function approveMemberEvent(actor: Actor, eventId: unknown, deps: EventReviewer = eventsRepository) {
+export async function approveMemberEvent(actor: Actor, eventId: unknown, reviewVersion: unknown, deps: EventReviewer = eventsRepository) {
   requireAdmin(actor);
-  return deps.review(actor, eventIdSchema.parse(eventId), {decision: "approve"});
+  return deps.review(actor, eventIdSchema.parse(eventId), {decision: "approve", reviewVersion: reviewVersionSchema.parse(reviewVersion)});
 }
 
-export async function rejectMemberEvent(actor: Actor, eventId: unknown, reason: unknown, deps: EventReviewer = eventsRepository) {
+export async function rejectMemberEvent(actor: Actor, eventId: unknown, reason: unknown, reviewVersion: unknown, deps: EventReviewer = eventsRepository) {
   requireAdmin(actor);
-  return deps.review(actor, eventIdSchema.parse(eventId), {decision: "reject", reason: rejectionReasonSchema.parse(reason)});
+  return deps.review(actor, eventIdSchema.parse(eventId), {decision: "reject", reason: rejectionReasonSchema.parse(reason), reviewVersion: reviewVersionSchema.parse(reviewVersion)});
 }
