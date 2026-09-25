@@ -248,20 +248,20 @@ describe("companyProfilesRepository (programme B-6, B-7)", () => {
     const repository = createCompanyProfilesRepository({loadDatabase: load, getCompanyRole: roles});
 
     await expect(repository.submitForReview(member, COMPANY)).resolves.toMatchObject({public_profile_status: "pending_review"});
-    await expect(repository.review(staff, COMPANY, {decision: "approve"})).resolves.toMatchObject({public_profile_status: "published"});
+    await expect(repository.review(staff, COMPANY, {decision: "approve", reviewVersion: "42"})).resolves.toMatchObject({public_profile_status: "published"});
     expect(execute).toHaveBeenCalledTimes(6);
     // `literalText` drops interpolated identifiers, so the audit table itself
     // is invisible here; its column list is what pins the statement.
     expect(statementText(execute, 5)).toContain("INSERT INTO");
     expect(statementText(execute, 5)).toContain("actor_user_id, actor_type, action, target_type, target_id, metadata");
-    await expect(repository.review(member, COMPANY, {decision: "approve"})).rejects.toThrow();
+    await expect(repository.review(member, COMPANY, {decision: "approve", reviewVersion: "42"})).rejects.toThrow();
   });
 
   it("refuses to publish a profile with no slug, which companies_public_profile_slug_check would reject", async () => {
     const {execute, load} = db([[{id: COMPANY, public_profile_status: "pending_review", slug: null}]]);
     const repository = createCompanyProfilesRepository({loadDatabase: load, getCompanyRole: roles});
 
-    await expect(repository.review(staff, COMPANY, {decision: "approve"})).rejects.toThrow("COMPANY_SLUG_REQUIRED");
+    await expect(repository.review(staff, COMPANY, {decision: "approve", reviewVersion: "42"})).rejects.toThrow("COMPANY_SLUG_REQUIRED");
     expect(execute).toHaveBeenCalledTimes(1);
   });
 
@@ -269,11 +269,11 @@ describe("companyProfilesRepository (programme B-6, B-7)", () => {
     const {load} = db([[{id: COMPANY, public_profile_status: "hidden", slug: "acme"}]]);
     const repository = createCompanyProfilesRepository({loadDatabase: load, getCompanyRole: roles});
 
-    await expect(repository.review(staff, COMPANY, {decision: "approve"})).rejects.toThrow("INVALID_PROFILE_TRANSITION");
+    await expect(repository.review(staff, COMPANY, {decision: "approve", reviewVersion: "42"})).rejects.toThrow("INVALID_PROFILE_TRANSITION");
   });
 
   it("keeps the review queue and the sitemap slug list behind their own gates", async () => {
-    const queue = [{id: COMPANY, public_profile_status: "pending_review", slug: "acme", display_name: "Acme", logo_url: null}];
+    const queue = [{id: COMPANY, public_profile_status: "pending_review", slug: "acme", display_name: "Acme", logo_url: null, review_version: "42"}];
     const {execute, load} = db([queue, [{slug: "acme"}]]);
     const repository = createCompanyProfilesRepository({loadDatabase: load, getCompanyRole: roles});
 
@@ -294,7 +294,7 @@ describe("companyProfilesRepository (programme B-6, B-7)", () => {
     // may render `website` as an href.
     const queued = (slug: string, website: string | null) => ({
       id: COMPANY, public_profile_status: "pending_review", slug,
-      display_name: "Acme", logo_url: null, website,
+      display_name: "Acme", logo_url: null, review_version: "42", website,
     });
     const {load} = db([[
       queued("acme", "javascript:alert(1)"),

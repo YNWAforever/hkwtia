@@ -30,7 +30,7 @@ export default async function AdminProfilesReviewPage({params}: Props) {
   // reviewer who cannot read the field that caused the demotion publishes
   // unreviewed copy onto an anonymous page.
   const reviewRows: ProfileReviewRow[] | null = pendingRows === null ? null : pendingRows.map((row) => ({
-    id: row.id, name: row.display_name, slug: row.slug ?? null, tags: row.tags ?? [], website: row.website ?? null,
+    id: row.id, reviewVersion: row.review_version, name: row.display_name, slug: row.slug ?? null, tags: row.tags ?? [], website: row.website ?? null,
     taglineEn: row.tagline_en ?? null, taglineZhHk: row.tagline_zh_hk ?? null,
     descriptionEn: row.description ?? null, descriptionZhHk: row.description_zh_hk ?? null,
     industry: row.industry ?? null, sizeBand: row.size_band ?? null,

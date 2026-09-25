@@ -32,13 +32,14 @@ export type CompanyProfileReviewer = Readonly<{
 
 const companyIdSchema = z.string().uuid();
 const rejectionReasonSchema = z.string().trim().min(1).max(1_000);
+const reviewVersionSchema = z.string().regex(/^\d{1,10}$/);
 
-export async function approveCompanyProfile(actor: Actor, companyId: unknown, deps: CompanyProfileReviewer = companyProfilesRepository) {
+export async function approveCompanyProfile(actor: Actor, companyId: unknown, reviewVersion: unknown, deps: CompanyProfileReviewer = companyProfilesRepository) {
   requireAdmin(actor);
-  return deps.review(actor, companyIdSchema.parse(companyId), {decision: "approve"});
+  return deps.review(actor, companyIdSchema.parse(companyId), {decision: "approve", reviewVersion: reviewVersionSchema.parse(reviewVersion)});
 }
 
-export async function rejectCompanyProfile(actor: Actor, companyId: unknown, reason: unknown, deps: CompanyProfileReviewer = companyProfilesRepository) {
+export async function rejectCompanyProfile(actor: Actor, companyId: unknown, reason: unknown, reviewVersion: unknown, deps: CompanyProfileReviewer = companyProfilesRepository) {
   requireAdmin(actor);
-  return deps.review(actor, companyIdSchema.parse(companyId), {decision: "reject", reason: rejectionReasonSchema.parse(reason)});
+  return deps.review(actor, companyIdSchema.parse(companyId), {decision: "reject", reason: rejectionReasonSchema.parse(reason), reviewVersion: reviewVersionSchema.parse(reviewVersion)});
 }
