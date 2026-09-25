@@ -58,6 +58,7 @@ export function createMediaUploadPost(dependencies: Dependencies) {
       });
       return json(201, {id: row.id, url: row.url});
     } catch (error) {
+      if (error instanceof Error && error.message === "FORBIDDEN") return new Response("Not found", {status: 404, headers: {"cache-control": "no-store"}});
       if (error instanceof BoundedBodyError || error instanceof MediaUploadValidationError) {
         return json(400, {error: "INVALID_MEDIA_UPLOAD"});
       }

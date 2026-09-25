@@ -1,11 +1,10 @@
 import {AgentRuntimeError} from "@/lib/ai/runtime";
 import type {MembershipPlanCode} from "@/lib/membership/constants";
 import {requireMember, type Actor} from "@/lib/membership/lifecycle";
-import {aiWriterRunsPerMonth} from "@/lib/membership/entitlements";
+import {aiWriterRunsPerMonth, isBenefitEligibleMembershipStatus} from "@/lib/membership/entitlements";
 import {writerBriefSchema, type WriterKind} from "@/lib/ai/writers/contracts";
 import {generateWriterCopy} from "@/lib/ai/writers/generate";
 import {agentRunsRepository} from "@/lib/db/repos/agent-runs";
-import {isPortalMembershipStatus} from "@/lib/portal/queries";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 
 type MemberActor = Extract<Actor, {kind: "member"}>;
@@ -34,7 +33,7 @@ export function startOfHongKongMonth(now: Date): Date {
 
 const defaultDependencies: WriterActionDependencies = {
   plansFor: async (actor) => (await membershipsRepository.list(actor))
-    .filter((membership) => isPortalMembershipStatus(membership.status))
+    .filter((membership) => isBenefitEligibleMembershipStatus(membership.status))
     .map((membership) => membership.planCode),
   countRuns: (actor, since) => agentRunsRepository.countWriterRuns(actor, since),
   generate: ({memberActor, kind, brief}) => generateWriterCopy({memberActor, kind, brief}),

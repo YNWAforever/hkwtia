@@ -16,7 +16,7 @@ import {enrollEventReminder, type EventReminderEnrollmentInput} from "@/lib/even
 import {canTransitionEvent, derivedEventFlags, hongKongQuarterBounds} from "@/lib/events/status";
 import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl} from "@/lib/media/url";
 import {publicMemberPageSlug} from "@/lib/members/public";
-import type {MembershipPlanCode} from "@/lib/membership/constants";
+import {MEMBERSHIP_PLAN_CODES, type MembershipPlanCode} from "@/lib/membership/constants";
 import {requireMember, type Actor, type AdminActor, type CompanyRole} from "@/lib/membership/lifecycle";
 
 const eventIdSchema = z.string().uuid();
@@ -779,9 +779,38 @@ async function writeMemberEvent(
 ): Promise<MemberEventRow> {
   const parsed = memberEventInputSchema.parse(input);
   const id = eventId === undefined ? null : eventIdSchema.parse(eventId);
-  const write: MemberEventWrite = {parsed, status, company: eventIdSchema.parse(companyId), profileId: actor.profileId, now: (deps.now ?? (() => new Date()))()};
+  const company = eventIdSchema.parse(companyId);
   const database = await memberDatabase(deps);
   return database.transaction(async (transaction) => {
+    let plan: MembershipPlanCode | null = null;
+    if (status === "pending_review") {
+      // The company membership row serialises submissions and billing transitions.
+      // A dashboard count taken before this lock is only a display hint: two
+      // requests can otherwise both claim the final Startup slot.
+      const membership = executedRows(await transaction.execute(sql`
+        SELECT ${memberships.planCode} AS plan_code FROM ${memberships}
+        WHERE ${memberships.companyId} = ${company}
+          AND ${memberships.status} IN ('active', 'past_due', 'cancel_at_period_end')
+        FOR UPDATE
+      `))[0];
+      if (!membership) throw new Error("NO_MEMBERSHIP_FOR_COMPANY");
+      plan = z.enum(MEMBERSHIP_PLAN_CODES).parse(membership.plan_code);
+    }
+    // Read after the lock: a wait may cross a Hong Kong quarter boundary.
+    // The same instant determines both the quota window and submitted_at.
+    const now = (deps.now ?? (() => new Date()))();
+    if (plan !== null) {
+      const {start, end} = hongKongQuarterBounds(now);
+      const excluded = id === null ? sql`` : sql` AND ${events.id} <> ${id}`;
+      const count = executedRows(await transaction.execute(sql`
+        SELECT count(*)::int AS count FROM ${events}
+        WHERE ${events.organiserCompanyId} = ${company}
+          AND ${events.submittedAt} >= ${start} AND ${events.submittedAt} < ${end}
+          AND ${events.status} IN ('pending_review', 'published', 'cancelled')${excluded}
+      `))[0];
+      assertCanSubmitEvent(plan, Number(count?.count ?? 0));
+    }
+    const write: MemberEventWrite = {parsed, status, company, profileId: actor.profileId, now};
     if (parsed.heroMediaId !== null) {
       // Same rule as the admin path: an archived asset is never re-attached.
       // S-3 adds ownership: a member may only attach media they uploaded
@@ -812,14 +841,13 @@ export async function saveMemberEventDraft(actor: Actor, companyId: string, inpu
   return writeMemberEvent(member, companyId, input, "draft", deps, eventId);
 }
 
-/** The caller supplies the plan and this quarter's count (`countCompanySubmissionsThisQuarter`); D-5 is asserted before any SQL. */
+/** The locked write reads the current company plan and quota. */
 export async function submitMemberEvent(
   actor: Actor, companyId: string, input: unknown,
-  deps: MemberEventDependencies & Readonly<{plan: MembershipPlanCode; usedThisQuarter: number}>,
+  deps: MemberEventDependencies = {},
   eventId?: string,
 ): Promise<MemberEventRow> {
   const member = await requireCompanyManager(actor, companyId, deps);
-  assertCanSubmitEvent(deps.plan, deps.usedThisQuarter);
   return writeMemberEvent(member, companyId, input, "pending_review", deps, eventId);
 }
 

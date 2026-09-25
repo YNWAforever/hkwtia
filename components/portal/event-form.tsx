@@ -1,6 +1,6 @@
 "use client";
 
-import {useActionState, useState} from "react";
+import {useActionState, useRef, useState} from "react";
 
 import {HeroUpload, type HeroUploadLabels} from "@/components/portal/hero-upload";
 import type {MemberEventFormState} from "@/lib/events/member-actions";
@@ -24,9 +24,9 @@ const textareaClass = "min-h-28 w-full rounded-md border border-input bg-backgro
 const labelClass = "space-y-2 text-sm font-medium";
 
 /**
- * Two submit buttons share one form and one action: the submitter's `intent`
- * value (React includes the clicked button's name/value in the FormData) tells
- * the action whether to save a draft or submit for review, so there is a single
+ * Two submit buttons share one form and one action. Each click sets a hidden
+ * `intent` input before React builds FormData, telling the action whether to save
+ * a draft or submit for review. This keeps a single
  * action state and a failed submission can never read as a failed draft save.
  * `notice` is the post-redirect "saved" copy from the edit page; the form owns
  * it so it disappears the moment a later attempt fails. The hero field is a
@@ -34,11 +34,17 @@ const labelClass = "space-y-2 text-sm font-medium";
  * paste an id from an earlier upload, and `HeroUpload` beneath it fills it in
  * after a successful post to /api/portal/media/upload (S-3).
  */
-export function EventForm({values, labels, action, canSubmit, notice = null}: Readonly<{
-  values: MemberEventView | null; labels: EventFormLabels; action: Action; canSubmit: boolean; notice?: string | null;
+export function EventForm({values, labels, action, canSubmit, canSaveDraft = true, canUploadHero, notice = null}: Readonly<{
+  values: MemberEventView | null; labels: EventFormLabels; action: Action; canSubmit: boolean; canSaveDraft?: boolean; canUploadHero?: boolean; notice?: string | null;
 }>) {
   const [state, dispatch, pending] = useActionState(action, initial);
   const [heroMediaId, setHeroMediaId] = useState(values?.heroMediaId ?? "");
+  const intentInput = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const markDirty = () => {if (formRef.current) formRef.current.dataset.dirty = "true";};
+  const setIntent = (intent: "draft" | "submit") => {
+    if (intentInput.current) intentInput.current.value = intent;
+  };
   // `startsAt`/`endsAt` post under the parser's names while their defaults come
   // from the `*Local` view fields, hence the separate `name` argument.
   const field = (valueKey: TextField, label: string, type = "text", extra: Readonly<{name?: string; required?: boolean; pattern?: string; min?: number}> = {}) => (
@@ -48,7 +54,8 @@ export function EventForm({values, labels, action, canSubmit, notice = null}: Re
     </label>
   );
   return (
-    <form action={dispatch} className="glass-card grid gap-5 p-5 sm:grid-cols-2 sm:p-8" noValidate>
+    <form action={dispatch} className="glass-card grid gap-5 p-5 sm:grid-cols-2 sm:p-8" data-member-event-form noValidate onChange={markDirty} onInput={markDirty} ref={formRef}>
+      <input name="intent" ref={intentInput} type="hidden" value="submit" readOnly />
       {notice && state.status !== "error" ? <p className="text-sm text-muted-foreground sm:col-span-2" role="status">{notice}</p> : null}
       {values ? <input name="eventId" type="hidden" value={values.id} /> : null}
       {field("slug", labels.slug, "text", {required: true, pattern: "[a-z0-9]+(?:-[a-z0-9]+)*"})}
@@ -86,11 +93,11 @@ export function EventForm({values, labels, action, canSubmit, notice = null}: Re
         <input className={inputClass} name="heroMediaId" onChange={(event) => setHeroMediaId(event.target.value)} type="text" value={heroMediaId} />
         <span className="block text-xs text-muted-foreground">{labels.heroHelp}</span>
       </label>
-      <HeroUpload labels={labels.hero} onUploaded={setHeroMediaId} />
+      {(canUploadHero ?? (canSaveDraft || canSubmit)) ? <HeroUpload labels={labels.hero} onUploaded={(id) => {setHeroMediaId(id); markDirty();}} /> : null}
       {state.status === "error" ? <p className="text-sm text-destructive sm:col-span-2" role="alert">{labels.errors[state.code ?? "INVALID"] ?? labels.errors.INVALID}</p> : null}
       <div className="flex flex-wrap gap-3 sm:col-span-2">
-        <button className="inline-flex min-h-11 items-center rounded-md border border-border px-4 text-sm font-medium disabled:opacity-60" disabled={pending} formAction={dispatch} name="intent" type="submit" value="draft">{pending ? labels.saving : labels.saveDraft}</button>
-        <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending || !canSubmit} name="intent" type="submit" value="submit">{pending ? labels.saving : labels.submit}</button>
+        <button className="inline-flex min-h-11 items-center rounded-md border border-border px-4 text-sm font-medium disabled:opacity-60" disabled={pending || !canSaveDraft} onClick={() => setIntent("draft")} type="submit">{pending ? labels.saving : labels.saveDraft}</button>
+        <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending || !canSubmit} onClick={() => setIntent("submit")} type="submit">{pending ? labels.saving : labels.submit}</button>
       </div>
     </form>
   );

@@ -2144,6 +2144,10 @@
     "memberEvents": {
       "eyebrow": "Your organisation's events",
       "newTitle": "Submit an event",
+      "publishingFor": "Publishing for {company}",
+      "chooseCompany": "Organisation",
+      "useCompany": "Use organisation",
+      "changeCompanyWarning": "Changing organisation will discard the event details you have entered. Continue?",
       "newAction": "Submit an event",
       "listTitle": "Events your organisation has submitted",
       "listEmpty": "Your organisation has not submitted an event yet.",
