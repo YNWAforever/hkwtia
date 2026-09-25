@@ -127,7 +127,18 @@ describe("auth send-path rate limiting", () => {
     await expect(request.json()).resolves.toEqual({email: "person@example.test"});
   });
 
-  it("ignores an oversized body rather than buffering it", async () => {
+  it("rejects an oversized send body with no Content-Length before the provider reads it", async () => {
+    const request = new Request("https://hkwtia.test/api/auth/sign-in/magic-link", {
+      method: "POST",
+      headers: {"content-type": "application/json", "x-vercel-forwarded-for": "203.0.113.10"},
+      body: JSON.stringify({email: "person@example.test", pad: "x".repeat(9_000)}),
+    });
+    expect(request.headers.get("content-length")).toBeNull();
+    const response = await rateLimitAuthRequest(request, limiters());
+    expect(response?.status).toBe(413);
+  });
+
+  it("rejects a declared oversized body without buffering it", async () => {
     const request = new Request("https://hkwtia.test/api/auth/sign-in/magic-link", {
       method: "POST",
       headers: {
@@ -138,8 +149,8 @@ describe("auth send-path rate limiting", () => {
       body: JSON.stringify({email: "person@example.test", pad: "x".repeat(9_000)}),
     });
 
-    // Allowed through on the IP bucket, but the address was never extracted.
-    await expect(rateLimitAuthRequest(request, limiters())).resolves.toBeNull();
+    const response = await rateLimitAuthRequest(request, limiters());
+    expect(response?.status).toBe(413);
   });
 });
 

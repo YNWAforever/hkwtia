@@ -116,7 +116,7 @@ export default async function EventPage({params}: Props) {
   const guestLabels = {
     title: t("guest.title"), name: t("guest.name"), email: t("guest.email"), organisation: t("guest.organisation"), whatsappNumber: t("guest.whatsappNumber"),
     marketingConsent: t("guest.marketingConsent"), consent: t("guest.consent"), website: t("guest.website"), submit: t("guest.submit"), submitting: t("guest.submitting"),
-    registered: t("guest.registered"), waitlist: t("guest.waitlist"), already: t("guest.already"), invalid: t("guest.invalid"), rateLimited: t("guest.rateLimited"),
+    registered: t("guest.registered"), waitlist: t("guest.waitlist"), already: t("guest.already"), confirmationPending: t("guest.confirmationPending"), invalid: t("guest.invalid"), rateLimited: t("guest.rateLimited"),
     closed: t("guest.closed"), external: t("guest.external"), unavailable: t("guest.unavailable"),
   };
   const ticketLabels = {

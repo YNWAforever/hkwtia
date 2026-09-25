@@ -11,11 +11,13 @@ const publicPosts = vi.hoisted(() => ({
 const showcase = vi.hoisted(() => ({
   listPublishedSlugs: vi.fn(),
 }));
+const events = vi.hoisted(() => ({listPublic: vi.fn()}));
 const companyProfiles = vi.hoisted(() => ({
   listPublishedSlugs: vi.fn(),
 }));
 
 vi.mock("@/lib/db/repos/public-posts", () => publicPosts);
+vi.mock("@/lib/db/repos/events", () => ({eventsRepository: events}));
 vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: showcase}));
 vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: companyProfiles}));
 vi.mock("@/content/news", () => ({
@@ -33,6 +35,7 @@ describe("published build logs in the sitemap", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     publicPosts.listPublishedNews.mockResolvedValue([]);
+    events.listPublic.mockResolvedValue([]);
     showcase.listPublishedSlugs.mockResolvedValue([]);
     companyProfiles.listPublishedSlugs.mockResolvedValue([]);
   });
@@ -71,19 +74,9 @@ describe("published build logs in the sitemap", () => {
     ).toHaveLength(1);
   });
 
-  it("keeps static sitemap entries when only the public-post read fails", async () => {
-    publicPosts.listPublishedBuildLogs.mockRejectedValue(
-      new Error("TRANSIENT_DATABASE_READ"),
-    );
-
-    const urls = (await sitemap()).map((entry) => entry.url);
-
-    expect(urls).toEqual(expect.arrayContaining([
-      "http://localhost:3000/",
-      "http://localhost:3000/zh",
-      "http://localhost:3000/news",
-      "http://localhost:3000/zh/news",
-    ]));
+  it("reports a dynamic-source outage instead of publishing a partial 200 sitemap", async () => {
+    publicPosts.listPublishedBuildLogs.mockRejectedValue(new Error("TRANSIENT_DATABASE_READ"));
+    await expect(sitemap()).rejects.toThrow("TRANSIENT_DATABASE_READ");
   });
 
   it("adds both localized URLs for each published showcase slug", async () => {
@@ -98,16 +91,10 @@ describe("published build logs in the sitemap", () => {
     ]));
   });
 
-  it("keeps static sitemap entries when showcase reads fail", async () => {
+  it("reports a showcase read failure instead of omitting published URLs", async () => {
     publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
     showcase.listPublishedSlugs.mockRejectedValue(new Error("TRANSIENT_DATABASE_READ"));
-
-    const urls = (await sitemap()).map((entry) => entry.url);
-
-    expect(urls).toEqual(expect.arrayContaining([
-      "http://localhost:3000/",
-      "http://localhost:3000/zh",
-    ]));
+    await expect(sitemap()).rejects.toThrow("TRANSIENT_DATABASE_READ");
   });
 
   it("declares en, zh-HK and an English x-default alternate on every static entry", async () => {
@@ -134,6 +121,7 @@ describe("published member pages in the sitemap (D-11)", () => {
     vi.clearAllMocks();
     publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
     publicPosts.listPublishedNews.mockResolvedValue([]);
+    events.listPublic.mockResolvedValue([]);
     showcase.listPublishedSlugs.mockResolvedValue([]);
   });
 
@@ -148,12 +136,8 @@ describe("published member pages in the sitemap (D-11)", () => {
     ]));
   });
 
-  it("keeps the static routes when the member read fails", async () => {
+  it("reports a member read failure instead of omitting reviewed profiles", async () => {
     companyProfiles.listPublishedSlugs.mockRejectedValue(new Error("DATABASE_UNAVAILABLE"));
-
-    const urls = (await sitemap()).map((entry) => entry.url);
-
-    expect(urls).toContain("http://localhost:3000/members");
-    expect(urls.some((url) => url.startsWith("http://localhost:3000/members/"))).toBe(false);
+    await expect(sitemap()).rejects.toThrow("DATABASE_UNAVAILABLE");
   });
 });

@@ -1,6 +1,6 @@
 import "server-only";
 
-import {createHmac, randomUUID} from "node:crypto";
+import {createHmac, randomUUID, timingSafeEqual} from "node:crypto";
 import {z} from "zod";
 
 import {contactWriterActor, type ContactsRepository} from "@/lib/db/repos/contacts";
@@ -20,7 +20,7 @@ const inputSchema = z.object({
 });
 
 export type GuestRsvpResult = Readonly<
-  | {ok: true; disposition: GuestRegistrationDisposition}
+  | {ok: true; disposition: GuestRegistrationDisposition | "confirmation_pending"}
   | {ok: false; code: "invalid" | "rate_limited" | "closed" | "external" | "unavailable"}
 >;
 
@@ -58,6 +58,26 @@ function textValue(formData: FormData, key: string): string {
 /** Cancel tokens are random; only their HMAC digest is stored, so a database read cannot cancel on a guest's behalf. */
 export function cancelTokenDigest(secret: string, token: string): string {
   return createHmac("sha256", secret).update(token).digest("hex");
+}
+
+function cancelSignature(secret: string, digest: string): string {
+  return createHmac("sha256", secret).update("guest-cancel-v2:" + digest).digest("hex");
+}
+
+/** The signed digest can be reconstructed for email retries without storing a raw cancellation token. */
+export function signedGuestCancelToken(secret: string, digest: string): string {
+  if (!/^[0-9a-f]{64}$/.test(digest)) throw new Error("INVALID_CANCEL_DIGEST");
+  return digest + "." + cancelSignature(secret, digest);
+}
+
+export function cancelDigestFromToken(secret: string, token: string): string | null {
+  // Links already mailed before the confirm-POST change remain usable.
+  if (/^[0-9a-f]{32}$/.test(token)) return cancelTokenDigest(secret, token);
+  if (!/^[0-9a-f]{64}\.[0-9a-f]{64}$/.test(token)) return null;
+  const digest = token.slice(0, 64);
+  const supplied = Buffer.from(token.slice(65), "hex");
+  const expected = Buffer.from(cancelSignature(secret, digest), "hex");
+  return timingSafeEqual(supplied, expected) ? digest : null;
 }
 
 /**
@@ -128,20 +148,28 @@ export function createGuestRegistrationService(dependencies: GuestRegistrationDe
         consentSource: "rsvp",
       }).catch(() => undefined);
 
-      // A replayed RSVP keeps its original token; the stored digest was not replaced,
-      // so a second email would carry a link that cancels nothing.
-      if (result.disposition !== "already_registered") {
-        await dependencies.sendConfirmation({
-          to: email,
-          name: parsed.data.name,
-          locale: parsed.data.locale,
-          slug: result.slug,
-          eventTitle: result.eventTitle,
-          disposition: result.disposition,
-          registrationId: result.id,
-          cancelTokenDigest: digest,
-          cancelUrl: `${dependencies.appUrl}/api/events/guest/cancel?token=${token}`,
-        }).catch(() => undefined);
+      // A signed digest is reproducible from the stored row for a failed email retry.
+      // The transport uses the same idempotency key if an earlier send did reach it.
+      if (result.status !== "attended") {
+        const cancelUrl = new URL("/api/events/guest/cancel", dependencies.appUrl);
+        cancelUrl.searchParams.set("token", signedGuestCancelToken(dependencies.secret, result.cancelTokenDigest));
+        cancelUrl.searchParams.set("locale", parsed.data.locale);
+        try {
+          await dependencies.sendConfirmation({
+            to: email,
+            name: parsed.data.name,
+            locale: parsed.data.locale,
+            slug: result.slug,
+            eventTitle: result.eventTitle,
+            disposition: result.status,
+            registrationId: result.id,
+            cancelTokenDigest: result.cancelTokenDigest,
+            cancelUrl: cancelUrl.toString(),
+          });
+        } catch {
+          // The seat is saved, and a repeat submit can regenerate this exact link.
+          return {ok: true, disposition: "confirmation_pending"};
+        }
       }
       return {ok: true, disposition: result.disposition};
     },

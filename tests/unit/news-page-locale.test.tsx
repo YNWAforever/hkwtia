@@ -11,10 +11,12 @@ const publicPosts = vi.hoisted(() => ({
 }));
 const events = vi.hoisted(() => ({listPublic: vi.fn()}));
 const showcase = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
+const companyProfiles = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
 
 vi.mock("@/lib/db/repos/public-posts", () => publicPosts);
 vi.mock("@/lib/db/repos/events", () => ({eventsRepository: events}));
 vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: showcase}));
+vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: companyProfiles}));
 vi.mock("next-intl/server", () => ({
   getTranslations: async () => Object.assign((key: string) => key, {raw: (key: string) => key}),
   setRequestLocale: () => undefined,
@@ -37,6 +39,8 @@ vi.mock("@/i18n/navigation", () => ({
 import NewsPage from "@/app/[locale]/(public)/news/page";
 import NewsPostPage, {generateMetadata} from "@/app/[locale]/(public)/news/[slug]/page";
 import sitemap from "@/app/sitemap";
+
+beforeEach(() => companyProfiles.listPublishedSlugs.mockResolvedValue([]));
 
 const publishedAt = new Date("2026-08-28T12:00:00.000Z");
 const chineseNews = {
@@ -121,21 +125,12 @@ describe("localized public News pages", () => {
     await expect(renderNewsDetail("zh-HK", "build-log")).resolves.toContain("Operational evidence");
   });
 
-  it.each([
-    ["en", englishNews, "zh-HK"],
-    ["zh-HK", chineseNews, "en"],
-  ] as const)("retains successful %s News URLs when the other locale fails", async (successfulLocale, row, failedLocale) => {
+  it.each(["en", "zh-HK"] as const)("fails the sitemap if %s News cannot be read", async (failedLocale) => {
     publicPosts.listPublishedNews.mockImplementation((locale: string) =>
-      locale === successfulLocale ? Promise.resolve([row]) : Promise.reject(new Error(failedLocale)));
-
-    const entries = await sitemap();
-    const expectedUrl = successfulLocale === "en"
-      ? `http://localhost:3000/news/${row.slug}`
-      : `http://localhost:3000/zh/news/${row.slug}`;
-
-    expect(entries.map((entry) => entry.url)).toContain(expectedUrl);
-    expect(entries.find((entry) => entry.url === expectedUrl)?.alternates).toBeUndefined();
+      locale === failedLocale ? Promise.reject(new Error(failedLocale)) : Promise.resolve([englishNews]));
+    await expect(sitemap()).rejects.toThrow(failedLocale);
   });
+
 
   it("omits untranslated Chinese News and suppresses its alternate", async () => {
     publicPosts.listPublishedNews.mockImplementation((locale: string) =>

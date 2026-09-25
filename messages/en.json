@@ -1263,6 +1263,8 @@
     "resultsDescription": "Use the filters to narrow the directory to solutions that fit your needs.",
     "emptyTitle": "No published listings match",
     "emptyDescription": "Try changing a filter or search term.",
+    "unavailableTitle": "Showcase listings are temporarily unavailable",
+    "unavailableDescription": "Please try again shortly.",
     "premium": "Premium",
     "goneGlobal": "Gone Global",
     "memberSince": "WTIA member since",
@@ -1387,6 +1389,8 @@
     "resultsTitle": "{count} members",
     "emptyTitle": "No member pages match yet",
     "emptyDescription": "Member pages appear here once organisations publish them. Try a broader search.",
+    "unavailableTitle": "Member pages are temporarily unavailable",
+    "unavailableDescription": "Please try again shortly.",
     "view": "View member page",
     "detail": {
       "website": "Website",
@@ -1580,13 +1584,18 @@
       "registered": "You're registered. A confirmation is on its way to your inbox.",
       "waitlist": "The event is full; you're on the waitlist and we'll email you if a place opens.",
       "already": "That email is already registered for this event.",
+      "confirmationPending": "Your registration is saved, but we could not email your confirmation. Please submit again to retry.",
       "invalid": "Check your name, email and WhatsApp number, then try again.",
       "rateLimited": "Too many attempts from this connection. Try again in a few minutes.",
       "closed": "Registration for this event has closed.",
       "external": "This event takes registrations on the organiser's site.",
       "unavailable": "Registration is not available right now.",
       "cancelled": "Your registration has been cancelled.",
-      "cancelInvalid": "That cancel link is not valid any more."
+      "cancelInvalid": "That cancel link is not valid any more.",
+      "cancelConfirmTitle": "Cancel your event registration?",
+      "cancelConfirmBody": "Confirm below to release your place. Opening this link has not changed your registration.",
+      "cancelConfirmAction": "Cancel registration",
+      "cancelKeepLink": "Keep my registration"
     },
     "card": {
       "venueLabel": "Venue",

@@ -1,4 +1,19 @@
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
+
+const dynamicSources = vi.hoisted(() => ({
+  buildLogs: vi.fn().mockResolvedValue([]),
+  news: vi.fn().mockResolvedValue([]),
+  events: vi.fn().mockResolvedValue([]),
+  showcase: vi.fn().mockResolvedValue([]),
+  members: vi.fn().mockResolvedValue([]),
+}));
+vi.mock('@/lib/db/repos/public-posts', () => ({
+  listPublishedBuildLogs: dynamicSources.buildLogs,
+  listPublishedNews: dynamicSources.news,
+}));
+vi.mock('@/lib/db/repos/events', () => ({eventsRepository: {listPublic: dynamicSources.events}}));
+vi.mock('@/lib/db/repos/showcase', () => ({showcaseRepository: {listPublishedSlugs: dynamicSources.showcase}}));
+vi.mock('@/lib/db/repos/company-profiles', () => ({companyProfilesRepository: {listPublishedSlugs: dynamicSources.members}}));
 
 import robots from '@/app/robots';
 import sitemap from '@/app/sitemap';

@@ -44,7 +44,7 @@ describe("eventGuestsRepository (programme B-4)", () => {
     const {execute, db} = database([[lockedEvent()], [{count: 0}], [], [{id: "g1", status: "registered"}], []]);
     const repository = createEventGuestsRepository(async () => db as never, () => new Date("2026-09-09T00:00:00Z"));
     const result = await repository.register(contactWriterActor("event_guest"), input({email: "A@B.hk", idempotencyKey: "k1k1k1k1"}));
-    expect(result).toEqual({id: "g1", disposition: "registered", eventTitle: "AI Clinic", slug: "ai-clinic"});
+    expect(result).toEqual({id: "g1", disposition: "registered", status: "registered", cancelTokenDigest: "d".repeat(64), eventTitle: "AI Clinic", slug: "ai-clinic"});
     expect(execute).toHaveBeenCalledTimes(5);
     expect(sqlText((execute.mock.calls[4] as unknown[])[0])).toContain("event.guest.registered");
 
@@ -54,9 +54,9 @@ describe("eventGuestsRepository (programme B-4)", () => {
   });
 
   it("reports an active existing row as already registered without writing", async () => {
-    const {execute, db} = database([[lockedEvent()], [{count: 1}], [{id: "g1", status: "registered"}]]);
+    const {execute, db} = database([[lockedEvent()], [{count: 1}], [{id: "g1", status: "registered", cancel_token_digest: "d".repeat(64)}]]);
     await expect(createEventGuestsRepository(async () => db as never, () => new Date("2026-09-09T00:00:00Z")).register(contactWriterActor("event_guest"), input({idempotencyKey: "k1k1k1k1"})))
-      .resolves.toEqual({id: "g1", disposition: "already_registered", eventTitle: "AI Clinic", slug: "ai-clinic"});
+      .resolves.toEqual({id: "g1", disposition: "already_registered", status: "registered", cancelTokenDigest: "d".repeat(64), eventTitle: "AI Clinic", slug: "ai-clinic"});
     // lock, capacity, probe: no INSERT and no audit row.
     expect(execute).toHaveBeenCalledTimes(3);
     const probe = sqlText((execute.mock.calls[2] as unknown[])[0]);
@@ -91,8 +91,10 @@ describe("eventGuestsRepository (programme B-4)", () => {
   });
 
   it("cancels by token digest and reports unknown tokens", async () => {
-    const {db} = database([[{id: "g1"}]]);
+    const {db, execute} = database([[{id: "g1", event_id: EVENT}], []]);
     await expect(createEventGuestsRepository(async () => db as never).cancelByToken(contactWriterActor("event_guest"), "d".repeat(64))).resolves.toBe("cancelled");
+    expect(execute).toHaveBeenCalledTimes(2);
+    expect(sqlText((execute.mock.calls[1] as unknown[])[0])).toContain("event.guest.cancelled");
     const miss = database([[]]);
     await expect(createEventGuestsRepository(async () => miss.db as never).cancelByToken(contactWriterActor("event_guest"), "d".repeat(64))).resolves.toBe("unknown");
     await expect(createEventGuestsRepository(async () => miss.db as never).cancelByToken(contactWriterActor("event_guest"), "not-a-digest")).rejects.toThrow();

@@ -62,11 +62,10 @@ describe("public environment boundaries", () => {
     // beats unresolvable, and it exercises the same degrade path.
     vi.stubEnv("DATABASE_URL", "postgres://user:pw@127.0.0.1:1/hkwtia");
     const {default: sitemap} = await import("@/app/sitemap");
-    // Every database read is individually caught, so an unreachable database
-    // degrades to the static public routes rather than failing the document.
-    const entries = await sitemap();
-    expect(entries.length).toBeGreaterThan(0);
-    expect(entries.some(({url}) => url.endsWith("/privacy"))).toBe(true);
+    // Import must remain independent of Neon Auth; a later database outage
+    // rejects the dynamic sitemap instead of presenting incomplete URLs as a 200.
+    await expect(sitemap()).rejects.toThrow();
+
   }, 20_000);
 
   // The split must not soften the boundary it was carved out of: importing the
