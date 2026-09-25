@@ -1657,6 +1657,8 @@
     "description": "Browse WTIA announcements and community news.",
     "emptyTitle": "No news is published yet",
     "emptyDescription": "News will appear here when content is confirmed.",
+    "unavailableTitle": "News could not be fully loaded",
+    "unavailableDescription": "Some items may be missing. Please try again shortly.",
     "breadcrumbCurrent": "News",
     "statusNews": "News",
     "statusBuildLog": "Build Log",

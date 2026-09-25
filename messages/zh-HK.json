@@ -1657,6 +1657,8 @@
     "description": "瀏覽 WTIA 的公告及社群消息。",
     "emptyTitle": "暫未有已發布消息",
     "emptyDescription": "消息內容確認後，會在此顯示。",
+    "unavailableTitle": "消息未能完整載入",
+    "unavailableDescription": "部分內容可能未有顯示，請稍後再試。",
     "breadcrumbCurrent": "新聞",
     "statusNews": "新聞",
     "statusBuildLog": "開發日誌",

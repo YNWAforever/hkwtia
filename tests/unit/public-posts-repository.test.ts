@@ -48,6 +48,7 @@ const fullDataset: readonly FixtureRow[] = [
   row("news-post", {kind: "news"}),
   // Published, but retired: must leave the feed and its slug route together.
   row("archived-news-post", {kind: "news", archivedAt: new Date("2026-07-30T00:00:00.000Z")}),
+  row("archived-build-log", {archivedAt: new Date("2026-07-30T00:00:00.000Z")}),
   visibleAlpha,
 ];
 
@@ -190,6 +191,7 @@ describe("public posts repository", () => {
     expect(statement.sql).toMatch(/kind.*=.*buildlog/i);
     expect(statement.sql).toMatch(/published_at.*IS NOT NULL/i);
     expect(statement.sql).toMatch(/published_at.*<=/i);
+    expect(statement.sql).toMatch(/archived_at.*IS NULL/i);
     expect(statement.sql).toMatch(
       /ORDER BY.*published_at.*DESC.*slug.*ASC/i,
     );
@@ -218,6 +220,7 @@ describe("public posts repository", () => {
     expect(statement.sql).toMatch(/kind.*=.*buildlog/i);
     expect(statement.sql).toMatch(/published_at.*IS NOT NULL/i);
     expect(statement.sql).toMatch(/published_at.*<=/i);
+    expect(statement.sql).toMatch(/archived_at.*IS NULL/i);
     expect(statement.sql).toMatch(/slug.*=/i);
     expect(statement.sql).toMatch(/LIMIT/i);
     expect(statement.sql).toMatch(/body_mdx/i);
@@ -232,6 +235,17 @@ describe("public posts repository", () => {
         1,
       ]),
     );
+  });
+
+  it("excludes an archived build log from both the feed and its slug route", async () => {
+    const fixture = predicateSensitiveProxy(fullDataset);
+    const repository = createPublicPostsRepository(async () => fixture.database as never);
+
+    const summaries = await repository.listPublishedBuildLogs(asOf);
+    const detail = await repository.getPublishedBuildLogBySlug("archived-build-log", asOf);
+
+    expect(summaries.map(({slug}) => slug)).not.toContain("archived-build-log");
+    expect(detail).toBeNull();
   });
 
   it("rejects invalid slugs before loading the database", async () => {

@@ -41,11 +41,14 @@ export default async function NewsPage({params}: Props) {
     getTranslations({locale}),
   ]);
   const appLocale = locale as AppLocale;
-  // A database outage degrades to the empty state rather than a 500.
+  // Each feed can fail independently. Keep available posts and name an outage honestly.
   const [news, buildLogs] = await Promise.all([
-    listPublishedNews(appLocale).catch(() => []),
-    listPublishedBuildLogs().catch(() => []),
+    listPublishedNews(appLocale).catch(() => null),
+    listPublishedBuildLogs().catch(() => null),
   ]);
+  const unavailable = news === null || buildLogs === null;
+  const availableNews = news ?? [];
+  const availableBuildLogs = buildLogs ?? [];
 
   return (
     <>
@@ -57,9 +60,10 @@ export default async function NewsPage({params}: Props) {
         breadcrumbLabel={common("breadcrumbLabel")}
       />
       <Section tone="paper">
-        {news.length > 0 || buildLogs.length > 0 ? (
+        {unavailable ? <HonestEmpty variant="inner" title={t("unavailableTitle")} copy={t("unavailableDescription")} /> : null}
+        {availableNews.length > 0 || availableBuildLogs.length > 0 ? (
           <div className="archive-grid">
-            {news.map((post) => (
+            {availableNews.map((post) => (
               <NewsCard
                 author={post.author}
                 key={post.slug}
@@ -70,11 +74,11 @@ export default async function NewsPage({params}: Props) {
                 title={post.title}
               />
             ))}
-            {buildLogs.map((post) => (
+            {availableBuildLogs.map((post) => (
               <BuildLogCard key={post.slug} locale={appLocale} post={post} statusLabel={t("statusBuildLog")}/>
             ))}
           </div>
-        ) : (
+        ) : unavailable ? null : (
           <HonestEmpty variant="inner" title={t("emptyTitle")} copy={t("emptyDescription")} />
         )}
         <NewsQualityPanel labels={{eyebrow: t("quality.eyebrow"), title: t("quality.title"), body: t("quality.body")}} />
