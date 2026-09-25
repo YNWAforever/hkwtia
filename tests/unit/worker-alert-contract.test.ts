@@ -2,7 +2,7 @@ import {readFileSync} from "node:fs";
 
 import {describe, expect, it} from "vitest";
 
-import {prepareWorkerAlertRequest} from "@/lib/jobs/runners";
+import {prepareWorkerAlertRequest, renderWorkerAlert} from "@/lib/jobs/runners";
 
 /**
  * Phase C2 Task 10 Step 1. The worker's escalation path and the route that
@@ -14,15 +14,16 @@ import {prepareWorkerAlertRequest} from "@/lib/jobs/runners";
  * nobody was paged — the one code path whose entire purpose is to be noticed.
  * The send queue would have been the ninth member of the same gap.
  *
- * `WorkerJob` is read as TEXT: `workers/` is excluded from the root
+ * `WORKER_JOBS` is read as TEXT: `workers/` is excluded from the root
  * `tsconfig.json`, so importing it would be a typecheck failure rather than a
- * contract test.
+ * contract test. Phase D-4d made it a value (so `workers/tests/worker.test.ts`
+ * can prove every job is scheduled); the union is derived from it.
  */
 const WORKER_SOURCE_PATH = "workers/src/index.ts";
 
 function workerJobs(source: string): string[] {
-  const declaration = /export type WorkerJob =([\s\S]*?);/m.exec(source);
-  if (!declaration) throw new Error("WORKER_JOB_UNION_NOT_FOUND");
+  const declaration = /export const WORKER_JOBS = \[([\s\S]*?)\]\s*as const;/m.exec(source);
+  if (!declaration) throw new Error("WORKER_JOBS_DECLARATION_NOT_FOUND");
   return [...declaration[1].matchAll(/"([^"]+)"/g)].map((match) => match[1]);
 }
 
@@ -58,5 +59,27 @@ describe("worker alert job vocabulary", () => {
     // payload, so an unbounded `job` is an unbounded set of claimable run keys.
     await expect(prepareWorkerAlertRequest(alertRequest("not-a-job")))
       .rejects.toMatchObject({code: "INVALID_WORKER_ALERT"});
+  });
+});
+
+
+describe("refund-batch alert wording", () => {
+  it("describes the first failed attempt without claiming all retries failed", async () => {
+    const early = await renderWorkerAlert({
+      job: "event-cancellation-refunds",
+      scheduledTime: "2026-09-25T02:00:00.000Z",
+      attemptCount: 1,
+      errorCode: "JOB_HTTP_ERROR",
+    });
+    expect(early.html).toContain("first attempt");
+    expect(early.html).not.toContain("after its bounded retries");
+
+    const final = await renderWorkerAlert({
+      job: "journey-runner",
+      scheduledTime: "2026-09-25T02:00:00.000Z",
+      attemptCount: 3,
+      errorCode: "JOB_HTTP_ERROR",
+    });
+    expect(final.html).toContain("after its bounded retries");
   });
 });

@@ -3,7 +3,7 @@ import "server-only";
 import {and, eq, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";
-import {auditEvents, profiles as profilesTable, type Profile} from "@/lib/db/server-schema";
+import {auditEvents, contacts, messageSuppressions, profiles as profilesTable, type Profile} from "@/lib/db/server-schema";
 import {forbidden, getDb, requireMember, requireSystem} from "@/lib/db/repos/common";
 
 type ProfileConsentColumns = "whatsappNumber" | "whatsappOptIn" | "whatsappConsentAt" | "whatsappConsentSource" | "whatsappConsentTextVersion" | "marketingConsentAt";
@@ -62,8 +62,8 @@ export const profilesRepository = {
    * no trace of a consent decision with legal weight. The withdrawal side is
    * also what left `suppressionsRepository.optOutWhatsApp` reasoning about a
    * re-consent it could not see — that method treats the flag transition as
-   * evidence of a new withdrawal precisely because this surface can grant the
-   * flag back while the suppression row (which nothing deletes) stays.
+   * evidence of a new withdrawal. A grant now also clears the old suppression
+   * and linked contact opt-out in this same transaction.
    *
    * Putting the gate in the repository rather than in the callers is boundary
    * 1/2: a third surface that learns to write the flag inherits the audit row
@@ -103,6 +103,23 @@ export const profilesRepository = {
       const updated = rows[0] ?? null;
       const prior = before[0];
       if (updated && prior !== undefined && prior.whatsappOptIn !== input.whatsappOptIn) {
+        if (input.whatsappOptIn === true) {
+          await transaction.delete(messageSuppressions).where(and(
+            eq(messageSuppressions.profileId, userId),
+            eq(messageSuppressions.channel, "whatsapp"),
+            eq(messageSuppressions.classification, "marketing"),
+          ));
+          if (updated.whatsappNumber) {
+            await transaction.update(contacts).set({
+              whatsappOptIn: true,
+              whatsappOptedOutAt: null,
+              whatsappConsentAt: updated.whatsappConsentAt,
+              whatsappConsentSource: updated.whatsappConsentSource,
+              whatsappConsentTextVersion: updated.whatsappConsentTextVersion,
+              updatedAt: new Date(),
+            }).where(and(eq(contacts.profileId, userId), eq(contacts.phoneE164, updated.whatsappNumber)));
+          }
+        }
         await transaction.insert(auditEvents).values({
           actorUserId: userId,
           actorType: actor.kind,

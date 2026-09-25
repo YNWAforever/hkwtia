@@ -133,7 +133,7 @@ export const eventStatusEnum = pgEnum("event_status", [
 export const eventVisibilityEnum = pgEnum("event_visibility", ["public", "members_only", "invite_only"]);
 export const eventFormatEnum = pgEnum("event_format", ["in_person", "online", "hybrid"]);
 export const registrationModeEnum = pgEnum("registration_mode", ["rsvp", "external", "ticketed"]);
-export const eventOrderStatusEnum = pgEnum("event_order_status", ["pending", "paid", "expired", "failed", "refunded"]);
+export const eventOrderStatusEnum = pgEnum("event_order_status", ["pending", "paid", "expired", "failed", "refunded", "refund_failed"]);
 export const eventRefundReasonEnum = pgEnum("event_refund_reason", ["oversold", "staff", "cancelled"]);
 export const guestRegistrationStatusEnum = pgEnum("guest_registration_status", [
   "registered", "waitlist", "cancelled", "attended",

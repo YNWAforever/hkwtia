@@ -117,6 +117,11 @@ describe("the admin inbox thread page", () => {
     state.transcript.mockReset();
   });
 
+  it("propagates a transcript read outage instead of returning a false 404", async () => {
+    state.transcript.mockRejectedValue(new Error("INBOX_REPOSITORY_UNAVAILABLE"));
+    await expect(AdminInboxThreadPage({params: Promise.resolve({locale: "en", id: conversationId})}))
+      .rejects.toThrow("INBOX_REPOSITORY_UNAVAILABLE");
+  });
   it("does not offer to take over a web thread, which setHandling refuses", async () => {
     await page({channel: "web", handling: "bot"});
     expect(screen.queryByRole("button", {name: take})).toBeNull();

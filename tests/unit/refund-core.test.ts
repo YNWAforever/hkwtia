@@ -1,5 +1,6 @@
 import {describe, expect, it, vi} from "vitest";
 
+import {systemActor} from "@/lib/auth/authorize";
 import {refundOrder, type RefundDependencies} from "@/lib/tickets/refund-core";
 
 const staff = {kind: "staff" as const, userId: "auth-1", profileId: "p-1"};
@@ -26,6 +27,7 @@ function dependencies(overrides: Partial<RefundDependencies> = {}): RefundDepend
     stripe: {
       paymentIntentForSession: vi.fn(async () => "pi_1"),
       refundPaymentIntent: vi.fn(async () => undefined),
+      fullyRefundedPaymentIntent: vi.fn(async () => false),
     },
     sendRefundEmail: vi.fn(async () => undefined),
     now: () => new Date("2026-09-16T12:00:00Z"),
@@ -41,15 +43,18 @@ describe("refundOrder", () => {
 
     expect(result).toEqual({status: "refunded"});
     expect(vi.mocked(deps.stripe.paymentIntentForSession)).toHaveBeenCalledWith("cs_test_1");
-    expect(vi.mocked(deps.stripe.refundPaymentIntent)).toHaveBeenCalledWith("pi_1", `ticket-refund:${orderId}`);
+    expect(vi.mocked(deps.stripe.refundPaymentIntent)).toHaveBeenCalledWith("pi_1", `ticket-refund:${orderId}`, {requireSucceeded: true, orderId, refundReason: "staff"});
     const commit = vi.mocked(deps.orders.refundPaidOrder).mock.calls[0]![1] as Record<string, unknown>;
     expect(commit).toMatchObject({
       refundedAt: new Date("2026-09-16T12:00:00Z"),
       actorUserId: "auth-1",
       actorType: "staff",
+      // A staff refund is recorded as a staff reason in both the column and the
+      // audit metadata, so the system issuer below can be told apart from it.
+      refundReason: "staff",
+      reason: "staff",
       note: "Duplicate purchase",
     });
-    expect(commit).not.toHaveProperty("refundReason");
   });
 
   it("refuses an order that is not paid, without touching the provider", async () => {
@@ -84,6 +89,34 @@ describe("refundOrder", () => {
     expect(vi.mocked(deps.orders.refundPaidOrder)).not.toHaveBeenCalled();
   });
 
+  it("keeps a later failed refund visible for staff without retrying its spent Stripe key", async () => {
+    const deps = dependencies({orders: {orderById: vi.fn(async () => order({status: "refund_failed", refundReason: "cancelled"})),
+      refundPaidOrder: vi.fn(async () => true)}});
+    await expect(refundOrder(systemActor("event-cancellation"), {orderId}, deps))
+      .resolves.toEqual({status: "provider_failed"});
+    expect(vi.mocked(deps.stripe.refundPaymentIntent)).not.toHaveBeenCalled();
+  });
+  it("reconciles a failed order after a verified later full refund without sending a new refund", async () => {
+    const deps = dependencies({
+      orders: {
+        orderById: vi.fn(async () => order({status: "refund_failed", refundReason: "cancelled"})),
+        refundPaidOrder: vi.fn(async () => true),
+        reconcileRefundedOrder: vi.fn(async () => true),
+      },
+      stripe: {
+        paymentIntentForSession: vi.fn(async () => "pi_1"),
+        refundPaymentIntent: vi.fn(async () => undefined),
+        fullyRefundedPaymentIntent: vi.fn(async () => true),
+      },
+    });
+    await expect(refundOrder(staff, {orderId}, deps)).resolves.toEqual({status: "refunded"});
+    expect(deps.stripe.refundPaymentIntent).not.toHaveBeenCalled();
+    expect(deps.orders.reconcileRefundedOrder).toHaveBeenCalledWith(orderId, expect.objectContaining({
+      expectedAmountHkdCents: 50_000, refundReason: "cancelled", reason: "provider_reconciled",
+    }));
+    expect(deps.sendRefundEmail).toHaveBeenCalledTimes(1);
+  });
+
   it("reports an unknown order as not found", async () => {
     const deps = dependencies({
       orders: {
@@ -105,6 +138,7 @@ describe("refundOrder", () => {
         refundPaymentIntent: vi.fn(async () => {
           throw new Error("stripe_down");
         }),
+        fullyRefundedPaymentIntent: vi.fn(async () => false),
       },
     });
 
@@ -112,6 +146,47 @@ describe("refundOrder", () => {
 
     expect(result).toEqual({status: "provider_failed"});
     expect(vi.mocked(deps.orders.refundPaidOrder)).not.toHaveBeenCalled();
+  });
+
+  it("reports an accepted pending refund without claiming it failed or committing it", async () => {
+    const pending = Object.assign(new Error("STRIPE_REFUND_NOT_SUCCEEDED"), {code: "STRIPE_REFUND_PENDING"});
+    const deps = dependencies({
+      stripe: {
+        paymentIntentForSession: vi.fn(async () => "pi_1"),
+        refundPaymentIntent: vi.fn(async () => { throw pending; }),
+        fullyRefundedPaymentIntent: vi.fn(async () => false),
+      },
+    });
+
+    await expect(refundOrder(staff, {orderId}, deps)).resolves.toEqual({status: "pending"});
+    expect(deps.orders.refundPaidOrder).not.toHaveBeenCalled();
+    expect(deps.sendRefundEmail).not.toHaveBeenCalled();
+  });
+  it("reconciles a full provider refund after a lost commit without issuing another refund", async () => {
+    const refundPaymentIntent = vi.fn(async () => { throw new Error("already_refunded"); });
+    const fullyRefundedPaymentIntent = vi.fn(async () => true);
+    const deps = dependencies({
+      stripe: {paymentIntentForSession: vi.fn(async () => "pi_1"), refundPaymentIntent, fullyRefundedPaymentIntent},
+    });
+
+    await expect(refundOrder(systemActor("event-cancellation"), {orderId}, deps))
+      .resolves.toEqual({status: "refunded"});
+    expect(refundPaymentIntent).not.toHaveBeenCalled();
+    expect(fullyRefundedPaymentIntent).toHaveBeenCalledWith("pi_1", 50_000);
+    expect(deps.orders.refundPaidOrder).toHaveBeenCalledWith(orderId, expect.objectContaining({reason: "provider_reconciled"}));
+    expect(deps.sendRefundEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not commit when the provider cannot prove the order was fully refunded", async () => {
+    const deps = dependencies({
+      stripe: {
+        paymentIntentForSession: vi.fn(async () => "pi_1"),
+        refundPaymentIntent: vi.fn(async () => { throw new Error("provider_down"); }),
+        fullyRefundedPaymentIntent: vi.fn(async () => false),
+      },
+    });
+    await expect(refundOrder(staff, {orderId}, deps)).resolves.toEqual({status: "provider_failed"});
+    expect(deps.orders.refundPaidOrder).not.toHaveBeenCalled();
   });
 
   it("reports already_refunded when the conditional commit loses the race", async () => {
@@ -132,6 +207,7 @@ describe("refundOrder", () => {
       stripe: {
         paymentIntentForSession: vi.fn(async () => null),
         refundPaymentIntent: vi.fn(async () => undefined),
+        fullyRefundedPaymentIntent: vi.fn(async () => false),
       },
     });
 
@@ -149,6 +225,7 @@ describe("refundOrder", () => {
           throw new Error("stripe_read_down");
         }),
         refundPaymentIntent: vi.fn(async () => undefined),
+        fullyRefundedPaymentIntent: vi.fn(async () => false),
       },
     });
 
@@ -201,5 +278,31 @@ describe("refundOrder", () => {
 
     expect(result).toEqual({status: "refunded"});
     expect(vi.mocked(deps.orders.refundPaidOrder)).toHaveBeenCalledTimes(1);
+  });
+
+  // The event-cancellation sweep refunds as `systemActor("event-cancellation")`.
+  // That actor must reach the refund while an anonymous one must never: the
+  // audit records `actorType: "system"` with no user id, and admitting a general
+  // `Actor` would let a public caller refund with no authority named at all.
+  it("admits the event-cancellation system actor and records it as the authority", async () => {
+    const deps = dependencies();
+
+    const result = await refundOrder(systemActor("event-cancellation"), {orderId}, deps);
+
+    expect(result).toEqual({status: "refunded"});
+    const commit = vi.mocked(deps.orders.refundPaidOrder).mock.calls[0]![1] as Record<string, unknown>;
+    // The whole-branch finding: every refund was recorded `reason: "staff"`,
+    // including the sweep's, so a report filtering on the reason attributed a
+    // cancellation refund to a person. The column and the metadata now carry the
+    // event-cancellation reason while the staff path keeps `staff`.
+    expect(commit).toMatchObject({actorUserId: null, actorType: "system", refundReason: "cancelled", reason: "event_cancelled"});
+  });
+
+  it("refuses an anonymous actor by the type, so no refund can name no authority", () => {
+    const anonymous = {kind: "anonymous", userId: null} as const;
+    const call = () =>
+      // @ts-expect-error an anonymous actor is neither an admin nor the system authority
+      refundOrder(anonymous, {orderId}, dependencies());
+    expect(call).toBeTypeOf("function");
   });
 });

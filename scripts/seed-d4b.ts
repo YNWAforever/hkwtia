@@ -22,6 +22,32 @@ const D4B_EVENT_TITLE_EN = "D4B Acceptance Ticket Event";
 const D4B_EVENT_TITLE_ZH = "D4B 驗收門票活動";
 
 /**
+ * Phase D-4d's cancellation walk gets its own event, order and seat. It cannot
+ * reuse D-4b's: that fixture is shared with D-4c, whose walk refunds its order
+ * and whose seed refuses to reuse an order that is no longer `paid`, while
+ * cancelling an event leaves its orders `paid` and makes D-4b's check-in walk
+ * refuse admission. Three walks, three fates, so the event each one mutates is
+ * its own.
+ *
+ * The walks are ORDERED, not independently repeatable: seed once, then D-4b,
+ * then D-4c, then D-4d. Once D-4c's walk has refunded D4B's order, the guard
+ * below aborts at `D4B_ACCEPTANCE_ORDER_NOT_PAID` before it reaches any D-4d
+ * write, so re-running `db:seed:d4b` does NOT reset the D4D event. Repeating the
+ * D-4d walk therefore needs a fresh seed (a database D-4c has not mutated);
+ * re-seeding against the same database is deliberately refused rather than
+ * quietly restoring an order another acceptance run left in a state the
+ * evidence depends on.
+ */
+export const D4D_EVENT_ID = "d4d00000-0000-4000-8000-000000000010";
+export const D4D_EVENT_SLUG = "d4d-acceptance-cancel-event";
+export const D4D_ORDER_IDS = ["d4d00000-0000-4000-8000-000000000021", "d4d00000-0000-4000-8000-000000000022"] as const;
+export const D4D_ORDER_IDEMPOTENCY_KEYS = ["d4d-acceptance-order-one", "d4d-acceptance-order-two"] as const;
+export const D4D_SEAT_IDS = ["d4d00000-0000-4000-8000-000000000031", "d4d00000-0000-4000-8000-000000000032", "d4d00000-0000-4000-8000-000000000033"] as const;
+export const D4D_GUEST_REGISTRATION_ID = "d4d00000-0000-4000-8000-000000000040";
+const D4D_EVENT_TITLE_EN = "D4D Acceptance Cancel Event";
+const D4D_EVENT_TITLE_ZH = "D4D 驗收取消活動";
+
+/**
  * The brief's guard call was `assertIsolatedSeedEnvironment({prefix, flag,
  * hostAllowlistVar, environment})`; the real helper takes `(environment,
  * options)` and returns the resolved URL, so this wraps it that way instead.
@@ -123,15 +149,104 @@ export async function seedD4b(pool: D4bSeedPool, options: Readonly<{asOf: Date}>
       );
     }
 
+    // Phase D-4d: the event the cancellation walk cancels. Two paid orders over
+    // three seats and one standing RSVP registrant, so the costed confirmation
+    // has a non-zero order count, amount, attendee count AND registrant count --
+    // the four figures it exists to show. A single paid order would let a broken
+    // preview pass while still naming some cost.
+    const d4dStartsAt = new Date(asOf.getTime() + 45 * 24 * 60 * 60 * 1000);
+    await connection.query(
+      `INSERT INTO events
+       (id, slug, title_en, title_zh, description_en, description_zh, starts_at, venue,
+        capacity, member_only, published, status, visibility, format, registration_mode,
+        ticket_price_hkd_cents, published_at, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8,
+         50, false, true, 'published'::event_status, 'public'::event_visibility,
+         'in_person'::event_format, 'ticketed'::registration_mode, 12345, $9, $9, $9)
+       ON CONFLICT (id) DO UPDATE SET
+         slug = EXCLUDED.slug, title_en = EXCLUDED.title_en, title_zh = EXCLUDED.title_zh,
+         description_en = EXCLUDED.description_en, description_zh = EXCLUDED.description_zh,
+         starts_at = EXCLUDED.starts_at, venue = EXCLUDED.venue, capacity = EXCLUDED.capacity,
+         member_only = EXCLUDED.member_only, published = EXCLUDED.published, status = EXCLUDED.status,
+         visibility = EXCLUDED.visibility, format = EXCLUDED.format,
+         registration_mode = EXCLUDED.registration_mode,
+         ticket_price_hkd_cents = EXCLUDED.ticket_price_hkd_cents,
+         published_at = EXCLUDED.published_at, updated_at = EXCLUDED.updated_at`,
+      [D4D_EVENT_ID, D4D_EVENT_SLUG, D4D_EVENT_TITLE_EN, D4D_EVENT_TITLE_ZH,
+        "A synthetic, non-production ticketed event for D-4d cancellation acceptance verification.",
+        "D-4d 驗收用的合成、非生產收費活動。", d4dStartsAt, "WTIA Office", asOf],
+    );
+
+    const d4dOrders = [
+      {id: D4D_ORDER_IDS[0], key: D4D_ORDER_IDEMPOTENCY_KEYS[0], amount: 30000, buyer: "D4D Acceptance Buyer One", email: "d4d-buyer-one@example.test"},
+      {id: D4D_ORDER_IDS[1], key: D4D_ORDER_IDEMPOTENCY_KEYS[1], amount: 15000, buyer: "D4D Acceptance Buyer Two", email: "d4d-buyer-two@example.test"},
+    ];
+    for (const order of d4dOrders) {
+      await connection.query(
+        `INSERT INTO event_orders
+         (id, event_id, buyer_profile_id, buyer_name, buyer_email, buyer_locale, amount_hkd_cents,
+          currency, status, idempotency_key, expires_at, paid_at, created_at, updated_at)
+         VALUES ($1, $2, NULL, $3, $4, 'en', $5, 'hkd', 'paid'::event_order_status, $6, $7, $7, $7, $7)
+         ON CONFLICT (idempotency_key) DO UPDATE SET
+           event_id = EXCLUDED.event_id, buyer_name = EXCLUDED.buyer_name,
+           buyer_email = EXCLUDED.buyer_email, buyer_locale = EXCLUDED.buyer_locale,
+           amount_hkd_cents = EXCLUDED.amount_hkd_cents, status = EXCLUDED.status,
+           idempotency_key = EXCLUDED.idempotency_key, expires_at = EXCLUDED.expires_at,
+           paid_at = EXCLUDED.paid_at, refunded_at = NULL, refund_reason = NULL, updated_at = EXCLUDED.updated_at`,
+        [order.id, D4D_EVENT_ID, order.buyer, order.email, order.amount, order.key, asOf],
+      );
+    }
+
+    const d4dSeats = [
+      {id: D4D_SEAT_IDS[0], orderId: D4D_ORDER_IDS[0], position: 1, name: "D4D Acceptance Cancel One", email: "d4d-one@example.test"},
+      {id: D4D_SEAT_IDS[1], orderId: D4D_ORDER_IDS[0], position: 2, name: "D4D Acceptance Cancel Two", email: "d4d-two@example.test"},
+      {id: D4D_SEAT_IDS[2], orderId: D4D_ORDER_IDS[1], position: 1, name: "D4D Acceptance Cancel Three", email: "d4d-three@example.test"},
+    ];
+    for (const seat of d4dSeats) {
+      await connection.query(
+        `INSERT INTO event_order_seats
+         (id, order_id, position, attendee_name, attendee_email, checked_in_at, created_at)
+         VALUES ($1, $2, $3, $4, $5, NULL, $6)
+         ON CONFLICT (id) DO UPDATE SET
+           order_id = EXCLUDED.order_id, position = EXCLUDED.position,
+           attendee_name = EXCLUDED.attendee_name, attendee_email = EXCLUDED.attendee_email,
+           checked_in_at = NULL`,
+        [seat.id, seat.orderId, seat.position, seat.name, seat.email, asOf],
+      );
+    }
+
+    // The registrant the confirmation names and says will NOT be emailed. Kept
+    // standing on every seed run: only its status feeds the preview count.
+    await connection.query(
+      `INSERT INTO event_guest_registrations
+       (id, event_id, contact_id, name, email, locale, status, cancel_token_digest, idempotency_key, created_at, updated_at)
+       VALUES ($1, $2, NULL, $3, $4, 'en', 'registered'::guest_registration_status, $5, $6, $7, $7)
+       ON CONFLICT (id) DO UPDATE SET
+         event_id = EXCLUDED.event_id, name = EXCLUDED.name, email = EXCLUDED.email,
+         locale = EXCLUDED.locale, status = EXCLUDED.status,
+         cancel_token_digest = EXCLUDED.cancel_token_digest, updated_at = EXCLUDED.updated_at`,
+      [D4D_GUEST_REGISTRATION_ID, D4D_EVENT_ID, "D4D Acceptance Registrant", "d4d-registrant@example.test",
+        "d4d-acceptance-cancel-digest", "d4d-acceptance-registration", asOf],
+    );
+
     const counts = (await connection.query(
       `SELECT
          (SELECT count(*)::integer FROM events WHERE id = $1::uuid AND slug = $2) AS event_count,
          (SELECT count(*)::integer FROM event_orders WHERE id = $3::uuid AND event_id = $1::uuid AND status = 'paid') AS order_count,
-         (SELECT count(*)::integer FROM event_order_seats WHERE id = ANY($4::uuid[]) AND order_id = $3::uuid) AS seat_count`,
-      [D4B_EVENT_ID, D4B_EVENT_SLUG, D4B_ORDER_ID, D4B_SEAT_IDS],
+         (SELECT count(*)::integer FROM event_order_seats WHERE id = ANY($4::uuid[]) AND order_id = $3::uuid) AS seat_count,
+         (SELECT count(*)::integer FROM events WHERE id = $5::uuid AND slug = $6) AS d4d_event_count,
+         (SELECT count(*)::integer FROM event_orders WHERE id = ANY($7::uuid[]) AND event_id = $5::uuid AND status = 'paid') AS d4d_order_count,
+         (SELECT count(*)::integer FROM event_order_seats WHERE id = ANY($8::uuid[]) AND order_id = ANY($7::uuid[])) AS d4d_seat_count,
+         (SELECT count(*)::integer FROM event_guest_registrations WHERE id = $9::uuid AND event_id = $5::uuid AND status <> 'cancelled') AS d4d_registrant_count`,
+      [D4B_EVENT_ID, D4B_EVENT_SLUG, D4B_ORDER_ID, D4B_SEAT_IDS,
+        D4D_EVENT_ID, D4D_EVENT_SLUG, D4D_ORDER_IDS, D4D_SEAT_IDS, D4D_GUEST_REGISTRATION_ID],
     )).rows?.[0];
     if (Number(counts?.event_count) !== 1 || Number(counts?.order_count) !== 1 || Number(counts?.seat_count) !== 2) {
       throw new Error("D4B_ACCEPTANCE_OWNED_COUNT_MISMATCH");
+    }
+    if (Number(counts?.d4d_event_count) !== 1 || Number(counts?.d4d_order_count) !== 2
+      || Number(counts?.d4d_seat_count) !== 3 || Number(counts?.d4d_registrant_count) !== 1) {
+      throw new Error("D4D_ACCEPTANCE_OWNED_COUNT_MISMATCH");
     }
 
     await connection.query("COMMIT");
@@ -161,6 +276,15 @@ export function d4bAcceptanceUrls(appUrl: string, secret: string): readonly stri
       lines.push(`D4B_PASS_URL_${label}${suffix}=${base}${localizedPath(locale, `/pass/${token}`)}`);
       lines.push(`D4B_CHECK_IN_URL_${label}${suffix}=${base}${localizedPath(locale, `/admin/check-in/${token}`)}`);
     }
+  }
+  // Phase D-4d: the cancellation walk's own event, plus one pass for its seat so
+  // it can prove the pass page explains a cancellation instead of 404ing. Only
+  // D4D_SEAT_IDS[0] needs a token: the walk asserts the cancelled pass state,
+  // not admission, and one seat is enough to reach that page.
+  const d4dToken = signPassToken({seatId: D4D_SEAT_IDS[0], eventId: D4D_EVENT_ID}, secret);
+  for (const [locale, suffix] of [["en", ""], ["zh-HK", "_ZH"]] as const) {
+    lines.push(`D4D_PUBLIC_URL${suffix}=${base}${localizedPath(locale, `/events/${D4D_EVENT_SLUG}`)}`);
+    lines.push(`D4D_PASS_URL${suffix}=${base}${localizedPath(locale, `/pass/${d4dToken}`)}`);
   }
   return lines;
 }

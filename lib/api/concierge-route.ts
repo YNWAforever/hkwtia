@@ -28,6 +28,7 @@ import {
   type ConversationOwner,
 } from "@/lib/db/repos/conversations";
 import {actorContactEmail} from "@/lib/db/repos/profile-identities";
+import {readBoundedText} from "@/lib/security/bounded-body";
 import {
   clientIpFromHeaders,
   isSameOrigin,
@@ -120,15 +121,7 @@ function cookieValue(request: Request, name: string): string | null {
 }
 
 async function parseRequestBody(request: Request): Promise<unknown> {
-  const declared = request.headers.get("content-length");
-  if (declared && Number(declared) > MAX_BODY_BYTES) {
-    throw new Error("REQUEST_BODY_TOO_LARGE");
-  }
-  const text = await request.text();
-  if (new TextEncoder().encode(text).byteLength > MAX_BODY_BYTES) {
-    throw new Error("REQUEST_BODY_TOO_LARGE");
-  }
-  return JSON.parse(text);
+  return JSON.parse(await readBoundedText(request, MAX_BODY_BYTES));
 }
 
 function authorizationDenied(error: unknown): boolean {
@@ -291,10 +284,16 @@ async function productionHandler(request: Request): Promise<Response> {
     ) {
       headers.set("x-real-ip", "127.0.0.1");
     }
+    let body: string;
+    try {
+      body = await readBoundedText(request, MAX_BODY_BYTES);
+    } catch {
+      return jsonError("INVALID_REQUEST", 400);
+    }
     const acceptanceRequest = new Request(request.url, {
       method: request.method,
       headers,
-      body: await request.text(),
+      body,
     });
     return createConciergePostHandler({
       expectedOrigin: acceptanceOrigin,

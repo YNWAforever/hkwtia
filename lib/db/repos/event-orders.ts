@@ -7,8 +7,13 @@ import {MAX_TICKET_SEATS, TICKET_HOLD_MS} from "@/config/tickets";
 import {getDb} from "@/lib/db/repos/common";
 import {auditEvents, eventOrderSeats, eventOrders, events} from "@/lib/db/server-schema";
 
-export type OrderStatus = "pending" | "paid" | "expired" | "failed" | "refunded";
+export type OrderStatus = "pending" | "paid" | "expired" | "failed" | "refunded" | "refund_failed";
 export type RefundReason = "oversold" | "staff" | "cancelled";
+export type RefundReconciliationInput = Readonly<{
+  refundedAt: Date; expectedAmountHkdCents: number; actorUserId: string | null;
+  actorType: string; refundReason: RefundReason; reason: string; note: string | null;
+  stripeEventId: string | null;
+}>;
 
 export type OrderRecord = Readonly<{
   id: string; eventId: string; buyerProfileId: string | null; buyerName: string; buyerEmail: string;
@@ -44,7 +49,7 @@ export type CreateOrderInput = Readonly<{
 
 export type CreateOrderResult =
   | Readonly<{ok: true; order: OrderRecord; reused: boolean}>
-  | Readonly<{ok: false; reason: "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "AMOUNT_MISMATCH" | "SOLD_OUT"}>;
+  | Readonly<{ok: false; reason: "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "AMOUNT_MISMATCH" | "SOLD_OUT" | "ATTEMPT_CHANGED"}>;
 
 export type SettleResult =
   | Readonly<{status: "paid" | "duplicate" | "ignored" | "oversold" | "refund_due" | "unknown"; order: OrderRecord | null}>;
@@ -59,7 +64,7 @@ export type EventOrdersTransaction = Readonly<{
    * the receipt names the attendees and the per-attendee passes need each id:
    * one read serves both, rather than a second query per recipient.
    */
-  orderSeats: (orderId: string) => Promise<readonly Readonly<{seatId: string; position: number; attendeeName: string}>[]>;
+  orderSeats: (orderId: string) => Promise<readonly Readonly<{seatId: string; position: number; attendeeName: string; attendeeEmail: string}>[]>;
   /** One seat with its paid order, for a single pass. */
   seatForPass: (seatId: string) => Promise<Readonly<{seatId: string; attendeeName: string; attendeeEmail: string; eventId: string; buyerLocale: "en" | "zh-HK"; order: OrderRecord}> | null>;
   /** Seats of paid orders, or of pending ones whose hold has not lapsed. */
@@ -73,12 +78,23 @@ export type EventOrdersTransaction = Readonly<{
   orderById: (orderId: string) => Promise<OrderRecord | null>;
   /** Every order of an event with its seats, newest paid first. */
   listEventOrders: (eventId: string) => Promise<readonly EventOrderRow[]>;
+  /** Orders still owed a refund because their event was cancelled. */
+  ordersAwaitingCancellationRefund: (limit: number) => Promise<readonly Readonly<{orderId: string; eventId: string}>[]>;
+  /** Move a failed attempt to the retry tail while it remains paid. */
+  deferFailedCancellationRefund: (orderId: string) => Promise<void>;
   /**
    * The refund commit: moves the row only while it is still `paid`, and writes
    * the audit row in the same transaction. `false` means someone else got there
    * first, which is a result rather than an error.
+   *
+   * `refundReason` is the column's coarse enum; `reason` is the issuer-specific
+   * audit value. They are carried rather than hardcoded because a staff refund
+   * and the event-cancellation sweep both land here and a report must be able to
+   * tell them apart (D-4d whole-branch finding).
    */
-  refundPaidOrder: (orderId: string, input: Readonly<{refundedAt: Date; actorUserId: string | null; actorType: string; note: string | null}>) => Promise<boolean>;
+  refundPaidOrder: (orderId: string, input: Readonly<{refundedAt: Date; actorUserId: string | null; actorType: string; refundReason: RefundReason; reason: string; note: string | null}>) => Promise<boolean>;
+  reconcileRefundedOrder: (orderId: string, input: RefundReconciliationInput) => Promise<boolean>;
+  markRefundFailed: (orderId: string, input: Readonly<{eventId: string; refundId: string; amountHkdCents: number}>) => Promise<boolean>;
   insertAudit: (input: Readonly<{actorUserId: string | null; actorType: string; action: string; targetType: string; targetId: string; metadata: Record<string, unknown>}>) => Promise<void>;
   eventSummary: (eventId: string) => Promise<readonly Readonly<{titleEn: string; titleZh: string | null; startsAt: Date; slug: string; venue: string | null}>[]>;
 }>;
@@ -193,8 +209,8 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       return row ? orderFrom(row) : null;
     },
     seatsOfOrder: async (orderId) => Number(rows<{value: number}>(await tx.execute(sql`SELECT COUNT(*)::int AS value FROM ${eventOrderSeats} WHERE order_id = ${orderId}`))[0]?.value ?? 0),
-    orderSeats: async (orderId) => rows<{seatId: string; position: number; attendeeName: string}>(await tx.execute(sql`
-      SELECT id AS "seatId", position, attendee_name AS "attendeeName" FROM ${eventOrderSeats} WHERE order_id = ${orderId} ORDER BY position ASC
+    orderSeats: async (orderId) => rows<{seatId: string; position: number; attendeeName: string; attendeeEmail: string}>(await tx.execute(sql`
+      SELECT id AS "seatId", position, attendee_name AS "attendeeName", attendee_email AS "attendeeEmail" FROM ${eventOrderSeats} WHERE order_id = ${orderId} ORDER BY position ASC
     `)),
     seatForPass: async (seatId) => {
       const row = rows<Record<string, unknown>>(await tx.execute(sql`
@@ -261,12 +277,22 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       seatCount: Number(row.seat_count),
       seatNames: Array.isArray(row.seat_names) ? (row.seat_names as string[]) : [],
     })),
+    ordersAwaitingCancellationRefund: async (limit) => rows<{orderId: string; eventId: string}>(await tx.execute(sql`
+      SELECT o.id AS "orderId", o.event_id AS "eventId"
+      FROM ${eventOrders} o JOIN ${events} e ON e.id = o.event_id
+      WHERE o.status IN ('paid', 'refund_failed') AND e.status = 'cancelled'
+      ORDER BY o.updated_at ASC, o.id ASC
+      LIMIT ${limit}
+    `)),
+    deferFailedCancellationRefund: async (orderId) => {
+      await tx.execute(sql`UPDATE ${eventOrders} SET updated_at = NOW() WHERE id = ${orderId} AND status IN ('paid', 'refund_failed')`);
+    },
     refundPaidOrder: async (orderId, input) => {
       // `AND status = 'paid'` is the whole guard: two staff clicking at once
       // produce one transition because the second UPDATE matches no row.
       const updated = rows<{id: string}>(await tx.execute(sql`
         UPDATE ${eventOrders}
-        SET status = 'refunded', refunded_at = ${input.refundedAt}, refund_reason = 'staff', updated_at = NOW()
+        SET status = 'refunded', refunded_at = ${input.refundedAt}, refund_reason = ${input.refundReason}, updated_at = NOW()
         WHERE id = ${orderId} AND status = 'paid'
         RETURNING id
       `));
@@ -277,8 +303,59 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
         action: "event.order.refunded",
         targetType: "event_order",
         targetId: orderId,
-        metadata: {reason: "staff", note: input.note},
+        metadata: {reason: input.reason, note: input.note},
       });
+      return true;
+    },
+    reconcileRefundedOrder: async (orderId, input) => {
+      const updated = rows<{id: string}>(await tx.execute(sql`
+        UPDATE ${eventOrders}
+        SET status = 'refunded', refunded_at = ${input.refundedAt},
+            refund_reason = COALESCE(refund_reason, ${input.refundReason}::event_refund_reason), updated_at = NOW()
+        WHERE id = ${orderId} AND status IN ('paid', 'refund_failed')
+          AND amount_hkd_cents = ${input.expectedAmountHkdCents}
+        RETURNING id
+      `));
+      if (updated.length === 0) return false;
+      await writeAuditRow(tx, {
+        actorUserId: input.actorUserId, actorType: input.actorType,
+        action: "event.order.refunded", targetType: "event_order", targetId: orderId,
+        metadata: {reason: input.reason, note: input.note, stripeEventId: input.stripeEventId},
+      });
+      return true;
+    },
+    markRefundFailed: async (orderId, input) => {
+      // Lock the order before checking the audit row. A pending refund keeps
+      // status=paid, so status alone cannot dedupe its webhook redeliveries.
+      const current = rows<{id: string; status: "paid" | "refunded"}>(await tx.execute(sql`
+        SELECT id, status FROM ${eventOrders}
+        WHERE id = ${orderId} AND status IN ('paid', 'refunded')
+          AND amount_hkd_cents = ${input.amountHkdCents}
+        FOR UPDATE
+      `))[0];
+      if (!current) return false;
+      if (current.status === "paid") {
+        const seen = rows<{id: string}>(await tx.execute(sql`
+          SELECT id FROM ${auditEvents}
+          WHERE target_type = 'event_order' AND target_id = ${orderId}
+            AND action = 'event.order.refund_failed'
+            AND metadata ->> 'stripeRefundId' = ${input.refundId}
+          LIMIT 1
+        `))[0];
+        if (seen) return false;
+      } else {
+        const updated = rows<{id: string}>(await tx.execute(sql`
+          UPDATE ${eventOrders}
+          SET status = 'refund_failed', refunded_at = NULL, updated_at = NOW()
+          WHERE id = ${orderId} AND status = 'refunded'
+            AND amount_hkd_cents = ${input.amountHkdCents}
+          RETURNING id
+        `));
+        if (updated.length === 0) return false;
+      }
+      await writeAuditRow(tx, {actorUserId: null, actorType: "system", action: "event.order.refund_failed",
+        targetType: "event_order", targetId: orderId,
+        metadata: {stripeEventId: input.eventId, stripeRefundId: input.refundId}});
       return true;
     },
     insertAudit: async (input) => { await writeAuditRow(tx, input); },
@@ -315,8 +392,29 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
         if (event.registrationMode !== "ticketed" || event.ticketPriceHkdCents === null) {
           return {ok: false, reason: "EVENT_NOT_TICKETED"};
         }
+        if (!event.published || event.startsAt <= input.now) return {ok: false, reason: "EVENT_CLOSED"};
         const existing = await tx.orderByIdempotencyKey(input.idempotencyKey);
-        if (existing) return {ok: true, order: existing, reused: true};
+        if (existing) {
+          // A key names one immutable purchase attempt. A failed Stripe call
+          // can leave this order without a session; using the current form to
+          // mint one would charge for different seats than this row records.
+          if (existing.eventId !== input.eventId ||
+              existing.buyerProfileId !== input.buyerProfileId ||
+              existing.buyerName !== input.buyerName ||
+              existing.buyerEmail !== input.buyerEmail ||
+              existing.buyerLocale !== input.buyerLocale ||
+              existing.amountHkdCents !== input.amountHkdCents) {
+            return {ok: false, reason: "ATTEMPT_CHANGED"};
+          }
+          const previousSeats = await tx.orderSeats(existing.id);
+          if (previousSeats.length !== input.seats.length ||
+              previousSeats.some((seat, index) => seat.position !== index + 1 ||
+                seat.attendeeName !== input.seats[index]?.name ||
+                seat.attendeeEmail !== input.seats[index]?.email)) {
+            return {ok: false, reason: "ATTEMPT_CHANGED"};
+          }
+          return {ok: true, order: existing, reused: true};
+        }
         if (input.amountHkdCents !== event.ticketPriceHkdCents * input.seats.length) {
           return {ok: false, reason: "AMOUNT_MISMATCH"};
         }
@@ -359,6 +457,11 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
         }
         if (order.status !== "pending") return {status: "ignored", order};
         const event = await tx.lockEvent(order.eventId);
+        if (event && !event.published) {
+          await tx.markStatus(order.id, "refunded", {refundedAt: now, refundReason: "cancelled"});
+          await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.refunded", targetType: "event_order", targetId: order.id, metadata: {reason: "event_closed"}});
+          return {status: "refund_due", order: {...order, status: "refunded", refundedAt: now, refundReason: "cancelled"}};
+        }
         if (event && event.capacity !== null) {
           const others = await tx.heldSeats(order.eventId, now, order.id);
           const seats = await tx.seatsOfOrder(order.id);
@@ -417,12 +520,32 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
     },
 
     /**
+     * The sweep's work list. A query rather than a queue: the predicate is the
+     * work, so a missed run catches up and nothing has to be enqueued.
+     */
+    async ordersAwaitingCancellationRefund(limit: number): Promise<readonly Readonly<{orderId: string; eventId: string}>[]> {
+      return runTransaction((tx) => tx.ordersAwaitingCancellationRefund(limit));
+    },
+
+    async deferFailedCancellationRefund(orderId: string): Promise<void> {
+      return runTransaction((tx) => tx.deferFailedCancellationRefund(orderId));
+    },
+
+    /**
      * The conditional refund commit. `false` means the order was not `paid` when
      * the statement ran, so the caller reports "already refunded" rather than
      * claiming a refund it did not make.
      */
-    async refundPaidOrder(orderId: string, input: Readonly<{refundedAt: Date; actorUserId: string | null; actorType: string; note: string | null}>): Promise<boolean> {
+    async refundPaidOrder(orderId: string, input: Readonly<{refundedAt: Date; actorUserId: string | null; actorType: string; refundReason: RefundReason; reason: string; note: string | null}>): Promise<boolean> {
       return runTransaction((tx) => tx.refundPaidOrder(orderId, input));
+    },
+
+    async reconcileRefundedOrder(orderId: string, input: RefundReconciliationInput): Promise<boolean> {
+      return runTransaction((tx) => tx.reconcileRefundedOrder(orderId, input));
+    },
+
+    async markRefundFailed(orderId: string, input: Readonly<{eventId: string; refundId: string; amountHkdCents: number}>): Promise<boolean> {
+      return runTransaction((tx) => tx.markRefundFailed(orderId, input));
     },
 
     /** Each seat of an order, in position order, for the receipt and the passes. */

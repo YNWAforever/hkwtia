@@ -205,6 +205,7 @@ function projectPublicEvent(row: PublicEventMemoryRow, locale: string): PublicEv
     registrationMode: event.registrationMode,
     externalRegistrationUrl: event.externalRegistrationUrl,
     ticketPriceHkdCents: event.ticketPriceHkdCents,
+    cancelled: event.status === "cancelled",
     // The name is always projected; the slug only where the company really has
     // a published page, so the detail view can never link to a 404 (D-11).
     organiser: organiser ? {name: organiser.name, slug: publicMemberPageSlug(organiser)} : null,
@@ -214,6 +215,14 @@ function projectPublicEvent(row: PublicEventMemoryRow, locale: string): PublicEv
 // S-1: public reads decide on the enums, never the legacy booleans.
 function isPubliclyVisible(event: Pick<Event, "status" | "visibility">): boolean {
   return event.status === "published" && event.visibility === "public";
+}
+
+// Programme D-4d: the detail page is reachable for a cancelled event so a buyer's
+// receipt link resolves, while the listing stays opportunities-to-attend only. Two
+// predicates rather than one, because the two readers genuinely differ -- a single
+// widened rule would put cancelled events back in the listing.
+function isPubliclyReachable(event: Pick<Event, "status" | "visibility">): boolean {
+  return (event.status === "published" || event.status === "cancelled") && event.visibility === "public";
 }
 
 // Programme B-6: the /events filter axes as SQL, and below as the in-memory twin the
@@ -309,14 +318,14 @@ export async function getPublicEventBySlug(slug: unknown, locale: string, option
   const parsedSlug = slugSchema.safeParse(slug);
   if (!parsedSlug.success) return null;
   if (options.source) {
-    const row = (await publicRowsFrom(options.source)).find(({event}) => event.slug === parsedSlug.data && isPubliclyVisible(event));
+    const row = (await publicRowsFrom(options.source)).find(({event}) => event.slug === parsedSlug.data && isPubliclyReachable(event));
     return row ? projectPublicEvent(row, locale) : null;
   }
   const database = await getDb();
   const [row] = await database.select(publicProjectionSelection).from(events)
     .leftJoin(media, eq(events.heroMediaId, media.id))
     .leftJoin(companies, eq(events.organiserCompanyId, companies.id))
-    .where(and(eq(events.slug, parsedSlug.data), eq(events.status, "published"), eq(events.visibility, "public"))).limit(1);
+    .where(and(eq(events.slug, parsedSlug.data), inArray(events.status, ["published", "cancelled"]), eq(events.visibility, "public"))).limit(1);
   if (!row) return null;
   return projectPublicEvent(publicMemoryRow(row), locale);
 }
@@ -435,6 +444,7 @@ export async function updateEvent(actor: Actor, id: unknown, input: unknown, dep
   return (dependencies ?? await defaultMutationDependencies()).transaction(async (transaction) => {
     const current = await transaction.lockEvent(eventId);
     if (!current) return null;
+    if (current.status === "cancelled") throw new Error("EVENT_CANCELLED_TERMINAL");
     assertPriceOnlyOnTicketed(parsed.registrationMode ?? current.registrationMode, parsed.ticketPriceHkdCents);
     eventPeriodSchema.parse({startsAt: parsed.startsAt ?? current.startsAt, endsAt: parsed.endsAt === undefined ? current.endsAt : parsed.endsAt});
     if (parsed.heroMediaId !== undefined && parsed.heroMediaId !== null) {
@@ -874,6 +884,105 @@ export async function reviewEvent(actor: Actor, eventId: string, decision: unkno
   });
 }
 
+/**
+ * D-4d: the irreversible transition. `cancelled` is terminal, and the write that
+ * reaches it commits the status, its derived flags and its audit row together.
+ *
+ * The explicit `cancelled` refusal is load-bearing. `canTransitionEvent("cancelled",
+ * "cancelled")` is TRUE because the table maps `cancelled` to `["cancelled"]`, so a
+ * guard that consulted only the table would run a second UPDATE and mint a second
+ * `event.cancelled` audit row for one cancellation. `draft` and `rejected`, by
+ * contrast, *are* the table's job: it forbids them from reaching `cancelled`.
+ */
+export type CancelEventOutcome =
+  | Readonly<{status: "cancelled"; event: MemberEventRow}>
+  | Readonly<{status: "already_cancelled"}>
+  | Readonly<{status: "invalid_transition"; from: EventStatus}>
+  | Readonly<{status: "not_found"}>;
+
+export async function cancelEvent(actor: Actor, eventId: unknown, deps: MemberEventDependencies = {}): Promise<CancelEventOutcome> {
+  requireAdmin(actor);
+  const id = eventIdSchema.parse(eventId);
+  const database = await memberDatabase(deps);
+  return database.transaction(async (transaction) => {
+    // FOR UPDATE: a concurrent cancel or review on the same row must serialise so
+    // the checks below see the other writer's outcome, not stale state.
+    const current = memberEventRows(await transaction.execute(sql`SELECT * FROM ${events} WHERE ${events.id} = ${id} FOR UPDATE`))[0];
+    if (!current) return {status: "not_found" as const};
+    if (current.status === "cancelled") return {status: "already_cancelled" as const};
+    if (!canTransitionEvent(current.status, "cancelled")) return {status: "invalid_transition" as const, from: current.status};
+    const flags = derivedEventFlags({status: "cancelled", visibility: current.visibility});
+    // `published_at` is left as it stood: it records when the event *was*
+    // published, and the derived `published` flag is what unpublishes it now.
+    const updated = memberEventRows(await transaction.execute(sql`
+      UPDATE ${events}
+      SET status = 'cancelled', published = ${flags.published}, member_only = ${flags.memberOnly}, updated_at = now()
+      WHERE ${events.id} = ${id}
+      RETURNING *
+    `))[0];
+    if (!updated) return {status: "not_found" as const};
+    await transaction.execute(sql`
+      INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata)
+      VALUES (${actor.profileId}, ${actor.kind}, 'event.cancelled', 'event', ${id},
+              ${JSON.stringify({slug: current.slug, from: current.status})}::jsonb)
+    `);
+    return {status: "cancelled" as const, event: updated};
+  });
+}
+
+/** The numbers the cancellation confirmation shows before an irreversible act. */
+export type CancellationPreview = Readonly<{
+  paidOrders: number;
+  refundTotalHkdCents: number;
+  attendees: number;
+  /**
+   * Member and guest RSVP registrations that are still standing. Separate from
+   * `attendees` because the two answer different questions: `attendees` is who
+   * a refund covers (paid seats), this is who the slice will *not* email. On a
+   * free event `attendees` is legitimately zero and this is the only figure that
+   * tells staff anyone is affected at all.
+   */
+  rsvpRegistrants: number;
+}>;
+
+const cancellationPreviewRowSchema = z.object({
+  paid_orders: z.coerce.number().int().min(0),
+  refund_total_hkd_cents: z.coerce.number().int().min(0),
+  attendees: z.coerce.number().int().min(0),
+  rsvp_registrants: z.coerce.number().int().min(0),
+});
+
+/**
+ * The costed preview: how many orders the sweep will refund, the total in HKD
+ * cents, how many seats those orders cover, and how many RSVP registrants
+ * cancellation will leave un-notified. `null` means the event does not exist --
+ * a free event is zeroes, not `null`, because "nothing was sold" and "there is
+ * no such event" are different answers.
+ *
+ * The aggregates are separate scalar subqueries on purpose: a single
+ * `SELECT sum(amount) … FROM orders JOIN seats` multiplies each order amount by
+ * its seat count, so the refund total would overstate what is paid back. The
+ * registrant figure reads the door list's two tables (member registrations and
+ * guest registrations); a row that cancelled its own place is not a registrant.
+ */
+export async function cancellationPreview(actor: Actor, eventId: unknown, deps: MemberEventDependencies = {}): Promise<CancellationPreview | null> {
+  requireAdmin(actor);
+  const id = eventIdSchema.parse(eventId);
+  const database = await memberDatabase(deps);
+  const row = executedRows(await database.execute(sql`
+    SELECT
+      (SELECT count(*)::int FROM ${eventOrders} WHERE ${eventOrders.eventId} = ${events.id} AND ${eventOrders.status} = 'paid') AS paid_orders,
+      (SELECT COALESCE(sum(${eventOrders.amountHkdCents}), 0)::int FROM ${eventOrders} WHERE ${eventOrders.eventId} = ${events.id} AND ${eventOrders.status} = 'paid') AS refund_total_hkd_cents,
+      (SELECT count(*)::int FROM ${eventOrderSeats} JOIN ${eventOrders} ON ${eventOrders.id} = ${eventOrderSeats.orderId} WHERE ${eventOrders.eventId} = ${events.id} AND ${eventOrders.status} = 'paid') AS attendees,
+      (SELECT count(*)::int FROM ${eventRegistrations} WHERE ${eventRegistrations.eventId} = ${events.id} AND ${eventRegistrations.status} <> 'cancelled')
+        + (SELECT count(*)::int FROM ${eventGuestRegistrations} WHERE ${eventGuestRegistrations.eventId} = ${events.id} AND ${eventGuestRegistrations.status} <> 'cancelled') AS rsvp_registrants
+    FROM ${events} WHERE ${events.id} = ${id}
+  `))[0];
+  if (!row) return null;
+  const parsed = cancellationPreviewRowSchema.parse(row);
+  return {paidOrders: parsed.paid_orders, refundTotalHkdCents: parsed.refund_total_hkd_cents, attendees: parsed.attendees, rsvpRegistrants: parsed.rsvp_registrants};
+}
+
 export async function listEventsForReview(actor: Actor, deps: MemberEventDependencies = {}): Promise<MemberEventRow[]> {
   requireAdmin(actor);
   const database = await memberDatabase(deps);
@@ -908,4 +1017,6 @@ export const eventsRepository = {
   countCompanySubmissionsThisQuarter,
   review: reviewEvent,
   listForReview: listEventsForReview,
+  cancel: cancelEvent,
+  cancellationPreview,
 };

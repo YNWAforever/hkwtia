@@ -26,6 +26,11 @@ export type PublicEventProjection = Readonly<{
   // cents, or null when the event is not ticketed. The detail page renders its
   // checkout form only in the "ticketed" arm, where the column is non-null.
   ticketPriceHkdCents: number | null;
+  // Phase D-4d: a cancelled event stays reachable so the link in a buyer's receipt
+  // resolves, but it is not a thing to attend, so it is never listed. This is the
+  // event's own status; `PublicEventStatus` above is a TIME status derived from the
+  // dates and must not be overloaded with it.
+  cancelled: boolean;
   organiser: Readonly<{name: string; slug: string | null}> | null;
 }>;
 

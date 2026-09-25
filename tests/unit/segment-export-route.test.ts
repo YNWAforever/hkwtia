@@ -23,6 +23,17 @@ describe("segment export completion audit", () => {
     mocks.get.mockResolvedValue({id: segmentId, filterVersion: 1, filters});
   });
 
+  it("distinguishes an unavailable segment store from an absent segment", async () => {
+    mocks.get.mockRejectedValueOnce(new Error("database unavailable"));
+    const unavailable = await GET(new Request("http://localhost/api/admin/segments/export"), {params: Promise.resolve({id: segmentId})});
+    expect(unavailable.status).toBe(500);
+    expect(mocks.preview).not.toHaveBeenCalled();
+
+    mocks.get.mockResolvedValueOnce(null);
+    const missing = await GET(new Request("http://localhost/api/admin/segments/export"), {params: Promise.resolve({id: segmentId})});
+    expect(missing.status).toBe(404);
+  });
+
   it("does not record a successful export when a later page fails", async () => {
     mocks.preview
       .mockResolvedValueOnce({total: 2, items: [member], nextCursor: "next-page"})

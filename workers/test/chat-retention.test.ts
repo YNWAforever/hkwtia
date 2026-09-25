@@ -56,7 +56,12 @@ describe("chat retention Worker schedule", () => {
   it.each([
     [
       "0 * * * *",
-      ["aiops-metrics", "approvals-expirer", "journey-runner"],
+      [
+        "aiops-metrics",
+        "approvals-expirer",
+        "journey-runner",
+        "event-cancellation-refunds",
+      ],
     ],
     ["0 2 * * *", ["renewal-runner"]],
     ["0 18 * * *", ["engagement-score"]],

@@ -7,6 +7,8 @@ import type {EventOrderRow} from "@/lib/db/repos/event-orders";
 import type {RefundOrderState} from "@/lib/tickets/refund-actions";
 import en from "@/messages/en.json";
 import zhHk from "@/messages/zh-HK.json";
+import {readFileSync} from "node:fs";
+import {resolve} from "node:path";
 
 const ORDER_ID = "b1a2c3d4-1111-4222-8333-944455566677";
 
@@ -19,10 +21,11 @@ const labels = {
   status: "Status",
   refundedOn: "Refunded on",
   refund: "Refund",
+  recheckRefund: "Recheck refund",
   cancel: "Cancel",
   note: "Note",
   confirm: "Refund {buyer}'s seats ({seats}) for {amount}?",
-  statuses: {pending: "Pending", paid: "Paid", expired: "Expired", failed: "Failed", refunded: "Refunded"},
+  statuses: {pending: "Pending", paid: "Paid", expired: "Expired", failed: "Failed", refunded: "Refunded", refund_failed: "Refund failed"},
 } as const;
 
 function amountLabel(cents: number): string {
@@ -134,6 +137,18 @@ describe("OrdersTable", () => {
     expect(screen.queryByText(/Sep 13, 2026/)).toBeNull();
   });
 
+  it("lets staff recheck a failed refund without presenting a new refund confirmation", async () => {
+    const action = vi.fn(noopAction());
+    render(<OrdersTable action={action} labels={labels} locale="en"
+      rows={[orderRow({status: "refund_failed", refundReason: "staff"})]} />);
+    expect(screen.getByText("Refund failed")).toBeInTheDocument();
+    expect(screen.queryByRole("button", {name: "Refund"})).toBeNull();
+    const recheck = screen.getByRole("button", {name: "Recheck refund"});
+    fireEvent.submit(recheck.closest("form")!);
+    await waitFor(() => expect(action).toHaveBeenCalledTimes(1));
+    expect(action.mock.calls[0]![1].get("orderId")).toBe(ORDER_ID);
+  });
+
   it("renders no refund control on a row that is not paid", () => {
     render(<OrdersTable action={noopAction()} labels={labels} locale="en" rows={[orderRow({status: "pending"})]} />);
 
@@ -145,6 +160,11 @@ describe("the orders status labels", () => {
   // Derived from the enum the repository writes, so a new status cannot be added
   // without a label: a missing one renders the raw status, which is the trap the
   // adjacent attendee-status map was caught by.
+  it("binds the translated failed-refund status on the admin event page", () => {
+    const page = readFileSync(resolve(process.cwd(), "app/[locale]/(admin)/admin/events-mgmt/[id]/page.tsx"), "utf8");
+    expect(page).toContain('refund_failed: tOrders("statuses.refund_failed")');
+  });
+
   it("covers every status the repository can emit, in both bundles", () => {
     const statuses = [...eventOrderStatusEnum.enumValues].sort();
 
@@ -155,7 +175,7 @@ describe("the orders status labels", () => {
   // The five outcomes the action maps every refund result onto, in both bundles:
   // a missing key is a refund result rendered as `undefined`.
   it("ships every refund outcome key in both bundles", () => {
-    const outcomes = ["alreadyRefunded", "commitFailed", "notAdmissible", "notFound", "providerFailed", "refunded"];
+    const outcomes = ["alreadyRefunded", "commitFailed", "notAdmissible", "notFound", "pending", "providerFailed", "refunded"];
 
     expect(Object.keys(en.Admin.eventsMgmt.orders.refundOutcomes).sort()).toEqual(outcomes);
     expect(Object.keys(zhHk.Admin.eventsMgmt.orders.refundOutcomes).sort()).toEqual(outcomes);

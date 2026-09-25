@@ -25,7 +25,7 @@ export type AdminActor = Extract<AuthenticatedActor, {kind: "staff" | "exco" | "
 export type Actor =
   | Readonly<{kind: "anonymous"; userId: null}>
   | AuthenticatedActor
-  | Readonly<{kind: "system"; userId: null; source: "stripe-webhook"}>;
+  | Readonly<{kind: "system"; userId: null; source: "stripe-webhook" | "event-cancellation"}>;
 
 // The one shared `Actor` value for reads made on behalf of an unauthenticated visitor (public
 // homepage sections, marketing pages). Previously copy-pasted as a local

@@ -31,6 +31,7 @@ export const EMAIL_TEMPLATE_IDS = [
   "event_reminder_24h",
   "event_ticket_confirmation",
   "event_ticket_refunded",
+  "event_ticket_refund_failed",
   "event_ticket_pass",
 ] as const;
 
@@ -94,6 +95,7 @@ const DEFAULT_CLASSIFICATION = {
   // transactional and never given a marketing footer.
   event_ticket_confirmation: "transactional",
   event_ticket_refunded: "transactional",
+  event_ticket_refund_failed: "transactional",
   // Per-attendee pass (Phase D-4b): one seat's own admission, so transactional
   // and never given a marketing footer.
   event_ticket_pass: "transactional",

@@ -38,6 +38,7 @@ const MESSAGES: RefundOutcomeMessages = {
   alreadyRefunded: "This order was already refunded.",
   notAdmissible: "This order is not payable, so there is nothing to refund.",
   providerFailed: "The refund did not go through, so nothing was charged back. You can try again.",
+  pending: "Refund pending confirmation.",
   commitFailed: "The provider may have refunded this order, but we could not record it. Check the provider before retrying.",
   notFound: "That order could not be found.",
 };
@@ -49,6 +50,7 @@ const ZH_MESSAGES: RefundOutcomeMessages = {
   alreadyRefunded: zhHk.Admin.eventsMgmt.orders.refundOutcomes.alreadyRefunded,
   notAdmissible: zhHk.Admin.eventsMgmt.orders.refundOutcomes.notAdmissible,
   providerFailed: zhHk.Admin.eventsMgmt.orders.refundOutcomes.providerFailed,
+  pending: zhHk.Admin.eventsMgmt.orders.refundOutcomes.pending,
   commitFailed: zhHk.Admin.eventsMgmt.orders.refundOutcomes.commitFailed,
   notFound: zhHk.Admin.eventsMgmt.orders.refundOutcomes.notFound,
 };
@@ -161,6 +163,14 @@ describe("submitRefundOrderAction", () => {
 
     expect(result).toEqual({status: "error", message: ZH_MESSAGES.commitFailed});
     expect(result).not.toEqual({status: "error", message: MESSAGES.commitFailed});
+    expect(cache.revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("reports a provider-accepted pending refund without saying it failed", async () => {
+    state.result = {status: "pending"};
+    const {submitRefundOrderAction} = await loadActions();
+    await expect(submitRefundOrderAction(EVENT_PATH, MESSAGES, {status: "idle"}, form()))
+      .resolves.toEqual({status: "ok", message: MESSAGES.pending});
     expect(cache.revalidatePath).not.toHaveBeenCalled();
   });
 

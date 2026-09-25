@@ -1,6 +1,6 @@
 import {describe, expect, it, vi} from "vitest";
 
-import {createTicketCheckInRepository, type SeatRow, type TicketCheckInTransaction} from "@/lib/db/repos/ticket-check-in";
+import {createTicketCheckInRepository, type PassView, type SeatRow, type TicketCheckInTransaction} from "@/lib/db/repos/ticket-check-in";
 
 const staff = {kind: "staff" as const, userId: "auth-1", profileId: "p-1"};
 const eventId = "8b7a6c5d-4e3f-2a1b-9c8d-7e6f5a4b3c2d";
@@ -45,33 +45,39 @@ function fake(overrides: Partial<{orderStatus: string; checkedInAt: Date | null;
   // never take the write lock.
   const readSeat = vi.fn(async () => row);
   const lockSeat = vi.fn(async () => row);
+  const lockEvent = vi.fn(async () => row?.eventStatus ?? null);
   const update = vi.fn(async () => undefined);
   const insertAudit = vi.fn(async () => undefined);
-  const transaction: TicketCheckInTransaction = {readSeat, lockSeat, update, insertAudit};
-  return {transaction, readSeat, lockSeat, update, insertAudit};
+  const transaction = {readSeat, lockEvent, lockSeat, update, insertAudit};
+  return {transaction, readSeat, lockEvent, lockSeat, update, insertAudit};
 }
 
 function repository(transaction: TicketCheckInTransaction) {
   return createTicketCheckInRepository({transaction: async (work) => work(transaction), now: () => occurredAt});
 }
 
+function view(overrides: Partial<PassView> = {}): PassView {
+  return {
+    seatId,
+    orderId,
+    eventId,
+    position: 1,
+    attendeeName: "Ada Lovelace",
+    checkedInAt: null,
+    eventTitleEn: "Tech Night",
+    eventTitleZh: "科技之夜",
+    eventSlug: "tech-night",
+    eventStartsAt: new Date("2026-10-01T10:00:00.000Z"),
+    eventVenue: "HKSTP",
+    buyerLocale: "zh-HK",
+    ...overrides,
+  };
+}
+
 describe("ticket check-in repository", () => {
-  it("passForSeat returns the seat facts for a paid order", async () => {
+  it("passForSeat returns an active result for a paid order", async () => {
     const {transaction, readSeat, lockSeat} = fake();
-    await expect(repository(transaction).passForSeat({seatId, eventId})).resolves.toEqual({
-      seatId,
-      orderId,
-      eventId,
-      position: 1,
-      attendeeName: "Ada Lovelace",
-      checkedInAt: null,
-      eventTitleEn: "Tech Night",
-      eventTitleZh: "科技之夜",
-      eventSlug: "tech-night",
-      eventStartsAt: new Date("2026-10-01T10:00:00.000Z"),
-      eventVenue: "HKSTP",
-      buyerLocale: "zh-HK",
-    });
+    await expect(repository(transaction).passForSeat({seatId, eventId})).resolves.toEqual({status: "active", view: view()});
     // A public read must not take the row lock, and it must select the seat it
     // was asked for — a wrong-seat selector would otherwise stay green.
     expect(readSeat).toHaveBeenCalledWith(seatId);
@@ -83,24 +89,37 @@ describe("ticket check-in repository", () => {
     "expired",
     "pending",
     "failed",
-  ])("passForSeat returns null for a %s order", async (orderStatus) => {
+  ])("passForSeat returns unavailable for a %s order", async (orderStatus) => {
     const {transaction} = fake({orderStatus});
-    await expect(repository(transaction).passForSeat({seatId, eventId})).resolves.toBeNull();
+    await expect(repository(transaction).passForSeat({seatId, eventId})).resolves.toEqual({status: "unavailable"});
   });
 
-  it("passForSeat returns null for a cancelled event", async () => {
+  it("passForSeat returns cancelled for a paid seat whose event was cancelled", async () => {
     const {transaction} = fake({eventStatus: "cancelled"});
-    await expect(repository(transaction).passForSeat({seatId, eventId})).resolves.toBeNull();
+    await expect(repository(transaction).passForSeat({seatId, eventId})).resolves.toEqual({status: "cancelled", view: view()});
   });
 
-  it("passForSeat returns null when the signed event id does not match the seat's", async () => {
+  // The sweep refunds a cancelled event's paid orders, so the steady state of a
+  // receipt link after cancellation is a refunded order under a cancelled event.
+  // If `refunded` won, the link would 404 again exactly when the buyer needs it.
+  it("passForSeat still returns cancelled after the sweep refunded the seat", async () => {
+    const {transaction} = fake({eventStatus: "cancelled", orderStatus: "refunded"});
+    await expect(repository(transaction).passForSeat({seatId, eventId})).resolves.toEqual({status: "cancelled", view: view()});
+  });
+
+  it("passForSeat returns unavailable for a never-paid seat of a cancelled event", async () => {
+    const {transaction} = fake({eventStatus: "cancelled", orderStatus: "pending"});
+    await expect(repository(transaction).passForSeat({seatId, eventId})).resolves.toEqual({status: "unavailable"});
+  });
+
+  it("passForSeat returns unavailable when the signed event id does not match the seat's", async () => {
     const {transaction} = fake({eventId: otherEventId});
-    await expect(repository(transaction).passForSeat({seatId, eventId})).resolves.toBeNull();
+    await expect(repository(transaction).passForSeat({seatId, eventId})).resolves.toEqual({status: "unavailable"});
   });
 
-  it("passForSeat returns null when the seat does not exist", async () => {
+  it("passForSeat returns unavailable when the seat does not exist", async () => {
     const {transaction} = fake({row: null});
-    await expect(repository(transaction).passForSeat({seatId, eventId})).resolves.toBeNull();
+    await expect(repository(transaction).passForSeat({seatId, eventId})).resolves.toEqual({status: "unavailable"});
   });
 
   it("checkInSeat sets checked_in_at and audits event.seat.checked_in", async () => {
@@ -120,6 +139,22 @@ describe("ticket check-in repository", () => {
     });
   });
 
+  it("locks the event before the seat and refuses a cancellation that won the race", async () => {
+    const calls: string[] = [];
+    const readSeat = vi.fn(async () => { calls.push("readSeat"); return seatRow(); });
+    const lockEvent = vi.fn(async () => { calls.push("lockEvent"); return "cancelled"; });
+    const lockSeat = vi.fn(async () => { calls.push("lockSeat"); return seatRow(); });
+    const update = vi.fn(async () => undefined);
+    const insertAudit = vi.fn(async () => undefined);
+    const transaction = {readSeat, lockEvent, lockSeat, update, insertAudit};
+
+    await expect(repository(transaction).checkInSeat(staff, {seatId})).resolves.toEqual({disposition: "not_admissible"});
+    expect(calls).toEqual(["readSeat", "lockEvent"]);
+    expect(lockEvent).toHaveBeenCalledWith(eventId);
+    expect(update).not.toHaveBeenCalled();
+    expect(insertAudit).not.toHaveBeenCalled();
+  });
+
   it("checkInSeat on an already-checked-in seat returns already_checked_in and writes nothing", async () => {
     const {transaction, update, insertAudit} = fake({checkedInAt: earlier});
     await expect(repository(transaction).checkInSeat(staff, {seatId})).resolves.toEqual({disposition: "already_checked_in"});
@@ -131,8 +166,9 @@ describe("ticket check-in repository", () => {
     let checkedInAt: Date | null = null;
     const update = vi.fn(async (_seatId: string, patch: Readonly<{checkedInAt: Date | null}>) => { checkedInAt = patch.checkedInAt; });
     const insertAudit = vi.fn(async () => undefined);
-    const transaction: TicketCheckInTransaction = {
+    const transaction = {
       readSeat: async () => seatRow({checkedInAt}),
+      lockEvent: async () => "published",
       lockSeat: async () => seatRow({checkedInAt}),
       update,
       insertAudit,

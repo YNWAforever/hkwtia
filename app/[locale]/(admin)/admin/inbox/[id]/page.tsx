@@ -32,7 +32,7 @@ export default async function AdminInboxThreadPage({params}: Props) {
   setRequestLocale(locale);
   const actor = await requireAdminPageActor();
   const t = await getTranslations({locale, namespace: "Admin.inbox"});
-  const transcript = await readTranscript(actor, id).catch(() => null);
+  const transcript = await readTranscript(actor, id);
   if (!transcript) notFound();
   const conversation = transcript.conversation;
 

@@ -62,11 +62,21 @@ import {
   eventReminderVariables,
 } from "@/lib/events/reminder-enrollment";
 import type {AppLocale} from "@/i18n/routing";
+import {runEventCancellationRefunds, type EventCancellationRefundSummary} from "@/lib/jobs/event-cancellation-refunds";
 import {JobRequestError, type PreparedJob} from "@/lib/jobs/handler";
+import {RUNNER_BATCH_LIMIT} from "@/lib/jobs/limits";
 import {approvedTemplateKeys} from "@/lib/whatsapp/approved-templates";
 
 const MAX_WORKER_ALERT_BYTES = 4_096;
-const RUNNER_BATCH_LIMIT = 100;
+
+/**
+ * Re-exported, not defined here, since Phase D-4d. The batch bound moved to
+ * `lib/jobs/limits.ts` so `lib/jobs/event-cancellation-refunds.ts` can read it
+ * without importing this module — this module imports that runner, so the old
+ * location would have closed an import cycle. The name stays exported here so
+ * existing callers keep working.
+ */
+export {RUNNER_BATCH_LIMIT};
 
 /**
  * Every member of the Worker's own `WorkerJob` union, and Phase C2 Task 10 is
@@ -75,11 +85,14 @@ const RUNNER_BATCH_LIMIT = 100;
  * `aiops-metrics` and `chat-retention` were missing, so three failed runs of
  * either produced a 400 `INVALID_WORKER_ALERT` and nobody was paged — the one
  * code path whose entire purpose is to be noticed. `whatsapp-send-queue` would
- * have been the ninth member of the same gap.
+ * have been the ninth member of the same gap. Phase D-4d scheduled the
+ * `event-cancellation-refunds` sweep, so it joins the vocabulary too: a
+ * scheduled job whose final failure the alert route refuses is a job nobody is
+ * paged about.
  *
  * Still an enum and never `z.string()`: the run key is a digest of this payload,
  * so an unbounded `job` is an unbounded set of claimable run keys.
- * `tests/unit/worker-alert-contract.test.ts` reads the union out of
+ * `tests/unit/worker-alert-contract.test.ts` reads `WORKER_JOBS` out of
  * `workers/src/index.ts` and asserts this list covers it.
  */
 const workerAlertSchema = z.object({
@@ -93,6 +106,7 @@ const workerAlertSchema = z.object({
     "aiops-metrics",
     "chat-retention",
     "whatsapp-send-queue",
+    "event-cancellation-refunds",
   ]),
   scheduledTime: z.string().min(1).max(64),
   attemptCount: z.number().int().min(1).max(3),
@@ -113,7 +127,8 @@ export type WorkerAlertPayload = Readonly<{
     | "board-reporter"
     | "aiops-metrics"
     | "chat-retention"
-    | "whatsapp-send-queue";
+    | "whatsapp-send-queue"
+    | "event-cancellation-refunds";
   scheduledTime: string;
   attemptCount: number;
   errorCode: "JOB_HTTP_ERROR" | "JOB_NETWORK_ERROR" | "JOB_TIMEOUT";
@@ -136,6 +151,8 @@ type ProductionRunnerOverrides = Partial<Readonly<{
   runBoardReporter(now: Date): Promise<unknown>;
   runAiOpsMetrics(now: Date): Promise<{refreshed: 1}>;
   runWhatsAppSendQueue(now: Date): Promise<unknown>;
+  /** No clock: the refund primitive reads its own when it commits. */
+  runEventCancellationRefunds(): Promise<unknown>;
   runWorkerAlert(payload: WorkerAlertPayload): Promise<unknown>;
 }>>;
 
@@ -248,6 +265,13 @@ export async function renderWorkerAlert(
   payload: WorkerAlertPayload,
 ): Promise<RenderedEmail> {
   const subject = "WTIA automation alert";
+  const earlyFailure = payload.attemptCount < 3;
+  const summary = earlyFailure
+    ? "A scheduled automation failed on its first attempt. The Worker will continue its retries."
+    : "A scheduled automation did not succeed after its bounded retries.";
+  const guidance = earlyFailure
+    ? "Review the affected work in the automation dashboard; the Worker is still retrying."
+    : "Review the automation dashboard before retrying manually.";
   const details = [
     ["Job", payload.job],
     ["Scheduled time", payload.scheduledTime],
@@ -263,9 +287,10 @@ export async function renderWorkerAlert(
   const text = [
     subject,
     "",
+    summary,
     ...details.map(([label, value]) => `${label}: ${value}`),
     "",
-    "Review the automation dashboard before retrying manually.",
+    guidance,
   ].join("\n");
   return {
     subject,
@@ -274,9 +299,9 @@ export async function renderWorkerAlert(
       '<main style="max-width:640px;margin:32px auto;padding:32px;background:#fff;border:1px solid #e2e8f0">',
       '<p style="color:#2563eb;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">WTIA</p>',
       `<h1 style="color:#0f172a">${subject}</h1>`,
-      '<p style="color:#475569">A scheduled automation did not succeed after its bounded retries.</p>',
+      `<p style="color:#475569">${summary}</p>`,
       `<table role="presentation" style="border-collapse:collapse;width:100%">${rows}</table>`,
-      '<p style="color:#475569">Review the automation dashboard before retrying manually.</p>',
+      `<p style="color:#475569">${guidance}</p>`,
       "</main></body></html>",
     ].join(""),
     text,
@@ -552,6 +577,10 @@ export async function runProductionRenewal(now: Date): Promise<unknown> {
   return runRenewalReconciliation(automationCronActor(), now);
 }
 
+export function runProductionEventCancellationRefunds(): Promise<EventCancellationRefundSummary> {
+  return runEventCancellationRefunds();
+}
+
 async function runProductionEngagement(now: Date): Promise<unknown> {
   return recomputeEngagementScores(automationCronActor(), now);
 }
@@ -643,6 +672,8 @@ export function createJobRunners(
     overrides.runAiOpsMetrics ?? runProductionAiOpsMetrics;
   const runWhatsAppSendQueue =
     overrides.runWhatsAppSendQueue ?? runProductionWhatsAppSendQueue;
+  const runEventCancellationRefunds =
+    overrides.runEventCancellationRefunds ?? runProductionEventCancellationRefunds;
   const runWorkerAlert = overrides.runWorkerAlert ?? sendWorkerAlert;
 
   return {
@@ -676,6 +707,9 @@ export function createJobRunners(
     },
     whatsappSendQueue(now: Date) {
       return runWhatsAppSendQueue(now);
+    },
+    eventCancellationRefunds() {
+      return runEventCancellationRefunds();
     },
     workerAlert(payload: WorkerAlertPayload) {
       return runWorkerAlert(payload);

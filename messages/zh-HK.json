@@ -342,12 +342,18 @@
       },
       "event_ticket_refunded": {
         "subject": "{eventTitle} 的退款",
-        "preview": "訂單 {orderId} 已退款。",
-        "heading": "款項已退回",
-        "body": "我們已就訂單 {orderId}（{eventTitle}）退回 HK${amount}。視乎銀行處理，款項可能需要數天才顯示。",
+        "preview": "訂單 {orderId} 的退款已提交。",
+        "heading": "退款正在處理",
+        "body": "我們已就訂單 {orderId}（{eventTitle}）提交 HK${amount} 的退款。視乎銀行處理，款項可能需要數天才顯示。",
         "cta": "查看活動"
       },
-      "event_ticket_pass": {
+      "event_ticket_refund_failed": {
+        "subject": "{eventTitle} 退款狀態更新",
+        "preview": "訂單 {orderId} 的退款未能完成。",
+        "heading": "你的退款需要進一步處理",
+        "body": "訂單 {orderId}（{eventTitle}）的 HK${amount} 退款未能完成。我們的團隊正跟進。如需協助，請與我們聯絡。",
+        "cta": "聯絡 WTIA"
+      },      "event_ticket_pass": {
         "subject": "{eventTitle} 的門票",
         "preview": "{attendeeName} 的專屬入場門票。",
         "heading": "{attendeeName}，這是你的門票",
@@ -1460,6 +1466,11 @@
       "open": "進行中",
       "past": "已結束"
     },
+    "cancelled": {
+      "heading": "此活動已取消",
+      "body": "此活動將不會舉行。任何已付款的訂單將獲全額退款。",
+      "refundPolicy": "查閱退款政策"
+    },
     "quickTabs": {
       "label": "按狀態篩選活動",
       "open": "現正開放",
@@ -1612,6 +1623,7 @@
       "SOLD_OUT": "剩餘座位不足以完成此訂單。",
       "EVENT_CLOSED": "本活動已截止售票。",
       "UNAVAILABLE": "暫時未能進行購票，請稍後再試。",
+      "RETRY_CHANGED": "購票資料已更改。請再次提交以開始新的付款程序。",
       "RATE_LIMITED": "此連線嘗試次數過多，請稍後再試。"
     }
   },
@@ -1621,7 +1633,12 @@
     "seat": "座位 {position}",
     "qrLabel": "報到二維碼",
     "checkedIn": "已報到",
-    "presentAtDoor": "請於現場出示此通行證。"
+    "presentAtDoor": "請於現場出示此通行證。",
+    "cancelled": {
+      "heading": "此活動已取消",
+      "body": "此活動將不會舉行。任何已付款的訂單將獲全額退款。",
+      "refundPolicy": "查閱退款政策"
+    }
   },
   "News": {
     "metaTitle": "消息｜WiseTech Hong Kong",
@@ -2868,6 +2885,7 @@
       "checkingIn": "簽到中……",
       "checkInSuccess": "已為參加者簽到。",
       "checkInError": "未能為參加者簽到，請再試一次。",
+      "checkInEventCancelled": "此活動已取消，無法為任何人簽到。",
       "resendPass": "重發門票",
       "resending": "正在傳送門票……",
       "resendSuccess": "門票電郵已發送。",
@@ -2903,6 +2921,23 @@
         "empty": "目前沒有等待審核的會員活動。",
         "error": "無法載入等待審核的會員活動。"
       },
+      "cancel": {
+        "heading": "取消活動",
+        "description": "取消後無法復原。所有已付款訂單將獲全額退款，活動會從公開列表移除，且無法再次發布。",
+        "button": "取消活動",
+        "keep": "保留活動",
+        "submitting": "取消中…",
+        "unavailable": "暫時無法載入退款金額。取消活動後仍會為所有已付款訂單退款。",
+        "cancelledNotice": "此活動已取消，所有已付款訂單正在退款。",
+        "confirm": "將為 {orders} 張已付款訂單退款 {amount}（{attendees} 位已付款參加者）。{registrants} 位報名者將不會收到電郵通知。此操作無法復原。",
+        "outcomes": {
+          "success": "活動已取消，所有已付款訂單將獲退款。",
+          "alreadyCancelled": "此活動已取消，因此沒有任何變更。",
+          "invalidTransition": "只有已發布的活動可以取消。",
+          "notFound": "找不到該活動。",
+          "error": "無法取消此活動，請再試一次。"
+        }
+      },
       "orders": {
         "heading": "訂單",
         "unavailable": "暫時無法載入訂單。",
@@ -2914,6 +2949,7 @@
         "status": "狀態",
         "refundedOn": "退款日期",
         "refund": "退款",
+        "recheckRefund": "重新查核退款",
         "cancel": "取消",
         "note": "備註",
         "confirm": "確定向 {buyer} 退款 {amount}（座位：{seats}）？",
@@ -2922,13 +2958,15 @@
           "paid": "已付款",
           "expired": "已過期",
           "failed": "失敗",
-          "refunded": "已退款"
+          "refunded": "已退款",
+          "refund_failed": "退款失敗，需職員跟進"
         },
         "refundOutcomes": {
           "refunded": "已退款。",
           "alreadyRefunded": "此訂單已經退款。",
           "notAdmissible": "此訂單並非已付款，沒有可退款項。",
-          "providerFailed": "退款未能完成，因此沒有從買家一方扣回任何款項。請再試一次。",
+          "providerFailed": "退款尚未完成。請檢查 Stripe，並安排新的退款或其他處理方法。",
+          "pending": "Stripe 已接受退款，現正等候完成。請先查核最終狀態，切勿直接重試。",
           "commitFailed": "付款服務商可能已退款，但我們無法在此記錄。請先向付款服務商查核，切勿直接重試。",
           "notFound": "找不到此訂單。"
         }

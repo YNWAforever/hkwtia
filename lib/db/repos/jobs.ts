@@ -10,6 +10,7 @@ import {
 } from "@/lib/auth/automation-actor";
 
 import type {WebhookLifecycleCommand} from "@/lib/billing/webhook-service";
+import type {CurrentSubscriptionState} from "@/lib/billing/stripe";
 import {auditEvents, billingAttempts, engagementEvents, jobs as jobsTable, journeyState, membershipApplications, memberships, type Job} from "@/lib/db/server-schema";
 import {getDb, requireSystem} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";
@@ -66,8 +67,7 @@ function isStale(command: WebhookLifecycleCommand, latest: Record<string, unknow
   const latestCreated = Number(latest.stripe_created);
   const latestEventId = latest.event_id;
   if (!Number.isSafeInteger(latestCreated) || typeof latestEventId !== "string") throw new Error("WEBHOOK_AUDIT_INVALID");
-  return command.eventCreated < latestCreated
-    || (command.eventCreated === latestCreated && command.eventId <= latestEventId);
+  return command.eventCreated < latestCreated;
 }
 
 function lifecycleSources(command: WebhookLifecycleCommand): readonly string[] {
@@ -75,7 +75,7 @@ function lifecycleSources(command: WebhookLifecycleCommand): readonly string[] {
     case "active": return ["pending_payment", "pending_review", "active", "past_due", "cancel_at_period_end"];
     case "past_due": return ["active", "past_due", "cancel_at_period_end"];
     case "cancel_at_period_end": return ["active", "past_due", "cancel_at_period_end"];
-    case "cancelled": return ["pending_review", "active", "past_due", "cancel_at_period_end", "cancelled"];
+    case "cancelled": return ["pending_payment", "pending_review", "active", "past_due", "cancel_at_period_end", "cancelled"];
     default: return [];
   }
 }
@@ -224,12 +224,12 @@ export const jobsRepository = {
     return rows[0] ?? null;
   },
 
-  async processWebhookLifecycle(actor: Actor, command: WebhookLifecycleCommand): Promise<"processed" | "duplicate"> {
+  async processWebhookLifecycle(actor: Actor, command: WebhookLifecycleCommand, currentSubscription?: (subscriptionId: string) => Promise<CurrentSubscriptionState>): Promise<"processed" | "duplicate"> {
     requireSystem(actor);
     const db = await getDb();
     try {
       return await db.transaction(async (tx) => {
-        const allowedSources = lifecycleSources(command);
+        const isCheckoutActivation = command.eventType === "checkout.session.completed" || command.eventType === "checkout.session.async_payment_succeeded";
         const claim = resultRow(await tx.execute(sql`INSERT INTO ${jobsTable}
           ("run_key", "kind", "state", "attempt_count")
           VALUES (${command.eventId}, ${command.eventType}, 'processing', 1)
@@ -249,10 +249,10 @@ export const jobsRepository = {
           WHERE ${memberships.id} = ${command.membershipId}
             AND ${memberships.applicationId} = ${command.applicationId}
             AND ${memberships.planCode} = ${command.planCode}
-            AND ((${command.eventType} = 'checkout.session.completed'
+            AND ((${isCheckoutActivation} = true
               AND (${memberships.stripeCustomerId} IS NULL OR ${memberships.stripeCustomerId} = ${command.stripeCustomerId})
               AND (${memberships.stripeSubscriptionId} IS NULL OR ${memberships.stripeSubscriptionId} = ${command.stripeSubscriptionId}))
-            OR (${command.eventType} <> 'checkout.session.completed'
+            OR (${isCheckoutActivation} = false
               AND ${memberships.stripeCustomerId} = ${command.stripeCustomerId}
               AND ${memberships.stripeSubscriptionId} = ${command.stripeSubscriptionId}))
           FOR UPDATE OF ${memberships}`));
@@ -265,9 +265,20 @@ export const jobsRepository = {
             AND ${auditEvents.action} IN ('stripe.webhook.processed', 'stripe.webhook.ignored_stale')
           ORDER BY stripe_created DESC, event_id DESC LIMIT 1`));
         const stale = isStale(command, latest);
+        let transition = command;
+        if (latest && Number(latest.stripe_created) === command.eventCreated) {
+          // Stripe event IDs do not order changes within one second. Read the
+          // current resource after the membership lock so concurrent deliveries
+          // cannot commit a stale snapshot after a newer one.
+          if (!currentSubscription) throw new Error("WEBHOOK_RECONCILIATION_UNAVAILABLE");
+          const current = await currentSubscription(command.stripeSubscriptionId);
+          if (current.stripeSubscriptionId !== command.stripeSubscriptionId ||
+              current.stripeCustomerId !== command.stripeCustomerId) throw new WebhookCorrelationError();
+          transition = {...command, ...current};
+        }
 
         let attemptId: string | null = null;
-        if (command.eventType === 'checkout.session.completed') {
+        if (isCheckoutActivation) {
           const attempt = resultRow(await tx.execute(sql`SELECT ${billingAttempts.id} AS attempt_id
             FROM ${billingAttempts}
             WHERE ${billingAttempts.membershipId} = ${command.membershipId}
@@ -279,15 +290,15 @@ export const jobsRepository = {
         }
 
         const currentStatus = requiredString(membership, "status");
-        if (!stale && !allowedSources.includes(currentStatus)) throw new WebhookCorrelationError();
+        if (!stale && !lifecycleSources(transition).includes(currentStatus)) throw new WebhookCorrelationError();
         if (!stale) {
           const updated = resultRow(await tx.execute(sql`UPDATE ${memberships}
-            SET "status" = ${command.nextStatus}::membership_status,
+            SET "status" = ${transition.nextStatus}::membership_status,
                 "stripe_customer_id" = ${command.stripeCustomerId},
                 "stripe_subscription_id" = ${command.stripeSubscriptionId},
-                "billing_period_start" = COALESCE(${command.billingPeriodStart}, ${memberships.billingPeriodStart}),
-                "billing_period_end" = COALESCE(${command.billingPeriodEnd}, ${memberships.billingPeriodEnd}),
-                "cancel_at_period_end" = ${command.cancelAtPeriodEnd}, "updated_at" = now()
+                "billing_period_start" = COALESCE(${transition.billingPeriodStart}, ${memberships.billingPeriodStart}),
+                "billing_period_end" = COALESCE(${transition.billingPeriodEnd}, ${memberships.billingPeriodEnd}),
+                "cancel_at_period_end" = ${transition.cancelAtPeriodEnd}, "updated_at" = now()
             WHERE ${memberships.id} = ${command.membershipId}
             RETURNING ${memberships.id} AS membership_id`));
           if (!updated) throw new Error("WEBHOOK_MUTATION_FAILED");
@@ -298,7 +309,7 @@ export const jobsRepository = {
               RETURNING ${billingAttempts.id} AS attempt_id`));
             if (!completedAttempt) throw new Error("WEBHOOK_MUTATION_FAILED");
           }
-          await insertWebhookLifecycleEnrollment(actor, tx, command, membership);
+          await insertWebhookLifecycleEnrollment(actor, tx, transition, membership);
         }
 
         if (command.isRenewal && (command.eventType === 'invoice.paid' || command.eventType === 'invoice.payment_failed')) {
@@ -343,7 +354,7 @@ export const jobsRepository = {
         const audit = resultRow(await tx.execute(sql`INSERT INTO ${auditEvents}
           ("actor_type", "action", "target_type", "target_id", "request_id", "metadata")
           VALUES ('system', ${action}, 'membership', ${command.membershipId}, ${command.eventId},
-            jsonb_build_object('eventType', ${command.eventType}::text, 'stripeCreated', ${command.eventCreated}::bigint, 'eventId', ${command.eventId}::text, 'status', ${command.nextStatus}::text))
+            jsonb_build_object('eventType', ${command.eventType}::text, 'stripeCreated', ${command.eventCreated}::bigint, 'eventId', ${command.eventId}::text, 'status', ${transition.nextStatus}::text))
           RETURNING ${auditEvents.id} AS audit_id`));
         if (!audit) throw new Error("WEBHOOK_MUTATION_FAILED");
         const completed = resultRow(await tx.execute(sql`UPDATE ${jobsTable}

@@ -342,12 +342,18 @@
       },
       "event_ticket_refunded": {
         "subject": "Your refund for {eventTitle}",
-        "preview": "Order {orderId} has been refunded.",
-        "heading": "Your payment has been returned",
-        "body": "We have refunded HK${amount} for order {orderId} ({eventTitle}). Depending on your bank, it can take a few days to appear.",
+        "preview": "A refund has been submitted for order {orderId}.",
+        "heading": "Your refund is in progress",
+        "body": "We have submitted a refund of HK${amount} for order {orderId} ({eventTitle}). Your bank may take a few days to display the credit.",
         "cta": "View the event"
       },
-      "event_ticket_pass": {
+      "event_ticket_refund_failed": {
+        "subject": "Update on your refund for {eventTitle}",
+        "preview": "The refund for order {orderId} did not complete.",
+        "heading": "Your refund needs further attention",
+        "body": "The refund of HK${amount} for order {orderId} ({eventTitle}) did not complete. Our team is reviewing it. Please contact us if you need help.",
+        "cta": "Contact WTIA"
+      },      "event_ticket_pass": {
         "subject": "Your pass for {eventTitle}",
         "preview": "Your personal entry pass, {attendeeName}.",
         "heading": "Your pass, {attendeeName}",
@@ -1460,6 +1466,11 @@
       "open": "Open",
       "past": "Past"
     },
+    "cancelled": {
+      "heading": "This event has been cancelled",
+      "body": "This event will not take place. Any paid order is refunded in full.",
+      "refundPolicy": "Read our refund policy"
+    },
     "quickTabs": {
       "label": "Filter events by status",
       "open": "Open now",
@@ -1612,6 +1623,7 @@
       "SOLD_OUT": "There are not enough seats left for this order.",
       "EVENT_CLOSED": "Ticket sales for this event have closed.",
       "UNAVAILABLE": "Ticket checkout is not available right now. Please try again shortly.",
+      "RETRY_CHANGED": "Your purchase details changed. Submit again to start a new checkout.",
       "RATE_LIMITED": "Too many attempts from this connection. Try again in a few minutes."
     }
   },
@@ -1621,7 +1633,12 @@
     "seat": "Seat {position}",
     "qrLabel": "Check-in QR code",
     "checkedIn": "Checked in",
-    "presentAtDoor": "Present this pass at the door."
+    "presentAtDoor": "Present this pass at the door.",
+    "cancelled": {
+      "heading": "This event has been cancelled",
+      "body": "This event will not take place. Any paid order is refunded in full.",
+      "refundPolicy": "Read our refund policy"
+    }
   },
   "News": {
     "metaTitle": "News | WiseTech Hong Kong",
@@ -2867,6 +2884,7 @@
       "checkingIn": "Checking in...",
       "checkInSuccess": "Attendee checked in.",
       "checkInError": "We could not check in this attendee. Please try again.",
+      "checkInEventCancelled": "This event is cancelled, so nobody can be checked in.",
       "resendPass": "Resend pass",
       "resending": "Sending pass...",
       "resendSuccess": "Pass email sent.",
@@ -2902,6 +2920,23 @@
         "empty": "No member events are waiting for review.",
         "error": "Member events awaiting review could not be loaded."
       },
+      "cancel": {
+        "heading": "Cancel event",
+        "description": "Cancelling is final. Every paid order is refunded in full, the event leaves the public listing, and it cannot be published again.",
+        "button": "Cancel event",
+        "keep": "Keep event",
+        "submitting": "Cancelling...",
+        "unavailable": "The refund cost could not be loaded right now. Cancelling will still refund every paid order.",
+        "cancelledNotice": "This event has been cancelled. Every paid order is being refunded.",
+        "confirm": "Refund {orders} paid orders for {amount} ({attendees} paid attendees). {registrants} RSVP registrants will not be emailed. This cannot be undone.",
+        "outcomes": {
+          "success": "Event cancelled. Every paid order will be refunded.",
+          "alreadyCancelled": "This event was already cancelled, so nothing changed.",
+          "invalidTransition": "Only a published event can be cancelled.",
+          "notFound": "That event could not be found.",
+          "error": "We could not cancel this event. Please try again."
+        }
+      },
       "orders": {
         "heading": "Orders",
         "unavailable": "Orders could not be loaded right now.",
@@ -2913,6 +2948,7 @@
         "status": "Status",
         "refundedOn": "Refunded on",
         "refund": "Refund",
+        "recheckRefund": "Recheck refund",
         "cancel": "Cancel",
         "note": "Note",
         "confirm": "Refund {buyer}'s seats ({seats}) for {amount}?",
@@ -2921,13 +2957,15 @@
           "paid": "Paid",
           "expired": "Expired",
           "failed": "Failed",
-          "refunded": "Refunded"
+          "refunded": "Refunded",
+          "refund_failed": "Refund failed — staff follow-up needed"
         },
         "refundOutcomes": {
           "refunded": "Refunded.",
           "alreadyRefunded": "This order was already refunded.",
           "notAdmissible": "This order is not payable, so there is nothing to refund.",
-          "providerFailed": "The refund did not go through, so nothing was charged back. You can try again.",
+          "providerFailed": "The refund has not been completed. Check Stripe and arrange a new refund or another remedy before closing this order.",
+          "pending": "Stripe accepted the refund and it is pending. Check its final status before retrying.",
           "commitFailed": "The payment provider may have refunded this order, but we could not record it here. Check the payment provider before trying again.",
           "notFound": "That order could not be found."
         }

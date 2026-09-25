@@ -1,15 +1,27 @@
 /// <reference types="@cloudflare/workers-types" />
 
-export type WorkerJob =
-  | "aiops-metrics"
-  | "journey-runner"
-  | "approvals-expirer"
-  | "renewal-runner"
-  | "engagement-score"
-  | "chat-retention"
-  | "retention-analyst"
-  | "board-reporter"
-  | "whatsapp-send-queue";
+/**
+ * Every job the Worker may invoke, declared as a value rather than a bare type
+ * so a test can enumerate it. A member added here but absent from
+ * `JOBS_BY_CRON` is a job the Worker never runs: the event-cancellation refund
+ * sweep shipped exactly that way, with a live route and no trigger, so its
+ * headline promise was silently inert until review. `WORKER_JOBS` and
+ * `JOBS_BY_CRON` move together, and `tests/worker.test.ts` fails if they drift.
+ */
+export const WORKER_JOBS = [
+  "aiops-metrics",
+  "journey-runner",
+  "approvals-expirer",
+  "renewal-runner",
+  "engagement-score",
+  "chat-retention",
+  "retention-analyst",
+  "board-reporter",
+  "whatsapp-send-queue",
+  "event-cancellation-refunds",
+] as const;
+
+export type WorkerJob = typeof WORKER_JOBS[number];
 
 export type WorkerEnv = Readonly<{
   APP_URL: string;
@@ -63,14 +75,34 @@ export const AI_REQUEST_TIMEOUT_MS = 240_000;
  * dispatcher has to answer with `provider_acceptance_uncertain`.
  */
 export const QUEUE_REQUEST_TIMEOUT_MS = 30_000;
+/**
+ * Phase D-4d whole-branch finding. The cancellation sweep refunds up to
+ * `RUNNER_BATCH_LIMIT` (100) orders in one pass, each a sequential Stripe round
+ * trip; that does not fit in the ten-second default, and the default is not a
+ * free ceiling — the batch has already done work when it aborts. Thirty seconds
+ * matches the `QUEUE_REQUEST_TIMEOUT_MS` precedent for "a batch of provider
+ * round-trips does not fit in 10s".
+ *
+ * A batch larger than fits in the window is not lost: the refund commit is
+ * conditional on `status = 'paid'` and the provider call carries a deterministic
+ * per-order key, so the next hourly run picks up whatever stayed `paid` and
+ * re-issuing an already-refunded order is a no-op.
+ */
+export const CANCELLATION_REFUND_TIMEOUT_MS = 30_000;
 const RETRY_DELAYS = [250, 1_000] as const;
 const ATTEMPT_COUNT = 3;
 const BASE_JOBS = [
   "aiops-metrics",
   "approvals-expirer",
   "journey-runner",
+  "event-cancellation-refunds",
 ] as const satisfies readonly WorkerJob[];
-const JOBS_BY_CRON = {
+/**
+ * Exported so a test can prove every `WorkerJob` appears here: a job declared
+ * but never scheduled is dead code, and nothing about the route, its runner or
+ * its type would say so.
+ */
+export const JOBS_BY_CRON = {
   "0 * * * *": BASE_JOBS,
   "0 2 * * *": ["renewal-runner"],
   "0 18 * * *": ["engagement-score"],
@@ -92,6 +124,7 @@ const REQUEST_TIMEOUT_BY_JOB = {
   "retention-analyst": AI_REQUEST_TIMEOUT_MS,
   "board-reporter": AI_REQUEST_TIMEOUT_MS,
   "whatsapp-send-queue": QUEUE_REQUEST_TIMEOUT_MS,
+  "event-cancellation-refunds": CANCELLATION_REFUND_TIMEOUT_MS,
 } as const satisfies Readonly<Record<WorkerJob, number>>;
 
 class WorkerConfigError extends Error {
@@ -239,17 +272,18 @@ function logSanitized(
   }
 }
 
-async function notifyFinalFailure(
+async function notifyFailure(
   job: WorkerJob,
   scheduledTime: string,
   errorCode: JobFailureCode,
+  attemptCount: number,
   config: ValidConfig,
   dependencies: WorkerDependencies,
 ): Promise<void> {
   const payload = {
     job,
     scheduledTime,
-    attemptCount: ATTEMPT_COUNT,
+    attemptCount,
     errorCode,
   } as const;
 
@@ -321,17 +355,20 @@ async function invokeJob(
       finalErrorCode = exceptionCode(error);
     }
 
+    // A refund batch can fail for one order, then succeed on the next retry
+    // after deferring that order. Preserve the first failure as an alert.
+    if (job === "event-cancellation-refunds" && attempt === 1) {
+      await notifyFailure(
+        job, scheduledTime, finalErrorCode, attempt, config, dependencies,
+      );
+    }
     if (attempt < ATTEMPT_COUNT) {
       await dependencies.sleep(RETRY_DELAYS[attempt - 1]);
     }
   }
 
-  await notifyFinalFailure(
-    job,
-    scheduledTime,
-    finalErrorCode,
-    config,
-    dependencies,
+  await notifyFailure(
+    job, scheduledTime, finalErrorCode, ATTEMPT_COUNT, config, dependencies,
   );
 }
 

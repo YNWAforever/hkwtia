@@ -13,6 +13,7 @@ const routeFiles = [
   "app/api/jobs/aiops-metrics/route.ts",
   "app/api/jobs/board-reporter/route.ts",
   "app/api/jobs/chat-retention/route.ts",
+  "app/api/jobs/event-cancellation-refunds/route.ts",
   "app/api/jobs/retention-analyst/route.ts",
   // Phase C2 Task 10 (C-5, D-10). This tuple is hand-maintained and discovers
   // nothing, so a route added without a line here ships uncovered by the

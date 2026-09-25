@@ -21,7 +21,7 @@ type TicketEmailDependencies = Readonly<{
 export type TicketProcessorDependencies = Readonly<{
   orders: Pick<EventOrdersRepository, "settlePaid" | "expireBySession" | "eventSummary" | "seatsOfOrder" | "orderSeats" | "seatForPass">;
   /** The deterministic key makes a retried refund safe to re-issue. */
-  refundPaymentIntent: (paymentIntentId: string, idempotencyKey: string) => Promise<void>;
+  refundPaymentIntent: (paymentIntentId: string, idempotencyKey: string, orderId: string) => Promise<void>;
   email: TicketEmailDependencies;
   /** For the receipt's "view the event" link, built from the order's own locale. */
   appUrl: string;
@@ -52,7 +52,7 @@ function formatEventDate(value: Date, locale: "en" | "zh-HK"): string {
 
 type EventSummary = Readonly<{title: string; startsAt: Date; slug: string; venue: string | null}>;
 
-type TicketEmailTemplate = "event_ticket_confirmation" | "event_ticket_refunded" | "event_ticket_pass";
+type TicketEmailTemplate = "event_ticket_confirmation" | "event_ticket_refunded" | "event_ticket_refund_failed" | "event_ticket_pass";
 
 /**
  * Overrides for the per-attendee pass: the receipt is the buyer's, so its
@@ -185,15 +185,29 @@ export async function sendSeatPass(
 export async function sendOrderRefundEmail(
   order: OrderRecord,
   dependencies: TicketProcessorDependencies = ticketProcessorDependencies(),
+  idempotencyKey?: string,
 ): Promise<void> {
   try {
     // `eventSummary` throws *before* `sendTicketEmail`'s own catch, and a refund
     // email with no event is still better than none, so the read is inside this
     // guard rather than left to escape.
     const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
-    await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
+    await sendTicketEmail(dependencies, "event_ticket_refunded", order, event, {idempotencyKey});
   } catch (error) {
     dependencies.onEmailError?.(error, {orderId: order.id, template: "event_ticket_refunded"});
+  }
+}
+
+/** Notify the buyer after a failed refund attempt, whether or not a success notice preceded it. */
+export async function sendOrderRefundFailureEmail(order: OrderRecord, eventId: string, dependencies: TicketProcessorDependencies = ticketProcessorDependencies()): Promise<void> {
+  try {
+    const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
+    await sendTicketEmail(dependencies, "event_ticket_refund_failed", order, event, {
+      ctaUrl: `${dependencies.appUrl}${localizedPath(order.buyerLocale, "/contact")}`,
+      idempotencyKey: `ticket-refund-failed:${order.id}:${eventId}`,
+    });
+  } catch (error) {
+    dependencies.onEmailError?.(error, {orderId: order.id, template: "event_ticket_refund_failed"});
   }
 }
 
@@ -209,7 +223,7 @@ let defaultDependencies: TicketProcessorDependencies | undefined;
 export function ticketProcessorDependencies(): TicketProcessorDependencies {
   defaultDependencies ??= {
     orders: eventOrdersRepository,
-    refundPaymentIntent: (paymentIntentId, idempotencyKey) => stripeBillingAdapter().refundPaymentIntent(paymentIntentId, idempotencyKey),
+    refundPaymentIntent: (paymentIntentId, idempotencyKey, orderId) => stripeBillingAdapter().refundPaymentIntent(paymentIntentId, idempotencyKey, {orderId}),
     email: {renderEmail, transport: createConfiguredEmailTransport(), emailFrom: emailEnv().emailFrom},
     appUrl: appEnv().appUrl,
     passSecret: ticketPassEnv().ticketPassTokenSecret,
@@ -253,15 +267,14 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
         // `refund_due`: the session was paid in the moment our hold lapsed, or a
         // refund we committed but whose provider call failed.
         // Either way the whole charge is returned, never a partial credit.
-        if (command.paymentIntentId) {
-          // Re-issuing is safe: the deterministic key makes a redelivery after a
-          // failed provider call refund the same payment intent once, not twice.
-          await dependencies.refundPaymentIntent(command.paymentIntentId, `ticket-refund:${order.id}`);
-          // Only promise what actually happened — a settlement with no payment
-          // intent issues no refund, so it must send no refund email either.
-          const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
-          await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
-        }
+        // A committed refund-due state with no provider intent is unfinished
+        // work. Make Stripe retry instead of permanently acknowledging it.
+        if (!command.paymentIntentId) throw new Error("TICKET_PAYMENT_INTENT_MISSING");
+        // Re-issuing is safe: the deterministic key makes a redelivery after a
+        // failed provider call refund the same payment intent once, not twice.
+        await dependencies.refundPaymentIntent(command.paymentIntentId, `ticket-refund:${order.id}`, order.id);
+        const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
+        await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
         return "processed";
       }
       if (settlement.status === "paid") {

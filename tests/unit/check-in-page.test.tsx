@@ -68,7 +68,7 @@ function seat(overrides: Partial<PassView> = {}): PassView {
 function loader(overrides: Partial<CheckInPageDependencies> = {}) {
   return createCheckInLoader({
     verify: () => claims,
-    passForSeat: async () => seat(),
+    passForSeat: async () => ({status: "active", view: seat()}),
     ...overrides,
   });
 }
@@ -94,19 +94,25 @@ describe("the check-in loader", () => {
   it("resolves already_checked_in once the seat carries a check-in time", async () => {
     const checkedInAt = new Date("2026-09-16T01:00:00.000Z");
 
-    await expect(loader({passForSeat: async () => seat({checkedInAt})})("tok"))
+    await expect(loader({passForSeat: async () => ({status: "active", view: seat({checkedInAt})})})("tok"))
       .resolves.toEqual({state: "already_checked_in", seat: seat({checkedInAt})});
   });
 
   it("resolves null for an invalid token, before reading any seat", async () => {
-    const passForSeat = vi.fn(async () => seat());
+    const passForSeat = vi.fn(async () => ({status: "active" as const, view: seat()}));
 
     await expect(loader({verify: () => null, passForSeat})("bad")).resolves.toBeNull();
     expect(passForSeat).not.toHaveBeenCalled();
   });
 
-  it("resolves null for a seat that is inadmissible or does not exist", async () => {
-    await expect(loader({passForSeat: async () => null})("tok")).resolves.toBeNull();
+  it("resolves null for an unavailable seat", async () => {
+    await expect(loader({passForSeat: async () => ({status: "unavailable"})})("tok")).resolves.toBeNull();
+  });
+
+  // The pass page explains a cancelled event; the check-in must not. A cancelled
+  // seat resolves to null here, so the staff surface 404s and nobody is admitted.
+  it("resolves null for a cancelled event's seat", async () => {
+    await expect(loader({passForSeat: async () => ({status: "cancelled", view: seat()})})("tok")).resolves.toBeNull();
   });
 });
 

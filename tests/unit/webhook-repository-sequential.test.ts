@@ -86,6 +86,15 @@ describe("sequential production webhook transaction", () => {
     expect(script.committed()).toBe(true);
   });
 
+  it("claims the original Checkout attempt on delayed payment success", async () => {
+    const script = scriptedDatabase([claimed, locked, noLatest, attempt, membershipUpdated, attemptUpdated, journeyInserted, audited, completed]);
+    database.current = script.db;
+    const delayed = {...command, eventType: "checkout.session.async_payment_succeeded" as const};
+    await expect(jobsRepository.processWebhookLifecycle(systemActor("stripe-webhook"), delayed)).resolves.toBe("processed");
+    expect(script.statements[3]).toMatch(/active[\s\S]*cs_test_m1_checkout[\s\S]*for update/);
+    expect(script.statements[5]).toContain("attempt-1");
+    expect(script.statements).toHaveLength(9);
+  });
   it("returns duplicate after only the claim statement for a completed or in-flight event", async () => {
     const script = scriptedDatabase([{rows: []}]);
     database.current = script.db;
@@ -139,25 +148,25 @@ describe("sequential production webhook transaction", () => {
     expect(script.statements[4]).toContain("stripe.webhook.ignored_stale");
   });
 
-  it("uses event ID as a deterministic tiebreaker for contradictory same-second events", async () => {
-    const higher = scriptedDatabase([
-      claimed, locked, {rows: [{stripe_created: 100, event_id: "evt_a"}]}, attempt,
-      membershipUpdated, attemptUpdated, journeyInserted, audited, completed,
-    ]);
-    database.current = higher.db;
-    await expect(jobsRepository.processWebhookLifecycle(systemActor("stripe-webhook"), {...command, eventId: "evt_z"})).resolves.toBe("processed");
-    expect(higher.statements[6]).toContain("jsonb_to_recordset");
-    expect(higher.statements[7]).toContain("stripe.webhook.processed");
-
-    const lower = scriptedDatabase([
-      claimed, locked, {rows: [{stripe_created: 100, event_id: "evt_z"}]}, attempt, audited, completed,
-    ]);
-    database.current = lower.db;
-    await expect(jobsRepository.processWebhookLifecycle(systemActor("stripe-webhook"), {...command, eventId: "evt_a"})).resolves.toBe("processed");
-    expect(lower.statements[4]).toContain("stripe.webhook.ignored_stale");
-    expect(lower.statements).toHaveLength(6);
+  it("reconciles both event-ID orders against Stripe when events share one second", async () => {
+    for (const [incomingId, previousId] of [["evt_z", "evt_a"], ["evt_a", "evt_z"]] as const) {
+      const script = scriptedDatabase([
+        claimed, {rows: [{membership_id: membershipId, status: "active", profile_id: "profile-1", company_id: null}]}, {rows: [{stripe_created: 100, event_id: previousId}]}, attempt,
+        membershipUpdated, attemptUpdated, journeyInserted, audited, completed,
+      ]);
+      database.current = script.db;
+      const current = vi.fn(async () => ({
+        stripeSubscriptionId: subscriptionId, stripeCustomerId: customerId,
+        nextStatus: "past_due" as const, cancelAtPeriodEnd: false,
+        billingPeriodStart: null, billingPeriodEnd: null,
+      }));
+      await expect(jobsRepository.processWebhookLifecycle(systemActor("stripe-webhook"), {...command, eventId: incomingId}, current))
+        .resolves.toBe("processed");
+      expect(current).toHaveBeenCalledWith(subscriptionId);
+      expect(script.statements[4]).toContain("past_due");
+      expect(script.statements[7]).toContain("stripe.webhook.processed");
+    }
   });
-
   it("rolls back membership state and stops before audit or job completion when journey insertion fails", async () => {
     const statements: string[] = [];
     const committedMembership = {status: "pending_payment"};

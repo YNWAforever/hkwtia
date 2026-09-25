@@ -57,3 +57,18 @@ export const PHASE_C_JOB_KINDS = [
 ] as const;
 
 export type PhaseCJobKind = typeof PHASE_C_JOB_KINDS[number];
+
+/**
+ * A group of its own, for the reason PHASE_C_JOB_KIND records: a member added to
+ * `M3_AUTOMATION_JOB_KINDS` is interpolated into `jobs_automation_recent_idx`'s
+ * partial predicate, so the next generated migration emits an unintended DROP
+ * INDEX / CREATE INDEX and two contract tests go red for a reason unrelated to
+ * this job.
+ */
+export const PHASE_D_JOB_KIND = {
+  EVENT_CANCELLATION_REFUNDS: "event-cancellation-refunds",
+} as const;
+
+export const PHASE_D_JOB_KINDS = [PHASE_D_JOB_KIND.EVENT_CANCELLATION_REFUNDS] as const;
+
+export type PhaseDJobKind = typeof PHASE_D_JOB_KINDS[number];

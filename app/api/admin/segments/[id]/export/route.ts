@@ -9,7 +9,8 @@ export async function GET(_request: Request, {params}: Props): Promise<Response>
   const actor = await requireAdminActor().catch(() => null);
   const id = segmentIdSchema.safeParse((await params).id);
   if (!actor || !id.success) return new Response(null, {status: 404});
-  const segment = await segmentsRepository.get(actor, id.data).catch(() => null);
+  const segment = await segmentsRepository.get(actor, id.data).catch(() => undefined);
+  if (segment === undefined) return new Response(null, {status: 500});
   if (!segment) return new Response(null, {status: 404});
 
   // C-6. One clock for the whole export. `renewalWithinDays` and

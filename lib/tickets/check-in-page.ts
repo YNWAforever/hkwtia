@@ -1,7 +1,7 @@
 import "server-only";
 
 import {ticketPassEnv} from "@/lib/config/env";
-import {ticketCheckInRepository, type PassView} from "@/lib/db/repos/ticket-check-in";
+import {ticketCheckInRepository, type PassSeatResult, type PassView} from "@/lib/db/repos/ticket-check-in";
 import {verifyPassToken, type PassClaims} from "@/lib/tickets/pass-token";
 
 export type CheckInState = "ready" | "already_checked_in";
@@ -10,7 +10,7 @@ export type CheckInPageData = Readonly<{state: CheckInState; seat: PassView}>;
 
 export type CheckInPageDependencies = Readonly<{
   verify: (token: string) => PassClaims | null;
-  passForSeat: (claims: PassClaims) => Promise<PassView | null>;
+  passForSeat: (claims: PassClaims) => Promise<PassSeatResult>;
 }>;
 
 /**
@@ -21,11 +21,13 @@ export function createCheckInLoader(dependencies: CheckInPageDependencies) {
   return async function loadCheckIn(token: string): Promise<CheckInPageData | null> {
     const claims = dependencies.verify(token);
     if (!claims) return null;
-    const seat = await dependencies.passForSeat(claims);
-    // `passForSeat` already refuses a non-paid, refunded or cancelled seat, so a
-    // seat that arrives here is admissible; the two states left are which side
-    // of the check-in it is on.
-    if (!seat) return null;
+    const result = await dependencies.passForSeat(claims);
+    // Only an `active` seat can be admitted. A cancelled event's seat resolves
+    // to null here as well, so the check-in 404s and nobody is let into an
+    // event that is not happening; the public pass page, not this surface, is
+    // where the cancellation is explained.
+    if (result.status !== "active") return null;
+    const seat = result.view;
     return {state: seat.checkedInAt ? "already_checked_in" : "ready", seat};
   };
 }

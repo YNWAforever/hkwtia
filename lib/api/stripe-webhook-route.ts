@@ -8,18 +8,31 @@ import {processStripeEvent, WebhookInputError} from "@/lib/billing/webhook-servi
 import type {TicketProcessor} from "@/lib/billing/webhook-service";
 import {billingEnv} from "@/lib/config/env";
 import type {Actor} from "@/lib/membership/lifecycle";
+import {BoundedBodyError, readBoundedText} from "@/lib/security/bounded-body";
 
 type Dependencies = Readonly<{
   constructEvent(rawBody: string, signature: string): Stripe.Event;
   processEvent(event: Stripe.Event): Promise<"processed" | "duplicate">;
 }>;
 
+const MAX_STRIPE_WEBHOOK_BODY_BYTES = 1_048_576;
+
 export function createWebhookPost(dependencies: Dependencies) {
   return async function post(request: Request): Promise<Response> {
     const signature = request.headers.get("stripe-signature");
     if (!signature) return Response.json({error: "INVALID_SIGNATURE"}, {status: 400});
 
-    const rawBody = await request.text();
+    let rawBody: string;
+    try {
+      rawBody = await readBoundedText(request, MAX_STRIPE_WEBHOOK_BODY_BYTES);
+    } catch (error) {
+      if (error instanceof BoundedBodyError) {
+        return Response.json({error: error.reason === "TOO_LARGE" ? "BODY_TOO_LARGE" : "INVALID_BODY"}, {
+          status: error.reason === "TOO_LARGE" ? 413 : 400,
+        });
+      }
+      return Response.json({error: "BODY_READ_FAILED"}, {status: 400});
+    }
     let event: Stripe.Event;
     try {
       event = dependencies.constructEvent(rawBody, signature);
