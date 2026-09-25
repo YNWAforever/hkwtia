@@ -55,13 +55,13 @@ export function createPublicPostsRepository(loadDatabase: DatabaseLoader = getDb
   return {
     async listPublishedBuildLogs(asOf = new Date()) {
       const database = await loadDatabase();
-      const rows = await database.select({slug: posts.slug, titleEn: posts.titleEn, titleZh: posts.titleZh, publishedAt: posts.publishedAt, author: posts.author}).from(posts).where(and(eq(posts.kind, "buildlog"), isNotNull(posts.publishedAt), lte(posts.publishedAt, asOf))).orderBy(desc(posts.publishedAt), asc(posts.slug));
+      const rows = await database.select({slug: posts.slug, titleEn: posts.titleEn, titleZh: posts.titleZh, publishedAt: posts.publishedAt, author: posts.author}).from(posts).where(and(eq(posts.kind, "buildlog"), isNotNull(posts.publishedAt), lte(posts.publishedAt, asOf), isNull(posts.archivedAt))).orderBy(desc(posts.publishedAt), asc(posts.slug));
       return publishedBuildLogSummaryRowSchema.array().parse(rows);
     },
     async getPublishedBuildLogBySlug(slug, asOf = new Date()) {
       const parsedSlug = parsePublishedBuildLogSlug(slug);
       const database = await loadDatabase();
-      const rows = await database.select({slug: posts.slug, titleEn: posts.titleEn, titleZh: posts.titleZh, publishedAt: posts.publishedAt, author: posts.author, bodyMdx: posts.bodyMdx}).from(posts).where(and(eq(posts.kind, "buildlog"), isNotNull(posts.publishedAt), lte(posts.publishedAt, asOf), eq(posts.slug, parsedSlug))).limit(1);
+      const rows = await database.select({slug: posts.slug, titleEn: posts.titleEn, titleZh: posts.titleZh, publishedAt: posts.publishedAt, author: posts.author, bodyMdx: posts.bodyMdx}).from(posts).where(and(eq(posts.kind, "buildlog"), isNotNull(posts.publishedAt), lte(posts.publishedAt, asOf), isNull(posts.archivedAt), eq(posts.slug, parsedSlug))).limit(1);
       return rows[0] ? publishedBuildLogDetailRowSchema.parse(rows[0]) : null;
     },
     async listPublishedNews(locale, asOf = new Date(), options = {}) {

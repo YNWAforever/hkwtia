@@ -108,13 +108,14 @@ describe("published posts through news routes", () => {
     expect(screen.getByText("translated:emptyTitle")).toBeInTheDocument();
   });
 
-  it("degrades to the empty state when the database is unavailable", async () => {
+  it("shows the unavailable state when both database reads fail", async () => {
     publicPosts.listPublishedNews.mockRejectedValueOnce(new Error("DB_DOWN"));
     publicPosts.listPublishedBuildLogs.mockRejectedValueOnce(new Error("DB_DOWN"));
 
     render(await NewsPage({params: Promise.resolve({locale: "en"})}));
 
-    expect(screen.getByText("translated:emptyTitle")).toBeInTheDocument();
+    expect(screen.getByText("translated:unavailableTitle")).toBeInTheDocument();
+    expect(screen.queryByText("translated:emptyTitle")).not.toBeInTheDocument();
   });
 
   it("resolves a news slug without falling through to build logs", async () => {

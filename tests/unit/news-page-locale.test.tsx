@@ -99,6 +99,27 @@ describe("localized public News pages", () => {
     expect(html).toContain("繁體消息");
   });
 
+  it.each(["en", "zh-HK"] as const)("shows an unavailable state when both %s feeds fail", async (locale) => {
+    publicPosts.listPublishedNews.mockRejectedValue(new Error("NEWS_UNAVAILABLE"));
+    publicPosts.listPublishedBuildLogs.mockRejectedValue(new Error("BUILD_LOG_UNAVAILABLE"));
+
+    const html = await renderNewsIndex(locale);
+
+    expect(html).toContain("unavailableTitle");
+    expect(html).not.toContain("emptyTitle");
+  });
+
+  it("shows available build logs alongside a partial news outage notice", async () => {
+    publicPosts.listPublishedNews.mockRejectedValue(new Error("NEWS_UNAVAILABLE"));
+    publicPosts.listPublishedBuildLogs.mockResolvedValue([buildLog]);
+
+    const html = await renderNewsIndex("en");
+
+    expect(html).toContain("Build log");
+    expect(html).toContain("unavailableTitle");
+    expect(html).not.toContain("emptyTitle");
+  });
+
   it("uses the localized News body for detail and metadata", async () => {
     const html = await renderNewsDetail("zh-HK");
     const metadata = await generateMetadata({
