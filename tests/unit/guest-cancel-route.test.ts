@@ -39,7 +39,7 @@ describe("GET /api/events/guest/cancel (programme B-4)", () => {
     const signature = "f".repeat(64);
     const submit = (token: string) => new Request("https://hkwtia.example/api/events/guest/cancel", {
       method: "POST", headers: {"content-type": "application/x-www-form-urlencoded"},
-      body: new URLSearchParams({token, locale: "en"}),
+      body: new URLSearchParams({token, locale: "en"}).toString(),
     });
     const invalid = await post(submit(digest + "." + signature));
     expect(invalid.headers.get("location")).toBe("https://hkwtia.example/events?guest=invalid");
@@ -54,7 +54,7 @@ describe("GET /api/events/guest/cancel (programme B-4)", () => {
     const token = signedGuestCancelToken("s".repeat(32), digest);
     const response = await post(new Request("https://hkwtia.example/api/events/guest/cancel", {
       method: "POST", headers: {"content-type": "application/x-www-form-urlencoded"},
-      body: new URLSearchParams({token, locale: "zh-HK"}),
+      body: new URLSearchParams({token, locale: "zh-HK"}).toString(),
     }));
     expect(response.headers.get("location")).toBe("https://hkwtia.example/zh/events?guest=cancelled");
     expect(cancelByToken).toHaveBeenCalledWith(expect.objectContaining({kind: "contact-writer", source: "event_guest"}), digest);
@@ -68,7 +68,7 @@ describe("GET /api/events/guest/cancel (programme B-4)", () => {
     cancelByToken.mockRejectedValueOnce(new Error("connection reset"));
     const response = await post(new Request("https://hkwtia.example/api/events/guest/cancel", {
       method: "POST", headers: {"content-type": "application/x-www-form-urlencoded"},
-      body: new URLSearchParams({token: TOKEN, locale: "en"}),
+      body: new URLSearchParams({token: TOKEN, locale: "en"}).toString(),
     }));
     expect(response.headers.get("location")).toBe("https://hkwtia.example/events?guest=unknown");
     expect(error).toHaveBeenCalledWith("guest-cancel", expect.any(Error));
