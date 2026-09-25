@@ -395,10 +395,11 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
         if (!event.published || event.startsAt <= input.now) return {ok: false, reason: "EVENT_CLOSED"};
         const existing = await tx.orderByIdempotencyKey(input.idempotencyKey);
         if (existing) {
-          // Once the hold ends or an order settles, its key cannot start another checkout.
-          // An expired attempt gets a fresh key; a paid one reports completion.
+          // An attached pending session can outlive the local seat hold.
+          // The checkout service checks Stripe before redirecting or rotating its key.
           if (existing.status === "paid") return {ok: false, reason: "ATTEMPT_COMPLETED"};
-          if (existing.status !== "pending" || existing.expiresAt <= input.now) {
+          if (existing.status !== "pending" || (existing.expiresAt <= input.now &&
+              (!existing.stripeCheckoutSessionId || !existing.stripeCheckoutUrl))) {
             return {ok: false, reason: "ATTEMPT_EXPIRED"};
           }
           // A key names one immutable purchase attempt. A failed Stripe call

@@ -61,12 +61,12 @@ function ticketEvent(status: EventStatus) {
 async function attemptTicketCheckout(status: EventStatus): Promise<AttemptResult> {
   // A cancelled event's `published` flag is false and `createTicketCheckout`
   // refuses on it. Reaching `createOrder` is the admitted outcome; the fake
-  // short-circuits there, because the subject is admission, not Stripe.
+  // returns an open stored session, because the subject is admission, not Stripe.
   const dependencies = {
     orders: {
-      createOrder: async () => ({ok: true, reused: false, order: {stripeCheckoutUrl: "https://checkout.stripe.test/x"}}),
+      createOrder: async () => ({ok: true, reused: true, order: {stripeCheckoutSessionId: "cs_matrix", stripeCheckoutUrl: "https://checkout.stripe.test/x"}}),
     },
-    stripe: {},
+    stripe: {ticketSessionStatus: async () => "open"},
     eventForTicket: async () => ticketEvent(status),
     appUrl: "https://app.example.test",
     now: () => at,

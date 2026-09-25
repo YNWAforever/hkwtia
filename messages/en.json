@@ -1637,7 +1637,7 @@
       "UNAVAILABLE": "Ticket checkout is not available right now. Please try again shortly.",
       "RETRY_CHANGED": "Your purchase details changed. Submit again to start a new checkout.",
       "RETRY_EXPIRED": "This checkout attempt expired. Submit again to start a new checkout.",
-      "ALREADY_COMPLETED": "This purchase is already complete. Check your confirmation before buying again.",
+      "ALREADY_COMPLETED": "This checkout has ended. Check your payment status before buying again.",
       "RATE_LIMITED": "Too many attempts from this connection. Try again in a few minutes."
     }
   },

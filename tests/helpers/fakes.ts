@@ -54,6 +54,7 @@ export class FakeStripeBillingAdapter implements StripeBillingAdapter {
   checkoutUrl = "https://checkout.stripe.test/session";
   ticketSessionId = "cs_test_ticket";
   ticketUrl = "https://checkout.stripe.test/ticket";
+  ticketStatus: "open" | "complete" | "expired" = "open";
   portalUrl = "https://billing.stripe.test/session";
 
   async createCheckoutSession(input: CheckoutSessionInput): Promise<{id: string; url: string}> {
@@ -68,6 +69,11 @@ export class FakeStripeBillingAdapter implements StripeBillingAdapter {
   async createEventTicketSession(input: EventTicketSessionInput): Promise<{id: string; url: string}> {
     this.ticketRequests.push(structuredClone(input));
     return {id: this.ticketSessionId, url: this.ticketUrl};
+  }
+
+  async ticketSessionStatus(sessionId: string): Promise<"open" | "complete" | "expired"> {
+    void sessionId;
+    return this.ticketStatus;
   }
 
   async paymentIntentForSession(_sessionId: string): Promise<string | null> {

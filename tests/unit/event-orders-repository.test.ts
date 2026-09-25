@@ -104,6 +104,22 @@ describe("eventOrdersRepository.createOrder", () => {
     expect(result).toEqual({ok: false, reason});
     expect(tx.insertOrder).not.toHaveBeenCalled();
   });
+  it("keeps an attached pending session on the same key after the seat hold ends", async () => {
+    const existing = order({
+      expiresAt: now,
+      stripeCheckoutSessionId: "cs_existing",
+      stripeCheckoutUrl: "https://checkout.stripe.test/existing",
+    });
+    const tx = transaction({
+      orderByIdempotencyKey: vi.fn(async () => existing),
+      orderSeats: vi.fn(async () => [{seatId: "seat-1", position: 1, attendeeName: "Ada", attendeeEmail: "ada@example.test"}]),
+    });
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({
+      eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test",
+      buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now,
+    })).resolves.toEqual({ok: true, order: existing, reused: true});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
   it("reuses the order a repeated idempotency key names", async () => {
     const tx = transaction({orderByIdempotencyKey: vi.fn(async () => order()), orderSeats: vi.fn(async () => [{seatId: "seat-1", position: 1, attendeeName: "Ada", attendeeEmail: "ada@example.test"}])});
     await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now}))

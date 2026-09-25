@@ -1,6 +1,6 @@
 import "server-only";
 
-import {MAX_TICKET_SEATS, TICKET_SESSION_MIN_MS} from "@/config/tickets";
+import {MAX_TICKET_SEATS, TICKET_HOLD_MS, TICKET_SESSION_MIN_MS} from "@/config/tickets";
 import type {AppLocale} from "@/i18n/routing";
 import {appEnv} from "@/lib/config/env";
 import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
@@ -26,7 +26,7 @@ export type TicketCheckoutResult =
 
 export type TicketCheckoutDependencies = Readonly<{
   orders: EventOrdersRepository;
-  stripe: Pick<StripeBillingAdapter, "createEventTicketSession">;
+  stripe: Pick<StripeBillingAdapter, "createEventTicketSession" | "ticketSessionStatus">;
   eventForTicket: (eventId: string) => Promise<TicketEvent | null>;
   appUrl: string;
   now: () => Date;
@@ -111,10 +111,31 @@ export async function createTicketCheckout(
                   : "EVENT_NOT_FOUND";
     return {status: "error", code};
   }
-  // A reused key returns the session it already minted; minting a second one
-  // would charge the buyer twice for one form.
-  if (created.order.stripeCheckoutUrl) {
+  // The provider's session can outlive the local seat hold. Keep an open one on
+  // its original key; rotate only after Stripe confirms expiry, so one retry
+  // cannot create a second payable session in that overlap.
+  if (created.order.stripeCheckoutSessionId || created.order.stripeCheckoutUrl) {
+    if (!created.order.stripeCheckoutSessionId || !created.order.stripeCheckoutUrl) {
+      return {status: "error", code: "UNAVAILABLE"};
+    }
+    let status: "open" | "complete" | "expired";
+    try {
+      status = await dependencies.stripe.ticketSessionStatus(created.order.stripeCheckoutSessionId);
+    } catch {
+      return {status: "error", code: "UNAVAILABLE"};
+    }
+    if (status === "complete") return {status: "error", code: "ALREADY_COMPLETED"};
+    if (status === "expired") return {status: "error", code: "RETRY_EXPIRED"};
     return {status: "redirect", url: created.order.stripeCheckoutUrl};
+  }
+
+  // Stripe compares the full request for a reused idempotency key. Derive the
+  // provider expiry from the order's immutable hold instead of a fresh clock read.
+  // Stop retries once the fixed expiry approaches Stripe's 30-minute minimum;
+  // an unattached session has never supplied a payable URL to this buyer.
+  const sessionExpiresAt = new Date(created.order.expiresAt.getTime() + TICKET_SESSION_MIN_MS - TICKET_HOLD_MS);
+  if (sessionExpiresAt.getTime() - dependencies.now().getTime() < TICKET_HOLD_MS + 60_000) {
+    return {status: "error", code: "RETRY_EXPIRED"};
   }
 
   try {
@@ -129,11 +150,7 @@ export async function createTicketCheckout(
       successUrl: `${origin}${eventPath}?ticket=received`,
       cancelUrl: `${origin}${eventPath}?ticket=cancelled`,
       idempotencyKey: created.order.idempotencyKey,
-      // Stripe demands at least 30 minutes after session CREATION, and this
-      // clock read is taken after the order write, so a bare `TICKET_HOLD_MS`
-      // is a rejection. The margin is Stripe's lower bound plus slack; the
-      // database hold stays `TICKET_HOLD_MS`.
-      expiresAt: new Date(dependencies.now().getTime() + TICKET_SESSION_MIN_MS),
+      expiresAt: sessionExpiresAt,
     });
     await dependencies.orders.attachSession(created.order.id, session.id, session.url);
     return {status: "redirect", url: session.url};

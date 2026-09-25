@@ -9,7 +9,7 @@ const pendingOrder = {
   id: "order-1", eventId: "ev-1", amountHkdCents: 25_000, status: "pending" as const,
   stripeCheckoutSessionId: null, stripeCheckoutUrl: null, buyerProfileId: null,
   buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en" as const,
-  currency: "hkd", idempotencyKey: "idem-1", expiresAt: now, paidAt: null,
+  currency: "hkd", idempotencyKey: "idem-1", expiresAt: new Date(now.getTime() + 1_800_000), paidAt: null,
   refundedAt: null, refundReason: null,
 };
 
@@ -21,7 +21,7 @@ function dependencies(overrides: Partial<TicketCheckoutDependencies> = {}): Tick
       createOrder: vi.fn(async () => ({ok: true, reused: false, order: pendingOrder})),
       attachSession: vi.fn(async () => undefined),
     } as never,
-    stripe: {createEventTicketSession: vi.fn(async () => ({id: "cs_1", url: "https://checkout.stripe.test/1"}))} as never,
+    stripe: {createEventTicketSession: vi.fn(async () => ({id: "cs_1", url: "https://checkout.stripe.test/1"})), ticketSessionStatus: vi.fn(async () => "open")} as never,
     eventForTicket: vi.fn(async () => ({id: "ev-1", slug: "edge-ai", titleEn: "Edge AI", titleZh: "邊緣 AI", startsAt: new Date("2026-10-01T10:00:00Z"), published: true, registrationMode: "ticketed", ticketPriceHkdCents: 25_000})),
     ...overrides,
   };
@@ -77,8 +77,35 @@ describe("createTicketCheckout", () => {
     await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "redirect", url: "https://checkout.stripe.test/existing"});
     expect(deps.stripe.createEventTicketSession).not.toHaveBeenCalled();
+    expect(deps.stripe.ticketSessionStatus).toHaveBeenCalledWith("cs_existing");
   });
 
+  it.each([
+    ["expired", "RETRY_EXPIRED"],
+    ["complete", "ALREADY_COMPLETED"],
+  ] as const)("does not redirect to a %s Stripe session", async (providerStatus, code) => {
+    const ticketSessionStatus = vi.fn(async () => providerStatus);
+    const deps = dependencies({
+      orders: {createOrder: vi.fn(async () => ({ok: true, reused: true, order: {...pendingOrder,
+        stripeCheckoutSessionId: "cs_existing", stripeCheckoutUrl: "https://checkout.stripe.test/existing"}}))} as never,
+      stripe: {createEventTicketSession: vi.fn(), ticketSessionStatus} as never,
+    });
+    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+      .resolves.toEqual({status: "error", code});
+    expect(ticketSessionStatus).toHaveBeenCalledWith("cs_existing");
+    expect(deps.stripe.createEventTicketSession).not.toHaveBeenCalled();
+  });
+
+  it("keeps the key on a Stripe session read failure", async () => {
+    const deps = dependencies({
+      orders: {createOrder: vi.fn(async () => ({ok: true, reused: true, order: {...pendingOrder,
+        stripeCheckoutSessionId: "cs_existing", stripeCheckoutUrl: "https://checkout.stripe.test/existing"}}))} as never,
+      stripe: {createEventTicketSession: vi.fn(), ticketSessionStatus: vi.fn(async () => { throw new Error("provider_down"); })} as never,
+    });
+    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+      .resolves.toEqual({status: "error", code: "UNAVAILABLE"});
+    expect(deps.stripe.createEventTicketSession).not.toHaveBeenCalled();
+  });
   it("sends the event's Chinese title and localized return urls for a zh-HK buyer", async () => {
     const deps = dependencies();
     await createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "陳", email: "chan@example.test"}, seats, idempotencyKey: "idem-1", locale: "zh-HK"}, deps);
@@ -99,9 +126,39 @@ describe("createTicketCheckout", () => {
     expect(deps.orders.createOrder).not.toHaveBeenCalled();
   });
 
-  // Stripe requires `expires_at` to be at least 30 minutes after the session is
-  // CREATED. The hold is computed before the order write and the network call,
-  // so the reading taken at the call is the one the margin must clear.
+  // The fixed order-derived expiry must still clear Stripe's 30-minute minimum at call time.
+  it("uses the same Stripe expiry for repeated calls with one purchase key", async () => {
+    const orderTime = new Date("2026-09-14T04:00:00Z");
+    const readings = [orderTime, new Date(orderTime.getTime() + 5_000),
+      new Date(orderTime.getTime() + 30_000), new Date(orderTime.getTime() + 35_000)];
+    let index = 0;
+    const deps = dependencies({
+      now: () => readings[index++]!,
+      orders: {createOrder: vi.fn(async () => ({ok: true, reused: true, order: {...pendingOrder,
+        expiresAt: new Date(orderTime.getTime() + 1_800_000)}})),
+        attachSession: vi.fn(async () => undefined)} as never,
+    });
+    const input = {eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
+      seats, idempotencyKey: "idem-1", locale: "en" as const};
+    await createTicketCheckout(input, deps);
+    await createTicketCheckout(input, deps);
+    const adapter = deps.stripe.createEventTicketSession as unknown as {mock: {calls: Array<[{expiresAt: Date}]>}};
+    expect(adapter.mock.calls).toHaveLength(2);
+    expect(adapter.mock.calls[1]![0].expiresAt).toEqual(adapter.mock.calls[0]![0].expiresAt);
+  });
+
+  it("retires an unattached key after the original Stripe creation window", async () => {
+    const orderTime = new Date("2026-09-14T04:00:00Z");
+    const deps = dependencies({
+      now: () => new Date(orderTime.getTime() + 6 * 60_000),
+      orders: {createOrder: vi.fn(async () => ({ok: true, reused: true, order: {...pendingOrder,
+        expiresAt: new Date(orderTime.getTime() + 1_800_000)}}))} as never,
+    });
+    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
+      seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+      .resolves.toEqual({status: "error", code: "RETRY_EXPIRED"});
+    expect(deps.stripe.createEventTicketSession).not.toHaveBeenCalled();
+  });
   it("expires the Stripe session at least 30 minutes after the reading taken at the call", async () => {
     const orderTime = new Date("2026-09-14T04:00:00Z");
     const callTime = new Date(orderTime.getTime() + 60_000);
