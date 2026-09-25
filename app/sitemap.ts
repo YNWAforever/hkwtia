@@ -15,7 +15,6 @@ import type {AppLocale} from "@/i18n/routing";
 import {absoluteUrl, localizedPath} from "@/lib/urls";
 
 const locales: AppLocale[] = ["en", "zh-HK"];
-const anonymous = {kind: "anonymous", userId: null} as const;
 
 function alternates(pathname: string) {
   const englishUrl = absoluteUrl(localizedPath("en", pathname));
@@ -68,8 +67,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const asOf = new Date();
   const [buildLogs, eventSlugs, englishNews, chineseNews, showcaseSlugs, memberSlugs] = await Promise.all([
     listPublishedBuildLogs(),
-    eventsRepository.listPublic(anonymous, {status: "open", asOf})
-      .then((rows) => rows.map(({slug}) => slug)),
+    eventsRepository.listPublicSlugs(),
     listPublishedNews("en", asOf),
     listPublishedNews("zh-HK", asOf),
     showcaseRepository.listPublishedSlugs(),

@@ -3,7 +3,7 @@ import {readFileSync} from "node:fs";
 import {renderToStaticMarkup} from "react-dom/server";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
-const events = vi.hoisted(() => ({getPublicBySlug: vi.fn(), listPublic: vi.fn()}));
+const events = vi.hoisted(() => ({getPublicBySlug: vi.fn(), listPublicSlugs: vi.fn()}));
 const publicPosts = vi.hoisted(() => ({listPublishedBuildLogs: vi.fn(), listPublishedNews: vi.fn()}));
 const showcase = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
 const companyProfiles = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
@@ -41,7 +41,7 @@ describe("public Event detail page review regressions", () => {
     publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
     publicPosts.listPublishedNews.mockResolvedValue([]);
     showcase.listPublishedSlugs.mockResolvedValue([]);
-    events.listPublic.mockResolvedValue([]);
+    events.listPublicSlugs.mockResolvedValue([]);
   });
 
   it("uses the reader's exact equality boundary to keep registration visible", async () => {
@@ -114,15 +114,32 @@ describe("public Event detail page review regressions", () => {
 });
 
 describe("Event sitemap repository behavior", () => {
-  it("emits only repository Event URLs, not static-content fallback URLs", async () => {
-    events.listPublic.mockResolvedValue([{slug: "repository-event"}]);
+  beforeEach(() => {
+    vi.clearAllMocks();
+    publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
+    publicPosts.listPublishedNews.mockResolvedValue([]);
+    showcase.listPublishedSlugs.mockResolvedValue([]);
+    companyProfiles.listPublishedSlugs.mockResolvedValue([]);
+  });
+
+  it("includes published past events as well as upcoming events in both locales", async () => {
+    events.listPublicSlugs.mockResolvedValue(["upcoming-event", "past-event"]);
 
     const urls = (await sitemap()).map(({url}) => url);
 
-    expect(events.listPublic).toHaveBeenCalledWith(
-      {kind: "anonymous", userId: null},
-      expect.objectContaining({status: "open", asOf: expect.any(Date)}),
-    );
+    expect(events.listPublicSlugs).toHaveBeenCalledOnce();
+    for (const slug of ["upcoming-event", "past-event"]) {
+      expect(urls).toContain(`http://localhost:3000/events/${slug}`);
+      expect(urls).toContain(`http://localhost:3000/zh/events/${slug}`);
+    }
+  });
+
+  it("emits only repository Event URLs, not static-content fallback URLs", async () => {
+    events.listPublicSlugs.mockResolvedValue(["repository-event"]);
+
+    const urls = (await sitemap()).map(({url}) => url);
+
+    expect(events.listPublicSlugs).toHaveBeenCalledOnce();
     expect(urls).toEqual(expect.arrayContaining([
       "http://localhost:3000/events/repository-event",
       "http://localhost:3000/zh/events/repository-event",
@@ -132,7 +149,7 @@ describe("Event sitemap repository behavior", () => {
   });
 
   it("fails the sitemap read after an Event repository outage", async () => {
-    events.listPublic.mockRejectedValue(new Error("EVENT_REPOSITORY_UNAVAILABLE"));
+    events.listPublicSlugs.mockRejectedValue(new Error("EVENT_REPOSITORY_UNAVAILABLE"));
     await expect(sitemap()).rejects.toThrow("EVENT_REPOSITORY_UNAVAILABLE");
   });
 });

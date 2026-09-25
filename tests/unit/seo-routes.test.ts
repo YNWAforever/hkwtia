@@ -11,7 +11,7 @@ vi.mock('@/lib/db/repos/public-posts', () => ({
   listPublishedBuildLogs: dynamicSources.buildLogs,
   listPublishedNews: dynamicSources.news,
 }));
-vi.mock('@/lib/db/repos/events', () => ({eventsRepository: {listPublic: dynamicSources.events}}));
+vi.mock('@/lib/db/repos/events', () => ({eventsRepository: {listPublicSlugs: dynamicSources.events}}));
 vi.mock('@/lib/db/repos/showcase', () => ({showcaseRepository: {listPublishedSlugs: dynamicSources.showcase}}));
 vi.mock('@/lib/db/repos/company-profiles', () => ({companyProfilesRepository: {listPublishedSlugs: dynamicSources.members}}));
 

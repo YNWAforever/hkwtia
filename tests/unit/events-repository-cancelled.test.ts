@@ -2,7 +2,7 @@ import {drizzle} from "drizzle-orm/pg-proxy";
 import {describe, expect, it, vi} from "vitest";
 
 import type {Event} from "@/lib/db/server-schema";
-import {getPublicEventBySlug, listPublicEvents} from "@/lib/db/repos/events";
+import {getPublicEventBySlug, listPublicEventSlugs, listPublicEvents} from "@/lib/db/repos/events";
 import type {Actor} from "@/lib/membership/lifecycle";
 import {legacyDerivedEventColumns} from "@/tests/fixtures/event-row";
 
@@ -57,6 +57,26 @@ describe("the public reads and a cancelled event", () => {
     const past = (await listPublicEvents(anonymous, {status: "past", asOf, locale: "en", source})).map((item) => item.slug);
     expect(open).toEqual(["published-public"]);
     expect(past).toEqual([]);
+  });
+
+  it("lists published past and upcoming public slugs while excluding cancelled and private events", async () => {
+    const past = event("past-public", {startsAt: new Date("2029-12-01T00:00:00.000Z"), endsAt: null});
+    const privateEvent = event("private-member", {visibility: "members_only"});
+
+    await expect(listPublicEventSlugs([...source, past, privateEvent])).resolves.toEqual(["past-public", "published-public"]);
+  });
+
+  it("queries only public published slugs without a time boundary or full event projection", async () => {
+    const calls = capture();
+
+    await listPublicEventSlugs();
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].query).toMatch(/select.+slug.+from.+events/i);
+    expect(calls[0].query).not.toMatch(/join|starts_at|ends_at/i);
+    expect(calls[0].params).toContain("published");
+    expect(calls[0].params).toContain("public");
+    expect(calls[0].params).not.toContain("cancelled");
   });
 
   it("marks a published event as not cancelled", async () => {
