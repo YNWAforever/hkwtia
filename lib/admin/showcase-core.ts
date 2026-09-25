@@ -18,13 +18,13 @@ export type AdminShowcaseRepository = Pick<
   ShowcaseRepository, "publish" | "reject" | "setPremium" | "setLogoMedia"
 >;
 
-export async function publishShowcaseListing(actor: AdminActor, id: string, repository: AdminShowcaseRepository = showcaseRepository) {
-  return repository.publish(actor, z.string().min(1).parse(id));
+export async function publishShowcaseListing(actor: AdminActor, id: string, reviewVersion: string, repository: AdminShowcaseRepository = showcaseRepository) {
+  return repository.publish(actor, z.string().min(1).parse(id), reviewVersion);
 }
 
-export async function rejectShowcaseListing(actor: AdminActor, id: string, reason: string, repository: AdminShowcaseRepository = showcaseRepository) {
+export async function rejectShowcaseListing(actor: AdminActor, id: string, reason: string, reviewVersion: string, repository: AdminShowcaseRepository = showcaseRepository) {
   const parsedReason = z.string().trim().min(1).max(1_000).parse(reason);
-  return repository.reject(actor, z.string().min(1).parse(id), parsedReason);
+  return repository.reject(actor, z.string().min(1).parse(id), parsedReason, reviewVersion);
 }
 
 export async function setShowcasePremium(actor: AdminActor, id: string, premium: boolean, repository: AdminShowcaseRepository = showcaseRepository) {

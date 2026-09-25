@@ -61,8 +61,8 @@ function memoryStore(initial: ShowcaseListing[]): ShowcaseStore & {viewWrites: n
       else rows.push(next);
       return next;
     },
-    listForReview: async () => rows,
-    setStatus: async (id, status, reviewerId, reason) => {
+    listForReview: async () => rows.map((row) => ({...row, reviewVersion: "1"})),
+    setStatus: async (id, status, reviewerId, reviewVersion, reason) => {
       const row = rows.find((candidate) => candidate.id === id);
       if (!row) return null;
       Object.assign(row, {status, reviewedByProfileId: reviewerId, reviewedAt: new Date("2030-01-01T00:00:00.000Z"), rejectionReason: reason ?? null});
@@ -140,11 +140,11 @@ describe("showcase repository", () => {
     const repo = createShowcaseRepository({store});
     const staff = {kind: "staff", userId: "staff", profileId: "staff"} as AdminActor;
 
-    const published = await repo.publish(staff, "pending-1");
+    const published = await repo.publish(staff, "pending-1", "1");
     expect(published?.status).toBe("published");
     expect(published?.reviewedByProfileId).toBe(staff.profileId);
 
-    const rejected = await repo.reject(staff, "pending-2", "Needs clearer case study");
+    const rejected = await repo.reject(staff, "pending-2", "Needs clearer case study", "1");
     expect(rejected?.status).toBe("rejected");
     expect(rejected?.rejectionReason).toBe("Needs clearer case study");
   });
