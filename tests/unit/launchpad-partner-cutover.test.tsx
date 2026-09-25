@@ -80,7 +80,7 @@ describe("Launch Pad landing-partner repository cutover", () => {
     expect(existsSync(join(process.cwd(), "config", "landing-partners.json"))).toBe(false);
   });
 
-  it("does not disclose contact or notes and renders one localized empty state on zero/error", async () => {
+  it("does not disclose contact or notes and distinguishes empty data from a read error", async () => {
     const markup = renderToStaticMarkup(await LaunchPadPage(pageProps("zh-HK")));
 
     expect(markup).toContain("資料庫夥伴");
@@ -95,7 +95,8 @@ describe("Launch Pad landing-partner repository cutover", () => {
 
     state.listPublishedPartners.mockRejectedValueOnce(new Error("database unavailable"));
     const errorMarkup = renderToStaticMarkup(await LaunchPadPage(pageProps()));
-    expect(errorMarkup.match(/partners\.empty/g)).toHaveLength(1);
+    expect(errorMarkup).toContain("partners.unavailable");
+    expect(errorMarkup).not.toContain("partners.empty");
     expect(errorMarkup).not.toContain("Repository Partner");
   });
 
