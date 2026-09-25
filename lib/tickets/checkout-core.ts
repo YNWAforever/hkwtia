@@ -92,8 +92,10 @@ export async function createTicketCheckout(
     now,
   });
   if (!created.ok) {
-    const code: TicketCheckoutErrorCode = created.reason === "SOLD_OUT"
-      ? "SOLD_OUT"
+    const code: TicketCheckoutErrorCode = created.reason === "EVENT_CLOSED"
+      ? "EVENT_CLOSED"
+      : created.reason === "SOLD_OUT"
+        ? "SOLD_OUT"
       : created.reason === "EVENT_NOT_TICKETED"
         ? "EVENT_NOT_TICKETED"
         // A mismatch means this service computed the amount wrongly; it is our

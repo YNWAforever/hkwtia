@@ -28,6 +28,7 @@ function transaction(overrides: Partial<EventOrdersTransaction> = {}): EventOrde
     ordersAwaitingCancellationRefund: vi.fn(async () => []),
     deferFailedCancellationRefund: vi.fn(async () => undefined),
     refundPaidOrder: vi.fn(async () => false),
+    markRefundFailed: vi.fn(async () => false),
     insertAudit: vi.fn(async () => undefined),
     eventSummary: vi.fn(async () => []),
     ...overrides,
@@ -54,6 +55,19 @@ describe("eventOrdersRepository.createOrder", () => {
     expect(tx.insertOrder).not.toHaveBeenCalled();
   });
 
+  it("refuses a cancelled event after the caller's earlier publication check", async () => {
+    const tx = transaction({lockEvent: vi.fn(async () => ({...event, published: false}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now}))
+      .resolves.toEqual({ok: false, reason: "EVENT_CLOSED"});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+
+  it("refuses an event whose start time passed before the locked write", async () => {
+    const tx = transaction({lockEvent: vi.fn(async () => ({...event, startsAt: now}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now}))
+      .resolves.toEqual({ok: false, reason: "EVENT_CLOSED"});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
   it("refuses an amount the event's own price does not derive", async () => {
     const tx = transaction();
     await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 99_000, now}))
@@ -91,6 +105,13 @@ describe("eventOrdersRepository.settlePaid", () => {
     expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.paid", targetId: "order-1"}));
   });
 
+  it("refunds a pending payment when the event was cancelled before settlement", async () => {
+    const tx = transaction({orderBySessionId: vi.fn(async () => order()), lockEvent: vi.fn(async () => ({...event, published: false}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now))
+      .resolves.toMatchObject({status: "refund_due", order: expect.objectContaining({status: "refunded", refundReason: "cancelled"})});
+    expect(tx.markStatus).toHaveBeenCalledWith("order-1", "refunded", expect.objectContaining({refundReason: "cancelled"}));
+    expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.refunded", metadata: {reason: "event_closed"}}));
+  });
   it("refunds a payment that arrives after the order expired locally", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "expired"}))});
     await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now))

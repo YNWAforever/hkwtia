@@ -52,6 +52,10 @@ describe("public Event detail page review regressions", () => {
     expect(rendered).toContain('data-registration-form="true"');
   });
 
+  it("propagates a detail read outage instead of returning a false 404", async () => {
+    events.getPublicBySlug.mockRejectedValue(new Error("EVENT_REPOSITORY_UNAVAILABLE"));
+    await expect(EventPage(props)).rejects.toThrow("EVENT_REPOSITORY_UNAVAILABLE");
+  });
   it("hides registration immediately before the request-scoped boundary", async () => {
     events.getPublicBySlug.mockImplementation(async (_slug: string, _locale: string, options: {asOf: Date}) => event(new Date(options.asOf.getTime() - 1).toISOString()));
 

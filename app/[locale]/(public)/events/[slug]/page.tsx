@@ -76,7 +76,7 @@ export default async function EventPage({params}: Props) {
   // A failed session read degrades to the anonymous path: the public page must render
   // whether or not auth is reachable, and the guest form is the anonymous path anyway.
   const [event, t, tTicket, actor] = await Promise.all([
-    eventsRepository.getPublicBySlug(slug, locale, {asOf}).catch(() => null),
+    eventsRepository.getPublicBySlug(slug, locale, {asOf}),
     getTranslations({locale, namespace: "Events"}),
     getTranslations({locale, namespace: "Ticket"}),
     getActor().catch(() => null),

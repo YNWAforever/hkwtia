@@ -105,6 +105,11 @@ describe("profilesRepository.update audits a WhatsApp consent change", () => {
     // Same transaction as the change, not merely "also written".
     const update = recorder.statements.find((statement) => statement.sql.toLowerCase().startsWith(`update "profiles"`));
     expect(update?.depth).toBe(1);
+    const cleared = recorder.statements.filter((statement) => /^(delete from "message_suppressions"|update "contacts")/.test(statement.sql.toLowerCase()));
+    expect(cleared).toHaveLength(2);
+    expect(cleared.every((statement) => statement.depth === 1)).toBe(true);
+    expect(cleared[0]?.sql.toLowerCase()).toContain('"profile_id"');
+    expect(cleared[1]?.sql.toLowerCase()).toContain('"phone_e164"');
   });
 
   it("writes consent.whatsapp.revoked when the member withdraws", async () => {
@@ -135,6 +140,7 @@ describe("profilesRepository.update audits a WhatsApp consent change", () => {
     await profilesRepository.update(actor, "member-1", {displayName: "Ada Chan", whatsappOptIn: true});
 
     expect(audits(recorder.statements)).toHaveLength(0);
+    expect(recorder.statements.some((statement) => /^(delete from "message_suppressions"|update "contacts")/.test(statement.sql.toLowerCase()))).toBe(false);
   });
 
   it("leaves an update that carries no consent value alone", async () => {
@@ -143,6 +149,7 @@ describe("profilesRepository.update audits a WhatsApp consent change", () => {
     await profilesRepository.update(actor, "member-1", {jobTitle: "CTO"});
 
     expect(audits(recorder.statements)).toHaveLength(0);
+    expect(recorder.statements.some((statement) => /^(delete from "message_suppressions"|update "contacts")/.test(statement.sql.toLowerCase()))).toBe(false);
     expect(recorder.statements.some((statement) => statement.sql.toLowerCase().startsWith("select"))).toBe(false);
   });
 

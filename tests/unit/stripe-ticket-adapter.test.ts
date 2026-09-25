@@ -7,15 +7,17 @@ function client() {
   const create = vi.fn(async (_params: unknown, _options?: unknown) => ({id: "cs_test_1", url: "https://checkout.stripe.test/1"}));
   const retrieve = vi.fn(async (_id: string) => ({payment_intent: "pi_1"} as {payment_intent: string | {id: string} | null}));
   const refund = vi.fn(async () => ({status: "succeeded"}));
+  const listSessions = vi.fn(async () => ({data: [] as Array<{id: string; client_reference_id: string; payment_intent: string; metadata: {kind: string; orderId: string}}>, has_more: false}));
   const listRefunds = vi.fn(async () => ({data: [{id: "re_1", status: "succeeded", currency: "hkd", amount: 50_000}], has_more: false}));
   const retrieveIntent = vi.fn(async () => ({
     id: "pi_1", status: "succeeded", currency: "hkd", amount_received: 50_000,
     latest_charge: {id: "ch_1", currency: "hkd", amount_captured: 50_000, amount_refunded: 50_000},
   }));
   return {
-    create, retrieve, refund, retrieveIntent, listRefunds,
+    create, retrieve, refund, retrieveIntent, listRefunds, listSessions,
     value: {
-      checkout: {sessions: {create, retrieve}},
+      checkout: {sessions: {create, retrieve, list: listSessions}},
+      subscriptions: {retrieve: vi.fn()},
       billingPortal: {sessions: {create: vi.fn()}},
       invoices: {list: vi.fn()},
       refunds: {create: refund, list: listRefunds},
@@ -47,8 +49,8 @@ describe("event ticket checkout session", () => {
 
   it("refunds the payment intent behind a session with a stable idempotency key", async () => {
     const {refund, value} = client();
-    await createStripeBillingAdapter(value).refundPaymentIntent("pi_1", "ticket-refund:order-1");
-    expect(refund).toHaveBeenCalledWith({payment_intent: "pi_1"}, {idempotencyKey: "ticket-refund:order-1"});
+    await createStripeBillingAdapter(value).refundPaymentIntent("pi_1", "ticket-refund:order-1", {orderId: "order-1"});
+    expect(refund).toHaveBeenCalledWith({payment_intent: "pi_1", metadata: {eventOrderId: "order-1"}}, {idempotencyKey: "ticket-refund:order-1"});
   });
 
   it("does not report an accepted but pending provider refund as complete", async () => {
@@ -61,6 +63,16 @@ describe("event ticket checkout session", () => {
   });
 });
 
+describe("finding an older refund without metadata", () => {
+  it("returns only the order correlated to the exact payment intent and Checkout reference", async () => {
+    const {listSessions, value} = client();
+    const orderId = "33333333-3333-4333-8333-333333333333";
+    listSessions.mockResolvedValue({data: [{id: "cs_ticket", client_reference_id: orderId,
+      payment_intent: "pi_1", metadata: {kind: "event_ticket", orderId}}], has_more: false});
+    await expect(createStripeBillingAdapter(value).ticketOrderIdForPaymentIntent("pi_1")).resolves.toBe(orderId);
+    expect(listSessions).toHaveBeenCalledWith({payment_intent: "pi_1", limit: 2});
+  });
+});
 describe("reconciling a provider refund after a lost database commit", () => {
   it("accepts only a fully refunded charge for the exact HKD order amount", async () => {
     const {retrieveIntent, listRefunds, value} = client();

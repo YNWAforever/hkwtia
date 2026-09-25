@@ -265,7 +265,7 @@ describe("createTicketProcessor", () => {
 
     await expect(processor.process(systemActor("stripe-webhook"), command("checkout.session.completed"))).resolves.toBe("processed");
 
-    expect(refundPaymentIntent).toHaveBeenCalledWith(paymentIntentId, `ticket-refund:${orderId}`);
+    expect(refundPaymentIntent).toHaveBeenCalledWith(paymentIntentId, `ticket-refund:${orderId}`, orderId);
     expect(renderEmail).toHaveBeenCalledWith(expect.objectContaining({template: "event_ticket_refunded", locale: "en", recipientName: "Ada"}));
     expect(transport.sends).toHaveLength(1);
   });

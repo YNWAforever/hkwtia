@@ -12,7 +12,7 @@ const checkBody = (table: Parameters<typeof getTableConfig>[0], name: string): s
 
 describe("phase D-4a ticket schema contract", () => {
   it("defines the order status and refund reason vocabularies", () => {
-    expect(eventOrderStatusEnum.enumValues).toEqual(["pending", "paid", "expired", "failed", "refunded"]);
+    expect(eventOrderStatusEnum.enumValues).toEqual(["pending", "paid", "expired", "failed", "refunded", "refund_failed"]);
     expect(eventRefundReasonEnum.enumValues).toEqual(["oversold", "staff", "cancelled"]);
   });
 

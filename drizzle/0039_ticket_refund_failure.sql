@@ -1,0 +1,3 @@
+ALTER TYPE "public"."event_order_status" ADD VALUE 'refund_failed';--> statement-breakpoint
+ALTER TABLE "site_announcements" DROP CONSTRAINT "site_announcements_href_check";--> statement-breakpoint
+ALTER TABLE "site_announcements" ADD CONSTRAINT "site_announcements_href_check" CHECK ("site_announcements"."href" IN ('/', '/join', '/about', '/about/chairman', '/about/committees', '/about/history', '/membership', '/showcase', '/launchpad', '/ai-ops', '/events', '/news', '/programs/cpai', '/programs/hkict', '/programs/tct', '/programs/asa', '/programmes', '/contact', '/partners', '/privacy', '/refund-policy', '/ai-transparency', '/members'));

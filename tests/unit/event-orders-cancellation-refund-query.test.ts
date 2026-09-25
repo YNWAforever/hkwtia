@@ -43,7 +43,7 @@ function capture() {
 }
 
 describe("the event-cancellation sweep read", () => {
-  it("selects only paid orders whose event is cancelled, bounded by the batch limit", async () => {
+  it("selects paid and failed-refund orders of cancelled events, bounded by the batch limit", async () => {
     const statements = capture();
 
     await eventOrdersRepository.ordersAwaitingCancellationRefund(100);
@@ -51,8 +51,8 @@ describe("the event-cancellation sweep read", () => {
     expect(statements).toHaveLength(1);
     const {sql, params} = statements[0]!;
 
-    // The `paid` filter: without it the sweep refunds orders that were never paid.
-    expect(sql).toMatch(/o\.status\s*=\s*'paid'/);
+    // Only paid orders and failed refunds need provider attention.
+    expect(sql).toMatch(/o\.status\s+IN\s*\('paid',\s*'refund_failed'\)/);
     // The `cancelled` filter: without it the sweep refunds every paid order.
     expect(sql).toMatch(/e\.status\s*=\s*'cancelled'/);
     // Each arm reads the column off its own table, so a swapped alias cannot
@@ -65,14 +65,14 @@ describe("the event-cancellation sweep read", () => {
     expect(sql).toMatch(/ORDER\s+BY\s+o\.updated_at\s+ASC/i);
   });
 
-  it("moves a failed paid order to the retry tail without changing its refund status", async () => {
+  it("moves a failed order to the alert tail without changing its refund status", async () => {
     const statements = capture();
     await eventOrdersRepository.deferFailedCancellationRefund("order-1");
     expect(statements).toHaveLength(1);
     const {sql, params} = statements[0]!;
     expect(sql).toMatch(/UPDATE\s+"event_orders"/i);
     expect(sql).toMatch(/updated_at\s*=\s*NOW\(\)/i);
-    expect(sql).toMatch(/status\s*=\s*'paid'/i);
+    expect(sql).toMatch(/status\s+IN\s*\('paid',\s*'refund_failed'\)/i);
     expect(params).toContain("order-1");
   });
 });

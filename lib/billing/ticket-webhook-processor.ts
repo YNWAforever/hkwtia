@@ -21,7 +21,7 @@ type TicketEmailDependencies = Readonly<{
 export type TicketProcessorDependencies = Readonly<{
   orders: Pick<EventOrdersRepository, "settlePaid" | "expireBySession" | "eventSummary" | "seatsOfOrder" | "orderSeats" | "seatForPass">;
   /** The deterministic key makes a retried refund safe to re-issue. */
-  refundPaymentIntent: (paymentIntentId: string, idempotencyKey: string) => Promise<void>;
+  refundPaymentIntent: (paymentIntentId: string, idempotencyKey: string, orderId: string) => Promise<void>;
   email: TicketEmailDependencies;
   /** For the receipt's "view the event" link, built from the order's own locale. */
   appUrl: string;
@@ -52,7 +52,7 @@ function formatEventDate(value: Date, locale: "en" | "zh-HK"): string {
 
 type EventSummary = Readonly<{title: string; startsAt: Date; slug: string; venue: string | null}>;
 
-type TicketEmailTemplate = "event_ticket_confirmation" | "event_ticket_refunded" | "event_ticket_pass";
+type TicketEmailTemplate = "event_ticket_confirmation" | "event_ticket_refunded" | "event_ticket_refund_failed" | "event_ticket_pass";
 
 /**
  * Overrides for the per-attendee pass: the receipt is the buyer's, so its
@@ -197,6 +197,19 @@ export async function sendOrderRefundEmail(
   }
 }
 
+/** Correct the earlier refund notice when Stripe later reverses that refund. */
+export async function sendOrderRefundFailureEmail(order: OrderRecord, eventId: string, dependencies: TicketProcessorDependencies = ticketProcessorDependencies()): Promise<void> {
+  try {
+    const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
+    await sendTicketEmail(dependencies, "event_ticket_refund_failed", order, event, {
+      ctaUrl: `${dependencies.appUrl}${localizedPath(order.buyerLocale, "/contact")}`,
+      idempotencyKey: `ticket-refund-failed:${order.id}:${eventId}`,
+    });
+  } catch (error) {
+    dependencies.onEmailError?.(error, {orderId: order.id, template: "event_ticket_refund_failed"});
+  }
+}
+
 let defaultDependencies: TicketProcessorDependencies | undefined;
 
 /**
@@ -209,7 +222,7 @@ let defaultDependencies: TicketProcessorDependencies | undefined;
 export function ticketProcessorDependencies(): TicketProcessorDependencies {
   defaultDependencies ??= {
     orders: eventOrdersRepository,
-    refundPaymentIntent: (paymentIntentId, idempotencyKey) => stripeBillingAdapter().refundPaymentIntent(paymentIntentId, idempotencyKey),
+    refundPaymentIntent: (paymentIntentId, idempotencyKey, orderId) => stripeBillingAdapter().refundPaymentIntent(paymentIntentId, idempotencyKey, {orderId}),
     email: {renderEmail, transport: createConfiguredEmailTransport(), emailFrom: emailEnv().emailFrom},
     appUrl: appEnv().appUrl,
     passSecret: ticketPassEnv().ticketPassTokenSecret,
@@ -256,7 +269,7 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
         if (command.paymentIntentId) {
           // Re-issuing is safe: the deterministic key makes a redelivery after a
           // failed provider call refund the same payment intent once, not twice.
-          await dependencies.refundPaymentIntent(command.paymentIntentId, `ticket-refund:${order.id}`);
+          await dependencies.refundPaymentIntent(command.paymentIntentId, `ticket-refund:${order.id}`, order.id);
           // Only promise what actually happened — a settlement with no payment
           // intent issues no refund, so it must send no refund email either.
           const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);

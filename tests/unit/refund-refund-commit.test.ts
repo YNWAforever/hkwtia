@@ -140,3 +140,40 @@ describe("refundPaidOrder", () => {
     expect(update?.params).toContain("order-1");
   });
 });
+
+describe("markRefundFailed", () => {
+  const failed = {eventId: "evt_failed", refundId: "re_failed", paymentIntentId: "pi_ticket",
+    orderId: "order-1", amountHkdCents: 25_000};
+
+  it("moves the exact refunded order to a visible failure state with one audit row", async () => {
+    const fake = fakeDatabase([{id: "order-1"}]);
+    database.current = fake.db;
+    await expect(createEventOrdersRepository().markRefundFailed("order-1", failed)).resolves.toBe(true);
+    const update = fake.queries.find((query) => /^\s*update/i.test(query.sql));
+    expect(update?.sql).toMatch(/status\s*=\s*'refund_failed'/);
+    expect(update?.sql).toMatch(/refunded_at\s*=\s*NULL/i);
+    expect(update?.sql).toMatch(/status\s*=\s*'refunded'/);
+    expect(update?.sql).toMatch(/amount_hkd_cents\s*=\s*\$\d+/);
+    const audit = fake.queries.find((query) => /^\s*insert/i.test(query.sql));
+    expect(audit?.params).toEqual([null, "system", "event.order.refund_failed", "event_order", "order-1",
+      JSON.stringify({stripeEventId: "evt_failed", stripeRefundId: "re_failed"})]);
+    expect(fake.depths).toEqual([1, 1]);
+  });
+
+  it("does not audit a replay once the order is no longer refunded", async () => {
+    const fake = fakeDatabase([]);
+    database.current = fake.db;
+    await expect(createEventOrdersRepository().markRefundFailed("order-1", failed)).resolves.toBe(false);
+    expect(fake.queries.some((query) => /^\s*insert/i.test(query.sql))).toBe(false);
+  });
+});
+describe("cancelled event refund work list", () => {
+  it("keeps later provider failures visible to the alerting sweep", async () => {
+    const fake = fakeDatabase([]);
+    database.current = fake.db;
+    await createEventOrdersRepository().ordersAwaitingCancellationRefund(10);
+    await createEventOrdersRepository().deferFailedCancellationRefund("order-1");
+    expect(fake.queries[0]?.sql).toMatch(/o\.status IN \('paid', 'refund_failed'\)/);
+    expect(fake.queries[1]?.sql).toMatch(/status IN \('paid', 'refund_failed'\)/);
+  });
+});

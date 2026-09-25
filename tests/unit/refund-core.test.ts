@@ -43,7 +43,7 @@ describe("refundOrder", () => {
 
     expect(result).toEqual({status: "refunded"});
     expect(vi.mocked(deps.stripe.paymentIntentForSession)).toHaveBeenCalledWith("cs_test_1");
-    expect(vi.mocked(deps.stripe.refundPaymentIntent)).toHaveBeenCalledWith("pi_1", `ticket-refund:${orderId}`, {requireSucceeded: true});
+    expect(vi.mocked(deps.stripe.refundPaymentIntent)).toHaveBeenCalledWith("pi_1", `ticket-refund:${orderId}`, {requireSucceeded: true, orderId});
     const commit = vi.mocked(deps.orders.refundPaidOrder).mock.calls[0]![1] as Record<string, unknown>;
     expect(commit).toMatchObject({
       refundedAt: new Date("2026-09-16T12:00:00Z"),
@@ -89,6 +89,13 @@ describe("refundOrder", () => {
     expect(vi.mocked(deps.orders.refundPaidOrder)).not.toHaveBeenCalled();
   });
 
+  it("keeps a later failed refund visible for staff without retrying its spent Stripe key", async () => {
+    const deps = dependencies({orders: {orderById: vi.fn(async () => order({status: "refund_failed", refundReason: "cancelled"})),
+      refundPaidOrder: vi.fn(async () => true)}});
+    await expect(refundOrder(systemActor("event-cancellation"), {orderId}, deps))
+      .resolves.toEqual({status: "provider_failed"});
+    expect(vi.mocked(deps.stripe.refundPaymentIntent)).not.toHaveBeenCalled();
+  });
   it("reports an unknown order as not found", async () => {
     const deps = dependencies({
       orders: {

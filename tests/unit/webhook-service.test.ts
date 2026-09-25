@@ -1,4 +1,4 @@
-import {describe, expect, it} from "vitest";
+import {describe, expect, it, vi} from "vitest";
 
 import {processStripeEvent, type WebhookLifecycleCommand, type WebhookProcessor} from "@/lib/billing/webhook-service";
 import {systemActor} from "@/lib/auth/authorize";
@@ -42,6 +42,40 @@ describe("Stripe webhook lifecycle mapping", () => {
     });
   });
 
+  it("waits for delayed Checkout payment and activates on async success", async () => {
+    const {commands, processor} = captureProcessor();
+    const pending = checkoutCompleted("evt_pending", {payment_status: "unpaid", customer: null, subscription: null});
+    await expect(processStripeEvent(pending, systemActor("stripe-webhook"), processor)).resolves.toBe("processed");
+    expect(commands).toEqual([]);
+
+    const paid = {...checkoutCompleted("evt_delayed_paid"), type: "checkout.session.async_payment_succeeded"} as ReturnType<typeof checkoutCompleted>;
+    await expect(processStripeEvent(paid, systemActor("stripe-webhook"), processor)).resolves.toBe("processed");
+    expect(commands).toHaveLength(1);
+    expect(commands[0]).toMatchObject({eventType: "checkout.session.async_payment_succeeded", stripeCheckoutSessionId: checkoutSessionId, nextStatus: "active"});
+  });
+  it("routes a failed ticket refund to reconciliation instead of acknowledging it unseen", async () => {
+    const processor = {process: vi.fn(async () => "processed" as const)};
+    const failed = {
+      ...checkoutCompleted("evt_refund_failed"), type: "refund.failed",
+      data: {object: {id: "re_failed", status: "failed", payment_intent: "pi_ticket",
+        amount: 25_000, currency: "hkd", metadata: {eventOrderId: "33333333-3333-4333-8333-333333333333"}}},
+    } as unknown as ReturnType<typeof checkoutCompleted>;
+    await expect(processStripeEvent(failed, systemActor("stripe-webhook"), captureProcessor().processor, null, processor))
+      .resolves.toBe("processed");
+    expect(processor.process).toHaveBeenCalledWith(expect.anything(), {
+      eventId: "evt_refund_failed", refundId: "re_failed", paymentIntentId: "pi_ticket",
+      orderId: "33333333-3333-4333-8333-333333333333", amountHkdCents: 25_000,
+    });
+  });
+  it("routes old refund failures without refund metadata for Checkout lookup", async () => {
+    const processor = {process: vi.fn(async () => "processed" as const)};
+    const failed = {...checkoutCompleted("evt_old_refund"), type: "refund.failed",
+      data: {object: {id: "re_old", status: "failed", payment_intent: "pi_ticket",
+        amount: 25_000, currency: "hkd", metadata: {}}}} as unknown as ReturnType<typeof checkoutCompleted>;
+    await expect(processStripeEvent(failed, systemActor("stripe-webhook"), captureProcessor().processor, null, processor))
+      .resolves.toBe("processed");
+    expect(processor.process).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({orderId: null}));
+  });
   it("restores a past-due membership after invoice.paid", async () => {
     const {commands, processor} = captureProcessor();
     await processStripeEvent(invoicePaid(), systemActor("stripe-webhook"), processor);
@@ -119,7 +153,6 @@ describe("Stripe webhook lifecycle mapping", () => {
     checkoutCompleted("evt_bad_metadata", {metadata: {membershipId}}),
     checkoutCompleted("evt_bad_reference", {client_reference_id: "11111111-1111-4111-8111-111111111112"}),
     invoicePaid("evt_bad_customer", {customer: null}),
-    checkoutCompleted("evt_unpaid", {payment_status: "unpaid"}),
     checkoutCompleted("evt_free_plan", {metadata: {membershipId, applicationId, planCode: "community"}}),
     invoicePaid("evt_cycle_missing_period", {billing_reason: "subscription_cycle", period_start: null}),
   ])("rejects malformed or inconsistent ownership metadata before repository mutation", async (stripeEvent) => {

@@ -99,13 +99,11 @@ export function createSuppressionsRepository(loadDatabase: AutomationDatabaseLoa
      * Do not reorder it back.
      *
      * A review caught the first attempt at this, which keyed the audit on the
-     * suppression INSERT alone. Nothing in the tree DELETEs a suppression
-     * outside the seeds, while a re-consent path already ships — the portal
-     * profile form writes `whatsapp_opt_in = true` through
-     * `lib/portal/command-core.ts` — so a member who re-granted and then
-     * withdrew again through `/api/unsubscribe?channel=whatsapp` had the flag
-     * cleared here (a real, member-initiated withdrawal) and got no audit row
-     * and no new suppression: no trace at all, breaking boundary 11. Hence the
+     * suppression INSERT alone. Portal re-consent now deletes the suppression
+     * in the same transaction, but the flag transition remains an independent
+     * signal. Before that cleanup, a member who re-granted in the portal
+     * and then withdrew through `/api/unsubscribe?channel=whatsapp` could
+     * clear the flag without a new suppression row or audit event. Hence the
      * guard on the UPDATE rather than a guard on the INSERT: the flag
      * TRANSITION is the second, independent evidence of newness, and the
      * metadata says which half spoke.

@@ -17,7 +17,7 @@ export type EventCancellationRefundDependencies = Readonly<{
  * notFound`.
  *
  * `failed` folds `provider_failed` and `commit_failed` together on purpose --
- * both leave the order `paid`, which is what makes the next run retry it -- and
+ * both keep the order on the sweep's work list, which makes the next run alert -- and
  * is distinct from `notAdmissible`, where the order was not `paid` to begin with
  * and so will not be retried.
  */
@@ -41,7 +41,7 @@ export class EventCancellationRefundBatchError extends Error {
 
 /**
  * Attempt the whole bounded batch, then fail the job if any order still needs
- * attention. Failed orders stay paid and move behind untouched work by their
+ * attention. Failed orders stay on the work list and move behind untouched work by their
  * existing updated_at timestamp, so a full batch of persistent failures cannot
  * starve later orders. No additional progress table or migration is needed.
  */

@@ -4,6 +4,7 @@ import Stripe from "stripe";
 
 import {STRIPE_API_VERSION} from "@/lib/billing/stripe-api-version";
 import {billingEnv} from "@/lib/config/env";
+import type {MembershipStatus} from "@/lib/membership/lifecycle";
 
 export type CheckoutMetadata = Readonly<{
   membershipId: string;
@@ -51,13 +52,19 @@ export type InvoiceRecord = Readonly<{
   hostedInvoiceUrl: string | null;
 }>;
 
+export type CurrentSubscriptionState = Readonly<{
+  stripeSubscriptionId: string; stripeCustomerId: string; nextStatus: MembershipStatus;
+  cancelAtPeriodEnd: boolean; billingPeriodStart: Date | null; billingPeriodEnd: Date | null;
+}>;
 export interface StripeBillingAdapter {
   createCheckoutSession(input: CheckoutSessionInput): Promise<{id: string; url: string}>;
+  currentSubscription(subscriptionId: string): Promise<CurrentSubscriptionState>;
   createEventTicketSession(input: EventTicketSessionInput): Promise<{id: string; url: string}>;
   /** The intent to refund for a settled session; `null` when the session has none. */
   paymentIntentForSession(sessionId: string): Promise<string | null>;
+  ticketOrderIdForPaymentIntent(paymentIntentId: string): Promise<string | null>;
   /** `idempotencyKey` makes a retried refund after a failed webhook safe to re-issue. */
-  refundPaymentIntent(paymentIntentId: string, idempotencyKey: string, options?: {requireSucceeded?: boolean}): Promise<void>;
+  refundPaymentIntent(paymentIntentId: string, idempotencyKey: string, options?: {requireSucceeded?: boolean; orderId?: string}): Promise<void>;
   /** Prove a lost commit against the provider before recording a refund locally. */
   fullyRefundedPaymentIntent(paymentIntentId: string, expectedAmountHkdCents: number): Promise<boolean>;
   createBillingPortalSession(input: PortalSessionInput): Promise<{url: string}>;
@@ -71,15 +78,17 @@ type StripeClient = {
       options?: Stripe.RequestOptions,
     ): Promise<Pick<Stripe.Checkout.Session, "id" | "url">>;
     retrieve(id: string): Promise<Pick<Stripe.Checkout.Session, "payment_intent">>;
+    list(params: {payment_intent: string; limit: number}): Promise<{data: Array<Pick<Stripe.Checkout.Session, "id" | "metadata" | "client_reference_id" | "payment_intent">>; has_more: boolean}>;
   }};
   billingPortal: {sessions: {create(
     params: Stripe.BillingPortal.SessionCreateParams,
   ): Promise<Pick<Stripe.BillingPortal.Session, "url">>}};
+  subscriptions: {retrieve(id: string): Promise<Pick<Stripe.Subscription, "id" | "customer" | "status" | "cancel_at_period_end" | "items">>};
   invoices: {list(
     params: Stripe.InvoiceListParams,
   ): Promise<{data: Array<Pick<Stripe.Invoice, "id" | "created" | "amount_paid" | "currency" | "status" | "hosted_invoice_url">>}>};
   refunds: {
-    create(params: {payment_intent: string}, options?: Stripe.RequestOptions): Promise<Pick<Stripe.Refund, "status">>;
+    create(params: {payment_intent: string; metadata?: {eventOrderId: string}}, options?: Stripe.RequestOptions): Promise<Pick<Stripe.Refund, "status">>;
     list(params: {payment_intent: string; limit: number}): Promise<{data: Array<Pick<Stripe.Refund, "status" | "currency" | "amount">>; has_more: boolean}>;
   };
   paymentIntents: {retrieve(id: string, params: {expand: string[]}): Promise<Pick<Stripe.PaymentIntent, "id" | "status" | "currency" | "amount_received" | "latest_charge">>};
@@ -99,6 +108,29 @@ export function createStripeBillingAdapter(client: StripeClient): StripeBillingA
       }, {idempotencyKey: input.idempotencyKey});
       if (!session.url) throw new Error("STRIPE_CHECKOUT_URL_MISSING");
       return {id: session.id, url: session.url};
+    },
+
+    async currentSubscription(subscriptionId) {
+      const subscription = await client.subscriptions.retrieve(subscriptionId);
+      if (subscription.id !== subscriptionId) throw new Error("STRIPE_SUBSCRIPTION_MISMATCH");
+      const stripeCustomerId = typeof subscription.customer === "string"
+        ? subscription.customer : subscription.customer.id;
+      if (!stripeCustomerId) throw new Error("STRIPE_CUSTOMER_MISSING");
+      const cancelAtPeriodEnd = subscription.cancel_at_period_end === true;
+      let nextStatus: MembershipStatus;
+      if (subscription.status === "canceled") nextStatus = "cancelled";
+      else if (subscription.status === "past_due" || subscription.status === "unpaid") nextStatus = "past_due";
+      else if (subscription.status === "active" || subscription.status === "trialing") {
+        nextStatus = cancelAtPeriodEnd ? "cancel_at_period_end" : "active";
+      } else throw new Error("STRIPE_SUBSCRIPTION_STATUS_UNSUPPORTED");
+      const item = subscription.items.data[0];
+      const start = item?.current_period_start;
+      const end = item?.current_period_end;
+      const billingPeriodStart = Number.isSafeInteger(start) && start >= 0 ? new Date(start * 1000) : null;
+      const billingPeriodEnd = Number.isSafeInteger(end) && end >= 0 ? new Date(end * 1000) : null;
+      return {stripeSubscriptionId: subscription.id, stripeCustomerId, nextStatus,
+        cancelAtPeriodEnd: nextStatus === "cancelled" ? false : cancelAtPeriodEnd,
+        billingPeriodStart, billingPeriodEnd};
     },
 
     async createEventTicketSession(input) {
@@ -133,8 +165,25 @@ export function createStripeBillingAdapter(client: StripeClient): StripeBillingA
       return typeof intent === "string" ? intent : intent?.id ?? null;
     },
 
+    async ticketOrderIdForPaymentIntent(paymentIntentId) {
+      const sessions = await client.checkout.sessions.list({payment_intent: paymentIntentId, limit: 2});
+      if (sessions.has_more || sessions.data.length > 1) throw new Error("STRIPE_CHECKOUT_AMBIGUOUS");
+      const session = sessions.data[0];
+      if (!session) return null;
+      const orderId = session.metadata?.orderId;
+      const intent = session.payment_intent;
+      const intentId = typeof intent === "string" ? intent : intent?.id;
+      if (session.metadata?.kind !== "event_ticket" ||
+          typeof orderId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(orderId) ||
+          session.client_reference_id !== orderId || intentId !== paymentIntentId) {
+        throw new Error("STRIPE_CHECKOUT_CORRELATION_FAILED");
+      }
+      return orderId;
+    },
+
     async refundPaymentIntent(paymentIntentId, idempotencyKey, options) {
-      const refund = await client.refunds.create({payment_intent: paymentIntentId}, {idempotencyKey});
+      const refund = await client.refunds.create({payment_intent: paymentIntentId,
+        ...(options?.orderId ? {metadata: {eventOrderId: options.orderId}} : {})}, {idempotencyKey});
       // refundOrder keeps paid orders until provider success. The existing
       // oversold webhook has its own retry contract and opts out.
       if (options?.requireSucceeded && refund.status !== "succeeded") {

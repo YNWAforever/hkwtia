@@ -60,6 +60,7 @@ export async function refundOrder(
   const order = await dependencies.orders.orderById(input.orderId);
   if (!order) return {status: "not_found"};
   if (order.status === "refunded") return {status: "already_refunded"};
+  if (order.status === "refund_failed") return {status: "provider_failed"};
   if (order.status !== "paid") return {status: "not_admissible"};
   if (!order.stripeCheckoutSessionId) return {status: "provider_failed"};
 
@@ -75,7 +76,7 @@ export async function refundOrder(
 
   let providerReconciled = false;
   try {
-    await dependencies.stripe.refundPaymentIntent(paymentIntentId, `ticket-refund:${order.id}`, {requireSucceeded: true});
+    await dependencies.stripe.refundPaymentIntent(paymentIntentId, `ticket-refund:${order.id}`, {requireSucceeded: true, orderId: order.id});
   } catch {
     // The provider may have accepted an earlier refund whose database commit
     // failed. Reconcile only an exact full refund of this order's HKD charge.

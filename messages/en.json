@@ -347,7 +347,13 @@
         "body": "We have refunded HK${amount} for order {orderId} ({eventTitle}). Depending on your bank, it can take a few days to appear.",
         "cta": "View the event"
       },
-      "event_ticket_pass": {
+      "event_ticket_refund_failed": {
+        "subject": "Update on your refund for {eventTitle}",
+        "preview": "The refund for order {orderId} did not complete.",
+        "heading": "Your refund needs further attention",
+        "body": "We need to correct our earlier refund notice. The refund of HK${amount} for order {orderId} ({eventTitle}) did not complete. Our team is reviewing it. Please contact us if you need help.",
+        "cta": "Contact WTIA"
+      },      "event_ticket_pass": {
         "subject": "Your pass for {eventTitle}",
         "preview": "Your personal entry pass, {attendeeName}.",
         "heading": "Your pass, {attendeeName}",
@@ -2949,13 +2955,14 @@
           "paid": "Paid",
           "expired": "Expired",
           "failed": "Failed",
-          "refunded": "Refunded"
+          "refunded": "Refunded",
+          "refund_failed": "Refund failed — staff follow-up needed"
         },
         "refundOutcomes": {
           "refunded": "Refunded.",
           "alreadyRefunded": "This order was already refunded.",
           "notAdmissible": "This order is not payable, so there is nothing to refund.",
-          "providerFailed": "The refund did not go through, so nothing was charged back. You can try again.",
+          "providerFailed": "The refund has not been completed. Check Stripe and arrange a new refund or another remedy before closing this order.",
           "commitFailed": "The payment provider may have refunded this order, but we could not record it here. Check the payment provider before trying again.",
           "notFound": "That order could not be found."
         }

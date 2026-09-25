@@ -5,6 +5,7 @@ import {renderEmail, type RenderEmailInput} from "@/lib/email/render";
 import {createTestTransport} from "@/lib/email/transport";
 import {
   sendOrderRefundEmail,
+  sendOrderRefundFailureEmail,
   type TicketProcessorDependencies,
 } from "@/lib/billing/ticket-webhook-processor";
 import {refundOrder, type RefundDependencies} from "@/lib/tickets/refund-core";
@@ -109,6 +110,17 @@ describe("sendOrderRefundEmail", () => {
   });
 });
 
+describe("a later failed refund's correction", () => {
+  it("emails the buyer in their language with a contact link and event-scoped key", async () => {
+    const {dependencies, transport, renderEmail: renderEmailSpy} = emailDependencies();
+    await sendOrderRefundFailureEmail(order({buyerLocale: "zh-HK"}), "evt_failed", dependencies);
+    const input = (renderEmailSpy.mock.calls[0] as unknown as [RenderEmailInput])[0];
+    expect(input).toMatchObject({template: "event_ticket_refund_failed", locale: "zh-HK"});
+    expect(input.variables).toMatchObject({orderId, amount: "250.00", ctaUrl: "https://w.test/zh/contact"});
+    expect(transport.sends).toHaveLength(1);
+    expect(transport.sends[0]!.idempotencyKey).toBe(`ticket-refund-failed:${orderId}:evt_failed`);
+  });
+});
 describe("a staff refund's notification", () => {
   it("sends exactly one event_ticket_refunded with the order's locale and amount", async () => {
     const {dependencies, transport, renderEmail: renderEmailSpy} = emailDependencies();
