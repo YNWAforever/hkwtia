@@ -7,10 +7,10 @@ import {eventsRepository, localizeEvent, type LocalizedEvent} from "@/lib/db/rep
 import type {Event} from "@/lib/db/server-schema";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {requireMember, type Actor, type MembershipRecord} from "@/lib/membership/lifecycle";
+import {isBenefitEligibleMembershipStatus} from "@/lib/membership/entitlements";
 
 type MemberActor = Extract<Actor, {kind: "member"}>;
 
-const directoryStatuses = ["active", "past_due", "cancel_at_period_end"] as const;
 const defaultPageSize = 20;
 const maxPageSize = 50;
 
@@ -160,7 +160,7 @@ function visibleDirectoryRecords(rows: readonly DirectoryCandidate[], query: Rea
 }
 
 function membershipIsDirectoryEligible(membership: MembershipRecord): boolean {
-  return (directoryStatuses as readonly string[]).includes(membership.status);
+  return isBenefitEligibleMembershipStatus(membership.status);
 }
 
 async function requirePortalEntitlement(actor: Actor, dependencies: PortalContentDependencies): Promise<MemberActor> {

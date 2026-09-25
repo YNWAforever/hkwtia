@@ -2144,6 +2144,10 @@
     "memberEvents": {
       "eyebrow": "貴機構的活動",
       "newTitle": "提交活動",
+      "publishingFor": "發布機構：{company}",
+      "chooseCompany": "機構",
+      "useCompany": "選擇機構",
+      "changeCompanyWarning": "更改機構會清除已輸入的活動資料。要繼續嗎？",
       "newAction": "提交活動",
       "listTitle": "貴機構已提交的活動",
       "listEmpty": "貴機構尚未提交任何活動。",

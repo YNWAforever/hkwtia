@@ -25,7 +25,7 @@ export default async function PortalToolPage({params}: Props) {
     getDashboard(actor),
     getTranslations({locale, namespace: "Portal"}),
   ]);
-  const available = isToolAvailable(tool, dashboard.memberships.map((membership) => membership.planCode));
+  const available = isToolAvailable(tool, dashboard.memberships);
 
   if (!available) {
     return (

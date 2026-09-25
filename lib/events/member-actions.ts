@@ -32,7 +32,7 @@ function errorCode(error: unknown): string {
  * a draft save and a submission, so the form carries a single action state
  * and a failed submission can never be mistaken for a failed draft save.
  */
-export async function saveMemberEventAction(locale: AppLocale, _state: MemberEventFormState, formData: FormData): Promise<MemberEventFormState> {
+export async function saveMemberEventAction(locale: AppLocale, companyId: string, _state: MemberEventFormState, formData: FormData): Promise<MemberEventFormState> {
   const actor = await requireActor();
   const mode = formData.get("intent") === "draft" ? "draft" : "submit";
   // An empty hidden field means "create"; the edit page posts the row id so
@@ -40,7 +40,7 @@ export async function saveMemberEventAction(locale: AppLocale, _state: MemberEve
   const eventIdField = formData.get("eventId");
   const eventId = typeof eventIdField === "string" && eventIdField.length > 0 ? eventIdField : undefined;
   try {
-    const event = await saveMemberEvent(actor, mode, memberEventInputFromFormData(formData), {eventId});
+    const event = await saveMemberEvent(actor, mode, memberEventInputFromFormData(formData), {eventId, companyId});
     // `revalidatePath` takes the internal app-router path, where `/zh-HK/…` is correct.
     revalidatePath(`/${locale}/portal/events`);
     revalidatePath(`/${locale}/portal/events/${event.id}/edit`);

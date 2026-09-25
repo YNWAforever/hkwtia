@@ -21,7 +21,6 @@ export default async function PortalToolsPage({params}: Props) {
     getDashboard(actor),
     getTranslations({locale, namespace: "Portal"}),
   ]);
-  const plans = dashboard.memberships.map((membership) => membership.planCode);
 
   return (
     <div className="space-y-8">
@@ -32,7 +31,7 @@ export default async function PortalToolsPage({params}: Props) {
       </header>
       <ul className="grid gap-4 md:grid-cols-2">
         {MEMBER_TOOLS.map((tool) => {
-          const available = isToolAvailable(tool, plans);
+          const available = isToolAvailable(tool, dashboard.memberships);
           return (
             <li className="glass-card flex flex-col gap-3 p-5" key={tool.key}>
               <h2 className="font-serif text-2xl font-semibold">{t(tool.titleKey)}</h2>

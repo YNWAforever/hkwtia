@@ -1,7 +1,7 @@
 import {render, screen} from "@testing-library/react";
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 
-const state = vi.hoisted(() => ({plans: ["startup"] as string[], notFound: vi.fn()}));
+const state = vi.hoisted(() => ({plans: ["startup"] as string[], statuses: ["active"] as string[], notFound: vi.fn()}));
 
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async () => (key: string) => key),
@@ -15,7 +15,7 @@ vi.mock("@/lib/auth/actor", () => ({
 }));
 vi.mock("@/lib/portal/queries", () => ({
   getDashboard: vi.fn(async () => ({
-    memberships: state.plans.map((planCode, index) => ({id: `m${index}`, planCode})),
+    memberships: state.plans.map((planCode, index) => ({id: `m${index}`, planCode, status: state.statuses[index]})),
     companies: [],
   })),
 }));
@@ -27,6 +27,7 @@ const params = (key: string) => Promise.resolve({locale: "en", key});
 describe("/portal/tools/[key]", () => {
   beforeEach(() => {
     state.plans = ["startup"];
+    state.statuses = ["active"];
     state.notFound.mockClear();
     process.env.MEMBER_TOOL_CONTENT_CALENDAR_TOKEN = "fixture-token";
   });
@@ -62,6 +63,12 @@ describe("/portal/tools/[key]", () => {
     expect(screen.getByRole("link", {name: "tools.upgrade"})).toHaveAttribute("href", "/membership");
   });
 
+  it("does not disclose the shared tool token to a pending paid membership", async () => {
+    state.statuses = ["pending_payment"];
+    const {container} = render(await PortalToolPage({params: params("content-calendar")}));
+    expect(container.querySelector("iframe")).toBeNull();
+    expect(screen.getByText("tools.lockedTitle")).toBeVisible();
+  });
   it("fails closed when the token is not configured", async () => {
     delete process.env.MEMBER_TOOL_CONTENT_CALENDAR_TOKEN;
     const {container} = render(await PortalToolPage({params: params("content-calendar")}));

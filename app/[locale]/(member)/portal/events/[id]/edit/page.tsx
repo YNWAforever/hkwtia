@@ -36,9 +36,13 @@ export default async function EditMemberEventPage({params, searchParams}: Props)
     if (error instanceof ZodError || (error instanceof Error && error.message === "FORBIDDEN")) return null;
     throw error;
   });
-  if (!row) notFound();
+  if (!row?.organiser_company_id) notFound();
   const values = memberEventViewFromRow(row);
-  const context = await loadMemberEventsContext(actor).catch(() => null);
+  const context = await loadMemberEventsContext(actor, undefined, {companyId: row.organiser_company_id, excludeEventId: id}).catch((error: unknown) => {
+    if (error instanceof Error && error.message === "MEMBERSHIP_INACTIVE") return "NO_MEMBERSHIP_FOR_COMPANY";
+    if (error instanceof Error && (error.message === "NO_MANAGED_COMPANY" || error.message === "NO_MEMBERSHIP_FOR_COMPANY")) return error.message;
+    throw error;
+  });
   const saved = (await searchParams).saved;
   const notice = saved === "submit" ? t("submitted") : saved === "draft" ? t("draftSaved") : null;
   return (
@@ -48,7 +52,8 @@ export default async function EditMemberEventPage({params, searchParams}: Props)
         <h1 className="font-serif text-4xl font-semibold tracking-tight">{values.titleEn}</h1>
         {values.rejectionReason ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{t("rejectedWith", {reason: values.rejectionReason})}</p> : null}
       </header>
-      <EventForm action={saveMemberEventAction.bind(null, locale)} canSubmit={Boolean(context?.canPublish) || values.status === "pending_review"} labels={eventFormLabels(t)} notice={notice} values={values} />
+      {typeof context === "string" ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive" role="alert">{t(`errors.${context}`)}</p> : null}
+      <EventForm action={saveMemberEventAction.bind(null, locale, row.organiser_company_id)} canSaveDraft={typeof context !== "string"} canUploadHero={typeof context !== "string" && context.limit > 0} canSubmit={typeof context !== "string" && (context.canPublish)} labels={eventFormLabels(t)} notice={notice} values={values} />
     </div>
   );
 }

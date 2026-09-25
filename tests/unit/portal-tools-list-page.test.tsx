@@ -3,7 +3,7 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import {MEMBER_TOOLS} from "@/config/member-tools";
 
-const state = vi.hoisted(() => ({plans: ["community"] as string[]}));
+const state = vi.hoisted(() => ({plans: ["community"] as string[], statuses: ["active"] as string[]}));
 
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async () => (key: string) => key),
@@ -14,7 +14,7 @@ vi.mock("@/lib/auth/actor", () => ({
 }));
 vi.mock("@/lib/portal/queries", () => ({
   getDashboard: vi.fn(async () => ({
-    memberships: state.plans.map((planCode, index) => ({id: `m${index}`, planCode})),
+    memberships: state.plans.map((planCode, index) => ({id: `m${index}`, planCode, status: state.statuses[index]})),
     companies: [],
   })),
 }));
@@ -36,6 +36,7 @@ function toolCard(): HTMLElement {
 describe("/portal/tools", () => {
   beforeEach(() => {
     state.plans = ["community"];
+    state.statuses = ["active"];
   });
 
   it("renders the tools heading", async () => {
@@ -53,6 +54,14 @@ describe("/portal/tools", () => {
     expect(card.getByRole("link", {name: "tools.upgrade"})).toHaveAttribute("href", "/membership");
   });
 
+  it("keeps a pending paid plan locked even when an active Community plan exists", async () => {
+    state.plans = ["corporate", "community"];
+    state.statuses = ["pending_payment", "active"];
+    render(await PortalToolsPage({params: Promise.resolve({locale: "en"})}));
+    const card = within(toolCard());
+    expect(card.queryByRole("link", {name: "tools.open"})).not.toBeInTheDocument();
+    expect(card.getByText("tools.lockedTitle")).toBeVisible();
+  });
   it("links an entitled member through to the tool", async () => {
     state.plans = ["startup"];
     render(await PortalToolsPage({params: Promise.resolve({locale: "en"})}));

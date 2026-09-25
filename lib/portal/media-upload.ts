@@ -12,6 +12,8 @@ import {mediaRepository} from "@/lib/db/repos/media";
 import type {MediaRow} from "@/lib/db/server-schema";
 import {normalizeImageUpload} from "@/lib/media/image-upload";
 import {privateR2Storage} from "@/lib/media/r2-storage";
+import {entitlementsFor, isBenefitEligibleMembershipStatus} from "@/lib/membership/entitlements";
+import {getDashboard} from "@/lib/portal/queries";
 import {requireMember, type Actor} from "@/lib/membership/lifecycle";
 
 /**
@@ -22,6 +24,19 @@ import {requireMember, type Actor} from "@/lib/membership/lifecycle";
  * attached as a hero. The pipeline itself is actor-free, so nothing here ever
  * has to borrow a staff-shaped actor to get past the admin service's gate.
  */
+async function mayUploadEventHero(actor: Actor): Promise<boolean> {
+  let dashboard: Awaited<ReturnType<typeof getDashboard>>;
+  try {
+    dashboard = await getDashboard(actor);
+  } catch (error) {
+    if (error instanceof Error && error.message === "MEMBERSHIP_INACTIVE") return false;
+    throw error;
+  }
+  return dashboard.companies.some((company) => company.canManage && dashboard.memberships.some((membership) =>
+    membership.companyId === company.id && isBenefitEligibleMembershipStatus(membership.status)
+      && entitlementsFor(membership.planCode).publishEventsPerQuarter > 0,
+  ));
+}
 const defaultDependencies: MediaUploadServiceDependencies = {
   normalize: normalizeImageUpload,
   storage: privateR2Storage,
@@ -37,6 +52,7 @@ export async function uploadMemberMedia(
   // Authorization deliberately precedes normalization, storage configuration,
   // provider access, and database work — the same ordering as the admin path.
   requireMember(actor);
+  if (!(await mayUploadEventHero(actor))) throw new Error("FORBIDDEN");
   return runMediaUploadPipeline(input, {
     normalize: dependencies.normalize,
     storage: dependencies.storage,

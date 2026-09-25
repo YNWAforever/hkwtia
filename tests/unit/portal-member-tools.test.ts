@@ -7,17 +7,24 @@ const tool = MEMBER_TOOLS[0];
 
 describe("member tool availability", () => {
   it("locks a plan the tool does not name", () => {
-    expect(isToolAvailable(tool, ["community"])).toBe(false);
+    expect(isToolAvailable(tool, [{planCode: "community", status: "active"}])).toBe(false);
   });
 
   it.each(["startup", "corporate", "patron"] as const)("opens for %s", (plan) => {
-    expect(isToolAvailable(tool, [plan])).toBe(true);
+    expect(isToolAvailable(tool, [{planCode: plan, status: "active"}])).toBe(true);
   });
 
   it("admits a member who holds several memberships on any one of them", () => {
-    expect(isToolAvailable(tool, ["community", "startup"])).toBe(true);
+    expect(isToolAvailable(tool, [{planCode: "community", status: "active"}, {planCode: "startup", status: "active"}])).toBe(true);
   });
 
+  it.each(["pending_payment", "pending_review"] as const)("locks a %s paid plan", (status) => {
+    expect(isToolAvailable(tool, [{planCode: "startup", status}])).toBe(false);
+  });
+
+  it.each(["active", "past_due", "cancel_at_period_end"] as const)("honours a %s paid plan", (status) => {
+    expect(isToolAvailable(tool, [{planCode: "startup", status}])).toBe(true);
+  });
   it("locks a member with no memberships at all", () => {
     expect(isToolAvailable(tool, [])).toBe(false);
   });

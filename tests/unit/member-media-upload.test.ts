@@ -1,4 +1,9 @@
-import {describe, expect, it, vi} from "vitest";
+import {beforeEach, describe, expect, it, vi} from "vitest";
+const dashboard = vi.hoisted(() => ({planCode: "startup", status: "active", canManage: true}));
+vi.mock("@/lib/portal/queries", () => ({getDashboard: vi.fn(async () => ({
+  companies: [{id: "company-1", canManage: dashboard.canManage}],
+  memberships: [{companyId: "company-1", planCode: dashboard.planCode, status: dashboard.status}],
+}))}));
 
 import type {MediaUploadServiceDependencies} from "@/lib/admin/media-upload-service";
 import {createMemberMediaUploadPost, uploadMemberMedia} from "@/lib/portal/media-upload";
@@ -44,6 +49,7 @@ function uploadRequest(overrides: Readonly<{origin?: string}> = {}): Request {
 }
 
 describe("member media upload (programme B-2, S-3)", () => {
+  beforeEach(() => {dashboard.planCode = "startup"; dashboard.status = "active"; dashboard.canManage = true;});
   it("refuses anonymous and staff actors before normalisation, storage or persistence", async () => {
     const {value, persist} = dependencies();
     await expect(uploadMemberMedia({kind: "anonymous", userId: null}, input, value)).rejects.toThrow("FORBIDDEN");
@@ -55,6 +61,24 @@ describe("member media upload (programme B-2, S-3)", () => {
     expect(persist).not.toHaveBeenCalled();
   });
 
+  it.each(["pending_payment", "pending_review", "cancelled"])("rejects a %s upload before normalization or R2", async (status) => {
+    dashboard.status = status;
+    const {value, persist} = dependencies();
+    await expect(uploadMemberMedia(member, input, value)).rejects.toThrow("FORBIDDEN");
+    expect(value.normalize).not.toHaveBeenCalled();
+    expect(value.storage.put).not.toHaveBeenCalled();
+    expect(persist).not.toHaveBeenCalled();
+  });
+
+  it("rejects a Community plan or non-manager before R2", async () => {
+    const {value} = dependencies();
+    dashboard.planCode = "community";
+    await expect(uploadMemberMedia(member, input, value)).rejects.toThrow("FORBIDDEN");
+    dashboard.planCode = "startup";
+    dashboard.canManage = false;
+    await expect(uploadMemberMedia(member, input, value)).rejects.toThrow("FORBIDDEN");
+    expect(value.storage.put).not.toHaveBeenCalled();
+  });
   it("normalises, stores, then persists with the member as registrant", async () => {
     const {value, persist, order} = dependencies();
     const result = await uploadMemberMedia(member, input, value);
@@ -71,6 +95,11 @@ describe("member media upload (programme B-2, S-3)", () => {
     expect(order).toEqual(["normalize", "put", "delete"]);
   });
 
+  it("answers 404 when the member upload service refuses entitlement", async () => {
+    const upload = vi.fn(async () => {throw new Error("FORBIDDEN");});
+    const post = createMemberMediaUploadPost({actor: async () => member, expectedOrigin: () => "https://hkwtia.example", upload});
+    expect((await post(uploadRequest())).status).toBe(404);
+  });
   it("answers 404 to a visitor and to staff, 403 cross-origin, and 201 to a member through the route", async () => {
     const upload = vi.fn(async () => ({id: ID, url: `/api/media/${ID}`}));
     const anonymous = createMemberMediaUploadPost({actor: async () => { throw new Error("UNAUTHORIZED"); }, expectedOrigin: () => "https://hkwtia.example", upload});

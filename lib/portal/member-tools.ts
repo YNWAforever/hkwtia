@@ -1,5 +1,6 @@
 import type {MemberTool} from "@/config/member-tools";
-import type {MembershipPlanCode} from "@/lib/membership/constants";
+import type {MembershipPlanCode, MembershipStatus} from "@/lib/membership/constants";
+import {isBenefitEligibleMembershipStatus} from "@/lib/membership/entitlements";
 
 /**
  * Whether a member may open a tool.
@@ -8,8 +9,8 @@ import type {MembershipPlanCode} from "@/lib/membership/constants";
  * plan-level statement `/membership` mirrors, and a unit test holds every tool's tiers to
  * plans whose entitlements say `included`, so the two vocabularies cannot drift apart.
  */
-export function isToolAvailable(tool: MemberTool, plans: readonly MembershipPlanCode[]): boolean {
-  return tool.tiers.some((tier) => plans.includes(tier));
+export function isToolAvailable(tool: MemberTool, memberships: readonly Readonly<{planCode: MembershipPlanCode; status: MembershipStatus}>[]): boolean {
+  return memberships.some((membership) => isBenefitEligibleMembershipStatus(membership.status) && tool.tiers.includes(membership.planCode));
 }
 
 /**
