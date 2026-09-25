@@ -89,6 +89,21 @@ describe("eventOrdersRepository.createOrder", () => {
       .resolves.toMatchObject({ok: true});
   });
 
+  it.each([
+    ["expired", {expiresAt: now}, "ATTEMPT_EXPIRED"],
+    ["already paid", {status: "paid" as const}, "ATTEMPT_COMPLETED"],
+  ])("does not reopen a %s purchase attempt", async (_label, overrides, reason) => {
+    const tx = transaction({
+      orderByIdempotencyKey: vi.fn(async () => order(overrides)),
+      orderSeats: vi.fn(async () => [{seatId: "seat-1", position: 1, attendeeName: "Ada", attendeeEmail: "ada@example.test"}]),
+    });
+    const result = await createEventOrdersRepository(async (work) => work(tx)).createOrder({
+      eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test",
+      buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now,
+    });
+    expect(result).toEqual({ok: false, reason});
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
   it("reuses the order a repeated idempotency key names", async () => {
     const tx = transaction({orderByIdempotencyKey: vi.fn(async () => order()), orderSeats: vi.fn(async () => [{seatId: "seat-1", position: 1, attendeeName: "Ada", attendeeEmail: "ada@example.test"}])});
     await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now}))

@@ -49,7 +49,7 @@ export type CreateOrderInput = Readonly<{
 
 export type CreateOrderResult =
   | Readonly<{ok: true; order: OrderRecord; reused: boolean}>
-  | Readonly<{ok: false; reason: "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "AMOUNT_MISMATCH" | "SOLD_OUT" | "ATTEMPT_CHANGED"}>;
+  | Readonly<{ok: false; reason: "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "AMOUNT_MISMATCH" | "SOLD_OUT" | "ATTEMPT_CHANGED" | "ATTEMPT_EXPIRED" | "ATTEMPT_COMPLETED"}>;
 
 export type SettleResult =
   | Readonly<{status: "paid" | "duplicate" | "ignored" | "oversold" | "refund_due" | "unknown"; order: OrderRecord | null}>;
@@ -395,6 +395,12 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
         if (!event.published || event.startsAt <= input.now) return {ok: false, reason: "EVENT_CLOSED"};
         const existing = await tx.orderByIdempotencyKey(input.idempotencyKey);
         if (existing) {
+          // Once the hold ends or an order settles, its key cannot start another checkout.
+          // An expired attempt gets a fresh key; a paid one reports completion.
+          if (existing.status === "paid") return {ok: false, reason: "ATTEMPT_COMPLETED"};
+          if (existing.status !== "pending" || existing.expiresAt <= input.now) {
+            return {ok: false, reason: "ATTEMPT_EXPIRED"};
+          }
           // A key names one immutable purchase attempt. A failed Stripe call
           // can leave this order without a session; using the current form to
           // mint one would charge for different seats than this row records.

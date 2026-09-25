@@ -18,7 +18,7 @@ export type TicketCheckoutInput = Readonly<{
 }>;
 
 export type TicketCheckoutErrorCode =
-  | "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "SOLD_OUT" | "INVALID_SEATS" | "UNAVAILABLE" | "RETRY_CHANGED";
+  | "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "SOLD_OUT" | "INVALID_SEATS" | "UNAVAILABLE" | "RETRY_CHANGED" | "RETRY_EXPIRED" | "ALREADY_COMPLETED";
 
 export type TicketCheckoutResult =
   | Readonly<{status: "redirect"; url: string}>
@@ -96,15 +96,19 @@ export async function createTicketCheckout(
       ? "EVENT_CLOSED"
       : created.reason === "ATTEMPT_CHANGED"
         ? "RETRY_CHANGED"
-        : created.reason === "SOLD_OUT"
-        ? "SOLD_OUT"
-      : created.reason === "EVENT_NOT_TICKETED"
-        ? "EVENT_NOT_TICKETED"
-        // A mismatch means this service computed the amount wrongly; it is our
-        // bug, not the buyer's, so it is reported as unavailable.
-        : created.reason === "AMOUNT_MISMATCH"
-          ? "UNAVAILABLE"
-          : "EVENT_NOT_FOUND";
+        : created.reason === "ATTEMPT_EXPIRED"
+          ? "RETRY_EXPIRED"
+          : created.reason === "ATTEMPT_COMPLETED"
+            ? "ALREADY_COMPLETED"
+            : created.reason === "SOLD_OUT"
+              ? "SOLD_OUT"
+              : created.reason === "EVENT_NOT_TICKETED"
+                ? "EVENT_NOT_TICKETED"
+                // A mismatch means this service computed the amount wrongly; it is our
+                // bug, not the buyer's, so it is reported as unavailable.
+                : created.reason === "AMOUNT_MISMATCH"
+                  ? "UNAVAILABLE"
+                  : "EVENT_NOT_FOUND";
     return {status: "error", code};
   }
   // A reused key returns the session it already minted; minting a second one

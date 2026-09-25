@@ -51,6 +51,8 @@ describe("createTicketCheckout", () => {
     ["a sold-out order", "SOLD_OUT", "SOLD_OUT"],
     ["an amount that does not derive from the price", "AMOUNT_MISMATCH", "UNAVAILABLE"],
     ["a reused key with changed purchase details", "ATTEMPT_CHANGED", "RETRY_CHANGED"],
+    ["an expired purchase attempt", "ATTEMPT_EXPIRED", "RETRY_EXPIRED"],
+    ["an already paid purchase", "ATTEMPT_COMPLETED", "ALREADY_COMPLETED"],
     ["an event deleted between the read and the order", "EVENT_NOT_FOUND", "EVENT_NOT_FOUND"],
   ] as const)("maps %s to an error", async (_case, reason, code) => {
     const deps = dependencies({orders: {createOrder: vi.fn(async () => ({ok: false, reason}))} as never});
