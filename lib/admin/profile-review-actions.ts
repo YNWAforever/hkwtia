@@ -33,12 +33,12 @@ function afterReview(path: string, slug: string | null | undefined): void {
 
 export async function approveCompanyProfileAction(path: string, formData: FormData): Promise<void> {
   const actor = await requireAdminActor();
-  const {slug} = await approveCompanyProfile(actor, formData.get("companyId"));
+  const {slug} = await approveCompanyProfile(actor, formData.get("companyId"), formData.get("reviewVersion"));
   afterReview(path, slug);
 }
 
 export async function rejectCompanyProfileAction(path: string, formData: FormData): Promise<void> {
   const actor = await requireAdminActor();
-  const {slug} = await rejectCompanyProfile(actor, formData.get("companyId"), formData.get("rejectionReason"));
+  const {slug} = await rejectCompanyProfile(actor, formData.get("companyId"), formData.get("rejectionReason"), formData.get("reviewVersion"));
   afterReview(path, slug);
 }

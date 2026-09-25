@@ -19,6 +19,7 @@ const labels: ProfileReviewLabels = en.Admin.profilesReview;
 
 const row: ProfileReviewRow = {
   id: "11111111-1111-4111-8111-111111111111",
+  reviewVersion: "42",
   name: "Acme Wireless",
   slug: "acme-wireless",
   tags: ["ai"],
@@ -40,6 +41,7 @@ describe("profile review preview", () => {
 
     // displayName is the row's own column; the other four live in the preview.
     expect(html).toContain("Acme Wireless");
+    expect(html.match(/name="reviewVersion" value="42"/g)).toHaveLength(2);
     expect(html).toContain("https://acme.example/en");
     expect(html).toContain("Rewritten English prose the owner saved from the portal.");
     expect(html).toContain("Logistics technology");

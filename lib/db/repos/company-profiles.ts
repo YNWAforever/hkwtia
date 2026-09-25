@@ -123,8 +123,8 @@ const profileInputSchema = z.object({
 export type CompanyProfileInput = z.input<typeof profileInputSchema>;
 
 const reviewDecisionSchema = z.discriminatedUnion("decision", [
-  z.object({decision: z.literal("approve")}).strict(),
-  z.object({decision: z.literal("reject"), reason: z.string().trim().min(1).max(1_000)}).strict(),
+  z.object({decision: z.literal("approve"), reviewVersion: z.string().regex(/^\d{1,10}$/)}).strict(),
+  z.object({decision: z.literal("reject"), reason: z.string().trim().min(1).max(1_000), reviewVersion: z.string().regex(/^\d{1,10}$/)}).strict(),
 ]);
 
 export type CompanyProfileReviewDecision = z.input<typeof reviewDecisionSchema>;
@@ -215,6 +215,7 @@ export type CompanyProfileRow = z.infer<typeof companyProfileRowSchema>;
 const reviewQueueRowSchema = companyProfileRowSchema.extend({
   display_name: z.string(),
   logo_url: z.string().nullable(),
+  review_version: z.string().regex(/^\d{1,10}$/),
   website: z.string().nullable().optional().transform((value) => publicWebsiteUrl(value ?? null)),
 });
 
@@ -560,7 +561,7 @@ export function createCompanyProfilesRepository(dependencies: CompanyProfileDepe
       requireAdmin(actor);
       const database = await loadDatabase();
       return executedRows(await database.execute(sql`
-        SELECT ${companies}.*, ${media.url} AS logo_url
+        SELECT ${companies}.*, ${companies}.xmin::text AS review_version, ${media.url} AS logo_url
         FROM ${companies}
         LEFT JOIN ${media} ON ${media.id} = ${companies.logoMediaId} AND ${media.archivedAt} IS NULL
         WHERE ${companies.publicProfileStatus} = 'pending_review'
@@ -602,9 +603,11 @@ export function createCompanyProfilesRepository(dependencies: CompanyProfileDepe
             profile_rejection_reason = ${reason},
             updated_at = now()
           WHERE ${companies.id} = ${id}
+            AND ${companies.publicProfileStatus} = 'pending_review'
+            AND ${companies}.xmin::text = ${parsed.reviewVersion}
           RETURNING *
         `))[0];
-        if (!updated) throw new Error("COMPANY_NOT_FOUND");
+        if (!updated) throw new Error("INVALID_PROFILE_TRANSITION");
         await transaction.execute(sql`
           INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata)
           VALUES (${actor.profileId}, ${actor.kind}, ${approved ? "company.profile.approved" : "company.profile.rejected"}, 'company', ${id},
