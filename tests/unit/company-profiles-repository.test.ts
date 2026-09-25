@@ -1,3 +1,4 @@
+import {PgDialect} from "drizzle-orm/pg-core";
 import {describe, expect, it, vi} from "vitest";
 
 import {createCompanyProfilesRepository} from "@/lib/db/repos/company-profiles";
@@ -13,7 +14,10 @@ const roles = async (actor: Actor): Promise<CompanyRole | null> =>
 /** Each queue entry is what the next `execute` returns, or an Error it rejects with. */
 function db(rows: (Record<string, unknown>[] | Error)[]) {
   const queue = [...rows];
-  const execute = vi.fn<(query: unknown) => Promise<Record<string, unknown>[]>>(async () => {
+  const execute = vi.fn<(query: unknown) => Promise<Record<string, unknown>[]>>(async (query) => {
+    const statement = literalText(query);
+    if (statement.includes("AS company_id") && statement.includes("FOR UPDATE")) return [{company_id: COMPANY}];
+    if (statement.includes("AS role") && statement.includes("FOR UPDATE")) return [{role: "owner"}];
     const next = queue.shift() ?? [];
     if (next instanceof Error) throw next;
     return next;
@@ -154,6 +158,35 @@ describe("companyProfilesRepository (programme B-6, B-7)", () => {
     expect(execute).not.toHaveBeenCalled();
   });
 
+  it.each(["update", "submit"] as const)("blocks %s after the manager role is revoked following preflight", async (operation) => {
+    const execute = vi.fn(async (query: unknown): Promise<Record<string, unknown>[]> => {
+      const statement = literalText(query);
+      if (statement.includes("AS company_id") && statement.includes("FOR UPDATE")) return [{company_id: COMPANY}];
+      if (statement.includes("AS role") && statement.includes("FOR UPDATE")) return [];
+      if (statement.includes("UPDATE")) return [{id: COMPANY, public_profile_status: "pending_review"}];
+      return [];
+    });
+    const database = {execute, transaction: async <T,>(work: (tx: {execute: typeof execute}) => Promise<T>) => work({execute})};
+    const repository = createCompanyProfilesRepository({
+      loadDatabase: async () => database as never,
+      getCompanyRole: roles,
+    });
+    const write = operation === "update"
+      ? repository.updateProfile(member, COMPANY, profile)
+      : repository.submitForReview(member, COMPANY);
+    await expect(write).rejects.toThrow("FORBIDDEN");
+    expect(execute).toHaveBeenCalledTimes(2);
+    expect(statementText(execute, 0)).toContain("FOR UPDATE");
+    expect(statementText(execute, 1)).toContain("AS role");
+    const roleQuery = new PgDialect().sqlToQuery(execute.mock.calls[1]?.[0] as Parameters<PgDialect["sqlToQuery"]>[0]);
+    expect(roleQuery.sql).toContain('"company_members"."company_id" =');
+    expect(roleQuery.sql).toContain('"company_members"."user_id" =');
+    expect(roleQuery.sql).toContain('"company_members"."revoked_at" IS NULL');
+    expect(roleQuery.sql).toMatch(/"company_members"\."role" IN \('owner', 'admin'\)/);
+    expect(roleQuery.params).toEqual([COMPANY, member.profileId]);
+    expect(execute.mock.calls.some(([query]) => /^\s*UPDATE\b/.test(literalText(query)))).toBe(false);
+  });
+
   it("member updates require a manager role and reject unknown tags before any SQL", async () => {
     const {execute, load} = db([[{id: COMPANY, public_profile_status: "hidden"}]]);
     const repository = createCompanyProfilesRepository({loadDatabase: load, getCompanyRole: roles});
@@ -164,7 +197,7 @@ describe("companyProfilesRepository (programme B-6, B-7)", () => {
     await expect(repository.updateProfile(member, COMPANY, profile)).resolves.toMatchObject({id: COMPANY});
     // A published profile re-enters review on every owner edit, and the
     // reviewer columns reset, so a stale approval never covers new copy.
-    expect(statementText(execute, 0)).toContain("pending_review");
+    expect(statementText(execute, 2)).toContain("pending_review");
   });
 
   // The write schema and the public projection run the same `canonicalHttpsUrl`
@@ -187,7 +220,7 @@ describe("companyProfilesRepository (programme B-6, B-7)", () => {
 
     await expect(repository.updateProfile(member, COMPANY, {...profile, website: "https://acme.example/en?ref=wtia#about"}))
       .resolves.toMatchObject({id: COMPANY});
-    expect(execute).toHaveBeenCalledTimes(1);
+    expect(execute).toHaveBeenCalledTimes(3);
   });
 
   it("maps the slug unique violation to COMPANY_SLUG_TAKEN, wrapped or raw", async () => {
@@ -216,11 +249,11 @@ describe("companyProfilesRepository (programme B-6, B-7)", () => {
 
     await expect(repository.submitForReview(member, COMPANY)).resolves.toMatchObject({public_profile_status: "pending_review"});
     await expect(repository.review(staff, COMPANY, {decision: "approve"})).resolves.toMatchObject({public_profile_status: "published"});
-    expect(execute).toHaveBeenCalledTimes(4);
+    expect(execute).toHaveBeenCalledTimes(6);
     // `literalText` drops interpolated identifiers, so the audit table itself
     // is invisible here; its column list is what pins the statement.
-    expect(statementText(execute, 3)).toContain("INSERT INTO");
-    expect(statementText(execute, 3)).toContain("actor_user_id, actor_type, action, target_type, target_id, metadata");
+    expect(statementText(execute, 5)).toContain("INSERT INTO");
+    expect(statementText(execute, 5)).toContain("actor_user_id, actor_type, action, target_type, target_id, metadata");
     await expect(repository.review(member, COMPANY, {decision: "approve"})).rejects.toThrow();
   });
 
