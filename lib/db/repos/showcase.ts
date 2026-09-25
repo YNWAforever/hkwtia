@@ -29,6 +29,9 @@ import {
  * optional so every existing in-memory test double stays valid.
  */
 export type PublicShowcaseRow = ShowcaseListing & PublicLogoJoin;
+// PostgreSQL xmin changes on every UPDATE, including same-status resubmissions.
+// The staff form carries this snapshot token into the guarded review write.
+export type ReviewShowcaseRow = PublicShowcaseRow & Readonly<{reviewVersion: string}>;
 export type PublicReadOptions = Readonly<{limit?: number}>;
 
 const publicLogoColumns = {
@@ -43,6 +46,7 @@ const publicReadLimitSchema = z.number().int().min(1).max(12);
 const readLimit = (options: PublicReadOptions = {}) =>
   options.limit === undefined ? undefined : publicReadLimitSchema.parse(options.limit);
 // An empty select clears the logo; anything else must be a real registry id.
+const reviewVersionSchema = z.string().regex(/^\d{1,10}$/);
 const mediaIdSchema = z.union([z.literal(""), z.null()]).transform(() => null)
   .or(z.string().uuid());
 
@@ -50,8 +54,8 @@ export type ShowcaseStore = Readonly<{
   getByCompany: (companyId: string) => Promise<ShowcaseListing | null>;
   getById: (id: string) => Promise<ShowcaseListing | null>;
   upsert: (companyId: string, input: ListingInput, status: "draft" | "pending_review") => Promise<ShowcaseListing>;
-  listForReview: () => Promise<readonly PublicShowcaseRow[]>;
-  setStatus: (id: string, status: "published" | "rejected" | "pending_review", reviewerId: string, rejectionReason?: string | null) => Promise<ShowcaseListing | null>;
+  listForReview: () => Promise<readonly ReviewShowcaseRow[]>;
+  setStatus: (id: string, status: "published" | "rejected" | "pending_review", reviewerId: string, reviewVersion: string, rejectionReason?: string | null) => Promise<ShowcaseListing | null>;
   setPremium: (id: string, premium: boolean) => Promise<ShowcaseListing | null>;
   setLogoMedia: (id: string, mediaId: string | null) => Promise<ShowcaseListing | null>;
   listPublished: (filters: ShowcaseFilters, options?: PublicReadOptions) => Promise<readonly PublicShowcaseRow[]>;
@@ -70,9 +74,9 @@ export type ShowcaseRepository = Readonly<{
   getByCompany: (actor: Actor, companyId: string) => Promise<ShowcaseListing | null>;
   upsertDraft: (actor: Actor, companyId: string, input: unknown, status?: "draft" | "pending_review") => Promise<ShowcaseListing>;
   submitForReview: (actor: Actor, companyId: string, input: unknown) => Promise<ShowcaseListing>;
-  listForReview: (actor: AdminActor) => Promise<readonly PublicShowcaseRow[]>;
-  publish: (actor: AdminActor, id: string) => Promise<ShowcaseListing | null>;
-  reject: (actor: AdminActor, id: string, reason: string) => Promise<ShowcaseListing | null>;
+  listForReview: (actor: AdminActor) => Promise<readonly ReviewShowcaseRow[]>;
+  publish: (actor: AdminActor, id: string, reviewVersion: string) => Promise<ShowcaseListing | null>;
+  reject: (actor: AdminActor, id: string, reason: string, reviewVersion: string) => Promise<ShowcaseListing | null>;
   setPremium: (actor: AdminActor, id: string, premium: boolean) => Promise<ShowcaseListing | null>;
   setLogoMedia: (actor: AdminActor, id: string, mediaId: unknown) => Promise<ShowcaseListing | null>;
   listPublished: (filters: ShowcaseFilters | Readonly<Record<string, unknown>>, options?: PublicReadOptions) => Promise<readonly PublicShowcaseRow[]>;
@@ -100,7 +104,7 @@ function arrayContains(column: unknown, value: string) {
   return sql`${column} @> ARRAY[${value}]::text[]`;
 }
 
-function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseStore {
+export function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseStore {
   return {
     async getByCompany(companyId) {
       const database = await loadDatabase();
@@ -174,12 +178,12 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseS
       // Joined so staff can see the picture they are publishing, not just its
       // slug — the logo goes out under the association's brand.
       return database
-        .select({...getTableColumns(showcaseListings), ...publicLogoColumns})
+        .select({...getTableColumns(showcaseListings), ...publicLogoColumns, reviewVersion: sql<string>`${showcaseListings}.xmin::text`})
         .from(showcaseListings)
         .leftJoin(media, eq(showcaseListings.logoMediaId, media.id))
         .orderBy(desc(showcaseListings.updatedAt), asc(showcaseListings.slug));
     },
-    async setStatus(id, status, reviewerId, rejectionReason = null) {
+    async setStatus(id, status, reviewerId, reviewVersion, rejectionReason = null) {
       const database = await loadDatabase();
       return (await database.update(showcaseListings).set({
         status,
@@ -187,7 +191,7 @@ function databaseStore(loadDatabase: () => Promise<Database> = getDb): ShowcaseS
         reviewedByProfileId: reviewerId,
         rejectionReason,
         updatedAt: new Date(),
-      }).where(eq(showcaseListings.id, id)).returning())[0] ?? null;
+      }).where(and(eq(showcaseListings.id, id), eq(showcaseListings.status, "pending_review"), sql`${showcaseListings}.xmin::text = ${reviewVersion}`)).returning())[0] ?? null;
     },
     async setPremium(id, premium) {
       const database = await loadDatabase();
@@ -305,22 +309,28 @@ export function createShowcaseRepository(
       requireAdmin(actor);
       return store.listForReview();
     },
-    async publish(actor, id) {
+    async publish(actor, id, reviewVersion) {
       requireAdmin(actor);
       const parsedId = listingIdSchema.parse(id);
+      const parsedVersion = reviewVersionSchema.parse(reviewVersion);
       const current = await store.getById(parsedId);
       if (!current) return null;
       if (!transitionListingStatus(current.status, "published")) throw new Error("INVALID_SHOWCASE_TRANSITION");
-      return store.setStatus(parsedId, "published", actor.profileId, null);
+      const published = await store.setStatus(parsedId, "published", actor.profileId, parsedVersion, null);
+      if (!published) throw new Error("INVALID_SHOWCASE_TRANSITION");
+      return published;
     },
-    async reject(actor, id, reason) {
+    async reject(actor, id, reason, reviewVersion) {
       requireAdmin(actor);
       const parsedId = listingIdSchema.parse(id);
+      const parsedVersion = reviewVersionSchema.parse(reviewVersion);
       const parsedReason = z.string().trim().min(1).max(1_000).parse(reason);
       const current = await store.getById(parsedId);
       if (!current) return null;
       if (!transitionListingStatus(current.status, "rejected")) throw new Error("INVALID_SHOWCASE_TRANSITION");
-      return store.setStatus(parsedId, "rejected", actor.profileId, parsedReason);
+      const rejected = await store.setStatus(parsedId, "rejected", actor.profileId, parsedVersion, parsedReason);
+      if (!rejected) throw new Error("INVALID_SHOWCASE_TRANSITION");
+      return rejected;
     },
     async setPremium(actor, id, premium) {
       requireAdmin(actor);
