@@ -4,7 +4,7 @@ import {randomUUID} from "node:crypto";
 import {and, eq, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";
-import {companies as companiesTable, companyMembers, membershipApplications, type Company} from "@/lib/db/server-schema";
+import {companies as companiesTable, companyMembers, membershipApplications, memberships, type Company} from "@/lib/db/server-schema";
 import {forbidden, getDb, requireMember, requireSystem} from "@/lib/db/repos/common";
 
 export type CompanyInput = Pick<Company, "legalName" | "displayName"> & Partial<Pick<Company, "website" | "industry" | "sizeBand" | "description" | "logoReference" | "directoryVisible">>;
@@ -82,6 +82,12 @@ function reviewResetFor(input: CompanyUpdate) {
  * that would notice — every other assertion in the suite is on generated SQL
  * text, which renders the broken form just as happily as the working one.
  */
+function executedRows(result: unknown): Record<string, unknown>[] {
+  if (Array.isArray(result)) return result as Record<string, unknown>[];
+  if (result && typeof result === "object" && "rows" in result && Array.isArray(result.rows)) return result.rows as Record<string, unknown>[];
+  return [];
+}
+
 function companyMembershipScope(actor: Extract<Actor, {kind: "member"}>) {
   return sql`EXISTS (SELECT 1 FROM ${companyMembers} WHERE ${companyMembers.companyId} = ${companiesTable.id} AND ${companyMembers.userId} = ${actor.profileId} AND ${companyMembers.revokedAt} IS NULL)`;
 }
@@ -187,6 +193,31 @@ export const companiesRepository = {
     if (actor.kind === "anonymous") forbidden();
     if (actor.kind === "system") requireSystem(actor);
     const db = await getDb();
+    if (actor.kind === "member") {
+      return db.transaction(async (transaction) => {
+        // A join-step company may have no membership yet. Lock one if present,
+        // in the same order as seat revocation, then lock the manager row.
+        await transaction.execute(sql`
+          SELECT ${memberships.companyId} AS company_id FROM ${memberships}
+          WHERE ${memberships.companyId} = ${companyId} FOR UPDATE
+        `);
+        const role = executedRows(await transaction.execute(sql`
+          SELECT ${companyMembers.role} AS role FROM ${companyMembers}
+          WHERE ${companyMembers.companyId} = ${companyId}
+            AND ${companyMembers.userId} = ${actor.profileId}
+            AND ${companyMembers.revokedAt} IS NULL
+            AND ${companyMembers.role} IN ('owner', 'admin')
+          FOR UPDATE
+        `))[0]?.role;
+        if (role !== "owner" && role !== "admin") forbidden();
+        const rows = await transaction.update(companiesTable)
+          .set({...input, ...reviewResetFor(input), updatedAt: new Date()})
+          .where(companyMutationScope(actor, companyId))
+          .returning();
+        if (!rows[0]) forbidden();
+        return rows[0] ?? null;
+      });
+    }
     const rows = await db.update(companiesTable)
       .set({...input, ...reviewResetFor(input), updatedAt: new Date()})
       .where(companyMutationScope(actor, companyId))

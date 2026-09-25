@@ -1,7 +1,8 @@
 import {readFileSync, readdirSync} from "node:fs";
 import path from "node:path";
 
-import {sql} from "drizzle-orm";
+import {sql, type SQL} from "drizzle-orm";
+import {PgDialect} from "drizzle-orm/pg-core";
 import {drizzle} from "drizzle-orm/pg-proxy";
 import {describe, expect, it, vi} from "vitest";
 
@@ -145,10 +146,31 @@ describe("EXISTS authorization scopes render as executable Postgres", () => {
    */
   it.each(memberScopedCalls)("%s parenthesises its EXISTS subquery", async (_name, invoke) => {
     const statements: string[] = [];
-    database.current = drizzle(async (query: string) => {
+    const proxy = drizzle(async (query: string) => {
       statements.push(query);
       return {rows: []};
     });
+    if (_name === "companies.update") {
+      // pg-proxy cannot transact. Execute the callback against the same SQL
+      // recorder, returning an active role so the scoped UPDATE is emitted.
+      const transaction = {
+        execute: async (query: SQL) => {
+          const result = await proxy.execute(query);
+          const statement = new PgDialect().sqlToQuery(query).sql.toLowerCase();
+          if (statement.includes('from "company_members"') && statement.includes("for update")) {
+            return {rows: [{role: "admin"}]};
+          }
+          return result;
+        },
+        update: proxy.update.bind(proxy),
+      };
+      database.current = {
+        ...transaction,
+        transaction: async <T,>(work: (tx: typeof transaction) => Promise<T>) => work(transaction),
+      };
+    } else {
+      database.current = proxy;
+    }
 
     await invoke().catch(() => undefined);
 

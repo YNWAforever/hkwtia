@@ -6,10 +6,10 @@ import {z} from "zod";
 import {isIndustryTag} from "@/config/industry-tags";
 import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb} from "@/lib/db/repos/common";
-import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
+import type {AutomationDatabase, AutomationDatabaseLoader, AutomationSqlExecutor} from "@/lib/db/repos/journeys";
 import {mediaRepository} from "@/lib/db/repos/media";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
-import {auditEvents, companies, events, media, memberships, showcaseListings} from "@/lib/db/server-schema";
+import {auditEvents, companies, companyMembers, events, media, memberships, showcaseListings} from "@/lib/db/server-schema";
 import {MEMBERSHIP_PLAN_CODES, type MembershipPlanCode} from "@/lib/membership/constants";
 import {requireMember, type Actor, type CompanyRole} from "@/lib/membership/lifecycle";
 import {canonicalHttpsUrl} from "@/lib/security/https-url";
@@ -377,6 +377,28 @@ export function createCompanyProfilesRepository(dependencies: CompanyProfileDepe
     return actor;
   }
 
+  async function lockCompanyManager(
+    transaction: AutomationSqlExecutor,
+    actor: Extract<Actor, {kind: "member"}>,
+    companyId: string,
+  ): Promise<void> {
+    // Seat mutations lock membership before company_members. Keep that order so
+    // a role revoked after the preflight cannot still write through this transaction.
+    await transaction.execute(sql`
+      SELECT ${memberships.companyId} AS company_id FROM ${memberships}
+      WHERE ${memberships.companyId} = ${companyId} FOR UPDATE
+    `);
+    const role = executedRows(await transaction.execute(sql`
+      SELECT ${companyMembers.role} AS role FROM ${companyMembers}
+      WHERE ${companyMembers.companyId} = ${companyId}
+        AND ${companyMembers.userId} = ${actor.profileId}
+        AND ${companyMembers.revokedAt} IS NULL
+        AND ${companyMembers.role} IN ('owner', 'admin')
+      FOR UPDATE
+    `))[0]?.role;
+    if (role !== "owner" && role !== "admin") throw new Error("FORBIDDEN");
+  }
+
   return {
     /** Anonymous. The directory: every published profile, filtered and ordered in SQL. */
     async listPublished(filters: MemberFilters): Promise<PublicMemberSummary[]> {
@@ -476,7 +498,9 @@ export function createCompanyProfilesRepository(dependencies: CompanyProfileDepe
       const database = await loadDatabase();
       let result: unknown;
       try {
-        result = await database.execute(sql`
+        result = await database.transaction(async (transaction) => {
+          await lockCompanyManager(transaction, manager, id);
+          return transaction.execute(sql`
           UPDATE ${companies} SET
             slug = ${parsed.slug},
             tagline_en = ${parsed.taglineEn},
@@ -491,7 +515,8 @@ export function createCompanyProfilesRepository(dependencies: CompanyProfileDepe
             updated_at = now()
           WHERE ${companies.id} = ${id}
           RETURNING *
-        `);
+          `);
+        });
       } catch (error) {
         if (isSlugUniqueViolation(error)) throw new Error("COMPANY_SLUG_TAKEN");
         throw error;
@@ -508,16 +533,19 @@ export function createCompanyProfilesRepository(dependencies: CompanyProfileDepe
      */
     async submitForReview(actor: Actor, companyId: string): Promise<CompanyProfileRow> {
       const id = companyIdSchema.parse(companyId);
-      await requireCompanyManager(actor, id);
+      const manager = await requireCompanyManager(actor, id);
       const database = await loadDatabase();
-      const row = companyProfileRows(await database.execute(sql`
+      const row = companyProfileRows(await database.transaction(async (transaction) => {
+        await lockCompanyManager(transaction, manager, id);
+        return transaction.execute(sql`
         UPDATE ${companies}
         SET public_profile_status = 'pending_review', updated_at = now()
         WHERE ${companies.id} = ${id}
           AND ${companies.publicProfileStatus} IN ('hidden', 'rejected')
           AND ${companies.slug} IS NOT NULL
         RETURNING *
-      `))[0];
+        `);
+      }))[0];
       if (!row) throw new Error("INVALID_PROFILE_TRANSITION");
       return row;
     },

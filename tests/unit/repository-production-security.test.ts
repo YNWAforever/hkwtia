@@ -1,3 +1,4 @@
+import {PgDialect} from "drizzle-orm/pg-core";
 import {drizzle} from "drizzle-orm/pg-proxy";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
@@ -5,7 +6,27 @@ const database = vi.hoisted(() => ({current: null as unknown}));
 
 vi.mock("@/lib/db/repos/common", async (importOriginal) => {
   const original = await importOriginal<typeof import("@/lib/db/repos/common")>();
-  return {...original, getDb: async () => database.current};
+  return {...original, getDb: async () => {
+    const current = database.current as object;
+    // pg-proxy cannot open transactions. These tests inspect SQL only; the
+    // disposable PostgreSQL test proves the actual lock and commit behavior.
+    return new Proxy(current, {get(target, property, receiver) {
+      if (property !== "transaction") return Reflect.get(target, property, receiver);
+      return async (work: (tx: object) => Promise<unknown>) => work(new Proxy(current, {
+        get(txTarget, txProperty, txReceiver) {
+          if (txProperty !== "execute") return Reflect.get(txTarget, txProperty, txReceiver);
+          return async (query: Parameters<PgDialect["sqlToQuery"]>[0]) => {
+            const result = await Reflect.get(txTarget, "execute", txReceiver).call(txTarget, query);
+            const statement = new PgDialect().sqlToQuery(query).sql.toLowerCase();
+            if (statement.includes('from "company_members"') && statement.includes("for update")) {
+              return {rows: [{role: "admin"}]};
+            }
+            return result;
+          };
+        },
+      }));
+    }});
+  }};
 });
 
 import {companiesRepository, type CompanyUpdate} from "@/lib/db/repos/companies";
@@ -76,7 +97,7 @@ function normalizedSql(statement: string | undefined): string {
 function setClause(statement: string | undefined): string {
   const normalized = normalizedSql(statement);
   const start = normalized.indexOf(" set ");
-  const end = normalized.indexOf(" where ");
+  const end = normalized.indexOf(" where ", start);
   return start === -1 ? "" : normalized.slice(start, end === -1 ? undefined : end);
 }
 
