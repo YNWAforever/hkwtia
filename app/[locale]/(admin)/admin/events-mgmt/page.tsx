@@ -35,7 +35,7 @@ export default async function AdminEventsPage({params}: Props) {
   // Snake_case rows from the raw-SQL seam, mapped field by field so the table
   // never renders a raw database row.
   const reviewRows: ReviewRow[] | null = pendingRows === null ? null : pendingRows.map((row) => ({
-    id: row.id, slug: row.slug, titleEn: row.title_en, titleZh: row.title_zh, startsAt: row.starts_at, organiser: row.organiser_name ?? null,
+    id: row.id, reviewVersion: row.review_version, slug: row.slug, titleEn: row.title_en, titleZh: row.title_zh, startsAt: row.starts_at, organiser: row.organiser_name ?? null,
     submittedAt: row.submitted_at, format: row.format, visibility: row.visibility,
   }));
   const reviewLabels = {caption: t("review.caption"), event: t("review.event"), organiser: t("review.organiser"), starts: t("review.starts"), submitted: t("review.submitted"), format: t("review.format"), visibility: t("review.visibility"), approve: t("review.approve"), reject: t("review.reject"), rejectionReason: t("review.rejectionReason"), empty: t("review.empty")};

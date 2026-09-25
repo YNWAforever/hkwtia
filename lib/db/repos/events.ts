@@ -686,6 +686,8 @@ const memberEventRowSchema = z.object({
 }).passthrough();
 
 export type MemberEventRow = z.infer<typeof memberEventRowSchema>;
+const memberEventReviewRowSchema = memberEventRowSchema.extend({review_version: z.string().regex(/^\d{1,10}$/)});
+export type MemberEventReviewRow = z.infer<typeof memberEventReviewRowSchema>;
 
 /** Neon returns `{rows}`; the in-memory executor in tests returns the array itself. */
 function executedRows(result: unknown): Record<string, unknown>[] {
@@ -894,8 +896,8 @@ export async function countCompanySubmissionsThisQuarter(actor: Actor, companyId
 }
 
 const reviewDecisionSchema = z.discriminatedUnion("decision", [
-  z.object({decision: z.literal("approve")}).strict(),
-  z.object({decision: z.literal("reject"), reason: z.string().trim().min(1).max(1_000)}).strict(),
+  z.object({decision: z.literal("approve"), reviewVersion: z.string().regex(/^\d{1,10}$/)}).strict(),
+  z.object({decision: z.literal("reject"), reason: z.string().trim().min(1).max(1_000), reviewVersion: z.string().regex(/^\d{1,10}$/)}).strict(),
 ]);
 
 export type EventReviewDecision = z.input<typeof reviewDecisionSchema>;
@@ -920,10 +922,11 @@ export async function reviewEvent(actor: Actor, eventId: string, decision: unkno
       UPDATE ${events}
       SET status = ${next}, published = ${flags.published}, member_only = ${flags.memberOnly}, published_at = ${publishedAt},
           reviewed_at = now(), reviewed_by_profile_id = ${actor.profileId}, rejection_reason = ${reason}, updated_at = now()
-      WHERE ${events.id} = ${id}
+      WHERE ${events.id} = ${id} AND ${events.status} = 'pending_review'
+        AND ${events}.xmin::text = ${parsed.reviewVersion}
       RETURNING *
     `))[0];
-    if (!updated) throw new Error("EVENT_NOT_FOUND");
+    if (!updated) throw new Error("INVALID_EVENT_TRANSITION");
     await transaction.execute(sql`
       INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata)
       VALUES (${actor.profileId}, ${actor.kind}, ${parsed.decision === "approve" ? "event.review.approved" : "event.review.rejected"}, 'event', ${id},
@@ -1032,19 +1035,19 @@ export async function cancellationPreview(actor: Actor, eventId: unknown, deps: 
   return {paidOrders: parsed.paid_orders, refundTotalHkdCents: parsed.refund_total_hkd_cents, attendees: parsed.attendees, rsvpRegistrants: parsed.rsvp_registrants};
 }
 
-export async function listEventsForReview(actor: Actor, deps: MemberEventDependencies = {}): Promise<MemberEventRow[]> {
+export async function listEventsForReview(actor: Actor, deps: MemberEventDependencies = {}): Promise<MemberEventReviewRow[]> {
   requireAdmin(actor);
   const database = await memberDatabase(deps);
   // The organiser's display name rides along for the review queue: the
   // companies repository is member-scoped, so staff cannot look it up per row.
   // An admin-authored event has no organiser, hence the LEFT JOIN.
-  return memberEventRows(await database.execute(sql`
-    SELECT ${events}.*, ${companies.displayName} AS organiser_name
+  return executedRows(await database.execute(sql`
+    SELECT ${events}.*, ${events}.xmin::text AS review_version, ${companies.displayName} AS organiser_name
     FROM ${events}
     LEFT JOIN ${companies} ON ${companies.id} = ${events.organiserCompanyId}
     WHERE ${events.status} = 'pending_review'
     ORDER BY ${events.submittedAt} ASC NULLS LAST, ${events.slug} ASC
-  `));
+  `)).map((row) => memberEventReviewRowSchema.parse(row));
 }
 
 export const eventsRepository = {

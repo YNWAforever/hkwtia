@@ -315,20 +315,20 @@ describe("member event writes (programme B-1)", () => {
   it("reviews only from pending_review and audits in the same transaction", async () => {
     const pending = row({status: "pending_review", submitted_at: new Date("2026-09-01T00:00:00Z")});
     const {execute, deps} = fakeDeps([[pending], [{...pending, status: "published", published: true, published_at: new Date()}], []]);
-    await expect(reviewEvent(staff, EVENT, {decision: "approve"}, deps)).resolves.toMatchObject({status: "published"});
+    await expect(reviewEvent(staff, EVENT, {decision: "approve", reviewVersion: "42"}, deps)).resolves.toMatchObject({status: "published"});
     expect(execute).toHaveBeenCalledTimes(3);
     expect(statementText(execute, 0)).toContain("FOR UPDATE");
     expect(statementText(execute, 1)).toContain("COALESCE");
     const rejected = fakeDeps([[{...pending, status: "draft"}]]);
-    await expect(reviewEvent(staff, EVENT, {decision: "reject", reason: "duplicate"}, rejected.deps)).rejects.toThrow("INVALID_EVENT_TRANSITION");
+    await expect(reviewEvent(staff, EVENT, {decision: "reject", reason: "duplicate", reviewVersion: "42"}, rejected.deps)).rejects.toThrow("INVALID_EVENT_TRANSITION");
     expect(rejected.execute).toHaveBeenCalledTimes(1);
-    await expect(reviewEvent(member, EVENT, {decision: "approve"}, deps)).rejects.toThrow();
+    await expect(reviewEvent(member, EVENT, {decision: "approve", reviewVersion: "42"}, deps)).rejects.toThrow();
   });
 
   it("leaves published_at alone on rejection", async () => {
     const pending = row({status: "pending_review"});
     const {execute, deps} = fakeDeps([[pending], [{...pending, status: "rejected", rejection_reason: "duplicate"}], []]);
-    await expect(reviewEvent(staff, EVENT, {decision: "reject", reason: "duplicate"}, deps)).resolves.toMatchObject({status: "rejected"});
+    await expect(reviewEvent(staff, EVENT, {decision: "reject", reason: "duplicate", reviewVersion: "42"}, deps)).resolves.toMatchObject({status: "rejected"});
     expect(statementText(execute, 1)).not.toContain("COALESCE");
   });
 
@@ -343,14 +343,14 @@ describe("member event writes (programme B-1)", () => {
   it("stamps each review decision with its exact spec audit action (B-3)", async () => {
     const pending = row({status: "pending_review"});
     const approve = fakeDeps([[pending], [{...pending, status: "published", published: true, published_at: new Date()}], []]);
-    await expect(reviewEvent(staff, EVENT, {decision: "approve"}, approve.deps)).resolves.toMatchObject({status: "published"});
+    await expect(reviewEvent(staff, EVENT, {decision: "approve", reviewVersion: "42"}, approve.deps)).resolves.toMatchObject({status: "published"});
     const approved = paramValues(approve.execute.mock.calls[2]?.[0]);
     expect(approved).toContain("event.review.approved");
     expect(approved).not.toContain("event.review.rejected");
     expect(statementText(approve.execute, 2)).toContain("'event'");
 
     const reject = fakeDeps([[pending], [{...pending, status: "rejected", rejection_reason: "duplicate"}], []]);
-    await expect(reviewEvent(staff, EVENT, {decision: "reject", reason: "duplicate"}, reject.deps)).resolves.toMatchObject({status: "rejected"});
+    await expect(reviewEvent(staff, EVENT, {decision: "reject", reason: "duplicate", reviewVersion: "42"}, reject.deps)).resolves.toMatchObject({status: "rejected"});
     const rejected = paramValues(reject.execute.mock.calls[2]?.[0]);
     expect(rejected).toContain("event.review.rejected");
     expect(rejected).not.toContain("event.review.approved");
@@ -359,7 +359,7 @@ describe("member event writes (programme B-1)", () => {
   it("requires a reason to reject and an existing row to review", async () => {
     const {deps} = fakeDeps([[]]);
     await expect(reviewEvent(staff, EVENT, {decision: "reject"}, deps)).rejects.toThrow();
-    await expect(reviewEvent(staff, EVENT, {decision: "approve"}, fakeDeps([[]]).deps)).rejects.toThrow("EVENT_NOT_FOUND");
+    await expect(reviewEvent(staff, EVENT, {decision: "approve", reviewVersion: "42"}, fakeDeps([[]]).deps)).rejects.toThrow("EVENT_NOT_FOUND");
   });
 
   it("scopes company listings and edits to managers and counts the quarter", async () => {
@@ -389,14 +389,14 @@ describe("member event writes (programme B-1)", () => {
   });
 
   it("lists the review queue for staff only, with the organiser's display name joined in", async () => {
-    const {execute, deps} = fakeDeps([[{...row({status: "pending_review"}), organiser_name: "Acme Robotics"}]]);
+    const {execute, deps} = fakeDeps([[{...row({status: "pending_review"}), organiser_name: "Acme Robotics", review_version: "42"}]]);
     await expect(listEventsForReview(member, deps)).rejects.toThrow("FORBIDDEN");
     expect(execute).not.toHaveBeenCalled();
-    await expect(listEventsForReview(staff, deps)).resolves.toMatchObject([{id: EVENT, status: "pending_review", organiser_name: "Acme Robotics"}]);
+    await expect(listEventsForReview(staff, deps)).resolves.toMatchObject([{id: EVENT, status: "pending_review", organiser_name: "Acme Robotics", review_version: "42"}]);
     const statement = statementText(execute, 0);
     expect(statement).toContain("pending_review");
     // An admin-authored event has no organiser; the join must not drop it.
-    const orphan = fakeDeps([[{...row({status: "pending_review", organiser_company_id: null}), organiser_name: null}]]);
-    await expect(listEventsForReview(staff, orphan.deps)).resolves.toMatchObject([{id: EVENT, organiser_name: null}]);
+    const orphan = fakeDeps([[{...row({status: "pending_review", organiser_company_id: null}), organiser_name: null, review_version: "42"}]]);
+    await expect(listEventsForReview(staff, orphan.deps)).resolves.toMatchObject([{id: EVENT, organiser_name: null, review_version: "42"}]);
   });
 });
