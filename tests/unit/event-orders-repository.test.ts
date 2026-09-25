@@ -21,7 +21,8 @@ function transaction(overrides: Partial<EventOrdersTransaction> = {}): EventOrde
     paidSeats: vi.fn(async () => 0),
     insertOrder: vi.fn(async () => order()),
     insertSeats: vi.fn(async () => undefined),
-    attachSession: vi.fn(async () => undefined),
+    attachSession: vi.fn(async () => true),
+    expireUnattachedOrder: vi.fn(async () => true),
     markStatus: vi.fn(async () => undefined),
     orderById: vi.fn(async () => null),
     listEventOrders: vi.fn(async () => []),
@@ -215,14 +216,20 @@ describe("eventOrdersRepository.paidSeats", () => {
 describe("eventOrdersRepository.expireBySession", () => {
   it("expires a pending order and writes the audit row", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order())});
-    await createEventOrdersRepository(async (work) => work(tx)).expireBySession("cs_1");
+    await expect(createEventOrdersRepository(async (work) => work(tx)).expireBySession("cs_1")).resolves.toBe(true);
     expect(tx.markStatus).toHaveBeenCalledWith("order-1", "expired", {});
     expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.expired", targetId: "order-1"}));
   });
 
+  it("allows a new key after the expired webhook already released the hold", async () => {
+    const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "expired"}))});
+    await expect(createEventOrdersRepository(async (work) => work(tx)).expireBySession("cs_1")).resolves.toBe(true);
+    expect(tx.markStatus).not.toHaveBeenCalled();
+    expect(tx.insertAudit).not.toHaveBeenCalled();
+  });
   it("leaves an order that is no longer pending alone", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "paid"}))});
-    await createEventOrdersRepository(async (work) => work(tx)).expireBySession("cs_1");
+    await expect(createEventOrdersRepository(async (work) => work(tx)).expireBySession("cs_1")).resolves.toBe(false);
     expect(tx.markStatus).not.toHaveBeenCalled();
     expect(tx.insertAudit).not.toHaveBeenCalled();
   });

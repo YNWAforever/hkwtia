@@ -125,7 +125,14 @@ export async function createTicketCheckout(
       return {status: "error", code: "UNAVAILABLE"};
     }
     if (status === "complete") return {status: "error", code: "ALREADY_COMPLETED"};
-    if (status === "expired") return {status: "error", code: "RETRY_EXPIRED"};
+    if (status === "expired") {
+      try {
+        const released = await dependencies.orders.expireBySession(created.order.stripeCheckoutSessionId);
+        return {status: "error", code: released ? "RETRY_EXPIRED" : "UNAVAILABLE"};
+      } catch {
+        return {status: "error", code: "UNAVAILABLE"};
+      }
+    }
     return {status: "redirect", url: created.order.stripeCheckoutUrl};
   }
 
@@ -135,7 +142,12 @@ export async function createTicketCheckout(
   // an unattached session has never supplied a payable URL to this buyer.
   const sessionExpiresAt = new Date(created.order.expiresAt.getTime() + TICKET_SESSION_MIN_MS - TICKET_HOLD_MS);
   if (sessionExpiresAt.getTime() - dependencies.now().getTime() < TICKET_HOLD_MS + 60_000) {
-    return {status: "error", code: "RETRY_EXPIRED"};
+    try {
+      const released = await dependencies.orders.expireUnattachedOrder(created.order.id);
+      return {status: "error", code: released ? "RETRY_EXPIRED" : "UNAVAILABLE"};
+    } catch {
+      return {status: "error", code: "UNAVAILABLE"};
+    }
   }
 
   try {
@@ -152,7 +164,8 @@ export async function createTicketCheckout(
       idempotencyKey: created.order.idempotencyKey,
       expiresAt: sessionExpiresAt,
     });
-    await dependencies.orders.attachSession(created.order.id, session.id, session.url);
+    const attached = await dependencies.orders.attachSession(created.order.id, session.id, session.url);
+    if (!attached) return {status: "error", code: "UNAVAILABLE"};
     return {status: "redirect", url: session.url};
   } catch {
     // The order stays pending and expires; the buyer is never charged.

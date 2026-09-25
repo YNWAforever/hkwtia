@@ -19,7 +19,7 @@ function dependencies(overrides: Partial<TicketCheckoutDependencies> = {}): Tick
     appUrl: "https://w.test",
     orders: {
       createOrder: vi.fn(async () => ({ok: true, reused: false, order: pendingOrder})),
-      attachSession: vi.fn(async () => undefined),
+      attachSession: vi.fn(async () => true),
     } as never,
     stripe: {createEventTicketSession: vi.fn(async () => ({id: "cs_1", url: "https://checkout.stripe.test/1"})), ticketSessionStatus: vi.fn(async () => "open")} as never,
     eventForTicket: vi.fn(async () => ({id: "ev-1", slug: "edge-ai", titleEn: "Edge AI", titleZh: "邊緣 AI", startsAt: new Date("2026-10-01T10:00:00Z"), published: true, registrationMode: "ticketed", ticketPriceHkdCents: 25_000})),
@@ -87,15 +87,28 @@ describe("createTicketCheckout", () => {
     const ticketSessionStatus = vi.fn(async () => providerStatus);
     const deps = dependencies({
       orders: {createOrder: vi.fn(async () => ({ok: true, reused: true, order: {...pendingOrder,
-        stripeCheckoutSessionId: "cs_existing", stripeCheckoutUrl: "https://checkout.stripe.test/existing"}}))} as never,
+        stripeCheckoutSessionId: "cs_existing", stripeCheckoutUrl: "https://checkout.stripe.test/existing"}})),
+        expireBySession: vi.fn(async () => true)} as never,
       stripe: {createEventTicketSession: vi.fn(), ticketSessionStatus} as never,
     });
     await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "error", code});
     expect(ticketSessionStatus).toHaveBeenCalledWith("cs_existing");
+    if (providerStatus === "expired") expect(deps.orders.expireBySession).toHaveBeenCalledWith("cs_existing");
     expect(deps.stripe.createEventTicketSession).not.toHaveBeenCalled();
   });
 
+  it("keeps the key when payment wins the provider-expiry race", async () => {
+    const deps = dependencies({
+      orders: {createOrder: vi.fn(async () => ({ok: true, reused: true, order: {...pendingOrder,
+        stripeCheckoutSessionId: "cs_existing", stripeCheckoutUrl: "https://checkout.stripe.test/existing"}})),
+        expireBySession: vi.fn(async () => false)} as never,
+      stripe: {createEventTicketSession: vi.fn(), ticketSessionStatus: vi.fn(async () => "expired")} as never,
+    });
+    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
+      seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+      .resolves.toEqual({status: "error", code: "UNAVAILABLE"});
+  });
   it("keeps the key on a Stripe session read failure", async () => {
     const deps = dependencies({
       orders: {createOrder: vi.fn(async () => ({ok: true, reused: true, order: {...pendingOrder,
@@ -136,7 +149,7 @@ describe("createTicketCheckout", () => {
       now: () => readings[index++]!,
       orders: {createOrder: vi.fn(async () => ({ok: true, reused: true, order: {...pendingOrder,
         expiresAt: new Date(orderTime.getTime() + 1_800_000)}})),
-        attachSession: vi.fn(async () => undefined)} as never,
+        attachSession: vi.fn(async () => true)} as never,
     });
     const input = {eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
       seats, idempotencyKey: "idem-1", locale: "en" as const};
@@ -152,12 +165,36 @@ describe("createTicketCheckout", () => {
     const deps = dependencies({
       now: () => new Date(orderTime.getTime() + 6 * 60_000),
       orders: {createOrder: vi.fn(async () => ({ok: true, reused: true, order: {...pendingOrder,
-        expiresAt: new Date(orderTime.getTime() + 1_800_000)}}))} as never,
+        expiresAt: new Date(orderTime.getTime() + 1_800_000)}})),
+        expireUnattachedOrder: vi.fn(async () => true)} as never,
     });
     await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
       seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "error", code: "RETRY_EXPIRED"});
     expect(deps.stripe.createEventTicketSession).not.toHaveBeenCalled();
+    expect(deps.orders.expireUnattachedOrder).toHaveBeenCalledWith("order-1");
+  });
+  it("keeps the old key when an attached session wins the release race", async () => {
+    const orderTime = new Date("2026-09-14T04:00:00Z");
+    const deps = dependencies({
+      now: () => new Date(orderTime.getTime() + 6 * 60_000),
+      orders: {createOrder: vi.fn(async () => ({ok: true, reused: true, order: {...pendingOrder,
+        expiresAt: new Date(orderTime.getTime() + 1_800_000)}})),
+        expireUnattachedOrder: vi.fn(async () => false)} as never,
+    });
+    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
+      seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+      .resolves.toEqual({status: "error", code: "UNAVAILABLE"});
+    expect(deps.stripe.createEventTicketSession).not.toHaveBeenCalled();
+  });
+
+  it("does not redirect when a concurrent release wins before session attachment", async () => {
+    const deps = dependencies({orders: {createOrder: vi.fn(async () => ({ok: true, reused: false, order: pendingOrder})),
+      attachSession: vi.fn(async () => false)} as never});
+    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
+      seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+      .resolves.toEqual({status: "error", code: "UNAVAILABLE"});
+    expect(deps.orders.attachSession).toHaveBeenCalledWith("order-1", "cs_1", "https://checkout.stripe.test/1");
   });
   it("expires the Stripe session at least 30 minutes after the reading taken at the call", async () => {
     const orderTime = new Date("2026-09-14T04:00:00Z");
@@ -168,7 +205,7 @@ describe("createTicketCheckout", () => {
       now: () => readings[Math.min(index++, readings.length - 1)]!,
       orders: {
         createOrder: vi.fn(async () => ({ok: true, reused: false, order: {...pendingOrder, expiresAt: new Date(orderTime.getTime() + 1_800_000)}})),
-        attachSession: vi.fn(async () => undefined),
+        attachSession: vi.fn(async () => true),
       } as never,
     });
 
