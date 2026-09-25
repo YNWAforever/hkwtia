@@ -782,20 +782,26 @@ async function writeMemberEvent(
   const company = eventIdSchema.parse(companyId);
   const database = await memberDatabase(deps);
   return database.transaction(async (transaction) => {
-    let plan: MembershipPlanCode | null = null;
-    if (status === "pending_review") {
-      // The company membership row serialises submissions and billing transitions.
-      // A dashboard count taken before this lock is only a display hint: two
-      // requests can otherwise both claim the final Startup slot.
-      const membership = executedRows(await transaction.execute(sql`
-        SELECT ${memberships.planCode} AS plan_code FROM ${memberships}
-        WHERE ${memberships.companyId} = ${company}
-          AND ${memberships.status} IN ('active', 'past_due', 'cancel_at_period_end')
-        FOR UPDATE
-      `))[0];
-      if (!membership) throw new Error("NO_MEMBERSHIP_FOR_COMPANY");
-      plan = z.enum(MEMBERSHIP_PLAN_CODES).parse(membership.plan_code);
-    }
+    // Seat revocation and role changes take this membership lock first. A role
+    // resolved before this transaction can be revoked while the write waits.
+    const membership = executedRows(await transaction.execute(sql`
+      SELECT ${memberships.planCode} AS plan_code FROM ${memberships}
+      WHERE ${memberships.companyId} = ${company}
+        AND ${memberships.status} IN ('active', 'past_due', 'cancel_at_period_end')
+      FOR UPDATE
+    `))[0];
+    if (!membership) throw new Error("NO_MEMBERSHIP_FOR_COMPANY");
+    const manager = executedRows(await transaction.execute(sql`
+      SELECT ${companyMembers.role} AS role FROM ${companyMembers}
+      WHERE ${companyMembers.companyId} = ${company}
+        AND ${companyMembers.userId} = ${actor.profileId}
+        AND ${companyMembers.revokedAt} IS NULL
+        AND ${companyMembers.role} IN ('owner', 'admin')
+      FOR UPDATE
+    `))[0];
+    if (manager?.role !== "owner" && manager?.role !== "admin") throw new Error("FORBIDDEN");
+    const plan: MembershipPlanCode | null = status === "pending_review"
+      ? z.enum(MEMBERSHIP_PLAN_CODES).parse(membership.plan_code) : null;
     // Read after the lock: a wait may cross a Hong Kong quarter boundary.
     // The same instant determines both the quota window and submitted_at.
     const now = (deps.now ?? (() => new Date()))();
