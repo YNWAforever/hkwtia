@@ -1,8 +1,9 @@
 import {readFileSync} from "node:fs";
 
-import {describe, expect, it} from "vitest";
+import {PgDialect} from "drizzle-orm/pg-core";
+import {describe, expect, it, vi} from "vitest";
 
-import type {Cohort, CohortApplication} from "@/lib/db/server-schema";
+import {cohorts, companyMembers, memberships, type Cohort, type CohortApplication} from "@/lib/db/server-schema";
 import {
   createCohortRepository,
   databaseStore,
@@ -199,6 +200,49 @@ describe("M6 cohort repository", () => {
     });
     await expect(repo.createApplication(actorFor("member-1"), cohortId, {cohortId, readiness: {market: "Singapore"}}))
       .rejects.toThrow("COHORT_NOT_OPEN");
+  });
+
+  it("rejects a newly revoked manager inside the cohort insert transaction", async () => {
+    const selectedTables: unknown[] = [];
+    let managerPredicate: unknown;
+    const insert = vi.fn(() => ({
+      values: () => ({
+        onConflictDoNothing: () => ({returning: async () => [application()]}),
+      }),
+    }));
+    const select = vi.fn(() => ({
+      from: (table: unknown) => {
+        selectedTables.push(table);
+        return {
+          where: (predicate: unknown) => {
+            if (table === companyMembers) managerPredicate = predicate;
+            return {
+              limit: () => ({
+                for: async () => table === cohorts ? [{status: "open"}]
+                : table === memberships ? [{companyId}] : [], // Seat revocation removed the manager.
+              }),
+            };
+          },
+        };
+      },
+    }));
+    const database = {
+      transaction: async <T,>(work: (tx: {select: typeof select; insert: typeof insert}) => Promise<T>) =>
+        work({select, insert}),
+    };
+    const store = databaseStore(async () => database as never);
+
+    await expect(store.createApplication({
+      cohortId, companyId, readiness: {market: "Singapore"}, managerProfileId: "member-1",
+    } as never)).rejects.toThrow("FORBIDDEN");
+    expect(selectedTables).toEqual([memberships, companyMembers]);
+    const managerQuery = new PgDialect().sqlToQuery(managerPredicate as Parameters<PgDialect["sqlToQuery"]>[0]);
+    expect(managerQuery.sql).toContain('"company_members"."company_id" =');
+    expect(managerQuery.sql).toContain('"company_members"."user_id" =');
+    expect(managerQuery.sql).toContain('"company_members"."revoked_at" is null');
+    expect(managerQuery.sql).toContain('"company_members"."role" in');
+    expect(managerQuery.params).toEqual([companyId, "member-1", "owner", "admin"]);
+    expect(insert).not.toHaveBeenCalled();
   });
 
   it("requires staff access to list and move applications", async () => {
