@@ -1,3 +1,4 @@
+import {PgDialect} from "drizzle-orm/pg-core";
 import {describe, expect, it, vi} from "vitest";
 
 import {
@@ -43,7 +44,10 @@ function row(overrides: Partial<MemberEventRow> = {}): MemberEventRow {
 /** Each queue entry is what the next `execute` returns, or an Error it rejects with. */
 function fakeDeps(queue: (Record<string, unknown>[] | Error)[] = [[]]) {
   const pending = [...queue];
-  const execute = vi.fn<(query: unknown) => Promise<Record<string, unknown>[]>>(async () => {
+  const execute = vi.fn<(query: unknown) => Promise<Record<string, unknown>[]>>(async (query) => {
+    const statement = literalText(query);
+    if (statement.includes("AS plan_code") && statement.includes("FOR UPDATE")) return [{plan_code: "startup"}];
+    if (statement.includes("AS role") && statement.includes("FOR UPDATE")) return [{role: "admin"}];
     const next = pending.shift() ?? [];
     if (next instanceof Error) throw next;
     return next;
@@ -93,14 +97,55 @@ describe("member event writes (programme B-1)", () => {
     expect(execute).not.toHaveBeenCalled();
   });
 
+  it("rejects a draft when the manager role was revoked after the preflight check", async () => {
+    const execute = vi.fn(async (query: unknown) => {
+      const statement = literalText(query);
+      if (statement.includes("plan_code")) return [{plan_code: "startup"}];
+      if (statement.includes("INSERT INTO")) return [row()];
+      return [];
+    });
+    const transaction = vi.fn(async <T,>(work: (tx: {execute: typeof execute}) => Promise<T>) => work({execute}));
+    const deps = {loadDatabase: async () => ({execute, transaction}) as never, getCompanyRole: roles};
+    await expect(saveMemberEventDraft(member, COMPANY, input, deps)).rejects.toThrow("FORBIDDEN");
+    expect(transaction).toHaveBeenCalledOnce();
+    expect(execute).toHaveBeenCalledTimes(2);
+    expect(statementText(execute, 0)).toContain("AS plan_code");
+    expect(statementText(execute, 1)).toContain("AS role");
+    expect(statementText(execute, 1)).toContain("FOR UPDATE");
+    expect(paramValues(execute.mock.calls[1]?.[0])).toContain(member.profileId);
+    const roleQuery = new PgDialect().sqlToQuery(execute.mock.calls[1]?.[0] as Parameters<PgDialect["sqlToQuery"]>[0]);
+    expect(roleQuery.sql).toContain('"company_members"."company_id" =');
+    expect(roleQuery.sql).toContain('"company_members"."user_id" =');
+    expect(roleQuery.sql).toContain('"company_members"."revoked_at" IS NULL');
+    expect(roleQuery.sql).toMatch(/"company_members"\."role" IN \('owner', 'admin'\)/);
+    expect(roleQuery.params).toEqual([COMPANY, member.profileId]);
+  });
+
+  it("rejects a submission when the manager role was revoked while waiting for the membership lock", async () => {
+    const execute = vi.fn(async (query: unknown) => {
+      const statement = literalText(query);
+      if (statement.includes("plan_code")) return [{plan_code: "startup"}];
+      if (statement.includes("count(*)")) return [{count: 0}];
+      if (statement.includes("INSERT INTO")) return [row({status: "pending_review"})];
+      return [];
+    });
+    const transaction = vi.fn(async <T,>(work: (tx: {execute: typeof execute}) => Promise<T>) => work({execute}));
+    const deps = {loadDatabase: async () => ({execute, transaction}) as never, getCompanyRole: roles};
+    await expect(submitMemberEvent(member, COMPANY, input, deps)).rejects.toThrow("FORBIDDEN");
+    expect(transaction).toHaveBeenCalledOnce();
+    expect(execute).toHaveBeenCalledTimes(2);
+    expect(statementText(execute, 0)).toContain("AS plan_code");
+    expect(statementText(execute, 1)).toContain("AS role");
+    expect(statementText(execute, 1)).toContain("FOR UPDATE");
+  });
   it("saves a new draft with a single INSERT and returns the typed row", async () => {
     const {execute, deps} = fakeDeps([[row()]]);
     const saved = await saveMemberEventDraft(member, COMPANY, input, deps);
     expect(saved).toMatchObject({id: EVENT, status: "draft", organiser_company_id: COMPANY});
     expect(saved.starts_at).toBeInstanceOf(Date);
-    expect(execute).toHaveBeenCalledTimes(1);
-    expect(statementText(execute, 0)).toContain("INSERT INTO");
-    expect(statementText(execute, 0)).not.toContain("ON CONFLICT");
+    expect(execute).toHaveBeenCalledTimes(3);
+    expect(statementText(execute, 2)).toContain("INSERT INTO");
+    expect(statementText(execute, 2)).not.toContain("ON CONFLICT");
   });
 
   it("rejects a row the database returns in an unexpected shape instead of rendering it", async () => {
@@ -121,6 +166,7 @@ describe("member event writes (programme B-1)", () => {
     function forPlan(planCode: string, count: number) {
       const execute = vi.fn(async (query: unknown) => {
         const statement = literalText(query);
+        if (statement.includes("AS role")) return [{role: "admin"}];
         if (statement.includes("FOR UPDATE")) return [{plan_code: planCode}];
         if (statement.includes("count(*)")) return [{count}];
         return [row({status: "pending_review", submitted_at: new Date("2026-09-09T00:00:00Z")})];
@@ -149,6 +195,7 @@ describe("member event writes (programme B-1)", () => {
   it("recounts quota under the membership lock so a second last-seat submission fails", async () => {
     const execute = vi.fn(async (query: unknown) => {
       const statement = literalText(query);
+      if (statement.includes("AS role")) return [{role: "admin"}];
       if (statement.includes("FOR UPDATE")) return [{plan_code: "startup"}];
       if (statement.includes("count(*)")) return [{count: 2}];
       return [row({status: "pending_review"})];
@@ -157,14 +204,16 @@ describe("member event writes (programme B-1)", () => {
     const deps = {loadDatabase: async () => ({execute, transaction}) as never, getCompanyRole: roles};
     await expect(submitMemberEvent(member, COMPANY, input, deps)).rejects.toThrow("EVENT_QUOTA_EXCEEDED");
     expect(transaction).toHaveBeenCalledOnce();
-    expect(execute).toHaveBeenCalledTimes(2);
+    expect(execute).toHaveBeenCalledTimes(3);
     expect(statementText(execute, 0)).toContain("FOR UPDATE");
-    expect(statementText(execute, 1)).toContain("count(*)");
+    expect(statementText(execute, 1)).toContain("AS role");
+    expect(statementText(execute, 2)).toContain("count(*)");
   });
 
   it("excludes the current event from the locked recount on resubmission", async () => {
     const execute = vi.fn(async (query: unknown) => {
       const statement = literalText(query);
+      if (statement.includes("AS role")) return [{role: "admin"}];
       if (statement.includes("FOR UPDATE")) return [{plan_code: "startup"}];
       if (statement.includes("count(*)")) return [{count: 1}];
       return [row({status: "pending_review"})];
@@ -172,12 +221,13 @@ describe("member event writes (programme B-1)", () => {
     const transaction = vi.fn(async <T,>(work: (tx: {execute: typeof execute}) => Promise<T>) => work({execute}));
     const deps = {loadDatabase: async () => ({execute, transaction}) as never, getCompanyRole: roles};
     await expect(submitMemberEvent(member, COMPANY, input, deps, EVENT)).resolves.toMatchObject({status: "pending_review"});
-    expect(statementText(execute, 1)).toContain("<>");
-    expect(paramValues(execute.mock.calls[1]?.[0])).toContain(EVENT);
+    expect(statementText(execute, 2)).toContain("<>");
+    expect(paramValues(execute.mock.calls[2]?.[0])).toContain(EVENT);
   });
   it("uses the locked membership plan rather than a stale dashboard plan", async () => {
     const execute = vi.fn(async (query: unknown) => {
       const statement = literalText(query);
+      if (statement.includes("AS role")) return [{role: "admin"}];
       if (statement.includes("FOR UPDATE")) return [{id: "membership-1", plan_code: "startup"}];
       if (statement.includes("count(*)")) return [{count: 2}];
       return [row({status: "pending_review"})];
@@ -185,13 +235,14 @@ describe("member event writes (programme B-1)", () => {
     const transaction = vi.fn(async <T,>(work: (tx: {execute: typeof execute}) => Promise<T>) => work({execute}));
     const deps = {loadDatabase: async () => ({execute, transaction}) as never, getCompanyRole: roles};
     await expect(submitMemberEvent(member, COMPANY, input, deps)).rejects.toThrow("EVENT_QUOTA_EXCEEDED");
-    expect(execute).toHaveBeenCalledTimes(2);
+    expect(execute).toHaveBeenCalledTimes(3);
   });
 
   it("reads the clock after acquiring the membership lock and uses it for both quarter and submission", async () => {
     const execute = vi.fn(async (query: unknown) => {
       const statement = literalText(query);
-      if (statement.includes("FOR UPDATE")) {order.push("lock"); return [{plan_code: "startup"}];}
+      if (statement.includes("AS role")) {order.push("role-lock"); return [{role: "admin"}];}
+      if (statement.includes("FOR UPDATE")) {order.push("membership-lock"); return [{plan_code: "startup"}];}
       if (statement.includes("count(*)")) return [{count: 0}];
       return [row({status: "pending_review"})];
     });
@@ -201,8 +252,8 @@ describe("member event writes (programme B-1)", () => {
     const deps = {loadDatabase: async () => ({execute, transaction}) as never, getCompanyRole: roles, now};
     await submitMemberEvent(member, COMPANY, input, deps);
     expect(now).toHaveBeenCalledOnce();
-    expect(order).toEqual(["lock", "clock"]);
-    expect(paramValues(execute.mock.calls[2]?.[0])).toContainEqual(new Date("2026-09-30T15:59:59Z"));
+    expect(order).toEqual(["membership-lock", "role-lock", "clock"]);
+    expect(paramValues(execute.mock.calls[3]?.[0])).toContainEqual(new Date("2026-09-30T15:59:59Z"));
   });
   it("maps a slug unique violation on insert to EVENT_SLUG_TAKEN", async () => {
     const {deps} = fakeDeps([uniqueViolation()]);
@@ -217,9 +268,9 @@ describe("member event writes (programme B-1)", () => {
     const {execute, deps} = fakeDeps([[row({slug: "ai-clinic-2026-renamed"})]]);
     const saved = await saveMemberEventDraft(member, COMPANY, {...input, slug: "ai-clinic-2026-renamed"}, deps, EVENT);
     expect(saved).toMatchObject({id: EVENT, slug: "ai-clinic-2026-renamed"});
-    expect(execute).toHaveBeenCalledTimes(1);
-    expect(statementText(execute, 0)).toContain("UPDATE");
-    expect(statementText(execute, 0)).not.toContain("INSERT INTO");
+    expect(execute).toHaveBeenCalledTimes(3);
+    expect(statementText(execute, 2)).toContain("UPDATE");
+    expect(statementText(execute, 2)).not.toContain("INSERT INTO");
   });
 
   it("maps a slug unique violation on update to EVENT_SLUG_TAKEN", async () => {
@@ -230,24 +281,24 @@ describe("member event writes (programme B-1)", () => {
   it("reports an owned but published row as not editable", async () => {
     const {execute, deps} = fakeDeps([[], [{status: "published"}]]);
     await expect(saveMemberEventDraft(member, COMPANY, input, deps, EVENT)).rejects.toThrow("EVENT_NOT_EDITABLE");
-    expect(execute).toHaveBeenCalledTimes(2);
+    expect(execute).toHaveBeenCalledTimes(4);
   });
 
   it("reports another organiser's id as forbidden", async () => {
-    const {execute, deps} = fakeDeps([[{plan_code: "startup"}], [{count: 0}], [], []]);
+    const {execute, deps} = fakeDeps([[{count: 0}], [], []]);
     await expect(submitMemberEvent(member, COMPANY, input, deps, EVENT)).rejects.toThrow("FORBIDDEN");
-    expect(execute).toHaveBeenCalledTimes(4);
+    expect(execute).toHaveBeenCalledTimes(5);
   });
 
   it("refuses an archived hero and checks the asset before writing", async () => {
     const archived = fakeDeps([[{id: HERO, archived_at: new Date("2026-01-01T00:00:00Z"), registered_by_profile_id: "member-1"}]]);
     await expect(saveMemberEventDraft(member, COMPANY, {...input, heroMediaId: HERO}, archived.deps)).rejects.toThrow("EVENT_HERO_MEDIA_INVALID");
-    expect(archived.execute).toHaveBeenCalledTimes(1);
+    expect(archived.execute).toHaveBeenCalledTimes(3);
     const missing = fakeDeps([[]]);
     await expect(saveMemberEventDraft(member, COMPANY, {...input, heroMediaId: HERO}, missing.deps)).rejects.toThrow("EVENT_HERO_MEDIA_INVALID");
     const active = fakeDeps([[{id: HERO, archived_at: null, registered_by_profile_id: "member-1"}], [row({hero_media_id: HERO})]]);
     await expect(saveMemberEventDraft(member, COMPANY, {...input, heroMediaId: HERO}, active.deps)).resolves.toMatchObject({hero_media_id: HERO});
-    expect(active.execute).toHaveBeenCalledTimes(2);
+    expect(active.execute).toHaveBeenCalledTimes(4);
   });
 
   it("refuses a hero another profile uploaded, in the same locked read (S-3)", async () => {
@@ -255,8 +306,8 @@ describe("member event writes (programme B-1)", () => {
     // member may only attach media whose registered_by_profile_id is theirs.
     const foreign = fakeDeps([[{id: HERO, archived_at: null, registered_by_profile_id: "staff-1"}]]);
     await expect(saveMemberEventDraft(member, COMPANY, {...input, heroMediaId: HERO}, foreign.deps)).rejects.toThrow("EVENT_HERO_MEDIA_INVALID");
-    expect(foreign.execute).toHaveBeenCalledTimes(1);
-    expect(literalText(foreign.execute.mock.calls[0]?.[0])).toContain("FOR UPDATE");
+    expect(foreign.execute).toHaveBeenCalledTimes(3);
+    expect(literalText(foreign.execute.mock.calls[2]?.[0])).toContain("FOR UPDATE");
     const unstamped = fakeDeps([[{id: HERO, archived_at: null, registered_by_profile_id: null}]]);
     await expect(saveMemberEventDraft(member, COMPANY, {...input, heroMediaId: HERO}, unstamped.deps)).rejects.toThrow("EVENT_HERO_MEDIA_INVALID");
   });
