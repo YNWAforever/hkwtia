@@ -15,10 +15,11 @@ import {createEventOrdersRepository} from "@/lib/db/repos/event-orders";
 
 function proxyDatabase(
   statements: string[],
-  handlers: Readonly<{order?: Record<string, unknown>; event?: Record<string, unknown>}> = {},
+  handlers: Readonly<{order?: Record<string, unknown>; event?: Record<string, unknown>; updated?: boolean}> = {},
 ) {
   const proxy = drizzle(async (query: string) => {
     statements.push(query);
+    if (handlers.updated && /UPDATE "event_orders"/i.test(query) && /RETURNING id/i.test(query)) return {rows: [{id: "order-1"}]};
     if (handlers.order && /SELECT \* FROM "event_orders"/.test(query)) return {rows: [handlers.order]};
     if (handlers.event && /FROM "events"/.test(query)) return {rows: [handlers.event]};
     return {rows: []};
@@ -104,5 +105,42 @@ describe("event order status patches", () => {
     expect(update).not.toMatch(/paid_at/);
     expect(update).not.toMatch(/refunded_at/);
     expect(update).not.toMatch(/refund_reason/);
+  });
+});
+
+describe("checkout session attachment and release", () => {
+  it("attaches a session only to a pending order without another session", async () => {
+    const statements: string[] = [];
+    database.current = proxyDatabase(statements, {updated: true});
+    await expect(createEventOrdersRepository().attachSession("order-1", "cs_1", "https://checkout.stripe.test/1"))
+      .resolves.toBe(true);
+    const update = statusUpdate(statements);
+    expect(update).toMatch(/status\s*=\s*'pending'/);
+    expect(update).toMatch(/stripe_checkout_session_id IS NULL/);
+    expect(update).toMatch(/stripe_checkout_url IS NULL/);
+    expect(update).toMatch(/RETURNING id/);
+    const condition = update.split("WHERE")[1] ?? "";
+    expect(condition).toMatch(/stripe_checkout_session_id\s*=\s*\$\d+/);
+    expect(condition).toMatch(/stripe_checkout_url\s*=\s*\$\d+/);
+  });
+
+  it("expires an unattached order and audits the released hold in one transaction", async () => {
+    const statements: string[] = [];
+    database.current = proxyDatabase(statements, {updated: true});
+    await expect(createEventOrdersRepository().expireUnattachedOrder("order-1")).resolves.toBe(true);
+    const update = statusUpdate(statements);
+    expect(update).toMatch(/SET status\s*=\s*'expired'/);
+    expect(update).toMatch(/status\s*=\s*'pending'/);
+    expect(update).toMatch(/stripe_checkout_session_id IS NULL/);
+    expect(update).toMatch(/stripe_checkout_url IS NULL/);
+    expect(update).toMatch(/RETURNING id/);
+    expect(statements.join("\n")).toMatch(/INSERT INTO "audit_events"/i);
+  });
+
+  it("does not audit when another request has already attached a session", async () => {
+    const statements: string[] = [];
+    database.current = proxyDatabase(statements);
+    await expect(createEventOrdersRepository().expireUnattachedOrder("order-1")).resolves.toBe(false);
+    expect(statements.join("\n")).not.toMatch(/INSERT INTO "audit_events"/i);
   });
 });

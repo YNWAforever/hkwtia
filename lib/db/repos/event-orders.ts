@@ -49,7 +49,7 @@ export type CreateOrderInput = Readonly<{
 
 export type CreateOrderResult =
   | Readonly<{ok: true; order: OrderRecord; reused: boolean}>
-  | Readonly<{ok: false; reason: "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "AMOUNT_MISMATCH" | "SOLD_OUT" | "ATTEMPT_CHANGED"}>;
+  | Readonly<{ok: false; reason: "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "AMOUNT_MISMATCH" | "SOLD_OUT" | "ATTEMPT_CHANGED" | "ATTEMPT_EXPIRED" | "ATTEMPT_COMPLETED"}>;
 
 export type SettleResult =
   | Readonly<{status: "paid" | "duplicate" | "ignored" | "oversold" | "refund_due" | "unknown"; order: OrderRecord | null}>;
@@ -73,7 +73,8 @@ export type EventOrdersTransaction = Readonly<{
   paidSeats: (eventId: string) => Promise<number>;
   insertOrder: (input: CreateOrderInput & {expiresAt: Date; status: "pending"}) => Promise<OrderRecord>;
   insertSeats: (orderId: string, seats: readonly SeatInput[]) => Promise<void>;
-  attachSession: (orderId: string, sessionId: string, url: string) => Promise<void>;
+  attachSession: (orderId: string, sessionId: string, url: string) => Promise<boolean>;
+  expireUnattachedOrder: (orderId: string) => Promise<boolean>;
   markStatus: (orderId: string, status: OrderStatus, patch: Readonly<{paidAt?: Date; refundedAt?: Date; refundReason?: RefundReason}>) => Promise<void>;
   orderById: (orderId: string) => Promise<OrderRecord | null>;
   /** Every order of an event with its seats, newest paid first. */
@@ -246,7 +247,32 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       return orderFrom(row);
     },
     insertSeats: async (orderId, seats) => { for (const [index, seat] of seats.entries()) await tx.execute(sql`INSERT INTO ${eventOrderSeats} (order_id, position, attendee_name, attendee_email, created_at) VALUES (${orderId}, ${index + 1}, ${seat.name}, ${seat.email}, NOW())`); },
-    attachSession: async (orderId, sessionId, url) => { await tx.execute(sql`UPDATE ${eventOrders} SET stripe_checkout_session_id = ${sessionId}, stripe_checkout_url = ${url}, updated_at = NOW() WHERE id = ${orderId}`); },
+    attachSession: async (orderId, sessionId, url) => {
+      const updated = rows<{id: string}>(await tx.execute(sql`
+        UPDATE ${eventOrders}
+        SET stripe_checkout_session_id = ${sessionId}, stripe_checkout_url = ${url}, updated_at = NOW()
+        WHERE id = ${orderId} AND status = 'pending'
+          AND ((stripe_checkout_session_id IS NULL AND stripe_checkout_url IS NULL)
+            OR (stripe_checkout_session_id = ${sessionId} AND stripe_checkout_url = ${url}))
+        RETURNING id
+      `));
+      return updated.length > 0;
+    },
+    expireUnattachedOrder: async (orderId) => {
+      const updated = rows<{id: string}>(await tx.execute(sql`
+        UPDATE ${eventOrders} SET status = 'expired', updated_at = NOW()
+        WHERE id = ${orderId} AND status = 'pending'
+          AND stripe_checkout_session_id IS NULL AND stripe_checkout_url IS NULL
+        RETURNING id
+      `));
+      if (updated.length === 0) return false;
+      await writeAuditRow(tx, {
+        actorUserId: null, actorType: "system", action: "event.order.expired",
+        targetType: "event_order", targetId: orderId,
+        metadata: {reason: "checkout_retry_window_elapsed"},
+      });
+      return true;
+    },
     // The patch is genuinely partial: only the columns it supplies are written.
     // Setting every column on every transition would let the NEXT transition
     // erase the previous one -- a staff refund (D-4c) would null `paid_at`, and
@@ -395,6 +421,13 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
         if (!event.published || event.startsAt <= input.now) return {ok: false, reason: "EVENT_CLOSED"};
         const existing = await tx.orderByIdempotencyKey(input.idempotencyKey);
         if (existing) {
+          // An attached pending session can outlive the local seat hold.
+          // The checkout service checks Stripe before redirecting or rotating its key.
+          if (existing.status === "paid") return {ok: false, reason: "ATTEMPT_COMPLETED"};
+          if (existing.status !== "pending" || (existing.expiresAt <= input.now &&
+              (!existing.stripeCheckoutSessionId || !existing.stripeCheckoutUrl))) {
+            return {ok: false, reason: "ATTEMPT_EXPIRED"};
+          }
           // A key names one immutable purchase attempt. A failed Stripe call
           // can leave this order without a session; using the current form to
           // mint one would charge for different seats than this row records.
@@ -430,8 +463,12 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
       });
     },
 
-    async attachSession(orderId: string, sessionId: string, url: string): Promise<void> {
-      await runTransaction(async (tx) => { await tx.attachSession(orderId, sessionId, url); });
+    async attachSession(orderId: string, sessionId: string, url: string): Promise<boolean> {
+      return runTransaction((tx) => tx.attachSession(orderId, sessionId, url));
+    },
+
+    async expireUnattachedOrder(orderId: string): Promise<boolean> {
+      return runTransaction((tx) => tx.expireUnattachedOrder(orderId));
     },
 
     async settlePaid(sessionId: string, now: Date): Promise<SettleResult> {
@@ -477,13 +514,15 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
       });
     },
 
-    async expireBySession(sessionId: string): Promise<void> {
-      await runTransaction(async (tx) => {
+    async expireBySession(sessionId: string): Promise<boolean> {
+      return runTransaction(async (tx) => {
         const order = await tx.orderBySessionId(sessionId);
-        if (order?.status === "pending") {
-          await tx.markStatus(order.id, "expired", {});
-          await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.expired", targetType: "event_order", targetId: order.id, metadata: {}});
-        }
+        if (!order) return false;
+        if (order.status === "expired") return true;
+        if (order.status !== "pending") return false;
+        await tx.markStatus(order.id, "expired", {});
+        await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.expired", targetType: "event_order", targetId: order.id, metadata: {}});
+        return true;
       });
     },
 

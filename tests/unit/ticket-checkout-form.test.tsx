@@ -40,6 +40,7 @@ const labels: TicketCheckoutLabels = {
     EVENT_CLOSED: "Ticket sales have closed.",
     UNAVAILABLE: "Ticket sales are unavailable right now.",
     RETRY_CHANGED: "Purchase details changed; submit again to start a new checkout.",
+    RETRY_EXPIRED: "The checkout attempt expired. Submit again to start a new checkout.",
     RATE_LIMITED: "Too many attempts. Try again shortly.",
   },
 };
@@ -112,21 +113,21 @@ describe("TicketCheckoutForm", () => {
     expect(screen.getByRole("button", {name: labels.submitting})).toBeDisabled();
   });
 
-  it("starts a new key after a changed-attempt refusal", async () => {
+  it.each(["RETRY_CHANGED", "RETRY_EXPIRED"] as const)("starts a new key after a %s refusal", async (code) => {
     const view = renderForm();
     const first = view.container.querySelector<HTMLInputElement>('input[name="idempotencyKey"]')?.value;
-    vi.mocked(submitTicketCheckoutAction).mockResolvedValueOnce({status: "error", code: "RETRY_CHANGED"});
+    vi.mocked(submitTicketCheckoutAction).mockResolvedValueOnce({status: "error", code});
     const action = reactState.useActionState.mock.calls.at(-1)![0] as
       (state: TicketCheckoutState, data: FormData) => Promise<TicketCheckoutState>;
     await act(async () => { await action({status: "idle"}, new FormData()); });
-    reactState.results[0] = [{status: "error", code: "RETRY_CHANGED"}, vi.fn(), false];
+    reactState.results[0] = [{status: "error", code}, vi.fn(), false];
     view.rerender(<TicketCheckoutForm eventId="10000000-0000-4000-8000-000000000001"
       labels={labels} locale="en" pricePerSeat="Price per seat: HK$250.00" refundPolicyHref="/refund-policy" />);
     const second = view.container.querySelector<HTMLInputElement>('input[name="idempotencyKey"]')?.value;
     expect(first).toBeTruthy();
     expect(second).toBeTruthy();
     expect(second).not.toBe(first);
-    expect(screen.getByRole("alert")).toHaveTextContent(labels.errors.RETRY_CHANGED);
+    expect(screen.getByRole("alert")).toHaveTextContent(labels.errors[code]);
   });
   it("renders a localized error for a refused checkout", () => {
     reactState.results.push([{status: "error", code: "SOLD_OUT"}, vi.fn(), false]);

@@ -111,6 +111,22 @@ describe("reconciling a provider refund after a lost database commit", () => {
   });
 });
 
+describe("checking a reused ticket session", () => {
+  it.each(["open", "complete", "expired"] as const)("returns the provider's %s status", async (status) => {
+    const {retrieve, value} = client();
+    retrieve.mockResolvedValue({id: "cs_test_1", status, payment_intent: null} as never);
+    await expect(createStripeBillingAdapter(value).ticketSessionStatus("cs_test_1")).resolves.toBe(status);
+    expect(retrieve).toHaveBeenCalledWith("cs_test_1");
+  });
+
+  it("refuses a mismatched session id or unknown status", async () => {
+    const {retrieve, value} = client();
+    retrieve.mockResolvedValueOnce({id: "cs_other", status: "open", payment_intent: null} as never);
+    await expect(createStripeBillingAdapter(value).ticketSessionStatus("cs_test_1")).rejects.toThrow("STRIPE_CHECKOUT_CORRELATION_FAILED");
+    retrieve.mockResolvedValueOnce({id: "cs_test_1", status: null, payment_intent: null} as never);
+    await expect(createStripeBillingAdapter(value).ticketSessionStatus("cs_test_1")).rejects.toThrow("STRIPE_CHECKOUT_STATUS_UNVERIFIED");
+  });
+});
 describe("reading the payment intent behind a settled session", () => {
   it("returns the intent id when Stripe hands back a bare string", async () => {
     const {retrieve, value} = client();

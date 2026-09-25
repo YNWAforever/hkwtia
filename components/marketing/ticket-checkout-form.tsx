@@ -23,7 +23,7 @@ export function TicketCheckoutForm({eventId, locale, pricePerSeat, labels, refun
   const [idempotencyKey, setIdempotencyKey] = useState("");
   const [state, dispatch, pending] = useActionState(async (previous: TicketCheckoutState, formData: FormData) => {
     const result = await submitTicketCheckoutAction(previous, formData);
-    if (result.status === "error" && result.code === "RETRY_CHANGED") setIdempotencyKey(newAttemptId());
+    if (result.status === "error" && (result.code === "RETRY_CHANGED" || result.code === "RETRY_EXPIRED")) setIdempotencyKey(newAttemptId());
     return result;
   }, initial);
   const [seatCount, setSeatCount] = useState(1);

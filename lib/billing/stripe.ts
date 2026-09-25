@@ -64,6 +64,8 @@ export interface StripeBillingAdapter {
   createCheckoutSession(input: CheckoutSessionInput): Promise<{id: string; url: string}>;
   currentSubscription(subscriptionId: string): Promise<CurrentSubscriptionState>;
   createEventTicketSession(input: EventTicketSessionInput): Promise<{id: string; url: string}>;
+  /** Verify a reused ticket Checkout Session before redirecting to its stored URL. */
+  ticketSessionStatus(sessionId: string): Promise<"open" | "complete" | "expired">;
   /** The intent to refund for a settled session; `null` when the session has none. */
   paymentIntentForSession(sessionId: string): Promise<string | null>;
   ticketOrderIdForPaymentIntent(paymentIntentId: string): Promise<string | null>;
@@ -81,7 +83,7 @@ type StripeClient = {
       params: Stripe.Checkout.SessionCreateParams,
       options?: Stripe.RequestOptions,
     ): Promise<Pick<Stripe.Checkout.Session, "id" | "url">>;
-    retrieve(id: string): Promise<Pick<Stripe.Checkout.Session, "payment_intent">>;
+    retrieve(id: string): Promise<Pick<Stripe.Checkout.Session, "id" | "status" | "payment_intent">>;
     list(params: {payment_intent: string; limit: number}): Promise<{data: Array<Pick<Stripe.Checkout.Session, "id" | "metadata" | "client_reference_id" | "payment_intent">>; has_more: boolean}>;
   }};
   billingPortal: {sessions: {create(
@@ -162,6 +164,14 @@ export function createStripeBillingAdapter(client: StripeClient): StripeBillingA
       return {id: session.id, url: session.url};
     },
 
+    async ticketSessionStatus(sessionId) {
+      const session = await client.checkout.sessions.retrieve(sessionId);
+      if (session.id !== sessionId) throw new Error("STRIPE_CHECKOUT_CORRELATION_FAILED");
+      if (session.status !== "open" && session.status !== "complete" && session.status !== "expired") {
+        throw new Error("STRIPE_CHECKOUT_STATUS_UNVERIFIED");
+      }
+      return session.status;
+    },
     async paymentIntentForSession(sessionId) {
       const session = await client.checkout.sessions.retrieve(sessionId);
       const intent = session.payment_intent;
