@@ -6,10 +6,12 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 const events = vi.hoisted(() => ({getPublicBySlug: vi.fn(), listPublic: vi.fn()}));
 const publicPosts = vi.hoisted(() => ({listPublishedBuildLogs: vi.fn(), listPublishedNews: vi.fn()}));
 const showcase = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
+const companyProfiles = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
 
 vi.mock("@/lib/db/repos/events", () => ({eventsRepository: events}));
 vi.mock("@/lib/db/repos/public-posts", () => publicPosts);
 vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: showcase}));
+vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: companyProfiles}));
 vi.mock("next-intl/server", () => ({getTranslations: async () => (key: string) => key, setRequestLocale: () => undefined}));
 vi.mock("next/navigation", () => ({notFound: () => { throw new Error("NEXT_NOT_FOUND"); }}));
 vi.mock("next/image", () => ({default: ({unoptimized, ...props}: {unoptimized?: boolean; [key: string]: unknown}) => <img {...props} data-unoptimized={String(unoptimized)}/> }));
@@ -17,6 +19,8 @@ vi.mock("@/components/portal/event-registration-form", () => ({EventRegistration
 
 import EventPage, {generateMetadata} from "@/app/[locale]/(public)/events/[slug]/page";
 import sitemap from "@/app/sitemap";
+
+beforeEach(() => companyProfiles.listPublishedSlugs.mockResolvedValue([]));
 
 const props = {params: Promise.resolve({locale: "en", slug: "public-event"})};
 const event = (endsAt: string, hero: {url: string; alt: string} | null = null) => ({
@@ -113,17 +117,8 @@ describe("Event sitemap repository behavior", () => {
     expect(readFileSync("app/sitemap.ts", "utf8")).not.toContain("@/content/events");
   });
 
-  it("omits Event detail URLs after a repository failure while retaining unrelated routes", async () => {
+  it("fails the sitemap read after an Event repository outage", async () => {
     events.listPublic.mockRejectedValue(new Error("EVENT_REPOSITORY_UNAVAILABLE"));
-
-    const urls = (await sitemap()).map(({url}) => url);
-
-    expect(urls).toEqual(expect.arrayContaining([
-      "http://localhost:3000/",
-      "http://localhost:3000/zh",
-      "http://localhost:3000/news",
-      "http://localhost:3000/zh/news",
-    ]));
-    expect(urls.some((url) => url.includes("/events/"))).toBe(false);
+    await expect(sitemap()).rejects.toThrow("EVENT_REPOSITORY_UNAVAILABLE");
   });
 });

@@ -7,7 +7,6 @@ import {eventsRepository} from "@/lib/db/repos/events";
 import {
   listPublishedBuildLogs,
   listPublishedNews,
-  type PublishedBuildLogSummary,
   type PublishedNewsSummary,
 } from "@/lib/db/repos/public-posts";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
@@ -68,17 +67,14 @@ export const dynamic = "force-dynamic";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const asOf = new Date();
   const [buildLogs, eventSlugs, englishNews, chineseNews, showcaseSlugs, memberSlugs] = await Promise.all([
-    listPublishedBuildLogs().catch((): readonly PublishedBuildLogSummary[] => []),
+    listPublishedBuildLogs(),
     eventsRepository.listPublic(anonymous, {status: "open", asOf})
-      .then((rows) => rows.map(({slug}) => slug))
-      .catch((): readonly string[] => []),
-    listPublishedNews("en", asOf).catch((): readonly PublishedNewsSummary[] => []),
-    listPublishedNews("zh-HK", asOf).catch((): readonly PublishedNewsSummary[] => []),
-    showcaseRepository.listPublishedSlugs().catch((): readonly string[] => []),
-    // D-11: only reviewed, published profiles are addressable, and the repository
-    // scopes that in SQL. Caught like every other read so an unreachable database
-    // costs the member urls, not the document.
-    companyProfilesRepository.listPublishedSlugs().catch((): readonly string[] => []),
+      .then((rows) => rows.map(({slug}) => slug)),
+    listPublishedNews("en", asOf),
+    listPublishedNews("zh-HK", asOf),
+    showcaseRepository.listPublishedSlugs(),
+    // A transient read failure must not publish an apparently complete partial sitemap.
+    companyProfilesRepository.listPublishedSlugs(),
   ]);
   const staticEntries = publicRoutes.flatMap((pathname) => localizedEntries(pathname));
   const eventEntries = eventSlugs.flatMap((slug) => localizedEntries(`/events/${slug}`));

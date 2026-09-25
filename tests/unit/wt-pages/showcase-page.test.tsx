@@ -88,6 +88,13 @@ describe("/showcase rewrite", () => {
     expect(screen.queryByText("partner-record-grid")).not.toBeInTheDocument();
   });
 
+  it("shows an unavailable state when the database is unreachable", async () => {
+    showcase.listPublished.mockRejectedValue(new Error("DATABASE_UNAVAILABLE"));
+    const html = await renderShowcase();
+    expect(html).toContain("Showcase listings are temporarily unavailable");
+    expect(html).not.toContain(bundles.en.Showcase.emptyTitle);
+  });
+
   it("renders published listings inside .partner-record-grid using the restyled ShowcaseCard", async () => {
     showcase.listPublished.mockResolvedValue([{
       slug: "harbour-vision-ai", premium: true, goneGlobal: false, views: 1, memberSince: "2020-01-01",

@@ -103,10 +103,12 @@ describe("/members directory (D-11)", () => {
     expect(html).not.toContain('class="partner-record-grid"');
   });
 
-  it("degrades to the empty state when the database is unreachable", async () => {
+  it("shows an unavailable state when the database is unreachable", async () => {
     profiles.listPublished.mockRejectedValue(new Error("DATABASE_UNAVAILABLE"));
 
-    await expect(renderDirectory()).resolves.toContain(bundles.en.Members.emptyTitle);
+    const html = await renderDirectory();
+    expect(html).toContain("Member pages are temporarily unavailable");
+    expect(html).not.toContain(bundles.en.Members.emptyTitle);
   });
 
   it("links the clear action and the cards through localizedPath in zh-HK", async () => {

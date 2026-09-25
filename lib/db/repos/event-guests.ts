@@ -24,7 +24,7 @@ const digestSchema = z.string().regex(/^[0-9a-f]{64}$/);
 export type GuestRegistrationInput = z.input<typeof guestInputSchema>;
 export type GuestRegistrationDisposition = "registered" | "waitlist" | "already_registered";
 /** `eventTitle` and `slug` are read from the locked row so the confirmation email never trusts a form field for either. */
-export type GuestRegistrationResult = Readonly<{id: string; disposition: GuestRegistrationDisposition; eventTitle: string; slug: string}>;
+export type GuestRegistrationResult = Readonly<{id: string; disposition: GuestRegistrationDisposition; status: "registered" | "waitlist" | "attended"; cancelTokenDigest: string; eventTitle: string; slug: string}>;
 
 /**
  * Narrower than `requireContactWriter` in contacts.ts: the capability symbol
@@ -92,11 +92,12 @@ export function createEventGuestsRepository(loadDatabase: AutomationDatabaseLoad
         // an earlier `xmax = 0` probe reported a revived cancellation as a replay,
         // so the guest never received the cancel link for their new token.
         const existing = rowsFrom(await transaction.execute(sql`
-          SELECT id, status FROM ${eventGuestRegistrations}
+          SELECT id, status, cancel_token_digest FROM ${eventGuestRegistrations}
           WHERE ${eventGuestRegistrations.eventId} = ${parsed.eventId} AND ${eventGuestRegistrations.email} = ${parsed.email} FOR UPDATE
         `))[0];
         if (existing && existing.status !== "cancelled") {
-          return {id: String(existing.id), disposition: "already_registered", eventTitle, slug};
+          const existingStatus = existing.status === "waitlist" ? "waitlist" : existing.status === "attended" ? "attended" : "registered";
+          return {id: String(existing.id), disposition: "already_registered", status: existingStatus, cancelTokenDigest: digestSchema.parse(existing.cancel_token_digest), eventTitle, slug};
         }
 
         // Fresh insert, or a cancelled row revived with the new token and details.
@@ -129,7 +130,7 @@ export function createEventGuestsRepository(loadDatabase: AutomationDatabaseLoad
           VALUES (NULL, 'contact-writer', 'event.guest.registered', 'event_guest_registration', ${id},
                   ${JSON.stringify({eventId: parsed.eventId, status: disposition})}::jsonb)
         `);
-        return {id, disposition, eventTitle, slug};
+        return {id, disposition, status: disposition, cancelTokenDigest: parsed.cancelTokenDigest, eventTitle, slug};
       });
     },
 
@@ -137,12 +138,20 @@ export function createEventGuestsRepository(loadDatabase: AutomationDatabaseLoad
       requireGuestWriter(actor);
       const digest = digestSchema.parse(cancelTokenDigest);
       const database = await loadDatabase();
-      const row = rowsFrom(await database.execute(sql`
-        UPDATE ${eventGuestRegistrations} SET status = 'cancelled', cancelled_at = now(), updated_at = now()
-        WHERE ${eventGuestRegistrations.cancelTokenDigest} = ${digest} AND ${eventGuestRegistrations.status} <> 'cancelled'
-        RETURNING id
-      `))[0];
-      return row ? "cancelled" : "unknown";
+      return database.transaction(async (transaction) => {
+        const row = rowsFrom(await transaction.execute(sql`
+          UPDATE ${eventGuestRegistrations} SET status = 'cancelled', cancelled_at = now(), updated_at = now()
+          WHERE ${eventGuestRegistrations.cancelTokenDigest} = ${digest} AND ${eventGuestRegistrations.status} IN ('registered', 'waitlist')
+          RETURNING id, event_id
+        `))[0];
+        if (!row) return "unknown";
+        await transaction.execute(sql`
+          INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata)
+          VALUES (NULL, 'contact-writer', 'event.guest.cancelled', 'event_guest_registration', ${String(row.id)},
+                  ${JSON.stringify({eventId: String(row.event_id)})}::jsonb)
+        `);
+        return "cancelled";
+      });
     },
   };
 }

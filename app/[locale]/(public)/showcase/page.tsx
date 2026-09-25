@@ -62,9 +62,9 @@ export default async function ShowcasePage({params, searchParams}: Props) {
     searchParams,
   ]);
   const filters = parseShowcaseFilters(query);
-  // A database outage degrades to the empty state rather than a 500 -- unchanged from today.
-  const rows = await showcaseRepository.listPublished(filters).catch(() => []);
-  const listings = rows.map((row) => toPublicListing(row, locale));
+  // A failed read is unknown availability, not zero published listings.
+  const rows = await showcaseRepository.listPublished(filters).catch(() => null);
+  const listings = rows?.map((row) => toPublicListing(row, locale)) ?? [];
   const cardLabels = {premium: t("premium"), goneGlobal: t("goneGlobal"), memberSince: t("memberSince"), category: t("filters.category"), view: t("view")};
   const filterLabels = {search: t("filters.search"), category: t("filters.category"), useCase: t("filters.useCase"), deployment: t("filters.deployment"), language: t("filters.language"), worksWith: t("filters.worksWith"), submit: t("filters.submit"), clear: t("filters.clear")};
   const prompts = PROMPTS.map((prompt) => ({query: prompt.query, label: t(`prompts.${prompt.key}`)}));
@@ -84,7 +84,9 @@ export default async function ShowcasePage({params, searchParams}: Props) {
       <DirectoryPrompts locale={locale} prompts={prompts} />
       <ShowcaseFilters filters={filters} labels={filterLabels} locale={locale} />
       <SolutionNeeds chips={chips} filters={filters} locale={locale} />
-      {listings.length > 0
+      {rows === null
+        ? <HonestEmpty copy={t("unavailableDescription")} title={t("unavailableTitle")} variant="inner" />
+        : listings.length > 0
         ? <div className="partner-record-grid">{listings.map((listing) => <ShowcaseCard key={listing.slug} labels={cardLabels} listing={listing} locale={locale} />)}</div>
         : <HonestEmpty actions={[{label: t("filters.clear"), href: "/showcase"}]} copy={t("emptyDescription")} title={t("emptyTitle")} variant="inner" />}
     </Section>

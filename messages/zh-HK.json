@@ -1263,6 +1263,8 @@
     "resultsDescription": "使用篩選條件，找出切合你需要的方案。",
     "emptyTitle": "沒有符合的已發布展示頁",
     "emptyDescription": "請嘗試更改篩選條件或搜尋字詞。",
+    "unavailableTitle": "展示名錄暫時無法顯示",
+    "unavailableDescription": "請稍後再試。",
     "premium": "精選",
     "goneGlobal": "走向全球",
     "memberSince": "WTIA 會員始於",
@@ -1387,6 +1389,8 @@
     "resultsTitle": "{count} 個會員",
     "emptyTitle": "暫時沒有相符的會員專頁",
     "emptyDescription": "機構發布專頁後會在此顯示。請嘗試更廣泛的搜尋。",
+    "unavailableTitle": "會員頁面暫時無法顯示",
+    "unavailableDescription": "請稍後再試。",
     "view": "查看會員專頁",
     "detail": {
       "website": "網站",
@@ -1580,13 +1584,18 @@
       "registered": "已報名。確認電郵正發送至你的信箱。",
       "waitlist": "活動已滿；你已列入候補名單，有名額時我們會電郵通知你。",
       "already": "此電郵已報名參加本活動。",
+      "confirmationPending": "你的報名已儲存，但確認電郵未能寄出。請再次提交以重試。",
       "invalid": "請檢查姓名、電郵及 WhatsApp 號碼，然後再試。",
       "rateLimited": "此連線嘗試次數過多，請稍後再試。",
       "closed": "本活動已截止報名。",
       "external": "本活動於主辦機構網站接受報名。",
       "unavailable": "目前無法報名。",
       "cancelled": "你的報名已取消。",
-      "cancelInvalid": "此取消連結已失效。"
+      "cancelInvalid": "此取消連結已失效。",
+      "cancelConfirmTitle": "確定取消活動報名？",
+      "cancelConfirmBody": "請在下方確認，才會釋出你的名額。開啟此連結並不會更改報名。",
+      "cancelConfirmAction": "確認取消報名",
+      "cancelKeepLink": "保留我的報名"
     },
     "card": {
       "venueLabel": "地點",

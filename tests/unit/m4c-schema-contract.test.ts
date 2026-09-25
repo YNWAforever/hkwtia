@@ -1,7 +1,7 @@
 import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 
-import {getMaterializedViewConfig} from "drizzle-orm/pg-core";
+import {getMaterializedViewConfig, PgDialect} from "drizzle-orm/pg-core";
 import {describe, expect, it} from "vitest";
 
 import * as serverSchema from "@/lib/db/server-schema";
@@ -33,6 +33,16 @@ const allowedPublicColumns = [
 ].sort();
 
 describe("M4C AI-Ops materialized-view schema contract", () => {
+  it("counts only bot-handled concierge threads in the agent metrics cohort", () => {
+    const query = getMaterializedViewConfig(serverSchema.aiopsMonthlyMetrics).query;
+    expect(query).toBeDefined();
+    if (!query) return;
+    const sql = new PgDialect().sqlToQuery(query).sql;
+    const cohort = sql.match(/month_conversations AS \(([\s\S]*?)\),\s*latest_terminal AS/)?.[1];
+    expect(cohort).toBeDefined();
+    expect(cohort).toMatch(/conversations\.agent_kind = 'concierge'[\s\S]*?AND conversations\.handling = 'bot'/);
+  });
+
   it("declares exactly the approved scalar-only public columns in Drizzle and generated metadata", () => {
     const view = (serverSchema as Record<string, unknown>).aiopsMonthlyMetrics;
     expect(view).toBeDefined();
@@ -52,6 +62,15 @@ describe("M4C AI-Ops materialized-view schema contract", () => {
     const snapshotView = snapshot.views?.["public.aiops_monthly_metrics"];
     expect(snapshotView).toBeDefined();
     expect(Object.keys(snapshotView?.columns ?? {}).sort()).toEqual(allowedPublicColumns);
+  });
+
+  it("recreates the unique index after replacing the view, preserving concurrent refresh", () => {
+    const migration = readFileSync(resolve("drizzle/0040_phase_d_aiops_bot_cohort.sql"), "utf8");
+    const create = migration.indexOf('CREATE MATERIALIZED VIEW "public"."aiops_monthly_metrics"');
+    const index = migration.indexOf('CREATE UNIQUE INDEX "aiops_monthly_metrics_month_start_unique"');
+    expect(create).toBeGreaterThanOrEqual(0);
+    expect(index).toBeGreaterThan(create);
+    expect(migration).toMatch(/AND conversations\.handling = 'bot'/);
   });
 
   it("ships a Hong Kong twelve-month migration with concurrent-refresh support", () => {

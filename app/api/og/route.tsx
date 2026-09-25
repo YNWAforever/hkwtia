@@ -1,6 +1,7 @@
 import {ImageResponse} from "next/og";
 import {z} from "zod";
 
+import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl, hasUrlObfuscation} from "@/lib/media/url";
 import {renderOgCard} from "@/lib/og/renderers";
 import {resolveOgRenderer, type OgEntityKind} from "@/lib/og/resolve-renderer";
 
@@ -14,8 +15,20 @@ const paramsSchema = z.object({
   kind: z.enum(KINDS),
   title: z.string().trim().min(1).max(300),
   eyebrow: z.string().trim().min(1).max(60),
-  image: z.string().url().max(500).optional(),
 }).strict();
+
+function safeImageUrl(value: string | null, requestUrl: URL): string | null {
+  if (!value || value.length > 500 || value !== value.trim() || hasUrlObfuscation(value)) return null;
+  try {
+    const image = new URL(value, requestUrl.origin);
+    if (image.origin !== requestUrl.origin || image.username || image.password || image.search || image.hash) return null;
+    if (/%(?:2e|2f|5c|25)/i.test(image.pathname)) return null;
+    if (!isRegistrableMediaUrl(image.pathname) && !isPrivateMediaDeliveryUrl(image.pathname)) return null;
+    return image.toString();
+  } catch {
+    return null;
+  }
+}
 
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);
@@ -23,12 +36,11 @@ export async function GET(request: Request): Promise<Response> {
     kind: url.searchParams.get("kind") ?? undefined,
     title: url.searchParams.get("title") ?? undefined,
     eyebrow: url.searchParams.get("eyebrow") ?? undefined,
-    ...(url.searchParams.get("image") ? {image: url.searchParams.get("image")!} : {}),
   });
   // A bad request must not 500: a crawler that gets an error here drops the card for the
   // page entirely, so fall through to the card that needs nothing.
   const entity = parsed.success
-    ? {kind: parsed.data.kind as OgEntityKind, title: parsed.data.title, eyebrow: parsed.data.eyebrow, imageUrl: parsed.data.image ?? null}
+    ? {kind: parsed.data.kind as OgEntityKind, title: parsed.data.title, eyebrow: parsed.data.eyebrow, imageUrl: safeImageUrl(url.searchParams.get("image"), url)}
     : {kind: "page" as const, title: "WiseTech Hong Kong", eyebrow: "WTIA", imageUrl: null};
 
   const {renderer, props} = resolveOgRenderer(entity);

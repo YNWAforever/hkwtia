@@ -1,4 +1,29 @@
-import {describe, expect, it} from "vitest";
+import {describe, expect, it, vi} from "vitest";
+
+vi.mock("next/og", () => ({
+  ImageResponse: class extends Response {
+    constructor(element: unknown) { super(JSON.stringify(element)); }
+  },
+}));
+
+import {GET} from "@/app/api/og/route";
+
+describe("GET /api/og image source", () => {
+  const card = (image: string) => new Request("https://hkwtia.test/api/og?" + new URLSearchParams({kind: "member", title: "A member", eyebrow: "Member", image}));
+
+  it("does not let a caller make ImageResponse fetch a loopback image", async () => {
+    const tree = await (await GET(card("http://127.0.0.1:1234/probe"))).text();
+    expect(tree).toContain("A member");
+    expect(tree).not.toContain("127.0.0.1");
+  });
+
+  it("keeps a same-origin media image on the member card", async () => {
+    const tree = await (await GET(card("/images/member.png"))).text();
+    expect(tree).toContain("A member");
+    expect(tree).toContain("https://hkwtia.test/images/member.png");
+  });
+});
+
 
 import {renderOgCard} from "@/lib/og/renderers";
 

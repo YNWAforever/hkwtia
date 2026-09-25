@@ -45,7 +45,9 @@ export async function readBoundedBytes(
     if (chunk.done) break;
     length += chunk.value.byteLength;
     if (length > maxBytes) {
-      await reader.cancel();
+      // A clone uses a tee: awaiting cancellation of this branch can hang until
+      // the original request branch is also cancelled or consumed.
+      void reader.cancel().catch(() => undefined);
       throw new BoundedBodyError("TOO_LARGE");
     }
     chunks.push(chunk.value);

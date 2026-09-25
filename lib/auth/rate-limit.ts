@@ -4,6 +4,7 @@ import {createHash} from "node:crypto";
 
 import {createInMemoryRateLimiter, type RateLimiter} from "@/lib/security/rate-limit";
 import {clientIpFromHeaders} from "@/lib/security/request-origin";
+import {BoundedBodyError, readBoundedBytes} from "@/lib/security/bounded-body";
 
 /**
  * Rate limits the outbound-email and credential-guessing auth endpoints.
@@ -120,19 +121,24 @@ export function authPathOf(url: string): string | null {
   }
 }
 
-async function emailFrom(request: Request): Promise<string | null> {
-  const declared = Number(request.headers.get("content-length") ?? "0");
-  if (Number.isFinite(declared) && declared > MAX_BODY_BYTES) return null;
+type EmailBody = Readonly<{email: string | null; tooLarge: boolean}>;
+
+async function emailFrom(request: Request): Promise<EmailBody> {
+  let bytes: Uint8Array;
   try {
-    // Cloned so the provider handler still receives an unread body.
-    const body: unknown = await request.clone().json();
-    if (!body || typeof body !== "object") return null;
+    bytes = await readBoundedBytes(request.clone(), MAX_BODY_BYTES);
+  } catch (error) {
+    return {email: null, tooLarge: error instanceof BoundedBodyError};
+  }
+  try {
+    const body: unknown = JSON.parse(new TextDecoder("utf-8", {fatal: true}).decode(bytes));
+    if (!body || typeof body !== "object") return {email: null, tooLarge: false};
     const value = (body as {email?: unknown}).email;
-    if (typeof value !== "string") return null;
+    if (typeof value !== "string") return {email: null, tooLarge: false};
     const email = value.trim();
-    return email.length > 0 && email.length <= 320 ? email : null;
+    return {email: email.length > 0 && email.length <= 320 ? email : null, tooLarge: false};
   } catch {
-    return null;
+    return {email: null, tooLarge: false};
   }
 }
 
@@ -165,6 +171,10 @@ export async function rateLimitAuthRequest(
 
   if (!emailSendPaths.has(path)) return null;
 
-  const decision = checkAuthSend({ip, email: await emailFrom(request)}, dependencies);
+  const body = await emailFrom(request);
+  if (body.tooLarge) {
+    return Response.json({error: "PAYLOAD_TOO_LARGE"}, {status: 413, headers: {"cache-control": "no-store"}});
+  }
+  const decision = checkAuthSend({ip, email: body.email}, dependencies);
   return decision.allowed ? null : tooManyRequests(decision.retryAfterSeconds);
 }

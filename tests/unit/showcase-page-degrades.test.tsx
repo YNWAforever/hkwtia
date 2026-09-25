@@ -14,7 +14,7 @@ vi.mock("@/lib/showcase/lead-request-action", () => ({requestIntroAction: vi.fn(
 // than about the English copy.
 vi.mock("next-intl/server", () => ({
   setRequestLocale: () => undefined,
-  getTranslations: async () => (key: string) => key === "emptyTitle" ? "No showcase listings" : key,
+  getTranslations: async () => (key: string) => key === "emptyTitle" ? "No showcase listings" : key === "unavailableTitle" ? "Showcase listings are temporarily unavailable" : key,
 }));
 vi.mock("@/i18n/navigation", () => ({
   Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
@@ -23,13 +23,7 @@ vi.mock("@/i18n/navigation", () => ({
 import ShowcasePage from "@/app/[locale]/(public)/showcase/page";
 import {generateMetadata as detailMetadata} from "@/app/[locale]/(public)/showcase/[slug]/page";
 
-/**
- * `/news` wraps its reads in `.catch(() => [])` so an unreachable database
- * degrades to the empty state rather than a 500. `/showcase` awaits
- * `listPublished` bare, so the same outage takes the page down — and it is a
- * redirect destination for eight migrated member stories, so a visitor
- * following a link from a 2017 interview would get an error page.
- */
+/** An unavailable listing read must not be rendered as a genuine zero-result search. */
 async function render(): Promise<string> {
   return renderToStaticMarkup(await ShowcasePage({
     params: Promise.resolve({locale: "en"}),
@@ -42,12 +36,13 @@ describe("public Showcase degradation", () => {
     vi.clearAllMocks();
   });
 
-  it("renders the empty state when the listing read fails", async () => {
+  it("renders an unavailable state when the listing read fails", async () => {
     showcase.listPublished.mockRejectedValue(new Error("TRANSIENT_DATABASE_READ"));
 
     const html = await render();
 
-    expect(html).toContain("No showcase listings");
+    expect(html).toContain("Showcase listings are temporarily unavailable");
+    expect(html).not.toContain("No showcase listings");
   });
 
   it("still renders listings when the read succeeds", async () => {

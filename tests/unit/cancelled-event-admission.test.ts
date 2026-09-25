@@ -110,12 +110,16 @@ async function attemptMemberRsvp(status: EventStatus): Promise<AttemptResult> {
 async function attemptGuestRsvp(status: EventStatus): Promise<AttemptResult> {
   // The repository reads the raw `status` string (it is not part of the public
   // projection), so this is the one door that refuses on `cancelled` directly.
+  const replies = [
+    [{
+      id: EVENT_ID, slug: "cancelled-acceptance-event", title_en: "Cancelled event", title_zh: null,
+      status, visibility: "public", registration_mode: "rsvp", capacity: null, starts_at: startsAt, ends_at: null,
+    }],
+    [{count: 0}], [], [{id: EVENT_ID, status: "registered"}], [],
+  ];
   const database = {
     transaction: async <T>(work: (tx: {execute: (query: unknown) => Promise<unknown>}) => Promise<T>) => work({
-      execute: async () => ({rows: [{
-        id: EVENT_ID, slug: "cancelled-acceptance-event", title_en: "Cancelled event", title_zh: null,
-        status, visibility: "public", registration_mode: "rsvp", capacity: null, starts_at: startsAt, ends_at: null,
-      }]}),
+      execute: async () => ({rows: replies.shift() ?? []}),
     }),
   };
   const repository = createEventGuestsRepository(async () => database as never, () => at);

@@ -117,35 +117,22 @@ Implementing whatever comes back is Phase D. Recording it here is what makes it 
 
 ## Recorded decisions
 
-### `aiops_monthly_metrics` — **declined** (C2 Task 13 Step 4, C1 O-6)
+### `aiops_monthly_metrics` — corrected in migration 0040, pending deployment
 
-§6 names this materialized view as the go-live monitoring signal, and it will read a successful human
-takeover as an AI problem: `month_conversations` counts every `agent_kind='concierge'` conversation
-whatever its `handling`, a thread a person takes over produces no terminal `agent_run` — so a thread
-that was escalated and then handled well stays in `escalation_rate` and never reaches
-`agent_resolved_rate`'s numerator — and `first_response` keys off `role='assistant'`, so a
-`role='staff'` reply is excluded from the median sample entirely.
+The Phase C1 audit found that the materialized view counted human-handled concierge
+conversations in its denominator, while a staff reply could never enter its assistant-only
+first-response sample. Migration 0040 restricts `month_conversations` to `handling = 'bot'`,
+so resolution, escalation, failure and first-response figures share the bot-handled cohort.
+The dashboard methodology copy continues to explain that staff inbox outcomes and replies
+are outside these AI metrics.
 
-The fix is one line in the view body (`AND conversations.handling = 'bot'`). **It was attempted as
-migration 0035 and declined**, per the plan's own instruction not to force it:
-
-- `npx drizzle-kit generate` does regenerate the body cleanly — the emitted file carried the new
-  predicate and the 23 public columns were unchanged.
-- But it emits `DROP MATERIALIZED VIEW` + `CREATE MATERIALIZED VIEW` and **does not recreate
-  `aiops_monthly_metrics_month_start_unique`**. Dropping a materialized view drops its indexes, that
-  index is raw SQL in `drizzle/0013_m4c_aiops_metrics.sql` and is not declared in
-  `lib/db/schema-core.ts`, so drizzle-kit cannot know about it — and
-  `aiOpsMetricsRepository.refresh` calls `.concurrently()`, which Postgres refuses without a unique
-  index. The migration would therefore have left the hourly AI-Ops refresh failing permanently while
-  the dashboard quietly served stale numbers: a monitoring fix that breaks monitoring.
-- The only repair is hand-editing generated SQL, which is what the plan calls forcing it.
-
-**Consequence, and what was done instead:** the view stays as it is, and the dashboard now says so.
-`AiOps.methodologyDescription` in both bundles carries the caveat — resolution, escalation, failure
-and first-response figures describe threads the concierge kept, and a staff reply is not counted as a
-first response. Read `agent_resolved_rate` that way after go-live. Fixing the view properly means
-declaring the unique index in the Drizzle schema first, so a regenerated view brings it back; that is
-**Phase D**.
+The first attempt was declined because Drizzle regenerated the view without its raw-SQL
+unique index. Migration 0040 deliberately recreates
+`aiops_monthly_metrics_month_start_unique` after creating the view; hourly
+`REFRESH MATERIALIZED VIEW CONCURRENTLY` requires that index. The schema contract
+test checks the predicate and statement order. All migrations, the index lookup and a
+concurrent refresh passed on a disposable pgvector/PostgreSQL 16 database. No production
+migration was applied as part of this source change.
 
 ## What the code already proves (no database, no Woztell credentials)
 

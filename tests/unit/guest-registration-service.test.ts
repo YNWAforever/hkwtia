@@ -1,4 +1,5 @@
 import {describe, expect, it, vi} from "vitest";
+import {createHmac} from "node:crypto";
 
 import type {GuestRegistrationResult} from "@/lib/db/repos/event-guests";
 import {cancelTokenDigest, createGuestRegistrationService} from "@/lib/events/guest-registration-core";
@@ -14,13 +15,13 @@ function form(overrides: Record<string, string> = {}): FormData {
   return data;
 }
 
-function service() {
-  const register = vi.fn(async (): Promise<GuestRegistrationResult> => ({id: "g1", disposition: "registered", eventTitle: "AI Clinic", slug: "ai-clinic"}));
+function service(limit = 1) {
+  const register = vi.fn(async (_actor: unknown, input: {cancelTokenDigest: string}): Promise<GuestRegistrationResult> => ({id: "g1", disposition: "registered", status: "registered", cancelTokenDigest: input.cancelTokenDigest, eventTitle: "AI Clinic", slug: "ai-clinic"}));
   const upsertContact = vi.fn(async () => ({id: "c1", disposition: "upserted" as const}));
   const send = vi.fn(async () => undefined);
   const subject = createGuestRegistrationService({
     guests: {register}, contacts: {upsertFromInterestForm: upsertContact},
-    limiter: createInMemoryRateLimiter({limit: 1, windowMs: 60_000, now: () => 1}),
+    limiter: createInMemoryRateLimiter({limit, windowMs: 60_000, now: () => 1}),
     resolveClientIp: async () => "203.0.113.9", sendConfirmation: send,
     secret: "s".repeat(32), appUrl: "https://hkwtia.example",
   });
@@ -46,12 +47,18 @@ describe("guest registration service (programme B-4)", () => {
     const [payload] = send.mock.calls[0] as unknown as [{to: string; eventTitle: string; slug: string; cancelUrl: string; registrationId: string; cancelTokenDigest: string}];
     // The slug comes from the repository's locked row, never from the form.
     expect(payload).toEqual(expect.objectContaining({to: "ada@example.hk", eventTitle: "AI Clinic", slug: "ai-clinic", disposition: "registered", registrationId: "g1"}));
-    expect(payload.cancelUrl).toMatch(/^https:\/\/hkwtia\.example\/api\/events\/guest\/cancel\?token=[0-9a-f]{32}$/);
+    const url = new URL(payload.cancelUrl);
+    expect(url.pathname).toBe("/api/events/guest/cancel");
+    expect(url.searchParams.get("locale")).toBe("en");
+    const signedToken = url.searchParams.get("token") ?? "";
+    expect(signedToken).toMatch(/^[0-9a-f]{64}\.[0-9a-f]{64}$/);
+    const [signedDigest, signature] = signedToken.split(".");
+    expect(signedDigest).toBe(payload.cancelTokenDigest);
+    expect(signature).toBe(createHmac("sha256", "s".repeat(32)).update("guest-cancel-v2:" + signedDigest).digest("hex"));
     // The repository only ever saw the digest of the token in the link, never the token itself.
-    const token = new URL(payload.cancelUrl).searchParams.get("token") ?? "";
     const [, registered] = register.mock.calls[0] as unknown as [unknown, {cancelTokenDigest: string}];
-    expect(registered.cancelTokenDigest).toBe(cancelTokenDigest("s".repeat(32), token));
-    expect(registered.cancelTokenDigest).not.toContain(token);
+    expect(registered.cancelTokenDigest).toBe(payload.cancelTokenDigest);
+    expect(registered.cancelTokenDigest).not.toContain(signedToken);
     expect(payload.cancelTokenDigest).toBe(registered.cancelTokenDigest);
   });
 
@@ -72,12 +79,28 @@ describe("guest registration service (programme B-4)", () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it("does not re-send a confirmation to an already registered guest, and survives a contact failure", async () => {
+  it("resends the same usable cancellation link after a confirmation delivery failure", async () => {
+    const {subject, register, send} = service(2);
+    send.mockRejectedValueOnce(new Error("transport unavailable"));
+    await expect(subject.submit(form())).resolves.toEqual({ok: true, disposition: "confirmation_pending"});
+    const first = (send.mock.calls[0] as unknown as [{cancelUrl: string; cancelTokenDigest: string}])[0];
+    register.mockResolvedValueOnce({
+      id: "g1", disposition: "already_registered", status: "registered",
+      cancelTokenDigest: first.cancelTokenDigest, eventTitle: "AI Clinic", slug: "ai-clinic",
+    } as GuestRegistrationResult);
+    await expect(subject.submit(form())).resolves.toEqual({ok: true, disposition: "already_registered"});
+    expect(send).toHaveBeenCalledTimes(2);
+    const second = (send.mock.calls[1] as unknown as [{cancelUrl: string; cancelTokenDigest: string}])[0];
+    expect(second.cancelTokenDigest).toBe(first.cancelTokenDigest);
+    expect(second.cancelUrl).toBe(first.cancelUrl);
+  });
+
+  it("allows a confirmation retry despite a contact failure", async () => {
     const {subject, register, upsertContact, send} = service();
-    register.mockResolvedValueOnce({id: "g1", disposition: "already_registered", eventTitle: "AI Clinic", slug: "ai-clinic"});
+    register.mockResolvedValueOnce({id: "g1", disposition: "already_registered", status: "registered", cancelTokenDigest: "d".repeat(64), eventTitle: "AI Clinic", slug: "ai-clinic"});
     upsertContact.mockRejectedValueOnce(new Error("CONTACT_UPSERT_FAILED"));
     await expect(subject.submit(form())).resolves.toEqual({ok: true, disposition: "already_registered"});
-    expect(send).not.toHaveBeenCalled();
+    expect(send).toHaveBeenCalledTimes(1);
   });
 
   it("returns unavailable instead of throwing when the repository fails unexpectedly", async () => {

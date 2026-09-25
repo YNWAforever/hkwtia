@@ -6,9 +6,13 @@ const publicPosts = vi.hoisted(() => ({
   listPublishedNews: vi.fn(),
 }));
 const showcase = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
+const events = vi.hoisted(() => ({listPublic: vi.fn()}));
+const companyProfiles = vi.hoisted(() => ({listPublishedSlugs: vi.fn()}));
 
 vi.mock("@/lib/db/repos/public-posts", () => publicPosts);
 vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: showcase}));
+vi.mock("@/lib/db/repos/events", () => ({eventsRepository: events}));
+vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: companyProfiles}));
 
 import sitemap from "@/app/sitemap";
 import {milestones} from "@/content/milestones";
@@ -25,6 +29,8 @@ describe("milestone detail pages in the sitemap", () => {
     publicPosts.listPublishedBuildLogs.mockResolvedValue([]);
     publicPosts.listPublishedNews.mockResolvedValue([]);
     showcase.listPublishedSlugs.mockResolvedValue([]);
+    events.listPublic.mockResolvedValue([]);
+    companyProfiles.listPublishedSlugs.mockResolvedValue([]);
   });
 
   it("lists every milestone in both locales", async () => {

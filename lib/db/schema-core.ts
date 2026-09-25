@@ -1509,6 +1509,7 @@ export const aiopsMonthlyMetrics = pgMaterializedView(
     FROM months
     INNER JOIN conversations
       ON conversations.agent_kind = 'concierge'
+     AND conversations.handling = 'bot'
      AND conversations.created_at >= months.month_from
      AND conversations.created_at < months.month_to
   ),

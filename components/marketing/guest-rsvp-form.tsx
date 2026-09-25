@@ -7,14 +7,14 @@ import type {GuestRsvpResult} from "@/lib/events/guest-registration-core";
 
 export type GuestRsvpLabels = Readonly<{
   title: string; name: string; email: string; organisation: string; whatsappNumber: string; marketingConsent: string; consent: string;
-  website: string; submit: string; submitting: string; registered: string; waitlist: string; already: string;
+  website: string; submit: string; submitting: string; registered: string; waitlist: string; already: string; confirmationPending: string;
   invalid: string; rateLimited: string; closed: string; external: string; unavailable: string;
 }>;
 
-type FormStatus = "idle" | "registered" | "waitlist" | "already_registered" | "invalid" | "rate_limited" | "closed" | "external" | "unavailable";
+type FormStatus = "idle" | "registered" | "waitlist" | "already_registered" | "confirmation_pending" | "invalid" | "rate_limited" | "closed" | "external" | "unavailable";
 type FormState = Readonly<{status: FormStatus}>;
 const initialState: FormState = {status: "idle"};
-const FAILED: readonly FormStatus[] = ["invalid", "rate_limited", "closed", "external", "unavailable"];
+const FAILED: readonly FormStatus[] = ["invalid", "rate_limited", "closed", "external", "unavailable", "confirmation_pending"];
 
 /** Anonymous RSVP on the event detail page (programme B-4), shaped like the interest form. */
 export function GuestRsvpForm({action, eventId, locale, labels, id = "guest-rsvp"}: Readonly<{
@@ -32,7 +32,7 @@ export function GuestRsvpForm({action, eventId, locale, labels, id = "guest-rsvp
     initialState,
   );
   const message: Record<FormStatus, string> = {
-    idle: "", registered: labels.registered, waitlist: labels.waitlist, already_registered: labels.already,
+    idle: "", registered: labels.registered, waitlist: labels.waitlist, already_registered: labels.already, confirmation_pending: labels.confirmationPending,
     invalid: labels.invalid, rate_limited: labels.rateLimited, closed: labels.closed, external: labels.external, unavailable: labels.unavailable,
   };
   const failed = FAILED.includes(state.status);

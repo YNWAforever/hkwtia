@@ -41,9 +41,8 @@ export default async function MembersPage({params, searchParams}: Props) {
     searchParams,
   ]);
   const filters = parseMemberFilters(query);
-  // A public page degrades rather than 500s: an unreachable database renders the honest empty
-  // state, the same contract /showcase and /events already keep.
-  const members = await companyProfilesRepository.listPublished(filters).catch(() => []);
+  // A failed read is unknown availability, not an empty directory.
+  const members = await companyProfilesRepository.listPublished(filters).catch(() => null);
   const plans = Object.fromEntries(
     MEMBERSHIP_PLAN_CODES.map((plan) => [plan, t(`plans.${plan}`)]),
   ) as Record<MembershipPlanCode, string>;
@@ -59,7 +58,7 @@ export default async function MembersPage({params, searchParams}: Props) {
     <Section id="results" labelledBy="members-results-title">
       {/* The count is the section's accessible name and a polite live region: a filter submit is a
           full navigation, so this is what tells a screen-reader user what came back. */}
-      <p aria-live="polite" className="sr-only" id="members-results-title" role="status">{t("resultsTitle", {count: members.length})}</p>
+      <p aria-live="polite" className="sr-only" id="members-results-title" role="status">{members === null ? t("unavailableTitle") : t("resultsTitle", {count: members.length})}</p>
       <MemberFilters
         filters={filters}
         labels={{
@@ -69,7 +68,9 @@ export default async function MembersPage({params, searchParams}: Props) {
         }}
         locale={locale}
       />
-      {members.length > 0
+      {members === null
+        ? <HonestEmpty copy={t("unavailableDescription")} title={t("unavailableTitle")} variant="inner" />
+        : members.length > 0
         ? <div className="partner-record-grid">
           {members.map((member) => <MemberCard key={member.slug} labels={{plans, view: t("view")}} locale={locale} member={member} />)}
         </div>
