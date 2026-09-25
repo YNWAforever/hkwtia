@@ -59,6 +59,39 @@ describe("the event-cancellation refund sweep", () => {
     expect(deferUnsettledOrder).toHaveBeenCalledWith("commit-failed");
   });
 
+  it("continues after an unexpected per-order error and alerts with a reconciled summary", async () => {
+    const listOrders = vi.fn(async () => [
+      {orderId: "broken-read", eventId: "ev-cancelled"},
+      {orderId: "refunded-ok", eventId: "ev-cancelled"},
+    ]);
+    const refundOrder = vi.fn(async (_actor, input: {orderId: string}) => {
+      if (input.orderId === "broken-read") throw new Error("ORDER_READ_FAILED");
+      return {status: "refunded" as const};
+    });
+    const deferUnsettledOrder = vi.fn(async () => undefined);
+
+    await expect(runEventCancellationRefunds({listOrders, refundOrder, deferUnsettledOrder}))
+      .rejects.toMatchObject({summary: {scanned: 2, refunded: 1, failed: 1}});
+    expect(refundOrder).toHaveBeenCalledTimes(2);
+    expect(deferUnsettledOrder).toHaveBeenCalledWith("broken-read");
+  });
+
+  it("continues after deferring one order fails and alerts instead of calling it pending", async () => {
+    const listOrders = vi.fn(async () => [
+      {orderId: "defer-failed", eventId: "ev-cancelled"},
+      {orderId: "refunded-ok", eventId: "ev-cancelled"},
+    ]);
+    const refundOrder = vi.fn(async (_actor, input: {orderId: string}) =>
+      input.orderId === "defer-failed" ? {status: "pending" as const} : {status: "refunded" as const});
+    const deferUnsettledOrder = vi.fn(async (orderId: string) => {
+      if (orderId === "defer-failed") throw new Error("DEFER_FAILED");
+    });
+
+    await expect(runEventCancellationRefunds({listOrders, refundOrder, deferUnsettledOrder}))
+      .rejects.toMatchObject({summary: {scanned: 2, refunded: 1, pending: 0, failed: 1}});
+    expect(refundOrder).toHaveBeenCalledTimes(2);
+  });
+
   it("reports a pending provider refund without alerting as a failure", async () => {
     const {dependencies} = harness({refundOrder: vi.fn(async () => ({status: "pending" as const}))});
     await expect(runEventCancellationRefunds(dependencies)).resolves.toMatchObject({scanned: 2, pending: 2, failed: 0});

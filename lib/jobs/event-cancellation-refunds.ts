@@ -16,10 +16,9 @@ export type EventCancellationRefundDependencies = Readonly<{
  * reconcile: `scanned === refunded + alreadyRefunded + pending + failed + notAdmissible +
  * notFound`.
  *
- * `failed` folds `provider_failed` and `commit_failed` together on purpose --
- * both keep the order on the sweep's work list, which makes the next run alert -- and
- * is distinct from `notAdmissible`, where the order was not `paid` to begin with
- * and so will not be retried.
+ * `failed` includes provider/commit failures, unexpected per-order errors, and
+ * unsuccessful queue deferrals. Each leaves the order on the sweep's work list
+ * and keeps the job alerting, unlike `notAdmissible`, which is not retried.
  */
 export type EventCancellationRefundSummary = Readonly<{
   scanned: number;
@@ -63,20 +62,45 @@ export async function runEventCancellationRefunds(
   let notAdmissible = 0;
   let notFound = 0;
 
+  const deferUnsettled = async (orderId: string): Promise<boolean> => {
+    try {
+      await dependencies.deferUnsettledOrder(orderId);
+      return true;
+    } catch (error) {
+      console.error("event-cancellation-refunds defer failed", {
+        orderId, errorName: error instanceof Error ? error.name : "unknown",
+      });
+      return false;
+    }
+  };
+
   for (const order of orders) {
-    const result = await dependencies.refundOrder(actor, {orderId: order.orderId, note: "Event cancelled"});
+    let result: RefundResult;
+    try {
+      result = await dependencies.refundOrder(actor, {orderId: order.orderId, note: "Event cancelled"});
+    } catch (error) {
+      // One malformed order or failed read must not prevent the rest of the
+      // bounded batch from receiving their refunds. Leave it on the work list and
+      // fail the run after the remaining orders have been attempted.
+      failed += 1;
+      console.error("event-cancellation-refunds order failed", {
+        orderId: order.orderId, errorName: error instanceof Error ? error.name : "unknown",
+      });
+      await deferUnsettled(order.orderId);
+      continue;
+    }
     if (result.status === "refunded") refunded += 1;
     else if (result.status === "already_refunded") alreadyRefunded += 1;
     else if (result.status === "pending") {
-      pending += 1;
-      await dependencies.deferUnsettledOrder(order.orderId);
+      if (await deferUnsettled(order.orderId)) pending += 1;
+      else failed += 1;
     }
     else if (result.status === "not_admissible") notAdmissible += 1;
     else if (result.status === "not_found") notFound += 1;
     else {
       failed += 1;
       if (result.status === "commit_failed") commitFailed += 1;
-      await dependencies.deferUnsettledOrder(order.orderId);
+      await deferUnsettled(order.orderId);
     }
   }
 
