@@ -223,7 +223,7 @@ describe("cancelled event refund work list", () => {
     const fake = fakeDatabase([]);
     database.current = fake.db;
     await createEventOrdersRepository().ordersAwaitingCancellationRefund(10);
-    await createEventOrdersRepository().deferFailedCancellationRefund("order-1");
+    await createEventOrdersRepository().deferUnsettledCancellationRefund("order-1");
     expect(fake.queries[0]?.sql).toMatch(/o\.status IN \('paid', 'refund_failed'\)/);
     expect(fake.queries[1]?.sql).toMatch(/status IN \('paid', 'refund_failed'\)/);
   });

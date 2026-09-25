@@ -7,13 +7,13 @@ import {refundOrder, type RefundResult} from "@/lib/tickets/refund-core";
 
 export type EventCancellationRefundDependencies = Readonly<{
   listOrders: (limit: number) => Promise<readonly Readonly<{orderId: string; eventId: string}>[]>;
-  deferFailedOrder: (orderId: string) => Promise<void>;
+  deferUnsettledOrder: (orderId: string) => Promise<void>;
   refundOrder: (actor: ReturnType<typeof systemActor>, input: Readonly<{orderId: string; note?: string | null}>) => Promise<RefundResult>;
 }>;
 
 /**
  * Every outcome a run can produce, each in its own bucket so the tallies
- * reconcile: `scanned === refunded + alreadyRefunded + failed + notAdmissible +
+ * reconcile: `scanned === refunded + alreadyRefunded + pending + failed + notAdmissible +
  * notFound`.
  *
  * `failed` folds `provider_failed` and `commit_failed` together on purpose --
@@ -42,14 +42,14 @@ export class EventCancellationRefundBatchError extends Error {
 
 /**
  * Attempt the whole bounded batch, then fail the job if any order still needs
- * attention. Failed orders stay on the work list and move behind untouched work by their
- * existing updated_at timestamp, so a full batch of persistent failures cannot
+ * attention. Pending and failed orders stay on the work list. Refreshing their
+ * updated_at timestamps moves them behind untouched work, so a full batch cannot
  * starve later orders. No additional progress table or migration is needed.
  */
 export async function runEventCancellationRefunds(
   dependencies: EventCancellationRefundDependencies = {
     listOrders: (limit) => eventOrdersRepository.ordersAwaitingCancellationRefund(limit),
-    deferFailedOrder: (orderId) => eventOrdersRepository.deferFailedCancellationRefund(orderId),
+    deferUnsettledOrder: (orderId) => eventOrdersRepository.deferUnsettledCancellationRefund(orderId),
     refundOrder: (actor, input) => refundOrder(actor, input),
   },
 ): Promise<EventCancellationRefundSummary> {
@@ -67,13 +67,16 @@ export async function runEventCancellationRefunds(
     const result = await dependencies.refundOrder(actor, {orderId: order.orderId, note: "Event cancelled"});
     if (result.status === "refunded") refunded += 1;
     else if (result.status === "already_refunded") alreadyRefunded += 1;
-    else if (result.status === "pending") pending += 1;
+    else if (result.status === "pending") {
+      pending += 1;
+      await dependencies.deferUnsettledOrder(order.orderId);
+    }
     else if (result.status === "not_admissible") notAdmissible += 1;
     else if (result.status === "not_found") notFound += 1;
     else {
       failed += 1;
       if (result.status === "commit_failed") commitFailed += 1;
-      await dependencies.deferFailedOrder(order.orderId);
+      await dependencies.deferUnsettledOrder(order.orderId);
     }
   }
 

@@ -79,6 +79,18 @@ describe("public Event detail page review regressions", () => {
     expect(rendered).toContain('"image":"http://localhost:3000/api/media/10000000-0000-4000-8000-000000000001"');
   });
 
+  it.each([
+    "/images/events/hero.webp",
+    "/api/media/10000000-0000-4000-8000-000000000001",
+  ])("uses a safe event hero in the Open Graph image: %s", async (url) => {
+    events.getPublicBySlug.mockResolvedValue(event("2030-01-01T12:00:00.000Z", {url, alt: "Event hero"}));
+
+    const metadata = await generateMetadata(props);
+    const imageUrl = (metadata.openGraph as {images: {url: string}[]}).images[0].url;
+
+    expect(new URL(imageUrl).searchParams.get("image")).toBe(url);
+  });
+
   it("uses repository public visibility for metadata and detail markup, excluding an unsafe archived-or-donor hero", async () => {
     events.getPublicBySlug.mockResolvedValue(null);
     await expect(generateMetadata(props)).resolves.toEqual({});
@@ -90,6 +102,8 @@ describe("public Event detail page review regressions", () => {
     const metadata = await generateMetadata(props);
     expect(metadata.title).toBe("Public Event | WiseTech Hong Kong");
     expect(metadata.description).toBe("A public Event description.");
+    const imageUrl = (metadata.openGraph as {images: {url: string}[]}).images[0].url;
+    expect(new URL(imageUrl).searchParams.get("image")).toBeNull();
     const zhMetadata = await generateMetadata({params: Promise.resolve({locale: "zh-HK", slug: "public-event"})});
     expect(zhMetadata.title).toBe("Public Event｜WiseTech Hong Kong");
     const rendered = renderToStaticMarkup(await EventPage(props));

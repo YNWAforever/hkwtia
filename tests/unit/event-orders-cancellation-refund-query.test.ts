@@ -67,7 +67,7 @@ describe("the event-cancellation sweep read", () => {
 
   it("moves a failed order to the alert tail without changing its refund status", async () => {
     const statements = capture();
-    await eventOrdersRepository.deferFailedCancellationRefund("order-1");
+    await eventOrdersRepository.deferUnsettledCancellationRefund("order-1");
     expect(statements).toHaveLength(1);
     const {sql, params} = statements[0]!;
     expect(sql).toMatch(/UPDATE\s+"event_orders"/i);
