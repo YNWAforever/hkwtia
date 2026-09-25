@@ -52,6 +52,7 @@ const labels: AiOpsDashboardLabels = {
   deployment: "Live deployment",
   acceptance: "M4 acceptance evidence",
   noBuildLogs: "No published build logs are available.",
+  buildLogsUnavailable: "Build logs are temporarily unavailable.",
 };
 
 function monthStartAt(index: number) {
