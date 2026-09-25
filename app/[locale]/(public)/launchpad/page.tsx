@@ -43,16 +43,17 @@ export default async function LaunchPadPage({params, searchParams = Promise.reso
     getTranslations({locale: appLocale, namespace: 'Common'}),
     // Unscoped: the breadcrumb label keys are fully qualified (`Navigation.links.launchpad`).
     getTranslations({locale: appLocale}),
-    cohortRepository.listPublicCohorts(anonymous).catch((): Awaited<ReturnType<typeof cohortRepository.listPublicCohorts>> => []),
+    cohortRepository.listPublicCohorts(anonymous).catch(() => null),
   ]);
-  const partners = await landingPartnersRepository.listPublished({limit: 100}).catch(() => []);
+  const partners = await landingPartnersRepository.listPublished({limit: 100}).catch(() => null);
+  const availableCohorts = cohorts ?? [];
   const answers = parseFundingAnswers(query);
   const fundingResults = getFundingResults(query, appLocale);
-  const calendarLabels = {title: t('calendar.title'), empty: t('calendar.empty'), starts: t('calendar.starts'), ends: t('calendar.ends'), noEnd: t('calendar.noEnd'), capacity: t('calendar.capacity'), fee: t('calendar.fee'), statuses: {planning: t('calendar.statuses.planning'), open: t('calendar.statuses.open'), active: t('calendar.statuses.active'), completed: t('calendar.statuses.completed'), archived: t('calendar.statuses.archived')}};
-  const partnerLabels = {title: t('partners.title'), empty: t('partners.empty'), market: t('partners.market'), region: t('partners.region')};
+  const calendarLabels = {title: t('calendar.title'), empty: t(cohorts === null ? 'calendar.unavailable' : 'calendar.empty'), starts: t('calendar.starts'), ends: t('calendar.ends'), noEnd: t('calendar.noEnd'), capacity: t('calendar.capacity'), fee: t('calendar.fee'), statuses: {planning: t('calendar.statuses.planning'), open: t('calendar.statuses.open'), active: t('calendar.statuses.active'), completed: t('calendar.statuses.completed'), archived: t('calendar.statuses.archived')}};
+  const partnerLabels = {title: t('partners.title'), empty: t(partners === null ? 'partners.unavailable' : 'partners.empty'), market: t('partners.market'), region: t('partners.region')};
   const fundingLabels = {formLabel: t('funding.formLabel'), instructions: t('funding.instructions'), submit: t('funding.submit'), questions: {sector: {label: t('funding.questions.sector.label'), options: {trade: t('funding.questions.sector.options.trade'), 'advanced-training': t('funding.questions.sector.options.advancedTraining'), 'smart-production': t('funding.questions.sector.options.smartProduction'), 'life-health': t('funding.questions.sector.options.lifeHealth'), 'ai-data-science': t('funding.questions.sector.options.aiDataScience'), 'advanced-manufacturing-new-energy': t('funding.questions.sector.options.advancedManufacturing'), 'research-development': t('funding.questions.sector.options.researchDevelopment')}}, stage: {label: t('funding.questions.stage.label'), options: {'business-registered-non-subvented': t('funding.questions.stage.options.businessRegistered'), 'incorporated-non-subvented': t('funding.questions.stage.options.incorporated'), 'incorporated-subvented': t('funding.questions.stage.options.subvented')}}, market: {label: t('funding.questions.market.label'), options: {'hong-kong': t('funding.questions.market.options.hongKong'), 'covered-economy': t('funding.questions.market.options.coveredEconomy'), global: t('funding.questions.market.options.global')}}, employees: {label: t('funding.questions.employees.label'), options: {standard: t('funding.questions.employees.options.standard'), 'trainee-hk-pr': t('funding.questions.employees.options.traineeHongKongPermanentResident')}}, revenue: {label: t('funding.questions.revenue.label'), options: {'under-100m': t('funding.questions.revenue.options.under100m'), 'investment-100m-project-150m': t('funding.questions.revenue.options.investment100mProject150m'), 'eligible-rd-expenditure': t('funding.questions.revenue.options.eligibleRdExpenditure')}}}};
   const fundingResultsLabels = {heading: t('funding.results.heading'), eligible: t('funding.results.eligible'), ineligible: t('funding.results.ineligible'), source: t('funding.results.source'), asOf: t('funding.results.asOf')};
-  const openCohorts = cohorts.filter((cohort) => cohort.status === 'open').map((cohort) => ({id: cohort.id, name: appLocale === 'zh-HK' ? cohort.nameZhHk : cohort.nameEn, status: cohort.status}));
+  const openCohorts = availableCohorts.filter((cohort) => cohort.status === 'open').map((cohort) => ({id: cohort.id, name: appLocale === 'zh-HK' ? cohort.nameZhHk : cohort.nameEn, status: cohort.status}));
   const applicationLabels = {title: t('application.title'), cohort: t('application.cohort'), market: t('application.market'), readiness: t('application.readiness'), consent: t('application.consent'), submit: t('application.submit'), submitting: t('application.submitting'), success: t('application.success'), invalid: t('application.invalid'), unauthorized: t('application.unauthorized'), signIn: t('application.signIn'), error: t('application.error')};
   const openingLabels = {
     eyebrow: t('eyebrow'), title: t('title'), lead: t('description'),
@@ -80,12 +81,12 @@ export default async function LaunchPadPage({params, searchParams = Promise.reso
       <Section tone="bright">
         <SectionHeading eyebrow={t('calendar.eyebrow')} title={t('calendar.title')} variant="stacked" />
         <p className="mt-3 max-w-2xl text-muted-foreground">{t('calendar.intro')}</p>
-        <div className="mt-6"><CohortCalendar cohorts={cohorts} locale={appLocale} labels={calendarLabels}/></div>
+        <div className="mt-6"><CohortCalendar cohorts={availableCohorts} locale={appLocale} labels={calendarLabels}/></div>
       </Section>
       <Section tone="paper">
         <SectionHeading eyebrow={t('partners.eyebrow')} title={t('partners.title')} variant="stacked" />
         <p className="mt-3 max-w-2xl text-muted-foreground">{t('partners.intro')}</p>
-        <div className="mt-6"><LandingPartnerMap partners={partners} locale={appLocale} labels={partnerLabels}/></div>
+        <div className="mt-6"><LandingPartnerMap partners={partners ?? []} locale={appLocale} labels={partnerLabels}/></div>
       </Section>
       <Section tone="bright">
         <SectionHeading eyebrow={t('funding.eyebrow')} title={t('funding.title')} variant="stacked" />

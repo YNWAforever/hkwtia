@@ -1141,6 +1141,7 @@
       "title": "Cohort calendar",
       "intro": "Explore current and upcoming Launch Pad cohorts.",
       "empty": "No public cohorts are scheduled yet.",
+      "unavailable": "Cohort schedules are temporarily unavailable. Please try again shortly.",
       "starts": "Starts",
       "ends": "Ends",
       "noEnd": "No fixed end date",
@@ -1159,6 +1160,7 @@
       "title": "Landing partner map",
       "intro": "Meet the public organisations that help cohorts navigate priority markets.",
       "empty": "Landing partners will be announced shortly.",
+      "unavailable": "Landing partners could not be loaded. Please try again shortly.",
       "market": "Market",
       "region": "Region",
       "statuses": {
