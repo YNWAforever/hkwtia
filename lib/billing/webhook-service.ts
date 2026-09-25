@@ -85,10 +85,14 @@ function normalizeTicket(event: Stripe.Event): TicketWebhookCommand | null {
   if (!parsed.success) throw new WebhookInputError();
   const checkoutSessionId = stringId(object.id);
   if (object.client_reference_id !== parsed.data.orderId) throw new WebhookInputError();
+  // Stripe may expand payment_intent in a Checkout Session event. Keep the
+  // identifier in either representation so a late or oversold payment can be
+  // refunded rather than acknowledged without a provider refund.
+  const paymentIntentId = object.payment_intent == null ? null : stringId(object.payment_intent);
+  if (completed && !paymentIntentId) throw new Error("TICKET_PAYMENT_INTENT_MISSING");
   return {
     eventId: event.id, eventType: completed ? "checkout.session.completed" : "checkout.session.expired",
-    orderId: parsed.data.orderId, checkoutSessionId,
-    paymentIntentId: typeof object.payment_intent === "string" ? object.payment_intent : null,
+    orderId: parsed.data.orderId, checkoutSessionId, paymentIntentId,
   };
 }
 function normalizeRefundFailure(event: Stripe.Event): RefundFailureCommand | null {

@@ -33,6 +33,15 @@ describe("failed ticket refund reconciliation", () => {
     expect(deps.sendFailureEmail).toHaveBeenCalledWith(order, command.eventId);
   });
 
+  it("records a failed pending refund while preserving a still-paid ticket", async () => {
+    const paid = {...order, status: "paid" as const, refundedAt: null, refundReason: null};
+    const deps = dependencies(paid);
+    await expect(processRefundFailure(systemActor("stripe-webhook"), command, deps)).resolves.toBe("processed");
+    expect(deps.stripe.fullyRefundedPaymentIntent).toHaveBeenCalledWith("pi_ticket", 25_000);
+    expect(deps.orders.markRefundFailed).toHaveBeenCalledWith(order.id, command);
+    expect(deps.sendFailureEmail).toHaveBeenCalledWith(paid, command.eventId);
+  });
+
   it("finds a pre-change refund through its verified Checkout Session", async () => {
     const deps = dependencies();
     await expect(processRefundFailure(systemActor("stripe-webhook"), {...command, orderId: null}, deps))

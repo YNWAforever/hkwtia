@@ -20,6 +20,18 @@ describe("Stripe webhook route", () => {
     expect(processEvent).not.toHaveBeenCalled();
   });
 
+  it("rejects an oversized body before signature verification", async () => {
+    const constructEvent = vi.fn(() => checkoutCompleted());
+    const processEvent = vi.fn(async () => "processed" as const);
+    const post = createWebhookPost({constructEvent, processEvent});
+    const response = await post(new Request("http://localhost/api/stripe/webhook", {
+      method: "POST", body: "x".repeat(1_048_577), headers: {"stripe-signature": "valid"},
+    }));
+    expect(response.status).toBe(413);
+    expect(constructEvent).not.toHaveBeenCalled();
+    expect(processEvent).not.toHaveBeenCalled();
+  });
+
   it("returns 200 only after a processed or duplicate verified event", async () => {
     const stripeEvent = checkoutCompleted();
     let finished = false;

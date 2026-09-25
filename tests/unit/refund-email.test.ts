@@ -95,6 +95,16 @@ describe("sendOrderRefundEmail", () => {
     expect(transport.sends[0]!.idempotencyKey).toBe(`ticket-refund:${orderId}`);
   });
 
+  it.each([
+    ["en", "Your payment has been returned"],
+    ["zh-HK", "款項已退回"],
+  ] as const)("does not claim the %s refund has settled while the provider may still be pending", async (buyerLocale, settledClaim) => {
+    const {dependencies, transport} = emailDependencies();
+    await sendOrderRefundEmail(order({buyerLocale}), dependencies);
+    expect(transport.sends).toHaveLength(1);
+    expect(transport.sends[0]!.html).not.toContain(settledClaim);
+  });
+
   it("uses a distinct key for a recovery notice after an earlier failure correction", async () => {
     const {dependencies, transport} = emailDependencies();
     await sendOrderRefundEmail(order(), dependencies, `ticket-refund-recovered:${orderId}:evt_success`);
@@ -116,7 +126,17 @@ describe("sendOrderRefundEmail", () => {
   });
 });
 
-describe("a later failed refund's correction", () => {
+describe("a failed refund notice", () => {
+  it.each([
+    ["en", "correct our earlier"],
+    ["zh-HK", "更正早前"],
+  ] as const)("uses accurate %s copy when a pending refund fails before any success notice", async (buyerLocale, oldClaim) => {
+    const {dependencies, transport} = emailDependencies();
+    await sendOrderRefundFailureEmail(order({buyerLocale, status: "paid"}), "evt_pending_failed", dependencies);
+    expect(transport.sends).toHaveLength(1);
+    expect(transport.sends[0]!.html).not.toContain(oldClaim);
+  });
+
   it("emails the buyer in their language with a contact link and event-scoped key", async () => {
     const {dependencies, transport, renderEmail: renderEmailSpy} = emailDependencies();
     await sendOrderRefundFailureEmail(order({buyerLocale: "zh-HK"}), "evt_failed", dependencies);

@@ -6,6 +6,7 @@ import {
   unsubscribeActor,
 } from "@/lib/db/repos/suppressions";
 import {verifyUnsubscribeTokenWithAny} from "@/lib/email/unsubscribe-token";
+import {BoundedBodyError, readBoundedText} from "@/lib/security/bounded-body";
 
 type UnsubscribeResult = "created" | "existing";
 
@@ -38,15 +39,14 @@ class UnsubscribeRequestError extends Error {
 }
 
 async function requestBody(request: Request): Promise<string> {
-  const contentLength = request.headers.get("content-length");
-  if (contentLength && Number(contentLength) > MAX_UNSUBSCRIBE_BODY_BYTES) {
-    throw new UnsubscribeRequestError("UNSUBSCRIBE_BODY_TOO_LARGE", 413);
+  try {
+    return await readBoundedText(request, MAX_UNSUBSCRIBE_BODY_BYTES);
+  } catch (error) {
+    if (error instanceof BoundedBodyError && error.reason === "TOO_LARGE") {
+      throw new UnsubscribeRequestError("UNSUBSCRIBE_BODY_TOO_LARGE", 413);
+    }
+    throw error;
   }
-  const bytes = await request.arrayBuffer();
-  if (bytes.byteLength > MAX_UNSUBSCRIBE_BODY_BYTES) {
-    throw new UnsubscribeRequestError("UNSUBSCRIBE_BODY_TOO_LARGE", 413);
-  }
-  return new TextDecoder().decode(bytes);
 }
 
 async function formValues(request: Request): Promise<Readonly<{

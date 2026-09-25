@@ -198,7 +198,7 @@ export async function sendOrderRefundEmail(
   }
 }
 
-/** Correct the earlier refund notice when Stripe later reverses that refund. */
+/** Notify the buyer after a failed refund attempt, whether or not a success notice preceded it. */
 export async function sendOrderRefundFailureEmail(order: OrderRecord, eventId: string, dependencies: TicketProcessorDependencies = ticketProcessorDependencies()): Promise<void> {
   try {
     const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
@@ -267,15 +267,14 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
         // `refund_due`: the session was paid in the moment our hold lapsed, or a
         // refund we committed but whose provider call failed.
         // Either way the whole charge is returned, never a partial credit.
-        if (command.paymentIntentId) {
-          // Re-issuing is safe: the deterministic key makes a redelivery after a
-          // failed provider call refund the same payment intent once, not twice.
-          await dependencies.refundPaymentIntent(command.paymentIntentId, `ticket-refund:${order.id}`, order.id);
-          // Only promise what actually happened — a settlement with no payment
-          // intent issues no refund, so it must send no refund email either.
-          const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
-          await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
-        }
+        // A committed refund-due state with no provider intent is unfinished
+        // work. Make Stripe retry instead of permanently acknowledging it.
+        if (!command.paymentIntentId) throw new Error("TICKET_PAYMENT_INTENT_MISSING");
+        // Re-issuing is safe: the deterministic key makes a redelivery after a
+        // failed provider call refund the same payment intent once, not twice.
+        await dependencies.refundPaymentIntent(command.paymentIntentId, `ticket-refund:${order.id}`, order.id);
+        const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
+        await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
         return "processed";
       }
       if (settlement.status === "paid") {

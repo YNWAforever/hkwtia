@@ -188,10 +188,11 @@ export function createStripeBillingAdapter(client: StripeClient): StripeBillingA
     async refundPaymentIntent(paymentIntentId, idempotencyKey, options) {
       const refund = await client.refunds.create({payment_intent: paymentIntentId,
         ...(options?.orderId ? {metadata: {eventOrderId: options.orderId, ...(options.refundReason ? {eventOrderRefundReason: options.refundReason} : {})}} : {})}, {idempotencyKey});
-      // refundOrder keeps paid orders until provider success. The existing
-      // oversold webhook has its own retry contract and opts out.
-      if (options?.requireSucceeded && refund.status !== "succeeded") {
-        if (refund.status === "pending" || refund.status === "requires_action") throw new RefundPendingError();
+      // The oversold lane accepts a pending refund request, but a provider
+      // refusal is never a completed request and must reach its retry path.
+      if (refund.status === "pending" || refund.status === "requires_action") {
+        if (options?.requireSucceeded) throw new RefundPendingError();
+      } else if (refund.status !== "succeeded") {
         throw new Error("STRIPE_REFUND_NOT_SUCCEEDED");
       }
     },

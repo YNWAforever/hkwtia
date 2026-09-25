@@ -342,16 +342,16 @@
       },
       "event_ticket_refunded": {
         "subject": "Your refund for {eventTitle}",
-        "preview": "Order {orderId} has been refunded.",
-        "heading": "Your payment has been returned",
-        "body": "We have refunded HK${amount} for order {orderId} ({eventTitle}). Depending on your bank, it can take a few days to appear.",
+        "preview": "A refund has been submitted for order {orderId}.",
+        "heading": "Your refund is in progress",
+        "body": "We have submitted a refund of HK${amount} for order {orderId} ({eventTitle}). Your bank may take a few days to display the credit.",
         "cta": "View the event"
       },
       "event_ticket_refund_failed": {
         "subject": "Update on your refund for {eventTitle}",
         "preview": "The refund for order {orderId} did not complete.",
         "heading": "Your refund needs further attention",
-        "body": "We need to correct our earlier refund notice. The refund of HK${amount} for order {orderId} ({eventTitle}) did not complete. Our team is reviewing it. Please contact us if you need help.",
+        "body": "The refund of HK${amount} for order {orderId} ({eventTitle}) did not complete. Our team is reviewing it. Please contact us if you need help.",
         "cta": "Contact WTIA"
       },      "event_ticket_pass": {
         "subject": "Your pass for {eventTitle}",

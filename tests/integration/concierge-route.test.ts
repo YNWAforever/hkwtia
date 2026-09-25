@@ -89,6 +89,16 @@ describe("Concierge SSE route", () => {
     ].join(""));
   });
 
+  it("reads a bounded request stream without calling the unbounded text reader", async () => {
+    const deps = routeDependencies();
+    const oversized = request({message: "x".repeat(8_193), locale: "en"});
+    const text = vi.spyOn(oversized, "text");
+    const response = await createConciergePostHandler(deps)(oversized);
+    expect(response.status).toBe(400);
+    expect(text).not.toHaveBeenCalled();
+    expect(deps.service.startTurn).not.toHaveBeenCalled();
+  });
+
   it("validates and maps fallback contact email without promoting it to confirmed identity", async () => {
     const deps = routeDependencies();
     const response = await createConciergePostHandler(deps)(request({

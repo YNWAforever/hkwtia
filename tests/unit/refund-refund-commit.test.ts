@@ -20,7 +20,7 @@ const dialect = new PgDialect();
 
 type Rendered = Readonly<{sql: string; params: readonly unknown[]}>;
 
-function fakeDatabase(updateRows: readonly unknown[]) {
+function fakeDatabase(updateRows: readonly unknown[], selectRows: (sql: string) => readonly unknown[] = () => []) {
   const queries: Rendered[] = [];
   const depths: number[] = [];
   let depth = 0;
@@ -28,7 +28,7 @@ function fakeDatabase(updateRows: readonly unknown[]) {
     const rendered = dialect.sqlToQuery(query as never);
     queries.push({sql: rendered.sql, params: rendered.params as readonly unknown[]});
     depths.push(depth);
-    return {rows: /^\s*update/i.test(rendered.sql) ? updateRows : []};
+    return {rows: /^\s*update/i.test(rendered.sql) ? updateRows : /^\s*select/i.test(rendered.sql) ? selectRows(rendered.sql) : []};
   });
   const db = {
     execute,
@@ -175,7 +175,8 @@ describe("markRefundFailed", () => {
     orderId: "order-1", amountHkdCents: 25_000};
 
   it("moves the exact refunded order to a visible failure state with one audit row", async () => {
-    const fake = fakeDatabase([{id: "order-1"}]);
+    const fake = fakeDatabase([{id: "order-1"}], (statement) =>
+      statement.includes('"event_orders"') ? [{id: "order-1", status: "refunded"}] : []);
     database.current = fake.db;
     await expect(createEventOrdersRepository().markRefundFailed("order-1", failed)).resolves.toBe(true);
     const update = fake.queries.find((query) => /^\s*update/i.test(query.sql));
@@ -186,7 +187,28 @@ describe("markRefundFailed", () => {
     const audit = fake.queries.find((query) => /^\s*insert/i.test(query.sql));
     expect(audit?.params).toEqual([null, "system", "event.order.refund_failed", "event_order", "order-1",
       JSON.stringify({stripeEventId: "evt_failed", stripeRefundId: "re_failed"})]);
-    expect(fake.depths).toEqual([1, 1]);
+    expect(fake.depths.every((depth) => depth === 1)).toBe(true);
+  });
+
+  it("audits a failed pending refund without revoking a paid ticket", async () => {
+    const fake = fakeDatabase([], (statement) =>
+      statement.includes('"event_orders"') ? [{id: "order-1", status: "paid"}] : []);
+    database.current = fake.db;
+    await expect(createEventOrdersRepository().markRefundFailed("order-1", failed)).resolves.toBe(true);
+    expect(fake.queries.some((query) => /^\s*update/i.test(query.sql))).toBe(false);
+    const audit = fake.queries.find((query) => /^\s*insert/i.test(query.sql));
+    expect(audit?.params).toEqual([null, "system", "event.order.refund_failed", "event_order", "order-1",
+      JSON.stringify({stripeEventId: "evt_failed", stripeRefundId: "re_failed"})]);
+    expect(fake.depths.every((depth) => depth === 1)).toBe(true);
+  });
+
+  it("deduplicates a paid-order failure by provider refund id", async () => {
+    const fake = fakeDatabase([], (statement) =>
+      statement.includes('"event_orders"') ? [{id: "order-1", status: "paid"}] : [{id: "already-audited"}]);
+    database.current = fake.db;
+    await expect(createEventOrdersRepository().markRefundFailed("order-1", failed)).resolves.toBe(false);
+    expect(fake.queries.some((query) => query.sql.includes('"audit_events"') && query.sql.includes("stripeRefundId"))).toBe(true);
+    expect(fake.queries.some((query) => /^\s*insert/i.test(query.sql))).toBe(false);
   });
 
   it("does not audit a replay once the order is no longer refunded", async () => {

@@ -39,7 +39,9 @@ export async function processRefundFailure(
   const paymentIntentId = await dependencies.stripe.paymentIntentForSession(order.stripeCheckoutSessionId);
   if (paymentIntentId !== command.paymentIntentId) throw new RefundFailureCorrelationError();
   if (order.status === "refund_failed") return "duplicate";
-  if (order.status !== "refunded") return "processed";
+  // A refund can fail while the order is still paid. Record that attempt
+  // without revoking a ticket whose charge was never returned.
+  if (order.status !== "refunded" && order.status !== "paid") return "processed";
   if (await dependencies.stripe.fullyRefundedPaymentIntent(paymentIntentId, order.amountHkdCents)) return "processed";
   if (!await dependencies.orders.markRefundFailed(order.id, command)) return "duplicate";
   try { await dependencies.sendFailureEmail(order, command.eventId); }

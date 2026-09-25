@@ -180,13 +180,16 @@ describe("unsubscribe token", () => {
       padding: "x".repeat(8_192),
     });
 
-    const response = await post(new Request("https://www.hkwtia.org/api/unsubscribe", {
+    const oversized = new Request("https://www.hkwtia.org/api/unsubscribe", {
       method: "POST",
       body: body.toString(),
       headers: {"content-type": "application/x-www-form-urlencoded"},
-    }));
+    });
+    const arrayBuffer = vi.spyOn(oversized, "arrayBuffer");
+    const response = await post(oversized);
 
     expect(response.status).toBe(413);
+    expect(arrayBuffer).not.toHaveBeenCalled();
     await expect(response.json()).resolves.toEqual({error: "UNSUBSCRIBE_BODY_TOO_LARGE"});
     expect(unsubscribeEmailMarketing).not.toHaveBeenCalled();
   });

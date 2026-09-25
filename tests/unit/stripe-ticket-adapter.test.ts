@@ -53,6 +53,13 @@ describe("event ticket checkout session", () => {
     expect(refund).toHaveBeenCalledWith({payment_intent: "pi_1", metadata: {eventOrderId: "order-1"}}, {idempotencyKey: "ticket-refund:order-1"});
   });
 
+  it.each(["failed", "canceled"])("rejects a %s refund even for the oversold webhook lane", async (status) => {
+    const {refund, value} = client();
+    refund.mockResolvedValue({status});
+    await expect(createStripeBillingAdapter(value).refundPaymentIntent("pi_1", "ticket-refund:order-1"))
+      .rejects.toThrow("STRIPE_REFUND_NOT_SUCCEEDED");
+  });
+
   it("does not report an accepted but pending provider refund as complete", async () => {
     const {refund, value} = client();
     refund.mockResolvedValue({status: "pending"});

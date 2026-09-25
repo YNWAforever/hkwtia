@@ -325,13 +325,34 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       return true;
     },
     markRefundFailed: async (orderId, input) => {
-      const updated = rows<{id: string}>(await tx.execute(sql`
-        UPDATE ${eventOrders}
-        SET status = 'refund_failed', refunded_at = NULL, updated_at = NOW()
-        WHERE id = ${orderId} AND status = 'refunded' AND amount_hkd_cents = ${input.amountHkdCents}
-        RETURNING id
-      `));
-      if (updated.length === 0) return false;
+      // Lock the order before checking the audit row. A pending refund keeps
+      // status=paid, so status alone cannot dedupe its webhook redeliveries.
+      const current = rows<{id: string; status: "paid" | "refunded"}>(await tx.execute(sql`
+        SELECT id, status FROM ${eventOrders}
+        WHERE id = ${orderId} AND status IN ('paid', 'refunded')
+          AND amount_hkd_cents = ${input.amountHkdCents}
+        FOR UPDATE
+      `))[0];
+      if (!current) return false;
+      if (current.status === "paid") {
+        const seen = rows<{id: string}>(await tx.execute(sql`
+          SELECT id FROM ${auditEvents}
+          WHERE target_type = 'event_order' AND target_id = ${orderId}
+            AND action = 'event.order.refund_failed'
+            AND metadata ->> 'stripeRefundId' = ${input.refundId}
+          LIMIT 1
+        `))[0];
+        if (seen) return false;
+      } else {
+        const updated = rows<{id: string}>(await tx.execute(sql`
+          UPDATE ${eventOrders}
+          SET status = 'refund_failed', refunded_at = NULL, updated_at = NOW()
+          WHERE id = ${orderId} AND status = 'refunded'
+            AND amount_hkd_cents = ${input.amountHkdCents}
+          RETURNING id
+        `));
+        if (updated.length === 0) return false;
+      }
       await writeAuditRow(tx, {actorUserId: null, actorType: "system", action: "event.order.refund_failed",
         targetType: "event_order", targetId: orderId,
         metadata: {stripeEventId: input.eventId, stripeRefundId: input.refundId}});

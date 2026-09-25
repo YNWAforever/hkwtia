@@ -156,6 +156,17 @@ describe("processStripeEvent ticket branch", () => {
     }]);
   });
 
+  it("normalises an expanded payment intent on a paid ticket session", async () => {
+    const ticket = captureTicketProcessor();
+    await processStripeEvent(
+      ticketEvent("checkout.session.completed", "evt_expanded", {payment_intent: {id: paymentIntentId}}),
+      systemActor("stripe-webhook"),
+      captureMembershipProcessor().processor,
+      ticket.processor,
+    );
+    expect(ticket.commands[0]?.paymentIntentId).toBe(paymentIntentId);
+  });
+
   it("still routes a membership event through the membership processor unchanged", async () => {
     const membership = captureMembershipProcessor();
     const ticket = captureTicketProcessor();
@@ -307,14 +318,14 @@ describe("createTicketProcessor", () => {
     expect(transport.sends).toHaveLength(1);
   });
 
-  it("sends no refund email when there is no payment intent to refund", async () => {
+  it("retries a refund-due settlement when the payment intent is absent", async () => {
     const {processor, refundPaymentIntent, transport} = buildTicketProcessor({
       settle: {status: "oversold", order: {...pendingOrder, status: "refunded", refundReason: "oversold"}},
     });
 
     await expect(
       processor.process(systemActor("stripe-webhook"), {...command("checkout.session.completed"), paymentIntentId: null}),
-    ).resolves.toBe("processed");
+    ).rejects.toThrow("TICKET_PAYMENT_INTENT_MISSING");
 
     expect(refundPaymentIntent).not.toHaveBeenCalled();
     expect(transport.sends).toEqual([]);

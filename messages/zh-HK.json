@@ -342,16 +342,16 @@
       },
       "event_ticket_refunded": {
         "subject": "{eventTitle} 的退款",
-        "preview": "訂單 {orderId} 已退款。",
-        "heading": "款項已退回",
-        "body": "我們已就訂單 {orderId}（{eventTitle}）退回 HK${amount}。視乎銀行處理，款項可能需要數天才顯示。",
+        "preview": "訂單 {orderId} 的退款已提交。",
+        "heading": "退款正在處理",
+        "body": "我們已就訂單 {orderId}（{eventTitle}）提交 HK${amount} 的退款。視乎銀行處理，款項可能需要數天才顯示。",
         "cta": "查看活動"
       },
       "event_ticket_refund_failed": {
         "subject": "{eventTitle} 退款狀態更新",
         "preview": "訂單 {orderId} 的退款未能完成。",
         "heading": "你的退款需要進一步處理",
-        "body": "我們需要更正早前的退款通知。訂單 {orderId}（{eventTitle}）的 HK${amount} 退款未能完成。我們的團隊正跟進。如需協助，請與我們聯絡。",
+        "body": "訂單 {orderId}（{eventTitle}）的 HK${amount} 退款未能完成。我們的團隊正跟進。如需協助，請與我們聯絡。",
         "cta": "聯絡 WTIA"
       },      "event_ticket_pass": {
         "subject": "{eventTitle} 的門票",
