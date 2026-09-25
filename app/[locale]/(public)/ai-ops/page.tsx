@@ -14,7 +14,7 @@ import {buildBreadcrumbData} from "@/lib/structured-data";
 type Props={params:Promise<{locale:string}>}; export const revalidate=300;
 // Decision 3: eyebrow/title/description are page-level PageHero content now, not part of
 // AiOpsDashboardLabels -- see components/marketing/aiops/dashboard.tsx.
-const keys=["currentMonth","partialMonth","lastUpdated","fresh","stale","empty","unavailable","notEnoughData","conversations","resolved","firstResponse","csat","escalation","failure","hoursSaved","llmCost","responses","samples","hours","resolutionTarget","csatTarget","renewalHeading","overallRenewal","firstYearRenewal","overallTarget","firstYearTarget","renewalChartTitle","renewalChartDescription","month","paid","due","rate","methodologyHeading","methodologyDescription","architectureHeading","architectureDescription","approvalGate","publicationGate","evidenceHeading","buildLogs","source","commits","deployment","acceptance","noBuildLogs"] as const;
+const keys=["currentMonth","partialMonth","lastUpdated","fresh","stale","empty","unavailable","notEnoughData","conversations","resolved","firstResponse","csat","escalation","failure","hoursSaved","llmCost","responses","samples","hours","resolutionTarget","csatTarget","renewalHeading","overallRenewal","firstYearRenewal","overallTarget","firstYearTarget","renewalChartTitle","renewalChartDescription","month","paid","due","rate","methodologyHeading","methodologyDescription","architectureHeading","architectureDescription","approvalGate","publicationGate","evidenceHeading","buildLogs","source","commits","deployment","acceptance","noBuildLogs","buildLogsUnavailable"] as const;
 async function labels(locale:string):Promise<AiOpsDashboardLabels>{const t=await getTranslations({locale,namespace:"AiOps"});return Object.fromEntries(keys.map(key=>[key,t(key)])) as AiOpsDashboardLabels}
 function safe(rows:Awaited<ReturnType<typeof publicPostsRepository.listPublishedBuildLogs>>){return rows.filter(row=>/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(row.slug)&&!/[\r\n@]/.test(`${row.titleEn}${row.titleZh}${row.author}`))}
 export async function generateMetadata({params}:Props):Promise<Metadata>{const {locale}=await params;const t=await getTranslations({locale,namespace:"AiOps"});return buildPageMetadata({locale:locale as AppLocale,pathname:"/ai-ops",title:t("metaTitle"),description:t("metaDescription")})}
@@ -22,7 +22,7 @@ export default async function AiOpsPage({params}:Props){
   const {locale}=await params;setRequestLocale(locale);
   const [rows,published,uiLabels,heroT,common,tRoot]=await Promise.all([
     aiOpsPublicRepository.readLatestTwelveMonths().catch(()=>null),
-    publicPostsRepository.listPublishedBuildLogs().catch(()=>[]),
+    publicPostsRepository.listPublishedBuildLogs().catch(()=>null),
     labels(locale),
     getTranslations({locale,namespace:"AiOps"}),
     getTranslations({locale,namespace:"Common"}),
@@ -38,7 +38,7 @@ export default async function AiOpsPage({params}:Props){
       breadcrumb={{homeHref: "/", homeLabel: common("breadcrumbHome"), current: heroT("breadcrumbCurrent")}}
       breadcrumbLabel={common("breadcrumbLabel")}
     />
-    <AiOpsDashboard locale={locale as AppLocale} state={state} buildLogs={safe(published)} evidence={AI_OPS_EXTERNAL_EVIDENCE} labels={uiLabels}/>
+    <AiOpsDashboard locale={locale as AppLocale} state={state} buildLogs={published === null ? null : safe(published)} evidence={AI_OPS_EXTERNAL_EVIDENCE} labels={uiLabels}/>
     <StructuredData data={buildBreadcrumbData(routeBreadcrumbItems(locale as AppLocale, "/ai-ops", tRoot))} />
   </>;
 }

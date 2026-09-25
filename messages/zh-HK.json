@@ -1452,6 +1452,7 @@
     "deployment": "正式網站",
     "acceptance": "M4 驗收實證",
     "noBuildLogs": "暫未有已發布開發紀錄。",
+    "buildLogsUnavailable": "開發紀錄暫時無法載入。",
     "breadcrumbCurrent": "AI-Ops"
   },
   "Events": {
