@@ -10,6 +10,7 @@ import {ShowcaseCard} from "@/components/marketing/showcase-card";
 import {ShowcaseDetail} from "@/components/marketing/showcase-detail";
 import {isPrivateMediaDeliveryUrl} from "@/lib/media/url";
 import type {PublicListing} from "@/lib/showcase/contracts";
+import en from "@/messages/en.json";
 
 const listForAdmin = vi.hoisted(() => vi.fn());
 
@@ -98,7 +99,7 @@ describe("revocation-aware secure media rendering", () => {
       reviewedByProfileId: null, rejectionReason: null, createdAt: new Date(), updatedAt: new Date(),
     };
     render(<ShowcaseReviewTable
-      labels={{caption: "Listings", company: "Company", slug: "Slug", logo: "Logo", logoNone: "None", saveLogo: "Save logo", status: "Status", premium: "Premium", publish: "Publish", reject: "Reject", rejectionReason: "Reason", savePremium: "Save premium"}}
+      labels={{...en.Admin.listingsReview, fields: en.Portal.showcaseListing.fields}}
       listings={[
         {...base, logoMediaUrl: secureUrl, logoMediaAltEn: "Secure logo"},
         {...base, id: "listing-2", slug: "static", logoMediaUrl: staticUrl, logoMediaAltEn: "Static logo"},

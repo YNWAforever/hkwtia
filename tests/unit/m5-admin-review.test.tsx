@@ -9,6 +9,7 @@ import {
 } from "@/lib/admin/showcase-core";
 import type {ShowcaseRepository} from "@/lib/db/repos/showcase";
 import type {AdminActor} from "@/lib/membership/lifecycle";
+import en from "@/messages/en.json";
 
 const staff = {kind: "staff", userId: "staff-1", profileId: "staff-1"} as AdminActor;
 const row = {
@@ -42,7 +43,7 @@ describe("staff Showcase review", () => {
   });
 
   it("renders review rows with explicit accessible controls", () => {
-    render(<ShowcaseReviewTable listings={[row]} labels={{caption: "Listings", company: "Company", slug: "Slug", logo: "Logo", status: "Status", premium: "Premium", publish: "Publish", reject: "Reject", rejectionReason: "Rejection reason", savePremium: "Save premium", logoNone: "No logo", saveLogo: "Save logo"}} publishAction={async () => undefined} rejectAction={async () => undefined} premiumAction={async () => undefined} />);
+    render(<ShowcaseReviewTable listings={[row]} labels={{...en.Admin.listingsReview, fields: en.Portal.showcaseListing.fields}} publishAction={async () => undefined} rejectAction={async () => undefined} premiumAction={async () => undefined} />);
     expect(screen.getByText("Harbour Vision AI")).toBeInTheDocument();
     expect(screen.getByRole("button", {name: "Publish"})).toBeInTheDocument();
     expect(screen.getByRole("button", {name: "Reject"})).toBeInTheDocument();
