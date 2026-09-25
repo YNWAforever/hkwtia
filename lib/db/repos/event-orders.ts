@@ -80,8 +80,8 @@ export type EventOrdersTransaction = Readonly<{
   listEventOrders: (eventId: string) => Promise<readonly EventOrderRow[]>;
   /** Orders still owed a refund because their event was cancelled. */
   ordersAwaitingCancellationRefund: (limit: number) => Promise<readonly Readonly<{orderId: string; eventId: string}>[]>;
-  /** Move a failed attempt to the retry tail while it remains paid. */
-  deferFailedCancellationRefund: (orderId: string) => Promise<void>;
+  /** Move a pending or failed attempt to the retry tail while it remains unsettled. */
+  deferUnsettledCancellationRefund: (orderId: string) => Promise<void>;
   /**
    * The refund commit: moves the row only while it is still `paid`, and writes
    * the audit row in the same transaction. `false` means someone else got there
@@ -284,7 +284,7 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       ORDER BY o.updated_at ASC, o.id ASC
       LIMIT ${limit}
     `)),
-    deferFailedCancellationRefund: async (orderId) => {
+    deferUnsettledCancellationRefund: async (orderId) => {
       await tx.execute(sql`UPDATE ${eventOrders} SET updated_at = NOW() WHERE id = ${orderId} AND status IN ('paid', 'refund_failed')`);
     },
     refundPaidOrder: async (orderId, input) => {
@@ -527,8 +527,8 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
       return runTransaction((tx) => tx.ordersAwaitingCancellationRefund(limit));
     },
 
-    async deferFailedCancellationRefund(orderId: string): Promise<void> {
-      return runTransaction((tx) => tx.deferFailedCancellationRefund(orderId));
+    async deferUnsettledCancellationRefund(orderId: string): Promise<void> {
+      return runTransaction((tx) => tx.deferUnsettledCancellationRefund(orderId));
     },
 
     /**

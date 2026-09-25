@@ -13,7 +13,7 @@ function harness(overrides: Partial<EventCancellationRefundDependencies> = {}) {
     dependencies: {
       listOrders: vi.fn(async () => orders),
       refundOrder,
-      deferFailedOrder: vi.fn(async () => undefined),
+      deferUnsettledOrder: vi.fn(async () => undefined),
       ...overrides,
     },
     refundOrder,
@@ -27,7 +27,7 @@ describe("the event-cancellation refund sweep", () => {
       summary: {scanned: 2, refunded: 1, failed: 1, notAdmissible: 0, notFound: 0},
     });
     expect(refundOrder).toHaveBeenCalledTimes(2);
-    expect(dependencies.deferFailedOrder).toHaveBeenCalledWith("cancelled-paid-2");
+    expect(dependencies.deferUnsettledOrder).toHaveBeenCalledWith("cancelled-paid-2");
   });
 
   it("refunds as the system actor, so the audit cannot name a person", async () => {
@@ -42,7 +42,7 @@ describe("the event-cancellation refund sweep", () => {
     await expect(runEventCancellationRefunds(dependencies)).rejects.toMatchObject({summary: {failed: 1}});
     // The batch still advances, but the job must fail so the Worker alerts.
     expect(refundOrder).toHaveBeenCalledTimes(2);
-    expect(dependencies.deferFailedOrder).toHaveBeenCalledWith("cancelled-paid-2");
+    expect(dependencies.deferUnsettledOrder).toHaveBeenCalledWith("cancelled-paid-2");
   });
 
   it("continues the batch and counts a commit failure as failed", async () => {
@@ -52,22 +52,41 @@ describe("the event-cancellation refund sweep", () => {
     ]);
     const refundOrder = vi.fn(async (_actor, input: {orderId: string}) =>
       input.orderId === "commit-failed" ? {status: "commit_failed" as const} : {status: "refunded" as const});
-    const deferFailedOrder = vi.fn(async () => undefined);
-    await expect(runEventCancellationRefunds({listOrders, refundOrder, deferFailedOrder}))
+    const deferUnsettledOrder = vi.fn(async () => undefined);
+    await expect(runEventCancellationRefunds({listOrders, refundOrder, deferUnsettledOrder}))
       .rejects.toMatchObject({summary: {scanned: 2, refunded: 1, failed: 1, commitFailed: 1}});
     expect(refundOrder).toHaveBeenCalledTimes(2);
-    expect(deferFailedOrder).toHaveBeenCalledWith("commit-failed");
+    expect(deferUnsettledOrder).toHaveBeenCalledWith("commit-failed");
   });
 
   it("reports a pending provider refund without alerting as a failure", async () => {
     const {dependencies} = harness({refundOrder: vi.fn(async () => ({status: "pending" as const}))});
     await expect(runEventCancellationRefunds(dependencies)).resolves.toMatchObject({scanned: 2, pending: 2, failed: 0});
-    expect(dependencies.deferFailedOrder).not.toHaveBeenCalled();
+    expect(dependencies.deferUnsettledOrder).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not let a full batch of pending refunds starve untouched orders", async () => {
+    const queue = Array.from({length: 100}, (_, index) => ({orderId: `pending-${index}`, eventId: "cancelled"}));
+    queue.push({orderId: "untouched-paid", eventId: "cancelled"});
+    const listOrders = vi.fn(async (limit: number) => queue.slice(0, limit));
+    const deferUnsettledOrder = vi.fn(async (orderId: string) => {
+      const index = queue.findIndex((order) => order.orderId === orderId);
+      const [order] = queue.splice(index, 1);
+      queue.push(order!);
+    });
+    const refundOrder = vi.fn(async (_actor, input: {orderId: string}) =>
+      input.orderId === "untouched-paid" ? {status: "refunded" as const} : {status: "pending" as const});
+
+    await runEventCancellationRefunds({listOrders, deferUnsettledOrder, refundOrder});
+    const second = await runEventCancellationRefunds({listOrders, deferUnsettledOrder, refundOrder});
+
+    expect(second.refunded).toBe(1);
+    expect(refundOrder).toHaveBeenCalledWith(expect.anything(), {orderId: "untouched-paid", note: "Event cancelled"});
   });
 
   it("bounds the batch, so one run cannot walk an unbounded backlog", async () => {
     const listOrders = vi.fn(async () => []);
-    await runEventCancellationRefunds({listOrders, deferFailedOrder: vi.fn(), refundOrder: vi.fn()});
+    await runEventCancellationRefunds({listOrders, deferUnsettledOrder: vi.fn(), refundOrder: vi.fn()});
     expect(listOrders).toHaveBeenCalledWith(100);
   });
 
@@ -99,10 +118,10 @@ describe("the event-cancellation refund sweep", () => {
     };
     const refundOrder = vi.fn(async (_actor, input: {orderId: string}) => byOrder[input.orderId]!);
 
-    const deferFailedOrder = vi.fn(async () => undefined);
+    const deferUnsettledOrder = vi.fn(async () => undefined);
     let summary: Record<string, number> | undefined;
     try {
-      await runEventCancellationRefunds({listOrders, refundOrder, deferFailedOrder});
+      await runEventCancellationRefunds({listOrders, refundOrder, deferUnsettledOrder});
     } catch (error) {
       summary = (error as {summary: Record<string, number>}).summary;
     }
@@ -110,6 +129,6 @@ describe("the event-cancellation refund sweep", () => {
     expect(summary).toEqual({scanned: 6, refunded: 1, alreadyRefunded: 1, pending: 0, failed: 2, commitFailed: 1, notAdmissible: 1, notFound: 1});
     const {scanned, refunded, alreadyRefunded, failed, notAdmissible, notFound} = summary!;
     expect(refunded + alreadyRefunded + failed + notAdmissible + notFound).toBe(scanned);
-    expect(deferFailedOrder).toHaveBeenCalledTimes(2);
+    expect(deferUnsettledOrder).toHaveBeenCalledTimes(2);
   });
 });

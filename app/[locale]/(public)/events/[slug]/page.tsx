@@ -59,9 +59,9 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
     getTranslations({locale, namespace: "Events"}),
   ]);
   if (!row) return {};
-  // The same own-origin filter the page body applies: a donor or private-delivery hero must
-  // not be embedded in og:image any more than it is rendered in the hero.
-  const heroImageUrl = row.hero && !(isPrivateMediaDeliveryUrl(row.hero.url) || isRegistrableMediaUrl(row.hero.url)) ? row.hero.url : null;
+  // Match the page body: only a registered own-origin image or a private delivery
+  // image can appear in og:image. A donor URL is excluded.
+  const heroImageUrl = row.hero && (isPrivateMediaDeliveryUrl(row.hero.url) || isRegistrableMediaUrl(row.hero.url)) ? row.hero.url : null;
   const base = buildPageMetadata({locale: locale as AppLocale, pathname: `/events/${row.slug}`, title: brandedTitle(locale as AppLocale, row.title), description: row.description, image: ogImagePath({kind: "event", title: row.title, eyebrow: t("eyebrow"), imageUrl: heroImageUrl})});
   return {
     ...base,
