@@ -18,7 +18,7 @@ function dependencies(current = order) {
   return {
     orders: {orderById: vi.fn(async () => current), markRefundFailed: vi.fn(async () => true)},
     stripe: {paymentIntentForSession: vi.fn(async () => "pi_ticket"), fullyRefundedPaymentIntent: vi.fn(async () => false),
-      ticketOrderIdForPaymentIntent: vi.fn(async () => order.id)},
+      ticketOrderIdForPaymentIntent: vi.fn(async (): Promise<string | null> => order.id)},
     sendFailureEmail: vi.fn(async () => undefined),
   };
 }
@@ -46,6 +46,14 @@ describe("failed ticket refund reconciliation", () => {
     await expect(processRefundFailure(systemActor("stripe-webhook"), command, deps)).resolves.toBe("processed");
     expect(deps.orders.markRefundFailed).not.toHaveBeenCalled();
     expect(deps.sendFailureEmail).not.toHaveBeenCalled();
+  });
+
+  it("ignores an unrelated failed refund without a ticket checkout", async () => {
+    const deps = dependencies();
+    deps.stripe.ticketOrderIdForPaymentIntent.mockResolvedValue(null);
+    await expect(processRefundFailure(systemActor("stripe-webhook"), {...command, orderId: null}, deps))
+      .resolves.toBe("processed");
+    expect(deps.orders.orderById).not.toHaveBeenCalled();
   });
 
   it("rejects a refund that points to another order's payment or amount", async () => {

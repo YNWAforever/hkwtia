@@ -18,7 +18,7 @@ export type TicketCheckoutInput = Readonly<{
 }>;
 
 export type TicketCheckoutErrorCode =
-  | "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "SOLD_OUT" | "INVALID_SEATS" | "UNAVAILABLE";
+  | "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "SOLD_OUT" | "INVALID_SEATS" | "UNAVAILABLE" | "RETRY_CHANGED";
 
 export type TicketCheckoutResult =
   | Readonly<{status: "redirect"; url: string}>
@@ -94,7 +94,9 @@ export async function createTicketCheckout(
   if (!created.ok) {
     const code: TicketCheckoutErrorCode = created.reason === "EVENT_CLOSED"
       ? "EVENT_CLOSED"
-      : created.reason === "SOLD_OUT"
+      : created.reason === "ATTEMPT_CHANGED"
+        ? "RETRY_CHANGED"
+        : created.reason === "SOLD_OUT"
         ? "SOLD_OUT"
       : created.reason === "EVENT_NOT_TICKETED"
         ? "EVENT_NOT_TICKETED"

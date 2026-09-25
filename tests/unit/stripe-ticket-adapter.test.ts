@@ -57,13 +57,20 @@ describe("event ticket checkout session", () => {
     const {refund, value} = client();
     refund.mockResolvedValue({status: "pending"});
     await expect(createStripeBillingAdapter(value).refundPaymentIntent("pi_1", "ticket-refund:order-1", {requireSucceeded: true}))
-      .rejects.toThrow("STRIPE_REFUND_NOT_SUCCEEDED");
+      .rejects.toMatchObject({code: "STRIPE_REFUND_PENDING", message: "STRIPE_REFUND_NOT_SUCCEEDED"});
     await expect(createStripeBillingAdapter(value).refundPaymentIntent("pi_1", "ticket-refund:order-1"))
       .resolves.toBeUndefined();
   });
 });
 
 describe("finding an older refund without metadata", () => {
+  it("returns no ticket order for an unrelated Checkout payment", async () => {
+    const {listSessions, value} = client();
+    listSessions.mockResolvedValue({data: [{id: "cs_member", client_reference_id: "member-1",
+      payment_intent: "pi_1", metadata: {kind: "membership", orderId: "member-1"}}], has_more: false});
+    await expect(createStripeBillingAdapter(value).ticketOrderIdForPaymentIntent("pi_1")).resolves.toBeNull();
+  });
+
   it("returns only the order correlated to the exact payment intent and Checkout reference", async () => {
     const {listSessions, value} = client();
     const orderId = "33333333-3333-4333-8333-333333333333";

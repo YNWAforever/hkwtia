@@ -28,6 +28,7 @@ function transaction(overrides: Partial<EventOrdersTransaction> = {}): EventOrde
     ordersAwaitingCancellationRefund: vi.fn(async () => []),
     deferFailedCancellationRefund: vi.fn(async () => undefined),
     refundPaidOrder: vi.fn(async () => false),
+    reconcileRefundedOrder: vi.fn(async () => false),
     markRefundFailed: vi.fn(async () => false),
     insertAudit: vi.fn(async () => undefined),
     eventSummary: vi.fn(async () => []),
@@ -89,13 +90,32 @@ describe("eventOrdersRepository.createOrder", () => {
   });
 
   it("reuses the order a repeated idempotency key names", async () => {
-    const tx = transaction({orderByIdempotencyKey: vi.fn(async () => order())});
+    const tx = transaction({orderByIdempotencyKey: vi.fn(async () => order()), orderSeats: vi.fn(async () => [{seatId: "seat-1", position: 1, attendeeName: "Ada", attendeeEmail: "ada@example.test"}])});
     await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder({eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now}))
       .resolves.toMatchObject({ok: true, reused: true});
     expect(tx.insertOrder).not.toHaveBeenCalled();
   });
 });
 
+describe("eventOrdersRepository.createOrder changed attempts", () => {
+  it("rejects a reused key when the amount, buyer, or seats changed", async () => {
+    const oldSeats = [{seatId: "seat-1", position: 1, attendeeName: "Ada", attendeeEmail: "ada@example.test"}];
+    const tx = transaction({
+      orderByIdempotencyKey: vi.fn(async () => order()),
+      orderSeats: vi.fn(async () => oldSeats),
+    });
+    const repository = createEventOrdersRepository(async (work) => work(tx));
+    const input = {eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test",
+      buyerLocale: "en" as const, idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now};
+
+    await expect(repository.createOrder({...input, amountHkdCents: 50_000, seats: [...seats, {name: "Bob", email: "bob@example.test"}]}))
+      .resolves.toEqual({ok: false, reason: "ATTEMPT_CHANGED"});
+    await expect(repository.createOrder({...input, buyerEmail: "other@example.test"}))
+      .resolves.toEqual({ok: false, reason: "ATTEMPT_CHANGED"});
+    await expect(repository.createOrder({...input, seats: [{name: "Other", email: "ada@example.test"}]}))
+      .resolves.toEqual({ok: false, reason: "ATTEMPT_CHANGED"});
+  });
+});
 describe("eventOrdersRepository.settlePaid", () => {
   it("marks a pending order paid", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order())});

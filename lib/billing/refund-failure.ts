@@ -31,7 +31,7 @@ export async function processRefundFailure(
 ): Promise<"processed" | "duplicate"> {
   if (actor.kind !== "system" || actor.source !== "stripe-webhook") throw new Error("FORBIDDEN");
   const orderId = command.orderId ?? await dependencies.stripe.ticketOrderIdForPaymentIntent(command.paymentIntentId);
-  if (!orderId) throw new RefundFailureCorrelationError();
+  if (!orderId) return "processed";
   const order = await dependencies.orders.orderById(orderId);
   if (!order || !order.stripeCheckoutSessionId || order.amountHkdCents !== command.amountHkdCents || order.currency !== "hkd") {
     throw new RefundFailureCorrelationError();

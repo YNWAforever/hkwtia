@@ -141,6 +141,35 @@ describe("refundPaidOrder", () => {
   });
 });
 
+describe("reconcileRefundedOrder", () => {
+  it("moves a provider-verified failed order to refunded with one audit record", async () => {
+    const fake = fakeDatabase([{id: "order-1"}]);
+    database.current = fake.db;
+    await expect(createEventOrdersRepository().reconcileRefundedOrder("order-1", {
+      refundedAt, expectedAmountHkdCents: 25_000, actorUserId: null, actorType: "system",
+      refundReason: "cancelled", reason: "provider_reconciled", note: null, stripeEventId: "evt_success",
+    })).resolves.toBe(true);
+    const update = fake.queries.find((query) => /^\s*update/i.test(query.sql));
+    expect(update?.sql).toMatch(/status IN \('paid', 'refund_failed'\)/);
+    expect(update?.sql).toMatch(/amount_hkd_cents\s*=\s*\$\d+/);
+    expect(update?.sql).toMatch(/status\s*=\s*'refunded'/);
+    const audit = fake.queries.find((query) => /^\s*insert/i.test(query.sql));
+    expect(audit?.params).toEqual([null, "system", "event.order.refunded", "event_order", "order-1",
+      JSON.stringify({reason: "provider_reconciled", note: null, stripeEventId: "evt_success"})]);
+    expect(fake.depths).toEqual([1, 1]);
+  });
+
+  it("writes no audit when another worker settled first", async () => {
+    const fake = fakeDatabase([]);
+    database.current = fake.db;
+    await expect(createEventOrdersRepository().reconcileRefundedOrder("order-1", {
+      refundedAt, expectedAmountHkdCents: 25_000, actorUserId: null, actorType: "system",
+      refundReason: "staff", reason: "provider_reconciled", note: null, stripeEventId: "evt_success",
+    })).resolves.toBe(false);
+    expect(fake.queries.some((query) => /^\s*insert/i.test(query.sql))).toBe(false);
+  });
+});
+
 describe("markRefundFailed", () => {
   const failed = {eventId: "evt_failed", refundId: "re_failed", paymentIntentId: "pi_ticket",
     orderId: "order-1", amountHkdCents: 25_000};

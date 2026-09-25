@@ -123,7 +123,7 @@ export default async function EventPage({params}: Props) {
     heading: tTicket("heading"), buyerName: tTicket("buyerName"), buyerEmail: tTicket("buyerEmail"),
     seatCount: tTicket("seatCount"), attendeeName: tTicket("attendeeName"), attendeeEmail: tTicket("attendeeEmail"),
     website: tTicket("website"), submit: tTicket("submit"), submitting: tTicket("submitting"), refundPolicy: tTicket("refundPolicy"),
-    errors: {INVALID: tTicket("errors.INVALID"), SOLD_OUT: tTicket("errors.SOLD_OUT"), EVENT_CLOSED: tTicket("errors.EVENT_CLOSED"), UNAVAILABLE: tTicket("errors.UNAVAILABLE"), RATE_LIMITED: tTicket("errors.RATE_LIMITED")},
+    errors: {INVALID: tTicket("errors.INVALID"), SOLD_OUT: tTicket("errors.SOLD_OUT"), EVENT_CLOSED: tTicket("errors.EVENT_CLOSED"), UNAVAILABLE: tTicket("errors.UNAVAILABLE"), RETRY_CHANGED: tTicket("errors.RETRY_CHANGED"), RATE_LIMITED: tTicket("errors.RATE_LIMITED")},
   };
 
   return (

@@ -20,7 +20,12 @@ export function TicketCheckoutForm({eventId, locale, pricePerSeat, labels, refun
   eventId: string; locale: "en" | "zh-HK"; pricePerSeat: string; labels: TicketCheckoutLabels; refundPolicyHref: string;
   defaultBuyerName?: string; defaultBuyerEmail?: string;
 }>) {
-  const [state, dispatch, pending] = useActionState(submitTicketCheckoutAction, initial);
+  const [idempotencyKey, setIdempotencyKey] = useState("");
+  const [state, dispatch, pending] = useActionState(async (previous: TicketCheckoutState, formData: FormData) => {
+    const result = await submitTicketCheckoutAction(previous, formData);
+    if (result.status === "error" && result.code === "RETRY_CHANGED") setIdempotencyKey(newAttemptId());
+    return result;
+  }, initial);
   const [seatCount, setSeatCount] = useState(1);
   // Minted once, AFTER mount: a value minted during render differs between the
   // server and the client, which is a hydration mismatch. `newAttemptId` steps
@@ -28,14 +33,15 @@ export function TicketCheckoutForm({eventId, locale, pricePerSeat, labels, refun
   // only — one implementation, shared with the inbox composer. The submit button
   // stays disabled until it is non-empty, so a submit can never reach the server
   // without the uuid its schema requires.
-  const [idempotencyKey, setIdempotencyKey] = useState("");
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time mint of a browser-only value after mount; minting during render instead would mismatch the server-rendered markup, which never has one.
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time browser-only UUID after mount; render-time mint would mismatch server markup.
   useEffect(() => { setIdempotencyKey(newAttemptId()); }, []);
 
   useEffect(() => {
     if (state.status === "redirect") window.location.assign(state.url);
   }, [state]);
 
+  // The action rotates the key only after an edited attempt is rejected.
+  // Other errors keep their key, so an uncertain provider response remains safe to retry.
   const inputClass = "min-h-11 w-full rounded-md border border-input bg-background px-3";
   return (
     <form action={dispatch} className="space-y-4" noValidate>

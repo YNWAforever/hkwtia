@@ -9,6 +9,11 @@ import {auditEvents, eventOrderSeats, eventOrders, events} from "@/lib/db/server
 
 export type OrderStatus = "pending" | "paid" | "expired" | "failed" | "refunded" | "refund_failed";
 export type RefundReason = "oversold" | "staff" | "cancelled";
+export type RefundReconciliationInput = Readonly<{
+  refundedAt: Date; expectedAmountHkdCents: number; actorUserId: string | null;
+  actorType: string; refundReason: RefundReason; reason: string; note: string | null;
+  stripeEventId: string | null;
+}>;
 
 export type OrderRecord = Readonly<{
   id: string; eventId: string; buyerProfileId: string | null; buyerName: string; buyerEmail: string;
@@ -44,7 +49,7 @@ export type CreateOrderInput = Readonly<{
 
 export type CreateOrderResult =
   | Readonly<{ok: true; order: OrderRecord; reused: boolean}>
-  | Readonly<{ok: false; reason: "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "AMOUNT_MISMATCH" | "SOLD_OUT"}>;
+  | Readonly<{ok: false; reason: "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "AMOUNT_MISMATCH" | "SOLD_OUT" | "ATTEMPT_CHANGED"}>;
 
 export type SettleResult =
   | Readonly<{status: "paid" | "duplicate" | "ignored" | "oversold" | "refund_due" | "unknown"; order: OrderRecord | null}>;
@@ -59,7 +64,7 @@ export type EventOrdersTransaction = Readonly<{
    * the receipt names the attendees and the per-attendee passes need each id:
    * one read serves both, rather than a second query per recipient.
    */
-  orderSeats: (orderId: string) => Promise<readonly Readonly<{seatId: string; position: number; attendeeName: string}>[]>;
+  orderSeats: (orderId: string) => Promise<readonly Readonly<{seatId: string; position: number; attendeeName: string; attendeeEmail: string}>[]>;
   /** One seat with its paid order, for a single pass. */
   seatForPass: (seatId: string) => Promise<Readonly<{seatId: string; attendeeName: string; attendeeEmail: string; eventId: string; buyerLocale: "en" | "zh-HK"; order: OrderRecord}> | null>;
   /** Seats of paid orders, or of pending ones whose hold has not lapsed. */
@@ -88,6 +93,7 @@ export type EventOrdersTransaction = Readonly<{
    * tell them apart (D-4d whole-branch finding).
    */
   refundPaidOrder: (orderId: string, input: Readonly<{refundedAt: Date; actorUserId: string | null; actorType: string; refundReason: RefundReason; reason: string; note: string | null}>) => Promise<boolean>;
+  reconcileRefundedOrder: (orderId: string, input: RefundReconciliationInput) => Promise<boolean>;
   markRefundFailed: (orderId: string, input: Readonly<{eventId: string; refundId: string; amountHkdCents: number}>) => Promise<boolean>;
   insertAudit: (input: Readonly<{actorUserId: string | null; actorType: string; action: string; targetType: string; targetId: string; metadata: Record<string, unknown>}>) => Promise<void>;
   eventSummary: (eventId: string) => Promise<readonly Readonly<{titleEn: string; titleZh: string | null; startsAt: Date; slug: string; venue: string | null}>[]>;
@@ -203,8 +209,8 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       return row ? orderFrom(row) : null;
     },
     seatsOfOrder: async (orderId) => Number(rows<{value: number}>(await tx.execute(sql`SELECT COUNT(*)::int AS value FROM ${eventOrderSeats} WHERE order_id = ${orderId}`))[0]?.value ?? 0),
-    orderSeats: async (orderId) => rows<{seatId: string; position: number; attendeeName: string}>(await tx.execute(sql`
-      SELECT id AS "seatId", position, attendee_name AS "attendeeName" FROM ${eventOrderSeats} WHERE order_id = ${orderId} ORDER BY position ASC
+    orderSeats: async (orderId) => rows<{seatId: string; position: number; attendeeName: string; attendeeEmail: string}>(await tx.execute(sql`
+      SELECT id AS "seatId", position, attendee_name AS "attendeeName", attendee_email AS "attendeeEmail" FROM ${eventOrderSeats} WHERE order_id = ${orderId} ORDER BY position ASC
     `)),
     seatForPass: async (seatId) => {
       const row = rows<Record<string, unknown>>(await tx.execute(sql`
@@ -301,6 +307,23 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       });
       return true;
     },
+    reconcileRefundedOrder: async (orderId, input) => {
+      const updated = rows<{id: string}>(await tx.execute(sql`
+        UPDATE ${eventOrders}
+        SET status = 'refunded', refunded_at = ${input.refundedAt},
+            refund_reason = COALESCE(refund_reason, ${input.refundReason}::event_refund_reason), updated_at = NOW()
+        WHERE id = ${orderId} AND status IN ('paid', 'refund_failed')
+          AND amount_hkd_cents = ${input.expectedAmountHkdCents}
+        RETURNING id
+      `));
+      if (updated.length === 0) return false;
+      await writeAuditRow(tx, {
+        actorUserId: input.actorUserId, actorType: input.actorType,
+        action: "event.order.refunded", targetType: "event_order", targetId: orderId,
+        metadata: {reason: input.reason, note: input.note, stripeEventId: input.stripeEventId},
+      });
+      return true;
+    },
     markRefundFailed: async (orderId, input) => {
       const updated = rows<{id: string}>(await tx.execute(sql`
         UPDATE ${eventOrders}
@@ -350,7 +373,27 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
         }
         if (!event.published || event.startsAt <= input.now) return {ok: false, reason: "EVENT_CLOSED"};
         const existing = await tx.orderByIdempotencyKey(input.idempotencyKey);
-        if (existing) return {ok: true, order: existing, reused: true};
+        if (existing) {
+          // A key names one immutable purchase attempt. A failed Stripe call
+          // can leave this order without a session; using the current form to
+          // mint one would charge for different seats than this row records.
+          if (existing.eventId !== input.eventId ||
+              existing.buyerProfileId !== input.buyerProfileId ||
+              existing.buyerName !== input.buyerName ||
+              existing.buyerEmail !== input.buyerEmail ||
+              existing.buyerLocale !== input.buyerLocale ||
+              existing.amountHkdCents !== input.amountHkdCents) {
+            return {ok: false, reason: "ATTEMPT_CHANGED"};
+          }
+          const previousSeats = await tx.orderSeats(existing.id);
+          if (previousSeats.length !== input.seats.length ||
+              previousSeats.some((seat, index) => seat.position !== index + 1 ||
+                seat.attendeeName !== input.seats[index]?.name ||
+                seat.attendeeEmail !== input.seats[index]?.email)) {
+            return {ok: false, reason: "ATTEMPT_CHANGED"};
+          }
+          return {ok: true, order: existing, reused: true};
+        }
         if (input.amountHkdCents !== event.ticketPriceHkdCents * input.seats.length) {
           return {ok: false, reason: "AMOUNT_MISMATCH"};
         }
@@ -474,6 +517,10 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
      */
     async refundPaidOrder(orderId: string, input: Readonly<{refundedAt: Date; actorUserId: string | null; actorType: string; refundReason: RefundReason; reason: string; note: string | null}>): Promise<boolean> {
       return runTransaction((tx) => tx.refundPaidOrder(orderId, input));
+    },
+
+    async reconcileRefundedOrder(orderId: string, input: RefundReconciliationInput): Promise<boolean> {
+      return runTransaction((tx) => tx.reconcileRefundedOrder(orderId, input));
     },
 
     async markRefundFailed(orderId: string, input: Readonly<{eventId: string; refundId: string; amountHkdCents: number}>): Promise<boolean> {

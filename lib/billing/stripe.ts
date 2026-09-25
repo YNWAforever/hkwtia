@@ -56,6 +56,10 @@ export type CurrentSubscriptionState = Readonly<{
   stripeSubscriptionId: string; stripeCustomerId: string; nextStatus: MembershipStatus;
   cancelAtPeriodEnd: boolean; billingPeriodStart: Date | null; billingPeriodEnd: Date | null;
 }>;
+export class RefundPendingError extends Error {
+  readonly code = "STRIPE_REFUND_PENDING";
+  constructor() { super("STRIPE_REFUND_NOT_SUCCEEDED"); }
+}
 export interface StripeBillingAdapter {
   createCheckoutSession(input: CheckoutSessionInput): Promise<{id: string; url: string}>;
   currentSubscription(subscriptionId: string): Promise<CurrentSubscriptionState>;
@@ -64,7 +68,7 @@ export interface StripeBillingAdapter {
   paymentIntentForSession(sessionId: string): Promise<string | null>;
   ticketOrderIdForPaymentIntent(paymentIntentId: string): Promise<string | null>;
   /** `idempotencyKey` makes a retried refund after a failed webhook safe to re-issue. */
-  refundPaymentIntent(paymentIntentId: string, idempotencyKey: string, options?: {requireSucceeded?: boolean; orderId?: string}): Promise<void>;
+  refundPaymentIntent(paymentIntentId: string, idempotencyKey: string, options?: {requireSucceeded?: boolean; orderId?: string; refundReason?: "staff" | "cancelled"}): Promise<void>;
   /** Prove a lost commit against the provider before recording a refund locally. */
   fullyRefundedPaymentIntent(paymentIntentId: string, expectedAmountHkdCents: number): Promise<boolean>;
   createBillingPortalSession(input: PortalSessionInput): Promise<{url: string}>;
@@ -170,11 +174,11 @@ export function createStripeBillingAdapter(client: StripeClient): StripeBillingA
       if (sessions.has_more || sessions.data.length > 1) throw new Error("STRIPE_CHECKOUT_AMBIGUOUS");
       const session = sessions.data[0];
       if (!session) return null;
+      if (session.metadata?.kind !== "event_ticket") return null;
       const orderId = session.metadata?.orderId;
       const intent = session.payment_intent;
       const intentId = typeof intent === "string" ? intent : intent?.id;
-      if (session.metadata?.kind !== "event_ticket" ||
-          typeof orderId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(orderId) ||
+      if (typeof orderId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(orderId) ||
           session.client_reference_id !== orderId || intentId !== paymentIntentId) {
         throw new Error("STRIPE_CHECKOUT_CORRELATION_FAILED");
       }
@@ -183,10 +187,11 @@ export function createStripeBillingAdapter(client: StripeClient): StripeBillingA
 
     async refundPaymentIntent(paymentIntentId, idempotencyKey, options) {
       const refund = await client.refunds.create({payment_intent: paymentIntentId,
-        ...(options?.orderId ? {metadata: {eventOrderId: options.orderId}} : {})}, {idempotencyKey});
+        ...(options?.orderId ? {metadata: {eventOrderId: options.orderId, ...(options.refundReason ? {eventOrderRefundReason: options.refundReason} : {})}} : {})}, {idempotencyKey});
       // refundOrder keeps paid orders until provider success. The existing
       // oversold webhook has its own retry contract and opts out.
       if (options?.requireSucceeded && refund.status !== "succeeded") {
+        if (refund.status === "pending" || refund.status === "requires_action") throw new RefundPendingError();
         throw new Error("STRIPE_REFUND_NOT_SUCCEEDED");
       }
     },

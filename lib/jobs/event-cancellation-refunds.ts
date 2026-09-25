@@ -25,6 +25,7 @@ export type EventCancellationRefundSummary = Readonly<{
   scanned: number;
   refunded: number;
   alreadyRefunded: number;
+  pending: number;
   failed: number;
   /** Subset of failed: provider accepted the refund but the DB commit did not. */
   commitFailed: number;
@@ -56,6 +57,7 @@ export async function runEventCancellationRefunds(
   const actor = systemActor("event-cancellation");
   let refunded = 0;
   let alreadyRefunded = 0;
+  let pending = 0;
   let failed = 0;
   let commitFailed = 0;
   let notAdmissible = 0;
@@ -65,6 +67,7 @@ export async function runEventCancellationRefunds(
     const result = await dependencies.refundOrder(actor, {orderId: order.orderId, note: "Event cancelled"});
     if (result.status === "refunded") refunded += 1;
     else if (result.status === "already_refunded") alreadyRefunded += 1;
+    else if (result.status === "pending") pending += 1;
     else if (result.status === "not_admissible") notAdmissible += 1;
     else if (result.status === "not_found") notFound += 1;
     else {
@@ -74,7 +77,7 @@ export async function runEventCancellationRefunds(
     }
   }
 
-  const summary = {scanned: orders.length, refunded, alreadyRefunded, failed, commitFailed, notAdmissible, notFound};
+  const summary = {scanned: orders.length, refunded, alreadyRefunded, pending, failed, commitFailed, notAdmissible, notFound};
   if (failed > 0) {
     console.error("event-cancellation-refunds", {summary});
     throw new EventCancellationRefundBatchError(summary);

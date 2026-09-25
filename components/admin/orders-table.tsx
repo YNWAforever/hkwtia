@@ -8,7 +8,7 @@ import type {EventOrderRow} from "@/lib/db/repos/event-orders";
 
 export type OrdersLabels = Readonly<{
   caption: string; empty: string; buyer: string; seats: string; amount: string; status: string; refundedOn: string;
-  refund: string; confirm: string; cancel: string; note: string; statuses: Readonly<Record<string, string>>;
+  refund: string; recheckRefund: string; confirm: string; cancel: string; note: string; statuses: Readonly<Record<string, string>>;
 }>;
 
 const initial: RefundOrderState = {status: "idle"};
@@ -55,6 +55,11 @@ export function OrdersTable({action, rows, labels, locale}: Readonly<{action: (s
               <td>
                 {order.status === "refunded" ? (
                   <span className="text-muted-foreground">{labels.refundedOn} {order.refundedAt ? refundedOn.format(order.refundedAt) : ""}</span>
+                ) : order.status === "refund_failed" ? (
+                  <form action={dispatch}>
+                    <input name="orderId" type="hidden" value={order.id}/>
+                    <button className="min-h-11 rounded-md border px-4" disabled={pending} type="submit">{labels.recheckRefund}</button>
+                  </form>
                 ) : order.status === "paid" ? (
                   confirming === order.id ? (
                     <form action={dispatch} className="space-y-2">

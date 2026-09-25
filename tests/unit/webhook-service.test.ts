@@ -67,6 +67,31 @@ describe("Stripe webhook lifecycle mapping", () => {
       orderId: "33333333-3333-4333-8333-333333333333", amountHkdCents: 25_000,
     });
   });
+  it("routes a final successful ticket refund for provider-verified reconciliation", async () => {
+    const success = {process: vi.fn(async () => "processed" as const)};
+    const event = ({...checkoutCompleted("evt_refund_succeeded"), type: "refund.updated",
+      data: {object: {id: "re_succeeded", status: "succeeded", payment_intent: "pi_ticket",
+        amount: 25_000, currency: "hkd", metadata: {eventOrderId: "33333333-3333-4333-8333-333333333333", eventOrderRefundReason: "cancelled"}}}}
+      ) as unknown as ReturnType<typeof checkoutCompleted>;
+    await expect(processStripeEvent(event, systemActor("stripe-webhook"), captureProcessor().processor, null,
+      {process: vi.fn()}, success)).resolves.toBe("processed");
+    expect(success.process).toHaveBeenCalledWith(expect.anything(), {
+      eventId: "evt_refund_succeeded", refundId: "re_succeeded", paymentIntentId: "pi_ticket",
+      orderId: "33333333-3333-4333-8333-333333333333", amountHkdCents: 25_000, refundReason: "cancelled",
+    });
+  });
+
+  it("routes an immediately succeeded refund.created event", async () => {
+    const success = {process: vi.fn(async () => "processed" as const)};
+    const event = ({...checkoutCompleted("evt_refund_created"), type: "refund.created",
+      data: {object: {id: "re_created", status: "succeeded", payment_intent: "pi_ticket",
+        amount: 25_000, currency: "hkd", metadata: {eventOrderId: "33333333-3333-4333-8333-333333333333"}}}}
+      ) as unknown as ReturnType<typeof checkoutCompleted>;
+    await expect(processStripeEvent(event, systemActor("stripe-webhook"), captureProcessor().processor, null,
+      {process: vi.fn()}, success)).resolves.toBe("processed");
+    expect(success.process).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({refundId: "re_created"}));
+  });
+
   it("routes old refund failures without refund metadata for Checkout lookup", async () => {
     const processor = {process: vi.fn(async () => "processed" as const)};
     const failed = {...checkoutCompleted("evt_old_refund"), type: "refund.failed",

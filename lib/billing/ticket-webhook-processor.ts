@@ -185,13 +185,14 @@ export async function sendSeatPass(
 export async function sendOrderRefundEmail(
   order: OrderRecord,
   dependencies: TicketProcessorDependencies = ticketProcessorDependencies(),
+  idempotencyKey?: string,
 ): Promise<void> {
   try {
     // `eventSummary` throws *before* `sendTicketEmail`'s own catch, and a refund
     // email with no event is still better than none, so the read is inside this
     // guard rather than left to escape.
     const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
-    await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
+    await sendTicketEmail(dependencies, "event_ticket_refunded", order, event, {idempotencyKey});
   } catch (error) {
     dependencies.onEmailError?.(error, {orderId: order.id, template: "event_ticket_refunded"});
   }

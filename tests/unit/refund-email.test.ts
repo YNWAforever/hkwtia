@@ -95,6 +95,12 @@ describe("sendOrderRefundEmail", () => {
     expect(transport.sends[0]!.idempotencyKey).toBe(`ticket-refund:${orderId}`);
   });
 
+  it("uses a distinct key for a recovery notice after an earlier failure correction", async () => {
+    const {dependencies, transport} = emailDependencies();
+    await sendOrderRefundEmail(order(), dependencies, `ticket-refund-recovered:${orderId}:evt_success`);
+    expect(transport.sends[0]!.idempotencyKey).toBe(`ticket-refund-recovered:${orderId}:evt_success`);
+  });
+
   it("logs and swallows a mail failure, because the refund is already committed", async () => {
     const onEmailError = vi.fn();
     const {dependencies} = emailDependencies({

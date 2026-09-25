@@ -9,7 +9,7 @@ import {refundOrder, type RefundResult} from "@/lib/tickets/refund-core";
 export type RefundOrderState = Readonly<{status: "idle"} | {status: "ok"; message: string} | {status: "error"; message: string}>;
 
 /**
- * The five outcome strings, resolved by the page from `Admin.eventsMgmt.orders.refundOutcomes`
+ * The refund outcome strings, resolved by the page from `Admin.eventsMgmt.orders.refundOutcomes`
  * and bound in, exactly as `submitSeatCheckInAction` receives its `SeatCheckInMessages`.
  * The action holds no user-visible copy of its own: a hard-coded English literal here would
  * render untranslated on the zh-HK staff pages, and this is a `.ts` module the visible-string
@@ -20,6 +20,7 @@ export type RefundOutcomeMessages = Readonly<{
   alreadyRefunded: string;
   notAdmissible: string;
   providerFailed: string;
+  pending: string;
   commitFailed: string;
   notFound: string;
 }>;
@@ -31,6 +32,7 @@ const messageKey: Readonly<Record<RefundResult["status"], keyof RefundOutcomeMes
   already_refunded: "alreadyRefunded",
   not_admissible: "notAdmissible",
   provider_failed: "providerFailed",
+  pending: "pending",
   commit_failed: "commitFailed",
   not_found: "notFound",
 };
@@ -52,7 +54,7 @@ export async function submitRefundOrderAction(eventPath: string, messages: Refun
   // follows for `not_admissible`. `already_refunded` can mean another staff member won
   // the race, so the page is refreshed in case this one is stale.
   if (result.status === "refunded" || result.status === "already_refunded") revalidatePath(eventPath);
-  return result.status === "refunded"
-    ? {status: "ok", message: messages.refunded}
+  return result.status === "refunded" || result.status === "pending"
+    ? {status: "ok", message: messages[messageKey[result.status]]}
     : {status: "error", message: messages[messageKey[result.status]]};
 }

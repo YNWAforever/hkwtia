@@ -1623,6 +1623,7 @@
       "SOLD_OUT": "There are not enough seats left for this order.",
       "EVENT_CLOSED": "Ticket sales for this event have closed.",
       "UNAVAILABLE": "Ticket checkout is not available right now. Please try again shortly.",
+      "RETRY_CHANGED": "Your purchase details changed. Submit again to start a new checkout.",
       "RATE_LIMITED": "Too many attempts from this connection. Try again in a few minutes."
     }
   },
@@ -2947,6 +2948,7 @@
         "status": "Status",
         "refundedOn": "Refunded on",
         "refund": "Refund",
+        "recheckRefund": "Recheck refund",
         "cancel": "Cancel",
         "note": "Note",
         "confirm": "Refund {buyer}'s seats ({seats}) for {amount}?",
@@ -2963,6 +2965,7 @@
           "alreadyRefunded": "This order was already refunded.",
           "notAdmissible": "This order is not payable, so there is nothing to refund.",
           "providerFailed": "The refund has not been completed. Check Stripe and arrange a new refund or another remedy before closing this order.",
+          "pending": "Stripe accepted the refund and it is pending. Check its final status before retrying.",
           "commitFailed": "The payment provider may have refunded this order, but we could not record it here. Check the payment provider before trying again.",
           "notFound": "That order could not be found."
         }

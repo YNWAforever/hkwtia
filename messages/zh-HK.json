@@ -1623,6 +1623,7 @@
       "SOLD_OUT": "剩餘座位不足以完成此訂單。",
       "EVENT_CLOSED": "本活動已截止售票。",
       "UNAVAILABLE": "暫時未能進行購票，請稍後再試。",
+      "RETRY_CHANGED": "購票資料已更改。請再次提交以開始新的付款程序。",
       "RATE_LIMITED": "此連線嘗試次數過多，請稍後再試。"
     }
   },
@@ -2948,6 +2949,7 @@
         "status": "狀態",
         "refundedOn": "退款日期",
         "refund": "退款",
+        "recheckRefund": "重新查核退款",
         "cancel": "取消",
         "note": "備註",
         "confirm": "確定向 {buyer} 退款 {amount}（座位：{seats}）？",
@@ -2964,6 +2966,7 @@
           "alreadyRefunded": "此訂單已經退款。",
           "notAdmissible": "此訂單並非已付款，沒有可退款項。",
           "providerFailed": "退款尚未完成。請檢查 Stripe，並安排新的退款或其他處理方法。",
+          "pending": "Stripe 已接受退款，現正等候完成。請先查核最終狀態，切勿直接重試。",
           "commitFailed": "付款服務商可能已退款，但我們無法在此記錄。請先向付款服務商查核，切勿直接重試。",
           "notFound": "找不到此訂單。"
         }

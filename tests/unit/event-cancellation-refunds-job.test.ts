@@ -59,6 +59,12 @@ describe("the event-cancellation refund sweep", () => {
     expect(deferFailedOrder).toHaveBeenCalledWith("commit-failed");
   });
 
+  it("reports a pending provider refund without alerting as a failure", async () => {
+    const {dependencies} = harness({refundOrder: vi.fn(async () => ({status: "pending" as const}))});
+    await expect(runEventCancellationRefunds(dependencies)).resolves.toMatchObject({scanned: 2, pending: 2, failed: 0});
+    expect(dependencies.deferFailedOrder).not.toHaveBeenCalled();
+  });
+
   it("bounds the batch, so one run cannot walk an unbounded backlog", async () => {
     const listOrders = vi.fn(async () => []);
     await runEventCancellationRefunds({listOrders, deferFailedOrder: vi.fn(), refundOrder: vi.fn()});
@@ -101,7 +107,7 @@ describe("the event-cancellation refund sweep", () => {
       summary = (error as {summary: Record<string, number>}).summary;
     }
 
-    expect(summary).toEqual({scanned: 6, refunded: 1, alreadyRefunded: 1, failed: 2, commitFailed: 1, notAdmissible: 1, notFound: 1});
+    expect(summary).toEqual({scanned: 6, refunded: 1, alreadyRefunded: 1, pending: 0, failed: 2, commitFailed: 1, notAdmissible: 1, notFound: 1});
     const {scanned, refunded, alreadyRefunded, failed, notAdmissible, notFound} = summary!;
     expect(refunded + alreadyRefunded + failed + notAdmissible + notFound).toBe(scanned);
     expect(deferFailedOrder).toHaveBeenCalledTimes(2);

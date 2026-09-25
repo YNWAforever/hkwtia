@@ -5,6 +5,7 @@ import {requireSystem} from "@/lib/membership/lifecycle";
 import {jobsRepository} from "@/lib/db/repos/jobs";
 import {stripeBillingAdapter} from "@/lib/billing/stripe";
 import {processRefundFailure, type RefundFailureCommand} from "@/lib/billing/refund-failure";
+import {processRefundSuccess, type RefundSuccessCommand} from "@/lib/billing/refund-success";
 import type {Actor, MembershipPlanCode, MembershipStatus} from "@/lib/membership/lifecycle";
 
 const supportedEventTypes = ["checkout.session.completed", "checkout.session.async_payment_succeeded", "invoice.paid", "invoice.payment_failed", "customer.subscription.updated", "customer.subscription.deleted"] as const;
@@ -17,6 +18,7 @@ export type TicketWebhookCommand = Readonly<{
 }>;
 export interface TicketProcessor { process(actor: Actor, command: TicketWebhookCommand): Promise<"processed" | "duplicate">; }
 export interface RefundFailureProcessor { process(actor: Actor, command: RefundFailureCommand): Promise<"processed" | "duplicate">; }
+export interface RefundSuccessProcessor { process(actor: Actor, command: RefundSuccessCommand): Promise<"processed" | "duplicate">; }
 export class WebhookInputError extends Error { readonly code = "INVALID_WEBHOOK_EVENT"; constructor() { super("INVALID_WEBHOOK_EVENT"); this.name = "WebhookInputError"; } }
 const metadataSchema = z.object({membershipId: z.string().uuid(), applicationId: z.string().uuid(), planCode: z.enum(["community", "startup", "corporate", "patron"])}).strict();
 type StripeObject = Record<string, unknown>;
@@ -103,7 +105,28 @@ function normalizeRefundFailure(event: Stripe.Event): RefundFailureCommand | nul
     orderId: parsedOrderId?.success ? parsedOrderId.data : null, amountHkdCents: amount};
 }
 
+function normalizeRefundSuccess(event: Stripe.Event): RefundSuccessCommand | null {
+  if (event.type !== "refund.updated" && event.type !== "refund.created") return null;
+  const object = objectValue(event.data?.object);
+  if (object.status !== "succeeded") return null;
+  const rawMetadata = object.metadata;
+  if (rawMetadata != null && typeof rawMetadata !== "object") throw new WebhookInputError();
+  const candidate = rawMetadata && "eventOrderId" in rawMetadata ? rawMetadata.eventOrderId : null;
+  const parsedOrderId = candidate === null ? null : z.string().uuid().safeParse(candidate);
+  const reason = rawMetadata && "eventOrderRefundReason" in rawMetadata ? rawMetadata.eventOrderRefundReason : null;
+  const parsedReason = reason === null ? null : z.enum(["staff", "cancelled"]).safeParse(reason);
+  const amount = object.amount;
+  if ((parsedOrderId !== null && !parsedOrderId.success) || (parsedReason !== null && !parsedReason.success) ||
+      object.currency !== "hkd" || typeof amount !== "number" || !Number.isSafeInteger(amount) || amount <= 0) {
+    throw new WebhookInputError();
+  }
+  return {eventId: event.id, refundId: stringId(object.id), paymentIntentId: stringId(object.payment_intent),
+    orderId: parsedOrderId?.success ? parsedOrderId.data : null, amountHkdCents: amount,
+    refundReason: parsedReason?.success ? parsedReason.data : null};
+}
+
 const productionRefundFailureProcessor: RefundFailureProcessor = {process: processRefundFailure};
+const productionRefundSuccessProcessor: RefundSuccessProcessor = {process: processRefundSuccess};
 const productionProcessor: WebhookProcessor = {process: (actor, command) => jobsRepository.processWebhookLifecycle(actor, command, (id) => stripeBillingAdapter().currentSubscription(id))};
 export async function processStripeEvent(
   event: Stripe.Event,
@@ -111,8 +134,14 @@ export async function processStripeEvent(
   processor: WebhookProcessor = productionProcessor,
   ticketProcessor: TicketProcessor | null = null,
   refundFailureProcessor: RefundFailureProcessor = productionRefundFailureProcessor,
+  refundSuccessProcessor: RefundSuccessProcessor = productionRefundSuccessProcessor,
 ): Promise<"processed" | "duplicate"> {
   requireSystem(actor);
+  const successfulRefund = normalizeRefundSuccess(event);
+  if (successfulRefund) {
+    try { return await refundSuccessProcessor.process(actor, successfulRefund); }
+    catch (error) { if (error && typeof error === "object" && "code" in error && error.code === "INVALID_WEBHOOK_EVENT") throw new WebhookInputError(); throw error; }
+  }
   const failedRefund = normalizeRefundFailure(event);
   if (failedRefund) {
     try { return await refundFailureProcessor.process(actor, failedRefund); }
