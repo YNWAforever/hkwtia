@@ -146,7 +146,7 @@ export type EventMutationDependencies = Readonly<{transaction: <T>(work: (transa
 }>) => Promise<T>) => Promise<T>}>;
 export type RegistrationStatus = "registered" | "waitlist" | "cancelled" | "attended" | "no_show";
 export type EventRegistrationDependencies = Readonly<{transaction: <T>(work: (transaction: Readonly<{
-  lockEvent: (eventId: string) => Promise<Readonly<{id: string; capacity: number | null; published: boolean; startsAt: Date; endsAt: Date | null}> | null>;
+  lockEvent: (eventId: string) => Promise<Readonly<{id: string; capacity: number | null; published: boolean; registrationMode: Event["registrationMode"]; visibility: Event["visibility"]; startsAt: Date; endsAt: Date | null}> | null>;
   hasEligibleMembership: (profileId: string) => Promise<boolean>;
   getRegistration: (eventId: string, profileId: string) => Promise<Readonly<{status: RegistrationStatus}> | null>;
   countRegistered: (eventId: string) => Promise<number>;
@@ -156,7 +156,7 @@ export type EventRegistrationDependencies = Readonly<{transaction: <T>(work: (tr
 
 export type LocalizedEvent = Readonly<{
   id: string; slug: string; title: string; description: string; startsAt: string; endsAt: string | null;
-  venue: string | null; capacity: number | null; memberOnly: boolean; published: boolean;
+  venue: string | null; capacity: number | null; memberOnly: boolean; published: boolean; registrationMode: Event["registrationMode"]; visibility: Event["visibility"]; externalRegistrationUrl: string | null;
 }>;
 
 async function rowsFrom(source?: EventRows): Promise<readonly Event[]> {
@@ -388,6 +388,9 @@ export function localizeEvent(event: Event, locale: string): LocalizedEvent {
     capacity: event.capacity,
     memberOnly: event.memberOnly,
     published: event.published,
+    registrationMode: event.registrationMode,
+    visibility: event.visibility,
+    externalRegistrationUrl: event.externalRegistrationUrl,
   };
 }
 
@@ -477,12 +480,20 @@ export async function updateEvent(actor: Actor, id: unknown, input: unknown, dep
 async function defaultRegistrationDependencies(): Promise<EventRegistrationDependencies> {
   const db = await getDb();
   return {transaction: (work) => db.transaction(async (tx) => work({
-    lockEvent: async (eventId) => (await tx.select({id: events.id, capacity: events.capacity, published: events.published, startsAt: events.startsAt, endsAt: events.endsAt}).from(events).where(eq(events.id, eventId)).for("update"))[0] ?? null,
+    lockEvent: async (eventId) => (await tx.select({id: events.id, capacity: events.capacity, published: events.published, registrationMode: events.registrationMode, visibility: events.visibility, startsAt: events.startsAt, endsAt: events.endsAt}).from(events).where(eq(events.id, eventId)).for("update"))[0] ?? null,
     hasEligibleMembership: async (profileId) => Boolean((await tx.select({id: memberships.id}).from(memberships)
       .leftJoin(companyMembers, and(eq(companyMembers.companyId, memberships.companyId), eq(companyMembers.userId, profileId), isNull(companyMembers.revokedAt)))
       .where(and(or(eq(memberships.ownerUserId, profileId), eq(companyMembers.userId, profileId)), inArray(memberships.status, eligibleStatuses))).limit(1))[0]),
     getRegistration: async (eventId, profileId) => (await tx.select({status: eventRegistrations.status}).from(eventRegistrations).where(and(eq(eventRegistrations.eventId, eventId), eq(eventRegistrations.profileId, profileId))))[0] ?? null,
-    countRegistered: async (eventId) => Number((await tx.select({value: count()}).from(eventRegistrations).where(and(eq(eventRegistrations.eventId, eventId), inArray(eventRegistrations.status, ["registered", "attended"]))))[0]?.value ?? 0),
+    countRegistered: async (eventId) => {
+      // The event row is locked by registerForEvent. Guest RSVP takes the same
+      // lock, so both populations contribute to one serialized capacity check.
+      const memberRows = await tx.select({value: count()}).from(eventRegistrations)
+        .where(and(eq(eventRegistrations.eventId, eventId), inArray(eventRegistrations.status, ["registered", "attended"])));
+      const guestRows = await tx.select({value: count()}).from(eventGuestRegistrations)
+        .where(and(eq(eventGuestRegistrations.eventId, eventId), inArray(eventGuestRegistrations.status, ["registered", "attended"])));
+      return Number(memberRows[0]?.value ?? 0) + Number(guestRows[0]?.value ?? 0);
+    },
     upsertRegistration: async (eventId, profileId, status) => { await tx.insert(eventRegistrations).values({eventId, profileId, status, checkedInAt: null}).onConflictDoUpdate({target: [eventRegistrations.eventId, eventRegistrations.profileId], set: {status, checkedInAt: null}}); },
     insertAudit: async (input) => { await tx.insert(auditEvents).values(input); },
   })), enrollReminder: enrollEventReminder};
@@ -494,7 +505,8 @@ export async function registerForEvent(actor: Actor, input: unknown, dependencie
   const resolved = dependencies ?? await defaultRegistrationDependencies();
   const outcome = await resolved.transaction<Readonly<{disposition: "registered" | "waitlist" | "already_registered" | "already_waitlisted"; startsAt?: Date}>>(async (transaction) => {
     const event = await transaction.lockEvent(eventId);
-    if (!event || !event.published) throw new Error("EVENT_NOT_FOUND");
+    if (!event || !event.published || event.visibility === "invite_only") throw new Error("EVENT_NOT_FOUND");
+    if (event.registrationMode !== "rsvp") throw new Error("EVENT_REGISTRATION_NOT_RSVP");
     if (eventBoundary(event) < (resolved.now?.() ?? new Date())) throw new Error("EVENT_REGISTRATION_CLOSED");
     if (!await transaction.hasEligibleMembership(actor.profileId)) throw new Error("MEMBERSHIP_INACTIVE");
     const existing = await transaction.getRegistration(eventId, actor.profileId);

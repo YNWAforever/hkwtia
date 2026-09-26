@@ -7,7 +7,7 @@ import type {Actor} from "@/lib/membership/lifecycle";
 const staff: Actor = {kind: "staff", userId: "auth-staff", profileId: "profile-staff"};
 const member = (profileId: string): Actor => ({kind: "member", userId: `auth-${profileId}`, profileId});
 const createInput = {slug: "member-mixer", titleEn: "Member mixer", titleZh: "會員交流會", descriptionEn: "Meet the community.", descriptionZh: "與社群交流。", startsAt: "2099-09-01T10:00:00.000Z", endsAt: "2099-09-01T12:00:00.000Z", venue: "WTIA", capacity: 1, memberOnly: true, published: true, heroMediaId: null};
-const eventLock = {id: "11111111-1111-4111-8111-111111111111", capacity: 1, published: true, startsAt: new Date(createInput.startsAt), endsAt: new Date(createInput.endsAt)};
+const eventLock = {id: "11111111-1111-4111-8111-111111111111", capacity: 1, published: true, registrationMode: "rsvp", visibility: "members_only", startsAt: new Date(createInput.startsAt), endsAt: new Date(createInput.endsAt)} as const;
 
 describe("admin Event mutations and registration capacity", () => {
   it("requires an admin and appends the audit in the same create transaction", async () => {
@@ -40,6 +40,42 @@ describe("admin Event mutations and registration capacity", () => {
     // B-5: only the confirmed seat gets the 24-hour reminder; the waitlisted member has nothing to attend yet.
     expect(enrollReminder).toHaveBeenCalledTimes(1);
     expect(enrollReminder).toHaveBeenCalledWith({profileId: "profile-a", eventId: eventLock.id, startsAt: eventLock.startsAt});
+  });
+
+  it.each(["ticketed", "external"] as const)("refuses free RSVP for a %s event before checking membership", async (registrationMode) => {
+    const hasEligibleMembership = vi.fn(async () => true);
+    const upsertRegistration = vi.fn(async () => undefined);
+    const dependencies: EventRegistrationDependencies = {
+      transaction: async (work) => work({
+        lockEvent: async () => ({...eventLock, registrationMode}),
+        hasEligibleMembership,
+        getRegistration: async () => null,
+        countRegistered: async () => 0,
+        upsertRegistration,
+        insertAudit: async () => undefined,
+      }),
+    };
+    await expect(registerForEvent(member("profile-a"), {eventId: eventLock.id}, dependencies))
+      .rejects.toThrow("EVENT_REGISTRATION_NOT_RSVP");
+    expect(hasEligibleMembership).not.toHaveBeenCalled();
+    expect(upsertRegistration).not.toHaveBeenCalled();
+  });
+
+  it("hides invite-only events from direct member RSVP calls", async () => {
+    const hasEligibleMembership = vi.fn(async () => true);
+    const dependencies: EventRegistrationDependencies = {
+      transaction: async (work) => work({
+        lockEvent: async () => ({...eventLock, registrationMode: "rsvp", visibility: "invite_only"}),
+        hasEligibleMembership,
+        getRegistration: async () => null,
+        countRegistered: async () => 0,
+        upsertRegistration: async () => undefined,
+        insertAudit: async () => undefined,
+      }),
+    };
+    await expect(registerForEvent(member("profile-a"), {eventId: eventLock.id}, dependencies))
+      .rejects.toThrow("EVENT_NOT_FOUND");
+    expect(hasEligibleMembership).not.toHaveBeenCalled();
   });
 
   it("keeps a registration that succeeded when the reminder enrolment fails", async () => {

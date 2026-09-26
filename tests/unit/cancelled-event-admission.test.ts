@@ -87,7 +87,7 @@ async function attemptTicketCheckout(status: EventStatus): Promise<AttemptResult
 async function attemptMemberRsvp(status: EventStatus): Promise<AttemptResult> {
   const dependencies: EventRegistrationDependencies = {
     transaction: async (work) => work({
-      lockEvent: async () => ({id: EVENT_ID, capacity: null, published: flagsFor(status).published, startsAt, endsAt: null}),
+      lockEvent: async () => ({id: EVENT_ID, capacity: null, published: flagsFor(status).published, registrationMode: "rsvp", visibility: "public", startsAt, endsAt: null}),
       hasEligibleMembership: async () => true,
       getRegistration: async () => null,
       countRegistered: async () => 0,
