@@ -34,6 +34,7 @@ function form(overrides: Record<string, string> = {}): FormData {
   data.set("buyerName", "Ada Lovelace");
   data.set("buyerEmail", "ADA@EXAMPLE.HK");
   data.set("locale", "en");
+  data.set("quantity", "1");
   data.set("seatName-0", "Ada Lovelace");
   data.set("seatEmail-0", "ada@example.hk");
   for (const [key, value] of Object.entries(overrides)) data.set(key, value);
@@ -65,8 +66,15 @@ describe("submitTicketCheckoutAction", () => {
   it("rejects malformed input before reaching the checkout core", async () => {
     const action = await loadAction();
 
-    await expect(action({status: "idle"}, form({buyerEmail: "not-an-email"}))).resolves.toEqual({status: "error", code: "INVALID"});
-    await expect(action({status: "idle"}, form({eventId: "not-a-uuid"}))).resolves.toEqual({status: "error", code: "INVALID"});
+    await expect(action({status: "idle"}, form({buyerEmail: "not-an-email"}))).resolves.toEqual({status: "error", code: "INVALID", fieldErrors: {buyerEmail: "invalid"}});
+    await expect(action({status: "idle"}, form({eventId: "not-a-uuid"}))).resolves.toEqual({status: "error", code: "INVALID", fieldErrors: {eventId: "invalid"}});
+    expect(state.calls).toHaveLength(0);
+  });
+
+  it("refuses an incomplete selected seat before reaching the checkout core", async () => {
+    const action = await loadAction();
+    const data = form({quantity: "3"});
+    await expect(action({status: "idle"}, data)).resolves.toEqual(expect.objectContaining({status: "error", code: "INVALID"}));
     expect(state.calls).toHaveLength(0);
   });
 

@@ -34,6 +34,12 @@ const labels: TicketCheckoutLabels = {
   submit: "Buy tickets",
   submitting: "Redirecting to payment…",
   refundPolicy: "Refund policy",
+  fillBuyer: "I am also attending",
+  removeSeat: "Remove attendee",
+  total: "Total",
+  paymentNature: "One-time ticket payment. Seats are confirmed after payment.",
+  eventDate: "Event date",
+  fieldErrors: {required: "Required", invalid: "Invalid", extra: "Extra attendee"},
   errors: {
     INVALID: "Check the form.",
     SOLD_OUT: "This event is sold out.",
@@ -51,6 +57,7 @@ function renderForm(overrides: Partial<Parameters<typeof TicketCheckoutForm>[0]>
     labels={labels}
     locale="en"
     pricePerSeat="Price per seat: HK$250.00"
+    unitAmountHkdCents={25000}
     refundPolicyHref="/refund-policy"
     {...overrides}
   />);
@@ -77,6 +84,27 @@ describe("TicketCheckoutForm", () => {
     expect(screen.queryByText("Attendee name 4")).toBeNull();
   });
 
+  it("submits the selected quantity and displays the computed total", () => {
+    const view = renderForm();
+    fireEvent.change(screen.getByLabelText(labels.seatCount), {target: {value: "3"}});
+    expect(view.container.querySelector<HTMLSelectElement>('select[name="quantity"]')?.value).toBe("3");
+    expect(screen.getByText(/HK\$750\.00/)).toBeInTheDocument();
+    expect(screen.getByText(labels.paymentNature)).toBeInTheDocument();
+  });
+
+  it("copies buyer details to seat one and can explicitly remove another attendee", () => {
+    renderForm();
+    fireEvent.change(screen.getByLabelText(labels.buyerName), {target: {value: "Ada Lovelace"}});
+    fireEvent.change(screen.getByLabelText(labels.buyerEmail), {target: {value: "ada@example.test"}});
+    fireEvent.click(screen.getByRole("button", {name: labels.fillBuyer}));
+    expect(screen.getByLabelText("Attendee name 1")).toHaveValue("Ada Lovelace");
+    expect(screen.getByLabelText("Attendee email 1")).toHaveValue("ada@example.test");
+    fireEvent.change(screen.getByLabelText(labels.seatCount), {target: {value: "3"}});
+    fireEvent.click(screen.getAllByRole("button", {name: labels.removeSeat})[1]);
+    expect(screen.queryByText("Attendee name 3")).toBeNull();
+    expect(screen.getByLabelText(labels.seatCount)).toHaveValue("2");
+  });
+
   it("prefills the buyer name and email for a signed-in member", () => {
     renderForm({defaultBuyerEmail: "ada@example.hk", defaultBuyerName: "Ada Lovelace"});
 
@@ -97,7 +125,7 @@ describe("TicketCheckoutForm", () => {
   // until it has, which the server's `z.string().uuid()` requires.
   it("cannot be submitted before the key is minted", () => {
     const markup = renderToStaticMarkup(
-      <TicketCheckoutForm eventId="10000000-0000-4000-8000-000000000001" labels={labels} locale="en" pricePerSeat="Price per seat: HK$250.00" refundPolicyHref="/refund-policy" />,
+      <TicketCheckoutForm eventId="10000000-0000-4000-8000-000000000001" labels={labels} locale="en" pricePerSeat="Price per seat: HK$250.00" unitAmountHkdCents={25000} refundPolicyHref="/refund-policy" />,
     );
 
     expect(markup).toContain('name="idempotencyKey"');
@@ -122,7 +150,7 @@ describe("TicketCheckoutForm", () => {
     await act(async () => { await action({status: "idle"}, new FormData()); });
     reactState.results[0] = [{status: "error", code}, vi.fn(), false];
     view.rerender(<TicketCheckoutForm eventId="10000000-0000-4000-8000-000000000001"
-      labels={labels} locale="en" pricePerSeat="Price per seat: HK$250.00" refundPolicyHref="/refund-policy" />);
+      labels={labels} locale="en" pricePerSeat="Price per seat: HK$250.00" unitAmountHkdCents={25000} refundPolicyHref="/refund-policy" />);
     const second = view.container.querySelector<HTMLInputElement>('input[name="idempotencyKey"]')?.value;
     expect(first).toBeTruthy();
     expect(second).toBeTruthy();

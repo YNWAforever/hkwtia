@@ -124,6 +124,7 @@ export default async function EventPage({params}: Props) {
     heading: tTicket("heading"), buyerName: tTicket("buyerName"), buyerEmail: tTicket("buyerEmail"),
     seatCount: tTicket("seatCount"), attendeeName: tTicket("attendeeName"), attendeeEmail: tTicket("attendeeEmail"),
     website: tTicket("website"), submit: tTicket("submit"), submitting: tTicket("submitting"), refundPolicy: tTicket("refundPolicy"),
+    fillBuyer: tTicket("fillBuyer"), removeSeat: tTicket("removeSeat"), total: tTicket("total"), paymentNature: tTicket("paymentNature"), eventDate: tTicket("eventDate"), fieldErrors: {required: tTicket("fieldErrors.required"), invalid: tTicket("fieldErrors.invalid"), extra: tTicket("fieldErrors.extra")},
     errors: {INVALID: tTicket("errors.INVALID"), SOLD_OUT: tTicket("errors.SOLD_OUT"), NOT_ELIGIBLE: tTicket("errors.NOT_ELIGIBLE"), EVENT_CLOSED: tTicket("errors.EVENT_CLOSED"), UNAVAILABLE: tTicket("errors.UNAVAILABLE"), RETRY_CHANGED: tTicket("errors.RETRY_CHANGED"), RETRY_EXPIRED: tTicket("errors.RETRY_EXPIRED"), ALREADY_COMPLETED: tTicket("errors.ALREADY_COMPLETED"), RATE_LIMITED: tTicket("errors.RATE_LIMITED")},
   };
 
@@ -194,6 +195,8 @@ export default async function EventPage({params}: Props) {
                   locale={appLocale}
                   labels={ticketLabels}
                   pricePerSeat={tTicket("price", {price: formatTicketPrice(displayEvent.ticketPriceHkdCents, appLocale)})}
+                  unitAmountHkdCents={displayEvent.ticketPriceHkdCents ?? 0}
+                  eventStartsAt={displayEvent.startsAt}
                   refundPolicyHref={localizedPath(appLocale, "/refund-policy")}
                 />
               ) : registration.kind === "external" ? (

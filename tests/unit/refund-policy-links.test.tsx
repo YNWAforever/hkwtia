@@ -33,6 +33,12 @@ const labels: TicketCheckoutLabels = {
   submit: "Buy tickets",
   submitting: "Redirecting to payment…",
   refundPolicy: "Refund policy",
+  fillBuyer: "I am also attending",
+  removeSeat: "Remove attendee",
+  total: "Total",
+  paymentNature: "One-time ticket payment.",
+  eventDate: "Event date",
+  fieldErrors: {required: "Required", invalid: "Invalid", extra: "Extra"},
   errors: {INVALID: "Check the form."},
 };
 
@@ -43,6 +49,7 @@ function renderCheckout(overrides: Partial<Parameters<typeof TicketCheckoutForm>
       labels={labels}
       locale="en"
       pricePerSeat="Price per seat: HK$250.00"
+      unitAmountHkdCents={25000}
       refundPolicyHref="/refund-policy"
       {...overrides}
     />,

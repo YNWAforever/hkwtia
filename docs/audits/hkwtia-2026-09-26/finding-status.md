@@ -11,7 +11,7 @@ T00 initial classification, 2026-09-27 Asia/Hong_Kong. The remote and feature br
 | F05 | T05 | still-present | open | Membership cancellation returns to auto-redirecting checkout GET. |
 | F06 | T08 | still-present | open | Guest branch has no staff check-in. |
 | F07 | T09 | still-present | open | Event cancellation lacks durable free RSVP notification. |
-| F08 | T04 | still-present | open | Seat parser drops blank rendered rows; offline reproduction returned one of three. |
+| F08 | T04 | still-present | seat integrity code-verified; recovery pending | Selected quantity is now submitted; the parser requires exactly that many valid attendees and rejects extra nonempty rows. Parser/action/form focused tests pass. Same-browser recovery and DB/browser acceptance remain. |
 | F09 | T05 | still-present | open | Completion status has no bounded owner-only refresh. |
 | F10 | T07 | still-present | open | Join GET creates new application without a supplied application ID. |
 | F11 | T12–T16 | still-present | open | Member workspace lacks selection, import, and batch workflow; existing segments/campaigns are retained. |
@@ -26,7 +26,7 @@ T00 initial classification, 2026-09-27 Asia/Hong_Kong. The remote and feature br
 | F20 | T10 | still-present | open | Login surface lacks navigation/support context in source and historical snapshot. |
 | F21 | T17 | still-present | open | Homepage uses `force-dynamic` and waits for all section reads. Historical proxy timing is not user performance evidence. |
 | F22 | T15 | still-present | open | Comp form has no reason/validity/target; future bulk/company policy remains unapproved. |
-| F23 | T04/T16 | still-present | open | Checkout lacks quantity integrity, total and durable recovery; ticket resend bulk depends on T13. |
+| F23 | T04/T16 | still-present | partial code-verified | Ticket form now shows server-price-derived total and one-time payment nature; selected quantity is enforced. Durable recovery and T16 resend remain. |
 | F24 | T17 | still-present | open | RSVP/ticket rate limit is process-local; abuse incidence and suitable hold ceiling are unmeasured. |
 | F25 | T00/T09/T13/T17/T18 | needs-runtime | open | CI exists, but deployment SHA, staging payment journeys, worker health and production monitoring are unverified. |
 

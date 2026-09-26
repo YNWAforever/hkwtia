@@ -6,18 +6,24 @@ import {useActionState, useEffect, useState} from "react";
 import {MAX_TICKET_SEATS} from "@/config/tickets";
 import {newAttemptId} from "@/lib/random-id";
 import {submitTicketCheckoutAction, type TicketCheckoutState} from "@/lib/tickets/checkout-actions";
+import {formatTicketPrice} from "@/lib/tickets/format";
 
 export type TicketCheckoutLabels = Readonly<{
   heading: string; buyerName: string; buyerEmail: string; seatCount: string;
   attendeeName: string; attendeeEmail: string; website: string;
   submit: string; submitting: string; refundPolicy: string;
+  fillBuyer: string; removeSeat: string; total: string; paymentNature: string; eventDate: string;
+  fieldErrors: Readonly<{required: string; invalid: string; extra: string}>;
   errors: Readonly<Record<string, string>>;
 }>;
 
+type Attendee = Readonly<{name: string; email: string}>;
+const emptyAttendee = (): Attendee => ({name: "", email: ""});
 const initial: TicketCheckoutState = {status: "idle"};
 
-export function TicketCheckoutForm({eventId, locale, pricePerSeat, labels, refundPolicyHref, defaultBuyerName = "", defaultBuyerEmail = ""}: Readonly<{
-  eventId: string; locale: "en" | "zh-HK"; pricePerSeat: string; labels: TicketCheckoutLabels; refundPolicyHref: string;
+export function TicketCheckoutForm({eventId, locale, pricePerSeat, unitAmountHkdCents, eventStartsAt, labels, refundPolicyHref, defaultBuyerName = "", defaultBuyerEmail = ""}: Readonly<{
+  eventId: string; locale: "en" | "zh-HK"; pricePerSeat: string; unitAmountHkdCents: number;
+  eventStartsAt?: string; labels: TicketCheckoutLabels; refundPolicyHref: string;
   defaultBuyerName?: string; defaultBuyerEmail?: string;
 }>) {
   const [idempotencyKey, setIdempotencyKey] = useState("");
@@ -26,22 +32,28 @@ export function TicketCheckoutForm({eventId, locale, pricePerSeat, labels, refun
     if (result.status === "error" && (result.code === "RETRY_CHANGED" || result.code === "RETRY_EXPIRED")) setIdempotencyKey(newAttemptId());
     return result;
   }, initial);
-  const [seatCount, setSeatCount] = useState(1);
-  // Minted once, AFTER mount: a value minted during render differs between the
-  // server and the client, which is a hydration mismatch. `newAttemptId` steps
-  // down to `getRandomValues` because `crypto.randomUUID` is secure-context
-  // only — one implementation, shared with the inbox composer. The submit button
-  // stays disabled until it is non-empty, so a submit can never reach the server
-  // without the uuid its schema requires.
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time browser-only UUID after mount; render-time mint would mismatch server markup.
-  useEffect(() => { setIdempotencyKey(newAttemptId()); }, []);
+  const [buyerName, setBuyerName] = useState(defaultBuyerName);
+  const [buyerEmail, setBuyerEmail] = useState(defaultBuyerEmail);
+  const [seats, setSeats] = useState<readonly Attendee[]>([emptyAttendee()]);
+  const seatCount = seats.length;
+  const setSeatCount = (count: number) => setSeats((current) => count < current.length
+    ? current.slice(0, count)
+    : [...current, ...Array.from({length: count - current.length}, emptyAttendee)]);
+  const setSeat = (index: number, field: keyof Attendee, value: string) => setSeats((current) =>
+    current.map((seat, seatIndex) => seatIndex === index ? {...seat, [field]: value} : seat));
+  const fieldError = (name: string) => {
+    const code = state.status === "error" ? state.fieldErrors?.[name] : undefined;
+    return code ? <p className="text-sm text-destructive" id={`ticket-${name}-error`} role="alert">{labels.fieldErrors[code]}</p> : null;
+  };
 
+  // Minted once after mount: render-time minting differs across server/client markup.
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- browser-only UUID after mount avoids hydration mismatch.
+  useEffect(() => { setIdempotencyKey(newAttemptId()); }, []);
   useEffect(() => {
     if (state.status === "redirect") window.location.assign(state.url);
   }, [state]);
 
-  // The action rotates the key only after an edited attempt is rejected.
-  // Other errors keep their key, so an uncertain provider response remains safe to retry.
+  // A refusal that might hide an uncertain provider outcome keeps the same key.
   const inputClass = "min-h-11 w-full rounded-md border border-input bg-background px-3";
   return (
     <form action={dispatch} className="space-y-4" noValidate>
@@ -49,36 +61,45 @@ export function TicketCheckoutForm({eventId, locale, pricePerSeat, labels, refun
       <input name="eventId" type="hidden" value={eventId}/>
       <input name="locale" type="hidden" value={locale}/>
       <input name="idempotencyKey" type="hidden" value={idempotencyKey}/>
-      {/* Honeypot: a bot fills it, a person never sees it. */}
       <label className="sr-only" htmlFor="ticket-website">{labels.website}</label>
       <input autoComplete="off" className="hidden" id="ticket-website" name="website" tabIndex={-1} type="text"/>
       <label className="block space-y-2 text-sm font-medium">
         <span>{labels.buyerName}</span>
-        <input className={inputClass} defaultValue={defaultBuyerName} name="buyerName" required type="text"/>
+        <input className={inputClass} name="buyerName" onChange={(event) => setBuyerName(event.target.value)} required type="text" value={buyerName}/>
+        {fieldError("buyerName")}
       </label>
       <label className="block space-y-2 text-sm font-medium">
         <span>{labels.buyerEmail}</span>
-        <input className={inputClass} defaultValue={defaultBuyerEmail} name="buyerEmail" required type="email"/>
+        <input className={inputClass} name="buyerEmail" onChange={(event) => setBuyerEmail(event.target.value)} required type="email" value={buyerEmail}/>
+        {fieldError("buyerEmail")}
       </label>
+      <button className="text-sm underline" onClick={() => setSeats((current) => current.map((seat, index) => index === 0 ? {name: buyerName, email: buyerEmail} : seat))} type="button">{labels.fillBuyer}</button>
       <label className="block space-y-2 text-sm font-medium">
         <span>{labels.seatCount}</span>
-        <select className={inputClass} onChange={(event) => setSeatCount(Number(event.target.value))} value={seatCount}>
+        <select className={inputClass} name="quantity" onChange={(event) => setSeatCount(Number(event.target.value))} value={seatCount}>
           {Array.from({length: MAX_TICKET_SEATS}, (_, index) => index + 1).map((count) => <option key={count} value={count}>{count}</option>)}
         </select>
+        {fieldError("quantity")}
       </label>
-      {Array.from({length: seatCount}, (_, index) => (
+      {seats.map((seat, index) => (
         <div className="grid gap-3 sm:grid-cols-2" key={index}>
           <label className="block space-y-2 text-sm font-medium">
             <span>{labels.attendeeName} {index + 1}</span>
-            <input className={inputClass} name={`seatName-${index}`} required type="text"/>
+            <input className={inputClass} name={`seatName-${index}`} onChange={(event) => setSeat(index, "name", event.target.value)} required type="text" value={seat.name}/>
+            {fieldError(`seatName-${index}`)}
           </label>
           <label className="block space-y-2 text-sm font-medium">
             <span>{labels.attendeeEmail} {index + 1}</span>
-            <input className={inputClass} name={`seatEmail-${index}`} required type="email"/>
+            <input className={inputClass} name={`seatEmail-${index}`} onChange={(event) => setSeat(index, "email", event.target.value)} required type="email" value={seat.email}/>
+            {fieldError(`seatEmail-${index}`)}
           </label>
+          {index > 0 ? <button className="text-sm underline sm:col-span-2" onClick={() => setSeats((current) => current.filter((_, seatIndex) => seatIndex !== index))} type="button">{labels.removeSeat}</button> : null}
         </div>
       ))}
+      {eventStartsAt ? <p className="text-sm">{labels.eventDate}: {new Intl.DateTimeFormat(locale, {dateStyle: "long", timeStyle: "short", timeZone: "Asia/Hong_Kong"}).format(new Date(eventStartsAt))}</p> : null}
       <p className="text-sm text-muted-foreground">{pricePerSeat}</p>
+      <p className="text-sm font-semibold">{labels.total}: {formatTicketPrice(unitAmountHkdCents * seatCount, locale)}</p>
+      <p className="text-sm text-muted-foreground">{labels.paymentNature}</p>
       <p className="text-sm"><Link className="underline" href={refundPolicyHref}>{labels.refundPolicy}</Link></p>
       <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending || idempotencyKey === ""} type="submit">
         {pending ? labels.submitting : labels.submit}

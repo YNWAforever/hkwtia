@@ -1646,6 +1646,12 @@
     "refundPolicy": "退款政策",
     "submit": "前往付款",
     "submitting": "正在前往付款……",
+    "fillBuyer": "我也是出席者",
+    "removeSeat": "移除此出席者",
+    "total": "總額",
+    "paymentNature": "門票為一次性付款；付款確認後才確定座位。",
+    "eventDate": "活動日期及時間",
+    "fieldErrors": {"required": "此欄必填。", "invalid": "請輸入有效資料。", "extra": "請移除額外的出席者資料。"},
     "errors": {
       "INVALID": "請檢查購買者及出席者資料，然後再試。",
       "SOLD_OUT": "剩餘座位不足以完成此訂單。",

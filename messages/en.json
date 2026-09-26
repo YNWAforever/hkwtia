@@ -1646,6 +1646,12 @@
     "refundPolicy": "Refund policy",
     "submit": "Continue to payment",
     "submitting": "Redirecting to payment…",
+    "fillBuyer": "I am also attending",
+    "removeSeat": "Remove attendee",
+    "total": "Total",
+    "paymentNature": "One-time ticket payment. Seats are confirmed after payment.",
+    "eventDate": "Event date and time",
+    "fieldErrors": {"required": "This field is required.", "invalid": "Enter a valid value.", "extra": "Remove the extra attendee details."},
     "errors": {
       "INVALID": "Check the buyer and attendee details, then try again.",
       "SOLD_OUT": "There are not enough seats left for this order.",
