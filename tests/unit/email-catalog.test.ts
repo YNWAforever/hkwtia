@@ -31,6 +31,7 @@ const REQUIRED_TEMPLATE_IDS = [
   "approval_request",
   "campaign_generic",
   "event_guest_confirmation",
+  "event_guest_waitlist",
   "event_reminder_24h",
   "event_ticket_confirmation",
   "event_ticket_refunded",
@@ -56,9 +57,9 @@ const FIXTURE_VARIABLES = {
 } as const;
 
 describe("email catalogue", () => {
-  it("contains exactly the 29 approved template IDs in stable order", () => {
+  it("contains exactly the 30 approved template IDs in stable order", () => {
     expect(EMAIL_TEMPLATE_IDS).toEqual(REQUIRED_TEMPLATE_IDS);
-    expect(new Set(EMAIL_TEMPLATE_IDS).size).toBe(29);
+    expect(new Set(EMAIL_TEMPLATE_IDS).size).toBe(30);
   });
 
   it("keeps the guest confirmation transactional and carries the cancel link in its body", () => {
@@ -67,6 +68,17 @@ describe("email catalogue", () => {
     expect(template.copy.subject).toContain("Fixture Event");
     expect(template.copy.body).toContain(FIXTURE_VARIABLES.cancelUrl);
     expect(() => getEmailTemplate("en", "event_guest_confirmation", FIXTURE_VARIABLES, "marketing")).toThrow("EMAIL_CLASSIFICATION_OVERRIDE_FORBIDDEN");
+  });
+
+  it.each(["en", "zh-HK"] as const)("keeps the %s guest waitlist receipt distinct from a confirmed seat", (locale) => {
+    const waitlist = getEmailTemplate(locale, "event_guest_waitlist", FIXTURE_VARIABLES);
+    const confirmed = getEmailTemplate(locale, "event_guest_confirmation", FIXTURE_VARIABLES);
+    expect(waitlist.classification).toBe("transactional");
+    expect(waitlist.copy.body).toContain(FIXTURE_VARIABLES.cancelUrl);
+    expect(waitlist.copy.preview).not.toBe(confirmed.copy.preview);
+    expect(waitlist.copy.heading).not.toBe(confirmed.copy.heading);
+    expect(() => getEmailTemplate(locale, "event_guest_waitlist", FIXTURE_VARIABLES, "marketing"))
+      .toThrow("EMAIL_CLASSIFICATION_OVERRIDE_FORBIDDEN");
   });
 
   it("keeps the 24-hour event reminder transactional and names the start time and venue", () => {

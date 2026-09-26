@@ -323,7 +323,14 @@
         "subject": "已登記：{eventTitle}",
         "preview": "你的報名已確認。",
         "heading": "期待見到你",
-        "body": "多謝報名。如計劃有變，請使用取消連結，讓候補名單上的人可以補上。{cancelUrl}",
+        "body": "多謝報名。如計劃有變，請使用取消連結釋出名額。{cancelUrl}",
+        "cta": "查看活動"
+      },
+      "event_guest_waitlist": {
+        "subject": "候補中：{eventTitle}",
+        "preview": "你的名額尚未確認。",
+        "heading": "你已加入候補名單",
+        "body": "活動目前額滿，你的名額尚未確認。如要取消候補，請使用此連結：{cancelUrl}",
         "cta": "查看活動"
       },
       "event_reminder_24h": {
@@ -1585,7 +1592,7 @@
       "submit": "報名",
       "submitting": "報名中…",
       "registered": "已報名。確認電郵正發送至你的信箱。",
-      "waitlist": "活動已滿；你已列入候補名單，有名額時我們會電郵通知你。",
+      "waitlist": "活動已滿。你已列入候補名單，名額尚未確認。",
       "already": "此電郵已報名參加本活動。",
       "confirmationPending": "你的報名已儲存，但確認電郵未能寄出。請再次提交以重試。",
       "invalid": "請檢查姓名、電郵及 WhatsApp 號碼，然後再試。",

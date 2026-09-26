@@ -35,7 +35,7 @@ export async function submitGuestRsvpAction(formData: FormData): Promise<GuestRs
     appUrl,
     async sendConfirmation(confirmation) {
       const rendered = await renderEmail({
-        template: "event_guest_confirmation",
+        template: confirmation.disposition === "waitlist" ? "event_guest_waitlist" : "event_guest_confirmation",
         locale: confirmation.locale,
         recipientName: confirmation.name,
         classification: "transactional",
