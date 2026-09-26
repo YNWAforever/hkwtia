@@ -58,16 +58,13 @@ function writerHarness(deltas: string[]) {
   };
   const adoptPrestarted = vi.fn(() => ({runId: actor.runId, fail}));
   const stream = vi.fn(async () => runtimeStream);
-  const start = vi.fn(async () => {});
   const dependencies: Partial<WriterDependencies> = {
-    agentRuns: {start} as unknown as WriterDependencies["agentRuns"],
     runtime: {adoptPrestarted, stream},
     credentials: {openaiApiKey: "test"},
     enabled: true,
     model: "openai:gpt-4.1-mini",
-    createRunId: () => actor.runId,
   };
-  return {dependencies, adoptPrestarted, runtimeStream, finalize, fail, stream, start};
+  return {dependencies, adoptPrestarted, runtimeStream, finalize, fail, stream};
 }
 
 const writerOutputs = {
@@ -134,7 +131,7 @@ describe("generateWriterCopy", () => {
     profileId: "profile-1",
   };
 
-  it("starts the run row before streaming and returns the parsed copy", async () => {
+  it("adopts the quota-reserved run before streaming and returns the parsed copy", async () => {
     const order: string[] = [];
     const finalize = vi.fn(async () => completedFinish());
     const fail = vi.fn(async (error?: unknown) => (error instanceof AgentRuntimeError ? error : new AgentRuntimeError("invalid_provider_response")));
@@ -150,36 +147,25 @@ describe("generateWriterCopy", () => {
       order.push("stream");
       return runtimeStream;
     });
-    const start = vi.fn(async () => {
-      order.push("start");
-    });
     const dependencies: Partial<WriterDependencies> = {
-      agentRuns: {start} as unknown as WriterDependencies["agentRuns"],
       runtime: {adoptPrestarted, stream},
       credentials: {openaiApiKey: "test"},
       enabled: true,
       model: "openai:gpt-4.1-mini",
-      createRunId: () => actor.runId,
     };
 
     await expect(generateWriterCopy({
       memberActor,
+      runId: actor.runId,
       kind: "event",
       brief: "Launch copy",
       dependencies,
     })).resolves.toEqual({descriptionEn: "Launch copy", descriptionZh: "\u555f\u52d5\u6587\u6848"});
 
-    expect(order).toEqual(["start", "stream"]);
-    expect(start).toHaveBeenCalledWith(
-      {
-        kind: "agent",
-        agent: "writer",
-        runId: actor.runId,
-        conversationId: null,
-        profileId: "profile-1",
-        trigger: "portal",
-      },
-      {provider: null, model: null},
+    expect(order).toEqual(["stream"]);
+    expect(adoptPrestarted).toHaveBeenCalledWith(
+      {agent: "writer", conversationId: null, profileId: "profile-1", trigger: "portal"},
+      actor.runId,
     );
     expect(stream).toHaveBeenCalledWith(expect.objectContaining({
       system: writerSystemPrompt("event"),
@@ -193,6 +179,7 @@ describe("generateWriterCopy", () => {
 
     await expect(generateWriterCopy({
       memberActor,
+      runId: actor.runId,
       kind,
       brief: "brief",
       dependencies,
@@ -207,6 +194,7 @@ describe("generateWriterCopy", () => {
 
     await expect(generateWriterCopy({
       memberActor,
+      runId: actor.runId,
       kind: "event",
       brief: "brief",
       dependencies,

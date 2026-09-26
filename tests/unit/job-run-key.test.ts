@@ -15,6 +15,14 @@ import {PHASE_C_JOB_KIND} from "@/lib/jobs/kinds";
  */
 const SAFE_RUN_KEY = /^[A-Za-z0-9:-]{1,160}$/;
 
+describe("runKeyFor minute bucket", () => {
+  it("gives each ticket-email recovery minute a separate safe run key", () => {
+    const key = (instant: string) => runKeyFor("ticket-emails", "minute", new Date(instant));
+    expect(key("2026-09-26T04:23:00.000Z")).toBe(key("2026-09-26T04:23:59.999Z"));
+    expect(key("2026-09-26T04:24:00.000Z")).not.toBe(key("2026-09-26T04:23:59.999Z"));
+    expect(key("2026-09-26T04:23:59.999Z")).toMatch(SAFE_RUN_KEY);
+  });
+});
 describe("runKeyFor ten-minute bucket", () => {
   it("floors the instant to its ten-minute window", () => {
     expect(runKeyFor(PHASE_C_JOB_KIND.WHATSAPP_SEND_QUEUE, "ten-minute", new Date("2026-09-10T04:23:45.000Z")))

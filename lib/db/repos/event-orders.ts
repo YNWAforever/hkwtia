@@ -41,6 +41,9 @@ export type TicketEvent = Readonly<{
 
 export type SeatInput = Readonly<{name: string; email: string}>;
 
+export type TicketNoticeKind = "confirmation" | "pass" | "refund" | "refund_failed";
+export type TicketNoticeInput = Readonly<{orderId: string; seatId: string | null; kind: TicketNoticeKind; eventKey: string}>;
+
 export type CreateOrderInput = Readonly<{
   eventId: string; buyerProfileId: string | null; buyerName: string; buyerEmail: string;
   buyerLocale: "en" | "zh-HK";
@@ -97,6 +100,7 @@ export type EventOrdersTransaction = Readonly<{
   reconcileRefundedOrder: (orderId: string, input: RefundReconciliationInput) => Promise<boolean>;
   markRefundFailed: (orderId: string, input: Readonly<{eventId: string; refundId: string; amountHkdCents: number}>) => Promise<boolean>;
   insertAudit: (input: Readonly<{actorUserId: string | null; actorType: string; action: string; targetType: string; targetId: string; metadata: Record<string, unknown>}>) => Promise<void>;
+  enqueueTicketNotice: (input: TicketNoticeInput) => Promise<void>;
   eventSummary: (eventId: string) => Promise<readonly Readonly<{titleEn: string; titleZh: string | null; startsAt: Date; slug: string; venue: string | null}>[]>;
 }>;
 
@@ -190,6 +194,16 @@ async function writeAuditRow(
   await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${input.actorUserId}, ${input.actorType}, ${input.action}, ${input.targetType}, ${input.targetId}, ${JSON.stringify(input.metadata)}::jsonb)`);
 }
 
+async function writeTicketNotice(
+  tx: Readonly<{execute: (query: SQL) => Promise<unknown>}>,
+  input: TicketNoticeInput,
+): Promise<void> {
+  await tx.execute(sql`
+    INSERT INTO ticket_email_outbox (order_id, seat_id, kind, event_key)
+    VALUES (${input.orderId}, ${input.seatId}, ${input.kind}, ${input.eventKey})
+    ON CONFLICT (event_key) DO NOTHING
+  `);
+}
 async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promise<T>): Promise<T> {
   const db = await getDb();
   return db.transaction(async (tx) => work({
@@ -331,6 +345,7 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
         targetId: orderId,
         metadata: {reason: input.reason, note: input.note},
       });
+      await writeTicketNotice(tx, {orderId, seatId: null, kind: "refund", eventKey: `ticket-refund:${orderId}:${input.refundedAt.toISOString()}`});
       return true;
     },
     reconcileRefundedOrder: async (orderId, input) => {
@@ -348,6 +363,7 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
         action: "event.order.refunded", targetType: "event_order", targetId: orderId,
         metadata: {reason: input.reason, note: input.note, stripeEventId: input.stripeEventId},
       });
+      await writeTicketNotice(tx, {orderId, seatId: null, kind: "refund", eventKey: `ticket-refund:${orderId}:${input.refundedAt.toISOString()}`});
       return true;
     },
     markRefundFailed: async (orderId, input) => {
@@ -382,8 +398,10 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       await writeAuditRow(tx, {actorUserId: null, actorType: "system", action: "event.order.refund_failed",
         targetType: "event_order", targetId: orderId,
         metadata: {stripeEventId: input.eventId, stripeRefundId: input.refundId}});
+      await writeTicketNotice(tx, {orderId, seatId: null, kind: "refund_failed", eventKey: `ticket-refund-failed:${orderId}:${input.eventId}`});
       return true;
     },
+    enqueueTicketNotice: async (input) => { await writeTicketNotice(tx, input); },
     insertAudit: async (input) => { await writeAuditRow(tx, input); },
     eventSummary: async (eventId) => rows<Record<string, unknown>>(await tx.execute(sql`
       SELECT title_en AS "titleEn", title_zh AS "titleZh", starts_at AS "startsAt", slug, venue FROM ${events} WHERE id = ${eventId} LIMIT 1
@@ -482,12 +500,14 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
         if (order.status === "expired") {
           await tx.markStatus(order.id, "refunded", {refundedAt: now, refundReason: "cancelled"});
           await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.refunded", targetType: "event_order", targetId: order.id, metadata: {reason: "late_payment"}});
+          await tx.enqueueTicketNotice({orderId: order.id, seatId: null, kind: "refund", eventKey: `ticket-refund:${order.id}:${now.toISOString()}`});
           return {status: "refund_due", order: {...order, status: "refunded", refundedAt: now, refundReason: "cancelled"}};
         }
         // A refund we committed but could not finish. The row is already
         // `refunded`, but if the provider call failed the money is still here, so
-        // the retry must re-issue it — safe because the provider call carries the
-        // deterministic `ticket-refund:<orderId>` idempotency key. `staff` refunds
+        // the webhook must reconcile the provider before considering a reissue.
+        // The deterministic key protects short-window retries, but an old event
+        // can arrive after the provider forgets that key. `staff` refunds
         // (D-4c) are not this lane's to re-attempt.
         if (order.status === "refunded" && (order.refundReason === "oversold" || order.refundReason === "cancelled")) {
           return {status: "refund_due", order};
@@ -497,6 +517,7 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
         if (event && !event.published) {
           await tx.markStatus(order.id, "refunded", {refundedAt: now, refundReason: "cancelled"});
           await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.refunded", targetType: "event_order", targetId: order.id, metadata: {reason: "event_closed"}});
+          await tx.enqueueTicketNotice({orderId: order.id, seatId: null, kind: "refund", eventKey: `ticket-refund:${order.id}:${now.toISOString()}`});
           return {status: "refund_due", order: {...order, status: "refunded", refundedAt: now, refundReason: "cancelled"}};
         }
         if (event && event.capacity !== null) {
@@ -505,11 +526,16 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
           if (others + seats > event.capacity) {
             await tx.markStatus(order.id, "refunded", {refundedAt: now, refundReason: "oversold"});
             await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.refunded", targetType: "event_order", targetId: order.id, metadata: {reason: "oversold"}});
+            await tx.enqueueTicketNotice({orderId: order.id, seatId: null, kind: "refund", eventKey: `ticket-refund:${order.id}:${now.toISOString()}`});
             return {status: "oversold", order: {...order, status: "refunded", refundedAt: now, refundReason: "oversold"}};
           }
         }
         await tx.markStatus(order.id, "paid", {paidAt: now});
         await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.paid", targetType: "event_order", targetId: order.id, metadata: {}});
+        await tx.enqueueTicketNotice({orderId: order.id, seatId: null, kind: "confirmation", eventKey: `ticket-confirmation:${order.id}`});
+        for (const seat of await tx.orderSeats(order.id)) {
+          await tx.enqueueTicketNotice({orderId: order.id, seatId: seat.seatId, kind: "pass", eventKey: `ticket-pass:${seat.seatId}:${now.toISOString()}`});
+        }
         return {status: "paid", order: {...order, status: "paid", paidAt: now}};
       });
     },

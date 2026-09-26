@@ -110,6 +110,7 @@ function build(options: {settle?: SettleResult; onEmailError?: (error: unknown, 
   const renderEmailSpy = vi.fn(renderEmail);
   const dependencies: TicketProcessorDependencies = {
     orders: orders as unknown as TicketProcessorDependencies["orders"],
+    fullyRefundedPaymentIntent: vi.fn(async () => false),
     refundPaymentIntent: vi.fn(async () => undefined),
     email: {
       renderEmail: renderEmailSpy as unknown as typeof renderEmail,

@@ -7,6 +7,8 @@ import * as engagementRoute from "@/app/api/jobs/engagement-score/route";
 import * as journeyRoute from "@/app/api/jobs/journey-runner/route";
 import * as renewalRoute from "@/app/api/jobs/renewal-runner/route";
 import * as workerAlertRoute from "@/app/api/jobs/worker-alert/route";
+import * as showcaseLeadEmailsRoute from "@/app/api/jobs/showcase-lead-emails/route";
+import * as ticketEmailsRoute from "@/app/api/jobs/ticket-emails/route";
 import {automationCronActor} from "@/lib/auth/automation-actor";
 import {createJobRunnerContextRepository} from "@/lib/db/repos/job-runner-context";
 import {
@@ -68,6 +70,8 @@ describe("job route exports and security", () => {
     ["approvals", approvalRoute],
     ["worker-alert", workerAlertRoute],
     ["board-reporter", boardReporterRoute],
+    ["showcase-lead-emails", showcaseLeadEmailsRoute],
+    ["ticket-emails", ticketEmailsRoute],
   ])("exports POST and no GET for %s", (_name, route) => {
     expect(typeof route.POST).toBe("function");
     expect("GET" in route).toBe(false);
@@ -80,6 +84,8 @@ describe("job route exports and security", () => {
     approvalRoute.POST,
     workerAlertRoute.POST,
     boardReporterRoute.POST,
+    showcaseLeadEmailsRoute.POST,
+    ticketEmailsRoute.POST,
   ])("returns 405 for a non-POST request and 401 for a missing bearer", async (post) => {
     const getResponse = await post(new Request("http://localhost/api/jobs/test", {
       method: "GET",

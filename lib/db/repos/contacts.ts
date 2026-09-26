@@ -41,6 +41,11 @@ function requireContactWriter(actor: unknown): asserts actor is ContactWriterAct
   }
 }
 
+export function requireContactWriterSource(actor: unknown, source: ContactWriterSource): asserts actor is ContactWriterActor {
+  requireContactWriter(actor);
+  if (actor.source !== source) throw new Error("FORBIDDEN");
+}
+
 const interestInputSchema = z.object({
   email: z.string().trim().email().max(320).transform((value) => value.toLowerCase()),
   displayName: z.string().trim().max(200).nullable(),

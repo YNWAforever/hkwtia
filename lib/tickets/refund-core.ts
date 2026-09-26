@@ -17,7 +17,7 @@ export type RefundResult =
 export type RefundDependencies = Readonly<{
   orders: Pick<EventOrdersRepository, "orderById" | "refundPaidOrder"> & Partial<Pick<EventOrdersRepository, "reconcileRefundedOrder">>;
   stripe: Pick<StripeBillingAdapter, "paymentIntentForSession" | "refundPaymentIntent" | "fullyRefundedPaymentIntent">;
-  /** Best-effort: the refund is already committed, so a mail failure is logged, not thrown. */
+  /** The refund transaction queues a durable notice; immediate delivery is best effort. */
   sendRefundEmail: (order: OrderRecord, idempotencyKey?: string) => Promise<void>;
   now: () => Date;
 }>;

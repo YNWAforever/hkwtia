@@ -11,6 +11,7 @@ import {createConfiguredEmailTransport} from "@/lib/email/transport";
 import type {TicketProcessor, TicketWebhookCommand} from "@/lib/billing/webhook-service";
 import {localizedPath} from "@/lib/urls";
 import {signPassToken} from "@/lib/tickets/pass-token";
+import {deliverTicketEmailsForOrder, productionTicketEmailDependencies} from "@/lib/billing/ticket-email-runner";
 
 type TicketEmailDependencies = Readonly<{
   renderEmail: typeof renderEmail;
@@ -20,7 +21,9 @@ type TicketEmailDependencies = Readonly<{
 
 export type TicketProcessorDependencies = Readonly<{
   orders: Pick<EventOrdersRepository, "settlePaid" | "expireBySession" | "eventSummary" | "seatsOfOrder" | "orderSeats" | "seatForPass">;
-  /** The deterministic key makes a retried refund safe to re-issue. */
+  /** Reconcile a committed refund before a redelivered checkout can reissue it. */
+  fullyRefundedPaymentIntent: (paymentIntentId: string, expectedAmountHkdCents: number) => Promise<boolean>;
+  /** The deterministic key makes a still-due refund safe to re-issue. */
   refundPaymentIntent: (paymentIntentId: string, idempotencyKey: string, orderId: string) => Promise<void>;
   email: TicketEmailDependencies;
   /** For the receipt's "view the event" link, built from the order's own locale. */
@@ -28,6 +31,8 @@ export type TicketProcessorDependencies = Readonly<{
   /** Signs each attendee's pass URL; the pass page verifies with the same key. */
   passSecret: string;
   now: () => Date;
+  /** Production delivery uses the committed outbox intents. */
+  deliverQueuedOrderNotices?: (orderId: string) => Promise<void>;
   /** Best-effort: a mail failure must not fail the webhook, which Stripe retries. */
   onEmailError?: (error: unknown, context: Readonly<{orderId: string; template: string}>) => void;
 }>;
@@ -122,10 +127,8 @@ async function sendTicketEmail(
       idempotencyKey: overrides.idempotencyKey ?? `${template === "event_ticket_confirmation" ? "ticket-confirmation" : "ticket-refund"}:${order.id}`,
     });
   } catch (error) {
-    // The settlement-committed sends (receipt, refund) keep swallowing: the
-    // order is already paid and a throw here would 500 a webhook Stripe only
-    // redelivers into a `duplicate`. A user-initiated send opts into `throwOnError`
-    // so its caller can tell "sent" from "nothing was sent".
+    // The direct-send fallback must not fail a committed settlement. Production
+    // records the notice before this point and retries it from the outbox.
     if (options.throwOnError) throw error;
     dependencies.onEmailError?.(error, {orderId: order.id, template});
   }
@@ -139,9 +142,8 @@ async function sendTicketEmail(
 export type SeatPassOutcome = "sent" | "undeliverable" | "not_admissible";
 
 /**
- * One seat's pass, with the attempt key supplied by the caller: the webhook
- * passes the settlement instant (so a redelivery is a no-op) and the staff
- * resend passes a fresh attempt (so a deliberate resend is never suppressed).
+ * One seat's pass for a staff resend or injected direct-send fallback. The
+ * staff resend passes a fresh attempt so a deliberate resend is not suppressed.
  *
  * The seat id is the only input: the order and the event are resolved here, so
  * a caller cannot pair a seat with the wrong order.
@@ -173,20 +175,20 @@ export async function sendSeatPass(
 }
 
 /**
- * The refund email for a refund committed outside the webhook — a staff refund
- * (Phase D-4c). Same template, recipient and deterministic `ticket-refund:<orderId>`
- * key as the webhook's own refund lane, so the two paths cannot send two different
- * messages for one refund, and a re-issue collapses at the transport rather than
- * mailing the buyer twice.
- *
- * Best-effort by design: the refund is already committed, so a mail failure is
- * logged and never thrown past the caller — a failed send must not undo a refund.
+ * Try immediate delivery after a committed refund. Production reads the durable
+ * notice written in the refund transaction; injected test dependencies retain
+ * the direct-send fallback. Email failure never undoes a refund.
  */
 export async function sendOrderRefundEmail(
   order: OrderRecord,
   dependencies: TicketProcessorDependencies = ticketProcessorDependencies(),
   idempotencyKey?: string,
 ): Promise<void> {
+  if (dependencies.deliverQueuedOrderNotices) {
+    try { await dependencies.deliverQueuedOrderNotices(order.id); }
+    catch (error) { dependencies.onEmailError?.(error, {orderId: order.id, template: "event_ticket_refunded"}); }
+    return;
+  }
   try {
     // `eventSummary` throws *before* `sendTicketEmail`'s own catch, and a refund
     // email with no event is still better than none, so the read is inside this
@@ -200,6 +202,11 @@ export async function sendOrderRefundEmail(
 
 /** Notify the buyer after a failed refund attempt, whether or not a success notice preceded it. */
 export async function sendOrderRefundFailureEmail(order: OrderRecord, eventId: string, dependencies: TicketProcessorDependencies = ticketProcessorDependencies()): Promise<void> {
+  if (dependencies.deliverQueuedOrderNotices) {
+    try { await dependencies.deliverQueuedOrderNotices(order.id); }
+    catch (error) { dependencies.onEmailError?.(error, {orderId: order.id, template: "event_ticket_refund_failed"}); }
+    return;
+  }
   try {
     const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
     await sendTicketEmail(dependencies, "event_ticket_refund_failed", order, event, {
@@ -216,18 +223,19 @@ let defaultDependencies: TicketProcessorDependencies | undefined;
 /**
  * The production dependency bag, built on first use so no env is read at import.
  *
- * The staff resend (`resendPassAction`) consumes `sendSeatPass` with the same bag
- * the webhook builds, so both paths send the identical email rather than two
- * implementations that drift.
+ * The first receipt and pass flow drains the durable outbox. Staff resends use
+ * `sendSeatPass` with a fresh attempt key.
  */
 export function ticketProcessorDependencies(): TicketProcessorDependencies {
   defaultDependencies ??= {
     orders: eventOrdersRepository,
+    fullyRefundedPaymentIntent: (paymentIntentId, amountHkdCents) => stripeBillingAdapter().fullyRefundedPaymentIntent(paymentIntentId, amountHkdCents),
     refundPaymentIntent: (paymentIntentId, idempotencyKey, orderId) => stripeBillingAdapter().refundPaymentIntent(paymentIntentId, idempotencyKey, {orderId}),
     email: {renderEmail, transport: createConfiguredEmailTransport(), emailFrom: emailEnv().emailFrom},
     appUrl: appEnv().appUrl,
     passSecret: ticketPassEnv().ticketPassTokenSecret,
     now: () => new Date(),
+    deliverQueuedOrderNotices: (orderId) => deliverTicketEmailsForOrder(orderId, productionTicketEmailDependencies()),
     onEmailError(error, context) { console.error("ticket email failed", context, error); },
   };
   return defaultDependencies;
@@ -240,9 +248,7 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
     const seats = await dependencies.orders.orderSeats(order.id);
     const settlement = order.paidAt?.getTime() ?? 0;
     for (const seat of seats) {
-      // Per-seat guard: one seat's failed read must not drop the passes for the
-      // seats after it. The settlement is already committed, so the loss is
-      // recoverable only by Task 7's staff resend.
+      // Direct-send fallback: keep one seat's failure from dropping later seats.
       try {
         await sendSeatPass(dependencies, {seatId: seat.seatId, attemptKey: String(settlement)});
       } catch (error) {
@@ -270,25 +276,40 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
         // A committed refund-due state with no provider intent is unfinished
         // work. Make Stripe retry instead of permanently acknowledging it.
         if (!command.paymentIntentId) throw new Error("TICKET_PAYMENT_INTENT_MISSING");
-        // Re-issuing is safe: the deterministic key makes a redelivery after a
-        // failed provider call refund the same payment intent once, not twice.
+        // A checkout event can be redelivered after the provider's
+        // idempotency window. The local `refunded` state also covers refunds
+        // already settled by cancellation. Verify the full charge before
+        // reissuing a `refund_due` request, and avoid repeating its buyer
+        // notice after the mail provider's deduplication window too.
+        if (settlement.status === "refund_due" &&
+            await dependencies.fullyRefundedPaymentIntent(command.paymentIntentId, order.amountHkdCents)) {
+          if (dependencies.deliverQueuedOrderNotices) {
+            try { await dependencies.deliverQueuedOrderNotices(order.id); }
+            catch (error) { dependencies.onEmailError?.(error, {orderId: order.id, template: "event_ticket_refunded"}); }
+          }
+          return "processed";
+        }
         await dependencies.refundPaymentIntent(command.paymentIntentId, `ticket-refund:${order.id}`, order.id);
-        const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
-        await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
+        if (dependencies.deliverQueuedOrderNotices) {
+          try { await dependencies.deliverQueuedOrderNotices(order.id); }
+          catch (error) { dependencies.onEmailError?.(error, {orderId: order.id, template: "event_ticket_refunded"}); }
+        } else {
+          const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
+          await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
+        }
         return "processed";
       }
       if (settlement.status === "paid") {
+        if (dependencies.deliverQueuedOrderNotices) {
+          try { await dependencies.deliverQueuedOrderNotices(order.id); }
+          catch (error) { dependencies.onEmailError?.(error, {orderId: order.id, template: "event_ticket_confirmation"}); }
+          return "processed";
+        }
         // Only a paid settlement admits anyone, so only it earns a pass. An
         // oversold or late-paid order has already taken the refund branch above.
         //
-        // Both guards exist because the settlement is already committed. Without
-        // them a failed read escapes `process`, the route answers 500, and Stripe
-        // redelivers — but the redelivery makes `settlePaid` answer `duplicate`,
-        // so the paid branch is skipped before either send runs and the receipt
-        // and every pass are lost with no retry. Log the failure and leave the
-        // recovery to the staff resend rather than to a Stripe redelivery. The
-        // receipt's own guard covers `eventSummary`, which throws *before* the
-        // email catch inside `sendTicketEmail` can see it.
+        // Direct-send fallback still guards failures after settlement. Production
+        // retries the committed notices through the scheduled outbox worker.
         try {
           const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
           await sendTicketEmail(dependencies, "event_ticket_confirmation", order, event);

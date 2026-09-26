@@ -140,6 +140,7 @@ describe("Cloudflare automation scheduler", () => {
     // A minimum count, so a broken walk over WORKER_JOBS cannot pass vacuously.
     expect(WORKER_JOBS.length).toBeGreaterThanOrEqual(10);
     expect([...scheduled].sort()).toEqual([...WORKER_JOBS].sort());
+    expect(JOBS_BY_CRON["*/10 * * * *"]).toContain("showcase-lead-emails");
   });
 
   /**

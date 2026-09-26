@@ -32,6 +32,7 @@ function transaction(overrides: Partial<EventOrdersTransaction> = {}): EventOrde
     reconcileRefundedOrder: vi.fn(async () => false),
     markRefundFailed: vi.fn(async () => false),
     insertAudit: vi.fn(async () => undefined),
+    enqueueTicketNotice: vi.fn(async () => undefined),
     eventSummary: vi.fn(async () => []),
     ...overrides,
   };
@@ -149,6 +150,25 @@ describe("eventOrdersRepository.createOrder changed attempts", () => {
   });
 });
 describe("eventOrdersRepository.settlePaid", () => {
+  it("records the receipt and every pass inside the paid transaction", async () => {
+    const enqueueTicketNotice = vi.fn(async () => undefined);
+    const tx = transaction({
+      orderBySessionId: vi.fn(async () => order()),
+      orderSeats: vi.fn(async () => [
+        {seatId: "seat-1", position: 1, attendeeName: "Ada", attendeeEmail: "ada@example.test"},
+        {seatId: "seat-2", position: 2, attendeeName: "Bob", attendeeEmail: "bob@example.test"},
+      ]),
+      enqueueTicketNotice,
+    } as Partial<EventOrdersTransaction>);
+
+    await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now))
+      .resolves.toMatchObject({status: "paid"});
+    expect(enqueueTicketNotice).toHaveBeenCalledTimes(3);
+    expect(enqueueTicketNotice).toHaveBeenCalledWith({orderId: "order-1", seatId: null, kind: "confirmation", eventKey: "ticket-confirmation:order-1"});
+    expect(enqueueTicketNotice).toHaveBeenCalledWith({orderId: "order-1", seatId: "seat-1", kind: "pass", eventKey: "ticket-pass:seat-1:2026-09-14T04:00:00.000Z"});
+    expect(enqueueTicketNotice).toHaveBeenCalledWith({orderId: "order-1", seatId: "seat-2", kind: "pass", eventKey: "ticket-pass:seat-2:2026-09-14T04:00:00.000Z"});
+  });
+
   it("marks a pending order paid", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order())});
     await expect(createEventOrdersRepository(async (work) => work(tx)).settlePaid("cs_1", now))
@@ -163,6 +183,7 @@ describe("eventOrdersRepository.settlePaid", () => {
       .resolves.toMatchObject({status: "refund_due", order: expect.objectContaining({status: "refunded", refundReason: "cancelled"})});
     expect(tx.markStatus).toHaveBeenCalledWith("order-1", "refunded", expect.objectContaining({refundReason: "cancelled"}));
     expect(tx.insertAudit).toHaveBeenCalledWith(expect.objectContaining({action: "event.order.refunded", metadata: {reason: "event_closed"}}));
+    expect(tx.enqueueTicketNotice).toHaveBeenCalledWith({orderId: "order-1", seatId: null, kind: "refund", eventKey: "ticket-refund:order-1:2026-09-14T04:00:00.000Z"});
   });
   it("refunds a payment that arrives after the order expired locally", async () => {
     const tx = transaction({orderBySessionId: vi.fn(async () => order({status: "expired"}))});

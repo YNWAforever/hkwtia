@@ -1,5 +1,3 @@
-import {randomUUID} from "node:crypto";
-
 import {z} from "zod";
 
 import type {WriterAgentActor} from "@/lib/auth/agent-actor";
@@ -112,18 +110,15 @@ export async function runWriterJson<T>(input: {
 type MemberActor = Extract<Actor, {kind: "member"}>;
 
 export type WriterDependencies = Readonly<{
-  agentRuns: Pick<typeof agentRunsRepository, "start">;
   runtime: WriterRuntime;
   credentials: WriterAgentConfig["credentials"];
   enabled: boolean;
   model: string;
-  createRunId: () => string;
 }>;
 
 function defaultDependencies(): WriterDependencies {
   const ai = aiEnv();
   return {
-    agentRuns: agentRunsRepository,
     runtime: createAgentRuntime({agentRuns: agentRunsRepository}),
     credentials: {
       ...(ai.openaiApiKey === undefined ? {} : {openaiApiKey: ai.openaiApiKey}),
@@ -131,18 +126,18 @@ function defaultDependencies(): WriterDependencies {
     },
     enabled: ai.agentsEnabled,
     model: ai.agentModelWriter,
-    createRunId: randomUUID,
   };
 }
 
 /**
- * Generate copy for one surface. Starts the run row first (so a crash mid-stream
- * still leaves a `running` row the runtime's failure path closes), then runs one
+ * Generate copy for one surface using the run reserved by the quota repository
+ * before any provider request. A crash mid-stream leaves a `running` row. Run one
  * step and returns the parsed copy. Nothing is persisted beyond the run row —
  * the caller puts the text in a form the member must still save.
  */
 export async function generateWriterCopy(input: {
   memberActor: MemberActor;
+  runId: string;
   kind: WriterKind;
   brief: string;
   dependencies?: Partial<WriterDependencies>;
@@ -151,12 +146,11 @@ export async function generateWriterCopy(input: {
   const actor: WriterAgentActor = {
     kind: "agent",
     agent: "writer",
-    runId: deps.createRunId(),
+    runId: input.runId,
     conversationId: null,
     profileId: input.memberActor.profileId,
     trigger: "portal",
   };
-  await deps.agentRuns.start(actor, {provider: null, model: null});
   const agentConfig: WriterAgentConfig = {
     enabled: deps.enabled,
     model: deps.model,

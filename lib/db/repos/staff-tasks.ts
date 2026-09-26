@@ -19,6 +19,8 @@ import {getDb} from "@/lib/db/repos/common";
 
 export type StaffTaskContext = Readonly<{
   contactEmail?: string;
+  noticeKind?: "ack" | "staff" | "confirmation" | "pass" | "refund" | "refund_failed";
+  orderId?: string;
   conversationId?: string;
   agentRunId?: string;
   reasonCode?: string;

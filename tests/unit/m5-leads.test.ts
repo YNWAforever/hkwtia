@@ -29,28 +29,14 @@ function dependencies(overrides: Record<string, unknown> = {}) {
     service: createLeadService({
       repository: {
         getPublishedBySlug: vi.fn(async () => listing),
-        createLead: vi.fn(async (input) => {
+        createLead: vi.fn(async (_actor, input) => {
           leads.push(input);
           return {...input, id: `lead-${leads.length}`};
         }),
       },
       limiter: createInMemoryRateLimiter({limit: 1, windowMs: 60_000, now: () => 10_000}),
-      emailTransport: {
-        async send(input) {
-          sends.push(input);
-          return {status: "sent" as const, providerId: `provider-${sends.length}`};
-        },
-      },
-      renderEmail: vi.fn(async ({template}: {template: string}) => ({
-        subject: template,
-        html: `<p>${template}</p>`,
-        text: template,
-        headers: {},
-      })),
-      resolveStaffRecipient: async () => "staff@example.com",
+      deliverLeadEmails: vi.fn(async (leadId: string) => { sends.push(leadId); }),
       resolveClientIp: async () => "203.0.113.10",
-      emailFrom: "WTIA <notifications@example.com>",
-      appUrl: "https://hkwtia.example",
       ...overrides,
     }),
     leads,
@@ -65,11 +51,17 @@ describe("showcase request-intro lead service", () => {
     await expect(fake.service.request(form())).resolves.toEqual({ok: true});
     expect(fake.leads).toHaveLength(1);
     expect(fake.leads[0]).toMatchObject({email: "ada@example.com", listingId: listing.id, locale: "en"});
-    expect(fake.sends).toHaveLength(2);
-    expect(fake.sends).toEqual(expect.arrayContaining([
-      expect.objectContaining({to: "ada@example.com", idempotencyKey: "showcase-lead:lead-1:ack"}),
-      expect.objectContaining({to: "staff@example.com", idempotencyKey: "showcase-lead:lead-1:staff"}),
-    ]));
+    expect(fake.sends).toEqual(["lead-1"]);
+  });
+
+  it("uses the showcase-intro contact-writer capability for the durable lead", async () => {
+    const createLead = vi.fn(async (_actor: unknown, input: unknown) => ({id: "lead-1", input}));
+    const fake = dependencies({repository: {getPublishedBySlug: vi.fn(async () => listing), createLead}});
+    await expect(fake.service.request(form())).resolves.toEqual({ok: true});
+    expect(createLead).toHaveBeenCalledWith(
+      expect.objectContaining({kind: "contact-writer", source: "showcase_intro"}),
+      expect.objectContaining({listingId: listing.id, email: "ada@example.com"}),
+    );
   });
 
   it("returns invalid before side effects for malformed input or missing listings", async () => {
@@ -112,7 +104,7 @@ describe("showcase request-intro lead service", () => {
   it("does not spend a listing lookup on rate-limited requests", async () => {
     const getPublishedBySlug = vi.fn(async () => listing);
     const fake = dependencies({
-      repository: {getPublishedBySlug, createLead: vi.fn(async (input: unknown) => input)},
+      repository: {getPublishedBySlug, createLead: vi.fn(async (_actor: unknown, _input: unknown) => ({id: "lead-1"}))},
     });
 
     await fake.service.request(form({idempotencyKey: "first"}));
@@ -144,12 +136,12 @@ describe("showcase request-intro lead service", () => {
   it("keeps a durable lead when delivery fails and ignores duplicate idempotency keys", async () => {
     const fake = dependencies({
       limiter: createInMemoryRateLimiter({limit: 2, windowMs: 60_000, now: () => 10_000}),
-      emailTransport: {async send() {throw new Error("provider down");}},
+      deliverLeadEmails: async () => {throw new Error("provider down");},
       repository: {
         getPublishedBySlug: vi.fn(async () => listing),
-        createLead: vi.fn(async (input) => input.idempotencyKey === "duplicate" && fake.leads.length > 0
+        createLead: vi.fn(async (_actor, input) => input.idempotencyKey === "duplicate" && fake.leads.length > 0
           ? null
-          : (fake.leads.push(input), input)),
+          : (fake.leads.push(input), {id: "lead-1"})),
       },
     });
 

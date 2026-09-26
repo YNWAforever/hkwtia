@@ -1,0 +1,36 @@
+name: Weekly production Lighthouse
+
+on:
+  schedule:
+    - cron: "30 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Resolve production canonical host
+        id: target
+        run: node scripts/resolve-production-lhci-target.mjs
+      - name: Audit production routes in both locales
+        run: npm run test:lighthouse
+        env:
+          LHCI_BASE_URL: ${{ steps.target.outputs.base_url }}
+      - name: Preserve Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-lighthouse
+          path: .lighthouseci/
+          if-no-files-found: warn
+          retention-days: 14

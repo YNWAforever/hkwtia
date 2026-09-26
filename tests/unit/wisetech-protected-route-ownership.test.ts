@@ -304,8 +304,9 @@ describe("WiseTech protected route ownership", () => {
     // Phase D Task 8 added /api/og: 58 + 1 = 59.
     // Phase D-4b Task 5 added /admin/check-in/[token]: 59 + 1 = 60.
     // Phase D-4d Task 2 added /api/jobs/event-cancellation-refunds: 60 + 1 = 61.
-    expect(codeFiles).toHaveLength(61);
-    expect(inventoryFiles).toHaveLength(61);
+    // Showcase lead recovery and ticket email delivery each add a protected cron endpoint.
+    expect(codeFiles).toHaveLength(63);
+    expect(inventoryFiles).toHaveLength(63);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -334,9 +335,10 @@ describe("WiseTech protected route ownership", () => {
     expect(count("webhook-handler")).toBe(2);
     // Phase C2 Task 10 (C-5, D-10) added the ten-minute WhatsApp send queue: 9 + 1 = 10.
     // Phase D-4d Task 2 added the event-cancellation refund sweep: 10 + 1 = 11.
-    expect(count("job-handler")).toBe(11);
+    // Showcase lead recovery and ticket email delivery add two authenticated jobs.
+    expect(count("job-handler")).toBe(13);
     expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(35);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(26);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(28);
   });
 
   it("publishes only the canonical deeply immutable protected conventions export", () => {

@@ -49,6 +49,7 @@ function emailDependencies(
   const renderEmailSpy = vi.fn(options.render ?? renderEmail);
   const dependencies: TicketProcessorDependencies = {
     orders: {eventSummary: vi.fn(async () => eventSummary)} as unknown as TicketProcessorDependencies["orders"],
+    fullyRefundedPaymentIntent: vi.fn(async () => false),
     refundPaymentIntent: vi.fn(async () => undefined),
     email: {
       renderEmail: renderEmailSpy as unknown as typeof renderEmail,

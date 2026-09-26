@@ -103,6 +103,17 @@ const legacyPatternRedirects: LegacyRedirect[] = [
   {source: "/element_category/:path*", destination: "/", permanent: true},
 ];
 
+function isCanonicalCutoverUrl(value: string | undefined): boolean {
+  if (!value) return false;
+  try {
+    // Match the configured site URL, including scheme and root path. A hostname
+    // containing hkwtia.org is not evidence that the canonical domain is live.
+    return new URL(value).href === "https://hkwtia.org/";
+  } catch {
+    return false;
+  }
+}
+
 // Must stay in sync with the prefixes matched by legacyPatternRedirects above —
 // this is what keeps legacyLiteralRedirects from double-covering the same url.
 // The milestone posts' /YYYY/MM/ shape is deliberately NOT listed here (see the
@@ -193,7 +204,7 @@ const nextConfig: NextConfig = {
     // this would send every visitor to a WordPress site that no longer expects them, with no
     // way back except a deploy. Gated, it is inert until the env var flips and instant when
     // it does. Pinned by tests/unit/redirects.test.ts.
-    const cutoverDone = (process.env.NEXT_PUBLIC_SITE_URL ?? "").includes("hkwtia.org");
+    const cutoverDone = isCanonicalCutoverUrl(process.env.NEXT_PUBLIC_SITE_URL);
     const hostRedirects = cutoverDone
       ? [{
           source: "/:path*",

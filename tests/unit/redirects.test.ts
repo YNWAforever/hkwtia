@@ -120,6 +120,20 @@ describe("legacy redirects", () => {
       process.env.NEXT_PUBLIC_SITE_URL = "https://staging.example";
       expect(hostRuleOn(await getRedirects())).toBeUndefined();
 
+      for (const lookalike of [
+        "https://not-hkwtia.org",
+        "https://hkwtia.org.evil.example",
+        "http://hkwtia.org",
+        "https://hkwtia.org:8443",
+        "https://hkwtia.org/preview",
+        "https://hkwtia.org/?preview=1",
+        "https://hkwtia.org@evil.example",
+        "not-a-url hkwtia.org",
+      ]) {
+        process.env.NEXT_PUBLIC_SITE_URL = lookalike;
+        expect(hostRuleOn(await getRedirects()), lookalike).toBeUndefined();
+      }
+
       process.env.NEXT_PUBLIC_SITE_URL = "https://hkwtia.org";
       const armed = hostRuleOn(await getRedirects());
       expect(armed).toBeDefined();

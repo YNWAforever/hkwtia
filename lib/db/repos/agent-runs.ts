@@ -1,5 +1,7 @@
 import "server-only";
 
+import {randomUUID} from "node:crypto";
+
 import {sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
@@ -9,12 +11,13 @@ import {
   type ConciergeAgentActor,
 } from "@/lib/auth/agent-actor";
 import {getDb} from "@/lib/db/repos/common";
+import {startOfHongKongMonth} from "@/lib/automation/hong-kong-time";
 import type {
   AutomationDatabase,
   AutomationDatabaseLoader,
 } from "@/lib/db/repos/journeys";
 import type {ConversationOwner} from "@/lib/db/repos/conversations";
-import {agentRuns, conversations} from "@/lib/db/server-schema";
+import {agentRuns, conversations, profiles} from "@/lib/db/server-schema";
 import {forbidden, requireMember, type Actor as SessionActor} from "@/lib/membership/lifecycle";
 
 export type AgentRunRecord = Readonly<{
@@ -46,6 +49,10 @@ const startInputSchema = z.object({
   acceptanceOwnershipKey: z.string()
     .regex(/^m4b-acceptance-v\d+$/)
     .optional(),
+}).strict();
+const writerReservationInputSchema = z.object({
+  cap: z.number().refine((value) => value === Number.POSITIVE_INFINITY || (Number.isSafeInteger(value) && value > 0)),
+  startedAt: z.date().refine((value) => Number.isFinite(value.getTime())),
 }).strict();
 const configureModelInputSchema = z.object({
   provider: z.enum(["openai", "anthropic"]),
@@ -265,11 +272,50 @@ export function createAgentRunsRepository(
   loadDatabase: AutomationDatabaseLoader = defaultDatabaseLoader,
 ) {
   return {
+    /** Serialise the quota count and run creation for one profile before provider work. */
+    async reserveWriterRun(actor: SessionActor, input: unknown): Promise<string | null> {
+      requireMember(actor);
+      const parsed = writerReservationInputSchema.parse(input);
+      const since = startOfHongKongMonth(parsed.startedAt);
+      const database = await loadDatabase();
+      return database.transaction(async (transaction) => {
+        // Every writer reservation locks the same profile row. Under READ COMMITTED,
+        // the next count sees the previous reservation after that lock is released.
+        const locked = rowsFrom(await transaction.execute(sql`
+          SELECT ${profiles.id} FROM ${profiles}
+          WHERE ${profiles.id} = ${actor.profileId}
+          FOR UPDATE
+        `))[0];
+        if (!locked) forbidden();
+        const countRows = rowsFrom(await transaction.execute(sql`
+          SELECT COUNT(*)::int AS count FROM ${agentRuns}
+          WHERE agent = 'writer'
+            AND profile_id = ${actor.profileId}
+            AND created_at >= ${since}
+        `));
+        const count = Number(countRows[0]?.count);
+        if (!Number.isSafeInteger(count) || count < 0) throw new Error("INVALID_WRITER_RUN_COUNT");
+        if (count >= parsed.cap) return null;
+        const runId = randomUUID();
+        const inserted = rowsFrom(await transaction.execute(sql`
+          INSERT INTO ${agentRuns}
+            (id, agent, conversation_id, profile_id, trigger, status,
+             provider, model, summary, started_at, created_at, updated_at)
+          VALUES (${runId}, 'writer', NULL, ${actor.profileId}, 'portal', 'running',
+                  NULL, NULL, NULL, ${parsed.startedAt}, ${parsed.startedAt}, ${parsed.startedAt})
+          RETURNING id
+        `))[0];
+        if (!inserted) throw new Error("WRITER_RUN_RESERVATION_FAILED");
+        return String(inserted.id);
+      });
+    },
+
     async start(
       actor: AgentRunActor,
       input: unknown,
     ): Promise<AgentRunRecord> {
       requireAgentRunActor(actor);
+      if (actor.agent === "writer") forbidden();
       const parsed = startInputSchema.parse(input);
       const startedAt = parsed.startedAt ?? new Date();
       const acceptanceSummary = parsed.acceptanceOwnershipKey
@@ -311,40 +357,7 @@ export function createAgentRunsRepository(
           AND ${actorOwnerPredicate(actor)}
         RETURNING *
       `
-        : actor.agent === "writer"
-          ? sql`
-        INSERT INTO ${agentRuns}
-          (
-            id,
-            agent,
-            conversation_id,
-            profile_id,
-            trigger,
-            status,
-            provider,
-            model,
-            summary,
-            started_at,
-            created_at,
-            updated_at
-          )
-        VALUES (
-          ${actor.runId},
-          ${actor.agent},
-          NULL,
-          ${actor.profileId},
-          ${actor.trigger},
-          'running',
-          ${parsed.provider ?? null},
-          ${parsed.model ?? null},
-          ${acceptanceSummary},
-          ${startedAt},
-          ${startedAt},
-          ${startedAt}
-        )
-        RETURNING *
-      `
-          : sql`
+        : sql`
         INSERT INTO ${agentRuns}
           (
             id,

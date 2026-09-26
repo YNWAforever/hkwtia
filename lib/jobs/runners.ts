@@ -66,6 +66,8 @@ import {runEventCancellationRefunds, type EventCancellationRefundSummary} from "
 import {JobRequestError, type PreparedJob} from "@/lib/jobs/handler";
 import {RUNNER_BATCH_LIMIT} from "@/lib/jobs/limits";
 import {approvedTemplateKeys} from "@/lib/whatsapp/approved-templates";
+import {drainLeadEmailOutbox, productionLeadEmailDependencies} from "@/lib/showcase/lead-email-runner";
+import {drainTicketEmailOutbox, productionTicketEmailDependencies} from "@/lib/billing/ticket-email-runner";
 
 const MAX_WORKER_ALERT_BYTES = 4_096;
 
@@ -107,6 +109,8 @@ const workerAlertSchema = z.object({
     "chat-retention",
     "whatsapp-send-queue",
     "event-cancellation-refunds",
+    "showcase-lead-emails",
+    "ticket-emails",
   ]),
   scheduledTime: z.string().min(1).max(64),
   attemptCount: z.number().int().min(1).max(3),
@@ -128,7 +132,9 @@ export type WorkerAlertPayload = Readonly<{
     | "aiops-metrics"
     | "chat-retention"
     | "whatsapp-send-queue"
-    | "event-cancellation-refunds";
+    | "event-cancellation-refunds"
+    | "showcase-lead-emails"
+    | "ticket-emails";
   scheduledTime: string;
   attemptCount: number;
   errorCode: "JOB_HTTP_ERROR" | "JOB_NETWORK_ERROR" | "JOB_TIMEOUT";
@@ -153,6 +159,8 @@ type ProductionRunnerOverrides = Partial<Readonly<{
   runWhatsAppSendQueue(now: Date): Promise<unknown>;
   /** No clock: the refund primitive reads its own when it commits. */
   runEventCancellationRefunds(): Promise<unknown>;
+  runShowcaseLeadEmails(now: Date): Promise<unknown>;
+  runTicketEmails(now: Date): Promise<unknown>;
   runWorkerAlert(payload: WorkerAlertPayload): Promise<unknown>;
 }>>;
 
@@ -674,6 +682,10 @@ export function createJobRunners(
     overrides.runWhatsAppSendQueue ?? runProductionWhatsAppSendQueue;
   const runEventCancellationRefunds =
     overrides.runEventCancellationRefunds ?? runProductionEventCancellationRefunds;
+  const runShowcaseLeadEmails = overrides.runShowcaseLeadEmails ??
+    ((now: Date) => drainLeadEmailOutbox(now, productionLeadEmailDependencies()));
+  const runTicketEmails = overrides.runTicketEmails ??
+    ((now: Date) => drainTicketEmailOutbox(now, productionTicketEmailDependencies()));
   const runWorkerAlert = overrides.runWorkerAlert ?? sendWorkerAlert;
 
   return {
@@ -710,6 +722,12 @@ export function createJobRunners(
     },
     eventCancellationRefunds() {
       return runEventCancellationRefunds();
+    },
+    showcaseLeadEmails(now: Date) {
+      return runShowcaseLeadEmails(now);
+    },
+    ticketEmails(now: Date) {
+      return runTicketEmails(now);
     },
     workerAlert(payload: WorkerAlertPayload) {
       return runWorkerAlert(payload);
