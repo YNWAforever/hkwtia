@@ -323,7 +323,14 @@
         "subject": "You're on the list: {eventTitle}",
         "preview": "Your RSVP is confirmed.",
         "heading": "See you there",
-        "body": "Thanks for registering. If your plans change, use the cancel link so someone on the waitlist can take your place. {cancelUrl}",
+        "body": "Thanks for registering. If your plans change, use the cancel link to release your place. {cancelUrl}",
+        "cta": "View the event"
+      },
+      "event_guest_waitlist": {
+        "subject": "Waitlisted: {eventTitle}",
+        "preview": "Your place is not confirmed.",
+        "heading": "You're on the waitlist",
+        "body": "The event is currently full. Your place is not confirmed. You can cancel your waitlist request here: {cancelUrl}",
         "cta": "View the event"
       },
       "event_reminder_24h": {
@@ -1585,7 +1592,7 @@
       "submit": "Register",
       "submitting": "Registering…",
       "registered": "You're registered. A confirmation is on its way to your inbox.",
-      "waitlist": "The event is full; you're on the waitlist and we'll email you if a place opens.",
+      "waitlist": "The event is full. You are on the waitlist, and your place is not confirmed.",
       "already": "That email is already registered for this event.",
       "confirmationPending": "Your registration is saved, but we could not email your confirmation. Please submit again to retry.",
       "invalid": "Check your name, email and WhatsApp number, then try again.",
