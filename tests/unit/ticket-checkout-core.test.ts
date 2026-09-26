@@ -1,5 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
+import {ANONYMOUS_ACTOR} from "@/lib/membership/lifecycle";
+
 import {createTicketCheckout, type TicketCheckoutDependencies} from "@/lib/tickets/checkout-core";
 
 const now = new Date("2026-09-14T04:00:00Z");
@@ -22,15 +24,40 @@ function dependencies(overrides: Partial<TicketCheckoutDependencies> = {}): Tick
       attachSession: vi.fn(async () => true),
     } as never,
     stripe: {createEventTicketSession: vi.fn(async () => ({id: "cs_1", url: "https://checkout.stripe.test/1"})), ticketSessionStatus: vi.fn(async () => "open")} as never,
-    eventForTicket: vi.fn(async () => ({id: "ev-1", slug: "edge-ai", titleEn: "Edge AI", titleZh: "邊緣 AI", startsAt: new Date("2026-10-01T10:00:00Z"), published: true, registrationMode: "ticketed", ticketPriceHkdCents: 25_000})),
+    eventForTicket: vi.fn(async () => ({id: "ev-1", slug: "edge-ai", titleEn: "Edge AI", titleZh: "邊緣 AI", startsAt: new Date("2026-10-01T10:00:00Z"), published: true, visibility: "public", memberOnly: false, registrationMode: "ticketed", ticketPriceHkdCents: 25_000})),
     ...overrides,
   };
 }
 
+describe("ticket purchase eligibility", () => {
+  it("refuses an anonymous buyer before order creation or Stripe for a members-only event", async () => {
+    const deps = dependencies({eventForTicket: vi.fn(async () => ({id: "ev-1", slug: "private", titleEn: "Private", titleZh: "Private", startsAt: new Date("2026-10-01T10:00:00Z"), published: true, visibility: "members_only", memberOnly: true, registrationMode: "ticketed", ticketPriceHkdCents: 25_000}))});
+    await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+      .resolves.toEqual({status: "error", code: "NOT_ELIGIBLE"});
+    expect(deps.orders.createOrder).not.toHaveBeenCalled();
+    expect(deps.stripe.createEventTicketSession).not.toHaveBeenCalled();
+  });
+
+  it("passes a verified member actor into the order transaction", async () => {
+    const actor = {kind: "member", userId: "auth-1", profileId: "profile-1"} as const;
+    const deps = dependencies({eventForTicket: vi.fn(async () => ({id: "ev-1", slug: "private", titleEn: "Private", titleZh: "Private", startsAt: new Date("2026-10-01T10:00:00Z"), published: true, visibility: "members_only", memberOnly: true, registrationMode: "ticketed", ticketPriceHkdCents: 25_000}))});
+    await expect(createTicketCheckout({actor, eventId: "ev-1", buyer: {profileId: actor.profileId, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+      .resolves.toEqual({status: "redirect", url: "https://checkout.stripe.test/1"});
+    expect(deps.orders.createOrder).toHaveBeenCalledWith(expect.objectContaining({actor, buyerProfileId: actor.profileId}));
+  });
+
+  it("refuses an invite-only event until invitation authority exists", async () => {
+    const deps = dependencies({eventForTicket: vi.fn(async () => ({id: "ev-1", slug: "invite", titleEn: "Invite", titleZh: "Invite", startsAt: new Date("2026-10-01T10:00:00Z"), published: true, visibility: "invite_only", memberOnly: true, registrationMode: "ticketed", ticketPriceHkdCents: 25_000}))});
+    await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+      .resolves.toEqual({status: "error", code: "NOT_ELIGIBLE"});
+    expect(deps.orders.createOrder).not.toHaveBeenCalled();
+    expect(deps.stripe.createEventTicketSession).not.toHaveBeenCalled();
+  });
+});
 describe("createTicketCheckout", () => {
   it("computes the amount from the event price and redirects to Stripe", async () => {
     const deps = dependencies();
-    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+    await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "redirect", url: "https://checkout.stripe.test/1"});
     expect((deps.orders.createOrder as unknown as {mock: {calls: unknown[][]}}).mock.calls[0]![0]).toMatchObject({amountHkdCents: 25_000});
     expect(deps.stripe.createEventTicketSession).toHaveBeenCalledWith(expect.objectContaining({unitAmountHkdCents: 25_000, seats: 1, orderId: "order-1"}));
@@ -42,8 +69,8 @@ describe("createTicketCheckout", () => {
     ["an unpublished event", {published: false}, "EVENT_CLOSED"],
     ["a started event", {startsAt: new Date("2026-09-01T00:00:00Z")}, "EVENT_CLOSED"],
   ])("refuses %s", async (_case, overrides, code) => {
-    const deps = dependencies({eventForTicket: vi.fn(async () => ({id: "ev-1", slug: "s", titleEn: "t", titleZh: "t", startsAt: new Date("2026-10-01T10:00:00Z"), published: true, registrationMode: "ticketed", ticketPriceHkdCents: 25_000, ...overrides}))});
-    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+    const deps = dependencies({eventForTicket: vi.fn(async () => ({id: "ev-1", slug: "s", titleEn: "t", titleZh: "t", startsAt: new Date("2026-10-01T10:00:00Z"), published: true, visibility: "public", memberOnly: false, registrationMode: "ticketed", ticketPriceHkdCents: 25_000, ...overrides}))});
+    await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "error", code});
   });
 
@@ -56,25 +83,25 @@ describe("createTicketCheckout", () => {
     ["an event deleted between the read and the order", "EVENT_NOT_FOUND", "EVENT_NOT_FOUND"],
   ] as const)("maps %s to an error", async (_case, reason, code) => {
     const deps = dependencies({orders: {createOrder: vi.fn(async () => ({ok: false, reason}))} as never});
-    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+    await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "error", code});
   });
 
   it("returns an unavailable error when the event is not found", async () => {
     const deps = dependencies({eventForTicket: vi.fn(async () => null)});
-    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+    await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "error", code: "EVENT_NOT_FOUND"});
   });
 
   it("refuses more seats than the policy cap", async () => {
     const many = Array.from({length: 11}, (_, index) => ({name: `A${index}`, email: `a${index}@example.test`}));
-    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats: many, idempotencyKey: "idem-1", locale: "en"}, dependencies()))
+    await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats: many, idempotencyKey: "idem-1", locale: "en"}, dependencies()))
       .resolves.toEqual({status: "error", code: "INVALID_SEATS"});
   });
 
   it("returns the stored url for a reused order without minting a second session", async () => {
     const deps = dependencies({orders: {createOrder: vi.fn(async () => ({ok: true, reused: true, order: {...pendingOrder, stripeCheckoutSessionId: "cs_existing", stripeCheckoutUrl: "https://checkout.stripe.test/existing"}}))} as never});
-    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+    await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "redirect", url: "https://checkout.stripe.test/existing"});
     expect(deps.stripe.createEventTicketSession).not.toHaveBeenCalled();
     expect(deps.stripe.ticketSessionStatus).toHaveBeenCalledWith("cs_existing");
@@ -91,7 +118,7 @@ describe("createTicketCheckout", () => {
         expireBySession: vi.fn(async () => true)} as never,
       stripe: {createEventTicketSession: vi.fn(), ticketSessionStatus} as never,
     });
-    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+    await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "error", code});
     expect(ticketSessionStatus).toHaveBeenCalledWith("cs_existing");
     if (providerStatus === "expired") expect(deps.orders.expireBySession).toHaveBeenCalledWith("cs_existing");
@@ -105,7 +132,7 @@ describe("createTicketCheckout", () => {
         expireBySession: vi.fn(async () => false)} as never,
       stripe: {createEventTicketSession: vi.fn(), ticketSessionStatus: vi.fn(async () => "expired")} as never,
     });
-    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
+    await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
       seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "error", code: "UNAVAILABLE"});
   });
@@ -115,13 +142,13 @@ describe("createTicketCheckout", () => {
         stripeCheckoutSessionId: "cs_existing", stripeCheckoutUrl: "https://checkout.stripe.test/existing"}}))} as never,
       stripe: {createEventTicketSession: vi.fn(), ticketSessionStatus: vi.fn(async () => { throw new Error("provider_down"); })} as never,
     });
-    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+    await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "error", code: "UNAVAILABLE"});
     expect(deps.stripe.createEventTicketSession).not.toHaveBeenCalled();
   });
   it("sends the event's Chinese title and localized return urls for a zh-HK buyer", async () => {
     const deps = dependencies();
-    await createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "陳", email: "chan@example.test"}, seats, idempotencyKey: "idem-1", locale: "zh-HK"}, deps);
+    await createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "陳", email: "chan@example.test"}, seats, idempotencyKey: "idem-1", locale: "zh-HK"}, deps);
     expect(deps.stripe.createEventTicketSession).toHaveBeenCalledWith(expect.objectContaining({
       eventTitle: "邊緣 AI",
       successUrl: "https://w.test/zh/events/edge-ai?ticket=received",
@@ -131,7 +158,7 @@ describe("createTicketCheckout", () => {
 
   it("refuses an app url that carries userinfo", async () => {
     const deps = dependencies({appUrl: "https://wtia.org.hk@evil.example"});
-    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
+    await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .rejects.toThrow("INVALID_APP_URL");
     // The write-then-throw defect: a bad APP_URL must be rejected before the
     // pending order exists, or it strands seats for the whole hold window and
@@ -151,7 +178,7 @@ describe("createTicketCheckout", () => {
         expiresAt: new Date(orderTime.getTime() + 1_800_000)}})),
         attachSession: vi.fn(async () => true)} as never,
     });
-    const input = {eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
+    const input = {actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
       seats, idempotencyKey: "idem-1", locale: "en" as const};
     await createTicketCheckout(input, deps);
     await createTicketCheckout(input, deps);
@@ -168,7 +195,7 @@ describe("createTicketCheckout", () => {
         expiresAt: new Date(orderTime.getTime() + 1_800_000)}})),
         expireUnattachedOrder: vi.fn(async () => true)} as never,
     });
-    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
+    await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
       seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "error", code: "RETRY_EXPIRED"});
     expect(deps.stripe.createEventTicketSession).not.toHaveBeenCalled();
@@ -182,7 +209,7 @@ describe("createTicketCheckout", () => {
         expiresAt: new Date(orderTime.getTime() + 1_800_000)}})),
         expireUnattachedOrder: vi.fn(async () => false)} as never,
     });
-    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
+    await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
       seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "error", code: "UNAVAILABLE"});
     expect(deps.stripe.createEventTicketSession).not.toHaveBeenCalled();
@@ -191,7 +218,7 @@ describe("createTicketCheckout", () => {
   it("does not redirect when a concurrent release wins before session attachment", async () => {
     const deps = dependencies({orders: {createOrder: vi.fn(async () => ({ok: true, reused: false, order: pendingOrder})),
       attachSession: vi.fn(async () => false)} as never});
-    await expect(createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
+    await expect(createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
       seats, idempotencyKey: "idem-1", locale: "en"}, deps))
       .resolves.toEqual({status: "error", code: "UNAVAILABLE"});
     expect(deps.orders.attachSession).toHaveBeenCalledWith("order-1", "cs_1", "https://checkout.stripe.test/1");
@@ -209,7 +236,7 @@ describe("createTicketCheckout", () => {
       } as never,
     });
 
-    await createTicketCheckout({eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps);
+    await createTicketCheckout({actor: ANONYMOUS_ACTOR, eventId: "ev-1", buyer: {profileId: null, name: "Ada", email: "ada@example.test"}, seats, idempotencyKey: "idem-1", locale: "en"}, deps);
 
     const adapter = deps.stripe.createEventTicketSession as unknown as {mock: {calls: Array<[{expiresAt: Date}]>}};
     const expiresAt = adapter.mock.calls[0]![0].expiresAt;

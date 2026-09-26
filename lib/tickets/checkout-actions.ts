@@ -6,6 +6,7 @@ import {z} from "zod";
 import {MAX_TICKET_SEATS} from "@/config/tickets";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
+import {ANONYMOUS_ACTOR} from "@/lib/membership/lifecycle";
 import {createInMemoryRateLimiter} from "@/lib/security/rate-limit";
 import {clientIpFromHeaders} from "@/lib/security/request-origin";
 import {createTicketCheckout} from "@/lib/tickets/checkout-core";
@@ -73,11 +74,11 @@ export async function submitTicketCheckoutAction(_previous: TicketCheckoutState,
   });
   if (!parsed.success) return {status: "error", code: "INVALID"};
 
-  // A failed session read degrades to the guest path rather than throwing out of
-  // the Server Action: an identity-provider outage must not turn a purchase into
-  // a 500, and the guest path is the one an anonymous visitor already takes.
+  // A failed session read can still use the public guest path. The locked
+  // repository rejects private events unless a member actor is verified.
   const actor = await getActor().catch(() => null);
   const result = await createTicketCheckout({
+    actor: actor ?? ANONYMOUS_ACTOR,
     eventId: parsed.data.eventId,
     buyer: {
       profileId: actor?.kind === "member" ? actor.profileId : null,

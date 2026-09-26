@@ -28,9 +28,12 @@ export const ENTITLEMENTS: Readonly<Record<MembershipPlanCode, Entitlements>> = 
   patron: Object.freeze({directoryListing: "featured", publishEventsPerQuarter: Number.POSITIVE_INFINITY, showcaseListings: 3, whatsappSupport: "dedicated", memberTools: "included", coBrandedEvents: true, aiWriterRunsPerMonth: Number.POSITIVE_INFINITY}),
 });
 
+/** Current policy includes past_due and cancel_at_period_end; changing it needs association approval. */
+export const BENEFIT_ELIGIBLE_MEMBERSHIP_STATUSES = ["active", "past_due", "cancel_at_period_end"] as const satisfies readonly MembershipStatus[];
+
 /** A recoverable portal account is not yet entitled to paid benefits. */
 export function isBenefitEligibleMembershipStatus(status: MembershipStatus): boolean {
-  return status === "active" || status === "past_due" || status === "cancel_at_period_end";
+  return (BENEFIT_ELIGIBLE_MEMBERSHIP_STATUSES as readonly MembershipStatus[]).includes(status);
 }
 export function entitlementsFor(plan: MembershipPlanCode): Entitlements {
   if (!(MEMBERSHIP_PLAN_CODES as readonly string[]).includes(plan)) throw new Error("INVALID_PLAN_CODE");

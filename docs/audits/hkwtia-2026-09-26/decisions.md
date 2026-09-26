@@ -14,3 +14,9 @@
 - Test identities, isolated database, Stripe test mode and authorized test recipients for external acceptance.
 
 These gates do not block independent code and unit-test work.
+
+## T02 ticket policy
+
+- The existing benefit policy remains `active`, `past_due`, or `cancel_at_period_end`. A private ticket checkout checks the buyer's current personal membership or an unrevoked company seat in the event-locked order transaction. This is a buyer eligibility rule; there is no approved per-attendee membership rule in the event model. Do not add one by inference.
+- A conflicting legacy `member_only` flag and new `visibility` use the stricter restriction. `invite_only` remains unavailable for ticket purchase until a real invitation authority is designed.
+- A revoked member cannot retrieve or mint a checkout session through the application. An already issued Stripe URL may remain open outside the application. The existing webhook settlement/refund rules remain unchanged pending association policy on whether to expire that session and how to handle payment that races revocation. This is a release gate for private ticketing, not a claim of closed provider exposure.

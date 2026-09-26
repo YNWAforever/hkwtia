@@ -7,7 +7,7 @@ T00 initial classification, 2026-09-27 Asia/Hong_Kong. The remote and feature br
 | F01 | T01 | still-present | code-verified; browser fixture blocked | Validation now runs before env/transport, with field errors, retained input, safe error IDs and committed-registration confirmation recovery. Four focused unit files pass (15 tests). Local browser cases skipped because no open RSVP fixture; deployed cause and staging retest remain. |
 | F02 | T06 | still-present | open | `member-table.tsx` has no detail link. |
 | F03 | T03 | still-present | open | `eventFormInput` lacks `externalRegistrationUrl`; offline reproduction confirmed. |
-| F04 | T02 | still-present | open | Ticket write path lacks visibility and membership authorization; offline stub accepted private modes. |
+| F04 | T02 | still-present | code-verified; DB and provider gate | Checkout and locked order transaction now enforce the stricter visibility/legacy flag, verify actor against buyer profile, and lock current personal or company membership before an order or Stripe session. Invite-only fails closed. 87 focused unit tests pass; three PostgreSQL tests skipped without a disposable DB. Existing open provider sessions after revocation need policy and test-mode reconciliation. |
 | F05 | T05 | still-present | open | Membership cancellation returns to auto-redirecting checkout GET. |
 | F06 | T08 | still-present | open | Guest branch has no staff check-in. |
 | F07 | T09 | still-present | open | Event cancellation lacks durable free RSVP notification. |

@@ -3,9 +3,13 @@ import "server-only";
 import {eq, sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
+import type {Actor} from "@/lib/membership/lifecycle";
+import {BENEFIT_ELIGIBLE_MEMBERSHIP_STATUSES} from "@/lib/membership/entitlements";
+import {ticketPurchaseAudience} from "@/lib/tickets/eligibility";
+
 import {MAX_TICKET_SEATS, TICKET_HOLD_MS} from "@/config/tickets";
 import {getDb} from "@/lib/db/repos/common";
-import {auditEvents, eventOrderSeats, eventOrders, events} from "@/lib/db/server-schema";
+import {auditEvents, companyMembers, eventOrderSeats, eventOrders, events, memberships} from "@/lib/db/server-schema";
 
 export type OrderStatus = "pending" | "paid" | "expired" | "failed" | "refunded" | "refund_failed";
 export type RefundReason = "oversold" | "staff" | "cancelled";
@@ -31,12 +35,12 @@ export type EventOrderRow = Readonly<{
 
 export type LockedEvent = Readonly<{
   id: string; capacity: number | null; published: boolean; startsAt: Date; endsAt: Date | null;
-  registrationMode: string; ticketPriceHkdCents: number | null;
+  registrationMode: string; ticketPriceHkdCents: number | null; visibility: string; memberOnly: boolean;
 }>;
 
 export type TicketEvent = Readonly<{
   id: string; slug: string; titleEn: string; titleZh: string; startsAt: Date;
-  published: boolean; registrationMode: string; ticketPriceHkdCents: number | null;
+  published: boolean; registrationMode: string; ticketPriceHkdCents: number | null; visibility: string; memberOnly: boolean;
 }>;
 
 export type SeatInput = Readonly<{name: string; email: string}>;
@@ -45,6 +49,7 @@ export type TicketNoticeKind = "confirmation" | "pass" | "refund" | "refund_fail
 export type TicketNoticeInput = Readonly<{orderId: string; seatId: string | null; kind: TicketNoticeKind; eventKey: string}>;
 
 export type CreateOrderInput = Readonly<{
+  actor: Actor;
   eventId: string; buyerProfileId: string | null; buyerName: string; buyerEmail: string;
   buyerLocale: "en" | "zh-HK";
   idempotencyKey: string; seats: readonly SeatInput[]; amountHkdCents: number; now: Date;
@@ -52,13 +57,14 @@ export type CreateOrderInput = Readonly<{
 
 export type CreateOrderResult =
   | Readonly<{ok: true; order: OrderRecord; reused: boolean}>
-  | Readonly<{ok: false; reason: "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "AMOUNT_MISMATCH" | "SOLD_OUT" | "ATTEMPT_CHANGED" | "ATTEMPT_EXPIRED" | "ATTEMPT_COMPLETED"}>;
+  | Readonly<{ok: false; reason: "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "NOT_ELIGIBLE" | "AMOUNT_MISMATCH" | "SOLD_OUT" | "ATTEMPT_CHANGED" | "ATTEMPT_EXPIRED" | "ATTEMPT_COMPLETED"}>;
 
 export type SettleResult =
   | Readonly<{status: "paid" | "duplicate" | "ignored" | "oversold" | "refund_due" | "unknown"; order: OrderRecord | null}>;
 
 export type EventOrdersTransaction = Readonly<{
   lockEvent: (eventId: string) => Promise<LockedEvent | null>;
+  hasEligibleMembership: (profileId: string) => Promise<boolean>;
   orderByIdempotencyKey: (key: string) => Promise<OrderRecord | null>;
   orderBySessionId: (sessionId: string) => Promise<OrderRecord | null>;
   seatsOfOrder: (orderId: string) => Promise<number>;
@@ -167,6 +173,8 @@ function lockedEventFrom(row: Record<string, unknown>): LockedEvent {
     startsAt: requiredDate(row.startsAt),
     endsAt: optionalDate(row.endsAt),
     registrationMode: String(row.registrationMode),
+    visibility: String(row.visibility),
+    memberOnly: Boolean(row.memberOnly),
     ticketPriceHkdCents: row.ticketPriceHkdCents === null || row.ticketPriceHkdCents === undefined ? null : Number(row.ticketPriceHkdCents),
   };
 }
@@ -210,10 +218,31 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
     lockEvent: async (eventId) => {
       const row = rows<Record<string, unknown>>(await tx.execute(sql`
         SELECT id, capacity, published, starts_at AS "startsAt", ends_at AS "endsAt",
-               registration_mode AS "registrationMode", ticket_price_hkd_cents AS "ticketPriceHkdCents"
+               registration_mode AS "registrationMode", ticket_price_hkd_cents AS "ticketPriceHkdCents",
+               visibility, member_only AS "memberOnly"
         FROM ${events} WHERE id = ${eventId} FOR UPDATE
       `))[0];
       return row ? lockedEventFrom(row) : null;
+    },
+    hasEligibleMembership: async (profileId) => {
+      // SHARE locks serialize eligibility with membership state and company-seat revocation.
+      // The event row is locked first by createOrder, then these rows; all buyers
+      // of this event follow the same lock order before capacity is read.
+      const statusList = sql.join(BENEFIT_ELIGIBLE_MEMBERSHIP_STATUSES.map((status) => sql`${status}`), sql`, `);
+      const personal = rows<{id: string}>(await tx.execute(sql`
+        SELECT id FROM ${memberships}
+        WHERE owner_user_id = ${profileId} AND status IN (${statusList})
+        LIMIT 1 FOR SHARE
+      `));
+      if (personal.length > 0) return true;
+      const company = rows<{id: string}>(await tx.execute(sql`
+        SELECT m.id FROM ${memberships} m
+        JOIN ${companyMembers} cm ON cm.company_id = m.company_id
+        WHERE cm.user_id = ${profileId} AND cm.revoked_at IS NULL
+          AND m.status IN (${statusList})
+        LIMIT 1 FOR SHARE OF m, cm
+      `));
+      return company.length > 0;
     },
     orderByIdempotencyKey: async (key) => {
       const row = rows<Record<string, unknown>>(await tx.execute(sql`SELECT * FROM ${eventOrders} WHERE idempotency_key = ${key} LIMIT 1`))[0];
@@ -419,6 +448,7 @@ export async function ticketEventFor(eventId: string): Promise<TicketEvent | nul
   const row = (await db.select({
     id: events.id, slug: events.slug, titleEn: events.titleEn, titleZh: events.titleZh, startsAt: events.startsAt,
     published: events.published, registrationMode: events.registrationMode, ticketPriceHkdCents: events.ticketPriceHkdCents,
+    visibility: events.visibility, memberOnly: events.memberOnly,
   }).from(events).where(eq(events.id, eventId)).limit(1))[0];
   if (!row) return null;
   return {...row, titleZh: row.titleZh ?? row.titleEn};
@@ -437,6 +467,14 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
           return {ok: false, reason: "EVENT_NOT_TICKETED"};
         }
         if (!event.published || event.startsAt <= input.now) return {ok: false, reason: "EVENT_CLOSED"};
+        const buyerProfileId = input.actor?.kind === "member" ? input.actor.profileId : null;
+        if (!input.actor || input.buyerProfileId !== buyerProfileId) return {ok: false, reason: "NOT_ELIGIBLE"};
+        const audience = ticketPurchaseAudience(event);
+        if (audience === "invite_only") return {ok: false, reason: "NOT_ELIGIBLE"};
+        if (audience === "members_only" &&
+            (input.actor.kind !== "member" || !await tx.hasEligibleMembership(input.actor.profileId))) {
+          return {ok: false, reason: "NOT_ELIGIBLE"};
+        }
         const existing = await tx.orderByIdempotencyKey(input.idempotencyKey);
         if (existing) {
           // An attached pending session can outlive the local seat hold.

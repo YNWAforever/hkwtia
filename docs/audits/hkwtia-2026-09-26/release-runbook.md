@@ -8,3 +8,7 @@
 6. Demo cleanup requires an exact dry-run ID manifest and separate approval; restore publication state from that manifest if needed, preserving registrations, orders, refunds and cancelled status.
 
 Current state: code branch in progress; staging unverified; production unreleased.
+
+## T02 private ticket preflight
+
+Run a read-only mismatch inventory before private ticketing: `SELECT id, visibility, member_only FROM events WHERE member_only IS DISTINCT FROM (visibility <> 'public');` Review each row; no automatic cleanup is authorized. In Stripe test mode, exercise a member whose company seat is revoked after checkout URL creation, then resolve the provider-expiry and paid-webhook policy before enabling private ticket sales. Verify `past_due` remains eligible under the existing benefit policy.

@@ -1646,6 +1646,7 @@
     "errors": {
       "INVALID": "Check the buyer and attendee details, then try again.",
       "SOLD_OUT": "There are not enough seats left for this order.",
+      "NOT_ELIGIBLE": "You need a current membership to buy tickets for this event.",
       "EVENT_CLOSED": "Ticket sales for this event have closed.",
       "UNAVAILABLE": "Ticket checkout is not available right now. Please try again shortly.",
       "RETRY_CHANGED": "Your purchase details changed. Submit again to start a new checkout.",

@@ -7,7 +7,7 @@ import {registerForEvent, type EventRegistrationDependencies} from "@/lib/db/rep
 import {createTicketCheckInRepository} from "@/lib/db/repos/ticket-check-in";
 import type {EventStatus} from "@/lib/db/schema-core";
 import {derivedEventFlags} from "@/lib/events/status";
-import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
+import {ANONYMOUS_ACTOR, type Actor, type AdminActor} from "@/lib/membership/lifecycle";
 import {createTicketCheckout, type TicketCheckoutDependencies} from "@/lib/tickets/checkout-core";
 
 /**
@@ -53,6 +53,7 @@ function ticketEvent(status: EventStatus) {
     titleZh: "已取消活動",
     startsAt,
     published: flagsFor(status).published,
+    visibility: "public" as const, memberOnly: false,
     registrationMode: "ticketed" as const,
     ticketPriceHkdCents: 1_000,
   };
@@ -73,7 +74,7 @@ async function attemptTicketCheckout(status: EventStatus): Promise<AttemptResult
   } as unknown as TicketCheckoutDependencies;
 
   const result = await createTicketCheckout({
-    eventId: EVENT_ID,
+    actor: ANONYMOUS_ACTOR, eventId: EVENT_ID,
     buyer: {profileId: null, name: "Buyer", email: "buyer@example.test"},
     seats: [{name: "Buyer", email: "buyer@example.test"}],
     idempotencyKey: "matrix-checkout",
