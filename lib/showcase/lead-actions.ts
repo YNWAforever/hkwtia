@@ -6,6 +6,7 @@ import {z} from "zod";
 import type {RenderEmailInput, RenderedEmail} from "@/lib/email/render";
 import type {EmailTransport} from "@/lib/email/transport";
 import type {ShowcaseRepository} from "@/lib/db/repos/showcase";
+import {contactWriterActor, type ContactWriterActor} from "@/lib/db/repos/contacts";
 import type {NewLead} from "@/lib/db/server-schema";
 import type {RateLimiter} from "@/lib/security/rate-limit";
 import type {AppLocale} from "@/i18n/routing";
@@ -25,7 +26,7 @@ const leadInputSchema = z.object({
 type LeadListing = Readonly<{id: string; slug: string; nameEn: string}>;
 type LeadRepository = Readonly<{
   getPublishedBySlug: (slug: string) => Promise<LeadListing | null>;
-  createLead: (input: NewLead) => Promise<unknown | null>;
+  createLead: (actor: ContactWriterActor, input: NewLead) => Promise<unknown | null>;
 }>;
 type LeadEmailRenderer = (input: RenderEmailInput) => Promise<RenderedEmail>;
 
@@ -119,7 +120,7 @@ export function createLeadService(dependencies: LeadServiceDependencies) {
       if (!listing) return {ok: false, code: "invalid"};
 
       const idempotencyKey = parsed.data.idempotencyKey ?? randomUUID();
-      const lead = await dependencies.repository.createLead({
+      const lead = await dependencies.repository.createLead(contactWriterActor("showcase_intro"), {
         listingId: listing.id,
         contactName: parsed.data.contactName,
         email: parsed.data.email,

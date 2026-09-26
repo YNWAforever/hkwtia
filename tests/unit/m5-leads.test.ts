@@ -29,7 +29,7 @@ function dependencies(overrides: Record<string, unknown> = {}) {
     service: createLeadService({
       repository: {
         getPublishedBySlug: vi.fn(async () => listing),
-        createLead: vi.fn(async (input) => {
+        createLead: vi.fn(async (_actor, input) => {
           leads.push(input);
           return {...input, id: `lead-${leads.length}`};
         }),
@@ -72,6 +72,16 @@ describe("showcase request-intro lead service", () => {
     ]));
   });
 
+  it("uses the showcase-intro contact-writer capability for the durable lead", async () => {
+    const createLead = vi.fn(async (_actor: unknown, input: unknown) => input);
+    const fake = dependencies({repository: {getPublishedBySlug: vi.fn(async () => listing), createLead}});
+    await expect(fake.service.request(form())).resolves.toEqual({ok: true});
+    expect(createLead).toHaveBeenCalledWith(
+      expect.objectContaining({kind: "contact-writer", source: "showcase_intro"}),
+      expect.objectContaining({listingId: listing.id, email: "ada@example.com"}),
+    );
+  });
+
   it("returns invalid before side effects for malformed input or missing listings", async () => {
     const fake = dependencies();
 
@@ -112,7 +122,7 @@ describe("showcase request-intro lead service", () => {
   it("does not spend a listing lookup on rate-limited requests", async () => {
     const getPublishedBySlug = vi.fn(async () => listing);
     const fake = dependencies({
-      repository: {getPublishedBySlug, createLead: vi.fn(async (input: unknown) => input)},
+      repository: {getPublishedBySlug, createLead: vi.fn(async (_actor: unknown, input: unknown) => input)},
     });
 
     await fake.service.request(form({idempotencyKey: "first"}));
@@ -147,7 +157,7 @@ describe("showcase request-intro lead service", () => {
       emailTransport: {async send() {throw new Error("provider down");}},
       repository: {
         getPublishedBySlug: vi.fn(async () => listing),
-        createLead: vi.fn(async (input) => input.idempotencyKey === "duplicate" && fake.leads.length > 0
+        createLead: vi.fn(async (_actor, input) => input.idempotencyKey === "duplicate" && fake.leads.length > 0
           ? null
           : (fake.leads.push(input), input)),
       },

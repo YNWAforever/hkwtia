@@ -5,9 +5,11 @@ import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb, type Database} from "@/lib/db/repos/common";
+import {requireContactWriterSource, type ContactWriterActor} from "@/lib/db/repos/contacts";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {
   companyMembers,
+  contacts,
   leads,
   media,
   memberships,
@@ -85,7 +87,7 @@ export type ShowcaseRepository = Readonly<{
   getPublishedBySlug: (slug: string) => Promise<PublicShowcaseRow | null>;
   listPublishedSlugs: () => Promise<readonly string[]>;
   recordView: (slug: string) => Promise<void>;
-  createLead: (input: NewLead) => Promise<Lead | null>;
+  createLead: (actor: ContactWriterActor, input: NewLead) => Promise<Lead | null>;
 }>;
 
 function publicSort<T extends ShowcaseListing>(rows: readonly T[]): T[] {
@@ -275,7 +277,29 @@ export function databaseStore(loadDatabase: () => Promise<Database> = getDb): Sh
     },
     async insertLead(input) {
       const database = await loadDatabase();
-      return (await database.insert(leads).values(input).onConflictDoNothing({target: leads.idempotencyKey}).returning())[0] ?? null;
+      return database.transaction(async (transaction) => {
+        // Insert first: an idempotent replay must not create an orphan contact.
+        // The lead and prospect are committed together, so staff never see one
+        // without the other when contact capture fails.
+        const lead = (await transaction.insert(leads)
+          .values({...input, contactId: null})
+          .onConflictDoNothing({target: leads.idempotencyKey})
+          .returning())[0] ?? null;
+        if (!lead) return null;
+        const contact = (await transaction.insert(contacts).values({
+          displayName: lead.contactName,
+          email: lead.email,
+          locale: lead.locale,
+          source: "showcase_intro",
+        }).returning({id: contacts.id}))[0];
+        if (!contact) throw new Error("SHOWCASE_LEAD_CONTACT_CAPTURE_FAILED");
+        const linked = (await transaction.update(leads)
+          .set({contactId: contact.id, updatedAt: new Date()})
+          .where(eq(leads.id, lead.id))
+          .returning())[0];
+        if (!linked) throw new Error("SHOWCASE_LEAD_CONTACT_LINK_FAILED");
+        return linked;
+      });
     },
   };
 }
@@ -377,7 +401,8 @@ export function createShowcaseRepository(
     async recordView(slug) {
       await store.incrementViews(slugSchema.parse(slug));
     },
-    async createLead(input) {
+    async createLead(actor, input) {
+      requireContactWriterSource(actor, "showcase_intro");
       return store.insertLead(input);
     },
   };
