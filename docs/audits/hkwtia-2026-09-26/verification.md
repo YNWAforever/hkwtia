@@ -1,0 +1,22 @@
+# Verification record
+
+Record every result with date, SHA, environment, command, exit code, count, skips, and artifact path. A skipped test is not a pass.
+
+| Date (HKT) | SHA / environment | Command | Result | Scope / limitation |
+|---|---|---|---|---|
+| 2026-09-27 | audit ZIP, Node 24.18.0 | SHA-256 top-level and ZIP manifest check | 6/6 and 108/108 match | Integrity only. |
+| 2026-09-27 | ZIP baseline `e309f9e8` | `node --disable-warning=ExperimentalWarning evidence/reproduce-findings.mjs source` | exit 0 | Historical in-memory F03/F04/F08 reproduction; no current DB, endpoint or Stripe. |
+| 2026-09-27 | feature worktree `e309f9e8` | `npm ci --no-audit --no-fund` | exit 0; 1334 packages | Locked dependencies installed. |
+| 2026-09-27 | feature worktree `e309f9e8` | `npm test` | exit 1; 627 files passed, 1 failed to load, 27 skipped; 5591 tests passed, 75 skipped | Existing `production-lhci-target.test.ts` import of the `.mjs` CLI failed with `SyntaxError: Invalid or unexpected token`. Full log in the plan workspace. |
+| 2026-09-27 | feature worktree `e309f9e8` | `npm run audit:strings` | exit 0; 268 TSX files | Baseline pass. |
+| 2026-09-27 | feature worktree `e309f9e8` | `npm run lint` | exit 0; 0 errors, 59 warnings | Baseline warnings. |
+| 2026-09-27 | feature worktree `e309f9e8` | `npm run typecheck` | exit 0 | Baseline pass. |
+| 2026-09-27 | feature worktree `e309f9e8` | `npm run build` | exit 0 | Production build compiled, typechecked and generated route output without task env values. |
+| 2026-09-27 | feature worktree `e309f9e8` | `npm audit --omit=dev --audit-level=high` | exit 0; 8 below-high advisories | High-severity gate passed; one low and seven moderate remain in dependency report. |
+
+## Outstanding gates
+
+- Full suite baseline has one existing CLI import failure. The fix and rerun remain required.
+- No isolated `DATABASE_URL_TEST` or Stripe test variables in this shell. Do not run migrations, seeds or paid flows against unknown hosts.
+- Browser acceptance needs a local/preview server and test identities. The public alias's deployed SHA is unverified.
+- `npm run test:e2e` and focused browser journeys must be run and recorded before handoff.
