@@ -847,6 +847,7 @@
     "rateLimited": "此連線嘗試次數過多，請稍後再試。"
   },
   "Join": {
+    "resume": {"title": "續辦會員申請", "description": "選擇已儲存的申請，或開始另一份申請。每份申請的付款及審批記錄都會保留。", "lastSaved": "上次儲存：{date}", "continue": "繼續申請", "start": "開始申請", "new": "開始新申請", "account": "開啟會員專區", "statusUnavailable": "暫時無法讀取申請狀態，請稍後再試。", "steps": {"profile": "個人資料", "company": "公司資料", "checkout": "等待付款", "review": "審批中", "complete": "已完成"}},
     "checkoutSummary": {"processing": "系統正等待付款確認。當會籍狀態更新時，此頁會自動顯示結果。", "title": "會員付款", "description": "前往安全付款前，請先核對會籍資料。從 Stripe 返回後，你可在此決定何時繼續。", "plan": "計劃", "fee": "年費", "feeAtProvider": "確實金額將於安全付款頁確認", "status": "狀態", "pending": "待付款", "continuePayment": "繼續安全付款", "later": "稍後完成", "changeDetails": "更改公司資料", "sameAttempt": "系統會續用現有付款嘗試。更改公司資料不會更改計劃或費用。", "stillProcessing": "付款仍在確認中。你可再次查核，或聯絡 WTIA 協助確認。", "openPortal": "前往會員專區", "reviewNext": "查看申請進度", "checkAgain": "再次查核狀態", "contactSupport": "聯絡 WTIA"},
     "backToMembership": "返回會員計劃",
     "title": "加入 WTIA",

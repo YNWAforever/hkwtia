@@ -8,16 +8,16 @@ import {JoinProgress} from "@/components/join/progress";
 import {StructuredData} from "@/components/seo/structured-data";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
-import {destinationForJoin, parseJoinContinuation} from "@/lib/membership/join-navigation";
+import {parseJoinContinuation} from "@/lib/membership/join-navigation";
 import {buildPageMetadata} from "@/lib/metadata";
-import {startJoin} from "@/lib/membership/join-service";
+import {applicationsRepository} from "@/lib/db/repos/applications";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
 import {buildBreadcrumbData} from "@/lib/structured-data";
 import {localizedPath} from "@/lib/urls";
 import {planChooserItems} from "@/lib/membership/join-plan-chooser";
 
-import {requestMagicLink} from "./actions";
+import {requestMagicLink, resumeJoinAction} from "./actions";
 
 type Props = {params: Promise<{locale: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>};
 
@@ -108,15 +108,36 @@ export default async function JoinPage({params, searchParams}: Props) {
 
   const companyPlan = plan === "startup" || plan === "corporate";
   if (actor) {
-    const application = await startJoin(actor, {plan, applicationId: queryValue(query.application) ?? null}).catch(() => notFound());
-    const destination = destinationForJoin(locale, plan, application.applicationId, application.next);
-    if (destination.kind === "page") redirect(destination.href!);
-    const status = destination.next === "complete" || destination.next === "review" ? destination.next : "checkout";
+    if (actor.kind !== "member") notFound();
+    const applications = await applicationsRepository.listOwned(actor, plan);
+    const requestedId = queryValue(query.application);
+    if (requestedId && !applications.some((application) => application.id === requestedId)) notFound();
+    const resumable = applications.filter((application) => ["draft", "pending_payment", "pending_review"].includes(application.status));
     return (
       <section className="glass-card p-6 sm:p-10">
         <JoinProgress active={companyPlan ? "company" : "profile"} labels={labels} showCompany={companyPlan}/>
-        <h1 className="font-serif text-4xl font-semibold">{t(`status.${status}.title`)}</h1>
-        <p className="mt-4 text-muted-foreground">{t(`status.${status}.description`)}</p>
+        <p className="text-sm font-medium text-primary">{t(`plans.${plan}`)}</p>
+        <h1 className="mt-3 font-serif text-4xl font-semibold">{t("resume.title")}</h1>
+        <p className="mt-4 text-muted-foreground">{t("resume.description")}</p>
+        {queryValue(query.error) === "status" && <p className="mt-4 text-destructive" role="alert">{t("resume.statusUnavailable")}</p>}
+        {resumable.length > 0 && <ul className="mt-6 space-y-3">
+          {resumable.map((application) => (
+            <li className="rounded-lg border border-border p-4" key={application.id}>
+              <p className="font-medium">{t(`resume.steps.${application.status === "pending_payment" ? "checkout" : application.status === "pending_review" ? "review" : application.currentStep}`)}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{t("resume.lastSaved", {date: new Intl.DateTimeFormat(locale === "zh-HK" ? "zh-HK" : "en-HK", {dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Hong_Kong"}).format(application.updatedAt)})}</p>
+              <form action={resumeJoinAction} className="mt-3">
+                <input name="locale" type="hidden" value={locale}/><input name="plan" type="hidden" value={plan}/><input name="applicationId" type="hidden" value={application.id}/>
+                <button className="min-h-11 rounded-md bg-primary px-5 text-primary-foreground" type="submit">{t("resume.continue")}</button>
+              </form>
+            </li>
+          ))}
+        </ul>}
+        <form action={resumeJoinAction} className="mt-6">
+          <input name="locale" type="hidden" value={locale}/><input name="plan" type="hidden" value={plan}/>
+          {resumable.length > 0 && <input name="intent" type="hidden" value="new"/>}
+          <button className="min-h-11 rounded-md border border-primary px-5 text-primary" type="submit">{t(resumable.length > 0 ? "resume.new" : "resume.start")}</button>
+        </form>
+        {applications.some((application) => application.status === "completed") && <Link className="mt-5 inline-block text-primary underline" href={localizedPath(locale, "/portal")}>{t("resume.account")}</Link>}
         {trail}
       </section>
     );
@@ -131,6 +152,7 @@ export default async function JoinPage({params, searchParams}: Props) {
       <p className="mt-4 text-muted-foreground">{queryValue(query.sent) ? t("magicLinkSent") : t("authDescription")}</p>
       <div className="mt-8">
         <JoinForm action={action} fieldNames={["email"]} pendingLabel={t("sending")} submitLabel={t("sendMagicLink")}>
+          {plan && queryValue(query.application) && <input name="application" type="hidden" value={queryValue(query.application)}/>}
           <div>
             <label className="mb-2 block text-sm font-medium" htmlFor="email">{t("fields.email")}</label>
             <input aria-describedby="email-error" autoComplete="email" className="min-h-11 w-full rounded-md border border-input bg-background px-3" id="email" name="email" required type="email"/>

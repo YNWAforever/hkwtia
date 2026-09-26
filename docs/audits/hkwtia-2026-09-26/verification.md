@@ -44,6 +44,12 @@ Record every result with date, SHA, environment, command, exit code, count, skip
 | 2026-09-27 | T06 disposable PostgreSQL | `npx vitest run tests/integration/member-360-purchases.test.ts` | exit 0; 2 skipped | `RUN_POSTGRES_INTEGRATION=1` unset and Docker daemon unavailable; buyer isolation SQL not run on PostgreSQL. |
 | 2026-09-27 | T06 managed local Next server | `npx playwright test tests/e2e/admin-members.spec.ts` | exit 0; 2 skipped | Isolated M2 database and staff auth values absent; no browser acceptance. |
 
+| 2026-09-27 | T07 feature worktree | `npx vitest run` four join unit files | exit 0; 4 files, 55 tests passed | Read-only GET, applicant ownership, explicit POST, persisted steps and safe magic-link resume intent. Mocked DB/auth. |
+| 2026-09-27 | T07 feature worktree | `npx vitest run tests/integration/join-resume.test.ts` | exit 0; 3 skipped | `RUN_POSTGRES_INTEGRATION=1` unset and Docker daemon unavailable; advisory-lock concurrency remains unverified on PostgreSQL. |
+| 2026-09-27 | T07 feature worktree | `npm run typecheck`; `npm run audit:strings`; focused ESLint | exit 0 for all; 268 TSX scanned | Types, bilingual copy and changed-code lint. |
+
+| 2026-09-27 | T07 managed local Next server | `npx playwright test tests/e2e/join-resume.spec.ts` | exit 0; 2 skipped | Isolated M2 database/auth and non-Production Preview target absent; no browser acceptance. |
+
 ## Outstanding gates
 
 - Full suite baseline has one existing CLI import failure. The fix and rerun remain required.

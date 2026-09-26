@@ -1,6 +1,6 @@
 import "server-only";
 
-import {and, eq, or, sql} from "drizzle-orm";
+import {and, desc, eq, inArray, isNull, or, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";
 import {companyMembers, membershipApplications as membershipApplicationsTable, type MembershipApplication} from "@/lib/db/server-schema";
@@ -26,6 +26,47 @@ function applicationScope(actor: Actor, applicationId: string) {
 }
 
 export const applicationsRepository = {
+  /** Applicant-owned applications only; company access never grants join-resume authority. */
+  async listOwned(actor: Actor, planCode?: MembershipApplication["planCode"]): Promise<MembershipApplication[]> {
+    requireMember(actor);
+    const db = await getDb();
+    return db.select().from(membershipApplicationsTable)
+      .where(and(eq(membershipApplicationsTable.applicantUserId, actor.profileId), planCode ? eq(membershipApplicationsTable.planCode, planCode) : sql`true`))
+      .orderBy(desc(membershipApplicationsTable.updatedAt), desc(membershipApplicationsTable.id));
+  },
+  /** The advisory lock serializes find/create for an applicant, plan and ownership target. */
+  async resumeOrCreate(actor: Actor, input: {planCode: MembershipApplication["planCode"]; companyId: string | null; newApplication: boolean}): Promise<MembershipApplication> {
+    requireMember(actor);
+    const db = await getDb();
+    return db.transaction(async (tx) => {
+      const scope = `${actor.profileId}:${input.planCode}:${input.companyId ?? "unassigned"}`;
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${scope}, 0))`);
+      if (input.companyId) {
+        const member = await tx.select({userId: companyMembers.userId}).from(companyMembers)
+          .where(and(eq(companyMembers.companyId, input.companyId), eq(companyMembers.userId, actor.profileId), isNull(companyMembers.revokedAt))).limit(1);
+        if (!member[0]) forbidden();
+      }
+      if (!input.newApplication) {
+        const existing = await tx.select().from(membershipApplicationsTable)
+          .where(and(
+            eq(membershipApplicationsTable.applicantUserId, actor.profileId),
+            eq(membershipApplicationsTable.planCode, input.planCode),
+            input.companyId ? eq(membershipApplicationsTable.companyId, input.companyId) : isNull(membershipApplicationsTable.companyId),
+            inArray(membershipApplicationsTable.status, ["draft", "pending_payment", "pending_review"]),
+          ))
+          .orderBy(desc(membershipApplicationsTable.updatedAt), desc(membershipApplicationsTable.id)).limit(1);
+        if (existing[0]) return existing[0];
+      }
+      const created = await tx.insert(membershipApplicationsTable).values({
+        applicantUserId: actor.profileId,
+        planCode: input.planCode,
+        companyId: input.companyId,
+        currentStep: "profile",
+        status: "draft",
+      }).returning();
+      return created[0];
+    });
+  },
   async setCompany(actor: Actor, applicationId: string, companyId: string): Promise<MembershipApplication | null> {
     requireMember(actor);
     const db = await getDb();

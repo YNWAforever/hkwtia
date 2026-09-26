@@ -13,6 +13,13 @@ describe("join navigation", () => {
     expect(destinationForJoin("zh-HK", "startup", "application-a", next)).toEqual({kind, next, href});
   });
 
+  it("keeps a validated application ID in the same-origin callback", () => {
+    const id = "68df2a4a-8f11-4e78-97c0-7b315cff2ac4";
+    const callback = buildJoinCallback("https://preview.example.test", "en", "startup", null, id);
+    expect(new URL(callback).searchParams.get("application")).toBe(id);
+    expect(() => buildJoinCallback("https://preview.example.test", "en", "startup", null, "https://evil.example")).toThrow("INVALID_APPLICATION_ID");
+  });
+
   it("builds the magic-link callback from APP_URL and an allowlisted path", () => {
     const callback = buildJoinCallback("https://preview.example.test", "zh-HK", "corporate", "/portal/profile");
     expect(callback).toBe("https://preview.example.test/zh/join?plan=corporate&next=%2Fportal%2Fprofile");

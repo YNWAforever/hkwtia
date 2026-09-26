@@ -11,6 +11,8 @@ const repoState = vi.hoisted(() => ({
   createdCompanyInput: null as null | Record<string, unknown>,
   updatedCompanyInput: null as null | Record<string, unknown>,
   completedInput: null as null | Record<string, unknown>,
+  startInput: null as null | Record<string, unknown>,
+  startResult: {applicationId: "application-a", next: "profile"} as {applicationId: string; next: string},
   completeResult: {applicationId: "application-a", next: "checkout", membershipId: "membership-a"} as Record<string, unknown>,
 }));
 
@@ -33,6 +35,7 @@ vi.mock("@/lib/auth/server", () => ({
 }));
 vi.mock("@/lib/auth/actor", () => ({requireActor: async () => ({kind: "member", userId: "user-a", profileId: "user-a"}), getActor: vi.fn()}));
 vi.mock("@/lib/db/repos/applications", () => ({applicationsRepository: {getById: async () => repoState.application, update: async () => repoState.application}}));
+vi.mock("@/lib/db/repos/memberships", () => ({membershipsRepository: {getByApplicationId: async () => ({id: "membership-a"})}}));
 vi.mock("@/lib/db/repos/companies", () => ({companiesRepository: {
   createForApplication: async (_actor: unknown, _applicationId: string, input: Record<string, unknown>) => {repoState.createdCompanyInput = input; return repoState.company;},
   getById: async () => repoState.company,
@@ -61,14 +64,14 @@ vi.mock("@/lib/billing/checkout-service", () => ({createCheckoutSession: async (
   return {url: "https://checkout.stripe.test/session-a"};
 }}));
 vi.mock("@/lib/membership/join-service", () => ({
-  startJoin: async () => ({applicationId: "application-a"}),
+  startJoin: async (_actor: unknown, input: Record<string, unknown>) => {repoState.startInput = input; return repoState.startResult;},
   completeApplication: async (_actor: unknown, input: Record<string, unknown>) => {
     repoState.completedInput = input;
     return repoState.completeResult;
   },
 }));
 
-import {beginMembershipCheckoutAction, requestMagicLink, saveCompany, saveProfile} from "@/app/[locale]/(join)/join/actions";
+import {beginMembershipCheckoutAction, requestMagicLink, resumeJoinAction, saveCompany, saveProfile} from "@/app/[locale]/(join)/join/actions";
 
 describe("join Server Actions", () => {
   beforeEach(() => {
@@ -82,10 +85,27 @@ describe("join Server Actions", () => {
     repoState.updatedCompanyInput = null;
     repoState.linkedContactInput = null;
     repoState.completedInput = null;
+    repoState.startInput = null;
+    repoState.startResult = {applicationId: "application-a", next: "profile"};
     repoState.completeResult = {applicationId: "application-a", next: "checkout", membershipId: "membership-a"};
     repoState.application = {id: "application-a", applicantUserId: "user-a", companyId: null, planCode: "startup", currentStep: "company", status: "draft"};
     process.env.APP_URL = "https://m1-preview.example.test";
     process.env.NEXT_PUBLIC_SITE_URL = "https://canonical-marketing.example.test";
+  });
+
+  it("creates a join draft only after an explicit POST and routes a saved payment step", async () => {
+    const start = new FormData();
+    start.set("locale", "en"); start.set("plan", "startup"); start.set("intent", "new");
+    await expect(resumeJoinAction(start)).rejects.toThrow("NEXT_REDIRECT");
+    expect(repoState.startInput).toEqual({plan: "startup", applicationId: null, companyId: null, newApplication: true});
+    expect(redirectState.url).toBe("/join/profile?plan=startup&application=application-a");
+
+    repoState.startResult = {applicationId: "application-a", next: "checkout"};
+    const resume = new FormData();
+    resume.set("locale", "en"); resume.set("plan", "startup"); resume.set("applicationId", "application-a");
+    await expect(resumeJoinAction(resume)).rejects.toThrow("NEXT_REDIRECT");
+    expect(repoState.startInput).toEqual({plan: "startup", applicationId: "application-a", companyId: null, newApplication: false});
+    expect(redirectState.url).toBe("/join/checkout?membership_id=membership-a");
   });
 
   it("returns a localized field error without calling auth for an invalid email", async () => {
@@ -108,6 +128,15 @@ describe("join Server Actions", () => {
       callbackURL: "https://m1-preview.example.test/zh/join?plan=startup&next=%2Fportal",
     });
     expect(redirectState.url).toBe("/zh/join?plan=startup&sent=1&next=%2Fportal");
+  });
+
+  it("carries a validated application resume ID through magic-link sign-in", async () => {
+    const id = "68df2a4a-8f11-4e78-97c0-7b315cff2ac4";
+    const form = new FormData();
+    form.set("email", "member@example.test"); form.set("application", id);
+    await expect(requestMagicLink("en", "startup", null, {}, form)).rejects.toThrow("NEXT_REDIRECT");
+    expect(authState.input?.callbackURL).toBe(`https://m1-preview.example.test/join?plan=startup&application=${id}`);
+    expect(redirectState.url).toBe(`/join?plan=startup&sent=1&application=${id}`);
   });
 
   it("carries a portal continuation through the auth request and sent state", async () => {
