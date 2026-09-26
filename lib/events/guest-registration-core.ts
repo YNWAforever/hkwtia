@@ -1,29 +1,18 @@
 import "server-only";
 
 import {createHmac, randomUUID, timingSafeEqual} from "node:crypto";
-import {z} from "zod";
 
 import {contactWriterActor, type ContactsRepository} from "@/lib/db/repos/contacts";
 import type {EventGuestsRepository, GuestRegistrationDisposition} from "@/lib/db/repos/event-guests";
 import type {RateLimiter} from "@/lib/security/rate-limit";
-import {normalizeWhatsAppNumber} from "@/lib/whatsapp/number";
-
-const inputSchema = z.object({
-  eventId: z.string().uuid(),
-  name: z.string().trim().min(1).max(200),
-  email: z.string().trim().email().max(320),
-  locale: z.enum(["en", "zh-HK"]),
-  whatsappNumber: z.string().trim().max(32),
-  organisation: z.string().trim().max(200),
-  marketingConsent: z.boolean(),
-  website: z.string().trim(),
-});
+import {parseGuestRsvp, type GuestRsvpFieldErrors} from "@/lib/events/guest-registration-input";
 
 export type GuestRsvpResult = Readonly<
   | {ok: true; disposition: GuestRegistrationDisposition | "confirmation_pending"}
-  | {ok: false; code: "invalid" | "rate_limited" | "closed" | "external" | "unavailable"}
+  | {ok: false; code: "invalid"; fieldErrors: GuestRsvpFieldErrors}
+  | {ok: false; code: "unavailable"; errorId?: string}
+  | {ok: false; code: "rate_limited" | "closed" | "external"}
 >;
-
 export type GuestConfirmation = Readonly<{
   to: string;
   name: string;
@@ -91,20 +80,9 @@ export function createGuestRegistrationService(dependencies: GuestRegistrationDe
     async submit(formData: FormData): Promise<GuestRsvpResult> {
       // Honeypot first, exactly as the interest form: bots fill every field.
       if (textValue(formData, "website").trim().length > 0) return {ok: true, disposition: "registered"};
-      const parsed = inputSchema.safeParse({
-        eventId: textValue(formData, "eventId"),
-        name: textValue(formData, "name"),
-        email: textValue(formData, "email"),
-        locale: textValue(formData, "locale"),
-        whatsappNumber: textValue(formData, "whatsappNumber"),
-        organisation: textValue(formData, "organisation"),
-        marketingConsent: formData.get("marketingConsent") === "on",
-        website: textValue(formData, "website"),
-      });
-      if (!parsed.success) return {ok: false, code: "invalid"};
-      const whatsappNumber = parsed.data.whatsappNumber ? normalizeWhatsAppNumber(parsed.data.whatsappNumber) : null;
-      if (parsed.data.whatsappNumber && !whatsappNumber) return {ok: false, code: "invalid"};
-
+      const parsed = parseGuestRsvp(formData);
+      if (!parsed.ok) return {ok: false, code: "invalid", fieldErrors: parsed.fieldErrors};
+      const whatsappNumber = parsed.data.normalizedWhatsAppNumber;
       // Keyed on the client, not the email: the email is attacker-chosen.
       const clientIp = await dependencies.resolveClientIp();
       const email = parsed.data.email.toLowerCase();
@@ -134,27 +112,31 @@ export function createGuestRegistrationService(dependencies: GuestRegistrationDe
         if (message === "EVENT_NOT_FOUND") return {ok: false, code: "unavailable"};
         // A Server Action that throws hands the browser an opaque error page; the
         // form knows how to render `unavailable`, so an outage degrades to that.
-        console.error("guest-rsvp", error);
-        return {ok: false, code: "unavailable"};
+        const errorId = randomUUID();
+        console.error("guest-rsvp-register", errorId, error instanceof Error ? error.name : "unknown");
+        return {ok: false, code: "unavailable", errorId};
       }
 
       // The contact is the funnel spine (D-6); its failure must not undo a registration.
-      await dependencies.contacts.upsertFromInterestForm(actor, {
-        email,
-        displayName: parsed.data.name,
-        locale: parsed.data.locale,
-        whatsappNumber,
-        whatsappOptIn: parsed.data.marketingConsent && whatsappNumber !== null,
-        consentSource: "rsvp",
-      }).catch(() => undefined);
-
+      try {
+        await dependencies.contacts.upsertFromInterestForm(actor, {
+          email,
+          displayName: parsed.data.name,
+          locale: parsed.data.locale,
+          whatsappNumber,
+          whatsappOptIn: parsed.data.marketingConsent && whatsappNumber !== null,
+          consentSource: "rsvp",
+        });
+      } catch {
+        // The registration is committed; contact enrichment cannot invalidate it.
+      }
       // A signed digest is reproducible from the stored row for a failed email retry.
       // The transport uses the same idempotency key if an earlier send did reach it.
       if (result.status !== "attended") {
-        const cancelUrl = new URL("/api/events/guest/cancel", dependencies.appUrl);
-        cancelUrl.searchParams.set("token", signedGuestCancelToken(dependencies.secret, result.cancelTokenDigest));
-        cancelUrl.searchParams.set("locale", parsed.data.locale);
         try {
+          const cancelUrl = new URL("/api/events/guest/cancel", dependencies.appUrl);
+          cancelUrl.searchParams.set("token", signedGuestCancelToken(dependencies.secret, result.cancelTokenDigest));
+          cancelUrl.searchParams.set("locale", parsed.data.locale);
           await dependencies.sendConfirmation({
             to: email,
             name: parsed.data.name,
@@ -167,7 +149,7 @@ export function createGuestRegistrationService(dependencies: GuestRegistrationDe
             cancelUrl: cancelUrl.toString(),
           });
         } catch {
-          // The seat is saved, and a repeat submit can regenerate this exact link.
+          // The registration is saved. A repeat submit reuses its idempotency key and cancellation digest.
           return {ok: true, disposition: "confirmation_pending"};
         }
       }

@@ -14,6 +14,10 @@ Record every result with date, SHA, environment, command, exit code, count, skip
 | 2026-09-27 | feature worktree `e309f9e8` | `npm run build` | exit 0 | Production build compiled, typechecked and generated route output without task env values. |
 | 2026-09-27 | feature worktree `e309f9e8` | `npm audit --omit=dev --audit-level=high` | exit 0; 8 below-high advisories | High-severity gate passed; one low and seven moderate remain in dependency report. |
 
+| 2026-09-27 | T01 feature worktree | `npx vitest run` four guest RSVP files | exit 0; 4 files, 15 tests passed | Empty/malformed fields, dependency failure, retained values, saved-registration send failure. No DB fixture. |
+| 2026-09-27 | T01 local managed Next server | `npx playwright test tests/e2e/guest-rsvp-recovery.spec.ts` | exit 0; 2 skipped | Both locales lacked an open RSVP event fixture; this is not browser acceptance. |
+| 2026-09-27 | T01 feature worktree | `npm run typecheck` | exit 0 | TypeScript contract pass. |
+
 ## Outstanding gates
 
 - Full suite baseline has one existing CLI import failure. The fix and rerun remain required.

@@ -118,6 +118,7 @@ export default async function EventPage({params}: Props) {
     marketingConsent: t("guest.marketingConsent"), consent: t("guest.consent"), website: t("guest.website"), submit: t("guest.submit"), submitting: t("guest.submitting"),
     registered: t("guest.registered"), waitlist: t("guest.waitlist"), already: t("guest.already"), confirmationPending: t("guest.confirmationPending"), invalid: t("guest.invalid"), rateLimited: t("guest.rateLimited"),
     closed: t("guest.closed"), external: t("guest.external"), unavailable: t("guest.unavailable"),
+    requiredField: t("guest.requiredField"), invalidField: t("guest.invalidField"), invalidEmail: t("guest.invalidEmail"), invalidWhatsapp: t("guest.invalidWhatsapp"), errorReference: t("guest.errorReference"),
   };
   const ticketLabels = {
     heading: tTicket("heading"), buyerName: tTicket("buyerName"), buyerEmail: tTicket("buyerEmail"),

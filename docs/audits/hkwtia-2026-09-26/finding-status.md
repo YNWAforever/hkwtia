@@ -4,7 +4,7 @@ T00 initial classification, 2026-09-27 Asia/Hong_Kong. The remote and feature br
 
 | ID | Task | Initial classification | Status | Current evidence / remaining proof |
 |---|---|---|---|---|
-| F01 | T01 | still-present | open | `submitGuestRsvpAction` initializes env and transport before validation. Historical browser error observed; precise deployed cause needs logs and browser retest. |
+| F01 | T01 | still-present | code-verified; browser fixture blocked | Validation now runs before env/transport, with field errors, retained input, safe error IDs and committed-registration confirmation recovery. Four focused unit files pass (15 tests). Local browser cases skipped because no open RSVP fixture; deployed cause and staging retest remain. |
 | F02 | T06 | still-present | open | `member-table.tsx` has no detail link. |
 | F03 | T03 | still-present | open | `eventFormInput` lacks `externalRegistrationUrl`; offline reproduction confirmed. |
 | F04 | T02 | still-present | open | Ticket write path lacks visibility and membership authorization; offline stub accepted private modes. |

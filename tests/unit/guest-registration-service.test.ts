@@ -2,7 +2,7 @@ import {describe, expect, it, vi} from "vitest";
 import {createHmac} from "node:crypto";
 
 import type {GuestRegistrationResult} from "@/lib/db/repos/event-guests";
-import {cancelTokenDigest, createGuestRegistrationService} from "@/lib/events/guest-registration-core";
+import {createGuestRegistrationService} from "@/lib/events/guest-registration-core";
 import {createInMemoryRateLimiter} from "@/lib/security/rate-limit";
 
 const EVENT = "22222222-2222-4222-8222-222222222222";
@@ -64,8 +64,8 @@ describe("guest registration service (programme B-4)", () => {
 
   it("rejects invalid input and rate-limits the client", async () => {
     const {subject, register} = service();
-    await expect(subject.submit(form({email: "nope"}))).resolves.toEqual({ok: false, code: "invalid"});
-    await expect(subject.submit(form({whatsappNumber: "12"}))).resolves.toEqual({ok: false, code: "invalid"});
+    await expect(subject.submit(form({email: "nope"}))).resolves.toMatchObject({ok: false, code: "invalid", fieldErrors: expect.any(Object)});
+    await expect(subject.submit(form({whatsappNumber: "12"}))).resolves.toMatchObject({ok: false, code: "invalid", fieldErrors: expect.any(Object)});
     expect(register).not.toHaveBeenCalled();
     await subject.submit(form());
     await expect(subject.submit(form({email: "other@example.hk"}))).resolves.toEqual({ok: false, code: "rate_limited"});
@@ -107,9 +107,30 @@ describe("guest registration service (programme B-4)", () => {
     const {subject, register, send} = service();
     const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
     register.mockRejectedValueOnce(new Error("connection reset"));
-    await expect(subject.submit(form())).resolves.toEqual({ok: false, code: "unavailable"});
+    await expect(subject.submit(form())).resolves.toMatchObject({ok: false, code: "unavailable", errorId: expect.any(String)});
     expect(send).not.toHaveBeenCalled();
-    expect(error).toHaveBeenCalledWith("guest-rsvp", expect.any(Error));
+    expect(error).toHaveBeenCalledWith("guest-rsvp-register", expect.any(String), "Error");
     error.mockRestore();
+  });
+  it("returns a safe reference for an unexpected repository outage", async () => {
+    const {subject, register, send} = service();
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    try {
+      register.mockRejectedValueOnce(new Error("PRIVATE_DB_DETAILS"));
+      const result = await subject.submit(form());
+      expect(result).toMatchObject({ok: false, code: "unavailable", errorId: expect.any(String)});
+      expect(JSON.stringify(result)).not.toContain("PRIVATE_DB_DETAILS");
+      expect(JSON.stringify(log.mock.calls)).not.toContain("PRIVATE_DB_DETAILS");
+      expect(send).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+    }
+  });
+
+  it("keeps a saved registration successful if contact enrichment throws synchronously", async () => {
+    const {subject, upsertContact, send} = service();
+    upsertContact.mockImplementationOnce(() => { throw new Error("CONTACT_SYNC_FAILURE"); });
+    await expect(subject.submit(form())).resolves.toEqual({ok: true, disposition: "registered"});
+    expect(send).toHaveBeenCalledTimes(1);
   });
 });
