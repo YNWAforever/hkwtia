@@ -8,6 +8,8 @@ const seatId = "3f1c9d5e-6a2b-4c8d-9e0f-1a2b3c4d5e6f";
 
 const labels = {
   caption: "Attendees",
+  search: "Search name, email or ticket ID",
+  noMatches: "No attendees match this search.",
   kind: "Type",
   kinds: {member: "Member", guest: "Guest", ticket: "Ticket"},
   name: "Name",
@@ -51,6 +53,44 @@ function renderTable(seatCheckInAction: (state: EventActionState, formData: Form
     seatCheckInAction={seatCheckInAction}
   />);
 }
+
+describe("the door list's guest check-in", () => {
+  it("submits a guest registration ID and filters by email or ticket seat", async () => {
+    const guestAction = vi.fn(async (_state: EventActionState, _formData: FormData): Promise<EventActionState> => ({status: "success", message: "Checked in"}));
+    render(<AttendeeTable
+      attendees={[
+        {kind: "guest", profileId: null, guestId: "guest-1", seatId: null, orderId: null, displayName: "Guest", email: "guest@example.test", organisation: null, status: "registered", checkedInAt: null},
+        ticketRow(),
+      ]}
+      checkInAction={async () => ({})} guestCheckInAction={guestAction} labels={labels} locale="en"
+      resendPassMessages={resendMessages} resendPassPath="/en/admin/events-mgmt/event-1" seatCheckInAction={async () => ({})}
+    />);
+    fireEvent.change(screen.getByRole("searchbox", {name: labels.search}), {target: {value: "guest@example.test"}});
+    expect(screen.getByText("guest@example.test")).toBeInTheDocument();
+    expect(screen.queryByText("ada@example.test")).not.toBeInTheDocument();
+    fireEvent.submit(screen.getByRole("button", {name: "Check in"}).closest("form")!);
+    await waitFor(() => expect(guestAction).toHaveBeenCalledTimes(1));
+    expect(guestAction.mock.calls[0]![1].get("registrationId")).toBe("guest-1");
+    expect(guestAction.mock.calls[0]![1].get("profileId")).toBeNull();
+    fireEvent.change(screen.getByRole("searchbox", {name: labels.search}), {target: {value: seatId}});
+    expect(screen.getByText("ada@example.test")).toBeInTheDocument();
+    expect(screen.queryByText("guest@example.test")).not.toBeInTheDocument();
+  });
+
+  it("offers the registration-keyed check-in control to a confirmed guest", () => {
+    render(<AttendeeTable
+      attendees={[{kind: "guest", profileId: null, guestId: "guest-1", seatId: null, orderId: null, displayName: "Guest", email: "guest@example.test", organisation: null, status: "registered", checkedInAt: null}]}
+      checkInAction={async () => ({})}
+      guestCheckInAction={async () => ({})}
+      labels={labels}
+      locale="en"
+      resendPassMessages={resendMessages}
+      resendPassPath="/en/admin/events-mgmt/event-1"
+      seatCheckInAction={async () => ({})}
+    />);
+    expect(screen.getByRole("button", {name: "Check in"})).toBeInTheDocument();
+  });
+});
 
 describe("the door list's ticket check-in fallback", () => {
   // Spec section 4.3: the door list carries a Check in action for a ticket seat

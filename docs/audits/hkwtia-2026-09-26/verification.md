@@ -50,6 +50,11 @@ Record every result with date, SHA, environment, command, exit code, count, skip
 
 | 2026-09-27 | T07 managed local Next server | `npx playwright test tests/e2e/join-resume.spec.ts` | exit 0; 2 skipped | Isolated M2 database/auth and non-Production Preview target absent; no browser acceptance. |
 
+| 2026-09-27 | T08 feature worktree | `npx vitest run` four guest/action/table/presentation files | exit 0; 4 files, 31 tests passed | Registration-keyed UI, search, actor guard, locked-write query order, repeat/ineligible mapping and copy. Mocked DB. |
+| 2026-09-27 | T08 disposable PostgreSQL | `npx vitest run tests/integration/guest-check-in.test.ts` | exit 0; 2 skipped | `RUN_POSTGRES_INTEGRATION=1` unset and Docker daemon unavailable; concurrent audit count and transaction rollback not executed on PostgreSQL. |
+| 2026-09-27 | T08 feature worktree | `npm run typecheck`; `npm run audit:strings`; focused ESLint | exit 0 for all; 268 TSX scanned | Types, bilingual copy, changed-code lint. |
+| 2026-09-27 | T08 managed local Next server | `npx playwright test tests/e2e/event-check-in.spec.ts` | exit 0; 2 skipped | Isolated staff/database/confirmed guest and non-Production Preview absent; no 390px browser acceptance. |
+
 ## Outstanding gates
 
 - Full suite baseline has one existing CLI import failure. The fix and rerun remain required.

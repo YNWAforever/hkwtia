@@ -4,9 +4,10 @@ import {revalidatePath} from "next/cache";
 import {notFound} from "next/navigation";
 import {z} from "zod";
 
-import {runCancelEventAction, runCheckInAction, runEventFormAction, runMemberCheckInAction, type CancelEventMessages, type EventActionState, type MemberCheckInMessages} from "@/lib/admin/event-action-core";
+import {runCancelEventAction, runCheckInAction, runEventFormAction, runMemberCheckInAction, runGuestCheckInAction, type GuestCheckInMessages, type CancelEventMessages, type EventActionState, type MemberCheckInMessages} from "@/lib/admin/event-action-core";
 import {eventFormInput} from "@/lib/admin/event-form-input";
 import {checkInAttendee} from "@/lib/admin/events";
+import {checkInGuest} from "@/lib/admin/guest-check-in";
 import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
 import {requireAdminActor} from "@/lib/auth/actor";
 import {sendSeatPass, ticketProcessorDependencies} from "@/lib/billing/ticket-webhook-processor";
@@ -78,6 +79,20 @@ export async function checkInEventAttendeeAction(eventId: string, path: string, 
       // A cancelled event's refusal wrote nothing, so there is nothing to
       // revalidate; a real check-in re-renders the row as attended.
       if (outcome.disposition !== "event_cancelled") revalidatePath(path);
+      return outcome;
+    }});
+  } catch (error) {
+    if (isAuthorizationDenial(error)) notFound();
+    throw error;
+  }
+}
+
+export async function checkInEventGuestAction(eventId: string, path: string, messages: GuestCheckInMessages, state: EventActionState, formData: FormData): Promise<EventActionState> {
+  try {
+    return await runGuestCheckInAction(state, formData, {...messages, mutate: async (data) => {
+      const registrationId = z.string().uuid().parse(data.get("registrationId"));
+      const outcome = await checkInGuest(await requireAdminActor(), {eventId, registrationId});
+      if (outcome === "checked_in") revalidatePath(path);
       return outcome;
     }});
   } catch (error) {

@@ -90,6 +90,38 @@ describe("eventGuestsRepository (programme B-4)", () => {
     expect(closed.execute).toHaveBeenCalledTimes(1);
   });
 
+  it("checks in a confirmed guest once and audits the registration ID", async () => {
+    const staff = {kind: "staff", userId: "staff", profileId: "staff"} as const;
+    const registrationId = "33333333-3333-4333-8333-333333333333";
+    const input = {eventId: EVENT, registrationId};
+    const first = database([[{status: "published"}], [{status: "registered", checked_in_at: null}], [], []]);
+    await expect(createEventGuestsRepository(async () => first.db as never).checkInGuest(staff, input)).resolves.toBe("checked_in");
+    expect(first.execute).toHaveBeenCalledTimes(4);
+    expect(sqlText((first.execute.mock.calls[2] as unknown[])[0])).toContain("checked_in_at");
+    expect(sqlText((first.execute.mock.calls[3] as unknown[])[0])).toContain("event.guest.checked_in");
+    expect(sqlText((first.execute.mock.calls[3] as unknown[])[0])).toContain(registrationId);
+    const repeat = database([[{status: "published"}], [{status: "attended", checked_in_at: new Date()}]]);
+    await expect(createEventGuestsRepository(async () => repeat.db as never).checkInGuest(staff, input)).resolves.toBe("already_checked_in");
+    expect(repeat.execute).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects cancelled events, waitlisted guests, other-event IDs and nonstaff actors without writes", async () => {
+    const staff = {kind: "staff", userId: "staff", profileId: "staff"} as const;
+    const input = {eventId: EVENT, registrationId: "33333333-3333-4333-8333-333333333333"};
+    for (const rows of [
+      [[{status: "cancelled"}]],
+      [[{status: "published"}], [{status: "waitlist", checked_in_at: null}]],
+      [[{status: "published"}], []],
+    ]) {
+      const {db, execute} = database(rows);
+      await expect(createEventGuestsRepository(async () => db as never).checkInGuest(staff, input)).resolves.toBe("ineligible");
+      expect(execute.mock.calls.length).toBeLessThanOrEqual(2);
+    }
+    const noAccess = database([]);
+    await expect(createEventGuestsRepository(async () => noAccess.db as never).checkInGuest({kind: "anonymous", userId: null}, input)).rejects.toThrow("FORBIDDEN");
+    expect(noAccess.execute).not.toHaveBeenCalled();
+  });
+
   it("cancels by token digest and reports unknown tokens", async () => {
     const {db, execute} = database([[{id: "g1", event_id: EVENT}], []]);
     await expect(createEventGuestsRepository(async () => db as never).cancelByToken(contactWriterActor("event_guest"), "d".repeat(64))).resolves.toBe("cancelled");

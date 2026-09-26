@@ -79,6 +79,25 @@ export async function runMemberCheckInAction(_state: EventActionState, formData:
  * branch a seat can land on has a distinct string and none of them can be
  * mistaken for another.
  */
+export type GuestCheckInMessages = Readonly<{
+  successMessage: string;
+  alreadyMessage: string;
+  ineligibleMessage: string;
+  errorMessage: string;
+}>;
+
+export async function runGuestCheckInAction(_state: EventActionState, formData: FormData, options: GuestCheckInMessages & Readonly<{mutate: (formData: FormData) => Promise<"checked_in" | "already_checked_in" | "ineligible">}>): Promise<EventActionState> {
+  try {
+    const outcome = await options.mutate(formData);
+    if (outcome === "ineligible") return {status: "error", message: options.ineligibleMessage};
+    if (outcome === "already_checked_in") return {status: "success", message: options.alreadyMessage};
+    return {status: "success", message: options.successMessage};
+  } catch (error) {
+    if (isAuthorizationDenial(error)) throw error;
+    return {status: "error", message: options.errorMessage};
+  }
+}
+
 export type SeatCheckInMessages = Readonly<{
   successMessage: string;
   successMessageAlready: string;

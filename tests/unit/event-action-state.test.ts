@@ -1,7 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 import {z} from "zod";
 
-import {runCheckInAction, runEventFormAction} from "@/lib/admin/event-action-core";
+import {runCheckInAction, runEventFormAction, runGuestCheckInAction} from "@/lib/admin/event-action-core";
 import {runEventRegistrationAction} from "@/lib/portal/event-action-core";
 
 const form = (values: Record<string, string>) => { const data = new FormData(); for (const [key, value] of Object.entries(values)) data.set(key, value); return data; };
@@ -23,6 +23,19 @@ describe("safe localized Event action states", () => {
   it("returns the recognized Event disposition without exposing mutation payloads", async () => {
     const mutate = vi.fn(async () => ({disposition: "registered" as const, privatePayload: "do not expose"}));
     await expect(runEventRegistrationAction({}, form({eventId: "11111111-1111-4111-8111-111111111111"}), {messages, mutate})).resolves.toEqual({code: "registered", message: "Registered."});
+  });
+
+  it("reports guest admission, repeat and ineligible results without claiming a new check-in", async () => {
+    const guestMessages = {successMessage: "Checked in.", alreadyMessage: "Already checked in.", ineligibleMessage: "Not eligible.", errorMessage: "Try again."};
+    const data = form({registrationId: "guest-id"});
+    for (const [outcome, status, message] of [
+      ["checked_in", "success", "Checked in."],
+      ["already_checked_in", "success", "Already checked in."],
+      ["ineligible", "error", "Not eligible."],
+    ] as const) {
+      await expect(runGuestCheckInAction({}, data, {...guestMessages, mutate: async () => outcome})).resolves.toEqual({status, message});
+    }
+    await expect(runGuestCheckInAction({}, data, {...guestMessages, mutate: async () => { throw new Error("private guest record"); }})).resolves.toEqual({status: "error", message: "Try again."});
   });
 
   it.each(["UNAUTHORIZED", "FORBIDDEN"])("rethrows %s from admin Event mutations for 404 mapping", async (failure) => {

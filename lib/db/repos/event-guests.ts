@@ -3,6 +3,9 @@ import "server-only";
 import {sql} from "drizzle-orm";
 import {z} from "zod";
 
+import {requireAdmin} from "@/lib/auth/authorize";
+import type {Actor} from "@/lib/membership/lifecycle";
+
 import {contactWriterActor, type ContactWriterActor} from "@/lib/db/repos/contacts";
 import {getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
@@ -20,6 +23,8 @@ const guestInputSchema = z.object({
   cancelTokenDigest: z.string().regex(/^[0-9a-f]{64}$/),
 }).strict();
 const digestSchema = z.string().regex(/^[0-9a-f]{64}$/);
+const guestCheckInSchema = z.object({eventId: z.string().uuid(), registrationId: z.string().uuid()}).strict();
+export type GuestCheckInDisposition = "checked_in" | "already_checked_in" | "ineligible";
 
 export type GuestRegistrationInput = z.input<typeof guestInputSchema>;
 export type GuestRegistrationDisposition = "registered" | "waitlist" | "already_registered";
@@ -131,6 +136,36 @@ export function createEventGuestsRepository(loadDatabase: AutomationDatabaseLoad
                   ${JSON.stringify({eventId: parsed.eventId, status: disposition})}::jsonb)
         `);
         return {id, disposition, status: disposition, cancelTokenDigest: parsed.cancelTokenDigest, eventTitle, slug};
+      });
+    },
+
+    /** Staff-only admission. Event and guest row locks serialize cancellation and repeat taps. */
+    async checkInGuest(actor: Actor, input: unknown): Promise<GuestCheckInDisposition> {
+      requireAdmin(actor);
+      const parsed = guestCheckInSchema.parse(input);
+      const database = await loadDatabase();
+      return database.transaction(async (transaction) => {
+        const event = rowsFrom(await transaction.execute(sql`
+          SELECT status FROM ${events} WHERE ${events.id} = ${parsed.eventId} FOR UPDATE
+        `))[0];
+        if (!event || event.status !== "published") return "ineligible";
+        const guest = rowsFrom(await transaction.execute(sql`
+          SELECT status, checked_in_at FROM ${eventGuestRegistrations}
+          WHERE ${eventGuestRegistrations.eventId} = ${parsed.eventId} AND ${eventGuestRegistrations.id} = ${parsed.registrationId} FOR UPDATE
+        `))[0];
+        if (!guest) return "ineligible";
+        if (guest.checked_in_at || guest.status === "attended") return "already_checked_in";
+        if (guest.status !== "registered") return "ineligible";
+        await transaction.execute(sql`
+          UPDATE ${eventGuestRegistrations} SET status = 'attended', checked_in_at = ${now()}, updated_at = now()
+          WHERE ${eventGuestRegistrations.eventId} = ${parsed.eventId} AND ${eventGuestRegistrations.id} = ${parsed.registrationId}
+        `);
+        await transaction.execute(sql`
+          INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata)
+          VALUES (${actor.profileId}, ${actor.kind}, 'event.guest.checked_in', 'event_guest_registration', ${parsed.registrationId},
+                  ${JSON.stringify({eventId: parsed.eventId})}::jsonb)
+        `);
+        return "checked_in";
       });
     },
 
