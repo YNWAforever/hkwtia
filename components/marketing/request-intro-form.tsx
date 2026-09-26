@@ -1,9 +1,10 @@
 "use client";
 
-import {useActionState} from "react";
+import {useActionState, useRef} from "react";
 
 import type {AppLocale} from "@/i18n/routing";
 import type {LeadRequestResult} from "@/lib/showcase/lead-actions";
+import {newAttemptId} from "@/lib/random-id";
 
 type Labels = Readonly<{
   name: string;
@@ -32,10 +33,22 @@ export function RequestIntroForm({
   slug: string;
   labels: Labels;
 }>) {
+  const attemptId = useRef<string | null>(null);
+  const tokenInput = useRef<HTMLInputElement>(null);
   const [state, formAction, pending] = useActionState(
     async (_previous: FormState, formData: FormData): Promise<FormState> => {
+      // onSubmit snapshots the key before React queues an action. A queued
+      // submit keeps its captured key even after an earlier action succeeds.
+      const submittedKey = formData.get("idempotencyKey");
+      attemptId.current = typeof submittedKey === "string" && submittedKey
+        ? submittedKey
+        : attemptId.current ?? newAttemptId();
+      formData.set("idempotencyKey", attemptId.current);
       const result = await action(formData);
-      if (result.ok) return {status: "success"};
+      if (result.ok) {
+        attemptId.current = null;
+        return {status: "success"};
+      }
       return {status: result.code};
     },
     initialState,
@@ -48,7 +61,11 @@ export function RequestIntroForm({
         ? labels.rateLimited
         : "";
 
-  return <form action={formAction} className="partner-form" noValidate>
+  return <form action={formAction} className="partner-form" noValidate onSubmit={() => {
+    attemptId.current ??= newAttemptId();
+    if (tokenInput.current) tokenInput.current.value = attemptId.current;
+  }}>
+    <input name="idempotencyKey" ref={tokenInput} type="hidden" />
     <input name="slug" type="hidden" value={slug} />
     <input name="locale" type="hidden" value={locale} />
     <div className="form-grid">
