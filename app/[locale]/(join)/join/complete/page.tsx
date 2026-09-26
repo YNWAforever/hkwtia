@@ -7,6 +7,7 @@ import type {AppLocale} from "@/i18n/routing";
 import {buildPageMetadata} from "@/lib/metadata";
 import {getActor} from "@/lib/auth/actor";
 import {loadJoinCompletionState, type JoinCompletionDisplay} from "@/lib/membership/join-billing-state";
+import {localizedPath} from "@/lib/urls";
 
 type Props = Readonly<{
   params: Promise<{locale: string}>;
@@ -43,10 +44,11 @@ export default async function CompletePage({params, searchParams}: Props) {
   const t = await getTranslations("Join");
   // Map the webhook-authoritative display state to the same status.{key}.{title,description}
   // copy /join/page.tsx's own resumption rendering already uses for these three outcomes.
-  const displayToMessageKey: Record<JoinCompletionDisplay, "complete" | "review" | "checkout"> = {
+  const displayToMessageKey: Record<JoinCompletionDisplay, "complete" | "review" | "checkout" | "failed"> = {
     active: "complete",
     review: "review",
     processing: "checkout",
+    failed: "failed",
   };
   const messageKey = displayToMessageKey[state.display];
   return (
@@ -55,12 +57,18 @@ export default async function CompletePage({params, searchParams}: Props) {
       <div className="mt-4 text-muted-foreground">
         <CheckoutStatus
           labels={{
-            processing: t("status.checkout.description"),
+            processing: t("checkoutSummary.processing"),
             active: t("status.complete.description"),
             review: t("status.review.description"),
-            failed: t("errors.save"),
+            failed: t("status.failed.description"),
           }}
           status={state.display}
+          statusUrl={`/api/membership/checkout-status?${new URLSearchParams({membershipId: state.membership.id})}`}
+          timeoutLabel={t("checkoutSummary.stillProcessing")}
+          portal={{href: localizedPath(locale, "/portal"), label: t("checkoutSummary.openPortal")}}
+          review={{href: `${localizedPath(locale, "/join")}?${new URLSearchParams({plan: state.membership.planCode, application: state.application.id})}`, label: t("checkoutSummary.reviewNext")}}
+          manualCheck={{href: `${localizedPath(locale, "/join/complete")}?${new URLSearchParams({membership_id: state.membership.id})}`, label: t("checkoutSummary.checkAgain")}}
+          support={{href: localizedPath(locale, "/contact"), label: t("checkoutSummary.contactSupport")}}
         />
       </div>
     </section>

@@ -16,3 +16,9 @@ Run a read-only mismatch inventory before private ticketing: `SELECT id, visibil
 ## T04 schema and rollback gate
 
 Apply `0043_event_checkout_recoveries` after 0042 and before the web build that imports the recovery repository. In the isolated test environment, verify one attached open session survives cancel/reload, a paid or provider-expired session is not duplicated, an unrelated member receives 404, and a provisional-cookie persistence failure cannot mint a new key after reload. Do not deploy the T04 web code before the table exists. A web rollback may leave the additive table in place; retain its rows through the provider reconciliation window. Do not delete recovery rows or expire live Stripe sessions as cleanup without separate authorization.
+
+## T05 membership checkout return
+
+- No new database migration or worker flag is required for T05. Deploy web after the existing billing attempt migrations and price mappings are present. Keep the existing Stripe webhook endpoint and idempotency behavior.
+- In isolated staging, create an owned pending-payment application and record its membership ID as `HKWTIA_TEST_PENDING_MEMBERSHIP_ID`. Verify GET summary creates no Stripe session; explicit continue creates/resumes one session; cancel returns to summary; success stays processing until the authenticated webhook changes membership state; unauthorized status reads return 404 and `private, no-store`. Exercise decline, 3DS, webhook before/after return, replay and asynchronous success with Stripe test mode.
+- Roll back the web release if summary/action/status breaks. The original Stripe session and billing attempt records remain valid; do not delete them. A web rollback restores the old GET redirect behavior, so avoid rolling back during an in-flight payment without monitoring and user communication.

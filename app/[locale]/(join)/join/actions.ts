@@ -22,6 +22,8 @@ import {whatsappConsentFields} from "@/lib/whatsapp/consent";
 import {completeApplication, startJoin} from "@/lib/membership/join-service";
 import type {JoinStep} from "@/lib/membership/onboarding";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
+import {createCheckoutSession} from "@/lib/billing/checkout-service";
+import {loadPendingJoinBillingState} from "@/lib/membership/join-billing-state";
 import {type BillingInterval} from "@/lib/membership/catalog";
 import {localizedPath} from "@/lib/urls";
 
@@ -197,4 +199,16 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
     return {message: t("errors.save")};
   }
+}
+
+/** Only an explicit POST may claim or resume a payable membership attempt. */
+export async function beginMembershipCheckoutAction(formData: FormData): Promise<void> {
+  const membershipId = z.string().uuid().safeParse(formData.get("membershipId"));
+  const locale = z.enum(["en", "zh-HK"]).safeParse(formData.get("locale"));
+  if (!membershipId.success || !locale.success) throw new Error("INVALID_CHECKOUT_REQUEST");
+  const actor = await requireActor();
+  const state = await loadPendingJoinBillingState(actor, membershipId.data);
+  if (!state) throw new Error("CHECKOUT_NOT_AVAILABLE");
+  const session = await createCheckoutSession(state.actor, state.membership.id, locale.data);
+  redirect(session.url);
 }

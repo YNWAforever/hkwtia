@@ -847,6 +847,7 @@
     "rateLimited": "Too many attempts from this connection. Try again in a few minutes."
   },
   "Join": {
+    "checkoutSummary": {"processing": "We are waiting for payment confirmation. This page will update when your membership status changes.", "title": "Membership checkout", "description": "Review your membership before continuing to secure payment. Returning from Stripe keeps you here until you choose to continue.", "plan": "Plan", "fee": "Annual fee", "feeAtProvider": "Exact amount confirmed at secure checkout", "status": "Status", "pending": "Awaiting payment", "continuePayment": "Continue to secure payment", "later": "Finish later", "changeDetails": "Change company details", "sameAttempt": "Your existing payment attempt will be resumed. Changing company details does not change your plan or fee.", "stillProcessing": "Payment is still being confirmed. You can check again or ask WTIA to verify it.", "openPortal": "Open member portal", "reviewNext": "View application progress", "checkAgain": "Check status again", "contactSupport": "Contact WTIA"},
     "backToMembership": "Back to membership",
     "title": "Join WTIA",
     "metaTitle": "Membership application | WiseTech Hong Kong",
@@ -913,9 +914,10 @@
       "whatsappNumber": "Enter a valid WhatsApp number with country code"
     },
     "status": {
+      "failed": {"title": "Payment needs attention", "description": "We could not confirm an active membership. Please check your billing status or contact WTIA."},
       "complete": {
         "title": "Welcome to WTIA",
-        "description": "Your Community membership is active. Open your member portal to complete your profile and explore member benefits."
+        "description": "Your membership is active. Open your member portal to complete your profile and explore member benefits."
       },
       "checkout": {
         "title": "Application saved",

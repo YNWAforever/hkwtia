@@ -2,6 +2,7 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const authState = vi.hoisted(() => ({input: null as null | {email: string; callbackURL?: string}}));
 const redirectState = vi.hoisted(() => ({url: null as string | null}));
+const billingState = vi.hoisted(() => ({scoped: true, calls: [] as unknown[][], sessionCalls: [] as unknown[][]}));
 const repoState = vi.hoisted(() => ({
   application: {id: "application-a", applicantUserId: "user-a", companyId: null as string | null, planCode: "startup", currentStep: "company", status: "draft"},
   company: {id: "company-a", legalName: "Acme Limited", displayName: "Acme"},
@@ -51,6 +52,14 @@ vi.mock("@/lib/db/repos/contacts", () => ({
     },
   },
 }));
+vi.mock("@/lib/membership/join-billing-state", () => ({loadPendingJoinBillingState: async (...args: unknown[]) => {
+  billingState.calls.push(args);
+  return billingState.scoped ? {actor: args[0], membership: {id: args[1]}} : null;
+}}));
+vi.mock("@/lib/billing/checkout-service", () => ({createCheckoutSession: async (...args: unknown[]) => {
+  billingState.sessionCalls.push(args);
+  return {url: "https://checkout.stripe.test/session-a"};
+}}));
 vi.mock("@/lib/membership/join-service", () => ({
   startJoin: async () => ({applicationId: "application-a"}),
   completeApplication: async (_actor: unknown, input: Record<string, unknown>) => {
@@ -59,13 +68,16 @@ vi.mock("@/lib/membership/join-service", () => ({
   },
 }));
 
-import {requestMagicLink, saveCompany, saveProfile} from "@/app/[locale]/(join)/join/actions";
+import {beginMembershipCheckoutAction, requestMagicLink, saveCompany, saveProfile} from "@/app/[locale]/(join)/join/actions";
 
 describe("join Server Actions", () => {
   beforeEach(() => {
     resetAuthRateLimits();
     authState.input = null;
     redirectState.url = null;
+    billingState.scoped = true;
+    billingState.calls = [];
+    billingState.sessionCalls = [];
     repoState.createdCompanyInput = null;
     repoState.updatedCompanyInput = null;
     repoState.linkedContactInput = null;
@@ -255,5 +267,38 @@ describe("join Server Actions", () => {
     expect(state).toEqual({message: "localized:errors.rateLimited"});
     // The decisive assertion: the provider was never asked to send.
     expect(authState.input).toBeNull();
+  });
+});
+describe("explicit membership checkout action", () => {
+  const id = "20000000-0000-4000-8000-000000000002";
+  function form(membershipId = id) {
+    const data = new FormData();
+    data.set("membershipId", membershipId);
+    data.set("locale", "zh-HK");
+    return data;
+  }
+
+  it("creates or resumes only the actor-scoped pending attempt on POST", async () => {
+    billingState.scoped = true; billingState.calls = []; billingState.sessionCalls = [];
+    await expect(beginMembershipCheckoutAction(form())).rejects.toThrow("NEXT_REDIRECT");
+    expect(billingState.calls).toHaveLength(1);
+    expect(billingState.calls[0]?.[1]).toBe(id);
+    expect(billingState.sessionCalls).toHaveLength(1);
+    expect(billingState.sessionCalls[0]?.[1]).toBe(id);
+    expect(billingState.sessionCalls[0]?.[2]).toBe("zh-HK");
+    expect(redirectState.url).toBe("https://checkout.stripe.test/session-a");
+  });
+
+  it("does not create a Stripe session when ownership or pending state is absent", async () => {
+    billingState.scoped = false; billingState.sessionCalls = [];
+    await expect(beginMembershipCheckoutAction(form())).rejects.toThrow("CHECKOUT_NOT_AVAILABLE");
+    expect(billingState.sessionCalls).toHaveLength(0);
+  });
+
+  it("rejects malformed membership IDs before any scoped read", async () => {
+    billingState.calls = []; billingState.sessionCalls = [];
+    await expect(beginMembershipCheckoutAction(form("not-an-id"))).rejects.toThrow("INVALID_CHECKOUT_REQUEST");
+    expect(billingState.calls).toHaveLength(0);
+    expect(billingState.sessionCalls).toHaveLength(0);
   });
 });

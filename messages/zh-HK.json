@@ -847,6 +847,7 @@
     "rateLimited": "此連線嘗試次數過多，請稍後再試。"
   },
   "Join": {
+    "checkoutSummary": {"processing": "系統正等待付款確認。當會籍狀態更新時，此頁會自動顯示結果。", "title": "會員付款", "description": "前往安全付款前，請先核對會籍資料。從 Stripe 返回後，你可在此決定何時繼續。", "plan": "計劃", "fee": "年費", "feeAtProvider": "確實金額將於安全付款頁確認", "status": "狀態", "pending": "待付款", "continuePayment": "繼續安全付款", "later": "稍後完成", "changeDetails": "更改公司資料", "sameAttempt": "系統會續用現有付款嘗試。更改公司資料不會更改計劃或費用。", "stillProcessing": "付款仍在確認中。你可再次查核，或聯絡 WTIA 協助確認。", "openPortal": "前往會員專區", "reviewNext": "查看申請進度", "checkAgain": "再次查核狀態", "contactSupport": "聯絡 WTIA"},
     "backToMembership": "返回會員計劃",
     "title": "加入 WTIA",
     "metaTitle": "會籍申請｜WiseTech Hong Kong",
@@ -913,9 +914,10 @@
       "whatsappNumber": "請輸入包含國家代碼的有效 WhatsApp 號碼"
     },
     "status": {
+      "failed": {"title": "付款狀態需查核", "description": "現時未能確認會籍已啟用。請查核付款狀態或聯絡 WTIA。"},
       "complete": {
         "title": "歡迎加入 WTIA",
-        "description": "你的社群會籍已啟用。立即前往會員專區完善個人檔案並探索會員權益。"
+        "description": "你的會籍已啟用。立即前往會員專區完善個人檔案並探索會員權益。"
       },
       "checkout": {
         "title": "申請已儲存",
