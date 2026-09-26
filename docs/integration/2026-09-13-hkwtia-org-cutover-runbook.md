@@ -117,3 +117,18 @@ the rollback, so search results and some client paths take longer to unwind.
   after DNS moves, `https://hkwtia.org` serves the new app and is not a WordPress source.
 - Watch GSC coverage for a crawl cycle. A rise in "crawled, not indexed" on `/about/history/*`
   is expected initially — 45 of those pages are newly published.
+
+## Weekly production Lighthouse
+
+The `Weekly production Lighthouse` GitHub Actions workflow runs each Monday at 02:30 UTC
+and can also be dispatched manually. It reads the production alias sitemap: a verified 200
+keeps the audit on `hkwtia.vercel.app`; an exact 308 to the verified
+`hkwtia.org/sitemap.xml` switches the audit to `hkwtia.org`. Any other response
+fails the job. The existing `lighthouserc.js` tests ten routes across both locales
+and applies its performance, accessibility, and SEO thresholds. Inspect the workflow
+status and the `production-lighthouse` artifact (retained for 14 days); after the
+cutover, confirm the resolver step prints `https://hkwtia.org`.
+
+This job measures the public site only. Search Console coverage, top queries, and
+crawled-but-not-indexed URLs still require the owner's GSC property access or an
+export; Lighthouse results cannot substitute for that cross-reference.
