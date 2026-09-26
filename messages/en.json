@@ -1567,6 +1567,9 @@
       }
     },
     "detail": {
+      "format": "Format",
+      "onlineUrl": "Join online",
+      "formats": {"in_person": "In person", "online": "Online", "hybrid": "Hybrid"},
       "date": "Date and time",
       "venue": "Venue",
       "capacity": "Capacity",
@@ -2891,6 +2894,13 @@
       }
     },
     "eventsMgmt": {
+      "format": "Format",
+      "formats": {"in_person": "In person", "online": "Online", "hybrid": "Hybrid"},
+      "onlineUrl": "Online meeting URL",
+      "externalRegistrationUrl": "External registration URL",
+      "tags": "Tags (comma separated)",
+      "visibility": "Visibility",
+      "visibilities": {"public": "Public", "members_only": "Members only", "invite_only": "Invitation only"},
       "eyebrow": "Event operations",
       "title": "Event management",
       "description": "Create, publish, and manage event attendance.",

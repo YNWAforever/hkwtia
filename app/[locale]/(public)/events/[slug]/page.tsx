@@ -93,7 +93,7 @@ export default async function EventPage({params}: Props) {
   const registrationMessages = {registered: t("registration.registered"), waitlist: t("registration.waitlist"), alreadyRegistered: t("registration.alreadyRegistered"), alreadyWaitlisted: t("registration.alreadyWaitlisted"), unauthenticated: t("registration.unauthenticated"), ineligible: t("registration.ineligible"), closed: t("registration.closed"), error: t("registration.error")};
   async function registerAction(state: RegistrationActionState, formData: FormData): Promise<RegistrationActionState> { "use server"; return runPublicEventRegistrationAction(state, formData, {messages: registrationMessages}); }
   const past = eventBoundary({startsAt: new Date(displayEvent.startsAt), endsAt: displayEvent.endsAt ? new Date(displayEvent.endsAt) : null}) < asOf;
-  const detailLabels = {date: t("detail.date"), venue: t("detail.venue"), capacity: t("detail.capacity")};
+  const detailLabels = {date: t("detail.date"), venue: t("detail.venue"), capacity: t("detail.capacity"), format: t("detail.format"), formats: {in_person: t("detail.formats.in_person"), online: t("detail.formats.online"), hybrid: t("detail.formats.hybrid")}, onlineUrl: t("detail.onlineUrl")};
   // Programme B-6 / D-11: the organiser links to its /members page when it has one, and is
   // otherwise a name in the facts grid and an unlinked Event.organizer. The slug alone is the
   // condition on purpose -- `projectPublicEvent` in lib/db/repos/events.ts already withholds it

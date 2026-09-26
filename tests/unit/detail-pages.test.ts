@@ -7,7 +7,7 @@ import {publicEventDefaults} from "@/tests/fixtures/public-event";
 
 describe("detail views", () => {
   it("renders a display-safe public Event projection with one heading and date", () => {
-    render(createElement(EventDetail, {locale: "en", labels: {date: "Date", venue: "Venue", capacity: "Capacity"}, event: {id: "event-id", slug: "demo-day", title: "Demo Day", description: "A public Event.", startsAt: "2026-08-01T02:00:00.000Z", endsAt: null, venue: "WTIA", capacity: null, hero: null, ...publicEventDefaults}}));
+    render(createElement(EventDetail, {locale: "en", labels: {date: "Date", venue: "Venue", capacity: "Capacity", format: "Format", formats: {in_person: "In person", online: "Online", hybrid: "Hybrid"}, onlineUrl: "Join online"}, event: {id: "event-id", slug: "demo-day", title: "Demo Day", description: "A public Event.", startsAt: "2026-08-01T02:00:00.000Z", endsAt: null, venue: "WTIA", capacity: null, hero: null, ...publicEventDefaults}}));
     expect(screen.getAllByRole("heading", {level: 1})).toHaveLength(1);
     expect(screen.getByText(/2026/)).toBeInTheDocument();
   });

@@ -46,6 +46,13 @@ describe("the event write boundary prices only ticketed events", () => {
     await expect(createEvent(staff, {...base, registrationMode: "rsvp", ticketPriceHkdCents: 25_000}, dependencies())).rejects.toThrow("ticketPriceHkdCents is only valid for ticketed events");
   });
 
+  it("refuses invite-only ticketing until invitation purchase authority exists", async () => {
+    const inserted = vi.fn(async (input) => ({id: "11111111-1111-4111-8111-111111111111", ...input}));
+    await expect(createEvent(staff, {...base, registrationMode: "ticketed", visibility: "invite_only", ticketPriceHkdCents: 25_000}, dependencies(inserted)))
+      .rejects.toThrow("invite-only ticketing is unsupported");
+    expect(inserted).not.toHaveBeenCalled();
+  });
+
   it("carries a ticketed price to the insert", async () => {
     const inserted = vi.fn(async (input) => ({id: "11111111-1111-4111-8111-111111111111", ...input}));
     await createEvent(staff, {...base, registrationMode: "ticketed", ticketPriceHkdCents: 25_000}, dependencies(inserted));

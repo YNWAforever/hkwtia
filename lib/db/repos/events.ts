@@ -85,6 +85,11 @@ function assertPriceOnlyOnTicketed(mode: string, price: number | null | undefine
     throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "ticketPriceHkdCents is only valid for ticketed events"}]);
   }
 }
+function assertSupportedTicketVisibility(mode: string, visibility: EventVisibility): void {
+  if (mode === "ticketed" && visibility === "invite_only") {
+    throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["visibility"], message: "invite-only ticketing is unsupported"}]);
+  }
+}
 const eventInputSchema = eventInputObjectSchema.superRefine(addEventShapeIssues);
 const eventUpdateSchema = eventInputObjectSchema.partial().superRefine((input, context) => {
   if (Object.keys(input).length === 0) context.addIssue({code: z.ZodIssueCode.custom, message: "event update is empty"});
@@ -443,6 +448,7 @@ export async function createEvent(actor: Actor, input: unknown, dependencies?: E
   const parsed = eventInputSchema.parse(input);
   // The create arm has the whole story — the parsed mode is the row's mode.
   assertPriceOnlyOnTicketed(parsed.registrationMode, parsed.ticketPriceHkdCents);
+  assertSupportedTicketVisibility(parsed.registrationMode, parsed.visibility ?? (parsed.memberOnly ? "members_only" : "public"));
   return (dependencies ?? await defaultMutationDependencies()).transaction(async (transaction) => {
     if (parsed.heroMediaId !== null) {
       const mediaRow = await transaction.lockActiveMedia(parsed.heroMediaId);
@@ -464,6 +470,7 @@ export async function updateEvent(actor: Actor, id: unknown, input: unknown, dep
     if (!current) return null;
     if (current.status === "cancelled") throw new Error("EVENT_CANCELLED_TERMINAL");
     assertPriceOnlyOnTicketed(parsed.registrationMode ?? current.registrationMode, parsed.ticketPriceHkdCents);
+    assertSupportedTicketVisibility(parsed.registrationMode ?? current.registrationMode, visibilityFrom(parsed, current.visibility));
     eventPeriodSchema.parse({startsAt: parsed.startsAt ?? current.startsAt, endsAt: parsed.endsAt === undefined ? current.endsAt : parsed.endsAt});
     if (parsed.heroMediaId !== undefined && parsed.heroMediaId !== null) {
       const mediaRow = await transaction.lockActiveMedia(parsed.heroMediaId);

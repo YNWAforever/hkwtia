@@ -1567,6 +1567,9 @@
       }
     },
     "detail": {
+      "format": "形式",
+      "onlineUrl": "網上參與",
+      "formats": {"in_person": "實體", "online": "網上", "hybrid": "混合"},
       "date": "日期及時間",
       "venue": "地點",
       "capacity": "名額",
@@ -2892,6 +2895,13 @@
       }
     },
     "eventsMgmt": {
+      "format": "活動形式",
+      "formats": {"in_person": "實體", "online": "網上", "hybrid": "混合"},
+      "onlineUrl": "網上會議網址",
+      "externalRegistrationUrl": "外部報名網址",
+      "tags": "標籤（以逗號分隔）",
+      "visibility": "可見範圍",
+      "visibilities": {"public": "公開", "members_only": "僅限會員", "invite_only": "僅限受邀者"},
       "eyebrow": "活動營運",
       "title": "活動管理",
       "description": "建立、發佈及管理活動出席。",

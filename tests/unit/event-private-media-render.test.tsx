@@ -24,7 +24,7 @@ describe("private Event hero rendering", () => {
         hero: {url: "/api/media/10000000-0000-4000-8000-000000000001", alt: "Curated Event hero"},
         ...publicEventDefaults,
       }}
-      labels={{date: "Date", venue: "Venue", capacity: "Capacity"}}
+      labels={{date: "Date", venue: "Venue", capacity: "Capacity", format: "Format", formats: {in_person: "In person", online: "Online", hybrid: "Hybrid"}, onlineUrl: "Join online"}}
       locale="en"
     />);
 

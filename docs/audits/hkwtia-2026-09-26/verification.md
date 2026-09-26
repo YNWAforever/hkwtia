@@ -22,6 +22,10 @@ Record every result with date, SHA, environment, command, exit code, count, skip
 | 2026-09-27 | T02 feature worktree | `npx vitest run tests/integration/ticket-eligibility-postgres.test.ts` | exit 0; 1 file and 3 tests skipped | `RUN_POSTGRES_INTEGRATION=1` was not set; Docker daemon unavailable. Last-seat and revocation SQL remain unexecuted. |
 | 2026-09-27 | T02 feature worktree | `npm run typecheck` | exit 0 | Actor and repository interface typecheck. |
 
+| 2026-09-27 | T03 feature worktree | `npx vitest run` six event authoring/detail files | exit 0; 6 files, 54 tests passed | Form mode/format round trip, validation, ticket visibility guard and public online/hybrid facts. No database. |
+| 2026-09-27 | T03 local managed Next server | `npx playwright test tests/e2e/admin-event-authoring.spec.ts` | exit 0; 2 skipped | Staff identity, isolated M2 database and test payment setup absent; not browser acceptance. |
+| 2026-09-27 | T03 feature worktree | `npm run typecheck`; `npm run audit:strings` | exit 0 for both; 268 TSX scanned | Updated event field and translation contracts. |
+
 ## Outstanding gates
 
 - Full suite baseline has one existing CLI import failure. The fix and rerun remain required.

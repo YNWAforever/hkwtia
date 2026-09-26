@@ -56,6 +56,19 @@ describe("public Event detail page review regressions", () => {
     expect(rendered).toContain('data-registration-form="true"');
   });
 
+  it("shows online and hybrid locations on published event details", async () => {
+    events.getPublicBySlug.mockResolvedValue({...event("2030-01-01T12:00:00.000Z"), venue: null, format: "online", onlineUrl: "https://meet.example.test/session"});
+    const online = renderToStaticMarkup(await EventPage(props));
+    expect(online).toContain("detail.formats.online");
+    expect(online).toContain('href="https://meet.example.test/session"');
+
+    events.getPublicBySlug.mockResolvedValue({...event("2030-01-01T12:00:00.000Z"), format: "hybrid", onlineUrl: "https://meet.example.test/hybrid"});
+    const hybrid = renderToStaticMarkup(await EventPage(props));
+    expect(hybrid).toContain("detail.formats.hybrid");
+    expect(hybrid).toContain("Hong Kong");
+    expect(hybrid).toContain('href="https://meet.example.test/hybrid"');
+  });
+
   it("propagates a detail read outage instead of returning a false 404", async () => {
     events.getPublicBySlug.mockRejectedValue(new Error("EVENT_REPOSITORY_UNAVAILABLE"));
     await expect(EventPage(props)).rejects.toThrow("EVENT_REPOSITORY_UNAVAILABLE");
