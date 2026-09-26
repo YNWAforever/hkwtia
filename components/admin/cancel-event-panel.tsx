@@ -8,7 +8,7 @@ import type {CancellationPreview} from "@/lib/db/repos/events";
 
 export type CancelPanelLabels = Readonly<{
   heading: string; description: string; button: string; keep: string; submitting: string;
-  unavailable: string; confirm: string;
+  unavailable: string; confirm: string; noticePreview: string; noticeUnavailable: string;
 }>;
 
 const initialState: EventActionState = {};
@@ -39,11 +39,12 @@ function costedSentence(labels: CancelPanelLabels, preview: CancellationPreview,
  * client component may hold; a locally-defined closure would not be. The control
  * posts nothing until it is opened, so a stray click cannot cancel an event.
  */
-export function CancelEventPanel({action, labels, locale, preview}: Readonly<{
+export function CancelEventPanel({action, labels, locale, preview, notificationPreview}: Readonly<{
   action: (state: EventActionState, formData: FormData) => Promise<EventActionState>;
   labels: CancelPanelLabels;
   locale: string;
   preview: CancellationPreview | null;
+  notificationPreview?: Readonly<{candidates: number; knownBlocked: number}> | null;
 }>) {
   const [state, dispatch, pending] = useActionState(action, initialState);
   const [confirming, setConfirming] = useState(false);
@@ -56,7 +57,8 @@ export function CancelEventPanel({action, labels, locale, preview}: Readonly<{
           {/* The confirmation is a polite status region, not an assertive alert:
               it is a question the staff member just opened. */}
           <p role="status">{preview === null ? labels.unavailable : costedSentence(labels, preview, locale)}</p>
-          <button className="min-h-11 rounded-md bg-destructive px-4 text-destructive-foreground" disabled={pending || preview === null} type="submit">{pending ? labels.submitting : labels.button}</button>
+          {notificationPreview === null ? <p role="alert">{labels.noticeUnavailable}</p> : notificationPreview ? <p>{labels.noticePreview.replace("{candidates}", String(notificationPreview.candidates)).replace("{blocked}", String(notificationPreview.knownBlocked))}</p> : null}
+          <button className="min-h-11 rounded-md bg-destructive px-4 text-destructive-foreground" disabled={pending || preview === null || notificationPreview === null} type="submit">{pending ? labels.submitting : labels.button}</button>
           <button className="ml-2 min-h-11 rounded-md border px-4" disabled={pending} onClick={() => setConfirming(false)} type="button">{labels.keep}</button>
         </form>
       ) : (

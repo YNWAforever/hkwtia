@@ -61,3 +61,13 @@ Record every result with date, SHA, environment, command, exit code, count, skip
 - No isolated `DATABASE_URL_TEST` or Stripe test variables in this shell. Do not run migrations, seeds or paid flows against unknown hosts.
 - Browser acceptance needs a local/preview server and test identities. The public alias's deployed SHA is unverified.
 - `npm run test:e2e` and focused browser journeys must be run and recorded before handoff.
+
+
+| 2026-09-27 | T09 feature worktree | focused cancellation panel/repository/worker vitest | exit 0; 3 files, 35 tests passed | Intent snapshot SQL shape, confirmation counts, retry boundaries, frozen key, timeout and known-block behavior. Repository and transport mocked; no real DB/provider. |
+| 2026-09-27 | T09 feature worktree | email catalogue and render snapshots vitest | exit 0; 2 files, 19 tests passed | Exact 31-template ID list, service classification and en/zh-HK rendered HTML/text. |
+| 2026-09-27 | T09 feature worktree | job kind/routes/handler/worker-cron vitest | exit 0; 4 files, 66 tests passed | Route authorization and registry contract. |
+| 2026-09-27 | T09 feature worktree | worker package npm test --prefix workers -- --run | exit 0; 5 files, 47 tests passed | Worker schedule and dispatch contract. |
+| 2026-09-27 | T09 feature worktree | npm run typecheck; npm run audit:strings; npx drizzle-kit check | exit 0 for all; 268 TSX scanned | Types, bilingual strings, migration metadata only. Migration 0044 was not applied. |
+| 2026-09-27 | T09 disposable PostgreSQL | npx vitest run tests/integration/event-cancellation-notices.test.ts | exit 0; 3 skipped | RUN_POSTGRES_INTEGRATION=1 unset, Docker unavailable. Atomic snapshot/rollback and concurrent claims remain unexecuted on PostgreSQL. |
+
+| 2026-09-27 | T09 feature worktree | npm run build; focused ESLint; git diff --check | exit 0 for all | Production bundle includes authenticated event-notifications route. Build did not connect to DB or provider. |

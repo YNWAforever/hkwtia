@@ -32,6 +32,7 @@ const REQUIRED_TEMPLATE_IDS = [
   "campaign_generic",
   "event_guest_confirmation",
   "event_guest_waitlist",
+  "event_rsvp_cancelled",
   "event_reminder_24h",
   "event_ticket_confirmation",
   "event_ticket_refunded",
@@ -45,6 +46,7 @@ const FIXTURE_VARIABLES = {
   recipientName: "Fixture Member",
   eventTitle: "Fixture Event",
   cancelUrl: "https://www.hkwtia.org/api/events/guest/cancel?token=fixture",
+  ctaUrl: "https://www.hkwtia.org/en/events/fixture",
   startsAt: "1 March 2030 at 10:00",
   venue: "KOHO, Kwun Tong",
   eventDate: "1 March 2030",
@@ -57,9 +59,9 @@ const FIXTURE_VARIABLES = {
 } as const;
 
 describe("email catalogue", () => {
-  it("contains exactly the 30 approved template IDs in stable order", () => {
+  it("contains exactly the 31 approved template IDs in stable order", () => {
     expect(EMAIL_TEMPLATE_IDS).toEqual(REQUIRED_TEMPLATE_IDS);
-    expect(new Set(EMAIL_TEMPLATE_IDS).size).toBe(30);
+    expect(new Set(EMAIL_TEMPLATE_IDS).size).toBe(31);
   });
 
   it("keeps the guest confirmation transactional and carries the cancel link in its body", () => {
@@ -78,6 +80,14 @@ describe("email catalogue", () => {
     expect(waitlist.copy.preview).not.toBe(confirmed.copy.preview);
     expect(waitlist.copy.heading).not.toBe(confirmed.copy.heading);
     expect(() => getEmailTemplate(locale, "event_guest_waitlist", FIXTURE_VARIABLES, "marketing"))
+      .toThrow("EMAIL_CLASSIFICATION_OVERRIDE_FORBIDDEN");
+  });
+
+  it.each(["en", "zh-HK"] as const)("keeps the %s cancellation notice transactional and linked to the event", (locale) => {
+    const template = getEmailTemplate(locale, "event_rsvp_cancelled", FIXTURE_VARIABLES);
+    expect(template.classification).toBe("transactional");
+    expect(template.copy.body).toContain(FIXTURE_VARIABLES.eventTitle);
+    expect(() => getEmailTemplate(locale, "event_rsvp_cancelled", FIXTURE_VARIABLES, "marketing"))
       .toThrow("EMAIL_CLASSIFICATION_OVERRIDE_FORBIDDEN");
   });
 

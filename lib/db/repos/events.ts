@@ -8,7 +8,7 @@ import {getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
-import {auditEvents, companies, companyMembers, eventGuestRegistrations, eventOrderSeats, eventOrders, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility, type PublicProfileStatus} from "@/lib/db/server-schema";
+import {auditEvents, companies, companyMembers, eventCancellationIntents, eventCancellationNotifications, eventGuestRegistrations, eventOrderSeats, eventOrders, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility, type PublicProfileStatus} from "@/lib/db/server-schema";
 import {assertCanSubmitEvent} from "@/lib/events/entitlement-core";
 import {EMPTY_EVENT_FILTERS, hongKongMonthBounds, normaliseEventTag, type EventFilters} from "@/lib/events/filters";
 import {eventBoundary, type PublicEventProjection, type PublicEventStatus} from "@/lib/events/public";
@@ -997,6 +997,27 @@ export async function cancelEvent(actor: Actor, eventId: unknown, deps: MemberEv
       VALUES (${actor.profileId}, ${actor.kind}, 'event.cancelled', 'event', ${id},
               ${JSON.stringify({slug: current.slug, from: current.status})}::jsonb)
     `);
+    // Snapshot identities and contact fields while the event lock prevents new RSVPs.
+    // One set-based write, no synchronous email. The worker pages durable rows.
+    await transaction.execute(sql`
+      INSERT INTO ${eventCancellationIntents} (event_id, revision, cancelled_at, actor_profile_id)
+      VALUES (${id}, 1, now(), ${actor.profileId}) ON CONFLICT (event_id) DO NOTHING
+    `);
+    await transaction.execute(sql`
+      INSERT INTO ${eventCancellationNotifications}
+        (event_id, revision, registration_kind, registration_id, channel,
+         recipient_name, recipient_email, recipient_locale, status, idempotency_key)
+      SELECT ${id}, 1, 'member', r.profile_id, 'email', p.display_name, p.email, p.locale,
+             'pending', 'event-cancel:' || ${id}::text || ':1:member:' || r.profile_id || ':email'
+      FROM ${eventRegistrations} AS r JOIN ${profiles} AS p ON p.id = r.profile_id
+      WHERE r.event_id = ${id} AND r.status IN ('registered', 'waitlist', 'attended')
+      UNION ALL
+      SELECT ${id}, 1, 'guest', g.id::text, 'email', g.name, g.email, g.locale,
+             'pending', 'event-cancel:' || ${id}::text || ':1:guest:' || g.id::text || ':email'
+      FROM ${eventGuestRegistrations} AS g
+      WHERE g.event_id = ${id} AND g.status IN ('registered', 'waitlist', 'attended')
+      ON CONFLICT (event_id, revision, registration_kind, registration_id, channel) DO NOTHING
+    `);
     return {status: "cancelled" as const, event: updated};
   });
 }
@@ -1009,7 +1030,7 @@ export type CancellationPreview = Readonly<{
   /**
    * Member and guest RSVP registrations that are still standing. Separate from
    * `attendees` because the two answer different questions: `attendees` is who
-   * a refund covers (paid seats), this is who the slice will *not* email. On a
+   * a refund covers (paid seats), this is who the cancellation affects. On a
    * free event `attendees` is legitimately zero and this is the only figure that
    * tells staff anyone is affected at all.
    */

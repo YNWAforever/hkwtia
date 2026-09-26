@@ -33,6 +33,7 @@ import {
   resolveM4BAcceptanceOwnershipKey,
 } from "@/lib/acceptance/m4b-runtime-guard";
 import {automationCronActor} from "@/lib/auth/automation-actor";
+import {eventCancellationNoticesEnabled, productionEventNotificationDependencies, runEventCancellationNotifications} from "@/lib/jobs/event-notification-runner";
 import {createWoztellAdapter} from "@/lib/channels/woztell";
 import {aiEnv, appEnv, emailEnv} from "@/lib/config/env";
 import {aiOpsMetricsRepository} from "@/lib/db/repos/aiops-metrics";
@@ -159,6 +160,7 @@ type ProductionRunnerOverrides = Partial<Readonly<{
   runWhatsAppSendQueue(now: Date): Promise<unknown>;
   /** No clock: the refund primitive reads its own when it commits. */
   runEventCancellationRefunds(): Promise<unknown>;
+  runEventNotifications(now: Date): Promise<unknown>;
   runShowcaseLeadEmails(now: Date): Promise<unknown>;
   runTicketEmails(now: Date): Promise<unknown>;
   runWorkerAlert(payload: WorkerAlertPayload): Promise<unknown>;
@@ -585,6 +587,11 @@ export async function runProductionRenewal(now: Date): Promise<unknown> {
   return runRenewalReconciliation(automationCronActor(), now);
 }
 
+export async function runProductionEventNotifications(now: Date): Promise<unknown> {
+  if (!eventCancellationNoticesEnabled()) return {disabled: true};
+  return runEventCancellationNotifications(now, productionEventNotificationDependencies());
+}
+
 export function runProductionEventCancellationRefunds(): Promise<EventCancellationRefundSummary> {
   return runEventCancellationRefunds();
 }
@@ -682,6 +689,7 @@ export function createJobRunners(
     overrides.runWhatsAppSendQueue ?? runProductionWhatsAppSendQueue;
   const runEventCancellationRefunds =
     overrides.runEventCancellationRefunds ?? runProductionEventCancellationRefunds;
+  const runEventNotifications = overrides.runEventNotifications ?? runProductionEventNotifications;
   const runShowcaseLeadEmails = overrides.runShowcaseLeadEmails ??
     ((now: Date) => drainLeadEmailOutbox(now, productionLeadEmailDependencies()));
   const runTicketEmails = overrides.runTicketEmails ??
@@ -722,6 +730,9 @@ export function createJobRunners(
     },
     eventCancellationRefunds() {
       return runEventCancellationRefunds();
+    },
+    eventNotifications(now: Date) {
+      return runEventNotifications(now);
     },
     showcaseLeadEmails(now: Date) {
       return runShowcaseLeadEmails(now);

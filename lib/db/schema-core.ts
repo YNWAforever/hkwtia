@@ -990,6 +990,54 @@ export const ticketEmailOutbox = pgTable("ticket_email_outbox", {
   check("ticket_email_outbox_seat_check", sql`(${table.kind} = 'pass') = (${table.seatId} IS NOT NULL)`),
   index("ticket_email_outbox_due_idx").on(table.status, table.nextAttemptAt, table.claimExpiresAt),
 ]);
+export const eventCancellationIntents = pgTable("event_cancellation_intents", {
+  eventId: uuid("event_id").primaryKey().references(() => events.id, {onDelete: "restrict"}),
+  revision: integer("revision").default(1).notNull(),
+  cancelledAt: timestamp("cancelled_at", {withTimezone: true}).defaultNow().notNull(),
+  actorProfileId: text("actor_profile_id").notNull(),
+}, (table) => [check("event_cancellation_intents_revision_check", sql`${table.revision} = 1`)]);
+
+export const eventCancellationNotifications = pgTable("event_cancellation_notifications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  eventId: uuid("event_id").notNull().references(() => eventCancellationIntents.eventId, {onDelete: "restrict"}),
+  revision: integer("revision").default(1).notNull(),
+  registrationKind: text("registration_kind").notNull(),
+  registrationId: text("registration_id").notNull(),
+  channel: text("channel").default("email").notNull(),
+  recipientName: text("recipient_name").notNull(),
+  recipientEmail: text("recipient_email"),
+  recipientLocale: text("recipient_locale").notNull(),
+  status: text("status").default("pending").notNull(),
+  payload: jsonb("payload").$type<Record<string, unknown>>(),
+  idempotencyKey: text("idempotency_key").notNull(),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  nextAttemptAt: timestamp("next_attempt_at", {withTimezone: true}).defaultNow().notNull(),
+  claimExpiresAt: timestamp("claim_expires_at", {withTimezone: true}),
+  firstAttemptAt: timestamp("first_attempt_at", {withTimezone: true}),
+  providerId: text("provider_id"),
+  errorCode: text("error_code"),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  check("event_cancellation_notifications_kind_check", sql`${table.registrationKind} IN ('member', 'guest')`),
+  check("event_cancellation_notifications_channel_check", sql`${table.channel} = 'email'`),
+  check("event_cancellation_notifications_status_check", sql`${table.status} IN ('pending', 'queued', 'sending', 'accepted', 'blocked', 'failed', 'uncertain')`),
+  check("event_cancellation_notifications_attempt_check", sql`${table.attemptCount} >= 0`),
+  unique("event_cancellation_notifications_scope_unique").on(table.eventId, table.revision, table.registrationKind, table.registrationId, table.channel),
+  unique("event_cancellation_notifications_key_unique").on(table.idempotencyKey),
+  index("event_cancellation_notifications_due_idx").on(table.status, table.nextAttemptAt, table.claimExpiresAt),
+]);
+
+export const emailAddressBlocks = pgTable("email_address_blocks", {
+  email: text("email").primaryKey(),
+  reasonCode: text("reason_code").notNull(),
+  active: boolean("active").default(true).notNull(),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  check("email_address_blocks_reason_check", sql`${table.reasonCode} IN ('hard_bounce', 'invalid_address', 'manual')`),
+  check("email_address_blocks_lowercase_check", sql`${table.email} = lower(${table.email})`),
+]);
+
 export const approvals = pgTable("approvals", {
   id: uuid("id").defaultRandom().primaryKey(),
   actionType: text("action_type").notNull(),

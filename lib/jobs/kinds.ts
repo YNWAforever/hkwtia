@@ -67,12 +67,14 @@ export type PhaseCJobKind = typeof PHASE_C_JOB_KINDS[number];
  */
 export const PHASE_D_JOB_KIND = {
   EVENT_CANCELLATION_REFUNDS: "event-cancellation-refunds",
+  EVENT_NOTIFICATIONS: "event-notifications",
   SHOWCASE_LEAD_EMAILS: "showcase-lead-emails",
   TICKET_EMAILS: "ticket-emails",
 } as const;
 
 export const PHASE_D_JOB_KINDS = [
   PHASE_D_JOB_KIND.EVENT_CANCELLATION_REFUNDS,
+  PHASE_D_JOB_KIND.EVENT_NOTIFICATIONS,
   PHASE_D_JOB_KIND.SHOWCASE_LEAD_EMAILS,
   PHASE_D_JOB_KIND.TICKET_EMAILS,
 ] as const;

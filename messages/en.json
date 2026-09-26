@@ -333,6 +333,13 @@
         "body": "The event is currently full. Your place is not confirmed. You can cancel your waitlist request here: {cancelUrl}",
         "cta": "View the event"
       },
+      "event_rsvp_cancelled": {
+        "subject": "Cancelled: {eventTitle}",
+        "preview": "Your WTIA event RSVP is affected.",
+        "heading": "This event has been cancelled",
+        "body": "WTIA has cancelled {eventTitle}. Your RSVP or waitlist place is no longer active. Please see the event page for details or contact WTIA if you need help.",
+        "cta": "View event details"
+      },
       "event_reminder_24h": {
         "subject": "Tomorrow: {eventTitle}",
         "preview": "Your WTIA event is tomorrow.",
@@ -3011,8 +3018,11 @@
         "keep": "Keep event",
         "submitting": "Cancelling...",
         "unavailable": "The refund cost could not be loaded right now. Cancelling will still refund every paid order.",
-        "cancelledNotice": "This event has been cancelled. Every paid order is being refunded.",
-        "confirm": "Refund {orders} paid orders for {amount} ({attendees} paid attendees). {registrants} RSVP registrants will not be emailed. This cannot be undone.",
+        "cancelledNotice": "This event has been cancelled. Paid orders enter the refund workflow. RSVP notices are recorded for the notification worker; provider acceptance is not proof of delivery.",
+        "confirm": "Refund {orders} paid orders for {amount} ({attendees} paid attendees). {registrants} RSVP registrations are affected. Cancellation notices will be recorded; sending remains held until the notice worker is enabled. This cannot be undone.",
+        "noticePreview": "{candidates} RSVP notices will be recorded; {blocked} known blocked addresses.",
+        "noticeUnavailable": "The RSVP notice preview could not be loaded. Try again before cancelling.",
+        "noticeSummary": "RSVP notices: {pending} pending, {queued} queued, {accepted} accepted by provider, {blocked} blocked, {failed} provider-refused, {uncertain} uncertain. Accepted does not confirm delivery.",
         "outcomes": {
           "success": "Event cancelled. Every paid order will be refunded.",
           "alreadyCancelled": "This event was already cancelled, so nothing changed.",

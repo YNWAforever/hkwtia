@@ -302,6 +302,13 @@
       "when": 1790460000000,
       "tag": "0043_event_checkout_recoveries",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1790463600000,
+      "tag": "0044_event_cancellation_notifications",
+      "breakpoints": true
     }
   ]
 }

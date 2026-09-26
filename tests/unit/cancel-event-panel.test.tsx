@@ -14,7 +14,9 @@ const labels: CancelPanelLabels = {
   keep: "Keep event",
   submitting: "Cancelling...",
   unavailable: "The refund cost could not be loaded right now.",
-  confirm: "Refund {orders} paid orders for {amount} ({attendees} paid attendees). {registrants} RSVP registrants will not be emailed. This cannot be undone.",
+  noticePreview: "{candidates} RSVP notices; {blocked} known blocked.",
+  noticeUnavailable: "The notice preview could not be loaded.",
+  confirm: "Refund {orders} paid orders for {amount} ({attendees} paid attendees). {registrants} RSVP registrations are affected. This cannot be undone.",
 };
 
 const PREVIEW = {paidOrders: 2, refundTotalHkdCents: 100_000, attendees: 3, rsvpRegistrants: 7};
@@ -41,7 +43,7 @@ describe("CancelEventPanel", () => {
     expect(action).not.toHaveBeenCalled();
   });
 
-  it("names the orders, the refund total, the attendees and the un-notified registrants before it submits", () => {
+  it("names the orders, the refund total, the attendees and the affected registrants before it submits", () => {
     render(<CancelEventPanel action={noopAction()} labels={labels} locale="en" preview={PREVIEW} />);
 
     fireEvent.click(screen.getByRole("button", {name: labels.button}));
@@ -53,11 +55,18 @@ describe("CancelEventPanel", () => {
     // The finding this pins: the registrant count is interpolated too, so a free
     // event whose only attendees are registrants is not reported as zero.
     expect(confirm).toHaveTextContent("7");
-    expect(confirm).toHaveTextContent("will not be emailed");
+    expect(confirm).toHaveTextContent("RSVP registrations are affected");
     // No placeholder survived: a broken replacement would show the raw `{orders}`.
     expect(confirm.textContent).not.toContain("{");
     // The dismiss control is what lets staff stop before the irreversible write.
     expect(screen.getByRole("button", {name: labels.keep})).toBeInTheDocument();
+  });
+
+  it("shows the durable RSVP notice candidate and known-block counts before confirmation", () => {
+    render(<CancelEventPanel action={noopAction()} labels={labels} locale="en" preview={PREVIEW} notificationPreview={{candidates: 7, knownBlocked: 2}} />);
+    fireEvent.click(screen.getByRole("button", {name: labels.button}));
+    expect(screen.getByText(/7 RSVP notices/)).toBeInTheDocument();
+    expect(screen.getByText(/2 known blocked/)).toBeInTheDocument();
   });
 
   it("submits the confirmation through the action it was given", async () => {
@@ -99,7 +108,7 @@ describe("CancelEventPanel", () => {
 describe("the cancellation copy", () => {
   // Derived from the bundles the pages bind, so a key missing from one locale is
   // a string rendered as `undefined` rather than a silent English fallback.
-  const keys = ["heading", "description", "button", "keep", "submitting", "unavailable", "cancelledNotice", "confirm", "outcomes"].sort();
+  const keys = ["heading", "description", "button", "keep", "submitting", "unavailable", "cancelledNotice", "confirm", "noticePreview", "noticeUnavailable", "noticeSummary", "outcomes"].sort();
   const outcomeKeys = ["success", "alreadyCancelled", "invalidTransition", "notFound", "error"].sort();
 
   it("ships the same cancel keys in both bundles", () => {
@@ -119,16 +128,12 @@ describe("the cancellation copy", () => {
     expect(confirm).toContain("{registrants}");
   });
 
-  // The finding this pins: naming the registrants is only honest if the copy says
-  // what happens to them. A free event's registrants are not emailed, and the
-  // confirmation must say so rather than reading as "nobody is affected".
   it.each([
     ["en", en],
     ["zh-HK", zhHk],
-  ] as const)("says in the %s confirmation that RSVP registrants are not emailed", (_locale, bundle) => {
-    const confirm = bundle.Admin.eventsMgmt.cancel.confirm;
-    const saysNotEmailed = /not be emailed/i.test(confirm) || confirm.includes("不會");
-    expect(saysNotEmailed).toBe(true);
+  ] as const)("says in the %s confirmation that RSVP registrations are affected", (_locale, bundle) => {
+    expect(bundle.Admin.eventsMgmt.cancel.confirm).toContain("{registrants}");
+    expect(bundle.Admin.eventsMgmt.cancel.confirm).not.toMatch(/not be emailed|不會收到電郵/i);
   });
 
   it("falls back to a language-neutral confirmation when a placeholder is missing", () => {

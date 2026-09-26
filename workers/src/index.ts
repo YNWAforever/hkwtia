@@ -19,6 +19,7 @@ export const WORKER_JOBS = [
   "board-reporter",
   "whatsapp-send-queue",
   "event-cancellation-refunds",
+  "event-notifications",
   "showcase-lead-emails",
   "ticket-emails",
 ] as const;
@@ -111,7 +112,7 @@ export const JOBS_BY_CRON = {
   "0 3 * * *": ["chat-retention"],
   "15 18 * * *": ["retention-analyst"],
   "30 0 1 * *": ["board-reporter"],
-  "*/10 * * * *": ["whatsapp-send-queue", "showcase-lead-emails"],
+  "*/10 * * * *": ["whatsapp-send-queue", "showcase-lead-emails", "event-notifications"],
   "* * * * *": ["ticket-emails"],
 } as const satisfies Readonly<
   Record<string, readonly WorkerJob[]>
@@ -128,6 +129,7 @@ const REQUEST_TIMEOUT_BY_JOB = {
   "board-reporter": AI_REQUEST_TIMEOUT_MS,
   "whatsapp-send-queue": QUEUE_REQUEST_TIMEOUT_MS,
   "event-cancellation-refunds": CANCELLATION_REFUND_TIMEOUT_MS,
+  "event-notifications": QUEUE_REQUEST_TIMEOUT_MS,
   "showcase-lead-emails": QUEUE_REQUEST_TIMEOUT_MS,
   "ticket-emails": QUEUE_REQUEST_TIMEOUT_MS,
 } as const satisfies Readonly<Record<WorkerJob, number>>;
