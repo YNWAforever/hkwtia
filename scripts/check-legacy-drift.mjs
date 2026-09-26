@@ -29,16 +29,20 @@ async function fetchText(url) {
 
 const index = await fetchText(`${wordpress}/sitemap.xml`);
 const subSitemaps = locs(index).filter((u) => u.endsWith(".xml"));
+if (subSitemaps.length === 0) throw new Error("no WordPress sub-sitemaps found; refusing a vacuous drift check");
 console.log(`Reading ${subSitemaps.length} sub-sitemaps from ${wordpress}`);
 
 const live = new Set();
+const unreadable = [];
 for (const sub of subSitemaps) {
   try {
     for (const url of locs(await fetchText(sub))) live.add(url.replace(/^https?:\/\/[^/]+/, "").replace(/\/$/, "") || "/");
   } catch (error) {
-    console.warn(`  skipped ${sub}: ${error.message}`);
+    unreadable.push(`${sub}: ${error.message}`);
   }
 }
+if (unreadable.length > 0) throw new Error(`failed to read WordPress sub-sitemap: ${unreadable.join("; ")}`);
+if (live.size === 0) throw new Error("no WordPress URLs parsed; refusing a vacuous drift check");
 
 const raw = JSON.parse(readFileSync("content/legacy-urls.json", "utf8"));
 const entries = Array.isArray(raw) ? raw : (raw.entries ?? raw.urls ?? Object.values(raw).find(Array.isArray));
@@ -52,8 +56,9 @@ console.log(`uncovered literals: ${gaps.length}`);
 
 if (gaps.length === 0) {
   console.log("\nOK: every live url is either captured or covered by a pattern rule.");
-  process.exit(0);
+  process.exitCode = 0;
+} else {
+  console.error("\nThese live urls have no redirect and would 404 on cutover:\n");
+  for (const gap of gaps.sort()) console.error(`  ${gap}`);
+  process.exitCode = 1;
 }
-console.error("\nThese live urls have no redirect and would 404 on cutover:\n");
-for (const gap of gaps.sort()) console.error(`  ${gap}`);
-process.exit(1);

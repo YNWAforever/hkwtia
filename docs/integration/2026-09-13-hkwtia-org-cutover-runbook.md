@@ -18,7 +18,7 @@ which stays serveable throughout and is the rollback.
 | 1 | Legacy destinations answer | `node scripts/verify-legacy-redirects.mjs` | `OK: 576/576` |
 | 2 | No drift since capture | `node scripts/check-legacy-drift.mjs` | `OK: every live url …` |
 | 3 | Suite green | `npm run audit:strings && npm run lint && npm run typecheck && npm test && npm run build` | all pass |
-| 4 | Production serves the intended commit | `npx vercel inspect https://hkwtia.vercel.app --scope ynwaforevers-projects` | `githubCommitSha` matches `main` |
+| 4 | Production serves the intended commit | `git rev-parse origin/main`; in Vercel Project → Deployments, open the deployment behind `hkwtia.vercel.app` and read **Source → Commit** | the full Source SHA matches `origin/main`; stop if the SHA cannot be read |
 | 5 | Pre-flip state is inert | `curl -sI https://hkwtia.vercel.app/` | `200` and **no** `location:` header |
 
 Do not start the window unless all five pass. Check 5 is the one that cannot be inferred from the
@@ -38,19 +38,24 @@ observation rather than trusted to that check being clever (see "The guard's sha
    interval, canonicals still name the pre-cutover host; complete the next steps promptly.
 4. **Vercel env, redeploy and promote.** Set `NEXT_PUBLIC_SITE_URL=https://hkwtia.org` for
    Production, redeploy, then promote explicitly — merging alone builds only a Preview in
-   this project. Confirm with `vercel inspect` that the alias carries the intended
-   `githubCommitSha`. The deployed value changes canonicals, `og:url` and the sitemap host,
+   this project. Reopen the production deployment behind `hkwtia.vercel.app` in Vercel
+   Project → Deployments and compare **Source → Commit** with `git rev-parse origin/main`;
+   `vercel inspect --json` does not expose the required commit SHA in the current CLI output.
+   The deployed value changes canonicals, `og:url` and the sitemap host,
    and arms the `hkwtia.vercel.app` → 308. The sitemap and page canonicals follow the value
-   in both states, pinned by `tests/unit/sitemap-host.test.ts` (committed `794c8522`).
+   in both states, pinned by `tests/unit/sitemap-host.test.ts`.
 5. **Verify the deployed cutover, in this order:**
    - `curl -sI https://hkwtia.org/ | head -1` → `200`
    - `curl -sI https://hkwtia.vercel.app/ | head -1` → `308`, `location: https://hkwtia.org/`
-   - `curl -s https://hkwtia.org/sitemap.xml | grep -c "<loc>"` → well over 500
+   - `node scripts/verify-cutover-sitemap.mjs --host https://hkwtia.org --canonical https://hkwtia.org` → nonempty sitemap, both locales, and every `<loc>` and alternate on the canonical host
+   - `node scripts/verify-cutover-sitemap.mjs --host https://hkwtia.vercel.app --canonical https://hkwtia.org --expect-redirect` → 308 to the canonical sitemap, then the same host checks
    - `curl -s https://hkwtia.org/ | grep canonical` → `https://hkwtia.org`
    - `node scripts/verify-legacy-redirects.mjs --host https://hkwtia.org` → `OK: 576/576`
 6. **Google Search Console.** Add `hkwtia.org` as a property if the existing Site Kit property
-   is not reusable, submit `https://hkwtia.org/sitemap.xml`, and use Change of Address only if
-   the property is genuinely moving rather than being replaced in place.
+   is not reusable, and confirm Search Console marks the property **Verified**. Submit
+   `https://hkwtia.org/sitemap.xml`; confirm the submission appears in Sitemaps and later
+   reaches **Success**. Record a pending processing state and follow it until Success. Use
+   Change of Address only if the property is genuinely moving rather than being replaced in place.
 
 ## The guard's shape, and its one soft edge
 
@@ -107,7 +112,8 @@ the rollback, so search results and some client paths take longer to unwind.
 - Walk the external references and printed material — partner sites, directory listings, email
   signatures, printed matter — and update any that still name `hkwtia.vercel.app`; confirm every
   changed link resolves `200` on `hkwtia.org`.
-- Re-run `node scripts/check-legacy-drift.mjs --wordpress https://hkwtia.org` once WordPress is
-  retired, to confirm no URL was left behind.
+- Preserve the final successful pre-window `check-legacy-drift.mjs` output. Re-run the drift
+  checker only against a separately reachable WordPress origin while it remains available;
+  after DNS moves, `https://hkwtia.org` serves the new app and is not a WordPress source.
 - Watch GSC coverage for a crawl cycle. A rise in "crawled, not indexed" on `/about/history/*`
   is expected initially — 45 of those pages are newly published.

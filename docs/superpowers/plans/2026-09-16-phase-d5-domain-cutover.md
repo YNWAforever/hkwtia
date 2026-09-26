@@ -4,11 +4,18 @@
 
 **Goal:** Prove the sitemap and the page canonicals follow `NEXT_PUBLIC_SITE_URL`, and write the ordered runbook that takes `hkwtia.org` live without a half-done cutover.
 
-**Architecture:** No production behaviour changes. The 308 and its arming guard already exist in `next.config.ts` and are already pinned; the sitemap and `buildPageMetadata` already read the same variable through `absoluteUrl`. This slice adds the missing **verification** and the **runbook**.
+**Architecture:** No production application behaviour changes. The 308 and its arming guard already exist in `next.config.ts` and are already pinned; the sitemap and `buildPageMetadata` already read the same variable through `absoluteUrl`. This slice adds the missing **verification** and the **runbook**.
 
 **Tech Stack:** Next.js 16 App Router, TypeScript strict, Vitest.
 
 **Spec:** `docs/superpowers/specs/2026-09-16-phase-d5-domain-cutover-design.md`
+
+**Review correction (2026-09-26):** the governing runbook needs operational verification beyond
+the original plan. `check-legacy-drift.mjs` now fails on empty or unreadable WordPress
+sitemaps, and `verify-cutover-sitemap.mjs` validates live URL origins and the preview alias
+redirect. Their focused regression tests are `legacy-drift-preflight.test.ts` and
+`cutover-sitemap-preflight.test.ts`. The owner still performs the domain, environment, DNS,
+and Search Console steps.
 
 ## Global Constraints
 
@@ -35,13 +42,13 @@
 Create `tests/unit/sitemap-host.test.ts`. The sitemap is one async function that awaits several repositories, so stub them; every assertion below is about the **host**, not about row contents.
 
 ```ts
-import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
+import {afterEach, describe, expect, it, vi} from "vitest";
 
 // The sitemap is a single async function awaiting every repository at once, so
 // they are stubbed rather than reached: this test is about the HOST each entry is
 // published on, not about which rows exist.
 vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: {listPublishedSlugs: vi.fn(async () => [])}}));
-vi.mock("@/lib/db/repos/events", () => ({eventsRepository: {listPublic: vi.fn(async () => [])}}));
+vi.mock("@/lib/db/repos/events", () => ({eventsRepository: {listPublicSlugs: vi.fn(async () => [])}}));
 vi.mock("@/lib/db/repos/public-posts", () => ({listPublishedBuildLogs: vi.fn(async () => []), listPublishedNews: vi.fn(async () => [])}));
 vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: {listPublishedSlugs: vi.fn(async () => [])}}));
 
@@ -114,7 +121,7 @@ describe("the sitemap's host", () => {
 });
 ```
 
-The mock shapes above are the real exports, read from `app/sitemap.ts` and each repository: `listPublishedBuildLogs()`, `eventsRepository.listPublic(actor, {status, asOf})`, `listPublishedNews(locale, asOf)`, `showcaseRepository.listPublishedSlugs()`, `companyProfilesRepository.listPublishedSlugs()`. Every one of those calls is already wrapped in `.catch(() => [])` in the sitemap, so an empty return is the natural stub. If a mock name drifts, the test fails on the mock rather than on an assertion — the wrong reason to fail.
+The mock shapes above are the real exports, read from `app/sitemap.ts` and each repository: `listPublishedBuildLogs()`, `eventsRepository.listPublicSlugs()`, `listPublishedNews(locale, asOf)`, `showcaseRepository.listPublishedSlugs()`, `companyProfilesRepository.listPublishedSlugs()`. The current sitemap awaits the reads in `Promise.all` without per-read catches, so each mock must name the current repository method and resolve an empty collection. If a mock name drifts, the test fails on the mock rather than on an assertion — the wrong reason to fail.
 
 - [ ] **Step 2: Run it — and expect it to PASS**
 

@@ -32,8 +32,8 @@ because the cutover needs the domain, DNS and Google Search Console, all of whic
 
 **Out, deliberately:**
 
-- **Any new code.** The guard, the redirect and the variable's plumbing already exist; this slice adds no
-  behaviour, and if an implementation finds itself changing `next.config.ts` it has misread the slice.
+- **Any production application code.** The guard, the redirect and the variable's plumbing already exist; this slice adds no
+  production behaviour, and if an implementation finds itself changing `next.config.ts` it has misread the slice.
 - The **operations themselves**: attaching the domain, DNS, and Google Search Console. They need
   credentials and the domain, and they are the owner's to perform — this slice documents them.
 - Approving or claiming the cutover has happened. Nothing here asserts the domain is live.
@@ -167,6 +167,14 @@ test stays in place.
 | A test that mutates the site URL leaks into another test or the build | The test restores the variable, and the build is part of the gate |
 | Someone re-runs the cutover steps out of order under pressure | Numbered steps, each with an owner and a verification, and a rollback at the end |
 | The slice quietly grows into changing the redirect | §2 says explicitly that any change to `next.config.ts` means the slice has been misread |
+
+**Review correction (2026-09-26):** the governing runbook also relied on two weak operator checks:
+`check-legacy-drift.mjs` could report success after reading zero WordPress URLs, and counting
+`<loc>` entries did not prove the live sitemap named the cutover host. The operational checker
+now fails closed on missing or unreadable WordPress data, and
+`scripts/verify-cutover-sitemap.mjs` checks the deployed sitemap and the preview alias redirect.
+Neither changes production application behaviour. The deployed alias redirects to the canonical
+sitemap; it does not serve a second XML response.
 
 ## 10. Definition of done
 

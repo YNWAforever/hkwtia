@@ -1,10 +1,10 @@
-import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
+import {afterEach, describe, expect, it, vi} from "vitest";
 
 // The sitemap is a single async function awaiting every repository at once, so
 // they are stubbed rather than reached: this test is about the HOST each entry is
 // published on, not about which rows exist.
 vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: {listPublishedSlugs: vi.fn(async () => [])}}));
-vi.mock("@/lib/db/repos/events", () => ({eventsRepository: {listPublic: vi.fn(async () => [])}}));
+vi.mock("@/lib/db/repos/events", () => ({eventsRepository: {listPublicSlugs: vi.fn(async () => [])}}));
 vi.mock("@/lib/db/repos/public-posts", () => ({listPublishedBuildLogs: vi.fn(async () => []), listPublishedNews: vi.fn(async () => [])}));
 vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: {listPublishedSlugs: vi.fn(async () => [])}}));
 
@@ -46,7 +46,16 @@ describe("the sitemap's host", () => {
     process.env.NEXT_PUBLIC_SITE_URL = PREVIEW_HOST;
     const urls = await locs();
     expect(urls.length).toBeGreaterThan(0);
-    for (const url of urls) expect(url).not.toContain("hkwtia.org");
+    for (const url of urls) {
+      expect(new URL(url).origin).toBe(PREVIEW_HOST);
+      expect(url).not.toContain("hkwtia.org");
+    }
+    const metadata = buildPageMetadata({locale: "en", pathname: "/events", title: "Events", description: "Events"});
+    const canonical = new URL(String(metadata.alternates?.canonical));
+    expect(canonical.origin).toBe(PREVIEW_HOST);
+    const sitemapEntry = (await sitemap()).find((entry) => new URL(entry.url).pathname === "/events");
+    expect(sitemapEntry).toBeDefined();
+    expect(new URL(sitemapEntry!.url).origin).toBe(canonical.origin);
   });
 
   it("keeps the locale alternates on the same host as the entry they annotate", async () => {
