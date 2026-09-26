@@ -132,3 +132,30 @@ cutover, confirm the resolver step prints `https://hkwtia.org`.
 This job measures the public site only. Search Console coverage, top queries, and
 crawled-but-not-indexed URLs still require the owner's GSC property access or an
 export; Lighthouse results cannot substitute for that cross-reference.
+
+## Search Console cross-reference after cutover
+
+After the domain is serving the new site and the Search Console property is verified, an owner can
+export four files to a local directory outside the repository:
+
+1. Save https://hkwtia.org/sitemap.xml as sitemap.xml.
+2. In Page indexing, open **Crawled - currently not indexed** and export its example-URL table as
+   coverage.csv. The CSV must have an English URL or Page column.
+3. In Performance > Search results, export the Queries table as queries.csv. The CSV must have
+   Top queries (or Query), Clicks, and Impressions columns.
+4. In Links > Internal links > Top linked pages, export the table as links.csv. The CSV must have
+   Target page (or Page/URL) and Internal links (or Links) columns.
+
+Run from the repository with local paths to those four files:
+
+~~~powershell
+node --import tsx scripts/gsc-cross-reference.ts --sitemap "C:\path\to\sitemap.xml" --coverage "C:\path\to\coverage.csv" --queries "C:\path\to\queries.csv" --links "C:\path\to\links.csv"
+~~~
+
+The command prints Markdown that can be saved outside the repository. It rejects missing or malformed
+files and a sitemap with any host other than https://hkwtia.org. It lists exported
+crawled-not-indexed examples that are still in the sitemap, the exported top queries, and exported
+internal-link counts. A URL absent from either Search Console export is **unknown**: Page indexing
+examples are limited samples, and the Links export is not a complete site link graph. Inspect
+important URLs with Search Console URL Inspection before deciding whether to change a page.
+No owner export is present in this checkout, so the cross-reference has only fixture-test evidence.
