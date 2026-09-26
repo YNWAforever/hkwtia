@@ -57,7 +57,7 @@ Record every result with date, SHA, environment, command, exit code, count, skip
 
 ## Outstanding gates
 
-- Full suite baseline has one existing CLI import failure. The fix and rerun remain required.
+- The Lighthouse target CLI shebang was removed so Vitest can import its exported function; its nine tests and the full suite now pass. This is a test-loader repair, not a production Lighthouse measurement.
 - No isolated `DATABASE_URL_TEST` or Stripe test variables in this shell. Do not run migrations, seeds or paid flows against unknown hosts.
 - Browser acceptance needs a local/preview server and test identities. The public alias's deployed SHA is unverified.
 - `npm run test:e2e` and focused browser journeys must be run and recorded before handoff.
@@ -84,3 +84,17 @@ Record every result with date, SHA, environment, command, exit code, count, skip
 The historical demo event's current production row, registration/order relationships and deployed SHA were not queried. The browser walk used the local worktree server, not a staging or live alias. No Stripe Price reconciliation or membership policy approval was available.
 
 | 2026-09-27 | T10 feature worktree | `npm run lint`; changed-file ESLint; `npm run build` | exit 0 for all; full lint 61 warnings, focused lint 5 warnings, build compiled and generated 251 static pages | Warnings are test mock image tags; no lint errors. Build ran without database/provider credentials and does not prove runtime behavior. |
+
+## T11 admin pagination evidence
+
+| Date | Target | Command | Result | Scope and limit |
+|---|---|---|---|---|
+| 2026-09-27 | feature worktree | Focused Vitest: new cursor/event/member tests and existing event/member regressions | exit 0; 10 new event tests, 10 member-timeline tests, 2 summary tests, 2 rendered page tests, plus prior event/member suites | By-ID, SQL bounds, tie keys, actor checks, lazy sections, copy and legacy compatibility. SQL proxy/mocked DB; no live PostgreSQL latency evidence. |
+| 2026-09-27 | feature worktree | `npm run typecheck`; `npm run audit:strings`; `git diff --check` | exit 0; 268 TSX scanned | Types, bilingual strings and whitespace after T11 event/member wiring. |
+| 2026-09-27 | disposable PostgreSQL | `npx vitest run tests/integration/admin-pagination.test.ts` | exit 0; 3 skipped | `RUN_POSTGRES_INTEGRATION=1` unset and Docker daemon unavailable. Same-name member/guest/ticket, same-time orders/notes and authorization were not executed on PostgreSQL. |
+
+No 10k-member/500-attendee load fixture, EXPLAIN ANALYZE, query count or server p50/p95 was produced. Staff sign-in and Preview admin browser acceptance are also unavailable in this shell. T11 is code-verified by unit/rendered tests only; staging and production remain unverified.
+| 2026-09-27 | T11 feature worktree | `npm run lint`; `npm run build` | exit 0 for both; lint 61 warnings, 0 errors; build compiled and generated 251 static pages | Same warning count as T10. Build has no authenticated admin/database acceptance or performance proof. |
+
+| 2026-09-27 | T11 full feature worktree | `npm test` | exit 0; 654 files and 5,754 tests passed; 34 files and 93 tests skipped | All checked-in unit suites pass after contract reconciliation. PostgreSQL integration remains skipped without an isolated test database/Docker; browser and provider acceptance remain separate gates. |
+| 2026-09-27 | T11 feature worktree | `npm run typecheck`; `npm run audit:strings`; `npm run lint` | exit 0 for all; 268 TSX scanned; lint 61 warnings, 0 errors | Static checks after the full-suite repairs. Existing warning count unchanged from T10. |

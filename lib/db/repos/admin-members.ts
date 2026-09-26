@@ -1,11 +1,12 @@
 import "server-only";
 
-import {inArray, sql} from "drizzle-orm";
+import {inArray, sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 import {alias} from "drizzle-orm/pg-core";
 
 import type {Member360, MemberPurchaseItem} from "@/lib/admin/member-360";
 import {membershipSummaryOrder, membershipSummaryOrderSql} from "@/lib/admin/membership-summary";
+import {decodeScopedCursor, encodeScopedCursor, parsePageQuery, type CursorPage} from "@/lib/admin/pagination";
 
 import {decodeAdminMemberCursor, encodeAdminMemberCursor, type AdminMemberListItem, type AdminMemberPage, type AdminMemberQuery} from "@/lib/admin/member-types";
 import {requireAdmin} from "@/lib/auth/authorize";
@@ -124,7 +125,103 @@ export async function readMemberPurchases(
   return orders.map((order) => ({...order, createdAt: order.createdAt.toISOString(), paidAt: order.paidAt?.toISOString() ?? null, refundedAt: order.refundedAt?.toISOString() ?? null, seats: (seatsByOrder.get(order.id) ?? []).map((seat) => ({id: seat.id, attendeeName: seat.attendeeName, checkedInAt: seat.checkedInAt?.toISOString() ?? null}))}));
 }
 
+export const memberTimelineKindSchema = z.enum(["engagement", "emails", "events", "purchases", "notes", "journeys", "whatsapp", "suppressions"]);
+export type MemberTimelineKind = z.infer<typeof memberTimelineKindSchema>;
+type MemberTimelineItem =
+  | Member360["engagement"]["events"][number]
+  | Member360["emails"][number]
+  | (Member360["events"][number] & {id: string})
+  | Member360["purchases"][number]
+  | Member360["notes"][number]
+  | Member360["journeys"][number]
+  | Member360["whatsapp"][number]
+  | Member360["suppressions"][number];
+export type MemberTimelineResult = Readonly<{kind: MemberTimelineKind; page: CursorPage<MemberTimelineItem>}>;
+
+type TimelineSqlSpec = Readonly<{select: SQL; from: SQL; where: SQL; sortAt: SQL; id: SQL; searchColumns: readonly SQL[]}>;
+
+function timelineSql(kind: MemberTimelineKind, profileId: string): TimelineSqlSpec {
+  switch (kind) {
+    case "engagement": return {select: sql`${engagementEvents.id} AS id, ${engagementEvents.type} AS type, ${engagementEvents.points} AS points, ${engagementEvents.occurredAt} AS "occurredAt"`, from: sql`${engagementEvents}`, where: sql`${engagementEvents.profileId} = ${profileId}`, sortAt: sql`${engagementEvents.occurredAt}`, id: sql`${engagementEvents.id}`, searchColumns: [sql`${engagementEvents.type}::text`]};
+    case "emails": return {select: sql`${emailLog.id} AS id, ${emailLog.template} AS template, ${emailLog.subject} AS subject, ${emailLog.status} AS status, ${emailLog.createdAt} AS "createdAt"`, from: sql`${emailLog}`, where: sql`${emailLog.profileId} = ${profileId}`, sortAt: sql`${emailLog.createdAt}`, id: sql`${emailLog.id}`, searchColumns: [sql`${emailLog.template}`, sql`${emailLog.subject}`, sql`${emailLog.status}::text`]};
+    case "events": return {select: sql`${eventRegistrations.eventId} AS "eventId", ${events.titleEn} AS title, ${events.startsAt} AS "startsAt", ${eventRegistrations.status} AS status, ${eventRegistrations.checkedInAt} AS "checkedInAt"`, from: sql`${eventRegistrations} INNER JOIN ${events} ON ${events.id} = ${eventRegistrations.eventId}`, where: sql`${eventRegistrations.profileId} = ${profileId}`, sortAt: sql`${events.startsAt}`, id: sql`${eventRegistrations.eventId}`, searchColumns: [sql`${events.titleEn}`, sql`${eventRegistrations.status}::text`]};
+    case "purchases": return {select: sql`${eventOrders.id} AS id, ${eventOrders.eventId} AS "eventId", ${events.titleEn} AS "titleEn", ${events.titleZh} AS "titleZh", ${eventOrders.status} AS status, ${eventOrders.amountHkdCents} AS "amountHkdCents", ${eventOrders.paidAt} AS "paidAt", ${eventOrders.refundedAt} AS "refundedAt", ${eventOrders.refundReason} AS "refundReason", ${eventOrders.createdAt} AS "createdAt"`, from: sql`${eventOrders} INNER JOIN ${events} ON ${events.id} = ${eventOrders.eventId}`, where: sql`${eventOrders.buyerProfileId} = ${profileId}`, sortAt: sql`${eventOrders.createdAt}`, id: sql`${eventOrders.id}`, searchColumns: [sql`${events.titleEn}`, sql`${events.titleZh}`, sql`${eventOrders.status}::text`]};
+    case "notes": return {select: sql`${memberNotes.id} AS id, ${memberNotes.authorProfileId} AS "authorProfileId", ${noteAuthors.displayName} AS "authorName", ${memberNotes.body} AS body, ${memberNotes.replacesNoteId} AS "replacesNoteId", ${memberNotes.createdAt} AS "createdAt"`, from: sql`${memberNotes} LEFT JOIN ${noteAuthors} ON ${noteAuthors.id} = ${memberNotes.authorProfileId}`, where: sql`${memberNotes.profileId} = ${profileId}`, sortAt: sql`${memberNotes.createdAt}`, id: sql`${memberNotes.id}`, searchColumns: [sql`${memberNotes.body}`]};
+    case "journeys": return {select: sql`${journeyState.id} AS id, ${journeyState.journey} AS journey, ${journeyState.step} AS step, ${journeyState.status} AS status, ${journeyState.scheduledAt} AS "scheduledAt", ${journeyState.attemptCount} AS "attemptCount", ${journeyState.errorCode} AS "errorCode"`, from: sql`${journeyState}`, where: sql`${journeyState.profileId} = ${profileId}`, sortAt: sql`${journeyState.scheduledAt}`, id: sql`${journeyState.id}`, searchColumns: [sql`${journeyState.journey}`, sql`${journeyState.step}`, sql`${journeyState.status}::text`]};
+    case "whatsapp": return {select: sql`${whatsappLog.id} AS id, ${whatsappLog.template} AS template, ${whatsappLog.status} AS status, ${whatsappLog.locale} AS locale, ${whatsappLog.classification} AS classification, ${whatsappLog.attemptCount} AS "attemptCount", ${whatsappLog.errorCode} AS "errorCode", ${whatsappLog.createdAt} AS "createdAt"`, from: sql`${whatsappLog}`, where: sql`${whatsappLog.profileId} = ${profileId}`, sortAt: sql`${whatsappLog.createdAt}`, id: sql`${whatsappLog.id}`, searchColumns: [sql`${whatsappLog.template}`, sql`${whatsappLog.status}::text`]};
+    case "suppressions": return {select: sql`${messageSuppressions.id} AS id, ${messageSuppressions.channel} AS channel, ${messageSuppressions.classification} AS classification, ${messageSuppressions.reasonCode} AS "reasonCode", ${messageSuppressions.createdAt} AS "createdAt"`, from: sql`${messageSuppressions}`, where: sql`${messageSuppressions.profileId} = ${profileId}`, sortAt: sql`${messageSuppressions.createdAt}`, id: sql`${messageSuppressions.id}`, searchColumns: [sql`${messageSuppressions.channel}::text`, sql`${messageSuppressions.reasonCode}`]};
+  }
+}
+
+/** One selected staff history at a time. Every branch orders by (time, ID). */
+export async function getMemberTimelinePage(actor: Actor, profileIdInput: unknown, kindInput: unknown, queryInput: unknown): Promise<MemberTimelineResult | null> {
+  requireAdmin(actor);
+  const profileId = z.string().min(1).max(200).parse(profileIdInput);
+  const kind = memberTimelineKindSchema.parse(kindInput);
+  const query = parsePageQuery(queryInput);
+  const search = query.search.toLocaleLowerCase("en");
+  const scope = `member:${profileId}:${kind}:${search}`;
+  const cursor = query.cursor ? decodeScopedCursor(scope, query.cursor) : null;
+  const cursorAt = cursor ? new Date(cursor[0]) : null;
+  if (cursorAt && !Number.isFinite(cursorAt.getTime())) throw new Error("INVALID_CURSOR");
+  const db = await getDb();
+  const target = resultRows(await db.execute(sql`SELECT ${profiles.id} AS id FROM ${profiles} WHERE ${profiles.id} = ${profileId} LIMIT 1`));
+  if (!target.length) return null;
+  const spec = timelineSql(kind, profileId);
+  const result = resultRows(await db.execute(sql`
+    SELECT ${spec.select}, ${spec.sortAt} AS cursor_at, ${spec.id}::text AS cursor_id
+    FROM ${spec.from}
+    WHERE ${spec.where}
+      AND ${search ? sql`position(${search} in lower(concat_ws(' ', ${sql.join([...spec.searchColumns], sql`, `)}))) > 0` : sql`TRUE`}
+      AND ${cursorAt && cursor ? sql`(${spec.sortAt}, ${spec.id}::text) < (${cursorAt}, ${cursor[1]})` : sql`TRUE`}
+    ORDER BY ${spec.sortAt} DESC, ${spec.id} DESC
+    LIMIT ${query.limit + 1}
+  `));
+  const hasNext = result.length > query.limit;
+  const pageRows = result.slice(0, query.limit);
+  let items: MemberTimelineItem[];
+  switch (kind) {
+    case "engagement": items = z.array(member360EngagementEventSchema).parse(pageRows).map((row) => ({...row, occurredAt: row.occurredAt.toISOString()})); break;
+    case "emails": items = z.array(member360EmailSchema).parse(pageRows).map((row) => ({...row, createdAt: row.createdAt.toISOString()})); break;
+    case "events": items = z.array(member360RegistrationSchema).parse(pageRows).map((row) => ({...row, id: row.eventId, startsAt: row.startsAt.toISOString(), checkedInAt: row.checkedInAt?.toISOString() ?? null})); break;
+    case "notes": items = z.array(member360NoteSchema).parse(pageRows).map((row) => ({...row, createdAt: row.createdAt.toISOString()})); break;
+    case "journeys": items = z.array(member360JourneySchema).parse(pageRows).map((row) => ({...row, scheduledAt: row.scheduledAt.toISOString()})); break;
+    case "whatsapp": items = z.array(member360WhatsappSchema).parse(pageRows).map((row) => ({...row, createdAt: row.createdAt.toISOString()})); break;
+    case "suppressions": items = z.array(member360SuppressionSchema).parse(pageRows).map((row) => ({...row, createdAt: row.createdAt.toISOString()})); break;
+    case "purchases": {
+      const orders = z.array(member360PurchaseSchema).parse(pageRows);
+      const seats = orders.length ? z.array(member360SeatSchema).parse(resultRows(await db.execute(sql`SELECT ${eventOrderSeats.id} AS id, ${eventOrderSeats.orderId} AS "orderId", ${eventOrderSeats.attendeeName} AS "attendeeName", ${eventOrderSeats.checkedInAt} AS "checkedInAt" FROM ${eventOrderSeats} WHERE ${inArray(eventOrderSeats.orderId, orders.map((order) => order.id))} ORDER BY ${eventOrderSeats.orderId}, ${eventOrderSeats.position}`))) : [];
+      const seatsByOrder = new Map<string, typeof seats>();
+      for (const seat of seats) seatsByOrder.set(seat.orderId, [...(seatsByOrder.get(seat.orderId) ?? []), seat]);
+      items = orders.map((order) => ({...order, createdAt: order.createdAt.toISOString(), paidAt: order.paidAt?.toISOString() ?? null, refundedAt: order.refundedAt?.toISOString() ?? null, seats: (seatsByOrder.get(order.id) ?? []).map((seat) => ({id: seat.id, attendeeName: seat.attendeeName, checkedInAt: seat.checkedInAt?.toISOString() ?? null}))}));
+      break;
+    }
+  }
+  const last = pageRows.at(-1);
+  const key = last ? z.object({cursor_at: z.coerce.date(), cursor_id: z.string()}).parse(last) : null;
+  return {kind, page: {items, nextCursor: hasNext && key ? encodeScopedCursor(scope, [key.cursor_at.toISOString(), key.cursor_id, ""]) : null}};
+}
+
 export const adminMembersRepository = {
+  getMemberTimelinePage,
+  async getSummary(actor: Extract<Actor, {kind: "staff" | "exco" | "superadmin"}>, profileId: string): Promise<Member360 | null> {
+    requireAdmin(actor);
+    z.string().min(1).parse(profileId);
+    const db = await getDb();
+    const profile = z.array(member360ProfileSchema).parse(resultRows(await db.execute(sql`SELECT ${profiles.id} AS id, ${profiles.displayName} AS "displayName", ${profiles.email} AS email, ${profiles.phone} AS phone, ${profiles.role} AS role FROM ${profiles} WHERE ${profiles.id} = ${profileId} LIMIT 1`)))[0];
+    if (!profile) return null;
+    const companiesForProfile = z.array(member360CompanySchema).parse(resultRows(await db.execute(sql`SELECT ${companies.id} AS id, ${companies.displayName} AS name, ${companyMembers.role} AS role FROM ${companyMembers} INNER JOIN ${companies} ON ${companies.id} = ${companyMembers.companyId} WHERE ${companyMembers.userId} = ${profileId} AND ${companyMembers.revokedAt} IS NULL ORDER BY ${companies.displayName}`)));
+    const allMemberships = z.array(member360MembershipSchema).parse(resultRows(await db.execute(sql`SELECT ${memberships.id} AS id, ${memberships.companyId} AS "companyId", ${memberships.planCode} AS "planCode", ${memberships.status} AS status, ${memberships.billingPeriodEnd} AS "renewalAt", ${memberships.stripeCustomerId} AS "stripeCustomerId", ${memberships.stripeSubscriptionId} AS "stripeSubscriptionId" FROM ${memberships} WHERE ${memberships.ownerUserId} = ${profileId} OR ${memberships.companyId} IN (SELECT ${companyMembers.companyId} FROM ${companyMembers} WHERE ${companyMembers.userId} = ${profileId} AND ${companyMembers.revokedAt} IS NULL) ORDER BY ${membershipSummaryOrderSql(sql`${memberships.status}`)}, ${memberships.id}, ${memberships.companyId} NULLS LAST`))).sort(membershipSummaryOrder);
+    const membership = allMemberships[0] ?? null;
+    const score = z.array(member360ScoreSchema).parse(resultRows(await db.execute(sql`SELECT ${engagementScores.score} AS score, ${engagementScores.trend} AS trend FROM ${engagementScores} WHERE ${engagementScores.profileId} = ${profileId} LIMIT 1`)))[0] ?? {score: null, trend: null};
+    return {
+      profile, companies: companiesForProfile,
+      membership: membership ? {...membership, renewalAt: membership.renewalAt?.toISOString() ?? null} : null,
+      memberships: allMemberships.map((item) => ({...item, renewalAt: item.renewalAt?.toISOString() ?? null})),
+      engagement: {score: numberOrNull(score.score), trend: numberOrNull(score.trend), events: []},
+      emails: [], events: [], purchases: [], notes: [], journeys: [], whatsapp: [], suppressions: [],
+    };
+  },
   async get360(actor: Extract<Actor, {kind: "staff" | "exco" | "superadmin"}>, profileId: string): Promise<Member360 | null> {
     requireAdmin(actor);
     const db = await getDb();

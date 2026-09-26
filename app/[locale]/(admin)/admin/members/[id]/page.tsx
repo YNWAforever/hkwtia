@@ -8,10 +8,9 @@ import {MemberNoteForm} from "@/components/admin/member-note-form";
 import {MemberProfileForm} from "@/components/admin/member-profile-form";
 import {MembershipCompForm} from "@/components/admin/membership-comp-form";
 import type {AppLocale} from "@/i18n/routing";
-import {
-  getMember360,
-  Member360NotFoundError,
-} from "@/lib/admin/member-360";
+import type {Member360} from "@/lib/admin/member-360";
+import {parsePageQuery} from "@/lib/admin/pagination";
+import {adminMembersRepository, memberTimelineKindSchema, type MemberTimelineKind, type MemberTimelineResult} from "@/lib/db/repos/admin-members";
 import {appendMemberNoteAction} from "@/lib/admin/member-note-actions";
 import {updateMemberProfileAction} from "@/lib/admin/member-profile-actions";
 import {compMembershipAction} from "@/lib/admin/membership-comp-actions";
@@ -25,6 +24,22 @@ type Props = Readonly<{
   params: Promise<{locale: string; id: string}>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }>;
+
+function withTimeline(summary: Member360, result: MemberTimelineResult | null): Member360 {
+  if (!result) return summary;
+  // The repository validates and maps each kind with its own schema before this view projection.
+  const items = result.page.items;
+  switch (result.kind) {
+    case "engagement": return {...summary, engagement: {...summary.engagement, events: items as Member360["engagement"]["events"]}};
+    case "emails": return {...summary, emails: items as Member360["emails"]};
+    case "events": return {...summary, events: items as Member360["events"]};
+    case "purchases": return {...summary, purchases: items as Member360["purchases"]};
+    case "notes": return {...summary, notes: items as Member360["notes"]};
+    case "journeys": return {...summary, journeys: items as Member360["journeys"]};
+    case "whatsapp": return {...summary, whatsapp: items as Member360["whatsapp"]};
+    case "suppressions": return {...summary, suppressions: items as Member360["suppressions"]};
+  }
+}
 
 export default async function AdminMember360Page({params, searchParams}: Props) {
   const {locale: localeValue, id} = await params;
@@ -46,15 +61,36 @@ export default async function AdminMember360Page({params, searchParams}: Props) 
 
   const t = await getTranslations({locale, namespace: "Admin"});
   const actor = await requireAdminPageActor();
-  let view;
-  try {
-    view = await getMember360(actor, profileId.data);
-  } catch (error) {
-    if (error instanceof Member360NotFoundError) {
-      notFound();
+  const rawSection = rawListState.section;
+  const parsedSection = rawSection === undefined ? null : memberTimelineKindSchema.safeParse(rawSection);
+  if (parsedSection && !parsedSection.success) notFound();
+  const activeHistory: MemberTimelineKind | null = parsedSection ? parsedSection.data : null;
+  const historyQuery = activeHistory ? parsePageQuery({
+    search: typeof rawListState.historyQ === "string" ? rawListState.historyQ : "",
+    cursor: typeof rawListState.historyCursor === "string" ? rawListState.historyCursor : null,
+    limit: 20,
+  }) : null;
+  const summary = await adminMembersRepository.getSummary(actor, profileId.data);
+  if (!summary) notFound();
+  const timeline = activeHistory && historyQuery
+    ? await adminMembersRepository.getMemberTimelinePage(actor, profileId.data, activeHistory, historyQuery)
+    : null;
+  if (activeHistory && !timeline) notFound();
+  const view = withTimeline(summary, timeline);
+  const memberPath = `${locale === "zh-HK" ? "/zh" : ""}/admin/members/${profileId.data}`;
+  const retainedListKeys = ["q", "limit", "cursor", "history"] as const;
+  const sectionHref = (section: MemberTimelineKind | null, nextCursor?: string | null) => {
+    const query = new URLSearchParams();
+    for (const key of retainedListKeys) {
+      const value = rawListState[key];
+      if (typeof value === "string") query.set(key, value);
     }
-    throw error;
-  }
+    if (section) query.set("section", section);
+    if (section && section === activeHistory && historyQuery?.search) query.set("historyQ", historyQuery.search);
+    if (nextCursor) query.set("historyCursor", nextCursor);
+    const encoded = query.toString();
+    return `${memberPath}${encoded ? `?${encoded}` : ""}`;
+  };
 
   const appendAction = appendMemberNoteAction.bind(null, profileId.data, `/${locale}/admin/members/${profileId.data}`, {
       success: t("member360.noteSuccess"),
@@ -85,7 +121,18 @@ export default async function AdminMember360Page({params, searchParams}: Props) 
           {t("member360.description")}
         </p>
       </header>
+      <nav aria-label={t("member360.historyNav")} className="flex flex-wrap gap-2">
+        <a aria-current={activeHistory === null ? "page" : undefined} className="min-h-11 rounded-md border px-4 py-2 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground" href={sectionHref(null)}>{t("member360.overview")}</a>
+        {memberTimelineKindSchema.options.map((section) => <a aria-current={activeHistory === section ? "page" : undefined} className="min-h-11 rounded-md border px-4 py-2 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground" href={sectionHref(section)} key={section}>{t(`member360.${section}`)}</a>)}
+      </nav>
+      {activeHistory ? <form action={memberPath} className="flex flex-wrap items-end gap-2" method="get">
+        {retainedListKeys.map((key) => typeof rawListState[key] === "string" ? <input key={key} name={key} type="hidden" value={rawListState[key] as string}/> : null)}
+        <input name="section" type="hidden" value={activeHistory}/>
+        <label className="block text-sm" htmlFor="member-history-search">{t("member360.searchHistory")}<input className="mt-2 block min-h-11 rounded-md border px-3" defaultValue={historyQuery?.search} id="member-history-search" name="historyQ" type="search"/></label>
+        <button className="min-h-11 rounded-md border px-4" type="submit">{t("member360.searchSubmit")}</button>
+      </form> : null}
       <Member360View
+        activeHistory={activeHistory}
         locale={locale}
         labels={{
           profile: t("member360.profile"),
@@ -146,6 +193,8 @@ export default async function AdminMember360Page({params, searchParams}: Props) 
         stripeSubscriptionHref={subscriptionHref}
         view={view}
       />
+      {activeHistory && timeline?.page.nextCursor ? <a className="inline-flex min-h-11 items-center text-primary underline" href={sectionHref(activeHistory, timeline.page.nextCursor)}>{t("member360.nextPage")}</a> : null}
+      {activeHistory && historyQuery?.cursor ? <a className="text-primary underline" href={sectionHref(activeHistory)}>{t("member360.firstPage")}</a> : null}
       {editable
         ? <MemberProfileForm
           action={updateMemberProfileAction.bind(

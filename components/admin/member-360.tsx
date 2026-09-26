@@ -65,6 +65,7 @@ type Member360ViewProps = Readonly<{
   labels: Member360Labels;
   stripeCustomerHref: string | null;
   stripeSubscriptionHref: string | null;
+  activeHistory?: "engagement" | "emails" | "events" | "purchases" | "notes" | "journeys" | "whatsapp" | "suppressions" | null;
 }>;
 
 type MemberFieldProps = Readonly<{
@@ -94,6 +95,7 @@ export function Member360View({
   labels,
   stripeCustomerHref,
   stripeSubscriptionHref,
+  activeHistory,
 }: Member360ViewProps) {
   const moneyFormatter = new Intl.NumberFormat(locale, {style: "currency", currency: "HKD"});
   const dateTimeFormatter = new Intl.DateTimeFormat(locale, {
@@ -234,7 +236,7 @@ export function Member360View({
             {valueOrEmpty(view.engagement.trend, labels.empty)}
           </MemberField>
         </dl>
-        {view.engagement.events.length === 0 ? (
+        {(activeHistory === undefined || activeHistory === "engagement") && (view.engagement.events.length === 0 ? (
           <p className="text-sm text-muted-foreground">{labels.empty}</p>
         ) : (
           <ul className="space-y-3">
@@ -247,10 +249,10 @@ export function Member360View({
               </li>
             ))}
           </ul>
-        )}
+        ))}
       </section>
 
-      <section
+      {(activeHistory === undefined || activeHistory === "emails") && <section
         aria-labelledby="member-emails-heading"
         className="glass-card space-y-4 p-5 sm:p-8"
       >
@@ -275,9 +277,9 @@ export function Member360View({
             ))}
           </ul>
         )}
-      </section>
+      </section>}
 
-      <section
+      {(activeHistory === undefined || activeHistory === "events") && <section
         aria-labelledby="member-events-heading"
         className="glass-card space-y-4 p-5 sm:p-8"
       >
@@ -302,9 +304,9 @@ export function Member360View({
             ))}
           </ul>
         )}
-      </section>
+      </section>}
 
-      <section aria-labelledby="member-purchases-heading" className="glass-card space-y-4 p-5 sm:p-8 lg:col-span-2">
+      {(activeHistory === undefined || activeHistory === "purchases") && <section aria-labelledby="member-purchases-heading" className="glass-card space-y-4 p-5 sm:p-8 lg:col-span-2">
         <h2 className="font-serif text-2xl font-semibold" id="member-purchases-heading">{labels.purchases}</h2>
         {(view.purchases ?? []).length === 0 ? <p className="text-sm text-muted-foreground">{labels.empty}</p> : <ul className="space-y-4">
           {(view.purchases ?? []).map((order) => <li className="border-t border-border pt-4" key={order.id}>
@@ -321,9 +323,9 @@ export function Member360View({
             <ul className="mt-1 list-inside list-disc text-sm">{order.seats.map((seat) => <li key={seat.id}>{seat.attendeeName}{seat.checkedInAt ? ` · ${dateTimeFormatter.format(new Date(seat.checkedInAt))}` : ""}</li>)}</ul>
           </li>)}
         </ul>}
-      </section>
+      </section>}
 
-      <section
+      {(activeHistory === undefined || activeHistory === "journeys") && <section
         aria-labelledby="member-journeys-heading"
         className="glass-card space-y-4 p-5 sm:p-8"
       >
@@ -361,9 +363,9 @@ export function Member360View({
             ))}
           </ul>
         )}
-      </section>
+      </section>}
 
-      <section
+      {(activeHistory === undefined || activeHistory === "whatsapp") && <section
         aria-labelledby="member-whatsapp-heading"
         className="glass-card space-y-4 p-5 sm:p-8"
       >
@@ -404,9 +406,9 @@ export function Member360View({
             ))}
           </ul>
         )}
-      </section>
+      </section>}
 
-      <section
+      {(activeHistory === undefined || activeHistory === "suppressions") && <section
         aria-labelledby="member-suppressions-heading"
         className="glass-card space-y-4 p-5 sm:p-8"
       >
@@ -442,9 +444,9 @@ export function Member360View({
             ))}
           </ul>
         )}
-      </section>
+      </section>}
 
-      <section
+      {(activeHistory === undefined || activeHistory === "notes") && <section
         aria-labelledby="member-notes-heading"
         className="glass-card space-y-4 p-5 sm:p-8 lg:col-span-2"
       >
@@ -469,7 +471,7 @@ export function Member360View({
             ))}
           </ul>
         )}
-      </section>
+      </section>}
     </div>
   );
 }

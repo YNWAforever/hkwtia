@@ -1,6 +1,8 @@
 import "server-only";
 
 import {eq, sql, type SQL} from "drizzle-orm";
+import {requireAdmin} from "@/lib/auth/authorize";
+import {decodeScopedCursor, encodeScopedCursor, parsePageQuery, type CursorPage} from "@/lib/admin/pagination";
 import {z} from "zod";
 
 import type {Actor} from "@/lib/membership/lifecycle";
@@ -663,6 +665,46 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
       return runTransaction((tx) => tx.seatForPass(seatId));
     },
   };
+}
+
+/** Staff-only bounded order list. Aggregate seats only after selecting the page. */
+export async function listEventOrderPage(actor: Actor, eventIdInput: unknown, queryInput: unknown): Promise<CursorPage<EventOrderRow> | null> {
+  requireAdmin(actor);
+  const eventId = z.string().uuid().parse(eventIdInput);
+  const query = parsePageQuery(queryInput);
+  const search = query.search.toLocaleLowerCase("en");
+  const scope = `event:${eventId}:orders:${search}`;
+  const cursor = query.cursor ? decodeScopedCursor(scope, query.cursor) : null;
+  let cursorAt: Date | null = null;
+  if (cursor) {
+    cursorAt = new Date(cursor[0]);
+    if (!Number.isFinite(cursorAt.getTime()) || !z.string().uuid().safeParse(cursor[1]).success) throw new Error("INVALID_CURSOR");
+  }
+  const db = await getDb();
+  const existing = rows(await db.execute(sql`SELECT ${events.id} AS id FROM ${events} WHERE ${events.id} = ${eventId}`));
+  if (!existing.length) return null;
+  const result = rows<Record<string, unknown>>(await db.execute(sql`
+    WITH page_orders AS (
+      SELECT o.* FROM ${eventOrders} o
+      WHERE o.event_id = ${eventId}
+        AND ${search ? sql`(position(${search} in lower(o.buyer_name)) > 0 OR position(${search} in lower(o.buyer_email)) > 0 OR position(${search} in o.id::text) > 0)` : sql`TRUE`}
+        AND ${cursorAt && cursor ? sql`(o.created_at, o.id) < (${cursorAt}, ${cursor[1]}::uuid)` : sql`TRUE`}
+      ORDER BY o.created_at DESC, o.id DESC
+      LIMIT ${query.limit + 1}
+    )
+    SELECT p.*, COALESCE(seats.seat_names, ARRAY[]::text[]) AS seat_names, COALESCE(seats.seat_count, 0) AS seat_count
+    FROM page_orders p
+    LEFT JOIN LATERAL (
+      SELECT array_agg(s.attendee_name ORDER BY s.position ASC) AS seat_names, count(*)::int AS seat_count
+      FROM ${eventOrderSeats} s WHERE s.order_id = p.id
+    ) seats ON true
+    ORDER BY p.created_at DESC, p.id DESC
+  `));
+  const hasNext = result.length > query.limit;
+  const pageRows = result.slice(0, query.limit);
+  const items = pageRows.map((row) => ({order: orderFrom(row), seatCount: Number(row.seat_count), seatNames: Array.isArray(row.seat_names) ? row.seat_names as string[] : []}));
+  const last = pageRows.at(-1);
+  return {items, nextCursor: hasNext && last ? encodeScopedCursor(scope, [requiredDate(last.created_at).toISOString(), String(last.id), ""]) : null};
 }
 
 export const eventOrdersRepository = createEventOrdersRepository();

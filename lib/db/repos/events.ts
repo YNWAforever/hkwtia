@@ -4,6 +4,7 @@ import {and, asc, count, desc, eq, gte, inArray, isNull, lt, notInArray, or, sql
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
+import {decodeScopedCursor, encodeScopedCursor, parsePageQuery, type CursorPage} from "@/lib/admin/pagination";
 import {AUDIT_DEMO_EVENT_SLUGS, isAuditDemoEventSlug} from "@/config/demo-events";
 import {getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
@@ -556,6 +557,14 @@ export async function listAdminEvents(actor: Actor, source?: EventRows): Promise
   return sorted(await rowsFrom(source));
 }
 
+export async function getAdminEventById(actor: Actor, eventIdInput: unknown): Promise<Event | null> {
+  requireAdmin(actor);
+  const eventId = eventIdSchema.parse(eventIdInput);
+  const database = await getDb();
+  const rows = await database.select().from(events).where(eq(events.id, eventId)).limit(1);
+  return rows[0] ?? null;
+}
+
 /**
  * One row per person on the door list, whether they came through the member
  * registration (profile-keyed) or the public guest form (B-4). `status` is the
@@ -640,6 +649,47 @@ export async function listEventAttendees(actor: Actor, eventIdInput: unknown, de
       checkedInAt: parsed.checked_in_at,
     };
   });
+}
+
+/** Bounded door list; CSV export keeps its independent full-stream contract. */
+export async function listEventAttendeePage(actor: Actor, eventIdInput: unknown, queryInput: unknown, deps: MemberEventDependencies = {}): Promise<CursorPage<EventAttendee> | null> {
+  requireAdmin(actor);
+  const eventId = eventIdSchema.parse(eventIdInput);
+  const query = parsePageQuery(queryInput);
+  const search = query.search.toLocaleLowerCase("en");
+  const scope = `event:${eventId}:attendees:${search}`;
+  const cursor = query.cursor ? decodeScopedCursor(scope, query.cursor) : null;
+  const database = await memberDatabase(deps);
+  const existing = executedRows(await database.execute(sql`SELECT ${events.id} AS id FROM ${events} WHERE ${events.id} = ${eventId}`));
+  if (existing.length === 0) return null;
+  const rows = executedRows(await database.execute(sql`
+    WITH attendee_rows AS (
+      SELECT 'member'::text AS kind, ${eventRegistrations.profileId} AS profile_id, NULL::uuid AS guest_id, NULL::uuid AS seat_id, NULL::uuid AS order_id, ${profiles.displayName} AS display_name, ${profiles.email} AS email, NULL::text AS organisation, ${eventRegistrations.status}::text AS status, ${eventRegistrations.checkedInAt} AS checked_in_at, ${eventRegistrations.profileId}::text AS item_id
+      FROM ${eventRegistrations} JOIN ${profiles} ON ${profiles.id} = ${eventRegistrations.profileId}
+      WHERE ${eventRegistrations.eventId} = ${eventId}
+      UNION ALL
+      SELECT 'guest'::text, NULL::text, ${eventGuestRegistrations.id}, NULL::uuid, NULL::uuid, ${eventGuestRegistrations.name}, ${eventGuestRegistrations.email}, ${eventGuestRegistrations.organisation}, ${eventGuestRegistrations.status}::text, ${eventGuestRegistrations.checkedInAt}, ${eventGuestRegistrations.id}::text
+      FROM ${eventGuestRegistrations} WHERE ${eventGuestRegistrations.eventId} = ${eventId}
+      UNION ALL
+      SELECT 'ticket'::text, NULL::text, NULL::uuid, ${eventOrderSeats.id}, ${eventOrders.id}, ${eventOrderSeats.attendeeName}, ${eventOrderSeats.attendeeEmail}, NULL::text, ${eventOrders.status}::text, ${eventOrderSeats.checkedInAt}, ${eventOrderSeats.id}::text
+      FROM ${eventOrderSeats} JOIN ${eventOrders} ON ${eventOrders.id} = ${eventOrderSeats.orderId}
+      WHERE ${eventOrders.eventId} = ${eventId} AND ${eventOrders.status} = 'paid'
+    )
+    SELECT attendee_rows.*, lower(display_name) AS sort_name FROM attendee_rows
+    WHERE ${search ? sql`(position(${search} in lower(display_name)) > 0 OR position(${search} in lower(coalesce(email, ''))) > 0 OR position(${search} in lower(coalesce(organisation, ''))) > 0 OR position(${search} in coalesce(order_id::text, '')) > 0 OR position(${search} in coalesce(seat_id::text, '')) > 0)` : sql`TRUE`}
+      AND ${cursor ? sql`(lower(display_name), kind, item_id) > (${cursor[0]}, ${cursor[1]}, ${cursor[2]})` : sql`TRUE`}
+    ORDER BY lower(display_name) ASC, kind ASC, item_id ASC
+    LIMIT ${query.limit + 1}
+  `));
+  const hasNext = rows.length > query.limit;
+  const pageRows = rows.slice(0, query.limit);
+  const items = pageRows.map((row) => {
+    const parsed = attendeeRowSchema.parse(row);
+    return {kind: parsed.kind, profileId: parsed.profile_id, guestId: parsed.guest_id, seatId: parsed.seat_id, orderId: parsed.order_id, displayName: parsed.display_name, email: parsed.email, organisation: parsed.organisation, status: parsed.status, checkedInAt: parsed.checked_in_at};
+  });
+  const last = pageRows.at(-1);
+  const nextCursor = hasNext && last ? encodeScopedCursor(scope, [String(last.sort_name), String(last.kind), String(last.item_id)]) : null;
+  return {items, nextCursor};
 }
 
 // ---------------------------------------------------------------------------
@@ -1102,10 +1152,12 @@ export const eventsRepository = {
   listForMember: listMemberEvents,
   getBySlug: getEventBySlug,
   listForAdmin: listAdminEvents,
+  getForAdmin: getAdminEventById,
   create: createEvent,
   update: updateEvent,
   register: registerForEvent,
   listAttendees: listEventAttendees,
+  listAttendeePage: listEventAttendeePage,
   saveMemberDraft: saveMemberEventDraft,
   submitMember: submitMemberEvent,
   listForCompany: listCompanyEvents,
