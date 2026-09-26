@@ -12,6 +12,7 @@ function deps(overrides: Partial<WriterActionDependencies> = {}): WriterActionDe
     plansFor: vi.fn(async () => ["startup"] as const),
     countRuns: vi.fn(async () => 0),
     reserveRun: vi.fn(async () => "reserved-run"),
+    settleFailedRun: vi.fn(async () => {}),
     generate: vi.fn(async () => ({descriptionEn: "a", descriptionZh: "b"})),
     now: () => now,
     ...overrides,
@@ -94,6 +95,14 @@ describe("runWriterAssist", () => {
     const generate = vi.fn(async () => { throw new Error("provider down"); });
     await expect(runWriterAssist(member, {kind: "event", brief: "hello"}, deps({generate})))
       .resolves.toEqual({status: "error", code: "FAILED"});
+  });
+
+  it("settles a reserved run when writer setup throws before the runtime starts", async () => {
+    const generate = vi.fn(async () => { throw new AgentRuntimeError("configuration_error"); });
+    const settleFailedRun = vi.fn(async () => {});
+    await expect(runWriterAssist(member, {kind: "event", brief: "hello"}, deps({generate, settleFailedRun})))
+      .resolves.toEqual({status: "error", code: "UNAVAILABLE"});
+    expect(settleFailedRun).toHaveBeenCalledWith(member, "reserved-run", expect.any(AgentRuntimeError));
   });
 
   it("reports an unconfigured agent as UNAVAILABLE", async () => {
