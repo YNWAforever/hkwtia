@@ -45,11 +45,16 @@ export async function POST(request: Request): Promise<Response> {
   const locale = localeOf(form.get("locale"));
   const digest = cancelDigestFromToken(unsubscribeEnv().unsubscribeTokenSecret, form.get("token") ?? "");
   if (!digest) return redirect(request, locale, "/events?guest=invalid");
-  const outcome = await eventGuestsRepository
-    .cancelByToken(contactWriterActor("event_guest"), digest)
-    .catch((error: unknown) => {
-      console.error("guest-cancel", error);
-      return "unknown" as const;
-    });
-  return redirect(request, locale, "/events?guest=" + outcome);
+  try {
+    const outcome = await eventGuestsRepository.cancelByToken(contactWriterActor("event_guest"), digest);
+    return redirect(request, locale, "/events?guest=" + outcome);
+  } catch (error) {
+    console.error("guest-cancel", error);
+    // Keep the signed token on the confirmation page so a transient database
+    // failure does not masquerade as an invalid link or strand the guest.
+    const target = new URL(localizedPath(locale, "/events/guest-cancel"), request.url);
+    target.searchParams.set("token", form.get("token") ?? "");
+    target.searchParams.set("error", "unavailable");
+    return new Response(null, {status: 303, headers: {location: target.toString(), "cache-control": "no-store"}});
+  }
 }

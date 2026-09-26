@@ -9,7 +9,7 @@ export const metadata: Metadata = {robots: {index: false, follow: false}, referr
 
 type Props = Readonly<{
   params: Promise<{locale: string}>;
-  searchParams: Promise<{token?: string | string[]}>;
+  searchParams: Promise<{token?: string | string[]; error?: string | string[]}>;
 }>;
 
 export default async function GuestCancelPage({params, searchParams}: Props) {
@@ -22,6 +22,7 @@ export default async function GuestCancelPage({params, searchParams}: Props) {
     <div className="container mx-auto max-w-2xl px-6 py-20">
       <h1 className="text-3xl font-semibold">{t("guest.cancelConfirmTitle")}</h1>
       <p className="mt-4">{t("guest.cancelConfirmBody")}</p>
+      {query.error === "unavailable" ? <p className="mt-4" role="alert">{t("guest.cancelUnavailable")}</p> : null}
       <form action="/api/events/guest/cancel" className="mt-8" method="post">
         <input name="token" type="hidden" value={token} />
         <input name="locale" type="hidden" value={locale} />

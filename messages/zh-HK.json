@@ -1602,6 +1602,7 @@
       "unavailable": "目前無法報名。",
       "cancelled": "你的報名已取消。",
       "cancelInvalid": "此取消連結已失效。",
+      "cancelUnavailable": "目前無法取消你的報名，你的名額未有更改。請重試。",
       "cancelConfirmTitle": "確定取消活動報名？",
       "cancelConfirmBody": "請在下方確認，才會釋出你的名額。開啟此連結並不會更改報名。",
       "cancelConfirmAction": "確認取消報名",
