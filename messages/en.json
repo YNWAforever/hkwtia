@@ -1602,6 +1602,7 @@
       "unavailable": "Registration is not available right now.",
       "cancelled": "Your registration has been cancelled.",
       "cancelInvalid": "That cancel link is not valid any more.",
+      "cancelUnavailable": "We could not cancel your registration right now. Your place is unchanged. Please try again.",
       "cancelConfirmTitle": "Cancel your event registration?",
       "cancelConfirmBody": "Confirm below to release your place. Opening this link has not changed your registration.",
       "cancelConfirmAction": "Cancel registration",

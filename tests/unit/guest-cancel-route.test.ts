@@ -60,7 +60,7 @@ describe("GET /api/events/guest/cancel (programme B-4)", () => {
     expect(cancelByToken).toHaveBeenCalledWith(expect.objectContaining({kind: "contact-writer", source: "event_guest"}), digest);
   });
 
-  it("logs a POST repository failure and redirects with guest=unknown", async () => {
+  it("keeps a failed cancellation retryable instead of reporting an invalid link", async () => {
     const post = Reflect.get(cancelRoute, "POST") as ((request: Request) => Promise<Response>) | undefined;
     expect(post).toBeTypeOf("function");
     if (!post) return;
@@ -70,7 +70,7 @@ describe("GET /api/events/guest/cancel (programme B-4)", () => {
       method: "POST", headers: {"content-type": "application/x-www-form-urlencoded"},
       body: new URLSearchParams({token: TOKEN, locale: "en"}).toString(),
     }));
-    expect(response.headers.get("location")).toBe("https://hkwtia.example/events?guest=unknown");
+    expect(response.headers.get("location")).toBe("https://hkwtia.example/events/guest-cancel?token=" + TOKEN + "&error=unavailable");
     expect(error).toHaveBeenCalledWith("guest-cancel", expect.any(Error));
     error.mockRestore();
   });
