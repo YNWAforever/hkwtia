@@ -305,8 +305,9 @@ describe("WiseTech protected route ownership", () => {
     // Phase D-4b Task 5 added /admin/check-in/[token]: 59 + 1 = 60.
     // Phase D-4d Task 2 added /api/jobs/event-cancellation-refunds: 60 + 1 = 61.
     // Showcase lead recovery and ticket email delivery each add a protected cron endpoint.
-    expect(codeFiles).toHaveLength(63);
-    expect(inventoryFiles).toHaveLength(63);
+    // Audit remediation adds checkout recovery, membership checkout status, and event notifications.
+    expect(codeFiles).toHaveLength(66);
+    expect(inventoryFiles).toHaveLength(66);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -331,14 +332,16 @@ describe("WiseTech protected route ownership", () => {
     // session, and there is no HMAC in front of it — which is exactly why its
     // repository method carries its own capability actor (plan S-14).
     // Phase D Task 8 added the public /api/og card renderer: 12 + 1 = 13.
-    expect(count("api-handler")).toBe(13);
+    // Audit remediation adds two scoped checkout endpoints.
+    expect(count("api-handler")).toBe(15);
     expect(count("webhook-handler")).toBe(2);
     // Phase C2 Task 10 (C-5, D-10) added the ten-minute WhatsApp send queue: 9 + 1 = 10.
     // Phase D-4d Task 2 added the event-cancellation refund sweep: 10 + 1 = 11.
     // Showcase lead recovery and ticket email delivery add two authenticated jobs.
-    expect(count("job-handler")).toBe(13);
+    // Audit remediation adds the cancellation notification job.
+    expect(count("job-handler")).toBe(14);
     expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(35);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(28);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(31);
   });
 
   it("publishes only the canonical deeply immutable protected conventions export", () => {

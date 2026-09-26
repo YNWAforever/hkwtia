@@ -110,6 +110,7 @@ const workerAlertSchema = z.object({
     "chat-retention",
     "whatsapp-send-queue",
     "event-cancellation-refunds",
+    "event-notifications",
     "showcase-lead-emails",
     "ticket-emails",
   ]),
@@ -134,6 +135,7 @@ export type WorkerAlertPayload = Readonly<{
     | "chat-retention"
     | "whatsapp-send-queue"
     | "event-cancellation-refunds"
+    | "event-notifications"
     | "showcase-lead-emails"
     | "ticket-emails";
   scheduledTime: string;

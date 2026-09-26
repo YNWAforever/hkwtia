@@ -48,7 +48,7 @@ describe("public Showcase degradation", () => {
   it("still renders listings when the read succeeds", async () => {
     showcase.listPublished.mockResolvedValue([]);
 
-    await expect(render()).resolves.toContain("No showcase listings");
+    await expect(render()).resolves.toContain("noPublishedTitle");
     expect(showcase.listPublished).toHaveBeenCalledOnce();
   });
 });

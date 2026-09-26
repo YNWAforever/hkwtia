@@ -22,6 +22,8 @@ describe("membership join schemas", () => {
     expect(joinInputSchema.parse({plan: "community", applicationId: null})).toEqual({
       plan: "community",
       applicationId: null,
+      companyId: null,
+      newApplication: false,
     });
     expectTypeOf<JoinInput["plan"]>().toEqualTypeOf<(typeof PLAN_CODES)[number]>();
   });
