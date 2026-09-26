@@ -13,6 +13,7 @@ import {
   leads,
   media,
   memberships,
+  showcaseLeadEmailOutbox,
   showcaseListings,
   type Lead,
   type NewLead,
@@ -298,6 +299,21 @@ export function databaseStore(loadDatabase: () => Promise<Database> = getDb): Sh
           .where(eq(leads.id, lead.id))
           .returning())[0];
         if (!linked) throw new Error("SHOWCASE_LEAD_CONTACT_LINK_FAILED");
+        // Both notices are recoverable even if the request process or provider
+        // dies immediately after this transaction commits.
+        const queued = await transaction.insert(showcaseLeadEmailOutbox).values([
+          {
+            leadId: linked.id,
+            kind: "ack",
+            idempotencyKey: `showcase-lead:${linked.idempotencyKey}:ack`,
+          },
+          {
+            leadId: linked.id,
+            kind: "staff",
+            idempotencyKey: `showcase-lead:${linked.idempotencyKey}:staff`,
+          },
+        ]).returning({id: showcaseLeadEmailOutbox.id});
+        if (queued.length !== 2) throw new Error("SHOWCASE_LEAD_EMAIL_ENQUEUE_FAILED");
         return linked;
       });
     },

@@ -4,7 +4,7 @@ import type {AppLocale} from "@/i18n/routing";
 import type {OpenStaffTask} from "@/lib/db/repos/staff-tasks";
 import {localizedPath} from "@/lib/urls";
 
-type Labels = Readonly<{kind: string; summary: string; member: string; conversation: string; created: string; actions: string; resolve: string; openConversation: string; empty: string}>;
+type Labels = Readonly<{kind: string; summary: string; member: string; conversation: string; created: string; actions: string; resolve: string; openConversation: string; empty: string; leadEmail: string; leadEmailBlocked: string; leadEmailUncertain: string; leadAck: string; leadStaff: string}>;
 
 export function TaskTable({locale, tasks, labels, action}: Readonly<{locale: AppLocale; tasks: readonly OpenStaffTask[]; labels: Labels; action: (formData: FormData) => Promise<void>}>) {
   const formatter = new Intl.DateTimeFormat(locale, {dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Hong_Kong"});
@@ -16,8 +16,8 @@ export function TaskTable({locale, tasks, labels, action}: Readonly<{locale: App
         <tbody>
           {tasks.map((task) => (
             <tr className="border-t border-border" key={task.id}>
-              <td className="p-3">{task.kind}</td>
-              <td className="p-3">{task.summaryCode}</td>
+              <td className="p-3">{task.kind === "showcase_lead_email" ? labels.leadEmail : task.kind}</td>
+              <td className="p-3"><div>{task.kind === "showcase_lead_email" ? (task.summaryCode === "showcase_lead_email_uncertain" ? labels.leadEmailUncertain : labels.leadEmailBlocked) : task.summaryCode}</div>{task.context.noticeKind ? <div className="text-muted-foreground">{task.context.noticeKind === "ack" ? labels.leadAck : labels.leadStaff}</div> : null}{task.context.contactEmail ? <div className="text-muted-foreground">{task.context.contactEmail}</div> : null}</td>
               <td className="p-3">{task.profileId ?? ""}</td>
               <td className="p-3">{task.context.conversationId ? <Link className="text-primary underline" href={localizedPath(locale, `/admin/inbox/${task.context.conversationId}`)}>{labels.openConversation}</Link> : ""}</td>
               <td className="p-3"><time dateTime={task.createdAt.toISOString()}>{formatter.format(task.createdAt)}</time></td>

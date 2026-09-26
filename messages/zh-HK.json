@@ -2637,6 +2637,11 @@
       "resolve": "標記為已處理",
       "openConversation": "開啟對話",
       "empty": "目前沒有待處理項目。",
+      "leadEmail": "展示頁介紹電郵",
+      "leadEmailBlocked": "電郵未能送出，請人手跟進",
+      "leadEmailUncertain": "電郵送達狀態未明；重發前請先核實",
+      "leadAck": "確認電郵",
+      "leadStaff": "員工通知",
       "error": "無法載入任務。"
     },
     "listingsReview": {

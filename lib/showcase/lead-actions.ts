@@ -3,14 +3,10 @@ import "server-only";
 import {randomUUID} from "node:crypto";
 import {z} from "zod";
 
-import type {RenderEmailInput, RenderedEmail} from "@/lib/email/render";
-import type {EmailTransport} from "@/lib/email/transport";
 import type {ShowcaseRepository} from "@/lib/db/repos/showcase";
 import {contactWriterActor, type ContactWriterActor} from "@/lib/db/repos/contacts";
 import type {NewLead} from "@/lib/db/server-schema";
 import type {RateLimiter} from "@/lib/security/rate-limit";
-import type {AppLocale} from "@/i18n/routing";
-import {localizedPath} from "@/lib/urls";
 
 const leadInputSchema = z.object({
   slug: z.string().trim().min(2).max(96).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
@@ -26,9 +22,8 @@ const leadInputSchema = z.object({
 type LeadListing = Readonly<{id: string; slug: string; nameEn: string}>;
 type LeadRepository = Readonly<{
   getPublishedBySlug: (slug: string) => Promise<LeadListing | null>;
-  createLead: (actor: ContactWriterActor, input: NewLead) => Promise<unknown | null>;
+  createLead: (actor: ContactWriterActor, input: NewLead) => Promise<{id: string} | null>;
 }>;
-type LeadEmailRenderer = (input: RenderEmailInput) => Promise<RenderedEmail>;
 
 export type LeadRequestResult = Readonly<
   | {ok: true}
@@ -38,13 +33,9 @@ export type LeadRequestResult = Readonly<
 export type LeadServiceDependencies = Readonly<{
   repository: LeadRepository | Pick<ShowcaseRepository, "getPublishedBySlug" | "createLead">;
   limiter: RateLimiter;
-  emailTransport: EmailTransport;
-  renderEmail: LeadEmailRenderer;
-  resolveStaffRecipient: () => Promise<string | null>;
+  deliverLeadEmails: (leadId: string) => Promise<void>;
   /** Injected so the service stays testable outside a request scope. */
   resolveClientIp: () => Promise<string | null>;
-  emailFrom: string;
-  appUrl: string;
 }>;
 
 function textValue(formData: FormData, key: string): string {
@@ -63,33 +54,6 @@ function parseFormData(formData: FormData) {
     website: textValue(formData, "website"),
     idempotencyKey: textValue(formData, "idempotencyKey") || undefined,
   });
-}
-
-function absoluteCtaUrl(appUrl: string, locale: AppLocale, path: string): string {
-  return new URL(localizedPath(locale, path), appUrl).toString();
-}
-
-async function sendRenderedEmail(
-  dependencies: LeadServiceDependencies,
-  input: RenderEmailInput,
-  recipient: string,
-  from: string,
-  idempotencyKey: string,
-): Promise<void> {
-  try {
-    const rendered = await dependencies.renderEmail(input);
-    await dependencies.emailTransport.send({
-      to: recipient,
-      from,
-      subject: rendered.subject,
-      html: rendered.html,
-      text: rendered.text,
-      headers: rendered.headers,
-      idempotencyKey,
-    });
-  } catch {
-    // The lead is already durable; delivery is retriable and must not expose provider details.
-  }
 }
 
 export function createLeadService(dependencies: LeadServiceDependencies) {
@@ -131,25 +95,10 @@ export function createLeadService(dependencies: LeadServiceDependencies) {
       });
       if (!lead) return {ok: true};
 
-      const locale = parsed.data.locale as AppLocale;
-      const ctaUrl = absoluteCtaUrl(dependencies.appUrl, locale, `/showcase/${listing.slug}`);
-      const ackInput: RenderEmailInput = {
-        template: "lead_ack",
-        locale,
-        recipientName: parsed.data.contactName,
-        variables: {ctaUrl},
-      };
-      await sendRenderedEmail(dependencies, ackInput, parsed.data.email, dependencies.emailFrom, `showcase-lead:${idempotencyKey}:ack`);
-
-      const staffRecipient = await dependencies.resolveStaffRecipient().catch(() => null);
-      if (staffRecipient) {
-        const staffInput: RenderEmailInput = {
-          template: "lead_staff_notify",
-          locale,
-          recipientName: listing.nameEn,
-          variables: {ctaUrl},
-        };
-        await sendRenderedEmail(dependencies, staffInput, staffRecipient, dependencies.emailFrom, `showcase-lead:${idempotencyKey}:staff`);
+      try {
+        await dependencies.deliverLeadEmails(lead.id);
+      } catch {
+        // The transaction already enqueued both notices; cron recovers this claim.
       }
 
       return {ok: true};

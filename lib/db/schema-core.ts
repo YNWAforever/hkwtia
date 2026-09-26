@@ -1323,6 +1323,49 @@ export const leads = pgTable(
   ],
 );
 
+/** The exact provider request is frozen before the first send. Resend only
+ * deduplicates an idempotency key for 24 hours and only for the same payload.
+ */
+export type ShowcaseLeadEmailPayload = Readonly<{
+  to: string;
+  from: string;
+  subject: string;
+  html: string;
+  text: string;
+  headers: Readonly<Record<string, string>>;
+  idempotencyKey: string;
+}>;
+
+export const showcaseLeadEmailOutbox = pgTable(
+  "showcase_lead_email_outbox",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    leadId: uuid("lead_id").notNull().references(() => leads.id, {onDelete: "cascade"}),
+    kind: text("kind").notNull(),
+    status: text("status").default("queued").notNull(),
+    payload: jsonb("payload").$type<ShowcaseLeadEmailPayload>(),
+    idempotencyKey: text("idempotency_key").notNull(),
+    attemptCount: integer("attempt_count").default(0).notNull(),
+    nextAttemptAt: timestamp("next_attempt_at", {withTimezone: true}).defaultNow().notNull(),
+    claimExpiresAt: timestamp("claim_expires_at", {withTimezone: true}),
+    firstAttemptAt: timestamp("first_attempt_at", {withTimezone: true}),
+    providerId: text("provider_id"),
+    errorCode: text("error_code"),
+    createdAt: createdAt("created_at"),
+    updatedAt: updatedAt("updated_at"),
+  },
+  (table) => [
+    check("showcase_lead_email_outbox_kind_check", sql`${table.kind} IN ('ack', 'staff')`),
+    check("showcase_lead_email_outbox_status_check",
+      sql`${table.status} IN ('queued', 'sending', 'sent', 'blocked', 'uncertain')`),
+    check("showcase_lead_email_outbox_attempt_check", sql`${table.attemptCount} >= 0`),
+    unique("showcase_lead_email_outbox_lead_kind_unique").on(table.leadId, table.kind),
+    unique("showcase_lead_email_outbox_idempotency_key_unique").on(table.idempotencyKey),
+    index("showcase_lead_email_outbox_due_idx")
+      .on(table.status, table.nextAttemptAt, table.claimExpiresAt),
+  ],
+);
+
 /**
  * The funnel spine (programme D-6). A contact is anyone WTIA may need to
  * reach who is not, or not yet, a profile: a WhatsApp sender we do not

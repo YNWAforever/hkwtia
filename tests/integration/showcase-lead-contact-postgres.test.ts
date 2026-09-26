@@ -60,6 +60,21 @@ describe.skipIf(!enabled)("showcase lead contact capture on disposable PostgreSQ
       idempotency_key text NOT NULL UNIQUE,
       created_at timestamptz DEFAULT now() NOT NULL, updated_at timestamptz DEFAULT now() NOT NULL
     )`);
+    await pool.query(`CREATE TABLE showcase_lead_email_outbox (
+      id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+      lead_id uuid NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+      kind text NOT NULL, status text DEFAULT 'queued' NOT NULL,
+      payload jsonb, idempotency_key text NOT NULL UNIQUE,
+      attempt_count integer DEFAULT 0 NOT NULL,
+      next_attempt_at timestamptz DEFAULT now() NOT NULL,
+      claim_expires_at timestamptz, first_attempt_at timestamptz,
+      provider_id text, error_code text,
+      created_at timestamptz DEFAULT now() NOT NULL,
+      updated_at timestamptz DEFAULT now() NOT NULL,
+      UNIQUE (lead_id, kind),
+      CONSTRAINT refuse_outbox_test
+        CHECK (idempotency_key NOT LIKE 'showcase-lead:showcase-contact-outbox-boom:%')
+    )`);
   }, 60_000);
 
   afterAll(async () => {
@@ -77,6 +92,27 @@ describe.skipIf(!enabled)("showcase lead contact capture on disposable PostgreSQ
       FROM leads l JOIN contacts c ON c.id = l.contact_id`);
     expect(rows.rows).toHaveLength(1);
     expect(rows.rows[0]).toMatchObject({source: "showcase_intro", email: "ada@example.com", whatsapp_opt_in: false});
+    const contacts = await pool.query("SELECT count(*)::int AS count FROM contacts");
+    expect(contacts.rows[0]?.count).toBe(1);
+    const notifications = await pool.query(
+      "SELECT kind, status, idempotency_key FROM showcase_lead_email_outbox ORDER BY kind",
+    );
+    expect(notifications.rows).toEqual([
+      {kind: "ack", status: "queued", idempotency_key: "showcase-lead:showcase-contact-1:ack"},
+      {kind: "staff", status: "queued", idempotency_key: "showcase-lead:showcase-contact-1:staff"},
+    ]);
+  });
+
+  it("rolls back the lead and contact when notification enqueue fails", async () => {
+    if (!pool) throw new Error("disposable PostgreSQL pool unavailable");
+    const store = databaseStore(async () => drizzle(pool!) as unknown as Database);
+    await expect(store.insertLead({...baseLead, idempotencyKey: "showcase-contact-outbox-boom"}))
+      .rejects.toThrow();
+    const leads = await pool.query(
+      "SELECT count(*)::int AS count FROM leads WHERE idempotency_key = $1",
+      ["showcase-contact-outbox-boom"],
+    );
+    expect(leads.rows[0]?.count).toBe(0);
     const contacts = await pool.query("SELECT count(*)::int AS count FROM contacts");
     expect(contacts.rows[0]?.count).toBe(1);
   });

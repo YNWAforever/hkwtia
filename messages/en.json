@@ -2636,6 +2636,11 @@
       "resolve": "Mark resolved",
       "openConversation": "Open conversation",
       "empty": "Nothing is waiting for a person.",
+      "leadEmail": "Showcase introduction email",
+      "leadEmailBlocked": "Email delivery needs manual follow-up",
+      "leadEmailUncertain": "Email delivery status is uncertain; check before resending",
+      "leadAck": "Acknowledgement",
+      "leadStaff": "Staff notification",
       "error": "Tasks could not be loaded."
     },
     "listingsReview": {

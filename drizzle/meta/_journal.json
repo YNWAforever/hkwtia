@@ -281,6 +281,13 @@
       "when": 1790344719272,
       "tag": "0040_phase_d_aiops_bot_cohort",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1790408863314,
+      "tag": "0041_showcase-lead-email-outbox",
+      "breakpoints": true
     }
   ]
 }
