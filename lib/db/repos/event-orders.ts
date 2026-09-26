@@ -486,8 +486,9 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
         }
         // A refund we committed but could not finish. The row is already
         // `refunded`, but if the provider call failed the money is still here, so
-        // the retry must re-issue it — safe because the provider call carries the
-        // deterministic `ticket-refund:<orderId>` idempotency key. `staff` refunds
+        // the webhook must reconcile the provider before considering a reissue.
+        // The deterministic key protects short-window retries, but an old event
+        // can arrive after the provider forgets that key. `staff` refunds
         // (D-4c) are not this lane's to re-attempt.
         if (order.status === "refunded" && (order.refundReason === "oversold" || order.refundReason === "cancelled")) {
           return {status: "refund_due", order};

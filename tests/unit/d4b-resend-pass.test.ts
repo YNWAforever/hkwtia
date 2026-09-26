@@ -111,6 +111,7 @@ function buildDependencies(options: Readonly<{seatPresent?: boolean}> = {}): Tic
   };
   return {
     orders: orders as unknown as TicketProcessorDependencies["orders"],
+    fullyRefundedPaymentIntent: vi.fn(async () => false),
     refundPaymentIntent: vi.fn(async () => undefined),
     email: {renderEmail, transport, emailFrom: "tickets@wtia.test"},
     appUrl: "https://w.test",

@@ -96,6 +96,7 @@ function captureTicketProcessor() {
 function buildTicketProcessor(options: {
   settle?: SettleResult;
   seats?: number;
+  providerFullyRefunded?: boolean;
   summary?: {title: string; startsAt: Date; slug: string; venue: string | null} | null;
   orderSeats?: readonly {seatId: string; position: number; attendeeName: string}[];
 } = {}) {
@@ -108,6 +109,7 @@ function buildTicketProcessor(options: {
     seatForPass: vi.fn(async () => null),
   };
   const refundPaymentIntent = vi.fn(async () => undefined);
+  const fullyRefundedPaymentIntent = vi.fn(async () => options.providerFullyRefunded ?? false);
   // The real renderer runs behind the spy, so a missing placeholder throws and
   // the send is skipped — the same silence production would see.
   const renderEmailSpy = vi.fn(renderEmail);
@@ -115,6 +117,7 @@ function buildTicketProcessor(options: {
   const dependencies: TicketProcessorDependencies = {
     orders: orders as unknown as TicketProcessorDependencies["orders"],
     refundPaymentIntent,
+    fullyRefundedPaymentIntent,
     email: {
       renderEmail: renderEmailSpy as unknown as typeof renderEmail,
       transport,
@@ -128,6 +131,7 @@ function buildTicketProcessor(options: {
     processor: createTicketProcessor(dependencies),
     orders,
     refundPaymentIntent,
+    fullyRefundedPaymentIntent,
     renderEmail: renderEmailSpy,
     transport,
   };
@@ -270,15 +274,42 @@ describe("createTicketProcessor", () => {
   });
 
   it.each(["oversold", "refund_due"] as const)("refunds the whole charge and emails the buyer when the settlement is %s", async (status) => {
-    const {processor, refundPaymentIntent, renderEmail, transport} = buildTicketProcessor({
+    const {processor, refundPaymentIntent, fullyRefundedPaymentIntent, renderEmail, transport} = buildTicketProcessor({
       settle: {status, order: {...pendingOrder, status: "refunded"}},
     });
 
     await expect(processor.process(systemActor("stripe-webhook"), command("checkout.session.completed"))).resolves.toBe("processed");
 
     expect(refundPaymentIntent).toHaveBeenCalledWith(paymentIntentId, `ticket-refund:${orderId}`, orderId);
+    expect(fullyRefundedPaymentIntent).toHaveBeenCalledTimes(status === "refund_due" ? 1 : 0);
     expect(renderEmail).toHaveBeenCalledWith(expect.objectContaining({template: "event_ticket_refunded", locale: "en", recipientName: "Ada"}));
     expect(transport.sends).toHaveLength(1);
+  });
+
+  it("does not reissue a refund that the provider has already fully settled", async () => {
+    const {processor, fullyRefundedPaymentIntent, refundPaymentIntent, transport} = buildTicketProcessor({
+      settle: {status: "refund_due", order: {...pendingOrder, status: "refunded", refundReason: "cancelled"}},
+      providerFullyRefunded: true,
+    });
+
+    await expect(processor.process(systemActor("stripe-webhook"), command("checkout.session.completed"))).resolves.toBe("processed");
+
+    expect(fullyRefundedPaymentIntent).toHaveBeenCalledWith(paymentIntentId, pendingOrder.amountHkdCents);
+    expect(refundPaymentIntent).not.toHaveBeenCalled();
+    expect(transport.sends).toEqual([]);
+  });
+
+  it("does not reissue or email when provider reconciliation is unavailable", async () => {
+    const state = buildTicketProcessor({
+      settle: {status: "refund_due", order: {...pendingOrder, status: "refunded", refundReason: "cancelled"}},
+    });
+    state.fullyRefundedPaymentIntent.mockRejectedValueOnce(new Error("provider read unavailable"));
+
+    await expect(state.processor.process(systemActor("stripe-webhook"), command("checkout.session.completed")))
+      .rejects.toThrow("provider read unavailable");
+
+    expect(state.refundPaymentIntent).not.toHaveBeenCalled();
+    expect(state.transport.sends).toEqual([]);
   });
 
   it("re-issues the refund on redelivery when the first provider call threw, with the same idempotency key", async () => {
@@ -296,8 +327,10 @@ describe("createTicketProcessor", () => {
       .mockRejectedValueOnce(new Error("stripe unavailable"))
       .mockResolvedValue(undefined);
     const transport = createTestTransport();
+    const fullyRefundedPaymentIntent = vi.fn(async () => false);
     const processor = createTicketProcessor({
       orders: orders as unknown as TicketProcessorDependencies["orders"],
+      fullyRefundedPaymentIntent,
       refundPaymentIntent,
       email: {renderEmail, transport, emailFrom: "tickets@wtia.test"},
       appUrl: "https://w.test",
@@ -312,6 +345,9 @@ describe("createTicketProcessor", () => {
     // the email is sent.
     await expect(processor.process(systemActor("stripe-webhook"), command("checkout.session.completed"))).resolves.toBe("processed");
 
+    expect(orders.settlePaid).toHaveBeenCalledTimes(2);
+    expect(fullyRefundedPaymentIntent).toHaveBeenCalledTimes(1);
+    expect(fullyRefundedPaymentIntent).toHaveBeenCalledWith(paymentIntentId, pendingOrder.amountHkdCents);
     expect(refundPaymentIntent).toHaveBeenCalledTimes(2);
     expect(refundPaymentIntent.mock.calls[0]![1]).toBe(`ticket-refund:${orderId}`);
     expect(refundPaymentIntent.mock.calls[1]![1]).toBe(`ticket-refund:${orderId}`);
@@ -406,6 +442,7 @@ describe("createTicketProcessor", () => {
     const onEmailError = vi.fn();
     const processor = createTicketProcessor({
       orders: orders as unknown as TicketProcessorDependencies["orders"],
+      fullyRefundedPaymentIntent: vi.fn(async () => false),
       refundPaymentIntent: vi.fn(async () => undefined),
       email: {renderEmail, transport: createTestTransport(), emailFrom: "tickets@wtia.test"},
       appUrl: "https://w.test",
@@ -430,6 +467,7 @@ describe("createTicketProcessor", () => {
     const onEmailError = vi.fn();
     const processor = createTicketProcessor({
       orders: orders as unknown as TicketProcessorDependencies["orders"],
+      fullyRefundedPaymentIntent: vi.fn(async () => false),
       refundPaymentIntent: vi.fn(async () => undefined),
       email: {
         renderEmail: vi.fn(async () => { throw new Error("EMAIL_VARIABLE_MISSING:eventDate"); }) as unknown as typeof renderEmail,

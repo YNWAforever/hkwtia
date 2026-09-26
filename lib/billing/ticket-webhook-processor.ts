@@ -20,7 +20,9 @@ type TicketEmailDependencies = Readonly<{
 
 export type TicketProcessorDependencies = Readonly<{
   orders: Pick<EventOrdersRepository, "settlePaid" | "expireBySession" | "eventSummary" | "seatsOfOrder" | "orderSeats" | "seatForPass">;
-  /** The deterministic key makes a retried refund safe to re-issue. */
+  /** Reconcile a committed refund before a redelivered checkout can reissue it. */
+  fullyRefundedPaymentIntent: (paymentIntentId: string, expectedAmountHkdCents: number) => Promise<boolean>;
+  /** The deterministic key makes a still-due refund safe to re-issue. */
   refundPaymentIntent: (paymentIntentId: string, idempotencyKey: string, orderId: string) => Promise<void>;
   email: TicketEmailDependencies;
   /** For the receipt's "view the event" link, built from the order's own locale. */
@@ -223,6 +225,7 @@ let defaultDependencies: TicketProcessorDependencies | undefined;
 export function ticketProcessorDependencies(): TicketProcessorDependencies {
   defaultDependencies ??= {
     orders: eventOrdersRepository,
+    fullyRefundedPaymentIntent: (paymentIntentId, amountHkdCents) => stripeBillingAdapter().fullyRefundedPaymentIntent(paymentIntentId, amountHkdCents),
     refundPaymentIntent: (paymentIntentId, idempotencyKey, orderId) => stripeBillingAdapter().refundPaymentIntent(paymentIntentId, idempotencyKey, {orderId}),
     email: {renderEmail, transport: createConfiguredEmailTransport(), emailFrom: emailEnv().emailFrom},
     appUrl: appEnv().appUrl,
@@ -270,8 +273,15 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
         // A committed refund-due state with no provider intent is unfinished
         // work. Make Stripe retry instead of permanently acknowledging it.
         if (!command.paymentIntentId) throw new Error("TICKET_PAYMENT_INTENT_MISSING");
-        // Re-issuing is safe: the deterministic key makes a redelivery after a
-        // failed provider call refund the same payment intent once, not twice.
+        // A checkout event can be redelivered after the provider's
+        // idempotency window. The local `refunded` state also covers refunds
+        // already settled by cancellation. Verify the full charge before
+        // reissuing a `refund_due` request, and avoid repeating its buyer
+        // notice after the mail provider's deduplication window too.
+        if (settlement.status === "refund_due" &&
+            await dependencies.fullyRefundedPaymentIntent(command.paymentIntentId, order.amountHkdCents)) {
+          return "processed";
+        }
         await dependencies.refundPaymentIntent(command.paymentIntentId, `ticket-refund:${order.id}`, order.id);
         const event = await dependencies.orders.eventSummary(order.eventId, order.buyerLocale);
         await sendTicketEmail(dependencies, "event_ticket_refunded", order, event);
