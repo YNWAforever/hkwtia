@@ -11,6 +11,7 @@ function deps(overrides: Partial<WriterActionDependencies> = {}): WriterActionDe
   return {
     plansFor: vi.fn(async () => ["startup"] as const),
     countRuns: vi.fn(async () => 0),
+    reserveRun: vi.fn(async () => "reserved-run"),
     generate: vi.fn(async () => ({descriptionEn: "a", descriptionZh: "b"})),
     now: () => now,
     ...overrides,
@@ -99,6 +100,20 @@ describe("runWriterAssist", () => {
     const generate = vi.fn(async () => { throw new AgentRuntimeError("configuration_error"); });
     await expect(runWriterAssist(member, {kind: "event", brief: "hello"}, deps({generate})))
       .resolves.toEqual({status: "error", code: "UNAVAILABLE"});
+  });
+  it("admits only one of two requests for the final monthly quota slot", async () => {
+    let reservations = 0;
+    const reserveRun = vi.fn(async () => (++reservations === 1 ? "run-1" : null));
+    const generate = vi.fn(async () => ({descriptionEn: "a", descriptionZh: "b"}));
+    const dependencies = {...deps({countRuns: async () => 19, generate}), reserveRun};
+    const requests = await Promise.all([
+      runWriterAssist(member, {kind: "event", brief: "first"}, dependencies),
+      runWriterAssist(member, {kind: "event", brief: "second"}, dependencies),
+    ]);
+    expect(requests.filter((result) => result.status === "ok")).toHaveLength(1);
+    expect(requests.filter((result) => result.status === "error" && result.code === "QUOTA_EXCEEDED")).toHaveLength(1);
+    expect(reserveRun).toHaveBeenCalledTimes(2);
+    expect(generate).toHaveBeenCalledOnce();
   });
 });
 

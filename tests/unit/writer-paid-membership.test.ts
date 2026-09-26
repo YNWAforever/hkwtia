@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({countRuns: vi.fn(async () => 0), generate: vi.f
 vi.mock("@/lib/db/repos/memberships", () => ({
   membershipsRepository: {list: vi.fn(async () => [{planCode: "startup", status: state.status}])},
 }));
-vi.mock("@/lib/db/repos/agent-runs", () => ({agentRunsRepository: {countWriterRuns: mocks.countRuns}}));
+vi.mock("@/lib/db/repos/agent-runs", () => ({agentRunsRepository: {countWriterRuns: mocks.countRuns, reserveWriterRun: vi.fn(async () => "reserved-run")}}));
 vi.mock("@/lib/ai/writers/generate", () => ({generateWriterCopy: mocks.generate}));
 
 import {runWriterAssist} from "@/lib/portal/writer-action-core";

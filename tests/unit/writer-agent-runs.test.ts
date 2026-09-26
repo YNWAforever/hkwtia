@@ -26,22 +26,60 @@ function recordingDatabase(responses: readonly Record<string, unknown>[][] = [])
 }
 
 describe("agentRunsRepository writer runs", () => {
-  it("persists the request profile and no conversation", async () => {
-    const {database, statements} = recordingDatabase();
-    const repository = createAgentRunsRepository(async () => database);
-    await repository.start(writer, {provider: null, model: null});
-    const sql = statements[0]!.sql.toLowerCase();
-    expect(sql).toContain('insert into "agent_runs"');
-    // Drizzle quotes identifiers, so the unquoted `from conversations` this
-    // used to assert against could never match — the negative was vacuous.
-    // The writer actor takes the self-contained `INSERT … VALUES` arm; the
-    // concierge arm is `INSERT … SELECT … FROM "conversations"` and is
-    // ownership-guarded. Assert the discriminating shape, quoted.
-    expect(sql).toMatch(/insert into "agent_runs"[\s\S]*values/i);
-    expect(sql).not.toMatch(/from "conversations"/i);
-    expect(statements[0]!.params).toContain("writer");
+  it("locks the member, recounts, and inserts the writer run in one transaction", async () => {
+    const statements: ReturnType<PgDialect["sqlToQuery"]>[] = [];
+    const transaction = vi.fn(async (work: (tx: {execute: (query: never) => Promise<unknown>}) => Promise<unknown>) =>
+      work({execute: async (query) => {
+        const statement = dialect.sqlToQuery(query);
+        statements.push(statement);
+        if (/for update/i.test(statement.sql)) return [{id: "profile-9"}];
+        if (/count\(\*\)/i.test(statement.sql)) return [{count: 19}];
+        return [{id: writer.runId}];
+      }}));
+    const repository = createAgentRunsRepository(async () => ({transaction, execute: vi.fn()} as never));
+    const startedAt = new Date("2026-09-14T04:00:00Z");
+    const runId = await repository.reserveWriterRun(
+      {kind: "member", userId: "u1", profileId: "profile-9"},
+      {cap: 20, startedAt},
+    );
+    expect(runId).toBeTruthy();
+    expect(transaction).toHaveBeenCalledOnce();
+    expect(statements).toHaveLength(3);
+    expect(statements[0]!.sql).toMatch(/from "profiles"[\s\S]*for update/i);
     expect(statements[0]!.params).toContain("profile-9");
-    expect(statements[0]!.params).toContain("portal");
+    expect(statements[1]!.sql).toMatch(/from "agent_runs"[\s\S]*agent = 'writer'[\s\S]*profile_id =/i);
+    expect(statements[1]!.params).toContain("profile-9");
+    expect(statements[1]!.params).toContainEqual(new Date("2026-08-31T16:00:00Z"));
+    expect(statements[2]!.sql).toMatch(/insert into "agent_runs"[\s\S]*returning id/i);
+    expect(statements[2]!.params).toContain("profile-9");
+  });
+
+  it("does not insert a run when the locked recount reaches the cap", async () => {
+    const statements: string[] = [];
+    const transaction = vi.fn(async (work: (tx: {execute: (query: never) => Promise<unknown>}) => Promise<unknown>) =>
+      work({execute: async (query) => {
+        const statement = dialect.sqlToQuery(query);
+        statements.push(statement.sql);
+        return /for update/i.test(statement.sql) ? [{id: "profile-9"}] : [{count: 20}];
+      }}));
+    const repository = createAgentRunsRepository(async () => ({transaction, execute: vi.fn()} as never));
+    await expect(repository.reserveWriterRun(
+      {kind: "member", userId: "u1", profileId: "profile-9"},
+      {cap: 20, startedAt: new Date("2026-09-14T04:00:00Z")},
+    )).resolves.toBeNull();
+    expect(statements).toHaveLength(2);
+    expect(statements.some((statement) => /insert into/i.test(statement))).toBe(false);
+  });
+
+  it("refuses a non-member reservation and an unmetered writer start before opening the database", async () => {
+    const loadDatabase = vi.fn(async () => { throw new Error("database should not open"); });
+    const repository = createAgentRunsRepository(loadDatabase);
+    await expect(repository.reserveWriterRun(
+      {kind: "anonymous", userId: null},
+      {cap: 20, startedAt: new Date()},
+    )).rejects.toThrow("FORBIDDEN");
+    await expect(repository.start(writer, {provider: null, model: null})).rejects.toThrow("FORBIDDEN");
+    expect(loadDatabase).not.toHaveBeenCalled();
   });
 
   it("counts a member's writer runs since a timestamp", async () => {
