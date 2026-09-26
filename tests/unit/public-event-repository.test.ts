@@ -1,7 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
 import type {Event, PublicProfileStatus} from "@/lib/db/server-schema";
-import {countPublicEvents, getEventBySlug, getPublicEventBySlug, listFeaturedPublicEvents, listMemberEvents, listPublicEvents} from "@/lib/db/repos/events";
+import {countPublicEvents, getEventBySlug, getPublicEventBySlug, listFeaturedPublicEvents, localizeEvent, listMemberEvents, listPublicEvents} from "@/lib/db/repos/events";
 import {parseEventFilters} from "@/lib/events/filters";
 import type {Actor} from "@/lib/membership/lifecycle";
 import {legacyDerivedEventColumns} from "@/tests/fixtures/event-row";
@@ -26,6 +26,20 @@ function organiser(name: string, slug: string | null, publicProfileStatus: Publi
 }
 
 describe("repository-backed Event visibility", () => {
+  it("preserves registration mode and destination in the member portal event projection", () => {
+    const projected = localizeEvent(event("offsite", {
+      registrationMode: "external",
+      visibility: "members_only",
+      externalRegistrationUrl: "https://tickets.example.hk/offsite",
+    }), "en");
+    expect(projected).toMatchObject({
+      registrationMode: "external",
+      visibility: "members_only",
+      externalRegistrationUrl: "https://tickets.example.hk/offsite",
+    });
+  });
+
+
   const rows = [event("draft-public", {published: false}), event("published-member", {memberOnly: true}), event("published-public")];
 
   it("returns only published public Events to anonymous readers", async () => {
