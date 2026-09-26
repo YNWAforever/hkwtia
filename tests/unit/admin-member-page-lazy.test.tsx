@@ -42,6 +42,12 @@ describe("Member 360 page lazy histories", () => {
     expect(reads.timeline).not.toHaveBeenCalled();
   });
 
+  it("retains multi-value list filters when navigating a history and returning", async () => {
+    const html = renderToStaticMarkup(await AdminMember360Page({params: Promise.resolve({locale: "en", id}), searchParams: Promise.resolve({q: "acme", status: ["active", "past_due"], planCode: "corporate", section: "notes"})}));
+    expect(html).toContain('/admin/members?q=acme&amp;status=active&amp;status=past_due&amp;planCode=corporate');
+    expect(html).toContain('section=notes');
+  });
+
   it("loads only the chosen history after an explicit section navigation", async () => {
     expect(await markup("notes")).toContain('data-active="notes"');
     expect(reads.summary).toHaveBeenCalledOnce();

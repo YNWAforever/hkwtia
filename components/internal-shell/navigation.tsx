@@ -28,27 +28,39 @@ function findCurrentLink(groups: readonly InternalNavGroup[], currentPath: strin
   return matchingHrefs.reduce((longest, current) => (current.length > longest.length ? current : longest));
 }
 
-function NavLinks({groups, currentPath, onNavigate}: {groups: readonly InternalNavGroup[]; currentPath: string; onNavigate?: () => void}) {
+function NavLinks({groups, currentPath, onNavigate, dropdown = false}: {groups: readonly InternalNavGroup[]; currentPath: string; onNavigate?: () => void; dropdown?: boolean}) {
   const currentLink = findCurrentLink(groups, currentPath);
 
   return (
     <>
-      {groups.map((group) => (
-        <div key={group.id} className="space-y-1">
-          {group.label ? <p className="px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group.label}</p> : null}
-          {group.links.map((link) => (
-            <Link
-              key={link.id}
-              href={link.href}
-              className={linkClassName}
-              aria-current={link.href === currentLink ? "page" : undefined}
-              onClick={onNavigate}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-      ))}
+      {groups.map((group) => {
+        const links = group.links.map((link) => (
+          <Link
+            key={link.id}
+            href={link.href}
+            className={linkClassName}
+            aria-current={link.href === currentLink ? "page" : undefined}
+            onClick={onNavigate}
+          >
+            {link.label}
+          </Link>
+        ));
+        return dropdown ? (
+          <details key={group.id} className="relative shrink-0">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-md px-3 py-2 text-sm font-semibold text-foreground hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
+              {group.label ?? group.id}
+            </summary>
+            <div className="absolute left-0 top-full z-50 mt-1 min-w-56 space-y-1 rounded-md border border-border bg-background p-2 shadow-lg">
+              {links}
+            </div>
+          </details>
+        ) : (
+          <div key={group.id} className="space-y-1">
+            {group.label ? <p className="px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group.label}</p> : null}
+            {links}
+          </div>
+        );
+      })}
     </>
   );
 }
@@ -65,7 +77,7 @@ export function InternalNavigation({
     <nav aria-label={labels.navigationLabel} className="border-b bg-background">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <div className="hidden flex-1 items-center gap-1 md:flex">
-          <NavLinks groups={groups} currentPath={currentPath} />
+          <NavLinks groups={groups} currentPath={currentPath} dropdown />
         </div>
         <div className="hidden md:block">{children}</div>
         <div className="md:hidden">

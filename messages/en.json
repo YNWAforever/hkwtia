@@ -2469,6 +2469,7 @@
       "openTasks": "Open staff tasks"
     },
     "navigation": {
+      "groups": {"workspace": "Workspace", "membersOrganizations": "Members & organisations", "events": "Events", "communicationsFollowUp": "Communications & follow-up", "contentSettings": "Content & settings"},
       "label": "Staff administration navigation",
       "dashboard": "Dashboard",
       "inbox": "Inbox",
@@ -2834,6 +2835,9 @@
       }
     },
     "members": {
+      "selection": {"page": "Select this page", "all": "Select all {count} matching", "clear": "Clear selection", "selected": "{count} selected", "row": "Select {name}"},
+      "savedViews": {"title": "Saved views", "name": "View name", "save": "Save view", "saved": "View saved", "invalid": "Check the view name and filters.", "error": "Could not save the view. Try again.", "shared": "Shared with staff", "empty": "No saved views yet."},
+      "filters": {"status": "Membership status", "plan": "Plan", "renewalFrom": "Renewal from (Hong Kong date)", "renewalTo": "Renewal to (Hong Kong date)", "companyId": "Company ID", "locale": "Preferred language", "completeness": "Profile completeness", "sort": "Sort by", "apply": "Apply filters", "clear": "Clear filters", "any": "Any", "complete": "Complete", "incomplete": "Missing contact details", "nameAsc": "Name A–Z", "nameDesc": "Name Z–A", "renewalAsc": "Renewal soonest", "english": "English", "chinese": "繁體中文", "viewsLabel": "Default views", "views": {"active": "Active", "due30": "Due within 30 days", "due60": "Due within 60 days", "due90": "Due within 90 days", "pastDue": "Past due", "expired": "Expired", "missingData": "Missing details"}},
       "view": "View",
       "planCodes": {"community": "Community", "startup": "Startup", "corporate": "Corporate", "patron": "Patron"},
       "statusCodes": {"active": "Active", "past_due": "Past due", "cancel_at_period_end": "Ends at period end", "pending_review": "Pending review", "pending_payment": "Awaiting payment", "cancelled": "Cancelled", "expired": "Expired"},

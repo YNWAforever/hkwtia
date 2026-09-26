@@ -309,6 +309,13 @@
       "when": 1790463600000,
       "tag": "0044_event_cancellation_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1790467200000,
+      "tag": "0045_admin_member_views",
+      "breakpoints": true
     }
   ]
 }

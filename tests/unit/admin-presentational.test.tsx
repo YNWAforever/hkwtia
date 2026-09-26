@@ -67,11 +67,12 @@ describe("admin presentation", () => {
     adminNavMocks.labels = labels;
     const {container: navContainer} = render(<AdminNav locale="en" />);
     const nav = navContainer.innerHTML;
-    const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: null}} query="" locale="en"/>);
+    const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: null, totalMatching: 0}} query="" locale="en"/>);
     const page = renderToStaticMarkup(<main><h1>{labels.members.title}</h1>{table}</main>);
 
     expect(page.match(/<h1/g)).toHaveLength(1);
     expect(nav).toContain(`aria-label="${labels.navigation.label}"`);
+    expect(nav.match(/<summary/g)).toHaveLength(5);
     expect(nav).toContain(`>${labels.navigation.automations}</a>`);
     expect(nav).toContain("/admin/automations");
     expect(table).toMatch(new RegExp(`<caption[^>]*>${labels.members.caption}</caption>`));
@@ -81,7 +82,7 @@ describe("admin presentation", () => {
     adminNavMocks.labels = labels;
     const {container: navContainer} = render(<AdminNav locale="en" />);
     const nav = navContainer.innerHTML;
-    const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: "opaque-cursor"}} query="acme" locale="en"/>);
+    const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: "opaque-cursor", totalMatching: 21}} query="acme" locale="en"/>);
 
     expect(nav).toContain(labels.brand);
     expect(table).toContain("?q=acme&amp;cursor=opaque-cursor");

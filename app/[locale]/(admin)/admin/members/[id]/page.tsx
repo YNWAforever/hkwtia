@@ -19,6 +19,7 @@ import {getEditableMemberProfile} from "@/lib/db/repos/admin-member-profile";
 import {adminMemberListHref, parseAdminMemberHistory, parseAdminMemberRouteQuery} from "@/lib/admin/member-types";
 
 const profileIdSchema = z.string().min(1);
+const retainedListKeys = ["q", "status", "planCode", "renewalFrom", "renewalTo", "companyId", "locale", "completeness", "sort", "limit", "cursor", "history"] as const;
 
 type Props = Readonly<{
   params: Promise<{locale: string; id: string}>;
@@ -48,7 +49,8 @@ export default async function AdminMember360Page({params, searchParams}: Props) 
   const rawListState: Record<string, string | string[] | undefined> = searchParams ? await searchParams : {};
   let backHref = adminMemberListHref(locale === "zh-HK" ? "/zh" : "", {search: "", limit: 20, cursor: null});
   try {
-    const listState = parseAdminMemberRouteQuery(rawListState);
+    const listInput = Object.fromEntries(retainedListKeys.filter((key) => rawListState[key] !== undefined).map((key) => [key, rawListState[key]]));
+    const listState = parseAdminMemberRouteQuery(listInput);
     backHref = adminMemberListHref(locale === "zh-HK" ? "/zh" : "", listState, parseAdminMemberHistory(rawListState.history));
   } catch {
     // Ignore malformed or external return hints; only locally constructed list URLs are used.
@@ -78,12 +80,12 @@ export default async function AdminMember360Page({params, searchParams}: Props) 
   if (activeHistory && !timeline) notFound();
   const view = withTimeline(summary, timeline);
   const memberPath = `${locale === "zh-HK" ? "/zh" : ""}/admin/members/${profileId.data}`;
-  const retainedListKeys = ["q", "limit", "cursor", "history"] as const;
   const sectionHref = (section: MemberTimelineKind | null, nextCursor?: string | null) => {
     const query = new URLSearchParams();
     for (const key of retainedListKeys) {
       const value = rawListState[key];
       if (typeof value === "string") query.set(key, value);
+      if (Array.isArray(value)) for (const item of value) query.append(key, item);
     }
     if (section) query.set("section", section);
     if (section && section === activeHistory && historyQuery?.search) query.set("historyQ", historyQuery.search);

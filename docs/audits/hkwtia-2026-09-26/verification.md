@@ -98,3 +98,16 @@ No 10k-member/500-attendee load fixture, EXPLAIN ANALYZE, query count or server 
 
 | 2026-09-27 | T11 full feature worktree | `npm test` | exit 0; 654 files and 5,754 tests passed; 34 files and 93 tests skipped | All checked-in unit suites pass after contract reconciliation. PostgreSQL integration remains skipped without an isolated test database/Docker; browser and provider acceptance remain separate gates. |
 | 2026-09-27 | T11 feature worktree | `npm run typecheck`; `npm run audit:strings`; `npm run lint` | exit 0 for all; 268 TSX scanned; lint 61 warnings, 0 errors | Static checks after the full-suite repairs. Existing warning count unchanged from T10. |
+
+## T12 member operations evidence
+
+| Date | Target | Command | Result | Scope and limit |
+|---|---|---|---|---|
+| 2026-09-27 | feature worktree | Focused T12 query, saved-view, navigation, selection and repository Vitest | pass; selection/navigation 7 tests plus repository/cursor regression 8 tests | Strict filters, HK day conversion, actor/saved-view boundaries, page selection, filter reset and SQL-proxy row shape. No actual PostgreSQL read. |
+| 2026-09-27 | disposable PostgreSQL | `npm test -- tests/integration/member-filter-selection.test.ts` | 4 skipped | `RUN_POSTGRES_INTEGRATION=1` unset and Docker daemon unavailable; matching-row, company and Hong Kong boundary SQL remain unexecuted against PostgreSQL. |
+| 2026-09-27 | feature worktree | `npx drizzle-kit check`; `npm run audit:strings`; `npm run typecheck` | exit 0; 272 TSX scanned | Migration metadata, bilingual strings and types. Migration 0045 unapplied. |
+| 2026-09-27 | feature worktree | `npm test` | exit 1; 661 files and 5,782 tests passed, 2 tests failed, 35 files/97 tests skipped | Two stale T12 cursor/projection fixtures caused the failures. Both were updated; the 5 affected tests then passed. A fresh full suite remains required before handoff. |
+| 2026-09-27 | feature worktree | `npm run lint` | exit 1; 1 new React effect error, 63 warnings | Selection state was then moved to `useSyncExternalStore`; its focused test and direct ESLint passed. Fresh full lint remains required. |
+
+Saved-view migration, staff browser flow, keyboard/mobile checks, and a selection-to-server-preview journey remain unverified. This is code evidence, not staging verification or production release.
+| 2026-09-27 | feature worktree | `npm run build`; `git diff --check` | exit 0; 251 static pages generated; diff check exit 0 | Bundles the T12 admin page and saved-view action. No database, auth, provider or staff browser session was exercised. |

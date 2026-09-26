@@ -1,6 +1,7 @@
 import "server-only";
 
 import {inArray, sql, type SQL} from "drizzle-orm";
+import {adminMemberQuerySchema, hongKongDayStartUtc} from "@/lib/admin/member-query";
 import {z} from "zod";
 import {alias} from "drizzle-orm/pg-core";
 
@@ -18,6 +19,7 @@ const memberRowSchema = z.object({
   profileId: z.string(), membershipId: z.string().nullable().default(null), companyId: z.string().nullable().default(null), displayName: z.string(), email: z.string().nullable(), companyName: z.string().nullable(),
   planCode: z.string().nullable(), membershipStatus: z.string().nullable(), renewalAt: z.coerce.date().nullable(),
   score: z.union([z.string(), z.number()]).nullable(),
+  matchingMembershipIds: z.array(z.string()).default([]), sortKey: z.union([z.string(), z.date()]).optional(), totalMatching: z.coerce.number().int().nonnegative().default(0),
 });
 
 type MemberRow = z.infer<typeof memberRowSchema>;
@@ -55,32 +57,33 @@ function numberOrNull(value: string | number | null): number | null {
 
 function toItem(row: MemberRow): AdminMemberListItem {
   const numericScore = row.score === null ? null : Number(row.score);
-  return {profileId: row.profileId, membershipId: row.membershipId, companyId: row.companyId, displayName: row.displayName, email: row.email, companyName: row.companyName, planCode: row.planCode, membershipStatus: row.membershipStatus, renewalAt: row.renewalAt?.toISOString() ?? null, score: numericScore !== null && Number.isFinite(numericScore) ? numericScore : null};
+  return {profileId: row.profileId, membershipId: row.membershipId, companyId: row.companyId, displayName: row.displayName, email: row.email, companyName: row.companyName, planCode: row.planCode, membershipStatus: row.membershipStatus, renewalAt: row.renewalAt?.toISOString() ?? null, score: numericScore !== null && Number.isFinite(numericScore) ? numericScore : null, matchingMembershipIds: row.matchingMembershipIds};
 }
 
-/**
- * Projects one representative row per profile before outer pagination. Matching profiles are chosen
- * across every active company membership first; representatives prefer membership status (active,
- * past due, ending, pending, terminal), then membership ID and company ID for stable tie-breaking.
- */
+/** Filter each profile against one matching membership row, then project a stable representative. */
 function memberSearchStatement(query: AdminMemberQuery) {
-  const cursor = decodeAdminMemberCursor(query.cursor);
-  const pattern = `%${query.search}%`;
-  const matches = query.search
-    ? sql`${profiles.displayName} ILIKE ${pattern} OR ${profiles.email} ILIKE ${pattern} OR ${companies.displayName} ILIKE ${pattern}`
-    : sql`TRUE`;
-  const afterCursor = cursor
-    ? sql`lower("displayName") > ${cursor.displayName} OR (lower("displayName") = ${cursor.displayName} AND "profileId" > ${cursor.profileId})`
-    : sql`TRUE`;
+  const cursor = decodeAdminMemberCursor(query.cursor, query);
+  const search = query.search.toLocaleLowerCase("en");
+  const conditions: SQL[] = [];
+  if (search) conditions.push(sql`(position(${search} in lower(${profiles.displayName})) > 0 OR position(${search} in lower(coalesce(${profiles.email}, ''))) > 0 OR position(${search} in lower(coalesce(${membershipCompanies.displayName}, ''))) > 0)`);
+  if (query.status.length) conditions.push(inArray(memberships.status, query.status));
+  if (query.planCode.length) conditions.push(inArray(memberships.planCode, query.planCode));
+  if (query.companyId) conditions.push(sql`${memberships.companyId} = ${query.companyId}::uuid`);
+  if (query.renewalFrom) conditions.push(sql`${memberships.billingPeriodEnd} >= ${hongKongDayStartUtc(query.renewalFrom)}`);
+  if (query.renewalTo) conditions.push(sql`${memberships.billingPeriodEnd} < ${hongKongDayStartUtc(query.renewalTo, true)}`);
+  if (query.locale) conditions.push(sql`${profiles.locale} = ${query.locale}`);
+  const incomplete = sql`(nullif(trim(coalesce(${profiles.email}, '')), '') IS NULL OR nullif(trim(coalesce(${profiles.phone}, '')), '') IS NULL OR nullif(trim(coalesce(${profiles.jobTitle}, '')), '') IS NULL)`;
+  if (query.completeness === "incomplete") conditions.push(incomplete);
+  if (query.completeness === "complete") conditions.push(sql`NOT ${incomplete}`);
+  const where = conditions.length ? sql.join(conditions.map((term) => sql`(${term})`), sql` AND `) : sql`TRUE`;
+  const sortKey = query.sort === "renewal_asc" ? sql`coalesce("renewalAt", '9999-12-31T00:00:00Z'::timestamptz)` : sql`lower("displayName")`;
+  const descending = query.sort === "name_desc";
+  const cursorValue = cursor ? (query.sort === "renewal_asc" ? sql`${cursor.sortKey}::timestamptz` : sql`${cursor.sortKey}`) : sql`NULL`;
+  const afterCursor = cursor ? sql`(${sortKey}, "profileId") ${descending ? sql`<` : sql`>`} (${cursorValue}, ${cursor.profileId})` : sql`TRUE`;
+  const direction = descending ? sql`DESC` : sql`ASC`;
 
   return sql`
-    WITH matching_profiles AS (
-      SELECT DISTINCT ${profiles.id} AS profile_id
-      FROM ${profiles}
-      LEFT JOIN ${companyMembers} ON ${companyMembers.userId} = ${profiles.id} AND ${companyMembers.revokedAt} IS NULL
-      LEFT JOIN ${companies} ON ${companies.id} = ${companyMembers.companyId}
-      WHERE ${matches}
-    ), candidate_rows AS (
+    WITH matching_memberships AS (
       SELECT ${profiles.id} AS profile_id, ${profiles.displayName} AS display_name, ${profiles.email} AS email,
         ${membershipCompanies.displayName} AS company_name, ${memberships.companyId} AS company_id, ${memberships.id} AS membership_id,
         ${memberships.planCode} AS plan_code, ${memberships.status} AS membership_status,
@@ -90,20 +93,26 @@ function memberSearchStatement(query: AdminMemberQuery) {
           ${memberships.id} NULLS LAST, ${memberships.companyId} NULLS LAST
         ) AS row_rank
       FROM ${profiles}
-      INNER JOIN matching_profiles ON matching_profiles.profile_id = ${profiles.id}
       LEFT JOIN ${companyMembers} ON ${companyMembers.userId} = ${profiles.id} AND ${companyMembers.revokedAt} IS NULL
       LEFT JOIN ${memberships} ON ${memberships.ownerUserId} = ${profiles.id} OR ${memberships.companyId} = ${companyMembers.companyId}
       LEFT JOIN ${membershipCompanies} ON ${membershipCompanies.id} = ${memberships.companyId}
       LEFT JOIN ${engagementScores} ON ${engagementScores.profileId} = ${profiles.id}
+      WHERE ${where}
+    ), matching_ids AS (
+      SELECT profile_id, coalesce(array_agg(DISTINCT membership_id::text) FILTER (WHERE membership_id IS NOT NULL), ARRAY[]::text[]) AS matching_membership_ids
+      FROM matching_memberships GROUP BY profile_id
     ), projected_members AS (
-      SELECT profile_id AS "profileId", membership_id AS "membershipId", company_id AS "companyId",
-        display_name AS "displayName", email, company_name AS "companyName", plan_code AS "planCode",
-        membership_status AS "membershipStatus", renewal_at AS "renewalAt", score
-      FROM candidate_rows WHERE row_rank = 1
+      SELECT matched.profile_id AS "profileId", matched.membership_id AS "membershipId", matched.company_id AS "companyId",
+        matched.display_name AS "displayName", matched.email, matched.company_name AS "companyName", matched.plan_code AS "planCode",
+        matched.membership_status AS "membershipStatus", matched.renewal_at AS "renewalAt", matched.score,
+        matching_ids.matching_membership_ids AS "matchingMembershipIds"
+      FROM matching_memberships matched JOIN matching_ids ON matching_ids.profile_id = matched.profile_id
+      WHERE matched.row_rank = 1
     )
-    SELECT * FROM projected_members
+    SELECT *, ${sortKey} AS "sortKey", (SELECT count(*) FROM projected_members) AS "totalMatching"
+    FROM projected_members
     WHERE ${afterCursor}
-    ORDER BY lower("displayName"), "profileId"
+    ORDER BY ${sortKey} ${direction}, "profileId" ${direction}
     LIMIT ${query.limit + 1}
   `;
 }
@@ -255,13 +264,17 @@ export const adminMembersRepository = {
     };
   },
 
-  async search(actor: Actor, query: AdminMemberQuery): Promise<AdminMemberPage> {
+  async search(actor: Actor, queryInput: unknown): Promise<AdminMemberPage> {
     requireAdmin(actor);
+    const query = adminMemberQuerySchema.parse(queryInput);
     const db = await getDb();
     const result = await db.execute(memberSearchStatement(query));
     const rows = z.array(memberRowSchema).parse(Array.isArray(result) ? result : result.rows);
     const hasNextPage = rows.length > query.limit;
-    const items = rows.slice(0, query.limit).map(toItem);
-    return {items, nextCursor: hasNextPage && items.length > 0 ? encodeAdminMemberCursor(items[items.length - 1]) : null};
+    const pageRows = rows.slice(0, query.limit);
+    const items = pageRows.map(toItem);
+    const last = pageRows.at(-1);
+    const cursorItem = last ? {displayName: last.displayName, profileId: last.profileId, sortKey: last.sortKey instanceof Date ? last.sortKey.toISOString() : last.sortKey} : null;
+    return {items, totalMatching: rows[0]?.totalMatching ?? 0, nextCursor: hasNextPage && cursorItem ? encodeAdminMemberCursor(cursorItem, query) : null};
   },
 };

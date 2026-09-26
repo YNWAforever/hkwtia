@@ -33,6 +33,7 @@ export function PortalNav({locale}: Readonly<{locale: AppLocale}>) {
 
   const groups: readonly InternalNavGroup[] = portalNavigationGroups.map((group) => ({
     id: group.id,
+    label: t("navigation"),
     links: group.links.map((link) => ({
       id: link.id,
       href: localizedPath(locale, link.href),

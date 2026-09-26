@@ -751,6 +751,21 @@ export const savedSegments = pgTable("saved_segments", {
   updatedAt: updatedAt("updated_at"),
 });
 
+/** Staff member workspace views stay separate from campaign audience segments. */
+export const adminMemberViews = pgTable("admin_member_views", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  ownerProfileId: text("owner_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  name: text("name").notNull(),
+  filterVersion: integer("filter_version").default(1).notNull(),
+  query: jsonb("query").$type<Record<string, unknown>>().notNull(),
+  shared: boolean("shared").default(false).notNull(),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  uniqueIndex("admin_member_views_owner_name_unique").on(table.ownerProfileId, table.name),
+  index("admin_member_views_shared_updated_idx").on(table.shared, table.updatedAt),
+]);
+
 export const campaigns = pgTable("campaigns", {
   id: uuid("id").defaultRandom().primaryKey(),
   segmentId: uuid("segment_id").notNull().references(() => savedSegments.id, {onDelete: "restrict"}),

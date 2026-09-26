@@ -17,7 +17,7 @@ describe("admin member list/detail membership summary", () => {
     const queries: string[] = [];
     database.current = drizzle(async (query) => {
       queries.push(query);
-      if (/with matching_profiles/i.test(query)) return {rows: [{profileId: "member-a", displayName: "Member A", email: "a@example.test", membershipId: active.id, companyId: active.companyId, companyName: "Company A", planCode: active.planCode, membershipStatus: active.status, renewalAt: active.renewalAt, score: "9"}]};
+      if (/with matching_memberships/i.test(query)) return {rows: [{profileId: "member-a", displayName: "Member A", email: "a@example.test", membershipId: active.id, companyId: active.companyId, companyName: "Company A", planCode: active.planCode, membershipStatus: active.status, renewalAt: active.renewalAt, score: "9", matchingMembershipIds: [active.id, expired.id], sortKey: "member a", totalMatching: 1}]};
       if (/from "profiles"/i.test(query)) return {rows: [{id: "member-a", displayName: "Member A", email: "a@example.test", phone: null, role: "member"}]};
       if (/from "member_notes"/i.test(query)) return {rows: [{id: "note-a", authorProfileId: "staff-a", authorName: "Staff A", body: "Follow up", replacesNoteId: null, createdAt: new Date("2026-08-01")}]};
       if (/from "event_orders"/i.test(query)) return {rows: [{id: "order-a", eventId: "event-a", titleEn: "AI Forum", titleZh: "AI 論壇", status: "refunded", amountHkdCents: 25000, paidAt: new Date("2026-08-01"), refundedAt: new Date("2026-08-02"), refundReason: "cancelled", createdAt: new Date("2026-08-01")}]};
@@ -28,7 +28,7 @@ describe("admin member list/detail membership summary", () => {
     });
     const list = await adminMembersRepository.search(staff, {search: "", limit: 20, cursor: null});
     const detail = await adminMembersRepository.get360(staff, "member-a");
-    expect(list.items[0]).toMatchObject({membershipId: active.id, companyId: "company-a"});
+    expect(list.items[0]).toMatchObject({membershipId: active.id, companyId: "company-a", matchingMembershipIds: [active.id, expired.id]});
     expect(detail?.membership).toMatchObject({id: active.id, status: "active"});
     expect(detail?.memberships.map((item) => item.id)).toEqual([active.id, expired.id]);
     expect(detail?.companies.map((item) => item.id)).toEqual(["company-a", "company-b"]);
@@ -37,6 +37,6 @@ describe("admin member list/detail membership summary", () => {
     expect(queries.join(" ")).toMatch(/buyer_profile_id/);
     expect(queries.join(" ")).not.toMatch(/buyer_email.*member-a/);
     expect(queries.filter((query) => /from "memberships"/i.test(query)).join(" ")).toMatch(/case [\s\S]*status[\s\S]*when 'active' then 0/i);
-    expect(queries.find((query) => /with matching_profiles/i.test(query))).toMatch(/"memberships"\."company_id" AS company_id/i);
+    expect(queries.find((query) => /with matching_memberships/i.test(query))).toMatch(/"memberships"\."company_id" AS company_id/i);
   });
 });
