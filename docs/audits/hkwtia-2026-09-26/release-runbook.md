@@ -12,3 +12,7 @@ Current state: code branch in progress; staging unverified; production unrelease
 ## T02 private ticket preflight
 
 Run a read-only mismatch inventory before private ticketing: `SELECT id, visibility, member_only FROM events WHERE member_only IS DISTINCT FROM (visibility <> 'public');` Review each row; no automatic cleanup is authorized. In Stripe test mode, exercise a member whose company seat is revoked after checkout URL creation, then resolve the provider-expiry and paid-webhook policy before enabling private ticket sales. Verify `past_due` remains eligible under the existing benefit policy.
+
+## T04 schema and rollback gate
+
+Apply `0043_event_checkout_recoveries` after 0042 and before the web build that imports the recovery repository. In the isolated test environment, verify one attached open session survives cancel/reload, a paid or provider-expired session is not duplicated, an unrelated member receives 404, and a provisional-cookie persistence failure cannot mint a new key after reload. Do not deploy the T04 web code before the table exists. A web rollback may leave the additive table in place; retain its rows through the provider reconciliation window. Do not delete recovery rows or expire live Stripe sessions as cleanup without separate authorization.

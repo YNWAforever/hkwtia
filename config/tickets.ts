@@ -9,3 +9,6 @@ export const TICKET_HOLD_MS = 30 * 60_000;
  * seconds of latency. Stripe's lower bound plus slack.
  */
 export const TICKET_SESSION_MIN_MS = TICKET_HOLD_MS + 5 * 60_000;
+
+/** Same-browser capability lifetime; longer than the provider session minimum. */
+export const TICKET_RECOVERY_MS = 45 * 60_000;

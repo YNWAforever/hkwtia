@@ -10,6 +10,10 @@ const state = vi.hoisted(() => ({
 
 vi.mock("next/headers", () => ({
   headers: async () => new Headers({"x-vercel-forwarded-for": state.ip}),
+  cookies: async () => ({get: () => undefined, set: () => undefined, delete: () => undefined}),
+}));
+vi.mock("@/lib/db/repos/event-checkout-recoveries", () => ({
+  eventCheckoutRecoveriesRepository: {issueForAttempt: async () => true, read: async () => null, invalidate: async () => undefined},
 }));
 vi.mock("@/lib/auth/actor", () => ({
   getActor: async () => {

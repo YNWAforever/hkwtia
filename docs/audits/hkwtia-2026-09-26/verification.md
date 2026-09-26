@@ -29,6 +29,12 @@ Record every result with date, SHA, environment, command, exit code, count, skip
 | 2026-09-27 | T04 seat slice feature worktree | `npx vitest run` parser/action/form/refund-link files | exit 0; 4 files, 34 tests passed | Quantity 1/3/10, missing/extra rows, total and buyer-to-attendee copy; no DB or Stripe. |
 | 2026-09-27 | T04 seat slice feature worktree | `npm run typecheck`; `npm run audit:strings` | exit 0 for both; 268 TSX scanned | Ticket component interface and bilingual copy. |
 
+| 2026-09-27 | T04 recovery feature worktree | `npx vitest run` nine ticket files | exit 0; 9 files, 79 tests passed | Token digest/cookie, owner-checked read, provider-confirmed resume, quantity and core idempotency. Mocked DB/provider; no paid flow. |
+| 2026-09-27 | T04 recovery feature worktree | `npm run typecheck`; `npm run audit:strings`; focused ESLint | exit 0 for all; 268 TSX scanned | Recovery route/schema/action/UI and bilingual copy. |
+| 2026-09-27 | T04 recovery feature worktree | `npx drizzle-kit check` | exit 0 | Migration metadata consistent; does not apply 0043 or prove SQL against PostgreSQL. |
+| 2026-09-27 | T04 feature worktree | `npx vitest run tests/integration/ticket-checkout-recovery-postgres.test.ts` | exit 0; 2 skipped | `RUN_POSTGRES_INTEGRATION=1` not set and Docker unavailable; migration SQL not run. |
+| 2026-09-27 | T04 managed local Next server | `npx playwright test tests/e2e/ticket-checkout-recovery.spec.ts` | exit 0; 2 skipped | Isolated M2 DB/auth/Stripe test-mode values absent; no browser or provider acceptance. |
+
 ## Outstanding gates
 
 - Full suite baseline has one existing CLI import failure. The fix and rerun remain required.

@@ -18,7 +18,7 @@ vi.mock("react", async (importOriginal) => {
 });
 
 // The form binds to the real Server Action; this suite renders the client half only.
-vi.mock("@/lib/tickets/checkout-actions", () => ({submitTicketCheckoutAction: vi.fn()}));
+vi.mock("@/lib/tickets/checkout-actions", () => ({submitTicketCheckoutAction: vi.fn(), resumeTicketCheckoutAction: vi.fn()}));
 
 import {TicketCheckoutForm, type TicketCheckoutLabels} from "@/components/marketing/ticket-checkout-form";
 import {submitTicketCheckoutAction, type TicketCheckoutState} from "@/lib/tickets/checkout-actions";
@@ -40,6 +40,12 @@ const labels: TicketCheckoutLabels = {
   paymentNature: "One-time ticket payment. Seats are confirmed after payment.",
   eventDate: "Event date",
   fieldErrors: {required: "Required", invalid: "Invalid", extra: "Extra attendee"},
+  recoveryLoading: "Checking previous checkout",
+  recoveryTitle: "Pending checkout",
+  recoverySummary: "Reserved seats",
+  recoveryResume: "Continue existing payment",
+  recoveryChecking: "Checking payment",
+  recoveryUnavailable: "Checkout status unavailable",
   errors: {
     INVALID: "Check the form.",
     SOLD_OUT: "This event is sold out.",
@@ -67,6 +73,7 @@ describe("TicketCheckoutForm", () => {
   beforeEach(() => {
     reactState.results = [];
     reactState.useActionState.mockClear();
+    vi.spyOn(globalThis, "fetch").mockImplementation(() => new Promise<Response>(() => undefined));
   });
 
   it("renders one attendee name and email row per selected seat", () => {
@@ -103,6 +110,15 @@ describe("TicketCheckoutForm", () => {
     fireEvent.click(screen.getAllByRole("button", {name: labels.removeSeat})[1]);
     expect(screen.queryByText("Attendee name 3")).toBeNull();
     expect(screen.getByLabelText(labels.seatCount)).toHaveValue("2");
+  });
+
+  it("reopens a pending attempt after mount and hides the new purchase controls", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({eventId: "10000000-0000-4000-8000-000000000001", status: "pending", seatCount: 3, amountHkdCents: 75000, expiresAt: "2030-01-01T00:00:00.000Z"}), {status: 200}));
+    renderForm();
+    expect(await screen.findByText(labels.recoveryTitle)).toBeInTheDocument();
+    expect(screen.getByText(/HK\$750\.00/)).toBeInTheDocument();
+    expect(screen.getByRole("button", {name: labels.recoveryResume})).toBeInTheDocument();
+    expect(screen.queryByRole("button", {name: labels.submit})).toBeNull();
   });
 
   it("prefills the buyer name and email for a signed-in member", () => {
@@ -145,7 +161,7 @@ describe("TicketCheckoutForm", () => {
     const view = renderForm();
     const first = view.container.querySelector<HTMLInputElement>('input[name="idempotencyKey"]')?.value;
     vi.mocked(submitTicketCheckoutAction).mockResolvedValueOnce({status: "error", code});
-    const action = reactState.useActionState.mock.calls.at(-1)![0] as
+    const action = reactState.useActionState.mock.calls[0]![0] as
       (state: TicketCheckoutState, data: FormData) => Promise<TicketCheckoutState>;
     await act(async () => { await action({status: "idle"}, new FormData()); });
     reactState.results[0] = [{status: "error", code}, vi.fn(), false];

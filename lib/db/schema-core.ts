@@ -929,6 +929,20 @@ export const eventOrders = pgTable("event_orders", {
   check("event_orders_amount_check", sql`${table.amountHkdCents} > 0`),
 ]);
 
+export const eventCheckoutRecoveries = pgTable("event_checkout_recoveries", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orderId: uuid("order_id").notNull().references(() => eventOrders.id, {onDelete: "cascade"}),
+  recoveryDigest: text("recovery_digest").notNull(),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  invalidatedAt: timestamp("invalidated_at", {withTimezone: true}),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  unique("event_checkout_recoveries_order_unique").on(table.orderId),
+  unique("event_checkout_recoveries_digest_unique").on(table.recoveryDigest),
+  index("event_checkout_recoveries_expiry_idx").on(table.expiresAt),
+  check("event_checkout_recoveries_digest_check", sql`${table.recoveryDigest} ~ '^[a-f0-9]{64}$'`),
+]);
+
 export const eventOrderSeats = pgTable("event_order_seats", {
   id: uuid("id").defaultRandom().primaryKey(),
   orderId: uuid("order_id").notNull().references(() => eventOrders.id, {onDelete: "cascade"}),

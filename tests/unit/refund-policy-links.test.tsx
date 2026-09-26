@@ -1,8 +1,8 @@
 import {render, screen} from "@testing-library/react";
-import {describe, expect, it, vi} from "vitest";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 
 // The form binds to the real Server Action; this suite renders the client half only.
-vi.mock("@/lib/tickets/checkout-actions", () => ({submitTicketCheckoutAction: vi.fn()}));
+vi.mock("@/lib/tickets/checkout-actions", () => ({submitTicketCheckoutAction: vi.fn(), resumeTicketCheckoutAction: vi.fn()}));
 
 import {TicketCheckoutForm, type TicketCheckoutLabels} from "@/components/marketing/ticket-checkout-form";
 import en from "@/messages/en.json";
@@ -39,6 +39,8 @@ const labels: TicketCheckoutLabels = {
   paymentNature: "One-time ticket payment.",
   eventDate: "Event date",
   fieldErrors: {required: "Required", invalid: "Invalid", extra: "Extra"},
+  recoveryLoading: "Checking previous checkout", recoveryTitle: "Pending checkout", recoverySummary: "Reserved seats",
+  recoveryResume: "Continue existing payment", recoveryChecking: "Checking payment", recoveryUnavailable: "Status unavailable",
   errors: {INVALID: "Check the form."},
 };
 
@@ -57,6 +59,7 @@ function renderCheckout(overrides: Partial<Parameters<typeof TicketCheckoutForm>
 }
 
 describe("ticket refund-policy link", () => {
+  beforeEach(() => { vi.spyOn(globalThis, "fetch").mockImplementation(() => new Promise<Response>(() => undefined)); });
   it("renders an anchor at the localized refund-policy path it was given, labelled from Ticket", () => {
     renderCheckout({labels: {...labels, refundPolicy: ticketLabel("en")}});
 

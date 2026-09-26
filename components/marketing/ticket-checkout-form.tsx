@@ -5,7 +5,8 @@ import {useActionState, useEffect, useState} from "react";
 
 import {MAX_TICKET_SEATS} from "@/config/tickets";
 import {newAttemptId} from "@/lib/random-id";
-import {submitTicketCheckoutAction, type TicketCheckoutState} from "@/lib/tickets/checkout-actions";
+import {resumeTicketCheckoutAction, submitTicketCheckoutAction, type TicketCheckoutState} from "@/lib/tickets/checkout-actions";
+import type {TicketRecoverySummary} from "@/lib/tickets/checkout-recovery";
 import {formatTicketPrice} from "@/lib/tickets/format";
 
 export type TicketCheckoutLabels = Readonly<{
@@ -14,6 +15,8 @@ export type TicketCheckoutLabels = Readonly<{
   submit: string; submitting: string; refundPolicy: string;
   fillBuyer: string; removeSeat: string; total: string; paymentNature: string; eventDate: string;
   fieldErrors: Readonly<{required: string; invalid: string; extra: string}>;
+  recoveryLoading: string; recoveryTitle: string; recoverySummary: string; recoveryResume: string;
+  recoveryChecking: string; recoveryUnavailable: string;
   errors: Readonly<Record<string, string>>;
 }>;
 
@@ -27,9 +30,21 @@ export function TicketCheckoutForm({eventId, locale, pricePerSeat, unitAmountHkd
   defaultBuyerName?: string; defaultBuyerEmail?: string;
 }>) {
   const [idempotencyKey, setIdempotencyKey] = useState("");
+  const [recoveryReset, setRecoveryReset] = useState(false);
+  const [recovery, setRecovery] = useState<"checking" | "none" | "unavailable" | TicketRecoverySummary>("checking");
   const [state, dispatch, pending] = useActionState(async (previous: TicketCheckoutState, formData: FormData) => {
+    setRecoveryReset(false);
     const result = await submitTicketCheckoutAction(previous, formData);
     if (result.status === "error" && (result.code === "RETRY_CHANGED" || result.code === "RETRY_EXPIRED")) setIdempotencyKey(newAttemptId());
+    return result;
+  }, initial);
+  const [resumeState, resumeDispatch, resumePending] = useActionState(async (previous: TicketCheckoutState, formData: FormData) => {
+    const result = await resumeTicketCheckoutAction(previous, formData);
+    if (result.status === "error" && result.code === "RETRY_EXPIRED") {
+      setRecovery("none");
+      setRecoveryReset(true);
+      setIdempotencyKey(newAttemptId());
+    }
     return result;
   }, initial);
   const [buyerName, setBuyerName] = useState(defaultBuyerName);
@@ -50,14 +65,45 @@ export function TicketCheckoutForm({eventId, locale, pricePerSeat, unitAmountHkd
   // eslint-disable-next-line react-hooks/set-state-in-effect -- browser-only UUID after mount avoids hydration mismatch.
   useEffect(() => { setIdempotencyKey(newAttemptId()); }, []);
   useEffect(() => {
+    const controller = new AbortController();
+    void fetch(`/api/events/checkout-recovery?eventId=${encodeURIComponent(eventId)}`, {cache: "no-store", credentials: "same-origin", signal: controller.signal})
+      .then(async (response) => {
+        if (response.status === 404) { setRecovery("none"); return; }
+        if (!response.ok) { setRecovery("unavailable"); return; }
+        const data = await response.json() as Partial<TicketRecoverySummary>;
+        if (data.eventId !== eventId || typeof data.seatCount !== "number" || typeof data.amountHkdCents !== "number" || typeof data.expiresAt !== "string" || data.status !== "pending") {
+          setRecovery("unavailable"); return;
+        }
+        setRecovery(data as TicketRecoverySummary);
+      })
+      .catch(() => { if (!controller.signal.aborted) setRecovery("unavailable"); });
+    return () => controller.abort();
+  }, [eventId]);
+  useEffect(() => {
     if (state.status === "redirect") window.location.assign(state.url);
   }, [state]);
+  useEffect(() => {
+    if (resumeState.status === "redirect") window.location.assign(resumeState.url);
+  }, [resumeState]);
+
+  const activeRecovery = recoveryReset ? null : state.status === "pending" ? state.summary : typeof recovery === "object" ? recovery : null;
+  if (activeRecovery) return <section className="space-y-4" role="status">
+    <h3 className="font-serif text-xl font-semibold">{labels.recoveryTitle}</h3>
+    <p>{labels.recoverySummary}: {activeRecovery.seatCount} · {formatTicketPrice(activeRecovery.amountHkdCents, locale)}</p>
+    <form action={resumeDispatch}>
+      <input name="eventId" type="hidden" value={eventId}/>
+      <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={resumePending} type="submit">{resumePending ? labels.recoveryChecking : labels.recoveryResume}</button>
+    </form>
+    {resumeState.status === "error" ? <p className="text-sm text-destructive" role="alert">{labels.errors[resumeState.code] ?? labels.errors.UNAVAILABLE}</p> : null}
+  </section>;
+  if (recovery === "unavailable") return <p className="text-sm text-destructive" role="alert">{labels.recoveryUnavailable}</p>;
 
   // A refusal that might hide an uncertain provider outcome keeps the same key.
   const inputClass = "min-h-11 w-full rounded-md border border-input bg-background px-3";
   return (
     <form action={dispatch} className="space-y-4" noValidate>
       <h3 className="font-serif text-xl font-semibold">{labels.heading}</h3>
+      {recovery === "checking" ? <p role="status">{labels.recoveryLoading}</p> : null}
       <input name="eventId" type="hidden" value={eventId}/>
       <input name="locale" type="hidden" value={locale}/>
       <input name="idempotencyKey" type="hidden" value={idempotencyKey}/>
@@ -101,7 +147,7 @@ export function TicketCheckoutForm({eventId, locale, pricePerSeat, unitAmountHkd
       <p className="text-sm font-semibold">{labels.total}: {formatTicketPrice(unitAmountHkdCents * seatCount, locale)}</p>
       <p className="text-sm text-muted-foreground">{labels.paymentNature}</p>
       <p className="text-sm"><Link className="underline" href={refundPolicyHref}>{labels.refundPolicy}</Link></p>
-      <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending || idempotencyKey === ""} type="submit">
+      <button className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending || recovery !== "none" || idempotencyKey === ""} type="submit">
         {pending ? labels.submitting : labels.submit}
       </button>
       {state.status === "error" ? <p className="text-sm text-destructive" role="alert">{labels.errors[state.code] ?? labels.errors.INVALID}</p> : null}
