@@ -288,6 +288,13 @@
       "when": 1790408863314,
       "tag": "0041_showcase-lead-email-outbox",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1790428838005,
+      "tag": "0042_ticket_email_outbox",
+      "breakpoints": true
     }
   ]
 }

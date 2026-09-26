@@ -19,7 +19,7 @@ import {verifyCronBearer} from "@/lib/jobs/auth";
  * WhatsApp send queue would drain once an hour while every log line said it was
  * healthy.
  */
-export type JobBucket = "hourly" | "daily" | "ten-minute";
+export type JobBucket = "hourly" | "daily" | "ten-minute" | "minute";
 export type JobClaimResult = RepositoryJobClaimResult;
 
 export type JobHandlerRepository = Readonly<{
@@ -98,6 +98,7 @@ export function runKeyFor(
   // millisecond arithmetic so the key can never acquire a `.`, which
   // SAFE_RUN_KEY refuses.
   if (bucket === "ten-minute") return `${kind}:${instant.slice(0, 15)}0`;
+  if (bucket === "minute") return `${kind}:${instant.slice(0, 16)}`;
   return `${kind}:${bucket === "hourly" ? instant.slice(0, 13) : instant.slice(0, 10)}`;
 }
 

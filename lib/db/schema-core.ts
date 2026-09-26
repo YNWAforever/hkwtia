@@ -720,6 +720,8 @@ export const staffTasks = pgTable("staff_tasks", {
   context: jsonb("context")
     .$type<{
       contactEmail?: string;
+      orderId?: string;
+      noticeKind?: "ack" | "staff" | "confirmation" | "pass" | "refund" | "refund_failed";
       conversationId?: string;
       agentRunId?: string;
       reasonCode?: string;
@@ -940,6 +942,40 @@ export const eventOrderSeats = pgTable("event_order_seats", {
   uniqueIndex("event_order_seats_position_unique").on(table.orderId, table.position),
 ]);
 
+export type TicketEmailPayload = Readonly<{
+  to: string;
+  from: string;
+  subject: string;
+  html: string;
+  text: string;
+  headers: Readonly<Record<string, string>>;
+  idempotencyKey: string;
+}>;
+
+export const ticketEmailOutbox = pgTable("ticket_email_outbox", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orderId: uuid("order_id").notNull().references(() => eventOrders.id, {onDelete: "cascade"}),
+  seatId: uuid("seat_id").references(() => eventOrderSeats.id, {onDelete: "cascade"}),
+  kind: text("kind").notNull(),
+  status: text("status").default("queued").notNull(),
+  payload: jsonb("payload").$type<TicketEmailPayload>(),
+  eventKey: text("event_key").notNull(),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  nextAttemptAt: timestamp("next_attempt_at", {withTimezone: true}).defaultNow().notNull(),
+  claimExpiresAt: timestamp("claim_expires_at", {withTimezone: true}),
+  firstAttemptAt: timestamp("first_attempt_at", {withTimezone: true}),
+  providerId: text("provider_id"),
+  errorCode: text("error_code"),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  unique("ticket_email_outbox_event_key_unique").on(table.eventKey),
+  check("ticket_email_outbox_kind_check", sql`${table.kind} IN ('confirmation', 'pass', 'refund', 'refund_failed')`),
+  check("ticket_email_outbox_status_check", sql`${table.status} IN ('queued', 'sending', 'sent', 'blocked', 'uncertain', 'suppressed')`),
+  check("ticket_email_outbox_attempt_check", sql`${table.attemptCount} >= 0`),
+  check("ticket_email_outbox_seat_check", sql`(${table.kind} = 'pass') = (${table.seatId} IS NOT NULL)`),
+  index("ticket_email_outbox_due_idx").on(table.status, table.nextAttemptAt, table.claimExpiresAt),
+]);
 export const approvals = pgTable("approvals", {
   id: uuid("id").defaultRandom().primaryKey(),
   actionType: text("action_type").notNull(),

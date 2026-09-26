@@ -2642,6 +2642,15 @@
       "leadEmailUncertain": "電郵送達狀態未明；重發前請先核實",
       "leadAck": "確認電郵",
       "leadStaff": "員工通知",
+      "ticketEmail": "門票電郵",
+      "ticketEmailBlocked": "門票電郵未能送出，請人手跟進",
+      "ticketEmailUncertain": "門票電郵送達狀態未明；重發前請先核實",
+      "ticketRefundPending": "Stripe 退款仍在處理中",
+      "ticketConfirmation": "購票收據",
+      "ticketPass": "入場憑證",
+      "ticketRefund": "退款通知",
+      "ticketRefundFailed": "退款失敗通知",
+      "ticketOrder": "訂單",
       "error": "無法載入任務。"
     },
     "listingsReview": {

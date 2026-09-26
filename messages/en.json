@@ -2641,6 +2641,15 @@
       "leadEmailUncertain": "Email delivery status is uncertain; check before resending",
       "leadAck": "Acknowledgement",
       "leadStaff": "Staff notification",
+      "ticketEmail": "Ticket email",
+      "ticketEmailBlocked": "Ticket email needs manual follow-up",
+      "ticketEmailUncertain": "Ticket email status is uncertain; check before resending",
+      "ticketRefundPending": "Refund is still pending at Stripe",
+      "ticketConfirmation": "Receipt",
+      "ticketPass": "Attendee pass",
+      "ticketRefund": "Refund notice",
+      "ticketRefundFailed": "Refund failure notice",
+      "ticketOrder": "Order",
       "error": "Tasks could not be loaded."
     },
     "listingsReview": {

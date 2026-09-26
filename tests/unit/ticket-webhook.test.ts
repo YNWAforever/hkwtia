@@ -99,6 +99,7 @@ function buildTicketProcessor(options: {
   providerFullyRefunded?: boolean;
   summary?: {title: string; startsAt: Date; slug: string; venue: string | null} | null;
   orderSeats?: readonly {seatId: string; position: number; attendeeName: string}[];
+  deliverQueuedOrderNotices?: (orderId: string) => Promise<void>;
 } = {}) {
   const orders = {
     settlePaid: vi.fn(async (): Promise<SettleResult> => options.settle ?? {status: "paid", order: pendingOrder}),
@@ -126,6 +127,7 @@ function buildTicketProcessor(options: {
     appUrl: "https://w.test",
     passSecret: "pass-secret-fixture",
     now: () => new Date("2026-09-14T04:00:00Z"),
+    deliverQueuedOrderNotices: options.deliverQueuedOrderNotices,
   };
   return {
     processor: createTicketProcessor(dependencies),
@@ -262,6 +264,15 @@ describe("processStripeEvent ticket branch", () => {
 });
 
 describe("createTicketProcessor", () => {
+  it("drains committed paid notices through the outbox instead of sending them directly", async () => {
+    const deliverQueuedOrderNotices = vi.fn(async () => undefined);
+    const {processor, transport} = buildTicketProcessor({deliverQueuedOrderNotices});
+    await expect(processor.process(systemActor("stripe-webhook"), command("checkout.session.completed")))
+      .resolves.toBe("processed");
+    expect(deliverQueuedOrderNotices).toHaveBeenCalledWith(orderId);
+    expect(transport.sends).toEqual([]);
+  });
+
   it("expires the order for a checkout.session.expired and sends nothing", async () => {
     const {processor, orders, refundPaymentIntent, transport} = buildTicketProcessor();
 

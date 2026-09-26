@@ -84,7 +84,10 @@ describe("refundPaidOrder", () => {
 
     // Both statements ran inside the single transaction the public method opened.
     expect(fake.db.transaction).toHaveBeenCalledTimes(1);
-    expect(fake.depths).toEqual([1, 1]);
+    expect(fake.queries.some((query) => /INSERT INTO ticket_email_outbox/i.test(query.sql)
+      && query.params.includes("refund")
+      && query.params.includes("ticket-refund:order-1:2026-09-14T05:00:00.000Z"))).toBe(true);
+    expect(fake.depths).toEqual([1, 1, 1]);
   });
 
   // The whole-branch finding this pins: every refund used to record
@@ -156,7 +159,10 @@ describe("reconcileRefundedOrder", () => {
     const audit = fake.queries.find((query) => /^\s*insert/i.test(query.sql));
     expect(audit?.params).toEqual([null, "system", "event.order.refunded", "event_order", "order-1",
       JSON.stringify({reason: "provider_reconciled", note: null, stripeEventId: "evt_success"})]);
-    expect(fake.depths).toEqual([1, 1]);
+    expect(fake.queries.some((query) => /INSERT INTO ticket_email_outbox/i.test(query.sql)
+      && query.params.includes("refund")
+      && query.params.includes("ticket-refund:order-1:2026-09-14T05:00:00.000Z"))).toBe(true);
+    expect(fake.depths).toEqual([1, 1, 1]);
   });
 
   it("writes no audit when another worker settled first", async () => {
@@ -187,7 +193,9 @@ describe("markRefundFailed", () => {
     const audit = fake.queries.find((query) => /^\s*insert/i.test(query.sql));
     expect(audit?.params).toEqual([null, "system", "event.order.refund_failed", "event_order", "order-1",
       JSON.stringify({stripeEventId: "evt_failed", stripeRefundId: "re_failed"})]);
-    expect(fake.depths.every((depth) => depth === 1)).toBe(true);
+    expect(fake.queries.some((query) => /INSERT INTO ticket_email_outbox/i.test(query.sql)
+      && query.params.includes("refund_failed")
+      && query.params.includes("ticket-refund-failed:order-1:evt_failed"))).toBe(true);    expect(fake.depths.every((depth) => depth === 1)).toBe(true);
   });
 
   it("audits a failed pending refund without revoking a paid ticket", async () => {
@@ -199,7 +207,9 @@ describe("markRefundFailed", () => {
     const audit = fake.queries.find((query) => /^\s*insert/i.test(query.sql));
     expect(audit?.params).toEqual([null, "system", "event.order.refund_failed", "event_order", "order-1",
       JSON.stringify({stripeEventId: "evt_failed", stripeRefundId: "re_failed"})]);
-    expect(fake.depths.every((depth) => depth === 1)).toBe(true);
+    expect(fake.queries.some((query) => /INSERT INTO ticket_email_outbox/i.test(query.sql)
+      && query.params.includes("refund_failed")
+      && query.params.includes("ticket-refund-failed:order-1:evt_failed"))).toBe(true);    expect(fake.depths.every((depth) => depth === 1)).toBe(true);
   });
 
   it("deduplicates a paid-order failure by provider refund id", async () => {
