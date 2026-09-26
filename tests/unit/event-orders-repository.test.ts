@@ -4,7 +4,7 @@ import {ANONYMOUS_ACTOR} from "@/lib/membership/lifecycle";
 import {createEventOrdersRepository, type EventOrdersTransaction, type LockedEvent, type OrderRecord} from "@/lib/db/repos/event-orders";
 
 const now = new Date("2026-09-14T04:00:00Z");
-const event: LockedEvent = {id: "ev-1", capacity: 2, published: true, startsAt: new Date("2026-10-01T10:00:00Z"), endsAt: null, registrationMode: "ticketed", ticketPriceHkdCents: 25_000, visibility: "public", memberOnly: false};
+const event: LockedEvent = {id: "ev-1", slug: "real-event", capacity: 2, published: true, startsAt: new Date("2026-10-01T10:00:00Z"), endsAt: null, registrationMode: "ticketed", ticketPriceHkdCents: 25_000, visibility: "public", memberOnly: false};
 
 function order(overrides: Partial<OrderRecord> = {}): OrderRecord {
   return {id: "order-1", eventId: "ev-1", buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", amountHkdCents: 25_000, currency: "hkd", status: "pending", stripeCheckoutSessionId: null, stripeCheckoutUrl: null, idempotencyKey: "idem-1", expiresAt: new Date(now.getTime() + 1_800_000), paidAt: null, refundedAt: null, refundReason: null, ...overrides};
@@ -43,6 +43,15 @@ function transaction(overrides: Partial<EventOrdersTransaction> = {}): EventOrde
 const seats = [{name: "Ada", email: "ada@example.test"}];
 
 describe("eventOrdersRepository.createOrder", () => {
+  it("refuses a direct paid order for the audited demo event before reading or reusing an attempt", async () => {
+    const tx = transaction({lockEvent: vi.fn(async () => ({...event, slug: "wtia-global-growth-demo-briefing-2026"}))});
+    const input = {eventId: "ev-1", actor: ANONYMOUS_ACTOR, buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now} as const;
+    await expect(createEventOrdersRepository(async (work) => work(tx)).createOrder(input))
+      .resolves.toEqual({ok: false, reason: "EVENT_NOT_FOUND"});
+    expect(tx.orderByIdempotencyKey).not.toHaveBeenCalled();
+    expect(tx.insertOrder).not.toHaveBeenCalled();
+  });
+
   it("refuses a direct anonymous write to a locked members-only event", async () => {
     const tx = transaction({lockEvent: vi.fn(async () => ({...event, visibility: "members_only", memberOnly: true}))});
     const input = {eventId: "ev-1", actor: {kind: "anonymous", userId: null}, buyerProfileId: null, buyerName: "Ada", buyerEmail: "ada@example.test", buyerLocale: "en", idempotencyKey: "idem-1", seats, amountHkdCents: 25_000, now} as const;

@@ -56,6 +56,21 @@ describe("admin event form contract", () => {
     expect(update).toHaveBeenCalledWith(current.id, expect.objectContaining({externalRegistrationUrl: fields.externalRegistrationUrl}));
   });
 
+  it("blocks publication of the exact audited demo event on create and update", async () => {
+    const slug = "wtia-global-growth-demo-briefing-2026";
+    const published = eventFormInput(form({slug, published: "on"}));
+    await expect(createEvent(staff, published, deps)).rejects.toThrow("DEMO_EVENT_PUBLICATION_BLOCKED");
+
+    const draft = await createEvent(staff, eventFormInput(form({slug})), deps);
+    const update = vi.fn();
+    const updateDeps: EventMutationDependencies = {transaction: async (work) => work({
+      insertEvent: vi.fn(), lockEvent: vi.fn(async () => draft), updateEvent: update,
+      lockActiveMedia: vi.fn(), insertAudit: vi.fn(async () => undefined),
+    })};
+    await expect(updateEvent(staff, draft.id, published, updateDeps)).rejects.toThrow("DEMO_EVENT_PUBLICATION_BLOCKED");
+    expect(update).not.toHaveBeenCalled();
+  });
+
   it("rejects empty and unsafe external URLs", async () => {
     for (const externalRegistrationUrl of ["", "javascript:alert(1)", "ftp://example.test/ai"]) {
       await expect(createEvent(staff, eventFormInput(form({externalRegistrationUrl})), deps)).rejects.toThrow(z.ZodError);

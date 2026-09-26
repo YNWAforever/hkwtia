@@ -77,6 +77,7 @@
       "tct": "Tech to Connect",
       "cpai": "CPAI",
       "membership": "會員計劃",
+      "members": "會員名錄",
       "showcase": "會員與方案展示",
       "news": "最新消息",
       "aiOps": "人工智能營運",
@@ -100,7 +101,7 @@
     },
     "explore": "探索",
     "viewOverview": "查看總覽",
-    "search": "搜尋 WiseTech",
+    "search": "搜尋方案",
     "openMenu": "開啟導覽選單",
     "closeMenu": "關閉導覽選單",
     "menuTitle": "網站導覽",
@@ -490,6 +491,7 @@
         "label": "會員名錄",
         "title": "認識正在塑造未來的人。",
         "copyEmpty": "名錄已準備承載獲批公開的專頁，並設有可控可見度及需獲同意的引薦流程；目前尚未顯示現行會員紀錄。",
+        "copyUnavailable": "會員專頁暫時無法顯示。",
         "copyAvailable": "已發布的會員方案現已上線，設有可控可見度及需獲同意的引薦流程。",
         "action": "探索會員"
       },
@@ -497,6 +499,7 @@
         "label": "AI 解決方案市場",
         "title": "尋找可在真實環境落地的 AI。",
         "copyEmpty": "規劃中的方案市場將比較成熟度、部署方式、安全、市場覆蓋及經審閱證據；目前尚未顯示現行方案紀錄。",
+        "copyUnavailable": "方案展示暫時無法顯示。",
         "copyAvailable": "已發布方案現已上線，可按用途、部署方式及已審閱證據比較。",
         "action": "探索解決方案"
       }
@@ -628,9 +631,10 @@
       "title": "按你的目標，選擇合適參與關係。",
       "intro": "會員身份支援持續參與；夥伴合作則由清晰受眾、項目及預期成果開始。",
       "membership": {
+        "catalogPricesLabel": "現行網上計劃會費",
         "label": "會員計劃",
         "title": "建立持續參與生態系統的路徑。",
-        "copy": "專業人士、初創、中小企、企業及策略夥伴可選擇相應路徑；現行費用及最終權益由會員團隊提供。",
+        "copy": "請在會籍頁比較現時可用的計劃及會費。如需確認資格或公布目錄以外的安排，請聯絡 WTIA。",
         "points": ["相關活動及知識", "專頁及可見度選擇", "實用的首 90 天旅程"],
         "primaryAction": "比較會員計劃",
         "secondaryAction": "準備會員查詢"
@@ -756,21 +760,47 @@
         "description": "適合支持 WTIA 使命的策略夥伴。"
       }
     },
+    "dimensionsTitle": "會籍內容",
     "faqTitle": "會員常見問題",
     "faq": {
       "0": {
-        "question": "可以網上入會嗎？",
-        "answer": "可以。社群、初創及企業會籍均可於網上申請及付款；贊助人會籍由聯絡查詢開始。"
+        "question": "誰可以申請？",
+        "answer": "社群會籍面向個人；初創及企業會籍由機構申請。贊助會籍由 WTIA 職員跟進。WTIA 會在審核時確認資格。"
       },
       "1": {
-        "question": "在哪裡查看現行會費及付款選項？",
-        "answer": "目前可用的會費及付款週期會顯示於會員級別卡片。"
+        "question": "在哪裡查看現行會費？",
+        "answer": "可用的會費及帳單週期來自現行會籍目錄，見上方計劃卡片。付款前請以付款服務顯示的最終金額為準。"
       },
       "2": {
-        "question": "如何申請贊助人會籍？",
-        "answer": "先提交聯絡要求，再由 WTIA 職員人手審批。"
+        "question": "付費計劃會自動續費嗎？",
+        "answer": "網上付費流程使用 Stripe 訂閱結帳。付款前請向 WTIA 確認適用於你會籍的續費及取消條款。"
+      },
+      "3": {
+        "question": "如何付款或取消？",
+        "answer": "選擇可用的網上計劃後，可前往安全結帳頁。如需取消或其他安排，請聯絡 WTIA；本頁不會更改現有訂閱。"
+      },
+      "4": {
+        "question": "公司會籍包含多少席位？",
+        "answer": "現行網站目錄設定為初創五席、企業二十五席。公司負責人或管理員可在專區管理邀請；最終席位以協議為準。"
+      },
+      "5": {
+        "question": "審批需時多久？",
+        "answer": "申請狀態可在會員專區查看。WTIA 未在本頁公布固定審批時限；如時間緊迫，請聯絡會員團隊。"
+      },
+      "6": {
+        "question": "可以退款嗎？",
+        "answer": "已公布的退款政策適用於活動門票。付款前請向 WTIA 確認會籍退款及取消條款；本頁不承諾會籍退款權益。"
+      },
+      "7": {
+        "question": "可以取得發票嗎？",
+        "answer": "會員專區顯示會籍及付款狀態。請向 WTIA 確認適用於你的發票或收據安排。"
+      },
+      "8": {
+        "question": "個人資料與公司會籍有何關係？",
+        "answer": "你的個人資料與公司會籍分開保留。公司負責人或管理員可邀請席位；你的申請及歷史仍連結你的個人資料。"
       }
     },
+    "faqLinks": {"refund": "查閱活動門票退款政策", "contact": "向 WTIA 查詢會籍條款"},
     "priceLabels": {
       "free": "免費",
       "review": "聯絡我們"
@@ -788,14 +818,14 @@
     "sme": {
       "label": "適合中小企",
       "title": "未確定哪個級別適合你？",
-      "copy": "中小企可先由社群會籍開始，隨參與計劃增加而升級。WTIA 職員可協助你選擇合適級別。",
+      "copy": "比較已公布的計劃，並向 WTIA 查詢哪種會籍適合你的機構及參與方式。",
       "action": "查詢 WTIA"
     },
     "pricing": {
       "readyLabel": "現行收費",
-      "readyCopy": "以上初創及企業會籍的收費，均為會員目錄中現行已確認的價格。",
+      "readyCopy": "上方會費根據現行網站目錄及已設定的結帳價格編號顯示。請在安全結帳頁確認總額及訂閱條款。",
       "fallbackLabel": "收費",
-      "fallbackCopy": "初創及企業會籍收費仍在敲定中。申請前請向會員團隊確認現行收費。"
+      "fallbackCopy": "本頁有部分會費暫時無法顯示。申請前請向會員團隊確認現行價格。"
     },
     "dimensions": {
       "network": {"title": "網絡", "copy": "遍及生態系統的社群及聯繫網絡。"},
@@ -943,6 +973,13 @@
     }
   },
   "MemberLogin": {
+    "home": "主頁",
+    "join": "加入 WTIA",
+    "support": "聯絡支援",
+    "navigation": "常用連結",
+    "help": "請輸入電郵地址，以接收安全登入連結。",
+    "resend": "重新傳送登入連結",
+    "deliveryHelp": "如未收到郵件，請查看垃圾郵件匣、重新要求連結，或聯絡支援。",
     "formLabel": "會員登入",
     "emailLabel": "電郵地址",
     "submit": "傳送安全登入連結",
@@ -1280,6 +1317,8 @@
     "ownerCta": "管理你的展示頁",
     "resultsTitle": "探索會員方案",
     "resultsDescription": "使用篩選條件，找出切合你需要的方案。",
+    "noPublishedTitle": "尚未有公開方案",
+    "noPublishedDescription": "尚未有已發佈的方案。",
     "emptyTitle": "沒有符合的已發布展示頁",
     "emptyDescription": "請嘗試更改篩選條件或搜尋字詞。",
     "unavailableTitle": "展示名錄暫時無法顯示",
@@ -1406,6 +1445,8 @@
       "patron": "贊助人"
     },
     "resultsTitle": "{count} 個會員",
+    "noPublishedTitle": "尚未有公開會員專頁",
+    "noPublishedDescription": "尚未有已發佈的會員專頁。",
     "emptyTitle": "暫時沒有相符的會員專頁",
     "emptyDescription": "機構發布專頁後會在此顯示。請嘗試更廣泛的搜尋。",
     "unavailableTitle": "會員頁面暫時無法顯示",
@@ -1487,8 +1528,14 @@
     "emptyDescription": "確認日期及詳情後，WTIA 活動會在此顯示。",
     "statusLabel": "活動狀態",
     "status": {
-      "open": "進行中",
+      "open": "報名資訊",
       "past": "已結束"
+    },
+    "lifecycle": {
+      "upcoming": "即將舉行",
+      "ongoing": "進行中",
+      "ended": "已結束",
+      "cancelled": "已取消"
     },
     "cancelled": {
       "heading": "此活動已取消",

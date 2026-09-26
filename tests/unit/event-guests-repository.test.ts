@@ -75,6 +75,12 @@ describe("eventGuestsRepository (programme B-4)", () => {
     expect(upsert).toContain("e".repeat(64));
   });
 
+  it("refuses a forged RSVP to the exact audited demo event", async () => {
+    const {db, execute} = database([[lockedEvent({slug: "wtia-global-growth-demo-briefing-2026"})]]);
+    await expect(createEventGuestsRepository(async () => db as never).register(contactWriterActor("event_guest"), input())).rejects.toThrow("EVENT_NOT_FOUND");
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+
   it("refuses closed, unpublished or external-registration events before writing", async () => {
     const now = () => new Date("2026-09-09T00:00:00Z");
     const external = database([[lockedEvent({registration_mode: "external", capacity: null})]]);

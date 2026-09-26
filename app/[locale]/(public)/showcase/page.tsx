@@ -62,6 +62,7 @@ export default async function ShowcasePage({params, searchParams}: Props) {
     searchParams,
   ]);
   const filters = parseShowcaseFilters(query);
+  const hasFilters = Object.values(filters).some(Boolean);
   // A failed read is unknown availability, not zero published listings.
   const rows = await showcaseRepository.listPublished(filters).catch(() => null);
   const listings = rows?.map((row) => toPublicListing(row, locale)) ?? [];
@@ -88,7 +89,7 @@ export default async function ShowcasePage({params, searchParams}: Props) {
         ? <HonestEmpty copy={t("unavailableDescription")} title={t("unavailableTitle")} variant="inner" />
         : listings.length > 0
         ? <div className="partner-record-grid">{listings.map((listing) => <ShowcaseCard key={listing.slug} labels={cardLabels} listing={listing} locale={locale} />)}</div>
-        : <HonestEmpty actions={[{label: t("filters.clear"), href: "/showcase"}]} copy={t("emptyDescription")} title={t("emptyTitle")} variant="inner" />}
+        : <HonestEmpty actions={[{label: t("filters.clear"), href: "/showcase"}]} copy={t(hasFilters ? "emptyDescription" : "noPublishedDescription")} title={t(hasFilters ? "emptyTitle" : "noPublishedTitle")} variant="inner" />}
     </Section>
     <SolutionVerification badges={badges} copy={t("verification.copy")} label={t("verification.label")} title={t("verification.title")} />
     <Section labelledBy="showcase-pathways-title">

@@ -16,7 +16,7 @@ import {getActor} from "@/lib/auth/actor";
 import {eventsRepository} from "@/lib/db/repos/events";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 import {submitGuestRsvpAction} from "@/lib/events/guest-registration-action";
-import {eventBoundary} from "@/lib/events/public";
+import {deriveEventDisplayStatus} from "@/lib/events/status";
 import {formatEventDate} from "@/lib/home/format-event-date";
 import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl} from "@/lib/media/url";
 import {runPublicEventRegistrationAction} from "@/lib/events/registration-action";
@@ -92,7 +92,8 @@ export default async function EventPage({params}: Props) {
     : null;
   const registrationMessages = {registered: t("registration.registered"), waitlist: t("registration.waitlist"), alreadyRegistered: t("registration.alreadyRegistered"), alreadyWaitlisted: t("registration.alreadyWaitlisted"), unauthenticated: t("registration.unauthenticated"), ineligible: t("registration.ineligible"), closed: t("registration.closed"), error: t("registration.error")};
   async function registerAction(state: RegistrationActionState, formData: FormData): Promise<RegistrationActionState> { "use server"; return runPublicEventRegistrationAction(state, formData, {messages: registrationMessages}); }
-  const past = eventBoundary({startsAt: new Date(displayEvent.startsAt), endsAt: displayEvent.endsAt ? new Date(displayEvent.endsAt) : null}) < asOf;
+  const displayStatus = deriveEventDisplayStatus({...displayEvent, confirmedSeats: null, waitlistAvailable: false}, asOf);
+  const past = displayStatus.lifecycle === "ended";
   const detailLabels = {date: t("detail.date"), venue: t("detail.venue"), capacity: t("detail.capacity"), format: t("detail.format"), formats: {in_person: t("detail.formats.in_person"), online: t("detail.formats.online"), hybrid: t("detail.formats.hybrid")}, onlineUrl: t("detail.onlineUrl")};
   // Programme B-6 / D-11: the organiser links to its /members page when it has one, and is
   // otherwise a name in the facts grid and an unlinked Event.organizer. The slug alone is the
@@ -185,7 +186,7 @@ export default async function EventPage({params}: Props) {
           <div className="event-action-bar">
             <div>
               <time dateTime={displayEvent.startsAt}>{formatEventDate(displayEvent.startsAt, appLocale)}</time>
-              <strong>{t("status.open")}</strong>
+              <strong>{t("lifecycle." + displayStatus.lifecycle)}</strong>
             </div>
             <div>
               {registration.kind === "ticket" ? (

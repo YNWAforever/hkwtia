@@ -77,6 +77,7 @@ export default async function EventsPage({params, searchParams}: Props) {
   };
   const cardLabels = {
     status: {open: t("status.open"), past: t("status.past")},
+    lifecycle: {upcoming: t("lifecycle.upcoming"), ongoing: t("lifecycle.ongoing"), ended: t("lifecycle.ended"), cancelled: t("lifecycle.cancelled")},
     venueLabel: t("card.venueLabel"),
     capacityLabel: t("card.capacityLabel"),
     cta: t("card.cta"),
@@ -127,7 +128,7 @@ export default async function EventsPage({params, searchParams}: Props) {
               ) : (
                 <div className="event-library">
                   {records.map((event) => (
-                    <EventCard event={event} key={event.id} labels={cardLabels} locale={appLocale} status={status} />
+                    <EventCard event={event} key={event.id} labels={cardLabels} locale={appLocale} status={status} asOf={asOf} />
                   ))}
                 </div>
               )

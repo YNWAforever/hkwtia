@@ -94,6 +94,16 @@ describe("repository-backed Membership page", () => {
     expect(html.match(/Membership is currently unavailable/g)).toHaveLength(1);
   });
 
+  it("renders answer-bearing FAQ entries and support links for unresolved terms", async () => {
+    const html = await renderMembership([community]);
+    for (let index = 0; index < 8; index += 1) {
+      expect(html).toContain(`faq.${index}.question`);
+      expect(html).toContain(`faq.${index}.answer`);
+    }
+    expect(html).toContain('href="/refund-policy"');
+    expect(html).toContain('href="/contact"');
+  });
+
   it("renders only reconciled tiers with localized labels and persisted CTAs", async () => {
     const html = await renderMembership([community]);
 

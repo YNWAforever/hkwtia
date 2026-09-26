@@ -5,11 +5,13 @@ import {Section} from '@/components/wt/section';
 import {SectionHeading} from '@/components/wt/section-heading';
 import {StatusLabel} from '@/components/wt/status-label';
 import type {AppLocale} from '@/i18n/routing';
+import {companyProfilesRepository} from '@/lib/db/repos/company-profiles';
 import {showcaseRepository} from '@/lib/db/repos/showcase';
+import {parseMemberFilters} from '@/lib/members/public';
 import {cn} from '@/lib/utils';
 
 const panels = [
-  {key: 'directory', index: '01', href: '/showcase'},
+  {key: 'directory', index: '01', href: '/members'},
   {key: 'marketplace', index: '02', href: '/showcase'},
 ] as const;
 
@@ -17,8 +19,14 @@ const panels = [
 // :202 .product-panel-head.
 export async function MarketProducts({locale}: Readonly<{locale: AppLocale}>) {
   const t = await getTranslations({locale, namespace: 'Home.marketProducts'});
-  const listings = await showcaseRepository.listPublished({}, {limit: 12}).catch(() => []);
-  const available = listings.length > 0;
+  const [members, listings] = await Promise.all([
+    companyProfilesRepository.listPublished(parseMemberFilters({})).catch(() => null),
+    showcaseRepository.listPublished({}, {limit: 12}).catch(() => null),
+  ]);
+  const availability = {
+    directory: members === null ? "unavailable" : members.length > 0 ? "available" : "empty",
+    marketplace: listings === null ? "unavailable" : listings.length > 0 ? "available" : "empty",
+  } as const;
 
   return (
     <Section labelledBy="market-products-title" id="market-products">
@@ -31,7 +39,7 @@ export async function MarketProducts({locale}: Readonly<{locale: AppLocale}>) {
               <StatusLabel>{t(`${panel.key}.label`)}</StatusLabel>
             </div>
             <h3>{t(`${panel.key}.title`)}</h3>
-            <p>{t(available ? `${panel.key}.copyAvailable` : `${panel.key}.copyEmpty`)}</p>
+            <p>{t(`${panel.key}.${availability[panel.key] === "unavailable" ? "copyUnavailable" : availability[panel.key] === "available" ? "copyAvailable" : "copyEmpty"}`)}</p>
             <ActionLink variant="text-link" href={panel.href}>{t(`${panel.key}.action`)}</ActionLink>
           </article>
         ))}

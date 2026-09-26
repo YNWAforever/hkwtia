@@ -1,9 +1,10 @@
 import "server-only";
 
-import {and, asc, count, desc, eq, gte, inArray, isNull, lt, or, sql, type SQL} from "drizzle-orm";
+import {and, asc, count, desc, eq, gte, inArray, isNull, lt, notInArray, or, sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
+import {AUDIT_DEMO_EVENT_SLUGS, isAuditDemoEventSlug} from "@/config/demo-events";
 import {getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
@@ -151,7 +152,7 @@ export type EventMutationDependencies = Readonly<{transaction: <T>(work: (transa
 }>) => Promise<T>) => Promise<T>}>;
 export type RegistrationStatus = "registered" | "waitlist" | "cancelled" | "attended" | "no_show";
 export type EventRegistrationDependencies = Readonly<{transaction: <T>(work: (transaction: Readonly<{
-  lockEvent: (eventId: string) => Promise<Readonly<{id: string; capacity: number | null; published: boolean; registrationMode: Event["registrationMode"]; visibility: Event["visibility"]; startsAt: Date; endsAt: Date | null}> | null>;
+  lockEvent: (eventId: string) => Promise<Readonly<{id: string; slug?: string; capacity: number | null; published: boolean; registrationMode: Event["registrationMode"]; visibility: Event["visibility"]; startsAt: Date; endsAt: Date | null}> | null>;
   hasEligibleMembership: (profileId: string) => Promise<boolean>;
   getRegistration: (eventId: string, profileId: string) => Promise<Readonly<{status: RegistrationStatus}> | null>;
   countRegistered: (eventId: string) => Promise<number>;
@@ -218,16 +219,16 @@ function projectPublicEvent(row: PublicEventMemoryRow, locale: string): PublicEv
 }
 
 // S-1: public reads decide on the enums, never the legacy booleans.
-function isPubliclyVisible(event: Pick<Event, "status" | "visibility">): boolean {
-  return event.status === "published" && event.visibility === "public";
+function isPubliclyVisible(event: Pick<Event, "status" | "visibility" | "slug">): boolean {
+  return event.status === "published" && event.visibility === "public" && !isAuditDemoEventSlug(event.slug);
 }
 
 // Programme D-4d: the detail page is reachable for a cancelled event so a buyer's
 // receipt link resolves, while the listing stays opportunities-to-attend only. Two
 // predicates rather than one, because the two readers genuinely differ -- a single
 // widened rule would put cancelled events back in the listing.
-function isPubliclyReachable(event: Pick<Event, "status" | "visibility">): boolean {
-  return (event.status === "published" || event.status === "cancelled") && event.visibility === "public";
+function isPubliclyReachable(event: Pick<Event, "status" | "visibility" | "slug">): boolean {
+  return (event.status === "published" || event.status === "cancelled") && event.visibility === "public" && !isAuditDemoEventSlug(event.slug);
 }
 
 // Programme B-6: the /events filter axes as SQL, and below as the in-memory twin the
@@ -293,7 +294,7 @@ export async function listPublicEvents(_actor: Actor, options: PublicEventReadOp
   const query = database.select(publicProjectionSelection).from(events)
     .leftJoin(media, eq(events.heroMediaId, media.id))
     .leftJoin(companies, eq(events.organiserCompanyId, companies.id))
-    .where(and(eq(events.status, "published"), eq(events.visibility, "public"), predicate, ...publicFilterPredicates(filters))).orderBy(...order);
+    .where(and(eq(events.status, "published"), eq(events.visibility, "public"), notInArray(events.slug, [...AUDIT_DEMO_EVENT_SLUGS]), predicate, ...publicFilterPredicates(filters))).orderBy(...order);
   const rows = await (limit === undefined ? query : query.limit(limit));
   return rows.map((row) => projectPublicEvent(publicMemoryRow(row), locale));
 }
@@ -308,7 +309,7 @@ export async function listPublicEventSlugs(source?: PublicEventSource): Promise<
   }
   const database = await getDb();
   const rows = await database.select({slug: events.slug}).from(events)
-    .where(and(eq(events.status, "published"), eq(events.visibility, "public")))
+    .where(and(eq(events.status, "published"), eq(events.visibility, "public"), notInArray(events.slug, [...AUDIT_DEMO_EVENT_SLUGS])))
     .orderBy(asc(events.slug));
   return rows.map(({slug}) => slug);
 }
@@ -330,13 +331,13 @@ export async function countPublicEvents(_actor: Actor, options: PublicEventCount
   // The organiser predicate reads companies, so the count joins it the way the list does.
   const [row] = await database.select({value: count()}).from(events)
     .leftJoin(companies, eq(events.organiserCompanyId, companies.id))
-    .where(and(eq(events.status, "published"), eq(events.visibility, "public"), predicate, ...publicFilterPredicates(filters)));
+    .where(and(eq(events.status, "published"), eq(events.visibility, "public"), notInArray(events.slug, [...AUDIT_DEMO_EVENT_SLUGS]), predicate, ...publicFilterPredicates(filters)));
   return Number(row?.value ?? 0);
 }
 
 export async function getPublicEventBySlug(slug: unknown, locale: string, options: PublicEventSlugOptions): Promise<PublicEventProjection | null> {
   const parsedSlug = slugSchema.safeParse(slug);
-  if (!parsedSlug.success) return null;
+  if (!parsedSlug.success || isAuditDemoEventSlug(parsedSlug.data)) return null;
   if (options.source) {
     const row = (await publicRowsFrom(options.source)).find(({event}) => event.slug === parsedSlug.data && isPubliclyReachable(event));
     return row ? projectPublicEvent(row, locale) : null;
@@ -376,8 +377,8 @@ export async function listMemberEvents(actor: Actor, source?: EventRows, eligibi
 // Members see every published event that is not invite-only. The default
 // source lists the whole table; the in-memory branch applies the same rule
 // so tests exercise the filter the database query would.
-function isMemberVisible(event: Pick<Event, "status" | "visibility">): boolean {
-  return event.status === "published" && event.visibility !== "invite_only";
+function isMemberVisible(event: Pick<Event, "status" | "visibility" | "slug">): boolean {
+  return event.status === "published" && event.visibility !== "invite_only" && !isAuditDemoEventSlug(event.slug);
 }
 
 export function localizeEvent(event: Event, locale: string): LocalizedEvent {
@@ -449,6 +450,7 @@ export async function createEvent(actor: Actor, input: unknown, dependencies?: E
   // The create arm has the whole story — the parsed mode is the row's mode.
   assertPriceOnlyOnTicketed(parsed.registrationMode, parsed.ticketPriceHkdCents);
   assertSupportedTicketVisibility(parsed.registrationMode, parsed.visibility ?? (parsed.memberOnly ? "members_only" : "public"));
+  if (isAuditDemoEventSlug(parsed.slug) && reconciledEventFlags(parsed).status === "published") throw new Error("DEMO_EVENT_PUBLICATION_BLOCKED");
   return (dependencies ?? await defaultMutationDependencies()).transaction(async (transaction) => {
     if (parsed.heroMediaId !== null) {
       const mediaRow = await transaction.lockActiveMedia(parsed.heroMediaId);
@@ -471,12 +473,13 @@ export async function updateEvent(actor: Actor, id: unknown, input: unknown, dep
     if (current.status === "cancelled") throw new Error("EVENT_CANCELLED_TERMINAL");
     assertPriceOnlyOnTicketed(parsed.registrationMode ?? current.registrationMode, parsed.ticketPriceHkdCents);
     assertSupportedTicketVisibility(parsed.registrationMode ?? current.registrationMode, visibilityFrom(parsed, current.visibility));
+    const flags = reconciledEventFlags(parsed, {status: current.status, visibility: current.visibility});
+    if (isAuditDemoEventSlug(current.slug) && flags.status === "published") throw new Error("DEMO_EVENT_PUBLICATION_BLOCKED");
     eventPeriodSchema.parse({startsAt: parsed.startsAt ?? current.startsAt, endsAt: parsed.endsAt === undefined ? current.endsAt : parsed.endsAt});
     if (parsed.heroMediaId !== undefined && parsed.heroMediaId !== null) {
       const mediaRow = await transaction.lockActiveMedia(parsed.heroMediaId);
       if (!mediaRow || mediaRow.archivedAt !== null) throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["heroMediaId"], message: "EVENT_HERO_MEDIA_INVALID"}]);
     }
-    const flags = reconciledEventFlags(parsed, {status: current.status, visibility: current.visibility});
     const event = await transaction.updateEvent(eventId, {...parsed, ...flags, publishedAt: flags.status === "published" ? (current.publishedAt ?? new Date()) : null});
     if (!event) return null;
     await transaction.insertAudit({actorUserId: actor.profileId, actorType: actor.kind, action: "event.updated", targetType: "event", targetId: event.id, metadata: {fields: Object.keys(parsed).sort()}});
@@ -512,7 +515,7 @@ export async function registerForEvent(actor: Actor, input: unknown, dependencie
   const resolved = dependencies ?? await defaultRegistrationDependencies();
   const outcome = await resolved.transaction<Readonly<{disposition: "registered" | "waitlist" | "already_registered" | "already_waitlisted"; startsAt?: Date}>>(async (transaction) => {
     const event = await transaction.lockEvent(eventId);
-    if (!event || !event.published || event.visibility === "invite_only") throw new Error("EVENT_NOT_FOUND");
+    if (!event || !event.published || event.visibility === "invite_only" || isAuditDemoEventSlug(event.slug)) throw new Error("EVENT_NOT_FOUND");
     if (event.registrationMode !== "rsvp") throw new Error("EVENT_REGISTRATION_NOT_RSVP");
     if (eventBoundary(event) < (resolved.now?.() ?? new Date())) throw new Error("EVENT_REGISTRATION_CLOSED");
     if (!await transaction.hasEligibleMembership(actor.profileId)) throw new Error("MEMBERSHIP_INACTIVE");
@@ -539,7 +542,7 @@ export async function registerForEvent(actor: Actor, input: unknown, dependencie
 
 export async function getEventBySlug(actor: Actor, slug: unknown, source?: EventRows): Promise<Event | null> {
   const parsedSlug = slugSchema.safeParse(slug);
-  if (!parsedSlug.success) return null;
+  if (!parsedSlug.success || (actor.kind !== "staff" && actor.kind !== "exco" && actor.kind !== "superadmin" && isAuditDemoEventSlug(parsedSlug.data))) return null;
   const row = (await rowsFrom(source)).find((event) => event.slug === parsedSlug.data) ?? null;
   if (!row) return null;
   if (actor.kind === "anonymous") return isPubliclyVisible(row) ? row : null;

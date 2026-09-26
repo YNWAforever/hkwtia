@@ -12,6 +12,9 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/auth/actor", () => ({getActor: vi.fn(async () => null)}));
 
+vi.mock("next/image", () => ({default: ({alt, src, ...props}: {alt: string; src: string}) => <img alt={alt} src={src} {...props} />}));
+vi.mock("@/i18n/navigation", () => ({Link: ({children, href, ...props}: {children: React.ReactNode; href: string}) => <a href={href} {...props}>{children}</a>}));
+
 import {getActor} from "@/lib/auth/actor";
 import MemberLoginPage from "@/app/[locale]/member-login/page";
 
@@ -45,6 +48,21 @@ describe("MemberLoginPage", () => {
     render(await MemberLoginPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({})}));
     expect(screen.getByLabelText("emailLabel")).toBeInTheDocument();
     expect(screen.getByRole("button", {name: "submit"})).toBeInTheDocument();
+  });
+
+  it("renders a compact branded shell with home, join and support paths", async () => {
+    render(await MemberLoginPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({})}));
+    expect(screen.getByRole("main")).toBeInTheDocument();
+    expect(screen.getByRole("img", {name: "logoAlt"})).toBeInTheDocument();
+    expect(screen.getByRole("link", {name: "home"})).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", {name: "join"})).toHaveAttribute("href", "/join");
+    expect(screen.getByRole("link", {name: "support"})).toHaveAttribute("href", expect.stringMatching(/^mailto:/));
+  });
+
+  it("keeps the send form available after an email is sent so the visitor can request another link", async () => {
+    render(await MemberLoginPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({sent: "1", next: "/portal/billing"})}));
+    expect(screen.getByTestId("member-login-form")).toHaveAttribute("data-continuation", "/portal/billing");
+    expect(screen.getByRole("button", {name: "resend"})).toBeInTheDocument();
   });
 
   it("fails open to the default target when next fails the continuation parser", async () => {

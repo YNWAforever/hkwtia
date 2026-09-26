@@ -4,6 +4,7 @@ import {sql} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
+import {isAuditDemoEventSlug} from "@/config/demo-events";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 import {contactWriterActor, type ContactWriterActor} from "@/lib/db/repos/contacts";
@@ -77,7 +78,7 @@ export function createEventGuestsRepository(loadDatabase: AutomationDatabaseLoad
           FROM ${events} WHERE ${events.id} = ${parsed.eventId} FOR UPDATE
         `))[0];
         // A guest sees exactly what the public page shows (S-1); anything else is not-found, not forbidden.
-        if (!event || event.status !== "published" || event.visibility !== "public") throw new Error("EVENT_NOT_FOUND");
+        if (!event || event.status !== "published" || event.visibility !== "public" || isAuditDemoEventSlug(event.slug)) throw new Error("EVENT_NOT_FOUND");
         if (event.registration_mode === "external") throw new Error("EVENT_REGISTRATION_EXTERNAL");
         if (event.registration_mode === "ticketed") throw new Error("EVENT_REGISTRATION_TICKETED");
         const boundary = new Date(String(event.ends_at ?? event.starts_at));

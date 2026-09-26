@@ -31,7 +31,7 @@ export async function Hero({locale}: Readonly<{locale: AppLocale}>) {
         <div className="hero-actions">
           <ActionLink href="/events?status=open" variant="button">{t('actions.findEvent')}</ActionLink>
           <ActionLink href="/join" variant="text-link-light">{t('actions.join')}</ActionLink>
-          <ActionLink href="/showcase" variant="text-link-light">{t('actions.members')}</ActionLink>
+          <ActionLink href="/members" variant="text-link-light">{t('actions.members')}</ActionLink>
         </div>
       </div>
       <div className="hero-note">{t('note')}</div>

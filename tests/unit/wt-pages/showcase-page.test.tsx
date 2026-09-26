@@ -84,8 +84,17 @@ describe("/showcase rewrite", () => {
     showcase.listPublished.mockResolvedValue([]);
     render(await ShowcasePage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({})}));
 
-    expect(await screen.findByRole("status")).toHaveTextContent(bundles.en.Showcase.emptyTitle);
+    expect(await screen.findByRole("status")).toHaveTextContent(bundles.en.Showcase.noPublishedTitle);
     expect(screen.queryByText("partner-record-grid")).not.toBeInTheDocument();
+  });
+
+  it("distinguishes no published solutions from a filter with no matches", async () => {
+    showcase.listPublished.mockResolvedValue([]);
+    const unfiltered = await renderShowcase();
+    const filtered = await renderShowcase({q: "missing"});
+    expect(unfiltered).toContain("No solutions are published yet.");
+    expect(filtered).toContain(bundles.en.Showcase.emptyDescription);
+    expect(filtered).not.toContain("No solutions are published yet.");
   });
 
   it("shows an unavailable state when the database is unreachable", async () => {

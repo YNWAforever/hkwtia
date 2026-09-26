@@ -76,6 +76,7 @@
       "tct": "Tech to Connect",
       "cpai": "CPAI",
       "membership": "Membership",
+      "members": "Member directory",
       "showcase": "Member & solution showcase",
       "news": "News",
       "aiOps": "AI operations",
@@ -99,7 +100,7 @@
     },
     "explore": "Explore",
     "viewOverview": "View overview",
-    "search": "Search WiseTech",
+    "search": "Search solutions",
     "openMenu": "Open navigation",
     "closeMenu": "Close navigation",
     "menuTitle": "Navigation",
@@ -490,6 +491,7 @@
         "label": "Member Directory",
         "title": "Meet the people shaping what comes next.",
         "copyEmpty": "The directory is ready for approved public profiles, with controlled visibility and consent-based introductions. No live member records are shown yet.",
+        "copyUnavailable": "Member profiles are temporarily unavailable.",
         "copyAvailable": "Published member solutions are now live, with controlled visibility and consent-based introductions.",
         "action": "Discover members"
       },
@@ -497,6 +499,7 @@
         "label": "AI Solutions Marketplace",
         "title": "Find AI ready for the real world.",
         "copyEmpty": "The planned marketplace will compare maturity, deployment, security, market coverage and reviewed evidence. No live solution records are shown yet.",
+        "copyUnavailable": "Solution listings are temporarily unavailable.",
         "copyAvailable": "Published solutions are now live to compare, by use case, deployment and reviewed evidence.",
         "action": "Explore solutions"
       }
@@ -628,9 +631,10 @@
       "title": "Choose the relationship that fits your goal.",
       "intro": "Membership supports ongoing participation. Partnership starts with a defined audience, initiative and intended outcome.",
       "membership": {
+        "catalogPricesLabel": "Current online plan fees",
         "label": "Membership",
         "title": "Build an active route into the ecosystem.",
-        "copy": "Choose a pathway for professionals, startups, SMEs, corporates or strategic partners. Current fees and final entitlements are provided by the membership team.",
+        "copy": "Compare currently available plans and fees on the membership page. Ask WTIA about eligibility and arrangements that differ from the published catalog.",
         "points": ["Relevant activities and knowledge", "Profile and visibility choices", "A practical first-90-day journey"],
         "primaryAction": "Compare Membership",
         "secondaryAction": "Prepare a membership enquiry"
@@ -756,21 +760,47 @@
         "description": "For strategic supporters of WTIA's mission."
       }
     },
+    "dimensionsTitle": "Membership features",
     "faqTitle": "Membership FAQ",
     "faq": {
       "0": {
-        "question": "Can I join online?",
-        "answer": "Yes. Community, Startup and Corporate membership can be applied for and paid online. Patron membership begins with a contact request."
+        "question": "Who can apply?",
+        "answer": "Community is for individuals. Startup and Corporate applications are for organisations. Patron starts with WTIA staff. WTIA confirms eligibility during review."
       },
       "1": {
-        "question": "Where can I see current membership fees and billing options?",
-        "answer": "Current available fees and billing cadences are shown in the membership tier cards."
+        "question": "Where are current fees?",
+        "answer": "Available fees and billing options come from the current membership catalog and appear in the plan cards above. The payment provider confirms the final amount before payment."
       },
       "2": {
-        "question": "How is Patron membership arranged?",
-        "answer": "Patron membership begins with a contact request and is reviewed manually by WTIA staff."
+        "question": "Does a paid plan renew automatically?",
+        "answer": "The online paid flow opens a Stripe subscription checkout. Ask WTIA to confirm renewal and cancellation terms for your membership before paying."
+      },
+      "3": {
+        "question": "How do I pay or cancel?",
+        "answer": "Choose an available online plan to continue to secure checkout. For a cancellation or a different arrangement, contact WTIA; this page does not change an existing subscription."
+      },
+      "4": {
+        "question": "How many company seats are included?",
+        "answer": "The current site catalog allows five Startup seats and 25 Corporate seats. Company owners or administrators manage invitations in the portal; your agreement controls the confirmed allowance."
+      },
+      "5": {
+        "question": "How long does approval take?",
+        "answer": "Your application status appears in the member portal. WTIA has not published a fixed review deadline here; contact the membership team if timing matters."
+      },
+      "6": {
+        "question": "Can I get a refund?",
+        "answer": "The published refund policy covers event tickets. Confirm membership refund and cancellation terms with WTIA before payment; no membership refund entitlement is stated here."
+      },
+      "7": {
+        "question": "Can I receive an invoice?",
+        "answer": "The portal shows membership and payment status. Contact WTIA to confirm the invoice or receipt available for your arrangement."
+      },
+      "8": {
+        "question": "How does my profile relate to a company?",
+        "answer": "Your personal profile remains separate from a company membership. Company owners or administrators can invite seats; your own application and history stay attached to your profile."
       }
     },
+    "faqLinks": {"refund": "Read event ticket refund policy", "contact": "Ask WTIA about membership terms"},
     "priceLabels": {
       "free": "Free",
       "review": "Contact us"
@@ -788,14 +818,14 @@
     "sme": {
       "label": "For SMEs",
       "title": "Not sure which tier fits?",
-      "copy": "Small and medium enterprises can start with a Community membership and move up as programme participation grows. WTIA staff can help you choose.",
+      "copy": "Compare the published plans and ask WTIA which membership fits your organisation and intended participation.",
       "action": "Ask WTIA"
     },
     "pricing": {
       "readyLabel": "Current pricing",
-      "readyCopy": "Startup and Corporate fees shown above are the current, confirmed rates from the membership catalog.",
+      "readyCopy": "The fees above reflect the current site catalog and configured checkout price references. Confirm the total and subscription terms at secure checkout.",
       "fallbackLabel": "Pricing",
-      "fallbackCopy": "Startup and Corporate fees are being finalised. Confirm current rates with the membership team before applying."
+      "fallbackCopy": "Some fees are unavailable on this page. Contact the membership team to confirm the current rate before applying."
     },
     "dimensions": {
       "network": {"title": "Network", "copy": "Community and networking access across the ecosystem."},
@@ -943,6 +973,13 @@
     }
   },
   "MemberLogin": {
+    "home": "Home",
+    "join": "Join WTIA",
+    "support": "Contact support",
+    "navigation": "Helpful links",
+    "help": "Enter your email to receive a secure sign-in link.",
+    "resend": "Resend sign-in link",
+    "deliveryHelp": "If the email does not arrive, check your spam folder, request another link, or contact support.",
     "formLabel": "Member sign in",
     "emailLabel": "Email address",
     "submit": "Send secure sign-in link",
@@ -1280,6 +1317,8 @@
     "ownerCta": "Manage your showcase listing",
     "resultsTitle": "Explore member solutions",
     "resultsDescription": "Use the filters to narrow the directory to solutions that fit your needs.",
+    "noPublishedTitle": "No public solutions yet",
+    "noPublishedDescription": "No solutions are published yet.",
     "emptyTitle": "No published listings match",
     "emptyDescription": "Try changing a filter or search term.",
     "unavailableTitle": "Showcase listings are temporarily unavailable",
@@ -1406,6 +1445,8 @@
       "patron": "Patron"
     },
     "resultsTitle": "{count} members",
+    "noPublishedTitle": "No public member profiles yet",
+    "noPublishedDescription": "No member profiles are published yet.",
     "emptyTitle": "No member pages match yet",
     "emptyDescription": "Member pages appear here once organisations publish them. Try a broader search.",
     "unavailableTitle": "Member pages are temporarily unavailable",
@@ -1487,8 +1528,14 @@
     "emptyDescription": "WTIA events will appear here when dates and details are confirmed.",
     "statusLabel": "Event status",
     "status": {
-      "open": "Open",
+      "open": "Registration information",
       "past": "Past"
+    },
+    "lifecycle": {
+      "upcoming": "Upcoming",
+      "ongoing": "Ongoing",
+      "ended": "Ended",
+      "cancelled": "Cancelled"
     },
     "cancelled": {
       "heading": "This event has been cancelled",

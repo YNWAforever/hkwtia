@@ -9,10 +9,19 @@ vi.mock("@/i18n/navigation", () => ({
 import {EventCard} from "@/components/marketing/event-card";
 import {publicEventDefaults} from "@/tests/fixtures/public-event";
 
-const labels = {status: {open: "Open", past: "Past"}, venueLabel: "Venue", capacityLabel: "Capacity", cta: "View event"};
+const labels = {status: {open: "Open", past: "Past"}, lifecycle: {upcoming: "Upcoming", ongoing: "Ongoing", ended: "Ended", cancelled: "Cancelled"}, venueLabel: "Venue", capacityLabel: "Capacity", cta: "View event"};
 
 describe("EventCard", () => {
-  it("renders the open-status pill, date block, venue, capacity and two links for an open event", () => {
+  it("labels an October 3 event upcoming on September 26 even in the open registration tab", () => {
+    render(<EventCard
+      event={{id: "future", slug: "future", title: "October event", description: "d", startsAt: "2026-10-03T02:00:00.000Z", endsAt: "2026-10-03T06:00:00.000Z", venue: null, capacity: 40, hero: null, ...publicEventDefaults}}
+      status="open" asOf={new Date("2026-09-26T04:00:00.000Z")} locale="en" labels={labels}
+    />);
+    expect(screen.getByText("Upcoming")).toBeInTheDocument();
+    expect(screen.queryByText("Ongoing")).toBeNull();
+  });
+
+  it("renders the upcoming lifecycle pill, date block, venue, capacity and two links for an open event", () => {
     render(
       <EventCard
         event={{id: "1", slug: "ai-clinic", title: "AI Clinic", description: "A hands-on clinic.", startsAt: "2030-10-24T02:00:00.000Z", endsAt: null, venue: "Kwun Tong", capacity: 40, hero: null, ...publicEventDefaults}}
@@ -24,8 +33,8 @@ describe("EventCard", () => {
 
     const card = screen.getByRole("heading", {level: 3, name: "AI Clinic"}).closest("article")!;
     expect(card).toHaveClass("event-card-v2");
-    expect(within(card).getByText("Open")).toHaveClass("event-status");
-    expect(within(card).getByText("Open")).not.toHaveClass("completed");
+    expect(within(card).getByText("Upcoming")).toHaveClass("event-status");
+    expect(within(card).getByText("Upcoming")).not.toHaveClass("completed");
     expect(within(card).getByText("Kwun Tong")).toBeInTheDocument();
     expect(within(card).getByText("40")).toBeInTheDocument();
     expect(within(card).getAllByRole("link")).toHaveLength(2);
@@ -33,7 +42,7 @@ describe("EventCard", () => {
     expect(within(card).getByRole("link", {name: "View event"})).toHaveAttribute("href", "/events/ai-clinic");
   });
 
-  it("renders the past-status pill and omits venue/capacity facts that are null, keeping the description clamped", () => {
+  it("renders the ended lifecycle pill and omits venue/capacity facts that are null, keeping the description clamped", () => {
     const longDescription = "B".repeat(240);
     render(
       <EventCard
@@ -44,7 +53,7 @@ describe("EventCard", () => {
       />,
     );
 
-    const pastPill = screen.getByText("Past");
+    const pastPill = screen.getByText("Ended");
     expect(pastPill).toHaveClass("event-status", "completed");
     expect(screen.queryByText("Venue")).not.toBeInTheDocument();
     expect(screen.queryByText("Capacity")).not.toBeInTheDocument();

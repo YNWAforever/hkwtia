@@ -71,3 +71,16 @@ Record every result with date, SHA, environment, command, exit code, count, skip
 | 2026-09-27 | T09 disposable PostgreSQL | npx vitest run tests/integration/event-cancellation-notices.test.ts | exit 0; 3 skipped | RUN_POSTGRES_INTEGRATION=1 unset, Docker unavailable. Atomic snapshot/rollback and concurrent claims remain unexecuted on PostgreSQL. |
 
 | 2026-09-27 | T09 feature worktree | npm run build; focused ESLint; git diff --check | exit 0 for all | Production bundle includes authenticated event-notifications route. Build did not connect to DB or provider. |
+
+## T10 public content and navigation evidence
+
+| Date | Target | Command | Result | Scope and limit |
+|---|---|---|---|---|
+| 2026-09-27 | feature worktree | Focused Vitest on 19 event/demo/home/navigation/login/membership files | exit 0; 156 tests passed | Includes exact demo public/RSVP/order/admin publication guards, dated event lifecycle, separate directory/showcase availability, safe login continuation and FAQ/catalog rendering. Mocked DB/provider except pure model logic. |
+| 2026-09-27 | feature worktree | `npm run typecheck`; `npm run audit:strings`; `git diff --check` | exit 0; 268 TSX scanned | Type, bilingual string and whitespace gates. |
+| 2026-09-27 | local managed Next browser | `npx playwright test tests/e2e/public-navigation.spec.ts --reporter=line` | exit 0; 10 passed, 2 skipped | en/zh public destinations, FAQ, 390/768/1440px overflow/headings and axe on membership passed. Login cases skipped because `NEON_AUTH_BASE_URL`/`NEON_AUTH_COOKIE_SECRET` absent; no login browser acceptance. |
+| 2026-09-27 | feature worktree, URL explicitly unset | `npm run content:archive-demo` | exit 1 `DATABASE_URL_REQUIRED` | Proves the inventory/mutation script does not access a database without an explicit URL. No dry-run against an isolated or production database was possible, and no cleanup occurred. |
+
+The historical demo event's current production row, registration/order relationships and deployed SHA were not queried. The browser walk used the local worktree server, not a staging or live alias. No Stripe Price reconciliation or membership policy approval was available.
+
+| 2026-09-27 | T10 feature worktree | `npm run lint`; changed-file ESLint; `npm run build` | exit 0 for all; full lint 61 warnings, focused lint 5 warnings, build compiled and generated 251 static pages | Warnings are test mock image tags; no lint errors. Build ran without database/provider credentials and does not prove runtime behavior. |

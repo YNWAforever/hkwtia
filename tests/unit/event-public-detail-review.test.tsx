@@ -47,7 +47,7 @@ describe("public Event detail page review regressions", () => {
   it("uses the reader's exact equality boundary to keep registration visible", async () => {
     events.getPublicBySlug.mockImplementation(async (_slug: string, _locale: string, options: {asOf: Date}) => {
       await new Promise((resolve) => setTimeout(resolve, 15));
-      return event(options.asOf.toISOString());
+      return {...event(options.asOf.toISOString()), startsAt: new Date(options.asOf.getTime() - 3_600_000).toISOString()};
     });
 
     const rendered = renderToStaticMarkup(await EventPage(props));
@@ -74,7 +74,7 @@ describe("public Event detail page review regressions", () => {
     await expect(EventPage(props)).rejects.toThrow("EVENT_REPOSITORY_UNAVAILABLE");
   });
   it("hides registration immediately before the request-scoped boundary", async () => {
-    events.getPublicBySlug.mockImplementation(async (_slug: string, _locale: string, options: {asOf: Date}) => event(new Date(options.asOf.getTime() - 1).toISOString()));
+    events.getPublicBySlug.mockImplementation(async (_slug: string, _locale: string, options: {asOf: Date}) => ({...event(new Date(options.asOf.getTime() - 1).toISOString()), startsAt: new Date(options.asOf.getTime() - 3_600_000).toISOString()}));
 
     const rendered = renderToStaticMarkup(await EventPage(props));
 

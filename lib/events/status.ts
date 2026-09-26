@@ -42,3 +42,37 @@ export function hongKongQuarterBounds(at: Date): Readonly<{start: Date; end: Dat
     end: new Date(Date.UTC(year, quarterStartMonth + 3, 1) - HONG_KONG_OFFSET_MS),
   };
 }
+
+export type EventLifecycleDisplay = "upcoming" | "ongoing" | "ended" | "cancelled";
+export type EventRegistrationDisplay = "open" | "full" | "waitlist" | "closed";
+
+/** Lifecycle is time/status; registration is a separate capacity decision. */
+export function deriveEventDisplayStatus(
+  event: Readonly<{
+    startsAt: Date | string;
+    endsAt: Date | string | null;
+    cancelled: boolean;
+    capacity: number | null;
+    confirmedSeats: number | null;
+    waitlistAvailable: boolean;
+  }>,
+  now: Date,
+): Readonly<{lifecycle: EventLifecycleDisplay; registration: EventRegistrationDisplay | null}> {
+  const start = new Date(event.startsAt).getTime();
+  const end = event.endsAt === null ? start : new Date(event.endsAt).getTime();
+  if (!Number.isFinite(start) || !Number.isFinite(end) || !Number.isFinite(now.getTime()) || end < start) {
+    throw new Error("INVALID_EVENT_DISPLAY_DATE");
+  }
+  const lifecycle: EventLifecycleDisplay = event.cancelled ? "cancelled"
+    : now.getTime() < start ? "upcoming"
+      : now.getTime() <= end ? "ongoing" : "ended";
+  if (lifecycle === "cancelled" || lifecycle === "ended") return {lifecycle, registration: "closed"};
+  if (event.capacity === null) return {lifecycle, registration: "open"};
+  if (event.confirmedSeats === null) return {lifecycle, registration: null};
+  return {
+    lifecycle,
+    registration: event.confirmedSeats >= event.capacity
+      ? event.waitlistAvailable ? "waitlist" : "full"
+      : "open",
+  };
+}

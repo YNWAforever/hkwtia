@@ -61,7 +61,7 @@ describe("Hero", () => {
     expect(actions).toHaveLength(3);
     expect(actions[0]).toHaveAttribute("href", "/events?status=open");
     expect(actions[1]).toHaveAttribute("href", "/join");
-    expect(actions[2]).toHaveAttribute("href", "/showcase");
+    expect(actions[2]).toHaveAttribute("href", "/members");
 
     const discover = screen.getByRole("link", {name: new RegExp(bundles[locale].Home.hero.discover)});
     expect(discover).toHaveAttribute("href", "#home-discover");

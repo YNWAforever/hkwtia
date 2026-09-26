@@ -8,6 +8,7 @@ import {BENEFIT_ELIGIBLE_MEMBERSHIP_STATUSES} from "@/lib/membership/entitlement
 import {ticketPurchaseAudience} from "@/lib/tickets/eligibility";
 
 import {MAX_TICKET_SEATS, TICKET_HOLD_MS} from "@/config/tickets";
+import {isAuditDemoEventSlug} from "@/config/demo-events";
 import {getDb} from "@/lib/db/repos/common";
 import {auditEvents, companyMembers, eventOrderSeats, eventOrders, events, memberships} from "@/lib/db/server-schema";
 
@@ -34,7 +35,7 @@ export type EventOrderRow = Readonly<{
 }>;
 
 export type LockedEvent = Readonly<{
-  id: string; capacity: number | null; published: boolean; startsAt: Date; endsAt: Date | null;
+  id: string; slug: string; capacity: number | null; published: boolean; startsAt: Date; endsAt: Date | null;
   registrationMode: string; ticketPriceHkdCents: number | null; visibility: string; memberOnly: boolean;
 }>;
 
@@ -168,6 +169,7 @@ function orderFrom(row: Record<string, unknown>): OrderRecord {
 function lockedEventFrom(row: Record<string, unknown>): LockedEvent {
   return {
     id: String(row.id),
+    slug: String(row.slug),
     capacity: row.capacity === null || row.capacity === undefined ? null : Number(row.capacity),
     published: Boolean(row.published),
     startsAt: requiredDate(row.startsAt),
@@ -217,7 +219,7 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
   return db.transaction(async (tx) => work({
     lockEvent: async (eventId) => {
       const row = rows<Record<string, unknown>>(await tx.execute(sql`
-        SELECT id, capacity, published, starts_at AS "startsAt", ends_at AS "endsAt",
+        SELECT id, slug, capacity, published, starts_at AS "startsAt", ends_at AS "endsAt",
                registration_mode AS "registrationMode", ticket_price_hkd_cents AS "ticketPriceHkdCents",
                visibility, member_only AS "memberOnly"
         FROM ${events} WHERE id = ${eventId} FOR UPDATE
@@ -459,7 +461,7 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
     async createOrder(input: CreateOrderInput): Promise<CreateOrderResult> {
       return runTransaction(async (tx) => {
         const event = await tx.lockEvent(input.eventId);
-        if (!event) return {ok: false, reason: "EVENT_NOT_FOUND"};
+        if (!event || isAuditDemoEventSlug(event.slug)) return {ok: false, reason: "EVENT_NOT_FOUND"};
         // The lock already holds the authoritative mode and price, so the
         // "a client-supplied amount is never read" invariant is enforced here
         // rather than resting on the caller being correct forever.
