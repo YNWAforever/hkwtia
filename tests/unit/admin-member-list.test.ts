@@ -15,6 +15,8 @@ describe("admin member list", () => {
         return {
           items: [{
             profileId: "member-acme",
+            membershipId: "membership-acme",
+            companyId: "company-acme",
             displayName: "Acme Member",
             email: "member@acme.example",
             companyName: "Acme Limited",

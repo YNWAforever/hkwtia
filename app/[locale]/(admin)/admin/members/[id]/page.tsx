@@ -1,4 +1,5 @@
 import {notFound} from "next/navigation";
+import Link from "next/link";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {z} from "zod";
 
@@ -16,17 +17,27 @@ import {updateMemberProfileAction} from "@/lib/admin/member-profile-actions";
 import {compMembershipAction} from "@/lib/admin/membership-comp-actions";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {getEditableMemberProfile} from "@/lib/db/repos/admin-member-profile";
+import {adminMemberListHref, parseAdminMemberHistory, parseAdminMemberRouteQuery} from "@/lib/admin/member-types";
 
 const profileIdSchema = z.string().min(1);
 
 type Props = Readonly<{
   params: Promise<{locale: string; id: string}>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }>;
 
-export default async function AdminMember360Page({params}: Props) {
+export default async function AdminMember360Page({params, searchParams}: Props) {
   const {locale: localeValue, id} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
+  const rawListState: Record<string, string | string[] | undefined> = searchParams ? await searchParams : {};
+  let backHref = adminMemberListHref(locale === "zh-HK" ? "/zh" : "", {search: "", limit: 20, cursor: null});
+  try {
+    const listState = parseAdminMemberRouteQuery(rawListState);
+    backHref = adminMemberListHref(locale === "zh-HK" ? "/zh" : "", listState, parseAdminMemberHistory(rawListState.history));
+  } catch {
+    // Ignore malformed or external return hints; only locally constructed list URLs are used.
+  }
 
   const profileId = profileIdSchema.safeParse(id);
   if (!profileId.success) {
@@ -63,6 +74,7 @@ export default async function AdminMember360Page({params}: Props) {
   return (
     <div className="space-y-8">
       <header className="space-y-3">
+        <Link className="inline-flex text-sm text-primary underline focus-visible:outline" href={backHref}>{t("member360.backToMembers")}</Link>
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">
           {t("navigation.members")}
         </p>
@@ -79,6 +91,19 @@ export default async function AdminMember360Page({params}: Props) {
           profile: t("member360.profile"),
           companies: t("member360.companies"),
           membership: t("member360.membership"),
+          allMemberships: t("member360.allMemberships"),
+          membershipId: t("member360.membershipId"),
+          personalMembership: t("member360.personalMembership"),
+          purchases: t("member360.purchases"),
+          purchaseBuyer: t("member360.purchaseBuyer"),
+          purchaseAttendees: t("member360.purchaseAttendees"),
+          purchaseAmount: t("member360.purchaseAmount"),
+          refundReason: t("member360.refundReason"),
+          refundedAt: t("member360.refundedAt"),
+          planCodes: Object.fromEntries(["community", "startup", "corporate", "patron"].map((code) => [code, t(`members.planCodes.${code}`)])),
+          membershipStatuses: Object.fromEntries(["active", "past_due", "cancel_at_period_end", "pending_review", "pending_payment", "cancelled", "expired"].map((code) => [code, t(`members.statusCodes.${code}`)])),
+          purchaseStatuses: Object.fromEntries(["pending", "paid", "expired", "failed", "refunded", "refund_failed"].map((code) => [code, t(`member360.purchaseStatuses.${code}`)])),
+          refundReasons: Object.fromEntries(["oversold", "staff", "cancelled"].map((code) => [code, t(`member360.refundReasons.${code}`)])),
           engagement: t("member360.engagement"),
           emails: t("member360.emails"),
           events: t("member360.events"),

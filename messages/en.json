@@ -2779,6 +2779,9 @@
       }
     },
     "members": {
+      "view": "View",
+      "planCodes": {"community": "Community", "startup": "Startup", "corporate": "Corporate", "patron": "Patron"},
+      "statusCodes": {"active": "Active", "past_due": "Past due", "cancel_at_period_end": "Ends at period end", "pending_review": "Pending review", "pending_payment": "Awaiting payment", "cancelled": "Cancelled", "expired": "Expired"},
       "title": "Members",
       "description": "Search member profiles, companies, memberships, and engagement scores.",
       "search": "Search members",
@@ -3339,6 +3342,18 @@
       "next": "Next page"
     },
     "member360": {
+      "allMemberships": "All associated memberships",
+      "membershipId": "Membership ID",
+      "personalMembership": "Personal membership",
+      "purchases": "Ticket purchases",
+      "purchaseBuyer": "Buyer",
+      "purchaseAttendees": "Attendees",
+      "purchaseAmount": "Amount",
+      "refundReason": "Refund reason",
+      "refundedAt": "Refunded at",
+      "purchaseStatuses": {"pending": "Pending", "paid": "Paid", "expired": "Expired", "failed": "Failed", "refunded": "Refunded", "refund_failed": "Refund failed"},
+      "refundReasons": {"oversold": "Oversold", "staff": "Staff decision", "cancelled": "Event cancelled"},
+      "backToMembers": "Back to member list",
       "profileHeading": "Contact details",
       "profileDescription": "Correct a member's contact details. Membership, billing, role and consent settings are not editable here.",
       "profileDisplayName": "Display name",

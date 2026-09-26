@@ -39,6 +39,11 @@ Record every result with date, SHA, environment, command, exit code, count, skip
 | 2026-09-27 | T05 feature worktree | `npm run typecheck`; `npm run audit:strings`; focused ESLint; `git diff --check` | exit 0 for all; 268 TSX scanned | Type, translation and changed-code checks. |
 | 2026-09-27 | T05 managed local Next server | `npx playwright test tests/e2e/membership-checkout.spec.ts` | exit 0; 2 skipped | Missing isolated M2 DB/auth/Stripe setup, owned pending membership fixture and non-Production Preview target. No browser or provider acceptance. |
 
+| 2026-09-27 | T06 feature worktree | `npx vitest run` nine admin member files | exit 0; 9 files, 35 tests passed | Shared priority, multi-company scope, generated SQL selected company, purchase/seat/refund projection, staff note author, local navigation and copy. Mocked DB; no live records. |
+| 2026-09-27 | T06 feature worktree | `npm run typecheck`; `npm run audit:strings`; focused ESLint; `git diff --check` | exit 0 for all; 268 TSX scanned | Type, translation and changed-code checks. |
+| 2026-09-27 | T06 disposable PostgreSQL | `npx vitest run tests/integration/member-360-purchases.test.ts` | exit 0; 2 skipped | `RUN_POSTGRES_INTEGRATION=1` unset and Docker daemon unavailable; buyer isolation SQL not run on PostgreSQL. |
+| 2026-09-27 | T06 managed local Next server | `npx playwright test tests/e2e/admin-members.spec.ts` | exit 0; 2 skipped | Isolated M2 database and staff auth values absent; no browser acceptance. |
+
 ## Outstanding gates
 
 - Full suite baseline has one existing CLI import failure. The fix and rerun remain required.
