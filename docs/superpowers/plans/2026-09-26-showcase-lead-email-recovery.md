@@ -54,7 +54,7 @@
 **Interface:** runLeadEmailForLead(leadId, dependencies) handles the immediate path; runLeadEmailBatch(now, dependencies) drains up to a fixed bound. Both use the same claim/freeze/send/settle primitive. Production dependencies resolve email configuration lazily so a missing provider does not prevent lead capture.
 
 - [x] Test failed transport, scheduled retry with byte-identical payload/key, independent ack/staff progress, no resend after sent, stale claim refusal, and expired provider window escalation.
-- [ ] Add direct regression tests for provider client error and exhausted attempt count terminal escalation.
+- [x] Add direct regression tests for provider client error and exhausted attempt count terminal escalation.
 - [x] Implement the runner. Catch delivery failures only after recording a retryable or terminal state. Keep the public action result free of provider detail.
 - [x] Wire a ten-minute cron job through createJobPost and WORKER_JOBS/JOBS_BY_CRON, including worker timeout and alert vocabulary. Extend job route and worker schedule tests so a missing trigger fails.
 - [x] Verify the existing successful intro path still dispatches both emails promptly.
@@ -63,5 +63,12 @@
 
 - [x] Run focused unit tests and RUN_POSTGRES_INTEGRATION=1 disposable PostgreSQL tests. Confirm no live credentials are used.
 - [x] Run npm.cmd run audit:strings, npm.cmd run lint, npm.cmd run typecheck, npm.cmd test, and npm.cmd run build. Restore build-generated next-env.d.ts.
-- [ ] Review git diff --check and the generated migration. Stage explicit paths and commit on the isolated branch with a conventional message.
-- [ ] Report the local commit, test counts, skipped environment gates, and the public-remote publication block separately.
+- [x] Review git diff --check and the generated migration. Stage explicit paths and commit on the isolated branch with a conventional message.
+- [x] Report the local commit, test counts, skipped environment gates, and the public-remote publication block separately.
+
+## 2026-09-26 follow-up verification
+
+- A disposable PostgreSQL test reproduced a failed terminal staff-task insert: untyped parameters inside `jsonb_build_object` raised SQLSTATE 42P18 and rolled back the blocked transition. Both values now use explicit `::text` casts. The terminal test passes, and an attempt-boundary mutation makes it fail.
+- A stalled provider call left the scheduled runner waiting past the Worker's 30-second request budget. The runner now waits at most six seconds per send and claims three notices per ten-minute run. Timeout keeps retryable work durable; the frozen payload and idempotency key still govern a provider acceptance that arrives after the runner stops waiting.
+- Direct provider-client-error coverage confirms a definitive refusal becomes blocked while the independent staff notice settles. A branch mutation makes that test fail.
+- Focused unit: 4/4; disposable PostgreSQL: 4/4; Worker: 47/47. Full unit suite: 625 files and 5,575 tests passed, 26 files and 70 tests skipped behind existing environment gates. String audit, lint (0 errors, 59 warnings), root and Worker typechecks, and production build passed.

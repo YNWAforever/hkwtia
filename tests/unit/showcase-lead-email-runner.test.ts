@@ -52,7 +52,12 @@ function setup() {
       item.status = "queued";
       return true;
     }),
-    markBlocked: vi.fn(async () => true),
+    markBlocked: vi.fn(async (_actor, id: string, attempt: number) => {
+      const item = state.get(id)!;
+      if (item.status !== "sending" || item.attemptCount !== attempt) return false;
+      item.status = "blocked";
+      return true;
+    }),
   };
   function claim() {
     return [...state.values()].filter((item) => item.status === "queued").map((item) => {
@@ -84,6 +89,49 @@ function setup() {
 }
 
 describe("showcase lead email recovery", () => {
+  it("releases a stalled provider call before the worker's request deadline", async () => {
+    const {dependencies, state} = setup();
+    dependencies.transport.send = vi.fn(async () => new Promise<never>(() => {}));
+    vi.useFakeTimers({toFake: ["setTimeout", "clearTimeout"]});
+    let finished = false;
+    try {
+      const delivery = deliverLeadEmailForLead(
+        ack.leadId, dependencies, new Date("2026-09-26T00:00:00Z"),
+      ).then(() => { finished = true; });
+      await vi.advanceTimersByTimeAsync(20_000);
+      expect(finished).toBe(true);
+      await delivery;
+      expect(state.get(ack.id)?.status).toBe("queued");
+      expect(state.get(staff.id)?.status).toBe("queued");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it("escalates a definitive provider client refusal without retrying it", async () => {
+    const {dependencies, state} = setup();
+    dependencies.transport.send = vi.fn(async (input) => {
+      if (input.idempotencyKey === ack.idempotencyKey) {
+        throw new DeliveryFailure("provider_client_error");
+      }
+      return {status: "sent" as const, providerId: "staff-id"};
+    });
+    await deliverLeadEmailForLead(
+      ack.leadId, dependencies, new Date("2026-09-26T00:00:00Z"),
+    );
+    expect(state.get(ack.id)?.status).toBe("blocked");
+    expect(state.get(staff.id)?.status).toBe("sent");
+    expect(dependencies.outbox.markBlocked).toHaveBeenCalledWith(
+      expect.anything(), ack.id, 1, expect.any(Date), "provider_client_error",
+    );
+    expect(dependencies.outbox.markRetryable).not.toHaveBeenCalled();
+  });
+  it("claims a batch small enough for three bounded sequential provider calls", async () => {
+    const {dependencies} = setup();
+    await drainLeadEmailOutbox(new Date("2026-09-26T00:00:00Z"), dependencies);
+    expect(dependencies.outbox.claimDue).toHaveBeenCalledWith(
+      expect.anything(), expect.any(Date), 3,
+    );
+  });
   it("retries a failed acknowledgement with the exact frozen provider payload and leaves a settled staff notice alone", async () => {
     const {dependencies, state, sent} = setup();
     await deliverLeadEmailForLead(ack.leadId, dependencies, new Date("2026-09-26T00:00:00Z"));

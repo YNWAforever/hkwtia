@@ -168,8 +168,8 @@ export function createShowcaseLeadEmailOutboxRepository(
           jsonb_build_object(
             'contactEmail', leads.email,
             'locale', leads.locale,
-            'noticeKind', ${String(changed[0]?.kind)},
-            'reasonCode', ${reasonCode}
+            'noticeKind', ${String(changed[0]?.kind)}::text,
+            'reasonCode', ${reasonCode}::text
           )
         FROM leads WHERE leads.id = ${String(changed[0]?.lead_id)}::uuid
         ON CONFLICT (dedupe_key) DO NOTHING

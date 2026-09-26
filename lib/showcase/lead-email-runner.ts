@@ -31,6 +31,11 @@ export type LeadEmailRunnerDependencies = Readonly<{
 
 type DeliveryActor = Parameters<Outbox["loadContext"]>[0];
 
+// The Worker stops waiting after 30 seconds. Three serial sends at six seconds
+// each leave time for rendering and database state changes within that budget.
+const SEND_TIMEOUT_MS = 6_000;
+const SCHEDULED_BATCH_LIMIT = 3;
+
 function ctaUrl(appUrl: string, locale: "en" | "zh-HK", slug: string): string {
   return new URL(localizedPath(locale, `/showcase/${slug}`), appUrl).toString();
 }
@@ -63,6 +68,30 @@ async function payloadFor(
   };
 }
 
+// The installed Resend SDK has no abort signal on emails.send. A timeout stops
+// this runner from waiting, but the provider may still accept the request.
+// Retries reuse the frozen payload and key, and the 23-hour cutoff prevents a
+// re-send after the provider's deduplication window.
+async function sendWithDeadline(
+  transport: EmailTransport,
+  payload: ShowcaseLeadEmailPayload,
+): Promise<{status: "sent"; providerId: string}> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      transport.send(payload),
+      new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(
+          () => reject(new DeliveryFailure("retryable_network")),
+          SEND_TIMEOUT_MS,
+        );
+      }),
+    ]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
 async function processClaims(
   actor: DeliveryActor,
   claims: readonly LeadEmailClaim[],
@@ -88,7 +117,7 @@ async function processClaims(
       if (!frozen) continue;
     }
     try {
-      const result = await dependencies.transport.send(payload);
+      const result = await sendWithDeadline(dependencies.transport, payload);
       const settled = await dependencies.outbox.markSent(actor, claim.id, claim.attemptCount, result.providerId);
       if (!settled) throw new Error("SHOWCASE_LEAD_EMAIL_SETTLEMENT_LOST");
     } catch (error) {
@@ -117,7 +146,7 @@ export async function drainLeadEmailOutbox(
   dependencies: LeadEmailRunnerDependencies,
 ): Promise<void> {
   const actor = automationCronActor();
-  const claims = await dependencies.outbox.claimDue(actor, now, 20);
+  const claims = await dependencies.outbox.claimDue(actor, now, SCHEDULED_BATCH_LIMIT);
   await processClaims(actor, claims, dependencies, now);
 }
 

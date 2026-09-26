@@ -145,6 +145,40 @@ describe.skipIf(!enabled)("showcase lead email outbox on disposable PostgreSQL",
       {status: "sent", payload: null},
     ]);
   });
+  it("blocks an exhausted send and opens one staff task in the same transaction", async () => {
+    if (!pool) throw new Error("disposable PostgreSQL pool unavailable");
+    const exhaustedLead = "66666666-6666-4666-8666-666666666666";
+    const now = new Date();
+    await pool.query(`INSERT INTO leads (id, contact_name, email, locale, idempotency_key)
+      VALUES ($1, 'Exhausted Sender', 'exhausted@example.com', 'en', 'outbox-exhausted')`, [exhaustedLead]);
+    const inserted = await pool.query(`INSERT INTO showcase_lead_email_outbox
+      (lead_id, kind, status, idempotency_key, attempt_count, next_attempt_at,
+       claim_expires_at, first_attempt_at, payload)
+      VALUES ($1, 'ack', 'sending', 'showcase-lead:outbox-exhausted:ack', 8, $2, $3, $2, '{}'::jsonb)
+      RETURNING id`, [exhaustedLead, now, new Date(now.getTime() + 60_000)]);
+    const id = String(inserted.rows[0]?.id);
+    const repository = store();
+    const actor = automationCronActor();
+    expect(await repository.markRetryable(actor, id, 8, now, "retryable_network")).toBe(true);
+    expect(await repository.markRetryable(actor, id, 8, now, "retryable_network")).toBe(false);
+    const outbox = await pool.query(
+      "SELECT status, error_code FROM showcase_lead_email_outbox WHERE id = $1", [id],
+    );
+    expect(outbox.rows[0]).toEqual({status: "blocked", error_code: "attempts_exhausted"});
+    const task = await pool.query(
+      "SELECT summary_code, context FROM staff_tasks WHERE dedupe_key = $1",
+      [`showcase-lead-email:${id}`],
+    );
+    expect(task.rows).toEqual([{
+      summary_code: "showcase_lead_email_blocked",
+      context: {
+        contactEmail: "exhausted@example.com",
+        locale: "en",
+        noticeKind: "ack",
+        reasonCode: "attempts_exhausted",
+      },
+    }]);
+  });
   it("stops an expired uncertain send after the provider dedupe window and opens one staff task", async () => {
     if (!pool) throw new Error("disposable PostgreSQL pool unavailable");
     const secondLead = "22222222-2222-4222-8222-222222222222";
@@ -163,14 +197,24 @@ describe.skipIf(!enabled)("showcase lead email outbox on disposable PostgreSQL",
     const outcome = await pool.query(`SELECT status FROM showcase_lead_email_outbox
       WHERE lead_id = $1`, [secondLead]);
     expect(outcome.rows[0]?.status).toBe("uncertain");
-    const tasks = await pool.query(`SELECT kind, context FROM staff_tasks`);
+    const tasks = await pool.query(
+      `SELECT kind, context FROM staff_tasks
+       WHERE dedupe_key = (SELECT 'showcase-lead-email:' || id::text
+         FROM showcase_lead_email_outbox WHERE lead_id = $1)`,
+      [secondLead],
+    );
     expect(tasks.rows).toHaveLength(1);
     expect(tasks.rows[0]).toMatchObject({
       kind: "showcase_lead_email",
       context: {contactEmail: "grace@example.com", locale: "zh-HK", noticeKind: "ack"},
     });
     await repository.claimDue(automationCronActor(), now, 5);
-    const repeated = await pool.query("SELECT count(*)::int AS count FROM staff_tasks");
+    const repeated = await pool.query(
+      `SELECT count(*)::int AS count FROM staff_tasks
+       WHERE dedupe_key = (SELECT 'showcase-lead-email:' || id::text
+         FROM showcase_lead_email_outbox WHERE lead_id = $1)`,
+      [secondLead],
+    );
     expect(repeated.rows[0]?.count).toBe(1);
   });
 });
