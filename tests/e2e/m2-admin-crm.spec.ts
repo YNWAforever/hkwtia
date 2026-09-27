@@ -26,7 +26,7 @@ const messages = (locale: "en" | "zh-HK") => JSON.parse(readFileSync(new URL(`..
 const en = messages("en");
 const zh = messages("zh-HK");
 
-const CSV_HEADER = "profileId,displayName,email,companyName,planCode,membershipStatus,renewalAt,score";
+const CSV_HEADER = "kind,id,displayName,email,companyName,planCode,membershipStatus,renewalAt,score,whatsappNumber,whatsappOptIn,contactStage,contactSource";
 const CAMPAIGN_DRAFT_ID = "30000000-0000-4000-8000-000000000001";
 const ARR = "Annual recurring revenue";
 const ADMIN_ROUTES = [
@@ -77,7 +77,7 @@ test.describe("M2 credential-free browser evidence", () => {
     }
 
     await page.goto("/portal");
-    await expect(page).toHaveURL(/\/join\?next=%2Fportal/);
+    await expect(page).toHaveURL(/\/member-login\?next=%2Fportal/);
   });
 });
 
@@ -109,6 +109,7 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
   });
 
   test("the canonical segment has exact rows and CSV headers while queueing is idempotent", async ({page}) => {
+    await resetM2AuthenticatedFixtures(buildM2RuntimeEnvironment(process.env), undefined, new Date());
     await signInForM2(page, "staff");
     const query = new URLSearchParams([
       ["tier", "corporate"],
@@ -128,7 +129,7 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
     expect(exportResponse.headers()["content-disposition"]).toContain(`segment-${M2_UUIDS.segments[0]}.csv`);
     const csv = (await exportResponse.text()).replace(/^\uFEFF/, "");
     expect(csv.split("\r\n")[0]).toBe(CSV_HEADER);
-    expect(csv.split("\r\n").slice(1, 4).map((row) => row.split(",")[0])).toEqual(["m2-risk-01", "m2-risk-02", "m2-risk-03"]);
+    expect(csv.split("\r\n").slice(1, 4).map((row) => row.split(",").slice(0, 2))).toEqual([["member", "m2-risk-01"], ["member", "m2-risk-02"], ["member", "m2-risk-03"]]);
 
     const segment = page.getByRole("listitem").filter({hasText: "M2 engineered at-risk"});
     await segment.getByRole("button", {name: en.Admin.segments.queue}).click();
@@ -145,6 +146,7 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
   });
 
   test("the report reconciles committed July fixture values before browser mutations", async ({page}) => {
+    await resetM2AuthenticatedFixtures(buildM2RuntimeEnvironment(process.env));
     await signInForM2(page, "staff");
     await page.goto("/admin/reports?from=2026-07-01&to=2026-07-31");
     await expect(page.getByRole("heading", {level: 1, name: en.Admin.reports.title})).toBeVisible();
@@ -156,8 +158,10 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
     await expect(page.locator('section[aria-labelledby="report-renewal"]')).toContainText(`${en.Admin.reports.denominator}4`);
     await expect(page.locator('section[aria-labelledby="report-first-year-renewal"]')).toContainText(`${en.Admin.reports.numerator}1`);
     await expect(page.locator('section[aria-labelledby="report-first-year-renewal"]')).toContainText(`${en.Admin.reports.denominator}2`);
+    // July 31 includes the July 25 fixture event; the July 20 unit reference excludes it.
+    await expect(page.locator('section[aria-labelledby="report-attendance"]')).toContainText("37.5%");
     await expect(page.locator('section[aria-labelledby="report-attendance"]')).toContainText(`${en.Admin.reports.numerator}3`);
-    await expect(page.locator('section[aria-labelledby="report-attendance"]')).toContainText(`${en.Admin.reports.denominator}6`);
+    await expect(page.locator('section[aria-labelledby="report-attendance"]')).toContainText(`${en.Admin.reports.denominator}8`);
     await expect(page.locator('section[aria-labelledby="report-at-risk"]')).toContainText("3");
   });
 
