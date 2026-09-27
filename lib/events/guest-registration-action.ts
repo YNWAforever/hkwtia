@@ -10,12 +10,9 @@ import {renderEmail} from "@/lib/email/render";
 import {createConfiguredEmailTransport} from "@/lib/email/transport";
 import {createGuestRegistrationService, type GuestRsvpResult} from "@/lib/events/guest-registration-core";
 import {parseGuestRsvp} from "@/lib/events/guest-registration-input";
-import {createInMemoryRateLimiter} from "@/lib/security/rate-limit";
+import {createSharedRateLimiter} from "@/lib/security/shared-rate-limit";
 import {clientIpFromHeaders} from "@/lib/security/request-origin";
 import {localizedPath} from "@/lib/urls";
-
-// Process-local, mirroring lib/growth/interest-action.ts.
-const guestRateLimiter = createInMemoryRateLimiter({limit: 5, windowMs: 15 * 60_000});
 
 /**
  * The Server Action boundary for the public guest RSVP form (programme B-4).
@@ -38,7 +35,7 @@ export async function submitGuestRsvpAction(formData: FormData): Promise<GuestRs
     service = createGuestRegistrationService({
       guests: eventGuestsRepository,
       contacts: contactsRepository,
-      limiter: guestRateLimiter,
+      limiter: createSharedRateLimiter("guest-rsvp", process.env.RATE_LIMIT_KEY_SECRET ?? ""),
       resolveClientIp: async () => clientIpFromHeaders(await headers()),
       // The unsubscribe secret already keys one-click, mail-borne capabilities;
       // the cancel token shares its secret and rotation.

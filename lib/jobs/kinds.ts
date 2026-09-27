@@ -86,3 +86,7 @@ export const ADMIN_BATCH_JOB_KIND = {ADMIN_BATCHES: "admin-batches"} as const;
 
 /** Separate from the M3 partial-index list. */
 export const MEMBERSHIP_GRANT_JOB_KIND = {EXPIRY: "membership-grant-expiry"} as const;
+
+
+/** Separate from the M3 partial-index list; T17's bounded TTL cleanup. */
+export const RATE_LIMIT_JOB_KIND = {CLEANUP: "rate-limit-cleanup"} as const;

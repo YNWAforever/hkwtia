@@ -161,3 +161,15 @@ Communication, invitation, ticket resend, export, staff browser and shared-envir
 | 2026-09-27 | feature worktree | `npm run typecheck`; `npm run audit:strings`; focused ESLint | exit 0; 279 TSX scanned | Type, bilingual UI and repository-layer import rule. A first full lint run caught the export DB helper in the admin layer; it was moved to `lib/db/repos` and focused lint passed. |
 
 The resend and export flags remain default off. No staff-authenticated browser flow, provider delivery, shared-environment download, real member communication or production migration was exercised. Renewal reminder and update invitation remain open.
+
+
+## T17 shared rate-limit evidence
+
+| Date | Environment | Command | Result | Scope and limit |
+|---|---|---|---|---|
+| 2026-09-27 | disposable PostgreSQL 16 via Docker | `RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/shared-rate-limit.test.ts` | exit 0; 2 tests passed | Migration 0049 applied; two instances racing on one key allow five and reject sixth, cold-start persistence, operation scope, 15-minute reset, expired-row cleanup, and store fault. Initial stub run failed with all six allowed. |
+| 2026-09-27 | feature worktree | `npx vitest run tests/unit/guest-registration-service.test.ts tests/unit/ticket-checkout-actions.test.ts tests/unit/shared-rate-limit.test.ts` | guest/ticket 18 tests and digest 2 tests passed in focused runs | Guest service awaits async decision; checkout store outage returns unavailable without order write; scope/secret digest guards. Mock shared store in action tests. |
+| 2026-09-27 | local worker package | `npm test` in `workers/` | exit 0; 5 files, 47 tests passed | Ten-minute cleanup route included in the declared job schedule; no deployed worker call. |
+| 2026-09-27 | feature worktree | `npx drizzle-kit check`; focused ESLint | exit 0 | Migration journal and new limiter/job source. Initial T17 typecheck caught a test mock tuple annotation; corrected and pending full gate. |
+
+No shared environment, real proxy load, production key, or deployed cleanup job has been verified. Auth/interest endpoints still use their existing separate limiter design. Pending hold ceiling, public cache, notification load and RUM remain open.

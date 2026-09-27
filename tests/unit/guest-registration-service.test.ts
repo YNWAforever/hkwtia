@@ -72,6 +72,19 @@ describe("guest registration service (programme B-4)", () => {
     expect(register).toHaveBeenCalledTimes(1);
   });
 
+  it("awaits a shared-store allowance before writing a registration", async () => {
+    const register = vi.fn(async (_actor: unknown, input: {cancelTokenDigest: string}): Promise<GuestRegistrationResult> => ({id: "g2", disposition: "registered", status: "registered", cancelTokenDigest: input.cancelTokenDigest, eventTitle: "AI Clinic", slug: "ai-clinic"}));
+    const limiter = {check: vi.fn(async () => ({allowed: true, retryAfterSeconds: 0}))};
+    const subject = createGuestRegistrationService({
+      guests: {register}, contacts: {upsertFromInterestForm: vi.fn(async () => ({id: "c2", disposition: "upserted" as const}))},
+      limiter, resolveClientIp: async () => "203.0.113.9",
+      sendConfirmation: vi.fn(async () => undefined), secret: "s".repeat(32), appUrl: "https://hkwtia.example",
+    });
+    await expect(subject.submit(form())).resolves.toEqual({ok: true, disposition: "registered"});
+    expect(limiter.check).toHaveBeenCalledOnce();
+    expect(register).toHaveBeenCalledOnce();
+  });
+
   it("maps repository refusals to codes", async () => {
     const {subject, register, send} = service();
     register.mockRejectedValueOnce(new Error("EVENT_REGISTRATION_CLOSED"));

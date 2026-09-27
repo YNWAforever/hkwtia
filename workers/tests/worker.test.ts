@@ -141,6 +141,7 @@ describe("Cloudflare automation scheduler", () => {
     expect(WORKER_JOBS.length).toBeGreaterThanOrEqual(10);
     expect([...scheduled].sort()).toEqual([...WORKER_JOBS].sort());
     expect(JOBS_BY_CRON["*/10 * * * *"]).toContain("showcase-lead-emails");
+    expect(JOBS_BY_CRON["*/10 * * * *"]).toContain("rate-limit-cleanup");
   });
 
   /**

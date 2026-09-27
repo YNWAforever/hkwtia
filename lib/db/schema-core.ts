@@ -2051,3 +2051,20 @@ export type EventFormat = (typeof eventFormatEnum.enumValues)[number];
 export type RegistrationMode = (typeof registrationModeEnum.enumValues)[number];
 export type GuestRegistrationStatus = (typeof guestRegistrationStatusEnum.enumValues)[number];
 export type PublicProfileStatus = (typeof publicProfileStatusEnum.enumValues)[number];
+
+
+/** T17: one atomic 5/15-minute bucket per server-keyed digest and public operation. */
+export const rateLimitBuckets = pgTable("rate_limit_buckets", {
+  scope: text("scope").notNull(),
+  keyHash: text("key_hash").notNull(),
+  windowStartedAt: timestamp("window_started_at", {withTimezone: true}).notNull(),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  count: integer("count").notNull(),
+}, (table) => [
+  primaryKey({columns: [table.scope, table.keyHash]}),
+  index("rate_limit_buckets_expiry_idx").on(table.expiresAt),
+  check("rate_limit_buckets_scope_check", sql`${table.scope} IN ('guest-rsvp','ticket-checkout')`),
+  check("rate_limit_buckets_hash_check", sql`${table.keyHash} ~ '^[a-f0-9]{64}$'`),
+  check("rate_limit_buckets_window_check", sql`${table.expiresAt} > ${table.windowStartedAt}`),
+  check("rate_limit_buckets_count_check", sql`${table.count} BETWEEN 1 AND 5`),
+]);

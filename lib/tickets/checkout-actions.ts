@@ -5,7 +5,7 @@ import {z} from "zod";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
 import {ANONYMOUS_ACTOR} from "@/lib/membership/lifecycle";
-import {createInMemoryRateLimiter} from "@/lib/security/rate-limit";
+import {createSharedRateLimiter} from "@/lib/security/shared-rate-limit";
 import {clientIpFromHeaders} from "@/lib/security/request-origin";
 import {createTicketCheckout} from "@/lib/tickets/checkout-core";
 import {eventCheckoutRecoveriesRepository} from "@/lib/db/repos/event-checkout-recoveries";
@@ -14,10 +14,6 @@ import {stripeBillingAdapter} from "@/lib/billing/stripe";
 import {newRecoveryToken, readTicketRecovery, recoveryDigest, resumeTicketRecovery, type TicketRecoverySummary} from "@/lib/tickets/checkout-recovery";
 import {parseTicketRecoveryCookie, ticketRecoveryCookieOptions, ticketRecoveryCookieValue, TICKET_RECOVERY_COOKIE} from "@/lib/tickets/recovery-cookie";
 import {parseTicketCheckoutForm, type TicketCheckoutFormResult} from "@/lib/tickets/checkout-input";
-
-// Process-local, the guest RSVP's numbers: a bot cannot complete a payment, but
-// it can create pending orders, and this bounds that.
-const ticketRateLimiter = createInMemoryRateLimiter({limit: 5, windowMs: 15 * 60_000});
 
 export type TicketCheckoutState =
   | Readonly<{status: "idle"}>
@@ -39,8 +35,14 @@ export async function submitTicketCheckoutAction(_previous: TicketCheckoutState,
   // `clientIpFromHeaders` returns null when no trusted proxy header is present;
   // the limiter refuses an empty key, which is the fail-closed direction for a
   // payment boundary and matches the limiter's own `!key` guard.
-  if (!ticketRateLimiter.check(clientIpFromHeaders(await headers()) ?? "").allowed) {
-    return {status: "error", code: "RATE_LIMITED"};
+  const clientIp = clientIpFromHeaders(await headers());
+  if (!clientIp) return {status: "error", code: "RATE_LIMITED"};
+  try {
+    const limiter = createSharedRateLimiter("ticket-checkout", process.env.RATE_LIMIT_KEY_SECRET ?? "");
+    if (!(await limiter.check("ip:" + clientIp)).allowed) return {status: "error", code: "RATE_LIMITED"};
+  } catch {
+    // A missing digest secret or shared-store outage cannot allow an unbounded payable attempt.
+    return {status: "error", code: "UNAVAILABLE"};
   }
 
   const parsed = parseTicketCheckoutForm(formData);

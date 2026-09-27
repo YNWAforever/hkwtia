@@ -4,7 +4,6 @@ import {createHmac, randomUUID, timingSafeEqual} from "node:crypto";
 
 import {contactWriterActor, type ContactsRepository} from "@/lib/db/repos/contacts";
 import type {EventGuestsRepository, GuestRegistrationDisposition} from "@/lib/db/repos/event-guests";
-import type {RateLimiter} from "@/lib/security/rate-limit";
 import {parseGuestRsvp, type GuestRsvpFieldErrors} from "@/lib/events/guest-registration-input";
 
 export type GuestRsvpResult = Readonly<
@@ -30,7 +29,7 @@ export type GuestConfirmation = Readonly<{
 export type GuestRegistrationDependencies = Readonly<{
   guests: Pick<EventGuestsRepository, "register">;
   contacts: Pick<ContactsRepository, "upsertFromInterestForm">;
-  limiter: RateLimiter;
+  limiter: Readonly<{check: (key: string) => {allowed: boolean} | Promise<{allowed: boolean}>}>;
   /** Injected so the service stays testable outside a request scope. */
   resolveClientIp: () => Promise<string | null>;
   sendConfirmation: (confirmation: GuestConfirmation) => Promise<void>;
@@ -72,7 +71,7 @@ export function cancelDigestFromToken(secret: string, token: string): string | n
 /**
  * Anonymous RSVP (programme B-4), shaped like lib/growth/interest-service.ts:
  * honeypot, validation, an IP-keyed limiter, then the capability-gated
- * repository write. The event title in the confirmation comes back from the
+ * repository write. The limiter can be asynchronous because production uses a shared store. The event title in the confirmation comes back from the
  * locked event row, never from the form.
  */
 export function createGuestRegistrationService(dependencies: GuestRegistrationDependencies) {
@@ -87,7 +86,7 @@ export function createGuestRegistrationService(dependencies: GuestRegistrationDe
       const clientIp = await dependencies.resolveClientIp();
       const email = parsed.data.email.toLowerCase();
       const limiterKey = clientIp ? `guest-rsvp:ip:${clientIp}` : `guest-rsvp:email:${email}`;
-      if (!dependencies.limiter.check(limiterKey).allowed) return {ok: false, code: "rate_limited"};
+      if (!(await dependencies.limiter.check(limiterKey)).allowed) return {ok: false, code: "rate_limited"};
 
       const token = randomUUID().replace(/-/g, "");
       const digest = cancelTokenDigest(dependencies.secret, token);
