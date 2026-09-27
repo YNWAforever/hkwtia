@@ -182,3 +182,36 @@ No shared environment, real proxy load, production key, or deployed cleanup job 
 | 2026-09-27 | feature worktree | `npm run typecheck`; focused ESLint | exit 0 | TS and changed-file lint after the streaming change. |
 
 Public `force-dynamic` remains. No shared-cache key, CMS invalidation, A/B member isolation, same-region Lighthouse/RUM, or notification-capacity result is claimed.
+
+## T18 critical-journey test mapping
+
+The existing Playwright specs are the canonical journey suites; a second `hkwtia-critical-journeys.spec.ts` would duplicate their fixtures and could pass while their stronger checks fail. This table maps the plan's requested journey to the current equivalent and records what still requires an isolated Preview.
+
+| Journey | Existing browser spec(s) | Current acceptance gap |
+|---|---|---|
+| Roles and actor denial | `m2-admin-crm.spec.ts`, `admin-members.spec.ts`, `portal-dashboard.spec.ts` | Isolated Neon Auth identities and side-effect checks after revocation. |
+| Join and resume | `join-auth.spec.ts`, `join-resume.spec.ts`, `phase-a-funnel.spec.ts` | Two-tab live database and expired-link Preview fixture. |
+| Membership billing | `membership-checkout.spec.ts`, `phase-a-funnel.spec.ts` | Stripe test-mode redirect/webhook/3DS and second-account denial. |
+| Event authoring | `admin-event-authoring.spec.ts`, `phase-b1-member-events.spec.ts` | Staff login and persisted bilingual mode/format round trip. |
+| RSVP and tickets | `guest-rsvp-recovery.spec.ts`, `phase-d4a-ticket-checkout.spec.ts`, `ticket-checkout-recovery.spec.ts`, `seat-management.spec.ts` | 1/3/10-seat provider matrix and last-seat concurrent Preview run. |
+| Cancellation/refunds | `phase-d4d-event-cancellation.spec.ts`, `phase-d4c-refunds.spec.ts` | Provider unknown/retry and notification receipt reconciliation. |
+| Check-in | `event-check-in.spec.ts`, `phase-d4b-passes-and-check-in.spec.ts` | Isolated guest/member/ticket data and 390px staff session. |
+| Member operations | `admin-members.spec.ts`, `phase-d2-member-tools.spec.ts` | Saved view, batch selection, actor revocation and 10k-member load. |
+| Bulk/import | No pre-existing full browser spec; disposable PostgreSQL integration covers batch/import/grant transactions | Synthetic staff browser, 5,000-row load, two workers and safe test recipients remain. |
+| Public/accessibility | `core-pages.spec.ts`, `public-navigation.spec.ts`, `accessibility.spec.ts` | Repeat against known deployment SHA at 390/768/1440px and compare axe/Lighthouse baselines. |
+
+The manual `.github/workflows/audit-acceptance.yml` runs a non-Production Preview public subset and disposable PostgreSQL tests. It has not run remotely. Its public subset can skip auth cases; it cannot mark the authenticated matrix complete.
+
+## T18 full-gate repair log
+
+| Date | Environment | Command | Result | Scope and limit |
+|---|---|---|---|---|
+| 2026-09-27 | feature worktree | `npm run audit:strings`; `npm run lint`; `npm audit --omit=dev --audit-level=high` | exit 0; 279 TSX; lint 0 errors/63 warnings; audit 1 low/7 moderate | No high-severity audit result. Warnings are recorded rather than called clean lint. |
+| 2026-09-27 | feature worktree | first `npm test -- --reporter=dot` | exit 1; 5,833 passed, 23 failed, 113 skipped | Nine failed files exposed stale router/limiter fixtures, route ownership, worker alert vocabulary, repository boundary, ticket recovery and the pre-existing npm optional-peer closure. Not a passing gate. |
+| 2026-09-27 | feature worktree | second `npm test -- --reporter=json --outputFile=test-results/audit-vitest.json` | exit 1; 5,851 passed, 5 failed, 113 skipped | Machine-readable report isolated `ci-security-contract`, `repository-boundary` and `ticket-checkout-action-recovery`. No green claim. |
+| 2026-09-27 | feature worktree | `npx vitest run tests/unit/repository-boundary.test.ts`; `npm run typecheck` | exit 0; 32 boundary cases, types | DB-bearing batch handlers and finite-grant SQL relocated into repositories; established paths are thin exports. |
+| 2026-09-27 | disposable PostgreSQL 16 via Docker | `RUN_POSTGRES_INTEGRATION=1 npx vitest run` on five moved batch handler integration files | exit 0; 5 files/8 tests | Import, profile correction, finite grant, ticket resend and private export still work through the original atomic batch transaction. Synthetic data only. |
+| 2026-09-27 | feature worktree | focused route-parity, worker-alert, guest-email, admin render, ticket recovery and npm lock contract suites | exit 0 after fixes; route parity 33 tests, ticket recovery 5, lock contract 12 | Test fixtures now inject the shared limiter; seven new protected routes and the cleanup alert kind are enumerated; four npm optional-peer records restored. |
+| 2026-09-27 | feature worktree | first `npm run build` after contract repair | exit 1 at TypeScript | Alert schema accepted `rate-limit-cleanup` while a duplicate manual type omitted it. The type now derives from the schema and `npm run typecheck` passes; build must be rerun. |
+
+A final full suite and build are required after these repairs. The JSON reports stay under ignored `test-results/` and are local evidence, not CI artifacts.
