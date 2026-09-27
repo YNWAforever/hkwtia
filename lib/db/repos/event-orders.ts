@@ -1,4 +1,5 @@
 import "server-only";
+import {alias} from "drizzle-orm/pg-core";
 
 import {eq, sql, type SQL} from "drizzle-orm";
 import {requireAdmin} from "@/lib/auth/authorize";
@@ -246,7 +247,7 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
         SELECT m.id FROM ${memberships} m
         JOIN ${companyMembers} cm ON cm.company_id = m.company_id
         WHERE cm.user_id = ${profileId} AND cm.revoked_at IS NULL
-          AND m.status IN (${statusList})
+          AND m.status IN (${statusList}) AND ${membershipGrantValiditySql(undefined, alias(memberships, "m"))}
         LIMIT 1 FOR SHARE OF m, cm
       `));
       return company.length > 0;

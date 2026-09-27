@@ -1,4 +1,5 @@
 import "server-only";
+import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
 
 import {createHash, randomBytes} from "node:crypto";
 import {and, eq, gt, inArray, isNull, sql} from "drizzle-orm";
@@ -200,7 +201,7 @@ async function productionDependencies(): Promise<SeatServiceDependencies> {
       .from(companies)
       .innerJoin(memberships, eq(memberships.companyId, companies.id))
       .innerJoin(companyMembers, eq(companyMembers.companyId, companies.id))
-      .where(and(eq(companies.id, companyId), eq(companyMembers.userId, actor.profileId), isNull(companyMembers.revokedAt), inArray(memberships.status, ["active", "past_due", "cancel_at_period_end"])))
+      .where(and(eq(companies.id, companyId), eq(companyMembers.userId, actor.profileId), isNull(companyMembers.revokedAt), inArray(memberships.status, ["active", "past_due", "cancel_at_period_end"]), membershipGrantValiditySql()))
       .limit(1);
     return rows[0] ?? null;
   };
@@ -210,7 +211,7 @@ async function productionDependencies(): Promise<SeatServiceDependencies> {
       .select({id: companies.id, seatLimit: memberships.seatLimit})
       .from(companies)
       .innerJoin(memberships, eq(memberships.companyId, companies.id))
-      .where(and(eq(companies.id, companyId), inArray(memberships.status, ["active", "past_due", "cancel_at_period_end"])))
+      .where(and(eq(companies.id, companyId), inArray(memberships.status, ["active", "past_due", "cancel_at_period_end"]), membershipGrantValiditySql()))
       .limit(1);
     return rows[0] ?? null;
   };

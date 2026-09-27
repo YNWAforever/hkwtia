@@ -141,3 +141,9 @@ Keep `force-dynamic` while layout announcement reads and `i18n/request.ts` datab
 ## T18 repository path mapping
 
 The full repository-boundary gate found direct runtime `server-schema` imports in five T13–T16 batch handler files and the finite-grant SQL helper. The implementations now live at `lib/db/repos/batch-handlers/{export-members,import-commit,membership-grant,profile-patch,ticket-resend}.ts` and `lib/db/repos/membership-grant-sql.ts`. Existing `lib/admin/batches/handlers/*` and `lib/membership/grant-sql.ts` paths are thin exports for current callers/tests. This is a relocation of the same implementation, not a second batch system. The existing atomic item transaction remains the owner of all effects.
+
+### Continuation ruling — implementation versus activation
+
+The T00–T02 scratch ledger was stale; the 31 committed changes through `728f6177` and the permanent audit evidence are authoritative. Rechecked PR #94: no reviews outstanding, current HEAD CI and Preview deployment successful, Preview access still protected. A policy gate controls activation, not delivery of disabled capability: T15 explicitly requires company/bulk grant capability, UI and tests with flags off. Likewise local synthetic load work and T12 true application/payment queues do not require provider credentials. These remain implementation work until completed; the earlier handoff did not complete them.
+
+Finite-grant reader review found missing date predicates in directory/company benefit paths. One shared alias-aware predicate now owns these checks; billing/history reads remain records of the transaction and are not hidden by benefit expiry.

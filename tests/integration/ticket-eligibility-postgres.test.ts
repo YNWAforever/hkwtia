@@ -110,6 +110,17 @@ describe.skipIf(!enabled)("ticket purchase eligibility and last seat on disposab
     await expect(repository.createOrder(purchase(privateEventId, member, member.profileId))).resolves.toEqual({ok: false, reason: "NOT_ELIGIBLE"});
   });
 
+  it("refuses future and expired company grants without relying on the expiry job", async () => {
+    if (!pool) throw new Error("disposable PostgreSQL pool is unavailable");
+    const repository = createEventOrdersRepository();
+    await pool.query("UPDATE company_members SET revoked_at=NULL WHERE company_id=$1", [companyId]);
+    for (const [start, end] of [[1, 2], [-2, -1]]) {
+      await pool.query("UPDATE memberships SET grant_effective_at=now()+$2*interval '1 day',grant_expires_at=now()+$3*interval '1 day' WHERE company_id=$1", [companyId, start, end]);
+      await expect(repository.createOrder(purchase(privateEventId, member, member.profileId))).resolves.toEqual({ok: false, reason: "NOT_ELIGIBLE"});
+    }
+    await pool.query("UPDATE memberships SET grant_effective_at=now()-interval '1 day',grant_expires_at=now()+interval '1 day' WHERE company_id=$1", [companyId]);
+    await expect(repository.createOrder(purchase(privateEventId, member, member.profileId))).resolves.toMatchObject({ok: true});
+  });
   it("rejects buyer profile forgery in the repository write service", async () => {
     const repository = createEventOrdersRepository();
     await expect(repository.createOrder(purchase(privateEventId, ANONYMOUS_ACTOR, member.profileId))).resolves.toEqual({ok: false, reason: "NOT_ELIGIBLE"});
