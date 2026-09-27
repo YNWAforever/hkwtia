@@ -268,3 +268,9 @@ Executed: grant service/batch/unit set **12/12** passed; final UI, company flag-
 ## T12 queue verification — continuation
 
 Three real PostgreSQL tests first failed on the missing read capability, then passed: two applications for one person remain distinct through tied-timestamp pagination; the latest attempt is linked by the exact membership; persisted completed applications leave the payment queue even when membership state is stale; staff-only reads, literal search and filter-scoped cursor rejection hold. The rendered table test failed before implementation and then passed, proving the Chinese Member 360 link uses the applicant profile ID and displays separate application/membership/billing identities. The table plus discovered admin page boundary suite passed **5/5**. Typecheck and the 283-file visible-string audit passed. Full lint passed with 64 warnings; its one newly introduced unused cursor-variable warning was removed afterward. Authenticated browser acceptance remains unrun.
+
+## Incremental migration check — continuation
+
+- `tests/unit/migration-journal-order.test.ts`: observed red on 0048 (1790457600000 < 0047's 1790474400000), then green after correction to 1790476200000.
+- `RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/audit-migration-upgrade.test.ts`: both PostgreSQL cases passed (39.8s). A temporary historical journal demonstrated the missing grant column after an imports-only deployment. Correct metadata applied the remaining migrations twice; the historical null grant stayed indefinite and the old insert shape still worked.
+- Database: disposable loopback pgvector PostgreSQL 16, synthetic profiles only. Repository journal remained corrected during the historical reproduction. Automatic approval review had rejected a proposed persistent working-tree mutation; the accepted reproduction used temporary migration files against the isolated fixture.
