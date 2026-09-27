@@ -1061,12 +1061,12 @@ export async function cancelEvent(actor: Actor, eventId: unknown, deps: MemberEv
       INSERT INTO ${eventCancellationNotifications}
         (event_id, revision, registration_kind, registration_id, channel,
          recipient_name, recipient_email, recipient_locale, status, idempotency_key)
-      SELECT ${id}, 1, 'member', r.profile_id, 'email', p.display_name, p.email, p.locale,
+      SELECT ${id}::uuid, 1, 'member', r.profile_id, 'email', p.display_name, p.email, p.locale,
              'pending', 'event-cancel:' || ${id}::text || ':1:member:' || r.profile_id || ':email'
       FROM ${eventRegistrations} AS r JOIN ${profiles} AS p ON p.id = r.profile_id
       WHERE r.event_id = ${id} AND r.status IN ('registered', 'waitlist', 'attended')
       UNION ALL
-      SELECT ${id}, 1, 'guest', g.id::text, 'email', g.name, g.email, g.locale,
+      SELECT ${id}::uuid, 1, 'guest', g.id::text, 'email', g.name, g.email, g.locale,
              'pending', 'event-cancel:' || ${id}::text || ':1:guest:' || g.id::text || ':email'
       FROM ${eventGuestRegistrations} AS g
       WHERE g.event_id = ${id} AND g.status IN ('registered', 'waitlist', 'attended')

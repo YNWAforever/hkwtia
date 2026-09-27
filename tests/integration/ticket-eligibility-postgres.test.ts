@@ -56,11 +56,11 @@ describe.skipIf(!enabled)("ticket purchase eligibility and last seat on disposab
     databaseState.current = drizzle(pool);
     await pool.query(`
       CREATE TABLE events (
-        id uuid PRIMARY KEY, capacity integer, published boolean NOT NULL, starts_at timestamptz NOT NULL,
+        id uuid PRIMARY KEY, slug text NOT NULL DEFAULT 'synthetic-event', capacity integer, published boolean NOT NULL, starts_at timestamptz NOT NULL,
         ends_at timestamptz, registration_mode text NOT NULL, ticket_price_hkd_cents integer,
         visibility text NOT NULL, member_only boolean NOT NULL
       );
-      CREATE TABLE memberships (id uuid PRIMARY KEY, owner_user_id text, company_id uuid, status text NOT NULL);
+      CREATE TABLE memberships (id uuid PRIMARY KEY, owner_user_id text, company_id uuid, status text NOT NULL, grant_effective_at timestamptz, grant_expires_at timestamptz);
       CREATE TABLE company_members (company_id uuid NOT NULL, user_id text NOT NULL, revoked_at timestamptz);
       CREATE TABLE event_orders (
         id uuid PRIMARY KEY, event_id uuid NOT NULL, buyer_profile_id text, buyer_name text NOT NULL,
