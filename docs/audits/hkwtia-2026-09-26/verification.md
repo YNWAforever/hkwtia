@@ -304,3 +304,27 @@ New tests first reproduced repeated news reads (two queries rather than one), th
 ## T17 ticket hold assessment
 
 The real PostgreSQL eligibility suite passed 5/5, including five concurrent retries of one ten-seat group attempt: one pending order, exactly ten seats, and the unrelated eleventh-seat attempt rejected. Existing last-seat concurrency and private/grant denials still pass. There is no measured abuse incidence or evidence supporting a tighter household/company pending-hold rule; the existing ten-seat limit and hold/session recovery policy are retained. This is local contention evidence, not a load-derived approval of a new ceiling.
+
+## Continuation capacity, retention and observability results
+
+| Check actually run | Result | Evidence boundary |
+|---|---|---|
+| Disposable PostgreSQL 16, 5,000-row CSV import, all 49 migrations | 1/1 passed; validation 5,357.80 ms, batch submission 33.59 ms, execution 251,166.88 ms; exactly 5,000 succeeded, zero pending/running/skipped/failed | evidence/import-load.json pins parent 3964b567 plus the then-uncommitted harness; Node 24.18.0, shared Windows machine. No shared DB or provider. |
+| Retention and import commit integration | 5/5 passed; dry-run nonmutation, payload scrub, active-run protection, repeat safety, actor denial | Disposable PostgreSQL; cleanup flag enabled only in test process. |
+| Response instrumentation, jobs and webhook focused tests | 66/66 passed | Generated request IDs, signed-event lag, safe counters, unchanged auth/retry and logging-failure isolation. |
+| Worker tests with installed worker dependencies | 48/48 passed; worker TypeScript passed | Vitest 4.1.10; records terminal failure/recovery and web/worker revision. No worker deployment. |
+| Alert evaluator + actual local CLI trigger/recovery | 3/3 unit cases; four trigger and four recovery transitions | Committed sanitized JSON under evidence/. No hosted alert delivery. |
+| Isolated authenticated preflight | exit 1: all 16 M2 environment inputs absent | Actual names-only failure; no credentials read/printed and no test DB contacted. |
+| Browser batch fixture transaction driver | 1/1 passed in disposable PostgreSQL | 10 claims -> 8 effects/2 failed -> 2 retry claims -> 10 unique effects/audits; stable effect keys. Browser test remains credential-gated. |
+
+The final full suite, build and browser/lab checks are recorded below after completion. Earlier passing commits are historical evidence until the candidate is rerun.
+
+## Final-gate continuation repair log
+
+The first continuation full Vitest run failed: 5,887 passed, 10 failed, 141 skipped (1,708 suites). It exposed stale renewal/invitation request fixtures, an announcement source-text assertion tied to the old layout location, and four missing protected-route owners (grants, communications, application queue and import retention). The fixtures now carry exact membership/Segment IDs; the announcement check renders the streamed header boundary; the explicit protected inventory enumerates all 77 routes with 40 admin pages and 18 jobs. The repaired focused set passed 65/65. A new full run is required after the attendee export continuation.
+
+The first Playwright collection failed because two new files used JSON imports without Node import attributes and the selected external base URL lacked M4B's explicit allowed-origin variable. Both files now use the repository's readFileSync pattern; four cases collect. With the exact loopback allowed origin, the actual full E2E gate ran 19 tests successfully, skipped six, then stopped after three Concierge mock-provider cases returned 500 in the production server lacking their acceptance configuration; 366 did not run. This is a failed gate. The production-server public subset then passed 22 cases and skipped two login cases (47 seconds), including en/zh, 390/768/1440px, FAQ/navigation and axe. No authenticated acceptance is claimed.
+
+The strict browser-report CLI accepted a synthetic two-pass report and rejected the same report with one skip. The isolated batch driver refused to run without its explicit isolation/paused-worker attestation. These are guard checks, not browser acceptance.
+
+Attendee export tests first rejected the absent operation, then passed the real artifact/owner/expiry/changed-preview/flag-revocation cases. A new 500-row fixture initially failed on ambiguous uuid/text binding, which was corrected with an explicit UUID cast. The final export suite passed 3/3; migration-upgrade and existing member-export suites passed another 3/3. The new evidence/attendee-export-load.json records one 500-row artifact: submit 6.93 ms, preview 95.81 ms, worker execution 119.43 ms and download 12.71 ms. All 50 migrations were applied only to disposable PostgreSQL. The report pins df71a3b2 plus the then-uncommitted export capability.

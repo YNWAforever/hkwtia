@@ -10,6 +10,7 @@ export default defineConfig([
     "coverage/**",
     "playwright-report/**",
     "test-results/**",
+    ".tmp/**",
     // Git ignores this, but flat config keeps its own list — without the entry
     // `npm run lint` walks into a worktree and lints a second copy of the repo.
     ".worktrees/**",

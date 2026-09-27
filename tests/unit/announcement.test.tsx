@@ -1,4 +1,5 @@
 import {readFileSync} from "node:fs";
+import {PublicHeader} from "@/components/layout/public-header";
 
 import {fireEvent, render, screen} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
@@ -11,6 +12,10 @@ vi.mock("@/i18n/navigation", () => ({
     <a href={href} {...props} />,
 }));
 
+const headerRead=vi.hoisted(()=>vi.fn());
+vi.mock("@/lib/db/repos/announcements",()=>({announcementsRepository:{getActive:headerRead}}));
+vi.mock("next-intl/server",()=>({getTranslations:async()=>(key:string)=>key}));
+vi.mock("@/components/layout/site-header",()=>({SiteHeader:({hasAnnouncement}:{hasAnnouncement:boolean})=><header data-announcement={String(hasAnnouncement)}/>}));
 const record = {
   id: "launch",
   startsAt: "2026-08-28T00:00:00.000Z",
@@ -97,11 +102,14 @@ describe("persisted announcement projection", () => {
     expect(toAnnouncementBarView({...projectPersistedAnnouncement(persisted), title: {en: "", "zh-HK": ""}}, "en")).toBeNull();
   });
 
-  it("activates the repository-selected announcement in the public layout", () => {
-    const source = readFileSync("app/[locale]/(public)/layout.tsx", "utf8");
-    expect(source).toContain("announcementsRepository.getActive");
-    expect(source).toContain("toAnnouncementBarView");
-    expect(source).not.toContain("announcement={null}");
+  it("renders the repository-selected announcement and matching header offset in the streamed boundary", async () => {
+    headerRead.mockResolvedValue(projectPersistedAnnouncement(persisted));
+    const {container,unmount}=render(await PublicHeader({locale:"zh-HK"}));
+    expect(headerRead).toHaveBeenCalledWith(expect.any(Date));
+    expect(screen.getByText("現正接受申請")).toBeVisible();
+    expect(container.querySelector('header')).toHaveAttribute('data-announcement','true');
+    expect(screen.getByRole('link',{name:"查看計劃"})).toHaveAttribute('href','/launchpad');
+    unmount();
   });
 });
 

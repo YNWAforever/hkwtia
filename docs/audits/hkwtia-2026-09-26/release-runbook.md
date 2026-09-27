@@ -130,3 +130,46 @@ Rollback: disable MEMBER_COMMUNICATION_BATCH_ENABLED to block creation/materiali
 Deploy the public reader and CMS invalidation code together. In the isolated Preview, warm both locales in guest/member A/member B sessions, save and restore synthetic CMS copy, and confirm fresh content in all sessions. Verify internal /en and /zh-HK invalidation paths, anonymous projection, news limits and date rendering. Measure cold and warm loads including banner-induced layout movement. Self-hosted multiple instances must use a shared Next cache handler; a process-local filesystem is not multi-instance proof. Vercel Preview protection and absent test identities remain gates.
 
 Rollback reader caching and CMS tag invalidation as one compatible web release; no schema change. Purge the public-page-copy and public-news entries through the authorized platform cache mechanism when rolling back stale content. Keep session and mutation responses private. No production deployment or cache purge ran here.
+
+## T14 retention activation and rollback
+
+1. Retain the schema/web/worker order above (0047 is required). Deploy the compatible web route with MEMBER_IMPORT_RETENTION_ENABLED=false before deploying the worker that names member-import-retention. The ten-minute disabled call must return disabled with zero writes.
+2. Obtain approval for upload/staging retention. Set the approved day values for new staging; inspect existing expires_at values separately. In isolated staging enable cleanup, call the authenticated route with `?dryRun=true`, compare counts, then execute a synthetic scrub. Verify an active import remains protected and a repeat produces zero changes. Dry-run and live job keys are distinct.
+3. Before shared-environment activation, record reviewed counts, policy owner and approval, web/worker SHA, migration ledger and backup/recovery owner. No shared cleanup is authorized by the implementation request.
+4. Roll back by disabling MEMBER_IMPORT_RETENTION_ENABLED before pausing/reverting the worker. Already scrubbed payloads stay scrubbed; restoration needs a separately approved backup procedure. Never restore by deleting audit/batch history. Investigate persistently full ten-upload/one-run sweep counts as backlog; resolve abandoned batches deliberately.
+
+## T18 metrics and alert rehearsal
+
+Deploy web response instrumentation first, then a compatible worker with a validated WORKER_REVISION equal to its source SHA. Enable AUDIT_METRICS_ENABLED only in the isolated environment initially. Correlate worker_invocation.requestId with job_result.requestId and the returned web revision. Save migration ledger separately; a request header is not proof of schema state. Retain existing job authentication and retries.
+
+Build aggregate observations from these existing sources:
+
+- Error rate: job_result and stripe_webhook_result status/outcome grouped by deployment and interval; keep denied requests separate from server failures.
+- Verified webhook lag: stripe_webhook_result.lagMs; absent samples mean unknown, never zero.
+- Notification backlog/oldest age and provider latency: existing ticket_email_metric queue/provider records. Compare terminal settlement and test-sink receipts separately.
+- Batch failures: job_result counters.failed plus persisted admin_batch_items state='failed', grouped without target IDs. A failed settlement is distinct from a terminal item refusal.
+- Last business success: job_result outcome='completed' by kind, cross-checked against the existing jobs ledger. Exclude disabled/stale/duplicate responses; worker HTTP acceptance alone is insufficient. Supply only enabled jobs to the alert snapshot.
+
+Run `npx tsx scripts/audit-alert-check.ts <aggregate-snapshot.json> [previous-report.json] [thresholds.json]` against sanitized local snapshots. The committed failing/healthy inputs and trigger/recovery outputs in evidence/ demonstrate four triggers and four recoveries. Unknown observations retain the previous known alert state. These are local evaluator results, not hosted alert delivery. Before production activation, provision the approved log sink and alert recipient, run one isolated fault/recovery and save receipts, query/window definitions and owner. Disable metrics to roll back logging without changing outbox/business state; retain diagnostic artifacts under approved retention.
+
+## T18 authenticated workflow operation
+
+After this workflow is available on the default branch, select the exact feature SHA and Preview URL, `run_authenticated=true`, and `batch_worker_paused=true` only after pausing the isolated environment's scheduled batch worker. The Preview must have ADMIN_BATCH_ENABLED=true for synthetic correction tests, the complete migrated schema, and test identities. Leave real provider sends disabled or configured exclusively to an approved test sink. All fixtures must be synthetic and isolated.
+
+The `audit-isolated` GitHub environment requires secrets named AUDIT_ followed by the 16 environment names in tests/fixtures/m2-runtime-env.ts, except APP_URL (taken from the input URL). DATABASE_URL_TEST maps to AUDIT_DATABASE_URL_TEST. The preflight compares its host to M2_TEST_NEON_HOST and requires Stripe's sk_test_ key prefix. This validates configuration shape, not isolation or provider activation; the operator must confirm both. No value is printed. Protected Preview access needs an authorized session/bypass mechanism; this workflow does not disable protection.
+
+The new admin-batches browser scenario creates ten distinct `.example.test` profiles per locale, leaves synthetic/audit evidence in the isolated database, and drives only its exact profile-patch batch while the scheduled worker is paused. It proves persisted preview/progress, eight successes plus two controlled failures, retry of two only, stable effect keys and exactly one audit per final effect. It does not prove provider delivery. Resume the isolated worker only after fixture batches finish and counts are reviewed.
+
+The preflight currently fails on missing isolated credentials. The report checker deliberately fails any skipped/unexecuted/flaky acceptance. A green public job or deployment cannot substitute for this matrix. No production promotion is authorized here.
+
+## T11/T16 attendee artifact rollout (migration 0050)
+
+The current candidate requires migrations 0043–0050 in journal order; earlier reports mentioning 49 migrations describe their earlier code revision. 0050 is additive except widening the existing operation CHECK (drop/add within the migration transaction), and introduces no enum value. Fresh and 0047-prefix upgrade checks use the current chain. Apply 0050 before the new web/worker code with ADMIN_BATCH_ENABLED=false and EVENT_ATTENDEE_EXPORT_ENABLED=false.
+
+In isolated staging, pause other batch work, enable both flags, preview an exact synthetic event/search and confirm the displayed row count. Change a selected attendee before execution: the worker must skip with EXPORT_SNAPSHOT_CHANGED. Re-preview unchanged data, commit, then verify one private file and audit, correct formula escaping, owner-only download, expiry and bounded cache cleanup. Verify the old CSV bookmark redirects and the content tab still reads no attendees. The 500-row disposable case recorded 6.93 ms submission, 95.81 ms preview, 119.43 ms materialization and 12.71 ms download; it is local evidence, not an authenticated deployment result.
+
+Rollback: first stop new export creation by disabling EVENT_ATTENDEE_EXPORT_ENABLED; this also blocks private downloads and new artifact writes. Pause/cancel pending event-export batches and let running leases settle before rolling back the worker to a version that does not recognize the new operation. Retain the widened CHECK and artifact table. Disabling the flag pauses its cache cleanup too: expired files remain inaccessible but may persist until the compatible cleanup is explicitly resumed. Do not delete audit or successful batch items. If a cache purge is needed on a shared database, obtain the applicable cleanup authority and target only expired artifact rows. The legacy CSV path becomes available again when the capability is off.
+
+## RUM follow-up contract
+
+No new visitor tracking or consent default is enabled. After an authorized deployment, the operator may use the existing approved analytics/observability product to collect aggregate public-page LCP, INP and CLS by locale/device/region, retaining no member IDs, entered form content or payment details. Record consent basis, sampling/window, sample counts and deployed SHA before comparing p75 to the proposed 2.5s/200ms/0.1 targets. Report insufficient observations explicitly. Local Lighthouse medians are lab results from a loaded Windows host; they do not establish Hong Kong RUM or provider-backed production latency.

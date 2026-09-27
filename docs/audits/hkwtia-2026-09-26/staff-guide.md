@@ -41,3 +41,11 @@ Open Applications and payments from the member workspace. Unfinished join, Await
 From Members, open Communications and choose a saved Segment you own. Select a channel and either exact membership scopes for renewal or people for an invitation. Selection persists across pages; Select matching includes all displayed segment matches up to the stated limit. A person with two selected memberships is blocked so company details cannot be mixed. Shared contact points and missing approved language templates are also blocked.
 
 Preview the durable batch and inspect every blocked/skipped reason before execution. Completed items create campaign drafts, not sent messages. Open Campaigns for the normal separate review/approval. You cannot review a campaign while the batch is still adding recipients. Renewal, language and consent changes are checked again before delivery and can skip a previously eligible item. Invitations use the member's existing login and profile page.
+
+### Import expiry and failed work
+
+Private import payload cleanup is delivered but disabled. Retention periods need association approval before the operator enables cleanup. Once expired payloads are scrubbed they cannot be recovered from the import screen; audit and result identifiers remain. Resolve abandoned queued/ready import batches before expecting staging cleanup. Do not resubmit successful rows to recover a partial batch: inspect its failed reasons and retry only eligible transient failures.
+
+### Attendee CSV preview (when enabled)
+
+On an event's Attendees tab, search first and choose Preview attendee CSV export. The preview shows the event and matching row count. Commit it and reopen the batch progress page to download the finished private CSV. If an attendee changes before execution, the item is skipped: prepare a fresh preview. The file is a frozen snapshot once prepared and expires after the configured short window; another staff account cannot download your file. A batch total of one means one event-export request; use its displayed row count for the number of attendees. No payment, admission or message state changes during export.

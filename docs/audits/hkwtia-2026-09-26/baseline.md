@@ -29,3 +29,17 @@
 | Config/auth | `lib/config/env.ts`, `lib/auth/actor.ts`, `lib/auth/authorize.ts` |
 
 All listed audit source paths still exist at the identical Git SHA. No historical source was copied over the current tree. New interfaces in T01–T18 will be checked against these owners before editing callers.
+
+## Continuation path map (current branch)
+
+| Planned capability | Existing implementation reused / current addition |
+|---|---|
+| Bulk handler implementations | lib/db/repos/batch-handlers/*; original lib/admin/batches/handlers/* paths are thin exports |
+| Public shared cache | lib/i18n/page-copy-cache.ts; lib/db/repos/public-posts.ts; components/layout/public-header.tsx |
+| Import retention | lib/db/repos/member-import-retention.ts, lib/admin/imports/retention-config.ts, existing job/worker registry |
+| Observability / alert rehearsal | lib/observability/audit-metrics.ts, audit-alerts.ts; scripts/audit-alert-check.ts |
+| Whole-journey browser gate | Existing focused tests plus admin-batches.spec.ts/public-cache-isolation.spec.ts; .github/workflows/audit-acceptance.yml |
+
+The original T00 environment statement is historical. Since then, Docker-owned disposable PostgreSQL fixtures have run migrations/seeds, capacity and transactional checks. No configured shared DATABASE_URL_TEST, authenticated Preview or production migration has been used.
+
+Current continuation adds migration 0050_event_attendee_exports after the 49-entry chain used by earlier capacity evidence. It widens the existing batch operation CHECK and adds a short-lived private artifact table. The background export reuses events.listAttendeePage, admin-batches, its authenticated worker route, and /api/admin/batches/[id]/export; no parallel export service was added.

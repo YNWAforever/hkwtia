@@ -1,0 +1,10 @@
+import {M2_LIVE_ENV_NAMES} from "../tests/fixtures/m2-runtime-env";
+const missing=M2_LIVE_ENV_NAMES.filter(key=>!process.env[key]?.trim());
+if(missing.length)throw new Error(`ISOLATED_ACCEPTANCE_MISSING: ${missing.join(', ')}`);
+if(process.env.AUDIT_ISOLATED_ACCEPTANCE!=="true")throw new Error("ISOLATED_ACCEPTANCE_ATTESTATION_REQUIRED");
+if(process.env.AUDIT_BATCH_WORKER_PAUSED!=="true")throw new Error("ISOLATED_BATCH_WORKER_PAUSED_ATTESTATION_REQUIRED");
+const app=new URL(process.env.PLAYWRIGHT_BASE_URL??process.env.APP_URL!);
+if(app.hostname==='hkwtia.vercel.app'||(app.protocol!=='https:'&&!["localhost","127.0.0.1"].includes(app.hostname)))throw new Error("ISOLATED_PREVIEW_REQUIRED");
+if(new URL(process.env.DATABASE_URL_TEST!).hostname!==process.env.M2_TEST_NEON_HOST)throw new Error("ISOLATED_DATABASE_HOST_MISMATCH");
+if(!process.env.STRIPE_TEST_SECRET_KEY!.startsWith('sk_test_'))throw new Error("STRIPE_TEST_MODE_REQUIRED");
+console.log("Isolated acceptance inputs present; host and test-mode guards passed. This does not prove provider activation.");

@@ -306,8 +306,8 @@ describe("WiseTech protected route ownership", () => {
     // Phase D-4d Task 2 added /api/jobs/event-cancellation-refunds: 60 + 1 = 61.
     // Showcase lead recovery and ticket email delivery each add a protected cron endpoint.
     // Audit remediation adds checkout recovery, membership checkout status, and event notifications.
-    expect(codeFiles).toHaveLength(73);
-    expect(inventoryFiles).toHaveLength(73);
+    expect(codeFiles).toHaveLength(77);
+    expect(inventoryFiles).toHaveLength(77);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -326,7 +326,7 @@ describe("WiseTech protected route ownership", () => {
     // Phase C2 Task 4 (C-4) added the contacts pipeline: 31 + 1 = 32.
     // Phase C2 Task 9 (C-5) added the campaign wizard and its detail page: 32 + 2 = 34.
     // Phase D-4b Task 5 added the scan-reached door check-in page: 34 + 1 = 35.
-    expect(count("admin-page")).toBe(37);
+    expect(count("admin-page")).toBe(40);
     // Phase C1 Task 11 (C-3) added the WOZTELL history backfill: 11 + 1 = 12.
     // It is an `api-handler`, not a `webhook-handler`: the caller is a staff
     // session, and there is no HMAC in front of it — which is exactly why its
@@ -339,9 +339,9 @@ describe("WiseTech protected route ownership", () => {
     // Phase D-4d Task 2 added the event-cancellation refund sweep: 10 + 1 = 11.
     // Showcase lead recovery and ticket email delivery add two authenticated jobs.
     // Audit remediation adds the cancellation notification job.
-    expect(count("job-handler")).toBe(17);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(37);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(36);
+    expect(count("job-handler")).toBe(18);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(40);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(37);
   });
 
   it("publishes only the canonical deeply immutable protected conventions export", () => {

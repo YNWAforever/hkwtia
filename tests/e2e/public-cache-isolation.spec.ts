@@ -1,7 +1,8 @@
+import {readFileSync} from "node:fs";
 import {expect,test} from "@playwright/test";
 import {missingM2LiveEnvironment,signInForM2} from "../fixtures/m2-auth";
-import en from "../../messages/en.json";
-import zh from "../../messages/zh-HK.json";
+const en=JSON.parse(readFileSync(new URL("../../messages/en.json",import.meta.url),"utf8")) as typeof import("../../messages/en.json");
+const zh=JSON.parse(readFileSync(new URL("../../messages/zh-HK.json",import.meta.url),"utf8")) as typeof import("../../messages/zh-HK.json");
 
 const missing=missingM2LiveEnvironment();
 const isolated=process.env.AUDIT_ISOLATED_ACCEPTANCE === "true";
