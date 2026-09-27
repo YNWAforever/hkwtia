@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import {expect, test} from "@playwright/test";
 import {Pool} from "pg";
 import {missingM2IdentityEnvironment, signInForM2} from "../fixtures/m2-auth";
+import {finalAuditIsolatedDatabaseUrl} from "../fixtures/audit-isolated-db";
 
 const missing = missingM2IdentityEnvironment();
 test.describe("isolated admin workspace shell", () => {
@@ -12,7 +13,7 @@ test.describe("isolated admin workspace shell", () => {
     await page.goto("/admin");
     const sidebar = page.getByTestId("admin-desktop-sidebar");
     await expect(sidebar).toBeVisible();
-    await expect(sidebar.getByRole("navigation").getByRole("link")).toHaveCount(22);
+    await expect(sidebar.getByRole("navigation").getByRole("link")).toHaveCount(23);
     await expect(sidebar.getByRole("link", {name: /Dashboard/})).toHaveAttribute("aria-current", "page");
     await expect(page.getByRole("link", {name: /Find a member/})).toHaveAttribute("href", "/admin/members");
     await page.getByRole("button", {name: /Collapse sidebar/}).click();
@@ -44,7 +45,7 @@ test.describe("isolated admin workspace shell", () => {
     await signInForM2(page, "superadmin");
     await page.goto("/zh/admin");
     const sidebar = page.getByTestId("admin-desktop-sidebar");
-    await expect(sidebar.getByRole("navigation").getByRole("link")).toHaveCount(22);
+    await expect(sidebar.getByRole("navigation").getByRole("link")).toHaveCount(23);
     await expect(sidebar.getByRole("link", {name: "控制台"})).toHaveAttribute("aria-current", "page");
     await expect(page.getByText("超級管理員")).toBeVisible();
     await sidebar.getByRole("link", {name: "會員", exact: true}).click();
@@ -53,14 +54,8 @@ test.describe("isolated admin workspace shell", () => {
   });
 
   test("removing a synthetic staff role denies the next server request", async ({page}) => {
-    const url = process.env.DATABASE_URL_TEST;
-    const expectedHost = process.env.M2_TEST_NEON_HOST?.replace("-pooler", "");
-    const isolated = process.env.AUDIT_ISOLATED_ACCEPTANCE === "1"
-      && process.env.NEON_PROJECT_ID === "solitary-wave-52860119"
-      && process.env.M2_TEST_NEON_PROJECT_ID === "solitary-wave-52860119"
-      && url && url === process.env.DATABASE_URL
-      && expectedHost && new URL(url).hostname.replace("-pooler", "") === expectedHost;
-    test.skip(!isolated, "Role mutation requires the exact isolated acceptance database and opt-in");
+    const url = finalAuditIsolatedDatabaseUrl();
+    if (!url) {test.skip(true, "Role mutation requires the exact isolated acceptance database and opt-in"); return;}
     await signInForM2(page, "staff");
     await page.goto("/admin");
     await expect(page.getByTestId("admin-desktop-sidebar")).toBeVisible();

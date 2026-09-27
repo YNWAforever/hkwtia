@@ -1,0 +1,23 @@
+import {render, screen} from "@testing-library/react";
+import {describe, expect, it, vi} from "vitest";
+
+vi.mock("@/components/admin/batch-progress", () => ({BatchProgressPoller: () => null}));
+vi.mock("@/lib/admin/batches/actions", () => ({commitAdminBatchAction: vi.fn(), retryAdminBatchAction: vi.fn(), cancelAdminBatchAction: vi.fn()}));
+
+import {BatchPreviewPanel, type BatchLabels} from "@/components/admin/batch-preview";
+import type {BatchPreview} from "@/lib/admin/batches/types";
+
+const labels: BatchLabels = {title: "Batch", description: "Review", back: "Back", states: {completed_with_errors: "Completed with errors", failed: "Failed"}, counters: {pending: "Pending", running: "Running", succeeded: "Succeeded", skipped: "Skipped", failed: "Failed"}, total: "Total", eligible: "Eligible", blocked: "Blocked", operation: "Operation", target: "Target", before: "Before", after: "After", reason: "Reason", attempts: "Attempts", result: "Result", commit: "Commit", retry: "Retry failed items", cancel: "Cancel", expires: "Expires", empty: "Empty", manualReview: "Review this error before any further action"};
+const preview = (code: string): BatchPreview => ({batchId: "11111111-1111-4111-8111-111111111111", operation: "profile_patch", state: "completed_with_errors", digest: "a".repeat(64), expiresAt: "", total: 1, eligible: 1, skipped: 0, blocked: 0, counters: {pending: 0, running: 0, succeeded: 0, skipped: 0, failed: 1}, items: [{target: {type: "profile", id: "synthetic"}, previewStatus: "eligible", eligible: true, reasonCode: null, before: {}, after: {}, expectedVersion: "version", state: "failed", attemptCount: 1, errorCode: code, resultRef: null}]});
+
+describe("batch recovery actions", () => {
+  it("does not offer a retry for a permanent failure", () => {
+    render(<BatchPreviewPanel labels={labels} preview={preview("PERMANENT_VALIDATION")}/>);
+    expect(screen.queryByRole("button", {name: "Retry failed items"})).not.toBeInTheDocument();
+    expect(screen.getByText("Review this error before any further action")).toBeInTheDocument();
+  });
+  it("offers retry only for a transient failed item", () => {
+    render(<BatchPreviewPanel labels={labels} preview={preview("TRANSIENT_NETWORK")}/>);
+    expect(screen.getByRole("button", {name: "Retry failed items"})).toBeInTheDocument();
+  });
+});

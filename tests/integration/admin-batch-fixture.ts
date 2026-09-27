@@ -21,6 +21,15 @@ export async function isolatedBatchDatabase() {
     const port = binding.slice(binding.lastIndexOf(":") + 1);
     if (!/^\d+$/.test(port)) throw new Error("disposable PostgreSQL port unavailable");
     pool = new Pool({connectionString: `postgresql://postgres:test@127.0.0.1:${port}/postgres?sslmode=disable`});
+    // Docker's in-container pg_isready can precede readiness through the published host port.
+    for (let attempt = 0; attempt < 30; attempt += 1) {
+      try {await pool.query("SELECT 1"); break;}
+      catch (error) {
+        const code = error && typeof error === "object" && "code" in error ? String(error.code) : "";
+        if (attempt === 29 || !["57P03", "ECONNREFUSED"].includes(code)) throw error;
+        await delay(200);
+      }
+    }
     await pool.query(`
       CREATE TABLE profiles (id text PRIMARY KEY, display_name text NOT NULL, email text, phone text, job_title text, locale text NOT NULL, role text NOT NULL, updated_at timestamptz NOT NULL DEFAULT now());
       CREATE TABLE companies (id uuid PRIMARY KEY, display_name text NOT NULL);

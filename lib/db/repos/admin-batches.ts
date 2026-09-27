@@ -83,7 +83,7 @@ export function createAdminBatchesRepository(loadDatabase: () => Promise<BatchDa
       return db.transaction(async (tx) => {
         const batch = await readOwned(tx, actor.profileId, batchId, true);
         if (batch.state !== "completed_with_errors" && batch.state !== "running") throw new Error("BATCH_RETRY_UNAVAILABLE");
-        const retried = rows(await tx.execute(sql`UPDATE ${adminBatchItems} SET state = 'pending', next_attempt_at = NULL, lease_owner = NULL, lease_expires_at = NULL, error_code = NULL, updated_at = ${now()} WHERE ${adminBatchItems.batchId} = ${batchId}::uuid AND ${adminBatchItems.state} = 'failed' AND ${adminBatchItems.errorCode} LIKE 'TRANSIENT_%' AND ${adminBatchItems.attemptCount} < ${batchRuntimeConfig().maxAttempts} RETURNING ${adminBatchItems.id} AS id`));
+        const retried = rows(await tx.execute(sql`UPDATE ${adminBatchItems} SET state = 'pending', next_attempt_at = NULL, lease_owner = NULL, lease_expires_at = NULL, error_code = NULL, updated_at = ${now()} WHERE ${adminBatchItems.batchId} = ${batchId}::uuid AND ${adminBatchItems.state} = 'failed' AND left(${adminBatchItems.errorCode}, 10) = 'TRANSIENT_' AND ${adminBatchItems.attemptCount} < ${batchRuntimeConfig().maxAttempts} RETURNING ${adminBatchItems.id} AS id`));
         if (retried.length === 0) throw new Error("BATCH_NOTHING_RETRYABLE");
         await tx.execute(sql`UPDATE ${adminBatches} SET state = 'queued', updated_at = ${now()} WHERE ${adminBatches.id} = ${batchId}::uuid`);
         await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${actor.profileId}, ${actor.kind}, 'admin.batch.retry_requested', 'admin_batch', ${batchId}, jsonb_build_object('count', ${retried.length}::int))`);

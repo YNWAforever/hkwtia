@@ -13,6 +13,7 @@ const ADMIN_UUID_DETAIL = /^\/admin\/(?:announcements|batches|campaigns|cohorts|
 const ADMIN_NESTED_UUID_DETAIL = /^\/admin\/reports\/board-drafts\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ADMIN_PAGE_COPY_NAMESPACE = /^\/admin\/page-copy\/[A-Za-z][A-Za-z0-9_-]{0,79}$/;
 const QUERY_KEYS: Readonly<Record<string, readonly string[]>> = {
+  "/admin/batches": ["state", "operation", "cursor"],
   "/admin/members": ["q", "status", "planCode", "renewalFrom", "renewalTo", "companyId", "locale", "completeness", "sort", "limit", "cursor", "history", "view"],
   "/admin/members/queue": ["status", "q", "limit", "cursor"],
   "/admin/contacts": ["stage", "source", "owner", "optIn", "q", "cursor", "saved"],

@@ -24,6 +24,7 @@ export const groupLabelKeys = {
 export const linkLabelKeys = {
   dashboard: "navigation.dashboard",
   members: "navigation.members",
+  batches: "navigation.batches",
   "at-risk": "navigation.atRisk",
   inbox: "navigation.inbox",
   contacts: "navigation.contacts",

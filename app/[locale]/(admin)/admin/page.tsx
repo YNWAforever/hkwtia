@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {DashboardTiles, type DashboardTile} from "@/components/admin/dashboard-tiles";
@@ -8,6 +9,8 @@ import {listOpenTasks} from "@/lib/admin/inbox";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {adminPostsRepository} from "@/lib/db/repos/admin-posts";
 import {companyProfilesRepository} from "@/lib/db/repos/company-profiles";
+import {adminBatchHistoryRepository} from "@/lib/db/repos/admin-batch-history";
+import {localizedPath} from "@/lib/urls";
 import {showcaseRepository} from "@/lib/db/repos/showcase";
 import type {AdminActor} from "@/lib/membership/lifecycle";
 
@@ -55,7 +58,10 @@ export default async function AdminPage({params}: Props) {
   // routes instead of relying on a hand-maintained list that fails open.
   const actor = await requireAdminPageActor();
   const t = await getTranslations({locale, namespace: "Admin"});
-  const counts = await queueCounts(actor);
+  const [counts, recentBatches] = await Promise.all([
+    queueCounts(actor),
+    adminBatchHistoryRepository.recent(actor).catch(() => null),
+  ]);
 
   const tiles: readonly DashboardTile[] = [
     {id: "approvals", href: "/admin/approvals", label: t("dashboard.pendingApprovals"), count: counts.approvals},
@@ -83,6 +89,12 @@ export default async function AdminPage({params}: Props) {
           unavailable: t("dashboard.unavailable"),
         }}
       />
+      <section aria-labelledby="admin-recent-batches" className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-serif text-2xl font-semibold" id="admin-recent-batches">{t("batches.history.recentTitle")}</h2><Link className="text-primary underline" href={localizedPath(locale, "/admin/batches")}>{t("batches.history.viewAll")}</Link></div>
+        {recentBatches === null ? <p className="text-muted-foreground" role="status">{t("batches.history.recentUnavailable")}</p>
+          : recentBatches.length === 0 ? <p className="text-muted-foreground">{t("batches.history.recentEmpty")}</p>
+          : <ul className="grid gap-3">{recentBatches.map(item => <li className="flex flex-wrap items-center justify-between gap-3 rounded-md border bg-card p-4" key={item.id}><div><p className="font-medium">{t(`batches.history.operations.${item.operation}`)}</p><p className="text-sm text-muted-foreground">{t(`batches.states.${item.state}`)} · {item.succeeded} / {item.total}</p></div><Link className="inline-flex min-h-11 items-center text-primary underline" href={localizedPath(locale, `/admin/batches/${item.id}`)}>{t("batches.history.open")}</Link></li>)}</ul>}
+      </section>
     </div>
   );
 }

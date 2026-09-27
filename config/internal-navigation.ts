@@ -28,7 +28,7 @@ export const adminNavigationGroups = [
     {id: "tasks", href: "/admin/tasks"}, {id: "reports", href: "/admin/reports"},
   ]},
   {id: "members-organizations", links: [
-    {id: "members", href: "/admin/members"}, {id: "contacts", href: "/admin/contacts"},
+    {id: "members", href: "/admin/members"}, {id: "batches", href: "/admin/batches"}, {id: "contacts", href: "/admin/contacts"},
     {id: "segments", href: "/admin/segments"}, {id: "listings", href: "/admin/listings-review"},
     {id: "profiles-review", href: "/admin/profiles-review"}, {id: "cohorts", href: "/admin/cohorts"},
   ]},
