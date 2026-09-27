@@ -55,6 +55,8 @@ const config = {
       }
     },
     assert: {
+      // A single lucky run must not hide slower repeated measurements.
+      aggregationMethod: 'median',
       assertions: {
         'categories:performance': ['error', {minScore: 0.9}],
         'categories:accessibility': ['error', {minScore: 0.95}],

@@ -62,3 +62,17 @@ for (const prefix of ['', '/zh']) {
     await expect(page.locator('main > .page-hero')).toHaveCSS('content-visibility', 'visible');
   });
 }
+
+for (const prefix of ['', '/zh']) {
+  test(`${prefix || 'en'}: streamed home shell keeps the footer below the first viewport`, async ({page}) => {
+    await page.setViewportSize({width: 390, height: 844});
+    await page.goto(prefix || '/');
+    // Model the independently suspended sections before their data arrives. The
+    // real hero and footer stay rendered, so this pins the shell's layout reserve.
+    await page.addStyleTag({content: 'main > :not(.hero) { display: none !important; }'});
+    await expect(page.locator('main > .hero')).toBeVisible();
+    const footer = await page.locator('.site-footer').boundingBox();
+    expect(footer).not.toBeNull();
+    expect(footer!.y).toBeGreaterThanOrEqual(844);
+  });
+}

@@ -517,6 +517,12 @@
  * immediate scrolling keeps the destination aligned as those sections render. */
 html:has(.site-root > main > .defer-following-sections) { scroll-behavior: auto; }
 
+/* The streamed homepage initially contains only its hero. Reserve one viewport
+ * so the already-rendered footer cannot flash into view and jump away as the
+ * independent sections arrive. This is a minimum, not a fixed content height. */
+.site-root > main:has(> .hero.defer-following-sections) { min-height: 100svh; }
+
+
 .site-root > main > .defer-following-sections ~ section:not(.archive-proof, .conversion-section) {
   content-visibility: auto;
   contain-intrinsic-block-size: auto 800px;

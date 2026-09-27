@@ -114,6 +114,16 @@ describe("preview session harness", () => {
   });
 
   describe("lighthouserc.js", () => {
+    it("evaluates repeated measurements by median rather than the best run", async () => {
+      const {ci} = await loadLighthouse({});
+      expect(ci.assert.aggregationMethod).toBe("median");
+      expect(ci.assert.assertions).toMatchObject({
+        "categories:performance": ["error", {minScore: 0.9}],
+        "categories:accessibility": ["error", {minScore: 0.95}],
+        "categories:seo": ["error", {minScore: 0.95}],
+      });
+    });
+
     it("keeps the local defaults when no Preview cookie is configured", async () => {
       const {ci} = await loadLighthouse({});
       expect(ci.upload.target).toBe("temporary-public-storage");
