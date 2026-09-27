@@ -294,3 +294,13 @@ Three real PostgreSQL tests first failed on the missing read capability, then pa
 | 100 claims of 50 | p50 1,157.48 ms; p95 6,752.62 ms; maximum 10,387.29 ms |
 
 Environment: Windows, Node v24.18.0, PostgreSQL 16.15, Intel i5-12500 (6 cores/12 logical processors), shared machine with unrelated concurrent work. The report pins parent SHA 12ee2b4c; the committed capacity harness was then uncommitted. These measurements satisfy the proposed local search p95 target; they are neither production capacity nor Hong Kong RUM. No index or hold policy was changed based on these results.
+
+## T17 cache verification
+
+New tests first reproduced repeated news reads (two queries rather than one), the absent framework page-copy cache, and a delayed announcement blocking the main response. The fixed real-Next-cache tests plus existing request-config tests passed 10/10; shell/announcement/homepage/repository boundary passed 55/55. Date hydration, locale/limit separation, failure recovery and immediate tag invalidation are asserted. The cache harness supplies Node AsyncLocalStorage, as Next's runtime does. Typecheck and string audit passed after implementation.
+
+`tests/e2e/public-cache-isolation.spec.ts` adds isolated A/B/guest public reads and a bilingual CMS save/warm-cache invalidation with restoration. It requires explicit isolated acceptance plus existing M2 credentials. No cache isolation browser success is claimed until that environment runs it. The tests do not authorize production copy changes.
+
+## T17 ticket hold assessment
+
+The real PostgreSQL eligibility suite passed 5/5, including five concurrent retries of one ten-seat group attempt: one pending order, exactly ten seats, and the unrelated eleventh-seat attempt rejected. Existing last-seat concurrency and private/grant denials still pass. There is no measured abuse incidence or evidence supporting a tighter household/company pending-hold rule; the existing ten-seat limit and hold/session recovery policy are retained. This is local contention evidence, not a load-derived approval of a new ceiling.

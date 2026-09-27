@@ -157,7 +157,7 @@ describe("public shell server surfaces", () => {
 
   it("keeps the public shell owner order and exactly one named main", () => {
     const source = readFileSync(resolve(process.cwd(), "app/[locale]/(public)/layout.tsx"), "utf8");
-    const ordered = ["skip-link", "<AnnouncementBar", "<SiteHeader", "<main id=\"main-content\"", "<SiteFooter", "<ConciergeWidget"];
+    const ordered = ["skip-link", "<Suspense fallback={<SiteHeader", "<PublicHeader", "<main id=\"main-content\"", "<SiteFooter", "<ConciergeWidget"];
     const positions = ordered.map((token) => source.indexOf(token));
     expect(positions.every((position) => position >= 0)).toBe(true);
     expect(positions).toEqual([...positions].sort((a, b) => a - b));

@@ -125,4 +125,18 @@ describe.skipIf(!enabled)("ticket purchase eligibility and last seat on disposab
     const repository = createEventOrdersRepository();
     await expect(repository.createOrder(purchase(privateEventId, ANONYMOUS_ACTOR, member.profileId))).resolves.toEqual({ok: false, reason: "NOT_ELIGIBLE"});
   });
+  it("holds exactly ten seats across concurrent retries of one legitimate group attempt",async()=>{
+    if(!pool)throw new Error("pool missing");
+    const groupEvent=randomUUID();
+    await pool.query("INSERT INTO events (id,capacity,published,starts_at,registration_mode,ticket_price_hkd_cents,visibility,member_only) VALUES ($1,10,true,'2030-01-01','ticketed',25000,'public',false)",[groupEvent]);
+    const request={...purchase(groupEvent),seats:Array.from({length:10},(_,index)=>({name:'Synthetic '+index,email:'group-'+index+'@example.test'})),amountHkdCents:250000};
+    const repository=createEventOrdersRepository();
+    const results=await Promise.all(Array.from({length:5},()=>repository.createOrder(request)));
+    expect(results.every(result=>result.ok)).toBe(true);
+    const orders=await pool.query("SELECT count(*)::int AS count FROM event_orders WHERE event_id=$1 AND status='pending'",[groupEvent]);
+    const seats=await pool.query("SELECT count(*)::int AS count FROM event_order_seats s JOIN event_orders o ON o.id=s.order_id WHERE o.event_id=$1",[groupEvent]);
+    expect(orders.rows[0].count).toBe(1);expect(seats.rows[0].count).toBe(10);
+    expect(await repository.createOrder(purchase(groupEvent))).toEqual({ok:false,reason:"SOLD_OUT"});
+  });
+
 });
