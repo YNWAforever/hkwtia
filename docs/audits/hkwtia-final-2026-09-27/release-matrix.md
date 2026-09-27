@@ -8,7 +8,7 @@ Observed 2026-09-28 Asia/Hong_Kong. This is a review package, not a deployment r
 | Inspected production Neon branch | Migration ledger last id 36; grant columns, checkout recovery, import and batch tables absent | Read-only metadata and zero-row SQL | Confirm this is alias's DB binding; review additive 0037–0051 sequence before a separately authorized production migration. |
 | Isolated acceptance Neon | Project `solitary-wave-52860119`, branch `br-lingering-unit-azxl75s5`; migration ledger 0051 after this guarded rehearsal, expiring 2026-10-04 | Exact project/URL/host guard, synthetic identities | Ledger and both new auth bucket constraints verified read-only after migration; confirm exact Preview binding and never substitute production URL. |
 | Local web | Source through `cb88d7e8` on localhost:3127 | Unit, build, guarded Chromium | Local acceptance is not hosted staging. |
-| Hosted Preview web | No exact URL/SHA verified at this record | No completed deployment | Deploy feature PR to protected Preview; record URL, SHA, DB binding, flags and screenshots. |
+| Hosted Preview web | READY deployment `dpl_3yP2xSwBm1f4zYXJATtWvubAqtUy`, Git SHA `4f1359bf`, exact URL `https://hkwtia-7ncoe8s03-ynwaforevers-projects.vercel.app` | Vercel metadata and read-only login/browser 15/15; screenshot in acceptance | DB binding, flags, worker and provider paths unverified; a later test/docs commit needs its own deployment check. |
 | Worker/cron | Production and Preview worker SHA unknown | No matched revision/lease proof | Record worker SHA, schedule, last success, oldest pending, dead letters and uncertain outcomes before effects. |
 | Flags | Source defaults `AUTH_GOOGLE_ENABLED=false`, `ADMIN_BATCH_ENABLED=false`, `EVENT_ATTENDEE_EXPORT_ENABLED=false`, `EVENT_CANCELLATION_NOTICES_ENABLED=false`; deployed values unknown | `.env.example` and code only | Inspect exact target; open individually after relevant schema/web/worker/provider/policy gates. |
 | Neon Auth/Google | Shared Google provider listed on isolated branch; localhost omitted from trusted origins | Provider metadata only | Add exact protected Preview origin/callback and prove synthetic account/linking before enabling. |
@@ -33,7 +33,7 @@ Observed 2026-09-28 Asia/Hong_Kong. This is a review package, not a deployment r
 ## Outstanding gates
 
 1. Vercel→Neon binding for the production alias; reviewed migration plan from 0036 to 0051 and separate production authorization.
-2. Protected Preview deployment with exact web/worker SHAs, isolated DB ledger and flag values.
+2. Preview web is READY and read-only login passed at SHA 4f1359bf; exact DB binding, worker SHA, isolated ledger and deployed flag values remain unverified. Recheck the final PR SHA after later test/docs commits.
 3. Google trusted callback and synthetic provider round trip; test-inbox magic-link receipt/expiry and cross-device recovery.
 4. Matching Stripe test webhook secret/Price IDs and fresh isolated pending membership; provider-backed checkout/refund acceptance. Real email/WhatsApp receipts and hosted worker schedule.
 5. Association-owner factual/legal and membership policy approval. Proposed defaults in the plan are not association policy.
