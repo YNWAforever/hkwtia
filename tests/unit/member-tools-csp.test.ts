@@ -66,6 +66,13 @@ describe("member tools CSP", () => {
     expect(declared).toEqual(expect.arrayContaining(widgetOrigins));
   });
 
+  it("allows native form redirects only to this app and the two Stripe payment surfaces", async () => {
+    const directives = (await contentSecurityPolicy()).split(";").map(part => part.trim());
+    expect(directives.filter(part => part.startsWith("form-action "))).toEqual([
+      "form-action 'self' https://checkout.stripe.com https://billing.stripe.com",
+    ]);
+  });
+
   it("still refuses to be framed itself", async () => {
     // What stops a contributor "fixing" frame-src by removing frame-ancestors, which is
     // what makes the admin approve/publish forms clickjackable.

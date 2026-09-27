@@ -35,8 +35,9 @@ const turnstileChallengeOrigin = "https://challenges.cloudflare.com";
  *                    named. A `<base>` tag injection would otherwise repoint
  *                    every relative script URL on the page.
  * - `object-src`     no plugin content anywhere on this site.
- * - `form-action`    every form here posts same-origin; Stripe is a redirect,
- *                    not a cross-origin form post.
+ * - `form-action`    native forms post same-origin and can redirect to Stripe
+ *                    Checkout or Billing Portal before hydration. Chromium
+ *                    applies this directive to those redirects too.
  *
  * NOT set, deliberately:
  * - `script-src` / `default-src` — a useful policy needs a per-request nonce,
@@ -51,7 +52,7 @@ const contentSecurityPolicy = [
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "object-src 'none'",
-  "form-action 'self'",
+  "form-action 'self' https://checkout.stripe.com https://billing.stripe.com",
   // Phase D-2: the member tools are third-party pages iframed inside the portal, and the
   // concierge's Cloudflare Turnstile challenge is a third-party iframe on every page. Both
   // origins are named here; the tool origins are derived from config/member-tools.ts so a
