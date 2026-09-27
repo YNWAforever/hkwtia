@@ -5,6 +5,16 @@ import {batchRequestSchema, batchPreviewDigest, batchRetryDelayMs, batchRuntimeC
 const selection = {mode: "ids", profileIds: ["member-a"]} as const;
 const key = "11111111-1111-4111-8111-111111111111";
 
+describe("T16 profile cleanup patch contract", () => {
+  it("allows bounded operations metadata and rejects identity, consent and billing fields", () => {
+    const base = {operation: "profile_patch", idempotencyKey: "11111111-1111-4111-8111-111111111111", selection: {mode: "ids", profileIds: ["a"]}, payload: {patch: {tags: ["outreach"], ownerProfileId: "staff"}, reason: "Staff assignment correction"}};
+    expect(batchRequestSchema.safeParse(base).success).toBe(true);
+    for (const field of ["role", "email", "whatsappOptIn", "stripeSubscriptionId", "status"]) {
+      expect(batchRequestSchema.safeParse({...base, payload: {...base.payload, patch: {...base.payload.patch, [field]: "forged"}}}).success).toBe(false);
+    }
+  });
+});
+
 describe("admin batch request contract", () => {
   it("accepts a narrow profile patch and rejects actor, role, payment and consent fields", () => {
     expect(batchRequestSchema.parse({operation: "profile_patch", idempotencyKey: key, selection, payload: {patch: {locale: "zh-HK"}, reason: "Staff correction"}})).toMatchObject({operation: "profile_patch"});

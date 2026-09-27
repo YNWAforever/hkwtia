@@ -10,7 +10,7 @@ const profileTarget = z.object({kind: z.literal("profile"), profileId: z.string(
 const companyTarget = z.object({kind: z.literal("company"), companyId: z.string().uuid()}).strict();
 const grantTarget = z.discriminatedUnion("kind", [profileTarget, companyTarget]);
 const common = {idempotencyKey};
-const patchPayload = z.object({patch: z.object({locale: z.enum(["en", "zh-HK"]).optional()}).strict().refine((patch) => Object.keys(patch).length > 0, "EMPTY_PATCH"), reason: z.string().trim().min(3).max(500)}).strict();
+const patchPayload = z.object({patch: z.object({locale: z.enum(["en", "zh-HK"]).optional(), tags: z.array(z.string().trim().min(1).max(30)).max(10).refine((tags) => new Set(tags).size === tags.length, "DUPLICATE_TAG").optional(), ownerProfileId: z.string().trim().min(1).max(200).nullable().optional()}).strict().refine((patch) => Object.keys(patch).length > 0, "EMPTY_PATCH"), reason: z.string().trim().min(3).max(500)}).strict();
 const channel = z.enum(["email", "whatsapp"]);
 const isoInstant = z.string().datetime({offset: true});
 const memberFields = z.enum(["displayName", "email", "companyName", "planCode", "membershipStatus", "renewalAt", "locale"]);

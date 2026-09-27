@@ -141,3 +141,11 @@ Current and incoming row values are displayed in the bilingual preview; exact-ID
 | 2026-09-27 | feature worktree | `npm run typecheck`; `npm run audit:strings`; `npx drizzle-kit check`; focused ESLint | exit 0; 278 TSX scanned | Type, bilingual strings, migration metadata and changed-source lint. Initial lint rejected a repository import from the membership folder; expiry runner moved to `lib/db/repos` and rerun passed. |
 
 No approved association grant policy, superadmin browser session, staging deployment, live expiry job or production grant was exercised. Both grant flags default off; migration 0048 exists only in the branch and disposable PostgreSQL tests.
+## T16 profile cleanup evidence
+
+| Date | Environment | Command | Result | Scope and limit |
+|---|---|---|---|---|
+| 2026-09-27 | feature worktree | `npx vitest run tests/unit/admin-batch-contract.test.ts tests/unit/admin-batch-profile-patch.test.ts`; `npm run typecheck` | exit 0; 6 unit cases passed; typecheck passed | Strict request allowlist, locked reread and audit SQL. Initial test run caught the old mock's missing locked read; fixture corrected after the real PostgreSQL test passed. |
+| 2026-09-27 | disposable PostgreSQL 16 via Docker | `RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/admin-batch-profile-cleanup.test.ts` | exit 0; 2 tests passed | Metadata-only patch, profile version and audit in one item transaction; owner role demotion after preview skips without metadata or audit. Initial behavior test failed with `BATCH_PATCH_UNAVAILABLE` before implementation. |
+
+Communication, invitation, ticket resend, export, staff browser and shared-environment evidence are not part of this slice. No real recipient or member was changed.

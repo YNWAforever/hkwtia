@@ -23,7 +23,7 @@ describe("profile patch batch handler", () => {
   });
 
   it("uses a version-checked profile update and audit inside the item transaction", async () => {
-    const {tx, statements} = executor((query) => /^UPDATE/i.test(query.trim()) ? [{id: "a"}] : []);
+    const {tx, statements} = executor((query) => /^UPDATE/i.test(query.trim()) ? [{id: "a"}] : /FROM "profiles"/i.test(query) ? [{id: "a", locale: "en", role: "member", updatedAt: "2026-09-27 00:00:00.123456+00", tags: [], ownerProfileId: null}] : []);
     const claim = {itemId: "22222222-2222-4222-8222-222222222222", batchId, operation: "profile_patch" as const, actorProfileId: "staff", request, target: {type: "profile" as const, id: "a"}, expectedVersion: "2026-09-27 00:00:00.123456+00", effectKey: "effect-a", attemptCount: 1, leaseOwner: "worker", leaseToken: 1};
     expect(await profilePatchBatchHandler.execute(staff, claim, tx)).toEqual({status: "succeeded", resultRef: "a"});
     expect(statements.some((query) => /UPDATE "profiles".*updated_at/i.test(query))).toBe(true);
