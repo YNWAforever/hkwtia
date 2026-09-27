@@ -78,6 +78,7 @@ export default async function MembershipPage({params}: Props) {
 
   return <>
     <PageHero
+        className="defer-following-sections"
       breadcrumb={{homeHref: "/", homeLabel: tCommon("breadcrumbHome"), current: t("title")}}
       breadcrumbLabel={tCommon("breadcrumbLabel")}
       eyebrow={t("eyebrow")}

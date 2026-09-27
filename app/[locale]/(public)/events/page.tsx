@@ -86,6 +86,7 @@ export default async function EventsPage({params, searchParams}: Props) {
   return (
     <>
       <PageHero
+        className="defer-following-sections"
         breadcrumb={{homeHref: "/", homeLabel: common("breadcrumbHome"), current: t("breadcrumbCurrent")}}
         breadcrumbLabel={common("breadcrumbLabel")}
         eyebrow={t("eyebrow")}

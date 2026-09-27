@@ -20,7 +20,7 @@ export async function Hero({locale}: Readonly<{locale: AppLocale}>) {
   const image = assertOwnOriginEditorialImage(HERO_IMAGE);
 
   return (
-    <section className="hero" aria-labelledby="hero-title">
+    <section className="hero defer-following-sections" aria-labelledby="hero-title">
       <Image alt={t('imageAlt')} className="hero-image" fill priority sizes="100vw" src={image} />
       <div className="hero-scrim" aria-hidden="true" />
       <div className="network-field" aria-hidden="true"><i /><i /><i /><i /><i /><i /></div>
