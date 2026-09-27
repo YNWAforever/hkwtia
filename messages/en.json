@@ -118,6 +118,7 @@
     "dismiss": "Dismiss announcement"
   },
   "Footer": {
+    "staffSignIn": "Staff sign in",
     "brand": {
       "publicName": "WiseTech Hong Kong",
       "descriptor": "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association",
@@ -986,9 +987,32 @@
       "textVersion": "Consent wording 2026-09-v1"
     }
   },
+  "AdminLogin": {
+    "title": "Staff sign in",
+    "help": "Use your WTIA staff email to request a secure sign-in link. Access to the workspace still requires a staff role.",
+    "navigation": "Helpful links",
+    "home": "Home",
+    "memberSignIn": "Member sign in",
+    "memberPortal": "Open member portal",
+    "support": "Contact support",
+    "emailLabel": "Staff email address",
+    "submit": "Send sign-in link",
+    "resend": "Resend sign-in link",
+    "sent": "Check your inbox for the sign-in link. It will return you to the staff workspace after your role is verified.",
+    "deliveryHelp": "If the email does not arrive, check your spam folder or contact support.",
+    "accessDenied": "Staff access is unavailable for this account",
+    "accessDeniedHelp": "This signed-in account does not have a staff role. Use your member portal or contact WTIA support if you expected staff access.",
+    "errors": {
+      "email": "Enter a valid email address.",
+      "invalidContinuation": "That staff destination is invalid. Start again from staff sign in.",
+      "rateLimited": "Too many sign-in emails have been requested. Wait and try again.",
+      "auth": "We could not send the sign-in link. Please try again."
+    }
+  },
   "MemberLogin": {
     "home": "Home",
     "join": "Join WTIA",
+    "staffSignIn": "Staff sign in",
     "support": "Contact support",
     "navigation": "Helpful links",
     "help": "Enter your email to receive a secure sign-in link.",

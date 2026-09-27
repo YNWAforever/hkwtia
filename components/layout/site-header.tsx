@@ -75,7 +75,7 @@ export async function SiteHeader({locale, hasAnnouncement = false}: SiteHeaderPr
             switchToChineseLabel={mobileLabels.switchToChinese}
           />
           <WhatsAppLink className="signin-link" label={tWhatsApp("chat")} locale={locale} prefill={tWhatsApp("prefill.header")} source="header" />
-          <Link className="signin-link" href={navigation.memberPortal.href}>
+          <Link className="signin-link member-login-link" href={navigation.memberPortal.href}>
             {navigation.memberPortal.label}
           </Link>
           {/* Plain Link, not ActionLink: the donor's header button carries no arrow (errata E-16). */}

@@ -119,6 +119,7 @@
     "dismiss": "關閉公告"
   },
   "Footer": {
+    "staffSignIn": "職員登入",
     "brand": {
       "publicName": "WiseTech Hong Kong",
       "descriptor": "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台",
@@ -986,9 +987,32 @@
       "textVersion": "同意書版本 2026-09-v1"
     }
   },
+  "AdminLogin": {
+    "title": "職員登入",
+    "help": "輸入你的 WTIA 職員電郵地址，索取安全登入連結。進入工作平台仍須通過職員權限驗證。",
+    "navigation": "實用連結",
+    "home": "主頁",
+    "memberSignIn": "會員登入",
+    "memberPortal": "前往會員平台",
+    "support": "聯絡支援",
+    "emailLabel": "職員電郵地址",
+    "submit": "傳送登入連結",
+    "resend": "重新傳送登入連結",
+    "sent": "請查看收件箱。完成登入及職員權限驗證後，你會返回工作平台。",
+    "deliveryHelp": "如未收到電郵，請檢查垃圾郵件資料夾或聯絡支援。",
+    "accessDenied": "此帳戶沒有職員存取權",
+    "accessDeniedHelp": "目前登入的帳戶沒有職員角色。你可以使用會員平台；如認為應有職員權限，請聯絡 WTIA 支援。",
+    "errors": {
+      "email": "請輸入有效電郵地址。",
+      "invalidContinuation": "職員平台連結無效，請從職員登入頁重新開始。",
+      "rateLimited": "登入電郵請求過於頻繁，請稍後再試。",
+      "auth": "暫時無法傳送登入連結，請再試一次。"
+    }
+  },
   "MemberLogin": {
     "home": "主頁",
     "join": "加入 WTIA",
+    "staffSignIn": "職員登入",
     "support": "聯絡支援",
     "navigation": "常用連結",
     "help": "請輸入電郵地址，以接收安全登入連結。",

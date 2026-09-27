@@ -81,6 +81,7 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
           <nav aria-label={t("navigation")} className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
             <Link className="min-h-11 content-center underline-offset-4 hover:underline" href="/">{t("home")}</Link>
             <Link className="min-h-11 content-center underline-offset-4 hover:underline" href="/join">{t("join")}</Link>
+            <Link className="min-h-11 content-center underline-offset-4 hover:underline" href="/admin-login">{t("staffSignIn")}</Link>
             <a className="min-h-11 content-center underline-offset-4 hover:underline" href={`mailto:${siteConfig.contact.email}`}>{t("support")}</a>
           </nav>
         </header>

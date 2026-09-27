@@ -56,6 +56,7 @@ describe("MemberLoginPage", () => {
     expect(screen.getByRole("img", {name: "logoAlt"})).toBeInTheDocument();
     expect(screen.getByRole("link", {name: "home"})).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", {name: "join"})).toHaveAttribute("href", "/join");
+    expect(screen.getByRole("link", {name: "staffSignIn"})).toHaveAttribute("href", "/admin-login");
     expect(screen.getByRole("link", {name: "support"})).toHaveAttribute("href", expect.stringMatching(/^mailto:/));
   });
 

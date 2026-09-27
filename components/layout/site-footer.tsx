@@ -138,6 +138,7 @@ export async function SiteFooter({locale}: {locale: AppLocale}) {
           {contactLink === null ? null : (
             <Link className={footerTargetClassName} href={contactLink.href}>{contactLink.label}</Link>
           )}
+          <Link className={footerTargetClassName} href="/admin-login">{t("staffSignIn")}</Link>
           <a className={footerTargetClassName} href={`mailto:${siteConfig.contact.email}`}>
             {siteConfig.contact.email}
           </a>

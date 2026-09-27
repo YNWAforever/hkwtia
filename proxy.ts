@@ -7,6 +7,8 @@ import {
 } from "@neondatabase/auth/server";
 
 import {authEnv} from "@/lib/config/env";
+import {allowedAdminDestination} from "@/lib/auth/login-destination";
+import {localizedPath} from "@/lib/urls";
 import {routing} from "./i18n/routing";
 
 /**
@@ -115,8 +117,20 @@ const neonAuthExchange = createNeonAuthExchange(
 );
 const intlMiddleware = createMiddleware(routing);
 
+export function anonymousAdminLoginRedirect(request: NextRequest): NextResponse | null {
+  if (request.cookies.has(NEON_AUTH_SESSION_COOKIE_NAME)) return null;
+  const pathname = request.nextUrl.pathname;
+  const locale = pathname === "/zh" || pathname.startsWith("/zh/") ? "zh-HK" : "en";
+  const internalPath = locale === "zh-HK" ? pathname.slice(3) || "/" : pathname;
+  const destination = allowedAdminDestination(`${internalPath}${request.nextUrl.search}`);
+  if (!destination) return null;
+  const login = new URL(localizedPath(locale, "/admin-login"), request.url);
+  login.searchParams.set("next", destination);
+  return NextResponse.redirect(login, 307);
+}
+
 export default async function middleware(request: NextRequest): Promise<NextResponse> {
-  return (await neonAuthExchange(request)) ?? intlMiddleware(request);
+  return (await neonAuthExchange(request)) ?? anonymousAdminLoginRedirect(request) ?? intlMiddleware(request);
 }
 
 export const config = {

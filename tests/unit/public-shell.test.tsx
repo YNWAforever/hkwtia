@@ -103,7 +103,7 @@ describe("public shell server surfaces", () => {
       actions: markup.indexOf('class="header-actions"'),
       search: markup.indexOf('class="search-link"'),
       language: markup.indexOf("language-link"),
-      signIn: markup.indexOf('class="signin-link"'),
+      signIn: markup.indexOf('class="signin-link member-login-link"'),
       join: markup.indexOf("button button-small"),
       mobileTrigger: markup.indexOf('class="mobile-trigger"'),
     };
@@ -135,9 +135,9 @@ describe("public shell server surfaces", () => {
       "/events", "/launchpad", "/programmes", "/programs/hkict", "/programs/asa", "/programs/tct", "/programs/cpai",
       "/membership", "/showcase", "/news", "/ai-ops", "/ai-transparency", "/about", "/about/history",
       "/about/chairman", "/about/committees", "/contact", "/partners", "/privacy",
-      // The Membership column carries the two action destinations as well; without them here a
-      // dropped Join or Member sign-in link would leave the sweep untouched.
-      "/join", "/member-login",
+      // The Membership column carries Join and Member sign-in; Contact now carries staff
+      // sign-in. Keep all three in the exact route inventory.
+      "/join", "/member-login", "/admin-login",
       "mailto:contact@hkwtia.org",
     ];
     const targetHrefs = new Set(expectedHrefs);
