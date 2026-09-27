@@ -1,0 +1,37 @@
+{
+  "applicationSha": "1e4f6246ac42f3dd0249acad2be949aaf94a6aa6",
+  "runId": 36328316486,
+  "url": "https://github.com/YNWAforever/hkwtia/actions/runs/36328316486",
+  "status": "success",
+  "jobs": [
+    "checks",
+    "tests (1)",
+    "tests (2)",
+    "quality"
+  ],
+  "environment": "Ubuntu GitHub runner; Node22",
+  "testSummaries": [
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-09-27T15:09:54.1771481Z  Test Files  343 passed | 29 skipped (372)",
+    "tests (1)\tRun npx vitest run --shard=1/2\t2026-09-27T15:09:54.1807494Z       Tests  3098 passed | 79 skipped (3177)",
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-09-27T15:09:00.4039059Z  Test Files  346 passed | 26 skipped (372)",
+    "tests (2)\tRun npx vitest run --shard=2/2\t2026-09-27T15:09:00.4071193Z       Tests  2829 passed | 68 skipped (2897)"
+  ],
+  "skips": "Credential/opt-in integration cases are skipped by the standard CI suite. Separately executed isolated browser/DB/provider acceptance is recorded in adjacent evidence.",
+  "productionDependencyAudit": {
+    "high": 0,
+    "critical": 0,
+    "moderate": 10,
+    "low": 1,
+    "command": "npm audit --omit=dev --audit-level=high"
+  },
+  "rawLogSha256": "5149a6b7d49f42c2f63f4070f9179174c0c0c2093bec55696154de4bde70f158",
+  "tests": {
+    "passed": 5927,
+    "failed": 0,
+    "skipped": 147
+  },
+  "files": {
+    "passed": 689,
+    "skipped": 55
+  }
+}

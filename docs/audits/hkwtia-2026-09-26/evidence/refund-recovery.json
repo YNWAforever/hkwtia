@@ -1,0 +1,48 @@
+{
+  "scope": "Recover verified Stripe TEST refund after local audit rollback",
+  "before": {
+    "orderId": "49b23869-02e4-431e-a577-0180ed57e31e",
+    "eventId": "be945154-d2e8-45d4-94ac-828cd9601d09",
+    "sessionId": "cs_test_a1wWm4SP1dUhIB7IgT0XJhsnHHcTehj7ovQiFJzEffz6W8HmZ6HXgtYE2u",
+    "paymentIntent": "pi_3UKJRWELEX4A1xsq1evx8dQY",
+    "refunds": [
+      {
+        "id": "re_3UKJRWELEX4A1xsq1ZLzuTqv",
+        "status": "succeeded",
+        "amount": 7500,
+        "currency": "hkd"
+      }
+    ]
+  },
+  "steps": [
+    "Provider refund verified before recovery",
+    "Both locale confirmation screens",
+    "Local refund reconciled through staff action",
+    "Stale second staff action reports already refunded",
+    "Both locale passes404 and seats absent",
+    "One unchanged provider refund, one profile-linked audit and one notice"
+  ],
+  "verificationMode": "Read-only consequences after the recorded UI reconciliation and stale second submission; original selector failure retained",
+  "audit": [
+    {
+      "actor_user_id": "m2-staff-01",
+      "actor_type": "staff",
+      "reason": "provider_reconciled"
+    }
+  ],
+  "refundNoticeCount": 1,
+  "applicationSha": "1e4f6246ac42f3dd0249acad2be949aaf94a6aa6",
+  "recordedAt": "2026-09-27",
+  "environment": "Windows Node 24.18.0; localhost:3011; isolated Neon/Auth branch br-lingering-unit-azxl75s5; hkwtia_m2_audit; Stripe test; email test transport; no scheduled worker",
+  "readOnlyVerificationSha256": "6c837a05ad1542665864a96d538d05cbda286a55bf42eafd14ad1c605aa8c6d5",
+  "rawLogSha256": "05e94b66872f33e309156d912d1f20d6193ed6fc28db4935bcc1958dccfacc25",
+  "attemptHistory": [
+    "Initial real refund succeeded at Stripe but local transaction rolled back on audit actor FK.",
+    "Recovery staff action reconciled local state. Stale second staff action returned already refunded; original harness failed because getByRole(alert) also matched Next empty announcer.",
+    "Independent read-only browser/DB/provider verification passed; original selector failure is not relabelled a complete harness pass."
+  ],
+  "limits": [
+    "No second provider refund was created",
+    "Email test transport only"
+  ]
+}

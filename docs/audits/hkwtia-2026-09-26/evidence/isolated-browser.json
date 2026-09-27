@@ -1,0 +1,442 @@
+{
+  "recordedDate": "2026-09-27",
+  "implementationCommits": [
+    "1f6296c0",
+    "0d5dcc11",
+    "33b5e4b9",
+    "42fb5a8f"
+  ],
+  "environment": {
+    "web": "Next development server on localhost:3011",
+    "database": "dedicated Neon branch br-lingering-unit-azxl75s5, 50 migrations",
+    "auth": "real Neon Auth with five synthetic identities",
+    "node": "v24.18.0",
+    "os": "Windows",
+    "browser": "Playwright Chromium 1228",
+    "workers": 1,
+    "scheduledWorker": "none; guarded fixture drivers only"
+  },
+  "uniquePassedCasesAcrossRuns": 24,
+  "runs": [
+    {
+      "report": "isolated-journeys-third.json",
+      "sourceSha256": "54d491a6469d58b248c3f277189b8e73e197fd459e5fcd64791235c046fc6184",
+      "startedAt": "2026-09-27T12:18:24.125Z",
+      "durationMs": 473556.083,
+      "counts": {
+        "passed": 11,
+        "failed": 1,
+        "timedOut": 0,
+        "skipped": 0,
+        "not-run": 0
+      },
+      "tests": [
+        {
+          "file": "admin-batches.spec.ts",
+          "title": "en: ten selected members, two controlled failures, retry only failures",
+          "status": "passed",
+          "durationMs": 62112
+        },
+        {
+          "file": "admin-batches.spec.ts",
+          "title": "zh-HK: ten selected members, two controlled failures, retry only failures",
+          "status": "passed",
+          "durationMs": 60663
+        },
+        {
+          "file": "admin-event-authoring.spec.ts",
+          "title": "en: staff event modes survive create, edit and public rendering",
+          "status": "passed",
+          "durationMs": 96043
+        },
+        {
+          "file": "admin-event-authoring.spec.ts",
+          "title": "zh-HK: staff event modes survive create, edit and public rendering",
+          "status": "failed",
+          "durationMs": 20077
+        },
+        {
+          "file": "admin-members.spec.ts",
+          "title": "en: member search, detail and return retain the filter",
+          "status": "passed",
+          "durationMs": 31011
+        },
+        {
+          "file": "admin-members.spec.ts",
+          "title": "zh-HK: member search, detail and return retain the filter",
+          "status": "passed",
+          "durationMs": 16085
+        },
+        {
+          "file": "event-check-in.spec.ts",
+          "title": "en: staff finds and checks in a confirmed guest at 390px",
+          "status": "passed",
+          "durationMs": 15532
+        },
+        {
+          "file": "event-check-in.spec.ts",
+          "title": "zh-HK: staff finds and checks in a confirmed guest at 390px",
+          "status": "passed",
+          "durationMs": 24705
+        },
+        {
+          "file": "join-resume.spec.ts",
+          "title": "en: signed-in join start and return are resumable across tabs",
+          "status": "passed",
+          "durationMs": 38083
+        },
+        {
+          "file": "join-resume.spec.ts",
+          "title": "zh-HK: signed-in join start and return are resumable across tabs",
+          "status": "passed",
+          "durationMs": 13865
+        },
+        {
+          "file": "public-cache-isolation.spec.ts",
+          "title": "member A, company member B and guest see only the public bilingual news projection",
+          "status": "passed",
+          "durationMs": 30838
+        },
+        {
+          "file": "public-cache-isolation.spec.ts",
+          "title": "a staff bilingual copy save invalidates warmed public entries in separate guest contexts",
+          "status": "passed",
+          "durationMs": 57274
+        }
+      ]
+    },
+    {
+      "report": "isolated-import-event-rsvp.json",
+      "sourceSha256": "10232172d9043b3acc39683c164043f3e61c66c5dae94bdc64753d3cf742d2fd",
+      "startedAt": "2026-09-27T12:28:38.750Z",
+      "durationMs": 116080.92599999999,
+      "counts": {
+        "passed": 0,
+        "failed": 2,
+        "timedOut": 0,
+        "skipped": 0,
+        "not-run": 4
+      },
+      "tests": [
+        {
+          "file": "admin-event-authoring.spec.ts",
+          "title": "en: staff event modes survive create, edit and public rendering",
+          "status": "failed",
+          "durationMs": 73699
+        },
+        {
+          "file": "admin-event-authoring.spec.ts",
+          "title": "zh-HK: staff event modes survive create, edit and public rendering",
+          "status": "failed",
+          "durationMs": 24527
+        },
+        {
+          "file": "admin-imports.spec.ts",
+          "title": "en: import reviews differences and commits only two eligible synthetic rows",
+          "status": "not-run",
+          "durationMs": 0
+        },
+        {
+          "file": "admin-imports.spec.ts",
+          "title": "zh-HK: import reviews differences and commits only two eligible synthetic rows",
+          "status": "not-run",
+          "durationMs": 0
+        },
+        {
+          "file": "guest-rsvp-recovery.spec.ts",
+          "title": "en: empty RSVP and a lost action response stay on the form",
+          "status": "not-run",
+          "durationMs": 0
+        },
+        {
+          "file": "guest-rsvp-recovery.spec.ts",
+          "title": "zh-HK: empty RSVP and a lost action response stay on the form",
+          "status": "not-run",
+          "durationMs": 0
+        }
+      ]
+    },
+    {
+      "report": "isolated-import-event-rsvp-recheck.json",
+      "sourceSha256": "85f0968f8ba9c97d91666fb47847a00d980aa9b8818713fcc8ad8a6d001c6585",
+      "startedAt": "2026-09-27T12:31:42.854Z",
+      "durationMs": 574292.986,
+      "counts": {
+        "passed": 7,
+        "failed": 2,
+        "timedOut": 0,
+        "skipped": 2,
+        "not-run": 1
+      },
+      "tests": [
+        {
+          "file": "admin-event-authoring.spec.ts",
+          "title": "en: staff event modes survive create, edit and public rendering",
+          "status": "passed",
+          "durationMs": 134146
+        },
+        {
+          "file": "admin-event-authoring.spec.ts",
+          "title": "zh-HK: staff event modes survive create, edit and public rendering",
+          "status": "passed",
+          "durationMs": 108631
+        },
+        {
+          "file": "admin-imports.spec.ts",
+          "title": "en: import reviews differences and commits only two eligible synthetic rows",
+          "status": "passed",
+          "durationMs": 88804
+        },
+        {
+          "file": "admin-imports.spec.ts",
+          "title": "zh-HK: import reviews differences and commits only two eligible synthetic rows",
+          "status": "passed",
+          "durationMs": 54078
+        },
+        {
+          "file": "guest-rsvp-recovery.spec.ts",
+          "title": "en: empty RSVP and a lost action response stay on the form",
+          "status": "skipped",
+          "durationMs": 40607
+        },
+        {
+          "file": "guest-rsvp-recovery.spec.ts",
+          "title": "zh-HK: empty RSVP and a lost action response stay on the form",
+          "status": "skipped",
+          "durationMs": 35611
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "en: long home sections defer layout and reveal on keyboard focus",
+          "status": "passed",
+          "durationMs": 9550
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "en: programme anchors reveal their sections and print includes the full page",
+          "status": "failed",
+          "durationMs": 40873
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "en: membership FAQ remains available on direct fragment navigation",
+          "status": "passed",
+          "durationMs": 15786
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "/zh: long home sections defer layout and reveal on keyboard focus",
+          "status": "passed",
+          "durationMs": 7927
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "/zh: programme anchors reveal their sections and print includes the full page",
+          "status": "failed",
+          "durationMs": 27095
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "/zh: membership FAQ remains available on direct fragment navigation",
+          "status": "not-run",
+          "durationMs": 0
+        }
+      ]
+    },
+    {
+      "report": "isolated-grant-rsvp-rendering.json",
+      "sourceSha256": "32356fa6e8a41e753639d715366df0df928e01db91991580a5357227289b1bbd",
+      "startedAt": "2026-09-27T12:44:01.009Z",
+      "durationMs": 370456.783,
+      "counts": {
+        "passed": 0,
+        "failed": 0,
+        "timedOut": 2,
+        "skipped": 0,
+        "not-run": 8
+      },
+      "tests": [
+        {
+          "file": "admin-grants.spec.ts",
+          "title": "en: only superadmin grants a finite membership and duplicate submission preserves one grant",
+          "status": "timedOut",
+          "durationMs": 180012
+        },
+        {
+          "file": "admin-grants.spec.ts",
+          "title": "zh-HK: only superadmin grants a finite membership and duplicate submission preserves one grant",
+          "status": "timedOut",
+          "durationMs": 180008
+        },
+        {
+          "file": "guest-rsvp-recovery.spec.ts",
+          "title": "en: empty RSVP and a lost action response stay on the form",
+          "status": "not-run",
+          "durationMs": 0
+        },
+        {
+          "file": "guest-rsvp-recovery.spec.ts",
+          "title": "zh-HK: empty RSVP and a lost action response stay on the form",
+          "status": "not-run",
+          "durationMs": 0
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "en: long home sections defer layout and reveal on keyboard focus",
+          "status": "not-run",
+          "durationMs": 0
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "en: programme anchors reveal their sections and print includes the full page",
+          "status": "not-run",
+          "durationMs": 0
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "en: membership FAQ remains available on direct fragment navigation",
+          "status": "not-run",
+          "durationMs": 0
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "/zh: long home sections defer layout and reveal on keyboard focus",
+          "status": "not-run",
+          "durationMs": 0
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "/zh: programme anchors reveal their sections and print includes the full page",
+          "status": "not-run",
+          "durationMs": 0
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "/zh: membership FAQ remains available on direct fragment navigation",
+          "status": "not-run",
+          "durationMs": 0
+        }
+      ]
+    },
+    {
+      "report": "isolated-grant-rsvp-rendering-recheck.json",
+      "sourceSha256": "878338e32c4851e030d8d74df4e988724a32e5615ed22eef22d30fb6213b8021",
+      "startedAt": "2026-09-27T12:52:00.794Z",
+      "durationMs": 293520.91000000003,
+      "counts": {
+        "passed": 6,
+        "failed": 4,
+        "timedOut": 0,
+        "skipped": 0,
+        "not-run": 0
+      },
+      "tests": [
+        {
+          "file": "admin-grants.spec.ts",
+          "title": "en: only superadmin grants a finite membership and duplicate submission preserves one grant",
+          "status": "failed",
+          "durationMs": 75031
+        },
+        {
+          "file": "admin-grants.spec.ts",
+          "title": "zh-HK: only superadmin grants a finite membership and duplicate submission preserves one grant",
+          "status": "failed",
+          "durationMs": 87456
+        },
+        {
+          "file": "guest-rsvp-recovery.spec.ts",
+          "title": "en: empty RSVP and a lost action response stay on the form",
+          "status": "failed",
+          "durationMs": 26600
+        },
+        {
+          "file": "guest-rsvp-recovery.spec.ts",
+          "title": "zh-HK: empty RSVP and a lost action response stay on the form",
+          "status": "failed",
+          "durationMs": 6453
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "en: long home sections defer layout and reveal on keyboard focus",
+          "status": "passed",
+          "durationMs": 6222
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "en: programme anchors reveal their sections and print includes the full page",
+          "status": "passed",
+          "durationMs": 15541
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "en: membership FAQ remains available on direct fragment navigation",
+          "status": "passed",
+          "durationMs": 14969
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "/zh: long home sections defer layout and reveal on keyboard focus",
+          "status": "passed",
+          "durationMs": 7794
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "/zh: programme anchors reveal their sections and print includes the full page",
+          "status": "passed",
+          "durationMs": 2831
+        },
+        {
+          "file": "public-rendering.spec.ts",
+          "title": "/zh: membership FAQ remains available on direct fragment navigation",
+          "status": "passed",
+          "durationMs": 10420
+        }
+      ]
+    },
+    {
+      "report": "isolated-grant-rsvp-final.json",
+      "sourceSha256": "71f38f1af14b72be921dd140cbf48400c9f8e18ac2dde9b2eb36b0cb744daedb",
+      "startedAt": "2026-09-27T12:57:59.617Z",
+      "durationMs": 161038.552,
+      "counts": {
+        "passed": 4,
+        "failed": 0,
+        "timedOut": 0,
+        "skipped": 0,
+        "not-run": 0
+      },
+      "tests": [
+        {
+          "file": "admin-grants.spec.ts",
+          "title": "en: only superadmin grants a finite membership and duplicate submission preserves one grant",
+          "status": "passed",
+          "durationMs": 71505
+        },
+        {
+          "file": "admin-grants.spec.ts",
+          "title": "zh-HK: only superadmin grants a finite membership and duplicate submission preserves one grant",
+          "status": "passed",
+          "durationMs": 66343
+        },
+        {
+          "file": "guest-rsvp-recovery.spec.ts",
+          "title": "en: empty RSVP and a lost action response stay on the form",
+          "status": "passed",
+          "durationMs": 10432
+        },
+        {
+          "file": "guest-rsvp-recovery.spec.ts",
+          "title": "zh-HK: empty RSVP and a lost action response stay on the form",
+          "status": "passed",
+          "durationMs": 6132
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Focused runs span the listed fixes; not one clean full-suite run.",
+    "No real payment, refund, member message or production mutation.",
+    "Hosted web/worker staging, provider acceptance and RUM remain unverified.",
+    "Earlier stopped runs and all raw reports remain in ignored .tmp/audit-release."
+  ]
+}

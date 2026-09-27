@@ -40,6 +40,34 @@ All listed audit source paths still exist at the identical Git SHA. No historica
 | Observability / alert rehearsal | lib/observability/audit-metrics.ts, audit-alerts.ts; scripts/audit-alert-check.ts |
 | Whole-journey browser gate | Existing focused tests plus admin-batches.spec.ts/public-cache-isolation.spec.ts; .github/workflows/audit-acceptance.yml |
 
-The original T00 environment statement is historical. Since then, Docker-owned disposable PostgreSQL fixtures have run migrations/seeds, capacity and transactional checks. No configured shared DATABASE_URL_TEST, authenticated Preview or production migration has been used.
+The original T00 environment statement is historical. Since then, Docker-owned disposable PostgreSQL fixtures have run migrations/seeds, capacity and transactional checks. At that checkpoint no configured shared DATABASE_URL_TEST or authenticated browser identity had been used; the later isolated Neon setup below supersedes this environment gate. No production migration has been used.
 
 Current continuation adds migration 0050_event_attendee_exports after the 49-entry chain used by earlier capacity evidence. It widens the existing batch operation CHECK and adds a short-lived private artifact table. The background export reuses events.listAttendeePage, admin-batches, its authenticated worker route, and /api/admin/batches/[id]/export; no parallel export service was added.
+
+## Approved continuation: public Preview access
+
+The continuation began from 2b77fb871ff54006b0d51222caba730fd936b174 on the same isolated branch. PR #94 was already ready for review (no longer draft); the external automated review reported that it was skipped for unavailable service usage. That is not review approval.
+
+Authorized Vercel protection access now permits read-only public checks on https://hkwtia-1iubzqpi0-ynwaforevers-projects.vercel.app. Only the deployment protection cookie is retained under ignored .playwright/. This public protection step supplied no member/staff session or database credential. The subsequent isolated Neon setup below supplies synthetic identities; the then-current payment preflight was unsatisfied; the test-mode continuation below supersedes that credential gate.
+
+Rendering path mapping: handwritten app/styles/wisetech-shell.css owns the five-page opt-in; components/home/hero.tsx and the four existing public landing pages mark the starting hero. The generated wisetech.css port stays byte-pinned. tests/e2e/public-rendering.spec.ts checks native focus, fragments and print against an actual server.
+
+## Isolated Neon and Auth continuation
+
+Created branch codex-audit-20260927 (br-lingering-unit-azxl75s5) under the pre-existing hkwtia-m2-preview project solitary-wave-52860119. The production project fragrant-mountain-25240574 was not used. This new branch expires at 2026-10-04T12:00:00Z. Its cloned ledger contained six migrations and 30 synthetic M2 profiles. The actual repository migration runner applied the remaining chain through 0050; the M1 and guarded M2 seeds then succeeded. Five newly created synthetic Auth users map to the existing staff/member/company-admin/ExCo/superadmin fixtures. No verification email was sent.
+
+Private connection strings, session cookies and generated passwords remain in ignored .playwright files. Local Next at localhost:3011 uses only this new branch. ADMIN_BATCH_ENABLED, MEMBER_IMPORT_ENABLED and MEMBERSHIP_GRANTS_ENABLED were enabled only there; no scheduled worker is connected. Existing batch worker repositories are driven by guarded fixture tools. The initial non-payment runs lacked STRIPE_TEST_SECRET_KEY; the subsequently supplied test key is privately configured and the real test flow below passed. The strict complete preflight still requires all 16 base inputs plus nine role/journey fixture inputs; independent non-payment browser suites require their 12 identity/database inputs. See evidence/isolated-neon-environment.json.
+
+## Test payment and final application baseline
+
+At 69eba85fe01a501a30560223e8f0ae8ff5a1fd40, CI and the median Linux Lighthouse gate pass. Vercel deployment dpl_Gqzg4LYYvYqEQNEAwsnKNJqosbfc is READY at https://hkwtia-pliwy2vk8-ynwaforevers-projects.vercel.app. Later verification-only commits are recorded in verification.md. No production alias was promoted.
+
+A sixth synthetic Auth identity was added for payment acceptance. The user-supplied Stripe test key is stored only in ignored local test env files. Old Preview price IDs were absent from that test account; isolated products/prices use the unchanged seed amounts (startup HK$2,400/year; corporate HK$12,000/year, HKD, livemode=false). Stripe CLI forwarded genuine signed test events only to the local application. Membership 0e0fb976-6ef1-4efe-93cc-a7be55454d2a is now active after a real test payment. No live payment or real member message occurred.
+
+For the strict M2 CRM suite, a separate empty hkwtia_m2_audit database was created on the same isolated branch, migrated through all 50 entries and seeded with exactly 30 M2 profiles. Five existing synthetic Auth IDs were mapped there. This preserves the first database's completed payment and grant evidence while providing the report's original fixture baseline. The operational queue tests explicitly rebase only known M2 fixture dates; historical July report checks restore the original dates.
+
+## Final application candidate after provider acceptance
+
+`1e4f6246ac42f3dd0249acad2be949aaf94a6aa6` includes two real-provider-discovered repairs: signed ticket paths now reach locale routing, and refund audit rows use the authenticated application profile ID required by the audit foreign key. The exact candidate Preview is https://hkwtia-p7vk6461f-ynwaforevers-projects.vercel.app (dpl_AvucgCHx4LsXy66QbaDJ6sua161f). Test/release-document commits after this SHA do not alter application behavior.
+
+The isolated hkwtia_m2_audit database now contains the completed three-seat payment/refund evidence and earlier failed-attempt fixtures. The original membership fixture remains active in neondb. These consumed fixtures are retained; a new strict CRM seed or pending-payment fixture must use a fresh isolated baseline. All payment/refund objects have livemode=false. Ticket email uses only the test transport.

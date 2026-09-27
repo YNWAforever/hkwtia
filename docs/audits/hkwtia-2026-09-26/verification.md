@@ -55,7 +55,7 @@ Record every result with date, SHA, environment, command, exit code, count, skip
 | 2026-09-27 | T08 feature worktree | `npm run typecheck`; `npm run audit:strings`; focused ESLint | exit 0 for all; 268 TSX scanned | Types, bilingual copy, changed-code lint. |
 | 2026-09-27 | T08 managed local Next server | `npx playwright test tests/e2e/event-check-in.spec.ts` | exit 0; 2 skipped | Isolated staff/database/confirmed guest and non-Production Preview absent; no 390px browser acceptance. |
 
-## Outstanding gates
+## Historical gates at T08 (superseded by later evidence)
 
 - The Lighthouse target CLI shebang was removed so Vitest can import its exported function; its nine tests and the full suite now pass. This is a test-loader repair, not a production Lighthouse measurement.
 - No isolated `DATABASE_URL_TEST` or Stripe test variables in this shell. Disposable Docker PostgreSQL 16 suites ran with synthetic data; no shared-host migrations, seeds or paid flows ran.
@@ -374,3 +374,104 @@ Reproduction corrections: Windows Chrome-launcher cleanup first failed with EPER
 For a repeat, build and serve with matching NEXT_PUBLIC_SITE_URL/APP_URL and browser origin, use three runs per URL in the committed locale order, a fresh profile, and filesystem-only LHCI output. The sanitized exact local collection config is `evidence/lighthouse-local.config.json`; its debugging port requires an operator-owned headless Chrome. Use a new private profile and disable extensions. Do not reuse any authenticated production session.
 
 Compact evidence: `evidence/final-gates.json` records command results, skips and source report hashes; `evidence/lighthouse-local.json` contains every run, medians, device settings, warnings and raw report hashes. Raw reports remain in ignored `.tmp/audit-release/`. The release runbook and decisions retain every policy/environment gate.
+
+## Approved continuation: Preview and rendering regressions
+
+At application SHA 2b77fb871ff54006b0d51222caba730fd936b174, the first protected Preview public walk produced 21 passes, one failure and two skips. The failing English home was actually Chinese because the saved protection session also contained NEXT_LOCALE=zh-HK. The cookie serializer regression reproduced that boundary (1 failed, 9 passed), then passed 10/10 after the fix. With only the protection cookie retained, the actual public walk passed 22 cases and skipped the two locally gated Auth cases (2.0 minutes). English route tests now explicitly assert their language.
+
+A separate real Preview browser run exercised both public login screens: HTTP 200, billing continuation, join/support links and rejection of /admin as a member continuation all passed in both locales. No login email was submitted, and no member session or mutation was used. PLAYWRIGHT_PUBLIC_AUTH=true makes these same existing tests run in the next remote public suite without supplying server secrets locally.
+
+Before the rendering fix, the new browser regression failed because a distant home heading was already fully rendered (checkVisibility with contentVisibilityAuto returned true). The paired layout probe and new regression use real pages, not mocked HTML. Focus/fragment/print, the final build and repeated Lighthouse results are recorded in the subsequent continuation evidence. The first build attempt after extracting the serializer failed on its missing .d.mts export; that declaration was added before the repeated build. No failed attempt is a release pass.
+
+## Real isolated Neon/Auth browser acceptance (approved continuation)
+
+The new Neon branch br-lingering-unit-azxl75s5 in hkwtia-m2-preview was migrated through 0050 with the repository migration runner and seeded with guarded synthetic M1/M2 data. Five real Auth password identities were mapped to existing test roles. Local Next at localhost:3011 used only that branch. No production database, real recipient or live payment provider was used. See evidence/isolated-neon-environment.json and evidence/isolated-browser.json for environment, per-case outcomes and report hashes.
+
+| Actual focused run | Result | Diagnosis / scope |
+|---|---|---|
+| Initial member selection browser attempts | failed/stopped | Real next-intl ICU errors broke checkbox labels; 1f6296c0 fixes raw count/name templates. A real formatter regression failed in both locales before the fix. A subsequent test selector incorrectly required an exact label around a select containing option text; corrected by selecting the batch combobox. |
+| isolated-journeys-third | 11 passed, 1 failed, zero skips | Both locales: batch 8-success/2-failure and retry-of-2, member search/detail/purchases/return, 390px guest check-in, join start/second-tab resume; A/B/guest cache and bilingual CMS warm-cache invalidation passed. Chinese event case collided with the preceding English title; fixture titles now include their unique slug. |
+| isolated-import-event-rsvp | 2 failed, 4 not run | Temporary malformed JSON during an uncommitted translation edit caused compile/auth failures. Both bundles were repaired and parsed before rerun. |
+| isolated-import-event-rsvp-recheck | 7 passed, 2 failed, 2 skipped, 1 not run | Both four-mode event journeys and both import workflows passed. Import assertions include 1 create/1 update/1 duplicate/1 invalid, exact eligible selection, before/incoming labels, two effects/audits and zero memberships. Print failed because selector specificity overrode the print rule; RSVP discovery skipped when the first six events were external fixtures. |
+| isolated-grant-rsvp-rendering | 2 timed out, 8 not run | Cold dev compilation consumed the first grant test; five real identity sessions exceeded the original 180-second bound. The five-role test now has a bounded 420-second timeout. |
+| isolated-grant-rsvp-rendering-recheck | 6 passed, 4 failed | All bilingual focus/fragment/print cases passed after 33b5e4b9. Grant duplicate test needed to refill the React-reset form; RSVP test used the wrong translation path. Harness corrected, with an explicit fixture slug and typed bundle. |
+| isolated-grant-rsvp-final | 4 passed, zero skips; 2.7 minutes | Both locales: five-role grant boundary, finite window, repeat refusal, exactly one grant/audit; empty RSVP validation/focus and aborted action response preserving inputs. |
+| Final focused unit set | 4 files / 15 tests passed | Real bilingual member/import translator, isolated runtime mapping, M2 browser contract, and artifact-upload guard. The project mapping test first failed on an unrelated inherited Neon project; it now maps the explicit test project. The upload guard first failed on the broad test-results path; authenticated CI now uploads only its result JSON. |
+
+There are 24 distinct passing browser cases across these focused runs. Failed attempts are retained; this is not a claim that the full browser matrix passed. At that checkpoint the payment matrix lacked STRIPE_TEST_SECRET_KEY and a pending fixture; the later real Stripe test evidence below supersedes that credential gate. Company/bulk grant activation, delivery providers, hosted worker/alerts and RUM remain separate gates.
+
+## Final provider, browser and clean-runner performance evidence
+
+Application revision: 69eba85fe01a501a30560223e8f0ae8ff5a1fd40. CI passed at https://github.com/YNWAforever/hkwtia/actions/runs/36324520965; median Lighthouse passed at https://github.com/YNWAforever/hkwtia/actions/runs/36324522776. The prior 24f0d39a run failed typecheck because the Lighthouse declaration omitted aggregationMethod; 69eba85f adds that declaration. Vercel's matching deployment is READY. These are code/public-lab gates, not complete staging acceptance.
+
+| Actual continuation check | Result | Environment / limitation |
+|---|---|---|
+| CSP header + image policy unit suites | 2 files / 308 tests passed | Native Stripe redirect regression first failed; exact provider origins only. |
+| Membership recovery, native form and ticket recovery browser set | 5 passed, 1 English ticket timeout | Real isolated Neon/Auth, local Next; both locale membership recovery and JavaScript-disabled Stripe redirects passed. |
+| English ticket focused rerun | 1 passed, zero skips | Exact INVALID response and retained buyer/attendee values; server limiter remains active behind a trusted loopback test proxy. Chinese ticket had passed in the preceding set. |
+| Genuine Stripe test payment | exit0 | Decline kept the same attempt processing; public test 3DS challenge completed; provider reports complete/paid/livemode=false. No real funds. |
+| Held signed webhook release and identical replay | exit0 | Completion processing before release, active via browser polling afterwards; checkout.session.completed and invoice.paid each returned200 processed; replay returned200 duplicate. Independent DB read: both jobs completed, attempt_count1 and exactly one audit each. |
+| Completion after webhook already committed | 2 locale cases passed | Fresh real Auth browser contexts render active immediately, with zero status polls before active. |
+| Public rendering browser suite | 8 passed, zero skips | Focus/fragment/print plus both streamed-shell cases. Shell cases first failed with footer inside the first viewport. |
+| Lighthouse median aggregation regression | 11 passed | New default-median case first failed. Actual config now uses median for all assertions. |
+| M2 reset unit suite | 9 passed | Operational date case first failed with no dated updates; only exact synthetic IDs shift. |
+| Latest local strings/lint/typecheck | all exit0 | 287 TSX; lint0 errors/65 warnings; Windows Node24.18.0. |
+
+Stripe evidence: evidence/stripe-test-acceptance.json pins real event/session IDs, database facts, original reproduction source hash and raw log hash. The supplied key is absent from committed files. Old Preview price IDs returned resource_missing in the supplied test account; the isolated prices match existing seed amounts and HKD annual interval. The live provider methods were card/Link only, so asynchronous-method acceptance remains unverified. The sanitized reproduction is scripts/verify-audit-stripe-checkout.mjs; syntax and focused ESLint pass after removing noisy logs. The initial harness failures (button labels, challenge selector and currency interaction) remain in local logs; they are not passing application checks.
+
+The first clean Linux run (08930b5f, workflow36322351834) was green under optimistic aggregation but homepage medians were0.89 with CLS0.149/0.162. It did not satisfy the required median result. After the viewport reserve, final Ubuntu/Node22 production-build reports contain three measurements for each of ten routes. All medians pass, CLS is0 and SEO is1 on every route. Raw report hashes and individual measurements are in evidence/lighthouse-linux-before-stream-reserve.json and evidence/lighthouse-linux-final.json.
+
+| Route | Median performance | LCP ms | Accessibility |
+|---|---:|---:|---:|
+| / | 0.96 | 2489.40 | 1.00 |
+| /membership | 0.98 | 2243.94 | 0.96 |
+| /events | 0.96 | 2624.67 | 1.00 |
+| /programmes | 0.96 | 2769.17 | 0.96 |
+| /partners | 0.97 | 2443.41 | 1.00 |
+| /zh | 0.97 | 2398.68 | 1.00 |
+| /zh/membership | 0.98 | 2233.83 | 0.96 |
+| /zh/events | 0.96 | 2640.17 | 1.00 |
+| /zh/programmes | 0.96 | 2765.83 | 0.96 |
+| /zh/partners | 0.98 | 2268.08 | 1.00 |
+
+This provider-free local lab does not establish same-region RUM, hosted database latency or a production release. Earlier failures and skips above remain part of the record.
+
+## Final CRM acceptance
+
+Commit1a703edb fixes the dated browser fixture and current CSV/login contracts. The full real-Auth suite passed **11/11, zero skips/failures/flakes, 5.4minutes** on localhost:3011 with a fresh hkwtia_m2_audit database on the isolated Neon branch. All50 migrations and exactly30 M2 profiles were seeded; five existing synthetic Auth IDs were mapped. It covers anonymous404, public/login continuation, Member360 note, exact segment/CSV rows and idempotent campaign queueing, ordered at-risk members, exact report totals, one check-in engagement, one approval audit, selected admin axe, Chinese recovery copy and anonymous/member/company-admin denial across all enumerated admin routes.
+
+Failed attempts are retained in evidence/crm-browser.json with raw report hashes. The mixed acceptance DB report had extra current active revenue. The fresh DB then exposed a stale browser attendance denominator: July31 includes a July25 fixture event (3/8=37.5%), whereas the integration test explicitly freezes July20 (3/6=50%). Report logic and policy were unchanged. A repeated focused reset unit run passes9/9 and focused lint passes with zero warnings.
+
+## Additional ticket routing regression
+
+A real Stripe-test HKD75 payment for three synthetic seats settled paid through its genuine signed checkout event. The issued pass then returned404: the locale proxy excluded dotted capability paths. tests/unit/signed-ticket-route-matcher.test.ts uses the installed Next matcher and real signPassToken output. Before the fix:4 failed/9 passed (all en/zh pass/check-in paths excluded). After four exact route exceptions: the matcher plus existing proxy tests pass22/22. Static/API paths remain excluded; normal locale rewriting and existing Auth exchange remain covered. The provider walk continues below; this partial paid attempt alone does not prove refund acceptance.
+
+## Final ticket provider and refund regression evidence
+
+Application SHA `1e4f6246ac42f3dd0249acad2be949aaf94a6aa6`. The actual fresh reproduction exited0: a synthetic public three-seat order charged HKD75 through genuine Stripe TEST Checkout, its original signed checkout event settled paid, three seats existed and the signed pass returned200. English confirmation cancel left the order paid; Chinese confirmation committed one succeeded full refund. Both locale attendee lists removed the seats and both pass URLs returned404. Replaying the original signed checkout event left the order refunded with exactly one provider refund, one refund audit and one refund notice. Both webhook responses say processed; the assertions prove idempotent effects.
+
+The previously accepted-provider/local-audit-rollback order was inspected before recovery. Provider state showed exactly one succeeded HKD75 refund. The staff action reconciled the local transaction; a stale second submit reported already refunded. That browser harness failed because its alert selector also matched Next's empty announcer. A separate read-only check passed both locale revoked-pass/absent-seat assertions, the unchanged one provider refund, one m2-staff-01 profile-linked audit and one notice. This is documented recovery evidence, not a claim that the failed harness passed.
+
+| Executed check | Result | Boundary |
+|---|---|---|
+| Signed-route red regression | 4 failed / 9 passed before fix | Real signPassToken and installed Next matcher; all four localized routes exposed the defect. |
+| Signed-route and existing proxy green regression | 22 passed | Static/API exclusions, locale rewrite and Auth exchange remain covered. |
+| Refund red unit + real PostgreSQL regression | 4 failed / 16 passed | Auth ID versus application-profile FK reproduced. |
+| First refund green attempt | 29 passed / 1 failed | Minimal fixture omitted event_refund_reason; fixture repaired, no production schema change. |
+| Final refund focused gate | 3 files / 30 passed, zero failed/skipped | Unit/core/email plus 2 disposable PostgreSQL 16 transaction/recovery cases; RUN_POSTGRES_INTEGRATION=1. |
+| Fresh genuine ticket payment/refund/replay | exit0 | Real isolated Neon/Auth, local web, genuine Stripe test card and signatures; test email transport. |
+| Recovery read-only consequences | exit0 | Provider, DB and both locale browser consequences; earlier selector failure retained. |
+
+Sanitized evidence: evidence/ticket-stripe-refund.json and evidence/refund-recovery.json, including source/log SHA256 hashes. Reproduction: scripts/verify-audit-ticket-refund.mjs (Node24 --conditions=react-server). The formatted copy changes only diagnostic logging/import location and adds a production-mode refusal; syntax and focused lint pass. Raw screenshots, signed URLs, payloads, credentials and sessions remain ignored locally. No real recipient delivery or production release is claimed.
+
+## Final application CI and hosted public Preview
+
+The actual CI run for `1e4f6246ac42f3dd0249acad2be949aaf94a6aa6` passed: https://github.com/YNWAforever/hkwtia/actions/runs/36328316486. Both full shards passed **5,927 tests**, with **147 skipped** (689 files passed, 55 skipped). Checks and the required quality job passed. The production-dependency audit reports one low/ten moderate/zero high/zero critical vulnerabilities; dev-inclusive install output is a separate population. CI skips do not count as DB/browser/provider acceptance. Raw log hash and summaries are in evidence/ci-final-application.json.
+
+The exact application Preview https://hkwtia-p7vk6461f-ynwaforevers-projects.vercel.app is READY. The actual protected read-only run of core-pages, public-navigation and public-rendering passed **32/32, zero skips/failures/flakes, 178.4seconds**. It includes English/Chinese content and links, 390/768/1440px fit, selected axe checks, both public login shells, keyboard reveal, fragments, print and streamed-shell layout reserve. It used a protection-only cookie and no member identity or database mutation. evidence/public-preview-final.json records every case and the raw report hash. This is hosted public acceptance; authenticated business journeys used local web with the isolated hosted DB/Auth and remain separate from a complete hosted worker deployment.
+
+## Final local gates and handoff boundary
+
+At the final application revision (with only the guarded reproduction script added in b74a2109), all actual local gates returned0: `npm run audit:strings` (287 TSX files), `npm run lint` (0 errors, 63 warnings), `npm run typecheck`, and `npm run build` (production compile/static generation). The owned local dev process was stopped first; no private provider/test environment was injected into the build. Exact log/report hashes are in evidence/release-gates-final.json. The root checkout's unrelated AGENTS.md modification and untracked work were preserved. Only the isolated worktree's explicit implementation/evidence paths were committed.
+
+Code: T00 classifications and all unblocked T01–T18 implementation are on the reviewable feature branch; each finding retains its individual remaining proof/policy gate. Isolated acceptance: selected operational/CRM/batch/import/grant journeys and genuine Stripe test membership/ticket/refund paths passed with the exact scope above. Hosted staging: public Preview passed32/32; complete authenticated hosted web/worker/provider-sink acceptance remains open. Production: no migration, cleanup, publication/promotion, real payment/refund or real-member message. PR #94 is open for review; the external automated code review was skipped for service usage, which is not review approval.
