@@ -374,6 +374,20 @@
         "heading": "Your pass, {attendeeName}",
         "body": "Show this email's pass at the door for {eventTitle} on {eventDate} at {venue}. Each pass admits one person, so please do not forward it.",
         "cta": "Open your pass"
+      },
+      "batch_membership_renewal": {
+        "subject": "Review your WTIA membership renewal",
+        "preview": "Sign in to review your membership and billing options.",
+        "heading": "Your membership renewal",
+        "body": "Hello {recipientName}, the renewal date for the {planName} membership of {membershipScope} is {renewalDate}. Sign in to review this membership and its billing options.",
+        "cta": "Review membership"
+      },
+      "batch_profile_update": {
+        "subject": "Please review your WTIA profile",
+        "preview": "Keep your member details up to date.",
+        "heading": "Review your member profile",
+        "body": "Hello {recipientName}, please sign in to review your member profile and update any details that have changed.",
+        "cta": "Review my profile"
       }
     }
   },
@@ -2646,7 +2660,11 @@
         "missing_variable": "Message details missing",
         "marketing_suppressed": "Consent changed before sending",
         "template_not_approved": "Template not approved for sending",
-        "unknown_recipient": "Recipient no longer on file"
+        "unknown_recipient": "Recipient no longer on file",
+        "COMMUNICATION_CHANGED": "Member or membership details changed",
+        "COMMUNICATION_DISABLED": "Bulk communication is paused",
+        "SHARED_CONTACT_POINT": "Contact details are shared by multiple members",
+        "RENEWAL_DATE_MISSING": "Renewal date is missing"
       },
       "status": {
         "draft": "Draft",
@@ -2840,7 +2858,8 @@
 "before": "Current",
 "incoming": "Incoming",
     "batches": {
-      "downloadCsv": "Download CSV","title": "Batch preview and progress", "description": "Review every item before committing. Changes and failures remain visible here.", "back": "Back to members", "states": {"preparing": "Preparing snapshot", "ready": "Ready for review", "queued": "Queued", "running": "Running", "completed": "Completed", "completed_with_errors": "Completed with errors", "cancelled": "Cancelled", "expired": "Preview expired", "pending": "Pending", "succeeded": "Succeeded", "skipped": "Skipped", "failed": "Failed"}, "counters": {"pending": "Pending", "running": "Running", "succeeded": "Succeeded", "skipped": "Skipped", "failed": "Failed"}, "total": "Total", "eligible": "Eligible", "blocked": "Blocked", "operation": "State", "target": "Target", "before": "Before", "after": "After", "reason": "Reason or error", "attempts": "Attempts", "result": "Result", "commit": "Commit batch", "retry": "Retry failed items", "cancel": "Cancel remaining", "expires": "Preview expires", "empty": "No items in this snapshot."},
+      "downloadCsv": "Download CSV","title": "Batch preview and progress", "description": "Review every item before committing. Changes and failures remain visible here.", "back": "Back to members", "states": {"preparing": "Preparing snapshot", "ready": "Ready for review", "queued": "Queued", "running": "Running", "completed": "Completed", "completed_with_errors": "Completed with errors", "cancelled": "Cancelled", "expired": "Preview expired", "pending": "Pending", "succeeded": "Succeeded", "skipped": "Skipped", "failed": "Failed"}, "counters": {"pending": "Pending", "running": "Running", "succeeded": "Succeeded", "skipped": "Skipped", "failed": "Failed"}, "total": "Total", "eligible": "Eligible", "blocked": "Blocked", "operation": "State", "target": "Target", "before": "Before", "after": "After", "reason": "Reason or error", "attempts": "Attempts", "result": "Result", "commit": "Commit batch", "retry": "Retry failed items", "cancel": "Cancel remaining", "expires": "Preview expires", "empty": "No items in this snapshot.",
+      "reviewCampaigns": "Review campaign drafts"},
     "members": {
       "batch": {"field": "Change field", "tags": "Operational tags", "tagsHelp": "Comma-separated, at most 10 tags of 30 characters. Replaces existing tags; leave empty to clear.", "owner": "Responsible staff", "unassigned": "Unassigned", "preview": "Preview correction", "reason": "Reason for correction", "language": "Preferred language", "english": "English", "chinese": "Traditional Chinese", "error": "Could not prepare the batch. Check the selection and try again.", "exportPreview": "Preview CSV export", "exportFields": "Export fields", "exportError": "Could not prepare export."},
       "importLink": "Import members",
@@ -3525,6 +3544,33 @@
       "invalid": "Enter a valid plan, date window and reason.",
       "duplicate": "This member already has a live membership.",
       "error": "The finite grant could not be created."
+    },
+    "communications": {
+      "title": "Member reminders and invitations",
+      "back": "Back to members",
+      "disabled": "Bulk communications are not enabled.",
+      "segment": "Saved segment",
+      "chooseSegment": "Choose a saved segment",
+      "load": "Load members",
+      "manageSegments": "Manage segments",
+      "operation": "Action",
+      "renewal": "Membership renewal reminder",
+      "invite": "Profile update invitation",
+      "channel": "Channel",
+      "email": "Email",
+      "whatsapp": "WhatsApp",
+      "help": "Choose one membership per person for each renewal batch. Preview checks current eligibility and consent. Executing a batch creates campaign drafts for separate review; it does not send immediately. Missing approved language templates are blocked.",
+      "selectAll": "Select this page",
+      "selectAllMatching": "Select all matching members",
+      "selected": "{count} selected",
+      "previous": "Previous",
+      "next": "Next",
+      "name": "Member",
+      "scope": "Membership",
+      "date": "Renewal date",
+      "preview": "Preview campaign drafts",
+      "error": "Unable to prepare these communications. Check the selected segment and try again.",
+      "empty": "No matching members in this segment."
     }
   },
   "MarketingExtras": {

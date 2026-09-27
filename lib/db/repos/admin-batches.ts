@@ -20,7 +20,7 @@ function rows(result: unknown): unknown[] {
 }
 const countersSchema = z.object({pending: z.number().int().nonnegative().default(0), running: z.number().int().nonnegative().default(0), succeeded: z.number().int().nonnegative().default(0), skipped: z.number().int().nonnegative().default(0), failed: z.number().int().nonnegative().default(0)}).passthrough();
 const batchRowSchema = z.object({id: z.string().uuid(), actorProfileId: z.string(), operation: z.enum(["profile_patch", "import_commit", "membership_grant", "renewal_reminder", "profile_update_invite", "ticket_resend", "export_members"]), state: z.enum(["preparing", "ready", "queued", "running", "completed", "completed_with_errors", "cancelled", "expired"]), previewDigest: z.string().nullable().default(null), previewExpiresAt: z.coerce.date().nullable().default(null), counters: countersSchema.default({}), validatedPayload: z.record(z.unknown()).default({})});
-const itemRowSchema = z.object({targetType: z.enum(["profile", "company", "ticket_seat", "import_row"]), targetId: z.string(), previewStatus: z.enum(["eligible", "skipped", "blocked"]), expectedVersion: z.string(), beforeSummary: z.record(z.unknown()).default({}), afterSummary: z.record(z.unknown()).default({}), reasonCode: z.string().nullable().default(null), state: z.enum(["pending", "running", "succeeded", "skipped", "failed"]).default("pending"), attemptCount: z.coerce.number().int().nonnegative().default(0), errorCode: z.string().nullable().default(null), resultRef: z.string().nullable().default(null)});
+const itemRowSchema = z.object({targetType: z.enum(["profile", "membership", "company", "ticket_seat", "import_row"]), targetId: z.string(), previewStatus: z.enum(["eligible", "skipped", "blocked"]), expectedVersion: z.string(), beforeSummary: z.record(z.unknown()).default({}), afterSummary: z.record(z.unknown()).default({}), reasonCode: z.string().nullable().default(null), state: z.enum(["pending", "running", "succeeded", "skipped", "failed"]).default("pending"), attemptCount: z.coerce.number().int().nonnegative().default(0), errorCode: z.string().nullable().default(null), resultRef: z.string().nullable().default(null)});
 type BatchRow = z.infer<typeof batchRowSchema>;
 function firstRow(result: unknown): unknown {return rows(result)[0];}
 async function readOwned(executor: BatchExecutor, actorProfileId: string, batchId: string, lock: boolean): Promise<BatchRow> {
@@ -110,7 +110,7 @@ export const adminBatchesRepository = createAdminBatchesRepository();
 
 const claimRowSchema = z.object({
   itemId: z.string().uuid(), batchId: z.string().uuid(), operation: z.enum(["profile_patch", "import_commit", "membership_grant", "renewal_reminder", "profile_update_invite", "ticket_resend", "export_members"]),
-  actorProfileId: z.string(), selectionSnapshot: z.unknown(), targetType: z.enum(["profile", "company", "ticket_seat", "import_row"]), targetId: z.string(), expectedVersion: z.string(), effectKey: z.string(), attemptCount: z.coerce.number().int().positive(), leaseOwner: z.string(), leaseToken: z.coerce.number().int().positive(),
+  actorProfileId: z.string(), selectionSnapshot: z.unknown(), targetType: z.enum(["profile", "membership", "company", "ticket_seat", "import_row"]), targetId: z.string(), expectedVersion: z.string(), effectKey: z.string(), attemptCount: z.coerce.number().int().positive(), leaseOwner: z.string(), leaseToken: z.coerce.number().int().positive(),
 });
 function toClaim(raw: unknown): BatchClaim {
   const row = claimRowSchema.parse(raw);

@@ -27,6 +27,8 @@ export const EMAIL_TEMPLATE_IDS = [
   "lead_staff_notify",
   "approval_request",
   "campaign_generic",
+  "batch_membership_renewal",
+  "batch_profile_update",
   "event_guest_confirmation",
   "event_guest_waitlist",
   "event_rsvp_cancelled",
@@ -87,6 +89,8 @@ const DEFAULT_CLASSIFICATION = {
   lead_staff_notify: "transactional",
   approval_request: "transactional",
   campaign_generic: "marketing",
+  batch_membership_renewal: "marketing",
+  batch_profile_update: "marketing",
   // Guest RSVP receipt (Phase B1, B-4): a reply to the guest's own action, carrying
   // their cancel link, so it is transactional and must never gain a marketing footer.
   event_guest_confirmation: "transactional",

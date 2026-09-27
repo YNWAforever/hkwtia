@@ -24,6 +24,7 @@ export async function prepareBatch(actor: Actor, input: unknown, store: BatchGat
   requireAdmin(actor);
   const request = batchRequestSchema.parse(input);
   if (!capabilities.has(request.operation) || (request.operation === "import_commit" && process.env.MEMBER_IMPORT_ENABLED !== "true") || (request.operation === "membership_grant" && (process.env.MEMBERSHIP_GRANTS_ENABLED !== "true" || process.env.MEMBERSHIP_GRANT_BATCH_ENABLED !== "true"))) throw new Error("BATCH_OPERATION_UNAVAILABLE");
+  if (["renewal_reminder", "profile_update_invite"].includes(request.operation) && process.env.MEMBER_COMMUNICATION_BATCH_ENABLED !== "true") throw new Error("BATCH_OPERATION_UNAVAILABLE");
   if (request.operation === "export_members" && process.env.MEMBER_EXPORT_ENABLED !== "true") throw new Error("BATCH_OPERATION_UNAVAILABLE");
   if (request.operation === "ticket_resend" && process.env.TICKET_RESEND_BATCH_ENABLED !== "true") throw new Error("BATCH_OPERATION_UNAVAILABLE");
   if (request.operation === "membership_grant" && actor.kind !== "superadmin") throw new Error("FORBIDDEN");

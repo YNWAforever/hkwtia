@@ -35,3 +35,9 @@ For selected members, choose the correction field before previewing. Tags replac
 ### Applications and payments
 
 Open Applications and payments from the member workspace. Unfinished join, Awaiting payment and Awaiting review each list actual applications. A person can have more than one application. Read the linked membership and latest billing attempt as separate states, especially when reconciling a completed payment. Open the applicant name to inspect Member 360; the displayed application ID identifies the application only. This queue does not send reminders or change payment state.
+
+## Renewal reminders and profile invitations (when enabled)
+
+From Members, open Communications and choose a saved Segment you own. Select a channel and either exact membership scopes for renewal or people for an invitation. Selection persists across pages; Select matching includes all displayed segment matches up to the stated limit. A person with two selected memberships is blocked so company details cannot be mixed. Shared contact points and missing approved language templates are also blocked.
+
+Preview the durable batch and inspect every blocked/skipped reason before execution. Completed items create campaign drafts, not sent messages. Open Campaigns for the normal separate review/approval. You cannot review a campaign while the batch is still adding recipients. Renewal, language and consent changes are checked again before delivery and can skip a previously eligible item. Invitations use the member's existing login and profile page.

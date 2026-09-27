@@ -7,6 +7,8 @@ const fixtureVars = {
   recipientName: "Fixture Member",
   ctaUrl: "https://www.hkwtia.org/portal",
   companyName: "Fixture Company",
+  membershipScope: "Fixture Company",
+  planName: "Corporate",
   renewalDate: "30 September 2026",
   amount: "1,000.00",
   eventTitle: "Fixture Event",
@@ -115,4 +117,10 @@ describe("renderEmail", () => {
       variables,
     })).rejects.toThrow("EMAIL_CTA_URL_REQUIRED");
   });
+});
+
+it.each(["en","zh-HK"] as const)("renders the exact %s renewal scope as marketing and links the invitation to login",async(locale)=>{
+  const renewal=await renderEmail({template:"batch_membership_renewal",locale,recipientName:"Ada",variables:{...fixtureVars,membershipScope:"Selected Company",planName:"Corporate",renewalDate:"2030-11-01"},unsubscribeUrl:"https://example.test/unsubscribe",unsubscribeOneClickUrl:"https://example.test/api/unsubscribe"});
+  expect(renewal.text).toContain("Selected Company");expect(renewal.text).toContain("2030-11-01");expect(renewal.text).toContain("Corporate");
+  expect(renewal.headers).toHaveProperty("List-Unsubscribe-Post","List-Unsubscribe=One-Click");
 });

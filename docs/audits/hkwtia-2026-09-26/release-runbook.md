@@ -118,3 +118,9 @@ The operational checks proposed by the audit are webhook handling lag over five 
 ## Grant migration preflight
 
 0048's unpublished journal timestamp has been corrected to follow 0047. The full journal contains **49 entries**, beginning at 0001. Before any authorized shared-environment migration, inspect both the Drizzle ledger and the four `memberships.grant_*` columns plus `memberships_grant_window_check`. If an environment previously reached 0049 while missing those columns, stop that environment's rollout and prepare an explicit additive repair; the corrected timestamp alone cannot recover a file below an already-recorded higher timestamp. Isolated fresh and 0047-prefix upgrade tests passed. This task has not migrated a shared database.
+
+## T16 reviewed communications rollout
+
+Ship the Segment/Campaign, batch handler and both delivery runner changes together, after additive migrations 0046–0049. Keep ADMIN_BATCH_ENABLED and MEMBER_COMMUNICATION_BATCH_ENABLED false. In isolated staging only, enable both, select exact synthetic membership IDs or profile invitations, inspect the durable preview, execute, then open Campaigns for the existing two-person review. Review must fail while the batch still has pending/running items. Revoke consent, change renewal date/locale or disable the communication flag before delivery and verify no send. Capture one approved test-sink receipt per supported locale/channel; missing WhatsApp templates remain blocked.
+
+Rollback: disable MEMBER_COMMUNICATION_BATCH_ENABLED to block creation/materialization and pending batch-origin campaign delivery, then pause new batch claims before worker rollback. Inspect in-flight sends and reconcile provider IDs; retain campaign/batch/audit history. Do not replay accepted or uncertain provider results. Ordinary campaigns retain their existing gate. This capability does not authorize live reminders or invitations.

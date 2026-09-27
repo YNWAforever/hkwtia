@@ -374,6 +374,20 @@
         "heading": "{attendeeName}，這是你的門票",
         "body": "請於活動當日在入口出示此門票。活動：{eventTitle}，日期：{eventDate}，地點：{venue}。每張門票只限一人入場，請勿轉發。",
         "cta": "開啟門票"
+      },
+      "batch_membership_renewal": {
+        "subject": "查閱你的 WTIA 會籍續期",
+        "preview": "登入查閱會籍及帳單選項。",
+        "heading": "會籍續期提醒",
+        "body": "{recipientName}，你好。{membershipScope} 的{planName}會籍續期日期為 {renewalDate}。請登入查閱此會籍及帳單選項。",
+        "cta": "查閱會籍"
+      },
+      "batch_profile_update": {
+        "subject": "請查閱你的 WTIA 會員資料",
+        "preview": "保持會員資料準確。",
+        "heading": "更新會員資料",
+        "body": "{recipientName}，你好。請登入查閱會員資料，並更新已變更的內容。",
+        "cta": "查閱我的資料"
       }
     }
   },
@@ -2647,7 +2661,11 @@
         "missing_variable": "訊息內容未填妥",
         "marketing_suppressed": "發送前同意狀態已改變",
         "template_not_approved": "範本未獲批核發送",
-        "unknown_recipient": "收件人紀錄已不存在"
+        "unknown_recipient": "收件人紀錄已不存在",
+        "COMMUNICATION_CHANGED": "會員或會籍資料已變更",
+        "COMMUNICATION_DISABLED": "批量通訊已暫停",
+        "SHARED_CONTACT_POINT": "多位會員共用聯絡資料",
+        "RENEWAL_DATE_MISSING": "缺少續期日期"
       },
       "status": {
         "draft": "草稿",
@@ -2841,7 +2859,8 @@
 "before": "現有",
 "incoming": "匯入",
     "batches": {
-      "downloadCsv": "下載 CSV","title": "批次預覽及進度", "description": "提交前逐項核對。變更和失敗結果會保留在此頁。", "back": "返回會員", "states": {"preparing": "正在建立快照", "ready": "待審核", "queued": "已排隊", "running": "處理中", "completed": "已完成", "completed_with_errors": "完成但有錯誤", "cancelled": "已取消", "expired": "預覽已過期", "pending": "待處理", "succeeded": "成功", "skipped": "已略過", "failed": "失敗"}, "counters": {"pending": "待處理", "running": "處理中", "succeeded": "成功", "skipped": "已略過", "failed": "失敗"}, "total": "總數", "eligible": "符合資格", "blocked": "受阻", "operation": "狀態", "target": "目標", "before": "更改前", "after": "更改後", "reason": "原因或錯誤", "attempts": "嘗試次數", "result": "結果", "commit": "提交批次", "retry": "重試失敗項目", "cancel": "取消剩餘項目", "expires": "預覽到期時間", "empty": "此快照沒有項目。"},
+      "downloadCsv": "下載 CSV","title": "批次預覽及進度", "description": "提交前逐項核對。變更和失敗結果會保留在此頁。", "back": "返回會員", "states": {"preparing": "正在建立快照", "ready": "待審核", "queued": "已排隊", "running": "處理中", "completed": "已完成", "completed_with_errors": "完成但有錯誤", "cancelled": "已取消", "expired": "預覽已過期", "pending": "待處理", "succeeded": "成功", "skipped": "已略過", "failed": "失敗"}, "counters": {"pending": "待處理", "running": "處理中", "succeeded": "成功", "skipped": "已略過", "failed": "失敗"}, "total": "總數", "eligible": "符合資格", "blocked": "受阻", "operation": "狀態", "target": "目標", "before": "更改前", "after": "更改後", "reason": "原因或錯誤", "attempts": "嘗試次數", "result": "結果", "commit": "提交批次", "retry": "重試失敗項目", "cancel": "取消剩餘項目", "expires": "預覽到期時間", "empty": "此快照沒有項目。",
+      "reviewCampaigns": "審核通訊草稿"},
     "members": {
       "batch": {"field": "更改欄位", "tags": "營運標籤", "tagsHelp": "以逗號分隔，最多 10 個標籤，每個最多 30 字。將取代現有標籤；留空代表清除。", "owner": "負責職員", "unassigned": "未分配","preview": "預覽資料修正", "reason": "更改原因", "language": "偏好語言", "english": "英文", "chinese": "繁體中文", "error": "無法準備批次。請檢查選取項目後重試。", "exportPreview": "預覽 CSV 匯出", "exportFields": "匯出欄位", "exportError": "無法準備匯出。"},
       "importLink": "匯入會員",
@@ -3554,6 +3573,33 @@
       "invalid": "請輸入有效級別、日期範圍及理由。",
       "duplicate": "此會員已有生效中的會籍。",
       "error": "未能建立有限期贈予。"
+    },
+    "communications": {
+      "title": "會員提醒及邀請",
+      "back": "返回會員列表",
+      "disabled": "批量通訊功能尚未啟用。",
+      "segment": "已儲存分組",
+      "chooseSegment": "選擇已儲存分組",
+      "load": "載入會員",
+      "manageSegments": "管理分組",
+      "operation": "操作",
+      "renewal": "會籍續期提醒",
+      "invite": "更新資料邀請",
+      "channel": "渠道",
+      "email": "電郵",
+      "whatsapp": "WhatsApp",
+      "help": "每批續期提醒請為每位會員選擇一項會籍。預覽會檢查最新資格及通訊同意。執行批次只會建立通訊草稿，須另行審核後才發送。未有獲批語言範本的項目會被阻擋。",
+      "selectAll": "選取此頁",
+      "selectAllMatching": "選取所有符合條件的會員",
+      "selected": "已選取 {count} 項",
+      "previous": "上一頁",
+      "next": "下一頁",
+      "name": "會員",
+      "scope": "會籍",
+      "date": "續期日期",
+      "preview": "預覽通訊草稿",
+      "error": "未能準備通訊。請檢查所選分組後重試。",
+      "empty": "此分組沒有符合條件的會員。"
     }
   },
   "MarketingExtras": {

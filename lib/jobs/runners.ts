@@ -1,3 +1,4 @@
+import {recheckBatchCommunication} from "@/lib/db/repos/batch-handlers/communication";
 import "server-only";
 
 import {createHash} from "node:crypto";
@@ -526,6 +527,7 @@ async function runProductionCampaigns(now: Date): Promise<unknown> {
   // offering an email schedule later is a screen change, not a silent outage.
   await campaignsRepository.promoteScheduledCampaigns(automationCronActor(), now, "email");
   return runCampaignBatch({
+    recheckCommunication: recheckBatchCommunication,
     campaigns: campaignsRepository,
     deliveries: deliveriesRepository,
     staffTasks: staffTasksRepository,
@@ -565,6 +567,7 @@ async function runProductionCampaigns(now: Date): Promise<unknown> {
 export async function runProductionWhatsAppSendQueue(now: Date): Promise<unknown> {
   const notifications = createProductionNotificationDependencies();
   return runWhatsAppCampaignBatch({
+    recheckCommunication: recheckBatchCommunication,
     campaigns: campaignsRepository,
     dispatch: (actor, request) => dispatchNotification(actor, request, notifications),
   }, {now, limit: WHATSAPP_QUEUE_BATCH_LIMIT});
