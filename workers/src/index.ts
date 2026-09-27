@@ -25,6 +25,7 @@ export const WORKER_JOBS = [
   "admin-batches",
   "membership-grant-expiry",
   "rate-limit-cleanup",
+  "member-import-retention",
 ] as const;
 
 export type WorkerJob = typeof WORKER_JOBS[number];
@@ -33,6 +34,8 @@ export type WorkerEnv = Readonly<{
   APP_URL: string;
   CRON_SECRET: string;
   VERCEL_AUTOMATION_BYPASS_SECRET?: string;
+  AUDIT_METRICS_ENABLED?: string;
+  WORKER_REVISION?: string;
 }>;
 
 type JobFailureCode =
@@ -55,11 +58,14 @@ type WorkerLog =
   | Readonly<{errorCode: ConfigErrorCode}>
   | Readonly<{job: WorkerJob; errorCode: AlertLogCode}>;
 
+export type WorkerMetric = Readonly<{event: "worker_invocation"; job: WorkerJob; outcome: "accepted" | "failed"; scheduledTime: string; occurredAt: string; durationMs: number; attempts: number; workerRevision?: string; webRevision?: string; requestId?: string}>;
+
 export type WorkerDependencies = Readonly<{
   fetch: typeof fetch;
   sleep: (milliseconds: number) => Promise<void>;
   logger: Readonly<{
     error: (record: WorkerLog) => void;
+    info?: (record: WorkerMetric) => void;
   }>;
 }>;
 
@@ -115,7 +121,7 @@ export const JOBS_BY_CRON = {
   "0 3 * * *": ["chat-retention"],
   "15 18 * * *": ["retention-analyst"],
   "30 0 1 * *": ["board-reporter"],
-  "*/10 * * * *": ["whatsapp-send-queue", "showcase-lead-emails", "event-notifications", "rate-limit-cleanup"],
+  "*/10 * * * *": ["whatsapp-send-queue", "showcase-lead-emails", "event-notifications", "rate-limit-cleanup", "member-import-retention"],
   "* * * * *": ["ticket-emails", "admin-batches", "membership-grant-expiry"],
 } as const satisfies Readonly<
   Record<string, readonly WorkerJob[]>
@@ -138,6 +144,7 @@ const REQUEST_TIMEOUT_BY_JOB = {
   "admin-batches": QUEUE_REQUEST_TIMEOUT_MS,
   "membership-grant-expiry": REQUEST_TIMEOUT_MS,
   "rate-limit-cleanup": REQUEST_TIMEOUT_MS,
+  "member-import-retention": QUEUE_REQUEST_TIMEOUT_MS,
 } as const satisfies Readonly<Record<WorkerJob, number>>;
 
 class WorkerConfigError extends Error {
@@ -154,6 +161,8 @@ type ValidConfig = Readonly<{
   appUrl: URL;
   secret: string;
   protectionBypass: string | null;
+  metricsEnabled: boolean;
+  revision?: string;
 }>;
 
 function isLocalHostname(hostname: string): boolean {
@@ -205,6 +214,8 @@ function validateConfig(env: WorkerEnv): ValidConfig {
   appUrl.pathname = appUrl.pathname.replace(/\/+$/u, "") || "/";
   return {
     appUrl,
+    metricsEnabled: env.AUDIT_METRICS_ENABLED === "true",
+    revision: env.WORKER_REVISION && /^[a-f0-9]{7,40}$/i.test(env.WORKER_REVISION) ? env.WORKER_REVISION : undefined,
     secret: env.CRON_SECRET,
     protectionBypass:
       env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim() || null,
@@ -339,6 +350,17 @@ async function invokeJob(
   config: ValidConfig,
   dependencies: WorkerDependencies,
 ): Promise<void> {
+  const started = Date.now();
+  function metric(outcome: "accepted" | "failed", attempts: number, response?: Response) {
+    if (!config.metricsEnabled) return;
+    const webRevision = response?.headers.get("x-hkwtia-revision");
+    const requestId = response?.headers.get("x-request-id");
+    try { dependencies.logger.info?.({event: "worker_invocation", job, outcome, scheduledTime, occurredAt: new Date().toISOString(), durationMs: Math.max(0, Date.now()-started), attempts,
+      ...(config.revision ? {workerRevision: config.revision} : {}),
+      ...(webRevision && /^[a-f0-9]{7,40}$/i.test(webRevision) ? {webRevision} : {}),
+      ...(requestId && /^[0-9a-f-]{36}$/i.test(requestId) ? {requestId} : {}),
+    }); } catch {/* Observation cannot alter delivery or alert behavior. */}
+  }
   let finalErrorCode: JobFailureCode = "JOB_NETWORK_ERROR";
 
   for (let attempt = 1; attempt <= ATTEMPT_COUNT; attempt += 1) {
@@ -361,6 +383,7 @@ async function invokeJob(
         REQUEST_TIMEOUT_BY_JOB[job],
       );
       if (response.ok) {
+        metric("accepted", attempt, response);
         return;
       }
       finalErrorCode = "JOB_HTTP_ERROR";
@@ -380,6 +403,7 @@ async function invokeJob(
     }
   }
 
+  metric("failed", ATTEMPT_COUNT);
   await notifyFailure(
     job, scheduledTime, finalErrorCode, ATTEMPT_COUNT, config, dependencies,
   );
@@ -407,6 +431,7 @@ const defaultDependencies: WorkerDependencies = {
       setTimeout(resolve, milliseconds);
     }),
   logger: {
+    info: (record) => console.info(JSON.stringify(record)),
     error: (record) => {
       console.error(record);
     },

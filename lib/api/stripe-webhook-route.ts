@@ -1,4 +1,5 @@
 import "server-only";
+import {observeAuditResponse} from "@/lib/observability/audit-metrics";
 
 import Stripe from "stripe";
 
@@ -19,6 +20,8 @@ const MAX_STRIPE_WEBHOOK_BODY_BYTES = 1_048_576;
 
 export function createWebhookPost(dependencies: Dependencies) {
   return async function post(request: Request): Promise<Response> {
+    let verifiedCreated: number | undefined;
+    return observeAuditResponse("stripe_webhook_result", async () => {
     const signature = request.headers.get("stripe-signature");
     if (!signature) return Response.json({error: "INVALID_SIGNATURE"}, {status: 400});
 
@@ -36,6 +39,7 @@ export function createWebhookPost(dependencies: Dependencies) {
     let event: Stripe.Event;
     try {
       event = dependencies.constructEvent(rawBody, signature);
+      verifiedCreated = event.created;
     } catch {
       return Response.json({error: "INVALID_SIGNATURE"}, {status: 400});
     }
@@ -49,6 +53,7 @@ export function createWebhookPost(dependencies: Dependencies) {
       }
       return Response.json({error: "WEBHOOK_PROCESSING_FAILED"}, {status: 500});
     }
+    }, () => ({lagMs: verifiedCreated === undefined ? undefined : Date.now() - verifiedCreated * 1000}));
   };
 }
 

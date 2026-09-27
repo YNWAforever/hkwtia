@@ -1,4 +1,5 @@
 import "server-only";
+import {importRetentionConfig} from "@/lib/admin/imports/retention-config";
 
 import {createHash} from "node:crypto";
 import {inArray, sql} from "drizzle-orm";
@@ -63,7 +64,7 @@ export function createMemberImportRepository(loadDatabase: () => Promise<BatchDa
       const parsed = await parseMemberImport(bytes, format);
       const digest = createHash("sha256").update(bytes).digest("hex");
       const db = await loadDatabase();
-      const uploaded = z.object({id: z.string().uuid()}).parse(first(await db.execute(sql`INSERT INTO ${memberImportUploads} (actor_profile_id, file_digest, format, parsed_snapshot, row_count, expires_at) VALUES (${actor.profileId}, ${digest}, ${format}, ${JSON.stringify(parsed)}::jsonb, ${parsed.rows.length}, ${new Date(now().getTime() + 7 * 86_400_000)}) RETURNING ${memberImportUploads.id} AS id`)));
+      const uploaded = z.object({id: z.string().uuid()}).parse(first(await db.execute(sql`INSERT INTO ${memberImportUploads} (actor_profile_id, file_digest, format, parsed_snapshot, row_count, expires_at) VALUES (${actor.profileId}, ${digest}, ${format}, ${JSON.stringify(parsed)}::jsonb, ${parsed.rows.length}, ${new Date(now().getTime() + importRetentionConfig().uploadMs)}) RETURNING ${memberImportUploads.id} AS id`)));
       // Original bytes are never persisted. The private parsed snapshot is time-bounded.
       return {uploadId: uploaded.id, headers: parsed.headers, rowCount: parsed.rows.length};
     },
@@ -79,7 +80,7 @@ export function createMemberImportRepository(loadDatabase: () => Promise<BatchDa
         const matched = await matchRows(tx, upload.parsedSnapshot, mapping);
         const counts: Record<string, number> = {total: matched.length, create: 0, update: 0, unchanged: 0, duplicate: 0, conflict: 0, invalid: 0};
         for (const row of matched) counts[row.status] = (counts[row.status] ?? 0) + 1;
-        const run = z.object({id: z.string().uuid()}).parse(first(await tx.execute(sql`INSERT INTO ${memberImportRuns} (upload_id, actor_profile_id, file_digest, mapping_digest, mapping, state, summary, expires_at) VALUES (${uploadId}::uuid, ${actor.profileId}, ${upload.fileDigest}, ${digest}, ${JSON.stringify(mapping)}::jsonb, 'validated', ${JSON.stringify(counts)}::jsonb, ${new Date(now().getTime() + 30 * 86_400_000)}) RETURNING ${memberImportRuns.id} AS id`)));
+        const run = z.object({id: z.string().uuid()}).parse(first(await tx.execute(sql`INSERT INTO ${memberImportRuns} (upload_id, actor_profile_id, file_digest, mapping_digest, mapping, state, summary, expires_at) VALUES (${uploadId}::uuid, ${actor.profileId}, ${upload.fileDigest}, ${digest}, ${JSON.stringify(mapping)}::jsonb, 'validated', ${JSON.stringify(counts)}::jsonb, ${new Date(now().getTime() + importRetentionConfig().stagingMs)}) RETURNING ${memberImportRuns.id} AS id`)));
         const records = matched.map((row) => ({row_number: row.rowNumber, validated_payload: row.values, before_snapshot: row.before, validation_status: row.status, match_target_id: row.targetId, expected_version: row.expectedVersion, conflict_reason: row.reason}));
         if (records.length) await tx.execute(sql`INSERT INTO ${memberImportRows} (run_id, row_number, validated_payload, before_snapshot, validation_status, match_target_id, expected_version, conflict_reason) SELECT ${run.id}::uuid, value.row_number, value.validated_payload, value.before_snapshot, value.validation_status, value.match_target_id, value.expected_version, value.conflict_reason FROM jsonb_to_recordset(${JSON.stringify(records)}::jsonb) AS value(row_number integer, validated_payload jsonb, before_snapshot jsonb, validation_status text, match_target_id text, expected_version text, conflict_reason text)`);
         await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${actor.profileId}, ${actor.kind}, 'member.import.validated', 'member_import_run', ${run.id}, jsonb_build_object('rows', ${matched.length}::int))`);

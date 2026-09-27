@@ -117,6 +117,7 @@ const workerAlertSchema = z.object({
     "admin-batches",
     "membership-grant-expiry",
     "rate-limit-cleanup",
+    "member-import-retention",
   ]),
   scheduledTime: z.string().min(1).max(64),
   attemptCount: z.number().int().min(1).max(3),

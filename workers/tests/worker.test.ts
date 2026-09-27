@@ -1047,3 +1047,14 @@ describe("Cloudflare automation scheduler", () => {
     ]);
   });
 });
+
+it("records worker transport failure and recovery with pinned versions and no secrets",async()=>{
+  const info=vi.fn();let failing=true;
+  const worker=createAutomationWorker({logger:{error:vi.fn(),info},sleep:async()=>{},fetch:async input=>new Response(null,{status:String(input).endsWith('/worker-alert')?200:failing?503:200,headers:{'x-hkwtia-revision':'b'.repeat(40),'x-request-id':'11111111-1111-4111-8111-111111111111'}})});
+  const env={...DEFAULT_ENV,AUDIT_METRICS_ENABLED:'true',WORKER_REVISION:'a'.repeat(40)};
+  await dispatchScheduled(worker,{cron:'0 2 * * *',env});
+  failing=false;await dispatchScheduled(worker,{cron:'0 2 * * *',env,scheduledTime:SCHEDULED_TIME+86400000});
+  expect(info.mock.calls.map(call=>call[0].outcome)).toEqual(['failed','accepted']);
+  expect(info.mock.calls[1]![0]).toMatchObject({event:'worker_invocation',job:'renewal-runner',workerRevision:'a'.repeat(40),webRevision:'b'.repeat(40)});
+  expect(JSON.stringify(info.mock.calls)).not.toMatch(/cron-test-secret|Bearer|app.example.test/);
+});
