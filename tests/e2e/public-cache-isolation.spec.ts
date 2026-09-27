@@ -1,10 +1,10 @@
 import {readFileSync} from "node:fs";
 import {expect,test} from "@playwright/test";
-import {missingM2LiveEnvironment,signInForM2} from "../fixtures/m2-auth";
+import {missingM2IdentityEnvironment,signInForM2} from "../fixtures/m2-auth";
 const en=JSON.parse(readFileSync(new URL("../../messages/en.json",import.meta.url),"utf8")) as typeof import("../../messages/en.json");
 const zh=JSON.parse(readFileSync(new URL("../../messages/zh-HK.json",import.meta.url),"utf8")) as typeof import("../../messages/zh-HK.json");
 
-const missing=missingM2LiveEnvironment();
+const missing=missingM2IdentityEnvironment();
 const isolated=process.env.AUDIT_ISOLATED_ACCEPTANCE === "true";
 test.describe("isolated public cache acceptance",()=>{
   test.skip(!isolated || missing.length>0,`Requires AUDIT_ISOLATED_ACCEPTANCE=true and isolated M2 identities: ${missing.join(", ")}`);

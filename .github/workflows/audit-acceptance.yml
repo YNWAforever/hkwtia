@@ -62,10 +62,13 @@ jobs:
           if-no-files-found: ignore
 
   preview-public:
+    environment: audit-isolated
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
       PLAYWRIGHT_BASE_URL: ${{ inputs.preview_url }}
+      PLAYWRIGHT_PUBLIC_AUTH: "true"
+      VERCEL_SHARE_URL: ${{ secrets.AUDIT_VERCEL_SHARE_URL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -77,8 +80,14 @@ jobs:
         run: |
           node --input-type=module -e 'const u = new URL(process.env.PLAYWRIGHT_BASE_URL); if (u.protocol !== "https:" || u.hostname === "hkwtia.vercel.app") { throw new Error("ISOLATED_HTTPS_PREVIEW_REQUIRED"); }'
       - run: npx playwright install --with-deps chromium
+      - name: Enter authorized protected Preview when configured
+        if: env.VERCEL_SHARE_URL != ''
+        run: |
+          node --input-type=module -e 'if (new URL(process.env.VERCEL_SHARE_URL).origin !== new URL(process.env.PLAYWRIGHT_BASE_URL).origin) throw new Error("PREVIEW_SHARE_ORIGIN_MISMATCH")'
+          node scripts/vercel-preview-session.mjs
+          echo "PLAYWRIGHT_STORAGE_STATE=.playwright/preview-state.json" >> "$GITHUB_ENV"
       - name: Verify bilingual public routes on the supplied Preview
-        run: npx playwright test tests/e2e/core-pages.spec.ts tests/e2e/public-navigation.spec.ts --reporter=line
+        run: npx playwright test tests/e2e/core-pages.spec.ts tests/e2e/public-navigation.spec.ts tests/e2e/public-rendering.spec.ts --reporter=line
       - name: Save browser failure artifacts
         if: failure()
         uses: actions/upload-artifact@v4
@@ -94,6 +103,9 @@ jobs:
     timeout-minutes: 45
     env:
       AUDIT_ISOLATED_ACCEPTANCE: "true"
+      MEMBER_IMPORT_ENABLED: "true"
+      MEMBERSHIP_GRANTS_ENABLED: "true"
+      VERCEL_SHARE_URL: ${{ secrets.AUDIT_VERCEL_SHARE_URL }}
       AUDIT_BATCH_WORKER_PAUSED: ${{ inputs.batch_worker_paused }}
       PLAYWRIGHT_BASE_URL: ${{ inputs.preview_url }}
       APP_URL: ${{ inputs.preview_url }}
@@ -113,6 +125,15 @@ jobs:
       M2_TEST_MEMBER_PASSWORD: ${{ secrets.AUDIT_M2_TEST_MEMBER_PASSWORD }}
       M2_TEST_COMPANY_ADMIN_EMAIL: ${{ secrets.AUDIT_M2_TEST_COMPANY_ADMIN_EMAIL }}
       M2_TEST_COMPANY_ADMIN_PASSWORD: ${{ secrets.AUDIT_M2_TEST_COMPANY_ADMIN_PASSWORD }}
+      M2_TEST_EXCO_EMAIL: ${{ secrets.AUDIT_M2_TEST_EXCO_EMAIL }}
+      M2_TEST_EXCO_PASSWORD: ${{ secrets.AUDIT_M2_TEST_EXCO_PASSWORD }}
+      M2_TEST_SUPERADMIN_EMAIL: ${{ secrets.AUDIT_M2_TEST_SUPERADMIN_EMAIL }}
+      M2_TEST_SUPERADMIN_PASSWORD: ${{ secrets.AUDIT_M2_TEST_SUPERADMIN_PASSWORD }}
+      HKWTIA_TEST_PENDING_MEMBERSHIP_ID: ${{ secrets.AUDIT_HKWTIA_TEST_PENDING_MEMBERSHIP_ID }}
+      HKWTIA_TEST_GUEST_CHECKIN_EVENT_ID: ${{ secrets.AUDIT_HKWTIA_TEST_GUEST_CHECKIN_EVENT_ID }}
+      HKWTIA_TEST_GUEST_CHECKIN_EMAIL: ${{ secrets.AUDIT_HKWTIA_TEST_GUEST_CHECKIN_EMAIL }}
+      HKWTIA_TEST_GUEST_CHECKIN_EMAIL_ZH: ${{ secrets.AUDIT_HKWTIA_TEST_GUEST_CHECKIN_EMAIL_ZH }}
+      HKWTIA_TEST_GUEST_RSVP_SLUG: ${{ secrets.AUDIT_HKWTIA_TEST_GUEST_RSVP_SLUG }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -123,12 +144,20 @@ jobs:
       - name: Fail closed on missing isolated database, identities or test-mode configuration
         run: npx tsx scripts/audit-acceptance-preflight.ts
       - run: npx playwright install --with-deps chromium
+      - name: Enter authorized protected Preview when configured
+        if: env.VERCEL_SHARE_URL != ''
+        run: |
+          node --input-type=module -e 'if (new URL(process.env.VERCEL_SHARE_URL).origin !== new URL(process.env.PLAYWRIGHT_BASE_URL).origin) throw new Error("PREVIEW_SHARE_ORIGIN_MISMATCH")'
+          node scripts/vercel-preview-session.mjs
+          echo "PLAYWRIGHT_STORAGE_STATE=.playwright/preview-state.json" >> "$GITHUB_ENV"
       - name: Run existing authenticated journey suites
         run: >-
           npx playwright test
           tests/e2e/m2-admin-crm.spec.ts
           tests/e2e/admin-members.spec.ts
           tests/e2e/admin-batches.spec.ts
+          tests/e2e/admin-imports.spec.ts
+          tests/e2e/admin-grants.spec.ts
           tests/e2e/join-resume.spec.ts
           tests/e2e/membership-checkout.spec.ts
           tests/e2e/admin-event-authoring.spec.ts
@@ -144,5 +173,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: audit-authenticated-evidence
-          path: test-results/
+          path: test-results/audit-authenticated.json
           if-no-files-found: ignore

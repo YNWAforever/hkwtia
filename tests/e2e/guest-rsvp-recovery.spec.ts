@@ -3,24 +3,28 @@ import {readFileSync} from "node:fs";
 import {expect, test} from "@playwright/test";
 
 const copy = (locale: "en" | "zh-HK") => {
-  const bundle = JSON.parse(readFileSync(new URL(`../../messages/${locale}.json`, import.meta.url), "utf8"));
-  return bundle.Events.detail.guest as {submit: string; invalid: string; requiredField: string; unavailable: string};
+  const bundle = JSON.parse(readFileSync(new URL(`../../messages/${locale}.json`, import.meta.url), "utf8")) as typeof import("../../messages/en.json");
+  return bundle.Events.guest;
 };
 
 for (const {locale, prefix} of [{locale: "en" as const, prefix: ""}, {locale: "zh-HK" as const, prefix: "/zh"}]) {
   test(`${locale}: empty RSVP and a lost action response stay on the form`, async ({page}) => {
-    await page.goto(`${prefix}/events?status=open`);
-    const hrefs = [...new Set(await page.locator(".event-library a[href*='/events/']").evaluateAll((links) =>
-      links.map((link) => link.getAttribute("href")).filter((href): href is string => Boolean(href)),
-    ))].slice(0, 6);
-    let eventHref: string | null = null;
-    for (const href of hrefs) {
-      await page.goto(href);
-      if (await page.locator("form.guest-rsvp-form").count()) { eventHref = href; break; }
+    const fixtureSlug = process.env.HKWTIA_TEST_GUEST_RSVP_SLUG?.trim();
+    let eventHref: string | null = fixtureSlug ? `${prefix}/events/${encodeURIComponent(fixtureSlug)}` : null;
+    if (eventHref) {
+      await page.goto(eventHref);
+      await expect(page.locator("form.guest-rsvp-form")).toHaveCount(1);
+    } else {
+      await page.goto(`${prefix}/events?status=open`);
+      const hrefs = [...new Set(await page.locator(".event-library a[href*='/events/']").evaluateAll((links) =>
+        links.map((link) => link.getAttribute("href")).filter((href): href is string => Boolean(href)),
+      ))].slice(0, 6);
+      for (const href of hrefs) {
+        await page.goto(href);
+        if (await page.locator("form.guest-rsvp-form").count()) { eventHref = href; break; }
+      }
     }
-    test.skip(eventHref === null, hrefs.length === 0
-      ? "isolated environment has no open event fixture"
-      : "the six soonest open events have no anonymous RSVP form");
+    test.skip(eventHref === null, "No open RSVP form in the first six events; set HKWTIA_TEST_GUEST_RSVP_SLUG to an isolated fixture");
 
     const labels = copy(locale);
     const form = page.locator("form.guest-rsvp-form");

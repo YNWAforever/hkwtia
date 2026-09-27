@@ -13,8 +13,8 @@ type AcceptanceMessages = Readonly<{
   Membership: {title: string};
   NotFound: {title: string};
   Admin: {
-    members: {title: string; search: string};
-    member360: {engagement: string; noteBody: string; addNote: string; noteSuccess: string};
+    members: {title: string; search: string; filters: {apply: string}};
+    member360: {notes: string; engagement: string; noteBody: string; addNote: string; noteSuccess: string};
     segments: {total: string; queue: string; queued: string; existing: string; recipients: string; save: string; saveValidation: string};
     atRisk: {title: string};
     reports: {title: string; numerator: string; denominator: string};
@@ -95,12 +95,13 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
     await page.goto("/admin/members");
     await expect(page.getByRole("heading", {level: 1, name: en.Admin.members.title})).toBeVisible();
     await page.getByRole("searchbox", {name: en.Admin.members.search}).fill("M2 Risk 01");
-    await page.getByRole("button", {name: en.Admin.members.search}).click();
+    await page.getByRole("button", {name: en.Admin.members.filters.apply, exact: true}).click();
     await expect(page.getByRole("row", {name: /M2 Risk 01/})).toBeVisible();
 
     await page.goto("/admin/members/m2-risk-01");
     await expect(page.getByRole("heading", {level: 1, name: "M2 Risk 01"})).toBeVisible();
     await expect(page.getByRole("heading", {level: 2, name: en.Admin.member360.engagement})).toBeVisible();
+    await page.getByRole("link", {name: en.Admin.member360.notes, exact: true}).click();
     await page.getByRole("textbox", {name: en.Admin.member360.noteBody, exact: true}).fill("M2 acceptance follow-up");
     await page.getByRole("button", {name: en.Admin.member360.addNote}).click();
     await expect(page.getByText(en.Admin.member360.noteSuccess)).toBeVisible();
@@ -162,14 +163,14 @@ test.describe("M2 authenticated Admin CRM acceptance", () => {
 
   test("event check-in appends exactly one event_attended engagement", async ({page}) => {
     await signInForM2(page, "staff");
-    await page.goto(`/admin/events-mgmt/${M2_UUIDS.events[0]}`);
+    await page.goto(`/admin/events-mgmt/${M2_UUIDS.events[0]}?tab=attendees&q=M2+Member+04`);
     const attendee = page.getByRole("row", {name: /M2 Member 04/});
     await expect(attendee.getByRole("button", {name: en.Admin.eventsMgmt.checkIn})).toBeEnabled();
     await attendee.getByRole("button", {name: en.Admin.eventsMgmt.checkIn}).click();
     await expect(attendee.getByText(en.Admin.eventsMgmt.checkInSuccess)).toBeVisible();
     await expect(attendee.getByRole("button", {name: en.Admin.eventsMgmt.checkIn})).toBeDisabled();
 
-    await page.goto("/admin/members/m2-member-04");
+    await page.goto("/admin/members/m2-member-04?section=engagement");
     await expect(page.getByText("event_attended", {exact: false})).toHaveCount(1);
   });
 

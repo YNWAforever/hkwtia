@@ -1,9 +1,9 @@
 import {readFileSync} from "node:fs";
 import {expect, test} from "@playwright/test";
 
-import {missingM2LiveEnvironment, signInForM2} from "../fixtures/m2-auth";
+import {missingM2IdentityEnvironment, signInForM2} from "../fixtures/m2-auth";
 
-const missing = [...missingM2LiveEnvironment()];
+const missing = [...missingM2IdentityEnvironment()];
 if (!process.env.PLAYWRIGHT_BASE_URL?.trim()) missing.push("PLAYWRIGHT_BASE_URL (isolated non-Production Preview)");
 if (/hkwtia\.vercel\.app|production/i.test(process.env.PLAYWRIGHT_BASE_URL ?? "")) missing.push("non-Production PLAYWRIGHT_BASE_URL");
 const bundle = (locale: "en" | "zh-HK") => JSON.parse(readFileSync(new URL(`../../messages/${locale}.json`, import.meta.url), "utf8")) as {

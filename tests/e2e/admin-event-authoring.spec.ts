@@ -2,9 +2,9 @@ import {readFileSync} from "node:fs";
 
 import {expect, test} from "@playwright/test";
 
-import {missingM2LiveEnvironment, signInForM2} from "../fixtures/m2-auth";
+import {missingM2IdentityEnvironment, signInForM2} from "../fixtures/m2-auth";
 
-const missing = missingM2LiveEnvironment();
+const missing = missingM2IdentityEnvironment();
 const copy = (locale: "en" | "zh-HK") => JSON.parse(readFileSync(new URL(`../../messages/${locale}.json`, import.meta.url), "utf8")) as {
   Admin: {eventsMgmt: {create: string; createSuccess: string; registrationModes: Record<string, string>}};
 };
@@ -17,12 +17,12 @@ const modes = [
 
 for (const {locale, prefix} of [{locale: "en" as const, prefix: ""}, {locale: "zh-HK" as const, prefix: "/zh"}]) {
   test(`${locale}: staff event modes survive create, edit and public rendering`, async ({page}) => {
-    test.skip(missing.length > 0, `isolated M2 DB/auth/Stripe acceptance values are missing: ${missing.join(", ")}`);
+    test.skip(missing.length > 0, `isolated M2 DB/auth acceptance values are missing: ${missing.join(", ")}`);
     await signInForM2(page, "staff");
     const labels = copy(locale).Admin.eventsMgmt;
     for (const [index, mode] of modes.entries()) {
       const slug = `audit-${locale.toLowerCase()}-${mode.slug}-${Date.now()}-${index}`;
-      const title = `Audit ${mode.slug} ${index}`;
+      const title = `Audit ${slug}`;
       await page.goto(`${prefix}/admin/events-mgmt`);
       const form = page.locator("form:has(input[name=slug])").first();
       await form.locator("input[name=slug]").fill(slug);

@@ -3,7 +3,7 @@ import {randomUUID} from "node:crypto";
 import {execFile} from "node:child_process";
 import {promisify} from "node:util";
 import {expect,test,type Page} from "@playwright/test";
-import {missingM2LiveEnvironment,signInForM2} from "../fixtures/m2-auth";
+import {missingM2IdentityEnvironment,signInForM2} from "../fixtures/m2-auth";
 const en=JSON.parse(readFileSync(new URL("../../messages/en.json",import.meta.url),"utf8")) as typeof import("../../messages/en.json");
 const zh=JSON.parse(readFileSync(new URL("../../messages/zh-HK.json",import.meta.url),"utf8")) as typeof import("../../messages/zh-HK.json");
 const runProcess=promisify(execFile);
@@ -12,7 +12,7 @@ async function driver(mode:string,run:string,batchId?:string){
   return JSON.parse(stdout) as {name:string;ids:string[];claimed:number;changed:number;items:{target_id:string;state:string;attempt_count:number;effect_key:string}[];effects:{target_id:string;n:number}[]};
 }
 async function counter(page:Page,label:string,value:number){await expect(page.locator('dl > div').filter({has:page.locator('dt',{hasText:new RegExp(`^${label}$`)})}).locator('dd')).toHaveText(String(value));}
-const missing=missingM2LiveEnvironment();
+const missing=missingM2IdentityEnvironment();
 for(const [locale,prefix,messages] of [['en','',en],['zh-HK','/zh',zh]] as const){
  test(`${locale}: ten selected members, two controlled failures, retry only failures`,async({page,baseURL})=>{
   test.skip(missing.length>0||process.env.AUDIT_ISOLATED_ACCEPTANCE!=='true'||process.env.AUDIT_BATCH_WORKER_PAUSED!=='true','Requires isolated M2 identities, exact DB allowlist and a paused scheduled batch worker');
@@ -21,7 +21,7 @@ for(const [locale,prefix,messages] of [['en','',en],['zh-HK','/zh',zh]] as const
   await signInForM2(page,'staff');await page.goto(`${prefix}/admin/members?q=${encodeURIComponent(fixture.name)}`);
   await expect(page.locator('tbody tr')).toHaveCount(10);
   for(let i=0;i<10;i++)await page.getByRole('checkbox',{name:member.selection.row.replace('{name}',`${fixture.name} ${i}`),exact:true}).check();
-  await page.getByLabel(member.batch.language,{exact:true}).selectOption('zh-HK');
+  await page.getByRole('combobox',{name:member.batch.language,exact:true}).filter({hasNot:page.locator('option[value=""]')}).selectOption('zh-HK');
   await page.getByLabel(member.batch.reason,{exact:true}).fill('Synthetic acceptance language correction');
   await page.getByRole('button',{name:member.batch.preview,exact:true}).click();
   await expect(page).toHaveURL(/\/admin\/batches\/[a-f0-9-]+$/);
