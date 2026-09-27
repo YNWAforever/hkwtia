@@ -115,6 +115,7 @@ const workerAlertSchema = z.object({
     "ticket-emails",
     "admin-batches",
     "membership-grant-expiry",
+    "rate-limit-cleanup",
   ]),
   scheduledTime: z.string().min(1).max(64),
   attemptCount: z.number().int().min(1).max(3),
@@ -125,27 +126,7 @@ const workerAlertSchema = z.object({
   ]),
 }).strict();
 
-export type WorkerAlertPayload = Readonly<{
-  job:
-    | "journey-runner"
-    | "renewal-runner"
-    | "engagement-score"
-    | "approvals-expirer"
-    | "retention-analyst"
-    | "board-reporter"
-    | "aiops-metrics"
-    | "chat-retention"
-    | "whatsapp-send-queue"
-    | "event-cancellation-refunds"
-    | "event-notifications"
-    | "showcase-lead-emails"
-    | "ticket-emails"
-    | "admin-batches"
-    | "membership-grant-expiry";
-  scheduledTime: string;
-  attemptCount: number;
-  errorCode: "JOB_HTTP_ERROR" | "JOB_NETWORK_ERROR" | "JOB_TIMEOUT";
-}>;
+export type WorkerAlertPayload = Readonly<z.infer<typeof workerAlertSchema>>;
 
 type WorkerAlertDependencies = Readonly<{
   recipients?: StaffAlertRecipientsRepository;
