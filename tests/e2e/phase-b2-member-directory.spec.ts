@@ -76,6 +76,8 @@ for (const {locale, prefix} of locales) {
     const first = page.locator(".partner-record-grid a[href*='/members/']").first();
     test.skip((await first.count()) === 0, "no published member pages on this target");
     await first.click();
+    await expect(page).toHaveURL(new RegExp(`${prefix}/members/[^/?#]+$`));
+    await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(2);
     // Both blocks are `<script>` contents, so read text rather than visibility, and parse instead of
     // matching a substring: a company whose name happened to contain "Organization" would otherwise
     // pass a spec that the JSON-LD had gone missing.
