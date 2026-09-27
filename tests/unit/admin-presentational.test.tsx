@@ -23,7 +23,7 @@ const adminNavMocks = vi.hoisted(() => ({
   labels: {} as Record<string, unknown>,
   pathname: "/admin",
 }));
-vi.mock("next/navigation", () => ({usePathname: () => adminNavMocks.pathname}));
+vi.mock("next/navigation", () => ({usePathname: () => adminNavMocks.pathname, useRouter: () => ({push: vi.fn(), replace: vi.fn(), refresh: vi.fn()})}));
 vi.mock("next-intl", () => ({
   useTranslations: (namespace: string) => (key: string) => {
     const root = namespace === "Admin" ? adminNavMocks.labels : {};

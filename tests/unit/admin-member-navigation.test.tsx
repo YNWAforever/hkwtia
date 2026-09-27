@@ -1,5 +1,7 @@
 import {renderToStaticMarkup} from "react-dom/server";
-import {describe, expect, it} from "vitest";
+import {describe, expect, it, vi} from "vitest";
+
+vi.mock("next/navigation", () => ({useRouter: () => ({push: vi.fn(), replace: vi.fn(), refresh: vi.fn()})}));
 
 import {MemberTable} from "@/components/admin/member-table";
 import {adminMemberListHref, encodeAdminMemberCursor, parseAdminMemberHistory, parseAdminMemberRouteQuery} from "@/lib/admin/member-types";

@@ -23,6 +23,7 @@ vi.mock("next/headers", () => ({
 vi.mock("@/lib/auth/actor", () => ({getActor: async () => state.actor}));
 vi.mock("@/lib/tickets/checkout-core", () => ({createTicketCheckout: state.core}));
 vi.mock("@/lib/db/repos/event-checkout-recoveries", () => ({eventCheckoutRecoveriesRepository: {issueForAttempt: state.issue, read: state.read, invalidate: state.invalidate}}));
+vi.mock("@/lib/security/shared-rate-limit", () => ({createSharedRateLimiter: () => ({check: async () => ({allowed: true, retryAfterSeconds: 0})})}));
 vi.mock("@/lib/billing/stripe", () => ({stripeBillingAdapter: () => ({ticketSessionStatus: state.providerStatus})}));
 vi.mock("@/lib/db/repos/event-orders", () => ({eventOrdersRepository: {expireBySession: state.expireBySession, expireUnattachedOrder: vi.fn()}}));
 
