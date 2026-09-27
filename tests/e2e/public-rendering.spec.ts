@@ -4,14 +4,18 @@ for (const prefix of ['', '/zh']) {
   test(`${prefix || 'en'}: long home sections defer layout and reveal on keyboard focus`, async ({page}) => {
     await page.setViewportSize({width: 390, height: 844});
     await page.goto(prefix || '/');
-    const heading = page.locator('#conversion-paths h2');
+    const heading = page.locator('#programmes h2');
     await expect(heading).toHaveCount(1);
     // checkVisibility reads skipped rendering without forcing the descendant's layout.
     await expect.poll(() => heading.evaluate((element) => element.checkVisibility({contentVisibilityAuto: true}))).toBe(false);
     await expect(page.locator('main > .hero')).toHaveCSS('content-visibility', 'visible');
     await expect(page.locator('h1')).toBeInViewport();
+    // End sections must retain their real height so accessibility measurement and
+    // footer placement never use a placeholder that can overlap visible content.
+    await expect(page.locator('.archive-proof')).toHaveCSS('content-visibility', 'visible');
+    await expect(page.locator('.conversion-section')).toHaveCSS('content-visibility', 'visible');
 
-    const link = page.locator('#conversion-paths a').first();
+    const link = page.locator('#programmes a').first();
     // Follow the real tab order from the page start. This also exercises intermediate
     // skipped sections; jumping with DOM focus during initial hydration can be reset
     // by Next's navigation focus handler before a person could reach this link.
@@ -25,7 +29,7 @@ for (const prefix of ['', '/zh']) {
     await expect(link).toBeInViewport();
     await expect.poll(() => heading.evaluate((element) => element.checkVisibility({contentVisibilityAuto: true}))).toBe(true);
     await page.keyboard.press('Tab');
-    await expect(page.locator('#conversion-paths a').nth(1)).toBeFocused();
+    await expect(page.locator('#programmes a').nth(1)).toBeFocused();
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
   });
 

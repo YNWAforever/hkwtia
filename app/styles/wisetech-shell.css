@@ -509,19 +509,21 @@
  * The estimate is replaced by the measured size once a section renders. A sibling
  * selector also tolerates streamed boundaries and JSON-LD before/after the hero.
  * Do not apply this globally: forms, sticky controls and other page layouts have
- * not been assessed for containment. Print must render every section in full. */
+ * not been assessed for containment. The homepage end sections retain real size
+ * to keep archive captions, conversion targets and footer geometry stable.
+ * Print must render every section in full. */
 /* Smooth scrolling fixes its destination before skipped sections acquire their
  * real height; a long focus/fragment jump can then land above the target. Native
  * immediate scrolling keeps the destination aligned as those sections render. */
 html:has(.site-root > main > .defer-following-sections) { scroll-behavior: auto; }
 
-.site-root > main > .defer-following-sections ~ section {
+.site-root > main > .defer-following-sections ~ section:not(.archive-proof, .conversion-section) {
   content-visibility: auto;
   contain-intrinsic-block-size: auto 800px;
 }
 
 @media print {
-  .site-root > main > .defer-following-sections ~ section {
+  .site-root > main > .defer-following-sections ~ section:not(.archive-proof, .conversion-section) {
     content-visibility: visible;
     contain-intrinsic-block-size: none;
   }
