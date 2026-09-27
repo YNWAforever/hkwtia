@@ -7,7 +7,7 @@
 5. Roll back by closing flags and pausing new claims, recording in-flight effects, then reverting web/worker to schema-compatible versions. Keep audit, outbox, batch and payment records. Reconcile provider-accepted work; do not resend unknown outcomes blindly or drop tables.
 6. Demo cleanup requires an exact dry-run ID manifest and separate approval; restore publication state from that manifest if needed, preserving registrations, orders, refunds and cancelled status.
 
-Current state: code branch in progress; staging unverified; production unreleased.
+Current state: draft PR #94 is reviewable; code and selected disposable-DB journeys are verified as recorded in `verification.md`; staging unverified; production unreleased.
 
 ## T02 private ticket preflight
 

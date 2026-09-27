@@ -58,9 +58,9 @@ Record every result with date, SHA, environment, command, exit code, count, skip
 ## Outstanding gates
 
 - The Lighthouse target CLI shebang was removed so Vitest can import its exported function; its nine tests and the full suite now pass. This is a test-loader repair, not a production Lighthouse measurement.
-- No isolated `DATABASE_URL_TEST` or Stripe test variables in this shell. Do not run migrations, seeds or paid flows against unknown hosts.
-- Browser acceptance needs a local/preview server and test identities. The public alias's deployed SHA is unverified.
-- `npm run test:e2e` and focused browser journeys must be run and recorded before handoff.
+- No isolated `DATABASE_URL_TEST` or Stripe test variables in this shell. Disposable Docker PostgreSQL 16 suites ran with synthetic data; no shared-host migrations, seeds or paid flows ran.
+- Browser acceptance still needs isolated test identities, Neon Auth, Stripe test mode and access to the SHA-specific protected Preview. The public alias's deployed SHA is unverified.
+- Full Playwright was attempted twice and did not pass; the credential-free public subset passed 22 with 2 login skips. Authenticated journeys remain an external gate.
 
 
 | 2026-09-27 | T09 feature worktree | focused cancellation panel/repository/worker vitest | exit 0; 3 files, 35 tests passed | Intent snapshot SQL shape, confirmation counts, retry boundaries, frozen key, timeout and known-block behavior. Repository and transport mocked; no real DB/provider. |
@@ -121,7 +121,7 @@ Saved-view migration, staff browser flow, keyboard/mobile checks, and a selectio
 | 2026-09-27 | feature worktree | `npm run typecheck`; `npm run audit:strings`; focused ESLint; `npx drizzle-kit check` | all exit 0; 275 TSX scanned | Batch page, bilingual copy, migration metadata and changed files. |
 | 2026-09-27 | feature worktree | `npm run lint` | initial exit 1 on impure `Date.now` render; corrected; fresh full lint pending | Existing warnings remain. |
 
-Migration 0046 is not applied to staging/production. `ADMIN_BATCH_ENABLED` remains false. No staff-authenticated browser or 5000-item load run has been performed. Full suite/build and prior DB/browser gates remain for T18.
+Migration 0046 is not applied to staging/production. `ADMIN_BATCH_ENABLED` remains false. No staff-authenticated browser or 5000-item load run has been performed. Later T18 entries below record full suite/build and selected disposable-DB passes; staff browser and staging gates remain.
 ## T14 member import evidence
 
 | Date | Environment | Command | Result | Scope and limit |
@@ -235,3 +235,19 @@ A final full suite and build were run after these repairs. The JSON reports stay
 | 2026-09-27 | GitHub workflow dispatch | `gh workflow run audit-acceptance.yml --ref codex/audit-remediation-20260927 ...` | HTTP 404: new workflow is not registered on the default branch | Manual workflow cannot be dispatched before it exists on the default branch; no remote disposable-DB or Preview browser result is claimed. |
 
 The first full local Playwright attempt on port 3107 was stopped after the Concierge route returned 503: its documented loopback-only deterministic acceptance pair and matching `APP_URL` were absent. The second full run used those values; the four Concierge mock cases passed, but by approximately case 115/390 anonymous protected-route and guest-cancel checks failed repeatedly while Neon Auth reported `ECONNREFUSED` at `localhost:3000`. It was stopped, and the full E2E gate is **not passed**. The credential-free bilingual local public subset (`core-pages` and `public-navigation`) finished with 22 passed and 2 login cases skipped in 3.3 minutes; it covers both locales, 390/768/1440px public layouts, navigation, FAQ and selected axe checks. No Neon Auth, isolated `DATABASE_URL_TEST`, Stripe test-mode, Preview share token or staff/member test identities are present in this session. Only variable presence was checked; values were not read or printed.
+
+## Final disposable PostgreSQL rerun and release gates
+
+| Date | Environment | Command | Result | Scope and limit |
+|---|---|---|---|---|
+| 2026-09-27 | disposable Docker PostgreSQL 16 | `RUN_POSTGRES_INTEGRATION=1 npx vitest run` on eight selected ticket, join, check-in, cancellation, admin pagination, purchase and outbox integration files | first attempt: 5 files passed, 3 failed; 17 tests passed, 6 failed | The red cases exposed two real raw-SQL defects: `note_authors` was treated as a physical relation, and cancellation's `UNION ALL` bound `event_id` as text. The ticket eligibility synthetic table also lacked current `events.slug` and grant-window fields. No provider was contacted. |
+| 2026-09-27 | disposable Docker PostgreSQL 16; commit `b71583ed` | same eight-file command, `--maxWorkers=1 --reporter=dot` | exit 0; 8 files, 23 tests passed, 0 failed; 123.03 s | Validates transactional SQL and synthetic journeys. It is neither authenticated Preview acceptance nor a load measurement. |
+| 2026-09-27 | feature worktree after `b71583ed` | `npm run typecheck`; focused ESLint on three changed files | exit 0 for both | Type and changed-file lint after the SQL repair. |
+| 2026-09-27 | feature worktree after `b71583ed` | `npm run build` | exit 0; 256 static pages | Production compile, TypeScript and page generation pass after SQL repair; generated `next-env.d.ts` restored. No provider or staging assertion. |
+| 2026-09-27 | feature worktree after `b71583ed` | `npm run audit:strings`; `npx drizzle-kit check`; `npm audit --omit=dev --audit-level=high` | exit 0 for all; 279 TSX; metadata consistent; 1 low/7 moderate advisories | Translation scan and metadata/high-severity dependency gates; no shared migration or dependency upgrade. |
+| 2026-09-27 | feature worktree after `b71583ed` | `npm run lint` | exit 0; 0 errors, 63 warnings | Full repository lint after final code repair. Warnings remain recorded. |
+| 2026-09-27 | feature worktree at `88fbff90` before `b71583ed` | `npm test -- --maxWorkers=2 --reporter=json --outputFile=test-results/audit-vitest-final.json` | exit 0; 5,859 passed, 0 failed, 115 skipped, 1,678 suites | Full local unit collection after queue metrics. This result predates the final SQL correction; those paths were separately exercised by PostgreSQL above. JSON is local ignored evidence. |
+| 2026-09-27 | feature worktree after `b71583ed` | `npm test -- --maxWorkers=2 --reporter=json --outputFile=test-results/audit-vitest-postgres-fix.json` | exit 0; 1,678/1,678 suites; 5,859 passed, 0 failed, 115 skipped | Final full local Vitest collection after the SQL repair. Skips are not staging acceptance; JSON remains under ignored `test-results/`. |
+| 2026-09-27 | GitHub PR #94 at `88fbff90` | `gh pr checks 94` and Vercel Preview status | `checks`, `quality`, both test shards and Vercel deployment passed | SHA-specific Preview `https://hkwtia-n0ufe31jm-ynwaforevers-projects.vercel.app` is Vercel-login protected; no app acceptance was run there. Latest SQL commit requires fresh CI/Preview evidence after push. |
+
+Code coverage is broader than runtime acceptance. No member-facing send, payment/refund, shared database migration or production cleanup was performed. The default-off batch, grant, notification and limiter rollout and rollback sequence is in `release-runbook.md`; external policy and credential gates remain in `decisions.md`.
