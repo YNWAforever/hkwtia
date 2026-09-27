@@ -8,7 +8,7 @@ const bundles = {
   en: JSON.parse(readFileSync(resolve(process.cwd(), "messages/en.json"), "utf8")),
   "zh-HK": JSON.parse(readFileSync(resolve(process.cwd(), "messages/zh-HK.json"), "utf8")),
 } as const;
-const profiles = vi.hoisted(() => ({listPublished: vi.fn()}));
+const profiles = vi.hoisted(() => ({listPublished: vi.fn(), listPublishedPage: vi.fn()}));
 
 vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: profiles}));
 vi.mock("next-intl/server", () => ({
@@ -40,22 +40,34 @@ describe("public directory availability", () => {
   let log: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
+    profiles.listPublishedPage.mockReset();
     profiles.listPublished.mockReset();
+    profiles.listPublished.mockResolvedValue([]);
     log = vi.spyOn(console, "error").mockImplementation(() => undefined);
   });
   afterEach(() => log.mockRestore());
 
   it("shows a real empty result without emitting a failure event", async () => {
-    profiles.listPublished.mockResolvedValue([]);
+    profiles.listPublishedPage.mockResolvedValue({items: [], nextCursor: null});
     const html = await renderDirectory();
     expect(html).toContain(bundles.en.Members.noPublishedTitle);
     expect(html).not.toContain(bundles.en.Members.unavailableTitle);
     expect(log).not.toHaveBeenCalled();
   });
 
+  it("offers a filter-preserving next page when the repository has more rows", async () => {
+    profiles.listPublishedPage.mockResolvedValue({items: [{
+      id: "00000000-0000-4000-8000-000000000001", slug: "member-one", name: "Member One",
+      tagline: {en: null, zhHk: null}, tags: [], plan: null, website: null, logoUrl: null,
+    }], nextCursor: "next-cursor"});
+    const html = await renderDirectory("en", {q: "member"});
+    expect(html).toContain('cursor=next-cursor');
+    expect(html).toContain(bundles.en.Members.loadMore);
+  });
+
   it("correlates a missing grant column safely and offers a filter-preserving retry", async () => {
     const error = new Error("private company and email: member@example.test", {cause: Object.assign(new Error("missing grant"), {code: "42703"})});
-    profiles.listPublished.mockRejectedValue(error);
+    profiles.listPublishedPage.mockRejectedValue(error);
 
     const html = await renderDirectory("zh-HK", {q: "harbour", tag: "ai", plan: "invalid"});
     expect(html).toContain(bundles["zh-HK"].Members.unavailableTitle);

@@ -505,7 +505,7 @@
       "directory": {
         "label": "Member Directory",
         "title": "Meet the people shaping what comes next.",
-        "copyEmpty": "The directory is ready for approved public profiles, with controlled visibility and consent-based introductions. No live member records are shown yet.",
+        "copyEmpty": "Explore the member directory. Organisations decide whether to submit a public profile for WTIA review.",
         "copyUnavailable": "Member profiles are temporarily unavailable.",
         "copyAvailable": "Published member solutions are now live, with controlled visibility and consent-based introductions.",
         "action": "Discover members"
@@ -513,7 +513,7 @@
       "marketplace": {
         "label": "AI Solutions Marketplace",
         "title": "Find AI ready for the real world.",
-        "copyEmpty": "The planned marketplace will compare maturity, deployment, security, market coverage and reviewed evidence. No live solution records are shown yet.",
+        "copyEmpty": "Browse the solution showcase by use case and deployment approach as approved listings become available.",
         "copyUnavailable": "Solution listings are temporarily unavailable.",
         "copyAvailable": "Published solutions are now live to compare, by use case, deployment and reviewed evidence.",
         "action": "Explore solutions"
@@ -567,7 +567,7 @@
     "programmeShowcase": {
       "eyebrow": "Programmes + awards",
       "title": "Participation that turns into progress",
-      "intro": "Existing programme equity is retained and reframed around clear outcomes, audiences and the next action.",
+      "intro": "Explore WTIA programmes, awards and credentials, with edition records and details of how to take part.",
       "eventSeriesLabel": "Event series",
       "credentialLabel": "Credential",
       "editionsFact": "{count, plural, one {# edition} other {# editions}} since {year}",
@@ -1511,7 +1511,9 @@
       "corporate": "Corporate",
       "patron": "Patron"
     },
-    "resultsTitle": "{count} members",
+    "resultsTitle": "{count} members on this page",
+    "loadMore": "View more members",
+    "paginationLabel": "Member directory pages",
     "noPublishedTitle": "No public member profiles yet",
     "noPublishedDescription": "No member profiles are published yet.",
     "emptyTitle": "No member pages match yet",

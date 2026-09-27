@@ -17,7 +17,7 @@ function messageAt(locale: "en" | "zh-HK", namespace: string | undefined, key: s
   return key.split(".").reduce<unknown>((v, p) => (v as Record<string, unknown> | undefined)?.[p], root);
 }
 
-const profiles = vi.hoisted(() => ({getPublishedBySlug: vi.fn(), listPublished: vi.fn()}));
+const profiles = vi.hoisted(() => ({getPublishedBySlug: vi.fn(), listPublishedPage: vi.fn()}));
 
 vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: profiles}));
 vi.mock("next-intl/server", () => ({
@@ -66,12 +66,12 @@ async function renderDirectory(searchParams: Record<string, string> = {}, locale
 
 describe("/members directory (D-11)", () => {
   beforeEach(() => {
-    profiles.listPublished.mockReset();
+    profiles.listPublishedPage.mockReset();
     profiles.getPublishedBySlug.mockReset();
   });
 
   it("renders a published profile per card inside the donor record grid", async () => {
-    profiles.listPublished.mockResolvedValue([summary, {...summary, slug: "kowloon-cloud", name: "Kowloon Cloud", plan: "startup"}]);
+    profiles.listPublishedPage.mockResolvedValue({items: [summary, {...summary, slug: "kowloon-cloud", name: "Kowloon Cloud", plan: "startup"}], nextCursor: null});
 
     const html = await renderDirectory();
 
@@ -85,17 +85,17 @@ describe("/members directory (D-11)", () => {
   });
 
   it("passes the parsed filters to the repository and keeps them in the form", async () => {
-    profiles.listPublished.mockResolvedValue([]);
+    profiles.listPublishedPage.mockResolvedValue({items: [], nextCursor: null});
 
     const html = await renderDirectory({q: "harbour", tag: "ai", plan: "nonsense"});
 
-    expect(profiles.listPublished).toHaveBeenCalledWith({q: "harbour", tag: "ai", plan: null});
+    expect(profiles.listPublishedPage).toHaveBeenCalledWith({q: "harbour", tag: "ai", plan: null}, null);
     expect(html).toContain('value="harbour"');
     expect(html).toContain('<option value="ai" selected="">');
   });
 
   it("shows the honest empty state, not a fabricated grid, at zero results", async () => {
-    profiles.listPublished.mockResolvedValue([]);
+    profiles.listPublishedPage.mockResolvedValue({items: [], nextCursor: null});
 
     const html = await renderDirectory();
 
@@ -104,7 +104,7 @@ describe("/members directory (D-11)", () => {
   });
 
   it("distinguishes an empty published directory from filters with no matches", async () => {
-    profiles.listPublished.mockResolvedValue([]);
+    profiles.listPublishedPage.mockResolvedValue({items: [], nextCursor: null});
     const unfiltered = await renderDirectory();
     const filtered = await renderDirectory({q: "missing"});
     expect(unfiltered).toContain("No member profiles are published yet.");
@@ -113,7 +113,7 @@ describe("/members directory (D-11)", () => {
   });
 
   it("shows an unavailable state when the database is unreachable", async () => {
-    profiles.listPublished.mockRejectedValue(new Error("DATABASE_UNAVAILABLE"));
+    profiles.listPublishedPage.mockRejectedValue(new Error("DATABASE_UNAVAILABLE"));
 
     const html = await renderDirectory();
     expect(html).toContain("Member pages are temporarily unavailable");
@@ -121,7 +121,7 @@ describe("/members directory (D-11)", () => {
   });
 
   it("links the clear action and the cards through localizedPath in zh-HK", async () => {
-    profiles.listPublished.mockResolvedValue([summary]);
+    profiles.listPublishedPage.mockResolvedValue({items: [summary], nextCursor: null});
 
     const html = await renderDirectory({}, "zh-HK");
 
@@ -133,7 +133,7 @@ describe("/members directory (D-11)", () => {
 
 describe("/members/[slug] (D-11)", () => {
   beforeEach(() => {
-    profiles.listPublished.mockReset();
+    profiles.listPublishedPage.mockReset();
     profiles.getPublishedBySlug.mockReset();
   });
 

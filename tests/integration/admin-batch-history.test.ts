@@ -11,7 +11,7 @@ const staff = {kind: "staff", userId: "staff", profileId: "staff"} as const;
 const root = {kind: "superadmin", userId: "root", profileId: "root"} as const;
 const enabled = process.env.RUN_POSTGRES_INTEGRATION === "1";
 let fixture: Awaited<ReturnType<typeof isolatedBatchDatabase>>;
-let ids: string[] = [];
+const ids: string[] = [];
 
 async function insertBatch(actor: "staff" | "root", operation: "profile_patch" | "export_members", state: "ready" | "completed_with_errors", when: string, counters: Record<string, number>) {
   const id = randomUUID();

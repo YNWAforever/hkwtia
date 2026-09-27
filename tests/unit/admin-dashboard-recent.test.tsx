@@ -5,8 +5,7 @@ const state = vi.hoisted(() => ({recent: vi.fn(async () => [{id: "11111111-1111-
 vi.mock("next-intl/server", () => ({getTranslations: vi.fn(async () => (key: string) => key), setRequestLocale: vi.fn()}));
 vi.mock("next/link", () => ({default: ({children, href, ...props}: {children: React.ReactNode; href: string}) => <a href={href} {...props}>{children}</a>}));
 vi.mock("@/lib/admin/page-auth", () => ({requireAdminPageActor: async () => ({kind: "staff", userId: "staff", profileId: "staff"})}));
-vi.mock("@/lib/admin/approvals", () => ({listPendingApprovals: async () => []}));
-vi.mock("@/lib/admin/at-risk", () => ({listAtRiskMembers: async () => []}));
+vi.mock("@/lib/db/repos/admin-dashboard", () => ({adminDashboardRepository: {counts: async () => ({approvals: 0, atRisk: 0, listings: 0, profiles: 0, openTasks: 0, draftNews: 0})}}));
 vi.mock("@/lib/admin/inbox", () => ({listOpenTasks: async () => []}));
 vi.mock("@/lib/db/repos/admin-posts", () => ({adminPostsRepository: {listForAdmin: async () => []}}));
 vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: {listForReview: async () => []}}));

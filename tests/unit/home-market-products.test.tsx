@@ -26,12 +26,12 @@ vi.mock("@/i18n/navigation", () => ({
   Link: ({children, href, ...props}: {children: ReactNode; href: string}) => <a href={href} {...props}>{children}</a>,
 }));
 vi.mock("@/lib/db/repos/showcase", () => ({showcaseRepository: {listPublished}}));
-vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: {listPublished: listMembers}}));
+vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: {listPublishedPage: listMembers}}));
 
 describe("MarketProducts", () => {
   it("prints the donor's exact 'no live records' copy on both panels when nothing is published", async () => {
     listPublished.mockResolvedValueOnce([]);
-    listMembers.mockResolvedValueOnce([]);
+    listMembers.mockResolvedValueOnce({items: [], nextCursor: null});
     const {MarketProducts} = await import("@/components/home/market-products");
     render(await MarketProducts({locale: "en"}));
 
@@ -47,7 +47,7 @@ describe("MarketProducts", () => {
 
   it("uses independent directory and showcase availability and correct destinations", async () => {
     listPublished.mockResolvedValueOnce([{}, {}]);
-    listMembers.mockResolvedValueOnce([]);
+    listMembers.mockResolvedValueOnce({items: [], nextCursor: null});
     const {MarketProducts} = await import("@/components/home/market-products");
     render(await MarketProducts({locale: "en"}));
 
@@ -60,7 +60,7 @@ describe("MarketProducts", () => {
 
   it("shows member directory availability without implying showcase listings exist", async () => {
     listPublished.mockResolvedValueOnce([]);
-    listMembers.mockResolvedValueOnce([{}]);
+    listMembers.mockResolvedValueOnce({items: [{}], nextCursor: null});
     const {MarketProducts} = await import("@/components/home/market-products");
     render(await MarketProducts({locale: "zh-HK"}));
     expect(screen.getByText(bundles["zh-HK"].Home.marketProducts.directory.copyAvailable)).toBeInTheDocument();
@@ -69,7 +69,7 @@ describe("MarketProducts", () => {
 
   it("describes an unavailable showcase read without claiming zero published records", async () => {
     listPublished.mockRejectedValueOnce(new Error("db down"));
-    listMembers.mockResolvedValueOnce([]);
+    listMembers.mockResolvedValueOnce({items: [], nextCursor: null});
     const {MarketProducts} = await import("@/components/home/market-products");
     render(await MarketProducts({locale: "en"}));
 

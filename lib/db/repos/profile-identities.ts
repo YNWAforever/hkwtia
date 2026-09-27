@@ -1,6 +1,6 @@
 import "server-only";
 
-import {eq, sql} from "drizzle-orm";
+import {and, eq, isNull, lte, or, sql} from "drizzle-orm";
 
 import {getDb, type Database} from "@/lib/db/repos/common";
 import {profiles} from "@/lib/db/server-schema";
@@ -34,7 +34,12 @@ export function createProfileIdentityRepository(loadDatabase: () => Promise<Data
     },
     async touchLastLogin(profileId: string): Promise<void> {
       const db = await loadDatabase();
-      await db.update(profiles).set({lastLoginAt: new Date()}).where(eq(profiles.id, profileId));
+      const now = new Date();
+      const cutoff = new Date(now.getTime() - 15 * 60_000);
+      await db.update(profiles).set({lastLoginAt: now}).where(and(
+        eq(profiles.id, profileId),
+        or(isNull(profiles.lastLoginAt), lte(profiles.lastLoginAt, cutoff)),
+      ));
     },
     /** The caller must derive this subject from a verified server-side Neon session. */
     async provisionMember(input: VerifiedSubject): Promise<ProfileProvisionResult> {

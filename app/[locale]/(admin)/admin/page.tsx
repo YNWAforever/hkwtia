@@ -3,51 +3,12 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {DashboardTiles, type DashboardTile} from "@/components/admin/dashboard-tiles";
 import type {AppLocale} from "@/i18n/routing";
-import {listPendingApprovals} from "@/lib/admin/approvals";
-import {listAtRiskMembers} from "@/lib/admin/at-risk";
-import {listOpenTasks} from "@/lib/admin/inbox";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
-import {adminPostsRepository} from "@/lib/db/repos/admin-posts";
-import {companyProfilesRepository} from "@/lib/db/repos/company-profiles";
 import {adminBatchHistoryRepository} from "@/lib/db/repos/admin-batch-history";
+import {adminDashboardRepository} from "@/lib/db/repos/admin-dashboard";
 import {localizedPath} from "@/lib/urls";
-import {showcaseRepository} from "@/lib/db/repos/showcase";
-import type {AdminActor} from "@/lib/membership/lifecycle";
 
 type Props = Readonly<{params: Promise<{locale: string}>}>;
-
-/**
- * Each queue is counted independently and degrades on its own. One unreachable
- * table should cost staff that tile, not the whole workspace: the dashboard is
- * the page they land on, so failing it closed would read as "the admin panel is
- * down" when three of four queues are fine.
- */
-async function count<T>(read: Promise<readonly T[]>): Promise<number | null> {
-  try {
-    return (await read).length;
-  } catch {
-    return null;
-  }
-}
-
-async function queueCounts(actor: AdminActor) {
-  const [approvals, atRisk, listings, profiles, openTasks, draftNews] = await Promise.all([
-    count(listPendingApprovals(actor)),
-    count(listAtRiskMembers(actor, {asOf: new Date()})),
-    count(showcaseRepository.listForReview(actor)),
-    count(companyProfilesRepository.listForReview(actor)),
-    count(listOpenTasks(actor)),
-    (async () => {
-      try {
-        const posts = await adminPostsRepository.listForAdmin(actor);
-        return posts.filter((post) => post.publishedAt === null).length;
-      } catch {
-        return null;
-      }
-    })(),
-  ]);
-  return {approvals, atRisk, listings, profiles, openTasks, draftNews};
-}
 
 export default async function AdminPage({params}: Props) {
   const {locale: localeValue} = await params;
@@ -59,7 +20,7 @@ export default async function AdminPage({params}: Props) {
   const actor = await requireAdminPageActor();
   const t = await getTranslations({locale, namespace: "Admin"});
   const [counts, recentBatches] = await Promise.all([
-    queueCounts(actor),
+    adminDashboardRepository.counts(actor),
     adminBatchHistoryRepository.recent(actor).catch(() => null),
   ]);
 

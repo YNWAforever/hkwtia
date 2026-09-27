@@ -505,7 +505,7 @@
       "directory": {
         "label": "會員名錄",
         "title": "認識正在塑造未來的人。",
-        "copyEmpty": "名錄已準備承載獲批公開的專頁，並設有可控可見度及需獲同意的引薦流程；目前尚未顯示現行會員紀錄。",
+        "copyEmpty": "瀏覽會員名錄。機構可自行決定是否提交公開專頁，由 WTIA 審核。",
         "copyUnavailable": "會員專頁暫時無法顯示。",
         "copyAvailable": "已發布的會員方案現已上線，設有可控可見度及需獲同意的引薦流程。",
         "action": "探索會員"
@@ -513,7 +513,7 @@
       "marketplace": {
         "label": "AI 解決方案市場",
         "title": "尋找可在真實環境落地的 AI。",
-        "copyEmpty": "規劃中的方案市場將比較成熟度、部署方式、安全、市場覆蓋及經審閱證據；目前尚未顯示現行方案紀錄。",
+        "copyEmpty": "按用途及部署方式瀏覽方案展示，查看已獲批准公開的方案。",
         "copyUnavailable": "方案展示暫時無法顯示。",
         "copyAvailable": "已發布方案現已上線，可按用途、部署方式及已審閱證據比較。",
         "action": "探索解決方案"
@@ -567,7 +567,7 @@
     "programmeShowcase": {
       "eyebrow": "計劃 + 獎項",
       "title": "把參與轉化為進步",
-      "intro": "保留現有計劃的品牌資產，並以成果、受眾及下一步行動重新呈現。",
+      "intro": "探索 WTIA 計劃、獎項及專業資格，查看歷屆紀錄與參與詳情。",
       "eventSeriesLabel": "活動系列",
       "credentialLabel": "專業資格",
       "editionsFact": "自 {year} 年起共 {count} 屆",
@@ -1511,7 +1511,9 @@
       "corporate": "企業",
       "patron": "贊助人"
     },
-    "resultsTitle": "{count} 個會員",
+    "resultsTitle": "本頁顯示 {count} 個會員",
+    "loadMore": "查看更多會員",
+    "paginationLabel": "會員名錄分頁",
     "noPublishedTitle": "尚未有公開會員專頁",
     "noPublishedDescription": "尚未有已發佈的會員專頁。",
     "emptyTitle": "暫時沒有相符的會員專頁",

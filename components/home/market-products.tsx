@@ -20,11 +20,11 @@ const panels = [
 export async function MarketProducts({locale}: Readonly<{locale: AppLocale}>) {
   const t = await getTranslations({locale, namespace: 'Home.marketProducts'});
   const [members, listings] = await Promise.all([
-    companyProfilesRepository.listPublished(parseMemberFilters({})).catch(() => null),
+    companyProfilesRepository.listPublishedPage(parseMemberFilters({}), null, 1).catch(() => null),
     showcaseRepository.listPublished({}, {limit: 12}).catch(() => null),
   ]);
   const availability = {
-    directory: members === null ? "unavailable" : members.length > 0 ? "available" : "empty",
+    directory: members === null ? "unavailable" : members.items.length > 0 ? "available" : "empty",
     marketplace: listings === null ? "unavailable" : listings.length > 0 ? "available" : "empty",
   } as const;
 

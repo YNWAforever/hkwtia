@@ -68,7 +68,7 @@ vi.mock("@/content/programs/asa", () => ({
 
 const sectionIds = [
   "hero-title", "open-now-title", "pathways-title", "events-journey-title",
-  "market-products-title", "outcomes-title", "ecosystem-title", "programme-showcase-title",
+  "market-products-title", "ecosystem-title", "programme-showcase-title",
   "gba-gateway-title", "impact-title", "archive-stories-title", "legacy-network-title",
   "conversion-paths-title",
 ] as const;
@@ -110,7 +110,7 @@ describe("Home page", () => {
     setEmptyFixtures();
   });
 
-  it.each(["en", "zh-HK"] as const)("renders all 13 sections as labelled landmarks, in order, in %s", async (locale) => {
+  it.each(["en", "zh-HK"] as const)("renders the active sections as labelled landmarks, in order, in %s", async (locale) => {
     listPublic.mockImplementation(async (_actor: unknown, options: {status: string}) =>
       options.status === "past" ? [pastEvent] : []);
     partnersListPublished.mockResolvedValue([publishedPartner]);
@@ -124,6 +124,15 @@ describe("Home page", () => {
 
     expect(screen.getAllByRole("heading", {level: 1})).toHaveLength(1);
     expect(document.querySelector('script[type="application/ld+json"]')?.textContent).toContain('"@type":"Organization"');
+  });
+
+  it.each(["en", "zh-HK"] as const)("shows one activity empty state and no editorial placeholder on %s", async (locale) => {
+    await renderHome(locale);
+    expect(screen.getAllByText(bundles[locale].Home.openNow.empty.title)).toHaveLength(1);
+    expect(document.body.textContent).not.toContain("Publishing framework");
+    expect(document.body.textContent).not.toContain("發布框架");
+    expect(document.body.textContent).not.toContain("Existing programme equity is retained");
+    expect(document.body.textContent).not.toContain("保留現有計劃的品牌資產");
   });
 
   it("hides legacy-network at 0 published partners and shows it once a partner is published", async () => {

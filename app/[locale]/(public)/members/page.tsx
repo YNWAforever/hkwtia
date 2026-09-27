@@ -44,13 +44,19 @@ export default async function MembersPage({params, searchParams}: Props) {
   ]);
   const filters = parseMemberFilters(query);
   const hasFilters = Object.values(filters).some(Boolean);
+  const cursor = typeof query.cursor === "string" && query.cursor.length <= 1024 ? query.cursor : null;
   // A failed read is unknown availability, not an empty directory.
-  const directory = await companyProfilesRepository.listPublished(filters).then(
-    (items) => ({items, reference: null}),
-    (error: unknown) => ({items: null, reference: recordDirectoryReadFailure(error)}),
+  const directory = await companyProfilesRepository.listPublishedPage(filters, cursor).then(
+    (page) => ({...page, reference: null}),
+    (error: unknown) => ({items: null, nextCursor: null, reference: recordDirectoryReadFailure(error)}),
   );
   const members = directory.items;
-  const retryQuery = memberFilterQuery(filters).toString();
+  const retryParams = memberFilterQuery(filters);
+  if (cursor) retryParams.set("cursor", cursor);
+  const retryQuery = retryParams.toString();
+  const nextParams = memberFilterQuery(filters);
+  if (directory.nextCursor) nextParams.set("cursor", directory.nextCursor);
+  const nextHref = localizedPath(locale, `/members?${nextParams.toString()}`);
   const retryHref = localizedPath(locale, `/members${retryQuery ? `?${retryQuery}` : ""}`);
   const plans = Object.fromEntries(
     MEMBERSHIP_PLAN_CODES.map((plan) => [plan, t(`plans.${plan}`)]),
@@ -89,6 +95,7 @@ export default async function MembersPage({params, searchParams}: Props) {
           {members.map((member) => <MemberCard key={member.slug} labels={{plans, view: t("view")}} locale={locale} member={member} />)}
         </div>
         : <HonestEmpty actions={[{label: t("filters.clear"), href: "/members"}]} copy={t(hasFilters ? "emptyDescription" : "noPublishedDescription")} title={t(hasFilters ? "emptyTitle" : "noPublishedTitle")} variant="inner" />}
+      {directory.nextCursor && <nav aria-label={t("paginationLabel")} className="mt-8 text-center"><a className="button button-dark" href={nextHref}>{t("loadMore")}</a></nav>}
     </Section>
     <ClosingBand
       actions={[{label: t("detail.join"), href: "/membership"}]}
