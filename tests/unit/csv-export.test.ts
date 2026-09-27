@@ -7,6 +7,11 @@ describe("member CSV export", () => {
     expect(csvCell(value)).toBe(`'${value}`);
   });
 
+  it("neutralizes a control-prefixed cell before spreadsheet interpretation", () => {
+    expect(csvCell("\u0001hello")).toBe("'\u0001hello");
+    expect(csvCell("\u001b=2+2")).toBe("'\u001b=2+2");
+  });
+
   it("uses a UTF-8 BOM, fixed header order, RFC 4180 quoting, and CRLF endings", () => {
     const csv = encodeAudienceCsv([{
       kind: "member",

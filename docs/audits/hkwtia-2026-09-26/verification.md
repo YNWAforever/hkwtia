@@ -122,3 +122,12 @@ Saved-view migration, staff browser flow, keyboard/mobile checks, and a selectio
 | 2026-09-27 | feature worktree | `npm run lint` | initial exit 1 on impure `Date.now` render; corrected; fresh full lint pending | Existing warnings remain. |
 
 Migration 0046 is not applied to staging/production. `ADMIN_BATCH_ENABLED` remains false. No staff-authenticated browser or 5000-item load run has been performed. Full suite/build and prior DB/browser gates remain for T18.
+## T14 member import evidence
+
+| Date | Environment | Command | Result | Scope and limit |
+|---|---|---|---|---|
+| 2026-09-27 | feature worktree | Focused CSV/import validation, match, service, upload-route and wizard Vitest | pass; 24 tests including 2 wizard cases | BOM, quoted newline, Chinese, duplicate/invalid fields, XLSX formula/external-link rejection, actor/flag checks and conflict-row selection. Mocks except parser. |
+| 2026-09-27 | disposable PostgreSQL 16 via Docker | `RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/member-import-commit.test.ts tests/integration/admin-batch-snapshot.test.ts tests/integration/admin-batch-concurrency.test.ts tests/integration/member-filter-selection.test.ts` | exit 0; 4 files, 8 tests passed, then 3 import tests passed after the preview-snapshot change | Migration 0047, actor-owned staging, exact-ID/contact conflicts, same-file run reuse, confirmed batch commit, prior batch/filter regressions. No shared data. |
+| 2026-09-27 | feature worktree | `npm run typecheck`; `npm run audit:strings`; `npx drizzle-kit check`; focused ESLint; `npm audit --omit=dev --audit-level=high` | exit 0; 277 TSX scanned; audit reports 8 low/moderate paths | Type, copy, migration, new-source lint and no high npm audit advisory. Full suite/lint/build remain for T18. |
+
+Current and incoming row values are displayed in the bilingual preview; exact-ID version change after preview skips without profile mutation or import audit. No staff-authenticated browser, real upload proxy, 5000-row load, approved retention deletion or staging deployment was exercised. Migration 0047 and both flags remain unapplied/disabled outside disposable tests.

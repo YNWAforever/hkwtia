@@ -772,6 +772,7 @@ export const adminBatches = pgTable("admin_batches", {
   actorProfileId: text("actor_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
   operation: text("operation").notNull(),
   validatedPayload: jsonb("validated_payload").$type<Record<string, unknown>>().notNull(),
+  beforeSnapshot: jsonb("before_snapshot").$type<Record<string, unknown>>().default({}).notNull(),
   selectionSnapshot: jsonb("selection_snapshot").$type<Record<string, unknown>>().notNull(),
   idempotencyKey: text("idempotency_key").notNull(),
   requestDigest: text("request_digest").notNull(),
@@ -823,6 +824,66 @@ export const adminBatchItems = pgTable("admin_batch_items", {
   check("admin_batch_items_state_check", sql`${table.state} IN ('pending','running','succeeded','skipped','failed')`),
   check("admin_batch_items_attempt_check", sql`${table.attemptCount} >= 0 AND ${table.leaseToken} >= 0`),
 ]);
+
+/** Private parsed upload. Original bytes are discarded immediately after bounded parsing. */
+export const memberImportUploads = pgTable("member_import_uploads", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  actorProfileId: text("actor_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  fileDigest: text("file_digest").notNull(),
+  format: text("format").notNull(),
+  parsedSnapshot: jsonb("parsed_snapshot").$type<Record<string, unknown>>().notNull(),
+  rowCount: integer("row_count").notNull(),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  index("member_import_uploads_owner_created_idx").on(table.actorProfileId, table.createdAt),
+  check("member_import_uploads_format_check", sql`${table.format} IN ('csv','xlsx')`),
+  check("member_import_uploads_rows_check", sql`${table.rowCount} >= 0 AND ${table.rowCount} <= 5000`),
+]);
+
+export const memberImportRuns = pgTable("member_import_runs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  uploadId: uuid("upload_id").notNull().references(() => memberImportUploads.id, {onDelete: "restrict"}),
+  actorProfileId: text("actor_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  fileDigest: text("file_digest").notNull(),
+  mappingDigest: text("mapping_digest").notNull(),
+  mapping: jsonb("mapping").$type<Record<string, unknown>>().notNull(),
+  state: text("state").default("validated").notNull(),
+  summary: jsonb("summary").$type<Record<string, number>>().notNull(),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  confirmedAt: timestamp("confirmed_at", {withTimezone: true}),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  uniqueIndex("member_import_runs_digest_unique").on(table.actorProfileId, table.fileDigest, table.mappingDigest),
+  index("member_import_runs_owner_created_idx").on(table.actorProfileId, table.createdAt),
+  check("member_import_runs_state_check", sql`${table.state} IN ('validated','confirmed','committed','expired')`),
+]);
+
+export const memberImportRows = pgTable("member_import_rows", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  runId: uuid("run_id").notNull().references(() => memberImportRuns.id, {onDelete: "restrict"}),
+  rowNumber: integer("row_number").notNull(),
+  validatedPayload: jsonb("validated_payload").$type<Record<string, unknown>>().notNull(),
+  beforeSnapshot: jsonb("before_snapshot").$type<Record<string, unknown>>().default({}).notNull(),
+  validationStatus: text("validation_status").notNull(),
+  matchTargetId: text("match_target_id"),
+  conflictReason: text("conflict_reason"),
+  expectedVersion: text("expected_version"),
+  confirmed: boolean("confirmed").default(false).notNull(),
+  batchItemId: uuid("batch_item_id").references(() => adminBatchItems.id, {onDelete: "set null"}),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  uniqueIndex("member_import_rows_number_unique").on(table.runId, table.rowNumber),
+  index("member_import_rows_status_idx").on(table.runId, table.validationStatus),
+  check("member_import_rows_status_check", sql`${table.validationStatus} IN ('create','update','unchanged','duplicate','conflict','invalid')`),
+]);
+
+export const memberOperationsMetadata = pgTable("member_operations_metadata", {
+  profileId: text("profile_id").primaryKey().references(() => profiles.id, {onDelete: "cascade"}),
+  tags: text("tags").array().default(sql`'{}'::text[]`).notNull(),
+  ownerProfileId: text("owner_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  updatedAt: updatedAt("updated_at"),
+});
 
 export const campaigns = pgTable("campaigns", {
   id: uuid("id").defaultRandom().primaryKey(),

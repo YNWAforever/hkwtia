@@ -23,7 +23,7 @@ const commitSchema = z.object({batchId: batchIdSchema, previewDigest: z.string()
 export async function prepareBatch(actor: Actor, input: unknown, store: BatchGateway = adminBatchesRepository, capabilities: ReadonlySet<BatchOperation> = new Set(process.env.ADMIN_BATCH_ENABLED === "true" ? Object.keys(batchOperationHandlers) as BatchOperation[] : [])): Promise<{batchId: string}> {
   requireAdmin(actor);
   const request = batchRequestSchema.parse(input);
-  if (!capabilities.has(request.operation)) throw new Error("BATCH_OPERATION_UNAVAILABLE");
+  if (!capabilities.has(request.operation) || (request.operation === "import_commit" && process.env.MEMBER_IMPORT_ENABLED !== "true")) throw new Error("BATCH_OPERATION_UNAVAILABLE");
   return store.create(actor, request, batchPreviewDigest(request));
 }
 export async function getBatchPreview(actor: Actor, batchId: unknown, store: BatchGateway = adminBatchesRepository): Promise<BatchPreview> {

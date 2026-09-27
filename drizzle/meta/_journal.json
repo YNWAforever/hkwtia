@@ -323,6 +323,13 @@
       "when": 1790470800000,
       "tag": "0046_admin_batches",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1790474400000,
+      "tag": "0047_member_imports",
+      "breakpoints": true
     }
   ]
 }
