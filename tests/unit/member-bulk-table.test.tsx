@@ -50,4 +50,23 @@ describe("member selection to batch preview", () => {
     await waitFor(() => expect(batchSpies.prepare).toHaveBeenCalledWith(expect.objectContaining({operation: "profile_patch", selection: {mode: "ids", profileIds: ["a"]}, payload: {patch: {locale: "en"}, reason: "Member requested English"}})));
     expect(batchSpies.push).toHaveBeenCalledWith("/admin/batches/11111111-1111-4111-8111-111111111111");
   });
-});
+  it("previews only the chosen tags correction, with no accidental locale change", async () => {
+    sessionStorage.clear();
+    batchSpies.prepare.mockReset().mockResolvedValue({batchId: "11111111-1111-4111-8111-111111111111"});
+    render(<MemberBulkTable locale="en" items={[member("a", "Ada")]} totalMatching={1} labels={labels} selectionLabels={selectionLabels} selectionKey="active" rowHrefs={{a: "/admin/members/a"}} previousHref={null} nextHref={null} batchLabels={{preview: "Preview correction", reason: "Reason", language: "Language", english: "English", chinese: "Chinese", error: "Could not prepare batch", patch: {field: "Change field", tags: "Operational tags", tagsHelp: "Comma-separated; replaces existing tags", owner: "Responsible staff", unassigned: "Unassigned"}}}/>);
+    fireEvent.click(screen.getByRole("checkbox", {name: "Select Ada"}));
+    fireEvent.change(screen.getByRole("combobox", {name: "Change field"}), {target: {value: "tags"}});
+    fireEvent.change(screen.getByRole("textbox", {name: "Operational tags"}), {target: {value: "priority, renewal"}});
+    fireEvent.change(screen.getByRole("textbox", {name: "Reason"}), {target: {value: "Verified operational tags"}});
+    fireEvent.click(screen.getByRole("button", {name: "Preview correction"}));
+    await waitFor(() => expect(batchSpies.prepare).toHaveBeenCalledWith(expect.objectContaining({payload: {patch: {tags: ["priority", "renewal"]}, reason: "Verified operational tags"}})));
+  });  it("previews an explicitly selected responsible staff member without changing tags or locale", async () => {
+    sessionStorage.clear(); batchSpies.prepare.mockReset().mockResolvedValue({batchId: "11111111-1111-4111-8111-111111111111"});
+    render(<MemberBulkTable locale="en" ownerOptions={[{id: "staff-a", name: "Synthetic Staff"}]} items={[member("a", "Ada")]} totalMatching={1} labels={labels} selectionLabels={selectionLabels} selectionKey="active" rowHrefs={{a: "/admin/members/a"}} previousHref={null} nextHref={null} batchLabels={{preview: "Preview correction", reason: "Reason", language: "Language", english: "English", chinese: "Chinese", error: "Could not prepare batch", patch: {field: "Change field", tags: "Operational tags", tagsHelp: "Replaces tags", owner: "Responsible staff", unassigned: "Unassigned"}}}/>);
+    fireEvent.click(screen.getByRole("checkbox", {name: "Select Ada"}));
+    fireEvent.change(screen.getByRole("combobox", {name: "Change field"}), {target: {value: "ownerProfileId"}});
+    fireEvent.change(screen.getByRole("combobox", {name: "Responsible staff"}), {target: {value: "staff-a"}});
+    fireEvent.change(screen.getByRole("textbox", {name: "Reason"}), {target: {value: "Approved assignment"}});
+    fireEvent.click(screen.getByRole("button", {name: "Preview correction"}));
+    await waitFor(() => expect(batchSpies.prepare).toHaveBeenCalledWith(expect.objectContaining({payload: {patch: {ownerProfileId: "staff-a"}, reason: "Approved assignment"}})));
+  });});

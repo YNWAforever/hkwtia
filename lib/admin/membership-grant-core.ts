@@ -1,3 +1,4 @@
+import {batchRequestSchema} from "@/lib/admin/batches/types";
 import {grantInputSchema} from "@/lib/membership/grants";
 
 /** HTML datetime-local is interpreted in Asia/Hong_Kong; the round trip rejects overflow dates. */
@@ -20,5 +21,21 @@ export function parseProfileGrantForm(profileId: string, formData: FormData) {
     effectiveAt: hktLocalToIso(String(formData.get("effectiveAt") ?? "")),
     expiresAt: hktLocalToIso(String(formData.get("expiresAt") ?? "")),
     reason: formData.get("reason"),
+  });
+}
+
+/** Targets remain explicit IDs; eligibility and names are read by the durable preview worker. */
+export function parseBatchGrantForm(formData: FormData) {
+  const kind = formData.get("targetKind");
+  const ids = String(formData.get("targetIds") ?? "").split(/\r?\n/).map((id) => id.trim()).filter(Boolean);
+  return batchRequestSchema.parse({
+    operation: "membership_grant", idempotencyKey: formData.get("idempotencyKey"),
+    targets: [...new Set(ids)].map((id) => kind === "profile" ? {kind, profileId: id} : {kind, companyId: id}),
+    payload: {
+      planCode: formData.get("planCode"),
+      effectiveAt: hktLocalToIso(String(formData.get("effectiveAt") ?? "")),
+      expiresAt: hktLocalToIso(String(formData.get("expiresAt") ?? "")),
+      reason: formData.get("reason"),
+    },
   });
 }

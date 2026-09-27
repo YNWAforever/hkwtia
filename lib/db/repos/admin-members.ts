@@ -212,6 +212,15 @@ export async function getMemberTimelinePage(actor: Actor, profileIdInput: unknow
 }
 
 export const adminMembersRepository = {
+  async listOperationOwners(actor: Actor) {
+    requireAdmin(actor);
+    const db = await getDb();
+    return z.array(z.object({id: z.string(), name: z.string()})).parse(resultRows(await db.execute(sql`
+      SELECT ${profiles.id} AS id, ${profiles.displayName} AS name FROM ${profiles}
+      WHERE ${profiles.role} IN ('staff', 'exco', 'superadmin')
+      ORDER BY ${profiles.displayName}, ${profiles.id} LIMIT 200
+    `)));
+  },
   getMemberTimelinePage,
   async getSummary(actor: Extract<Actor, {kind: "staff" | "exco" | "superadmin"}>, profileId: string): Promise<Member360 | null> {
     requireAdmin(actor);

@@ -25,3 +25,9 @@ For an event cancellation, inspect the member, guest, waitlist and paid-ticket c
 ## Escalation
 
 If a batch item is `uncertain`, a provider result is unknown, or a webhook has not settled, pause new work and reconcile its existing key and provider record before retrying. Record the batch ID, item ID, environment and deployment SHA without copying member data or secrets into a ticket. See `release-runbook.md` for migration order, flags and rollback.
+
+### Explicit grants and corrections
+
+When the approved environment enables the capability, a superadmin can open Membership grants from the member workspace. Choose profile or company targets, paste trusted IDs one per line and enter a plan, Hong Kong start/expiry time and reason. The worker resolves names and conflicts into the existing durable preview; inspect every target before committing. Company and bulk activation each require their own approval. No Stripe charge or payment record is created.
+
+For selected members, choose the correction field before previewing. Tags replace the existing tag list; an empty list clears it. Responsible staff is a current staff selector, with an explicit Unassigned option. Other fields stay outside that correction. Preview and execution both enforce server-side eligibility and current versions.

@@ -13,9 +13,9 @@ import type {AppLocale} from "@/i18n/routing";
 
 export type MemberSelectionLabels = Readonly<{page: string; all: string; clear: string; selected: string; row: string}>;
 type TableLabels = Readonly<{name: string; email: string; company: string; plan: string; status: string; renewal: string; score: string; view: string; caption: string; empty: string; unavailable: string; previous: string; next: string; planCodes?: Readonly<Record<string, string>>; statusCodes?: Readonly<Record<string, string>>}>;
-export type MemberBatchLabels = Readonly<{preview: string; reason: string; language: string; english: string; chinese: string; error: string; export?: Readonly<{preview: string; fields: string; error: string}>}>;
+export type MemberBatchLabels = Readonly<{preview: string; reason: string; language: string; english: string; chinese: string; error: string; patch?: Readonly<{field: string; tags: string; tagsHelp: string; owner: string; unassigned: string}>; export?: Readonly<{preview: string; fields: string; error: string}>}>;
 type ExportField = "displayName" | "email" | "companyName" | "planCode" | "membershipStatus" | "renewalAt" | "locale";
-type Props = Readonly<{batchLabels?: MemberBatchLabels; selectionQuery?: AdminMemberQuery; locale: AppLocale; items: readonly AdminMemberListItem[]; totalMatching: number; labels: TableLabels; selectionLabels: MemberSelectionLabels; selectionKey: string; rowHrefs: Readonly<Record<string, string>>; previousHref: string | null; nextHref: string | null}>;
+type Props = Readonly<{ownerOptions?: readonly Readonly<{id: string; name: string}>[]; batchLabels?: MemberBatchLabels; selectionQuery?: AdminMemberQuery; locale: AppLocale; items: readonly AdminMemberListItem[]; totalMatching: number; labels: TableLabels; selectionLabels: MemberSelectionLabels; selectionKey: string; rowHrefs: Readonly<Record<string, string>>; previousHref: string | null; nextHref: string | null}>;
 
 const storageKey = "adminMemberDraftSelection";
 const draftChangedEvent = "admin-member-draft-selection-changed";
@@ -40,9 +40,12 @@ function validDraft(value: unknown): value is Draft {
   return typeof draft.key === "string" && (draft.mode === "ids" || draft.mode === "query") && validIds(draft.selectedIds) && validIds(draft.excludedIds);
 }
 
-export function MemberBulkTable({locale, items, totalMatching, labels, selectionLabels, selectionKey, rowHrefs, previousHref, nextHref, batchLabels, selectionQuery}: Props) {
+export function MemberBulkTable({locale, items, totalMatching, labels, selectionLabels, selectionKey, rowHrefs, previousHref, nextHref, batchLabels, selectionQuery, ownerOptions = []}: Props) {
   const router = useRouter();
   const [batchLocale, setBatchLocale] = useState<"en" | "zh-HK">("en");
+  const [patchField, setPatchField] = useState<"locale" | "tags" | "ownerProfileId">("locale");
+  const [batchTags, setBatchTags] = useState("");
+  const [batchOwner, setBatchOwner] = useState("");
   const [batchReason, setBatchReason] = useState("");
   const [batchPending, setBatchPending] = useState(false);
   const [batchError, setBatchError] = useState(false);
@@ -83,7 +86,7 @@ export function MemberBulkTable({locale, items, totalMatching, labels, selection
       const selection = mode === "query"
         ? {mode: "query" as const, query: {...selectionQuery!, cursor: null}, excludedProfileIds: [...excludedIds]}
         : {mode: "ids" as const, profileIds: [...selectedIds]};
-      const {batchId} = await prepareAdminBatchAction({operation: "profile_patch", idempotencyKey: crypto.randomUUID(), selection, payload: {patch: {locale: batchLocale}, reason: batchReason}});
+      const {batchId} = await prepareAdminBatchAction({operation: "profile_patch", idempotencyKey: crypto.randomUUID(), selection, payload: {patch: patchField === "tags" ? {tags: batchTags.split(",").map((tag) => tag.trim()).filter(Boolean)} : patchField === "ownerProfileId" ? {ownerProfileId: batchOwner || null} : {locale: batchLocale}, reason: batchReason}});
       router.push(localizedPath(locale, `/admin/batches/${batchId}`));
     } catch {setBatchError(true);}
     finally {setBatchPending(false);}
@@ -110,7 +113,10 @@ export function MemberBulkTable({locale, items, totalMatching, labels, selection
       <button className="min-h-11 rounded-md border border-border px-3 text-sm" onClick={clear} type="button">{selectionLabels.clear}</button>
     </div>
     {batchLabels ? <div className="flex flex-wrap items-end gap-3 rounded-md border border-border p-3">
-      <label className="grid gap-1 text-sm">{batchLabels.language}<select className="min-h-11 rounded-md border border-input bg-background px-3" value={batchLocale} onChange={(event) => setBatchLocale(event.target.value as "en" | "zh-HK")}><option value="en">{batchLabels.english}</option><option value="zh-HK">{batchLabels.chinese}</option></select></label>
+      {batchLabels.patch ? <label className="grid gap-1 text-sm">{batchLabels.patch.field}<select className="min-h-11 rounded-md border border-input bg-background px-3" value={patchField} onChange={(event) => setPatchField(event.target.value as typeof patchField)}><option value="locale">{batchLabels.language}</option><option value="tags">{batchLabels.patch.tags}</option><option value="ownerProfileId">{batchLabels.patch.owner}</option></select></label> : null}
+      {patchField === "locale" ? <label className="grid gap-1 text-sm">{batchLabels.language}<select className="min-h-11 rounded-md border border-input bg-background px-3" value={batchLocale} onChange={(event) => setBatchLocale(event.target.value as "en" | "zh-HK")}><option value="en">{batchLabels.english}</option><option value="zh-HK">{batchLabels.chinese}</option></select></label> : null}
+      {patchField === "tags" && batchLabels.patch ? <div className="grid gap-1"><label className="grid gap-1 text-sm">{batchLabels.patch.tags}<input aria-describedby="batch-tags-help" className="min-h-11 rounded-md border border-input bg-background px-3" maxLength={309} onChange={(event) => setBatchTags(event.target.value)} value={batchTags}/></label><p className="text-xs text-muted-foreground" id="batch-tags-help">{batchLabels.patch.tagsHelp}</p></div> : null}
+      {patchField === "ownerProfileId" && batchLabels.patch ? <label className="grid gap-1 text-sm">{batchLabels.patch.owner}<select className="min-h-11 rounded-md border border-input bg-background px-3" value={batchOwner} onChange={(event) => setBatchOwner(event.target.value)}><option value="">{batchLabels.patch.unassigned}</option>{ownerOptions.map((owner) => <option key={owner.id} value={owner.id}>{owner.name}</option>)}</select></label> : null}
       <label className="grid min-w-64 flex-1 gap-1 text-sm">{batchLabels.reason}<input className="min-h-11 rounded-md border border-input bg-background px-3" maxLength={500} minLength={3} onChange={(event) => setBatchReason(event.target.value)} required type="text" value={batchReason}/></label>
       <button className="min-h-11 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50" disabled={selectedCount === 0 || selectedCount > 5000 || batchPending || batchReason.trim().length < 3} onClick={preparePreview} type="button">{batchLabels.preview}</button>
       {batchError ? <p className="w-full text-sm text-destructive" role="alert">{batchLabels.error}</p> : null}

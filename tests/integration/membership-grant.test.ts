@@ -13,7 +13,7 @@ function input(profileId: string) {return {target: {kind: "profile", profileId},
 
 describe.skipIf(!enabled)("finite membership grants on disposable PostgreSQL", () => {
   beforeAll(async () => {fixture = await isolatedBatchDatabase();}, 60_000);
-  afterAll(async () => {if (fixture) await fixture.close();});
+  afterAll(async () => {if (fixture) await fixture.close();}, 40_000);
   it("refuses an existing live membership with no grant or audit write", async () => {
     await expect(grantMembership(actor, input("a"), {enabled: true, loadDatabase: async () => fixture.database})).rejects.toThrow("MEMBERSHIP_ALREADY_EXISTS");
     const grants = await fixture.pool.query("SELECT count(*)::int AS n FROM memberships WHERE grant_reason IS NOT NULL");
@@ -42,6 +42,21 @@ describe.skipIf(!enabled)("finite membership grants on disposable PostgreSQL", (
     const audits = await fixture.pool.query("SELECT count(*)::int AS n FROM audit_events WHERE action='membership.grant.created' AND metadata->>'targetId'='grant-d'");
     expect(audits.rows[0]?.n).toBe(1);
   }, 60_000);
+  it("supports explicitly enabled company grants with catalog seats and one atomic audit", async () => {
+    const companyId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+    await fixture.pool.query("INSERT INTO companies (id,display_name) VALUES ($1,'Synthetic Grant Company')", [companyId]);
+    const candidate = {...input("unused"), target: {kind: "company", companyId}, effectiveAt: "2040-01-01T00:00:00.000Z", expiresAt: "2041-01-01T00:00:00.000Z"};
+    const attempts = await Promise.allSettled([1, 2].map(() => grantMembership(actor, candidate, {enabled: true, companyEnabled: true, loadDatabase: async () => fixture.database})));
+    expect(attempts.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    expect(attempts.filter((result) => result.status === "rejected")).toHaveLength(1);
+    const grants = await fixture.pool.query("SELECT owner_user_id,company_id,seat_limit,stripe_customer_id,stripe_subscription_id FROM memberships WHERE company_id=$1", [companyId]);
+    expect(grants.rows).toEqual([{owner_user_id: null, company_id: companyId, seat_limit: 12, stripe_customer_id: null, stripe_subscription_id: null}]);
+    expect((await fixture.pool.query("SELECT metadata->>'targetKind' AS kind FROM audit_events WHERE metadata->>'targetId'=$1", [companyId])).rows).toEqual([{kind: "company"}]);
+  }, 60_000);
+
+  it("refuses a nonexistent company even with its capability explicitly enabled", async () => {
+    await expect(grantMembership(actor, {...input("unused"), target: {kind: "company", companyId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd"}}, {enabled: true, companyEnabled: true, loadDatabase: async () => fixture.database})).rejects.toThrow("GRANT_COMPANY_NOT_FOUND");
+  });
   it("expires only due grant rows, never a paid membership, and audits once", async () => {
     const now = new Date("2026-11-01T00:00:00.000Z");
     expect(await expireFiniteGrants(now, {loadDatabase: async () => fixture.database})).toBe(1);
