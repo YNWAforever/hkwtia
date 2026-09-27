@@ -120,5 +120,14 @@ export default async function middleware(request: NextRequest): Promise<NextResp
 }
 
 export const config = {
-  matcher: "/((?!api|trpc|_next|_vercel|.*\\..*).*)",
+  matcher: [
+    "/((?!api|trpc|_next|_vercel|.*\\..*).*)",
+    // Signed tickets use payload.signature. These are application routes even
+    // though their capability contains a dot; token and staff checks stay in
+    // the existing pages/repositories. Static files retain the exclusion above.
+    "/pass/:token",
+    "/zh/pass/:token",
+    "/admin/check-in/:token",
+    "/zh/admin/check-in/:token",
+  ],
 };
