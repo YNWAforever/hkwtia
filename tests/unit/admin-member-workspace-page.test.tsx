@@ -1,8 +1,10 @@
+import {createTranslator} from "next-intl";
+import en from "@/messages/en.json";
 import {renderToStaticMarkup} from "react-dom/server";
 import {describe, expect, it, vi} from "vitest";
 
 const calls = vi.hoisted(() => ({actor: vi.fn(), members: vi.fn(), views: vi.fn()}));
-vi.mock("next-intl/server", () => ({setRequestLocale: () => undefined, getTranslations: async () => (key: string) => key}));
+vi.mock("next-intl/server", () => ({setRequestLocale: () => undefined, getTranslations: async () => createTranslator({locale: "en", messages: en, namespace: "Admin", onError: (error) => {throw error;}})}));
 vi.mock("@/lib/admin/page-auth", () => ({requireAdminPageActor: calls.actor}));
 vi.mock("@/lib/admin/members", () => ({searchAdminMembers: calls.members}));
 vi.mock("@/lib/admin/member-views", () => ({listMemberViews: calls.views}));
