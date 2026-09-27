@@ -183,6 +183,16 @@ No shared environment, real proxy load, production key, or deployed cleanup job 
 
 Public `force-dynamic` remains. No shared-cache key, CMS invalidation, A/B member isolation, same-region Lighthouse/RUM, or notification-capacity result is claimed.
 
+## T17 ticket queue capacity and T18 metric evidence
+
+| Date | Environment | Command | Result | Scope and limit |
+|---|---|---|---|---|
+| 2026-09-27 | disposable PostgreSQL 16 via Docker | `RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/ticket-email-capacity.test.ts` | exit 0; 2 passed after red/green repair | 500 synthetic confirmation notices; first three froze payloads and got a retryable provider outage, then every unique key settled once. At the current limit of three claims per tick, recovery took 167 simulated minute ticks. The test uses a mock acceptance, not a provider or wall-clock throughput measurement. |
+| 2026-09-27 | local Vitest | `npx vitest run tests/unit/ticket-email-runner.test.ts` | exit 0; 11 passed | Provider duration/outcome and aggregate queue health emit no recipient/key; a failed metric sink cannot re-send an accepted email; a failed queue probe emits an unavailable signal and recovers on the next drain. |
+| 2026-09-27 | feature worktree | focused ESLint and `npm run typecheck` | exit 0 | Repository and runner type/lint boundaries after metrics. |
+
+The queue test first failed because `queueHealth` was absent, then caught an empty-queue age incorrectly reported as zero; both failures were read before the implementation was corrected. The production runner now logs `ticket_email_metric` JSON with backlog, oldest pending age, claim count, provider outcome and provider-only duration. It logs no recipient, message text or idempotency key. No deployed log/alert pipeline has been verified. Five-minute pending-age and three missed-cron thresholds remain proposals, not association SLA or enabled alerts. Changing the current three-per-minute ticket batch needs provider rate, timeout, lease and test-sink acceptance; the 167-tick result is a capacity warning, not permission to raise live send throughput.
+
 ## T18 critical-journey test mapping
 
 The existing Playwright specs are the canonical journey suites; a second `hkwtia-critical-journeys.spec.ts` would duplicate their fixtures and could pass while their stronger checks fail. This table maps the plan's requested journey to the current equivalent and records what still requires an isolated Preview.
@@ -214,4 +224,14 @@ The manual `.github/workflows/audit-acceptance.yml` runs a non-Production Previe
 | 2026-09-27 | feature worktree | focused route-parity, worker-alert, guest-email, admin render, ticket recovery and npm lock contract suites | exit 0 after fixes; route parity 33 tests, ticket recovery 5, lock contract 12 | Test fixtures now inject the shared limiter; seven new protected routes and the cleanup alert kind are enumerated; four npm optional-peer records restored. |
 | 2026-09-27 | feature worktree | first `npm run build` after contract repair | exit 1 at TypeScript | Alert schema accepted `rate-limit-cleanup` while a duplicate manual type omitted it. The type now derives from the schema and `npm run typecheck` passes; build must be rerun. |
 
-A final full suite and build are required after these repairs. The JSON reports stay under ignored `test-results/` and are local evidence, not CI artifacts.
+A final full suite and build were run after these repairs. The JSON reports stay under ignored `test-results/` and are local evidence, not CI artifacts.
+
+| Date | Environment | Command | Result | Scope and limit |
+|---|---|---|---|---|
+| 2026-09-27 | feature worktree, bounded local workers | `npm test -- --maxWorkers=2 --reporter=json --outputFile=test-results/audit-vitest-bounded.json` | exit 0; 5,856 passed, 0 failed, 113 skipped | Full repository Vitest collection. Skips include credential and database gated suites; this is a unit gate, not staging acceptance. Earlier unbounded runs failed under contention and exposed fixtures/contracts repaired in this branch. |
+| 2026-09-27 | feature worktree | `npm run lint`; `npm run typecheck`; `npm run audit:strings`; `npx drizzle-kit check`; `npm run build`; `npm audit --omit=dev --audit-level=high` | exits 0; lint 0 errors/63 warnings; strings 279 TSX; build 256 static pages; audit 1 low/7 moderate | Lint warnings remain; no high-severity npm audit result. The final build and typecheck were after code repairs; generated `next-env.d.ts` was restored. |
+| 2026-09-27 | GitHub PR #94 at `f6ee1005` | CI checks and Vercel status | CI `checks`, `quality`, both test shards passed; Vercel Preview deployment succeeded | Remote checks do not prove authenticated journeys, migrations or provider effects. Preview URL: `https://hkwtia-bv2yh7357-ynwaforevers-projects.vercel.app`. |
+| 2026-09-27 | SHA-specific protected Preview | `npx playwright test tests/e2e/core-pages.spec.ts tests/e2e/public-navigation.spec.ts` | stopped after four Chinese route assertions saw Vercel's logged-out page (`html lang=en-US`) | Vercel protection hides app content; no share token/storage state available. This is a Preview access gate, not a locale result. |
+| 2026-09-27 | GitHub workflow dispatch | `gh workflow run audit-acceptance.yml --ref codex/audit-remediation-20260927 ...` | HTTP 404: new workflow is not registered on the default branch | Manual workflow cannot be dispatched before it exists on the default branch; no remote disposable-DB or Preview browser result is claimed. |
+
+The first full local Playwright attempt on port 3107 was stopped after the Concierge route returned 503: its documented loopback-only deterministic acceptance pair and matching `APP_URL` were absent. The second full run used those values; the four Concierge mock cases passed, but by approximately case 115/390 anonymous protected-route and guest-cancel checks failed repeatedly while Neon Auth reported `ECONNREFUSED` at `localhost:3000`. It was stopped, and the full E2E gate is **not passed**. The credential-free bilingual local public subset (`core-pages` and `public-navigation`) finished with 22 passed and 2 login cases skipped in 3.3 minutes; it covers both locales, 390/768/1440px public layouts, navigation, FAQ and selected axe checks. No Neon Auth, isolated `DATABASE_URL_TEST`, Stripe test-mode, Preview share token or staff/member test identities are present in this session. Only variable presence was checked; values were not read or printed.

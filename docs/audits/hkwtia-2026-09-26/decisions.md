@@ -136,6 +136,7 @@ These gates do not block independent code and unit-test work.
 ## T17 public rendering boundary
 
 Keep `force-dynamic` while layout announcement reads and `i18n/request.ts` database copy overrides are request-dependent. The homepage now streams independent Server Component sections after the hero. Shared public caching requires explicit locale/filter keys and mutation invalidation; do not infer cache safety from a fast local unit test.
+- The existing ticket outbox remains the queue authority. `queueHealth` is cron-actor scoped and reports only aggregate backlog and oldest age; the ticket runner emits recipient-free `ticket_email_metric` provider duration/outcome and queue JSON. A telemetry sink failure cannot change send settlement. The disposable 500-notice outage/recovery walk required 167 simulated one-minute claim ticks at the current three-per-tick limit. Keep that default until provider rate, timeout, lease and approved test-sink evidence justify a bounded increase; no live send-rate or alert threshold was changed.
 
 ## T18 repository path mapping
 

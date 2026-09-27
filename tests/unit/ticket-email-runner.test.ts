@@ -1,6 +1,6 @@
 import {describe, expect, it, vi} from "vitest";
 
-import {deliverTicketEmailsForOrder, type TicketEmailRunnerDependencies} from "@/lib/billing/ticket-email-runner";
+import {deliverTicketEmailsForOrder, drainTicketEmailOutbox, type TicketEmailRunnerDependencies} from "@/lib/billing/ticket-email-runner";
 import type {OrderRecord} from "@/lib/db/repos/event-orders";
 import type {TicketEmailClaim} from "@/lib/db/repos/ticket-email-outbox";
 import {createTestTransport} from "@/lib/email/transport";
@@ -68,6 +68,53 @@ describe("ticket email outbox runner", () => {
       expect.objectContaining({to: "ada@example.test", idempotencyKey: "ticket-confirmation:" + orderId}), now);
     expect(transport.sends).toHaveLength(1);
     expect(outbox.markSent).toHaveBeenCalledWith(noticeId, 1, "test-email-1");
+  });
+
+  it("records provider latency and aggregate queue health without recipient details", async () => {
+    const {dependencies, outbox} = fixture();
+    const queueHealth = vi.fn(async () => ({backlog: 499, oldestPendingAgeSeconds: 601}));
+    Object.assign(outbox, {queueHealth});
+    const recorded: unknown[] = [];
+    Object.assign(dependencies, {recordMetric: (metric: unknown) => recorded.push(metric)});
+
+    await drainTicketEmailOutbox(now, dependencies);
+    expect(queueHealth).toHaveBeenCalledWith(expect.anything(), expect.any(Date));
+    expect(recorded).toEqual([
+      expect.objectContaining({kind: "provider_send", outcome: "accepted", durationMs: expect.any(Number)}),
+      {kind: "queue_health", claimed: 1, backlog: 499, oldestPendingAgeSeconds: 601},
+    ]);
+    const serialized = JSON.stringify(recorded);
+    expect(serialized).not.toContain("ada@example.test");
+    expect(serialized).not.toContain("ticket-confirmation");
+  });
+
+  it("reports a queue probe failure and recovers on the next drain", async () => {
+    const {dependencies, outbox} = fixture();
+    outbox.claimDue.mockResolvedValue([]);
+    let unavailable = true;
+    Object.assign(outbox, {queueHealth: vi.fn(async () => {
+      if (unavailable) throw new Error("database temporarily unavailable");
+      return {backlog: 0, oldestPendingAgeSeconds: null};
+    })});
+    const recorded: unknown[] = [];
+    Object.assign(dependencies, {recordMetric: (metric: unknown) => recorded.push(metric)});
+
+    await drainTicketEmailOutbox(now, dependencies);
+    unavailable = false;
+    await drainTicketEmailOutbox(now, dependencies);
+    expect(recorded).toEqual([
+      {kind: "queue_health_unavailable"},
+      {kind: "queue_health", claimed: 0, backlog: 0, oldestPendingAgeSeconds: null},
+    ]);
+  });
+
+  it("does not retry an accepted provider send when telemetry fails", async () => {
+    const {dependencies, outbox, transport} = fixture();
+    Object.assign(dependencies, {recordMetric: () => { throw new Error("metric sink unavailable"); }});
+    await deliverTicketEmailsForOrder(orderId, dependencies, now);
+    expect(transport.sends).toHaveLength(1);
+    expect(outbox.markSent).toHaveBeenCalledOnce();
+    expect(outbox.markRetryable).not.toHaveBeenCalled();
   });
 
   it("holds a refund notice until the provider confirms the full refund", async () => {

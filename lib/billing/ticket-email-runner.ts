@@ -14,9 +14,13 @@ import {signPassToken} from "@/lib/tickets/pass-token";
 import {localizedPath} from "@/lib/urls";
 
 type Outbox = typeof ticketEmailOutboxRepository;
+export type TicketEmailMetric =
+  | Readonly<{kind: "provider_send"; outcome: "accepted" | "refused" | "uncertain"; durationMs: number}>
+  | Readonly<{kind: "queue_health"; claimed: number; backlog: number; oldestPendingAgeSeconds: number | null}>
+  | Readonly<{kind: "queue_health_unavailable"}>;
 export type TicketEmailRunnerDependencies = Readonly<{
   outbox: Pick<Outbox, "claimDue" | "claimForOrder" | "freezePayload" | "markSent"
-    | "markRetryable" | "markBlocked" | "markSuppressed">;
+    | "markRetryable" | "markBlocked" | "markSuppressed"> & Partial<Pick<Outbox, "queueHealth">>;
   orders: Pick<EventOrdersRepository, "orderById" | "eventSummary" | "orderSeats"
     | "seatsOfOrder" | "seatForPass" | "resendEligible">;
   renderEmail: (input: RenderEmailInput) => Promise<RenderedEmail>;
@@ -25,6 +29,7 @@ export type TicketEmailRunnerDependencies = Readonly<{
   emailFrom: string;
   appUrl: string;
   passSecret: string;
+  recordMetric?: (metric: TicketEmailMetric) => void;
 }>;
 
 const SEND_TIMEOUT_MS = 6_000;
@@ -124,6 +129,11 @@ async function sendWithDeadline(transport: EmailTransport, payload: TicketEmailP
   }
 }
 
+function emitMetric(dependencies: TicketEmailRunnerDependencies, metric: TicketEmailMetric): void {
+  try { dependencies.recordMetric?.(metric); }
+  catch { /* Telemetry cannot change a provider send or settlement outcome. */ }
+}
+
 async function processClaims(
   claims: readonly TicketEmailClaim[], dependencies: TicketEmailRunnerDependencies, now: Date,
 ): Promise<void> {
@@ -195,12 +205,28 @@ async function processClaims(
       if (!await dependencies.outbox.freezePayload(claim.id, claim.attemptCount, payload, now)) continue;
     }
 
+    const startedAt = performance.now();
+    let providerAccepted = false;
+    let providerDurationMs = 0;
     try {
       const result = await sendWithDeadline(dependencies.transport, payload);
+      providerAccepted = true;
+      providerDurationMs = Math.max(0, Math.round(performance.now() - startedAt));
       if (!await dependencies.outbox.markSent(claim.id, claim.attemptCount, result.providerId)) {
         throw new Error("TICKET_EMAIL_SETTLEMENT_LOST");
       }
+      emitMetric(dependencies, {
+        kind: "provider_send", outcome: "accepted",
+        durationMs: providerDurationMs,
+      });
     } catch (error) {
+      if (!providerAccepted) providerDurationMs = Math.max(0, Math.round(performance.now() - startedAt));
+      emitMetric(dependencies, {
+        kind: "provider_send",
+        outcome: providerAccepted ? "uncertain"
+          : error instanceof DeliveryFailure && error.code === "provider_client_error" ? "refused" : "uncertain",
+        durationMs: providerDurationMs,
+      });
       if (error instanceof DeliveryFailure && error.code === "provider_client_error") {
         await dependencies.outbox.markBlocked(claim.id, claim.attemptCount, now, error.code);
       } else {
@@ -221,8 +247,17 @@ export async function deliverTicketEmailsForOrder(
 export async function drainTicketEmailOutbox(
   now: Date, dependencies: TicketEmailRunnerDependencies,
 ): Promise<void> {
-  const claims = await dependencies.outbox.claimDue(automationCronActor(), now, BATCH_LIMIT);
+  const actor = automationCronActor();
+  const claims = await dependencies.outbox.claimDue(actor, now, BATCH_LIMIT);
   await processClaims(claims, dependencies, now);
+  if (dependencies.outbox.queueHealth && dependencies.recordMetric) {
+    try {
+      const health = await dependencies.outbox.queueHealth(actor, new Date());
+      emitMetric(dependencies, {kind: "queue_health", claimed: claims.length, ...health});
+    } catch {
+      emitMetric(dependencies, {kind: "queue_health_unavailable"});
+    }
+  }
 }
 
 export function productionTicketEmailDependencies(): TicketEmailRunnerDependencies {
@@ -231,6 +266,7 @@ export function productionTicketEmailDependencies(): TicketEmailRunnerDependenci
     outbox: ticketEmailOutboxRepository, orders: eventOrdersRepository, renderEmail,
     transport: createConfiguredEmailTransport(environment), emailFrom: environment.emailFrom,
     appUrl: appEnv().appUrl, passSecret: ticketPassEnv().ticketPassTokenSecret,
+    recordMetric: (metric) => console.info(JSON.stringify({event: "ticket_email_metric", ...metric})),
     refundVerified: async (order) => {
       if (!order.stripeCheckoutSessionId) return false;
       const stripe = stripeBillingAdapter();
