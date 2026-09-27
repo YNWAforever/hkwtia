@@ -280,3 +280,17 @@ Three real PostgreSQL tests first failed on the missing read capability, then pa
 - Local Vitest: seven focused files, 92 tests passed, including six real PostgreSQL scenarios for exact company renewal scope, changed renewal data, consent/locale changes, shared contacts, approved template checks and campaign review freezing. Separate email render tests passed nine cases and added four bilingual snapshots. The email and WhatsApp runners first failed the missing-recheck tests; their fixed focused run passed 31 tests. The review test first showed an unfinished source batch could enter review, then passed after the transaction guard.
 - After replacing per-recipient preview reads with the shared bulk facts projection: bulk-communication-eligibility and communication-audit-load passed all seven cases. 5,000 synthetic profiles were eligible, six SQL statements, 7,362.82 ms on this loaded Windows machine, zero campaigns created. See evidence/communication-load.json; recorded revision is the parent plus the then-uncommitted communication implementation, not a deployed SHA.
 - Typecheck passed after the bulk projection. String audit passed 285 TSX files. ESLint passed with zero errors and 63 existing warnings. No provider, shared database or real recipient was used. Authenticated browser, approved WhatsApp locale templates and synthetic provider receipts remain staging gates.
+
+## T11/T12/T13 capacity evidence
+
+`RUN_POSTGRES_INTEGRATION=1 RUN_AUDIT_LOAD=1 npx vitest run tests/integration/admin-audit-load.test.ts --maxWorkers=1` passed both cases. The fixture owns a disposable loopback pgvector PostgreSQL 16 container, applies all 49 migrations twice and seeds M1 twice. It never reads a shared DATABASE_URL. Evidence is in `evidence/admin-load.json`, including EXPLAIN ANALYZE/BUFFERS plans.
+
+| Synthetic workload | Observed result |
+|---|---|
+| 10,000 profiles/memberships; 20 search samples | p50 221.73 ms; p95 603.47 ms |
+| Member 360 summary; 20 samples | p50 43.91 ms; p95 423.17 ms |
+| 500 attendees; 20 page samples | p50 16.85 ms; p95 48.00 ms; cursor walk returned 500 unique IDs |
+| 5,000 locale corrections | preview 1,061.06 ms; execution 212,236.17 ms; exactly 5,000 effects and audits; no pending/running/failed/skipped |
+| 100 claims of 50 | p50 1,157.48 ms; p95 6,752.62 ms; maximum 10,387.29 ms |
+
+Environment: Windows, Node v24.18.0, PostgreSQL 16.15, Intel i5-12500 (6 cores/12 logical processors), shared machine with unrelated concurrent work. The report pins parent SHA 12ee2b4c; the committed capacity harness was then uncommitted. These measurements satisfy the proposed local search p95 target; they are neither production capacity nor Hong Kong RUM. No index or hold policy was changed based on these results.
