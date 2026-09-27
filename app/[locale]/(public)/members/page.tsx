@@ -11,10 +11,12 @@ import {Section} from "@/components/wt/section";
 import type {AppLocale} from "@/i18n/routing";
 import {companyProfilesRepository} from "@/lib/db/repos/company-profiles";
 import {buildPageMetadata} from "@/lib/metadata";
-import {parseMemberFilters} from "@/lib/members/public";
+import {recordDirectoryReadFailure} from "@/lib/members/directory-availability";
+import {memberFilterQuery, parseMemberFilters} from "@/lib/members/public";
 import {MEMBERSHIP_PLAN_CODES, type MembershipPlanCode} from "@/lib/membership/constants";
 import {routeBreadcrumbItems} from "@/lib/seo/route-breadcrumbs";
 import {buildBreadcrumbData} from "@/lib/structured-data";
+import {localizedPath} from "@/lib/urls";
 
 // D-11: the public member directory, over reviewed `public_profile_status = 'published'` rows.
 // `force-dynamic` because the whole page is a filtered read of a table staff edit continuously;
@@ -43,7 +45,13 @@ export default async function MembersPage({params, searchParams}: Props) {
   const filters = parseMemberFilters(query);
   const hasFilters = Object.values(filters).some(Boolean);
   // A failed read is unknown availability, not an empty directory.
-  const members = await companyProfilesRepository.listPublished(filters).catch(() => null);
+  const directory = await companyProfilesRepository.listPublished(filters).then(
+    (items) => ({items, reference: null}),
+    (error: unknown) => ({items: null, reference: recordDirectoryReadFailure(error)}),
+  );
+  const members = directory.items;
+  const retryQuery = memberFilterQuery(filters).toString();
+  const retryHref = localizedPath(locale, `/members${retryQuery ? `?${retryQuery}` : ""}`);
   const plans = Object.fromEntries(
     MEMBERSHIP_PLAN_CODES.map((plan) => [plan, t(`plans.${plan}`)]),
   ) as Record<MembershipPlanCode, string>;
@@ -70,7 +78,12 @@ export default async function MembersPage({params, searchParams}: Props) {
         locale={locale}
       />
       {members === null
-        ? <HonestEmpty copy={t("unavailableDescription")} title={t("unavailableTitle")} variant="inner" />
+        ? <HonestEmpty
+          actions={[{label: t("retry"), href: retryHref}]}
+          copy={t("unavailableDescription", {reference: directory.reference})}
+          title={t("unavailableTitle")}
+          variant="inner"
+        />
         : members.length > 0
         ? <div className="partner-record-grid">
           {members.map((member) => <MemberCard key={member.slug} labels={{plans, view: t("view")}} locale={locale} member={member} />)}

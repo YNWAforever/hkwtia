@@ -1464,7 +1464,8 @@
     "emptyTitle": "No member pages match yet",
     "emptyDescription": "Member pages appear here once organisations publish them. Try a broader search.",
     "unavailableTitle": "Member pages are temporarily unavailable",
-    "unavailableDescription": "Please try again shortly.",
+    "unavailableDescription": "Please try again shortly. Reference: {reference}.",
+    "retry": "Try again",
     "view": "View member page",
     "detail": {
       "website": "Website",

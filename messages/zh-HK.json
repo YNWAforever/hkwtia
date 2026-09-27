@@ -1464,7 +1464,8 @@
     "emptyTitle": "暫時沒有相符的會員專頁",
     "emptyDescription": "機構發布專頁後會在此顯示。請嘗試更廣泛的搜尋。",
     "unavailableTitle": "會員頁面暫時無法顯示",
-    "unavailableDescription": "請稍後再試。",
+    "unavailableDescription": "請稍後再試。參考編號：{reference}。",
+    "retry": "再試一次",
     "view": "查看會員專頁",
     "detail": {
       "website": "網站",
