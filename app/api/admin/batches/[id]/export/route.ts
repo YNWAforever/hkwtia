@@ -1,4 +1,4 @@
-import {downloadMemberBatchCsv} from "@/lib/admin/batches/export";
+import {downloadAdminBatchCsv} from "@/lib/admin/batches/export";
 import {requireAdminActor} from "@/lib/auth/actor";
 
 type Props = Readonly<{params: Promise<{id: string}>}>;
@@ -8,10 +8,10 @@ export async function GET(_request: Request, {params}: Props): Promise<Response>
   if (!actor) return new Response(null, {status: 404});
   const id = (await params).id;
   try {
-    const file = await downloadMemberBatchCsv(actor, id);
+    const file = await downloadAdminBatchCsv(actor, id);
     return new Response(file.csv, {headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="members-${id}.csv"`,
+      "Content-Disposition": `attachment; filename="export-${id}.csv"`,
       "Cache-Control": "private, no-store",
       "X-Content-Type-Options": "nosniff",
     }});

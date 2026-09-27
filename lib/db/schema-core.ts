@@ -798,7 +798,7 @@ export const adminBatches = pgTable("admin_batches", {
   index("admin_batches_preparing_idx").on(table.state, table.preparationLeaseExpiresAt, table.createdAt),
   index("admin_batches_owner_recent_idx").on(table.actorProfileId, table.createdAt),
   check("admin_batches_state_check", sql`${table.state} IN ('preparing','ready','queued','running','completed','completed_with_errors','cancelled','expired')`),
-  check("admin_batches_operation_check", sql`${table.operation} IN ('profile_patch','import_commit','membership_grant','renewal_reminder','profile_update_invite','ticket_resend','export_members')`),
+  check("admin_batches_operation_check", sql`${table.operation} IN ('profile_patch','import_commit','membership_grant','renewal_reminder','profile_update_invite','ticket_resend','export_members','export_event_attendees')`),
 ]);
 
 export const adminBatchItems = pgTable("admin_batch_items", {
@@ -2068,3 +2068,12 @@ export const rateLimitBuckets = pgTable("rate_limit_buckets", {
   check("rate_limit_buckets_window_check", sql`${table.expiresAt} > ${table.windowStartedAt}`),
   check("rate_limit_buckets_count_check", sql`${table.count} BETWEEN 1 AND 5`),
 ]);
+
+/** Private materialized export; download authorization/expiry is checked before returning bytes. */
+export const adminBatchExportArtifacts = pgTable("admin_batch_export_artifacts", {
+  batchId: uuid("batch_id").primaryKey().references(() => adminBatches.id, {onDelete: "restrict"}),
+  csv: text("csv").notNull(),
+  rowCount: integer("row_count").notNull(),
+  createdAt: createdAt("created_at"),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+}, table => [index("admin_batch_export_artifacts_expiry_idx").on(table.expiresAt), check("admin_batch_export_artifacts_bounds", sql`${table.rowCount} BETWEEN 1 AND 5000 AND octet_length(${table.csv}) <= 10485760`)]);

@@ -1,6 +1,7 @@
 import {renderToStaticMarkup} from "react-dom/server";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
+vi.mock("@/components/admin/event-attendee-export-button",()=>({EventAttendeeExportButton:({search}:{search:string})=><button data-export-search={search}>export preview</button>}));
 const reads = vi.hoisted(() => ({
   byId: vi.fn(), all: vi.fn(), attendees: vi.fn(), attendeePage: vi.fn(), orderPage: vi.fn(), allOrders: vi.fn(), media: vi.fn(), cancel: vi.fn(), notice: vi.fn(), noticeSummary: vi.fn(), held: vi.fn(), paid: vi.fn(),
 }));
@@ -69,6 +70,13 @@ describe("admin event detail tabs", () => {
     expect(reads.orderPage).not.toHaveBeenCalled();
   });
 
+  it("offers a background export of the visible search without reading the full list", async()=>{
+    vi.stubEnv("ADMIN_BATCH_ENABLED","true");vi.stubEnv("EVENT_ATTENDEE_EXPORT_ENABLED","true");
+    try{
+      const page=await AdminEventDetailPage({params:Promise.resolve({locale:"zh-HK",id}),searchParams:Promise.resolve({tab:"attendees",q:"Synthetic"})});
+      const html=renderToStaticMarkup(page);expect(html).toContain('data-export-search="Synthetic"');expect(html).not.toContain('attendees.csv');expect(reads.attendees).not.toHaveBeenCalled();
+    }finally{vi.unstubAllEnvs();}
+  });
   it("loads only the bounded order page on the orders tab", async () => {
     expect(await markup("orders")).toContain('data-tab="orders"');
     expect(reads.orderPage).toHaveBeenCalledOnce();

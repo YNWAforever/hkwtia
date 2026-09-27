@@ -3065,6 +3065,8 @@
       "resendSuccess": "Pass email sent.",
       "resendError": "We could not send this pass email. Please try again.",
       "exportCsv": "Download attendees (CSV)",
+      "exportPreview": "Preview attendee CSV export",
+      "exportError": "Could not prepare the export. Try again.",
       "kind": "Type",
       "kinds": {
         "member": "Member",

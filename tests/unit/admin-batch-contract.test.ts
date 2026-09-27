@@ -28,9 +28,10 @@ describe("admin batch request contract", () => {
     const variants = [
       {operation: "import_commit", payload: {importRunId: key}},
       {operation: "membership_grant", targets: [{kind: "profile", profileId: "member-a"}], payload: {planCode: "startup", effectiveAt: "2026-10-01T00:00:00.000Z", expiresAt: "2027-10-01T00:00:00.000Z", reason: "Approved programme"}},
-      {operation: "renewal_reminder", selection, payload: {channel: "email"}},
-      {operation: "profile_update_invite", selection, payload: {channel: "email"}},
+      {operation: "renewal_reminder", membershipIds: [key], payload: {channel: "email", segmentId: key}},
+      {operation: "profile_update_invite", selection, payload: {channel: "email", segmentId: key}},
       {operation: "ticket_resend", targetSeatIds: [key], payload: {}},
+      {operation: "export_event_attendees", payload: {eventId: key, search: "Synthetic"}},
       {operation: "export_members", selection, payload: {fields: ["displayName", "email"]}},
     ];
     for (const variant of variants) expect(batchRequestSchema.parse({...variant, idempotencyKey: key}).operation).toBe(variant.operation);

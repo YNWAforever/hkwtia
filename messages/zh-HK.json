@@ -3066,6 +3066,8 @@
       "resendSuccess": "門票電郵已發送。",
       "resendError": "未能發送門票電郵，請再試一次。",
       "exportCsv": "下載出席名單（CSV）",
+      "exportPreview": "預覽出席者 CSV 匯出",
+      "exportError": "未能準備匯出，請重試。",
       "kind": "類別",
       "kinds": {
         "member": "會員",

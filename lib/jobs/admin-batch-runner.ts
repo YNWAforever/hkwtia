@@ -1,3 +1,5 @@
+import {automationCronActor} from "@/lib/auth/automation-actor";
+import {cleanupEventAttendeeArtifacts} from "@/lib/db/repos/batch-handlers/export-event-attendees";
 import "server-only";
 
 import {randomUUID} from "node:crypto";
@@ -17,6 +19,7 @@ export async function runAdminBatchJob(now: Date, options: {repository?: BatchWo
   const workerId = options.workerId ?? randomUUID();
   const repository = options.repository ?? adminBatchWorkerRepository;
   const handlers: BatchHandlerRegistry = options.handlers ?? batchOperationHandlers;
+  await cleanupEventAttendeeArtifacts(automationCronActor(), undefined, now);
   await repository.prepareNext(handlers, now);
   const claims = await repository.claimItems(workerId, now, batchRuntimeConfig().claimSize);
   let settled = 0;

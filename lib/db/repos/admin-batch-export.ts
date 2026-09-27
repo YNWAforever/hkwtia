@@ -1,3 +1,4 @@
+import {downloadEventAttendeeArtifact} from "@/lib/db/repos/batch-handlers/export-event-attendees";
 import "server-only";
 
 import {sql} from "drizzle-orm";
@@ -77,4 +78,16 @@ export async function downloadMemberBatchCsv(actor: Actor, batchId: string, load
     await tx.execute(sql`INSERT INTO audit_events (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${actor.profileId}, ${actor.kind}, 'admin.batch.export_downloaded', 'admin_batch', ${id}, jsonb_build_object('rowCount', ${ids.length}::int, 'fields', ${JSON.stringify(fields)}::jsonb))`);
     return {csv, rowCount: ids.length};
   }, {isolationLevel: "repeatable read"});
+}
+
+/** Dispatch by the actor-owned persisted operation, never a caller-supplied export kind. */
+export async function downloadAdminBatchCsv(actor:Actor,batchId:string,loadDatabase:()=>Promise<BatchDatabase>=async()=>await getDb() as unknown as BatchDatabase,now=new Date()):Promise<MemberBatchExport>{
+  requireAdmin(actor);batchIdSchema.parse(batchId);
+  if(process.env.ADMIN_BATCH_ENABLED!=="true")throw new Error("EXPORT_UNAVAILABLE");
+  const db=await loadDatabase();
+  const batch=rows(await db.execute(sql`SELECT operation FROM admin_batches WHERE id=${batchId}::uuid AND actor_profile_id=${actor.profileId}`))[0] as {operation:string}|undefined;
+  if(!batch)throw new Error("BATCH_NOT_FOUND");
+  if(batch.operation==="export_event_attendees")return downloadEventAttendeeArtifact(actor,batchId,async()=>db,now);
+  if(batch.operation==="export_members")return downloadMemberBatchCsv(actor,batchId,async()=>db,now);
+  throw new Error("EXPORT_INCOMPLETE");
 }

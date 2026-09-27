@@ -62,6 +62,18 @@ describe("admin batch actor boundary", () => {
     } finally {vi.unstubAllEnvs();}
   });
 
+  it("gates attendee exports before persistence and rejects a member actor", async()=>{
+    const store=gateway(), input={operation:"export_event_attendees",idempotencyKey:batchId,payload:{eventId:batchId,search:"Synthetic"}}, capabilities=new Set(["export_event_attendees"] as const);
+    vi.stubEnv("EVENT_ATTENDEE_EXPORT_ENABLED", "false");
+    try{
+      await expect(prepareBatch(staff,input,store as BatchGateway,capabilities)).rejects.toThrow("BATCH_OPERATION_UNAVAILABLE");
+      vi.stubEnv("EVENT_ATTENDEE_EXPORT_ENABLED", "true");
+      await expect(prepareBatch(member,input,store as BatchGateway,capabilities)).rejects.toThrow("FORBIDDEN");
+      expect(store.create).not.toHaveBeenCalled();
+      await expect(prepareBatch(staff,input,store as BatchGateway,capabilities)).resolves.toEqual({batchId});
+    }finally{vi.unstubAllEnvs();}
+  });
+
   it("checks ownership inputs and delegates preview, commit, retry and cancel without accepting a forged actor", async () => {
     const store = gateway();
     await expect(getBatchPreview(member, batchId, store as BatchGateway)).rejects.toThrow("FORBIDDEN");

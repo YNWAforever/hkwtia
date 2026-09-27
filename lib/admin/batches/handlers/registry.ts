@@ -1,3 +1,4 @@
+import {eventAttendeeExportHandler} from "@/lib/admin/batches/handlers/export-event-attendees";
 import {renewalReminderBatchHandler} from "@/lib/admin/batches/handlers/renewal-reminder";
 import {profileUpdateInviteBatchHandler} from "@/lib/admin/batches/handlers/profile-update-invite";
 import "server-only";
@@ -9,4 +10,4 @@ import {exportMembersBatchHandler} from "@/lib/admin/batches/handlers/export-mem
 import {ticketResendBatchHandler} from "@/lib/admin/batches/handlers/ticket-resend";
 import type {BatchHandlerRegistry} from "@/lib/admin/batches/worker-types";
 
-export const batchOperationHandlers = {renewal_reminder: renewalReminderBatchHandler, profile_update_invite: profileUpdateInviteBatchHandler, profile_patch: profilePatchBatchHandler, import_commit: importCommitBatchHandler, membership_grant: membershipGrantBatchHandler, ticket_resend: ticketResendBatchHandler, export_members: exportMembersBatchHandler} satisfies BatchHandlerRegistry;
+export const batchOperationHandlers = {export_event_attendees: eventAttendeeExportHandler, renewal_reminder: renewalReminderBatchHandler, profile_update_invite: profileUpdateInviteBatchHandler, profile_patch: profilePatchBatchHandler, import_commit: importCommitBatchHandler, membership_grant: membershipGrantBatchHandler, ticket_resend: ticketResendBatchHandler, export_members: exportMembersBatchHandler} satisfies BatchHandlerRegistry;

@@ -344,6 +344,13 @@
       "when": 1790478000000,
       "tag": "0049_shared_rate_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1790481600000,
+      "tag": "0050_event_attendee_exports",
+      "breakpoints": true
     }
   ]
 }

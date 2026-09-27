@@ -22,6 +22,7 @@ export const batchRequestSchema = z.discriminatedUnion("operation", [
   z.object({...common, operation: z.literal("renewal_reminder"), membershipIds: z.array(z.string().uuid()).min(1).max(5000), payload: z.object({channel, segmentId: z.string().uuid()}).strict()}).strict(),
   z.object({...common, operation: z.literal("profile_update_invite"), selection: memberSelectionSchema, payload: z.object({channel, segmentId: z.string().uuid()}).strict()}).strict(),
   z.object({...common, operation: z.literal("ticket_resend"), targetSeatIds: z.array(z.string().uuid()).min(1).max(5000), payload: z.object({}).strict()}).strict(),
+  z.object({...common, operation: z.literal("export_event_attendees"), payload: z.object({eventId: z.string().uuid(), search: z.string().trim().max(120).default("")}).strict()}).strict(),
   z.object({...common, operation: z.literal("export_members"), selection: memberSelectionSchema, payload: z.object({fields: z.array(memberFields).min(1).max(7).refine((fields) => new Set(fields).size === fields.length, "DUPLICATE_FIELDS")}).strict()}).strict(),
 ]);
 export type BatchRequest = z.infer<typeof batchRequestSchema>;
@@ -30,7 +31,7 @@ export const BATCH_STATES = ["preparing", "ready", "queued", "running", "complet
 export const BATCH_ITEM_STATES = ["pending", "running", "succeeded", "skipped", "failed"] as const;
 export type BatchState = typeof BATCH_STATES[number];
 export type BatchItemState = typeof BATCH_ITEM_STATES[number];
-export type BatchTarget = Readonly<{type: "profile" | "membership" | "company" | "ticket_seat" | "import_row"; id: string}>;
+export type BatchTarget = Readonly<{type: "profile" | "membership" | "company" | "ticket_seat" | "import_row" | "event"; id: string}>;
 export type BatchPreviewItem = Readonly<{target: BatchTarget; previewStatus: "eligible" | "skipped" | "blocked"; eligible: boolean; reasonCode: string | null; before: Readonly<Record<string, unknown>>; after: Readonly<Record<string, unknown>>; expectedVersion: string}>;
 export type BatchProgressItem = BatchPreviewItem & Readonly<{state: BatchItemState; attemptCount: number; errorCode: string | null; resultRef: string | null}>;
 export type BatchPreview = Readonly<{counters: Readonly<Record<BatchItemState, number>>; batchId: string; operation: BatchOperation; state: BatchState; digest: string; expiresAt: string; total: number; eligible: number; skipped: number; blocked: number; items: readonly BatchProgressItem[]}>;
