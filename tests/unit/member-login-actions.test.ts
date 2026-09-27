@@ -49,7 +49,7 @@ describe("requestMemberLoginLink", () => {
   it("propagates a rate-limit rejection without calling the provider", async () => {
     checkAuthSend.mockReturnValueOnce({allowed: false, retryAfterSeconds: 120});
     const result = await requestMemberLoginLink({email: "a@example.com", next: null}, "en");
-    expect(result).toEqual({ok: false, error: "rate_limited"});
+    expect(result).toEqual({ok: false, error: "rate_limited", retryAfterSeconds: 120});
     expect(signInMagicLink).not.toHaveBeenCalled();
   });
 

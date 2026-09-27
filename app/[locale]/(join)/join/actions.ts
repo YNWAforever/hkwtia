@@ -105,11 +105,11 @@ export async function requestMagicLink(locale: AppLocale, plan: PlanCode | null,
   // `auth.signIn.magicLink` fetches the upstream auth service directly, so it
   // never passes through our /api/auth catch-all. The shared guard has to be
   // applied here too or this path stays an unauthenticated email amplifier.
-  const send = checkAuthSend({
+  const send = await checkAuthSend({
     ip: clientIpFromHeaders(await headers()),
     email: email.data,
   });
-  if (!send.allowed) return {message: t("errors.rateLimited")};
+  if (!send.allowed) return {message: t(send.unavailable ? "errors.limiterUnavailable" : "errors.rateLimited")};
   const applicationValue = formData.get("application");
   const applicationId = typeof applicationValue === "string" && applicationValue ? applicationValue : null;
   let callbackURL: string;

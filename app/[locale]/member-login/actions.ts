@@ -17,7 +17,7 @@ const emailSchema = z.string().trim().email();
 
 export type MemberLoginResult =
   | {ok: true}
-  | {ok: false; error: "invalid_email" | "invalid_continuation" | "rate_limited" | "provider_error"};
+  | {ok: false; error: "invalid_email" | "invalid_continuation" | "rate_limited" | "limiter_unavailable" | "provider_error"; retryAfterSeconds?: number};
 
 /**
  * Mirrors lib/membership/join-navigation.ts's buildJoinCallback, pointed at
@@ -79,7 +79,9 @@ async function sendValidatedLoginLink(
 ): Promise<MemberLoginResult> {
   // Server Actions call the provider directly; the API catch-all is not on this path.
   const send = await checkAuthSend({ip: clientIpFromHeaders(await headers()), email});
-  if (!send.allowed) return {ok: false, error: "rate_limited"};
+  if (!send.allowed) return send.unavailable
+    ? {ok: false, error: "limiter_unavailable"}
+    : {ok: false, error: "rate_limited", retryAfterSeconds: send.retryAfterSeconds};
   const callbackURL = buildLoginCallback(appEnv().appUrl, locale, continuation, intent);
   try {
     const result = await auth.signIn.magicLink({email, callbackURL});

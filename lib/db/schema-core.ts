@@ -2063,10 +2063,10 @@ export const rateLimitBuckets = pgTable("rate_limit_buckets", {
 }, (table) => [
   primaryKey({columns: [table.scope, table.keyHash]}),
   index("rate_limit_buckets_expiry_idx").on(table.expiresAt),
-  check("rate_limit_buckets_scope_check", sql`${table.scope} IN ('guest-rsvp','ticket-checkout')`),
+  check("rate_limit_buckets_scope_check", sql`${table.scope} IN ('guest-rsvp','ticket-checkout','auth-send-ip','auth-send-email','auth-credential-ip')`),
   check("rate_limit_buckets_hash_check", sql`${table.keyHash} ~ '^[a-f0-9]{64}$'`),
   check("rate_limit_buckets_window_check", sql`${table.expiresAt} > ${table.windowStartedAt}`),
-  check("rate_limit_buckets_count_check", sql`${table.count} BETWEEN 1 AND 5`),
+  check("rate_limit_buckets_count_check", sql`${table.count} BETWEEN 1 AND 20`),
 ]);
 
 /** Private materialized export; download authorization/expiry is checked before returning bytes. */

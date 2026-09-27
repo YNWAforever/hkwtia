@@ -7,9 +7,11 @@ vi.mock("next-intl/server", () => ({
   setRequestLocale: vi.fn(),
 }));
 vi.mock("next/navigation", () => ({redirect: (path: string) => { state.redirected = path; throw new Error("NEXT_REDIRECT"); }}));
-vi.mock("@/lib/auth/actor", () => ({getActor: async () => {
-  if (state.failure) throw new Error("IDENTITY_UNAVAILABLE");
-  return state.actor;
+vi.mock("@/lib/auth/login-resolution-server", () => ({resolveCurrentLogin: async ({path}: {path: string}) => {
+  if (state.failure) return {kind: "unavailable", reference: "safe-ref"};
+  if (!state.actor) return {kind: "signed-out"};
+  if (state.actor.kind === "member") return {kind: "forbidden"};
+  return {kind: "allowed", destination: {intent: "admin", path}};
 }}));
 vi.mock("next/image", () => ({default: ({alt, src, ...props}: {alt: string; src: string}) => <img alt={alt} src={src} {...props} />}));
 vi.mock("@/i18n/navigation", () => ({Link: ({children, href, ...props}: {children: React.ReactNode; href: string}) => <a href={href} {...props}>{children}</a>}));
@@ -42,6 +44,8 @@ describe("public staff login page", () => {
 
   it("does not present an identity-store outage as signed out", async () => {
     state.failure = true;
-    await expect(AdminLoginPage(props())).rejects.toThrow("IDENTITY_UNAVAILABLE");
+    render(await AdminLoginPage(props()));
+    expect(screen.getByRole("alert")).toHaveTextContent("identityUnavailable");
+    expect(screen.queryByTestId("admin-login-form")).not.toBeInTheDocument();
   });
 });

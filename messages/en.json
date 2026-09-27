@@ -956,6 +956,7 @@
       "description": "Company description (optional)"
     },
     "errors": {
+      "limiterUnavailable": "Sign-in is temporarily unavailable. Please try again shortly.",
       "required": "Complete this required field.",
       "email": "Enter a valid email address.",
       "auth": "We could not send the sign-in link. Please try again.",
@@ -1000,12 +1001,24 @@
     "resend": "Resend sign-in link",
     "sent": "Check your inbox for the sign-in link. It will return you to the staff workspace after your role is verified.",
     "deliveryHelp": "If the email does not arrive, check your spam folder or contact support.",
+    "profileRecovery": "Staff account needs review",
+    "profileRecoveryHelp": "Your provider sign-in worked, but this account has no WTIA profile. Contact WTIA support for staff access review. You can use member sign in to start an ordinary member profile.",
+    "google": "Continue with Google",
+    "separator": "or",
+    "changeEmail": "Change email",
+    "maskedTo": "Sent to",
+    "waitSeconds": "Please wait before resending:",
+    "googleUnavailable": "Google sign-in will be available after provider setup is verified.",
+    "sending": "Sending…",
+    "identityUnavailable": "Staff sign-in is temporarily unavailable. Reference: {reference}.",
+    "retry": "Retry staff sign in",
     "accessDenied": "Staff access is unavailable for this account",
     "accessDeniedHelp": "This signed-in account does not have a staff role. Use your member portal or contact WTIA support if you expected staff access.",
     "errors": {
       "email": "Enter a valid email address.",
       "invalidContinuation": "That staff destination is invalid. Start again from staff sign in.",
       "rateLimited": "Too many sign-in emails have been requested. Wait and try again.",
+      "limiterUnavailable": "Sign-in is temporarily unavailable. Please try again shortly.",
       "auth": "We could not send the sign-in link. Please try again."
     }
   },
@@ -1022,9 +1035,25 @@
     "emailLabel": "Email address",
     "submit": "Send secure sign-in link",
     "sent": "Check your inbox for your secure sign-in link. It will return you to your member portal.",
+    "profileOnboarding": "Your sign-in is verified. Create a member profile to continue with the existing joining process. This does not activate membership.",
+    "createProfile": "Create member profile",
+    "profileConflict": "This email is already linked to another account. Contact WTIA support to recover access; no profile was linked.",
+    "profileUnverified": "Verify the email address with your sign-in provider before creating a profile.",
+    "profileUnavailable": "We could not create your profile right now. Please try again or contact support.",
+    "memberAccessDenied": "This account has a staff role. Use staff sign in or contact support.",
+    "google": "Continue with Google",
+    "separator": "or",
+    "changeEmail": "Change email",
+    "maskedTo": "Sent to",
+    "waitSeconds": "Please wait before resending:",
+    "googleUnavailable": "Google sign-in will be available after provider setup is verified.",
+    "sending": "Sending…",
+    "identityUnavailable": "Sign-in is temporarily unavailable. Reference: {reference}.",
+    "retry": "Retry sign in",
     "errors": {
       "email": "Enter a valid email address.",
       "rateLimited": "Too many sign-in emails have been requested. Wait a few minutes and try again.",
+      "limiterUnavailable": "Sign-in is temporarily unavailable. Please try again shortly.",
       "auth": "We could not send the sign-in link. Please try again.",
       "invalidContinuation": "That sign-in link is not valid. Start again from the member portal."
     }
