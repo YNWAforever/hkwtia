@@ -31,11 +31,13 @@ const config = {
       // WP-8 row 8.3 names `/`, `/membership`, `/events`; `/programmes` and `/partners` are the
       // WP-7 surfaces, audited because they are new. Each in both locales.
       url: [
-        `${baseUrl}/`, `${baseUrl}/zh`,
-        `${baseUrl}/membership`, `${baseUrl}/zh/membership`,
-        `${baseUrl}/events`, `${baseUrl}/zh/events`,
-        `${baseUrl}/programmes`, `${baseUrl}/zh/programmes`,
-        `${baseUrl}/partners`, `${baseUrl}/zh/partners`
+        // Lighthouse reuses its browser profile: visiting /zh stores NEXT_LOCALE=zh-HK.
+        // Keep every unprefixed English route before Chinese routes so the next English
+        // audit is not silently redirected to Chinese by that persisted cookie.
+        `${baseUrl}/`, `${baseUrl}/membership`, `${baseUrl}/events`,
+        `${baseUrl}/programmes`, `${baseUrl}/partners`,
+        `${baseUrl}/zh`, `${baseUrl}/zh/membership`, `${baseUrl}/zh/events`,
+        `${baseUrl}/zh/programmes`, `${baseUrl}/zh/partners`
       ],
       numberOfRuns: 1,
       // A remote base URL (a Preview) is already serving; lhci only starts a server when the
