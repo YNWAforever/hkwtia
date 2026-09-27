@@ -132,3 +132,7 @@ These gates do not block independent code and unit-test work.
 - Migration 0049 adds one PostgreSQL bucket per operation and server-keyed HMAC digest. Guest RSVP and paid ticket checkout retain five attempts per 15-minute window across web instances; the trusted proxy IP resolver is unchanged. Guest RSVP retains its prior normalized-email fallback only when no trusted IP is present; ticket checkout still denies a missing IP. No new household/company network block is inferred.
 - `RATE_LIMIT_KEY_SECRET` is a distinct server secret (minimum 32 UTF-8 bytes). The application fails closed with a localized unavailable response on a missing key or store error; there is no process-local allow fallback. Rotation changes bucket digests and temporarily resets counts, so rotate with operational review. Raw IP/email values are never sent to the database or logs.
 - The existing authenticated worker now calls a ten-minute cleanup route, deleting at most 1000 expired buckets per run. The route reports `removed` for backlog observation; migration must precede web and worker activation. This quota applies to RSVP and new ticket checkout, not the separately scoped auth/interest limits.
+
+## T17 public rendering boundary
+
+Keep `force-dynamic` while layout announcement reads and `i18n/request.ts` database copy overrides are request-dependent. The homepage now streams independent Server Component sections after the hero. Shared public caching requires explicit locale/filter keys and mutation invalidation; do not infer cache safety from a fast local unit test.

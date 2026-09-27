@@ -173,3 +173,12 @@ The resend and export flags remain default off. No staff-authenticated browser f
 | 2026-09-27 | feature worktree | `npx drizzle-kit check`; focused ESLint | exit 0 | Migration journal and new limiter/job source. Initial T17 typecheck caught a test mock tuple annotation; corrected and pending full gate. |
 
 No shared environment, real proxy load, production key, or deployed cleanup job has been verified. Auth/interest endpoints still use their existing separate limiter design. Pending hold ceiling, public cache, notification load and RUM remain open.
+
+## T17 homepage streaming evidence
+
+| Date | Environment | Command | Result | Scope and limit |
+|---|---|---|---|---|
+| 2026-09-27 | feature worktree | `npx vitest run tests/unit/homepage.test.tsx` | exit 0; 7 passed | Regression was first observed failing: with a pending event read, `HomePage` did not resolve. It now returns the hero tree while twelve section reads remain behind independent Suspense boundaries. The jsdom section test resolves async Server Components before client rendering; it is not a browser stream measurement. |
+| 2026-09-27 | feature worktree | `npm run typecheck`; focused ESLint | exit 0 | TS and changed-file lint after the streaming change. |
+
+Public `force-dynamic` remains. No shared-cache key, CMS invalidation, A/B member isolation, same-region Lighthouse/RUM, or notification-capacity result is claimed.

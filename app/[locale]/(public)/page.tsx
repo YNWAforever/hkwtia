@@ -1,4 +1,5 @@
 import type {Metadata} from 'next';
+import {Suspense} from 'react';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 
 import {ArchiveStories} from '@/components/home/archive-stories';
@@ -32,56 +33,44 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   return buildPageMetadata({locale: locale as AppLocale, pathname: '/', title: t('metaTitle'), description: t('metaDescription'), image: '/images/projects-hero.jpg'});
 }
 
-// 13 sections, each an independent read: Promise.all fans every section's own
-// .catch(() => [])/Promise.allSettled read out in parallel, so one slow or failing model
-// never blocks another. Ecosystem and LegacyNetwork are 'use client' presentational
-// components -- their data/translation resolution happens here, in server code, and is
-// passed down as plain serializable props (Tasks 8 and 13).
+// Resolve the hero first. Each subsequent read has its own Suspense boundary so a
+// slow public model cannot delay the hero or every section that follows it.
+async function EcosystemSection({locale}: Readonly<{locale: AppLocale}>) {
+  const t = await getTranslations({locale, namespace: 'Home.ecosystem'});
+  return <Ecosystem industries={buildEcosystemIndustries((key) => t(key))} labels={buildEcosystemLabels(t)} />;
+}
+
+async function LegacyNetworkSection({locale}: Readonly<{locale: AppLocale}>) {
+  const [groups, t] = await Promise.all([
+    loadLegacyNetworkGroups(locale),
+    getTranslations({locale, namespace: 'Home.legacyNetwork'}),
+  ]);
+  return <LegacyNetwork groups={groups} labels={buildLegacyNetworkLabels(t)} />;
+}
+
 export default async function HomePage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
   const appLocale = locale as AppLocale;
-
-  const [
-    hero, openNow, pathways, eventsJourney, marketProducts, outcomes,
-    programmeShowcase, gbaGateway, impactEvidence, archiveStories, conversionPaths,
-    ecosystemT, legacyNetworkGroups, legacyNetworkT,
-  ] = await Promise.all([
-    Hero({locale: appLocale}),
-    OpenNow({locale: appLocale}),
-    Pathways({locale: appLocale}),
-    EventsJourney({locale: appLocale}),
-    MarketProducts({locale: appLocale}),
-    Outcomes({locale: appLocale}),
-    ProgrammeShowcase({locale: appLocale}),
-    GbaGateway({locale: appLocale}),
-    ImpactEvidence({locale: appLocale}),
-    ArchiveStories({locale: appLocale}),
-    ConversionPaths({locale: appLocale}),
-    getTranslations({locale, namespace: 'Home.ecosystem'}),
-    loadLegacyNetworkGroups(appLocale),
-    getTranslations({locale, namespace: 'Home.legacyNetwork'}),
-  ]);
-
-  const ecosystemIndustries = buildEcosystemIndustries((key) => ecosystemT(key));
+  const hero = await Hero({locale: appLocale});
 
   return (
     <>
       <StructuredData data={buildOrganizationData()} />
       <StructuredData data={buildWebSiteData()} />
       {hero}
-      {openNow}
-      {pathways}
-      {eventsJourney}
-      {marketProducts}
-      {outcomes}
-      <Ecosystem industries={ecosystemIndustries} labels={buildEcosystemLabels(ecosystemT)} />
-      {programmeShowcase}
-      {gbaGateway}
-      {impactEvidence}
-      {archiveStories}
-      <LegacyNetwork groups={legacyNetworkGroups} labels={buildLegacyNetworkLabels(legacyNetworkT)} />
-      {conversionPaths}
+      <Suspense fallback={null}><OpenNow locale={appLocale} /></Suspense>
+      <Suspense fallback={null}><Pathways locale={appLocale} /></Suspense>
+      <Suspense fallback={null}><EventsJourney locale={appLocale} /></Suspense>
+      <Suspense fallback={null}><MarketProducts locale={appLocale} /></Suspense>
+      <Suspense fallback={null}><Outcomes locale={appLocale} /></Suspense>
+      <Suspense fallback={null}><EcosystemSection locale={appLocale} /></Suspense>
+      <Suspense fallback={null}><ProgrammeShowcase locale={appLocale} /></Suspense>
+      <Suspense fallback={null}><GbaGateway locale={appLocale} /></Suspense>
+      <Suspense fallback={null}><ImpactEvidence locale={appLocale} /></Suspense>
+      <Suspense fallback={null}><ArchiveStories locale={appLocale} /></Suspense>
+      <Suspense fallback={null}><LegacyNetworkSection locale={appLocale} /></Suspense>
+      <Suspense fallback={null}><ConversionPaths locale={appLocale} /></Suspense>
     </>
   );
 }

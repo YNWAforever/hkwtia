@@ -2,7 +2,7 @@ import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 
 import {render, screen, within} from "@testing-library/react";
-import type {ReactNode} from "react";
+import {cloneElement, isValidElement, type ReactElement, type ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const bundles = {
@@ -81,6 +81,26 @@ function setEmptyFixtures() {
   listPublicCohorts.mockResolvedValue([]);
 }
 
+// This jsdom test resolves async Server Components before passing the tree to the
+// client renderer. Browser streaming is covered separately; jsdom cannot render
+// async Server Components as if they were Client Components.
+async function resolveServerTree(node: ReactNode): Promise<ReactNode> {
+  if (Array.isArray(node)) return Promise.all(node.map(resolveServerTree));
+  if (!isValidElement(node)) return node;
+  const element = node as ReactElement<{children?: ReactNode}>;
+  if (typeof element.type === "function" && element.type.constructor.name === "AsyncFunction") {
+    const rendered = await (element.type as (props: object) => Promise<ReactNode>)(element.props);
+    return resolveServerTree(rendered);
+  }
+  if (!("children" in element.props)) return element;
+  return cloneElement(element, {children: await resolveServerTree(element.props.children)});
+}
+
+async function renderHome(locale: "en" | "zh-HK") {
+  const {default: HomePage} = await import("@/app/[locale]/(public)/page");
+  return render(await resolveServerTree(await HomePage({params: Promise.resolve({locale})})));
+}
+
 const pastEvent = {id: "1", slug: "past-event", title: "Past Event", description: "d", startsAt: "2025-01-01T02:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: null};
 const publishedPartner = {id: "1", name: "Partner", category: "supporting" as const, websiteUrl: null, logoUrl: null, logoAlt: null, displayOrder: 1, featured: false};
 
@@ -95,8 +115,7 @@ describe("Home page", () => {
       options.status === "past" ? [pastEvent] : []);
     partnersListPublished.mockResolvedValue([publishedPartner]);
 
-    const {default: HomePage} = await import("@/app/[locale]/(public)/page");
-    render(await HomePage({params: Promise.resolve({locale})}));
+    await renderHome(locale);
 
     const labelled = [...document.querySelectorAll("[aria-labelledby]")]
       .map((el) => el.getAttribute("aria-labelledby"))
@@ -108,28 +127,23 @@ describe("Home page", () => {
   });
 
   it("hides legacy-network at 0 published partners and shows it once a partner is published", async () => {
-    const {default: HomePage} = await import("@/app/[locale]/(public)/page");
-
-    const first = render(await HomePage({params: Promise.resolve({locale: "en"})}));
+    const first = await renderHome("en");
     expect(document.querySelector('[aria-labelledby="legacy-network-title"]')).toBeNull();
     first.unmount();
 
     partnersListPublished.mockResolvedValue([publishedPartner]);
-    render(await HomePage({params: Promise.resolve({locale: "en"})}));
+    await renderHome("en");
     expect(document.querySelector('[aria-labelledby="legacy-network-title"]')).not.toBeNull();
   });
 
   it("omits every impact tile, and hides the section, when every metric is 0", async () => {
-    const {default: HomePage} = await import("@/app/[locale]/(public)/page");
-    render(await HomePage({params: Promise.resolve({locale: "en"})}));
+    await renderHome("en");
 
     expect(document.querySelector('[aria-labelledby="impact-title"]')).toBeNull();
   });
 
   it("renders the Open Now honest-empty state when no event is open, and available cards once one is", async () => {
-    const {default: HomePage} = await import("@/app/[locale]/(public)/page");
-
-    const first = render(await HomePage({params: Promise.resolve({locale: "en"})}));
+    const first = await renderHome("en");
     // Scoped to the Open Now landmark: Home.eventsJourney.emptyTitle shares the identical
     // English string with Home.openNow.empty.title ("No activities are currently open."), so
     // an unscoped query would match both sections' empty states and fail as ambiguous.
@@ -141,8 +155,23 @@ describe("Home page", () => {
       options.status === "open"
         ? [{id: "1", slug: "ai-clinic", title: "AI Clinic", description: "d", startsAt: "2026-10-01T02:00:00.000Z", endsAt: null, venue: null, capacity: null, hero: null}]
         : []);
-    render(await HomePage({params: Promise.resolve({locale: "en"})}));
+    await renderHome("en");
     expect(screen.getByRole("heading", {level: 3, name: "AI Clinic"})).toBeInTheDocument();
+  });
+
+  it("returns the hero shell while an event section read is still pending", async () => {
+    let release: (() => void) | undefined;
+    const pending = new Promise<void>((resolve) => { release = resolve; });
+    listPublic.mockImplementation(async () => { await pending; return []; });
+    const {default: HomePage} = await import("@/app/[locale]/(public)/page");
+    const page = HomePage({params: Promise.resolve({locale: "en"})});
+    const shellReady = await Promise.race([
+      page.then(() => true),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 100)),
+    ]);
+    release?.();
+    await page;
+    expect(shellReady).toBe(true);
   });
 
   it("exports a force-dynamic home route", async () => {
