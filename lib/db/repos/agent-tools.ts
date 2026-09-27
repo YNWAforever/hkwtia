@@ -12,7 +12,7 @@ import {approvalsRepository} from "@/lib/db/repos/approvals";
 import {getDb, type Database} from "@/lib/db/repos/common";
 import {kbDocumentsRepository} from "@/lib/db/repos/kb-documents";
 import {staffTasksRepository} from "@/lib/db/repos/staff-tasks";
-import {membershipGrantValiditySql} from "@/lib/membership/grant-sql";
+import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
 import {
   companies,
   companyMembers,

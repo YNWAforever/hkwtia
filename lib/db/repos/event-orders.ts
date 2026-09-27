@@ -7,7 +7,7 @@ import {z} from "zod";
 
 import type {Actor} from "@/lib/membership/lifecycle";
 import {BENEFIT_ELIGIBLE_MEMBERSHIP_STATUSES} from "@/lib/membership/entitlements";
-import {membershipGrantValiditySql} from "@/lib/membership/grant-sql";
+import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
 import {ticketPurchaseAudience} from "@/lib/tickets/eligibility";
 
 import {MAX_TICKET_SEATS, TICKET_HOLD_MS} from "@/config/tickets";

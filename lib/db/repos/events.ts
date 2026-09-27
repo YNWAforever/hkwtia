@@ -9,7 +9,7 @@ import {AUDIT_DEMO_EVENT_SLUGS, isAuditDemoEventSlug} from "@/config/demo-events
 import {getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
-import {membershipGrantValiditySql} from "@/lib/membership/grant-sql";
+import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {auditEvents, companies, companyMembers, eventCancellationIntents, eventCancellationNotifications, eventGuestRegistrations, eventOrderSeats, eventOrders, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility, type PublicProfileStatus} from "@/lib/db/server-schema";
 import {assertCanSubmitEvent} from "@/lib/events/entitlement-core";

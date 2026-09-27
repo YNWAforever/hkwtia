@@ -5,7 +5,7 @@ import {and, eq, isNull, or, sql} from "drizzle-orm";
 import type {Actor} from "@/lib/membership/lifecycle";
 import {companyMembers, membershipApplications, memberships as membershipsTable, type Membership} from "@/lib/db/server-schema";
 import {forbidden, getDb, requireSystem} from "@/lib/db/repos/common";
-import {membershipGrantValiditySql} from "@/lib/membership/grant-sql";
+import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
 import {dunningLapseRepository} from "@/lib/db/repos/dunning-lapse";
 
 export {

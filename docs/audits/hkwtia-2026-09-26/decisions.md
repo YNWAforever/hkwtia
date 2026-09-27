@@ -136,3 +136,7 @@ These gates do not block independent code and unit-test work.
 ## T17 public rendering boundary
 
 Keep `force-dynamic` while layout announcement reads and `i18n/request.ts` database copy overrides are request-dependent. The homepage now streams independent Server Component sections after the hero. Shared public caching requires explicit locale/filter keys and mutation invalidation; do not infer cache safety from a fast local unit test.
+
+## T18 repository path mapping
+
+The full repository-boundary gate found direct runtime `server-schema` imports in five T13–T16 batch handler files and the finite-grant SQL helper. The implementations now live at `lib/db/repos/batch-handlers/{export-members,import-commit,membership-grant,profile-patch,ticket-resend}.ts` and `lib/db/repos/membership-grant-sql.ts`. Existing `lib/admin/batches/handlers/*` and `lib/membership/grant-sql.ts` paths are thin exports for current callers/tests. This is a relocation of the same implementation, not a second batch system. The existing atomic item transaction remains the owner of all effects.

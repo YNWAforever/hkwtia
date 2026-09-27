@@ -10,7 +10,7 @@ import {requireDeliveryActor, type DeliveryActor} from "@/lib/db/repos/deliverie
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {requireWoztellWebhook} from "@/lib/db/repos/woztell-inbound-events";
 import {companyMembers, contacts, memberships, messageSuppressions, profiles} from "@/lib/db/server-schema";
-import {membershipGrantValiditySql} from "@/lib/membership/grant-sql";
+import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 /**
