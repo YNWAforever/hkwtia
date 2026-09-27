@@ -1,0 +1,351 @@
+{
+  "applicationSha": "092e73bb25cd9799902beacd9855fd484dfde48f",
+  "harnessCommit": "1185c782",
+  "environment": {
+    "os": "Windows",
+    "node": "v24.18.0",
+    "database": "owned disposable PostgreSQL 16 only",
+    "providers": "none",
+    "stagingVerified": false,
+    "productionReleased": false
+  },
+  "unit": {
+    "command": "npm test -- --maxWorkers=2 --reporter=json --outputFile=.tmp/audit-release/vitest-frozen.json",
+    "success": false,
+    "total": 6047,
+    "passed": 5900,
+    "failed": 2,
+    "pending": 145,
+    "totalSuites": 1714,
+    "testFiles": 740,
+    "startTime": 1790503328780,
+    "sourceReportSha256": "c83139a23f700c9af577a0e462419fda54a598e6c8ead7f78d05c941a6885a2b",
+    "skippedByFile": [
+      {
+        "file": "tests/integration/admin-audit-load.test.ts",
+        "count": 2
+      },
+      {
+        "file": "tests/integration/admin-batch-browser-fixture.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/admin-batch-concurrency.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/admin-batch-export.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/admin-batch-profile-cleanup.test.ts",
+        "count": 2
+      },
+      {
+        "file": "tests/integration/admin-batch-snapshot.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/admin-batch-ticket-resend.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/admin-pagination.test.ts",
+        "count": 3
+      },
+      {
+        "file": "tests/integration/aiops-materialized-view.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/audit-migration-upgrade.test.ts",
+        "count": 2
+      },
+      {
+        "file": "tests/integration/automation-runners-postgres.test.ts",
+        "count": 5
+      },
+      {
+        "file": "tests/integration/bulk-communication-eligibility.test.ts",
+        "count": 6
+      },
+      {
+        "file": "tests/integration/cohort-role-revocation-postgres.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/communication-audit-load.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/company-profile-review-version-postgres.test.ts",
+        "count": 3
+      },
+      {
+        "file": "tests/integration/company-profile-role-revocation-postgres.test.ts",
+        "count": 3
+      },
+      {
+        "file": "tests/integration/company-review-demotion-postgres.test.ts",
+        "count": 3
+      },
+      {
+        "file": "tests/integration/event-attendee-batch-export.test.ts",
+        "count": 3
+      },
+      {
+        "file": "tests/integration/event-cancellation-notices.test.ts",
+        "count": 3
+      },
+      {
+        "file": "tests/integration/guest-check-in.test.ts",
+        "count": 2
+      },
+      {
+        "file": "tests/integration/join-resume.test.ts",
+        "count": 3
+      },
+      {
+        "file": "tests/integration/journey-claim-concurrency.test.ts",
+        "count": 2
+      },
+      {
+        "file": "tests/integration/m2-acceptance.test.ts",
+        "count": 10
+      },
+      {
+        "file": "tests/integration/m3-acceptance.test.ts",
+        "count": 5
+      },
+      {
+        "file": "tests/integration/m4a-acceptance.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/m4b-acceptance.test.ts",
+        "count": 3
+      },
+      {
+        "file": "tests/integration/m4b-cross-window-cleanup.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/m4c-seed-postgres.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/member-360-purchases.test.ts",
+        "count": 2
+      },
+      {
+        "file": "tests/integration/member-application-queues.test.ts",
+        "count": 3
+      },
+      {
+        "file": "tests/integration/member-event-review-version-postgres.test.ts",
+        "count": 3
+      },
+      {
+        "file": "tests/integration/member-event-role-revocation-postgres.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/member-filter-selection.test.ts",
+        "count": 4
+      },
+      {
+        "file": "tests/integration/member-import-audit-load.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/member-import-commit.test.ts",
+        "count": 3
+      },
+      {
+        "file": "tests/integration/member-import-retention.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/membership-grant-batch.test.ts",
+        "count": 3
+      },
+      {
+        "file": "tests/integration/membership-grant-benefits.test.ts",
+        "count": 4
+      },
+      {
+        "file": "tests/integration/membership-grant.test.ts",
+        "count": 6
+      },
+      {
+        "file": "tests/integration/migration.test.ts",
+        "count": 2
+      },
+      {
+        "file": "tests/integration/shared-rate-limit.test.ts",
+        "count": 2
+      },
+      {
+        "file": "tests/integration/showcase-lead-contact-postgres.test.ts",
+        "count": 3
+      },
+      {
+        "file": "tests/integration/showcase-lead-email-outbox-postgres.test.ts",
+        "count": 4
+      },
+      {
+        "file": "tests/integration/showcase-manager-revocation-postgres.test.ts",
+        "count": 3
+      },
+      {
+        "file": "tests/integration/showcase-review-transition-postgres.test.ts",
+        "count": 3
+      },
+      {
+        "file": "tests/integration/task8-automations-postgres.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/ticket-checkout-recovery-postgres.test.ts",
+        "count": 2
+      },
+      {
+        "file": "tests/integration/ticket-eligibility-postgres.test.ts",
+        "count": 5
+      },
+      {
+        "file": "tests/integration/ticket-email-capacity.test.ts",
+        "count": 2
+      },
+      {
+        "file": "tests/integration/ticket-email-outbox-postgres.test.ts",
+        "count": 5
+      },
+      {
+        "file": "tests/integration/woztell-live.acceptance.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/integration/writer-quota-postgres.test.ts",
+        "count": 2
+      },
+      {
+        "file": "tests/unit/task10-postgres-integration.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/unit/task7-postgres-integration.test.ts",
+        "count": 2
+      },
+      {
+        "file": "tests/unit/task8-postgres-integration.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/unit/task9-postgres-integration.test.ts",
+        "count": 2
+      },
+      {
+        "file": "tests/unit/webhook-postgres-concurrency.test.ts",
+        "count": 1
+      },
+      {
+        "file": "tests/unit/woztell-normalizer-captured.test.ts",
+        "count": 1
+      }
+    ]
+  },
+  "gates": [
+    {
+      "command": "npx vitest run tests/unit/wt-pages/partners-page.test.tsx tests/unit/wt-pages/programs-editions.test.tsx --maxWorkers=1 --reporter=verbose",
+      "exitCode": 0,
+      "testsPassed": 9,
+      "previousTimeoutCasesMs": [
+        1385,
+        1395
+      ]
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0,
+      "errors": 0,
+      "warnings": 63
+    },
+    {
+      "command": "npm run typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run audit:strings",
+      "exitCode": 0,
+      "tsxFiles": 287
+    },
+    {
+      "command": "npx drizzle-kit check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "generatedPages": 263
+    },
+    {
+      "command": "npm audit --omit=dev --audit-level=high",
+      "exitCode": 0,
+      "advisories": {
+        "low": 1,
+        "moderate": 7,
+        "high": 0
+      }
+    },
+    {
+      "command": "worker Vitest and TypeScript",
+      "exitCode": 0,
+      "testsPassed": 48,
+      "sourceCommit": "df71a3b2"
+    },
+    {
+      "command": "npx vitest run tests/unit/preview-session-harness.test.ts --maxWorkers=1",
+      "exitCode": 0,
+      "testsPassed": 9
+    }
+  ],
+  "browser": {
+    "public": {
+      "command": "npm run test:e2e -- tests/e2e/core-pages.spec.ts tests/e2e/public-navigation.spec.ts --reporter=line,json",
+      "startTime": "2026-09-27T10:14:51.494Z",
+      "duration": 35173.867,
+      "expected": 22,
+      "skipped": 2,
+      "unexpected": 0,
+      "flaky": 0,
+      "sourceReportSha256": "dc0f465175459673158efca53fb1cf2cef378a3638dae606b787a8cc861b0722",
+      "gate": "partial: two login tests require Auth"
+    },
+    "full": {
+      "command": "npm run test:e2e -- --max-failures=3 --reporter=line,json",
+      "startTime": "2026-09-27T09:40:51.984Z",
+      "duration": 94068.842,
+      "expected": 19,
+      "skipped": 372,
+      "unexpected": 3,
+      "flaky": 0,
+      "intentionallySkipped": 6,
+      "didNotRun": 366,
+      "sourceReportSha256": "66a9be67d24909b3159056cde7e4d2bdae8e3b89b0aa4bd45bffebcef6bef8d3",
+      "gate": "failed: three Concierge mock-provider 500 responses without acceptance server configuration; stopped early"
+    }
+  },
+  "lighthouse": {
+    "gate": "failed",
+    "details": "lighthouse-local.json"
+  },
+  "acceptance": {
+    "missingM2Inputs": 16,
+    "isolatedPreflightExitCode": 1,
+    "previewAccess": "Vercel login protection",
+    "providerReceipts": false,
+    "hostedAlerts": false,
+    "policyActivation": false
+  }
+}

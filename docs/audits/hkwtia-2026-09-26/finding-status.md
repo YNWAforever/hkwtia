@@ -24,11 +24,11 @@ T00 initial classification, 2026-09-27 Asia/Hong_Kong. The remote and feature br
 | F18 | T10 | needs-runtime | code and local-browser verified; policy/provider gate | Home and membership page read the same validated persisted plan catalog; FAQ answers are rendered in both locales. The policy copy matrix separates code facts from unapproved eligibility, renewal, refund, invoice and legal-name terms. Stripe Price amounts were not verified with provider data. |
 | F19 | T10 | still-present | code-verified; dated browser fixture gate | Lifecycle now derives upcoming/ongoing/ended/cancelled from injected time, separately from registration open/full/waitlist/closed. Event cards and detail use lifecycle; exact Oct 3 versus Sep 26 regression passes. No browser fixture currently proves the historical event date on a deployed site. |
 | F20 | T10 | still-present | code-verified; login browser gate | A bounded branded login shell has home/join/support links, resend help and persistent form after send; safe allowlisted continuation remains. Unit tests pass. Two local browser login cases skipped without Neon Auth pair. |
-| F21 | T17 | still-present | homepage stream and public cache code-verified; browser/RUM gate | The hero resolves before twelve independently suspended sections, and a delayed event read no longer blocks the root response. The announcement read now has its own shell boundary; public news and page-copy reads use the Next Data Cache with explicit CMS invalidation and locale/limit keys. Real framework-cache unit checks pass; `force-dynamic` remains. Historical proxy timing is not user performance evidence; browser stream, same-region Lighthouse/RUM and cache acceptance remain. |
+| F21 | T17 | still-present | homepage stream and public cache code-verified; browser/RUM gate | The hero resolves before twelve independently suspended sections, and a delayed event read no longer blocks the root response. The announcement read now has its own shell boundary; public news and page-copy reads use the Next Data Cache with explicit CMS invalidation and locale/limit keys. Real framework-cache unit checks pass; `force-dynamic` remains. Historical proxy timing is not user performance evidence; the final local Lighthouse run records three measurements per route with four Chinese medians below 0.90 (gate failed); browser stream, authenticated cache acceptance and staging/RUM remain. |
 | F22 | T15 | still-present | finite profile code and disposable PostgreSQL verified; policy/browser gate | Migration 0048 stores separate grant window/reason/actor on memberships while historic comps remain null/indefinite. Default-off superadmin profile grant, time-gated entitlement reads, atomic expiry/audit job and policy-gated T13 bulk handler are implemented. Four grant DB tests and one bulk preview/commit DB test pass. Continuation: alias-aware grant validity fixed the real PostgreSQL directory/company benefit gaps (47b10371). Company capability and explicit-target bulk form are now implemented behind separate default-off flags, sharing the same transaction; company policy approval, authenticated browser, staging and production remain open. |
 | F23 | T04/T16 | still-present | T04 and T16 code and disposable-DB verified; provider/browser gate | Ticket form shows the server-price-derived total, date, payment nature and refund link; quantity is enforced. Recovery stores only a token digest and blocks duplicate payable sessions. T16 resend is queued through the existing outbox with paid/event/seat rechecks and default-off delivery; test-mode provider acceptance and staff browser remain. |
 | F24 | T17 | still-present | shared-limit code/DB verified; staging/load gate | RSVP/ticket entrypoints now use one atomic PostgreSQL 5/15-minute bucket per server-keyed digest; two instances reject the sixth attempt and fail closed on store outage. Migration 0049 and ten-minute cleanup pass disposable tests. Five concurrent retries of a legal ten-seat attempt produced one order/ten held seats in PostgreSQL. No stricter hold ceiling is justified by measured abuse; live proxy behavior and incidence remain unmeasured. |
-| F25 | T00/T09/T13/T17/T18 | needs-runtime | T09/T13/T17 code-verified; T18 instrumentation and strict acceptance gate added, staging open | Authenticated notice/batch/limiter jobs, worker contracts, aggregate ticket queue health and recipient-free provider latency logs are in branch. Disposable PostgreSQL 500-notice recovery took 167 simulated ticks at the unchanged three-per-tick limit. Draft PR #94 CI and SHA-specific Vercel deployment passed, but Preview is protected; full local E2E failed on missing Neon Auth. Continuation adds request IDs, web/worker SHA correlation, signed-webhook lag, strict no-skip authenticated CI and local four-signal alert trigger/recovery evidence. Provider receipts, isolated staging journeys, enabled hosted alerts and production smoke remain unverified. |
+| F25 | T00/T09/T13/T17/T18 | needs-runtime | T09/T13/T17 code-verified; T18 instrumentation and strict acceptance gate added, staging open | Authenticated notice/batch/limiter jobs, worker contracts, aggregate ticket queue health and recipient-free provider latency logs are in branch. Disposable PostgreSQL 500-notice recovery took 167 simulated ticks at the unchanged three-per-tick limit. Draft PR #94 CI and SHA-specific Vercel deployments passed through 1185c782, but Preview is protected; full local E2E remains failed/environment-gated (see exact candidate results). Continuation adds request IDs, web/worker SHA correlation, signed-webhook lag, strict no-skip authenticated CI and local four-signal alert trigger/recovery evidence. Provider receipts, isolated staging journeys, enabled hosted alerts and production smoke remain unverified. |
 
 No finding is marked `already-fixed` at T00. Historical CODE/REPRO evidence does not establish a production incident; historical LIVE evidence does not establish today's deployment SHA. Update each row with commit, focused test, DB/browser result, and release environment as work lands.
 
@@ -39,3 +39,30 @@ T14 remains development evidence. `MEMBER_IMPORT_ENABLED=false` is the default; 
 T15 is development evidence only. `MEMBERSHIP_GRANTS_ENABLED=false` and `MEMBERSHIP_GRANT_BATCH_ENABLED=false`; migration 0048 was applied only to disposable PostgreSQL. No live grant was made.
 
 Continuation: F11 now has measured 5,000-row import completion (5,000 successes), an eight-success/two-failure retry fixture and default-off payload-retention cleanup with disposable DB proof. F21 has shared-cache/streaming tests; same-region lab/RUM and authenticated cache acceptance remain release gates. See verification.md for exact runs and limits.
+
+## Review commit index
+
+These are implementation anchors on `codex/audit-remediation-20260927`, reviewed in [draft PR #94](https://github.com/YNWAforever/hkwtia/pull/94). Later shared-contract and verification commits apply across findings. Status and acceptance limits remain those above; a commit is not a deployment claim.
+
+| Findings | Implementation commits |
+|---|---|
+| F01 | `d37db31c` |
+| F02, F12, F13 | `2f1c9d49`, `cbe31b17`, `c7f4cf5e`, `b71583ed` |
+| F03 | `996d519f` |
+| F04 | `05cd024a`, `47b10371` |
+| F05, F09 | `b114fb9e` |
+| F06 | `de74fb8e` |
+| F07 | `093847e5`, `b71583ed` |
+| F08 | `daf5907f`, `a6eb5009` |
+| F10 | `3c72bd6e` |
+| F11 | `a5502305`, `fe68a6a9`, `000438e9`, `4eef8be3`, `df71a3b2` |
+| F14 | `cf941158`, `b71583ed`, `42d1c81c` |
+| F15 | `cf941158`, `669253f9` |
+| F16, F17, F18, F19, F20 | `2b48e8c9` |
+| F21 | `36f1a571`, `3964b567` |
+| F22 | `75e2ba9e`, `47b10371`, `000438e9`, `12ee2b4c` |
+| F23 | `a6eb5009`, `66db41ef` |
+| F24 | `27f347b2`, `3964b567` |
+| F25 | `88fbff90`, `df71a3b2`, `092e73bb` |
+
+The final candidate verification section in verification.md supersedes earlier candidate gate summaries. The branch retains all 50 migrations; none was applied to a shared environment during this task.

@@ -1,0 +1,54 @@
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "http://localhost:3000/",
+        "http://localhost:3000/membership",
+        "http://localhost:3000/events",
+        "http://localhost:3000/programmes",
+        "http://localhost:3000/partners",
+        "http://localhost:3000/zh",
+        "http://localhost:3000/zh/membership",
+        "http://localhost:3000/zh/events",
+        "http://localhost:3000/zh/programmes",
+        "http://localhost:3000/zh/partners"
+      ],
+      "numberOfRuns": 3,
+      "startServerReadyPattern": "Ready in",
+      "startServerReadyTimeout": 120000,
+      "settings": {
+        "chromeFlags": "--no-sandbox --disable-gpu --disable-dev-shm-usage",
+        "port": 9232,
+        "extraHeaders": {
+          "Accept-Language": "en-US,en;q=0.9"
+        }
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": [
+          "error",
+          {
+            "minScore": 0.9
+          }
+        ],
+        "categories:accessibility": [
+          "error",
+          {
+            "minScore": 0.95
+          }
+        ],
+        "categories:seo": [
+          "error",
+          {
+            "minScore": 0.95
+          }
+        ]
+      }
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": ".tmp/audit-release/lighthouse-final"
+    }
+  }
+}

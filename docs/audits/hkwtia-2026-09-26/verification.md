@@ -207,7 +207,7 @@ The existing Playwright specs are the canonical journey suites; a second `hkwtia
 | Cancellation/refunds | `phase-d4d-event-cancellation.spec.ts`, `phase-d4c-refunds.spec.ts` | Provider unknown/retry and notification receipt reconciliation. |
 | Check-in | `event-check-in.spec.ts`, `phase-d4b-passes-and-check-in.spec.ts` | Isolated guest/member/ticket data and 390px staff session. |
 | Member operations | `admin-members.spec.ts`, `phase-d2-member-tools.spec.ts` | Saved view, batch selection, actor revocation and 10k-member load. |
-| Bulk/import | No pre-existing full browser spec; disposable PostgreSQL integration covers batch/import/grant transactions | Synthetic staff browser, 5,000-row load, two workers and safe test recipients remain. |
+| Bulk/import | `admin-batches.spec.ts`; disposable PostgreSQL integration covers batch/import/grant transactions | The 5,000-row load and retry transaction driver passed locally. Authenticated staff browser and safe provider receipts remain unverified. |
 | Public/accessibility | `core-pages.spec.ts`, `public-navigation.spec.ts`, `accessibility.spec.ts` | Repeat against known deployment SHA at 390/768/1440px and compare axe/Lighthouse baselines. |
 
 The manual `.github/workflows/audit-acceptance.yml` runs a non-Production Preview public subset and disposable PostgreSQL tests. It has not run remotely. Its public subset can skip auth cases; it cannot mark the authenticated matrix complete.
@@ -328,3 +328,49 @@ The first Playwright collection failed because two new files used JSON imports w
 The strict browser-report CLI accepted a synthetic two-pass report and rejected the same report with one skip. The isolated batch driver refused to run without its explicit isolation/paused-worker attestation. These are guard checks, not browser acceptance.
 
 Attendee export tests first rejected the absent operation, then passed the real artifact/owner/expiry/changed-preview/flag-revocation cases. A new 500-row fixture initially failed on ambiguous uuid/text binding, which was corrected with an explicit UUID cast. The final export suite passed 3/3; migration-upgrade and existing member-export suites passed another 3/3. The new evidence/attendee-export-load.json records one 500-row artifact: submit 6.93 ms, preview 95.81 ms, worker execution 119.43 ms and download 12.71 ms. All 50 migrations were applied only to disposable PostgreSQL. The report pins df71a3b2 plus the then-uncommitted export capability.
+
+## Candidate gates — 2026-09-27
+
+Application candidate: `092e73bb25cd9799902beacd9855fd484dfde48f`. The subsequent `1185c782` changes only Lighthouse URL ordering: the reusable browser kept NEXT_LOCALE=zh-HK after `/zh` and silently redirected later unprefixed English checks. A real Lighthouse run reproduced it; English routes now precede Chinese routes. The existing Preview-session harness passed 9/9; direct config inventory/order validation and focused ESLint passed. No application code changed after the production build below.
+
+| Actual gate | Result | Limits |
+|---|---|---|
+| `npm run audit:strings` | pass; 287 TSX files | Both message bundles retain parity checks. |
+| `npm run lint` | pass; 0 errors, 63 warnings | Existing warnings retained. The initial repeat found temporary Chrome extension files under .tmp; generated artifacts are now ignored by Git, ESLint and TypeScript. |
+| `npm run typecheck`; `npx drizzle-kit check` | pass | Schema metadata check is not a shared migration. |
+| `npm run build` | pass; 263 generated pages | Production compile on Windows/Node 24.18.0, without provider/test credentials. |
+| `npm audit --omit=dev --audit-level=high` | pass; 1 low, 7 moderate, no high | No dependency auto-upgrade. |
+| Full local `npm test -- --maxWorkers=2 --reporter=json --outputFile=.tmp/audit-release/vitest-frozen.json` | **failed**; 5,900 passed, 2 failed, 145 skipped, 1,714 suites | `wt-pages/partners-page` and `wt-pages/programs-editions` each failed at about 20 seconds while build/browser work overlapped. JSON reports STACK_TRACE_ERROR; durations match the configured timeout. This failed local run is retained even when focused/CI reruns pass. |
+| GitHub CI at `092e73bb`, then `1185c782` | **pass**: checks, both test shards and required quality | Ubuntu/Node 22. Workflow runs the actual full sharded Vitest suite plus strings/lint/types/build/dependency audit. Credential skips are not staging acceptance. Latest code CI: https://github.com/YNWAforever/hkwtia/actions/runs/36312575612. |
+| Latest local production public browser subset | 22 passed, 2 login tests skipped; 35.2 s | Both locales, 390/768/1440px, navigation/FAQ/selected axe. The build ran on loopback:3148. Authenticated login and mutations remain unverified. |
+| Full local Playwright gate | **failed**; 19 passed, 3 failed, 6 intentional skips, 366 not run | Concierge mock-provider route returned 500 without acceptance-server configuration. The max-failures stop left the rest unexecuted. JSON combines intentional skips/unexecuted as 372; neither is a pass. |
+| Vercel Preview at `092e73bb` | deployment success; app acceptance blocked | https://hkwtia-8zvcx1ha8-ynwaforevers-projects.vercel.app redirects to vercel.com with title Login – Vercel. No protection was disabled and no authenticated app content was inspected. |
+
+The local raw JSON/logs are under ignored `.tmp/audit-release/`; final-gates.json records compact counts and source report hashes. There was no shared migration, provider send, payment/refund, production cleanup or production deployment. The source branch is reviewable; staging is not accepted and production is not released.
+
+The two local timeout files were rerun without code changes using `npx vitest run tests/unit/wt-pages/partners-page.test.tsx tests/unit/wt-pages/programs-editions.test.tsx --maxWorkers=1 --reporter=verbose`: **2 files / 9 tests passed**, 33.80 seconds total. The previously failing render cases took 1,385 ms and 1,395 ms. Together with both green CI shards, this supports load-related timeouts; it does not rewrite the earlier failed local gate.
+
+## Candidate Lighthouse lab
+
+Executed `npm run test:lighthouse -- --config=.tmp/audit-release/lighthouse-matched.config.json`: **exit 1**, 30 valid reports, three per URL, all final URLs matched. The repository assertion failed on `/zh` performance (0.83). The median scores for four Chinese routes are below 0.90; these remain an open performance gate. Accessibility is 0.96–1.00, SEO 1.00 and CLS zero in the recorded medians. No RUM pass is claimed.
+
+| Route | Median performance | LCP ms | TBT ms | CLS | Accessibility | SEO |
+|---|---:|---:|---:|---:|---:|---:|
+| / | 0.94 | 2593.72 | 202.00 | 0 | 1.00 | 1.00 |
+| /membership | 0.97 | 2417.11 | 87.03 | 0 | 1.00 | 1.00 |
+| /events | 0.96 | 2673.87 | 73.50 | 0 | 1.00 | 1.00 |
+| /programmes | 0.93 | 2935.32 | 162.50 | 0 | 0.96 | 1.00 |
+| /partners | 0.94 | 2581.41 | 166.00 | 0 | 1.00 | 1.00 |
+| /zh | 0.83 | 2667.68 | 507.49 | 0 | 1.00 | 1.00 |
+| /zh/membership | 0.88 | 2594.35 | 386.32 | 0 | 1.00 | 1.00 |
+| /zh/events | 0.88 | 2522.37 | 376.45 | 0 | 1.00 | 1.00 |
+| /zh/programmes | 0.89 | 2786.80 | 309.81 | 0 | 0.96 | 1.00 |
+| /zh/partners | 0.97 | 2447.08 | 142.63 | 0 | 1.00 | 1.00 |
+
+Environment: production Next build at `http://localhost:3000`, Windows/Node 24.18.0, Intel i5-12500, dedicated Playwright Chromium 1228 profile with extensions disabled, Lighthouse mobile simulated network/CPU settings saved in `evidence/lighthouse-local.json`. Collection overlapped the end of the full local unit run and other work on the shared host; Lighthouse reported slow-CPU calibration warnings. No Auth, database-backed public content or provider configuration was supplied. These are local lab observations, not Hong Kong user performance or a before/after baseline. The Chinese homepage trace showed roughly twice the style/layout work of the sampled English trace; this observation does not establish its cause. Re-profile the reviewed bilingual content on an isolated staging host before a performance release claim.
+
+Reproduction corrections: Windows Chrome-launcher cleanup first failed with EPERM, so collection used a separately launched, hidden headless Chrome over its local debugging port. Shared locale cookies then redirected English URLs; `1185c782` orders English first. Finally, port 3148 differed from the build’s NEXT_PUBLIC_SITE_URL fallback (localhost:3000), which falsely failed canonical checks. The final run used matching port 3000 and a fresh profile. No canonical application code, threshold or production setting was changed to obtain a pass. All outputs used filesystem upload; no report/session cookie was sent to public artifact storage.
+
+For a repeat, build and serve with matching NEXT_PUBLIC_SITE_URL/APP_URL and browser origin, use three runs per URL in the committed locale order, a fresh profile, and filesystem-only LHCI output. The sanitized exact local collection config is `evidence/lighthouse-local.config.json`; its debugging port requires an operator-owned headless Chrome. Use a new private profile and disable extensions. Do not reuse any authenticated production session.
+
+Compact evidence: `evidence/final-gates.json` records command results, skips and source report hashes; `evidence/lighthouse-local.json` contains every run, medians, device settings, warnings and raw report hashes. Raw reports remain in ignored `.tmp/audit-release/`. The release runbook and decisions retain every policy/environment gate.
