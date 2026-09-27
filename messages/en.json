@@ -2521,6 +2521,24 @@
     "verificationError": "Verification is unavailable. Reload the page and try again."
   },
   "Admin": {
+    "brandShort": "WTIA",
+    "shell": {
+      "menu": "Open workspace menu",
+      "closeMenu": "Close workspace menu",
+      "collapseSidebar": "Collapse sidebar",
+      "expandSidebar": "Expand sidebar",
+      "breadcrumbs": "Workspace location",
+      "searchMembers": "Find a member",
+      "viewSite": "View site",
+      "account": "Account",
+      "signOut": "Sign out",
+      "signOutError": "Could not sign out. Please try again.",
+      "roles": {
+        "staff": "Staff",
+        "exco": "Executive Committee",
+        "superadmin": "Superadmin"
+      }
+    },
     "brand": "WTIA",
     "title": "Staff workspace",
     "description": "Manage WTIA member operations from a protected staff-only workspace.",

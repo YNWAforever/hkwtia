@@ -53,6 +53,7 @@ describe.skipIf(!enabled)("verified auth subject profile provisioning", () => {
       .resolves.toEqual({kind: "ready", identity: {profileId: "new-subject", role: "member"}});
     await expect(repo.provisionMember({authUserId: "new-subject", email: "new@example.test", displayName: "Changed"}))
       .resolves.toEqual({kind: "ready", identity: {profileId: "new-subject", role: "member"}});
+    await expect(repo.getDisplayName("new-subject")).resolves.toBe("New Member");
     const rows = await pool!.query("SELECT id, role, display_name FROM profiles WHERE auth_user_id = 'new-subject'");
     expect(rows.rows).toEqual([{id: "new-subject", role: "member", display_name: "New Member"}]);
     await pool!.query("INSERT INTO profiles (id,auth_user_id,email,role,display_name) VALUES ('staff-profile','staff-subject','staff@example.test','staff','Staff')");
@@ -62,6 +63,7 @@ describe.skipIf(!enabled)("verified auth subject profile provisioning", () => {
 
   it("requires recovery for a same-email different-subject account and never links its role", async () => {
     const repo = createProfileIdentityRepository(async () => drizzle(pool!) as never);
+    await pool!.query("INSERT INTO profiles (id,auth_user_id,email,role,display_name) VALUES ('staff-profile','staff-subject','staff@example.test','staff','Staff') ON CONFLICT DO NOTHING");
     await expect(repo.provisionMember({authUserId: "unlinked-subject", email: "STAFF@example.test", displayName: "Other"}))
       .resolves.toEqual({kind: "conflict"});
     const rows = await pool!.query("SELECT id FROM profiles WHERE auth_user_id = 'unlinked-subject'");

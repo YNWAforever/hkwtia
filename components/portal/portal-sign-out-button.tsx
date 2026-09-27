@@ -5,7 +5,7 @@ import {useState} from "react";
 import {authClient} from "@/lib/auth/client";
 import {useRouter} from "@/i18n/navigation";
 
-export function PortalSignOutButton({label, errorLabel}: Readonly<{label: string; errorLabel: string}>) {
+export function PortalSignOutButton({label, errorLabel, destination = "/member-login"}: Readonly<{label: string; errorLabel: string; destination?: "/member-login" | "/admin-login"}>) {
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
   const router = useRouter();
@@ -20,8 +20,9 @@ export function PortalSignOutButton({label, errorLabel}: Readonly<{label: string
           setPending(true);
           setFailed(false);
           try {
-            await authClient.signOut();
-            router.push("/member-login");
+            const result = await authClient.signOut();
+            if (result.error) throw new Error("SIGN_OUT_FAILED");
+            router.push(destination);
             router.refresh();
           } catch {
             setFailed(true);

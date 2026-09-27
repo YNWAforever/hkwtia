@@ -3,8 +3,8 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import type {ReactNode} from "react";
 
-import {AdminNav} from "@/components/admin/admin-nav";
-import {InternalAppShell} from "@/components/internal-shell/app-shell";
+import {AdminAppShell} from "@/components/admin/admin-app-shell";
+import {profileIdentityRepository} from "@/lib/db/repos/profile-identities";
 import type {AppLocale} from "@/i18n/routing";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 
@@ -20,11 +20,13 @@ export default async function AdminLayout({children, params}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
-  await requireAdminPageActor();
-  const t = await getTranslations({locale, namespace: "Common"});
-  return (
-    <InternalAppShell navigation={<AdminNav locale={locale} />} skipLabel={t("skipToContent")}>
-      {children}
-    </InternalAppShell>
-  );
+  const actor = await requireAdminPageActor();
+  const [t, identity] = await Promise.all([
+    getTranslations({locale, namespace: "Common"}),
+    profileIdentityRepository.getDisplayName(actor.profileId),
+  ]);
+  if (!identity) throw new Error("ADMIN_PROFILE_MISSING");
+  return <AdminAppShell identity={identity} locale={locale} role={actor.kind} skipLabel={t("skipToContent")}>
+    {children}
+  </AdminAppShell>;
 }

@@ -26,6 +26,12 @@ export function createProfileIdentityRepository(loadDatabase: () => Promise<Data
         .from(profiles).where(eq(profiles.authUserId, authUserId)).limit(1);
       return rows[0] ?? null;
     },
+    async getDisplayName(profileId: string): Promise<string | null> {
+      const db = await loadDatabase();
+      const rows = await db.select({displayName: profiles.displayName})
+        .from(profiles).where(eq(profiles.id, profileId)).limit(1);
+      return rows[0]?.displayName ?? null;
+    },
     async touchLastLogin(profileId: string): Promise<void> {
       const db = await loadDatabase();
       await db.update(profiles).set({lastLoginAt: new Date()}).where(eq(profiles.id, profileId));

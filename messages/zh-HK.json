@@ -2522,6 +2522,24 @@
     "verificationError": "目前無法進行驗證。請重新載入頁面再試。"
   },
   "Admin": {
+    "brandShort": "WTIA",
+    "shell": {
+      "menu": "開啟工作平台選單",
+      "closeMenu": "關閉工作平台選單",
+      "collapseSidebar": "收起側欄",
+      "expandSidebar": "展開側欄",
+      "breadcrumbs": "工作平台位置",
+      "searchMembers": "尋找會員",
+      "viewSite": "瀏覽網站",
+      "account": "帳戶",
+      "signOut": "登出",
+      "signOutError": "未能登出，請再試一次。",
+      "roles": {
+        "staff": "職員",
+        "exco": "執行委員",
+        "superadmin": "超級管理員"
+      }
+    },
     "brand": "WTIA",
     "title": "職員工作區",
     "description": "在受保護的職員專用工作區管理 WTIA 會員營運。",
