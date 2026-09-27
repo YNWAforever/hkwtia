@@ -5,6 +5,7 @@ import {and, eq, isNull, or, sql} from "drizzle-orm";
 import type {Actor} from "@/lib/membership/lifecycle";
 import {companyMembers, membershipApplications, memberships as membershipsTable, type Membership} from "@/lib/db/server-schema";
 import {forbidden, getDb, requireSystem} from "@/lib/db/repos/common";
+import {membershipGrantValiditySql} from "@/lib/membership/grant-sql";
 import {dunningLapseRepository} from "@/lib/db/repos/dunning-lapse";
 
 export {
@@ -138,7 +139,7 @@ export const membershipsRepository = {
     return db
       .select()
       .from(membershipsTable)
-      .where(or(eq(membershipsTable.ownerUserId, actor.profileId), companyMembershipScope(actor)));
+      .where(and(or(eq(membershipsTable.ownerUserId, actor.profileId), companyMembershipScope(actor)), membershipGrantValiditySql()));
   },
 
   async create(actor: Actor, input: MembershipInput): Promise<Membership> {

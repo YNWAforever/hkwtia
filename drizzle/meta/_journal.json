@@ -330,6 +330,13 @@
       "when": 1790474400000,
       "tag": "0047_member_imports",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1790457600000,
+      "tag": "0048_membership_grants",
+      "breakpoints": true
     }
   ]
 }

@@ -3507,6 +3507,19 @@
       "invalid": "Choose a plan before granting a membership.",
       "error": "The membership could not be granted.",
       "duplicate": "This member already has a membership. Open it to change the plan instead of granting a second one."
+    },
+    "membershipGrant": {
+      "title": "Finite profile grant",
+      "description": "Available only with approved association policy. Enter an explicit start, expiry and reason; dates use Hong Kong time. This creates no Stripe payment.",
+      "plan": "Plan",
+      "start": "Starts (Hong Kong time)",
+      "expiry": "Expires (Hong Kong time)",
+      "reason": "Approval reason",
+      "submit": "Create finite grant",
+      "success": "Finite grant created.",
+      "invalid": "Enter a valid plan, date window and reason.",
+      "duplicate": "This member already has a live membership.",
+      "error": "The finite grant could not be created."
     }
   },
   "MarketingExtras": {

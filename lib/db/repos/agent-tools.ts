@@ -12,6 +12,7 @@ import {approvalsRepository} from "@/lib/db/repos/approvals";
 import {getDb, type Database} from "@/lib/db/repos/common";
 import {kbDocumentsRepository} from "@/lib/db/repos/kb-documents";
 import {staffTasksRepository} from "@/lib/db/repos/staff-tasks";
+import {membershipGrantValiditySql} from "@/lib/membership/grant-sql";
 import {
   companies,
   companyMembers,
@@ -323,6 +324,7 @@ export function createAgentToolsRepository(
                     'past_due',
                     'cancel_at_period_end'
                   )
+                  AND ${membershipGrantValiditySql()}
               )
             )
           )        ORDER BY ${events.startsAt}, ${events.slug}, ${events.id}

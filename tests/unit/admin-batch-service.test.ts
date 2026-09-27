@@ -35,6 +35,19 @@ describe("admin batch actor boundary", () => {
     expect(store.create).toHaveBeenCalledWith(staff, expect.objectContaining({operation: "profile_patch"}), expect.stringMatching(/^[a-f0-9]{64}$/));
   });
 
+  it("requires separate grant and bulk policy flags plus a superadmin before persisting grant batches", async () => {
+    const store = gateway();
+    const grant = {operation: "membership_grant", idempotencyKey: batchId, targets: [{kind: "profile", profileId: "member-a"}], payload: {planCode: "community", effectiveAt: "2026-10-01T00:00:00.000Z", expiresAt: "2026-11-01T00:00:00.000Z", reason: "Approved test scholarship"}};
+    const capability = new Set(["membership_grant"] as const);
+    await expect(prepareBatch(staff, grant, store as BatchGateway, capability)).rejects.toThrow("BATCH_OPERATION_UNAVAILABLE");
+    vi.stubEnv("MEMBERSHIP_GRANTS_ENABLED", "true");
+    vi.stubEnv("MEMBERSHIP_GRANT_BATCH_ENABLED", "true");
+    try {
+      await expect(prepareBatch(staff, grant, store as BatchGateway, capability)).rejects.toThrow("FORBIDDEN");
+      expect(store.create).not.toHaveBeenCalled();
+    } finally {vi.unstubAllEnvs();}
+  });
+
   it("checks ownership inputs and delegates preview, commit, retry and cancel without accepting a forged actor", async () => {
     const store = gateway();
     await expect(getBatchPreview(member, batchId, store as BatchGateway)).rejects.toThrow("FORBIDDEN");

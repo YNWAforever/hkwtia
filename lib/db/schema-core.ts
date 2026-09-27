@@ -321,6 +321,10 @@ export const memberships = pgTable(
     stripeSubscriptionId: text("stripe_subscription_id"),
     billingPeriodStart: timestamp("billing_period_start", {withTimezone: true}),
     billingPeriodEnd: timestamp("billing_period_end", {withTimezone: true}),
+    grantEffectiveAt: timestamp("grant_effective_at", {withTimezone: true}),
+    grantExpiresAt: timestamp("grant_expires_at", {withTimezone: true}),
+    grantReason: text("grant_reason"),
+    grantActorProfileId: text("grant_actor_profile_id"),
     cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false).notNull(),
     createdAt: createdAt("created_at"),
     updatedAt: updatedAt("updated_at"),
@@ -331,6 +335,7 @@ export const memberships = pgTable(
       sql`(${table.ownerUserId} IS NOT NULL AND ${table.companyId} IS NULL) OR (${table.ownerUserId} IS NULL AND ${table.companyId} IS NOT NULL)`,
     ),
     check("memberships_seat_limit_check", sql`${table.seatLimit} >= 0`),
+    check("memberships_grant_window_check", sql`(${table.grantEffectiveAt} IS NULL AND ${table.grantExpiresAt} IS NULL AND ${table.grantReason} IS NULL AND ${table.grantActorProfileId} IS NULL) OR (${table.grantEffectiveAt} IS NOT NULL AND ${table.grantExpiresAt} IS NOT NULL AND ${table.grantReason} IS NOT NULL AND length(trim(${table.grantReason})) >= 10 AND ${table.grantActorProfileId} IS NOT NULL AND ${table.grantEffectiveAt} < ${table.grantExpiresAt})`),
     uniqueIndex("memberships_stripe_subscription_unique")
       .on(table.stripeSubscriptionId)
       .where(sql`${table.stripeSubscriptionId} IS NOT NULL`),
@@ -356,6 +361,7 @@ export const memberships = pgTable(
     index("memberships_owner_idx").on(table.ownerUserId),
     index("memberships_company_idx").on(table.companyId),
     index("memberships_billing_period_end_idx").on(table.billingPeriodEnd),
+    index("memberships_grant_expires_at_idx").on(table.grantExpiresAt),
   ],
 );
 

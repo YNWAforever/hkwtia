@@ -131,3 +131,13 @@ Migration 0046 is not applied to staging/production. `ADMIN_BATCH_ENABLED` remai
 | 2026-09-27 | feature worktree | `npm run typecheck`; `npm run audit:strings`; `npx drizzle-kit check`; focused ESLint; `npm audit --omit=dev --audit-level=high` | exit 0; 277 TSX scanned; audit reports 8 low/moderate paths | Type, copy, migration, new-source lint and no high npm audit advisory. Full suite/lint/build remain for T18. |
 
 Current and incoming row values are displayed in the bilingual preview; exact-ID version change after preview skips without profile mutation or import audit. No staff-authenticated browser, real upload proxy, 5000-row load, approved retention deletion or staging deployment was exercised. Migration 0047 and both flags remain unapplied/disabled outside disposable tests.
+## T15 finite grant evidence
+
+| Date | Environment | Command | Result | Scope and limit |
+|---|---|---|---|---|
+| 2026-09-27 | feature worktree | Focused finite-grant model/service/form, historical comp, batch service and worker contract Vitest | exit 0; 41 grant/comp/worker cases plus 4 batch service cases | Strict target/reason/window, HKT midnight, default-off and superadmin gates, historic comp behavior, worker registry parity. Mocked DB for unit cases. |
+| 2026-09-27 | disposable PostgreSQL 16 via Docker | `RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/membership-grant-batch.test.ts tests/integration/membership-grant.test.ts tests/integration/admin-batch-snapshot.test.ts tests/integration/admin-batch-concurrency.test.ts tests/integration/member-import-commit.test.ts` | exit 0; 5 files, 10 tests passed | Real 0048 on synthetic schema; plan seats, conflict and concurrent same-profile grants, single audit, future/expiry SQL boundaries, expiry only grant rows, bulk target preview/commit, and prior batch/import regressions. The first grant DB run caught an untyped PostgreSQL JSON parameter; fixed and rerun. |
+| 2026-09-27 | local worker package | `npm test` in `workers/` | exit 0; 5 files, 47 tests passed | Schedule/dispatch and worker package contracts; no deployed cron call. |
+| 2026-09-27 | feature worktree | `npm run typecheck`; `npm run audit:strings`; `npx drizzle-kit check`; focused ESLint | exit 0; 278 TSX scanned | Type, bilingual strings, migration metadata and changed-source lint. Initial lint rejected a repository import from the membership folder; expiry runner moved to `lib/db/repos` and rerun passed. |
+
+No approved association grant policy, superadmin browser session, staging deployment, live expiry job or production grant was exercised. Both grant flags default off; migration 0048 exists only in the branch and disposable PostgreSQL tests.

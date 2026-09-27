@@ -7,6 +7,7 @@ import {Member360View} from "@/components/admin/member-360";
 import {MemberNoteForm} from "@/components/admin/member-note-form";
 import {MemberProfileForm} from "@/components/admin/member-profile-form";
 import {MembershipCompForm} from "@/components/admin/membership-comp-form";
+import {MembershipGrantForm} from "@/components/admin/membership-grant-form";
 import type {AppLocale} from "@/i18n/routing";
 import type {Member360} from "@/lib/admin/member-360";
 import {parsePageQuery} from "@/lib/admin/pagination";
@@ -14,6 +15,7 @@ import {adminMembersRepository, memberTimelineKindSchema, type MemberTimelineKin
 import {appendMemberNoteAction} from "@/lib/admin/member-note-actions";
 import {updateMemberProfileAction} from "@/lib/admin/member-profile-actions";
 import {compMembershipAction} from "@/lib/admin/membership-comp-actions";
+import {grantMembershipAction} from "@/lib/admin/membership-grant-actions";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {getEditableMemberProfile} from "@/lib/db/repos/admin-member-profile";
 import {adminMemberListHref, parseAdminMemberHistory, parseAdminMemberRouteQuery} from "@/lib/admin/member-types";
@@ -239,6 +241,12 @@ export default async function AdminMember360Page({params, searchParams}: Props) 
         }}
         profileId={profileId.data}
       />
+      {actor.kind === "superadmin" && process.env.MEMBERSHIP_GRANTS_ENABLED === "true" ? <MembershipGrantForm
+        action={grantMembershipAction.bind(null, profileId.data, `/${locale}/admin/members/${profileId.data}`, {
+          success: t("membershipGrant.success"), invalid: t("membershipGrant.invalid"), duplicate: t("membershipGrant.duplicate"), error: t("membershipGrant.error"),
+        })}
+        labels={{title: t("membershipGrant.title"), description: t("membershipGrant.description"), plan: t("membershipGrant.plan"), start: t("membershipGrant.start"), expiry: t("membershipGrant.expiry"), reason: t("membershipGrant.reason"), submit: t("membershipGrant.submit")}}
+      /> : null}
       <MemberNoteForm
         action={appendAction}
         labels={{

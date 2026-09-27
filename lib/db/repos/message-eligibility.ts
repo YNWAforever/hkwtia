@@ -10,6 +10,7 @@ import {requireDeliveryActor, type DeliveryActor} from "@/lib/db/repos/deliverie
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {requireWoztellWebhook} from "@/lib/db/repos/woztell-inbound-events";
 import {companyMembers, contacts, memberships, messageSuppressions, profiles} from "@/lib/db/server-schema";
+import {membershipGrantValiditySql} from "@/lib/membership/grant-sql";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 /**
@@ -298,11 +299,11 @@ export function recipientFactsProjection(targets: SQL): SQL {
     LEFT JOIN LATERAL (
       SELECT ${memberships.status} AS status, ${memberships.planCode} AS plan_code, ${memberships.billingPeriodEnd} AS renewal_at
       FROM ${memberships}
-      WHERE ${memberships.ownerUserId} = target.profile_id
+      WHERE (${memberships.ownerUserId} = target.profile_id
         OR ${memberships.companyId} IN (
           SELECT ${companyMembers.companyId} FROM ${companyMembers}
           WHERE ${companyMembers.userId} = target.profile_id AND ${companyMembers.revokedAt} IS NULL
-        )
+        )) AND ${membershipGrantValiditySql()}
       ORDER BY ${memberships.createdAt} DESC
       LIMIT 1
     ) AS membership ON true

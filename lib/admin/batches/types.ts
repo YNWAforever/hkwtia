@@ -18,7 +18,7 @@ const memberFields = z.enum(["displayName", "email", "companyName", "planCode", 
 export const batchRequestSchema = z.discriminatedUnion("operation", [
   z.object({...common, operation: z.literal("profile_patch"), selection: memberSelectionSchema, payload: patchPayload}).strict(),
   z.object({...common, operation: z.literal("import_commit"), payload: z.object({importRunId: z.string().uuid()}).strict()}).strict(),
-  z.object({...common, operation: z.literal("membership_grant"), targets: z.array(grantTarget).min(1).max(5000), payload: z.object({planCode: z.enum(MEMBERSHIP_PLAN_CODES), effectiveAt: isoInstant, expiresAt: isoInstant, reason: z.string().trim().min(3).max(500)}).strict().refine((payload) => Date.parse(payload.effectiveAt) < Date.parse(payload.expiresAt), "INVALID_GRANT_WINDOW")}).strict(),
+  z.object({...common, operation: z.literal("membership_grant"), targets: z.array(grantTarget).min(1).max(5000), payload: z.object({planCode: z.enum(MEMBERSHIP_PLAN_CODES), effectiveAt: isoInstant, expiresAt: isoInstant, reason: z.string().trim().min(10).max(1000)}).strict().refine((payload) => Date.parse(payload.effectiveAt) < Date.parse(payload.expiresAt), "INVALID_GRANT_WINDOW")}).strict(),
   z.object({...common, operation: z.literal("renewal_reminder"), selection: memberSelectionSchema, payload: z.object({channel}).strict()}).strict(),
   z.object({...common, operation: z.literal("profile_update_invite"), selection: memberSelectionSchema, payload: z.object({channel}).strict()}).strict(),
   z.object({...common, operation: z.literal("ticket_resend"), targetSeatIds: z.array(z.string().uuid()).min(1).max(5000), payload: z.object({}).strict()}).strict(),

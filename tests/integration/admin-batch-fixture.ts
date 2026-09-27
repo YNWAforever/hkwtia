@@ -25,17 +25,22 @@ export async function isolatedBatchDatabase() {
       CREATE TABLE profiles (id text PRIMARY KEY, display_name text NOT NULL, email text, phone text, job_title text, locale text NOT NULL, role text NOT NULL, updated_at timestamptz NOT NULL DEFAULT now());
       CREATE TABLE companies (id uuid PRIMARY KEY, display_name text NOT NULL);
       CREATE TABLE company_members (user_id text NOT NULL, company_id uuid NOT NULL, revoked_at timestamptz);
-      CREATE TABLE memberships (id uuid PRIMARY KEY, owner_user_id text, company_id uuid, plan_code text NOT NULL, status text NOT NULL, billing_period_end timestamptz);
+      CREATE TABLE membership_plans (code text PRIMARY KEY, seat_allowance integer NOT NULL);
+      CREATE TABLE memberships (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), owner_user_id text, company_id uuid, plan_code text NOT NULL, status text NOT NULL, seat_limit integer NOT NULL DEFAULT 0, billing_period_end timestamptz, stripe_customer_id text, stripe_subscription_id text, updated_at timestamptz NOT NULL DEFAULT now());
+      CREATE UNIQUE INDEX memberships_owner_live_unique ON memberships (owner_user_id) WHERE owner_user_id IS NOT NULL AND status NOT IN ('cancelled','expired');
       CREATE TABLE engagement_scores (profile_id text PRIMARY KEY, score numeric NOT NULL);
       CREATE TABLE contacts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), profile_id text, display_name text, email text, source text, stage text, owner_profile_id text, tags text[] NOT NULL DEFAULT ARRAY[]::text[], locale text NOT NULL DEFAULT 'en', whatsapp_opt_in boolean NOT NULL DEFAULT false, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
       CREATE TABLE audit_events (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), actor_user_id text, actor_type text NOT NULL, action text NOT NULL, target_type text NOT NULL, target_id text NOT NULL, metadata jsonb, created_at timestamptz NOT NULL DEFAULT now());
-      INSERT INTO profiles (id,display_name,email,phone,job_title,locale,role) VALUES ('staff','Staff','staff@example.test','1','Staff','en','staff'),('a','Ada','a@example.test','2','Member','en','member'),('b','Bea','b@example.test','3','Member','en','member');
+      INSERT INTO profiles (id,display_name,email,phone,job_title,locale,role) VALUES ('root','Root','root@example.test','0','Superadmin','en','superadmin'),('staff','Staff','staff@example.test','1','Staff','en','staff'),('a','Ada','a@example.test','2','Member','en','member'),('b','Bea','b@example.test','3','Member','en','member'),('grant-c','Cai','c@example.test','4','Member','en','member'),('grant-d','Dee','d@example.test','5','Member','en','member');
+      INSERT INTO membership_plans (code,seat_allowance) VALUES ('community',1),('startup',3),('corporate',12),('patron',20);
       INSERT INTO memberships (id,owner_user_id,plan_code,status) VALUES ('11111111-1111-4111-8111-111111111111','a','community','active'),('22222222-2222-4222-8222-222222222222','b','community','active');
     `);
     const migration = readFileSync("drizzle/0046_admin_batches.sql", "utf8");
     for (const statement of migration.split("--> statement-breakpoint").map((item) => item.trim()).filter(Boolean)) await pool.query(statement);
     const importMigration = readFileSync("drizzle/0047_member_imports.sql", "utf8");
     for (const statement of importMigration.split("--> statement-breakpoint").map((item) => item.trim()).filter(Boolean)) await pool.query(statement);
+    const grantMigration = readFileSync("drizzle/0048_membership_grants.sql", "utf8");
+    for (const statement of grantMigration.split("--> statement-breakpoint").map((item) => item.trim()).filter(Boolean)) await pool.query(statement);
     const database = drizzle(pool) as unknown as BatchDatabase;
     return {pool, database, close: async () => {await pool!.end(); docker(["rm", "-f", container]);}};
   } catch (error) {

@@ -9,6 +9,7 @@ import {AUDIT_DEMO_EVENT_SLUGS, isAuditDemoEventSlug} from "@/config/demo-events
 import {getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
+import {membershipGrantValiditySql} from "@/lib/membership/grant-sql";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
 import {auditEvents, companies, companyMembers, eventCancellationIntents, eventCancellationNotifications, eventGuestRegistrations, eventOrderSeats, eventOrders, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility, type PublicProfileStatus} from "@/lib/db/server-schema";
 import {assertCanSubmitEvent} from "@/lib/events/entitlement-core";
@@ -494,7 +495,7 @@ async function defaultRegistrationDependencies(): Promise<EventRegistrationDepen
     lockEvent: async (eventId) => (await tx.select({id: events.id, capacity: events.capacity, published: events.published, registrationMode: events.registrationMode, visibility: events.visibility, startsAt: events.startsAt, endsAt: events.endsAt}).from(events).where(eq(events.id, eventId)).for("update"))[0] ?? null,
     hasEligibleMembership: async (profileId) => Boolean((await tx.select({id: memberships.id}).from(memberships)
       .leftJoin(companyMembers, and(eq(companyMembers.companyId, memberships.companyId), eq(companyMembers.userId, profileId), isNull(companyMembers.revokedAt)))
-      .where(and(or(eq(memberships.ownerUserId, profileId), eq(companyMembers.userId, profileId)), inArray(memberships.status, eligibleStatuses))).limit(1))[0]),
+      .where(and(or(eq(memberships.ownerUserId, profileId), eq(companyMembers.userId, profileId)), inArray(memberships.status, eligibleStatuses), membershipGrantValiditySql())).limit(1))[0]),
     getRegistration: async (eventId, profileId) => (await tx.select({status: eventRegistrations.status}).from(eventRegistrations).where(and(eq(eventRegistrations.eventId, eventId), eq(eventRegistrations.profileId, profileId))))[0] ?? null,
     countRegistered: async (eventId) => {
       // The event row is locked by registerForEvent. Guest RSVP takes the same

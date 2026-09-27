@@ -7,6 +7,7 @@ import {z} from "zod";
 
 import type {Actor} from "@/lib/membership/lifecycle";
 import {BENEFIT_ELIGIBLE_MEMBERSHIP_STATUSES} from "@/lib/membership/entitlements";
+import {membershipGrantValiditySql} from "@/lib/membership/grant-sql";
 import {ticketPurchaseAudience} from "@/lib/tickets/eligibility";
 
 import {MAX_TICKET_SEATS, TICKET_HOLD_MS} from "@/config/tickets";
@@ -235,7 +236,7 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       const statusList = sql.join(BENEFIT_ELIGIBLE_MEMBERSHIP_STATUSES.map((status) => sql`${status}`), sql`, `);
       const personal = rows<{id: string}>(await tx.execute(sql`
         SELECT id FROM ${memberships}
-        WHERE owner_user_id = ${profileId} AND status IN (${statusList})
+        WHERE owner_user_id = ${profileId} AND status IN (${statusList}) AND ${membershipGrantValiditySql()}
         LIMIT 1 FOR SHARE
       `));
       if (personal.length > 0) return true;
