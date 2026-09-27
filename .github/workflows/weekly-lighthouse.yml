@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: "30 2 * * 1"
   workflow_dispatch:
+    inputs:
+      local_lab:
+        description: Build the selected ref and audit localhost without provider credentials
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -20,17 +26,39 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Resolve production canonical host
+        if: ${{ !inputs.local_lab }}
         id: target
         run: node scripts/resolve-production-lhci-target.mjs
       - name: Audit production routes in both locales
+        if: ${{ !inputs.local_lab }}
         run: npm run test:lighthouse
         env:
           LHCI_BASE_URL: ${{ steps.target.outputs.base_url }}
+      - name: Build isolated local lab
+        if: inputs.local_lab
+        env:
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+          APP_URL: http://localhost:3000
+        run: npm run build
+      - name: Audit isolated build three times per route
+        if: inputs.local_lab
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          import {ci} from './lighthouserc.js';
+          writeFileSync('.lhci-local-lab.json', JSON.stringify({ci: {
+            ...ci,
+            collect: {...ci.collect, numberOfRuns: 3, startServerCommand: 'node node_modules/next/dist/bin/next start'},
+            upload: {target: 'filesystem', outputDir: '.lighthouseci/lab-reports'}
+          }}));
+          NODE
+          npm run test:lighthouse -- --config=.lhci-local-lab.json
       - name: Preserve Lighthouse reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: production-lighthouse
+          name: ${{ inputs.local_lab && 'isolated-build-lighthouse' || 'production-lighthouse' }}
           path: .lighthouseci/
+          include-hidden-files: true
           if-no-files-found: warn
           retention-days: 14

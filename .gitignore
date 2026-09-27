@@ -39,3 +39,6 @@ playwright-report/
 .superpowers/
 
 content/milestones.draft.json
+
+# Disposable migration copies and local audit reports
+.tmp/

@@ -77,6 +77,7 @@
       "tct": "Tech to Connect",
       "cpai": "CPAI",
       "membership": "會員計劃",
+      "members": "會員名錄",
       "showcase": "會員與方案展示",
       "news": "最新消息",
       "aiOps": "人工智能營運",
@@ -100,7 +101,7 @@
     },
     "explore": "探索",
     "viewOverview": "查看總覽",
-    "search": "搜尋 WiseTech",
+    "search": "搜尋方案",
     "openMenu": "開啟導覽選單",
     "closeMenu": "關閉導覽選單",
     "menuTitle": "網站導覽",
@@ -333,6 +334,13 @@
         "body": "活動目前額滿，你的名額尚未確認。如要取消候補，請使用此連結：{cancelUrl}",
         "cta": "查看活動"
       },
+      "event_rsvp_cancelled": {
+        "subject": "活動已取消：{eventTitle}",
+        "preview": "你報名的 WTIA 活動已取消。",
+        "heading": "活動已取消",
+        "body": "WTIA 已取消 {eventTitle}。你的報名或候補名額已不再有效。請查看活動頁面了解詳情；如需協助，請聯絡 WTIA。",
+        "cta": "查看活動詳情"
+      },
       "event_reminder_24h": {
         "subject": "明天：{eventTitle}",
         "preview": "你的 WTIA 活動明天舉行。",
@@ -366,6 +374,20 @@
         "heading": "{attendeeName}，這是你的門票",
         "body": "請於活動當日在入口出示此門票。活動：{eventTitle}，日期：{eventDate}，地點：{venue}。每張門票只限一人入場，請勿轉發。",
         "cta": "開啟門票"
+      },
+      "batch_membership_renewal": {
+        "subject": "查閱你的 WTIA 會籍續期",
+        "preview": "登入查閱會籍及帳單選項。",
+        "heading": "會籍續期提醒",
+        "body": "{recipientName}，你好。{membershipScope} 的{planName}會籍續期日期為 {renewalDate}。請登入查閱此會籍及帳單選項。",
+        "cta": "查閱會籍"
+      },
+      "batch_profile_update": {
+        "subject": "請查閱你的 WTIA 會員資料",
+        "preview": "保持會員資料準確。",
+        "heading": "更新會員資料",
+        "body": "{recipientName}，你好。請登入查閱會員資料，並更新已變更的內容。",
+        "cta": "查閱我的資料"
       }
     }
   },
@@ -483,6 +505,7 @@
         "label": "會員名錄",
         "title": "認識正在塑造未來的人。",
         "copyEmpty": "名錄已準備承載獲批公開的專頁，並設有可控可見度及需獲同意的引薦流程；目前尚未顯示現行會員紀錄。",
+        "copyUnavailable": "會員專頁暫時無法顯示。",
         "copyAvailable": "已發布的會員方案現已上線，設有可控可見度及需獲同意的引薦流程。",
         "action": "探索會員"
       },
@@ -490,6 +513,7 @@
         "label": "AI 解決方案市場",
         "title": "尋找可在真實環境落地的 AI。",
         "copyEmpty": "規劃中的方案市場將比較成熟度、部署方式、安全、市場覆蓋及經審閱證據；目前尚未顯示現行方案紀錄。",
+        "copyUnavailable": "方案展示暫時無法顯示。",
         "copyAvailable": "已發布方案現已上線，可按用途、部署方式及已審閱證據比較。",
         "action": "探索解決方案"
       }
@@ -621,9 +645,10 @@
       "title": "按你的目標，選擇合適參與關係。",
       "intro": "會員身份支援持續參與；夥伴合作則由清晰受眾、項目及預期成果開始。",
       "membership": {
+        "catalogPricesLabel": "現行網上計劃會費",
         "label": "會員計劃",
         "title": "建立持續參與生態系統的路徑。",
-        "copy": "專業人士、初創、中小企、企業及策略夥伴可選擇相應路徑；現行費用及最終權益由會員團隊提供。",
+        "copy": "請在會籍頁比較現時可用的計劃及會費。如需確認資格或公布目錄以外的安排，請聯絡 WTIA。",
         "points": ["相關活動及知識", "專頁及可見度選擇", "實用的首 90 天旅程"],
         "primaryAction": "比較會員計劃",
         "secondaryAction": "準備會員查詢"
@@ -749,21 +774,47 @@
         "description": "適合支持 WTIA 使命的策略夥伴。"
       }
     },
+    "dimensionsTitle": "會籍內容",
     "faqTitle": "會員常見問題",
     "faq": {
       "0": {
-        "question": "可以網上入會嗎？",
-        "answer": "可以。社群、初創及企業會籍均可於網上申請及付款；贊助人會籍由聯絡查詢開始。"
+        "question": "誰可以申請？",
+        "answer": "社群會籍面向個人；初創及企業會籍由機構申請。贊助會籍由 WTIA 職員跟進。WTIA 會在審核時確認資格。"
       },
       "1": {
-        "question": "在哪裡查看現行會費及付款選項？",
-        "answer": "目前可用的會費及付款週期會顯示於會員級別卡片。"
+        "question": "在哪裡查看現行會費？",
+        "answer": "可用的會費及帳單週期來自現行會籍目錄，見上方計劃卡片。付款前請以付款服務顯示的最終金額為準。"
       },
       "2": {
-        "question": "如何申請贊助人會籍？",
-        "answer": "先提交聯絡要求，再由 WTIA 職員人手審批。"
+        "question": "付費計劃會自動續費嗎？",
+        "answer": "網上付費流程使用 Stripe 訂閱結帳。付款前請向 WTIA 確認適用於你會籍的續費及取消條款。"
+      },
+      "3": {
+        "question": "如何付款或取消？",
+        "answer": "選擇可用的網上計劃後，可前往安全結帳頁。如需取消或其他安排，請聯絡 WTIA；本頁不會更改現有訂閱。"
+      },
+      "4": {
+        "question": "公司會籍包含多少席位？",
+        "answer": "現行網站目錄設定為初創五席、企業二十五席。公司負責人或管理員可在專區管理邀請；最終席位以協議為準。"
+      },
+      "5": {
+        "question": "審批需時多久？",
+        "answer": "申請狀態可在會員專區查看。WTIA 未在本頁公布固定審批時限；如時間緊迫，請聯絡會員團隊。"
+      },
+      "6": {
+        "question": "可以退款嗎？",
+        "answer": "已公布的退款政策適用於活動門票。付款前請向 WTIA 確認會籍退款及取消條款；本頁不承諾會籍退款權益。"
+      },
+      "7": {
+        "question": "可以取得發票嗎？",
+        "answer": "會員專區顯示會籍及付款狀態。請向 WTIA 確認適用於你的發票或收據安排。"
+      },
+      "8": {
+        "question": "個人資料與公司會籍有何關係？",
+        "answer": "你的個人資料與公司會籍分開保留。公司負責人或管理員可邀請席位；你的申請及歷史仍連結你的個人資料。"
       }
     },
+    "faqLinks": {"refund": "查閱活動門票退款政策", "contact": "向 WTIA 查詢會籍條款"},
     "priceLabels": {
       "free": "免費",
       "review": "聯絡我們"
@@ -781,14 +832,14 @@
     "sme": {
       "label": "適合中小企",
       "title": "未確定哪個級別適合你？",
-      "copy": "中小企可先由社群會籍開始，隨參與計劃增加而升級。WTIA 職員可協助你選擇合適級別。",
+      "copy": "比較已公布的計劃，並向 WTIA 查詢哪種會籍適合你的機構及參與方式。",
       "action": "查詢 WTIA"
     },
     "pricing": {
       "readyLabel": "現行收費",
-      "readyCopy": "以上初創及企業會籍的收費，均為會員目錄中現行已確認的價格。",
+      "readyCopy": "上方會費根據現行網站目錄及已設定的結帳價格編號顯示。請在安全結帳頁確認總額及訂閱條款。",
       "fallbackLabel": "收費",
-      "fallbackCopy": "初創及企業會籍收費仍在敲定中。申請前請向會員團隊確認現行收費。"
+      "fallbackCopy": "本頁有部分會費暫時無法顯示。申請前請向會員團隊確認現行價格。"
     },
     "dimensions": {
       "network": {"title": "網絡", "copy": "遍及生態系統的社群及聯繫網絡。"},
@@ -847,6 +898,8 @@
     "rateLimited": "此連線嘗試次數過多，請稍後再試。"
   },
   "Join": {
+    "resume": {"title": "續辦會員申請", "description": "選擇已儲存的申請，或開始另一份申請。每份申請的付款及審批記錄都會保留。", "lastSaved": "上次儲存：{date}", "continue": "繼續申請", "start": "開始申請", "new": "開始新申請", "account": "開啟會員專區", "statusUnavailable": "暫時無法讀取申請狀態，請稍後再試。", "steps": {"profile": "個人資料", "company": "公司資料", "checkout": "等待付款", "review": "審批中", "complete": "已完成"}},
+    "checkoutSummary": {"processing": "系統正等待付款確認。當會籍狀態更新時，此頁會自動顯示結果。", "title": "會員付款", "description": "前往安全付款前，請先核對會籍資料。從 Stripe 返回後，你可在此決定何時繼續。", "plan": "計劃", "fee": "年費", "feeAtProvider": "確實金額將於安全付款頁確認", "status": "狀態", "pending": "待付款", "continuePayment": "繼續安全付款", "later": "稍後完成", "changeDetails": "更改公司資料", "sameAttempt": "系統會續用現有付款嘗試。更改公司資料不會更改計劃或費用。", "stillProcessing": "付款仍在確認中。你可再次查核，或聯絡 WTIA 協助確認。", "openPortal": "前往會員專區", "reviewNext": "查看申請進度", "checkAgain": "再次查核狀態", "contactSupport": "聯絡 WTIA"},
     "backToMembership": "返回會員計劃",
     "title": "加入 WTIA",
     "metaTitle": "會籍申請｜WiseTech Hong Kong",
@@ -913,9 +966,10 @@
       "whatsappNumber": "請輸入包含國家代碼的有效 WhatsApp 號碼"
     },
     "status": {
+      "failed": {"title": "付款狀態需查核", "description": "現時未能確認會籍已啟用。請查核付款狀態或聯絡 WTIA。"},
       "complete": {
         "title": "歡迎加入 WTIA",
-        "description": "你的社群會籍已啟用。立即前往會員專區完善個人檔案並探索會員權益。"
+        "description": "你的會籍已啟用。立即前往會員專區完善個人檔案並探索會員權益。"
       },
       "checkout": {
         "title": "申請已儲存",
@@ -933,6 +987,13 @@
     }
   },
   "MemberLogin": {
+    "home": "主頁",
+    "join": "加入 WTIA",
+    "support": "聯絡支援",
+    "navigation": "常用連結",
+    "help": "請輸入電郵地址，以接收安全登入連結。",
+    "resend": "重新傳送登入連結",
+    "deliveryHelp": "如未收到郵件，請查看垃圾郵件匣、重新要求連結，或聯絡支援。",
     "formLabel": "會員登入",
     "emailLabel": "電郵地址",
     "submit": "傳送安全登入連結",
@@ -1270,6 +1331,8 @@
     "ownerCta": "管理你的展示頁",
     "resultsTitle": "探索會員方案",
     "resultsDescription": "使用篩選條件，找出切合你需要的方案。",
+    "noPublishedTitle": "尚未有公開方案",
+    "noPublishedDescription": "尚未有已發佈的方案。",
     "emptyTitle": "沒有符合的已發布展示頁",
     "emptyDescription": "請嘗試更改篩選條件或搜尋字詞。",
     "unavailableTitle": "展示名錄暫時無法顯示",
@@ -1396,6 +1459,8 @@
       "patron": "贊助人"
     },
     "resultsTitle": "{count} 個會員",
+    "noPublishedTitle": "尚未有公開會員專頁",
+    "noPublishedDescription": "尚未有已發佈的會員專頁。",
     "emptyTitle": "暫時沒有相符的會員專頁",
     "emptyDescription": "機構發布專頁後會在此顯示。請嘗試更廣泛的搜尋。",
     "unavailableTitle": "會員頁面暫時無法顯示",
@@ -1477,8 +1542,14 @@
     "emptyDescription": "確認日期及詳情後，WTIA 活動會在此顯示。",
     "statusLabel": "活動狀態",
     "status": {
-      "open": "進行中",
+      "open": "報名資訊",
       "past": "已結束"
+    },
+    "lifecycle": {
+      "upcoming": "即將舉行",
+      "ongoing": "進行中",
+      "ended": "已結束",
+      "cancelled": "已取消"
     },
     "cancelled": {
       "heading": "此活動已取消",
@@ -1567,6 +1638,9 @@
       }
     },
     "detail": {
+      "format": "形式",
+      "onlineUrl": "網上參與",
+      "formats": {"in_person": "實體", "online": "網上", "hybrid": "混合"},
       "date": "日期及時間",
       "venue": "地點",
       "capacity": "名額",
@@ -1600,6 +1674,11 @@
       "closed": "本活動已截止報名。",
       "external": "本活動於主辦機構網站接受報名。",
       "unavailable": "目前無法報名。",
+      "requiredField": "此欄必填。",
+      "invalidField": "請輸入有效資料。",
+      "invalidEmail": "請輸入有效電郵地址。",
+      "invalidWhatsapp": "請輸入有效 WhatsApp 號碼。",
+      "errorReference": "錯誤編號：",
       "cancelled": "你的報名已取消。",
       "cancelInvalid": "此取消連結已失效。",
       "cancelUnavailable": "目前無法取消你的報名，你的名額未有更改。請重試。",
@@ -1638,9 +1717,22 @@
     "refundPolicy": "退款政策",
     "submit": "前往付款",
     "submitting": "正在前往付款……",
+    "fillBuyer": "我也是出席者",
+    "removeSeat": "移除此出席者",
+    "total": "總額",
+    "paymentNature": "門票為一次性付款；付款確認後才確定座位。",
+    "eventDate": "活動日期及時間",
+    "fieldErrors": {"required": "此欄必填。", "invalid": "請輸入有效資料。", "extra": "請移除額外的出席者資料。"},
+    "recoveryLoading": "正在檢查現有付款程序…",
+    "recoveryTitle": "待完成付款",
+    "recoverySummary": "預留座位及金額",
+    "recoveryResume": "繼續現有付款",
+    "recoveryChecking": "正在檢查付款…",
+    "recoveryUnavailable": "暫時無法核對你之前的付款程序。請重新整理頁面後再試。",
     "errors": {
       "INVALID": "請檢查購買者及出席者資料，然後再試。",
       "SOLD_OUT": "剩餘座位不足以完成此訂單。",
+      "NOT_ELIGIBLE": "購買此活動門票需要現時有效的會籍。",
       "EVENT_CLOSED": "本活動已截止售票。",
       "UNAVAILABLE": "暫時未能進行購票，請稍後再試。",
       "RETRY_CHANGED": "購票資料已更改。請再次提交以開始新的付款程序。",
@@ -2392,6 +2484,7 @@
       "openTasks": "待處理員工任務"
     },
     "navigation": {
+      "groups": {"workspace": "工作台", "membersOrganizations": "會員與機構", "events": "活動", "communicationsFollowUp": "通訊與跟進", "contentSettings": "內容與設定"},
       "label": "職員管理導覽",
       "dashboard": "控制台",
       "inbox": "訊息中心",
@@ -2568,7 +2661,11 @@
         "missing_variable": "訊息內容未填妥",
         "marketing_suppressed": "發送前同意狀態已改變",
         "template_not_approved": "範本未獲批核發送",
-        "unknown_recipient": "收件人紀錄已不存在"
+        "unknown_recipient": "收件人紀錄已不存在",
+        "COMMUNICATION_CHANGED": "會員或會籍資料已變更",
+        "COMMUNICATION_DISABLED": "批量通訊已暫停",
+        "SHARED_CONTACT_POINT": "多位會員共用聯絡資料",
+        "RENEWAL_DATE_MISSING": "缺少續期日期"
       },
       "status": {
         "draft": "草稿",
@@ -2756,7 +2853,23 @@
         "rejected": "已拒絕"
       }
     },
+    "applicationQueue": {"title":"入會申請及付款","description":"每列代表一份申請。相關會籍及最新付款嘗試分開顯示，方便跟進未完成申請及核對付款。","caption":"入會申請工作清單","applicant":"申請人","application":"申請","step":"已儲存步驟","membership":"相關會籍","billing":"最新付款嘗試","updated":"更新時間（香港時間）","none":"未有記錄","empty":"此清單沒有符合條件的申請。","back":"返回會員","views":"申請工作清單","viewsLabels":{"draft":"待完成入會","pending_payment":"待付款","pending_review":"待審批"},"search":"姓名、電郵、機構或申請 ID","invalid":"清單篩選或分頁資料無效。請清除篩選後重試。","unavailable":"暫時無法載入申請清單，請稍後重試。","loading":"正在載入申請…","draft":"草稿","steps":{"profile":"個人資料","company":"機構資料","checkout":"付款","complete":"完成","review":"審批"},"billingStates":{"active":"進行中的付款嘗試","completed":"已完成付款嘗試","abandoned":"已放棄付款嘗試","expired":"已到期付款嘗試"}},
+    "batchGrants": {"title":"贈送會籍","formTitle":"準備有限期贈送會籍","description":"選擇明確對象、日期及理由。提交前請檢查每個對象及衝突；此操作不會記錄付款。","back":"返回會員","plan":"會籍計劃","start":"生效時間（香港時間）","expiry":"到期時間（香港時間）","reason":"贈送理由","preview":"預覽贈送會籍","kind":"對象類型","profile":"個人會員檔案","company":"機構","ids":"對象 ID","help":"每行輸入一個可信會員檔案或機構 ID，最多 5000 個。預覽會顯示名稱、計劃名額及衝突。日期適用於所有對象。","disabled":"此環境尚未啟用批量贈送會籍。","success":"已準備贈送會籍。","invalid":"請檢查對象 ID、計劃、日期及理由。","duplicate":"對象已有尚未結束的會籍。","error":"無法準備贈送會籍。請檢查權限後重試。"},
+    "imports": {"title": "匯入會員資料", "disabled": "此環境尚未啟用會員匯入。", "back": "返回會員", "steps": {"upload": "上載", "map": "欄位配對", "validate": "驗證", "preview": "檢視差異", "submit": "準備批次"}, "upload": "上載檔案", "chooseFile": "選擇 CSV 或 XLSX 檔案", "next": "下一頁", "error": "無法繼續匯入。請檢查檔案、欄位配對及權限後重試。", "fields": {"profileId": "可信會員 ID", "displayName": "姓名", "email": "電郵", "locale": "偏好語言", "planCode": "會籍計劃建議", "renewalAt": "續會日期建議", "tags": "營運標籤", "ownerProfileId": "負責職員 ID"}, "skip": "不配對", "validate": "驗證資料列", "preview": "檢視逐列差異", "confirm": "確認所選資料列", "prepare": "準備批次預覽", "selectAll": "選取所有合資格資料列", "selected": "已選取 {count} 列", "before": "目前資料", "incoming": "匯入資料", "status": "狀態", "reason": "原因", "row": "資料列", "total": "總數", "create": "新 CRM 聯絡人", "update": "會員資料修正", "conflict": "待人工處理衝突", "invalid": "無效", "duplicate": "重複", "unchanged": "未變更", "limits": "CSV 或單一工作表 XLSX，最多 10 MiB 及 5000 列。新聯絡人不是已啟用會員；會籍建議不會自動授予權益。"},
+"before": "現有",
+"incoming": "匯入",
+    "batches": {
+      "downloadCsv": "下載 CSV","title": "批次預覽及進度", "description": "提交前逐項核對。變更和失敗結果會保留在此頁。", "back": "返回會員", "states": {"preparing": "正在建立快照", "ready": "待審核", "queued": "已排隊", "running": "處理中", "completed": "已完成", "completed_with_errors": "完成但有錯誤", "cancelled": "已取消", "expired": "預覽已過期", "pending": "待處理", "succeeded": "成功", "skipped": "已略過", "failed": "失敗"}, "counters": {"pending": "待處理", "running": "處理中", "succeeded": "成功", "skipped": "已略過", "failed": "失敗"}, "total": "總數", "eligible": "符合資格", "blocked": "受阻", "operation": "狀態", "target": "目標", "before": "更改前", "after": "更改後", "reason": "原因或錯誤", "attempts": "嘗試次數", "result": "結果", "commit": "提交批次", "retry": "重試失敗項目", "cancel": "取消剩餘項目", "expires": "預覽到期時間", "empty": "此快照沒有項目。",
+      "reviewCampaigns": "審核通訊草稿"},
     "members": {
+      "batch": {"field": "更改欄位", "tags": "營運標籤", "tagsHelp": "以逗號分隔，最多 10 個標籤，每個最多 30 字。將取代現有標籤；留空代表清除。", "owner": "負責職員", "unassigned": "未分配","preview": "預覽資料修正", "reason": "更改原因", "language": "偏好語言", "english": "英文", "chinese": "繁體中文", "error": "無法準備批次。請檢查選取項目後重試。", "exportPreview": "預覽 CSV 匯出", "exportFields": "匯出欄位", "exportError": "無法準備匯出。"},
+      "importLink": "匯入會員",
+      "selection": {"page": "選取本頁", "all": "選取全部 {count} 個相符會員", "clear": "清除選取", "selected": "已選取 {count} 個", "row": "選取 {name}"},
+      "savedViews": {"title": "已儲存檢視", "name": "檢視名稱", "save": "儲存檢視", "saved": "檢視已儲存", "invalid": "請檢查名稱及篩選條件。", "error": "無法儲存檢視，請重試。", "shared": "與職員共用", "empty": "暫無已儲存檢視。"},
+      "filters": {"status": "會籍狀態", "plan": "會籍計劃", "renewalFrom": "續會日期由（香港時間）", "renewalTo": "續會日期至（香港時間）", "companyId": "機構 ID", "locale": "偏好語言", "completeness": "會員資料完整度", "sort": "排序", "apply": "套用篩選", "clear": "清除篩選", "any": "全部", "complete": "資料齊全", "incomplete": "欠缺聯絡資料", "nameAsc": "姓名 A–Z", "nameDesc": "姓名 Z–A", "renewalAsc": "最近續會", "english": "英文", "chinese": "繁體中文", "viewsLabel": "預設檢視", "views": {"active": "有效", "due30": "30 日內到期", "due60": "60 日內到期", "due90": "90 日內到期", "pastDue": "欠費", "expired": "已屆滿", "missingData": "欠缺資料"}},
+      "view": "查看",
+      "planCodes": {"community": "社群", "startup": "初創", "corporate": "企業", "patron": "贊助人"},
+      "statusCodes": {"active": "有效", "past_due": "逾期未付", "cancel_at_period_end": "期末終止", "pending_review": "待審批", "pending_payment": "待付款", "cancelled": "已取消", "expired": "已過期"},
       "title": "會員",
       "description": "搜尋會員檔案、公司、會籍及參與分數。",
       "search": "搜尋會員",
@@ -2886,7 +2999,19 @@
       }
     },
     "eventsMgmt": {
+      "format": "活動形式",
+      "formats": {"in_person": "實體", "online": "網上", "hybrid": "混合"},
+      "onlineUrl": "網上會議網址",
+      "externalRegistrationUrl": "外部報名網址",
+      "tags": "標籤（以逗號分隔）",
+      "visibility": "可見範圍",
+      "visibilities": {"public": "公開", "members_only": "僅限會員", "invite_only": "僅限受邀者"},
       "eyebrow": "活動營運",
+      "tabs": {"label": "活動分頁", "content": "內容", "attendees": "出席者", "orders": "訂單及退款", "notifications": "通知"},
+      "searchOrders": "搜尋訂單",
+      "searchSubmit": "搜尋",
+      "nextPage": "下一頁",
+      "firstPage": "第一頁",
       "title": "活動管理",
       "description": "建立、發佈及管理活動出席。",
       "existing": "活動",
@@ -2932,11 +3057,17 @@
       "checkInSuccess": "已為參加者簽到。",
       "checkInError": "未能為參加者簽到，請再試一次。",
       "checkInEventCancelled": "此活動已取消，無法為任何人簽到。",
+      "guestAlreadyCheckedIn": "這位訪客已簽到。",
+      "guestIneligible": "這位訪客無法簽到。請檢查報名或活動狀態。",
+      "attendeeSearch": "搜尋姓名、電郵或門票編號",
+      "attendeeNoMatches": "沒有符合搜尋條件的參加者。",
       "resendPass": "重發門票",
       "resending": "正在傳送門票……",
       "resendSuccess": "門票電郵已發送。",
       "resendError": "未能發送門票電郵，請再試一次。",
       "exportCsv": "下載出席名單（CSV）",
+      "exportPreview": "預覽出席者 CSV 匯出",
+      "exportError": "未能準備匯出，請重試。",
       "kind": "類別",
       "kinds": {
         "member": "會員",
@@ -2974,8 +3105,11 @@
         "keep": "保留活動",
         "submitting": "取消中…",
         "unavailable": "暫時無法載入退款金額。取消活動後仍會為所有已付款訂單退款。",
-        "cancelledNotice": "此活動已取消，所有已付款訂單正在退款。",
-        "confirm": "將為 {orders} 張已付款訂單退款 {amount}（{attendees} 位已付款參加者）。{registrants} 位報名者將不會收到電郵通知。此操作無法復原。",
+        "cancelledNotice": "此活動已取消。已付款訂單進入退款流程。報名取消通知已記錄，須由通知工作程序處理；服務商接受不代表已送達。",
+        "confirm": "將為 {orders} 張已付款訂單退款 {amount}（{attendees} 位已付款參加者）。{registrants} 個報名受影響。取消通知會先記錄；啟用通知工作程序前不會發送。此操作無法復原。",
+        "noticePreview": "將記錄 {candidates} 個報名取消通知；已知有 {blocked} 個地址不能發送。",
+        "noticeUnavailable": "暫時無法載入報名通知預覽。請稍後再取消活動。",
+        "noticeSummary": "報名取消通知：{pending} 個待處理、{queued} 個排隊中、{accepted} 個服務商已接受、{blocked} 個被阻止、{failed} 個服務商拒絕、{uncertain} 個狀態未能確定。服務商接受不代表已送達。",
         "outcomes": {
           "success": "活動已取消，所有已付款訂單將獲退款。",
           "alreadyCancelled": "此活動已取消，因此沒有任何變更。",
@@ -3338,6 +3472,26 @@
       "next": "下一頁"
     },
     "member360": {
+      "allMemberships": "所有關聯會籍",
+      "membershipId": "會籍識別碼",
+      "personalMembership": "個人會籍",
+      "purchases": "門票購買紀錄",
+      "purchaseBuyer": "購買者",
+      "purchaseAttendees": "出席者",
+      "ticketResendPreview": "預覽重寄入場證",
+      "ticketResendError": "無法準備重寄入場證。",
+      "purchaseAmount": "金額",
+      "refundReason": "退款原因",
+      "refundedAt": "退款時間",
+      "purchaseStatuses": {"pending": "待處理", "paid": "已付款", "expired": "已過期", "failed": "失敗", "refunded": "已退款", "refund_failed": "退款失敗"},
+      "refundReasons": {"oversold": "超額售票", "staff": "職員決定", "cancelled": "活動取消"},
+      "backToMembers": "返回會員列表",
+      "historyNav": "會員紀錄",
+      "overview": "概覽",
+      "searchHistory": "搜尋此紀錄",
+      "searchSubmit": "搜尋",
+      "nextPage": "下一頁",
+      "firstPage": "第一頁",
       "profileHeading": "聯絡資料",
       "profileDescription": "更正會員的聯絡資料。會籍、付款、權限及同意設定不可在此修改。",
       "profileDisplayName": "顯示名稱",
@@ -3408,6 +3562,46 @@
       "invalid": "請先選擇會籍級別。",
       "error": "無法授予會籍。",
       "duplicate": "此會員已有會籍。請開啟現有會籍更改級別，而非另行授予。"
+    },
+    "membershipGrant": {
+      "title": "有限期個人會籍贈予",
+      "description": "須先獲協會批准政策。請填寫生效、到期時間及理由；日期採用香港時間。此操作不會建立 Stripe 付款。",
+      "plan": "會籍級別",
+      "start": "生效時間（香港時間）",
+      "expiry": "到期時間（香港時間）",
+      "reason": "批准理由",
+      "submit": "建立有限期贈予",
+      "success": "有限期贈予已建立。",
+      "invalid": "請輸入有效級別、日期範圍及理由。",
+      "duplicate": "此會員已有生效中的會籍。",
+      "error": "未能建立有限期贈予。"
+    },
+    "communications": {
+      "title": "會員提醒及邀請",
+      "back": "返回會員列表",
+      "disabled": "批量通訊功能尚未啟用。",
+      "segment": "已儲存分組",
+      "chooseSegment": "選擇已儲存分組",
+      "load": "載入會員",
+      "manageSegments": "管理分組",
+      "operation": "操作",
+      "renewal": "會籍續期提醒",
+      "invite": "更新資料邀請",
+      "channel": "渠道",
+      "email": "電郵",
+      "whatsapp": "WhatsApp",
+      "help": "每批續期提醒請為每位會員選擇一項會籍。預覽會檢查最新資格及通訊同意。執行批次只會建立通訊草稿，須另行審核後才發送。未有獲批語言範本的項目會被阻擋。",
+      "selectAll": "選取此頁",
+      "selectAllMatching": "選取所有符合條件的會員",
+      "selected": "已選取 {count} 項",
+      "previous": "上一頁",
+      "next": "下一頁",
+      "name": "會員",
+      "scope": "會籍",
+      "date": "續期日期",
+      "preview": "預覽通訊草稿",
+      "error": "未能準備通訊。請檢查所選分組後重試。",
+      "empty": "此分組沒有符合條件的會員。"
     }
   },
   "MarketingExtras": {

@@ -1,18 +1,23 @@
 "use client";
 
-import {useActionState} from "react";
+import {useActionState, useState} from "react";
 
 import type {CheckInActionMessages} from "@/lib/admin/event-actions";
 import {resendPassAction} from "@/lib/admin/event-actions";
 import type {EventActionState} from "@/lib/admin/event-action-core";
 import type {EventAttendee} from "@/lib/db/repos/events";
 
-type Labels = Readonly<{caption: string; kind: string; kinds: Readonly<{member: string; guest: string; ticket: string}>; name: string; email: string; organisation: string; status: string; checkedIn: string; checkIn: string; checkingIn: string; resendPass: string; resending: string; unavailable: string; statuses: Readonly<Record<string, string>>}>;
+type Labels = Readonly<{caption: string; search: string; noMatches: string; kind: string; kinds: Readonly<{member: string; guest: string; ticket: string}>; name: string; email: string; organisation: string; status: string; checkedIn: string; checkIn: string; checkingIn: string; resendPass: string; resending: string; unavailable: string; statuses: Readonly<Record<string, string>>}>;
 const initialState: EventActionState = {};
 
 function CheckInForm({action, profileId, labels, disabled}: Readonly<{action: (state: EventActionState, formData: FormData) => Promise<EventActionState>; profileId: string; labels: Labels; disabled: boolean}>) {
   const [state, formAction, pending] = useActionState(action, initialState);
   return <form action={formAction} className="space-y-1"><input name="profileId" type="hidden" value={profileId}/><button className="underline disabled:no-underline disabled:opacity-60" disabled={disabled || pending} type="submit">{pending ? labels.checkingIn : labels.checkIn}</button>{state.message ? <p aria-live="polite" className={state.status === "error" ? "text-xs text-destructive" : "text-xs text-muted-foreground"} role={state.status === "error" ? "alert" : "status"}>{state.message}</p> : null}</form>;
+}
+
+function GuestCheckInForm({action, registrationId, labels, disabled}: Readonly<{action: (state: EventActionState, formData: FormData) => Promise<EventActionState>; registrationId: string; labels: Labels; disabled: boolean}>) {
+  const [state, formAction, pending] = useActionState(action, initialState);
+  return <form action={formAction} className="space-y-1"><input name="registrationId" type="hidden" value={registrationId}/><button className="underline disabled:no-underline disabled:opacity-60" disabled={disabled || pending} type="submit">{pending ? labels.checkingIn : labels.checkIn}</button>{state.message ? <p aria-live="polite" className={state.status === "error" ? "text-xs text-destructive" : "text-xs text-muted-foreground"} role={state.status === "error" ? "alert" : "status"}>{state.message}</p> : null}</form>;
 }
 
 /**
@@ -42,14 +47,22 @@ function ResendPassForm({seatId, path, messages, labels}: Readonly<{seatId: stri
   return <form action={formAction} className="space-y-1"><input name="seatId" type="hidden" value={seatId}/><button className="text-sm underline disabled:no-underline disabled:opacity-60" disabled={pending} type="submit">{pending ? labels.resending : labels.resendPass}</button>{state.message ? <p aria-live="polite" className={state.status === "error" ? "text-xs text-destructive" : "text-xs text-muted-foreground"} role={state.status === "error" ? "alert" : "status"}>{state.message}</p> : null}</form>;
 }
 
-/**
- * Members and guests share one door list (programme B-4). Only members get the
- * member check-in button: the action is keyed by profile id, and a guest arrives
- * through Phase B's own form. A ticket seat (Phase D-4b) gets the seat-keyed
- * Check in fallback beside a Resend pass control: the scanner's page is the
- * normal path, but the fallback admits a paid seat whose pass cannot be produced.
- */
-export function AttendeeTable({attendees, labels, checkInAction, seatCheckInAction, resendPassPath, resendPassMessages, locale, checkInBlocked = false}: Readonly<{attendees: readonly EventAttendee[]; labels: Labels; checkInAction: (state: EventActionState, formData: FormData) => Promise<EventActionState>; seatCheckInAction: (state: EventActionState, formData: FormData) => Promise<EventActionState>; resendPassPath: string; resendPassMessages: CheckInActionMessages; locale: string; checkInBlocked?: boolean}>) {
+/** Member, guest and paid-seat IDs remain distinct on the door list. */
+export function AttendeeTable({attendees, labels, checkInAction, guestCheckInAction, seatCheckInAction, resendPassPath, resendPassMessages, locale, checkInBlocked = false, showSearch = true}: Readonly<{attendees: readonly EventAttendee[]; labels: Labels; checkInAction: (state: EventActionState, formData: FormData) => Promise<EventActionState>; guestCheckInAction?: (state: EventActionState, formData: FormData) => Promise<EventActionState>; seatCheckInAction: (state: EventActionState, formData: FormData) => Promise<EventActionState>; resendPassPath: string; resendPassMessages: CheckInActionMessages; locale: string; checkInBlocked?: boolean; showSearch?: boolean}>) {
+  const [search, setSearch] = useState("");
+  const query = search.trim().toLocaleLowerCase(locale);
+  const visible = query ? attendees.filter((attendee) => [attendee.displayName, attendee.email, attendee.organisation, attendee.seatId, attendee.orderId].some((value) => value?.toLocaleLowerCase(locale).includes(query))) : attendees;
   const formatter = new Intl.DateTimeFormat(locale, {dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Hong_Kong"});
-  return <div className="overflow-x-auto"><table className="w-full text-left"><caption className="sr-only">{labels.caption}</caption><thead><tr><th className="p-3">{labels.kind}</th><th className="p-3">{labels.name}</th><th className="p-3">{labels.email}</th><th className="p-3">{labels.organisation}</th><th className="p-3">{labels.status}</th><th className="p-3">{labels.checkedIn}</th><th className="p-3">{labels.checkIn}</th></tr></thead><tbody>{attendees.map((attendee) => <tr className="border-t" key={`${attendee.kind}:${attendee.profileId ?? attendee.guestId ?? attendee.seatId ?? attendee.email ?? attendee.displayName}`}><td className="p-3">{labels.kinds[attendee.kind]}</td><td className="p-3">{attendee.displayName}</td><td className="p-3">{attendee.email ?? labels.unavailable}</td><td className="p-3">{attendee.organisation ?? labels.unavailable}</td><td className="p-3">{labels.statuses[attendee.status] ?? labels.unavailable}</td><td className="p-3">{attendee.checkedInAt ? formatter.format(attendee.checkedInAt) : labels.unavailable}</td><td className="p-3">{attendee.kind === "member" && attendee.profileId ? <CheckInForm action={checkInAction} disabled={checkInBlocked || Boolean(attendee.checkedInAt)} labels={labels} profileId={attendee.profileId}/> : attendee.kind === "ticket" && attendee.seatId ? <div className="space-y-2"><SeatCheckInForm action={seatCheckInAction} disabled={checkInBlocked || Boolean(attendee.checkedInAt)} labels={labels} seatId={attendee.seatId}/><ResendPassForm labels={labels} messages={resendPassMessages} path={resendPassPath} seatId={attendee.seatId}/></div> : <span className="text-muted-foreground">{labels.unavailable}</span>}</td></tr>)}</tbody></table></div>;
+  return <div className="space-y-4">
+    {showSearch ? <div><label className="block text-sm font-medium" htmlFor="attendee-search">{labels.search}</label><input className="mt-2 min-h-11 w-full max-w-md rounded-md border border-input bg-background px-3" id="attendee-search" onChange={(event) => setSearch(event.target.value)} type="search" value={search}/></div> : null}
+    {visible.length === 0 && <p className="text-sm text-muted-foreground" role="status">{labels.noMatches}</p>}
+    <div className="overflow-x-auto"><table className="w-full text-left"><caption className="sr-only">{labels.caption}</caption><thead><tr><th className="p-3">{labels.kind}</th><th className="p-3">{labels.name}</th><th className="p-3">{labels.email}</th><th className="p-3">{labels.organisation}</th><th className="p-3">{labels.status}</th><th className="p-3">{labels.checkedIn}</th><th className="p-3">{labels.checkIn}</th></tr></thead><tbody>{visible.map((attendee) => <tr className="border-t" key={`${attendee.kind}:${attendee.profileId ?? attendee.guestId ?? attendee.seatId ?? attendee.email ?? attendee.displayName}`}>
+      <td className="p-3">{labels.kinds[attendee.kind]}</td><td className="p-3">{attendee.displayName}</td><td className="p-3">{attendee.email ?? labels.unavailable}</td><td className="p-3">{attendee.organisation ?? labels.unavailable}</td><td className="p-3">{labels.statuses[attendee.status] ?? labels.unavailable}</td><td className="p-3">{attendee.checkedInAt ? formatter.format(attendee.checkedInAt) : labels.unavailable}</td><td className="p-3">{
+        attendee.kind === "member" && attendee.profileId ? <CheckInForm action={checkInAction} disabled={checkInBlocked || attendee.status !== "registered" || Boolean(attendee.checkedInAt)} labels={labels} profileId={attendee.profileId}/>
+        : attendee.kind === "guest" && attendee.guestId && guestCheckInAction ? <GuestCheckInForm action={guestCheckInAction} disabled={checkInBlocked || attendee.status !== "registered" || Boolean(attendee.checkedInAt)} labels={labels} registrationId={attendee.guestId}/>
+        : attendee.kind === "ticket" && attendee.seatId ? <div className="space-y-2"><SeatCheckInForm action={seatCheckInAction} disabled={checkInBlocked || Boolean(attendee.checkedInAt)} labels={labels} seatId={attendee.seatId}/><ResendPassForm labels={labels} messages={resendPassMessages} path={resendPassPath} seatId={attendee.seatId}/></div>
+        : <span className="text-muted-foreground">{labels.unavailable}</span>
+      }</td>
+    </tr>)}</tbody></table></div>
+  </div>;
 }

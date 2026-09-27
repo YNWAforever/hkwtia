@@ -58,8 +58,8 @@ import {localizeNavigation} from "@/config/navigation";
 
 describe("public shell server surfaces", () => {
   it.each([
-    ["en", "Events & Programmes", "Join WiseTech", "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association", "Search WiseTech"],
-    ["zh-HK", "活動及計劃", "加入 WiseTech", "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台 · 中文法定名稱待正式批准", "搜尋 WiseTech"],
+    ["en", "Events & Programmes", "Join WiseTech", "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association", "Search solutions"],
+    ["zh-HK", "活動及計劃", "加入 WiseTech", "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台 · 中文法定名稱待正式批准", "搜尋方案"],
   ] as const)("renders complete %s header copy", async (locale, group, join, descriptor, search) => {
     const view = render(await SiteHeader({locale, hasAnnouncement: true}));
     expect(screen.getByText("WiseTech Hong Kong")).toBeInTheDocument();
@@ -157,7 +157,7 @@ describe("public shell server surfaces", () => {
 
   it("keeps the public shell owner order and exactly one named main", () => {
     const source = readFileSync(resolve(process.cwd(), "app/[locale]/(public)/layout.tsx"), "utf8");
-    const ordered = ["skip-link", "<AnnouncementBar", "<SiteHeader", "<main id=\"main-content\"", "<SiteFooter", "<ConciergeWidget"];
+    const ordered = ["skip-link", "<Suspense fallback={<SiteHeader", "<PublicHeader", "<main id=\"main-content\"", "<SiteFooter", "<ConciergeWidget"];
     const positions = ordered.map((token) => source.indexOf(token));
     expect(positions.every((position) => position >= 0)).toBe(true);
     expect(positions).toEqual([...positions].sort((a, b) => a - b));

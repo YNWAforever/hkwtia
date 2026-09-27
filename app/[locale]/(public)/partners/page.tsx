@@ -63,6 +63,7 @@ export default async function PartnersPage({params}: Props) {
   return (
     <>
       <PageHero
+        className="defer-following-sections"
         eyebrow={t('hero.eyebrow')}
         title={t('hero.title')}
         lead={t('hero.lead')}

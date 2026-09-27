@@ -14,6 +14,8 @@ const applicationIdSchema = z.string().trim().min(1).max(128).nullable().optiona
 export const joinInputSchema = z.object({
   plan: planCodeSchema,
   applicationId: applicationIdSchema,
+  companyId: z.string().uuid().nullable().optional().default(null),
+  newApplication: z.boolean().optional().default(false),
 });
 
 export type JoinInput = z.infer<typeof joinInputSchema> & {plan: PlanCode};

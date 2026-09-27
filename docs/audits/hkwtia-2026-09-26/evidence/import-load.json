@@ -1,0 +1,20 @@
+{
+  "revision": "3964b567820c298c8b8c93b610fbe5d6b0b85b75",
+  "generatedAt": "2026-09-27T09:21:45.874Z",
+  "node": "v24.18.0",
+  "platform": "win32",
+  "database": "disposable pgvector/pgvector:pg16",
+  "syntheticOnly": true,
+  "rows": 5000,
+  "completed": true,
+  "stageMs": 5357.796199999997,
+  "submitMs": 33.58750000000873,
+  "executionMs": 251166.8777,
+  "counters": {
+    "pending": 0,
+    "running": 0,
+    "succeeded": 5000,
+    "skipped": 0,
+    "failed": 0
+  }
+}

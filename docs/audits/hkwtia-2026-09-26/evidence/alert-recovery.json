@@ -1,0 +1,73 @@
+{
+  "dryRun": true,
+  "signals": [
+    {
+      "key": "webhook-lag",
+      "value": 0,
+      "threshold": 300000,
+      "state": "ok"
+    },
+    {
+      "key": "notification-age",
+      "value": 0,
+      "threshold": 300000,
+      "state": "ok"
+    },
+    {
+      "key": "batch-failures",
+      "value": 0,
+      "threshold": 1,
+      "state": "ok"
+    },
+    {
+      "key": "job:ticket-emails",
+      "value": 1,
+      "threshold": 3,
+      "state": "ok"
+    }
+  ],
+  "observed": [
+    {
+      "key": "webhook-lag",
+      "value": 0,
+      "threshold": 300000,
+      "state": "ok"
+    },
+    {
+      "key": "notification-age",
+      "value": 0,
+      "threshold": 300000,
+      "state": "ok"
+    },
+    {
+      "key": "batch-failures",
+      "value": 0,
+      "threshold": 1,
+      "state": "ok"
+    },
+    {
+      "key": "job:ticket-emails",
+      "value": 1,
+      "threshold": 3,
+      "state": "ok"
+    }
+  ],
+  "transitions": [
+    {
+      "key": "webhook-lag",
+      "event": "recovered"
+    },
+    {
+      "key": "notification-age",
+      "event": "recovered"
+    },
+    {
+      "key": "batch-failures",
+      "event": "recovered"
+    },
+    {
+      "key": "job:ticket-emails",
+      "event": "recovered"
+    }
+  ]
+}

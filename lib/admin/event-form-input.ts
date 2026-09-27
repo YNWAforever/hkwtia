@@ -56,6 +56,9 @@ export function eventFormInput(formData: FormData) {
   const capacity = String(formData.get("capacity") ?? "").trim();
   const optional = (name: string) => String(formData.get(name) ?? "").trim() || null;
   const registrationMode = String(formData.get("registrationMode") ?? "rsvp");
+  const format = String(formData.get("format") ?? "in_person");
+  const visibility = String(formData.get("visibility") ?? (formData.get("memberOnly") === "on" ? "members_only" : "public"));
+  const tags = String(formData.get("tags") ?? "").split(/[,\n]/).map((tag) => tag.trim()).filter(Boolean);
   return {
     slug: formData.get("slug"),
     titleEn: formData.get("titleEn"),
@@ -64,12 +67,17 @@ export function eventFormInput(formData: FormData) {
     descriptionZh: optional("descriptionZh"),
     startsAt: formDate(formData, "startsAt"),
     endsAt: formDate(formData, "endsAt", true),
-    venue: optional("venue"),
+    venue: format === "online" ? null : optional("venue"),
     capacity: capacity ? Number(capacity) : null,
-    memberOnly: formData.get("memberOnly") === "on",
+    format,
+    onlineUrl: format === "online" || format === "hybrid" ? optional("onlineUrl") : null,
+    tags,
+    visibility,
+    memberOnly: visibility !== "public",
     published: formData.get("published") === "on",
     heroMediaId: optional("heroMediaId"),
     registrationMode,
+    externalRegistrationUrl: registrationMode === "external" ? optional("externalRegistrationUrl") : null,
     ticketPriceHkdCents: parseTicketPrice({
       mode: registrationMode,
       price: String(formData.get("ticketPriceHkdCents") ?? ""),

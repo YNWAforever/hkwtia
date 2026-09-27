@@ -10,6 +10,7 @@ import {requireDeliveryActor, type DeliveryActor} from "@/lib/db/repos/deliverie
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {requireWoztellWebhook} from "@/lib/db/repos/woztell-inbound-events";
 import {companyMembers, contacts, memberships, messageSuppressions, profiles} from "@/lib/db/server-schema";
+import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
 import type {Actor} from "@/lib/membership/lifecycle";
 
 /**
@@ -298,11 +299,11 @@ export function recipientFactsProjection(targets: SQL): SQL {
     LEFT JOIN LATERAL (
       SELECT ${memberships.status} AS status, ${memberships.planCode} AS plan_code, ${memberships.billingPeriodEnd} AS renewal_at
       FROM ${memberships}
-      WHERE ${memberships.ownerUserId} = target.profile_id
+      WHERE (${memberships.ownerUserId} = target.profile_id
         OR ${memberships.companyId} IN (
           SELECT ${companyMembers.companyId} FROM ${companyMembers}
           WHERE ${companyMembers.userId} = target.profile_id AND ${companyMembers.revokedAt} IS NULL
-        )
+        )) AND ${membershipGrantValiditySql()}
       ORDER BY ${memberships.createdAt} DESC
       LIMIT 1
     ) AS membership ON true
@@ -315,11 +316,8 @@ export function recipientFactsProjection(targets: SQL): SQL {
  * One anchor per side, chosen by recipient kind, handed to the shared
  * projection above.
  */
-async function loadRecipientFacts(
-  database: AutomationDatabase,
-  recipient: EligibilityRecipient,
-): Promise<RecipientFacts | null> {
-  const anchor = recipient.kind === "member"
+function recipientFactsAnchor(recipient: EligibilityRecipient | Readonly<{kind: "members"; profileIds: readonly string[]}>): SQL {
+  return recipient.kind !== "contact"
     ? sql`
         SELECT
           'member'::text AS kind,
@@ -359,7 +357,7 @@ async function loadRecipientFacts(
           ${contacts.whatsappOptedOutAt} AS whatsapp_opted_out_at
         FROM ${profiles}
         LEFT JOIN ${contacts} ON ${contacts.profileId} = ${profiles.id}
-        WHERE ${profiles.id} = ${recipient.profileId}
+        WHERE ${recipient.kind === "members" ? sql`${profiles.id} = ANY(ARRAY[${sql.join(recipient.profileIds.map(id => sql`${id}`), sql`, `)}]::text[]) AND ${profiles.role} = 'member'` : sql`${profiles.id} = ${recipient.profileId}`}
       `
     : sql`
         SELECT
@@ -377,7 +375,13 @@ async function loadRecipientFacts(
         WHERE ${contacts.id} = ${recipient.contactId}
       `;
 
-  const row = rowsFrom(await database.execute(recipientFactsProjection(anchor)))[0];
+}
+
+async function loadRecipientFacts(
+  database: AutomationDatabase,
+  recipient: EligibilityRecipient,
+): Promise<RecipientFacts | null> {
+  const row = rowsFrom(await database.execute(recipientFactsProjection(recipientFactsAnchor(recipient))))[0];
   return row ? parseRecipientFactsRow(row) : null;
 }
 
@@ -546,6 +550,13 @@ export function createMessageEligibilityRepository(
      * Authorize, parse, then open the database, the order every repository in
      * this tree keeps: a refusal must never be observable as a query.
      */
+    async factsForMembers(actor: DeliveryActor, input: unknown): Promise<readonly RecipientFacts[]> {
+      requireDeliveryActor(actor);
+      const profileIds = z.array(z.string().min(1).max(255)).min(1).max(5000).parse(input);
+      const database = await loadDatabase();
+      return rowsFrom(await database.execute(recipientFactsProjection(recipientFactsAnchor({kind: "members", profileIds})))).map(parseRecipientFactsRow);
+    },
+
     async factsFor(actor: DeliveryActor, recipient: unknown): Promise<RecipientFacts | null> {
       requireDeliveryActor(actor);
       const parsed = recipientSchema.parse(recipient);

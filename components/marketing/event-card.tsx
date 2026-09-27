@@ -5,6 +5,7 @@ import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import type {PublicEventProjection, PublicEventStatus} from "@/lib/events/public";
 import {formatEventDate} from "@/lib/home/format-event-date";
+import {deriveEventDisplayStatus, type EventLifecycleDisplay} from "@/lib/events/status";
 import {isPrivateMediaDeliveryUrl} from "@/lib/media/url";
 import {cn} from "@/lib/utils";
 
@@ -17,6 +18,7 @@ const EVENT_CARD_FALLBACK_PHOTO = "/editorial/events-community.webp";
 
 export type EventCardLabels = Readonly<{
   status: Readonly<{open: string; past: string}>;
+  lifecycle: Readonly<Record<EventLifecycleDisplay, string>>;
   venueLabel: string;
   capacityLabel: string;
   cta: string;
@@ -25,6 +27,7 @@ export type EventCardLabels = Readonly<{
 export type EventCardProps = Readonly<{
   event: PublicEventProjection;
   status: PublicEventStatus;
+  asOf?: Date;
   locale: AppLocale;
   labels: EventCardLabels;
 }>;
@@ -59,7 +62,8 @@ function dateBlockParts(value: string, locale: AppLocale): Readonly<{day: string
 // surfaces the two real optional facts the repository actually projects (venue, capacity)
 // instead of fabricating one. `formatEventDate` is the same Asia/Hong_Kong helper already shared
 // by components/home/open-now.tsx and components/home/events-journey.tsx.
-export function EventCard({event, status, locale, labels}: EventCardProps) {
+export function EventCard({event, status, asOf = new Date(), locale, labels}: EventCardProps) {
+  const lifecycle = deriveEventDisplayStatus({...event, confirmedSeats: null, waitlistAvailable: false}, asOf).lifecycle;
   const {day, month} = dateBlockParts(event.startsAt, locale);
   const fullDate = formatEventDate(event.startsAt, locale);
 
@@ -77,7 +81,7 @@ export function EventCard({event, status, locale, labels}: EventCardProps) {
         <span>{month}</span>
       </div>
       <div className="event-card-body">
-        <span className={cn("event-status", status === "past" && "completed")}>{labels.status[status]}</span>
+        <span className={cn("event-status", status === "past" && "completed")}>{labels.lifecycle[lifecycle]}</span>
         <h3><Link href={`/events/${event.slug}`}>{event.title}</Link></h3>
         <p className="line-clamp-3 break-words">{event.description}</p>
         <dl>

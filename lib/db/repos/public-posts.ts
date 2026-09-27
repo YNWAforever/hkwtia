@@ -1,4 +1,5 @@
 import "server-only";
+import {unstable_cache} from "next/cache";
 
 import {and, asc, desc, eq, isNotNull, isNull, lte, sql} from "drizzle-orm";
 import {z} from "zod";
@@ -83,5 +84,15 @@ export function createPublicPostsRepository(loadDatabase: DatabaseLoader = getDb
 export const publicPostsRepository = createPublicPostsRepository();
 export function listPublishedBuildLogs(asOf?: Date): Promise<readonly PublishedBuildLogSummary[]> { return publicPostsRepository.listPublishedBuildLogs(asOf); }
 export function getPublishedBuildLogBySlug(slug: string, asOf?: Date): Promise<PublishedBuildLogDetail | null> { return publicPostsRepository.getPublishedBuildLogBySlug(slug, asOf); }
-export function listPublishedNews(locale: AppLocale, asOf?: Date, options?: PublicReadOptions): Promise<readonly PublishedNewsSummary[]> { return publicPostsRepository.listPublishedNews(locale, asOf, options); }
+// Cache only the anonymous published projection, with locale and bounded limit in the key.
+// The JSON cache transport turns Date into string; hydrate at this boundary for callers.
+const cachedNews = unstable_cache(async (locale: AppLocale, limit: number | null) => {
+  const rows = await publicPostsRepository.listPublishedNews(locale, undefined, limit === null ? {} : {limit});
+  return rows.map(row => ({...row, publishedAt: row.publishedAt.toISOString()}));
+}, ["public-news-v1"], {tags: ["public-news"], revalidate: 60});
+export async function listPublishedNews(locale: AppLocale, asOf?: Date, options?: PublicReadOptions): Promise<readonly PublishedNewsSummary[]> {
+  if (asOf) return publicPostsRepository.listPublishedNews(locale, asOf, options);
+  const rows = await cachedNews(locale, readLimit(options) ?? null);
+  return rows.map(row => ({...row, publishedAt: new Date(row.publishedAt)}));
+}
 export function getPublishedNewsBySlug(locale: AppLocale, slug: string, asOf?: Date): Promise<PublishedNewsDetail | null> { return publicPostsRepository.getPublishedNewsBySlug(locale, slug, asOf); }

@@ -3,6 +3,8 @@ import "server-only";
 import {MAX_TICKET_SEATS, TICKET_HOLD_MS, TICKET_SESSION_MIN_MS} from "@/config/tickets";
 import type {AppLocale} from "@/i18n/routing";
 import {appEnv} from "@/lib/config/env";
+import type {Actor} from "@/lib/membership/lifecycle";
+import {ticketPurchaseAudience} from "@/lib/tickets/eligibility";
 import {stripeBillingAdapter, type StripeBillingAdapter} from "@/lib/billing/stripe";
 import {eventOrdersRepository, ticketEventFor, ticketSeatsSchema, type EventOrdersRepository, type SeatInput, type TicketEvent} from "@/lib/db/repos/event-orders";
 import {localizedPath} from "@/lib/urls";
@@ -10,6 +12,7 @@ import {localizedPath} from "@/lib/urls";
 export type {TicketEvent};
 
 export type TicketCheckoutInput = Readonly<{
+  actor: Actor;
   eventId: string;
   buyer: Readonly<{profileId: string | null; name: string; email: string}>;
   seats: readonly SeatInput[];
@@ -18,7 +21,7 @@ export type TicketCheckoutInput = Readonly<{
 }>;
 
 export type TicketCheckoutErrorCode =
-  | "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "SOLD_OUT" | "INVALID_SEATS" | "UNAVAILABLE" | "RETRY_CHANGED" | "RETRY_EXPIRED" | "ALREADY_COMPLETED";
+  | "EVENT_NOT_FOUND" | "EVENT_NOT_TICKETED" | "EVENT_CLOSED" | "NOT_ELIGIBLE" | "SOLD_OUT" | "INVALID_SEATS" | "UNAVAILABLE" | "RETRY_CHANGED" | "RETRY_EXPIRED" | "ALREADY_COMPLETED";
 
 export type TicketCheckoutResult =
   | Readonly<{status: "redirect"; url: string}>
@@ -72,6 +75,12 @@ export async function createTicketCheckout(
   }
   const now = dependencies.now();
   if (!event.published || event.startsAt <= now) return {status: "error", code: "EVENT_CLOSED"};
+  const buyerProfileId = input.actor?.kind === "member" ? input.actor.profileId : null;
+  if (!input.actor || input.buyer.profileId !== buyerProfileId) return {status: "error", code: "NOT_ELIGIBLE"};
+  const audience = ticketPurchaseAudience(event);
+  if (audience === "invite_only" || (audience === "members_only" && input.actor.kind !== "member")) {
+    return {status: "error", code: "NOT_ELIGIBLE"};
+  }
 
   const amountHkdCents = event.ticketPriceHkdCents * parsedSeats.data.length;
   // Validated BEFORE the order row is written: a bad `APP_URL` must fail with no
@@ -81,8 +90,9 @@ export async function createTicketCheckout(
   const origin = appOrigin(dependencies.appUrl);
   const eventPath = localizedPath(input.locale, `/events/${event.slug}`);
   const created = await dependencies.orders.createOrder({
+    actor: input.actor,
     eventId: event.id,
-    buyerProfileId: input.buyer.profileId,
+    buyerProfileId,
     buyerName: input.buyer.name,
     buyerEmail: input.buyer.email,
     buyerLocale: input.locale,
@@ -94,6 +104,8 @@ export async function createTicketCheckout(
   if (!created.ok) {
     const code: TicketCheckoutErrorCode = created.reason === "EVENT_CLOSED"
       ? "EVENT_CLOSED"
+      : created.reason === "NOT_ELIGIBLE"
+        ? "NOT_ELIGIBLE"
       : created.reason === "ATTEMPT_CHANGED"
         ? "RETRY_CHANGED"
         : created.reason === "ATTEMPT_EXPIRED"

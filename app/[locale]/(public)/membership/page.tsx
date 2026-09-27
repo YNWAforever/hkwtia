@@ -2,6 +2,7 @@ import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {MembershipDimensions} from "@/components/marketing/membership-dimensions";
+import {ActionLink} from "@/components/wt/action-link";
 import {PlanGrid, type PlanGridTier} from "@/components/marketing/plan-grid";
 import {PricingNote} from "@/components/marketing/pricing-note";
 import {WhatsAppLink} from "@/components/marketing/whatsapp-link";
@@ -73,9 +74,11 @@ export default async function MembershipPage({params}: Props) {
   const pricingReady = publicTiers.some((tier) => tier.code === "startup") && publicTiers.some((tier) => tier.code === "corporate");
   const dimensions = DIMENSION_KEYS.map((key) => ({title: t(`dimensions.${key}.title`), copy: t(`dimensions.${key}.copy`)}));
   const steps = [0, 1, 2, 3, 4].map((index) => ({title: t(`first90.steps.${index}.title`), copy: t(`first90.steps.${index}.copy`)}));
+  const questions = Array.from({length: 9}, (_, index) => ({question: t(`faq.${index}.question`), answer: t(`faq.${index}.answer`)}));
 
   return <>
     <PageHero
+        className="defer-following-sections"
       breadcrumb={{homeHref: "/", homeLabel: tCommon("breadcrumbHome"), current: t("title")}}
       breadcrumbLabel={tCommon("breadcrumbLabel")}
       eyebrow={t("eyebrow")}
@@ -92,8 +95,21 @@ export default async function MembershipPage({params}: Props) {
         : <HonestEmpty copy={t("tiersIntro")} title={t("unavailable")} variant="inner" />}
     </Section>
     <Section labelledBy="membership-dimensions-title">
-      <h2 className="sr-only" id="membership-dimensions-title">{t("faqTitle")}</h2>
+      <h2 className="sr-only" id="membership-dimensions-title">{t("dimensionsTitle")}</h2>
       <MembershipDimensions items={dimensions} />
+    </Section>
+    <Section id="faq" labelledBy="membership-faq-title">
+      <h2 id="membership-faq-title">{t("faqTitle")}</h2>
+      <dl className="mt-8 grid gap-6 md:grid-cols-2">
+        {questions.map(({question, answer}) => <div className="rounded-lg border bg-card p-5" key={question}>
+          <dt className="font-semibold">{question}</dt>
+          <dd className="mt-2 text-muted-foreground">{answer}</dd>
+        </div>)}
+      </dl>
+      <div className="mt-6 flex flex-wrap gap-5">
+        <ActionLink href="/refund-policy" variant="text-link">{t("faqLinks.refund")}</ActionLink>
+        <ActionLink href="/contact" variant="text-link">{t("faqLinks.contact")}</ActionLink>
+      </div>
     </Section>
     <Section labelledBy="membership-first90-title">
       <h2 id="membership-first90-title">{t("first90.heading")}</h2>

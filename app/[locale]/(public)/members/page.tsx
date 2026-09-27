@@ -41,6 +41,7 @@ export default async function MembersPage({params, searchParams}: Props) {
     searchParams,
   ]);
   const filters = parseMemberFilters(query);
+  const hasFilters = Object.values(filters).some(Boolean);
   // A failed read is unknown availability, not an empty directory.
   const members = await companyProfilesRepository.listPublished(filters).catch(() => null);
   const plans = Object.fromEntries(
@@ -74,7 +75,7 @@ export default async function MembersPage({params, searchParams}: Props) {
         ? <div className="partner-record-grid">
           {members.map((member) => <MemberCard key={member.slug} labels={{plans, view: t("view")}} locale={locale} member={member} />)}
         </div>
-        : <HonestEmpty actions={[{label: t("filters.clear"), href: "/members"}]} copy={t("emptyDescription")} title={t("emptyTitle")} variant="inner" />}
+        : <HonestEmpty actions={[{label: t("filters.clear"), href: "/members"}]} copy={t(hasFilters ? "emptyDescription" : "noPublishedDescription")} title={t(hasFilters ? "emptyTitle" : "noPublishedTitle")} variant="inner" />}
     </Section>
     <ClosingBand
       actions={[{label: t("detail.join"), href: "/membership"}]}

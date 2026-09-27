@@ -477,3 +477,21 @@ describe("campaign recipient repository fencing", () => {
     expect(fake.commands[0]?.params).toContain(now);
   });
 });
+
+describe("batch communication send-time boundary", () => {
+  it("checks the selected membership before rendering, reserving or sending email", async () => {
+    const test = memoryHarness([recipient("member-1", {variables: {_batchItemId: crypto.randomUUID()}})]);
+    const recheckCommunication = vi.fn(async () => "COMMUNICATION_CHANGED");
+    const result = await runCampaignBatch({...test.deps, recheckCommunication}, {now, limit: 10});
+    expect(recheckCommunication).toHaveBeenCalledOnce();
+    expect(result).toMatchObject({sent: 0, skipped: 1});
+    expect(test.logs.size).toBe(0);
+    expect(test.providerCalls).toEqual([]);
+    expect(test.rendered).toEqual([]);
+  });
+  it("fails closed if a batch campaign reaches a runner without its recheck dependency", async () => {
+    const test = memoryHarness([recipient("member-1", {variables: {_batchItemId: crypto.randomUUID()}})]);
+    expect(await runCampaignBatch(test.deps, {now, limit: 10})).toMatchObject({sent: 0, skipped: 1});
+    expect(test.providerCalls).toEqual([]);
+  });
+});

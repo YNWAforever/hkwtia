@@ -96,9 +96,8 @@ describe("cancelEvent", () => {
     expect(outcome).toMatchObject({status: "cancelled"});
     expect(outcome.status === "cancelled" && outcome.event.status).toBe("cancelled");
     expect(outcome.status === "cancelled" && outcome.event.published).toBe(false);
-    // Every statement ran through the transaction handle; nothing touched the
-    // outer database, which is what makes the three writes one unit.
-    expect(used).toEqual(["transaction", "transaction", "transaction"]);
+    // Every statement, including intent and recipient snapshot, shares the transaction.
+    expect(used).toEqual(Array(5).fill("transaction"));
     expect(execute).not.toHaveBeenCalled();
 
     expect(statementText(txExecute, 0)).toContain("FOR UPDATE");
@@ -120,6 +119,22 @@ describe("cancelEvent", () => {
     expect(paramValues(txExecute.mock.calls[2]?.[0])).toContain(staff.profileId);
     expect(paramValues(txExecute.mock.calls[2]?.[0])).toContain("staff");
     expect(paramValues(txExecute.mock.calls[2]?.[0])).toContain(EVENT);
+  });
+
+  it("persists a unique cancellation intent and member/guest recipient snapshot in the same transaction", async () => {
+    const {txExecute, used, deps} = fakeDeps([
+      [row({status: "published"})],
+      [row({status: "cancelled", published: false})],
+      [], [], [],
+    ]);
+    await expect(cancelEvent(staff, EVENT, deps)).resolves.toMatchObject({status: "cancelled"});
+    expect(used).toEqual(Array(5).fill("transaction"));
+    const intent = dialect.sqlToQuery(txExecute.mock.calls[3]?.[0] as never).sql;
+    const snapshot = dialect.sqlToQuery(txExecute.mock.calls[4]?.[0] as never).sql;
+    expect(intent).toContain("event_cancellation_intents");
+    expect(snapshot).toContain("event_cancellation_notifications");
+    expect(snapshot).toContain("event_registrations");
+    expect(snapshot).toContain("event_guest_registrations");
   });
 
   // `canTransitionEvent("cancelled", "cancelled")` is TRUE because the table maps

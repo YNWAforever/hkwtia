@@ -16,7 +16,7 @@ import {getActor} from "@/lib/auth/actor";
 import {eventsRepository} from "@/lib/db/repos/events";
 import {profilesRepository} from "@/lib/db/repos/profiles";
 import {submitGuestRsvpAction} from "@/lib/events/guest-registration-action";
-import {eventBoundary} from "@/lib/events/public";
+import {deriveEventDisplayStatus} from "@/lib/events/status";
 import {formatEventDate} from "@/lib/home/format-event-date";
 import {isPrivateMediaDeliveryUrl, isRegistrableMediaUrl} from "@/lib/media/url";
 import {runPublicEventRegistrationAction} from "@/lib/events/registration-action";
@@ -92,8 +92,9 @@ export default async function EventPage({params}: Props) {
     : null;
   const registrationMessages = {registered: t("registration.registered"), waitlist: t("registration.waitlist"), alreadyRegistered: t("registration.alreadyRegistered"), alreadyWaitlisted: t("registration.alreadyWaitlisted"), unauthenticated: t("registration.unauthenticated"), ineligible: t("registration.ineligible"), closed: t("registration.closed"), error: t("registration.error")};
   async function registerAction(state: RegistrationActionState, formData: FormData): Promise<RegistrationActionState> { "use server"; return runPublicEventRegistrationAction(state, formData, {messages: registrationMessages}); }
-  const past = eventBoundary({startsAt: new Date(displayEvent.startsAt), endsAt: displayEvent.endsAt ? new Date(displayEvent.endsAt) : null}) < asOf;
-  const detailLabels = {date: t("detail.date"), venue: t("detail.venue"), capacity: t("detail.capacity")};
+  const displayStatus = deriveEventDisplayStatus({...displayEvent, confirmedSeats: null, waitlistAvailable: false}, asOf);
+  const past = displayStatus.lifecycle === "ended";
+  const detailLabels = {date: t("detail.date"), venue: t("detail.venue"), capacity: t("detail.capacity"), format: t("detail.format"), formats: {in_person: t("detail.formats.in_person"), online: t("detail.formats.online"), hybrid: t("detail.formats.hybrid")}, onlineUrl: t("detail.onlineUrl")};
   // Programme B-6 / D-11: the organiser links to its /members page when it has one, and is
   // otherwise a name in the facts grid and an unlinked Event.organizer. The slug alone is the
   // condition on purpose -- `projectPublicEvent` in lib/db/repos/events.ts already withholds it
@@ -118,12 +119,15 @@ export default async function EventPage({params}: Props) {
     marketingConsent: t("guest.marketingConsent"), consent: t("guest.consent"), website: t("guest.website"), submit: t("guest.submit"), submitting: t("guest.submitting"),
     registered: t("guest.registered"), waitlist: t("guest.waitlist"), already: t("guest.already"), confirmationPending: t("guest.confirmationPending"), invalid: t("guest.invalid"), rateLimited: t("guest.rateLimited"),
     closed: t("guest.closed"), external: t("guest.external"), unavailable: t("guest.unavailable"),
+    requiredField: t("guest.requiredField"), invalidField: t("guest.invalidField"), invalidEmail: t("guest.invalidEmail"), invalidWhatsapp: t("guest.invalidWhatsapp"), errorReference: t("guest.errorReference"),
   };
   const ticketLabels = {
     heading: tTicket("heading"), buyerName: tTicket("buyerName"), buyerEmail: tTicket("buyerEmail"),
     seatCount: tTicket("seatCount"), attendeeName: tTicket("attendeeName"), attendeeEmail: tTicket("attendeeEmail"),
     website: tTicket("website"), submit: tTicket("submit"), submitting: tTicket("submitting"), refundPolicy: tTicket("refundPolicy"),
-    errors: {INVALID: tTicket("errors.INVALID"), SOLD_OUT: tTicket("errors.SOLD_OUT"), EVENT_CLOSED: tTicket("errors.EVENT_CLOSED"), UNAVAILABLE: tTicket("errors.UNAVAILABLE"), RETRY_CHANGED: tTicket("errors.RETRY_CHANGED"), RETRY_EXPIRED: tTicket("errors.RETRY_EXPIRED"), ALREADY_COMPLETED: tTicket("errors.ALREADY_COMPLETED"), RATE_LIMITED: tTicket("errors.RATE_LIMITED")},
+    fillBuyer: tTicket("fillBuyer"), removeSeat: tTicket("removeSeat"), total: tTicket("total"), paymentNature: tTicket("paymentNature"), eventDate: tTicket("eventDate"), fieldErrors: {required: tTicket("fieldErrors.required"), invalid: tTicket("fieldErrors.invalid"), extra: tTicket("fieldErrors.extra")},
+    recoveryLoading: tTicket("recoveryLoading"), recoveryTitle: tTicket("recoveryTitle"), recoverySummary: tTicket("recoverySummary"), recoveryResume: tTicket("recoveryResume"), recoveryChecking: tTicket("recoveryChecking"), recoveryUnavailable: tTicket("recoveryUnavailable"),
+    errors: {INVALID: tTicket("errors.INVALID"), SOLD_OUT: tTicket("errors.SOLD_OUT"), NOT_ELIGIBLE: tTicket("errors.NOT_ELIGIBLE"), EVENT_CLOSED: tTicket("errors.EVENT_CLOSED"), UNAVAILABLE: tTicket("errors.UNAVAILABLE"), RETRY_CHANGED: tTicket("errors.RETRY_CHANGED"), RETRY_EXPIRED: tTicket("errors.RETRY_EXPIRED"), ALREADY_COMPLETED: tTicket("errors.ALREADY_COMPLETED"), RATE_LIMITED: tTicket("errors.RATE_LIMITED")},
   };
 
   return (
@@ -182,7 +186,7 @@ export default async function EventPage({params}: Props) {
           <div className="event-action-bar">
             <div>
               <time dateTime={displayEvent.startsAt}>{formatEventDate(displayEvent.startsAt, appLocale)}</time>
-              <strong>{t("status.open")}</strong>
+              <strong>{t("lifecycle." + displayStatus.lifecycle)}</strong>
             </div>
             <div>
               {registration.kind === "ticket" ? (
@@ -193,6 +197,8 @@ export default async function EventPage({params}: Props) {
                   locale={appLocale}
                   labels={ticketLabels}
                   pricePerSeat={tTicket("price", {price: formatTicketPrice(displayEvent.ticketPriceHkdCents, appLocale)})}
+                  unitAmountHkdCents={displayEvent.ticketPriceHkdCents ?? 0}
+                  eventStartsAt={displayEvent.startsAt}
                   refundPolicyHref={localizedPath(appLocale, "/refund-policy")}
                 />
               ) : registration.kind === "external" ? (

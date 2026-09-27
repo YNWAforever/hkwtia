@@ -321,6 +321,10 @@ export const memberships = pgTable(
     stripeSubscriptionId: text("stripe_subscription_id"),
     billingPeriodStart: timestamp("billing_period_start", {withTimezone: true}),
     billingPeriodEnd: timestamp("billing_period_end", {withTimezone: true}),
+    grantEffectiveAt: timestamp("grant_effective_at", {withTimezone: true}),
+    grantExpiresAt: timestamp("grant_expires_at", {withTimezone: true}),
+    grantReason: text("grant_reason"),
+    grantActorProfileId: text("grant_actor_profile_id"),
     cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false).notNull(),
     createdAt: createdAt("created_at"),
     updatedAt: updatedAt("updated_at"),
@@ -331,6 +335,7 @@ export const memberships = pgTable(
       sql`(${table.ownerUserId} IS NOT NULL AND ${table.companyId} IS NULL) OR (${table.ownerUserId} IS NULL AND ${table.companyId} IS NOT NULL)`,
     ),
     check("memberships_seat_limit_check", sql`${table.seatLimit} >= 0`),
+    check("memberships_grant_window_check", sql`(${table.grantEffectiveAt} IS NULL AND ${table.grantExpiresAt} IS NULL AND ${table.grantReason} IS NULL AND ${table.grantActorProfileId} IS NULL) OR (${table.grantEffectiveAt} IS NOT NULL AND ${table.grantExpiresAt} IS NOT NULL AND ${table.grantReason} IS NOT NULL AND length(trim(${table.grantReason})) >= 10 AND ${table.grantActorProfileId} IS NOT NULL AND ${table.grantEffectiveAt} < ${table.grantExpiresAt})`),
     uniqueIndex("memberships_stripe_subscription_unique")
       .on(table.stripeSubscriptionId)
       .where(sql`${table.stripeSubscriptionId} IS NOT NULL`),
@@ -356,6 +361,7 @@ export const memberships = pgTable(
     index("memberships_owner_idx").on(table.ownerUserId),
     index("memberships_company_idx").on(table.companyId),
     index("memberships_billing_period_end_idx").on(table.billingPeriodEnd),
+    index("memberships_grant_expires_at_idx").on(table.grantExpiresAt),
   ],
 );
 
@@ -751,6 +757,140 @@ export const savedSegments = pgTable("saved_segments", {
   updatedAt: updatedAt("updated_at"),
 });
 
+/** Staff member workspace views stay separate from campaign audience segments. */
+export const adminMemberViews = pgTable("admin_member_views", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  ownerProfileId: text("owner_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  name: text("name").notNull(),
+  filterVersion: integer("filter_version").default(1).notNull(),
+  query: jsonb("query").$type<Record<string, unknown>>().notNull(),
+  shared: boolean("shared").default(false).notNull(),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  uniqueIndex("admin_member_views_owner_name_unique").on(table.ownerProfileId, table.name),
+  index("admin_member_views_shared_updated_idx").on(table.shared, table.updatedAt),
+]);
+
+/** Durable, actor-owned admin batch previews and execution records. Text CHECKs avoid same-transaction enum migration traps. */
+export const adminBatches = pgTable("admin_batches", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  actorProfileId: text("actor_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  operation: text("operation").notNull(),
+  validatedPayload: jsonb("validated_payload").$type<Record<string, unknown>>().notNull(),
+  beforeSnapshot: jsonb("before_snapshot").$type<Record<string, unknown>>().default({}).notNull(),
+  selectionSnapshot: jsonb("selection_snapshot").$type<Record<string, unknown>>().notNull(),
+  idempotencyKey: text("idempotency_key").notNull(),
+  requestDigest: text("request_digest").notNull(),
+  state: text("state").default("preparing").notNull(),
+  previewDigest: text("preview_digest"),
+  previewExpiresAt: timestamp("preview_expires_at", {withTimezone: true}),
+  preparationLeaseOwner: text("preparation_lease_owner"),
+  preparationLeaseExpiresAt: timestamp("preparation_lease_expires_at", {withTimezone: true}),
+  preparationToken: integer("preparation_token").default(0).notNull(),
+  counters: jsonb("counters").$type<Record<string, number>>().default(sql`'{}'::jsonb`).notNull(),
+  createdAt: createdAt("created_at"),
+  preparedAt: timestamp("prepared_at", {withTimezone: true}),
+  committedAt: timestamp("committed_at", {withTimezone: true}),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  uniqueIndex("admin_batches_actor_key_unique").on(table.actorProfileId, table.idempotencyKey),
+  index("admin_batches_preparing_idx").on(table.state, table.preparationLeaseExpiresAt, table.createdAt),
+  index("admin_batches_owner_recent_idx").on(table.actorProfileId, table.createdAt),
+  check("admin_batches_state_check", sql`${table.state} IN ('preparing','ready','queued','running','completed','completed_with_errors','cancelled','expired')`),
+  check("admin_batches_operation_check", sql`${table.operation} IN ('profile_patch','import_commit','membership_grant','renewal_reminder','profile_update_invite','ticket_resend','export_members','export_event_attendees')`),
+]);
+
+export const adminBatchItems = pgTable("admin_batch_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  batchId: uuid("batch_id").notNull().references(() => adminBatches.id, {onDelete: "restrict"}),
+  targetType: text("target_type").notNull(),
+  targetId: text("target_id").notNull(),
+  expectedVersion: text("expected_version").notNull(),
+  beforeSummary: jsonb("before_summary").$type<Record<string, unknown>>().default(sql`'{}'::jsonb`).notNull(),
+  afterSummary: jsonb("after_summary").$type<Record<string, unknown>>().default(sql`'{}'::jsonb`).notNull(),
+  previewStatus: text("preview_status").notNull(),
+  state: text("state").default("pending").notNull(),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  nextAttemptAt: timestamp("next_attempt_at", {withTimezone: true}),
+  leaseOwner: text("lease_owner"),
+  leaseExpiresAt: timestamp("lease_expires_at", {withTimezone: true}),
+  leaseToken: integer("lease_token").default(0).notNull(),
+  effectKey: text("effect_key").notNull().unique(),
+  resultRef: text("result_ref"),
+  errorCode: text("error_code"),
+  reasonCode: text("reason_code"),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  uniqueIndex("admin_batch_items_target_unique").on(table.batchId, table.targetType, table.targetId),
+  index("admin_batch_items_claim_idx").on(table.state, table.nextAttemptAt, table.leaseExpiresAt),
+  index("admin_batch_items_batch_state_idx").on(table.batchId, table.state),
+  check("admin_batch_items_preview_check", sql`${table.previewStatus} IN ('eligible','skipped','blocked')`),
+  check("admin_batch_items_state_check", sql`${table.state} IN ('pending','running','succeeded','skipped','failed')`),
+  check("admin_batch_items_attempt_check", sql`${table.attemptCount} >= 0 AND ${table.leaseToken} >= 0`),
+]);
+
+/** Private parsed upload. Original bytes are discarded immediately after bounded parsing. */
+export const memberImportUploads = pgTable("member_import_uploads", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  actorProfileId: text("actor_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  fileDigest: text("file_digest").notNull(),
+  format: text("format").notNull(),
+  parsedSnapshot: jsonb("parsed_snapshot").$type<Record<string, unknown>>().notNull(),
+  rowCount: integer("row_count").notNull(),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  index("member_import_uploads_owner_created_idx").on(table.actorProfileId, table.createdAt),
+  check("member_import_uploads_format_check", sql`${table.format} IN ('csv','xlsx')`),
+  check("member_import_uploads_rows_check", sql`${table.rowCount} >= 0 AND ${table.rowCount} <= 5000`),
+]);
+
+export const memberImportRuns = pgTable("member_import_runs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  uploadId: uuid("upload_id").notNull().references(() => memberImportUploads.id, {onDelete: "restrict"}),
+  actorProfileId: text("actor_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  fileDigest: text("file_digest").notNull(),
+  mappingDigest: text("mapping_digest").notNull(),
+  mapping: jsonb("mapping").$type<Record<string, unknown>>().notNull(),
+  state: text("state").default("validated").notNull(),
+  summary: jsonb("summary").$type<Record<string, number>>().notNull(),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  confirmedAt: timestamp("confirmed_at", {withTimezone: true}),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  uniqueIndex("member_import_runs_digest_unique").on(table.actorProfileId, table.fileDigest, table.mappingDigest),
+  index("member_import_runs_owner_created_idx").on(table.actorProfileId, table.createdAt),
+  check("member_import_runs_state_check", sql`${table.state} IN ('validated','confirmed','committed','expired')`),
+]);
+
+export const memberImportRows = pgTable("member_import_rows", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  runId: uuid("run_id").notNull().references(() => memberImportRuns.id, {onDelete: "restrict"}),
+  rowNumber: integer("row_number").notNull(),
+  validatedPayload: jsonb("validated_payload").$type<Record<string, unknown>>().notNull(),
+  beforeSnapshot: jsonb("before_snapshot").$type<Record<string, unknown>>().default({}).notNull(),
+  validationStatus: text("validation_status").notNull(),
+  matchTargetId: text("match_target_id"),
+  conflictReason: text("conflict_reason"),
+  expectedVersion: text("expected_version"),
+  confirmed: boolean("confirmed").default(false).notNull(),
+  batchItemId: uuid("batch_item_id").references(() => adminBatchItems.id, {onDelete: "set null"}),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  uniqueIndex("member_import_rows_number_unique").on(table.runId, table.rowNumber),
+  index("member_import_rows_status_idx").on(table.runId, table.validationStatus),
+  check("member_import_rows_status_check", sql`${table.validationStatus} IN ('create','update','unchanged','duplicate','conflict','invalid')`),
+]);
+
+export const memberOperationsMetadata = pgTable("member_operations_metadata", {
+  profileId: text("profile_id").primaryKey().references(() => profiles.id, {onDelete: "cascade"}),
+  tags: text("tags").array().default(sql`'{}'::text[]`).notNull(),
+  ownerProfileId: text("owner_profile_id").references(() => profiles.id, {onDelete: "set null"}),
+  updatedAt: updatedAt("updated_at"),
+});
+
 export const campaigns = pgTable("campaigns", {
   id: uuid("id").defaultRandom().primaryKey(),
   segmentId: uuid("segment_id").notNull().references(() => savedSegments.id, {onDelete: "restrict"}),
@@ -929,6 +1069,20 @@ export const eventOrders = pgTable("event_orders", {
   check("event_orders_amount_check", sql`${table.amountHkdCents} > 0`),
 ]);
 
+export const eventCheckoutRecoveries = pgTable("event_checkout_recoveries", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orderId: uuid("order_id").notNull().references(() => eventOrders.id, {onDelete: "cascade"}),
+  recoveryDigest: text("recovery_digest").notNull(),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  invalidatedAt: timestamp("invalidated_at", {withTimezone: true}),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  unique("event_checkout_recoveries_order_unique").on(table.orderId),
+  unique("event_checkout_recoveries_digest_unique").on(table.recoveryDigest),
+  index("event_checkout_recoveries_expiry_idx").on(table.expiresAt),
+  check("event_checkout_recoveries_digest_check", sql`${table.recoveryDigest} ~ '^[a-f0-9]{64}$'`),
+]);
+
 export const eventOrderSeats = pgTable("event_order_seats", {
   id: uuid("id").defaultRandom().primaryKey(),
   orderId: uuid("order_id").notNull().references(() => eventOrders.id, {onDelete: "cascade"}),
@@ -976,6 +1130,54 @@ export const ticketEmailOutbox = pgTable("ticket_email_outbox", {
   check("ticket_email_outbox_seat_check", sql`(${table.kind} = 'pass') = (${table.seatId} IS NOT NULL)`),
   index("ticket_email_outbox_due_idx").on(table.status, table.nextAttemptAt, table.claimExpiresAt),
 ]);
+export const eventCancellationIntents = pgTable("event_cancellation_intents", {
+  eventId: uuid("event_id").primaryKey().references(() => events.id, {onDelete: "restrict"}),
+  revision: integer("revision").default(1).notNull(),
+  cancelledAt: timestamp("cancelled_at", {withTimezone: true}).defaultNow().notNull(),
+  actorProfileId: text("actor_profile_id").notNull(),
+}, (table) => [check("event_cancellation_intents_revision_check", sql`${table.revision} = 1`)]);
+
+export const eventCancellationNotifications = pgTable("event_cancellation_notifications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  eventId: uuid("event_id").notNull().references(() => eventCancellationIntents.eventId, {onDelete: "restrict"}),
+  revision: integer("revision").default(1).notNull(),
+  registrationKind: text("registration_kind").notNull(),
+  registrationId: text("registration_id").notNull(),
+  channel: text("channel").default("email").notNull(),
+  recipientName: text("recipient_name").notNull(),
+  recipientEmail: text("recipient_email"),
+  recipientLocale: text("recipient_locale").notNull(),
+  status: text("status").default("pending").notNull(),
+  payload: jsonb("payload").$type<Record<string, unknown>>(),
+  idempotencyKey: text("idempotency_key").notNull(),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  nextAttemptAt: timestamp("next_attempt_at", {withTimezone: true}).defaultNow().notNull(),
+  claimExpiresAt: timestamp("claim_expires_at", {withTimezone: true}),
+  firstAttemptAt: timestamp("first_attempt_at", {withTimezone: true}),
+  providerId: text("provider_id"),
+  errorCode: text("error_code"),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  check("event_cancellation_notifications_kind_check", sql`${table.registrationKind} IN ('member', 'guest')`),
+  check("event_cancellation_notifications_channel_check", sql`${table.channel} = 'email'`),
+  check("event_cancellation_notifications_status_check", sql`${table.status} IN ('pending', 'queued', 'sending', 'accepted', 'blocked', 'failed', 'uncertain')`),
+  check("event_cancellation_notifications_attempt_check", sql`${table.attemptCount} >= 0`),
+  unique("event_cancellation_notifications_scope_unique").on(table.eventId, table.revision, table.registrationKind, table.registrationId, table.channel),
+  unique("event_cancellation_notifications_key_unique").on(table.idempotencyKey),
+  index("event_cancellation_notifications_due_idx").on(table.status, table.nextAttemptAt, table.claimExpiresAt),
+]);
+
+export const emailAddressBlocks = pgTable("email_address_blocks", {
+  email: text("email").primaryKey(),
+  reasonCode: text("reason_code").notNull(),
+  active: boolean("active").default(true).notNull(),
+  createdAt: createdAt("created_at"),
+}, (table) => [
+  check("email_address_blocks_reason_check", sql`${table.reasonCode} IN ('hard_bounce', 'invalid_address', 'manual')`),
+  check("email_address_blocks_lowercase_check", sql`${table.email} = lower(${table.email})`),
+]);
+
 export const approvals = pgTable("approvals", {
   id: uuid("id").defaultRandom().primaryKey(),
   actionType: text("action_type").notNull(),
@@ -1849,3 +2051,29 @@ export type EventFormat = (typeof eventFormatEnum.enumValues)[number];
 export type RegistrationMode = (typeof registrationModeEnum.enumValues)[number];
 export type GuestRegistrationStatus = (typeof guestRegistrationStatusEnum.enumValues)[number];
 export type PublicProfileStatus = (typeof publicProfileStatusEnum.enumValues)[number];
+
+
+/** T17: one atomic 5/15-minute bucket per server-keyed digest and public operation. */
+export const rateLimitBuckets = pgTable("rate_limit_buckets", {
+  scope: text("scope").notNull(),
+  keyHash: text("key_hash").notNull(),
+  windowStartedAt: timestamp("window_started_at", {withTimezone: true}).notNull(),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+  count: integer("count").notNull(),
+}, (table) => [
+  primaryKey({columns: [table.scope, table.keyHash]}),
+  index("rate_limit_buckets_expiry_idx").on(table.expiresAt),
+  check("rate_limit_buckets_scope_check", sql`${table.scope} IN ('guest-rsvp','ticket-checkout')`),
+  check("rate_limit_buckets_hash_check", sql`${table.keyHash} ~ '^[a-f0-9]{64}$'`),
+  check("rate_limit_buckets_window_check", sql`${table.expiresAt} > ${table.windowStartedAt}`),
+  check("rate_limit_buckets_count_check", sql`${table.count} BETWEEN 1 AND 5`),
+]);
+
+/** Private materialized export; download authorization/expiry is checked before returning bytes. */
+export const adminBatchExportArtifacts = pgTable("admin_batch_export_artifacts", {
+  batchId: uuid("batch_id").primaryKey().references(() => adminBatches.id, {onDelete: "restrict"}),
+  csv: text("csv").notNull(),
+  rowCount: integer("row_count").notNull(),
+  createdAt: createdAt("created_at"),
+  expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
+}, table => [index("admin_batch_export_artifacts_expiry_idx").on(table.expiresAt), check("admin_batch_export_artifacts_bounds", sql`${table.rowCount} BETWEEN 1 AND 5000 AND octet_length(${table.csv}) <= 10485760`)]);

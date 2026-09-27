@@ -1,0 +1,14 @@
+{
+  "revision": "12ee2b4c4fb2a6ead89fb8e72f7d0d031b92e1e9",
+  "generatedAt": "2026-09-27T08:44:51.445Z",
+  "node": "v24.18.0",
+  "platform": "win32",
+  "database": "disposable pgvector/pgvector:pg16",
+  "syntheticOnly": true,
+  "rows": 5000,
+  "eligible": 5000,
+  "queries": 6,
+  "elapsedMs": 7362.823499999999,
+  "campaignsCreated": 0,
+  "completed": true
+}

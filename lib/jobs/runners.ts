@@ -1,3 +1,4 @@
+import {recheckBatchCommunication} from "@/lib/db/repos/batch-handlers/communication";
 import "server-only";
 
 import {createHash} from "node:crypto";
@@ -33,6 +34,7 @@ import {
   resolveM4BAcceptanceOwnershipKey,
 } from "@/lib/acceptance/m4b-runtime-guard";
 import {automationCronActor} from "@/lib/auth/automation-actor";
+import {eventCancellationNoticesEnabled, productionEventNotificationDependencies, runEventCancellationNotifications} from "@/lib/jobs/event-notification-runner";
 import {createWoztellAdapter} from "@/lib/channels/woztell";
 import {aiEnv, appEnv, emailEnv} from "@/lib/config/env";
 import {aiOpsMetricsRepository} from "@/lib/db/repos/aiops-metrics";
@@ -109,8 +111,13 @@ const workerAlertSchema = z.object({
     "chat-retention",
     "whatsapp-send-queue",
     "event-cancellation-refunds",
+    "event-notifications",
     "showcase-lead-emails",
     "ticket-emails",
+    "admin-batches",
+    "membership-grant-expiry",
+    "rate-limit-cleanup",
+    "member-import-retention",
   ]),
   scheduledTime: z.string().min(1).max(64),
   attemptCount: z.number().int().min(1).max(3),
@@ -121,24 +128,7 @@ const workerAlertSchema = z.object({
   ]),
 }).strict();
 
-export type WorkerAlertPayload = Readonly<{
-  job:
-    | "journey-runner"
-    | "renewal-runner"
-    | "engagement-score"
-    | "approvals-expirer"
-    | "retention-analyst"
-    | "board-reporter"
-    | "aiops-metrics"
-    | "chat-retention"
-    | "whatsapp-send-queue"
-    | "event-cancellation-refunds"
-    | "showcase-lead-emails"
-    | "ticket-emails";
-  scheduledTime: string;
-  attemptCount: number;
-  errorCode: "JOB_HTTP_ERROR" | "JOB_NETWORK_ERROR" | "JOB_TIMEOUT";
-}>;
+export type WorkerAlertPayload = Readonly<z.infer<typeof workerAlertSchema>>;
 
 type WorkerAlertDependencies = Readonly<{
   recipients?: StaffAlertRecipientsRepository;
@@ -159,6 +149,7 @@ type ProductionRunnerOverrides = Partial<Readonly<{
   runWhatsAppSendQueue(now: Date): Promise<unknown>;
   /** No clock: the refund primitive reads its own when it commits. */
   runEventCancellationRefunds(): Promise<unknown>;
+  runEventNotifications(now: Date): Promise<unknown>;
   runShowcaseLeadEmails(now: Date): Promise<unknown>;
   runTicketEmails(now: Date): Promise<unknown>;
   runWorkerAlert(payload: WorkerAlertPayload): Promise<unknown>;
@@ -537,6 +528,7 @@ async function runProductionCampaigns(now: Date): Promise<unknown> {
   // offering an email schedule later is a screen change, not a silent outage.
   await campaignsRepository.promoteScheduledCampaigns(automationCronActor(), now, "email");
   return runCampaignBatch({
+    recheckCommunication: recheckBatchCommunication,
     campaigns: campaignsRepository,
     deliveries: deliveriesRepository,
     staffTasks: staffTasksRepository,
@@ -576,6 +568,7 @@ async function runProductionCampaigns(now: Date): Promise<unknown> {
 export async function runProductionWhatsAppSendQueue(now: Date): Promise<unknown> {
   const notifications = createProductionNotificationDependencies();
   return runWhatsAppCampaignBatch({
+    recheckCommunication: recheckBatchCommunication,
     campaigns: campaignsRepository,
     dispatch: (actor, request) => dispatchNotification(actor, request, notifications),
   }, {now, limit: WHATSAPP_QUEUE_BATCH_LIMIT});
@@ -583,6 +576,11 @@ export async function runProductionWhatsAppSendQueue(now: Date): Promise<unknown
 
 export async function runProductionRenewal(now: Date): Promise<unknown> {
   return runRenewalReconciliation(automationCronActor(), now);
+}
+
+export async function runProductionEventNotifications(now: Date): Promise<unknown> {
+  if (!eventCancellationNoticesEnabled()) return {disabled: true};
+  return runEventCancellationNotifications(now, productionEventNotificationDependencies());
 }
 
 export function runProductionEventCancellationRefunds(): Promise<EventCancellationRefundSummary> {
@@ -682,6 +680,7 @@ export function createJobRunners(
     overrides.runWhatsAppSendQueue ?? runProductionWhatsAppSendQueue;
   const runEventCancellationRefunds =
     overrides.runEventCancellationRefunds ?? runProductionEventCancellationRefunds;
+  const runEventNotifications = overrides.runEventNotifications ?? runProductionEventNotifications;
   const runShowcaseLeadEmails = overrides.runShowcaseLeadEmails ??
     ((now: Date) => drainLeadEmailOutbox(now, productionLeadEmailDependencies()));
   const runTicketEmails = overrides.runTicketEmails ??
@@ -722,6 +721,9 @@ export function createJobRunners(
     },
     eventCancellationRefunds() {
       return runEventCancellationRefunds();
+    },
+    eventNotifications(now: Date) {
+      return runEventNotifications(now);
     },
     showcaseLeadEmails(now: Date) {
       return runShowcaseLeadEmails(now);

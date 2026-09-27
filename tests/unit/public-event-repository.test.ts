@@ -1,7 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
 import type {Event, PublicProfileStatus} from "@/lib/db/server-schema";
-import {countPublicEvents, getEventBySlug, getPublicEventBySlug, listFeaturedPublicEvents, localizeEvent, listMemberEvents, listPublicEvents} from "@/lib/db/repos/events";
+import {countPublicEvents, getEventBySlug, getPublicEventBySlug, listPublicEventSlugs, listFeaturedPublicEvents, localizeEvent, listMemberEvents, listPublicEvents} from "@/lib/db/repos/events";
 import {parseEventFilters} from "@/lib/events/filters";
 import type {Actor} from "@/lib/membership/lifecycle";
 import {legacyDerivedEventColumns} from "@/tests/fixtures/event-row";
@@ -41,6 +41,17 @@ describe("repository-backed Event visibility", () => {
 
 
   const rows = [event("draft-public", {published: false}), event("published-member", {memberOnly: true}), event("published-public")];
+
+  it("keeps the exact audited demonstration event out of every public reader", async () => {
+    const demo = event("wtia-global-growth-demo-briefing-2026");
+    const real = event("real-event");
+    const source = [demo, real];
+    expect((await listPublicEvents(anonymous, {status: "open", asOf, source})).map((row) => row.slug)).toEqual(["real-event"]);
+    expect((await listFeaturedPublicEvents(anonymous, {asOf, limit: 2}, source)).map((row) => row.slug)).toEqual(["real-event"]);
+    expect(await listPublicEventSlugs(source)).toEqual(["real-event"]);
+    expect(await countPublicEvents(anonymous, {status: "open", asOf, source})).toBe(1);
+    expect(await getPublicEventBySlug(demo.slug, "en", {asOf, source})).toBeNull();
+  });
 
   it("returns only published public Events to anonymous readers", async () => {
     expect((await listPublicEvents(anonymous, {status: "open", asOf, source: rows})).map((item) => item.slug)).toEqual(["published-public"]);

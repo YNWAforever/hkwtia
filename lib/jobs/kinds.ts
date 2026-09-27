@@ -67,14 +67,26 @@ export type PhaseCJobKind = typeof PHASE_C_JOB_KINDS[number];
  */
 export const PHASE_D_JOB_KIND = {
   EVENT_CANCELLATION_REFUNDS: "event-cancellation-refunds",
+  EVENT_NOTIFICATIONS: "event-notifications",
   SHOWCASE_LEAD_EMAILS: "showcase-lead-emails",
   TICKET_EMAILS: "ticket-emails",
 } as const;
 
 export const PHASE_D_JOB_KINDS = [
   PHASE_D_JOB_KIND.EVENT_CANCELLATION_REFUNDS,
+  PHASE_D_JOB_KIND.EVENT_NOTIFICATIONS,
   PHASE_D_JOB_KIND.SHOWCASE_LEAD_EMAILS,
   PHASE_D_JOB_KIND.TICKET_EMAILS,
 ] as const;
 
 export type PhaseDJobKind = typeof PHASE_D_JOB_KINDS[number];
+
+/** Kept out of the M3 partial-index kind list. */
+export const ADMIN_BATCH_JOB_KIND = {ADMIN_BATCHES: "admin-batches"} as const;
+
+/** Separate from the M3 partial-index list. */
+export const MEMBERSHIP_GRANT_JOB_KIND = {EXPIRY: "membership-grant-expiry"} as const;
+
+
+/** Separate from the M3 partial-index list; T17's bounded TTL cleanup. */
+export const RATE_LIMIT_JOB_KIND = {CLEANUP: "rate-limit-cleanup"} as const;

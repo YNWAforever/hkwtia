@@ -46,6 +46,11 @@ export function previewSessionPlan(env) {
   return {origin: url.origin, shareUrl: raw, statePath: STATE_PATH, cookiePath: COOKIE_PATH};
 }
 
+// Keep application locale and member sessions out of a reusable public acceptance context.
+export function previewStorageState(cookies) {
+  return {cookies: cookies.filter((cookie) => cookie.name === "_vercel_jwt"), origins: []};
+}
+
 async function main() {
   const plan = previewSessionPlan(process.env);
   // `playwright` (not only `@playwright/test`) is installed, so the browser API is imported directly.
@@ -72,7 +77,7 @@ async function main() {
     const jwt = cookies.find((cookie) => cookie.name === "_vercel_jwt");
     if (!jwt) throw new Error("VERCEL_SESSION_COOKIE_MISSING");
     mkdirSync(STATE_DIR, {recursive: true});
-    writeFileSync(plan.statePath, `${JSON.stringify({cookies, origins: []}, null, 2)}\n`, {mode: 0o600});
+    writeFileSync(plan.statePath, `${JSON.stringify(previewStorageState(cookies), null, 2)}\n`, {mode: 0o600});
     writeFileSync(plan.cookiePath, `_vercel_jwt=${jwt.value}\n`, {mode: 0o600});
     // `writeFileSync`'s `mode` only applies when the call creates the file; a rerun that
     // overwrites an existing file (from an earlier session, wider permissions) would silently

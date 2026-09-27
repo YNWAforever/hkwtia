@@ -3,19 +3,19 @@ import {resolve} from "node:path";
 
 import {expect, type Page} from "@playwright/test";
 
-import {M2_LIVE_ENV_NAMES, missingM2LiveEnvironment} from "@/tests/fixtures/m2-runtime-env";
+import {M2_LIVE_ENV_NAMES, missingM2IdentityEnvironment, missingM2LiveEnvironment} from "@/tests/fixtures/m2-runtime-env";
 
-export {M2_LIVE_ENV_NAMES, missingM2LiveEnvironment};
+export {M2_LIVE_ENV_NAMES, missingM2IdentityEnvironment, missingM2LiveEnvironment};
 
-export type TestRole = "staff" | "member" | "company-admin";
+export type TestRole = "staff" | "member" | "company-admin" | "exco" | "superadmin";
 
 export async function signInForM2(page: Page, role: TestRole): Promise<void> {
-  const prefix = {staff: "M2_TEST_STAFF", member: "M2_TEST_MEMBER", "company-admin": "M2_TEST_COMPANY_ADMIN"}[role];
+  const prefix = {staff: "M2_TEST_STAFF", member: "M2_TEST_MEMBER", "company-admin": "M2_TEST_COMPANY_ADMIN", exco: "M2_TEST_EXCO", superadmin: "M2_TEST_SUPERADMIN"}[role];
   const email = process.env[prefix + "_EMAIL"]?.trim();
   const password = process.env[prefix + "_PASSWORD"]?.trim();
   if (!email || !password) throw new Error(prefix + "_EMAIL and " + prefix + "_PASSWORD are required");
 
-  const callbackURL = role === "staff" ? "/admin" : "/portal";
+  const callbackURL = ["staff", "exco", "superadmin"].includes(role) ? "/admin" : "/portal";
   await page.goto("/");
   const response = await page.request.post("/api/auth/sign-in/email", {
     data: {email, password, callbackURL},

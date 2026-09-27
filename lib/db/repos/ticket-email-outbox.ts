@@ -149,6 +149,29 @@ export function createTicketEmailOutboxRepository(loadDatabase: () => Promise<Da
   }
 
   return {
+    async queueHealth(actor: AutomationCronActor, now: Date): Promise<Readonly<{
+      backlog: number; oldestPendingAgeSeconds: number | null;
+    }>> {
+      requireAutomationCron(actor);
+      const db = await loadDatabase();
+      const row = rowsFrom(await db.execute(sql`
+        SELECT count(*)::int AS backlog,
+          CASE WHEN min(created_at) IS NULL THEN NULL
+            ELSE GREATEST(0, FLOOR(EXTRACT(EPOCH FROM (${now}::timestamptz - min(created_at)))))::int
+          END
+            AS oldest_pending_age_seconds
+        FROM ticket_email_outbox
+        WHERE status IN ('queued', 'sending')
+      `))[0];
+      if (!row) throw new Error("TICKET_EMAIL_QUEUE_HEALTH_UNAVAILABLE");
+      const backlog = Number(row.backlog);
+      const oldest = row.oldest_pending_age_seconds;
+      if (!Number.isSafeInteger(backlog) || backlog < 0
+        || (oldest !== null && (!Number.isSafeInteger(Number(oldest)) || Number(oldest) < 0))) {
+        throw new Error("TICKET_EMAIL_QUEUE_HEALTH_INVALID");
+      }
+      return {backlog, oldestPendingAgeSeconds: oldest === null ? null : Number(oldest)};
+    },
     async claimDue(actor: AutomationCronActor, now: Date, limit: number): Promise<TicketEmailClaim[]> {
       requireAutomationCron(actor);
       return claim(now, limit, null);

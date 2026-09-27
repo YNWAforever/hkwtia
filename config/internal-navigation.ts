@@ -23,45 +23,25 @@ export const portalNavigationGroups = [
 ] as const satisfies readonly InternalNavGroupConfig[];
 
 export const adminNavigationGroups = [
-  {
-    id: "workspace",
-    links: [
-      {id: "dashboard", href: "/admin"},
-      {id: "members", href: "/admin/members"},
-      {id: "at-risk", href: "/admin/at-risk"},
-      {id: "inbox", href: "/admin/inbox"},
-      // Phase C2 (C-4): the prospect side of the same funnel the inbox shows the
-      // member side of, so it sits beside it rather than under operations.
-      {id: "contacts", href: "/admin/contacts"},
-      {id: "tasks", href: "/admin/tasks"},
-      {id: "segments", href: "/admin/segments"},
-      // Phase C2 (C-5): a campaign is addressed to a saved segment, so it sits
-      // immediately after the screen that builds one.
-      {id: "campaigns", href: "/admin/campaigns"},
-    ],
-  },
-  {
-    id: "content",
-    links: [
-      {id: "announcements", href: "/admin/announcements"},
-      {id: "news", href: "/admin/news"},
-      {id: "page-copy", href: "/admin/page-copy"},
-      {id: "media", href: "/admin/media"},
-      {id: "partners", href: "/admin/partners"},
-      {id: "landing-partners", href: "/admin/landing-partners"},
-    ],
-  },
-  {
-    id: "operations",
-    links: [
-      {id: "events", href: "/admin/events-mgmt"},
-      {id: "listings", href: "/admin/listings-review"},
-      {id: "profiles-review", href: "/admin/profiles-review"},
-      {id: "cohorts", href: "/admin/cohorts"},
-      {id: "approvals", href: "/admin/approvals"},
-      {id: "reports", href: "/admin/reports"},
-      {id: "automations", href: "/admin/automations"},
-      {id: "templates", href: "/admin/templates"},
-    ],
-  },
+  {id: "workspace", links: [
+    {id: "dashboard", href: "/admin"}, {id: "at-risk", href: "/admin/at-risk"},
+    {id: "tasks", href: "/admin/tasks"}, {id: "reports", href: "/admin/reports"},
+  ]},
+  {id: "members-organizations", links: [
+    {id: "members", href: "/admin/members"}, {id: "contacts", href: "/admin/contacts"},
+    {id: "segments", href: "/admin/segments"}, {id: "listings", href: "/admin/listings-review"},
+    {id: "profiles-review", href: "/admin/profiles-review"}, {id: "cohorts", href: "/admin/cohorts"},
+  ]},
+  {id: "events", links: [
+    {id: "events", href: "/admin/events-mgmt"}, {id: "approvals", href: "/admin/approvals"},
+  ]},
+  {id: "communications-follow-up", links: [
+    {id: "inbox", href: "/admin/inbox"}, {id: "campaigns", href: "/admin/campaigns"},
+    {id: "templates", href: "/admin/templates"}, {id: "automations", href: "/admin/automations"},
+  ]},
+  {id: "content-settings", links: [
+    {id: "announcements", href: "/admin/announcements"}, {id: "news", href: "/admin/news"},
+    {id: "page-copy", href: "/admin/page-copy"}, {id: "media", href: "/admin/media"},
+    {id: "partners", href: "/admin/partners"}, {id: "landing-partners", href: "/admin/landing-partners"},
+  ]},
 ] as const satisfies readonly InternalNavGroupConfig[];

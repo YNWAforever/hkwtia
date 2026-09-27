@@ -13,6 +13,7 @@ import {requireActor} from "@/lib/auth/actor";
 import {appEnv} from "@/lib/config/env";
 import {clientIpFromHeaders} from "@/lib/security/request-origin";
 import {applicationsRepository} from "@/lib/db/repos/applications";
+import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {companiesRepository} from "@/lib/db/repos/companies";
 import {contactWriterActor, contactsRepository} from "@/lib/db/repos/contacts";
 import {profilesRepository} from "@/lib/db/repos/profiles";
@@ -22,6 +23,8 @@ import {whatsappConsentFields} from "@/lib/whatsapp/consent";
 import {completeApplication, startJoin} from "@/lib/membership/join-service";
 import type {JoinStep} from "@/lib/membership/onboarding";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
+import {createCheckoutSession} from "@/lib/billing/checkout-service";
+import {loadPendingJoinBillingState} from "@/lib/membership/join-billing-state";
 import {type BillingInterval} from "@/lib/membership/catalog";
 import {localizedPath} from "@/lib/urls";
 
@@ -67,6 +70,30 @@ function redirectToOutcome(locale: AppLocale, plan: PlanCode, result: {applicati
   }
 }
 
+/** Explicit join POST. A page refresh or prefetch cannot create a draft. */
+export async function resumeJoinAction(formData: FormData): Promise<void> {
+  const locale = formData.get("locale") === "zh-HK" ? "zh-HK" : "en";
+  const planValue = formData.get("plan");
+  if (typeof planValue !== "string") redirect(localizedPath(locale, "/membership"));
+  let plan: PlanCode;
+  try { plan = getPlan(planValue).code; } catch { redirect(localizedPath(locale, "/membership")); }
+  const applicationId = formData.get("applicationId");
+  const companyId = formData.get("companyId");
+  const actor = await requireActor();
+  if (actor.kind !== "member") throw new Error("UNAUTHORIZED");
+  const result = await startJoin(actor, {
+    plan,
+    applicationId: typeof applicationId === "string" && applicationId ? applicationId : null,
+    companyId: typeof companyId === "string" && companyId ? companyId : null,
+    newApplication: formData.get("intent") === "new",
+  });
+  const destination = destinationForJoin(locale, plan, result.applicationId, result.next);
+  if (destination.kind === "page") redirect(destination.href!);
+  const membership = await membershipsRepository.getByApplicationId(actor, result.applicationId);
+  if (!membership) redirect(`${localizedPath(locale, "/join")}?${new URLSearchParams({plan, application: result.applicationId, error: "status"})}`);
+  redirect(nextUrl(locale, result.next === "checkout" ? "/join/checkout" : "/join/complete", {membership_id: membership.id}));
+}
+
 export async function requestMagicLink(locale: AppLocale, plan: PlanCode | null, continuation: JoinContinuation | null, _state: JoinFormState, formData: FormData): Promise<JoinFormState> {
   if (plan != null) getPlan(plan);
   const email = emailSchema.safeParse(formData.get("email"));
@@ -83,7 +110,11 @@ export async function requestMagicLink(locale: AppLocale, plan: PlanCode | null,
     email: email.data,
   });
   if (!send.allowed) return {message: t("errors.rateLimited")};
-  const callbackURL = buildJoinCallback(appEnv().appUrl, locale, plan, next);
+  const applicationValue = formData.get("application");
+  const applicationId = typeof applicationValue === "string" && applicationValue ? applicationValue : null;
+  let callbackURL: string;
+  try { callbackURL = buildJoinCallback(appEnv().appUrl, locale, plan, next, applicationId); }
+  catch { return {message: t("errors.auth")}; }
 
   try {
     const result = await auth.signIn.magicLink({email: email.data, callbackURL});
@@ -92,7 +123,7 @@ export async function requestMagicLink(locale: AppLocale, plan: PlanCode | null,
     return {message: t("errors.auth")};
   }
 
-  redirect(nextUrl(locale, "/join", {plan, sent: "1", next}));
+  redirect(nextUrl(locale, "/join", {plan, sent: "1", next, application: applicationId}));
 }
 
 export async function saveProfile(locale: AppLocale, plan: PlanCode, applicationId: string | null, _state: JoinFormState, formData: FormData): Promise<JoinFormState> {
@@ -197,4 +228,16 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
     return {message: t("errors.save")};
   }
+}
+
+/** Only an explicit POST may claim or resume a payable membership attempt. */
+export async function beginMembershipCheckoutAction(formData: FormData): Promise<void> {
+  const membershipId = z.string().uuid().safeParse(formData.get("membershipId"));
+  const locale = z.enum(["en", "zh-HK"]).safeParse(formData.get("locale"));
+  if (!membershipId.success || !locale.success) throw new Error("INVALID_CHECKOUT_REQUEST");
+  const actor = await requireActor();
+  const state = await loadPendingJoinBillingState(actor, membershipId.data);
+  if (!state) throw new Error("CHECKOUT_NOT_AVAILABLE");
+  const session = await createCheckoutSession(state.actor, state.membership.id, locale.data);
+  redirect(session.url);
 }

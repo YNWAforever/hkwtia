@@ -368,3 +368,15 @@ npm audit --omit=dev --audit-level=high
 ## Repository guidance
 
 See [`AGENTS.md`](./AGENTS.md) for i18n, accessibility, server-component, test, commit, and secret-handling conventions.
+
+## 2026-09-26 audit remediation branch
+
+The implementation and release evidence are in [`docs/audits/hkwtia-2026-09-26/`](./docs/audits/hkwtia-2026-09-26/). Read `finding-status.md` for F01–F25, `verification.md` for commands actually run and skips, `decisions.md` for policy gates, and `release-runbook.md` for the additive migration and rollback order. The [staff guide](./docs/audits/hkwtia-2026-09-26/staff-guide.md) covers search, batch preview/retry, import, grants, ticket resend, cancellation and check-in in an isolated Preview.
+
+The manual [audit acceptance workflow](./.github/workflows/audit-acceptance.yml) runs disposable PostgreSQL transaction/concurrency tests and bilingual public Playwright checks against a supplied HTTPS Preview URL. It rejects the production alias. Its public job does not exercise authenticated Stripe, Neon Auth or real delivery; those require the isolated environment and test credentials recorded in the runbook. All new effect flags default off.
+
+Audit remediation communication controls and staged activation: see [staff guide](docs/audits/hkwtia-2026-09-26/staff-guide.md) and [release runbook](docs/audits/hkwtia-2026-09-26/release-runbook.md). MEMBER_COMMUNICATION_BATCH_ENABLED defaults off; batch execution creates reviewed campaign drafts and does not authorize sending to live members.
+
+The audit workflow also offers `run_authenticated` in the `audit-isolated` environment. Its preflight and report checker fail missing credentials and skipped tests. The controlled batch retry case requires the isolated scheduled batch worker paused; see the release runbook for the exact secret/flag mapping. `AUDIT_METRICS_ENABLED` adds aggregate job/webhook/worker correlation logs; `scripts/audit-alert-check.ts` rehearses proposed alerts locally without sending notifications. Import payload cleanup is default-off behind `MEMBER_IMPORT_RETENTION_ENABLED`, with configurable day values and an authenticated dry run. No production activation is implied.
+
+The attendee CSV continuation uses the same batch engine and private download route. Apply additive migration 0050 before its web/worker code; EVENT_ATTENDEE_EXPORT_ENABLED defaults false and EVENT_ATTENDEE_EXPORT_TTL_MINUTES defaults to 30. When enabled, the worker materializes the current event/search preview and the download serves an owner-scoped expiring artifact. See the runbook before enabling or rolling back this operation.

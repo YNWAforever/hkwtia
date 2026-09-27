@@ -1,0 +1,99 @@
+{
+  "scope": "Stripe TEST mode, isolated Neon, synthetic identity, worker paused",
+  "steps": [
+    {
+      "case": "decline",
+      "result": "declined at provider; membership remains processing; same Checkout session"
+    },
+    {
+      "case": "3DS and delayed webhook",
+      "result": "challenge completed; real paid Checkout returns processing while signed provider events held"
+    },
+    {
+      "case": "webhook release",
+      "result": "real Stripe-signed deliveries activate membership and browser polling reveals active"
+    },
+    {
+      "case": "replay",
+      "result": "same signed event replay acknowledged without membership change"
+    }
+  ],
+  "deliveries": [
+    {
+      "eventId": "evt_1UKIgOELEX4A1xsqPWerTe3d",
+      "type": "checkout.session.completed",
+      "status": 200,
+      "outcome": {
+        "received": true,
+        "result": "processed"
+      }
+    },
+    {
+      "eventId": "evt_1UKIgPELEX4A1xsq1dsxulAn",
+      "type": "invoice.paid",
+      "status": 200,
+      "outcome": {
+        "received": true,
+        "result": "processed"
+      }
+    },
+    {
+      "eventId": "evt_1UKIgOELEX4A1xsqPWerTe3d",
+      "type": "checkout.session.completed",
+      "status": 200,
+      "outcome": {
+        "received": true,
+        "result": "duplicate"
+      }
+    }
+  ],
+  "sessionId": "cs_test_a1wf2TPiDEOxm9SQ97qu1VTlK3FfLBpxJ73vWKsTFifC0cmyj68ozUnWPW",
+  "membershipId": "0e0fb976-6ef1-4efe-93cc-a7be55454d2a",
+  "paymentMethods": [
+    "card",
+    "link"
+  ],
+  "provider": {
+    "status": "complete",
+    "paymentStatus": "paid",
+    "livemode": false
+  },
+  "databaseFacts": [
+    {
+      "run_key": "evt_1UKIgOELEX4A1xsqPWerTe3d",
+      "kind": "checkout.session.completed",
+      "state": "completed",
+      "attempt_count": 1,
+      "audit_count": 1
+    },
+    {
+      "run_key": "evt_1UKIgPELEX4A1xsq1dsxulAn",
+      "kind": "invoice.paid",
+      "state": "completed",
+      "attempt_count": 1,
+      "audit_count": 1
+    }
+  ],
+  "verifiedAt": "2026-09-27T14:08:22.875Z",
+  "sourceScriptSha256": "5f53e091e6e12edc588bcb7620244541030a321f9d34b48559aeaadeabdb5f82",
+  "rawLogSha256": "f97be12200c96029b0d916d49c1c95b9b4dff4f3f14933fb5b801283ffe27273",
+  "limits": [
+    "Card and Link enabled for the actual Checkout; no real asynchronous payment method configured.",
+    "This is local web plus isolated hosted DB/Auth, not a complete hosted staging deployment.",
+    "Worker paused; no real member message."
+  ],
+  "earlyCompletionBrowser": [
+    {
+      "locale": "en",
+      "case": "webhook before completion-page visit",
+      "initialState": "active",
+      "statusPollsBeforeActive": 0
+    },
+    {
+      "locale": "zh-HK",
+      "case": "webhook before completion-page visit",
+      "initialState": "active",
+      "statusPollsBeforeActive": 0
+    }
+  ]
+}

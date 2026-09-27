@@ -1,4 +1,5 @@
 import "server-only";
+import {observeAuditResponse} from "@/lib/observability/audit-metrics";
 
 import {
   automationCronActor,
@@ -176,7 +177,7 @@ export function createJobPost<T = undefined>(
   const secret = options.secret ?? (() => automationEnv().cronSecret);
   const actor = automationCronActor();
 
-  return async function post(request: Request): Promise<Response> {
+  const run = async function post(request: Request): Promise<Response> {
     if (request.method.toUpperCase() !== "POST") {
       return Response.json({error: "METHOD_NOT_ALLOWED"}, {
         status: 405,
@@ -259,4 +260,5 @@ export function createJobPost<T = undefined>(
     }
     return json({duplicate: false, summary});
   };
+  return request => observeAuditResponse("job_result", () => run(request), () => ({kind: options.kind}));
 }

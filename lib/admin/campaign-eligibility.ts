@@ -79,7 +79,8 @@ export type CampaignReportReason =
   | "missing_variable"
   | "marketing_suppressed"
   | "template_not_approved"
-  | "unknown_recipient";
+  | "unknown_recipient"
+  | "COMMUNICATION_CHANGED" | "COMMUNICATION_DISABLED" | "SHARED_CONTACT_POINT" | "RENEWAL_DATE_MISSING";
 
 export const CAMPAIGN_REPORT_REASONS: readonly CampaignReportReason[] = [
   "no_email",
@@ -91,6 +92,7 @@ export const CAMPAIGN_REPORT_REASONS: readonly CampaignReportReason[] = [
   "marketing_suppressed",
   "template_not_approved",
   "unknown_recipient",
+  "COMMUNICATION_CHANGED", "COMMUNICATION_DISABLED", "SHARED_CONTACT_POINT", "RENEWAL_DATE_MISSING",
 ];
 
 /**

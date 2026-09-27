@@ -1,0 +1,1 @@
+{"now":"2026-09-27T00:10:00.000Z","webhookLagMs":300001,"oldestNotificationMs":300001,"batchFailures":2,"jobs":[{"kind":"ticket-emails","enabled":true,"intervalMs":60000,"lastCompletedAt":"2026-09-27T00:06:00.000Z"}]}

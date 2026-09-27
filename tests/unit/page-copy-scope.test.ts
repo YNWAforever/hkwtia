@@ -122,7 +122,7 @@ describe("page copy scope", () => {
       // rewritten as a composition of the 13 home/* sections and nothing referenced them
       // any more, leaving the 2 metaTitle/metaDescription leaves plus the 13 sections'
       // 161 editable fields already accounted for above (206 - 43 = 163).
-      Home: 163,
+      Home: 166,
       About: 19,
       Chairman: 8,
       Committees: 12,
@@ -151,7 +151,7 @@ describe("page copy scope", () => {
       // Phase A Task 1 (programme D-5) added tierBenefits.* -- the per-tier benefit
       // lists rendered on the plan grid (community 3 + startup 4 + corporate 5 +
       // patron 4 = 16 array elements) -- 82 + 16 = 98.
-      Membership: 98,
+      Membership: 113,
       // WP-4 Task 20 added the breadcrumbCurrent field for the shared PageHero's breadcrumb.
       // Phase A Task 13 (programme D-6/D-7) added the "WhatsApp messages and enquiries"
       // section: heading + 2 body paragraphs = 3 leaves -- 47 + 3 = 50.
@@ -172,7 +172,7 @@ describe("page copy scope", () => {
       // narrowly-scoped one so it alone (not the rest of Footer) is staff-editable.
       MarketingExtras: 1,
     });
-    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(559);
+    expect(Object.values(sizes).reduce((total, count) => total + count, 0)).toBe(577);
   });
 
   it("offers a Chinese placeholder for every English field", () => {

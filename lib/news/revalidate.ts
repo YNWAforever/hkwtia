@@ -1,7 +1,7 @@
-import {revalidatePath} from "next/cache";
+import {revalidatePath, revalidateTag} from "next/cache";
 
 import {routing} from "@/i18n/routing";
-import {localizedPath} from "@/lib/urls";
+
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -11,11 +11,12 @@ const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
  * helper is safe to call from anywhere.
  */
 export function revalidatePublicNews(...slugs: readonly (string | null | undefined)[]): void {
+  revalidateTag("public-news", {expire: 0});
   for (const locale of routing.locales) {
-    revalidatePath(localizedPath(locale, "/news"));
+    revalidatePath(`/${locale}/news`);
     for (const slug of new Set(slugs)) {
       if (typeof slug !== "string" || !slugPattern.test(slug)) continue;
-      revalidatePath(localizedPath(locale, `/news/${slug}`));
+      revalidatePath(`/${locale}/news/${slug}`);
     }
   }
   revalidatePath("/sitemap.xml");

@@ -1,14 +1,17 @@
 import "server-only";
 
-import {and, asc, count, desc, eq, gte, inArray, isNull, lt, or, sql, type SQL} from "drizzle-orm";
+import {and, asc, count, desc, eq, gte, inArray, isNull, lt, notInArray, or, sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
+import {decodeScopedCursor, encodeScopedCursor, parsePageQuery, type CursorPage} from "@/lib/admin/pagination";
+import {AUDIT_DEMO_EVENT_SLUGS, isAuditDemoEventSlug} from "@/config/demo-events";
 import {getDb} from "@/lib/db/repos/common";
 import type {AutomationDatabase, AutomationDatabaseLoader} from "@/lib/db/repos/journeys";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
+import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
-import {auditEvents, companies, companyMembers, eventGuestRegistrations, eventOrderSeats, eventOrders, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility, type PublicProfileStatus} from "@/lib/db/server-schema";
+import {auditEvents, companies, companyMembers, eventCancellationIntents, eventCancellationNotifications, eventGuestRegistrations, eventOrderSeats, eventOrders, eventRegistrations, events, media, memberships, profiles, type Event, type EventStatus, type EventVisibility, type PublicProfileStatus} from "@/lib/db/server-schema";
 import {assertCanSubmitEvent} from "@/lib/events/entitlement-core";
 import {EMPTY_EVENT_FILTERS, hongKongMonthBounds, normaliseEventTag, type EventFilters} from "@/lib/events/filters";
 import {eventBoundary, type PublicEventProjection, type PublicEventStatus} from "@/lib/events/public";
@@ -85,6 +88,11 @@ function assertPriceOnlyOnTicketed(mode: string, price: number | null | undefine
     throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["ticketPriceHkdCents"], message: "ticketPriceHkdCents is only valid for ticketed events"}]);
   }
 }
+function assertSupportedTicketVisibility(mode: string, visibility: EventVisibility): void {
+  if (mode === "ticketed" && visibility === "invite_only") {
+    throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["visibility"], message: "invite-only ticketing is unsupported"}]);
+  }
+}
 const eventInputSchema = eventInputObjectSchema.superRefine(addEventShapeIssues);
 const eventUpdateSchema = eventInputObjectSchema.partial().superRefine((input, context) => {
   if (Object.keys(input).length === 0) context.addIssue({code: z.ZodIssueCode.custom, message: "event update is empty"});
@@ -146,7 +154,7 @@ export type EventMutationDependencies = Readonly<{transaction: <T>(work: (transa
 }>) => Promise<T>) => Promise<T>}>;
 export type RegistrationStatus = "registered" | "waitlist" | "cancelled" | "attended" | "no_show";
 export type EventRegistrationDependencies = Readonly<{transaction: <T>(work: (transaction: Readonly<{
-  lockEvent: (eventId: string) => Promise<Readonly<{id: string; capacity: number | null; published: boolean; registrationMode: Event["registrationMode"]; visibility: Event["visibility"]; startsAt: Date; endsAt: Date | null}> | null>;
+  lockEvent: (eventId: string) => Promise<Readonly<{id: string; slug?: string; capacity: number | null; published: boolean; registrationMode: Event["registrationMode"]; visibility: Event["visibility"]; startsAt: Date; endsAt: Date | null}> | null>;
   hasEligibleMembership: (profileId: string) => Promise<boolean>;
   getRegistration: (eventId: string, profileId: string) => Promise<Readonly<{status: RegistrationStatus}> | null>;
   countRegistered: (eventId: string) => Promise<number>;
@@ -213,16 +221,16 @@ function projectPublicEvent(row: PublicEventMemoryRow, locale: string): PublicEv
 }
 
 // S-1: public reads decide on the enums, never the legacy booleans.
-function isPubliclyVisible(event: Pick<Event, "status" | "visibility">): boolean {
-  return event.status === "published" && event.visibility === "public";
+function isPubliclyVisible(event: Pick<Event, "status" | "visibility" | "slug">): boolean {
+  return event.status === "published" && event.visibility === "public" && !isAuditDemoEventSlug(event.slug);
 }
 
 // Programme D-4d: the detail page is reachable for a cancelled event so a buyer's
 // receipt link resolves, while the listing stays opportunities-to-attend only. Two
 // predicates rather than one, because the two readers genuinely differ -- a single
 // widened rule would put cancelled events back in the listing.
-function isPubliclyReachable(event: Pick<Event, "status" | "visibility">): boolean {
-  return (event.status === "published" || event.status === "cancelled") && event.visibility === "public";
+function isPubliclyReachable(event: Pick<Event, "status" | "visibility" | "slug">): boolean {
+  return (event.status === "published" || event.status === "cancelled") && event.visibility === "public" && !isAuditDemoEventSlug(event.slug);
 }
 
 // Programme B-6: the /events filter axes as SQL, and below as the in-memory twin the
@@ -288,7 +296,7 @@ export async function listPublicEvents(_actor: Actor, options: PublicEventReadOp
   const query = database.select(publicProjectionSelection).from(events)
     .leftJoin(media, eq(events.heroMediaId, media.id))
     .leftJoin(companies, eq(events.organiserCompanyId, companies.id))
-    .where(and(eq(events.status, "published"), eq(events.visibility, "public"), predicate, ...publicFilterPredicates(filters))).orderBy(...order);
+    .where(and(eq(events.status, "published"), eq(events.visibility, "public"), notInArray(events.slug, [...AUDIT_DEMO_EVENT_SLUGS]), predicate, ...publicFilterPredicates(filters))).orderBy(...order);
   const rows = await (limit === undefined ? query : query.limit(limit));
   return rows.map((row) => projectPublicEvent(publicMemoryRow(row), locale));
 }
@@ -303,7 +311,7 @@ export async function listPublicEventSlugs(source?: PublicEventSource): Promise<
   }
   const database = await getDb();
   const rows = await database.select({slug: events.slug}).from(events)
-    .where(and(eq(events.status, "published"), eq(events.visibility, "public")))
+    .where(and(eq(events.status, "published"), eq(events.visibility, "public"), notInArray(events.slug, [...AUDIT_DEMO_EVENT_SLUGS])))
     .orderBy(asc(events.slug));
   return rows.map(({slug}) => slug);
 }
@@ -325,13 +333,13 @@ export async function countPublicEvents(_actor: Actor, options: PublicEventCount
   // The organiser predicate reads companies, so the count joins it the way the list does.
   const [row] = await database.select({value: count()}).from(events)
     .leftJoin(companies, eq(events.organiserCompanyId, companies.id))
-    .where(and(eq(events.status, "published"), eq(events.visibility, "public"), predicate, ...publicFilterPredicates(filters)));
+    .where(and(eq(events.status, "published"), eq(events.visibility, "public"), notInArray(events.slug, [...AUDIT_DEMO_EVENT_SLUGS]), predicate, ...publicFilterPredicates(filters)));
   return Number(row?.value ?? 0);
 }
 
 export async function getPublicEventBySlug(slug: unknown, locale: string, options: PublicEventSlugOptions): Promise<PublicEventProjection | null> {
   const parsedSlug = slugSchema.safeParse(slug);
-  if (!parsedSlug.success) return null;
+  if (!parsedSlug.success || isAuditDemoEventSlug(parsedSlug.data)) return null;
   if (options.source) {
     const row = (await publicRowsFrom(options.source)).find(({event}) => event.slug === parsedSlug.data && isPubliclyReachable(event));
     return row ? projectPublicEvent(row, locale) : null;
@@ -371,8 +379,8 @@ export async function listMemberEvents(actor: Actor, source?: EventRows, eligibi
 // Members see every published event that is not invite-only. The default
 // source lists the whole table; the in-memory branch applies the same rule
 // so tests exercise the filter the database query would.
-function isMemberVisible(event: Pick<Event, "status" | "visibility">): boolean {
-  return event.status === "published" && event.visibility !== "invite_only";
+function isMemberVisible(event: Pick<Event, "status" | "visibility" | "slug">): boolean {
+  return event.status === "published" && event.visibility !== "invite_only" && !isAuditDemoEventSlug(event.slug);
 }
 
 export function localizeEvent(event: Event, locale: string): LocalizedEvent {
@@ -443,6 +451,8 @@ export async function createEvent(actor: Actor, input: unknown, dependencies?: E
   const parsed = eventInputSchema.parse(input);
   // The create arm has the whole story — the parsed mode is the row's mode.
   assertPriceOnlyOnTicketed(parsed.registrationMode, parsed.ticketPriceHkdCents);
+  assertSupportedTicketVisibility(parsed.registrationMode, parsed.visibility ?? (parsed.memberOnly ? "members_only" : "public"));
+  if (isAuditDemoEventSlug(parsed.slug) && reconciledEventFlags(parsed).status === "published") throw new Error("DEMO_EVENT_PUBLICATION_BLOCKED");
   return (dependencies ?? await defaultMutationDependencies()).transaction(async (transaction) => {
     if (parsed.heroMediaId !== null) {
       const mediaRow = await transaction.lockActiveMedia(parsed.heroMediaId);
@@ -464,12 +474,14 @@ export async function updateEvent(actor: Actor, id: unknown, input: unknown, dep
     if (!current) return null;
     if (current.status === "cancelled") throw new Error("EVENT_CANCELLED_TERMINAL");
     assertPriceOnlyOnTicketed(parsed.registrationMode ?? current.registrationMode, parsed.ticketPriceHkdCents);
+    assertSupportedTicketVisibility(parsed.registrationMode ?? current.registrationMode, visibilityFrom(parsed, current.visibility));
+    const flags = reconciledEventFlags(parsed, {status: current.status, visibility: current.visibility});
+    if (isAuditDemoEventSlug(current.slug) && flags.status === "published") throw new Error("DEMO_EVENT_PUBLICATION_BLOCKED");
     eventPeriodSchema.parse({startsAt: parsed.startsAt ?? current.startsAt, endsAt: parsed.endsAt === undefined ? current.endsAt : parsed.endsAt});
     if (parsed.heroMediaId !== undefined && parsed.heroMediaId !== null) {
       const mediaRow = await transaction.lockActiveMedia(parsed.heroMediaId);
       if (!mediaRow || mediaRow.archivedAt !== null) throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["heroMediaId"], message: "EVENT_HERO_MEDIA_INVALID"}]);
     }
-    const flags = reconciledEventFlags(parsed, {status: current.status, visibility: current.visibility});
     const event = await transaction.updateEvent(eventId, {...parsed, ...flags, publishedAt: flags.status === "published" ? (current.publishedAt ?? new Date()) : null});
     if (!event) return null;
     await transaction.insertAudit({actorUserId: actor.profileId, actorType: actor.kind, action: "event.updated", targetType: "event", targetId: event.id, metadata: {fields: Object.keys(parsed).sort()}});
@@ -483,7 +495,7 @@ async function defaultRegistrationDependencies(): Promise<EventRegistrationDepen
     lockEvent: async (eventId) => (await tx.select({id: events.id, capacity: events.capacity, published: events.published, registrationMode: events.registrationMode, visibility: events.visibility, startsAt: events.startsAt, endsAt: events.endsAt}).from(events).where(eq(events.id, eventId)).for("update"))[0] ?? null,
     hasEligibleMembership: async (profileId) => Boolean((await tx.select({id: memberships.id}).from(memberships)
       .leftJoin(companyMembers, and(eq(companyMembers.companyId, memberships.companyId), eq(companyMembers.userId, profileId), isNull(companyMembers.revokedAt)))
-      .where(and(or(eq(memberships.ownerUserId, profileId), eq(companyMembers.userId, profileId)), inArray(memberships.status, eligibleStatuses))).limit(1))[0]),
+      .where(and(or(eq(memberships.ownerUserId, profileId), eq(companyMembers.userId, profileId)), inArray(memberships.status, eligibleStatuses), membershipGrantValiditySql())).limit(1))[0]),
     getRegistration: async (eventId, profileId) => (await tx.select({status: eventRegistrations.status}).from(eventRegistrations).where(and(eq(eventRegistrations.eventId, eventId), eq(eventRegistrations.profileId, profileId))))[0] ?? null,
     countRegistered: async (eventId) => {
       // The event row is locked by registerForEvent. Guest RSVP takes the same
@@ -505,7 +517,7 @@ export async function registerForEvent(actor: Actor, input: unknown, dependencie
   const resolved = dependencies ?? await defaultRegistrationDependencies();
   const outcome = await resolved.transaction<Readonly<{disposition: "registered" | "waitlist" | "already_registered" | "already_waitlisted"; startsAt?: Date}>>(async (transaction) => {
     const event = await transaction.lockEvent(eventId);
-    if (!event || !event.published || event.visibility === "invite_only") throw new Error("EVENT_NOT_FOUND");
+    if (!event || !event.published || event.visibility === "invite_only" || isAuditDemoEventSlug(event.slug)) throw new Error("EVENT_NOT_FOUND");
     if (event.registrationMode !== "rsvp") throw new Error("EVENT_REGISTRATION_NOT_RSVP");
     if (eventBoundary(event) < (resolved.now?.() ?? new Date())) throw new Error("EVENT_REGISTRATION_CLOSED");
     if (!await transaction.hasEligibleMembership(actor.profileId)) throw new Error("MEMBERSHIP_INACTIVE");
@@ -532,7 +544,7 @@ export async function registerForEvent(actor: Actor, input: unknown, dependencie
 
 export async function getEventBySlug(actor: Actor, slug: unknown, source?: EventRows): Promise<Event | null> {
   const parsedSlug = slugSchema.safeParse(slug);
-  if (!parsedSlug.success) return null;
+  if (!parsedSlug.success || (actor.kind !== "staff" && actor.kind !== "exco" && actor.kind !== "superadmin" && isAuditDemoEventSlug(parsedSlug.data))) return null;
   const row = (await rowsFrom(source)).find((event) => event.slug === parsedSlug.data) ?? null;
   if (!row) return null;
   if (actor.kind === "anonymous") return isPubliclyVisible(row) ? row : null;
@@ -544,6 +556,14 @@ export async function getEventBySlug(actor: Actor, slug: unknown, source?: Event
 export async function listAdminEvents(actor: Actor, source?: EventRows): Promise<Event[]> {
   requireAdmin(actor);
   return sorted(await rowsFrom(source));
+}
+
+export async function getAdminEventById(actor: Actor, eventIdInput: unknown): Promise<Event | null> {
+  requireAdmin(actor);
+  const eventId = eventIdSchema.parse(eventIdInput);
+  const database = await getDb();
+  const rows = await database.select().from(events).where(eq(events.id, eventId)).limit(1);
+  return rows[0] ?? null;
 }
 
 /**
@@ -630,6 +650,47 @@ export async function listEventAttendees(actor: Actor, eventIdInput: unknown, de
       checkedInAt: parsed.checked_in_at,
     };
   });
+}
+
+/** Bounded door list; CSV export keeps its independent full-stream contract. */
+export async function listEventAttendeePage(actor: Actor, eventIdInput: unknown, queryInput: unknown, deps: MemberEventDependencies = {}): Promise<CursorPage<EventAttendee> | null> {
+  requireAdmin(actor);
+  const eventId = eventIdSchema.parse(eventIdInput);
+  const query = parsePageQuery(queryInput);
+  const search = query.search.toLocaleLowerCase("en");
+  const scope = `event:${eventId}:attendees:${search}`;
+  const cursor = query.cursor ? decodeScopedCursor(scope, query.cursor) : null;
+  const database = await memberDatabase(deps);
+  const existing = executedRows(await database.execute(sql`SELECT ${events.id} AS id FROM ${events} WHERE ${events.id} = ${eventId}`));
+  if (existing.length === 0) return null;
+  const rows = executedRows(await database.execute(sql`
+    WITH attendee_rows AS (
+      SELECT 'member'::text AS kind, ${eventRegistrations.profileId} AS profile_id, NULL::uuid AS guest_id, NULL::uuid AS seat_id, NULL::uuid AS order_id, ${profiles.displayName} AS display_name, ${profiles.email} AS email, NULL::text AS organisation, ${eventRegistrations.status}::text AS status, ${eventRegistrations.checkedInAt} AS checked_in_at, ${eventRegistrations.profileId}::text AS item_id
+      FROM ${eventRegistrations} JOIN ${profiles} ON ${profiles.id} = ${eventRegistrations.profileId}
+      WHERE ${eventRegistrations.eventId} = ${eventId}
+      UNION ALL
+      SELECT 'guest'::text, NULL::text, ${eventGuestRegistrations.id}, NULL::uuid, NULL::uuid, ${eventGuestRegistrations.name}, ${eventGuestRegistrations.email}, ${eventGuestRegistrations.organisation}, ${eventGuestRegistrations.status}::text, ${eventGuestRegistrations.checkedInAt}, ${eventGuestRegistrations.id}::text
+      FROM ${eventGuestRegistrations} WHERE ${eventGuestRegistrations.eventId} = ${eventId}
+      UNION ALL
+      SELECT 'ticket'::text, NULL::text, NULL::uuid, ${eventOrderSeats.id}, ${eventOrders.id}, ${eventOrderSeats.attendeeName}, ${eventOrderSeats.attendeeEmail}, NULL::text, ${eventOrders.status}::text, ${eventOrderSeats.checkedInAt}, ${eventOrderSeats.id}::text
+      FROM ${eventOrderSeats} JOIN ${eventOrders} ON ${eventOrders.id} = ${eventOrderSeats.orderId}
+      WHERE ${eventOrders.eventId} = ${eventId} AND ${eventOrders.status} = 'paid'
+    )
+    SELECT attendee_rows.*, lower(display_name) AS sort_name FROM attendee_rows
+    WHERE ${search ? sql`(position(${search} in lower(display_name)) > 0 OR position(${search} in lower(coalesce(email, ''))) > 0 OR position(${search} in lower(coalesce(organisation, ''))) > 0 OR position(${search} in coalesce(order_id::text, '')) > 0 OR position(${search} in coalesce(seat_id::text, '')) > 0)` : sql`TRUE`}
+      AND ${cursor ? sql`(lower(display_name), kind, item_id) > (${cursor[0]}, ${cursor[1]}, ${cursor[2]})` : sql`TRUE`}
+    ORDER BY lower(display_name) ASC, kind ASC, item_id ASC
+    LIMIT ${query.limit + 1}
+  `));
+  const hasNext = rows.length > query.limit;
+  const pageRows = rows.slice(0, query.limit);
+  const items = pageRows.map((row) => {
+    const parsed = attendeeRowSchema.parse(row);
+    return {kind: parsed.kind, profileId: parsed.profile_id, guestId: parsed.guest_id, seatId: parsed.seat_id, orderId: parsed.order_id, displayName: parsed.display_name, email: parsed.email, organisation: parsed.organisation, status: parsed.status, checkedInAt: parsed.checked_in_at};
+  });
+  const last = pageRows.at(-1);
+  const nextCursor = hasNext && last ? encodeScopedCursor(scope, [String(last.sort_name), String(last.kind), String(last.item_id)]) : null;
+  return {items, nextCursor};
 }
 
 // ---------------------------------------------------------------------------
@@ -990,6 +1051,27 @@ export async function cancelEvent(actor: Actor, eventId: unknown, deps: MemberEv
       VALUES (${actor.profileId}, ${actor.kind}, 'event.cancelled', 'event', ${id},
               ${JSON.stringify({slug: current.slug, from: current.status})}::jsonb)
     `);
+    // Snapshot identities and contact fields while the event lock prevents new RSVPs.
+    // One set-based write, no synchronous email. The worker pages durable rows.
+    await transaction.execute(sql`
+      INSERT INTO ${eventCancellationIntents} (event_id, revision, cancelled_at, actor_profile_id)
+      VALUES (${id}, 1, now(), ${actor.profileId}) ON CONFLICT (event_id) DO NOTHING
+    `);
+    await transaction.execute(sql`
+      INSERT INTO ${eventCancellationNotifications}
+        (event_id, revision, registration_kind, registration_id, channel,
+         recipient_name, recipient_email, recipient_locale, status, idempotency_key)
+      SELECT ${id}::uuid, 1, 'member', r.profile_id, 'email', p.display_name, p.email, p.locale,
+             'pending', 'event-cancel:' || ${id}::text || ':1:member:' || r.profile_id || ':email'
+      FROM ${eventRegistrations} AS r JOIN ${profiles} AS p ON p.id = r.profile_id
+      WHERE r.event_id = ${id} AND r.status IN ('registered', 'waitlist', 'attended')
+      UNION ALL
+      SELECT ${id}::uuid, 1, 'guest', g.id::text, 'email', g.name, g.email, g.locale,
+             'pending', 'event-cancel:' || ${id}::text || ':1:guest:' || g.id::text || ':email'
+      FROM ${eventGuestRegistrations} AS g
+      WHERE g.event_id = ${id} AND g.status IN ('registered', 'waitlist', 'attended')
+      ON CONFLICT (event_id, revision, registration_kind, registration_id, channel) DO NOTHING
+    `);
     return {status: "cancelled" as const, event: updated};
   });
 }
@@ -1002,7 +1084,7 @@ export type CancellationPreview = Readonly<{
   /**
    * Member and guest RSVP registrations that are still standing. Separate from
    * `attendees` because the two answer different questions: `attendees` is who
-   * a refund covers (paid seats), this is who the slice will *not* email. On a
+   * a refund covers (paid seats), this is who the cancellation affects. On a
    * free event `attendees` is legitimately zero and this is the only figure that
    * tells staff anyone is affected at all.
    */
@@ -1071,10 +1153,12 @@ export const eventsRepository = {
   listForMember: listMemberEvents,
   getBySlug: getEventBySlug,
   listForAdmin: listAdminEvents,
+  getForAdmin: getAdminEventById,
   create: createEvent,
   update: updateEvent,
   register: registerForEvent,
   listAttendees: listEventAttendees,
+  listAttendeePage: listEventAttendeePage,
   saveMemberDraft: saveMemberEventDraft,
   submitMember: submitMemberEvent,
   listForCompany: listCompanyEvents,

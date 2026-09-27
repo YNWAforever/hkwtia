@@ -23,7 +23,7 @@ const adminNavMocks = vi.hoisted(() => ({
   labels: {} as Record<string, unknown>,
   pathname: "/admin",
 }));
-vi.mock("next/navigation", () => ({usePathname: () => adminNavMocks.pathname}));
+vi.mock("next/navigation", () => ({usePathname: () => adminNavMocks.pathname, useRouter: () => ({push: vi.fn(), replace: vi.fn(), refresh: vi.fn()})}));
 vi.mock("next-intl", () => ({
   useTranslations: (namespace: string) => (key: string) => {
     const root = namespace === "Admin" ? adminNavMocks.labels : {};
@@ -67,11 +67,12 @@ describe("admin presentation", () => {
     adminNavMocks.labels = labels;
     const {container: navContainer} = render(<AdminNav locale="en" />);
     const nav = navContainer.innerHTML;
-    const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: null}} query="" locale="en"/>);
+    const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: null, totalMatching: 0}} query="" locale="en"/>);
     const page = renderToStaticMarkup(<main><h1>{labels.members.title}</h1>{table}</main>);
 
     expect(page.match(/<h1/g)).toHaveLength(1);
     expect(nav).toContain(`aria-label="${labels.navigation.label}"`);
+    expect(nav.match(/<summary/g)).toHaveLength(5);
     expect(nav).toContain(`>${labels.navigation.automations}</a>`);
     expect(nav).toContain("/admin/automations");
     expect(table).toMatch(new RegExp(`<caption[^>]*>${labels.members.caption}</caption>`));
@@ -81,7 +82,7 @@ describe("admin presentation", () => {
     adminNavMocks.labels = labels;
     const {container: navContainer} = render(<AdminNav locale="en" />);
     const nav = navContainer.innerHTML;
-    const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: "opaque-cursor"}} query="acme" locale="en"/>);
+    const table = renderToStaticMarkup(<MemberTable labels={labels.members} page={{items: [], nextCursor: "opaque-cursor", totalMatching: 21}} query="acme" locale="en"/>);
 
     expect(nav).toContain(labels.brand);
     expect(table).toContain("?q=acme&amp;cursor=opaque-cursor");
@@ -136,7 +137,7 @@ describe("admin presentation", () => {
    * `tests/unit/event-attendees-ticket-rows.test.ts`.
    */
   it.each([en.Admin.eventsMgmt, zh.Admin.eventsMgmt])("renders a ticket seat's paid status from the door-list labels", (events) => {
-    const labels = {caption: events.attendees, kind: events.kind, kinds: {member: events.kinds.member, guest: events.kinds.guest, ticket: events.kinds.ticket}, name: events.name, email: events.email, organisation: events.organisation, status: events.status, checkedIn: events.checkedIn, checkIn: events.checkIn, checkingIn: events.checkingIn, resendPass: events.resendPass, resending: events.resending, unavailable: events.unavailable, statuses: {registered: events.statuses.registered, waitlist: events.statuses.waitlist, cancelled: events.statuses.cancelled, attended: events.statuses.attended, no_show: events.statuses.noShow, paid: events.statuses.paid}};
+    const labels = {caption: events.attendees, search: events.attendeeSearch, noMatches: events.attendeeNoMatches, kind: events.kind, kinds: {member: events.kinds.member, guest: events.kinds.guest, ticket: events.kinds.ticket}, name: events.name, email: events.email, organisation: events.organisation, status: events.status, checkedIn: events.checkedIn, checkIn: events.checkIn, checkingIn: events.checkingIn, resendPass: events.resendPass, resending: events.resending, unavailable: events.unavailable, statuses: {registered: events.statuses.registered, waitlist: events.statuses.waitlist, cancelled: events.statuses.cancelled, attended: events.statuses.attended, no_show: events.statuses.noShow, paid: events.statuses.paid}};
     const {container} = render(<AttendeeTable attendees={[{kind: "ticket", profileId: null, guestId: null, seatId: "seat-1", orderId: "order-1", displayName: "Ada Lovelace", email: "ada@example.test", organisation: null, status: "paid", checkedInAt: null}]} checkInAction={async () => ({})} labels={labels} locale="en" resendPassMessages={{successMessage: events.resendSuccess, errorMessage: events.resendError}} resendPassPath="/en/admin/events-mgmt/event-1" seatCheckInAction={async () => ({})}/>);
     expect(container.textContent).toContain(events.statuses.paid);
     // A ticket seat carries both controls: the seat-keyed Check in fallback for a

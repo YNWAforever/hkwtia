@@ -6,10 +6,25 @@ const state = vi.hoisted(() => ({
   actorThrows: false,
   result: {status: "redirect", url: "https://checkout.stripe.com/session"} as Record<string, unknown>,
   calls: [] as Array<Record<string, unknown>>,
+  rateLimitThrows: false,
+  rateLimitAllowed: true,
+  rateLimitCalls: 0,
 }));
 
 vi.mock("next/headers", () => ({
   headers: async () => new Headers({"x-vercel-forwarded-for": state.ip}),
+  cookies: async () => ({get: () => undefined, set: () => undefined, delete: () => undefined}),
+}));
+vi.mock("@/lib/security/shared-rate-limit", () => ({
+  createSharedRateLimiter: () => ({check: async () => {
+    if (state.rateLimitThrows) throw new Error("PRIVATE_RATE_LIMIT_DATABASE_DETAIL");
+    state.rateLimitCalls += 1;
+    const allowed = state.rateLimitAllowed && state.rateLimitCalls <= 5;
+    return {allowed, retryAfterSeconds: allowed ? 0 : 900};
+  }}),
+}));
+vi.mock("@/lib/db/repos/event-checkout-recoveries", () => ({
+  eventCheckoutRecoveriesRepository: {issueForAttempt: async () => true, read: async () => null, invalidate: async () => undefined},
 }));
 vi.mock("@/lib/auth/actor", () => ({
   getActor: async () => {
@@ -34,13 +49,14 @@ function form(overrides: Record<string, string> = {}): FormData {
   data.set("buyerName", "Ada Lovelace");
   data.set("buyerEmail", "ADA@EXAMPLE.HK");
   data.set("locale", "en");
+  data.set("quantity", "1");
   data.set("seatName-0", "Ada Lovelace");
   data.set("seatEmail-0", "ada@example.hk");
   for (const [key, value] of Object.entries(overrides)) data.set(key, value);
   return data;
 }
 
-/** A fresh module instance per test: the limiter is deliberately process-local. */
+/** A fresh action module per test; the shared limiter store is a controlled mock. */
 async function loadAction() {
   vi.resetModules();
   return (await import("@/lib/tickets/checkout-actions")).submitTicketCheckoutAction;
@@ -53,6 +69,18 @@ describe("submitTicketCheckoutAction", () => {
     state.actorThrows = false;
     state.result = {status: "redirect", url: "https://checkout.stripe.com/session"};
     state.calls = [];
+    state.rateLimitThrows = false;
+    state.rateLimitAllowed = true;
+    state.rateLimitCalls = 0;
+  });
+
+  it("fails closed without creating an order when the shared limiter store is unavailable", async () => {
+    state.rateLimitThrows = true;
+    const action = await loadAction();
+    const result = await action({status: "idle"}, form());
+    expect(result).toEqual({status: "error", code: "UNAVAILABLE"});
+    expect(JSON.stringify(result)).not.toContain("PRIVATE_RATE_LIMIT_DATABASE_DETAIL");
+    expect(state.calls).toEqual([]);
   });
 
   it("ignores a honeypot submission without reaching the checkout core", async () => {
@@ -65,8 +93,15 @@ describe("submitTicketCheckoutAction", () => {
   it("rejects malformed input before reaching the checkout core", async () => {
     const action = await loadAction();
 
-    await expect(action({status: "idle"}, form({buyerEmail: "not-an-email"}))).resolves.toEqual({status: "error", code: "INVALID"});
-    await expect(action({status: "idle"}, form({eventId: "not-a-uuid"}))).resolves.toEqual({status: "error", code: "INVALID"});
+    await expect(action({status: "idle"}, form({buyerEmail: "not-an-email"}))).resolves.toEqual({status: "error", code: "INVALID", fieldErrors: {buyerEmail: "invalid"}});
+    await expect(action({status: "idle"}, form({eventId: "not-a-uuid"}))).resolves.toEqual({status: "error", code: "INVALID", fieldErrors: {eventId: "invalid"}});
+    expect(state.calls).toHaveLength(0);
+  });
+
+  it("refuses an incomplete selected seat before reaching the checkout core", async () => {
+    const action = await loadAction();
+    const data = form({quantity: "3"});
+    await expect(action({status: "idle"}, data)).resolves.toEqual(expect.objectContaining({status: "error", code: "INVALID"}));
     expect(state.calls).toHaveLength(0);
   });
 

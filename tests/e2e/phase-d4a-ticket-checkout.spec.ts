@@ -71,10 +71,8 @@ for (const {locale, prefix} of locales) {
     await expect(buyerPage.getByText(copy.Ticket.heading)).toBeVisible();
     await buyerPage.locator('input[name="buyerName"]').fill("Ada Lovelace");
     await buyerPage.locator('input[name="buyerEmail"]').fill("ada@example.test");
-    // The seat-count select is bound to client state that decides how many
-    // attendee rows render; it is never submitted, so it carries no `name` and
-    // the field contract is its label. `getByLabel` reaches it, exactly as the
-    // component's unit test does.
+    // The selected quantity is submitted and the server rejects any missing
+    // attendee rows before creating a payable order.
     await buyerPage.getByLabel(copy.Ticket.seatCount).selectOption("2");
     await buyerPage.locator('input[name="seatName-0"]').fill("Ada Lovelace");
     await buyerPage.locator('input[name="seatEmail-0"]').fill("ada@example.test");

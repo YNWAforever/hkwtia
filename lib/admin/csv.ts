@@ -25,7 +25,7 @@ const header = [
 const UTF8_BOM = String.fromCharCode(0xfeff);
 
 function neutralizeFormula(value: string): string {
-  return /^\s*[=+\-@]/u.test(value) ? `'${value}` : value;
+  return (/^[\x00-\x1f\x7f]/u.test(value) || /^\s*[=+\-@]/u.test(value)) ? `'${value}` : value;
 }
 
 export function csvCell(value: string | number | null): string {

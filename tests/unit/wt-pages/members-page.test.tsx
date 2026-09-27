@@ -99,8 +99,17 @@ describe("/members directory (D-11)", () => {
 
     const html = await renderDirectory();
 
-    expect(html).toContain(bundles.en.Members.emptyTitle);
+    expect(html).toContain(bundles.en.Members.noPublishedTitle);
     expect(html).not.toContain('class="partner-record-grid"');
+  });
+
+  it("distinguishes an empty published directory from filters with no matches", async () => {
+    profiles.listPublished.mockResolvedValue([]);
+    const unfiltered = await renderDirectory();
+    const filtered = await renderDirectory({q: "missing"});
+    expect(unfiltered).toContain("No member profiles are published yet.");
+    expect(filtered).toContain(bundles.en.Members.emptyDescription);
+    expect(filtered).not.toContain("No member profiles are published yet.");
   });
 
   it("shows an unavailable state when the database is unreachable", async () => {

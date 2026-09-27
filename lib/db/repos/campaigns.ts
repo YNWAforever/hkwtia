@@ -29,7 +29,7 @@ import {
 } from "@/lib/admin/campaigns";
 import {SEGMENT_FILTER_VERSION, parseSegmentFilter, segmentIdSchema, type SegmentFilterSet} from "@/lib/admin/segment-schema";
 import {requireAdmin} from "@/lib/auth/authorize";
-import {auditEvents, campaignRecipients, campaigns, contacts, profiles, savedSegments} from "@/lib/db/server-schema";
+import {adminBatches, auditEvents, campaignRecipients, campaigns, contacts, profiles, savedSegments} from "@/lib/db/server-schema";
 import {
   createCampaignRecipientDeliveryRepository,
   type CampaignRecipientDeliveryRepository,
@@ -194,12 +194,13 @@ async function transitionCampaign(
   campaignId: string,
   from: readonly string[],
   assignment: SQL,
+  condition: SQL = sql`true`,
 ): Promise<void> {
   const rows = resultRows(await db.execute(sql`
     UPDATE ${campaigns} AS target
     SET ${assignment}, updated_at = now()
     WHERE target.id = ${campaignId}::uuid
-      AND target.status IN (${statusList(from)})
+      AND target.status IN (${statusList(from)}) AND ${condition}
     RETURNING target.id
   `));
   // A transition that matched nothing is a stale screen, not a silent no-op:
@@ -527,7 +528,13 @@ export function createCampaignsRepository(
       const db = asDb(store);
       await transitionCampaign(db, parsedCampaignId, ["draft"], sql`
         status = 'review', rejection_reason = NULL, reviewed_at = NULL, reviewed_by_profile_id = NULL
-      `);
+      `, sql`(target.variables_template->>'_batchId' IS NULL OR EXISTS (
+        SELECT 1 FROM ${adminBatches} b WHERE b.id::text = target.variables_template->>'_batchId'
+          AND b.actor_profile_id = target.created_by_profile_id
+          AND b.state IN ('completed','completed_with_errors','cancelled')
+          AND coalesce((b.counters->>'pending')::int,0) = 0
+          AND coalesce((b.counters->>'running')::int,0) = 0
+      ))`);
       await appendCampaignAudit(db, actor, parsedCampaignId, "campaign.submitted_for_review", {});
     },
 

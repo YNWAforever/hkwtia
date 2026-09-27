@@ -155,7 +155,7 @@ describe("event detail page donor markup", () => {
   });
 
   it("shows the past-event action bar instead of any registration form once the boundary has passed", async () => {
-    events.getPublicBySlug.mockResolvedValue(event("2020-01-02T09:00:00.000Z"));
+    events.getPublicBySlug.mockResolvedValue(event("2020-01-02T09:00:00.000Z", {startsAt: "2020-01-01T09:00:00.000Z"}));
 
     const rendered = renderToStaticMarkup(await EventPage(props));
 

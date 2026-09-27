@@ -81,6 +81,26 @@ describe("isolated M2 authenticated fixture reset", () => {
     expect(seed).toHaveBeenCalledTimes(1);
   });
 
+  it("rebases only fixture operational dates when a browser reference instant is explicit", async () => {
+    const connection = {query: vi.fn<(sql: string, values?: readonly unknown[]) => Promise<unknown>>(async () => undefined), release: vi.fn()};
+    const seed = vi.fn(async () => undefined);
+    await resetM2AuthenticatedFixtures(
+      {DATABASE_URL_TEST: "isolated", DATABASE_URL: "isolated"},
+      {connect: async () => connection, seed},
+      new Date("2026-09-27T00:00:00Z"),
+    );
+    const updates = connection.query.mock.calls.filter(([sql]) => sql.includes("jsonb_to_recordset"));
+    expect(updates).toHaveLength(2);
+    const profiles = JSON.parse(String(updates[0]![1]![0])) as Array<{id: string; last_login_at: string | null}>;
+    const memberships = JSON.parse(String(updates[1]![1]![0])) as Array<{id: string; billing_period_end: string}>;
+    expect(profiles).toHaveLength(30);
+    expect(profiles.every(row => row.id.startsWith("m2-"))).toBe(true);
+    expect(profiles.find(row => row.id === "m2-risk-01")?.last_login_at).toBe("2026-09-26T00:00:00.000Z");
+    expect(memberships[0]?.billing_period_end).toBe("2026-10-12T00:00:00.000Z");
+    expect(updates.every(([sql]) => sql.includes("WHERE") && sql.includes("fixture.id"))).toBe(true);
+    expect(seed).toHaveBeenCalledTimes(1);
+  });
+
   it("deletes only named deterministic mutation state and reruns the M2 seed transactionally", async () => {
     const queries: string[] = [];
     const connection = {query: vi.fn(async (sql: string, values: readonly unknown[] = []) => { queries.push(sql + "\n" + JSON.stringify(values)); }), release: vi.fn()};

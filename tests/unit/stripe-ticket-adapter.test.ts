@@ -1,5 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
+import {ANONYMOUS_ACTOR} from "@/lib/membership/lifecycle";
+
 import {createStripeBillingAdapter} from "@/lib/billing/stripe";
 import {createTicketCheckout, type TicketCheckoutDependencies} from "@/lib/tickets/checkout-core";
 
@@ -177,14 +179,14 @@ describe("the charge a two-seat order creates", () => {
       stripe: createStripeBillingAdapter(value),
       eventForTicket: vi.fn(async () => ({
         id: "ev-1", slug: "edge-ai", titleEn: "Edge AI", titleZh: "邊緣 AI", startsAt: new Date("2026-10-01T10:00:00Z"),
-        published: true, registrationMode: "ticketed", ticketPriceHkdCents: 25_000,
+        published: true, visibility: "public", memberOnly: false, registrationMode: "ticketed", ticketPriceHkdCents: 25_000,
       })),
       appUrl: "https://w.test",
       now: () => new Date("2026-09-14T04:00:00Z"),
     };
 
     await createTicketCheckout({
-      eventId: "ev-1",
+      actor: ANONYMOUS_ACTOR, eventId: "ev-1",
       buyer: {profileId: null, name: "Ada", email: "ada@example.test"},
       seats: [{name: "Ada", email: "ada@example.test"}, {name: "Grace", email: "grace@example.test"}],
       idempotencyKey: "idem-1",

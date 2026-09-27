@@ -1,4 +1,5 @@
 import "server-only";
+import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
 
 import {sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
@@ -324,6 +325,7 @@ const directoryFrom = sql`
     FROM ${memberships}
     WHERE ${memberships.companyId} = ${companies.id}
       AND ${memberships.status} IN ('active', 'past_due', 'cancel_at_period_end')
+      AND ${membershipGrantValiditySql()}
     ORDER BY ${memberships.createdAt} DESC
     LIMIT 1
   ) active_plan ON true

@@ -44,6 +44,7 @@ export type JoinMembership = {
 type ApplicationRepository = {
   getById: (actor: Actor, applicationId: string) => Promise<JoinApplication | null>;
   create: (actor: Actor, input: Record<string, unknown>) => Promise<JoinApplication>;
+  resumeOrCreate?: (actor: Actor, input: {planCode: PlanCode; companyId: string | null; newApplication: boolean}) => Promise<JoinApplication>;
   update: (actor: Actor, applicationId: string, input: Record<string, unknown>) => Promise<JoinApplication | null>;
   setCompany?: (actor: Actor, applicationId: string, companyId: string) => Promise<JoinApplication | null>;
 };
@@ -158,7 +159,7 @@ async function loadOrCreateApplication(
 ): Promise<JoinApplication> {
   if (input.applicationId) {
     const existing = await deps.applications.getById(actor, input.applicationId);
-    if (!existing) throw new Error("APPLICATION_NOT_FOUND");
+    if (!existing || existing.applicantUserId !== actor.profileId) throw new Error("APPLICATION_NOT_FOUND");
     if (existing.planCode !== input.plan) throw new Error("APPLICATION_PLAN_MISMATCH");
     if (companyId && existing.companyId && existing.companyId !== companyId) throw new Error("APPLICATION_COMPANY_MISMATCH");
     if (companyId && !existing.companyId) {

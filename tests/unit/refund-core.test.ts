@@ -47,7 +47,7 @@ describe("refundOrder", () => {
     const commit = vi.mocked(deps.orders.refundPaidOrder).mock.calls[0]![1] as Record<string, unknown>;
     expect(commit).toMatchObject({
       refundedAt: new Date("2026-09-16T12:00:00Z"),
-      actorUserId: "auth-1",
+      actorUserId: "p-1",
       actorType: "staff",
       // A staff refund is recorded as a staff reason in both the column and the
       // audit metadata, so the system issuer below can be told apart from it.
@@ -112,7 +112,7 @@ describe("refundOrder", () => {
     await expect(refundOrder(staff, {orderId}, deps)).resolves.toEqual({status: "refunded"});
     expect(deps.stripe.refundPaymentIntent).not.toHaveBeenCalled();
     expect(deps.orders.reconcileRefundedOrder).toHaveBeenCalledWith(orderId, expect.objectContaining({
-      expectedAmountHkdCents: 50_000, refundReason: "cancelled", reason: "provider_reconciled",
+      expectedAmountHkdCents: 50_000, actorUserId: "p-1", refundReason: "cancelled", reason: "provider_reconciled",
     }));
     expect(deps.sendRefundEmail).toHaveBeenCalledTimes(1);
   });

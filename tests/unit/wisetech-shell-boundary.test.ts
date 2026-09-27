@@ -41,7 +41,7 @@ describe("WiseTech PR2 source boundary", () => {
   it("does not expose donor-only five-group or retired paths", () => {
     const navigation = readFileSync(resolve(process.cwd(), "config/navigation.ts"), "utf8");
     for (const sourceOnly of [
-      "/activities", "/members", "/solutions", "/programmes/", "/gba", "/insights",
+      "/activities", "/solutions", "/programmes/", "/gba", "/insights",
       "events-activities", "members-solutions", "programmes-gba", "insights-about",
     ]) expect(navigation, sourceOnly).not.toMatch(new RegExp(`['\"]${sourceOnly}['\"]`));
   });

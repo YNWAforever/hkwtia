@@ -1,5 +1,7 @@
 import "server-only";
+import {membershipGrantValiditySql} from "@/lib/db/repos/membership-grant-sql";
 
+import {alias} from "drizzle-orm/pg-core";
 import {and, eq, gt, inArray, isNull, or, sql} from "drizzle-orm";
 
 import {getDb} from "@/lib/db/repos/common";
@@ -34,6 +36,7 @@ export const portalContentRepository = {
     const activeMembership = sql`EXISTS (
       SELECT 1 FROM ${memberships} AS directory_membership
       WHERE directory_membership.status IN ('active', 'past_due', 'cancel_at_period_end')
+        AND ${membershipGrantValiditySql(undefined, alias(memberships, "directory_membership"))}
         AND (directory_membership.owner_user_id = ${profiles.id} OR EXISTS (
           SELECT 1 FROM ${companyMembers} AS directory_membership_member
           WHERE directory_membership_member.company_id = directory_membership.company_id
@@ -47,7 +50,7 @@ export const portalContentRepository = {
   async getSeatOverview(actor: Actor, companyId: string): Promise<SeatOverview | null> {
     if (actor.kind !== "member") forbidden();
     const db = await getDb();
-    const access = await db.select({companyId: companies.id, seatLimit: memberships.seatLimit, role: companyMembers.role}).from(companies).innerJoin(memberships, eq(memberships.companyId, companies.id)).innerJoin(companyMembers, eq(companyMembers.companyId, companies.id)).where(and(eq(companies.id, companyId), eq(companyMembers.userId, actor.profileId), isNull(companyMembers.revokedAt), inArray(memberships.status, ["active", "past_due", "cancel_at_period_end"]))).limit(1);
+    const access = await db.select({companyId: companies.id, seatLimit: memberships.seatLimit, role: companyMembers.role}).from(companies).innerJoin(memberships, eq(memberships.companyId, companies.id)).innerJoin(companyMembers, eq(companyMembers.companyId, companies.id)).where(and(eq(companies.id, companyId), eq(companyMembers.userId, actor.profileId), isNull(companyMembers.revokedAt), inArray(memberships.status, ["active", "past_due", "cancel_at_period_end"]), membershipGrantValiditySql())).limit(1);
     const current = access[0];
     if (!current) forbidden();
     const [members, invitations] = await Promise.all([

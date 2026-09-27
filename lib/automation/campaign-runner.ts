@@ -1,3 +1,4 @@
+import type {CommunicationClaim} from "@/lib/db/repos/batch-handlers/communication";
 import "server-only";
 
 import {WHATSAPP_TEMPLATES, type WhatsAppTemplateKey} from "@/config/whatsapp-templates";
@@ -60,6 +61,8 @@ const campaignTemplateMap = {
   "renewal-reminder": "campaign_generic",
   "member-update": "campaign_generic",
   "membership_renewal": "campaign_generic",
+  "batch-renewal-reminder": "batch_membership_renewal",
+  "batch-profile-update": "batch_profile_update",
 } as const;
 type CampaignSourceTemplate = keyof typeof campaignTemplateMap;
 
@@ -88,7 +91,7 @@ export type CampaignRecipientContext = Readonly<{
 
 export type CampaignRenderInput = Readonly<{
   sourceTemplate: CampaignSourceTemplate;
-  template: "campaign_generic";
+  template: (typeof campaignTemplateMap)[CampaignSourceTemplate];
   locale: AppLocale;
   variables: Readonly<Record<string, string>>;
   unsubscribeUrl: string;
@@ -216,6 +219,7 @@ type WhatsAppRecipientMutations = CampaignFailureMutations & CampaignCompletion 
 type TaskCreator = Pick<StaffTasksRepository, "createOnce">;
 
 export type CampaignRunnerDependencies = Readonly<{
+  recheckCommunication?: (actor: AutomationCronActor, claim: CommunicationClaim, channel: "email" | "whatsapp") => Promise<string | null>;
   campaigns: CampaignRecipientMutations;
   deliveries: EmailDeliveries;
   staffTasks: TaskCreator;
@@ -516,6 +520,12 @@ async function processRecipient(
   now: Date,
   summary: MutableSummary,
 ): Promise<void> {
+  if (claim.variables._batchItemId) {
+    let reason: string | null;
+    try {reason = dependencies.recheckCommunication ? await dependencies.recheckCommunication(runnerActor, claim, "email") : "COMMUNICATION_DISABLED";}
+    catch {await settleFailure(dependencies.campaigns, claim, campaignDeliveryKey(claim), "retryable_network", now, summary); return;}
+    if (reason) {await dependencies.campaigns.markRecipientSuppressed(runnerActor, claim.id, claim.claimedAt, reason); summary.skipped += 1; return;}
+  }
   let context: CampaignRecipientContext;
   try {
     context = await dependencies.loadContext(runnerActor, claim.profileId);
@@ -617,6 +627,7 @@ export async function runCampaignBatch(
  * the tick.
  */
 export type WhatsAppCampaignRunnerDependencies = Readonly<{
+  recheckCommunication?: (actor: AutomationCronActor, claim: CommunicationClaim, channel: "email" | "whatsapp") => Promise<string | null>;
   campaigns: WhatsAppRecipientMutations;
   /**
    * Injected rather than imported so this module keeps no runtime dependency on
@@ -652,6 +663,12 @@ async function processWhatsAppRecipient(
   summary: MutableSummary,
 ): Promise<void> {
   const deliveryKey = campaignWhatsAppDeliveryKey(claim);
+  if (claim.variables._batchItemId) {
+    let reason: string | null;
+    try {reason = dependencies.recheckCommunication ? await dependencies.recheckCommunication(runnerActor, claim, "whatsapp") : "COMMUNICATION_DISABLED";}
+    catch {await settleFailure(dependencies.campaigns, claim, deliveryKey, "retryable_network", now, summary); return;}
+    if (reason) {await dependencies.campaigns.markRecipientBlocked(runnerActor, claim.id, claim.claimedAt, reason); summary.skipped += 1; return;}
+  }
   const template = sendableTemplateKey(claim.templateKey);
   if (template === null) {
     // A registry row for a key the code has retired. Blocked, not failed: no

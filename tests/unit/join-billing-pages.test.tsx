@@ -9,6 +9,7 @@ const state = vi.hoisted(() => ({
   applicationCalls: [] as unknown[][],
   checkoutCalls: [] as unknown[][],
   redirectUrl: null as string | null,
+  activeAttemptPrice: null as string | null,
   notFound: false,
 }));
 
@@ -20,6 +21,8 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/lib/auth/actor", () => ({getActor: async () => actor}));
 vi.mock("@/lib/db/repos/memberships", () => ({membershipsRepository: {getById: async (...args: unknown[]) => { state.membershipCalls.push(args); return state.membership; }}}));
 vi.mock("@/lib/db/repos/applications", () => ({applicationsRepository: {getById: async (...args: unknown[]) => { state.applicationCalls.push(args); return state.application; }}}));
+vi.mock("@/lib/db/repos/membership-plans", () => ({membershipPlansRepository: {list: async () => [{code: "startup", audience: "startup", billingBehavior: "checkout", seatAllowance: 5, active: true, annualPriceHkd: 1200, monthlyPriceHkd: null, stripePriceReference: "price_startup_test"}]}}));
+vi.mock("@/lib/db/repos/billing-attempts", () => ({billingAttemptsRepository: {getActive: async () => state.activeAttemptPrice ? {priceReference: state.activeAttemptPrice} : null}}));
 vi.mock("@/lib/billing/checkout-service", () => ({createCheckoutSession: async (...args: unknown[]) => { state.checkoutCalls.push(args); return {url: "https://checkout.stripe.test/session-a"}; }}));
 
 import CheckoutPage from "@/app/[locale]/(join)/join/checkout/page";
@@ -39,14 +42,27 @@ describe("join billing pages", () => {
     state.checkoutCalls = [];
     state.redirectUrl = null;
     state.notFound = false;
+    state.activeAttemptPrice = null;
+    process.env.STRIPE_STARTUP_PRICE_ID = "price_startup_test";
   });
 
-  it("starts checkout from actor-scoped membership and application state with locale", async () => {
-    await expect(CheckoutPage(props("zh-HK"))).rejects.toThrow("NEXT_REDIRECT");
+  it("renders a local checkout summary without creating a Stripe session on GET", async () => {
+    const markup = renderToStaticMarkup(await CheckoutPage(props("zh-HK")));
     expect(state.membershipCalls).toEqual([[actor, "membership-a"]]);
     expect(state.applicationCalls).toEqual([[actor, "application-a"]]);
-    expect(state.checkoutCalls).toEqual([[actor, "membership-a", "zh-HK"]]);
-    expect(state.redirectUrl).toBe("https://checkout.stripe.test/session-a");
+    expect(state.checkoutCalls).toHaveLength(0);
+    expect(state.redirectUrl).toBeNull();
+    expect(markup).toContain('name="membershipId"');
+    expect(markup).toContain('type="submit"');
+  });
+
+  it("uses the validated catalog amount only when a resumed attempt has the same price", async () => {
+    let markup = renderToStaticMarkup(await CheckoutPage(props()));
+    expect(markup).toContain("HK$1,200.00");
+    state.activeAttemptPrice = "price_old_attempt";
+    markup = renderToStaticMarkup(await CheckoutPage(props()));
+    expect(markup).not.toContain("HK$1,200.00");
+    expect(markup).toContain("localized:checkoutSummary.feeAtProvider");
   });
 
   it("fails closed when the scoped application does not match the membership", async () => {
@@ -98,10 +114,10 @@ describe("loadJoinCompletionState", () => {
     expect(result).toMatchObject({display: "review"});
   });
 
-  it.each(["cancelled", "expired", "past_due"])("returns null for a %s membership status", async (status) => {
+  it.each(["cancelled", "expired", "past_due"])("renders a failed projection for a %s membership", async (status) => {
     state.membership = {...state.membership, status};
     const result = await loadJoinCompletionState(actor, "membership-a");
-    expect(result).toBeNull();
+    expect(result).toMatchObject({display: "failed"});
   });
 
   it("returns null when the membership is missing", async () => {

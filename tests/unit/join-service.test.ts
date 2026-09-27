@@ -141,6 +141,24 @@ describe("membership join orchestration", () => {
     expect(deps.inspect().applications.size).toBe(1);
   });
 
+  it("rejects another applicant's application ID even when a reader returns it", async () => {
+    const deps = harness();
+    const created = await startJoin(actor, {plan: "startup", applicationId: null}, deps);
+    const other = {kind: "member", userId: "other-user", profileId: "other-user"} as const;
+    await expect(startJoin(other, {plan: "startup", applicationId: created.applicationId}, deps)).rejects.toThrow("APPLICATION_NOT_FOUND");
+  });
+
+  it("resumes payment and review steps from persisted application status", async () => {
+    const deps = harness();
+    const paid = await startJoin(actor, {plan: "startup", applicationId: null}, deps);
+    await deps.applications.update(actor, paid.applicationId, {status: "pending_payment"});
+    await expect(startJoin(actor, {plan: "startup", applicationId: paid.applicationId}, deps)).resolves.toMatchObject({next: "checkout"});
+    const review = await startJoin(actor, {plan: "patron", applicationId: null}, deps);
+    await deps.applications.update(actor, review.applicationId, {status: "pending_review"});
+    await expect(startJoin(actor, {plan: "patron", applicationId: review.applicationId}, deps)).resolves.toMatchObject({next: "review"});
+    expect(deps.inspect().applications.size).toBe(2);
+  });
+
   it("activates community without creating a checkout session", async () => {
     const deps = harness();
     const result = await completeApplication(

@@ -1,5 +1,5 @@
 import {renderToStaticMarkup} from "react-dom/server";
-import type {ReactNode} from "react";
+import {cloneElement,isValidElement,type ReactElement,type ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import type {ScheduledAnnouncementProjection} from "@/lib/public-shell/announcement";
@@ -46,9 +46,16 @@ const activeProjection: ScheduledAnnouncementProjection = {
   priority: 20,
 };
 
+async function resolveTree(node:ReactNode):Promise<ReactNode>{
+  if(Array.isArray(node))return Promise.all(node.map(resolveTree));
+  if(!isValidElement(node))return node;
+  const element=node as ReactElement<{children?:ReactNode}>;
+  if(typeof element.type === "function")return resolveTree(await (element.type as (props:object)=>Promise<ReactNode>)(element.props));
+  return "children" in element.props?cloneElement(element,{children:await resolveTree(element.props.children)}):element;
+}
 async function renderPublicLayout(locale: "en" | "zh-HK"): Promise<string> {
   const {default: PublicLayout} = await import("@/app/[locale]/(public)/layout");
-  return renderToStaticMarkup(await PublicLayout({children: <p>Shell remains available</p> as ReactNode, params: Promise.resolve({locale})}));
+  return renderToStaticMarkup(await resolveTree(await PublicLayout({children: <p>Shell remains available</p> as ReactNode, params: Promise.resolve({locale})})));
 }
 
 describe("public layout announcement cutover", () => {
@@ -85,4 +92,15 @@ describe("public layout announcement cutover", () => {
     await renderPublicLayout("en");
     expect(barState.announcement).toBeNull();
   });
+});
+
+it("returns the main shell while the announcement database read is pending",async()=>{
+  let release!:()=>void;
+  const pending=new Promise<void>(resolve=>{release=resolve;});
+  announcements.getActive.mockImplementationOnce(async()=>{await pending;return null;});
+  const {default:PublicLayout}=await import("@/app/[locale]/(public)/layout");
+  const response=PublicLayout({children:<p>Immediate hero</p>,params:Promise.resolve({locale:"en"})});
+  const ready=await Promise.race([response.then(()=>true),new Promise<boolean>(resolve=>setTimeout(()=>resolve(false),100))]);
+  release();await response;
+  expect(ready).toBe(true);
 });

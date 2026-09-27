@@ -19,6 +19,7 @@ vi.mock("@/lib/db/repos/contacts", () => ({
   contactsRepository: {upsertFromInterestForm: async () => ({id: "contact-1"})},
 }));
 vi.mock("@/lib/db/repos/event-guests", () => ({eventGuestsRepository: {register}}));
+vi.mock("@/lib/security/shared-rate-limit", () => ({createSharedRateLimiter: () => ({check: async () => ({allowed: true, retryAfterSeconds: 0})})}));
 vi.mock("@/lib/email/render", () => ({renderEmail}));
 vi.mock("@/lib/email/transport", () => ({createConfiguredEmailTransport: () => ({send})}));
 

@@ -11,6 +11,14 @@ import {localizedPath} from "@/lib/urls";
 
 /** The real link ids configured for the admin nav — kept in sync with linkLabelKeys via `satisfies`. */
 type AdminNavLinkId = (typeof adminNavigationGroups)[number]["links"][number]["id"];
+type AdminNavGroupId = (typeof adminNavigationGroups)[number]["id"];
+const groupLabelKeys = {
+  workspace: "navigation.groups.workspace",
+  "members-organizations": "navigation.groups.membersOrganizations",
+  events: "navigation.groups.events",
+  "communications-follow-up": "navigation.groups.communicationsFollowUp",
+  "content-settings": "navigation.groups.contentSettings",
+} satisfies Record<AdminNavGroupId, string>;
 
 /** Maps each config link id to the Admin.navigation message key that resolves its nav label. */
 const linkLabelKeys = {
@@ -45,6 +53,7 @@ export function AdminNav({locale}: Readonly<{locale: AppLocale}>) {
 
   const groups: readonly InternalNavGroup[] = adminNavigationGroups.map((group) => ({
     id: group.id,
+    label: t(groupLabelKeys[group.id]),
     links: group.links.map((link) => ({
       id: link.id,
       href: localizedPath(locale, link.href),

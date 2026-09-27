@@ -49,7 +49,7 @@ export async function loadPendingJoinBillingState(
 // WP-6 Task 13 -- Task 12 started routing Community/Patron completions here before this existed,
 // which 404'd every non-pending_payment completion. Stripe's webhook only writes memberships.status,
 // never membershipApplications.status, so checking application.status would reject the "active" case.
-export type JoinCompletionDisplay = "processing" | "review" | "active";
+export type JoinCompletionDisplay = "processing" | "review" | "active" | "failed";
 
 export type JoinCompletionState = Readonly<{
   actor: Extract<Actor, {kind: "member"}>;
@@ -62,6 +62,10 @@ const completionStatusDisplay: Partial<Record<string, JoinCompletionDisplay>> = 
   pending_payment: "processing",
   pending_review: "review",
   active: "active",
+  cancel_at_period_end: "active",
+  past_due: "failed",
+  cancelled: "failed",
+  expired: "failed",
 };
 
 export async function loadJoinCompletionState(

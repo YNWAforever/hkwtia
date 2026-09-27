@@ -108,6 +108,8 @@ export async function refundOrder(
   const refundReason: RefundReason = recoveringFailure ? (order.refundReason ?? (actor.kind === "system" ? "cancelled" : "staff")) : actor.kind === "system" ? "cancelled" : "staff";
   const reason = providerReconciled ? "provider_reconciled" : actor.kind === "system" ? "event_cancelled" : "staff";
 
+  // audit_events.actor_user_id references profiles.id, not the Auth user ID.
+  const auditProfileId = actor.kind === "system" ? null : actor.profileId;
   let committed: boolean;
   try {
     const refundedAt = dependencies.now();
@@ -115,12 +117,12 @@ export async function refundOrder(
       if (!dependencies.orders.reconcileRefundedOrder) return {status: "commit_failed"};
       committed = await dependencies.orders.reconcileRefundedOrder(order.id, {
         refundedAt, expectedAmountHkdCents: order.amountHkdCents,
-        actorUserId: actor.userId, actorType: actor.kind, refundReason, reason,
+        actorUserId: auditProfileId, actorType: actor.kind, refundReason, reason,
         note: input.note ?? null, stripeEventId: null,
       });
     } else {
       committed = await dependencies.orders.refundPaidOrder(order.id, {
-        refundedAt, actorUserId: actor.userId, actorType: actor.kind,
+        refundedAt, actorUserId: auditProfileId, actorType: actor.kind,
         refundReason, reason, note: input.note ?? null,
       });
     }

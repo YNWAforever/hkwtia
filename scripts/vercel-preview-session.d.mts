@@ -15,3 +15,6 @@ export function previewSessionPlan(env: Record<string, string | undefined>): Pre
 
 /** The script's own error code when `error` carries one, otherwise `PREVIEW_SESSION_FAILED`. */
 export function failureMessage(error: unknown): string;
+
+/** Reusable public acceptance state includes only the deployment protection cookie. */
+export function previewStorageState<T extends {name: string}>(cookies: readonly T[]): {cookies: T[]; origins: []};

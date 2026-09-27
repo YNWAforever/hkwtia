@@ -61,10 +61,12 @@ describe("every admin route uses the shared 404 auth boundary", () => {
   it("authorizes the member list before parsing untrusted route query values", () => {
     const source = readFileSync(resolve(process.cwd(), "app/[locale]/(admin)/admin/members/page.tsx"), "utf8");
     const authorization = source.indexOf("const actor = await requireAdminPageActor();");
-    const parsing = source.indexOf("const query = parseAdminMemberRouteQuery(await searchParams);");
+    const queryRead = source.indexOf("const rawQuery = await searchParams;");
+    const parsing = source.indexOf("const query = parseAdminMemberRouteQuery(rawQuery);");
 
     expect(authorization).toBeGreaterThanOrEqual(0);
-    expect(parsing).toBeGreaterThan(authorization);
+    expect(queryRead).toBeGreaterThan(authorization);
+    expect(parsing).toBeGreaterThan(queryRead);
     expect(source).toContain("searchAdminMembers(actor, query)");
   });
 

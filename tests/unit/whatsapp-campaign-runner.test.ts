@@ -594,3 +594,14 @@ describe("send queue wiring", () => {
     expect(runners).toMatch(/dispatchNotification\(actor, request, notifications\)/);
   });
 });
+
+describe("batch WhatsApp send-time boundary", () => {
+  it("rechecks membership and locale before reaching the dispatcher", async () => {
+    const test = harness({recipients: [recipient({variables: {_batchItemId: crypto.randomUUID()}})]});
+    const recheckCommunication = vi.fn(async () => "COMMUNICATION_CHANGED");
+    expect(await runWhatsAppCampaignBatch({...test.dependencies, recheckCommunication}, {now: NOW, limit: 10})).toMatchObject({sent: 0, skipped: 1});
+    expect(recheckCommunication).toHaveBeenCalledOnce();
+    expect(test.sendTemplateMessage).not.toHaveBeenCalled();
+    expect(test.deliveries.size).toBe(0);
+  });
+});
