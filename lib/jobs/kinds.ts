@@ -80,3 +80,6 @@ export const PHASE_D_JOB_KINDS = [
 ] as const;
 
 export type PhaseDJobKind = typeof PHASE_D_JOB_KINDS[number];
+
+/** Kept out of the M3 partial-index kind list. */
+export const ADMIN_BATCH_JOB_KIND = {ADMIN_BATCHES: "admin-batches"} as const;

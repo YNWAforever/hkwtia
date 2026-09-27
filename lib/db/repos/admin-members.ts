@@ -95,7 +95,7 @@ function memberSearchStatement(query: AdminMemberQuery) {
       FROM ${profiles}
       LEFT JOIN ${companyMembers} ON ${companyMembers.userId} = ${profiles.id} AND ${companyMembers.revokedAt} IS NULL
       LEFT JOIN ${memberships} ON ${memberships.ownerUserId} = ${profiles.id} OR ${memberships.companyId} = ${companyMembers.companyId}
-      LEFT JOIN ${membershipCompanies} ON ${membershipCompanies.id} = ${memberships.companyId}
+      LEFT JOIN ${companies} AS membership_companies ON ${membershipCompanies.id} = ${memberships.companyId}
       LEFT JOIN ${engagementScores} ON ${engagementScores.profileId} = ${profiles.id}
       WHERE ${where}
     ), matching_ids AS (
@@ -264,12 +264,12 @@ export const adminMembersRepository = {
     };
   },
 
-  async search(actor: Actor, queryInput: unknown): Promise<AdminMemberPage> {
+  async search(actor: Actor, queryInput: unknown, database?: {execute: (statement: SQL) => PromiseLike<unknown>}): Promise<AdminMemberPage> {
     requireAdmin(actor);
     const query = adminMemberQuerySchema.parse(queryInput);
-    const db = await getDb();
+    const db = database ?? await getDb();
     const result = await db.execute(memberSearchStatement(query));
-    const rows = z.array(memberRowSchema).parse(Array.isArray(result) ? result : result.rows);
+    const rows = z.array(memberRowSchema).parse(resultRows(result));
     const hasNextPage = rows.length > query.limit;
     const pageRows = rows.slice(0, query.limit);
     const items = pageRows.map(toItem);

@@ -1,6 +1,11 @@
 "use client";
 
-import {useEffect, useSyncExternalStore} from "react";
+import {useEffect, useState, useSyncExternalStore} from "react";
+import {useRouter} from "next/navigation";
+
+import {prepareAdminBatchAction} from "@/lib/admin/batches/actions";
+import type {AdminMemberQuery} from "@/lib/admin/member-query";
+import {localizedPath} from "@/lib/urls";
 import Link from "next/link";
 
 import type {AdminMemberListItem} from "@/lib/admin/member-types";
@@ -8,7 +13,8 @@ import type {AppLocale} from "@/i18n/routing";
 
 export type MemberSelectionLabels = Readonly<{page: string; all: string; clear: string; selected: string; row: string}>;
 type TableLabels = Readonly<{name: string; email: string; company: string; plan: string; status: string; renewal: string; score: string; view: string; caption: string; empty: string; unavailable: string; previous: string; next: string; planCodes?: Readonly<Record<string, string>>; statusCodes?: Readonly<Record<string, string>>}>;
-type Props = Readonly<{locale: AppLocale; items: readonly AdminMemberListItem[]; totalMatching: number; labels: TableLabels; selectionLabels: MemberSelectionLabels; selectionKey: string; rowHrefs: Readonly<Record<string, string>>; previousHref: string | null; nextHref: string | null}>;
+export type MemberBatchLabels = Readonly<{preview: string; reason: string; language: string; english: string; chinese: string; error: string}>;
+type Props = Readonly<{batchLabels?: MemberBatchLabels; selectionQuery?: AdminMemberQuery; locale: AppLocale; items: readonly AdminMemberListItem[]; totalMatching: number; labels: TableLabels; selectionLabels: MemberSelectionLabels; selectionKey: string; rowHrefs: Readonly<Record<string, string>>; previousHref: string | null; nextHref: string | null}>;
 
 const storageKey = "adminMemberDraftSelection";
 const draftChangedEvent = "admin-member-draft-selection-changed";
@@ -33,7 +39,12 @@ function validDraft(value: unknown): value is Draft {
   return typeof draft.key === "string" && (draft.mode === "ids" || draft.mode === "query") && validIds(draft.selectedIds) && validIds(draft.excludedIds);
 }
 
-export function MemberBulkTable({locale, items, totalMatching, labels, selectionLabels, selectionKey, rowHrefs, previousHref, nextHref}: Props) {
+export function MemberBulkTable({locale, items, totalMatching, labels, selectionLabels, selectionKey, rowHrefs, previousHref, nextHref, batchLabels, selectionQuery}: Props) {
+  const router = useRouter();
+  const [batchLocale, setBatchLocale] = useState<"en" | "zh-HK">("en");
+  const [batchReason, setBatchReason] = useState("");
+  const [batchPending, setBatchPending] = useState(false);
+  const [batchError, setBatchError] = useState(false);
   const snapshot = useSyncExternalStore(subscribeToDraft, draftSnapshot, serverDraftSnapshot);
   let stored: unknown;
   try {stored = JSON.parse(snapshot);} catch {stored = null;}
@@ -61,6 +72,19 @@ export function MemberBulkTable({locale, items, totalMatching, labels, selection
     else writeDraft({...draft, selectedIds: pageSelected ? selectedIds.filter((id) => !pageIds.includes(id)) : [...new Set([...selectedIds, ...pageIds])]});
   };
   const clear = () => writeDraft({...draft, mode: "ids", selectedIds: [], excludedIds: []});
+  const preparePreview = async () => {
+    if (selectedCount < 1 || batchPending || (mode === "query" && !selectionQuery)) return;
+    setBatchPending(true);
+    setBatchError(false);
+    try {
+      const selection = mode === "query"
+        ? {mode: "query" as const, query: {...selectionQuery!, cursor: null}, excludedProfileIds: [...excludedIds]}
+        : {mode: "ids" as const, profileIds: [...selectedIds]};
+      const {batchId} = await prepareAdminBatchAction({operation: "profile_patch", idempotencyKey: crypto.randomUUID(), selection, payload: {patch: {locale: batchLocale}, reason: batchReason}});
+      router.push(localizedPath(locale, `/admin/batches/${batchId}`));
+    } catch {setBatchError(true);}
+    finally {setBatchPending(false);}
+  };
 
   return <div className="space-y-4">
     <div className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-muted/30 p-3">
@@ -68,6 +92,12 @@ export function MemberBulkTable({locale, items, totalMatching, labels, selection
       {totalMatching > items.length && mode === "ids" ? <button className="min-h-11 rounded-md border border-border px-3 text-sm" onClick={() => writeDraft({...draft, mode: "query", excludedIds: []})} type="button">{format(selectionLabels.all, totalMatching, "count")}</button> : null}
       <button className="min-h-11 rounded-md border border-border px-3 text-sm" onClick={clear} type="button">{selectionLabels.clear}</button>
     </div>
+    {batchLabels ? <div className="flex flex-wrap items-end gap-3 rounded-md border border-border p-3">
+      <label className="grid gap-1 text-sm">{batchLabels.language}<select className="min-h-11 rounded-md border border-input bg-background px-3" value={batchLocale} onChange={(event) => setBatchLocale(event.target.value as "en" | "zh-HK")}><option value="en">{batchLabels.english}</option><option value="zh-HK">{batchLabels.chinese}</option></select></label>
+      <label className="grid min-w-64 flex-1 gap-1 text-sm">{batchLabels.reason}<input className="min-h-11 rounded-md border border-input bg-background px-3" maxLength={500} minLength={3} onChange={(event) => setBatchReason(event.target.value)} required type="text" value={batchReason}/></label>
+      <button className="min-h-11 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50" disabled={selectedCount === 0 || selectedCount > 5000 || batchPending || batchReason.trim().length < 3} onClick={preparePreview} type="button">{batchLabels.preview}</button>
+      {batchError ? <p className="w-full text-sm text-destructive" role="alert">{batchLabels.error}</p> : null}
+    </div> : null}
     <div className="overflow-x-auto rounded-md border border-border"><table className="min-w-full text-left text-sm">
       <caption className="caption-top px-4 py-3 text-left font-medium text-foreground">{labels.caption}</caption>
       <thead className="border-y border-border bg-muted/40 text-muted-foreground"><tr><th className="px-4 py-3" scope="col"><input aria-label={selectionLabels.page} checked={pageSelected} onChange={togglePage} type="checkbox"/></th>{columns.map((label) => <th className="px-4 py-3 font-medium" key={label} scope="col">{label}</th>)}</tr></thead>

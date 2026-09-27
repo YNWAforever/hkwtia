@@ -113,6 +113,7 @@ const workerAlertSchema = z.object({
     "event-notifications",
     "showcase-lead-emails",
     "ticket-emails",
+    "admin-batches",
   ]),
   scheduledTime: z.string().min(1).max(64),
   attemptCount: z.number().int().min(1).max(3),
@@ -137,7 +138,8 @@ export type WorkerAlertPayload = Readonly<{
     | "event-cancellation-refunds"
     | "event-notifications"
     | "showcase-lead-emails"
-    | "ticket-emails";
+    | "ticket-emails"
+    | "admin-batches";
   scheduledTime: string;
   attemptCount: number;
   errorCode: "JOB_HTTP_ERROR" | "JOB_NETWORK_ERROR" | "JOB_TIMEOUT";

@@ -22,6 +22,7 @@ export const WORKER_JOBS = [
   "event-notifications",
   "showcase-lead-emails",
   "ticket-emails",
+  "admin-batches",
 ] as const;
 
 export type WorkerJob = typeof WORKER_JOBS[number];
@@ -113,7 +114,7 @@ export const JOBS_BY_CRON = {
   "15 18 * * *": ["retention-analyst"],
   "30 0 1 * *": ["board-reporter"],
   "*/10 * * * *": ["whatsapp-send-queue", "showcase-lead-emails", "event-notifications"],
-  "* * * * *": ["ticket-emails"],
+  "* * * * *": ["ticket-emails", "admin-batches"],
 } as const satisfies Readonly<
   Record<string, readonly WorkerJob[]>
 >;
@@ -132,6 +133,7 @@ const REQUEST_TIMEOUT_BY_JOB = {
   "event-notifications": QUEUE_REQUEST_TIMEOUT_MS,
   "showcase-lead-emails": QUEUE_REQUEST_TIMEOUT_MS,
   "ticket-emails": QUEUE_REQUEST_TIMEOUT_MS,
+  "admin-batches": QUEUE_REQUEST_TIMEOUT_MS,
 } as const satisfies Readonly<Record<WorkerJob, number>>;
 
 class WorkerConfigError extends Error {

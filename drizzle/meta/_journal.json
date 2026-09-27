@@ -316,6 +316,13 @@
       "when": 1790467200000,
       "tag": "0045_admin_member_views",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1790470800000,
+      "tag": "0046_admin_batches",
+      "breakpoints": true
     }
   ]
 }

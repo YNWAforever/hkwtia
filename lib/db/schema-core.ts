@@ -766,6 +766,64 @@ export const adminMemberViews = pgTable("admin_member_views", {
   index("admin_member_views_shared_updated_idx").on(table.shared, table.updatedAt),
 ]);
 
+/** Durable, actor-owned admin batch previews and execution records. Text CHECKs avoid same-transaction enum migration traps. */
+export const adminBatches = pgTable("admin_batches", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  actorProfileId: text("actor_profile_id").notNull().references(() => profiles.id, {onDelete: "restrict"}),
+  operation: text("operation").notNull(),
+  validatedPayload: jsonb("validated_payload").$type<Record<string, unknown>>().notNull(),
+  selectionSnapshot: jsonb("selection_snapshot").$type<Record<string, unknown>>().notNull(),
+  idempotencyKey: text("idempotency_key").notNull(),
+  requestDigest: text("request_digest").notNull(),
+  state: text("state").default("preparing").notNull(),
+  previewDigest: text("preview_digest"),
+  previewExpiresAt: timestamp("preview_expires_at", {withTimezone: true}),
+  preparationLeaseOwner: text("preparation_lease_owner"),
+  preparationLeaseExpiresAt: timestamp("preparation_lease_expires_at", {withTimezone: true}),
+  preparationToken: integer("preparation_token").default(0).notNull(),
+  counters: jsonb("counters").$type<Record<string, number>>().default(sql`'{}'::jsonb`).notNull(),
+  createdAt: createdAt("created_at"),
+  preparedAt: timestamp("prepared_at", {withTimezone: true}),
+  committedAt: timestamp("committed_at", {withTimezone: true}),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  uniqueIndex("admin_batches_actor_key_unique").on(table.actorProfileId, table.idempotencyKey),
+  index("admin_batches_preparing_idx").on(table.state, table.preparationLeaseExpiresAt, table.createdAt),
+  index("admin_batches_owner_recent_idx").on(table.actorProfileId, table.createdAt),
+  check("admin_batches_state_check", sql`${table.state} IN ('preparing','ready','queued','running','completed','completed_with_errors','cancelled','expired')`),
+  check("admin_batches_operation_check", sql`${table.operation} IN ('profile_patch','import_commit','membership_grant','renewal_reminder','profile_update_invite','ticket_resend','export_members')`),
+]);
+
+export const adminBatchItems = pgTable("admin_batch_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  batchId: uuid("batch_id").notNull().references(() => adminBatches.id, {onDelete: "restrict"}),
+  targetType: text("target_type").notNull(),
+  targetId: text("target_id").notNull(),
+  expectedVersion: text("expected_version").notNull(),
+  beforeSummary: jsonb("before_summary").$type<Record<string, unknown>>().default(sql`'{}'::jsonb`).notNull(),
+  afterSummary: jsonb("after_summary").$type<Record<string, unknown>>().default(sql`'{}'::jsonb`).notNull(),
+  previewStatus: text("preview_status").notNull(),
+  state: text("state").default("pending").notNull(),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  nextAttemptAt: timestamp("next_attempt_at", {withTimezone: true}),
+  leaseOwner: text("lease_owner"),
+  leaseExpiresAt: timestamp("lease_expires_at", {withTimezone: true}),
+  leaseToken: integer("lease_token").default(0).notNull(),
+  effectKey: text("effect_key").notNull().unique(),
+  resultRef: text("result_ref"),
+  errorCode: text("error_code"),
+  reasonCode: text("reason_code"),
+  createdAt: createdAt("created_at"),
+  updatedAt: updatedAt("updated_at"),
+}, (table) => [
+  uniqueIndex("admin_batch_items_target_unique").on(table.batchId, table.targetType, table.targetId),
+  index("admin_batch_items_claim_idx").on(table.state, table.nextAttemptAt, table.leaseExpiresAt),
+  index("admin_batch_items_batch_state_idx").on(table.batchId, table.state),
+  check("admin_batch_items_preview_check", sql`${table.previewStatus} IN ('eligible','skipped','blocked')`),
+  check("admin_batch_items_state_check", sql`${table.state} IN ('pending','running','succeeded','skipped','failed')`),
+  check("admin_batch_items_attempt_check", sql`${table.attemptCount} >= 0 AND ${table.leaseToken} >= 0`),
+]);
+
 export const campaigns = pgTable("campaigns", {
   id: uuid("id").defaultRandom().primaryKey(),
   segmentId: uuid("segment_id").notNull().references(() => savedSegments.id, {onDelete: "restrict"}),

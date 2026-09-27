@@ -111,3 +111,14 @@ No 10k-member/500-attendee load fixture, EXPLAIN ANALYZE, query count or server 
 
 Saved-view migration, staff browser flow, keyboard/mobile checks, and a selection-to-server-preview journey remain unverified. This is code evidence, not staging verification or production release.
 | 2026-09-27 | feature worktree | `npm run build`; `git diff --check` | exit 0; 251 static pages generated; diff check exit 0 | Bundles the T12 admin page and saved-view action. No database, auth, provider or staff browser session was exercised. |
+
+## T13 batch engine evidence
+
+| Date | Environment | Command | Result | Scope and limit |
+|---|---|---|---|---|
+| 2026-09-27 | feature worktree | focused batch/member Vitest | 11 unit cases passed | Contract, actor gate, default-off flag, selection UI, repository, retry, profile handler; DB mocked. |
+| 2026-09-27 | disposable PostgreSQL 16 via Docker | `RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/admin-batch-snapshot.test.ts tests/integration/admin-batch-concurrency.test.ts tests/integration/member-filter-selection.test.ts` | 3 files, 6 tests passed | Real migration 0046, filter SQL, selection snapshot, digest/ownership, competing claims, expired lease/fence and atomic update/audit. Initial run failed on alias and timestamp precision; fixed and rerun passed. Local disposable database only. |
+| 2026-09-27 | feature worktree | `npm run typecheck`; `npm run audit:strings`; focused ESLint; `npx drizzle-kit check` | all exit 0; 275 TSX scanned | Batch page, bilingual copy, migration metadata and changed files. |
+| 2026-09-27 | feature worktree | `npm run lint` | initial exit 1 on impure `Date.now` render; corrected; fresh full lint pending | Existing warnings remain. |
+
+Migration 0046 is not applied to staging/production. `ADMIN_BATCH_ENABLED` remains false. No staff-authenticated browser or 5000-item load run has been performed. Full suite/build and prior DB/browser gates remain for T18.

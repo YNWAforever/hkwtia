@@ -1,5 +1,9 @@
-import {fireEvent, render, screen} from "@testing-library/react";
-import {describe, expect, it} from "vitest";
+import {fireEvent, render, screen, waitFor} from "@testing-library/react";
+import {describe, expect, it, vi} from "vitest";
+
+const batchSpies = vi.hoisted(() => ({prepare: vi.fn(), push: vi.fn()}));
+vi.mock("@/lib/admin/batches/actions", () => ({prepareAdminBatchAction: batchSpies.prepare}));
+vi.mock("next/navigation", () => ({useRouter: () => ({push: batchSpies.push})}));
 
 import {MemberBulkTable} from "@/components/admin/member-bulk-table";
 
@@ -31,5 +35,19 @@ describe("member page selection", () => {
     expect(screen.getByRole("status")).toHaveTextContent("9 selected");
     fireEvent.click(screen.getByRole("button", {name: "Clear selection"}));
     expect(screen.getByRole("status")).toHaveTextContent("0 selected");
+  });
+});
+
+
+describe("member selection to batch preview", () => {
+  it("submits only the explicit page IDs and navigates to the durable preview", async () => {
+    sessionStorage.clear();
+    batchSpies.prepare.mockResolvedValueOnce({batchId: "11111111-1111-4111-8111-111111111111"});
+    render(<MemberBulkTable locale="en" items={[member("a", "Ada"), member("b", "Bea")]} totalMatching={10} labels={labels} selectionLabels={selectionLabels} selectionKey="active" rowHrefs={{a: "/admin/members/a", b: "/admin/members/b"}} previousHref={null} nextHref={null} batchLabels={{preview: "Preview language change", reason: "Reason", language: "Language", english: "English", chinese: "Chinese", error: "Could not prepare batch"}}/>);
+    fireEvent.click(screen.getByRole("checkbox", {name: "Select Ada"}));
+    fireEvent.change(screen.getByRole("textbox", {name: "Reason"}), {target: {value: "Member requested English"}});
+    fireEvent.click(screen.getByRole("button", {name: "Preview language change"}));
+    await waitFor(() => expect(batchSpies.prepare).toHaveBeenCalledWith(expect.objectContaining({operation: "profile_patch", selection: {mode: "ids", profileIds: ["a"]}, payload: {patch: {locale: "en"}, reason: "Member requested English"}})));
+    expect(batchSpies.push).toHaveBeenCalledWith("/admin/batches/11111111-1111-4111-8111-111111111111");
   });
 });
