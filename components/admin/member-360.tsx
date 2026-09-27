@@ -2,6 +2,7 @@ import type {ReactNode} from "react";
 
 import type {AppLocale} from "@/i18n/routing";
 import type {Member360} from "@/lib/admin/member-360";
+import {TicketResendPreviewButton} from "@/components/admin/ticket-resend-preview-button";
 
 export type Member360Labels = Readonly<{
   profile: string;
@@ -65,6 +66,7 @@ type Member360ViewProps = Readonly<{
   labels: Member360Labels;
   stripeCustomerHref: string | null;
   stripeSubscriptionHref: string | null;
+  ticketResendLabels?: Readonly<{preview: string; error: string}>;
   activeHistory?: "engagement" | "emails" | "events" | "purchases" | "notes" | "journeys" | "whatsapp" | "suppressions" | null;
 }>;
 
@@ -95,6 +97,7 @@ export function Member360View({
   labels,
   stripeCustomerHref,
   stripeSubscriptionHref,
+  ticketResendLabels,
   activeHistory,
 }: Member360ViewProps) {
   const moneyFormatter = new Intl.NumberFormat(locale, {style: "currency", currency: "HKD"});
@@ -320,7 +323,7 @@ export function Member360View({
               {order.refundedAt && <MemberField label={labels.refundedAt}><time dateTime={order.refundedAt}>{dateTimeFormatter.format(new Date(order.refundedAt))}</time></MemberField>}
             </dl>
             <p className="mt-3 text-sm font-medium">{labels.purchaseAttendees}</p>
-            <ul className="mt-1 list-inside list-disc text-sm">{order.seats.map((seat) => <li key={seat.id}>{seat.attendeeName}{seat.checkedInAt ? ` · ${dateTimeFormatter.format(new Date(seat.checkedInAt))}` : ""}</li>)}</ul>
+            <ul className="mt-1 list-inside list-disc text-sm">{order.seats.map((seat) => <li key={seat.id}>{seat.attendeeName}{seat.checkedInAt ? ` · ${dateTimeFormatter.format(new Date(seat.checkedInAt))}` : ""}{ticketResendLabels && order.status === "paid" && !seat.checkedInAt ? <TicketResendPreviewButton seatId={seat.id} locale={locale} label={ticketResendLabels.preview} errorLabel={ticketResendLabels.error}/> : null}</li>)}</ul>
           </li>)}
         </ul>}
       </section>}

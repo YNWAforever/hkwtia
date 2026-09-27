@@ -80,6 +80,8 @@ export type EventOrdersTransaction = Readonly<{
   orderSeats: (orderId: string) => Promise<readonly Readonly<{seatId: string; position: number; attendeeName: string; attendeeEmail: string}>[]>;
   /** One seat with its paid order, for a single pass. */
   seatForPass: (seatId: string) => Promise<Readonly<{seatId: string; attendeeName: string; attendeeEmail: string; eventId: string; buyerLocale: "en" | "zh-HK"; order: OrderRecord}> | null>;
+  /** Recheck a deliberate resend immediately before the outbox sends it. */
+  resendEligible: (seatId: string, now: Date) => Promise<boolean>;
   /** Seats of paid orders, or of pending ones whose hold has not lapsed. */
   heldSeats: (eventId: string, now: Date, excludingOrderId?: string) => Promise<number>;
   /** Seats of paid orders only -- the subset of `heldSeats` that has been bought. */
@@ -273,6 +275,15 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       // handles those columns, so the order is folded once, not mapped twice.
       return {seatId: String(row.seatId), attendeeName: String(row.attendeeName), attendeeEmail: String(row.attendeeEmail), eventId: String(row.eventId), buyerLocale: row.buyerLocale === "zh-HK" ? "zh-HK" : "en", order: orderFrom(row)};
     },
+    resendEligible: async (seatId, now) => rows<{id: string}>(await tx.execute(sql`
+      SELECT s.id FROM ${eventOrderSeats} s
+      JOIN ${eventOrders} o ON o.id = s.order_id
+      JOIN ${events} e ON e.id = o.event_id
+      WHERE s.id = ${seatId} AND s.checked_in_at IS NULL
+        AND o.status = 'paid' AND e.status = 'published'
+        AND e.registration_mode = 'ticketed' AND e.starts_at > ${now}
+      LIMIT 1
+    `)).length === 1,
     heldSeats: async (eventId, now, excludingOrderId) => Number(rows<{value: number}>(await tx.execute(sql`
       SELECT COUNT(*)::int AS value FROM ${eventOrderSeats} AS s
       JOIN ${eventOrders} AS o ON o.id = s.order_id
@@ -662,6 +673,9 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
     },
 
     /** One seat with its order, for a single pass. `null` unless the order is paid. */
+    async resendEligible(seatId: string, now: Date): Promise<boolean> {
+      return runTransaction((tx) => tx.resendEligible(seatId, now));
+    },
     async seatForPass(seatId: string): Promise<Readonly<{seatId: string; attendeeName: string; attendeeEmail: string; eventId: string; buyerLocale: "en" | "zh-HK"; order: OrderRecord}> | null> {
       return runTransaction((tx) => tx.seatForPass(seatId));
     },

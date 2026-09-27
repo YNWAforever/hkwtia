@@ -48,6 +48,20 @@ describe("admin batch actor boundary", () => {
     } finally {vi.unstubAllEnvs();}
   });
 
+  it("requires separate default-off flags for resend and private export", async () => {
+    const store = gateway();
+    const resend = {operation: "ticket_resend", idempotencyKey: batchId, targetSeatIds: [batchId], payload: {}};
+    const exportRequest = {operation: "export_members", idempotencyKey: batchId, selection: {mode: "ids", profileIds: ["member-a"]}, payload: {fields: ["displayName", "email"]}};
+    await expect(prepareBatch(staff, resend, store as BatchGateway, new Set(["ticket_resend"]))).rejects.toThrow("BATCH_OPERATION_UNAVAILABLE");
+    await expect(prepareBatch(staff, exportRequest, store as BatchGateway, new Set(["export_members"]))).rejects.toThrow("BATCH_OPERATION_UNAVAILABLE");
+    vi.stubEnv("TICKET_RESEND_BATCH_ENABLED", "true");
+    vi.stubEnv("MEMBER_EXPORT_ENABLED", "true");
+    try {
+      await expect(prepareBatch(staff, resend, store as BatchGateway, new Set(["ticket_resend"]))).resolves.toEqual({batchId});
+      await expect(prepareBatch(staff, exportRequest, store as BatchGateway, new Set(["export_members"]))).resolves.toEqual({batchId});
+    } finally {vi.unstubAllEnvs();}
+  });
+
   it("checks ownership inputs and delegates preview, commit, retry and cancel without accepting a forged actor", async () => {
     const store = gateway();
     await expect(getBatchPreview(member, batchId, store as BatchGateway)).rejects.toThrow("FORBIDDEN");

@@ -149,3 +149,15 @@ No approved association grant policy, superadmin browser session, staging deploy
 | 2026-09-27 | disposable PostgreSQL 16 via Docker | `RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/admin-batch-profile-cleanup.test.ts` | exit 0; 2 tests passed | Metadata-only patch, profile version and audit in one item transaction; owner role demotion after preview skips without metadata or audit. Initial behavior test failed with `BATCH_PATCH_UNAVAILABLE` before implementation. |
 
 Communication, invitation, ticket resend, export, staff browser and shared-environment evidence are not part of this slice. No real recipient or member was changed.
+
+
+## T16 ticket resend and private export evidence
+
+| Date | Environment | Command | Result | Scope and limit |
+|---|---|---|---|---|
+| 2026-09-27 | disposable PostgreSQL 16 via Docker | `RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/admin-batch-ticket-resend.test.ts` | exit 0; 1 test passed | Exact-seat preview, one stable outbox key, event cancelled after preview skips without an extra outbox row. Synthetic tables and recipients; no provider send. |
+| 2026-09-27 | feature worktree | `npx vitest run tests/unit/ticket-email-runner.test.ts` | exit 0; 8 tests passed | Outbox resend send-time cancellation and default-off suppression, alongside existing confirmation/refund behavior. Mock transport only. |
+| 2026-09-27 | disposable PostgreSQL 16 via Docker | `RUN_POSTGRES_INTEGRATION=1 npx vitest run tests/integration/admin-batch-export.test.ts tests/integration/admin-batch-profile-cleanup.test.ts` | exit 0; 3 tests passed | Exact ID snapshot, formula-neutralized CSV, actor-owned 30-minute download, and shared selection refactor regression. No browser download or shared storage. |
+| 2026-09-27 | feature worktree | `npm run typecheck`; `npm run audit:strings`; focused ESLint | exit 0; 279 TSX scanned | Type, bilingual UI and repository-layer import rule. A first full lint run caught the export DB helper in the admin layer; it was moved to `lib/db/repos` and focused lint passed. |
+
+The resend and export flags remain default off. No staff-authenticated browser flow, provider delivery, shared-environment download, real member communication or production migration was exercised. Renewal reminder and update invitation remain open.

@@ -193,6 +193,7 @@ export default async function AdminMember360Page({params, searchParams}: Props) 
           stripeCustomer: t("member360.stripeCustomer"),
           stripeSubscription: t("member360.stripeSubscription"),
         }}
+        ticketResendLabels={process.env.ADMIN_BATCH_ENABLED === "true" && process.env.TICKET_RESEND_BATCH_ENABLED === "true" ? {preview: t("member360.ticketResendPreview"), error: t("member360.ticketResendError")} : undefined}
         stripeCustomerHref={customerHref}
         stripeSubscriptionHref={subscriptionHref}
         view={view}

@@ -18,7 +18,7 @@ export type TicketEmailRunnerDependencies = Readonly<{
   outbox: Pick<Outbox, "claimDue" | "claimForOrder" | "freezePayload" | "markSent"
     | "markRetryable" | "markBlocked" | "markSuppressed">;
   orders: Pick<EventOrdersRepository, "orderById" | "eventSummary" | "orderSeats"
-    | "seatsOfOrder" | "seatForPass">;
+    | "seatsOfOrder" | "seatForPass" | "resendEligible">;
   renderEmail: (input: RenderEmailInput) => Promise<RenderedEmail>;
   transport: EmailTransport;
   refundVerified: (order: OrderRecord) => Promise<boolean>;
@@ -142,6 +142,27 @@ async function processClaims(
     if (!admissible(claim.kind, order.status)) {
       await dependencies.outbox.markSuppressed(claim.id, claim.attemptCount, now);
       continue;
+    }
+
+    if (claim.kind === "pass" && claim.eventKey.startsWith("ticket-resend:")) {
+      if (process.env.TICKET_RESEND_BATCH_ENABLED !== "true") {
+        await dependencies.outbox.markSuppressed(claim.id, claim.attemptCount, now);
+        continue;
+      }
+      if (!claim.seatId) {
+        await dependencies.outbox.markBlocked(claim.id, claim.attemptCount, now, "seat_missing");
+        continue;
+      }
+      let valid: boolean;
+      try {valid = await dependencies.orders.resendEligible(claim.seatId, now);}
+      catch {
+        await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "resend_eligibility_read_failed");
+        continue;
+      }
+      if (!valid) {
+        await dependencies.outbox.markSuppressed(claim.id, claim.attemptCount, now);
+        continue;
+      }
     }
 
     if (claim.kind === "refund") {

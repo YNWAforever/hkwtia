@@ -42,6 +42,7 @@ function fixture(claimOverrides: Partial<TicketEmailClaim> = {}, orderOverrides:
     orderSeats: vi.fn(async () => [{seatId: "66666666-6666-4666-8666-666666666666", position: 1, attendeeName: "Ada"}]),
     seatsOfOrder: vi.fn(async () => 1),
     seatForPass: vi.fn(async () => null),
+    resendEligible: vi.fn(async () => true),
   };
   const renderEmail = vi.fn(async () => ({
     subject: "Ticket receipt", html: "<p>Ticket receipt</p>", text: "Ticket receipt", headers: {},
@@ -103,6 +104,37 @@ describe("ticket email outbox runner", () => {
     expect(outbox.freezePayload).toHaveBeenCalledWith(noticeId, 1,
       expect.objectContaining({to: "bea@example.test", idempotencyKey: "ticket-pass:" + seatId + ":2026-09-26T04:00:00.000Z"}), now);
     expect(transport.sends).toHaveLength(1);
+  });
+
+  it("suppresses a queued resend when its seat or event is no longer valid", async () => {
+    vi.stubEnv("TICKET_RESEND_BATCH_ENABLED", "true");
+    const seatId = "66666666-6666-4666-8666-666666666666";
+    const {dependencies, orders, outbox, transport} = fixture({
+      kind: "pass", seatId, eventKey: "ticket-resend:batch-item-1",
+    });
+    orders.resendEligible = vi.fn(async () => false);
+    await deliverTicketEmailsForOrder(orderId, dependencies, now);
+    expect(orders.resendEligible).toHaveBeenCalledWith(seatId, now);
+    expect(outbox.markSuppressed).toHaveBeenCalledWith(noticeId, 1, now);
+    expect(transport.sends).toEqual([]);
+    vi.unstubAllEnvs();
+  });
+
+  it("suppresses queued resends when the separate resend delivery flag is off", async () => {
+    const seatId = "66666666-6666-4666-8666-666666666666";
+    const {dependencies, orders, outbox, transport} = fixture({
+      kind: "pass", seatId, eventKey: "ticket-resend:batch-item-2",
+    });
+    orders.seatForPass.mockResolvedValue({
+      seatId, attendeeName: "Bea", attendeeEmail: "bea@example.test",
+      eventId: order.eventId, buyerLocale: "en", order,
+    } as never);
+    vi.stubEnv("TICKET_RESEND_BATCH_ENABLED", "");
+    try {
+      await deliverTicketEmailsForOrder(orderId, dependencies, now);
+      expect(outbox.markSuppressed).toHaveBeenCalledWith(noticeId, 1, now);
+      expect(transport.sends).toEqual([]);
+    } finally {vi.unstubAllEnvs();}
   });
 
   it("sends a refund failure notice with the contact link", async () => {

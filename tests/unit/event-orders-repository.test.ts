@@ -19,6 +19,7 @@ function transaction(overrides: Partial<EventOrdersTransaction> = {}): EventOrde
     seatsOfOrder: vi.fn(async () => 1),
     orderSeats: vi.fn(async () => []),
     seatForPass: vi.fn(async () => null),
+    resendEligible: vi.fn(async () => true),
     heldSeats: vi.fn(async () => 0),
     paidSeats: vi.fn(async () => 0),
     insertOrder: vi.fn(async () => order()),

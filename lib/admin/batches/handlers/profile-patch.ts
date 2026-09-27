@@ -4,9 +4,8 @@ import {inArray, sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
 import type {BatchOperationHandler} from "@/lib/admin/batches/worker-types";
-import {batchRuntimeConfig} from "@/lib/admin/batches/types";
+import {resolveMemberSelectionIds} from "@/lib/admin/batches/selection";
 import {requireAdmin} from "@/lib/auth/authorize";
-import {adminMembersRepository} from "@/lib/db/repos/admin-members";
 import {auditEvents, memberOperationsMetadata, profiles} from "@/lib/db/server-schema";
 
 const profileRowSchema = z.object({id: z.string(), locale: z.enum(["en", "zh-HK"]), role: z.string(), updatedAt: z.string(), tags: z.array(z.string()).default([]), ownerProfileId: z.string().nullable().default(null)});
@@ -24,22 +23,7 @@ export const profilePatchBatchHandler: BatchOperationHandler = {
   async prepare(actor, request, tx) {
     requireAdmin(actor);
     if (request.operation !== "profile_patch") throw new Error("BATCH_OPERATION_MISMATCH");
-    const selection = request.selection;
-    let ids: string[];
-    if (selection.mode === "ids") ids = [...selection.profileIds];
-    else {
-      ids = [];
-      const excluded = new Set(selection.excludedProfileIds);
-      let cursor: string | null = null;
-      for (;;) {
-        const page = await adminMembersRepository.search(actor, {...selection.query, cursor, limit: 50}, tx);
-        if (page.totalMatching > batchRuntimeConfig().maxItems) throw new Error("BATCH_TOO_LARGE");
-        ids.push(...page.items.map((item) => item.profileId).filter((id) => !excluded.has(id)));
-        if (ids.length > batchRuntimeConfig().maxItems) throw new Error("BATCH_TOO_LARGE");
-        if (!page.nextCursor) break;
-        cursor = page.nextCursor;
-      }
-    }
+    const ids = await resolveMemberSelectionIds(actor, request.selection, tx);
     const found = new Map<string, z.infer<typeof profileRowSchema>>();
     for (let offset = 0; offset < ids.length; offset += 100) {
       const chunk = ids.slice(offset, offset + 100);
