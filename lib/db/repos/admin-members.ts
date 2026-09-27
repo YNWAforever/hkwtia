@@ -11,7 +11,7 @@ import {decodeScopedCursor, encodeScopedCursor, parsePageQuery, type CursorPage}
 
 import {decodeAdminMemberCursor, encodeAdminMemberCursor, type AdminMemberListItem, type AdminMemberPage, type AdminMemberQuery} from "@/lib/admin/member-types";
 import {requireAdmin} from "@/lib/auth/authorize";
-import {companies, companyMembers, emailLog, engagementEvents, engagementScores, eventRegistrations, events, eventOrders, eventOrderSeats, journeyState, memberNotes, memberships, messageSuppressions, profiles, whatsappLog} from "@/lib/db/server-schema";
+import {membershipApplications, billingAttempts, companies, companyMembers, emailLog, engagementEvents, engagementScores, eventRegistrations, events, eventOrders, eventOrderSeats, journeyState, memberNotes, memberships, messageSuppressions, profiles, whatsappLog} from "@/lib/db/server-schema";
 import {getDb} from "@/lib/db/repos/common";
 import type {Actor} from "@/lib/membership/lifecycle";
 
@@ -211,7 +211,58 @@ export async function getMemberTimelinePage(actor: Actor, profileIdInput: unknow
   return {kind, page: {items, nextCursor: hasNext && key ? encodeScopedCursor(scope, [key.cursor_at.toISOString(), key.cursor_id, ""]) : null}};
 }
 
+export const applicationQueueQuerySchema = z.object({
+  status: z.enum(["draft", "pending_payment", "pending_review"]).default("draft"),
+  search: z.string().trim().max(120).default(""),
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+  cursor: z.string().max(1000).nullable().default(null),
+}).strict();
+const applicationQueueRowSchema = z.object({
+  applicationId: z.string().uuid(), profileId: z.string(), name: z.string(), email: z.string().nullable(),
+  companyId: z.string().uuid().nullable(), companyName: z.string().nullable(), planCode: z.string(),
+  applicationState: z.string(), step: z.string(), membershipId: z.string().uuid().nullable(), membershipState: z.string().nullable(),
+  billingAttemptId: z.string().uuid().nullable(), billingState: z.string().nullable(),
+  updatedAt: z.coerce.date(), updatedKey: z.string(),
+});
+export type ApplicationQueueItem = Omit<z.infer<typeof applicationQueueRowSchema>, "updatedAt" | "updatedKey"> & {updatedAt: string};
+
+/** Application-centric operational view. No application, membership or billing ID is used as a profile ID. */
+async function getApplicationQueuePage(actor: Actor, input: unknown): Promise<CursorPage<ApplicationQueueItem>> {
+  requireAdmin(actor);
+  const query = applicationQueueQuerySchema.parse(input);
+  const scope = `applications:${query.status}:${query.search}`;
+  const cursor = query.cursor ? decodeScopedCursor(scope, query.cursor) : null;
+  if (cursor && (!Number.isFinite(Date.parse(cursor[0])) || !z.string().uuid().safeParse(cursor[1]).success)) throw new Error("INVALID_CURSOR");
+  const after = cursor ? sql`(${membershipApplications.updatedAt}, ${membershipApplications.id}) < (${cursor[0]}::timestamptz, ${cursor[1]}::uuid)` : sql`TRUE`;
+  const pattern = `%${query.search.replace(/[\\%_]/g, "\\$&")}%`;
+  const search = query.search ? sql`(${profiles.displayName} ILIKE ${pattern} OR ${profiles.email} ILIKE ${pattern} OR ${companies.displayName} ILIKE ${pattern} OR ${membershipApplications.id}::text ILIKE ${pattern})` : sql`TRUE`;
+  const db = await getDb();
+  const found = z.array(applicationQueueRowSchema).parse(resultRows(await db.execute(sql`
+    SELECT ${membershipApplications.id} AS "applicationId", ${profiles.id} AS "profileId",
+      ${profiles.displayName} AS name, ${profiles.email} AS email, ${companies.id} AS "companyId",
+      ${companies.displayName} AS "companyName", ${membershipApplications.planCode} AS "planCode",
+      ${membershipApplications.status} AS "applicationState", ${membershipApplications.currentStep} AS step,
+      ${memberships.id} AS "membershipId", ${memberships.status} AS "membershipState",
+      latest_billing.id AS "billingAttemptId", latest_billing.state AS "billingState",
+      ${membershipApplications.updatedAt} AS "updatedAt", ${membershipApplications.updatedAt}::text AS "updatedKey"
+    FROM ${membershipApplications}
+    JOIN ${profiles} ON ${profiles.id} = ${membershipApplications.applicantUserId}
+    LEFT JOIN ${companies} ON ${companies.id} = ${membershipApplications.companyId}
+    LEFT JOIN ${memberships} ON ${memberships.applicationId} = ${membershipApplications.id}
+    LEFT JOIN LATERAL (
+      SELECT ${billingAttempts.id} AS id, ${billingAttempts.state} AS state FROM ${billingAttempts}
+      WHERE ${billingAttempts.membershipId} = ${memberships.id}
+      ORDER BY ${billingAttempts.attemptNumber} DESC, ${billingAttempts.id} DESC LIMIT 1
+    ) latest_billing ON TRUE
+    WHERE ${membershipApplications.status} = ${query.status} AND ${search} AND ${after}
+    ORDER BY ${membershipApplications.updatedAt} DESC, ${membershipApplications.id} DESC LIMIT ${query.limit + 1}
+  `)));
+  const page = found.slice(0, query.limit);
+  const last = page.at(-1);
+  return {items: page.map(({updatedAt, updatedKey, ...item}) => {void updatedKey; return {...item, updatedAt: updatedAt.toISOString()};}), nextCursor: found.length > query.limit && last ? encodeScopedCursor(scope, [last.updatedKey, last.applicationId, ""]) : null};
+}
 export const adminMembersRepository = {
+  getApplicationQueuePage,
   async listOperationOwners(actor: Actor) {
     requireAdmin(actor);
     const db = await getDb();

@@ -31,3 +31,7 @@ If a batch item is `uncertain`, a provider result is unknown, or a webhook has n
 When the approved environment enables the capability, a superadmin can open Membership grants from the member workspace. Choose profile or company targets, paste trusted IDs one per line and enter a plan, Hong Kong start/expiry time and reason. The worker resolves names and conflicts into the existing durable preview; inspect every target before committing. Company and bulk activation each require their own approval. No Stripe charge or payment record is created.
 
 For selected members, choose the correction field before previewing. Tags replace the existing tag list; an empty list clears it. Responsible staff is a current staff selector, with an explicit Unassigned option. Other fields stay outside that correction. Preview and execution both enforce server-side eligibility and current versions.
+
+### Applications and payments
+
+Open Applications and payments from the member workspace. Unfinished join, Awaiting payment and Awaiting review each list actual applications. A person can have more than one application. Read the linked membership and latest billing attempt as separate states, especially when reconciling a completed payment. Open the applicant name to inspect Member 360; the displayed application ID identifies the application only. This queue does not send reminders or change payment state.
