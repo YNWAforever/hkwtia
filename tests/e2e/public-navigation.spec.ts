@@ -42,10 +42,12 @@ for (const {prefix, memberLink, showcaseLink, faq} of locales) {
   });
 }
 
-const authAvailable = Boolean(process.env.NEON_AUTH_BASE_URL?.trim() && process.env.NEON_AUTH_COOKIE_SECRET?.trim());
+// Remote public login checks need the server configured, but never need its secrets locally.
+// An explicit assertion runs these checks and fails if that remote capability is absent.
+const authAvailable = process.env.PLAYWRIGHT_PUBLIC_AUTH === "true" || Boolean(process.env.NEON_AUTH_BASE_URL?.trim() && process.env.NEON_AUTH_COOKIE_SECRET?.trim());
 for (const prefix of ["", "/zh"] as const) {
   test(`${prefix || "en"}: member login keeps safe return and recovery paths`, async ({page}) => {
-    test.skip(!authAvailable, "Neon Auth pair is required to load the member login route");
+    test.skip(!authAvailable, "Configure the local Neon Auth pair, or assert remote public Auth with PLAYWRIGHT_PUBLIC_AUTH=true");
     await page.goto(`${prefix}/member-login?next=%2Fportal%2Fbilling`);
     const form = page.getByTestId("member-login-form");
     await expect(form).toHaveAttribute("data-continuation", "/portal/billing");

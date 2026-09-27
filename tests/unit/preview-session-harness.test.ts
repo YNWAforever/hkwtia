@@ -3,7 +3,7 @@ import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {afterEach, describe, expect, it, vi} from "vitest";
 
-import {failureMessage, previewSessionPlan} from "../../scripts/vercel-preview-session.mjs";
+import {failureMessage, previewSessionPlan, previewStorageState} from "../../scripts/vercel-preview-session.mjs";
 
 const gitignore = readFileSync("./.gitignore", "utf8");
 const playwrightConfig = readFileSync("./playwright.config.ts", "utf8");
@@ -30,6 +30,12 @@ afterEach(() => vi.unstubAllEnvs());
 // storage state and a Lighthouse cookie header — both written under an ignored directory,
 // never printed, never committed (delivery gates: "record outcomes without copying credentials").
 describe("preview session harness", () => {
+  it("starts public acceptance with only the protection credential, not a saved language or member session", () => {
+    const gate = {name: "_vercel_jwt", value: "synthetic-gate", domain: "hkwtia-x.vercel.app", path: "/", expires: -1, httpOnly: true, secure: true, sameSite: "Lax"};
+    const cookies = [gate, {...gate, name: "NEXT_LOCALE", value: "zh-HK"}, {...gate, name: "neon-auth.session_token", value: "synthetic-member"}];
+    expect(previewStorageState(cookies)).toEqual({cookies: [gate], origins: []});
+    expect(cookies).toHaveLength(3);
+  });
   it("refuses to run without a share url, and refuses non-vercel or non-https hosts", () => {
     expect(() => previewSessionPlan({})).toThrow("VERCEL_SHARE_URL_REQUIRED");
     expect(() => previewSessionPlan({VERCEL_SHARE_URL: "http://hkwtia-x.vercel.app/?_vercel_share=t"})).toThrow("VERCEL_SHARE_URL_REQUIRES_HTTPS_VERCEL_PREVIEW");
