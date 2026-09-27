@@ -10,7 +10,7 @@ export interface LighthouseCiConfig {
     startServerReadyTimeout: number;
     settings: {chromeFlags: string; extraHeaders?: {Cookie: string}};
   };
-  assert: {assertions: Record<string, [string, {minScore: number}]>};
+  assert: {aggregationMethod: "median"; assertions: Record<string, [string, {minScore: number}]>};
   upload: {target: "temporary-public-storage"} | {target: "filesystem"; outputDir: string};
 }
 
