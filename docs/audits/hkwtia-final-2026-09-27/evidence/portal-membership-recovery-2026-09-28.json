@@ -18,6 +18,28 @@
     "fixtureMutation": false,
     "browserAcceptance": "blocked_by_vercel_protection"
   },
+  "previewHostedAcceptance": {
+    "deploymentId": "dpl_DSg3dcWvFwHo9SC629oegGVcGG1j",
+    "gitSha": "186e989d174c4296e7c0398f6aba6d39f100080f",
+    "branchAlias": "https://hkwtia-git-codex-final-login-admin-b7a1aa-ynwaforevers-projects.vercel.app",
+    "databaseProject": "solitary-wave-52860119",
+    "testIdentity": "synthetic",
+    "browserResult": "1 passed (23.8s)",
+    "englishAndChineseRecovery": true,
+    "chineseSignOutDestination": "/zh/member-login",
+    "membershipAndCompanyLinkRestorationRowCountsChecked": true,
+    "protectionAccess": "existing automation bypass token yielded protection-only browser cookie; project settings unchanged",
+    "screenshots": {
+      "en": {
+        "file": "portal-membership-recovery-preview-en-2026-09-28.png",
+        "sha256": "cacc96a79e9ae96a42857632ceb8b927fe6f9aa3d3e88d589942b0c8bb37fa31"
+      },
+      "zhHK": {
+        "file": "portal-membership-recovery-preview-zh-2026-09-28.png",
+        "sha256": "16bc1d5253846b275122842693ce1d3d504904925f155973f5c2d9e019c19abf"
+      }
+    }
+  },
   "localIsolatedAcceptance": {
     "databaseProject": "solitary-wave-52860119",
     "serverOrigin": "http://localhost:3011",
