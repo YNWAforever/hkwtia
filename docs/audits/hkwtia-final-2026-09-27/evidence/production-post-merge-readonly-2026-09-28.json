@@ -1,0 +1,73 @@
+{
+  "observedAt": "2026-09-28T05:52:42.018Z",
+  "scope": "Anonymous read-only production public route smoke after PR #95 merge",
+  "merge": {
+    "pr": 95,
+    "mergedAt": "2026-09-28T05:15:44Z",
+    "mergeCommit": "8c4800d2e5669a2e20698c0beb274b21e10da13c"
+  },
+  "deployment": {
+    "id": "dpl_5ToXE6nkMqyd74L2AvD9ZTJUhJaz",
+    "target": "production",
+    "status": "Ready",
+    "alias": "https://hkwtia.vercel.app"
+  },
+  "routes": [
+    {
+      "path": "/",
+      "http": 200,
+      "heading": "How can Hong Kong lead the AI+ era?"
+    },
+    {
+      "path": "/zh",
+      "http": 200,
+      "heading": "香港如何引領 AI+ 時代？"
+    },
+    {
+      "path": "/members",
+      "http": 200,
+      "resultState": "unavailable",
+      "recordGrid": false
+    },
+    {
+      "path": "/zh/members",
+      "http": 200,
+      "resultState": "unavailable",
+      "recordGrid": false
+    },
+    {
+      "path": "/member-login",
+      "http": 200,
+      "heading": "Member sign in"
+    },
+    {
+      "path": "/zh/member-login",
+      "http": 200,
+      "heading": "會員登入"
+    },
+    {
+      "path": "/admin-login",
+      "http": 200,
+      "heading": "Staff sign in"
+    },
+    {
+      "path": "/zh/admin-login",
+      "http": 200,
+      "heading": "職員登入"
+    }
+  ],
+  "directoryFailure": {
+    "publicReference": "e5126411-d567-4a70-a21e-1d228a4f0457",
+    "sanitizedLogEvent": "public_directory_read_failed",
+    "sanitizedLogCode": "schema_missing",
+    "logOccurredAt": "2026-09-28T05:49:09.855Z",
+    "logDeployment": "8c4800d2e5669a2e20698c0beb274b21e10da13c",
+    "screenshot": "production-directory-unavailable-2026-09-28.png",
+    "screenshotSha256": "C9EF09D5FC78434B6E319D7B6E49C69E567F7FEA108532DEF30C1BBFDA546D03"
+  },
+  "limits": [
+    "HTTP 200 is not directory recovery; both locales render the unavailable state",
+    "The actual production database binding and migration ledger were not determined",
+    "No production database mutation, rollback, payment, grant or provider send was performed"
+  ]
+}
