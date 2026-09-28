@@ -1,0 +1,60 @@
+{
+  "observedAtUtc": "2026-09-28T04:16:09Z",
+  "scope": "Protected branch Preview, isolated Neon/Auth, synthetic staff/buyer, genuine Stripe TEST events, email test transport; no live send",
+  "deploymentId": "dpl_298fgWr8kjr6Vu1pnTrZd8WPu4cE",
+  "branchHeadAtTest": "fbafb303",
+  "testTicketPassSecret": "Encrypted branch-scoped Preview override; value omitted",
+  "eventId": "90a4a468-f41f-4123-b12f-2680d020ff38",
+  "orderId": "b3fa761e-4332-46d4-971d-23fa4adb1895",
+  "sessionId": "cs_test_a1OdMvUFeDjAPU0RjV3rT5zkCQRmY7r1REtdhLyXbzGH2GdnrQkrlZNqU1",
+  "steps": [
+    {
+      "case": "three-seat payment",
+      "result": "HKD75 provider paid; local paid; exactly three seats; pass HTTP200"
+    },
+    {
+      "case": "staff refund and replay",
+      "result": "bilingual confirmation; one Stripe succeeded full refund; three seats removed; both locale passes HTTP404; replay remains refunded with one audit/notice"
+    }
+  ],
+  "deliveries": [
+    {
+      "eventId": "evt_1UKVxOELEX4A1xsqAb4bQ7WY",
+      "type": "checkout.session.completed",
+      "cliExit": 0,
+      "outcome": {
+        "received": true,
+        "result": "processed"
+      }
+    },
+    {
+      "eventId": "evt_1UKVxOELEX4A1xsqAb4bQ7WY",
+      "type": "checkout.session.completed",
+      "cliExit": 0,
+      "outcome": {
+        "received": true,
+        "result": "processed"
+      }
+    }
+  ],
+  "payment": {
+    "amountHkdCents": 7500,
+    "status": "paid",
+    "livemode": false
+  },
+  "refund": {
+    "id": "re_3UKVxMELEX4A1xsq1IQlATop",
+    "amount": 7500,
+    "currency": "hkd",
+    "status": "succeeded"
+  },
+  "databaseFacts": {
+    "refund_audits": 1,
+    "refund_notices": 1
+  },
+  "limits": [
+    "No real email delivery",
+    "Worker schedule and claims were not verified",
+    "No production payment or refund"
+  ]
+}
