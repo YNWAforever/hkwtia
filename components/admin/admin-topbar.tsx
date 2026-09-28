@@ -6,6 +6,7 @@ import {usePathname} from "next/navigation";
 import {useTranslations} from "next-intl";
 
 import {AdminAccountMenu} from "@/components/admin/admin-account-menu";
+import {LocaleSwitcher} from "@/components/layout/locale-switcher";
 import {linkLabelKeys} from "@/components/admin/admin-nav";
 import {adminNavigationGroups} from "@/config/internal-navigation";
 import type {AppLocale} from "@/i18n/routing";
@@ -15,6 +16,7 @@ type Role = "staff" | "exco" | "superadmin";
 export function AdminTopbar({locale, identity, role, mobileTrigger}: Readonly<{locale: AppLocale; identity: string; role: Role; mobileTrigger: ReactNode}>) {
   const pathname = usePathname();
   const t = useTranslations("Admin");
+  const tNav = useTranslations("Navigation");
   const links = adminNavigationGroups.reduce<Array<{id: keyof typeof linkLabelKeys; href: string}>>((items, group) => {
     for (const link of group.links) items.push(link);
     return items;
@@ -31,6 +33,7 @@ export function AdminTopbar({locale, identity, role, mobileTrigger}: Readonly<{l
     </nav>
     <Link className="hidden min-h-11 items-center text-sm underline sm:inline-flex" href={localizedPath(locale, "/admin/members")}>{t("shell.searchMembers")}</Link>
     <Link className="hidden min-h-11 items-center text-sm underline sm:inline-flex" href={localizedPath(locale, "/")}>{t("shell.viewSite")}</Link>
+    <LocaleSwitcher locale={locale} englishLabel={tNav("english")} chineseLabel={tNav("chinese")} switchToEnglishLabel={tNav("switchToEnglish")} switchToChineseLabel={tNav("switchToChinese")}/>
     <AdminAccountMenu identity={identity} role={role}/>
   </header>;
 }

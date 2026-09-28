@@ -5,6 +5,8 @@ import {redirect} from "next/navigation";
 
 import {siteConfig} from "@/config/site";
 import {SignInForm} from "@/components/auth/sign-in-form";
+import {LocaleSwitcher} from "@/components/layout/locale-switcher";
+import {PortalSignOutButton} from "@/components/portal/portal-sign-out-button";
 import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {resolveCurrentLogin} from "@/lib/auth/login-resolution-server";
@@ -91,6 +93,7 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
             <Link className="min-h-11 content-center underline-offset-4 hover:underline" href="/admin-login">{t("staffSignIn")}</Link>
             <a className="min-h-11 content-center underline-offset-4 hover:underline" href={`mailto:${siteConfig.contact.email}`}>{t("support")}</a>
           </nav>
+          <LocaleSwitcher locale={locale} englishLabel={tNav("english")} chineseLabel={tNav("chinese")} switchToEnglishLabel={tNav("switchToEnglish")} switchToChineseLabel={tNav("switchToChinese")}/>
         </header>
         <section aria-labelledby="login-heading" className="glass-card mx-auto max-w-xl p-6 sm:p-10">
           <h1 className="font-serif text-4xl font-semibold" id="login-heading">{t("formLabel")}</h1>
@@ -103,8 +106,9 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
             <form action={provisionMemberProfileAction.bind(null, locale, profileContinuation ?? undefined)} data-testid="profile-provision-form">
               <button className="mt-4 min-h-11 rounded-md bg-primary px-4 text-primary-foreground" type="submit">{t("createProfile")}</button>
             </form>
+            <PortalSignOutButton errorLabel={t("switchAccountError")} label={t("switchAccount")}/>
           </div> : null}
-          {resolution.kind === "forbidden" ? <p className="mt-5 text-destructive" role="alert">{t("memberAccessDenied")}</p> : null}
+          {resolution.kind === "forbidden" ? <div className="mt-5"><p className="text-destructive" role="alert">{t("memberAccessDenied")}</p><PortalSignOutButton errorLabel={t("switchAccountError")} label={t("switchAccount")}/></div> : null}
           {resolution.kind === "unavailable" ? <div className="mt-5" role="alert">
             <p>{t("identityUnavailable", {reference: resolution.reference})}</p>
             <a className="mt-3 inline-flex min-h-11 items-center underline" href={`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent(continuation)}`}>{t("retry")}</a>

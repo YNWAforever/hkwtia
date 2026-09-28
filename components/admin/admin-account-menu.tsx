@@ -14,6 +14,7 @@ export function AdminAccountMenu({identity, role}: Readonly<{identity: string; r
     <div className="absolute right-0 z-50 mt-1 min-w-48 rounded-md border bg-background p-2 shadow-lg">
       <p className="px-3 py-2 text-xs text-muted-foreground">{t("shell.account")}</p>
       <PortalSignOutButton destination="/admin-login" errorLabel={t("shell.signOutError")} label={t("shell.signOut")}/>
+      <PortalSignOutButton destination="/admin-login" errorLabel={t("shell.signOutError")} label={t("shell.switchAccount")}/>
     </div>
   </details>;
 }

@@ -4,6 +4,7 @@ const state = vi.hoisted(() => ({path: "/zh/admin/members/123", push: vi.fn(), r
 vi.mock("next/navigation", () => ({usePathname: () => state.path}));
 vi.mock("next-intl", () => ({useTranslations: () => (key: string) => key}));
 vi.mock("@/i18n/navigation", () => ({useRouter: () => ({push: state.push, refresh: state.refresh})}));
+vi.mock("@/components/layout/locale-switcher", () => ({LocaleSwitcher: ({switchToEnglishLabel}: {switchToEnglishLabel: string}) => <button aria-label={switchToEnglishLabel} type="button"/>}));
 vi.mock("@/lib/auth/client", () => ({authClient: {signOut: state.signOut}}));
 import {AdminAppShell} from "@/components/admin/admin-app-shell";
 
@@ -25,6 +26,14 @@ describe("admin workspace shell", () => {
     fireEvent.click(screen.getByRole("button", {name: "shell.collapseSidebar"}));
     expect(screen.getByTestId("admin-desktop-sidebar")).toHaveAttribute("data-collapsed", "true");
     expect(screen.getByRole("link", {name: "Skip to content"})).toHaveAttribute("href", "#main-content");
+  });
+  it("exposes a locale control and switches accounts only after provider sign-out succeeds", async () => {
+    render(<AdminAppShell {...props}><h1>Member detail</h1></AdminAppShell>);
+    expect(screen.getByRole("button", {name: "switchToEnglish"})).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Synthetic Staff"));
+    fireEvent.click(screen.getByRole("button", {name: "shell.switchAccount"}));
+    await waitFor(() => expect(state.signOut).toHaveBeenCalledTimes(1));
+    expect(state.push).toHaveBeenCalledWith("/admin-login");
   });
   it("keeps the admin session in place when the provider rejects sign-out", async () => {
     state.signOut.mockResolvedValueOnce({error: {message: "provider unavailable"}});

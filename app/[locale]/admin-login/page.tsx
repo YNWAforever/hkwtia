@@ -5,6 +5,8 @@ import {redirect} from "next/navigation";
 
 import {AccessDenied} from "@/components/auth/access-denied";
 import {SignInForm} from "@/components/auth/sign-in-form";
+import {LocaleSwitcher} from "@/components/layout/locale-switcher";
+import {PortalSignOutButton} from "@/components/portal/portal-sign-out-button";
 import {siteConfig} from "@/config/site";
 import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
@@ -71,13 +73,15 @@ export default async function AdminLoginPage({params, searchParams}: Props) {
           <Link className="min-h-11 content-center underline-offset-4 hover:underline" href="/member-login">{t("memberSignIn")}</Link>
           <a className="min-h-11 content-center underline-offset-4 hover:underline" href={`mailto:${siteConfig.contact.email}`}>{t("support")}</a>
         </nav>
+        <LocaleSwitcher locale={locale} englishLabel={tNav("english")} chineseLabel={tNav("chinese")} switchToEnglishLabel={tNav("switchToEnglish")} switchToChineseLabel={tNav("switchToChinese")}/>
       </header>
       {resolution.kind === "forbidden"
-        ? <AccessDenied title={t("accessDenied")} copy={t("accessDeniedHelp")} home={t("home")} portal={t("memberPortal")}/>
+        ? <div className="mx-auto max-w-xl"><AccessDenied title={t("accessDenied")} copy={t("accessDeniedHelp")} home={t("home")} portal={t("memberPortal")}/><PortalSignOutButton destination="/admin-login" errorLabel={t("switchAccountError")} label={t("switchAccount")}/></div>
         : resolution.kind === "needs-profile" ? <section className="glass-card mx-auto max-w-xl p-6 sm:p-10" role="alert">
           <h1 className="font-serif text-3xl">{t("profileRecovery")}</h1>
           <p className="mt-3">{t("profileRecoveryHelp")}</p>
           <Link className="mt-4 inline-flex min-h-11 items-center underline" href="/member-login">{t("memberSignIn")}</Link>
+          <PortalSignOutButton destination="/admin-login" errorLabel={t("switchAccountError")} label={t("switchAccount")}/>
         </section>
         : resolution.kind === "unavailable" ? <section className="glass-card mx-auto max-w-xl p-6 sm:p-10" role="alert">
           <h1 className="font-serif text-3xl">{t("identityUnavailable", {reference: resolution.reference})}</h1>
