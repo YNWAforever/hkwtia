@@ -46,7 +46,7 @@ describe.skipIf(!finalAuditIsolatedDatabaseUrl())("dashboard parity on isolated 
     const [approvals, atRisk, listings, profiles, tasks, posts] = await Promise.all([
       listPendingApprovals(actor),
       listAtRiskMembers(actor, {asOf}),
-      showcaseRepository.listForReview(actor),
+      showcaseRepository.listForReview(actor, "pending_review"),
       companyProfilesRepository.listForReview(actor),
       listOpenTasks(actor),
       adminPostsRepository.listForAdmin(actor),
@@ -54,7 +54,7 @@ describe.skipIf(!finalAuditIsolatedDatabaseUrl())("dashboard parity on isolated 
     expect(counts).toEqual({
       approvals: approvals.length,
       atRisk: atRisk.length,
-      listings: listings.length,
+      listings: listings.items.length,
       profiles: profiles.length,
       openTasks: tasks.length,
       draftNews: posts.filter((post) => post.publishedAt === null).length,

@@ -2841,7 +2841,7 @@
       "caption": "公司展示頁",
       "filterLabel": "展示頁狀態",
       "filterPending": "等待審核",
-      "filterAll": "所有展示頁",
+      "filterAll": "所有展示頁", "pagination": "展示頁審核分頁", "next": "下一頁（50 項）",
       "company": "公司",
       "slug": "Slug",
       "logo": "標誌",

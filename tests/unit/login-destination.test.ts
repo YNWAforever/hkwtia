@@ -37,6 +37,15 @@ describe("login destination allowlist", () => {
       .toBe("/admin/batches?state=ready&operation=profile_patch");
   });
 
+  it("keeps bounded review and batch item page cursors through sign-in", () => {
+    expect(parseLoginDestination("/admin/listings-review?status=pending_review&cursor=abc_123", "admin").path)
+      .toBe("/admin/listings-review?status=pending_review&cursor=abc_123");
+    expect(parseLoginDestination(`/admin/batches/${uuid}?cursor=abc_123`, "admin").path)
+      .toBe(`/admin/batches/${uuid}?cursor=abc_123`);
+    for (const raw of ["/admin/listings-review?status=published&cursor=abc", "/admin/listings-review?cursor=one&cursor=two", `/admin/batches/${uuid}?cursor=`, `/admin/batches/${uuid}?cursor=abc&returnTo=%2Fadmin`]) {
+      expect(parseLoginDestination(raw, "admin").path).toBe("/admin");
+    }
+  });
   it("keeps validated event and Member360 detail views through sign-in", () => {
     expect(parseLoginDestination(`/admin/events-mgmt/${uuid}?tab=attendees&q=Acme&cursor=abc`, "admin").path)
       .toBe(`/admin/events-mgmt/${uuid}?tab=attendees&q=Acme&cursor=abc`);

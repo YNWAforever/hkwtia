@@ -61,7 +61,7 @@ function memoryStore(initial: ShowcaseListing[]): ShowcaseStore & {viewWrites: n
       else rows.push(next);
       return next;
     },
-    listForReview: async () => rows.map((row) => ({...row, reviewVersion: "1"})),
+    listForReview: async () => ({items: rows.map((row) => ({...row, reviewVersion: "1"})), nextCursor: null}),
     setStatus: async (id, status, reviewerId, reviewVersion, reason) => {
       const row = rows.find((candidate) => candidate.id === id);
       if (!row) return null;

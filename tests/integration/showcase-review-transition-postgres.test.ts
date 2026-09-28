@@ -81,7 +81,7 @@ describe.skipIf(!enabled)("showcase review transition on disposable PostgreSQL",
     await pool.query("UPDATE showcase_listings SET status = 'pending_review', description_en = 'Original' WHERE id = $1", [listingId]);
     const repo = createShowcaseRepository({store: databaseStore(async () => drizzle(pool!) as never)});
     const staff = {kind: "staff", userId: "staff", profileId: "staff"} as AdminActor;
-    const reviewedVersion = (await repo.listForReview(staff)).find((row) => row.id === listingId)?.reviewVersion;
+    const reviewedVersion = (await repo.listForReview(staff)).items.find((row) => row.id === listingId)?.reviewVersion;
     expect(reviewedVersion).toMatch(/^\d+$/);
     await pool.query("UPDATE showcase_listings SET status = 'pending_review', description_en = 'Unreviewed change' WHERE id = $1", [listingId]);
     await expect(repo.publish(staff, listingId, reviewedVersion!)).rejects.toThrow("INVALID_SHOWCASE_TRANSITION");
@@ -96,7 +96,7 @@ describe.skipIf(!enabled)("showcase review transition on disposable PostgreSQL",
     const store = databaseStore(async () => drizzle(pool!) as never);
     const repo = createShowcaseRepository({store});
     const staff = {kind: "staff", userId: "staff", profileId: "staff"} as AdminActor;
-    const reviewedVersion = (await repo.listForReview(staff)).find((row) => row.id === listingId)?.reviewVersion;
+    const reviewedVersion = (await repo.listForReview(staff)).items.find((row) => row.id === listingId)?.reviewVersion;
     expect(reviewedVersion).toMatch(/^\d+$/);
     const editor = await pool.connect();
     let result: Promise<string> | undefined;
@@ -125,4 +125,24 @@ describe.skipIf(!enabled)("showcase review transition on disposable PostgreSQL",
       finally { editor.release(); if (result) await result; }
     }
   }, 20_000);
+  it("pages 51 synthetic pending listings without duplicates and scopes the cursor to the filter", async () => {
+    if (!pool) throw new Error("disposable PostgreSQL pool is unavailable");
+    await pool.query(`INSERT INTO showcase_listings
+      (id, company_id, slug, status, member_since, name_en, name_zh_hk,
+       tagline_en, tagline_zh_hk, description_en, description_zh_hk, category, updated_at)
+      SELECT md5('listing-' || n)::uuid, md5('company-' || n)::uuid,
+        'review-page-' || lpad(n::text, 3, '0'), 'pending_review', '2020-01-01',
+        'Synthetic ' || n, '測試', 'Tagline', '標語', 'Description', '描述', 'software',
+        '2026-09-29T00:00:00Z'::timestamptz
+      FROM generate_series(1, 51) AS n`);
+    const repo = createShowcaseRepository({store: databaseStore(async () => drizzle(pool!) as never)});
+    const staff = {kind: "staff", userId: "staff", profileId: "staff"} as AdminActor;
+    const first = await repo.listForReview(staff, "pending_review");
+    expect(first.items).toHaveLength(50);
+    expect(first.nextCursor).toEqual(expect.any(String));
+    const second = await repo.listForReview(staff, "pending_review", first.nextCursor!);
+    expect(second.items.length).toBeGreaterThan(0);
+    expect(new Set([...first.items, ...second.items].map(row => row.id)).size).toBe(first.items.length + second.items.length);
+    await expect(repo.listForReview(staff, undefined, first.nextCursor!)).rejects.toThrow("INVALID_CURSOR");
+  }, 30_000);
 });

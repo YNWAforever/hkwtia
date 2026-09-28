@@ -12,6 +12,7 @@ const ADMIN_STATIC_ROUTES = new Set<string>([
   "/admin/members/grants", "/admin/members/communications", "/admin/page-copy",
 ]);
 const ADMIN_UUID_DETAIL = /^\/admin\/(?:announcements|batches|campaigns|cohorts|events-mgmt|inbox|landing-partners|media|members|news|partners)\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const ADMIN_BATCH_DETAIL = /^\/admin\/batches\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ADMIN_EVENT_DETAIL = /^\/admin\/events-mgmt\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ADMIN_MEMBER_DETAIL = /^\/admin\/members\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const EVENT_TABS = new Set(["content", "attendees", "orders", "notifications"]);
@@ -22,7 +23,7 @@ const ADMIN_NESTED_UUID_DETAIL = /^\/admin\/reports\/board-drafts\/[0-9a-f]{8}-[
 const ADMIN_PAGE_COPY_NAMESPACE = /^\/admin\/page-copy\/[A-Za-z][A-Za-z0-9_-]{0,79}$/;
 const QUERY_KEYS: Readonly<Record<string, readonly string[]>> = {
   "/admin/batches": ["state", "operation", "cursor"],
-  "/admin/listings-review": ["status"],
+  "/admin/listings-review": ["status", "cursor"],
   "/admin/members": ["q", "status", "planCode", "renewalFrom", "renewalTo", "companyId", "locale", "completeness", "sort", "limit", "cursor", "history", "view"],
   "/admin/members/queue": ["status", "q", "limit", "cursor"],
   "/admin/contacts": ["stage", "source", "owner", "optIn", "q", "cursor", "saved"],
@@ -40,7 +41,7 @@ export function allowedMemberDestination(raw: string | null | undefined): string
   if (raw === "/join") return raw;
   if (!raw.startsWith("/join?") || raw.includes("#") || raw.includes("\\") || /[\u0000-\u001f\u007f]/.test(raw)) return null;
   const query = new URLSearchParams(raw.slice("/join?".length));
-  if ([...query].some(([key, value]) => !["plan", "application", "next"].includes(key) || value.length > 256 || query.getAll(key).length !== 1)) return null;
+  if ([...query].some(([key, value]) => !["plan", "application", "next"].includes(key) || value.length > (key.toLowerCase().includes("cursor") ? 1000 : 256) || query.getAll(key).length !== 1)) return null;
   const plan = query.get("plan");
   const application = query.get("application");
   const next = query.get("next");
@@ -62,14 +63,17 @@ export function allowedAdminDestination(raw: string | null | undefined): string 
     ADMIN_NESTED_UUID_DETAIL.test(path) || ADMIN_PAGE_COPY_NAMESPACE.test(path)
   )) return null;
   if (!query) return path;
+  const isBatchDetail = ADMIN_BATCH_DETAIL.test(path);
   const isEventDetail = ADMIN_EVENT_DETAIL.test(path);
   const isMemberDetail = ADMIN_MEMBER_DETAIL.test(path);
-  const allowedKeys: readonly string[] | undefined = isEventDetail ? EVENT_DETAIL_QUERY_KEYS
+  const allowedKeys: readonly string[] | undefined = isBatchDetail ? ["cursor"]
+    : isEventDetail ? EVENT_DETAIL_QUERY_KEYS
     : isMemberDetail ? MEMBER_DETAIL_QUERY_KEYS : QUERY_KEYS[path];
   if (!allowedKeys) return null;
   const parsed = new URLSearchParams(query);
-  if ([...parsed].some(([key, value]) => !allowedKeys.includes(key) || value.length > 256 || /[\u0000-\u001f\u007f]/.test(value))) return null;
-  if (path === "/admin/listings-review" && (parsed.getAll("status").length !== 1 || parsed.get("status") !== "pending_review")) return null;
+  if ([...parsed].some(([key, value]) => !allowedKeys.includes(key) || value.length > (key.toLowerCase().includes("cursor") ? 1000 : 256) || /[\u0000-\u001f\u007f]/.test(value))) return null;
+  if (parsed.has("cursor") && (parsed.getAll("cursor").length !== 1 || !/^[A-Za-z0-9_-]+$/.test(parsed.get("cursor") ?? ""))) return null;
+  if (path === "/admin/listings-review" && (parsed.getAll("status").length > 1 || (parsed.has("status") && parsed.get("status") !== "pending_review"))) return null;
   if (isEventDetail) {
     const tab = parsed.get("tab");
     if (parsed.getAll("tab").length > 1 || (tab && !EVENT_TABS.has(tab))) return null;

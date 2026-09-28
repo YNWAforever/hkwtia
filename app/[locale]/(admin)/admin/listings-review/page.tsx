@@ -18,9 +18,14 @@ export default async function AdminListingsReviewPage({params, searchParams}: Pr
   setRequestLocale(locale);
   const actor = await requireAdminPageActor();
   const query = searchParams ? await searchParams : {};
+  if (Object.keys(query).some(key => !["status", "cursor"].includes(key))) notFound();
   const status = query.status;
+  const cursor = query.cursor;
   if (status !== undefined && status !== "pending_review") notFound();
-  const listings = await showcaseRepository.listForReview(actor, status === "pending_review" ? status : undefined);
+  if (cursor !== undefined && (typeof cursor !== "string" || cursor.length === 0 || cursor.length > 1000)) notFound();
+  let page;
+  try {page = await showcaseRepository.listForReview(actor, status === "pending_review" ? status : undefined, cursor);}
+  catch (error) {if (error instanceof Error && error.message === "INVALID_CURSOR") notFound(); throw error;}
   const mediaOptions = (await mediaRepository.listActiveForAdmin(actor)).map((entry) => ({
     id: entry.id,
     label: locale === "zh-HK" ? entry.altZh : entry.altEn,
@@ -40,7 +45,7 @@ export default async function AdminListingsReviewPage({params, searchParams}: Pr
       <Link aria-current={status === undefined ? "page" : undefined} className="underline" href={localizedPath(locale, "/admin/listings-review")}>{t("filterAll")}</Link>
     </nav>
     <ShowcaseReviewTable
-      listings={listings}
+      listings={page.items}
       labels={labels}
       publishAction={publishShowcaseListingAction.bind(null, path)}
       rejectAction={rejectShowcaseListingAction.bind(null, path)}
@@ -48,5 +53,6 @@ export default async function AdminListingsReviewPage({params, searchParams}: Pr
       logoAction={setShowcaseLogoAction.bind(null, path)}
       mediaOptions={mediaOptions}
     />
+    {page.nextCursor ? <nav aria-label={t("pagination")}><Link className="inline-flex min-h-11 items-center rounded-md border px-4 text-sm" href={localizedPath(locale, `/admin/listings-review?${new URLSearchParams({...status ? {status} : {}, cursor: page.nextCursor}).toString()}`)}>{t("next")}</Link></nav> : null}
   </div>;
 }

@@ -1,7 +1,7 @@
 import {renderToStaticMarkup} from "react-dom/server";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
-const state = vi.hoisted(() => ({list: vi.fn(async () => []), media: vi.fn(async () => [])}));
+const state = vi.hoisted(() => ({list: vi.fn(async () => ({items: [], nextCursor: "next-safe"})), media: vi.fn(async () => [])}));
 vi.mock("next-intl/server", () => ({
   setRequestLocale: vi.fn(),
   getTranslations: vi.fn(async () => Object.assign((key: string) => key, {raw: (key: string) => key})),
@@ -22,7 +22,8 @@ describe("admin showcase review queue", () => {
       params: Promise.resolve({locale: "en"}),
       searchParams: Promise.resolve({status: "pending_review"}),
     }));
-    expect(state.list).toHaveBeenCalledWith(expect.objectContaining({kind: "staff"}), "pending_review");
+    expect(state.list).toHaveBeenCalledWith(expect.objectContaining({kind: "staff"}), "pending_review", undefined);
+    expect(html).toContain('href="/admin/listings-review?status=pending_review&amp;cursor=next-safe"');
     expect(html).toContain('href="/admin/listings-review"');
   });
 
@@ -33,8 +34,16 @@ describe("admin showcase review queue", () => {
     })).rejects.toThrow("NEXT_NOT_FOUND");
     expect(state.list).not.toHaveBeenCalled();
   });
+  it("passes a scoped cursor and rejects ambiguous or unrelated query keys", async () => {
+    await AdminListingsReviewPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({status: "pending_review", cursor: "cursor-safe"})});
+    expect(state.list).toHaveBeenCalledWith(expect.objectContaining({kind: "staff"}), "pending_review", "cursor-safe");
+    state.list.mockClear();
+    await expect(AdminListingsReviewPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({cursor: ["one", "two"]})})).rejects.toThrow("NEXT_NOT_FOUND");
+    await expect(AdminListingsReviewPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({other: "unexpected"})})).rejects.toThrow("NEXT_NOT_FOUND");
+    expect(state.list).not.toHaveBeenCalled();
+  });
   it("retains the all-status management view for existing links", async () => {
     await AdminListingsReviewPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({})});
-    expect(state.list).toHaveBeenCalledWith(expect.objectContaining({kind: "staff"}), undefined);
+    expect(state.list).toHaveBeenCalledWith(expect.objectContaining({kind: "staff"}), undefined, undefined);
   });
 });

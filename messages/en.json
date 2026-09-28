@@ -2840,7 +2840,7 @@
       "caption": "Company listings",
       "filterLabel": "Listing status",
       "filterPending": "Awaiting review",
-      "filterAll": "All listings",
+      "filterAll": "All listings", "pagination": "Showcase review pages", "next": "Next 50 listings",
       "company": "Company",
       "slug": "Slug",
       "logo": "Logo",
