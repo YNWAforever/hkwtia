@@ -86,7 +86,7 @@ test.describe("isolated admin workspace shell", () => {
     await signInForM2(page, "member");
     await page.goto("/admin");
     await expect(page).toHaveURL(/\/admin-login/);
-    await expect(page.getByRole("alert")).toBeVisible();
+    await expect(page.getByRole("alert").filter({hasText: /Staff access is unavailable/})).toBeVisible();
     await expect(page.getByTestId("admin-desktop-sidebar")).toHaveCount(0);
   });
 });
