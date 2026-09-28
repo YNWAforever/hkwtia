@@ -1,5 +1,6 @@
 import {fireEvent, render, screen} from "@testing-library/react";
 import {describe, expect, it, vi} from "vitest";
+import Link from "next/link";
 
 const navigate = vi.hoisted(() => ({prevented: vi.fn()}));
 vi.mock("next/link", () => ({default: ({children, href, onNavigate, ...props}: {children: React.ReactNode; href: string; onNavigate?: (event: {preventDefault: () => void}) => void}) => <a href={href} onClick={event => onNavigate?.({preventDefault: () => {navigate.prevented(); event.preventDefault();}})} {...props}>{children}</a>}));
@@ -24,6 +25,17 @@ describe("admin unsaved form navigation", () => {
     fireEvent.click(screen.getByRole("link", {name: "News"}));
     expect(confirm).toHaveBeenCalledTimes(1);
     expect(navigate.prevented).toHaveBeenCalledTimes(1);
+    vi.unstubAllGlobals();
+  });
+  it("also protects direct links inside an editor page", () => {
+    const confirm = vi.fn(() => false);
+    vi.stubGlobal("confirm", confirm);
+    render(<AdminUnsavedChangesProvider confirmMessage="Leave draft?"><Editor/><Link href="/admin/news">Direct page link</Link></AdminUnsavedChangesProvider>);
+    fireEvent.click(screen.getByRole("button", {name: "Edit draft"}));
+    const click = new MouseEvent("click", {bubbles: true, cancelable: true});
+    screen.getByRole("link", {name: "Direct page link"}).dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(true);
+    expect(confirm).toHaveBeenCalledTimes(1);
     vi.unstubAllGlobals();
   });
 });
