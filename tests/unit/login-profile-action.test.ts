@@ -1,12 +1,15 @@
 import {beforeEach, describe, expect, it, vi} from "vitest";
-const state = vi.hoisted(() => ({session: null as unknown, provision: vi.fn(), destination: ""}));
-vi.mock("@/lib/auth/server", () => ({getSession: async () => state.session}));
+const state = vi.hoisted(() => ({session: null as unknown, sessionError: null as Error | null, provision: vi.fn(), destination: ""}));
+vi.mock("@/lib/auth/server", () => ({getSession: async () => {
+  if (state.sessionError) throw state.sessionError;
+  return state.session;
+}}));
 vi.mock("@/lib/db/repos/profile-identities", () => ({profileIdentityRepository: {provisionMember: (...args: unknown[]) => state.provision(...args)}}));
 vi.mock("next/navigation", () => ({redirect: (path: string) => {state.destination = path; throw new Error("NEXT_REDIRECT");}}));
 import {provisionMemberProfileAction} from "@/app/[locale]/member-login/provision-action";
 
 describe("member profile creation action", () => {
-  beforeEach(() => {state.session = null; state.destination = ""; state.provision.mockReset();});
+  beforeEach(() => {state.session = null; state.sessionError = null; state.destination = ""; state.provision.mockReset();});
   it("requires a verified server session and never writes for signed-out calls", async () => {
     await expect(provisionMemberProfileAction("en")).rejects.toThrow("NEXT_REDIRECT");
     expect(state.provision).not.toHaveBeenCalled();
@@ -27,8 +30,24 @@ describe("member profile creation action", () => {
   });
   it("does not expose database errors or route them as signed out", async () => {
     state.session = {user: {id: "subject", email: "test@example.test", emailVerified: true}};
-    state.provision.mockRejectedValue(new Error("secret-db-url"));
+    state.provision.mockRejectedValue(Object.assign(new Error("secret-db-url"), {cause: Object.assign(new Error("private-sql"), {code: "42703"})}));
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
     await expect(provisionMemberProfileAction("en")).rejects.toThrow("NEXT_REDIRECT");
     expect(state.destination).toBe("/member-login?profile=unavailable");
+    expect(log).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(String(log.mock.calls[0]?.[0]))).toMatchObject({event: "member_profile_provision_unavailable", stage: "provision", sqlstate: "42703"});
+    expect(String(log.mock.calls[0]?.[0])).not.toContain("secret-db-url");
+    expect(String(log.mock.calls[0]?.[0])).not.toContain("private-sql");
+    log.mockRestore();
+  });
+  it("distinguishes a session-read failure without exposing its detail", async () => {
+    state.sessionError = new Error("private-auth-token");
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    await expect(provisionMemberProfileAction("en")).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.provision).not.toHaveBeenCalled();
+    expect(state.destination).toBe("/member-login?profile=unavailable");
+    expect(JSON.parse(String(log.mock.calls[0]?.[0]))).toMatchObject({event: "member_profile_provision_unavailable", stage: "session"});
+    expect(String(log.mock.calls[0]?.[0])).not.toContain("private-auth-token");
+    log.mockRestore();
   });
 });

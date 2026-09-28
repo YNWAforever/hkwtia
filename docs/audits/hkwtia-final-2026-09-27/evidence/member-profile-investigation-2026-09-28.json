@@ -1,0 +1,70 @@
+{
+  "finding": "A06 member profile onboarding after Google login",
+  "reported_host_before_and_after": "hkwtia.vercel.app",
+  "reported_method": "Google",
+  "exact_user_request_time": "not supplied",
+  "production_deployment": "dpl_4FisCUU1aiJ73UChjk7SBkjUgW2A",
+  "preview_main_deployment": "dpl_Cwpuj7cRjXaaChYreiJhCFBB2mTK",
+  "log_window_utc": [
+    "2026-09-28T14:35:00Z",
+    "2026-09-28T14:40:00Z"
+  ],
+  "production_window": {
+    "events": 22,
+    "member_login_gets": 4,
+    "member_login_posts": 0,
+    "profile_unavailable_events": 0
+  },
+  "preview_window": {
+    "events": 13,
+    "google_social_start_utc": "2026-09-28T14:37:21Z",
+    "member_login_post_utc": [
+      "2026-09-28T14:37:37Z",
+      "2026-09-28T14:37:44Z"
+    ],
+    "profile_unavailable_event_utc": "2026-09-28T14:37:44Z",
+    "correlation_to_user": "unproven"
+  },
+  "anonymous_production_post_probe": {
+    "utc": "2026-09-28T15:24:24Z",
+    "route": "POST /zh/member-login",
+    "deployment": "dpl_4FisCUU1aiJ73UChjk7SBkjUgW2A",
+    "response": 200,
+    "identity_or_action": "none; empty form body"
+  },
+  "preview_main_schema": {
+    "project": "solitary-wave-52860119",
+    "branch": "br-dark-forest-az0shpz9",
+    "ledger": 6,
+    "missing_column": "profiles.whatsapp_opt_in",
+    "synthetic_runtime_insert": "failed SQLSTATE 42703; cleanup checked"
+  },
+  "isolated_preview_copy": {
+    "branch": "br-long-fire-az608acp",
+    "expires_utc": "2026-10-05T15:13:00Z",
+    "migrations": "0007-0051; npm.cmd run db:migrate exit 0",
+    "ledger_after": 51,
+    "aggregate_counts_before_after": {
+      "profiles": 30,
+      "companies": 12,
+      "memberships": 18,
+      "events": 4
+    },
+    "synthetic_runtime_insert": "passed; 1/1; cleanup checked"
+  },
+  "production_branch_synthetic_copy": {
+    "branch": "br-muddy-smoke-aozr8i5y",
+    "ledger": 51,
+    "synthetic_runtime_insert": "passed; 1/1; cleanup checked"
+  },
+  "diagnostic_code": {
+    "unit_red": "2 expected failures; missing stage and SQLSTATE",
+    "unit_green": "5/5 passed",
+    "isolated_neon_green": "1/1 passed on upgraded preview copy",
+    "deployed_to_production": false,
+    "commit": "74124380"
+  },
+  "real_user_google_callback_and_profile_write": "unverified",
+  "production_root_cause": "unresolved; no correlated production POST or safe error stage",
+  "authenticated_error_screenshot": "not supplied; report text only"
+}

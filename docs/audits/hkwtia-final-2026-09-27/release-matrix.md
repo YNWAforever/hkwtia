@@ -111,3 +111,12 @@ User-authorized read-only access now confirms the existing Neon `production` bra
 ## Production auth configuration checkpoint — 2026-09-28T10:59Z
 
 User-authorized Production RATE_LIMIT_KEY_SECRET and AUTH_GOOGLE_ENABLED=true were applied, and the existing application rebuilt as READY `dpl_4FisCUU1aiJ73UChjk7SBkjUgW2A`, now serving hkwtia.vercel.app. Four bilingual login pages enable Google; a browser click reaches Google's login page. Invalid synthetic credentials return normal provider 401, and malformed magic-link input returns 400 rather than LIMITER_UNAVAILABLE. [Receipt, commands and rollback](acceptance.md). Actual email receipt and authenticated Google callback/role verification remain unverified. This supersedes the earlier production Google-disabled configuration state, without changing separate worker/communication/policy gates.
+
+## Member profile Google continuation gate — 2026-09-28
+
+| Scope | Code fixed | Staging verified | Production released |
+| --- | --- | --- | --- |
+| Profile action diagnostics | Safe stage and SQLSTATE logging added on PR #98; focused unit 5/5 | Isolated Neon runtime profile insert 1/1 on upgraded copy; no authenticated Google callback | **No** — Production still runs `dpl_4FisCUU1aiJ73UChjk7SBkjUgW2A`; user's `hkwtia.vercel.app` failure is unresolved |
+| Preview-main schema | Existing application insert reproduced SQLSTATE 42703 at ledger 0006; no policy changed | Isolated copy upgraded 0007–0051 and synthetic insert passed; original Preview-main still ledger 0006 | Not a Production release item |
+
+[Detailed sanitized receipt, commands and boundaries](acceptance.md#member-profile-creation-report-after-google-login--2026-09-28). Before releasing this diagnostic change, review PR #98, run the source gates, deploy a protected Preview and verify a synthetic Google callback/profile creation on the same host and isolated database. If Production publication is approved, record the exact web SHA, database binding and worker compatibility, then use one user-controlled retry to capture the new safe stage/code. Roll back to the previous web deployment if the diagnostic revision regresses login; leave schema and existing profiles intact. Treat migration of shared Preview-main as a separate target-specific change after recovery snapshot and branch rehearsal. Neither skipped provider verification nor an uncorrelated Preview log is a successful Production fix.
