@@ -3,20 +3,18 @@ import {commitAdminBatchAction, retryAdminBatchAction, cancelAdminBatchAction} f
 import {BatchProgressPoller} from "@/components/admin/batch-progress";
 import {batchRuntimeConfig, type BatchPreview} from "@/lib/admin/batches/types";
 
-export type BatchLabels = Readonly<{title: string; description: string; back: string; states: Record<string, string>; counters: Record<string, string>; total: string; eligible: string; blocked: string; operation: string; target: string; before: string; after: string; reason: string; attempts: string; result: string; commit: string; retry: string; cancel: string; expires: string; empty: string; manualReview: string; more: string}>;
+export type BatchLabels = Readonly<{title: string; description: string; back: string; states: Record<string, string>; counters: Record<string, string>; total: string; eligible: string; blocked: string; operation: string; target: string; before: string; after: string; reason: string; attempts: string; result: string; commit: string; retry: string; cancel: string; expires: string; empty: string; manualReview: string; more: string; progressUnavailable: string}>;
 
 export function BatchPreviewPanel({preview, labels, pageHref}: {preview: BatchPreview; labels: BatchLabels; pageHref?: string}) {
   const ready = preview.state === "ready" && preview.eligible > 0;
   const retryable = ["running", "completed_with_errors"].includes(preview.state) && (preview.retryableFailed ?? preview.items.some(item => item.state === "failed" && item.errorCode?.startsWith("TRANSIENT_") && item.attemptCount < batchRuntimeConfig().maxAttempts));
-  const counters = ["pending", "running", "succeeded", "skipped", "failed"] as const;
   return <section className="space-y-6" aria-labelledby="batch-title">
-    <BatchProgressPoller state={preview.state}/>
-    <header className="space-y-2"><h1 className="font-serif text-4xl font-semibold" id="batch-title">{labels.title}</h1><p className="text-muted-foreground">{labels.description}</p><p className="font-medium" role="status">{labels.states[preview.state] ?? preview.state}</p></header>
+    <BatchProgressPoller batchId={preview.batchId} state={preview.state} counters={preview.counters} labels={{states: labels.states, counters: labels.counters, unavailable: labels.progressUnavailable}}/>
+    <header className="space-y-2"><h1 className="font-serif text-4xl font-semibold" id="batch-title">{labels.title}</h1><p className="text-muted-foreground">{labels.description}</p></header>
     <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
       <div><dt>{labels.total}</dt><dd className="text-2xl font-semibold">{preview.total}</dd></div>
       <div><dt>{labels.eligible}</dt><dd className="text-2xl font-semibold">{preview.eligible}</dd></div>
       <div><dt>{labels.blocked}</dt><dd className="text-2xl font-semibold">{preview.blocked}</dd></div>
-      {counters.map((key) => <div key={key}><dt>{labels.counters[key]}</dt><dd className="text-2xl font-semibold">{preview.counters[key]}</dd></div>)}
     </dl>
     {preview.expiresAt && preview.state === "ready" ? <p className="text-sm text-muted-foreground">{labels.expires}: <time dateTime={preview.expiresAt}>{preview.expiresAt}</time></p> : null}
     <div className="flex flex-wrap gap-3">

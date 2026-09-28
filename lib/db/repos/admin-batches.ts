@@ -38,7 +38,8 @@ function itemPreview(row: unknown): BatchProgressItem {
   return {target: {type: item.targetType, id: item.targetId}, previewStatus: item.previewStatus, eligible: item.previewStatus === "eligible", reasonCode: item.reasonCode, before: item.beforeSummary, after: item.afterSummary, expectedVersion: item.expectedVersion, state: item.state, attemptCount: item.attemptCount, errorCode: item.errorCode, resultRef: item.resultRef};
 }
 
-export function createAdminBatchesRepository(loadDatabase: () => Promise<BatchDatabase> = async () => await getDb() as unknown as BatchDatabase, now: () => Date = () => new Date()): BatchGateway {
+export type BatchStatusRepository = BatchGateway & Readonly<{status: (actor: AdminActor, batchId: string) => Promise<BatchSummary>}>;
+export function createAdminBatchesRepository(loadDatabase: () => Promise<BatchDatabase> = async () => await getDb() as unknown as BatchDatabase, now: () => Date = () => new Date()): BatchStatusRepository {
   return {
     async create(actor, request: BatchRequest, requestDigest) {
       requireAdmin(actor);
@@ -55,7 +56,11 @@ export function createAdminBatchesRepository(loadDatabase: () => Promise<BatchDa
         return {batchId: row.id};
       });
     },
-    async preview(actor, batchId, cursor): Promise<BatchPreview> {
+    async status(actor, batchId): Promise<BatchSummary> {
+      requireAdmin(actor);
+      const db = await loadDatabase();
+      return summary(await readOwned(db, actor.profileId, z.string().uuid().parse(batchId), false));
+    },    async preview(actor, batchId, cursor): Promise<BatchPreview> {
       requireAdmin(actor);
       const db = await loadDatabase();
       const batch = await readOwned(db, actor.profileId, batchId, false);

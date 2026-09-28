@@ -60,6 +60,16 @@ describe("durable admin batch repository", () => {
     await repo.preview(staff, batchId, page.nextCursor);
     expect(statements.at(-1)?.query).toMatch(/target_type.*target_id/);
   });
+  it("reads owner-scoped status without loading any item rows", async () => {
+    const batch = {id: batchId, actorProfileId: "staff", operation: "profile_patch", state: "running", previewDigest: "a".repeat(64), previewExpiresAt: new Date("2030-01-01T00:00:00Z"), counters: {pending: 2, running: 1, succeeded: 7, skipped: 0, failed: 0}, validatedPayload: request.payload};
+    const {database, statements} = fakeDb((_query, params) => params.includes("other") ? [] : [batch]);
+    const repo = createAdminBatchesRepository(async () => database);
+    const status = await repo.status(staff, batchId);
+    expect(status).toMatchObject({batchId, state: "running", counters: {pending: 2, succeeded: 7}});
+    expect(statements.every(({query}) => !query.includes("admin_batch_items"))).toBe(true);
+    expect(statements[0]?.params).toContain("staff");
+    await expect(repo.status({...staff, profileId: "other"}, batchId)).rejects.toThrow("BATCH_NOT_FOUND");
+  });
   it("does not report a retry queued when no transient failed item was reset", async () => {
     const batch = {id: batchId, actorProfileId: "staff", operation: "profile_patch", state: "completed_with_errors", previewDigest: "a".repeat(64), previewExpiresAt: new Date("2030-01-01T00:00:00Z"), counters: {pending: 0, running: 0, succeeded: 1, skipped: 0, failed: 1}, validatedPayload: request.payload};
     const {database} = fakeDb((query) => query.includes('RETURNING') ? [] : [batch]);
