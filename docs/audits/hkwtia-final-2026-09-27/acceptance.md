@@ -238,3 +238,20 @@ Confirmed two configuration causes on production deployment `dpl_5ToXE6nkMqyd74L
 Focused command: `npx.cmd vitest run tests/unit/auth-route-rate-limit.test.ts tests/unit/shared-rate-limit.test.ts` — **37/37 passed**, 2 files, 2026-09-28 16:58 HKT. Existing guards correctly fail closed; disabling rate limiting or changing authorization is not a fix.
 
 Prepared configuration remedy: create a distinct cryptographically random Production `RATE_LIMIT_KEY_SECRET` (at least 32 bytes), set Production `AUTH_GOOGLE_ENABLED=true`, and rebuild the existing production deployment so its runtime receives both variables. A production configuration/redeployment approval request is pending; the earlier migration approval does not cover this deployment. No production setting was changed during diagnosis. After approval, verify Google button and redirect, and use an invalid synthetic credential request to distinguish a working limiter/provider rejection from `LIMITER_UNAVAILABLE`. Actual magic-link delivery needs an approved recipient, and Google callback verification needs a user-controlled Google account; neither is claimed complete.
+
+## Production authentication configuration repaired — 2026-09-28
+
+The user approved the proposed configuration repair by continuing after the explicit request. A distinct random 48-byte secret (96 hexadecimal characters) was generated in memory and added as sensitive Vercel Production `RATE_LIMIT_KEY_SECRET` via exact standard input. Production `AUTH_GOOGLE_ENABLED=true` was added. No secret was written to a file or printed. No authorization rule or application code was changed.
+
+`vercel.cmd redeploy dpl_5ToXE6nkMqyd74L2AvD9ZTJUhJaz --target production --scope ynwaforevers-projects --no-wait --no-color` rebuilt the existing application as **READY `dpl_4FisCUU1aiJ73UChjk7SBkjUgW2A`**, URL `https://hkwtia-pkanovuap-ynwaforevers-projects.vercel.app`. Build completed at 2026-09-28T10:58:39Z; `vercel.cmd inspect hkwtia.vercel.app --scope ynwaforevers-projects --no-color` confirmed the live alias uses this deployment. The original application source was rebuilt; no unrelated feature branch was promoted.
+
+[Browser/API receipt](evidence/production-auth-config-repair-2026-09-28.json), starting 10:59:10Z:
+- English and zh-HK admin and member login pages: HTTP 200, Google button enabled.
+- Synthetic nonexistent credential request: HTTP 401 `INVALID_EMAIL_OR_PASSWORD`, replacing `LIMITER_UNAVAILABLE`.
+- Malformed email sent to the magic-link API: HTTP 400 `VALIDATION_ERROR`, proving the shared send guard reaches provider validation without sending email.
+- Actual browser click on the zh-HK admin Google button reached `https://accounts.google.com/v3/signin/identifier`.
+- [Enabled admin page screenshot](evidence/production-admin-login-enabled-2026-09-28.png).
+
+[Exact verification script](evidence/verify-production-auth-config.mjs) uses only synthetic invalid credentials and malformed email, stops at Google's login page and logs no OAuth query/state. Command: `node docs/audits/hkwtia-final-2026-09-27/evidence/verify-production-auth-config.mjs`. This verifies the two reported configuration blockers are removed; it does not claim a real magic-link inbox receipt or an authenticated Google callback/role decision.
+
+Rollback: retain the rate-limit secret to avoid restoring the login outage. If Google must be disabled, set `AUTH_GOOGLE_ENABLED=false` in Production and rebuild a reviewed compatible application. Rolling back to the old deployment snapshot also restores its missing-secret configuration; prefer a rebuild with the required secret. No real member message, account creation, role change, payment or worker deployment occurred. Remaining provider/worker/policy gates are unchanged.

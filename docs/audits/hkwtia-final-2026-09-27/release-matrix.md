@@ -101,3 +101,8 @@ The production `DATABASE_URL` is encrypted in Vercel; its actual Neon project/br
 ## Direct production database access update
 
 User-authorized read-only access now confirms the existing Neon `production` branch (`fragrant-mountain-25240574` / `br-noisy-glitter-ao2npd77` / `neondb`) at ledger 0036, with pending 0037–0051 and missing grant columns reproduced as SQLSTATE 42703. All applied migration hashes match after accounting for line endings. [Exact preflight](acceptance.md#direct-production-database-preflight) records the target, SQL, script and receipt. This resolves access to that production branch; the independent Vercel alias binding remains unverified. Migration 0040 replaces a derived materialized view, so the full sequence is not exclusively additive. Target-specific isolated rehearsal, recovery snapshot, production migration authorization and post-migration directory checks remain required. No production schema or data was changed.
+
+
+## Production auth configuration checkpoint — 2026-09-28T10:59Z
+
+User-authorized Production RATE_LIMIT_KEY_SECRET and AUTH_GOOGLE_ENABLED=true were applied, and the existing application rebuilt as READY `dpl_4FisCUU1aiJ73UChjk7SBkjUgW2A`, now serving hkwtia.vercel.app. Four bilingual login pages enable Google; a browser click reaches Google's login page. Invalid synthetic credentials return normal provider 401, and malformed magic-link input returns 400 rather than LIMITER_UNAVAILABLE. [Receipt, commands and rollback](acceptance.md). Actual email receipt and authenticated Google callback/role verification remain unverified. This supersedes the earlier production Google-disabled configuration state, without changing separate worker/communication/policy gates.
