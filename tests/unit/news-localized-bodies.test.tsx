@@ -46,7 +46,7 @@ function mutationDependencies() {
     findBySlug: vi.fn(async () => null),
     insertPost: vi.fn(async (input: Record<string, unknown>) => post(input)),
     lockPost: vi.fn(async () => post()),
-    updatePost: vi.fn(async (_id: string, input: Record<string, unknown>) => post(input)),
+    updatePost: vi.fn(async (_id: string, input: Record<string, unknown>, updatedAt: Date) => post({...input, updatedAt})),
     setArchivedAt: vi.fn(async () => post()),
     insertAudit: vi.fn(async () => undefined),
   };
@@ -99,7 +99,7 @@ describe("localized news-body repository contract", () => {
   it("requires and audits both bodies on every edited news record", async () => {
     const {dependencies, transaction} = mutationDependencies();
 
-    await expect(updateNewsPost(staff, post().id, {titleEn: "Incomplete"}, dependencies))
+    await expect(updateNewsPost(staff, post().id, {titleEn: "Incomplete"}, dependencies, post().updatedAt))
       .rejects.toMatchObject({
         issues: expect.arrayContaining([
           expect.objectContaining({path: ["bodyMdx"]}),
@@ -107,10 +107,11 @@ describe("localized news-body repository contract", () => {
         ]),
       });
 
-    await updateNewsPost(staff, post().id, {...validInput, ...bodies}, dependencies);
+    await updateNewsPost(staff, post().id, {...validInput, ...bodies}, dependencies, post().updatedAt);
     expect(transaction.updatePost).toHaveBeenCalledWith(
       post().id,
       expect.objectContaining(bodies),
+      expect.any(Date),
     );
     expect(transaction.insertAudit).toHaveBeenLastCalledWith(expect.objectContaining({
       action: "post.updated",
@@ -130,6 +131,7 @@ describe("localized news form contract", () => {
       validationMessage: "Check the fields.",
       slugConflictMessage: "Slug conflict.",
       errorMessage: "Error.",
+      conflictMessage: "Reload and compare.",
       mutate: async () => {
         const {z} = await import("zod");
         throw new z.ZodError([{
@@ -148,7 +150,7 @@ describe("localized news form contract", () => {
         slug: "Slug", titleEn: "English title", titleZh: "Chinese title",
         author: "Author", bodyMdx: "English body", bodyMdxZhHk: "Chinese body",
         bodyHelp: "Safe formatting only", published: "Published",
-        save: "Save", saving: "Saving",
+        save: "Save", saving: "Saving", saveDraft: "Save as draft", savePublish: "Save and publish", previewDraft: "Preview draft", previewPrivate: "Draft preview", previewEnglish: "English", previewChinese: "Chinese",
       }}
       values={{...validInput}}
     />);
@@ -159,6 +161,22 @@ describe("localized news form contract", () => {
   });
 });
 
+describe("news editor revision", () => {
+  it("posts the loaded revision with an edit form", () => {
+    const revision = new Date("2026-08-29T00:00:00.000Z");
+    const {container} = render(<NewsForm
+      action={vi.fn()}
+      labels={{
+        slug: "Slug", titleEn: "English title", titleZh: "Chinese title",
+        author: "Author", bodyMdx: "English body", bodyMdxZhHk: "Chinese body",
+        bodyHelp: "Safe formatting only", published: "Published",
+        save: "Save", saving: "Saving", saveDraft: "Save as draft", savePublish: "Save and publish", previewDraft: "Preview draft", previewPrivate: "Draft preview", previewEnglish: "English", previewChinese: "Chinese",
+      }}
+      values={{...validInput, updatedAt: revision}}
+    />);
+    expect(container.querySelector('input[name="expectedUpdatedAt"]')).toHaveAttribute("value", revision.toISOString());
+  });
+});
 describe("news page authorization ordering", () => {
   it("guards the detail page before parsing its route id or loading the post", () => {
     const source = readFileSync(

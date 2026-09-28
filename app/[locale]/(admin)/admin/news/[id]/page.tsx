@@ -29,6 +29,7 @@ export default async function AdminNewsDetailPage({params}: Props) {
     successMessage: t("updateSuccess"),
     validationMessage: t("validation"),
     slugConflictMessage: t("slugConflict"),
+    conflictMessage: t("editConflict"),
     errorMessage: t("error"),
   };
   const updateAction = updateNewsAction.bind(
@@ -41,7 +42,7 @@ export default async function AdminNewsDetailPage({params}: Props) {
     slug: t("slug"), titleEn: t("titleEn"), titleZh: t("titleZh"), author: t("author"),
     bodyMdx: t("bodyMdx"), bodyMdxZhHk: t("bodyMdxZhHk"),
     bodyHelp: t("bodyHelp"), published: t("published"),
-    save: t("save"), saving: t("saving"),
+    save: t("save"), saving: t("saving"), saveDraft: t("saveDraft"), savePublish: t("savePublish"), previewDraft: t("previewDraft"), previewPrivate: t("previewPrivate"), previewEnglish: t("previewEnglish"), previewChinese: t("previewChinese"),
   };
 
   return (

@@ -8,8 +8,8 @@ import {EventForm} from "@/components/admin/event-form";
 import type {NewsActionState} from "@/lib/admin/news-action-core";
 
 const action = vi.fn(async () => ({}));
-const newsLabels = {slug: "Slug", titleEn: "English title", titleZh: "Chinese title", author: "Author", bodyMdx: "English body", bodyMdxZhHk: "Chinese body", bodyHelp: "Help", published: "Published", save: "Save", saving: "Saving"};
-const pageLabels = {english: "English copy", chinese: "Chinese copy", revertHint: "Fallback", save: "Save", saving: "Saving"};
+const newsLabels = {slug: "Slug", titleEn: "English title", titleZh: "Chinese title", author: "Author", bodyMdx: "English body", bodyMdxZhHk: "Chinese body", bodyHelp: "Help", published: "Published", save: "Save", saving: "Saving", saveDraft: "Save as draft", savePublish: "Save and publish", previewDraft: "Preview draft", previewPrivate: "Draft preview", previewEnglish: "English", previewChinese: "Chinese"};
+const pageLabels = {english: "English copy", chinese: "Chinese copy", revertHint: "Fallback", save: "Save", saving: "Saving", saveDraft: "Save as draft", savePublish: "Save and publish", previewDraft: "Preview draft", previewPrivate: "Draft preview", previewEnglish: "English", previewChinese: "Chinese"};
 const eventLabels = {
   slug: "Slug", titleEn: "English title", titleZh: "Chinese title", descriptionEn: "English description", descriptionZh: "Chinese description",
   startsAt: "Starts", endsAt: "Ends", venue: "Venue", capacity: "Capacity", registrationMode: "Registration",
@@ -36,13 +36,13 @@ describe("admin CMS draft changes", () => {
     const save = vi.fn(async () => result);
     render(<AdminUnsavedChangesProvider confirmMessage="Leave?"><NewsForm action={save} labels={newsLabels}/></AdminUnsavedChangesProvider>);
     fireEvent.input(screen.getByLabelText("English title"), {target: {value: "Draft"}});
-    const submit = screen.getByRole("button", {name: "Save"});
+    const submit = screen.getByRole("button", {name: "Save as draft"});
     fireEvent.click(submit);
     await waitFor(() => expect(screen.getByRole("alert", {name: ""})).toHaveTextContent("Try again"));
     expect(screen.getByLabelText("English title")).toHaveValue("Draft");
     expectReloadWarning();
     result = {status: "success", message: "Saved"};
-    fireEvent.click(screen.getByRole("button", {name: "Save"}));
+    fireEvent.click(screen.getByRole("button", {name: "Save as draft"}));
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Saved"));
     const unload = new Event("beforeunload", {cancelable: true});
     window.dispatchEvent(unload);
