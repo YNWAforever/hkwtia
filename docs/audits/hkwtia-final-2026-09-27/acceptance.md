@@ -294,3 +294,29 @@ Exact read commands: `vercel.cmd logs --project hkwtia --environment production 
 ### Source gates for the profile diagnostic revision
 
 After the focused red/green and isolated Neon run, sequential gates on this worktree were: `npm.cmd test` — exit 0, **706 files passed, 62 skipped; 6,016 tests passed, 162 skipped**; `npm.cmd run lint` — exit 0 with 0 errors and 67 warnings; `npm.cmd run typecheck` — exit 0; `npm.cmd run audit:strings` — exit 0, 295 TSX files scanned; `npm.cmd run build` — exit 0, 267 static pages generated. The local build emitted expected database-backed page-copy read errors because `DATABASE_URL` was unset, then used the existing fallback; its exit 0 proves compilation/build, not a database-backed page render or Production login. The guarded Neon test was run separately with its isolated URL; the full suite skipped it by default.
+
+### Production member-profile diagnostic rollout
+
+[Sanitized machine-readable rollout receipt](evidence/member-profile-production-rollout-2026-09-29.json).
+
+At 2026-09-29 00:16 HKT, the approved PR #98 diagnostic revision was READY on the Production alias. Git merge `5b967aef84c64b96c3e60d13d7f46dfd64a74430` and reviewed PR head `0076981b203632da15ae8f881d3cb55287ccaa79` both resolve to tree `52069c73a7cd96413398ddad6225adfaed11ceda`. All six PR checks were green before merge. The `release` Git production branch does not automatically deploy main, so the pinned READY Preview source `dpl_6uDsdukdAAnkUx4doBngiUYsHoPC` was rebuilt with `--target production`, not promoted with Preview environment variables. New deployment `dpl_8cr2En9xQhrs5nDpxny9GY3L4stx` is READY, target `production`, source SHA `0076981b`, and serves `hkwtia.vercel.app`. Build logs show the same source SHA and `Build Completed`; no build failure.
+
+Exact release and verification commands:
+
+```powershell
+git show -s --format="%H %T" origin/main
+git show -s --format="%H %T" 0076981b203632da15ae8f881d3cb55287ccaa79
+gh pr view 98 --json state,mergeCommit,headRefOid
+vercel.cmd inspect hkwtia.vercel.app --scope ynwaforevers-projects --no-color
+vercel.cmd redeploy dpl_6uDsdukdAAnkUx4doBngiUYsHoPC --target production --scope ynwaforevers-projects --no-color --no-wait
+vercel.cmd inspect dpl_8cr2En9xQhrs5nDpxny9GY3L4stx --scope ynwaforevers-projects --no-color
+vercel.cmd api /v13/deployments/dpl_8cr2En9xQhrs5nDpxny9GY3L4stx --scope ynwaforevers-projects --raw
+```
+
+The API result was parsed locally and only deployment id, Git SHA/ref, READY state, Production target and project id were recorded. The prior Production alias was `dpl_4FisCUU1aiJ73UChjk7SBkjUgW2A`; keep it as the schema-compatible rollback target. No Production migration, worker change, payment, refund or message send was part of this deployment.
+
+Anonymous smoke ran `Invoke-WebRequest -UseBasicParsing -MaximumRedirection 5 -TimeoutSec 30` for `/zh/member-login`, `/en/member-login`, `/zh/admin-login`, `/zh/members` and `/zh/portal`; every request returned HTTP 200. A fresh, empty-cookie Playwright Chromium context independently loaded `/zh/member-login` and `/zh/members`, each HTTP 200. The Chinese login page had one visible `使用 Google 繼續` button without `disabled` or `aria-disabled`. No Google callback or authenticated profile write was initiated by the agent. [Login screenshot](evidence/production-member-login-diagnostic-2026-09-29.png) SHA256 `e79c81f53353f1e2106f8f837851849326c55c1220cb8a397046a07c0610f06b`; [directory screenshot](evidence/production-member-directory-diagnostic-2026-09-29.png) SHA256 `ef796d2ee02ec8023c0099a6e2e08f281a362a61c4eae266260f9c81d9d19ce8`. The browser script used `chromium.launch({headless:true})`, `browser.newPage({viewport:{width:1365,height:900},deviceScaleFactor:1})`, `page.goto('https://hkwtia.vercel.app'+path,{waitUntil:'domcontentloaded',timeout:30000})`, `page.locator('button, a').filter({hasText:/Google/i})`, and `page.screenshot({fullPage:true})` on those two routes.
+
+A bounded post-release log query (`vercel.cmd logs --project hkwtia --environment production --no-branch --since 2026-09-28T16:16:00Z --until 2026-09-28T16:22:00Z --json --limit 1000 --scope ynwaforevers-projects --no-color`) parsed 24 Production events and found zero `member_profile_provision_unavailable` events. This is only an observation window; it is not a successful Google/profile test.
+
+**Open diagnostic gate:** the user placed the prior failed Google/profile attempt about four hours before this deployment, so it cannot emit the newly added `stage`/SQLSTATE data. Request one user-controlled retry after 00:16 HKT with its minute. Correlate only the bounded `member_profile_provision_unavailable` stage/code and route status; do not log or report identity, OAuth parameters, raw database errors or provider secrets. The telemetry change is Production released; a profile creation fix and end-to-end Google callback are not verified.

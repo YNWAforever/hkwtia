@@ -1,6 +1,14 @@
 # Release matrix and rollout / rollback gate
 
-## Latest portal checkpoint — 2026-09-28
+## Production diagnostic rollout — 2026-09-29 00:16 HKT
+
+PR [#98](https://github.com/YNWAforever/hkwtia/pull/98) merged as `5b967aef84c64b96c3e60d13d7f46dfd64a74430`. Its reviewed head `0076981b203632da15ae8f881d3cb55287ccaa79` and the merge commit have the same Git tree `52069c73a7cd96413398ddad6225adfaed11ceda`. The reviewed source was rebuilt with Vercel's Production target and is READY as `dpl_8cr2En9xQhrs5nDpxny9GY3L4stx`; `hkwtia.vercel.app` points to it. Vercel metadata confirms source SHA `0076981b`, target `production`, project `prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n`. The project Git production branch is `release`, so the main-branch merge alone was not treated as deployment. Previous READY Production deployment `dpl_4FisCUU1aiJ73UChjk7SBkjUgW2A` is the web rollback target.
+
+Anonymous Production checks returned HTTP 200 for `/zh/member-login`, `/en/member-login`, `/zh/admin-login`, `/zh/members` and `/zh/portal`. A fresh browser loaded the Chinese member-login page and directory (HTTP 200) and found the `使用 Google 繼續` button enabled. [Login screenshot](evidence/production-member-login-diagnostic-2026-09-29.png) SHA256 `e79c81f53353f1e2106f8f837851849326c55c1220cb8a397046a07c0610f06b`; [directory screenshot](evidence/production-member-directory-diagnostic-2026-09-29.png) SHA256 `ef796d2ee02ec8023c0099a6e2e08f281a362a61c4eae266260f9c81d9d19ce8`. [Commands and receipt](acceptance.md#production-member-profile-diagnostic-rollout). No migration, worker deployment, payment, refund or message send was performed.
+
+**Release claim:** the diagnostic source change is released to Production and the anonymous entry pages are healthy. The underlying Google sign-in/member profile write is **not verified fixed**. A user-controlled retry after 00:16 HKT, with its exact time, is required to correlate the new `stage=session|provision` and optional SQLSTATE event. The user's earlier attempt about four hours before the rollout cannot produce this event. Keep the full membership release gate open; do not infer provider success from a visible Google button.
+
+## Historical portal checkpoint — 2026-09-28
 
 PR #97 application/test SHA `186e989d174c4296e7c0398f6aba6d39f100080f` includes page-level `MEMBERSHIP_INACTIVE` recovery. Focused, full source and guarded local checks passed. Hosted bilingual Chromium acceptance also passed **1 test in 23.8s** at READY protected Preview `dpl_DSg3dcWvFwHo9SC629oegGVcGG1j`, with synthetic sign-in, English/zh-HK recovery, Chinese sign-out and exact isolated fixture restoration. The earlier Preview 401 protection gate was resolved using an existing automation bypass token for a protection-only browser cookie; no project setting changed. [Exact receipt, command and screenshots](acceptance.md#hosted-preview-portal-recovery-verification).
 
