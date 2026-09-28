@@ -7,7 +7,7 @@ import type {AppLocale} from "@/i18n/routing";
 import {savePageCopyAction} from "@/lib/admin/page-copy-actions";
 import {pageCopyFieldName} from "@/lib/admin/page-copy-form-input";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
-import {pageCopyRepository} from "@/lib/db/repos/page-copy";
+import {pageCopyRepository, pageCopyRevision} from "@/lib/db/repos/page-copy";
 import {pageCopyBundleValues, pageCopyCatalog} from "@/lib/i18n/page-copy-catalog";
 import {isPageCopyNamespace} from "@/lib/i18n/page-copy-scope";
 import {localizedPath} from "@/lib/urls";
@@ -49,6 +49,7 @@ export default async function AdminPageCopyNamespacePage({params}: Props) {
       unchangedMessage: t("saveUnchanged"),
       validationMessage: t("validation"),
       errorMessage: t("error"),
+      conflictMessage: t("editConflict"),
     },
   );
 
@@ -63,12 +64,14 @@ export default async function AdminPageCopyNamespacePage({params}: Props) {
       <PageCopyForm
         action={action}
         fields={fields}
+        revision={pageCopyRevision(overrides.filter((row) => row.namespace === namespace))}
         labels={{
           english: t("english"),
           chinese: t("chinese"),
           revertHint: t("revertHint"),
           save: t("save"),
           saving: t("saving"),
+          previewDraft: t("previewDraft"), previewPrivate: t("previewPrivate"), previewEnglish: t("previewEnglish"), previewChinese: t("previewChinese"),
         }}
       />
     </div>

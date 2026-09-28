@@ -1,6 +1,7 @@
 "use server";
 
 import {notFound} from "next/navigation";
+import {z} from "zod";
 
 import {
   runPageCopyFormAction,
@@ -24,6 +25,7 @@ export type PageCopyFormActionMessages = Readonly<{
   unchangedMessage: string;
   validationMessage: string;
   errorMessage: string;
+  conflictMessage: string;
 }>;
 
 export async function savePageCopyAction(
@@ -42,7 +44,8 @@ export async function savePageCopyAction(
       // Both locales are edited in one form and saved in one transaction, but
       // stored per locale so English can be overridden while Chinese still
       // falls back to its bundle value.
-      const result = await savePageCopy(actor, pageCopyFormInput(namespace, data));
+      const revision = z.string().regex(/^[a-f0-9]{64}$/).parse(data.get("revision"));
+      const result = await savePageCopy(actor, {...pageCopyFormInput(namespace, data), revision});
       if (result.updated || result.cleared) {
         clearPageCopyCache();
         for (const route of pageCopyRoutes[namespace]) revalidatePublicRoute(route);

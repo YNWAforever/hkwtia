@@ -14,7 +14,7 @@ const eventLabels = {
   slug: "Slug", titleEn: "English title", titleZh: "Chinese title", descriptionEn: "English description", descriptionZh: "Chinese description",
   startsAt: "Starts", endsAt: "Ends", venue: "Venue", capacity: "Capacity", registrationMode: "Registration",
   registrationModes: {rsvp: "RSVP", external: "External", ticketed: "Ticketed"}, ticketPriceHkdCents: "Ticket price",
-  memberOnly: "Members only", published: "Published", heroMediaId: "Hero", noHeroMedia: "No hero", save: "Save", saving: "Saving",
+  memberOnly: "Members only", published: "Published", heroMediaId: "Hero", noHeroMedia: "No hero", save: "Save", saving: "Saving", saveDraft: "Save as draft", savePublish: "Save and publish", previewDraft: "Preview draft", previewPrivate: "Private draft preview", previewEnglish: "English", previewChinese: "Chinese",
   format: "Format", formats: {in_person: "In person", online: "Online", hybrid: "Hybrid"}, onlineUrl: "Online URL",
   externalRegistrationUrl: "External registration URL", tags: "Tags", visibility: "Visibility",
   visibilities: {public: "Public", members_only: "Members only", invite_only: "Invite only"},
@@ -48,10 +48,20 @@ describe("admin CMS draft changes", () => {
     window.dispatchEvent(unload);
     expect(unload.defaultPrevented).toBe(false);
   });  it("marks edited bilingual page copy as unsaved", () => {
-    render(<AdminUnsavedChangesProvider confirmMessage="Leave?"><PageCopyForm action={action} fields={[{keyPath: "home.title", enBundle: "Default", zhBundle: "預設", enField: "en.home.title", zhField: "zh.home.title", enValue: "Current", zhValue: "目前"}]} labels={pageLabels}/></AdminUnsavedChangesProvider>);
+    render(<AdminUnsavedChangesProvider confirmMessage="Leave?"><PageCopyForm action={action} fields={[{keyPath: "home.title", enBundle: "Default", zhBundle: "預設", enField: "en.home.title", zhField: "zh.home.title", enValue: "Current", zhValue: "目前"}]} labels={pageLabels} revision={"0".repeat(64)}/></AdminUnsavedChangesProvider>);
     fireEvent.input(screen.getByLabelText("Chinese copy"), {target: {value: "未儲存"}});
     expectReloadWarning();
   });
+  it("previews effective bilingual page copy inside the admin form", () => {
+    const {container} = render(<AdminUnsavedChangesProvider confirmMessage="Leave?"><PageCopyForm action={action} fields={[{keyPath: "home.title", enBundle: "Default", zhBundle: "預設", enField: "en.home.title", zhField: "zh.home.title", enValue: "Current", zhValue: "目前"}]} labels={pageLabels} revision={"0".repeat(64)}/></AdminUnsavedChangesProvider>);
+    fireEvent.change(screen.getByLabelText("Chinese copy"), {target: {value: "<script>alert(1)</script>"}});
+    fireEvent.click(screen.getByRole("button", {name: "Preview draft"}));
+    expect(screen.getByText("Draft preview")).toBeInTheDocument();
+    expect(screen.getAllByText("Current")).toHaveLength(2);
+    expect(screen.getByText("<script>alert(1)</script>")).toBeInTheDocument();
+    expect(container.querySelector("script")).toBeNull();
+  });
+
   it("marks changed event settings as unsaved", () => {
     render(<AdminUnsavedChangesProvider confirmMessage="Leave?"><EventForm action={action} labels={eventLabels}/></AdminUnsavedChangesProvider>);
     fireEvent.change(screen.getByLabelText("Registration"), {target: {value: "external"}});

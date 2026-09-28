@@ -4,6 +4,7 @@ import {
   listPageCopyForAdmin,
   listPageCopyForLocale,
   savePageCopy,
+  pageCopyRevision,
   type PageCopyEntry,
   type PageCopyMutationDependencies,
   type PageCopyReadDependencies,
@@ -19,6 +20,7 @@ const body = "sections.0.body.0";
 function mutationDependencies(stored: readonly PageCopyEntry[] = []) {
   const audits: {action: string; metadata: Record<string, unknown>}[] = [];
   const transaction = {
+    lockNamespace: vi.fn(async () => undefined),
     listForNamespace: vi.fn(async () => stored),
     upsert: vi.fn(async () => undefined),
     remove: vi.fn(async () => undefined),
@@ -29,7 +31,7 @@ function mutationDependencies(stored: readonly PageCopyEntry[] = []) {
   const dependencies: PageCopyMutationDependencies = {
     transaction: (work) => work(transaction as never),
   };
-  return {dependencies, transaction, audits};
+  return {dependencies, transaction, audits, revision: pageCopyRevision(stored)};
 }
 
 function row(overrides: Partial<PageCopyEntry> = {}): PageCopyEntry {
@@ -55,16 +57,27 @@ describe("page copy repository", () => {
     expect(transaction.upsert).not.toHaveBeenCalled();
   });
 
+  it("rejects a stale namespace revision before touching either locale", async () => {
+    const {dependencies, transaction, audits} = mutationDependencies([row({value: "Newer value"})]);
+    await expect(savePageCopy(staff, {
+      namespace: "Privacy", revision: "0".repeat(64),
+      entries: [{locale: "en", keyPath: heading, value: "Stale edit"}],
+    }, dependencies)).rejects.toThrow("PAGE_COPY_EDIT_CONFLICT");
+    expect(transaction.upsert).not.toHaveBeenCalled();
+    expect(transaction.remove).not.toHaveBeenCalled();
+    expect(audits).toEqual([]);
+  });
+
   it("writes both locales in one transaction and audits what changed", async () => {
-    const {dependencies, transaction, audits} = mutationDependencies();
+    const {dependencies, transaction, audits, revision} = mutationDependencies();
 
     await expect(savePageCopy(staff, {
-      namespace: "Privacy",
+      namespace: "Privacy", revision,
       entries: [
         {locale: "en", keyPath: heading, value: "What we collect about you"},
         {locale: "zh-HK", keyPath: heading, value: "我們收集的資料"},
       ],
-    }, dependencies)).resolves.toEqual({updated: 2, cleared: 0});
+    }, dependencies)).resolves.toMatchObject({updated: 2, cleared: 0});
 
     expect(transaction.upsert).toHaveBeenCalledTimes(2);
     expect(transaction.upsert).toHaveBeenCalledWith({
@@ -84,15 +97,15 @@ describe("page copy repository", () => {
   });
 
   it("writes nothing and audits nothing when no value differs", async () => {
-    const {dependencies, transaction, audits} = mutationDependencies([row({value: "Stored"})]);
+    const {dependencies, transaction, audits, revision} = mutationDependencies([row({value: "Stored"})]);
 
     await expect(savePageCopy(staff, {
-      namespace: "Privacy",
+      namespace: "Privacy", revision,
       entries: [
         {locale: "en", keyPath: heading, value: "Stored"},
         {locale: "zh-HK", keyPath: body, value: ""},
       ],
-    }, dependencies)).resolves.toEqual({updated: 0, cleared: 0});
+    }, dependencies)).resolves.toMatchObject({updated: 0, cleared: 0});
 
     expect(transaction.upsert).not.toHaveBeenCalled();
     expect(transaction.remove).not.toHaveBeenCalled();
@@ -100,24 +113,24 @@ describe("page copy repository", () => {
   });
 
   it("clears an override so the page falls back to its bundle value", async () => {
-    const {dependencies, transaction, audits} = mutationDependencies([row()]);
+    const {dependencies, transaction, audits, revision} = mutationDependencies([row()]);
 
     await expect(savePageCopy(staff, {
-      namespace: "Privacy", entries: [{locale: "en", keyPath: heading, value: "   "}],
-    }, dependencies)).resolves.toEqual({updated: 0, cleared: 1});
+      namespace: "Privacy", revision, entries: [{locale: "en", keyPath: heading, value: "   "}],
+    }, dependencies)).resolves.toMatchObject({updated: 0, cleared: 1});
 
     expect(transaction.remove).toHaveBeenCalledWith("en", "Privacy", heading);
     expect(audits[0]?.metadata).toMatchObject({cleared: [`en:${heading}`], updated: []});
   });
 
   it("leaves the other locale's override alone when only one is cleared", async () => {
-    const {dependencies, transaction} = mutationDependencies([
+    const {dependencies, transaction, revision} = mutationDependencies([
       row({locale: "en"}),
       row({locale: "zh-HK", value: "已儲存"}),
     ]);
 
     await savePageCopy(staff, {
-      namespace: "Privacy",
+      namespace: "Privacy", revision,
       entries: [
         {locale: "en", keyPath: heading, value: ""},
         {locale: "zh-HK", keyPath: heading, value: "已儲存"},
@@ -130,7 +143,7 @@ describe("page copy repository", () => {
 
   it.each([
     ["an out-of-scope namespace", {namespace: "LaunchPad", entries: [{locale: "en", keyPath: "applyCta", value: "Join"}]}],
-    ["an unknown key path", {namespace: "Privacy", entries: [{locale: "en", keyPath: "sections.0.body.99", value: "x"}]}],
+    ["an unknown key path", {namespace: "Privacy", revision: pageCopyRevision([]), entries: [{locale: "en", keyPath: "sections.0.body.99", value: "x"}]}],
     ["a path escaping the namespace", {namespace: "Privacy", entries: [{locale: "en", keyPath: "__proto__", value: "x"}]}],
     ["an unknown locale", {namespace: "Privacy", entries: [{locale: "fr", keyPath: heading, value: "x"}]}],
     ["a malformed key path", {namespace: "Privacy", entries: [{locale: "en", keyPath: "../secret", value: "x"}]}],
@@ -151,7 +164,7 @@ describe("page copy repository", () => {
     const {dependencies} = mutationDependencies();
 
     await expect(savePageCopy(staff, {
-      namespace: "Privacy", entries: [{locale: "en", keyPath: "sections.0.body.99", value: "x"}],
+      namespace: "Privacy", revision: pageCopyRevision([]), entries: [{locale: "en", keyPath: "sections.0.body.99", value: "x"}],
     }, dependencies)).rejects.toMatchObject({
       issues: [expect.objectContaining({
         path: ["sections.0.body.99"], message: "KEY_PATH_UNKNOWN",
