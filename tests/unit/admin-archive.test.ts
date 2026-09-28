@@ -11,14 +11,14 @@ const at = new Date("2026-08-10T00:00:00.000Z");
 
 function newsTransaction(archivedAt: Date | null) {
   const audits: {action: string}[] = [];
-  const current = {id, slug: "a-post", kind: "news", archivedAt} as never;
+  const current = {id, slug: "a-post", kind: "news", archivedAt, updatedAt: archivedAt ?? new Date("2026-08-09T00:00:00.000Z")} as never;
   const transaction = {
     findBySlug: vi.fn(async () => null),
     insertPost: vi.fn(),
     lockPost: vi.fn(async () => current),
     updatePost: vi.fn(),
-    setArchivedAt: vi.fn(async (_id: string, next: Date | null) =>
-      ({...(current as object), archivedAt: next}) as never),
+    setArchivedAt: vi.fn(async (_id: string, next: Date | null, updatedAt: Date) =>
+      ({...(current as object), archivedAt: next, updatedAt}) as never),
     insertAudit: vi.fn(async (input: {action: string}) => { audits.push({action: input.action}); }),
   };
   return {dependencies: {transaction: (work: never) => (work as never as (t: unknown) => unknown)(transaction)} as never, transaction, audits};
@@ -48,7 +48,7 @@ describe("news archiving", () => {
     const post = await setNewsArchived(staff, id, true, dependencies, () => at);
 
     expect(post?.archivedAt).toEqual(at);
-    expect(transaction.setArchivedAt).toHaveBeenCalledWith(id, at);
+    expect(transaction.setArchivedAt).toHaveBeenCalledWith(id, at, at);
     expect(audits).toEqual([{action: "post.archived"}]);
   });
 
@@ -57,7 +57,7 @@ describe("news archiving", () => {
 
     await setNewsArchived(staff, id, false, dependencies, () => at);
 
-    expect(transaction.setArchivedAt).toHaveBeenCalledWith(id, null);
+    expect(transaction.setArchivedAt).toHaveBeenCalledWith(id, null, new Date(at.getTime() + 1));
     expect(audits).toEqual([{action: "post.unarchived"}]);
   });
 
