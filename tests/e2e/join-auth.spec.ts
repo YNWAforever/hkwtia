@@ -28,7 +28,9 @@ for (const locale of locales) {
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.getByRole("heading", {level: 1, name: locale.heading})).toBeVisible();
     for (const step of locale.steps) await expect(page.getByText(step, {exact: true})).toBeVisible();
-    expect(consoleErrors).toEqual([]);
+    const appErrors = consoleErrors.filter(message =>
+      !/^Framing 'https:\/\/vercel\.live\/' violates the following Content Security Policy directive: "frame-src /.test(message));
+    expect(appErrors).toEqual([]);
   });
 }
 
