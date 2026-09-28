@@ -19,7 +19,7 @@ const state = vi.hoisted(() => ({
     retryableFailed: false
   }))
 }));
-vi.mock("next-intl/server", () => ({getTranslations: vi.fn(async () => (key: string) => key), setRequestLocale: vi.fn()}));
+vi.mock("next-intl/server", () => ({getTranslations: vi.fn(async () => Object.assign((key: string) => key, {raw: () => ({})})), setRequestLocale: vi.fn()}));
 vi.mock("next/navigation", () => ({notFound: () => {throw new Error("NEXT_NOT_FOUND");}}));
 vi.mock("next/link", () => ({default: ({children, href, ...props}: {children: React.ReactNode; href: string}) => <a href={href} {...props}>{children}</a>}));
 vi.mock("@/lib/admin/page-auth", () => ({requireAdminPageActor: vi.fn(async () => state.actor)}));
