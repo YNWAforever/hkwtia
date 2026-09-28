@@ -1,0 +1,67 @@
+{
+  "finding": "Production Google login followed by member profile creation failure",
+  "codeChange": {
+    "pr": 98,
+    "reviewedHead": "0076981b203632da15ae8f881d3cb55287ccaa79",
+    "mergeCommit": "5b967aef84c64b96c3e60d13d7f46dfd64a74430",
+    "tree": "52069c73a7cd96413398ddad6225adfaed11ceda",
+    "behavior": "bounded session/provision stage and optional SQLSTATE logging; user-visible error unchanged"
+  },
+  "production": {
+    "previousDeployment": "dpl_4FisCUU1aiJ73UChjk7SBkjUgW2A",
+    "deployment": "dpl_8cr2En9xQhrs5nDpxny9GY3L4stx",
+    "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+    "target": "production",
+    "state": "READY",
+    "sourceSha": "0076981b203632da15ae8f881d3cb55287ccaa79",
+    "alias": "hkwtia.vercel.app",
+    "method": "redeploy pinned Preview source with --target production"
+  },
+  "anonymousSmoke": {
+    "routes": [
+      "/zh/member-login",
+      "/en/member-login",
+      "/zh/admin-login",
+      "/zh/members",
+      "/zh/portal"
+    ],
+    "statuses": [
+      200,
+      200,
+      200,
+      200,
+      200
+    ],
+    "googleButton": {
+      "count": 1,
+      "visible": true,
+      "enabled": true
+    },
+    "screenshots": [
+      {
+        "path": "production-member-login-diagnostic-2026-09-29.png",
+        "sha256": "e79c81f53353f1e2106f8f837851849326c55c1220cb8a397046a07c0610f06b"
+      },
+      {
+        "path": "production-member-directory-diagnostic-2026-09-29.png",
+        "sha256": "ef796d2ee02ec8023c0099a6e2e08f281a362a61c4eae266260f9c81d9d19ce8"
+      }
+    ]
+  },
+  "postReleaseLogs": {
+    "since": "2026-09-28T16:16:00Z",
+    "until": "2026-09-28T16:22:00Z",
+    "parsedEvents": 24,
+    "profileDiagnosticEvents": 0
+  },
+  "scope": {
+    "migration": false,
+    "workerDeploy": false,
+    "payment": false,
+    "refund": false,
+    "messageSend": false,
+    "authenticatedGoogleCallbackVerified": false,
+    "profileCreationVerified": false
+  },
+  "nextGate": "Correlate one user-controlled post-release retry by HKT minute and bounded stage/code"
+}
