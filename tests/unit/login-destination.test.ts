@@ -26,6 +26,16 @@ describe("login destination allowlist", () => {
       .toBe("/admin/batches?state=ready&operation=profile_patch");
   });
 
+  it("keeps validated event and Member360 detail views through sign-in", () => {
+    expect(parseLoginDestination(`/admin/events-mgmt/${uuid}?tab=attendees&q=Acme&cursor=abc`, "admin").path)
+      .toBe(`/admin/events-mgmt/${uuid}?tab=attendees&q=Acme&cursor=abc`);
+    expect(parseLoginDestination(`/admin/members/${uuid}?section=notes&historyQ=Renewal&historyCursor=abc`, "admin").path)
+      .toBe(`/admin/members/${uuid}?section=notes&historyQ=Renewal&historyCursor=abc`);
+  });
+
+  it.each(["tab=unknown", "tab=attendees&returnTo=https%3A%2F%2Fevil.example", "tab=orders%0A", "tab=content#fragment"])("rejects unsafe event detail query %s", (query) => {
+    expect(parseLoginDestination(`/admin/events-mgmt/${uuid}?${query}`, "admin").path).toBe("/admin");
+  });
   it.each([
     "https://evil.example/admin", "//evil.example/admin", "/\\evil.example/admin",
     "/admin/unknown", "/admin/members/not-a-uuid", "/admin/members%2fqueue",

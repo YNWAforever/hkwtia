@@ -14,6 +14,14 @@ describe("anonymous admin entry", () => {
     expect(target.searchParams.get("next")).toBe("/admin/members?q=Acme&status=active");
   });
 
+  it("retains a validated event attendees view in the anonymous redirect", () => {
+    const id = "1a538745-848b-448f-94d6-3b6a92f4e891";
+    const response = anonymousAdminLoginRedirect(new NextRequest(`https://hkwtia.example/zh/admin/events-mgmt/${id}?tab=attendees&q=Acme`));
+    expect(response?.status).toBe(307);
+    const target = new URL(response!.headers.get("location")!);
+    expect(target.pathname).toBe("/zh/admin-login");
+    expect(target.searchParams.get("next")).toBe(`/admin/events-mgmt/${id}?tab=attendees&q=Acme`);
+  });
   it("does not intercept known routes for a visitor carrying a session cookie", () => {
     const request = new NextRequest("https://hkwtia.example/admin/members");
     request.cookies.set(cookie, "session");
