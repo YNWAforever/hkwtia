@@ -9,15 +9,37 @@ import {getSession} from "@/lib/auth/server";
 import {profileIdentityRepository} from "@/lib/db/repos/profile-identities";
 import {localizedPath} from "@/lib/urls";
 
+/** Retain only the bounded SQLSTATE, including a Drizzle-wrapped cause. */
+function safeSqlstate(error: unknown): string | undefined {
+  let current = error;
+  for (let depth = 0; depth < 3; depth += 1) {
+    if (!current || typeof current !== "object") return undefined;
+    const code = "code" in current ? current.code : undefined;
+    if (typeof code === "string" && /^[0-9A-Z]{5}$/.test(code)) return code;
+    current = "cause" in current ? current.cause : undefined;
+  }
+  return undefined;
+}
+
 /** No actor, role, email, or membership state arrives from the browser. */
 export async function provisionMemberProfileAction(locale: AppLocale): Promise<void> {
   let outcome: "unverified" | "conflict" | "ready" | "forbidden" | "unavailable";
+  let stage: "session" | "provision" = "session";
   try {
-    const result = await provisionVerifiedMember(await getSession(), (identity) => profileIdentityRepository.provisionMember(identity));
+    const session = await getSession();
+    stage = "provision";
+    const result = await provisionVerifiedMember(session, (identity) => profileIdentityRepository.provisionMember(identity));
     outcome = result.kind === "ready" && result.identity.role !== "member" ? "forbidden" : result.kind;
-  } catch {
+  } catch (error) {
     const reference = randomUUID();
-    console.error(JSON.stringify({event: "member_profile_provision_unavailable", reference, occurredAt: new Date().toISOString()}));
+    const sqlstate = safeSqlstate(error);
+    console.error(JSON.stringify({
+      event: "member_profile_provision_unavailable",
+      reference,
+      occurredAt: new Date().toISOString(),
+      stage,
+      ...(sqlstate ? {sqlstate} : {}),
+    }));
     outcome = "unavailable";
   }
   if (outcome === "ready") redirect(localizedPath(locale, "/join"));
