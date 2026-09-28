@@ -1,6 +1,7 @@
 "use server";
 
 import {cookies, headers} from "next/headers";
+import {redirect} from "next/navigation";
 import {z} from "zod";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
@@ -109,7 +110,8 @@ export async function submitTicketCheckoutAction(_previous: TicketCheckoutState,
     });
     if (!issued) return {status: "error", code: "UNAVAILABLE"};
   } catch { return {status: "error", code: "UNAVAILABLE"}; }
-  return result.status === "redirect" ? {status: "redirect", url: result.url} : {status: "error", code: result.code};
+  if (result.status === "redirect") redirect(result.url);
+  return {status: "error", code: result.code};
 }
 
 export async function resumeTicketCheckoutAction(_previous: TicketCheckoutState, formData: FormData): Promise<TicketCheckoutState> {

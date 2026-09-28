@@ -4,6 +4,7 @@ const state = vi.hoisted(() => ({
   cookie: undefined as string | undefined,
   cookieSet: vi.fn(),
   cookieDelete: vi.fn(),
+  redirect: vi.fn(),
   issue: vi.fn(),
   read: vi.fn(),
   core: vi.fn(),
@@ -12,6 +13,7 @@ const state = vi.hoisted(() => ({
   invalidate: vi.fn(),
   actor: {kind: "member", userId: "user-1", profileId: "profile-1"} as unknown,
 }));
+vi.mock("next/navigation", () => ({redirect: (url: string) => {state.redirect(url); throw new Error("NEXT_REDIRECT");}}));
 vi.mock("next/headers", () => ({
   headers: async () => new Headers({"x-vercel-forwarded-for": "203.0.113.21"}),
   cookies: async () => ({
@@ -42,7 +44,7 @@ async function action() {
 describe("ticket checkout action recovery capability", () => {
   beforeEach(() => {
     state.cookie = undefined;
-    state.cookieSet.mockReset(); state.cookieDelete.mockReset(); state.issue.mockReset(); state.read.mockReset(); state.core.mockReset();
+    state.cookieSet.mockReset(); state.cookieDelete.mockReset(); state.redirect.mockReset(); state.issue.mockReset(); state.read.mockReset(); state.core.mockReset();
     state.providerStatus.mockReset(); state.providerStatus.mockResolvedValue("open");
     state.expireBySession.mockReset(); state.expireBySession.mockResolvedValue(true); state.invalidate.mockReset();
     state.issue.mockResolvedValue(true);
@@ -51,12 +53,18 @@ describe("ticket checkout action recovery capability", () => {
     state.actor = {kind: "member", userId: "user-1", profileId: "profile-1"};
   });
   it("sets an HttpOnly capability and persists only its digest for the accepted attempt", async () => {
-    const result = await (await action())({status: "idle"}, form());
-    expect(result).toEqual({status: "redirect", url: "https://checkout.stripe.com/c/pay/test"});
+    await expect((await action())({status: "idle"}, form())).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.redirect).toHaveBeenCalledWith("https://checkout.stripe.com/c/pay/test");
     expect(state.cookieSet).toHaveBeenCalledWith(expect.any(String), expect.any(String), expect.objectContaining({httpOnly: true, sameSite: "lax"}));
     const raw = state.cookieSet.mock.calls[0][1] as string;
     expect(state.issue).toHaveBeenCalledWith(expect.objectContaining({eventId: EVENT_ID, idempotencyKey: KEY, buyerProfileId: "profile-1", digest: expect.stringMatching(/^[a-f0-9]{64}$/)}));
     expect(JSON.stringify(state.issue.mock.calls)).not.toContain(raw);
+  });
+  it("redirects from the action only after persisting the capability", async () => {
+    await expect((await action())({status: "idle"}, form())).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.issue).toHaveBeenCalledOnce();
+    expect(state.redirect).toHaveBeenCalledWith("https://checkout.stripe.com/c/pay/test");
+    expect(state.issue.mock.invocationCallOrder[0]).toBeLessThan(state.redirect.mock.invocationCallOrder[0]);
   });
   it("shows an existing pending attempt without creating a second payable session", async () => {
     state.cookie = `v1.${EVENT_ID}.${KEY}.${"a".repeat(43)}`;
