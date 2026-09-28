@@ -11,7 +11,7 @@ import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 export type BatchSummary = Readonly<{batchId: string; state: BatchState; counters: Readonly<Record<"pending" | "running" | "succeeded" | "skipped" | "failed", number>>}>;
 export type BatchGateway = Readonly<{
   create: (actor: AdminActor, request: BatchRequest, requestDigest: string) => Promise<{batchId: string}>;
-  preview: (actor: AdminActor, id: string) => Promise<BatchPreview>;
+  preview: (actor: AdminActor, id: string, cursor?: string | null) => Promise<BatchPreview>;
   commit: (actor: AdminActor, id: string, digest: string) => Promise<BatchSummary>;
   retryFailed: (actor: AdminActor, id: string) => Promise<BatchSummary>;
   cancelPending: (actor: AdminActor, id: string) => Promise<BatchSummary>;
@@ -31,9 +31,9 @@ export async function prepareBatch(actor: Actor, input: unknown, store: BatchGat
   if (request.operation === "membership_grant" && actor.kind !== "superadmin") throw new Error("FORBIDDEN");
   return store.create(actor, request, batchPreviewDigest(request));
 }
-export async function getBatchPreview(actor: Actor, batchId: unknown, store: BatchGateway = adminBatchesRepository): Promise<BatchPreview> {
+export async function getBatchPreview(actor: Actor, batchId: unknown, store: BatchGateway = adminBatchesRepository, cursor?: string | null): Promise<BatchPreview> {
   requireAdmin(actor);
-  return store.preview(actor, batchIdSchema.parse(batchId));
+  return store.preview(actor, batchIdSchema.parse(batchId), cursor);
 }
 export async function commitBatch(actor: Actor, input: unknown, store: BatchGateway = adminBatchesRepository): Promise<BatchSummary> {
   requireAdmin(actor);

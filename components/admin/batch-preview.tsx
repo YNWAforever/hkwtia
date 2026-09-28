@@ -1,12 +1,13 @@
+import Link from "next/link";
 import {commitAdminBatchAction, retryAdminBatchAction, cancelAdminBatchAction} from "@/lib/admin/batches/actions";
 import {BatchProgressPoller} from "@/components/admin/batch-progress";
 import {batchRuntimeConfig, type BatchPreview} from "@/lib/admin/batches/types";
 
-export type BatchLabels = Readonly<{title: string; description: string; back: string; states: Record<string, string>; counters: Record<string, string>; total: string; eligible: string; blocked: string; operation: string; target: string; before: string; after: string; reason: string; attempts: string; result: string; commit: string; retry: string; cancel: string; expires: string; empty: string; manualReview: string}>;
+export type BatchLabels = Readonly<{title: string; description: string; back: string; states: Record<string, string>; counters: Record<string, string>; total: string; eligible: string; blocked: string; operation: string; target: string; before: string; after: string; reason: string; attempts: string; result: string; commit: string; retry: string; cancel: string; expires: string; empty: string; manualReview: string; more: string}>;
 
-export function BatchPreviewPanel({preview, labels}: {preview: BatchPreview; labels: BatchLabels}) {
+export function BatchPreviewPanel({preview, labels, pageHref}: {preview: BatchPreview; labels: BatchLabels; pageHref?: string}) {
   const ready = preview.state === "ready" && preview.eligible > 0;
-  const retryable = ["running", "completed_with_errors"].includes(preview.state) && preview.items.some(item => item.state === "failed" && item.errorCode?.startsWith("TRANSIENT_") && item.attemptCount < batchRuntimeConfig().maxAttempts);
+  const retryable = ["running", "completed_with_errors"].includes(preview.state) && (preview.retryableFailed ?? preview.items.some(item => item.state === "failed" && item.errorCode?.startsWith("TRANSIENT_") && item.attemptCount < batchRuntimeConfig().maxAttempts));
   const counters = ["pending", "running", "succeeded", "skipped", "failed"] as const;
   return <section className="space-y-6" aria-labelledby="batch-title">
     <BatchProgressPoller state={preview.state}/>
@@ -25,5 +26,6 @@ export function BatchPreviewPanel({preview, labels}: {preview: BatchPreview; lab
     </div>
     {preview.counters.failed > 0 && !retryable ? <p className="rounded-md border p-3 text-sm" role="status">{labels.manualReview}</p> : null}
     {preview.items.length ? <div className="overflow-x-auto rounded-md border"><table className="min-w-full text-left text-sm"><thead className="bg-muted"><tr><th className="px-3 py-2" scope="col">{labels.target}</th><th className="px-3 py-2" scope="col">{labels.operation}</th><th className="px-3 py-2" scope="col">{labels.before}</th><th className="px-3 py-2" scope="col">{labels.after}</th><th className="px-3 py-2" scope="col">{labels.reason}</th><th className="px-3 py-2" scope="col">{labels.attempts}</th><th className="px-3 py-2" scope="col">{labels.result}</th></tr></thead><tbody>{preview.items.map((item) => <tr className="border-t" key={`${item.target.type}:${item.target.id}`}><th className="px-3 py-2" scope="row">{item.target.id}</th><td className="px-3 py-2">{labels.states[item.state] ?? item.state}</td><td className="px-3 py-2">{Object.entries(item.before).map(([key,value]) => `${key}: ${String(value)}`).join(", ")}</td><td className="px-3 py-2">{Object.entries(item.after).map(([key,value]) => `${key}: ${String(value)}`).join(", ")}</td><td className="px-3 py-2">{item.errorCode ?? item.reasonCode ?? ""}</td><td className="px-3 py-2">{item.attemptCount}</td><td className="px-3 py-2">{item.resultRef ?? ""}</td></tr>)}</tbody></table></div> : <p className="text-muted-foreground">{labels.empty}</p>}
+    {preview.nextCursor && pageHref ? <Link className="inline-flex min-h-11 items-center text-primary underline" href={`${pageHref}?cursor=${encodeURIComponent(preview.nextCursor)}`}>{labels.more}</Link> : null}
   </section>;
 }

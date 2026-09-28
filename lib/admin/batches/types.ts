@@ -34,7 +34,7 @@ export type BatchItemState = typeof BATCH_ITEM_STATES[number];
 export type BatchTarget = Readonly<{type: "profile" | "membership" | "company" | "ticket_seat" | "import_row" | "event"; id: string}>;
 export type BatchPreviewItem = Readonly<{target: BatchTarget; previewStatus: "eligible" | "skipped" | "blocked"; eligible: boolean; reasonCode: string | null; before: Readonly<Record<string, unknown>>; after: Readonly<Record<string, unknown>>; expectedVersion: string}>;
 export type BatchProgressItem = BatchPreviewItem & Readonly<{state: BatchItemState; attemptCount: number; errorCode: string | null; resultRef: string | null}>;
-export type BatchPreview = Readonly<{counters: Readonly<Record<BatchItemState, number>>; batchId: string; operation: BatchOperation; state: BatchState; digest: string; expiresAt: string; total: number; eligible: number; skipped: number; blocked: number; items: readonly BatchProgressItem[]}>;
+export type BatchPreview = Readonly<{counters: Readonly<Record<BatchItemState, number>>; batchId: string; operation: BatchOperation; state: BatchState; digest: string; expiresAt: string; total: number; eligible: number; skipped: number; blocked: number; items: readonly BatchProgressItem[]; nextCursor?: string | null; retryableFailed?: boolean}>;
 
 function canonical(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(canonical);
