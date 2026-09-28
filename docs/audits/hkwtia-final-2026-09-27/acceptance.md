@@ -167,3 +167,34 @@ gh pr checks 96
 The environment listing confirms an encrypted Production `DATABASE_URL` entry. The temporary diagnostic received that name with type `string` and length **0**; it also received the two Neon Auth variable names. The earlier URL-only parser therefore exited without a host/database result. This establishes a local credential-retrieval limitation, not absence of the variable in the deployed runtime. No credential value was printed or saved, and no database query or write was attempted. The exact bound Neon project ID, branch ID and database name are still required to select the read-only ledger preflight; do not substitute the previously inspected candidate.
 
 At head `6896a75a`, PR #96 remained open/draft and all six reported checks passed. This recheck changes evidence only; it does not rerun provider acceptance or establish a production release.
+
+## Direct production database preflight
+
+Following the user's instruction to use the production database directly, a fresh read-only transaction inspected project `fragrant-mountain-25240574`, branch `br-noisy-glitter-ao2npd77` (named `production`, default), database `neondb`, direct endpoint `ep-steep-wind-ao0pbldw.c-2.ap-southeast-1.aws.neon.tech`. The connection was retrieved through the authenticated Neon CLI and held only in process memory. PostgreSQL confirmed `transaction_read_only=on`; the transaction ended with `ROLLBACK`. The independent Vercel Production binding is still not exposed by available environment retrieval.
+
+[Schema-only receipt](evidence/production-schema-preflight-2026-09-28.json), recorded at 2026-09-28T06:48:01Z:
+
+- 36 migration ledger rows; latest ID 36 exactly matches `0036_company_live_membership_unique` and its committed SHA256.
+- All 36 applied migrations match committed content when LF/CRLF line endings are considered. Ten raw-byte differences are explained solely by line endings; no unexplained content mismatch was found.
+- Fifteen migrations are pending, `0037` through `0051`. None of their new tables already exists.
+- No `memberships.grant_*` columns exist. `SELECT grant_effective_at, grant_expires_at FROM memberships WHERE false` fails with SQLSTATE `42703`; the savepoint is rolled back. Migration `0048` supplies those columns.
+- No existing ticketed events were counted, so the new `0038` ticket-price constraint has no currently ticketed rows to reject. This is a point-in-time preflight, not a migration rehearsal.
+- The existing `aiops_monthly_metrics` materialized view is present. Migration `0040` replaces that derived view; the pending sequence must not be described as exclusively additive DDL.
+
+Exact diagnostic script is [production-schema-readonly.mjs](evidence/production-schema-readonly.mjs). Run from the repository root after loading `HKWTIA_PRODUCTION_DIAGNOSTIC_URL` in memory from:
+
+```powershell
+$productionDiagnosticUrl = (& neon.cmd connection-string br-noisy-glitter-ao2npd77 --project-id fragrant-mountain-25240574 --database-name neondb --role-name neondb_owner --no-color | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or -not $productionDiagnosticUrl.StartsWith('postgres')) { throw 'Connection retrieval failed' }
+try {
+  $env:HKWTIA_PRODUCTION_DIAGNOSTIC_URL = $productionDiagnosticUrl
+  node docs/audits/hkwtia-final-2026-09-27/evidence/production-schema-readonly.mjs
+} finally {
+  Remove-Item Env:HKWTIA_PRODUCTION_DIAGNOSTIC_URL -ErrorAction SilentlyContinue
+  $productionDiagnosticUrl = $null
+}
+```
+
+The connection-string command's stdout **must be captured directly into the process environment**, never printed, committed or pasted. The executed wrapper captured stdout, checked success and the URL scheme, ran the script, and removed the environment variable in `finally`. The script verifies the exact hostname/database and TLS certificate, uses `BEGIN READ ONLY`, a ten-second statement timeout and schema/ledger queries only. It retrieves no member records and invokes no provider.
+
+Before a production migration: rehearse this exact 0036→0051 sequence on an isolated branch, confirm snapshot/restore readiness and compatible web/worker behavior, then obtain explicit authorization to apply this target-specific sequence. No production migration, data update, fixture seed, flag change or real communication occurred in this preflight.
