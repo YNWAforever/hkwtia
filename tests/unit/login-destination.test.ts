@@ -46,7 +46,13 @@ describe("login destination allowlist", () => {
       expect(parseLoginDestination(raw, "admin").path).toBe("/admin");
     }
   });
-  it("keeps validated event and Member360 detail views through sign-in", () => {
+  it("preserves only a valid failed batch filter through sign-in", () => {
+    expect(parseLoginDestination(`/admin/batches/${uuid}?filter=failed&cursor=abc_123`, "admin").path)
+      .toBe(`/admin/batches/${uuid}?filter=failed&cursor=abc_123`);
+    for (const raw of [`/admin/batches/${uuid}?filter=other`, `/admin/batches/${uuid}?filter=failed&filter=failed`]) {
+      expect(parseLoginDestination(raw, "admin").path).toBe("/admin");
+    }
+  });  it("keeps validated event and Member360 detail views through sign-in", () => {
     expect(parseLoginDestination(`/admin/events-mgmt/${uuid}?tab=attendees&q=Acme&cursor=abc`, "admin").path)
       .toBe(`/admin/events-mgmt/${uuid}?tab=attendees&q=Acme&cursor=abc`);
     expect(parseLoginDestination(`/admin/members/${uuid}?section=notes&historyQ=Renewal&historyCursor=abc`, "admin").path)

@@ -66,13 +66,14 @@ export function allowedAdminDestination(raw: string | null | undefined): string 
   const isBatchDetail = ADMIN_BATCH_DETAIL.test(path);
   const isEventDetail = ADMIN_EVENT_DETAIL.test(path);
   const isMemberDetail = ADMIN_MEMBER_DETAIL.test(path);
-  const allowedKeys: readonly string[] | undefined = isBatchDetail ? ["cursor"]
+  const allowedKeys: readonly string[] | undefined = isBatchDetail ? ["filter", "cursor"]
     : isEventDetail ? EVENT_DETAIL_QUERY_KEYS
     : isMemberDetail ? MEMBER_DETAIL_QUERY_KEYS : QUERY_KEYS[path];
   if (!allowedKeys) return null;
   const parsed = new URLSearchParams(query);
   if ([...parsed].some(([key, value]) => !allowedKeys.includes(key) || value.length > (key.toLowerCase().includes("cursor") ? 1000 : 256) || /[\u0000-\u001f\u007f]/.test(value))) return null;
   if (parsed.has("cursor") && (parsed.getAll("cursor").length !== 1 || !/^[A-Za-z0-9_-]+$/.test(parsed.get("cursor") ?? ""))) return null;
+  if (isBatchDetail && (parsed.getAll("filter").length > 1 || (parsed.has("filter") && parsed.get("filter") !== "failed"))) return null;
   if (path === "/admin/listings-review" && (parsed.getAll("status").length > 1 || (parsed.has("status") && parsed.get("status") !== "pending_review"))) return null;
   if (isEventDetail) {
     const tab = parsed.get("tab");

@@ -67,6 +67,41 @@ describe.skipIf(!enabled)("admin batch snapshot on disposable PostgreSQL", () =>
     expect(last.nextCursor).toBeNull();
     expect(last.items.at(-1)?.target.id).toBe("synthetic-5000");
     expect((await repository.status(staff, batchId)).counters.failed).toBe(1);
+    const failed = await repository.preview(staff, batchId, null, "failed");
+    expect(failed.items.map((item) => item.target.id)).toEqual(["synthetic-4999"]);
+    expect(failed.nextCursor).toBeNull();
+    await expect(repository.preview(staff, batchId, first.nextCursor, "failed")).rejects.toThrow("INVALID_CURSOR");
     await expect(repository.preview(other, batchId)).rejects.toThrow("BATCH_NOT_FOUND");
+  }, 60_000);
+  it("retries only one actor-owned transient item without changing effect keys or uncertain outcomes", async () => {
+    const inserted = await fixture.pool.query<{id: string}>(`INSERT INTO admin_batches
+      (actor_profile_id, operation, validated_payload, selection_snapshot, idempotency_key,
+       request_digest, state, counters)
+      VALUES ('staff', 'profile_patch', '{}'::jsonb, '{}'::jsonb, $1,
+        'synthetic-digest', 'completed_with_errors',
+        '{"pending":0,"running":0,"succeeded":0,"skipped":0,"failed":3}'::jsonb)
+      RETURNING id`, [randomUUID()]);
+    const batchId = inserted.rows[0]?.id;
+    if (!batchId) throw new Error("synthetic batch was not inserted");
+    for (const [targetId, errorCode] of [["transient-a", "TRANSIENT_NETWORK"], ["uncertain-b", "PROVIDER_ACCEPTANCE_UNCERTAIN"], ["permanent-c", "PERMANENT_VALIDATION"]]) {
+      await fixture.pool.query(`INSERT INTO admin_batch_items
+        (batch_id, target_type, target_id, expected_version, preview_status, state, attempt_count, effect_key, error_code)
+        VALUES ($1, 'profile', $2, 'v1', 'eligible', 'failed', 1, $3, $4)`, [batchId, targetId, `stable-effect:${targetId}`, errorCode]);
+    }
+    const repository = createAdminBatchesRepository(async () => fixture.database, () => now);
+    await expect(repository.retryFailedItem(other, batchId, {type: "profile", id: "transient-a"})).rejects.toThrow("BATCH_NOT_FOUND");
+    await expect(repository.retryFailedItem(staff, batchId, {type: "profile", id: "uncertain-b"})).rejects.toThrow("BATCH_NOTHING_RETRYABLE");
+    await expect(repository.retryFailedItem(staff, batchId, {type: "profile", id: "permanent-c"})).rejects.toThrow("BATCH_NOTHING_RETRYABLE");
+    expect((await repository.retryFailedItem(staff, batchId, {type: "profile", id: "transient-a"})).state).toBe("queued");
+    const items = await fixture.pool.query<{target_id: string; state: string; error_code: string | null; effect_key: string; attempt_count: number}>(
+      "SELECT target_id,state,error_code,effect_key,attempt_count FROM admin_batch_items WHERE batch_id=$1 ORDER BY target_id", [batchId]);
+    expect(items.rows).toEqual([
+      {target_id: "permanent-c", state: "failed", error_code: "PERMANENT_VALIDATION", effect_key: "stable-effect:permanent-c", attempt_count: 1},
+      {target_id: "transient-a", state: "pending", error_code: null, effect_key: "stable-effect:transient-a", attempt_count: 1},
+      {target_id: "uncertain-b", state: "failed", error_code: "PROVIDER_ACCEPTANCE_UNCERTAIN", effect_key: "stable-effect:uncertain-b", attempt_count: 1},
+    ]);
+    expect((await repository.status(staff, batchId)).counters).toMatchObject({pending: 1, failed: 2});
+    const audit = await fixture.pool.query("SELECT action FROM audit_events WHERE metadata->>'batchId'=$1 AND action='admin.batch.item.retry_requested'", [batchId]);
+    expect(audit.rowCount).toBe(1);
   }, 60_000);
 });

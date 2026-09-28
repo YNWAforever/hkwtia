@@ -26,7 +26,7 @@ vi.mock("@/lib/admin/page-auth", () => ({requireAdminPageActor: vi.fn(async () =
 vi.mock("@/lib/admin/batches/service", () => ({getBatchPreview: state.preview}));
 vi.mock("@/lib/db/repos/admin-batches", () => ({adminBatchesRepository: {}}));
 vi.mock("@/components/admin/batch-progress", () => ({BatchProgressPoller: () => null}));
-vi.mock("@/lib/admin/batches/actions", () => ({commitAdminBatchAction: vi.fn(), retryAdminBatchAction: vi.fn(), cancelAdminBatchAction: vi.fn()}));
+vi.mock("@/lib/admin/batches/actions", () => ({commitAdminBatchAction: vi.fn(), retryAdminBatchAction: vi.fn(), retryAdminBatchItemAction: vi.fn(), cancelAdminBatchAction: vi.fn()}));
 
 import AdminBatchPage from "@/app/[locale]/(admin)/admin/batches/[id]/page";
 const batchId = "11111111-1111-4111-8111-111111111111";
@@ -36,8 +36,13 @@ describe("batch detail pagination", () => {
   beforeEach(() => state.preview.mockClear());
   it("passes a validated scoped cursor to the owner-scoped preview read", async () => {
     render(await AdminBatchPage(props({cursor: "cursor-safe"})));
-    expect(state.preview).toHaveBeenCalledWith(state.actor, batchId, expect.anything(), "cursor-safe");
+    expect(state.preview).toHaveBeenCalledWith(state.actor, batchId, expect.anything(), "cursor-safe", "all");
     expect(screen.getByRole("link", {name: "more"})).toHaveAttribute("href", `/admin/batches/${batchId}?cursor=next-safe`);
+  });
+  it("passes a failed-only filter and keeps it in the scoped next link", async () => {
+    render(await AdminBatchPage(props({filter: "failed", cursor: "cursor-safe"})));
+    expect(state.preview).toHaveBeenCalledWith(state.actor, batchId, expect.anything(), "cursor-safe", "failed");
+    expect(screen.getByRole("link", {name: "more"})).toHaveAttribute("href", `/admin/batches/${batchId}?filter=failed&cursor=next-safe`);
   });
   it("rejects ambiguous cursor arrays before reading batch items", async () => {
     await expect(AdminBatchPage(props({cursor: ["one", "two"]}))).rejects.toThrow("NEXT_NOT_FOUND");
