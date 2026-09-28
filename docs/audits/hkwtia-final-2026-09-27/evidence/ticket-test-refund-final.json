@@ -1,0 +1,51 @@
+{
+  "scope": "Synthetic ticket payment and staff refund; Stripe TEST; isolated DB/Auth; email test transport",
+  "steps": [
+    {
+      "case": "three-seat payment",
+      "result": "HKD75 provider paid; local paid; exactly three seats; pass HTTP200"
+    },
+    {
+      "case": "staff refund and replay",
+      "result": "bilingual confirmation; one Stripe succeeded full refund; three seats removed; both locale passes HTTP404; replay remains refunded with one audit/notice"
+    }
+  ],
+  "deliveries": [
+    {
+      "eventId": "evt_1UKUHfELEX4A1xsq3lFax4eM",
+      "type": "checkout.session.completed",
+      "status": 200,
+      "outcome": {
+        "received": true,
+        "result": "processed"
+      }
+    },
+    {
+      "eventId": "evt_1UKUHfELEX4A1xsq3lFax4eM",
+      "type": "checkout.session.completed",
+      "status": 200,
+      "outcome": {
+        "received": true,
+        "result": "processed"
+      }
+    }
+  ],
+  "eventId": "7308ff3a-5947-457e-8fb0-3c568219d95c",
+  "orderId": "7609cc8d-c00b-4a0b-8aa3-4e9521635002",
+  "sessionId": "cs_test_a14tjiSC14IFsE7UEZczMdl7LNW9FLxo8oLVAmyL1L4KPudk5UB29mQyoM",
+  "payment": {
+    "amountHkdCents": 7500,
+    "status": "paid",
+    "livemode": false
+  },
+  "refund": {
+    "id": "re_3UKUHeELEX4A1xsq0BEbQZXq",
+    "amount": 7500,
+    "currency": "hkd",
+    "status": "succeeded"
+  },
+  "databaseFacts": {
+    "refund_audits": 1,
+    "refund_notices": 1
+  }
+}
