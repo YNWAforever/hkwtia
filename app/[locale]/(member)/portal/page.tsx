@@ -2,10 +2,11 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {redirect} from "next/navigation";
 
 import {StatusCard} from "@/components/portal/status-card";
+import {PortalSignOutButton} from "@/components/portal/portal-sign-out-button";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
 import {isAdminActor} from "@/lib/auth/authorize";
-import {getDashboard} from "@/lib/portal/queries";
+import {getDashboard, type DashboardViewModel} from "@/lib/portal/queries";
 import {localizedPath} from "@/lib/urls";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +27,23 @@ export default async function PortalPage({params}: Props) {
   // FORBIDDEN into the error boundary. Same parallel-render reason as the
   // anonymous guard above, so this lives in the page as well as the layout.
   if (isAdminActor(actor)) redirect(localizedPath(locale, "/admin"));
-  const dashboard = await getDashboard(actor);
+  let dashboard: DashboardViewModel;
+  try {
+    dashboard = await getDashboard(actor);
+  } catch (error) {
+    if (!(error instanceof Error && error.message === "MEMBERSHIP_INACTIVE")) throw error;
+    const t = await getTranslations({locale, namespace: "Portal"});
+    return <section className="glass-card mx-auto max-w-xl p-6 sm:p-10" role="status">
+      <h1 className="font-serif text-3xl font-semibold">{t("membershipUnavailableTitle")}</h1>
+      <p className="mt-3 text-muted-foreground">{t("membershipUnavailableDescription")}</p>
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <PortalSignOutButton label={t("signOut")} errorLabel={t("signOutError")} />
+        <a className="min-h-11 content-center underline underline-offset-4" href={localizedPath(locale, "/membership")}>
+          {t("membershipOptions")}
+        </a>
+      </div>
+    </section>;
+  }
   const t = await getTranslations({locale, namespace: "Portal"});
   const status = dashboard.primaryStatus;
   const action = dashboard.onboarding.nextAction;

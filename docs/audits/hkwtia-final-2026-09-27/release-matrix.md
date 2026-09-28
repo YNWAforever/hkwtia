@@ -1,6 +1,11 @@
 # Release matrix and rollout / rollback gate
 
-## Current production checkpoint — 2026-09-28T07:50Z
+## Latest portal checkpoint — 2026-09-28
+
+PR #97 application/test SHA `186e989d174c4296e7c0398f6aba6d39f100080f` includes page-level `MEMBERSHIP_INACTIVE` recovery. Focused, full source and guarded local checks passed. Hosted bilingual Chromium acceptance also passed **1 test in 23.8s** at READY protected Preview `dpl_DSg3dcWvFwHo9SC629oegGVcGG1j`, with synthetic sign-in, English/zh-HK recovery, Chinese sign-out and exact isolated fixture restoration. The earlier Preview 401 protection gate was resolved using an existing automation bypass token for a protection-only browser cookie; no project setting changed. [Exact receipt, command and screenshots](acceptance.md#hosted-preview-portal-recovery-verification).
+
+Production alias remains on READY `dpl_4FisCUU1aiJ73UChjk7SBkjUgW2A` and does **not** have the portal page fix. A production `/zh/portal` `MEMBERSHIP_INACTIVE` exception is consistent with the user's reported symptom, but their request was not correlated. The remaining page-fix gate is PR review/merge, exact web-SHA verification and a synthetic Production smoke. Schema 0037–0051 and bilingual directory recovery were verified earlier; Production rate limiting and Google-button configuration were subsequently repaired. This page fix needs no new migration or worker change. Roll back only to a schema-compatible web revision if required. Historical checkpoints below retain their original observation times and are superseded where they describe an unavailable directory, missing login configuration or blocked Preview portal acceptance.
+## Production schema checkpoint — 2026-09-28T07:50Z
 
 **Migrations 0037–0051 are applied to the authorized production database and both public directory locales have recovered.** This supersedes the earlier unmigrated/unavailable checkpoints retained below. The latest verified production ledger is 0051 with no pending migrations or unexplained hash differences. The directory correctly shows no published members; no data was seeded or published. [Execution and evidence](acceptance.md).
 
@@ -10,7 +15,7 @@ Remaining release gates are provider receipts (Google, actual magic-link email, 
 
 
 
-Observed 2026-09-28 Asia/Hong_Kong. This review package includes read-only post-merge production observation; a Ready web deployment is not a verified full production release. Feature branch `codex/final-login-admin-20260928` starts at PR #94 merge `fe22b49ed9828dd0cfad536273df5960ed90ca66`; latest application commit `64363879`, latest browser test commit `29fe7822`. See [acceptance.md](acceptance.md) and [baseline.md](baseline.md).
+Historical post-merge observation, 2026-09-28 Asia/Hong_Kong. This review package includes read-only post-merge production observation; a Ready web deployment is not a verified full production release. Feature branch `codex/final-login-admin-20260928` starts at PR #94 merge `fe22b49ed9828dd0cfad536273df5960ed90ca66`; latest application commit `64363879`, latest browser test commit `29fe7822`. See [acceptance.md](acceptance.md) and [baseline.md](baseline.md).
 
 | Surface | Observed revision/state | Evidence | Gate |
 |---|---|---|---|
@@ -101,3 +106,8 @@ The production `DATABASE_URL` is encrypted in Vercel; its actual Neon project/br
 ## Direct production database access update
 
 User-authorized read-only access now confirms the existing Neon `production` branch (`fragrant-mountain-25240574` / `br-noisy-glitter-ao2npd77` / `neondb`) at ledger 0036, with pending 0037–0051 and missing grant columns reproduced as SQLSTATE 42703. All applied migration hashes match after accounting for line endings. [Exact preflight](acceptance.md#direct-production-database-preflight) records the target, SQL, script and receipt. This resolves access to that production branch; the independent Vercel alias binding remains unverified. Migration 0040 replaces a derived materialized view, so the full sequence is not exclusively additive. Target-specific isolated rehearsal, recovery snapshot, production migration authorization and post-migration directory checks remain required. No production schema or data was changed.
+
+
+## Production auth configuration checkpoint — 2026-09-28T10:59Z
+
+User-authorized Production RATE_LIMIT_KEY_SECRET and AUTH_GOOGLE_ENABLED=true were applied, and the existing application rebuilt as READY `dpl_4FisCUU1aiJ73UChjk7SBkjUgW2A`, now serving hkwtia.vercel.app. Four bilingual login pages enable Google; a browser click reaches Google's login page. Invalid synthetic credentials return normal provider 401, and malformed magic-link input returns 400 rather than LIMITER_UNAVAILABLE. [Receipt, commands and rollback](acceptance.md). Actual email receipt and authenticated Google callback/role verification remain unverified. This supersedes the earlier production Google-disabled configuration state, without changing separate worker/communication/policy gates.
