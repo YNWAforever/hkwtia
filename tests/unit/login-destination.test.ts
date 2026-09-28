@@ -15,6 +15,15 @@ describe("login destination allowlist", () => {
     expect(parseLoginDestination("/admin/members", "member").path).toBe("/portal");
   });
 
+  it("preserves only validated Join plans and owned application hints for members", () => {
+    expect(parseLoginDestination(`/join?plan=startup&application=${uuid}`, "member").path)
+      .toBe(`/join?plan=startup&application=${uuid}`);
+    expect(parseLoginDestination("/join?next=%2Fportal%2Fcompany", "member").path)
+      .toBe("/join?next=%2Fportal%2Fcompany");
+    for (const raw of ["/join?plan=made-up", "/join?plan=startup&application=not-a-uuid", "/join?next=https%3A%2F%2Fevil.example", "/join?plan=community&role=staff", "/join#fragment"]) {
+      expect(parseLoginDestination(raw, "member").path).toBe("/portal");
+    }
+  });
   it("preserves known admin pages, details and bounded list filters", () => {
     expect(parseLoginDestination("/admin/inbox", "admin").path).toBe("/admin/inbox");
     expect(parseLoginDestination(`/admin/members/${uuid}`, "admin").path).toBe(`/admin/members/${uuid}`);

@@ -22,6 +22,20 @@ describe("member profile creation action", () => {
     expect(state.provision).toHaveBeenCalledWith({authUserId: "real-subject", email: "test@example.test", displayName: "Synthetic"});
     expect(state.destination).toBe("/zh/join");
   });
+  it("returns a verified new profile to its validated Join plan", async () => {
+    state.session = {user: {id: "real-subject", email: "test@example.test", emailVerified: true}};
+    state.provision.mockResolvedValue({kind: "ready", identity: {profileId: "real-subject", role: "member"}});
+    const next = "/join?plan=startup&application=1a538745-848b-448f-94d6-3b6a92f4e891";
+    await expect(provisionMemberProfileAction("zh-HK", next)).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.destination).toBe(`/zh${next}`);
+  });
+
+  it("rejects a tampered profile return destination", async () => {
+    state.session = {user: {id: "real-subject", email: "test@example.test", emailVerified: true}};
+    state.provision.mockResolvedValue({kind: "ready", identity: {profileId: "real-subject", role: "member"}});
+    await expect(provisionMemberProfileAction("en", "/admin")).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.destination).toBe("/join");
+  });
   it("never links a different subject with the same email", async () => {
     state.session = {user: {id: "new-subject", email: "test@example.test", emailVerified: true}};
     state.provision.mockResolvedValue({kind: "conflict"});
@@ -42,6 +56,21 @@ describe("member profile creation action", () => {
     expect(String(log.mock.calls[0]?.[0])).not.toContain("secret-db-url");
     expect(String(log.mock.calls[0]?.[0])).not.toContain("private-sql");
     log.mockRestore();
+  });
+  it("keeps a validated Join continuation on an unavailable retry with the same log reference", async () => {
+    state.session = {user: {id: "subject", email: "test@example.test", emailVerified: true}};
+    state.provision.mockRejectedValue(new Error("private-db-detail"));
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const next = "/join?plan=corporate";
+    try {
+      await expect(provisionMemberProfileAction("en", next)).rejects.toThrow("NEXT_REDIRECT");
+      const target = new URL(state.destination, "https://example.test");
+      expect(target.searchParams.get("next")).toBe(next);
+      expect(target.searchParams.get("reference")).toBe(JSON.parse(String(log.mock.calls[0]?.[0])).reference);
+      expect(state.destination).not.toContain("private-db-detail");
+    } finally {
+      log.mockRestore();
+    }
   });
   it("distinguishes a session-read failure without exposing its detail", async () => {
     state.sessionError = new Error("private-auth-token");

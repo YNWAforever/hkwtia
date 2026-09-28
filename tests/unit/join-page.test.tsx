@@ -1,12 +1,16 @@
 import {renderToStaticMarkup} from "react-dom/server";
+import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 import type {ReactNode} from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
+const social = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/auth/client", () => ({authClient: {signIn: {social}}}));
 const state = vi.hoisted(() => ({
   actor: null as {kind: "member"; userId: string} | null,
   redirectUrl: null as string | null,
   startJoinCalls: [] as unknown[][],
   ownedApplications: [] as Array<Record<string, unknown>>,
+  loginResolution: {kind: "signed-out"} as {kind: string},
 }));
 
 vi.mock("next-intl/server", () => ({
@@ -18,6 +22,7 @@ vi.mock("next/navigation", () => ({
   notFound: () => { throw new Error("NEXT_NOT_FOUND"); },
 }));
 vi.mock("@/lib/auth/actor", () => ({getActor: async () => state.actor}));
+vi.mock("@/lib/auth/login-resolution-server", () => ({resolveCurrentLogin: async () => state.loginResolution}));
 vi.mock("@/lib/db/repos/applications", () => ({applicationsRepository: {listOwned: async () => state.ownedApplications}}));
 vi.mock("@/lib/membership/join-service", () => ({
   startJoin: async (...args: unknown[]) => { state.startJoinCalls.push(args); return {applicationId: "application-a", next: "profile"}; },
@@ -42,6 +47,8 @@ describe("JoinPage portal continuation auth", () => {
     state.redirectUrl = null;
     state.startJoinCalls = [];
     state.ownedApplications = [];
+    social.mockReset();
+    state.loginResolution = {kind: "signed-out"};
   });
 
   it("renders the localized auth form when a portal continuation has no plan", async () => {
@@ -53,6 +60,28 @@ describe("JoinPage portal continuation auth", () => {
     expect(state.startJoinCalls).toHaveLength(0);
   });
 
+  it("offers Google and returns to the selected plan and application after authentication", async () => {
+    social.mockResolvedValue({data: {}, error: null});
+    const application = "1a538745-848b-448f-94d6-3b6a92f4e891";
+    const previous = process.env.AUTH_GOOGLE_ENABLED;
+    process.env.AUTH_GOOGLE_ENABLED = "true";
+    try {
+      render(await JoinPage(props("zh-HK", {plan: "startup", application})));
+      fireEvent.click(screen.getByRole("button", {name: "localized:google"}));
+      await waitFor(() => expect(social).toHaveBeenCalledWith({
+        provider: "google",
+        callbackURL: `/zh/member-login?next=${encodeURIComponent(`/join?plan=startup&application=${application}`)}`,
+      }));
+    } finally {
+      if (previous === undefined) delete process.env.AUTH_GOOGLE_ENABLED;
+      else process.env.AUTH_GOOGLE_ENABLED = previous;
+    }
+  });
+  it("sends a verified provider subject without a profile to onboarding with the selected plan", async () => {
+    state.loginResolution = {kind: "needs-profile"};
+    await expect(JoinPage(props("zh-HK", {plan: "startup"}))).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.redirectUrl).toBe("/zh/member-login?next=%2Fjoin%3Fplan%3Dstartup");
+  });
   it("renders the plan chooser on a bare /join and the unavailable state for a malformed plan", async () => {
     const chooser = renderToStaticMarkup(await JoinPage(props("zh-HK", {})));
     expect(chooser).toContain("localized:choosePlanTitle");

@@ -1,5 +1,7 @@
 import {adminNavigationGroups} from "@/config/internal-navigation";
-import {parsePortalContinuation} from "@/lib/portal/continuation";
+import {MEMBERSHIP_PLAN_CODES} from "@/lib/membership/constants";
+import {parseJoinContinuation} from "@/lib/membership/join-navigation";
+import {isPortalContinuation} from "@/lib/portal/continuation";
 
 export type LoginIntent = "member" | "admin";
 export type LoginDestination = Readonly<{intent: LoginIntent; path: string}>;
@@ -28,6 +30,25 @@ const QUERY_KEYS: Readonly<Record<string, readonly string[]>> = {
   "/admin/reports": ["period", "view"],
 };
 
+const APPLICATION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/** Portal or Join only; application ownership is checked after authentication. */
+export function allowedMemberDestination(raw: string | null | undefined): string | null {
+  if (typeof raw !== "string" || raw.length === 0 || raw.length > 2048) return null;
+  if (isPortalContinuation(raw)) return raw;
+  if (raw === "/join") return raw;
+  if (!raw.startsWith("/join?") || raw.includes("#") || raw.includes("\\") || /[\u0000-\u001f\u007f]/.test(raw)) return null;
+  const query = new URLSearchParams(raw.slice("/join?".length));
+  if ([...query].some(([key, value]) => !["plan", "application", "next"].includes(key) || value.length > 256 || query.getAll(key).length !== 1)) return null;
+  const plan = query.get("plan");
+  const application = query.get("application");
+  const next = query.get("next");
+  if (plan !== null && !(MEMBERSHIP_PLAN_CODES as readonly string[]).includes(plan)) return null;
+  if (application !== null && (!plan || !APPLICATION_ID.test(application))) return null;
+  if (next !== null && parseJoinContinuation(next) !== next) return null;
+  if (!plan && !next) return null;
+  return `/join?${query.toString()}`;
+}
 /** A path for post-login navigation only. Every destination is still protected by its server guard. */
 export function allowedAdminDestination(raw: string | null | undefined): string | null {
   if (typeof raw !== "string" || raw.length === 0 || raw.length > 2048 || !raw.startsWith("/admin")) return null;
@@ -61,5 +82,5 @@ export function allowedAdminDestination(raw: string | null | undefined): string 
 }
 
 export function parseLoginDestination(raw: string | null | undefined, intent: LoginIntent): LoginDestination {
-  return {intent, path: intent === "member" ? parsePortalContinuation(raw) : allowedAdminDestination(raw) ?? "/admin"};
+  return {intent, path: intent === "member" ? allowedMemberDestination(raw) ?? "/portal" : allowedAdminDestination(raw) ?? "/admin"};
 }

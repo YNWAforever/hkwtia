@@ -4,6 +4,7 @@ import {randomUUID} from "node:crypto";
 import {redirect} from "next/navigation";
 
 import type {AppLocale} from "@/i18n/routing";
+import {allowedMemberDestination} from "@/lib/auth/login-destination";
 import {provisionVerifiedMember} from "@/lib/auth/login-provision";
 import {getSession} from "@/lib/auth/server";
 import {profileIdentityRepository} from "@/lib/db/repos/profile-identities";
@@ -22,7 +23,8 @@ function safeSqlstate(error: unknown): string | undefined {
 }
 
 /** No actor, role, email, or membership state arrives from the browser. */
-export async function provisionMemberProfileAction(locale: AppLocale): Promise<void> {
+export async function provisionMemberProfileAction(locale: AppLocale, requestedDestination?: string): Promise<void> {
+  const continuation = allowedMemberDestination(requestedDestination);
   let outcome: "unverified" | "conflict" | "ready" | "forbidden" | "unavailable";
   let stage: "session" | "provision" = "session";
   let reference: string | undefined;
@@ -43,8 +45,9 @@ export async function provisionMemberProfileAction(locale: AppLocale): Promise<v
     }));
     outcome = "unavailable";
   }
-  if (outcome === "ready") redirect(localizedPath(locale, "/join"));
+  if (outcome === "ready") redirect(localizedPath(locale, continuation ?? "/join"));
   const query = new URLSearchParams({profile: outcome});
   if (reference) query.set("reference", reference);
+  if (continuation) query.set("next", continuation);
   redirect(`${localizedPath(locale, "/member-login")}?${query.toString()}`);
 }

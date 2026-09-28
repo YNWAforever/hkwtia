@@ -9,7 +9,7 @@ import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {resolveCurrentLogin} from "@/lib/auth/login-resolution-server";
 import {provisionMemberProfileAction} from "./provision-action";
-import {parsePortalContinuation} from "@/lib/portal/continuation";
+import {allowedMemberDestination, parseLoginDestination} from "@/lib/auth/login-destination";
 import {localizedPath} from "@/lib/urls";
 
 import {requestMemberLoginLink} from "./actions";
@@ -46,7 +46,9 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
 
   // Fails open to /portal for a stale or tampered `next` — this page must
   // never surface an error to a visitor over an invalid continuation alone.
-  const continuation = parsePortalContinuation(queryValue(query.next));
+  const requestedDestination = queryValue(query.next);
+  const continuation = parseLoginDestination(requestedDestination, "member").path;
+  const profileContinuation = allowedMemberDestination(requestedDestination);
 
   // Clicking the magic-link email lands the browser back here already
   // authenticated (Neon Auth verifies the token and redirects to this
@@ -98,7 +100,7 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
             {queryValue(query.profile) === "conflict" ? <p className="mt-3 text-destructive" role="alert">{t("profileConflict")}</p> : null}
             {queryValue(query.profile) === "unverified" ? <p className="mt-3 text-destructive" role="alert">{t("profileUnverified")}</p> : null}
             {queryValue(query.profile) === "unavailable" ? <div className="mt-3 text-destructive" role="alert"><p>{t("profileUnavailable")}</p>{profileReference ? <p>{t("profileReference", {reference: profileReference})}</p> : null}</div> : null}
-            <form action={provisionMemberProfileAction.bind(null, locale)} data-testid="profile-provision-form">
+            <form action={provisionMemberProfileAction.bind(null, locale, profileContinuation ?? undefined)} data-testid="profile-provision-form">
               <button className="mt-4 min-h-11 rounded-md bg-primary px-4 text-primary-foreground" type="submit">{t("createProfile")}</button>
             </form>
           </div> : null}

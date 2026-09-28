@@ -5,7 +5,7 @@ import {useFormStatus} from "react-dom";
 
 import type {AppLocale} from "@/i18n/routing";
 import type {LoginIntent} from "@/lib/auth/login-destination";
-import {authClient} from "@/lib/auth/client";
+import {GoogleSignInButton} from "@/components/auth/google-sign-in-button";
 import {localizedPath} from "@/lib/urls";
 
 type Labels = Readonly<{
@@ -36,8 +36,6 @@ function EmailSubmit({label, pendingLabel, disabled}: {label: string; pendingLab
 }
 
 export function SignInForm({intent, locale, destination, action, googleEnabled, sent = false, retryAfterSeconds = 0, labels}: Props) {
-  const [googlePending, setGooglePending] = useState(false);
-  const [googleError, setGoogleError] = useState(false);
   const [email, setEmail] = useState("");
   const [masked, setMasked] = useState("");
   const [remaining, setRemaining] = useState(retryAfterSeconds);
@@ -56,21 +54,6 @@ export function SignInForm({intent, locale, destination, action, googleEnabled, 
     } catch { return; }
   }, [maskKey, waitKey, retryAfterSeconds]);
 
-  async function startGoogle() {
-    if (!googleEnabled || googlePending) return;
-    setGooglePending(true);
-    setGoogleError(false);
-    const callbackURL = `${localizedPath(locale, intent === "admin" ? "/admin-login" : "/member-login")}?next=${encodeURIComponent(destination)}`;
-    try {
-      const result = await authClient.signIn.social({provider: "google", callbackURL});
-      if (result?.error) setGoogleError(true);
-    } catch {
-      setGoogleError(true);
-    } finally {
-      setGooglePending(false);
-    }
-  }
-
   function rememberRecipient() {
     try {
       const safeMask = maskEmail(email);
@@ -84,11 +67,11 @@ export function SignInForm({intent, locale, destination, action, googleEnabled, 
       <p>{labels.sent}{masked ? ` ${labels.maskedTo} ${masked}.` : ""}</p>
       <a className="mt-2 inline-flex min-h-11 items-center text-sm underline" href={`${localizedPath(locale, intent === "admin" ? "/admin-login" : "/member-login")}?next=${encodeURIComponent(destination)}`}>{labels.changeEmail}</a>
     </div> : null}
-    <button className="mt-8 flex min-h-11 w-full items-center justify-center rounded-md border border-input bg-background px-4 font-medium disabled:opacity-50" disabled={!googleEnabled || googlePending} onClick={() => void startGoogle()} type="button">
-      {labels.google}
-    </button>
-    {!googleEnabled ? <p className="mt-2 text-sm text-muted-foreground">{labels.googleUnavailable}</p> : null}
-    {googleError ? <p className="mt-3 text-sm text-destructive" role="alert">{labels.providerError}</p> : null}
+    <GoogleSignInButton
+      callbackURL={`${localizedPath(locale, intent === "admin" ? "/admin-login" : "/member-login")}?next=${encodeURIComponent(destination)}`}
+      enabled={googleEnabled}
+      labels={labels}
+    />
     <p className="my-5 text-center text-sm text-muted-foreground">{labels.separator}</p>
     <form action={action} data-continuation={destination} data-testid={`${intent}-login-form`} onSubmit={rememberRecipient}>
       <label className="mb-2 block text-sm font-medium" htmlFor={`${intent}-login-email`}>{labels.email}</label>
