@@ -13,6 +13,22 @@ describe("safe localized Event action states", () => {
     expect(state).toMatchObject({status: "error", message: "Check the fields.", fieldErrors: {slug: "Check the fields."}, values: {slug: "bad slug", titleEn: "Draft title"}});
   });
 
+  it("returns the new event revision after a successful edit", async () => {
+    const state = await runEventFormAction({}, form({titleEn: "Second edit"}), {
+      validationMessage: "Check the fields.", errorMessage: "Try again.", successMessage: "Saved.",
+      mutate: async () => ({revision: "2026-09-29T00:00:00.001Z"}),
+    });
+    expect(state).toMatchObject({status: "success", revision: "2026-09-29T00:00:00.001Z"});
+  });
+
+  it("keeps entered event fields and gives a stale editor a conflict message", async () => {
+    const state = await runEventFormAction({}, form({titleEn: "Unsaved event"}), {
+      validationMessage: "Check the fields.", errorMessage: "Try again.",
+      successMessage: "Saved.", conflictMessage: "Reload and compare.",
+      mutate: async () => {throw new Error("EVENT_EDIT_CONFLICT");},
+    });
+    expect(state).toMatchObject({status: "error", message: "Reload and compare.", values: {titleEn: "Unsaved event"}});
+  });
   it("returns generic localized errors without leaking domain payloads", async () => {
     const checkIn = await runCheckInAction({}, form({profileId: "private-profile"}), {successMessage: "Checked in.", errorMessage: "Unable to check in.", mutate: async () => { throw new Error("DB payload private-profile"); }});
     const registration = await runEventRegistrationAction({}, form({eventId: "11111111-1111-4111-8111-111111111111"}), {messages, mutate: async () => { throw new Error("expired profile-private"); }});

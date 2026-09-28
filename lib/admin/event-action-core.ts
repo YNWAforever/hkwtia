@@ -10,29 +10,32 @@ export type EventActionState = Readonly<{
   message?: string;
   fieldErrors?: Readonly<Record<string, string>>;
   values?: Readonly<Record<string, string>>;
+  revision?: string;
 }>;
 
 type EventFormOptions = Readonly<{
   successMessage: string;
   validationMessage: string;
   errorMessage: string;
-  mutate: (formData: FormData) => Promise<unknown>;
+  conflictMessage?: string;
+  mutate: (formData: FormData) => Promise<{revision?: string} | void>;
 }>;
 type SimpleOptions = Readonly<{successMessage: string; errorMessage: string; mutate: (formData: FormData) => Promise<unknown>}>;
 const preservedFields = ["slug", "titleEn", "titleZh", "descriptionEn", "descriptionZh", "startsAt", "endsAt", "venue", "capacity", "registrationMode", "externalRegistrationUrl", "format", "onlineUrl", "tags", "visibility", "ticketPriceHkdCents", "memberOnly", "published", "heroMediaId"] as const;
 
-export async function runEventFormAction(_state: EventActionState, formData: FormData, options: EventFormOptions): Promise<EventActionState> {
+export async function runEventFormAction(state: EventActionState, formData: FormData, options: EventFormOptions): Promise<EventActionState> {
   const values = Object.fromEntries(preservedFields.map((name) => [name, String(formData.get(name) ?? "")]));
   try {
-    await options.mutate(formData);
-    return {status: "success", message: options.successMessage};
+    const result = await options.mutate(formData);
+    return {status: "success", message: options.successMessage, ...(result?.revision ? {revision: result.revision} : {})};
   } catch (error) {
     if (isAuthorizationDenial(error)) throw error;
+    if (error instanceof Error && error.message === "EVENT_EDIT_CONFLICT") return {status: "error", message: options.conflictMessage ?? options.errorMessage, values, ...(state.revision ? {revision: state.revision} : {})};
     if (error instanceof z.ZodError) {
       const fieldErrors = Object.fromEntries(error.issues.flatMap((issue) => typeof issue.path[0] === "string" ? [[issue.path[0], options.validationMessage]] : []));
-      return {status: "error", message: options.validationMessage, fieldErrors, values};
+      return {status: "error", message: options.validationMessage, fieldErrors, values, ...(state.revision ? {revision: state.revision} : {})};
     }
-    return {status: "error", message: options.errorMessage, values};
+    return {status: "error", message: options.errorMessage, values, ...(state.revision ? {revision: state.revision} : {})};
   }
 }
 

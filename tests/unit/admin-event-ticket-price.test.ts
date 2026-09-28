@@ -68,7 +68,7 @@ describe("the event write boundary prices only ticketed events", () => {
     const current = storedEvent("rsvp");
     const update = vi.fn(async (updateId, input) => ({id: updateId, ...input}));
     const updateDependencies: EventMutationDependencies = {transaction: (work) => work({insertEvent: vi.fn(), lockEvent: async () => current, updateEvent: update, lockActiveMedia: vi.fn(), insertAudit: vi.fn(async () => undefined)})};
-    await expect(updateEvent(staff, id, {ticketPriceHkdCents: 25_000}, updateDependencies)).rejects.toThrow("ticketPriceHkdCents is only valid for ticketed events");
+    await expect(updateEvent(staff, id, {ticketPriceHkdCents: 25_000}, updateDependencies, current.updatedAt)).rejects.toThrow("ticketPriceHkdCents is only valid for ticketed events");
     expect(update).not.toHaveBeenCalled();
   });
 
@@ -79,8 +79,8 @@ describe("the event write boundary prices only ticketed events", () => {
     const current = storedEvent("ticketed");
     const update = vi.fn(async (updateId, input) => ({id: updateId, ...input}));
     const updateDependencies: EventMutationDependencies = {transaction: (work) => work({insertEvent: vi.fn(), lockEvent: async () => current, updateEvent: update, lockActiveMedia: vi.fn(), insertAudit: vi.fn(async () => undefined)})};
-    await expect(updateEvent(staff, id, {ticketPriceHkdCents: 25_000}, updateDependencies)).resolves.toMatchObject({ticketPriceHkdCents: 25_000});
-    expect(update).toHaveBeenCalledWith(id, expect.objectContaining({ticketPriceHkdCents: 25_000}));
+    await expect(updateEvent(staff, id, {ticketPriceHkdCents: 25_000}, updateDependencies, current.updatedAt)).resolves.toMatchObject({ticketPriceHkdCents: 25_000});
+    expect(update).toHaveBeenCalledWith(id, expect.objectContaining({ticketPriceHkdCents: 25_000}), expect.any(Date));
   });
 });
 

@@ -148,7 +148,7 @@ export type MemberEventEligibility = Readonly<{hasEligibleMembership: (actor: Ex
 export type EventMutationDependencies = Readonly<{transaction: <T>(work: (transaction: Readonly<{
   insertEvent: (input: StoredEventInput) => Promise<Event>;
   lockEvent: (id: string) => Promise<Event | null>;
-  updateEvent: (id: string, input: StoredEventUpdate) => Promise<Event | null>;
+  updateEvent: (id: string, input: StoredEventUpdate, updatedAt: Date) => Promise<Event | null>;
   lockActiveMedia: (id: string) => Promise<Readonly<{id: string; archivedAt: Date | null}> | null>;
   insertAudit: (input: EventAudit) => Promise<void>;
 }>) => Promise<T>) => Promise<T>}>;
@@ -440,7 +440,7 @@ async function defaultMutationDependencies(): Promise<EventMutationDependencies>
       return row;
     },
     lockEvent: async (id) => (await tx.select().from(events).where(eq(events.id, id)).for("update"))[0] ?? null,
-    updateEvent: async (id, input) => (await tx.update(events).set({...input, updatedAt: new Date()}).where(eq(events.id, id)).returning())[0] ?? null,
+    updateEvent: async (id, input, updatedAt) => (await tx.update(events).set({...input, updatedAt}).where(eq(events.id, id)).returning())[0] ?? null,
     lockActiveMedia: async (id) => (await tx.select({id: media.id, archivedAt: media.archivedAt}).from(media).where(eq(media.id, id)).for("update"))[0] ?? null,
     insertAudit: async (input) => { await tx.insert(auditEvents).values(input); },
   }))};
@@ -465,14 +465,16 @@ export async function createEvent(actor: Actor, input: unknown, dependencies?: E
   });
 }
 
-export async function updateEvent(actor: Actor, id: unknown, input: unknown, dependencies?: EventMutationDependencies): Promise<Event | null> {
+export async function updateEvent(actor: Actor, id: unknown, input: unknown, dependencies?: EventMutationDependencies, expectedUpdatedAt?: Date): Promise<Event | null> {
   requireAdmin(actor);
   const eventId = eventIdSchema.parse(id);
   const parsed = eventUpdateSchema.parse(input);
+  if (!(expectedUpdatedAt instanceof Date) || !Number.isFinite(expectedUpdatedAt.getTime())) throw new Error("EVENT_EDIT_REVISION_REQUIRED");
   return (dependencies ?? await defaultMutationDependencies()).transaction(async (transaction) => {
     const current = await transaction.lockEvent(eventId);
     if (!current) return null;
     if (current.status === "cancelled") throw new Error("EVENT_CANCELLED_TERMINAL");
+    if (current.updatedAt.getTime() !== expectedUpdatedAt.getTime()) throw new Error("EVENT_EDIT_CONFLICT");
     assertPriceOnlyOnTicketed(parsed.registrationMode ?? current.registrationMode, parsed.ticketPriceHkdCents);
     assertSupportedTicketVisibility(parsed.registrationMode ?? current.registrationMode, visibilityFrom(parsed, current.visibility));
     const flags = reconciledEventFlags(parsed, {status: current.status, visibility: current.visibility});
@@ -482,7 +484,8 @@ export async function updateEvent(actor: Actor, id: unknown, input: unknown, dep
       const mediaRow = await transaction.lockActiveMedia(parsed.heroMediaId);
       if (!mediaRow || mediaRow.archivedAt !== null) throw new z.ZodError([{code: z.ZodIssueCode.custom, path: ["heroMediaId"], message: "EVENT_HERO_MEDIA_INVALID"}]);
     }
-    const event = await transaction.updateEvent(eventId, {...parsed, ...flags, publishedAt: flags.status === "published" ? (current.publishedAt ?? new Date()) : null});
+    const nextUpdatedAt = new Date(Math.max(Date.now(), current.updatedAt.getTime() + 1));
+    const event = await transaction.updateEvent(eventId, {...parsed, ...flags, publishedAt: flags.status === "published" ? (current.publishedAt ?? new Date()) : null}, nextUpdatedAt);
     if (!event) return null;
     await transaction.insertAudit({actorUserId: actor.profileId, actorType: actor.kind, action: "event.updated", targetType: "event", targetId: event.id, metadata: {fields: Object.keys(parsed).sort()}});
     return event;

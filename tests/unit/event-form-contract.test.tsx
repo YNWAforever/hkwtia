@@ -21,14 +21,14 @@ function form(overrides: Record<string, string> = {}): FormData {
   return data;
 }
 const deps: EventMutationDependencies = {transaction: async (work) => work({
-  insertEvent: vi.fn(async (input) => ({id: "11111111-1111-4111-8111-111111111111", ...input})),
+  insertEvent: vi.fn(async (input) => ({id: "11111111-1111-4111-8111-111111111111", ...input, updatedAt: new Date("2026-09-29T00:00:00.000Z")})),
   lockEvent: vi.fn(), updateEvent: vi.fn(), lockActiveMedia: vi.fn(), insertAudit: vi.fn(async () => undefined),
 })};
 const labels = {
   slug: "Slug", titleEn: "English title", titleZh: "Chinese title", descriptionEn: "English description", descriptionZh: "Chinese description",
   startsAt: "Starts", endsAt: "Ends", venue: "Venue", capacity: "Capacity", registrationMode: "Registration",
   registrationModes: {rsvp: "RSVP", external: "External", ticketed: "Ticketed"}, ticketPriceHkdCents: "Ticket price",
-  memberOnly: "Members only", published: "Published", heroMediaId: "Hero", noHeroMedia: "No hero", save: "Save", saving: "Saving",
+  memberOnly: "Members only", published: "Published", heroMediaId: "Hero", noHeroMedia: "No hero", save: "Save", saving: "Saving", saveDraft: "Save as draft", savePublish: "Save and publish", previewDraft: "Preview draft", previewPrivate: "Private draft preview", previewEnglish: "English", previewChinese: "Chinese",
   format: "Format", formats: {in_person: "In person", online: "Online", hybrid: "Hybrid"}, onlineUrl: "Online URL",
   externalRegistrationUrl: "External registration URL", tags: "Tags", visibility: "Visibility",
   visibilities: {public: "Public", members_only: "Members only", invite_only: "Invite only"},
@@ -49,11 +49,11 @@ describe("admin event form contract", () => {
       lockActiveMedia: vi.fn(), insertAudit: vi.fn(async () => undefined),
     })};
     const next = eventFormInput(form({format: "hybrid", titleEn: "Revised AI clinic"}));
-    await expect(updateEvent(staff, current.id, next, updateDeps)).resolves.toMatchObject({
+    await expect(updateEvent(staff, current.id, next, updateDeps, current.updatedAt)).resolves.toMatchObject({
       titleEn: "Revised AI clinic", format: "hybrid", onlineUrl: fields.onlineUrl,
       externalRegistrationUrl: fields.externalRegistrationUrl, tags: ["ai", "machine-learning"],
     });
-    expect(update).toHaveBeenCalledWith(current.id, expect.objectContaining({externalRegistrationUrl: fields.externalRegistrationUrl}));
+    expect(update).toHaveBeenCalledWith(current.id, expect.objectContaining({externalRegistrationUrl: fields.externalRegistrationUrl}), expect.any(Date));
   });
 
   it("blocks publication of the exact audited demo event on create and update", async () => {
@@ -67,7 +67,7 @@ describe("admin event form contract", () => {
       insertEvent: vi.fn(), lockEvent: vi.fn(async () => draft), updateEvent: update,
       lockActiveMedia: vi.fn(), insertAudit: vi.fn(async () => undefined),
     })};
-    await expect(updateEvent(staff, draft.id, published, updateDeps)).rejects.toThrow("DEMO_EVENT_PUBLICATION_BLOCKED");
+    await expect(updateEvent(staff, draft.id, published, updateDeps, draft.updatedAt)).rejects.toThrow("DEMO_EVENT_PUBLICATION_BLOCKED");
     expect(update).not.toHaveBeenCalled();
   });
 
@@ -91,6 +91,26 @@ describe("admin event form contract", () => {
   it("clears mode-specific values when registration and format change", () => {
     const parsed = eventFormInput(form({registrationMode: "rsvp", format: "in_person", ticketPriceHkdCents: "250"}));
     expect(parsed).toMatchObject({registrationMode: "rsvp", externalRegistrationUrl: null, ticketPriceHkdCents: null, format: "in_person", onlineUrl: null});
+  });
+
+  it("previews both draft languages in the protected editor without interpreting HTML", () => {
+    const {container} = render(<EventForm action={vi.fn(async () => ({}))} labels={labels}/>);
+    fireEvent.change(screen.getByLabelText("English title"), {target: {value: "Edited event"}});
+    fireEvent.change(screen.getByLabelText("English description"), {target: {value: "<img src=x onerror=alert(1)>"}});
+    fireEvent.change(screen.getByLabelText("Chinese title"), {target: {value: "草稿活動"}});
+    fireEvent.click(screen.getByRole("button", {name: "Preview draft"}));
+    expect(screen.getByText("Private draft preview")).toBeInTheDocument();
+    expect(screen.getByText("Edited event")).toBeInTheDocument();
+    expect(screen.getByText("草稿活動")).toBeInTheDocument();
+    expect(container.querySelector("img[src=x]")).toBeNull();
+    expect(screen.getByText("<img src=x onerror=alert(1)>")).toBeInTheDocument();
+  });
+
+  it("submits the rendered edit revision and omits it for new events", () => {
+    const {container, rerender} = render(<EventForm action={vi.fn(async () => ({}))} labels={labels} values={{updatedAt: new Date("2026-09-29T00:00:00.000Z")}} />);
+    expect(container.querySelector<HTMLInputElement>("input[name=expectedUpdatedAt]")?.value).toBe("2026-09-29T00:00:00.000Z");
+    rerender(<EventForm action={vi.fn(async () => ({}))} labels={labels} />);
+    expect(container.querySelector("input[name=expectedUpdatedAt]")).toBeNull();
   });
 
   it("shows only fields relevant to the selected modes and retains edit values", () => {
