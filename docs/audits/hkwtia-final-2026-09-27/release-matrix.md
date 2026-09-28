@@ -1,5 +1,15 @@
 # Release matrix and rollout / rollback gate
 
+## Current production checkpoint — 2026-09-28T07:50Z
+
+**Migrations 0037–0051 are applied to the authorized production database and both public directory locales have recovered.** This supersedes the earlier unmigrated/unavailable checkpoints retained below. The latest verified production ledger is 0051 with no pending migrations or unexplained hash differences. The directory correctly shows no published members; no data was seeded or published. [Execution and evidence](acceptance.md).
+
+Recovery snapshot: `snap-blue-mud-aojc25bd` at 07:49:04Z, expires 2026-10-05T00:00:00Z. Isolated rehearsal branch: `br-muddy-smoke-aozr8i5y`, same expiry. Production target: `fragrant-mountain-25240574 / br-noisy-glitter-ao2npd77 / neondb`. All 15 migrations were rehearsed before production; migration 0040 replaces the derived metrics view and restores its unique index. Direct schema verification and both live locale browser assertions passed. No production worker, flag or provider action was performed.
+
+Remaining release gates are provider receipts (Google, actual magic-link email, asynchronous payment method), compatible worker/cron health, capability-specific flags and association policy. Deployment environment metadata still does not expose the exact database host, although recovery immediately after this target's migration supports that binding inference. Full production release is not declared.
+
+
+
 Observed 2026-09-28 Asia/Hong_Kong. This review package includes read-only post-merge production observation; a Ready web deployment is not a verified full production release. Feature branch `codex/final-login-admin-20260928` starts at PR #94 merge `fe22b49ed9828dd0cfad536273df5960ed90ca66`; latest application commit `64363879`, latest browser test commit `29fe7822`. See [acceptance.md](acceptance.md) and [baseline.md](baseline.md).
 
 | Surface | Observed revision/state | Evidence | Gate |

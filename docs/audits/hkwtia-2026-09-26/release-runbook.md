@@ -215,3 +215,8 @@ The fresh provider walk and the recorded recovery now pass in the isolated envir
 ## Handoff decision
 
 Use verification.md and evidence/release-gates-final.json for the final code/CI/Preview boundary. The tested application SHA is1e4f6246; subsequent guarded reproduction and release-document commits do not alter app/web/worker behavior. The exact tested Preview remains linked there. Code is ready for review; complete hosted staging and production are not marked released. The task authorizes no production migration, cleanup, provider send, merge or promotion. Review the outstanding policy/provider/hosted gates above before requesting a specific release action.
+
+
+## Authorized production rollout update — 2026-09-28
+
+The user subsequently authorized all migrations 0037–0051. After a successful isolated production-copy rehearsal and recovery snapshot `snap-blue-mud-aojc25bd`, the repository migration command applied the sequence to `fragrant-mountain-25240574` / `br-noisy-glitter-ao2npd77` / `neondb`. Read-only verification confirms ledger 0051, no pending migration/hash mismatch, required constraints, and unchanged checked row counts. Both live directory locales now show the normal empty state instead of unavailable. [Execution, receipts, screenshots and rollback limits](../hkwtia-final-2026-09-27/acceptance.md). This supersedes earlier statements that production schema is unmigrated; it does not mark provider/worker/flag/policy gates complete.

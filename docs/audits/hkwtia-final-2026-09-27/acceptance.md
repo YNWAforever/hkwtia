@@ -198,3 +198,30 @@ try {
 The connection-string command's stdout **must be captured directly into the process environment**, never printed, committed or pasted. The executed wrapper captured stdout, checked success and the URL scheme, ran the script, and removed the environment variable in `finally`. The script verifies the exact hostname/database and TLS certificate, uses `BEGIN READ ONLY`, a ten-second statement timeout and schema/ledger queries only. It retrieves no member records and invokes no provider.
 
 Before a production migration: rehearse this exact 0036→0051 sequence on an isolated branch, confirm snapshot/restore readiness and compatible web/worker behavior, then obtain explicit authorization to apply this target-specific sequence. No production migration, data update, fixture seed, flag change or real communication occurred in this preflight.
+
+## Authorized production migrations 0037–0051
+
+The user explicitly authorized **all migrations 0037–0051**. On 2026-09-28 the existing repository command `npm.cmd run db:migrate` completed successfully first on an isolated copy, then on production. No migration source, application policy, provider configuration or feature flag was changed.
+
+Target: Neon project `fragrant-mountain-25240574`, production branch `br-noisy-glitter-ao2npd77`, database `neondb`, direct endpoint `ep-steep-wind-ao0pbldw.c-2.ap-southeast-1.aws.neon.tech`. Source branch: `codex/final-login-admin-20260928` at `b9bbfdbe`; production web remains the previously merged PR #95 application.
+
+### Rehearsal and recovery point
+
+- Isolated branch `br-muddy-smoke-aozr8i5y`, named `audit-0037-0051-rehearsal-20260928`, copied from production at parent LSN `0/4A46778`. Created 2026-09-28T07:45:51Z; expires 2026-10-05T00:00:00Z. No application/worker was pointed at this copy, no fixtures were seeded, and no provider was invoked.
+- Rehearsal `npm.cmd run db:migrate`: exit 0. [Read-only verification](evidence/migration-rehearsal-after-2026-09-28.json): ledger 51, no pending entries, no unexplained hash mismatch, four grant columns, four expected grant/auth/batch constraints and the metrics unique index.
+- Production recovery snapshot `snap-blue-mud-aojc25bd`, named `hkwtia-pre-0037-0051-20260928`, created 2026-09-28T07:49:04Z from `br-noisy-glitter-ao2npd77`; expires 2026-10-05T00:00:00Z. Snapshot creation succeeded; restoration was not exercised.
+- The Neon CLI session expired after the rehearsal migration. The authenticated Neon connector supplied subsequent credentials and created the snapshot. Credentials stayed out of committed files/output; pooled connection hostnames returned by the connector were converted to their verified direct endpoint before migration.
+
+### Production execution and verification
+
+`npm.cmd run db:migrate` ran with the exact production `DATABASE_URL` held in process memory and `PGOPTIONS='-c lock_timeout=10000 -c statement_timeout=120000'`; both environment variables were removed in `finally`. It exited 0 with “migrations applied successfully”. These were the committed Drizzle migrations, not ad hoc SQL.
+
+[Before](evidence/migration-production-before-2026-09-28.json) at 07:49:28Z: ledger 36, exactly fifteen pending migrations. [After](evidence/migration-production-after-2026-09-28.json) at 07:50:15Z: ledger 51, zero pending, zero unexplained hash mismatches, required grant columns/constraints and metrics unique index present. The zero-row grant query now succeeds. Counts of profiles, companies, memberships, events and audit events were identical before/after (1 / 3 / 0 / 1 / 2). Counts provide a scoped preservation check, not a row-by-row data comparison. [Verification script](evidence/verify-migration-rollout.mjs) ran read-only transactions.
+
+Anonymous production HTTP/DOM checks at 07:50:32Z–07:50:34Z returned 200 and the normal zero-member directory state in **both locales**, replacing the prior unavailable error. [DOM receipt](evidence/production-directory-after-migrations-2026-09-28.json). Playwright Chromium separately asserted the localized empty-state heading and captured [English](evidence/production-directory-recovered-en-2026-09-28.png) and [zh-HK](evidence/production-directory-recovered-zh-2026-09-28.png) screenshots. Zero published profiles is a successful empty result; no profiles were published or fabricated to populate the directory.
+
+### Release and rollback boundary
+
+**Production schema migrations 0037–0051 are applied and verified; the live directory read failure is recovered.** The temporal recovery after this database change supports the alias-binding inference, but encrypted deployment credential metadata still does not independently expose its hostname. Full production provider/worker rollout is not claimed: Google/magic-link receipts, worker revision/cron health, asynchronous payment methods, live communication and policy gates remain separate.
+
+For rollback, retain schema and history and prefer a compatible web/worker revision. Migration 0040 replaces a derived metrics view and recreates its required unique index; a reverse drop-table migration is not a safe rollback. The pre-migration snapshot may be restored to a **separate recovery branch** for diagnosis if needed; do not replace production with it without first reconciling any writes after 07:49:04Z and obtaining restore authorization. Snapshot and rehearsal retention end 2026-10-05T00:00:00Z. No live send, payment/refund, grant, worker deployment, fixture seed, data cleanup or flag activation was performed.
