@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import {usePathname} from "next/navigation";
 import {useTranslations} from "next-intl";
 
 import {adminNavigationGroups} from "@/config/internal-navigation";
 import {findCurrentLink, type InternalNavGroup} from "@/components/internal-shell/navigation";
+import {GuardedAdminLink} from "@/components/admin/unsaved-changes-guard";
 import type {AppLocale} from "@/i18n/routing";
 import {localizedPath} from "@/lib/urls";
 
@@ -60,20 +60,20 @@ export function AdminNav({locale, collapsed = false, onNavigate, showBrand = tru
   }));
   const current = findCurrentLink(groups, pathname);
   return <div className="flex h-full min-h-0 flex-col">
-    {showBrand ? <Link className="flex min-h-16 items-center border-b px-4 font-serif text-xl font-semibold text-foreground" href={localizedPath(locale, "/admin")}>{collapsed ? t("brandShort") : t("brand")}</Link> : null}
+    {showBrand ? <GuardedAdminLink className="flex min-h-16 items-center border-b px-4 font-serif text-xl font-semibold text-foreground" href={localizedPath(locale, "/admin")}>{collapsed ? t("brandShort") : t("brand")}</GuardedAdminLink> : null}
     <nav aria-label={t("navigation.label")} className="space-y-5 overflow-y-auto px-3 py-5">
       {groups.map(group => <div className="space-y-1" key={group.id}>
         {!collapsed ? <p className="px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group.label}</p> : null}
-        {group.links.map(link => <Link
+        {group.links.map(link => <GuardedAdminLink
           aria-current={link.href === current ? "page" : undefined}
           aria-label={collapsed ? link.label : undefined}
           className="flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-primary aria-[current=page]:bg-primary/10 aria-[current=page]:text-primary"
-          href={link.href} key={link.id} onClick={onNavigate}
+          href={link.href} key={link.id} onNavigate={onNavigate}
           title={collapsed ? link.label : undefined}
         >
           <span aria-hidden="true" className="mr-3 inline-flex size-5 shrink-0 items-center justify-center rounded border border-current text-[10px]">{link.label.slice(0, 1)}</span>
           {!collapsed ? <span>{link.label}</span> : null}
-        </Link>)}
+        </GuardedAdminLink>)}
       </div>)}
     </nav>
   </div>;

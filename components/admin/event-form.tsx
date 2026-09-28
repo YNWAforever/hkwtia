@@ -2,6 +2,8 @@
 
 import {useActionState, useState} from "react";
 
+import {useAdminUnsavedChanges} from "@/components/admin/unsaved-changes-guard";
+
 import type {EventActionState} from "@/lib/admin/event-action-core";
 import {formatHongKongDateTimeLocal} from "@/lib/admin/event-form-input";
 
@@ -29,7 +31,12 @@ export function EventForm({action, labels, values = {}, mediaRows = []}: Readonl
   action: (state: EventActionState, formData: FormData) => Promise<EventActionState>;
   labels: Labels; values?: Values; mediaRows?: readonly {id: string; altEn: string; altZh: string}[];
 }>) {
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const {setDirty} = useAdminUnsavedChanges();
+  const [state, formAction, pending] = useActionState(async (previous: EventActionState, formData: FormData) => {
+    const result = await action(previous, formData);
+    if (result.status === "success") setDirty(false);
+    return result;
+  }, initialState);
   const value = (name: string, fallback: string | number | null | undefined) => state.values?.[name] ?? fallback ?? "";
   const [mode, setMode] = useState(values.registrationMode ?? "rsvp");
   const [format, setFormat] = useState(values.format ?? "in_person");
@@ -43,7 +50,7 @@ export function EventForm({action, labels, values = {}, mediaRows = []}: Readonl
   const published = state.values?.published !== undefined ? state.values.published === "on" : Boolean(values.published);
   const visibility = value("visibility", values.visibility ?? (values.memberOnly ? "members_only" : "public"));
 
-  return <form action={formAction} className="glass-card grid gap-4 p-6 md:grid-cols-2" noValidate>
+  return <form action={formAction} onChange={() => setDirty(true)} onInput={() => setDirty(true)} className="glass-card grid gap-4 p-6 md:grid-cols-2" noValidate>
     <label>{labels.slug}<input {...fieldProps("slug")} className={inputClass} defaultValue={value("slug", values.slug)} name="slug" required/>{error("slug")}</label>
     <label>{labels.titleEn}<input {...fieldProps("titleEn")} className={inputClass} defaultValue={value("titleEn", values.titleEn)} name="titleEn" required/>{error("titleEn")}</label>
     <label>{labels.titleZh}<input {...fieldProps("titleZh")} className={inputClass} defaultValue={value("titleZh", values.titleZh)} name="titleZh"/>{error("titleZh")}</label>

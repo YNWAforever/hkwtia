@@ -1,11 +1,11 @@
 "use client";
 
 import type {ReactNode} from "react";
-import Link from "next/link";
 import {usePathname} from "next/navigation";
 import {useTranslations} from "next-intl";
 
 import {AdminAccountMenu} from "@/components/admin/admin-account-menu";
+import {GuardedAdminLink, useAdminUnsavedChanges} from "@/components/admin/unsaved-changes-guard";
 import {LocaleSwitcher} from "@/components/layout/locale-switcher";
 import {linkLabelKeys} from "@/components/admin/admin-nav";
 import {adminNavigationGroups} from "@/config/internal-navigation";
@@ -17,6 +17,7 @@ export function AdminTopbar({locale, identity, role, mobileTrigger}: Readonly<{l
   const pathname = usePathname();
   const t = useTranslations("Admin");
   const tNav = useTranslations("Navigation");
+  const {confirmLeave} = useAdminUnsavedChanges();
   const links = adminNavigationGroups.reduce<Array<{id: keyof typeof linkLabelKeys; href: string}>>((items, group) => {
     for (const link of group.links) items.push(link);
     return items;
@@ -28,12 +29,12 @@ export function AdminTopbar({locale, identity, role, mobileTrigger}: Readonly<{l
   return <header className="sticky top-0 z-30 flex min-h-16 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur sm:px-6">
     <div className="lg:hidden">{mobileTrigger}</div>
     <nav aria-label={t("shell.breadcrumbs")} className="min-w-0 flex-1 truncate text-sm">
-      <Link className="text-muted-foreground hover:underline" href={localizedPath(locale, "/admin")}>{t("navigation.dashboard")}</Link>
+      <GuardedAdminLink className="text-muted-foreground hover:underline" href={localizedPath(locale, "/admin")}>{t("navigation.dashboard")}</GuardedAdminLink>
       {current && current.href !== "/admin" ? <><span aria-hidden="true" className="mx-2">/</span><span aria-current="page">{t(linkLabelKeys[current.id])}</span></> : null}
     </nav>
-    <Link className="hidden min-h-11 items-center text-sm underline sm:inline-flex" href={localizedPath(locale, "/admin/members")}>{t("shell.searchMembers")}</Link>
-    <Link className="hidden min-h-11 items-center text-sm underline sm:inline-flex" href={localizedPath(locale, "/")}>{t("shell.viewSite")}</Link>
-    <LocaleSwitcher locale={locale} englishLabel={tNav("english")} chineseLabel={tNav("chinese")} switchToEnglishLabel={tNav("switchToEnglish")} switchToChineseLabel={tNav("switchToChinese")}/>
+    <GuardedAdminLink className="hidden min-h-11 items-center text-sm underline sm:inline-flex" href={localizedPath(locale, "/admin/members")}>{t("shell.searchMembers")}</GuardedAdminLink>
+    <GuardedAdminLink className="hidden min-h-11 items-center text-sm underline sm:inline-flex" href={localizedPath(locale, "/")}>{t("shell.viewSite")}</GuardedAdminLink>
+    <LocaleSwitcher beforeSwitch={confirmLeave} locale={locale} englishLabel={tNav("english")} chineseLabel={tNav("chinese")} switchToEnglishLabel={tNav("switchToEnglish")} switchToChineseLabel={tNav("switchToChinese")}/>
     <AdminAccountMenu identity={identity} role={role}/>
   </header>;
 }

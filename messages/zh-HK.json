@@ -2533,6 +2533,7 @@
   },
   "Admin": {
     "brandShort": "WTIA",
+    "unsavedChanges": {"confirm": "你有尚未儲存的修改。離開此頁並捨棄修改？"},
     "shell": {
       "menu": "開啟工作平台選單",
       "closeMenu": "關閉工作平台選單",

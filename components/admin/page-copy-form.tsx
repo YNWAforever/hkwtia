@@ -2,6 +2,8 @@
 
 import {useActionState} from "react";
 
+import {useAdminUnsavedChanges} from "@/components/admin/unsaved-changes-guard";
+
 import type {PageCopyActionState} from "@/lib/admin/page-copy-action-core";
 
 export type PageCopyField = Readonly<{
@@ -43,10 +45,15 @@ export function PageCopyForm({
   fields: readonly PageCopyField[];
   labels: Labels;
 }>) {
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const {setDirty} = useAdminUnsavedChanges();
+  const [state, formAction, pending] = useActionState(async (previous: PageCopyActionState, formData: FormData) => {
+    const result = await action(previous, formData);
+    if (result.status === "success") setDirty(false);
+    return result;
+  }, initialState);
 
   return (
-    <form action={formAction} className="space-y-6" noValidate>
+    <form action={formAction} onChange={() => setDirty(true)} onInput={() => setDirty(true)} className="space-y-6" noValidate>
       <p className="text-sm text-muted-foreground">{labels.revertHint}</p>
       <ul className="space-y-6">
         {fields.map((entry) => {

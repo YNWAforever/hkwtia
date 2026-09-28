@@ -7,6 +7,7 @@ vi.mock("@/i18n/navigation", () => ({useRouter: () => ({push: state.push, refres
 vi.mock("@/components/layout/locale-switcher", () => ({LocaleSwitcher: ({switchToEnglishLabel}: {switchToEnglishLabel: string}) => <button aria-label={switchToEnglishLabel} type="button"/>}));
 vi.mock("@/lib/auth/client", () => ({authClient: {signOut: state.signOut}}));
 import {AdminAppShell} from "@/components/admin/admin-app-shell";
+import {useAdminUnsavedChanges} from "@/components/admin/unsaved-changes-guard";
 
 const props = {locale: "zh-HK" as const, identity: "Synthetic Staff", role: "staff" as const, skipLabel: "Skip to content"};
 describe("admin workspace shell", () => {
@@ -42,6 +43,21 @@ describe("admin workspace shell", () => {
     fireEvent.click(screen.getByRole("button", {name: "shell.signOut"}));
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("shell.signOutError"));
     expect(state.push).not.toHaveBeenCalled();
+  });
+  it("keeps the account session when the editor cancels leaving a dirty form", async () => {
+    const confirm = vi.fn(() => false);
+    vi.stubGlobal("confirm", confirm);
+    function DraftToggle() {
+      const {setDirty} = useAdminUnsavedChanges();
+      return <button onClick={() => setDirty(true)} type="button">Edit draft</button>;
+    }
+    render(<AdminAppShell {...props}><DraftToggle/></AdminAppShell>);
+    fireEvent.click(screen.getByRole("button", {name: "Edit draft"}));
+    fireEvent.click(screen.getByText("Synthetic Staff"));
+    fireEvent.click(screen.getByRole("button", {name: "shell.switchAccount"}));
+    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(state.signOut).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
   });
   it("opens a keyboard-dismissable mobile navigation drawer", async () => {
     render(<AdminAppShell {...props}><h1>Member detail</h1></AdminAppShell>);

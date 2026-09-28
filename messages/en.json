@@ -2532,6 +2532,7 @@
   },
   "Admin": {
     "brandShort": "WTIA",
+    "unsavedChanges": {"confirm": "You have unsaved changes. Leave this page and discard them?"},
     "shell": {
       "menu": "Open workspace menu",
       "closeMenu": "Close workspace menu",

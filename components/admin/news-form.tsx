@@ -2,6 +2,8 @@
 
 import {useActionState} from "react";
 
+import {useAdminUnsavedChanges} from "@/components/admin/unsaved-changes-guard";
+
 import type {NewsActionState} from "@/lib/admin/news-action-core";
 
 type Labels = Readonly<{
@@ -38,7 +40,12 @@ export function NewsForm({
   labels: Labels;
   values?: Values;
 }>) {
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const {setDirty} = useAdminUnsavedChanges();
+  const [state, formAction, pending] = useActionState(async (previous: NewsActionState, formData: FormData) => {
+    const result = await action(previous, formData);
+    if (result.status === "success") setDirty(false);
+    return result;
+  }, initialState);
 
   // Echoed submission values win over the stored row so a failed save never
   // discards what the author typed.
@@ -61,7 +68,7 @@ export function NewsForm({
   const field = "mt-2 block min-h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring";
 
   return (
-    <form action={formAction} className="glass-card grid gap-4 p-6 md:grid-cols-2" noValidate>
+    <form action={formAction} onChange={() => setDirty(true)} onInput={() => setDirty(true)} className="glass-card grid gap-4 p-6 md:grid-cols-2" noValidate>
       <label className="text-sm font-semibold" htmlFor="news-slug">
         {labels.slug}
         <input className={field} defaultValue={value("slug", values.slug)} id="news-slug" name="slug" required {...fieldProps("slug")}/>
