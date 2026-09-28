@@ -150,3 +150,20 @@ At PR SHA `da90dfc1`, `gh pr checks 95` reported `checks`, `quality`, both test 
 Anonymous read-only Node `fetch`/JSDOM inspection returned HTTP 200 for `/`, `/zh`, `/members`, `/zh/members`, `/member-login`, `/zh/member-login`, `/admin-login` and `/zh/admin-login`. Both member directory results sections rendered their unavailable headings and **no** record grid; HTTP 200 alone is not recovery. A fresh `/members` page displayed reference `e5126411-d567-4a70-a21e-1d228a4f0457`. `vercel.cmd logs --environment production --no-branch --query e5126411-d567-4a70-a21e-1d228a4f0457 --since 10m --limit 20 --json --scope ynwaforevers-projects` returned one matching sanitized `public_directory_read_failed` event with code `schema_missing`, deployment `dpl_5ToXE6nkMqyd74L2AvD9ZTJUhJaz`, and web SHA `8c4800d2`. The log does not identify the bound database or exact missing object.
 
 Read-only Playwright captured [the Chinese unavailable page](evidence/production-directory-unavailable-2026-09-28.png), SHA256 `C9EF09D5FC78434B6E319D7B6E49C69E567F7FEA108532DEF30C1BBFDA546D03` (1440 × 3030). The browser asserted the unavailable heading before capture; automatic image viewing was blocked by this tool sandbox, so no claim of manual visual inspection is made. [Sanitized eight-route and log receipt](evidence/production-post-merge-readonly-2026-09-28.json) SHA256 `7BADDF8FBFE2EF42362B7180D8789292811060CD6C650B6BF32FC724F8882717`. The actual production Neon binding and ledger remain unknown, and the separately inspected ledger-0036 candidate is not assigned to this alias. This agent performed no production database write, provider action, live message, payment, refund or grant.
+
+## Production binding access recheck
+
+At 2026-09-28T06:40:46Z–06:40:47Z, fresh anonymous DOM probes again returned HTTP 200 with the unavailable recovery heading and no record grid for both `/members` and `/zh/members`. Production directory recovery remains unverified.
+
+Read-only commands run from the feature worktree:
+
+```powershell
+vercel.cmd env run --help
+vercel.cmd env ls production --scope ynwaforevers-projects
+vercel.cmd env run -e production --scope ynwaforevers-projects -- node -e 'console.log(JSON.stringify({databaseVariableNames:Object.keys(process.env).filter(k=>/DATABASE|POSTGRES|NEON/.test(k)),databaseValueType:typeof process.env.DATABASE_URL,databaseValueLength:process.env.DATABASE_URL?.length??0}))'
+gh pr checks 96
+```
+
+The environment listing confirms an encrypted Production `DATABASE_URL` entry. The temporary diagnostic received that name with type `string` and length **0**; it also received the two Neon Auth variable names. The earlier URL-only parser therefore exited without a host/database result. This establishes a local credential-retrieval limitation, not absence of the variable in the deployed runtime. No credential value was printed or saved, and no database query or write was attempted. The exact bound Neon project ID, branch ID and database name are still required to select the read-only ledger preflight; do not substitute the previously inspected candidate.
+
+At head `6896a75a`, PR #96 remained open/draft and all six reported checks passed. This recheck changes evidence only; it does not rerun provider acceptance or establish a production release.
