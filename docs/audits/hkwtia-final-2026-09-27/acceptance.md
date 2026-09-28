@@ -1,3 +1,5 @@
+> 2026-09-29 follow-up: [current finding and acceptance evidence](../hkwtia-2026-09-29/verification.md). This file retains the 2026-09-27/28 historical receipts; do not apply its old deployment or provider claims to the new branch.
+
 # Final audit acceptance record
 
 Branch `codex/final-login-admin-20260928` starts at PR #94 merge `fe22b49ed9828dd0cfad536273df5960ed90ca66`. Application commits: `330c5968`, `f87dcd52`, `08e0bc62`, `89511a10`, `731c1467`, `cb88d7e8`; browser test corrections `86377dcc` and `7e776e46`. Results are scoped below to local, isolated, protected Preview, and a final anonymous post-merge production read-only checkpoint. **Synthetic authenticated admin and public directory are hosted-Preview verified; later sections record local and hosted isolated Stripe test-mode round trips. Google/magic-link receipts and full production release remain unverified; the production web is deployed but its directory remains unavailable.**

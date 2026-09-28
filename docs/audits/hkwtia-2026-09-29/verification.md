@@ -1,0 +1,34 @@
+# HKWTIA 2026-09-29 verification log
+
+All repository commands ran in `C:\Users\laich\Documents\hkwtia\.worktrees\final-login-admin`. Logs are under `%TEMP%`; they contain no committed secrets. The supplied audit is a specification, not a test result. No Production write, live send, real payment, or member identity was used.
+
+## Baseline and focused regression
+
+- Before edits, `npm.cmd test -- --maxWorkers=2` passed 706 files / 6,016 tests and skipped 62 files / 162 tests. Log: `%TEMP%\hkwtia-20260929-baseline-test.log`.
+- F03 sent-state/support-reference, F01/F02 Join and destination, F06 queue count/filter, F07 batch paging/polling, and F09 dirty-form checks were observed RED before their fixes and GREEN after. The focused Join set passed 60 tests.
+- `RUN_POSTGRES_INTEGRATION=1 npx.cmd vitest run tests/integration/showcase-review-transition-postgres.test.ts --reporter=dot`: 4/4 passed in disposable PostgreSQL 16, including 51 synthetic listings, cursor continuation and concurrent review guards. The first run caught a real wrapper cursor-forwarding bug, which was fixed before this pass.
+- `RUN_POSTGRES_INTEGRATION=1 npx.cmd vitest run tests/integration/admin-batch-snapshot.test.ts --reporter=dot`: 2/2 passed in disposable PostgreSQL 16, including exact 5,000 totals, 50-row pages, off-page retryability, final page and non-owner denial.
+- `npx.cmd vitest run tests/unit/admin-batch-progress.test.tsx tests/unit/admin-batch-status-route.test.ts tests/unit/admin-batch-preview-recovery.test.tsx tests/unit/admin-batch-detail-page.test.tsx tests/unit/admin-batch-repository.test.ts --reporter=dot`: 15/15 passed. CMS guard/form set: 17/17 passed. Locale switcher: 11/11 passed.
+- First stable full-suite run found 11 failures in three files: the new guarded status route was absent from the explicit protected-route inventory, and the login recovery test's navigation mock omitted new locale hooks. No runtime authorization was removed. Commit `5fb79ec7` registered the route and corrected the tests; `npx.cmd vitest run tests/unit/login-pages-resolution.test.tsx tests/unit/wisetech-protected-route-ownership.test.ts tests/unit/wisetech-route-parity.test.ts --reporter=dot` then passed 36/36. Failed-run log: `%TEMP%\hkwtia-20260929-final-test.log`.
+
+## Final source gates
+
+| Gate | Exact command | Result |
+|---|---|---|
+| Full Vitest | `npm.cmd test -- --maxWorkers=2` | Exit 0: 714 files / 6,065 tests passed; 62 files / 164 tests skipped by environment gates. `%TEMP%\hkwtia-20260929-final-test-rerun.log`. |
+| Lint | `npm.cmd run lint` | Exit 0: 0 errors, 67 warnings. |
+| TypeScript | `npm.cmd run typecheck` | Exit 0. |
+| Visible strings | `npm.cmd run audit:strings` | Exit 0; 297 TSX files scanned. |
+| Production build | `npm.cmd run build` | Exit 0, including `/api/admin/batches/[id]/status`. `%TEMP%\hkwtia-20260929-final-build-rerun.log`. With no local `DATABASE_URL`, prerender logged missing-DB cache warnings; this is not a database or provider acceptance result. |
+| Dashboard parity | `RUN_POSTGRES_INTEGRATION=1 npx.cmd vitest run tests/integration/admin-dashboard-counts.test.ts --reporter=dot` | 2 SQL-mock tests passed, 1 isolated-Neon parity test skipped: `AUDIT_ISOLATED_ACCEPTANCE` and matching `DATABASE_URL_TEST`/Neon host were absent. Do not count this as a database pass. |
+
+## Browser and Preview boundaries
+
+- Focused `npx.cmd playwright test tests/e2e/login-entry.spec.ts --project=chromium --reporter=line`: exit 0, 15/15 anonymous bilingual seven-width/keyboard and staff deep-link cases. The local server still logged page-copy missing-DB warnings; no provider login was attempted. Log: `%TEMP%\hkwtia-20260929-login-entry-browser.log`.
+- Local `npx.cmd playwright test tests/e2e/login-entry.spec.ts tests/e2e/join-auth.spec.ts --project=chromium --reporter=line` with no test DB/provider: 17 passed, 2 Join console-cleanliness cases failed because the page-copy read had no `DATABASE_URL`. Log: `%TEMP%\hkwtia-20260929-local-browser.log`.
+- A fresh `postgres:16` container was reachable, but `npm.cmd run db:migrate` failed before ledger entry 1 because that image lacks required `vector` extension. Its PostgreSQL log showed `extension "vector" is not available`; the container was removed.
+- Repeated on a fresh local `pgvector/pgvector:pg16` container: `npm.cmd run db:migrate` exited 0. The same browser suites plus `tests/e2e/audit-20260929-anonymous-entries.spec.ts` had 20 passed, 3 failed (the two Join console cases and the Auth-dependent admin screenshot). Local Next uses the Neon serverless runtime client, which could not read the local PostgreSQL page-copy table; the local Auth endpoint was unavailable. The container was removed. Log: `%TEMP%\hkwtia-20260929-isolated-browser.log`. This is not clean Join acceptance.
+- Visual-only `npx.cmd playwright test tests/e2e/audit-20260929-anonymous-entries.spec.ts --project=chromium --reporter=line` passed 3/3 and produced [English member login](evidence/member-login-en-desktop.png), [Chinese mobile member login](evidence/member-login-zh-mobile.png), and [Chinese Join](evidence/join-zh-desktop.png). Both member-login captures show safe `unavailable` recovery because this local server lacks Auth; Join shows Google disabled. They are **not** successful provider screenshots. Log: `%TEMP%\hkwtia-20260929-visual-capture.log`.
+- Screenshot SHA256: `member-login-en-desktop.png` `a39f750a3d1c133000374ed6f051d04194c1336fe23a64ec92ea235f5d87e751`; `member-login-zh-mobile.png` `93101da2ff8fc11d0bc7f227810b8357f876dc81fee73370eee34198676ef457`; `join-zh-desktop.png` `8178348ea956c580dd5868148b9ad051fc02b4a47e6253aa6325b07a664db723`.
+- Automatic Vercel Preview `dpl_7BZVNYtrHtu3rjQwNfwJ2uZovDnY` for application SHA `5fb79ec7` was READY. Unauthenticated browser HTTP redirected 302 to `vercel.com` protection; no `VERCEL_SHARE_URL` or `PLAYWRIGHT_STORAGE_STATE` was present. The desktop browser tool also failed to initialize under the current Windows ACL sandbox. Using authenticated `vercel.cmd curl` read-only: `/en/member-login` redirected to `/member-login`, final 200 with `Member sign in`, Google and locale UI; `/admin-login` 200 with `Staff sign in`; `/join?plan=startup` 200 with `Join WTIA`; unauthenticated `/admin/listings-review` 307 to `/admin-login`; unauthenticated synthetic batch-status path 404 as the route contract requires. These are HTTP/SSR smokes, not Playwright Preview acceptance.
+- Google callback/linking, actual magic-link inbox receipt/expiry/reuse, profile provisioning, synthetic staff role revocation on this Preview, batch worker/provider accepted-timeout, Stripe test checkout/refund and all Production journeys remain unverified on this branch.
