@@ -31,6 +31,8 @@ describe("login destination allowlist", () => {
       .toBe("/admin/members?q=Harbour&status=active");
     expect(parseLoginDestination("/admin/members/queue?status=draft&q=Acme", "admin").path)
       .toBe("/admin/members/queue?status=draft&q=Acme");
+    expect(parseLoginDestination("/admin/listings-review?status=pending_review", "admin").path)
+      .toBe("/admin/listings-review?status=pending_review");
     expect(parseLoginDestination("/admin/batches?state=ready&operation=profile_patch", "admin").path)
       .toBe("/admin/batches?state=ready&operation=profile_patch");
   });

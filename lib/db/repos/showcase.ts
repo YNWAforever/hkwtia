@@ -59,7 +59,7 @@ export type ShowcaseStore = Readonly<{
   getByCompany: (companyId: string) => Promise<ShowcaseListing | null>;
   getById: (id: string) => Promise<ShowcaseListing | null>;
   upsert: (companyId: string, input: ListingInput, status: "draft" | "pending_review", managerProfileId: string) => Promise<ShowcaseListing>;
-  listForReview: () => Promise<readonly ReviewShowcaseRow[]>;
+  listForReview: (status?: "pending_review") => Promise<readonly ReviewShowcaseRow[]>;
   setStatus: (id: string, status: "published" | "rejected" | "pending_review", reviewerId: string, reviewVersion: string, rejectionReason?: string | null) => Promise<ShowcaseListing | null>;
   setPremium: (id: string, premium: boolean) => Promise<ShowcaseListing | null>;
   setLogoMedia: (id: string, mediaId: string | null) => Promise<ShowcaseListing | null>;
@@ -79,7 +79,7 @@ export type ShowcaseRepository = Readonly<{
   getByCompany: (actor: Actor, companyId: string) => Promise<ShowcaseListing | null>;
   upsertDraft: (actor: Actor, companyId: string, input: unknown, status?: "draft" | "pending_review") => Promise<ShowcaseListing>;
   submitForReview: (actor: Actor, companyId: string, input: unknown) => Promise<ShowcaseListing>;
-  listForReview: (actor: AdminActor) => Promise<readonly ReviewShowcaseRow[]>;
+  listForReview: (actor: AdminActor, status?: "pending_review") => Promise<readonly ReviewShowcaseRow[]>;
   publish: (actor: AdminActor, id: string, reviewVersion: string) => Promise<ShowcaseListing | null>;
   reject: (actor: AdminActor, id: string, reason: string, reviewVersion: string) => Promise<ShowcaseListing | null>;
   setPremium: (actor: AdminActor, id: string, premium: boolean) => Promise<ShowcaseListing | null>;
@@ -192,7 +192,7 @@ export function databaseStore(loadDatabase: () => Promise<Database> = getDb): Sh
         return row;
       });
     },
-    async listForReview() {
+    async listForReview(status) {
       const database = await loadDatabase();
       // Joined so staff can see the picture they are publishing, not just its
       // slug — the logo goes out under the association's brand.
@@ -200,6 +200,7 @@ export function databaseStore(loadDatabase: () => Promise<Database> = getDb): Sh
         .select({...getTableColumns(showcaseListings), ...publicLogoColumns, reviewVersion: sql<string>`${showcaseListings}.xmin::text`})
         .from(showcaseListings)
         .leftJoin(media, eq(showcaseListings.logoMediaId, media.id))
+        .where(status ? eq(showcaseListings.status, status) : undefined)
         .orderBy(desc(showcaseListings.updatedAt), asc(showcaseListings.slug));
     },
     async setStatus(id, status, reviewerId, reviewVersion, rejectionReason = null) {
@@ -361,9 +362,9 @@ export function createShowcaseRepository(
     async submitForReview(actor, companyId, input) {
       return this.upsertDraft(actor, companyId, input, "pending_review");
     },
-    async listForReview(actor) {
+    async listForReview(actor, status) {
       requireAdmin(actor);
-      return store.listForReview();
+      return store.listForReview(status);
     },
     async publish(actor, id, reviewVersion) {
       requireAdmin(actor);

@@ -22,6 +22,7 @@ const ADMIN_NESTED_UUID_DETAIL = /^\/admin\/reports\/board-drafts\/[0-9a-f]{8}-[
 const ADMIN_PAGE_COPY_NAMESPACE = /^\/admin\/page-copy\/[A-Za-z][A-Za-z0-9_-]{0,79}$/;
 const QUERY_KEYS: Readonly<Record<string, readonly string[]>> = {
   "/admin/batches": ["state", "operation", "cursor"],
+  "/admin/listings-review": ["status"],
   "/admin/members": ["q", "status", "planCode", "renewalFrom", "renewalTo", "companyId", "locale", "completeness", "sort", "limit", "cursor", "history", "view"],
   "/admin/members/queue": ["status", "q", "limit", "cursor"],
   "/admin/contacts": ["stage", "source", "owner", "optIn", "q", "cursor", "saved"],
@@ -68,6 +69,7 @@ export function allowedAdminDestination(raw: string | null | undefined): string 
   if (!allowedKeys) return null;
   const parsed = new URLSearchParams(query);
   if ([...parsed].some(([key, value]) => !allowedKeys.includes(key) || value.length > 256 || /[\u0000-\u001f\u007f]/.test(value))) return null;
+  if (path === "/admin/listings-review" && (parsed.getAll("status").length !== 1 || parsed.get("status") !== "pending_review")) return null;
   if (isEventDetail) {
     const tab = parsed.get("tab");
     if (parsed.getAll("tab").length > 1 || (tab && !EVENT_TABS.has(tab))) return null;

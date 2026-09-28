@@ -55,7 +55,7 @@ export function createAdminDashboardRepository(loadDatabase: () => Promise<Count
             OR ((${profiles.lastLoginAt} IS NULL OR ${profiles.lastLoginAt} <= ${noLoginCutoff})
               AND candidates.renewal_at >= ${asOf} AND candidates.renewal_at <= ${renewalBefore}))
         `),
-        count(sql`SELECT count(*) AS count FROM ${showcaseListings}`),
+        count(sql`SELECT count(*) AS count FROM ${showcaseListings} WHERE ${showcaseListings.status} = 'pending_review'`),
         count(sql`SELECT count(*) AS count FROM ${companies} WHERE ${companies.publicProfileStatus} = 'pending_review'`),
         count(sql`SELECT count(*) AS count FROM ${staffTasks} WHERE ${staffTasks.status} = 'open'`),
         count(sql`SELECT count(*) AS count FROM ${posts} WHERE ${posts.kind} = 'news' AND ${posts.publishedAt} IS NULL`),
