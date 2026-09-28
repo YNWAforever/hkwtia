@@ -95,6 +95,7 @@ export const protectedRouteOwnershipInventory: readonly ProtectedRouteOwner[] = 
 
   owner({id: "api-admin-member-import-upload", family: "api", classification: "api-handler", routePath: "/api/admin/members/import/upload", filePath: "app/api/admin/members/import/upload/route.ts", dataOwner: "Guarded staff CSV/XLSX upload into isolated import staging."}),
   owner({id: "api-admin-batch-export", family: "api", classification: "api-handler", routePath: "/api/admin/batches/[id]/export", filePath: "app/api/admin/batches/[id]/export/route.ts", dataOwner: "Short-lived actor-owned completed member CSV export."}),
+  owner({id: "api-admin-batch-status", family: "api", classification: "api-handler", routePath: "/api/admin/batches/[id]/status", filePath: "app/api/admin/batches/[id]/status/route.ts", dataOwner: "No-store actor-owned batch progress read."}),
   owner({id: "api-admin-segment-export", family: "api", classification: "api-handler", routePath: "/api/admin/segments/[id]/export", filePath: "app/api/admin/segments/[id]/export/route.ts", dataOwner: "Authorised segment export handler."}),
   owner({id: "api-ai-concierge", family: "api", classification: "api-handler", routePath: "/api/ai/concierge", filePath: "app/api/ai/concierge/route.ts", dataOwner: "Guarded Concierge conversation action."}),
   owner({id: "api-ai-conversation-feedback", family: "api", classification: "api-handler", routePath: "/api/ai/conversations/[id]/feedback", filePath: "app/api/ai/conversations/[id]/feedback/route.ts", dataOwner: "Conversation feedback action selected by id."}),
