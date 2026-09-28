@@ -24,28 +24,38 @@ test.describe("isolated portal membership recovery", () => {
 
     const pool = new Pool({connectionString: url});
     const originalStatuses: {id: string; status: string}[] = [];
+    const originalCompanyLinkIds: string[] = [];
+    let profileId: string | null = null;
     try {
       const profiles = await pool.query<{id: string; role: string}>(
         "SELECT id, role FROM profiles WHERE auth_user_id = $1", [session.user!.id],
       );
       expect(profiles.rows).toHaveLength(1);
       expect(profiles.rows[0]?.role).toBe("member");
-      const profileId = profiles.rows[0]!.id;
+      profileId = profiles.rows[0]!.id;
 
-      // This fixture is personal. Refuse a company-linked account so the test
-      // cannot temporarily change another synthetic member's entitlement.
-      const companyLinks = await pool.query<{count: number}>(
-        "SELECT count(*)::int AS count FROM company_members WHERE user_id = $1 AND revoked_at IS NULL", [profileId],
+      // Revoke only this synthetic actor's links; the company memberships and
+      // every other actor's entitlements remain intact during the browser check.
+      const companyLinks = await pool.query<{id: string}>(
+        "SELECT id FROM company_members WHERE user_id = $1 AND revoked_at IS NULL", [profileId],
       );
-      expect(companyLinks.rows[0]?.count).toBe(0);
+      expect(companyLinks.rows).toHaveLength(3);
+      originalCompanyLinkIds.push(...companyLinks.rows.map((row) => row.id));
       const memberships = await pool.query<{id: string; status: string}>(
         "SELECT id, status FROM memberships WHERE owner_user_id = $1", [profileId],
       );
       expect(memberships.rows.length).toBeGreaterThan(0);
       originalStatuses.push(...memberships.rows);
+      for (const linkId of originalCompanyLinkIds) {
+        const changed = await pool.query(
+          "UPDATE company_members SET revoked_at = now() WHERE id = $1 AND user_id = $2 AND revoked_at IS NULL",
+          [linkId, profileId],
+        );
+        expect(changed.rowCount).toBe(1);
+      }
       for (const membership of originalStatuses) {
         const changed = await pool.query(
-          "UPDATE memberships SET status = 'canceled' WHERE id = $1 AND owner_user_id = $2 AND status = $3",
+          "UPDATE memberships SET status = 'cancelled' WHERE id = $1 AND owner_user_id = $2 AND status = $3",
           [membership.id, profileId, membership.status],
         );
         expect(changed.rowCount).toBe(1);
@@ -60,16 +70,32 @@ test.describe("isolated portal membership recovery", () => {
       await expect(page.getByRole("heading", {name: "此帳戶目前沒有可使用的會籍"})).toBeVisible();
       await expect(page.getByRole("link", {name: "查看會籍選項"})).toHaveAttribute("href", "/zh/membership");
       await page.screenshot({path: "test-results/portal-membership-recovery-zh.png", fullPage: true});
-      await page.getByRole("button", {name: "登出"}).click();
+      await page.locator("#main-content").getByRole("button", {name: "登出"}).click();
       await expect(page).toHaveURL(/\/zh\/member-login$/);
     } finally {
+      let restoreError: unknown = null;
       for (const membership of originalStatuses) {
-        await pool.query(
-          "UPDATE memberships SET status = $2 WHERE id = $1 AND status = 'canceled'",
-          [membership.id, membership.status],
-        );
+        try {
+          const restored = await pool.query(
+            "UPDATE memberships SET status = $2 WHERE id = $1 AND status = 'cancelled'",
+            [membership.id, membership.status],
+          );
+          if (restored.rowCount !== 1) throw new Error("MEMBERSHIP_RESTORE_MISMATCH");
+        } catch (error) { restoreError ??= error; }
+      }
+      if (profileId) {
+        for (const linkId of originalCompanyLinkIds) {
+          try {
+            const restored = await pool.query(
+              "UPDATE company_members SET revoked_at = NULL WHERE id = $1 AND user_id = $2 AND revoked_at IS NOT NULL",
+              [linkId, profileId],
+            );
+            if (restored.rowCount !== 1) throw new Error("COMPANY_LINK_RESTORE_MISMATCH");
+          } catch (error) { restoreError ??= error; }
+        }
       }
       await pool.end();
+      if (restoreError) throw restoreError;
     }
   });
 });

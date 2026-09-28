@@ -1,0 +1,40 @@
+{
+  "recordedAtUtc": "2026-09-28T12:22:29Z",
+  "productionObservation": {
+    "deploymentId": "dpl_4FisCUU1aiJ73UChjk7SBkjUgW2A",
+    "timestampMs": 1790595133857,
+    "requestPath": "/zh/portal",
+    "source": "serverless-middleware",
+    "error": "MEMBERSHIP_INACTIVE",
+    "correlatedToReportedUserRequest": false
+  },
+  "previewAttempt": {
+    "deploymentId": "dpl_GyPEk6gBgYfkHZKssHAU38NWcZRw",
+    "gitSha": "88350b340a4784456deee82a7dc24997d0aec67b",
+    "readyState": "READY",
+    "syntheticSignInHttpStatus": 401,
+    "responseKeys": ["protection", "error"],
+    "reachedApplicationSignIn": false,
+    "fixtureMutation": false,
+    "browserAcceptance": "blocked_by_vercel_protection"
+  },
+  "localIsolatedAcceptance": {
+    "databaseProject": "solitary-wave-52860119",
+    "serverOrigin": "http://localhost:3011",
+    "syntheticMember": true,
+    "browserResult": "1 passed",
+    "englishAndChineseRecovery": true,
+    "chineseSignOutDestination": "/zh/member-login",
+    "membershipAndCompanyLinkRestorationRowCountsChecked": true,
+    "screenshots": {
+      "en": {
+        "file": "portal-membership-recovery-local-en-2026-09-28.png",
+        "sha256": "04a976972a3f95ecf8f4af7687844733b0895350fdc8be146a97f96fc617e485"
+      },
+      "zhHK": {
+        "file": "portal-membership-recovery-local-zh-2026-09-28.png",
+        "sha256": "d95c1af7e464a9c5dbc76f2c9caacf838a260ade188b07ea71150048da6b46a4"
+      }
+    }
+  }
+}

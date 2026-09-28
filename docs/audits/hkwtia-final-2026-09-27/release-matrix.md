@@ -1,6 +1,11 @@
 # Release matrix and rollout / rollback gate
 
-## Current production checkpoint — 2026-09-28T07:50Z
+## Latest portal checkpoint — 2026-09-28T12:22Z
+
+PR #97 now includes code SHA `88350b340a4784456deee82a7dc24997d0aec67b`. The page-level `MEMBERSHIP_INACTIVE` recovery is code fixed and passed a guarded local Chromium run against isolated Neon in English and zh-HK, including sign-out and exact fixture restoration. Its READY branch Preview is `dpl_GyPEk6gBgYfkHZKssHAU38NWcZRw`; hosted authenticated portal acceptance is **blocked** because the current Vercel protection session returns 401 before the synthetic sign-in reaches the app. Production alias remains on READY `dpl_4FisCUU1aiJ73UChjk7SBkjUgW2A` and does **not** have this page fix. One production portal exception is consistent with the reported symptom but lacks request correlation. [Receipt and screenshots](acceptance.md#member-portal-recovery-after-reported-wrong-account-login--2026-09-28).
+
+Production schema 0037–0051 and bilingual directory recovery were verified earlier; Production rate limiting and Google-button configuration were subsequently repaired. The portal release gate is to renew Preview protection access and complete hosted synthetic recovery, then review/deploy PR #97 and verify the exact Production SHA with a synthetic login/recovery smoke. No new migration or worker change is required for this page fix. Google callback, actual magic-link receipt, worker health, asynchronous payment method and association policy remain separate gates. Preserve the Production rate-limit secret during any rollback; revert only to a schema-compatible web revision. Historical checkpoints below retain their original observation times and are superseded where they describe an unavailable directory or missing login configuration.
+## Production schema checkpoint — 2026-09-28T07:50Z
 
 **Migrations 0037–0051 are applied to the authorized production database and both public directory locales have recovered.** This supersedes the earlier unmigrated/unavailable checkpoints retained below. The latest verified production ledger is 0051 with no pending migrations or unexplained hash differences. The directory correctly shows no published members; no data was seeded or published. [Execution and evidence](acceptance.md).
 
@@ -10,7 +15,7 @@ Remaining release gates are provider receipts (Google, actual magic-link email, 
 
 
 
-Observed 2026-09-28 Asia/Hong_Kong. This review package includes read-only post-merge production observation; a Ready web deployment is not a verified full production release. Feature branch `codex/final-login-admin-20260928` starts at PR #94 merge `fe22b49ed9828dd0cfad536273df5960ed90ca66`; latest application commit `64363879`, latest browser test commit `29fe7822`. See [acceptance.md](acceptance.md) and [baseline.md](baseline.md).
+Historical post-merge observation, 2026-09-28 Asia/Hong_Kong. This review package includes read-only post-merge production observation; a Ready web deployment is not a verified full production release. Feature branch `codex/final-login-admin-20260928` starts at PR #94 merge `fe22b49ed9828dd0cfad536273df5960ed90ca66`; latest application commit `64363879`, latest browser test commit `29fe7822`. See [acceptance.md](acceptance.md) and [baseline.md](baseline.md).
 
 | Surface | Observed revision/state | Evidence | Gate |
 |---|---|---|---|
