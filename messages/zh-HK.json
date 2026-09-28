@@ -2558,6 +2558,7 @@
     "dashboard": {
       "heading": "待辦佇列",
       "description": "目前需要職員處理的項目。",
+      "snapshotAt": "隊列快照：{time}（香港時間）",
       "view": "開啟",
       "unavailable": "無法讀取",
       "pendingApprovals": "待審批項目",

@@ -18,6 +18,7 @@ describe("admin dashboard recent batch recovery", () => {
   it("shows the actor's latest job with a direct recovery link", async () => {
     render(await AdminPage({params: Promise.resolve({locale: "en"})}));
     expect(screen.getByRole("heading", {name: "batches.history.recentTitle"})).toBeInTheDocument();
+    expect(screen.getByText("dashboard.snapshotAt")).toBeInTheDocument();
     expect(screen.getByRole("link", {name: "batches.history.open"})).toHaveAttribute("href", "/admin/batches/11111111-1111-4111-8111-111111111111");
     expect(screen.getByRole("link", {name: /dashboard.listingsAwaitingReview/})).toHaveAttribute("href", "/admin/listings-review?status=pending_review");
     expect(state.recent).toHaveBeenCalledTimes(1);

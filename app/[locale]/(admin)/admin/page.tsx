@@ -19,8 +19,9 @@ export default async function AdminPage({params}: Props) {
   // routes instead of relying on a hand-maintained list that fails open.
   const actor = await requireAdminPageActor();
   const t = await getTranslations({locale, namespace: "Admin"});
+  const snapshotAt = new Date();
   const [counts, recentBatches] = await Promise.all([
-    adminDashboardRepository.counts(actor),
+    adminDashboardRepository.counts(actor, snapshotAt),
     adminBatchHistoryRepository.recent(actor).catch(() => null),
   ]);
 
@@ -39,6 +40,7 @@ export default async function AdminPage({params}: Props) {
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("brand")}</p>
         <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{t("title")}</h1>
         <p className="text-lg text-muted-foreground">{t("description")}</p>
+        <p className="text-sm text-muted-foreground"><time dateTime={snapshotAt.toISOString()}>{t("dashboard.snapshotAt", {time: new Intl.DateTimeFormat(locale, {dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Hong_Kong"}).format(snapshotAt)})}</time></p>
       </header>
       <DashboardTiles
         locale={locale}

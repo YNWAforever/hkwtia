@@ -2557,6 +2557,7 @@
     "dashboard": {
       "heading": "Queues",
       "description": "What is waiting for staff attention right now.",
+      "snapshotAt": "Queue snapshot: {time} (Hong Kong time)",
       "view": "Open",
       "unavailable": "Unavailable",
       "pendingApprovals": "Pending approvals",
