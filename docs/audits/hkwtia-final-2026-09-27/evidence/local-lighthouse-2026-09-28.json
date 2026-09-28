@@ -1,0 +1,132 @@
+{
+  "runId": 36381912832,
+  "runUrl": "https://github.com/YNWAforever/hkwtia/actions/runs/36381912832",
+  "headSha": "12d7ad6d2dd272d346f0cc353c7483c903c08d5b",
+  "workflowInput": "local_lab=true",
+  "workflowConclusion": "success",
+  "environment": "GitHub Actions ubuntu-latest; Node 22; locally built Next app without provider credentials or database",
+  "lighthouseVersion": "12.6.1",
+  "formFactor": "mobile",
+  "throttlingMethod": "simulate",
+  "reportCount": 30,
+  "routeCount": 10,
+  "assertionFailures": 0,
+  "thresholds": {
+    "performance": 90,
+    "accessibility": 95,
+    "seo": 95
+  },
+  "scopeLimit": "Lab navigation metrics on ten public routes; no directory, login, hosted Preview, field INP or production measurement",
+  "routes": [
+    {
+      "path": "/",
+      "runs": 3,
+      "finalPath": "/",
+      "performanceScore": 96,
+      "accessibilityScore": 100,
+      "seoScore": 100,
+      "lcpMs": 2559,
+      "cls": 0,
+      "tbtMs": 69
+    },
+    {
+      "path": "/membership",
+      "runs": 3,
+      "finalPath": "/membership",
+      "performanceScore": 98,
+      "accessibilityScore": 96,
+      "seoScore": 100,
+      "lcpMs": 2244,
+      "cls": 0,
+      "tbtMs": 72
+    },
+    {
+      "path": "/events",
+      "runs": 3,
+      "finalPath": "/events",
+      "performanceScore": 97,
+      "accessibilityScore": 100,
+      "seoScore": 100,
+      "lcpMs": 2599,
+      "cls": 0,
+      "tbtMs": 58
+    },
+    {
+      "path": "/programmes",
+      "runs": 3,
+      "finalPath": "/programmes",
+      "performanceScore": 96,
+      "accessibilityScore": 96,
+      "seoScore": 100,
+      "lcpMs": 2765,
+      "cls": 0,
+      "tbtMs": 63
+    },
+    {
+      "path": "/partners",
+      "runs": 3,
+      "finalPath": "/partners",
+      "performanceScore": 98,
+      "accessibilityScore": 100,
+      "seoScore": 100,
+      "lcpMs": 2251,
+      "cls": 0,
+      "tbtMs": 56
+    },
+    {
+      "path": "/zh",
+      "runs": 3,
+      "finalPath": "/zh",
+      "performanceScore": 96,
+      "accessibilityScore": 100,
+      "seoScore": 100,
+      "lcpMs": 2575,
+      "cls": 0,
+      "tbtMs": 94
+    },
+    {
+      "path": "/zh/membership",
+      "runs": 3,
+      "finalPath": "/zh/membership",
+      "performanceScore": 98,
+      "accessibilityScore": 96,
+      "seoScore": 100,
+      "lcpMs": 2253,
+      "cls": 0,
+      "tbtMs": 66
+    },
+    {
+      "path": "/zh/events",
+      "runs": 3,
+      "finalPath": "/zh/events",
+      "performanceScore": 96,
+      "accessibilityScore": 100,
+      "seoScore": 100,
+      "lcpMs": 2610,
+      "cls": 0,
+      "tbtMs": 61
+    },
+    {
+      "path": "/zh/programmes",
+      "runs": 3,
+      "finalPath": "/zh/programmes",
+      "performanceScore": 97,
+      "accessibilityScore": 96,
+      "seoScore": 100,
+      "lcpMs": 2543,
+      "cls": 0,
+      "tbtMs": 59
+    },
+    {
+      "path": "/zh/partners",
+      "runs": 3,
+      "finalPath": "/zh/partners",
+      "performanceScore": 98,
+      "accessibilityScore": 100,
+      "seoScore": 100,
+      "lcpMs": 2394,
+      "cls": 0,
+      "tbtMs": 63
+    }
+  ]
+}

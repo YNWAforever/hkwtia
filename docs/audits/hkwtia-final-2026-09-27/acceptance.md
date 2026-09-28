@@ -1,6 +1,6 @@
 # Final audit acceptance record
 
-Branch `codex/final-login-admin-20260928` starts at PR #94 merge `fe22b49ed9828dd0cfad536273df5960ed90ca66`. Application commits: `330c5968`, `f87dcd52`, `08e0bc62`, `89511a10`, `731c1467`, `cb88d7e8`; browser test corrections `86377dcc` and `7e776e46`. Results are scoped below to local, isolated, or protected Preview. **Synthetic authenticated admin and public directory are hosted-Preview verified; later sections record local and hosted isolated Stripe test-mode round trips. Google/magic-link receipts and production release remain unverified.**
+Branch `codex/final-login-admin-20260928` starts at PR #94 merge `fe22b49ed9828dd0cfad536273df5960ed90ca66`. Application commits: `330c5968`, `f87dcd52`, `08e0bc62`, `89511a10`, `731c1467`, `cb88d7e8`; browser test corrections `86377dcc` and `7e776e46`. Results are scoped below to local, isolated, protected Preview, and a final anonymous post-merge production read-only checkpoint. **Synthetic authenticated admin and public directory are hosted-Preview verified; later sections record local and hosted isolated Stripe test-mode round trips. Google/magic-link receipts and full production release remain unverified; the production web is deployed but its directory remains unavailable.**
 
 | Finding / scenario | SHA | Environment / actor | Observed result | Artifact / remaining gate |
 |---|---|---|---|---|
@@ -11,7 +11,7 @@ Branch `codex/final-login-admin-20260928` starts at PR #94 merge `fe22b49ed9828d
 | A05 shared auth limits | 08e0bc62 | Disposable PostgreSQL 16; anonymous request/action | Route/action share atomic IP/email buckets; concurrency, retry and fail-closed cases passed. | Additive `0051_auth_rate_limits.sql` passed disposable PG and guarded isolated Neon upgrade; production target ledger/rollout pending. |
 | A06 verified-user recovery | 08e0bc62 | Disposable PG/unit; verified synthetic subject | Missing profile creates member only; conflicting email refused without link/promotion; expired membership retains renewal path. | Real Auth callback plus Join/renewal browser continuation pending. |
 | A07 SaaS admin shell | 89511a10 | Isolated Neon + hosted Preview Chromium; synthetic staff/superadmin/member | Sidebar, mobile drawer, role/account/sign-out, search entry and prior destinations; denial/removal passed 5/5 hosted. | [local desktop](evidence/admin-shell-desktop.png), [local mobile](evidence/admin-shell-mobile.png); hosted result below. |
-| A08 directory outage | 330c5968 | Production public baseline; separately inspected DB; disposable PG; isolated hosted Preview | Baseline `/zh/members` unavailable; old-schema query reproduced 42703. Safe log reference/retry distinguishes error from empty. Branch Preview bound to isolated ledger 0051 serves synthetic member list/detail; six bilingual browser cases passed. | [baseline screenshot](evidence/directory-unavailable.png); production alias binding and recovery remain unverified. |
+| A08 directory outage | 330c5968 | Production public baseline; separately inspected DB; disposable PG; isolated hosted Preview | Baseline `/zh/members` unavailable; old-schema query reproduced 42703. Safe log reference/retry distinguishes error from empty. Branch Preview bound to isolated ledger 0051 serves synthetic member list/detail; six bilingual browser cases passed. | [baseline screenshot](evidence/directory-unavailable.png); [post-merge read-only check](#post-merge-production-read-only-checkpoint) shows both production locales still unavailable with `schema_missing`; database binding remains unknown. |
 | A09 batch deployment | 731c1467 | Source/isolated DB/Chromium; synthetic staff | Local history/recovery UI and safe retry passed; current worker package 48/48 and typecheck passed, but no hosted worker effects ran. | Branch Preview database `neondb` has batch schema at ledger 0051 and flag remains off. [Worker checkpoint](#worker-source-and-deployment-checkpoint) pins the July Preview deployment; source SHA and production binding remain unverified. |
 | A10 operation centre | 731c1467 | Disposable PG + isolated Neon and hosted Preview Chromium; synthetic staff | Actor-scoped filtered 25-row history, recent jobs and durable recovery; PG 3/3, local browser 1/1 and hosted browser 1/1 passed. | [local](evidence/admin-batch-history.png), [hosted](evidence/preview-admin-batch-history.png); worker effects remain unverified. |
 | A11 visitor copy | cb88d7e8 | Unit/local source; anonymous, en/zh-HK | Editorial copy and duplicate empty panels removed; homepage test 9/9 passed. | Protected Preview /zh returned 200 without the old editorial phrase; association owner factual/legal review pending. |
@@ -138,3 +138,90 @@ On 2026-09-28, in the feature worktree, `npm.cmd ci --prefix workers --ignore-sc
 Read-only Wrangler v4.114.0 `deployments list --env preview --json` and `deployments status --env preview --json`, run from `workers/` with `CI=true`, identified Cloudflare Worker `hkwtia-m3-preview`: current deployment `00511ed9-5392-47b8-a256-6d6d87ff4092` created **2026-07-26T18:42:05.409883Z**, version `67abdfce-e2f3-4964-ad19-3468bf00fd89` at **100%**. This is a Cloudflare version ID, not a Git SHA; no source-revision annotation was established. Current `workers/wrangler.toml` declares eight cron expressions, but deployed trigger configuration, last successful invocation, leases, queue age and dead letters were not read or exercised. The observed July worker deployment cannot be treated as matched to the September web PR. Production worker state was not inspected. No deploy, trigger edit, cron invocation or provider send occurred.
 
 At PR SHA `da90dfc1`, `gh pr checks 95` reported `checks`, `quality`, both test shards, Vercel and Preview Comments passing. `vercel.cmd inspect hkwtia-git-codex-final-login-admin-b7a1aa-ynwaforevers-projects.vercel.app --scope ynwaforevers-projects --no-color` reported READY Preview deployment `dpl_FsiUSM5JrJEQNjf6SPizdTHHZhCP`. This docs-only web deployment is separate from the earlier provider and directory acceptance deployments. A compatible worker deployment and observed cron/queue health remain release gates.
+
+## Branch-head Lighthouse lab checkpoint
+
+`gh workflow run weekly-lighthouse.yml --ref codex/final-login-admin-20260928 -f local_lab=true` produced [run 36381912832](https://github.com/YNWAforever/hkwtia/actions/runs/36381912832) at PR SHA `12d7ad6d`, conclusion **success**. Its production target and audit steps were skipped; the Linux local build and `npm run test:lighthouse -- --config=.lhci-local-lab.json` passed. The 30 mobile simulated reports cover the workflow's ten public routes in both locales, three runs each, with no assertion failures. [Sanitized route medians](evidence/local-lighthouse-2026-09-28.json) SHA256 `F6DB4ABA402A1CBE89D1202FCB364334091C5DD716CF693C9E51CB973E192872`; raw reports remain in the short-lived GitHub artifact. [Conditions, scores and limits](performance.md#branch-head-linux-lighthouse-local-lab) distinguish lab results from hosted and field measurements. Two Windows local attempts failed during Chrome profile cleanup with `EPERM` before completing the route set and are not counted as passes. Directory, login, hosted Preview and field INP remain unmeasured.
+
+## Post-merge production read-only checkpoint
+
+`gh pr view 95 --json mergedAt,mergeCommit,headRefOid,baseRefOid,author,mergedBy` recorded owner merge at 2026-09-28T05:15:44Z, merge commit `8c4800d2e5669a2e20698c0beb274b21e10da13c`. `vercel.cmd inspect hkwtia.vercel.app --scope ynwaforevers-projects --no-color` reported READY production deployment `dpl_5ToXE6nkMqyd74L2AvD9ZTJUhJaz`. This agent did not merge, promote, migrate or change production flags.
+
+Anonymous read-only Node `fetch`/JSDOM inspection returned HTTP 200 for `/`, `/zh`, `/members`, `/zh/members`, `/member-login`, `/zh/member-login`, `/admin-login` and `/zh/admin-login`. Both member directory results sections rendered their unavailable headings and **no** record grid; HTTP 200 alone is not recovery. A fresh `/members` page displayed reference `e5126411-d567-4a70-a21e-1d228a4f0457`. `vercel.cmd logs --environment production --no-branch --query e5126411-d567-4a70-a21e-1d228a4f0457 --since 10m --limit 20 --json --scope ynwaforevers-projects` returned one matching sanitized `public_directory_read_failed` event with code `schema_missing`, deployment `dpl_5ToXE6nkMqyd74L2AvD9ZTJUhJaz`, and web SHA `8c4800d2`. The log does not identify the bound database or exact missing object.
+
+Read-only Playwright captured [the Chinese unavailable page](evidence/production-directory-unavailable-2026-09-28.png), SHA256 `C9EF09D5FC78434B6E319D7B6E49C69E567F7FEA108532DEF30C1BBFDA546D03` (1440 × 3030). The browser asserted the unavailable heading before capture; automatic image viewing was blocked by this tool sandbox, so no claim of manual visual inspection is made. [Sanitized eight-route and log receipt](evidence/production-post-merge-readonly-2026-09-28.json) SHA256 `7BADDF8FBFE2EF42362B7180D8789292811060CD6C650B6BF32FC724F8882717`. The actual production Neon binding and ledger remain unknown, and the separately inspected ledger-0036 candidate is not assigned to this alias. This agent performed no production database write, provider action, live message, payment, refund or grant.
+
+## Production binding access recheck
+
+At 2026-09-28T06:40:46Z–06:40:47Z, fresh anonymous DOM probes again returned HTTP 200 with the unavailable recovery heading and no record grid for both `/members` and `/zh/members`. Production directory recovery remains unverified.
+
+Read-only commands run from the feature worktree:
+
+```powershell
+vercel.cmd env run --help
+vercel.cmd env ls production --scope ynwaforevers-projects
+vercel.cmd env run -e production --scope ynwaforevers-projects -- node -e 'console.log(JSON.stringify({databaseVariableNames:Object.keys(process.env).filter(k=>/DATABASE|POSTGRES|NEON/.test(k)),databaseValueType:typeof process.env.DATABASE_URL,databaseValueLength:process.env.DATABASE_URL?.length??0}))'
+gh pr checks 96
+```
+
+The environment listing confirms an encrypted Production `DATABASE_URL` entry. The temporary diagnostic received that name with type `string` and length **0**; it also received the two Neon Auth variable names. The earlier URL-only parser therefore exited without a host/database result. This establishes a local credential-retrieval limitation, not absence of the variable in the deployed runtime. No credential value was printed or saved, and no database query or write was attempted. The exact bound Neon project ID, branch ID and database name are still required to select the read-only ledger preflight; do not substitute the previously inspected candidate.
+
+At head `6896a75a`, PR #96 remained open/draft and all six reported checks passed. This recheck changes evidence only; it does not rerun provider acceptance or establish a production release.
+
+## Direct production database preflight
+
+Following the user's instruction to use the production database directly, a fresh read-only transaction inspected project `fragrant-mountain-25240574`, branch `br-noisy-glitter-ao2npd77` (named `production`, default), database `neondb`, direct endpoint `ep-steep-wind-ao0pbldw.c-2.ap-southeast-1.aws.neon.tech`. The connection was retrieved through the authenticated Neon CLI and held only in process memory. PostgreSQL confirmed `transaction_read_only=on`; the transaction ended with `ROLLBACK`. The independent Vercel Production binding is still not exposed by available environment retrieval.
+
+[Schema-only receipt](evidence/production-schema-preflight-2026-09-28.json), recorded at 2026-09-28T06:48:01Z:
+
+- 36 migration ledger rows; latest ID 36 exactly matches `0036_company_live_membership_unique` and its committed SHA256.
+- All 36 applied migrations match committed content when LF/CRLF line endings are considered. Ten raw-byte differences are explained solely by line endings; no unexplained content mismatch was found.
+- Fifteen migrations are pending, `0037` through `0051`. None of their new tables already exists.
+- No `memberships.grant_*` columns exist. `SELECT grant_effective_at, grant_expires_at FROM memberships WHERE false` fails with SQLSTATE `42703`; the savepoint is rolled back. Migration `0048` supplies those columns.
+- No existing ticketed events were counted, so the new `0038` ticket-price constraint has no currently ticketed rows to reject. This is a point-in-time preflight, not a migration rehearsal.
+- The existing `aiops_monthly_metrics` materialized view is present. Migration `0040` replaces that derived view; the pending sequence must not be described as exclusively additive DDL.
+
+Exact diagnostic script is [production-schema-readonly.mjs](evidence/production-schema-readonly.mjs). Run from the repository root after loading `HKWTIA_PRODUCTION_DIAGNOSTIC_URL` in memory from:
+
+```powershell
+$productionDiagnosticUrl = (& neon.cmd connection-string br-noisy-glitter-ao2npd77 --project-id fragrant-mountain-25240574 --database-name neondb --role-name neondb_owner --no-color | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or -not $productionDiagnosticUrl.StartsWith('postgres')) { throw 'Connection retrieval failed' }
+try {
+  $env:HKWTIA_PRODUCTION_DIAGNOSTIC_URL = $productionDiagnosticUrl
+  node docs/audits/hkwtia-final-2026-09-27/evidence/production-schema-readonly.mjs
+} finally {
+  Remove-Item Env:HKWTIA_PRODUCTION_DIAGNOSTIC_URL -ErrorAction SilentlyContinue
+  $productionDiagnosticUrl = $null
+}
+```
+
+The connection-string command's stdout **must be captured directly into the process environment**, never printed, committed or pasted. The executed wrapper captured stdout, checked success and the URL scheme, ran the script, and removed the environment variable in `finally`. The script verifies the exact hostname/database and TLS certificate, uses `BEGIN READ ONLY`, a ten-second statement timeout and schema/ledger queries only. It retrieves no member records and invokes no provider.
+
+Before a production migration: rehearse this exact 0036→0051 sequence on an isolated branch, confirm snapshot/restore readiness and compatible web/worker behavior, then obtain explicit authorization to apply this target-specific sequence. No production migration, data update, fixture seed, flag change or real communication occurred in this preflight.
+
+## Authorized production migrations 0037–0051
+
+The user explicitly authorized **all migrations 0037–0051**. On 2026-09-28 the existing repository command `npm.cmd run db:migrate` completed successfully first on an isolated copy, then on production. No migration source, application policy, provider configuration or feature flag was changed.
+
+Target: Neon project `fragrant-mountain-25240574`, production branch `br-noisy-glitter-ao2npd77`, database `neondb`, direct endpoint `ep-steep-wind-ao0pbldw.c-2.ap-southeast-1.aws.neon.tech`. Source branch: `codex/final-login-admin-20260928` at `b9bbfdbe`; production web remains the previously merged PR #95 application.
+
+### Rehearsal and recovery point
+
+- Isolated branch `br-muddy-smoke-aozr8i5y`, named `audit-0037-0051-rehearsal-20260928`, copied from production at parent LSN `0/4A46778`. Created 2026-09-28T07:45:51Z; expires 2026-10-05T00:00:00Z. No application/worker was pointed at this copy, no fixtures were seeded, and no provider was invoked.
+- Rehearsal `npm.cmd run db:migrate`: exit 0. [Read-only verification](evidence/migration-rehearsal-after-2026-09-28.json): ledger 51, no pending entries, no unexplained hash mismatch, four grant columns, four expected grant/auth/batch constraints and the metrics unique index.
+- Production recovery snapshot `snap-blue-mud-aojc25bd`, named `hkwtia-pre-0037-0051-20260928`, created 2026-09-28T07:49:04Z from `br-noisy-glitter-ao2npd77`; expires 2026-10-05T00:00:00Z. Snapshot creation succeeded; restoration was not exercised.
+- The Neon CLI session expired after the rehearsal migration. The authenticated Neon connector supplied subsequent credentials and created the snapshot. Credentials stayed out of committed files/output; pooled connection hostnames returned by the connector were converted to their verified direct endpoint before migration.
+
+### Production execution and verification
+
+`npm.cmd run db:migrate` ran with the exact production `DATABASE_URL` held in process memory and `PGOPTIONS='-c lock_timeout=10000 -c statement_timeout=120000'`; both environment variables were removed in `finally`. It exited 0 with “migrations applied successfully”. These were the committed Drizzle migrations, not ad hoc SQL.
+
+[Before](evidence/migration-production-before-2026-09-28.json) at 07:49:28Z: ledger 36, exactly fifteen pending migrations. [After](evidence/migration-production-after-2026-09-28.json) at 07:50:15Z: ledger 51, zero pending, zero unexplained hash mismatches, required grant columns/constraints and metrics unique index present. The zero-row grant query now succeeds. Counts of profiles, companies, memberships, events and audit events were identical before/after (1 / 3 / 0 / 1 / 2). Counts provide a scoped preservation check, not a row-by-row data comparison. [Verification script](evidence/verify-migration-rollout.mjs) ran read-only transactions.
+
+Anonymous production HTTP/DOM checks at 07:50:32Z–07:50:34Z returned 200 and the normal zero-member directory state in **both locales**, replacing the prior unavailable error. [DOM receipt](evidence/production-directory-after-migrations-2026-09-28.json). Playwright Chromium separately asserted the localized empty-state heading and captured [English](evidence/production-directory-recovered-en-2026-09-28.png) and [zh-HK](evidence/production-directory-recovered-zh-2026-09-28.png) screenshots. Zero published profiles is a successful empty result; no profiles were published or fabricated to populate the directory.
+
+### Release and rollback boundary
+
+**Production schema migrations 0037–0051 are applied and verified; the live directory read failure is recovered.** The temporal recovery after this database change supports the alias-binding inference, but encrypted deployment credential metadata still does not independently expose its hostname. Full production provider/worker rollout is not claimed: Google/magic-link receipts, worker revision/cron health, asynchronous payment methods, live communication and policy gates remain separate.
+
+For rollback, retain schema and history and prefer a compatible web/worker revision. Migration 0040 replaces a derived metrics view and recreates its required unique index; a reverse drop-table migration is not a safe rollback. The pre-migration snapshot may be restored to a **separate recovery branch** for diagnosis if needed; do not replace production with it without first reconciling any writes after 07:49:04Z and obtaining restore authorization. Snapshot and rehearsal retention end 2026-10-05T00:00:00Z. No live send, payment/refund, grant, worker deployment, fixture seed, data cleanup or flag activation was performed.

@@ -82,3 +82,8 @@ Code is reviewable in PR #94. Selected isolated acceptance and public Preview ar
 ## Final provider continuation
 
 Application SHA `1e4f6246` includes the signed-path fix (`76cfdf01`) and refund audit identity fix (`1e4f6246`). F08/F23 now have genuine Stripe test payment/refund and replay evidence in evidence/ticket-stripe-refund.json. The accepted-provider/local-rollback recovery is separately recorded in evidence/refund-recovery.json, including the failed selector attempt. The focused refund gate passes 30/30 with two real disposable PostgreSQL cases and zero skips. No real member message, production migration or production payment/refund was performed.
+
+
+## Authorized production rollout update — 2026-09-28
+
+The user subsequently authorized all migrations 0037–0051. After a successful isolated production-copy rehearsal and recovery snapshot `snap-blue-mud-aojc25bd`, the repository migration command applied the sequence to `fragrant-mountain-25240574` / `br-noisy-glitter-ao2npd77` / `neondb`. Read-only verification confirms ledger 0051, no pending migration/hash mismatch, required constraints, and unchanged checked row counts. Both live directory locales now show the normal empty state instead of unavailable. [Execution, receipts, screenshots and rollback limits](../hkwtia-final-2026-09-27/acceptance.md). This supersedes earlier statements that production schema is unmigrated; it does not mark provider/worker/flag/policy gates complete.
