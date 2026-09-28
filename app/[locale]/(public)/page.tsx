@@ -12,7 +12,6 @@ import {ImpactEvidence} from '@/components/home/impact-evidence';
 import {LegacyNetwork} from '@/components/home/legacy-network';
 import {MarketProducts} from '@/components/home/market-products';
 import {OpenNow} from '@/components/home/open-now';
-import {Outcomes} from '@/components/home/outcomes';
 import {Pathways} from '@/components/home/pathways';
 import {ProgrammeShowcase} from '@/components/home/programme-showcase';
 import {StructuredData} from '@/components/seo/structured-data';
@@ -63,7 +62,6 @@ export default async function HomePage({params}: Props) {
       <Suspense fallback={null}><Pathways locale={appLocale} /></Suspense>
       <Suspense fallback={null}><EventsJourney locale={appLocale} /></Suspense>
       <Suspense fallback={null}><MarketProducts locale={appLocale} /></Suspense>
-      <Suspense fallback={null}><Outcomes locale={appLocale} /></Suspense>
       <Suspense fallback={null}><EcosystemSection locale={appLocale} /></Suspense>
       <Suspense fallback={null}><ProgrammeShowcase locale={appLocale} /></Suspense>
       <Suspense fallback={null}><GbaGateway locale={appLocale} /></Suspense>

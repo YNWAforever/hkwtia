@@ -1,7 +1,7 @@
 import {render, screen} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
-const state = vi.hoisted(() => ({redirectUrl: null as string | null}));
+const state = vi.hoisted(() => ({redirectUrl: null as string | null, resolution: {kind: "signed-out"} as {kind: string; destination?: {intent: "member"; path: string}}}));
 
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async () => Object.assign((key: string) => key, {raw: (key: string) => key})),
@@ -10,24 +10,24 @@ vi.mock("next-intl/server", () => ({
 vi.mock("next/navigation", () => ({
   redirect: (url: string) => { state.redirectUrl = url; throw new Error("NEXT_REDIRECT"); },
 }));
-vi.mock("@/lib/auth/actor", () => ({getActor: vi.fn(async () => null)}));
+vi.mock("@/lib/auth/login-resolution-server", () => ({resolveCurrentLogin: vi.fn(async () => state.resolution)}));
 
 vi.mock("next/image", () => ({default: ({alt, src, ...props}: {alt: string; src: string}) => <img alt={alt} src={src} {...props} />}));
 vi.mock("@/i18n/navigation", () => ({Link: ({children, href, ...props}: {children: React.ReactNode; href: string}) => <a href={href} {...props}>{children}</a>}));
 
-import {getActor} from "@/lib/auth/actor";
 import MemberLoginPage from "@/app/[locale]/member-login/page";
 
 describe("MemberLoginPage", () => {
   beforeEach(() => {
     state.redirectUrl = null;
+    state.resolution = {kind: "signed-out"};
   });
 
   // Regression: clicking the magic-link email landed an authenticated actor
   // back on this page with a dead-end "already signed in" message and no
   // way forward. Mirrors /join's page.tsx, which already redirects.
   it("redirects an already-authenticated actor to the continuation instead of showing a login form", async () => {
-    vi.mocked(getActor).mockResolvedValueOnce({kind: "member", userId: "u1", profileId: "p1"});
+    state.resolution = {kind: "allowed", destination: {intent: "member", path: "/portal/billing"}};
 
     await expect(
       MemberLoginPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({next: "/portal/billing"})}),
@@ -35,13 +35,11 @@ describe("MemberLoginPage", () => {
     expect(state.redirectUrl).toBe("/portal/billing");
   });
 
-  it("redirects an authenticated actor to the default portal when next is absent", async () => {
-    vi.mocked(getActor).mockResolvedValueOnce({kind: "staff", userId: "u2", profileId: "p2"});
-
-    await expect(
-      MemberLoginPage({params: Promise.resolve({locale: "zh-HK"}), searchParams: Promise.resolve({})}),
-    ).rejects.toThrow("NEXT_REDIRECT");
-    expect(state.redirectUrl).toBe("/zh/portal");
+  it("does not forward a staff role into the member portal", async () => {
+    state.resolution = {kind: "forbidden"};
+    render(await MemberLoginPage({params: Promise.resolve({locale: "zh-HK"}), searchParams: Promise.resolve({})}));
+    expect(screen.getByRole("alert")).toHaveTextContent("memberAccessDenied");
+    expect(screen.queryByTestId("member-login-form")).not.toBeInTheDocument();
   });
 
   it("renders an email field and a submit control when unauthenticated", async () => {
@@ -56,6 +54,7 @@ describe("MemberLoginPage", () => {
     expect(screen.getByRole("img", {name: "logoAlt"})).toBeInTheDocument();
     expect(screen.getByRole("link", {name: "home"})).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", {name: "join"})).toHaveAttribute("href", "/join");
+    expect(screen.getByRole("link", {name: "staffSignIn"})).toHaveAttribute("href", "/admin-login");
     expect(screen.getByRole("link", {name: "support"})).toHaveAttribute("href", expect.stringMatching(/^mailto:/));
   });
 

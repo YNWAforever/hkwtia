@@ -9,8 +9,10 @@ const state = vi.hoisted(() => ({
   rateLimitThrows: false,
   rateLimitAllowed: true,
   rateLimitCalls: 0,
+  redirect: vi.fn(),
 }));
 
+vi.mock("next/navigation", () => ({redirect: (url: string) => {state.redirect(url); throw new Error("NEXT_REDIRECT");}}));
 vi.mock("next/headers", () => ({
   headers: async () => new Headers({"x-vercel-forwarded-for": state.ip}),
   cookies: async () => ({get: () => undefined, set: () => undefined, delete: () => undefined}),
@@ -72,6 +74,7 @@ describe("submitTicketCheckoutAction", () => {
     state.rateLimitThrows = false;
     state.rateLimitAllowed = true;
     state.rateLimitCalls = 0;
+    state.redirect.mockReset();
   });
 
   it("fails closed without creating an order when the shared limiter store is unavailable", async () => {
@@ -108,10 +111,8 @@ describe("submitTicketCheckoutAction", () => {
   it("checks the buyer out as a guest when no member is signed in", async () => {
     const action = await loadAction();
 
-    await expect(action({status: "idle"}, form())).resolves.toEqual({
-      status: "redirect",
-      url: "https://checkout.stripe.com/session",
-    });
+    await expect(action({status: "idle"}, form())).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.redirect).toHaveBeenCalledWith("https://checkout.stripe.com/session");
     expect(state.calls).toEqual([expect.objectContaining({
       eventId: EVENT_ID,
       buyer: {profileId: null, name: "Ada Lovelace", email: "ada@example.hk"},
@@ -125,7 +126,7 @@ describe("submitTicketCheckoutAction", () => {
     state.actor = {kind: "member", userId: "user-1", profileId: "profile-1"};
     const action = await loadAction();
 
-    await action({status: "idle"}, form());
+    await expect(action({status: "idle"}, form())).rejects.toThrow("NEXT_REDIRECT");
 
     expect(state.calls).toEqual([expect.objectContaining({
       buyer: {profileId: "profile-1", name: "Ada Lovelace", email: "ada@example.hk"},
@@ -139,10 +140,8 @@ describe("submitTicketCheckoutAction", () => {
     state.actorThrows = true;
     const action = await loadAction();
 
-    await expect(action({status: "idle"}, form())).resolves.toEqual({
-      status: "redirect",
-      url: "https://checkout.stripe.com/session",
-    });
+    await expect(action({status: "idle"}, form())).rejects.toThrow("NEXT_REDIRECT");
+    expect(state.redirect).toHaveBeenCalledWith("https://checkout.stripe.com/session");
     expect(state.calls).toEqual([expect.objectContaining({
       buyer: {profileId: null, name: "Ada Lovelace", email: "ada@example.hk"},
     })]);
@@ -159,10 +158,7 @@ describe("submitTicketCheckoutAction", () => {
     const action = await loadAction();
 
     for (let attempt = 0; attempt < 5; attempt += 1) {
-      await expect(action({status: "idle"}, form())).resolves.toEqual({
-        status: "redirect",
-        url: "https://checkout.stripe.com/session",
-      });
+      await expect(action({status: "idle"}, form())).rejects.toThrow("NEXT_REDIRECT");
     }
     await expect(action({status: "idle"}, form())).resolves.toEqual({status: "error", code: "RATE_LIMITED"});
     expect(state.calls).toHaveLength(5);

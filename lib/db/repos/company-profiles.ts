@@ -53,6 +53,8 @@ export type PublicMemberSummary = Readonly<{
   logoUrl: string | null;
 }>;
 
+export type PublicMemberPage = Readonly<{items: PublicMemberSummary[]; nextCursor: string | null}>;
+
 export type PublicMemberProfile = PublicMemberSummary & Readonly<{
   description: Readonly<{en: string | null; zhHk: string | null}>;
   industry: string | null;
@@ -333,7 +335,8 @@ const directoryFrom = sql`
 `;
 
 // D-5 "featured": patron and corporate lead the directory, then alphabetical.
-const directoryOrder = sql`ORDER BY CASE active_plan.plan_code WHEN 'patron' THEN 0 WHEN 'corporate' THEN 1 ELSE 2 END, ${companies.displayName} ASC`;
+const directoryRank = sql`CASE active_plan.plan_code WHEN 'patron' THEN 0 WHEN 'corporate' THEN 1 ELSE 2 END`;
+const directoryOrder = sql`ORDER BY ${directoryRank}, ${companies.displayName} ASC, ${companies.id} ASC`;
 
 /** Every filter is validated here, before it can reach SQL; an unusable one is dropped rather than passed through. */
 function directoryFilters(filters: MemberFilters): SQL {
@@ -362,6 +365,32 @@ function summaryFrom(row: z.infer<typeof summaryRowSchema>): PublicMemberSummary
     website: publicWebsiteUrl(row.website),
     logoUrl: row.logo_url,
   };
+}
+
+const directoryCursorSchema = z.object({
+  v: z.literal(1),
+  scope: z.string().max(512),
+  rank: z.number().int().min(0).max(2),
+  name: z.string(),
+  id: z.string().uuid(),
+}).strict();
+
+function directoryScope(filters: MemberFilters): string {
+  return JSON.stringify([
+    searchPattern(filters.q) === null ? null : filters.q?.trim() ?? null,
+    filters.tag !== null && isIndustryTag(filters.tag) ? filters.tag : null,
+    filters.plan !== null && (MEMBERSHIP_PLAN_CODES as readonly string[]).includes(filters.plan) ? filters.plan : null,
+  ]);
+}
+
+function directoryCursor(raw: string | null, scope: string) {
+  if (!raw || raw.length > 1024) return null;
+  try {
+    const value = directoryCursorSchema.parse(JSON.parse(Buffer.from(raw, "base64url").toString("utf8")));
+    return value.scope === scope ? value : null;
+  } catch {
+    return null;
+  }
 }
 
 export function createCompanyProfilesRepository(dependencies: CompanyProfileDependencies = {}) {
@@ -403,6 +432,32 @@ export function createCompanyProfilesRepository(dependencies: CompanyProfileDepe
   }
 
   return {
+    /** Anonymous. Keyset pagination with a deterministic tie-breaker and a filter-bound cursor. */
+    async listPublishedPage(filters: MemberFilters, rawCursor: string | null, requestedLimit = 24): Promise<PublicMemberPage> {
+      const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(48, Math.trunc(requestedLimit))) : 24;
+      const scope = directoryScope(filters);
+      const cursor = directoryCursor(rawCursor, scope);
+      const after = cursor
+        ? sql` AND (${directoryRank}, ${companies.displayName}, ${companies.id}) > (${cursor.rank}, ${cursor.name}, ${cursor.id})`
+        : sql``;
+      const database = await loadDatabase();
+      const rows = executedRows(await database.execute(sql`
+        SELECT ${directoryColumns}, ${directoryRank} AS sort_rank
+        ${directoryFrom}
+        WHERE ${publishedScope}${directoryFilters(filters)}${after}
+        ${directoryOrder}
+        LIMIT ${limit + 1}
+      `));
+      const visible = rows.slice(0, limit);
+      const last = visible.at(-1);
+      const nextCursor = rows.length > limit && last
+        ? Buffer.from(JSON.stringify({
+          v: 1, scope, rank: Number(last.sort_rank), name: String(last.display_name), id: String(last.id),
+        })).toString("base64url")
+        : null;
+      return {items: visible.map((row) => summaryFrom(summaryRowSchema.parse(row))), nextCursor};
+    },
+
     /** Anonymous. The directory: every published profile, filtered and ordered in SQL. */
     async listPublished(filters: MemberFilters): Promise<PublicMemberSummary[]> {
       const database = await loadDatabase();

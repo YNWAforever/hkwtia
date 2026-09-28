@@ -1,8 +1,10 @@
 import "server-only";
 
 import {createHash} from "node:crypto";
+import {rateLimitRepository, type SharedRateLimitInput} from "@/lib/db/repos/rate-limit";
+import {createSharedRateLimiter} from "@/lib/security/shared-rate-limit";
 
-import {createInMemoryRateLimiter, type RateLimiter} from "@/lib/security/rate-limit";
+import type {RateLimiter} from "@/lib/security/rate-limit";
 import {clientIpFromHeaders} from "@/lib/security/request-origin";
 import {BoundedBodyError, readBoundedBytes} from "@/lib/security/bounded-body";
 
@@ -23,11 +25,9 @@ import {BoundedBodyError, readBoundedBytes} from "@/lib/security/bounded-body";
  * would leave `/join` open; guarding only `/join` would leave the raw endpoint
  * open, and that one needs no session at all.
  *
- * WHAT THIS BUYS. `createInMemoryRateLimiter` is process-local, so on Vercel
- * the real ceiling is `limit x concurrent instances`. It stops a naive script
- * and accidental retry storms, and it gives the correct check one named home.
- * It does not bound sends fleet-wide against a distributed or deliberately
- * paced sender — that needs a shared store, which is out of scope here.
+ * The default path uses the existing PostgreSQL rate_limit_buckets store.
+ * Test-only injected in-memory limiters preserve focused parser tests; they are
+ * never the deployed default. Shared-store failures deny outbound effects.
  */
 
 /** Endpoints that mail an address the caller chooses. */
@@ -49,33 +49,17 @@ const credentialPaths: ReadonlySet<string> = new Set([
 // exists so a hostile body is never buffered by our clone.
 const MAX_BODY_BYTES = 8_192;
 
-// The per-address bucket is what protects a victim: an attacker rotates source
-// IPs far more easily than the target inbox.
-function createDefaultLimiters() {
-  return {
-    email: createInMemoryRateLimiter({limit: 3, windowMs: 15 * 60_000}),
-    sendIp: createInMemoryRateLimiter({limit: 10, windowMs: 60 * 60_000}),
-    credential: createInMemoryRateLimiter({limit: 20, windowMs: 5 * 60_000}),
-  };
-}
-
-let defaults = createDefaultLimiters();
-
-/**
- * Test-only. These buckets are module-scope, so a suite that exercises several
- * sends would otherwise exhaust them and fail later cases for the wrong reason.
- */
-export function resetAuthRateLimits(): void {
-  defaults = createDefaultLimiters();
-}
-
+// The per-address bucket protects the recipient when a sender rotates IPs.
 export type AuthRateLimitDependencies = Readonly<{
   emailLimiter?: RateLimiter;
   sendIpLimiter?: RateLimiter;
   credentialLimiter?: RateLimiter;
+  store?: Pick<typeof rateLimitRepository, "consumeRateLimit">;
+  secret?: string;
+  now?: () => Date;
 }>;
 
-export type AuthSendDecision = Readonly<{allowed: boolean; retryAfterSeconds: number}>;
+export type AuthSendDecision = Readonly<{allowed: boolean; retryAfterSeconds: number; unavailable?: true}>;
 
 const ALLOWED: AuthSendDecision = {allowed: true, retryAfterSeconds: 0};
 
@@ -90,22 +74,32 @@ function emailBucket(email: string): string {
  * `x-vercel-forwarded-for` is always present, so `unknown` only ever collects
  * local development, where denying would break `/join` for no security gain.
  */
-export function checkAuthSend(
+async function checkScope(
+  scope: Extract<SharedRateLimitInput["scope"], `auth-${string}`>,
+  rawKey: string,
+  dependencies: AuthRateLimitDependencies,
+  injected?: RateLimiter,
+): Promise<AuthSendDecision> {
+  try {
+    if (injected) return injected.check(rawKey);
+    return await createSharedRateLimiter(
+      scope, dependencies.secret ?? process.env.RATE_LIMIT_KEY_SECRET ?? "",
+      dependencies.store ?? rateLimitRepository, dependencies.now,
+    ).check(rawKey);
+  } catch {
+    return {allowed: false, retryAfterSeconds: 0, unavailable: true};
+  }
+}
+
+export async function checkAuthSend(
   input: Readonly<{ip: string | null; email: string | null}>,
   dependencies: AuthRateLimitDependencies = {},
-): AuthSendDecision {
-  // IP first: an attacker rotating addresses from one source burns their own
-  // quota before they ever reach a second inbox.
-  const byIp = (dependencies.sendIpLimiter ?? defaults.sendIp)
-    .check(`auth:send:ip:${input.ip ?? "unknown"}`);
-  if (!byIp.allowed) return {allowed: false, retryAfterSeconds: byIp.retryAfterSeconds};
-
+): Promise<AuthSendDecision> {
+  // IP first: rotating addresses from one source spends that source's quota.
+  const byIp = await checkScope("auth-send-ip", `auth:send:ip:${input.ip ?? "unknown"}`, dependencies, dependencies.sendIpLimiter);
+  if (!byIp.allowed) return byIp;
   if (!input.email) return ALLOWED;
-  const byEmail = (dependencies.emailLimiter ?? defaults.email)
-    .check(`auth:send:email:${emailBucket(input.email)}`);
-  return byEmail.allowed
-    ? ALLOWED
-    : {allowed: false, retryAfterSeconds: byEmail.retryAfterSeconds};
+  return checkScope("auth-send-email", `auth:send:email:${emailBucket(input.email)}`, dependencies, dependencies.emailLimiter);
 }
 
 /** `/api/auth/sign-in/magic-link` -> `sign-in/magic-link`. */
@@ -149,6 +143,10 @@ function tooManyRequests(retryAfterSeconds: number): Response {
   );
 }
 
+function limiterUnavailable(): Response {
+  return Response.json({error: "LIMITER_UNAVAILABLE"}, {status: 503, headers: {"cache-control": "no-store", "retry-after": "30"}});
+}
+
 /**
  * Returns a 429 when the request should be refused, or null to let the provider
  * handler run untouched. Paths outside the two sets above pass straight
@@ -164,9 +162,8 @@ export async function rateLimitAuthRequest(
   const ip = clientIpFromHeaders(request.headers);
 
   if (credentialPaths.has(path)) {
-    const limit = (dependencies.credentialLimiter ?? defaults.credential)
-      .check(`auth:credential:${ip ?? "unknown"}`);
-    return limit.allowed ? null : tooManyRequests(limit.retryAfterSeconds);
+    const limit = await checkScope("auth-credential-ip", `auth:credential:${ip ?? "unknown"}`, dependencies, dependencies.credentialLimiter);
+    return limit.allowed ? null : limit.unavailable ? limiterUnavailable() : tooManyRequests(limit.retryAfterSeconds);
   }
 
   if (!emailSendPaths.has(path)) return null;
@@ -175,6 +172,6 @@ export async function rateLimitAuthRequest(
   if (body.tooLarge) {
     return Response.json({error: "PAYLOAD_TOO_LARGE"}, {status: 413, headers: {"cache-control": "no-store"}});
   }
-  const decision = checkAuthSend({ip, email: body.email}, dependencies);
-  return decision.allowed ? null : tooManyRequests(decision.retryAfterSeconds);
+  const decision = await checkAuthSend({ip, email: body.email}, dependencies);
+  return decision.allowed ? null : decision.unavailable ? limiterUnavailable() : tooManyRequests(decision.retryAfterSeconds);
 }

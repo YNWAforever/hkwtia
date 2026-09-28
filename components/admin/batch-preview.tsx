@@ -1,11 +1,12 @@
 import {commitAdminBatchAction, retryAdminBatchAction, cancelAdminBatchAction} from "@/lib/admin/batches/actions";
 import {BatchProgressPoller} from "@/components/admin/batch-progress";
-import type {BatchPreview} from "@/lib/admin/batches/types";
+import {batchRuntimeConfig, type BatchPreview} from "@/lib/admin/batches/types";
 
-export type BatchLabels = Readonly<{title: string; description: string; back: string; states: Record<string, string>; counters: Record<string, string>; total: string; eligible: string; blocked: string; operation: string; target: string; before: string; after: string; reason: string; attempts: string; result: string; commit: string; retry: string; cancel: string; expires: string; empty: string}>;
+export type BatchLabels = Readonly<{title: string; description: string; back: string; states: Record<string, string>; counters: Record<string, string>; total: string; eligible: string; blocked: string; operation: string; target: string; before: string; after: string; reason: string; attempts: string; result: string; commit: string; retry: string; cancel: string; expires: string; empty: string; manualReview: string}>;
 
 export function BatchPreviewPanel({preview, labels}: {preview: BatchPreview; labels: BatchLabels}) {
   const ready = preview.state === "ready" && preview.eligible > 0;
+  const retryable = ["running", "completed_with_errors"].includes(preview.state) && preview.items.some(item => item.state === "failed" && item.errorCode?.startsWith("TRANSIENT_") && item.attemptCount < batchRuntimeConfig().maxAttempts);
   const counters = ["pending", "running", "succeeded", "skipped", "failed"] as const;
   return <section className="space-y-6" aria-labelledby="batch-title">
     <BatchProgressPoller state={preview.state}/>
@@ -19,9 +20,10 @@ export function BatchPreviewPanel({preview, labels}: {preview: BatchPreview; lab
     {preview.expiresAt && preview.state === "ready" ? <p className="text-sm text-muted-foreground">{labels.expires}: <time dateTime={preview.expiresAt}>{preview.expiresAt}</time></p> : null}
     <div className="flex flex-wrap gap-3">
       {ready ? <form action={commitAdminBatchAction.bind(null, preview.batchId, preview.digest)}><button className="min-h-11 rounded-md bg-primary px-4 text-primary-foreground" type="submit">{labels.commit}</button></form> : null}
-      {["running", "completed_with_errors"].includes(preview.state) && preview.counters.failed > 0 ? <form action={retryAdminBatchAction.bind(null, preview.batchId)}><button className="min-h-11 rounded-md border px-4" type="submit">{labels.retry}</button></form> : null}
+      {retryable ? <form action={retryAdminBatchAction.bind(null, preview.batchId)}><button className="min-h-11 rounded-md border px-4" type="submit">{labels.retry}</button></form> : null}
       {["ready", "queued", "running"].includes(preview.state) ? <form action={cancelAdminBatchAction.bind(null, preview.batchId)}><button className="min-h-11 rounded-md border px-4" type="submit">{labels.cancel}</button></form> : null}
     </div>
+    {preview.counters.failed > 0 && !retryable ? <p className="rounded-md border p-3 text-sm" role="status">{labels.manualReview}</p> : null}
     {preview.items.length ? <div className="overflow-x-auto rounded-md border"><table className="min-w-full text-left text-sm"><thead className="bg-muted"><tr><th className="px-3 py-2" scope="col">{labels.target}</th><th className="px-3 py-2" scope="col">{labels.operation}</th><th className="px-3 py-2" scope="col">{labels.before}</th><th className="px-3 py-2" scope="col">{labels.after}</th><th className="px-3 py-2" scope="col">{labels.reason}</th><th className="px-3 py-2" scope="col">{labels.attempts}</th><th className="px-3 py-2" scope="col">{labels.result}</th></tr></thead><tbody>{preview.items.map((item) => <tr className="border-t" key={`${item.target.type}:${item.target.id}`}><th className="px-3 py-2" scope="row">{item.target.id}</th><td className="px-3 py-2">{labels.states[item.state] ?? item.state}</td><td className="px-3 py-2">{Object.entries(item.before).map(([key,value]) => `${key}: ${String(value)}`).join(", ")}</td><td className="px-3 py-2">{Object.entries(item.after).map(([key,value]) => `${key}: ${String(value)}`).join(", ")}</td><td className="px-3 py-2">{item.errorCode ?? item.reasonCode ?? ""}</td><td className="px-3 py-2">{item.attemptCount}</td><td className="px-3 py-2">{item.resultRef ?? ""}</td></tr>)}</tbody></table></div> : <p className="text-muted-foreground">{labels.empty}</p>}
   </section>;
 }

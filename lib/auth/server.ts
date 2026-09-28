@@ -1,6 +1,7 @@
 import "server-only";
 
 import {randomBytes} from "node:crypto";
+import {cache} from "react";
 
 import {createNeonAuth} from "@neondatabase/auth/next/server";
 
@@ -54,7 +55,7 @@ function isCookieMutationError(error: unknown): boolean {
 }
 
 /** Read the current Neon Auth session from the request cookies. */
-export async function getSession(): Promise<NeonSession | null> {
+export const getSession = cache(async function getSession(): Promise<NeonSession | null> {
   try {
     const result = await auth.getSession({query: {disableCookieCache: "true", disableRefresh: "true"}}) as SessionResult;
     if (result.error != null) {
@@ -67,4 +68,4 @@ export async function getSession(): Promise<NeonSession | null> {
     if (isCookieMutationError(error)) return null;
     throw error;
   }
-}
+});

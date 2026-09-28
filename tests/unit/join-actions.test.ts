@@ -19,7 +19,8 @@ const repoState = vi.hoisted(() => ({
 vi.mock("next-intl/server", () => ({
   getTranslations: async () => (key: string) => `localized:${key}`,
 }));
-import {resetAuthRateLimits} from "@/lib/auth/rate-limit";
+const limiterState = vi.hoisted(() => ({sends: 0}));
+vi.mock("@/lib/auth/rate-limit", () => ({checkAuthSend: async () => ({allowed: ++limiterState.sends <= 3, retryAfterSeconds: 900})}));
 
 vi.mock("next/headers", () => ({
   headers: async () => new Headers({"x-vercel-forwarded-for": "203.0.113.9"}),
@@ -75,7 +76,7 @@ import {beginMembershipCheckoutAction, requestMagicLink, resumeJoinAction, saveC
 
 describe("join Server Actions", () => {
   beforeEach(() => {
-    resetAuthRateLimits();
+    limiterState.sends = 0;
     authState.input = null;
     redirectState.url = null;
     billingState.scoped = true;

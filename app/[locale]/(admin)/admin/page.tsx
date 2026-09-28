@@ -1,50 +1,14 @@
+import Link from "next/link";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {DashboardTiles, type DashboardTile} from "@/components/admin/dashboard-tiles";
 import type {AppLocale} from "@/i18n/routing";
-import {listPendingApprovals} from "@/lib/admin/approvals";
-import {listAtRiskMembers} from "@/lib/admin/at-risk";
-import {listOpenTasks} from "@/lib/admin/inbox";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
-import {adminPostsRepository} from "@/lib/db/repos/admin-posts";
-import {companyProfilesRepository} from "@/lib/db/repos/company-profiles";
-import {showcaseRepository} from "@/lib/db/repos/showcase";
-import type {AdminActor} from "@/lib/membership/lifecycle";
+import {adminBatchHistoryRepository} from "@/lib/db/repos/admin-batch-history";
+import {adminDashboardRepository} from "@/lib/db/repos/admin-dashboard";
+import {localizedPath} from "@/lib/urls";
 
 type Props = Readonly<{params: Promise<{locale: string}>}>;
-
-/**
- * Each queue is counted independently and degrades on its own. One unreachable
- * table should cost staff that tile, not the whole workspace: the dashboard is
- * the page they land on, so failing it closed would read as "the admin panel is
- * down" when three of four queues are fine.
- */
-async function count<T>(read: Promise<readonly T[]>): Promise<number | null> {
-  try {
-    return (await read).length;
-  } catch {
-    return null;
-  }
-}
-
-async function queueCounts(actor: AdminActor) {
-  const [approvals, atRisk, listings, profiles, openTasks, draftNews] = await Promise.all([
-    count(listPendingApprovals(actor)),
-    count(listAtRiskMembers(actor, {asOf: new Date()})),
-    count(showcaseRepository.listForReview(actor)),
-    count(companyProfilesRepository.listForReview(actor)),
-    count(listOpenTasks(actor)),
-    (async () => {
-      try {
-        const posts = await adminPostsRepository.listForAdmin(actor);
-        return posts.filter((post) => post.publishedAt === null).length;
-      } catch {
-        return null;
-      }
-    })(),
-  ]);
-  return {approvals, atRisk, listings, profiles, openTasks, draftNews};
-}
 
 export default async function AdminPage({params}: Props) {
   const {locale: localeValue} = await params;
@@ -55,7 +19,10 @@ export default async function AdminPage({params}: Props) {
   // routes instead of relying on a hand-maintained list that fails open.
   const actor = await requireAdminPageActor();
   const t = await getTranslations({locale, namespace: "Admin"});
-  const counts = await queueCounts(actor);
+  const [counts, recentBatches] = await Promise.all([
+    adminDashboardRepository.counts(actor),
+    adminBatchHistoryRepository.recent(actor).catch(() => null),
+  ]);
 
   const tiles: readonly DashboardTile[] = [
     {id: "approvals", href: "/admin/approvals", label: t("dashboard.pendingApprovals"), count: counts.approvals},
@@ -83,6 +50,12 @@ export default async function AdminPage({params}: Props) {
           unavailable: t("dashboard.unavailable"),
         }}
       />
+      <section aria-labelledby="admin-recent-batches" className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-serif text-2xl font-semibold" id="admin-recent-batches">{t("batches.history.recentTitle")}</h2><Link className="text-primary underline" href={localizedPath(locale, "/admin/batches")}>{t("batches.history.viewAll")}</Link></div>
+        {recentBatches === null ? <p className="text-muted-foreground" role="status">{t("batches.history.recentUnavailable")}</p>
+          : recentBatches.length === 0 ? <p className="text-muted-foreground">{t("batches.history.recentEmpty")}</p>
+          : <ul className="grid gap-3">{recentBatches.map(item => <li className="flex flex-wrap items-center justify-between gap-3 rounded-md border bg-card p-4" key={item.id}><div><p className="font-medium">{t(`batches.history.operations.${item.operation}`)}</p><p className="text-sm text-muted-foreground">{t(`batches.states.${item.state}`)} · {item.succeeded} / {item.total}</p></div><Link className="inline-flex min-h-11 items-center text-primary underline" href={localizedPath(locale, `/admin/batches/${item.id}`)}>{t("batches.history.open")}</Link></li>)}</ul>}
+      </section>
     </div>
   );
 }

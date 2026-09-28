@@ -1,0 +1,61 @@
+{
+  "scope": "Stripe TEST mode, isolated Neon, synthetic identity, worker paused",
+  "steps": [
+    {
+      "case": "decline",
+      "result": "declined at provider; membership remains processing; same Checkout session"
+    },
+    {
+      "case": "3DS and delayed webhook",
+      "result": "challenge completed; real paid Checkout returns processing while signed provider events held"
+    },
+    {
+      "case": "webhook release",
+      "result": "real Stripe-signed deliveries activate membership and browser polling reveals active"
+    },
+    {
+      "case": "replay",
+      "result": "same signed event replay acknowledged without membership change"
+    }
+  ],
+  "deliveries": [
+    {
+      "eventId": "evt_1UKU1cELEX4A1xsqFemx7jxN",
+      "type": "checkout.session.completed",
+      "status": 200,
+      "outcome": {
+        "received": true,
+        "result": "processed"
+      }
+    },
+    {
+      "eventId": "evt_1UKU1dELEX4A1xsqoFsb2rhx",
+      "type": "invoice.paid",
+      "status": 200,
+      "outcome": {
+        "received": true,
+        "result": "processed"
+      }
+    },
+    {
+      "eventId": "evt_1UKU1cELEX4A1xsqFemx7jxN",
+      "type": "checkout.session.completed",
+      "status": 200,
+      "outcome": {
+        "received": true,
+        "result": "duplicate"
+      }
+    }
+  ],
+  "sessionId": "cs_test_a1VMjL5LA71NMquCg7hzj2dbadvYuW65MSPmTsxFMpKKz1IKgCByNF7UcU",
+  "membershipId": "e03ae70b-656e-4211-98d8-d86f57232f9b",
+  "paymentMethods": [
+    "card",
+    "link"
+  ],
+  "provider": {
+    "status": "complete",
+    "paymentStatus": "paid",
+    "livemode": false
+  }
+}

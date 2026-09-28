@@ -18,7 +18,7 @@ const linkClassName =
  * returns the longest one (most specific). Returns undefined if no match exists.
  * This ensures exactly one link gets aria-current="page" even with nested routes.
  */
-function findCurrentLink(groups: readonly InternalNavGroup[], currentPath: string): string | undefined {
+export function findCurrentLink(groups: readonly InternalNavGroup[], currentPath: string): string | undefined {
   const allHrefs = groups.flatMap((group) => group.links.map((link) => link.href));
   const matchingHrefs = allHrefs.filter((href) => href === currentPath || currentPath.startsWith(`${href}/`));
 

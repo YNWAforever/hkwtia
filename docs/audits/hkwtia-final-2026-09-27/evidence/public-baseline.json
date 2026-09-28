@@ -1,0 +1,96 @@
+[
+  {
+    "slug": "home-desktop",
+    "path": "/zh",
+    "width": 1366,
+    "atUtc": "2026-09-27T16:52:18.267Z",
+    "status": 200,
+    "finalUrl": "https://hkwtia.vercel.app/zh",
+    "vercelId": "sin1::iad1::ckrgf-1790527936299-4281afc193cf",
+    "title": "WiseTech Hong Kong",
+    "h1": "香港如何引領 AI+ 時代？",
+    "login": {
+      "text": "會員登入",
+      "display": "none",
+      "visibility": "visible",
+      "href": "/zh/member-login"
+    },
+    "bodyUnavailable": false,
+    "bodyNotFound": false,
+    "screenshot": "evidence/home-desktop.png",
+    "screenshotSha256": "27fc649552865ff3f15e8d3c9062ac155f9c5d380e180ec6b1160f1653a634e4"
+  },
+  {
+    "slug": "home-mobile",
+    "path": "/zh",
+    "width": 390,
+    "atUtc": "2026-09-27T16:52:21.933Z",
+    "status": 200,
+    "finalUrl": "https://hkwtia.vercel.app/zh",
+    "vercelId": "sin1::iad1::f7q5f-1790527941041-8e01570a80da",
+    "title": "WiseTech Hong Kong",
+    "h1": "香港如何引領 AI+ 時代？",
+    "login": {
+      "text": "會員登入",
+      "display": "none",
+      "visibility": "visible",
+      "href": "/zh/member-login"
+    },
+    "bodyUnavailable": false,
+    "bodyNotFound": false,
+    "screenshot": "evidence/home-mobile.png",
+    "screenshotSha256": "f40a1dc2a6ccc30051372e209c780551eb9f4426881c6daa223ef0206689cf99"
+  },
+  {
+    "slug": "admin-anonymous",
+    "path": "/zh/admin",
+    "width": 1366,
+    "atUtc": "2026-09-27T16:52:24.267Z",
+    "status": 404,
+    "finalUrl": "https://hkwtia.vercel.app/zh/admin",
+    "vercelId": "sin1::iad1::98ppx-1790527943512-578511bd43eb",
+    "title": "WiseTech Hong Kong",
+    "login": null,
+    "bodyUnavailable": false,
+    "bodyNotFound": false,
+    "screenshot": "evidence/admin-anonymous.png",
+    "screenshotSha256": "1f3d7e4fc2c8e2a304f3bb6d573b16833664ee62caa219b3d55b970280df2e5f"
+  },
+  {
+    "slug": "member-login",
+    "path": "/zh/member-login",
+    "width": 1366,
+    "atUtc": "2026-09-27T16:52:27.029Z",
+    "status": 200,
+    "finalUrl": "https://hkwtia.vercel.app/zh/member-login",
+    "vercelId": "sin1::iad1::dc42d-1790527946204-bff0d4ea6ab5",
+    "title": "WiseTech Hong Kong",
+    "h1": "會員登入",
+    "login": null,
+    "bodyUnavailable": false,
+    "bodyNotFound": false,
+    "screenshot": "evidence/member-login.png",
+    "screenshotSha256": "8f2e141a8060075b7b16b606228fa453bf16992c0a01e9379fef4f0275ca495a"
+  },
+  {
+    "slug": "directory",
+    "path": "/zh/members",
+    "width": 1366,
+    "atUtc": "2026-09-27T16:52:31.693Z",
+    "status": 200,
+    "finalUrl": "https://hkwtia.vercel.app/zh/members",
+    "vercelId": "sin1::iad1::jpg9x-1790527950263-dcec3a6222cf",
+    "title": "會員｜WiseTech Hong Kong",
+    "h1": "WTIA 會員",
+    "login": {
+      "text": "會員登入",
+      "display": "none",
+      "visibility": "visible",
+      "href": "/zh/member-login"
+    },
+    "bodyUnavailable": true,
+    "bodyNotFound": false,
+    "screenshot": "evidence/directory.png",
+    "screenshotSha256": "87379e79566ba5ef8aeb144c656a2884d43b9a37909ef69dc18ffc2005db973c"
+  }
+]

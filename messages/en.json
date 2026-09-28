@@ -118,6 +118,7 @@
     "dismiss": "Dismiss announcement"
   },
   "Footer": {
+    "staffSignIn": "Staff sign in",
     "brand": {
       "publicName": "WiseTech Hong Kong",
       "descriptor": "The evolving AI+ industry platform of the Hong Kong Wireless Technology Industry Association",
@@ -504,7 +505,7 @@
       "directory": {
         "label": "Member Directory",
         "title": "Meet the people shaping what comes next.",
-        "copyEmpty": "The directory is ready for approved public profiles, with controlled visibility and consent-based introductions. No live member records are shown yet.",
+        "copyEmpty": "Explore the member directory. Organisations decide whether to submit a public profile for WTIA review.",
         "copyUnavailable": "Member profiles are temporarily unavailable.",
         "copyAvailable": "Published member solutions are now live, with controlled visibility and consent-based introductions.",
         "action": "Discover members"
@@ -512,7 +513,7 @@
       "marketplace": {
         "label": "AI Solutions Marketplace",
         "title": "Find AI ready for the real world.",
-        "copyEmpty": "The planned marketplace will compare maturity, deployment, security, market coverage and reviewed evidence. No live solution records are shown yet.",
+        "copyEmpty": "Browse the solution showcase by use case and deployment approach as approved listings become available.",
         "copyUnavailable": "Solution listings are temporarily unavailable.",
         "copyAvailable": "Published solutions are now live to compare, by use case, deployment and reviewed evidence.",
         "action": "Explore solutions"
@@ -566,7 +567,7 @@
     "programmeShowcase": {
       "eyebrow": "Programmes + awards",
       "title": "Participation that turns into progress",
-      "intro": "Existing programme equity is retained and reframed around clear outcomes, audiences and the next action.",
+      "intro": "Explore WTIA programmes, awards and credentials, with edition records and details of how to take part.",
       "eventSeriesLabel": "Event series",
       "credentialLabel": "Credential",
       "editionsFact": "{count, plural, one {# edition} other {# editions}} since {year}",
@@ -955,6 +956,7 @@
       "description": "Company description (optional)"
     },
     "errors": {
+      "limiterUnavailable": "Sign-in is temporarily unavailable. Please try again shortly.",
       "required": "Complete this required field.",
       "email": "Enter a valid email address.",
       "auth": "We could not send the sign-in link. Please try again.",
@@ -986,9 +988,44 @@
       "textVersion": "Consent wording 2026-09-v1"
     }
   },
+  "AdminLogin": {
+    "title": "Staff sign in",
+    "help": "Use your WTIA staff email to request a secure sign-in link. Access to the workspace still requires a staff role.",
+    "navigation": "Helpful links",
+    "home": "Home",
+    "memberSignIn": "Member sign in",
+    "memberPortal": "Open member portal",
+    "support": "Contact support",
+    "emailLabel": "Staff email address",
+    "submit": "Send sign-in link",
+    "resend": "Resend sign-in link",
+    "sent": "Check your inbox for the sign-in link. It will return you to the staff workspace after your role is verified.",
+    "deliveryHelp": "If the email does not arrive, check your spam folder or contact support.",
+    "profileRecovery": "Staff account needs review",
+    "profileRecoveryHelp": "Your provider sign-in worked, but this account has no WTIA profile. Contact WTIA support for staff access review. You can use member sign in to start an ordinary member profile.",
+    "google": "Continue with Google",
+    "separator": "or",
+    "changeEmail": "Change email",
+    "maskedTo": "Sent to",
+    "waitSeconds": "Please wait before resending:",
+    "googleUnavailable": "Google sign-in will be available after provider setup is verified.",
+    "sending": "Sending…",
+    "identityUnavailable": "Staff sign-in is temporarily unavailable. Reference: {reference}.",
+    "retry": "Retry staff sign in",
+    "accessDenied": "Staff access is unavailable for this account",
+    "accessDeniedHelp": "This signed-in account does not have a staff role. Use your member portal or contact WTIA support if you expected staff access.",
+    "errors": {
+      "email": "Enter a valid email address.",
+      "invalidContinuation": "That staff destination is invalid. Start again from staff sign in.",
+      "rateLimited": "Too many sign-in emails have been requested. Wait and try again.",
+      "limiterUnavailable": "Sign-in is temporarily unavailable. Please try again shortly.",
+      "auth": "We could not send the sign-in link. Please try again."
+    }
+  },
   "MemberLogin": {
     "home": "Home",
     "join": "Join WTIA",
+    "staffSignIn": "Staff sign in",
     "support": "Contact support",
     "navigation": "Helpful links",
     "help": "Enter your email to receive a secure sign-in link.",
@@ -998,9 +1035,25 @@
     "emailLabel": "Email address",
     "submit": "Send secure sign-in link",
     "sent": "Check your inbox for your secure sign-in link. It will return you to your member portal.",
+    "profileOnboarding": "Your sign-in is verified. Create a member profile to continue with the existing joining process. This does not activate membership.",
+    "createProfile": "Create member profile",
+    "profileConflict": "This email is already linked to another account. Contact WTIA support to recover access; no profile was linked.",
+    "profileUnverified": "Verify the email address with your sign-in provider before creating a profile.",
+    "profileUnavailable": "We could not create your profile right now. Please try again or contact support.",
+    "memberAccessDenied": "This account has a staff role. Use staff sign in or contact support.",
+    "google": "Continue with Google",
+    "separator": "or",
+    "changeEmail": "Change email",
+    "maskedTo": "Sent to",
+    "waitSeconds": "Please wait before resending:",
+    "googleUnavailable": "Google sign-in will be available after provider setup is verified.",
+    "sending": "Sending…",
+    "identityUnavailable": "Sign-in is temporarily unavailable. Reference: {reference}.",
+    "retry": "Retry sign in",
     "errors": {
       "email": "Enter a valid email address.",
       "rateLimited": "Too many sign-in emails have been requested. Wait a few minutes and try again.",
+      "limiterUnavailable": "Sign-in is temporarily unavailable. Please try again shortly.",
       "auth": "We could not send the sign-in link. Please try again.",
       "invalidContinuation": "That sign-in link is not valid. Start again from the member portal."
     }
@@ -1458,13 +1511,16 @@
       "corporate": "Corporate",
       "patron": "Patron"
     },
-    "resultsTitle": "{count} members",
+    "resultsTitle": "{count} members on this page",
+    "loadMore": "View more members",
+    "paginationLabel": "Member directory pages",
     "noPublishedTitle": "No public member profiles yet",
     "noPublishedDescription": "No member profiles are published yet.",
     "emptyTitle": "No member pages match yet",
     "emptyDescription": "Member pages appear here once organisations publish them. Try a broader search.",
     "unavailableTitle": "Member pages are temporarily unavailable",
-    "unavailableDescription": "Please try again shortly.",
+    "unavailableDescription": "Please try again shortly. Reference: {reference}.",
+    "retry": "Try again",
     "view": "View member page",
     "detail": {
       "website": "Website",
@@ -2467,6 +2523,24 @@
     "verificationError": "Verification is unavailable. Reload the page and try again."
   },
   "Admin": {
+    "brandShort": "WTIA",
+    "shell": {
+      "menu": "Open workspace menu",
+      "closeMenu": "Close workspace menu",
+      "collapseSidebar": "Collapse sidebar",
+      "expandSidebar": "Expand sidebar",
+      "breadcrumbs": "Workspace location",
+      "searchMembers": "Find a member",
+      "viewSite": "View site",
+      "account": "Account",
+      "signOut": "Sign out",
+      "signOutError": "Could not sign out. Please try again.",
+      "roles": {
+        "staff": "Staff",
+        "exco": "Executive Committee",
+        "superadmin": "Superadmin"
+      }
+    },
     "brand": "WTIA",
     "title": "Staff workspace",
     "description": "Manage WTIA member operations from a protected staff-only workspace.",
@@ -2491,6 +2565,7 @@
       "tasks": "Tasks",
       "segments": "Segments",
       "members": "Members",
+      "batches": "Batches",
       "atRisk": "At risk",
       "announcements": "Announcements",
       "partners": "Partners",
@@ -2859,11 +2934,51 @@
 "incoming": "Incoming",
     "batches": {
       "downloadCsv": "Download CSV","title": "Batch preview and progress", "description": "Review every item before committing. Changes and failures remain visible here.", "back": "Back to members", "states": {"preparing": "Preparing snapshot", "ready": "Ready for review", "queued": "Queued", "running": "Running", "completed": "Completed", "completed_with_errors": "Completed with errors", "cancelled": "Cancelled", "expired": "Preview expired", "pending": "Pending", "succeeded": "Succeeded", "skipped": "Skipped", "failed": "Failed"}, "counters": {"pending": "Pending", "running": "Running", "succeeded": "Succeeded", "skipped": "Skipped", "failed": "Failed"}, "total": "Total", "eligible": "Eligible", "blocked": "Blocked", "operation": "State", "target": "Target", "before": "Before", "after": "After", "reason": "Reason or error", "attempts": "Attempts", "result": "Result", "commit": "Commit batch", "retry": "Retry failed items", "cancel": "Cancel remaining", "expires": "Preview expires", "empty": "No items in this snapshot.",
-      "reviewCampaigns": "Review campaign drafts"},
+      "reviewCampaigns": "Review campaign drafts",
+      "history": {
+        "recentTitle": "Recent batch jobs",
+        "viewAll": "View all batches",
+        "recentEmpty": "No batch jobs yet.",
+        "recentUnavailable": "Recent jobs are temporarily unavailable.",
+        "manualReview": "This failure needs review before another attempt. Check the item result and provider state; no automatic retry is available.",
+        "title": "Batch operations",
+        "description": "Review recent jobs, reopen previews, and follow progress or recovery actions.",
+        "disabled": "New batch actions are disabled in this environment. Existing jobs remain available for review. Ask an operator to complete the schema and worker rollout before enabling actions.",
+        "stateFilter": "State",
+        "operationFilter": "Operation",
+        "allStates": "All states",
+        "allOperations": "All operations",
+        "apply": "Apply filters",
+        "unavailable": "Batch history is temporarily unavailable. Please try again.",
+        "retry": "Retry history",
+        "empty": "No batches match these filters.",
+        "tableCaption": "Recent batch jobs",
+        "created": "Created",
+        "operation": "Operation",
+        "state": "State",
+        "actor": "Prepared by",
+        "progress": "Succeeded / total",
+        "details": "Details",
+        "open": "Open job",
+        "pagination": "Batch history pages",
+        "next": "Next page",
+        "backToHistory": "Back to batch history",
+        "operations": {
+          "profile_patch": "Profile correction",
+          "import_commit": "Member import",
+          "membership_grant": "Membership grant",
+          "renewal_reminder": "Renewal reminder",
+          "profile_update_invite": "Profile update invitation",
+          "ticket_resend": "Ticket resend",
+          "export_members": "Member export",
+          "export_event_attendees": "Attendee export"
+        }
+      }
+    },
     "members": {
       "batch": {"field": "Change field", "tags": "Operational tags", "tagsHelp": "Comma-separated, at most 10 tags of 30 characters. Replaces existing tags; leave empty to clear.", "owner": "Responsible staff", "unassigned": "Unassigned", "preview": "Preview correction", "reason": "Reason for correction", "language": "Preferred language", "english": "English", "chinese": "Traditional Chinese", "error": "Could not prepare the batch. Check the selection and try again.", "exportPreview": "Preview CSV export", "exportFields": "Export fields", "exportError": "Could not prepare export."},
       "importLink": "Import members",
-      "selection": {"page": "Select this page", "all": "Select all {count} matching", "clear": "Clear selection", "selected": "{count} selected", "row": "Select {name}"},
+      "selection": {"page": "Select this page", "all": "Select all {count} matching", "clear": "Clear selection", "selected": "{count} selected", "row": "Select {name}", "explicitScope": "Checked members only, across visited pages.", "allMatchingScope": "All members matching these filters, except unchecked rows."},
       "savedViews": {"title": "Saved views", "name": "View name", "save": "Save view", "saved": "View saved", "invalid": "Check the view name and filters.", "error": "Could not save the view. Try again.", "shared": "Shared with staff", "empty": "No saved views yet."},
       "filters": {"status": "Membership status", "plan": "Plan", "renewalFrom": "Renewal from (Hong Kong date)", "renewalTo": "Renewal to (Hong Kong date)", "companyId": "Company ID", "locale": "Preferred language", "completeness": "Profile completeness", "sort": "Sort by", "apply": "Apply filters", "clear": "Clear filters", "any": "Any", "complete": "Complete", "incomplete": "Missing contact details", "nameAsc": "Name A–Z", "nameDesc": "Name Z–A", "renewalAsc": "Renewal soonest", "english": "English", "chinese": "繁體中文", "viewsLabel": "Default views", "views": {"active": "Active", "due30": "Due within 30 days", "due60": "Due within 60 days", "due90": "Due within 90 days", "pastDue": "Past due", "expired": "Expired", "missingData": "Missing details"}},
       "view": "View",

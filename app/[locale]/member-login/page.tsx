@@ -4,9 +4,11 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {redirect} from "next/navigation";
 
 import {siteConfig} from "@/config/site";
+import {SignInForm} from "@/components/auth/sign-in-form";
 import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
-import {getActor} from "@/lib/auth/actor";
+import {resolveCurrentLogin} from "@/lib/auth/login-resolution-server";
+import {provisionMemberProfileAction} from "./provision-action";
 import {parsePortalContinuation} from "@/lib/portal/continuation";
 import {localizedPath} from "@/lib/urls";
 
@@ -24,13 +26,14 @@ function queryValue(value: string | string[] | undefined): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
-function errorMessageKey(code: string | undefined): "errors.email" | "errors.invalidContinuation" | "errors.rateLimited" | "errors.auth" | null {
+function errorMessageKey(code: string | undefined): "errors.email" | "errors.invalidContinuation" | "errors.rateLimited" | "errors.limiterUnavailable" | "errors.auth" | null {
   switch (code) {
     case "invalid_email": return "errors.email";
     case "invalid_continuation": return "errors.invalidContinuation";
     case "rate_limited": return "errors.rateLimited";
+    case "limiter_unavailable": return "errors.limiterUnavailable";
     case "provider_error": return "errors.auth";
-    default: return null;
+    default: return code ? "errors.auth" : null;
   }
 }
 
@@ -50,11 +53,9 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
   // callback URL). Forward immediately, mirroring /join's page.tsx — this
   // page must never leave an authenticated visitor stranded on a login
   // form with no way to reach /portal.
-  const actor = await getActor().catch(() => null);
-  if (actor) {
-    redirect(localizedPath(locale, continuation));
-  }
-  const sent = Boolean(queryValue(query.sent));
+  const resolution = await resolveCurrentLogin({intent: "member", path: continuation});
+  if (resolution.kind === "allowed") redirect(localizedPath(locale, resolution.destination.path));
+  const sent = queryValue(query.sent) === "1";
   const errorKey = errorMessageKey(queryValue(query.error));
 
   async function submitMemberLogin(formData: FormData): Promise<void> {
@@ -67,6 +68,7 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
     } else {
       target.set("error", result.error);
     }
+    if (!result.ok && result.retryAfterSeconds) target.set("wait", String(result.retryAfterSeconds));
     redirect(`${localizedPath(locale, "/member-login")}?${target.toString()}`);
   }
 
@@ -81,20 +83,36 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
           <nav aria-label={t("navigation")} className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
             <Link className="min-h-11 content-center underline-offset-4 hover:underline" href="/">{t("home")}</Link>
             <Link className="min-h-11 content-center underline-offset-4 hover:underline" href="/join">{t("join")}</Link>
+            <Link className="min-h-11 content-center underline-offset-4 hover:underline" href="/admin-login">{t("staffSignIn")}</Link>
             <a className="min-h-11 content-center underline-offset-4 hover:underline" href={`mailto:${siteConfig.contact.email}`}>{t("support")}</a>
           </nav>
         </header>
         <section aria-labelledby="login-heading" className="glass-card mx-auto max-w-xl p-6 sm:p-10">
           <h1 className="font-serif text-4xl font-semibold" id="login-heading">{t("formLabel")}</h1>
           <p className="mt-3 text-muted-foreground">{t("help")}</p>
-          {sent ? <p className="mt-4" role="status">{t("sent")}</p> : null}
-          {errorKey ? <p className="mt-4 text-sm text-destructive" role="alert">{t(errorKey)}</p> : null}
-          <form action={submitMemberLogin} className="mt-8" data-continuation={continuation} data-testid="member-login-form">
-            <label className="mb-2 block text-sm font-medium" htmlFor="email">{t("emailLabel")}</label>
-            <input autoComplete="email" className="min-h-11 w-full rounded-md border border-input bg-background px-3" id="email" name="email" required type="email" />
-            <button className="mt-4 inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 text-primary-foreground" type="submit">{t(sent ? "resend" : "submit")}</button>
-          </form>
-          <p className="mt-5 text-sm text-muted-foreground">{t("deliveryHelp")}</p>
+          {resolution.kind === "needs-profile" ? <div className="mt-6" role="status">
+            <p>{t("profileOnboarding")}</p>
+            {queryValue(query.profile) === "conflict" ? <p className="mt-3 text-destructive" role="alert">{t("profileConflict")}</p> : null}
+            {queryValue(query.profile) === "unverified" ? <p className="mt-3 text-destructive" role="alert">{t("profileUnverified")}</p> : null}
+            {queryValue(query.profile) === "unavailable" ? <p className="mt-3 text-destructive" role="alert">{t("profileUnavailable")}</p> : null}
+            <form action={provisionMemberProfileAction.bind(null, locale)} data-testid="profile-provision-form">
+              <button className="mt-4 min-h-11 rounded-md bg-primary px-4 text-primary-foreground" type="submit">{t("createProfile")}</button>
+            </form>
+          </div> : null}
+          {resolution.kind === "forbidden" ? <p className="mt-5 text-destructive" role="alert">{t("memberAccessDenied")}</p> : null}
+          {resolution.kind === "unavailable" ? <div className="mt-5" role="alert">
+            <p>{t("identityUnavailable", {reference: resolution.reference})}</p>
+            <a className="mt-3 inline-flex min-h-11 items-center underline" href={`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent(continuation)}`}>{t("retry")}</a>
+          </div> : null}
+          {resolution.kind === "signed-out" && errorKey ? <p className="mt-4 text-sm text-destructive" role="alert">{t(errorKey)}</p> : null}
+          {resolution.kind === "signed-out" ? <SignInForm
+            action={submitMemberLogin} destination={continuation} googleEnabled={process.env.AUTH_GOOGLE_ENABLED === "true"}
+            intent="member" locale={locale} sent={sent} retryAfterSeconds={Math.min(3600, Math.max(0, Number(queryValue(query.wait)) || 0))}
+            labels={{email: t("emailLabel"), send: t("submit"), resend: t("resend"), sending: t("sending"),
+              google: t("google"), separator: t("separator"), changeEmail: t("changeEmail"), sent: t("sent"),
+              googleUnavailable: t("googleUnavailable"), providerError: t("errors.auth"), maskedTo: t("maskedTo"), waitSeconds: t("waitSeconds")}}
+          /> : null}
+          {resolution.kind === "signed-out" ? <p className="mt-5 text-sm text-muted-foreground">{t("deliveryHelp")}</p> : null}
         </section>
       </div>
     </main>

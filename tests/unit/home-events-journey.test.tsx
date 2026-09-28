@@ -38,13 +38,13 @@ describe("EventsJourney", () => {
     expect(within(grid).getByText(bundles.en.Home.eventsJourney.stages.after.title)).toBeInTheDocument();
   });
 
-  it("renders the .event-empty CTA to /events when no featured event exists", async () => {
+  it("does not repeat the Open Now empty state when no featured event exists", async () => {
     listFeaturedPublic.mockResolvedValueOnce([]);
     const {EventsJourney} = await import("@/components/home/events-journey");
     render(await EventsJourney({locale: "en"}));
 
-    expect(screen.getByText(bundles.en.Home.eventsJourney.emptyTitle)).toBeInTheDocument();
-    expect(screen.getByRole("link", {name: bundles.en.Home.eventsJourney.viewAllAction})).toHaveAttribute("href", "/events");
+    expect(screen.queryByText(bundles.en.Home.eventsJourney.emptyTitle)).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", {name: bundles.en.Home.eventsJourney.viewAllAction})).not.toBeInTheDocument();
   });
 
   it("renders up to 2 featured events as cards when available, and calls the repository with limit 2", async () => {

@@ -1,10 +1,8 @@
 import {getTranslations} from 'next-intl/server';
 
-import {ActionLink} from '@/components/wt/action-link';
 import {CardGrid} from '@/components/wt/card-grid';
 import {Section} from '@/components/wt/section';
 import {SectionHeading} from '@/components/wt/section-heading';
-import {StatusLabel} from '@/components/wt/status-label';
 import type {AppLocale} from '@/i18n/routing';
 import {eventsRepository} from '@/lib/db/repos/events';
 import {formatEventDate as formatDate} from '@/lib/home/format-event-date';
@@ -31,7 +29,7 @@ export async function EventsJourney({locale}: Readonly<{locale: AppLocale}>) {
           </article>
         ))}
       </div>
-      {events.length > 0 ? (
+      {events.length > 0 && (
         <CardGrid
           variant="service"
           items={events.map((event) => ({
@@ -40,14 +38,6 @@ export async function EventsJourney({locale}: Readonly<{locale: AppLocale}>) {
             href: `/events/${event.slug}`,
           }))}
         />
-      ) : (
-        <div className="event-empty">
-          <div>
-            <StatusLabel>{t('statusLabel')}</StatusLabel>
-            <h3>{t('emptyTitle')}</h3>
-          </div>
-          <ActionLink href="/events" variant="button-dark">{t('viewAllAction')}</ActionLink>
-        </div>
       )}
     </Section>
   );

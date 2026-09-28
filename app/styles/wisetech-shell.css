@@ -58,15 +58,26 @@
  * Tailwind layers, so it beats the button's `min-w-11` at runtime and shrinks the control below
  * the 44px floor. */
 .language-link { display: inline-flex; min-width: 44px; min-height: 44px; align-items: center; }
-/* The port hides .signin-link in three bands, not one: `@media(max-width:1240px)`
- * (app/styles/wisetech.css:1087), `@media(max-width:1320px)` (:288) and
- * `@media(max-width:1450px) and (min-width:1121px)` (:833-839). All three are specificity 0,1,0
- * and this companion sheet loads after the port, so a floor starting at 1241px would win over
- * two of them and un-hide the link from 1241px to 1450px -- including the 1440px visual
- * baseline viewport. The link is genuinely visible only above 1450px, so that is where the
- * tap-target floor starts. */
+/* Keep member sign-in in the visible header at every width. The donor hides both
+ * utility links under .signin-link; only WhatsApp keeps that donor behavior. */
+.header-actions .member-login-link {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  padding-inline: 4px;
+}
 @media (min-width: 1451px) {
   .signin-link { display: inline-flex; min-height: 44px; align-items: center; }
+}
+@media (max-width: 820px) {
+  /* Search, locale and join remain in the mobile sheet, leaving room for sign-in. */
+  .header-actions .search-link,
+  .header-actions .language-link,
+  .header-actions > .button-small { display: none; }
+  .header-actions { gap: 8px; }
+}
+@media (max-width: 520px) {
+  .header-inner .brand-copy { display: none; }
 }
 @media (max-width: 520px) {
   .mobile-trigger { width: 44px; height: 44px; }

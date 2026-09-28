@@ -80,9 +80,6 @@ export function TicketCheckoutForm({eventId, locale, pricePerSeat, unitAmountHkd
     return () => controller.abort();
   }, [eventId]);
   useEffect(() => {
-    if (state.status === "redirect") window.location.assign(state.url);
-  }, [state]);
-  useEffect(() => {
     if (resumeState.status === "redirect") window.location.assign(resumeState.url);
   }, [resumeState]);
 

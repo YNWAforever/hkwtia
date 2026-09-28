@@ -11,7 +11,7 @@ import Link from "next/link";
 import type {AdminMemberListItem} from "@/lib/admin/member-types";
 import type {AppLocale} from "@/i18n/routing";
 
-export type MemberSelectionLabels = Readonly<{page: string; all: string; clear: string; selected: string; row: string}>;
+export type MemberSelectionLabels = Readonly<{page: string; all: string; clear: string; selected: string; row: string; explicitScope: string; allMatchingScope: string}>;
 type TableLabels = Readonly<{name: string; email: string; company: string; plan: string; status: string; renewal: string; score: string; view: string; caption: string; empty: string; unavailable: string; previous: string; next: string; planCodes?: Readonly<Record<string, string>>; statusCodes?: Readonly<Record<string, string>>}>;
 export type MemberBatchLabels = Readonly<{preview: string; reason: string; language: string; english: string; chinese: string; error: string; patch?: Readonly<{field: string; tags: string; tagsHelp: string; owner: string; unassigned: string}>; export?: Readonly<{preview: string; fields: string; error: string}>}>;
 type ExportField = "displayName" | "email" | "companyName" | "planCode" | "membershipStatus" | "renewalAt" | "locale";
@@ -109,6 +109,7 @@ export function MemberBulkTable({locale, items, totalMatching, labels, selection
   return <div className="space-y-4">
     <div className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-muted/30 p-3">
       <p aria-live="polite" className="text-sm font-medium" role="status">{format(selectionLabels.selected, selectedCount, "count")}</p>
+      <p className="text-xs text-muted-foreground">{mode === "query" ? selectionLabels.allMatchingScope : selectionLabels.explicitScope}</p>
       {totalMatching > items.length && mode === "ids" ? <button className="min-h-11 rounded-md border border-border px-3 text-sm" onClick={() => writeDraft({...draft, mode: "query", excludedIds: []})} type="button">{format(selectionLabels.all, totalMatching, "count")}</button> : null}
       <button className="min-h-11 rounded-md border border-border px-3 text-sm" onClick={clear} type="button">{selectionLabels.clear}</button>
     </div>

@@ -119,6 +119,7 @@
     "dismiss": "關閉公告"
   },
   "Footer": {
+    "staffSignIn": "職員登入",
     "brand": {
       "publicName": "WiseTech Hong Kong",
       "descriptor": "Hong Kong Wireless Technology Industry Association 持續發展中的 AI+ 產業平台",
@@ -504,7 +505,7 @@
       "directory": {
         "label": "會員名錄",
         "title": "認識正在塑造未來的人。",
-        "copyEmpty": "名錄已準備承載獲批公開的專頁，並設有可控可見度及需獲同意的引薦流程；目前尚未顯示現行會員紀錄。",
+        "copyEmpty": "瀏覽會員名錄。機構可自行決定是否提交公開專頁，由 WTIA 審核。",
         "copyUnavailable": "會員專頁暫時無法顯示。",
         "copyAvailable": "已發布的會員方案現已上線，設有可控可見度及需獲同意的引薦流程。",
         "action": "探索會員"
@@ -512,7 +513,7 @@
       "marketplace": {
         "label": "AI 解決方案市場",
         "title": "尋找可在真實環境落地的 AI。",
-        "copyEmpty": "規劃中的方案市場將比較成熟度、部署方式、安全、市場覆蓋及經審閱證據；目前尚未顯示現行方案紀錄。",
+        "copyEmpty": "按用途及部署方式瀏覽方案展示，查看已獲批准公開的方案。",
         "copyUnavailable": "方案展示暫時無法顯示。",
         "copyAvailable": "已發布方案現已上線，可按用途、部署方式及已審閱證據比較。",
         "action": "探索解決方案"
@@ -566,7 +567,7 @@
     "programmeShowcase": {
       "eyebrow": "計劃 + 獎項",
       "title": "把參與轉化為進步",
-      "intro": "保留現有計劃的品牌資產，並以成果、受眾及下一步行動重新呈現。",
+      "intro": "探索 WTIA 計劃、獎項及專業資格，查看歷屆紀錄與參與詳情。",
       "eventSeriesLabel": "活動系列",
       "credentialLabel": "專業資格",
       "editionsFact": "自 {year} 年起共 {count} 屆",
@@ -955,6 +956,7 @@
       "description": "公司簡介（選填）"
     },
     "errors": {
+      "limiterUnavailable": "登入暫時無法使用，請稍後重試。",
       "required": "請填寫此必填欄位。",
       "email": "請輸入有效電郵地址。",
       "auth": "未能傳送登入連結，請再試一次。",
@@ -986,9 +988,44 @@
       "textVersion": "同意書版本 2026-09-v1"
     }
   },
+  "AdminLogin": {
+    "title": "職員登入",
+    "help": "輸入你的 WTIA 職員電郵地址，索取安全登入連結。進入工作平台仍須通過職員權限驗證。",
+    "navigation": "實用連結",
+    "home": "主頁",
+    "memberSignIn": "會員登入",
+    "memberPortal": "前往會員平台",
+    "support": "聯絡支援",
+    "emailLabel": "職員電郵地址",
+    "submit": "傳送登入連結",
+    "resend": "重新傳送登入連結",
+    "sent": "請查看收件箱。完成登入及職員權限驗證後，你會返回工作平台。",
+    "deliveryHelp": "如未收到電郵，請檢查垃圾郵件資料夾或聯絡支援。",
+    "profileRecovery": "職員帳戶需要審核",
+    "profileRecoveryHelp": "登入服務已驗證你的帳戶，但此帳戶沒有 WTIA 檔案。請聯絡 WTIA 支援審核職員存取權。你亦可透過會員登入建立一般會員檔案。",
+    "google": "使用 Google 繼續",
+    "separator": "或",
+    "changeEmail": "更改電郵",
+    "maskedTo": "已傳送至",
+    "waitSeconds": "重新傳送前請稍候：",
+    "googleUnavailable": "完成登入服務設定驗證後，即可使用 Google 登入。",
+    "sending": "傳送中…",
+    "identityUnavailable": "職員登入暫時無法使用。參考編號：{reference}。",
+    "retry": "重試職員登入",
+    "accessDenied": "此帳戶沒有職員存取權",
+    "accessDeniedHelp": "目前登入的帳戶沒有職員角色。你可以使用會員平台；如認為應有職員權限，請聯絡 WTIA 支援。",
+    "errors": {
+      "email": "請輸入有效電郵地址。",
+      "invalidContinuation": "職員平台連結無效，請從職員登入頁重新開始。",
+      "rateLimited": "登入電郵請求過於頻繁，請稍後再試。",
+      "limiterUnavailable": "登入暫時無法使用，請稍後重試。",
+      "auth": "暫時無法傳送登入連結，請再試一次。"
+    }
+  },
   "MemberLogin": {
     "home": "主頁",
     "join": "加入 WTIA",
+    "staffSignIn": "職員登入",
     "support": "聯絡支援",
     "navigation": "常用連結",
     "help": "請輸入電郵地址，以接收安全登入連結。",
@@ -998,9 +1035,25 @@
     "emailLabel": "電郵地址",
     "submit": "傳送安全登入連結",
     "sent": "請查閱電郵中的安全登入連結；連結會帶你返回會員專區。",
+    "profileOnboarding": "你的登入已獲驗證。建立會員檔案後，可繼續現有入會流程。建立檔案不會啟用會籍。",
+    "createProfile": "建立會員檔案",
+    "profileConflict": "此電郵已連結其他帳戶。請聯絡 WTIA 支援以恢復存取；系統沒有連結任何檔案。",
+    "profileUnverified": "建立檔案前，請先透過登入服務供應商驗證電郵地址。",
+    "profileUnavailable": "暫時無法建立檔案。請重試或聯絡支援。",
+    "memberAccessDenied": "此帳戶屬職員角色。請使用職員登入或聯絡支援。",
+    "google": "使用 Google 繼續",
+    "separator": "或",
+    "changeEmail": "更改電郵",
+    "maskedTo": "已傳送至",
+    "waitSeconds": "重新傳送前請稍候：",
+    "googleUnavailable": "完成登入服務設定驗證後，即可使用 Google 登入。",
+    "sending": "傳送中…",
+    "identityUnavailable": "登入暫時無法使用。參考編號：{reference}。",
+    "retry": "重試登入",
     "errors": {
       "email": "請輸入有效電郵地址。",
       "rateLimited": "登入電郵要求次數過多，請等待數分鐘後再試。",
+      "limiterUnavailable": "登入暫時無法使用，請稍後重試。",
       "auth": "未能傳送登入連結，請再試一次。",
       "invalidContinuation": "此登入連結無效，請從會員專區重新開始。"
     }
@@ -1458,13 +1511,16 @@
       "corporate": "企業",
       "patron": "贊助人"
     },
-    "resultsTitle": "{count} 個會員",
+    "resultsTitle": "本頁顯示 {count} 個會員",
+    "loadMore": "查看更多會員",
+    "paginationLabel": "會員名錄分頁",
     "noPublishedTitle": "尚未有公開會員專頁",
     "noPublishedDescription": "尚未有已發佈的會員專頁。",
     "emptyTitle": "暫時沒有相符的會員專頁",
     "emptyDescription": "機構發布專頁後會在此顯示。請嘗試更廣泛的搜尋。",
     "unavailableTitle": "會員頁面暫時無法顯示",
-    "unavailableDescription": "請稍後再試。",
+    "unavailableDescription": "請稍後再試。參考編號：{reference}。",
+    "retry": "再試一次",
     "view": "查看會員專頁",
     "detail": {
       "website": "網站",
@@ -2468,6 +2524,24 @@
     "verificationError": "目前無法進行驗證。請重新載入頁面再試。"
   },
   "Admin": {
+    "brandShort": "WTIA",
+    "shell": {
+      "menu": "開啟工作平台選單",
+      "closeMenu": "關閉工作平台選單",
+      "collapseSidebar": "收起側欄",
+      "expandSidebar": "展開側欄",
+      "breadcrumbs": "工作平台位置",
+      "searchMembers": "尋找會員",
+      "viewSite": "瀏覽網站",
+      "account": "帳戶",
+      "signOut": "登出",
+      "signOutError": "未能登出，請再試一次。",
+      "roles": {
+        "staff": "職員",
+        "exco": "執行委員",
+        "superadmin": "超級管理員"
+      }
+    },
     "brand": "WTIA",
     "title": "職員工作區",
     "description": "在受保護的職員專用工作區管理 WTIA 會員營運。",
@@ -2492,6 +2566,7 @@
       "tasks": "待辦",
       "segments": "分群",
       "members": "會員",
+      "batches": "批次作業",
       "atRisk": "高風險",
       "announcements": "公告",
       "partners": "合作夥伴",
@@ -2860,11 +2935,51 @@
 "incoming": "匯入",
     "batches": {
       "downloadCsv": "下載 CSV","title": "批次預覽及進度", "description": "提交前逐項核對。變更和失敗結果會保留在此頁。", "back": "返回會員", "states": {"preparing": "正在建立快照", "ready": "待審核", "queued": "已排隊", "running": "處理中", "completed": "已完成", "completed_with_errors": "完成但有錯誤", "cancelled": "已取消", "expired": "預覽已過期", "pending": "待處理", "succeeded": "成功", "skipped": "已略過", "failed": "失敗"}, "counters": {"pending": "待處理", "running": "處理中", "succeeded": "成功", "skipped": "已略過", "failed": "失敗"}, "total": "總數", "eligible": "符合資格", "blocked": "受阻", "operation": "狀態", "target": "目標", "before": "更改前", "after": "更改後", "reason": "原因或錯誤", "attempts": "嘗試次數", "result": "結果", "commit": "提交批次", "retry": "重試失敗項目", "cancel": "取消剩餘項目", "expires": "預覽到期時間", "empty": "此快照沒有項目。",
-      "reviewCampaigns": "審核通訊草稿"},
+      "reviewCampaigns": "審核通訊草稿",
+      "history": {
+        "recentTitle": "近期批次作業",
+        "viewAll": "查看所有批次",
+        "recentEmpty": "暫無批次作業。",
+        "recentUnavailable": "暫時無法讀取近期作業。",
+        "manualReview": "再次處理前請先核對失敗項目及服務供應商狀態；此項目目前不可自動重試。",
+        "title": "批次作業",
+        "description": "查看近期作業、重開預覽，並跟進進度及復原動作。",
+        "disabled": "此環境已停用新增批次作業。現有作業仍可供檢視。啟用前請由營運人員完成資料庫及工作程序部署。",
+        "stateFilter": "狀態",
+        "operationFilter": "作業",
+        "allStates": "所有狀態",
+        "allOperations": "所有作業",
+        "apply": "套用篩選",
+        "unavailable": "暫時無法讀取批次記錄，請稍後再試。",
+        "retry": "重試讀取",
+        "empty": "沒有符合條件的批次作業。",
+        "tableCaption": "近期批次作業",
+        "created": "建立時間",
+        "operation": "作業",
+        "state": "狀態",
+        "actor": "建立者",
+        "progress": "成功／總數",
+        "details": "詳情",
+        "open": "開啟作業",
+        "pagination": "批次記錄分頁",
+        "next": "下一頁",
+        "backToHistory": "返回批次記錄",
+        "operations": {
+          "profile_patch": "會員資料修正",
+          "import_commit": "會員匯入",
+          "membership_grant": "會籍授予",
+          "renewal_reminder": "續會提醒",
+          "profile_update_invite": "更新會員資料邀請",
+          "ticket_resend": "重發門票",
+          "export_members": "會員資料匯出",
+          "export_event_attendees": "參加者資料匯出"
+        }
+      }
+    },
     "members": {
       "batch": {"field": "更改欄位", "tags": "營運標籤", "tagsHelp": "以逗號分隔，最多 10 個標籤，每個最多 30 字。將取代現有標籤；留空代表清除。", "owner": "負責職員", "unassigned": "未分配","preview": "預覽資料修正", "reason": "更改原因", "language": "偏好語言", "english": "英文", "chinese": "繁體中文", "error": "無法準備批次。請檢查選取項目後重試。", "exportPreview": "預覽 CSV 匯出", "exportFields": "匯出欄位", "exportError": "無法準備匯出。"},
       "importLink": "匯入會員",
-      "selection": {"page": "選取本頁", "all": "選取全部 {count} 個相符會員", "clear": "清除選取", "selected": "已選取 {count} 個", "row": "選取 {name}"},
+      "selection": {"page": "選取本頁", "all": "選取全部 {count} 個相符會員", "clear": "清除選取", "selected": "已選取 {count} 個", "row": "選取 {name}", "explicitScope": "只包含已勾選的會員，可跨已瀏覽頁面。", "allMatchingScope": "包含所有符合篩選條件的會員，扣除已取消勾選的項目。"},
       "savedViews": {"title": "已儲存檢視", "name": "檢視名稱", "save": "儲存檢視", "saved": "檢視已儲存", "invalid": "請檢查名稱及篩選條件。", "error": "無法儲存檢視，請重試。", "shared": "與職員共用", "empty": "暫無已儲存檢視。"},
       "filters": {"status": "會籍狀態", "plan": "會籍計劃", "renewalFrom": "續會日期由（香港時間）", "renewalTo": "續會日期至（香港時間）", "companyId": "機構 ID", "locale": "偏好語言", "completeness": "會員資料完整度", "sort": "排序", "apply": "套用篩選", "clear": "清除篩選", "any": "全部", "complete": "資料齊全", "incomplete": "欠缺聯絡資料", "nameAsc": "姓名 A–Z", "nameDesc": "姓名 Z–A", "renewalAsc": "最近續會", "english": "英文", "chinese": "繁體中文", "viewsLabel": "預設檢視", "views": {"active": "有效", "due30": "30 日內到期", "due60": "60 日內到期", "due90": "90 日內到期", "pastDue": "欠費", "expired": "已屆滿", "missingData": "欠缺資料"}},
       "view": "查看",
