@@ -1040,6 +1040,7 @@
     "profileConflict": "This email is already linked to another account. Contact WTIA support to recover access; no profile was linked.",
     "profileUnverified": "Verify the email address with your sign-in provider before creating a profile.",
     "profileUnavailable": "We could not create your profile right now. Please try again or contact support.",
+    "profileReference": "Reference: {reference}.",
     "memberAccessDenied": "This account has a staff role. Use staff sign in or contact support.",
     "google": "Continue with Google",
     "separator": "or",

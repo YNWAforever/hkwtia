@@ -25,13 +25,14 @@ function safeSqlstate(error: unknown): string | undefined {
 export async function provisionMemberProfileAction(locale: AppLocale): Promise<void> {
   let outcome: "unverified" | "conflict" | "ready" | "forbidden" | "unavailable";
   let stage: "session" | "provision" = "session";
+  let reference: string | undefined;
   try {
     const session = await getSession();
     stage = "provision";
     const result = await provisionVerifiedMember(session, (identity) => profileIdentityRepository.provisionMember(identity));
     outcome = result.kind === "ready" && result.identity.role !== "member" ? "forbidden" : result.kind;
   } catch (error) {
-    const reference = randomUUID();
+    reference = randomUUID();
     const sqlstate = safeSqlstate(error);
     console.error(JSON.stringify({
       event: "member_profile_provision_unavailable",
@@ -43,5 +44,7 @@ export async function provisionMemberProfileAction(locale: AppLocale): Promise<v
     outcome = "unavailable";
   }
   if (outcome === "ready") redirect(localizedPath(locale, "/join"));
-  redirect(`${localizedPath(locale, "/member-login")}?profile=${outcome}`);
+  const query = new URLSearchParams({profile: outcome});
+  if (reference) query.set("reference", reference);
+  redirect(`${localizedPath(locale, "/member-login")}?${query.toString()}`);
 }

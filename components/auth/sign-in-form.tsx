@@ -40,7 +40,6 @@ export function SignInForm({intent, locale, destination, action, googleEnabled, 
   const [googleError, setGoogleError] = useState(false);
   const [email, setEmail] = useState("");
   const [masked, setMasked] = useState("");
-  const [sentState, setSentState] = useState(sent);
   const [remaining, setRemaining] = useState(retryAfterSeconds);
   const maskKey = `hkwtia-login-mask-${intent}`;
   const waitKey = `hkwtia-login-resend-${intent}`;
@@ -81,9 +80,9 @@ export function SignInForm({intent, locale, destination, action, googleEnabled, 
   }
 
   return <div>
-    {sentState ? <div className="mt-4" role="status">
+    {sent ? <div className="mt-4" role="status">
       <p>{labels.sent}{masked ? ` ${labels.maskedTo} ${masked}.` : ""}</p>
-      <button className="mt-2 min-h-11 text-sm underline" onClick={() => {setSentState(false); setEmail("");}} type="button">{labels.changeEmail}</button>
+      <a className="mt-2 inline-flex min-h-11 items-center text-sm underline" href={`${localizedPath(locale, intent === "admin" ? "/admin-login" : "/member-login")}?next=${encodeURIComponent(destination)}`}>{labels.changeEmail}</a>
     </div> : null}
     <button className="mt-8 flex min-h-11 w-full items-center justify-center rounded-md border border-input bg-background px-4 font-medium disabled:opacity-50" disabled={!googleEnabled || googlePending} onClick={() => void startGoogle()} type="button">
       {labels.google}
@@ -94,7 +93,7 @@ export function SignInForm({intent, locale, destination, action, googleEnabled, 
     <form action={action} data-continuation={destination} data-testid={`${intent}-login-form`} onSubmit={rememberRecipient}>
       <label className="mb-2 block text-sm font-medium" htmlFor={`${intent}-login-email`}>{labels.email}</label>
       <input autoComplete="email" className="min-h-11 w-full rounded-md border border-input bg-background px-3" id={`${intent}-login-email`} name="email" onChange={(event) => setEmail(event.target.value)} required type="email" value={email}/>
-      <EmailSubmit disabled={remaining > 0} label={sentState ? labels.resend : labels.send} pendingLabel={labels.sending}/>
+      <EmailSubmit disabled={remaining > 0} label={sent ? labels.resend : labels.send} pendingLabel={labels.sending}/>
       {remaining > 0 ? <p className="mt-2 text-sm text-muted-foreground">{labels.waitSeconds} {remaining}</p> : null}
     </form>
   </div>;

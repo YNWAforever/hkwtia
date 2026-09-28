@@ -33,9 +33,12 @@ describe("member profile creation action", () => {
     state.provision.mockRejectedValue(Object.assign(new Error("secret-db-url"), {cause: Object.assign(new Error("private-sql"), {code: "42703"})}));
     const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
     await expect(provisionMemberProfileAction("en")).rejects.toThrow("NEXT_REDIRECT");
-    expect(state.destination).toBe("/member-login?profile=unavailable");
+    const destination = new URL(state.destination, "https://example.test");
+    expect(destination.pathname).toBe("/member-login");
+    expect(destination.searchParams.get("profile")).toBe("unavailable");
+    expect(destination.searchParams.get("reference")).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
     expect(log).toHaveBeenCalledTimes(1);
-    expect(JSON.parse(String(log.mock.calls[0]?.[0]))).toMatchObject({event: "member_profile_provision_unavailable", stage: "provision", sqlstate: "42703"});
+    expect(JSON.parse(String(log.mock.calls[0]?.[0]))).toMatchObject({event: "member_profile_provision_unavailable", stage: "provision", sqlstate: "42703", reference: destination.searchParams.get("reference")});
     expect(String(log.mock.calls[0]?.[0])).not.toContain("secret-db-url");
     expect(String(log.mock.calls[0]?.[0])).not.toContain("private-sql");
     log.mockRestore();
@@ -45,8 +48,9 @@ describe("member profile creation action", () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
     await expect(provisionMemberProfileAction("en")).rejects.toThrow("NEXT_REDIRECT");
     expect(state.provision).not.toHaveBeenCalled();
-    expect(state.destination).toBe("/member-login?profile=unavailable");
-    expect(JSON.parse(String(log.mock.calls[0]?.[0]))).toMatchObject({event: "member_profile_provision_unavailable", stage: "session"});
+    const destination = new URL(state.destination, "https://example.test");
+    expect(destination.searchParams.get("profile")).toBe("unavailable");
+    expect(JSON.parse(String(log.mock.calls[0]?.[0]))).toMatchObject({event: "member_profile_provision_unavailable", stage: "session", reference: destination.searchParams.get("reference")});
     expect(String(log.mock.calls[0]?.[0])).not.toContain("private-auth-token");
     log.mockRestore();
   });

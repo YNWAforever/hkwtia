@@ -4,7 +4,7 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 const state = vi.hoisted(() => ({redirectUrl: null as string | null, resolution: {kind: "signed-out"} as {kind: string; destination?: {intent: "member"; path: string}}}));
 
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn(async () => Object.assign((key: string) => key, {raw: (key: string) => key})),
+  getTranslations: vi.fn(async () => Object.assign((key: string, params?: {reference?: string}) => key + (params?.reference ?? ""), {raw: (key: string) => key})),
   setRequestLocale: vi.fn(),
 }));
 vi.mock("next/navigation", () => ({
@@ -64,6 +64,18 @@ describe("MemberLoginPage", () => {
     expect(screen.getByRole("button", {name: "resend"})).toBeInTheDocument();
   });
 
+  it("shows the bounded support reference after profile creation fails", async () => {
+    state.resolution = {kind: "needs-profile"};
+    const reference = "11111111-1111-4111-8111-111111111111";
+    render(await MemberLoginPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({profile: "unavailable", reference})}));
+    expect(screen.getByRole("alert")).toHaveTextContent(reference);
+  });
+  it("does not reflect an untrusted reference into the profile error", async () => {
+    state.resolution = {kind: "needs-profile"};
+    render(await MemberLoginPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({profile: "unavailable", reference: "private-token<script>"})}));
+    expect(screen.getByRole("alert")).not.toHaveTextContent("private-token");
+    expect(screen.getByRole("alert")).not.toHaveTextContent("profileReference");
+  });
   it("fails open to the default target when next fails the continuation parser", async () => {
     render(await MemberLoginPage({params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({next: "/admin"})}));
     const form = screen.getByTestId("member-login-form");

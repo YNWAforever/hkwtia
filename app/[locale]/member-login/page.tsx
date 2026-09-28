@@ -57,6 +57,9 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
   if (resolution.kind === "allowed") redirect(localizedPath(locale, resolution.destination.path));
   const sent = queryValue(query.sent) === "1";
   const errorKey = errorMessageKey(queryValue(query.error));
+  const rawReference = queryValue(query.reference);
+  const profileReference = rawReference && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(rawReference)
+    ? rawReference : null;
 
   async function submitMemberLogin(formData: FormData): Promise<void> {
     "use server";
@@ -94,7 +97,7 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
             <p>{t("profileOnboarding")}</p>
             {queryValue(query.profile) === "conflict" ? <p className="mt-3 text-destructive" role="alert">{t("profileConflict")}</p> : null}
             {queryValue(query.profile) === "unverified" ? <p className="mt-3 text-destructive" role="alert">{t("profileUnverified")}</p> : null}
-            {queryValue(query.profile) === "unavailable" ? <p className="mt-3 text-destructive" role="alert">{t("profileUnavailable")}</p> : null}
+            {queryValue(query.profile) === "unavailable" ? <div className="mt-3 text-destructive" role="alert"><p>{t("profileUnavailable")}</p>{profileReference ? <p>{t("profileReference", {reference: profileReference})}</p> : null}</div> : null}
             <form action={provisionMemberProfileAction.bind(null, locale)} data-testid="profile-provision-form">
               <button className="mt-4 min-h-11 rounded-md bg-primary px-4 text-primary-foreground" type="submit">{t("createProfile")}</button>
             </form>

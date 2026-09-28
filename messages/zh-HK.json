@@ -1040,6 +1040,7 @@
     "profileConflict": "此電郵已連結其他帳戶。請聯絡 WTIA 支援以恢復存取；系統沒有連結任何檔案。",
     "profileUnverified": "建立檔案前，請先透過登入服務供應商驗證電郵地址。",
     "profileUnavailable": "暫時無法建立檔案。請重試或聯絡支援。",
+    "profileReference": "參考編號：{reference}。",
     "memberAccessDenied": "此帳戶屬職員角色。請使用職員登入或聯絡支援。",
     "google": "使用 Google 繼續",
     "separator": "或",
