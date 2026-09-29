@@ -8,6 +8,7 @@ const labels = {
   description: "What is waiting for staff attention right now.",
   view: "Open",
   unavailable: "Unavailable",
+  applicationQueue: "View application progress",
 } as const;
 
 function render(tiles: readonly DashboardTile[], locale: "en" | "zh-HK" = "en") {
@@ -49,6 +50,7 @@ describe("admin dashboard tiles", () => {
     const html = render([approvals(1)], "zh-HK");
 
     expect(html).toContain('href="/zh/admin/approvals"');
+    expect(html).toContain('href="/zh/admin/members/queue"');
     expect(html).not.toContain("/zh-HK/admin");
   });
 

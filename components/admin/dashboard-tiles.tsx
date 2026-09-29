@@ -16,6 +16,7 @@ export type DashboardTileLabels = Readonly<{
   description: string;
   view: string;
   unavailable: string;
+  applicationQueue: string;
 }>;
 
 /**
@@ -40,7 +41,7 @@ export function DashboardTiles({
         </h2>
         <p className="text-muted-foreground">{labels.description}</p>
       </header>
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {tiles.map((tile) => (
           <li key={tile.id}>
             <Link
@@ -58,6 +59,12 @@ export function DashboardTiles({
           </li>
         ))}
       </ul>
+      <Link
+        className="inline-flex min-h-11 items-center rounded-md text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        href={localizedPath(locale, "/admin/members/queue")}
+      >
+        {labels.applicationQueue}
+      </Link>
     </section>
   );
 }
