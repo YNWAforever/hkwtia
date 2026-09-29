@@ -64,3 +64,9 @@ All repository commands ran in `C:\Users\laich\Documents\hkwtia\.worktrees\final
 | Visible strings | npm.cmd run audit:strings | Exit 0; 297 TSX files scanned. Log: %TEMP%\hkwtia-20260929-postmerge-strings.log. |
 | Production build | npm.cmd run build | Exit 0. Log: %TEMP%\hkwtia-20260929-postmerge-build.log. No provider or database acceptance is implied by the build. |
 | Worktree | git diff --check; git status --short | Diff check exited 0. Next-generated next-env.d.ts and line-ending-only test snapshot changes were restored because they were clean before the gates. Only the three audit Markdown files remain edited. |
+
+### PR #101 dependency audit repair
+
+- Initial GitHub Actions run 36506723351: tests (1) and tests (2) passed, and Vercel Preview passed. The checks job failed only at npm audit --omit=dev --audit-level=high because package-lock.json resolved the optional Neon Auth UI AJV dependency fast-uri at vulnerable 3.1.6. The quality job failed as a consequence; it was not a source-test failure.
+- The two GitHub reviewed advisories GHSA-qw65-cvwx-89v3 and GHSA-58mr-gqgx-xq4g list fast-uri 3.1.7 as a patched 3.x version. The AJV parent allows ^3.0.1. package.json now pins the transitive release through an npm override, and the lockfile changes only that package's version, tarball URL and npm-published integrity. The optional AJV subtree is retained; a generic npm update had pruned it and was not used.
+- npm.cmd ci --dry-run --ignore-scripts --no-audit exited 0. The exact CI audit command, npm.cmd audit --omit=dev --audit-level=high, then exited 0. Its report still lists 8 lower-severity findings (1 low, 7 moderate); they are not represented as fixed. Log: %TEMP%\hkwtia-20260929-fasturi-audit-fixed.log. CI must rerun on the new commit before claiming the remote gate green.
