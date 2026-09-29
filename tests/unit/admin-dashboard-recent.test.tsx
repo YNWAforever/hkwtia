@@ -1,8 +1,8 @@
-import {render, screen} from "@testing-library/react";
+import {render, screen, within} from "@testing-library/react";
 import {describe, expect, it, vi} from "vitest";
 
-const state = vi.hoisted(() => ({recent: vi.fn(async () => [{id: "11111111-1111-4111-8111-111111111111", operation: "profile_patch", state: "ready", createdAt: "2026-09-27T12:00:00.000Z", actorLabel: "Synthetic Staff", total: 3, succeeded: 0, skipped: 0, failed: 0}])}));
-vi.mock("next-intl/server", () => ({getTranslations: vi.fn(async () => (key: string) => key), setRequestLocale: vi.fn()}));
+const state = vi.hoisted(() => ({recent: vi.fn(async () => [{id: "11111111-1111-4111-8111-111111111111", operation: "profile_patch", state: "completed_with_errors", createdAt: "2026-09-27T12:00:00.000Z", actorLabel: "Synthetic Staff", total: 3, succeeded: 1, skipped: 0, failed: 1}])}));
+vi.mock("next-intl/server", () => ({getTranslations: vi.fn(async () => (key: string, values?: {count?: number}) => key === "batches.history.recentFailed" ? `Failed: ${values?.count}` : key), setRequestLocale: vi.fn()}));
 vi.mock("next/link", () => ({default: ({children, href, ...props}: {children: React.ReactNode; href: string}) => <a href={href} {...props}>{children}</a>}));
 vi.mock("@/lib/admin/page-auth", () => ({requireAdminPageActor: async () => ({kind: "staff", userId: "staff", profileId: "staff"})}));
 vi.mock("@/lib/db/repos/admin-dashboard", () => ({adminDashboardRepository: {counts: async () => ({approvals: 0, atRisk: 0, listings: 0, profiles: 0, openTasks: 0, draftNews: 0})}}));
@@ -22,5 +22,28 @@ describe("admin dashboard recent batch recovery", () => {
     expect(screen.getByRole("link", {name: "batches.history.open"})).toHaveAttribute("href", "/admin/batches/11111111-1111-4111-8111-111111111111");
     expect(screen.getByRole("link", {name: /dashboard.listingsAwaitingReview/})).toHaveAttribute("href", "/admin/listings-review?status=pending_review");
     expect(state.recent).toHaveBeenCalledTimes(1);
+  });
+
+  it("puts review queues first and links directly to application progress", async () => {
+    render(await AdminPage({params: Promise.resolve({locale: "en"})}));
+
+    const queues = screen.getByRole("region", {name: "dashboard.heading"});
+    expect(within(queues).getAllByRole("link").map(link => link.getAttribute("href"))).toEqual([
+      "/admin/profiles-review",
+      "/admin/listings-review?status=pending_review",
+      "/admin/approvals",
+      "/admin/tasks",
+      "/admin/at-risk",
+      "/admin/news",
+      "/admin/members/queue",
+    ]);
+    expect(screen.getByRole("link", {name: "dashboard.applicationQueue"})).toHaveAttribute("href", "/admin/members/queue");
+  });
+
+  it("shows the batch time and failed item count for follow-up", async () => {
+    const {container} = render(await AdminPage({params: Promise.resolve({locale: "en"})}));
+
+    expect(container.querySelector('time[dateTime="2026-09-27T12:00:00.000Z"]')).not.toBeNull();
+    expect(screen.getByRole("link", {name: "batches.history.open"}).closest("li")).toHaveTextContent("Failed: 1");
   });
 });

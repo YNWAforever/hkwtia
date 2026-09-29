@@ -2566,7 +2566,8 @@
       "listingsAwaitingReview": "待審核展示企業",
       "profilesAwaitingReview": "等待審核的會員專頁",
       "draftNews": "新聞草稿",
-      "openTasks": "待處理員工任務"
+      "openTasks": "待處理員工任務",
+      "applicationQueue": "查看申請進度"
     },
     "navigation": {
       "groups": {"workspace": "工作台", "membersOrganizations": "會員與機構", "events": "活動", "communicationsFollowUp": "通訊與跟進", "contentSettings": "內容與設定"},
@@ -2952,10 +2953,11 @@
       "change": "變更", "noChange": "沒有欄位變更", "idLabel": "技術 ID", "targetTypes": {"profile": "會員", "membership": "會籍", "company": "機構", "ticket_seat": "門票席位", "import_row": "匯入紀錄", "event": "活動"}, "fieldNames": {"locale": "語言", "tags": "標籤", "ownerProfileId": "跟進職員", "targetName": "名稱", "displayName": "名稱", "companyName": "機構", "memberName": "會員", "planCode": "計劃", "seatLimit": "席位", "effectiveAt": "生效日期", "expiresAt": "到期日期", "channel": "渠道", "classification": "分類", "result": "結果", "fields": "欄位"}, "reasonTransient": "供應商暫時故障", "reasonChanged": "自預覽後資料已有變動", "reasonUnchanged": "無須變更", "reasonOther": "請核對此結果",
       "reviewCampaigns": "審核通訊草稿",
       "history": {
-        "recentTitle": "近期批次作業",
+        "recentTitle": "我的近期批次作業",
         "viewAll": "查看所有批次",
         "recentEmpty": "暫無批次作業。",
         "recentUnavailable": "暫時無法讀取近期作業。",
+        "recentFailed": "失敗：{count}",
         "manualReview": "再次處理前請先核對失敗項目及服務供應商狀態；此項目目前不可自動重試。",
         "title": "批次作業",
         "description": "查看近期作業、重開預覽，並跟進進度及復原動作。",

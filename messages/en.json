@@ -2565,7 +2565,8 @@
       "listingsAwaitingReview": "Listings awaiting review",
       "profilesAwaitingReview": "Member pages awaiting review",
       "draftNews": "Draft news posts",
-      "openTasks": "Open staff tasks"
+      "openTasks": "Open staff tasks",
+      "applicationQueue": "View application progress"
     },
     "navigation": {
       "groups": {"workspace": "Workspace", "membersOrganizations": "Members & organisations", "events": "Events", "communicationsFollowUp": "Communications & follow-up", "contentSettings": "Content & settings"},
@@ -2951,10 +2952,11 @@
       "change": "Changes", "noChange": "No changed fields", "idLabel": "Technical ID", "targetTypes": {"profile": "Member", "membership": "Membership", "company": "Company", "ticket_seat": "Ticket seat", "import_row": "Import row", "event": "Event"}, "fieldNames": {"locale": "Language", "tags": "Tags", "ownerProfileId": "Staff owner", "targetName": "Name", "displayName": "Name", "companyName": "Company", "memberName": "Member", "planCode": "Plan", "seatLimit": "Seats", "effectiveAt": "Effective date", "expiresAt": "Expiry date", "channel": "Channel", "classification": "Classification", "result": "Result", "fields": "Fields"}, "reasonTransient": "Temporary provider issue", "reasonChanged": "Changed since preview", "reasonUnchanged": "No change needed", "reasonOther": "Review this outcome",
       "reviewCampaigns": "Review campaign drafts",
       "history": {
-        "recentTitle": "Recent batch jobs",
+        "recentTitle": "My recent batch jobs",
         "viewAll": "View all batches",
         "recentEmpty": "No batch jobs yet.",
         "recentUnavailable": "Recent jobs are temporarily unavailable.",
+        "recentFailed": "Failed: {count}",
         "manualReview": "This failure needs review before another attempt. Check the item result and provider state; no automatic retry is available.",
         "title": "Batch operations",
         "description": "Review recent jobs, reopen previews, and follow progress or recovery actions.",
