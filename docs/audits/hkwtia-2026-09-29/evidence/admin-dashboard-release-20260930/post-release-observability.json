@@ -1,0 +1,21 @@
+{
+  "deploymentId": "dpl_5Xgjk74ximch2aUBugzHgWRfCgon",
+  "checkedAt": "2026-09-29T16:17:24.221Z",
+  "window": "1h",
+  "filter": "error",
+  "records": [
+    {
+      "timestamp": 1790698205827,
+      "level": "info",
+      "path": "/events",
+      "status": 200,
+      "domain": "hkwtia.vercel.app",
+      "method": "GET",
+      "messageType": "Connection terminated unexpectedly",
+      "source": "serverless"
+    }
+  ],
+  "limit": 100,
+  "truncated": false,
+  "exitCode": 0
+}

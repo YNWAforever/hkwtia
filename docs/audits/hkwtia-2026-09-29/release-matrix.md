@@ -1,30 +1,39 @@
 # HKWTIA 2026-09-29 release matrix and rollback
 
-**Current result: PR #100 is merged, but its code has not reached the Production alias.** PR #100 merged at 2026-09-29T00:08:29Z as b8d5f9d763daa818c7cc636a1df2cd121a3d4f0e (reviewed head e3bf5585ae582f4a5cbc0aa0131998d63416c0d7). The main-branch Vercel deployment dpl_ETSnBYsxX32TJD2Du3eaf5dsc5Gc is READY with that merge SHA and target null. Read-only alias lookup at 2026-09-29T00:44Z still resolved hkwtia.vercel.app to READY Production deployment dpl_8cr2En9xQhrs5nDpxny9GY3L4stx, SHA 0076981b203632da15ae8f881d3cb55287ccaa79. Merge, Preview readiness and Production release are separate states.
+**Current state (2026-09-30 HKT): PR #101/#102 are merged; Production serves `ab568934471cde8aea18f493a5422653c5d719e0`.** The explicitly approved alias promotion completed at 2026-09-29T16:09:38.625Z. [Release receipt, exact commands and screenshots](release-20260930.md) supersede the earlier unreleased-PR #100 state retained in the historical [verification log](verification.md).
 
-| Boundary | Exact release check | This round's evidence / status |
+| Boundary | Verified state | Remaining gate |
 |---|---|---|
-| Web | Reviewed SHA, exact deployment target, routes, build and browser receipt | PR #100 merged as b8d5f9d7. Main deployment dpl_ETSnBYsxX32TJD2Du3eaf5dsc5Gc is READY, target null. Production alias still serves diagnostic SHA 0076981b. Earlier PR Preview HTTP receipts and source gates remain recorded in verification.md; authenticated provider/browser acceptance is open. |
-| Worker and cron | Source SHA, region, schedule, lease/effect compatibility, last success, queue age and dead letters | No worker source change or deployment in this branch. Deployed worker version/health was not read back this round. No effects were invoked. |
-| Database | Explicit target branch, ledger 0037–0051, compatible schema and reads | Read-only Neon Production branch br-noisy-glitter-ao2npd77: neondb, ledger count 51/latest 51, page_copy and profiles present. Production runtime trace pooled host matches this branch compute metadata. This does not prove every deployed secret or transaction journey. No new migration in PR #100. |
-| Neon Auth | Exact branch, trusted origins, Google/linking and magic-link policy | Production branch Auth readback: Better Auth, trusted origin https://hkwtia.vercel.app, Google shared-provider mode, email shared-provider mode with generic Neon sender. WTIA-owned provider and test-inbox acceptance remain open. |
-| Stripe | Test versus Live mode, active price IDs/currency/interval and webhook endpoint | No new checkout/refund test. Existing payment rules and idempotency were unchanged. Prior PR/branch receipts are historical, not this branch's acceptance. |
-| Communications | Test inbox/sandbox, consent, suppression, outbox and worker | No real send or provider receipt. No consent default changed. |
-| Flags | `AUTH_GOOGLE_ENABLED`, `ADMIN_BATCH_ENABLED`, `MEMBER_IMPORT_ENABLED`, `MEMBERSHIP_GRANTS_ENABLED`, `MEMBERSHIP_GRANT_BATCH_ENABLED`, `MEMBER_COMMUNICATION_BATCH_ENABLED`, `MEMBER_EXPORT_ENABLED`, `EVENT_ATTENDEE_EXPORT_ENABLED`, `TICKET_RESEND_BATCH_ENABLED` | Values were not read back for this deployment; no flag was changed. Join Google entry remains feature-gated. |
-| Browser | Seven widths, two locales, authenticated journeys, queue, batch, CMS and transaction matrix | Earlier anonymous login entry passed 15/15; protected Preview provider journey is still unverified. A local Chromium history probe reproduced draft loss on browser Back: the Next App Router popstate listener ran before the late guard listener. The tentative late-listener fix was discarded and not committed. |
-| Production | Exact alias web SHA, DB ledger, Auth/worker binding, approved flags and smoke | Alias web SHA 0076981b; PR #100 merged SHA b8d5f9d7 is not on that alias. Production Neon branch ledger 51 and Auth configuration were read-only inspected. Worker SHA/region, flag values, F05 successful profile creation and effectful journeys remain unverified. No new Production write or deploy occurred in this follow-up. |
+| Source | PR #101 merge `290d50c6`; PR #102 merge `ab568934`; reviewed head `86c37d7e` has an identical source tree. Main CI run 36592795616 passed. | No code-completion claim beyond the findings recorded in finding-status.md. |
+| Isolated Preview | `dpl_AQVE9QJiQiPRpidi8Rpb9ScFrKTi`, real isolated Neon Auth; 5/5 shell/authorization tests; 16 dashboard destinations; two locales/seven widths; four Axe scans without serious/critical violations. | Google callback, magic-link inbox/expiry/linking, all batch/provider and CMS publish journeys are not verified by this dashboard suite. |
+| Production web | `hkwtia.vercel.app` resolves to READY production `dpl_5Xgjk74ximch2aUBugzHgWRfCgon`, SHA `ab568934`; staged and live anonymous smoke each passed 10 checks. | Real-member Google/profile journey is still unverified. |
+| Database | Read-only Production ledger count/latest 51 on `fragrant-mountain-25240574` / `br-noisy-glitter-ao2npd77`. Isolated branch ledger also 51. | No migration or seed is required or performed for this release. |
+| Worker and cron | No worker source/deployment or schedule change; no effects invoked. | Worker SHA/region, last-success, queue age and dead-letter health were not verified in this round. |
+| Neon Auth | Production configuration unchanged. The Preview uses the isolated branch and synthetic sessions. Its two trusted origins were added only to that branch. | F05 needs a correlated Google-to-profile result; F11 WTIA-owned providers, linking and inbox evidence remain open. |
+| Stripe and communications | No payment/refund or message test in this round. Preview credentials are test mode; existing Production Stripe mode remains test. Consent, price and idempotency rules unchanged. | Provider acceptance and any live activation require their separate gates. |
+| Flags | Production `AUTH_GOOGLE_ENABLED=true`; effectful flags remain at their existing absent/default settings. Only isolated Preview uses batch UI enabled, worker paused and live Woztell off. | No capability was activated in Production. |
+| Runtime logs | One new `/events` connection-terminated exception attached to HTTP 200; same symptom exists in prior deployment. Event-page repeats passed. | Root cause remains undiagnosed. This is not a clean-log or connection-fix claim. |
+| Policy and CMS | Existing policies preserved. | F08 manual decisions and F10 public legal/pricing claims need association decisions. F09 browser Back draft loss remains known. |
 
-## Controlled rollout order
+## Executed rollout order
 
-1. Review the merged source and its [finding status](finding-status.md) and [verification log](verification.md). Resolve F05 provider/profile root cause with a fresh support reference, then obtain synthetic Google and test-inbox receipts. Confirm F08/F10 association policy before their work; current source deliberately does not choose a policy.
-2. Read back the exact Preview Auth, database, provider and flags binding. Run protected Preview Playwright with a scoped protection-only session and synthetic actors: bilingual login/Join/resume, role revocation, pending queue, batch partial failure, CMS unsaved/publish and test-provider transactions. Record exact screenshots and provider receipts. A CLI 200 or a skipped test does not satisfy this gate.
-3. Reconfirm Production database host/branch and migration ledger. This branch has **no migration** to apply. Verify current web and worker compatibility with the existing schema, leases, outbox/effect keys and historical grants. Do not run production seed, migration, real payment/refund or member send as part of review.
-4. If later authorized for release, deploy the reviewed web SHA with effectful flags unchanged; no worker deployment is required by this source change. Verify anonymous and synthetic read-only Production journeys, then enable only separately approved capabilities after provider, policy and worker gates. Record exact alias deployment, web SHA, DB ledger, worker SHA/region, flag values and times.
+1. Confirmed exact reviewed/merged source, CI and isolated synthetic browser acceptance.
+2. Read back Production configuration/schema; retained existing flags and provider bindings. No new migration exists.
+3. Built Production with existing Production settings and `--skip-domain`; no isolated test overrides. Staged smoke passed.
+4. Obtained explicit approval for the exact SHA/deployment and promoted it. Verified alias identity and live smoke.
+5. Preserved existing worker, database and effectful configuration. Recorded the residual connection-log symptom and broad-audit gates.
 
-## Rollback and reconciliation
+The Vercel production branch is **`release`**. Merging `main` produces a Preview; it does not itself release the Production alias.
 
-- For a web regression, repoint the alias to the previous **schema-compatible** READY web deployment after verifying the exact ID. Do not roll back or drop 0037–0051 merely to revert UI.
-- If an effectful capability is later enabled and fails, stop new submissions through its approved flag, let in-flight worker claims settle, inspect provider acceptance and stored idempotency/effect keys, then reconcile before retry. Do not delete batches, outbox, payments, refunds, grants, audit or consent history.
-- A web rollback cannot undo an accepted external payment, refund, grant or message. Match worker code to the retained schema before changing worker deployment.
+## Verified rollback target and checklist
 
-**Claim boundary:** PR #100 code is merged and its local/isolated checks are recorded. Authenticated staging/provider journeys are not verified. Production alias still serves the earlier diagnostic SHA; the merged remediation is not Production released.
+- Previous compatible READY deployment: `dpl_8cr2En9xQhrs5nDpxny9GY3L4stx`, SHA `0076981b203632da15ae8f881d3cb55287ccaa79`.
+- Command syntax/identity checked; rollback has **not** been executed:
+
+```powershell
+vercel.cmd rollback dpl_8cr2En9xQhrs5nDpxny9GY3L4stx --yes --scope ynwaforevers-projects
+```
+
+After rollback, read the alias deployment/SHA again, repeat public/login/admin-denial smoke and inspect runtime logs. Do not reverse migrations 0037–0051, delete batch/outbox/audit/payment/grant/consent history or replay external effects. No DB or worker rollback is required for this web-only release.
+
+**Claim boundary:** dashboard code merged; isolated authenticated dashboard acceptance passed; approved web SHA is Production released. The remaining provider, policy, CMS-history and runtime-connection issues are explicitly open.

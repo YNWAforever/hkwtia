@@ -1,0 +1,36 @@
+{
+  "origin": "https://hkwtia.vercel.app",
+  "at": "2026-09-29T16:24:36.064Z",
+  "checks": [
+    {
+      "round": 1,
+      "path": "/events",
+      "status": 200,
+      "heading": "Events",
+      "rendered": true
+    },
+    {
+      "round": 1,
+      "path": "/zh/events",
+      "status": 200,
+      "heading": "活動",
+      "rendered": true
+    },
+    {
+      "round": 2,
+      "path": "/events",
+      "status": 200,
+      "heading": "Events",
+      "rendered": true
+    },
+    {
+      "round": 2,
+      "path": "/zh/events",
+      "status": 200,
+      "heading": "活動",
+      "rendered": true
+    }
+  ],
+  "pageErrors": [],
+  "passed": true
+}

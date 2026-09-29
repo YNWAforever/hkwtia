@@ -1,0 +1,98 @@
+{
+  "origin": "https://hkwtia-mizk4mnqo-ynwaforevers-projects.vercel.app",
+  "results": [
+    {
+      "path": "/admin/profiles-review",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "path": "/admin/listings-review?status=pending_review",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "path": "/admin/approvals",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "path": "/admin/tasks",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "path": "/admin/at-risk",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "path": "/admin/news",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "path": "/admin/batches/76c3ca0f-ccba-4619-8906-fddb19ddc3e6",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "path": "/admin/batches",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "locale": "en",
+      "recentTimes": 3,
+      "validHongKongTimes": true,
+      "failureCountVisible": true
+    },
+    {
+      "path": "/zh/admin/profiles-review",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "path": "/zh/admin/listings-review?status=pending_review",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "path": "/zh/admin/approvals",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "path": "/zh/admin/tasks",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "path": "/zh/admin/at-risk",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "path": "/zh/admin/news",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "path": "/zh/admin/batches/76c3ca0f-ccba-4619-8906-fddb19ddc3e6",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "path": "/zh/admin/batches",
+      "status": 200,
+      "authorized": true
+    },
+    {
+      "locale": "/zh",
+      "recentTimes": 3,
+      "validHongKongTimes": true,
+      "failureCountVisible": true
+    }
+  ],
+  "passed": true
+}
