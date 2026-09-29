@@ -1,23 +1,25 @@
+import {existsSync} from "node:fs";
 import {readFile} from "node:fs/promises";
 import {randomUUID} from "node:crypto";
-import {join} from "node:path";
-import {fileURLToPath} from "node:url";
+import {basename, join} from "node:path";
+import {fileURLToPath, pathToFileURL} from "node:url";
 
 import {Pool} from "pg";
 
 import {assertPartnerImportAuthorized, type PartnerImportAuthorization} from "@/scripts/lib/partner-import-guard";
 import {parseDonorPartnerFile, parseZhNameSidecar, resolveZhName, type DonorPartner} from "@/scripts/lib/partner-import-input";
 import {MediaUploadValidationError, normalizeImageUpload, type NormalizedImageUpload} from "@/lib/media/image-upload";
-import {createR2Storage, R2StorageError} from "@/lib/media/r2-storage";
+import {createR2Storage, resolveR2Config, R2StorageError} from "@/lib/media/r2-storage";
 
-/**
- * The donor checkout's partner-data module is read relative to
- * WISETECH_DONOR_DIR. This exact relative path was not verified against a
- * real donor checkout while writing this script (see the design spec's
- * appendix) -- adjust it if the real donor export lives elsewhere.
- */
-export const DONOR_PARTNER_DATA_RELATIVE_PATH = "partnerData.ts";
+/** Archived donor checkout, verified against commit f91ecc5f. */
+export const DONOR_PARTNER_DATA_RELATIVE_PATH = "app/partnerData.ts";
 export const DONOR_LOGO_DIRECTORY_RELATIVE_PATH = "public/partners";
+export async function loadDonorPartners(donorDir: string): Promise<readonly DonorPartner[]> {
+  const archivedPath = join(donorDir, DONOR_PARTNER_DATA_RELATIVE_PATH);
+  const donorPath = existsSync(archivedPath) ? archivedPath : join(donorDir, "partnerData.ts");
+  const donorModule = await import(pathToFileURL(donorPath).href);
+  return parseDonorPartnerFile(donorModule.default ?? donorModule.partners ?? donorModule);
+}
 
 type MediaInsertRow = Readonly<{
   id: string;
@@ -115,7 +117,7 @@ export async function importPartners(
       const mediaId = deps.generateId();
       const rawBytes = await deps.readLogoBytes(donorPartner.logoFile);
       const normalized = await deps.normalizeImage(rawBytes, "image/png", {
-        filename: donorPartner.logoFile,
+        filename: basename(donorPartner.logoFile),
         altEn: `${donorPartner.name} logo`,
         altZh: `${donorPartner.name} 標誌`,
         focalX: "50",
@@ -189,16 +191,19 @@ async function main(): Promise<void> {
     const authorization = await assertPartnerImportAuthorized(process.env, async () => {
       const result = await pool.query("SELECT count(*)::int AS count FROM acceptance_sentinel");
       return Number(result.rows[0]?.count ?? 0);
+    }, async (profileId) => {
+      const result = await pool.query<{role: string}>("SELECT role::text AS role FROM profiles WHERE id = $1 LIMIT 1", [profileId]);
+      return result.rows[0]?.role ?? null;
     });
 
-    const donorModule = await import(join(donorDir, DONOR_PARTNER_DATA_RELATIVE_PATH));
-    const donorPartners = parseDonorPartnerFile(donorModule.default ?? donorModule.partners);
+    const donorPartners = await loadDonorPartners(donorDir);
 
     const zhCsvPath = process.env.WISETECH_PARTNER_ZH_NAMES_CSV;
     const zhNameSidecar = zhCsvPath
       ? parseZhNameSidecar(await readFile(zhCsvPath, "utf8"))
       : new Map<string, string>();
 
+    resolveR2Config(process.env);
     const r2 = createR2Storage();
 
     const dependencies: PartnerImportDependencies = {
@@ -254,7 +259,8 @@ async function main(): Promise<void> {
       log: (message) => { console.log(message); },
     };
 
-    await importPartners(donorPartners, zhNameSidecar, authorization, dependencies);
+    const summary = await importPartners(donorPartners, zhNameSidecar, authorization, dependencies);
+    if (summary.skippedError > 0) throw new Error("PARTNER_IMPORT_INCOMPLETE");
   } finally {
     await pool.end();
   }

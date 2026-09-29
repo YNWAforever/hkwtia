@@ -1,6 +1,8 @@
+import {mkdtemp, mkdir, rm, writeFile} from "node:fs/promises";
+import {join} from "node:path";
 import {describe, expect, it, vi} from "vitest";
 
-import {importPartners, type PartnerImportDependencies} from "@/scripts/import-wisetech-partners";
+import {importPartners, loadDonorPartners, type PartnerImportDependencies} from "@/scripts/import-wisetech-partners";
 
 const donorPartners = [
   {name: "Harbour Trade Council", category: "supporting" as const, logoFile: "harbour-trade.png"},
@@ -62,6 +64,23 @@ describe("importPartners", () => {
     expect(insertedMedia).toHaveLength(2);
     expect(insertedPartners).toHaveLength(2);
     expect(insertedAudit).toHaveLength(2);
+  });
+
+  it("reads an archived category path but stores only the logo filename", async () => {
+    const readPaths: string[] = [];
+    const insertedMedia: Array<Record<string, unknown>> = [];
+    const deps = fakeDependencies({
+      readLogoBytes: async (logoFile) => { readPaths.push(logoFile); return new Uint8Array([0x89, 0x50, 0x4e, 0x47]); },
+      transaction: async (work) => work({
+        insertMedia: async (row) => { insertedMedia.push(row); return {id: "media-1"}; },
+        insertPartner: async () => ({id: "partner-1"}),
+        insertAudit: async () => {},
+      }),
+    });
+    const result = await importPartners([{name: "Harbour Trade Council", category: "supporting", logoFile: "supporting/trade.png"}], new Map(), {actorProfileId: "staff-1", actorKind: "staff"}, deps);
+    expect(result).toEqual({created: 1, skippedExisting: 0, skippedError: 0});
+    expect(readPaths).toEqual(["supporting/trade.png"]);
+    expect(insertedMedia[0]!.originalFilename).toBe("trade.png");
   });
 
   it("creates rows with published_at and both confirmed_at columns unset (null)", async () => {
@@ -199,6 +218,26 @@ describe("importPartners", () => {
       expect(line).not.toMatch(/https?:\/\//);
       expect(line).not.toContain("Harbour Trade Council");
       expect(line).not.toContain("GBA Media Group");
+    }
+  });
+});
+
+describe("loadDonorPartners", () => {
+  it("loads the archived donor module from app/partnerData.ts", async () => {
+    await mkdir(join(process.cwd(), ".playwright"), {recursive: true});
+    const donorDir = await mkdtemp(join(process.cwd(), ".playwright", "hkwtia-partners-"));
+    try {
+      await mkdir(join(donorDir, "app"));
+      await writeFile(join(donorDir, "app", "partnerData.ts"), [
+        'export const supportingOrganisations = [{name: "Harbour Trade Council", file: "trade.png"}];',
+        'export const regionalPartners = [];',
+        'export const mediaPartners = [];',
+      ].join("\n"));
+      expect(await loadDonorPartners(donorDir)).toEqual([
+        {name: "Harbour Trade Council", category: "supporting", logoFile: "supporting/trade.png"},
+      ]);
+    } finally {
+      await rm(donorDir, {recursive: true, force: true});
     }
   });
 });
