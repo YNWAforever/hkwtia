@@ -39,10 +39,10 @@ const expectedFingerprints = Object.freeze({
   navigationTargets: "4021c449ec1023a91fe94866123fc797b5de3adfa08f4e7e847e03b3767adb5d",
   forms: "2d6170f4f8df1dcb7f20c223f8de52b41123eb64b6361dd42d25cd8ac370ce99",
   formFlows: "348b4d93a7dae34fdf8e82682503158cb27f50d0cc7bf76b538308f1aabe1283",
-  sourceArtifacts: "4e4cff89b3ff0f51843e371ddb752a8515018324b49cd59acd81f78360217d29",
+  sourceArtifacts: "ca1a24184c88cf7efc12a61790b39bf59582c236e574cc5f6d55572cb17000b6",
   componentGroups: "4537b37dd90e7158cdb7f528d2a0a297f4787c883709b8626a01f6644a9e412c",
   content: "844b6c938731eb0afb64a4ca5f4fbf7f58cf46a004668dce7697b2eef1c6240c",
-  assets: "b3f512993bfb3042d5928a4852e2f99694658ec9eb33655c6126d2e6bc26c325",
+  assets: "466c6840a5401d499196eeff14d5c6307d234c25249604b528dc2801223d2e50",
 });
 
 const requiredGroups = Object.freeze(Object.keys(expectedFingerprints) as (keyof typeof expectedFingerprints)[]);

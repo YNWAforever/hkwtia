@@ -1,46 +1,81 @@
-# WiseTech Partner Import — Staff Runbook
+# WiseTech partner logo restoration
 
-This runbook covers running `scripts/import-wisetech-partners.ts` and confirming rights for the imported records. It does not cover archive photography (see §3) or writing the script itself (see `docs/superpowers/plans/2026-09-05-wisetech-wp5-content-migration.md`).
+## Source and decision
 
-## 1. Before you run anything
+The reviewed source is YNWAforever/wisetech commit
+f91ecc5fa29c2b9d416ed8315f23e9492baf993d. It exports
+supportingOrganisations, regionalPartners, and mediaPartners from
+app/partnerData.ts; each row has name and file. The 79 PNGs live under
+public/partners/{supporting,regional,media}/. Their counts are 58, 15, and 6.
+On 2026-09-30 HKT the WTIA requester confirmed that all 79 organisations still
+have current partner relationships and authorised WTIA to display their logos
+in this Codex task. The 79 local donor PNGs matched the SHA-256 values in
+config/wisetech-authoritative-source-inventory.ts; no other donor assets were
+covered by that confirmation.
 
-The script refuses to run without:
+The inventory now marks those 79 assets' relationship and logo-rights evidence
+approved and their disposition merge. Bilingual alt review and direct
+publication remain separate. The archive photographs and branding assets retain
+their previous gates. This decision is not evidence that records have been
+imported, published, or displayed on the live site.
 
-- `WISETECH_PARTNER_IMPORT=true`
-- `WISETECH_IMPORT_ACTOR_PROFILE_ID=<your profiles.id>` — every row this run creates is attributed to this profile in `audit_events`. Use your own profile id, not a shared or placeholder one.
-- `WISETECH_IMPORT_ACTOR_KIND` — one of `staff`, `exco`, `superadmin` (defaults to `staff` if unset).
-- Either the target database has a real `acceptance_sentinel` row (a disposable database provisioned for this purpose), **or** you explicitly set `WISETECH_IMPORT_ALLOW_PRODUCTION=true`. Only set this against the real production database once you have actually decided to import the real records there — there is no dry-run mode.
-- `WISETECH_DONOR_DIR=<path to the donor checkout>` — must contain the donor's partner data file and `public/partners/**` logo files.
-- `DATABASE_URL=<the target database>`.
+## Before importing
 
-Optional: `WISETECH_PARTNER_ZH_NAMES_CSV=<path to a name_en,name_zh_hk CSV>` — supply Chinese names for as many partners as you have them for. Any partner not listed keeps its English name as a placeholder `name_zh_hk` until you edit it in `/admin/partners`.
+1. Confirm the target database. Use an isolated database first. Production
+   requires a separate, explicit WISETECH_IMPORT_ALLOW_PRODUCTION=true.
+2. Supply WISETECH_DONOR_DIR pointing at the exact donor checkout above.
+   Compare its 79 files against the checked-in SHA-256 inventory before any
+   production run. Do not substitute a different checkout or add unreviewed
+   records.
+3. Supply DATABASE_URL and working R2 configuration:
+   R2_ACCOUNT_ID, R2_JURISDICTION, R2_ACCESS_KEY_ID,
+   R2_SECRET_ACCESS_KEY, and R2_BUCKET. The importer fails before the
+   loop if R2 configuration is missing. R2 uploads need isolated/test
+   credentials for isolated acceptance.
+4. Set WISETECH_PARTNER_IMPORT=true,
+   WISETECH_IMPORT_ACTOR_PROFILE_ID=<your profiles.id>, and
+   WISETECH_IMPORT_ACTOR_KIND=staff|exco|superadmin. The importer checks
+   that the profile exists and its database role exactly matches the claimed
+   role before writing. Use the actual operator's profile, never a placeholder.
+5. Optional: WISETECH_PARTNER_ZH_NAMES_CSV points to a
+   name_en,name_zh_hk CSV. Without a Chinese name, the English name remains
+   the temporary name_zh_hk and must be reviewed in the CMS.
 
-## 2. Running the import
+Run npm run content:import-wisetech-partners.
 
-```sh
-npm run content:import-wisetech-partners
-```
+Success for the exact 79-row source means created + skippedExisting = 79 and
+skippedError = 0. Any skipped error makes the command exit nonzero. Re-running
+is idempotent on (category, name_en). R2 objects uploaded before a failed DB
+transaction may remain; review and reconcile them before retrying.
 
-The script prints only a running count (`created=N skippedExisting=N skippedError=N`) — never a partner name, a URL, or a secret. Every created row is a real, insertable, but **unpublished and unconfirmed** partner: no visitor can see it yet, and the repo (`lib/db/repos/partners.ts`) refuses to publish it until both confirmations below exist.
+## Confirm and publish
 
-Running the script again against the same donor data is safe — it detects existing `(category, name_en)` pairs and creates nothing for them.
+Import creates audited media and partner records with all three confirmation/
+publication timestamps unset. No visitor can see them yet. For each record in
+/admin/partners/[id], review the English and Chinese names and both alt
+strings, set an accurate relationship window if known, record relationship and
+logo-rights confirmations, then publish. The repository refuses publication
+without both confirmations and a live logo media record with bilingual alt.
+Do not infer start dates or indefinite historical grants from the donor file.
 
-## 3. Confirming rights, per partner
+Verify /partners, /zh/partners, /, and /zh with all 79 records, including
+all three homepage categories and working images. Capture counts, image errors,
+and screenshots. A successful script run alone is not browser acceptance.
 
-For each newly-imported partner, in `/admin/partners/[id]`:
+## Rollback
 
-1. Confirm the **relationship window** — when this organisation was (or still is) a real WTIA partner. Set `relationshipStartsOn`/`relationshipEndsOn` if the relationship has a known end date; leave `relationshipEndsOn` unset if it's ongoing.
-2. Confirm the **logo rights** — that WTIA is authorised to display this organisation's logo on the public site. This is a real legal/relationship confirmation, not a formality — do not confirm it without actually checking.
-3. Once both are confirmed, the **Publish** action becomes available. Publishing is what makes the partner visible on `/partners` and the homepage wall.
+Unpublish affected records in the CMS first; public queries then stop returning
+them. If needed, archive them after unpublishing. Preserve audit history and
+uploaded R2 objects for reconciliation; do not delete them blindly. Rolling back
+application code cannot undo published database content, so verify public counts
+after both steps. This restoration requires no migration.
 
-Archive photography (the six donor `.webp` files, currently `retire` in `config/wisetech-authoritative-source-inventory.ts`) follows the same rights-confirmation principle but a different mechanism: once you've confirmed usage rights for one of those photos, upload it directly via `/admin/media` (bilingual alt text required) and reference it from the relevant page copy. There is no import script for this — `/admin/media` is already the correct, existing upload path.
+## Current release gate (2026-09-30)
 
-## 4. After rights are confirmed for an asset
-
-If you've confirmed rights for a specific archive photo or a class of partner logos such that `config/wisetech-authoritative-source-inventory.ts`'s disposition for that asset should change from `retire` to `merge`, that change:
-
-- happens in its own commit,
-- names the confirmation reference (who confirmed, when, and how) in the commit message,
-- is reviewed like any other code change.
-
-This runbook does not perform that step — it is a deliberate, one-at-a-time decision, not something the import script or this document should ever do automatically.
+Production partners has zero rows. vercel env ls production for the linked
+hkwtia project lists no R2 configuration keys, and the accessible local
+environments have no complete R2 configuration. Therefore the production import
+and browser acceptance have not run. Configure the existing R2 storage for the
+actual environment, then finish isolated import acceptance before a production
+import. The exact code and read-only evidence are in
+docs/integration/wisetech-partner-logo-restoration-2026-09-30.md.
