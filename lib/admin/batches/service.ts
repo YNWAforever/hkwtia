@@ -4,18 +4,19 @@ import {z} from "zod";
 
 import {batchOperationHandlers} from "@/lib/admin/batches/handlers/registry";
 import {adminBatchesRepository} from "@/lib/db/repos/admin-batches";
-import {batchPreviewDigest, batchRequestSchema, type BatchOperation, type BatchRequest, type BatchPreview, type BatchState} from "@/lib/admin/batches/types";
+import {batchPreviewDigest, batchRequestSchema, batchTargetSchema, type BatchItemFilter, type BatchOperation, type BatchRequest, type BatchPreview, type BatchState, type BatchTarget} from "@/lib/admin/batches/types";
 import {requireAdmin} from "@/lib/auth/authorize";
 import type {Actor, AdminActor} from "@/lib/membership/lifecycle";
 
 export type BatchSummary = Readonly<{batchId: string; state: BatchState; counters: Readonly<Record<"pending" | "running" | "succeeded" | "skipped" | "failed", number>>}>;
 export type BatchGateway = Readonly<{
   create: (actor: AdminActor, request: BatchRequest, requestDigest: string) => Promise<{batchId: string}>;
-  preview: (actor: AdminActor, id: string) => Promise<BatchPreview>;
+  preview: (actor: AdminActor, id: string, cursor?: string | null, filter?: BatchItemFilter) => Promise<BatchPreview>;
   commit: (actor: AdminActor, id: string, digest: string) => Promise<BatchSummary>;
   retryFailed: (actor: AdminActor, id: string) => Promise<BatchSummary>;
   cancelPending: (actor: AdminActor, id: string) => Promise<BatchSummary>;
 }>;
+export type BatchItemRetryGateway = Readonly<{retryFailedItem: (actor: AdminActor, id: string, target: BatchTarget) => Promise<BatchSummary>}>;
 const batchIdSchema = z.string().uuid();
 const commitSchema = z.object({batchId: batchIdSchema, previewDigest: z.string().regex(/^[a-f0-9]{64}$/)}).strict();
 
@@ -31,9 +32,9 @@ export async function prepareBatch(actor: Actor, input: unknown, store: BatchGat
   if (request.operation === "membership_grant" && actor.kind !== "superadmin") throw new Error("FORBIDDEN");
   return store.create(actor, request, batchPreviewDigest(request));
 }
-export async function getBatchPreview(actor: Actor, batchId: unknown, store: BatchGateway = adminBatchesRepository): Promise<BatchPreview> {
+export async function getBatchPreview(actor: Actor, batchId: unknown, store: BatchGateway = adminBatchesRepository, cursor?: string | null, filter: BatchItemFilter = "all"): Promise<BatchPreview> {
   requireAdmin(actor);
-  return store.preview(actor, batchIdSchema.parse(batchId));
+  return store.preview(actor, batchIdSchema.parse(batchId), cursor, filter);
 }
 export async function commitBatch(actor: Actor, input: unknown, store: BatchGateway = adminBatchesRepository): Promise<BatchSummary> {
   requireAdmin(actor);
@@ -43,6 +44,10 @@ export async function commitBatch(actor: Actor, input: unknown, store: BatchGate
 export async function retryFailedBatchItems(actor: Actor, batchId: unknown, store: BatchGateway = adminBatchesRepository): Promise<BatchSummary> {
   requireAdmin(actor);
   return store.retryFailed(actor, batchIdSchema.parse(batchId));
+}
+export async function retryFailedBatchItem(actor: Actor, batchId: unknown, target: unknown, store: BatchItemRetryGateway = adminBatchesRepository): Promise<BatchSummary> {
+  requireAdmin(actor);
+  return store.retryFailedItem(actor, batchIdSchema.parse(batchId), batchTargetSchema.parse(target));
 }
 export async function cancelPendingBatchItems(actor: Actor, batchId: unknown, store: BatchGateway = adminBatchesRepository): Promise<BatchSummary> {
   requireAdmin(actor);

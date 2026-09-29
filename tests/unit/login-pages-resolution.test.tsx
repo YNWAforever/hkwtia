@@ -5,9 +5,9 @@ vi.mock("@/lib/auth/login-resolution-server", () => ({resolveCurrentLogin: async
 vi.mock("@/lib/auth/actor", () => ({getActor: async () => null}));
 vi.mock("@/app/[locale]/member-login/provision-action", () => ({provisionMemberProfileAction: async () => undefined}));
 vi.mock("next-intl/server", () => ({getTranslations: async () => (key: string, params?: {reference?: string}) => params?.reference ? key + params.reference : key, setRequestLocale: vi.fn()}));
-vi.mock("next/navigation", () => ({redirect: () => {throw new Error("NEXT_REDIRECT");}}));
+vi.mock("next/navigation", () => ({redirect: () => {throw new Error("NEXT_REDIRECT");}, useSearchParams: () => new URLSearchParams()}));
 vi.mock("next/image", () => ({default: ({alt, src, ...props}: {alt: string; src: string}) => <img alt={alt} src={src} {...props} />}));
-vi.mock("@/i18n/navigation", () => ({Link: ({children, href, ...props}: {children: React.ReactNode; href: string}) => <a href={href} {...props}>{children}</a>}));
+vi.mock("@/i18n/navigation", () => ({Link: ({children, href, ...props}: {children: React.ReactNode; href: string}) => <a href={href} {...props}>{children}</a>, usePathname: () => "/member-login", useRouter: () => ({replace: vi.fn()})}));
 import MemberLoginPage from "@/app/[locale]/member-login/page";
 import AdminLoginPage from "@/app/[locale]/admin-login/page";
 const props = {params: Promise.resolve({locale: "en"}), searchParams: Promise.resolve({})};

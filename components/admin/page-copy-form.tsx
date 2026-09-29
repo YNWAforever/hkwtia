@@ -1,6 +1,8 @@
 "use client";
 
-import {useActionState} from "react";
+import {useActionState, useRef, useState} from "react";
+
+import {useAdminUnsavedChanges} from "@/components/admin/unsaved-changes-guard";
 
 import type {PageCopyActionState} from "@/lib/admin/page-copy-action-core";
 
@@ -20,6 +22,7 @@ type Labels = Readonly<{
   revertHint: string;
   save: string;
   saving: string;
+  previewDraft: string; previewPrivate: string; previewEnglish: string; previewChinese: string;
 }>;
 
 const initialState: PageCopyActionState = {};
@@ -38,15 +41,36 @@ export function PageCopyForm({
   action,
   fields,
   labels,
+  revision,
 }: Readonly<{
   action: (state: PageCopyActionState, formData: FormData) => Promise<PageCopyActionState>;
   fields: readonly PageCopyField[];
   labels: Labels;
+  revision: string;
 }>) {
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const {setDirty} = useAdminUnsavedChanges();
+  const formRef = useRef<HTMLFormElement>(null);
+  const [draftPreview, setDraftPreview] = useState<readonly Readonly<{keyPath: string; en: string; zh: string}>[] | null>(null);
+  const markEdited = () => {setDirty(true); setDraftPreview(null);};
+  const captureDraft = () => {
+    if (!formRef.current) return;
+    const data = new FormData(formRef.current);
+    setDraftPreview(fields.map((entry) => ({
+      keyPath: entry.keyPath,
+      en: String(data.get(entry.enField) ?? "").trim() || entry.enBundle,
+      zh: String(data.get(entry.zhField) ?? "").trim() || entry.zhBundle,
+    })));
+  };
+  const [state, formAction, pending] = useActionState(async (previous: PageCopyActionState, formData: FormData) => {
+    const result = await action(previous, formData);
+    if (result.status === "success") setDirty(false);
+    return result;
+  }, initialState);
 
   return (
-    <form action={formAction} className="space-y-6" noValidate>
+    <>
+    <form action={formAction} onChange={markEdited} onInput={markEdited} ref={formRef} className="space-y-6" noValidate>
+      <input name="revision" type="hidden" value={state.revision ?? revision}/>
       <p className="text-sm text-muted-foreground">{labels.revertHint}</p>
       <ul className="space-y-6">
         {fields.map((entry) => {
@@ -95,10 +119,22 @@ export function PageCopyForm({
         {state.message
           ? <p aria-live="polite" className={state.status === "error" ? "text-sm text-destructive" : "text-sm text-muted-foreground"} role={state.status === "error" ? "alert" : "status"}>{state.message}</p>
           : null}
+        <button className="inline-flex min-h-11 items-center justify-center rounded-md border px-4 py-2 text-sm font-medium" onClick={captureDraft} type="button">{labels.previewDraft}</button>
         <button className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60" disabled={pending} type="submit">
           {pending ? labels.saving : labels.save}
         </button>
       </div>
     </form>
+    {draftPreview ? <section aria-labelledby="page-copy-draft-preview-title" className="glass-card mt-6 space-y-5 p-6">
+      <h2 className="font-serif text-2xl font-semibold" id="page-copy-draft-preview-title">{labels.previewPrivate}</h2>
+      <ul className="space-y-5">{draftPreview.map((entry) => <li className="border-t pt-4" key={entry.keyPath}>
+        <p className="font-mono text-xs text-muted-foreground">{entry.keyPath}</p>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div><h3 className="text-sm font-semibold">{labels.previewEnglish}</h3><p className="whitespace-pre-wrap">{entry.en}</p></div>
+          <div><h3 className="text-sm font-semibold">{labels.previewChinese}</h3><p className="whitespace-pre-wrap">{entry.zh}</p></div>
+        </div>
+      </li>)}</ul>
+    </section> : null}
+    </>
   );
 }

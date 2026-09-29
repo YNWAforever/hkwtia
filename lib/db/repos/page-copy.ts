@@ -1,6 +1,7 @@
 import "server-only";
+import {createHash} from "node:crypto";
 
-import {and, asc, eq} from "drizzle-orm";
+import {and, asc, eq, sql} from "drizzle-orm";
 import {z} from "zod";
 
 import {routing} from "@/i18n/routing";
@@ -22,6 +23,7 @@ const keyPathSchema = z.string().trim().min(1).max(300)
 // overridden while Chinese silently kept its previous value.
 const saveInputSchema = z.object({
   namespace: namespaceSchema,
+  revision: z.string().regex(/^[a-f0-9]{64}$/),
   // A cleared value removes the override so the page falls back to the bundle.
   entries: z.array(z.object({
     locale: localeSchema,
@@ -39,7 +41,13 @@ export type PageCopyEntry = Readonly<{
   value: string;
 }>;
 
-export type PageCopySaveResult = Readonly<{updated: number; cleared: number}>;
+export type PageCopySaveResult = Readonly<{updated: number; cleared: number; revision: string}>;
+
+export function pageCopyRevision(rows: readonly Pick<PageCopyEntry, "locale" | "keyPath" | "value">[]): string {
+  const entries = rows.map(({locale, keyPath, value}) => [locale, keyPath, value] as const)
+    .sort((a, b) => `${a[0]}:${a[1]}`.localeCompare(`${b[0]}:${b[1]}`));
+  return createHash("sha256").update(JSON.stringify(entries)).digest("hex");
+}
 
 type PageCopyAudit = Readonly<{
   actorUserId: string;
@@ -51,6 +59,7 @@ type PageCopyAudit = Readonly<{
 }>;
 
 export type PageCopyMutationDependencies = Readonly<{transaction: <T>(work: (transaction: Readonly<{
+  lockNamespace: (namespace: string) => Promise<void>;
   listForNamespace: (namespace: string) => Promise<readonly PageCopyEntry[]>;
   upsert: (row: Readonly<{
     locale: string;
@@ -78,6 +87,7 @@ const projection = {
 async function defaultMutationDependencies(): Promise<PageCopyMutationDependencies> {
   const db = await getDb();
   return {transaction: (work) => db.transaction(async (tx) => work({
+    lockNamespace: async (namespace) => { await tx.execute(sql`SELECT pg_advisory_xact_lock(73083322, hashtext(${namespace}))`); },
     listForNamespace: async (namespace) => tx.select(projection).from(pageCopy)
       .where(eq(pageCopy.namespace, namespace)),
     upsert: async (row) => {
@@ -181,7 +191,10 @@ export async function savePageCopy(
   }
 
   return (dependencies ?? await defaultMutationDependencies()).transaction(async (transaction) => {
-    const current = new Map((await transaction.listForNamespace(parsed.namespace))
+    await transaction.lockNamespace(parsed.namespace);
+    const currentRows = await transaction.listForNamespace(parsed.namespace);
+    if (pageCopyRevision(currentRows) !== parsed.revision) throw new Error("PAGE_COPY_EDIT_CONFLICT");
+    const current = new Map(currentRows
       .map((row) => [`${row.locale}:${row.keyPath}`, row.value]));
     const updated: string[] = [];
     const cleared: string[] = [];
@@ -193,6 +206,7 @@ export async function savePageCopy(
         if (existing === undefined) continue;
         await transaction.remove(entry.locale, parsed.namespace, entry.keyPath);
         cleared.push(identity);
+        current.delete(identity);
         continue;
       }
       if (existing === entry.value) continue;
@@ -204,6 +218,7 @@ export async function savePageCopy(
         updatedByProfileId: actor.profileId,
       });
       updated.push(identity);
+      current.set(identity, entry.value);
     }
 
     if (updated.length || cleared.length) {
@@ -217,7 +232,11 @@ export async function savePageCopy(
       });
     }
 
-    return {updated: updated.length, cleared: cleared.length};
+    const revision = pageCopyRevision([...current].map(([identity, value]) => {
+      const separator = identity.indexOf(":");
+      return {locale: identity.slice(0, separator), keyPath: identity.slice(separator + 1), value};
+    }));
+    return {updated: updated.length, cleared: cleared.length, revision};
   });
 }
 

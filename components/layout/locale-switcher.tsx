@@ -15,6 +15,7 @@ type LocaleSwitcherProps = {
   switchToChineseLabel: string;
   /** The header passes the donor's `language-link`; the mobile menu and footer pass nothing. */
   className?: string;
+  beforeSwitch?: () => boolean;
 };
 
 export function LocaleSwitcher({
@@ -50,7 +51,8 @@ function LocaleSwitcherContent({
   chineseLabel,
   switchToEnglishLabel,
   switchToChineseLabel,
-  className
+  className,
+  beforeSwitch
 }: LocaleSwitcherProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -61,6 +63,7 @@ function LocaleSwitcherContent({
   const search = searchParams.toString();
 
   function switchLocale() {
+    if (beforeSwitch && !beforeSwitch()) return;
     const query = search ? `?${search}` : '';
     const fragment = window.location.hash;
     router.replace(`${pathname}${query}${fragment}`, {locale: targetLocale});

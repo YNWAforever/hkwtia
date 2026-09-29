@@ -38,6 +38,13 @@ describe("requestMemberLoginLink", () => {
     await expect(requestMemberLoginLink({email: "a@example.com", next: "/portal/events/not-a-uuid/edit"}, "en")).resolves.toEqual({ok: false, error: "invalid_continuation"});
   });
 
+  it("carries a validated Join plan through the member magic-link callback", async () => {
+    const next = "/join?plan=startup&application=1a538745-848b-448f-94d6-3b6a92f4e891";
+    expect(await requestMemberLoginLink({email: "a@example.com", next}, "en")).toEqual({ok: true});
+    expect(new URL(signInMagicLink.mock.calls[0][0].callbackURL).searchParams.get("next")).toBe(next);
+    await expect(requestMemberLoginLink({email: "a@example.com", next: "/join?plan=startup&role=staff"}, "en"))
+      .resolves.toEqual({ok: false, error: "invalid_continuation"});
+  });
   it("calls the shared magic-link provider with a member-login callback and a validated continuation", async () => {
     const result = await requestMemberLoginLink({email: "a@example.com", next: "/portal/billing"}, "en");
     expect(result).toEqual({ok: true});

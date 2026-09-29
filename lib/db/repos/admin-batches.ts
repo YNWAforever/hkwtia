@@ -3,7 +3,8 @@ import "server-only";
 import {sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
-import {batchPreviewDigest, batchRetryDelayMs, batchRuntimeConfig, batchRequestSchema, type BatchRequest, type BatchPreview, type BatchProgressItem} from "@/lib/admin/batches/types";
+import {batchPreviewDigest, batchRetryDelayMs, batchRuntimeConfig, batchRequestSchema, batchTargetSchema, type BatchRequest, type BatchPreview, type BatchProgressItem, type BatchTarget} from "@/lib/admin/batches/types";
+import {decodeScopedCursor, encodeScopedCursor} from "@/lib/admin/pagination";
 import type {BatchClaim, BatchHandlerRegistry, BatchOperationHandler, BatchWorkerRepository, BatchItemOutcome} from "@/lib/admin/batches/worker-types";
 import type {BatchGateway, BatchSummary} from "@/lib/admin/batches/service";
 import {requireAdmin} from "@/lib/auth/authorize";
@@ -37,7 +38,8 @@ function itemPreview(row: unknown): BatchProgressItem {
   return {target: {type: item.targetType, id: item.targetId}, previewStatus: item.previewStatus, eligible: item.previewStatus === "eligible", reasonCode: item.reasonCode, before: item.beforeSummary, after: item.afterSummary, expectedVersion: item.expectedVersion, state: item.state, attemptCount: item.attemptCount, errorCode: item.errorCode, resultRef: item.resultRef};
 }
 
-export function createAdminBatchesRepository(loadDatabase: () => Promise<BatchDatabase> = async () => await getDb() as unknown as BatchDatabase, now: () => Date = () => new Date()): BatchGateway {
+export type BatchStatusRepository = BatchGateway & Readonly<{status: (actor: AdminActor, batchId: string) => Promise<BatchSummary>; retryFailedItem: (actor: AdminActor, batchId: string, target: BatchTarget) => Promise<BatchSummary>}>;
+export function createAdminBatchesRepository(loadDatabase: () => Promise<BatchDatabase> = async () => await getDb() as unknown as BatchDatabase, now: () => Date = () => new Date()): BatchStatusRepository {
   return {
     async create(actor, request: BatchRequest, requestDigest) {
       requireAdmin(actor);
@@ -54,14 +56,61 @@ export function createAdminBatchesRepository(loadDatabase: () => Promise<BatchDa
         return {batchId: row.id};
       });
     },
-    async preview(actor, batchId): Promise<BatchPreview> {
+    async status(actor, batchId): Promise<BatchSummary> {
+      requireAdmin(actor);
+      const db = await loadDatabase();
+      return summary(await readOwned(db, actor.profileId, z.string().uuid().parse(batchId), false));
+    },
+    async preview(actor, batchId, cursor, filter = "all"): Promise<BatchPreview> {
       requireAdmin(actor);
       const db = await loadDatabase();
       const batch = await readOwned(db, actor.profileId, batchId, false);
-      const data = rows(await db.execute(sql`SELECT ${adminBatchItems.targetType} AS "targetType", ${adminBatchItems.targetId} AS "targetId", ${adminBatchItems.previewStatus} AS "previewStatus", ${adminBatchItems.expectedVersion} AS "expectedVersion", ${adminBatchItems.beforeSummary} AS "beforeSummary", ${adminBatchItems.afterSummary} AS "afterSummary", ${adminBatchItems.reasonCode} AS "reasonCode", ${adminBatchItems.state} AS state, ${adminBatchItems.attemptCount} AS "attemptCount", ${adminBatchItems.errorCode} AS "errorCode", ${adminBatchItems.resultRef} AS "resultRef" FROM ${adminBatchItems} WHERE ${adminBatchItems.batchId} = ${batchId}::uuid ORDER BY ${adminBatchItems.targetType}, ${adminBatchItems.targetId} LIMIT ${batchRuntimeConfig().maxItems + 1}`));
-      const items = data.map(itemPreview);
-      if (items.length > batchRuntimeConfig().maxItems) throw new Error("BATCH_TOO_LARGE");
-      return {batchId, operation: batch.operation, state: batch.state === "ready" && batch.previewExpiresAt && batch.previewExpiresAt.getTime() <= now().getTime() ? "expired" : batch.state, counters: countersSchema.parse(batch.counters), digest: batch.previewDigest ?? "", expiresAt: batch.previewExpiresAt?.toISOString() ?? "", total: items.length, eligible: items.filter((item) => item.eligible).length, skipped: data.filter((item) => itemRowSchema.parse(item).previewStatus === "skipped").length, blocked: data.filter((item) => itemRowSchema.parse(item).previewStatus === "blocked").length, items};
+      const config = batchRuntimeConfig();
+      const counts = z.object({
+        total: z.coerce.number().int().nonnegative(),
+        eligible: z.coerce.number().int().nonnegative(),
+        skipped: z.coerce.number().int().nonnegative(),
+        blocked: z.coerce.number().int().nonnegative(),
+        retryable: z.coerce.number().int().nonnegative(),
+      }).parse(firstRow(await db.execute(sql`
+        SELECT count(*)::int AS total,
+          count(*) FILTER (WHERE ${adminBatchItems.previewStatus} = 'eligible')::int AS eligible,
+          count(*) FILTER (WHERE ${adminBatchItems.previewStatus} = 'skipped')::int AS skipped,
+          count(*) FILTER (WHERE ${adminBatchItems.previewStatus} = 'blocked')::int AS blocked,
+          count(*) FILTER (WHERE ${adminBatchItems.state} = 'failed'
+            AND left(${adminBatchItems.errorCode}, 10) = 'TRANSIENT_'
+            AND ${adminBatchItems.attemptCount} < ${config.maxAttempts})::int AS retryable
+        FROM ${adminBatchItems} WHERE ${adminBatchItems.batchId} = ${batchId}::uuid
+      `)));
+      if (counts.total > config.maxItems) throw new Error("BATCH_TOO_LARGE");
+      const itemFilter = z.enum(["all", "failed"]).parse(filter);
+      const scope = itemFilter === "failed" ? `admin-batch:${batchId}:failed` : `admin-batch:${batchId}`;
+      const stateFilter = itemFilter === "failed" ? sql`AND ${adminBatchItems.state} = 'failed'` : sql``;
+      const key = cursor ? decodeScopedCursor(scope, cursor) : null;
+      const after = key ? sql`AND (${adminBatchItems.targetType}, ${adminBatchItems.targetId}) > (${key[0]}, ${key[1]})` : sql``;
+      const pageSize = 50;
+      const data = rows(await db.execute(sql`
+        SELECT ${adminBatchItems.targetType} AS "targetType", ${adminBatchItems.targetId} AS "targetId",
+          ${adminBatchItems.previewStatus} AS "previewStatus", ${adminBatchItems.expectedVersion} AS "expectedVersion",
+          ${adminBatchItems.beforeSummary} AS "beforeSummary", ${adminBatchItems.afterSummary} AS "afterSummary",
+          ${adminBatchItems.reasonCode} AS "reasonCode", ${adminBatchItems.state} AS state,
+          ${adminBatchItems.attemptCount} AS "attemptCount", ${adminBatchItems.errorCode} AS "errorCode",
+          ${adminBatchItems.resultRef} AS "resultRef"
+        FROM ${adminBatchItems} WHERE ${adminBatchItems.batchId} = ${batchId}::uuid ${stateFilter} ${after}
+        ORDER BY ${adminBatchItems.targetType}, ${adminBatchItems.targetId} LIMIT ${pageSize + 1}
+      `));
+      const items = data.slice(0, pageSize).map(itemPreview);
+      const last = items.at(-1);
+      const nextCursor = data.length > pageSize && last
+        ? encodeScopedCursor(scope, [last.target.type, last.target.id, ""]) : null;
+      return {
+        batchId, operation: batch.operation,
+        state: batch.state === "ready" && batch.previewExpiresAt && batch.previewExpiresAt.getTime() <= now().getTime() ? "expired" : batch.state,
+        counters: countersSchema.parse(batch.counters), digest: batch.previewDigest ?? "",
+        expiresAt: batch.previewExpiresAt?.toISOString() ?? "",
+        total: counts.total, eligible: counts.eligible, skipped: counts.skipped, blocked: counts.blocked,
+        retryableFailed: counts.retryable > 0, items, nextCursor,
+      };
     },
     async commit(actor, batchId, digest) {
       requireAdmin(actor);
@@ -75,6 +124,22 @@ export function createAdminBatchesRepository(loadDatabase: () => Promise<BatchDa
         if (!updated) throw new Error("BATCH_COMMIT_CONFLICT");
         await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${actor.profileId}, ${actor.kind}, 'admin.batch.committed', 'admin_batch', ${batchId}, jsonb_build_object('operation', ${batch.operation}::text))`);
         return summary(batch, "queued");
+      });
+    },
+    async retryFailedItem(actor, batchId, rawTarget) {
+      requireAdmin(actor);
+      const target = batchTargetSchema.parse(rawTarget);
+      const id = z.string().uuid().parse(batchId);
+      const db = await loadDatabase();
+      return db.transaction(async (tx) => {
+        const batch = await readOwned(tx, actor.profileId, id, true);
+        if (batch.state !== "completed_with_errors" && batch.state !== "running") throw new Error("BATCH_RETRY_UNAVAILABLE");
+        const retried = firstRow(await tx.execute(sql`UPDATE ${adminBatchItems} SET state = 'pending', next_attempt_at = NULL, lease_owner = NULL, lease_expires_at = NULL, error_code = NULL, updated_at = ${now()} WHERE ${adminBatchItems.batchId} = ${id}::uuid AND ${adminBatchItems.targetType} = ${target.type} AND ${adminBatchItems.targetId} = ${target.id} AND ${adminBatchItems.state} = 'failed' AND left(${adminBatchItems.errorCode}, 10) = 'TRANSIENT_' AND ${adminBatchItems.attemptCount} < ${batchRuntimeConfig().maxAttempts} RETURNING ${adminBatchItems.id} AS id`));
+        if (!retried || typeof retried !== "object" || !("id" in retried) || typeof retried.id !== "string") throw new Error("BATCH_NOTHING_RETRYABLE");
+        await tx.execute(sql`UPDATE ${adminBatches} SET state = 'queued', updated_at = ${now()} WHERE ${adminBatches.id} = ${id}::uuid`);
+        await tx.execute(sql`INSERT INTO ${auditEvents} (actor_user_id, actor_type, action, target_type, target_id, metadata) VALUES (${actor.profileId}, ${actor.kind}, 'admin.batch.item.retry_requested', 'admin_batch_item', ${retried.id}, jsonb_build_object('batchId', ${id}::text))`);
+        await refreshBatchCounters(tx, id, now());
+        return summary(await readOwned(tx, actor.profileId, id, false));
       });
     },
     async retryFailed(actor, batchId) {

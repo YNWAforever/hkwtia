@@ -4,6 +4,7 @@ import {
   createNewsPost,
   getNewsForAdmin,
   listNewsForAdmin,
+  setNewsArchived,
   updateNewsPost,
   type NewsMutationDependencies,
   type NewsReadDependencies,
@@ -42,7 +43,8 @@ function mutationDependencies(overrides: Record<string, unknown> = {}) {
     findBySlug: vi.fn(async () => null),
     insertPost: vi.fn(async (input: Record<string, unknown>) => post(input)),
     lockPost: vi.fn(async () => post()),
-    updatePost: vi.fn(async (_id: string, input: Record<string, unknown>) => post(input)),
+    updatePost: vi.fn(async (_id: string, input: Record<string, unknown>, updatedAt: Date) => post({...input, updatedAt})),
+    setArchivedAt: vi.fn(async (_id: string, archivedAt: Date | null, updatedAt: Date) => post({archivedAt, updatedAt})),
     insertAudit: vi.fn(async (input: {action: string; targetId: string}) => {
       audits.push(input);
     }),
@@ -64,7 +66,7 @@ describe("staff news repository", () => {
 
     await expect(createNewsPost(actor as never, validInput, dependencies))
       .rejects.toThrow("FORBIDDEN");
-    await expect(updateNewsPost(actor as never, post().id, validInput, dependencies))
+    await expect(updateNewsPost(actor as never, post().id, validInput, dependencies, post().updatedAt))
       .rejects.toThrow("FORBIDDEN");
     await expect(listNewsForAdmin(actor as never, {list: async () => [], listActive: async () => [], get: async () => null}))
       .rejects.toThrow("FORBIDDEN");
@@ -112,7 +114,7 @@ describe("staff news repository", () => {
       lockPost: vi.fn(async () => null),
     });
 
-    await expect(updateNewsPost(staff, post().id, {titleEn: "New", bodyMdx: validInput.bodyMdx, bodyMdxZhHk: validInput.bodyMdxZhHk}, dependencies))
+    await expect(updateNewsPost(staff, post().id, {titleEn: "New", bodyMdx: validInput.bodyMdx, bodyMdxZhHk: validInput.bodyMdxZhHk}, dependencies, post().updatedAt))
       .resolves.toBeNull();
     expect(transaction.updatePost).not.toHaveBeenCalled();
     expect(audits).toEqual([]);
@@ -133,12 +135,48 @@ describe("staff news repository", () => {
       after === undefined
         ? {titleEn: "Edited", bodyMdx: validInput.bodyMdx, bodyMdxZhHk: validInput.bodyMdxZhHk}
         : {publishedAt: after, bodyMdx: validInput.bodyMdx, bodyMdxZhHk: validInput.bodyMdxZhHk},
-      dependencies,
+      dependencies, post().updatedAt,
     );
 
     expect(audits.map(({action}) => action)).toEqual(expected);
   });
 
+  it("advances the stored revision beyond the locked value even if the clock is behind", async () => {
+    const locked = post({updatedAt: new Date("2099-01-01T00:00:00.000Z")});
+    const {dependencies, transaction} = mutationDependencies({
+      lockPost: vi.fn(async () => locked),
+    });
+    await updateNewsPost(
+      staff, post().id,
+      {titleEn: "Current edit", bodyMdx: validInput.bodyMdx, bodyMdxZhHk: validInput.bodyMdxZhHk},
+      dependencies, locked.updatedAt,
+    );
+    const revision = transaction.updatePost.mock.calls[0]?.[2] as Date | undefined;
+    expect(revision).toBeInstanceOf(Date);
+    expect(revision!.getTime()).toBeGreaterThan(locked.updatedAt.getTime());
+  });
+  it("advances the revision when archiving so an open editor becomes stale", async () => {
+    const locked = post({updatedAt: new Date("2099-01-01T00:00:00.000Z"), archivedAt: null});
+    const {dependencies, transaction} = mutationDependencies({
+      lockPost: vi.fn(async () => locked),
+    });
+    await setNewsArchived(staff, post().id, true, dependencies, () => new Date("2026-08-01T00:00:00.000Z"));
+    const revision = transaction.setArchivedAt.mock.calls[0]?.[2] as Date | undefined;
+    expect(revision).toBeInstanceOf(Date);
+    expect(revision!.getTime()).toBeGreaterThan(locked.updatedAt.getTime());
+  });
+  it("rejects a stale editor revision after locking without overwriting or auditing", async () => {
+    const {dependencies, transaction, audits} = mutationDependencies({
+      lockPost: vi.fn(async () => post({updatedAt: new Date("2026-08-02T00:00:00.000Z")})),
+    });
+    await expect(updateNewsPost(
+      staff, post().id,
+      {titleEn: "Stale edit", bodyMdx: validInput.bodyMdx, bodyMdxZhHk: validInput.bodyMdxZhHk},
+      dependencies, new Date("2026-08-01T00:00:00.000Z"),
+    )).rejects.toThrow("NEWS_EDIT_CONFLICT");
+    expect(transaction.updatePost).not.toHaveBeenCalled();
+    expect(audits).toEqual([]);
+  });
   it("reads only news rows and tolerates a malformed id", async () => {
     const reads: NewsReadDependencies = {
       list: vi.fn(async () => [post()] as never),

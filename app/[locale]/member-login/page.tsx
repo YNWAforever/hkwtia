@@ -5,11 +5,13 @@ import {redirect} from "next/navigation";
 
 import {siteConfig} from "@/config/site";
 import {SignInForm} from "@/components/auth/sign-in-form";
+import {LocaleSwitcher} from "@/components/layout/locale-switcher";
+import {PortalSignOutButton} from "@/components/portal/portal-sign-out-button";
 import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {resolveCurrentLogin} from "@/lib/auth/login-resolution-server";
 import {provisionMemberProfileAction} from "./provision-action";
-import {parsePortalContinuation} from "@/lib/portal/continuation";
+import {allowedMemberDestination, parseLoginDestination} from "@/lib/auth/login-destination";
 import {localizedPath} from "@/lib/urls";
 
 import {requestMemberLoginLink} from "./actions";
@@ -46,7 +48,9 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
 
   // Fails open to /portal for a stale or tampered `next` — this page must
   // never surface an error to a visitor over an invalid continuation alone.
-  const continuation = parsePortalContinuation(queryValue(query.next));
+  const requestedDestination = queryValue(query.next);
+  const continuation = parseLoginDestination(requestedDestination, "member").path;
+  const profileContinuation = allowedMemberDestination(requestedDestination);
 
   // Clicking the magic-link email lands the browser back here already
   // authenticated (Neon Auth verifies the token and redirects to this
@@ -57,6 +61,9 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
   if (resolution.kind === "allowed") redirect(localizedPath(locale, resolution.destination.path));
   const sent = queryValue(query.sent) === "1";
   const errorKey = errorMessageKey(queryValue(query.error));
+  const rawReference = queryValue(query.reference);
+  const profileReference = rawReference && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(rawReference)
+    ? rawReference : null;
 
   async function submitMemberLogin(formData: FormData): Promise<void> {
     "use server";
@@ -86,6 +93,7 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
             <Link className="min-h-11 content-center underline-offset-4 hover:underline" href="/admin-login">{t("staffSignIn")}</Link>
             <a className="min-h-11 content-center underline-offset-4 hover:underline" href={`mailto:${siteConfig.contact.email}`}>{t("support")}</a>
           </nav>
+          <LocaleSwitcher locale={locale} englishLabel={tNav("english")} chineseLabel={tNav("chinese")} switchToEnglishLabel={tNav("switchToEnglish")} switchToChineseLabel={tNav("switchToChinese")}/>
         </header>
         <section aria-labelledby="login-heading" className="glass-card mx-auto max-w-xl p-6 sm:p-10">
           <h1 className="font-serif text-4xl font-semibold" id="login-heading">{t("formLabel")}</h1>
@@ -94,12 +102,13 @@ export default async function MemberLoginPage({params, searchParams}: Props) {
             <p>{t("profileOnboarding")}</p>
             {queryValue(query.profile) === "conflict" ? <p className="mt-3 text-destructive" role="alert">{t("profileConflict")}</p> : null}
             {queryValue(query.profile) === "unverified" ? <p className="mt-3 text-destructive" role="alert">{t("profileUnverified")}</p> : null}
-            {queryValue(query.profile) === "unavailable" ? <p className="mt-3 text-destructive" role="alert">{t("profileUnavailable")}</p> : null}
-            <form action={provisionMemberProfileAction.bind(null, locale)} data-testid="profile-provision-form">
+            {queryValue(query.profile) === "unavailable" ? <div className="mt-3 text-destructive" role="alert"><p>{t("profileUnavailable")}</p>{profileReference ? <p>{t("profileReference", {reference: profileReference})}</p> : null}</div> : null}
+            <form action={provisionMemberProfileAction.bind(null, locale, profileContinuation ?? undefined)} data-testid="profile-provision-form">
               <button className="mt-4 min-h-11 rounded-md bg-primary px-4 text-primary-foreground" type="submit">{t("createProfile")}</button>
             </form>
+            <PortalSignOutButton errorLabel={t("switchAccountError")} label={t("switchAccount")}/>
           </div> : null}
-          {resolution.kind === "forbidden" ? <p className="mt-5 text-destructive" role="alert">{t("memberAccessDenied")}</p> : null}
+          {resolution.kind === "forbidden" ? <div className="mt-5"><p className="text-destructive" role="alert">{t("memberAccessDenied")}</p><PortalSignOutButton errorLabel={t("switchAccountError")} label={t("switchAccount")}/></div> : null}
           {resolution.kind === "unavailable" ? <div className="mt-5" role="alert">
             <p>{t("identityUnavailable", {reference: resolution.reference})}</p>
             <a className="mt-3 inline-flex min-h-11 items-center underline" href={`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent(continuation)}`}>{t("retry")}</a>

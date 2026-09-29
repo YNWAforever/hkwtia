@@ -97,8 +97,29 @@ describe("admin Event mutations and registration capacity", () => {
     const current = {...base, ...legacyDerivedEventColumns(base)};
     const update = vi.fn();
     const dependencies: EventMutationDependencies = {transaction: (work) => work({insertEvent: vi.fn(), lockEvent: async () => current, updateEvent: update, lockActiveMedia: vi.fn(), insertAudit: vi.fn()})};
-    await expect(updateEvent(staff, current.id, {endsAt: "2099-09-01T09:00:00.000Z"}, dependencies)).rejects.toThrow("endsAt must be after startsAt");
+    await expect(updateEvent(staff, current.id, {endsAt: "2099-09-01T09:00:00.000Z"}, dependencies, current.updatedAt)).rejects.toThrow("endsAt must be after startsAt");
     expect(update).not.toHaveBeenCalled();
+  });
+  it("refuses a stale event editor revision under the row lock without writing", async () => {
+    const base = {
+      id: eventLock.id, ...createInput,
+      startsAt: new Date(createInput.startsAt), endsAt: new Date(createInput.endsAt),
+      createdAt: new Date("2026-08-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-08-02T00:00:00.000Z"),
+    };
+    const current = {...base, ...legacyDerivedEventColumns(base)};
+    const update = vi.fn();
+    const audit = vi.fn();
+    const dependencies: EventMutationDependencies = {transaction: (work) => work({
+      insertEvent: vi.fn(), lockEvent: async () => current, updateEvent: update,
+      lockActiveMedia: vi.fn(), insertAudit: audit,
+    })};
+    await expect(updateEvent(
+      staff, current.id, {descriptionEn: "Stale edit"}, dependencies,
+      new Date("2026-08-01T00:00:00.000Z"),
+    )).rejects.toThrow("EVENT_EDIT_CONFLICT");
+    expect(update).not.toHaveBeenCalled();
+    expect(audit).not.toHaveBeenCalled();
   });
   it("does not revive a cancelled event from a stale admin form submission", async () => {
     const base = {id: eventLock.id, ...createInput, published: false, startsAt: new Date(createInput.startsAt), endsAt: new Date(createInput.endsAt), createdAt: new Date(), updatedAt: new Date()};
@@ -107,7 +128,7 @@ describe("admin Event mutations and registration capacity", () => {
     const audit = vi.fn();
     const dependencies: EventMutationDependencies = {transaction: (work) => work({insertEvent: vi.fn(), lockEvent: async () => current, updateEvent: update, lockActiveMedia: vi.fn(), insertAudit: audit})};
 
-    await expect(updateEvent(staff, current.id, {published: true}, dependencies)).rejects.toThrow("EVENT_CANCELLED_TERMINAL");
+    await expect(updateEvent(staff, current.id, {published: true}, dependencies, current.updatedAt)).rejects.toThrow("EVENT_CANCELLED_TERMINAL");
     expect(update).not.toHaveBeenCalled();
     expect(audit).not.toHaveBeenCalled();
   });
@@ -118,7 +139,7 @@ describe("admin Event mutations and registration capacity", () => {
     const update = vi.fn();
     const dependencies: EventMutationDependencies = {transaction: (work) => work({insertEvent: vi.fn(), lockEvent: async () => current, updateEvent: update, lockActiveMedia: vi.fn(), insertAudit: vi.fn()})};
 
-    await expect(updateEvent(staff, current.id, change, dependencies)).rejects.toThrow("EVENT_CANCELLED_TERMINAL");
+    await expect(updateEvent(staff, current.id, change, dependencies, current.updatedAt)).rejects.toThrow("EVENT_CANCELLED_TERMINAL");
     expect(update).not.toHaveBeenCalled();
   });
 

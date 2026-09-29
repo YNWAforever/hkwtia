@@ -13,13 +13,14 @@ import {requireAdminActor} from "@/lib/auth/actor";
 import {sendSeatPass, ticketProcessorDependencies} from "@/lib/billing/ticket-webhook-processor";
 import {cancelEvent, cancellationPreview, createEvent, updateEvent} from "@/lib/db/repos/events";
 
-export type EventFormActionMessages = Readonly<{successMessage: string; validationMessage: string; errorMessage: string}>;
+export type EventFormActionMessages = Readonly<{successMessage: string; validationMessage: string; errorMessage: string; conflictMessage: string}>;
 export type CheckInActionMessages = Readonly<{successMessage: string; errorMessage: string}>;
 
 export async function createEventAction(path: string, messages: EventFormActionMessages, state: EventActionState, formData: FormData): Promise<EventActionState> {
   try {
+    const actor = await requireAdminActor();
     return await runEventFormAction(state, formData, {...messages, mutate: async (data) => {
-      await createEvent(await requireAdminActor(), eventFormInput(data));
+      await createEvent(actor, eventFormInput(data));
       revalidatePath(path);
     }});
   } catch (error) {
@@ -30,10 +31,13 @@ export async function createEventAction(path: string, messages: EventFormActionM
 
 export async function updateEventAction(eventId: string, path: string, messages: EventFormActionMessages, state: EventActionState, formData: FormData): Promise<EventActionState> {
   try {
+    const actor = await requireAdminActor();
     return await runEventFormAction(state, formData, {...messages, mutate: async (data) => {
-      const updated = await updateEvent(await requireAdminActor(), eventId, eventFormInput(data));
+      const revision = new Date(z.string().datetime().parse(data.get("expectedUpdatedAt")));
+      const updated = await updateEvent(actor, eventId, eventFormInput(data), undefined, revision);
       if (!updated) throw new Error("EVENT_NOT_FOUND");
       revalidatePath(path);
+      return {revision: updated.updatedAt.toISOString()};
     }});
   } catch (error) {
     if (isAuthorizationDenial(error)) notFound();

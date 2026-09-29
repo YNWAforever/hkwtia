@@ -1,9 +1,10 @@
 import "server-only";
 
-import {and, asc, desc, eq, getTableColumns, ilike, inArray, isNull, or, sql} from "drizzle-orm";
+import {and, asc, desc, eq, getTableColumns, gt, ilike, inArray, isNull, lt, or, sql} from "drizzle-orm";
 import {z} from "zod";
 
 import {requireAdmin} from "@/lib/auth/authorize";
+import {decodeScopedCursor, encodeScopedCursor, type CursorPage} from "@/lib/admin/pagination";
 import {getDb, type Database} from "@/lib/db/repos/common";
 import {requireContactWriterSource, type ContactWriterActor} from "@/lib/db/repos/contacts";
 import {portalContentRepository} from "@/lib/db/repos/portal-content";
@@ -59,7 +60,7 @@ export type ShowcaseStore = Readonly<{
   getByCompany: (companyId: string) => Promise<ShowcaseListing | null>;
   getById: (id: string) => Promise<ShowcaseListing | null>;
   upsert: (companyId: string, input: ListingInput, status: "draft" | "pending_review", managerProfileId: string) => Promise<ShowcaseListing>;
-  listForReview: () => Promise<readonly ReviewShowcaseRow[]>;
+  listForReview: (status?: "pending_review", cursor?: string) => Promise<CursorPage<ReviewShowcaseRow>>;
   setStatus: (id: string, status: "published" | "rejected" | "pending_review", reviewerId: string, reviewVersion: string, rejectionReason?: string | null) => Promise<ShowcaseListing | null>;
   setPremium: (id: string, premium: boolean) => Promise<ShowcaseListing | null>;
   setLogoMedia: (id: string, mediaId: string | null) => Promise<ShowcaseListing | null>;
@@ -79,7 +80,7 @@ export type ShowcaseRepository = Readonly<{
   getByCompany: (actor: Actor, companyId: string) => Promise<ShowcaseListing | null>;
   upsertDraft: (actor: Actor, companyId: string, input: unknown, status?: "draft" | "pending_review") => Promise<ShowcaseListing>;
   submitForReview: (actor: Actor, companyId: string, input: unknown) => Promise<ShowcaseListing>;
-  listForReview: (actor: AdminActor) => Promise<readonly ReviewShowcaseRow[]>;
+  listForReview: (actor: AdminActor, status?: "pending_review", cursor?: string) => Promise<CursorPage<ReviewShowcaseRow>>;
   publish: (actor: AdminActor, id: string, reviewVersion: string) => Promise<ShowcaseListing | null>;
   reject: (actor: AdminActor, id: string, reason: string, reviewVersion: string) => Promise<ShowcaseListing | null>;
   setPremium: (actor: AdminActor, id: string, premium: boolean) => Promise<ShowcaseListing | null>;
@@ -192,15 +193,29 @@ export function databaseStore(loadDatabase: () => Promise<Database> = getDb): Sh
         return row;
       });
     },
-    async listForReview() {
+    async listForReview(status, cursor) {
       const database = await loadDatabase();
+      const scope = `showcase-review:${status ?? "all"}`;
+      const key = cursor ? decodeScopedCursor(scope, cursor) : null;
+      if (key && (!z.string().datetime({offset: true}).safeParse(key[0]).success || !z.string().min(1).max(100).safeParse(key[1]).success || !z.string().uuid().safeParse(key[2]).success)) throw new Error("INVALID_CURSOR");
+      const cursorAt = key ? new Date(key[0]) : null;
+      const after = key && cursorAt ? or(
+        lt(showcaseListings.updatedAt, cursorAt),
+        and(eq(showcaseListings.updatedAt, cursorAt), gt(showcaseListings.slug, key[1])),
+        and(eq(showcaseListings.updatedAt, cursorAt), eq(showcaseListings.slug, key[1]), gt(showcaseListings.id, key[2])),
+      ) : undefined;
       // Joined so staff can see the picture they are publishing, not just its
       // slug — the logo goes out under the association's brand.
-      return database
+      const data = await database
         .select({...getTableColumns(showcaseListings), ...publicLogoColumns, reviewVersion: sql<string>`${showcaseListings}.xmin::text`})
         .from(showcaseListings)
         .leftJoin(media, eq(showcaseListings.logoMediaId, media.id))
-        .orderBy(desc(showcaseListings.updatedAt), asc(showcaseListings.slug));
+        .where(and(status ? eq(showcaseListings.status, status) : undefined, after))
+        .orderBy(desc(showcaseListings.updatedAt), asc(showcaseListings.slug), asc(showcaseListings.id))
+        .limit(51);
+      const items = data.slice(0, 50);
+      const last = items.at(-1);
+      return {items, nextCursor: data.length > 50 && last ? encodeScopedCursor(scope, [last.updatedAt.toISOString(), last.slug, last.id]) : null};
     },
     async setStatus(id, status, reviewerId, reviewVersion, rejectionReason = null) {
       const database = await loadDatabase();
@@ -361,9 +376,9 @@ export function createShowcaseRepository(
     async submitForReview(actor, companyId, input) {
       return this.upsertDraft(actor, companyId, input, "pending_review");
     },
-    async listForReview(actor) {
+    async listForReview(actor, status, cursor) {
       requireAdmin(actor);
-      return store.listForReview();
+      return store.listForReview(status, cursor);
     },
     async publish(actor, id, reviewVersion) {
       requireAdmin(actor);

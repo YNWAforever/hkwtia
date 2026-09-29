@@ -7,6 +7,7 @@ export type NewsActionState = Readonly<{
   message?: string;
   fieldErrors?: Readonly<Record<string, string>>;
   values?: Readonly<Record<string, string>>;
+  revision?: string;
 }>;
 
 type NewsFormOptions = Readonly<{
@@ -14,7 +15,8 @@ type NewsFormOptions = Readonly<{
   validationMessage: string;
   slugConflictMessage: string;
   errorMessage: string;
-  mutate: (formData: FormData) => Promise<unknown>;
+  conflictMessage: string;
+  mutate: (formData: FormData) => Promise<{revision?: string} | void>;
 }>;
 
 /** Explicit allowlist: only these are ever echoed back to the browser. */
@@ -23,7 +25,7 @@ const preservedFields = [
 ] as const;
 
 export async function runNewsFormAction(
-  _state: NewsActionState,
+  state: NewsActionState,
   formData: FormData,
   options: NewsFormOptions,
 ): Promise<NewsActionState> {
@@ -31,10 +33,11 @@ export async function runNewsFormAction(
     preservedFields.map((name) => [name, String(formData.get(name) ?? "")]),
   );
   try {
-    await options.mutate(formData);
-    return {status: "success", message: options.successMessage};
+    const result = await options.mutate(formData);
+    return {status: "success", message: options.successMessage, ...(result?.revision ? {revision: result.revision} : {})};
   } catch (error) {
     if (isAuthorizationDenial(error)) throw error;
+    if (error instanceof Error && error.message === "NEWS_EDIT_CONFLICT") return {status: "error", message: options.conflictMessage, values, ...(state.revision ? {revision: state.revision} : {})};
     if (error instanceof z.ZodError) {
       // A duplicate slug is the one validation failure with its own message,
       // because "check the fields" does not tell an author what to change.
@@ -43,8 +46,8 @@ export async function runNewsFormAction(
       const message = conflict ? options.slugConflictMessage : options.validationMessage;
       const fieldErrors = Object.fromEntries(error.issues.flatMap((issue) =>
         typeof issue.path[0] === "string" ? [[issue.path[0], message]] : []));
-      return {status: "error", message, fieldErrors, values};
+      return {status: "error", message, fieldErrors, values, ...(state.revision ? {revision: state.revision} : {})};
     }
-    return {status: "error", message: options.errorMessage, values};
+    return {status: "error", message: options.errorMessage, values, ...(state.revision ? {revision: state.revision} : {})};
   }
 }

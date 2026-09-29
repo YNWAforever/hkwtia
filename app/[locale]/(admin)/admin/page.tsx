@@ -19,15 +19,16 @@ export default async function AdminPage({params}: Props) {
   // routes instead of relying on a hand-maintained list that fails open.
   const actor = await requireAdminPageActor();
   const t = await getTranslations({locale, namespace: "Admin"});
+  const snapshotAt = new Date();
   const [counts, recentBatches] = await Promise.all([
-    adminDashboardRepository.counts(actor),
+    adminDashboardRepository.counts(actor, snapshotAt),
     adminBatchHistoryRepository.recent(actor).catch(() => null),
   ]);
 
   const tiles: readonly DashboardTile[] = [
     {id: "approvals", href: "/admin/approvals", label: t("dashboard.pendingApprovals"), count: counts.approvals},
     {id: "at-risk", href: "/admin/at-risk", label: t("dashboard.atRisk"), count: counts.atRisk},
-    {id: "listings", href: "/admin/listings-review", label: t("dashboard.listingsAwaitingReview"), count: counts.listings},
+    {id: "listings", href: "/admin/listings-review?status=pending_review", label: t("dashboard.listingsAwaitingReview"), count: counts.listings},
     {id: "profiles-review", href: "/admin/profiles-review", label: t("dashboard.profilesAwaitingReview"), count: counts.profiles},
     {id: "tasks", href: "/admin/tasks", label: t("dashboard.openTasks"), count: counts.openTasks},
     {id: "news", href: "/admin/news", label: t("dashboard.draftNews"), count: counts.draftNews},
@@ -39,6 +40,7 @@ export default async function AdminPage({params}: Props) {
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("brand")}</p>
         <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{t("title")}</h1>
         <p className="text-lg text-muted-foreground">{t("description")}</p>
+        <p className="text-sm text-muted-foreground"><time dateTime={snapshotAt.toISOString()}>{t("dashboard.snapshotAt", {time: new Intl.DateTimeFormat(locale, {dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Hong_Kong"}).format(snapshotAt)})}</time></p>
       </header>
       <DashboardTiles
         locale={locale}

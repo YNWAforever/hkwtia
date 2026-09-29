@@ -133,7 +133,13 @@ describe("LocaleSwitcher", () => {
 
     expect(routerReplace).toHaveBeenCalledWith("/events?flag=", {locale: "en"});
   });
-  it("renders a 44px locale target in each Suspense state", () => {
+  it("keeps the current locale when an unsaved editor rejects the switch", () => {
+    const beforeSwitch = vi.fn(() => false);
+    render(<LocaleSwitcher beforeSwitch={beforeSwitch} locale="en" {...labels}/>);
+    fireEvent.click(screen.getByRole("button", {name: labels.switchToChineseLabel}));
+    expect(beforeSwitch).toHaveBeenCalledTimes(1);
+    expect(routerReplace).not.toHaveBeenCalled();
+  });  it("renders a 44px locale target in each Suspense state", () => {
     render(<LocaleSwitcher locale="en" {...labels} />);
 
     expect(screen.getByRole("button", {name: labels.switchToChineseLabel})).toHaveClass(

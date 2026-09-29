@@ -4,10 +4,13 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound, redirect} from "next/navigation";
 
 import {JoinForm} from "@/components/join/join-form";
+import {GoogleSignInButton} from "@/components/auth/google-sign-in-button";
 import {JoinProgress} from "@/components/join/progress";
 import {StructuredData} from "@/components/seo/structured-data";
 import type {AppLocale} from "@/i18n/routing";
 import {getActor} from "@/lib/auth/actor";
+import {resolveCurrentLogin} from "@/lib/auth/login-resolution-server";
+import {allowedMemberDestination} from "@/lib/auth/login-destination";
 import {parseJoinContinuation} from "@/lib/membership/join-navigation";
 import {buildPageMetadata} from "@/lib/metadata";
 import {applicationsRepository} from "@/lib/db/repos/applications";
@@ -41,6 +44,7 @@ export default async function JoinPage({params, searchParams}: Props) {
   const query = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("Join");
+  const tLogin = await getTranslations("MemberLogin");
   // Unscoped: the breadcrumb label keys are fully qualified (`Common.breadcrumbJoin`).
   const tRoot = await getTranslations({locale});
   // Five states render below -- chooser, invalid plan, two magic-link forms and the signed-in
@@ -49,8 +53,24 @@ export default async function JoinPage({params, searchParams}: Props) {
   const plan = selectedPlan(queryValue(query.plan));
   const continuation = parseJoinContinuation(queryValue(query.next), locale);
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
+  const joinQuery = new URLSearchParams();
+  if (plan) joinQuery.set("plan", plan);
+  if (continuation) joinQuery.set("next", continuation);
+  const requestedApplication = queryValue(query.application);
+  if (requestedApplication) joinQuery.set("application", requestedApplication);
+  const joinDestination = allowedMemberDestination(`/join?${joinQuery.toString()}`);
+  const googleCallback = joinDestination
+    ? `${localizedPath(locale, "/member-login")}?next=${encodeURIComponent(joinDestination)}` : null;
+  const googleLabels = {google: tLogin("google"), googleUnavailable: tLogin("googleUnavailable"), providerError: tLogin("errors.auth")};
 
   const actor = await getActor().catch(() => null);
+  if (!actor && joinDestination) {
+    const login = await resolveCurrentLogin({intent: "member", path: joinDestination});
+    if (login.kind === "needs-profile") {
+      redirect(`${localizedPath(locale, "/member-login")}?next=${encodeURIComponent(joinDestination)}`);
+    }
+    if (login.kind === "forbidden") notFound();
+  }
   if (actor && continuation) redirect(localizedPath(locale, continuation));
 
   if (!plan && !continuation) {
@@ -93,6 +113,8 @@ export default async function JoinPage({params, searchParams}: Props) {
         <JoinProgress active="auth" labels={labels} showCompany={false}/>
         <h1 className="mt-3 font-serif text-4xl font-semibold">{t("title")}</h1>
         <p className="mt-4 text-muted-foreground">{queryValue(query.sent) ? t("magicLinkSent") : t("authDescription")}</p>
+        {googleCallback ? <GoogleSignInButton callbackURL={googleCallback} enabled={process.env.AUTH_GOOGLE_ENABLED === "true"} labels={googleLabels}/> : null}
+        {googleCallback ? <p className="my-5 text-center text-sm text-muted-foreground">{tLogin("separator")}</p> : null}
         <div className="mt-8">
           <JoinForm action={action} fieldNames={["email"]} pendingLabel={t("sending")} submitLabel={t("sendMagicLink")}>
             <div>
@@ -150,6 +172,8 @@ export default async function JoinPage({params, searchParams}: Props) {
       <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t(`plans.${plan}`)}</p>
       <h1 className="mt-3 font-serif text-4xl font-semibold">{t("title")}</h1>
       <p className="mt-4 text-muted-foreground">{queryValue(query.sent) ? t("magicLinkSent") : t("authDescription")}</p>
+      {googleCallback ? <GoogleSignInButton callbackURL={googleCallback} enabled={process.env.AUTH_GOOGLE_ENABLED === "true"} labels={googleLabels}/> : null}
+      {googleCallback ? <p className="my-5 text-center text-sm text-muted-foreground">{tLogin("separator")}</p> : null}
       <div className="mt-8">
         <JoinForm action={action} fieldNames={["email"]} pendingLabel={t("sending")} submitLabel={t("sendMagicLink")}>
           {plan && queryValue(query.application) && <input name="application" type="hidden" value={queryValue(query.application)}/>}

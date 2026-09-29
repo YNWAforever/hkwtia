@@ -13,7 +13,8 @@ vi.mock("@/lib/auth/login-resolution-server", () => ({resolveCurrentLogin: async
   if (state.actor.kind === "member") return {kind: "forbidden"};
   return {kind: "allowed", destination: {intent: "admin", path}};
 }}));
-vi.mock("next/image", () => ({default: ({alt, src, ...props}: {alt: string; src: string}) => <img alt={alt} src={src} {...props} />}));
+vi.mock("@/components/layout/locale-switcher", () => ({LocaleSwitcher: ({switchToChineseLabel}: {switchToChineseLabel: string}) => <button aria-label={switchToChineseLabel} type="button"/>}));
+vi.mock("@/components/portal/portal-sign-out-button", () => ({PortalSignOutButton: ({label}: {label: string}) => <button type="button">{label}</button>}));vi.mock("next/image", () => ({default: ({alt, src, ...props}: {alt: string; src: string}) => <img alt={alt} src={src} {...props} />}));
 vi.mock("@/i18n/navigation", () => ({Link: ({children, href, ...props}: {children: React.ReactNode; href: string}) => <a href={href} {...props}>{children}</a>}));
 
 import AdminLoginPage from "@/app/[locale]/admin-login/page";
@@ -36,6 +37,12 @@ describe("public staff login page", () => {
     expect(screen.queryByTestId("admin-login-form")).not.toBeInTheDocument();
   });
 
+  it("offers locale and account switching after an authenticated member is denied staff access", async () => {
+    state.actor = {kind: "member", userId: "user", profileId: "profile"};
+    render(await AdminLoginPage(props("/admin/inbox")));
+    expect(screen.getByRole("button", {name: "switchToChinese"})).toBeInTheDocument();
+    expect(screen.getByRole("button", {name: "switchAccount"})).toBeInTheDocument();
+  });
   it("redirects authorized staff to the allowed destination", async () => {
     state.actor = {kind: "staff", userId: "user", profileId: "profile"};
     await expect(AdminLoginPage(props("/admin/inbox"))).rejects.toThrow("NEXT_REDIRECT");

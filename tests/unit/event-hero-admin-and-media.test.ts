@@ -52,7 +52,7 @@ describe("Event hero administration and media lifecycle", () => {
   it("offers only supplied active media IDs in the Event hero selector", () => {
     render(createElement(EventForm, {
       action: async () => ({}),
-      labels: {slug: "Slug", titleEn: "Title", titleZh: "Title", descriptionEn: "Description", descriptionZh: "Description", startsAt: "Starts", endsAt: "Ends", venue: "Venue", capacity: "Capacity", registrationMode: "Registration", registrationModes: {rsvp: "RSVP", external: "External", ticketed: "Ticketed"}, format: "Format", formats: {in_person: "In person", online: "Online", hybrid: "Hybrid"}, onlineUrl: "Online URL", externalRegistrationUrl: "External URL", tags: "Tags", visibility: "Visibility", visibilities: {public: "Public", members_only: "Members only", invite_only: "Invite only"}, ticketPriceHkdCents: "Ticket price (HKD)", memberOnly: "Members", published: "Published", heroMediaId: "Hero media", noHeroMedia: "No hero media", save: "Save", saving: "Saving"},
+      labels: {slug: "Slug", titleEn: "Title", titleZh: "Title", descriptionEn: "Description", descriptionZh: "Description", startsAt: "Starts", endsAt: "Ends", venue: "Venue", capacity: "Capacity", registrationMode: "Registration", registrationModes: {rsvp: "RSVP", external: "External", ticketed: "Ticketed"}, format: "Format", formats: {in_person: "In person", online: "Online", hybrid: "Hybrid"}, onlineUrl: "Online URL", externalRegistrationUrl: "External URL", tags: "Tags", visibility: "Visibility", visibilities: {public: "Public", members_only: "Members only", invite_only: "Invite only"}, ticketPriceHkdCents: "Ticket price (HKD)", memberOnly: "Members", published: "Published", heroMediaId: "Hero media", noHeroMedia: "No hero media", save: "Save", saving: "Saving", saveDraft: "Save as draft", savePublish: "Save and publish", previewDraft: "Preview draft", previewPrivate: "Private draft preview", previewEnglish: "English", previewChinese: "Chinese"},
       mediaRows: [{id: heroMediaId, altEn: "Active image", altZh: "啟用圖片"}],
     }));
 
@@ -122,7 +122,7 @@ describe("Event hero administration and media lifecycle", () => {
       } as never),
     };
 
-    await expect(updateEvent(staff, eventId, {heroMediaId}, dependencies))
+    await expect(updateEvent(staff, eventId, {heroMediaId}, dependencies, new Date("2029-01-01T00:00:00.000Z")))
       .rejects.toMatchObject({issues: [expect.objectContaining({path: ["heroMediaId"], message: "EVENT_HERO_MEDIA_INVALID"})]});
     expect(updateEventRow).not.toHaveBeenCalled();
     expect(insertAudit).not.toHaveBeenCalled();
@@ -157,12 +157,12 @@ describe("Event hero administration and media lifecycle", () => {
         insertAudit: updateAudit,
       } as never),
     };
-    await expect(updateEvent(staff, eventId, {heroMediaId: null}, updateDependencies))
+    await expect(updateEvent(staff, eventId, {heroMediaId: null}, updateDependencies, new Date("2029-01-01T00:00:00.000Z")))
       .resolves.toMatchObject({heroMediaId: null});
     expect(lockActiveMedia).not.toHaveBeenCalled();
     // D-12: a boolean-free admin update still writes both pairs, carried
     // over from the locked row rather than reset.
-    expect(updateEventRow).toHaveBeenCalledWith(eventId, {heroMediaId: null, status: "draft", visibility: "public", published: false, memberOnly: false, publishedAt: null});
+    expect(updateEventRow).toHaveBeenCalledWith(eventId, {heroMediaId: null, status: "draft", visibility: "public", published: false, memberOnly: false, publishedAt: null}, expect.any(Date));
     expect(updateAudit).toHaveBeenCalledOnce();
   });
 

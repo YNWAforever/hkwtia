@@ -30,11 +30,18 @@ describe("shared sign-in form", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Try again");
     expect(screen.getByRole("alert")).not.toHaveTextContent("internal secret");
   });
+  it("shows confirmation when the same form receives a new sent result", () => {
+    const {rerender} = render(<SignInForm {...props} googleEnabled sent={false}/>);
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    rerender(<SignInForm {...props} googleEnabled sent/>);
+    expect(screen.getByRole("status")).toHaveTextContent("Check your inbox");
+  });
   it("offers change email after a sent link without putting the address in the URL", async () => {
     sessionStorage.setItem("hkwtia-login-mask-member", "s***@e***.test");
     render(<SignInForm {...props} googleEnabled={false} sent/>);
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("s***@e***.test"));
-    fireEvent.click(screen.getByRole("button", {name: "Change email"}));
-    expect(screen.getByLabelText("Email")).toBeInTheDocument();
+    const changeEmail = screen.getByRole("link", {name: "Change email"});
+    expect(changeEmail).toHaveAttribute("href", "/member-login?next=%2Fportal%2Fbilling");
+    expect(changeEmail).not.toHaveAttribute("href", expect.stringContaining("synthetic"));
   });
 });

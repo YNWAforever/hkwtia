@@ -4,8 +4,10 @@ const state = vi.hoisted(() => ({path: "/zh/admin/members/123", push: vi.fn(), r
 vi.mock("next/navigation", () => ({usePathname: () => state.path}));
 vi.mock("next-intl", () => ({useTranslations: () => (key: string) => key}));
 vi.mock("@/i18n/navigation", () => ({useRouter: () => ({push: state.push, refresh: state.refresh})}));
+vi.mock("@/components/layout/locale-switcher", () => ({LocaleSwitcher: ({switchToEnglishLabel}: {switchToEnglishLabel: string}) => <button aria-label={switchToEnglishLabel} type="button"/>}));
 vi.mock("@/lib/auth/client", () => ({authClient: {signOut: state.signOut}}));
 import {AdminAppShell} from "@/components/admin/admin-app-shell";
+import {useAdminUnsavedChanges} from "@/components/admin/unsaved-changes-guard";
 
 const props = {locale: "zh-HK" as const, identity: "Synthetic Staff", role: "staff" as const, skipLabel: "Skip to content"};
 describe("admin workspace shell", () => {
@@ -26,6 +28,14 @@ describe("admin workspace shell", () => {
     expect(screen.getByTestId("admin-desktop-sidebar")).toHaveAttribute("data-collapsed", "true");
     expect(screen.getByRole("link", {name: "Skip to content"})).toHaveAttribute("href", "#main-content");
   });
+  it("exposes a locale control and switches accounts only after provider sign-out succeeds", async () => {
+    render(<AdminAppShell {...props}><h1>Member detail</h1></AdminAppShell>);
+    expect(screen.getByRole("button", {name: "switchToEnglish"})).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Synthetic Staff"));
+    fireEvent.click(screen.getByRole("button", {name: "shell.switchAccount"}));
+    await waitFor(() => expect(state.signOut).toHaveBeenCalledTimes(1));
+    expect(state.push).toHaveBeenCalledWith("/admin-login");
+  });
   it("keeps the admin session in place when the provider rejects sign-out", async () => {
     state.signOut.mockResolvedValueOnce({error: {message: "provider unavailable"}});
     render(<AdminAppShell {...props}><h1>Member detail</h1></AdminAppShell>);
@@ -33,6 +43,21 @@ describe("admin workspace shell", () => {
     fireEvent.click(screen.getByRole("button", {name: "shell.signOut"}));
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("shell.signOutError"));
     expect(state.push).not.toHaveBeenCalled();
+  });
+  it("keeps the account session when the editor cancels leaving a dirty form", async () => {
+    const confirm = vi.fn(() => false);
+    vi.stubGlobal("confirm", confirm);
+    function DraftToggle() {
+      const {setDirty} = useAdminUnsavedChanges();
+      return <button onClick={() => setDirty(true)} type="button">Edit draft</button>;
+    }
+    render(<AdminAppShell {...props}><DraftToggle/></AdminAppShell>);
+    fireEvent.click(screen.getByRole("button", {name: "Edit draft"}));
+    fireEvent.click(screen.getByText("Synthetic Staff"));
+    fireEvent.click(screen.getByRole("button", {name: "shell.switchAccount"}));
+    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(state.signOut).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
   });
   it("opens a keyboard-dismissable mobile navigation drawer", async () => {
     render(<AdminAppShell {...props}><h1>Member detail</h1></AdminAppShell>);

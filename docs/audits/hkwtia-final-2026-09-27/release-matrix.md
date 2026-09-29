@@ -1,3 +1,5 @@
+> 2026-09-29 follow-up: [current release matrix and rollback](../hkwtia-2026-09-29/release-matrix.md). The checkpoints below are historical and retain their original observation times.
+
 # Release matrix and rollout / rollback gate
 
 ## Production diagnostic rollout — 2026-09-29 00:16 HKT

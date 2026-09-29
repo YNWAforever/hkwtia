@@ -7,8 +7,7 @@ import type {AppLocale} from "@/i18n/routing";
 import {auth} from "@/lib/auth/server";
 import {checkAuthSend} from "@/lib/auth/rate-limit";
 import {appEnv} from "@/lib/config/env";
-import {allowedAdminDestination} from "@/lib/auth/login-destination";
-import {isPortalContinuation, type PortalContinuation} from "@/lib/portal/continuation";
+import {allowedAdminDestination, allowedMemberDestination} from "@/lib/auth/login-destination";
 import {clientIpFromHeaders} from "@/lib/security/request-origin";
 import {localizedPath} from "@/lib/urls";
 
@@ -46,16 +45,10 @@ export async function requestMemberLoginLink(
   const email = emailSchema.safeParse(input.email);
   if (!email.success) return {ok: false, error: "invalid_email"};
 
-  let continuation: PortalContinuation;
-  if (input.next == null) {
-    continuation = "/portal";
-  } else if (isPortalContinuation(input.next)) {
-    continuation = input.next;
-  } else {
-    // Strict rejection: an out-of-allowlist `next` must fail loudly, unlike
-    // parsePortalContinuation's fail-open default used by the page itself.
-    return {ok: false, error: "invalid_continuation"};
-  }
+  // A plan-bearing Join destination is allowed, but its application still
+  // belongs to the authenticated actor or the Join page returns 404.
+  const continuation = input.next == null ? "/portal" : allowedMemberDestination(input.next);
+  if (!continuation) return {ok: false, error: "invalid_continuation"};
 
   return sendValidatedLoginLink(email.data, continuation, locale, "member");
 }
