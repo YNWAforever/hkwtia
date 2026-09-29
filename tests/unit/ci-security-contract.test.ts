@@ -63,9 +63,9 @@ const requiredNpm10OptionalPeerClosure: Record<string, Record<string, unknown>> 
     peer: true,
   },
   "node_modules/fast-uri": {
-    version: "3.1.6",
-    resolved: "https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.6.tgz",
-    integrity: "sha512-7Ical1vFEMr0onbVzEDIreM22I4khW+fzyQPwvAFWBp1iwdshSZRsL4jjRvPG9JP1uiqMHRto+YU6R2/CzDz5Q==",
+    version: "3.1.7",
+    resolved: "https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.7.tgz",
+    integrity: "sha512-dOvZVzjdZdz7phd9v6jCbwxrBW3fK6n8Rc0CtdmM4bumzMnxywBYhuph6J819RRw/ku+rLbelwfMunktuzVVHg==",
     funding: [
       {type: "github", url: "https://github.com/sponsors/fastify"},
       {type: "opencollective", url: "https://opencollective.com/fastify"},
@@ -261,6 +261,19 @@ describe("CI and production dependency security contract", () => {
       driftedPackages[path] = {...driftedPackages[path], integrity: "sha512-hostile-drift"};
       expect(npm10OptionalPeerClosureMismatches(driftedRecord), `drifting ${path} must fail`).toEqual([path]);
     }
+  });
+
+  it("detects a vulnerable fast-uri version in the optional-peer closure", () => {
+    const vulnerableFixture: Record<string, unknown> = {
+      packages: structuredClone(requiredNpm10OptionalPeerClosure),
+    };
+    const packages = vulnerableFixture.packages as Record<string, Record<string, unknown>>;
+    packages["node_modules/fast-uri"] = {
+      ...packages["node_modules/fast-uri"],
+      version: "3.1.6",
+    };
+
+    expect(npm10OptionalPeerClosureMismatches(vulnerableFixture)).toEqual(["node_modules/fast-uri"]);
   });
 
   it("scopes Better Auth lock assertions to Neon Auth ancestry", () => {
