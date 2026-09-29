@@ -1,0 +1,35 @@
+{
+  "deploymentId": "dpl_8cr2En9xQhrs5nDpxny9GY3L4stx",
+  "checkedAt": "2026-09-29T16:18:49.796Z",
+  "window": "24h",
+  "filter": "error",
+  "records": [
+    {
+      "timestamp": 1790667474572,
+      "level": "error",
+      "path": "/zh/member-login",
+      "status": 200,
+      "messageType": "other",
+      "source": "serverless"
+    },
+    {
+      "timestamp": 1790641096285,
+      "level": "info",
+      "path": "/zh/membership",
+      "status": 200,
+      "messageType": "Connection terminated unexpectedly",
+      "source": "serverless-middleware"
+    },
+    {
+      "timestamp": 1790614025356,
+      "level": "error",
+      "path": "/zh/admin-login",
+      "status": 200,
+      "messageType": "other",
+      "source": "serverless-middleware"
+    }
+  ],
+  "limit": 100,
+  "truncated": false,
+  "exitCode": 0
+}

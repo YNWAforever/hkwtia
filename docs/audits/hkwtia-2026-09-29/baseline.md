@@ -13,3 +13,6 @@ Path mapping: the backlog names `docs/audits/hkwtia-final-2026-09-27/{acceptance
 - The existing sidebar, shared rate limiter, member-directory pagination, Member360, batch history, transaction guards, consent and payment policies were retained.
 
 See [finding-status.md](finding-status.md), [verification.md](verification.md), [decisions.md](decisions.md) and [release-matrix.md](release-matrix.md).
+## Released baseline — 2026-09-30 HKT
+
+PR #101 merged as `290d50c6`, and the reviewed dashboard head `86c37d7e` merged through PR #102 as `ab568934471cde8aea18f493a5422653c5d719e0`. Reviewed and merged source trees are identical. After explicit user approval, the Production alias now resolves to `dpl_5Xgjk74ximch2aUBugzHgWRfCgon` at that SHA; the previous compatible rollback is `dpl_8cr2En9xQhrs5nDpxny9GY3L4stx` / `0076981b`. Vercel's configured production branch is `release`, so main-branch merges alone do not promote the alias. [Release evidence](release-20260930.md) records the isolated Preview acceptance, Production smoke, configuration boundaries and remaining gates. No migration, seed or worker change was part of this release.
