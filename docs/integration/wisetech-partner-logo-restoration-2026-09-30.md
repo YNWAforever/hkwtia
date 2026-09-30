@@ -72,10 +72,10 @@ files, not as a published preview.
 | --- | --- | --- |
 | Code fixed | Verified locally | Focused tests, complete test suite, typecheck, build, string audit |
 | Isolated SQL import | Verified with synthetic fixtures | 79 rows, sequential rerun, atomic rollback, stored-role refusal; R2 port mocked |
-| Isolated R2 import | Blocked by missing bucket | Saved local credential format passed; PutObject returned 404 NoSuchBucket and CreateBucket returned 403 AccessDenied |
+| Isolated R2 import | Verified with real provider | 79 uploads and checksum/dimension-verified reads; rerun 0 created / 79 skipped / 0 errors |
 | Production import | Pending | R2 configuration absent from linked Vercel Production env; no import attempted |
-| CMS confirmation and publication | Pending | Per-record bilingual alt/name review and existing CMS publication actions |
-| Browser acceptance | Pending | Needs published records and working media on /, /zh, /partners, /zh/partners |
+| CMS confirmation and publication | Isolated verification passed | Real repository gates and synthetic staff browser unpublish/republish; production review/publication pending |
+| Browser acceptance | Local isolated verification passed | 8 locale/viewport route checks; Vercel Preview acceptance pending |
 
 Production Vercel environment variable names were read with vercel env ls
 production; no R2_ACCOUNT_ID, R2_JURISDICTION, R2_ACCESS_KEY_ID,
@@ -216,3 +216,79 @@ synthetic provider PUT/GET/checksum/delete acceptance, isolated 79-logo import
 and idempotent rerun, existing CMS confirmation/publication, and bilingual
 home/partners browser acceptance. Production configuration, import and release
 remain separately gated. No successful or skipped provider test is claimed.
+
+## Real R2 and local browser acceptance completed
+
+After the requester created the private test bucket, the same synthetic provider
+command exited 0 at `2026-09-30T14:58:54.314Z` (22:58:54 HKT). PUT, GET,
+SHA-256 metadata/bytes, PNG dimensions and run-owned DELETE all succeeded.
+This supersedes the earlier provisioning block; those failures are retained
+above as actual attempt history.
+
+Neon API checks reconfirmed the non-default, unprotected branch
+`br-lingering-unit-azxl75s5` in `solitary-wave-52860119` and the exact pooled
+`ep-plain-mouse-azm8pl2j` endpoint. Branch expiry remains 2026-10-04 20:00 HKT.
+The real-provider fixture used a newly created synthetic staff profile, with
+its role independently read from the database. All 79 donor bytes matched the
+checked-in approved inventory and passed the existing image normalizer.
+
+Actual sequential commands (ignored local runners; archived copies in the
+[evidence package](evidence/partner-logos-2026-09-30/README.md)):
+
+```powershell
+node --conditions=react-server --import tsx .playwright/run-partner-r2-isolated.mts prepare 'C:\Users\laich\Documents\hkwtia\.worktrees\audit-remediation\.playwright\audit-isolated.env' 'C:\Users\laich\Documents\hkwtia\.playwright\r2-isolated.env'
+node --conditions=react-server --import tsx .playwright/run-partner-r2-isolated.mts publish 'C:\Users\laich\Documents\hkwtia\.worktrees\audit-remediation\.playwright\audit-isolated.env' 'C:\Users\laich\Documents\hkwtia\.playwright\r2-isolated.env'
+node .playwright/run-partner-r2-web.mjs 'C:\Users\laich\Documents\hkwtia\.worktrees\audit-remediation\.playwright\audit-isolated.env' 'C:\Users\laich\Documents\hkwtia\.playwright\r2-isolated.env'
+node .playwright/run-partner-r2-browser.mjs
+node .playwright/run-partner-r2-cms.mjs 'C:\Users\laich\Documents\hkwtia\.worktrees\audit-remediation\.playwright\audit-isolated.env'
+```
+
+Results actually observed:
+
+- Import: created=79, skippedExisting=0, skippedError=0; 79 real R2 uploads,
+  79 byte/metadata checksums and dimension-verified reads, 79 creation audits.
+- Rerun: created=0, skippedExisting=79, skippedError=0; no additional upload.
+- Defaults: all 79 initially unpublished and both confirmation timestamps NULL.
+- Existing repository refused publication with `PARTNER_PUBLICATION_NOT_READY`
+  before confirmation. Both public projections were empty at that point.
+- Existing update/publication methods then produced 79 records in each locale,
+  58/15/6 categories, and 79 update + 79 publication audits. No relationship
+  start/end dates were invented or changed.
+- Local Chromium acceptance: 8 route/viewport cases passed, covering `/`, `/zh`,
+  `/partners`, `/zh/partners` at 1440x1000 and 390x844. Homepage tabs showed
+  58/15/6 totals and 12/12/6 real decoded images. Each full directory decoded
+  79 distinct images. Localized view-all links were actually clicked. No page
+  errors, console errors, failed media requests or horizontal overflow occurred.
+- CMS browser acceptance: anonymous editor access redirected to login; the
+  existing Neon Auth email/password API accepted an isolated `.example.test`
+  staff identity with HTTP 200. The real staff editor unpublish action reduced
+  the public count to 78, and republish restored 79. This verifies that CMS
+  journey; it is not a Google or magic-link provider acceptance claim.
+
+The initial agent-browser navigation timed out during the 31-second cold Next
+compilation; the warm retry worked. An initial shell-quoted eval failed and
+was replaced by stdin evaluation. The first bulk browser harness read an
+offscreen count before scrolling; its assertion failed (expected 58, received
+0). Scrolling to the real buttons before asserting their rendered text fixed
+that harness ordering. The 8-case rerun passed. No app code was changed to make
+these checks pass.
+
+Fresh typecheck and lint with `.playwright/**` excluded passed; lint has 0 errors
+and 67 existing warnings. The full unit suite and webpack build recorded above
+were run on identical app/library/script/test sources; `git diff origin/main --
+app components lib scripts tests messages package.json package-lock.json` was
+empty. This follow-up changes evidence only. Raw lint retains its recorded
+ignored-helper failure; it is not represented as passed.
+
+The 79 fixture records/objects and temporary synthetic actor are deliberately
+retained only in the isolated branch/private test bucket for Vercel Preview
+acceptance. No full fixture cleanup is claimed yet. The runner's cleanup mode
+is restricted to the confirmed test host, bucket and run-owned fixture state;
+run it after remote acceptance and record the actual result. The single-image
+provider probe was already cleaned successfully.
+
+Code is fixed and local isolated verification is complete. Vercel Preview
+verification and production restoration are still pending. No R2 credential
+has been sent to Vercel in this acceptance run so far; no production DB,
+production storage or domain was changed. No migration or worker deployment
+is required for this restoration.

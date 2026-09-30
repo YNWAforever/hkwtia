@@ -1,0 +1,26 @@
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {parseEnv} from 'node:util';
+import {chromium,expect} from '@playwright/test';
+const values=parseEnv(await readFile(process.argv[2],'utf8'));
+if(new URL(values.DATABASE_URL_TEST).hostname!=='ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech'||!values.M2_TEST_STAFF_EMAIL?.endsWith('.example.test')||!values.M2_TEST_STAFF_PASSWORD)throw new Error('ISOLATED_CMS_IDENTITY_REQUIRED');
+const state=JSON.parse(await readFile('.playwright/partner-r2-fixture-state.json','utf8'));
+if(state.phase!=='published-isolated'||state.partnerIds.length!==79)throw new Error('ISOLATED_CMS_FIXTURE_REQUIRED');
+const messages=JSON.parse(await readFile('messages/zh-HK.json','utf8')).Admin.partners;
+const browser=await chromium.launch({headless:true});
+const context=await browser.newContext({baseURL:'http://localhost:3017',viewport:{width:1440,height:1000}});
+const evidence={environment:'isolated local',authentication:'existing Neon Auth email/password API with synthetic staff; no email send',anonymousProtected:false,providerSignInStatus:null,staffEditor:false,unpublishedPublicCount:null,republishedPublicCount:null,productionChanged:false};
+try {
+  const page=await context.newPage();
+  const path='/zh/admin/partners/'+state.partnerIds[0];
+  await page.goto(path,{timeout:120_000});await expect(page).toHaveURL(/\/zh\/admin-login/,{timeout:45_000});evidence.anonymousProtected=true;
+  const response=await page.request.post('/api/auth/sign-in/email',{data:{email:values.M2_TEST_STAFF_EMAIL,password:values.M2_TEST_STAFF_PASSWORD,callbackURL:'/admin'},headers:{Origin:'http://localhost:3017'}});
+  evidence.providerSignInStatus=response.status();expect(response.ok()).toBe(true);
+  await page.goto(path,{timeout:120_000});await expect(page.locator('input[name="nameEn"]')).toHaveValue('HBCC Investment',{timeout:45_000});
+  await expect(page.locator('input[name="relationshipConfirmed"]')).toBeChecked();await expect(page.locator('input[name="logoRightsConfirmed"]')).toBeChecked();evidence.staffEditor=true;
+  await page.getByRole('button',{name:messages.unpublish,exact:true}).click();await expect(page.getByRole('button',{name:messages.publish,exact:true})).toBeVisible({timeout:30_000});
+  const publicPage=await context.newPage();await publicPage.goto('/zh/partners',{timeout:90_000});await expect(publicPage.locator('img[src^="/api/media/"]')).toHaveCount(78,{timeout:20_000});evidence.unpublishedPublicCount=78;
+  await page.getByRole('button',{name:messages.publish,exact:true}).click();await expect(page.getByRole('button',{name:messages.unpublish,exact:true})).toBeVisible({timeout:30_000});
+  await publicPage.reload();await expect(publicPage.locator('img[src^="/api/media/"]')).toHaveCount(79,{timeout:20_000});evidence.republishedPublicCount=79;
+  await mkdir('.playwright/partner-r2-cms',{recursive:true});await page.screenshot({path:'.playwright/partner-r2-cms/staff-editor.png',fullPage:true});evidence.passed=true;
+} catch(error) {evidence.passed=false;evidence.error={name:error?.name};process.exitCode=1;}
+finally {await writeFile('.playwright/partner-r2-cms-evidence.json',JSON.stringify(evidence,null,2)+'\n');console.log(JSON.stringify(evidence));await browser.close();}

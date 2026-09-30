@@ -1,0 +1,77 @@
+{
+  "scope": "isolated acceptance only; no production release",
+  "sourceCommit": "d9b75111",
+  "donorCommit": "f91ecc5fa29c2b9d416ed8315f23e9492baf993d",
+  "files": [
+    {
+      "filename": "README.md",
+      "bytes": 2062,
+      "sha256": "eeddce6837c8b9e8beebe80b8fc8e9cb68421efd088da7a68e87a6ef7d90530d"
+    },
+    {
+      "filename": "browser-acceptance.mjs.txt",
+      "bytes": 5892,
+      "sha256": "39a3905fdfb452ef81e77d105cb3ea84b4c83aca97ae776a9d599c8e6d0909fa"
+    },
+    {
+      "filename": "cms-acceptance.mjs.txt",
+      "bytes": 3260,
+      "sha256": "6c5eb481d8a318d118149f193baf533b51c3a75852e925b4c6d3a38431c426c3"
+    },
+    {
+      "filename": "home-en-desktop.png",
+      "bytes": 242983,
+      "sha256": "f59e6702032cbef43970aeb947629d937daf11777501926c50f50c2a1ad82d0b"
+    },
+    {
+      "filename": "home-zh-mobile.png",
+      "bytes": 54884,
+      "sha256": "2d30c208e5685383ede0f405039db4a9fc5a15c5ee447bac0b4aca7772b3cc75"
+    },
+    {
+      "filename": "isolated-fixture.mts.txt",
+      "bytes": 13920,
+      "sha256": "2cfc8a0bfd767136a190e76d848ca832820a819f931511df91a131a9016361ea"
+    },
+    {
+      "filename": "isolated-import.json",
+      "bytes": 1067,
+      "sha256": "e0554e15d6cb3efe5672e6f6c5b36f3f1e72a1acacfd4fb4ef0d4ed474872ebf"
+    },
+    {
+      "filename": "local-browser.json",
+      "bytes": 4589,
+      "sha256": "5436bc3f59f099e7e39bb643e2ade447eedbfb54ec9d45b6daddb48a1264b5b8"
+    },
+    {
+      "filename": "local-cms.json",
+      "bytes": 331,
+      "sha256": "fe1b33d679ce5fc2127cb46a1e1c8425cc8af37aab94b931a20d2e7c94662242"
+    },
+    {
+      "filename": "local-web.mjs.txt",
+      "bytes": 1816,
+      "sha256": "64dad4ca7860805324fb68ae24c25a378164c201411fc683fe4750a8b08b2fdd"
+    },
+    {
+      "filename": "partners-en-desktop.png",
+      "bytes": 2633011,
+      "sha256": "52f260d7f742341a8dd778c9a84ba88ee61357fb42e0ef539f774cba3b98cb40"
+    },
+    {
+      "filename": "partners-zh-mobile.png",
+      "bytes": 3013250,
+      "sha256": "c2b1d31c3bf9fdfa493cb78341743e9fde6492b180ac8f1b995f8aa90a5ad48d"
+    },
+    {
+      "filename": "provider-probe.mts.txt",
+      "bytes": 3933,
+      "sha256": "bdfc06e50736fe65ca0c03b077439972b1b717945ddbf3fbb0e1f58dc6476edd"
+    },
+    {
+      "filename": "r2-provider.json",
+      "bytes": 379,
+      "sha256": "dfa08485ea4eac907a287a77c7635a26276bb2b0e711d679ad51f2d8887b1c6d"
+    }
+  ]
+}

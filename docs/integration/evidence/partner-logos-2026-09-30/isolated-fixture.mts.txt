@@ -1,0 +1,141 @@
+import {readFile, writeFile, access} from 'node:fs/promises';
+import {randomUUID, createHash} from 'node:crypto';
+import {join} from 'node:path';
+import {parseEnv} from 'node:util';
+import {Pool} from 'pg';
+import sharp from 'sharp';
+import {authoritativeSourceInventory} from '../config/wisetech-authoritative-source-inventory';
+import {loadDonorPartners, importPartners, createPartnerImportDatabase} from '../scripts/import-wisetech-partners';
+import {assertPartnerImportAuthorized} from '../scripts/lib/partner-import-guard';
+import {normalizeImageUpload} from '../lib/media/image-upload';
+import {createR2Storage, resolveR2Config} from '../lib/media/r2-storage';
+import {partnersRepository} from '../lib/db/repos/partners';
+
+const statePath = '.playwright/partner-r2-fixture-state.json';
+const evidencePath = '.playwright/partner-r2-isolated-evidence.json';
+const donorDir = '.playwright/partner-logo-review/donor';
+const check = (condition: unknown, reason: string) => { if (!condition) throw new Error(reason); };
+type State = {run: string; actorId: string; email: string; objectKeys: string[]; partnerIds: string[]; sentinelDesignation: string; phase: string};
+async function save(state: State) { await writeFile(statePath, JSON.stringify(state, null, 2) + '\n'); }
+async function main() {
+  check(process.env.NODE_ENV !== 'production' && process.env.VERCEL_ENV !== 'production', 'PARTNER_R2_PRODUCTION_PROHIBITED');
+  const [mode, dbPath, r2Path] = process.argv.slice(2);
+  check(['prepare','publish','cleanup'].includes(mode) && dbPath && r2Path, 'PARTNER_R2_ARGUMENTS_REQUIRED');
+  const values = parseEnv(await readFile(dbPath, 'utf8'));
+  check(values.DATABASE_URL_TEST && new URL(values.DATABASE_URL_TEST).hostname === 'ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech' && values.NEON_PROJECT_ID === 'solitary-wave-52860119', 'PARTNER_R2_ISOLATED_DATABASE_REQUIRED');
+  process.env.DATABASE_URL = values.DATABASE_URL_TEST;
+  process.env.DATABASE_URL_TEST = values.DATABASE_URL_TEST;
+  process.env.VERCEL_ENV = 'test';
+  const r2Values = parseEnv(await readFile(r2Path, 'utf8'));
+  const environment = Object.fromEntries(['R2_ACCOUNT_ID','R2_JURISDICTION','R2_ACCESS_KEY_ID','R2_SECRET_ACCESS_KEY','R2_BUCKET'].map(key => [key, r2Values[key]]));
+  const config = resolveR2Config(environment);
+  check(config.bucket === 'hkwtia-partner-acceptance-20260930' && config.jurisdiction === 'default', 'PARTNER_R2_ISOLATED_BUCKET_REQUIRED');
+  const storage = createR2Storage({environment});
+  const pool = new Pool({connectionString: values.DATABASE_URL_TEST});
+  try {
+    if (mode === 'prepare') {
+      let stateExists = false;
+      try { await access(statePath); stateExists = true; } catch {}
+      check(!stateExists, 'PARTNER_R2_ACTIVE_STATE_EXISTS');
+      const donor = await loadDonorPartners(donorDir);
+      check(donor.length === 79 && donor.filter(r=>r.category==='supporting').length === 58 && donor.filter(r=>r.category==='regional').length === 15 && donor.filter(r=>r.category==='media').length === 6, 'PARTNER_R2_SOURCE_COUNT_MISMATCH');
+      const sourceAssets = authoritativeSourceInventory.assets.filter(row => row.sourcePath.startsWith('public/partners/'));
+      check(sourceAssets.length === 79, 'PARTNER_R2_INVENTORY_COUNT_MISMATCH');
+      const logoBytes = new Map<string, Buffer>();
+      for (const row of donor) {
+        const bytes = await readFile(join(donorDir, 'public/partners', row.logoFile));
+        const asset = sourceAssets.find(asset => asset.sourcePath === 'public/partners/' + row.logoFile);
+        check(asset && createHash('sha256').update(bytes).digest('hex') === asset.sha256 && asset.rightsStatus === 'approved' && asset.relationshipStatus === 'approved', 'PARTNER_R2_SOURCE_HASH_OR_APPROVAL_MISMATCH');
+        await normalizeImageUpload(bytes, 'image/png', {filename: row.logoFile.split('/').at(-1), altEn: row.name + ' logo', altZh: row.name + ' 標誌', focalX: '50', focalY: '50'});
+        check(!(await createPartnerImportDatabase(pool).findExisting(row.category, row.name)), 'PARTNER_R2_PREEXISTING_DONOR_RECORD');
+        logoBytes.set(row.logoFile, bytes);
+      }
+      console.log('verified 79 source hashes, approvals, image normalization and empty donor target');
+      const run = 'partner-r2-' + randomUUID();
+      const state: State = {run, actorId: run + '-staff', email: run + '@example.test', objectKeys: [], partnerIds: [], sentinelDesignation: run, phase: 'preparing'};
+      await save(state);
+      await pool.query("INSERT INTO acceptance_sentinel (designated_by,note) SELECT $1,'Temporary real-R2 partner acceptance on API-confirmed isolated branch' WHERE NOT EXISTS (SELECT 1 FROM acceptance_sentinel)", [state.sentinelDesignation]);
+      await pool.query("INSERT INTO profiles (id,auth_user_id,role,display_name,email) VALUES ($1,$1,'staff','Synthetic R2 partner acceptance staff',$2)", [state.actorId,state.email]);
+      const authorization = await assertPartnerImportAuthorized({WISETECH_PARTNER_IMPORT:'true',WISETECH_IMPORT_ACTOR_PROFILE_ID:state.actorId,WISETECH_IMPORT_ACTOR_KIND:'staff'}, async()=>(await pool.query('SELECT count(*)::int AS count FROM acceptance_sentinel')).rows[0].count, async(id)=>(await pool.query('SELECT role FROM profiles WHERE id=$1',[id])).rows[0]?.role ?? null);
+      let uploads = 0;
+      const deps = {...createPartnerImportDatabase(pool), readLogoBytes: async(file: string) => logoBytes.get(file)!, normalizeImage: normalizeImageUpload, uploadLogo: async(input: {key:string;bytes:Uint8Array;contentType:string;sha256:string}) => {
+        state.objectKeys.push(input.key); await save(state);
+        const result = await storage.put({...input,contentType:'image/png'});
+        uploads++; if (uploads % 10 === 0) console.log('R2 uploads completed=' + uploads);
+        return result;
+      }, generateId: randomUUID, log: (message:string)=>console.log(message)};
+      const initial = await importPartners(donor,new Map(),authorization,deps);
+      check(initial.created===79 && initial.skippedExisting===0 && initial.skippedError===0 && uploads===79,'PARTNER_R2_IMPORT_INCOMPLETE');
+      const imported = await pool.query('SELECT p.id,p.category,p.published_at,p.relationship_confirmed_at,p.logo_rights_confirmed_at,m.storage_key,m.storage_etag,m.checksum_sha256,m.width,m.height FROM partners p JOIN media m ON m.id=p.logo_media_id WHERE m.registered_by_profile_id=$1 ORDER BY p.display_order',[state.actorId]);
+      state.partnerIds = imported.rows.map(row=>row.id); await save(state);
+      check(imported.rows.length===79 && imported.rows.every(row=>!row.published_at && !row.relationship_confirmed_at && !row.logo_rights_confirmed_at),'PARTNER_R2_UNPUBLISHED_DEFAULTS_FAILED');
+      let reads = 0;
+      for (const row of imported.rows) {
+        const object = await storage.get({key:row.storage_key,etag:row.storage_etag});
+        check(object.body,'PARTNER_R2_IMAGE_BODY_MISSING');
+        const bytes = Buffer.from(await new Response(object.body).arrayBuffer());
+        const metadata = await sharp(bytes).metadata();
+        check(createHash('sha256').update(bytes).digest('hex')===row.checksum_sha256 && object.sha256===row.checksum_sha256 && object.contentType==='image/png' && metadata.width===row.width && metadata.height===row.height && metadata.format==='png','PARTNER_R2_IMAGE_READ_MISMATCH');
+        reads++; if (reads % 10 === 0) console.log('R2 reads verified=' + reads);
+      }
+      const repeated = await importPartners(donor,new Map(),authorization,deps);
+      check(repeated.created===0 && repeated.skippedExisting===79 && repeated.skippedError===0 && uploads===79,'PARTNER_R2_RERUN_FAILED');
+      const auditCount = Number((await pool.query("SELECT count(*)::int AS count FROM audit_events WHERE actor_user_id=$1 AND action='partner.created'",[state.actorId])).rows[0].count);
+      check(auditCount===79,'PARTNER_R2_IMPORT_AUDIT_COUNT_FAILED');
+      state.phase = 'imported-unpublished'; await save(state);
+      const evidence = {recordedAt:new Date().toISOString(),codeSource:'d9b75111',databaseProject:'solitary-wave-52860119',databaseBranch:'br-lingering-unit-azxl75s5',bucket:config.bucket,sourceVerified:79,initial,repeated,uploads,readVerified:reads,categories:{supporting:58,regional:15,media:6},unpublishedAndUnconfirmed:79,createdAudits:auditCount,actor:'synthetic stored staff',publication:'not attempted',productionChanged:false};
+      await writeFile(evidencePath,JSON.stringify(evidence,null,2)+'\n'); console.log(JSON.stringify(evidence));
+    } else {
+      const state: State = JSON.parse(await readFile(statePath,'utf8'));
+      check(/^partner-r2-[0-9a-f-]{36}$/.test(state.run) && state.actorId===state.run+'-staff' && state.email===state.run+'@example.test' && state.sentinelDesignation===state.run,'PARTNER_R2_STATE_INVALID');
+      if (mode === 'publish') {
+        const stored = (await pool.query('SELECT role,auth_user_id,email FROM profiles WHERE id=$1',[state.actorId])).rows[0];
+        check(stored?.role==='staff' && stored.auth_user_id===state.actorId && stored.email===state.email,'PARTNER_R2_STORED_ACTOR_MISMATCH');
+        const owned = (await pool.query('SELECT p.id FROM partners p JOIN media m ON m.id=p.logo_media_id WHERE m.registered_by_profile_id=$1',[state.actorId])).rows.map(row=>row.id);
+        check(owned.length===79 && state.partnerIds.length===79 && owned.every(id=>state.partnerIds.includes(id)),'PARTNER_R2_OWNED_ROWS_MISMATCH');
+        const actor = {kind:'staff' as const,userId:stored.auth_user_id,profileId:state.actorId};
+        let refusedBeforeConfirm = false;
+        try { await partnersRepository.setPublished(actor,state.partnerIds[0],true); }
+        catch (error) { if (error instanceof Error && error.message==='PARTNER_PUBLICATION_NOT_READY') refusedBeforeConfirm=true; else throw error; }
+        check(refusedBeforeConfirm,'PARTNER_R2_PREMATURE_PUBLICATION_ALLOWED');
+        check((await partnersRepository.listPublished('en',{limit:100})).length===0 && (await partnersRepository.listPublished('zh-HK',{limit:100})).length===0,'PARTNER_R2_PENDING_PUBLIC_LEAK');
+        console.log('existing repository refused premature publication; both public locales empty');
+        for (let index=0;index<state.partnerIds.length;index++) {
+          const id=state.partnerIds[index];
+          check(await partnersRepository.update(actor,id,{relationshipConfirmed:true,logoRightsConfirmed:true}),'PARTNER_R2_CONFIRM_FAILED');
+          check(await partnersRepository.setPublished(actor,id,true),'PARTNER_R2_PUBLISH_FAILED');
+          if ((index+1)%10===0) console.log('isolated confirmations and publications='+(index+1));
+        }
+        for (const locale of ['en','zh-HK'] as const) {
+          const rows=await partnersRepository.listPublished(locale,{limit:100});
+          check(rows.length===79 && rows.filter(r=>r.category==='supporting').length===58 && rows.filter(r=>r.category==='regional').length===15 && rows.filter(r=>r.category==='media').length===6 && rows.every(r=>r.logoUrl?.startsWith('/api/media/') && Boolean(r.logoAlt?.trim())),'PARTNER_R2_PUBLIC_PROJECTION_FAILED');
+        }
+        const auditRows=(await pool.query("SELECT action,count(*)::int AS count FROM audit_events WHERE actor_user_id=$1 GROUP BY action ORDER BY action",[state.actorId])).rows;
+        check(auditRows.length===3 && auditRows.every(row=>row.count===79),'PARTNER_R2_PUBLICATION_AUDIT_FAILED');
+        state.phase='published-isolated'; await save(state);
+        const evidence=JSON.parse(await readFile(evidencePath,'utf8'));
+        Object.assign(evidence,{publication:'existing repository methods on isolated branch',refusedBeforeConfirm,publicEn:79,publicZh:79,publicationAudits:auditRows,relationshipDatesUnchanged:true});
+        await writeFile(evidencePath,JSON.stringify(evidence,null,2)+'\n'); console.log(JSON.stringify(evidence));
+      } else {
+        await pool.query('BEGIN');
+        try {
+          await pool.query('DELETE FROM audit_events WHERE actor_user_id=$1',[state.actorId]);
+          await pool.query('DELETE FROM partners WHERE logo_media_id IN (SELECT id FROM media WHERE registered_by_profile_id=$1)',[state.actorId]);
+          await pool.query('DELETE FROM media WHERE registered_by_profile_id=$1',[state.actorId]);
+          await pool.query('DELETE FROM profiles WHERE id=$1 AND email=$2',[state.actorId,state.email]);
+          await pool.query('DELETE FROM acceptance_sentinel WHERE designated_by=$1',[state.sentinelDesignation]);
+          await pool.query('COMMIT');
+        } catch(error) { await pool.query('ROLLBACK'); throw error; }
+        let deleted=0;
+        for (const key of state.objectKeys) { await storage.delete(key); deleted++; }
+        const residue=(await pool.query('SELECT (SELECT count(*)::int FROM profiles WHERE id=$1) AS profiles,(SELECT count(*)::int FROM media WHERE registered_by_profile_id=$1) AS media,(SELECT count(*)::int FROM audit_events WHERE actor_user_id=$1) AS audits,(SELECT count(*)::int FROM acceptance_sentinel WHERE designated_by=$2) AS sentinels',[state.actorId,state.sentinelDesignation])).rows[0];
+        check(Object.values(residue).every(value=>value===0),'PARTNER_R2_CLEANUP_RESIDUE');
+        state.phase='cleaned'; await save(state);
+        const evidence=JSON.parse(await readFile(evidencePath,'utf8').catch(()=>'{}'));
+        Object.assign(evidence,{cleanupAt:new Date().toISOString(),cleanup:{deletedObjects:deleted,residue},productionChanged:false});
+        await writeFile(evidencePath,JSON.stringify(evidence,null,2)+'\n'); console.log(JSON.stringify({cleanup:evidence.cleanup}));
+      }
+    }
+  } finally { await pool.end(); }
+}
+main().catch(error=>{console.error(error instanceof Error && /^(PARTNER_R2_|PARTNER_IMPORT_|R2_)[A-Z_]+$/.test(error.message)?error.message:error?.name??'PARTNER_R2_FAILED');process.exitCode=1;}).finally(()=>process.exit(process.exitCode??0));

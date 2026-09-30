@@ -105,3 +105,22 @@ PUT/GET/SHA-256/delete probe before any 79-row import; its current result is
 failed, not provider acceptance. Full attempt details and exact commands are
 in the linked restoration evidence. No test credential has been sent to Vercel,
 and no production data or configuration was changed in this follow-up.
+
+## Provisioning resolved and actual isolated acceptance
+
+The requester created the named private test bucket. The real synthetic R2
+PUT/GET/checksum/dimension/delete probe subsequently passed. The exact approved
+79-logo source then passed real R2 + isolated Neon import/read verification and
+an idempotent rerun. Existing publication guards refused unconfirmed rows;
+existing repository methods and a real synthetic staff CMS browser unpublish/
+republish journey passed. The 8 bilingual desktop/mobile public route cases
+passed with all 79 directory images decoded. See the linked restoration report
+and its checksum-indexed evidence package for the exact commands and failures.
+
+Vercel Preview acceptance remains next. Retained fixture data is confined to the
+confirmed isolated branch/private bucket; cleanup is pending remote acceptance.
+Configure only the Preview deployment's test database/auth/Stripe/R2 settings,
+then verify its 79 actual media responses and bilingual views. Production
+configuration and data publication still need their actual environment and
+release authority; the local pass does not authorise a production migration or
+import. There is no schema change or new worker rollout for this restoration.
