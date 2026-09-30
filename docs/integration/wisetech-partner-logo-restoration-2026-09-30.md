@@ -341,3 +341,46 @@ Exit 0 at 2026-09-30T16:25:11.059Z (2026-10-01 00:25 HKT). Before counts:
 99 / 0 / 0 / 120; all run-owned residue and the temporary sentinel were zero.
 ROLLBACK restored the exact original counts. Objects deleted: 0.
 The 79 fixtures remain available for Preview; full cleanup is not claimed.
+
+## Subsequent Next.js audit advisory
+
+CI 36744617229 at 473ccd77 passed npm ci, dependency tree validation, string
+audit, lint, typecheck, build and both unit shards. Audit then failed on a
+different, newly available critical advisory for Next.js 16.3.4:
+[GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j).
+The brace-expansion findings were gone. A fresh local lockfile audit reproduced
+the Next.js failure with exit 1. The earlier passing audit above is retained as
+a timestamped attempt, not as the final gate.
+
+The maintainer's advisory identifies 16.3.6 as patched and limits affected
+applications to Node ImageResponse with attacker-controlled SVG values. This
+repository's current /api/og explicitly uses runtime=edge; no production
+exploitation or Node-path exposure is claimed. The package still fails the
+repository audit gate and has been upgraded to the official security patch.
+Next.js, eslint-config-next, @next/env, the Next lint plugin and matching SWC
+platform packages are now 16.3.6. Existing caret ranges and unrelated optional
+Auth peers are preserved; app, Auth, importer, membership/payment and worker
+sources remain unchanged.
+
+Actual command:
+
+```text
+npm install next@16.3.6 eslint-config-next@16.3.6 --save-prefix='^' --ignore-scripts --no-audit --no-fund
+npm audit --omit=dev --audit-level=high --package-lock-only
+```
+
+The package install selected exact ranges due to local npm settings; the
+existing caret style was explicitly restored in package.json and the root
+lockfile entries. Only the expected Next compiler/lint entries changed. The
+lockfile audit now exits 0 with 10 low/moderate findings, zero high/critical.
+Focused Next-patch rendering/auth regression: 10 files / 58 tests passed.
+Matching Next lint passed with 0 errors / 67 warnings. New full CI, local build
+and browser verification are in progress; no pending result is claimed as
+successful.
+
+The preceding brace-expansion-only candidate completed a fresh local full suite:
+716 files passed / 65 skipped; 6,097 tests passed / 171 skipped; zero failures,
+690 seconds, Node 24.18.0 on Windows. Its webpack build also exited 0. Those
+results apply to Next.js 16.3.4 and do not substitute for verifying 16.3.6.
+Generated next-env and snapshot line-ending changes were inspected and restored
+without changes to their committed contents.
