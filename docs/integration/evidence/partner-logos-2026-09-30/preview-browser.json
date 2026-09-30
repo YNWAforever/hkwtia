@@ -1,0 +1,201 @@
+{
+  "recordedAt": "2026-09-30T17:41:16.344Z",
+  "environment": "Vercel Preview; isolated Neon and private R2 test bucket",
+  "base": "https://hkwtia-partner-logos-20260930.vercel.app",
+  "codeSource": "d9b75111",
+  "candidateCommit": "68faa7be95abfa09710e871e68a6db501585559c",
+  "deploymentId": "dpl_qpvHQDcsMY2MxR9B1wbrg4AD9Rfg",
+  "nextVersion": "16.3.6",
+  "cases": [
+    {
+      "path": "/",
+      "viewport": "desktop",
+      "status": 200,
+      "categories": [
+        {
+          "category": "supporting",
+          "total": 58,
+          "shown": 12,
+          "loaded": 12
+        },
+        {
+          "category": "regional",
+          "total": 15,
+          "shown": 12,
+          "loaded": 12
+        },
+        {
+          "category": "media",
+          "total": 6,
+          "shown": 6,
+          "loaded": 6
+        }
+      ],
+      "screenshots": [
+        "home-en-desktop-supporting.png",
+        "home-en-desktop-regional.png",
+        "home-en-desktop-media.png"
+      ],
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "failedMedia": 0,
+      "horizontalOverflow": false
+    },
+    {
+      "path": "/partners",
+      "viewport": "desktop",
+      "navigation": "clicked localized view-all link",
+      "images": 79,
+      "uniqueImages": 79,
+      "decoded": 79,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "failedMedia": 0,
+      "horizontalOverflow": false,
+      "screenshot": "partners-en-desktop.png"
+    },
+    {
+      "path": "/zh",
+      "viewport": "desktop",
+      "status": 200,
+      "categories": [
+        {
+          "category": "supporting",
+          "total": 58,
+          "shown": 12,
+          "loaded": 12
+        },
+        {
+          "category": "regional",
+          "total": 15,
+          "shown": 12,
+          "loaded": 12
+        },
+        {
+          "category": "media",
+          "total": 6,
+          "shown": 6,
+          "loaded": 6
+        }
+      ],
+      "screenshots": [
+        "home-zh-desktop-supporting.png",
+        "home-zh-desktop-regional.png",
+        "home-zh-desktop-media.png"
+      ],
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "failedMedia": 0,
+      "horizontalOverflow": false
+    },
+    {
+      "path": "/zh/partners",
+      "viewport": "desktop",
+      "navigation": "clicked localized view-all link",
+      "images": 79,
+      "uniqueImages": 79,
+      "decoded": 79,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "failedMedia": 0,
+      "horizontalOverflow": false,
+      "screenshot": "partners-zh-desktop.png"
+    },
+    {
+      "path": "/",
+      "viewport": "mobile",
+      "status": 200,
+      "categories": [
+        {
+          "category": "supporting",
+          "total": 58,
+          "shown": 12,
+          "loaded": 12
+        },
+        {
+          "category": "regional",
+          "total": 15,
+          "shown": 12,
+          "loaded": 12
+        },
+        {
+          "category": "media",
+          "total": 6,
+          "shown": 6,
+          "loaded": 6
+        }
+      ],
+      "screenshots": [
+        "home-en-mobile-supporting.png",
+        "home-en-mobile-regional.png",
+        "home-en-mobile-media.png"
+      ],
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "failedMedia": 0,
+      "horizontalOverflow": false
+    },
+    {
+      "path": "/partners",
+      "viewport": "mobile",
+      "navigation": "clicked localized view-all link",
+      "images": 79,
+      "uniqueImages": 79,
+      "decoded": 79,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "failedMedia": 0,
+      "horizontalOverflow": false,
+      "screenshot": "partners-en-mobile.png"
+    },
+    {
+      "path": "/zh",
+      "viewport": "mobile",
+      "status": 200,
+      "categories": [
+        {
+          "category": "supporting",
+          "total": 58,
+          "shown": 12,
+          "loaded": 12
+        },
+        {
+          "category": "regional",
+          "total": 15,
+          "shown": 12,
+          "loaded": 12
+        },
+        {
+          "category": "media",
+          "total": 6,
+          "shown": 6,
+          "loaded": 6
+        }
+      ],
+      "screenshots": [
+        "home-zh-mobile-supporting.png",
+        "home-zh-mobile-regional.png",
+        "home-zh-mobile-media.png"
+      ],
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "failedMedia": 0,
+      "horizontalOverflow": false
+    },
+    {
+      "path": "/zh/partners",
+      "viewport": "mobile",
+      "navigation": "clicked localized view-all link",
+      "images": 79,
+      "uniqueImages": 79,
+      "decoded": 79,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "failedMedia": 0,
+      "horizontalOverflow": false,
+      "screenshot": "partners-zh-mobile.png"
+    }
+  ],
+  "productionChanged": false,
+  "passed": true
+}

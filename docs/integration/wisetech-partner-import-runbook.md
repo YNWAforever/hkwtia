@@ -124,3 +124,27 @@ then verify its 79 actual media responses and bilingual views. Production
 configuration and data publication still need their actual environment and
 release authority; the local pass does not authorise a production migration or
 import. There is no schema change or new worker rollout for this restoration.
+
+## Latest Preview acceptance and Production gate: 2026-10-01 HKT
+
+Explicit R2 test-to-Vercel authorization was received. The clean 68faa7be
+Preview dpl_qpvHQDcsMY2MxR9B1wbrg4AD9Rfg is READY at
+https://hkwtia-partner-logos-20260930.vercel.app. All 8 bilingual desktop/mobile
+cases passed with 79 real directory images decoded. Exact isolated Auth origin
+configuration resolved a reproduced INVALID_ORIGIN; real synthetic staff CMS
+login/protection and public unpublish/republish counts 78/79 passed. Full evidence
+and screenshots are in the restoration report and its SHA-indexed package.
+
+Production remains ab568934. A fresh names-only check shows four R2 settings,
+but R2_BUCKET is absent; their values and capability are unverified. Do not
+promote this test-env deployment. After separate actual Production authority,
+complete Production storage configuration, guarded unpublished import, CMS
+bilingual review/confirmation/publication and live browser acceptance. There is
+no migration or new worker. Rollback unpublishes scoped content before optional
+archive/web rollback and retains audits/objects. No Production rollback has run.
+
+Test fixtures remain for Preview review, not a full cleanup claim. The branch
+expires 2026-10-04 20:00 HKT. After review, tear down only this owned Preview alias,
+deployment and exact isolated Auth trusted origin, then reconcile/remove only
+its recorded run-owned rows/objects. The existing rollback-only SQL rehearsal
+and synthetic object DELETE passed; full fixture cleanup is still pending.

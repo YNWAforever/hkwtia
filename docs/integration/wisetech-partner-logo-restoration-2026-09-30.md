@@ -73,9 +73,9 @@ files, not as a published preview.
 | Code fixed | Verified locally | Focused tests, complete test suite, typecheck, build, string audit |
 | Isolated SQL import | Verified with synthetic fixtures | 79 rows, sequential rerun, atomic rollback, stored-role refusal; R2 port mocked |
 | Isolated R2 import | Verified with real provider | 79 uploads and checksum/dimension-verified reads; rerun 0 created / 79 skipped / 0 errors |
-| Production import | Pending | R2 configuration absent from linked Vercel Production env; no import attempted |
+| Production import | Pending | Latest names-only check has four R2 keys but no R2_BUCKET; production storage usability/configuration and import/publication authority remain gates |
 | CMS confirmation and publication | Isolated verification passed | Real repository gates and synthetic staff browser unpublish/republish; production review/publication pending |
-| Browser acceptance | Local isolated verification passed | 8 locale/viewport route checks; Vercel Preview acceptance pending |
+| Browser acceptance | Local and Vercel Preview verified | 8 remote locale/viewport cases, all 79 directory images decoded; real synthetic CMS protection/login/unpublish/republish passed |
 
 Production Vercel environment variable names were read with vercel env ls
 production; no R2_ACCOUNT_ID, R2_JURISDICTION, R2_ACCESS_KEY_ID,
@@ -435,3 +435,120 @@ rollout is required. The 79 test fixtures remain retained; full cleanup is not
 claimed. Neon branch expiry is 2026-10-04 20:00 HKT. Rollback remains scoped
 unpublication before optional archive and web rollback; never remove unrelated
 records, audits or storage objects.
+
+## Authorized Vercel Preview acceptance: 2026-10-01 HKT
+
+The requester explicitly authorized providing the R2 test credentials to Vercel.
+This resolves the earlier automatic-approval rejection; the failed attempt and
+its original pending status above are historical. Test DB/Auth/rate-limit/Stripe
+and R2 values were supplied only to this one isolated Preview, through CLI
+build/runtime overrides. They were neither committed nor printed. No Production
+environment value, domain, database, Auth configuration or object was changed.
+
+Deployment source was a clean tracked-only Git archive of exact
+68faa7be95abfa09710e871e68a6db501585559c. No local env, storage state or private
+helper was uploaded as source. Vercel completed the Next.js 16.3.6 build (267
+pages) with exit 0 at 2026-09-30T17:29:08.480Z / 2026-10-01 01:29 HKT.
+Deployment dpl_qpvHQDcsMY2MxR9B1wbrg4AD9Rfg is READY and resolves through
+https://hkwtia-partner-logos-20260930.vercel.app. The temporary alias was absent
+from all 12 pages of the team's alias inventory before assignment. No --prod,
+production alias or promotion was used. Production was independently rechecked
+as ab568934 / dpl_3KL2kwtCM7m5uwvXpcCtvJuVLHLu, READY.
+
+The isolated Neon endpoint/Auth pair was checked against API-confirmed branch
+br-lingering-unit-azxl75s5. The private test bucket remains
+hkwtia-partner-acceptance-20260930. Email mode is test, Woztell live mode is 0,
+and Google is disabled only in this test Preview. The paused-worker marker is
+an operator attestation; no worker is connected, deployed or invoked here.
+
+Actual commands from the implementation worktree:
+
+```powershell
+node .playwright/deploy-partner-r2-preview.mjs
+node C:/Users/laich/AppData/Roaming/npm/node_modules/vercel/dist/index.js alias set hkwtia-2724d2qdq-ynwaforevers-projects.vercel.app hkwtia-partner-logos-20260930.vercel.app --scope ynwaforevers-projects --no-color
+node .playwright/bootstrap-partner-r2-preview.mjs
+node .playwright/run-partner-r2-preview-browser.mjs
+node .playwright/run-partner-r2-preview-cms.mjs C:/Users/laich/Documents/hkwtia/.worktrees/audit-remediation/.playwright/audit-isolated.env
+node .playwright/capture-partner-r2-preview.mjs
+```
+
+Bootstrap used a legitimate Vercel connector share link and retained only its
+_vercel_jwt protection cookie in a separate ignored private state file. It did
+not forge any application/member/admin session. Share tokens, application
+cookies, test passwords and env values are excluded from the evidence package.
+
+Remote browser results: all 8 cases passed (English/Chinese home and directory,
+desktop 1440x1000 and mobile 390x844). Homepage totals were 58/15/6 and previews
+12/12/6. All four directory cases decoded 79 distinct real images; localized
+view-all links were actually clicked. Zero page/console/media errors and no
+horizontal overflow. Sixteen captures plus two normal viewport captures were
+produced; selected screenshots were inspected and are committed separately
+from the old local captures.
+
+The first remote CMS run reproduced HTTP 403 INVALID_ORIGIN before any CMS
+mutation. Provider metadata and the ignored test env agreed on the isolated
+Auth branch, whose trusted-domain list lacked this new alias. Exactly
+https://hkwtia-partner-logos-20260930.vercel.app was added to only that isolated
+branch using neon_add_auth_trusted_domain, auth_provider=better_auth. A readback
+confirmed it. No wildcard, role bypass or production Auth change was used.
+The unchanged assertions then passed at 2026-09-30T17:46:01.176Z / 01:46 HKT:
+anonymous editor redirected to login, real synthetic .example.test staff
+provider login returned 200, editor loaded both confirmations, unpublish reduced
+public count to 78, republish restored 79. This is not Google, magic-link,
+Stripe payment or real-member-message acceptance.
+
+Preparation-only failures were also observed: the initial helper's final log
+referenced undefined base after writing both runners; fixing that log field
+made preparation exit 0. The tool orchestration lacked URL and btoa globals;
+no secret was printed or file written by those failed orchestration steps. The
+subsequent guarded Node persistence and bootstrap passed. No app code changed
+for any of these harness/configuration issues.
+
+Latest Production names-only env check at 2026-09-30T17:48:22.509Z / 01:48 HKT
+supersedes the older all-keys-absent observation: R2_ACCOUNT_ID,
+R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY and R2_JURISDICTION are now listed;
+R2_BUCKET is missing. Their values/usability were not read or verified. This
+execution did not create or alter those Production settings. Production still
+needs a suitable bucket/configuration, actual guarded import/CMS review and
+explicit import/publication/release authority. Test credential authorization
+does not approve Production use or import.
+
+### Current release matrix and teardown
+
+| Stage | Result |
+| --- | --- |
+| Code fixed | PR #104 merged; PR #105 contains dependency patches and evidence; no app/policy changes in this follow-up |
+| Repository gates | Exact deployed runtime/dependencies passed CI 36747948546; 6097 unit tests passed, 171 skipped; build/lint/typecheck/strings/production-dependency audit passed |
+| Staging verified | Real R2, isolated SQL, 8 remote browser cases and real synthetic staff CMS all passed on deployment dpl_qpvHQDcsMY2MxR9B1wbrg4AD9Rfg |
+| Production released | No; production remains ab568934 |
+| Production storage/configuration | Four names present, R2_BUCKET absent; actual storage capability not verified |
+| Production import/publication | Not run; separately gated |
+| Fixture cleanup | Full cleanup not run; exactly the existing 79 run-owned test records/objects retained for Preview review |
+
+No migration, schema flag rollout or worker deployment is required. Keep this
+test deployment separate from a later Production-configured build; never
+promote the test-env Preview to Production. After actual release authority,
+configure Production R2, validate exact environment/operator identity, execute
+the SHA-verified import with publication unset, review bilingual names/alt and
+confirmed rights/relationship in the existing CMS, then publish and verify live
+counts and media. Existing membership/payment/consent policies remain unchanged.
+
+Production rollback starts by unpublishing only the affected partner rows,
+verifying public counts, then optionally archiving and rolling back the web
+release while retaining audits/storage for reconciliation. The isolated DB
+cleanup rollback rehearsal and single-object real DELETE probe are verified;
+full 79-object cleanup and any Production rollback are not claimed as performed.
+
+For test teardown after review: recheck the alias still points to this exact
+Preview, remove only that alias/deployment, remove only the exact trusted origin
+added above, then use the guarded run-owned fixture cleanup state for this test
+host/bucket. Preserve unrelated fixture/auth data; do not delete the Neon branch
+or bucket. If object cleanup fails after DB commit, retain the local key list
+and reconcile only those owned keys before declaring cleanup complete. The
+Neon branch expires 2026-10-04 20:00 HKT, so the Preview has that test-lifetime
+limit. Tokens and test credentials remain in ignored files/deployment settings.
+
+Detailed JSON, selected screenshots and exact no-secret harness archives are in
+[the checksum-indexed package](evidence/partner-logos-2026-09-30/README.md).
+This follow-up changes evidence only; its deployed code/dependencies exactly
+match green f46be17b and 68faa7be. No skipped test is called provider acceptance.

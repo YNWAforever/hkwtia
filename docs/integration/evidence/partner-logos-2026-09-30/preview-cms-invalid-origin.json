@@ -1,0 +1,19 @@
+{
+  "recordedAt": "2026-09-30T17:43:20.024Z",
+  "environment": "isolated Vercel Preview",
+  "base": "https://hkwtia-partner-logos-20260930.vercel.app",
+  "candidateCommit": "68faa7be95abfa09710e871e68a6db501585559c",
+  "deploymentId": "dpl_qpvHQDcsMY2MxR9B1wbrg4AD9Rfg",
+  "authentication": "existing Neon Auth email/password API with synthetic staff; no email send",
+  "anonymousProtected": true,
+  "providerSignInStatus": 403,
+  "staffEditor": false,
+  "unpublishedPublicCount": null,
+  "republishedPublicCount": null,
+  "productionChanged": false,
+  "providerErrorCode": "INVALID_ORIGIN",
+  "passed": false,
+  "error": {
+    "name": "Error"
+  }
+}

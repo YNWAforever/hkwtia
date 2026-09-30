@@ -68,3 +68,35 @@ The standard Git Preview is READY, not R2 acceptance. R2 credentials have not
 been transmitted to Vercel; that operation was rejected by automatic approval
 review and explicit authorization remains pending. Production is still ab568934.
 The isolated fixtures remain published only in the test database/private bucket.
+
+## Authorized remote Preview acceptance: 2026-10-01 HKT
+
+The earlier pending-authorization paragraph above records the prior attempt.
+The requester subsequently explicitly authorized R2 test credentials to Vercel.
+Deployment dpl_qpvHQDcsMY2MxR9B1wbrg4AD9Rfg built exact 68faa7be on Next.js
+16.3.6 and is READY at https://hkwtia-partner-logos-20260930.vercel.app.
+Credentials were supplied only as this Preview's build/runtime overrides, never
+committed. The source upload was a clean Git archive without local env/state.
+
+- preview-deployment.json: exact source/environment names, alias, test flags,
+  DB branch/private bucket, unchanged Production baseline and retained fixtures.
+- preview-browser.json: 8 real remote locale/viewport cases, four directories
+  each decode 79 unique images, homepage totals 58/15/6; zero errors/overflow.
+- preview-cms-invalid-origin.json: first real provider attempt failed 403.
+- preview-auth-origin.json: actual diagnosis, exact isolated trusted-domain
+  addition/readback; no wildcard or Production change.
+- preview-cms.json: subsequent real .example.test staff login 200, anonymous
+  protection, unpublish -> public 78, republish -> public 79, all passed.
+- preview-viewport-captures.json and preview-*.png: actual remote screenshots,
+  selected desktop/mobile home, full directory and synthetic staff editor.
+- preview-*.mjs.txt: exact no-secret deployment/bootstrap/browser/CMS/capture
+  runners. Restore each to its corresponding .playwright filename to reproduce.
+  Protection share/state and fixture-state files stay private/ignored.
+- production-r2-names.json: fresh read-only names check; four names present but
+  R2_BUCKET absent. Values and actual Production storage usability unverified.
+
+Full test fixture cleanup has not run; 79 records/objects are retained for this
+Preview review. Branch expiry is 2026-10-04 20:00 HKT. Teardown removes only this
+owned alias/deployment/trusted origin and run-owned test rows/objects; no branch
+or bucket deletion. See the parent report for exact commands and failure history.
+Production release/import/publication is still gated and was not performed.

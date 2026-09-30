@@ -1,0 +1,21 @@
+{
+  "recordedAt": "2026-09-30T17:54:30.706Z",
+  "project": "solitary-wave-52860119",
+  "branch": "br-lingering-unit-azxl75s5",
+  "provider": "better_auth",
+  "previewOrigin": "https://hkwtia-partner-logos-20260930.vercel.app",
+  "authEndpointMatchedVerifiedBranch": true,
+  "originListedBefore": false,
+  "initialResponse": {
+    "status": 403,
+    "code": "INVALID_ORIGIN"
+  },
+  "change": "Add exactly this Preview origin to the isolated branch trusted domains",
+  "originListedAfter": true,
+  "retryResponse": {
+    "status": 200,
+    "cmsPassed": true
+  },
+  "wildcardAdded": false,
+  "productionAuthChanged": false
+}
