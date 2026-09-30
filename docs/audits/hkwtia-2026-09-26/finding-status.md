@@ -87,3 +87,7 @@ Application SHA `1e4f6246` includes the signed-path fix (`76cfdf01`) and refund 
 ## Authorized production rollout update — 2026-09-28
 
 The user subsequently authorized all migrations 0037–0051. After a successful isolated production-copy rehearsal and recovery snapshot `snap-blue-mud-aojc25bd`, the repository migration command applied the sequence to `fragrant-mountain-25240574` / `br-noisy-glitter-ao2npd77` / `neondb`. Read-only verification confirms ledger 0051, no pending migration/hash mismatch, required constraints, and unchanged checked row counts. Both live directory locales now show the normal empty state instead of unavailable. [Execution, receipts, screenshots and rollback limits](../hkwtia-final-2026-09-27/acceptance.md). This supersedes earlier statements that production schema is unmigrated; it does not mark provider/worker/flag/policy gates complete.
+
+## Partner-logo follow-up — 2026-10-01 HKT
+
+The web/dependency changes in merged PR #105 are deployed to canonical Production as e7fa4add. Isolated partner acceptance passed; Production stage/live pre-import smoke passed 12/12 each. Actual 79-logo Production restoration remains incomplete pending selection of an existing privileged audit actor, import, deployed media verification and publication. [Receipt and exact limits](../../integration/partner-logo-production-release-2026-10-01.md). Existing F01–F25 classifications and unrelated provider/policy gates remain unchanged.

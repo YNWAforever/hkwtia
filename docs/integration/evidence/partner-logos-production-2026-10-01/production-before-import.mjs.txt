@@ -1,0 +1,44 @@
+import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {chromium,expect} from '@playwright/test';
+const deployment=JSON.parse(await readFile('.playwright/partner-production-deploy.json','utf8'));
+const base=deployment.deploymentUrl;
+if(base!=='https://hkwtia-may7nip2c-ynwaforevers-projects.vercel.app'||deployment.sourceCommit!=='e7fa4add247489f525f015007460fb522fb1531b'||deployment.target!=='production'||deployment.overrides.length)throw Error('PRODUCTION_DEPLOYMENT_GUARD');
+const folder='.playwright/partner-production-canonical-before-import';
+await mkdir(folder,{recursive:true});
+const evidence={recordedAt:new Date().toISOString(),sourceCommit:deployment.sourceCommit,origin:'https://hkwtia.vercel.app',environment:'Production-configured deployment before authorized import',cases:[],applicationSessionIncluded:false,productionDataWritten:false};
+const browser=await chromium.launch({headless:true});
+try {
+ for(const viewport of [{name:'desktop',width:1440,height:1000},{name:'mobile',width:390,height:844}]) {
+  const context=await browser.newContext({viewport:{width:viewport.width,height:viewport.height}});
+  for(const locale of [{name:'en',home:'/',partners:'/partners',admin:'/admin/partners',login:'/admin-login',messages:'en'},{name:'zh',home:'/zh',partners:'/zh/partners',admin:'/zh/admin/partners',login:'/zh/admin-login',messages:'zh-HK'}]) {
+   const bundle=JSON.parse(await readFile('messages/'+locale.messages+'.json','utf8'));
+   for(const [kind,path] of [['home',locale.home],['partners',locale.partners],['anonymous-admin',locale.admin]]) {
+    const page=await context.newPage();const errors=[];
+    page.on('pageerror',error=>errors.push({kind:'pageerror',name:error.name}));
+    page.on('console',message=>{if(message.type()==='error')errors.push({kind:'console'})});
+    const response=await page.goto('https://hkwtia.vercel.app'+path,{waitUntil:'domcontentloaded',timeout:120000});
+    expect(response?.status()).toBe(200);
+    await expect(page.locator('h1').first()).toBeVisible({timeout:45000});
+    expect(await page.locator('[data-nextjs-dialog],.vite-error-overlay').count()).toBe(0);
+    if(kind==='home')await expect(page.locator('.legacy-network')).toHaveCount(0);
+    if(kind==='partners') {
+     await expect(page.locator('.partner-record-card')).toHaveCount(0);
+     await expect(page.getByText(bundle.Partners.empty.title,{exact:true})).toBeVisible();
+     await expect(page.locator('.partner-source-note')).toContainText('0');
+    }
+    if(kind==='anonymous-admin')expect(new URL(page.url()).pathname).toBe(locale.login);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);
+    expect(errors).toEqual([]);
+    const screenshot=kind+'-'+locale.name+'-'+viewport.name+'.png';
+    await page.screenshot({path:folder+'/'+screenshot,fullPage:kind==='partners',animations:'disabled'});
+    const result={kind,path,viewport:viewport.name,status:response.status(),finalPath:new URL(page.url()).pathname,consoleErrors:0,pageErrors:0,horizontalOverflow:false,screenshot,...(kind==='partners'?{publishedPartners:0,localizedEmptyState:true}:{})};
+    evidence.cases.push(result);console.log(JSON.stringify(result));
+    await page.close();await writeFile(folder+'/evidence.json',JSON.stringify(evidence,null,2)+'\n');
+   }
+  }
+  await context.close();
+ }
+ expect(evidence.cases).toHaveLength(12);evidence.passed=true;
+} catch(error) {evidence.passed=false;evidence.failure={name:error?.name,code:'PRODUCTION_PREIMPORT_SMOKE_FAILED'};process.exitCode=1;}
+finally {await writeFile(folder+'/evidence.json',JSON.stringify(evidence,null,2)+'\n');await browser.close();}
+console.log(JSON.stringify({passed:evidence.passed,cases:evidence.cases.length,failure:evidence.failure}));

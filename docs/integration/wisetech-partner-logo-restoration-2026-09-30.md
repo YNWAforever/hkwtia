@@ -552,3 +552,9 @@ Detailed JSON, selected screenshots and exact no-secret harness archives are in
 [the checksum-indexed package](evidence/partner-logos-2026-09-30/README.md).
 This follow-up changes evidence only; its deployed code/dependencies exactly
 match green f46be17b and 68faa7be. No skipped test is called provider acceptance.
+
+## Superseding Production execution — 2026-10-01 HKT
+
+The requester explicitly authorized merge, Production deployment and 79-logo import/publication with the same bucket/default jurisdiction. PR #105 merged as e7fa4add, Production R2 names were configured, a clean Production-only build passed and the canonical domain was promoted to dpl_DLFixAkkcNmpMCUTu3BY98hTDstQ. Stage/live pre-import browser checks each passed 12/12.
+
+The 79-logo Production import/publication has not run: selection of an actual stored privileged audit operator remains pending. Production partners remain zero; deployed R2 image reads remain unverified. No role elevation, fixture seed, migration, payment/refund or member message occurred. [Exact receipt, evidence, remaining steps and rollback](partner-logo-production-release-2026-10-01.md) supersedes the earlier missing-bucket/unreleased statements above without closing broader provider/policy gates.

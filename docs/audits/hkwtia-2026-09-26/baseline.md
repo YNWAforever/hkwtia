@@ -71,3 +71,7 @@ For the strict M2 CRM suite, a separate empty hkwtia_m2_audit database was creat
 `1e4f6246ac42f3dd0249acad2be949aaf94a6aa6` includes two real-provider-discovered repairs: signed ticket paths now reach locale routing, and refund audit rows use the authenticated application profile ID required by the audit foreign key. The exact candidate Preview is https://hkwtia-p7vk6461f-ynwaforevers-projects.vercel.app (dpl_AvucgCHx4LsXy66QbaDJ6sua161f). Test/release-document commits after this SHA do not alter application behavior.
 
 The isolated hkwtia_m2_audit database now contains the completed three-seat payment/refund evidence and earlier failed-attempt fixtures. The original membership fixture remains active in neondb. These consumed fixtures are retained; a new strict CRM seed or pending-payment fixture must use a fresh isolated baseline. All payment/refund objects have livemode=false. Ticket email uses only the test transport.
+
+## Partner-logo release baseline — 2026-10-01 HKT
+
+PR #105 merged as e7fa4add247489f525f015007460fb522fb1531b, identical tracked tree to verified 163a34bc. Canonical Production now resolves dpl_DLFixAkkcNmpMCUTu3BY98hTDstQ with existing Production configuration. Actual migration ledger remains 0051; no migration/seed occurred. Partner rows remain zero pending user selection of an existing privileged audit operator. [Release receipt](../../integration/partner-logo-production-release-2026-10-01.md). This dated follow-up does not change the original audit baseline or finding classifications.

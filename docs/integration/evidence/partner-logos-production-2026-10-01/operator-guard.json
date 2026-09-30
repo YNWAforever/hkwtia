@@ -1,0 +1,12 @@
+{
+  "recordedAt": "2026-09-30T19:51:56.051Z",
+  "command": "node --conditions=react-server --import tsx .playwright/run-partner-production.mts import",
+  "expectedExitCode": 1,
+  "actualExitCode": 1,
+  "reason": "PARTNER_PRODUCTION_OPERATOR_SELECTION_REQUIRED",
+  "productionDatabaseWritten": false,
+  "productionObjectsWritten": false,
+  "selectedActor": "pending; requesters existing profile is member; unique existing superadmin requires operator selection",
+  "roleChanges": 0,
+  "syntheticProductionActorsCreated": 0
+}

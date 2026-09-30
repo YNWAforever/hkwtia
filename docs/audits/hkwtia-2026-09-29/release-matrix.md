@@ -37,3 +37,7 @@ vercel.cmd rollback dpl_8cr2En9xQhrs5nDpxny9GY3L4stx --yes --scope ynwaforevers-
 After rollback, read the alias deployment/SHA again, repeat public/login/admin-denial smoke and inspect runtime logs. Do not reverse migrations 0037–0051, delete batch/outbox/audit/payment/grant/consent history or replay external effects. No DB or worker rollback is required for this web-only release.
 
 **Claim boundary:** dashboard code merged; isolated authenticated dashboard acceptance passed; approved web SHA is Production released. The remaining provider, policy, CMS-history and runtime-connection issues are explicitly open.
+
+## Authorized partner-logo rollout — 2026-10-01 HKT
+
+[Actual release receipt and ordered checklist](../../integration/partner-logo-production-release-2026-10-01.md): R2 names configured, existing-Production-only web e7fa4add deployed/promoted with 12 staged and 12 live checks. No schema/flag/worker rollout. Remaining steps require selection of existing stored privileged actor, unpublished import, actual deployed 79-image verification, repository confirmations/publication and bilingual live acceptance. Canonical web rollback target is dpl_3KL2kwtCM7m5uwvXpcCtvJuVLHLu. Once published, first unpublish only recorded79 IDs and verify counts; preserve audits/objects. No Production rollback or full fixture cleanup has run. This supersedes older unreleased statements only for this web slice.
