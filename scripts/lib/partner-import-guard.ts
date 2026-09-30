@@ -46,6 +46,7 @@ async function sentinelConfirmsDisposable(countSentinelRows: () => Promise<numbe
 export async function assertPartnerImportAuthorized(
   environment: Environment,
   countSentinelRows: () => Promise<number>,
+  loadActorRole: (profileId: string) => Promise<string | null>,
 ): Promise<PartnerImportAuthorization> {
   const fail = (code: string): never => {
     throw new Error(code);
@@ -54,7 +55,7 @@ export async function assertPartnerImportAuthorized(
   if (normalized(environment.WISETECH_PARTNER_IMPORT) !== "true") fail("PARTNER_IMPORT_NOT_AUTHORIZED");
 
   const actorProfileIdRaw = environment.WISETECH_IMPORT_ACTOR_PROFILE_ID?.trim();
-  if (!actorProfileIdRaw) fail("PARTNER_IMPORT_ACTOR_REQUIRED");
+  if (!actorProfileIdRaw) throw new Error("PARTNER_IMPORT_ACTOR_REQUIRED");
 
   const rawActorKind = environment.WISETECH_IMPORT_ACTOR_KIND?.trim();
   // Distinguish "key not set at all" (default to staff) from "key set but blank" (invalid)
@@ -72,5 +73,13 @@ export async function assertPartnerImportAuthorized(
     fail("PARTNER_IMPORT_PRODUCTION_NOT_CONFIRMED");
   }
 
-  return {actorProfileId: actorProfileIdRaw as string, actorKind};
+  let storedRole: string | null;
+  try {
+    storedRole = await loadActorRole(actorProfileIdRaw);
+  } catch (error) {
+    throw new Error("PARTNER_IMPORT_ACTOR_CHECK_FAILED", {cause: error});
+  }
+  if (storedRole !== actorKind) fail("PARTNER_IMPORT_ACTOR_MISMATCH");
+
+  return {actorProfileId: actorProfileIdRaw, actorKind};
 }

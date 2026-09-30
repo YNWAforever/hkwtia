@@ -201,7 +201,7 @@ describe("WiseTech authoritative-source reconciliation", () => {
       ["app/WiseTechSite.tsx", "merge"], ["app/[lang]/[[...slug]]/page.tsx", "merge"],
       ["app/[lang]/layout.tsx", "merge"], ["app/chatgpt-auth.ts", "retire"],
       ["app/globals.css", "merge"], ["app/layout.tsx", "merge"], ["app/megaNav.ts", "merge"],
-      ["app/page.tsx", "retire"], ["app/partnerData.ts", "retire"],
+      ["app/page.tsx", "retire"], ["app/partnerData.ts", "merge"],
       ["app/sitemap.ts", "merge"], ["app/visualData.ts", "merge"],
     ]);
   });
@@ -236,7 +236,11 @@ describe("WiseTech authoritative-source reconciliation", () => {
     });
     const evidence = authoritativeSourceInventory.assets.map(({sourcePath, sha256, category}) => [sourcePath, sha256, category].join("|")).join("\n");
     expect(createHash("sha256").update(evidence).digest("hex")).toBe("c864faa2057bfe1257d0db9ff6166717d73a3cae90d957bfecdc0921bbbbff79");
-    expect(authoritativeSourceInventory.assets.every(({disposition, rightsStatus, relationshipStatus, englishAltStatus, traditionalChineseAltStatus, publishable}) => disposition === "retire" && rightsStatus === "unreviewed" && relationshipStatus === "unreviewed" && englishAltStatus === "unreviewed" && traditionalChineseAltStatus === "unreviewed" && publishable === false)).toBe(true);
+    const partnerLogos = authoritativeSourceInventory.assets.filter((asset) => asset.category === "historical-partner-logo");
+    const otherAssets = authoritativeSourceInventory.assets.filter((asset) => asset.category !== "historical-partner-logo");
+    expect(partnerLogos).toHaveLength(79);
+    expect(partnerLogos.every(({disposition, rightsStatus, relationshipStatus, englishAltStatus, traditionalChineseAltStatus, publishable}) => disposition === "merge" && rightsStatus === "approved" && relationshipStatus === "approved" && englishAltStatus === "unreviewed" && traditionalChineseAltStatus === "unreviewed" && publishable === false)).toBe(true);
+    expect(otherAssets.every(({disposition, rightsStatus, relationshipStatus, englishAltStatus, traditionalChineseAltStatus, publishable}) => disposition === "retire" && rightsStatus === "unreviewed" && relationshipStatus === "unreviewed" && englishAltStatus === "unreviewed" && traditionalChineseAltStatus === "unreviewed" && publishable === false)).toBe(true);
   });
 
   it("deep-freezes the complete checked-in evidence index", () => {

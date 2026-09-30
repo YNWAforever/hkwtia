@@ -1,26 +1,33 @@
 import {z} from "zod";
 
-/**
- * The donor's partnerData.ts export was not directly inspectable when this
- * schema was written (see docs/superpowers/specs/2026-09-05-wisetech-wp5-
- * content-migration-design.md's appendix). This schema encodes the master
- * plan's own description -- 58 supporting + 15 regional + 6 media = 79 -- not
- * a verified donor file shape. If the real export differs, adjust this
- * schema (not the transactional logic in import-wisetech-partners.ts) to
- * match it.
- */
+/** The archived donor module exports three named arrays; canonical arrays remain supported. */
+const donorLogoFileSchema = z.string().trim().regex(/^(?:(?:supporting|regional|media)\/)?[A-Za-z0-9][A-Za-z0-9._-]*\.png$/);
+const archivedLogoNameSchema = z.string().trim().regex(/^[A-Za-z0-9][A-Za-z0-9._-]*\.png$/);
+
 const donorPartnerSchema = z.object({
   name: z.string().trim().min(1),
   category: z.enum(["supporting", "regional", "media"]),
   website: z.string().url().optional(),
-  logoFile: z.string().trim().min(1),
+  logoFile: donorLogoFileSchema,
 });
 export type DonorPartner = z.output<typeof donorPartnerSchema>;
 
 const donorPartnerFileSchema = z.array(donorPartnerSchema);
+const archivedPartnerSchema = z.object({name: z.string().trim().min(1), file: archivedLogoNameSchema});
+const archivedPartnerModuleSchema = z.object({
+  supportingOrganisations: z.array(archivedPartnerSchema),
+  regionalPartners: z.array(archivedPartnerSchema),
+  mediaPartners: z.array(archivedPartnerSchema),
+});
 
 export function parseDonorPartnerFile(value: unknown): readonly DonorPartner[] {
-  return donorPartnerFileSchema.parse(value);
+  if (Array.isArray(value)) return donorPartnerFileSchema.parse(value);
+  const archived = archivedPartnerModuleSchema.parse(value);
+  return donorPartnerFileSchema.parse([
+    ...archived.supportingOrganisations.map((partner) => ({name: partner.name, category: "supporting", logoFile: `supporting/${partner.file}`})),
+    ...archived.regionalPartners.map((partner) => ({name: partner.name, category: "regional", logoFile: `regional/${partner.file}`})),
+    ...archived.mediaPartners.map((partner) => ({name: partner.name, category: "media", logoFile: `media/${partner.file}`})),
+  ]);
 }
 
 function splitCsvLine(line: string): readonly string[] {

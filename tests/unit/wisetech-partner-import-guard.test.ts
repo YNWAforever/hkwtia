@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 
-import {assertPartnerImportAuthorized} from "@/scripts/lib/partner-import-guard";
+import {assertPartnerImportAuthorized as authorize} from "@/scripts/lib/partner-import-guard";
 
 function env(overrides: Record<string, string | undefined> = {}): Record<string, string | undefined> {
   return {
@@ -12,6 +12,13 @@ function env(overrides: Record<string, string | undefined> = {}): Record<string,
 
 const disposable = async () => 1;
 const notDisposable = async () => 0;
+function assertPartnerImportAuthorized(
+  environment: Record<string, string | undefined>,
+  countSentinelRows: () => Promise<number>,
+  loadActorRole: (profileId: string) => Promise<string | null> = async () => environment.WISETECH_IMPORT_ACTOR_KIND ?? "staff",
+) {
+  return authorize(environment, countSentinelRows, loadActorRole);
+}
 
 describe("assertPartnerImportAuthorized", () => {
   it("refuses when WISETECH_PARTNER_IMPORT is not exactly \"true\"", async () => {
@@ -82,6 +89,19 @@ describe("assertPartnerImportAuthorized", () => {
     expect(result.actorKind).toBe("superadmin");
   });
 
+  it("rejects a supplied actor identity when the database role does not match", async () => {
+    await expect(assertPartnerImportAuthorized(env({WISETECH_IMPORT_ACTOR_KIND: "staff"}), disposable, async () => "member"))
+      .rejects.toThrow("PARTNER_IMPORT_ACTOR_MISMATCH");
+    await expect(assertPartnerImportAuthorized(env({WISETECH_IMPORT_ACTOR_KIND: "staff"}), disposable, async () => "superadmin"))
+      .rejects.toThrow("PARTNER_IMPORT_ACTOR_MISMATCH");
+    await expect(assertPartnerImportAuthorized(env({WISETECH_IMPORT_ACTOR_KIND: "staff"}), disposable, async () => null))
+      .rejects.toThrow("PARTNER_IMPORT_ACTOR_MISMATCH");
+  });
+
+  it("accepts a supplied actor identity only when the stored database role matches", async () => {
+    await expect(assertPartnerImportAuthorized(env({WISETECH_IMPORT_ACTOR_KIND: "superadmin"}), disposable, async (id) => id === "profile-abc-123" ? "superadmin" : null))
+      .resolves.toEqual({actorProfileId: "profile-abc-123", actorKind: "superadmin"});
+  });
   it("rejects a whitespace-only actor kind as invalid", async () => {
     await expect(assertPartnerImportAuthorized(env({WISETECH_IMPORT_ACTOR_KIND: "   "}), disposable))
       .rejects.toThrow("PARTNER_IMPORT_ACTOR_KIND_INVALID");

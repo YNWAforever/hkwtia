@@ -3,6 +3,20 @@ import {describe, expect, it} from "vitest";
 import {parseDonorPartnerFile, parseZhNameSidecar, resolveZhName} from "@/scripts/lib/partner-import-input";
 
 describe("parseDonorPartnerFile", () => {
+  it("accepts the archived donor's three named arrays and resolves each category's logo directory", () => {
+    const parsed = parseDonorPartnerFile({
+      supportingOrganisations: [{name: "Harbour Trade Council", file: "trade.png"}],
+      regionalPartners: [{name: "Regional Council", file: "regional.png"}],
+      mediaPartners: [{name: "GBA Media Group", file: "media.png"}],
+    });
+
+    expect(parsed).toEqual([
+      {name: "Harbour Trade Council", category: "supporting", logoFile: "supporting/trade.png"},
+      {name: "Regional Council", category: "regional", logoFile: "regional/regional.png"},
+      {name: "GBA Media Group", category: "media", logoFile: "media/media.png"},
+    ]);
+  });
+
   it("accepts a well-formed donor partner array", () => {
     const parsed = parseDonorPartnerFile([
       {name: "Harbour Trade Council", category: "supporting", logoFile: "harbour-trade.png"},
@@ -10,6 +24,14 @@ describe("parseDonorPartnerFile", () => {
     ]);
     expect(parsed).toHaveLength(2);
     expect(parsed[1]!.website).toBe("https://example.org");
+  });
+
+  it("rejects parent-directory logo paths before the importer reads local files", () => {
+    expect(() => parseDonorPartnerFile([{name: "X", category: "supporting", logoFile: "../private.png"}])).toThrow();
+  });
+
+  it("rejects archived filenames that escape their category directory", () => {
+    expect(() => parseDonorPartnerFile({supportingOrganisations: [{name: "X", file: "../private.png"}], regionalPartners: [], mediaPartners: []})).toThrow();
   });
 
   it("accepts an empty donor array", () => {
