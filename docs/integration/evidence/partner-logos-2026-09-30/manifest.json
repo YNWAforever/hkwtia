@@ -5,8 +5,8 @@
   "files": [
     {
       "filename": "README.md",
-      "bytes": 2062,
-      "sha256": "eeddce6837c8b9e8beebe80b8fc8e9cb68421efd088da7a68e87a6ef7d90530d"
+      "bytes": 2233,
+      "sha256": "6c10789f03fa1cd12769d4d784ed6c4735f36d5bbf7dbddc7d7448b6010e0fb0"
     },
     {
       "filename": "browser-acceptance.mjs.txt",
@@ -50,8 +50,8 @@
     },
     {
       "filename": "local-web.mjs.txt",
-      "bytes": 1816,
-      "sha256": "64dad4ca7860805324fb68ae24c25a378164c201411fc683fe4750a8b08b2fdd"
+      "bytes": 1819,
+      "sha256": "6892bc33de28b313cf0d38296fa206f71d93fcb81e0db6b392af1038e8c82d29"
     },
     {
       "filename": "partners-en-desktop.png",

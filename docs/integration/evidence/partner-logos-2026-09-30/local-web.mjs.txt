@@ -9,7 +9,7 @@ const environment = {...process.env};
 for (const key of ['NEON_AUTH_BASE_URL','NEON_AUTH_COOKIE_SECRET','RATE_LIMIT_KEY_SECRET','STRIPE_SECRET_KEY','STRIPE_WEBHOOK_SECRET','STRIPE_STARTUP_PRICE_ID','STRIPE_CORPORATE_PRICE_ID']) if (values[key]) environment[key]=values[key];
 if (!environment.STRIPE_SECRET_KEY?.startsWith('sk_test_')) throw new Error('ISOLATED_WEB_STRIPE_TEST_REQUIRED');
 for (const key of ['R2_ACCOUNT_ID','R2_JURISDICTION','R2_ACCESS_KEY_ID','R2_SECRET_ACCESS_KEY','R2_BUCKET']) environment[key]=r2Values[key];
-Object.assign(environment,{DATABASE_URL:values.DATABASE_URL_TEST,DATABASE_URL_TEST:values.DATABASE_URL_TEST,NODE_ENV:'development',VERCEL_ENV:'preview',APP_URL:'http://localhost:3017',NEXT_PUBLIC_SITE_URL:'http://localhost:3017',AUDIT_BATCH_WORKER_PAUSED:'1',EMAIL_DELIVERY_MODE:'test',RUN_LIVE_WOZTELL:'0'});
+Object.assign(environment,{DATABASE_URL:values.DATABASE_URL_TEST,DATABASE_URL_TEST:values.DATABASE_URL_TEST,NODE_ENV:'development',VERCEL_ENV:'preview',APP_URL:'http://localhost:3017',NEXT_PUBLIC_SITE_URL:'http://localhost:3017',AUDIT_BATCH_WORKER_PAUSED:'true',EMAIL_DELIVERY_MODE:'test',RUN_LIVE_WOZTELL:'0'});
 const child=spawn(process.execPath,['node_modules/next/dist/bin/next','dev','--webpack','--hostname','localhost','--port','3017'],{env:environment,stdio:'inherit',windowsHide:true});
 child.on('exit',code=>process.exit(code??1));
 for (const signal of ['SIGINT','SIGTERM']) process.on(signal,()=>child.kill(signal));

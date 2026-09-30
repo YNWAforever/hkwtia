@@ -25,7 +25,9 @@ captures contain the fixed site header at its capture scroll position.
 The `.txt` runner archives contain the exact ignored local harnesses, never
 env values. Copy them to their `.playwright/run-...` filenames named in the
 restoration report to reproduce. The web runner uses the existing test auth and
-Stripe settings, pauses the batch worker and sets email/test sending modes.
+Stripe settings and sets email/test sending modes. Its paused-worker marker is an
+operator attestation, not a worker-control switch; no worker is connected to this
+isolated acceptance branch. The archived runner now uses the required true marker.
 Never replace the embedded test database/bucket guards with production values.
 
 The 79 fixtures are retained for Preview acceptance; cleanup has not run.
