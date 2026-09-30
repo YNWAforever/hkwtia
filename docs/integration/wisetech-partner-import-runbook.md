@@ -74,7 +74,7 @@ after both steps. This restoration requires no migration.
 ## Current release gate (2026-09-30)
 
 Production partners has zero rows. vercel env ls production for the linked
-hkwtia project lists no R2 configuration keys, and the accessible local
+hkwtia project lists no R2 configuration keys. At the initial check, accessible local
 environments have no complete R2 configuration. Therefore the production import
 and browser acceptance have not run. Configure the existing R2 storage for the
 actual environment, then finish isolated import acceptance before a production
@@ -89,3 +89,19 @@ transactional audit rollback and stored-actor role refusal. Its R2 upload port
 was a mock. Actual R2 upload/read acceptance is still required before the
 production import. Exact commands, mutation proof and run-owned cleanup counts
 are in the linked restoration evidence above.
+
+## R2 provisioning follow-up
+
+The requester supplied all five settings in the ignored local test env file.
+Their format passed, but the exact test bucket
+`hkwtia-partner-acceptance-20260930` did not exist: synthetic PUT/DELETE returned
+`404 NoSuchBucket`. The requester confirmed it had not been created. Creating
+that bucket with the same credential returned `403 AccessDenied`.
+
+Create the private bucket through the matching Cloudflare account's R2
+dashboard, using default jurisdiction and Standard storage. Keep existing
+object-read/write credentials in the ignored test env file. Run the synthetic
+PUT/GET/SHA-256/delete probe before any 79-row import; its current result is
+failed, not provider acceptance. Full attempt details and exact commands are
+in the linked restoration evidence. No test credential has been sent to Vercel,
+and no production data or configuration was changed in this follow-up.

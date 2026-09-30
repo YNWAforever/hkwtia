@@ -72,7 +72,7 @@ files, not as a published preview.
 | --- | --- | --- |
 | Code fixed | Verified locally | Focused tests, complete test suite, typecheck, build, string audit |
 | Isolated SQL import | Verified with synthetic fixtures | 79 rows, sequential rerun, atomic rollback, stored-role refusal; R2 port mocked |
-| Isolated R2 import | Pending | Actual isolated R2 credentials/bucket and upload/read acceptance |
+| Isolated R2 import | Blocked by missing bucket | Saved local credential format passed; PutObject returned 404 NoSuchBucket and CreateBucket returned 403 AccessDenied |
 | Production import | Pending | R2 configuration absent from linked Vercel Production env; no import attempted |
 | CMS confirmation and publication | Pending | Per-record bilingual alt/name review and existing CMS publication actions |
 | Browser acceptance | Pending | Needs published records and working media on /, /zh, /partners, /zh/partners |
@@ -80,7 +80,9 @@ files, not as a published preview.
 Production Vercel environment variable names were read with vercel env ls
 production; no R2_ACCOUNT_ID, R2_JURISDICTION, R2_ACCESS_KEY_ID,
 R2_SECRET_ACCESS_KEY, or R2_BUCKET entries appeared. Accessible local env
-files likewise had no complete R2 configuration. No credential value was
+files likewise had no complete R2 configuration at that initial check. The
+later saved local test configuration is recorded below; it was not sent to
+Vercel. No credential value was
 printed or committed. Production Neon read-only role aggregation showed one
 member and one superadmin profile; no personal record or ID was exported.
 
@@ -168,3 +170,49 @@ production release was performed during this follow-up.
 Fresh raw `npm run lint` remained blocked: 20 errors in ignored local
 .playwright helpers, plus the same 67 warnings. The filtered tracked-code
 lint command passed; this raw gate is recorded as failed, not passed.
+
+## Saved R2 test configuration and provider attempt
+
+After the requester saved the ignored local test env file on 2026-09-30,
+all five required R2 settings were present. Account-ID format, the exact
+`hkwtia-partner-acceptance-20260930` bucket name, and `default` jurisdiction
+passed validation. No credential value was printed, committed, or sent to Vercel.
+
+Actual command from the feature worktree:
+
+```powershell
+node --conditions=react-server --import tsx .playwright/run-r2-provider-acceptance.mts 'C:\Users\laich\Documents\hkwtia\.playwright\r2-isolated.env'
+```
+
+This ignored local runner generates and normalizes an 8x8 synthetic PNG, uses
+the existing `createR2Storage` adapter to PUT/GET it, checks its bytes and SHA-256
+metadata, and deletes only its own randomly named acceptance key. The first
+attempt at 2026-09-30 14:44:37 UTC returned the adapter's closed
+`R2_STORAGE_FAILED` error, exit 1. A diagnostic rerun at 14:46:40 UTC used
+an injected real S3 client; it logged only the operation, error name/code,
+HTTP status and attempt count. PUT and cleanup DELETE each returned
+`404 NoSuchBucket`, exit 1. PUT/read/checksum/dimensions/cleanup success flags
+were all false. These attempts do not constitute provider acceptance.
+
+The requester then confirmed that the bucket had not been created. A guarded
+creation attempt for only that exact private test bucket used:
+
+```powershell
+node --conditions=react-server --import tsx .playwright/run-r2-create-bucket.mts 'C:\Users\laich\Documents\hkwtia\.playwright\r2-isolated.env'
+```
+
+The S3 `CreateBucket` request returned `403 AccessDenied`, exit 1; no bucket
+was created. The precise external dependency is to create the named private
+bucket in the matching Cloudflare account with default jurisdiction, then
+confirm the existing object-read/write credentials can access it. No
+administrative credential is required to be pasted into the task. Cloudflare's
+[creation guide](https://developers.cloudflare.com/r2/buckets/create-buckets/)
+and [R2 token permissions](https://developers.cloudflare.com/r2/api/tokens/)
+describe the dashboard setup and permission distinction.
+
+Successful object uploads: 0. Database mutations in this provider attempt: 0.
+No production import or release occurred. The remaining sequence is actual
+synthetic provider PUT/GET/checksum/delete acceptance, isolated 79-logo import
+and idempotent rerun, existing CMS confirmation/publication, and bilingual
+home/partners browser acceptance. Production configuration, import and release
+remain separately gated. No successful or skipped provider test is claimed.
