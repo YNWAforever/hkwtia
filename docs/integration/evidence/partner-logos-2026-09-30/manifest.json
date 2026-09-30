@@ -1,12 +1,19 @@
 {
   "scope": "isolated acceptance only; no production release",
   "sourceCommit": "d9b75111",
+  "securityPatchedCandidate": "f46be17b35b8d688b6d0c8ae0706f28e377fda99",
+  "nextVersion": "16.3.6",
   "donorCommit": "f91ecc5fa29c2b9d416ed8315f23e9492baf993d",
   "files": [
     {
       "filename": "README.md",
-      "bytes": 2706,
-      "sha256": "3d74cdb69eb2cf523305503500808e96b5f8070af951a26b0959c0e20a81c5aa"
+      "bytes": 4350,
+      "sha256": "3e14f6930c6260b0b155b359e4661dfed5cbbedd2b351e2920d45a273c5156c3"
+    },
+    {
+      "filename": "brace-patch-local-unit.json",
+      "bytes": 499,
+      "sha256": "eba38638f9fc854ad6792c09d3167948dd37dec5e09a11f25d2da17112993898"
     },
     {
       "filename": "browser-acceptance.mjs.txt",
@@ -57,6 +64,31 @@
       "filename": "local-web.mjs.txt",
       "bytes": 1819,
       "sha256": "6892bc33de28b313cf0d38296fa206f71d93fcb81e0db6b392af1038e8c82d29"
+    },
+    {
+      "filename": "next-patch-browser.json",
+      "bytes": 4681,
+      "sha256": "c07fb184a27802751657b8d69a982cd28999bd7b12194fad0441263d6e5d6989"
+    },
+    {
+      "filename": "next-patch-browser.mjs.txt",
+      "bytes": 6277,
+      "sha256": "9659de30b57c803d703adf099e2460603627da6f125a10c58f7fd3bafcd4f670"
+    },
+    {
+      "filename": "next-patch-ci.json",
+      "bytes": 3171,
+      "sha256": "30146498aaebe6cf745e63b9cfb4ba8bd339479082731dce3170b514c495159f"
+    },
+    {
+      "filename": "next-patch-cms.json",
+      "bytes": 467,
+      "sha256": "71bdf536facac43bf38f112f58d564ec8311430b2b58bd794089cc255dc6c9cd"
+    },
+    {
+      "filename": "next-patch-home-en-desktop.png",
+      "bytes": 162447,
+      "sha256": "59239666f8e8bf54f36048dfce0e8835f6c19473d60f499f6a06364d1635e6e5"
     },
     {
       "filename": "partners-en-desktop.png",

@@ -42,3 +42,29 @@ No production import, migration, worker rollout or publication was performed.
 
 `manifest.json` records SHA-256 and byte lengths for the captured files.
 Release order and rollback are in the parent import runbook/restoration report.
+
+## Security-patched candidate verification
+
+Candidate f46be17b patches brace-expansion and Next.js to 16.3.6; application,
+Auth, import, membership/payment and worker sources remain those of d9b75111.
+The preceding brace-only Windows full run is in brace-patch-local-unit.json.
+New candidate evidence is separate from the earlier captures:
+
+- next-patch-ci.json: GitHub Actions run 36746006758; checks, both full unit
+  shards and quality all passed. 6,097 tests passed / 171 skipped; 267-page
+  build. Production dependency audit has 13 low/moderate findings and no
+  high/critical. Install-time all-dependency audit includes development packages
+  and reports 29 findings, including 9 high; this is recorded separately.
+- next-patch-browser.json: 8 actual local route/viewport cases passed on
+  Next.js 16.3.6; every directory decoded all 79 distinct real R2 images.
+- next-patch-cms.json: real synthetic staff provider login and anonymous
+  protection passed; unpublish -> public 78, republish -> public 79.
+- next-patch-home-en-desktop.png: actual 1440x1000 viewport showing the normal
+  fixed-header position; inspected after capture. This is localhost, not Vercel.
+- next-patch-browser.mjs.txt: the exact new browser harness; second argument
+  .playwright/partner-r2-next-patch-browser keeps previous evidence intact.
+
+The standard Git Preview is READY, not R2 acceptance. R2 credentials have not
+been transmitted to Vercel; that operation was rejected by automatic approval
+review and explicit authorization remains pending. Production is still ab568934.
+The isolated fixtures remain published only in the test database/private bucket.

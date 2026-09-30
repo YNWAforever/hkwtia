@@ -384,3 +384,54 @@ The preceding brace-expansion-only candidate completed a fresh local full suite:
 results apply to Next.js 16.3.4 and do not substitute for verifying 16.3.6.
 Generated next-env and snapshot line-ending changes were inspected and restored
 without changes to their committed contents.
+
+## Final local and CI verification for f46be17b
+
+[CI 36746006758](https://github.com/YNWAforever/hkwtia/actions/runs/36746006758)
+passed checks, both unit shards and quality on Ubuntu/Node 22 after npm ci.
+The exact existing gates ran: npm ls, npm run audit:strings, npm run lint,
+npm run typecheck, npm run build, npm audit --omit=dev --audit-level=high,
+and vitest run --shard=1/2 + --shard=2/2. Unit results total 716 passed files,
+65 skipped files, 6,097 passed tests and 171 skipped tests; zero failures.
+The production audit gate reports 13 low/moderate findings, zero high/critical.
+The npm-ci install report includes development dependencies and still reports
+29 findings (3 low / 17 moderate / 9 high); it is not represented as zero or
+as a clean full-dependency audit.
+
+Fresh local Windows/Node 24.18.0 Next.js 16.3.6 webpack build exited 0 and
+generated 267 pages. Fresh focused OG/partner/CMS/login regression passed
+58/58; local filtered lint passed with 0 errors and 67 warnings. CI raw lint
+passed in its clean checkout. Local raw lint retains its ignored-helper block.
+
+Actual local browser command:
+
+```text
+node .playwright/run-partner-r2-browser.mjs .playwright/partner-r2-next-patch-browser
+node .playwright/run-partner-r2-cms.mjs C:\Users\laich\Documents\hkwtia\.worktrees\audit-remediation\.playwright\audit-isolated.env
+```
+
+All 8 route/viewport cases passed on the patched server; every full directory
+decoded 79 distinct R2 images. Real synthetic staff login returned 200; anonymous
+CMS protection and unpublish/republish again produced public counts 78/79.
+No Google/magic-link, Stripe payment or live member-message acceptance is claimed.
+The normal desktop viewport screenshot was inspected. The earlier fixed-header
+position in section/full-page screenshots is a capture artifact, not a redesign.
+
+Read-only Vercel checks reconfirmed Production code ab568934 at deployment
+dpl_3KL2kwtCM7m5uwvXpcCtvJuVLHLu. Git Preview f46be17b is READY at
+dpl_wGruhexFpu6yu5SLYVqjrbBerLib /
+https://hkwtia-pyt4g61op-ynwaforevers-projects.vercel.app. Its build status is
+not real-logo Preview acceptance. The automatic approval review rejected the
+manual Preview deployment because previous test-secret authorization covered
+DB/Auth/rate-limit/Stripe, but not R2 secret transmission to Vercel. No R2
+secret was transmitted. The explicit R2 Preview authorization question remains
+pending; the current candidate additionally includes the verified security
+patches above. No production configuration, import or release occurred.
+
+Release gates: R2-to-Vercel Preview authorization, actual remote image/browser
+acceptance, separately authorized production R2 configuration and guarded import,
+CMS production review/publication, then live acceptance. No migration or worker
+rollout is required. The 79 test fixtures remain retained; full cleanup is not
+claimed. Neon branch expiry is 2026-10-04 20:00 HKT. Rollback remains scoped
+unpublication before optional archive and web rollback; never remove unrelated
+records, audits or storage objects.
