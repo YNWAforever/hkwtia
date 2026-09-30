@@ -1,0 +1,76 @@
+import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+import {chromium,expect} from '@playwright/test';
+const deployment=JSON.parse(await readFile('.playwright/partner-r2-preview-deploy.json','utf8'));
+const base=deployment.origin;
+if(base!=='https://hkwtia-partner-logos-20260930.vercel.app'||deployment.sourceCommit!=='68faa7be95abfa09710e871e68a6db501585559c')throw Error('PREVIEW_BROWSER_GUARD');
+const folder='.playwright/partner-r2-preview-browser';
+
+await mkdir(folder,{recursive:true});
+const evidence={recordedAt:new Date().toISOString(),environment:'Vercel Preview; isolated Neon and private R2 test bucket',base,codeSource:'d9b75111',candidateCommit:deployment.sourceCommit,deploymentId:deployment.deploymentId,nextVersion:JSON.parse(await readFile('node_modules/next/package.json','utf8')).version,cases:[],productionChanged:false};
+const browser=await chromium.launch({headless:true});
+async function imagesReady(page,selector,count) {
+  const images=page.locator(selector);
+  await expect(images).toHaveCount(count);
+  const bounds=await images.evaluateAll(images=>({first:images[0].getBoundingClientRect().top+window.scrollY,last:images.at(-1).getBoundingClientRect().bottom+window.scrollY}));
+  for(let y=Math.max(0,bounds.first-150);y<bounds.last;y+=500) { await page.evaluate(y=>window.scrollTo({top:y,behavior:'instant'}),y); await page.waitForTimeout(80); }
+  await page.waitForFunction(({selector,count})=>{const images=[...document.querySelectorAll(selector)];return images.length===count&&images.every(img=>img.complete&&img.naturalWidth>0&&img.naturalHeight>0)}, {selector,count}, {timeout:45_000});
+}
+try {
+  for(const viewport of [{name:'desktop',width:1440,height:1000},{name:'mobile',width:390,height:844}]) {
+    const context=await browser.newContext({storageState:'.playwright/partner-r2-preview-state.json',viewport:{width:viewport.width,height:viewport.height}});
+    for(const locale of [{name:'en',home:'/',partners:'/partners'},{name:'zh',home:'/zh',partners:'/zh/partners'}]) {
+      const page=await context.newPage();
+      const errors=[];const failedMedia=[];
+      page.on('pageerror',error=>errors.push({kind:'pageerror',name:error.name}));
+      page.on('console',message=>{if(message.type()==='error')errors.push({kind:'console',text:message.text().slice(0,160)})});
+      page.on('response',response=>{if(new URL(response.url()).pathname.startsWith('/api/media/')&&response.status()>=400)failedMedia.push({status:response.status(),path:new URL(response.url()).pathname})});
+      page.on('requestfailed',request=>{if(new URL(request.url()).pathname.startsWith('/api/media/'))failedMedia.push({path:new URL(request.url()).pathname,failed:true})});
+      const response=await page.goto(base+locale.home,{waitUntil:'domcontentloaded',timeout:120_000});
+      expect(response?.status()).toBe(200);
+      const network=page.locator('.legacy-network');
+      await expect(network).toBeVisible({timeout:45_000});
+      await expect(network.locator('.legacy-tabs button')).toHaveCount(3);
+      const counts=[];const screenshots=[];
+      for(const [index,expected] of [58,15,6].entries()) {
+        const button=network.locator('.legacy-tabs button').nth(index);
+        await button.scrollIntoViewIfNeeded();
+        await expect(button.locator('b')).toHaveText(String(expected).padStart(2,'0'));
+        await button.click();
+        await expect(button).toHaveAttribute('aria-pressed','true');
+        const shown=Math.min(expected,12);
+        await expect(network.locator('.legacy-logo-card')).toHaveCount(shown);
+        await imagesReady(page,'.legacy-network img[src^="/api/media/"]',shown);
+        const sentence=await network.locator('.legacy-directory-action p').innerText();
+        expect(sentence).toContain(String(expected));expect(sentence).toContain(String(shown));
+        const filename=`home-${locale.name}-${viewport.name}-${['supporting','regional','media'][index]}.png`;
+        await network.screenshot({path:folder+'/'+filename,animations:'disabled'});
+        counts.push({category:['supporting','regional','media'][index],total:expected,shown,loaded:shown});screenshots.push(filename);
+      }
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);
+      expect(await page.locator('[data-nextjs-dialog],.vite-error-overlay').count()).toBe(0);
+      expect(errors).toEqual([]);expect(failedMedia).toEqual([]);
+      const homeCase={path:locale.home,viewport:viewport.name,status:200,categories:counts,screenshots,consoleErrors:0,pageErrors:0,failedMedia:0,horizontalOverflow:false};
+      evidence.cases.push(homeCase);console.log(JSON.stringify(homeCase));
+      const viewAll=network.locator('.legacy-directory-action a');
+      await expect(viewAll).toHaveAttribute('href',locale.partners);
+      await viewAll.click();await expect(page).toHaveURL(base+locale.partners,{timeout:90_000});
+      await imagesReady(page,'img[src^="/api/media/"]',79);
+      expect(await page.locator('img[src^="/api/media/"]').evaluateAll(images=>new Set(images.map(i=>i.getAttribute('src'))).size)).toBe(79);
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);
+      expect(errors).toEqual([]);expect(failedMedia).toEqual([]);
+      const filename=`partners-${locale.name}-${viewport.name}.png`;
+      await page.screenshot({path:folder+'/'+filename,fullPage:true,animations:'disabled'});
+      const partnerCase={path:locale.partners,viewport:viewport.name,navigation:'clicked localized view-all link',images:79,uniqueImages:79,decoded:79,consoleErrors:0,pageErrors:0,failedMedia:0,horizontalOverflow:false,screenshot:filename};
+      evidence.cases.push(partnerCase);console.log(JSON.stringify(partnerCase));
+      await page.close();await writeFile(folder+'/evidence.json',JSON.stringify(evidence,null,2)+'\n');
+    }
+    await context.close();
+  }
+  expect(evidence.cases).toHaveLength(8);evidence.passed=true;
+  await writeFile(folder+'/evidence.json',JSON.stringify(evidence,null,2)+'\n');
+} catch(error) {
+  evidence.passed=false;evidence.failure={name:error?.name,code:'PREVIEW_BROWSER_FAILED'};
+  await writeFile(folder+'/evidence.json',JSON.stringify(evidence,null,2)+'\n');
+  console.error(JSON.stringify(evidence.failure));process.exitCode=1;
+} finally {await browser.close();}

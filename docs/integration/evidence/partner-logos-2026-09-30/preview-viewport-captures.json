@@ -1,0 +1,23 @@
+{
+  "recordedAt": "2026-09-30T17:47:43.910Z",
+  "captures": [
+    {
+      "filename": "home-en-desktop-viewport.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "path": "/",
+      "origin": "https://hkwtia-partner-logos-20260930.vercel.app"
+    },
+    {
+      "filename": "home-zh-mobile-viewport.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "/zh",
+      "origin": "https://hkwtia-partner-logos-20260930.vercel.app"
+    }
+  ]
+}

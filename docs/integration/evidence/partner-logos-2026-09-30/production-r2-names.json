@@ -1,0 +1,16 @@
+{
+  "recordedAt": "2026-09-30T17:48:22.509Z",
+  "operation": "vercel env ls production; output reduced to names only",
+  "present": [
+    "R2_ACCOUNT_ID",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY",
+    "R2_JURISDICTION"
+  ],
+  "missing": [
+    "R2_BUCKET"
+  ],
+  "valuesRead": false,
+  "credentialsUsabilityVerified": false,
+  "changedByThisRun": false
+}

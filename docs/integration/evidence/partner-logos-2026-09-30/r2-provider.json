@@ -1,0 +1,13 @@
+{
+  "recordedAt": "2026-09-30T14:58:54.314Z",
+  "bucket": "hkwtia-partner-acceptance-20260930",
+  "jurisdiction": "default",
+  "provider": "Cloudflare R2 S3 API",
+  "synthetic": true,
+  "key": "acceptance/partner-logos/5afe4cdb-42e9-4548-8923-cc278db673ad/synthetic.png",
+  "put": true,
+  "read": true,
+  "checksumMatched": true,
+  "dimensionsMatched": true,
+  "cleanup": true
+}
