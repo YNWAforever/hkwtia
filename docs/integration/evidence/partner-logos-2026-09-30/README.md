@@ -30,7 +30,13 @@ operator attestation, not a worker-control switch; no worker is connected to thi
 isolated acceptance branch. The archived runner now uses the required true marker.
 Never replace the embedded test database/bucket guards with production values.
 
-The 79 fixtures are retained for Preview acceptance; cleanup has not run.
+The 79 fixtures are retained for Preview acceptance; full cleanup has not run.
+`cleanup-check.json` records a real isolated SQL deletion rehearsal followed by
+ROLLBACK: 79 partner/media rows and all 239 target/import audits were absent
+inside the transaction, then original table counts were restored. No object was
+deleted. The runner uses one dedicated transaction client and validates the
+exact stored actor, 79 partner IDs and 79 storage keys before deletion. CMS
+audits are scoped to these exact partner targets; other staff history remains.
 The fixture state containing run-owned IDs/keys remains ignored locally.
 No production import, migration, worker rollout or publication was performed.
 

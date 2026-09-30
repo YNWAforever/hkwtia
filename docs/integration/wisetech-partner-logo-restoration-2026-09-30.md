@@ -292,3 +292,52 @@ verification and production restoration are still pending. No R2 credential
 has been sent to Vercel in this acceptance run so far; no production DB,
 production storage or domain was changed. No migration or worker deployment
 is required for this restoration.
+
+## PR #105 dependency audit follow-up
+
+PR #105 at 90191ac5 ran CI 36741789465. Both unit shards passed, as did
+visible-string audit, lint, typecheck and build; the checks job failed only at
+`npm audit --omit=dev --audit-level=high`, and quality correctly failed too.
+The same command reproduced locally with exit 1. The existing lockfile contains
+brace-expansion 1.1.18 and 2.1.4, affected by the published high-severity nested
+brace recursion advisory [GHSA-qhr7-859c-m2p7](https://github.com/advisories/GHSA-qhr7-859c-m2p7).
+No homepage, importer or authorization regression was identified.
+
+A focused `npm update brace-expansion --ignore-scripts --no-audit --no-fund`
+updated only its existing major lines: 1.1.18 -> 1.1.21, 2.1.4 -> 2.1.7,
+and 5.0.9 -> 5.0.12. Unrelated optional peer entries pruned by npm were restored
+unchanged. package.json, direct dependencies, Auth and application sources are
+unchanged. The final lockfile diff has only three version/resolved/integrity
+triples. The exact audit gate now exits 0 with zero high/critical findings;
+10 low/moderate findings remain recorded, not represented as zero vulnerabilities.
+
+A one-off Node assertion probe checks normal en/zh and numeric brace expansion
+and both published deeply nested payloads against all three patched copies.
+The first probe incorrectly assumed v5's export was a function; it failed
+TypeError after the v1/v2 cases passed. Reading v5's actual named expand export
+and correcting the harness produced 3/3 successful cases without app changes.
+Focused partner-import regression: 4 files / 43 tests passed. Filtered lint
+passed with 0 errors / 67 warnings; typecheck passed; visible-string audit passed
+for 297 TSX files. Full suite and candidate build are being rerun; their final
+results will be recorded before handoff.
+
+## Isolated cleanup rehearsal
+
+`cleanup-check` uses a dedicated Postgres client for BEGIN/DELETE/ROLLBACK.
+It validates the synthetic stored actor and ownership of all 79 partner/media
+records against the local fixture state before deleting. The audit deletion
+includes only the import actor or exact owned partner targets, covering the
+real CMS staff unpublish/republish audit records without removing unrelated
+M2 staff history.
+
+Actual command:
+
+```powershell
+node --conditions=react-server --import tsx .playwright/run-partner-r2-isolated.mts cleanup-check 'C:\Users\laich\Documents\hkwtia\.worktrees\audit-remediation\.playwright\audit-isolated.env' 'C:\Users\laich\Documents\hkwtia\.playwright\r2-isolated.env'
+```
+
+Exit 0 at 2026-09-30T16:25:11.059Z (2026-10-01 00:25 HKT). Before counts:
+100 profiles / 79 partners / 79 media / 359 audits. Inside the transaction:
+99 / 0 / 0 / 120; all run-owned residue and the temporary sentinel were zero.
+ROLLBACK restored the exact original counts. Objects deleted: 0.
+The 79 fixtures remain available for Preview; full cleanup is not claimed.

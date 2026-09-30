@@ -5,13 +5,18 @@
   "files": [
     {
       "filename": "README.md",
-      "bytes": 2233,
-      "sha256": "6c10789f03fa1cd12769d4d784ed6c4735f36d5bbf7dbddc7d7448b6010e0fb0"
+      "bytes": 2706,
+      "sha256": "3d74cdb69eb2cf523305503500808e96b5f8070af951a26b0959c0e20a81c5aa"
     },
     {
       "filename": "browser-acceptance.mjs.txt",
       "bytes": 5892,
       "sha256": "39a3905fdfb452ef81e77d105cb3ea84b4c83aca97ae776a9d599c8e6d0909fa"
+    },
+    {
+      "filename": "cleanup-check.json",
+      "bytes": 622,
+      "sha256": "90bf106e1c2fb9fed980ce8ff1ea5d63246a502b1aa17559ef900b68d32c37fc"
     },
     {
       "filename": "cms-acceptance.mjs.txt",
@@ -30,8 +35,8 @@
     },
     {
       "filename": "isolated-fixture.mts.txt",
-      "bytes": 13920,
-      "sha256": "2cfc8a0bfd767136a190e76d848ca832820a819f931511df91a131a9016361ea"
+      "bytes": 17558,
+      "sha256": "ba4eabe743abe5ec250c7c3105595823184c99ff4aa529953e93be79d5ddd493"
     },
     {
       "filename": "isolated-import.json",

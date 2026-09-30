@@ -20,7 +20,7 @@ async function save(state: State) { await writeFile(statePath, JSON.stringify(st
 async function main() {
   check(process.env.NODE_ENV !== 'production' && process.env.VERCEL_ENV !== 'production', 'PARTNER_R2_PRODUCTION_PROHIBITED');
   const [mode, dbPath, r2Path] = process.argv.slice(2);
-  check(['prepare','publish','cleanup'].includes(mode) && dbPath && r2Path, 'PARTNER_R2_ARGUMENTS_REQUIRED');
+  check(['prepare','publish','cleanup-check','cleanup'].includes(mode) && dbPath && r2Path, 'PARTNER_R2_ARGUMENTS_REQUIRED');
   const values = parseEnv(await readFile(dbPath, 'utf8'));
   check(values.DATABASE_URL_TEST && new URL(values.DATABASE_URL_TEST).hostname === 'ep-plain-mouse-azm8pl2j-pooler.c-3.ap-southeast-1.aws.neon.tech' && values.NEON_PROJECT_ID === 'solitary-wave-52860119', 'PARTNER_R2_ISOLATED_DATABASE_REQUIRED');
   process.env.DATABASE_URL = values.DATABASE_URL_TEST;
@@ -117,18 +117,39 @@ async function main() {
         Object.assign(evidence,{publication:'existing repository methods on isolated branch',refusedBeforeConfirm,publicEn:79,publicZh:79,publicationAudits:auditRows,relationshipDatesUnchanged:true});
         await writeFile(evidencePath,JSON.stringify(evidence,null,2)+'\n'); console.log(JSON.stringify(evidence));
       } else {
-        await pool.query('BEGIN');
+        check(['imported-unpublished','published-isolated'].includes(state.phase),'PARTNER_R2_CLEANUP_PHASE_INVALID');
+        check(state.partnerIds.length===79 && new Set(state.partnerIds).size===79 && state.partnerIds.every(id=>/^[0-9a-f-]{36}$/.test(id)),'PARTNER_R2_CLEANUP_PARTNER_IDS_INVALID');
+        check(state.objectKeys.length===79 && new Set(state.objectKeys).size===79 && state.objectKeys.every(key=>/^media\/[0-9]{4}\/[0-9]{2}\/[0-9a-f-]{36}\.png$/.test(key)),'PARTNER_R2_CLEANUP_OBJECT_KEYS_INVALID');
+        const client=await pool.connect();
         try {
-          await pool.query('DELETE FROM audit_events WHERE actor_user_id=$1',[state.actorId]);
-          await pool.query('DELETE FROM partners WHERE logo_media_id IN (SELECT id FROM media WHERE registered_by_profile_id=$1)',[state.actorId]);
-          await pool.query('DELETE FROM media WHERE registered_by_profile_id=$1',[state.actorId]);
-          await pool.query('DELETE FROM profiles WHERE id=$1 AND email=$2',[state.actorId,state.email]);
-          await pool.query('DELETE FROM acceptance_sentinel WHERE designated_by=$1',[state.sentinelDesignation]);
-          await pool.query('COMMIT');
-        } catch(error) { await pool.query('ROLLBACK'); throw error; }
+          await client.query('BEGIN');
+          const stored=(await client.query('SELECT role,auth_user_id,email FROM profiles WHERE id=$1 FOR UPDATE',[state.actorId])).rows[0];
+          check(stored?.role==='staff' && stored.auth_user_id===state.actorId && stored.email===state.email,'PARTNER_R2_CLEANUP_ACTOR_MISMATCH');
+          const beforeCounts=(await client.query('SELECT (SELECT count(*)::int FROM profiles) AS profiles,(SELECT count(*)::int FROM partners) AS partners,(SELECT count(*)::int FROM media) AS media,(SELECT count(*)::int FROM audit_events) AS audits')).rows[0];
+          const owned=(await client.query('SELECT p.id,m.storage_key FROM partners p JOIN media m ON m.id=p.logo_media_id WHERE m.registered_by_profile_id=$1 FOR UPDATE OF p,m',[state.actorId])).rows;
+          check(owned.length===79 && owned.every(row=>state.partnerIds.includes(row.id) && state.objectKeys.includes(row.storage_key)),'PARTNER_R2_CLEANUP_OWNERSHIP_MISMATCH');
+          await client.query("DELETE FROM audit_events WHERE actor_user_id=$1 OR (target_type='partner' AND target_id=ANY($2::text[]))",[state.actorId,state.partnerIds]);
+          await client.query('DELETE FROM partners WHERE id=ANY($2::uuid[]) AND logo_media_id IN (SELECT id FROM media WHERE registered_by_profile_id=$1)',[state.actorId,state.partnerIds]);
+          await client.query('DELETE FROM media WHERE registered_by_profile_id=$1',[state.actorId]);
+          await client.query('DELETE FROM profiles WHERE id=$1 AND email=$2',[state.actorId,state.email]);
+          await client.query('DELETE FROM acceptance_sentinel WHERE designated_by=$1',[state.sentinelDesignation]);
+          if(mode==='cleanup-check') {
+            const residue=(await client.query("SELECT (SELECT count(*)::int FROM profiles WHERE id=$1) AS profiles,(SELECT count(*)::int FROM partners WHERE id=ANY($3::uuid[])) AS partners,(SELECT count(*)::int FROM media WHERE registered_by_profile_id=$1) AS media,(SELECT count(*)::int FROM audit_events WHERE actor_user_id=$1 OR (target_type='partner' AND target_id=ANY($3::text[]))) AS audits,(SELECT count(*)::int FROM acceptance_sentinel WHERE designated_by=$2) AS sentinels",[state.actorId,state.sentinelDesignation,state.partnerIds])).rows[0];
+            check(Object.values(residue).every(value=>value===0),'PARTNER_R2_CLEANUP_CHECK_RESIDUE');
+            const afterDeleteCounts=(await client.query('SELECT (SELECT count(*)::int FROM profiles) AS profiles,(SELECT count(*)::int FROM partners) AS partners,(SELECT count(*)::int FROM media) AS media,(SELECT count(*)::int FROM audit_events) AS audits')).rows[0];
+            await client.query('ROLLBACK');
+            const restoredCounts=(await client.query('SELECT (SELECT count(*)::int FROM profiles) AS profiles,(SELECT count(*)::int FROM partners) AS partners,(SELECT count(*)::int FROM media) AS media,(SELECT count(*)::int FROM audit_events) AS audits')).rows[0];
+            check(JSON.stringify(beforeCounts)===JSON.stringify(restoredCounts),'PARTNER_R2_CLEANUP_CHECK_RESTORE_FAILED');
+            const evidence={recordedAt:new Date().toISOString(),mode:'cleanup-check',passed:true,transactionRolledBack:true,fixtureRetained:true,objectsDeleted:0,beforeCounts,afterDeleteCounts,restoredCounts,residue,productionChanged:false};
+            await writeFile('.playwright/partner-r2-cleanup-check.json',JSON.stringify(evidence,null,2)+'\n');
+            console.log(JSON.stringify(evidence));return;
+          }
+          await client.query('COMMIT');
+        } catch(error) { await client.query('ROLLBACK'); throw error; }
+        finally { client.release(); }
         let deleted=0;
         for (const key of state.objectKeys) { await storage.delete(key); deleted++; }
-        const residue=(await pool.query('SELECT (SELECT count(*)::int FROM profiles WHERE id=$1) AS profiles,(SELECT count(*)::int FROM media WHERE registered_by_profile_id=$1) AS media,(SELECT count(*)::int FROM audit_events WHERE actor_user_id=$1) AS audits,(SELECT count(*)::int FROM acceptance_sentinel WHERE designated_by=$2) AS sentinels',[state.actorId,state.sentinelDesignation])).rows[0];
+        const residue=(await pool.query("SELECT (SELECT count(*)::int FROM profiles WHERE id=$1) AS profiles,(SELECT count(*)::int FROM partners WHERE id=ANY($3::uuid[])) AS partners,(SELECT count(*)::int FROM media WHERE registered_by_profile_id=$1) AS media,(SELECT count(*)::int FROM audit_events WHERE actor_user_id=$1 OR (target_type='partner' AND target_id=ANY($3::text[]))) AS audits,(SELECT count(*)::int FROM acceptance_sentinel WHERE designated_by=$2) AS sentinels",[state.actorId,state.sentinelDesignation,state.partnerIds])).rows[0];
         check(Object.values(residue).every(value=>value===0),'PARTNER_R2_CLEANUP_RESIDUE');
         state.phase='cleaned'; await save(state);
         const evidence=JSON.parse(await readFile(evidencePath,'utf8').catch(()=>'{}'));
