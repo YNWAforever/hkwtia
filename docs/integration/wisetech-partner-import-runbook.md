@@ -58,9 +58,10 @@ logo-rights confirmations, then publish. The repository refuses publication
 without both confirmations and a live logo media record with bilingual alt.
 Do not infer start dates or indefinite historical grants from the donor file.
 
-Verify /partners, /zh/partners, /, and /zh with all 79 records, including
-all three homepage categories and working images. Capture counts, image errors,
-and screenshots. A successful script run alone is not browser acceptance.
+Verify /partners and /zh/partners with all 79 records. On / and /zh, verify all
+three category counts (58/15/6) and the existing preview of up to 12 logos per
+selected tab. Check working images, capture counts and image errors, and save
+screenshots. A successful script run alone is not browser acceptance.
 
 ## Rollback
 
@@ -79,3 +80,12 @@ and browser acceptance have not run. Configure the existing R2 storage for the
 actual environment, then finish isolated import acceptance before a production
 import. The exact code and read-only evidence are in
 docs/integration/wisetech-partner-logo-restoration-2026-09-30.md.
+## Isolated SQL verification completed
+
+The follow-up test on the API-confirmed, non-default Neon acceptance branch
+passed using 79 synthetic records, real PNG normalization and the CLI's shared
+SQL adapter. It proved sequential rerun idempotency, unpublished defaults,
+transactional audit rollback and stored-actor role refusal. Its R2 upload port
+was a mock. Actual R2 upload/read acceptance is still required before the
+production import. Exact commands, mutation proof and run-owned cleanup counts
+are in the linked restoration evidence above.

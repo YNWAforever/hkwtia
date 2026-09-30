@@ -180,6 +180,56 @@ export async function importPartners(
   return {created, skippedExisting, skippedError};
 }
 
+export function createPartnerImportDatabase(pool: Pool): Pick<PartnerImportDependencies, "findExisting" | "transaction"> {
+  return {
+    findExisting: async (category, nameEn) => {
+      const result = await pool.query(
+        "SELECT 1 FROM partners WHERE category = $1 AND name_en = $2 LIMIT 1",
+        [category, nameEn],
+      );
+      return result.rowCount !== null && result.rowCount > 0;
+    },
+    transaction: async (work) => {
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+        const result = await work({
+          insertMedia: async (row) => {
+            const inserted = await client.query(
+              `INSERT INTO media (id, url, alt_en, alt_zh, storage_key, storage_etag, original_filename, content_type, byte_size, width, height, focal_x, focal_y, checksum_sha256, registered_by_profile_id)
+               VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING id`,
+              [row.id, row.url, row.altEn, row.altZh, row.storageKey, row.storageEtag, row.originalFilename, row.contentType, row.byteSize, row.width, row.height, row.focalX, row.focalY, row.checksumSha256, row.registeredByProfileId],
+            );
+            return {id: inserted.rows[0].id};
+          },
+          insertPartner: async (row) => {
+            const inserted = await client.query(
+              `INSERT INTO partners (name_en, name_zh_hk, category, website_url, logo_media_id, display_order, featured)
+               VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
+              [row.nameEn, row.nameZhHk, row.category, row.websiteUrl, row.logoMediaId, row.displayOrder, row.featured],
+            );
+            return {id: inserted.rows[0].id};
+          },
+          insertAudit: async (row) => {
+            await client.query(
+              `INSERT INTO audit_events (actor_user_id, actor_type, action, target_type, target_id, metadata)
+               VALUES ($1,$2,$3,$4,$5,$6)`,
+              [row.actorUserId, row.actorType, row.action, row.targetType, row.targetId, JSON.stringify(row.metadata)],
+            );
+          },
+        });
+        await client.query("COMMIT");
+        return result;
+      } catch (error) {
+        try { await client.query("ROLLBACK"); } catch { /* Preserve the original failure. */ }
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+  };
+}
+
 async function main(): Promise<void> {
   const donorDir = process.env.WISETECH_DONOR_DIR;
   if (!donorDir) throw new Error("PARTNER_IMPORT_DONOR_DIR_REQUIRED");
@@ -207,54 +257,10 @@ async function main(): Promise<void> {
     const r2 = createR2Storage();
 
     const dependencies: PartnerImportDependencies = {
-      findExisting: async (category, nameEn) => {
-        const result = await pool.query(
-          "SELECT 1 FROM partners WHERE category = $1 AND name_en = $2 LIMIT 1",
-          [category, nameEn],
-        );
-        return result.rowCount !== null && result.rowCount > 0;
-      },
+      ...createPartnerImportDatabase(pool),
       readLogoBytes: async (logoFile) => new Uint8Array(await readFile(join(donorDir, DONOR_LOGO_DIRECTORY_RELATIVE_PATH, logoFile))),
       normalizeImage: (bytes, contentType, fieldInput) => normalizeImageUpload(bytes, contentType, fieldInput),
       uploadLogo: (input) => r2.put({key: input.key, bytes: input.bytes as Uint8Array, contentType: input.contentType as never, sha256: input.sha256}),
-      transaction: async (work) => {
-        const client = await pool.connect();
-        try {
-          await client.query("BEGIN");
-          const result = await work({
-            insertMedia: async (row) => {
-              const inserted = await client.query(
-                `INSERT INTO media (id, url, alt_en, alt_zh, storage_key, storage_etag, original_filename, content_type, byte_size, width, height, focal_x, focal_y, checksum_sha256, registered_by_profile_id)
-                 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING id`,
-                [row.id, row.url, row.altEn, row.altZh, row.storageKey, row.storageEtag, row.originalFilename, row.contentType, row.byteSize, row.width, row.height, row.focalX, row.focalY, row.checksumSha256, row.registeredByProfileId],
-              );
-              return {id: inserted.rows[0].id};
-            },
-            insertPartner: async (row) => {
-              const inserted = await client.query(
-                `INSERT INTO partners (name_en, name_zh_hk, category, website_url, logo_media_id, display_order, featured)
-                 VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
-                [row.nameEn, row.nameZhHk, row.category, row.websiteUrl, row.logoMediaId, row.displayOrder, row.featured],
-              );
-              return {id: inserted.rows[0].id};
-            },
-            insertAudit: async (row) => {
-              await client.query(
-                `INSERT INTO audit_events (actor_user_id, actor_type, action, target_type, target_id, metadata)
-                 VALUES ($1,$2,$3,$4,$5,$6)`,
-                [row.actorUserId, row.actorType, row.action, row.targetType, row.targetId, JSON.stringify(row.metadata)],
-              );
-            },
-          });
-          await client.query("COMMIT");
-          return result;
-        } catch (error) {
-          try { await client.query("ROLLBACK"); } catch { /* Preserve the original failure. */ }
-          throw error;
-        } finally {
-          client.release();
-        }
-      },
       generateId: randomUUID,
       log: (message) => { console.log(message); },
     };
