@@ -6,7 +6,7 @@ import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
 import {createBillingPortalSession, createCheckoutSession} from "@/lib/billing/checkout-service";
 import {localizedPath} from "@/lib/urls";
-import {getDashboard} from "@/lib/portal/queries";
+import {getBillingSummary} from "@/lib/portal/billing-summary";
 
 type Props = Readonly<{params: Promise<{locale: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>}>;
 
@@ -22,19 +22,19 @@ export default async function BillingPage({params, searchParams}: Props) {
   setRequestLocale(locale);
   const query = await searchParams;
   const actor = await requireActor();
-  const dashboard = await getDashboard(actor);
+  const summary = await getBillingSummary(actor);
   const t = await getTranslations({locale, namespace: "Portal"});
   const errorPath = `${localizedPath(locale, "/portal/billing")}?error=1`;
-  const billingMemberships = dashboard.memberships.filter((membership) => !membership.companyId || dashboard.companies.some((company) => company.id === membership.companyId && (company.role === "owner" || company.role === "admin")));
   const actions: Record<string, () => Promise<void>> = {};
 
-  for (const membership of dashboard.memberships) {
+  for (const membership of summary.memberships) {
+    if (membership.recovery !== "new_checkout" && membership.recovery !== "resume" && !membership.canViewHistory) continue;
     actions[membership.id] = async () => {
       "use server";
       const currentActor = await requireActor();
       let session: {url: string};
       try {
-        session = membership.status === "pending_payment"
+        session = membership.recovery === "new_checkout"
           ? await createCheckoutSession(currentActor, membership.id, locale)
           : await createBillingPortalSession(currentActor, membership.id, locale);
       } catch {
@@ -52,7 +52,7 @@ export default async function BillingPage({params, searchParams}: Props) {
         <p className="text-lg text-muted-foreground">{t("billing.description")}</p>
       </header>
       {queryValue(query.error) === "1" ? <p className="rounded-md border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">{t("billing.error")}</p> : null}
-      <BillingActions memberships={billingMemberships} labels={{manage: t("billing.manage"), recover: t("billing.recover"), empty: t("billing.empty"), plan: (code) => t(`plans.${code}`), status: (value) => t(`status.${value}.label`)}} actions={actions} />
+      <BillingActions memberships={summary.memberships} supportHref={localizedPath(locale, "/contact")} labels={{manage: t("billing.manage"), recover: t("billing.recover"), history: t("billing.history"), support: t("billing.support"), supportMessage: t("billing.supportMessage"), providerUnavailable: t("billing.providerUnavailable"), empty: t("billing.empty"), plan: (code) => t(`plans.${code}`), status: (value) => t(`status.${value}.label`)}} actions={actions} />
     </div>
   );
 }

@@ -2191,6 +2191,8 @@
       "none": "You are all set"
     },
     "status": {
+      "expired": {"label": "Expired", "description": "Your membership has expired."},
+      "cancelled": {"label": "Cancelled", "description": "Your membership has been cancelled."},
       "active": {
         "label": "Active",
         "title": "Your membership is active",
@@ -2458,7 +2460,11 @@
       "manage": "Manage billing",
       "recover": "Continue payment",
       "empty": "No billing actions are available.",
-      "error": "We could not open billing right now."
+      "error": "We could not open billing right now.",
+      "history": "View billing history",
+      "support": "Contact membership support",
+      "supportMessage": "Contact WTIA to confirm your renewal or payment record. Viewing billing does not restore membership benefits.",
+      "providerUnavailable": "The payment provider could not be verified. Contact support before making another payment."
     },
     "seats": {
       "title": "Company seats",
@@ -2531,6 +2537,20 @@
     "verificationError": "Verification is unavailable. Reload the page and try again."
   },
   "Admin": {
+    "paymentReconciliation": {
+      "title": "Reconcile an existing membership payment",
+      "description": "Retrieve an existing Stripe event and replay its correlated membership lifecycle. This does not create a payment, refund or special membership. Unknown or mismatched records stay blocked.",
+      "event": "Existing Stripe event reference",
+      "reason": "Reconciliation reason",
+      "paid": "Paid but not activated",
+      "mismatch": "Subscription record mismatch",
+      "retry": "Retry a failed webhook",
+      "submit": "Verify provider record and reconcile",
+      "pending": "Verifying…",
+      "processed": "The existing event was processed. Check the membership status and audit record.",
+      "duplicate": "This event was already processed; no second payment effect was applied.",
+      "error": "Unable to reconcile. Confirm the event reference and correlated records with technical support before retrying."
+    },
     "brandShort": "WTIA",
     "unsavedChanges": {"confirm": "You have unsaved changes. Leave this page and discard them?"},
     "shell": {

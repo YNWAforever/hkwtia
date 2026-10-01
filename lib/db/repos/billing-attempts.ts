@@ -24,6 +24,7 @@ export type CheckoutSessionReference = Readonly<{
 }>;
 
 export type BillingAttemptErrorCode =
+  | "MEMBERSHIP_PAYMENT_RECONCILIATION_REQUIRED"
   | "MEMBERSHIP_NOT_PENDING_PAYMENT"
   | "PLAN_DOES_NOT_USE_CHECKOUT"
   | "MEMBERSHIP_APPLICATION_REQUIRED"
@@ -146,6 +147,7 @@ async function lockCheckoutMembership(
   `))[0]);
   if (!membership) forbidden();
   if (membership.status !== "pending_payment") attemptError("MEMBERSHIP_NOT_PENDING_PAYMENT");
+  if (membership.stripeSubscriptionId) attemptError("MEMBERSHIP_PAYMENT_RECONCILIATION_REQUIRED");
   if (membership.planCode !== "startup" && membership.planCode !== "corporate") {
     attemptError("PLAN_DOES_NOT_USE_CHECKOUT");
   }

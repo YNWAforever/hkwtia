@@ -2191,6 +2191,8 @@
       "none": "已全部完成"
     },
     "status": {
+      "expired": {"label": "已到期", "description": "你的會籍已到期。"},
+      "cancelled": {"label": "已取消", "description": "你的會籍已取消。"},
       "active": {
         "label": "已啟用",
         "title": "會員已啟用",
@@ -2458,7 +2460,11 @@
       "manage": "管理帳單",
       "recover": "繼續付款",
       "empty": "目前沒有可用帳單操作。",
-      "error": "目前無法開啟帳單，請稍後再試。"
+      "error": "目前無法開啟帳單，請稍後再試。",
+      "history": "查看帳單記錄",
+      "support": "聯絡會籍支援",
+      "supportMessage": "請聯絡 WTIA 核對續會或付款記錄。查看帳單不會恢復會籍權益。",
+      "providerUnavailable": "暫時無法核對付款服務，請先聯絡支援，勿再次付款。"
     },
     "seats": {
       "title": "公司席位",
@@ -2532,6 +2538,20 @@
     "verificationError": "目前無法進行驗證。請重新載入頁面再試。"
   },
   "Admin": {
+    "paymentReconciliation": {
+      "title": "核對現有會籍付款",
+      "description": "讀取現有 Stripe 事件，按已關聯的會籍流程重新處理。不會建立付款、退款或特別會籍。未知或不符的記錄會繼續被阻擋。",
+      "event": "現有 Stripe 事件編號",
+      "reason": "對帳原因",
+      "paid": "已付款但未啟用",
+      "mismatch": "訂閱記錄不一致",
+      "retry": "重試失敗的 webhook",
+      "submit": "核對付款服務記錄並對帳",
+      "pending": "正在核對…",
+      "processed": "現有事件已處理。請核對會籍狀態及稽核記錄。",
+      "duplicate": "此事件已處理，沒有再次套用付款效果。",
+      "error": "暫時無法對帳。請先與技術支援核對事件編號及相關記錄，才再重試。"
+    },
     "brandShort": "WTIA",
     "unsavedChanges": {"confirm": "你有尚未儲存的修改。離開此頁並捨棄修改？"},
     "shell": {

@@ -215,6 +215,12 @@ export function createScheduledJobsRepository(
 
 const scheduledJobsRepository = createScheduledJobsRepository();
 
+export type ManualPaymentReconciliation = Readonly<{
+  actor: Extract<Actor, {kind: "superadmin"}>;
+  requestId: string;
+  reasonCode: "paid_not_active" | "subscription_mismatch" | "webhook_retry";
+}>;
+
 export const jobsRepository = {
   ...scheduledJobsRepository,
   async getByRunKey(actor: Actor, runKey: string): Promise<Job | null> {
@@ -224,11 +230,29 @@ export const jobsRepository = {
     return rows[0] ?? null;
   },
 
-  async processWebhookLifecycle(actor: Actor, command: WebhookLifecycleCommand, currentSubscription?: (subscriptionId: string) => Promise<CurrentSubscriptionState>): Promise<"processed" | "duplicate"> {
+  async processWebhookLifecycle(actor: Actor, command: WebhookLifecycleCommand, currentSubscription?: (subscriptionId: string) => Promise<CurrentSubscriptionState>, manual?: ManualPaymentReconciliation): Promise<"processed" | "duplicate"> {
     requireSystem(actor);
     const db = await getDb();
     try {
       return await db.transaction(async (tx) => {
+        if (manual) {
+          if (manual.actor.kind !== "superadmin" || !/^[a-f0-9-]{36}$/i.test(manual.requestId) || !["paid_not_active", "subscription_mismatch", "webhook_retry"].includes(manual.reasonCode)) throw new Error("FORBIDDEN");
+          await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${"billing-reconciliation:" + manual.actor.profileId + ":" + manual.requestId}))`);
+          const previous = resultRow(await tx.execute(sql`SELECT target_id, metadata FROM ${auditEvents}
+            WHERE action='membership.payment.reconciled' AND actor_user_id=${manual.actor.profileId} AND request_id=${manual.requestId} LIMIT 1`));
+          if (previous) {
+            const metadata = previous.metadata as Record<string, unknown>;
+            if (previous.target_id !== command.membershipId || metadata.eventId !== command.eventId || metadata.reasonCode !== manual.reasonCode) throw new Error("PAYMENT_RECONCILIATION_REQUEST_CONFLICT");
+            if (metadata.disposition !== "processed" && metadata.disposition !== "duplicate") throw new Error("PAYMENT_RECONCILIATION_RECEIPT_INVALID");
+            return metadata.disposition;
+          }
+        }
+        const recordManual = async (disposition: "processed" | "duplicate") => {
+          if (!manual) return;
+          await tx.execute(sql`INSERT INTO ${auditEvents} (actor_type,actor_user_id,action,target_type,target_id,request_id,metadata)
+            VALUES ('superadmin',${manual.actor.profileId},'membership.payment.reconciled','membership',${command.membershipId},${manual.requestId},
+              jsonb_build_object('eventId',${command.eventId}::text,'reasonCode',${manual.reasonCode}::text,'disposition',${disposition}::text))`);
+        };
         const isCheckoutActivation = command.eventType === "checkout.session.completed" || command.eventType === "checkout.session.async_payment_succeeded";
         const claim = resultRow(await tx.execute(sql`INSERT INTO ${jobsTable}
           ("run_key", "kind", "state", "attempt_count")
@@ -238,7 +262,7 @@ export const jobsRepository = {
               "last_error" = NULL, "completed_at" = NULL, "updated_at" = now()
           WHERE ${jobsTable.state} = 'failed'
           RETURNING ${jobsTable.id} AS job_id`));
-        if (!claim) return "duplicate";
+        if (!claim) { await recordManual("duplicate"); return "duplicate"; }
         const jobId = requiredString(claim, "job_id");
 
         const membership = resultRow(await tx.execute(sql`SELECT ${memberships.id} AS membership_id, ${memberships.status} AS status,
@@ -362,6 +386,7 @@ export const jobsRepository = {
           WHERE ${jobsTable.id} = ${jobId} AND ${jobsTable.state} = 'processing'
           RETURNING ${jobsTable.id} AS job_id`));
         if (!completed) throw new Error("WEBHOOK_MUTATION_FAILED");
+        await recordManual("processed");
         return "processed";
       }, {isolationLevel: "read committed"});
     } catch (error) {

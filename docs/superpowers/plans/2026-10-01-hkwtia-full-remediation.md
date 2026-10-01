@@ -258,8 +258,8 @@
 
 **介面／契約：** 擬新增 getBillingSummary(actor: Actor): Promise<{membershipId:string|null; status:string; canManageBilling:boolean; recovery:"none"|"resume"|"new_checkout"|"support"; subscriptionRef:string|null}>；server 對本人或公司 owner/admin 授權，不依賴 active entitlement 的 getDashboard。敏感欄位按角色裁切。
 
-- [ ] **建立行為證據：** expired/cancelled billing 不500；seat member 不可代付/看不應見資料；pending/paid 重複 checkout 不造第二訂閱；亂序 webhook 不倒退；付款修復只對帳已存在訂單。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **建立行為證據：** expired/cancelled billing 不500；seat member 不可代付/看不應見資料；pending/paid 重複 checkout 不造第二訂閱；亂序 webhook 不倒退；付款修復只對帳已存在訂單。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
 - [ ] **實施：** 到期仍能查看本人合法帳單及下一步；依 provider 真狀態決定 resume、新 checkout 或 support，不以一個 button 盲建訂閱。管理端提供 payment→subscription→membership correlation 及具權限的既有 reconciliation 路徑，保留 idempotency/CAS；不得接受 client 自報 paid。
 - [ ] **驗證：** npm exec -- vitest run tests/unit/audit-full-billing-recovery.test.ts tests/unit/billing-recovery-cas.test.ts tests/unit/billing-checkout-locking.test.ts；npm run test:e2e -- tests/e2e/full-member-renewal.spec.ts。
 - [ ] **結案與提交：** 四類取消/過期/欠費/已付未啟用可恢復且不重複收款；取消/權益按 T09 批准政策驗收。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: recover billing access without granting membership access`。

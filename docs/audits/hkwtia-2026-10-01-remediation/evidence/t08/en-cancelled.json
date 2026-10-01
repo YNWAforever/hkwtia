@@ -1,0 +1,11 @@
+{
+  "environment": "confirmed isolated DB/Auth",
+  "status": "cancelled",
+  "http": 200,
+  "viewport": 390,
+  "history": true,
+  "blindCheckout": false,
+  "keyboard": true,
+  "providerSend": false,
+  "production": false
+}

@@ -259,3 +259,8 @@ export function stripeBillingAdapter(): StripeBillingAdapter {
   );
   return productionAdapter;
 }
+
+/** Read the provider's stored event; operator input is only an opaque lookup key. */
+export async function membershipStripeEvent(eventId: string): Promise<Stripe.Event> {
+  return new Stripe(billingEnv().stripeSecretKey, {apiVersion: STRIPE_API_VERSION}).events.retrieve(eventId);
+}

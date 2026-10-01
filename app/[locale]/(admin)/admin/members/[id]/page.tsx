@@ -4,6 +4,8 @@ import Link from "next/link";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {z} from "zod";
 
+import {PaymentReconciliationForm} from "@/components/admin/payment-reconciliation-form";
+import {reconcileMembershipPaymentAction} from "@/lib/admin/payment-reconciliation-actions";
 import {Member360View} from "@/components/admin/member-360";
 import {MemberNoteForm} from "@/components/admin/member-note-form";
 import {MemberProfileForm} from "@/components/admin/member-profile-form";
@@ -135,6 +137,10 @@ export default async function AdminMember360Page({params, searchParams}: Props) 
         <label className="block text-sm" htmlFor="member-history-search">{t("member360.searchHistory")}<input className="mt-2 block min-h-11 rounded-md border px-3" defaultValue={historyQuery?.search} id="member-history-search" name="historyQ" type="search"/></label>
         <button className="min-h-11 rounded-md border px-4" type="submit">{t("member360.searchSubmit")}</button>
       </form> : null}
+      {actor.kind === "superadmin" && process.env.PAYMENT_RECONCILIATION_ENABLED === "true" && membership && ["startup", "corporate"].includes(membership.planCode) ? <PaymentReconciliationForm
+        action={reconcileMembershipPaymentAction.bind(null,profileId.data,membership.id,locale)} requestId={randomUUID()}
+        labels={{title:t("paymentReconciliation.title"),description:t("paymentReconciliation.description"),event:t("paymentReconciliation.event"),reason:t("paymentReconciliation.reason"),paid:t("paymentReconciliation.paid"),mismatch:t("paymentReconciliation.mismatch"),retry:t("paymentReconciliation.retry"),submit:t("paymentReconciliation.submit"),pending:t("paymentReconciliation.pending"),processed:t("paymentReconciliation.processed"),duplicate:t("paymentReconciliation.duplicate"),error:t("paymentReconciliation.error")}}
+      /> : null}
       <Member360View
         activeHistory={activeHistory}
         locale={locale}
