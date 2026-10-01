@@ -81,3 +81,26 @@ Focused actual PG16/focused run: 35 pass / 0 skip. HTTP/actor guard run: 107 pas
 U22 grant entry/expiry boundary passed; U24 manual grant endpoint and role UI passed, whole-site roles remain T18/T22. U25 SQL parallel retry passed; two real browser windows remain T22. U23 paid activation reconciliation is not implemented by a complimentary grant and remains T08. Preview acceptance and Production release are pending.
 
 T06 fresh final gates: explicitly typed test actor authorization corrected; typecheck exit 0, HTTP test 8/0/0, strings exit 0 (297 TSX), build exit 0 (267 static pages). These successful runs supersede the earlier test-only TS2775/TS2459 failures.
+
+## T07 / O11 / U36 U37 U38 reviewed marketing entry
+
+**Code fixed; actual isolated SQL and browser review boundaries passed. Provider sends and deployed worker remain unverified.**
+
+Saved segment links carry the exact segment and validated draft UUID into the existing wizard. GET through every step writes zero rows. Only final POST creates a draft/snapshot; the legacy service/action and direct repository queued create cannot bypass review. The author cannot approve. The immutable approval audit records a digest covering campaign content, recipient identity/contact/locale/variables snapshot, registered WhatsApp content and the email catalog/render contract. Reviewer submits the version seen. Changed content/audience/template invalidates approval, queue, schedule, promotion and claims. Delivery status/attempt counters are excluded so sending the first recipient does not revoke approval of the remainder. Audience insert takes the campaign row lock and is draft-only. Claims materialize eligible campaign IDs so the digest is evaluated per campaign, not per recipient. No new schema/approval ledger.
+
+Original intended SQL red cases: 4 failures; subsequent worker/audience red cases: 4; registered-template version red: 1. Final real isolated SQL: 13 pass / 0 skip. Existing contacts/both behavior was retained: contact source/stage cannot match a member record, and fails closed; initial test expectation was corrected after reading this explicit historical policy, no code widening. Send-time actual SQL facts verify STOP from contacts and suppression store even while the member opt-in flag remains true. Existing delivery/actor focused run: 156 pass / 0 skip; review/wizard initial focused: 71 pass; final content/runner subset: 81 pass. Exact commands: evidence/t07/campaign.json. These unit doubles are not provider acceptance.
+
+Final actual Chromium: 2 pass / 0 skip, 43.9s; Chinese desktop and English 390px, keyboard entry and approval, GET row counts, unique draft/snapshot, author refusal, stale rejection with no review stamp, different synthetic ExCo successful approval and exact version audit. Screenshot inspection caught the stale warning remaining after success; behavior red then correction and browser rerun confirm it clears. Traces/videos off. No provider message dispatched.
+
+### T07 path mapping and release gate
+
+Proposed unit entry file is mapped to stronger actual-SQL tests/integration/audit-full-campaign-entry.test.ts plus existing action/wizard/resource tests. Existing createCampaignDraft, campaigns repository, immutable audit_events, campaign review actions and recipient delivery repository are reused. The shared email template map was moved into lib/admin/campaign-email-templates.ts without changing mapping or sender behavior. Independent transactional outboxes remain independent.
+
+New worker claim logic intentionally holds historical queued/scheduled campaigns lacking a current versioned approval; do not fabricate receipts or re-send historical effects. Before Production activation, inventory pending rows read-only, reconcile accepted/uncertain deliveries, and have a different authorized administrator review the current content/audience. Keep campaign sends paused during app/worker overlap. Rollback preserves the stronger worker guard and pauses campaigns; reverting to an old writer is not permission to restore the retired Queue. Production migration: none for this slice. App source deployed to Preview is not worker release or live-send authorization. U36 is isolated pass; U37 review/claim SQL and UI pass, actual worker/provider still pending; U38 STOP facts and contacts/both SQL pass, real provider journey pending.
+
+## T07 fresh repository gates
+
+- `npm.cmd test`: exit 0, 6149 pass / 193 skip / 0 fail; 726 pass files / 70 skip files, 366.59s. Exact skipped-file counts and source guards are recorded in `evidence/gates/t07-skips.json`; actual isolated SQL and Chromium counts above remain separate.
+- `npm.cmd run lint`: exit 0, 0 errors / 67 existing warnings. `npm.cmd run typecheck` and `npm.cmd run audit:strings`: exit 0, strings scanned 297 TSX files.
+- Fresh `npm.cmd run typecheck` followed by `npm.cmd run build`: both exit 0; installed Next 16.3.6, 267 static pages. No migration, provider send or Production release in this slice.
+- Corrected T06 command receipt to the exact filenames and commands in the saved successful focused logs; no test count or result changed.

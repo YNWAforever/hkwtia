@@ -19,11 +19,12 @@ describe("campaign queue Server Action boundary", () => {
     expect(source).toContain("throw error;");
   });
 
-  it("binds the validated URL draft on the server and never trusts a form idempotency key", () => {
+  it("removes legacy mutation from the page and carries validated draft context into the reviewed wizard", () => {
     const page = readFileSync(pagePath, "utf8");
     const component = readFileSync(componentPath, "utf8");
-    expect(page).toContain('import {queueCampaignAction} from "@/lib/admin/campaign-actions";');
-    expect(page).toMatch(/queueCampaignAction\.bind\(null, draft\.draftId, localizedPath\(locale, "\/admin\/segments"\)\)/);
+    expect(page).not.toContain('import {queueCampaignAction}');
+    expect(page).toContain('campaignBasePath={localizedPath(locale, "/admin/campaigns")} campaignDraft={draft.draftId}');
+    expect(page).not.toMatch(/queueCampaignAction\.bind/);
     expect(page).not.toContain('formData.get("idempotencyKey")');
     expect(page).not.toMatch(/async function queueAction[\s\S]*?"use server"/);
     expect(component).not.toMatch(/name=["']idempotencyKey["']/);

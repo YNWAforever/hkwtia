@@ -2704,6 +2704,12 @@
       "saved": "Contact updated."
     },
     "campaigns": {
+      "reviewContent": "Message content",
+      "reviewVersion": "Content and audience version",
+      "previewUnavailable": "Unavailable",
+      "previewBindings": "Recipient fields are resolved from the saved snapshot. Review the template and delivery counts below.",
+      "reviewBound": "Approval applies to the content and recipient snapshot shown here. Changes require a new review.",
+      "reviewStale": "This draft changed after you opened it. Review the current content and recipients before approving again.",
       "eyebrow": "Outbound",
       "title": "Campaigns",
       "description": "Name a campaign, choose a channel and template, pick a segment, check who it can actually reach, then have a second admin approve it.",
@@ -3066,7 +3072,7 @@
       "unavailable": "Not available",
       "saved": "Saved segments",
       "export": "Export CSV",
-      "queue": "Queue campaign",
+      "queue": "Create communication draft",
       "template": "Template",
       "templateRenewal": "Renewal reminder",
       "templateUpdate": "Member update",

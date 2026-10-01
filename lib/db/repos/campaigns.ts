@@ -35,6 +35,7 @@ import {
   type CampaignRecipientDeliveryRepository,
 } from "@/lib/db/repos/campaign-recipient-delivery";
 import {getDb} from "@/lib/db/repos/common";
+import {campaignReviewRevisionSql, currentCampaignApprovalSql} from "@/lib/db/repos/campaign-approval";
 import type {AutomationDatabase} from "@/lib/db/repos/journeys";
 import {parseRecipientFactsRow, recipientFactsProjection, type RecipientFacts} from "@/lib/db/repos/message-eligibility";
 import {projectedAudience} from "@/lib/db/repos/segments";
@@ -69,6 +70,8 @@ const campaignRecordSchema = z.object({
   segmentId: z.string().uuid(),
   createdByProfileId: z.string(),
   scheduledAt: z.coerce.date().nullable(),
+  templatePreviews: z.record(z.string()).optional(),
+  reviewRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(),
   reviewedAt: z.coerce.date().nullable(),
   reviewedByProfileId: z.string().nullable(),
   rejectionReason: z.string().nullable(),
@@ -195,6 +198,7 @@ async function transitionCampaign(
   from: readonly string[],
   assignment: SQL,
   condition: SQL = sql`true`,
+  failureCode = "Campaign is not in a state that allows this transition",
 ): Promise<void> {
   const rows = resultRows(await db.execute(sql`
     UPDATE ${campaigns} AS target
@@ -206,7 +210,7 @@ async function transitionCampaign(
   // A transition that matched nothing is a stale screen, not a silent no-op:
   // two admins on the same campaign would otherwise both be told the approval
   // landed.
-  if (!rows.length) throw new Error("Campaign is not in a state that allows this transition");
+  if (!rows.length) throw new Error(failureCode);
 }
 
 async function appendCampaignAudit(
@@ -377,7 +381,7 @@ export type CampaignsRepository =
   & CampaignRecipientDeliveryRepository
   & Readonly<{
     submitForReview: (actor: Actor, store: unknown, campaignId: string) => Promise<void>;
-    recordReview: (actor: Actor, store: unknown, campaignId: string, decision: CampaignReviewDecision) => Promise<void>;
+    recordReview: (actor: Actor, store: unknown, campaignId: string, decision: CampaignReviewDecision, expectedRevision?: string) => Promise<void>;
     schedule: (actor: Actor, store: unknown, campaignId: string, scheduledAt: Date) => Promise<void>;
     queueApproved: (actor: Actor, store: unknown, campaignId: string) => Promise<void>;
     listCampaigns: (actor: Actor, store: unknown) => Promise<readonly CampaignSummary[]>;
@@ -445,6 +449,7 @@ export function createCampaignsRepository(
     async createCampaign(actor: Actor, store, input): Promise<CampaignQueueResult> {
       requireAdmin(actor);
       const parsedInput: CreateCampaignRecord = createCampaignSchema.parse(input);
+      if (parsedInput.status !== "draft") throw new Error("CAMPAIGN_REVIEW_REQUIRED");
       const segment = await savedSegmentForActor(actor, store, parsedInput.segmentId);
       if (!segment) throw new Error("Saved segment was not found");
       const db = asDb(store);
@@ -473,6 +478,13 @@ export function createCampaignsRepository(
       requireAdmin(actor);
       const parsedRecipients = z.array(campaignRecipientSchema).parse(recipients);
       const parsedCampaignId = await ownedCampaign(actor, store, campaignId);
+      const locked = resultRows(await asDb(store).execute(sql`
+        SELECT target.id FROM ${campaigns} AS target
+        WHERE target.id = ${parsedCampaignId}::uuid
+          AND target.created_by_profile_id = ${actor.profileId} AND target.status = 'draft'
+        FOR UPDATE OF target
+      `));
+      if (!locked.length) throw new Error("CAMPAIGN_AUDIENCE_FROZEN");
       if (!parsedRecipients.length) return {inserted: 0, skipped: 0};
       const db = asDb(store);
       // The BARE, targetless ON CONFLICT DO NOTHING: it covers every constraint
@@ -538,16 +550,17 @@ export function createCampaignsRepository(
       await appendCampaignAudit(db, actor, parsedCampaignId, "campaign.submitted_for_review", {});
     },
 
-    async recordReview(actor, store, campaignId, decision) {
+    async recordReview(actor, store, campaignId, decision, expectedRevision) {
       requireAdmin(actor);
       const parsed = reviewDecisionSchema.parse(decision);
       const parsedCampaignId = await reviewableCampaign(actor, store, campaignId);
       const db = asDb(store);
       if (parsed.outcome === "approved") {
+        if (typeof expectedRevision !== "string" || !/^[a-f0-9]{64}$/.test(expectedRevision)) throw new Error("CAMPAIGN_REVIEW_VERSION_REQUIRED");
         await transitionCampaign(db, parsedCampaignId, ["review"], sql`
           reviewed_at = now(), reviewed_by_profile_id = ${actor.profileId}, rejection_reason = NULL
-        `);
-        await appendCampaignAudit(db, actor, parsedCampaignId, "campaign.review.approved", {});
+        `, sql`${campaignReviewRevisionSql(sql`target`)} = ${expectedRevision}`, "CAMPAIGN_REVIEW_STALE");
+        await appendCampaignAudit(db, actor, parsedCampaignId, "campaign.review.approved", {reviewRevision: expectedRevision});
         return;
       }
       // Back to `draft`, not `failed`: S-6 gives `failed` to the promotion step,
@@ -578,7 +591,7 @@ export function createCampaignsRepository(
         SET status = 'scheduled', scheduled_at = ${parsedScheduledAt}, updated_at = now()
         WHERE target.id = ${parsedCampaignId}::uuid
           AND target.status = 'review'
-          AND target.reviewed_at IS NOT NULL
+          AND ${currentCampaignApprovalSql(sql`target`)}
         RETURNING target.id
       `));
       if (!rows.length) throw new Error("Campaign is not in a state that allows this transition");
@@ -613,7 +626,7 @@ export function createCampaignsRepository(
         SET status = 'queued', updated_at = now()
         WHERE target.id = ${parsedCampaignId}::uuid
           AND target.status = 'review'
-          AND target.reviewed_at IS NOT NULL
+          AND ${currentCampaignApprovalSql(sql`target`)}
         RETURNING target.id
       `));
       if (!rows.length) throw new Error("Campaign is not in a state that allows this transition");
@@ -659,6 +672,8 @@ export function createCampaignsRepository(
         segmentId: campaigns.segmentId,
         createdByProfileId: campaigns.createdByProfileId,
         scheduledAt: campaigns.scheduledAt,
+        templatePreviews: sql<Record<string, string>>`COALESCE((SELECT previews FROM whatsapp_templates WHERE key = ${campaigns.templateKey}), '{}'::jsonb)`,
+        reviewRevision: campaignReviewRevisionSql(sql`${campaigns}`),
         reviewedAt: campaigns.reviewedAt,
         reviewedByProfileId: campaigns.reviewedByProfileId,
         rejectionReason: campaigns.rejectionReason,

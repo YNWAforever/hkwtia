@@ -2705,6 +2705,12 @@
       "saved": "已更新潛在客戶。"
     },
     "campaigns": {
+      "reviewContent": "訊息內容",
+      "reviewVersion": "內容及受眾版本",
+      "previewUnavailable": "暫時無法讀取",
+      "previewBindings": "收件人欄位採用已儲存的快照。請核對範本、內容及下方發送數目。",
+      "reviewBound": "批准只適用於目前內容及收件人快照。內容或受眾變更後須重新審批。",
+      "reviewStale": "草稿在你開啟後已變更。請先核對目前內容及收件人，再重新批准。",
       "eyebrow": "對外訊息",
       "title": "推廣活動",
       "description": "為活動命名、選擇渠道及範本、揀選分群，先確認實際可觸及的對象，再由另一位管理員批准。",
@@ -3067,7 +3073,7 @@
       "unavailable": "暫無資料",
       "saved": "已儲存的分群",
       "export": "匯出 CSV",
-      "queue": "排入活動佇列",
+      "queue": "建立通訊草稿",
       "template": "範本",
       "templateRenewal": "續期提示",
       "templateUpdate": "會員更新",

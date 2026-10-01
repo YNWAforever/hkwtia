@@ -7,6 +7,7 @@ import {
   requireAutomationSystem,
   type AutomationRepositoryActor,
 } from "@/lib/auth/automation-actor";
+import {currentCampaignApprovalSql} from "@/lib/db/repos/campaign-approval";
 import {campaignRecipients, campaigns, staffTasks, whatsappTemplates} from "@/lib/db/server-schema";
 import type {
   AutomationDatabaseLoader,
@@ -247,7 +248,13 @@ export function createCampaignRecipientDeliveryRepository(
 
       return database.transaction(async (transaction) => {
         const result = await transaction.execute(sql`
-          WITH completed AS (
+          WITH approved_campaigns AS MATERIALIZED (
+            SELECT campaign.id FROM ${campaigns} AS campaign
+            WHERE campaign.status IN ('queued', 'processing')
+              AND campaign.channel = ${channel}
+              AND (campaign.scheduled_at IS NULL OR campaign.scheduled_at <= ${now})
+              AND ${currentCampaignApprovalSql(sql`campaign`)}
+          ), completed AS (
             -- Phase C2 Task 1 Step 4b: 0033 adds campaigns.completed_at, so the
             -- writer lands in the same commit as the column. This sweep is the
             -- backstop, not the usual path: it catches a campaign whose last
@@ -265,6 +272,7 @@ export function createCampaignRecipientDeliveryRepository(
               -- must not complete a WhatsApp campaign whose recipients the
               -- ten-minute queue has not reached yet, and vice versa.
               AND idle.channel = ${channel}
+              AND idle.id IN (SELECT id FROM approved_campaigns)
               AND NOT EXISTS (
                 SELECT 1
                 FROM ${campaignRecipients} AS pending
@@ -277,6 +285,7 @@ export function createCampaignRecipientDeliveryRepository(
             SELECT target.id, target.status AS prior_status, target.error_code AS prior_error_code
             FROM ${campaignRecipients} AS target
             INNER JOIN ${campaigns} AS campaign ON campaign.id = target.campaign_id
+            INNER JOIN approved_campaigns approved ON approved.id = campaign.id
             -- S-6: the status list stays ('queued', 'processing'). Widening it
             -- to the Phase C states would let this loop drain a campaign that
             -- is still a draft, or one a second admin has not approved.
@@ -361,6 +370,7 @@ export function createCampaignRecipientDeliveryRepository(
             AND target.channel = ${channel}
             AND target.scheduled_at IS NOT NULL
             AND target.scheduled_at <= ${now}
+            AND ${currentCampaignApprovalSql(sql`target`)}
             -- The email arm matches nothing, spelled out rather than branched:
             -- approval is a WhatsApp fact, and a reader should not have to hold
             -- two versions of this statement in their head.
@@ -380,6 +390,7 @@ export function createCampaignRecipientDeliveryRepository(
             AND target.channel = ${channel}
             AND target.scheduled_at IS NOT NULL
             AND target.scheduled_at <= ${now}
+            AND ${currentCampaignApprovalSql(sql`target`)}
           RETURNING target.id AS id
         `)).map((row) => String((row as Record<string, unknown>).id));
 

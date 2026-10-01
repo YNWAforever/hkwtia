@@ -20,7 +20,7 @@ import {campaignsRepository} from "@/lib/db/repos/campaigns";
 import type {RecipientFacts} from "@/lib/db/repos/message-eligibility";
 import type {Actor} from "@/lib/membership/lifecycle";
 
-/** The `/admin/segments` shortcut's input (S-17): email, immediate, no review. */
+/** Historical shortcut input, retained only to reject stale callers. */
 export const queueCampaignSchema = z.object({
   segmentId: z.string().uuid(),
   template: z.string().trim().min(1).max(100),
@@ -49,7 +49,7 @@ export const createCampaignSchema = z.object({
   variablesTemplate: z.record(z.string().max(1000)).default({}),
   localeStrategy: z.literal("profile").default("profile"),
   idempotencyKey: z.string().uuid(),
-  status: z.enum(["draft", "queued"]).default("queued"),
+  status: z.enum(["draft", "queued"]).default("draft"),
 }).strict().superRefine((value, context) => {
   if (value.channel === "email" && value.template === null) {
     context.addIssue({code: z.ZodIssueCode.custom, message: "EMAIL_CAMPAIGN_REQUIRES_TEMPLATE", path: ["template"]});
@@ -119,6 +119,8 @@ export type CampaignRecord = Readonly<{
   segmentId: string;
   createdByProfileId: string;
   scheduledAt: Date | null;
+  reviewRevision?: string;
+  templatePreviews?: Readonly<Record<string, string>>;
   reviewedAt: Date | null;
   reviewedByProfileId: string | null;
   rejectionReason: string | null;
@@ -295,23 +297,8 @@ export async function readCampaign(
 
 export async function queueCampaign(actor: Actor, input: unknown, dependencies: CampaignQueueDependencies = campaignsRepository): Promise<CampaignQueueResult> {
   requireAdmin(actor);
-  const parsed = queueCampaignSchema.parse(input);
-  return dependencies.transaction(actor, async (store) => {
-    const segment = await dependencies.getSavedSegment(actor, store, parsed.segmentId);
-    if (!segment) throw new Error("Campaign segment was not found");
-    const existing = await dependencies.findCampaignByIdempotencyKey(actor, store, parsed.idempotencyKey, segment.id);
-    if (existing) return {...existing, disposition: "existing"};
-    const audience = await dependencies.audienceForSegment(actor, store, segment.filters);
-    // S-17. The shortcut stays email-only and immediate; `/admin/campaigns` is
-    // the reviewed path and the only one that can name a WhatsApp template.
-    const snapshot = snapshotAudience(audience, {channel: "email", templateVariables: [], variablesTemplate: {}});
-    const campaign = await dependencies.createCampaign(actor, store, createCampaignSchema.parse({...parsed, channel: "email", status: "queued"}));
-    if (campaign.disposition === "existing") return campaign;
-    await dependencies.insertRecipients(actor, store, campaign.campaignId, snapshot.rows);
-    await dependencies.appendAudit(actor, store, campaign.campaignId, {action: "campaign.queued", ...snapshot.summary});
-    // The count staff see is the count that will be SENT, not the number of
-    // rows written: the snapshot now also holds everyone the campaign could not
-    // reach, and reporting that total would overstate the blast.
-    return {...campaign, recipientCount: snapshot.summary.eligible};
-  });
+  // Stale callers authenticate but cannot bypass the reviewed draft path.
+  void input;
+  void dependencies;
+  throw new Error("LEGACY_CAMPAIGN_QUEUE_RETIRED");
 }

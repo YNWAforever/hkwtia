@@ -288,6 +288,24 @@ describe("the campaign detail page", () => {
     state.readCampaign.mockReset().mockResolvedValue({campaign: campaign(), report});
   });
 
+  it("shows the exact snapshot revision and escaped authored message details", async () => {
+    state.actorProfileId = reviewerProfileId;
+    state.readCampaign.mockResolvedValue({campaign: campaign({reviewRevision: "a".repeat(64), variablesTemplate: {headline: "<script>synthetic()</script>", _batchId: "private implementation"}}), report});
+    const {container} = render(await AdminCampaignDetailPage({params: Promise.resolve({locale: "en", id: campaignId})}));
+    expect(screen.getByText("<script>synthetic()</script>")).toBeInTheDocument();
+    expect(screen.queryByText("private implementation")).toBeNull();
+    expect(container.querySelector("script")).toBeNull();
+    expect(container.querySelector('input[name="expectedRevision"]')).toHaveValue("a".repeat(64));
+    expect(screen.getByText("a".repeat(12))).toBeInTheDocument();
+  });
+
+  it("clears a stale-review warning after successful approval", async () => {
+    state.actorProfileId = reviewerProfileId;
+    state.readCampaign.mockResolvedValue({campaign: campaign({status: "queued"}), report});
+    render(await AdminCampaignDetailPage({params: Promise.resolve({locale: "en", id: campaignId}), searchParams: Promise.resolve({reviewError: "stale"})}));
+    expect(screen.queryByText(en.Admin.campaigns.reviewStale)).toBeNull();
+  });
+
   it("tells the creator a second administrator has to approve, and offers them no control", async () => {
     state.actorProfileId = creatorProfileId;
 

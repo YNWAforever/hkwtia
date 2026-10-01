@@ -3,8 +3,8 @@
   "production": false,
   "source": "T06 governance slice following 50de2798",
   "commands": [
-    "node node_modules/vitest/vitest.mjs run tests/unit/audit-full-grant-boundary.test.ts tests/unit/admin-membership.test.ts tests/unit/membership-comp-action.test.ts tests/unit/membership-comp-form.test.tsx tests/integration/audit-full-grant-boundary.test.ts tests/integration/membership-grant-postgres.test.ts (RUN_POSTGRES_INTEGRATION=1)",
-    "node node_modules/vitest/vitest.mjs run tests/unit/audit-full-grant-action.test.ts tests/unit/server-action-actor-boundary.test.ts tests/unit/membership-grant-action.test.ts tests/unit/membership-grant-form.test.tsx",
+    "node node_modules/vitest/vitest.mjs run tests/integration/audit-full-grant-boundary.test.ts tests/integration/membership-grant.test.ts tests/unit/membership-grant-form.test.tsx tests/unit/membership-comp-form.test.tsx tests/unit/admin-member-page-lazy.test.tsx tests/unit/audit-full-grant-boundary.test.ts tests/unit/membership-grant-service.test.ts tests/unit/admin-membership.test.ts tests/unit/membership-comp-action.test.ts (RUN_POSTGRES_INTEGRATION=1)",
+    "node node_modules/vitest/vitest.mjs run tests/unit/audit-full-grant-boundary.test.ts tests/unit/membership-grant-service.test.ts tests/unit/audit-full-grant-action.test.ts tests/unit/server-action-actor-boundary.test.ts",
     "node --env-file=.env.local node_modules/@playwright/test/cli.js test tests/e2e/full-grant-governance.spec.ts --reporter=line (PLAYWRIGHT_BASE_URL=http://localhost:3450)"
   ],
   "results": {

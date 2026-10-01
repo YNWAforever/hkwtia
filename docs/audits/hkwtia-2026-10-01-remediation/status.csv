@@ -9,7 +9,7 @@
 "O08","recovery code-fixed; isolated-verified; T17 pending","T04 T17","evidence/t04; 29 focused + 4 Chromium cases","server draft/concurrent publish U48 remains T17","engineering"
 "O09","unverified","T17 T18","Inspect current CMS maintenance and workspace","","engineering"
 "O10","code-fixed; isolated-verified","T03","evidence/t03; 51 focused + 3 real SQL + 2 Chromium cases","Preview and release matrix pending","engineering"
-"O11","source-confirmed","T07","SegmentResults still uses legacy queue form","review and communication policy","communications"
+"O11","code fixed; isolated review/claim/STOP boundary verified; provider pending","T07","evidence/t07; 13 real SQL + 2 Chromium; reviewed version audit","isolated tagged worker/provider T11/T22; production pending-campaign review inventory","engineering and communications"
 "O12","unverified","T08","Inspect own billing authorization","","engineering"
 "O13","unverified","T12 T13 T21","Measure current SQL and renewal bounds","isolated load fixture","engineering"
 "O14","unverified","T20","Verify public wording and identity semantics","content signoff","association content owner"

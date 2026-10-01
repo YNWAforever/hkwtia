@@ -546,7 +546,9 @@ describe("campaign promotion repository (Step 4c)", () => {
     expect(promotion).toMatch(/SET status = 'queued'/i);
     expect(promotion).toMatch(/target\.status = 'scheduled'/i);
     expect(promotion).toMatch(/target\.scheduled_at <= \$\d+/i);
-    expect(promotion).not.toMatch(/whatsapp_templates/i);
+    expect(promotion).toContain("campaign.review.approved");
+    expect(promotion).toContain("reviewRevision");
+    expect(promotion).toMatch(/reviewed_by_profile_id <> target.created_by_profile_id/i);
     expect(fake.commands[1]?.params).toContain("whatsapp");
   });
 

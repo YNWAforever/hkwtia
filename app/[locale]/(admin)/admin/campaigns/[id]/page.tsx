@@ -1,6 +1,8 @@
 import {notFound} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {campaignTemplateSelection} from "@/lib/automation/campaign-runner";
+import {getEmailTemplate} from "@/lib/email/catalog";
 import {CampaignReport} from "@/components/admin/campaign-report";
 import type {AppLocale} from "@/i18n/routing";
 import {CAMPAIGN_REPORT_REASONS} from "@/lib/admin/campaign-eligibility";
@@ -14,11 +16,11 @@ import {readCampaign} from "@/lib/admin/campaigns";
 import {formatHongKongDateTimeLocal} from "@/lib/admin/event-form-input";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 
-type Props = Readonly<{params: Promise<{locale: string; id: string}>}>;
+type Props = Readonly<{params: Promise<{locale: string; id: string}>; searchParams?: Promise<{reviewError?: string}>}>;
 
 const fieldClass = "min-h-11 w-full rounded-md border border-input bg-background px-3 py-2";
 
-export default async function AdminCampaignDetailPage({params}: Props) {
+export default async function AdminCampaignDetailPage({params, searchParams}: Props) {
   const {locale: localeValue, id} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
@@ -44,6 +46,15 @@ export default async function AdminCampaignDetailPage({params}: Props) {
   }
 
   const {campaign, report} = result;
+  const reviewError = (await searchParams)?.reviewError;
+  const details = Object.entries(campaign.variablesTemplate).filter(([key]) => !key.startsWith("_"));
+  let emailCopy: {subject: string; body: string} | null = null;
+  if (campaign.channel === "email" && campaign.template) {
+    try {
+      const selected = campaignTemplateSelection(campaign.template);
+      emailCopy = getEmailTemplate(locale, selected.template, {recipientName: "{{displayName}}", ...campaign.variablesTemplate}, "marketing").copy;
+    } catch { emailCopy = null; }
+  }
   // S-7 as the screen states it. The authorization itself is `reviewableCampaign`
   // in the repository — this is only what stops the creator being offered a
   // control that would refuse them.
@@ -92,6 +103,15 @@ export default async function AdminCampaignDetailPage({params}: Props) {
         )}
       </header>
 
+      {reviewError === "stale" && campaign.status === "review" ? <p className="rounded-md border border-destructive/30 p-4" role="alert">{t("reviewStale")}</p> : null}
+      <section className="glass-card space-y-4 p-6" aria-label={t("reviewContent")}>
+        <h2 className="font-serif text-2xl font-semibold">{t("reviewContent")}</h2>
+        <p className="text-sm text-muted-foreground">{t("reviewVersion")}: <code>{campaign.reviewRevision?.slice(0, 12) ?? t("previewUnavailable")}</code></p>
+        {emailCopy ? <div className="space-y-2 rounded-md border p-4"><p className="font-medium">{emailCopy.subject}</p><p className="whitespace-pre-wrap">{emailCopy.body}</p></div> : null}
+        {campaign.channel === "whatsapp" ? <p className="whitespace-pre-wrap rounded-md border p-4">{campaign.templatePreviews?.[locale] ?? t("previewUnavailable")}</p> : null}
+        {details.length ? <dl className="grid gap-3">{details.map(([key, value]) => <div key={key}><dt className="text-sm text-muted-foreground">{key}</dt><dd className="break-words whitespace-pre-wrap">{value}</dd></div>)}</dl> : null}
+        <p className="text-sm text-muted-foreground">{t("previewBindings")}</p>
+      </section>
       <section className="glass-card space-y-4 p-6">
         {campaign.status === "draft" && isCreator ? (
           <form action={submitCampaignForReviewAction.bind(null, path)}>
@@ -108,6 +128,8 @@ export default async function AdminCampaignDetailPage({params}: Props) {
           <div className="space-y-6">
             <form action={approveCampaignAction.bind(null, path)} className="space-y-3">
               <input name="campaignId" type="hidden" value={campaign.id} />
+              <input name="expectedRevision" type="hidden" value={campaign.reviewRevision ?? ""} />
+              <p className="text-sm text-muted-foreground">{t("reviewBound")}</p>
               {campaign.channel === "whatsapp" ? (
                 <label className="grid max-w-sm gap-1 text-sm">
                   <span>{t("fields.scheduledAt")}</span>

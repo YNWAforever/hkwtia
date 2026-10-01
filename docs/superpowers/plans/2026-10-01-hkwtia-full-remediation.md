@@ -213,8 +213,8 @@
 
 **介面／契約：** 單一授予契約重用 MembershipGrantInput（target、planCode、effectiveAt、expiresAt、reason 10–1000 字）與現有 grant service；保留現有 superadmin/flag 邊界。舊 comp mutation 禁止新增 indefinite grants，回可理解的 legacy-retired code 或導向正式新入口，不保留弱權限捷徑。
 
-- [ ] **建立行為證據：** legacyCompCannotBypassGrantPolicy；staff/exco/server actor 偽造被拒；相同 idempotency 並發只一份 grant；expiredAt 邊界正確；既有 indefinite rows 保留原權益。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **建立行為證據：** legacyCompCannotBypassGrantPolicy；staff/exco/server actor 偽造被拒；相同 idempotency 並發只一份 grant；expiredAt 邊界正確；既有 indefinite rows 保留原權益。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
 - [ ] **實施：** 前台改「特別會籍」與「付款核對」兩操作；舊程式 caller 全部盤點替換，tests/seed 的既有用途明確區分。legacy inventory 只讀，列來源缺失不虛構原因/到期日。付款已扣但未啟用連到 T08 對帳，不新建 comp。擴大角色或撤回舊權益另需已批准政策。
 - [ ] **驗證：** npm exec -- vitest run tests/unit/audit-full-grant-boundary.test.ts tests/unit/membership-grant-service.test.ts；隔離三角色及並發 DB 驗收。
 - [ ] **結案與提交：** 任何入口均不能繞過同一 grant guard；新授予有原因期限與 audit；無既有權益被默默改動。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: unify membership grants and retire legacy comp writes`。
@@ -235,8 +235,8 @@
 
 **介面／契約：** saved segment 快捷鍵產生帶 segmentId 的 wizard context；無 DB 寫入的 GET。最後提交使用既有 createCampaignDraft 與 review service。舊 queueCampaign HTTP/action 入口不可再直接 queued；維持需要另一位管理員批准的現有規則。
 
-- [ ] **建立行為證據：** legacyQueueCannotSend；GET 不造 campaign row；作者不能自審；批准後內容/受眾變更使審批失效；入列後 STOP 仍在 send-time blocked；contacts/both filters 不擴大到全會員。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **建立行為證據：** legacyQueueCannotSend；GET 不造 campaign row；作者不能自審；批准後內容/受眾變更使審批失效；入列後 STOP 仍在 send-time blocked；contacts/both filters 不擴大到全會員。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
 - [ ] **實施：** 按鈕改「建立通訊草稿」；呈現預覽、可送/排除原因、內容及受眾版本；只批准所看版本。不要創造「小規模免批」例外。掃所有 callers，讓必需 transactional notices 使用原有獨立業務 outbox，而非誤導入 marketing review。
 - [ ] **驗證：** npm exec -- vitest run tests/unit/audit-full-campaign-entry.test.ts tests/unit/campaign-review-boundary.test.ts tests/unit/campaign-eligibility.test.ts；npm run test:e2e -- tests/e2e/full-campaign-review.spec.ts。
 - [ ] **結案與提交：** 新舊人工推廣入口同一流程，實際 provider send 只在批准及同意都有效時發生。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: route segment campaigns through draft review`。
