@@ -196,6 +196,11 @@ export function createStripeBillingAdapter(client: StripeClient): StripeBillingA
     },
 
     async refundPaymentIntent(paymentIntentId, idempotencyKey, options) {
+      // A prior accepted request can remain pending beyond the provider's
+      // idempotency retention window. Read it before any new refund request.
+      const prior = await client.refunds.list({payment_intent: paymentIntentId, limit: 100});
+      if (prior.has_more) throw new Error("STRIPE_REFUNDS_UNVERIFIED");
+      if (prior.data.some((refund) => !["succeeded", "failed", "canceled"].includes(refund.status ?? ""))) throw new RefundPendingError();
       const refund = await client.refunds.create({payment_intent: paymentIntentId,
         ...(options?.orderId ? {metadata: {eventOrderId: options.orderId, ...(options.refundReason ? {eventOrderRefundReason: options.refundReason} : {})}} : {})}, {idempotencyKey});
       // The oversold lane accepts a pending refund request, but a provider

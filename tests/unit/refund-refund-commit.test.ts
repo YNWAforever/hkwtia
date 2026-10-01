@@ -153,7 +153,7 @@ describe("reconcileRefundedOrder", () => {
       refundReason: "cancelled", reason: "provider_reconciled", note: null, stripeEventId: "evt_success",
     })).resolves.toBe(true);
     const update = fake.queries.find((query) => /^\s*update/i.test(query.sql));
-    expect(update?.sql).toMatch(/status IN \('paid', 'refund_failed'\)/);
+    expect(update?.sql).toMatch(/status IN \('paid', 'refund_failed', 'refund_pending'\)/);
     expect(update?.sql).toMatch(/amount_hkd_cents\s*=\s*\$\d+/);
     expect(update?.sql).toMatch(/status\s*=\s*'refunded'/);
     const audit = fake.queries.find((query) => /^\s*insert/i.test(query.sql));
@@ -162,7 +162,7 @@ describe("reconcileRefundedOrder", () => {
     expect(fake.queries.some((query) => /INSERT INTO ticket_email_outbox/i.test(query.sql)
       && query.params.includes("refund")
       && query.params.includes("ticket-refund:order-1:2026-09-14T05:00:00.000Z"))).toBe(true);
-    expect(fake.depths).toEqual([1, 1, 1]);
+    expect(fake.depths).toEqual([1, 1, 1, 1]);
   });
 
   it("writes no audit when another worker settled first", async () => {
@@ -188,7 +188,7 @@ describe("markRefundFailed", () => {
     const update = fake.queries.find((query) => /^\s*update/i.test(query.sql));
     expect(update?.sql).toMatch(/status\s*=\s*'refund_failed'/);
     expect(update?.sql).toMatch(/refunded_at\s*=\s*NULL/i);
-    expect(update?.sql).toMatch(/status\s*=\s*'refunded'/);
+    expect(update?.sql).toMatch(/status IN \('refunded', 'refund_pending'\)/);
     expect(update?.sql).toMatch(/amount_hkd_cents\s*=\s*\$\d+/);
     const audit = fake.queries.find((query) => /^\s*insert/i.test(query.sql));
     expect(audit?.params).toEqual([null, "system", "event.order.refund_failed", "event_order", "order-1",

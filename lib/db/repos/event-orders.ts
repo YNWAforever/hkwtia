@@ -16,7 +16,7 @@ import {isAuditDemoEventSlug} from "@/config/demo-events";
 import {getDb} from "@/lib/db/repos/common";
 import {auditEvents, companyMembers, eventOrderSeats, eventOrders, events, memberships} from "@/lib/db/server-schema";
 
-export type OrderStatus = "pending" | "paid" | "expired" | "failed" | "refunded" | "refund_failed";
+export type OrderStatus = "pending" | "paid" | "expired" | "failed" | "refunded" | "refund_failed" | "refund_pending";
 export type RefundReason = "oversold" | "staff" | "cancelled";
 export type RefundReconciliationInput = Readonly<{
   refundedAt: Date; expectedAmountHkdCents: number; actorUserId: string | null;
@@ -257,6 +257,11 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       return row ? orderFrom(row) : null;
     },
     orderBySessionId: async (sessionId) => {
+      // Every settlement/admission takes event -> order -> seat. A plain lookup
+      // resolves the immutable event before either write lock is held.
+      const initial = rows<{eventId: string}>(await tx.execute(sql`SELECT event_id AS "eventId" FROM ${eventOrders} WHERE stripe_checkout_session_id = ${sessionId} LIMIT 1`))[0];
+      if (!initial) return null;
+      await tx.execute(sql`SELECT id FROM ${events} WHERE id = ${initial.eventId} FOR UPDATE`);
       const row = rows<Record<string, unknown>>(await tx.execute(sql`SELECT * FROM ${eventOrders} WHERE stripe_checkout_session_id = ${sessionId} LIMIT 1 FOR UPDATE`))[0];
       return row ? orderFrom(row) : null;
     },
@@ -395,11 +400,12 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
       return true;
     },
     reconcileRefundedOrder: async (orderId, input) => {
+      const before = rows<{status: OrderStatus}>(await tx.execute(sql`SELECT status FROM ${eventOrders} WHERE id = ${orderId} FOR UPDATE`))[0];
       const updated = rows<{id: string}>(await tx.execute(sql`
         UPDATE ${eventOrders}
         SET status = 'refunded', refunded_at = ${input.refundedAt},
             refund_reason = COALESCE(refund_reason, ${input.refundReason}::event_refund_reason), updated_at = NOW()
-        WHERE id = ${orderId} AND status IN ('paid', 'refund_failed')
+        WHERE id = ${orderId} AND status IN ('paid', 'refund_failed', 'refund_pending')
           AND amount_hkd_cents = ${input.expectedAmountHkdCents}
         RETURNING id
       `));
@@ -409,15 +415,24 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
         action: "event.order.refunded", targetType: "event_order", targetId: orderId,
         metadata: {reason: input.reason, note: input.note, stripeEventId: input.stripeEventId},
       });
-      await writeTicketNotice(tx, {orderId, seatId: null, kind: "refund", eventKey: `ticket-refund:${orderId}:${input.refundedAt.toISOString()}`});
+      if (before?.status === "refund_failed" && input.refundReason !== "staff") {
+        // A notice suppressed before any provider attempt may resume after
+        // verified financial recovery. Frozen/accepted/uncertain effects never
+        // become automatic retries, and the original stable key is retained.
+        await tx.execute(sql`UPDATE ticket_email_outbox
+          SET status = 'queued', next_attempt_at = NOW(), claim_expires_at = NULL, error_code = NULL, updated_at = NOW()
+          WHERE order_id = ${orderId} AND event_key = ${`ticket-refund:${orderId}:pending`}
+            AND status = 'suppressed' AND first_attempt_at IS NULL AND provider_id IS NULL AND payload IS NULL`);
+      }
+      await writeTicketNotice(tx, {orderId, seatId: null, kind: "refund", eventKey: before?.status === "refund_pending" || before?.status === "refund_failed" && input.refundReason !== "staff" ? `ticket-refund:${orderId}:pending` : `ticket-refund:${orderId}:${input.refundedAt.toISOString()}`});
       return true;
     },
     markRefundFailed: async (orderId, input) => {
       // Lock the order before checking the audit row. A pending refund keeps
       // status=paid, so status alone cannot dedupe its webhook redeliveries.
-      const current = rows<{id: string; status: "paid" | "refunded"}>(await tx.execute(sql`
+      const current = rows<{id: string; status: "paid" | "refunded" | "refund_pending"}>(await tx.execute(sql`
         SELECT id, status FROM ${eventOrders}
-        WHERE id = ${orderId} AND status IN ('paid', 'refunded')
+        WHERE id = ${orderId} AND status IN ('paid', 'refunded', 'refund_pending')
           AND amount_hkd_cents = ${input.amountHkdCents}
         FOR UPDATE
       `))[0];
@@ -435,7 +450,7 @@ async function defaultTransaction<T>(work: (tx: EventOrdersTransaction) => Promi
         const updated = rows<{id: string}>(await tx.execute(sql`
           UPDATE ${eventOrders}
           SET status = 'refund_failed', refunded_at = NULL, updated_at = NOW()
-          WHERE id = ${orderId} AND status = 'refunded'
+          WHERE id = ${orderId} AND status IN ('refunded', 'refund_pending')
             AND amount_hkd_cents = ${input.amountHkdCents}
           RETURNING id
         `));
@@ -553,36 +568,36 @@ export function createEventOrdersRepository(runTransaction: <T>(work: (tx: Event
         // already expired may still carry a real payment. Refund it rather than
         // answer `ignored`, which would take money and hand back no seats.
         if (order.status === "expired") {
-          await tx.markStatus(order.id, "refunded", {refundedAt: now, refundReason: "cancelled"});
-          await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.refunded", targetType: "event_order", targetId: order.id, metadata: {reason: "late_payment"}});
-          await tx.enqueueTicketNotice({orderId: order.id, seatId: null, kind: "refund", eventKey: `ticket-refund:${order.id}:${now.toISOString()}`});
-          return {status: "refund_due", order: {...order, status: "refunded", refundedAt: now, refundReason: "cancelled"}};
+          await tx.markStatus(order.id, "refund_pending", {paidAt: now, refundReason: "cancelled"});
+          await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.refund_due", targetType: "event_order", targetId: order.id, metadata: {reason: "late_payment"}});
+          await tx.enqueueTicketNotice({orderId: order.id, seatId: null, kind: "refund", eventKey: `ticket-refund:${order.id}:pending`});
+          return {status: "refund_due", order: {...order, status: "refund_pending", paidAt: now, refundedAt: null, refundReason: "cancelled"}};
         }
-        // A refund we committed but could not finish. The row is already
-        // `refunded`, but if the provider call failed the money is still here, so
+        // New compensating intents remain refund_pending. Historical automatic
+        // refunded rows still require provider verification on replay, so
         // the webhook must reconcile the provider before considering a reissue.
         // The deterministic key protects short-window retries, but an old event
         // can arrive after the provider forgets that key. `staff` refunds
         // (D-4c) are not this lane's to re-attempt.
-        if (order.status === "refunded" && (order.refundReason === "oversold" || order.refundReason === "cancelled")) {
+        if ((order.status === "refund_pending" || order.status === "refund_failed" || order.status === "refunded") && (order.refundReason === "oversold" || order.refundReason === "cancelled")) {
           return {status: "refund_due", order};
         }
         if (order.status !== "pending") return {status: "ignored", order};
         const event = await tx.lockEvent(order.eventId);
         if (event && !event.published) {
-          await tx.markStatus(order.id, "refunded", {refundedAt: now, refundReason: "cancelled"});
-          await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.refunded", targetType: "event_order", targetId: order.id, metadata: {reason: "event_closed"}});
-          await tx.enqueueTicketNotice({orderId: order.id, seatId: null, kind: "refund", eventKey: `ticket-refund:${order.id}:${now.toISOString()}`});
-          return {status: "refund_due", order: {...order, status: "refunded", refundedAt: now, refundReason: "cancelled"}};
+          await tx.markStatus(order.id, "refund_pending", {paidAt: now, refundReason: "cancelled"});
+          await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.refund_due", targetType: "event_order", targetId: order.id, metadata: {reason: "event_closed"}});
+          await tx.enqueueTicketNotice({orderId: order.id, seatId: null, kind: "refund", eventKey: `ticket-refund:${order.id}:pending`});
+          return {status: "refund_due", order: {...order, status: "refund_pending", paidAt: now, refundedAt: null, refundReason: "cancelled"}};
         }
         if (event && event.capacity !== null) {
           const others = await tx.heldSeats(order.eventId, now, order.id);
           const seats = await tx.seatsOfOrder(order.id);
           if (others + seats > event.capacity) {
-            await tx.markStatus(order.id, "refunded", {refundedAt: now, refundReason: "oversold"});
-            await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.refunded", targetType: "event_order", targetId: order.id, metadata: {reason: "oversold"}});
-            await tx.enqueueTicketNotice({orderId: order.id, seatId: null, kind: "refund", eventKey: `ticket-refund:${order.id}:${now.toISOString()}`});
-            return {status: "oversold", order: {...order, status: "refunded", refundedAt: now, refundReason: "oversold"}};
+            await tx.markStatus(order.id, "refund_pending", {paidAt: now, refundReason: "oversold"});
+            await tx.insertAudit({actorUserId: null, actorType: "system", action: "event.order.refund_due", targetType: "event_order", targetId: order.id, metadata: {reason: "oversold"}});
+            await tx.enqueueTicketNotice({orderId: order.id, seatId: null, kind: "refund", eventKey: `ticket-refund:${order.id}:pending`});
+            return {status: "oversold", order: {...order, status: "refund_pending", paidAt: now, refundedAt: null, refundReason: "oversold"}};
           }
         }
         await tx.markStatus(order.id, "paid", {paidAt: now});

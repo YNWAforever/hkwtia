@@ -3453,6 +3453,7 @@
         }
       },
       "orders": {
+        "reference": "訂單編號",
         "heading": "訂單",
         "unavailable": "暫時無法載入訂單。",
         "caption": "訂單",
@@ -3473,7 +3474,7 @@
           "expired": "已過期",
           "failed": "失敗",
           "refunded": "已退款",
-          "refund_failed": "退款失敗，需職員跟進"
+          "refund_failed": "退款失敗，需職員跟進", "refund_pending": "退款待供應商確認"
         },
         "refundOutcomes": {
           "refunded": "已退款。",
@@ -3840,7 +3841,7 @@
       "purchaseAmount": "金額",
       "refundReason": "退款原因",
       "refundedAt": "退款時間",
-      "purchaseStatuses": {"pending": "待處理", "paid": "已付款", "expired": "已過期", "failed": "失敗", "refunded": "已退款", "refund_failed": "退款失敗"},
+      "purchaseStatuses": {"pending": "待處理", "paid": "已付款", "expired": "已過期", "failed": "失敗", "refunded": "已退款", "refund_failed": "退款失敗", "refund_pending": "退款待供應商確認"},
       "refundReasons": {"oversold": "超額售票", "staff": "職員決定", "cancelled": "活動取消"},
       "backToMembers": "返回會員列表",
       "historyNav": "會員紀錄",

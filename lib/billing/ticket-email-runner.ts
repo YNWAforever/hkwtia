@@ -22,7 +22,7 @@ export type TicketEmailRunnerDependencies = Readonly<{
   outbox: Pick<Outbox, "claimDue" | "claimForOrder" | "freezePayload" | "markSent"
     | "markRetryable" | "markBlocked" | "markSuppressed"> & Partial<Pick<Outbox, "queueHealth">>;
   orders: Pick<EventOrdersRepository, "orderById" | "eventSummary" | "orderSeats"
-    | "seatsOfOrder" | "seatForPass" | "resendEligible">;
+    | "seatsOfOrder" | "seatForPass" | "resendEligible" | "reconcileRefundedOrder">;
   renderEmail: (input: RenderEmailInput) => Promise<RenderedEmail>;
   transport: EmailTransport;
   refundVerified: (order: OrderRecord) => Promise<boolean>;
@@ -49,7 +49,7 @@ function formatEventDate(date: Date, locale: "en" | "zh-HK"): string {
 
 function admissible(kind: TicketEmailClaim["kind"], status: OrderRecord["status"]): boolean {
   if (kind === "confirmation" || kind === "pass") return status === "paid";
-  if (kind === "refund") return status === "refunded";
+  if (kind === "refund") return status === "refunded" || status === "refund_pending";
   return status === "paid" || status === "refund_failed";
 }
 
@@ -186,6 +186,21 @@ async function processClaims(
       if (!verified) {
         await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "refund_pending");
         continue;
+      }
+      if (order.status === "refund_pending") {
+        try {
+          await dependencies.orders.reconcileRefundedOrder(order.id, {
+            refundedAt: now, expectedAmountHkdCents: order.amountHkdCents,
+            actorUserId: null, actorType: "system", refundReason: order.refundReason ?? "cancelled",
+            reason: "provider_reconciled", note: null, stripeEventId: null,
+          });
+          const current = await dependencies.orders.orderById(order.id);
+          if (!current || current.status !== "refunded") throw new Error("REFUND_SETTLEMENT_NOT_VERIFIED");
+          order = current;
+        } catch {
+          await dependencies.outbox.markRetryable(claim.id, claim.attemptCount, now, "refund_commit_failed");
+          continue;
+        }
       }
     }
 

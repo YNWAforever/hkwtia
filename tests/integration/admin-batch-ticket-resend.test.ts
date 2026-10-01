@@ -1,5 +1,5 @@
 import {randomUUID} from "node:crypto";
-import {afterAll, beforeAll, describe, expect, it} from "vitest";
+import {afterAll, afterEach, beforeAll, describe, expect, it, vi} from "vitest";
 
 import {isolatedBatchDatabase} from "./admin-batch-fixture";
 import {batchOperationHandlers} from "@/lib/admin/batches/handlers/registry";
@@ -27,8 +27,10 @@ describe.skipIf(!enabled)("ticket resend batch on disposable PostgreSQL", () => 
     `);
   }, 60_000);
   afterAll(async () => {if (fixture) await fixture.close();});
+  afterEach(() => vi.unstubAllEnvs());
   it("queues one pass per stable item key, then skips a revoked ticket without sending", async () => {
-    process.env.TICKET_RESEND_BATCH_ENABLED = "true";
+    vi.stubEnv("TICKET_RESEND_BATCH_ENABLED", "true");
+    vi.stubEnv("ADMIN_BATCH_ENABLED", "true");
     const now = new Date();
     const request = batchRequestSchema.parse({operation: "ticket_resend", idempotencyKey: randomUUID(), targetSeatIds: [seatId], payload: {}});
     const batches = createAdminBatchesRepository(async () => fixture.database, () => now);
@@ -57,6 +59,6 @@ describe.skipIf(!enabled)("ticket resend batch on disposable PostgreSQL", () => 
     await worker.executeClaim(secondClaims[0]!, batchOperationHandlers.ticket_resend!, now);
     expect((await batches.preview(staff, secondId)).counters.skipped).toBe(1);
     expect((await fixture.pool.query("SELECT count(*)::int AS n FROM ticket_email_outbox")).rows[0]?.n).toBe(1);
-    delete process.env.TICKET_RESEND_BATCH_ENABLED;
+
   }, 60_000);
 });

@@ -1,7 +1,7 @@
 import "server-only";
 
 import type {Actor} from "@/lib/membership/lifecycle";
-import {stripeBillingAdapter} from "@/lib/billing/stripe";
+import {RefundPendingError, stripeBillingAdapter} from "@/lib/billing/stripe";
 import type {EventOrdersRepository, OrderRecord} from "@/lib/db/repos/event-orders";
 import {eventOrdersRepository} from "@/lib/db/repos/event-orders";
 import {appEnv, emailEnv, ticketPassEnv} from "@/lib/config/env";
@@ -20,7 +20,7 @@ type TicketEmailDependencies = Readonly<{
 }>;
 
 export type TicketProcessorDependencies = Readonly<{
-  orders: Pick<EventOrdersRepository, "settlePaid" | "expireBySession" | "eventSummary" | "seatsOfOrder" | "orderSeats" | "seatForPass">;
+  orders: Pick<EventOrdersRepository, "settlePaid" | "expireBySession" | "eventSummary" | "seatsOfOrder" | "orderSeats" | "seatForPass" | "reconcileRefundedOrder">;
   /** Reconcile a committed refund before a redelivered checkout can reissue it. */
   fullyRefundedPaymentIntent: (paymentIntentId: string, expectedAmountHkdCents: number) => Promise<boolean>;
   /** The deterministic key makes a still-due refund safe to re-issue. */
@@ -230,7 +230,7 @@ export function ticketProcessorDependencies(): TicketProcessorDependencies {
   defaultDependencies ??= {
     orders: eventOrdersRepository,
     fullyRefundedPaymentIntent: (paymentIntentId, amountHkdCents) => stripeBillingAdapter().fullyRefundedPaymentIntent(paymentIntentId, amountHkdCents),
-    refundPaymentIntent: (paymentIntentId, idempotencyKey, orderId) => stripeBillingAdapter().refundPaymentIntent(paymentIntentId, idempotencyKey, {orderId}),
+    refundPaymentIntent: (paymentIntentId, idempotencyKey, orderId) => stripeBillingAdapter().refundPaymentIntent(paymentIntentId, idempotencyKey, {orderId, requireSucceeded: true}),
     email: {renderEmail, transport: createConfiguredEmailTransport(), emailFrom: emailEnv().emailFrom},
     appUrl: appEnv().appUrl,
     passSecret: ticketPassEnv().ticketPassTokenSecret,
@@ -281,15 +281,30 @@ export function createTicketProcessor(dependencies: TicketProcessorDependencies)
         // already settled by cancellation. Verify the full charge before
         // reissuing a `refund_due` request, and avoid repeating its buyer
         // notice after the mail provider's deduplication window too.
-        if (settlement.status === "refund_due" &&
-            await dependencies.fullyRefundedPaymentIntent(command.paymentIntentId, order.amountHkdCents)) {
+        let verified = await dependencies.fullyRefundedPaymentIntent(command.paymentIntentId, order.amountHkdCents);
+        if (verified && order.status === "refunded") {
           if (dependencies.deliverQueuedOrderNotices) {
             try { await dependencies.deliverQueuedOrderNotices(order.id); }
             catch (error) { dependencies.onEmailError?.(error, {orderId: order.id, template: "event_ticket_refunded"}); }
           }
           return "processed";
         }
-        await dependencies.refundPaymentIntent(command.paymentIntentId, `ticket-refund:${order.id}`, order.id);
+        if (!verified) {
+          try { await dependencies.refundPaymentIntent(command.paymentIntentId, `ticket-refund:${order.id}`, order.id); }
+          catch (error) { if (error instanceof RefundPendingError) return "processed"; throw error; }
+          verified = await dependencies.fullyRefundedPaymentIntent(command.paymentIntentId, order.amountHkdCents);
+        }
+        // A pending/unknown provider result cannot turn a refund intent into
+        // success or send its success notice. The durable intent waits for the
+        // succeeded callback or verified outbox reconciliation.
+        if (!verified) return "processed";
+        if (order.status === "refund_pending" || order.status === "refund_failed") {
+          await dependencies.orders.reconcileRefundedOrder(order.id, {
+            refundedAt: dependencies.now(), expectedAmountHkdCents: order.amountHkdCents,
+            actorUserId: null, actorType: "system", refundReason: order.refundReason ?? "cancelled",
+            reason: "provider_reconciled", note: null, stripeEventId: command.eventId,
+          });
+        }
         if (dependencies.deliverQueuedOrderNotices) {
           try { await dependencies.deliverQueuedOrderNotices(order.id); }
           catch (error) { dependencies.onEmailError?.(error, {orderId: order.id, template: "event_ticket_refunded"}); }

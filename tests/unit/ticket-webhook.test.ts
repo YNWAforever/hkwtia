@@ -109,8 +109,9 @@ function buildTicketProcessor(options: {
     orderSeats: vi.fn(async () => options.orderSeats ?? []),
     seatForPass: vi.fn(async () => null),
   };
-  const refundPaymentIntent = vi.fn(async () => undefined);
-  const fullyRefundedPaymentIntent = vi.fn(async () => options.providerFullyRefunded ?? false);
+  let succeeded = false;
+  const refundPaymentIntent = vi.fn(async () => {succeeded = true;});
+  const fullyRefundedPaymentIntent = vi.fn(async () => options.providerFullyRefunded ?? succeeded);
   // The real renderer runs behind the spy, so a missing placeholder throws and
   // the send is skipped — the same silence production would see.
   const renderEmailSpy = vi.fn(renderEmail);
@@ -292,7 +293,7 @@ describe("createTicketProcessor", () => {
     await expect(processor.process(systemActor("stripe-webhook"), command("checkout.session.completed"))).resolves.toBe("processed");
 
     expect(refundPaymentIntent).toHaveBeenCalledWith(paymentIntentId, `ticket-refund:${orderId}`, orderId);
-    expect(fullyRefundedPaymentIntent).toHaveBeenCalledTimes(status === "refund_due" ? 1 : 0);
+    expect(fullyRefundedPaymentIntent).toHaveBeenCalledTimes(2);
     expect(renderEmail).toHaveBeenCalledWith(expect.objectContaining({template: "event_ticket_refunded", locale: "en", recipientName: "Ada"}));
     expect(transport.sends).toHaveLength(1);
   });
@@ -338,7 +339,7 @@ describe("createTicketProcessor", () => {
       .mockRejectedValueOnce(new Error("stripe unavailable"))
       .mockResolvedValue(undefined);
     const transport = createTestTransport();
-    const fullyRefundedPaymentIntent = vi.fn(async () => false);
+    const fullyRefundedPaymentIntent = vi.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(false).mockResolvedValue(true);
     const processor = createTicketProcessor({
       orders: orders as unknown as TicketProcessorDependencies["orders"],
       fullyRefundedPaymentIntent,
@@ -349,7 +350,7 @@ describe("createTicketProcessor", () => {
       now: () => new Date("2026-09-14T04:00:00Z"),
     });
 
-    // First delivery: the settlement commits the refund, the provider call throws,
+    // First delivery: the settlement commits the compensating intent, the provider call throws,
     // and the throw must reach the route so Stripe redelivers.
     await expect(processor.process(systemActor("stripe-webhook"), command("checkout.session.completed"))).rejects.toThrow("stripe unavailable");
     // Redelivery: the repository answers `refund_due`, the refund is re-issued and
@@ -357,7 +358,7 @@ describe("createTicketProcessor", () => {
     await expect(processor.process(systemActor("stripe-webhook"), command("checkout.session.completed"))).resolves.toBe("processed");
 
     expect(orders.settlePaid).toHaveBeenCalledTimes(2);
-    expect(fullyRefundedPaymentIntent).toHaveBeenCalledTimes(1);
+    expect(fullyRefundedPaymentIntent).toHaveBeenCalledTimes(3);
     expect(fullyRefundedPaymentIntent).toHaveBeenCalledWith(paymentIntentId, pendingOrder.amountHkdCents);
     expect(refundPaymentIntent).toHaveBeenCalledTimes(2);
     expect(refundPaymentIntent.mock.calls[0]![1]).toBe(`ticket-refund:${orderId}`);

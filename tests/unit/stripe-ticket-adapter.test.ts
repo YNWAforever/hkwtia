@@ -49,6 +49,16 @@ describe("event ticket checkout session", () => {
     expect((create.mock.calls[0]![1] as {idempotencyKey: string}).idempotencyKey).toBe("idem-1");
   });
 
+  it("reconciles an in-progress accepted provider refund before issuing another request", async () => {
+    const {refund,listRefunds,value}=client();
+    listRefunds.mockResolvedValue({data:[{id:"re_pending",status:"pending",currency:"hkd",amount:50000}],has_more:false});
+    await expect(createStripeBillingAdapter(value).refundPaymentIntent("pi_1","ticket-refund:order-1",{requireSucceeded:true})).rejects.toMatchObject({code:"STRIPE_REFUND_PENDING"});
+    expect(refund).not.toHaveBeenCalled();
+  });
+  it("fails closed when refund reconciliation is incomplete", async () => {
+    const {refund,listRefunds,value}=client();listRefunds.mockResolvedValue({data:[],has_more:true});
+    await expect(createStripeBillingAdapter(value).refundPaymentIntent("pi_1","ticket-refund:order-1")).rejects.toThrow("STRIPE_REFUNDS_UNVERIFIED");expect(refund).not.toHaveBeenCalled();
+  });
   it("refunds the payment intent behind a session with a stable idempotency key", async () => {
     const {refund, value} = client();
     await createStripeBillingAdapter(value).refundPaymentIntent("pi_1", "ticket-refund:order-1", {orderId: "order-1"});
