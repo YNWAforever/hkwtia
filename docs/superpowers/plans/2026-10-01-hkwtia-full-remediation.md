@@ -106,11 +106,11 @@
 
 **介面／契約：** 沿用 Admin.segments keys；新增 JSON value 品質檢查輸出 key 與 reasonCode，對連續佔位問號、U+FFFD、空 required label 失敗。合法 URL query／正則等非 UI 字串需明確例外，不全域粗暴取代問號。
 
-- [ ] **建立行為證據：** rendersReadableZhSegments：33 個已損壞值修復且與英文插值 token 一致；detectsCorruptTranslationSample 必須攔截 ???? 及替代字元；合法單問號句子通過。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 依英文語意恢復 33 值；補鍵值 parity、插值及 JSON 內容檢查到既有 audit 命令。逐個閱讀繁中 title/filter/preview/table，保留香港用語。
-- [ ] **驗證：** npm exec -- vitest run tests/unit/audit-full-translations.test.ts；npm run audit:strings；繁中與英文分群 UI 截圖。
-- [ ] **結案與提交：** U07、U08 pass；修改前後 mutation check 能使壞樣本紅燈。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: restore readable Chinese segment controls`。
+- [x] **建立行為證據：** rendersReadableZhSegments：33 個已損壞值修復且與英文插值 token 一致；detectsCorruptTranslationSample 必須攔截 ???? 及替代字元；合法單問號句子通過。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 依英文語意恢復 33 值；補鍵值 parity、插值及 JSON 內容檢查到既有 audit 命令。逐個閱讀繁中 title/filter/preview/table，保留香港用語。
+- [x] **驗證：** npm exec -- vitest run tests/unit/audit-full-translations.test.ts；npm run audit:strings；繁中與英文分群 UI 截圖。
+- [x] **結案與提交：** U07、U08 pass；修改前後 mutation check 能使壞樣本紅燈。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: restore readable Chinese segment controls`。
 
 ### T02 · 批次功能狀態與列表選取一致
 
