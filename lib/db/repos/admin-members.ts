@@ -60,22 +60,52 @@ function toItem(row: MemberRow): AdminMemberListItem {
   return {profileId: row.profileId, membershipId: row.membershipId, companyId: row.companyId, displayName: row.displayName, email: row.email, companyName: row.companyName, planCode: row.planCode, membershipStatus: row.membershipStatus, renewalAt: row.renewalAt?.toISOString() ?? null, score: numericScore !== null && Number.isFinite(numericScore) ? numericScore : null, matchingMembershipIds: row.matchingMembershipIds};
 }
 
-/** Filter each profile against one matching membership row, then project a stable representative. */
-function memberSearchStatement(query: AdminMemberQuery) {
-  const cursor = decodeAdminMemberCursor(query.cursor, query);
+/** List and bulk snapshots share the same membership-row predicate and ownership joins. */
+function memberMatchingPredicate(query: AdminMemberQuery): SQL {
   const search = query.search.toLocaleLowerCase("en");
   const conditions: SQL[] = [];
-  if (search) conditions.push(sql`(position(${search} in lower(${profiles.displayName})) > 0 OR position(${search} in lower(coalesce(${profiles.email}, ''))) > 0 OR position(${search} in lower(coalesce(${membershipCompanies.displayName}, ''))) > 0)`);
-  if (query.status.length) conditions.push(inArray(memberships.status, query.status));
-  if (query.planCode.length) conditions.push(inArray(memberships.planCode, query.planCode));
-  if (query.companyId) conditions.push(sql`${memberships.companyId} = ${query.companyId}::uuid`);
-  if (query.renewalFrom) conditions.push(sql`${memberships.billingPeriodEnd} >= ${hongKongDayStartUtc(query.renewalFrom)}`);
-  if (query.renewalTo) conditions.push(sql`${memberships.billingPeriodEnd} < ${hongKongDayStartUtc(query.renewalTo, true)}`);
+  if (search)
+    conditions.push(
+      sql`(position(${search} in lower(${profiles.displayName})) > 0 OR position(${search} in lower(coalesce(${profiles.email}, ''))) > 0 OR position(${search} in lower(coalesce(${membershipCompanies.displayName}, ''))) > 0)`,
+    );
+  if (query.status.length)
+    conditions.push(inArray(memberships.status, query.status));
+  if (query.planCode.length)
+    conditions.push(inArray(memberships.planCode, query.planCode));
+  if (query.companyId)
+    conditions.push(sql`${memberships.companyId} = ${query.companyId}::uuid`);
+  if (query.renewalFrom)
+    conditions.push(
+      sql`${memberships.billingPeriodEnd} >= ${hongKongDayStartUtc(query.renewalFrom)}`,
+    );
+  if (query.renewalTo)
+    conditions.push(
+      sql`${memberships.billingPeriodEnd} < ${hongKongDayStartUtc(query.renewalTo, true)}`,
+    );
   if (query.locale) conditions.push(sql`${profiles.locale} = ${query.locale}`);
   const incomplete = sql`(nullif(trim(coalesce(${profiles.email}, '')), '') IS NULL OR nullif(trim(coalesce(${profiles.phone}, '')), '') IS NULL OR nullif(trim(coalesce(${profiles.jobTitle}, '')), '') IS NULL)`;
   if (query.completeness === "incomplete") conditions.push(incomplete);
-  if (query.completeness === "complete") conditions.push(sql`NOT ${incomplete}`);
-  const where = conditions.length ? sql.join(conditions.map((term) => sql`(${term})`), sql` AND `) : sql`TRUE`;
+  if (query.completeness === "complete")
+    conditions.push(sql`NOT ${incomplete}`);
+  return conditions.length
+    ? sql.join(
+        conditions.map((term) => sql`(${term})`),
+        sql` AND `,
+      )
+    : sql`TRUE`;
+}
+
+function memberMatchingFrom(): SQL {
+  return sql`FROM ${profiles}
+      LEFT JOIN ${companyMembers} ON ${companyMembers.userId} = ${profiles.id} AND ${companyMembers.revokedAt} IS NULL
+      LEFT JOIN ${memberships} ON ${memberships.ownerUserId} = ${profiles.id} OR ${memberships.companyId} = ${companyMembers.companyId}
+      LEFT JOIN ${companies} AS membership_companies ON ${membershipCompanies.id} = ${memberships.companyId}`;
+}
+
+/** Filter each profile against one matching membership row, then project a stable representative. */
+function memberSearchStatement(query: AdminMemberQuery) {
+  const cursor = decodeAdminMemberCursor(query.cursor, query);
+  const where = memberMatchingPredicate(query);
   const sortKey = query.sort === "renewal_asc" ? sql`coalesce("renewalAt", '9999-12-31T00:00:00Z'::timestamptz)` : sql`lower("displayName")`;
   const descending = query.sort === "name_desc";
   const cursorValue = cursor ? (query.sort === "renewal_asc" ? sql`${cursor.sortKey}::timestamptz` : sql`${cursor.sortKey}`) : sql`NULL`;
@@ -92,10 +122,7 @@ function memberSearchStatement(query: AdminMemberQuery) {
           ${membershipSummaryOrderSql(sql`${memberships.status}`)},
           ${memberships.id} NULLS LAST, ${memberships.companyId} NULLS LAST
         ) AS row_rank
-      FROM ${profiles}
-      LEFT JOIN ${companyMembers} ON ${companyMembers.userId} = ${profiles.id} AND ${companyMembers.revokedAt} IS NULL
-      LEFT JOIN ${memberships} ON ${memberships.ownerUserId} = ${profiles.id} OR ${memberships.companyId} = ${companyMembers.companyId}
-      LEFT JOIN ${companies} AS membership_companies ON ${membershipCompanies.id} = ${memberships.companyId}
+      ${memberMatchingFrom()}
       LEFT JOIN ${engagementScores} ON ${engagementScores.profileId} = ${profiles.id}
       WHERE ${where}
     ), matching_ids AS (
@@ -322,6 +349,34 @@ export const adminMembersRepository = {
       whatsapp: whatsapp.map((delivery) => ({...delivery, createdAt: delivery.createdAt.toISOString()})),
       suppressions: suppressions.map((suppression) => ({...suppression, createdAt: suppression.createdAt.toISOString()})),
     };
+  },
+
+  /** Caller supplies the existing repeatable-read preparation transaction. */
+  async snapshotSelectionIds(
+    actor: Actor,
+    queryInput: unknown,
+    maxItems: number,
+    database: { execute: (statement: SQL) => PromiseLike<unknown> },
+  ): Promise<string[]> {
+    requireAdmin(actor);
+    const query = adminMemberQuerySchema.parse(queryInput);
+    if (query.cursor) throw new Error("CURSOR_NOT_A_FILTER");
+    if (!Number.isSafeInteger(maxItems) || maxItems < 1 || maxItems > 5000)
+      throw new Error("INVALID_BATCH_CONFIGURATION");
+    const found = z.array(z.object({ profileId: z.string().min(1) })).parse(
+      resultRows(
+        await database.execute(sql`
+      SELECT DISTINCT ${profiles.id} AS "profileId"
+      ${memberMatchingFrom()}
+      WHERE ${memberMatchingPredicate(query)}
+      ORDER BY ${profiles.id}
+      LIMIT ${maxItems + 1}
+    `),
+      ),
+    );
+    // Preserve total matching overflow even when the caller excludes some IDs.
+    if (found.length > maxItems) throw new Error("BATCH_TOO_LARGE");
+    return found.map((row) => row.profileId);
   },
 
   async search(actor: Actor, queryInput: unknown, database?: {execute: (statement: SQL) => PromiseLike<unknown>}): Promise<AdminMemberPage> {

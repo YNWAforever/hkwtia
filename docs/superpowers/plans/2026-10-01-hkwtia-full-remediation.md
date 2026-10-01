@@ -378,10 +378,10 @@ T11 evidence: source/isolated SQL/local workerd/browser verified; cloud deployed
 
 **介面／契約：** 保留 resolveMemberSelectionIds(actor: AdminActor,selection: MemberSelection,tx: BatchExecutor): Promise<string[]>；內部增加專用受權限限制的 snapshot query，沿用同一 predicate builder，最多讀 maxItems+1，不每 50 列重算聚合。
 
-- [ ] **建立行為證據：** ids 與 allMatching 結果一致；excluded 不誤改；5010超限；5000快照並發修改不擴大；row version/digest 改變拒絕舊提交；同一 owner scope。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 在既有 repeatable-read preparation transaction 內一次集合式取得 ID，或 bounded keyset 只計一次 total；不得改掉快照 isolation 省時間。UI 明示本頁/所有符合及排除。保留目前「符合條件總數超 max 即拒絕」語意，若想扣 exclusions 才限額需獨立變更與測試。
-- [ ] **驗證：** npm exec -- vitest run tests/integration/audit-full-batch-snapshot.test.ts；50/500/5000 性能對照，保存 SQL round trips、query plan、p95。
+- [x] **建立行為證據：** ids 與 allMatching 結果一致；excluded 不誤改；5010超限；5000快照並發修改不擴大；row version/digest 改變拒絕舊提交；同一 owner scope。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 在既有 repeatable-read preparation transaction 內一次集合式取得 ID，或 bounded keyset 只計一次 total；不得改掉快照 isolation 省時間。UI 明示本頁/所有符合及排除。保留目前「符合條件總數超 max 即拒絕」語意，若想扣 exclusions 才限額需獨立變更與測試。
+- [x] **驗證：** npm exec -- vitest run tests/integration/audit-full-batch-snapshot.test.ts；50/500/5000 性能對照，保存 SQL round trips、query plan、p95。
 - [ ] **結案與提交：** 不再以 100 次含 aggregate 的 search 完成 5000選取；結果及權限與舊契約一致。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`perf: resolve bulk member selections without repeated counts`。
 
 ### T14 · 批次預覽、執行、取消及安全重試
