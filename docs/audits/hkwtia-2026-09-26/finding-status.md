@@ -91,3 +91,9 @@ The user subsequently authorized all migrations 0037–0051. After a successful 
 ## Partner-logo follow-up — 2026-10-01 HKT
 
 The web/dependency changes in merged PR #105 are deployed to canonical Production as e7fa4add. Isolated partner acceptance passed; Production stage/live pre-import smoke passed 12/12 each. Actual 79-logo Production restoration remains incomplete pending selection of an existing privileged audit actor, import, deployed media verification and publication. [Receipt and exact limits](../../integration/partner-logo-production-release-2026-10-01.md). Existing F01–F25 classifications and unrelated provider/policy gates remain unchanged.
+
+## Completed Production partner-logo release — 2026-10-01 HKT
+
+The requester explicitly authorized the existing three R2 values to Vercel Production and same-source redeployment, resolving the earlier automatic-review gate. Canonical hkwtia.vercel.app now serves e7fa4add / dpl_GYj8pTrvHxSZRDszXnVnCtkDS8rV. Exactly79 approved logos are published:58 supporting/15 regional/6 media, with79 creation +79 update +79 publication audits under the existing unique stored superadmin. All79 deployed image checks passed; prepublication12/12 and postpublication immutable8/8 + anonymous canonical8/8 browser cases passed. Independent SQL confirms ledger51 and unchanged unrelated counts; no profile/role change, migration, new flag/worker, payment/refund or member send occurred.
+
+This supersedes only the logo slice's earlier import/config/publication-pending status. Broader audit findings,171 skipped CI tests, lower dependency findings, provider/policy/runtime gates and unperformed Production rollback/Preview teardown remain explicitly limited. Current web rollback first unpublishes the exact recorded79 IDs; retain data/audits/objects. [Actual release identity, commands, screenshots and ordered rollback](../../integration/partner-logo-production-release-2026-10-01.md).

@@ -1,5 +1,65 @@
 # Partner-logo Production release receipt — 2026-10-01 HKT
 
+## Completed Production partner-logo release — 2026-10-01 HKT
+
+This completion supersedes the earlier actor-selection, secret-transfer, deployed-image404 and publication-pending statements for the 79-logo slice only. Historical failures below remain evidence of the actual sequence. Broader audit/provider/policy gates retain their previous status.
+
+| Item | Verified result |
+| --- | --- |
+| Production code | e7fa4add247489f525f015007460fb522fb1531b; same tree as verified PR105 head163a34bcbc06fdc08a8b634d900e11ea65c0eb2f |
+| Current deployment | dpl_GYj8pTrvHxSZRDszXnVnCtkDS8rV; READY / Production |
+| Canonical / immutable | https://hkwtia.vercel.app / https://hkwtia-l4iqy398l-ynwaforevers-projects.vercel.app |
+| R2 update | Exactly existing Sensitive Production R2_ACCOUNT_ID, R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY; explicit user authority; values excluded |
+| Storage | hkwtia-partner-acceptance-20260930 / default; same bucket/jurisdiction |
+| Promotion / publication | 2026-10-01 10:10:34 / 10:13:14 HKT |
+| Data / actor | 79 published, rights/relationship confirmed; existing unique stored superadmin, independently authorized |
+| Categories / home preview | 58 supporting / 15 regional / 6 media; 12 / 12 / 6 shown and loaded |
+| Audit / idempotency | 79 created +79 updated +79 published =237; rerun created0/skipped79/errors0 |
+| Media / browser | 79/79 deployed bytes/checksum/dimensions; 12/12 prepublication; 8/8 immutable +8/8 anonymous canonical postpublication |
+| Source CI | CI36802683917 at70a5d6b7: 716 files/6097 tests passed; 65 files/171 tests skipped; lint/typecheck/strings/build/high-severity Production audit passed |
+| Changes outside this slice | No migration, new flag, worker deployment, profile/role change, Auth/Stripe update, payment/refund or member message |
+
+The explicit three-value Production authorization resolved the automatic approval-review gate before any credential transfer. Value-only PATCH updated the exact existing Sensitive variable IDs; values were never printed or committed. Old values are write-only, so no claim identifies which old value was invalid. A clean same-source Production rebuild generated267 pages. All79 deployed images passed before publication, then canonical identity and an anonymous200/checksum probe passed. This controlled R2-only change resolved the reproduced deployed404 without changing the media reader or disabling publication/authorization guards.
+
+Existing repository confirmation and publication methods recorded the selected stored actor. Independent final SQL verifies79 published/confirmed/active-media/bilingual-alt rows, all start/end relationship dates remainNULL, and ledger51. Unrelated counts remain2 profiles /3 companies /0 memberships /0 billing attempts. Approved English-name fallback is preserved where no approved Chinese translation exists.
+
+Both postpublication browser runs actually clicked localized view-all links, scrolled and decoded79 distinct directory images, checked all three homepage tabs and found zero page/console/media errors or horizontal overflow at1440x1000 and390x844. Canonical contexts had no cookies, application session or protection bypass. Selected normal viewport captures were visually inspected; extra element/full-page captures can include the real fixed header/focus layer in their capture geometry. Captures were not cosmetically edited. The inherited codeSource:d9b75111 literal in raw browser receipts is legacy harness metadata; guarded candidateCommit:e7fa4add and deploymentId:GYj8 identify the code actually exercised.
+
+### Actual commands for this successful continuation
+
+Run from the implementation worktree, in order. Ignored secret/operator/state inputs are local prerequisites and are never committed. These commands already ran; do not blindly replay production mutations.
+
+~~~powershell
+node .playwright/configure-partner-production-verified-r2.mjs
+node .playwright/deploy-partner-production-stage.mjs
+node .playwright/bootstrap-partner-production.mjs
+node .playwright/verify-partner-production-deployed-media.mjs
+node .playwright/run-partner-production-newconfig-before-publish.mjs
+node .playwright/promote-partner-production-verified-r2.mjs
+node .playwright/verify-partner-production-canonical-before-publish.mjs
+node --conditions=react-server --import tsx .playwright/run-partner-production.mts publish
+node .playwright/run-partner-production-browser.mjs stage
+node .playwright/verify-partner-production-final-sql.mjs
+node .playwright/run-partner-production-browser.mjs canonical
+node .playwright/capture-partner-production-canonical.mjs
+~~~
+
+Rollout order was approved R2 values -> same-source compatible Production web -> all79 deployed-media checks and12 prepublication cases -> canonical promotion/readback -> existing-repository publication -> independent SQL and16 final browser cases. The earlier guarded unpublished import and idempotent rerun preceded the configuration correction. No migration/flag/worker step is needed. --skip-domain advanced the secondary project alias during the build; canonical changed only at explicit promotion.
+
+### Verified rollback checklist; not executed
+
+1. Retain the private exact79 partner-ID/object-key state and independently revalidate the existing stored privileged actor. Use the archived Production runner's unpublish mode only for those recorded IDs. If later content exists, preserve it; scoped public counts should decrease by79 rather than assuming an empty directory.
+2. Verify both locales no longer expose these79 records, and retain rows, audit history and R2 objects for reconciliation. Code rollback alone does not unpublish database content.
+3. Only then, if web rollback is required, promote the previous same-source deployment dpl_DLFixAkkcNmpMCUTu3BY98hTDstQ using the linked project/scope. That deployment has known image404 from its old R2 configuration, so it is unsuitable for continuing published-logo service. Earlier dashboard target: dpl_3KL2kwtCM7m5uwvXpcCtvJuVLHLu / ab568934.
+4. Read back canonical deployment/source and repeat public/login/anonymous-admin smoke. Do not reverse ledger0037–0051, delete the bucket or member/payment/consent/audit history, or replay external effects. Restoring the old write-only R2 values is unavailable; a fresh rebuild with verified current settings is a separate recovery option.
+
+Production rollback and full Preview teardown have not run. Preview fixtures remain for review until their isolated branch expires2026-10-04 20:00HKT; teardown must select only recorded test keys/IDs and preserve these Production keys in the shared bucket. No Google/magic-link/Stripe/member-message or broader performance acceptance is claimed by these logo checks. Production audit passed its high-severity threshold with13 lower findings (1low/12moderate); dev-inclusive install audit still reports30 (3low/18moderate/9high).
+
+**Separate status:** code fixes merged (PR104/105); isolated staging verified; Production79-logo release verified. PR106 is the docs/evidence follow-up and remains for review; it adds no application/dependency/schema change. [Final receipt and hashed evidence](evidence/partner-logos-production-2026-10-01/README.md).
+
+## Historical execution receipts — superseded by the completed release above
+
+
 ## Scope and authority
 
 The requester confirmed all 79 current relationships and logo-display rights, authorized R2 credentials to Vercel, selected the same bucket hkwtia-partner-acceptance-20260930 / jurisdiction default, and explicitly authorized PR #105 merge, Production deployment, import and publication.

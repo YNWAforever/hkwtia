@@ -86,7 +86,175 @@
       "filename": "production-import-provider-gate.json",
       "bytes": 1837,
       "sha256": "8e5023aeedbfca6a0661a92bd4cda3bd06f4efbdf108e233681dc17a6a16ce21"
+    },
+    {
+      "filename": "r2-production-config-update.json",
+      "bytes": 690,
+      "sha256": "1b63cf3188e22e09076958adc68a09a3de5e5b05a1657bfce46dd142abf34bee"
+    },
+    {
+      "filename": "production-r2-config-build.json",
+      "bytes": 951,
+      "sha256": "c6d686ba0ebc9f225793ef401c5ec285c22dc52b86a035340682029211b863cf"
+    },
+    {
+      "filename": "production-r2-config-promotion.json",
+      "bytes": 758,
+      "sha256": "eee60df97727296995a9cb1510dd4867015b9b3dbd063cf7c083ad2c9f0da6e0"
+    },
+    {
+      "filename": "production-prepublication-media-79.json",
+      "bytes": 18565,
+      "sha256": "f7da3e8d05c3dfb3ec007c6f44034d979f102644b77b4e04ed087eb857ef935f"
+    },
+    {
+      "filename": "production-prepublication-browser-12.json",
+      "bytes": 4005,
+      "sha256": "4de4bf04daaca8d5f1fb3616e94a3ab6182b0fb1a3319dd38e8cc8636356f9a5"
+    },
+    {
+      "filename": "production-canonical-before-publish-media.json",
+      "bytes": 400,
+      "sha256": "e0bac9b79a1e5ef89854f1ede08a6b7a8b5863b8d01bfff1e983279a2c88e8f4"
+    },
+    {
+      "filename": "production-publication-final.json",
+      "bytes": 1352,
+      "sha256": "2aa6bf2aec0552ca1181158449e1622867d83e11f02be1500351dca083fb692f"
+    },
+    {
+      "filename": "production-final-sql.json",
+      "bytes": 904,
+      "sha256": "e17412abf2ecfcf52879311dfba45a5056511456ee30cf5c066a2cb7dbb1c97c"
+    },
+    {
+      "filename": "production-browser-immutable.json",
+      "bytes": 4793,
+      "sha256": "aada2f6cd4f21f611f14d8d21e03a20f33137b10a3cbe80c5c67f8597443facb"
+    },
+    {
+      "filename": "production-browser-canonical.json",
+      "bytes": 4761,
+      "sha256": "ff242d6dc674c6ffe8ea6ecffc1461f4784d9eb5ae80d24fec2f2c05203f9ed4"
+    },
+    {
+      "filename": "production-viewport-captures.json",
+      "bytes": 654,
+      "sha256": "85a2cd5f7352f3c7d7f97a8cb5b1d14468cc07945900d6c0bd677230955090a4"
+    },
+    {
+      "filename": "ci-70a5d6b7.json",
+      "bytes": 2037,
+      "sha256": "be5493c02d3f41e58cd8ec82e12fdf5ddf02003d812598d82c02c8fa8df7708f"
+    },
+    {
+      "filename": "production-configure-verified-r2.mjs.txt",
+      "bytes": 3217,
+      "sha256": "070e496a596862282803b9f443cb7d6aa2f15bbd23176b902fdb663bc544f463"
+    },
+    {
+      "filename": "production-promote-verified-r2.mjs.txt",
+      "bytes": 2938,
+      "sha256": "f97cb786e5c182f531048de9b128ed476f0ce952d7d547ff1f2d5829ffbfa450"
+    },
+    {
+      "filename": "production-import-publish-runner.mts.txt",
+      "bytes": 14265,
+      "sha256": "798b8655e3d4f9aad2f2c566c05430f96cd2e65bc449733b5e72d82c3f63ecf0"
+    },
+    {
+      "filename": "production-media-success-verifier.mjs.txt",
+      "bytes": 3583,
+      "sha256": "b72be12d1d4321d14d560227030166d082153cbfbf16975e7de37645b2fe5afe"
+    },
+    {
+      "filename": "production-final-sql-verifier.mjs.txt",
+      "bytes": 3486,
+      "sha256": "219ed7404c5d3d3debf640d683ae599bc034e6da800b13731935e8eb20e3bc06"
+    },
+    {
+      "filename": "production-browser-acceptance.mjs.txt",
+      "bytes": 6758,
+      "sha256": "06d24acd4f2c378fedf99d567845dafda4cd657df08f52d716d214fc9038d123"
+    },
+    {
+      "filename": "production-canonical-viewport.mjs.txt",
+      "bytes": 2460,
+      "sha256": "1410cde77c843253322c763685d33a50978ddea513707f4ec0f4c4d29bed6c2d"
+    },
+    {
+      "filename": "published-canonical-home-en-desktop-viewport.png",
+      "bytes": 163987,
+      "sha256": "baf645b22cdbbe941d3bed392353260eaaa6fcfa9cf99c82f3eaf23ce448c127"
+    },
+    {
+      "filename": "published-canonical-home-zh-mobile-viewport.png",
+      "bytes": 53480,
+      "sha256": "803d15ddf4ccca74f1c95c5c202a3d682ad2ebacf43f4f5a9fc8b84122d17b2e"
+    },
+    {
+      "filename": "published-canonical-partners-zh-desktop.png",
+      "bytes": 2791810,
+      "sha256": "0ad9e61fff29bdc93531be3fcbe8b068de8a48b70915ae1d4ef4abcb96ba6240"
+    },
+    {
+      "filename": "published-canonical-partners-zh-mobile.png",
+      "bytes": 3010897,
+      "sha256": "499fa2d2aba75dd58926adf64e1d635c981027725b0a630786acbca28c909295"
+    },
+    {
+      "filename": "published-canonical-home-en-desktop-regional.png",
+      "bytes": 259340,
+      "sha256": "13a0e5bec802b2a508256ee899ac35d8316d0dd24c27e65223b23db208c84db8"
+    },
+    {
+      "filename": "published-canonical-home-en-desktop-media.png",
+      "bytes": 169095,
+      "sha256": "c0fc14e007d9dd201b1cf956314811b74c88b7533e313366c89f275c79bf442b"
+    },
+    {
+      "filename": "published-stage-partners-en-desktop.png",
+      "bytes": 2630847,
+      "sha256": "dbe208ce37f0305874126d9e62ad1725d9eefb34e38829e0f5ad5697d427d435"
+    },
+    {
+      "filename": "published-stage-home-zh-desktop-supporting.png",
+      "bytes": 277481,
+      "sha256": "3664918231044d14ade78a1e8f56147c848ab3558a769f488f9ea99378a2d830"
+    },
+    {
+      "filename": "production-release-final.json",
+      "bytes": 2079,
+      "sha256": "550fba51e5cb93e001a1e2d9bb5cc8041eb4018d39dbb7e33fdf7008d634b023"
+    },
+    {
+      "filename": "production-config-build.log.txt",
+      "bytes": 10404,
+      "sha256": "afc813dd8517afe988085f76f0d5dfe1fce415d843006038fdee6604835f5712"
+    },
+    {
+      "filename": "production-deploy-same-source.mjs.txt",
+      "bytes": 4077,
+      "sha256": "b9b6d76300cd17821c9da3e769150501cd4a71cccd5b51c806a8d2c019baaa14"
+    },
+    {
+      "filename": "production-prepublication-browser.mjs.txt",
+      "bytes": 3811,
+      "sha256": "59e609010aac85b16bb2f82be029f4c3279a735e722f912f8e6afe0fd10ae95f"
+    },
+    {
+      "filename": "production-canonical-media-probe.mjs.txt",
+      "bytes": 1964,
+      "sha256": "69af7ca30283d4bfaf185dbe6d98f7982203229ff305937d8ecec58bddab6bbf"
+    },
+    {
+      "filename": "production-canonical-final-readback.json",
+      "bytes": 391,
+      "sha256": "2c894a65f2ffaec4bcac607ebf33d8e68ca498a6044a351a55e93f63c0a53675"
     }
   ],
-  "hashSource": "normalized Git index blobs"
+  "hashSource": "normalized Git index blobs",
+  "completedAt": "2026-10-01T02:24:51.354Z",
+  "currentDeploymentId": "dpl_GYj8pTrvHxSZRDszXnVnCtkDS8rV",
+  "currentStatus": "production_released_and_verified"
 }

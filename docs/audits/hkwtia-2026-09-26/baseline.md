@@ -75,3 +75,9 @@ The isolated hkwtia_m2_audit database now contains the completed three-seat paym
 ## Partner-logo release baseline — 2026-10-01 HKT
 
 PR #105 merged as e7fa4add247489f525f015007460fb522fb1531b, identical tracked tree to verified 163a34bc. Canonical Production now resolves dpl_DLFixAkkcNmpMCUTu3BY98hTDstQ with existing Production configuration. Actual migration ledger remains 0051; no migration/seed occurred. Partner rows remain zero pending user selection of an existing privileged audit operator. [Release receipt](../../integration/partner-logo-production-release-2026-10-01.md). This dated follow-up does not change the original audit baseline or finding classifications.
+
+## Completed Production partner-logo release — 2026-10-01 HKT
+
+The requester explicitly authorized the existing three R2 values to Vercel Production and same-source redeployment, resolving the earlier automatic-review gate. Canonical hkwtia.vercel.app now serves e7fa4add / dpl_GYj8pTrvHxSZRDszXnVnCtkDS8rV. Exactly79 approved logos are published:58 supporting/15 regional/6 media, with79 creation +79 update +79 publication audits under the existing unique stored superadmin. All79 deployed image checks passed; prepublication12/12 and postpublication immutable8/8 + anonymous canonical8/8 browser cases passed. Independent SQL confirms ledger51 and unchanged unrelated counts; no profile/role change, migration, new flag/worker, payment/refund or member send occurred.
+
+This supersedes only the logo slice's earlier import/config/publication-pending status. Broader audit findings,171 skipped CI tests, lower dependency findings, provider/policy/runtime gates and unperformed Production rollback/Preview teardown remain explicitly limited. Current web rollback first unpublishes the exact recorded79 IDs; retain data/audits/objects. [Actual release identity, commands, screenshots and ordered rollback](../../integration/partner-logo-production-release-2026-10-01.md).

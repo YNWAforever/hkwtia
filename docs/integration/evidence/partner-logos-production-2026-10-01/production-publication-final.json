@@ -1,0 +1,53 @@
+{
+  "recordedAt": "2026-10-01T02:13:14.171Z",
+  "sourceCommit": "e7fa4add247489f525f015007460fb522fb1531b",
+  "databaseProject": "fragrant-mountain-25240574",
+  "databaseBranch": "br-noisy-glitter-ao2npd77",
+  "bucket": "hkwtia-partner-acceptance-20260930",
+  "jurisdiction": "default",
+  "actor": "user-selected existing stored privileged profile",
+  "actorKind": "superadmin",
+  "initialImport": {
+    "at": "2026-10-01T01:37:26.934Z",
+    "created": 79,
+    "skippedExisting": 0,
+    "skippedError": 0,
+    "unpublishedAndUnconfirmed": 79,
+    "creationAudits": 79
+  },
+  "idempotentRerun": {
+    "created": 0,
+    "skippedExisting": 79,
+    "skippedError": 0
+  },
+  "directR2Verified": 79,
+  "sourceVerified": 79,
+  "publication": "existing repository methods; real stored actor",
+  "current": {
+    "publicEn": 79,
+    "publicZh": 79,
+    "audits": [
+      {
+        "action": "partner.created",
+        "count": 79
+      },
+      {
+        "action": "partner.published",
+        "count": 79
+      },
+      {
+        "action": "partner.updated",
+        "count": 79
+      }
+    ]
+  },
+  "unrelatedCounts": {
+    "profiles": 2,
+    "companies": 3,
+    "memberships": 0,
+    "billing_attempts": 0
+  },
+  "relationshipDates": "left null; no invented dates",
+  "chineseNames": "approved English fallback; no invented translations",
+  "passed": true
+}

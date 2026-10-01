@@ -1,0 +1,21 @@
+{
+  "recordedAt": "2026-10-01T02:02:57.486Z",
+  "sourceCommit": "e7fa4add247489f525f015007460fb522fb1531b",
+  "verifiedSourceCommit": "163a34bcbc06fdc08a8b634d900e11ea65c0eb2f",
+  "sourceTreesIdentical": true,
+  "target": "production",
+  "scope": "Actual same-source Production build after authorized three-key R2 update; no isolated overrides",
+  "projectId": "prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n",
+  "source": "clean tracked Git archive",
+  "overrides": [],
+  "bucket": "hkwtia-partner-acceptance-20260930",
+  "jurisdiction": "default",
+  "rollbackDeployment": "dpl_3KL2kwtCM7m5uwvXpcCtvJuVLHLu",
+  "phase": "built",
+  "migrationPerformed": false,
+  "workerDeployed": false,
+  "exitCode": 0,
+  "deploymentUrl": "https://hkwtia-l4iqy398l-ynwaforevers-projects.vercel.app",
+  "completedAt": "2026-10-01T02:04:39.285Z",
+  "domainAssignmentNote": "--skip-domain advanced the secondary project alias; canonical domain changed only at explicit promotion."
+}

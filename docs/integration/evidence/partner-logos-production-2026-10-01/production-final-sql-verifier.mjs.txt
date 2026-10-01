@@ -1,0 +1,19 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {Pool} from 'pg';
+const binding=JSON.parse(await readFile('.playwright/partner-production-db.json','utf8'));
+const state=JSON.parse(await readFile('.playwright/partner-production-import-state.json','utf8'));
+if(binding.NEON_PROJECT_ID!=='fragrant-mountain-25240574'||binding.NEON_BRANCH_ID!=='br-noisy-glitter-ao2npd77'||new URL(binding.DATABASE_URL).hostname!=='ep-steep-wind-ao0pbldw-pooler.c-2.ap-southeast-1.aws.neon.tech'||state.phase!=='published'||state.partnerIds.length!==79||new Set(state.partnerIds).size!==79)throw Error('FINAL_RELEASE_DATABASE_GUARD');
+const pool=new Pool({connectionString:binding.DATABASE_URL});
+const check=(v,c)=>{if(!v)throw Error(c)};
+try{
+ const actor=(await pool.query('SELECT role::text AS role,auth_user_id FROM profiles WHERE id=$1',[state.actorId])).rows[0];check(actor?.role==='superadmin'&&actor.auth_user_id,'FINAL_RELEASE_ACTOR_INVALID');
+ const rows=(await pool.query('SELECT p.id,p.category,p.published_at,p.archived_at,p.relationship_confirmed_at,p.logo_rights_confirmed_at,p.relationship_starts_on,p.relationship_ends_on,m.archived_at AS media_archived_at,m.registered_by_profile_id,m.storage_key,m.alt_en,m.alt_zh FROM partners p JOIN media m ON m.id=p.logo_media_id WHERE p.id=ANY($1::uuid[])',[state.partnerIds])).rows;
+ check(rows.length===79&&rows.every(r=>r.published_at&&!r.archived_at&&r.relationship_confirmed_at&&r.logo_rights_confirmed_at&&!r.relationship_starts_on&&!r.relationship_ends_on&&!r.media_archived_at&&r.registered_by_profile_id===state.actorId&&state.objectKeys.includes(r.storage_key)&&r.alt_en.trim()&&r.alt_zh.trim()),'FINAL_RELEASE_PUBLISHED_SCOPE');
+ const categories=Object.fromEntries(['supporting','regional','media'].map(category=>[category,rows.filter(r=>r.category===category).length]));check(categories.supporting===58&&categories.regional===15&&categories.media===6,'FINAL_RELEASE_CATEGORIES');
+ const audits=(await pool.query('SELECT action,count(*)::int AS count FROM audit_events WHERE actor_user_id=$1 AND target_id=ANY($2::text[]) GROUP BY action ORDER BY action',[state.actorId,state.partnerIds])).rows;
+ check(audits.length===3&&audits.every(a=>a.count===79)&&['partner.created','partner.updated','partner.published'].every(action=>audits.some(a=>a.action===action)),'FINAL_RELEASE_AUDITS');
+ const counts=(await pool.query('SELECT (SELECT count(*)::int FROM profiles) AS profiles,(SELECT count(*)::int FROM companies) AS companies,(SELECT count(*)::int FROM memberships) AS memberships,(SELECT count(*)::int FROM billing_attempts) AS billing_attempts')).rows[0];check(JSON.stringify(counts)===JSON.stringify(state.before),'FINAL_RELEASE_UNRELATED_COUNTS');
+ const ledger=Number((await pool.query('SELECT max(id) AS id FROM drizzle.__drizzle_migrations')).rows[0].id);check(ledger===51,'FINAL_RELEASE_MIGRATION_LEDGER');
+ const evidence={recordedAt:new Date().toISOString(),databaseProject:binding.NEON_PROJECT_ID,databaseBranch:binding.NEON_BRANCH_ID,published:79,confirmedRelationships:79,confirmedRights:79,activeMedia:79,bilingualAltPresent:79,unfabricatedNullRelationshipDates:79,categories,audits,actorKind:actor.role,actorWasExisting:true,roleChanges:0,profilesCreated:0,unrelatedCounts:counts,migrationLedger:ledger,migrationPerformed:false,passed:true};
+ await writeFile('.playwright/partner-production-final-sql.json',JSON.stringify(evidence,null,2)+'\n');console.log(JSON.stringify(evidence));
+}finally{await pool.end()}

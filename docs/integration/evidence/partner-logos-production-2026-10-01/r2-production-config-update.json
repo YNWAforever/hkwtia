@@ -1,0 +1,19 @@
+{
+  "recordedAt": "2026-10-01T02:02:45.808Z",
+  "authorization": "Requester explicitly authorized existing three R2 values to hkwtia Vercel Production and redeployment",
+  "scope": "three exact existing Sensitive Production R2 values only",
+  "bucket": "hkwtia-partner-acceptance-20260930",
+  "jurisdiction": "default",
+  "keysUpdated": [
+    "R2_ACCOUNT_ID",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY"
+  ],
+  "priorValuesReadable": false,
+  "priorDeploymentRetained": "dpl_DLFixAkkcNmpMCUTu3BY98hTDstQ",
+  "applicationSourceChanged": false,
+  "databaseAuthStripeChanged": false,
+  "productionDataChanged": false,
+  "phase": "updated",
+  "completedAt": "2026-10-01T02:02:53.709Z"
+}

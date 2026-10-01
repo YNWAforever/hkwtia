@@ -1,0 +1,649 @@
+{
+  "recordedAt": "2026-10-01T02:06:23.592Z",
+  "sourceCommit": "e7fa4add247489f525f015007460fb522fb1531b",
+  "origin": "https://hkwtia-l4iqy398l-ynwaforevers-projects.vercel.app",
+  "scope": "Actual deployed Production R2 media route before partner publication",
+  "mediaIds": [
+    "8f5e1973-1ccf-4af1-bb59-94c49ddf4696",
+    "452a8055-bd8d-4a25-974a-777231546a83",
+    "e7670b61-0f50-4911-b84c-276acbf78627",
+    "7d0f5218-7c7b-4134-86c7-7ce5d15eb203",
+    "4440f7bc-aa55-43be-a1d8-fce392d55469",
+    "854e3211-304f-4a6b-9199-9206a135e413",
+    "4ed796df-1c11-45fd-b8fe-0f723db91d90",
+    "f16b0f50-7f5a-4282-80b4-53a16beb8c1c",
+    "e046d32c-7e63-4a60-b816-54358962f937",
+    "b32202a3-7d1f-4d8b-b684-afb2268a7e85",
+    "eb052f70-bd3e-4766-9563-da0a37383a28",
+    "2c9d72b8-0871-41f8-a9b7-7be5f96dd877",
+    "09995d8e-994d-44a4-8627-6619bca4a0e4",
+    "d394f279-bb92-455b-a64b-a4e7c179159c",
+    "aecd947e-29ea-4554-ad43-1063a93302af",
+    "bd21796e-cef4-41f8-ab8b-c27e15947c1b",
+    "a542cf94-772b-4c5e-88a1-78e10684a0a3",
+    "7e14cd43-fb94-4a82-92ae-367cd69d1914",
+    "b0e1634c-8932-407c-8364-245a44dab966",
+    "f5679748-c8f5-4cbc-8641-49fefbe16ca0",
+    "3c47a59a-1de2-4f11-a4bf-857411d0f354",
+    "949f0f8f-b0dd-404c-9448-45b24e8b5261",
+    "852971ac-dfa2-466c-bcc0-2372facdefb8",
+    "ea2aa29d-964a-48d8-a62f-03ec25d808cd",
+    "b81445d8-c1b5-45d0-aeec-ea2e0109fa34",
+    "68a51787-b36a-46e6-bf4c-7be5552cfe34",
+    "fb98579b-8d0d-4d2e-af14-ab56b35fe14b",
+    "d300f287-e595-4f8c-ae5e-20002881ca86",
+    "9ae4b36b-3fe6-4d83-9393-326733210814",
+    "68ed3331-86da-48eb-badb-d77c191623f1",
+    "b2db3a9b-cc12-474c-8ece-7be2979326ce",
+    "4128b3b9-dbcc-4e2c-ab74-059bd1eaec81",
+    "067f504c-7b45-4a0d-9991-f9b2c398f87a",
+    "21152ace-2fd4-4bb8-ab86-7930821da26b",
+    "6128b5a2-f829-4c40-8561-f4b1e5bca30e",
+    "0ecbf79e-3593-4bd3-b104-2a41cf19e634",
+    "7b5c95a9-1734-4e91-822e-52e56893e9f2",
+    "400aab0a-c96d-4254-902c-12655ad0bb6e",
+    "3c846442-960e-4dfd-8b4a-4ecdf0281a9a",
+    "4cf04d14-4b3a-4805-92e5-46dab75accf5",
+    "a31f73ab-3810-404e-9450-e362fe6e3cde",
+    "731f2157-39fd-46b1-9464-e86d590ae385",
+    "2cc0bb1e-869a-4e52-999c-5f4415162996",
+    "9ea39ef6-815a-4768-965e-634da35dff77",
+    "3f8003c7-6d34-4750-b18b-61cd7d599b8b",
+    "f46c3626-4f78-4680-a893-de1579123e90",
+    "cedfcb0d-273c-432e-9f3f-59a798936322",
+    "1d95782b-3ceb-4f45-84b8-d537a88eb8ae",
+    "3a33d03e-476a-4a6e-800b-036bf57aa905",
+    "1d5d85a8-c691-44c7-979b-cadec6c3138a",
+    "1dcef07c-1a56-47f1-8b1f-934189931ba6",
+    "b57a5217-936d-41f9-b731-97ac6ab78dc6",
+    "6b2262ba-54d4-48ca-a333-1bbdf3b16661",
+    "be2e35d4-0ef8-463b-bb30-4000a37818d5",
+    "55638bd2-e2f3-4504-8a14-c26f34e660c2",
+    "41135d5d-a073-4794-a2d2-59cc3112905e",
+    "0accd898-00bb-4854-befd-de3781f2adbc",
+    "d5b68d10-609b-44fb-8597-26068889110e",
+    "261f7f75-f3ec-4937-8bfc-dc6596914114",
+    "4a877792-dc11-4ed9-91ea-1b48046704b1",
+    "68a37c39-fff0-4acb-b6c3-13826fb8af0e",
+    "f40bba94-9e4f-40fa-af28-5ca5b2e6505a",
+    "891074ca-8404-4e34-8e6e-c10d565a05e6",
+    "94fcd953-e19f-47b1-b96a-99c525c39cd3",
+    "3e17a710-db37-4670-9aa3-d52b0cd6f9f6",
+    "3384d16d-b4f8-4615-b909-6a963b1a5447",
+    "1a43268c-2333-4bb1-a365-09b28e290189",
+    "edd310d3-420d-42ea-96e6-a28bda53ac44",
+    "ccd420e3-447e-407b-a7d3-6be53d39044a",
+    "3c47d4b9-dad9-46e5-acf2-bd6bce87ba2d",
+    "5c1bcac5-28f5-4477-8958-5cdaaec5d82b",
+    "5e9b51bf-eb76-40a9-bd4d-0a56502a6818",
+    "22b36ba3-6fa8-40a0-a4ad-f2d9fa028f99",
+    "28278582-14c4-4247-9115-b1dc74ffb59b",
+    "55dccdb1-112b-40a7-9fb4-adc4435b4973",
+    "a5948f1b-f2c3-4c6e-8479-c41f00a0a523",
+    "0de3f311-7c06-4b3d-a72a-9d1b100c705e",
+    "4402523a-de63-46b4-9a46-87bd810051e4",
+    "e5e07c71-9365-4980-bf13-05a5fbc633da"
+  ],
+  "verified": 79,
+  "passed": true,
+  "items": [
+    {
+      "id": "8f5e1973-1ccf-4af1-bb59-94c49ddf4696",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "452a8055-bd8d-4a25-974a-777231546a83",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "e7670b61-0f50-4911-b84c-276acbf78627",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "7d0f5218-7c7b-4134-86c7-7ce5d15eb203",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "4440f7bc-aa55-43be-a1d8-fce392d55469",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "854e3211-304f-4a6b-9199-9206a135e413",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "4ed796df-1c11-45fd-b8fe-0f723db91d90",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "f16b0f50-7f5a-4282-80b4-53a16beb8c1c",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "e046d32c-7e63-4a60-b816-54358962f937",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "b32202a3-7d1f-4d8b-b684-afb2268a7e85",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "eb052f70-bd3e-4766-9563-da0a37383a28",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "2c9d72b8-0871-41f8-a9b7-7be5f96dd877",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "09995d8e-994d-44a4-8627-6619bca4a0e4",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "d394f279-bb92-455b-a64b-a4e7c179159c",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "aecd947e-29ea-4554-ad43-1063a93302af",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "bd21796e-cef4-41f8-ab8b-c27e15947c1b",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "a542cf94-772b-4c5e-88a1-78e10684a0a3",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "7e14cd43-fb94-4a82-92ae-367cd69d1914",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "b0e1634c-8932-407c-8364-245a44dab966",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "f5679748-c8f5-4cbc-8641-49fefbe16ca0",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "3c47a59a-1de2-4f11-a4bf-857411d0f354",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "949f0f8f-b0dd-404c-9448-45b24e8b5261",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "852971ac-dfa2-466c-bcc0-2372facdefb8",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "ea2aa29d-964a-48d8-a62f-03ec25d808cd",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "b81445d8-c1b5-45d0-aeec-ea2e0109fa34",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "68a51787-b36a-46e6-bf4c-7be5552cfe34",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "fb98579b-8d0d-4d2e-af14-ab56b35fe14b",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "d300f287-e595-4f8c-ae5e-20002881ca86",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "9ae4b36b-3fe6-4d83-9393-326733210814",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "68ed3331-86da-48eb-badb-d77c191623f1",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "b2db3a9b-cc12-474c-8ece-7be2979326ce",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "4128b3b9-dbcc-4e2c-ab74-059bd1eaec81",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "067f504c-7b45-4a0d-9991-f9b2c398f87a",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "21152ace-2fd4-4bb8-ab86-7930821da26b",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "6128b5a2-f829-4c40-8561-f4b1e5bca30e",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "0ecbf79e-3593-4bd3-b104-2a41cf19e634",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "7b5c95a9-1734-4e91-822e-52e56893e9f2",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "400aab0a-c96d-4254-902c-12655ad0bb6e",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "3c846442-960e-4dfd-8b4a-4ecdf0281a9a",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "4cf04d14-4b3a-4805-92e5-46dab75accf5",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "a31f73ab-3810-404e-9450-e362fe6e3cde",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "731f2157-39fd-46b1-9464-e86d590ae385",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "2cc0bb1e-869a-4e52-999c-5f4415162996",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "9ea39ef6-815a-4768-965e-634da35dff77",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "3f8003c7-6d34-4750-b18b-61cd7d599b8b",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "f46c3626-4f78-4680-a893-de1579123e90",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "cedfcb0d-273c-432e-9f3f-59a798936322",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "1d95782b-3ceb-4f45-84b8-d537a88eb8ae",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "3a33d03e-476a-4a6e-800b-036bf57aa905",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "1d5d85a8-c691-44c7-979b-cadec6c3138a",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "1dcef07c-1a56-47f1-8b1f-934189931ba6",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "b57a5217-936d-41f9-b731-97ac6ab78dc6",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "6b2262ba-54d4-48ca-a333-1bbdf3b16661",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "be2e35d4-0ef8-463b-bb30-4000a37818d5",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "55638bd2-e2f3-4504-8a14-c26f34e660c2",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "41135d5d-a073-4794-a2d2-59cc3112905e",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "0accd898-00bb-4854-befd-de3781f2adbc",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "d5b68d10-609b-44fb-8597-26068889110e",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "261f7f75-f3ec-4937-8bfc-dc6596914114",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "4a877792-dc11-4ed9-91ea-1b48046704b1",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "68a37c39-fff0-4acb-b6c3-13826fb8af0e",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "f40bba94-9e4f-40fa-af28-5ca5b2e6505a",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "891074ca-8404-4e34-8e6e-c10d565a05e6",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "94fcd953-e19f-47b1-b96a-99c525c39cd3",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "3e17a710-db37-4670-9aa3-d52b0cd6f9f6",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "3384d16d-b4f8-4615-b909-6a963b1a5447",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "1a43268c-2333-4bb1-a365-09b28e290189",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "edd310d3-420d-42ea-96e6-a28bda53ac44",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "ccd420e3-447e-407b-a7d3-6be53d39044a",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "3c47d4b9-dad9-46e5-acf2-bd6bce87ba2d",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "5c1bcac5-28f5-4477-8958-5cdaaec5d82b",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "5e9b51bf-eb76-40a9-bd4d-0a56502a6818",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "22b36ba3-6fa8-40a0-a4ad-f2d9fa028f99",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "28278582-14c4-4247-9115-b1dc74ffb59b",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "55dccdb1-112b-40a7-9fb4-adc4435b4973",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "a5948f1b-f2c3-4c6e-8479-c41f00a0a523",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "0de3f311-7c06-4b3d-a72a-9d1b100c705e",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "4402523a-de63-46b4-9a46-87bd810051e4",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    },
+    {
+      "id": "e5e07c71-9365-4980-bf13-05a5fbc633da",
+      "status": 200,
+      "contentType": "image/png",
+      "checksumVerified": true,
+      "dimensionsVerified": true
+    }
+  ],
+  "applicationSessionIncluded": false,
+  "lastAttempt": {
+    "mediaId": "e5e07c71-9365-4980-bf13-05a5fbc633da",
+    "status": 200
+  }
+}
