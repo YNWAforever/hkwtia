@@ -1,0 +1,107 @@
+{
+  "sourceSha": "83ebfa60559d0380a593d77306c8ffff3eae4375",
+  "coreSourceSha": "991a67eb",
+  "productionMutation": false,
+  "migrationRequired": false,
+  "scope": "disposable full/minimal PostgreSQL16 and confirmed isolated Neon/Auth; synthetic .example.test identities and data; no provider sends",
+  "red": [
+    "expired staging returned private details",
+    "preview payload changed after confirmation still executed",
+    "NUL reached PostgreSQL instead of bounded input rejection",
+    "correction download unavailable",
+    "new API absent from protected route ownership inventory;8 full-suite failures"
+  ],
+  "focused": {
+    "passed": 148,
+    "skipped": 0,
+    "failed": 0,
+    "files": 9,
+    "actualSqlCases": 14,
+    "unitCases": 134,
+    "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/audit-full-import-export.test.ts tests/integration/member-import-commit.test.ts tests/integration/member-import-retention.test.ts tests/integration/event-attendee-batch-export.test.ts tests/integration/admin-batch-export.test.ts tests/unit/member-import-validation.test.ts tests/unit/member-import-wizard.test.tsx tests/unit/server-action-actor-boundary.test.ts tests/unit/repository-boundary.test.ts --maxWorkers=1"
+  },
+  "routeInventory": {
+    "passed": 33,
+    "skipped": 0,
+    "failed": 0,
+    "protectedRoutes": 81
+  },
+  "browser": {
+    "passed": 2,
+    "skipped": 0,
+    "failed": 0,
+    "durationSeconds": 52.8,
+    "command": "PLAYWRIGHT_BASE_URL=http://localhost:3450 ADMIN_BATCH_ENABLED=true MEMBER_IMPORT_ENABLED=true AUDIT_ISOLATED_ACCEPTANCE=true NODE_OPTIONS=--max-old-space-size=4096 node --env-file=.env.local node_modules/@playwright/test/cli.js test tests/e2e/full-import-export.spec.ts --project=chromium --workers=1 --reporter=line",
+    "runtime": "Next16.3.6 production-mode local build991a67eb; later83ebfa60 only route inventory/test change",
+    "languages": [
+      "en",
+      "zh-HK"
+    ],
+    "viewports": [
+      "desktop",
+      "390x844"
+    ],
+    "effectsPerLocale": {
+      "logicalRows": 5,
+      "selected": 2,
+      "profileUpdate": 1,
+      "contactOnlyCreate": 1,
+      "duplicateExcluded": 1,
+      "conflictExcluded": 1,
+      "invalidExcluded": 1,
+      "auditRows": 2,
+      "repeatClaimCount": 0,
+      "newMemberships": 0,
+      "originalSyntheticProfileRoles": 10,
+      "newContactConsent": false
+    },
+    "privacy": "BOM correction CSV projects row number/status/reason only; private-no-store; attachment; anonymous/member/foreign superadmin denied404; actor query rejected404",
+    "priorFailures": "Dev English state reset once, cause unestablished; selector-only getByLabel failure not app RED; checkpoint warm English passed and final built both languages passed. Neither earlier failure counted as success."
+  },
+  "files": {
+    "import-en-desktop.png": "0e4caf2374841f7d496ec6433115cdb61cda6b2e47c77fa2a0ad9b39a8e648ac",
+    "import-en-mobile.png": "959167a33c24c827087a93e5f32903bd1a030b9e25601b28e996e798ef08f496",
+    "issues-en.csv": "7eeb7792f51e8d5f3891cc8e86d7f58173c721a18b5e09690f0830acf1b6970b",
+    "import-zh-HK-desktop.png": "cb260b787ae22bafd30d61fbd0ee9ac38785d9e41588ee7bc86fdb6118f44025",
+    "import-zh-HK-mobile.png": "df435b14c238138bc715f31e469ed512f939f3925b815662ee1437c4777fa384",
+    "issues-zh-HK.csv": "e0e514889b7cff6b3bf20f3939696e9610596ff25a62675464eb795248a4c022"
+  },
+  "releaseGate": "new row digest rejects old prepared imports; pause/drain verified old work or cancel pending items and prepare new preview; never replay completed effects or weaken comparison",
+  "remaining": [
+    "approved data-update invitation transport/recipient and identity verification",
+    "tagged isolated cloud worker/Preview acceptance",
+    "whole8-operation50/500/5000 matrix T21/T22",
+    "Production release and activation authorization for Oct1 candidate"
+  ],
+  "repositoryGates": {
+    "full": {
+      "passed": 6238,
+      "skipped": 259,
+      "failed": 0,
+      "passFiles": 815,
+      "allSkipFiles": 0
+    },
+    "lint": {
+      "exitCode": 0,
+      "errors": 0,
+      "existingWarnings": 67,
+      "command": "npm.cmd run lint"
+    },
+    "typecheck": {
+      "exitCode": 0,
+      "command": "npm.cmd run typecheck"
+    },
+    "strings": {
+      "exitCode": 0,
+      "files": 301,
+      "command": "npm.cmd run audit:strings"
+    },
+    "build": {
+      "exitCode": 0,
+      "staticPages": 267,
+      "next": "16.3.6",
+      "sourceSha": "83ebfa60559d0380a593d77306c8ffff3eae4375",
+      "command": "npm.cmd run build"
+    }
+  }
+}

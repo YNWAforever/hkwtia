@@ -1,0 +1,11 @@
+{
+  "command": "npm.cmd test -- --maxWorkers=4 --reporter=json --outputFile=.playwright/t15-full-final-results.json",
+  "source": "83ebfa60559d0380a593d77306c8ffff3eae4375",
+  "passed": 6238,
+  "skipped": 259,
+  "failed": 0,
+  "passFiles": 815,
+  "allSkipFiles": 0,
+  "reason": "Default provider/isolation/database guards unset; actual focused Docker SQL and isolated built Chromium reported separately; skips not passes",
+  "rows": []
+}

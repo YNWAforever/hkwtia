@@ -422,10 +422,10 @@ T11 evidence: source/isolated SQL/local workerd/browser verified; cloud deployed
 
 **介面／契約：** 沿用現有 importRunId、row decisions、import_commit、export_members/export_event_attendees；所有 mapping 和匹配決定成為 preview snapshot。export fields 限現有 allowlist，不因 CSV 要求直接開 email/role/consent mutation。
 
-- [ ] **建立行為證據：** BOM、中英/換行/逗號、重複列、大小寫電郵、既有身份、公式 = + - @ 與控制字元；其他角色下載拒絕；過期 URL 拒絕；重試匯入不重造人。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 每列標新增/更新/衝突/略過，顯示前後差異、來源與錯誤；email 匯入不是已驗證身份，更不是營銷同意。會員需收到指定且經批准的資料更新邀請才進登入流程。私人匯出有列數、欄位、期限及 audit，按 repository 現有 TTL/retention contract；不可 public 永久 URL。
-- [ ] **驗證：** npm exec -- vitest run tests/integration/audit-full-import-export.test.ts tests/unit/member-import-validation.test.ts；隔離 import/下載/過期及 retention job 驗收。
+- [x] **建立行為證據：** BOM、中英/換行/逗號、重複列、大小寫電郵、既有身份、公式 = + - @ 與控制字元；其他角色下載拒絕；過期 URL 拒絕；重試匯入不重造人。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 每列標新增/更新/衝突/略過，顯示前後差異、來源與錯誤；email 匯入不是已驗證身份，更不是營銷同意。會員需收到指定且經批准的資料更新邀請才進登入流程。私人匯出有列數、欄位、期限及 audit，按 repository 現有 TTL/retention contract；不可 public 永久 URL。
+- [x] **驗證：** npm exec -- vitest run tests/integration/audit-full-import-export.test.ts tests/unit/member-import-validation.test.ts；隔離 import/下載/過期及 retention job 驗收。
 - [ ] **結案與提交：** 非技術職員可用可下載的錯誤清單修正再匯入；重複與個資邊界不被簡化 UI 弱化。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: complete safe member import and export workflows`。
 
 ### T16 · 活動報名、付款、票券與退款閉環
