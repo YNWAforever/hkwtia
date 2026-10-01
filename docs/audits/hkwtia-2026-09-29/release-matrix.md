@@ -37,3 +37,17 @@ vercel.cmd rollback dpl_8cr2En9xQhrs5nDpxny9GY3L4stx --yes --scope ynwaforevers-
 After rollback, read the alias deployment/SHA again, repeat public/login/admin-denial smoke and inspect runtime logs. Do not reverse migrations 0037–0051, delete batch/outbox/audit/payment/grant/consent history or replay external effects. No DB or worker rollback is required for this web-only release.
 
 **Claim boundary:** dashboard code merged; isolated authenticated dashboard acceptance passed; approved web SHA is Production released. The remaining provider, policy, CMS-history and runtime-connection issues are explicitly open.
+
+## Authorized partner-logo rollout — 2026-10-01 HKT
+
+[Actual release receipt and ordered checklist](../../integration/partner-logo-production-release-2026-10-01.md): R2 names configured, existing-Production-only web e7fa4add deployed/promoted with 12 staged and 12 live checks. No schema/flag/worker rollout. Remaining steps require selection of existing stored privileged actor, unpublished import, actual deployed 79-image verification, repository confirmations/publication and bilingual live acceptance. Canonical web rollback target is dpl_3KL2kwtCM7m5uwvXpcCtvJuVLHLu. Once published, first unpublish only recorded79 IDs and verify counts; preserve audits/objects. No Production rollback or full fixture cleanup has run. This supersedes older unreleased statements only for this web slice.
+
+### Production import / provider gate — 2026-10-01 HKT
+
+The user selected the existing unique superadmin. Actual Production import created79 unpublished/unconfirmed partners and79 audit rows; all79 R2 hashes/dimensions passed. Rerun created0/skipped79. Unrelated counts remain2 profiles/3 companies/0 memberships/0 billing attempts. The deployed media route still returns404; current handler with actual Production DB and verified R2 config returns200/checksum-match locally. Automatic approval review rejected persistent Production R2 credential transfer, citing earlier Preview-only transfer scope. No secret patch/redeployment/publication occurred; explicit3-key Production transfer approval is pending. [Exact execution/gate](../../integration/partner-logo-production-release-2026-10-01.md). No skipped/unrun browser test is claimed complete.
+
+## Completed Production partner-logo release — 2026-10-01 HKT
+
+The requester explicitly authorized the existing three R2 values to Vercel Production and same-source redeployment, resolving the earlier automatic-review gate. Canonical hkwtia.vercel.app now serves e7fa4add / dpl_GYj8pTrvHxSZRDszXnVnCtkDS8rV. Exactly79 approved logos are published:58 supporting/15 regional/6 media, with79 creation +79 update +79 publication audits under the existing unique stored superadmin. All79 deployed image checks passed; prepublication12/12 and postpublication immutable8/8 + anonymous canonical8/8 browser cases passed. Independent SQL confirms ledger51 and unchanged unrelated counts; no profile/role change, migration, new flag/worker, payment/refund or member send occurred.
+
+This supersedes only the logo slice's earlier import/config/publication-pending status. Broader audit findings,171 skipped CI tests, lower dependency findings, provider/policy/runtime gates and unperformed Production rollback/Preview teardown remain explicitly limited. Current web rollback first unpublishes the exact recorded79 IDs; retain data/audits/objects. [Actual release identity, commands, screenshots and ordered rollback](../../integration/partner-logo-production-release-2026-10-01.md).

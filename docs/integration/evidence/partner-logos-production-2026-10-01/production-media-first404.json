@@ -1,0 +1,19 @@
+{
+  "recordedAt": "2026-10-01T01:38:07.515Z",
+  "sourceCommit": "e7fa4add247489f525f015007460fb522fb1531b",
+  "origin": "https://hkwtia-may7nip2c-ynwaforevers-projects.vercel.app",
+  "scope": "Actual deployed Production R2 media route before partner publication",
+  "mediaIds": [],
+  "verified": 0,
+  "passed": false,
+  "items": [],
+  "applicationSessionIncluded": false,
+  "lastAttempt": {
+    "mediaId": "8f5e1973-1ccf-4af1-bb59-94c49ddf4696",
+    "status": 404
+  },
+  "failure": {
+    "code": "PRODUCTION_MEDIA_HTTP_FAILED",
+    "name": "Error"
+  }
+}

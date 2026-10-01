@@ -1,0 +1,43 @@
+{
+  "recordedAt": "2026-10-01T02:15:19.578Z",
+  "databaseProject": "fragrant-mountain-25240574",
+  "databaseBranch": "br-noisy-glitter-ao2npd77",
+  "published": 79,
+  "confirmedRelationships": 79,
+  "confirmedRights": 79,
+  "activeMedia": 79,
+  "bilingualAltPresent": 79,
+  "unfabricatedNullRelationshipDates": 79,
+  "categories": {
+    "supporting": 58,
+    "regional": 15,
+    "media": 6
+  },
+  "audits": [
+    {
+      "action": "partner.created",
+      "count": 79
+    },
+    {
+      "action": "partner.published",
+      "count": 79
+    },
+    {
+      "action": "partner.updated",
+      "count": 79
+    }
+  ],
+  "actorKind": "superadmin",
+  "actorWasExisting": true,
+  "roleChanges": 0,
+  "profilesCreated": 0,
+  "unrelatedCounts": {
+    "profiles": 2,
+    "companies": 3,
+    "memberships": 0,
+    "billing_attempts": 0
+  },
+  "migrationLedger": 51,
+  "migrationPerformed": false,
+  "passed": true
+}

@@ -1,0 +1,137 @@
+import {readFile,writeFile,access} from 'node:fs/promises';
+import {createHash,randomUUID} from 'node:crypto';
+import {join} from 'node:path';
+import {parseEnv} from 'node:util';
+import {Pool} from 'pg';
+import sharp from 'sharp';
+import {authoritativeSourceInventory} from '../config/wisetech-authoritative-source-inventory';
+import {loadDonorPartners,importPartners,createPartnerImportDatabase} from '../scripts/import-wisetech-partners';
+import {assertPartnerImportAuthorized} from '../scripts/lib/partner-import-guard';
+import {normalizeImageUpload} from '../lib/media/image-upload';
+import {createR2Storage,resolveR2Config} from '../lib/media/r2-storage';
+import {partnersRepository} from '../lib/db/repos/partners';
+import type {AdminActor} from '../lib/membership/lifecycle';
+const check=(condition:unknown,code:string)=>{if(!condition)throw Error(code)};
+const statePath='.playwright/partner-production-import-state.json';
+const evidencePath='.playwright/partner-production-import-evidence.json';
+const actorPath='.playwright/partner-production-operator.json';
+const donorDir='.playwright/partner-logo-review/donor';
+type State={run:string;actorId:string;actorKind:AdminActor['kind'];objectKeys:string[];partnerIds:string[];phase:string;before:Record<string,number>};
+async function save(state:State){await writeFile(statePath,JSON.stringify(state,null,2)+'\n',{mode:0o600})}
+async function exists(path:string){try{await access(path);return true}catch{return false}}
+async function main(){
+ const mode=process.argv[2];
+ check(['preflight','import','verify','publish','unpublish'].includes(mode),'PARTNER_PRODUCTION_MODE_REQUIRED');
+ const binding=JSON.parse(await readFile('.playwright/partner-production-db.json','utf8'));
+ check(binding.NEON_PROJECT_ID==='fragrant-mountain-25240574'&&binding.NEON_BRANCH_ID==='br-noisy-glitter-ao2npd77','PARTNER_PRODUCTION_DATABASE_BINDING');
+ const url=new URL(binding.DATABASE_URL);
+ check(url.protocol==='postgresql:'&&url.hostname==='ep-steep-wind-ao0pbldw-pooler.c-2.ap-southeast-1.aws.neon.tech'&&url.pathname==='/neondb','PARTNER_PRODUCTION_DATABASE_TARGET');
+ const deployment=JSON.parse(await readFile('.playwright/partner-production-deploy.json','utf8'));
+ check(deployment.sourceCommit==='e7fa4add247489f525f015007460fb522fb1531b'&&deployment.target==='production'&&deployment.overrides.length===0,'PARTNER_PRODUCTION_CODE_TARGET');
+ const r2=parseEnv(await readFile('C:/Users/laich/Documents/hkwtia/.playwright/r2-isolated.env','utf8'));
+ const environment=Object.fromEntries(['R2_ACCOUNT_ID','R2_JURISDICTION','R2_ACCESS_KEY_ID','R2_SECRET_ACCESS_KEY','R2_BUCKET'].map(key=>[key,r2[key]]));
+ const config=resolveR2Config(environment);
+ check(config.bucket==='hkwtia-partner-acceptance-20260930'&&config.jurisdiction==='default','PARTNER_PRODUCTION_STORAGE_TARGET');
+ process.env.DATABASE_URL=binding.DATABASE_URL;delete process.env.DATABASE_URL_TEST;
+ const pool=new Pool({connectionString:binding.DATABASE_URL});
+ const storage=createR2Storage({environment});
+ const counts=async()=> (await pool.query('SELECT (SELECT count(*)::int FROM profiles) AS profiles,(SELECT count(*)::int FROM companies) AS companies,(SELECT count(*)::int FROM memberships) AS memberships,(SELECT count(*)::int FROM billing_attempts) AS billing_attempts')).rows[0] as Record<string,number>;
+ try{
+  const donor=await loadDonorPartners(donorDir);
+  check(donor.length===79&&donor.filter(r=>r.category==='supporting').length===58&&donor.filter(r=>r.category==='regional').length===15&&donor.filter(r=>r.category==='media').length===6,'PARTNER_PRODUCTION_SOURCE_COUNT');
+  const assets=authoritativeSourceInventory.assets.filter(a=>a.sourcePath.startsWith('public/partners/'));
+  check(assets.length===79,'PARTNER_PRODUCTION_INVENTORY_COUNT');
+  const bytes=new Map<string,Buffer>();
+  for(const row of donor){
+   const sourcePath='public/partners/'+row.logoFile;
+   const asset=assets.find(a=>a.sourcePath===sourcePath);
+   const content=await readFile(join(donorDir,sourcePath));
+   check(asset?.sha256===createHash('sha256').update(content).digest('hex')&&asset.rightsStatus==='approved'&&asset.relationshipStatus==='approved'&&asset.disposition==='merge','PARTNER_PRODUCTION_SOURCE_APPROVAL');
+   await normalizeImageUpload(content,'image/png',{filename:row.logoFile.split('/').at(-1),altEn:row.name+' logo',altZh:row.name+' 標誌',focalX:'50',focalY:'50'});
+   bytes.set(row.logoFile,content);
+  }
+  check(Number((await pool.query('SELECT max(id) AS id FROM drizzle.__drizzle_migrations')).rows[0].id)===51,'PARTNER_PRODUCTION_MIGRATION_BASELINE');
+  const operatorPresent=await exists(actorPath);
+  if(mode==='preflight'){
+   const result={recordedAt:new Date().toISOString(),databaseProject:binding.NEON_PROJECT_ID,databaseBranch:binding.NEON_BRANCH_ID,migrationLedger:51,sourceVerified:79,categories:{supporting:58,regional:15,media:6},bucket:config.bucket,jurisdiction:config.jurisdiction,operatorSelection:operatorPresent?'provided; revalidated before writes':'pending',counts:await counts(),partners:Number((await pool.query('SELECT count(*)::int AS count FROM partners')).rows[0].count),databaseWritten:false,storageWritten:false};
+   await writeFile('.playwright/partner-production-release-preflight.json',JSON.stringify(result,null,2)+'\n');
+   console.log(JSON.stringify(result));return;
+  }
+  check(operatorPresent,'PARTNER_PRODUCTION_OPERATOR_SELECTION_REQUIRED');
+  const selection=JSON.parse(await readFile(actorPath,'utf8'));
+  check(selection.authorizedByUser===true&&typeof selection.profileId==='string'&&selection.profileId.length>0,'PARTNER_PRODUCTION_OPERATOR_SELECTION_REQUIRED');
+  const stored=(await pool.query('SELECT id,role::text AS role,auth_user_id FROM profiles WHERE id=$1',[selection.profileId])).rows[0];
+  check(stored&&['staff','exco','superadmin'].includes(stored.role)&&typeof stored.auth_user_id==='string'&&stored.auth_user_id.length>0,'PARTNER_PRODUCTION_STORED_OPERATOR_INVALID');
+  const actor:AdminActor={kind:stored.role,userId:stored.auth_user_id,profileId:stored.id};
+  const authorization=await assertPartnerImportAuthorized({WISETECH_PARTNER_IMPORT:'true',WISETECH_IMPORT_ALLOW_PRODUCTION:'true',WISETECH_IMPORT_ACTOR_PROFILE_ID:actor.profileId,WISETECH_IMPORT_ACTOR_KIND:actor.kind},async()=>Number((await pool.query('SELECT count(*)::int AS count FROM acceptance_sentinel')).rows[0].count),async(id)=>(await pool.query('SELECT role::text AS role FROM profiles WHERE id=$1',[id])).rows[0]?.role??null);
+  let state:State;
+  if(await exists(statePath)){
+   state=JSON.parse(await readFile(statePath,'utf8'));
+   check(state.actorId===actor.profileId&&state.actorKind===actor.kind&&/^partner-production-[0-9a-f-]{36}$/.test(state.run),'PARTNER_PRODUCTION_STATE_OPERATOR');
+  }else{
+   check(mode==='import','PARTNER_PRODUCTION_IMPORT_STATE_REQUIRED');
+   check(Number((await pool.query('SELECT count(*)::int AS count FROM partners')).rows[0].count)===0,'PARTNER_PRODUCTION_TARGET_NOT_EMPTY');
+   state={run:'partner-production-'+randomUUID(),actorId:actor.profileId,actorKind:actor.kind,objectKeys:[],partnerIds:[],phase:'preparing',before:await counts()};
+   await save(state);
+  }
+  const owned=async()=> (await pool.query('SELECT p.id,p.name_en,p.name_zh_hk,p.category,p.relationship_starts_on,p.relationship_ends_on,p.published_at,p.relationship_confirmed_at,p.logo_rights_confirmed_at,m.id AS media_id,m.storage_key,m.storage_etag,m.checksum_sha256,m.width,m.height,m.alt_en,m.alt_zh,m.registered_by_profile_id FROM partners p JOIN media m ON m.id=p.logo_media_id WHERE m.storage_key=ANY($1::text[]) ORDER BY p.display_order',[state.objectKeys])).rows;
+  const verify=async()=>{
+   const rows=await owned();
+   check(rows.length===79&&new Set(rows.map(r=>r.id)).size===79&&rows.every(r=>r.registered_by_profile_id===actor.profileId&&!r.relationship_starts_on&&!r.relationship_ends_on),'PARTNER_PRODUCTION_RECORD_SCOPE');
+   for(const [index,row] of rows.entries()){
+    const expected=donor[index];
+    check(row.name_en===expected.name&&row.name_zh_hk===expected.name&&row.category===expected.category&&row.alt_en===expected.name+' logo'&&row.alt_zh===expected.name+' 標誌','PARTNER_PRODUCTION_CONTENT_REVIEW');
+    const object=await storage.get({key:row.storage_key,etag:row.storage_etag});check(object.body,'PARTNER_PRODUCTION_OBJECT_BODY');
+    const content=Buffer.from(await new Response(object.body).arrayBuffer());const metadata=await sharp(content).metadata();
+    check(createHash('sha256').update(content).digest('hex')===row.checksum_sha256&&object.sha256===row.checksum_sha256&&object.contentType==='image/png'&&metadata.format==='png'&&metadata.width===row.width&&metadata.height===row.height,'PARTNER_PRODUCTION_OBJECT_VERIFICATION');
+    if((index+1)%10===0)console.log('Production R2 reads verified='+(index+1));
+   }
+   check(JSON.stringify(await counts())===JSON.stringify(state.before),'PARTNER_PRODUCTION_UNRELATED_COUNTS_CHANGED');
+   state.partnerIds=rows.map(r=>r.id);await save(state);return rows;
+  };
+  if(mode==='import'){
+   check(['preparing','imported-unpublished'].includes(state.phase),'PARTNER_PRODUCTION_IMPORT_PHASE');
+   const current=await owned();
+   for(const row of donor){const existing=(await pool.query('SELECT p.id FROM partners p WHERE p.category=$1 AND p.name_en=$2',[row.category,row.name])).rows;check(existing.every(r=>current.some(c=>c.id===r.id)),'PARTNER_PRODUCTION_UNRELATED_DONOR_EXISTS')}
+   const deps={...createPartnerImportDatabase(pool),readLogoBytes:async(file:string)=>bytes.get(file)!,normalizeImage:normalizeImageUpload,uploadLogo:async(input:Parameters<typeof storage.put>[0])=>{check(!state.objectKeys.includes(input.key),'PARTNER_PRODUCTION_DUPLICATE_OBJECT_KEY');state.objectKeys.push(input.key);await save(state);return storage.put(input)},generateId:randomUUID,log:(message:string)=>console.log(message)};
+   const initial=await importPartners(donor,new Map(),authorization,deps);
+   check(initial.skippedError===0,'PARTNER_PRODUCTION_IMPORT_INCOMPLETE');
+   const rows=await verify();
+   check(rows.every(r=>!r.published_at&&!r.relationship_confirmed_at&&!r.logo_rights_confirmed_at),'PARTNER_PRODUCTION_UNPUBLISHED_DEFAULTS');
+   const repeated=await importPartners(donor,new Map(),authorization,deps);
+   check(repeated.created===0&&repeated.skippedExisting===79&&repeated.skippedError===0,'PARTNER_PRODUCTION_IDEMPOTENCY');
+   const audits=Number((await pool.query("SELECT count(*)::int AS count FROM audit_events WHERE actor_user_id=$1 AND action='partner.created' AND target_id=ANY($2::text[])",[actor.profileId,state.partnerIds])).rows[0].count);
+   check(audits===79,'PARTNER_PRODUCTION_CREATED_AUDITS');
+   state.phase='imported-unpublished';await save(state);
+   const evidence={recordedAt:new Date().toISOString(),sourceCommit:deployment.sourceCommit,databaseProject:binding.NEON_PROJECT_ID,databaseBranch:binding.NEON_BRANCH_ID,bucket:config.bucket,jurisdiction:config.jurisdiction,actor:'user-selected existing stored privileged profile',actorKind:actor.kind,sourceVerified:79,initial,repeated,readVerified:79,createdAudits:79,publications:0,unpublishedAndUnconfirmed:79,unrelatedCounts:state.before,relationshipDates:'left null; no invented dates',chineseNames:'approved English fallback; no invented translations',productionWritten:true};
+   await writeFile(evidencePath,JSON.stringify(evidence,null,2)+'\n');console.log(JSON.stringify(evidence));
+  }else if(mode==='verify'){
+   const rows=await verify();console.log(JSON.stringify({verified:79,published:rows.filter(r=>r.published_at).length,actorKind:actor.kind}));
+  }else{
+   const rows=await verify();
+   check(['imported-unpublished','published'].includes(state.phase),'PARTNER_PRODUCTION_PUBLICATION_PHASE');
+   const publish=mode==='publish';
+   if(publish){
+    const mediaEvidence=JSON.parse(await readFile('.playwright/partner-production-deployed-media.json','utf8'));
+    check(mediaEvidence.passed===true&&mediaEvidence.verified===79&&mediaEvidence.sourceCommit===deployment.sourceCommit&&mediaEvidence.origin===deployment.deploymentUrl&&mediaEvidence.mediaIds.length===79&&rows.every(r=>mediaEvidence.mediaIds.includes(r.media_id)),'PARTNER_PRODUCTION_DEPLOYED_MEDIA_REQUIRED');
+   }
+   for(const [index,id] of state.partnerIds.entries()){
+    if(publish)check(await partnersRepository.update(actor,id,{relationshipConfirmed:true,logoRightsConfirmed:true}),'PARTNER_PRODUCTION_CONFIRM_FAILED');
+    check(await partnersRepository.setPublished(actor,id,publish),'PARTNER_PRODUCTION_PUBLICATION_FAILED');
+    if((index+1)%10===0)console.log('Production '+(publish?'publications':'unpublications')+'='+(index+1));
+   }
+   for(const locale of ['en','zh-HK'] as const){
+    const publicRows=await partnersRepository.listPublished(locale,{limit:100});
+    check(publicRows.length===(publish?79:0),'PARTNER_PRODUCTION_PUBLIC_COUNT');
+   }
+   const auditRows=(await pool.query('SELECT action,count(*)::int AS count FROM audit_events WHERE actor_user_id=$1 AND target_id=ANY($2::text[]) GROUP BY action ORDER BY action',[actor.profileId,state.partnerIds])).rows;
+   if(publish)check(['partner.created','partner.updated','partner.published'].every(action=>auditRows.some(r=>r.action===action&&r.count===79)),'PARTNER_PRODUCTION_PUBLICATION_AUDITS');
+   check(JSON.stringify(await counts())===JSON.stringify(state.before),'PARTNER_PRODUCTION_UNRELATED_COUNTS_CHANGED');
+   state.phase=publish?'published':'imported-unpublished';await save(state);
+   const evidence=JSON.parse(await readFile(evidencePath,'utf8'));
+   Object.assign(evidence,{updatedAt:new Date().toISOString(),publication:publish?'existing repository methods; real stored actor':'scoped rollback unpublication',publicEn:publish?79:0,publicZh:publish?79:0,publicationAudits:auditRows});
+   await writeFile(evidencePath,JSON.stringify(evidence,null,2)+'\n');console.log(JSON.stringify({phase:state.phase,publicEn:evidence.publicEn,publicZh:evidence.publicZh,publicationAudits:auditRows}));
+  }
+ }finally{await pool.end()}
+}
+main().catch(error=>{console.error(error instanceof Error&&/^PARTNER_(PRODUCTION|IMPORT)_[A-Z_]+$/.test(error.message)?error.message:error?.name??'PARTNER_PRODUCTION_FAILED');process.exitCode=1}).finally(()=>process.exit(process.exitCode??0));

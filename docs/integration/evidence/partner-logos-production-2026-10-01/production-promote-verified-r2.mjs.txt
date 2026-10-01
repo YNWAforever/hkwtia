@@ -1,0 +1,16 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+const deployment=JSON.parse(await readFile('.playwright/partner-production-deploy.json','utf8'));
+const verified=JSON.parse(await readFile('.playwright/partner-production-verified-deployment.json','utf8'));
+const media=JSON.parse(await readFile('.playwright/partner-production-deployed-media.json','utf8'));
+const smoke=JSON.parse(await readFile('.playwright/partner-production-newconfig-before-publish/evidence.json','utf8'));
+const config=JSON.parse(await readFile('.playwright/partner-production-r2-verified-config.json','utf8'));
+const project=JSON.parse(await readFile('.vercel/project.json','utf8'));
+if(deployment.sourceCommit!=='e7fa4add247489f525f015007460fb522fb1531b'||deployment.deploymentUrl!=='https://hkwtia-l4iqy398l-ynwaforevers-projects.vercel.app'||deployment.target!=='production'||deployment.overrides.length||project.projectId!=='prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n'||project.orgId!=='team_qvzlsFmfCsLkgItSypqHjw3z'||verified.deploymentId!=='dpl_GYj8pTrvHxSZRDszXnVnCtkDS8rV'||verified.sourceCommit!==deployment.sourceCommit||verified.url!==deployment.deploymentUrl||verified.state!=='READY'||media.passed!==true||media.verified!==79||media.origin!==deployment.deploymentUrl||smoke.passed!==true||smoke.cases.length!==12||smoke.origin!==deployment.deploymentUrl||config.phase!=='updated'||config.keysUpdated.length!==3)throw Error('PRODUCTION_R2_PROMOTION_GUARD');
+const record={recordedAt:new Date().toISOString(),sourceCommit:deployment.sourceCommit,deploymentId:verified.deploymentId,canonicalDomain:'hkwtia.vercel.app',authorization:'Requester explicitly authorized3 R2 values to Production, same-version redeployment, and earlier79-logo publication',scope:'promote verified Production R2 configuration before publication',rollbackDeployment:'dpl_DLFixAkkcNmpMCUTu3BY98hTDstQ',earlierDashboardRollback:'dpl_3KL2kwtCM7m5uwvXpcCtvJuVLHLu',prepublicationBrowserCases:12,deployedMediaVerified:79,productionDataWrittenByPromotion:false,migrationPerformed:false,phase:'promoting'};
+await writeFile('.playwright/partner-production-r2-promotion.json',JSON.stringify(record,null,2)+'\n');
+try{
+ execFileSync(process.execPath,['C:/Users/laich/AppData/Roaming/npm/node_modules/vercel/dist/index.js','promote',record.deploymentId,'--yes','--scope','ynwaforevers-projects','--no-color','--timeout','1m'],{encoding:'utf8',stdio:['ignore','pipe','pipe'],timeout:65000});
+ record.phase='promoted';record.completedAt=new Date().toISOString();
+ await writeFile('.playwright/partner-production-r2-promotion.json',JSON.stringify(record,null,2)+'\n');console.log(JSON.stringify(record));
+}catch(error){record.phase='promotion-failed';record.exitCode=error.status;await writeFile('.playwright/partner-production-r2-promotion.json',JSON.stringify(record,null,2)+'\n');console.error('PRODUCTION_R2_PROMOTION_FAILED');process.exitCode=1}

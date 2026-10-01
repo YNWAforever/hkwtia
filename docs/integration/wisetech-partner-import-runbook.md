@@ -148,3 +148,9 @@ expires 2026-10-04 20:00 HKT. After review, tear down only this owned Preview al
 deployment and exact isolated Auth trusted origin, then reconcile/remove only
 its recorded run-owned rows/objects. The existing rollback-only SQL rehearsal
 and synthetic object DELETE passed; full fixture cleanup is still pending.
+
+## Completed Production partner-logo release — 2026-10-01 HKT
+
+The requester explicitly authorized the existing three R2 values to Vercel Production and same-source redeployment, resolving the earlier automatic-review gate. Canonical hkwtia.vercel.app now serves e7fa4add / dpl_GYj8pTrvHxSZRDszXnVnCtkDS8rV. Exactly79 approved logos are published:58 supporting/15 regional/6 media, with79 creation +79 update +79 publication audits under the existing unique stored superadmin. All79 deployed image checks passed; prepublication12/12 and postpublication immutable8/8 + anonymous canonical8/8 browser cases passed. Independent SQL confirms ledger51 and unchanged unrelated counts; no profile/role change, migration, new flag/worker, payment/refund or member send occurred.
+
+This supersedes only the logo slice's earlier import/config/publication-pending status. Broader audit findings,171 skipped CI tests, lower dependency findings, provider/policy/runtime gates and unperformed Production rollback/Preview teardown remain explicitly limited. Current web rollback first unpublishes the exact recorded79 IDs; retain data/audits/objects. [Actual release identity, commands, screenshots and ordered rollback](partner-logo-production-release-2026-10-01.md).

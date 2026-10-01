@@ -1,0 +1,22 @@
+import {readFile,writeFile,mkdir,mkdtemp,copyFile} from 'node:fs/promises';
+import {parseEnv} from 'node:util';
+import {execFileSync,spawn} from 'node:child_process';
+import {resolve,join} from 'node:path';
+const sha='e7fa4add247489f525f015007460fb522fb1531b';const cli='C:/Users/laich/AppData/Roaming/npm/node_modules/vercel/dist/index.js';
+const check=(x,s)=>{if(!x)throw Error(s)};const git=(a)=>execFileSync('git',a,{encoding:'utf8'}).trim();
+let sensitive=[];const scrub=(s)=>{let v=String(s);for(const x of sensitive)v=v.split(x).join('[redacted]');return v.replace(/postgres(?:ql)?:\/\/[^\s"'<>]+/g,'[redacted-db-url]')};
+async function main(){
+ check(git(['rev-parse','origin/main'])===sha,'PRODUCTION_SOURCE_CHANGED');check(!git(['diff','163a34bc',sha]),'PRODUCTION_SOURCE_TREE_MISMATCH');
+ const project=JSON.parse(await readFile('.vercel/project.json','utf8'));check(project.projectId==='prj_lT7YZDueA6kzhz2xrPPHFyNsDf8n'&&project.orgId==='team_qvzlsFmfCsLkgItSypqHjw3z','PRODUCTION_PROJECT_MISMATCH');
+ for(const path of ['.playwright/production-release.env','C:/Users/laich/Documents/hkwtia/.playwright/r2-isolated.env']){const e=parseEnv(await readFile(path,'utf8'));sensitive.push(...Object.values(e).filter(v=>v&&v.length>8));}
+ const tracked=git(['ls-tree','-r','--name-only',sha]).split('\n');check(!tracked.some(p=>/(^|\/)\.env(?:\.|$)/.test(p)&&!/(^|\/)\.env\.(example|sample|template)$/.test(p)),'PRODUCTION_TRACKED_ENV_FORBIDDEN');
+ const stage=await mkdtemp(resolve('.playwright/partner-production-source-'));check(stage.toLowerCase().startsWith(resolve('.playwright').toLowerCase()+'\\'),'PRODUCTION_STAGE_PATH');
+ const archive=resolve('.playwright/partner-production-source-e7fa4add.tar');execFileSync('git',['archive','--format=tar','--output',archive,sha]);execFileSync('tar',['-xf',archive,'-C',stage]);await mkdir(join(stage,'.vercel'));await copyFile('.vercel/project.json',join(stage,'.vercel/project.json'));
+ const record={recordedAt:new Date().toISOString(),sourceCommit:sha,verifiedSourceCommit:'163a34bcbc06fdc08a8b634d900e11ea65c0eb2f',sourceTreesIdentical:true,target:'production',scope:'build with configured Production env; skip domain assignment until acceptance',projectId:project.projectId,stage,source:'clean tracked Git archive',overrides:[],bucket:'hkwtia-partner-acceptance-20260930',jurisdiction:'default',rollbackDeployment:'dpl_3KL2kwtCM7m5uwvXpcCtvJuVLHLu',phase:'building',migrationPerformed:false,workerDeployed:false};
+ await writeFile('.playwright/partner-production-deploy.json',JSON.stringify(record,null,2)+'\n');console.log(JSON.stringify({sourceCommit:sha,target:'production',domainAssignment:'skipped',source:record.source,environment:'existing Production project configuration only'}));
+ const child=spawn(process.execPath,[cli,'deploy','--prod','--skip-domain','--yes','--scope','ynwaforevers-projects','--no-color','--meta','githubCommitSha='+sha,'--meta','githubCommitRef=main','--meta','githubOrg=YNWAforever','--meta','githubRepo=hkwtia'],{cwd:stage,env:{...process.env,NO_COLOR:'1'},stdio:['ignore','pipe','pipe'],windowsHide:true});
+ let output='';child.stdout.on('data',x=>output+=String(x));child.stderr.on('data',x=>output+=String(x));const status=await new Promise((ok,fail)=>{child.once('error',fail);child.once('close',ok)});output=scrub(output);
+ await writeFile('.playwright/partner-production-deploy.log',output,{mode:0o600});const urls=[...output.matchAll(/https:\/\/[a-z0-9-]+\.vercel\.app/g)].map(x=>x[0]);
+ Object.assign(record,{phase:status===0?'built':'failed',exitCode:status,deploymentUrl:urls.find(x=>x!=='https://hkwtia.vercel.app')??null,completedAt:new Date().toISOString()});await writeFile('.playwright/partner-production-deploy.json',JSON.stringify(record,null,2)+'\n');console.log(output.slice(-3200));console.log(JSON.stringify({exitCode:status,deploymentUrl:record.deploymentUrl,domainAssignment:'skipped'}));process.exitCode=status??1;
+}
+main().catch(error=>{console.error(/^PRODUCTION_[A-Z_]+$/.test(error.message)?error.message:'PRODUCTION_STAGE_FAILED');process.exitCode=1});
