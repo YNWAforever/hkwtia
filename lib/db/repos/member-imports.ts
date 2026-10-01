@@ -56,8 +56,9 @@ async function matchRows(tx: BatchExecutor, parsed: ParsedMemberImport, mapping:
   });
 }
 
+export type ImportIssueRow = Readonly<{rowNumber: number; status: "duplicate" | "conflict" | "invalid"; reason: string | null}>;
 export type ImportRunDetail = Readonly<{summary: ImportRunSummary; rows: readonly MatchedImportRow[]}>;
-export function createMemberImportRepository(loadDatabase: () => Promise<BatchDatabase> = async () => await getDb() as unknown as BatchDatabase, now: () => Date = () => new Date()): ImportGateway & Readonly<{read: (actor: AdminActor, runId: string) => Promise<ImportRunDetail>}> {
+export function createMemberImportRepository(loadDatabase: () => Promise<BatchDatabase> = async () => await getDb() as unknown as BatchDatabase, now: () => Date = () => new Date()): ImportGateway & Readonly<{read: (actor: AdminActor, runId: string) => Promise<ImportRunDetail>; issues: (actor: AdminActor, runId: string) => Promise<readonly ImportIssueRow[]>}> {
   return {
     async upload(actor, bytes, format) {
       requireAdmin(actor);
@@ -100,10 +101,28 @@ export function createMemberImportRepository(loadDatabase: () => Promise<BatchDa
         return summary(run.id, "confirmed", run.summary);
       });
     },
+    async issues(actor, runId) {
+      requireAdmin(actor);
+      const id=z.string().uuid().parse(runId);
+      if(process.env.MEMBER_IMPORT_ENABLED!=="true") throw new Error("IMPORT_DISABLED");
+      const db=await loadDatabase();
+      return db.transaction(async(tx)=>{
+        const raw=first(await tx.execute(sql`SELECT ${memberImportRuns.id} AS id,${memberImportRuns.state} AS state,${memberImportRuns.summary} AS summary,${memberImportRuns.expiresAt} AS "expiresAt" FROM ${memberImportRuns} WHERE ${memberImportRuns.id}=${id}::uuid AND ${memberImportRuns.actorProfileId}=${actor.profileId} FOR SHARE`));
+        if(!raw)throw new Error("IMPORT_RUN_UNAVAILABLE");
+        const run=runSchema.parse(raw);
+        if(run.expiresAt.getTime()<=now().getTime()||run.state==="expired")throw new Error("IMPORT_RUN_EXPIRED");
+        // No identity, email, name, incoming values or before snapshot leaves this report.
+        const data=z.array(z.object({rowNumber:z.coerce.number().int().min(2),status:z.enum(["duplicate","conflict","invalid"]),reason:z.string().nullable()})).parse(rows(await tx.execute(sql`SELECT ${memberImportRows.rowNumber} AS "rowNumber",${memberImportRows.validationStatus} AS status,${memberImportRows.conflictReason} AS reason FROM ${memberImportRows} WHERE ${memberImportRows.runId}=${id}::uuid AND ${memberImportRows.validationStatus} IN ('duplicate','conflict','invalid') ORDER BY ${memberImportRows.rowNumber} LIMIT 5001`)));
+        if(data.length>5000)throw new Error("IMPORT_TOO_MANY_ROWS");
+        await tx.execute(sql`INSERT INTO ${auditEvents}(actor_user_id,actor_type,action,target_type,target_id,metadata) VALUES(${actor.profileId},${actor.kind},'member.import.issues_downloaded','member_import_run',${id},jsonb_build_object('rows',${data.length}::int))`);
+        return data;
+      },{isolationLevel:"repeatable read"});
+    },
     async read(actor, runId) {
       requireAdmin(actor);
       const db = await loadDatabase();
       const run = runSchema.parse(first(await db.execute(sql`SELECT ${memberImportRuns.id} AS id, ${memberImportRuns.state} AS state, ${memberImportRuns.summary} AS summary, ${memberImportRuns.expiresAt} AS "expiresAt" FROM ${memberImportRuns} WHERE ${memberImportRuns.id} = ${runId}::uuid AND ${memberImportRuns.actorProfileId} = ${actor.profileId}`)));
+      if (run.expiresAt.getTime() <= now().getTime() || run.state === "expired") throw new Error("IMPORT_RUN_EXPIRED");
       const detail = z.array(z.object({rowNumber: z.coerce.number().int(), status: z.enum(["create", "update", "unchanged", "duplicate", "conflict", "invalid"]), values: z.record(z.unknown()), before: z.record(z.unknown()), targetId: z.string().nullable(), expectedVersion: z.string().nullable(), reason: z.string().nullable()})).parse(rows(await db.execute(sql`SELECT ${memberImportRows.rowNumber} AS "rowNumber", ${memberImportRows.validationStatus} AS status, ${memberImportRows.validatedPayload} AS values, ${memberImportRows.beforeSnapshot} AS before, ${memberImportRows.matchTargetId} AS "targetId", ${memberImportRows.expectedVersion} AS "expectedVersion", ${memberImportRows.conflictReason} AS reason FROM ${memberImportRows} WHERE ${memberImportRows.runId} = ${runId}::uuid ORDER BY ${memberImportRows.rowNumber} LIMIT 5001`)));
       if (detail.length > 5000) throw new Error("IMPORT_TOO_MANY_ROWS");
       return {summary: summary(run.id, run.state, run.summary), rows: detail};

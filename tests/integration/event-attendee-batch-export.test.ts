@@ -38,7 +38,7 @@ describe.skipIf(!enabled)('private background attendee exports',()=>{
  },60000);
  it('rejects a changed preview and disables materialization when the flag is revoked',async()=>{
   const first=await prepare();await f.pool.query("UPDATE event_guest_registrations SET name='Changed preview' WHERE id=$1",[guestId]);const now=new Date();const [claim]=await first.worker.claimItems('changed-export',now,1);await first.worker.executeClaim(claim!,eventAttendeeExportHandler,now);expect((await first.repo.preview(staff,first.batchId)).items[0]?.reasonCode).toBe('EXPORT_SNAPSHOT_CHANGED');
-  const second=await prepare();vi.stubEnv('EVENT_ATTENDEE_EXPORT_ENABLED','false');const [next]=await second.worker.claimItems('disabled-export',new Date(),1);await second.worker.executeClaim(next!,eventAttendeeExportHandler,new Date());expect((await second.repo.preview(staff,second.batchId)).items[0]?.reasonCode).toBe('EVENT_EXPORT_DISABLED');
+  const second=await prepare();vi.stubEnv('EVENT_ATTENDEE_EXPORT_ENABLED','false');const [next]=await second.worker.claimItems('disabled-export',new Date(),1);await second.worker.executeClaim(next!,eventAttendeeExportHandler,new Date());expect((await second.repo.preview(staff,second.batchId)).items[0]?.reasonCode).toBe('BATCH_OPERATION_UNAVAILABLE');
   expect((await f.pool.query("SELECT count(*)::int AS n FROM admin_batch_export_artifacts")).rows[0].n).toBe(0);
  },60000);
  it('materializes and serves 500 synthetic attendees with fixed snapshot counts',async()=>{

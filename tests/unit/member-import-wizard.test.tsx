@@ -20,7 +20,7 @@ describe("member import wizard", () => {
       {rowNumber: 2, status: "conflict", values: {email: "held@example.test"}, before: {}, targetId: null, expectedVersion: null, reason: "EMAIL_CANDIDATE_REVIEW"},
     ]});
     spies.confirm.mockResolvedValue({runId: "run-1", state: "confirmed"});
-    render(<MemberImportWizard locale="en" labels={labels}/>);
+    render(<MemberImportWizard locale="en" labels={{...labels, downloadErrors: "Download row issues"}}/>);
     fireEvent.change(screen.getByLabelText("Choose file"), {target: {files: [new File(["email\nnew@example.test"], "members.csv", {type: "text/csv"})]}});
     fireEvent.click(screen.getByRole("button", {name: "Upload file"}));
     await waitFor(() => expect(screen.getByLabelText("Email")).toBeInTheDocument());
@@ -28,6 +28,7 @@ describe("member import wizard", () => {
     fireEvent.click(screen.getByRole("button", {name: "Validate"}));
     await waitFor(() => expect(screen.getByRole("button", {name: "Preview differences"})).toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", {name: "Preview differences"}));
+    expect(screen.getByRole("link", {name: "Download row issues"})).toHaveAttribute("href", "/api/admin/members/import/run-1/errors?locale=en");
     expect(screen.getByRole("checkbox", {name: "Row 2"})).toBeDisabled();
     expect(screen.getByRole("button", {name: "Confirm selected"})).toBeDisabled();
     fireEvent.click(screen.getByRole("checkbox", {name: "Row 1"}));

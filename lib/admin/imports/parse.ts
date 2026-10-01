@@ -12,6 +12,7 @@ export type ParsedImportRow = Readonly<{rowNumber: number; cells: Readonly<Recor
 export type ParsedMemberImport = Readonly<{headers: readonly string[]; rows: readonly ParsedImportRow[]}>;
 
 function headersFrom(values: readonly string[]): string[] {
+  if (values.some((value) => value.includes("\u0000"))) throw new Error("IMPORT_CONTROL_CHARACTER_FORBIDDEN");
   const headers = values.map((value) => value.trim());
   if (!headers.length || headers.length > MAX_COLUMNS || headers.some((value) => !value || value.length > 100) || new Set(headers.map((value) => value.toLocaleLowerCase("en"))).size !== headers.length) throw new Error("IMPORT_HEADERS_INVALID");
   return headers;
@@ -21,6 +22,7 @@ function recordsFrom(values: readonly (readonly string[])[]): ParsedMemberImport
   const headers = headersFrom(values[0]!);
   if (values.length - 1 > MAX_MEMBER_IMPORT_ROWS) throw new Error("IMPORT_TOO_MANY_ROWS");
   const rows = values.slice(1).map((record, index) => {
+    if (record.some((value) => value.includes("\u0000"))) throw new Error("IMPORT_CONTROL_CHARACTER_FORBIDDEN");
     if (record.length !== headers.length || record.some((value) => value.length > 20_000)) throw new Error("IMPORT_ROW_INVALID");
     return {rowNumber: index + 2, cells: Object.fromEntries(headers.map((name, column) => [name, record[column]!]))};
   });
@@ -59,6 +61,7 @@ async function xlsxRecords(bytes: Uint8Array): Promise<ParsedMemberImport> {
   for (let rowNumber = 2; rowNumber <= sheet.rowCount; rowNumber += 1) {
     const row = sheet.getRow(rowNumber);
     const values = headers.map((_, index) => plainCell(row.getCell(index + 1).value));
+    if (values.some((value) => value.includes("\u0000"))) throw new Error("IMPORT_CONTROL_CHARACTER_FORBIDDEN");
     if (values.every((value) => value === "")) continue;
     if (values.some((value) => value.length > 20_000)) throw new Error("IMPORT_ROW_INVALID");
     rows.push({rowNumber, cells: Object.fromEntries(headers.map((name, index) => [name, values[index]!]))});

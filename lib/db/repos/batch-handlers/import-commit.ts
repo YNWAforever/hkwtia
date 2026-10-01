@@ -3,12 +3,17 @@ import "server-only";
 import {inArray, sql, type SQL} from "drizzle-orm";
 import {z} from "zod";
 
+import {batchPreviewDigest} from "@/lib/admin/batches/types";
 import type {BatchOperationHandler} from "@/lib/admin/batches/worker-types";
 import {requireAdmin} from "@/lib/auth/authorize";
 import {auditEvents, contacts, memberImportRows, memberImportRuns, memberOperationsMetadata, profiles} from "@/lib/db/server-schema";
 
 function rows(result: unknown): unknown[] {if (Array.isArray(result)) return result; if (result && typeof result === "object" && "rows" in result && Array.isArray(result.rows)) return result.rows; return [];}
 const importRowSchema = z.object({id: z.string().uuid(), rowNumber: z.coerce.number().int(), status: z.enum(["create", "update"]), values: z.record(z.unknown()), targetId: z.string().nullable(), expectedVersion: z.string().nullable()});
+/** Pins the row decision, mapping-derived payload and original profile CAS version. */
+function importRowPreviewVersion(row: z.infer<typeof importRowSchema>): string {
+  return batchPreviewDigest({rowNumber: row.rowNumber, status: row.status, values: row.values, targetId: row.targetId, profileVersion: row.expectedVersion});
+}
 const currentProfileSchema = z.object({id: z.string(), role: z.string(), email: z.string().nullable(), locale: z.string(), updatedAt: z.string()});
 const ownerSchema = z.object({role: z.string()});
 function text(value: unknown): string | null {return typeof value === "string" && value.length ? value : null;}
@@ -38,7 +43,7 @@ export const importCommitBatchHandler: BatchOperationHandler = {
           : email && current.email?.toLocaleLowerCase("en") !== email ? "EMAIL_IDENTITY_CONFLICT" : null
         : !email || occupied.has(email) ? "EMAIL_CANDIDATE_REVIEW" : null;
       const previewStatus = reasonCode ? "blocked" as const : "eligible" as const;
-      return {target: {type: "import_row" as const, id: row.id}, previewStatus, eligible: !reasonCode, reasonCode, expectedVersion: row.expectedVersion ?? "absent", before: current ? {profileId: current.id, locale: current.locale} : {}, after: {kind: row.status === "create" ? "CRM contact, not active member" : "member correction", locale: text(row.values.locale), tags: tags(row.values.tags), planRecommendation: text(row.values.planCode)}};
+      return {target: {type: "import_row" as const, id: row.id}, previewStatus, eligible: !reasonCode, reasonCode, expectedVersion: importRowPreviewVersion(row), before: current ? {profileId: current.id, locale: current.locale} : {}, after: {kind: row.status === "create" ? "CRM contact, not active member" : "member correction", locale: text(row.values.locale), tags: tags(row.values.tags), planRecommendation: text(row.values.planCode)}};
     });
   },
   async execute(actor, claim, tx) {
@@ -47,7 +52,7 @@ export const importCommitBatchHandler: BatchOperationHandler = {
     const parsed = rows(await tx.execute(sql`SELECT r.id AS id, r.row_number AS "rowNumber", r.validation_status AS status, r.validated_payload AS values, r.match_target_id AS "targetId", r.expected_version AS "expectedVersion" FROM ${memberImportRows} r JOIN ${memberImportRuns} run ON run.id = r.run_id WHERE r.id = ${claim.target.id}::uuid AND r.run_id = ${claim.request.payload.importRunId}::uuid AND r.confirmed = true AND r.validation_status IN ('create','update') AND run.actor_profile_id = ${actor.profileId} AND run.state = 'confirmed' AND run.expires_at > now() FOR UPDATE OF r`));
     if (!parsed.length) return {status: "skipped", reasonCode: "IMPORT_ROW_UNAVAILABLE"};
     const row = importRowSchema.parse(parsed[0]);
-    if ((row.expectedVersion ?? "absent") !== claim.expectedVersion) return {status: "skipped", reasonCode: "IMPORT_ROW_CHANGED"};
+    if (importRowPreviewVersion(row) !== claim.expectedVersion) return {status: "skipped", reasonCode: "IMPORT_ROW_CHANGED"};
     const ownerId = text(row.values.ownerProfileId);
     if (ownerId) {
       const owner = z.array(ownerSchema).parse(rows(await tx.execute(sql`SELECT ${profiles.role} AS role FROM ${profiles} WHERE ${profiles.id} = ${ownerId} LIMIT 1`)))[0];

@@ -1,4 +1,4 @@
-import {afterAll, beforeAll, describe, expect, it} from "vitest";
+import {afterAll, beforeAll, beforeEach, afterEach, describe, expect, it, vi} from "vitest";
 
 import {isolatedBatchDatabase} from "./admin-batch-fixture";
 import {createMemberImportRepository} from "@/lib/db/repos/member-imports";
@@ -13,6 +13,8 @@ const enabled = process.env.RUN_POSTGRES_INTEGRATION === "1";
 let fixture: Awaited<ReturnType<typeof isolatedBatchDatabase>>;
 
 describe.skipIf(!enabled)("member import staging on disposable PostgreSQL", () => {
+  beforeEach(() => {vi.stubEnv("ADMIN_BATCH_ENABLED","true");vi.stubEnv("MEMBER_IMPORT_ENABLED","true");});
+  afterEach(() => vi.unstubAllEnvs());
   beforeAll(async () => {fixture = await isolatedBatchDatabase();}, 60_000);
   afterAll(async () => {if (fixture) await fixture.close();});
 
