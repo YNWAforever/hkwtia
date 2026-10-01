@@ -1,8 +1,9 @@
 import {PolicyConfirmation} from "@/components/join/policy-confirmation";
+import {getJoinDraft} from "@/lib/membership/join-draft";
 import {getPolicyConfirmation} from "@/lib/membership/policy-view";
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
-import {redirect} from "next/navigation";
+import {notFound, redirect} from "next/navigation";
 
 import {JoinForm} from "@/components/join/join-form";
 import {JoinProgress} from "@/components/join/progress";
@@ -40,6 +41,9 @@ export default async function ProfilePage({params, searchParams}: Props) {
   if (!plan) redirect(localizedPath(locale, "/membership"));
   const actor = await getActor().catch(() => null);
   if (!actor) redirect(`${localizedPath(locale, "/join")}?plan=${plan}`);
+  if(actor.kind!=="member")notFound();
+  const draft=await getJoinDraft(actor,plan,value(query.application)??null);
+  if(!draft)notFound();
   const t = await getTranslations("Join");
   const companyPlan = plan === "startup" || plan === "corporate";
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
@@ -53,13 +57,13 @@ export default async function ProfilePage({params, searchParams}: Props) {
       <p className="mt-4 text-muted-foreground">{t("profileDescription")}</p>
       <div className="mt-8">
         <JoinForm action={action} fieldNames={["displayName", "phone", "jobTitle", "whatsappNumber"]} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("continue")}>
-          <Field autoComplete="name" error="displayName-error" label={t("fields.displayName")} name="displayName" required/>
-          <Field autoComplete="tel" error="phone-error" label={t("fields.phone")} name="phone" type="tel"/>
-          <Field autoComplete="organization-title" error="jobTitle-error" label={t("fields.jobTitle")} name="jobTitle"/>
-          <Field autoComplete="tel" error="whatsappNumber-error" label={t("fields.whatsappNumber")} name="whatsappNumber" type="tel"/>
+          <Field autoComplete="name" error="displayName-error" label={t("fields.displayName")} name="displayName" defaultValue={draft.profile?.displayName??""} required/>
+          <Field autoComplete="tel" error="phone-error" label={t("fields.phone")} name="phone" defaultValue={draft.profile?.phone??""} type="tel"/>
+          <Field autoComplete="organization-title" error="jobTitle-error" label={t("fields.jobTitle")} name="jobTitle" defaultValue={draft.profile?.jobTitle??""}/>
+          <Field autoComplete="tel" error="whatsappNumber-error" label={t("fields.whatsappNumber")} name="whatsappNumber" defaultValue={draft.profile?.whatsappNumber??""} type="tel"/>
           <div className="rounded-md border border-border p-4 text-sm">
             <label className="flex items-start gap-3 font-medium" htmlFor="whatsappOptIn">
-              <input className="mt-1" id="whatsappOptIn" name="whatsappOptIn" type="checkbox"/>
+              <input className="mt-1" id="whatsappOptIn" name="whatsappOptIn" type="checkbox" defaultChecked={draft.profile?.whatsappOptIn===true}/>
               <span>{t("whatsapp.optIn")}</span>
             </label>
             <p className="mt-2 text-muted-foreground">{t("whatsapp.consent")} <span className="sr-only">{t("whatsapp.textVersion")}</span></p>
@@ -71,6 +75,6 @@ export default async function ProfilePage({params, searchParams}: Props) {
   );
 }
 
-function Field({autoComplete, error, label, name, required = false, type = "text"}: {autoComplete: string; error: string; label: string; name: string; required?: boolean; type?: string}) {
-  return <div><label className="mb-2 block text-sm font-medium" htmlFor={name}>{label}</label><input aria-describedby={error} autoComplete={autoComplete} className="min-h-11 w-full rounded-md border border-input bg-background px-3" id={name} name={name} required={required} type={type}/></div>;
+function Field({autoComplete, error, label, name, defaultValue = "", required = false, type = "text"}: {autoComplete: string; error: string; label: string; name: string; defaultValue?: string; required?: boolean; type?: string}) {
+  return <div><label className="mb-2 block text-sm font-medium" htmlFor={name}>{label}</label><input aria-describedby={error} autoComplete={autoComplete} defaultValue={defaultValue} className="min-h-11 w-full rounded-md border border-input bg-background px-3" id={name} name={name} required={required} type={type}/></div>;
 }

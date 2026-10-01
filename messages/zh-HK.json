@@ -2549,6 +2549,48 @@
     "verificationError": "目前無法進行驗證。請重新載入頁面再試。"
   },
   "Admin": {
+    "applicationCase": {
+      "title": "入會申請個案",
+      "followUp": "跟進此申請",
+      "description": "指派負責人、列明指定缺件及記錄下一步。跟進操作不會批准會籍或確認收款。",
+      "owner": "個案負責人",
+      "unassigned": "未指派",
+      "due": "跟進期限（香港時間）",
+      "missing": "待補資料",
+      "nextAction": "下一步",
+      "note": "原因／跟進記錄",
+      "save": "儲存跟進",
+      "saving": "儲存中…",
+      "saved": "已儲存跟進。",
+      "conflict": "其他職員已更新此個案。你的修改尚未儲存，請重新載入最新版本後再決定。",
+      "error": "暫時無法儲存跟進。請檢查欄位後重試。",
+      "refresh": "重新載入個案",
+      "back": "返回申請佇列",
+      "timeline": "個案時間線",
+      "noHistory": "尚未記錄跟進決定。",
+      "noPayment": "尚未記錄付款嘗試",
+      "independent": "申請審批、付款及會籍是三項獨立事實。跟進不會把付款標為已付，亦不會啟用會籍。",
+      "applicationCompleted": "已完成",
+      "applicationAbandoned": "已放棄",
+      "missingFields": {
+        "displayName": "申請人姓名",
+        "phone": "聯絡電話",
+        "companyName": "公司名稱",
+        "companyWebsite": "公司網站",
+        "companySize": "公司規模",
+        "businessDescription": "業務介紹"
+      },
+      "nextActions": {
+        "none": "未選擇跟進",
+        "contact_applicant": "聯絡申請人",
+        "await_documents": "等待指定補件",
+        "review_ready": "交由獲授權者審批",
+        "await_payment": "等待現有付款",
+        "support_reconciliation": "轉交獲授權者對帳",
+        "follow_up_complete": "已完成本次跟進"
+      },
+      "open": "開啟申請個案"
+    },
     "paymentReconciliation": {
       "title": "核對現有會籍付款",
       "description": "讀取現有 Stripe 事件，按已關聯的會籍流程重新處理。不會建立付款、退款或特別會籍。未知或不符的記錄會繼續被阻擋。",

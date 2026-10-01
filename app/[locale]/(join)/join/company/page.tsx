@@ -1,8 +1,9 @@
 import {PolicyConfirmation} from "@/components/join/policy-confirmation";
+import {getJoinDraft} from "@/lib/membership/join-draft";
 import {getPolicyConfirmation} from "@/lib/membership/policy-view";
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
-import {redirect} from "next/navigation";
+import {notFound, redirect} from "next/navigation";
 
 import {JoinForm} from "@/components/join/join-form";
 import {JoinProgress} from "@/components/join/progress";
@@ -41,6 +42,9 @@ export default async function CompanyPage({params, searchParams}: Props) {
   if (!plan || !applicationId || (plan !== "startup" && plan !== "corporate")) redirect(localizedPath(locale, "/membership"));
   const actor = await getActor().catch(() => null);
   if (!actor) redirect(`${localizedPath(locale, "/join")}?plan=${plan}`);
+  if(actor.kind!=="member")notFound();
+  const draft=await getJoinDraft(actor,plan,applicationId);
+  if(!draft)notFound();
   const t = await getTranslations("Join");
   const labels = {plan: t("steps.plan"), auth: t("steps.auth"), profile: t("steps.profile"), company: t("steps.company")};
   const policyView = await getPolicyConfirmation(actor,applicationId,locale);
@@ -53,12 +57,12 @@ export default async function CompanyPage({params, searchParams}: Props) {
       <p className="mt-4 text-muted-foreground">{t("companyDescription")}</p>
       <div className="mt-8">
         <JoinForm action={action} fieldNames={["legalName", "companyDisplayName", "website", "industry", "sizeBand", "description"]} submitDisabled={!policyView.canProceed} pendingLabel={t("saving")} submitLabel={t("submitApplication")}>
-          <Field autoComplete="organization" label={t("fields.legalName")} name="legalName" required/>
-          <Field autoComplete="organization" label={t("fields.companyDisplayName")} name="companyDisplayName" required/>
-          <Field autoComplete="url" label={t("fields.website")} name="website" type="url"/>
-          <Field label={t("fields.industry")} name="industry"/>
-          <Field label={t("fields.sizeBand")} name="sizeBand"/>
-          <div><label className="mb-2 block text-sm font-medium" htmlFor="description">{t("fields.description")}</label><textarea aria-describedby="description-error" className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2" id="description" name="description"/></div>
+          <Field autoComplete="organization" label={t("fields.legalName")} name="legalName" defaultValue={draft.company?.legalName??""} required/>
+          <Field autoComplete="organization" label={t("fields.companyDisplayName")} name="companyDisplayName" defaultValue={draft.company?.displayName??""} required/>
+          <Field autoComplete="url" label={t("fields.website")} name="website" defaultValue={draft.company?.website??""} type="url"/>
+          <Field label={t("fields.industry")} name="industry" defaultValue={draft.company?.industry??""}/>
+          <Field label={t("fields.sizeBand")} name="sizeBand" defaultValue={draft.company?.sizeBand??""}/>
+          <div><label className="mb-2 block text-sm font-medium" htmlFor="description">{t("fields.description")}</label><textarea aria-describedby="description-error" className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2" id="description" name="description" defaultValue={draft.company?.description??""}/></div>
           <PolicyConfirmation view={policyView} supportHref={localizedPath(locale,"/contact")} labels={{title:t("policy.title"),version:t("policy.version"),accept:t("policy.accept"),accepted:t("policy.accepted"),unavailable:t("policy.unavailable"),ownerRequired:t("policy.ownerRequired"),support:t("policy.support")}}/>
         </JoinForm>
       </div>
@@ -66,6 +70,6 @@ export default async function CompanyPage({params, searchParams}: Props) {
   );
 }
 
-function Field({autoComplete, label, name, required = false, type = "text"}: {autoComplete?: string; label: string; name: string; required?: boolean; type?: string}) {
-  return <div><label className="mb-2 block text-sm font-medium" htmlFor={name}>{label}</label><input aria-describedby={`${name}-error`} autoComplete={autoComplete} className="min-h-11 w-full rounded-md border border-input bg-background px-3" id={name} name={name} required={required} type={type}/></div>;
+function Field({autoComplete, label, name, defaultValue = "", required = false, type = "text"}: {autoComplete?: string; label: string; name: string; defaultValue?: string; required?: boolean; type?: string}) {
+  return <div><label className="mb-2 block text-sm font-medium" htmlFor={name}>{label}</label><input aria-describedby={`${name}-error`} autoComplete={autoComplete} defaultValue={defaultValue} className="min-h-11 w-full rounded-md border border-input bg-background px-3" id={name} name={name} required={required} type={type}/></div>;
 }

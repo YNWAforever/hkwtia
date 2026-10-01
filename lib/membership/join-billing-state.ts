@@ -4,7 +4,7 @@ import {applicationsRepository} from "@/lib/db/repos/applications";
 import {membershipsRepository} from "@/lib/db/repos/memberships";
 import type {Actor, MembershipRecord} from "@/lib/membership/lifecycle";
 
-type ApplicationRecord = Readonly<{id: string; planCode: string; status: string}>;
+type ApplicationRecord = Readonly<{id: string; applicantUserId: string; planCode: string; status: string}>;
 type Dependencies = Readonly<{
   memberships: {getById(actor: Actor, membershipId: string): Promise<MembershipRecord | null>};
   applications: {getById(actor: Actor, applicationId: string): Promise<ApplicationRecord | null>};

@@ -1,5 +1,11 @@
 import "server-only";
 
+import {randomUUID} from "node:crypto";
+import {z} from "zod";
+import {requireAdmin} from "@/lib/auth/authorize";
+import {applicationCaseContextSchema,applicationCasePatchSchema,type ApplicationCase,type ApplicationCasePatch} from "@/lib/admin/application-case-types";
+import type {Database} from "@/lib/db/repos/common";
+
 import {and, desc, eq, inArray, isNull, or, sql} from "drizzle-orm";
 
 import type {Actor} from "@/lib/membership/lifecycle";
@@ -25,7 +31,11 @@ function applicationScope(actor: Actor, applicationId: string) {
   return and(eq(membershipApplicationsTable.id, applicationId), or(eq(membershipApplicationsTable.applicantUserId, actor.profileId), companyMembershipScope(actor)));
 }
 
+const applicationCases = createApplicationCasesRepository();
+
 export const applicationsRepository = {
+  getApplicationCase: applicationCases.getApplicationCase,
+  updateApplicationCase: applicationCases.updateApplicationCase,
   /** Applicant-owned applications only; company access never grants join-resume authority. */
   async listOwned(actor: Actor, planCode?: MembershipApplication["planCode"]): Promise<MembershipApplication[]> {
     requireMember(actor);
@@ -120,3 +130,90 @@ export const applicationsRepository = {
 export const applicationsRepo = applicationsRepository;
 
 export const applications = applicationsRepository;
+
+
+/** Operational metadata stays in the existing uniquely-deduplicated staff task.
+ * No case operation changes an applicant, company owner, payment or entitlement.
+ */
+export function createApplicationCasesRepository(load: () => Promise<Database> = getDb) {
+    async function getApplicationCase(actor: Actor, id: string): Promise<ApplicationCase | null> {
+        requireAdmin(actor);
+        const applicationId = z.string().uuid().parse(id);
+        const db = await load();
+        const result = await db.execute(sql `
+      SELECT app.id, app.applicant_user_id, p.display_name, app.company_id,
+        c.display_name AS company_name, app.plan_code, app.status, app.current_step,
+        m.id AS membership_id, m.status AS membership_status,
+        attempt.id AS attempt_id, attempt.state AS attempt_state, task.context
+      FROM membership_applications app JOIN profiles p ON p.id=app.applicant_user_id
+      LEFT JOIN companies c ON c.id=app.company_id
+      LEFT JOIN memberships m ON m.application_id=app.id
+      LEFT JOIN LATERAL (SELECT id,state FROM billing_attempts WHERE membership_id=m.id ORDER BY attempt_number DESC,id DESC LIMIT 1) attempt ON TRUE
+      LEFT JOIN staff_tasks task ON task.dedupe_key='membership-application:'||app.id::text AND task.kind='membership_application'
+      WHERE app.id=${applicationId} LIMIT 1
+    `);
+        const row = result.rows[0];
+        if (!row)
+            return null;
+        const context = row.context ? applicationCaseContextSchema.parse(row.context) : null;
+        if (context && context.applicationId !== applicationId)
+            throw Error("APPLICATION_CASE_CONTEXT_INVALID");
+        const audits = await db.execute(sql `SELECT id,created_at,actor_type,metadata FROM audit_events
+      WHERE target_type='membership_application' AND target_id=${applicationId}
+        AND action='membership.application.case.updated' ORDER BY created_at DESC,id DESC LIMIT 50`);
+        return {
+            application: { id: applicationId, profileId: String(row.applicant_user_id), name: String(row.display_name), companyId: row.company_id === null ? null : String(row.company_id), companyName: row.company_name === null ? null : String(row.company_name), planCode: String(row.plan_code), status: String(row.status), step: String(row.current_step) },
+            membership: row.membership_id ? { id: String(row.membership_id), status: String(row.membership_status) } : null,
+            payment: row.attempt_id ? { attemptId: String(row.attempt_id), state: String(row.attempt_state) } : null,
+            version: context?.caseVersion ?? "0", ownerProfileId: context?.ownerProfileId ?? null, dueAt: context?.dueAt ?? null, missingFields: context?.missingFields ?? [], nextActionCode: context?.nextActionCode ?? "none",
+            timeline: audits.rows.map(audit => {
+                const metadata = z.object({ case: applicationCaseContextSchema, note: z.string().nullable() }).parse(audit.metadata);
+                return { id: String(audit.id), at: new Date(String(audit.created_at)).toISOString(), actorType: String(audit.actor_type), note: metadata.note, case: metadata.case };
+            }),
+        };
+    }
+    async function updateApplicationCase(actor: Actor, id: string, patch: ApplicationCasePatch): Promise<{
+        version: string;
+    }> {
+        requireAdmin(actor);
+        const applicationId = z.string().uuid().parse(id);
+        const parsed = applicationCasePatchSchema.parse(patch);
+        const db = await load();
+        return db.transaction(async (tx) => {
+            // Lock the existing application first. Simultaneous first assignment and
+            // ordinary onboarding updates cannot create two case tasks or lose data.
+            const app = (await tx.execute(sql `SELECT applicant_user_id FROM membership_applications WHERE id=${applicationId} FOR UPDATE`)).rows[0];
+            if (!app)
+                throw Error("APPLICATION_NOT_FOUND");
+            const key = "membership-application:" + applicationId;
+            const task = (await tx.execute(sql `SELECT id,kind,context FROM staff_tasks WHERE dedupe_key=${key} FOR UPDATE`)).rows[0];
+            if (task && task.kind !== "membership_application")
+                throw Error("APPLICATION_CASE_CONTEXT_INVALID");
+            const previous = task ? applicationCaseContextSchema.parse(task.context) : null;
+            if (previous && previous.applicationId !== applicationId)
+                throw Error("APPLICATION_CASE_CONTEXT_INVALID");
+            if (parsed.expectedVersion !== (previous?.caseVersion ?? "0"))
+                throw Error("APPLICATION_CASE_VERSION_CONFLICT");
+            const owner = parsed.ownerProfileId === undefined ? previous?.ownerProfileId ?? null : parsed.ownerProfileId;
+            if (owner) {
+                const assigned = (await tx.execute(sql `SELECT id FROM profiles WHERE id=${owner} AND role IN ('staff','exco','superadmin') FOR SHARE`)).rows[0];
+                if (!assigned)
+                    throw Error("APPLICATION_CASE_OWNER_INVALID");
+            }
+            const context = applicationCaseContextSchema.parse({ applicationId, caseVersion: randomUUID(), ownerProfileId: owner,
+                dueAt: parsed.dueAt === undefined ? previous?.dueAt ?? null : parsed.dueAt,
+                missingFields: parsed.missingFields ?? previous?.missingFields ?? [], nextActionCode: parsed.nextActionCode ?? previous?.nextActionCode ?? "none" });
+            const encoded = JSON.stringify(context);
+            if (new TextEncoder().encode(encoded).byteLength > 4096)
+                throw Error("STAFF_TASK_CONTEXT_TOO_LARGE");
+            if (task)
+                await tx.execute(sql `UPDATE staff_tasks SET context=${encoded}::jsonb,summary_code=${context.nextActionCode},status=CASE WHEN ${context.nextActionCode}='follow_up_complete' THEN 'resolved'::staff_task_status ELSE 'open'::staff_task_status END,resolved_at=CASE WHEN ${context.nextActionCode}='follow_up_complete' THEN now() ELSE NULL END,resolved_by_profile_id=CASE WHEN ${context.nextActionCode}='follow_up_complete' THEN ${actor.profileId} ELSE NULL END,updated_at=now() WHERE id=${task.id}`);
+            else
+                await tx.execute(sql `INSERT INTO staff_tasks(profile_id,kind,dedupe_key,summary_code,context,status,resolved_at,resolved_by_profile_id) VALUES(${app.applicant_user_id},'membership_application',${key},${context.nextActionCode},${encoded}::jsonb,CASE WHEN ${context.nextActionCode}='follow_up_complete' THEN 'resolved'::staff_task_status ELSE 'open'::staff_task_status END,CASE WHEN ${context.nextActionCode}='follow_up_complete' THEN now() ELSE NULL END,CASE WHEN ${context.nextActionCode}='follow_up_complete' THEN ${actor.profileId} ELSE NULL END)`);
+            await tx.execute(sql `INSERT INTO audit_events(actor_type,actor_user_id,action,target_type,target_id,metadata)
+        VALUES(${actor.kind},${actor.profileId},'membership.application.case.updated','membership_application',${applicationId},${JSON.stringify({ previousVersion: parsed.expectedVersion, case: context, note: parsed.note ?? null })}::jsonb)`);
+            return { version: context.caseVersion };
+        });
+    }
+    return { getApplicationCase, updateApplicationCase };
+}

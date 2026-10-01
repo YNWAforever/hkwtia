@@ -1,3 +1,4 @@
+import {APPLICATION_NEXT_ACTIONS} from "@/lib/admin/application-case-types";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {TaskTable} from "@/components/admin/task-table";
@@ -14,6 +15,7 @@ export default async function AdminTasksPage({params}: Props) {
   setRequestLocale(locale);
   const actor = await requireAdminPageActor();
   const t = await getTranslations({locale, namespace: "Admin.tasks"});
+  const caseT = await getTranslations({locale, namespace: "Admin.applicationCase"});
   const header = <header className="space-y-3"><p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">{t("eyebrow")}</p><h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{t("title")}</h1><p className="text-lg text-muted-foreground">{t("description")}</p></header>;
   let tasks;
   try {
@@ -21,5 +23,5 @@ export default async function AdminTasksPage({params}: Props) {
   } catch {
     return <div className="space-y-8">{header}<p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-4 text-destructive" role="alert">{t("error")}</p></div>;
   }
-  return <div className="space-y-8">{header}<TaskTable action={resolveStaffTaskAction} labels={{kind: t("columns.kind"), summary: t("columns.summary"), member: t("columns.member"), conversation: t("columns.conversation"), created: t("columns.created"), actions: t("columns.actions"), resolve: t("resolve"), openConversation: t("openConversation"), empty: t("empty"), leadEmail: t("leadEmail"), leadEmailBlocked: t("leadEmailBlocked"), leadEmailUncertain: t("leadEmailUncertain"), leadAck: t("leadAck"), leadStaff: t("leadStaff"), ticketEmail: t("ticketEmail"), ticketEmailBlocked: t("ticketEmailBlocked"), ticketEmailUncertain: t("ticketEmailUncertain"), ticketRefundPending: t("ticketRefundPending"), ticketConfirmation: t("ticketConfirmation"), ticketPass: t("ticketPass"), ticketRefund: t("ticketRefund"), ticketRefundFailed: t("ticketRefundFailed"), ticketOrder: t("ticketOrder")}} locale={locale} tasks={tasks} /></div>;
+  return <div className="space-y-8">{header}<TaskTable action={resolveStaffTaskAction} labels={{applicationCase:caseT("title"),openApplicationCase:caseT("open"),caseNextActions:Object.fromEntries(APPLICATION_NEXT_ACTIONS.map(key=>[key,caseT(`nextActions.${key}`)])),kind: t("columns.kind"), summary: t("columns.summary"), member: t("columns.member"), conversation: t("columns.conversation"), created: t("columns.created"), actions: t("columns.actions"), resolve: t("resolve"), openConversation: t("openConversation"), empty: t("empty"), leadEmail: t("leadEmail"), leadEmailBlocked: t("leadEmailBlocked"), leadEmailUncertain: t("leadEmailUncertain"), leadAck: t("leadAck"), leadStaff: t("leadStaff"), ticketEmail: t("ticketEmail"), ticketEmailBlocked: t("ticketEmailBlocked"), ticketEmailUncertain: t("ticketEmailUncertain"), ticketRefundPending: t("ticketRefundPending"), ticketConfirmation: t("ticketConfirmation"), ticketPass: t("ticketPass"), ticketRefund: t("ticketRefund"), ticketRefundFailed: t("ticketRefundFailed"), ticketOrder: t("ticketOrder")}} locale={locale} tasks={tasks} /></div>;
 }

@@ -2548,6 +2548,48 @@
     "verificationError": "Verification is unavailable. Reload the page and try again."
   },
   "Admin": {
+    "applicationCase": {
+      "title": "Membership application case",
+      "followUp": "Follow up this application",
+      "description": "Assign an operator, list the specific missing fields and record the next action. This does not approve membership or record payment.",
+      "owner": "Case owner",
+      "unassigned": "Unassigned",
+      "due": "Follow-up due (Hong Kong time)",
+      "missing": "Information needed",
+      "nextAction": "Next action",
+      "note": "Reason / follow-up note",
+      "save": "Save follow-up",
+      "saving": "Saving…",
+      "saved": "Follow-up saved.",
+      "conflict": "Another operator updated this case. Your changes were not saved. Reload the current version before deciding.",
+      "error": "Unable to save this follow-up. Check the fields and try again.",
+      "refresh": "Reload current case",
+      "back": "Back to application queue",
+      "timeline": "Case timeline",
+      "noHistory": "No follow-up decisions recorded.",
+      "noPayment": "No payment attempt recorded",
+      "independent": "Application review, payment and membership are separate facts. Following up cannot mark a payment as paid or activate membership.",
+      "applicationCompleted": "Completed",
+      "applicationAbandoned": "Abandoned",
+      "missingFields": {
+        "displayName": "Applicant name",
+        "phone": "Contact phone",
+        "companyName": "Company name",
+        "companyWebsite": "Company website",
+        "companySize": "Company size",
+        "businessDescription": "Business description"
+      },
+      "nextActions": {
+        "none": "No follow-up selected",
+        "contact_applicant": "Contact applicant",
+        "await_documents": "Await requested information",
+        "review_ready": "Ready for authorized review",
+        "await_payment": "Await existing payment",
+        "support_reconciliation": "Refer payment to authorized reconciliation",
+        "follow_up_complete": "This follow-up is complete"
+      },
+      "open": "Open application case"
+    },
     "paymentReconciliation": {
       "title": "Reconcile an existing membership payment",
       "description": "Retrieve an existing Stripe event and replay its correlated membership lifecycle. This does not create a payment, refund or special membership. Unknown or mismatched records stay blocked.",

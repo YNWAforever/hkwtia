@@ -311,11 +311,13 @@
 
 **介面／契約：** 擬新增 ApplicationCasePatch={expectedVersion:string;ownerProfileId?:string|null;dueAt?:string|null;missingFields?:string[];nextActionCode?:string;note?:string}；updateApplicationCase(actor: Actor,id:string,patch:ApplicationCasePatch): Promise<{version:string}>。reuse staff task 關聯；新增 metadata 或 case table 只在缺少時建立，applicationId unique。
 
-- [ ] **建立行為證據：** assign/補件/更正/resume 保留同申請；並發版本衝突；一般職員不可竄改 paid/active；人工批准不等同已付；付款先到/審批先到依政策只啟用一次；公司席位不能改 owner。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 個案 header 顯示申請、付款、會籍三個獨立狀態；負責人、缺件清單、下一步、期限、timeline。補件只含 allowlisted 欄位名，不任意清空資料；安全續辦要登入後驗 owner。記錄每個決定及原因；批准/拒絕按 T09 規則，可先交付 assign/follow-up 不具權益副作用部分。
+- [x] **建立行為證據：** assign/補件/更正/resume 保留同申請；並發版本衝突；一般職員不可竄改 paid/active；人工批准不等同已付；付款先到/審批先到依政策只啟用一次；公司席位不能改 owner。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 個案 header 顯示申請、付款、會籍三個獨立狀態；負責人、缺件清單、下一步、期限、timeline。補件只含 allowlisted 欄位名，不任意清空資料；安全續辦要登入後驗 owner。記錄每個決定及原因；批准/拒絕按 T09 規則，可先交付 assign/follow-up 不具權益副作用部分。
 - [ ] **驗證：** npm exec -- vitest run tests/integration/audit-full-application-case.test.ts（使用隔離 DB，必須實際執行而非 skipped）；U10–U13 真瀏覽器及付款 test-mode。
 - [ ] **結案與提交：** 職員可從列表完成跟進，不用開 DB；同個案 timeline 能解釋為何未啟用。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`feat: add actionable membership application cases`。
+
+T10 engineering evidence: evidence/t10 and verification.md. Approval/activation policy, approved missing-document sends and whole U10-U13 remain explicitly gated; operational case closure does not approve or activate membership.
 
 ### T11 · 背景工作健康與未知外部效果
 
