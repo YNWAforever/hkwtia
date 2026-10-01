@@ -1,4 +1,7 @@
 import Link from "next/link";
+import {notFound} from "next/navigation";
+import {WorkQueueTable} from "@/components/admin/work-queue-table";
+import {WORK_ACTIONS,WORK_KINDS,listMyWork,workQueueQuerySchema} from "@/lib/admin/work-queue";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {DashboardTiles, type DashboardTile} from "@/components/admin/dashboard-tiles";
@@ -8,9 +11,9 @@ import {adminBatchHistoryRepository} from "@/lib/db/repos/admin-batch-history";
 import {adminDashboardRepository} from "@/lib/db/repos/admin-dashboard";
 import {localizedPath} from "@/lib/urls";
 
-type Props = Readonly<{params: Promise<{locale: string}>}>;
+type Props = Readonly<{params: Promise<{locale: string}>;searchParams?:Promise<Record<string,string|string[]|undefined>>}>;
 
-export default async function AdminPage({params}: Props) {
+export default async function AdminPage({params,searchParams}: Props) {
   const {locale: localeValue} = await params;
   const locale = localeValue as AppLocale;
   setRequestLocale(locale);
@@ -21,12 +24,19 @@ export default async function AdminPage({params}: Props) {
   const t = await getTranslations({locale, namespace: "Admin"});
   const snapshotAt = new Date();
   const hongKongDateTime = new Intl.DateTimeFormat(locale, {dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Hong_Kong"});
-  const [counts, recentBatches] = await Promise.all([
+  const raw=searchParams?await searchParams:{};
+  const parsed=workQueueQuerySchema.safeParse({scope:raw.workScope??"mine",cursor:raw.workCursor??null});
+  if(!parsed.success)notFound();
+  const query=parsed.data;
+  const [counts, recentBatches, work] = await Promise.all([
     adminDashboardRepository.counts(actor, snapshotAt),
     adminBatchHistoryRepository.recent(actor).catch(() => null),
+    listMyWork(actor,query,snapshotAt).catch(()=>null),
   ]);
 
   const tiles: readonly DashboardTile[] = [
+    {id:"unfinished-applications",href:"/admin/members/queue?status=draft",label:t("dashboard.unfinishedApplications"),count:counts.unfinishedApplications},
+    {id:"submitted-applications",href:"/admin/members/queue",label:t("dashboard.submittedApplications"),count:counts.submittedApplications},
     {id: "profiles-review", href: "/admin/profiles-review", label: t("dashboard.profilesAwaitingReview"), count: counts.profiles},
     {id: "listings", href: "/admin/listings-review?status=pending_review", label: t("dashboard.listingsAwaitingReview"), count: counts.listings},
     {id: "approvals", href: "/admin/approvals", label: t("dashboard.pendingApprovals"), count: counts.approvals},
@@ -43,6 +53,13 @@ export default async function AdminPage({params}: Props) {
         <p className="text-lg text-muted-foreground">{t("description")}</p>
         <p className="text-sm text-muted-foreground"><time dateTime={snapshotAt.toISOString()}>{t("dashboard.snapshotAt", {time: hongKongDateTime.format(snapshotAt)})}</time></p>
       </header>
+      <WorkQueueTable locale={locale} scope={query.scope} cursor={query.cursor} page={work} labels={{
+       title:t("workQueue.title"),description:t("workQueue.description"),mine:t("workQueue.mine"),unassigned:t("workQueue.unassigned"),all:t("workQueue.all"),empty:t("workQueue.empty"),unavailable:t("workQueue.unavailable"),summary:t("workQueue.summary"),owner:t("workQueue.owner"),due:t("workQueue.due"),nextAction:t("workQueue.nextAction"),overdue:t("workQueue.overdue"),assigned:t("workQueue.assigned"),noDue:t("workQueue.noDue"),next:t("workQueue.next"),first:t("workQueue.first"),
+       kinds:Object.fromEntries(WORK_KINDS.map(kind=>[kind,t(`workQueue.kinds.${kind}`)])) as Record<typeof WORK_KINDS[number],string>,
+       actions:Object.fromEntries(WORK_ACTIONS.map(action=>[action,t(`workQueue.actions.${action}`)])) as Record<typeof WORK_ACTIONS[number],string>,
+       states:Object.fromEntries(["draft","pending_review","pending_payment","active","past_due","human","open"].map(status=>[status,t(`workQueue.states.${status}`)])),
+      }}/>
+      <section aria-label={t("dashboard.denominators")} className="space-y-3"><p className="text-sm text-muted-foreground">{t("dashboard.denominatorHelp")}</p><dl className="grid gap-3 sm:grid-cols-3">{(["profileRecords","activeMemberships","companySeats"] as const).map(key=><div className="rounded-md border bg-card p-4" key={key}><dt className="text-sm text-muted-foreground">{t(`dashboard.${key}`)}</dt><dd className="mt-2 text-2xl font-semibold tabular-nums">{counts[key]??t("dashboard.unavailable")}</dd></div>)}</dl></section>
       <DashboardTiles
         locale={locale}
         tiles={tiles}

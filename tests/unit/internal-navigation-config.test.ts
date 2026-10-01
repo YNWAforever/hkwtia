@@ -30,13 +30,13 @@ describe("internal navigation config", () => {
     expect(links.some((link) => link.href.includes("seats"))).toBe(false);
   });
 
-  it("keeps all 23 Admin routes in five operational groups", () => {
-    expect(adminGroups.map((group) => group.id)).toEqual(["workspace", "members-organizations", "events", "communications-follow-up", "content-settings"]);
+  it("retains the existing 23 destinations and exposes applications/health in six groups", () => {
+    expect(adminGroups.map((group) => group.id)).toEqual(["workspace", "members-organizations", "events", "communications-follow-up", "content-settings","system-audit"]);
     const allLinks = adminGroups.flatMap((group) => group.links);
-    expect(allLinks).toHaveLength(23);
-    expect(new Set(allLinks.map((link) => link.href)).size).toBe(23);
-    expect(adminGroups.find((group) => group.id === "members-organizations")?.links.map((link) => link.id)).toEqual(["members", "batches", "contacts", "segments", "listings", "profiles-review", "cohorts"]);
-    expect(adminGroups.find((group) => group.id === "communications-follow-up")?.links.map((link) => link.id)).toEqual(["inbox", "campaigns", "templates", "automations"]);
+    expect(allLinks).toHaveLength(25);
+    expect(new Set(allLinks.map((link) => link.href)).size).toBe(25);
+    expect(adminGroups.find((group) => group.id === "members-organizations")?.links.map((link) => link.id)).toEqual(["members","applications","at-risk", "batches", "contacts", "segments", "listings", "profiles-review", "cohorts"]);
+    expect(adminGroups.find((group) => group.id === "communications-follow-up")?.links.map((link) => link.id)).toEqual(["inbox", "campaigns", "templates"]);
   });
 
 });

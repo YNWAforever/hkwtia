@@ -1,5 +1,7 @@
 import "server-only";
 
+import {z} from "zod";
+import {requireAdmin} from "@/lib/auth/authorize";
 import {randomUUID} from "node:crypto";
 import {and, eq, sql} from "drizzle-orm";
 
@@ -237,3 +239,16 @@ export const companiesRepository = {
 export const companiesRepo = companiesRepository;
 
 export const companies = companiesRepository;
+
+
+/** Private, bounded names for the admin filter; never an identity/contact directory. */
+export async function searchAdminCompanies(actor:Actor,input:{search:string;selectedId?:string|null}) {
+  requireAdmin(actor);
+  const parsed=z.object({search:z.string().trim().max(120),selectedId:z.string().uuid().nullable().optional()}).strict().parse(input);
+  const selected=parsed.selectedId??null;
+  const db=await getDb();
+  const result=await db.execute(sql`SELECT id,display_name AS name FROM companies
+   WHERE position(${parsed.search.toLocaleLowerCase("en")} in lower(display_name))>0 OR id=${selected}::uuid
+   ORDER BY (id=${selected}::uuid) DESC NULLS LAST,lower(display_name),id LIMIT 20`);
+  return z.array(z.object({id:z.string().uuid(),name:z.string()})).parse(result.rows);
+}

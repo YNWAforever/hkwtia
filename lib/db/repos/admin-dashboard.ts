@@ -2,7 +2,7 @@ import "server-only";
 import {sql, type SQL} from "drizzle-orm";
 import {requireAdmin} from "@/lib/auth/authorize";
 import {getDb} from "@/lib/db/repos/common";
-import {approvals, companies, companyMembers, engagementScores, memberships, posts, profiles, showcaseListings, staffTasks} from "@/lib/db/server-schema";
+import {approvals, companies, membershipApplications, companyMembers, engagementScores, memberships, posts, profiles, showcaseListings, staffTasks} from "@/lib/db/server-schema";
 import {AT_RISK_NO_LOGIN_DAYS, AT_RISK_RENEWAL_DAYS, AT_RISK_SCORE_MAX, AT_RISK_TREND_MAX, AT_RISK_DAY_MS} from "@/lib/admin/at-risk";
 import type {Actor} from "@/lib/membership/lifecycle";
 
@@ -10,6 +10,7 @@ type CountDatabase = Readonly<{execute: (statement: SQL) => Promise<unknown>}>;
 export type AdminDashboardCounts = Readonly<{
   approvals: number | null; atRisk: number | null; listings: number | null;
   profiles: number | null; openTasks: number | null; draftNews: number | null;
+  unfinishedApplications:number|null;submittedApplications:number|null;profileRecords:number|null;activeMemberships:number|null;companySeats:number|null;
 }>;
 
 function rows(result: unknown): Record<string, unknown>[] {
@@ -33,7 +34,7 @@ export function createAdminDashboardRepository(loadDatabase: () => Promise<Count
       requireAdmin(actor);
       const noLoginCutoff = new Date(asOf.getTime() - AT_RISK_NO_LOGIN_DAYS * AT_RISK_DAY_MS);
       const renewalBefore = new Date(asOf.getTime() + AT_RISK_RENEWAL_DAYS * AT_RISK_DAY_MS);
-      const [pendingApprovals, atRisk, listings, pendingProfiles, openTasks, draftNews] = await Promise.all([
+      const [pendingApprovals, atRisk, listings, pendingProfiles, openTasks, draftNews, unfinishedApplications,submittedApplications,profileRecords,activeMemberships,companySeats] = await Promise.all([
         count(sql`SELECT count(*) AS count FROM ${approvals} WHERE ${approvals.status} = 'pending'`),
         count(sql`
           WITH candidate_memberships AS (
@@ -59,8 +60,13 @@ export function createAdminDashboardRepository(loadDatabase: () => Promise<Count
         count(sql`SELECT count(*) AS count FROM ${companies} WHERE ${companies.publicProfileStatus} = 'pending_review'`),
         count(sql`SELECT count(*) AS count FROM ${staffTasks} WHERE ${staffTasks.status} = 'open'`),
         count(sql`SELECT count(*) AS count FROM ${posts} WHERE ${posts.kind} = 'news' AND ${posts.publishedAt} IS NULL`),
+        count(sql`SELECT count(*) AS count FROM ${membershipApplications} WHERE ${membershipApplications.status}='draft'`),
+        count(sql`SELECT count(*) AS count FROM ${membershipApplications} WHERE ${membershipApplications.status} IN ('pending_review','pending_payment')`),
+        count(sql`SELECT count(*) AS count FROM ${profiles}`),
+        count(sql`SELECT count(*) AS count FROM ${memberships} WHERE ${memberships.status}='active'`),
+        count(sql`SELECT count(*) AS count FROM ${companyMembers} WHERE ${companyMembers.revokedAt} IS NULL`),
       ]);
-      return {approvals: pendingApprovals, atRisk, listings, profiles: pendingProfiles, openTasks, draftNews};
+      return {approvals: pendingApprovals, atRisk, listings, profiles: pendingProfiles, openTasks, draftNews,unfinishedApplications,submittedApplications,profileRecords,activeMemberships,companySeats};
     },
   };
 }

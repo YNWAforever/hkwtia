@@ -14,7 +14,7 @@ import {adminPostsRepository} from "@/lib/db/repos/admin-posts";
 const actor = {kind: "staff" as const, userId: "staff-1", profileId: "staff-1"};
 
 describe("admin dashboard count contract", () => {
-  it("runs six bounded aggregate reads and preserves an unavailable tile", async () => {
+  it("runs eleven bounded aggregate reads and preserves an unavailable tile", async () => {
     const statements: string[] = [];
     const database = {execute: vi.fn(async (query: SQL) => {
       const statement = new PgDialect().sqlToQuery(query).sql;
@@ -24,8 +24,8 @@ describe("admin dashboard count contract", () => {
     })};
     const repository = createAdminDashboardRepository(async () => database as never);
     const counts = await repository.counts(actor, new Date("2026-09-28T00:00:00.000Z"));
-    expect(counts).toEqual({approvals: 7, atRisk: null, listings: 7, profiles: 7, openTasks: 7, draftNews: 7});
-    expect(statements).toHaveLength(6);
+    expect(counts).toEqual({approvals: 7, atRisk: null, listings: 7, profiles: 7, openTasks: 7, draftNews: 7,unfinishedApplications:7,submittedApplications:7,profileRecords:7,activeMemberships:7,companySeats:7});
+    expect(statements).toHaveLength(11);
     expect(statements[1]).toMatch(/UNION ALL/i);
     expect(statements.every((statement) => /count\s*\(/i.test(statement) && !/select\s+\*/i.test(statement))).toBe(true);
   });
@@ -51,7 +51,7 @@ describe.skipIf(!finalAuditIsolatedDatabaseUrl())("dashboard parity on isolated 
       listOpenTasks(actor),
       adminPostsRepository.listForAdmin(actor),
     ]);
-    expect(counts).toEqual({
+    expect(counts).toMatchObject({
       approvals: approvals.length,
       atRisk: atRisk.length,
       listings: listings.items.length,

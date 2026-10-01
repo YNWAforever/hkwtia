@@ -2679,10 +2679,18 @@
       "profilesAwaitingReview": "等待審核的會員專頁",
       "draftNews": "新聞草稿",
       "openTasks": "待處理員工任務",
-      "applicationQueue": "查看申請進度"
+      "applicationQueue": "查看申請進度",
+      "unfinishedApplications": "未完成入會申請",
+      "submittedApplications": "已提交入會申請",
+      "denominators": "記錄與權益數字",
+      "denominatorHelp": "會員檔案、有效會籍及公司席位是不同記錄；有效會籍包含免費或特別會籍，不代表全部已付款。",
+      "profileRecords": "會員檔案記錄",
+      "activeMemberships": "有效會籍記錄",
+      "companySeats": "未撤銷公司席位"
     },
     "navigation": {
-      "groups": {"workspace": "工作台", "membersOrganizations": "會員與機構", "events": "活動", "communicationsFollowUp": "通訊與跟進", "contentSettings": "內容與設定"},
+      "groups": {"workspace": "今日工作", "membersOrganizations": "會員與機構", "events": "活動與收款", "communicationsFollowUp": "訊息與支援", "contentSettings": "網站內容",
+        "systemAudit": "系統與稽核"},
       "label": "職員管理導覽",
       "dashboard": "控制台",
       "inbox": "訊息中心",
@@ -3189,7 +3197,13 @@
         "unavailable": "此環境暫未開放批次操作。你仍可查看會員及批次紀錄。",
         "exportUnavailable": "此環境暫未開放會員匯出功能。"},
       "savedViews": {"title": "已儲存檢視", "name": "檢視名稱", "save": "儲存檢視", "saved": "檢視已儲存", "invalid": "請檢查名稱及篩選條件。", "error": "無法儲存檢視，請重試。", "shared": "與職員共用", "empty": "暫無已儲存檢視。"},
-      "filters": {"status": "會籍狀態", "plan": "會籍計劃", "renewalFrom": "續會日期由（香港時間）", "renewalTo": "續會日期至（香港時間）", "companyId": "機構 ID", "locale": "偏好語言", "completeness": "會員資料完整度", "sort": "排序", "apply": "套用篩選", "clear": "清除篩選", "any": "全部", "complete": "資料齊全", "incomplete": "欠缺聯絡資料", "nameAsc": "姓名 A–Z", "nameDesc": "姓名 Z–A", "renewalAsc": "最近續會", "english": "英文", "chinese": "繁體中文", "viewsLabel": "預設檢視", "views": {"active": "有效", "due30": "30 日內到期", "due60": "60 日內到期", "due90": "90 日內到期", "pastDue": "欠費", "expired": "已屆滿", "missingData": "欠缺資料"}},
+      "filters": {"status": "會籍狀態", "plan": "會籍計劃", "renewalFrom": "續會日期由（香港時間）", "renewalTo": "續會日期至（香港時間）", "companyId": "公司名稱", "locale": "偏好語言", "completeness": "會員資料完整度", "sort": "排序", "apply": "套用篩選", "clear": "清除篩選", "any": "全部", "complete": "資料齊全", "incomplete": "欠缺聯絡資料", "nameAsc": "姓名 A–Z", "nameDesc": "姓名 Z–A", "renewalAsc": "最近續會", "english": "英文", "chinese": "繁體中文", "viewsLabel": "預設檢視", "views": {"active": "有效", "due30": "30 日內到期", "due60": "60 日內到期", "due90": "90 日內到期", "pastDue": "欠費", "expired": "已屆滿", "missingData": "欠缺資料"},
+        "advanced": "進階篩選",
+        "moreTools": "會員工具及儲存檢視",
+        "companyEmpty": "找不到符合的公司。",
+        "companyError": "暫時無法讀取公司名稱，請重試。",
+        "companyChoose": "請從已登記公司中選擇，或清空搜尋。",
+        "companySearching": "正在搜尋公司…"},
       "view": "查看",
       "planCodes": {"community": "社群", "startup": "初創", "corporate": "企業", "patron": "贊助人"},
       "statusCodes": {"active": "有效", "past_due": "逾期未付", "cancel_at_period_end": "期末終止", "pending_review": "待審批", "pending_payment": "待付款", "cancelled": "已取消", "expired": "已過期"},
@@ -3990,6 +4004,68 @@
       "preview": "預覽通訊草稿",
       "error": "未能準備通訊。請檢查所選分組後重試。",
       "empty": "此分組沒有符合條件的會員。"
+    },
+    "workQueue": {
+      "title": "今日工作",
+      "description": "按既有申請、會籍、付款及支援記錄查看待辦；開啟工作不會更改權益或發送訊息。",
+      "mine": "我的工作",
+      "unassigned": "未指派",
+      "all": "所有工作",
+      "empty": "此範圍暫無待辦。",
+      "unavailable": "暫時無法讀取工作清單，請重試。",
+      "summary": "工作",
+      "owner": "負責人",
+      "due": "期限（香港時間）",
+      "nextAction": "下一步",
+      "overdue": "已逾期",
+      "assigned": "已指派",
+      "noDue": "未設定期限",
+      "next": "下一頁工作",
+      "first": "返回第一頁",
+      "kinds": {
+        "application": "入會申請",
+        "renewal": "續會",
+        "payment": "付款跟進",
+        "support": "支援",
+        "content": "內容"
+      },
+      "actions": {
+        "open_case": "開啟案件",
+        "contact_applicant": "聯絡申請人",
+        "await_documents": "跟進文件",
+        "review_ready": "審閱申請",
+        "await_payment": "跟進付款",
+        "support_reconciliation": "核對付款記錄",
+        "review_renewal": "查看續會資料",
+        "open_conversation": "開啟對話",
+        "review_task": "查看待辦",
+        "edit_content": "編輯內容",
+        "edit_private_copy": "編輯私人草稿"
+      },
+      "states": {
+        "draft": "未完成申請／草稿",
+        "pending_review": "已提交待審",
+        "pending_payment": "等待付款",
+        "active": "有效會籍",
+        "past_due": "付款逾期",
+        "human": "人工跟進",
+        "open": "待處理"
+      }
+    },
+    "memberMaintenance": {
+      "title": "會員維護摘要",
+      "identity": "登入身分連結記錄",
+      "linked": "已有登入識別連結記錄",
+      "unknown": "未能確認登入連結",
+      "payment": "付款嘗試狀態",
+      "none": "未有待跟進項目／記錄",
+      "billingDetails": "付款供應商識別資料",
+      "paymentStates": {
+        "active": "進行中",
+        "completed": "嘗試已完成；會籍狀態另行核對",
+        "abandoned": "已放棄",
+        "expired": "已到期"
+      }
     }
   },
   "MarketingExtras": {

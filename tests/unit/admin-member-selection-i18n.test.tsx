@@ -8,6 +8,8 @@ vi.mock("next-intl/server", () => ({setRequestLocale: () => undefined, getTransl
 vi.mock("next/navigation", () => ({useRouter: () => ({push: vi.fn()})}));
 vi.mock("@/lib/admin/page-auth", () => ({requireAdminPageActor: async () => ({kind: "staff", userId: "staff", profileId: "staff"})}));
 vi.mock("@/lib/db/repos/admin-members", () => ({adminMembersRepository: {listOperationOwners: async () => []}}));
+vi.mock("@/lib/db/repos/companies", () => ({searchAdminCompanies: async () => []}));
+vi.mock("@/lib/admin/company-search-actions", () => ({searchAdminCompanyOptionsAction: async () => ({status:"success",items:[]})}));
 vi.mock("@/lib/admin/member-views", () => ({listMemberViews: async () => []}));
 vi.mock("@/lib/db/repos/admin-member-views", () => ({adminMemberViewsRepository: {}}));
 vi.mock("@/components/admin/member-saved-views", () => ({MemberSavedViews: () => null}));

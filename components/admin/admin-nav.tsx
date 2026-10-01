@@ -1,5 +1,6 @@
 "use client";
 
+import {LayoutDashboard,Users,Building2,ListChecks,Activity,Inbox,Contact,CheckSquare,Filter,Send,Megaphone,Newspaper,FileText,Image,Handshake,Network,Calendar,ShieldCheck,ClipboardCheck,Layers,BarChart3,Workflow,MessageSquare,HeartPulse,type LucideIcon} from "lucide-react";
 import {usePathname} from "next/navigation";
 import {useTranslations} from "next-intl";
 
@@ -13,6 +14,7 @@ import {localizedPath} from "@/lib/urls";
 type AdminNavLinkId = (typeof adminNavigationGroups)[number]["links"][number]["id"];
 type AdminNavGroupId = (typeof adminNavigationGroups)[number]["id"];
 export const groupLabelKeys = {
+  "system-audit":"navigation.groups.systemAudit",
   workspace: "navigation.groups.workspace",
   "members-organizations": "navigation.groups.membersOrganizations",
   events: "navigation.groups.events",
@@ -22,6 +24,8 @@ export const groupLabelKeys = {
 
 /** Maps each config link id to the Admin.navigation message key that resolves its nav label. */
 export const linkLabelKeys = {
+  applications:"applicationQueue.title",
+  "job-health":"jobHealth.title",
   dashboard: "navigation.dashboard",
   members: "navigation.members",
   batches: "navigation.batches",
@@ -47,6 +51,7 @@ export const linkLabelKeys = {
   templates: "navigation.templates",
 } satisfies Record<AdminNavLinkId, string>;
 
+const linkIcons={dashboard:LayoutDashboard,members:Users,applications:ListChecks,batches:Layers,"at-risk":Activity,inbox:Inbox,contacts:Contact,tasks:CheckSquare,segments:Filter,campaigns:Send,announcements:Megaphone,news:Newspaper,"page-copy":FileText,media:Image,partners:Handshake,"landing-partners":Network,events:Calendar,listings:Building2,"profiles-review":ClipboardCheck,cohorts:Users,approvals:ShieldCheck,reports:BarChart3,automations:Workflow,templates:MessageSquare,"job-health":HeartPulse} satisfies Record<AdminNavLinkId,LucideIcon>;
 export function AdminNav({locale, collapsed = false, onNavigate, showBrand = true}: Readonly<{
   locale: AppLocale; collapsed?: boolean; onNavigate?: () => void; showBrand?: boolean;
 }>) {
@@ -71,7 +76,7 @@ export function AdminNav({locale, collapsed = false, onNavigate, showBrand = tru
           href={link.href} key={link.id} onNavigate={onNavigate}
           title={collapsed ? link.label : undefined}
         >
-          <span aria-hidden="true" className="mr-3 inline-flex size-5 shrink-0 items-center justify-center rounded border border-current text-[10px]">{link.label.slice(0, 1)}</span>
+          {(() => {const Icon=linkIcons[link.id as AdminNavLinkId];return <Icon aria-hidden="true" className="mr-3 size-5 shrink-0" strokeWidth={2}/>;})()}
           {!collapsed ? <span>{link.label}</span> : null}
         </GuardedAdminLink>)}
       </div>)}

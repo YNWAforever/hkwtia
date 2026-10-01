@@ -5,7 +5,7 @@ const state = vi.hoisted(() => ({recent: vi.fn(async () => [{id: "11111111-1111-
 vi.mock("next-intl/server", () => ({getTranslations: vi.fn(async () => (key: string, values?: {count?: number}) => key === "batches.history.recentFailed" ? `Failed: ${values?.count}` : key), setRequestLocale: vi.fn()}));
 vi.mock("next/link", () => ({default: ({children, href, ...props}: {children: React.ReactNode; href: string}) => <a href={href} {...props}>{children}</a>}));
 vi.mock("@/lib/admin/page-auth", () => ({requireAdminPageActor: async () => ({kind: "staff", userId: "staff", profileId: "staff"})}));
-vi.mock("@/lib/db/repos/admin-dashboard", () => ({adminDashboardRepository: {counts: async () => ({approvals: 0, atRisk: 0, listings: 0, profiles: 0, openTasks: 0, draftNews: 0})}}));
+vi.mock("@/lib/db/repos/admin-dashboard", () => ({adminDashboardRepository: {counts: async () => ({approvals: 0, atRisk: 0, listings: 0, profiles: 0, openTasks: 0, draftNews: 0,unfinishedApplications:0,submittedApplications:0,profileRecords:0,activeMemberships:0,companySeats:0})}}));
 vi.mock("@/lib/admin/inbox", () => ({listOpenTasks: async () => []}));
 vi.mock("@/lib/db/repos/admin-posts", () => ({adminPostsRepository: {listForAdmin: async () => []}}));
 vi.mock("@/lib/db/repos/company-profiles", () => ({companyProfilesRepository: {listForReview: async () => []}}));
@@ -29,6 +29,8 @@ describe("admin dashboard recent batch recovery", () => {
 
     const queues = screen.getByRole("region", {name: "dashboard.heading"});
     expect(within(queues).getAllByRole("link").map(link => link.getAttribute("href"))).toEqual([
+      "/admin/members/queue?status=draft",
+      "/admin/members/queue",
       "/admin/profiles-review",
       "/admin/listings-review?status=pending_review",
       "/admin/approvals",

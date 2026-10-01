@@ -6,6 +6,8 @@ import {z} from "zod";
 
 import {PaymentReconciliationForm} from "@/components/admin/payment-reconciliation-form";
 import {reconcileMembershipPaymentAction} from "@/lib/admin/payment-reconciliation-actions";
+import {MemberMaintenanceSummary} from "@/components/admin/member-maintenance-summary";
+import {workQueueRepository,WORK_ACTIONS} from "@/lib/admin/work-queue";
 import {Member360View} from "@/components/admin/member-360";
 import {MemberNoteForm} from "@/components/admin/member-note-form";
 import {MemberProfileForm} from "@/components/admin/member-profile-form";
@@ -106,6 +108,7 @@ export default async function AdminMember360Page({params, searchParams}: Props) 
   );
   const editable = await getEditableMemberProfile(actor, profileId.data);
   const membership = view.membership;
+  const maintenance=await workQueueRepository.getMemberMaintenance(actor,profileId.data,membership?.id??null).catch(()=>null);
   const customerHref = membership?.stripeCustomerId
     ? `https://dashboard.stripe.com/customers/${encodeURIComponent(membership.stripeCustomerId)}`
     : null;
@@ -127,6 +130,12 @@ export default async function AdminMember360Page({params, searchParams}: Props) 
           {t("member360.description")}
         </p>
       </header>
+      <MemberMaintenanceSummary locale={locale} view={view} maintenance={maintenance} labels={{
+       title:t("memberMaintenance.title"),identity:t("memberMaintenance.identity"),linked:t("memberMaintenance.linked"),unknown:t("memberMaintenance.unknown"),membership:t("member360.membership"),renewal:t("member360.renewal"),payment:t("memberMaintenance.payment"),owner:t("workQueue.owner"),next:t("workQueue.nextAction"),none:t("memberMaintenance.none"),unassigned:t("workQueue.unassigned"),unavailable:t("workQueue.unavailable"),
+       paymentStates:Object.fromEntries(["active","completed","abandoned","expired"].map(state=>[state,t(`memberMaintenance.paymentStates.${state}`)])),
+       membershipStates:Object.fromEntries(["active","past_due","cancel_at_period_end","pending_review","pending_payment","cancelled","expired"].map(state=>[state,t(`members.statusCodes.${state}`)])),
+       actions:Object.fromEntries(WORK_ACTIONS.map(action=>[action,t(`workQueue.actions.${action}`)])),
+      }}/>
       <nav aria-label={t("member360.historyNav")} className="flex flex-wrap gap-2">
         <a aria-current={activeHistory === null ? "page" : undefined} className="min-h-11 rounded-md border px-4 py-2 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground" href={sectionHref(null)}>{t("member360.overview")}</a>
         {memberTimelineKindSchema.options.map((section) => <a aria-current={activeHistory === section ? "page" : undefined} className="min-h-11 rounded-md border px-4 py-2 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground" href={sectionHref(section)} key={section}>{t(`member360.${section}`)}</a>)}
@@ -196,6 +205,7 @@ export default async function AdminMember360Page({params, searchParams}: Props) 
           reasonCode: t("member360.reasonCode"),
           noteAuthor: t("member360.noteAuthor"),
           noteCreatedAt: t("member360.noteCreatedAt"),
+          billingDetails:t("memberMaintenance.billingDetails"),
           stripeCustomer: t("member360.stripeCustomer"),
           stripeSubscription: t("member360.stripeSubscription"),
         }}
