@@ -71,6 +71,21 @@
       "filename": "operator-guard.json",
       "bytes": 524,
       "sha256": "195b4a40fd6ede40dfa4fe5910073f018d8b87f05df096ba824511b6c65814cc"
+    },
+    {
+      "filename": "production-import-unpublished.json",
+      "bytes": 952,
+      "sha256": "fdefb7117434ab54e673a3bacb6b92187c36184236c84edb4a881f33fa000c25"
+    },
+    {
+      "filename": "production-media-first404.json",
+      "bytes": 554,
+      "sha256": "d19e020b872fdc21d53e05ec74c1cbdfc20e547a9427d3560ba668bf7ff785ca"
+    },
+    {
+      "filename": "production-import-provider-gate.json",
+      "bytes": 1837,
+      "sha256": "8e5023aeedbfca6a0661a92bd4cda3bd06f4efbdf108e233681dc17a6a16ce21"
     }
   ],
   "hashSource": "normalized Git index blobs"

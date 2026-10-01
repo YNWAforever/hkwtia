@@ -100,3 +100,17 @@ The shared bucket contains retained Preview fixture keys. Later test teardown mu
 - Production 79-logo restoration: incomplete; operator selection/import/deployed images/publication/final browser acceptance pending.
 
 [Checksum-indexed execution evidence](evidence/partner-logos-production-2026-10-01/manifest.json).
+
+## Production import continuation — 2026-10-01 09:44 HKT
+
+The requester explicitly selected the existing unique superadmin. Read-only stored-role/Auth-identity checks found exactly one valid existing profile; no profile or role was created/changed.
+
+Actual guarded Production import completed at 2026-10-01T01:37:26.934Z / 09:37 HKT: created79, skippedExisting0, skippedError0. All79 original approved hashes, uploaded R2 bytes/checksums/dimensions and transactional partner.created audit rows were verified. The idempotent rerun created0 and skippedExisting79 with no errors. All79 remain unpublished/unconfirmed. Row counts remain profiles2 / companies3 / memberships0 / billing_attempts0.
+
+The deployed media verifier then failed on the first image with404. Both the canonical request and the protection-authenticated immutable request reproduce404. Source inspection shows that the active complete media reader has no partner-publication gate. The same current repository/media handler, using the actual Production database and already verified R2 configuration, returned200/image/png with matching checksum. The initial local diagnostic helper incorrectly called native Response.status as a method; property access correction passed. No application source changed.
+
+A proposed value-only update of the three existing Sensitive Production R2 values plus redeployment was rejected by automatic approval review before execution. Its stated reason: previous credential transfer approval specifically covered Preview, and persistent Production secret transfer needs explicit scope. No Production env value changed and no new deployment occurred in this continuation. A precise request for R2_ACCOUNT_ID / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY to the linked hkwtia Production environment, same bucket/default, and same-source redeployment is pending.
+
+This supersedes the actor-selection/import-pending status above. Deployed R2 capability, publication and the final79-image bilingual browser acceptance remain incomplete. The old pre-import24 checks and green CI remain dated verified evidence; they are not successful Production logo acceptance.
+
+Added evidence: production-import-unpublished.json, production-media-first404.json and production-import-provider-gate.json. After explicit Production secret-transfer approval, sync only these3 R2 values, redeploy the same source, reverify all79 through deployed media, apply confirmations/publication using the selected stored actor, then execute the prepared8 stage +8 canonical logo browser cases. No publication gate is disabled.
