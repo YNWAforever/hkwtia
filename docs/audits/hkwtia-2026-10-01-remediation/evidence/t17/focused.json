@@ -1,0 +1,20 @@
+{
+  "environment": "Windows; native sequential implementation; disposable PostgreSQL16 full current schema; real Drizzle repository",
+  "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/audit-full-cms-workspace.test.ts tests/unit/audit-full-cms-action.test.ts tests/unit/audit-full-cms-preview.test.ts tests/unit/audit-full-cms-workspace.test.tsx tests/unit/audit-full-cms-draft.test.tsx tests/unit/audit-full-media-picker.test.tsx tests/unit/homepage.test.tsx tests/unit/page-copy-repository.test.ts tests/unit/page-copy-action-state.test.ts tests/unit/server-action-actor-boundary.test.ts tests/unit/repository-boundary.test.ts tests/unit/proxy.test.ts tests/unit/wisetech-protected-route-ownership.test.ts --maxWorkers=1",
+  "result": {
+    "passed": 211,
+    "skipped": 0,
+    "failed": 0,
+    "files": 13,
+    "actualSql": 9,
+    "unitActorUi": 202
+  },
+  "fullSuiteRegressions": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/unit/event-hero-admin-and-media.test.ts tests/unit/image-render-policy.test.ts tests/unit/audit-full-cms-workspace.test.tsx tests/unit/audit-full-media-picker.test.tsx --maxWorkers=1",
+    "passed": 335,
+    "skipped": 0,
+    "failed": 0
+  },
+  "production": false,
+  "sourceSha": "7e64f35502e140f600dc8446cbc75cceb95c2c70"
+}

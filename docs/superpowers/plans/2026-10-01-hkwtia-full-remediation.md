@@ -474,11 +474,13 @@ T11 evidence: source/isolated SQL/local workerd/browser verified; cloud deployed
 
 **介面／契約：** 擬新增 saveCopyDraft(actor: Actor,input:{namespace:string;baseRevision:string;changes:Record<string,string>;expectedDraftRevision:string|null}):Promise<{draftId:string;revision:string}>；publishCopyDraft(actor: Actor,input:{draftId:string;expectedDraftRevision:string;expectedPublishedRevision:string}):Promise<{revision:string}>。沿用 allowlisted keys 和 savePageCopy transaction，不讓 preview 對外公開未批准內容。
 
-- [ ] **建立行為證據：** save draft 不改匿名頁；publish 同 transaction audit/CAS；雙編輯衝突；回復舊版產生新 revision；cache 失效；唯一 label；媒體 79+ 可搜尋選擇，不接受跨來源任意 URL。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** Home 166 keys 改按頁面/區塊顯示，搜尋、只看已修改、雙語並排、重設及實際版面預覽；不要一次 render 332 inputs。server draft 提供跨裝置保存；T04 session draft 只是復原層。publish 權限沿現有 actor policy，不自創角色；保持 30 秒 cache 及發布失效。media picker 按名稱/用途/類型顯示縮圖及 alt，沿用現有媒體 registry/storage，不另造上傳平台。
-- [ ] **驗證：** npm exec -- vitest run tests/integration/audit-full-cms-publish.test.ts；npm run test:e2e -- tests/e2e/full-cms-workspace.spec.ts；匿名頁 readback + 中英 screenshot。
-- [ ] **結案與提交：** 保存/預覽/發布清楚分開；職員可在一個區塊完成修改；history/CAS 不遺失內容。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`feat: add focused CMS drafting and publishing workflow`。
+- [x] **建立行為證據：** save draft 不改匿名頁；publish 同 transaction audit/CAS；雙編輯衝突；回復舊版產生新 revision；cache 失效；唯一 label；媒體 79+ 可搜尋選擇，不接受跨來源任意 URL。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** Home 166 keys 改按頁面/區塊顯示，搜尋、只看已修改、雙語並排、重設及實際版面預覽；不要一次 render 332 inputs。server draft 提供跨裝置保存；T04 session draft 只是復原層。publish 權限沿現有 actor policy，不自創角色；保持 30 秒 cache 及發布失效。media picker 按名稱/用途/類型顯示縮圖及 alt，沿用現有媒體 registry/storage，不另造上傳平台。
+- [x] **驗證：** npm exec -- vitest run tests/integration/audit-full-cms-publish.test.ts；npm run test:e2e -- tests/e2e/full-cms-workspace.spec.ts；匿名頁 readback + 中英 screenshot。
+- [x] **結案與提交：** 保存/預覽/發布清楚分開；職員可在一個區塊完成修改；history/CAS 不遺失內容。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`feat: add focused CMS drafting and publishing workflow`。
+
+**實際證據：** source `7e64f35502e140f600dc8446cbc75cceb95c2c70`；211 focused／9 真 SQL、2 built Chromium；full6258 pass／275 skip／0 fail，lint/typecheck/strings/build0。0056只於確認隔離 ledger55→56；79合成媒體搜尋及真縮圖已驗證。Windows headless原生選單按鍵選取未驗證，T22保留人工門檻；cloud Preview、舊 writer/rollback及正式啟用未完成。mapping詳 evidence/t17/README.md。
 
 ### T18 · SaaS 導航、今日工作及會員維護
 

@@ -307,3 +307,21 @@ T16 actual asynchronous Stripe TEST refunds: `AUDIT_ISOLATED_ACCEPTANCE=true T16
 T16 final lint/typecheck/strings/build all exit0: lint0errors/67existing warnings; strings301TSX; Next16.3.6 build267pages. Lint first failed only four ignored CommonJS diagnostic scratch files; those owned files were retained as .txt outside lint, no source-rule change. All repository gates were actually rerun.
 
 T16 source commit:fde6d4e653a0133d46be4cf6557b00c0528664f0. Remaining event lifecycle/scale/cloud gates stay open T22; async refunds and local test-sink delivery are verified scopes.
+
+
+## T17 / private drafting and publication candidate
+
+Source, scope, RED evidence, exact commands and path mappings: evidence/t17/README.md. Focused211pass/0skip/0fail,13files,9actualSQL +202unit/actor/UI. Controlled public-write violation was detected by the real SQL privacy case and removed. Successful server action reset caused two real UI regressions: block selector reset to metaTitle while hero fields remained, and media selection cleared; both new RED tests now pass. Existing T04 session draft/actor/public-copy/cache boundaries remain.
+
+Actual0056 migration on confirmed isolated Neon ledger55→56, sentinel1, public-copy/member/order fingerprints unchanged; migration.json. Private draft CAS, own editor, explicit rebase, immutable publication history/sequence, same-transaction legacy save+audit, two-locale atomicity and restore→new revision verified. Public Home and own preview share actual Home composition; preview private/no-store/noindex, no cache pollution. Other namespaces reuse private workflow but retain text preview.
+
+Actual built Chromium complete Home workflow passed twice before the additional media case. Bilingual real preview/anonymous+foreign owner denial/keyboard publish/second editor conflict/revert/cleanup recorded in browser.json. Browser select reset defect led to the additional unit REDs. Full-page delayed content is not whole-page visual evidence; viewport screenshots describe visible sections only.
+
+First full gate6256pass/275skip/2fail: legacy EventForm fixture missing distinct search label and image render policy missing new exact-private-delivery consumer. Corrected test fixture/consumer inventory without relaxing policy;335 focused regressions pass. Final full rerun6258pass/275skip/0fail;742pass files/80all-skip files. Exact per-file skipped test names and environment variables: evidence/gates/t17-skips.json. Testing Library exact option type errors corrected; build passed after that correction. Final gate receipt follows.
+
+Release: flag off by default; approved schema0056 first, compatible app/private preview next, retire old direct-write instances before verified enable. Rollback flag off and compatible app, retaining every private/public revision and audit. No Production migration/deployment/flag action. T22 clean/baseline/mixed-writer rollback and cloud Preview readback remain pending. No R2 upload/provider send in T17.
+
+
+T17 final candidate source `7e64f35502e140f600dc8446cbc75cceb95c2c70`: full6258pass/275skip/0fail; lint0errors/67existingwarnings; typecheck0; strings304TSX/0 violations; Next16.3.6 build267static pages; built Chromium2pass/0skip/0fail54.5s. Exact commands and receipts:evidence/t17/gates.json. Media79 real static fixture images, search79→1, native selectOption, actual naturalWidth>0, English desktop/Chinese390px, eventwrites0/provideruploads0; fixtures retired after test. Tab focus verified; Windows headless native popup Arrow/End attempts failed and are not counted as successful keyboard selection. That manual keyboard criterion remains T22. Source JSON formatting was minimized with structural equality verified; existing translation values unchanged.
+
+Parent PR116 CI quality/checks/tests1/tests2/worker and Vercel Preview build read back SUCCESS. https://vercel.com/ynwaforevers-projects/hkwtia/CgaeWBmNC48N7YdpL9guvo4HZExJ . No isolated cloud acceptance claim.
