@@ -446,9 +446,9 @@ T11 evidence: source/isolated SQL/local workerd/browser verified; cloud deployed
 
 **介面／契約：** 沿用 order/seat/hold/payment/refund/outbox 模型及 Stripe event id；財務事件與通知分開。顯示 orderRef、付款狀態、票券狀態、退款及通知結果，不把 mail error 當 payment failed。
 
-- [ ] **建立行為證據：** 免費/付費、decline/cancel/async payment、最後一席競爭、hold expiry、相同 webhook/亂序、付款完成但回跳中斷、通知失敗、錯活動QR/重掃、退款成功/失敗/重送、退款與 check-in 競爭。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 先跑 source 現有測試及真 test-mode，僅按失敗修復；client 金額/票數不能取代 server 驗證。後台活動 header 保持 event context，分內容、報名、訂單、通知、簽到；demo 標示非公開原因。重發票不可重啟已退票權益，退款需批准角色/原因/冪等，成功 callback 後才確定退款狀態。
+- [x] **建立行為證據：** 免費/付費、decline/cancel/async payment、最後一席競爭、hold expiry、相同 webhook/亂序、付款完成但回跳中斷、通知失敗、錯活動QR/重掃、退款成功/失敗/重送、退款與 check-in 競爭。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 先跑 source 現有測試及真 test-mode，僅按失敗修復；client 金額/票數不能取代 server 驗證。後台活動 header 保持 event context，分內容、報名、訂單、通知、簽到；demo 標示非公開原因。重發票不可重啟已退票權益，退款需批准角色/原因/冪等，成功 callback 後才確定退款狀態。
 - [ ] **驗證：** npm exec -- vitest run tests/integration/audit-full-ticket-lifecycle.test.ts；npm run test:e2e -- tests/e2e/full-event-payment.spec.ts；附 Stripe test-mode event/訂單/票/outbox 遮罩 reference 與 read-after-write。
 - [ ] **結案與提交：** UI、DB 與 provider 三方一致；無 oversell、重複付款效果、重複票或未知退款被當成功。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: verify end-to-end event payments and ticket recovery`。
 
