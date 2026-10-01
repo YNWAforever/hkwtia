@@ -1,0 +1,10 @@
+{
+  "command": "npm.cmd test -- --maxWorkers=4 --reporter=json --outputFile=.playwright/t11-full-final-results.json",
+  "environment": "plain repository gate without SQL/provider opt-ins; controlled CPU concurrency",
+  "passed": 6231,
+  "skipped": 222,
+  "failed": 0,
+  "passFiles": 736,
+  "skipFiles": 0,
+  "rows": []
+}

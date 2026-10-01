@@ -2548,6 +2548,45 @@
     "verificationError": "Verification is unavailable. Reload the page and try again."
   },
   "Admin": {
+    "jobHealth": {
+      "heading": "Background job health",
+      "description": "Only verified completed polls confirm health. Unknown external effects require reconciliation before retry. Counts are unobserved until a verified poll is available.",
+      "job": "Job",
+      "state": "Health",
+      "lastStarted": "Last started",
+      "lastSuccess": "Last succeeded",
+      "nextExpected": "Next expected",
+      "oldestPending": "Oldest pending",
+      "failed": "Failed",
+      "uncertain": "Uncertain",
+      "deployment": "Worker version",
+      "unobserved": "Not observed",
+      "states": {
+        "healthy": "Healthy",
+        "degraded": "Needs attention",
+        "disabled": "Disabled",
+        "unknown": "Unknown"
+      },
+      "jobs": {
+        "aiops-metrics": "AI operational metrics",
+        "journey-runner": "Member journey delivery",
+        "approvals-expirer": "Approval expiry",
+        "renewal-runner": "Renewal enrolment",
+        "engagement-score": "Engagement scoring",
+        "chat-retention": "Chat retention",
+        "retention-analyst": "Retention analysis",
+        "board-reporter": "Board report drafts",
+        "whatsapp-send-queue": "Campaign delivery",
+        "event-cancellation-refunds": "Event refund queue",
+        "event-notifications": "Event notifications",
+        "showcase-lead-emails": "Showcase email queue",
+        "ticket-emails": "Ticket email queue",
+        "admin-batches": "Admin batch processing",
+        "membership-grant-expiry": "Finite grant expiry",
+        "rate-limit-cleanup": "Rate-limit cleanup",
+        "member-import-retention": "Import retention"
+      }
+    },
     "applicationCase": {
       "title": "Membership application case",
       "followUp": "Follow up this application",

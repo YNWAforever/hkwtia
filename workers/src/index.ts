@@ -36,6 +36,7 @@ export type WorkerEnv = Readonly<{
   VERCEL_AUTOMATION_BYPASS_SECRET?: string;
   AUDIT_METRICS_ENABLED?: string;
   WORKER_REVISION?: string;
+  WORKER_JOB_ALLOWLIST?: string;
 }>;
 
 type JobFailureCode =
@@ -47,7 +48,8 @@ type ConfigErrorCode =
   | "INVALID_APP_URL"
   | "INVALID_CRON_SECRET"
   | "INVALID_CRON"
-  | "INVALID_SCHEDULED_TIME";
+  | "INVALID_SCHEDULED_TIME"
+  | "INVALID_WORKER_JOB_SCOPE";
 
 type AlertLogCode =
   | "WORKER_ALERT_HTTP_ERROR"
@@ -58,7 +60,7 @@ type WorkerLog =
   | Readonly<{errorCode: ConfigErrorCode}>
   | Readonly<{job: WorkerJob; errorCode: AlertLogCode}>;
 
-export type WorkerMetric = Readonly<{event: "worker_invocation"; job: WorkerJob; outcome: "accepted" | "failed"; scheduledTime: string; occurredAt: string; durationMs: number; attempts: number; workerRevision?: string; webRevision?: string; requestId?: string}>;
+export type WorkerMetric = Readonly<{event: "worker_invocation"; job: WorkerJob; outcome: "accepted" | "failed" | "unknown" | "disabled"; scheduledTime: string; occurredAt: string; durationMs: number; attempts: number; workerRevision?: string; webRevision?: string; requestId?: string}>;
 
 export type WorkerDependencies = Readonly<{
   fetch: typeof fetch;
@@ -351,7 +353,7 @@ async function invokeJob(
   dependencies: WorkerDependencies,
 ): Promise<void> {
   const started = Date.now();
-  function metric(outcome: "accepted" | "failed", attempts: number, response?: Response) {
+  function metric(outcome: "accepted" | "failed" | "unknown" | "disabled", attempts: number, response?: Response) {
     if (!config.metricsEnabled) return;
     const webRevision = response?.headers.get("x-hkwtia-revision");
     const requestId = response?.headers.get("x-request-id");
@@ -372,6 +374,7 @@ async function invokeJob(
           method: "POST",
           headers: {
             authorization: `Bearer ${config.secret}`,
+            ...(config.revision && /^[a-f0-9]{40}$/i.test(config.revision) ? {"x-hkwtia-worker-revision":config.revision.toLowerCase()} : {}),
             ...(config.protectionBypass
               ? {
                   "x-vercel-protection-bypass":
@@ -383,7 +386,8 @@ async function invokeJob(
         REQUEST_TIMEOUT_BY_JOB[job],
       );
       if (response.ok) {
-        metric("accepted", attempt, response);
+        const outcome=response.headers.get("x-hkwtia-job-outcome");
+        metric(outcome==="completed"?"accepted":outcome==="disabled"?"disabled":"unknown",attempt,response);
         return;
       }
       finalErrorCode = "JOB_HTTP_ERROR";
@@ -415,7 +419,10 @@ async function runScheduled(
   dependencies: WorkerDependencies,
 ): Promise<void> {
   const config = validateConfig(env);
-  const jobs = dueJobs(controller.cron);
+  const requested=env.WORKER_JOB_ALLOWLIST;
+  const scope=requested===undefined?null:requested==="none"?[]:requested.split(",").map(key=>key.trim());
+  if(scope&&(scope.length===0&&requested!=="none"||new Set(scope).size!==scope.length||scope.some(key=>!WORKER_JOBS.includes(key as WorkerJob))))throw new WorkerConfigError("INVALID_WORKER_JOB_SCOPE");
+  const jobs = dueJobs(controller.cron).filter(job=>scope===null||scope.includes(job));
   const scheduledTime = canonicalScheduledTime(controller.scheduledTime);
   await Promise.allSettled(
     jobs.map((job) =>

@@ -1,5 +1,5 @@
 name = "hkwtia-m3-preview"
-main = "src/index.ts"
+main = "src/entry.ts"
 compatibility_date = "2026-07-26"
 
 [triggers]
@@ -7,3 +7,6 @@ crons = ["0 * * * *", "0 2 * * *", "0 18 * * *", "0 3 * * *", "15 18 * * *", "30
 
 [env.preview]
 name = "hkwtia-m3-preview"
+
+# Optional scoped rollout vars: WORKER_REVISION (full reviewed SHA), WORKER_JOB_ALLOWLIST.
+# No app URL/credential/default activation is embedded here. Acceptance uses a separate name/config.

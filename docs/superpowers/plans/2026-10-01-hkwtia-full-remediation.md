@@ -337,11 +337,14 @@ T10 engineering evidence: evidence/t10 and verification.md. Approval/activation 
 
 **介面／契約：** 擬新增 JobHealth={jobKey:string;enabled:boolean|null;deploymentSha:string|null;lastStartedAt:string|null;lastSucceededAt:string|null;nextExpectedAt:string|null;oldestPendingAt:string|null;failedCount:number;uncertainCount:number;state:"healthy"|"degraded"|"disabled"|"unknown"}；readJobHealth(actor: Actor):Promise<readonly JobHealth[]>。jobKey 來自既有 runner registry；heartbeat 只由已驗證 worker 寫。
 
-- [ ] **建立行為證據：** 沒有 heartbeat 不是 healthy；空 queue 但成功 poll 可 healthy idle；disabled 與失敗不同；heartbeat 過期按排程+容差變 degraded；provider accepted-timeout 不當確定失敗自動重送。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 在既有受保護 jobs endpoints/worker 完成後記錄 elapsed/count/錯誤 code，不存 PII。每 job 定義 expected interval 和 grace，寫入 runtime mapping；只啟動不能算成功。未知 provider outcome 以既有 outbox 狀態/新增 outcome 欄位表示，附 resultRef/reconcile action；必要時新增最小 migration，不創第二套 scheduler。
+- [x] **建立行為證據：** 沒有 heartbeat 不是 healthy；空 queue 但成功 poll 可 healthy idle；disabled 與失敗不同；heartbeat 過期按排程+容差變 degraded；provider accepted-timeout 不當確定失敗自動重送。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 在既有受保護 jobs endpoints/worker 完成後記錄 elapsed/count/錯誤 code，不存 PII。每 job 定義 expected interval 和 grace，寫入 runtime mapping；只啟動不能算成功。未知 provider outcome 以既有 outbox 狀態/新增 outcome 欄位表示，附 resultRef/reconcile action；必要時新增最小 migration，不創第二套 scheduler。
 - [ ] **驗證：** npm exec -- vitest run tests/unit/audit-full-job-health.test.ts；隔離 worker scheduled trigger、crash、timeout、空輪詢；核對 deployed worker SHA 與最近成功。
 - [ ] **結案與提交：** 操作者可分辨停用、未知、健康、異常；健康 UI 有真 worker readback。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`feat: expose verified worker and delivery health`。
+
+
+T11 evidence: source/isolated SQL/local workerd/browser verified; cloud deployed SHA/target, Preview and whole provider cases remain pending. See verification.md T11.
 
 ### T12 · 續會候選有界查詢、checkpoint 及補跑
 

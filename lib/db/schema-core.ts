@@ -22,6 +22,7 @@ import {
 import {sql} from "drizzle-orm";
 
 import {publicRoutes} from "@/config/public-routes";
+import {HEALTH_JOB_KEYS} from "@/lib/jobs/health-registry";
 import {M3_AUTOMATION_JOB_KIND_SQL_LIST} from "@/lib/jobs/kinds";
 import {MEMBERSHIP_PLAN_CODES, MEMBERSHIP_STATUSES} from "@/lib/membership/constants";
 
@@ -2083,3 +2084,16 @@ export const adminBatchExportArtifacts = pgTable("admin_batch_export_artifacts",
   createdAt: createdAt("created_at"),
   expiresAt: timestamp("expires_at", {withTimezone: true}).notNull(),
 }, table => [index("admin_batch_export_artifacts_expiry_idx").on(table.expiresAt), check("admin_batch_export_artifacts_bounds", sql`${table.rowCount} BETWEEN 1 AND 5000 AND octet_length(${table.csv}) <= 10485760`)]);
+
+/** Current verified worker poll observation. Job ownership/idempotency stays in jobs. */
+export const jobHealth = pgTable("job_health", {
+ jobKey:text("job_key").primaryKey(),workerRevision:text("worker_revision").notNull(),webRevision:text("web_revision"),pollId:uuid("poll_id").notNull(),
+ lastStartedAt:timestamp("last_started_at",{withTimezone:true}).notNull(),lastFinishedAt:timestamp("last_finished_at",{withTimezone:true}),lastSucceededAt:timestamp("last_succeeded_at",{withTimezone:true}),
+ outcome:text("outcome").$type<"processing"|"completed"|"disabled"|"failed"|"uncertain">().notNull(),elapsedMs:integer("elapsed_ms"),errorCode:text("error_code"),counts:jsonb("counts").$type<Record<string,number>>().default({}).notNull(),
+},table=>[
+ check("job_health_registered_key",sql`${table.jobKey} IN (${sql.raw(HEALTH_JOB_KEYS.map(key=>"'"+key+"'").join(","))})`),
+ check("job_health_revision",sql`${table.workerRevision} ~ '^[a-f0-9]{40}$' AND (${table.webRevision} IS NULL OR ${table.webRevision} ~ '^[a-f0-9]{40}$')`),
+ check("job_health_outcome",sql`${table.outcome} IN ('processing','completed','disabled','failed','uncertain')`),
+ check("job_health_elapsed",sql`${table.elapsedMs} IS NULL OR ${table.elapsedMs}>=0`),
+ check("job_health_counts",sql`jsonb_typeof(${table.counts})='object' AND octet_length(${table.counts}::text)<=2048`),
+]);

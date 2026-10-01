@@ -18,6 +18,8 @@ export default defineConfig([
     // not eslint-ignored, and its 500 KB bundle makes the stylish formatter throw
     // `RangeError: Invalid string length` instead of reporting anything.
     "dist/**",
+    // Local workerd creates generated bundles beneath its configured fixture directory.
+    "**/.wrangler/**",
   ]),
   {
     files: ["lib/**/*.{ts,tsx}"],
