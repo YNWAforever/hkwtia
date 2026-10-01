@@ -3021,6 +3021,10 @@
       "unavailable": "未提供"
     },
     "segments": {
+      "previous": "上一頁",
+      "next": "下一頁",
+      "first": "第一頁",
+      "range": "顯示第 {start}–{end} 項，共 {total} 項",
       "eyebrow": "會員分群",
       "title": "會員分群",
       "description": "預覽符合條件的會員群組、儲存分群，並匯出同一組結果。",

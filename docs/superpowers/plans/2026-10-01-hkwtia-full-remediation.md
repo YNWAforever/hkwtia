@@ -147,11 +147,11 @@
 
 **介面／契約：** 保留 SegmentPreview.nextCursor；URL 延續 validated filter、locale、campaignDraft。頁面顯示目前區間/總數；cursor 按 filter fingerprint 綁定，條件變更清除舊 cursor history。
 
-- [ ] **建立行為證據：** 51/101 筆遍歷不重不漏；previous 保留條件；改 filter 不沿用舊 cursor；第 21 個 event filter 選項不能掉失；空與查詢失敗不同。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 用既有 keyset cursor 建下一頁及上一頁歷史；UI 不把當頁 items.length 當受眾總數。preview total、符合條件、可發送及 blocked 數量分清；保留既有聯絡人與會員 filter 互斥安全規則。
-- [ ] **驗證：** npm exec -- vitest run tests/unit/audit-full-segment-pagination.test.tsx tests/unit/segment-query.test.ts；npm run test:e2e -- tests/e2e/full-segment-pagination.spec.ts。
-- [ ] **結案與提交：** 隔離 101 筆，翻頁與返回均保留 context；SQL 真資料結果與總數相符。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: paginate segment previews without losing filters`。
+- [x] **建立行為證據：** 51/101 筆遍歷不重不漏；previous 保留條件；改 filter 不沿用舊 cursor；第 21 個 event filter 選項不能掉失；空與查詢失敗不同。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 用既有 keyset cursor 建下一頁及上一頁歷史；UI 不把當頁 items.length 當受眾總數。preview total、符合條件、可發送及 blocked 數量分清；保留既有聯絡人與會員 filter 互斥安全規則。
+- [x] **驗證：** npm exec -- vitest run tests/unit/audit-full-segment-pagination.test.tsx tests/unit/segment-query.test.ts；npm run test:e2e -- tests/e2e/full-segment-pagination.spec.ts。
+- [x] **結案與提交：** 隔離 101 筆，翻頁與返回均保留 context；SQL 真資料結果與總數相符。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: paginate segment previews without losing filters`。
 
 ### T04 · CMS Back/Forward 草稿復原
 

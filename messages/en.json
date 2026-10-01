@@ -3020,6 +3020,10 @@
       "unavailable": "Not available"
     },
     "segments": {
+      "previous": "Previous page",
+      "next": "Next page",
+      "first": "First page",
+      "range": "Showing {start}–{end} of {total}",
       "eyebrow": "Member segments",
       "title": "Member segments",
       "description": "Preview a precise member audience, save it for later, and export the exact same result.",

@@ -8,7 +8,7 @@
 "O07","unverified","T10","Inspect current application workflow","review policy authority","membership operations"
 "O08","source-confirmed","T04","Historical CMS Back/Forward reproduction; current behavior to rerun","","engineering"
 "O09","unverified","T17 T18","Inspect current CMS maintenance and workspace","","engineering"
-"O10","source-confirmed","T03","SegmentResults ignores nextCursor","","engineering"
+"O10","code-fixed; isolated-verified","T03","evidence/t03; 51 focused + 3 real SQL + 2 Chromium cases","Preview and release matrix pending","engineering"
 "O11","source-confirmed","T07","SegmentResults still uses legacy queue form","review and communication policy","communications"
 "O12","unverified","T08","Inspect own billing authorization","","engineering"
 "O13","unverified","T12 T13 T21","Measure current SQL and renewal bounds","isolated load fixture","engineering"
