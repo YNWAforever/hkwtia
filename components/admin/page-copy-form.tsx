@@ -1,8 +1,11 @@
 "use client";
 
-import {useActionState, useRef, useState} from "react";
+import {useActionState, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore} from "react";
 
 import {useAdminUnsavedChanges} from "@/components/admin/unsaved-changes-guard";
+
+import {discardLocalCopyDraft, localCopyDraftKey, parseLocalCopyDraft, writeLocalCopyDraft, type LocalCopyDraft, type LocalCopyDraftLabels} from "@/lib/admin/page-copy-local-draft";
+import type {PageCopyNamespace} from "@/lib/i18n/page-copy-scope";
 
 import type {PageCopyActionState} from "@/lib/admin/page-copy-action-core";
 
@@ -37,21 +40,87 @@ function rowsFor(...values: readonly string[]): number {
   return 2;
 }
 
+const storageEvent = "hkwtia:cms-draft-changed";
+const unavailableSnapshot = "!storage-unavailable";
+function subscribeToDrafts(listener: () => void): () => void {
+  window.addEventListener(storageEvent, listener);
+  window.addEventListener("storage", listener);
+  return () => { window.removeEventListener(storageEvent, listener); window.removeEventListener("storage", listener); };
+}
+const serverDraftSnapshot = () => null;
+
 export function PageCopyForm({
   action,
   fields,
   labels,
   revision,
+  localDraft,
 }: Readonly<{
   action: (state: PageCopyActionState, formData: FormData) => Promise<PageCopyActionState>;
   fields: readonly PageCopyField[];
   labels: Labels;
   revision: string;
+  localDraft?: Readonly<{identity: string; namespace: PageCopyNamespace; labels: LocalCopyDraftLabels}>;
 }>) {
   const {setDirty} = useAdminUnsavedChanges();
   const formRef = useRef<HTMLFormElement>(null);
   const [draftPreview, setDraftPreview] = useState<readonly Readonly<{keyPath: string; en: string; zh: string}>[] | null>(null);
-  const markEdited = () => {setDirty(true); setDraftPreview(null);};
+  const draftNamespace = localDraft?.namespace;
+  const storageKey = localDraft ? localCopyDraftKey(localDraft.identity, localDraft.namespace) : null;
+  const [recoveryDismissed, setRecoveryDismissed] = useState(false);
+  const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [storageFailed, setStorageFailed] = useState(false);
+  const [values, setValues] = useState<Record<string, string>>(() => Object.fromEntries(fields.flatMap(entry => [[entry.enField, entry.enValue], [entry.zhField, entry.zhValue]])));
+  const publishedValues = Object.fromEntries(fields.flatMap(entry => [[entry.enField, entry.enValue], [entry.zhField, entry.zhValue]]));
+  const baseline = useRef<Record<string, string>>(publishedValues);
+  const baseRevision = useRef(revision);
+  const allowedFields = useMemo(() => new Set(fields.flatMap(entry => [entry.enField, entry.zhField])), [fields]);
+  const getSnapshot = useCallback(() => {
+    if (!storageKey) return null;
+    try { return window.sessionStorage.getItem(storageKey); } catch { return unavailableSnapshot; }
+  }, [storageKey]);
+  const snapshot = useSyncExternalStore(subscribeToDrafts, getSnapshot, serverDraftSnapshot);
+  const storedDraft = useMemo(() => snapshot && snapshot !== unavailableSnapshot && draftNamespace
+    ? parseLocalCopyDraft(snapshot, draftNamespace, allowedFields) : null, [snapshot, draftNamespace, allowedFields]);
+  const recovery = recoveryDismissed ? null : storedDraft;
+  const readValues = (data: FormData): Record<string, string> => Object.fromEntries(fields.flatMap(entry =>
+    [entry.enField, entry.zhField].map(name => [name, String(data.get(name) ?? "")])));
+  const persist = (values: Record<string, string>) => {
+    if (!storageKey || !localDraft) return;
+    const changes = Object.fromEntries(Object.entries(values).filter(([name, value]) => value !== baseline.current[name]));
+    const draft: LocalCopyDraft = {schemaVersion: 1, namespace: localDraft.namespace, baseRevision: baseRevision.current,
+      updatedAt: new Date().toISOString(), changes};
+    let saved = false;
+    try { saved = writeLocalCopyDraft(window.sessionStorage, storageKey, draft, allowedFields); } catch { /* Storage access itself can be denied. */ }
+    window.dispatchEvent(new Event(storageEvent));
+    setStorageFailed(!saved);
+    setSavedAt(saved && Object.keys(changes).length ? draft.updatedAt : null);
+  };
+  useEffect(() => () => setDirty(false), [setDirty]);
+  const markEdited = () => {
+    setDirty(true); setDraftPreview(null); setRecoveryDismissed(true);
+    if (formRef.current) {
+      const current = readValues(new FormData(formRef.current));
+      setValues(current); persist(current);
+    }
+  };
+  const discard = () => {
+    let cleared = true;
+    try { if (storageKey) cleared = discardLocalCopyDraft(window.sessionStorage, storageKey); } catch { cleared = false; }
+    window.dispatchEvent(new Event(storageEvent));
+    setStorageFailed(!cleared); setRecoveryDismissed(true); setSavedAt(null);
+  };
+  const discardChanges = () => {
+    discard();
+    setValues(baseline.current);
+    setDirty(false); setDraftPreview(null);
+  };
+  const restore = () => {
+    if (!recovery || recovery.baseRevision !== baseRevision.current || !draftNamespace) return;
+    if (!parseLocalCopyDraft(JSON.stringify(recovery), draftNamespace, allowedFields)) { discard(); return; }
+    setValues(current => ({...current, ...recovery.changes}));
+    setSavedAt(recovery.updatedAt); setRecoveryDismissed(true); setDirty(true); setDraftPreview(null);
+  };
   const captureDraft = () => {
     if (!formRef.current) return;
     const data = new FormData(formRef.current);
@@ -63,13 +132,38 @@ export function PageCopyForm({
   };
   const [state, formAction, pending] = useActionState(async (previous: PageCopyActionState, formData: FormData) => {
     const result = await action(previous, formData);
-    if (result.status === "success") setDirty(false);
+    if (result.status === "success") {
+      baseline.current = readValues(formData);
+      baseRevision.current = result.revision ?? baseRevision.current;
+      const current = formRef.current ? readValues(new FormData(formRef.current)) : baseline.current;
+      const changedDuringSave = Object.entries(current).some(([name, value]) => value !== baseline.current[name]);
+      setDirty(changedDuringSave);
+      if (changedDuringSave) persist(current); else discard();
+    }
     return result;
   }, initialState);
 
   return (
     <>
-    <form action={formAction} onChange={markEdited} onInput={markEdited} ref={formRef} className="space-y-6" noValidate>
+    {localDraft ? <section className="rounded-md border border-border p-4 space-y-3" aria-live="polite">
+      {storageFailed || snapshot === unavailableSnapshot ? <p className="text-sm text-destructive" role="alert">{localDraft.labels.unavailable}</p> : null}
+      {savedAt ? <p className="text-sm text-muted-foreground">{localDraft.labels.saved.replace("{time}", new Date(savedAt).toLocaleTimeString())}</p> : null}
+      {savedAt && !recovery ? <button className="min-h-11 rounded-md border px-3" onClick={discardChanges} type="button">{localDraft.labels.discard}</button> : null}
+      {recovery ? <>
+        <p>{recovery.baseRevision === revision ? localDraft.labels.available : localDraft.labels.conflict}</p>
+        <div className="flex gap-3">
+          {recovery.baseRevision === revision ? <button className="min-h-11 rounded-md border px-3" onClick={restore} type="button">{localDraft.labels.restore}</button> : null}
+          <button className="min-h-11 rounded-md border px-3" onClick={discardChanges} type="button">{localDraft.labels.discard}</button>
+        </div>
+        {recovery.baseRevision !== revision ? <details><summary className="cursor-pointer py-2">{localDraft.labels.compare}</summary>
+          <ul className="space-y-3">{Object.entries(recovery.changes).map(([name, value]) => <li key={name}>
+            <p className="font-mono text-xs">{name}</p><p>{localDraft.labels.current}: {publishedValues[name]}</p>
+            <p className="whitespace-pre-wrap">{localDraft.labels.draft}: <span>{value}</span></p>
+          </li>)}</ul>
+        </details> : null}
+      </> : null}
+    </section> : null}
+    <form action={formAction} ref={formRef} className="space-y-6" noValidate>
       <input name="revision" type="hidden" value={state.revision ?? revision}/>
       <p className="text-sm text-muted-foreground">{labels.revertHint}</p>
       <ul className="space-y-6">
@@ -87,7 +181,8 @@ export function PageCopyForm({
                     aria-describedby={invalid ? errorId : undefined}
                     aria-invalid={invalid}
                     className={field}
-                    defaultValue={entry.enValue}
+                    value={values[entry.enField] ?? entry.enValue}
+                    onChange={markEdited}
                     id={entry.enField}
                     name={entry.enField}
                     placeholder={entry.enBundle}
@@ -100,7 +195,8 @@ export function PageCopyForm({
                     aria-describedby={invalid ? errorId : undefined}
                     aria-invalid={invalid}
                     className={field}
-                    defaultValue={entry.zhValue}
+                    value={values[entry.zhField] ?? entry.zhValue}
+                    onChange={markEdited}
                     id={entry.zhField}
                     name={entry.zhField}
                     placeholder={entry.zhBundle}

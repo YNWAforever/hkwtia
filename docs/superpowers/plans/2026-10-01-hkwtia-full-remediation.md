@@ -167,11 +167,11 @@
 
 **介面／契約：** 擬新增 LocalCopyDraft={schemaVersion:1; namespace:string; baseRevision:string; updatedAt:string; changes:Record<string,string>}。只保存 allowlisted 非敏感 CMS 字串到 sessionStorage，key 按登入身份/namespace 分隔，TTL 24 小時；含兩語欄位。其保存不是正式發布。
 
-- [ ] **建立行為證據：** 真 Browser Back/Forward 恢復修改；語言/側欄離開可復原；storage 拒絕時顯示保存失敗；revision 改變時提示比對而非覆蓋；登出或換身份不顯示他人草稿。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 輸入時更新本機草稿並顯示「此分頁暫存」及最後成功時間；恢復/丟棄有明確選擇；成功發布或顯式丟棄後清除。若儲存不可用，清楚 warning + 既有離開保護；不能宣稱可以強制攔住所有 history。保留 server optimistic revision。
-- [ ] **驗證：** npm exec -- vitest run tests/unit/audit-full-cms-draft.test.ts；npm run test:e2e -- tests/e2e/full-cms-history.spec.ts。
-- [ ] **結案與提交：** 重跑 audit 原步驟無無聲遺失；storage 失效也不假報已保存。跨裝置 server draft 在 T17 完成。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: recover unsaved CMS copy after history navigation`。
+- [x] **建立行為證據：** 真 Browser Back/Forward 恢復修改；語言/側欄離開可復原；storage 拒絕時顯示保存失敗；revision 改變時提示比對而非覆蓋；登出或換身份不顯示他人草稿。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 輸入時更新本機草稿並顯示「此分頁暫存」及最後成功時間；恢復/丟棄有明確選擇；成功發布或顯式丟棄後清除。若儲存不可用，清楚 warning + 既有離開保護；不能宣稱可以強制攔住所有 history。保留 server optimistic revision。
+- [x] **驗證：** npm exec -- vitest run tests/unit/audit-full-cms-draft.test.ts；npm run test:e2e -- tests/e2e/full-cms-history.spec.ts。
+- [x] **結案與提交：** 重跑 audit 原步驟無無聲遺失；storage 失效也不假報已保存。跨裝置 server draft 在 T17 完成。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: recover unsaved CMS copy after history navigation`。
 
 ### T05 · Google／電郵登入與會員建檔閉環
 

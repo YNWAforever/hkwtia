@@ -3389,6 +3389,17 @@
       "uploadError": "The image could not be uploaded. Try again."
     },
     "pageCopy": {
+      "localDraft": {
+        "saved": "Saved in this tab at {time}. This is not published.",
+        "unavailable": "Draft storage is unavailable. Keep this page open or copy your changes before leaving.",
+        "available": "An unsaved draft is available in this tab.",
+        "restore": "Restore draft",
+        "discard": "Discard draft",
+        "conflict": "Published copy has changed. Compare your draft before editing the current version.",
+        "compare": "Compare draft and published copy",
+        "current": "Current copy",
+        "draft": "Draft copy"
+      },
       "eyebrow": "Page copy",
       "title": "Page copy",
       "description": "Edit the wording on the public marketing pages. Layout and structure stay fixed.",

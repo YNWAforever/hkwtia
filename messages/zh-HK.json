@@ -3418,6 +3418,17 @@
       "uploadError": "未能上載圖片，請再試一次。"
     },
     "pageCopy": {
+      "localDraft": {
+        "saved": "已於 {time} 在此分頁暫存，尚未發布。",
+        "unavailable": "無法暫存草稿。請保持本頁開啟，或在離開前複製修改內容。",
+        "available": "此分頁有尚未發布的草稿。",
+        "restore": "恢復草稿",
+        "discard": "丟棄草稿",
+        "conflict": "正式內容已更新。請先比對草稿，再修改目前版本。",
+        "compare": "比對草稿與正式內容",
+        "current": "目前內容",
+        "draft": "草稿內容"
+      },
       "eyebrow": "頁面文案",
       "title": "頁面文案",
       "description": "編輯公開市場推廣頁面的文字。版面與結構維持不變。",

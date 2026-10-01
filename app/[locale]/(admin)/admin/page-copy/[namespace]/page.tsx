@@ -62,7 +62,13 @@ export default async function AdminPageCopyNamespacePage({params}: Props) {
         <Link className="text-sm underline" href={localizedPath(locale, "/admin/page-copy")}>{t("back")}</Link>
       </header>
       <PageCopyForm
+        key={actor.profileId + ":" + namespace + ":" + pageCopyRevision(overrides.filter((row) => row.namespace === namespace))}
         action={action}
+        localDraft={{identity: actor.profileId, namespace, labels: {
+          saved: String(t.raw("localDraft.saved")), unavailable: t("localDraft.unavailable"), available: t("localDraft.available"),
+          restore: t("localDraft.restore"), discard: t("localDraft.discard"), conflict: t("localDraft.conflict"),
+          compare: t("localDraft.compare"), current: t("localDraft.current"), draft: t("localDraft.draft"),
+        }}}
         fields={fields}
         revision={pageCopyRevision(overrides.filter((row) => row.namespace === namespace))}
         labels={{

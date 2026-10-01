@@ -6,7 +6,7 @@
 "O05","unverified","T11","No current deployed worker evidence","worker metadata and isolated invocation","operations"
 "O06","unverified","T09","Check approved policy version","association policy authority","membership and finance"
 "O07","unverified","T10","Inspect current application workflow","review policy authority","membership operations"
-"O08","source-confirmed","T04","Historical CMS Back/Forward reproduction; current behavior to rerun","","engineering"
+"O08","recovery code-fixed; isolated-verified; T17 pending","T04 T17","evidence/t04; 29 focused + 4 Chromium cases","server draft/concurrent publish U48 remains T17","engineering"
 "O09","unverified","T17 T18","Inspect current CMS maintenance and workspace","","engineering"
 "O10","code-fixed; isolated-verified","T03","evidence/t03; 51 focused + 3 real SQL + 2 Chromium cases","Preview and release matrix pending","engineering"
 "O11","source-confirmed","T07","SegmentResults still uses legacy queue form","review and communication policy","communications"
