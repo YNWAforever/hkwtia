@@ -1,0 +1,12 @@
+{
+  "environment": "confirmed isolated Neon; sentinel verified",
+  "migration": "0054_renewal_episode_compatibility",
+  "duplicateGroupsBefore": 0,
+  "sqlSha256": "b23e929941bf2f0d60cf37ed95a477294b3c226237221cf18026034ffca1c54e",
+  "ledgerBefore": 53,
+  "ledgerAfter": 54,
+  "indexDefinition": "CREATE UNIQUE INDEX journey_state_renewal_episode_unique ON public.journey_state USING btree (membership_id, step, regexp_replace(instance_key, '^period:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:'::text, 'period:'::text)) WHERE ((journey = 'renewal'::text) AND (membership_id IS NOT NULL))",
+  "membershipFingerprintUnchanged": true,
+  "production": false,
+  "command": "node --env-file=.env.local --import tsx .playwright/migrate-renewal-compatibility.mts (guard then actual scripts/db-migrate.ts)"
+}

@@ -8,16 +8,20 @@ import {
 import type {ScheduledJourneyStep} from "@/lib/automation/types";
 import {
   requireAutomationSystem,
+  requireAutomationCron,
   type AutomationRepositoryActor,
 } from "@/lib/auth/automation-actor";
 import {
   auditEvents,
   emailLog,
   journeyState,
+  memberships,
+  membershipApplications,
   staffTasks,
   whatsappLog,
   type JourneyState,
 } from "@/lib/db/server-schema";
+import {JOURNEYS} from "@/config/journeys";
 import {forbidden, getDb, requireSystem} from "@/lib/db/repos/common";
 import type {StaffTaskInput} from "@/lib/db/repos/staff-tasks";
 import type {Actor} from "@/lib/membership/lifecycle";
@@ -146,6 +150,65 @@ function transitionResult(result: unknown): JourneyState {
 
 export function createJourneysRepository(loadDatabase: AutomationDatabaseLoader = defaultDatabaseLoader) {
   return {
+    /** One bounded SQL statement checks current billing scope and persists the page checkpoint. */
+    async enrollRenewalPage(
+      actor: AutomationRepositoryActor,
+      enrollments: readonly JourneyEnrollment[],
+    ): Promise<Readonly<{ created: number; existing: number; skipped: number }>> {
+      requireAutomationCron(actor);
+      const keys = new Set(JOURNEYS.renewal.map((step) => step.key as string));
+      if (
+        enrollments.length < 1 ||
+        enrollments.length > 2000 ||
+        enrollments.some(
+          (row) =>
+            row.journey !== "renewal" ||
+            !row.membershipId ||
+            !keys.has(row.step) ||
+            !Number.isFinite(row.scheduledAt.getTime()),
+        )
+      )
+        throw Error("INVALID_RENEWAL_CHECKPOINT");
+      const source = enrollments.map((row) => ({
+        profile_id: row.profileId,
+        membership_id: row.membershipId,
+        journey: row.journey,
+        instance_key: row.instanceKey,
+        step: row.step,
+        scheduled_at: row.scheduledAt.toISOString(),
+        delivery_key: row.deliveryKey,
+      }));
+      const db = await loadDatabase();
+      const row = rowsFrom(
+        await db.execute(sql`
+         WITH source AS (SELECT * FROM jsonb_to_recordset(${JSON.stringify(source)}::jsonb) AS s(profile_id text,membership_id text,journey text,instance_key text,step text,scheduled_at timestamptz,delivery_key text)),
+         correlated AS MATERIALIZED (SELECT s.*, 'period:'||to_char(m.billing_period_end AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS legacy_instance_key FROM source s
+          JOIN ${memberships} m ON m.id=s.membership_id::uuid LEFT JOIN ${membershipApplications} a ON a.id=m.application_id
+          WHERE COALESCE(m.owner_user_id,a.applicant_user_id)=s.profile_id AND m.status IN ('active','past_due') AND m.cancel_at_period_end=false AND m.billing_interval<>'none'
+           AND m.grant_effective_at IS NULL AND m.grant_expires_at IS NULL
+           AND s.instance_key='period:'||m.id::text||':'||to_char(m.billing_period_end AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') FOR SHARE OF m),
+         eligible AS (SELECT c.* FROM correlated c WHERE NOT EXISTS (SELECT 1 FROM ${journeyState} j WHERE j.membership_id=c.membership_id::uuid AND j.profile_id=c.profile_id AND j.journey='renewal' AND j.instance_key=c.legacy_instance_key AND j.step=c.step)),
+         inserted AS (INSERT INTO ${journeyState}(profile_id,membership_id,journey,instance_key,step,scheduled_at,delivery_key)
+          SELECT profile_id,membership_id::uuid,journey,instance_key,step,scheduled_at,delivery_key FROM eligible ON CONFLICT DO NOTHING RETURNING id)
+         SELECT (SELECT count(*) FROM inserted)::int AS created,((SELECT count(*) FROM correlated)-(SELECT count(*) FROM inserted))::int AS existing,((SELECT count(*) FROM source)-(SELECT count(*) FROM correlated))::int AS skipped
+        `),
+      )[0];
+      if (!row) throw Error("INVALID_RENEWAL_CHECKPOINT_RESULT");
+      const result = {
+        created: Number(row.created),
+        existing: Number(row.existing),
+        skipped: Number(row.skipped),
+      };
+      if (
+        Object.values(result).some(
+          (value) => !Number.isSafeInteger(value) || value < 0,
+        ) ||
+        result.created + result.existing + result.skipped !== enrollments.length
+      )
+        throw Error("INVALID_RENEWAL_CHECKPOINT_RESULT");
+      return result;
+    },
+
     async enroll(
       actor: AutomationRepositoryActor,
       enrollment: JourneyEnrollment,
