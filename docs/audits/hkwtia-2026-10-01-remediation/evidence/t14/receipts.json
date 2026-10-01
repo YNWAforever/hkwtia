@@ -59,5 +59,34 @@
     "8-operation effect matrix completed across T15/T16/T22",
     "50/500/5000 execution throughput and full-schema cold/remote performance T21/T22",
     "tagged isolated cloud worker/Preview and Production release remain separate gates"
-  ]
+  ],
+  "sourceSha": "3f2a5f71b9c53154767fe53392ff97e86f758afd",
+  "repositoryGates": {
+    "full": {
+      "passed": 6238,
+      "skipped": 253,
+      "failed": 0,
+      "passFiles": 737,
+      "allSkipFiles": 77,
+      "elapsedSeconds": 455.57,
+      "skipEvidence": "evidence/gates/t14-skips.json"
+    },
+    "lint": {
+      "exitCode": 0,
+      "errors": 0,
+      "existingWarnings": 67
+    },
+    "typecheck": {
+      "exitCode": 0
+    },
+    "visibleStrings": {
+      "exitCode": 0,
+      "tsxFiles": 301
+    },
+    "build": {
+      "exitCode": 0,
+      "next": "16.3.6",
+      "staticPages": 267
+    }
+  }
 }
