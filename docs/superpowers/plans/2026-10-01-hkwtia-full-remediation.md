@@ -502,11 +502,13 @@ T11 evidence: source/isolated SQL/local workerd/browser verified; cloud deployed
 
 **介面／契約：** 擬新增 WorkQueueItem={id:string;kind:"application"|"renewal"|"payment"|"support"|"content";summary:string;ownerProfileId:string|null;dueAt:string|null;nextActionCode:string;href:string;priority:"high"|"normal"}；listMyWork(actor: Actor,input:{scope:"mine"|"unassigned"|"all";cursor:string|null}):Promise<{items:readonly WorkQueueItem[];nextCursor:string|null}>，aggregate 既有 source records，不複製會籍/payment facts。
 
-- [ ] **建立行為證據：** dashboard failure 不偽裝0；草稿申請可見且分已提交/未完成；all scope 按權限；公司 autocomplete 不洩漏；篩選/返回保留；390/768/1440px；鍵盤及焦點管理；profile/付費/公司席位分母分清。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 六主組：今日工作、會員與機構、活動與收款、訊息與支援、網站內容、系統與稽核；保留舊 URL/deep links。用語意 icon+文字替代重複首字；mobile drawer 有 focus trap/return。會員列表首屏搜尋及資料，advanced filter 收起，公司名稱 autocomplete；Member360 固定 identity/會籍/到期/付款/負責人/下一步，低頻技術資料收進詳情。分頁不重置 view。
-- [ ] **驗證：** npm exec -- vitest run tests/unit/audit-full-workspace.test.tsx；npm run test:e2e -- tests/e2e/full-admin-daily-work.spec.ts；axe+人工鍵盤及中英三視窗寬度。
-- [ ] **結案與提交：** 營運可由工作台找到並完成入會、到期、付款例外；資訊不依靠 raw UUID 或24個平鋪入口。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`feat: organize admin around daily membership operations`。
+- [x] **建立行為證據：** dashboard failure 不偽裝0；草稿申請可見且分已提交/未完成；all scope 按權限；公司 autocomplete 不洩漏；篩選/返回保留；390/768/1440px；鍵盤及焦點管理；profile/付費/公司席位分母分清。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 六主組：今日工作、會員與機構、活動與收款、訊息與支援、網站內容、系統與稽核；保留舊 URL/deep links。用語意 icon+文字替代重複首字；mobile drawer 有 focus trap/return。會員列表首屏搜尋及資料，advanced filter 收起，公司名稱 autocomplete；Member360 固定 identity/會籍/到期/付款/負責人/下一步，低頻技術資料收進詳情。分頁不重置 view。
+- [x] **驗證：** npm exec -- vitest run tests/unit/audit-full-workspace.test.tsx；npm run test:e2e -- tests/e2e/full-admin-daily-work.spec.ts；axe+人工鍵盤及中英三視窗寬度。
+- [x] **結案與提交：** 營運可由工作台找到並完成入會、到期、付款例外；資訊不依靠 raw UUID 或24個平鋪入口。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`feat: organize admin around daily membership operations`。
+
+**執行結果：** code `57f0a8085130f82e65c02919d0681d1624d97687`;185focused/1skip/9真SQL、23既有會員回歸、2中英builtChromium、14axe掃描0violation；incomplete rules另記，人工SOP／全站roles／financial reports／batch preview等整合門檻仍T22，不稱完整UAT或正式發布。Full6272pass284skip0fail；詳細gate與scope見evidence/t18。T19–T23繼續。
 
 ### T19 · 客服交接、待辦與通訊送達維護
 

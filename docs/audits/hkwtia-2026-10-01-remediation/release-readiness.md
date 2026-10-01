@@ -27,3 +27,7 @@
 ## T17 candidate delta
 
 Source `7e64f35502e140f600dc8446cbc75cceb95c2c70`; isolated ledger56 (0056 only isolated); CMS_SERVER_DRAFTS_ENABLED defaultfalse. Full6258pass275skip0fail and2builtChromium verified. No Production migration/deployment/flag change. Rollout: approved schema0056→compatible app/private preview→retire old direct writers→verified enable. Rollback:flagoff, compatible app, retain drafts/sequence/published copy/audits. T22 upgrade/mixed-writer rehearsal and manual native-popup keyboard selection; cloud Preview and formal release gates remain. T18–T23 continuing.
+
+## T18 candidate delta
+
+Source `57f0a8085130f82e65c02919d0681d1624d97687`; no migration/new flag. Isolated9SQL/2builtChromium/14axe-scans verified scoped facts; full6272pass284skip0fail. Rollback app UI/read model only; preserve all previous schema/history/roles/policies. T19–T23 continue. No Preview acceptance or Production release claim.

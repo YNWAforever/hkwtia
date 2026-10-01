@@ -1,0 +1,16 @@
+{
+  "environment": "Windows Node24.18.0; freshly owned disposable PostgreSQL16 with full migrations; no configured Production URL consumed",
+  "command": "RUN_POSTGRES_INTEGRATION=1 node node_modules/vitest/vitest.mjs run tests/integration/audit-full-workspace.test.ts tests/integration/audit-full-company-search.test.ts tests/integration/admin-dashboard-counts.test.ts tests/unit/audit-full-workspace.test.tsx tests/unit/audit-full-company-picker.test.tsx tests/unit/server-action-actor-boundary.test.ts tests/unit/admin-app-shell.test.tsx tests/unit/internal-navigation-config.test.ts tests/unit/admin-dashboard-recent.test.tsx tests/unit/admin-member-selection-i18n.test.tsx tests/unit/admin-presentational.test.tsx tests/unit/ci-security-contract.test.ts tests/unit/repository-boundary.test.ts --maxWorkers=1",
+  "pass": 185,
+  "skip": 1,
+  "fail": 0,
+  "actualSqlPass": 9,
+  "skipReason": "Existing admin-dashboard-counts isolated Neon parity requires finalAuditIsolatedDatabaseUrl environment; not supplied in this disposable-container command. New actual SQL dashboard/work sources verified separately.",
+  "existingMemberRegressions": {
+    "pass": 23,
+    "skip": 0,
+    "fail": 0,
+    "files": 9
+  },
+  "production": false
+}
