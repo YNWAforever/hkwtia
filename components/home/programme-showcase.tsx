@@ -1,15 +1,14 @@
-import {getTranslations} from 'next-intl/server';
+import {getHomeTranslations, type HomeCopyProps} from '@/lib/home/copy-preview';
 
 import {ProgrammeGrid} from '@/components/marketing/programme-grid';
 import {Section} from '@/components/wt/section';
 import {SectionHeading} from '@/components/wt/section-heading';
-import type {AppLocale} from '@/i18n/routing';
 import {summarizeProgrammes} from '@/lib/home/programme-summaries';
 
 // Section 8 of 13. The grid itself lives in components/marketing/programme-grid.tsx since WP-7,
 // shared with /programmes.
-export async function ProgrammeShowcase({locale}: Readonly<{locale: AppLocale}>) {
-  const t = await getTranslations({locale, namespace: 'Home.programmeShowcase'});
+export async function ProgrammeShowcase({locale, copyOverrides}: HomeCopyProps) {
+  const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.programmeShowcase'});
   const summaries = summarizeProgrammes();
 
   return (

@@ -1,15 +1,14 @@
-import {getTranslations} from 'next-intl/server';
+import {getHomeTranslations, type HomeCopyProps} from '@/lib/home/copy-preview';
 
 import {Arrow} from '@/components/wt/arrow';
 import {StatusLabel} from '@/components/wt/status-label';
-import type {AppLocale} from '@/i18n/routing';
 import {formatEventDate} from '@/lib/home/format-event-date';
 import {loadImpactMetrics} from '@/lib/home/impact-metrics';
 
 // Section 10 of 13. app/styles/wisetech.css:235 .impact-section; :236 .impact-grid;
 // :240 .impact-metrics; :245-246 .impact-metrics .method-card.
-export async function ImpactEvidence({locale}: Readonly<{locale: AppLocale}>) {
-  const t = await getTranslations({locale, namespace: 'Home.impact'});
+export async function ImpactEvidence({locale, copyOverrides}: HomeCopyProps) {
+  const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.impact'});
   const metrics = await loadImpactMetrics();
   const formatDate = (value: Date) => formatEventDate(value, locale);
 

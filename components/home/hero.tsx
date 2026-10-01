@@ -1,10 +1,9 @@
-import {getTranslations} from 'next-intl/server';
+import {getHomeTranslations, type HomeCopyProps} from '@/lib/home/copy-preview';
 import Image from 'next/image';
 
 import {assertOwnOriginEditorialImage} from '@/components/marketing/institutional-page-intro';
 import {ActionLink} from '@/components/wt/action-link';
 import {Link} from '@/i18n/navigation';
-import type {AppLocale} from '@/i18n/routing';
 
 // The donor's own hero photograph (WiseTechSite.tsx:477), ported on the owner's 2026-09-07
 // instruction and byte-pinned by tests/unit/wisetech-asset-provenance.test.ts via the
@@ -15,8 +14,8 @@ const HERO_IMAGE = '/archive/tech-connect-ai-leaders.webp';
 // Donor top-spanning scrim (design doc §2, closes E-47): app/styles/wisetech.css:92 .hero;
 // :93 .hero-image/.hero-scrim/.network-field; :99 .hero-content; :102 .hero-actions;
 // :103 .hero-note; :104 .hero-scroll.
-export async function Hero({locale}: Readonly<{locale: AppLocale}>) {
-  const t = await getTranslations({locale, namespace: 'Home.hero'});
+export async function Hero({locale, copyOverrides}: HomeCopyProps) {
+  const t = await getHomeTranslations({locale, copyOverrides, namespace: 'Home.hero'});
   const image = assertOwnOriginEditorialImage(HERO_IMAGE);
 
   return (

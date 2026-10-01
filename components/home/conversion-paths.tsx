@@ -1,10 +1,10 @@
 import {getTranslations} from 'next-intl/server';
+import {getHomeTranslations, type HomeCopyProps} from '@/lib/home/copy-preview';
 
 import {ActionLink} from '@/components/wt/action-link';
 import {Section} from '@/components/wt/section';
 import {SectionHeading} from '@/components/wt/section-heading';
 import {StatusLabel} from '@/components/wt/status-label';
-import type {AppLocale} from '@/i18n/routing';
 import {membershipPlansRepository} from '@/lib/db/repos/membership-plans';
 import {buildPublicMembershipCatalog, publicPriceIds} from '@/lib/membership/public-catalog';
 
@@ -17,9 +17,9 @@ const panels = [
 
 // Section 13 of 13 -- the last homepage section. app/styles/wisetech.css:774 .conversion-section
 // (gradient background); :775 .conversion-grid (bordered 2-column panel layout).
-export async function ConversionPaths({locale}: Readonly<{locale: AppLocale}>) {
+export async function ConversionPaths({locale, copyOverrides}: HomeCopyProps) {
   const [t, tMembership, rows] = await Promise.all([
-    getTranslations({locale, namespace: 'Home.conversionPaths'}),
+    getHomeTranslations({locale, copyOverrides, namespace: 'Home.conversionPaths'}),
     getTranslations({locale, namespace: 'Membership'}),
     membershipPlansRepository.list().catch(() => null),
   ]);
