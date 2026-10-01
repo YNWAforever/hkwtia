@@ -57,3 +57,11 @@ T02 candidate gates at `86dab20e`: build passed (267 static pages); full suite r
 - The implementation uses React useSyncExternalStore for storage and keeps server-rendered recovery state empty until hydration. Focused lint, typecheck and strings passed. Final repository/Preview gates remain pending. Existing escaped-preview test now scopes its assertion to the preview region because controlled textareas also contain the escaped text.
 
 T01–T04 candidate at `63d28428`: full lint passed with 0 errors / 67 existing warnings. Full suite returned 6138 pass / 175 skip / 1 failure: `campaign-server-action-boundary` required the retired parser variable spelling. Its replacement checks actual metadata exclusion and rejection of injected idempotency/actor fields; the existing action-module/server binding assertions remain. Focused rerun passed 8 / 0 skip. A fresh full suite and build are still pending.
+
+## Frozen T01–T04 repository gates at c54e1828
+
+- `npm.cmd test`: exit 0, 724 files pass / 67 skip, 6140 tests pass / 175 skip, 340.43s. Exact skipped-file counts and source environment/opt-in guards are in `evidence/gates/t01-t04-skips.json`. Skips are unexecuted here; separately executed isolated SQL is counted separately.
+- `npm.cmd run lint`: exit 0, 0 errors / 67 existing warnings. `npm.cmd run typecheck` and `npm.cmd run audit:strings`: exit 0.
+- `npm.cmd run build`: exit 0, installed Next 16.3.6, compiled successfully, TypeScript completed, 267 static pages. Existing Edge/Browserslist notices retained; no framework/dependency upgrade.
+- `RUN_POSTGRES_INTEGRATION=1 npm.cmd exec -- vitest run tests/integration/page-copy-edit-concurrency-postgres.test.ts` (PowerShell env assignment): 1 pass / 0 skip, real disposable PostgreSQL 16, preserved namespace lock/CAS and audit transaction. Docker Engine 29.7.2 is available with cached postgres:16-alpine. This is existing published-copy concurrency, not T17 server draft/publish acceptance.
+- Code candidate SHA `c54e18280f3ed3532355031723545f114106748b`; subsequent evidence-only commit is source equivalent. Preview/provider/worker and T05–T23 remain pending. No Production migration, deployment, payment, refund or member message occurred.

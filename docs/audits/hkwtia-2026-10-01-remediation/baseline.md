@@ -23,7 +23,7 @@ Actual readback 2026-10-01 07:25 UTC: 51 ledger rows; one acceptance sentinel; 1
 ## Current verification
 
 - `npm.cmd ci`: pass, unchanged lockfile; 25 dependency advisories (3 low, 13 moderate, 9 high). No automatic upgrades applied.
-- `git diff --name-only e7fa4add247489f525f015007460fb522fb1531b HEAD`: documentation/evidence only.
+- At T00, `git diff --name-only e7fa4add247489f525f015007460fb522fb1531b 60a272b68c334d256d578ade36d8e24ca3be5485`: documentation/evidence only.
 - Typecheck, fresh suite, fixture scale/idempotency and migration rehearsal: pending.
 - Current deployed worker SHA/bindings/schedule readback: unverified; repository config alone is not deployment evidence.
 
