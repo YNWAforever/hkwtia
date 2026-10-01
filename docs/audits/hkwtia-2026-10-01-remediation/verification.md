@@ -30,3 +30,5 @@ Passwords, cookies, tokenized URLs and original personal audit screenshots were 
 - Existing isolated Auth enables localhost and has shared Google configured. Synthetic password identities work. Google and magic-link provider callbacks remain unverified until an approved test identity/recipient completes them.
 - New Production remediation publication/flags are not authorized by the earlier 79-logo release approval.
 T02 follow-up: viewport captures now scroll to the disabled explanation or correction controls, rather than showing the common filters above them. Both real-browser states were rerun and their image hashes differ. Full lint: 0 errors / 67 existing warnings.
+
+T02 candidate gates at `86dab20e`: build passed (267 static pages); full suite returned 6116 pass / 172 skip / 3 failures in two existing positive member-selection tests. Those fixtures did not enable the newly explicit operation capability. The fixtures now explicitly enable the authorized profile operation; focused rerun passed 17 / 0 skip. A fresh full candidate suite is still required. No production behavior was weakened to accommodate a test.
