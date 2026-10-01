@@ -69,3 +69,15 @@ T01–T04 candidate at `63d28428`: full lint passed with 0 errors / 67 existing 
 ## T05 existing identity protections (partial, provider gate remains)
 
 The existing provision repository was retained: actual isolated SQL verifies unique identity creation, concurrent same-email serialization, no membership activation and no privileged email merge. Six focused files / 44 tests passed / 0 skips / 0 failures. Exact command and masked receipt: `evidence/t05/identity.json`. PostgreSQL transport alone is supplied; the production repository executes the queries. This does not prove OAuth or magic-link callback, delivery, expiry or reuse. No provider bug is inferred from the historical passkey interruption. U02–U06 remain open for the provider-specific journeys. No Auth identity or Production row was created.
+
+## T06 / O03 finite grant and legacy retirement slice
+
+**Code fixed; isolated grant boundaries verified. Payment repair U23 remains T08. Production unchanged.**
+
+The stale comp service/action/core now refuse writes, authenticate their own actor, and show localized retirement on Member360. Historic NULL/NULL grants remain byte-identical in real PostgreSQL acceptance. Staff/ExCo cannot create finite grants; their swallowed authorization denial was reproduced and repaired. The current finite grant repository retains superadmin, feature flag, target, plan, seat and time guards. Single grant retries reuse the existing transactional immutable audit with an actor-scoped request key and canonical payload digest: two concurrent requests produce one grant/audit, changed payload conflicts, expiry replay does not reactivate. Batch ledger/handler remains the existing architecture. No schema migration required.
+
+Focused actual PG16/focused run: 35 pass / 0 skip. HTTP/actor guard run: 107 pass / 0 skip. Real isolated Chromium: 3 pass / 0 skip (staff/ExCo retirement; synthetic superadmin finite grant, verified DB actor/audit, no Stripe reference). The new test initially had a TypeScript assertion annotation error; corrected using an explicitly typed authorization function. Only fresh subsequent typecheck/build success counts. Full suite after behavior corrections: 6147 pass / 180 skip / 0 fail, 726 pass files / 69 skip files; skips remain environment-gated and not acceptance passes. Full lint: 0 errors / 67 existing warnings. Commands and masked receipts: evidence/t06/grant.json.
+
+U22 grant entry/expiry boundary passed; U24 manual grant endpoint and role UI passed, whole-site roles remain T18/T22. U25 SQL parallel retry passed; two real browser windows remain T22. U23 paid activation reconciliation is not implemented by a complimentary grant and remains T08. Preview acceptance and Production release are pending.
+
+T06 fresh final gates: explicitly typed test actor authorization corrected; typecheck exit 0, HTTP test 8/0/0, strings exit 0 (297 TSX), build exit 0 (267 static pages). These successful runs supersede the earlier test-only TS2775/TS2459 failures.

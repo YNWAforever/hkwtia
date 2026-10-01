@@ -3693,26 +3693,28 @@
       "noteError": "We could not save the staff note. Please try again."
     },
     "membershipComp": {
-      "title": "Grant a membership",
-      "description": "Creates an active membership without a payment — for a comp, a founding member, or a checkout that took money and never activated.",
+      "title": "Special membership",
+      "description": "The old indefinite grant entry is retired. Use an approved finite grant with a reason and expiry. For a payment already taken, reconcile the original payment and subscription.",
       "planLabel": "Plan",
       "submit": "Grant membership",
       "success": "Membership granted.",
       "invalid": "Choose a plan before granting a membership.",
       "error": "The membership could not be granted.",
-      "duplicate": "This member already has a membership. Open it to change the plan instead of granting a second one."
+      "duplicate": "This member already has a membership. Open it to change the plan instead of granting a second one.",
+      "retired": "This grant entry has been retired. Use the approved finite grant workflow, or payment reconciliation for an existing payment."
     },
     "membershipGrant": {
-      "title": "Finite profile grant",
+      "title": "Special membership",
       "description": "Available only with approved association policy. Enter an explicit start, expiry and reason; dates use Hong Kong time. This creates no Stripe payment.",
       "plan": "Plan",
       "start": "Starts (Hong Kong time)",
       "expiry": "Expires (Hong Kong time)",
       "reason": "Approval reason",
-      "submit": "Create finite grant",
+      "submit": "Create special membership",
       "success": "Finite grant created.",
       "invalid": "Enter a valid plan, date window and reason.",
       "duplicate": "This member already has a live membership.",
+      "conflict": "This request was already used for a different grant. Reload and review the new details before submitting.",
       "error": "The finite grant could not be created."
     },
     "communications": {

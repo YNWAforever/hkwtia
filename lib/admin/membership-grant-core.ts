@@ -1,3 +1,4 @@
+import {z} from "zod";
 import {batchRequestSchema} from "@/lib/admin/batches/types";
 import {grantInputSchema} from "@/lib/membership/grants";
 
@@ -38,4 +39,7 @@ export function parseBatchGrantForm(formData: FormData) {
       reason: formData.get("reason"),
     },
   });
+}
+export function parseGrantRequestKey(formData: FormData): string {
+  return z.string().uuid().parse(formData.get("idempotencyKey")).toLowerCase();
 }

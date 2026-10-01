@@ -1,37 +1,16 @@
 "use server";
-
 import {notFound} from "next/navigation";
-
-import {
-  runCompMembershipAction,
-  type CompMembershipActionState,
-} from "@/lib/admin/membership-comp-action-core";
-import {revalidateAdminPath} from "@/lib/admin/revalidate-path";
+import {getTranslations} from "next-intl/server";
+import type {CompMembershipActionState} from "@/lib/admin/membership-comp-action-core";
 import {requireAdminActor} from "@/lib/auth/actor";
 import {isAuthorizationDenial} from "@/lib/auth/authorization-denial";
-import {adminMembershipRepository} from "@/lib/db/repos/admin-membership";
-
-export type CompMembershipActionMessages = Readonly<{
-  successMessage: string;
-  validationMessage: string;
-  errorMessage: string;
-  duplicateMessage: string;
-}>;
-
-export async function compMembershipAction(
-  path: string,
-  messages: CompMembershipActionMessages,
-  state: CompMembershipActionState,
-  formData: FormData,
-): Promise<CompMembershipActionState> {
-  try {
-    return await runCompMembershipAction(state, formData, {...messages, mutate: async (input) => {
-      const actor = await requireAdminActor();
-      await adminMembershipRepository.comp(actor, input);
-      revalidateAdminPath(path);
-    }});
-  } catch (error) {
-    if (isAuthorizationDenial(error)) notFound();
-    throw error;
-  }
+export type CompMembershipActionMessages=Readonly<{successMessage:string;validationMessage:string;errorMessage:string;duplicateMessage:string}>;
+/** Stale requests authenticate independently and receive a safe, localized retired result. */
+export async function compMembershipAction(_path:string,_messages:CompMembershipActionMessages,_state:CompMembershipActionState,_formData:FormData):Promise<CompMembershipActionState>{
+ void _path; void _messages; void _state; void _formData;
+ try{
+  await requireAdminActor();
+  const t=await getTranslations("Admin.membershipComp");
+  return {status:"error",code:"LEGACY_COMP_RETIRED",message:t("retired")};
+ }catch(error){if(isAuthorizationDenial(error))notFound();throw error;}
 }

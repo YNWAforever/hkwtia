@@ -1,3 +1,4 @@
+import {randomUUID} from "node:crypto";
 import {notFound} from "next/navigation";
 import Link from "next/link";
 import {getTranslations, setRequestLocale} from "next-intl/server";
@@ -14,7 +15,6 @@ import {parsePageQuery} from "@/lib/admin/pagination";
 import {adminMembersRepository, memberTimelineKindSchema, type MemberTimelineKind, type MemberTimelineResult} from "@/lib/db/repos/admin-members";
 import {appendMemberNoteAction} from "@/lib/admin/member-note-actions";
 import {updateMemberProfileAction} from "@/lib/admin/member-profile-actions";
-import {compMembershipAction} from "@/lib/admin/membership-comp-actions";
 import {grantMembershipAction} from "@/lib/admin/membership-grant-actions";
 import {requireAdminPageActor} from "@/lib/admin/page-auth";
 import {getEditableMemberProfile} from "@/lib/db/repos/admin-member-profile";
@@ -227,24 +227,11 @@ export default async function AdminMember360Page({params, searchParams}: Props) 
           values={editable}
         />
         : null}
-      <MembershipCompForm
-        action={compMembershipAction.bind(null, `/${locale}/admin/members/${profileId.data}`, {
-          successMessage: t("membershipComp.success"),
-          validationMessage: t("membershipComp.invalid"),
-          errorMessage: t("membershipComp.error"),
-          duplicateMessage: t("membershipComp.duplicate"),
-        })}
-        labels={{
-          title: t("membershipComp.title"),
-          description: t("membershipComp.description"),
-          planLabel: t("membershipComp.planLabel"),
-          submit: t("membershipComp.submit"),
-        }}
-        profileId={profileId.data}
-      />
+      <MembershipCompForm labels={{title: t("membershipComp.title"), description: t("membershipComp.description")}}/>
       {actor.kind === "superadmin" && process.env.MEMBERSHIP_GRANTS_ENABLED === "true" ? <MembershipGrantForm
+        idempotencyKey={randomUUID()}
         action={grantMembershipAction.bind(null, profileId.data, `/${locale}/admin/members/${profileId.data}`, {
-          success: t("membershipGrant.success"), invalid: t("membershipGrant.invalid"), duplicate: t("membershipGrant.duplicate"), error: t("membershipGrant.error"),
+          success: t("membershipGrant.success"), invalid: t("membershipGrant.invalid"), duplicate: t("membershipGrant.duplicate"), conflict: t("membershipGrant.conflict"), error: t("membershipGrant.error"),
         })}
         labels={{title: t("membershipGrant.title"), description: t("membershipGrant.description"), plan: t("membershipGrant.plan"), start: t("membershipGrant.start"), expiry: t("membershipGrant.expiry"), reason: t("membershipGrant.reason"), submit: t("membershipGrant.submit")}}
       /> : null}
