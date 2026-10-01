@@ -2,7 +2,7 @@ import "server-only";
 
 import {z} from "zod";
 
-import {batchOperationHandlers} from "@/lib/admin/batches/handlers/registry";
+import {resolveBatchCapability} from "@/lib/admin/batches/capabilities";
 import {adminBatchesRepository} from "@/lib/db/repos/admin-batches";
 import {batchPreviewDigest, batchRequestSchema, batchTargetSchema, type BatchItemFilter, type BatchOperation, type BatchRequest, type BatchPreview, type BatchState, type BatchTarget} from "@/lib/admin/batches/types";
 import {requireAdmin} from "@/lib/auth/authorize";
@@ -21,15 +21,11 @@ const batchIdSchema = z.string().uuid();
 const commitSchema = z.object({batchId: batchIdSchema, previewDigest: z.string().regex(/^[a-f0-9]{64}$/)}).strict();
 
 /** No client actor or raw SQL enters the batch request; unregistered operations fail before persistence. */
-export async function prepareBatch(actor: Actor, input: unknown, store: BatchGateway = adminBatchesRepository, capabilities: ReadonlySet<BatchOperation> = new Set(process.env.ADMIN_BATCH_ENABLED === "true" ? Object.keys(batchOperationHandlers) as BatchOperation[] : [])): Promise<{batchId: string}> {
+export async function prepareBatch(actor: Actor, input: unknown, store: BatchGateway = adminBatchesRepository, capabilities?: ReadonlySet<BatchOperation>): Promise<{batchId: string}> {
   requireAdmin(actor);
   const request = batchRequestSchema.parse(input);
-  if (!capabilities.has(request.operation) || (request.operation === "import_commit" && process.env.MEMBER_IMPORT_ENABLED !== "true") || (request.operation === "membership_grant" && (process.env.MEMBERSHIP_GRANTS_ENABLED !== "true" || process.env.MEMBERSHIP_GRANT_BATCH_ENABLED !== "true"))) throw new Error("BATCH_OPERATION_UNAVAILABLE");
-  if (["renewal_reminder", "profile_update_invite"].includes(request.operation) && process.env.MEMBER_COMMUNICATION_BATCH_ENABLED !== "true") throw new Error("BATCH_OPERATION_UNAVAILABLE");
-  if (request.operation === "export_event_attendees" && process.env.EVENT_ATTENDEE_EXPORT_ENABLED !== "true") throw new Error("BATCH_OPERATION_UNAVAILABLE");
-  if (request.operation === "export_members" && process.env.MEMBER_EXPORT_ENABLED !== "true") throw new Error("BATCH_OPERATION_UNAVAILABLE");
-  if (request.operation === "ticket_resend" && process.env.TICKET_RESEND_BATCH_ENABLED !== "true") throw new Error("BATCH_OPERATION_UNAVAILABLE");
-  if (request.operation === "membership_grant" && actor.kind !== "superadmin") throw new Error("FORBIDDEN");
+  const capability = resolveBatchCapability(actor, request.operation, capabilities);
+  if (!capability.available) throw new Error(capability.reasonCode ?? "BATCH_OPERATION_UNAVAILABLE");
   return store.create(actor, request, batchPreviewDigest(request));
 }
 export async function getBatchPreview(actor: Actor, batchId: unknown, store: BatchGateway = adminBatchesRepository, cursor?: string | null, filter: BatchItemFilter = "all"): Promise<BatchPreview> {

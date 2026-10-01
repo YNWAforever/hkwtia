@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-10-01T08:00:54.046Z",
+  "environment": "local confirmed isolated DB/Auth",
+  "syntheticPasswordLogin": true,
+  "productionFlagsChanged": false,
+  "receipts": [
+    {
+      "scenario": "disabled",
+      "selectionCount": 0,
+      "historyStatus": 200
+    },
+    {
+      "scenario": "partial",
+      "profilePatchAvailable": true,
+      "exportUnavailable": true
+    },
+    {
+      "scenario": "member-not-authorized",
+      "privilegedListAbsent": true,
+      "route": "/zh/admin-login"
+    }
+  ]
+}

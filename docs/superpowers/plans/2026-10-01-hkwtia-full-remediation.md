@@ -126,11 +126,11 @@
 
 **介面／契約：** 擬新增 getBatchCapabilities(actor: AdminActor): Promise<readonly {operation: BatchOperation; available: boolean; reasonCode: string | null}[]>，消費現有 server env/role guards。UI 使用 server 結果，server action 仍獨立重驗；讀歷史權限與啟用新作業分開。
 
-- [ ] **建立行為證據：** noSelectionWhenNoOperations；roleAndFlagMatrix；historyReadableWhenDisabled；staleUiCannotBypassActionFlag。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 沒有可用選取操作時隱藏 checkbox/全選 toolbar，列表顯示「此環境暫未開放批次操作」。有部分操作時只顯示可用操作及具體停用原因；不在前台暴露秘密配置。不得為此修改 production flags。
-- [ ] **驗證：** npm exec -- vitest run tests/unit/audit-full-batch-capabilities.test.tsx tests/unit/admin-batch-service.test.ts；停用/部分啟用/無權限三種 UI。
-- [ ] **結案與提交：** 勾選一定對應可用動作；停用解釋及歷史可讀；服務端拒絕仍有效。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: align member selection with batch capabilities`。
+- [x] **建立行為證據：** noSelectionWhenNoOperations；roleAndFlagMatrix；historyReadableWhenDisabled；staleUiCannotBypassActionFlag。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 沒有可用選取操作時隱藏 checkbox/全選 toolbar，列表顯示「此環境暫未開放批次操作」。有部分操作時只顯示可用操作及具體停用原因；不在前台暴露秘密配置。不得為此修改 production flags。
+- [x] **驗證：** npm exec -- vitest run tests/unit/audit-full-batch-capabilities.test.tsx tests/unit/admin-batch-service.test.ts；停用/部分啟用/無權限三種 UI。
+- [x] **結案與提交：** 勾選一定對應可用動作；停用解釋及歷史可讀；服務端拒絕仍有效。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: align member selection with batch capabilities`。
 
 ### T03 · 分群完整分頁與 campaign context
 

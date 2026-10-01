@@ -13,3 +13,19 @@
 - `npm.cmd run typecheck`: pass. Focused ESLint: pass. Final full lint/build/candidate suite and Preview verification remain pending.
 
 Passwords, cookies, tokenized URLs and original personal audit screenshots were not copied to these receipts.
+
+## T02 / O02 / U26 (U57 release prerequisites remain pending)
+
+**Code fixed; local isolated acceptance passed. Production flags unchanged.**
+
+- `npm.cmd exec -- vitest run tests/unit/audit-full-batch-capabilities.test.tsx`: 5 target behavior failures / 3 pass before implementation: useless checkbox toolbar, partial rollout, grant role and forged-member capability boundary.
+- `npm.cmd exec -- vitest run tests/unit/audit-full-batch-capabilities.test.tsx tests/unit/admin-batch-service.test.ts tests/unit/member-bulk-table.test.tsx`: 19 pass / 0 skip.
+- Shared server capability resolver preserves all eight registered operations, existing per-operation flags and superadmin-only grants. UI receives only enabled operation names. Server action independently loads its actor and calls the same preparation guard; no client capability set is accepted. Existing server-only test injection remains a test port.
+- `node --env-file=.env.local .playwright/t02-browser.mjs`: real Chromium + isolated Auth/DB. Disabled state: no table checkboxes, explanation, history HTTP 200. Partial state: correction available, export unavailable with explanation. Authenticated member: privileged list absent, redirected to `/zh/admin-login`. Only ignored local flags changed and were restored in `finally`.
+- Typecheck, focused ESLint and strings gate passed. Full candidate suite/build, Preview and app/worker activation order remain pending.
+
+## Known external verification boundaries
+
+- Existing worker's secret APP_URL target and source SHA are unavailable in readback. A dedicated isolated tagged worker is required for T11; do not invoke the existing deployed worker to guess.
+- Existing isolated Auth enables localhost and has shared Google configured. Synthetic password identities work. Google and magic-link provider callbacks remain unverified until an approved test identity/recipient completes them.
+- New Production remediation publication/flags are not authorized by the earlier 79-logo release approval.

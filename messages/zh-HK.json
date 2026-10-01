@@ -2996,7 +2996,9 @@
     "members": {
       "batch": {"field": "更改欄位", "tags": "營運標籤", "tagsHelp": "以逗號分隔，最多 10 個標籤，每個最多 30 字。將取代現有標籤；留空代表清除。", "owner": "負責職員", "unassigned": "未分配","preview": "預覽資料修正", "reason": "更改原因", "language": "偏好語言", "english": "英文", "chinese": "繁體中文", "error": "無法準備批次。請檢查選取項目後重試。", "exportPreview": "預覽 CSV 匯出", "exportFields": "匯出欄位", "exportError": "無法準備匯出。"},
       "importLink": "匯入會員",
-      "selection": {"page": "選取本頁", "all": "選取全部 {count} 個相符會員", "clear": "清除選取", "selected": "已選取 {count} 個", "row": "選取 {name}", "explicitScope": "只包含已勾選的會員，可跨已瀏覽頁面。", "allMatchingScope": "包含所有符合篩選條件的會員，扣除已取消勾選的項目。"},
+      "selection": {"page": "選取本頁", "all": "選取全部 {count} 個相符會員", "clear": "清除選取", "selected": "已選取 {count} 個", "row": "選取 {name}", "explicitScope": "只包含已勾選的會員，可跨已瀏覽頁面。", "allMatchingScope": "包含所有符合篩選條件的會員，扣除已取消勾選的項目。",
+        "unavailable": "此環境暫未開放批次操作。你仍可查看會員及批次紀錄。",
+        "exportUnavailable": "此環境暫未開放會員匯出功能。"},
       "savedViews": {"title": "已儲存檢視", "name": "檢視名稱", "save": "儲存檢視", "saved": "檢視已儲存", "invalid": "請檢查名稱及篩選條件。", "error": "無法儲存檢視，請重試。", "shared": "與職員共用", "empty": "暫無已儲存檢視。"},
       "filters": {"status": "會籍狀態", "plan": "會籍計劃", "renewalFrom": "續會日期由（香港時間）", "renewalTo": "續會日期至（香港時間）", "companyId": "機構 ID", "locale": "偏好語言", "completeness": "會員資料完整度", "sort": "排序", "apply": "套用篩選", "clear": "清除篩選", "any": "全部", "complete": "資料齊全", "incomplete": "欠缺聯絡資料", "nameAsc": "姓名 A–Z", "nameDesc": "姓名 Z–A", "renewalAsc": "最近續會", "english": "英文", "chinese": "繁體中文", "viewsLabel": "預設檢視", "views": {"active": "有效", "due30": "30 日內到期", "due60": "60 日內到期", "due90": "90 日內到期", "pastDue": "欠費", "expired": "已屆滿", "missingData": "欠缺資料"}},
       "view": "查看",

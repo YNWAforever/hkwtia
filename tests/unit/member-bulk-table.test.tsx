@@ -11,22 +11,24 @@ const member = (id: string, name: string) => ({profileId: id, membershipId: id, 
 const labels = {name: "Name", email: "Email", company: "Company", plan: "Plan", status: "Status", renewal: "Renewal", score: "Score", view: "View", caption: "Members", empty: "No members", unavailable: "Unavailable", previous: "Previous", next: "Next"};
 const selectionLabels = {page: "Select this page", all: "Select all {count} matching", clear: "Clear selection", selected: "{count} selected", row: "Select {name}", explicitScope: "Checked members only", allMatchingScope: "All matching members except exclusions"};
 
+const defaultBatchLabels = {preview: "Preview correction", reason: "Reason", language: "Language", english: "English", chinese: "Chinese", error: "Could not prepare batch"};
+
 describe("member page selection", () => {
   it("retains a page selection across pagination and clears it when filters change", () => {
     sessionStorage.clear();
-    const first = render(<MemberBulkTable locale="en" items={[member("a", "Ada")]} totalMatching={10} labels={labels} selectionLabels={selectionLabels} selectionKey="active" rowHrefs={{a: "/admin/members/a"}} previousHref={null} nextHref={"/admin/members?cursor=next"}/>);
+    const first = render(<MemberBulkTable availableOperations={["profile_patch"]} batchLabels={defaultBatchLabels} locale="en" items={[member("a", "Ada")]} totalMatching={10} labels={labels} selectionLabels={selectionLabels} selectionKey="active" rowHrefs={{a: "/admin/members/a"}} previousHref={null} nextHref={"/admin/members?cursor=next"}/>);
     fireEvent.click(screen.getByRole("checkbox", {name: "Select Ada"}));
     first.unmount();
-    const second = render(<MemberBulkTable locale="en" items={[member("b", "Bea")]} totalMatching={10} labels={labels} selectionLabels={selectionLabels} selectionKey="active" rowHrefs={{b: "/admin/members/b"}} previousHref={"/admin/members"} nextHref={null}/>);
+    const second = render(<MemberBulkTable availableOperations={["profile_patch"]} batchLabels={defaultBatchLabels} locale="en" items={[member("b", "Bea")]} totalMatching={10} labels={labels} selectionLabels={selectionLabels} selectionKey="active" rowHrefs={{b: "/admin/members/b"}} previousHref={"/admin/members"} nextHref={null}/>);
     expect(screen.getByRole("status")).toHaveTextContent("1 selected");
     second.unmount();
-    render(<MemberBulkTable locale="en" items={[member("b", "Bea")]} totalMatching={2} labels={labels} selectionLabels={selectionLabels} selectionKey="expired" rowHrefs={{b: "/admin/members/b"}} previousHref={null} nextHref={null}/>);
+    render(<MemberBulkTable availableOperations={["profile_patch"]} batchLabels={defaultBatchLabels} locale="en" items={[member("b", "Bea")]} totalMatching={2} labels={labels} selectionLabels={selectionLabels} selectionKey="expired" rowHrefs={{b: "/admin/members/b"}} previousHref={null} nextHref={null}/>);
     expect(screen.getByRole("status")).toHaveTextContent("0 selected");
   });
 
   it("selects this page before an explicit all-matching choice and permits exclusions", () => {
     sessionStorage.clear();
-    render(<MemberBulkTable locale="en" items={[member("a", "Ada"), member("b", "Bea")]} totalMatching={10} labels={labels} selectionLabels={selectionLabels} selectionKey="active" rowHrefs={{a: "/admin/members/a", b: "/admin/members/b"}} previousHref={null} nextHref={null}/>);
+    render(<MemberBulkTable availableOperations={["profile_patch"]} batchLabels={defaultBatchLabels} locale="en" items={[member("a", "Ada"), member("b", "Bea")]} totalMatching={10} labels={labels} selectionLabels={selectionLabels} selectionKey="active" rowHrefs={{a: "/admin/members/a", b: "/admin/members/b"}} previousHref={null} nextHref={null}/>);
     fireEvent.click(screen.getByRole("checkbox", {name: "Select this page"}));
     expect(screen.getByRole("status")).toHaveTextContent("2 selected");
     expect(screen.getByText("Checked members only")).toBeInTheDocument();
@@ -45,7 +47,7 @@ describe("member selection to batch preview", () => {
   it("submits only the explicit page IDs and navigates to the durable preview", async () => {
     sessionStorage.clear();
     batchSpies.prepare.mockResolvedValueOnce({batchId: "11111111-1111-4111-8111-111111111111"});
-    render(<MemberBulkTable locale="en" items={[member("a", "Ada"), member("b", "Bea")]} totalMatching={10} labels={labels} selectionLabels={selectionLabels} selectionKey="active" rowHrefs={{a: "/admin/members/a", b: "/admin/members/b"}} previousHref={null} nextHref={null} batchLabels={{preview: "Preview language change", reason: "Reason", language: "Language", english: "English", chinese: "Chinese", error: "Could not prepare batch"}}/>);
+    render(<MemberBulkTable availableOperations={["profile_patch", "export_members"]} locale="en" items={[member("a", "Ada"), member("b", "Bea")]} totalMatching={10} labels={labels} selectionLabels={selectionLabels} selectionKey="active" rowHrefs={{a: "/admin/members/a", b: "/admin/members/b"}} previousHref={null} nextHref={null} batchLabels={{preview: "Preview language change", reason: "Reason", language: "Language", english: "English", chinese: "Chinese", error: "Could not prepare batch"}}/>);
     fireEvent.click(screen.getByRole("checkbox", {name: "Select Ada"}));
     fireEvent.change(screen.getByRole("textbox", {name: "Reason"}), {target: {value: "Member requested English"}});
     fireEvent.click(screen.getByRole("button", {name: "Preview language change"}));
@@ -55,7 +57,7 @@ describe("member selection to batch preview", () => {
   it("previews only the chosen tags correction, with no accidental locale change", async () => {
     sessionStorage.clear();
     batchSpies.prepare.mockReset().mockResolvedValue({batchId: "11111111-1111-4111-8111-111111111111"});
-    render(<MemberBulkTable locale="en" items={[member("a", "Ada")]} totalMatching={1} labels={labels} selectionLabels={selectionLabels} selectionKey="active" rowHrefs={{a: "/admin/members/a"}} previousHref={null} nextHref={null} batchLabels={{preview: "Preview correction", reason: "Reason", language: "Language", english: "English", chinese: "Chinese", error: "Could not prepare batch", patch: {field: "Change field", tags: "Operational tags", tagsHelp: "Comma-separated; replaces existing tags", owner: "Responsible staff", unassigned: "Unassigned"}}}/>);
+    render(<MemberBulkTable availableOperations={["profile_patch", "export_members"]} locale="en" items={[member("a", "Ada")]} totalMatching={1} labels={labels} selectionLabels={selectionLabels} selectionKey="active" rowHrefs={{a: "/admin/members/a"}} previousHref={null} nextHref={null} batchLabels={{preview: "Preview correction", reason: "Reason", language: "Language", english: "English", chinese: "Chinese", error: "Could not prepare batch", patch: {field: "Change field", tags: "Operational tags", tagsHelp: "Comma-separated; replaces existing tags", owner: "Responsible staff", unassigned: "Unassigned"}}}/>);
     fireEvent.click(screen.getByRole("checkbox", {name: "Select Ada"}));
     fireEvent.change(screen.getByRole("combobox", {name: "Change field"}), {target: {value: "tags"}});
     fireEvent.change(screen.getByRole("textbox", {name: "Operational tags"}), {target: {value: "priority, renewal"}});
@@ -64,7 +66,7 @@ describe("member selection to batch preview", () => {
     await waitFor(() => expect(batchSpies.prepare).toHaveBeenCalledWith(expect.objectContaining({payload: {patch: {tags: ["priority", "renewal"]}, reason: "Verified operational tags"}})));
   });  it("previews an explicitly selected responsible staff member without changing tags or locale", async () => {
     sessionStorage.clear(); batchSpies.prepare.mockReset().mockResolvedValue({batchId: "11111111-1111-4111-8111-111111111111"});
-    render(<MemberBulkTable locale="en" ownerOptions={[{id: "staff-a", name: "Synthetic Staff"}]} items={[member("a", "Ada")]} totalMatching={1} labels={labels} selectionLabels={selectionLabels} selectionKey="active" rowHrefs={{a: "/admin/members/a"}} previousHref={null} nextHref={null} batchLabels={{preview: "Preview correction", reason: "Reason", language: "Language", english: "English", chinese: "Chinese", error: "Could not prepare batch", patch: {field: "Change field", tags: "Operational tags", tagsHelp: "Replaces tags", owner: "Responsible staff", unassigned: "Unassigned"}}}/>);
+    render(<MemberBulkTable availableOperations={["profile_patch", "export_members"]} locale="en" ownerOptions={[{id: "staff-a", name: "Synthetic Staff"}]} items={[member("a", "Ada")]} totalMatching={1} labels={labels} selectionLabels={selectionLabels} selectionKey="active" rowHrefs={{a: "/admin/members/a"}} previousHref={null} nextHref={null} batchLabels={{preview: "Preview correction", reason: "Reason", language: "Language", english: "English", chinese: "Chinese", error: "Could not prepare batch", patch: {field: "Change field", tags: "Operational tags", tagsHelp: "Replaces tags", owner: "Responsible staff", unassigned: "Unassigned"}}}/>);
     fireEvent.click(screen.getByRole("checkbox", {name: "Select Ada"}));
     fireEvent.change(screen.getByRole("combobox", {name: "Change field"}), {target: {value: "ownerProfileId"}});
     fireEvent.change(screen.getByRole("combobox", {name: "Responsible staff"}), {target: {value: "staff-a"}});
