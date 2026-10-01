@@ -78,8 +78,8 @@
       "passed": 6238,
       "skipped": 259,
       "failed": 0,
-      "passFiles": 815,
-      "allSkipFiles": 0
+      "passFiles": 737,
+      "allSkipFiles": 78
     },
     "lint": {
       "exitCode": 0,
