@@ -29,3 +29,4 @@ Passwords, cookies, tokenized URLs and original personal audit screenshots were 
 - Existing worker's secret APP_URL target and source SHA are unavailable in readback. A dedicated isolated tagged worker is required for T11; do not invoke the existing deployed worker to guess.
 - Existing isolated Auth enables localhost and has shared Google configured. Synthetic password identities work. Google and magic-link provider callbacks remain unverified until an approved test identity/recipient completes them.
 - New Production remediation publication/flags are not authorized by the earlier 79-logo release approval.
+T02 follow-up: viewport captures now scroll to the disabled explanation or correction controls, rather than showing the common filters above them. Both real-browser states were rerun and their image hashes differ. Full lint: 0 errors / 67 existing warnings.
