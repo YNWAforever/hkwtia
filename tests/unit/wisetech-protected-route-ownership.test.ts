@@ -307,8 +307,9 @@ describe("WiseTech protected route ownership", () => {
     // Showcase lead recovery and ticket email delivery each add a protected cron endpoint.
     // Audit remediation adds checkout recovery, membership checkout status, and event notifications.
     // Full remediation T10 adds the authenticated application case detail: 79 + 1 = 80.
-    expect(codeFiles).toHaveLength(80);
-    expect(inventoryFiles).toHaveLength(80);
+    // Full remediation T15 adds the actor-owned correction report: 80 + 1 = 81.
+    expect(codeFiles).toHaveLength(81);
+    expect(inventoryFiles).toHaveLength(81);
     expect(inventoryFiles).toEqual(codeFiles);
     expect(validateRouteParity([], {
       appRoutes: new Set<string>(),
@@ -334,7 +335,8 @@ describe("WiseTech protected route ownership", () => {
     // repository method carries its own capability actor (plan S-14).
     // Phase D Task 8 added the public /api/og card renderer: 12 + 1 = 13.
     // Audit remediation adds scoped checkout endpoints and the actor-owned batch status read.
-    expect(count("api-handler")).toBe(18);
+    // T15 adds the private correction report.
+    expect(count("api-handler")).toBe(19);
     expect(count("webhook-handler")).toBe(2);
     // Phase C2 Task 10 (C-5, D-10) added the ten-minute WhatsApp send queue: 9 + 1 = 10.
     // Phase D-4d Task 2 added the event-cancellation refund sweep: 10 + 1 = 11.
@@ -342,7 +344,7 @@ describe("WiseTech protected route ownership", () => {
     // Audit remediation adds the cancellation notification job.
     expect(count("job-handler")).toBe(18);
     expect(protectedRouteOwnershipInventory.filter(({family}) => family === "admin")).toHaveLength(42);
-    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(38);
+    expect(protectedRouteOwnershipInventory.filter(({family}) => family === "api")).toHaveLength(39);
   });
 
   it("publishes only the canonical deeply immutable protected conventions export", () => {
