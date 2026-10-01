@@ -24,6 +24,9 @@ import {completeApplication, startJoin} from "@/lib/membership/join-service";
 import type {JoinStep} from "@/lib/membership/onboarding";
 import {getPlan, type PlanCode} from "@/lib/membership/plans";
 import {createCheckoutSession} from "@/lib/billing/checkout-service";
+import {policyAcceptanceEnabled,requireCurrentMembershipPolicy} from "@/lib/membership/policy";
+import {requirePolicyAcceptanceForApplication} from "@/lib/membership/policy-acceptance";
+import {recordPolicyAcceptance} from "@/lib/db/repos/membership-policy-acceptances";
 import {loadPendingJoinBillingState} from "@/lib/membership/join-billing-state";
 import {type BillingInterval} from "@/lib/membership/catalog";
 import {localizedPath} from "@/lib/urls";
@@ -144,6 +147,13 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
   try {
     const actor = await requireActor();
     if (actor.kind !== "member") return {message: t("errors.auth")};
+    if(policyAcceptanceEnabled()){
+      const policy=requireCurrentMembershipPolicy();
+      if(formData.get("policyAccepted")!=="on"){
+        if(!applicationId)return {message:t("policy.required")};
+        await requirePolicyAcceptanceForApplication(actor,applicationId);
+      }else if(formData.get("policyVersion")!==policy.version)return {message:t("policy.stale")};
+    }
     const existing = await profilesRepository.getById(actor, actor.profileId);
     // Programme D-7: the join step is the consent source; provenance is stamped
     // here, and completeApplication() only forwards name/locale afterwards.
@@ -169,6 +179,7 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
     }).catch(() => undefined);
     const application = await startJoin(actor, {plan, applicationId});
     const id = application.applicationId;
+    if(policyAcceptanceEnabled()&&formData.get("policyAccepted")==="on")await recordPolicyAcceptance(actor,{applicationId:id,policyVersion:String(formData.get("policyVersion"))});
     const companyPlan = ["startup", "corporate"].includes(plan);
     if (companyPlan) {
       await applicationsRepository.update(actor, id, {currentStep: "company"});
@@ -184,6 +195,7 @@ export async function saveProfile(locale: AppLocale, plan: PlanCode, application
     redirectToOutcome(locale, plan, result);
   } catch (error) {
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
+    if(error instanceof Error&&error.message.startsWith("MEMBERSHIP_POLICY_"))return {message:t(error.message==="MEMBERSHIP_POLICY_VERSION_STALE"?"policy.stale":"policy.required")};
     return {message: t("errors.save")};
   }
 }
@@ -210,6 +222,10 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
     if (actor.kind !== "member") return {message: t("errors.auth")};
     const application = await applicationsRepository.getById(actor, applicationId);
     if (!application || application.planCode !== plan || application.applicantUserId !== actor.profileId) return {message: t("errors.save")};
+    if(policyAcceptanceEnabled()){
+      if(formData.get("policyAccepted")==="on")await recordPolicyAcceptance(actor,{applicationId,policyVersion:String(formData.get("policyVersion"))});
+      else await requirePolicyAcceptanceForApplication(actor,applicationId);
+    }
     const company = application.companyId
       ? await companiesRepository.update(actor, application.companyId, parsed.data)
       : await companiesRepository.createForApplication(actor, applicationId, parsed.data);
@@ -226,6 +242,7 @@ export async function saveCompany(locale: AppLocale, plan: PlanCode, application
     redirectToOutcome(locale, plan, result);
   } catch (error) {
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
+    if(error instanceof Error&&error.message.startsWith("MEMBERSHIP_POLICY_"))return {message:t(error.message==="MEMBERSHIP_POLICY_VERSION_STALE"?"policy.stale":"policy.required")};
     return {message: t("errors.save")};
   }
 }
@@ -238,6 +255,13 @@ export async function beginMembershipCheckoutAction(formData: FormData): Promise
   const actor = await requireActor();
   const state = await loadPendingJoinBillingState(actor, membershipId.data);
   if (!state) throw new Error("CHECKOUT_NOT_AVAILABLE");
-  const session = await createCheckoutSession(state.actor, state.membership.id, locale.data);
+  let session:{url:string};
+  try{
+    if(policyAcceptanceEnabled()&&formData.get("policyAccepted")==="on")await recordPolicyAcceptance(state.actor,{applicationId:state.application.id,policyVersion:String(formData.get("policyVersion"))});
+    session=await createCheckoutSession(state.actor,state.membership.id,locale.data);
+  }catch(error){
+    if(error instanceof Error&&error.message.startsWith("MEMBERSHIP_POLICY_"))redirect(localizedPath(locale.data,"/join/checkout")+"?"+new URLSearchParams({membership_id:state.membership.id,policyError:error.message==="MEMBERSHIP_POLICY_VERSION_STALE"?"stale":"required"}));
+    throw error;
+  }
   redirect(session.url);
 }

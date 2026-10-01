@@ -6,6 +6,8 @@ import type {AppLocale} from "@/i18n/routing";
 import {requireActor} from "@/lib/auth/actor";
 import {createBillingPortalSession, createCheckoutSession} from "@/lib/billing/checkout-service";
 import {localizedPath} from "@/lib/urls";
+import {policyAcceptanceEnabled} from "@/lib/membership/policy";
+import {membershipsRepository} from "@/lib/db/repos/memberships";
 import {getBillingSummary} from "@/lib/portal/billing-summary";
 
 type Props = Readonly<{params: Promise<{locale: string}>; searchParams: Promise<Record<string, string | string[] | undefined>>}>;
@@ -32,6 +34,11 @@ export default async function BillingPage({params, searchParams}: Props) {
     actions[membership.id] = async () => {
       "use server";
       const currentActor = await requireActor();
+      if(membership.recovery==="new_checkout"&&policyAcceptanceEnabled()){
+        const current=await membershipsRepository.getBillingAccess(currentActor,membership.id);
+        if(current.status!=="pending_payment"||current.stripeSubscriptionId)redirect(errorPath);
+        redirect(localizedPath(locale,"/join/checkout")+"?membership_id="+encodeURIComponent(current.id));
+      }
       let session: {url: string};
       try {
         session = membership.recovery === "new_checkout"

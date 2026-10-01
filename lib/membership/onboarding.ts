@@ -1,6 +1,7 @@
 import "server-only";
 
 import type {Actor} from "@/lib/membership/lifecycle";
+import {requirePolicyAcceptanceForApplication} from "@/lib/membership/policy-acceptance";
 import {enrollActivatedMembership} from "@/lib/automation/enrollment";
 import {journeysRepository, type JourneysRepository} from "@/lib/db/repos/journeys";
 import {applicationsRepository} from "@/lib/db/repos/applications";
@@ -269,6 +270,7 @@ export async function completeApplication(
   if (application.status === "pending_review") return {applicationId: application.id, next: "review"};
   if (application.status === "pending_payment") return {applicationId: application.id, next: "checkout"};
 
+  await requirePolicyAcceptanceForApplication(actor,application.id);
   const target = companyId ? {ownerUserId: null, companyId} : {ownerUserId: actor.profileId, companyId: null};
   const membershipStatus = plan.billingBehavior === "free" ? "active" : plan.billingBehavior === "review" ? "pending_review" : "pending_payment";
   const membership = await createMembershipOnce(actor, application.id, {

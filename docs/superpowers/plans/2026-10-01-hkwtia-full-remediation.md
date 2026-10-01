@@ -284,11 +284,13 @@
 
 **介面／契約：** 擬新增 MembershipPolicy={version:string; effectiveAt:string; approvedAt:string; approvedBy:string; localeContent:Record<"en"|"zh-HK",string>}；recordPolicyAcceptance(actor: Actor,input:{applicationId:string;policyVersion:string}): Promise<void> 在 server 核對 owner/當前批准版本，留 timestamp 與 content hash。沿用既有 schema 若已有等價欄位。
 
-- [ ] **建立行為證據：** 未批准版本不能成為 active policy；舊版本失效要求重閱；偽造 application owner 被拒；同版本重試冪等；價錢仍來自 server catalog/Stripe。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 把需要 WTIA 決定的續費方式、寬限、取消生效、退款、發票/席位、審批計劃、特別授權角色列成具體選項/影響/負責人。可先完成 schema/UI/測試，不填假條款。批准後同一版本用在方案、FAQ、checkout 及客服；不把條款寫死到多處。沒有批准內容不自動改正式 checkout 行為。
+- [x] **建立行為證據：** 未批准版本不能成為 active policy；舊版本失效要求重閱；偽造 application owner 被拒；同版本重試冪等；價錢仍來自 server catalog/Stripe。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 把需要 WTIA 決定的續費方式、寬限、取消生效、退款、發票/席位、審批計劃、特別授權角色列成具體選項/影響/負責人。可先完成 schema/UI/測試，不填假條款。批准後同一版本用在方案、FAQ、checkout 及客服；不把條款寫死到多處。沒有批准內容不自動改正式 checkout 行為。
 - [ ] **驗證：** npm exec -- vitest run tests/unit/audit-full-policy-acceptance.test.ts；隔離 migration 正反相容及 checkout 中英預覽；記錄政策批准文件引用。
 - [ ] **結案與提交：** 工程 ready 與業務 approved 分開；相關正式功能只在批准版本存在後推出。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`feat: version membership policies and checkout acceptance`。
+
+**工程驗證：** 隔離 SQL 5 pass，純政策 10 pass，回歸 204 pass，擴充 focused 27 pass；真 Chromium／Stripe TEST checkout 1 pass。政策 registry 空白且 flag 預設停用；正式條款／批准文件 D01–D06 未提供，完整業務驗收及公開方案/FAQ T20 保持待辦。無 schema migration；沿用 audit_events 不變收據。
 
 ### T10 · 申請個案、補件及營運狀態
 

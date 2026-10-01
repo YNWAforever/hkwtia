@@ -899,6 +899,17 @@
     "rateLimited": "Too many attempts from this connection. Try again in a few minutes."
   },
   "Join": {
+    "policy": {
+      "title": "Membership terms",
+      "version": "Version",
+      "accept": "I have read and accept this version of the membership terms.",
+      "accepted": "The applicant has acknowledged the current terms.",
+      "unavailable": "Approved membership terms are not available. Please contact WTIA before continuing.",
+      "ownerRequired": "The applicant must acknowledge the current terms before a company billing manager can continue.",
+      "support": "Contact membership support",
+      "required": "Please review and acknowledge the current approved membership terms before continuing.",
+      "stale": "The membership terms have changed. Reload this page and review the current version."
+    },
     "resume": {"title": "Continue your membership application", "description": "Choose a saved application or start another one. Your payment and review history stays with each application.", "lastSaved": "Last saved {date}", "continue": "Continue application", "start": "Start application", "new": "Start a new application", "account": "Open member portal", "statusUnavailable": "Application status is temporarily unavailable. Please try again.", "steps": {"profile": "Your profile", "company": "Company details", "checkout": "Awaiting payment", "review": "Under review", "complete": "Complete"}},
     "checkoutSummary": {"processing": "We are waiting for payment confirmation. This page will update when your membership status changes.", "title": "Membership checkout", "description": "Review your membership before continuing to secure payment. Returning from Stripe keeps you here until you choose to continue.", "plan": "Plan", "fee": "Annual fee", "feeAtProvider": "Exact amount confirmed at secure checkout", "status": "Status", "pending": "Awaiting payment", "continuePayment": "Continue to secure payment", "later": "Finish later", "changeDetails": "Change company details", "sameAttempt": "Your existing payment attempt will be resumed. Changing company details does not change your plan or fee.", "stillProcessing": "Payment is still being confirmed. You can check again or ask WTIA to verify it.", "openPortal": "Open member portal", "reviewNext": "View application progress", "checkAgain": "Check status again", "contactSupport": "Contact WTIA"},
     "backToMembership": "Back to membership",

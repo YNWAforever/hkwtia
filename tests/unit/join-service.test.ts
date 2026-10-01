@@ -159,6 +159,14 @@ describe("membership join orchestration", () => {
     expect(deps.inspect().applications.size).toBe(2);
   });
 
+  it("cannot activate a new free membership without the configured approved policy", async () => {
+    vi.stubEnv("MEMBERSHIP_POLICY_ACCEPTANCE_ENABLED", "true");
+    const deps = harness();
+    await expect(completeApplication(actor, {plan: "community", billingInterval: "none", profile: {displayName: "Synthetic policy member"}, company: null}, deps)).rejects.toThrow("MEMBERSHIP_POLICY_UNAVAILABLE");
+    expect(deps.inspect().memberships).toHaveLength(0);
+    expect(deps.inspect().enrollmentRows.size).toBe(0);
+  });
+
   it("activates community without creating a checkout session", async () => {
     const deps = harness();
     const result = await completeApplication(
