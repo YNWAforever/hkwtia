@@ -29,6 +29,10 @@ for(const [locale,prefix,messages] of [['en','',en],['zh-HK','/zh',zh]] as const
   await driver('prepare',run,batchId);await page.reload();
   await counter(page,batch.total,10);await counter(page,batch.eligible,10);
   await expect(page.getByRole('status')).toHaveText(batch.states.ready);
+  const confirmation=page.getByRole('checkbox',{name:batch.confirm,exact:true});
+  await confirmation.focus();
+  await page.keyboard.press('Space');
+  await expect(confirmation).toBeChecked();
   await page.getByRole('button',{name:batch.commit,exact:true}).click();
   await expect(page.getByRole('status')).toHaveText(batch.states.queued);
   expect((await driver('fail',run,batchId)).claimed).toBe(10);await page.reload();
@@ -41,6 +45,14 @@ for(const [locale,prefix,messages] of [['en','',en],['zh-HK','/zh',zh]] as const
   expect((await driver('recover',run,batchId)).claimed).toBe(2);await page.reload();
   await expect(page.getByRole('status')).toHaveText(batch.states.completed);
   await counter(page,batch.counters.succeeded,10);await counter(page,batch.counters.failed,0);
+  await page.screenshot({path:`.playwright/t14-batch-${locale}-desktop.png`,fullPage:true});
+  await page.setViewportSize({width:390,height:844});
+  await page.reload();
+  await expect(page.getByRole('heading',{name:batch.title,exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:batch.retry,exact:true})).toHaveCount(0);
+  expect(await page.locator('section table').evaluate(table=>table.getBoundingClientRect().width)).toBeGreaterThanOrEqual(700);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await page.screenshot({path:`.playwright/t14-batch-${locale}-mobile.png`,fullPage:true});
   const final=await driver('facts',run,batchId);expect(final.changed).toBe(10);expect(final.effects).toHaveLength(10);
   expect(final.effects.every(effect=>effect.n===1)).toBe(true);
   expect(final.items.filter(item=>item.attempt_count===1)).toHaveLength(8);expect(final.items.filter(item=>item.attempt_count===2)).toHaveLength(2);

@@ -400,10 +400,10 @@ T11 evidence: source/isolated SQL/local workerd/browser verified; cloud deployed
 
 **介面／契約：** 重用 BatchRequest/BatchPreview/BatchState/BatchItemState；不為美化頁面另建批次狀態。deliveryOutcome 區分確定可重試與未知待對帳；只在必要時在 item metadata 增加 typed outcome，不把 unknown 映射成可任意 retry 的 failed。
 
-- [ ] **建立行為證據：** 相同 idempotency 重提交；preview expiry/CAS；worker lease 過期/crash；取消 queued/running；provider accepted-timeout；停用 flag 後新動作拒絕，既有 in-flight 依明確 worker policy 處理；結果總數守恆。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
-- [ ] **實施：** 預覽 before/after、eligible/skipped/blocked、原因、筆數、到期及確認；background progress 仍用現有 50 列/status API，按狀態增量更新。僅安全失敗項目可重試；處理中取消顯示可能已有部分成功，保留 provider receipts。不得全量 poll 5000 rows 或無條件「全部重試」。
-- [ ] **驗證：** npm exec -- vitest run tests/integration/audit-full-batch-failures.test.ts tests/unit/admin-batch-lease.test.ts；npm run test:e2e -- tests/e2e/full-batch-lifecycle.spec.ts。
+- [x] **建立行為證據：** 相同 idempotency 重提交；preview expiry/CAS；worker lease 過期/crash；取消 queued/running；provider accepted-timeout；停用 flag 後新動作拒絕，既有 in-flight 依明確 worker policy 處理；結果總數守恆。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **實施：** 預覽 before/after、eligible/skipped/blocked、原因、筆數、到期及確認；background progress 仍用現有 50 列/status API，按狀態增量更新。僅安全失敗項目可重試；處理中取消顯示可能已有部分成功，保留 provider receipts。不得全量 poll 5000 rows 或無條件「全部重試」。
+- [x] **驗證：** npm exec -- vitest run tests/integration/audit-full-batch-failures.test.ts tests/unit/admin-batch-lease.test.ts；npm run test:e2e -- tests/e2e/full-batch-lifecycle.spec.ts。
 - [ ] **結案與提交：** 八種 BatchOperation 逐一填預覽/角色/旗標/效果/重試矩陣；具副作用操作只以指定測試對象驗收。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`fix: make batch completion and recovery reliable`。
 
 ### T15 · 匯入、資料更新及私人匯出
