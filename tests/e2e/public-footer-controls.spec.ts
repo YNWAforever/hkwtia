@@ -39,6 +39,7 @@ for (const locale of ["en", "zh-HK"] as const) {
       expect(new URL(page.url()).search).toBe("?status=past");
       expect(new URL(page.url()).hash).toBe("#results");
       const reverse = page.locator("footer").getByRole("button", {name: locale === "en" ? otherLabels.Navigation.switchToEnglish : otherLabels.Navigation.switchToChinese});
+      await expect(reverse).toBeEnabled();
       await reverse.focus();
       await expect(reverse).toBeFocused();
       await page.keyboard.press("Enter");
