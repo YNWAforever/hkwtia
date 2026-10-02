@@ -1,0 +1,13 @@
+{
+  "sourceSha": "143f2d4644beb176d11246d77d363236a2059bea",
+  "passed": 0,
+  "failed": 2,
+  "skipped": 0,
+  "targetFailureConfirmed": true,
+  "targetProperty": "Next Link prefetch",
+  "expected": false,
+  "observed": [
+    null,
+    true
+  ]
+}
