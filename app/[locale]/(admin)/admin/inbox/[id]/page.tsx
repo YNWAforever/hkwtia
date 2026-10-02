@@ -200,7 +200,7 @@ export default async function AdminInboxThreadPage({ params }: Props) {
             {t("followUp.openBilling")}
           </Link>
         ) : null}
-        {followUp.nextActionCode==="delivery_reconciliation"?<Link className="min-h-11 text-primary underline" href={localizedPath(locale,"/admin/system/job-health")}>{t("followUp.openDelivery")}</Link>:null}
+        {followUp.nextActionCode==="delivery_reconciliation"?<Link className="min-h-11 text-primary underline" href={localizedPath(locale,"/admin/automations#verified-worker-health")}>{t("followUp.openDelivery")}</Link>:null}
       </nav>
       <section className="space-y-4 rounded-lg border p-4">
         <h2 className="font-serif text-2xl">{t("followUp.timeline")}</h2>

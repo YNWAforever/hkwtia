@@ -437,6 +437,9 @@
  * than a bare pass. */
 .intro-process span { color: #4a738c; }
 
+/* The numbered service links need AA contrast on their white cards. */
+.service-link>span:first-child { color: #4a738c; }
+
 /* 2. components/wt/interest-band.tsx (InterestBand), first rendered live by Task 4's /events
  * rewrite (Task 7's /showcase also uses it, but /showcase is not in this suite's route list).
  * `.event-interest` (wisetech.css:392) sets `background: var(--wt-blue)` with `color: white`,
