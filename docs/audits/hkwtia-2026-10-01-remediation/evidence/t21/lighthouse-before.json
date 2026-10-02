@@ -1,0 +1,130 @@
+{
+  "sourceSha": "b0f3d30abbaddb8bdc1b5a3934ac0636bff3f387",
+  "applicationEquivalentTo": "f327fd334e7766b22102154bf1959310b658ab78",
+  "profile": "supplementary devtools; default simulated failed Lantern dependency graph; unchanged thresholds; browser preference redirected en to zh",
+  "command": "npm.cmd run test:lighthouse -- --config=.playwright/t21-lhci.config.cjs",
+  "actualEnglishVerified": false,
+  "production": false,
+  "reports": [
+    {
+      "requested": "http://localhost:3450/",
+      "final": "http://localhost:3450/zh",
+      "performance": 0.69,
+      "accessibility": 0.96,
+      "seo": 0.92,
+      "lcpMs": 2955.352,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/zh)",
+      "fetchPriorityScore": 0
+    },
+    {
+      "requested": "http://localhost:3450/events",
+      "final": "http://localhost:3450/zh/events",
+      "performance": 0.51,
+      "accessibility": 1,
+      "seo": 0.92,
+      "lcpMs": 4463.914,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/zh/events)",
+      "fetchPriorityScore": 0
+    },
+    {
+      "requested": "http://localhost:3450/membership",
+      "final": "http://localhost:3450/zh/membership",
+      "performance": 0.53,
+      "accessibility": 0.97,
+      "seo": 0.92,
+      "lcpMs": 4345.89,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/zh/membership)",
+      "fetchPriorityScore": null
+    },
+    {
+      "requested": "http://localhost:3450/partners",
+      "final": "http://localhost:3450/zh/partners",
+      "performance": 0.7,
+      "accessibility": 1,
+      "seo": 0.92,
+      "lcpMs": 3556.685,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/zh/partners)",
+      "fetchPriorityScore": null
+    },
+    {
+      "requested": "http://localhost:3450/programmes",
+      "final": "http://localhost:3450/zh/programmes",
+      "performance": 0.69,
+      "accessibility": 0.96,
+      "seo": 0.92,
+      "lcpMs": 4044.209,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/zh/programmes)",
+      "fetchPriorityScore": null
+    },
+    {
+      "requested": "http://localhost:3450/zh",
+      "final": "http://localhost:3450/zh",
+      "performance": 0.6,
+      "accessibility": 0.96,
+      "seo": 0.92,
+      "lcpMs": 2770.991,
+      "cls": 0.1616038882138518,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/zh)",
+      "fetchPriorityScore": 0
+    },
+    {
+      "requested": "http://localhost:3450/zh/events",
+      "final": "http://localhost:3450/zh/events",
+      "performance": 0.79,
+      "accessibility": 1,
+      "seo": 0.92,
+      "lcpMs": 3169.334,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/zh/events)",
+      "fetchPriorityScore": 0
+    },
+    {
+      "requested": "http://localhost:3450/zh/membership",
+      "final": "http://localhost:3450/zh/membership",
+      "performance": 0.83,
+      "accessibility": 0.97,
+      "seo": 0.92,
+      "lcpMs": 2927.874,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/zh/membership)",
+      "fetchPriorityScore": null
+    },
+    {
+      "requested": "http://localhost:3450/zh/partners",
+      "final": "http://localhost:3450/zh/partners",
+      "performance": 0.75,
+      "accessibility": 1,
+      "seo": 0.92,
+      "lcpMs": 3383.909,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/zh/partners)",
+      "fetchPriorityScore": null
+    },
+    {
+      "requested": "http://localhost:3450/zh/programmes",
+      "final": "http://localhost:3450/zh/programmes",
+      "performance": 0.88,
+      "accessibility": 0.96,
+      "seo": 0.92,
+      "lcpMs": 2745.706,
+      "cls": 0,
+      "canonicalScore": 0,
+      "canonicalReason": "Points to another `hreflang` location (http://localhost:3450/zh/programmes)",
+      "fetchPriorityScore": null
+    }
+  ]
+}

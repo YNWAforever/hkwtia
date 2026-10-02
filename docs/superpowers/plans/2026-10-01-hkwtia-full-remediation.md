@@ -574,11 +574,14 @@ T11 evidence: source/isolated SQL/local workerd/browser verified; cloud deployed
 
 **介面／契約：** 產生 route/query/worker performance evidence（環境、SHA、資料量、樣本數、cold/warm、median/p95、TLS、錯誤率）；logger 只存 safe route、duration、correlation ID，不把 search term/PII/token 放標籤。
 
-- [ ] **建立行為證據：** 兩身份讀取不洩漏 cache；私人頁 no-store；發布使公開 copy cache 失效；50/500/5000 有界查詢；loading/empty/error 不互相混淆。
-- [ ] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
+- [x] **建立行為證據：** 兩身份讀取不洩漏 cache；私人頁 no-store；發布使公開 copy cache 失效；50/500/5000 有界查詢；loading/empty/error 不互相混淆。
+- [x] **確認修改前結果：** 程式缺陷先執行下列 focused test 並閱讀目標行為失敗；已通過或純設定／文件項記錄實際 baseline，不為追求紅燈破壞正常功能。
 - [ ] **實施：** 測香港/新加坡網絡與真環境位置，先分 TLS/network/app/DB；有證據才調 query/index、public cache、bundle/images 或 function region。不能把 iad1 改為亞洲就宣稱修好。reuse next 現有 docs/api；不要給整個 auth layout 公用 cache。移除CMS巨量render與重複查詢後再測。
 - [ ] **驗證：** npm exec -- vitest run tests/integration/audit-full-cache-boundary.test.ts；npm run test:lighthouse（記錄環境限制）；新增 performance script 用至少30次warm樣本/規模及獨立cold樣本；RUM mobile/desktop p75另列。
 - [ ] **結案與提交：** 目標而非既有實績：list/preview p95≤2秒；公開LCP≤2.5秒、INP≤200ms、CLS≤0.1。未有RUM樣本標 pending，不以Lighthouse代替。 把結果、SHA與證據填入 status/acceptance；只 stage 本任務檔案。建議 commit：`perf: verify and improve membership workspace performance`。
+
+
+**有限實績：** 2888c483/b0f3d30a/55c2d036；完整ledger56 local/Neon50/500/5000，每op30warm及獨立新連線；2cache+5paintbuiltChromium；68Home回歸。修正有目標RED的loading/read-failure/hero。原index/cache復用。Lighthouse實際failure與環境重測另記；HK/SG雙vantage、RUM、全HTTP與release未過門檻，不簽fullSLO。T22/T23繼續。
 
 ### T22 · 整合生命週期、UAT、migration 及回復演練
 

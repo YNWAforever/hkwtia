@@ -353,3 +353,8 @@ Parent PR118 checks/tests1/tests2/worker/quality/Vercel read back SUCCESS; https
 ## T20 scoped public journeys
 
 Application f327fd334e7766b22102154bf1959310b658ab78:77focused0skip/0fail7files; built Next267pages;4actualChromium0skip/0fail34.3s. Existing header/mobile/footer/auth redirect and79loaded assets plus published/public vs private/demo evidence preserved; no provider writes/Production mutations. Harness/environment failures and final aggregate gates explicitly in evidence/t20/README.md. Policy/content signoff remains separate.
+
+
+## T21 measured query/cache/first paint
+
+Source2888c483/b0f3d30a/55c2d036; full ledger56 local and confirmed isolated Neon, 30warm and independent connection per operation/50-500-5000, owned cleanup verified; exact samples/plans in evidence/t21. Two actual cache Chromium pass,5actual first-paint/SQL-delayChromium pass and68Home regressions;lint/type/strings/build0. Failed-read≠empty, real pending discovery anchor, eager/high image all have valid targetREDs. Full6293pass304skip0fail preceded Home delta; final aggregateT22 is separate, never claimed exact-final. Production anonymousHTTP read-only4×31samples is current olddeployment, notcandidate acceptance. Default/supplementary Lighthouse failures, locale/config correction and remainingRUM/HK-SG/cloud/wholeHTTP releasegates explicitly recorded; thresholds unchanged. No policy/schema/Production/provider mutation.
