@@ -1186,7 +1186,7 @@
     },
     "sourceNote": {
       "eyebrow": "Relationship context",
-      "title": "Published records, not a scraped logo wall.",
+      "title": "Meet our partners",
       "copy": "A record appears only after WTIA confirms both the relationship and the right to show the logo, and only while the relationship window is current.",
       "count": "{count, plural, one {# published partner record} other {# published partner records}}"
     },
