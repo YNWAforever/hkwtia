@@ -146,11 +146,11 @@ test("opens Contact Concierge, focuses the message, and restores the launcher af
 
 test("renders exact own-origin private Event and partner media without optimization", async ({page}) => {
   const {EventDetail, LegacyNetwork, NextIntlClientProvider} = presentationComponents();
-  const eventHtml = renderToStaticMarkup(createElement(EventDetail, {
+  const eventHtml = renderToStaticMarkup(createElement(NextIntlClientProvider, {locale: "en"}, createElement(EventDetail, {
     event: eventFixtureWithPrivateHero,
     locale: "en",
     labels: {date: "Date", venue: "Venue", capacity: "Capacity"},
-  }));
+  })));
   await expectExactPrivateMedia(page, eventHtml, EVENT_MEDIA_URL);
 
   const legacyNetworkHtml = renderToStaticMarkup(createElement(NextIntlClientProvider, {locale: "en"}, createElement(LegacyNetwork, {

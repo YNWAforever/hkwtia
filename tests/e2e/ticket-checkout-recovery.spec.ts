@@ -5,7 +5,7 @@ import {missingM2LiveEnvironment, signInForM2} from "../fixtures/m2-auth";
 
 const missing = missingM2LiveEnvironment();
 const bundle = (locale: "en" | "zh-HK") => JSON.parse(readFileSync(new URL(`../../messages/${locale}.json`, import.meta.url), "utf8")) as {
-  Admin: {eventsMgmt: {create: string; createSuccess: string}};
+  Admin: {eventsMgmt: {create: string; createSuccess: string; savePublish: string}};
   Ticket: {seatCount: string; buyerName: string; buyerEmail: string; submit: string; recoveryTitle: string; recoveryResume: string; errors: {INVALID: string}};
 };
 
@@ -29,8 +29,8 @@ for (const {locale, prefix} of [{locale: "en" as const, prefix: ""}, {locale: "z
     await form.locator("input[name=ticketPriceHkdCents]").fill("250");
     await form.locator("select[name=visibility]").selectOption("public");
     await form.locator("input[name=published]").check();
-    await form.getByRole("button", {name: labels.Admin.eventsMgmt.create}).click();
-    await expect(form.getByRole("status")).toHaveText(labels.Admin.eventsMgmt.createSuccess);
+    await form.getByRole("button", {name: labels.Admin.eventsMgmt.savePublish}).click();
+    await expect(form.getByRole("status").filter({hasText:labels.Admin.eventsMgmt.createSuccess})).toHaveText(labels.Admin.eventsMgmt.createSuccess);
 
     const buyerContext = await browser.newContext();
     const buyer = await buyerContext.newPage();

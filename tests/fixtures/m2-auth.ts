@@ -26,9 +26,10 @@ export async function signInForM2(page: Page, role: TestRole): Promise<void> {
   mkdirSync(directory, {recursive: true});
   const scope = createHash("sha256").update(new URL(page.url()).origin + "|" + (process.env.NEON_AUTH_BASE_URL ?? "") + "|" + role).digest("hex");
   const statePath = resolve(directory, scope + ".json");
+  const protectedPath = role === "member" || role === "company-admin" ? "/portal" : "/admin";
   try {
     const state = JSON.parse(readFileSync(statePath, "utf8")) as {cookies: Cookie[]};
-    if (Array.isArray(state.cookies) && await reuseM2Session(page, state.cookies, email!)) return;
+    if (Array.isArray(state.cookies) && await reuseM2Session(page, state.cookies, email!, protectedPath)) return;
   } catch { /* Missing, expired or malformed state requires a real sign-in. */ }
   const response = await page.request.post("/api/auth/sign-in/email", {
     data: {email, password, callbackURL},
@@ -36,5 +37,6 @@ export async function signInForM2(page: Page, role: TestRole): Promise<void> {
   });
   expect(response.ok()).toBe(true);
 
+  expect((await page.request.get(protectedPath, {maxRedirects: 0})).ok()).toBe(true);
   await page.context().storageState({path: statePath});
 }
